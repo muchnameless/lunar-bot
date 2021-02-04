@@ -188,7 +188,7 @@ class LunarClient extends Client {
 
 		if (!this.webhook) {
 			logger.warn('[CLIENT LOG]: webhook unavailable');
-			return this.logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
+			return this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
 		}
 
 		return this.webhook
@@ -199,7 +199,7 @@ class LunarClient extends Client {
 			})
 			.catch(error => {
 				logger.error(`[CLIENT LOG]: ${error.name}: ${error.message}`);
-				this.logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
+				this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
 			});
 	}
 
@@ -207,7 +207,7 @@ class LunarClient extends Client {
 	 * write data in 'cwd/log_buffer'
 	 * @param {*} data file content
 	 */
-	logToFile(data) {
+	_logToFile(data) {
 		fs.writeFile(
 			path.join(__dirname, '..', '..', 'log_buffer', `${new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}_${SnowflakeUtil.generate()}`),
 			data,
