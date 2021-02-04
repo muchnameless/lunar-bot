@@ -33,7 +33,7 @@ process
 
 	if (!fs.existsSync(LOG_BUFFER_DIR)) {
 		fs.mkdirSync(LOG_BUFFER_DIR);
-		logger.debug('created \'log_buffer\' folder');
+		logger.debug('[INIT]: created \'log_buffer\' folder');
 	}
 
 	// create bot client
@@ -77,7 +77,7 @@ process
 
 	// connect to Discord
 	client.login().catch(error => {
-		logger.error('[LOGIN ERROR]:', error);
+		logger.error('[INIT]: login error:', error);
 		closeConnectionAndExit();
 	});
 })();
