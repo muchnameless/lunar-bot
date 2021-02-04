@@ -1,6 +1,6 @@
 'use strict';
 
-const { Constants } = require('discord.js');
+// const { Constants } = require('discord.js');
 const { promisify, inspect } = require('util');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const hypixel = require('../api/hypixel');
@@ -164,7 +164,7 @@ const self = module.exports = {
 
 		if (!channel) return false;
 
-		if (channel.type === Constants.ChannelTypes.DM) {
+		if (channel.type === 'dm' /* Constants.ChannelTypes.DM */) {
 			switch (permFlag) {
 				case 'ADD_REACTIONS': // add new reactions to messages
 				case 'VIEW_CHANNEL':
