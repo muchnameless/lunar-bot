@@ -2,6 +2,7 @@
 
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+const fs = require('fs');
 const { Constants } = require('discord.js');
 const LunarClient = require('./src/structures/LunarClient');
 const { requireAll } = require('./src/functions/files');
@@ -26,6 +27,13 @@ process
 
 // init
 (async () => {
+	const LOG_BUFFER_DIR = path.join(__dirname, 'log_buffer');
+
+	if (!fs.existsSync(LOG_BUFFER_DIR)) {
+		fs.mkdirSync(LOG_BUFFER_DIR);
+		logger.debug('created \'log_buffer\' folder');
+	}
+
 	const client = new LunarClient({
 		// fetchAllMembers: true,
 		disableMentions: 'everyone',
