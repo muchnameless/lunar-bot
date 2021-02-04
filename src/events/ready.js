@@ -5,7 +5,6 @@ const { CronJob: cronJobDB } = require('../../database/models/index');
 const { MAYOR_CHANGE_INTERVAL } = require('../constants/skyblock');
 const { updatePlayerDatabase } = require('../functions/database');
 const { restoreMessage, getWeekOfYear } = require('../functions/util');
-const { postFileLogs } = require('../functions/files');
 const { startCompetition, endCompetition, performMayorReset, performDailyReset, performWeeklyReset, performMonthlyReset } = require('../functions/scheduledXpResets');
 const updateDaPrices = require('../functions/updateDaPrices');
 const logger = require('../functions/logger');
@@ -16,12 +15,14 @@ module.exports = async client => {
 
 
 	// Fetch all members for initially available guilds
+	// if (client.options.fetchAllMembers) {
 	try {
 		const promises = client.guilds.cache.map(guild => guild.available ? guild.members.fetch().then(() => logger.debug(`[READY]: ${guild.name}: fetched all ${guild.memberCount} members`)) : Promise.resolve());
 		await Promise.all(promises);
 	} catch (error) {
 		logger.error(`Failed to fetch all members before ready! ${error}`);
 	}
+	// }
 
 
 	const { config } = client;
@@ -32,7 +33,7 @@ module.exports = async client => {
 	client.webhook = await client.fetchWebhook(process.env.WEBHOOK_ID, process.env.WEBHOOK_TOKEN).catch(error => logger.error(`[CLIENT WEBHOOK]: ${error.name}: ${error.message}`)) ?? null;
 
 	// repost webhook logs that failed to be posted during the last uptime
-	if (client.webhook) postFileLogs(client);
+	if (client.webhook) client.postFileLogs();
 
 
 	// update player database and tax message every x min starting at the full hour

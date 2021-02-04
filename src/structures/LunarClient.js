@@ -1,9 +1,10 @@
 'use strict';
 
-const { Client, MessageEmbed, Constants } = require('discord.js');
+const { Client, MessageEmbed, SnowflakeUtil, Constants } = require('discord.js');
 const path = require('path');
+const fs = require('fs');
 const { cleanLoggingEmbedString } = require('../functions/util');
-const { getAllJsFiles, logToFile } = require('../functions/files');
+const { getAllJsFiles } = require('../functions/files');
 const db = require('../../database/models/index');
 const logger = require('../functions/logger');
 const BannedUserCollection = require('./collections/BannedUserCollection');
@@ -14,7 +15,6 @@ const CronJobCollection = require('./collections/CronJobCollection');
 const HypixelGuildCollection = require('./collections/HypixelGuildCollection');
 const PlayerCollection = require('./collections/PlayerCollection');
 const TaxCollectorCollection = require('./collections/TaxCollectorCollection');
-const Command = require('./Command');
 
 
 class LunarClient extends Client {
@@ -188,7 +188,7 @@ class LunarClient extends Client {
 
 		if (!this.webhook) {
 			logger.warn('[CLIENT LOG]: webhook unavailable');
-			return logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
+			return this.logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
 		}
 
 		return this.webhook
@@ -199,8 +199,38 @@ class LunarClient extends Client {
 			})
 			.catch(error => {
 				logger.error(`[CLIENT LOG]: ${error.name}: ${error.message}`);
-				logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
+				this.logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
 			});
+	}
+
+	/**
+	 * write data in 'cwd/log_buffer'
+	 * @param {*} data file content
+	 */
+	logToFile(data) {
+		fs.writeFile(
+			path.join(__dirname, '..', '..', 'log_buffer', `${new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}_${SnowflakeUtil.generate()}`),
+			data,
+			err => err && logger.info(err),
+		);
+	}
+
+	/**
+	 * read all files from 'cwd/log_buffer' and webhook log their parsed content
+	 */
+	postFileLogs() {
+		const LOG_BUFFER_PATH = path.join(__dirname, '..', '..', 'log_buffer');
+		const logBufferFiles = fs.readdirSync(LOG_BUFFER_PATH);
+
+		if (!logBufferFiles) return;
+
+		for (const file of logBufferFiles) {
+			const FILE_PATH = path.join(LOG_BUFFER_PATH, file);
+
+			this
+				.log(...fs.readFileSync(FILE_PATH, 'utf8').split('\n').map(x => new MessageEmbed(JSON.parse(x))))
+				.then(() => fs.unlinkSync(FILE_PATH));
+		}
 	}
 
 	/**

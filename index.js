@@ -27,6 +27,8 @@ process
 
 // init
 (async () => {
+
+	// create log_buffer folder if it is non-existent
 	const LOG_BUFFER_DIR = path.join(__dirname, 'log_buffer');
 
 	if (!fs.existsSync(LOG_BUFFER_DIR)) {
@@ -34,8 +36,9 @@ process
 		logger.debug('created \'log_buffer\' folder');
 	}
 
+	// create bot client
 	const client = new LunarClient({
-		// fetchAllMembers: true,
+		// fetchAllMembers: true, // enable when discord.js removes that feature
 		disableMentions: 'everyone',
 		partials: [
 			Constants.PartialTypes.CHANNEL,
