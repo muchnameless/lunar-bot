@@ -9,7 +9,7 @@ const logger = require('../../functions/logger');
 const offsetToReset = offsetFlags.COMPETITION_START;
 
 
-module.exports = class MyCommand extends Command {
+module.exports = class XpResetCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'resetxp' ],

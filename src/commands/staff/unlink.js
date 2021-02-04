@@ -7,7 +7,7 @@ const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = class MyCommand extends Command {
+module.exports = class UnlinkCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [],

@@ -9,7 +9,7 @@ const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = class MyCommand extends Command {
+module.exports = class LeaderboardCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'lb' ],
