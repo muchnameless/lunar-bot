@@ -4,16 +4,22 @@ const { MessageEmbed, version } = require('discord.js');
 const { commaListsOr, stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar, getRequiredRoles } = require('../../functions/util');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'h' ],
-	description: 'list of all commands or info about a specific command',
-	usage: '<`command`|`category` name>',
-	cooldown: 1,
-	execute: async (message, args, flags) => {
-		const { client } = message;
-		const { commands, config } = client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'h' ],
+			description: 'list of all commands or info about a specific command',
+			usage: '<`command`|`category` name>',
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { commands } = client;
 		const helpEmbed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'));
 
@@ -135,18 +141,12 @@ module.exports = {
 		}
 
 		if (command.description) helpEmbed.setDescription(`${command.description}`);
-		if (command.usage) {
-			if (typeof command.usage === 'function') {
-				helpEmbed.addField('**Usage:**', `\`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage(client)}`);
-			} else { // string
-				helpEmbed.addField('**Usage:**', `\`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage}`);
-			}
-		}
+		if (command.usage) helpEmbed.addField('**Usage:**', `\`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage}`);
 
 		const COOLDOWN = command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT');
 
 		helpEmbed.addField('**Cooldown:**', ms(COOLDOWN * 1000, { long: true }));
 
 		message.reply(helpEmbed, { reply: false });
-	},
+	}
 };

@@ -4,17 +4,22 @@ const { oneLine, commaListsOr } = require('common-tags');
 const { Player } = require('../../../database/models/index');
 const { getHypixelClient } = require('../../functions/util');
 const mojang = require('../../api/mojang');
+const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = {
-	// aliases: [ '' ],
-	description: 'link your discord id to your current hypixel discord tag (guild members only)',
-	args: true,
-	usage: '[`IGN`]',
-	cooldown: 5,
-	execute: async (message, args, flags) => {
-		const { client } = message;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [],
+			description: 'link your discord id to your current hypixel discord tag (guild members only)',
+			args: true,
+			usage: '[`IGN`]',
+			cooldown: 5,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
 		const { hypixelGuilds, players } = client;
 
 		let ign = args[0].replace(/\W/g, ''); // filter out all non alphanumerical characters
@@ -78,5 +83,5 @@ module.exports = {
 		}
 
 		message.reply(`successfully linked your discord account to \`${ign}\`.`);
-	},
+	}
 };

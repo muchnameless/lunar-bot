@@ -14,8 +14,8 @@ class CommandCollection extends BaseClientCollection {
 	}
 
 	// execute the help command
-	help(message, args, flags) {
-		return this.get('help').execute(message, args, flags);
+	help(...args) {
+		return this.get('help').run(...args);
 	}
 }
 

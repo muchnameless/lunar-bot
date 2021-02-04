@@ -7,6 +7,7 @@ const _ = require('lodash');
 const similarity = require('jaro-winkler');
 const ms = require('ms');
 const util = require('util');
+const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 const db = require('../../../database/models/index');
 const skyblock = require('../../constants/skyblock');
@@ -15,32 +16,39 @@ const functionsDB = require('../../functions/database');
 const hypixelMain = require('../../api/hypixel');
 const hypixelAux = require('../../api/hypixelAux');
 const mojang = require('../../api/mojang');
+/* eslint-enable no-unused-vars */
 
 
-module.exports = {
-	description: 'call js native eval-function on the args',
-	aliases: [ 'e', 'ev' ],
-	args: true,
-	usage: stripIndents`
-		<\`-a\`|\`--async\` (requires explicit return statement)> [\`expression\`]
+module.exports = class EvalCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'e', 'ev' ],
+			description: 'call js native eval-function on the args',
+			args: true,
+			usage: stripIndents`
+				<\`-a\`|\`--async\` (requires explicit return statement)> [\`expression\`]
 
-		destructured properties:
-		from d.js: Util, MessageEmbed, message / msg, client, ch(annel), g(uild), author, member
-		from client: config, players
+				available vars:
+				from d.js: Util, MessageEmbed, message / msg, client, ch(annel), g(uild), author, member
+				from client: config, players
 
-		required:
-		Discord, lodash, similarity, ms, util,
-		skyblock (constants), skyblockUtil, functionsUtil, functionsDB, functionsCH, hypixel, mojang, lgGuild
-	`,
-	cooldown: 0,
-	execute: async (message, args, flags, rawArgs) => {
+				required:
+				Discord, lodash, similarity, ms, util,
+				skyblock (constants), skyblockUtil, functionsUtil, functionsDB, functionsCH, hypixel, mojang, lgGuild
+			`,
+			cooldown: 0,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		/* eslint-disable no-unused-vars */
 		const { Util, MessageEmbed } = Discord;
 		const { cleanOutput } = functionsUtil;
-		const { client, channel, guild, author, member } = message;
+		const { channel, guild, author, member } = message;
 		const msg = message;
 		const ch = channel;
 		const g = guild;
-		const { config, hypixelGuilds, players, taxCollectors } = client;
+		const { hypixelGuilds, players, taxCollectors } = client;
 		const lgGuild = client.lgGuild;
 		const asyncFlags = [ 'a', 'async' ];
 		const stackTraceFlags = [ 's', 'stacktrace' ];
@@ -48,6 +56,7 @@ module.exports = {
 		const totalFlags = [ 'c', 'ch', 'channel', ...asyncFlags, ...stackTraceFlags, ...inspectFlags ];
 		const IS_ASYNC = flags.some(flag => asyncFlags.includes(flag));
 		const SHOULD_INSPECT = flags.some(flag => inspectFlags.includes(flag));
+		/* eslint-enable no-unused-vars */
 
 		let i = -1;
 
@@ -67,6 +76,7 @@ module.exports = {
 		let embedCharacterCount = responseEmbed.footer.text.length;
 		let hypixel;
 
+		// eslint-disable-next-line no-unused-vars
 		if (message.content.includes('hypixel')) hypixel = functionsUtil.getHypixelClient(true);
 
 		inputArray.forEach((input, index) => {
@@ -139,5 +149,5 @@ module.exports = {
 				.setTimestamp(),
 			);
 		}
-	},
+	}
 };

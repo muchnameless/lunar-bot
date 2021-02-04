@@ -1,12 +1,21 @@
 'use strict';
 
-module.exports = {
-	description: 'shows the bot\'s current memory usage',
-	aliases: [ 'm' ],
-	// args: true,
-	usage: '',
-	cooldown: 0,
-	execute: async (message, args, flags) => {
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
+
+
+module.exports = class MemoryCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'm' ],
+			description: 'shows the bot\'s current memory usage',
+			args: false,
+			usage: '',
+			cooldown: 0,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
 		const used = process.memoryUsage();
 
 		let response = '';
@@ -16,5 +25,5 @@ module.exports = {
 		}
 
 		message.reply(response, { code: 'js' });
-	},
+	}
 };

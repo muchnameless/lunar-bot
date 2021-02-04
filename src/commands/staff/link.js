@@ -4,19 +4,24 @@ const { stripIndents, oneLineCommaListsOr } = require('common-tags');
 const { checkIfDiscordTag, getHypixelClient } = require('../../functions/util');
 const { findMemberByTag } = require('../../functions/database');
 const { Player } = require('../../../database/models/index');
-const logger = require('../../functions/logger');
 const mojang = require('../../api/mojang');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	// aliases: [ '' ],
-	description: 'link a discord user to a minecraft ign',
-	args: true,
-	usage: '[`IGN`] [`discord id`|`discord tag`|`@mention`]',
-	cooldown: 1,
-	execute: async (message, args, flags, rawArgs) => {
-		const { client } = message;
-		const { players, hypixelGuilds, config } = client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [],
+			description: 'link a discord user to a minecraft ign',
+			args: true,
+			usage: '[`IGN`] [`discord id`|`discord tag`|`@mention`]',
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { players, hypixelGuilds } = client;
 
 		let player;
 
@@ -161,5 +166,5 @@ module.exports = {
 			`${reply}.`,
 			{ allowedMentions: { parse: [] } },
 		);
-	},
+	}
 };

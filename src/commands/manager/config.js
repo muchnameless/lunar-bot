@@ -1,21 +1,26 @@
 'use strict';
 
 const { stripIndents } = require('common-tags');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	description: 'show and edit the bot\'s config',
-	aliases: [ 'c', 'settings' ],
-	usage: stripIndents`
-		no args to show all configs
-		<\`query\`> to show search results from all entries
-		<\`key\`> <\`value\`> to upsert a key-value-pair
-		<\`-r\`|\`-d\`|\`--remove\`|\`--delete\`> <\`key\`> to remove a key-value-pair
-	`,
-	cooldown: 1,
-	execute: async function(message, args, flags) {
-		const { config } = message.client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'c', 'settings' ],
+			description: 'show and edit the bot\'s config',
+			usage: stripIndents`
+				no args to show all configs
+				<\`query\`> to show search results from all entries
+				<\`key\`> <\`value\`> to upsert a key-value-pair
+				<\`-r\`|\`-d\`|\`--remove\`|\`--delete\`> <\`key\`> to remove a key-value-pair
+			`,
+			cooldown: 1,
+		});
+	}
 
+	async run(client, config, message, args, flags, rawArgs) {
 		// list all config entries
 		if (!args.length) {
 			return message.reply(
@@ -55,5 +60,5 @@ module.exports = {
 			`${entry.key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${entry.value}'`,
 			{ code: 'apache' },
 		);
-	},
+	}
 };

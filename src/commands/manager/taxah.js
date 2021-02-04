@@ -1,17 +1,23 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
+const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'ah' ],
-	description: 'add / remove a player as tax collector',
-	args: true,
-	usage: '[`add`|`remove`] [`IGN`|`@mention`]',
-	cooldown: 1,
-	async execute(message, args, flags) {
-		const { config, taxCollectors } = message.client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'ah' ],
+			description: 'add / remove a player as tax collector',
+			args: true,
+			usage: '[`add`|`remove`] [`IGN`|`@mention`]',
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { taxCollectors } = client;
 
 		// identify input arguments
 		let type = '';
@@ -21,7 +27,9 @@ module.exports = {
 
 		if (!type.length || !ign.length || args.length !== 2) return message.reply(`\`${config.get('PREFIX')}${this.aliases?.[0] ?? this.name}\` ${this.usage}`);
 
-		const player = message.mentions.users.size ? message.client.players.getByID(message.mentions.users.first().id) : message.client.players.getByIGN(ign);
+		const player = message.mentions.users.size
+			? client.players.getByID(message.mentions.users.first().id)
+			: client.players.getByIGN(ign);
 
 		if (!player) return message.reply(`no player ${message.mentions.users.size
 			? `linked to \`${message.guild
@@ -66,7 +74,7 @@ module.exports = {
 				return message.reply('specify wether to `add` or `remove` the tax collector.');
 		}
 
-		message.client.log(new MessageEmbed()
+		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')
 			.setDescription(log)
@@ -74,5 +82,5 @@ module.exports = {
 		);
 
 		return message.reply(`${log}.`);
-	},
+	}
 };

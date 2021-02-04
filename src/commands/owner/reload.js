@@ -2,17 +2,22 @@
 
 const path = require('path');
 const { getAllJsFiles } = require('../../functions/files');
+const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'r', 'load' ],
-	description: 'reload a required .js file',
-	args: true,
-	usage: '[`command name` to reload, `all`|`commands` for all commands, `database`|`db` cache, `cooldown(s)`]',
-	cooldown: 0,
-	execute: async (message, args, flags) => {
-		const { client } = message;
+module.exports = class ReloadCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'r', 'load' ],
+			description: 'reload a required .js file',
+			args: true,
+			usage: '[`command name` to reload, `all`|`commands` for all commands, `database`|`db` cache, `cooldown(s)`]',
+			cooldown: 0,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
 		const INPUT = args[0].toLowerCase();
 		const command = client.commands.getByName(INPUT);
 
@@ -64,5 +69,5 @@ module.exports = {
 			default:
 				message.reply(`no command with the name or alias \`${INPUT}\`.`);
 		}
-	},
+	}
 };

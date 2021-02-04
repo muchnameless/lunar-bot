@@ -1,17 +1,23 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'paid' ],
-	description: 'manually set a player to paid',
-	args: true,
-	usage: client => `[\`IGN\`|\`@mention\`] <custom \`amount\` to overwrite the default of ${client.config.getNumber('TAX_AMOUNT').toLocaleString(client.config.get('NUMBER_FORMAT'))}>`,
-	cooldown: 1,
-	execute: async (message, args, flags) => {
-		const { client } = message;
-		const { config, players, taxCollectors } = client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'paid' ],
+			description: 'manually set a player to paid',
+			args: true,
+			usage: () => `[\`IGN\`|\`@mention\`] <custom \`amount\` to overwrite the default of ${this.client.config.getNumber('TAX_AMOUNT').toLocaleString(this.client.config.get('NUMBER_FORMAT'))}>`,
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { players, taxCollectors } = client;
 		const collector = taxCollectors.getByID(message.author.id);
 
 		if (!collector?.isCollecting) return message.reply('this command is restricted to tax collectors.');
@@ -46,5 +52,5 @@ module.exports = {
 			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${client.formatNumber(player.amount)} (manually)\`\`\``)
 			.setTimestamp(),
 		);
-	},
+	}
 };

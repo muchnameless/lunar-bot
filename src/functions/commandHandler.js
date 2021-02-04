@@ -73,7 +73,7 @@ module.exports = async (client, message) => {
 	// 'commandName -h' -> 'h commandName'
 	if (flags.some(flag => [ 'h', 'help' ].includes(flag))) {
 		logger.info(`'${message.content}' was executed by ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}`);
-		return client.commands.help(message, [ command?.name ?? COMMAND_NAME ], []).catch(logger.error);
+		return client.commands.help(client, config, message, [ command?.name ?? COMMAND_NAME ], []).catch(logger.error);
 	}
 
 	if (!command) return;
@@ -150,13 +150,7 @@ module.exports = async (client, message) => {
 		const reply = [];
 
 		reply.push('this command has mandatory arguments.');
-		if (command.usage) {
-			if (typeof command.usage === 'function') {
-				reply.push(`\nUse: \`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage(client)}`);
-			} else { // string
-				reply.push(`\nUse: \`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage}`);
-			}
-		}
+		if (command.usage) reply.push(`\nUse: \`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage}`);
 
 		logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} without providing the mandatory arguments`);
 		return message.reply(reply);
@@ -165,7 +159,7 @@ module.exports = async (client, message) => {
 	// execute command
 	try {
 		logger.info(`'${message.content}' was executed by ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}`);
-		await command.execute(message, args, flags, rawArgs);
+		await command.run(client, config, message, args, flags, rawArgs);
 	} catch (error) {
 		logger.error(`An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}:`, error);
 		message.reply(`an error occured while executing this command:\n${error.name}: ${error.message}`);

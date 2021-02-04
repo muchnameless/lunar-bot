@@ -5,26 +5,31 @@ const { autocorrect } = require('../../functions/util');
 const { addPageReactions, getOffsetFromFlags, getHypixelGuildFromFlags, createGainedStatsEmbed } = require('../../functions/leaderboardMessages');
 const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'lb' ],
-	description: 'guild member leaderboard for skill / slayer xp gained',
-	usage: client => stripIndents`
-		<\`type\`> <page \`number\`> <${client.hypixelGuilds.map(hGuild => `\`-${hGuild.name.replace(/ /g, '')}\``).join('|')}|\`-all\`> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`-${offset}\``).join('|')}>
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'lb' ],
+			description: 'guild member leaderboard for skill / slayer xp gained',
+			usage: () => stripIndents`
+				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.map(hGuild => `\`-${hGuild.name.replace(/ /g, '')}\``).join('|')}|\`-all\`> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`-${offset}\``).join('|')}>
 
-		currently supported types:
-		skill, ${SKILLS.join(', ')}
-		${COSMETIC_SKILLS.join(', ')}
-		slayer, revenant, tarantula, sven, ${SLAYERS.join(', ')}
-		dungeon, ${[ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ].join(', ')}
-		guildxp
-		weight
-	`,
-	cooldown: 1,
-	execute: async (message, args, flags) => {
-		const { client } = message;
-		const { config } = client;
+				currently supported types:
+				skill, ${SKILLS.join(', ')}
+				${COSMETIC_SKILLS.join(', ')}
+				slayer, revenant, tarantula, sven, ${SLAYERS.join(', ')}
+				dungeon, ${[ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ].join(', ')}
+				guildxp
+				weight
+			`,
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
 		const { id: userID } = message.author;
 
 		let type;
@@ -83,5 +88,5 @@ module.exports = {
 		}));
 
 		addPageReactions(reply);
-	},
+	}
 };

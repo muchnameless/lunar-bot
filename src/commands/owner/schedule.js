@@ -2,16 +2,23 @@
 
 const { CronJob } = require('../../../database/models/index');
 const { reverseDateInput, autocorrect } = require('../../functions/util');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 's' ],
-	description: 'schedule a command to be executed at a later time',
-	args: false,
-	usage: '[`command`] [`@time`]\n<`-l`, `--list`> to list all active cron jobs\n<`-r`, `--remove`, `-d`, `--delete`> <`name`> to delete a cron job',
-	cooldown: 0,
-	async execute(message, args, flags) {
-		const { config, cronJobs } = message.client;
+module.exports = class ScheduleCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 's' ],
+			description: 'schedule a command to be executed at a later time',
+			args: false,
+			usage: '[`command`] [`@time`]\n<`-l`, `--list`> to list all active cron jobs\n<`-r`, `--remove`, `-d`, `--delete`> <`name`> to delete a cron job',
+			cooldown: 0,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { cronJobs } = client;
 
 		// list all running cron jobs
 		if (flags.some(flag => [ 'l', 'list' ].includes(flag))) return message.reply(cronJobs.keyArray().join('\n'), { code: 'prolog', split: { char: '\n' } });
@@ -39,7 +46,7 @@ module.exports = {
 		// create a new cron job
 		if (!args.length) return message.reply(`\`${config.get('PREFIX')}${this.aliases?.[0] ?? this.name}\` ${this.usage}`);
 
-		const command = message.client.commands.getByName(args[0]);
+		const command = client.commands.getByName(args[0]);
 
 		if (!command) return message.reply(`unknown command \`${args[0]}\`.`);
 
@@ -88,5 +95,5 @@ module.exports = {
 
 		await message.reply(`\`${input}\` scheduled for \`${localDate}\`, total amount of cron jobs: ${cronJobs.size}`);
 		message.replyMessageID = null; // to not overwrite prev reply
-	},
+	}
 };

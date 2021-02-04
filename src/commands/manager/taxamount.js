@@ -1,19 +1,24 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	// aliases: [ '' ],
-	description: 'set the tax amount',
-	args: true,
-	usage: '[new `amount`]',
-	cooldown: 1,
-	execute: async (message, args, flags) => {
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [],
+			description: 'set the tax amount',
+			args: true,
+			usage: '[new `amount`]',
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
 		if (/\D/.test(args[0])) return message.reply(`\`${args[0]}\` is not a number.`);
 
-		const { client } = message;
-		const { config } = client;
 		const NEW_AMOUNT = Number(args[0]);
 		const OLD_AMOUNT = Number(config.get('TAX_AMOUNT'));
 
@@ -37,5 +42,5 @@ module.exports = {
 		);
 
 		message.reply(`changed the guild tax amount from \`${OLD_AMOUNT.toLocaleString(config.get('NUMBER_FORMAT'))}\` to \`${NEW_AMOUNT.toLocaleString(config.get('NUMBER_FORMAT'))}\``);
-	},
+	}
 };

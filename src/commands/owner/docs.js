@@ -2,20 +2,24 @@
 
 const fetch = require('node-fetch');
 const { autocorrect } = require('../../functions/util');
+const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 const projects = [ 'stable', 'master', 'commando', 'rpc', 'akairo', 'akairo-master', 'collection' ];
 
 
-module.exports = {
-	description: 'search discord.js docs',
-	// aliases: [ '' ],
-	args: true,
-	usage: `[\`query\`] <\`-${projects.join('`|`')}\` to use another source than 'stable'>`,
-	cooldown: 0,
-	execute: async (message, args, flags) => {
-		const { config } = message.client;
+module.exports = class DocsCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [],
+			description: 'search discord.js docs',
+			args: true,
+			usage: `[\`query\`] <\`-${projects.join('`|`')}\` to use another source than 'stable'>`,
+			cooldown: 0,
+		});
+	}
 
+	async run(client, config, message, args, flags, rawArgs) {
 		let project;
 
 		for (const flag of flags) {
@@ -35,5 +39,5 @@ module.exports = {
 		);
 
 		message.reply(embed ?? 'no response from the discord.js-docs-api.');
-	},
+	}
 };

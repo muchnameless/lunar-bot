@@ -2,16 +2,22 @@
 
 const { MessageEmbed } = require('discord.js');
 const { escapeIgn } = require('../../functions/util');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'collected' ],
-	description: 'show a list of taxahs and their collected tax amount',
-	// usage: '',
-	cooldown: 1,
-	execute: async (message, args, flags) => {
-		const { client } = message;
-		const { config, taxCollectors } = client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'collected' ],
+			description: 'show a list of taxahs and their collected tax amount',
+			usage: '',
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { taxCollectors } = client;
 		const collectedEmbed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Collected Guild Tax')
@@ -26,5 +32,5 @@ module.exports = {
 		});
 
 		message.reply(collectedEmbed);
-	},
+	}
 };

@@ -1,16 +1,23 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'debug' ],
-	description: 'dynamic test function',
-	args: false,
-	usage: '<test arguments>',
-	cooldown: 0,
-	execute: async (message, args, flags) => {
-		const { config, hypixelGuilds } = message.client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'debug' ],
+			description: 'dynamic test function',
+			args: false,
+			usage: '<test arguments>',
+			cooldown: 0,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { hypixelGuilds } = client;
 		const embed = new MessageEmbed()
 			.setTitle('Guild Ranks')
 			.setColor(config.get('EMBED_BLUE'))
@@ -46,5 +53,5 @@ module.exports = {
 				}
 			}
 		}
-	},
+	}
 };

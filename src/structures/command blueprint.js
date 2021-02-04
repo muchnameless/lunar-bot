@@ -7,16 +7,15 @@ const logger = require('../../functions/logger');
 module.exports = class MyCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [ 'comp' ],
-			description: 'WIP',
-			guildOnly: false,
+			aliases: [],
+			description: '',
 			args: false,
 			usage: '',
-			cooldown: 1,
+			cooldown: 0,
 		});
 	}
 
 	async run(client, config, message, args, flags, rawArgs) {
-		message.reply('WIP');
+
 	}
 };

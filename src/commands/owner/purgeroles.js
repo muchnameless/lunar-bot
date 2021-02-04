@@ -1,17 +1,22 @@
 'use strict';
 
 const { getRolesToPurge } = require('../../functions/database');
+const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = {
-	// aliases: [ '' ],
-	description: 'removes all roles that the bot manages from non guild members',
-	args: false,
-	// usage: '<test arguments>',
-	cooldown: 0,
-	execute: async (message, args, flags) => {
-		const { config } = message.client;
+module.exports = class PurgeRolesCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [],
+			description: 'removes all roles that the bot manages from non guild members',
+			args: false,
+			usage: '',
+			cooldown: 0,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
 		const lgGuild = message.client.lgGuild;
 
 		if (!lgGuild) return;
@@ -26,12 +31,12 @@ module.exports = {
 
 			if (!rolesToRemove.length) return;
 
-			message.client.setTimeout(() => {
+			client.setTimeout(() => {
 				member.roles.remove(rolesToRemove).then(
 					() => logger.info(`removed ${rolesToRemove.length} role(s) from ${member.user.tag} | ${member.displayName}`),
 					logger.error,
 				);
 			}, ++index * 30 * 1000);
 		});
-	},
+	}
 };

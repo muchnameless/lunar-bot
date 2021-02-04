@@ -3,16 +3,22 @@
 const { stripIndents, oneLineCommaListsOr, oneLine } = require('common-tags');
 const { findMemberByTag } = require('../../functions/database');
 const { checkIfDiscordTag } = require('../../functions/util');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	// aliases: [ '' ],
-	description: 'delete a link between a discord user and a minecraft ign',
-	args: true,
-	usage: '[`IGN`|`discord id`|`discord tag`|`@mention`]',
-	cooldown: 1,
-	execute: async (message, args, flags, rawArgs) => {
-		const { client } = message;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [],
+			description: 'delete a link between a discord user and a minecraft ign',
+			args: true,
+			usage: '[`IGN`|`discord id`|`discord tag`|`@mention`]',
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
 		const { players } = client;
 
 		let player;
@@ -59,5 +65,5 @@ module.exports = {
 			`,
 			{ allowedMentions: { parse: [] } },
 		);
-	},
+	}
 };

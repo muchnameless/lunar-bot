@@ -2,17 +2,22 @@
 
 const { addPageReactions, getOffsetFromFlags, getHypixelGuildFromFlags, createGainedStatsEmbed } = require('../../functions/leaderboardMessages');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'track' ],
-	description: 'gained weight from members below reqs',
-	// args: true,
-	// usage: '[`discord id`|`@mention`]',
-	cooldown: 1,
-	execute: async (message, args, flags) => {
-		const { client } = message;
-		const { config } = client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'track' ],
+			description: 'gained weight from members below reqs',
+			args: false,
+			usage: '',
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
 		const { id: userID } = message.author;
 
 		let page;
@@ -36,5 +41,5 @@ module.exports = {
 		}));
 
 		addPageReactions(reply);
-	},
+	}
 };

@@ -4,16 +4,22 @@ const { MessageEmbed } = require('discord.js');
 const { Player, Sequelize } = require('../../../database/models/index');
 const { checkBotPermissions } = require('../../functions/util');
 const { createTaxEmbed } = require('../../functions/database');
+const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'resettax' ],
-	description: 'reset the tax database',
-	usage: 'no arguments to reset everyone\n<`IGN`|`@mention`> to reset individual tax paid',
-	cooldown: 5,
-	execute: async (message, args, flags) => {
-		const { config, players, taxCollectors } = message.client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'resettax' ],
+			description: 'reset the tax database',
+			usage: 'no arguments to reset everyone\n<`IGN`|`@mention`> to reset individual tax paid',
+			cooldown: 5,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { players, taxCollectors } = client;
 
 		let currentTaxEmbed;
 		let result;
@@ -63,7 +69,7 @@ module.exports = {
 
 			// get current tax embed from #guild-tax channel
 			currentTaxEmbed = await (async () => {
-				const taxChannel = message.client.lgGuild?.channels.cache.get(config.get('TAX_CHANNEL_ID'));
+				const taxChannel = client.lgGuild?.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 				if (!taxChannel) return logger.warn('[TAX RESET] tax channel error');
 
@@ -75,11 +81,11 @@ module.exports = {
 			})();
 
 			if (!currentTaxEmbed && !flags.some(flag => [ 'f', 'force' ].includes(flag))) {
-				const ANSWER = await message.awaitReply(`unable to retrieve the current tax embed from ${message.client.lgGuild?.channels.cache.get(config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Continue?`, 30);
+				const ANSWER = await message.awaitReply(`unable to retrieve the current tax embed from ${client.lgGuild?.channels.cache.get(config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Continue?`, 30);
 
 				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 
-				currentTaxEmbed = createTaxEmbed(message.client);
+				currentTaxEmbed = createTaxEmbed(client);
 			}
 
 			// remove retired collectors
@@ -111,7 +117,7 @@ module.exports = {
 		}
 
 		// logging
-		message.client
+		client
 			.log(
 				currentTaxEmbed,
 				new MessageEmbed()
@@ -133,5 +139,5 @@ module.exports = {
 			}).catch(logger.error);
 
 		message.reply(`${result}.`);
-	},
+	}
 };

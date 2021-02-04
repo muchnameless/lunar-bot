@@ -3,17 +3,24 @@
 const { MessageEmbed } = require('discord.js');
 const { Player, Sequelize } = require('../../../database/models/index');
 const { offsetFlags } = require('../../constants/database');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 const offsetToReset = offsetFlags.COMPETITION_START;
 
 
-module.exports = {
-	aliases: [ 'resetxp' ],
-	description: 'reset the competition xp gained',
-	usage: 'no arguments to reset everyone\n<`IGN`|`@mention`> to reset individual xp gained',
-	cooldown: 5,
-	execute: async (message, args, flags) => {
-		const { players, config } = message.client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'resetxp' ],
+			description: 'reset the competition xp gained',
+			usage: 'no arguments to reset everyone\n<`IGN`|`@mention`> to reset individual xp gained',
+			cooldown: 5,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { players } = client;
 
 		let result;
 
@@ -73,7 +80,7 @@ module.exports = {
 		}
 
 		// logging
-		message.client.log(new MessageEmbed()
+		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('XP Tracking')
 			.setDescription(`${message.author.tag} | ${message.author} ${result}`)
@@ -81,5 +88,5 @@ module.exports = {
 		);
 
 		message.reply(`${result}.`);
-	},
+	}
 };

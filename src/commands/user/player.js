@@ -6,16 +6,22 @@ const { SKILLS, /* COSMETIC_SKILLS, */ SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES }
 const { XP_OFFSETS_SHORT, XP_OFFSETS_TIME } = require('../../constants/database');
 const { escapeIgn, upperCaseFirstChar } = require('../../functions/util');
 const { getOffsetFromFlags } = require('../../functions/leaderboardMessages');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'xp' ],
-	description: 'check a player\'s xp gained',
-	usage: '<`IGN` to check someone other than yourself>',
-	cooldown: 1,
-	execute: async (message, args, flags) => {
-		const { client } = message;
-		const { config, players } = client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'xp' ],
+			description: 'check a player\'s xp gained',
+			usage: '<`IGN` to check someone other than yourself>',
+			cooldown: 1,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { players } = client;
 		const player = message.mentions.users.size
 			? players.getByID(message.mentions.users.first().id)
 			: args.length
@@ -139,5 +145,5 @@ module.exports = {
 		// });
 
 		message.reply(embed /* .padFields() */);
-	},
+	}
 };

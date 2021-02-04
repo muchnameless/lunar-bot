@@ -2,15 +2,22 @@
 
 const { MessageEmbed, Util } = require('discord.js');
 const { escapeIgn } = require('../../functions/util');
+const Command = require('../../structures/Command');
+const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'issues' ],
-	description: 'list player db and discord role discrepancies',
-	cooldown: 0,
-	execute: async (message, args, flags) => {
-		const { config, players, hypixelGuilds } = message.client;
-		const lgGuild = message.client.lgGuild;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'issues' ],
+			description: 'list player db and discord role discrepancies',
+			cooldown: 0,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
+		const { players, hypixelGuilds } = client;
+		const lgGuild = client.lgGuild;
 
 		if (!lgGuild) return message.reply('discord guild is currently unavailable.');
 		if (lgGuild.members.cache.size !== lgGuild.memberCount) await lgGuild.members.fetch();
@@ -105,5 +112,5 @@ module.exports = {
 		});
 
 		message.reply(embed);
-	},
+	}
 };

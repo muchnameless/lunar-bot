@@ -1,17 +1,20 @@
 'use strict';
 
+const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = {
-	// aliases: [ '' ],
-	description: 'toggle the restriction of the bot to guild members',
-	// usage: '',
-	cooldown: 1,
-	execute: async (message, args, flags) => {
-		const { client } = message;
-		const { config } = client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [],
+			description: 'toggle the restriction of the bot to guild members',
+			usage: '',
+			cooldown: 1,
+		});
+	}
 
+	async run(client, config, message, args, flags, rawArgs) {
 		try {
 			switch (config.getBoolean('GUILD_PLAYER_ONLY_MODE')) {
 				case false:
@@ -26,5 +29,5 @@ module.exports = {
 			logger.error(error);
 			message.reply('error while editing the config entry.');
 		}
-	},
+	}
 };

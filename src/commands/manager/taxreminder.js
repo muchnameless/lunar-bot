@@ -2,19 +2,23 @@
 
 const { escapeIgn, checkBotPermissions } = require('../../functions/util');
 const { getHypixelGuildFromFlags } = require('../../functions/leaderboardMessages');
+const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = {
-	aliases: [ 'reminder' ],
-	description: 'ping all who have not paid',
-	guildOnly: true,
-	args: false,
-	usage: '<`-g` or `--ghostping` to ghost ping>\n<`IGNs` or `IDs` to exclude from the ping>',
-	cooldown: 60,
-	execute: async (message, args, flags) => {
-		const { client } = message;
-		const { config } = client;
+module.exports = class MyCommand extends Command {
+	constructor(data) {
+		super(data, {
+			aliases: [ 'reminder' ],
+			description: 'ping all who have not paid',
+			guildOnly: true,
+			args: false,
+			usage: '<`-g` or `--ghostping` to ghost ping>\n<`IGNs` or `IDs` to exclude from the ping>',
+			cooldown: 60,
+		});
+	}
+
+	async run(client, config, message, args, flags, rawArgs) {
 		const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'gp', 'ghost', 'ghostping' ].includes(arg));
 		const hGuild = getHypixelGuildFromFlags(client, flags);
 		const playersToRemind = (hGuild?.players ?? client.players).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
@@ -55,5 +59,5 @@ module.exports = {
 		if (!checkBotPermissions(message.channel, 'MANAGE_MESSAGES')) return fetched.filter(msg => msg.author.id === client.user.id).forEach(msg => msg.delete().catch(logger.error));
 
 		message.channel.bulkDelete([ message.id, ...fetched.filter(fetchedMsg => [ client.user.id, message.author.id ].includes(fetchedMsg.author.id)).keys() ]).catch(logger.error);
-	},
+	}
 };

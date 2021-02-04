@@ -14,6 +14,7 @@ const CronJobCollection = require('./collections/CronJobCollection');
 const HypixelGuildCollection = require('./collections/HypixelGuildCollection');
 const PlayerCollection = require('./collections/PlayerCollection');
 const TaxCollectorCollection = require('./collections/TaxCollectorCollection');
+const Command = require('./Command');
 
 
 class LunarClient extends Client {
@@ -34,14 +35,20 @@ class LunarClient extends Client {
 		this.taxCollectors = new TaxCollectorCollection(this);
 
 		for (const dbEntry of Object.values(db).filter(value => Object.getPrototypeOf(value) === db.Sequelize.Model)) {
-			Object.defineProperty(dbEntry.prototype, 'client', { value: this });
-			Object.defineProperty(dbEntry.prototype, 'db', { value: db });
+			Object.defineProperties(dbEntry.prototype, {
+				client: {
+					value: this,
+				},
+				db: {
+					value: db,
+				},
+			});
 		}
 	}
 
 	/**
 	 * returns the lunar guard discord guild
-	 * @returns {guild} lunar guard discord guild
+	 * @returns {Guild} lunar guard discord guild
 	 */
 	get lgGuild() {
 		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'));
@@ -103,11 +110,14 @@ class LunarClient extends Client {
 	 * @param {string} file command file to load
 	 */
 	loadCommand(file) {
-		const command = require(file);
 		const [, CATEGORY, COMMAND_NAME ] = file.match(/[/\\]commands[/\\](\D+)[/\\](\D+)\.js/);
+		const commandConstructor = require(file);
+		const command = new commandConstructor({
+			client: this,
+			name: COMMAND_NAME,
+			category: CATEGORY,
+		});
 
-		command.name = COMMAND_NAME;
-		command.category = CATEGORY;
 		this.commands.set(COMMAND_NAME.toLowerCase(), command);
 	}
 
