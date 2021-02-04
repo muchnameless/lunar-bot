@@ -1,0 +1,35 @@
+{
+  "name": "lunar-bot-dev",
+  "version": "1.0.0",
+  "description": "dev version of the lunar guard discord bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node . --trace-warnings",
+    "lint": "eslint . --fix",
+    "maintenance": "node maintenance.js",
+    "db": "node ./database/dbInit.js -a"
+  },
+  "author": "muchnameless",
+  "license": "ISC",
+  "dependencies": {
+    "@zikeji/hypixel": "^2.1.1",
+    "bufferutil": "^4.0.3",
+    "cache-manager": "^3.4.0",
+    "chalk": "^4.1.0",
+    "common-tags": "^1.8.0",
+    "cron": "^1.8.2",
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.19.0",
+    "jaro-winkler": "^0.2.8",
+    "lodash": "^4.17.20",
+    "ms": "^2.1.3",
+    "pg": "^8.5.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^6.5.0",
+    "sequelize-cli": "^6.2.0",
+    "utf-8-validate": "^5.0.4",
+    "winston": "^3.3.3"
+  }
+}

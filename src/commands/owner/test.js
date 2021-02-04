@@ -1,0 +1,50 @@
+'use strict';
+
+const { MessageEmbed } = require('discord.js');
+
+
+module.exports = {
+	aliases: [ 'debug' ],
+	description: 'dynamic test function',
+	args: false,
+	usage: '<test arguments>',
+	cooldown: 0,
+	execute: async (message, args, flags) => {
+		const { config, hypixelGuilds } = message.client;
+		const embed = new MessageEmbed()
+			.setTitle('Guild Ranks')
+			.setColor(config.get('EMBED_BLUE'))
+			.setTimestamp();
+
+		for (const hGuild of hypixelGuilds) {
+			const [ prio2Rank, prio3Rank ] = hGuild.ranks.filter(rank => rank.roleID);
+			const prio2Promotions = [];
+			const prio3Promotions = [];
+
+			for (const player of hGuild.players) {
+				const { totalWeight: weight } = player.getWeight();
+
+				if (player.guildRankPriority >= 4) { // staff
+					const member = await player.discordMember;
+
+					if (!member) continue;
+
+
+				} else if (player.guildRankPriority === 3) { // champ
+
+
+				} else if (player.guildRankPriority === 2) { // sent
+					if (weight >= prio3Rank.weightReq) {
+						prio3Promotions.push({ ign: player.ign, weight });
+					}
+				} else { // guard
+					if (weight >= prio3Rank.weightReq) {
+						prio3Promotions.push({ ign: player.ign, weight });
+					} else if (weight >= prio2Rank) {
+						prio2Promotions.push({ ign: player.ign, weight });
+					}
+				}
+			}
+		}
+	},
+};

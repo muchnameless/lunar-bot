@@ -1,0 +1,39 @@
+'use strict';
+
+const fetch = require('node-fetch');
+const { autocorrect } = require('../../functions/util');
+const logger = require('../../functions/logger');
+
+const projects = [ 'stable', 'master', 'commando', 'rpc', 'akairo', 'akairo-master', 'collection' ];
+
+
+module.exports = {
+	description: 'search discord.js docs',
+	// aliases: [ '' ],
+	args: true,
+	usage: `[\`query\`] <\`-${projects.join('`|`')}\` to use another source than 'stable'>`,
+	cooldown: 0,
+	execute: async (message, args, flags) => {
+		const { config } = message.client;
+
+		let project;
+
+		for (const flag of flags) {
+			const result = autocorrect(flag, projects);
+
+			if (result.similarity < config.get('AUTOCORRECT_THRESHOLD')) continue;
+
+			project = result.value;
+			break;
+		}
+
+		project ??= projects[0];
+
+		const embed = await fetch(`https://djsdocs.sorta.moe/v2/embed?src=${project}&q=${args.join('.').replace(/#/g, '.')}`).then(
+			res => res.json(),
+			logger.error,
+		);
+
+		message.reply(embed ?? 'no response from the discord.js-docs-api.');
+	},
+};
