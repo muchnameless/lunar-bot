@@ -42,18 +42,25 @@ module.exports = (sequelize, DataTypes) => {
 		 * @returns {DiscordMember?|Promise<DiscordMember?>}
 		 */
 		get discordMember() {
-			if (!this._discordMember) this._discordMember = (() => {
-				if (!this.inDiscord) return null;
+			// if (!this._discordMember) this._discordMember = (() => {
+			// 	if (!this.inDiscord) return null;
 
-				return this.client.lgGuild?.members
-					.fetch(this.discordID)
-					.catch(error => {
-						this.inDiscord = false; // prevent further fetches and try to link via cache in the next xpUpdate iterations
-						this.save();
-						return logger.error(`[GET DISCORD MEMBER]: error while fetching ${this.ign}'s discord data: ${error.name}: ${error.message}`);
-					})
-					?? null;
-			})();
+			// 	return this.client.lgGuild?.members
+			// 		.fetch(this.discordID)
+			// 		.catch(error => {
+			// 			this.inDiscord = false; // prevent further fetches and try to link via cache in the next xpUpdate iterations
+			// 			this.save();
+			// 			return logger.error(`[GET DISCORD MEMBER]: error while fetching ${this.ign}'s discord data: ${error.name}: ${error.message}`);
+			// 		})
+			// 		?? null;
+			// })();
+
+			if (!this._discordMember) this._discordMember = (this.inDiscord || null) &&
+				(this.client.lgGuild?.members.fetch(this.discordID).catch(error => {
+					this.inDiscord = false;
+					this.save();
+					return logger.error(`[GET DISCORD MEMBER]: error while fetching ${this.ign}'s discord data: ${error.name}: ${error.message}`);
+				}) ?? null);
 
 			return this._discordMember;
 		}
@@ -198,7 +205,7 @@ module.exports = (sequelize, DataTypes) => {
 			} catch (error) {
 				logger.log(
 					error.message === 'cached data' ? 'info' : 'error',
-					`[UPDATE XP]:  ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`,
+					`[UPDATE XP]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`,
 				);
 			}
 
@@ -438,6 +445,8 @@ module.exports = (sequelize, DataTypes) => {
 			discordMember.id;
 			this.inDiscord = true;
 			this.discordMember = discordMember;
+
+			logger.info(`[LINK]: ${this.logInfo}: linked to '${discordMember.user.tag}'`);
 
 			if (reason) await this.updateXp({
 				shouldSkipQueue: true,
