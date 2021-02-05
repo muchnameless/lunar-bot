@@ -27,6 +27,8 @@ const hypixel = new Client(process.env.HYPIXEL_KEY_AUX_2, {
 				// this endpoint is cached by cloudflare and updates every 10 seconds
 				ttl = 10;
 			} else if (key.startsWith('skyblock:auctions:')) {
+				return; // don't cache this endpoint
+
 				// this endpoint is cached by cloudflare and updates every 60 seconds
 				ttl = 60;
 			}

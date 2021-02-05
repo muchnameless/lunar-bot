@@ -6,7 +6,7 @@ const { MAYOR_CHANGE_INTERVAL } = require('../constants/skyblock');
 const { updatePlayerDatabase } = require('../functions/database');
 const { restoreMessage, getWeekOfYear } = require('../functions/util');
 const { startCompetition, endCompetition, performMayorReset, performDailyReset, performWeeklyReset, performMonthlyReset } = require('../functions/scheduledXpResets');
-const updateDaPrices = require('../functions/updateDaPrices');
+const updateDaPricesDatabase = require('../functions/updateDaPricesDatabase');
 const logger = require('../functions/logger');
 
 
@@ -39,7 +39,7 @@ module.exports = async client => {
 	// update player database and tax message every x min starting at the full hour
 	client.cronJobs.set('updatePlayerDatabase', new CronJob({
 		cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
-		onTick: () => updatePlayerDatabase(client),
+		onTick: () => config.getBoolean('PLAYER_DB_UPDATE_ENABLED') && updatePlayerDatabase(client),
 		start: true,
 	}));
 
@@ -47,7 +47,7 @@ module.exports = async client => {
 	// update DA prices 1 min before DA
 	client.cronJobs.set('updateDaPrices', new CronJob({
 		cronTime: '0 54 * * * *',
-		onTick: () => updateDaPrices(client),
+		onTick: () => config.getBoolean('DA_PRICES_DB_UPDATE_ENABLED') && updateDaPricesDatabase(client),
 		start: true,
 	}));
 
