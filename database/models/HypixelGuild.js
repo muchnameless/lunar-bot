@@ -38,6 +38,14 @@ module.exports = (sequelize, DataTypes) => {
 		}
 
 		/**
+		 * returns the amount of players in the guild
+		 * @returns {number}
+		 */
+		get playerCount() {
+			return this.players.size;
+		}
+
+		/**
 		 * updates the player database
 		 */
 		async update() {
@@ -247,7 +255,7 @@ module.exports = (sequelize, DataTypes) => {
 
 			const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length, ignChangedLog.length);
 			const getInlineFieldLineCount = string => string.length
-				? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 22), 0) // max shown is 23, number can be tweaked
+				? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 23), 0) // max shown is 23, number can be tweaked
 				: 0;
 
 			// create and send logging embed(s)
@@ -269,7 +277,7 @@ module.exports = (sequelize, DataTypes) => {
 				this.client.log(new MessageEmbed()
 					.setColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE'))
 					.setTitle(`${this.name} Player Database: ${CHANGES} change${CHANGES !== 1 ? 's' : ''}`)
-					.setDescription(`Number of players: ${PLAYERS_OLD_AMOUNT} -> ${this.players.size}`)
+					.setDescription(`Number of players: ${PLAYERS_OLD_AMOUNT} -> ${this.playerCount}`)
 					.addFields( // max value#length is 1024
 						{ name: `${'joined'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${IGNS_JOINED_LOG_LINE_COUNT ? `diff\n${joinedLogElement}` : `\n${joinedLogElement}`}\`\`\``, inline: true },
 						{ name: `${'left'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${PLAYERS_LEFT_LOG_LINE_COUNT ? `diff\n${leftLogElement}` : `\n${leftLogElement}`}\`\`\``, inline: true },

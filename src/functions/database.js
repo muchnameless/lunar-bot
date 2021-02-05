@@ -165,9 +165,9 @@ const self = module.exports = {
 			.setFooter('Last updated at')
 			.setTimestamp();
 
-		client.hypixelGuilds.forEach(hGuild => {
-			const guildPlayers = hGuild.players;
-			const GUILD_PLAYER_COUNT = guildPlayers.size;
+		// add guild specific fields
+		client.hypixelGuilds.forEach(hypixelGuild => {
+			const GUILD_PLAYER_COUNT = hypixelGuild.playerCount;
 			const ENTRIES_PER_ROW = Math.ceil(GUILD_PLAYER_COUNT / 3);
 			const values = [ '', '', '' ];
 
@@ -175,9 +175,9 @@ const self = module.exports = {
 
 			// construct player list in three rows: paid emoji + non line-breaking space + player ign, slice to keep everything in one line
 			if (config.getBoolean('TAX_TRACKING_ENABLED')) {
-				guildPlayers.forEach(player => values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\xa0${player.ign.slice(0, 15)}`);
+				hypixelGuild.players.forEach(player => values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\xa0${player.ign.slice(0, 15)}`);
 			} else {
-				guildPlayers.forEach(player => values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n•\xa0${player.ign.slice(0, 15)}`);
+				hypixelGuild.players.forEach(player => values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n•\xa0${player.ign.slice(0, 15)}`);
 			}
 
 			// add rows to tax embed
@@ -189,7 +189,7 @@ const self = module.exports = {
 
 				taxEmbed.addField(
 					fieldIndex % 2
-						? `${hGuild.name} (${GUILD_PLAYER_COUNT})`
+						? `${hypixelGuild.name} (${GUILD_PLAYER_COUNT})`
 						: '\u200b',
 					`\`\`\`\n${value}\`\`\``, // put everything in a code block
 					true,
@@ -203,8 +203,6 @@ const self = module.exports = {
 	// updates the player database and the corresponding tax message
 	updatePlayerDatabase: async client => {
 		const { config } = client;
-
-		if (!config.getBoolean('DB_UPDATE_ENABLED')) return;
 
 		// update player db
 		await client.hypixelGuilds.update();
