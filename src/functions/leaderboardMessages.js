@@ -147,7 +147,7 @@ const self = module.exports = {
 
 		type ??= config.get('CURRENT_COMPETITION');
 		offset ??= COMPETITION_RUNNING || Date.now() - COMPETITION_END_TIME <= 24 * 60 * 60 * 1000
-			? XP_OFFSETS_SHORT.competition
+			? offsetFlags.COMPETITION_START
 			: config.get('DEFAULT_XP_OFFSET');
 
 		const IS_COMPETITION_LB = offset === offsetFlags.COMPETITION_START;
@@ -155,6 +155,10 @@ const self = module.exports = {
 		const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END
 			? offsetFlags.COMPETITION_END
 			: '';
+
+		hypixelGuild = IS_COMPETITION_LB
+			? null
+			: client.players.getByID(userID)?.guild;
 
 		let guildPlayers;
 

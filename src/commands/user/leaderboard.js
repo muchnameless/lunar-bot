@@ -80,7 +80,7 @@ module.exports = class LeaderboardCommand extends Command {
 
 		const reply = await message.reply(createGainedStatsEmbed(client, {
 			userID,
-			hypixelGuild: getHypixelGuildFromFlags(client, flags) ?? client.players.getByID(userID)?.guild,
+			hypixelGuild: getHypixelGuildFromFlags(client, flags),
 			type,
 			offset: getOffsetFromFlags(config, flags),
 			shouldShowOnlyBelowReqs: flags.some(flag => [ 't', 'track' ].includes(flag)),
