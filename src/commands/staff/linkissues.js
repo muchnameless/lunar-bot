@@ -24,7 +24,6 @@ module.exports = class LinkIssuesCommand extends Command {
 
 		// discord members with wrong roles
 		const embed = new MessageEmbed()
-			.setTitle('Link Issues')
 			.setColor(config.get('EMBED_BLUE'))
 			.setTimestamp();
 		const GUILD_ROLE_ID = config.get('GUILD_ROLE_ID');
@@ -36,6 +35,8 @@ module.exports = class LinkIssuesCommand extends Command {
 			if (players.some(player => player.discordID === id)) return !member.roles.cache.has(VERIFIED_ROLE_ID) && missingVerifiedRole.push(member);
 			if (member.roles.cache.has(GUILD_ROLE_ID)) return guildRoleWithoutDbEntry.push(member);
 		});
+
+		let issuesAmount = missingVerifiedRole.length + guildRoleWithoutDbEntry.length;
 
 		Util
 			.splitMessage(
@@ -69,6 +70,8 @@ module.exports = class LinkIssuesCommand extends Command {
 			// db entries with issues
 			const [ unlinkedGuildPlayers, linkedPlayers ] = hGuild.players.partition(player => /\D/.test(player.discordID));
 			const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(player => !player.inDiscord);
+
+			issuesAmount += unlinkedGuildPlayers.size + linkedAndNotInDiscordCurrentGuild.size;
 
 			unlinkedPlayers.push({
 				guildName: hGuild.name,
@@ -111,6 +114,8 @@ module.exports = class LinkIssuesCommand extends Command {
 			});
 		});
 
-		message.reply(embed);
+		message.reply(embed
+			.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`),
+		);
 	}
 };

@@ -18,9 +18,10 @@ module.exports = class RankIssuesCommand extends Command {
 	async run(client, config, message, args, flags, rawArgs) {
 		const { hypixelGuilds } = client;
 		const embed = new MessageEmbed()
-			.setTitle('Rank issues')
 			.setColor(config.get('EMBED_BLUE'))
 			.setTimestamp();
+
+		let issuesAmount = 0;
 
 		for (const [, hypixelGuild] of hypixelGuilds) {
 			const belowWeightReq = [];
@@ -43,6 +44,8 @@ module.exports = class RankIssuesCommand extends Command {
 
 			const BELOW_WEIGHT_REQ_AMOUNT = belowWeightReq.length;
 
+			issuesAmount += BELOW_WEIGHT_REQ_AMOUNT;
+
 			embed.addFields(
 				BELOW_WEIGHT_REQ_AMOUNT
 					? {
@@ -62,6 +65,8 @@ module.exports = class RankIssuesCommand extends Command {
 			);
 		}
 
-		message.reply(embed);
+		message.reply(embed
+			.setTitle(`Rank Issues${issuesAmount ? ` (${issuesAmount})` : ''}`),
+		);
 	}
 };
