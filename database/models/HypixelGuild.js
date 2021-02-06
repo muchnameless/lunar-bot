@@ -129,6 +129,8 @@ module.exports = (sequelize, DataTypes) => {
 
 				// player joined again and is still in db
 				...playersJoinedAgain.map(async player => {
+					player.guildID = this.guildID;
+
 					// try to link new player to discord
 					await (async () => {
 						let discordMember = await player.discordMember;
@@ -147,7 +149,11 @@ module.exports = (sequelize, DataTypes) => {
 							if (!discordMember) {
 								if (/\D/.test(player.discordID)) player.discordID = discordTag; // save tag if no id is known
 								player.inDiscord = false;
-								joinedLog.push(`-\xa0${player.ign}: unknown discord tag ${player.discordID}`);
+								joinedLog.push(player.discordID.includes('#')
+									? `-\xa0${player.ign}: unknown discord tag ${player.discordID}`
+									: `-\xa0${player.ign}: unknown discord ID ${player.discordID}`,
+								);
+
 								return hasError = true;
 							}
 						}
@@ -157,7 +163,6 @@ module.exports = (sequelize, DataTypes) => {
 
 					await player.updateIgn();
 					joinedLog.push(`+\xa0${player.ign}`);
-					player.guildID = this.guildID;
 					await player.save();
 
 					players.set(player.minecraftUUID, player);
