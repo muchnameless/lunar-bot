@@ -156,7 +156,7 @@ const self = module.exports = {
 			? offsetFlags.COMPETITION_END
 			: '';
 
-		hypixelGuild = IS_COMPETITION_LB
+		hypixelGuild ??= IS_COMPETITION_LB
 			? null
 			: client.players.getByID(userID)?.guild;
 
@@ -348,14 +348,12 @@ const self = module.exports = {
 			// put playerreq into guildplayers and sort then do the above again
 			if (playerRequesting) {
 				playerRequesting = dataConverter(playerRequesting);
-				guildPlayers.push(playerRequesting);
-				guildPlayers.sort((a, b) => b.sortingStat - a.sortingStat);
 
 				embed.addField(
 					'Your placement',
 					stripIndent`
 						\`\`\`ada
-						#${`${guildPlayers.indexOf(playerRequesting) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
+						#${`${guildPlayers.findIndex(player => player.sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
 						     > ${getEntry(playerRequesting)}
 						\`\`\`
 						Page: ${page} / ${PAGES_TOTAL}
@@ -563,14 +561,12 @@ const self = module.exports = {
 			// put playerreq into guildplayers and sort then do the above again
 			if (playerRequesting) {
 				playerRequesting = dataConverter(playerRequesting);
-				guildPlayers.push(playerRequesting);
-				guildPlayers.sort((a, b) => b.sortingStat - a.sortingStat);
 
 				embed.addField(
 					'Your placement',
 					stripIndent`
 						\`\`\`ada
-						#${`${guildPlayers.indexOf(playerRequesting) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
+						#${`${guildPlayers.findIndex(player => player.sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
 						     > ${getEntry(playerRequesting)}
 						\`\`\`
 						Page: ${page} / ${PAGES_TOTAL}
