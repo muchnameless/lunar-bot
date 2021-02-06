@@ -32,7 +32,7 @@ module.exports = class XpResetCommand extends Command {
 				?? await Player.findOne({
 					where: {
 						ign: {
-							[Sequelize.Op.iLike]: args[0],
+							[Sequelize.Op.iLike]: `%${args[0]}%`,
 						},
 					},
 				});
