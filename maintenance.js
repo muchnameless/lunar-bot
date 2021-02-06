@@ -28,6 +28,8 @@ process
 		}).catch(logger.error)
 	)?.value;
 
+	const prefixRegex = new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i'); // allow PREFIX and @bot.id
+
 	db.sequelize.close().catch(logger.error);
 
 	const presence = { activity: { name: 'nothing due to maintenance', type: 'LISTENING' }, status: 'dnd' };
@@ -68,9 +70,6 @@ process
 	// message
 	client.on('message', async message => {
 		if (message.author.bot || message.system || message.webhookID) return; // filter out bot, system & webhook messages
-
-		const prefixRegex = new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i'); // allow PREFIX and @bot.id
-
 		if (message.guild && !prefixRegex.test(message)) return;
 
 		message.reply(`${client.user} is currently unavailable due to maintenance.`);
