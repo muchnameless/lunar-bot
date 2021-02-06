@@ -570,6 +570,7 @@ module.exports = (sequelize, DataTypes) => {
 			}
 
 			this.guildID = null;
+			this.guildRankPriority = 0;
 			this.save();
 			this.client.players.delete(this.minecraftUUID);
 			return true;

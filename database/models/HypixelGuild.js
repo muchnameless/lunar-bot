@@ -130,7 +130,6 @@ module.exports = (sequelize, DataTypes) => {
 				// player joined again and is still in db
 				...playersJoinedAgain.map(async player => {
 					player.guildID = this.guildID;
-					player.guildRankPriority = 0; // reset to default
 
 					await player.updateIgn();
 					joinedLog.push(`+\xa0${player.ign}`);
