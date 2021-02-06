@@ -131,6 +131,9 @@ module.exports = (sequelize, DataTypes) => {
 				...playersJoinedAgain.map(async player => {
 					player.guildID = this.guildID;
 
+					await player.updateIgn();
+					joinedLog.push(`+\xa0${player.ign}`);
+
 					// try to link new player to discord
 					await (async () => {
 						let discordMember = await player.discordMember;
@@ -161,8 +164,6 @@ module.exports = (sequelize, DataTypes) => {
 						return player.link(discordMember);
 					})();
 
-					await player.updateIgn();
-					joinedLog.push(`+\xa0${player.ign}`);
 					await player.save();
 
 					players.set(player.minecraftUUID, player);
