@@ -3,8 +3,8 @@
 const { MessageEmbed } = require('discord.js');
 const { oneLine, stripIndents } = require('common-tags');
 const { SKILLS, /* COSMETIC_SKILLS, */ SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
-const { XP_OFFSETS_SHORT, XP_OFFSETS_TIME } = require('../../constants/database');
-const { escapeIgn, upperCaseFirstChar } = require('../../functions/util');
+const { offsetFlags, XP_OFFSETS_TIME } = require('../../constants/database');
+const { /* escapeIgn, */ upperCaseFirstChar } = require('../../functions/util');
 const { getOffsetFromFlags } = require('../../functions/leaderboardMessages');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
@@ -43,8 +43,8 @@ module.exports = class PlayerCommand extends Command {
 		// update db?
 		if (flags.some(flag => [ 'f', 'force' ].includes(flag))) await player.updateXp({ shouldSkipQueue: true });
 
-		const offset = getOffsetFromFlags(config, flags) ?? (config.getBoolean('COMPETITION_RUNNING') || Date.now() - config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000
-			? XP_OFFSETS_SHORT.competition
+		const offset = getOffsetFromFlags(config, flags) ?? (config.getBoolean('COMPETITION_RUNNING') || (Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
+			? offsetFlags.COMPETITION_START
 			: config.get('DEFAULT_XP_OFFSET'));
 		const startingDate = new Date(Math.max(config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
 		const embed = new MessageEmbed()

@@ -146,7 +146,7 @@ const self = module.exports = {
 		const COMPETITION_END_TIME = config.getNumber('COMPETITION_END_TIME');
 
 		type ??= config.get('CURRENT_COMPETITION');
-		offset ??= COMPETITION_RUNNING || Date.now() - COMPETITION_END_TIME <= 24 * 60 * 60 * 1000
+		offset ??= COMPETITION_RUNNING || (Date.now() - COMPETITION_END_TIME >= 0 && Date.now() - COMPETITION_END_TIME <= 24 * 60 * 60 * 1000)
 			? offsetFlags.COMPETITION_START
 			: config.get('DEFAULT_XP_OFFSET');
 
