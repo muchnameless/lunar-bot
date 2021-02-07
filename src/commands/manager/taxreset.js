@@ -31,9 +31,8 @@ module.exports = class TaxResetCommand extends Command {
 				: players.getByIGN(args[0]))
 				?? await Player.findOne({
 					where: {
-						ign: {
-							[Sequelize.Op.iLike]: `%${args[0]}%`,
-						},
+						guildID: null,
+						ign: { [Sequelize.Op.iLike]: `%${args[0]}%` },
 					},
 				});
 
