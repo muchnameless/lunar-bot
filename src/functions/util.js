@@ -59,7 +59,7 @@ const self = module.exports = {
 	// cleans a string from an embed for console logging
 	cleanLoggingEmbedString: string => {
 		if (!string || typeof string !== 'string') return null;
-		return string.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '').replace(/`|\*|\n?\u200b/g, '').replace(/\n+/g, '\n');
+		return string.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '').replace(/`|\*|\n?\u200b|\\(?=_)/g, '').replace(/\n+/g, '\n');
 	},
 
 	// replaces the client's token in 'text' and escapes ` and @mentions
@@ -102,6 +102,23 @@ const self = module.exports = {
 			value: currentBestElement,
 			similarity: currentBestSimilarity,
 		};
+	},
+
+	autocorrectV2(query, validInput = [], attributeToQuery = null) {
+		return (attributeToQuery
+			? validInput.map(value => ({
+				value,
+				similarity: jaroWinklerSimilarity(query, value[attributeToQuery], { caseSensitive: false }),
+			}))
+			: validInput.map(value => ({
+				value,
+				similarity: jaroWinklerSimilarity(query, value, { caseSensitive: false }),
+			})))
+			.sort((a, b) => {
+				if (a.similarity < b.similarity) return 1;
+				if (a.similarity > b.similarity) return -1;
+				return 0;
+			})[0];
 	},
 
 	// removes the provided reaction from the user to a specific message
