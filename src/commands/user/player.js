@@ -49,7 +49,7 @@ module.exports = class PlayerCommand extends Command {
 		const startingDate = new Date(Math.max(config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
 		const embed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
-			.setAuthor(`${escapeIgn(player.ign)}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
+			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
 			// .setTitle(`${escapeIgn(player.ign)}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`)
 			// .setURL(player.url)
 			// .setThumbnail(player.image)
