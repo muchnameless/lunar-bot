@@ -812,7 +812,7 @@ module.exports = (sequelize, DataTypes) => {
 		async updateGuildXp(expHistory = {}) {
 			const currentDay = Object.keys(expHistory)[0];
 
-			if (!currentDay) return logger.warn(`[UPDATE GUILD XP]: ${this.logInfo}: no guild xp found`);
+			if (!currentDay) return this.client.config.getBoolean('EXTENDED_LOGGING') && logger.warn(`[UPDATE GUILD XP]: ${this.logInfo}: no guild xp found`);
 
 			const xp = expHistory[currentDay];
 
