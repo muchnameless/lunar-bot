@@ -113,7 +113,7 @@ class PlayerCollection extends BaseClientCollection {
 	 * update xp of all players
 	 */
 	updateXp(options = {}) {
-		return this.each(player => player.updateXp(options));
+		return this.each(player => player.updateXp(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`)));
 	}
 
 	/**
@@ -121,7 +121,7 @@ class PlayerCollection extends BaseClientCollection {
 	 * @param {object} options reset options
 	 */
 	resetXp(options = {}) {
-		return this.each(player => player.resetXp(options));
+		return this.each(player => player.resetXp(options).catch(error => logger.error(`[RESET XP]: ${error.name}: ${error.message}`)));
 	}
 }
 
