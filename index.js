@@ -2,7 +2,6 @@
 
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
-const fs = require('fs');
 const { Constants } = require('discord.js');
 const LunarClient = require('./src/structures/LunarClient');
 const { requireAll } = require('./src/functions/files');
@@ -28,7 +27,7 @@ process
 // init
 (async () => {
 
-	// create bot client
+	// initiate bot client
 	const client = new LunarClient({
 		// fetchAllMembers: true, // enable when discord.js removes that feature
 		disableMentions: 'everyone',
