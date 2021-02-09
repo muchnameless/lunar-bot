@@ -30,3 +30,5 @@ class LunarGuild extends Guild {
 }
 
 Structures.extend('Guild', Guild => LunarGuild); // eslint-disable-line no-shadow, no-unused-vars
+
+module.exports = LunarGuild;

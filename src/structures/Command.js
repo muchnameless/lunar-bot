@@ -1,5 +1,10 @@
 'use strict';
 
+const ConfigCollection = require('./collections/ConfigCollection');
+const LunarMessage = require('./extensions/Message');
+const LunarClient = require('./LunarClient');
+
+
 class Command {
 	/**
 	 * create a new command
@@ -37,13 +42,32 @@ class Command {
 	}
 
 	/**
-	 * 
-	 * @param {Message} message 
-	 * @param {string[]} args 
-	 * @param {string[]} flags 
-	 * @param {string[]} rawArgs 
+	 * @returns {?string[]}
 	 */
-	run(client, config, message, args, flags, rawArgs) {
+	get requiredRoles() {
+		switch (this.category) {
+			case 'staff':
+				return [ this.client.config.get('TRIAL_MODERATOR_ROLE_ID'), this.client.config.get('MODERATOR_ROLE_ID'), this.client.config.get('SENIOR_STAFF_ROLE_ID'), this.client.config.get('MANAGER_ROLE_ID') ];
+
+			case 'manager':
+				return [ this.client.config.get('MANAGER_ROLE_ID') ];
+
+			default:
+				if (this.client.config.getBoolean('GUILD_PLAYER_ONLY_MODE')) return [ this.client.config.get('GUILD_ROLE_ID') ];
+				return null;
+		}
+	}
+
+	/**
+	 * execute the command
+	 * @param {LunarClient} client
+	 * @param {ConfigCollection} config
+	 * @param {LunarMessage} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 * @param {string[]} flags command flags
+	 * @param {string[]} rawArgs arguments and flags
+	 */
+	run(client, config, message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
 }

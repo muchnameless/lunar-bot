@@ -10,35 +10,67 @@ const logger = require('./logger');
 
 const self = module.exports = {
 
-	// usage: await sleep(milliseconds)
+	/**
+	 * usage: await sleep(milliseconds)
+	 * @param {number} milliseconds to sleep
+	 */
 	sleep: promisify(setTimeout),
 
-	// lets you insert any string into a regex without escaping it
+	/**
+	 * lets you insert any string as the plain string into a regex
+	 * @param {string} string to escape
+	 */
 	escapeRegex: string => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
 
-	// escapes discord markdown in igns
+	/**
+	 * escapes discord markdown in igns
+	 * @param {string} string to escape
+	 */
 	escapeIgn: string => string.replace(/_/g, '\\_'),
 
-	// extracts user IDs from @mentions
+	/**
+	 * extracts user IDs from @mentions
+	 * @param {string} string to analyze
+	 */
 	getIDFromString: string => string.match(/<@!?(\d+)>/)?.[1] ?? null,
 
+	/**
+	 * abc -> Abc
+	 * @param {string} string to convert
+	 */
 	upperCaseFirstChar: string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`,
 
-	// trims a string to a certain length
+	/**
+	 * trims a string to a certain length
+	 * @param {string} string to trim
+	 * @param {number} max maximum length
+	 */
 	trim: (string, max) => string.length > max ? `${string.slice(0, max - 3)}...` : string,
 
-	// day.month.year -> year/month/day
+	/**
+	 * day.month.year -> year/month/day
+	 * @param {string} string to convert
+	 */
 	reverseDateInput: string => string.split('.').reverse().join('/'),
 
-	// checks the input string if it could be a discord tag
+	/**
+	 * checks the input string if it could be a discord tag
+	 * @param {string} string to check
+	 */
 	checkIfDiscordTag: string => /.+#\d{4}/.test(string),
 
-	// returns the aux client instead of the main one if 'shouldSkipQueue' is true and the main client's request queue is filled
+	/**
+	 * returns the hypixel client
+	 * @param {boolean} shouldSkipQueue wether to use the hypixel aux client when the main one's request queue is filled
+	 */
 	getHypixelClient: (shouldSkipQueue = false) => (shouldSkipQueue && hypixel.queue.promises.length > hypixelAux.queue.promises.length)
 		? hypixelAux
 		: hypixel,
 
-	// returns the ISO week number of the given date
+	/**
+	 * returns the ISO week number of the given date
+	 * @param {Date} date to analyze
+	 */
 	getWeekOfYear: date => {
 		const target = new Date(date.valueOf());
 		const dayNumber = (date.getUTCDay() + 6) % 7;
@@ -56,13 +88,20 @@ const self = module.exports = {
 		return Math.ceil((firstThursday - target) / (7 * 24 * 3600 * 1000)) + 1;
 	},
 
-	// cleans a string from an embed for console logging
+	/**
+	 * cleans a string from an embed for console logging
+	 * @param {string} string the string to clean
+	 */
 	cleanLoggingEmbedString: string => {
 		if (!string || typeof string !== 'string') return null;
 		return string.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '').replace(/`|\*|\n?\u200b|\\(?=_)/g, '').replace(/\n+/g, '\n');
 	},
 
-	// replaces the client's token in 'text' and escapes ` and @mentions
+	/**
+	 * replaces the client's token in 'text' and escapes ` and @mentions
+	 * @param {LunarClient} client discord client to get the token from
+	 * @param {string} text to clean
+	 */
 	cleanOutput: (client, text) => {
 		if (typeof text !== 'string') text = inspect(text, { depth: 1 });
 
@@ -121,7 +160,12 @@ const self = module.exports = {
 			})[0];
 	},
 
-	// removes the provided reaction from the user to a specific message
+	/**
+	 * removes the provided reaction from the user to a specific message
+	 * @param {Message} message discord message
+	 * @param {User} user discord user
+	 * @param {string} emojiName emoji name
+	 */
 	removeReaction: async (message, user, emojiName) => {
 		if (!message.guild || !self.checkBotPermissions(message.channel, 'MANAGE_MESSAGES')) return; // no perms to remove reactions (in DMs or that channel)
 
@@ -135,21 +179,6 @@ const self = module.exports = {
 
 		if (await reaction.users.remove(user.id).catch(error => logger.error(`[REMOVE REACTION]: ${error.name}: ${error.message}`)) && message.client.config.getBoolean('EXTENDED_LOGGING'))
 			logger.debug(`[REMOVE REACTION]: removed the ${emojiName} reaction from ${user.tag}`);
-	},
-
-	// returns an array of required roles for the provided category or null if there are none required
-	getRequiredRoles: (category, config) => {
-		switch (category) {
-			case 'staff':
-				return [ config.get('TRIAL_MODERATOR_ROLE_ID'), config.get('MODERATOR_ROLE_ID'), config.get('SENIOR_STAFF_ROLE_ID'), config.get('MANAGER_ROLE_ID') ];
-
-			case 'manager':
-				return [ config.get('MANAGER_ROLE_ID') ];
-
-			default:
-				if (config.getBoolean('GUILD_PLAYER_ONLY_MODE')) return [ config.get('GUILD_ROLE_ID') ];
-				return null;
-		}
 	},
 
 	// tries to fetch the cronJob message and creates a mock message as replacement in case of an error

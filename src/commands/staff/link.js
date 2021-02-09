@@ -5,6 +5,9 @@ const { checkIfDiscordTag, getHypixelClient } = require('../../functions/util');
 const { findMemberByTag } = require('../../functions/database');
 const { Player } = require('../../../database/models/index');
 const mojang = require('../../api/mojang');
+const ConfigCollection = require('../../structures/collections/ConfigCollection');
+const LunarMessage = require('../../structures/extensions/Message');
+const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -20,6 +23,15 @@ module.exports = class LinkCommand extends Command {
 		});
 	}
 
+	/**
+	 * execute the command
+	 * @param {LunarClient} client
+	 * @param {ConfigCollection} config
+	 * @param {LunarMessage} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 * @param {string[]} flags command flags
+	 * @param {string[]} rawArgs arguments and flags
+	 */
 	async run(client, config, message, args, flags, rawArgs) {
 		const { players, hypixelGuilds } = client;
 

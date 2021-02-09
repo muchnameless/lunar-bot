@@ -3,7 +3,10 @@
 const { MessageEmbed, version } = require('discord.js');
 const { commaListsOr, stripIndents } = require('common-tags');
 const ms = require('ms');
-const { upperCaseFirstChar, getRequiredRoles } = require('../../functions/util');
+const { upperCaseFirstChar } = require('../../functions/util');
+const ConfigCollection = require('../../structures/collections/ConfigCollection');
+const LunarMessage = require('../../structures/extensions/Message');
+const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -18,6 +21,15 @@ module.exports = class HelpCommand extends Command {
 		});
 	}
 
+	/**
+	 * execute the command
+	 * @param {LunarClient} client
+	 * @param {ConfigCollection} config
+	 * @param {LunarMessage} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 * @param {string[]} flags command flags
+	 * @param {string[]} rawArgs arguments and flags
+	 */
 	async run(client, config, message, args, flags, rawArgs) {
 		const { commands } = client;
 		const helpEmbed = new MessageEmbed()
@@ -73,7 +85,7 @@ module.exports = class HelpCommand extends Command {
 			helpEmbed
 				.setTitle(`Category: ${upperCaseFirstChar(CATEGORY_NAME)}`);
 
-			let requiredRoles = getRequiredRoles(CATEGORY_NAME, config);
+			let requiredRoles = categoryCommands.first().requiredRoles;
 
 			if (requiredRoles) {
 				requiredRoles = requiredRoles.map(roleID => client.lgGuild?.roles.cache.get(roleID));
@@ -125,7 +137,7 @@ module.exports = class HelpCommand extends Command {
 
 		helpEmbed.addField('**Category**:', `${upperCaseFirstChar(command.category)}`);
 
-		const requiredRoles = getRequiredRoles(command.category, config);
+		const requiredRoles = command.requiredRoles;
 
 		if (requiredRoles) {
 			const lgGuild = client.lgGuild;

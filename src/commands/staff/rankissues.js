@@ -2,6 +2,9 @@
 
 const { MessageEmbed } = require('discord.js');
 const { escapeIgn, trim } = require('../../functions/util');
+const ConfigCollection = require('../../structures/collections/ConfigCollection');
+const LunarMessage = require('../../structures/extensions/Message');
+const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -15,6 +18,15 @@ module.exports = class RankIssuesCommand extends Command {
 		});
 	}
 
+	/**
+	 * execute the command
+	 * @param {LunarClient} client
+	 * @param {ConfigCollection} config
+	 * @param {LunarMessage} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 * @param {string[]} flags command flags
+	 * @param {string[]} rawArgs arguments and flags
+	 */
 	async run(client, config, message, args, flags, rawArgs) {
 		const { hypixelGuilds } = client;
 		const embed = new MessageEmbed()

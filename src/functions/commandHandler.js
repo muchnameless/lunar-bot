@@ -3,7 +3,7 @@
 const { commaListsOr } = require('common-tags');
 const { Collection } = require('discord.js');
 const ms = require('ms');
-const { escapeRegex, getRequiredRoles, autocorrect } = require('./util');
+const { escapeRegex, autocorrect } = require('./util');
 const logger = require('../functions/logger');
 
 
@@ -88,7 +88,7 @@ module.exports = async (client, message) => {
 	if (message.author.id !== client.ownerID) {
 
 		// role permissions
-		const requiredRoles = getRequiredRoles(command.category, config);
+		const requiredRoles = command.requiredRoles;
 
 		if (requiredRoles) {
 			const lgGuild = client.lgGuild;
