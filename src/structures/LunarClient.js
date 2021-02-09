@@ -36,6 +36,7 @@ class LunarClient extends Client {
 		this.players = new PlayerCollection(this);
 		this.taxCollectors = new TaxCollectorCollection(this);
 
+		// add 'client' and 'db' to all db models
 		for (const dbEntry of Object.values(db).filter(value => Object.getPrototypeOf(value) === db.Sequelize.Model)) {
 			Object.defineProperties(dbEntry.prototype, {
 				client: {
@@ -50,7 +51,7 @@ class LunarClient extends Client {
 
 	/**
 	 * returns the lunar guard discord guild
-	 * @returns {LunarGuild} lunar guard discord guild
+	 * @returns {?LunarGuild} lunar guard discord guild
 	 */
 	get lgGuild() {
 		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'));
@@ -305,24 +306,6 @@ class LunarClient extends Client {
 	 */
 	formatNumber(number, paddingAmount = 0, converterFunction = x => x) {
 		return converterFunction(number).toLocaleString(this.config.get('NUMBER_FORMAT')).padStart(paddingAmount, ' ');
-	}
-
-	/**
-	 * returns an array of required roles for the provided category or null if there are none required
-	 * @param {string} category command category to check the required roles for
-	 */
-	getRequiredRoles(category) {
-		switch (category) {
-			case 'staff':
-				return [ this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ];
-
-			case 'manager':
-				return [ this.config.get('MANAGER_ROLE_ID') ];
-
-			default:
-				if (this.config.getBoolean('GUILD_PLAYER_ONLY_MODE')) return [ this.config.get('GUILD_ROLE_ID') ];
-				return null;
-		}
 	}
 }
 
