@@ -39,12 +39,8 @@ class LunarClient extends Client {
 		// add 'client' and 'db' to all db models
 		for (const dbEntry of Object.values(db).filter(value => Object.getPrototypeOf(value) === db.Sequelize.Model)) {
 			Object.defineProperties(dbEntry.prototype, {
-				client: {
-					value: this,
-				},
-				db: {
-					value: db,
-				},
+				client: { value: this },
+				db: { value: db },
 			});
 		}
 	}
