@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node . --trace-warnings",
-    "lint": "eslint . --fix",
+    "start": "node --trace-warnings .",
+    "lint": "eslint .",
     "maintenance": "node maintenance.js",
     "db": "node ./database/dbInit.js -a"
   },
