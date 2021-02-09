@@ -2,11 +2,12 @@
 
 const { Client, MessageEmbed, SnowflakeUtil, Constants } = require('discord.js');
 const path = require('path');
-const fs = require('fs');
+const { promises: fs } = require('fs');
 const { cleanLoggingEmbedString } = require('../functions/util');
 const { getAllJsFiles } = require('../functions/files');
 const db = require('../../database/models/index');
 const logger = require('../functions/logger');
+const LunarGuild = require('./extensions/Guild');
 const BannedUserCollection = require('./collections/BannedUserCollection');
 const CommandCollection = require('./collections/CommandCollection');
 const ConfigCollection = require('./collections/ConfigCollection');
@@ -23,6 +24,7 @@ class LunarClient extends Client {
 
 		this.webhook = null;
 		this.ownerID = process.env.OWNER ?? null;
+		this.logBufferPath = path.join(__dirname, '..', '..', 'log_buffer');
 
 		// custom collections
 		this.bannedUsers = new BannedUserCollection(this);
@@ -48,7 +50,7 @@ class LunarClient extends Client {
 
 	/**
 	 * returns the lunar guard discord guild
-	 * @returns {Guild} lunar guard discord guild
+	 * @returns {LunarGuild} lunar guard discord guild
 	 */
 	get lgGuild() {
 		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'));
@@ -103,6 +105,25 @@ class LunarClient extends Client {
 
 		(await db.TaxCollector.findAll())
 			.forEach(taxCollector => this.taxCollectors.set(taxCollector.minecraftUUID, taxCollector));
+	}
+
+	/**
+	 * fetches and caches the logging webhook and posts all remaining file logs from the log_buffer
+	 */
+	async initializeLoggingWebhook() {
+		if (this.config.getBoolean('LOGGING_WEBHOOK_DELETED')) return logger.warn('[LOGGING WEBHOOK]: deleted');
+
+		try {
+			const loggingWebhook = await this.fetchWebhook(process.env.WEBHOOK_ID, process.env.WEBHOOK_TOKEN);
+
+			if (!loggingWebhook) return;
+
+			this.webhook = loggingWebhook;
+			this._postFileLogs(); // repost webhook logs that failed to be posted during the last uptime
+		} catch (error) {
+			if (error.message === Constants.APIErrors.UNKNOWN_WEBHOOK) this.config.set('LOGGING_WEBHOOK_DELETED', 'true');
+			logger.error(`[LOGGING WEBHOOK]: ${error.name}: ${error.message}`);
+		}
 	}
 
 	/**
@@ -171,9 +192,10 @@ class LunarClient extends Client {
 		if (!embeds.length) throw new TypeError('[CLIENT LOG]: cannot send an empty message');
 		if (embeds.length > 10) throw new RangeError('[CLIENT LOG]: exceeded maximum embed count of 10');
 
-		for (const embed of embeds) {
+		// log to console
+		for (let embed of embeds) {
 			if (typeof embed === 'string') {
-				embeds[embeds.indexOf(embed)] = new MessageEmbed({ color: this.config.get('EMBED_BLUE'), description: embed });
+				embed = embeds[embeds.indexOf(embed)] = new MessageEmbed({ color: this.config.get('EMBED_BLUE'), description: embed });
 			} else if (typeof embed !== 'object' || !embed) {
 				throw new TypeError(`[CLIENT LOG]: provided argument '${embed}' is a ${typeof embed} instead of an Object or String`);
 			}
@@ -186,50 +208,82 @@ class LunarClient extends Client {
 			].filter(x => x != null).join('\n'));
 		}
 
+		// no logging webhook
 		if (!this.webhook) {
 			logger.warn('[CLIENT LOG]: webhook unavailable');
 			return this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
 		}
 
-		return this.webhook
-			.send({
+		// API call
+		try {
+			const res = await this.webhook.send({
 				username: `${this.user.username} Log`,
 				avatarURL: this.user.displayAvatarURL(),
 				embeds,
-			})
-			.catch(error => {
-				logger.error(`[CLIENT LOG]: ${error.name}: ${error.message}`);
-				this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
 			});
+
+			return res;
+		} catch (error) {
+			logger.error(`[CLIENT LOG]: ${error.name}: ${error.message}`);
+
+			// webhook doesn't exist anymore
+			if (error.message === Constants.APIErrors.UNKNOWN_WEBHOOK) {
+				this.webhook = null;
+				this.config.set('LOGGING_WEBHOOK_DELETED', 'true');
+			}
+
+			this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
+
+			return null;
+		}
+	}
+
+	/**
+	 * create log_buffer folder if it is non-existent
+	 */
+	async _createLogBufferFolder() {
+		return fs.mkdir(this.logBufferPath).then(
+			() => logger.debug('[LOG BUFFER]: created \'log_buffer\' folder'),
+			() => null,
+		);
 	}
 
 	/**
 	 * write data in 'cwd/log_buffer'
-	 * @param {*} data file content
+	 * @param {string} data file content
 	 */
-	_logToFile(data) {
-		fs.writeFile(
-			path.join(__dirname, '..', '..', 'log_buffer', `${new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}_${SnowflakeUtil.generate()}`),
-			data,
-			err => err && logger.info(err),
-		);
+	async _logToFile(data) {
+		try {
+			await this._createLogBufferFolder();
+			await fs.writeFile(
+				path.join(this.logBufferPath, `${new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}_${SnowflakeUtil.generate()}`),
+				data,
+			);
+		} catch (error) {
+			logger.error(`[LOG TO FILE]: ${error.name}: ${error.message}`);
+		}
 	}
 
 	/**
 	 * read all files from 'cwd/log_buffer' and webhook log their parsed content
 	 */
-	postFileLogs() {
-		const LOG_BUFFER_PATH = path.join(__dirname, '..', '..', 'log_buffer');
-		const logBufferFiles = fs.readdirSync(LOG_BUFFER_PATH);
+	async _postFileLogs() {
+		try {
+			await this._createLogBufferFolder();
 
-		if (!logBufferFiles) return;
+			const logBufferFiles = await fs.readdir(this.logBufferPath);
 
-		for (const file of logBufferFiles) {
-			const FILE_PATH = path.join(LOG_BUFFER_PATH, file);
+			if (!logBufferFiles) return;
 
-			this
-				.log(...fs.readFileSync(FILE_PATH, 'utf8').split('\n').map(x => new MessageEmbed(JSON.parse(x))))
-				.then(() => fs.unlinkSync(FILE_PATH));
+			for (const file of logBufferFiles) {
+				const FILE_PATH = path.join(this.logBufferPath, file);
+				const FILE_CONTENT = await fs.readFile(FILE_PATH, 'utf8');
+
+				await this.log(...FILE_CONTENT.split('\n').map(x => new MessageEmbed(JSON.parse(x))));
+				await fs.unlink(FILE_PATH);
+			}
+		} catch (error) {
+			logger.error(`[POST LOG FILES]: ${error.name}: ${error.message}`);
 		}
 	}
 
@@ -251,6 +305,24 @@ class LunarClient extends Client {
 	 */
 	formatNumber(number, paddingAmount = 0, converterFunction = x => x) {
 		return converterFunction(number).toLocaleString(this.config.get('NUMBER_FORMAT')).padStart(paddingAmount, ' ');
+	}
+
+	/**
+	 * returns an array of required roles for the provided category or null if there are none required
+	 * @param {string} category command category to check the required roles for
+	 */
+	getRequiredRoles(category) {
+		switch (category) {
+			case 'staff':
+				return [ this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ];
+
+			case 'manager':
+				return [ this.config.get('MANAGER_ROLE_ID') ];
+
+			default:
+				if (this.config.getBoolean('GUILD_PLAYER_ONLY_MODE')) return [ this.config.get('GUILD_ROLE_ID') ];
+				return null;
+		}
 	}
 }
 

@@ -25,16 +25,11 @@ module.exports = async client => {
 	// }
 
 
+	await client.initializeLoggingWebhook();
+
+
 	const { config } = client;
 	const now = new Date();
-
-
-	// fetch logging webhook
-	client.webhook = await client.fetchWebhook(process.env.WEBHOOK_ID, process.env.WEBHOOK_TOKEN).catch(error => logger.error(`[CLIENT WEBHOOK]: ${error.name}: ${error.message}`)) ?? null;
-
-	// repost webhook logs that failed to be posted during the last uptime
-	if (client.webhook) client.postFileLogs();
-
 
 	// update player database and tax message every x min starting at the full hour
 	client.cronJobs.set('updatePlayerDatabase', new CronJob({
@@ -43,14 +38,12 @@ module.exports = async client => {
 		start: true,
 	}));
 
-
 	// update DA prices 1 min before DA
 	client.cronJobs.set('updateDaPrices', new CronJob({
 		cronTime: '0 54 * * * *',
 		onTick: () => config.getBoolean('DA_PRICES_DB_UPDATE_ENABLED') && updateDaPricesDatabase(client),
 		start: true,
 	}));
-
 
 	// auto competition starting
 	if (config.getBoolean('COMPETITION_SCHEDULED')) {
@@ -76,7 +69,6 @@ module.exports = async client => {
 		endCompetition(client);
 	}
 
-
 	// mayor change reset
 	const NEXT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
@@ -90,7 +82,6 @@ module.exports = async client => {
 		performMayorReset(client);
 	}
 
-
 	// daily reset
 	if (new Date(config.getNumber('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) performDailyReset(client);
 
@@ -102,7 +93,6 @@ module.exports = async client => {
 		start: true,
 	}));
 
-
 	// weekly reset
 	if (getWeekOfYear(new Date(config.getNumber('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) performWeeklyReset(client);
 
@@ -113,7 +103,6 @@ module.exports = async client => {
 		onTick: () => performWeeklyReset(client),
 		start: true,
 	}));
-
 
 	// monthly reset
 	if (new Date(config.getNumber('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) performMonthlyReset(client);

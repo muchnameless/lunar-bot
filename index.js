@@ -28,14 +28,6 @@ process
 // init
 (async () => {
 
-	// create log_buffer folder if it is non-existent
-	const LOG_BUFFER_DIR = path.join(__dirname, 'log_buffer');
-
-	if (!fs.existsSync(LOG_BUFFER_DIR)) {
-		fs.mkdirSync(LOG_BUFFER_DIR);
-		logger.debug('[INIT]: created \'log_buffer\' folder');
-	}
-
 	// create bot client
 	const client = new LunarClient({
 		// fetchAllMembers: true, // enable when discord.js removes that feature
