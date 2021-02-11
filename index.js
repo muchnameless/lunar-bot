@@ -3,9 +3,9 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { Constants } = require('discord.js');
-const LunarClient = require('./src/structures/LunarClient');
 const { requireAll } = require('./src/functions/files');
-const { Config, closeConnectionAndExit } = require('./database/models/index');
+const db = require('./database/models/index');
+const LunarClient = require('./src/structures/LunarClient');
 const logger = require('./src/functions/logger');
 
 // discord.js structure extensions
@@ -19,9 +19,9 @@ process
 	})
 	.on('uncaughtException', error => {
 		logger.error('[UNCAUGHT EXCEPTION]:', error);
-		closeConnectionAndExit();
+		db.closeConnectionAndExit();
 	})
-	.on('SIGINT', closeConnectionAndExit);
+	.on('SIGINT', db.closeConnectionAndExit);
 
 
 // init
@@ -29,6 +29,7 @@ process
 
 	// initiate bot client
 	const client = new LunarClient({
+		db,
 		// fetchAllMembers: true, // enable when discord.js removes that feature
 		disableMentions: 'everyone',
 		partials: [
@@ -40,7 +41,7 @@ process
 		],
 		presence: {
 			activity: {
-				name: `${(await Config.findOne({ where: { key: 'PREFIX' } }))?.value}help`,
+				name: `${(await db.Config.findOne({ where: { key: 'PREFIX' } }))?.value}help`,
 				type: 'LISTENING',
 			},
 			status: 'online',
@@ -61,7 +62,7 @@ process
 				// 'GUILD_MESSAGE_TYPING',
 				// 'GUILD_PRESENCES',
 				// 'GUILD_VOICE_STATES',
-				// 'GUILD_WEBHOOKS',
+				'GUILD_WEBHOOKS',
 			],
 		},
 	});
@@ -69,6 +70,6 @@ process
 	// connect to Discord
 	client.login().catch(error => {
 		logger.error('[INIT]: login error:', error);
-		closeConnectionAndExit();
+		db.closeConnectionAndExit();
 	});
 })();
