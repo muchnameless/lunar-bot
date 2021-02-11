@@ -15,12 +15,12 @@ module.exports = async client => {
 
 	// Fetch all members for initially available guilds
 	// if (client.options.fetchAllMembers) {
-	try {
-		const promises = client.guilds.cache.map(guild => guild.available ? guild.members.fetch().then(() => logger.debug(`[READY]: ${guild.name}: fetched all ${guild.memberCount} members`)) : Promise.resolve());
-		await Promise.all(promises);
-	} catch (error) {
-		logger.error(`Failed to fetch all members before ready! ${error}`);
-	}
+	// try {
+	// 	const promises = client.guilds.cache.map(guild => guild.available ? guild.members.fetch().then(() => logger.debug(`[READY]: ${guild.name}: fetched all ${guild.memberCount} members`)) : Promise.resolve());
+	// 	await Promise.all(promises);
+	// } catch (error) {
+	// 	logger.error(`Failed to fetch all members before ready! ${error}`);
+	// }
 	// }
 
 

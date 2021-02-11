@@ -2,6 +2,10 @@
 
 const logger = require('../functions/logger');
 
+/*
+	doesn't emit so it's pretty useless, code from: S:\pi\lunar_bot_dev\node_modules\discord.js\src\client\websocket\handlers\GUILD_CREATE.js
+ */
+
 
 module.exports = async (client, oldGuild, newGuild) => {
 	// if (!client.options.fetchAllMembers) return;

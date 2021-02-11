@@ -30,7 +30,7 @@ process
 	// initiate bot client
 	const client = new LunarClient({
 		db,
-		// fetchAllMembers: true, // enable when discord.js removes that feature
+		fetchAllMembers: true, // enable when discord.js removes that feature
 		disableMentions: 'everyone',
 		partials: [
 			Constants.PartialTypes.CHANNEL,
