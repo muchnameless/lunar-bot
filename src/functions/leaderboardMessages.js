@@ -5,10 +5,18 @@ const { MessageEmbed } = require('discord.js');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_SHORT, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../constants/database');
 const { upperCaseFirstChar, autocorrect, checkBotPermissions } = require('./util');
+const ConfigCollection = require('../structures/collections/ConfigCollection');
+const LunarMessage = require('../structures/extensions/Message');
+const HypixelGuild = require('../structures/HypixelGuild');
+const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
-// returns a (new) page number or null if the emoji is not a valid page navigation emoji
+/**
+ * returns a (new) page number or null if the emoji is not a valid page navigation emoji
+ * @param {number} currentPage the current page
+ * @param {string} emojiName the emoji that triggered the page update
+ */
 function getPage(currentPage, emojiName) {
 	switch (emojiName) {
 		case DOUBLE_LEFT_EMOJI:
@@ -38,7 +46,10 @@ function getPage(currentPage, emojiName) {
 
 const self = module.exports = {
 
-	// adds reactions to navigate in pagination
+	/**
+	 * adds reactions to navigate in pagination
+	 * @param {LunarMessage} message the message to add the reactions to
+	 */
 	addPageReactions: async message => {
 		if (!message) return logger.warn('[ADD PAGE REACTIONS]: no message');
 		if (!checkBotPermissions(message.channel, 'ADD_REACTIONS')) return logger.warn(`[ADD PAGE REACTIONS]: missing 'ADD_REACTIONS' permission in #${message.channel.name}`);
@@ -55,7 +66,12 @@ const self = module.exports = {
 		}
 	},
 
-	// autocorrect an offset-flag using short names
+	/**
+	 * autocorrect an offset-flag using short names
+	 * @param {ConfigCollection} config the bot's config
+	 * @param {string[]} flags message flags
+	 * @returns {string}
+	 */
 	getOffsetFromFlags: (config, flags) => {
 		let offset;
 
@@ -71,7 +87,12 @@ const self = module.exports = {
 		return offset;
 	},
 
-	// autocorrect a hypixel-guild-flag and returns 'undefined', the guild object, or 'false' for the 'all'-flag
+	/**
+	 * autocorrect a hypixel-guild-flag and returns 'undefined', the guild object, or 'false' for the 'all'-flag
+	 * @param {LunarClient} client
+	 * @param {string[]} flags message flags
+	 * @returns {?HypixelGuild}
+	 */
 	getHypixelGuildFromFlags: (client, flags) => {
 		const { config, hypixelGuilds } = client;
 
@@ -82,11 +103,17 @@ const self = module.exports = {
 
 			const { similarity } = autocorrect(flag, [ 'all' ]);
 
-			if (similarity >= config.get('AUTOCORRECT_THRESHOLD')) return false;
+			if (similarity >= config.get('AUTOCORRECT_THRESHOLD')) return null;
 		}
+
+		return null;
 	},
 
-	// updates a xp leaderboard message
+	/**
+	 * updates a xp leaderboard message
+	 * @param {LunarMessage} message leaderboard message to update
+	 * @param {string} emojiName emoji that triggered the update
+	 */
 	updateLeaderboardMessage: (message, emojiName) => {
 		const PAGE_FIELD = message.embeds[0].fields[message.embeds[0].fields.length - 1].value;
 		const CURRENT_PAGE = Number(PAGE_FIELD.match(/(\d+) \/ \d+/)[1]);
@@ -101,7 +128,9 @@ const self = module.exports = {
 		const { content } = message;
 		const matchedDescription = message.embeds[0].description.match(/^(?<guildName>.+) (?:total|average|(?<belowReqs>below reqs)) \(/m);
 		const GUILD_NAME = matchedDescription.groups.guildName.trim();
-		const hypixelGuild = message.client.hypixelGuilds.getByName(GUILD_NAME);
+		const hypixelGuild = GUILD_NAME === 'Guilds'
+			? null
+			: message.client.hypixelGuilds.getByName(GUILD_NAME);
 		const USER_ID = message.guild ? message.mentions.users.first()?.id : message.channel.recipient.id;
 
 		let type = matchedTitle.groups.type.toLowerCase();
@@ -139,7 +168,17 @@ const self = module.exports = {
 		if (message.client.config.getBoolean('EXTENDED_LOGGING')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
 	},
 
-	// constructs a xp leaderboard message embed
+	/**
+	 * constructs a xp leaderboard message embed
+	 * @param {LunarClient} client
+	 * @param {object} param1
+	 * @param {string} param1.userID
+	 * @param {HypixelGuild} [param1.hypixelGuild]
+	 * @param {string} [param1.type]
+	 * @param {string} [param1.offset]
+	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
+	 * @param {number} [param1.page]
+	 */
 	createGainedStatsEmbed: (client, { userID, hypixelGuild = null, type, offset, shouldShowOnlyBelowReqs = false, page = 1 }) => {
 		const { config } = client;
 		const COMPETITION_RUNNING = config.getBoolean('COMPETITION_RUNNING');
@@ -383,7 +422,17 @@ const self = module.exports = {
 		return embed;
 	},
 
-	// constructs a total xp leaderboard message embed
+	/**
+	 * constructs a total xp leaderboard message embed
+	 * @param {LunarClient} client
+	 * @param {object} param1
+	 * @param {string} param1.userID
+	 * @param {HypixelGuild} [param1.hypixelGuild]
+	 * @param {string} [param1.type]
+	 * @param {string} [param1.offset]
+	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
+	 * @param {number} [param1.page]
+	 */
 	createTotalStatsEmbed: (client, { userID, hypixelGuild = null, type, offset = '', shouldShowOnlyBelowReqs = false, page = 1 }) => {
 		const { config } = client;
 

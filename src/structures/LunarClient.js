@@ -62,7 +62,7 @@ class LunarClient extends Client {
 
 	/**
 	 * loads all commands, events, db caches and logs the client in
-	 * @param {string?} token discord bot token
+	 * @param {?string} token discord bot token
 	 */
 	async login(token) {
 		await this.loadDbCache();

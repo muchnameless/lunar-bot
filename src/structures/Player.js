@@ -72,8 +72,16 @@ class Player extends Model {
 	}
 
 	/**
+	 * @typedef {object} GuildRank
+	 * @property {string} name name of the guild rank
+	 * @property {?string} roleID discord role ID associated with the guild rank
+	 * @property {number} priority hypixel guild rank priority
+	 * @property {?number} weightReq weight requirement for the guild rank
+	 */
+
+	/**
 	 * returns the guild rank of the player
-	 * @returns {object?}
+	 * @returns {?GuildRank}
 	 */
 	get guildRank() {
 		return this.guild?.ranks.find(rank => rank.priority === this.guildRankPriority) ?? null;

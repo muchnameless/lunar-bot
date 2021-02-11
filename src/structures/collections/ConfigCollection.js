@@ -51,7 +51,7 @@ class ConfigCollection extends BaseClientCollection {
 	/**
 	 * get the value of a config entry or `null` if non-existent
 	 * @param {string} key config key
-	 * @returns {string?} config value
+	 * @returns {?string} config value
 	 */
 	get(key) {
 		return super.get(key?.toUpperCase())?.value
@@ -63,7 +63,7 @@ class ConfigCollection extends BaseClientCollection {
 	/**
 	 * get the value of a config entry as a boolean
 	 * @param {string} key config key
-	 * @returns {boolean?} config value
+	 * @returns {?boolean} config value
 	 */
 	getBoolean(key) {
 		const VALUE = this.get(key?.toUpperCase());
