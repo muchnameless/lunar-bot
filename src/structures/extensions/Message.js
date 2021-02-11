@@ -1,7 +1,7 @@
 'use strict';
 
 const { commaListsAnd } = require('common-tags');
-const { Structures, MessageEmbed, Message } = require('discord.js');
+const { Structures, MessageEmbed, Message, GuildMember, User } = require('discord.js');
 const _ = require('lodash');
 const { findNearestCommandsChannel } = require('../../functions/util');
 const logger = require('../../functions/logger');
@@ -104,13 +104,6 @@ class LunarMessage extends Message {
 			? null
 			: options;
 
-		// add reply if it is not present
-		options.reply ??= this.guild
-			? this.author.id
-			: null; // cause editing message with reply pings author even in DMs
-
-		options.sameChannel ??= false;
-
 		// DMs
 		if (!this.guild) {
 			return this.replyMessageID && this.channel.messages.cache.has(this.replyMessageID)
@@ -121,6 +114,21 @@ class LunarMessage extends Message {
 						return message;
 					});
 		}
+
+		// add reply if it is not present
+		options.reply ??= this.author.id;
+
+		if (options.reply && typeof options.reply !== 'string') {
+			if (options.reply instanceof User || options.reply instanceof GuildMember) {
+				options.reply = options.reply.id;
+			} else if (options.reply instanceof LunarMessage) {
+				options.reply = options.reply.author.id;
+			}
+		}
+
+		options.sameChannel ??= false;
+
+		// if (options.reply) content = `\u200b<@${options.reply}>${content.length ? ', ' : ''}${content}`;
 
 		// guild -> requires permission
 		const requiredChannelPermissions = [ 'VIEW_CHANNEL', 'SEND_MESSAGES' ];

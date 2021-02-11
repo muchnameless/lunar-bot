@@ -1,9 +1,13 @@
 'use strict';
 
 const { Collection } = require('discord.js');
+// const LunarClient = require('../LunarClient');
 
 
 class BaseClientCollection extends Collection {
+	/**
+	 * @param {LunarClient} client 
+	 */
 	constructor(client, entries = null) {
 		super(entries);
 		this.client = client;

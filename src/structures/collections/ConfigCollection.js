@@ -1,6 +1,5 @@
 'use strict';
 
-const { Config } = require('../../../database/models/index');
 const logger = require('../../functions/logger');
 const BaseClientCollection = require('./BaseClientCollection');
 
@@ -17,14 +16,14 @@ class ConfigCollection extends BaseClientCollection {
 	 * @returns {Promise<Config>}
 	 */
 	async set(key, value) {
-		if (value instanceof Config) super.set(key, value);
+		if (value instanceof this.client.db.Config) super.set(key, value);
 
 		key = key.toUpperCase();
 
 		let dbEntry = super.get(key);
 
 		if (!dbEntry) {
-			dbEntry = await Config.create({ key, value });
+			dbEntry = await this.client.db.Config.create({ key, value });
 			super.set(key, dbEntry);
 			return dbEntry;
 		}

@@ -1,7 +1,6 @@
 'use strict';
 
 const { CronJob } = require('cron');
-const { CronJob: cronJobDB } = require('../../../database/models/index');
 const { restoreMessage } = require('../../functions/util');
 const logger = require('../../functions/logger');
 const BaseClientCollection = require('./BaseClientCollection');
@@ -14,7 +13,7 @@ class CronJobCollection extends BaseClientCollection {
 
 	async create({ name, date, command, authorID, messageID, channelID, args, flags }) {
 		// create db entry
-		await cronJobDB.create({
+		await this.client.db.CronJob.create({
 			name,
 			date: date.getTime(),
 			command: command.name,
@@ -29,9 +28,9 @@ class CronJobCollection extends BaseClientCollection {
 		this.set(name, new CronJob({
 			cronTime: date,
 			onTick: async () => {
-				command.execute(await restoreMessage(this, await cronJobDB.findOne({ where: { name } })), args, flags).catch(logger.error);
+				command.execute(await restoreMessage(this, await this.client.db.CronJob.findOne({ where: { name } })), args, flags).catch(logger.error);
 				this.delete(name);
-				cronJobDB.destroy({ where: { name } });
+				this.client.db.CronJob.destroy({ where: { name } });
 				logger.info(`[CRONJOB]: ${name}`);
 			},
 			start: true,

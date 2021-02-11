@@ -117,7 +117,7 @@ const self = module.exports = {
 	 * @param {any[]} validInput 
 	 * @param {string} attributeToQuery 
 	 */
-	autocorrect: (query, validInput = [], attributeToQuery = null) => {
+	autocorrect: (query, validInput, attributeToQuery = null) => {
 		let currentBestElement;
 		let currentBestSimilarity = 0;
 

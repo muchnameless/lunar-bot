@@ -30,13 +30,13 @@ module.exports = {
 		wolf: 1962,
 	},
 
-	DUNGEON_MAX_POINTS: {
-		catacombs: 6500,
-		healer: 200,
-		mage: 200,
-		berserk: 200,
-		archer: 200,
-		tank: 200,
+	DUNGEON_EXPONENTS: {
+		catacombs: 0.0002149604615,
+		healer: 0.0000045254834,
+		mage: 0.0000045254834,
+		berserk: 0.0000045254834,
+		archer: 0.0000045254834,
+		tank: 0.0000045254834,
 	},
 
 };

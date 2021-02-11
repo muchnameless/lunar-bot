@@ -1,7 +1,6 @@
 'use strict';
 
 const ms = require('ms');
-const { BannedUser } = require('../../../database/models/index');
 const logger = require('../../functions/logger');
 const BaseClientCollection = require('./BaseClientCollection');
 
@@ -30,7 +29,7 @@ class BannedUserCollection extends BaseClientCollection {
 		}
 
 		try {
-			const newBannedUser = await BannedUser.create({
+			const newBannedUser = await this.client.db.BannedUser.create({
 				discordID: user.id,
 				discordTag: user.tag,
 				reason: reason,

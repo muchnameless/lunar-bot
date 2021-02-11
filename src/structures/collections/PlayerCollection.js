@@ -1,14 +1,27 @@
 'use strict';
 
-const { Player } = require('../../../database/models/index');
 const { autocorrect } = require('../../functions/util');
 const logger = require('../../functions/logger');
+const Player = require('../Player');
 const BaseClientCollection = require('./BaseClientCollection');
 
+/**
+ * @typedef {BaseClientCollection<string, Player>} PlayerCollection
+ */
 
 class PlayerCollection extends BaseClientCollection {
+	/**
+	 * @returns {BaseClientCollection<string, Player>}
+	 */
 	constructor(client, entries) {
 		super(client, entries);
+	}
+
+	/**
+	 * @returns {string[]}
+	 */
+	get ignoredAuctions() {
+		return this.array().flatMap(player => player.auctionID ?? []);
 	}
 
 	set(key, value) {
@@ -43,7 +56,7 @@ class PlayerCollection extends BaseClientCollection {
 	 * @param {boolean} isAddingSingleEntry wether to call sortAlphabetically() and updateXp() after adding the new entry
 	 */
 	async add(options = {}, isAddingSingleEntry = true) {
-		const newPlayer = await Player.create(options);
+		const newPlayer = await this.client.db.Player.create(options);
 
 		this.set(newPlayer.minecraftUUID, newPlayer);
 
@@ -63,7 +76,7 @@ class PlayerCollection extends BaseClientCollection {
 	 * deletes all unnecessary db entries
 	 */
 	async sweepDb() {
-		const playersToSweep = await Player.findAll({
+		const playersToSweep = await this.client.db.Player.findAll({
 			where: {
 				guildID: null,
 				paid: false,
@@ -81,6 +94,7 @@ class PlayerCollection extends BaseClientCollection {
 	/**
 	 * get a player by their IGN, case insensitive and with auto-correction
 	 * @param {string} ign ign of the player
+	 * @returns {?Player}
 	 */
 	getByIGN(ign) {
 		if (!ign) return null;
@@ -95,6 +109,7 @@ class PlayerCollection extends BaseClientCollection {
 	/**
 	 * get a player by their discord ID
 	 * @param {string} id discord id of the player
+	 * @returns {?Player}
 	 */
 	getByID(id) {
 		if (!id) return null;

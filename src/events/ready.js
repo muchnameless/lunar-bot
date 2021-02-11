@@ -1,7 +1,6 @@
 'use strict';
 
 const { CronJob } = require('cron');
-const { CronJob: cronJobDB } = require('../../database/models/index');
 const { MAYOR_CHANGE_INTERVAL } = require('../constants/skyblock');
 const { updatePlayerDatabase } = require('../functions/database');
 const { restoreMessage, getWeekOfYear } = require('../functions/util');
@@ -28,7 +27,7 @@ module.exports = async client => {
 	await client.initializeLoggingWebhook();
 
 
-	const { config } = client;
+	const { config, db } = client;
 	const now = new Date();
 
 	// update player database and tax message every x min starting at the full hour
@@ -117,10 +116,10 @@ module.exports = async client => {
 
 
 	// resume command cron jobs
-	await Promise.all((await cronJobDB.findAll()).map(async cronJob => {
+	await Promise.all((await db.CronJob.findAll()).map(async cronJob => {
 		// expired while bot was offline
 		if (Date.now() > cronJob.date - 1000) { // -100 cause CronJob throws error if times are too close
-			cronJobDB.destroy({ where: { name: cronJob.name } });
+			db.CronJob.destroy({ where: { name: cronJob.name } });
 			client.commands.getByName(cronJob.command).execute(await restoreMessage(client, cronJob), cronJob.args?.split(' ') ?? [], cronJob.flags?.split(' ') ?? []).catch(logger.error);
 			return logger.info(`[CRONJOB]: ${cronJob.name}`);
 		}
@@ -130,7 +129,7 @@ module.exports = async client => {
 			onTick: async () => {
 				client.commands.getByName(cronJob.command).execute(await restoreMessage(client, cronJob), cronJob.args?.split(' ') ?? [], cronJob.flags?.split(' ') ?? []).catch(logger.error);
 				client.cronJobs.delete(cronJob.name);
-				cronJobDB.destroy({ where: { name: cronJob.name } });
+				db.CronJob.destroy({ where: { name: cronJob.name } });
 				logger.info(`[CRONJOB]: ${cronJob.name}`);
 			},
 			start: true,

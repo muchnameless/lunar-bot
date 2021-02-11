@@ -1,7 +1,6 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
-const { Player, Sequelize } = require('../../../database/models/index');
 const { checkBotPermissions } = require('../../functions/util');
 const { createTaxEmbed } = require('../../functions/database');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
@@ -31,7 +30,7 @@ module.exports = class TaxResetCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { players, taxCollectors } = client;
+		const { players, taxCollectors, db } = client;
 
 		let currentTaxEmbed;
 		let result;
@@ -41,10 +40,10 @@ module.exports = class TaxResetCommand extends Command {
 			const player = (message.mentions.users.size
 				? players.getByID(message.mentions.users.first().id)
 				: players.getByIGN(args[0]))
-				?? await Player.findOne({
+				?? await db.Player.findOne({
 					where: {
 						guildID: null,
-						ign: { [Sequelize.Op.iLike]: `%${args[0]}%` },
+						ign: { [db.Sequelize.Op.iLike]: `%${args[0]}%` },
 					},
 				});
 

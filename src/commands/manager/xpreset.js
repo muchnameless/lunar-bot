@@ -1,7 +1,6 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
-const { Player, Sequelize } = require('../../../database/models/index');
 const { offsetFlags } = require('../../constants/database');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
@@ -32,7 +31,7 @@ module.exports = class XpResetCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { players } = client;
+		const { players, db } = client;
 
 		let result;
 
@@ -41,10 +40,10 @@ module.exports = class XpResetCommand extends Command {
 			const player = (message.mentions.users.size
 				? players.getByID(message.mentions.users.first().id)
 				: players.getByIGN(args[0]))
-				?? await Player.findOne({
+				?? await db.Player.findOne({
 					where: {
 						guildID: null,
-						ign: { [Sequelize.Op.iLike]: `%${args[0]}%` },
+						ign: { [db.Sequelize.Op.iLike]: `%${args[0]}%` },
 					},
 				});
 

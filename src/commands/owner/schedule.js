@@ -1,6 +1,5 @@
 'use strict';
 
-const { CronJob } = require('../../../database/models/index');
 const { reverseDateInput, autocorrect } = require('../../functions/util');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
@@ -30,7 +29,7 @@ module.exports = class ScheduleCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { cronJobs } = client;
+		const { cronJobs, db } = client;
 
 		// list all running cron jobs
 		if (flags.some(flag => [ 'l', 'list' ].includes(flag))) return message.reply(cronJobs.keyArray().join('\n'), { code: 'prolog', split: { char: '\n' } });
@@ -46,7 +45,7 @@ module.exports = class ScheduleCommand extends Command {
 
 			cronJobToRemove.stop();
 			cronJobs.delete(result.value);
-			await CronJob.destroy({
+			await db.CronJob.destroy({
 				where: {
 					name: result.value,
 				},

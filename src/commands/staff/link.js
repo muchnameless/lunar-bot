@@ -3,7 +3,6 @@
 const { stripIndents, oneLineCommaListsOr } = require('common-tags');
 const { checkIfDiscordTag, getHypixelClient } = require('../../functions/util');
 const { findMemberByTag } = require('../../functions/database');
-const { Player } = require('../../../database/models/index');
 const mojang = require('../../api/mojang');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
@@ -33,7 +32,7 @@ module.exports = class LinkCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { players, hypixelGuilds } = client;
+		const { players, hypixelGuilds, db } = client;
 
 		let player;
 
@@ -68,7 +67,7 @@ module.exports = class LinkCommand extends Command {
 			if (!hypixelGuild || !hypixelGuilds.keyArray().includes(hypixelGuild._id)) continue;
 
 			// try to find player in the db
-			player = await Player.findByPk(minecraftUUID);
+			player = await db.Player.findByPk(minecraftUUID);
 
 			if (player) {
 				player.guildID = hypixelGuild._id;
@@ -79,7 +78,7 @@ module.exports = class LinkCommand extends Command {
 			// create new db entry
 			const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name}: ${error.message}`)) ?? 'unknown ign';
 
-			player = await Player
+			player = await db.Player
 				.create({
 					minecraftUUID,
 					ign: IGN,

@@ -7,19 +7,22 @@ const { X_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { SKILLS, SLAYERS } = require('../constants/skyblock');
 const { checkBotPermissions } = require('./util');
 const hypixel = require('../api/hypixel');
+// const LunarClient = require('../structures/LunarClient');
 const logger = require('./logger');
 
 
-// updates the tax database
+/**
+ * updates the tax database
+ * @param {LunarClient} client 
+ * @returns {Promise<string[]>}
+ */
 async function updateTaxDatabase(client) {
 	const { config, players, taxCollectors } = client;
 	const TAX_AUCTIONS_START_TIME = config.getNumber('TAX_AUCTIONS_START_TIME');
 	const TAX_AMOUNT = config.getNumber('TAX_AMOUNT');
 	const TAX_AUCTIONS_ITEMS = config.getArray('TAX_AUCTIONS_ITEMS');
 	const NOW = Date.now();
-	const ignoredAuctions = players
-		.array()
-		.flatMap(player => player.auctionID ?? []);
+	const ignoredAuctions = players.ignoredAuctions;
 	const availableAuctionsLog = [];
 	const loggingEmbed = new MessageEmbed()
 		.setColor(config.get('EMBED_BLUE'))
@@ -128,7 +131,11 @@ const self = module.exports = {
 		return rolesToRemove;
 	},
 
-	// tries to find a discord member by a discord tag
+	/**
+	 * tries to find a discord member by a discord tag
+	 * @param {LunarClient} client 
+	 * @param {string} tag 
+	 */
 	findMemberByTag: async (client, tag) => {
 		const lgGuild = client.lgGuild;
 
@@ -143,7 +150,11 @@ const self = module.exports = {
 		return fetched?.find(member => member.user.tag === tag) ?? null;
 	},
 
-	// creates and returns a tax embed
+	/**
+	 * creates and returns a tax embed
+	 * @param {LunarClient} client 
+	 * @param {string[]} availableAuctionsLog 
+	 */
 	createTaxEmbed: (client, availableAuctionsLog) => {
 		const { config, players, taxCollectors } = client;
 		const activeTaxCollectors = taxCollectors.filter(taxCollector => taxCollector.isCollecting); // eslint-disable-line no-shadow
@@ -200,7 +211,10 @@ const self = module.exports = {
 		return taxEmbed;
 	},
 
-	// updates the player database and the corresponding tax message
+	/**
+	 * updates the player database and the corresponding tax message
+	 * @param {LunarClient} client 
+	 */
 	updatePlayerDatabase: async client => {
 		const { config } = client;
 

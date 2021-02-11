@@ -1,7 +1,6 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
-const { Item } = require('../../database/models/index');
 const { DA_ITEMS } = require('../constants/skyblock');
 const { checkBotPermissions } = require('./util');
 const hypixel = require('../api/hypixelAux2');
@@ -116,7 +115,7 @@ module.exports = async function(client) {
 	} while (++page <= totalPages);
 
 	// update db
-	await Promise.all(Object.entries(DA_PRICES).map(async ([name, lowestBin]) => isFinite(lowestBin) && Item.upsert({ name, lowestBin })));
+	await Promise.all(Object.entries(DA_PRICES).map(async ([name, lowestBin]) => isFinite(lowestBin) && client.db.Item.upsert({ name, lowestBin })));
 
 	// post message
 	const { config } = client;
@@ -129,7 +128,7 @@ module.exports = async function(client) {
 		.send(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('DA Prices - Lowest Bin')
-			.setDescription((await Item.findAll()).sort((a, b) => a.dataValues.name.toLowerCase().localeCompare(b.dataValues.name.toLowerCase())).map(item => `${item.name}: ${item.lowestBin.toLocaleString(config.get('NUMBER_FORMAT'))}`).join('\n'))
+			.setDescription((await client.db.Item.findAll()).sort((a, b) => a.dataValues.name.toLowerCase().localeCompare(b.dataValues.name.toLowerCase())).map(item => `${item.name}: ${item.lowestBin.toLocaleString(config.get('NUMBER_FORMAT'))}`).join('\n'))
 			.setFooter(`fetched ${binAuctionsAmount.toLocaleString(config.get('NUMBER_FORMAT'))} bin auctions`)
 			.setTimestamp(),
 		)

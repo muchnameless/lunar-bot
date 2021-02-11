@@ -1,7 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
-const { getHypixelClient } = require('../../functions/util');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
 const LunarClient = require('../../structures/LunarClient');
@@ -30,6 +28,6 @@ module.exports = class TestCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const res = await getHypixelClient().guild.id();
+		return;
 	}
 };

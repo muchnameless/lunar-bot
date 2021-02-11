@@ -1,6 +1,5 @@
 'use strict';
 
-const { closeConnectionAndExit } = require('../../../database/models/index');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
 const LunarClient = require('../../structures/LunarClient');
@@ -28,6 +27,6 @@ module.exports = class StopCommand extends Command {
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
 		await message.reply('stopping the bot.').catch(logger.error);
-		closeConnectionAndExit();
+		client.db.closeConnectionAndExit();
 	}
 };

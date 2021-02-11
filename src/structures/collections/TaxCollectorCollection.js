@@ -1,6 +1,5 @@
 'use strict';
 
-const { TaxCollector } = require('../../../database/models/index');
 const BaseClientCollection = require('./BaseClientCollection');
 
 
@@ -10,7 +9,7 @@ class TaxCollectorCollection extends BaseClientCollection {
 	}
 
 	async add(player) {
-		const newTaxCollector = await TaxCollector.create({
+		const newTaxCollector = await this.client.db.TaxCollector.create({
 			minecraftUUID: player.minecraftUUID,
 			ign: player.ign,
 			isCollecting: true,

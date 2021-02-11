@@ -5,7 +5,6 @@ const path = require('path');
 const { promises: fs } = require('fs');
 const { cleanLoggingEmbedString } = require('../functions/util');
 const { getAllJsFiles } = require('../functions/files');
-const db = require('../../database/models/index');
 const logger = require('../functions/logger');
 const LunarGuild = require('./extensions/Guild');
 const BannedUserCollection = require('./collections/BannedUserCollection');
@@ -22,6 +21,7 @@ class LunarClient extends Client {
 	constructor(options = {}) {
 		super(options);
 
+		this.db = options.db;
 		this.webhook = null;
 		this.ownerID = process.env.OWNER ?? null;
 		this.logBufferPath = path.join(__dirname, '..', '..', 'log_buffer');
@@ -37,10 +37,9 @@ class LunarClient extends Client {
 		this.taxCollectors = new TaxCollectorCollection(this);
 
 		// add 'client' and 'db' to all db models
-		for (const dbEntry of Object.values(db).filter(value => Object.getPrototypeOf(value) === db.Sequelize.Model)) {
+		for (const dbEntry of Object.values(this.db).filter(value => Object.getPrototypeOf(value) === this.db.Sequelize.Model)) {
 			Object.defineProperties(dbEntry.prototype, {
 				client: { value: this },
-				db: { value: db },
 			});
 		}
 	}
@@ -78,21 +77,21 @@ class LunarClient extends Client {
 	 * loads all dbs into their respective <LunarClient>.<Collection>
 	 */
 	async loadDbCache() {
-		(await db.BannedUser.findAll())
+		(await this.db.BannedUser.findAll())
 			.forEach(user => this.bannedUsers.set(user.discordID, user));
 
-		(await db.Config.findAll())
+		(await this.db.Config.findAll())
 			.forEach(config => this.config._set(config.key, config));
 
-		(await db.HypixelGuild.findAll())
+		(await this.db.HypixelGuild.findAll())
 			.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
 			.forEach(hypixelGuild => this.hypixelGuilds.set(hypixelGuild.guildID, hypixelGuild));
 
-		(await db.Player.findAll({
+		(await this.db.Player.findAll({
 			where: {
 				// player is in a guild that the bot tracks
 				guildID: {
-					[db.Sequelize.Op.ne]: null,
+					[this.db.Sequelize.Op.ne]: null,
 				},
 			},
 		}))
@@ -100,7 +99,7 @@ class LunarClient extends Client {
 
 		this.players.sortAlphabetically();
 
-		(await db.TaxCollector.findAll())
+		(await this.db.TaxCollector.findAll())
 			.forEach(taxCollector => this.taxCollectors.set(taxCollector.minecraftUUID, taxCollector));
 	}
 
