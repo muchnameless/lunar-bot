@@ -57,7 +57,7 @@ module.exports = class TaxPaidCommand extends Command {
 			await player.resetTax();
 		}
 
-		const CUSTOM_AMOUNT = args.shift()?.replace(/,|./g);
+		const CUSTOM_AMOUNT = args.shift()?.replace(/,|\./g, '');
 
 		player.setToPaid({
 			amount: /\D/.test(CUSTOM_AMOUNT) ? config.getNumber('TAX_AMOUNT') : Number(CUSTOM_AMOUNT),
