@@ -34,8 +34,10 @@ module.exports = class TaxPaidCommand extends Command {
 
 		if (!collector?.isCollecting) return message.reply('this command is restricted to tax collectors.');
 
-		const [ IGN, CUSTOM_AMOUNT ] = args;
-		const player = message.mentions.users.size ? players.getByID(message.mentions.users.first().id) : players.getByIGN(IGN);
+		const IGN = args.shift();
+		const player = message.mentions.users.size
+			? players.getByID(message.mentions.users.first().id)
+			: players.getByIGN(IGN);
 
 		if (!player) return message.reply(`no player ${message.mentions.users.size
 			? `linked to \`${message.guild
@@ -45,18 +47,24 @@ module.exports = class TaxPaidCommand extends Command {
 			: `with the IGN \`${IGN}\``
 		} found.`);
 
-		if (player.paid && !flags.some(flag => [ 'f', 'force' ].includes(flag))) {
-			const ANSWER = await message.awaitReply(`\`${player.ign}\` is already set to paid with an amount of \`${client.formatNumber(player.amount)}\`. Overwrite this?`, 30);
+		if (player.paid) {
+			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+				const ANSWER = await message.awaitReply(`\`${player.ign}\` is already set to paid with an amount of \`${client.formatNumber(player.amount)}\`. Overwrite this?`, 30);
 
-			if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+			}
+
+			await player.resetTax();
 		}
+
+		const CUSTOM_AMOUNT = args.shift()?.replace(/,|./g);
 
 		player.setToPaid({
 			amount: /\D/.test(CUSTOM_AMOUNT) ? config.getNumber('TAX_AMOUNT') : Number(CUSTOM_AMOUNT),
 			collectedBy: collector.minecraftUUID,
 		});
 
-		message.reply(`\`${player.ign}\` manually set to paid with ${/\D/.test(CUSTOM_AMOUNT) ? 'the default' : 'a custom'} amount of \`${client.formatNumber(player.amount)}\` by \`${collector.ign}\``);
+		message.reply(`\`${player.ign}\` manually set to paid with ${/\D/.test(CUSTOM_AMOUNT) ? 'the default' : 'a custom'} amount of \`${client.formatNumber(player.amount)}\`.`);
 
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
