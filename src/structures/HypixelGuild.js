@@ -9,6 +9,7 @@ const { offsetFlags } = require('../constants/database');
 const hypixel = require('../api/hypixel');
 const mojang = require('../api/mojang');
 const PlayerCollection = require('./collections/PlayerCollection');
+// const Player = require('./Player');
 // const LunarClient = require('./LunarClient');
 const logger = require('../functions/logger');
 
@@ -128,7 +129,7 @@ class HypixelGuild extends Model {
 
 			// player left the guild
 			...playersLeft.map(async player => {
-				leftLog.push(`-\xa0${player.ign}${player.paid ? ` | paid ${player.amount}` : ''}`);
+				leftLog.push(`-\xa0${player.ign}${player.paid ? ` | paid ${player.amount.toLocaleString(config.get('NUMBER_FORMAT'))}` : ''}`);
 
 				if (await player.removeFromGuild()) return; // return if successful
 
