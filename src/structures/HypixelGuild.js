@@ -271,7 +271,7 @@ class HypixelGuild extends Model {
 
 		const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length, ignChangedLog.length);
 		const getInlineFieldLineCount = string => string.length
-			? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 23), 0) // max shown is 23, number can be tweaked
+			? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 24), 0) // max shown is 24, number can be tweaked
 			: 0;
 
 		// create and send logging embed(s)
