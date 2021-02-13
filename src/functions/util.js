@@ -119,9 +119,9 @@ const self = module.exports = {
 
 	/**
 	 * checks the query agains the validInput and returns the most likely match
-	 * @param {string} query 
-	 * @param {any[]} validInput 
-	 * @param {string} attributeToQuery 
+	 * @param {string} query
+	 * @param {any[]} validInput
+	 * @param {string} attributeToQuery
 	 */
 	autocorrect: (query, validInput, attributeToQuery = null) => {
 		let currentBestElement;
