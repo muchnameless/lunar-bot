@@ -568,8 +568,8 @@ class Player extends Model {
 			const rolesToAdd = [];
 			const rolesToRemove = getRolesToPurge(member);
 
-			// add ex guild role if player stayed for more than 5 days
-			if ((Date.now() - this.createdAt >= 5 * 24 * 60 * 60 * 1000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID')))
+			// add ex guild role if player stayed for more than 1 week
+			if ((Date.now() - this.createdAt >= 7 * 24 * 60 * 60 * 1000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID')))
 				rolesToAdd.push(config.get('EX_GUILD_ROLE_ID'));
 
 			if (!(await this.makeRoleApiCall(rolesToAdd, rolesToRemove, `left ${this.guildName}`))) {
