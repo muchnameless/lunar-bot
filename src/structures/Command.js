@@ -28,7 +28,9 @@ class Command {
 		this.description = info.description?.length ? info.description : null;
 		this.guildOnly = info.guildOnly ?? false;
 		this.args = info.args ?? false;
-		this._usage = info.usage?.length ? info.usage : null;
+		this._usage = typeof info.usage === 'function' || info.usage?.length
+			? info.usage
+			: null;
 		this.cooldown = info.cooldown ?? null;
 	}
 
