@@ -91,7 +91,7 @@ const self = module.exports = {
 	 * autocorrect a hypixel-guild-flag and returns 'undefined', the guild object, or 'false' for the 'all'-flag
 	 * @param {LunarClient} client
 	 * @param {string[]} flags message flags
-	 * @returns {?HypixelGuild}
+	 * @returns {?HypixelGuild|boolean}
 	 */
 	getHypixelGuildFromFlags: (client, flags) => {
 		const { config, hypixelGuilds } = client;
@@ -103,7 +103,7 @@ const self = module.exports = {
 
 			const { similarity } = autocorrect(flag, [ 'all' ]);
 
-			if (similarity >= config.get('AUTOCORRECT_THRESHOLD')) return null;
+			if (similarity >= config.get('AUTOCORRECT_THRESHOLD')) return false;
 		}
 
 		return null;
