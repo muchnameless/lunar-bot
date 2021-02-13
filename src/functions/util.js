@@ -41,6 +41,12 @@ const self = module.exports = {
 	upperCaseFirstChar: string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`,
 
 	/**
+	 * removes ',', '.' and '_' from the input string
+	 * @param {?string} string input
+	 */
+	removeNumberFormatting: string => string?.replace(/,|\.|_/g, ''),
+
+	/**
 	 * trims a string to a certain length
 	 * @param {string} string to trim
 	 * @param {number} max maximum length

@@ -1,9 +1,12 @@
 'use strict';
 
+const { DiscordAPIError, Constants } = require('discord.js');
 const { stripIndents, oneLineCommaListsOr } = require('common-tags');
+const { UNKNOWN_IGN } = require('../../constants/database');
 const { checkIfDiscordTag, getHypixelClient } = require('../../functions/util');
 const { findMemberByTag } = require('../../functions/database');
 const mojang = require('../../api/mojang');
+const Player = require('../../structures/Player');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
 const LunarClient = require('../../structures/LunarClient');
@@ -34,6 +37,9 @@ module.exports = class LinkCommand extends Command {
 	async run(client, config, message, args, flags, rawArgs) {
 		const { players, hypixelGuilds, db } = client;
 
+		/**
+		 * @type {Player}
+		 */
 		let player;
 
 		// try to find the player to link
@@ -76,7 +82,7 @@ module.exports = class LinkCommand extends Command {
 			}
 
 			// create new db entry
-			const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name}: ${error.message}`)) ?? 'unknown ign';
+			const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name}: ${error.message}`)) ?? UNKNOWN_IGN;
 
 			player = await db.Player
 				.create({
@@ -121,24 +127,34 @@ module.exports = class LinkCommand extends Command {
 
 		// player already linked
 		if (/^\d+$/.test(player.discordID)) {
-			const linkedUser = await client.users.fetch(player.discordID).catch(error => logger.error(`[LINK]: error fetching already linked user: ${error.name}: ${error.message}`));
+			let isDeleted = false;
 
-			if (player.discordID === DISCORD_ID) return message.reply(
-				`\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}.`,
-				{ allowedMentions: { parse: [] } },
-			);
+			const linkedUser = await client.users.fetch(player.discordID).catch(error => {
+				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
+					isDeleted = true;
+					return logger.error(`[LINK]: ${player.logInfo}: deleted discord user: ${player.discordID}`);
+				}
+				return logger.error(`[LINK]: ${player.logInfo}: error fetching already linked user: ${error.name}: ${error.message}`);
+			});
 
-			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
-				const ANSWER = await message.awaitReply(
-					stripIndents`
-						\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}. Overwrite this?
-						Make sure to provide the full ign if the player database is not already updated (check ${client.loggingChannel ?? '#lunar-logs'})
-					`,
-					30,
+			if (!isDeleted) {
+				if (player.discordID === DISCORD_ID) return message.reply(
+					`\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}.`,
 					{ allowedMentions: { parse: [] } },
 				);
 
-				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+					const ANSWER = await message.awaitReply(
+						stripIndents`
+							\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}. Overwrite this?
+							Make sure to provide the full ign if the player database is not already updated (check ${client.loggingChannel ?? '#lunar-logs'})
+						`,
+						30,
+						{ allowedMentions: { parse: [] } },
+					);
+
+					if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				}
 			}
 
 			if (!(await player.unlink(`unlinked by ${message.author.tag}`)) && linkedUser) {

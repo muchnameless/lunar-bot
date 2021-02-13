@@ -1,6 +1,7 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
+const { removeNumberFormatting } = require('../../functions/util');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
 const LunarClient = require('../../structures/LunarClient');
@@ -57,7 +58,7 @@ module.exports = class TaxPaidCommand extends Command {
 			await player.resetTax();
 		}
 
-		const CUSTOM_AMOUNT = args.shift()?.replace(/,|\./g, '');
+		const CUSTOM_AMOUNT = removeNumberFormatting(args.shift());
 
 		player.setToPaid({
 			amount: /\D/.test(CUSTOM_AMOUNT) ? config.getNumber('TAX_AMOUNT') : Number(CUSTOM_AMOUNT),

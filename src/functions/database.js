@@ -13,7 +13,7 @@ const logger = require('./logger');
 
 /**
  * updates the tax database
- * @param {LunarClient} client 
+ * @param {LunarClient} client
  * @returns {Promise<string[]>}
  */
 async function updateTaxDatabase(client) {
@@ -133,8 +133,8 @@ const self = module.exports = {
 
 	/**
 	 * tries to find a discord member by a discord tag
-	 * @param {LunarClient} client 
-	 * @param {string} tag 
+	 * @param {LunarClient} client
+	 * @param {string} tag
 	 */
 	findMemberByTag: async (client, tag) => {
 		const lgGuild = client.lgGuild;
@@ -152,8 +152,8 @@ const self = module.exports = {
 
 	/**
 	 * creates and returns a tax embed
-	 * @param {LunarClient} client 
-	 * @param {string[]} availableAuctionsLog 
+	 * @param {LunarClient} client
+	 * @param {string[]} availableAuctionsLog
 	 */
 	createTaxEmbed: (client, availableAuctionsLog) => {
 		const { config, players, taxCollectors } = client;
@@ -213,7 +213,7 @@ const self = module.exports = {
 
 	/**
 	 * updates the player database and the corresponding tax message
-	 * @param {LunarClient} client 
+	 * @param {LunarClient} client
 	 */
 	updatePlayerDatabase: async client => {
 		const { config } = client;
@@ -225,7 +225,7 @@ const self = module.exports = {
 		const availableAuctionsLog = config.getBoolean('TAX_TRACKING_ENABLED') && await updateTaxDatabase(client);
 
 		// update Xp
-		if (config.getBoolean('XP_TRACKING_ENABLED')) client.players.updateXp();
+		if (config.getBoolean('XP_TRACKING_ENABLED')) client.players.update();
 
 		// update taxMessage
 		const taxChannel = client.channels.cache.get(config.get('TAX_CHANNEL_ID'));

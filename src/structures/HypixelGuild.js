@@ -5,7 +5,7 @@ const { MessageEmbed, Util } = require('discord.js');
 const { autocorrect, findNearestCommandsChannel, checkBotPermissions, getHypixelClient } = require('../functions/util');
 const { findMemberByTag } = require('../functions/database');
 const { Y_EMOJI, X_EMOJI, CLOWN } = require('../constants/emojiCharacters');
-const { offsetFlags } = require('../constants/database');
+const { offsetFlags, UNKNOWN_IGN } = require('../constants/database');
 const hypixel = require('../api/hypixel');
 const mojang = require('../api/mojang');
 const PlayerCollection = require('./collections/PlayerCollection');
@@ -195,7 +195,7 @@ class HypixelGuild extends Model {
 
 				for (let index = DAYS_PASSED_SINCE_LAST_XP_UPDATE + 1; --index;) await player.resetXp({ offsetToReset: 'day' });
 
-				return player.updateXp({
+				return player.update({
 					shouldSkipQueue: true,
 					reason: `joined ${this.name}`,
 				});
@@ -204,7 +204,7 @@ class HypixelGuild extends Model {
 			// add all players to the db that joined
 			...membersJoinedNew.map(async hypixelGuildMember => { // eslint-disable-line no-shadow
 				const { uuid: minecraftUUID } = hypixelGuildMember;
-				const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${minecraftUUID}: ${error.name}: ${error.message}`)) ?? 'unknown ign';
+				const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${minecraftUUID}: ${error.name}: ${error.message}`)) ?? UNKNOWN_IGN;
 
 				joinedLog.push(`+\xa0${IGN}`);
 
@@ -240,7 +240,7 @@ class HypixelGuild extends Model {
 
 				player.discordMember = discordMember;
 
-				return player.updateXp({
+				return player.update({
 					shouldSkipQueue: true,
 					reason: `joined ${this.name}`,
 				});

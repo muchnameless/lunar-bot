@@ -3,7 +3,7 @@
 const { MessageEmbed, GuildMember } = require('discord.js');
 const { Model } = require('sequelize');
 const { stripIndents } = require('common-tags');
-const { XP_TYPES, XP_OFFSETS } = require('../constants/database');
+const { XP_TYPES, XP_OFFSETS, GUILD_ID_ERROR, UNKNOWN_IGN } = require('../constants/database');
 const { LEVELING_XP, SKILL_XP_PAST_50, SKILLS_CAP, RUNECRAFTING_XP, DUNGEON_XP, SLAYER_XP, SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../constants/weight');
 const { escapeIgn, getHypixelClient } = require('../functions/util');
@@ -104,6 +104,7 @@ class Player extends Model {
 
 	/**
 	 * returns a string with the ign and guild name
+	 * @returns {string}
 	 */
 	get logInfo() {
 		return `${this.ign} (${this.guildName})`;
@@ -124,14 +125,23 @@ class Player extends Model {
 	}
 
 	/**
+	 * updates the player data and discord member
+	 * @param {object} options
+	 * @param {boolean} [options.shouldSkipQueue] wether to use the hypixel aux client when the main one's request queue is filled
+	 * @param {?string} [options.reason] role update reason for discord's audit logs
+	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
+	 */
+	async update({ shouldSkipQueue = false, reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
+		await this.updateXp({ shouldSkipQueue });
+		await this.updateDiscordMember({ reason, shouldSendDm });
+	}
+
+	/**
 	 * updates skill and slayer xp
 	 * @param {object} options
-	 * @param {boolean?} [options.shouldSkipQueue] wether to use the hypixel aux client when the main one's request queue is filled
-	 * @param {string?} [options.reason] role update reason for discord's audit logs
+	 * @param {boolean} [options.shouldSkipQueue] wether to use the hypixel aux client when the main one's request queue is filled
 	 */
-	async updateXp(options = {}) {
-		const { shouldSkipQueue = false, reason = 'synced with ingame stats' } = options;
-
+	async updateXp({ shouldSkipQueue = false } = {}) {
 		try {
 			if (!this.mainProfileID) await this.fetchMainProfile(shouldSkipQueue); // detect main profile if it is unknown
 
@@ -215,27 +225,36 @@ class Player extends Model {
 				`[UPDATE XP]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`,
 			);
 		}
+	}
 
-		return this.updateRoles(reason);
+	/**
+	 * updates discord roles and nickname
+	 * @param {object} options
+	 * @param {?string} [options.reason] role update reason for discord's audit logs
+	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
+	 */
+	async updateDiscordMember({ reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
+		const member = await this.discordMember ?? (reason = 'found linked discord tag', await this.linkUsingCache());
+
+		if (this.guildID === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
+
+		if (!member) return; // no linked available discord member to update
+		if (!member.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID'))) return logger.warn(`[UPDATE DISCORD MEMBER]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing verified role`);
+
+		await this.updateRoles(reason);
+		await this.syncIgnWithDisplayName(shouldSendDm);
 	}
 
 	/**
 	 * updates the skyblock related discord roles using the db data
-	 * @param {string?} reason reason for discord's audit logs
+	 * @param {?string} reason reason for discord's audit logs
 	 */
 	async updateRoles(reason = null) {
-		const member = await this.discordMember ?? (reason = 'found linked discord tag', await this.linkUsingCache());
-
-		if (this.guildID === 'error') return this.removeFromGuild();
+		const member = await this.discordMember;
 
 		if (!member) return;
 
 		const { config } = this.client;
-
-		if (!member.roles.cache.has(config.get('VERIFIED_ROLE_ID'))) return logger.warn(`[UPDATE ROLES]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing verified role`);
-
-		await this.syncIgnWithDisplayName();
-
 		const rolesToAdd = [];
 		const rolesToRemove = [];
 
@@ -406,6 +425,7 @@ class Player extends Model {
 
 	/**
 	 * tries to link unlinked players via discord.js-cache (without any discord API calls)
+	 * @returns {Promise<?GuildMember>}
 	 */
 	async linkUsingCache() {
 		const lgGuild = this.client.lgGuild;
@@ -449,13 +469,13 @@ class Player extends Model {
 	 * @param {string} reason reason for discord's audit logs
 	 */
 	async link(discordMember, reason = null) {
-		discordMember.id;
+		this.discordID = discordMember.id;
 		this.inDiscord = true;
 		this.discordMember = discordMember;
 
 		logger.info(`[LINK]: ${this.logInfo}: linked to '${discordMember.user.tag}'`);
 
-		if (reason) await this.updateXp({
+		if (reason) await this.update({
 			shouldSkipQueue: true,
 			reason,
 		});
@@ -564,18 +584,16 @@ class Player extends Model {
 		const member = await this.discordMember;
 
 		if (member) {
-			const { config } = member.client;
-			const rolesToAdd = [];
+			const { config } = this.client;
+			const rolesToAdd = (Date.now() - this.createdAt >= 7 * 24 * 60 * 60 * 1000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
+				? [ config.get('EX_GUILD_ROLE_ID') ] // add ex guild role if player stayed for more than 1 week
+				: [];
 			const rolesToRemove = getRolesToPurge(member);
-
-			// add ex guild role if player stayed for more than 1 week
-			if ((Date.now() - this.createdAt >= 7 * 24 * 60 * 60 * 1000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID')))
-				rolesToAdd.push(config.get('EX_GUILD_ROLE_ID'));
 
 			if (!(await this.makeRoleApiCall(rolesToAdd, rolesToRemove, `left ${this.guildName}`))) {
 				// error updating roles
 				logger.warn(`[REMOVE FROM GUILD]: ${this.logInfo}: unable to update roles`);
-				this.guildID = 'error';
+				this.guildID = GUILD_ID_ERROR;
 				this.save();
 				return false;
 			}
@@ -599,16 +617,16 @@ class Player extends Model {
 
 		if (!member) return;
 		if (member.displayName.toLowerCase().includes(this.ign.toLowerCase())) return; // nickname includes ign
-		if (this.ign === 'unknown ign') return; // mojang api error
+		if (this.ign === UNKNOWN_IGN) return; // mojang api error
 
 		return this.makeNickApiCall(this.ign, shouldSendDm, 'display name didn\'t contain ign');
 	}
 
 	/**
 	 * sets a nickname for the player's discord member
-	 * @param {string?} newNick new nickname, null to remove the current nickname
+	 * @param {?string} newNick new nickname, null to remove the current nickname
 	 * @param {boolean} shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
-	 * @param {string?} reason reason for discord's audit logs
+	 * @param {?string} reason reason for discord's audit logs
 	 * @returns {Promise<boolean>} wether the API call was successful
 	 */
 	async makeNickApiCall(newNick = null, shouldSendDm = false, reason = null) {
@@ -674,7 +692,7 @@ class Player extends Model {
 	async fetchMainProfile(shouldSkipQueue = false) {
 		const profiles = await getHypixelClient(shouldSkipQueue).skyblock.profiles.uuid(this.minecraftUUID);
 
-		if (!profiles?.length) throw new Error(`[MAIN PROFILE]: ${this.logInfo}: unable to detect main profile name`);
+		if (!profiles.length) throw new Error(`[MAIN PROFILE]: ${this.logInfo}: unable to detect main profile name`);
 
 		const mainProfile = profiles[
 			profiles.length > 1
@@ -682,7 +700,8 @@ class Player extends Model {
 					.map(profile => {
 						const member = profile.members[this.minecraftUUID];
 						// calculate weight of this profile
-						return (Math.max(...SKILLS.map(skill => member[`experience_skill_${skill}`] ?? 0)) / 100) + (member.slayer_bosses ? SLAYERS.reduce((acc, slayer) => acc + (member.slayer_bosses[slayer].xp ?? 0), 0) : 0);
+						return Math.max(...SKILLS.map(skill => member[`experience_skill_${skill}`] ?? 0)) / 100 // highest skill xp / 100
+							+ SLAYERS.reduce((acc, slayer) => acc + (member.slayer_bosses?.[slayer]?.xp ?? 0), 0); // total slayer xp
 					})
 					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar, 0)
 				: 0
@@ -726,13 +745,11 @@ class Player extends Model {
 	/**
 	 * resets the xp gained to 0
 	 * @param {object} options
-	 * @param {string?} options.offsetToReset
-	 * @param {array?} options.typesToReset
+	 * @param {?string} options.offsetToReset
+	 * @param {?string[]} options.typesToReset
 	 * @returns {Promise<Player>}
 	 */
-	async resetXp(options = {}) {
-		const { offsetToReset = null, typesToReset = XP_TYPES } = options;
-
+	async resetXp({ offsetToReset = null, typesToReset = XP_TYPES } = {}) {
 		switch (offsetToReset) {
 			case null:
 				// no offset type specifies -> resetting everything
@@ -777,14 +794,12 @@ class Player extends Model {
 	/**
 	 * set the player to paid
 	 * @param {object} options
-	 * @param {number} options.amount paid amount
-	 * @param {string} options.collectedBy minecraft uuid of the player who collected
-	 * @param {string?} options.auctionID hypixel auction uuid
-	 * @param {boolean} options.shouldAdd wether to add the amount and auctionID or to overwrite already existing values
+	 * @param {?number} [options.amount] paid amount
+	 * @param {?string} [options.collectedBy] minecraft uuid of the player who collected
+	 * @param {?string} [options.auctionID] hypixel auction uuid
+	 * @param {?boolean} [options.shouldAdd] wether to add the amount and auctionID or to overwrite already existing values
 	 */
-	async setToPaid(options = {}) {
-		const { amount = this.client.config.getNumber('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null, shouldAdd = false } = options;
-
+	async setToPaid({ amount = this.client.config.getNumber('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null, shouldAdd = false } = {}) {
 		// update taxCollector
 		this.client.taxCollectors.get(collectedBy)?.addAmount(
 			this.collectedBy === this.minecraftUUID

@@ -63,7 +63,7 @@ class PlayerCollection extends BaseClientCollection {
 		if (isAddingSingleEntry) {
 			this.sortAlphabetically();
 
-			newPlayer.updateXp({
+			newPlayer.update({
 				shouldSkipQueue: true,
 				reason: `joined ${newPlayer.guild?.name}`,
 			});
@@ -125,10 +125,10 @@ class PlayerCollection extends BaseClientCollection {
 	}
 
 	/**
-	 * update xp of all players
+	 * update db entries and linked discord members of all players
 	 */
-	updateXp(options = {}) {
-		return this.each(player => player.updateXp(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`)));
+	update(options = {}) {
+		return this.each(player => player.update(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`)));
 	}
 
 	/**
