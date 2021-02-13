@@ -28,10 +28,17 @@ class Command {
 		this.description = info.description?.length ? info.description : null;
 		this.guildOnly = info.guildOnly ?? false;
 		this.args = info.args ?? false;
-		this._usage = typeof info.usage === 'function' || info.usage?.length
-			? info.usage
-			: null;
+		this.usage = info.usage;
 		this.cooldown = info.cooldown ?? null;
+	}
+
+	/**
+	 * @param {string|Function} value
+	 */
+	set usage(value) {
+		this._usage = typeof value === 'function' || value?.length
+			? value
+			: null;
 	}
 
 	/**
