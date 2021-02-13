@@ -1,6 +1,6 @@
 'use strict';
 
-const { Client, MessageEmbed, SnowflakeUtil, Constants } = require('discord.js');
+const { Client, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } = require('discord.js');
 const path = require('path');
 const { promises: fs } = require('fs');
 const { cleanLoggingEmbedString } = require('../functions/util');
@@ -117,7 +117,7 @@ class LunarClient extends Client {
 			this.webhook = loggingWebhook;
 			this._postFileLogs(); // repost webhook logs that failed to be posted during the last uptime
 		} catch (error) {
-			if (error.message === 'Unknown Webhook') this.config.set('LOGGING_WEBHOOK_DELETED', 'true');
+			if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_WEBHOOK) this.config.set('LOGGING_WEBHOOK_DELETED', 'true');
 			logger.error(`[LOGGING WEBHOOK]: ${error.name}: ${error.message}`);
 		}
 	}
@@ -223,7 +223,7 @@ class LunarClient extends Client {
 			logger.error(`[CLIENT LOG]: ${error.name}: ${error.message}`);
 
 			// webhook doesn't exist anymore
-			if (error.message === 'Unknown Webhook') {
+			if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_WEBHOOK) {
 				this.webhook = null;
 				this.config.set('LOGGING_WEBHOOK_DELETED', 'true');
 			}
