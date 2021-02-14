@@ -1,5 +1,6 @@
 'use strict';
 
+const ms = require('ms');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
 const LunarClient = require('../../structures/LunarClient');
@@ -30,6 +31,6 @@ module.exports = class PingCommand extends Command {
 
 		if (!pingMessage) return;
 
-		pingMessage.edit(`Api Latency: ${pingMessage.createdTimestamp - message.createdTimestamp} ms | Average WebSocket Heartbeat: ${Math.round(client.ws.ping)} ms.`);
+		pingMessage.edit(`Api Latency: ${ms(pingMessage.createdTimestamp - message.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(client.ws.ping), { long: true })}.`);
 	}
 };

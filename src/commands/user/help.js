@@ -157,7 +157,7 @@ module.exports = class HelpCommand extends Command {
 
 		const COOLDOWN = command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT');
 
-		helpEmbed.addField('**Cooldown:**', ms(COOLDOWN * 1000, { long: true }));
+		helpEmbed.addField('**Cooldown:**', ms(COOLDOWN * 1_000, { long: true }));
 
 		message.reply(helpEmbed, { reply: false });
 	}

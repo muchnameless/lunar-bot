@@ -585,7 +585,7 @@ class Player extends Model {
 
 		if (member) {
 			const { config } = this.client;
-			const rolesToAdd = (Date.now() - this.createdAt >= 7 * 24 * 60 * 60 * 1000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
+			const rolesToAdd = (Date.now() - this.createdAt >= 7 * 24 * 60 * 60_000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
 				? [ config.get('EX_GUILD_ROLE_ID') ] // add ex guild role if player stayed for more than 1 week
 				: [];
 			const rolesToRemove = getRolesToPurge(member);
@@ -979,9 +979,9 @@ class Player extends Model {
 		for (const slayer of SLAYERS) {
 			const experience = this[`${slayer}Xp${offset}`];
 
-			weight += experience <= 1000000
+			weight += experience <= 1_000_000
 				? experience / SLAYER_DIVIDER[slayer]
-				: 1000000 / SLAYER_DIVIDER[slayer] + Math.pow((experience - 1000000) / (SLAYER_DIVIDER[slayer] * 1.5), 0.942);
+				: 1_000_000 / SLAYER_DIVIDER[slayer] + Math.pow((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5), 0.942);
 		}
 
 		const maxXp = Object.values(DUNGEON_XP).reduce((acc, xp) => acc + xp, 0);

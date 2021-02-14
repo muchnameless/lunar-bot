@@ -27,7 +27,7 @@ class CronJobCollection extends BaseClientCollection {
 		this.set(name, new CronJob({
 			cronTime: date,
 			onTick: async () => {
-				command.execute(await (await this.client.db.CronJob.findOne({ where: { name } })).restoreCommandMessage(), args, flags).catch(logger.error);
+				command.run(this.client, this.client.config, await (await this.client.db.CronJob.findOne({ where: { name } })).restoreCommandMessage(), args, flags).catch(logger.error);
 				this.delete(name);
 				this.client.db.CronJob.destroy({ where: { name } });
 				logger.info(`[CRONJOB]: ${name}`);

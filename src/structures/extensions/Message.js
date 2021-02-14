@@ -179,7 +179,7 @@ class LunarMessage extends Message {
 				this.client.setTimeout(() => {
 					if (this.shouldReplyInSameChannel) return;
 					this.delete().catch(logger.error);
-				}, 10 * 1000);
+				}, 10_000);
 			}
 
 			logger.warn(commaListsAnd`no #bot-commands channel with the required permission${requiredChannelPermissions.length === 1 ? '' : 's'} ${requiredChannelPermissions.map(permission => `'${permission}'`)}`);
@@ -200,7 +200,7 @@ class LunarMessage extends Message {
 				.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.`)
 				.then(async commandsChannelMessage => {
 					if (!this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES'))
-						return commandsChannelMessage.delete({ timeout: 10 * 1000 });
+						return commandsChannelMessage.delete({ timeout: 10_000 });
 
 					this.client.setTimeout(() => {
 						if (!this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES') || this.shouldReplyInSameChannel)
@@ -209,13 +209,13 @@ class LunarMessage extends Message {
 						this.channel
 							.bulkDelete([ commandsChannelMessage.id, this.id ])
 							.catch(error => logger.error(`[SEND CORRECT CHANNEL]: unable to bulk delete: ${error.name}: ${error.message}`));
-					}, 10 * 1000);
+					}, 10_000);
 				});
 		} else if (this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES')) { // only delete author's message
 			this.client.setTimeout(() => {
 				if (this.shouldReplyInSameChannel) return;
 				this.delete().catch(logger.error);
-			}, 10 * 1000);
+			}, 10_000);
 		}
 
 		// send reply

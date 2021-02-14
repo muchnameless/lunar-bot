@@ -1,6 +1,7 @@
 'use strict';
 
 const { Model } = require('sequelize');
+const LunarMessage = require('./extensions/Message');
 const logger = require('../functions/logger');
 
 
@@ -24,17 +25,40 @@ class CronJob extends Model {
 	async restoreCommandMessage() {
 		const channel = await this.client.channels.fetch(this.channelID).catch(error => logger.error(`[CRON JOB RESUME]: channel: ${error.name}: ${error.message}`));
 		const message = await channel?.messages.fetch(this.messageID).catch(error => logger.error(`[CRON JOB RESUME]: message: ${error.name}: ${error.message}`))
-			?? new require('../structureExtensions/lib/Message')(this.client, {
+			?? new LunarMessage(this.client, {
 				// mock 'data'
 				id: this.messageID,
-				channel: channel,
+				channel,
 				content: `${this.name}${this.flags?.length ? ` -${this.flags.join(' -')}` : ''}${this.args?.length ? ` ${this.args.join(' ')}` : ''}`,
 				author: await this.client.users.fetch(this.authorID).catch(error => logger.error(`[CRON JOB RESUME]: user: ${error.name}: ${error.message}`)),
 				guild: channel?.guild,
-				member: await this.guild?.members.fetch(this.author).catch(error => logger.error(`[CRON JOB RESUME]: member: ${error.name}: ${error.message}`)) ?? null,
+				member: await channel?.guild?.members.fetch(this.author).catch(error => logger.error(`[CRON JOB RESUME]: member: ${error.name}: ${error.message}`)) ?? null,
 			}, channel);
 
 		return message;
+	}
+
+	/**
+	 * starts the cronJob or immediatly executes it if the scheduled time is in the past
+	 */
+	async resume() {
+		// expired while bot was offline
+		if (Date.now() > this.date - 10_000) { // -10_000 cause CronJob throws error if times are too close
+			this.client.db.CronJob.destroy({ where: { name: this.name } });
+			this.client.commands.getByName(this.command).run(this.client, this.client.config, await this.restoreCommandMessage(), this.args?.split(' ') ?? [], this.flags?.split(' ') ?? []).catch(logger.error);
+			return logger.info(`[CRONJOB]: ${this.name}`);
+		}
+
+		this.client.cronJobs.set(this.name, new CronJob({
+			cronTime: new Date(this.date),
+			onTick: async () => {
+				this.client.commands.getByName(this.command).run(this.client, this.client.config, await this.restoreCommandMessage(), this.args?.split(' ') ?? [], this.flags?.split(' ') ?? []).catch(logger.error);
+				this.client.cronJobs.delete(this.name);
+				this.client.db.CronJob.destroy({ where: { name: this.name } });
+				logger.info(`[CRONJOB]: ${this.name}`);
+			},
+			start: true,
+		}));
 	}
 }
 

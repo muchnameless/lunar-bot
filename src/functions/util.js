@@ -92,7 +92,7 @@ const self = module.exports = {
 			target.setUTCMonth(0, 1 + ((4 - target.getUTCDay()) + 7) % 7);
 		}
 
-		return Math.ceil((firstThursday - target) / (7 * 24 * 3600 * 1000)) + 1;
+		return Math.ceil((firstThursday - target) / (7 * 24 * 3_600_000)) + 1;
 	},
 
 	/**

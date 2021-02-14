@@ -87,7 +87,7 @@ module.exports = class ScheduleCommand extends Command {
 		const date = new Date(dateArgs.join(','));
 		const localDate = date.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-		if (Date.now() > date.getTime() - 1000) return message.reply(`${localDate} is in the past.`);
+		if (Date.now() > date.getTime() - 1_000) return message.reply(`${localDate} is in the past.`);
 
 		const argsString = commandArgs.join(' ');
 		const input = `${command.name}${flags.length ? ` -${flags.join(' -')}` : ''}${argsString.length ? ` ${argsString}` : ''}`;

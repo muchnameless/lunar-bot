@@ -33,7 +33,7 @@ module.exports = async function(client) {
 			switch (true) {
 				case auction.item_name.includes('Midas\' Sword'):
 					if (auction.starting_bid < DA_PRICES['Midas\' Sword']) DA_PRICES['Midas\' Sword'] = auction.starting_bid;
-					if (auction.starting_bid < DA_PRICES['Midas\' Sword [50M]'] && auction.item_lore.match(MIDAS_PRICE_PAID_REGEX)?.[0].replace(/\D/g, '') >= 50 * 1000 * 1000) DA_PRICES['Midas\' Sword [50M]'] = auction.starting_bid;
+					if (auction.starting_bid < DA_PRICES['Midas\' Sword [50M]'] && auction.item_lore.match(MIDAS_PRICE_PAID_REGEX)?.[0].replace(/\D/g, '') >= 50_000_000) DA_PRICES['Midas\' Sword [50M]'] = auction.starting_bid;
 					break;
 
 				case auction.item_name.includes('Spirit Mask'):

@@ -48,7 +48,7 @@ module.exports = class PurgeRolesCommand extends Command {
 					() => logger.info(`removed ${rolesToRemove.length} role(s) from ${member.user.tag} | ${member.displayName}`),
 					logger.error,
 				);
-			}, ++index * 30 * 1000);
+			}, ++index * 30 * 1_000);
 		});
 	}
 };

@@ -61,7 +61,7 @@ process
 	client.once('ready', () => {
 		client.setInterval(() => {
 			client.user.setPresence(presence).catch(error => logger.error('error while setting activity:\n', error));
-		}, 20 * 60 * 1000); // 20 min
+		}, 20 * 60_000); // 20 min
 
 		// log
 		logger.info(`Startup complete. Logged in as ${client.user.tag}`);

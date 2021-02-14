@@ -51,7 +51,7 @@ module.exports = async client => {
 
 	// auto competition starting
 	if (config.getBoolean('COMPETITION_SCHEDULED')) {
-		if (config.getNumber('COMPETITION_START_TIME') - 1000 > Date.now()) {
+		if (config.getNumber('COMPETITION_START_TIME') - 10_000 > Date.now()) {
 			client.cronJobs.set('competitionStart', new CronJob({
 				cronTime: new Date(config.getNumber('COMPETITION_START_TIME')),
 				onTick: () => startCompetition(client),
@@ -63,7 +63,7 @@ module.exports = async client => {
 	}
 
 	// auto competition ending
-	if (config.getNumber('COMPETITION_END_TIME') - 1000 > Date.now()) {
+	if (config.getNumber('COMPETITION_END_TIME') - 10_000 > Date.now()) {
 		client.cronJobs.set('competitionEnd', new CronJob({
 			cronTime: new Date(config.getNumber('COMPETITION_END_TIME')),
 			onTick: () => endCompetition(client),
@@ -76,7 +76,7 @@ module.exports = async client => {
 	// mayor change reset
 	const NEXT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
-	if (NEXT_MAYOR_TIME - 1000 > Date.now()) {
+	if (NEXT_MAYOR_TIME - 10_000 > Date.now()) {
 		client.cronJobs.set('mayorXpReset', new CronJob({
 			cronTime: new Date(NEXT_MAYOR_TIME),
 			onTick: () => performMayorReset(client),
@@ -121,25 +121,7 @@ module.exports = async client => {
 
 
 	// resume command cron jobs
-	await Promise.all((await db.CronJob.findAll()).map(async cronJob => {
-		// expired while bot was offline
-		if (Date.now() > cronJob.date - 1000) { // -100 cause CronJob throws error if times are too close
-			db.CronJob.destroy({ where: { name: cronJob.name } });
-			client.commands.getByName(cronJob.command).execute(await cronJob.restoreCommandMessage(), cronJob.args?.split(' ') ?? [], cronJob.flags?.split(' ') ?? []).catch(logger.error);
-			return logger.info(`[CRONJOB]: ${cronJob.name}`);
-		}
-
-		client.cronJobs.set(cronJob.name, new CronJob({
-			cronTime: new Date(cronJob.date),
-			onTick: async () => {
-				client.commands.getByName(cronJob.command).execute(await cronJob.restoreCommandMessage(), cronJob.args?.split(' ') ?? [], cronJob.flags?.split(' ') ?? []).catch(logger.error);
-				client.cronJobs.delete(cronJob.name);
-				db.CronJob.destroy({ where: { name: cronJob.name } });
-				logger.info(`[CRONJOB]: ${cronJob.name}`);
-			},
-			start: true,
-		}));
-	}));
+	await Promise.all((await db.CronJob.findAll()).map(cronJob => cronJob.resume())).catch(logger.error);
 
 
 	// set presence again every 20 min cause it get's lost sometimes
@@ -154,7 +136,7 @@ module.exports = async client => {
 			})
 			.then(presence => client.config.getBoolean('EXTENDED_LOGGING') && logger.info(`Activity set to ${presence.activities[0].name}`))
 			.catch(error => logger.error('error while setting activity:\n', error));
-	}, 20 * 60 * 1000); // 20 min
+	}, 20 * 60 * 1_000); // 20 min
 
 
 	// log ready

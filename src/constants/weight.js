@@ -14,14 +14,14 @@ module.exports = {
 	},
 
 	SKILL_DIVIDER: {
-		taming: 441379,
-		farming: 220689,
-		mining: 259634,
-		combat: 275862,
-		foraging: 259634,
-		fishing: 88274,
-		enchanting: 882758,
-		alchemy: 1103448,
+		taming: 441_379,
+		farming: 220_689,
+		mining: 259_634,
+		combat: 275_862,
+		foraging: 259_634,
+		fishing: 88_274,
+		enchanting: 882_758,
+		alchemy: 1_103_448,
 	},
 
 	SLAYER_DIVIDER: {

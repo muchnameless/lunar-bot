@@ -133,7 +133,7 @@ module.exports = class EvalCommand extends Command {
 			// add output fields till embed character limit of 6000 is reached
 			for (const [ index, output ] of OUTPUT_ARRAY.entries()) {
 				embedCharacterCount += output.length + 9;
-				if (embedCharacterCount > 6000) break;
+				if (embedCharacterCount > 6_000) break;
 				responseEmbed.addField(index ? '\u200b' : `Output${SHOULD_INSPECT ? ' (inspected)' : ''}`, `\`\`\`js\n${output}\`\`\``);
 			}
 
