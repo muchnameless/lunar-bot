@@ -1,8 +1,8 @@
 'use strict';
 
 const { CronJob } = require('cron');
-const logger = require('../../functions/logger');
 const BaseClientCollection = require('./BaseClientCollection');
+const logger = require('../../functions/logger');
 
 
 class CronJobCollection extends BaseClientCollection {
