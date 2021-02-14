@@ -21,6 +21,7 @@ class CronJob extends Model {
 
 	/**
 	 * tries to fetch the cronJob's original command message and creates a mock message as replacement in case of an error
+	 * @returns {Promise<LunarMessage>}
 	 */
 	async restoreCommandMessage() {
 		const channel = await this.client.channels.fetch(this.channelID).catch(error => logger.error(`[CRON JOB RESUME]: channel: ${error.name}: ${error.message}`));
