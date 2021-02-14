@@ -32,8 +32,7 @@ module.exports = async client => {
 	await client.initializeLoggingWebhook();
 
 
-	const { config, db } = client;
-	const now = new Date();
+	const { config } = client;
 
 	// update player database and tax message every x min starting at the full hour
 	client.cronJobs.set('updatePlayerDatabase', new CronJob({
@@ -86,6 +85,8 @@ module.exports = async client => {
 		performMayorReset(client);
 	}
 
+	const now = new Date();
+
 	// daily reset
 	if (new Date(config.getNumber('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) performDailyReset(client);
 
@@ -121,7 +122,7 @@ module.exports = async client => {
 
 
 	// resume command cron jobs
-	await Promise.all((await db.CronJob.findAll()).map(cronJob => cronJob.resume())).catch(logger.error);
+	await Promise.all((await client.db.CronJob.findAll()).map(async cronJob => cronJob.resume())).catch(logger.error);
 
 
 	// set presence again every 20 min cause it get's lost sometimes
