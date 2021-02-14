@@ -5,7 +5,6 @@ const { MessageEmbed } = require('discord.js');
 const _ = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { SKILLS, SLAYERS } = require('../constants/skyblock');
-const { checkBotPermissions } = require('./util');
 const hypixel = require('../api/hypixel');
 // const LunarClient = require('../structures/LunarClient');
 const logger = require('./logger');
@@ -132,25 +131,6 @@ const self = module.exports = {
 	},
 
 	/**
-	 * tries to find a discord member by a discord tag
-	 * @param {LunarClient} client
-	 * @param {string} tag
-	 */
-	findMemberByTag: async (client, tag) => {
-		const lgGuild = client.lgGuild;
-
-		if (!lgGuild) return null;
-
-		const discordMember = lgGuild.members.cache.find(member => member.user.tag === tag);
-
-		if (discordMember) return discordMember;
-
-		const fetched = await lgGuild.members.fetch({ query: tag.split('#')[0] }).catch(error => logger.error(`[UPDATE GUILD PLAYERS]: ${error.name}: ${error.message}`));
-
-		return fetched?.find(member => member.user.tag === tag) ?? null;
-	},
-
-	/**
 	 * creates and returns a tax embed
 	 * @param {LunarClient} client
 	 * @param {string[]} availableAuctionsLog
@@ -231,7 +211,7 @@ const self = module.exports = {
 		const taxChannel = client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 		if (!taxChannel?.guild?.available) return logger.warn('[TAX MESSAGE]: channel not found');
-		if (!checkBotPermissions(taxChannel, ['VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS'])) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+		if (!taxChannel.checkBotPermissions(['VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS'])) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 
 		const taxEmbed = self.createTaxEmbed(client, availableAuctionsLog);
 

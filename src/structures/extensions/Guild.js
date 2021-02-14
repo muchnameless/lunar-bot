@@ -27,6 +27,20 @@ class LunarGuild extends Guild {
 				.sort(([, a ], [, b ]) => b.comparePositionTo(a)),
 		);
 	}
+
+	/**
+	 * tries to find a discord member by a discord tag
+	 * @param {string} tag
+	 */
+	async findMemberByTag(tag) {
+		const discordMember = this.members.cache.find(member => member.user.tag === tag);
+
+		if (discordMember) return discordMember;
+
+		const fetched = await this.members.fetch({ query: tag.split('#')[0] }).catch(error => logger.error(`[UPDATE GUILD PLAYERS]: ${error.name}: ${error.message}`));
+
+		return fetched?.find(member => member.user.tag === tag) ?? null;
+	}
 }
 
 Structures.extend('Guild', Guild => LunarGuild); // eslint-disable-line no-shadow, no-unused-vars

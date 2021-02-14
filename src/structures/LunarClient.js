@@ -123,61 +123,6 @@ class LunarClient extends Client {
 	}
 
 	/**
-	 * loads a single command into the <LunarClient>.commands collection
-	 * @param {string} file command file to load
-	 */
-	loadCommand(file) {
-		const [, CATEGORY, COMMAND_NAME ] = file.match(/[/\\]commands[/\\](\D+)[/\\](\D+)\.js/);
-		const commandConstructor = require(file);
-		const command = new commandConstructor({
-			client: this,
-			name: COMMAND_NAME,
-			category: CATEGORY,
-		});
-
-		this.commands.set(COMMAND_NAME.toLowerCase(), command);
-	}
-
-	/**
-	 * loads all commands into the <LunarClient>.commands collection
-	 */
-	loadCommands() {
-		const commandFiles = getAllJsFiles(path.join(__dirname, '..', 'commands'));
-
-		if (!commandFiles) logger.warn('[COMMANDS]: no command files');
-
-		for (const file of commandFiles) {
-			this.loadCommand(file);
-		}
-
-		logger.debug(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
-	}
-
-	/**
-	 * loads all event-callbacks and binds them to their respective events
-	 */
-	_loadEvents() {
-		const eventFiles = getAllJsFiles(path.join(__dirname, '..', 'events'));
-
-		if (!eventFiles) return logger.warn('[EVENTS]: no event files');
-
-		for (const file of eventFiles) {
-			const event = require(file);
-			const EVENT_NAME = path.basename(file, '.js');
-
-			if (EVENT_NAME === Constants.Events.CLIENT_READY) {
-				this.once(EVENT_NAME, event.bind(null, this));
-			} else {
-				this.on(EVENT_NAME, event.bind(null, this));
-			}
-
-			delete require.cache[require.resolve(file)];
-		}
-
-		logger.debug(`[EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
-	}
-
-	/**
 	 * logs the embeds to console and via the logging webhook
 	 * @param {...MessageEmbed|string} embeds embeds to log
 	 * @param {Promise<Message?>}
@@ -281,6 +226,61 @@ class LunarClient extends Client {
 		} catch (error) {
 			logger.error(`[POST LOG FILES]: ${error.name}: ${error.message}`);
 		}
+	}
+
+	/**
+	 * loads a single command into the <LunarClient>.commands collection
+	 * @param {string} file command file to load
+	 */
+	loadCommand(file) {
+		const [, CATEGORY, COMMAND_NAME ] = file.match(/[/\\]commands[/\\](\D+)[/\\](\D+)\.js/);
+		const commandConstructor = require(file);
+		const command = new commandConstructor({
+			client: this,
+			name: COMMAND_NAME,
+			category: CATEGORY,
+		});
+
+		this.commands.set(COMMAND_NAME.toLowerCase(), command);
+	}
+
+	/**
+	 * loads all commands into the <LunarClient>.commands collection
+	 */
+	loadCommands() {
+		const commandFiles = getAllJsFiles(path.join(__dirname, '..', 'commands'));
+
+		if (!commandFiles) logger.warn('[COMMANDS]: no command files');
+
+		for (const file of commandFiles) {
+			this.loadCommand(file);
+		}
+
+		logger.debug(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
+	}
+
+	/**
+	 * loads all event-callbacks and binds them to their respective events
+	 */
+	_loadEvents() {
+		const eventFiles = getAllJsFiles(path.join(__dirname, '..', 'events'));
+
+		if (!eventFiles) return logger.warn('[EVENTS]: no event files');
+
+		for (const file of eventFiles) {
+			const event = require(file);
+			const EVENT_NAME = path.basename(file, '.js');
+
+			if (EVENT_NAME === Constants.Events.CLIENT_READY) {
+				this.once(EVENT_NAME, event.bind(null, this));
+			} else {
+				this.on(EVENT_NAME, event.bind(null, this));
+			}
+
+			delete require.cache[require.resolve(file)];
+		}
+
+		logger.debug(`[EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 	}
 
 	/**

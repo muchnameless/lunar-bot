@@ -3,10 +3,11 @@
 const { MessageEmbed, GuildMember } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const LunarClient = require('../structures/LunarClient');
+const logger = require('../functions/logger');
 
 
 /**
- * GUILD_MEMBER_UPDATE callback
+ * guildMemberUpdate
  * @param {LunarClient} client
  * @param {GuildMember} oldMember
  * @param {GuildMember} newMember
@@ -29,7 +30,8 @@ module.exports = async (client, oldMember, newMember) => {
 	const VERIFIED_ROLE_ID = config.get('VERIFIED_ROLE_ID');
 
 	if (oldMember.roles.cache.has(VERIFIED_ROLE_ID)) {
-		if (!newMember.roles.cache.has(VERIFIED_ROLE_ID)) { // member lost verified role -> log incident
+		// member lost verified role -> log incident
+		if (!newMember.roles.cache.has(VERIFIED_ROLE_ID)) {
 			return client.log(new MessageEmbed()
 				.setColor(config.get('EMBED_RED'))
 				.setAuthor(newMember.user.tag, newMember.user.displayAvatarURL({ dynamic: true }), player.url)
@@ -41,7 +43,9 @@ module.exports = async (client, oldMember, newMember) => {
 				.setTimestamp(),
 			);
 		}
-	} else if (newMember.roles.cache.has(VERIFIED_ROLE_ID)) { // member was given verified role -> update roles
+
+	// member was given verified role -> update roles
+	} else if (newMember.roles.cache.has(VERIFIED_ROLE_ID)) {
 		return player.updateDiscordMember({ reason: `received ${newMember.guild.roles.cache.get(VERIFIED_ROLE_ID).name} role` });
 	}
 };

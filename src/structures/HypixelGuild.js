@@ -2,8 +2,7 @@
 
 const { Model } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
-const { autocorrect, findNearestCommandsChannel, checkBotPermissions, getHypixelClient } = require('../functions/util');
-const { findMemberByTag } = require('../functions/database');
+const { autocorrect, getHypixelClient } = require('../functions/util');
 const { Y_EMOJI, X_EMOJI, CLOWN } = require('../constants/emojiCharacters');
 const { offsetFlags, UNKNOWN_IGN } = require('../constants/database');
 const hypixel = require('../api/hypixel');
@@ -157,7 +156,7 @@ class HypixelGuild extends Model {
 							return hasError = true;
 						}
 
-						discordMember = await findMemberByTag(this.client, discordTag);
+						discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
 
 						if (!discordMember) {
 							if (/\D/.test(player.discordID)) player.discordID = discordTag; // save tag if no id is known
@@ -222,7 +221,7 @@ class HypixelGuild extends Model {
 						return hasError = true;
 					}
 
-					discordMember = await findMemberByTag(this.client, discordTag);
+					discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
 
 					if (discordMember) return;
 
@@ -333,7 +332,7 @@ class HypixelGuild extends Model {
 			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested ${RANK_NAME} but could not be found in the player db`);
 
 			return message.reply(
-				`unable to find you in the player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${findNearestCommandsChannel(message) ?? '#bot-commands'}`,
+				`unable to find you in the player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
 				{ sameChannel: true },
 			);
 		}
@@ -345,7 +344,7 @@ class HypixelGuild extends Model {
 			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[CHECK RANK REQS]: delete: ${error.name}: ${error.message}`));
 			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank but already had it`);
 
-			return checkBotPermissions(message.channel, 'ADD_REACTIONS') && message.react(CLOWN).catch(error => logger.error(`[CHECK RANK REQS]: clown reaction: ${error.name}: ${error.message}`)); // get clowned
+			return message.channel.checkBotPermissions('ADD_REACTIONS') && message.react(CLOWN).catch(error => logger.error(`[CHECK RANK REQS]: clown reaction: ${error.name}: ${error.message}`)); // get clowned
 		}
 
 		const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));

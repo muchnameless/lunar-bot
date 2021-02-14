@@ -1,6 +1,12 @@
 'use strict';
 
+const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
-module.exports = (client, error) => logger.error(error);
+/**
+ * error
+ * @param {LunarClient} client
+ * @param {*} error
+ */
+module.exports = async (client, error) => logger.error(error);

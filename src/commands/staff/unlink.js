@@ -1,7 +1,6 @@
 'use strict';
 
 const { stripIndents, oneLineCommaListsOr, oneLine } = require('common-tags');
-const { findMemberByTag } = require('../../functions/database');
 const { checkIfDiscordTag } = require('../../functions/util');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
@@ -44,7 +43,7 @@ module.exports = class UnlinkCommand extends Command {
 			for (const arg of args) {
 				// discord tag
 				if (checkIfDiscordTag(arg)) {
-					const discordMember = await findMemberByTag(client, arg);
+					const discordMember = await client.lgGuild?.findMemberByTag(arg);
 
 					if (!discordMember) continue;
 

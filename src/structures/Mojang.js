@@ -51,7 +51,7 @@ class Mojang {
 		if (typeof options !== 'object' || options === null) throw new TypeError('[Mojang Client]: options must be an object');
 		const { cache = true, force = false } = options;
 
-		if (!this.cache || !force) {
+		if (this.cache && !force) {
 			const cachedResponse = await this.cache.get(query);
 			if (cachedResponse) return cachedResponse;
 		}

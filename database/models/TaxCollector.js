@@ -4,6 +4,7 @@ const TaxCollector = require('../../src/structures/TaxCollector');
 
 
 module.exports = (sequelize, DataTypes) => {
+
 	TaxCollector.init({
 		minecraftUUID: {
 			type: DataTypes.STRING,

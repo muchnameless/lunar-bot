@@ -1,11 +1,20 @@
 'use strict';
 
-const { removeReaction } = require('../functions/util');
+const { MessageReaction, User } = require('discord.js');
 const { updateLeaderboardMessage } = require('../functions/leaderboardMessages');
 const { LOCK } = require('../constants/emojiCharacters');
+const LunarMessage = require('../structures/extensions/Message');
+const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
+/**
+ * messageReactionAdd
+ * @param {LunarClient} client
+ * @param {MessageReaction} reaction
+ * @param {LunarMessage} reaction.message
+ * @param {User} user
+ */
 module.exports = async (client, reaction, user) => {
 	try {
 		if (reaction.message.partial) await reaction.message.fetch();
@@ -27,14 +36,15 @@ module.exports = async (client, reaction, user) => {
 	if (message.guild) {
 		const AUTHOR_ID = message.mentions.users.first()?.id;
 
-		if (user.id !== AUTHOR_ID || emoji.name !== LOCK) removeReaction(message, user, emoji.name);
+		if ((user.id !== AUTHOR_ID || emoji.name !== LOCK) && message.channel.checkBotPermissions('MANAGE_MESSAGES')) reaction.users.remove(user).catch(error => logger.error(`[REMOVE REACTION]: ${error.name}: ${error.message}`));
+
 		if (![ AUTHOR_ID, client.ownerID ].includes(user.id)) return;
 
 		// message locked by author
 		if (message.reactions.cache.has(LOCK) &&
 			(message.reactions.cache.get(LOCK).users.cache.size
 				? message.reactions.cache.get(LOCK).users.cache
-				: (await message.reactions.cache.get(LOCK).users.fetch()))?.has(AUTHOR_ID)
+				: (await message.reactions.cache.get(LOCK).users.fetch().catch(logger.error)))?.has(AUTHOR_ID)
 		) return;
 	} else if (message.reactions.cache.has(LOCK)) { // DMs
 		return;

@@ -1,7 +1,6 @@
 'use strict';
 
 const { CronJob } = require('cron');
-const { restoreMessage } = require('../../functions/util');
 const logger = require('../../functions/logger');
 const BaseClientCollection = require('./BaseClientCollection');
 
@@ -28,7 +27,7 @@ class CronJobCollection extends BaseClientCollection {
 		this.set(name, new CronJob({
 			cronTime: date,
 			onTick: async () => {
-				command.execute(await restoreMessage(this, await this.client.db.CronJob.findOne({ where: { name } })), args, flags).catch(logger.error);
+				command.execute(await (await this.client.db.CronJob.findOne({ where: { name } })).restoreCommandMessage(), args, flags).catch(logger.error);
 				this.delete(name);
 				this.client.db.CronJob.destroy({ where: { name } });
 				logger.info(`[CRONJOB]: ${name}`);

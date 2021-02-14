@@ -2,11 +2,15 @@
 
 const { MessageEmbed } = require('discord.js');
 const { DA_ITEMS } = require('../constants/skyblock');
-const { checkBotPermissions } = require('./util');
 const hypixel = require('../api/hypixelAux2');
+const LunarClient = require('../structures/LunarClient');
 const logger = require('./logger');
 
 
+/**
+ * updates the da prices database and sends the current lbin embed
+ * @param {LunarClient} client
+ */
 module.exports = async function(client) {
 	logger.info('[UPDATE DA PRICES]: update started');
 
@@ -119,12 +123,12 @@ module.exports = async function(client) {
 
 	// post message
 	const { config } = client;
-	const DA_PRICES_CHANNEL = client.channels.cache.get(config.get('DA_PRICES_CHANNEL_ID'));
+	const daPricesChannel = client.channels.cache.get(config.get('DA_PRICES_CHANNEL_ID'));
 
-	if (!DA_PRICES_CHANNEL?.guild?.available) return logger.warn('[UPDATE DA PRICES]: unknown channel');
-	if (!checkBotPermissions(DA_PRICES_CHANNEL, [ 'VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS' ])) return logger.warn('[UPDATE DA PRICES]: missing perms for DA prices channel');
+	if (!daPricesChannel?.guild?.available) return logger.warn('[UPDATE DA PRICES]: unknown channel');
+	if (!daPricesChannel.checkBotPermissions([ 'VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS' ])) return logger.warn('[UPDATE DA PRICES]: missing perms for DA prices channel');
 
-	await DA_PRICES_CHANNEL
+	await daPricesChannel
 		.send(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('DA Prices - Lowest Bin')

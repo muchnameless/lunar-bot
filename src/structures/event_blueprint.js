@@ -5,10 +5,10 @@ const logger = require('../functions/logger');
 
 
 /**
- * invalidated
+ * EVENT_NAME
  * @param {LunarClient} client
+ * @param {...any} args
  */
-module.exports = async client => {
-	logger.warn('[INVALIDATED]: the client became invalidated');
-	client.db.closeConnectionAndExit();
+module.exports = async (client, ...args) => {
+	// do stuff
 };

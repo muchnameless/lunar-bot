@@ -3,7 +3,6 @@
 const { commaListsAnd } = require('common-tags');
 const { Structures, MessageEmbed, Message, GuildMember, User } = require('discord.js');
 const _ = require('lodash');
-const { findNearestCommandsChannel } = require('../../functions/util');
 const logger = require('../../functions/logger');
 
 
@@ -20,6 +19,15 @@ class LunarMessage extends Message {
 	 */
 	get shouldReplyInSameChannel() {
 		return this.content?.split(/ +/).filter(x => x.startsWith('-')).some(x => [ 'c', 'ch', 'channel' ].includes(x.toLowerCase().replace(/^-+/, ''))) ?? false;
+	}
+
+	/**
+	 * returns the nearest 'bot-commands'-channel with all required permissions for the bot and the message.member
+	 * @param {string[]} requiredChannelPermissions
+	 */
+	findNearestCommandsChannel(requiredChannelPermissions = [ 'VIEW_CHANNEL', 'SEND_MESSAGES' ]) {
+		return this.channel.parent.children.find(channel => channel.name.includes('commands') && channel.permissionsFor(this.guild.me).has(requiredChannelPermissions) && channel.permissionsFor(this.member).has([ 'VIEW_CHANNEL', 'SEND_MESSAGES' ]))
+			?? this.guild.channels.cache.find(channel => channel.name.includes('bot-commands') && channel.permissionsFor(this.guild.me).has(requiredChannelPermissions) && channel.permissionsFor(this.member).has([ 'VIEW_CHANNEL', 'SEND_MESSAGES' ]));
 	}
 
 	/**
@@ -163,7 +171,7 @@ class LunarMessage extends Message {
 		}
 
 		// redirect reply to nearest #bot-commands channel
-		const commandsChannel = findNearestCommandsChannel(this, requiredChannelPermissions);
+		const commandsChannel = this.findNearestCommandsChannel(requiredChannelPermissions);
 
 		// no #bot-commands channel found
 		if (!commandsChannel) {

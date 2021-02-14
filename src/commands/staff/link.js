@@ -4,7 +4,6 @@ const { DiscordAPIError, Constants } = require('discord.js');
 const { stripIndents, oneLineCommaListsOr } = require('common-tags');
 const { UNKNOWN_IGN } = require('../../constants/database');
 const { checkIfDiscordTag, getHypixelClient } = require('../../functions/util');
-const { findMemberByTag } = require('../../functions/database');
 const mojang = require('../../api/mojang');
 const Player = require('../../structures/Player');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
@@ -111,7 +110,7 @@ module.exports = class LinkCommand extends Command {
 			? message.mentions.users.first().id
 			: await (async () => {
 				for (const tag of rawArgs.filter(arg => checkIfDiscordTag(arg))) {
-					const res = await findMemberByTag(client, tag);
+					const res = await client.lgGuild?.findMemberByTag(tag);
 					if (res) return res.id;
 				}
 

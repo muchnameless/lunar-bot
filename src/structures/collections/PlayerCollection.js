@@ -92,6 +92,13 @@ class PlayerCollection extends BaseClientCollection {
 	}
 
 	/**
+	 * sweeps all cached discord members
+	 */
+	sweepDiscordMemberCache() {
+		return this.each(player => player.discordMember = null);
+	}
+
+	/**
 	 * get a player by their IGN, case insensitive and with auto-correction
 	 * @param {string} ign ign of the player
 	 * @returns {?Player}

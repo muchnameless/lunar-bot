@@ -4,6 +4,7 @@ const HypixelGuild = require('../../src/structures/HypixelGuild');
 
 
 module.exports = (sequelize, DataTypes) => {
+
 	HypixelGuild.init({
 		guildID: {
 			type: DataTypes.STRING,

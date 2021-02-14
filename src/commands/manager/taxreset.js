@@ -1,7 +1,6 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
-const { checkBotPermissions } = require('../../functions/util');
 const { createTaxEmbed } = require('../../functions/database');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
@@ -101,7 +100,7 @@ module.exports = class TaxResetCommand extends Command {
 			// remove retired collectors
 			await Promise.all(taxCollectors.map(async taxCollector => !taxCollector.isCollecting && taxCollector.remove()));
 
-			const leftAndPaid = await Player.findAll({
+			const leftAndPaid = await client.db.Player.findAll({
 				where: {
 					guildID: null,
 					paid: true,
@@ -137,7 +136,7 @@ module.exports = class TaxResetCommand extends Command {
 					.setTimestamp(),
 			).then(async logMessage => {
 				if (!currentTaxEmbed) return;
-				if (!checkBotPermissions(logMessage.channel, 'MANAGE_MESSAGES')) return;
+				if (!logMessage.channel.checkBotPermissions('MANAGE_MESSAGES')) return;
 
 				const pinnedMessages = await logMessage.channel.messages.fetchPinned().catch(logger.error);
 				if (pinnedMessages?.size >= 50) await pinnedMessages.last().unpin({ reason: 'reached max pin amount' }).then(

@@ -1,6 +1,6 @@
 'use strict';
 
-const { escapeIgn, checkBotPermissions } = require('../../functions/util');
+const { escapeIgn } = require('../../functions/util');
 const { getHypixelGuildFromFlags } = require('../../functions/leaderboardMessages');
 const ConfigCollection = require('../../structures/collections/ConfigCollection');
 const LunarMessage = require('../../structures/extensions/Message');
@@ -68,7 +68,7 @@ module.exports = class TaxReminderCommand extends Command {
 		const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error(`[TAX REMINDER]: ghost ping: ${error.name}: ${error.message}`));
 
 		if (!fetched) return;
-		if (!checkBotPermissions(message.channel, 'MANAGE_MESSAGES')) return fetched.filter(msg => msg.author.id === client.user.id).forEach(msg => msg.delete().catch(logger.error));
+		if (!message.channel.checkBotPermissions('MANAGE_MESSAGES')) return fetched.filter(msg => msg.author.id === client.user.id).forEach(msg => msg.delete().catch(logger.error));
 
 		message.channel.bulkDelete([ message.id, ...fetched.filter(fetchedMsg => [ client.user.id, message.author.id ].includes(fetchedMsg.author.id)).keys() ]).catch(logger.error);
 	}

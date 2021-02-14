@@ -4,10 +4,16 @@ const { commaListsOr } = require('common-tags');
 const { Collection } = require('discord.js');
 const ms = require('ms');
 const { escapeRegex, autocorrect } = require('./util');
+const LunarMessage = require('../structures/extensions/Message');
+const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
-// command handler
+/**
+ * command handler
+ * @param {LunarClient} client
+ * @param {LunarMessage} message
+ */
 module.exports = async (client, message) => {
 	try {
 		if (message.partial) await message.fetch();

@@ -1,19 +1,9 @@
 'use strict';
 
-const { Model } = require('sequelize');
+const CronJob = require('../../src/structures/CronJob');
 
 
 module.exports = (sequelize, DataTypes) => {
-	class CronJob extends Model {
-		/**
-		 * Helper method for defining associations.
-		 * This method is not a part of Sequelize lifecycle.
-		 * The `models/index` file will call this method automatically.
-		 */
-		static associate(models) {
-			// define associations here
-		}
-	}
 
 	CronJob.init({
 		name: {
@@ -21,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
 			primaryKey: true,
 		},
 		date: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.BIGINT,
 			allowNull: false,
 		},
 		command: {

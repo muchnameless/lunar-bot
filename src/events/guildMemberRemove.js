@@ -1,15 +1,22 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, GuildMember } = require('discord.js');
 const { stripIndents } = require('common-tags');
+const LunarClient = require('../structures/LunarClient');
+const logger = require('../functions/logger');
 
 
-// check discord members that left for id in player database
+/**
+ * guildMemberRemove
+ * @param {LunarClient} client
+ * @param {GuildMember} member
+ */
 module.exports = async (client, member) => {
 	const { config } = client;
 
 	if (member.guild.id !== config.get('DISCORD_GUILD_ID')) return;
 
+	// check discord members that left for id in player database
 	const { user } = member;
 	const player = client.players.getByID(user.id);
 

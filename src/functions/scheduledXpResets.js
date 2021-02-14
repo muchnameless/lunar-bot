@@ -4,10 +4,16 @@ const { MessageEmbed } = require('discord.js');
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../constants/skyblock');
 const { offsetFlags } = require('../constants/database');
+const LunarClient = require('../structures/LunarClient');
+const logger = require('./logger');
 
 
 const self = module.exports = {
 
+	/**
+	 * resets competitionStart xp, updates the config and logs the event
+	 * @param {LunarClient} client
+	 */
 	startCompetition: client => {
 		const { config } = client;
 
@@ -22,6 +28,10 @@ const self = module.exports = {
 		);
 	},
 
+	/**
+	 * resets competitionEnd xp, updates the config and logs the event
+	 * @param {LunarClient} client
+	 */
 	endCompetition: client => {
 		const { config } = client;
 
@@ -35,6 +45,10 @@ const self = module.exports = {
 		);
 	},
 
+	/**
+	 * resets offsetMayor xp, updates the config and logs the event
+	 * @param {LunarClient} client
+	 */
 	performMayorReset: client => {
 		const { config } = client;
 		const CURRENT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
@@ -55,6 +69,10 @@ const self = module.exports = {
 		}));
 	},
 
+	/**
+	 * shifts the daily xp array, updates the config and logs the event
+	 * @param {LunarClient} client
+	 */
 	performDailyReset: client => {
 		const { config } = client;
 
@@ -68,6 +86,10 @@ const self = module.exports = {
 		);
 	},
 
+	/**
+	 * resets offsetWeek xp, updates the config and logs the event
+	 * @param {LunarClient} client
+	 */
 	performWeeklyReset: client => {
 		const { config } = client;
 
@@ -81,6 +103,10 @@ const self = module.exports = {
 		);
 	},
 
+	/**
+	 * resets offsetMonth xp, updates the config and logs the event
+	 * @param {LunarClient} client
+	 */
 	performMonthlyReset: client => {
 		const { config } = client;
 

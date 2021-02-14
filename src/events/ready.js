@@ -3,12 +3,17 @@
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../constants/skyblock');
 const { updatePlayerDatabase } = require('../functions/database');
-const { restoreMessage, getWeekOfYear } = require('../functions/util');
+const { getWeekOfYear } = require('../functions/util');
 const { startCompetition, endCompetition, performMayorReset, performDailyReset, performWeeklyReset, performMonthlyReset } = require('../functions/scheduledXpResets');
 const updateDaPricesDatabase = require('../functions/updateDaPricesDatabase');
+const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
+/**
+ * ready
+ * @param {LunarClient} client
+ */
 module.exports = async client => {
 	logger.debug(`[READY]: logged in as ${client.user.tag}`);
 
@@ -120,14 +125,14 @@ module.exports = async client => {
 		// expired while bot was offline
 		if (Date.now() > cronJob.date - 1000) { // -100 cause CronJob throws error if times are too close
 			db.CronJob.destroy({ where: { name: cronJob.name } });
-			client.commands.getByName(cronJob.command).execute(await restoreMessage(client, cronJob), cronJob.args?.split(' ') ?? [], cronJob.flags?.split(' ') ?? []).catch(logger.error);
+			client.commands.getByName(cronJob.command).execute(await cronJob.restoreCommandMessage(), cronJob.args?.split(' ') ?? [], cronJob.flags?.split(' ') ?? []).catch(logger.error);
 			return logger.info(`[CRONJOB]: ${cronJob.name}`);
 		}
 
 		client.cronJobs.set(cronJob.name, new CronJob({
 			cronTime: new Date(cronJob.date),
 			onTick: async () => {
-				client.commands.getByName(cronJob.command).execute(await restoreMessage(client, cronJob), cronJob.args?.split(' ') ?? [], cronJob.flags?.split(' ') ?? []).catch(logger.error);
+				client.commands.getByName(cronJob.command).execute(await cronJob.restoreCommandMessage(), cronJob.args?.split(' ') ?? [], cronJob.flags?.split(' ') ?? []).catch(logger.error);
 				client.cronJobs.delete(cronJob.name);
 				db.CronJob.destroy({ where: { name: cronJob.name } });
 				logger.info(`[CRONJOB]: ${cronJob.name}`);
