@@ -1,9 +1,5 @@
 'use strict';
 
-const ConfigCollection = require('./collections/ConfigCollection');
-const LunarMessage = require('./extensions/Message');
-const LunarClient = require('./LunarClient');
-
 
 class Command {
 	/**
@@ -69,9 +65,9 @@ class Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('./LunarClient')} client
+	 * @param {import('./database/ConfigHandler')} config
+	 * @param {import('./extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags

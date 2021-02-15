@@ -2,9 +2,6 @@
 
 const { MessageEmbed } = require('discord.js');
 const { offsetFlags } = require('../../constants/database');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -23,9 +20,9 @@ module.exports = class XpResetCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -40,7 +37,7 @@ module.exports = class XpResetCommand extends Command {
 			const player = (message.mentions.users.size
 				? players.getByID(message.mentions.users.first().id)
 				: players.getByIGN(args[0]))
-				?? await db.Player.findOne({
+				?? await players.model.findOne({
 					where: {
 						guildID: null,
 						ign: { [db.Sequelize.Op.iLike]: `%${args[0]}%` },
@@ -79,7 +76,7 @@ module.exports = class XpResetCommand extends Command {
 			await players.sweepDb();
 
 			await Promise.all([
-				...players.map(async player => {
+				...players.cache.map(async player => {
 					if (player.notes === 'skill api disabled') player.notes = null;
 					return player.resetXp({ offsetToReset });
 				}),

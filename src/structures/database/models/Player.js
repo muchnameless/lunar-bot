@@ -1,27 +1,28 @@
 'use strict';
 
-const { MessageEmbed, GuildMember } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { Model } = require('sequelize');
 const { stripIndents } = require('common-tags');
-const { XP_TYPES, XP_OFFSETS, GUILD_ID_ERROR, UNKNOWN_IGN } = require('../constants/database');
-const { LEVELING_XP, SKILL_XP_PAST_50, SKILLS_CAP, RUNECRAFTING_XP, DUNGEON_XP, SLAYER_XP, SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../constants/skyblock');
-const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../constants/weight');
-const { escapeIgn, getHypixelClient } = require('../functions/util');
-const { getRolesToPurge } = require('../functions/database');
-const mojang = require('../api/mojang');
-// const LunarClient = require('./LunarClient');
-const HypixelGuild = require('./HypixelGuild');
-const logger = require('../functions/logger');
+const { XP_TYPES, XP_OFFSETS, GUILD_ID_ERROR, UNKNOWN_IGN } = require('../../../constants/database');
+const { LEVELING_XP, SKILL_XP_PAST_50, SKILLS_CAP, RUNECRAFTING_XP, DUNGEON_XP, SLAYER_XP, SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../../constants/skyblock');
+const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
+const { escapeIgn, getHypixelClient } = require('../../../functions/util');
+const { getRolesToPurge } = require('../../../functions/database');
+const mojang = require('../../../api/mojang');
+const logger = require('../../../functions/logger');
 
 
 class Player extends Model {
 	constructor(...args) {
 		super(...args);
 
+		/**
+		 * @type {?import('discord.js').GuildMember|Promise<?import('discord.js').GuildMember>}
+		 */
 		this._discordMember = null;
 
 		/**
-		 * @type {LunarClient}
+		 * @type {import('../../LunarClient')}
 		 */
 		this.client;
 	}
@@ -37,15 +38,15 @@ class Player extends Model {
 
 	/**
 	 * returns the hypixel guild db object associated with the player
-	 * @returns {?HypixelGuild}
+	 * @returns {?import('./HypixelGuild')}
 	 */
 	get guild() {
-		return this.client.hypixelGuilds.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
+		return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
 	}
 
 	/**
 	 * fetches the discord member if the id is valid and the player is in lg discord
-	 * @returns {GuildMember|Promise<?GuildMember>|null}
+	 * @returns {?import('discord.js').GuildMember|Promise<?import('discord.js').GuildMember>}
 	 */
 	get discordMember() {
 		if (!this._discordMember) this._discordMember = (() => {
@@ -272,7 +273,7 @@ class Player extends Model {
 			.forEach(roleID => member.roles.cache.has(roleID) && rolesToRemove.push(roleID));
 
 		// hypixel guild roles
-		for (const [ guildID, { roleID } ] of this.client.hypixelGuilds) {
+		for (const [ guildID, { roleID } ] of this.client.hypixelGuilds.cache) {
 			if (guildID === this.guildID) {
 				if (!member.roles.cache.has(roleID)) rolesToAdd.push(roleID);
 			} else if (member.roles.cache.has(roleID)) {
@@ -425,7 +426,7 @@ class Player extends Model {
 
 	/**
 	 * tries to link unlinked players via discord.js-cache (without any discord API calls)
-	 * @returns {Promise<?GuildMember>}
+	 * @returns {Promise<?import('discord.js').GuildMember>}
 	 */
 	async linkUsingCache() {
 		const lgGuild = this.client.lgGuild;
@@ -465,7 +466,7 @@ class Player extends Model {
 
 	/**
 	 * links a player to the provided discord guild member, updating roles and nickname
-	 * @param {GuildMember} discordMember the member to link the player to
+	 * @param {import('discord.js').GuildMember} discordMember the member to link the player to
 	 * @param {string} reason reason for discord's audit logs
 	 */
 	async link(discordMember, reason = null) {
@@ -604,7 +605,7 @@ class Player extends Model {
 		this.guildID = null;
 		this.guildRankPriority = 0;
 		this.save();
-		this.client.players.delete(this.minecraftUUID);
+		this.client.players.cache.delete(this.minecraftUUID);
 		return true;
 	}
 
@@ -747,7 +748,7 @@ class Player extends Model {
 	 * @param {object} options
 	 * @param {?string} options.offsetToReset
 	 * @param {?string[]} options.typesToReset
-	 * @returns {Promise<Player>}
+	 * @returns {Promise<this>}
 	 */
 	async resetXp({ offsetToReset = null, typesToReset = XP_TYPES } = {}) {
 		switch (offsetToReset) {
@@ -830,8 +831,7 @@ class Player extends Model {
 	 * destroys the db entry and removes it from the client.players collection
 	 */
 	async delete() {
-		this.client.players.delete(this.minecraftUUID);
-		return this.destroy();
+		return this.client.players.remove(this);
 	}
 
 	/**

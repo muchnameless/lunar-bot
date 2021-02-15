@@ -1,19 +1,17 @@
 'use strict';
 
-const LunarGuild = require('../structures/extensions/Guild');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /*
-	doesn't emit so it's pretty useless, code from: S:\pi\lunar_bot_dev\node_modules\discord.js\src\client\websocket\handlers\GUILD_CREATE.js
+	doesn't emit in all cases, so it's pretty useless, code from: S:\pi\lunar_bot_dev\node_modules\discord.js\src\client\websocket\handlers\GUILD_CREATE.js
  */
 
 /**
  * guildUpdate
- * @param {LunarClient} client
- * @param {LunarGuild} oldGuild
- * @param {LunarGuild} newGuild
+ * @param {import('../structures/LunarClient')} client
+ * @param {import('../structures/extensions/Guild')} oldGuild
+ * @param {import('../structures/extensions/Guild')} newGuild
  */
 module.exports = async (client, oldGuild, newGuild) => {
 	if (!client.options.fetchAllMembers) return;

@@ -2,9 +2,6 @@
 
 const { MessageEmbed } = require('discord.js');
 const { escapeIgn, trim } = require('../../functions/util');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -20,28 +17,27 @@ module.exports = class RankIssuesCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { hypixelGuilds } = client;
 		const embed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTimestamp();
 
 		let issuesAmount = 0;
 
-		for (const [, hypixelGuild] of hypixelGuilds) {
+		for (const hypixelGuild of client.hypixelGuilds.cache.values()) {
 			const belowWeightReq = [];
 
-			for (const [, player] of hypixelGuild.players) {
+			for (const player of hypixelGuild.players.values()) {
 				const rank = player.guildRank;
 
-				if (!rank?.roleID) continue; // non-requestable rank
+				if (!rank?.roleID) continue; // unkown or non-requestable rank
 
 				const { totalWeight } = player.getWeight();
 

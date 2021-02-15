@@ -1,51 +1,39 @@
 'use strict';
 
+const ModelHandler = require('./ModelHandler');
 const logger = require('../../functions/logger');
-const BaseClientCollection = require('./BaseClientCollection');
 
 
-class ConfigCollection extends BaseClientCollection {
-	constructor(client, entries = null) {
-		super(client, entries);
+class ConfigHandler extends ModelHandler {
+	constructor(options) {
+		super(options);
+
+		/**
+		 * @type {import('discord.js').Collection<string, import('./models/Config')}
+		 */
+		this.cache;
+		/**
+		 * @type {import('./models/Config')}
+		 */
+		this.model;
 	}
 
 	/**
-	 * sets a config entry (tries to modify an existing one and creates a new one if non-existend)
+	 * upserts a config entry
 	 * @param {string} key config key
 	 * @param {string} value new value
-	 * @returns {Promise<Config>}
 	 */
 	async set(key, value) {
-		if (value instanceof this.client.db.Config) super.set(key, value);
+		if (value instanceof this.model) return this.cache.set(key, value);
 
 		key = key.toUpperCase();
 
-		let dbEntry = super.get(key);
+		const dbEntry = this.cache.get(key);
 
-		if (!dbEntry) {
-			dbEntry = await this.client.db.Config.create({ key, value });
-			super.set(key, dbEntry);
-			return dbEntry;
-		}
+		if (!dbEntry) return super.add({ key, value });
 
 		dbEntry.value = value;
-		return await dbEntry.save();
-	}
-
-	/**
-	 * deletes an element from the config
-	 * @param {string} key config key
-	 */
-	async delete(key) {
-		key = key.toUpperCase();
-
-		const dbEntry = super.get(key);
-
-		if (!dbEntry) return false;
-
-		await dbEntry.destroy();
-
-		return super.delete(key);
+		return dbEntry.save();
 	}
 
 	/**
@@ -54,7 +42,7 @@ class ConfigCollection extends BaseClientCollection {
 	 * @returns {?string} config value
 	 */
 	get(key) {
-		return super.get(key?.toUpperCase())?.value
+		return this.cache.get(key?.toUpperCase())?.value
 			?? (/^[a-z]+_(?:55|60)_ROLE_ID$/.test(key)
 				? null
 				: logger.warn(`[CONFIG VALUE] ${key} is not a valid config key`));
@@ -103,4 +91,4 @@ class ConfigCollection extends BaseClientCollection {
 	}
 }
 
-module.exports = ConfigCollection;
+module.exports = ConfigHandler;

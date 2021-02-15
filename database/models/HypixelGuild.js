@@ -1,6 +1,6 @@
 'use strict';
 
-const HypixelGuild = require('../../src/structures/HypixelGuild');
+const HypixelGuild = require('../../src/structures/database/models/HypixelGuild');
 
 
 module.exports = (sequelize, DataTypes) => {

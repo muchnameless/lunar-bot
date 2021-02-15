@@ -1,14 +1,12 @@
 'use strict';
 
 const ms = require('ms');
-const { Constants } = require('discord.js');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /**
  * rateLimit
- * @param {LunarClient} client
+ * @param {import('../structures/LunarClient')} client
  * @param {Object} rateLimitInfo Object containing the rate limit info
  * @param {number} rateLimitInfo.timeout Timeout in ms
  * @param {number} rateLimitInfo.limit Number of requests that can be made to this endpoint

@@ -1,10 +1,6 @@
 'use strict';
 
 const { escapeIgn } = require('../../functions/util');
-const { getHypixelGuildFromFlags } = require('../../functions/leaderboardMessages');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -23,17 +19,17 @@ module.exports = class TaxReminderCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
 		const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'gp', 'ghost', 'ghostping' ].includes(arg));
-		const hGuild = getHypixelGuildFromFlags(client, flags);
-		const playersToRemind = (hGuild?.players ?? client.players).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
+		const hGuild = client.hypixelGuilds.getFromFlags(flags);
+		const playersToRemind = (hGuild ? hGuild.players : client.players.cache).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
 		const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(player => player.inDiscord && /^\d+$/.test(player.discordID));
 		const AMOUNT_TO_PING = playersPingable.size;
 

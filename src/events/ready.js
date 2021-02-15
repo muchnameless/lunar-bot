@@ -6,13 +6,12 @@ const { updatePlayerDatabase } = require('../functions/database');
 const { getWeekOfYear } = require('../functions/util');
 const { startCompetition, endCompetition, performMayorReset, performDailyReset, performWeeklyReset, performMonthlyReset } = require('../functions/scheduledXpResets');
 const updateDaPricesDatabase = require('../functions/updateDaPricesDatabase');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /**
  * ready
- * @param {LunarClient} client
+ * @param {import('../structures/LunarClient')} client
  */
 module.exports = async client => {
 	logger.debug(`[READY]: logged in as ${client.user.tag}`);
@@ -32,17 +31,17 @@ module.exports = async client => {
 	await client.initializeLoggingWebhook();
 
 
-	const { config } = client;
+	const { config, cronJobs } = client;
 
 	// update player database and tax message every x min starting at the full hour
-	client.cronJobs.set('updatePlayerDatabase', new CronJob({
+	cronJobs.cache.set('updatePlayerDatabase', new CronJob({
 		cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
 		onTick: () => config.getBoolean('PLAYER_DB_UPDATE_ENABLED') && updatePlayerDatabase(client),
 		start: true,
 	}));
 
 	// update DA prices 1 min before DA
-	client.cronJobs.set('updateDaPrices', new CronJob({
+	cronJobs.cache.set('updateDaPrices', new CronJob({
 		cronTime: '0 54 * * * *',
 		onTick: () => config.getBoolean('DA_PRICES_DB_UPDATE_ENABLED') && updateDaPricesDatabase(client),
 		start: true,
@@ -51,7 +50,7 @@ module.exports = async client => {
 	// auto competition starting
 	if (config.getBoolean('COMPETITION_SCHEDULED')) {
 		if (config.getNumber('COMPETITION_START_TIME') - 10_000 > Date.now()) {
-			client.cronJobs.set('competitionStart', new CronJob({
+			cronJobs.cache.set('competitionStart', new CronJob({
 				cronTime: new Date(config.getNumber('COMPETITION_START_TIME')),
 				onTick: () => startCompetition(client),
 				start: true,
@@ -63,7 +62,7 @@ module.exports = async client => {
 
 	// auto competition ending
 	if (config.getNumber('COMPETITION_END_TIME') - 10_000 > Date.now()) {
-		client.cronJobs.set('competitionEnd', new CronJob({
+		cronJobs.cache.set('competitionEnd', new CronJob({
 			cronTime: new Date(config.getNumber('COMPETITION_END_TIME')),
 			onTick: () => endCompetition(client),
 			start: true,
@@ -76,7 +75,7 @@ module.exports = async client => {
 	const NEXT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
 	if (NEXT_MAYOR_TIME - 10_000 > Date.now()) {
-		client.cronJobs.set('mayorXpReset', new CronJob({
+		cronJobs.cache.set('mayorXpReset', new CronJob({
 			cronTime: new Date(NEXT_MAYOR_TIME),
 			onTick: () => performMayorReset(client),
 			start: true,
@@ -91,7 +90,7 @@ module.exports = async client => {
 	if (new Date(config.getNumber('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) performDailyReset(client);
 
 	// each day at 00:00:00
-	client.cronJobs.set('dailyXpReset', new CronJob({
+	cronJobs.cache.set('dailyXpReset', new CronJob({
 		cronTime: '0 0 0 * * *',
 		timeZone: 'GMT',
 		onTick: () => performDailyReset(client),
@@ -102,7 +101,7 @@ module.exports = async client => {
 	if (getWeekOfYear(new Date(config.getNumber('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) performWeeklyReset(client);
 
 	// each monday at 00:00:00
-	client.cronJobs.set('weeklyXpReset', new CronJob({
+	cronJobs.cache.set('weeklyXpReset', new CronJob({
 		cronTime: '0 0 0 * * MON',
 		timeZone: 'GMT',
 		onTick: () => performWeeklyReset(client),
@@ -113,7 +112,7 @@ module.exports = async client => {
 	if (new Date(config.getNumber('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) performMonthlyReset(client);
 
 	// the first of each month at 00:00:00
-	client.cronJobs.set('monthlyXpReset', new CronJob({
+	cronJobs.cache.set('monthlyXpReset', new CronJob({
 		cronTime: '0 0 0 1 * *',
 		timeZone: 'GMT',
 		onTick: () => performMonthlyReset(client),
@@ -141,5 +140,5 @@ module.exports = async client => {
 
 
 	// log ready
-	logger.debug(`[READY]: startup complete. ${client.cronJobs.size} CronJobs running. Logging webhook available: ${Boolean(client.webhook)}`);
+	logger.debug(`[READY]: startup complete. ${cronJobs.size} CronJobs running. Logging webhook available: ${Boolean(client.webhook)}`);
 };

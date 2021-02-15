@@ -1,52 +1,59 @@
 'use strict';
 
-const { Client, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } = require('discord.js');
+const { Client, Collection, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } = require('discord.js');
 const path = require('path');
 const { promises: fs } = require('fs');
 const { cleanLoggingEmbedString } = require('../functions/util');
 const { getAllJsFiles } = require('../functions/files');
-const logger = require('../functions/logger');
-const LunarGuild = require('./extensions/Guild');
-const BannedUserCollection = require('./collections/BannedUserCollection');
+const DatabaseHandler = require('./database/DatabaseHandler');
 const CommandCollection = require('./collections/CommandCollection');
-const ConfigCollection = require('./collections/ConfigCollection');
-const CooldownCollection = require('./collections/CooldownCollection');
-const CronJobCollection = require('./collections/CronJobCollection');
-const HypixelGuildCollection = require('./collections/HypixelGuildCollection');
-const PlayerCollection = require('./collections/PlayerCollection');
-const TaxCollectorCollection = require('./collections/TaxCollectorCollection');
+const logger = require('../functions/logger');
 
 
 class LunarClient extends Client {
 	constructor(options = {}) {
 		super(options);
 
-		this.db = options.db;
+		this.db = new DatabaseHandler({ client: this, db: options.db });
 		this.webhook = null;
 		this.ownerID = process.env.OWNER ?? null;
 		this.logBufferPath = path.join(__dirname, '..', '..', 'log_buffer');
 
 		// custom collections
-		this.bannedUsers = new BannedUserCollection(this);
+		// /**
+		//  * @type {CommandCollection<string, import('./Command')>}
+		//  */
 		this.commands = new CommandCollection(this);
-		this.config = new ConfigCollection(this);
-		this.cooldowns = new CooldownCollection(this);
-		this.cronJobs = new CronJobCollection(this);
-		this.hypixelGuilds = new HypixelGuildCollection(this);
-		this.players = new PlayerCollection(this);
-		this.taxCollectors = new TaxCollectorCollection(this);
+		this.cooldowns = new Collection();
+	}
 
-		// add 'client' and 'db' to all db models
-		for (const dbEntry of Object.values(this.db).filter(value => Object.getPrototypeOf(value) === this.db.Sequelize.Model)) {
-			Object.defineProperties(dbEntry.prototype, {
-				client: { value: this },
-			});
-		}
+	get bannedUsers() {
+		return this.db.bannedUsers;
+	}
+
+	get config() {
+		return this.db.config;
+	}
+
+	get cronJobs() {
+		return this.db.cronJobs;
+	}
+
+	get hypixelGuilds() {
+		return this.db.hypixelGuilds;
+	}
+
+	get players() {
+		return this.db.players;
+	}
+
+	get taxCollectors() {
+		return this.db.taxCollectors;
 	}
 
 	/**
 	 * returns the lunar guard discord guild
-	 * @returns {?LunarGuild} lunar guard discord guild
+	 * @returns {?import('./extensions/Guild')} lunar guard discord guild
 	 */
 	get lgGuild() {
 		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'));
@@ -65,42 +72,12 @@ class LunarClient extends Client {
 	 * @param {?string} token discord bot token
 	 */
 	async login(token) {
-		await this.loadDbCache();
+		await this.db.loadCache();
 
-		this.loadCommands();
+		this.commands.loadAll();
 		this._loadEvents();
 
 		return super.login(token);
-	}
-
-	/**
-	 * loads all dbs into their respective <LunarClient>.<Collection>
-	 */
-	async loadDbCache() {
-		(await this.db.BannedUser.findAll())
-			.forEach(user => this.bannedUsers.set(user.discordID, user));
-
-		(await this.db.Config.findAll())
-			.forEach(config => this.config._set(config.key, config));
-
-		(await this.db.HypixelGuild.findAll())
-			.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-			.forEach(hypixelGuild => this.hypixelGuilds.set(hypixelGuild.guildID, hypixelGuild));
-
-		(await this.db.Player.findAll({
-			where: {
-				// player is in a guild that the bot tracks
-				guildID: {
-					[this.db.Sequelize.Op.ne]: null,
-				},
-			},
-		}))
-			.forEach(player => this.players.set(player.minecraftUUID, player));
-
-		this.players.sortAlphabetically();
-
-		(await this.db.TaxCollector.findAll())
-			.forEach(taxCollector => this.taxCollectors.set(taxCollector.minecraftUUID, taxCollector));
 	}
 
 	/**
@@ -125,7 +102,7 @@ class LunarClient extends Client {
 	/**
 	 * logs the embeds to console and via the logging webhook
 	 * @param {...MessageEmbed|string} embeds embeds to log
-	 * @param {Promise<Message?>}
+	 * @param {Promise<?import('./extensions/Message')>}
 	 */
 	async log(...embeds) {
 		embeds = embeds.filter(x => x != null); // filter out null, undefined, ...
@@ -226,37 +203,6 @@ class LunarClient extends Client {
 		} catch (error) {
 			logger.error(`[POST LOG FILES]: ${error.name}: ${error.message}`);
 		}
-	}
-
-	/**
-	 * loads a single command into the <LunarClient>.commands collection
-	 * @param {string} file command file to load
-	 */
-	loadCommand(file) {
-		const [, CATEGORY, COMMAND_NAME ] = file.match(/[/\\]commands[/\\](\D+)[/\\](\D+)\.js/);
-		const commandConstructor = require(file);
-		const command = new commandConstructor({
-			client: this,
-			name: COMMAND_NAME,
-			category: CATEGORY,
-		});
-
-		this.commands.set(COMMAND_NAME.toLowerCase(), command);
-	}
-
-	/**
-	 * loads all commands into the <LunarClient>.commands collection
-	 */
-	loadCommands() {
-		const commandFiles = getAllJsFiles(path.join(__dirname, '..', 'commands'));
-
-		if (!commandFiles) logger.warn('[COMMANDS]: no command files');
-
-		for (const file of commandFiles) {
-			this.loadCommand(file);
-		}
-
-		logger.debug(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
 	}
 
 	/**

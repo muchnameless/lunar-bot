@@ -4,15 +4,13 @@ const { commaListsOr } = require('common-tags');
 const { Collection } = require('discord.js');
 const ms = require('ms');
 const { escapeRegex, autocorrect } = require('./util');
-const LunarMessage = require('../structures/extensions/Message');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /**
  * command handler
- * @param {LunarClient} client
- * @param {LunarMessage} message
+ * @param {import('../structures/LunarClient')} client
+ * @param {import('../structures/extensions/Message')} message
  */
 module.exports = async (client, message) => {
 	try {
@@ -28,12 +26,12 @@ module.exports = async (client, message) => {
 
 	if (message.guild && !MATCHED_PREFIX.length) { // must use prefix for commands in guild
 		// channel-specific triggers
-		return client.hypixelGuilds.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequest(message);
+		return client.hypixelGuilds.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequest(message);
 	}
 
 	// banned users
-	if (client.bannedUsers.has(message.author.id)) {
-		const bannedUser = client.bannedUsers.get(message.author.id);
+	if (client.bannedUsers.cache.has(message.author.id)) {
+		const bannedUser = client.bannedUsers.cache.get(message.author.id);
 		const { reason, expiresAt } = bannedUser;
 
 		if (Date.now() >= expiresAt) {

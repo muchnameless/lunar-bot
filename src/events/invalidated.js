@@ -1,12 +1,11 @@
 'use strict';
 
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /**
  * invalidated
- * @param {LunarClient} client
+ * @param {import('../structures/LunarClient')} client
  */
 module.exports = async client => {
 	logger.warn('[INVALIDATED]: the client became invalidated');

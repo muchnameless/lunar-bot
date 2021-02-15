@@ -4,8 +4,6 @@ const { promisify, inspect } = require('util');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const hypixel = require('../api/hypixel');
 const hypixelAux = require('../api/hypixelAux');
-const LunarMessage = require('../structures/extensions/Message');
-// const LunarClient = require('../structures/LunarClient');
 const logger = require('./logger');
 
 
@@ -106,7 +104,7 @@ const self = module.exports = {
 
 	/**
 	 * replaces the client's token in 'text' and escapes ` and @mentions
-	 * @param {LunarClient} client discord client to get the token from
+	 * @param {import('../structures/LunarClient')} client discord client to get the token from
 	 * @param {string} text to clean
 	 */
 	cleanOutput: (client, text) => {
@@ -128,7 +126,7 @@ const self = module.exports = {
 		let currentBestElement;
 		let currentBestSimilarity = 0;
 
-		for (const element of Array.isArray(validInput) ? validInput : validInput.values()) {
+		for (const element of validInput.values()) {
 			const similarity = jaroWinklerSimilarity(query, attributeToQuery ? element[attributeToQuery] : element, { caseSensitive: false });
 
 			if (similarity === 1) return {

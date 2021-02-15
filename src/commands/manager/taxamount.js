@@ -2,9 +2,6 @@
 
 const { MessageEmbed } = require('discord.js');
 const { removeNumberFormatting } = require('../../functions/util');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -22,9 +19,9 @@ module.exports = class TaxAmountCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -42,7 +39,7 @@ module.exports = class TaxAmountCommand extends Command {
 
 		// update tax collectors if they have the default amount
 		await Promise.all(client.taxCollectors.filter(taxCollector => taxCollector.isCollecting).map(async (_, uuid) => {
-			const player = client.players.get(uuid);
+			const player = client.players.cache.get(uuid);
 			if (player.amount === OLD_AMOUNT && player.collectedBy === uuid) return player.setToPaid();
 		}));
 

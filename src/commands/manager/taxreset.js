@@ -2,9 +2,6 @@
 
 const { MessageEmbed } = require('discord.js');
 const { createTaxEmbed } = require('../../functions/database');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -21,15 +18,15 @@ module.exports = class TaxResetCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { players, taxCollectors, db } = client;
+		const { db, players, taxCollectors } = client;
 
 		let currentTaxEmbed;
 		let result;
@@ -39,7 +36,7 @@ module.exports = class TaxResetCommand extends Command {
 			const player = (message.mentions.users.size
 				? players.getByID(message.mentions.users.first().id)
 				: players.getByIGN(args[0]))
-				?? await db.Player.findOne({
+				?? await players.model.findOne({
 					where: {
 						guildID: null,
 						ign: { [db.Sequelize.Op.iLike]: `%${args[0]}%` },
@@ -98,9 +95,9 @@ module.exports = class TaxResetCommand extends Command {
 			}
 
 			// remove retired collectors
-			await Promise.all(taxCollectors.map(async taxCollector => !taxCollector.isCollecting && taxCollector.remove()));
+			await Promise.all(taxCollectors.cache.map(async taxCollector => !taxCollector.isCollecting && taxCollector.remove()));
 
-			const leftAndPaid = await client.db.Player.findAll({
+			const leftAndPaid = await players.model.findAll({
 				where: {
 					guildID: null,
 					paid: true,
@@ -109,7 +106,7 @@ module.exports = class TaxResetCommand extends Command {
 
 			// update database
 			await Promise.all(
-				players.map(async player => taxCollectors.has(player.minecraftUUID)
+				players.cache.map(async player => taxCollectors.cache.has(player.minecraftUUID)
 					? player.setToPaid()
 					: player.resetTax(),
 				),

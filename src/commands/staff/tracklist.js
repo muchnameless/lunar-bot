@@ -1,10 +1,7 @@
 'use strict';
 
-const { addPageReactions, getOffsetFromFlags, getHypixelGuildFromFlags, createGainedStatsEmbed } = require('../../functions/leaderboardMessages');
+const { addPageReactions, getOffsetFromFlags, createGainedStatsEmbed } = require('../../functions/leaderboardMessages');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -22,9 +19,9 @@ module.exports = class TracklistCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -45,7 +42,7 @@ module.exports = class TracklistCommand extends Command {
 
 		const reply = await message.reply(createGainedStatsEmbed(client, {
 			userID,
-			hypixelGuild: getHypixelGuildFromFlags(client, flags) ?? client.players.getByID(userID)?.guild,
+			hypixelGuild: client.hypixelGuilds.getFromFlags(flags) ?? client.players.getByID(userID)?.guild,
 			type: 'track',
 			offset: getOffsetFromFlags(config, flags) ?? XP_OFFSETS_SHORT.week,
 			shouldShowOnlyBelowReqs: true,

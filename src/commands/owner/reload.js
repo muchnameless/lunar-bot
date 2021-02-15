@@ -2,9 +2,6 @@
 
 const path = require('path');
 const { getAllJsFiles } = require('../../functions/files');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -22,9 +19,9 @@ module.exports = class ReloadCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -42,11 +39,12 @@ module.exports = class ReloadCommand extends Command {
 
 			try {
 				const commandFiles = getAllJsFiles(path.join(__dirname, '..'));
-				const nameRegex = new RegExp(command.name);
+				const nameRegex = new RegExp(command.name, 'i');
 				const NEW_PATH = commandFiles.find(file => nameRegex.test(file));
 
 				client.commands.delete(command.name);
-				client.loadCommand(NEW_PATH);
+				client.commands.load(NEW_PATH);
+
 				logger.info(`command ${command.name} was reloaded successfully`);
 				return message.reply(`command \`${command.name}\` was reloaded successfully.`);
 			} catch (error) {
@@ -65,12 +63,7 @@ module.exports = class ReloadCommand extends Command {
 
 			case 'db':
 			case 'database':
-				client.bannedUsers.clear();
-				client.config.clear();
-				client.hypixelGuilds.clear();
-				client.players.clear();
-				client.taxCollectors.clear();
-				await client.loadDbCache();
+				await client.db.loadCache();
 				return message.reply('database cache reloaded successfully.');
 
 			case 'cooldown':

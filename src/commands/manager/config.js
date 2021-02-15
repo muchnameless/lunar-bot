@@ -1,9 +1,6 @@
 'use strict';
 
 const { stripIndents } = require('common-tags');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -25,9 +22,9 @@ module.exports = class ConfigCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -36,7 +33,7 @@ module.exports = class ConfigCommand extends Command {
 		// list all config entries
 		if (!args.length) {
 			return message.reply(
-				config.sort((a, b) => a.key.localeCompare(b.key)).map(cfg => `${cfg.key}: ${cfg.value}`).join('\n'),
+				config.cache.sorted((a, b) => a.key.localeCompare(b.key)).map(cfg => `${cfg.key}: ${cfg.value}`).join('\n'),
 				{ code: 'apache', split: { char: '\n' } },
 			);
 		}
@@ -51,15 +48,15 @@ module.exports = class ConfigCommand extends Command {
 
 				if (VALUE === null) return message.reply(`\`${KEY}\` is not in the config.`);
 
-				await config.delete(KEY);
+				await config.remove(KEY);
 				return message.reply(`removed \`${KEY}\`: \`${VALUE}\``);
 			}
 
-			const QUERY_REGEX = new RegExp(args[0], 'i');
-			const configEntries = config.filter(cfg => QUERY_REGEX.test(cfg.key) || QUERY_REGEX.test(cfg.value));
+			const queryRegex = new RegExp(args[0], 'i');
+			const configEntries = config.cache.filter(cfg => queryRegex.test(cfg.key) || queryRegex.test(cfg.value));
 
 			return message.reply(
-				configEntries.sort((a, b) => a.key.localeCompare(b.key)).map(cfg => `${cfg.key}: ${cfg.value}`).join('\n') || `no config entries for '${args[0]}' found`,
+				configEntries.sorted((a, b) => a.key.localeCompare(b.key)).map(cfg => `${cfg.key}: ${cfg.value}`).join('\n') || `no config entries for '${args[0]}' found`,
 				{ code: 'apache', split: { char: '\n' } },
 			);
 		}
@@ -68,6 +65,7 @@ module.exports = class ConfigCommand extends Command {
 		const KEY = args.shift().toUpperCase();
 		const OLD_VALUE = config.get(KEY);
 		const entry = await config.set(KEY, args.join(' '));
+
 		return message.reply(
 			`${entry.key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${entry.value}'`,
 			{ code: 'apache' },

@@ -1,14 +1,12 @@
 'use strict';
 
-const LunarMessage = require('../structures/extensions/Message');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /**
  * messageDelete
- * @param {LunarClient} client
- * @param {LunarMessage} message
+ * @param {import('../structures/LunarClient')} client
+ * @param {import('../structures/extensions/Message')} message
  */
 module.exports = async (client, message) => {
 	if (!message.replyMessageID) return;

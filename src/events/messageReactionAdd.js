@@ -1,19 +1,16 @@
 'use strict';
 
-const { MessageReaction, User } = require('discord.js');
 const { updateLeaderboardMessage } = require('../functions/leaderboardMessages');
 const { LOCK } = require('../constants/emojiCharacters');
-const LunarMessage = require('../structures/extensions/Message');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /**
  * messageReactionAdd
- * @param {LunarClient} client
- * @param {MessageReaction} reaction
- * @param {LunarMessage} reaction.message
- * @param {User} user
+ * @param {import('../structures/LunarClient')} client
+ * @param {import('discord.js').MessageReaction} reaction
+ * @param {import('../structures/extensions/Message')} reaction.message
+ * @param {import('discord.js').User} user
  */
 module.exports = async (client, reaction, user) => {
 	try {

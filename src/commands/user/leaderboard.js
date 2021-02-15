@@ -2,12 +2,9 @@
 
 const { stripIndents } = require('common-tags');
 const { autocorrect } = require('../../functions/util');
-const { addPageReactions, getOffsetFromFlags, getHypixelGuildFromFlags, createGainedStatsEmbed } = require('../../functions/leaderboardMessages');
+const { addPageReactions, getOffsetFromFlags, createGainedStatsEmbed } = require('../../functions/leaderboardMessages');
 const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -18,7 +15,7 @@ module.exports = class LeaderboardCommand extends Command {
 			aliases: [ 'lb' ],
 			description: 'guild member leaderboard for skill / slayer xp gained',
 			usage: () => stripIndents`
-				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.map(hGuild => `\`-${hGuild.name.replace(/ /g, '')}\``).join('|')}|\`-all\`> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`-${offset}\``).join('|')}>
+				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.cache.map(hGuild => `\`-${hGuild.name.replace(/ /g, '')}\``).join('|')}|\`-all\`> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`-${offset}\``).join('|')}>
 
 				currently supported types:
 				skill, ${SKILLS.join(', ')}
@@ -34,9 +31,9 @@ module.exports = class LeaderboardCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -92,7 +89,7 @@ module.exports = class LeaderboardCommand extends Command {
 
 		const reply = await message.reply(createGainedStatsEmbed(client, {
 			userID,
-			hypixelGuild: getHypixelGuildFromFlags(client, flags),
+			hypixelGuild: client.hypixelGuilds.getFromFlags(flags),
 			type,
 			offset: getOffsetFromFlags(config, flags),
 			shouldShowOnlyBelowReqs: flags.some(flag => [ 't', 'track' ].includes(flag)),

@@ -1,6 +1,6 @@
 'use strict';
 
-const TaxCollector = require('../../src/structures/TaxCollector');
+const TaxCollector = require('../../src/structures/database/models/TaxCollector');
 
 
 module.exports = (sequelize, DataTypes) => {

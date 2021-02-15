@@ -2,15 +2,12 @@
 
 const { Model } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
-const { autocorrect, getHypixelClient } = require('../functions/util');
-const { Y_EMOJI, X_EMOJI, CLOWN } = require('../constants/emojiCharacters');
-const { offsetFlags, UNKNOWN_IGN } = require('../constants/database');
-const hypixel = require('../api/hypixel');
-const mojang = require('../api/mojang');
-const PlayerCollection = require('./collections/PlayerCollection');
-// const Player = require('./Player');
-// const LunarClient = require('./LunarClient');
-const logger = require('../functions/logger');
+const { autocorrect, getHypixelClient } = require('../../../functions/util');
+const { Y_EMOJI, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
+const { offsetFlags, UNKNOWN_IGN } = require('../../../constants/database');
+const hypixel = require('../../../api/hypixel');
+const mojang = require('../../../api/mojang');
+const logger = require('../../../functions/logger');
 
 
 class HypixelGuild extends Model {
@@ -18,12 +15,12 @@ class HypixelGuild extends Model {
 		super(...args);
 
 		/**
-		 * @type {PlayerCollection}
+		 * @type {import('discord.js').Collection<string, import('./Player')>}
 		 */
 		this._players = null;
 
 		/**
-		 * @type {LunarClient}
+		 * @type {import('../../LunarClient')}
 		 */
 		this.client;
 	}
@@ -37,12 +34,15 @@ class HypixelGuild extends Model {
 		// define associations here
 	}
 
+	set players(value) {
+		this._players = value;
+	}
+
 	/**
 	 * returns the filtered <LunarClient>.players containing all players from this guild
-	 * @returns {PlayerCollection}
 	 */
 	get players() {
-		if (!this._players) this._players = this.client.players.filter(player => player.guildID === this.guildID);
+		if (!this._players) this._players = this.client.players.cache.filter(player => player.guildID === this.guildID);
 		return this._players;
 	}
 
@@ -103,12 +103,12 @@ class HypixelGuild extends Model {
 		// all old players left (???)
 		if (PLAYERS_LEFT_AMOUNT && PLAYERS_LEFT_AMOUNT === PLAYERS_OLD_AMOUNT) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: aborting guild player update request due to the possibility of an error from the fetched data`);
 
-		const membersJoined = currentGuildMembers.filter(player => !players.has(player.uuid));
+		const membersJoined = currentGuildMembers.filter(player => !players.cache.has(player.uuid));
 		const playersJoinedAgain = [];
 		const membersJoinedNew = [];
 
 		await Promise.all(membersJoined.map(async hypixelGuildMember => {
-			const dbEntry = await this.client.db.Player.findByPk(hypixelGuildMember.uuid);
+			const dbEntry = await this.client.players.model.findByPk(hypixelGuildMember.uuid);
 			if (dbEntry) return playersJoinedAgain.push(dbEntry);
 			return membersJoinedNew.push(hypixelGuildMember);
 		}));
@@ -248,7 +248,7 @@ class HypixelGuild extends Model {
 
 		// update guild xp gained and ingame ranks
 		currentGuildMembers.forEach(async hypixelGuildMember => {
-			const player = players.get(hypixelGuildMember.uuid);
+			const player = players.cache.get(hypixelGuildMember.uuid);
 
 			if (!player) return logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
 
@@ -305,7 +305,7 @@ class HypixelGuild extends Model {
 
 	/**
 	 * determine the requested rank and compare the player's weight with the rank's requirement
-	 * @param {Message} message discord message which was send in #rank-requests channel
+	 * @param {import('../../extensions/Message')} message discord message which was send in #rank-requests channel
 	 */
 	async handleRankRequest(message) {
 		if (message.mentions.users.size) return; // ignore messages with tagged users

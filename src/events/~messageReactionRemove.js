@@ -1,15 +1,13 @@
 'use strict';
 
-const { MessageReaction, User } = require('discord.js');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /**
  * messageReactionRemove
- * @param {LunarClient} client
- * @param {MessageReaction} reaction
- * @param {User} user
+ * @param {import('../structures/LunarClient')} client
+ * @param {import('discord.js').MessageReaction} reaction
+ * @param {import('discord.js').User} user
  */
 module.exports = async (client, reaction, user) => {
 	if (!client.config.getBoolean('EXTENDED_LOGGING')) return;

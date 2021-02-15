@@ -4,6 +4,15 @@ const { Model } = require('sequelize');
 
 
 class TaxCollector extends Model {
+	constructor(...args) {
+		super(...args);
+
+		/**
+		 * @type {import('../../LunarClient')}
+		 */
+		this.client;
+	}
+
 	/**
 	 * Helper method for defining associations.
 	 * This method is not a part of Sequelize lifecycle.
@@ -14,7 +23,7 @@ class TaxCollector extends Model {
 	}
 
 	get player() {
-		return this.client.players.get(this.minecraftUUID) ?? null;
+		return this.client.players.cache.get(this.minecraftUUID) ?? null;
 	}
 
 	async addAmount(amount) {
@@ -28,11 +37,10 @@ class TaxCollector extends Model {
 	}
 
 	async remove() {
-		this.client.taxCollectors.delete(this.minecraftUUID);
-		return this.destroy();
+		return this.client.taxCollectors.remove(this);
 	}
 
-	//todo
+	// todo
 	async update() {
 		return 'WIP';
 	}

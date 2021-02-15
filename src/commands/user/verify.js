@@ -3,9 +3,6 @@
 const { oneLine, commaListsOr } = require('common-tags');
 const { getHypixelClient } = require('../../functions/util');
 const mojang = require('../../api/mojang');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -23,9 +20,9 @@ module.exports = class VerifyCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -52,8 +49,8 @@ module.exports = class VerifyCommand extends Command {
 
 		const { _id: GUILD_ID } = hypixelGuild;
 
-		if (!hypixelGuilds.keyArray().includes(GUILD_ID)) return message.reply(commaListsOr`
-			according to the hypixel API, \`${ign}\` is not in ${hypixelGuilds.map(hGuild => hGuild.name)}. ${ERROR_STRING}
+		if (!hypixelGuilds.cache.keyArray().includes(GUILD_ID)) return message.reply(commaListsOr`
+			according to the hypixel API, \`${ign}\` is not in ${hypixelGuilds.cache.map(hGuild => hGuild.name)}. ${ERROR_STRING}
 		`);
 
 		const hypixelPlayer = await getHypixelClient(true).player.uuid(MINECRAFT_UUID).catch(error => logger.error(`[VERIFY]: player fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
@@ -72,7 +69,7 @@ module.exports = class VerifyCommand extends Command {
 		`);
 
 		try {
-			player ??= await db.Player.findByPk(MINECRAFT_UUID) ?? await db.Player.create({
+			player ??= await players.model.findByPk(MINECRAFT_UUID) ?? await players.model.create({
 				minecraftUUID: MINECRAFT_UUID,
 				ign,
 			});

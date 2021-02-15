@@ -3,13 +3,12 @@
 const { MessageEmbed } = require('discord.js');
 const { DA_ITEMS } = require('../constants/skyblock');
 const hypixel = require('../api/hypixelAux2');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('./logger');
 
 
 /**
  * updates the da prices database and sends the current lbin embed
- * @param {LunarClient} client
+ * @param {import('../structures/LunarClient')} client
  */
 module.exports = async function(client) {
 	logger.info('[UPDATE DA PRICES]: update started');

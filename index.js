@@ -16,6 +16,7 @@ requireAll(path.join(__dirname, 'src', 'structures', 'extensions'));
 process
 	.on('unhandledRejection', error => {
 		logger.error('[UNCAUGHT PROMISE REJECTION]:', error);
+		process.exit(-1);
 	})
 	.on('uncaughtException', error => {
 		logger.error('[UNCAUGHT EXCEPTION]:', error);

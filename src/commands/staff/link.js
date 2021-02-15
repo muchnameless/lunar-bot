@@ -5,10 +5,6 @@ const { stripIndents, oneLineCommaListsOr } = require('common-tags');
 const { UNKNOWN_IGN } = require('../../constants/database');
 const { checkIfDiscordTag, getHypixelClient } = require('../../functions/util');
 const mojang = require('../../api/mojang');
-const Player = require('../../structures/Player');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -26,18 +22,18 @@ module.exports = class LinkCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { players, hypixelGuilds, db } = client;
+		const { players, hypixelGuilds } = client;
 
 		/**
-		 * @type {Player}
+		 * @type {import('../../structures/database/models/Player')}
 		 */
 		let player;
 
@@ -69,10 +65,10 @@ module.exports = class LinkCommand extends Command {
 
 			const hypixelGuild = await getHypixelClient(true).guild.player(minecraftUUID).catch(error => logger.error(`[LINK]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
 
-			if (!hypixelGuild || !hypixelGuilds.keyArray().includes(hypixelGuild._id)) continue;
+			if (!hypixelGuild || !hypixelGuilds.cache.keyArray().includes(hypixelGuild._id)) continue;
 
 			// try to find player in the db
-			player = await db.Player.findByPk(minecraftUUID);
+			player = await players.model.findByPk(minecraftUUID).catch(error => logger.error(`[LINK]: ${error.name}: ${error.message}`));
 
 			if (player) {
 				player.guildID = hypixelGuild._id;
@@ -83,7 +79,7 @@ module.exports = class LinkCommand extends Command {
 			// create new db entry
 			const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name}: ${error.message}`)) ?? UNKNOWN_IGN;
 
-			player = await db.Player
+			player = await players.model
 				.create({
 					minecraftUUID,
 					ign: IGN,

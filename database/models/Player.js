@@ -1,7 +1,7 @@
 'use strict';
 
 const { XP_TYPES, XP_OFFSETS } = require('../../src/constants/database');
-const Player = require('../../src/structures/Player');
+const Player = require('../../src/structures/database/models/Player');
 
 
 module.exports = (sequelize, DataTypes) => {

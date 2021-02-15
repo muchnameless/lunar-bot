@@ -1,16 +1,15 @@
 'use strict';
 
-const { MessageEmbed, GuildMember } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /**
  * guildMemberUpdate
- * @param {LunarClient} client
- * @param {GuildMember} oldMember
- * @param {GuildMember} newMember
+ * @param {import('../structures/LunarClient')} client
+ * @param {import('discord.js').GuildMember} oldMember
+ * @param {import('discord.js').GuildMember} newMember
  */
 module.exports = async (client, oldMember, newMember) => {
 	const { config } = client;

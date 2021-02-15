@@ -4,7 +4,6 @@ const { MessageEmbed } = require('discord.js');
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../constants/skyblock');
 const { offsetFlags } = require('../constants/database');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('./logger');
 
 
@@ -12,12 +11,12 @@ const self = module.exports = {
 
 	/**
 	 * resets competitionStart xp, updates the config and logs the event
-	 * @param {LunarClient} client
+	 * @param {import('../structures/LunarClient')} client
 	 */
 	startCompetition: client => {
-		const { config } = client;
+		const { config, players } = client;
 
-		client.players.resetXp({ offsetToReset: offsetFlags.COMPETITION_START });
+		players.resetXp({ offsetToReset: offsetFlags.COMPETITION_START });
 		config.set('COMPETITION_RUNNING', 'true');
 		config.set('COMPETITION_SCHEDULED', 'false');
 		client.log(new MessageEmbed()
@@ -30,12 +29,12 @@ const self = module.exports = {
 
 	/**
 	 * resets competitionEnd xp, updates the config and logs the event
-	 * @param {LunarClient} client
+	 * @param {import('../structures/LunarClient')} client
 	 */
 	endCompetition: client => {
-		const { config } = client;
+		const { config, players } = client;
 
-		client.players.resetXp({ offsetToReset: offsetFlags.COMPETITION_END });
+		players.resetXp({ offsetToReset: offsetFlags.COMPETITION_END });
 		config.set('COMPETITION_RUNNING', 'false');
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
@@ -47,22 +46,22 @@ const self = module.exports = {
 
 	/**
 	 * resets offsetMayor xp, updates the config and logs the event
-	 * @param {LunarClient} client
+	 * @param {import('../structures/LunarClient')} client
 	 */
 	performMayorReset: client => {
-		const { config } = client;
+		const { config, players } = client;
 		const CURRENT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
 		config.set('LAST_MAYOR_XP_RESET_TIME', CURRENT_MAYOR_TIME);
-		client.players.resetXp({ offsetToReset: offsetFlags.MAYOR });
+		players.resetXp({ offsetToReset: offsetFlags.MAYOR });
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Current Mayor XP Tracking')
-			.setDescription(`reset the xp gained from all ${client.players.size} guild members`)
+			.setDescription(`reset the xp gained from all ${players.size} guild members`)
 			.setTimestamp(),
 		);
 
-		client.cronJobs.set('mayorXpReset', new CronJob({
+		client.cronJobs.cache.set('mayorXpReset', new CronJob({
 			cronTime: new Date(CURRENT_MAYOR_TIME + MAYOR_CHANGE_INTERVAL),
 			onTick: () => self.performMayorReset(client),
 			start: true,
@@ -71,51 +70,51 @@ const self = module.exports = {
 
 	/**
 	 * shifts the daily xp array, updates the config and logs the event
-	 * @param {LunarClient} client
+	 * @param {import('../structures/LunarClient')} client
 	 */
 	performDailyReset: client => {
-		const { config } = client;
+		const { config, players } = client;
 
 		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
-		client.players.resetXp({ offsetToReset: 'day' });
+		players.resetXp({ offsetToReset: 'day' });
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Daily XP Tracking')
-			.setDescription(`reset the xp gained from all ${client.players.size} guild members`)
+			.setDescription(`reset the xp gained from all ${players.size} guild members`)
 			.setTimestamp(),
 		);
 	},
 
 	/**
 	 * resets offsetWeek xp, updates the config and logs the event
-	 * @param {LunarClient} client
+	 * @param {import('../structures/LunarClient')} client
 	 */
 	performWeeklyReset: client => {
-		const { config } = client;
+		const { config, players } = client;
 
 		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
-		client.players.resetXp({ offsetToReset: offsetFlags.WEEK });
+		players.resetXp({ offsetToReset: offsetFlags.WEEK });
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Weekly XP Tracking')
-			.setDescription(`reset the xp gained from all ${client.players.size} guild members`)
+			.setDescription(`reset the xp gained from all ${players.size} guild members`)
 			.setTimestamp(),
 		);
 	},
 
 	/**
 	 * resets offsetMonth xp, updates the config and logs the event
-	 * @param {LunarClient} client
+	 * @param {import('../structures/LunarClient')} client
 	 */
 	performMonthlyReset: client => {
-		const { config } = client;
+		const { config, players } = client;
 
 		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
-		client.players.resetXp({ offsetToReset: offsetFlags.MONTH });
+		players.resetXp({ offsetToReset: offsetFlags.MONTH });
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Monthly XP Tracking')
-			.setDescription(`reset the xp gained from all ${client.players.size} guild members`)
+			.setDescription(`reset the xp gained from all ${players.size} guild members`)
 			.setTimestamp(),
 		);
 	},

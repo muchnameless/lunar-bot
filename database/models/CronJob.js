@@ -1,6 +1,6 @@
 'use strict';
 
-const CronJob = require('../../src/structures/CronJob');
+const CronJob = require('../../src/structures/database/models/CronJob');
 
 
 module.exports = (sequelize, DataTypes) => {

@@ -1,14 +1,12 @@
 'use strict';
 
-const LunarGuild = require('../structures/extensions/Guild');
-const LunarClient = require('../structures/LunarClient');
 const logger = require('../functions/logger');
 
 
 /**
  * guildCreate
- * @param {LunarClient} client
- * @param {LunarGuild} guild
+ * @param {import('../structures/LunarClient')} client
+ * @param {import('../structures/extensions/Guild')} guild
  */
 module.exports = async (client, guild) => {
 	if (!client.options.fetchAllMembers) return;

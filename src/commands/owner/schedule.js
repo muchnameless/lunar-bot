@@ -1,9 +1,6 @@
 'use strict';
 
 const { reverseDateInput, autocorrect } = require('../../functions/util');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -21,35 +18,31 @@ module.exports = class ScheduleCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { cronJobs, db } = client;
+		const { cronJobs } = client;
 
 		// list all running cron jobs
-		if (flags.some(flag => [ 'l', 'list' ].includes(flag))) return message.reply(cronJobs.keyArray().join('\n'), { code: 'prolog', split: { char: '\n' } });
+		if (flags.some(flag => [ 'l', 'list' ].includes(flag))) return message.reply(cronJobs.cache.keyArray().join('\n'), { code: 'prolog', split: { char: '\n' } });
 
 		// remove a cron job
 		if (flags.some(flag => [ 'r', 'remove', 'd', 'delete' ].includes(flag))) {
 			const name = args.join(' ');
-			const result = autocorrect(name, cronJobs.keyArray());
-			const cronJobToRemove = cronJobs.get(result.similarity >= config.get('AUTOCORRECT_THRESHOLD') ? result.value : null);
+			const result = autocorrect(name, cronJobs.cache, 'name');
 
-			if (!cronJobToRemove) return message.reply(`no cron job with the name \`${name}\` found.`);
-			if (!name.includes('@')) return message.reply(`unable to remove \`${result.value}\`.`);
+			if (result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return message.reply(`no cron job with the name \`${name}\` found.`);
 
-			cronJobToRemove.stop();
-			cronJobs.delete(result.value);
-			await db.CronJob.destroy({
-				where: {
-					name: result.value,
-				},
-			});
+			const { value: cronJob } = result;
+
+			if (!cronJob.name.includes('@')) return message.reply(`unable to remove \`${cronJob.name}\`.`);
+
+			await cronJobs.remove(cronJob);
 
 			return message.reply(`\`${name}\` was removed successfully, total amount of cron jobs: ${cronJobs.size}`);
 		}
@@ -85,26 +78,26 @@ module.exports = class ScheduleCommand extends Command {
 		if (!hasDate) dateArgs.unshift(reverseDateInput(new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }))); // add date if only time is present
 
 		const date = new Date(dateArgs.join(','));
-		const localDate = date.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+		const LOCALE_DATE_STRING = date.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-		if (Date.now() > date.getTime() - 1_000) return message.reply(`${localDate} is in the past.`);
+		if (Date.now() > date.getTime() - 1_000) return message.reply(`${LOCALE_DATE_STRING} is in the past.`);
 
-		const argsString = commandArgs.join(' ');
-		const input = `${command.name}${flags.length ? ` -${flags.join(' -')}` : ''}${argsString.length ? ` ${argsString}` : ''}`;
-		const name = `${input} @ ${localDate}`;
+		const ARGS_STRING = commandArgs.join(' ');
+		const INPUT_STRING = `${command.name}${flags.length ? ` -${flags.join(' -')}` : ''}${ARGS_STRING.length ? ` ${ARGS_STRING}` : ''}`;
+		const name = `${INPUT_STRING} @ ${LOCALE_DATE_STRING}`;
 
-		await cronJobs.create({
+		await cronJobs.add({
 			name,
 			date,
 			command,
 			authorID: message.author.id,
 			messageID: message.id,
 			channelID: message.channel.id,
-			args: argsString || null,
+			args: ARGS_STRING || null,
 			flags: flags.join(' ') || null,
 		});
 
-		await message.reply(`\`${input}\` scheduled for \`${localDate}\`, total amount of cron jobs: ${cronJobs.size}`);
+		await message.reply(`\`${INPUT_STRING}\` scheduled for \`${LOCALE_DATE_STRING}\`, total amount of cron jobs: ${cronJobs.size}`);
 		message.replyMessageID = null; // to not overwrite prev reply
 	}
 };

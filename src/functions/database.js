@@ -6,13 +6,12 @@ const _ = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { SKILLS, SLAYERS } = require('../constants/skyblock');
 const hypixel = require('../api/hypixel');
-// const LunarClient = require('../structures/LunarClient');
 const logger = require('./logger');
 
 
 /**
  * updates the tax database
- * @param {LunarClient} client
+ * @param {import('../structures/LunarClient')} client
  * @returns {Promise<string[]>}
  */
 async function updateTaxDatabase(client) {
@@ -32,7 +31,7 @@ async function updateTaxDatabase(client) {
 	let unknownPlayers = 0;
 
 	// update db
-	await Promise.all(taxCollectors
+	await Promise.all(taxCollectors.cache
 		.filter(taxCollector => taxCollector.isCollecting)
 		.map(async taxCollector => {
 			const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID).catch(error => logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
@@ -59,7 +58,7 @@ async function updateTaxDatabase(client) {
 
 			taxAuctions.forEach(auction => {
 				const { bidder, amount } = auction.bids[auction.bids.length - 1];
-				const player = players.get(bidder);
+				const player = players.cache.get(bidder);
 
 				if (!player) return ++unknownPlayers;
 
@@ -94,18 +93,27 @@ const self = module.exports = {
 
 	/**
 	 * returns an array with the member's roles that the bot manages
-	 * @param {GuildMember} member discord member to analyze
+	 * @param {import('discord.js').GuildMember} member discord member to analyze
 	 * @returns {string[]}
 	 */
 	getRolesToPurge: member => {
-		const { config, hypixelGuilds } = member.client;
+		const {
+			/**
+			 * @type {import('../structures/database/ConfigHandler')}
+			 */
+			config,
+			/**
+			 * @type {import('../structures/database/HypixelGuildHandler')}
+			 */
+			hypixelGuilds,
+		} = member.client;
 		const rolesToRemove = [];
 
 		[
 			config.get('GUILD_DELIMITER_ROLE_ID'),
-			...hypixelGuilds.array().flatMap(hGuild => hGuild.ranks.map(rank => rank.roleID)),
+			...hypixelGuilds.cache.array().flatMap(hGuild => hGuild.ranks.map(rank => rank.roleID)),
 			config.get('GUILD_ROLE_ID'),
-			...hypixelGuilds.map(hGuild => hGuild.roleID),
+			...hypixelGuilds.cache.map(hGuild => hGuild.roleID),
 			config.get('SKILL_DELIMITER_ROLE_ID'),
 			config.get('AVERAGE_LVL_50_ROLE_ID'), config.get('AVERAGE_LVL_45_ROLE_ID'), config.get('AVERAGE_LVL_40_ROLE_ID'),
 			config.get('SLAYER_DELIMITER_ROLE_ID'),
@@ -132,15 +140,14 @@ const self = module.exports = {
 
 	/**
 	 * creates and returns a tax embed
-	 * @param {LunarClient} client
+	 * @param {import('../structures/LunarClient')} client
 	 * @param {string[]} availableAuctionsLog
 	 */
-	createTaxEmbed: (client, availableAuctionsLog) => {
-		const { config, players, taxCollectors } = client;
-		const activeTaxCollectors = taxCollectors.filter(taxCollector => taxCollector.isCollecting); // eslint-disable-line no-shadow
+	createTaxEmbed: ({ config, hypixelGuilds, players, taxCollectors }, availableAuctionsLog) => {
+		const activeTaxCollectors = taxCollectors.cache.filter(taxCollector => taxCollector.isCollecting); // eslint-disable-line no-shadow
 		const PLAYER_COUNT = players.size;
-		const PAID_COUNT = players.filter(player => player.paid).size;
-		const TOTAL_COINS = taxCollectors.reduce((acc, taxCollector) => acc + taxCollector.collectedAmount, 0);
+		const PAID_COUNT = players.cache.filter(player => player.paid).size;
+		const TOTAL_COINS = taxCollectors.cache.reduce((acc, taxCollector) => acc + taxCollector.collectedAmount, 0);
 		const taxEmbed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')
@@ -157,7 +164,7 @@ const self = module.exports = {
 			.setTimestamp();
 
 		// add guild specific fields
-		client.hypixelGuilds.forEach(hypixelGuild => {
+		hypixelGuilds.cache.forEach(hypixelGuild => {
 			const GUILD_PLAYER_COUNT = hypixelGuild.playerCount;
 			const ENTRIES_PER_ROW = Math.ceil(GUILD_PLAYER_COUNT / 3);
 			const values = [ '', '', '' ];
@@ -193,7 +200,7 @@ const self = module.exports = {
 
 	/**
 	 * updates the player database and the corresponding tax message
-	 * @param {LunarClient} client
+	 * @param {import('../structures/LunarClient')} client
 	 */
 	updatePlayerDatabase: async client => {
 		const { config } = client;

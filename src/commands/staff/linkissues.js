@@ -2,9 +2,6 @@
 
 const { MessageEmbed, Util } = require('discord.js');
 const { escapeIgn } = require('../../functions/util');
-const ConfigCollection = require('../../structures/collections/ConfigCollection');
-const LunarMessage = require('../../structures/extensions/Message');
-const LunarClient = require('../../structures/LunarClient');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -20,9 +17,9 @@ module.exports = class LinkIssuesCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {LunarClient} client
-	 * @param {ConfigCollection} config
-	 * @param {LunarMessage} message message that triggered the command
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -44,7 +41,7 @@ module.exports = class LinkIssuesCommand extends Command {
 		const missingVerifiedRole = [];
 
 		lgGuild.members.cache.forEach((member, id) => {
-			if (players.some(player => player.discordID === id)) return !member.roles.cache.has(VERIFIED_ROLE_ID) && missingVerifiedRole.push(member);
+			if (players.cache.some(player => player.discordID === id)) return !member.roles.cache.has(VERIFIED_ROLE_ID) && missingVerifiedRole.push(member);
 			if (member.roles.cache.has(GUILD_ROLE_ID)) return guildRoleWithoutDbEntry.push(member);
 		});
 
@@ -78,15 +75,15 @@ module.exports = class LinkIssuesCommand extends Command {
 		const unlinkedPlayers = [];
 		const linkedAndNotInDiscord = [];
 
-		hypixelGuilds.forEach(hGuild => {
+		hypixelGuilds.cache.forEach(hypixelGuild => {
 			// db entries with issues
-			const [ unlinkedGuildPlayers, linkedPlayers ] = hGuild.players.partition(player => /\D/.test(player.discordID));
+			const [ unlinkedGuildPlayers, linkedPlayers ] = hypixelGuild.players.partition(player => /\D/.test(player.discordID));
 			const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(player => !player.inDiscord);
 
 			issuesAmount += unlinkedGuildPlayers.size + linkedAndNotInDiscordCurrentGuild.size;
 
 			unlinkedPlayers.push({
-				guildName: hGuild.name,
+				guildName: hypixelGuild.name,
 				amount: unlinkedGuildPlayers.size,
 				values: Util.splitMessage(
 					unlinkedGuildPlayers
@@ -97,7 +94,7 @@ module.exports = class LinkIssuesCommand extends Command {
 			});
 
 			linkedAndNotInDiscord.push({
-				guildName: hGuild.name,
+				guildName: hypixelGuild.name,
 				amount: linkedAndNotInDiscordCurrentGuild.size,
 				values: Util.splitMessage(
 					linkedAndNotInDiscordCurrentGuild
