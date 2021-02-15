@@ -1,5 +1,6 @@
 'use strict';
 
+const ms = require('ms');
 const { stripIndent, oneLine } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
@@ -392,12 +393,26 @@ const self = module.exports = {
 			}
 		}
 
-		embed.title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
-		embed.setDescription(stripIndent`
-			Tracking xp gained since ${STARTING_TIME} GMT
+		let description = '';
+
+		if (IS_COMPETITION_LB) {
+			description += `Start: ${STARTING_TIME} GMT\n`;
+			if (COMPETITION_RUNNING) {
+				description += `Time left: ${ms(COMPETITION_END_TIME - Date.now(), { long: true })}\n`;
+			} else { // competition already ended
+				description += `Ended: ${new Date(COMPETITION_END_TIME).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT\n`;
+			}
+		} else {
+			description += `Tracking xp gained since ${STARTING_TIME} GMT\n`;
+		}
+
+		description += stripIndent`
 			${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}
 			\`\`\`ada${playerList}\`\`\`
-		`);
+		`;
+
+		embed.title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
+		embed.setDescription(description);
 
 		return embed;
 	},
