@@ -30,15 +30,15 @@ module.exports = class TaxCollectedCommand extends Command {
 		const collectedEmbed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Collected Guild Tax')
-			.setDescription(`Total amount: ${client.formatNumber(taxCollectors.reduce((acc, collector) => acc + collector.collectedAmount, 0))}\n\u200b`)
+			.setDescription(`Total amount: ${client.formatNumber(taxCollectors.cache.reduce((acc, collector) => acc + collector.collectedAmount, 0))}\n\u200b`)
 			.setTimestamp();
 
-		taxCollectors.forEach(collector => {
+		for (const taxCollector of taxCollectors.cache.values()) {
 			collectedEmbed.addField(
-				`${escapeIgn(collector.ign)}${collector.isCollecting ? '' : ' (inactive)'}`,
-				client.formatNumber(collector.collectedAmount),
+				`${escapeIgn(taxCollector.ign)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
+				client.formatNumber(taxCollector.collectedAmount),
 			);
-		});
+		}
 
 		message.reply(collectedEmbed);
 	}
