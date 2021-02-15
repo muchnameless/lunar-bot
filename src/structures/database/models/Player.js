@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, GuildMember } = require('discord.js');
 const { Model } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, GUILD_ID_ERROR, UNKNOWN_IGN } = require('../../../constants/database');
@@ -17,7 +17,7 @@ class Player extends Model {
 		super(...args);
 
 		/**
-		 * @type {?import('discord.js').GuildMember|Promise<?import('discord.js').GuildMember>}
+		 * @type {?GuildMember|Promise<?GuildMember>}
 		 */
 		this._discordMember = null;
 
@@ -46,7 +46,7 @@ class Player extends Model {
 
 	/**
 	 * fetches the discord member if the id is valid and the player is in lg discord
-	 * @returns {?import('discord.js').GuildMember|Promise<?import('discord.js').GuildMember>}
+	 * @returns {?GuildMember|Promise<?GuildMember>}
 	 */
 	get discordMember() {
 		if (!this._discordMember) this._discordMember = (() => {
@@ -426,7 +426,7 @@ class Player extends Model {
 
 	/**
 	 * tries to link unlinked players via discord.js-cache (without any discord API calls)
-	 * @returns {Promise<?import('discord.js').GuildMember>}
+	 * @returns {Promise<?GuildMember>}
 	 */
 	async linkUsingCache() {
 		const lgGuild = this.client.lgGuild;
@@ -466,20 +466,27 @@ class Player extends Model {
 
 	/**
 	 * links a player to the provided discord guild member, updating roles and nickname
-	 * @param {import('discord.js').GuildMember} discordMember the member to link the player to
+	 * @param {GuildMember|string} discordMemberOrID the member to link the player to
 	 * @param {string} reason reason for discord's audit logs
 	 */
-	async link(discordMember, reason = null) {
-		this.discordID = discordMember.id;
-		this.inDiscord = true;
-		this.discordMember = discordMember;
+	async link(discordMemberOrID, reason = null) {
+		if (discordMemberOrID instanceof GuildMember) {
+			this.discordID = discordMemberOrID.id;
+			this.inDiscord = true;
+			this.discordMember = discordMemberOrID;
 
-		logger.info(`[LINK]: ${this.logInfo}: linked to '${discordMember.user.tag}'`);
+			logger.info(`[LINK]: ${this.logInfo}: linked to '${discordMemberOrID.user.tag}'`);
 
-		if (reason) await this.update({
-			shouldSkipQueue: true,
-			reason,
-		});
+			if (reason) await this.update({
+				shouldSkipQueue: true,
+				reason,
+			});
+		} else if (typeof discordMemberOrID === 'string' && /\D/.test(discordMemberOrID)) {
+			this.discordID = discordMemberOrID;
+			this.inDiscord = false;
+		} else {
+			throw new Error('[LINK]: input must be either a discord GuildMember or a discord ID');
+		}
 
 		return this.save();
 	}

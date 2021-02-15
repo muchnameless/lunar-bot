@@ -30,6 +30,8 @@ module.exports = class LinkCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
+		message.channel.startTyping(10);
+
 		const { players, hypixelGuilds } = client;
 
 		/**
@@ -120,6 +122,45 @@ module.exports = class LinkCommand extends Command {
 		// no discord account to link found
 		if (!DISCORD_ID) return message.reply('either provide the user\'s discord id, tag or @mention them.');
 
+		// discordID already linked to another player
+		const playerLinkedToID = players.getByID(DISCORD_ID);
+
+		if (playerLinkedToID) {
+			let isDeleted = false;
+
+			const linkedUser = await client.users.fetch(playerLinkedToID.discordID).catch(error => {
+				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
+					isDeleted = true;
+					return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: deleted discord user: ${playerLinkedToID.discordID}`);
+				}
+				return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: error fetching already linked user: ${error.name}: ${error.message}`);
+			});
+
+			if (!isDeleted) {
+				if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+					const ANSWER = await message.awaitReply(
+						stripIndents`
+							${linkedUser ?? `\`${DISCORD_ID}\``} is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?
+							Make sure to provide the full ign if the player database is not already updated (check ${client.loggingChannel ?? '#lunar-logs'})
+						`,
+						30,
+						{ allowedMentions: { parse: [] } },
+					);
+
+					if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				}
+			}
+
+			if (!(await playerLinkedToID.unlink(`unlinked by ${message.author.tag}`)) && linkedUser) {
+				await message
+					.reply(
+						`unable to update roles and nickname for the currently linked member ${linkedUser}.`,
+						{ allowedMentions: { parse: [] } },
+					)
+					.then(replyMessage => replyMessage.replyMessageID = null);
+			}
+		}
+
 		// player already linked
 		if (/^\d+$/.test(player.discordID)) {
 			let isDeleted = false;
@@ -162,9 +203,6 @@ module.exports = class LinkCommand extends Command {
 			}
 		}
 
-		// link the player
-		player.discordID = DISCORD_ID;
-
 		// try to find the linked users member data
 		const discordMember = message.mentions.members?.size
 			? message.mentions.members.first()
@@ -172,21 +210,23 @@ module.exports = class LinkCommand extends Command {
 
 		// no discord member for the user to link found
 		if (!discordMember) {
-			player.save();
+			await player.link(DISCORD_ID);
 			return message.reply(`\`${player.ign}\` linked to \`${DISCORD_ID}\` but could not be found on the Lunar Guard discord server.`);
 		}
 
 		// user to link is in discord -> update roles
-		player.link(discordMember, `linked by ${message.author.tag}`);
+		await player.link(discordMember, `linked by ${message.author.tag}`);
 
 		let reply = `\`${player.ign}\` linked to ${discordMember}`;
 
 		if (!discordMember.roles.cache.has(config.get('VERIFIED_ROLE_ID')))
 			reply += ` (missing ${client.lgGuild?.roles.cache.get(config.get('VERIFIED_ROLE_ID'))?.name ?? config.get('VERIFIED_ROLE_ID')} role)`;
 
-		return message.reply(
+		message.reply(
 			`${reply}.`,
 			{ allowedMentions: { parse: [] } },
 		);
+
+		message.channel.stopTyping(true);
 	}
 };
