@@ -43,30 +43,57 @@ class PlayerHandler extends ModelHandler {
 		this.sortAlphabetically();
 	}
 
+	/**
+	 * add a player to the cache and sweep the player's hypixelGuild's player cache
+	 * @param {string} key
+	 * @param {import('./models/Player')} value
+	 */
 	set(key, value) {
-		this.client.hypixelGuilds.cache.get(value.guildID).players = null;
+		this.client.hypixelGuilds.sweepPlayerCache(value.guildID);
+
 		return this.cache.set(key, value);
 	}
 
-	delete(key) {
-		const hypixelGuild = this.client.hypixelGuilds.cache.get(this.cache.get(key)?.guildID);
-		if (hypixelGuild) hypixelGuild.players = null;
+	/**
+	 * delete a player from the cache and sweep the player's hypixelGuild's player cache
+	 * @param {string|import('./models/Player')} idOrPlayer
+	 */
+	delete(idOrPlayer) {
+		const player = this.resolve(idOrPlayer);
 
-		return this.cache.delete(key);
+		if (!player) throw new Error(`[PLAYER HANDLER DELETE]: invalid input: ${idOrPlayer}`);
+
+		this.client.hypixelGuilds.sweepPlayerCache(player.guildID);
+
+		return this.cache.delete(player.minecraftUUID);
 	}
 
+	/**
+	 * sweep the cache and the hypixelGuild players cache
+	 * @param {Function} fn
+	 */
 	sweep(fn) {
-		this.client.hypixelGuilds.cache.forEach(hGuild => hGuild.players = null);
+		this.client.hypixelGuilds.sweepPlayerCache();
+
 		return this.cache.sweep(fn);
 	}
 
+	/**
+	 * clears the cache and the hypixelGuild players cache
+	 */
 	clear() {
-		this.client.hypixelGuilds.cache.forEach(hGuild => hGuild.players = null);
+		this.client.hypixelGuilds.sweepPlayerCache();
+
 		return this.cache.clear();
 	}
 
+	/**
+	 * sort the cache and sweeps the hypixelGuild players cache
+	 * @param {Function} compareFunction
+	 */
 	sort(compareFunction) {
-		this.client.hypixelGuilds.cache.forEach(hGuild => hGuild.players = null);
+		this.client.hypixelGuilds.sweepPlayerCache();
+
 		return this.cache.sort(compareFunction);
 	}
 
@@ -77,6 +104,8 @@ class PlayerHandler extends ModelHandler {
 	 */
 	async add(options = {}, isAddingSingleEntry = true) {
 		const newPlayer = await super.add(options);
+
+		this.client.hypixelGuilds.sweepPlayerCache(newPlayer.guildID);
 
 		if (isAddingSingleEntry) {
 			this.sortAlphabetically();

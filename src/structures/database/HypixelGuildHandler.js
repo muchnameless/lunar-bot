@@ -43,6 +43,22 @@ class HypixelGuildHandler extends ModelHandler {
 	}
 
 	/**
+	 * sweeps the player cache
+	 * @param {?string|import('./models/HypixelGuild')} idOrGuild
+	 */
+	sweepPlayerCache(idOrGuild) {
+		if (idOrGuild) {
+			const hypixelGuild = this.resolve(idOrGuild);
+
+			if (!hypixelGuild) throw new Error(`[SWEEP PLAYER CACHE]: invalid input: ${idOrGuild}`);
+
+			return hypixelGuild.players = null;
+		}
+
+		return this.cache.each(hypixelGuild => hypixelGuild.players = null);
+	}
+
+	/**
 	 * get a hypixel guild by its name, case insensitive and with auto-correction
 	 * @param {string} name name of the hypixel guild
 	 * @returns {?import('./models/HypixelGuild')}

@@ -612,7 +612,7 @@ class Player extends Model {
 		this.guildID = null;
 		this.guildRankPriority = 0;
 		this.save();
-		this.client.players.cache.delete(this.minecraftUUID);
+		this.client.players.delete(this);
 		return true;
 	}
 
