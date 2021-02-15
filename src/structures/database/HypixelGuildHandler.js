@@ -19,6 +19,12 @@ class HypixelGuildHandler extends ModelHandler {
 		this.model;
 	}
 
+	async loadCache(condition) {
+		await super.loadCache(condition);
+
+		this.cache.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+	}
+
 	/**
 	 * update all guilds
 	 * @returns {Promise<boolean>} success
