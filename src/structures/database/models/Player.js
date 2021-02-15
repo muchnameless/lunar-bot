@@ -730,7 +730,7 @@ class Player extends Model {
 
 		this.syncIgnWithDisplayName();
 
-		const taxCollector = this.client.taxCollectors.get(this.minecraftUUID);
+		const taxCollector = this.client.taxCollectors.cache.get(this.minecraftUUID);
 
 		if (taxCollector) {
 			taxCollector.ign = PLAYER_IGN_CURRENT;
@@ -783,7 +783,7 @@ class Player extends Model {
 	 * resets the guild tax paid
 	 */
 	async resetTax() {
-		this.client.taxCollectors.get(this.collectedBy)?.addAmount(-this.amount);
+		this.client.taxCollectors.cache.get(this.collectedBy)?.addAmount(-this.amount);
 
 		this.paid = false;
 		this.amount = 0;
@@ -802,7 +802,7 @@ class Player extends Model {
 	 */
 	async setToPaid({ amount = this.client.config.getNumber('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null, shouldAdd = false } = {}) {
 		// update taxCollector
-		this.client.taxCollectors.get(collectedBy)?.addAmount(
+		this.client.taxCollectors.cache.get(collectedBy)?.addAmount(
 			this.collectedBy === this.minecraftUUID
 				? amount - this.amount
 				: amount,

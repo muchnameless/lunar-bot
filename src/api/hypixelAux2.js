@@ -30,7 +30,7 @@ const hypixel = new Client(process.env.HYPIXEL_KEY_AUX_2, {
 				return; // don't cache this endpoint
 
 				// this endpoint is cached by cloudflare and updates every 60 seconds
-				ttl = 60;
+				// ttl = 60;
 			}
 
 			// prepend our key with "hypixel" so we don't conflict with anyone else

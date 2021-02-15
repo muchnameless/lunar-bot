@@ -52,7 +52,7 @@ module.exports = class TaxAhCommand extends Command {
 
 		switch (type) {
 			case 'add':
-				if (taxCollectors.get(player.minecraftUUID)?.isCollecting) return message.reply(`\`${player.ign}\` is already a tax collector.`);
+				if (taxCollectors.cache.get(player.minecraftUUID)?.isCollecting) return message.reply(`\`${player.ign}\` is already a tax collector.`);
 
 				await taxCollectors.add(player);
 				if (!player.paid) player.setToPaid(); // let collector collect their own tax if they have not paid already
@@ -61,7 +61,7 @@ module.exports = class TaxAhCommand extends Command {
 
 			case 'rem':
 			case 'remove': {
-				const taxCollector = taxCollectors.get(player.minecraftUUID);
+				const taxCollector = taxCollectors.cache.get(player.minecraftUUID);
 
 				if (!taxCollector?.isCollecting) return message.reply(`\`${player.ign}\` is not a tax collector.`);
 

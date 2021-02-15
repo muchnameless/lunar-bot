@@ -28,7 +28,7 @@ module.exports = class VerifyCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { hypixelGuilds, players, db } = client;
+		const { hypixelGuilds, players } = client;
 
 		let ign = args[0].replace(/\W/g, ''); // filter out all non alphanumerical characters
 
