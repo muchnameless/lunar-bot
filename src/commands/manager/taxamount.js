@@ -38,7 +38,7 @@ module.exports = class TaxAmountCommand extends Command {
 		await config.set('TAX_AMOUNT', newAmount);
 
 		// update tax collectors if they have the default amount
-		await Promise.all(client.taxCollectors.filter(taxCollector => taxCollector.isCollecting).map(async (_, uuid) => {
+		await Promise.all(client.taxCollectors.cache.filter(taxCollector => taxCollector.isCollecting).map(async (_, uuid) => {
 			const player = client.players.cache.get(uuid);
 			if (player.amount === OLD_AMOUNT && player.collectedBy === uuid) return player.setToPaid();
 		}));
