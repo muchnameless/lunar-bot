@@ -466,23 +466,23 @@ class Player extends Model {
 
 	/**
 	 * links a player to the provided discord guild member, updating roles and nickname
-	 * @param {GuildMember|string} discordMemberOrID the member to link the player to
+	 * @param {GuildMember|string} idOrDiscordMember the member to link the player to
 	 * @param {string} reason reason for discord's audit logs
 	 */
-	async link(discordMemberOrID, reason = null) {
-		if (discordMemberOrID instanceof GuildMember) {
-			this.discordID = discordMemberOrID.id;
+	async link(idOrDiscordMember, reason = null) {
+		if (idOrDiscordMember instanceof GuildMember) {
+			this.discordID = idOrDiscordMember.id;
 			this.inDiscord = true;
-			this.discordMember = discordMemberOrID;
+			this.discordMember = idOrDiscordMember;
 
-			logger.info(`[LINK]: ${this.logInfo}: linked to '${discordMemberOrID.user.tag}'`);
+			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
 
 			if (reason) await this.update({
 				shouldSkipQueue: true,
 				reason,
 			});
-		} else if (typeof discordMemberOrID === 'string' && /\D/.test(discordMemberOrID)) {
-			this.discordID = discordMemberOrID;
+		} else if (typeof idOrDiscordMember === 'string' && /\D/.test(idOrDiscordMember)) {
+			this.discordID = idOrDiscordMember;
 			this.inDiscord = false;
 		} else {
 			throw new Error('[LINK]: input must be either a discord GuildMember or a discord ID');
