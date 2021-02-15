@@ -37,7 +37,7 @@ class BannedUserHandler extends ModelHandler {
 
 				return `\`${user.tag}\` is now banned ${bannedUser.expiresAt === Infinity ? 'indefinitely' : `for ${ms(bannedUser.expiresAt - Date.now(), { long: true })}`}. Reason: ${bannedUser.reason?.length ? bannedUser.reason : 'no reason specified'}.`;
 			} catch (error) {
-				return `an error occurred while trying to update the ban from \`${user.tag}\` from using ${this.user}.`;
+				return `an error occurred while trying to update the ban from \`${user.tag}\` from using ${this.client.user}.`;
 			}
 		}
 
@@ -49,10 +49,10 @@ class BannedUserHandler extends ModelHandler {
 				expiresAt: expiresAt,
 			});
 
-			return `successfully banned \`${user.tag}\` from using ${this.user} ${expiresAt === Infinity ? 'indefinitely' : `for ${ms(expiresAt - Date.now(), { long: true })}`}. Reason: ${reason?.length ? reason : 'no reason specified'}.`;
+			return `successfully banned \`${user.tag}\` from using ${this.client.user} ${expiresAt === Infinity ? 'indefinitely' : `for ${ms(expiresAt - Date.now(), { long: true })}`}. Reason: ${reason?.length ? reason : 'no reason specified'}.`;
 		} catch (error) {
 			logger.error(error);
-			return `an error occurred while trying to ban \`${user.tag}\` from using ${this.user}.`;
+			return `an error occurred while trying to ban \`${user.tag}\` from using ${this.client.user}.`;
 		}
 	}
 
@@ -67,10 +67,10 @@ class BannedUserHandler extends ModelHandler {
 			await this.cache.get(user.id).destroy();
 			this.cache.delete(user.id);
 
-			return `successfully unbanned \`${user.tag}\` from using ${this.user}.`;
+			return `successfully unbanned \`${user.tag}\` from using ${this.client.user}.`;
 		} catch (error) {
 			logger.error(error);
-			return `an error occurred while trying to unban \`${user.tag}\` from using ${this.user}.`;
+			return `an error occurred while trying to unban \`${user.tag}\` from using ${this.client.user}.`;
 		}
 	}
 }
