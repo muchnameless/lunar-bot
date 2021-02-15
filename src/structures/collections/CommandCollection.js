@@ -60,17 +60,16 @@ class CommandCollection extends Collection {
 	 * @returns {?import('../Command')}
 	 */
 	getByName(name) {
-		const command = this.get(name) ?? this.get(this.aliases.get(name))
+		const command = this.get(name) ?? this.get(this.aliases.get(name));
 
 		if (command) return command;
 
-		let result = autocorrect(name, this, 'name');
+		// autocorrect input
+		const result = autocorrect(name, [ ...this.map(cmd => cmd.name), ...this.aliases.values() ]);
 
-		if (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return result.value;
+		if (result.similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
 
-		result = autocorrect(name, this.aliases);
-
-		if (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return this.get(result.value);
+		return this.get(result.value) ?? this.get(this.aliases.get(result.value));
 	}
 
 	/**
