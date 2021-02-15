@@ -56,10 +56,8 @@ module.exports = class TaxReminderCommand extends Command {
 		// send ping message and split between pings if too many chars
 		await message.reply(pingMessage, { reply: false, sameChannel: true, split: { char: ' ' } });
 
-		message.channel.stopTyping();
-
 		// optional ghost ping (delete ping message(s))
-		if (!SHOULD_GHOST_PING) return;
+		if (!SHOULD_GHOST_PING) return message.channel.stopTyping(true);
 
 		const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error(`[TAX REMINDER]: ghost ping: ${error.name}: ${error.message}`));
 
@@ -67,5 +65,7 @@ module.exports = class TaxReminderCommand extends Command {
 		if (!message.channel.checkBotPermissions('MANAGE_MESSAGES')) return fetched.filter(msg => msg.author.id === client.user.id).forEach(msg => msg.delete().catch(logger.error));
 
 		message.channel.bulkDelete([ message.id, ...fetched.filter(fetchedMsg => [ client.user.id, message.author.id ].includes(fetchedMsg.author.id)).keys() ]).catch(logger.error);
+
+		message.channel.stopTyping(true);
 	}
 };
