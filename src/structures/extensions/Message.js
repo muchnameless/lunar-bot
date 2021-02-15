@@ -1,8 +1,9 @@
 'use strict';
 
 const { commaListsAnd } = require('common-tags');
-const { Structures, MessageEmbed, Message, GuildMember, User } = require('discord.js');
+const { Structures, MessageEmbed, Message, User } = require('discord.js');
 const _ = require('lodash');
+const LunarGuildMember = require('./GuildMember');
 const logger = require('../../functions/logger');
 
 
@@ -127,7 +128,7 @@ class LunarMessage extends Message {
 		options.reply ??= this.author.id;
 
 		if (options.reply && typeof options.reply !== 'string') {
-			if (options.reply instanceof User || options.reply instanceof GuildMember) {
+			if (options.reply instanceof User || options.reply instanceof LunarGuildMember) {
 				options.reply = options.reply.id;
 			} else if (options.reply instanceof LunarMessage) {
 				options.reply = options.reply.author.id;

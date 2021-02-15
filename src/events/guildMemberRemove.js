@@ -8,7 +8,7 @@ const logger = require('../functions/logger');
 /**
  * guildMemberRemove
  * @param {import('../structures/LunarClient')} client
- * @param {import('discord.js').GuildMember} member
+ * @param {import('../structures/extensions/GuildMember')} member
  */
 module.exports = async (client, member) => {
 	const { config } = client;

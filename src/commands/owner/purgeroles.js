@@ -1,6 +1,5 @@
 'use strict';
 
-const { getRolesToPurge } = require('../../functions/database');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -26,7 +25,7 @@ module.exports = class PurgeRolesCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const lgGuild = message.client.lgGuild;
+		const lgGuild = client.lgGuild;
 
 		if (!lgGuild) return;
 		if (lgGuild.members.cache.size !== lgGuild.memberCount) await lgGuild.members.fetch();
@@ -36,7 +35,10 @@ module.exports = class PurgeRolesCommand extends Command {
 		lgGuild.members.cache.forEach(member => {
 			if (member.roles.cache.has(config.get('GUILD_ROLE_ID'))) return;
 
-			const rolesToRemove = getRolesToPurge(member);
+			/**
+			 * @type {string[]}
+			 */
+			const rolesToRemove = member.rolesToPurge;
 
 			if (!rolesToRemove.length) return;
 

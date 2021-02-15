@@ -1,13 +1,13 @@
 'use strict';
 
-const { MessageEmbed, GuildMember } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { Model } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, GUILD_ID_ERROR, UNKNOWN_IGN } = require('../../../constants/database');
 const { LEVELING_XP, SKILL_XP_PAST_50, SKILLS_CAP, RUNECRAFTING_XP, DUNGEON_XP, SLAYER_XP, SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { escapeIgn, getHypixelClient } = require('../../../functions/util');
-const { getRolesToPurge } = require('../../../functions/database');
+const LunarGuildMember = require('../../extensions/GuildMember');
 const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
 
@@ -17,7 +17,7 @@ class Player extends Model {
 		super(...args);
 
 		/**
-		 * @type {?GuildMember|Promise<?GuildMember>}
+		 * @type {?LunarGuildMember|Promise<?LunarGuildMember>}
 		 */
 		this._discordMember = null;
 
@@ -46,7 +46,7 @@ class Player extends Model {
 
 	/**
 	 * fetches the discord member if the id is valid and the player is in lg discord
-	 * @returns {?GuildMember|Promise<?GuildMember>}
+	 * @returns {?LunarGuildMember|Promise<?LunarGuildMember>}
 	 */
 	get discordMember() {
 		if (!this._discordMember) this._discordMember = (() => {
@@ -426,7 +426,7 @@ class Player extends Model {
 
 	/**
 	 * tries to link unlinked players via discord.js-cache (without any discord API calls)
-	 * @returns {Promise<?GuildMember>}
+	 * @returns {Promise<?LunarGuildMember>}
 	 */
 	async linkUsingCache() {
 		const lgGuild = this.client.lgGuild;
@@ -466,11 +466,11 @@ class Player extends Model {
 
 	/**
 	 * links a player to the provided discord guild member, updating roles and nickname
-	 * @param {GuildMember|string} idOrDiscordMember the member to link the player to
+	 * @param {LunarGuildMember|string} idOrDiscordMember the member to link the player to
 	 * @param {string} reason reason for discord's audit logs
 	 */
 	async link(idOrDiscordMember, reason = null) {
-		if (idOrDiscordMember instanceof GuildMember) {
+		if (idOrDiscordMember instanceof LunarGuildMember) {
 			this.discordID = idOrDiscordMember.id;
 			this.inDiscord = true;
 			this.discordMember = idOrDiscordMember;
@@ -505,7 +505,7 @@ class Player extends Model {
 
 		if (currentLinkedMember) {
 			// remove roles that the bot manages
-			const rolesToPurge = getRolesToPurge(currentLinkedMember);
+			const rolesToPurge = currentLinkedMember.rolesToPurge;
 
 			if (rolesToPurge.length)
 				wasSuccessful = await this.makeRoleApiCall([], rolesToPurge, reason);
@@ -596,7 +596,7 @@ class Player extends Model {
 			const rolesToAdd = (Date.now() - this.createdAt >= 7 * 24 * 60 * 60_000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
 				? [ config.get('EX_GUILD_ROLE_ID') ] // add ex guild role if player stayed for more than 1 week
 				: [];
-			const rolesToRemove = getRolesToPurge(member);
+			const rolesToRemove = member.rolesToPurge;
 
 			if (!(await this.makeRoleApiCall(rolesToAdd, rolesToRemove, `left ${this.guildName}`))) {
 				// error updating roles
