@@ -3,6 +3,10 @@
 const BannedUser = require('../../src/structures/database/models/BannedUser');
 
 
+/**
+ * @param {import('sequelize')} sequelize
+ * @param {import('sequelize').DataTypes} DataTypes
+ */
 module.exports = (sequelize, DataTypes) => {
 
 	BannedUser.init({

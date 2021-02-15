@@ -3,6 +3,10 @@
 const Config = require('../../src/structures/database/models/Config');
 
 
+/**
+ * @param {import('sequelize')} sequelize
+ * @param {import('sequelize').DataTypes} DataTypes
+ */
 module.exports = (sequelize, DataTypes) => {
 
 	Config.init({

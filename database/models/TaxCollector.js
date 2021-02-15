@@ -3,6 +3,10 @@
 const TaxCollector = require('../../src/structures/database/models/TaxCollector');
 
 
+/**
+ * @param {import('sequelize')} sequelize
+ * @param {import('sequelize').DataTypes} DataTypes
+ */
 module.exports = (sequelize, DataTypes) => {
 
 	TaxCollector.init({

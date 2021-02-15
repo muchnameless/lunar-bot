@@ -3,6 +3,10 @@
 const CronJob = require('../../src/structures/database/models/CronJob');
 
 
+/**
+ * @param {import('sequelize')} sequelize
+ * @param {import('sequelize').DataTypes} DataTypes
+ */
 module.exports = (sequelize, DataTypes) => {
 
 	CronJob.init({

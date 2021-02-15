@@ -4,6 +4,10 @@ const { XP_TYPES, XP_OFFSETS } = require('../../src/constants/database');
 const Player = require('../../src/structures/database/models/Player');
 
 
+/**
+ * @param {import('sequelize')} sequelize
+ * @param {import('sequelize').DataTypes} DataTypes
+ */
 module.exports = (sequelize, DataTypes) => {
 
 	const dataObject = {

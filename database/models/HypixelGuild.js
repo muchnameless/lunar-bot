@@ -3,6 +3,10 @@
 const HypixelGuild = require('../../src/structures/database/models/HypixelGuild');
 
 
+/**
+ * @param {import('sequelize')} sequelize
+ * @param {import('sequelize').DataTypes} DataTypes
+ */
 module.exports = (sequelize, DataTypes) => {
 
 	HypixelGuild.init({
