@@ -1,7 +1,7 @@
 'use strict';
 
 const { exec } = require('child_process');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

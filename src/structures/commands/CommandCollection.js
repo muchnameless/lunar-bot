@@ -4,7 +4,7 @@ const { Collection } = require('discord.js');
 const path = require('path');
 const { getAllJsFiles } = require('../../functions/files');
 const { autocorrect } = require('../../functions/util');
-const Command = require('../Command');
+const Command = require('./Command');
 const logger = require('../../functions/logger');
 
 
@@ -57,7 +57,7 @@ class CommandCollection extends Collection {
 	/**
 	 * get a command by name or by alias
 	 * @param {string} name
-	 * @returns {?import('../Command')}
+	 * @returns {?import('./Command')}
 	 */
 	getByName(name) {
 		const command = this.get(name) ?? this.get(this.aliases.get(name));
@@ -92,7 +92,7 @@ class CommandCollection extends Collection {
 		if (Object.getPrototypeOf(commandConstructor) !== Command) throw new Error(`[LOAD COMMAND]: invalid input: ${file}`);
 
 		/**
-		 * @type {import('../Command')}
+		 * @type {import('./Command')}
 		 */
 		const command = new commandConstructor({
 			client: this.client,

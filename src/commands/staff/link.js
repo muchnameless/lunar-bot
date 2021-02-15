@@ -5,7 +5,7 @@ const { stripIndents, oneLineCommaListsOr } = require('common-tags');
 const { UNKNOWN_IGN } = require('../../constants/database');
 const { checkIfDiscordTag, getHypixelClient } = require('../../functions/util');
 const mojang = require('../../api/mojang');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

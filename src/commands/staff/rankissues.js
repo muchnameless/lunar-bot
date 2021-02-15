@@ -2,7 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { escapeIgn, trim } = require('../../functions/util');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

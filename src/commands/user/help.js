@@ -4,7 +4,7 @@ const { MessageEmbed, version } = require('discord.js');
 const { commaListsOr, stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar } = require('../../functions/util');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

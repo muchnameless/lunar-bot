@@ -3,7 +3,7 @@
 const { commaListsOr } = require('common-tags');
 const { autocorrect } = require('../../functions/util');
 const { SKILLS, DUNGEON_TYPES } = require('../../constants/skyblock');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 const COMPETITION_TYPES = [ ...SKILLS, 'slayer', ...DUNGEON_TYPES ];

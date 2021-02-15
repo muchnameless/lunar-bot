@@ -5,7 +5,7 @@ class Command {
 	/**
 	 * create a new command
 	 * @param {object} param0
-	 * @param {import('./LunarClient')} param0.client discord client that instantiated this command
+	 * @param {import('../LunarClient')} param0.client discord client that instantiated this command
 	 * @param {string} param0.name the name of the command
 	 * @param {string} param0.category the category of the command
 	 * @param {object} param1 additional information about the command
@@ -89,9 +89,9 @@ class Command {
 
 	/**
 	 * execute the command
-	 * @param {import('./LunarClient')} client
-	 * @param {import('./database/ConfigHandler')} config
-	 * @param {import('./extensions/Message')} message message that triggered the command
+	 * @param {import('../LunarClient')} client
+	 * @param {import('../database/ConfigHandler')} config
+	 * @param {import('../extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags

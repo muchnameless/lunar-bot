@@ -5,7 +5,7 @@ const { autocorrect } = require('../../functions/util');
 const { addPageReactions, getOffsetFromFlags, createTotalStatsEmbed } = require('../../functions/leaderboardMessages');
 const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

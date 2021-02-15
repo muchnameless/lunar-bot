@@ -6,7 +6,7 @@ const { SKILLS, /* COSMETIC_SKILLS, */ SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES }
 const { offsetFlags, XP_OFFSETS_TIME } = require('../../constants/database');
 const { /* escapeIgn, */ upperCaseFirstChar } = require('../../functions/util');
 const { getOffsetFromFlags } = require('../../functions/leaderboardMessages');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

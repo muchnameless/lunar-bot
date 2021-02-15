@@ -2,7 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { offsetFlags } = require('../../constants/database');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 const offsetToReset = offsetFlags.COMPETITION_START;

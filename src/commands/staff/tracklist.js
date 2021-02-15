@@ -2,7 +2,7 @@
 
 const { addPageReactions, getOffsetFromFlags, createGainedStatsEmbed } = require('../../functions/leaderboardMessages');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

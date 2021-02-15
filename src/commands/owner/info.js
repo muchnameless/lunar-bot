@@ -3,7 +3,7 @@
 const { stripIndents } = require('common-tags');
 const { version } = require('discord.js');
 const ms = require('ms');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

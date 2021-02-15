@@ -1,7 +1,7 @@
 'use strict';
 
 const { escapeIgn } = require('../../functions/util');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

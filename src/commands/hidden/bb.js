@@ -1,7 +1,7 @@
 'use strict';
 
 const { FLUSHED } = require('../../constants/emojiCharacters');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

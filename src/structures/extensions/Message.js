@@ -25,6 +25,7 @@ class LunarMessage extends Message {
 	/**
 	 * returns the nearest 'bot-commands'-channel with all required permissions for the bot and the message.member
 	 * @param {string[]} requiredChannelPermissions
+	 * @returns {import('./TextChannel')}
 	 */
 	findNearestCommandsChannel(requiredChannelPermissions = [ 'VIEW_CHANNEL', 'SEND_MESSAGES' ]) {
 		return this.channel.parent.children.find(channel => channel.name.includes('commands') && channel.permissionsFor(this.guild.me).has(requiredChannelPermissions) && channel.permissionsFor(this.member).has([ 'VIEW_CHANNEL', 'SEND_MESSAGES' ]))

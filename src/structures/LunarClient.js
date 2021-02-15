@@ -5,7 +5,7 @@ const path = require('path');
 const { getAllJsFiles } = require('../functions/files');
 const DatabaseHandler = require('./database/DatabaseHandler');
 const LogHandler = require('./LogHandler');
-const CommandCollection = require('./collections/CommandCollection');
+const CommandCollection = require('./commands/CommandCollection');
 const logger = require('../functions/logger');
 
 
@@ -19,7 +19,7 @@ class LunarClient extends Client {
 
 		// custom collections
 		// /**
-		//  * @type {CommandCollection<string, import('./Command')>}
+		//  * @type {CommandCollection<string, import('./commands/Command')>}
 		//  */
 		this.commands = new CommandCollection(this);
 		this.cooldowns = new Collection();

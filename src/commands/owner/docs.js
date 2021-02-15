@@ -2,7 +2,7 @@
 
 const fetch = require('node-fetch');
 const { autocorrect } = require('../../functions/util');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 const projects = [ 'stable', 'master', 'commando', 'rpc', 'akairo', 'akairo-master', 'collection' ];

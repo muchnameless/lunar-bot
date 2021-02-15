@@ -3,7 +3,7 @@
 const { oneLine, commaListsOr } = require('common-tags');
 const { getHypixelClient } = require('../../functions/util');
 const mojang = require('../../api/mojang');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

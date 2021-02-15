@@ -2,7 +2,7 @@
 
 const { stripIndents, oneLineCommaListsOr, oneLine } = require('common-tags');
 const { checkIfDiscordTag } = require('../../functions/util');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 

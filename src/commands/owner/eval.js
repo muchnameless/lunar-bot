@@ -13,7 +13,7 @@ const functionsFiles = require('../../functions/files');
 const hypixelMain = require('../../api/hypixel');
 const hypixelAux = require('../../api/hypixelAux');
 const mojang = require('../../api/mojang');
-const Command = require('../../structures/Command');
+const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 /* eslint-enable no-unused-vars */
 
