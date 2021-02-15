@@ -24,8 +24,6 @@ class ConfigHandler extends ModelHandler {
 	 * @param {string} value new value
 	 */
 	async set(key, value) {
-		if (value instanceof this.model) return this.cache.set(key, value);
-
 		key = key.toUpperCase();
 
 		const dbEntry = this.cache.get(key);
