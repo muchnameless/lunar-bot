@@ -58,7 +58,7 @@ module.exports = class ReloadCommand extends Command {
 			case 'commands':
 				client.commands.clear();
 				Object.keys(require.cache).filter(key => /[/\\]commands[/\\]\D+[/\\]\D+\.js/.test(key)).forEach(file => delete require.cache[file]);
-				client.loadCommands();
+				client.commands.loadAll();
 				return message.reply(`${client.commands.size} command${client.commands.size !== 1 ? 's' : ''} were reloaded successfully.`);
 
 			case 'db':
