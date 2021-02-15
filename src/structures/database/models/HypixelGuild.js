@@ -264,9 +264,11 @@ class HypixelGuild extends Model {
 		players.sortAlphabetically();
 
 		// logging
-		joinedLog = Util.splitMessage(joinedLog.join('\n'), { maxLength: 1011, char: '\n' });
-		leftLog = Util.splitMessage(leftLog.join('\n'), { maxLength: 1011, char: '\n' });
-		ignChangedLog = Util.splitMessage(ignChangedLog.join('\n'), { maxLength: 1015, char: '\n' });
+		const sortAlphabetically = arr => arr.sort((a, b) => a.slice(2).toLowerCase().localeCompare(b.slice(2).toLowerCase()));
+
+		joinedLog = Util.splitMessage(sortAlphabetically(joinedLog).join('\n'), { maxLength: 1011, char: '\n' });
+		leftLog = Util.splitMessage(sortAlphabetically(leftLog).join('\n'), { maxLength: 1011, char: '\n' });
+		ignChangedLog = Util.splitMessage(sortAlphabetically(ignChangedLog).join('\n'), { maxLength: 1015, char: '\n' });
 
 		const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length, ignChangedLog.length);
 		const getInlineFieldLineCount = string => string.length
