@@ -5,8 +5,8 @@ const logger = require('../../functions/logger');
 
 
 class LunarTextChannel extends TextChannel {
-	constructor(client, data) {
-		super(client, data);
+	constructor(...args) {
+		super(...args);
 	}
 
 	/**

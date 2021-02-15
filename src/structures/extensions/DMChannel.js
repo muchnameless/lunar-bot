@@ -5,8 +5,8 @@ const logger = require('../../functions/logger');
 
 
 class LunarDMChannel extends DMChannel {
-	constructor(client, data) {
-		super(client, data);
+	constructor(...args) {
+		super(...args);
 	}
 
 	/**

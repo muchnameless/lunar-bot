@@ -5,8 +5,8 @@ const logger = require('../../functions/logger');
 
 
 class LunarGuild extends Guild {
-	constructor(client, data) {
-		super(client, data);
+	constructor(...args) {
+		super(...args);
 
 		/**
 		 * @type {Collection<string, import('./GuildMember')}

@@ -8,8 +8,8 @@ const logger = require('../../functions/logger');
 
 
 class LunarMessage extends Message {
-	constructor(client, data, channel) {
-		super(client, data, channel);
+	constructor(...args) {
+		super(...args);
 
 		this.shouldSendReplyChannel = true;
 		this.replyMessageID = null;
