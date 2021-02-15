@@ -107,8 +107,7 @@ class DatabaseHandler {
 		let unknownPlayers = 0;
 
 		// update db
-		await Promise.all(taxCollectors.cache
-			.filter(taxCollector => taxCollector.isCollecting)
+		await Promise.all(taxCollectors.activeCollectors
 			.map(async taxCollector => {
 				const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID).catch(error => logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
 
@@ -170,7 +169,7 @@ class DatabaseHandler {
 	 */
 	createTaxEmbed(availableAuctionsLog = null) {
 		const { config, hypixelGuilds, players, taxCollectors } = this.handlers;
-		const activeTaxCollectors = taxCollectors.cache.filter(taxCollector => taxCollector.isCollecting); // eslint-disable-line no-shadow
+		const activeTaxCollectors = taxCollectors.activeCollectors; // eslint-disable-line no-shadow
 		const PLAYER_COUNT = players.size;
 		const PAID_COUNT = players.cache.filter(player => player.paid).size;
 		const TOTAL_COINS = taxCollectors.cache.reduce((acc, taxCollector) => acc + taxCollector.collectedAmount, 0);
@@ -179,7 +178,7 @@ class DatabaseHandler {
 			.setTitle('Guild Tax')
 			.setDescription(stripIndents(commaLists`
 				\`\`\`cs
-				Collectors: # /ah ${activeTaxCollectors.map(player => player.ign)}
+				Collectors: # /ah ${activeTaxCollectors.map(player => player.ign).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))}
 				Amount: ${config.getNumber('TAX_AMOUNT').toLocaleString(config.get('NUMBER_FORMAT'))}
 				Items: ${config.getArray('TAX_AUCTIONS_ITEMS').map(item => `'${item}'`)}
 				Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round((PAID_COUNT / PLAYER_COUNT) * 100)} % | collected amount: ${TOTAL_COINS.toLocaleString(config.get('NUMBER_FORMAT'))} coins

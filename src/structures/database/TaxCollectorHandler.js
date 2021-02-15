@@ -19,6 +19,13 @@ class TaxCollectorHandler extends ModelHandler {
 	}
 
 	/**
+	 * returns a collection of all currently active collectors
+	 */
+	get activeCollectors() {
+		return this.cache.filter(taxCollector => taxCollector.isCollecting);
+	}
+
+	/**
 	 * add a player as a taxcollector
 	 * @param {string|import('./models/Player')} uuidOrPlayer
 	 */

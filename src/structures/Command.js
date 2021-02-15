@@ -4,28 +4,29 @@
 class Command {
 	/**
 	 * create a new command
-	 * @param {Client} client discord client that instantiated this command
-	 * @param {string} name the name of the command
-	 * @param {string} category the category of the command
-	 * @param {object} info additional information about the command
-	 * @param {string[]} [info.aliases] command aliases
-	 * @param {string} [info.description] command description
-	 * @param {boolean} [info.guildOnly] wether this command can only be executed on servers
-	 * @param {boolean} [info.args] wether arguments are required or not
-	 * @param {string|Function} [info.usage] argument usage
-	 * @param {number} [info.cooldown] command cooldown
+	 * @param {object} param0
+	 * @param {import('./LunarClient')} param0.client discord client that instantiated this command
+	 * @param {string} param0.name the name of the command
+	 * @param {string} param0.category the category of the command
+	 * @param {object} param1 additional information about the command
+	 * @param {string[]} [param1.aliases] command aliases
+	 * @param {string} [param1.description] command description
+	 * @param {boolean} [param1.guildOnly] wether this command can only be executed on servers
+	 * @param {boolean} [param1.args] wether arguments are required or not
+	 * @param {string|Function} [param1.usage] argument usage
+	 * @param {number} [param1.cooldown] command cooldown
 	 */
-	constructor({ client, name, category }, info) {
+	constructor({ client, name, category }, { aliases, description, guildOnly, args, usage, cooldown }) {
 		this.client = client;
 		this.name = name;
 		this.category = category;
 
-		this.aliases = info.aliases?.length ? info.aliases : null;
-		this.description = info.description?.length ? info.description : null;
-		this.guildOnly = info.guildOnly ?? false;
-		this.args = info.args ?? false;
-		this.usage = info.usage;
-		this.cooldown = info.cooldown ?? null;
+		this.aliases = aliases?.length ? aliases : null;
+		this.description = description?.length ? description : null;
+		this.guildOnly = guildOnly ?? false;
+		this.args = args ?? false;
+		this.usage = usage;
+		this.cooldown = cooldown ?? null;
 	}
 
 	/**
@@ -52,7 +53,7 @@ class Command {
 	get requiredRoles() {
 		switch (this.category) {
 			case 'staff':
-				return [ this.client.config.get('TRIAL_MODERATOR_ROLE_ID'), this.client.config.get('MODERATOR_ROLE_ID'), this.client.config.get('SENIOR_STAFF_ROLE_ID'), this.client.config.get('MANAGER_ROLE_ID') ];
+				return [ this.client.config.get('SHRUG_ROLE_ID'), this.client.config.get('TRIAL_MODERATOR_ROLE_ID'), this.client.config.get('MODERATOR_ROLE_ID'), this.client.config.get('SENIOR_STAFF_ROLE_ID'), this.client.config.get('MANAGER_ROLE_ID') ];
 
 			case 'manager':
 				return [ this.client.config.get('MANAGER_ROLE_ID') ];
@@ -64,6 +65,29 @@ class Command {
 	}
 
 	/**
+	 * loads the command and possible aliases into their collections
+	 */
+	load() {
+		this.client.commands.set(this.name.toLowerCase(), this);
+		this.aliases?.forEach(alias => this.client.commands.aliases.set(alias.toLowerCase(), this.name.toLowerCase()));
+	}
+
+	/**
+	 * removes all aliases, deletes the require.cache and the command from the commandsCollection
+	 */
+	unload() {
+		this.aliases?.forEach(alias => this.client.commands.aliases.delete(alias.toLowerCase()));
+
+		const PATH = Object.keys(require.cache)
+			.filter(key => key.includes('commands'))
+			.find(key => key.includes(this.name));
+
+		delete require.cache[PATH];
+
+		this.client.commands.delete(this.name.toLowerCase());
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('./LunarClient')} client
 	 * @param {import('./database/ConfigHandler')} config
@@ -72,7 +96,7 @@ class Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	run(client, config, message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
+	async run(client, config, message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
 }

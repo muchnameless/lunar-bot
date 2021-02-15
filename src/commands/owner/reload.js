@@ -31,18 +31,13 @@ module.exports = class ReloadCommand extends Command {
 		const command = client.commands.getByName(INPUT);
 
 		if (command) {
-			const OLD_PATH = Object.keys(require.cache)
-				.filter(key => key.includes('commands'))
-				.find(key => key.includes(command.name));
-
-			delete require.cache[OLD_PATH];
+			command.unload();
 
 			try {
 				const commandFiles = getAllJsFiles(path.join(__dirname, '..'));
 				const nameRegex = new RegExp(command.name, 'i');
 				const NEW_PATH = commandFiles.find(file => nameRegex.test(file));
 
-				client.commands.delete(command.name);
 				client.commands.load(NEW_PATH);
 
 				logger.info(`command ${command.name} was reloaded successfully`);
@@ -56,8 +51,7 @@ module.exports = class ReloadCommand extends Command {
 		switch (INPUT) {
 			case 'all':
 			case 'commands':
-				client.commands.clear();
-				Object.keys(require.cache).filter(key => /[/\\]commands[/\\]\D+[/\\]\D+\.js/.test(key)).forEach(file => delete require.cache[file]);
+				client.commands.unloadAll();
 				client.commands.loadAll();
 				return message.reply(`${client.commands.size} command${client.commands.size !== 1 ? 's' : ''} were reloaded successfully.`);
 

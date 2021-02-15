@@ -3,6 +3,8 @@
 const { Collection } = require('discord.js');
 const path = require('path');
 const { getAllJsFiles } = require('../../functions/files');
+const { autocorrect } = require('../../functions/util');
+const Command = require('../Command');
 const logger = require('../../functions/logger');
 
 
@@ -15,6 +17,41 @@ class CommandCollection extends Collection {
 		super(entries);
 
 		this.client = client;
+		this.aliases = new Map();
+	}
+
+	get invisibleCategories() {
+		return [ 'hidden', 'owner' ];
+	}
+
+	/**
+	 * returns all non-hidden commands
+	 */
+	get visible() {
+		return this.filter(command => !this.invisibleCategories.includes(command.category));
+	}
+
+	/**
+	 * returns all command categories
+	 * @returns {string[]}
+	 */
+	get categories() {
+		return [ ...new Set(this.map(command => command.category)) ];
+	}
+
+	/**
+	 * returns all visible command categories
+	 */
+	get visibleCategories() {
+		return this.categories.filter(category => !this.invisibleCategories.includes(category));
+	}
+
+	/**
+	 * returns the commands from the provided category
+	 * @param {string} category
+	 */
+	filterByCategory(category) {
+		return this.filter(command => command.category === category);
 	}
 
 	/**
@@ -23,7 +60,17 @@ class CommandCollection extends Collection {
 	 * @returns {?import('../Command')}
 	 */
 	getByName(name) {
-		return this.get(name) ?? this.find(cmd => cmd.aliases?.includes(name));
+		const command = this.get(name) ?? this.get(this.aliases.get(name))
+
+		if (command) return command;
+
+		let result = autocorrect(name, this, 'name');
+
+		if (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return result.value;
+
+		result = autocorrect(name, this.aliases);
+
+		if (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return this.get(result.value);
 	}
 
 	/**
@@ -39,15 +86,22 @@ class CommandCollection extends Collection {
 	 * @param {string} file command file to load
 	 */
 	load(file) {
-		const [, category, name ] = file.match(/[/\\]commands[/\\](\D+)[/\\](\D+)\.js/);
+		const name = path.basename(file, '.js');
+		const category = path.basename(path.dirname(file));
 		const commandConstructor = require(file);
+
+		if (Object.getPrototypeOf(commandConstructor) !== Command) throw new Error(`[LOAD COMMAND]: invalid input: ${file}`);
+
+		/**
+		 * @type {import('../Command')}
+		 */
 		const command = new commandConstructor({
 			client: this.client,
 			name,
 			category,
 		});
 
-		this.set(name.toLowerCase(), command);
+		command.load();
 	}
 
 	/**
@@ -56,13 +110,18 @@ class CommandCollection extends Collection {
 	loadAll() {
 		const commandFiles = getAllJsFiles(path.join(__dirname, '..', '..', 'commands'));
 
-		if (!commandFiles) logger.warn('[COMMANDS]: no command files');
-
 		for (const file of commandFiles) {
 			this.load(file);
 		}
 
 		logger.debug(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
+	}
+
+	/**
+	 * unload all commands
+	 */
+	unloadAll() {
+		this.forEach(command => command.unload());
 	}
 }
 

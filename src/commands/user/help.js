@@ -35,15 +35,11 @@ module.exports = class HelpCommand extends Command {
 
 		// default help
 		if (!args.length) {
-			const BOT_ID = client.user.id;
-			const invisibleCategories = [ 'hidden', 'owner' ];
-			const categories = [ ...new Set(commands.map(command => command.category)) ].filter(category => !invisibleCategories.includes(category));
-
-			for (const category of categories) {
+			for (const category of commands.visibleCategories) {
 				helpEmbed.addField(
 					`${upperCaseFirstChar(category)} commands`,
 					` • ${commands
-						.filter(command => command.category === category)
+						.filterByCategory(category)
 						.map(command => [ command.name, command.aliases?.join(' | ') ].filter(Boolean).join(' | '))
 						.join('\n • ')
 					}`,
@@ -55,7 +51,7 @@ module.exports = class HelpCommand extends Command {
 				.setAuthor('Simple Discord Bot by muchnameless#7217')
 				.setDescription(stripIndents`
 					List of all currently available commands and their aliases:
-					Use \`${config.get('PREFIX')}\` or <@!${BOT_ID}> as prefix in servers.
+					Use \`${config.get('PREFIX')}\` or ${client.user} as prefix in servers.
 					\u200b
 				`)
 				.padFields()
@@ -71,33 +67,33 @@ module.exports = class HelpCommand extends Command {
 			return message.reply(helpEmbed);
 		}
 
+		const INPUT = args[0].toLowerCase();
+
 
 		// category help
-		const categories = [ ...new Set(commands.map(command => command.category)) ];
+		const requestedCategory = commands.categories.find(categoryName => categoryName === INPUT);
 
-		if (categories.includes(args[0].toLowerCase())) {
-			const CATEGORY_NAME = args[0].toLowerCase();
-			const categoryCommands = commands.filter(command => command.category === CATEGORY_NAME);
+		if (requestedCategory) {
+			const categoryCommands = commands.filterByCategory(INPUT);
 
-			helpEmbed
-				.setTitle(`Category: ${upperCaseFirstChar(CATEGORY_NAME)}`);
+			helpEmbed.setTitle(`Category: ${upperCaseFirstChar(INPUT)}`);
 
 			let requiredRoles = categoryCommands.first().requiredRoles;
 
 			if (requiredRoles) {
 				requiredRoles = requiredRoles.map(roleID => client.lgGuild?.roles.cache.get(roleID));
 				helpEmbed.setDescription(stripIndents`
-					**Required Role:**
+					**Required Roles:**
 					${commaListsOr`${message.guild?.id === config.get('DISCORD_GUILD_ID') ? requiredRoles : requiredRoles.map(role => role.name)}`}
 				`);
-			} else if (CATEGORY_NAME === 'owner') {
+			} else if (INPUT === 'owner') {
 				helpEmbed.setDescription(stripIndents`
 					**Required ID:**
 					<@${client.ownerID}>
 				`);
 			} else {
 				helpEmbed.setDescription(stripIndents`
-					**Required Role:**
+					**Required Roles:**
 					none
 				`);
 			}
@@ -107,7 +103,7 @@ module.exports = class HelpCommand extends Command {
 			categoryCommands.forEach(command => {
 				const commandName = [ command.name ];
 				if (command.aliases) commandName.push(command.aliases.join(' | '));
-				helpEmbed.addField(`${commandName.join(' | ')}`, `${command.description || '\u200b'}`, true);
+				helpEmbed.addField(`${commandName.join(' | ')}`, `${command.description ?? '\u200b'}`, true);
 			});
 
 			helpEmbed
@@ -123,10 +119,9 @@ module.exports = class HelpCommand extends Command {
 
 
 		// single command help
-		const COMMAND_NAME = args[0].toLowerCase();
-		const command = commands.getByName(COMMAND_NAME);
+		const command = commands.getByName(INPUT);
 
-		if (!command) return message.reply(`\`${COMMAND_NAME}\` is neither a valid command nor category.`);
+		if (!command) return message.reply(`\`${INPUT}\` is neither a valid command nor category.`);
 
 		helpEmbed.setTitle(`**Name:** ${command.name}`);
 

@@ -9,6 +9,7 @@ const ms = require('ms');
 const util = require('util');
 const skyblock = require('../../constants/skyblock');
 const functionsUtil = require('../../functions/util');
+const functionsFiles = require('../../functions/files');
 const hypixelMain = require('../../api/hypixel');
 const hypixelAux = require('../../api/hypixelAux');
 const mojang = require('../../api/mojang');
@@ -32,7 +33,7 @@ module.exports = class EvalCommand extends Command {
 
 				required:
 				Discord, lodash, similarity, ms, util,
-				skyblock (constants), functionsUtil, hypixel, mojang, lgGuild
+				skyblock (constants), functionsUtil, functionsFiles, hypixel, mojang, lgGuild
 			`,
 			cooldown: 0,
 		});
