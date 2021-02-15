@@ -25,7 +25,7 @@ class ModelHandler {
 	}
 
 	/**
-	 * loads the database cache
+	 * loads the database cache (performs a sweep first)
 	 * @param {object|undefined} condition optional condition to query the db with
 	 */
 	async loadCache(condition) {

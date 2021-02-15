@@ -28,27 +28,27 @@ class LunarClient extends Client {
 	}
 
 	get bannedUsers() {
-		return this.db.bannedUsers;
+		return this.db.handlers.bannedUsers;
 	}
 
 	get config() {
-		return this.db.config;
+		return this.db.handlers.config;
 	}
 
 	get cronJobs() {
-		return this.db.cronJobs;
+		return this.db.handlers.cronJobs;
 	}
 
 	get hypixelGuilds() {
-		return this.db.hypixelGuilds;
+		return this.db.handlers.hypixelGuilds;
 	}
 
 	get players() {
-		return this.db.players;
+		return this.db.handlers.players;
 	}
 
 	get taxCollectors() {
-		return this.db.taxCollectors;
+		return this.db.handlers.taxCollectors;
 	}
 
 	/**
@@ -65,6 +65,17 @@ class LunarClient extends Client {
 	 */
 	get loggingChannel() {
 		return this.channels.cache.get(this.webhook?.channelID) ?? null;
+	}
+
+	/**
+	 * starts and caches a cronJob
+	 * @param {string} name
+	 * @param {import('cron').CronJob} cronJob
+	 */
+	schedule(name, cronJob) {
+		if (!cronJob.running) cronJob.start();
+
+		this.cronJobs.cache.set(name, cronJob);
 	}
 
 	/**
@@ -217,11 +228,7 @@ class LunarClient extends Client {
 			const event = require(file);
 			const EVENT_NAME = path.basename(file, '.js');
 
-			if (EVENT_NAME === Constants.Events.CLIENT_READY) {
-				this.once(EVENT_NAME, event.bind(null, this));
-			} else {
-				this.on(EVENT_NAME, event.bind(null, this));
-			}
+			this[EVENT_NAME === Constants.Events.CLIENT_READY ? 'once' : 'on'](EVENT_NAME, event.bind(null, this));
 
 			delete require.cache[require.resolve(file)];
 		}

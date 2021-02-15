@@ -19,6 +19,17 @@ class CronJobHandler extends ModelHandler {
 		this.model;
 	}
 
+	/**
+	 * creates and starts a new cronJob
+	 * @param {object} param0
+	 * @param {string} param0.name
+	 * @param {Date} param0.date
+	 * @param {string} param0.authorID
+	 * @param {string} param0.messageID
+	 * @param {string} param0.channelID
+	 * @param {string[]} param0.args
+	 * @param {string[]} param0.flags
+	 */
 	async add({ name, date, command, authorID, messageID, channelID, args, flags }) {
 		// create db entry
 		await this.model.create({
@@ -45,6 +56,10 @@ class CronJobHandler extends ModelHandler {
 		}));
 	}
 
+	/**
+	 * stops and removes a cronJob
+	 * @param {string|import('./models/CronJob')} instanceOrId
+	 */
 	async remove(instanceOrId) {
 		const cronJob = this.resolve(instanceOrId);
 
@@ -53,6 +68,15 @@ class CronJobHandler extends ModelHandler {
 		cronJob.stop();
 
 		return super.remove(cronJob);
+	}
+
+	/**
+	 * resumes all cronJobs
+	 */
+	async resume() {
+		return Promise.all(
+			(await this.model.findAll()).map(async cronJob => cronJob.resume()),
+		);
 	}
 }
 

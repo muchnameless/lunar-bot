@@ -55,7 +55,7 @@ class CronJob extends Model {
 			return logger.info(`[CRONJOB]: ${this.name}`);
 		}
 
-		this.client.cronJobs.cache.set(this.name, new CronJob({
+		this.client.schedule(this.name, new CronJob({
 			cronTime: new Date(this.date),
 			onTick: async () => {
 				logger.info(`[CRONJOB]: ${this.name}`);

@@ -1,6 +1,10 @@
 'use strict';
 
-const { autocorrect } = require('../../functions/util');
+const { MessageEmbed } = require('discord.js');
+const { CronJob } = require('cron');
+const { MAYOR_CHANGE_INTERVAL } = require('../../constants/skyblock');
+const { offsetFlags } = require('../../constants/database');
+const { autocorrect, getWeekOfYear } = require('../../functions/util');
 const ModelHandler = require('./ModelHandler');
 const logger = require('../../functions/logger');
 
@@ -158,6 +162,189 @@ class PlayerHandler extends ModelHandler {
 	 */
 	resetXp(options = {}) {
 		return this.cache.each(player => player.resetXp(options).catch(error => logger.error(`[RESET XP]: ${error.name}: ${error.message}`)));
+	}
+
+	/**
+	 * creates cronJobs for all xp resets
+	 */
+	scheduleXpResets() {
+		const { config } = this.client;
+
+		// auto competition starting
+		if (config.getBoolean('COMPETITION_SCHEDULED')) {
+			if (config.getNumber('COMPETITION_START_TIME') - 10_000 > Date.now()) {
+				this.client.schedule('competitionStart', new CronJob({
+					cronTime: new Date(config.getNumber('COMPETITION_START_TIME')),
+					onTick: () => this.startCompetition(),
+					start: true,
+				}));
+			} else if (!config.getBoolean('COMPETITION_RUNNING')) {
+				this.startCompetition();
+			}
+		}
+
+		// auto competition ending
+		if (config.getNumber('COMPETITION_END_TIME') - 10_000 > Date.now()) {
+			this.client.schedule('competitionEnd', new CronJob({
+				cronTime: new Date(config.getNumber('COMPETITION_END_TIME')),
+				onTick: () => this.endCompetition(),
+				start: true,
+			}));
+		} else if (config.getBoolean('COMPETITION_RUNNING')) {
+			this.endCompetition();
+		}
+
+		// mayor change reset
+		const NEXT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
+
+		if (NEXT_MAYOR_TIME - 10_000 > Date.now()) {
+			this.client.schedule('mayorXpReset', new CronJob({
+				cronTime: new Date(NEXT_MAYOR_TIME),
+				onTick: () => this.performMayorReset(),
+				start: true,
+			}));
+		} else {
+			this.performMayorReset();
+		}
+
+		const now = new Date();
+
+		// daily reset
+		if (new Date(config.getNumber('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.performDailyReset();
+
+		// each day at 00:00:00
+		this.client.schedule('dailyXpReset', new CronJob({
+			cronTime: '0 0 0 * * *',
+			timeZone: 'GMT',
+			onTick: () => this.performDailyReset(),
+			start: true,
+		}));
+
+		// weekly reset
+		if (getWeekOfYear(new Date(config.getNumber('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.performWeeklyReset();
+
+		// each monday at 00:00:00
+		this.client.schedule('weeklyXpReset', new CronJob({
+			cronTime: '0 0 0 * * MON',
+			timeZone: 'GMT',
+			onTick: () => this.performWeeklyReset(),
+			start: true,
+		}));
+
+		// monthly reset
+		if (new Date(config.getNumber('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.performMonthlyReset();
+
+		// the first of each month at 00:00:00
+		this.client.schedule('monthlyXpReset', new CronJob({
+			cronTime: '0 0 0 1 * *',
+			timeZone: 'GMT',
+			onTick: () => this.performMonthlyReset(),
+			start: true,
+		}));
+	}
+
+	/**
+	 * resets competitionStart xp, updates the config and logs the event
+	 */
+	startCompetition() {
+		const { config } = this.client;
+
+		this.resetXp({ offsetToReset: offsetFlags.COMPETITION_START });
+		config.set('COMPETITION_RUNNING', 'true');
+		config.set('COMPETITION_SCHEDULED', 'false');
+		this.client.log(new MessageEmbed()
+			.setColor(config.get('EMBED_BLUE'))
+			.setTitle('Guild Competition')
+			.setDescription('started')
+			.setTimestamp(),
+		);
+	}
+
+	/**
+	 * resets competitionEnd xp, updates the config and logs the event
+	 */
+	endCompetition() {
+		const { config } = this.client;
+
+		this.resetXp({ offsetToReset: offsetFlags.COMPETITION_END });
+		config.set('COMPETITION_RUNNING', 'false');
+		this.client.log(new MessageEmbed()
+			.setColor(config.get('EMBED_BLUE'))
+			.setTitle('Guild Competition')
+			.setDescription('ended')
+			.setTimestamp(),
+		);
+	}
+
+	/**
+	 * resets offsetMayor xp, updates the config and logs the event
+	 */
+	performMayorXpReset() {
+		const { config } = this.client;
+		const CURRENT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
+
+		config.set('LAST_MAYOR_XP_RESET_TIME', CURRENT_MAYOR_TIME);
+		this.resetXp({ offsetToReset: offsetFlags.MAYOR });
+		this.client.log(new MessageEmbed()
+			.setColor(config.get('EMBED_BLUE'))
+			.setTitle('Current Mayor XP Tracking')
+			.setDescription(`reset the xp gained from all ${this.size} guild members`)
+			.setTimestamp(),
+		);
+
+		this.client.schedule('mayorXpReset', new CronJob({
+			cronTime: new Date(CURRENT_MAYOR_TIME + MAYOR_CHANGE_INTERVAL),
+			onTick: () => this.performMayorXpReset(),
+			start: true,
+		}));
+	}
+
+	/**
+	 * shifts the daily xp array, updates the config and logs the event
+	 */
+	performDailyXpReset() {
+		const { config } = this.client;
+
+		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
+		this.resetXp({ offsetToReset: 'day' });
+		this.client.log(new MessageEmbed()
+			.setColor(config.get('EMBED_BLUE'))
+			.setTitle('Daily XP Tracking')
+			.setDescription(`reset the xp gained from all ${this.size} guild members`)
+			.setTimestamp(),
+		);
+	}
+
+	/**
+	 * resets offsetWeek xp, updates the config and logs the event
+	 */
+	performWeeklyXpReset() {
+		const { config } = this.client;
+
+		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
+		this.resetXp({ offsetToReset: offsetFlags.WEEK });
+		this.client.log(new MessageEmbed()
+			.setColor(config.get('EMBED_BLUE'))
+			.setTitle('Weekly XP Tracking')
+			.setDescription(`reset the xp gained from all ${this.size} guild members`)
+			.setTimestamp(),
+		);
+	}
+
+	/**
+	 * resets offsetMonth xp, updates the config and logs the event
+	 */
+	performMonthlyXpReset() {
+		const { config } = this.client;
+
+		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
+		this.resetXp({ offsetToReset: offsetFlags.MONTH });
+		this.client.log(new MessageEmbed()
+			.setColor(config.get('EMBED_BLUE'))
+			.setTitle('Monthly XP Tracking')
+			.setDescription(`reset the xp gained from all ${this.size} guild members`)
+			.setTimestamp(),
+		);
 	}
 }
 

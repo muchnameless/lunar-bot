@@ -1,7 +1,6 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
-const { createTaxEmbed } = require('../../functions/database');
 const Command = require('../../structures/Command');
 const logger = require('../../functions/logger');
 
@@ -91,7 +90,7 @@ module.exports = class TaxResetCommand extends Command {
 
 				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 
-				currentTaxEmbed = createTaxEmbed(client);
+				currentTaxEmbed = client.db.createTaxEmbed();
 			}
 
 			// remove retired collectors

@@ -7,7 +7,7 @@ const hypixelAux = require('../api/hypixelAux');
 const logger = require('./logger');
 
 
-const self = module.exports = {
+module.exports = {
 
 	/**
 	 * usage: await sleep(milliseconds)
