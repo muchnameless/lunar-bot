@@ -47,10 +47,10 @@ class CronJobHandler extends ModelHandler {
 		this.cache.set(name, new CronJob({
 			cronTime: date,
 			onTick: async () => {
+				logger.info(`[CRONJOB]: ${name}`);
 				command.run(this.client, this.client.config, await (await this.model.findOne({ where: { name } })).restoreCommandMessage(), args, flags).catch(logger.error);
 				this.cache.delete(name);
 				this.model.destroy({ where: { name } });
-				logger.info(`[CRONJOB]: ${name}`);
 			},
 			start: true,
 		}));
@@ -63,7 +63,7 @@ class CronJobHandler extends ModelHandler {
 	async remove(instanceOrId) {
 		const cronJob = this.resolve(instanceOrId);
 
-		if (!cronJob) return logger.debug(`[CRONJOB REMOVE]: unknown entry: ${instanceOrId}`);
+		if (!cronJob) throw new Error(`[CRONJOB REMOVE]: invalid input: ${instanceOrId}`);
 
 		cronJob.stop();
 
