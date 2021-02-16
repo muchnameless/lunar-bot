@@ -144,7 +144,7 @@ class LunarClient extends Client {
 			}
 		}, 20 * 60 * 1_000); // 20 min
 
-		this.minecraftChatBridge.connect();
+		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) this.minecraftChatBridge.connect();
 
 		// log ready
 		logger.debug(`[READY]: startup complete. ${cronJobs.size} CronJobs running. Logging webhook available: ${this.logHandler.webhookAvailable}`);
