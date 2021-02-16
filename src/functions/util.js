@@ -75,7 +75,7 @@ module.exports = {
 		// pad message with random invisible characters
 		const invisChars = [ '⭍', 'ࠀ' ];
 
-		// max message length is 256 with patcher, 100 without
+		// max message length is 256 with patcher or post 1.12, 100 without
 		for (let index = 257 - string.length; --index;) {
 			string += invisChars[Math.floor(Math.random() * invisChars.length)];
 		}
