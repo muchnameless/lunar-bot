@@ -20,14 +20,20 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 	 */
 	const chatMessage = jsonMessage.extra.map(x => x.text).join('').trim();
 
+	if (client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ chatMessage });
+
 	if (!chatMessage.includes(':')) return; // non-player message
 
 	const messageParts = chatMessage.split(':');
 	const sender = messageParts.shift().replace(/§./g, '').trim(); // remove mc-chat markdown
 
+	if (client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ messageParts, sender });
+
 	if (!sender.startsWith('Guild >')) return;
 
 	const [, ign ] = sender.match(/^Guild > (?:\[\w+\+*\] )?(\w+)(?: \[\w+\])?/); // 'Guild > [HypixelRank] ign [GuildRank]'
+
+	if (client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ ign });
 
 	if (ign === bot.username) return; // ignore own messages (2/2)
 
