@@ -46,6 +46,11 @@ module.exports = (sequelize, DataTypes) => {
 				this.setDataValue('inDiscord', value);
 			},
 		},
+		chatBridgeMutedUntil: {
+			type: DataTypes.BIGINT,
+			defaultValue: 0,
+			allowNull: false,
+		},
 
 		// tax stats
 		paid: {
