@@ -91,6 +91,13 @@ class LunarClient extends Client {
 	}
 
 	/**
+	 * send in ingame chat via the chatBridge
+	 */
+	get chat() {
+		return this.chatBridge.bot.chat;
+	}
+
+	/**
 	 * loads all commands, events, db caches and logs the client in
 	 * @param {?string} token discord bot token
 	 */
