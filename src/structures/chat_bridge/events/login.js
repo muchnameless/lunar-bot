@@ -12,6 +12,8 @@ const logger = require('../../../functions/logger');
 module.exports = (client, bot) => {
 	logger.debug(`[CHATBRIDGE LOGIN]: logged in as ${bot.username}`);
 
+	client.clearTimeout(client.chatBridge.abortConnectionTimeout);
+
 	client.chatBridge.loginAttempts = 0;
 	client.chatBridge.exactDelay = 0;
 };

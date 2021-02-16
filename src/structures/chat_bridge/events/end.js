@@ -8,17 +8,12 @@ const logger = require('../../../functions/logger');
  * @param {import('mineflayer').Bot} bot
  */
 module.exports = (client, bot) => {
-	let loginDelay = client.chatBridge.exactDelay;
+	/**
+	 * @type {number}
+	 */
+	const LOGIN_DELAY = client.chatBridge.exactDelay || Math.min((client.chatBridge.loginAttempts++) * 5_000, 60_000);
 
-	if (!loginDelay) {
-		loginDelay = (client.chatBridge.loginAttempts + 1) * 5000;
+	logger.warn(`[CHATBRIDGE END]: Minecraft bot disconnected from server, attempting reconnect in ${ms(LOGIN_DELAY, { long: true })}`);
 
-		if (loginDelay > 60000) {
-			loginDelay = 60000;
-		}
-	}
-
-	logger.warn(`[CHATBRIDGE END]: Minecraft bot disconnected from server, attempting reconnect in ${ms(loginDelay, { long: true })}`);
-
-	setTimeout(() => client.chatBridge.connect(), loginDelay);
+	client.setTimeout(() => client.chatBridge.connect(), LOGIN_DELAY);
 };

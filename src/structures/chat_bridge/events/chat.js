@@ -32,10 +32,18 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 
 	let content = Util.escapeMarkdown(messageParts.join(':').replace(/ࠀ|⭍/g, '').trim()); // prettify message for discord
 
-	// try to replace :emoji: with the correct discord render string
-	content = content.replace(/:(.+):/, (_, p1) => client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? '$&');
-
 	if (!content.length) return;
+
+	// try to replace :emoji: with the correct discord render string
+	content = content
+		.replace(/:(.+):/, (_, p1) => client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? '$&') // emojis
+		.replace(/<?#([a-z-])>?/gi, (_, p1) => client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? '$&') // channels
+		.replace(/<?@[!&]?(\S+)>?/g, (_, p1) =>
+			client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
+			?? client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
+			?? client.users.cache.find(u => u.username.toLowerCase() === p1.toLowerCase())?.toString() // users
+			?? '$&',
+		);
 
 	const player = client.players.cache.find(p => p.ign === ign);
 	const member = await player?.discordMember;
@@ -45,7 +53,7 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 			username: member?.displayName ?? player?.ign ?? ign ?? client.user.username,
 			avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? client.user.displayAvatarURL({ dynamic: true }),
 			content,
-			allowedMentions: { parse: [] },
+			allowedMentions: { parse: [ 'users' ] },
 		});
 	} catch (error) {
 		logger.error(`[CHATBRIDGE DC CHAT]: ${error.name}: ${error.message}`);

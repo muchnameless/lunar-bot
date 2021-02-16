@@ -16,6 +16,9 @@ class ChatBridge {
 		this.webhook = null;
 		this.bot = null;
 		this.loginAttempts = 0;
+		this.exactDelay = 0;
+
+		this.abortConnectionTimeout = null;
 	}
 
 	/**
@@ -29,9 +32,13 @@ class ChatBridge {
 	 * fetch the webhook if it is uncached, create and log the bot into hypixel
 	 */
 	async connect() {
+		this.client.clearTimeout(this.abortConnectionTimeout);
+
 		if (!this.webhook) await this._fetchWebhook();
 		this._createBot();
 		this._loadEvents();
+
+		this.abortConnectionTimeout = this.client.setTimeout(() => this.bot.quit('Relogging'), 60_000);
 	}
 
 	/**
@@ -102,13 +109,25 @@ class ChatBridge {
 	}
 
 	/**
+	 * replaces discord renders with names
+	 * @param {string} string
+	 */
+	_cleanContent(string) {
+		return string
+			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // emojis
+			.replace(/<#(\d+)>/g, (_, p1) => this.client.channels.cache.get(p1)?.name ?? '$&') // channels
+			.replace(/<@&(\d+)>/g, (_, p1) => this.client.lgGuild?.roles.cache.get(p1)?.name ?? '$&') // roles
+			.replace(/<@!?(\d+)>/g, (_, p1) => this.client.lgGuild?.members.cache.get(p1)?.displayName ?? this.client.users.cache.get(p1)?.username ?? '$&'); // users
+	}
+
+	/**
 	 * converts a discord message to a minecraft message string for the bot to chat
 	 * @param {import('../extensions/Message')} message
 	 */
 	_makeContent(message) {
 		const player = this.client.players.getByID(message.author.id);
 
-		return this._hypixelSpamBypass(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: ${message.content.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:')}`.slice(0, 255));
+		return this._hypixelSpamBypass(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: ${this._cleanContent(message.content)}`.slice(0, 255));
 	}
 
 	/**
