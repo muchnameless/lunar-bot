@@ -3,7 +3,9 @@
 const { DiscordAPIError } = require('discord.js');
 const path = require('path');
 const mineflayer = require('mineflayer');
+const emojiRegex = require('emoji-regex');
 const { getAllJsFiles } = require('../../functions/files');
+const { unicodeToName } = require('../../constants/emojiNameUnicodeConverter');
 const logger = require('../../functions/logger');
 
 
@@ -114,7 +116,8 @@ class ChatBridge {
 	 */
 	_cleanContent(string) {
 		return string
-			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // emojis
+			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // custom emojis
+			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
 			.replace(/<#(\d+)>/g, (match, p1) => { // channels
 				const channelName = this.client.channels.cache.get(p1)?.name;
 				if (channelName) return `#${channelName}`;

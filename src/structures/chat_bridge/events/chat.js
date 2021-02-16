@@ -1,6 +1,7 @@
 'use strict';
 
 const { Util } = require('discord.js');
+const { nameToUnicode } = require('../../../constants/emojiNameUnicodeConverter');
 const logger = require('../../../functions/logger');
 
 
@@ -36,12 +37,12 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 
 	// try to replace :emoji: with the correct discord render string
 	content = content
-		.replace(/:(.+):/, (match, p1) => client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? match) // emojis
+		.replace(/:(.+):/, (match, p1) => client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[p1] ?? match) // emojis (custom and default)
 		.replace(/<?#([a-z-]+)>?/gi, (match, p1) => client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
 		.replace(/<?@[!&]?(\S+)>?/g, (match, p1) =>
-			client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
-			?? client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
+			client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
 			?? client.users.cache.find(u => u.username.toLowerCase() === p1.toLowerCase())?.toString() // users
+			?? client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
 			?? match,
 		);
 

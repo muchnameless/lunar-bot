@@ -1,10 +1,13 @@
 'use strict';
 
+/**
+ * https://github.com/DSharpPlus/DSharpPlus/blob/master/DSharpPlus/Entities/DiscordEmoji.EmojiUtils.cs#L15
+ */
 
 /**
  * discord emoji names to unicode emojis
  */
-module.exports = {
+const nameToUnicode = {
 	',:(': '\u{0001f613}',
 	',:)': '\u{0001f605}',
 	',:-(': '\u{0001f613}',
@@ -5865,4 +5868,17 @@ module.exports = {
 	'o=-)': '\u{0001f607}',
 	'x-)': '\u{0001f606}',
 	'♡': '\u{00002764}\u{0000fe0f}',
+};
+
+/**
+ * unicode emojis to discord emoji names
+ */
+const unicodeToName = Object.keys(nameToUnicode).reduceRight((ret, key) => {
+	ret[nameToUnicode[key]] = key;
+	return ret;
+}, {});
+
+module.exports = {
+	nameToUnicode,
+	unicodeToName,
 };
