@@ -65,25 +65,6 @@ module.exports = {
 	checkIfDiscordTag: string => /.+#\d{4}/.test(string),
 
 	/**
-	 * escapes 'ez' and pads the input string with random invisible chars to bypass the hypixel spam filter
-	 * @param {string} string
-	 */
-	hypixelSpamBypass: string => {
-		// escape 'ez'
-		string = string.replace(/\b(e+)(z+)\b/gi, '$1ࠀ$2');
-
-		// pad message with random invisible characters
-		const invisChars = [ '⭍', 'ࠀ' ];
-
-		// max message length is 256 with patcher or post 1.12, 100 without
-		for (let index = 257 - string.length; --index;) {
-			string += invisChars[Math.floor(Math.random() * invisChars.length)];
-		}
-
-		return string;
-	},
-
-	/**
 	 * returns the hypixel client
 	 * @param {boolean} shouldSkipQueue wether to use the hypixel aux client when the main one's request queue is filled
 	 */

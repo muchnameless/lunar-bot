@@ -10,8 +10,8 @@ const logger = require('../../../functions/logger');
  * @param {string} message chat message
  */
 module.exports = (client, bot) => {
-	logger.debug(`[LOGIN]: ${bot.username} logged in`);
+	logger.debug(`[CHATBRIDGE LOGIN]: logged in as ${bot.username}`);
 
-	client.minecraftChatBridge.loginAttempts = 0;
-	client.minecraftChatBridge.exactDelay = 0;
+	client.chatBridge.loginAttempts = 0;
+	client.chatBridge.exactDelay = 0;
 };

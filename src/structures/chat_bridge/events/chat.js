@@ -41,7 +41,7 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 	const member = await player?.discordMember;
 
 	try {
-		await client.minecraftChatBridge.webhook?.send({
+		await client.chatBridge.webhook?.send({
 			username: member?.displayName ?? player?.ign ?? ign ?? client.user.username,
 			avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? client.user.displayAvatarURL({ dynamic: true }),
 			content,

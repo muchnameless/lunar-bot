@@ -7,7 +7,7 @@ const logger = require('../../../functions/logger');
  * @param {import('mineflayer').Bot} bot
  */
 module.exports = (client, bot, ...args) => {
-	logger.warn(`[KICKED]: ${args}`);
+	logger.warn(`[CHATBRIDGE KICKED]: ${args}`);
 
-	client.minecraftChatBridge.loginAttempts++;
+	client.chatBridge.loginAttempts++;
 };

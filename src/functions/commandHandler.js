@@ -3,7 +3,7 @@
 const { commaListsOr } = require('common-tags');
 const { Collection } = require('discord.js');
 const ms = require('ms');
-const { escapeRegex, hypixelSpamBypass } = require('./util');
+const { escapeRegex } = require('./util');
 const logger = require('../functions/logger');
 
 
@@ -27,13 +27,7 @@ module.exports = async (client, message) => {
 	// must use prefix for commands in guild
 	if (message.guild && !MATCHED_PREFIX.length) {
 		// minecraft chat bridge
-		if (message.channel.id === config.get('CHATBRIDGE_CHANNEL_ID')) {
-			if (!config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return;
-
-			const player = client.players.getByID(message.author.id);
-
-			return client.bot.chat(hypixelSpamBypass(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: ${message.content.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:')}`));
-		}
+		if (message.channel.id === config.get('CHATBRIDGE_CHANNEL_ID')) return client.chatBridge.handleMessage(message);
 
 		// channel-specific triggers
 		return client.hypixelGuilds.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequest(message);

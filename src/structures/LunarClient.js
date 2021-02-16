@@ -5,7 +5,7 @@ const path = require('path');
 const { getAllJsFiles } = require('../functions/files');
 const DatabaseHandler = require('./database/DatabaseHandler');
 const LogHandler = require('./LogHandler');
-const MinecraftChatBridge = require('./minecraft_chat_bridge/MinecraftChatBridge');
+const ChatBridge = require('./chat_bridge/ChatBridge');
 const CommandCollection = require('./commands/CommandCollection');
 const logger = require('../functions/logger');
 
@@ -18,7 +18,7 @@ class LunarClient extends Client {
 
 		this.db = new DatabaseHandler({ client: this, db: options.db });
 		this.logHandler = new LogHandler(this);
-		this.minecraftChatBridge = new MinecraftChatBridge(this);
+		this.chatBridge = new ChatBridge(this);
 		// /**
 		//  * @type {CommandCollection<string, import('./commands/Command')>}
 		//  */
@@ -83,8 +83,11 @@ class LunarClient extends Client {
 		return this.logHandler.log.bind(this.logHandler);
 	}
 
+	/**
+	 * the minecraft bot for the chatBridge
+	 */
 	get bot() {
-		return this.minecraftChatBridge.bot;
+		return this.chatBridge.bot;
 	}
 
 	/**
@@ -144,7 +147,7 @@ class LunarClient extends Client {
 			}
 		}, 20 * 60 * 1_000); // 20 min
 
-		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) this.minecraftChatBridge.connect();
+		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.chatBridge.connect();
 
 		// log ready
 		logger.debug(`[READY]: startup complete. ${cronJobs.size} CronJobs running. Logging webhook available: ${this.logHandler.webhookAvailable}`);
