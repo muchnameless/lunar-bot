@@ -36,13 +36,13 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 
 	// try to replace :emoji: with the correct discord render string
 	content = content
-		.replace(/:(.+):/, (_, p1) => client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? '$&') // emojis
-		.replace(/<?#([a-z-])>?/gi, (_, p1) => client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? '$&') // channels
-		.replace(/<?@[!&]?(\S+)>?/g, (_, p1) =>
+		.replace(/:(.+):/, (match, p1) => client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? match) // emojis
+		.replace(/<?#([a-z-])>?/gi, (match, p1) => client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+		.replace(/<?@[!&]?(\S+)>?/g, (match, p1) =>
 			client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
 			?? client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
 			?? client.users.cache.find(u => u.username.toLowerCase() === p1.toLowerCase())?.toString() // users
-			?? '$&',
+			?? match,
 		);
 
 	const player = client.players.cache.find(p => p.ign === ign);

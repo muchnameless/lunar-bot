@@ -115,9 +115,9 @@ class ChatBridge {
 	_cleanContent(string) {
 		return string
 			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // emojis
-			.replace(/<#(\d+)>/g, (_, p1) => this.client.channels.cache.get(p1)?.name ?? '$&') // channels
-			.replace(/<@&(\d+)>/g, (_, p1) => this.client.lgGuild?.roles.cache.get(p1)?.name ?? '$&') // roles
-			.replace(/<@!?(\d+)>/g, (_, p1) => this.client.lgGuild?.members.cache.get(p1)?.displayName ?? this.client.users.cache.get(p1)?.username ?? '$&'); // users
+			.replace(/<#(\d+)>/g, (match, p1) => this.client.channels.cache.get(p1)?.name ?? match) // channels
+			.replace(/<@&(\d+)>/g, (match, p1) => this.client.lgGuild?.roles.cache.get(p1)?.name ?? match) // roles
+			.replace(/<@!?(\d+)>/g, (match, p1) => this.client.lgGuild?.members.cache.get(p1)?.displayName ?? this.client.users.cache.get(p1)?.username ?? match); // users
 	}
 
 	/**
