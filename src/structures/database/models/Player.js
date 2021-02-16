@@ -1008,6 +1008,13 @@ class Player extends Model {
 			totalWeight: weight + overflow,
 		};
 	}
+
+	/**
+	 * player nickname escaped for discord chat
+	 */
+	toString() {
+		return escapeIgn(this.ign);
+	}
 }
 
 module.exports = Player;
