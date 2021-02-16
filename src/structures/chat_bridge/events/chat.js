@@ -37,7 +37,7 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 	// try to replace :emoji: with the correct discord render string
 	content = content
 		.replace(/:(.+):/, (match, p1) => client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? match) // emojis
-		.replace(/<?#([a-z-])>?/gi, (match, p1) => client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+		.replace(/<?#([a-z-]+)>?/gi, (match, p1) => client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
 		.replace(/<?@[!&]?(\S+)>?/g, (match, p1) =>
 			client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
 			?? client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
