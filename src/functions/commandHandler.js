@@ -28,7 +28,7 @@ module.exports = async (client, message) => {
 	if (message.guild && !MATCHED_PREFIX.length) {
 		// minecraft chat bridge
 		if (message.channel.id === config.get('CHATBRIDGE_CHANNEL_ID')) {
-			if (!config.get('CHATBRIDGE_ENABLED') || !message.content.length) return;
+			if (!config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return;
 
 			const player = client.players.getByID(message.author.id);
 
