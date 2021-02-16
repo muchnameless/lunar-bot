@@ -50,6 +50,7 @@ module.exports = class MuteCommand extends Command {
 			: Infinity;
 
 		player.chatBridgeMutedUntil = EXPIRES_AT;
+		player.hasDiscordPingPermission = false;
 		await player.save();
 
 		message.reply(`discord messages from \`${player.ign}\` won't be passed to the ingame chat ${BAN_DURATION ? 'anymore' : `for ${ms(BAN_DURATION, { long: true })}`}`);

@@ -51,6 +51,11 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: 0,
 			allowNull: false,
 		},
+		hasDiscordPingPermission: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: true,
+			allowNull: false,
+		},
 
 		// tax stats
 		paid: {
