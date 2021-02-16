@@ -5,6 +5,7 @@ const path = require('path');
 const { getAllJsFiles } = require('../functions/files');
 const DatabaseHandler = require('./database/DatabaseHandler');
 const LogHandler = require('./LogHandler');
+const MinecraftChatBridge = require('./minecraft_chat_bridge/MinecraftChatBridge');
 const CommandCollection = require('./commands/CommandCollection');
 const logger = require('../functions/logger');
 
@@ -13,11 +14,11 @@ class LunarClient extends Client {
 	constructor(options = {}) {
 		super(options);
 
-		this.db = new DatabaseHandler({ client: this, db: options.db });
-		this.logHandler = new LogHandler(this);
 		this.ownerID = process.env.OWNER ?? null;
 
-		// custom collections
+		this.db = new DatabaseHandler({ client: this, db: options.db });
+		this.logHandler = new LogHandler(this);
+		this.minecraftChatBridge = new MinecraftChatBridge(this);
 		// /**
 		//  * @type {CommandCollection<string, import('./commands/Command')>}
 		//  */
@@ -82,6 +83,10 @@ class LunarClient extends Client {
 		return this.logHandler.log.bind(this.logHandler);
 	}
 
+	get bot() {
+		return this.minecraftChatBridge.bot;
+	}
+
 	/**
 	 * loads all commands, events, db caches and logs the client in
 	 * @param {?string} token discord bot token
@@ -139,6 +144,8 @@ class LunarClient extends Client {
 			}
 		}, 20 * 60 * 1_000); // 20 min
 
+		this.minecraftChatBridge.connect();
+
 		// log ready
 		logger.debug(`[READY]: startup complete. ${cronJobs.size} CronJobs running. Logging webhook available: ${this.logHandler.webhookAvailable}`);
 	}
@@ -159,8 +166,6 @@ class LunarClient extends Client {
 	 */
 	_loadEvents() {
 		const eventFiles = getAllJsFiles(path.join(__dirname, '..', 'events'));
-
-		if (!eventFiles) return logger.warn('[EVENTS]: no event files');
 
 		for (const file of eventFiles) {
 			const event = require(file);

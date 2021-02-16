@@ -3,7 +3,7 @@
 const { commaListsOr } = require('common-tags');
 const { Collection } = require('discord.js');
 const ms = require('ms');
-const { escapeRegex } = require('./util');
+const { escapeRegex, hypixelSpamBypass } = require('./util');
 const logger = require('../functions/logger');
 
 
@@ -26,6 +26,15 @@ module.exports = async (client, message) => {
 
 	// must use prefix for commands in guild
 	if (message.guild && !MATCHED_PREFIX.length) {
+		// minecraft chat bridge
+		if (message.channel.id === config.get('CHATBRIDGE_CHANNEL_ID')) {
+			if (!message.content.length) return;
+
+			const player = client.players.getByID(message.author.id);
+
+			return client.bot.chat(hypixelSpamBypass(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: ${message.content}`));
+		}
+
 		// channel-specific triggers
 		return client.hypixelGuilds.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequest(message);
 	}

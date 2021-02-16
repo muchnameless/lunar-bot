@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } = require('discord.js');
+const { MessageEmbed, SnowflakeUtil, DiscordAPIError } = require('discord.js');
 const path = require('path');
 const { promises: fs } = require('fs');
 const { cleanLoggingEmbedString } = require('../functions/util');
@@ -34,14 +34,12 @@ class LogHandler {
 		if (this.client.config.getBoolean('LOGGING_WEBHOOK_DELETED')) return logger.warn('[LOGGING WEBHOOK]: deleted');
 
 		try {
-			const loggingWebhook = await this.client.fetchWebhook(process.env.WEBHOOK_ID, process.env.WEBHOOK_TOKEN);
-
-			if (!loggingWebhook) return;
+			const loggingWebhook = await this.client.fetchWebhook(process.env.LOGGING_WEBHOOK_ID, process.env.LOGGING_WEBHOOK_TOKEN);
 
 			this.webhook = loggingWebhook;
 			this._postFileLogs(); // repost webhook logs that failed to be posted during the last uptime
 		} catch (error) {
-			if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_WEBHOOK) this.client.config.set('LOGGING_WEBHOOK_DELETED', 'true');
+			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) this.client.config.set('LOGGING_WEBHOOK_DELETED', 'true');
 			logger.error(`[LOGGING WEBHOOK]: ${error.name}: ${error.message}`);
 		}
 	}
@@ -91,7 +89,7 @@ class LogHandler {
 			logger.error(`[CLIENT LOG]: ${error.name}: ${error.message}`);
 
 			// webhook doesn't exist anymore
-			if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_WEBHOOK) {
+			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
 				this.webhook = null;
 				this.client.config.set('LOGGING_WEBHOOK_DELETED', 'true');
 			}
