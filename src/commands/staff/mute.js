@@ -9,9 +9,9 @@ module.exports = class MuteCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'mute a guild member from using the ChatBridge',
+			description: 'mute a guild member from using the ChatBridge (ingame to discord still works but won\'t ping users anymore)',
 			args: true,
-			usage: '[`ign`|`discord id`|`@mention`]',
+			usage: '[`ign`|`discord id`|`@mention`] <`time` in ms lib format>',
 			cooldown: 1,
 		});
 	}
