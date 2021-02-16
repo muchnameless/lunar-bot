@@ -229,45 +229,45 @@ class PlayerHandler extends ModelHandler {
 		if (NEXT_MAYOR_TIME - 10_000 > Date.now()) {
 			this.client.schedule('mayorXpReset', new CronJob({
 				cronTime: new Date(NEXT_MAYOR_TIME),
-				onTick: () => this.performMayorReset(),
+				onTick: () => this.performMayorXpReset(),
 				start: true,
 			}));
 		} else {
-			this.performMayorReset();
+			this.performMayorXpReset();
 		}
 
 		const now = new Date();
 
 		// daily reset
-		if (new Date(config.getNumber('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.performDailyReset();
+		if (new Date(config.getNumber('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.performDailyXpReset();
 
 		// each day at 00:00:00
 		this.client.schedule('dailyXpReset', new CronJob({
 			cronTime: '0 0 0 * * *',
 			timeZone: 'GMT',
-			onTick: () => this.performDailyReset(),
+			onTick: () => this.performDailyXpReset(),
 			start: true,
 		}));
 
 		// weekly reset
-		if (getWeekOfYear(new Date(config.getNumber('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.performWeeklyReset();
+		if (getWeekOfYear(new Date(config.getNumber('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.performWeeklyXpReset();
 
 		// each monday at 00:00:00
 		this.client.schedule('weeklyXpReset', new CronJob({
 			cronTime: '0 0 0 * * MON',
 			timeZone: 'GMT',
-			onTick: () => this.performWeeklyReset(),
+			onTick: () => this.performWeeklyXpReset(),
 			start: true,
 		}));
 
 		// monthly reset
-		if (new Date(config.getNumber('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.performMonthlyReset();
+		if (new Date(config.getNumber('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.performMonthlyXpReset();
 
 		// the first of each month at 00:00:00
 		this.client.schedule('monthlyXpReset', new CronJob({
 			cronTime: '0 0 0 1 * *',
 			timeZone: 'GMT',
-			onTick: () => this.performMonthlyReset(),
+			onTick: () => this.performMonthlyXpReset(),
 			start: true,
 		}));
 	}
