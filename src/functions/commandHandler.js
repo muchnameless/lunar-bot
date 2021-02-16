@@ -32,7 +32,7 @@ module.exports = async (client, message) => {
 
 			const player = client.players.getByID(message.author.id);
 
-			return client.bot.chat(hypixelSpamBypass(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: ${message.content}`));
+			return client.bot.chat(hypixelSpamBypass(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: ${message.content.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:')}`));
 		}
 
 		// channel-specific triggers

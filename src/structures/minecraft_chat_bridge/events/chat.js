@@ -30,7 +30,10 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 
 	if (ign === bot.username) return; // ignore own messages (2/2)
 
-	const content = Util.escapeMarkdown(messageParts.join(':').replace(/ࠀ|⭍/g, '').trim()); // prettify message for discord
+	let content = Util.escapeMarkdown(messageParts.join(':').replace(/ࠀ|⭍/g, '').trim()); // prettify message for discord
+
+	// try to replace :emoji: with the correct discord render string
+	content = content.replace(/:(.+):/, (_, p1) => client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? '$&');
 
 	if (!content.length) return;
 
