@@ -156,7 +156,12 @@ class ChatBridge {
 
 		// check if muted
 		if (player.chatBridgeMutedUntil) {
-			if (Date.now() < player.chatBridgeMutedUntil) return; // mute hasn't expired
+			if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
+				return message.author.send(`you are currently muted ${player.chatBridgeMutedUntil ? `until ${new Date(player.chatBridgeMutedUntil).toUTCString()}` : 'for an unspecified amount of time'}`).then(
+					() => logger.info(`[CHATBRIDGE]: ${player.info}: DMed muted user`),
+					error => logger.error(`[CHATBRIDGE]: ${player.info}: error DMing muted user: ${error.name}: ${error.message}`),
+				);
+			}
 
 			player.chatBridgeMutedUntil = 0;
 			player.save();
