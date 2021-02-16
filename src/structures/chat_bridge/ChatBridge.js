@@ -138,10 +138,9 @@ class ChatBridge {
 	/**
 	 * converts a discord message to a minecraft message string for the bot to chat
 	 * @param {import('../extensions/Message')} message
+	 * @param {import('../database/models/Player')} player
 	 */
-	_makeContent(message) {
-		const player = this.client.players.getByID(message.author.id);
-
+	_makeContent(message, player) {
 		return this._hypixelSpamBypass(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: ${this._cleanContent(message.content)}`.slice(0, 255));
 	}
 
@@ -153,8 +152,18 @@ class ChatBridge {
 		// chatbridge disabled or no message.content to chat
 		if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return;
 
+		const player = this.client.players.getByID(message.author.id);
+
+		// check if muted
+		if (player.chatBridgeMutedUntil) {
+			if (Date.now() < player.chatBridgeMutedUntil) return; // mute hasn't expired
+
+			player.chatBridgeMutedUntil = 0;
+			player.save();
+		}
+
 		try {
-			this.bot.chat(this._makeContent(message));
+			this.bot.chat(this._makeContent(message, player));
 		} catch (error) {
 			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
 		}
