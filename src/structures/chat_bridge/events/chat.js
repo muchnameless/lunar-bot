@@ -48,6 +48,6 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 			allowedMentions: { parse: [] },
 		});
 	} catch (error) {
-		logger.error(error);
+		logger.error(`[CHATBRIDGE DC CHAT]: ${error.name}: ${error.message}`);
 	}
 };

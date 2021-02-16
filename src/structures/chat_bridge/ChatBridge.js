@@ -122,7 +122,7 @@ class ChatBridge {
 		try {
 			this.bot.chat(this._makeContent(message));
 		} catch (error) {
-			logger.error(`[CHATBRIDGE CHAT]: ${error}`);
+			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
 		}
 	}
 }
