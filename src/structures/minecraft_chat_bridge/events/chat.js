@@ -11,6 +11,7 @@ const logger = require('../../../functions/logger');
  * @param {string} message chat message
  */
 module.exports = async (client, bot, username, message, translate, jsonMessage, matches) => {
+	if (!client.config.get('CHATBRIDGE_ENABLED')) return;
 	if (username === bot.username) return; // ignore own messages (1/2)
 
 	/**
