@@ -69,6 +69,10 @@ module.exports = {
 	 * @param {string} string
 	 */
 	hypixelSpamBypass: string => {
+		// escape 'ez'
+		string = string.replace(/\b(e+)(z+)\b/gi, '$1ࠀ$2');
+
+		// pad message with random invisible characters
 		const invisChars = [ '⭍', 'ࠀ' ];
 
 		// max message length is 256 with patcher, 100 without
