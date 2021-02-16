@@ -79,6 +79,7 @@ module.exports = {
 		for (let index = 257 - string.length; --index;) {
 			string += invisChars[Math.floor(Math.random() * invisChars.length)];
 		}
+
 		return string;
 	},
 
