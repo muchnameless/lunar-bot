@@ -65,7 +65,7 @@ module.exports = {
 	checkIfDiscordTag: string => /.+#\d{4}/.test(string),
 
 	/**
-	 * pads the input string with random invisible chars to bypass the hypixel spam filter
+	 * escapes 'ez' and pads the input string with random invisible chars to bypass the hypixel spam filter
 	 * @param {string} string
 	 */
 	hypixelSpamBypass: string => {
