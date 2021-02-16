@@ -10,4 +10,5 @@ module.exports = (client, bot, ...args) => {
 	logger.warn(`[CHATBRIDGE KICKED]: ${args}`);
 
 	client.chatBridge.loginAttempts++;
+	client.chatBridge.connect();
 };
