@@ -1,19 +1,15 @@
 'use strict';
 
-const ms = require('ms');
 const logger = require('../../../functions/logger');
 
 /**
  * @param {import('../../LunarClient')} client
  * @param {import('mineflayer').Bot} bot
+ * @param {string} reason
+ * @param {boolean} loggedIn wether the bot was fully logged in at the time of the kick
  */
-module.exports = (client, bot, ...args) => {
-	/**
-	 * @type {number}
-	 */
-	const LOGIN_DELAY = client.chatBridge.exactDelay || Math.min((client.chatBridge.loginAttempts++) * 5_000, 60_000);
+module.exports = (client, bot, reason, loggedIn) => {
+	logger.warn(`[CHATBRIDGE KICKED]: reason: ${reason}, logged in: ${loggedIn}`);
 
-	logger.warn(`[CHATBRIDGE KICKED]: Minecraft bot kicked from server, (${args}) attempting reconnect in ${ms(LOGIN_DELAY, { long: true })}`);
-
-	client.setTimeout(() => client.chatBridge.connect(), LOGIN_DELAY);
+	client.chatBridge.loginAttempts++;
 };

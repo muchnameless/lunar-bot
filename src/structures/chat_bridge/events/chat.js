@@ -13,7 +13,6 @@ const logger = require('../../../functions/logger');
  */
 module.exports = async (client, bot, username, message, translate, jsonMessage, matches) => {
 	if (!client.config.getBoolean('CHATBRIDGE_ENABLED')) return;
-	if (username === bot.username) return; // ignore own messages (1/2)
 
 	/**
 	 * @type {string}
@@ -22,6 +21,7 @@ module.exports = async (client, bot, username, message, translate, jsonMessage, 
 
 	if (client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ chatMessage });
 
+	if (username === bot.username) return; // ignore own messages (1/2)
 	if (!chatMessage.includes(':')) return; // non-player message
 
 	const messageParts = chatMessage.split(':');

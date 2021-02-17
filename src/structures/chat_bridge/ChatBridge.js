@@ -1,6 +1,6 @@
 'use strict';
 
-const { DiscordAPIError } = require('discord.js');
+const { Util, DiscordAPIError } = require('discord.js');
 const path = require('path');
 const mineflayer = require('mineflayer');
 const emojiRegex = require('emoji-regex');
@@ -18,8 +18,8 @@ class ChatBridge {
 		this.webhook = null;
 		this.bot = null;
 		this.loginAttempts = 0;
-		this.exactDelay = 0;
 
+		this._timeouts = new Set();
 		this.abortConnectionTimeout = null;
 	}
 
@@ -34,13 +34,44 @@ class ChatBridge {
 	 * fetch the webhook if it is uncached, create and log the bot into hypixel
 	 */
 	async connect() {
-		this.client.clearTimeout(this.abortConnectionTimeout);
-
 		if (!this.webhook) await this._fetchWebhook();
 		this._createBot();
 		this._loadEvents();
 
 		this.abortConnectionTimeout = this.client.setTimeout(() => this.bot.quit('Relogging'), 60_000);
+	}
+
+	/**
+	 * clears all timeouts
+	 */
+	clearAllTimeouts() {
+		this.client.clearTimeout(this.abortConnectionTimeout);
+		for (const t of this._timeouts) this.clearTimeout(t);
+	}
+
+	/**
+	 * Sets a timeout that will be automatically cancelled if the client is destroyed.
+	 * @param {Function} fn Function to execute
+	 * @param {number} delay Time to wait before executing (in milliseconds)
+	 * @param {...*} args Arguments for the function
+	 * @returns {Timeout}
+	 */
+	setTimeout(fn, delay, ...args) {
+		const timeout = setTimeout(() => {
+			fn(...args);
+			this._timeouts.delete(timeout);
+		}, delay);
+		this._timeouts.add(timeout);
+		return timeout;
+	}
+
+	/**
+	 * Clears a timeout.
+	 * @param {Timeout} timeout Timeout to cancel
+	 */
+	clearTimeout(timeout) {
+		clearTimeout(timeout);
+		this._timeouts.delete(timeout);
 	}
 
 	/**
@@ -84,25 +115,19 @@ class ChatBridge {
 			const EVENT_NAME = path.basename(file, '.js');
 
 			this.bot[EVENT_NAME === 'login' ? 'once' : 'on'](EVENT_NAME, event.bind(null, this.client, this.bot));
-
-			delete require.cache[require.resolve(file)];
 		}
 
 		logger.debug(`[CHATBRIDGE EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 	}
 
 	/**
-	 * escapes 'ez' and pads the input string with random invisible chars to bypass the hypixel spam filter
+	 * pads the input string with random invisible chars to bypass the hypixel spam filter
 	 * @param {string} string
 	 */
 	_hypixelSpamBypass(string) {
-		// escape 'ez'
-		string = string.replace(/\b(e+)(z+)\b/gi, '$1ࠀ$2');
+		const invisChars = [ '⭍', 'ࠀ' ]; // those don't render in the mc client
 
-		// pad message with random invisible characters
-		const invisChars = [ '⭍', 'ࠀ' ];
-
-		// max message length is 256 with patcher or post 1.12, 100 without
+		// max message length is 256 post 1.11, 100 pre 1.11
 		for (let index = 257 - string.length; --index;) {
 			string += invisChars[Math.floor(Math.random() * invisChars.length)];
 		}
@@ -111,10 +136,18 @@ class ChatBridge {
 	}
 
 	/**
+	 * escapes all standalone occurrences of 'ez', case-insensitive
+	 * @param {string} string
+	 */
+	_escapeEz(string) {
+		return string.replace(/\b(e+)(z+)\b/gi, '$1ࠀ$2');
+	}
+
+	/**
 	 * replaces discord renders with names
 	 * @param {string} string
 	 */
-	_cleanContent(string) {
+	_cleanDiscordMentions(string) {
 		return string
 			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // custom emojis
 			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
@@ -141,14 +174,17 @@ class ChatBridge {
 	 * @param {import('../database/models/Player')} player
 	 */
 	_makeContent(message, player) {
-		return this._hypixelSpamBypass(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: ${this._cleanContent(message.content)}`.slice(0, 255));
+		const prefix = this._escapeEz(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: `);
+		const toSend = this._escapeEz(this._cleanDiscordMentions(message.content));
+
+		return Util.splitMessage(toSend, { maxLength: 256 }).map(contentPart => this._hypixelSpamBypass(`${prefix}${contentPart}`));
 	}
 
 	/**
 	 * realy a message to ingame guild chat, replacing emojis with :emojiName:
 	 * @param {import('../extensions/Message')} message
 	 */
-	handleMessage(message) {
+	handleDiscordMessage(message) {
 		// chatbridge disabled or no message.content to chat
 		if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return;
 
@@ -168,7 +204,10 @@ class ChatBridge {
 		}
 
 		try {
-			this.bot.chat(this._makeContent(message, player));
+			this._makeContent(message, player).forEach((contentPart, index) => {
+				// sends each part 550 ms (approx 11 ticks) apart
+				this.setTimeout(this.bot.chat, index * 550, contentPart);
+			});
 		} catch (error) {
 			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
 		}
