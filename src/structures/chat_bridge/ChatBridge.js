@@ -1,6 +1,7 @@
 'use strict';
 
 const { Util, DiscordAPIError } = require('discord.js');
+const PROTO_VER_1_10 = require('minecraft-data')('1.10.2').version.version;
 const path = require('path');
 const mineflayer = require('mineflayer');
 const emojiRegex = require('emoji-regex');
@@ -124,11 +125,11 @@ class ChatBridge {
 	 * pads the input string with random invisible chars to bypass the hypixel spam filter
 	 * @param {string} string
 	 */
-	_hypixelSpamBypass(string) {
+	hypixelSpamBypass(string) {
 		const invisChars = [ '⭍', 'ࠀ' ]; // those don't render in the mc client
 
 		// max message length is 256 post 1.11, 100 pre 1.11
-		for (let index = 257 - string.length; --index;) {
+		for (let index = 0; index < ((this.bot.protocolVersion > PROTO_VER_1_10) ? 256 : 100) - string.length; ++index) {
 			string += invisChars[Math.floor(Math.random() * invisChars.length)];
 		}
 
@@ -140,7 +141,7 @@ class ChatBridge {
 	 * @param {string} string
 	 */
 	_escapeEz(string) {
-		return string.replace(/\b(e+)(z+)\b/gi, '$1ࠀ$2');
+		return string.replace(/(?<=\be+)(?=z+\b)/gi, 'ࠀ');
 	}
 
 	/**
@@ -177,7 +178,7 @@ class ChatBridge {
 		const prefix = this._escapeEz(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: `);
 		const toSend = this._escapeEz(this._cleanDiscordMentions(message.content));
 
-		return Util.splitMessage(toSend, { maxLength: 256 }).map(contentPart => this._hypixelSpamBypass(`${prefix}${contentPart}`));
+		return Util.splitMessage(toSend, { maxLength: 256 }).map(contentPart => this.hypixelSpamBypass(`${prefix}${contentPart}`));
 	}
 
 	/**
