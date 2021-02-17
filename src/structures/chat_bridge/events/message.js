@@ -41,6 +41,16 @@ module.exports = async (client, bot, jsonMsg, position) => {
 
 	// non player message
 	if (!message.includes(':')) {
+		// auto '/gc welcome'
+		if (message.includes('joined the guild')) {
+			bot.chat(client.chatBridge.hypixelSpamBypass('/gc welcome'));
+		}
+
+		// auto '/gc gg' for promotions
+		if (message.includes('was promoted from')) {
+			bot.chat(client.chatBridge.hypixelSpamBypass('/gc gg'));
+		}
+
 		// accept f reqs from guild members
 		const matched = message.match(/Friend request from (?:\[.+\+*\] )?(\w+)/);
 
@@ -113,5 +123,8 @@ module.exports = async (client, bot, jsonMsg, position) => {
 		const [, ign ] = whisperMatch;
 
 		if (client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[CHATBRIDGE DC CHAT]: whisper from ${ign}`);
+
+		// auto 'o/' reply
+		if (/\( ﾟ◡ﾟ\)\/|o\//.test(content)) return bot.chat(client.chatBridge.hypixelSpamBypass(`/w ${ign} o/`));
 	}
 };
