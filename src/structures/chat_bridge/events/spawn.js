@@ -10,5 +10,5 @@ const logger = require('../../../functions/logger');
 module.exports = (client, bot) => {
 	logger.info('[CHATBRIDGE]: sending mc client to limbo');
 
-	bot.send('§');
+	bot.chat('§');
 };
