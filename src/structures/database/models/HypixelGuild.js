@@ -380,7 +380,7 @@ class HypixelGuild extends Model {
 
 		logger.info(`[CHECK RANK REQS]: ${player.ign} requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
-		if (totalWeight < WEIGHT_REQ || !this.client.chatBridge.bot) return;
+		if (this.client.chatBridge.guildID !== this.guildID || totalWeight < WEIGHT_REQ || !this.client.chatBridge.bot) return;
 
 		try {
 			this.client.chatBridge.bot.chat(`/g setrank ${player.ign} ${RANK_NAME}`);

@@ -20,6 +20,8 @@ class ChatBridge {
 		this.bot = null;
 		this.loginAttempts = 0;
 
+		this.guildID = '5eeec8c08ea8c950b6cb6a19';
+
 		this._timeouts = new Set();
 		this.abortConnectionTimeout = null;
 	}
