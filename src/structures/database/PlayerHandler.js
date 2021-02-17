@@ -186,6 +186,14 @@ class PlayerHandler extends ModelHandler {
 	}
 
 	/**
+	 * transfers xp of all players
+	 * @param {object} options transfer options
+	 */
+	transferXp(options = {}) {
+		return this.cache.each(player => player.transferXp(options).catch(error => logger.error(`[TRANSFER XP]: ${error.name}: ${error.message}`)));
+	}
+
+	/**
 	 * reset xp of all players
 	 * @param {object} options reset options
 	 */

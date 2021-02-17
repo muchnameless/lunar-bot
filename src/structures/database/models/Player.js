@@ -751,6 +751,23 @@ class Player extends Model {
 	}
 
 	/**
+	 * transfers xp offsets
+	 * @param {obejct} options
+	 * @param {string} options.from
+	 * @param {string} options.to
+	 * @param {?string[]} [options.types]
+	 */
+	async transferXp({ from, to, types }) {
+		types ??= XP_TYPES;
+
+		for (const type of types) {
+			this[`${type}Xp${to}`] = this[`${type}Xp${from}`];
+		}
+
+		return this.save();
+	}
+
+	/**
 	 * resets the xp gained to 0
 	 * @param {object} options
 	 * @param {?string} options.offsetToReset
