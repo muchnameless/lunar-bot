@@ -3,7 +3,7 @@
 const { Model } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
 const { autocorrect, getHypixelClient } = require('../../../functions/util');
-const { Y_EMOJI, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
+const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
 const { offsetFlags, UNKNOWN_IGN } = require('../../../constants/database');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
@@ -330,6 +330,7 @@ class HypixelGuild extends Model {
 		} = result.value; // rank
 		const player = this.client.players.getByID(message.author.id);
 
+		// no player db entry
 		if (!player) {
 			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested ${RANK_NAME} but could not be found in the player db`);
 
@@ -339,9 +340,19 @@ class HypixelGuild extends Model {
 			);
 		}
 
+		// player is not in the guild
+		if (player.guildID !== this.guildID) {
+			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested ${RANK_NAME} but is not part of the guild`);
+
+			return message.reply(
+				`it seems like you are not in ${this.name}`,
+				{ sameChannel: true },
+			);
+		}
+
 		let { totalWeight } = player.getWeight();
 
-		// member already has requested role and therefore ingame rank
+		// player meets reqs and already has the rank or the member already has requested role and therefore ingame rank
 		if (totalWeight >= WEIGHT_REQ && (player.guildRankPriority === RANK_PRIORITY || message.member.roles.cache.has(ROLE_ID))) {
 			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[CHECK RANK REQS]: delete: ${error.name}: ${error.message}`));
 			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank but already had it`);
@@ -368,6 +379,16 @@ class HypixelGuild extends Model {
 		);
 
 		logger.info(`[CHECK RANK REQS]: ${player.ign} requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
+
+		if (totalWeight < WEIGHT_REQ || !this.client.chatBridge.bot) return;
+
+		try {
+			this.client.chatBridge.bot.chat(`/g setrank ${player.ign} ${RANK_NAME}`);
+
+			await message.react(Y_EMOJI_ALT);
+		} catch (error) {
+			logger.error('[CHECK RANK REQS]: promotion error:', error);
+		}
 	}
 }
 
