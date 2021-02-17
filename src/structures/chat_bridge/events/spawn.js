@@ -8,10 +8,7 @@ const logger = require('../../../functions/logger');
  * @param {import('mineflayer').Bot} bot
  */
 module.exports = (client, bot) => {
-	logger.debug(`[CHATBRIDGE LOGIN]: logged in as ${bot.username}`);
+	logger.info('[CHATBRIDGE]: sending mc client to limbo');
 
-	client.clearTimeout(client.chatBridge.abortConnectionTimeout);
-
-	client.chatBridge.loginAttempts = 0;
-	client.chatBridge.exactDelay = 0;
+	bot.send('§');
 };

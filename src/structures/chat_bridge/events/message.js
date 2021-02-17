@@ -24,6 +24,7 @@ const logger = require('../../../functions/logger');
  * * `game_info`
  */
 
+
 /**
  * @param {import('../../LunarClient')} client
  * @param {import('mineflayer').Bot} bot
