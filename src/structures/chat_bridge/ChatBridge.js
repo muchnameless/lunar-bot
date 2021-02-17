@@ -114,7 +114,7 @@ class ChatBridge {
 			const event = require(file);
 			const EVENT_NAME = path.basename(file, '.js');
 
-			this.bot[EVENT_NAME === 'login' ? 'once' : 'on'](EVENT_NAME, event.bind(null, this.client, this.bot));
+			this.bot[[ 'login', 'spawn' ].includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, this.client, this.bot));
 		}
 
 		logger.debug(`[CHATBRIDGE EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
