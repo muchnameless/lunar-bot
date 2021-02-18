@@ -184,6 +184,11 @@ class LunarClient extends Client {
 
 						if (newName === oldName) continue; // no update needed
 
+						if (!channel.editable) {
+							logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
+							continue;
+						}
+
 						await channel.setName(newName, `synced with ${mainGuild.name}'s average stats`);
 
 						logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
