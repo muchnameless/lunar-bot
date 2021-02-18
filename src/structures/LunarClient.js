@@ -179,7 +179,7 @@ class LunarClient extends Client {
 
 						if (!channel) continue; // no channel found
 
-						const newName = `${type} avg: ${stats[`${type}Average`]}`;
+						const newName = `${type} avg: ${stats[`${type}Average`].replace(/[^0-9.,]/g, ' ')}`;
 
 						if (newName === channel.name) continue; // no update needed
 
@@ -242,6 +242,7 @@ class LunarClient extends Client {
 	 * @param {number} number number to format
 	 * @param {number} paddingAmount amount to space-pad at the start (default 0)
 	 * @param {Function} converterFunction function to be called on the number
+	 * @returns {string}
 	 */
 	formatNumber(number, paddingAmount = 0, converterFunction = x => x) {
 		return converterFunction(number).toLocaleString(this.config.get('NUMBER_FORMAT')).padStart(paddingAmount, ' ');
