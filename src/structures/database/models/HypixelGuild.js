@@ -2,6 +2,7 @@
 
 const { Model } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
+const ms = require('ms');
 const { autocorrect, getHypixelClient } = require('../../../functions/util');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED } = require('../../../constants/emojiCharacters');
 const { offsetFlags, UNKNOWN_IGN } = require('../../../constants/database');
@@ -420,7 +421,7 @@ class HypixelGuild extends Model {
 		if (!this.chatBridge) {
 			logger.warn(`[CHATBRIDGE]: ${this.name}: offline`);
 			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-				message.react(X_EMOJI).catch(error => logger.error(`[CHECK RANK REQS]: clown reaction: ${error.name}: ${error.message}`)); // get clowned
+				message.react(X_EMOJI).catch(error => logger.error(`[CHECK RANK REQS]: x reaction: ${error.name}: ${error.message}`)); // get clowned
 			}
 			return true;
 		}
@@ -428,20 +429,31 @@ class HypixelGuild extends Model {
 		const player = this.client.players.getByID(message.author.id);
 
 		// check if muted
-		if (player.chatBridgeMutedUntil) {
+		if (player?.chatBridgeMutedUntil) {
 			if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
 				message.author.send(`you are currently muted ${player.chatBridgeMutedUntil ? `until ${new Date(player.chatBridgeMutedUntil).toUTCString()}` : 'for an unspecified amount of time'}`).then(
 					() => logger.info(`[CHATBRIDGE]: ${player.info}: DMed muted user`),
 					error => logger.error(`[CHATBRIDGE]: ${player.info}: error DMing muted user: ${error.name}: ${error.message}`),
 				);
 				if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-					message.react(MUTED).catch(error => logger.error(`[CHECK RANK REQS]: clown reaction: ${error.name}: ${error.message}`));
+					message.react(MUTED).catch(error => logger.error(`[CHECK RANK REQS]: muted reaction: ${error.name}: ${error.message}`));
 				}
 				return true;
 			}
 
 			player.chatBridgeMutedUntil = 0;
 			player.save();
+		}
+
+		if (this.chatBridge.guildChatMuted && !player?.isStaff) {
+			message.author.send(`guild chat is currently muted for ${ms(this.chatBridge.guildChatMutedUntil - Date.now(), { long: true })}`).then(
+				() => logger.info(`[CHATBRIDGE]: ${player.info}: DMed guild chat muted`),
+				error => logger.error(`[CHATBRIDGE]: ${player.info}: error DMing guild chat muted: ${error.name}: ${error.message}`),
+			);
+			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
+				message.react(MUTED).catch(error => logger.error(`[CHECK RANK REQS]: muted reaction: ${error.name}: ${error.message}`));
+			}
+			return true;
 		}
 
 		this.chatBridge.sendToHypixelGuildChat(message, player);

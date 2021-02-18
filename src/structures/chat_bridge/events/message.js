@@ -92,12 +92,27 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 		/**
 		 * auto chatBridge mute
 		 * [HypixelRank] IGN has muted [HypixelRank] IGN for 10s
+		 * [HypixelRank] IGN has muted the guild chat for 10M
 		 */
-		const muteMatched = message.match(/(?:\[.+\+*\] )?\w+ has muted (?:\[.+\+*\] )?(\w+) for (\w+)/);
+		const muteMatched = message.match(/(?:\[.+\+*\] )?\w+ has muted (?:\[.+\+*\] )?(the guild chat|\w+) for (\w+)/);
 
 		if (muteMatched) {
-			const [, ign, duration ] = muteMatched;
-			const player = chatBridge.client.players.cache.find(p => p.ign === ign);
+			const [, target, duration ] = muteMatched;
+
+			if (target === 'the guild chat') {
+				logger.info(`[CHATBRIDGE]: guild chat was muted for ${duration}`);
+				chatBridge.guildChatMuted = true;
+
+				const msDuration = ms(duration);
+
+				chatBridge.guildChatMutedUntil = Date.now() + msDuration;
+				chatBridge.guildChatUnmuteTimeout = setTimeout(() => {
+					chatBridge.guildChatMuted = false;
+					logger.info(`[CHATBRIDGE]: guild chat was unmuted automatically after ${duration}`);
+				}, msDuration);
+			}
+
+			const player = chatBridge.client.players.cache.find(p => p.ign === target);
 
 			if (!player) return;
 
@@ -108,25 +123,34 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 			player.chatBridgeMutedUntil = Date.now() + msDuration;
 			player.save();
 
-			return logger.info(`[CHATBRIDGE]: ${ign} was muted for ${duration}`);
+			return logger.info(`[CHATBRIDGE]: ${target} was muted for ${duration}`);
 		}
 
 		/**
 		 * auto chatBridge unmute
 		 * [HypixelRank] IGN has unmuted [HypixelRank] IGN
+		 * [HypixelRank] IGN has unmuted the guild chat!
 		 */
-		const unMuteMatched = message.match(/(?:\[.+\+*\] )?\w+ has unmuted (?:\[.+\+*\] )?(\w+)/);
+		const unMuteMatched = message.match(/(?:\[.+\+*\] )?\w+ has unmuted (?:\[.+\+*\] )?(the guild chat|\w+)/);
 
 		if (unMuteMatched) {
-			const [, ign ] = unMuteMatched;
-			const player = chatBridge.client.players.cache.find(p => p.ign === ign);
+			const [, target ] = unMuteMatched;
+
+			if (target === 'the guild chat') {
+				clearTimeout(chatBridge.guildChatUnmuteTimeout);
+				chatBridge.guildChatMuted = false;
+				chatBridge.guildChatMutedUntil = 0;
+				return logger.info('[CHATBRIDGE]: guild chat was unmuted');
+			}
+
+			const player = chatBridge.client.players.cache.find(p => p.ign === target);
 
 			if (!player) return;
 
 			player.chatBridgeMutedUntil = 0;
 			player.save();
 
-			return logger.info(`[CHATBRIDGE]: ${ign} was unmuted`);
+			return logger.info(`[CHATBRIDGE]: ${target} was unmuted`);
 		}
 	}
 
