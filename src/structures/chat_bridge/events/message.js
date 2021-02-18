@@ -27,13 +27,13 @@ const logger = require('../../../functions/logger');
 
 /**
  * @param {import('../ChatBridge')} chatBridge
- * @param {TextComponent[]} jsonMsg chat message from the server
+ * @param {TextComponent[]} jsonMessage chat message from the server
  * @param {ChatPosition} position
  */
-module.exports = async (chatBridge, jsonMsg, position) => {
+module.exports = async (chatBridge, jsonMessage, position) => {
 	if (!chatBridge.client.config.getBoolean('CHATBRIDGE_ENABLED')) return;
 
-	const message = jsonMsg.toString().trim();
+	const message = jsonMessage.toString().trim();
 
 	if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ position, message });
 
