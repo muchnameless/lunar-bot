@@ -51,15 +51,36 @@ class ChatBridge {
 	 * destroys the connection to the guild and reconnects the bot
 	 */
 	reconnect() {
-		this.ready = false;
-		if (this.guild) this.guild.chatBridge = null;
-		this.guild = null;
+		this._reset();
 
 		const LOGIN_DELAY = Math.min((this.loginAttempts + 1) * 5_000, 60_000);
 
 		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(LOGIN_DELAY, { long: true })}`);
 
-		this.client.setTimeout(() => this.connect(), LOGIN_DELAY);
+		setTimeout(() => this.connect(), LOGIN_DELAY);
+	}
+
+	/**
+	 * disconnects the bot
+	 */
+	disconnect() {
+		this._reset();
+
+		try {
+			this.bot.quit();
+		} catch (err) {
+			logger.error('[CHATBRIDGE ERROR]:', err);
+		}
+	}
+
+	/**
+	 * resets the chat bridge
+	 */
+	_reset() {
+		this.ready = false;
+		if (this.guild) this.guild.chatBridge = null;
+		this.guild = null;
+		clearTimeout(this.abortConnectionTimeout);
 	}
 
 	/**
