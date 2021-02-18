@@ -158,7 +158,7 @@ class LunarClient extends Client {
 
 		// schedule guild stats channel update
 		this.schedule('guildStatsChannelUpdate', new CronJob({
-			cronTime: '0 0/20 * * * *',
+			cronTime: '0 0 * * * *',
 			onTick: async () => {
 				if (!this.config.getBoolean('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
 
