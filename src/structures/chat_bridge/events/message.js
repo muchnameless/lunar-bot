@@ -76,7 +76,7 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 		 * accept f reqs from guild members
 		 * Friend request from [HypixelRank] IGN\n
 		 */
-		const friendReqMatched = message.match(/Friend request from (?:\[.+\+*\] )?(\w+)/);
+		const friendReqMatched = message.match(/Friend request from (?:\[.+\] )?(\w+)/);
 
 		if (friendReqMatched) {
 			const [, ign ] = friendReqMatched;
@@ -93,7 +93,7 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 		 * [HypixelRank] IGN has muted [HypixelRank] IGN for 10s
 		 * [HypixelRank] IGN has muted the guild chat for 10M
 		 */
-		const muteMatched = message.match(/(?:\[.+\+*\] )?\w+ has muted (?:\[.+\+*\] )?(the guild chat|\w+) for (\w+)/);
+		const muteMatched = message.match(/(?:\[.+\] )?\w+ has muted (?:\[.+\] )?(the guild chat|\w+) for (\w+)/);
 
 		if (muteMatched) {
 			const [, target, duration ] = muteMatched;
@@ -126,7 +126,7 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 		 * [HypixelRank] IGN has unmuted [HypixelRank] IGN
 		 * [HypixelRank] IGN has unmuted the guild chat!
 		 */
-		const unMuteMatched = message.match(/(?:\[.+\+*\] )?\w+ has unmuted (?:\[.+\+*\] )?(the guild chat|\w+)/);
+		const unMuteMatched = message.match(/(?:\[.+\] )?\w+ has unmuted (?:\[.+\] )?(the guild chat|\w+)/);
 
 		if (unMuteMatched) {
 			const [, target ] = unMuteMatched;
@@ -160,7 +160,7 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 
 
 	// guild message
-	const guildMatch = sender.match(/^Guild > (?:\[.+\+*\] )?(\w+)(?: \[\w+\])?/); // 'Guild > [HypixelRank] ign [GuildRank]'
+	const guildMatch = sender.match(/^Guild > (?:\[.+\] )?(\w+)(?: \[\w+\])?/); // 'Guild > [HypixelRank] ign [GuildRank]'
 
 	if (guildMatch) {
 		const [, ign ] = guildMatch;
@@ -192,7 +192,7 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 
 
 	// whisper message
-	const whisperMatch = sender.match(/^From (?:\[.+\+*\] )?(\w+)/); // 'From [HypixelRank] ign'
+	const whisperMatch = sender.match(/^From (?:\[.+\] )?(\w+)/); // 'From [HypixelRank] ign'
 
 	if (whisperMatch) {
 		const [, ign ] = whisperMatch;
