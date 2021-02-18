@@ -1,7 +1,6 @@
 'use strict';
 
 const { Util, DiscordAPIError } = require('discord.js');
-const PROTO_VER_1_10 = require('minecraft-data')('1.10.2').version.version;
 const path = require('path');
 const mineflayer = require('mineflayer');
 const emojiRegex = require('emoji-regex');
@@ -42,7 +41,6 @@ class ChatBridge {
 	async connect() {
 		if (!this.webhook) await this._fetchWebhook();
 		this.bot = this._createBot();
-		this.maxMessageLength = this.bot.protocolVersion > PROTO_VER_1_10 ? 256 : 100;
 		this._loadEvents();
 
 		// disconnect the bot if it hasn't successfully spawned in 60 seconds

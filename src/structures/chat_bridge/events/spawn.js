@@ -1,5 +1,6 @@
 'use strict';
 
+const PROTO_VER_1_10 = require('minecraft-data')('1.10.2').version.version;
 const logger = require('../../../functions/logger');
 
 
@@ -23,6 +24,7 @@ module.exports = chatBridge => {
 
 	// reset relog timeout
 	chatBridge.loginAttempts = 0;
+	chatBridge.maxMessageLength = chatBridge.bot.protocolVersion > PROTO_VER_1_10 ? 256 : 100;
 	chatBridge.ready = true;
 
 	// send bot to limbo (forbidden character in chat)
