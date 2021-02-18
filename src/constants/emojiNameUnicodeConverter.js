@@ -8839,6 +8839,9 @@ const unicodeToName = {
 	'\u{0001f4a4}': ':zzz:',
 };
 
+Object.freeze(nameToUnicode);
+Object.freeze(unicodeToName);
+
 module.exports = {
 	nameToUnicode,
 	unicodeToName,
