@@ -23,7 +23,7 @@ module.exports = chatBridge => {
 
 	// reset relog timeout
 	chatBridge.loginAttempts = 0;
-	this.ready = true;
+	chatBridge.ready = true;
 
 	// send bot to limbo (forbidden character in chat)
 	chatBridge.chat('§');
