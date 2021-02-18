@@ -414,7 +414,7 @@ class HypixelGuild extends Model {
 		let { totalWeight } = player.getWeight();
 
 		// player meets reqs and already has the rank or is staff and has the rank's role
-		if (totalWeight >= WEIGHT_REQ && (player.guildRankPriority === RANK_PRIORITY || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
+		if (totalWeight >= WEIGHT_REQ && (player.guildRankPriority >= RANK_PRIORITY || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
 			if (message.replyMessageID) {
 				message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[CHECK RANK REQS]: delete: ${error.name}: ${error.message}`));
 			}
