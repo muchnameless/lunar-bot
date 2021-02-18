@@ -108,6 +108,12 @@ class HypixelGuild extends Model {
 			}
 		}
 
+		if (hypixelGuildData.chatMute) {
+			this.chatMutedUntil = Date.now() + hypixelGuildData.chatMute;
+		} else {
+			this.chatMutedUntil = 0;
+		}
+
 		this.save();
 
 		// update guild players
@@ -446,9 +452,9 @@ class HypixelGuild extends Model {
 		}
 
 		// check if guild chat is muted
-		if (this.chatBridge.guildChatMuted && !player?.isStaff) {
-			if (Date.now() < this.chatBridge.guildChatMutedUntil) {
-				message.author.send(`guild chat is currently muted for ${ms(this.chatBridge.guildChatMutedUntil - Date.now(), { long: true })}`).then(
+		if (this.chatMutedUntil && !player?.isStaff) {
+			if (Date.now() < this.chatMutedUntil) {
+				message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
 					() => logger.info(`[CHATBRIDGE]: ${player.info}: DMed guild chat muted`),
 					error => logger.error(`[CHATBRIDGE]: ${player.info}: error DMing guild chat muted: ${error.name}: ${error.message}`),
 				);
@@ -458,8 +464,8 @@ class HypixelGuild extends Model {
 				return true;
 			}
 
-			this.chatBridge.guildChatMuted = false;
-			this.chatBridge.guildChatMutedUntil = 0;
+			this.chatMutedUntil = 0;
+			this.save();
 		}
 
 		this.chatBridge.sendToHypixelGuildChat(message, player);

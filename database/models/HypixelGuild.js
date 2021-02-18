@@ -33,6 +33,11 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: false,
 			allowNull: false,
 		},
+		chatMutedUntil: {
+			type: DataTypes.BIGINT,
+			defaultValue: 0,
+			allowNull: false,
+		},
 		chatBridgeChannelID: {
 			type: DataTypes.STRING,
 			defaultValue: null,

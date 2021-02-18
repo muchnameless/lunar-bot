@@ -100,16 +100,12 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 			const [, target, duration ] = muteMatched;
 
 			if (target === 'the guild chat') {
-				logger.info(`[CHATBRIDGE]: guild chat was muted for ${duration}`);
-				chatBridge.guildChatMuted = true;
+				const guild = chatBridge.guild;
 
-				const msDuration = ms(duration);
+				guild.chatMutedUntil = Date.now() + ms(duration);
+				guild.save();
 
-				chatBridge.guildChatMutedUntil = Date.now() + msDuration;
-				chatBridge.guildChatUnmuteTimeout = setTimeout(() => {
-					chatBridge.guildChatMuted = false;
-					logger.info(`[CHATBRIDGE]: guild chat was unmuted automatically after ${duration}`);
-				}, msDuration);
+				return logger.info(`[CHATBRIDGE]: ${guild.name}'s guild chat was muted for ${duration}`);
 			}
 
 			const player = chatBridge.client.players.cache.find(p => p.ign === target);
@@ -137,10 +133,12 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 			const [, target ] = unMuteMatched;
 
 			if (target === 'the guild chat') {
-				clearTimeout(chatBridge.guildChatUnmuteTimeout);
-				chatBridge.guildChatMuted = false;
-				chatBridge.guildChatMutedUntil = 0;
-				return logger.info('[CHATBRIDGE]: guild chat was unmuted');
+				const guild = chatBridge.guild;
+
+				guild.chatMutedUntil = 0;
+				guild.save();
+
+				return logger.info(`[CHATBRIDGE]: ${guild.name}'s guild chat was unmuted`);
 			}
 
 			const player = chatBridge.client.players.cache.find(p => p.ign === target);

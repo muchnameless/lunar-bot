@@ -33,9 +33,6 @@ class ChatBridge {
 		this.abortLoginTimeout = null;
 		this.queue = new AsyncQueue();
 		this.maxMessageLength = 100;
-		this.guildChatMuted = false;
-		this.guildChatMutedUntil = 0;
-		this.guildChatUnmuteTimeout = null;
 	}
 
 	/**

@@ -62,8 +62,8 @@ module.exports = class UnmuteCommand extends Command {
 			target.chatBridgeMutedUntil = 0;
 			await target.save();
 		} else {
-			guild.chatBridge.guildChatMutedUntil = 0;
-			guild.chatBridge.guildChatMuted = false;
+			guild.chatMutedUntil = 0;
+			await guild.save();
 		}
 
 		await guild.chatBridge.chat(`/g unmute ${target}`);
