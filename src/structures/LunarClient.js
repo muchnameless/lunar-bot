@@ -1,6 +1,7 @@
 'use strict';
 
 const { Client, Collection, Constants } = require('discord.js');
+const { CronJob } = require('cron');
 const path = require('path');
 const { getAllJsFiles } = require('../functions/files');
 const DatabaseHandler = require('./database/DatabaseHandler');
@@ -154,6 +155,42 @@ class LunarClient extends Client {
 				logger.error('error while setting activity:\n', error);
 			}
 		}, 20 * 60 * 1_000); // 20 min
+
+		// schedule guild stats channel update
+		this.schedule('guildStatsChannelUpdate', new CronJob({
+			cronTime: '0 0/20 * * * *',
+			onTick: async () => {
+				if (!this.config.getBoolean('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
+
+				const mainGuild = this.hypixelGuilds.cache.get(this.config.get('MAIN_GUILD_ID'));
+
+				if (!mainGuild) return;
+
+				const stats = mainGuild.stats;
+
+				if (!stats) return;
+
+				try {
+					for (const type of [ 'weight', 'skill', 'slayer', 'catacombs' ]) {
+						/**
+						 * @type {import('discord.js').VoiceChannel}
+						 */
+						const channel = this.channels.cache.get(this.config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
+
+						if (!channel) continue; // no channel found
+
+						const newName = `${type} avg: ${stats[type]}`;
+
+						if (newName === channel.name) continue; // no update needed
+
+						await channel.setName(newName, `synced with ${mainGuild.name}'s average stats`);
+					}
+				} catch (error) {
+					logger.error(`[GUILD STATS CHANNEL UPDATE]: ${error.name}: ${error.message}`);
+				}
+			},
+			start: true,
+		}));
 
 		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.chatBridge.connect();
 

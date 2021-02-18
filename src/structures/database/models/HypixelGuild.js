@@ -59,15 +59,18 @@ class HypixelGuild extends Model {
 		return this.players.size;
 	}
 
-	get totalStats() {
+	/**
+	 * returns various average stats
+	 */
+	get stats() {
 		const players = this.players;
 		const PLAYER_COUNT = players.size;
 
 		return ({
-			weightAverage: players.reduce((acc, player) => acc + player.getWeight().totalWeight, 0) / PLAYER_COUNT,
-			skillAverage: players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT,
-			slayerAverage: players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT,
-			catacombsAverage: players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT,
+			weightAverage: this.client.formatDecimalNumber(players.reduce((acc, player) => acc + player.getWeight().totalWeight, 0) / PLAYER_COUNT),
+			skillAverage: this.client.formatDecimalNumber(players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT),
+			slayerAverage: this.client.formatNumber(players.reduce((acc, player) => acc + player.getSlayerTotal(), 0) / PLAYER_COUNT, 0, Math.round),
+			catacombsAverage: this.client.formatDecimalNumber(players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT),
 		});
 	}
 
