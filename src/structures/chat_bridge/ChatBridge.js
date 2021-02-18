@@ -53,7 +53,7 @@ class ChatBridge {
 			}
 			this._reset();
 			this.connect();
-		}, 60_000);
+		}, Math.min(++this.loginAttempts * 60_000, 300_000));
 	}
 
 	/**
