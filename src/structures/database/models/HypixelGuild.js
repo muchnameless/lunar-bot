@@ -451,6 +451,7 @@ class HypixelGuild extends Model {
 		try {
 			await this.chatBridge.chat(`/g setrank ${player.ign} ${RANK_NAME}`);
 			await message.react(Y_EMOJI_ALT);
+			await player.updateRoles(`requested ${RANK_NAME}`);
 		} catch (error) {
 			logger.error('[CHECK RANK REQS]: promotion error:', error);
 		}
