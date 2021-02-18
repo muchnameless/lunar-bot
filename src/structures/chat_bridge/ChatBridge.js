@@ -167,7 +167,7 @@ class ChatBridge {
 		const prefix = `/gc ${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}: `;
 		const toSend = this.constructor._escapeEz(this.constructor._prettifyDiscordMentions(message.content));
 
-		for (const contentPart of Util.splitMessage(toSend, { maxLength: this.maxMessageLength })) {
+		for (const contentPart of Util.splitMessage(toSend, { maxLength: this.maxMessageLength - prefix.length })) {
 			this.chat(this.hypixelSpamBypass(`${prefix}${contentPart}`));
 		}
 	}
