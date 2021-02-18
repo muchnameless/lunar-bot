@@ -1044,7 +1044,7 @@ class Player extends Model {
 	}
 
 	/**
-	 * player nickname escaped for discord chat
+	 * player nickname
 	 */
 	toString() {
 		return this.ign;
