@@ -9,9 +9,9 @@ module.exports = class MuteCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'mute a guild member both ingame and for the chat bridge',
+			description: 'mute a single guild member or guild chat both ingame and for the chat bridge',
 			args: true,
-			usage: '[`ign`|`discord id`|`@mention`] <`time` in ms lib format>',
+			usage: '[`ign`|`discord id`|`@mention` for a single member] [`guild`|`everyone` for the guild chat] [`time` in ms lib format]',
 			cooldown: 0,
 		});
 	}
@@ -26,35 +26,58 @@ module.exports = class MuteCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
+		if (args.length < 2) return message.reply(`${config.get('PREFIX')}${this.usage}`);
+
 		const { players } = client;
-		const player = (message.mentions.users.size
-			? players.getByID(message.mentions.users.first().id)
-			: players.getByIGN(args[0]))
-			?? players.getByID(args[0]);
+		const [ TARGET_INPUT, DURATION_INPUT ] = args;
 
-		if (!player) return message.reply(`no player ${message.mentions.users.size
-			? `linked to \`${message.guild
-				? message.mentions.members.first().displayName
-				: message.mentions.users.first().username
-			}\``
-			: `with the IGN \`${args[0]}\``
-		} found.`);
+		let target;
+		let guild;
 
-		args.shift();
+		if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+			target = 'everyone';
+			guild = players.getByID(message.author.id)?.guild;
 
-		const BAN_DURATION = args.length
-			? ms(args[0])
-			: null;
-		const EXPIRES_AT = BAN_DURATION
-			? Date.now() + BAN_DURATION
-			: Infinity;
+			if (!guild) return message.reply('unable to find your guild.');
+		} else {
+			target = (message.mentions.users.size
+				? players.getByID(message.mentions.users.first().id)
+				: players.getByIGN(TARGET_INPUT))
+				?? players.getByID(TARGET_INPUT);
 
-		player.chatBridgeMutedUntil = EXPIRES_AT;
-		player.hasDiscordPingPermission = false;
-		await player.save();
+			if (!target) return message.reply(`no player ${message.mentions.users.size
+				? `linked to \`${message.guild
+					? message.mentions.members.first().displayName
+					: message.mentions.users.first().username
+				}\``
+				: `with the IGN \`${TARGET_INPUT}\``
+			} found.`);
 
-		await player.guild?.chatBridge.chat(`/g mute ${player.ign} ${args[0]}`);
+			guild = target.guild;
 
-		message.reply(`\`${player.ign}\` won't be passed to the ingame chat ${BAN_DURATION ? 'anymore' : `for ${ms(BAN_DURATION, { long: true })}`}`);
+			if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
+		}
+
+		if (!guild.chatBridge) return message.reply(`no chat bridge for \`${guild.name}\` found.`);
+		if (!guild.chatBridge.ready) return message.reply(`the chat bridge for \`${guild.name}\` is currently not online.`);
+
+		const DURATION = ms(DURATION_INPUT);
+
+		if (isNaN(DURATION)) return message.reply(`\`${DURATION_INPUT}\` is not a valid duration.`);
+
+		const EXPIRES_AT = Date.now() + DURATION;
+
+		if (target instanceof players.model) {
+			target.chatBridgeMutedUntil = EXPIRES_AT;
+			target.hasDiscordPingPermission = false;
+			await target.save();
+		} else {
+			guild.chatBridge.guildChatMutedUntil = EXPIRES_AT;
+			guild.chatBridge.guildChatMuted = true;
+		}
+
+		await guild.chatBridge.chat(`/g mute ${target} ${DURATION_INPUT}`);
+
+		message.reply(`muted \`${target}\` for \`${DURATION_INPUT}\``);
 	}
 };
