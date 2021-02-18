@@ -1,8 +1,7 @@
 'use strict';
 
-const { Util, DiscordAPIError } = require('discord.js');
+const { DiscordAPIError } = require('discord.js');
 const ms = require('ms');
-const { nameToUnicode } = require('../../../constants/emojiNameUnicodeConverter');
 const logger = require('../../../functions/logger');
 
 /**
@@ -155,8 +154,7 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 
 	const messageParts = message.split(':');
 	const sender = messageParts.shift().replace(/§./g, '').trim(); // remove mc-chat markdown
-
-	let content = messageParts.join(':').replace(/ࠀ|⭍/g, '').trim();
+	const content = messageParts.join(':').replace(/ࠀ|⭍/g, '').trim();
 
 	if (!content.length) return;
 
@@ -169,17 +167,6 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 
 		if (ign === chatBridge.bot.username) return; // ignore own messages
 
-		// prettify message for discord, try to replace :emoji: and others with the actually working discord render string
-		content = Util.escapeMarkdown(content)
-			.replace(/:(.+):/, (match, p1) => chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[p1] ?? match) // emojis (custom and default)
-			.replace(/<?#([a-z-]+)>?/gi, (match, p1) => chatBridge.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
-			.replace(/<?@[!&]?(\S+)>?/g, (match, p1) =>
-				chatBridge.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
-				?? chatBridge.client.users.cache.find(u => u.username.toLowerCase() === p1.toLowerCase())?.toString() // users
-				?? chatBridge.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
-				?? match,
-			);
-
 		const player = chatBridge.client.players.cache.find(p => p.ign === ign);
 		const member = await player?.discordMember;
 
@@ -189,12 +176,15 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 			await chatBridge.webhook.send({
 				username: member?.displayName ?? player?.ign ?? ign,
 				avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-				content,
+				content: chatBridge.parseMinecraftMessageToDiscord(content),
 				allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
 			});
 		} catch (error) {
-			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) chatBridge.client.config.set('CHATBRIDGE_WEBHOOK_DELETED', 'true');
 			logger.error(`[CHATBRIDGE DC CHAT]: ${error.name}: ${error.message}`);
+			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
+				chatBridge.uncacheWebhook();
+				chatBridge.reconnect();
+			}
 		}
 
 		return;

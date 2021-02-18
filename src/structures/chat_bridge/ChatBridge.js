@@ -7,7 +7,7 @@ const emojiRegex = require('emoji-regex');
 const ms = require('ms');
 const { sleep } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
-const { unicodeToName } = require('../../constants/emojiNameUnicodeConverter');
+const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
 const AsyncQueue = require('../AsyncQueue');
 const logger = require('../../functions/logger');
 
@@ -117,6 +117,14 @@ class ChatBridge {
 	}
 
 	/**
+	 * uncaches the webhook
+	 */
+	uncacheWebhook() {
+		this.webhook = null;
+		this.ready = false;
+	}
+
+	/**
 	 * create bot instance and logs into hypixel
 	 */
 	_createBot() {
@@ -162,6 +170,22 @@ class ChatBridge {
 	}
 
 	/**
+	 * prettify message for discord, tries to replace :emoji: and others with the actually working discord render string
+	 * @param {string} message
+	 */
+	parseMinecraftMessageToDiscord(message) {
+		return Util.escapeMarkdown(message)
+			.replace(/:(.+):/, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[p1] ?? match) // emojis (custom and default)
+			.replace(/<?#([a-z-]+)>?/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+			.replace(/<?@[!&]?(\S+)>?/g, (match, p1) =>
+				this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
+				?? this.client.users.cache.find(u => u.username.toLowerCase() === p1.toLowerCase())?.toString() // users
+				?? this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
+				?? match,
+			);
+	}
+
+	/**
 	 * escapes all standalone occurrences of 'ez', case-insensitive
 	 * @param {string} string
 	 */
@@ -173,7 +197,7 @@ class ChatBridge {
 	 * replaces discord renders with names
 	 * @param {string} string
 	 */
-	static _prettifyDiscordMentions(string) {
+	static _parseDiscordMessageToMinecraft(string) {
 		return string
 			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // custom emojis
 			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
@@ -201,7 +225,7 @@ class ChatBridge {
 	 */
 	sendToHypixelGuildChat(message, player) {
 		const prefix = `/gc ${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}: `;
-		const toSend = this.constructor._escapeEz(this.constructor._prettifyDiscordMentions(message.content));
+		const toSend = this.constructor._escapeEz(this.constructor._parseDiscordMessageToMinecraft(message.content));
 
 		for (const contentPart of Util.splitMessage(toSend, { maxLength: this.maxMessageLength - prefix.length })) {
 			this.chat(this.hypixelSpamBypass(`${prefix}${contentPart}`));
