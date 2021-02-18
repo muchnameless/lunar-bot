@@ -24,9 +24,6 @@ class ChatBridge {
 		 * @type {import('../database/models/HypixelGuild')}
 		 */
 		this.guild = null;
-		/**
-		 * @type {import('mineflayer').Bot}
-		 */
 		this.bot = null;
 		this.ready = false;
 		this.loginAttempts = 0;
@@ -44,7 +41,7 @@ class ChatBridge {
 	 */
 	async connect() {
 		if (!this.webhook) await this._fetchWebhook();
-		this.bot = this.createBot();
+		this.bot = this._createBot();
 		this.maxMessageLength = this.bot.protocolVersion > PROTO_VER_1_10 ? 256 : 100;
 		this._loadEvents();
 
