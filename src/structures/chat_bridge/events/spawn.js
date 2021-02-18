@@ -29,6 +29,7 @@ module.exports = async chatBridge => {
 
 	await chatBridge.fetchAndCacheWebhook();
 
+	if (chatBridge.criticalError) return;
 	if (!chatBridge.ready) return chatBridge.reconnect();
 
 	// send bot to limbo (forbidden character in chat)

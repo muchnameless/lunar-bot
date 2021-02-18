@@ -8,6 +8,7 @@ const ms = require('ms');
 const { sleep } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
+const WebhookError = require('../errors/WebhookError');
 const AsyncQueue = require('../AsyncQueue');
 const logger = require('../../functions/logger');
 
@@ -26,6 +27,7 @@ class ChatBridge {
 		this.guild = null;
 		this.bot = null;
 		this.ready = false;
+		this.criticalError = false;
 		this.loginAttempts = 0;
 		/**
 		 * disconnect the bot if it hasn't successfully spawned in 60 seconds
@@ -39,6 +41,7 @@ class ChatBridge {
 	 * fetch the webhook if it is uncached, create and log the bot into hypixel
 	 */
 	async connect() {
+		if (this.criticalError) throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
 		this.bot = this._createBot();
 		this._loadEvents();
 
@@ -105,25 +108,28 @@ class ChatBridge {
 		try {
 			const channel = this.client.channels.cache.get(this.guild.chatBridgeChannelID);
 
-			if (!channel) return logger.warn(`[CHATBRIDGE]: ${this.guild.name}: unknown channel: ${this.guild.chatBridgeChannelID}`);
-			if (!channel.checkBotPermissions('MANAGE_WEBHOOKS')) return logger.warn(`[CHATBRIDGE]: ${this.guild.name}: missing 'MANAGE_WEBHOOKS' in #${channel.name}`);
+			if (!channel) throw new WebhookError('unknown channel', channel, this.guild);
+			if (!channel.checkBotPermissions('MANAGE_WEBHOOKS')) throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.guild);
 
 			const webhooks = await channel.fetchWebhooks();
 
-			if (!webhooks.size) {
-				this.client.log(new MessageEmbed()
-					.setColor(this.client.config.get('EMBED_RED'))
-					.setTitle(`${this.guild.name} Chat Bridge`)
-					.setDescription(`**Error**: no webhooks in ${channel} found`)
-					.setTimestamp(),
-				);
-				this.disconnect();
-				return logger.warn(`[CHATBRIDGE]: ${this.guild.name}: no webhooks found in #${channel.name}`);
-			}
+			if (!webhooks.size) throw new WebhookError('no webhooks', channel, this.guild);
 
 			this.webhook = webhooks.first();
 			this.ready = true;
 		} catch (error) {
+			if (error instanceof WebhookError) {
+				this.client.log(new MessageEmbed()
+					.setColor(this.client.config.get('EMBED_RED'))
+					.setTitle(`${error.hypixelGuild.name} Chat Bridge`)
+					.setDescription(`**Error**: ${error.message}${error.channel ? `in ${error.channel}` : ''}`)
+					.setTimestamp(),
+				);
+				this.criticalError = true;
+
+				return this.disconnect();
+			}
+
 			logger.error(`[CHATBRIDGE]: ${this.guild.name}: error fetching webhook: ${error.name}: ${error.message}`);
 		}
 	}
