@@ -1,6 +1,7 @@
 'use strict';
 
 const { Util, DiscordAPIError } = require('discord.js');
+const ms = require('ms');
 const { nameToUnicode } = require('../../../constants/emojiNameUnicodeConverter');
 const logger = require('../../../functions/logger');
 
@@ -26,43 +27,107 @@ const logger = require('../../../functions/logger');
 
 
 /**
- * @param {import('../../LunarClient')} client
- * @param {import('mineflayer').Bot} bot
+ * @param {import('../ChatBridge')} chatBridge
  * @param {TextComponent[]} jsonMsg chat message from the server
  * @param {ChatPosition} position
  */
-module.exports = async (client, bot, jsonMsg, position) => {
-	if (!client.config.getBoolean('CHATBRIDGE_ENABLED')) return;
+module.exports = async (chatBridge, jsonMsg, position) => {
+	if (!chatBridge.client.config.getBoolean('CHATBRIDGE_ENABLED')) return;
 
 	const message = jsonMsg.toString().trim();
 
-	if (client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ position, message });
+	if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ position, message });
 
 
-	// non player message
+	// non-player message
 	if (!message.includes(':')) {
-		// auto '/gc welcome'
+
+		/**
+		 * auto '/gc welcome'
+		 * [HypixelRank] IGN joined the guild!
+		 */
 		if (message.includes('joined the guild')) {
-			bot.chat(client.chatBridge.hypixelSpamBypass('/gc welcome'));
+			return chatBridge.chat(chatBridge.hypixelSpamBypass('/gc welcome'));
 		}
 
-		// auto '/gc gg' for promotions
+		/**
+		 * [HypixelRank] IGN left the guild!
+		 */
+		if (message.includes('left the guild!')) {
+			return;
+		}
+
+
+		/**
+		 * auto '/gc gg' for promotions
+		 * [HypixelRank] IGN was promoted from PREV to NOW
+		 */
 		if (message.includes('was promoted from')) {
-			bot.chat(client.chatBridge.hypixelSpamBypass('/gc gg'));
+			return chatBridge.chat(chatBridge.hypixelSpamBypass('/gc gg'));
 		}
 
-		// accept f reqs from guild members
-		const matched = message.match(/Friend request from (?:\[.+\+*\] )?(\w+)/);
+		/**
+		 * [HypixelRank] IGN was demoted from PREV to NOW
+		 */
+		if (message.includes('was demoted from')) {
+			return;
+		}
 
-		if (!matched) return;
+		/**
+		 * accept f reqs from guild members
+		 * Friend request from [HypixelRank] IGN\n
+		 */
+		const friendReqMatched = message.match(/Friend request from (?:\[.+\+*\] )?(\w+)/);
 
-		const [, ign ] = matched;
-		const player = client.players.cache.find(p => p.ign === ign);
+		if (friendReqMatched) {
+			const [, ign ] = friendReqMatched;
+			const player = chatBridge.client.players.cache.find(p => p.ign === ign);
 
-		if (!player?.guildID) return;
+			if (!player?.guildID) return;
 
-		logger.info(`[CHATBRIDGE MESSAGE]: accepting f request from ${ign}`);
-		return bot.chat(`/f add ${ign}`);
+			logger.info(`[CHATBRIDGE MESSAGE]: accepting f request from ${ign}`);
+			return chatBridge.chat(`/f add ${ign}`);
+		}
+
+		/**
+		 * auto chatBridge mute
+		 * [HypixelRank] IGN has muted [HypixelRank] IGN for 10s
+		 */
+		const muteMatched = message.match(/(?:\[.+\+*\] )?\w+ has muted (?:\[.+\+*\] )?(\w+) for (\w+)/);
+
+		if (muteMatched) {
+			const [, ign, duration ] = muteMatched;
+			const player = chatBridge.client.players.find(p => p.ign === ign);
+
+			if (!player) return;
+
+			const msDuration = ms(duration);
+
+			if (!msDuration) return;
+
+			player.chatBridgeMutedUntil = Date.now() + msDuration;
+			player.save();
+
+			return logger.info(`[CHATBRIDGE]: ${ign} was muted for ${duration}`);
+		}
+
+		/**
+		 * auto chatBridge unmute
+		 * [HypixelRank] IGN has unmuted [HypixelRank] IGN
+		 */
+		const unMuteMatched = message.match(/(?:\[.+\+*\] )?\w+ has unmuted (?:\[.+\+*\] )?(\w+)/);
+
+		if (unMuteMatched) {
+			const [, ign ] = unMuteMatched;
+			const player = chatBridge.client.players.find(p => p.ign === ign);
+
+			if (!player) return;
+
+			player.chatBridgeMutedUntil = 0;
+			player.save();
+
+			return logger.info(`[CHATBRIDGE]: ${ign} was unmuted`);
+		}
 	}
 
 
@@ -70,8 +135,6 @@ module.exports = async (client, bot, jsonMsg, position) => {
 	const sender = messageParts.shift().replace(/§./g, '').trim(); // remove mc-chat markdown
 
 	let content = messageParts.join(':').replace(/ࠀ|⭍/g, '').trim();
-
-	if (client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ sender, content });
 
 	if (!content.length) return;
 
@@ -82,33 +145,33 @@ module.exports = async (client, bot, jsonMsg, position) => {
 	if (guildMatch) {
 		const [, ign ] = guildMatch;
 
-		if (ign === bot.username) return; // ignore own messages
+		if (ign === chatBridge.bot.username) return; // ignore own messages
 
 		// prettify message for discord, try to replace :emoji: and others with the actually working discord render string
 		content = Util.escapeMarkdown(content)
-			.replace(/:(.+):/, (match, p1) => client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[p1] ?? match) // emojis (custom and default)
-			.replace(/<?#([a-z-]+)>?/gi, (match, p1) => client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+			.replace(/:(.+):/, (match, p1) => chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[p1] ?? match) // emojis (custom and default)
+			.replace(/<?#([a-z-]+)>?/gi, (match, p1) => chatBridge.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
 			.replace(/<?@[!&]?(\S+)>?/g, (match, p1) =>
-				client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
-				?? client.users.cache.find(u => u.username.toLowerCase() === p1.toLowerCase())?.toString() // users
-				?? client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
+				chatBridge.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
+				?? chatBridge.client.users.cache.find(u => u.username.toLowerCase() === p1.toLowerCase())?.toString() // users
+				?? chatBridge.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
 				?? match,
 			);
 
-		const player = client.players.cache.find(p => p.ign === ign);
+		const player = chatBridge.client.players.cache.find(p => p.ign === ign);
 		const member = await player?.discordMember;
 
-		if (!client.chatBridge.webhook) return logger.warn('[CHATBRIDGE]: webhook unavailable');
+		if (!chatBridge.webhook) return logger.warn('[CHATBRIDGE]: webhook unavailable');
 
 		try {
-			await client.chatBridge.webhook.send({
-				username: member?.displayName ?? player?.ign ?? ign ?? client.user.username,
-				avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? client.user.displayAvatarURL({ dynamic: true }),
+			await chatBridge.webhook.send({
+				username: member?.displayName ?? player?.ign ?? ign,
+				avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? chatBridge.client.user.displayAvatarURL({ dynamic: true }),
 				content,
 				allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
 			});
 		} catch (error) {
-			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) client.config.set('CHATBRIDGE_WEBHOOK_DELETED', 'true');
+			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) chatBridge.client.config.set('CHATBRIDGE_WEBHOOK_DELETED', 'true');
 			logger.error(`[CHATBRIDGE DC CHAT]: ${error.name}: ${error.message}`);
 		}
 
@@ -122,9 +185,9 @@ module.exports = async (client, bot, jsonMsg, position) => {
 	if (whisperMatch) {
 		const [, ign ] = whisperMatch;
 
-		if (client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[CHATBRIDGE DC CHAT]: whisper from ${ign}`);
+		if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[CHATBRIDGE DC CHAT]: whisper from ${ign}`);
 
 		// auto 'o/' reply
-		if (/\( ﾟ◡ﾟ\)\/|o\//.test(content)) return bot.chat(client.chatBridge.hypixelSpamBypass(`/w ${ign} o/`));
+		if (/\( ﾟ◡ﾟ\)\/|o\//.test(content)) return chatBridge.chat(chatBridge.hypixelSpamBypass(`/w ${ign} o/`));
 	}
 };

@@ -5,8 +5,11 @@ const PROTO_VER_1_10 = require('minecraft-data')('1.10.2').version.version;
 const path = require('path');
 const mineflayer = require('mineflayer');
 const emojiRegex = require('emoji-regex');
+const ms = require('ms');
+const { sleep } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { unicodeToName } = require('../../constants/emojiNameUnicodeConverter');
+const AsyncQueue = require('../AsyncQueue');
 const logger = require('../../functions/logger');
 
 
@@ -17,20 +20,23 @@ class ChatBridge {
 	constructor(client) {
 		this.client = client;
 		this.webhook = null;
+		/**
+		 * @type {import('../database/models/HypixelGuild')}
+		 */
+		this.guild = null;
+		/**
+		 * @type {import('mineflayer').Bot}
+		 */
 		this.bot = null;
+		this.ready = false;
 		this.loginAttempts = 0;
-
-		this.guildID = '5eeec8c08ea8c950b6cb6a19';
-
 		this._timeouts = new Set();
+		/**
+		 * disconnect the bot if it hasn't successfully spawned in 60 seconds
+		 */
 		this.abortConnectionTimeout = null;
-	}
-
-	/**
-	 * wether the logging webhook is properly loaded and cached
-	 */
-	get webhookAvailable() {
-		return Boolean(this.webhook);
+		this.queue = new AsyncQueue();
+		this.maxMessageLength = 100;
 	}
 
 	/**
@@ -38,43 +44,27 @@ class ChatBridge {
 	 */
 	async connect() {
 		if (!this.webhook) await this._fetchWebhook();
-		this._createBot();
+		this.bot = this.createBot();
+		this.maxMessageLength = this.bot.protocolVersion > PROTO_VER_1_10 ? 256 : 100;
 		this._loadEvents();
 
-		this.abortConnectionTimeout = this.client.setTimeout(() => this.bot.quit('Relogging'), 60_000);
+		// disconnect the bot if it hasn't successfully spawned in 60 seconds
+		this.abortConnectionTimeout = setTimeout(() => this.bot.quit('Relogging'), 60_000);
 	}
 
 	/**
-	 * clears all timeouts
+	 * destroys the connection to the guild and reconnects the bot
 	 */
-	clearAllTimeouts() {
-		this.client.clearTimeout(this.abortConnectionTimeout);
-		for (const t of this._timeouts) this.clearTimeout(t);
-	}
+	reconnect() {
+		this.ready = false;
+		if (this.guild) this.guild.chatBridge = null;
+		this.guild = null;
 
-	/**
-	 * Sets a timeout that will be automatically cancelled if the client is destroyed.
-	 * @param {Function} fn Function to execute
-	 * @param {number} delay Time to wait before executing (in milliseconds)
-	 * @param {...*} args Arguments for the function
-	 * @returns {Timeout}
-	 */
-	setTimeout(fn, delay, ...args) {
-		const timeout = setTimeout(() => {
-			fn(...args);
-			this._timeouts.delete(timeout);
-		}, delay);
-		this._timeouts.add(timeout);
-		return timeout;
-	}
+		const LOGIN_DELAY = Math.min((this.loginAttempts + 1) * 5_000, 60_000);
 
-	/**
-	 * Clears a timeout.
-	 * @param {Timeout} timeout Timeout to cancel
-	 */
-	clearTimeout(timeout) {
-		clearTimeout(timeout);
-		this._timeouts.delete(timeout);
+		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(LOGIN_DELAY, { long: true })}`);
+
+		this.client.setTimeout(() => this.connect(), LOGIN_DELAY);
 	}
 
 	/**
@@ -97,7 +87,7 @@ class ChatBridge {
 	 * create bot instance and logs into hypixel
 	 */
 	_createBot() {
-		this.bot = mineflayer.createBot({
+		return mineflayer.createBot({
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
 			username: process.env.MINECRAFT_USERNAME,
@@ -117,7 +107,7 @@ class ChatBridge {
 			const event = require(file);
 			const EVENT_NAME = path.basename(file, '.js');
 
-			this.bot[[ 'login', 'spawn' ].includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, this.client, this.bot));
+			this.bot[[ 'login', 'spawn' ].includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, this));
 		}
 
 		logger.debug(`[CHATBRIDGE EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
@@ -131,7 +121,7 @@ class ChatBridge {
 		const invisChars = [ '⭍', 'ࠀ' ]; // those don't render in the mc client
 
 		// max message length is 256 post 1.11, 100 pre 1.11
-		for (let index = 0; index < ((this.bot.protocolVersion > PROTO_VER_1_10) ? 256 : 100) - string.length; ++index) {
+		for (let index = 0; index < this.maxMessageLength - string.length; ++index) {
 			string += invisChars[Math.floor(Math.random() * invisChars.length)];
 		}
 
@@ -142,7 +132,7 @@ class ChatBridge {
 	 * escapes all standalone occurrences of 'ez', case-insensitive
 	 * @param {string} string
 	 */
-	_escapeEz(string) {
+	static _escapeEz(string) {
 		return string.replace(/(?<=\be+)(?=z+\b)/gi, 'ࠀ');
 	}
 
@@ -150,7 +140,7 @@ class ChatBridge {
 	 * replaces discord renders with names
 	 * @param {string} string
 	 */
-	_cleanDiscordMentions(string) {
+	static _prettifyDiscordMentions(string) {
 		return string
 			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // custom emojis
 			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
@@ -172,47 +162,36 @@ class ChatBridge {
 	}
 
 	/**
-	 * converts a discord message to a minecraft message string for the bot to chat
+	 * realy a message to ingame guild chat, replacing emojis with :emojiName:
 	 * @param {import('../extensions/Message')} message
 	 * @param {import('../database/models/Player')} player
 	 */
-	_makeContent(message, player) {
-		const prefix = this._escapeEz(`/gc ${player?.ign ?? message.member?.displayName ?? message.author.username}: `);
-		const toSend = this._escapeEz(this._cleanDiscordMentions(message.content));
+	sendToHypixelGuildChat(message, player) {
+		const prefix = `/gc ${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}: `;
+		const toSend = this.constructor._escapeEz(this.constructor._prettifyDiscordMentions(message.content));
 
-		return Util.splitMessage(toSend, { maxLength: 256 }).map(contentPart => this.hypixelSpamBypass(`${prefix}${contentPart}`));
+		for (const contentPart of Util.splitMessage(toSend, { maxLength: this.maxMessageLength })) {
+			this.chat(this.hypixelSpamBypass(`${prefix}${contentPart}`));
+		}
 	}
 
 	/**
-	 * realy a message to ingame guild chat, replacing emojis with :emojiName:
-	 * @param {import('../extensions/Message')} message
+	 * send a message to the ingame chat, 600 ms queue cooldown
+	 * @param {string} message
 	 */
-	handleDiscordMessage(message) {
-		// chatbridge disabled or no message.content to chat
-		if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return;
+	async chat(message) {
+		if (!this.ready) throw new Error('chat bridge bot not online');
 
-		const player = this.client.players.getByID(message.author.id);
-
-		// check if muted
-		if (player.chatBridgeMutedUntil) {
-			if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
-				return message.author.send(`you are currently muted ${player.chatBridgeMutedUntil ? `until ${new Date(player.chatBridgeMutedUntil).toUTCString()}` : 'for an unspecified amount of time'}`).then(
-					() => logger.info(`[CHATBRIDGE]: ${player.info}: DMed muted user`),
-					error => logger.error(`[CHATBRIDGE]: ${player.info}: error DMing muted user: ${error.name}: ${error.message}`),
-				);
-			}
-
-			player.chatBridgeMutedUntil = 0;
-			player.save();
-		}
+		await this.queue.wait();
 
 		try {
-			this._makeContent(message, player).forEach((contentPart, index) => {
-				// sends each part 550 ms (approx 11 ticks) apart
-				this.setTimeout(this.bot.chat, index * 550, contentPart);
-			});
+			if (!this.ready) return;
+			this.bot.chat(message);
+			await sleep(600); // sends each part 600 ms apart ('you can only send a message once every half second')
 		} catch (error) {
 			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
+		} finally {
+			this.queue.shift();
 		}
 	}
 }

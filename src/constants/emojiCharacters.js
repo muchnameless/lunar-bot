@@ -23,4 +23,5 @@ module.exports = {
 	FLUSHED: '😳',
 	CLOWN: '🤡',
 	LOCK: '🔒',
+	MUTED: '🔇',
 };

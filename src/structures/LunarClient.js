@@ -92,9 +92,10 @@ class LunarClient extends Client {
 
 	/**
 	 * send in ingame chat via the chatBridge
+	 * @type {Function}
 	 */
 	get chat() {
-		return this.chatBridge.bot.chat;
+		return this.chatBridge.chat.bind(this.chatBridge);
 	}
 
 	/**

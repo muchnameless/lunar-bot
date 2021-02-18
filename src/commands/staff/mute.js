@@ -9,10 +9,10 @@ module.exports = class MuteCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'mute a guild member from using the ChatBridge (ingame to discord still works but won\'t ping users anymore)',
+			description: 'mute a guild member both ingame and for the chat bridge',
 			args: true,
 			usage: '[`ign`|`discord id`|`@mention`] <`time` in ms lib format>',
-			cooldown: 1,
+			cooldown: 0,
 		});
 	}
 
@@ -53,6 +53,8 @@ module.exports = class MuteCommand extends Command {
 		player.hasDiscordPingPermission = false;
 		await player.save();
 
-		message.reply(`discord messages from \`${player.ign}\` won't be passed to the ingame chat ${BAN_DURATION ? 'anymore' : `for ${ms(BAN_DURATION, { long: true })}`}`);
+		await player.guild?.chatBridge.chat(`/g mute ${player.ign} ${args[0]}`);
+
+		message.reply(`\`${player.ign}\` won't be passed to the ingame chat ${BAN_DURATION ? 'anymore' : `for ${ms(BAN_DURATION, { long: true })}`}`);
 	}
 };

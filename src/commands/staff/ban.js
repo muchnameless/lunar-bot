@@ -12,7 +12,7 @@ module.exports = class BanCommand extends Command {
 			description: 'ban a discord user from using the bot',
 			args: true,
 			usage: '[`discord id`|`@mention`] <`time` in ms lib format> <`reason`>',
-			cooldown: 1,
+			cooldown: 0,
 		});
 	}
 

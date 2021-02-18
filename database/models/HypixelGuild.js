@@ -28,6 +28,16 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: 0,
 			allowNull: true,
 		},
+		chatBridgeEnabled: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+			allowNull: false,
+		},
+		chatBridgeChannelID: {
+			type: DataTypes.STRING,
+			defaultValue: null,
+			allowNull: true,
+		},
 		rankRequestChannelID: {
 			type: DataTypes.STRING,
 			defaultValue: null,

@@ -13,7 +13,7 @@ module.exports = class TracklistCommand extends Command {
 			description: 'gained weight from members below reqs',
 			args: false,
 			usage: '',
-			cooldown: 1,
+			cooldown: 0,
 		});
 	}
 

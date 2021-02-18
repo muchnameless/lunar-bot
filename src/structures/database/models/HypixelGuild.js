@@ -3,7 +3,7 @@
 const { Model } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
 const { autocorrect, getHypixelClient } = require('../../../functions/util');
-const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
+const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED } = require('../../../constants/emojiCharacters');
 const { offsetFlags, UNKNOWN_IGN } = require('../../../constants/database');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
@@ -23,6 +23,11 @@ class HypixelGuild extends Model {
 		 * @type {import('../../LunarClient')}
 		 */
 		this.client;
+
+		/**
+		 * @type {import('../../chat_bridge/ChatBridge')}
+		 */
+		this.chatBridge = null;
 	}
 
 	/**
@@ -52,6 +57,18 @@ class HypixelGuild extends Model {
 	 */
 	get playerCount() {
 		return this.players.size;
+	}
+
+	get totalStats() {
+		const players = this.players;
+		const PLAYER_COUNT = players.size;
+
+		return ({
+			weightAverage: players.reduce((acc, player) => acc + player.getWeight().totalWeight, 0) / PLAYER_COUNT,
+			skillAverage: players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT,
+			slayerAverage: players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT,
+			catacombsAverage: players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT,
+		});
 	}
 
 	/**
@@ -252,7 +269,7 @@ class HypixelGuild extends Model {
 
 			if (!player) return logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
 
-			player.updateGuildXp(hypixelGuildMember.expHistory);
+			player.syncWithGuildData(hypixelGuildMember);
 			player.guildRankPriority = this.ranks.find(rank => rank.name === hypixelGuildMember.rank)?.priority ?? (/guild ?master/i.test(hypixelGuildMember.rank) ? 6 : 0);
 			player.save();
 		});
@@ -309,8 +326,8 @@ class HypixelGuild extends Model {
 	 * determine the requested rank and compare the player's weight with the rank's requirement
 	 * @param {import('../../extensions/Message')} message discord message which was send in #rank-requests channel
 	 */
-	async handleRankRequest(message) {
-		if (message.mentions.users.size) return; // ignore messages with tagged users
+	async handleRankRequestMessage(message) {
+		if (message.mentions.users.size) return true; // ignore messages with tagged users
 
 		const { config } = this.client;
 		const result = message.content
@@ -320,7 +337,7 @@ class HypixelGuild extends Model {
 			.map(word => autocorrect(word, this.ranks.filter(rank => rank.roleID), 'name'))
 			.sort((a, b) => b.similarity - a.similarity)[0]; // element with the highest similarity
 
-		if (!result || result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return;
+		if (!result || result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return true;
 
 		const {
 			name: RANK_NAME,
@@ -328,36 +345,33 @@ class HypixelGuild extends Model {
 			roleID: ROLE_ID,
 			priority: RANK_PRIORITY,
 		} = result.value; // rank
-		const player = this.client.players.getByID(message.author.id);
+		const player = this.players.find(p => p.discordID === message.author.id);
 
 		// no player db entry
 		if (!player) {
 			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested ${RANK_NAME} but could not be found in the player db`);
 
-			return message.reply(
-				`unable to find you in the player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
+			message.reply(
+				`unable to find you in the ${this.name} player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
 				{ sameChannel: true },
 			);
-		}
 
-		// player is not in the guild
-		if (player.guildID !== this.guildID) {
-			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested ${RANK_NAME} but is not part of the guild`);
-
-			return message.reply(
-				`it seems like you are not in ${this.name}`,
-				{ sameChannel: true },
-			);
+			return true;
 		}
 
 		let { totalWeight } = player.getWeight();
 
-		// player meets reqs and already has the rank or the member already has requested role and therefore ingame rank
-		if (totalWeight >= WEIGHT_REQ && (player.guildRankPriority === RANK_PRIORITY || message.member.roles.cache.has(ROLE_ID))) {
-			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[CHECK RANK REQS]: delete: ${error.name}: ${error.message}`));
-			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank but already had it`);
+		// player meets reqs and already has the rank or is staff and has the rank's role
+		if (totalWeight >= WEIGHT_REQ && (player.guildRankPriority === RANK_PRIORITY || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
+			if (message.replyMessageID) {
+				message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[CHECK RANK REQS]: delete: ${error.name}: ${error.message}`));
+			}
+			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
+				message.react(CLOWN).catch(error => logger.error(`[CHECK RANK REQS]: clown reaction: ${error.name}: ${error.message}`)); // get clowned
+			}
 
-			return message.channel.checkBotPermissions('ADD_REACTIONS') && message.react(CLOWN).catch(error => logger.error(`[CHECK RANK REQS]: clown reaction: ${error.name}: ${error.message}`)); // get clowned
+			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank but already had it`);
+			return true;
 		}
 
 		const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));
@@ -380,15 +394,55 @@ class HypixelGuild extends Model {
 
 		logger.info(`[CHECK RANK REQS]: ${player.ign} requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
-		if (this.client.chatBridge.guildID !== this.guildID || totalWeight < WEIGHT_REQ || !this.client.chatBridge.bot) return;
+		if (totalWeight < WEIGHT_REQ || !this.chatBridge?.ready) return true;
 
 		try {
-			this.client.chatBridge.bot.chat(`/g setrank ${player.ign} ${RANK_NAME}`);
-
+			await this.chatBridge.chat(`/g setrank ${player.ign} ${RANK_NAME}`);
 			await message.react(Y_EMOJI_ALT);
 		} catch (error) {
 			logger.error('[CHECK RANK REQS]: promotion error:', error);
 		}
+
+		return true;
+	}
+
+	/**
+	 * determine the requested rank and compare the player's weight with the rank's requirement
+	 * @param {import('../../extensions/Message')} message discord message which was send in #rank-requests channel
+	 */
+	async handleChatBridgeMessage(message) {
+		// chatbridge disabled or no message.content to chat
+		if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return true;
+
+		if (!this.chatBridge) {
+			logger.warn(`[CHATBRIDGE]: ${this.name}: offline`);
+			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
+				message.react(X_EMOJI).catch(error => logger.error(`[CHECK RANK REQS]: clown reaction: ${error.name}: ${error.message}`)); // get clowned
+			}
+			return true;
+		}
+
+		const player = this.client.players.getByID(message.author.id);
+
+		// check if muted
+		if (player.chatBridgeMutedUntil) {
+			if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
+				message.author.send(`you are currently muted ${player.chatBridgeMutedUntil ? `until ${new Date(player.chatBridgeMutedUntil).toUTCString()}` : 'for an unspecified amount of time'}`).then(
+					() => logger.info(`[CHATBRIDGE]: ${player.info}: DMed muted user`),
+					error => logger.error(`[CHATBRIDGE]: ${player.info}: error DMing muted user: ${error.name}: ${error.message}`),
+				);
+				if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
+					message.react(MUTED).catch(error => logger.error(`[CHECK RANK REQS]: clown reaction: ${error.name}: ${error.message}`));
+				}
+				return true;
+			}
+
+			player.chatBridgeMutedUntil = 0;
+			player.save();
+		}
+
+		this.chatBridge.sendToHypixelGuildChat(message, player);
+		return true;
 	}
 }
 

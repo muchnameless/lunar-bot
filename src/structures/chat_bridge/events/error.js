@@ -5,21 +5,16 @@ const logger = require('../../../functions/logger');
 
 
 /**
- * @param {import('../../LunarClient')} client
- * @param {import('mineflayer').Bot} bot
+ * @param {import('../ChatBridge')} chatBridge
  */
-module.exports = (client, bot, error) => {
+module.exports = (chatBridge, error) => {
 	logger.error('[CHATBRIDGE ERROR]:', error);
 
-	const LOGIN_DELAY = Math.min((++client.chatBridge.loginAttempts) * 5_000, 60_000);
-
 	try {
-		bot.quit();
-		logger.warn(`[CHATBRIDGE ERROR]: Minecraft bot disconnected from server, attempting reconnect in ${ms(LOGIN_DELAY, { long: true })}`);
+		chatBridge.bot.quit();
 	} catch (err) {
 		logger.error('[CHATBRIDGE ERROR]:', err);
 	}
 
-	client.chatBridge.clearAllTimeouts();
-	client.chatBridge.setTimeout(() => client.chatBridge.connect(), LOGIN_DELAY);
+	chatBridge.reconnect();
 };

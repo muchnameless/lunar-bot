@@ -26,11 +26,11 @@ module.exports = async (client, message) => {
 
 	// must use prefix for commands in guild
 	if (message.guild && !MATCHED_PREFIX.length) {
-		// minecraft chat bridge
-		if (message.channel.id === config.get('CHATBRIDGE_CHANNEL_ID')) return client.chatBridge.handleDiscordMessage(message);
-
 		// channel-specific triggers
-		return client.hypixelGuilds.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequest(message);
+		if (await client.hypixelGuilds.cache.find(hGuild => hGuild.chatBridgeChannelID === message.channel.id)?.handleChatBridgeMessage(message)) return;
+		if (await client.hypixelGuilds.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message)) return;
+
+		return;
 	}
 
 	// banned users

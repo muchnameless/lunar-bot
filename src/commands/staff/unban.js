@@ -11,7 +11,7 @@ module.exports = class UnbanCommand extends Command {
 			description: 'unban a discord user from using the bot',
 			args: true,
 			usage: '[`discord id`|`@mention`]',
-			cooldown: 1,
+			cooldown: 0,
 		});
 	}
 

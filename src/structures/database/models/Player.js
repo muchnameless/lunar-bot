@@ -126,6 +126,13 @@ class Player extends Model {
 	}
 
 	/**
+	 * wether the player has an ingame staff rank
+	 */
+	get isStaff() {
+		return this.guildRankPriority >= 4;
+	}
+
+	/**
 	 * updates the player data and discord member
 	 * @param {object} options
 	 * @param {boolean} [options.shouldSkipQueue] wether to use the hypixel aux client when the main one's request queue is filled
@@ -859,25 +866,35 @@ class Player extends Model {
 	}
 
 	/**
-	 * updates the guild xp
-	 * @param {object} expHistory member.expHistory from hypixel guild API
+	 * updates the guild xp and syncs guild mutes
+	 * @param {object} data from the hypixel guild API
+	 * @param {object} data.expHistory member.expHistory
+	 * @param {?number} data.mutedTill member.mutedTill
 	 */
-	async updateGuildXp(expHistory = {}) {
+	async syncWithGuildData({ expHistory = {}, mutedTill } = {}) {
+		// update guild xp
 		const currentDay = Object.keys(expHistory)[0];
 
-		if (!currentDay) return this.client.config.getBoolean('EXTENDED_LOGGING') && logger.warn(`[UPDATE GUILD XP]: ${this.logInfo}: no guild xp found`);
+		if (currentDay) {
+			const xp = expHistory[currentDay];
 
-		const xp = expHistory[currentDay];
-
-		if (this.guildXpDay === currentDay) { // xp gained on the same day
-			if (xp > this.guildXpDaily) { // player gained gxp since last update
-				this.guildXp += xp - this.guildXpDaily; // add delta
+			if (this.guildXpDay === currentDay) { // xp gained on the same day
+				if (xp > this.guildXpDaily) { // player gained gxp since last update
+					this.guildXp += xp - this.guildXpDaily; // add delta
+					this.guildXpDaily = xp;
+				}
+			} else { // new day
+				this.guildXpDay = currentDay;
 				this.guildXpDaily = xp;
+				this.guildXp += xp;
 			}
-		} else { // new day
-			this.guildXpDay = currentDay;
-			this.guildXpDaily = xp;
-			this.guildXp += xp;
+		} else {
+			this.client.config.getBoolean('EXTENDED_LOGGING') && logger.warn(`[UPDATE GUILD XP]: ${this.logInfo}: no guild xp found`);
+		}
+
+		// sync guild mutes
+		if (mutedTill) {
+			this.chatBridgeMutedUntil = mutedTill;
 		}
 
 		return this.save();

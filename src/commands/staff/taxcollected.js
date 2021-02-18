@@ -12,7 +12,7 @@ module.exports = class TaxCollectedCommand extends Command {
 			aliases: [ 'collected' ],
 			description: 'show a list of taxahs and their collected tax amount',
 			usage: '',
-			cooldown: 1,
+			cooldown: 0,
 		});
 	}
 
