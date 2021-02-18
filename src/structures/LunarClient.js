@@ -180,10 +180,13 @@ class LunarClient extends Client {
 						if (!channel) continue; // no channel found
 
 						const newName = `${type} avg: ${stats[`${type}Average`].replace(/[^0-9.,]/g, ' ')}`;
+						const { name: oldName } = channel;
 
-						if (newName === channel.name) continue; // no update needed
+						if (newName === oldName) continue; // no update needed
 
 						await channel.setName(newName, `synced with ${mainGuild.name}'s average stats`);
+
+						logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
 					}
 				} catch (error) {
 					logger.error(`[GUILD STATS CHANNEL UPDATE]: ${error.name}: ${error.message}`);
