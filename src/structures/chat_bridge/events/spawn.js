@@ -9,7 +9,7 @@ const logger = require('../../../functions/logger');
  */
 module.exports = chatBridge => {
 	// stop abort controller
-	clearTimeout(chatBridge.abortConnectionTimeout);
+	clearTimeout(chatBridge.abortLoginTimeout);
 
 	// link this chatBridge with the bot's guild
 	const guild = chatBridge.client.hypixelGuilds.cache.find(hGuild => hGuild.players.has(chatBridge.bot.player.uuid.replace(/-/g, '')));

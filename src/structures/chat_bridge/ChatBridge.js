@@ -30,7 +30,7 @@ class ChatBridge {
 		/**
 		 * disconnect the bot if it hasn't successfully spawned in 60 seconds
 		 */
-		this.abortConnectionTimeout = null;
+		this.abortLoginTimeout = null;
 		this.queue = new AsyncQueue();
 		this.maxMessageLength = 100;
 	}
@@ -44,7 +44,16 @@ class ChatBridge {
 		this._loadEvents();
 
 		// disconnect the bot if it hasn't successfully spawned in 60 seconds
-		this.abortConnectionTimeout = setTimeout(() => this.bot.quit('Relogging'), 60_000);
+		this.abortLoginTimeout = setTimeout(() => {
+			logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
+			try {
+				this.bot.quit();
+			} catch (error) {
+				logger.error(`[CHATBRIDGE ABORT TIMER]: ${error}`);
+			}
+			this._reset();
+			this.connect();
+		}, 60_000);
 	}
 
 	/**
@@ -80,7 +89,7 @@ class ChatBridge {
 		this.ready = false;
 		if (this.guild) this.guild.chatBridge = null;
 		this.guild = null;
-		clearTimeout(this.abortConnectionTimeout);
+		clearTimeout(this.abortLoginTimeout);
 	}
 
 	/**
