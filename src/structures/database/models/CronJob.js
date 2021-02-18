@@ -13,6 +13,38 @@ class CronJob extends Model {
 		 * @type {import('../../LunarClient')}
 		 */
 		this.client;
+		/**
+		 * @type {string}
+		 */
+		this.name;
+		/**
+		 * @type {number}
+		 */
+		this.date;
+		/**
+		 * @type {string}
+		 */
+		this.command;
+		/**
+		 * @type {string}
+		 */
+		this.authorID;
+		/**
+		 * @type {string}
+		 */
+		this.messageID;
+		/**
+		 * @type {string}
+		 */
+		this.channelID;
+		/**
+		 * @type {?string[]}
+		 */
+		this.args;
+		/**
+		 * @type {?string[]}
+		 */
+		this.flags;
 	}
 
 	/**

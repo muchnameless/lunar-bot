@@ -20,11 +20,88 @@ class Player extends Model {
 		 * @type {?LunarGuildMember|Promise<?LunarGuildMember>}
 		 */
 		this._discordMember = null;
-
 		/**
 		 * @type {import('../../LunarClient')}
 		 */
 		this.client;
+		/**
+		 * @type {string}
+		 */
+		this.minecraftUUID;
+		/**
+		 * @type {string}
+		 */
+		this.ign;
+		/**
+		 * @type {string}
+		 */
+		this.discordID;
+		/**
+		 * @type {string}
+		 */
+		this.guildID;
+		/**
+		 * @type {number}
+		 */
+		this.guildRankPriority;
+		/**
+		 * @type {boolean}
+		 */
+		this.inDiscord;
+		/**
+		 * @type {number}
+		 */
+		this.chatBridgeMutedUntil;
+		/**
+		 * @type {boolean}
+		 */
+		this.hasDiscordPingPermission;
+		/**
+		 * @type {boolean}
+		 */
+		this.paid;
+		/**
+		 * @type {number}
+		 */
+		this.amount;
+		/**
+		 * minecraftUUID of taxCollector
+		 * @type {string}
+		 */
+		this.collectedBy;
+		/**
+		 * @type {?string[]}
+		 */
+		this.auctionID;
+		/**
+		 * @type {?string}
+		 */
+		this.notes;
+		/**
+		 * @type {string}
+		 */
+		this.mainProfileID;
+		/**
+		 * cuteName (fruit name)
+		 * @type {string}
+		 */
+		this.mainProfileName;
+		/**
+		 * @type {number}
+		 */
+		this.xpLastUpdatedAt;
+		/**
+		 * @type {number}
+		 */
+		this.farmingLvlCap;
+		/**
+		 * @type {string}
+		 */
+		this.guildXpDay;
+		/**
+		 * @type {number}
+		 */
+		this.guildXpDaily;
 	}
 
 	/**
@@ -73,16 +150,8 @@ class Player extends Model {
 	}
 
 	/**
-	 * @typedef {object} GuildRank
-	 * @property {string} name name of the guild rank
-	 * @property {?string} roleID discord role ID associated with the guild rank
-	 * @property {number} priority hypixel guild rank priority
-	 * @property {?number} weightReq weight requirement for the guild rank
-	 */
-
-	/**
 	 * returns the guild rank of the player
-	 * @returns {?GuildRank}
+	 * @returns {?import('./HypixelGuild').GuildRank}
 	 */
 	get guildRank() {
 		return this.guild?.ranks.find(rank => rank.priority === this.guildRankPriority) ?? null;

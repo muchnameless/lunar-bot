@@ -11,6 +11,22 @@ class BannedUser extends Model {
 		 * @type {import('../../LunarClient')}
 		 */
 		this.client;
+		/**
+		 * @type {string}
+		 */
+		this.discordID;
+		/**
+		 * @type {string}
+		 */
+		this.discordTag;
+		/**
+		 * @type {string}
+		 */
+		this.reason;
+		/**
+		 * @type {number}
+		 */
+		this.expiresAt;
 	}
 
 	/**

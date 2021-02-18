@@ -10,6 +10,14 @@ const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
 
+/**
+ * @typedef {object} GuildRank
+ * @property {string} name name of the guild rank
+ * @property {?string} roleID discord role ID associated with the guild rank
+ * @property {number} priority hypixel guild rank priority
+ * @property {?number} weightReq weight requirement for the guild rank
+ */
+
 
 class HypixelGuild extends Model {
 	constructor(...args) {
@@ -19,16 +27,50 @@ class HypixelGuild extends Model {
 		 * @type {import('discord.js').Collection<string, import('./Player')>}
 		 */
 		this._players = null;
-
-		/**
-		 * @type {import('../../LunarClient')}
-		 */
-		this.client;
-
 		/**
 		 * @type {import('../../chat_bridge/ChatBridge')}
 		 */
 		this.chatBridge = null;
+		/**
+		 * @type {import('../../LunarClient')}
+		 */
+		this.client;
+		/**
+		 * @type {string}
+		 */
+		this.guildID;
+		/**
+		 * @type {string}
+		 */
+		this.roleID;
+		/**
+		 * @type {string}
+		 */
+		this.name;
+		/**
+		 * @type {number}
+		 */
+		this.weightReq;
+		/**
+		 * @type {boolean}
+		 */
+		this.chatBridgeEnabled;
+		/**
+		 * @type {number}
+		 */
+		this.chatMutedUntil;
+		/**
+		 * @type {string}
+		 */
+		this.chatBridgeChannelID;
+		/**
+		 * @type {string}
+		 */
+		this.rankRequestChannelID;
+		/**
+		 * @type {GuildRank[]}
+		 */
+		this.ranks;
 	}
 
 	/**

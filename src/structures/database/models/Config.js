@@ -11,6 +11,14 @@ class Config extends Model {
 		 * @type {import('../../LunarClient')}
 		 */
 		this.client;
+		/**
+		 * @type {string}
+		 */
+		this.key;
+		/**
+		 * @type {string}
+		 */
+		this.value;
 	}
 
 	/**

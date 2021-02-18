@@ -11,6 +11,22 @@ class TaxCollector extends Model {
 		 * @type {import('../../LunarClient')}
 		 */
 		this.client;
+		/**
+		 * @type {string}
+		 */
+		this.minecraftUUID;
+		/**
+		 * @type {string}
+		 */
+		this.ign;
+		/**
+		 * @type {boolean}
+		 */
+		this.isCollecting;
+		/**
+		 * @type {number}
+		 */
+		this.collectedAmount;
 	}
 
 	/**
