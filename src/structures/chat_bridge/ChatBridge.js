@@ -26,7 +26,6 @@ class ChatBridge {
 		this.bot = null;
 		this.ready = false;
 		this.loginAttempts = 0;
-		this._timeouts = new Set();
 		/**
 		 * disconnect the bot if it hasn't successfully spawned in 60 seconds
 		 */
