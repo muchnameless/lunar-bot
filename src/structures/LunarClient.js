@@ -179,7 +179,7 @@ class LunarClient extends Client {
 
 						if (!channel) continue; // no channel found
 
-						const newName = `${type} avg: ${stats[type]}`;
+						const newName = `${type} avg: ${stats[`${type}Average`]}`;
 
 						if (newName === channel.name) continue; // no update needed
 
