@@ -16,13 +16,12 @@ class LunarClient extends Client {
 		super(options);
 
 		this.ownerID = process.env.OWNER ?? null;
-
 		this.db = new DatabaseHandler({ client: this, db: options.db });
 		this.logHandler = new LogHandler(this);
-		this.chatBridge = new ChatBridge(this);
-		// /**
-		//  * @type {CommandCollection<string, import('./commands/Command')>}
-		//  */
+		/**
+		 * @type {ChatBridge[]}
+		 */
+		this.chatBridges = [];
 		this.commands = new CommandCollection(this);
 		this.cooldowns = new Collection();
 	}
@@ -85,18 +84,18 @@ class LunarClient extends Client {
 	}
 
 	/**
-	 * the minecraft bot for the chatBridge
+	 * the minecraft bot for the main guild's chatBridge
 	 */
 	get bot() {
-		return this.chatBridge.bot;
+		return this.chatBridges[0].bot;
 	}
 
 	/**
-	 * send in ingame chat via the chatBridge
+	 * send in ingame chat via the main guild's chatBridge
 	 * @type {Function}
 	 */
 	get chat() {
-		return this.chatBridge.chat.bind(this.chatBridge);
+		return this.chatBridges[0].chat.bind(this.chatBridge);
 	}
 
 	/**
@@ -200,7 +199,16 @@ class LunarClient extends Client {
 			start: true,
 		}));
 
-		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.chatBridge.connect();
+		// chatBridges
+		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) {
+			// instantiate chatBridges
+			for (let i = 0; i < process.env.MINECRAFT_ACCOUNT_TYPE.split(' ').length; ++i) {
+				this.chatBridges.push(new ChatBridge(this, i));
+			}
+
+			// connect chatBridges
+			await Promise.all(this.chatBridges.map(async chatBridge => chatBridge.connect()));
+		}
 
 		// log ready
 		logger.debug(`[READY]: startup complete. ${cronJobs.size} CronJobs running. Logging webhook available: ${this.logHandler.webhookAvailable}`);

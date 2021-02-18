@@ -1,6 +1,6 @@
 'use strict';
 
-const { Util, DiscordAPIError } = require('discord.js');
+const { Util } = require('discord.js');
 const path = require('path');
 const mineflayer = require('mineflayer');
 const emojiRegex = require('emoji-regex');
@@ -16,8 +16,9 @@ class ChatBridge {
 	/**
 	 * @param {import('../LunarClient')} client
 	 */
-	constructor(client) {
+	constructor(client, mcAccount) {
 		this.client = client;
+		this.mcAccount = mcAccount;
 		this.webhook = null;
 		/**
 		 * @type {import('../database/models/HypixelGuild')}
@@ -38,34 +39,33 @@ class ChatBridge {
 	 * fetch the webhook if it is uncached, create and log the bot into hypixel
 	 */
 	async connect() {
-		if (!this.webhook) await this._fetchWebhook();
 		this.bot = this._createBot();
 		this._loadEvents();
 
 		// disconnect the bot if it hasn't successfully spawned in 60 seconds
 		this.abortLoginTimeout = setTimeout(() => {
 			logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
-			try {
-				this.bot.quit();
-			} catch (error) {
-				logger.error(`[CHATBRIDGE ABORT TIMER]: ${error}`);
-			}
-			this._reset();
-			this.connect();
+			this.reconnect(0);
 		}, Math.min(++this.loginAttempts * 60_000, 300_000));
 	}
 
 	/**
 	 * destroys the connection to the guild and reconnects the bot
 	 */
-	reconnect() {
+	reconnect(loginDelay) {
 		this._reset();
 
-		const LOGIN_DELAY = Math.min((this.loginAttempts + 1) * 5_000, 60_000);
+		try {
+			this.bot.quit();
+		} catch (err) {
+			logger.error('[CHATBRIDGE ERROR]:', err);
+		}
 
-		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(LOGIN_DELAY, { long: true })}`);
+		loginDelay ??= Math.min(++this.loginAttempts * 5_000, 300_000);
 
-		setTimeout(() => this.connect(), LOGIN_DELAY);
+		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
+
+		setTimeout(() => this.connect(), loginDelay);
 	}
 
 	/**
@@ -92,18 +92,27 @@ class ChatBridge {
 	}
 
 	/**
-	 * fetch the chat bridge webhook
+	 * fetches the chat bridge discord webhook
 	 */
-	async _fetchWebhook() {
-		if (this.client.config.getBoolean('CHATBRIDGE_WEBHOOK_DELETED')) return logger.warn('[CHATBRIDGE WEBHOOK]: deleted');
+	async fetchAndCacheWebhook() {
+		if (this.webhook) return this.ready = true;
+		if (!this.guild) return logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
 
 		try {
-			const chatBridgeWebhook = await this.client.fetchWebhook(process.env.CHATBRIDGE_WEBHOOK_ID, process.env.CHATBRIDGE_WEBHOOK_TOKEN);
+			const channel = this.client.channels.cache.get(this.guild.chatBridgeChannelID);
 
-			this.webhook = chatBridgeWebhook;
+			if (!channel) return logger.warn(`[CHATBRIDGE]: ${this.guild.name}: unknown channel: ${this.guild.chatBridgeChannelID}`);
+			if (!channel.checkBotPermissions('MANAGE_WEBHOOKS')) return logger.warn(`[CHATBRIDGE]: ${this.guild.name}: missing 'MANAGE_WEBHOOKS' in #${channel.name}`);
+
+			const webhooks = await channel.fetchWebhooks();
+
+			if (!webhooks.size) return logger.warn(`[CHATBRIDGE]: ${this.guild.name}: no webhooks found in #${channel.name}`);
+
+			this.webhook = webhooks.first();
+			this.ready = true;
 		} catch (error) {
-			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) this.client.config.set('CHATBRIDGE_WEBHOOK_DELETED', 'true');
-			logger.error(`[CHATBRIDGE WEBHOOK]: ${error.name}: ${error.message}`);
+			logger.error(`[CHATBRIDGE]: ${this.guild.name}: error fetching webhook: ${error.name}: ${error.message}`);
+			this.ready = false;
 		}
 	}
 
@@ -114,10 +123,10 @@ class ChatBridge {
 		return mineflayer.createBot({
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
-			username: process.env.MINECRAFT_USERNAME,
-			password: process.env.MINECRAFT_PASSWORD,
+			username: process.env.MINECRAFT_USERNAME.split(' ')[this.mcAccount],
+			password: process.env.MINECRAFT_PASSWORD.split(' ')[this.mcAccount],
 			version: false,
-			auth: process.env.MINECRAFT_ACCOUNT_TYPE,
+			auth: process.env.MINECRAFT_ACCOUNT_TYPE.split(' ')[this.mcAccount],
 		});
 	}
 
