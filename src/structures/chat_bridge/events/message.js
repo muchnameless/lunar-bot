@@ -97,7 +97,7 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 
 		if (muteMatched) {
 			const [, ign, duration ] = muteMatched;
-			const player = chatBridge.client.players.find(p => p.ign === ign);
+			const player = chatBridge.client.players.cache.find(p => p.ign === ign);
 
 			if (!player) return;
 
@@ -119,7 +119,7 @@ module.exports = async (chatBridge, jsonMsg, position) => {
 
 		if (unMuteMatched) {
 			const [, ign ] = unMuteMatched;
-			const player = chatBridge.client.players.find(p => p.ign === ign);
+			const player = chatBridge.client.players.cache.find(p => p.ign === ign);
 
 			if (!player) return;
 
