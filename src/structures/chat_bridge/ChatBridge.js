@@ -1,6 +1,6 @@
 'use strict';
 
-const { Util } = require('discord.js');
+const { Util, MessageEmbed } = require('discord.js');
 const path = require('path');
 const mineflayer = require('mineflayer');
 const emojiRegex = require('emoji-regex');
@@ -95,7 +95,11 @@ class ChatBridge {
 	 * fetches the chat bridge discord webhook
 	 */
 	async fetchAndCacheWebhook() {
-		if (this.webhook) return this.ready = true;
+		if (this.webhook) {
+			return this.ready = true;
+		} else {
+			this.ready = false;
+		}
 		if (!this.guild) return logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
 
 		try {
@@ -106,13 +110,21 @@ class ChatBridge {
 
 			const webhooks = await channel.fetchWebhooks();
 
-			if (!webhooks.size) return logger.warn(`[CHATBRIDGE]: ${this.guild.name}: no webhooks found in #${channel.name}`);
+			if (!webhooks.size) {
+				this.client.log(new MessageEmbed()
+					.setColor(this.client.config.get('EMBED_RED'))
+					.setTitle(`${this.guild.name} Chat Bridge`)
+					.setDescription(`**Error**: no webhooks in ${channel} found`)
+					.setTimestamp(),
+				);
+				this.disconnect();
+				return logger.warn(`[CHATBRIDGE]: ${this.guild.name}: no webhooks found in #${channel.name}`);
+			}
 
 			this.webhook = webhooks.first();
 			this.ready = true;
 		} catch (error) {
 			logger.error(`[CHATBRIDGE]: ${this.guild.name}: error fetching webhook: ${error.name}: ${error.message}`);
-			this.ready = false;
 		}
 	}
 
