@@ -62,9 +62,22 @@ class ChatBridge extends EventEmitter {
 		 * @type {number}
 		 */
 		this.maxMessageLength = 100;
+		/**
+		 * increases each login, reset to 0 on successfull spawn
+		 */
 		this.loginAttempts = 0;
+		/**
+		 * wether the bot and webhook are both present
+		 */
 		this.ready = false;
+		/**
+		 * wether the chatBridge mc bot is currently reconnecting (prevents executing multiple reconnections)
+		 */
 		this.reconnecting = false;
+		/**
+		 * no webhooks in channel or wrong minecraft account credentials,
+		 * prevents chatBridge from trying to endlessly reconnect
+		 */
 		this.criticalError = false;
 
 		this._loadEvents();
@@ -87,15 +100,15 @@ class ChatBridge extends EventEmitter {
 	async connect() {
 		if (this.criticalError) throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
 
-		this._createBot();
-
-		this.reconnecting = false;
-
-		// disconnect the bot if it hasn't successfully spawned in 60 seconds
+		// reconnect the bot if it hasn't successfully spawned in 60 seconds
 		this.abortLoginTimeout = setTimeout(() => {
 			logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
 			this.reconnect(0);
 		}, Math.min(++this.loginAttempts * 60_000, 300_000));
+
+		this._createBot();
+
+		this.reconnecting = false;
 	}
 
 	/**
@@ -108,7 +121,7 @@ class ChatBridge extends EventEmitter {
 
 		this.disconnect();
 
-		loginDelay ??= Math.min(++this.loginAttempts * 5_000, 300_000);
+		loginDelay ??= Math.min(this.loginAttempts * 5_000, 300_000);
 
 		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
 
