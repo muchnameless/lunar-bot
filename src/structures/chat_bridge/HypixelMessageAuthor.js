@@ -24,7 +24,7 @@ class HypixelMessageAuthor {
 	 * @param {string} message
 	 */
 	async send(message) {
-		return this.chatBridge.chat(message, `/w ${this.ign}`);
+		return this.chatBridge.chat(message, `/w ${this.ign} `);
 	}
 }
 
