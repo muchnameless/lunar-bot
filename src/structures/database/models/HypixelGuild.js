@@ -335,7 +335,7 @@ class HypixelGuild extends Model {
 			if (!player) return logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
 
 			player.syncWithGuildData(hypixelGuildMember);
-			player.guildRankPriority = this.ranks.find(rank => rank.name === hypixelGuildMember.rank)?.priority ?? (/guild ?master/i.test(hypixelGuildMember.rank) ? 6 : 0);
+			player.guildRankPriority = this.ranks.find(rank => rank.name === hypixelGuildMember.rank)?.priority ?? (/guild ?master/i.test(hypixelGuildMember.rank) ? this.ranks.length + 1 : 0);
 			player.save();
 		});
 
