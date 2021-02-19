@@ -30,7 +30,7 @@ class HypixelGuild extends Model {
 		/**
 		 * @type {import('../../chat_bridge/ChatBridge')}
 		 */
-		this.chatBridge = null;
+		this._chatBridge = null;
 		/**
 		 * @type {import('../../LunarClient')}
 		 */
@@ -92,6 +92,18 @@ class HypixelGuild extends Model {
 	get players() {
 		if (!this._players) this._players = this.client.players.cache.filter(player => player.guildID === this.guildID);
 		return this._players;
+	}
+
+	set chatBridge(value) {
+		this._chatBridge = value;
+	}
+
+	/**
+	 * returns either the chatBridge if it is linked and ready or throws an exception
+	 */
+	get chatBridge() {
+		if (!this._chatBridge.ready) throw new Error(`${this.name}: ${this._chatBridge ? 'not ready' : 'no chatBridge found'}`);
+		return this._chatBridge;
 	}
 
 	/**
@@ -401,7 +413,7 @@ class HypixelGuild extends Model {
 
 		// no player db entry
 		if (!player) {
-			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested ${RANK_NAME} but could not be found in the player db`);
+			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested ${RANK_NAME} but could not be found in the player db`);
 
 			message.reply(
 				`unable to find you in the ${this.name} player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
@@ -416,13 +428,13 @@ class HypixelGuild extends Model {
 		// player meets reqs and already has the rank or is staff and has the rank's role
 		if (totalWeight >= WEIGHT_REQ && (player.guildRankPriority >= RANK_PRIORITY || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
 			if (message.replyMessageID) {
-				message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[CHECK RANK REQS]: delete: ${error.name}: ${error.message}`));
+				message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
 			}
 			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-				message.react(CLOWN).catch(error => logger.error(`[CHECK RANK REQS]: clown reaction: ${error.name}: ${error.message}`)); // get clowned
+				message.react(CLOWN).catch(error => logger.error(`[RANK REQUEST]: clown reaction: ${error.name}: ${error.message}`)); // get clowned
 			}
 
-			logger.info(`[CHECK RANK REQS]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
+			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
 			return true;
 		}
 
@@ -430,30 +442,30 @@ class HypixelGuild extends Model {
 
 		// player data could be outdated -> update data when player does not meet reqs
 		if (totalWeight < WEIGHT_REQ) {
-			logger.info(`[CHECK RANK REQS]: ${player.ign} requested ${RANK_NAME} but only had ${this.client.formatDecimalNumber(totalWeight, 0)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
+			logger.info(`[RANK REQUEST]: ${player.ign} requested ${RANK_NAME} but only had ${this.client.formatDecimalNumber(totalWeight, 0)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
 			await player.updateXp({ shouldSkipQueue: true });
 			({ totalWeight } = player.getWeight());
 		}
 
 		const WEIGHT_STRING = this.client.formatDecimalNumber(totalWeight, 0);
 
-		if (message.reactions.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[CHECK RANK REQS]: remove reaction: ${error.name}: ${error.message}`)); // get clowned
-
-		message.reply(
-			`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
-			{ reply: false, sameChannel: true },
-		);
-
-		logger.info(`[CHECK RANK REQS]: ${player.ign} requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
-
-		if (totalWeight < WEIGHT_REQ || !this.chatBridge?.ready) return true;
+		if (message.reactions.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error.name}: ${error.message}`)); // get clowned
 
 		try {
+			await message.reply(
+				`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
+				{ reply: false, sameChannel: true },
+			);
+
+			logger.info(`[RANK REQUEST]: ${player.ign} requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
+
+			if (totalWeight < WEIGHT_REQ) return true;
+
 			await this.chatBridge.chat(`/g setrank ${player.ign} ${RANK_NAME}`);
 			await message.react(Y_EMOJI_ALT);
 			await player.updateRoles(`requested ${RANK_NAME}`);
 		} catch (error) {
-			logger.error('[CHECK RANK REQS]: promotion error:', error);
+			logger.error(`[RANK REQUEST]: ${player.logInfo}: ${error.name}: ${error.message}`);
 		}
 
 		return true;
@@ -467,25 +479,17 @@ class HypixelGuild extends Model {
 		// chatbridge disabled or no message.content to chat
 		if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return true;
 
-		if (!this.chatBridge?.ready) {
-			logger.warn(`[CHATBRIDGE]: ${this.name}: offline`);
-			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-				message.react(X_EMOJI).catch(error => logger.error(`[CHECK RANK REQS]: x reaction: ${error.name}: ${error.message}`)); // get clowned
-			}
-			return true;
-		}
-
 		const player = this.client.players.getByID(message.author.id);
 
 		// check if player is muted
 		if (player?.chatBridgeMutedUntil) {
 			if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
 				message.author.send(`you are currently muted ${player.chatBridgeMutedUntil ? `until ${new Date(player.chatBridgeMutedUntil).toUTCString()}` : 'for an unspecified amount of time'}`).then(
-					() => logger.info(`[CHATBRIDGE]: ${player.info}: DMed muted user`),
-					error => logger.error(`[CHATBRIDGE]: ${player.info}: error DMing muted user: ${error.name}: ${error.message}`),
+					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
+					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error.name}: ${error.message}`),
 				);
 				if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-					message.react(MUTED).catch(error => logger.error(`[CHECK RANK REQS]: muted reaction: ${error.name}: ${error.message}`));
+					message.react(MUTED).catch(error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: muted reaction: ${error.name}: ${error.message}`));
 				}
 				return true;
 			}
@@ -498,11 +502,11 @@ class HypixelGuild extends Model {
 		if (this.chatMutedUntil && !player?.isStaff) {
 			if (Date.now() < this.chatMutedUntil) {
 				message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
-					() => logger.info(`[CHATBRIDGE]: ${player.info}: DMed guild chat muted`),
-					error => logger.error(`[CHATBRIDGE]: ${player.info}: error DMing guild chat muted: ${error.name}: ${error.message}`),
+					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed guild chat muted`),
+					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing guild chat muted: ${error.name}: ${error.message}`),
 				);
 				if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-					message.react(MUTED).catch(error => logger.error(`[CHECK RANK REQS]: muted reaction: ${error.name}: ${error.message}`));
+					message.react(MUTED).catch(error => logger.error(`[GUILD CHATBRIDGE]: muted reaction: ${error.name}: ${error.message}`));
 				}
 				return true;
 			}
@@ -511,7 +515,15 @@ class HypixelGuild extends Model {
 			this.save();
 		}
 
-		this.chatBridge.sendToHypixelGuildChat(message, player);
+		try {
+			await this.chatBridge.sendToHypixelGuildChat(message, player);
+		} catch (error) {
+			logger.warn(`[GUILD CHATBRIDGE]: ${error.message}`);
+			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
+				message.react(X_EMOJI).catch(err => logger.error(`[GUILD CHATBRIDGE]: x reaction: ${err.name}: ${err.message}`)); // get clowned
+			}
+		}
+
 		return true;
 	}
 }
