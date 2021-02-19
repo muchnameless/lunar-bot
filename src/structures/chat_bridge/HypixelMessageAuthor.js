@@ -15,6 +15,9 @@ class HypixelMessageAuthor {
 		this.guildRank = guildRank ?? null;
 	}
 
+	/**
+	 * the message author's player object
+	 */
 	get player() {
 		return this.chatBridge.client.players.cache.find(player => player.ign === this.ign);
 	}

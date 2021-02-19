@@ -18,7 +18,7 @@ module.exports = async (chatBridge, message) => {
 		case 'guild': {
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
 
-			const player = message.author.player;
+			const player = message.player;
 			const member = await player?.discordMember;
 
 			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: webhook unavailable`);
@@ -56,7 +56,7 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN joined the guild!
 			 */
 			if (message.content.includes('joined the guild')) {
-				return chatBridge.sendToMinecraftChat(chatBridge.hypixelSpamBypass('/gc welcome'));
+				return chatBridge.broadcast('welcome');
 			}
 
 			/**
@@ -73,7 +73,7 @@ module.exports = async (chatBridge, message) => {
 			 * The guild has completed Tier 3 of this week's Guild Quest!
 			 */
 			if (message.content.includes('was promoted from') || message.content.startsWith('The guild has completed ')) {
-				return chatBridge.sendToMinecraftChat(chatBridge.hypixelSpamBypass('/gc gg'));
+				return chatBridge.broadcast('gg');
 			}
 
 			/**
