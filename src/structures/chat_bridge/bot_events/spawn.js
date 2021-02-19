@@ -37,5 +37,5 @@ module.exports = async chatBridge => {
 	// send bot to limbo (forbidden character in chat)
 	chatBridge.sendToMinecraftChat('§');
 
-	logger.debug(`[CHATBRIDGE]: ${guild.name}: ${chatBridge.bot.player.username} online`);
+	logger.debug(`[CHATBRIDGE]: ${guild.name}: ${chatBridge.bot.player.username} spawned and ready`);
 };
