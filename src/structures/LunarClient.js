@@ -91,11 +91,19 @@ class LunarClient extends Client {
 	}
 
 	/**
-	 * send in ingame chat via the main guild's chatBridge
+	 * send to ingame chat via the main guild's chatBridge
 	 * @type {Function}
 	 */
 	get chat() {
-		return this.chatBridges[0].chat.bind(this.chatBridges[0]);
+		return this.chatBridges[0].sendToMinecraftChat.bind(this.chatBridges[0]);
+	}
+
+	/**
+	 * send to ingame guild chat via the main guild's chatBridge
+	 * @type {Function}
+	 */
+	get gchat() {
+		return this.chatBridges[0].gchat.bind(this.chatBridges[0]);
 	}
 
 	/**
