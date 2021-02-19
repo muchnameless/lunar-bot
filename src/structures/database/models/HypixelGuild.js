@@ -426,7 +426,7 @@ class HypixelGuild extends Model {
 		let { totalWeight } = player.getWeight();
 
 		// player meets reqs and already has the rank or is staff and has the rank's role
-		if (totalWeight >= WEIGHT_REQ && (player.guildRankPriority >= RANK_PRIORITY || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
+		if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
 			if (message.replyMessageID) {
 				message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
 			}
@@ -461,9 +461,19 @@ class HypixelGuild extends Model {
 
 			if (totalWeight < WEIGHT_REQ) return true;
 
-			await this.chatBridge.chat(`/g setrank ${player.ign} ${RANK_NAME}`);
+			if (player.isStaff) {
+				// set rank role to requested rank
+				const otherRequestableRankRoles = this.ranks.flatMap(({ roleID }) => roleID && roleID !== ROLE_ID ? roleID : []);
+				const rolesToRemove = [ ...message.member.roles.cache.keys() ].filter(roleID => otherRequestableRankRoles.includes(roleID));
+
+				await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
+			} else {
+				// set ingame rank and discord role
+				await this.chatBridge.sendToMinecraftChat(`/g setrank ${player.ign} ${RANK_NAME}`);
+				await player.updateRoles(`requested ${RANK_NAME}`);
+			}
+
 			await message.react(Y_EMOJI_ALT);
-			await player.updateRoles(`requested ${RANK_NAME}`);
 		} catch (error) {
 			logger.error(`[RANK REQUEST]: ${player.logInfo}: ${error.name}: ${error.message}`);
 		}
@@ -516,7 +526,7 @@ class HypixelGuild extends Model {
 		}
 
 		try {
-			await this.chatBridge.sendToHypixelGuildChat(message, player);
+			await this.chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player);
 		} catch (error) {
 			logger.warn(`[GUILD CHATBRIDGE]: ${error.message}`);
 			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
