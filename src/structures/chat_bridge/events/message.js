@@ -58,10 +58,11 @@ module.exports = async (chatBridge, jsonMessage, position) => {
 
 
 		/**
-		 * auto '/gc gg' for promotions
+		 * auto '/gc gg' for promotions / quest completions
 		 * [HypixelRank] IGN was promoted from PREV to NOW
+		 * The guild has completed Tier 3 of this week's Guild Quest!
 		 */
-		if (message.includes('was promoted from')) {
+		if (message.includes('was promoted from') || message.startsWith('The guild has completed ')) {
 			return chatBridge.chat(chatBridge.hypixelSpamBypass('/gc gg'));
 		}
 
@@ -104,7 +105,7 @@ module.exports = async (chatBridge, jsonMessage, position) => {
 				guild.chatMutedUntil = Date.now() + ms(duration);
 				guild.save();
 
-				return logger.info(`[CHATBRIDGE]: ${guild.name}'s guild chat was muted for ${duration}`);
+				return logger.info(`[CHATBRIDGE MESSAGE]: ${guild.name}'s guild chat was muted for ${duration}`);
 			}
 
 			const player = chatBridge.client.players.cache.find(p => p.ign === target);
@@ -118,7 +119,7 @@ module.exports = async (chatBridge, jsonMessage, position) => {
 			player.chatBridgeMutedUntil = Date.now() + msDuration;
 			player.save();
 
-			return logger.info(`[CHATBRIDGE]: ${target} was muted for ${duration}`);
+			return logger.info(`[CHATBRIDGE MESSAGE]: ${target} was muted for ${duration}`);
 		}
 
 		/**
@@ -137,7 +138,7 @@ module.exports = async (chatBridge, jsonMessage, position) => {
 				guild.chatMutedUntil = 0;
 				guild.save();
 
-				return logger.info(`[CHATBRIDGE]: ${guild.name}'s guild chat was unmuted`);
+				return logger.info(`[CHATBRIDGE MESSAGE]: ${guild.name}'s guild chat was unmuted`);
 			}
 
 			const player = chatBridge.client.players.cache.find(p => p.ign === target);
@@ -147,7 +148,7 @@ module.exports = async (chatBridge, jsonMessage, position) => {
 			player.chatBridgeMutedUntil = 0;
 			player.save();
 
-			return logger.info(`[CHATBRIDGE]: ${target} was unmuted`);
+			return logger.info(`[CHATBRIDGE MESSAGE]: ${target} was unmuted`);
 		}
 	}
 
@@ -170,7 +171,7 @@ module.exports = async (chatBridge, jsonMessage, position) => {
 		const player = chatBridge.client.players.cache.find(p => p.ign === ign);
 		const member = await player?.discordMember;
 
-		if (!chatBridge.webhook) return logger.warn('[CHATBRIDGE]: webhook unavailable');
+		if (!chatBridge.webhook) return logger.warn('[CHATBRIDGE MESSAGE]: webhook unavailable');
 
 		try {
 			await chatBridge.webhook.send({
@@ -180,7 +181,7 @@ module.exports = async (chatBridge, jsonMessage, position) => {
 				allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
 			});
 		} catch (error) {
-			logger.error(`[CHATBRIDGE DC CHAT]: ${error.name}: ${error.message}`);
+			logger.error(`[CHATBRIDGE MESSAGE]: ${error.name}: ${error.message}`);
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
 				chatBridge.uncacheWebhook();
 				chatBridge.reconnect();
@@ -197,7 +198,7 @@ module.exports = async (chatBridge, jsonMessage, position) => {
 	if (whisperMatch) {
 		const [, ign ] = whisperMatch;
 
-		if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[CHATBRIDGE DC CHAT]: whisper from ${ign}`);
+		if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[CHATBRIDGE MESSAGE]: whisper from ${ign}`);
 
 		// auto 'o/' reply
 		if (/\( ﾟ◡ﾟ\)\/|o\//.test(content)) return chatBridge.chat(chatBridge.hypixelSpamBypass(`/w ${ign} o/`));
