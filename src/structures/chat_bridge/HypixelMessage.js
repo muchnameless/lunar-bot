@@ -55,7 +55,7 @@ class HypixelMessage {
 				guildRank: matched.groups.guildRank,
 			});
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? 'whisper' : null);
-			this.content = this.rawContent.split(':').slice(1).join(':').replace(/ࠀ|⭍/g, '').trim();
+			this.content = this.rawContent.slice(matched[0].length).replace(/ࠀ|⭍/g, '').trim();
 		} else {
 			this.author = null;
 			this.type = null;
