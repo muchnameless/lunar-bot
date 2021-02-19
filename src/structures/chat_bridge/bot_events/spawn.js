@@ -21,11 +21,13 @@ module.exports = async chatBridge => {
 	if (!guild) {
 		chatBridge.ready = false;
 
-		logger.warn(`[CHATBRIDGE]: no guild matching ${chatBridge.bot.player.username} found`);
+		return logger.warn(`[CHATBRIDGE]: ${chatBridge.bot.player.username}: no matching guild found`);
 	}
 
 	guild.chatBridge = chatBridge;
 	chatBridge.guild = guild;
+
+	logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${chatBridge.bot.player.username}`);
 
 	await chatBridge.fetchAndCacheWebhook();
 
@@ -35,5 +37,5 @@ module.exports = async chatBridge => {
 	// send bot to limbo (forbidden character in chat)
 	chatBridge.sendToMinecraftChat('§');
 
-	logger.info(`[CHATBRIDGE]: ${guild.name}: ${chatBridge.bot.player.username} online`);
+	logger.debug(`[CHATBRIDGE]: ${guild.name}: ${chatBridge.bot.player.username} online`);
 };

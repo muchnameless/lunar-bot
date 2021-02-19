@@ -10,9 +10,5 @@ const logger = require('../../../functions/logger');
  * @param {HypixelMessage.ChatPosition} position
  */
 module.exports = async (chatBridge, jsonMessage, position) => {
-	if (!chatBridge.guild.chatBridgeEnabled) return;
-
-	const message = new HypixelMessage(chatBridge, jsonMessage, position);
-
-	chatBridge.emit('message', message);
+	chatBridge.emit('message', new HypixelMessage(chatBridge, jsonMessage, position));
 };

@@ -10,6 +10,7 @@ const logger = require('../../../functions/logger');
  * @param {import('../HypixelMessage')} message
  */
 module.exports = async (chatBridge, message) => {
+	if (!chatBridge.guild?.chatBridgeEnabled) return;
 	if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ position: message.position, message: message.rawContent });
 	if (!message.rawContent.length) return;
 

@@ -154,6 +154,8 @@ class ChatBridge extends EventEmitter {
 
 			this.webhook = webhooks.first();
 			this.ready = true;
+
+			logger.debug(`[CHATBRIDGE]: ${this.guild.name}: webhook fetched and cached`);
 		} catch (error) {
 			if (error instanceof WebhookError) {
 				this.client.log(new MessageEmbed()
