@@ -75,6 +75,10 @@ class ChatBridge extends EventEmitter {
 		this._loadEvents();
 	}
 
+	get logInfo() {
+		return `${this.bot?.username ?? 'no bot'} | ${this.guild?.name ?? 'no guild'}`;
+	}
+
 	/**
 	 * create and log the bot into hypixel
 	 */

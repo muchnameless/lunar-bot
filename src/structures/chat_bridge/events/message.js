@@ -10,8 +10,8 @@ const logger = require('../../../functions/logger');
  * @param {import('../HypixelMessage')} message
  */
 module.exports = async (chatBridge, message) => {
-	if (!chatBridge.guild?.chatBridgeEnabled) return;
 	if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ position: message.position, message: message.rawContent });
+	if (!chatBridge.guild?.chatBridgeEnabled) return;
 	if (!message.rawContent.length) return;
 
 	switch (message.type) {
@@ -21,7 +21,7 @@ module.exports = async (chatBridge, message) => {
 			const player = message.author.player;
 			const member = await player?.discordMember;
 
-			if (!chatBridge.ready) return logger.warn('[CHATBRIDGE MESSAGE]: webhook unavailable');
+			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: webhook unavailable`);
 
 			try {
 				await chatBridge.webhook.send({
@@ -31,7 +31,7 @@ module.exports = async (chatBridge, message) => {
 					allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
 				});
 			} catch (error) {
-				logger.error(`[CHATBRIDGE MESSAGE]: ${error.name}: ${error.message}`);
+				logger.error(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: ${error.name}: ${error.message}`);
 				if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
 					chatBridge.uncacheWebhook();
 					chatBridge.reconnect();
@@ -42,7 +42,7 @@ module.exports = async (chatBridge, message) => {
 		}
 
 		case 'whisper': {
-			if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[CHATBRIDGE MESSAGE]: whisper from ${message.author.ign}`);
+			if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: whisper from ${message.author.ign}`);
 
 			// auto 'o/' reply
 			if (/\( ﾟ◡ﾟ\)\/|o\//.test(message.content)) return message.author.send('o/');
@@ -95,7 +95,7 @@ module.exports = async (chatBridge, message) => {
 
 				if (!player?.guildID) return;
 
-				logger.info(`[CHATBRIDGE MESSAGE]: accepting f request from ${ign}`);
+				logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: accepting f request from ${ign}`);
 				return chatBridge.sendToMinecraftChat(`/f add ${ign}`);
 			}
 
@@ -115,7 +115,7 @@ module.exports = async (chatBridge, message) => {
 					guild.chatMutedUntil = Date.now() + ms(duration);
 					guild.save();
 
-					return logger.info(`[CHATBRIDGE MESSAGE]: ${guild.name}'s guild chat was muted for ${duration}`);
+					return logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: guild chat was muted for ${duration}`);
 				}
 
 				const player = chatBridge.client.players.cache.find(p => p.ign === target);
@@ -129,7 +129,7 @@ module.exports = async (chatBridge, message) => {
 				player.chatBridgeMutedUntil = Date.now() + msDuration;
 				player.save();
 
-				return logger.info(`[CHATBRIDGE MESSAGE]: ${target} was muted for ${duration}`);
+				return logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: ${target} was muted for ${duration}`);
 			}
 
 			/**
@@ -148,7 +148,7 @@ module.exports = async (chatBridge, message) => {
 					guild.chatMutedUntil = 0;
 					guild.save();
 
-					return logger.info(`[CHATBRIDGE MESSAGE]: ${guild.name}'s guild chat was unmuted`);
+					return logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: guild chat was unmuted`);
 				}
 
 				const player = chatBridge.client.players.cache.find(p => p.ign === target);
@@ -158,7 +158,7 @@ module.exports = async (chatBridge, message) => {
 				player.chatBridgeMutedUntil = 0;
 				player.save();
 
-				return logger.info(`[CHATBRIDGE MESSAGE]: ${target} was unmuted`);
+				return logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: ${target} was unmuted`);
 			}
 		}
 	}
