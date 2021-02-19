@@ -282,7 +282,7 @@ class ChatBridge extends EventEmitter {
 	 * replaces discord renders with names
 	 * @param {string} string
 	 */
-	static _parseDiscordMessageToMinecraft(string) {
+	_parseDiscordMessageToMinecraft(string) {
 		return string
 			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // custom emojis
 			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
@@ -310,7 +310,7 @@ class ChatBridge extends EventEmitter {
 	 */
 	async forwardDiscordMessageToHypixelGuildChat(message, player) {
 		return this.gchat(
-			this.constructor._escapeEz(this.constructor._parseDiscordMessageToMinecraft(message.content)),
+			this.constructor._escapeEz(this._parseDiscordMessageToMinecraft(message.content)),
 			`${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}: `,
 		);
 	}
