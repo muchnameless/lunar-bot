@@ -16,7 +16,7 @@ module.exports = async (chatBridge, message) => {
 
 	switch (message.type) {
 		case 'guild': {
-			// if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
+			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
 
 			const player = message.author.player;
 			const member = await player?.discordMember;
