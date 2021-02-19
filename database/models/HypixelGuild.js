@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		chatBridgeEnabled: {
 			type: DataTypes.BOOLEAN,
-			defaultValue: false,
+			defaultValue: true,
 			allowNull: false,
 		},
 		chatMutedUntil: {
