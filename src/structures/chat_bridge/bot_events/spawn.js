@@ -33,7 +33,7 @@ module.exports = async chatBridge => {
 	if (!chatBridge.ready) return chatBridge.reconnect();
 
 	// send bot to limbo (forbidden character in chat)
-	chatBridge.chat('§');
+	chatBridge.sendToMinecraftChat('§');
 
 	logger.info(`[CHATBRIDGE]: ${guild.name}: ${chatBridge.bot.player.username} online`);
 };

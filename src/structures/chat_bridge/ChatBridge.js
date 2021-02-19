@@ -1,6 +1,7 @@
 'use strict';
 
 const { Util, MessageEmbed } = require('discord.js');
+const { EventEmitter } = require('events');
 const path = require('path');
 const mineflayer = require('mineflayer');
 const emojiRegex = require('emoji-regex');
@@ -10,40 +11,79 @@ const { getAllJsFiles } = require('../../functions/files');
 const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
 const WebhookError = require('../errors/WebhookError');
 const AsyncQueue = require('../AsyncQueue');
+const MessageCollector = require('./MessageCollector');
 const logger = require('../../functions/logger');
 
+/**
+ * @typedef {MessageCollectorOptions} AwaitMessagesOptions
+ * @property {?string[]} [errors] Stop/end reasons that cause the promise to reject
+ */
 
-class ChatBridge {
+
+class ChatBridge extends EventEmitter {
 	/**
 	 * @param {import('../LunarClient')} client
 	 */
 	constructor(client, mcAccount) {
+		super();
+
 		this.client = client;
+		/**
+		 * position in the mcAccount array
+		 * @type {number}
+		 */
 		this.mcAccount = mcAccount;
+		/**
+		 * @type {?import('discord.js').Webhook}
+		 */
 		this.webhook = null;
+		/**
+		 * discord channel
+		 * @type {?import('../extensions/TextChannel')}
+		 */
+		this.channel = null;
 		/**
 		 * @type {import('../database/models/HypixelGuild')}
 		 */
 		this.guild = null;
+		/**
+		 * @type {import('mineflayer').Bot}
+		 */
 		this.bot = null;
-		this.ready = false;
-		this.criticalError = false;
-		this.loginAttempts = 0;
 		/**
 		 * disconnect the bot if it hasn't successfully spawned in 60 seconds
 		 */
 		this.abortLoginTimeout = null;
+		/**
+		 * scheduled reconnection
+		 */
+		this.reconnectTimeout = null;
+		/**
+		 * async queue for ingame chat messages
+		 */
 		this.queue = new AsyncQueue();
+		/**
+		 * 100 pre 1.10.2, 256 post 1.10.2
+		 * @type {number}
+		 */
 		this.maxMessageLength = 100;
+		this.loginAttempts = 0;
+		this.ready = false;
+		this.reconnecting = false;
+		this.criticalError = false;
+
+		this._loadEvents();
 	}
 
 	/**
-	 * fetch the webhook if it is uncached, create and log the bot into hypixel
+	 * create and log the bot into hypixel
 	 */
 	async connect() {
 		if (this.criticalError) throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
-		this.bot = this._createBot();
-		this._loadEvents();
+
+		this._createBot();
+
+		this.reconnecting = false;
 
 		// disconnect the bot if it hasn't successfully spawned in 60 seconds
 		this.abortLoginTimeout = setTimeout(() => {
@@ -56,42 +96,39 @@ class ChatBridge {
 	 * destroys the connection to the guild and reconnects the bot
 	 */
 	reconnect(loginDelay) {
-		this._reset();
+		// prevent multiple reconnections
+		if (this.reconnecting) return;
+		this.reconnecting = true;
 
-		try {
-			this.bot.quit();
-		} catch (err) {
-			logger.error('[CHATBRIDGE ERROR]:', err);
-		}
+		this.disconnect();
 
 		loginDelay ??= Math.min(++this.loginAttempts * 5_000, 300_000);
 
 		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
 
-		setTimeout(() => this.connect(), loginDelay);
+		this.reconnectTimeout = setTimeout(() => {
+			this.connect();
+			this.reconnectTimeout = null;
+		}, loginDelay);
 	}
 
 	/**
-	 * disconnects the bot
+	 * disconnects the bot and resets the chatBridge
 	 */
 	disconnect() {
-		this._reset();
-
-		try {
-			this.bot.quit();
-		} catch (err) {
-			logger.error('[CHATBRIDGE ERROR]:', err);
-		}
-	}
-
-	/**
-	 * resets the chat bridge
-	 */
-	_reset() {
 		this.ready = false;
 		if (this.guild) this.guild.chatBridge = null;
 		this.guild = null;
+		clearTimeout(this.reconnectTimeout);
 		clearTimeout(this.abortLoginTimeout);
+		this.reconnectTimeout = null;
+		this.abortLoginTimeout = null;
+
+		try {
+			this.bot?.quit?.();
+		} catch (error) {
+			logger.error('[CHATBRIDGE DISCONNECT]:', error);
+		}
 	}
 
 	/**
@@ -146,7 +183,7 @@ class ChatBridge {
 	 * create bot instance and logs into hypixel
 	 */
 	_createBot() {
-		return mineflayer.createBot({
+		this.bot = mineflayer.createBot({
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
 			username: process.env.MINECRAFT_USERNAME.split(' ')[this.mcAccount],
@@ -154,10 +191,30 @@ class ChatBridge {
 			version: false,
 			auth: process.env.MINECRAFT_ACCOUNT_TYPE.split(' ')[this.mcAccount],
 		});
+
+		this._loadBotEvents();
+
+		return this.bot;
 	}
 
 	/**
 	 * load bot events
+	 */
+	_loadBotEvents() {
+		const eventFiles = getAllJsFiles(path.join(__dirname, 'bot_events'));
+
+		for (const file of eventFiles) {
+			const event = require(file);
+			const EVENT_NAME = path.basename(file, '.js');
+
+			this.bot[[ 'login', 'spawn' ].includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, this));
+		}
+
+		logger.debug(`[CHATBRIDGE BOT EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
+	}
+
+	/**
+	 * load chatBridge events
 	 */
 	_loadEvents() {
 		const eventFiles = getAllJsFiles(path.join(__dirname, 'events'));
@@ -166,7 +223,9 @@ class ChatBridge {
 			const event = require(file);
 			const EVENT_NAME = path.basename(file, '.js');
 
-			this.bot[[ 'login', 'spawn' ].includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, this));
+			this.on(EVENT_NAME, event.bind(null, this));
+
+			delete require.cache[require.resolve(file)];
 		}
 
 		logger.debug(`[CHATBRIDGE EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
@@ -237,25 +296,52 @@ class ChatBridge {
 	}
 
 	/**
-	 * realy a message to ingame guild chat, replacing emojis with :emojiName:
+	 * forwards a discord message to ingame guild chat, prettifying discord renders
 	 * @param {import('../extensions/Message')} message
 	 * @param {import('../database/models/Player')} player
 	 */
-	sendToHypixelGuildChat(message, player) {
-		const prefix = `/gc ${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}: `;
-		const toSend = this.constructor._escapeEz(this.constructor._parseDiscordMessageToMinecraft(message.content));
+	async forwardDiscordMessageToHypixelGuildChat(message, player) {
+		return this.gchat(
+			this.constructor._escapeEz(this.constructor._parseDiscordMessageToMinecraft(message.content)),
+			`${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}: `,
+		);
+	}
 
-		for (const contentPart of Util.splitMessage(toSend, { maxLength: this.maxMessageLength - prefix.length })) {
-			this.chat(this.hypixelSpamBypass(`${prefix}${contentPart}`));
+	/**
+	 * send a message to ingame guild chat
+	 * @param {string} message
+	 * @param {?string} prefix
+	 */
+	async gchat(message, prefix = '') {
+		return this.chat(message, `/gc ${prefix}`);
+	}
+
+	/**
+	 * send a message to ingame party chat
+	 * @param {string} message
+	 * @param {?string} prefix
+	 */
+	async pchat(message, prefix = '') {
+		return this.chat(message, `/pc ${prefix}`);
+	}
+
+	/**
+	 * splits the message into the max ingame chat length, prefixes all parts and sends them
+	 * @param {string} message
+	 * @param {?string} prefix
+	 */
+	async chat(message, prefix = '') {
+		for (const contentPart of Util.splitMessage(message, { maxLength: this.maxMessageLength - prefix.length })) {
+			await this.sendToMinecraftChat(this.hypixelSpamBypass(`${prefix}${contentPart}`));
 		}
 	}
 
 	/**
-	 * send a message to the ingame chat, 600 ms queue cooldown
+	 * send a message to the ingame chat, without changing it, 600 ms queue cooldown
 	 * @param {string} message
 	 */
-	async chat(message) {
-		if (!this.ready) throw new Error('chat bridge bot not online');
+	async sendToMinecraftChat(message) {
+		if (!this.ready) throw new Error('chatBridge not ready');
 
 		await this.queue.wait();
 
@@ -268,6 +354,48 @@ class ChatBridge {
 		} finally {
 			this.queue.shift();
 		}
+	}
+
+	/**
+	 * send a message both to discord and the ingame guild chat
+	 * @param {string} message
+	 */
+	async broadcast(message) {
+		if (!this.ready) throw new Error('chatBridge not ready');
+
+		return Promise.all([
+			this.channel.send(message),
+			this.gchat(message),
+		]);
+	}
+
+	/**
+	 * collects chat messages from the bot
+	 * @param {import('./MessageCollector').CollectorFilter} filter
+	 * @param {MessageCollectorOptions} options
+	 */
+	createMessageCollector(filter, options = {}) {
+		return new MessageCollector(this, filter, options);
+	}
+
+	/**
+	 * promisified MessageCollector
+	 * @param {import('./MessageCollector').CollectorFilter} filter
+	 * @param {AwaitMessagesOptions} options
+	 * @returns {Promise<import('./MessageCollector').CollectedMessage[]>}
+	 */
+	awaitMessages(filter, options = {}) {
+		return new Promise((resolve, reject) => {
+			const collector = this.createMessageCollector(filter, options);
+
+			collector.once('end', (collection, reason) => {
+				if (options.errors?.includes(reason)) {
+					reject(collection);
+				} else {
+					resolve(collection);
+				}
+			});
+		});
 	}
 }
 
