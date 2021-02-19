@@ -66,6 +66,13 @@ class HypixelMessage {
 	}
 
 	/**
+	 * the message author's player object
+	 */
+	get player() {
+		return this.author?.player ?? null;
+	}
+
+	/**
 	 * replies ingame to the message
 	 * @param {string} message
 	 */
