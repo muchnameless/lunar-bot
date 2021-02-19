@@ -38,11 +38,6 @@ class ChatBridge extends EventEmitter {
 		 */
 		this.webhook = null;
 		/**
-		 * discord channel
-		 * @type {?import('../extensions/TextChannel')}
-		 */
-		this.channel = null;
-		/**
 		 * @type {import('../database/models/HypixelGuild')}
 		 */
 		this.guild = null;
@@ -77,6 +72,13 @@ class ChatBridge extends EventEmitter {
 
 	get logInfo() {
 		return `${this.bot?.username ?? 'no bot'} | ${this.guild?.name ?? 'no guild'}`;
+	}
+
+	/**
+	 * the logging webhook's channel
+	 */
+	get channel() {
+		return this.client.channels.cache.get(this.webhook?.channelID) ?? null;
 	}
 
 	/**
@@ -319,7 +321,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {?string} prefix
 	 */
 	async gchat(message, prefix = '') {
-		return this.chat(message, `/gc ${prefix}`);
+		return this.chat(message, `/gc ${prefix} `);
 	}
 
 	/**
@@ -328,7 +330,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {?string} prefix
 	 */
 	async pchat(message, prefix = '') {
-		return this.chat(message, `/pc ${prefix}`);
+		return this.chat(message, `/pc ${prefix} `);
 	}
 
 	/**
@@ -370,7 +372,7 @@ class ChatBridge extends EventEmitter {
 		if (!this.ready) throw new Error('chatBridge not ready');
 
 		return Promise.all([
-			this.channel.send(message),
+			this.channel?.send(message),
 			this.gchat(message),
 		]);
 	}
