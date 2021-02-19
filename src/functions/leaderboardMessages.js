@@ -107,7 +107,7 @@ const self = module.exports = {
 		 * @type {?import('../structures/database/models/HypixelGuild')}
 		 */
 		const hypixelGuild = GUILD_NAME === 'Guilds'
-			? null
+			? false
 			: message.client.hypixelGuilds.getByName(GUILD_NAME);
 		const USER_ID = message.guild ? message.mentions.users.first()?.id : message.channel.recipient.id;
 
