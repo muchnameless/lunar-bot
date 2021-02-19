@@ -22,64 +22,6 @@ module.exports = class CompetitionCommand extends Command {
 	}
 
 	/**
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 */
-	async getUserInput(message) {
-		let type;
-
-		let retries = 0;
-
-		do {
-			const ANSWER = await message.awaitReply(commaListsOr`competition type? ${COMPETITION_TYPES}`);
-
-			if (ANSWER) {
-				const result = autocorrect(ANSWER, COMPETITION_TYPES);
-
-				if (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) {
-					type = result.value;
-				} else {
-					if (++retries >= this.client.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
-
-					message.reply(`${ANSWER} is not a valid type`);
-				}
-			} else if (++retries >= this.client.config.get('USER_INPUT_MAX_RETRIES')) {
-				throw new Error('the command has been cancelled.');
-			}
-		} while (!type);
-
-		return type;
-	}
-
-	/**
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string} question
-	 */
-	async getDateInput(message, question) {
-		let userInput;
-		let retries = 0;
-
-		do {
-			const ANSWER = await message.awaitReply(question);
-
-			if (ANSWER) {
-				const result = new Date(ANSWER);
-
-				if (!isNaN(result)) {
-					userInput = result;
-				} else {
-					if (++retries >= this.client.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
-
-					message.reply(`${ANSWER} is not a valid date`);
-				}
-			} else if (++retries >= this.client.config.get('USER_INPUT_MAX_RETRIES')) {
-				throw new Error('the command has been cancelled.');
-			}
-		} while (!userInput);
-
-		return userInput;
-	}
-
-	/**
 	 * execute the command
 	 * @param {import('../../structures/LunarClient')} client
 	 * @param {import('../../structures/database/ConfigHandler')} config
@@ -89,53 +31,69 @@ module.exports = class CompetitionCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
+		return message.reply('WIP');
+
 		const collector = message.channel.createMessageCollector(
-			msg => msg.author.id === message.author.id && msg.content.toLowerCase() === 'cancel',
-			{ max: 1 },
+			msg => msg.author.id === message.author.id,
+			{ time: 60_000 },
 		);
 
-		const MAX_RETRIES = 3;
+		let type;
+		let startingTime;
+		let endingTime;
+		let retries = 0;
 
 		try {
-			let retries;
+			await message.reply(commaListsOr`competition type? ${COMPETITION_TYPES}`);
 
-			collector.on('collect', () => {
-				throw new Error('the command has been cancelled.');
-			});
+			for await (const collected of collector) {
+				collector.resetTimer();
 
-			// type
-			let type;
+				if (collected.content === 'cancel') throw new Error('command cancelled');
 
-			retries = 0;
-
-			do {
-				const ANSWER = await message.awaitReply(commaListsOr`competition type? ${COMPETITION_TYPES}`);
-
-				if (ANSWER) {
-					const result = autocorrect(ANSWER, COMPETITION_TYPES);
+				if (!type) {
+					const result = autocorrect(collected.content, COMPETITION_TYPES);
 
 					if (result.similarity >= config.get('AUTOCORRECT_THRESHOLD')) {
 						type = result.value;
+						retries = 0;
+						await message.awaitReply('starting time?');
 					} else {
-						if (++retries >= MAX_RETRIES) throw new Error('the command has been cancelled.');
+						if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
 
-						message.reply(`${ANSWER} is not a valid type`);
+						message.reply(`\`${collected.content}\` is not a valid type`);
 					}
-				} else if (++retries >= MAX_RETRIES) {
-					throw new Error('the command has been cancelled.');
+				} else if (!startingTime) {
+					const result = new Date(collected.content);
+
+					if (!isNaN(result)) {
+						startingTime = result;
+						retries = 0;
+						await message.awaitReply('ending time?');
+					} else {
+						if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+
+						message.reply(`\`${collected.content}\` is not a valid date`);
+					}
+				} else if (!endingTime) {
+					const result = new Date(collected.content);
+
+					if (!isNaN(result)) {
+						endingTime = result;
+						retries = 0;
+					} else {
+						if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+
+						message.reply(`\`${collected.content}\` is not a valid date`);
+					}
 				}
-			} while (!type);
-
-
-			// starting time
-			const startingTime = await this.getDateInput(message, 'starting time?');
-			const endingTime = await this.getDateInput(message, 'ending time?');
-
-			message.reply([ startingTime.toUTCString(), endingTime.toUTCString(), type ].join('\n'));
+			}
 		} catch (error) {
-			message.reply(error.message);
+			message.reply('the command has been cancelled.');
 		} finally {
 			collector.stop();
 		}
+
+		logger.debug({ type, startingTime, endingTime });
 	}
 };
