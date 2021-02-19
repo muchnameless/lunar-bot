@@ -153,6 +153,7 @@ class HypixelGuild extends Model {
 				};
 
 				logger.info(`[UPDATE GUILD]: ${this.name}: new rank`, newRank);
+				this.ranks ??= [];
 				this.ranks.push(newRank);
 				this.changed('ranks', true);
 			} else if (dbEntryRank.name !== rank.name) {
