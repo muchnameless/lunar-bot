@@ -95,7 +95,7 @@ class LunarClient extends Client {
 	 * @type {Function}
 	 */
 	get chat() {
-		return this.chatBridges[0].chat.bind(this.chatBridge);
+		return this.chatBridges[0].chat.bind(this.chatBridges[0]);
 	}
 
 	/**
