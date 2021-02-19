@@ -42,13 +42,11 @@ class HypixelMessage {
 		this.position = position;
 		this.rawContent = jsonMessage.toString().trim();
 
-		const messageParts = this.rawContent.split(':');
-
 		/**
 		 * Guild > [HypixelRank] ign [GuildRank]
 		 * From [HypixelRank] ign
 		 */
-		const matched = messageParts.shift().replace(/§[0-9a-gk-or]/g, '').trim().match(/^(?:(?<type>Guild|Party) > |(?<whisper>From) )(?:\[(?<hypixelRank>.+)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?/);
+		const matched = this.rawContent.replace(/§[0-9a-gk-or]/g, '').trim().match(/^(?:(?<type>Guild|Party) > |(?<whisper>From) )(?:\[(?<hypixelRank>.+)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
 			this.author = new HypixelMessageAuthor(this.chatBridge, {
@@ -57,7 +55,7 @@ class HypixelMessage {
 				guildRank: matched.groups.guildRank,
 			});
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? 'whisper' : null);
-			this.content = messageParts.join(':').replace(/ࠀ|⭍/g, '').trim();
+			this.content = this.rawContent.split(':').slice(1).join(':').replace(/ࠀ|⭍/g, '').trim();
 		} else {
 			this.author = null;
 			this.type = null;
