@@ -38,10 +38,6 @@ module.exports = class InviteCommand extends Command {
 		if (!guild) return message.reply('unable to find your guild.');
 
 		const chatBridge = guild.chatBridge;
-
-		if (!chatBridge) return message.reply(`no chat bridge for \`${guild.name}\` found.`);
-		if (!chatBridge.ready) return message.reply(`the chat bridge for \`${guild.name}\` is currently not online.`);
-
 		const [ ign ] = args;
 
 		try {
