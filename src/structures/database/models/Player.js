@@ -210,7 +210,7 @@ class Player extends Model {
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async update({ shouldSkipQueue = false, reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
-		if (this.guildID === GUILD_ID_BRIDGER) return;
+		if (this.guildID === GUILD_ID_BRIDGER) return this.updateIgn();
 		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp({ shouldSkipQueue });
 		await this.updateDiscordMember({ reason, shouldSendDm });
 	}
