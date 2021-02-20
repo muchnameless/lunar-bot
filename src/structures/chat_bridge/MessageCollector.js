@@ -1,14 +1,13 @@
 'use strict';
 
 const EventEmitter = require('events');
+const logger = require('../../functions/logger');
 
 /**
  * Filter to be applied to the collector.
  * @typedef {Function} CollectorFilter
- * @param {string} message
- * @param {import('./bot_events/message').TextComponent[]} jsonMessage
- * @param {string} position
- * @param {Array} collection The items collected by this collector
+ * @param {import('./HypixelMessage')} message
+ * @param {import('./HypixelMessage')[]} collection The items collected by this collector
  * @returns {boolean|Promise<boolean>}
  */
 
@@ -87,11 +86,14 @@ class MessageCollector extends EventEmitter {
 		 */
 		this.received = 0;
 
-		this.chatBridge.on('message', this._collect);
+		this.handleCollect = this.handleCollect.bind(this);
+		this._handleBotDisconnection = this._handleBotDisconnection.bind(this);
+
+		this.chatBridge.on('message', this.handleCollect);
 		this.chatBridge.bot.on('end', this._handleBotDisconnection);
 
 		this.once('end', () => {
-			this.chatBridge.removeListener('message', this._collect);
+			this.chatBridge.removeListener('message', this.handleCollect);
 			this.chatBridge.bot.removeListener('end', this._handleBotDisconnection);
 		});
 
@@ -104,7 +106,7 @@ class MessageCollector extends EventEmitter {
 	 * @param {import('./HypixelMessage')} message
 	 * @emits Collector#collect
 	 */
-	async _collect(message) {
+	async handleCollect(message) {
 		++this.received;
 
 		if (await this.filter(message, this.collected)) {
