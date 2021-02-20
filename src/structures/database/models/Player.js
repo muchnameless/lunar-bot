@@ -118,7 +118,16 @@ class Player extends Model {
 	 * @returns {?import('./HypixelGuild')}
 	 */
 	get guild() {
-		return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
+		switch (this.guildID) {
+			case GUILD_ID_BRIDGER:
+				return { name: 'Bridger' };
+
+			case GUILD_ID_ERROR:
+				return { name: 'Error' };
+
+			default:
+				return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
+		}
 	}
 
 	/**
@@ -199,7 +208,7 @@ class Player extends Model {
 	 * assumes the last two guild ranks are staff ranks
 	 */
 	get isStaff() {
-		return this.guildRankPriority >= this.guild?.ranks.length - 1;
+		return this.guildRankPriority && this.guildRankPriority >= this.guild?.ranks.length - 1;
 	}
 
 	/**
