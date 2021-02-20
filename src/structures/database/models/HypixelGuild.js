@@ -102,7 +102,7 @@ class HypixelGuild extends Model {
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
 	get chatBridge() {
-		if (!this._chatBridge.ready) throw new Error(`${this.name}: ${this._chatBridge ? 'not ready' : 'no chatBridge found'}`);
+		if (!this._chatBridge?.ready) throw new Error(`${this.name}: chat bridge ${this._chatBridge ? 'not ready' : 'not found'}`);
 		return this._chatBridge;
 	}
 
