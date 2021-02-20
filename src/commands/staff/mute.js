@@ -1,5 +1,6 @@
 'use strict';
 
+const { stripIndent } = require('common-tags');
 const ms = require('ms');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -58,9 +59,7 @@ module.exports = class MuteCommand extends Command {
 			if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
 		}
 
-		if (!guild.chatBridge) return message.reply(`no chat bridge for \`${guild.name}\` found.`);
-		if (!guild.chatBridge.ready) return message.reply(`the chat bridge for \`${guild.name}\` is currently not online.`);
-
+		const chatBridge = guild.chatBridge;
 		const DURATION = ms(DURATION_INPUT);
 
 		if (isNaN(DURATION)) return message.reply(`\`${DURATION_INPUT}\` is not a valid duration.`);
@@ -76,8 +75,22 @@ module.exports = class MuteCommand extends Command {
 			await guild.save();
 		}
 
-		await guild.chatBridge.chat(`/g mute ${target} ${DURATION_INPUT}`);
+		try {
+			const result = await Promise.all([
+				chatBridge.awaitMessages(
+					msg => /^(?:\[.+\] )?\w+ has muted (?:(?:\[.+\] )?\w+|the guild chat) for/.test(msg.content),
+					{ max: 1, time: 5_000 },
+				),
+				chatBridge.sendToMinecraftChat(`/g mute ${target} ${DURATION_INPUT}`),
+			]);
 
-		message.reply(`muted \`${target}\` for \`${DURATION_INPUT}\``);
+			message.reply(stripIndent`
+				muted \`${target}\` for \`${DURATION_INPUT}\`
+				 > ${result[0][0]?.content ?? 'no ingame result'}
+			`);
+		} catch (error) {
+			logger.error(error);
+			message.reply(`an unknown error occurred while muting \`${target}\`.`);
+		}
 	}
 };

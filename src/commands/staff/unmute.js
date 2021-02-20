@@ -1,5 +1,6 @@
 'use strict';
 
+const { stripIndent } = require('common-tags');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -55,8 +56,7 @@ module.exports = class UnmuteCommand extends Command {
 			if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
 		}
 
-		if (!guild.chatBridge) return message.reply(`no chat bridge for \`${guild.name}\` found.`);
-		if (!guild.chatBridge.ready) return message.reply(`the chat bridge for \`${guild.name}\` is currently not online.`);
+		const chatBridge = guild.chatBridge;
 
 		if (target instanceof players.model) {
 			target.chatBridgeMutedUntil = 0;
@@ -66,8 +66,22 @@ module.exports = class UnmuteCommand extends Command {
 			await guild.save();
 		}
 
-		await guild.chatBridge.chat(`/g unmute ${target}`);
+		try {
+			const result = await Promise.all([
+				chatBridge.awaitMessages(
+					msg => /^(?:\[.+\] )?\w+ has muted (?:(?:\[.+\] )?\w+|the guild chat) for/.test(msg.content),
+					{ max: 1, time: 5_000 },
+				),
+				chatBridge.sendToMinecraftChat(`/g unmute ${target}`),
+			]);
 
-		message.reply(`unmuted \`${target}\`.`);
+			message.reply(stripIndent`
+				unmuted \`${target}\`
+				 > ${result[0][0]?.content ?? 'no ingame result'}
+			`);
+		} catch (error) {
+			logger.error(error);
+			message.reply(`an unknown error occurred while unmuting \`${target}\`.`);
+		}
 	}
 };

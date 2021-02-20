@@ -57,7 +57,7 @@ module.exports = class InviteCommand extends Command {
 
 			message.reply(stripIndent`
 				invited \`${ign}\` into \`${guild.name}\`
-				 > ${result[0][0].content}
+				 > ${result[0][0]?.content ?? 'no ingame result'}
 			`);
 		} catch (error) {
 			logger.error(error);
