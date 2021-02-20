@@ -79,12 +79,12 @@ module.exports = class UnmuteCommand extends Command {
 			]);
 
 			message.reply(stripIndent`
-				unmuted ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name} guild chat\``}
+				unmuted ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`}
 				 > ${result[0][0]?.content ?? 'no ingame result'}
 			`);
 		} catch (error) {
 			logger.error(error);
-			message.reply(`an unknown error occurred while unmuting ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name} guild chat\``}.`);
+			message.reply(`an unknown error occurred while unmuting ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`}.`);
 		}
 	}
 };

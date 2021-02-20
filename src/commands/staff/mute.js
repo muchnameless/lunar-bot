@@ -88,12 +88,12 @@ module.exports = class MuteCommand extends Command {
 			]);
 
 			message.reply(stripIndent`
-				muted ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name} guild chat\``} for \`${DURATION_INPUT}\`
+				muted ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`} for \`${DURATION_INPUT}\`
 				 > ${result[0][0]?.content ?? 'no ingame result'}
 			`);
 		} catch (error) {
 			logger.error(error);
-			message.reply(`an unknown error occurred while muting ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name} guild chat\``}.`);
+			message.reply(`an unknown error occurred while muting ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`}.`);
 		}
 	}
 };
