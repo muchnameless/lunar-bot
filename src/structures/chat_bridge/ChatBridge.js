@@ -6,7 +6,7 @@ const path = require('path');
 const mineflayer = require('mineflayer');
 const emojiRegex = require('emoji-regex');
 const ms = require('ms');
-const { sleep } = require('../../functions/util');
+const { sleep, trim } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
 const WebhookError = require('../errors/WebhookError');
@@ -352,7 +352,16 @@ class ChatBridge extends EventEmitter {
 	 * @param {?string} prefix
 	 */
 	async chat(message, prefix = '') {
-		for (const contentPart of Util.splitMessage(message, { maxLength: this.maxMessageLength - prefix.length })) {
+		let messageParts;
+
+		try {
+			messageParts = Util.splitMessage(message, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
+		} catch {
+			// fallback in case the splitMessage throws if it doesn't contain any ' '
+			messageParts = [ trim(message, this.maxMessageLength - prefix.length) ];
+		}
+
+		for (const contentPart of messageParts) {
 			await this.sendToMinecraftChat(this.hypixelSpamBypass(`${prefix}${contentPart}`));
 		}
 	}
