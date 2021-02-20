@@ -97,7 +97,9 @@ module.exports = class ScheduleCommand extends Command {
 			flags: flags.join(' ') || null,
 		});
 
-		await message.reply(`\`${INPUT_STRING}\` scheduled for \`${LOCALE_DATE_STRING}\`, total amount of cron jobs: ${cronJobs.size}`);
-		message.replyMessageID = null; // to not overwrite prev reply
+		await message.reply(
+			`\`${INPUT_STRING}\` scheduled for \`${LOCALE_DATE_STRING}\`, total amount of cron jobs: ${cronJobs.size}`,
+			{ saveReplyMessageID: false },
+		);
 	}
 };

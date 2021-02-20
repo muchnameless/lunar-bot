@@ -152,12 +152,10 @@ module.exports = class LinkCommand extends Command {
 			}
 
 			if (!(await playerLinkedToID.unlink(`unlinked by ${message.author.tag}`)) && linkedUser) {
-				await message
-					.reply(
-						`unable to update roles and nickname for the currently linked member ${linkedUser}.`,
-						{ allowedMentions: { parse: [] } },
-					)
-					.then(replyMessage => replyMessage.replyMessageID = null);
+				await message.reply(
+					`unable to update roles and nickname for the currently linked member ${linkedUser}.`,
+					{ allowedMentions: { parse: [] }, saveReplyMessageID: false },
+				);
 			}
 		}
 
@@ -194,12 +192,10 @@ module.exports = class LinkCommand extends Command {
 			}
 
 			if (!(await player.unlink(`unlinked by ${message.author.tag}`)) && linkedUser) {
-				await message
-					.reply(
-						`unable to update roles and nickname for the currently linked member ${linkedUser}.`,
-						{ allowedMentions: { parse: [] } },
-					)
-					.then(replyMessage => replyMessage.replyMessageID = null);
+				await message.reply(
+					`unable to update roles and nickname for the currently linked member ${linkedUser}.`,
+					{ allowedMentions: { parse: [] }, saveReplyMessageID: false },
+				);
 			}
 		}
 

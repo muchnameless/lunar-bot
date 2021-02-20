@@ -11,7 +11,7 @@ class LunarMessage extends Message {
 	constructor(...args) {
 		super(...args);
 
-		this.shouldSendReplyChannel = true;
+		this.sendReplyChannel = true;
 		this.replyMessageID = null;
 	}
 
@@ -79,12 +79,11 @@ class LunarMessage extends Message {
 	 */
 	async awaitReply(question, timeoutSeconds = 60, options = {}) {
 		try {
-			const questionMessage = await this.reply(question, options);
+			const questionMessage = await this.reply(question, { saveReplyMessageID: false, ...options });
 
 			if (!questionMessage) return null;
 
-			this.replyMessageID = null; // to not overwride the question message
-			this.shouldSendReplyChannel = false; // to not ping the author with #bot-commands a second time
+			this.sendReplyChannel = false; // to not ping the author with #bot-commands a second time
 
 			const collected = await questionMessage.channel.awaitMessages(
 				msg => msg.author.id === this.author.id,
@@ -98,14 +97,24 @@ class LunarMessage extends Message {
 	}
 
 	/**
+	 * @typedef {import('discord.js').MessageOptions} MessageReplyOptions
+	 * @property {boolean} [sameChannel=false]
+	 * @property {boolean} [sendReplyChannel=true]
+	 * @property {boolean} [saveReplyMessageID=true]
+	 */
+
+	/**
 	 * replies in nearest #bot-commands or in message's channel if DMs or '-c' flag set
 	 * @param {string} content message reply content
-	 * @param {object} options message reply options
+	 * @param {MessageReplyOptions} [optionsInput] message reply options
+	 * @returns {Promise<?LunarMessage>}
 	 */
-	async reply(content, options = {}) {
+	async reply(content, optionsInput = {}) {
 		// analyze input and create (content, options)-argument
 		if (typeof content == undefined) throw new TypeError('content must be defined');
-		if (typeof options !== 'object' || options === null) throw new TypeError('options must be an Object');
+		if (typeof optionsInput !== 'object' || optionsInput === null) throw new TypeError('options must be an Object');
+
+		const options = optionsInput;
 
 		// only object as first arg provided
 		if (typeof content === 'object') {
@@ -113,8 +122,8 @@ class LunarMessage extends Message {
 				options.embed = content;
 				content = '';
 			} else if (!Array.isArray(content)) { // unknown options object
-				options = content;
-				content = options.content ?? '';
+				optionsInput = content;
+				content = optionsInput.content ?? '';
 			}
 		}
 
@@ -123,13 +132,15 @@ class LunarMessage extends Message {
 			? null
 			: options;
 
+		options.saveReplyMessageID ??= true;
+
 		// DMs
 		if (!this.guild) {
 			return this.replyMessageID && this.channel.messages.cache.has(this.replyMessageID)
 				? this.channel.messages.cache.get(this.replyMessageID).edit(content, options)
 				: this.channel.send(content, options)
 					.then(message => {
-						this.replyMessageID = message.id;
+						if (options.saveReplyMessageID) this.replyMessageID = message.id;
 						return message;
 					});
 		}
@@ -176,7 +187,7 @@ class LunarMessage extends Message {
 				? this.channel.messages.cache.get(this.replyMessageID).edit(content, options)
 				: this.channel.send(content, options)
 					.then(message => {
-						this.replyMessageID = message.id;
+						if (options.saveReplyMessageID) this.replyMessageID = message.id;
 						return message;
 					});
 		}
@@ -206,7 +217,7 @@ class LunarMessage extends Message {
 		}
 
 		// clean up channel after 10s
-		if (this.shouldSendReplyChannel) { // notify author and delete messages
+		if (this.sendReplyChannel) { // notify author and delete messages
 			super
 				.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.`)
 				.then(async commandsChannelMessage => {
