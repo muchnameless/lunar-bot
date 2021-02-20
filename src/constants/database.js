@@ -55,6 +55,8 @@ module.exports = {
 
 	UNKNOWN_IGN: 'unknown ign',
 
-	GUILD_ID_ERROR: 'error',
+	GUILD_ID_ERROR: 'ERROR',
+
+	GUILD_ID_BRIDGER: 'BRIDGER',
 
 };

@@ -3,7 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const { Model } = require('sequelize');
 const { stripIndents } = require('common-tags');
-const { XP_TYPES, XP_OFFSETS, GUILD_ID_ERROR, UNKNOWN_IGN } = require('../../../constants/database');
+const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER } = require('../../../constants/database');
 const { LEVELING_XP, SKILL_XP_PAST_50, SKILLS_CAP, RUNECRAFTING_XP, DUNGEON_XP, SLAYER_XP, SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { escapeIgn, getHypixelClient } = require('../../../functions/util');
@@ -210,7 +210,8 @@ class Player extends Model {
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async update({ shouldSkipQueue = false, reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
-		await this.updateXp({ shouldSkipQueue });
+		if (this.guildID === GUILD_ID_BRIDGER) return;
+		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp({ shouldSkipQueue });
 		await this.updateDiscordMember({ reason, shouldSendDm });
 	}
 
@@ -312,6 +313,8 @@ class Player extends Model {
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async updateDiscordMember({ reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
+		if (this.guildID === GUILD_ID_BRIDGER) return;
+
 		const member = await this.discordMember ?? (reason = 'found linked discord tag', await this.linkUsingCache());
 
 		if (this.guildID === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
@@ -698,6 +701,8 @@ class Player extends Model {
 	 * @param {boolean} shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async syncIgnWithDisplayName(shouldSendDm = false) {
+		if (this.guildID === GUILD_ID_BRIDGER) return;
+
 		const member = await this.discordMember;
 
 		if (!member) return;
