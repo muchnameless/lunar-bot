@@ -322,7 +322,7 @@ class ChatBridge extends EventEmitter {
 	async forwardDiscordMessageToHypixelGuildChat(message, player) {
 		return this.gchat(
 			this.constructor._escapeEz(this._parseDiscordMessageToMinecraft(message.content)),
-			`${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}: `,
+			`${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}:`,
 		);
 	}
 
