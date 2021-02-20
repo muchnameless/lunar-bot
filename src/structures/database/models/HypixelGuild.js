@@ -399,7 +399,7 @@ class HypixelGuild extends Model {
 			?.replace(/[^a-zA-Z ]/g, '') // delete all non alphabetical characters
 			.split(/ +/)
 			.filter(word => word.length >= 3) // filter out short words like 'am'
-			.map(word => autocorrect(word, this.ranks.filter(rank => rank.roleID), 'name'))
+			.map(word => autocorrect(word, this.ranks, 'name'))
 			.sort((a, b) => b.similarity - a.similarity)[0]; // element with the highest similarity
 
 		if (!result || result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return true;
@@ -410,17 +410,41 @@ class HypixelGuild extends Model {
 			roleID: ROLE_ID,
 			priority: RANK_PRIORITY,
 		} = result.value; // rank
-		const player = this.players.find(p => p.discordID === message.author.id);
 
-		// no player db entry
+		let player = this.players.find(p => p.discordID === message.author.id);
+
+		// no player db entry in this guild
 		if (!player) {
-			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested ${RANK_NAME} but could not be found in the player db`);
+			player = this.client.players.getByID(message.author.id);
+
+			// no player db entry in all guilds
+			if (!player) {
+				logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' but could not be found in the player db`);
+
+				message.reply(
+					`unable to find you in the ${this.name} player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
+					{ sameChannel: true },
+				);
+
+				return true;
+			}
+
+			// player found in other guild
+			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' from '${this.name}' but is in '${player.guildName}'`);
 
 			message.reply(
-				`unable to find you in the ${this.name} player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
+				`you need to be in ${this.name} in order to request this rank. If you just joined use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
 				{ sameChannel: true },
 			);
 
+			return true;
+		}
+
+		// non-requestable rank
+		if (!ROLE_ID) {
+			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank which is non-requestable`);
+			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
+			message.reactSafely(CLOWN);
 			return true;
 		}
 
