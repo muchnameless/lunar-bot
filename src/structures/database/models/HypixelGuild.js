@@ -465,7 +465,21 @@ class HypixelGuild extends Model {
 				await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
 			} else {
 				// set ingame rank and discord role
-				await this.chatBridge.sendToMinecraftChat(`/g setrank ${player.ign} ${RANK_NAME}`);
+				const chatBridge = this.chatBridge;
+				const filterRegex = new RegExp(`(?:\\[.+\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`);
+
+				// listen for ingame promotion message
+				await Promise.all([
+					chatBridge.awaitMessages(
+						msg => filterRegex.test(msg.content),
+						{ max: 1, time: 5_000, errors: [ 'time' ] },
+					),
+					this.chatBridge.sendToMinecraftChat(`/g setrank ${player.ign} ${RANK_NAME}`),
+				]);
+
+				// ingame chat message received
+				player.guildRankPriority = RANK_PRIORITY;
+				player.save();
 				await player.updateRoles(`requested ${RANK_NAME}`);
 			}
 
