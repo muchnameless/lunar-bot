@@ -417,7 +417,7 @@ class ChatBridge extends EventEmitter {
 
 	/**
 	 * send via the chatBridge webhook
-	 * @param {*} toSend
+	 * @param {import('discord.js').WebhookMessageOptions} toSend
 	 */
 	async sendViaWebhook(toSend) {
 		try {
