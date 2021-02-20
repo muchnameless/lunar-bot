@@ -271,15 +271,27 @@ class ChatBridge extends EventEmitter {
 	 */
 	parseMinecraftMessageToDiscord(message) {
 		return Util.escapeMarkdown(message)
-			.replace(/:(\S+):/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
-			.replace(/:(\S+?):/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
-			.replace(/<?#([a-z-]+)>?/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
-			.replace(/<?@[!&]?(\S+)>?/g, (match, p1) =>
-				this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members
-				?? this.client.users.cache.find(u => u.username.toLowerCase() === p1.toLowerCase())?.toString() // users
-				?? this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p1.toLowerCase())?.toString() // roles
-				?? match,
-			);
+			.replace(/(?<!<|<a):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
+			.replace(/(?<!<|<a):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
+			.replace(/#([a-z-]+)/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+			.replace(/(?<!<)@([!&])?(\S+)(?!\d+>)/g, (match, p1, p2) => {
+				switch (p1) {
+					case '!': // members/users
+						return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+							?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+							?? match;
+
+					case '&': // roles
+						return this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+							?? match;
+
+					default: // both
+						return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+							?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+							?? this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+							?? match;
+				}
+			});
 	}
 
 	/**
