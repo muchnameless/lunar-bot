@@ -44,11 +44,11 @@ module.exports = class InviteCommand extends Command {
 			const result = await Promise.all([
 				Promise.race([
 					chatBridge.awaitMessages(
-						msg => /^You invited (?:\[.+\] )?\w+ to your guild\. They have 5 minutes to accept\.$|^You sent an offline invite to (?:\[.+\] )?\w+! They will have 5 minutes to accept once they come online!$/.test(msg.content),
+						msg => /^You invited (?:\[.+?\] )?\w+ to your guild\. They have 5 minutes to accept\.$|^You sent an offline invite to (?:\[.+?\] )?\w+! They will have 5 minutes to accept once they come online!$/.test(msg.content),
 						{ max: 1, time: 5_000 },
 					),
 					chatBridge.awaitMessages(
-						msg => /^You've already invited (?:\[.+\] )?\w+ to your guild! Wait for them to accept!$|^(?:\[.+\] )?\w+ is already in another guild!$/.test(msg.content),
+						msg => /^You've already invited (?:\[.+?\] )?\w+ to your guild! Wait for them to accept!$|^(?:\[.+?\] )?\w+ is already in another guild!$/.test(msg.content),
 						{ max: 1, time: 5_000 },
 					),
 				]),

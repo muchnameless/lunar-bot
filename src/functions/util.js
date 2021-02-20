@@ -62,7 +62,7 @@ module.exports = {
 	 * checks the input string if it could be a discord tag
 	 * @param {string} string to check
 	 */
-	checkIfDiscordTag: string => /.+#\d{4}/.test(string),
+	checkIfDiscordTag: string => /.{2,32}#\d{4}/.test(string),
 
 	/**
 	 * returns the hypixel client

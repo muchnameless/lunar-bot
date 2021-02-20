@@ -271,7 +271,7 @@ class ChatBridge extends EventEmitter {
 	 */
 	parseMinecraftMessageToDiscord(message) {
 		return Util.escapeMarkdown(message)
-			.replace(/:(.+):/, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[p1] ?? match) // emojis (custom and default)
+			.replace(/:(\S+):/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[p1] ?? match) // emojis (custom and default)
 			.replace(/<?#([a-z-]+)>?/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
 			.replace(/<?@[!&]?(\S+)>?/g, (match, p1) =>
 				this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p1.toLowerCase())?.toString() // members

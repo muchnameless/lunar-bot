@@ -81,7 +81,7 @@ module.exports = class MuteCommand extends Command {
 		try {
 			const result = await Promise.all([
 				chatBridge.awaitMessages(
-					msg => /^(?:\[.+\] )?\w+ has muted (?:(?:\[.+\] )?\w+|the guild chat) for/.test(msg.content),
+					msg => /^(?:\[.+?\] )?\w+ has muted (?:(?:\[.+?\] )?\w+|the guild chat) for/.test(msg.content),
 					{ max: 1, time: 5_000 },
 				),
 				chatBridge.sendToMinecraftChat(`/g mute ${target} ${DURATION_INPUT}`),

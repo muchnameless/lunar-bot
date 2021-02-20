@@ -87,7 +87,7 @@ module.exports = async (chatBridge, message) => {
 			 * accept f reqs from guild members
 			 * Friend request from [HypixelRank] IGN\n
 			 */
-			const friendReqMatched = message.content.match(/Friend request from (?:\[.+\] )?(\w+)/);
+			const friendReqMatched = message.content.match(/Friend request from (?:\[.+?\] )?(\w+)/);
 
 			if (friendReqMatched) {
 				const [, ign ] = friendReqMatched;
@@ -104,7 +104,7 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN has muted [HypixelRank] IGN for 10s
 			 * [HypixelRank] IGN has muted the guild chat for 10M
 			 */
-			const muteMatched = message.content.match(/(?:\[.+\] )?\w+ has muted (?:\[.+\] )?(the guild chat|\w+) for (\w+)/);
+			const muteMatched = message.content.match(/(?:\[.+?\] )?\w+ has muted (?:\[.+?\] )?(the guild chat|\w+) for (\w+)/);
 
 			if (muteMatched) {
 				const [, target, duration ] = muteMatched;
@@ -137,7 +137,7 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN has unmuted [HypixelRank] IGN
 			 * [HypixelRank] IGN has unmuted the guild chat!
 			 */
-			const unMuteMatched = message.content.match(/(?:\[.+\] )?\w+ has unmuted (?:\[.+\] )?(the guild chat|\w+)/);
+			const unMuteMatched = message.content.match(/(?:\[.+?\] )?\w+ has unmuted (?:\[.+?\] )?(the guild chat|\w+)/);
 
 			if (unMuteMatched) {
 				const [, target ] = unMuteMatched;

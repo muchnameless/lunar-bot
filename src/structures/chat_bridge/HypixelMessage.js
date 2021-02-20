@@ -46,7 +46,7 @@ class HypixelMessage {
 		 * Guild > [HypixelRank] ign [GuildRank]
 		 * From [HypixelRank] ign
 		 */
-		const matched = this.rawContent.match(/^(?:(?<type>Guild|Party) > |(?<whisper>From) )(?:\[(?<hypixelRank>.+)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
+		const matched = this.rawContent.match(/^(?:(?<type>Guild|Party) > |(?<whisper>From) )(?:\[(?<hypixelRank>.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
 			this.author = new HypixelMessageAuthor(this.chatBridge, {

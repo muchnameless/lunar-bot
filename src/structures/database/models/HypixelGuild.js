@@ -466,7 +466,7 @@ class HypixelGuild extends Model {
 			} else {
 				// set ingame rank and discord role
 				const chatBridge = this.chatBridge;
-				const filterRegex = new RegExp(`(?:\\[.+\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`);
+				const filterRegex = new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`);
 
 				// listen for ingame promotion message
 				await Promise.all([
