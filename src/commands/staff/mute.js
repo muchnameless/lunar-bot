@@ -12,7 +12,7 @@ module.exports = class MuteCommand extends Command {
 			aliases: [],
 			description: 'mute a single guild member or guild chat both ingame and for the chat bridge',
 			args: true,
-			usage: '[`ign`|`discord id`|`@mention` for a single member] [`guild`|`everyone` for the guild chat] [`time` in ms lib format]',
+			usage: () => `[\`ign\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format]`,
 			cooldown: 0,
 		});
 	}
@@ -33,11 +33,14 @@ module.exports = class MuteCommand extends Command {
 		const [ TARGET_INPUT, DURATION_INPUT ] = args;
 
 		let target;
-		let guild;
+		/**
+		 * @type {import('../../structures/database/models/HypixelGuild')}
+		 */
+		let guild = client.hypixelGuilds.getFromArray([ ...flags, ...args ]);
 
-		if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+		if (guild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 			target = 'everyone';
-			guild = players.getByID(message.author.id)?.guild;
+			guild ??= players.getByID(message.author.id)?.guild;
 
 			if (!guild) return message.reply('unable to find your guild.');
 		} else {
