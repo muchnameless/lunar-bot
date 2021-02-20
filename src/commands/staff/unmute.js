@@ -84,7 +84,7 @@ module.exports = class UnmuteCommand extends Command {
 			`);
 		} catch (error) {
 			logger.error(error);
-			message.reply(`an unknown error occurred while unmuting \`${target}\`.`);
+			message.reply(`an unknown error occurred while unmuting ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name} guild chat\``}.`);
 		}
 	}
 };

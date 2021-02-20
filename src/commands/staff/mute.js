@@ -93,7 +93,7 @@ module.exports = class MuteCommand extends Command {
 			`);
 		} catch (error) {
 			logger.error(error);
-			message.reply(`an unknown error occurred while muting \`${target}\`.`);
+			message.reply(`an unknown error occurred while muting ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name} guild chat\``}.`);
 		}
 	}
 };
