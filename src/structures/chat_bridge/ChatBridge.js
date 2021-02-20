@@ -285,11 +285,16 @@ class ChatBridge extends EventEmitter {
 						return this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
 							?? match;
 
-					default: // both
+					default: { // players, members/users, roles
+						const player = this.client.players.cache.find(p => p.ign.toLowerCase() === p2.toLowerCase());
+
+						if (player?.inDiscord) return `<@${player.discordID}>`;
+
 						return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
 							?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
 							?? this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
 							?? match;
+					}
 				}
 			});
 	}
