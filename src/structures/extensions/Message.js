@@ -33,6 +33,15 @@ class LunarMessage extends Message {
 	}
 
 	/**
+	 * message.react with permission check and promise rejection catch
+	 * @param {import('discord.js').EmojiResolvable} emoji
+	 */
+	async reactSafely(emoji) {
+		if (!this.channel.checkBotPermissions('ADD_REACTIONS')) return this;
+		return super.react(emoji).catch(error => logger.error(`[REACT SAFELY]: ${error.name}: ${error.message}`));
+	}
+
+	/**
 	 * delete the message, added check for already deleted after timeout
 	 * @param {object} options message delete options
 	 * @param {number} [options.timeout] delay in ms

@@ -428,14 +428,9 @@ class HypixelGuild extends Model {
 
 		// player meets reqs and already has the rank or is staff and has the rank's role
 		if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
-			if (message.replyMessageID) {
-				message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
-			}
-			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-				message.react(CLOWN).catch(error => logger.error(`[RANK REQUEST]: clown reaction: ${error.name}: ${error.message}`)); // get clowned
-			}
-
 			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
+			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
+			message.reactSafely(CLOWN);
 			return true;
 		}
 
@@ -499,9 +494,7 @@ class HypixelGuild extends Model {
 					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
 					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error.name}: ${error.message}`),
 				);
-				if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-					message.react(MUTED).catch(error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: muted reaction: ${error.name}: ${error.message}`));
-				}
+				message.reactSafely(MUTED);
 				return true;
 			}
 
@@ -516,9 +509,7 @@ class HypixelGuild extends Model {
 					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed guild chat muted`),
 					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing guild chat muted: ${error.name}: ${error.message}`),
 				);
-				if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-					message.react(MUTED).catch(error => logger.error(`[GUILD CHATBRIDGE]: muted reaction: ${error.name}: ${error.message}`));
-				}
+				message.reactSafely(MUTED);
 				return true;
 			}
 
@@ -530,9 +521,7 @@ class HypixelGuild extends Model {
 			await this.chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player);
 		} catch (error) {
 			logger.warn(`[GUILD CHATBRIDGE]: ${error.message}`);
-			if (message.channel.checkBotPermissions('ADD_REACTIONS')) {
-				message.react(X_EMOJI).catch(err => logger.error(`[GUILD CHATBRIDGE]: x reaction: ${err.name}: ${err.message}`)); // get clowned
-			}
+			message.reactSafely(X_EMOJI);
 		}
 
 		return true;
