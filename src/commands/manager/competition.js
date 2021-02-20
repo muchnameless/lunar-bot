@@ -31,11 +31,9 @@ module.exports = class CompetitionCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		return message.reply('WIP');
-
 		const collector = message.channel.createMessageCollector(
 			msg => msg.author.id === message.author.id,
-			{ time: 60_000 },
+			{ idle: 30_000 },
 		);
 
 		let type;
@@ -44,51 +42,82 @@ module.exports = class CompetitionCommand extends Command {
 		let retries = 0;
 
 		try {
-			await message.reply(commaListsOr`competition type? ${COMPETITION_TYPES}`);
+			await message.reply(
+				commaListsOr`competition type? ${COMPETITION_TYPES}`,
+				{ saveReplyMessageID: false },
+			);
 
-			for await (const collected of collector) {
-				collector.resetTimer();
-
+			do {
+				const collected = await collector.next;
 				if (collected.content === 'cancel') throw new Error('command cancelled');
 
-				if (!type) {
-					const result = autocorrect(collected.content, COMPETITION_TYPES);
+				const result = autocorrect(collected.content, COMPETITION_TYPES);
 
-					if (result.similarity >= config.get('AUTOCORRECT_THRESHOLD')) {
-						type = result.value;
-						retries = 0;
-						await message.awaitReply('starting time?');
-					} else {
-						if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+				if (result.similarity >= config.get('AUTOCORRECT_THRESHOLD')) {
+					type = result.value;
+					retries = 0;
+				} else {
+					if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
 
-						message.reply(`\`${collected.content}\` is not a valid type`);
-					}
-				} else if (!startingTime) {
-					const result = new Date(collected.content);
-
-					if (!isNaN(result)) {
-						startingTime = result;
-						retries = 0;
-						await message.awaitReply('ending time?');
-					} else {
-						if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
-
-						message.reply(`\`${collected.content}\` is not a valid date`);
-					}
-				} else if (!endingTime) {
-					const result = new Date(collected.content);
-
-					if (!isNaN(result)) {
-						endingTime = result;
-						retries = 0;
-					} else {
-						if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
-
-						message.reply(`\`${collected.content}\` is not a valid date`);
-					}
+					message.reply(
+						`\`${collected.content}\` is not a valid type`,
+						{ saveReplyMessageID: false },
+					);
 				}
-			}
+			} while (!type);
+
+			await message.reply('starting time?');
+
+			do {
+				const collected = await collector.next;
+				if (collected.content === 'cancel') throw new Error('command cancelled');
+
+				const result = new Date(collected.content);
+
+				if (!isNaN(result)) {
+					startingTime = result;
+					retries = 0;
+				} else {
+					if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+
+					message.reply(
+						`\`${collected.content}\` is not a valid date`,
+						{ saveReplyMessageID: false },
+					);
+				}
+			} while (!startingTime);
+
+			await message.reply(
+				'ending time?',
+				{ saveReplyMessageID: false },
+			);
+
+			do {
+				const collected = await collector.next;
+				if (collected.content === 'cancel') throw new Error('command cancelled');
+
+				const result = new Date(collected.content);
+
+				if (!isNaN(result)) {
+					endingTime = result;
+					retries = 0;
+				} else {
+					if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+
+					message.reply(
+						`\`${collected.content}\` is not a valid date`,
+						{ saveReplyMessageID: false },
+					);
+				}
+			} while (!endingTime);
+
+			await message.reply(
+				`type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
+				{ saveReplyMessageID: false },
+			);
+
 		} catch (error) {
+			logger.error(error);
 			message.reply('the command has been cancelled.');
 		} finally {
 			collector.stop();
