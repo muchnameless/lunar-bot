@@ -245,8 +245,6 @@ class ChatBridge extends EventEmitter {
 			const EVENT_NAME = path.basename(file, '.js');
 
 			this.on(EVENT_NAME, event.bind(null, this));
-
-			delete require.cache[require.resolve(file)];
 		}
 
 		logger.debug(`[CHATBRIDGE EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
