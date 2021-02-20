@@ -28,6 +28,7 @@ module.exports = class TaxResetCommand extends Command {
 		const { db, players, taxCollectors } = client;
 
 		let currentTaxEmbed;
+		let currentTaxCollectedEmbed;
 		let result;
 
 		// individual player
@@ -85,13 +86,17 @@ module.exports = class TaxResetCommand extends Command {
 				return taxMessage.embeds[0];
 			})();
 
-			if (!currentTaxEmbed && !flags.some(flag => [ 'f', 'force' ].includes(flag))) {
-				const ANSWER = await message.awaitReply(`unable to retrieve the current tax embed from ${client.lgGuild?.channels.cache.get(config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Continue?`, 30);
+			if (!currentTaxEmbed) {
+				if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+					const ANSWER = await message.awaitReply(`unable to retrieve the current tax embed from ${client.lgGuild?.channels.cache.get(config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`, 30);
 
-				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+					if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				}
 
 				currentTaxEmbed = client.db.createTaxEmbed();
 			}
+
+			currentTaxCollectedEmbed = taxCollectors.createTaxCollectedEmbed();
 
 			// remove retired collectors
 			await Promise.all(taxCollectors.cache.map(async taxCollector => !taxCollector.isCollecting && taxCollector.remove()));
@@ -125,6 +130,7 @@ module.exports = class TaxResetCommand extends Command {
 		client
 			.log(
 				currentTaxEmbed,
+				currentTaxCollectedEmbed,
 				new MessageEmbed()
 					.setColor(config.get('EMBED_BLUE'))
 					.setTitle('Guild Tax')

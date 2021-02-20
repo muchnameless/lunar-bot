@@ -1,5 +1,7 @@
 'use strict';
 
+const { MessageEmbed } = require('discord.js');
+const { escapeIgn } = require('../../functions/util');
 const ModelHandler = require('./ModelHandler');
 const logger = require('../../functions/logger');
 
@@ -56,6 +58,26 @@ class TaxCollectorHandler extends ModelHandler {
 	 */
 	getByIGN(ign) {
 		return this.cache.get(this.client.players.getByIGN(ign)?.minecraftUUID) ?? null;
+	}
+
+	/**
+	 * returns a tax collected embed
+	 */
+	createTaxCollectedEmbed() {
+		const embed = new MessageEmbed()
+			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setTitle('Collected Guild Tax')
+			.setDescription(`Total amount: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedAmount, 0))}\n\u200b`)
+			.setTimestamp();
+
+		for (const taxCollector of this.cache.values()) {
+			embed.addField(
+				`${escapeIgn(taxCollector.ign)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
+				this.client.formatNumber(taxCollector.collectedAmount),
+			);
+		}
+
+		return embed;
 	}
 }
 
