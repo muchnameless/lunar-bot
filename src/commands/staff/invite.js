@@ -1,5 +1,6 @@
 'use strict';
 
+const { stripIndent } = require('common-tags');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -10,7 +11,7 @@ module.exports = class InviteCommand extends Command {
 			aliases: [],
 			description: 'invite someone into the guild',
 			args: true,
-			usage: '[`IGN`]',
+			usage: () => `[\`IGN\`] <${this.client.hypixelGuilds.cache.map(hGuild => `\`-${hGuild.name.replace(/ /g, '')}\``).join('|')}>`,
 			cooldown: 0,
 		});
 	}
@@ -29,7 +30,10 @@ module.exports = class InviteCommand extends Command {
 
 		if (!playerInviting) return message.reply('unable to find you in the player database, so the guild to invite to could not be determined.');
 
-		const guild = playerInviting.guild;
+		/**
+		 * @type {import('../../structures/database/models/HypixelGuild')}
+		 */
+		const guild = client.hypixelGuilds.getFromFlags(flags) ?? playerInviting.guild;
 
 		if (!guild) return message.reply('unable to find your guild.');
 
@@ -38,7 +42,30 @@ module.exports = class InviteCommand extends Command {
 		if (!chatBridge) return message.reply(`no chat bridge for \`${guild.name}\` found.`);
 		if (!chatBridge.ready) return message.reply(`the chat bridge for \`${guild.name}\` is currently not online.`);
 
-		await chatBridge.chat(`/g invite ${args[0]}`);
-		message.reply(`invited \`${args[0]}\` into \`${guild.name}\`.`);
+		const [ ign ] = args;
+
+		try {
+			const result = await Promise.all([
+				Promise.race([
+					chatBridge.awaitMessages(
+						msg => /^You invited (?:\[.+\] )?\w+ to your guild\. They have 5 minutes to accept\.$|^You sent an offline invite to (?:\[.+\] )?\w+! They will have 5 minutes to accept once they come online!$/.test(msg.content),
+						{ max: 1, time: 5_000 },
+					),
+					chatBridge.awaitMessages(
+						msg => /^You've already invited (?:\[.+\] )?\w+ to your guild! Wait for them to accept!$|^(?:\[.+\] )?\w+ is already in another guild!$/.test(msg.content),
+						{ max: 1, time: 5_000 },
+					),
+				]),
+				chatBridge.sendToMinecraftChat(`/g invite ${ign}`),
+			]);
+
+			message.reply(stripIndent`
+				invited \`${ign}\` into \`${guild.name}\`
+				 > ${result[0][0].content}
+			`);
+		} catch (error) {
+			logger.error(error);
+			message.reply(`an unknown error occurred while inviting \`${ign}\` into \`${guild.name}\`.`);
+		}
 	}
 };
