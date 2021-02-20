@@ -118,16 +118,8 @@ class Player extends Model {
 	 * @returns {?import('./HypixelGuild')}
 	 */
 	get guild() {
-		switch (this.guildID) {
-			case GUILD_ID_BRIDGER:
-				return { name: 'Bridger' };
-
-			case GUILD_ID_ERROR:
-				return { name: 'Error' };
-
-			default:
-				return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
-		}
+		if (this.guildID === GUILD_ID_BRIDGER) return this.client.hypixelGuilds.cache.get(this.client.config.get('MAIN_GUILD_ID')) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
+		return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
 	}
 
 	/**
