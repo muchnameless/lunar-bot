@@ -334,7 +334,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {?string} prefix
 	 */
 	async gchat(message, prefix = '') {
-		return this.chat(message, `/gc ${prefix} `);
+		return this.chat(message, `/gc ${prefix}${prefix.length ? ' ' : ''}`);
 	}
 
 	/**
@@ -343,7 +343,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {?string} prefix
 	 */
 	async pchat(message, prefix = '') {
-		return this.chat(message, `/pc ${prefix} `);
+		return this.chat(message, `/pc ${prefix}${prefix.length ? ' ' : ''}`);
 	}
 
 	/**
@@ -393,7 +393,7 @@ class ChatBridge extends EventEmitter {
 	/**
 	 * collects chat messages from the bot
 	 * @param {import('./MessageCollector').CollectorFilter} filter
-	 * @param {MessageCollectorOptions} options
+	 * @param {import('./MessageCollector').MessageCollectorOptions} options
 	 */
 	createMessageCollector(filter, options = {}) {
 		return new MessageCollector(this, filter, options);
