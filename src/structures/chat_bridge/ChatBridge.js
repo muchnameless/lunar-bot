@@ -1,6 +1,6 @@
 'use strict';
 
-const { Util, MessageEmbed } = require('discord.js');
+const { Util, MessageEmbed, DiscordAPIError } = require('discord.js');
 const { EventEmitter } = require('events');
 const path = require('path');
 const mineflayer = require('mineflayer');
@@ -413,6 +413,22 @@ class ChatBridge extends EventEmitter {
 			this.channel?.send(message),
 			this.gchat(message),
 		]);
+	}
+
+	/**
+	 * send via the chatBridge webhook
+	 * @param {*} toSend
+	 */
+	async sendViaWebhook(toSend) {
+		try {
+			await this.webhook.send(toSend);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE MESSAGE]: ${this.logInfo}: ${error.name}: ${error.message}`);
+			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
+				this.uncacheWebhook();
+				this.reconnect();
+			}
+		}
 	}
 
 	/**
