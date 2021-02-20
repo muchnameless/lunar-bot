@@ -10,6 +10,13 @@ class LunarDMChannel extends DMChannel {
 	}
 
 	/**
+	 * wether the channel is a ticket by yagpdb
+	 */
+	get isTicket() {
+		return false;
+	}
+
+	/**
 	 * checks wether the bot has the provided permission(s) in the channel
 	 * @param {string|string[]} permFlag
 	 */

@@ -19,7 +19,7 @@ class LunarMessage extends Message {
 	 * scans the message.content for a 'channel' flag
 	 */
 	get shouldReplyInSameChannel() {
-		return this.content?.split(/ +/).filter(x => x.startsWith('-')).some(x => [ 'c', 'ch', 'channel' ].includes(x.toLowerCase().replace(/^-+/, ''))) ?? false;
+		return this.channel.isTicket || (this.content?.split(/ +/).filter(x => x.startsWith('-')).some(x => [ 'c', 'ch', 'channel' ].includes(x.toLowerCase().replace(/^-+/, ''))) ?? false);
 	}
 
 	/**

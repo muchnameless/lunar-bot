@@ -1,10 +1,10 @@
 'use strict';
 
-const { Structures, TextChannel } = require('discord.js');
+const { Structures, NewsChannel } = require('discord.js');
 const logger = require('../../functions/logger');
 
 
-class LunarTextChannel extends TextChannel {
+class LunarNewsChannel extends NewsChannel {
 	constructor(...args) {
 		super(...args);
 	}
@@ -28,6 +28,6 @@ class LunarTextChannel extends TextChannel {
 	}
 }
 
-Structures.extend('TextChannel', TextChannel => LunarTextChannel); // eslint-disable-line no-shadow, no-unused-vars
+Structures.extend('NewsChannel', NewsChannel => LunarNewsChannel); // eslint-disable-line no-shadow, no-unused-vars
 
-module.exports = LunarTextChannel;
+module.exports = LunarNewsChannel;
