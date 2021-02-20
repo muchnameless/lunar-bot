@@ -1,6 +1,5 @@
 'use strict';
 
-const { DiscordAPIError } = require('discord.js');
 const ms = require('ms');
 const logger = require('../../../functions/logger');
 
@@ -23,22 +22,12 @@ module.exports = async (chatBridge, message) => {
 
 			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: webhook unavailable`);
 
-			try {
-				await chatBridge.webhook.send({
-					username: member?.displayName ?? player?.ign ?? message.author.ign,
-					avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-					content: chatBridge.parseMinecraftMessageToDiscord(message.content),
-					allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
-				});
-			} catch (error) {
-				logger.error(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: ${error.name}: ${error.message}`);
-				if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
-					chatBridge.uncacheWebhook();
-					chatBridge.reconnect();
-				}
-			}
-
-			return;
+			return chatBridge.sendViaWebhook({
+				username: member?.displayName ?? player?.ign ?? message.author.ign,
+				avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+				content: chatBridge.parseMinecraftMessageToDiscord(message.content),
+				allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
+			});
 		}
 
 		case 'whisper': {
@@ -56,6 +45,12 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN joined the guild!
 			 */
 			if (message.content.includes('joined the guild')) {
+				await chatBridge.sendViaWebhook({
+					username: chatBridge.guild.name,
+					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+					content: message.content,
+					allowedMentions: { parse: [] },
+				});
 				return chatBridge.broadcast('welcome');
 			}
 
@@ -63,6 +58,12 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN left the guild!
 			 */
 			if (message.content.includes('left the guild!')) {
+				await chatBridge.sendViaWebhook({
+					username: chatBridge.guild.name,
+					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+					content: message.content,
+					allowedMentions: { parse: [] },
+				});
 				return;
 			}
 
@@ -73,6 +74,12 @@ module.exports = async (chatBridge, message) => {
 			 * The guild has completed Tier 3 of this week's Guild Quest!
 			 */
 			if (message.content.includes('was promoted from') || message.content.startsWith('The guild has completed ')) {
+				await chatBridge.sendViaWebhook({
+					username: chatBridge.guild.name,
+					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+					content: message.content,
+					allowedMentions: { parse: [] },
+				});
 				return chatBridge.broadcast('gg');
 			}
 
@@ -80,6 +87,12 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN was demoted from PREV to NOW
 			 */
 			if (message.content.includes('was demoted from')) {
+				await chatBridge.sendViaWebhook({
+					username: chatBridge.guild.name,
+					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+					content: message.content,
+					allowedMentions: { parse: [] },
+				});
 				return;
 			}
 
@@ -107,6 +120,13 @@ module.exports = async (chatBridge, message) => {
 			const muteMatched = message.content.match(/(?:\[.+?\] )?\w+ has muted (?:\[.+?\] )?(the guild chat|\w+) for (\w+)/);
 
 			if (muteMatched) {
+				chatBridge.sendViaWebhook({
+					username: chatBridge.guild.name,
+					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+					content: message.content,
+					allowedMentions: { parse: [] },
+				});
+
 				const [, target, duration ] = muteMatched;
 
 				if (target === 'the guild chat') {
@@ -140,6 +160,13 @@ module.exports = async (chatBridge, message) => {
 			const unMuteMatched = message.content.match(/(?:\[.+?\] )?\w+ has unmuted (?:\[.+?\] )?(the guild chat|\w+)/);
 
 			if (unMuteMatched) {
+				chatBridge.sendViaWebhook({
+					username: chatBridge.guild.name,
+					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+					content: message.content,
+					allowedMentions: { parse: [] },
+				});
+
 				const [, target ] = unMuteMatched;
 
 				if (target === 'the guild chat') {
