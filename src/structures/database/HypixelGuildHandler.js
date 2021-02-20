@@ -1,5 +1,6 @@
 'use strict';
 
+const { GUILD_ID_BRIDGER, GUILD_ID_ERROR } = require('../../constants/database');
 const { autocorrect } = require('../../functions/util');
 const ModelHandler = require('./ModelHandler');
 const logger = require('../../functions/logger');
@@ -62,6 +63,8 @@ class HypixelGuildHandler extends ModelHandler {
 	 */
 	sweepPlayerCache(idOrGuild) {
 		if (idOrGuild) {
+			if (typeof idOrGuild === 'string' && [ GUILD_ID_BRIDGER, GUILD_ID_ERROR ].includes(idOrGuild)) return;
+
 			const hypixelGuild = this.resolve(idOrGuild);
 
 			if (!hypixelGuild) throw new Error(`[SWEEP PLAYER CACHE]: invalid input: ${idOrGuild}`);
