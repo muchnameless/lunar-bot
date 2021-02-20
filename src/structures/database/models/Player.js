@@ -196,9 +196,10 @@ class Player extends Model {
 
 	/**
 	 * wether the player has an ingame staff rank
+	 * assumes the last two guild ranks are staff ranks
 	 */
 	get isStaff() {
-		return this.guildRankPriority >= 4;
+		return this.guildRankPriority >= this.guild?.ranks.length - 1;
 	}
 
 	/**
