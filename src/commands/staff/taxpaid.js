@@ -12,7 +12,7 @@ module.exports = class TaxPaidCommand extends Command {
 			aliases: [ 'paid' ],
 			description: 'manually set a player to paid',
 			args: true,
-			usage: () => `[\`IGN\`|\`@mention\`] <custom \`amount\` to overwrite the default of ${this.client.config.getNumber('TAX_AMOUNT').toLocaleString(this.client.config.get('NUMBER_FORMAT'))}>`,
+			usage: () => `[\`IGN\`|\`@mention\`] <custom \`amount\` to overwrite the default of ${this.client.config.getNumber('TAX_AMOUNT')?.toLocaleString(this.client.config.get('NUMBER_FORMAT')) ?? 'none set'}>`,
 			cooldown: 0,
 		});
 	}

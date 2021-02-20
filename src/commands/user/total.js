@@ -15,7 +15,7 @@ module.exports = class TotalCommand extends Command {
 			aliases: [ 't', 'top' ],
 			description: 'guild member leaderboard for total skill lvl / slayer xp',
 			usage: () => stripIndents`
-				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.cache.map(hGuild => `\`-${hGuild.name.replace(/ /g, '')}\``).join('|')}|\`-all\`> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`-${offset}\``).join('|')}>
+				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.guildNameFlags}|\`-all\`> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`-${offset}\``).join('|')}>
 
 				currently supported types:
 				skill, ${SKILLS.join(', ')}
@@ -87,7 +87,7 @@ module.exports = class TotalCommand extends Command {
 
 		const reply = await message.reply(createTotalStatsEmbed(client, {
 			userID,
-			hypixelGuild: client.hypixelGuilds.getFromFlags(flags) ?? client.players.getByID(userID)?.guild,
+			hypixelGuild: client.hypixelGuilds.getFromArray(flags) ?? client.players.getByID(userID)?.guild,
 			type,
 			offset: getOffsetFromFlags(config, flags),
 			shouldShowOnlyBelowReqs: flags.some(flag => [ 't', 'track' ].includes(flag)),

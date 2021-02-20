@@ -42,7 +42,7 @@ module.exports = class TracklistCommand extends Command {
 
 		const reply = await message.reply(createGainedStatsEmbed(client, {
 			userID,
-			hypixelGuild: client.hypixelGuilds.getFromFlags(flags) ?? client.players.getByID(userID)?.guild,
+			hypixelGuild: client.hypixelGuilds.getFromArray(flags) ?? client.players.getByID(userID)?.guild,
 			type: 'track',
 			offset: getOffsetFromFlags(config, flags) ?? XP_OFFSETS_SHORT.week,
 			shouldShowOnlyBelowReqs: true,

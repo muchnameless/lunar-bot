@@ -15,7 +15,7 @@ module.exports = class LeaderboardCommand extends Command {
 			aliases: [ 'lb' ],
 			description: 'guild member leaderboard for skill / slayer xp gained',
 			usage: () => stripIndents`
-				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.cache.map(hGuild => `\`-${hGuild.name.replace(/ /g, '')}\``).join('|')}|\`-all\`> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`-${offset}\``).join('|')}>
+				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.guildNameFlags}|\`-all\`> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`-${offset}\``).join('|')}>
 
 				currently supported types:
 				skill, ${SKILLS.join(', ')}
@@ -89,7 +89,7 @@ module.exports = class LeaderboardCommand extends Command {
 
 		const reply = await message.reply(createGainedStatsEmbed(client, {
 			userID,
-			hypixelGuild: client.hypixelGuilds.getFromFlags(flags),
+			hypixelGuild: client.hypixelGuilds.getFromArray(flags),
 			type,
 			offset: getOffsetFromFlags(config, flags),
 			shouldShowOnlyBelowReqs: flags.some(flag => [ 't', 'track' ].includes(flag)),

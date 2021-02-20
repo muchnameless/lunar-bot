@@ -19,6 +19,20 @@ class HypixelGuildHandler extends ModelHandler {
 		this.model;
 	}
 
+	/**
+	 * `NameOne`|`NameTwo`|`NameThree`
+	 */
+	get guildNames() {
+		return this.cache.map(hGuild => `\`${hGuild.name.replace(/ /g, '')}\``).join('|');
+	}
+
+	/**
+	 * `-NameOne`|`-NameTwo`|`-NameThree`
+	 */
+	get guildNameFlags() {
+		return this.cache.map(hGuild => `\`-${hGuild.name.replace(/ /g, '')}\``).join('|');
+	}
+
 	async loadCache(condition) {
 		await super.loadCache(condition);
 
@@ -75,16 +89,16 @@ class HypixelGuildHandler extends ModelHandler {
 
 	/**
 	 * autocorrect all flags to the hypixel guilds names and returns the most likely math or null, or 'false' for the 'all'-flag
-	 * @param {string[]} flags message flags
+	 * @param {string[]} array message flags
 	 * @returns {?import('./models/HypixelGuild')|boolean}
 	 */
-	getFromFlags(flags) {
-		for (const flag of flags) {
-			const hypixelGuild = this.getByName(flag);
+	getFromArray(array) {
+		for (const element of array) {
+			const hypixelGuild = this.getByName(element);
 
 			if (hypixelGuild) return hypixelGuild;
 
-			const { similarity } = autocorrect(flag, [ 'all' ]);
+			const { similarity } = autocorrect(element, [ 'all' ]);
 
 			if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return false;
 		}
