@@ -186,7 +186,7 @@ const self = module.exports = {
 			guildPlayers = hypixelGuild.players.array();
 			if (shouldShowOnlyBelowReqs) guildPlayers = guildPlayers.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
 		} else {
-			guildPlayers = client.players.cache.array();
+			guildPlayers = client.players.allGuilds.array();
 		}
 
 		const PLAYER_COUNT = guildPlayers.length;
@@ -442,7 +442,7 @@ const self = module.exports = {
 			guildPlayers = hypixelGuild.players.array();
 			if (shouldShowOnlyBelowReqs) guildPlayers = guildPlayers.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
 		} else {
-			guildPlayers = client.players.cache.array();
+			guildPlayers = client.players.allGuilds.array();
 		}
 		const PLAYER_COUNT = guildPlayers.length;
 		const ELEMENTS_PER_PAGE = config.getNumber('ELEMENTS_PER_PAGE');

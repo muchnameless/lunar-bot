@@ -29,7 +29,7 @@ module.exports = class TaxReminderCommand extends Command {
 	async run(client, config, message, args, flags, rawArgs) {
 		const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'gp', 'ghost', 'ghostping' ].includes(arg));
 		const hGuild = client.hypixelGuilds.getFromArray(flags);
-		const playersToRemind = (hGuild ? hGuild.players : client.players.cache).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
+		const playersToRemind = (hGuild ? hGuild.players : client.players.allGuilds).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
 		const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(player => player.inDiscord && /^\d+$/.test(player.discordID));
 		const AMOUNT_TO_PING = playersPingable.size;
 

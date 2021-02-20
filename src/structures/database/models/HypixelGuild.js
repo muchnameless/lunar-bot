@@ -178,14 +178,14 @@ class HypixelGuild extends Model {
 		if (!currentGuildMembers.length) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: guild data did not include any members`);
 
 		const guildPlayers = this.players;
-		const playersLeft = guildPlayers.filter(player => !currentGuildMembers.some(hypixelGuildMember => hypixelGuildMember.uuid === player.minecraftUUID));
+		const playersLeft = guildPlayers.filter((_, minecraftUUID) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUUID));
 		const PLAYERS_LEFT_AMOUNT = playersLeft.size;
 		const PLAYERS_OLD_AMOUNT = guildPlayers.size;
 
 		// all old players left (???)
 		if (PLAYERS_LEFT_AMOUNT && PLAYERS_LEFT_AMOUNT === PLAYERS_OLD_AMOUNT) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: aborting guild player update request due to the possibility of an error from the fetched data`);
 
-		const membersJoined = currentGuildMembers.filter(player => !players.cache.has(player.uuid));
+		const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.allGuilds.has(uuid));
 		const playersJoinedAgain = [];
 		const membersJoinedNew = [];
 

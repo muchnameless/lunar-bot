@@ -3,7 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../../constants/skyblock');
-const { offsetFlags } = require('../../constants/database');
+const { offsetFlags, GUILD_ID_BRIDGER, GUILD_ID_ERROR } = require('../../constants/database');
 const { autocorrect, getWeekOfYear } = require('../../functions/util');
 const ModelHandler = require('./ModelHandler');
 const logger = require('../../functions/logger');
@@ -28,6 +28,13 @@ class PlayerHandler extends ModelHandler {
 	 */
 	get ignoredAuctions() {
 		return this.cache.array().flatMap(player => player.auctionID ?? []);
+	}
+
+	/**
+	 * get players from all guilds (no bridgers or errors)
+	 */
+	get allGuilds() {
+		return this.cache.filter(({ guildID }) => ![ GUILD_ID_BRIDGER, GUILD_ID_ERROR ].includes(guildID));
 	}
 
 	async loadCache() {
