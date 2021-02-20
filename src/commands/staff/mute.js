@@ -88,7 +88,7 @@ module.exports = class MuteCommand extends Command {
 			]);
 
 			message.reply(stripIndent`
-				muted \`${target}\` for \`${DURATION_INPUT}\`
+				muted ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name} guild chat\``} for \`${DURATION_INPUT}\`
 				 > ${result[0][0]?.content ?? 'no ingame result'}
 			`);
 		} catch (error) {
