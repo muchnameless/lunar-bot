@@ -16,26 +16,17 @@ module.exports = async chatBridge => {
 	chatBridge.maxMessageLength = chatBridge.bot.protocolVersion > PROTO_VER_1_10 ? 256 : 100;
 
 	// link this chatBridge with the bot's guild
-	const guild = chatBridge.client.hypixelGuilds.cache.find(hGuild => hGuild.players.has(chatBridge.bot.player.uuid.replace(/-/g, '')));
-
-	if (!guild) {
-		chatBridge.ready = false;
-
-		return logger.warn(`[CHATBRIDGE]: ${chatBridge.bot.player.username}: no matching guild found`);
+	try {
+		await chatBridge.link();
+	} catch (error) {
+		return logger.warn(error);
 	}
 
-	guild.chatBridge = chatBridge;
-	chatBridge.guild = guild;
-
-	logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${chatBridge.bot.player.username}`);
-
-	await chatBridge.fetchAndCacheWebhook();
-
-	if (chatBridge.criticalError) return;
+	// most likely webhook fetching timed out -> simple reconnect
 	if (!chatBridge.ready) return chatBridge.reconnect();
 
 	// send bot to limbo (forbidden character in chat)
 	chatBridge.sendToMinecraftChat('§');
 
-	logger.debug(`[CHATBRIDGE]: ${guild.name}: ${chatBridge.bot.player.username} spawned and ready`);
+	logger.debug(`[CHATBRIDGE]: ${chatBridge.guild.name}: ${chatBridge.bot.player.username} spawned and ready`);
 };
