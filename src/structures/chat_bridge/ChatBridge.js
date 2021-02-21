@@ -8,7 +8,7 @@ const emojiRegex = require('emoji-regex');
 const ms = require('ms');
 const { sleep, trim } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
-const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
+const { unicodeToName } = require('../../constants/emojiNameUnicodeConverter');
 const WebhookError = require('../errors/WebhookError');
 const AsyncQueue = require('../AsyncQueue');
 const MessageCollector = require('./MessageCollector');
@@ -132,12 +132,44 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * disconnects the bot and resets the chatBridge
+	 * links this chatBridge with the bot's guild
+	 * @param {?string} guildName
 	 */
-	disconnect() {
+	async link(guildName = null) {
+		const guild = guildName
+			? this.client.hypixelGuilds.cache.find(hGuild => hGuild.name === guildName)
+			: this.client.hypixelGuilds.cache.find(hGuild => hGuild.players.has(this.bot.player.uuid.replace(/-/g, '')));
+
+		if (!guild) {
+			this.ready = false;
+
+			throw new Error(`[CHATBRIDGE]: ${this.bot.player.username}: no matching guild found`);
+		}
+
+		guild.chatBridge = this;
+		this.guild = guild;
+
+		logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${this.bot.player.username}`);
+
+		await this._fetchAndCacheWebhook();
+
+		if (this.criticalError) throw new Error(`[CHATBRIDGE]: ${this.logInfo}: critical error`);
+	}
+
+	/**
+	 * unlinks the chatBridge from the linked guild
+	 */
+	unlink() {
 		this.ready = false;
 		if (this.guild) this.guild.chatBridge = null;
 		this.guild = null;
+	}
+
+	/**
+	 * disconnects the bot and resets the chatBridge
+	 */
+	disconnect() {
+		this.unlink();
 		clearTimeout(this.reconnectTimeout);
 		clearTimeout(this.abortLoginTimeout);
 		this.reconnectTimeout = null;
@@ -153,7 +185,7 @@ class ChatBridge extends EventEmitter {
 	/**
 	 * fetches the chat bridge discord webhook
 	 */
-	async fetchAndCacheWebhook() {
+	async _fetchAndCacheWebhook() {
 		if (this.webhook) {
 			return this.ready = true;
 		} else {
@@ -266,42 +298,6 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * prettify message for discord, tries to replace :emoji: and others with the actually working discord render string
-	 * @param {string} message
-	 */
-	parseMinecraftMessageToDiscord(message) {
-		return Util.escapeMarkdown(
-			message
-				.replace(/(?<!<|<a):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
-				.replace(/(?<!<|<a):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
-				.replace(/#([a-z-]+)/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
-				.replace(/(?<!<)@([!&])?(\S+)(?!\d+>)/g, (match, p1, p2) => {
-					switch (p1) {
-						case '!': // members/users
-							return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-								?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
-								?? match;
-
-						case '&': // roles
-							return this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-								?? match;
-
-						default: { // players, members/users, roles
-							const player = this.client.players.cache.find(p => p.ign.toLowerCase() === p2.toLowerCase());
-
-							if (player?.inDiscord) return `<@${player.discordID}>`;
-
-							return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-								?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
-								?? this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-								?? match;
-						}
-					}
-				}),
-		);
-	}
-
-	/**
 	 * escapes all standalone occurrences of 'ez', case-insensitive
 	 * @param {string} string
 	 */
@@ -389,12 +385,9 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} message
 	 */
 	async sendToMinecraftChat(message) {
-		if (!this.ready) throw new Error('chatBridge not ready');
-
 		await this.queue.wait();
 
 		try {
-			if (!this.ready) return;
 			this.bot.chat(message);
 			await sleep(600); // sends each part 600 ms apart ('you can only send a message once every half second')
 		} catch (error) {
