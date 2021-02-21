@@ -73,6 +73,8 @@ module.exports = class MuteCommand extends Command {
 			target.chatBridgeMutedUntil = EXPIRES_AT;
 			target.hasDiscordPingPermission = false;
 			await target.save();
+
+			if (target.notInGuild) return message.reply(`muted \`${target}\` for \`${DURATION_INPUT}\`.`);
 		} else {
 			guild.chatMutedUntil = EXPIRES_AT;
 			await guild.save();

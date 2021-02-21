@@ -64,6 +64,8 @@ module.exports = class UnmuteCommand extends Command {
 		if (target instanceof players.model) {
 			target.chatBridgeMutedUntil = 0;
 			await target.save();
+
+			if (target.notInGuild) return message.reply(`unmuted \`${target}\`.`);
 		} else {
 			guild.chatMutedUntil = 0;
 			await guild.save();

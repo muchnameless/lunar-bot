@@ -123,6 +123,13 @@ class Player extends Model {
 	}
 
 	/**
+	 * wether the player is a bridger or error case
+	 */
+	get notInGuild() {
+		return [ GUILD_ID_BRIDGER, GUILD_ID_ERROR ].includes(this.guildID);
+	}
+
+	/**
 	 * fetches the discord member if the id is valid and the player is in lg discord
 	 * @returns {?LunarGuildMember|Promise<?LunarGuildMember>}
 	 */
