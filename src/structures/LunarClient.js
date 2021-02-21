@@ -84,10 +84,17 @@ class LunarClient extends Client {
 	}
 
 	/**
+	 * the main chatBridge
+	 */
+	get chatBridge() {
+		return this.chatBridges[0];
+	}
+
+	/**
 	 * the minecraft bot for the main guild's chatBridge
 	 */
 	get bot() {
-		return this.chatBridges[0].bot;
+		return this.chatBridge.bot;
 	}
 
 	/**
@@ -95,7 +102,7 @@ class LunarClient extends Client {
 	 * @type {Function}
 	 */
 	get chat() {
-		return this.chatBridges[0].sendToMinecraftChat.bind(this.chatBridges[0]);
+		return this.chatBridge.sendToMinecraftChat.bind(this.chatBridge);
 	}
 
 	/**
@@ -103,7 +110,14 @@ class LunarClient extends Client {
 	 * @type {Function}
 	 */
 	get gchat() {
-		return this.chatBridges[0].gchat.bind(this.chatBridges[0]);
+		return this.chatBridge.gchat.bind(this.chatBridge);
+	}
+
+	/**
+	 * send a message both to discord and the ingame guild chat
+	 */
+	get broadcast() {
+		return this.chatBridge.broadcast.bind(this.chatBridge);
 	}
 
 	/**
