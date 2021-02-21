@@ -9,25 +9,33 @@ const logger = require('../../../functions/logger');
  * @param {import('../HypixelMessage')} message
  */
 module.exports = async (chatBridge, message) => {
-	if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug({ position: message.position, message: message.rawContent });
-	if (!chatBridge.guild?.chatBridgeEnabled) return;
+	if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[${message.position}]: ${message.rawContent}`);
+
+	if (!chatBridge.guild) {
+		/**
+		 * You joined GUILD_NAME!
+		 */
+		const guildJoinMatched = message.content.match(/(?<=^You joined ).+(?=!)/);
+
+		if (guildJoinMatched) {
+			const [ guildName ] = guildJoinMatched;
+
+			logger.info(`[CHATBRIDGE]: ${chatBridge.bot.username}: joined ${guildName}`);
+			return chatBridge.link(guildName);
+		}
+
+		return;
+	}
+
+	if (!chatBridge.guild.chatBridgeEnabled) return;
 	if (!message.rawContent.length) return;
 
 	switch (message.type) {
 		case 'guild': {
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
-
-			const player = message.player;
-			const member = await player?.discordMember;
-
 			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: webhook unavailable`);
 
-			return chatBridge.sendViaWebhook({
-				username: member?.displayName ?? player?.ign ?? message.author.ign,
-				avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-				content: chatBridge.parseMinecraftMessageToDiscord(message.content),
-				allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
-			});
+			return message.forwardToDiscord();
 		}
 
 		case 'whisper': {
@@ -35,6 +43,8 @@ module.exports = async (chatBridge, message) => {
 
 			// auto 'o/' reply
 			if (/\( ﾟ◡ﾟ\)\/|o\//.test(message.content)) return message.author.send('o/');
+
+			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: webhook unavailable`);
 
 			return;
 		}
@@ -45,12 +55,7 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN joined the guild!
 			 */
 			if (message.content.includes('joined the guild')) {
-				await chatBridge.sendViaWebhook({
-					username: chatBridge.guild.name,
-					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-					content: message.content,
-					allowedMentions: { parse: [] },
-				});
+				await message.forwardToDiscord();
 				return chatBridge.broadcast('welcome');
 			}
 
@@ -58,15 +63,27 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN left the guild!
 			 */
 			if (message.content.includes('left the guild!')) {
-				await chatBridge.sendViaWebhook({
-					username: chatBridge.guild.name,
-					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-					content: message.content,
-					allowedMentions: { parse: [] },
-				});
+				await message.forwardToDiscord();
 				return;
 			}
 
+			/**
+			 * You were kicked from the guild by [HypixelRank] IGN for reason 'REASON'.
+			 */
+			if (message.content.startsWith('You were kicked from the guild by ')) {
+				logger.warn(`[CHATBRIDGE]: ${chatBridge.logInfo}: bot was kicked from the guild`);
+				await message.forwardToDiscord();
+				return chatBridge.unlink();
+			}
+
+			/**
+			 * You left the guild
+			 */
+			if (message.content === 'You left the guild') {
+				logger.warn(`[CHATBRIDGE]: ${chatBridge.logInfo}: bot left the guild`);
+				await message.forwardToDiscord();
+				return chatBridge.unlink();
+			}
 
 			/**
 			 * auto '/gc gg' for promotions / quest completions
@@ -74,12 +91,7 @@ module.exports = async (chatBridge, message) => {
 			 * The guild has completed Tier 3 of this week's Guild Quest!
 			 */
 			if (message.content.includes('was promoted from') || message.content.startsWith('The guild has completed ')) {
-				await chatBridge.sendViaWebhook({
-					username: chatBridge.guild.name,
-					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-					content: message.content,
-					allowedMentions: { parse: [] },
-				});
+				await message.forwardToDiscord();
 				return chatBridge.broadcast('gg');
 			}
 
@@ -87,12 +99,7 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN was demoted from PREV to NOW
 			 */
 			if (message.content.includes('was demoted from')) {
-				await chatBridge.sendViaWebhook({
-					username: chatBridge.guild.name,
-					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-					content: message.content,
-					allowedMentions: { parse: [] },
-				});
+				await message.forwardToDiscord();
 				return;
 			}
 
@@ -106,7 +113,7 @@ module.exports = async (chatBridge, message) => {
 				const [, ign ] = friendReqMatched;
 				const player = chatBridge.client.players.cache.find(p => p.ign === ign);
 
-				if (!player?.guildID) return;
+				if (!player?.guildID) return logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: denying f request from ${ign}`);
 
 				logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: accepting f request from ${ign}`);
 				return chatBridge.sendToMinecraftChat(`/f add ${ign}`);
@@ -120,12 +127,7 @@ module.exports = async (chatBridge, message) => {
 			const muteMatched = message.content.match(/(?:\[.+?\] )?\w+ has muted (?:\[.+?\] )?(the guild chat|\w+) for (\w+)/);
 
 			if (muteMatched) {
-				chatBridge.sendViaWebhook({
-					username: chatBridge.guild.name,
-					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-					content: message.content,
-					allowedMentions: { parse: [] },
-				});
+				message.forwardToDiscord();
 
 				const [, target, duration ] = muteMatched;
 
@@ -160,12 +162,7 @@ module.exports = async (chatBridge, message) => {
 			const unMuteMatched = message.content.match(/(?:\[.+?\] )?\w+ has unmuted (?:\[.+?\] )?(the guild chat|\w+)/);
 
 			if (unMuteMatched) {
-				chatBridge.sendViaWebhook({
-					username: chatBridge.guild.name,
-					avatarURL: chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-					content: message.content,
-					allowedMentions: { parse: [] },
-				});
+				message.forwardToDiscord();
 
 				const [, target ] = unMuteMatched;
 
