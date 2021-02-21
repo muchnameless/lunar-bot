@@ -1,5 +1,7 @@
 'use strict';
 
+const { Util } = require('discord.js');
+const { nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
 
 /**
@@ -71,6 +73,41 @@ class HypixelMessage {
 	}
 
 	/**
+	 * prettify message for discord, tries to replace :emoji: and others with the actually working discord render string
+	 */
+	get parsedContent() {
+		return Util.escapeMarkdown(
+			this.content
+				.replace(/(?<!<|<a):(\S+):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
+				.replace(/(?<!<|<a):(\S+?):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
+				.replace(/#([a-z-]+)/gi, (match, p1) => this.chatBridge.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+				.replace(/(?<!<)@([!&])?(\S+)(?!\d+>)/g, (match, p1, p2) => {
+					switch (p1) {
+						case '!': // members/users
+							return this.chatBridge.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+								?? this.chatBridge.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+								?? match;
+
+						case '&': // roles
+							return this.chatBridge.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+								?? match;
+
+						default: { // players, members/users, roles
+							const player = this.chatBridge.client.players.cache.find(p => p.ign.toLowerCase() === p2.toLowerCase());
+
+							if (player?.inDiscord) return `<@${player.discordID}>`;
+
+							return this.chatBridge.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+								?? this.chatBridge.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+								?? this.chatBridge.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+								?? match;
+						}
+					}
+				}),
+		);
+	}
+
+	/**
 	 * replies ingame to the message
 	 * @param {string} message
 	 */
@@ -88,6 +125,30 @@ class HypixelMessage {
 			default:
 				throw new Error('unknown type to reply to');
 		}
+	}
+
+	/**
+	 * forwards the message to discord via the chatBridge's webhook
+	 */
+	async forwardToDiscord() {
+		if (this.author) {
+			const player = this.player;
+			const member = await player?.discordMember;
+
+			return this.chatBridge.sendViaWebhook({
+				username: member?.displayName ?? player?.ign ?? this.author.ign,
+				avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+				content: this.parsedContent,
+				allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
+			});
+		}
+
+		return this.chatBridge.sendViaWebhook({
+			username: this.chatBridge.guild.name,
+			avatarURL: this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+			content: this.content,
+			allowedMentions: { parse: [] },
+		});
 	}
 }
 
