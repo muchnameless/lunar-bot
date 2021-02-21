@@ -63,17 +63,7 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN left the guild!
 			 */
 			if (message.content.includes('left the guild!')) {
-				await message.forwardToDiscord();
-				return;
-			}
-
-			/**
-			 * You were kicked from the guild by [HypixelRank] IGN for reason 'REASON'.
-			 */
-			if (message.content.startsWith('You were kicked from the guild by ')) {
-				logger.warn(`[CHATBRIDGE]: ${chatBridge.logInfo}: bot was kicked from the guild`);
-				await message.forwardToDiscord();
-				return chatBridge.unlink();
+				return message.forwardToDiscord();
 			}
 
 			/**
@@ -81,6 +71,23 @@ module.exports = async (chatBridge, message) => {
 			 */
 			if (message.content === 'You left the guild') {
 				logger.warn(`[CHATBRIDGE]: ${chatBridge.logInfo}: bot left the guild`);
+				await message.forwardToDiscord();
+				return chatBridge.unlink();
+			}
+
+			/**
+			 * [HypixelRank] IGN was kicked from the guild by [HypixelRank] IGN!
+			 */
+
+			if (message.content.includes('was kicked from the guild by')) {
+				return message.forwardToDiscord();
+			}
+
+			/**
+			 * You were kicked from the guild by [HypixelRank] IGN for reason 'REASON'.
+			 */
+			if (message.content.startsWith('You were kicked from the guild by')) {
+				logger.warn(`[CHATBRIDGE]: ${chatBridge.logInfo}: bot was kicked from the guild`);
 				await message.forwardToDiscord();
 				return chatBridge.unlink();
 			}
@@ -99,8 +106,7 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN was demoted from PREV to NOW
 			 */
 			if (message.content.includes('was demoted from')) {
-				await message.forwardToDiscord();
-				return;
+				return message.forwardToDiscord();
 			}
 
 			/**
