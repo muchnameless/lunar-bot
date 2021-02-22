@@ -106,8 +106,8 @@ class CommandCollection extends Collection {
 	/**
 	 * loads all commands into the collection
 	 */
-	loadAll() {
-		const commandFiles = getAllJsFiles(path.join(__dirname, '..', '..', 'commands'));
+	async loadAll() {
+		const commandFiles = await getAllJsFiles(path.join(__dirname, '..', '..', 'commands'));
 
 		for (const file of commandFiles) {
 			this.load(file);

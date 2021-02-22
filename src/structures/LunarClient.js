@@ -125,10 +125,11 @@ class LunarClient extends Client {
 	 * @param {?string} token discord bot token
 	 */
 	async login(token) {
-		await this.db.loadCache();
-
-		this.commands.loadAll();
-		this._loadEvents();
+		await Promise.all([
+			this.db.loadCache(),
+			this.commands.loadAll(),
+			this._loadEvents(),
+		]);
 
 		this.once(Constants.Events.CLIENT_READY, this.onReady);
 
@@ -250,8 +251,8 @@ class LunarClient extends Client {
 	/**
 	 * loads all event-callbacks and binds them to their respective events
 	 */
-	_loadEvents() {
-		const eventFiles = getAllJsFiles(path.join(__dirname, '..', 'events'));
+	async _loadEvents() {
+		const eventFiles = await getAllJsFiles(path.join(__dirname, '..', 'events'));
 
 		for (const file of eventFiles) {
 			const event = require(file);

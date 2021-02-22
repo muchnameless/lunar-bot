@@ -8,9 +8,6 @@ const db = require('./database/models/index');
 const LunarClient = require('./src/structures/LunarClient');
 const logger = require('./src/functions/logger');
 
-// discord.js structure extensions
-requireAll(path.join(__dirname, 'src', 'structures', 'extensions'));
-
 
 // catch rejections
 process
@@ -26,6 +23,8 @@ process
 
 // init
 (async () => {
+	// discord.js structure extensions
+	await requireAll(path.join(__dirname, 'src', 'structures', 'extensions'));
 
 	// initiate bot client
 	const client = new LunarClient({

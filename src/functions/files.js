@@ -1,6 +1,6 @@
 'use strict';
 
-const fs = require('fs');
+const { promises: fs } = require('fs');
 const path = require('path');
 
 
@@ -11,13 +11,13 @@ const self = module.exports = {
 	 * @param {string} dirPath path to search in
 	 * @param {string[]} arrayOfFiles accumulator
 	 */
-	getAllJsFiles: (dirPath, arrayOfFiles = []) => {
-		const files = fs.readdirSync(dirPath);
+	getAllJsFiles: async (dirPath, arrayOfFiles = []) => {
+		const files = await fs.readdir(dirPath);
 
-		files.forEach(file => {
-			if (fs.statSync(path.join(dirPath, file)).isDirectory()) return arrayOfFiles = self.getAllJsFiles(path.join(dirPath, file), arrayOfFiles);
+		await Promise.all(files.map(async file => {
+			if ((await fs.stat(path.join(dirPath, file))).isDirectory()) return arrayOfFiles = await self.getAllJsFiles(path.join(dirPath, file), arrayOfFiles);
 			arrayOfFiles.push(path.join(dirPath, file));
-		});
+		}));
 
 		return arrayOfFiles.filter(file => !path.basename(file).startsWith('~') && path.extname(file) === '.js');
 	},
@@ -27,8 +27,8 @@ const self = module.exports = {
 	 * @param {string} dirPath path of the files to require
 	 * @param {any[]} args arguments to call the required files with
 	 */
-	requireAll: (dirPath, ...args) => {
-		const files = self.getAllJsFiles(dirPath);
+	requireAll: async (dirPath, ...args) => {
+		const files = await self.getAllJsFiles(dirPath);
 
 		if (args.length) {
 			files.forEach(file => require(file)(...args));
