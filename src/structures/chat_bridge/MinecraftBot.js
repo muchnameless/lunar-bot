@@ -33,7 +33,10 @@ module.exports = async (chatBridge, options) => {
 	 * @type {Function}
 	 * @param {string} message
 	 */
-	bot.chat = message => bot.write('chat', { message });
+	bot.chat = message => {
+		if (typeof message !== 'string') throw new Error(`[BOT CHAT]: input must be a string but received ${typeof message}`);
+		bot.write('chat', { message });
+	};
 
 	return bot;
 };
