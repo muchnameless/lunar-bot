@@ -6,11 +6,17 @@ const { SPAWN_EVENTS } = require('../../constants/chatBridge');
 const { getAllJsFiles } = require('../../functions/files');
 const logger = require('../../functions/logger');
 
+/**
+ * @typedef {import('minecraft-protocol').Client} MinecraftBot
+ * @method [chat]
+ * @method [quit]
+ */
 
 /**
  * returns a mc bot client
  * @param {import('./ChatBridge')} chatBridge
  * @param {import('minecraft-protocol').ClientOptions} options
+ * @returns {Promise<MinecraftBot>}
  */
 module.exports = async (chatBridge, options) => {
 	const bot = createClient(options);
@@ -29,14 +35,29 @@ module.exports = async (chatBridge, options) => {
 
 	logger.debug(`[CHATBRIDGE BOT EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 
-	/**
-	 * @type {Function}
-	 * @param {string} message
-	 */
-	bot.chat = message => {
-		if (typeof message !== 'string') throw new Error(`[BOT CHAT]: input must be a string but received ${typeof message}`);
-		bot.write('chat', { message });
-	};
+	Object.defineProperties(bot, {
+		/**
+		 * @type {Function}
+		 * @param {string} message
+		 */
+		chat: {
+			value: message => {
+				if (typeof message !== 'string') throw new Error(`[BOT CHAT]: input must be a string but received ${typeof message}`);
+				bot.write('chat', { message });
+			},
+		},
+
+		/**
+		 * @type {Function}
+		 * @param {string} reason
+		 */
+		quit: {
+			value: reason => {
+				reason ??= 'disconnect.quitting';
+				bot.end(reason);
+			},
+		},
+	});
 
 	return bot;
 };
