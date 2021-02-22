@@ -61,8 +61,8 @@ class HypixelMessage extends ChatMessage {
 	get parsedContent() {
 		return Util.escapeMarkdown(
 			this.content
-				.replace(/(?<!<|<a):(\S+):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
-				.replace(/(?<!<|<a):(\S+?):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match] ?? match) // emojis (custom and default)
+				.replace(/(?<!<|<a):(\S+):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.toLowerCase()] ?? match) // emojis (custom and default)
+				.replace(/(?<!<|<a):(\S+?):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.toLowerCase()] ?? match) // emojis (custom and default)
 				.replace(/#([a-z-]+)/gi, (match, p1) => this.chatBridge.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
 				.replace(/(?<!<)@([!&])?(\S+)(?!\d+>)/g, (match, p1, p2) => {
 					switch (p1) {
