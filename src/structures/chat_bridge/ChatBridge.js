@@ -43,7 +43,7 @@ class ChatBridge extends EventEmitter {
 		 */
 		this.guild = null;
 		/**
-		 * @type {import('minecraft-protocol').Client}
+		 * @type {import('./MinecraftBot').MinecraftBot}
 		 */
 		this.bot = null;
 		/**
@@ -398,6 +398,8 @@ class ChatBridge extends EventEmitter {
 	 * @param {import('discord.js').WebhookMessageOptions} toSend
 	 */
 	async sendViaWebhook(toSend) {
+		if (!toSend.content?.length) return logger.warn(`[CHATBRIDGE]: ${this.logInfo}: prevented sending empty message`);
+
 		try {
 			await this.webhook.send(toSend);
 		} catch (error) {
