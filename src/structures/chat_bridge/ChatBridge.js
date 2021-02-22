@@ -3,12 +3,13 @@
 const { Util, MessageEmbed, DiscordAPIError } = require('discord.js');
 const { EventEmitter } = require('events');
 const path = require('path');
-const mineflayer = require('mineflayer');
 const emojiRegex = require('emoji-regex');
 const ms = require('ms');
 const { sleep, trim } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
+const { VERSION } = require('../../constants/chatBridge');
 const { unicodeToName } = require('../../constants/emojiNameUnicodeConverter');
+const MinecraftBot = require('./MinecraftBot');
 const WebhookError = require('../errors/WebhookError');
 const AsyncQueue = require('../AsyncQueue');
 const MessageCollector = require('./MessageCollector');
@@ -42,7 +43,7 @@ class ChatBridge extends EventEmitter {
 		 */
 		this.guild = null;
 		/**
-		 * @type {import('mineflayer').Bot}
+		 * @type {import('minecraft-protocol').Client}
 		 */
 		this.bot = null;
 		/**
@@ -61,7 +62,9 @@ class ChatBridge extends EventEmitter {
 		 * 100 pre 1.10.2, 256 post 1.10.2
 		 * @type {number}
 		 */
-		this.maxMessageLength = 100;
+		this.maxMessageLength = require('minecraft-data')(VERSION).version.version > require('minecraft-data')('1.10.2').version.version
+			? 256
+			: 100;
 		/**
 		 * increases each login, reset to 0 on successfull spawn
 		 */
@@ -106,7 +109,7 @@ class ChatBridge extends EventEmitter {
 			this.reconnect(0);
 		}, Math.min(++this.loginAttempts * 60_000, 300_000));
 
-		this._createBot();
+		await this._createBot();
 
 		this.reconnecting = false;
 	}
@@ -138,18 +141,18 @@ class ChatBridge extends EventEmitter {
 	async link(guildName = null) {
 		const guild = guildName
 			? this.client.hypixelGuilds.cache.find(hGuild => hGuild.name === guildName)
-			: this.client.hypixelGuilds.cache.find(hGuild => hGuild.players.has(this.bot.player.uuid.replace(/-/g, '')));
+			: this.client.hypixelGuilds.cache.find(hGuild => hGuild.players.has(this.bot.uuid.replace(/-/g, '')));
 
 		if (!guild) {
 			this.ready = false;
 
-			throw new Error(`[CHATBRIDGE]: ${this.bot.player.username}: no matching guild found`);
+			throw new Error(`[CHATBRIDGE]: ${this.bot.username}: no matching guild found`);
 		}
 
 		guild.chatBridge = this;
 		this.guild = guild;
 
-		logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${this.bot.player.username}`);
+		logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${this.bot.username}`);
 
 		await this._fetchAndCacheWebhook();
 
@@ -233,44 +236,24 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * create bot instance and logs into hypixel
+	 * create bot instance, loads and binds it's events and logs it into hypixel
 	 */
-	_createBot() {
-		this.bot = mineflayer.createBot({
+	async _createBot() {
+		return this.bot = await MinecraftBot(this, {
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
 			username: process.env.MINECRAFT_USERNAME.split(' ')[this.mcAccount],
 			password: process.env.MINECRAFT_PASSWORD.split(' ')[this.mcAccount],
-			version: false,
+			version: VERSION,
 			auth: process.env.MINECRAFT_ACCOUNT_TYPE.split(' ')[this.mcAccount],
 		});
-
-		this._loadBotEvents();
-
-		return this.bot;
-	}
-
-	/**
-	 * load bot events
-	 */
-	_loadBotEvents() {
-		const eventFiles = getAllJsFiles(path.join(__dirname, 'bot_events'));
-
-		for (const file of eventFiles) {
-			const event = require(file);
-			const EVENT_NAME = path.basename(file, '.js');
-
-			this.bot[[ 'login', 'spawn' ].includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, this));
-		}
-
-		logger.debug(`[CHATBRIDGE BOT EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 	}
 
 	/**
 	 * load chatBridge events
 	 */
-	_loadEvents() {
-		const eventFiles = getAllJsFiles(path.join(__dirname, 'events'));
+	async _loadEvents() {
+		const eventFiles = await getAllJsFiles(path.join(__dirname, 'events'));
 
 		for (const file of eventFiles) {
 			const event = require(file);

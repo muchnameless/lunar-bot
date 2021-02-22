@@ -1,28 +1,9 @@
 'use strict';
 
 const { Util } = require('discord.js');
+const ChatMessage = require('prismarine-chat')(require('../../constants/chatBridge').VERSION);
 const { nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
-
-/**
- * @typedef {object} TextComponent
- * @property {object} json
- * @property {string} text
- * @property {any[]} extra
- * @property {*} bold
- * @property {*} italic
- * @property {*} underlined
- * @property {*} strikethrough
- * @property {*} obfuscated
- * @property {string} color
- */
-
-/**
- * @typedef {string} ChatPosition
- * * `chat`
- * * `system`
- * * `game_info`
- */
 
 /**
  * @typedef {string} HypixelMessageType
@@ -32,17 +13,19 @@ const HypixelMessageAuthor = require('./HypixelMessageAuthor');
  */
 
 
-class HypixelMessage {
+class HypixelMessage extends ChatMessage {
 	/**
 	 * @param {import('./ChatBridge')} chatBridge
-	 * @param {TextComponent[]} jsonMessage
-	 * @param {ChatPosition} position
+	 * @param {number} position
+	 * @param {} message
+	 * @param {?boolean} displayWarning
 	 */
-	constructor(chatBridge, jsonMessage, position) {
+	constructor(chatBridge, position, message, displayWarning) {
+		super(message, displayWarning);
+
 		this.chatBridge = chatBridge;
-		this.jsonMessage = jsonMessage;
-		this.position = position;
-		this.rawContent = jsonMessage.toString().trim();
+		this.position = { 0: 'chat', 1: 'system', 2: 'gameInfo' }[position];
+		this.rawContent = this.toString().trim();
 
 		/**
 		 * Guild > [HypixelRank] ign [GuildRank]
@@ -105,6 +88,13 @@ class HypixelMessage {
 					}
 				}),
 		);
+	}
+
+	/**
+	 * content with minecraft formatting codes
+	 */
+	get formattedContent() {
+		return this.toMotd().trim();
 	}
 
 	/**
