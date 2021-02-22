@@ -102,7 +102,7 @@ class LunarClient extends Client {
 	 * @type {Function}
 	 */
 	get chat() {
-		return this.chatBridge.sendToMinecraftChat.bind(this.chatBridge);
+		return this.chatBridge.queueForMinecraftChat.bind(this.chatBridge);
 	}
 
 	/**

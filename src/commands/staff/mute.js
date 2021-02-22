@@ -86,7 +86,7 @@ module.exports = class MuteCommand extends Command {
 					msg => /^(?:\[.+?\] )?\w+ has muted (?:(?:\[.+?\] )?\w+|the guild chat) for/.test(msg.content),
 					{ max: 1, time: 5_000 },
 				),
-				chatBridge.sendToMinecraftChat(`/g mute ${target} ${DURATION_INPUT}`),
+				chatBridge.queueForMinecraftChat(`/g mute ${target} ${DURATION_INPUT}`),
 			]);
 
 			message.reply(stripIndent`

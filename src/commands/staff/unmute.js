@@ -77,7 +77,7 @@ module.exports = class UnmuteCommand extends Command {
 					msg => /^(?:\[.+?\] )?\w+ has unmuted (?:(?:\[.+?\] )?\w+|the guild chat)|^(?:This player|The guild) is not muted!$/.test(msg.content),
 					{ max: 1, time: 5_000 },
 				),
-				chatBridge.sendToMinecraftChat(`/g unmute ${target}`),
+				chatBridge.queueForMinecraftChat(`/g unmute ${target}`),
 			]);
 
 			message.reply(stripIndent`

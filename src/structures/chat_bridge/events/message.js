@@ -122,7 +122,7 @@ module.exports = async (chatBridge, message) => {
 				if (!player?.guildID) return logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: denying f request from ${ign}`);
 
 				logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: accepting f request from ${ign}`);
-				return chatBridge.sendToMinecraftChat(`/f add ${ign}`);
+				return chatBridge.queueForMinecraftChat(`/f add ${ign}`);
 			}
 
 			/**

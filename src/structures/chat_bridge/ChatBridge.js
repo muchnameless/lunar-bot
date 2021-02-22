@@ -359,7 +359,7 @@ class ChatBridge extends EventEmitter {
 		}
 
 		for (const contentPart of messageParts) {
-			await this.sendToMinecraftChat(this.hypixelSpamBypass(`${prefix}${contentPart}`));
+			await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${contentPart}`));
 		}
 	}
 
@@ -367,7 +367,7 @@ class ChatBridge extends EventEmitter {
 	 * send a message to the ingame chat, without changing it, 600 ms queue cooldown
 	 * @param {string} message
 	 */
-	async sendToMinecraftChat(message) {
+	async queueForMinecraftChat(message) {
 		await this.queue.wait();
 
 		try {

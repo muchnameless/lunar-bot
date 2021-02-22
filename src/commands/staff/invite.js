@@ -52,7 +52,7 @@ module.exports = class InviteCommand extends Command {
 						{ max: 1, time: 5_000 },
 					),
 				]),
-				chatBridge.sendToMinecraftChat(`/g invite ${ign}`),
+				chatBridge.queueForMinecraftChat(`/g invite ${ign}`),
 			]);
 
 			message.reply(stripIndent`

@@ -498,7 +498,7 @@ class HypixelGuild extends Model {
 						msg => filterRegex.test(msg.content),
 						{ max: 1, time: 5_000, errors: [ 'time' ] },
 					),
-					this.chatBridge.sendToMinecraftChat(`/g setrank ${player.ign} ${RANK_NAME}`),
+					this.chatBridge.queueForMinecraftChat(`/g setrank ${player.ign} ${RANK_NAME}`),
 				]);
 
 				// ingame chat message received
