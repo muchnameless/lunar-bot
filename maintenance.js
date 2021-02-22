@@ -28,8 +28,6 @@ process
 		}).catch(logger.error)
 	)?.value;
 
-	const prefixRegex = new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i'); // allow PREFIX and @bot.id
-
 	db.sequelize.close().catch(logger.error);
 
 	const presence = { activity: { name: 'nothing due to maintenance', type: 'LISTENING' }, status: 'dnd' };
@@ -56,6 +54,8 @@ process
 			],
 		},
 	});
+
+	const prefixRegex = new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i'); // allow PREFIX and @bot.id
 
 	// ready
 	client.once('ready', () => {
