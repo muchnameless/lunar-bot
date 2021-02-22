@@ -170,8 +170,9 @@ class DatabaseHandler {
 	createTaxEmbed(availableAuctionsLog = null) {
 		const { config, hypixelGuilds, players, taxCollectors } = this.handlers;
 		const activeTaxCollectors = taxCollectors.activeCollectors; // eslint-disable-line no-shadow
-		const PLAYER_COUNT = players.size;
-		const PAID_COUNT = players.allGuilds.filter(player => player.paid).size;
+		const playersInGuild = players.inGuild;
+		const PLAYER_COUNT = playersInGuild.size;
+		const PAID_COUNT = playersInGuild.filter(player => player.paid).size;
 		const TOTAL_COINS = taxCollectors.cache.reduce((acc, taxCollector) => acc + taxCollector.collectedAmount, 0);
 		const taxEmbed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))

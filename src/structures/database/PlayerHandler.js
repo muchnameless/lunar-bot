@@ -33,7 +33,7 @@ class PlayerHandler extends ModelHandler {
 	/**
 	 * get players from all guilds (no bridgers or errors)
 	 */
-	get allGuilds() {
+	get inGuild() {
 		return this.cache.filter(player => !player.notInGuild);
 	}
 
