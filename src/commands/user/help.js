@@ -61,7 +61,7 @@ module.exports = class HelpCommand extends Command {
 					
 					Feel free to tag me <@${client.ownerID}> with or DM me any bugs or feature requests.
 				`)
-				.setFooter(`Hosted on a Raspberry Pi 4 B • Discord.js ${version}`)
+				.setFooter(`Discord.js ${version}`)
 				.setTimestamp();
 
 			return message.reply(helpEmbed);
