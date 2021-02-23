@@ -64,6 +64,13 @@ class Command {
 	}
 
 	/**
+	 * wether the command is part of a visible category
+	 */
+	get visible() {
+		return !this.client.commands.invisibleCategories.includes(this.category);
+	}
+
+	/**
 	 * loads the command and possible aliases into their collections
 	 */
 	load() {
