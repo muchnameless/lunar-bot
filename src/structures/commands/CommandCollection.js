@@ -60,8 +60,10 @@ class CommandCollection extends Collection {
 	 * @returns {?import('./Command')}
 	 */
 	getByName(name) {
-		const command = this.get(name) ?? this.get(this.aliases.get(name));
-
+		/**
+		 * @type {?import('./Command')}
+		 */
+		let command = this.get(name) ?? this.get(this.aliases.get(name));
 		if (command) return command;
 
 		// don't autocorrect single letters
@@ -69,10 +71,11 @@ class CommandCollection extends Collection {
 
 		// autocorrect input
 		const result = autocorrect(name, [ ...this.keys(), ...this.aliases.keys() ].filter(x => x.length > 1));
-
 		if (result.similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
 
-		return this.get(result.value) ?? this.get(this.aliases.get(result.value));
+		// return command if it is visible
+		command = this.get(result.value) ?? this.get(this.aliases.get(result.value));
+		return command.visible ? command : null;
 	}
 
 	/**
