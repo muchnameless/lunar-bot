@@ -68,7 +68,7 @@ class CommandCollection extends Collection {
 		if (name.length <= 1) return null;
 
 		// autocorrect input
-		const result = autocorrect(name, [ ...this.map(cmd => cmd.name), ...this.aliases.values() ]);
+		const result = autocorrect(name, [ ...this.keys(), ...this.aliases.keys() ].filter(x => x.length > 1));
 
 		if (result.similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
 
