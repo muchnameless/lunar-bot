@@ -59,7 +59,6 @@ class Command {
 				return [ this.client.config.get('MANAGER_ROLE_ID') ];
 
 			default:
-				if (this.client.config.getBoolean('GUILD_PLAYER_ONLY_MODE')) return [ this.client.config.get('GUILD_ROLE_ID') ];
 				return null;
 		}
 	}
