@@ -64,6 +64,9 @@ class CommandCollection extends Collection {
 
 		if (command) return command;
 
+		// don't autocorrect single letters
+		if (name.length <= 1) return null;
+
 		// autocorrect input
 		const result = autocorrect(name, [ ...this.map(cmd => cmd.name), ...this.aliases.values() ]);
 
