@@ -43,7 +43,7 @@ class CommandCollection extends Collection {
 	 * returns all visible command categories
 	 */
 	get visibleCategories() {
-		return this.categories.filter(category => !this.invisibleCategories.includes(category));
+		return this.categories.filter(category => !this.invisibleCategories.includes(category)).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 	}
 
 	/**
