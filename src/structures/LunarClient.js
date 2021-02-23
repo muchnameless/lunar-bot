@@ -34,10 +34,6 @@ class LunarClient extends Client {
 		return this.logHandler.webhook;
 	}
 
-	get bannedUsers() {
-		return this.db.handlers.bannedUsers;
-	}
-
 	get config() {
 		return this.db.handlers.config;
 	}

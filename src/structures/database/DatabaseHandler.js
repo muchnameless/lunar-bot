@@ -6,13 +6,11 @@ const { MessageEmbed } = require('discord.js');
 const _ = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../../constants/emojiCharacters');
 const hypixel = require('../../api/hypixel');
-const BannedUserHandler = require('./BannedUserHandler');
 const ConfigHandler = require('./ConfigHandler');
 const CronJobHandler = require('./CronJobHandler');
 const HypixelGuildHandler = require('./HypixelGuildHandler');
 const PlayerHandler = require('./PlayerHandler');
 const TaxCollectorHandler = require('./TaxCollectorHandler');
-const BannedUser = require('./models/BannedUser');
 const Config = require('./models/Config');
 const CronJob = require('./models/CronJob');
 const HypixelGuild = require('./models/HypixelGuild');
@@ -31,7 +29,6 @@ class DatabaseHandler {
 		this.client = client;
 
 		this.handlers = {
-			bannedUsers: new BannedUserHandler({ client, model: BannedUser }),
 			config: new ConfigHandler({ client, model: Config }),
 			cronJobs: new CronJobHandler({ client, model: CronJob }),
 			hypixelGuilds: new HypixelGuildHandler({ client, model: HypixelGuild }),

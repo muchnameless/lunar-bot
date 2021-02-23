@@ -33,19 +33,6 @@ module.exports = async (client, message) => {
 		return;
 	}
 
-	// banned users
-	if (client.bannedUsers.cache.has(message.author.id)) {
-		const bannedUser = client.bannedUsers.cache.get(message.author.id);
-		const { reason, expiresAt } = bannedUser;
-
-		if (Date.now() >= expiresAt) {
-			client.bannedUsers.remove(message.author.id).then(logger.info);
-		} else {
-			logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} while being on the banned users list for ${reason}`);
-			return message.author.send(`you are currently banned from using ${client.user} ${bannedUser.expiresAt === Infinity ? 'indefinitely' : `for ${ms(bannedUser.expiresAt - Date.now(), { long: true })}`}. Reason: ${reason?.length ? reason : 'no reason specified'}`).catch(logger.error);
-		}
-	}
-
 	// command, args, flags
 	const rawArgs = message.content.slice(MATCHED_PREFIX.length).trim().split(/ +/); // command arguments
 	const COMMAND_NAME = rawArgs.shift().toLowerCase(); // extract first word
