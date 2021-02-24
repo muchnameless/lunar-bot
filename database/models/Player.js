@@ -23,7 +23,6 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		discordID: {
 			type: DataTypes.STRING,
-			unique: true, // 'unique: true' breaks 'node dbInit.js --alter'
 			defaultValue: null,
 			allowNull: true,
 		},
@@ -63,22 +62,21 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: false,
 			allowNull: false,
 		},
-		amount: {
-			type: DataTypes.INTEGER,
-			defaultValue: 0,
-			allowNull: false,
-		},
-		collectedBy: { // uuid of tax collector
-			type: DataTypes.STRING,
-			defaultValue: null,
-			allowNull: true,
-		},
-		auctionID: { // hypixel api auction uuid
-			type: DataTypes.ARRAY(DataTypes.STRING),
-			// unique: true, // 'unique: true' breaks 'node dbInit.js --alter'
-			defaultValue: null,
-			allowNull: true,
-		},
+		// amount: {
+		// 	type: DataTypes.INTEGER,
+		// 	defaultValue: 0,
+		// 	allowNull: false,
+		// },
+		// collectedBy: { // uuid of tax collector
+		// 	type: DataTypes.STRING,
+		// 	defaultValue: null,
+		// 	allowNull: true,
+		// },
+		// auctionID: { // hypixel api auction uuid
+		// 	type: DataTypes.ARRAY(DataTypes.STRING),
+		// 	defaultValue: null,
+		// 	allowNull: true,
+		// },
 		notes: {
 			type: DataTypes.TEXT,
 			defaultValue: null,
@@ -148,6 +146,10 @@ module.exports = (sequelize, DataTypes) => {
 	Player.init(dataObject, {
 		sequelize,
 		modelName: 'Player',
+		indexes: [{ // setting unique down here work with `sync --alter`
+			unique: true,
+			fields: [ 'discordID' ],
+		}],
 	});
 
 	return Player;
