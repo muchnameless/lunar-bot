@@ -227,12 +227,12 @@ class Player extends Model {
 				.setColor(this.client.config.get('EMBED_BLUE'))
 				.setTitle('Bridger Database: 1 change')
 				.addFields( // max value#length is 1024
-					{ name: `${'joined'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${}\`\`\``, inline: true },
-					{ name: `${'left'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${}\`\`\``, inline: true },
+					{ name: `${'joined'.padEnd(75, '\xa0')}\u200b`, value: '```\u200b```', inline: true },
+					{ name: `${'left'.padEnd(75, '\xa0')}\u200b`, value: '```\u200b```', inline: true },
 					{ name: `${'new ign'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`\n${`${result.oldIgn} -> ${result.newIgn}`}\`\`\``, inline: true },
 				)
 				.setTimestamp(),
-			)
+			);
 		}
 
 		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp({ shouldSkipQueue }); // only query hypixel skyblock api for guild players error
