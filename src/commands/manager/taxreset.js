@@ -103,8 +103,8 @@ module.exports = class TaxResetCommand extends Command {
 
 
 			// update database
-			await Promise.all(
-				taxCollectors.cache.map(async taxCollector => { // remove retired collectors
+			await Promise.all([
+				...taxCollectors.cache.map(async taxCollector => { // remove retired collectors
 					if (taxCollector.isCollecting) {
 						taxCollector.resetAmount('tax');
 					} else {
@@ -120,12 +120,12 @@ module.exports = class TaxResetCommand extends Command {
 						},
 					},
 				),
-				players.cache.map(async player => { // reset current players
+				...players.cache.map(async player => { // reset current players
 					player.paid = false;
 					return player.save();
 				}),
 				config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up untill now
-			);
+			]);
 
 			// delete players who left the guild
 			players.sweepDb();

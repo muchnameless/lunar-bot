@@ -25,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		auctionID: { // hypixel api auction uuid
 			type: DataTypes.STRING,
-			unique: true, // 'unique: true' breaks 'node dbInit.js --alter'
 			defaultValue: null,
 			allowNull: true,
 		},
