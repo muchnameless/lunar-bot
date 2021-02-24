@@ -171,4 +171,15 @@ module.exports = {
 			})[0];
 	},
 
+	/**
+	 * <Array>.filter with an asynchronous callback function
+	 * @param {Array} arr
+	 * @param {Function} callback
+	 */
+	asyncFilter: async (arr, callback) => {
+		const fail = Symbol();
+		return (await Promise.all(arr.map(async item => (await callback(item)) ? item : fail))).filter(i=>i !== fail);
+	},
+
+
 };
