@@ -1,5 +1,6 @@
 'use strict';
 
+require('./pgEnum-fix');
 const { sequelize } = require('./models/index');
 const logger = require('../src/functions/logger');
 
