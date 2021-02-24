@@ -218,8 +218,22 @@ class Player extends Model {
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async update({ shouldSkipQueue = false, reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
-		if (this.guildID === GUILD_ID_BRIDGER) return this.updateIgn();
-		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp({ shouldSkipQueue });
+		if (this.guildID === GUILD_ID_BRIDGER) { // bridgers
+			const result = await this.updateIgn();
+			return result && this.client.log(new MessageEmbed()
+				.setColor(this.client.config.get('EMBED_BLUE'))
+				.setTitle('Bridger Database: 1 change')
+				.addFields( // max value#length is 1024
+					{ name: `${'joined'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${}\`\`\``, inline: true },
+					{ name: `${'left'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${}\`\`\``, inline: true },
+					{ name: `${'new ign'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`\n${`${result.oldIgn} -> ${result.newIgn}`}\`\`\``, inline: true },
+				)
+				.setTimestamp(),
+			)
+		}
+
+		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp({ shouldSkipQueue }); // only query hypixel skyblock api for guild players error
+
 		await this.updateDiscordMember({ reason, shouldSendDm });
 	}
 
