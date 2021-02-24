@@ -33,6 +33,9 @@ module.exports = class TaxResetCommand extends Command {
 
 		// individual player
 		if (args.length) {
+			/**
+			 * @type {import('../../structures/database/models/Player')}
+			 */
 			const player = (message.mentions.users.size
 				? players.getByID(message.mentions.users.first().id)
 				: players.getByIGN(args[0]))
@@ -53,17 +56,17 @@ module.exports = class TaxResetCommand extends Command {
 
 			if (!player.paid) return message.reply(`\`${player.ign}\` is not set to paid.`);
 
+			const OLD_AMOUNT = await player.taxAmount;
+
 			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
-				const ANSWER = await message.awaitReply(`reset tax paid from \`${player.ign}\`? Warning, this action cannot be undone.`, 30);
+				const ANSWER = await message.awaitReply(`reset tax paid from \`${player.ign}\` (amount: ${client.formatNumber(OLD_AMOUNT)})? Warning, this action cannot be undone.`, 30);
 
 				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
-			const { amount: OLD_AMOUNT } = player;
-
 			await player.resetTax();
 
-			result = `reset tax paid from \`${player.ign}\` (${OLD_AMOUNT.toLocaleString(config.get('NUMBER_FORMAT'))})`;
+			result = `reset tax paid from \`${player.ign}\` (amount: ${client.formatNumber(OLD_AMOUNT)})`;
 
 		// all players
 		} else {
@@ -98,30 +101,34 @@ module.exports = class TaxResetCommand extends Command {
 
 			currentTaxCollectedEmbed = taxCollectors.createTaxCollectedEmbed();
 
-			// remove retired collectors
-			await Promise.all(taxCollectors.cache.map(async taxCollector => !taxCollector.isCollecting && taxCollector.remove()));
-
-			const leftAndPaid = await players.model.findAll({
-				where: {
-					guildID: null,
-					paid: true,
-				},
-			});
 
 			// update database
 			await Promise.all(
-				players.cache.map(async player => taxCollectors.cache.has(player.minecraftUUID)
-					? player.setToPaid()
-					: player.resetTax(),
+				taxCollectors.cache.map(async taxCollector => { // remove retired collectors
+					if (taxCollector.isCollecting) {
+						taxCollector.resetAmount('tax');
+					} else {
+						taxCollector.remove();
+					}
+				}),
+				players.model.prototype.update( // reset players that left
+					{ paid: false },
+					{
+						where: {
+							guildID: null,
+							paid: true,
+						},
+					},
 				),
-				leftAndPaid.map(async player => player.resetTax()),
+				players.cache.map(async player => { // reset current players
+					player.paid = false;
+					return player.save();
+				}),
+				config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up untill now
 			);
 
 			// delete players who left the guild
 			players.sweepDb();
-
-			// ignore all auctions up untill now
-			await config.set('TAX_AUCTIONS_START_TIME', Date.now());
 
 			result = 'reset the tax database. All auctions up untill now will be ignored';
 		}

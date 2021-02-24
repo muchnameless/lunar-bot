@@ -40,7 +40,7 @@ class TaxCollectorHandler extends ModelHandler {
 			minecraftUUID: player.minecraftUUID,
 			ign: player.ign,
 			isCollecting: true,
-			collectedAmount: 0,
+			collectedTax: 0,
 		});
 	}
 
@@ -67,13 +67,13 @@ class TaxCollectorHandler extends ModelHandler {
 		const embed = new MessageEmbed()
 			.setColor(this.client.config.get('EMBED_BLUE'))
 			.setTitle('Collected Guild Tax')
-			.setDescription(`Total amount: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedAmount, 0))}\n\u200b`)
+			.setDescription(`Total amount: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0))}\n\u200b`)
 			.setTimestamp();
 
 		for (const taxCollector of this.cache.values()) {
 			embed.addField(
 				`${escapeIgn(taxCollector.ign)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
-				this.client.formatNumber(taxCollector.collectedAmount),
+				this.client.formatNumber(taxCollector.collectedTax),
 			);
 		}
 

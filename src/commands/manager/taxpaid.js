@@ -47,7 +47,8 @@ module.exports = class TaxPaidCommand extends Command {
 
 		if (player.paid) {
 			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
-				const ANSWER = await message.awaitReply(`\`${player.ign}\` is already set to paid with an amount of \`${client.formatNumber(player.amount)}\`. Overwrite this?`, 30);
+				const OLD_AMOUNT = await player.taxAmount;
+				const ANSWER = await message.awaitReply(`\`${player.ign}\` is already set to paid with an amount of \`${client.formatNumber(OLD_AMOUNT)}\`. Overwrite this?`, 30);
 
 				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
@@ -56,18 +57,19 @@ module.exports = class TaxPaidCommand extends Command {
 		}
 
 		const CUSTOM_AMOUNT = removeNumberFormatting(args.shift());
+		const AMOUNT = /\D/.test(CUSTOM_AMOUNT) ? config.getNumber('TAX_AMOUNT') : Number(CUSTOM_AMOUNT);
 
 		await player.setToPaid({
-			amount: /\D/.test(CUSTOM_AMOUNT) ? config.getNumber('TAX_AMOUNT') : Number(CUSTOM_AMOUNT),
+			amount: AMOUNT,
 			collectedBy: collector.minecraftUUID,
 		});
 
-		message.reply(`\`${player.ign}\` manually set to paid with ${/\D/.test(CUSTOM_AMOUNT) ? 'the default' : 'a custom'} amount of \`${client.formatNumber(player.amount)}\`.`);
+		message.reply(`\`${player.ign}\` manually set to paid with ${AMOUNT === config.getNumber('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${client.formatNumber(AMOUNT)}\`.`);
 
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')
-			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${client.formatNumber(player.amount)} (manually)\`\`\``)
+			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${client.formatNumber(AMOUNT)} (manually)\`\`\``)
 			.setTimestamp(),
 		);
 	}

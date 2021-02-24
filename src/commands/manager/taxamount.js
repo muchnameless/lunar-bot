@@ -35,14 +35,13 @@ module.exports = class TaxAmountCommand extends Command {
 
 		newAmount = Number(newAmount);
 
+		// update tax amount
 		await config.set('TAX_AMOUNT', newAmount);
 
-		// update tax collectors if they have the default amount
-		await Promise.all(client.taxCollectors.activeCollectors.map(async (_, uuid) => {
-			const player = client.players.cache.get(uuid);
-			if (player.amount === OLD_AMOUNT && player.collectedBy === uuid) return player.setToPaid();
-		}));
+		// update tax collectors
+		await Promise.all(client.taxCollectors.activeCollectors.map(async taxCollector => taxCollector.resetAmount('tax')));
 
+		// logging
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')

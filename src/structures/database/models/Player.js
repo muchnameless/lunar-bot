@@ -61,19 +61,6 @@ class Player extends Model {
 		 */
 		this.paid;
 		/**
-		 * @type {number}
-		 */
-		this.amount;
-		/**
-		 * minecraftUUID of taxCollector
-		 * @type {string}
-		 */
-		this.collectedBy;
-		/**
-		 * @type {?string[]}
-		 */
-		this.auctionID;
-		/**
 		 * @type {?string}
 		 */
 		this.notes;
@@ -208,6 +195,22 @@ class Player extends Model {
 	 */
 	get isStaff() {
 		return this.guildRankPriority && this.guildRankPriority >= this.guild?.ranks.length - 1;
+	}
+
+	/**
+	 * @returns {Promise<?number>}
+	 */
+	get taxAmount() {
+		return this.client.db.models.Transaction.findAll({
+			limit: 1,
+			where: {
+				from: this.minecraftUUID,
+				type: 'tax',
+			},
+			order: [[ 'createdAt', 'DESC' ]],
+			attributes: [ 'amount' ],
+			raw: true,
+		}).then(result => result.lengh ? result[0].amount : null);
 	}
 
 	/**
@@ -688,7 +691,7 @@ class Player extends Model {
 
 	/**
 	 * removes the discord server ingame guild role & all roles handled automatically by the bot
-	 * @returns {boolean} wether the discord role removal was successful or not
+	 * @returns {Promise<boolean>} wether the discord role removal was successful or not
 	 */
 	async removeFromGuild() {
 		const member = await this.discordMember;
@@ -911,12 +914,21 @@ class Player extends Model {
 	 * resets the guild tax paid
 	 */
 	async resetTax() {
-		this.client.taxCollectors.cache.get(this.collectedBy)?.addAmount(-this.amount);
+		if (!this.paid) return this;
+
+		const result = await this.client.db.models.Transaction.findAll({
+			limit: 1,
+			where: {
+				from: this.minecraftUUID,
+				type: 'tax',
+			},
+			order: [[ 'createdAt', 'DESC' ]],
+			attributes: [ 'to', 'amount' ],
+			raw: true,
+		});
+		if (result.length) this.client.taxCollectors.cache.get(result[0].to)?.addAmount(-result[0].amount, 'tax');
 
 		this.paid = false;
-		this.amount = 0;
-		this.collectedBy = null;
-		this.auctionID = null;
 		return this.save();
 	}
 
@@ -926,33 +938,47 @@ class Player extends Model {
 	 * @param {?number} [options.amount] paid amount
 	 * @param {?string} [options.collectedBy] minecraft uuid of the player who collected
 	 * @param {?string} [options.auctionID] hypixel auction uuid
-	 * @param {?boolean} [options.shouldAdd] wether to add the amount and auctionID or to overwrite already existing values
 	 */
-	async setToPaid({ amount = this.client.config.getNumber('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null, shouldAdd = false } = {}) {
-		// update taxCollector
-		this.client.taxCollectors.cache.get(collectedBy)?.addAmount(
-			this.collectedBy === this.minecraftUUID
-				? amount - this.amount
-				: amount,
-		);
-
-		this.paid = true;
-		this.collectedBy = collectedBy;
-
-		if (shouldAdd) {
-			this.amount += amount;
-			this.auctionID ??= [];
-			this.auctionID.push(auctionID);
+	async setToPaid({ amount = this.client.config.getNumber('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null } = {}) {
+		if (player.paid) {
+			await Promise.all([
+				this.client.taxCollectors.cache.get(collectedBy)?.addAmount(amount, 'donation'), // update taxCollector
+				this.client.db.models.Transaction.create({
+					from: this.minecraftUUID,
+					to: collectedBy,
+					amount,
+					auctionID,
+					type: 'donation',
+				}),
+			])
 		} else {
-			this.amount = amount;
-			this.auctionID = auctionID == null
-				? null
-				: [ auctionID ];
+			const overflow = Math.max(amount - this.client.config.getNumber('TAX_AMOUNT'), 0); // >=
+
+			this.paid = true;
+
+			// update database
+			await Promise.all([
+				this.client.taxCollectors.cache.get(collectedBy)?.addAmount(amount, 'tax'), // update taxCollector
+				this.client.db.models.Transaction.create({
+					from: this.minecraftUUID,
+					to: collectedBy,
+					amount: amount - overflow,
+					auctionID,
+					type: 'tax',
+				}),
+				this.save(),
+			]).catch(error => logger.error(`[PLAYER SET TO PAID]: ${error.name}: ${error.message}`));
+
+			if (overflow) await this.client.db.models.Transaction.create({
+				from: this.minecraftUUID,
+				to: collectedBy,
+				amount: overflow,
+				auctionID,
+				type: 'donation',
+			});
 		}
 
-		this.changed('auctionID', true);
-
-		return this.save();
+		return this;
 	}
 
 	/**

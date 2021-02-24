@@ -5,6 +5,7 @@ const { stripIndents, commaLists } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
 const _ = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../../constants/emojiCharacters');
+const { asyncFilter } = require('../../functions/util');
 const hypixel = require('../../api/hypixel');
 const ConfigHandler = require('./ConfigHandler');
 const CronJobHandler = require('./CronJobHandler');
@@ -84,6 +85,23 @@ class DatabaseHandler {
 	}
 
 	/**
+	 * false if the auctionID is already in the transactions db, true if not
+	 * @param {string} auctionID
+	 */
+	async _validateAuctionID(auctionID) {
+		try {
+			await this.models.Transaction.findOne({
+				where: { auctionID },
+				rejectOnEmpty: true, // rejects the promise if nothing was found
+				raw: true, // to not parse an eventual result
+			});
+			return false;
+		} catch {
+			return true;
+		}
+	}
+
+	/**
 	 * updates the tax database
 	 * @returns {Promise<string[]>}
 	 */
@@ -93,12 +111,8 @@ class DatabaseHandler {
 		const TAX_AMOUNT = config.getNumber('TAX_AMOUNT');
 		const TAX_AUCTIONS_ITEMS = config.getArray('TAX_AUCTIONS_ITEMS');
 		const NOW = Date.now();
-		const ignoredAuctions = players.ignoredAuctions;
 		const availableAuctionsLog = [];
-		const loggingEmbed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
-			.setTitle('Guild Tax')
-			.setTimestamp();
+		const taxPaidLog = [];
 
 		let auctionsAmount = 0;
 		let unknownPlayers = 0;
@@ -106,54 +120,66 @@ class DatabaseHandler {
 		// update db
 		await Promise.all(taxCollectors.activeCollectors
 			.map(async taxCollector => {
-				const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID).catch(error => logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
+				try {
+					const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID)
+					const taxAuctions = [];
+					const paidLog = [];
 
-				if (!auctions) return availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: API Error`);
+					let availableAuctions = 0;
 
-				const taxAuctions = [];
-				const paidLog = [];
+					(await asyncFilter(
+						auctions,
+						auction => TAX_AUCTIONS_ITEMS.includes(auction.item_name) && auction.start >= TAX_AUCTIONS_START_TIME && this._validateAuctionID(auction.uuid), // correct item & started after last reset & no outbid from already logged auction
+					))
+						.forEach(auction => auction.highest_bid_amount >= TAX_AMOUNT
+							? auction.bids.length && taxAuctions.push(auction)
+							: auction.end > NOW && ++availableAuctions,
+						);
 
-				let availableAuctions = 0;
+					availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: ${availableAuctions}`);
 
-				auctions
-					.filter(auction => TAX_AUCTIONS_ITEMS.includes(auction.item_name) && !ignoredAuctions.includes(auction.uuid) && auction.start >= TAX_AUCTIONS_START_TIME) // correct item & no outbid & started after last reset
-					.forEach(auction => auction.highest_bid_amount >= TAX_AMOUNT
-						? auction.bids.length && taxAuctions.push(auction)
-						: auction.end > NOW && ++availableAuctions,
-					);
+					if (auctions.meta.cached) return logger.info(`[UPDATE TAX DB]: ${taxCollector.ign}: cached data`);
 
-				availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: ${availableAuctions}`);
+					auctionsAmount += taxAuctions.length;
 
-				if (auctions.meta.cached) return logger.info(`[UPDATE TAX DB]: ${taxCollector.ign}: cached data`);
+					taxAuctions.forEach(auction => {
+						const { bidder, amount } = auction.bids[auction.bids.length - 1];
+						const player = players.cache.get(bidder);
 
-				auctionsAmount += taxAuctions.length;
+						if (!player) return ++unknownPlayers;
 
-				taxAuctions.forEach(auction => {
-					const { bidder, amount } = auction.bids[auction.bids.length - 1];
-					const player = players.cache.get(bidder);
+						paidLog.push(`${player.ign}: ${amount.toLocaleString(config.get('NUMBER_FORMAT'))}`);
+						if (config.getBoolean('EXTENDED_LOGGING')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${amount.toLocaleString(config.get('NUMBER_FORMAT'))} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
 
-					if (!player) return ++unknownPlayers;
-
-					paidLog.push(`${player.ign}: ${amount.toLocaleString(config.get('NUMBER_FORMAT'))}`);
-					if (config.getBoolean('EXTENDED_LOGGING')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${amount.toLocaleString(config.get('NUMBER_FORMAT'))} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
-
-					player.setToPaid({
-						amount,
-						collectedBy: taxCollector.minecraftUUID,
-						auctionID: auction.uuid,
-						shouldAdd: true,
+						player.setToPaid({
+							amount,
+							collectedBy: taxCollector.minecraftUUID,
+							auctionID: auction.uuid,
+							shouldAdd: true,
+						});
 					});
-				});
 
-				if (!paidLog.length) return;
+					if (!paidLog.length) return;
 
-				loggingEmbed.addField(`/ah ${taxCollector.ign}`, `\`\`\`\n${paidLog.join('\n')}\`\`\``);
+					taxPaidLog.push({
+						name: `/ah ${taxCollector.ign}`,
+						value: `\`\`\`\n${paidLog.join('\n')}\`\`\`` },
+					);
+				} catch (error) {
+					logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
+					availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: API Error`);
+				}
 			}),
 		).catch(error => logger.error(`[UPDATE TAX DB]: ${error.name}: ${error.message}`));
 
 		// logging
 		if (auctionsAmount && (config.getBoolean('EXTENDED_LOGGING') || (unknownPlayers && new Date().getMinutes() < config.getNumber('DATABASE_UPDATE_INTERVAL')))) logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);
-		if (loggingEmbed.fields.length) this.client.log(loggingEmbed);
+		if (taxPaidLog.length) this.client.log(new MessageEmbed()
+			.setColor(config.get('EMBED_BLUE'))
+			.setTitle('Guild Tax')
+			.addFields(...taxPaidLog)
+			.setTimestamp(),
+		);
 
 		return availableAuctionsLog
 			.sort((a, b) => a.split(':')[0].toLowerCase().localeCompare(b.split(':')[0].toLowerCase())) // alphabetically
@@ -170,7 +196,7 @@ class DatabaseHandler {
 		const playersInGuild = players.inGuild;
 		const PLAYER_COUNT = playersInGuild.size;
 		const PAID_COUNT = playersInGuild.filter(player => player.paid).size;
-		const TOTAL_COINS = taxCollectors.cache.reduce((acc, taxCollector) => acc + taxCollector.collectedAmount, 0);
+		const TOTAL_COINS = taxCollectors.cache.reduce((acc, taxCollector) => acc + taxCollector.collectedTax, 0);
 		const taxEmbed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')

@@ -16,17 +16,17 @@ class TaxCollector extends Model {
 		 */
 		this.minecraftUUID;
 		/**
-		 * @type {string}
-		 */
-		this.ign;
-		/**
 		 * @type {boolean}
 		 */
 		this.isCollecting;
 		/**
 		 * @type {number}
 		 */
-		this.collectedAmount;
+		this.collectedTax;
+		/**
+		 * @type {number}
+		 */
+		this.collectedDonations;
 	}
 
 	/**
@@ -42,23 +42,59 @@ class TaxCollector extends Model {
 		return this.client.players.cache.get(this.minecraftUUID) ?? null;
 	}
 
-	async addAmount(amount) {
-		this.collectedAmount += amount;
-		return this.save();
+	get ign() {
+		return this.player?.ign ?? null;
 	}
 
-	async resetAmount() {
-		this.collectedAmount = this.client.config.getNumber('TAX_AMOUNT');
-		return this.save();
+	/**
+	 * adds the amount to the taxCollector's collected amount
+	 * @param {number} amount
+	 * @param {string} type
+	 */
+	async addAmount(amount, type = 'tax') {
+		switch (type) {
+			case 'tax':
+				this.collectedTax += amount;
+				return this.save();
+
+			case 'donation':
+				this.collectedDonations += amount;
+				return this.save();
+
+			default:
+				throw new Error(`[ADD AMOUNT]: ${this.ign ?? this.minecraftUUID}: unknown type '${type}'`);
+		}
 	}
 
+	/**
+	 * resets the collected tax back to the default tax amount
+	 * @param {string} type
+	 */
+	async resetAmount(type = 'tax') {
+		switch (type) {
+			case 'tax':
+				this.collectedTax = this.client.config.getNumber('TAX_AMOUNT');
+				return this.save();
+
+			case 'donation':
+				this.collectedDonations = 0;
+				return this.save();
+
+			default:
+				throw new Error(`[RESET AMOUNT]: ${this.ign ?? this.minecraftUUID}: unknown type '${type}'`);
+		}
+	}
+
+	/**
+	 * removes the collector from the database
+	 */
 	async remove() {
 		return this.client.taxCollectors.remove(this);
 	}
 
 	// todo
 	async update() {
-		return 'WIP';
+		throw new Error('WIP');
 	}
 }
 

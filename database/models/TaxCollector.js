@@ -14,18 +14,18 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			primaryKey: true,
 		},
-		ign: {
-			type: DataTypes.STRING,
-			defaultValue: null,
-			allowNull: true,
-		},
 		isCollecting: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: true,
 			allowNull: false,
 		},
-		collectedAmount: {
-			type: DataTypes.INTEGER,
+		collectedTax: {
+			type: DataTypes.BIGINT,
+			defaultValue: 0,
+			allowNull: false,
+		},
+		collectedDonations: {
+			type: DataTypes.BIGINT,
 			defaultValue: 0,
 			allowNull: false,
 		},

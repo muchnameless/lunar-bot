@@ -210,7 +210,7 @@ class HypixelGuild extends Model {
 
 			// player left the guild
 			...playersLeft.map(async player => {
-				leftLog.push(`-\xa0${player.ign}${player.paid ? ` | paid ${player.amount.toLocaleString(config.get('NUMBER_FORMAT'))}` : ''}`);
+				leftLog.push(`-\xa0${player.ign}`);
 
 				if (await player.removeFromGuild()) return; // return if successful
 
