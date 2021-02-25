@@ -28,6 +28,11 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: null,
 			allowNull: true,
 		},
+		notes: {
+			type: DataTypes.TEXT,
+			defaultValue: null,
+			allowNull: true,
+		},
 		type: {
 			type: DataTypes.ENUM([ 'tax', 'donation' ]),
 			defaultValue: 'tax',
