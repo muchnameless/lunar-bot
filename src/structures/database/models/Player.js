@@ -969,16 +969,17 @@ class Player extends Model {
 			]);
 		} else {
 			const overflow = Math.max(amount - this.client.config.getNumber('TAX_AMOUNT'), 0); // >=
+			const taxAmount = amount - overflow;
 
 			this.paid = true;
 
 			// update database
 			await Promise.all([
-				this.client.taxCollectors.cache.get(collectedBy)?.addAmount(amount, 'tax'), // update taxCollector
+				this.client.taxCollectors.cache.get(collectedBy)?.addAmount(taxAmount, 'tax'), // update taxCollector
 				this.client.db.models.Transaction.create({
 					from: this.minecraftUUID,
 					to: collectedBy,
-					amount: amount - overflow,
+					amount: taxAmount,
 					auctionID,
 					type: 'tax',
 				}),
