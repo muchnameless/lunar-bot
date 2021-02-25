@@ -34,23 +34,26 @@ module.exports = class MyCommand extends Command {
 		});
 
 		// construct { donator: amount } object
-		const reduced = Object.fromEntries([ ...new Set(donations.map(d => d.from)) ].map(x => [ x, 0 ]));
+		const reducedAmount = Object.fromEntries([ ...new Set(donations.map(d => d.from)) ].map(x => [ x, 0 ]));
+		const reducedNotes = Object.fromEntries([ ...new Set(donations.map(d => d.from)) ].map(x => [ x, [] ]));
 
 		// fill said object
-		for (const { from, amount } of donations) {
-			reduced[from] += amount;
+		for (const { from, amount, notes } of donations) {
+			reducedAmount[from] += amount;
+			if (notes?.length) reducedNotes[from].push(notes);
 		}
 
 		// transform and prettify data
 		let playerList = '';
 		let totalAmount = 0;
 
-		await Promise.all([ ...Object.entries(reduced) ].map(async ([ minecraftUUID, amount ], index) => {
+		await Promise.all([ ...Object.entries(reducedAmount) ].map(async ([ minecraftUUID, amount ], index) => {
 			const IGN = client.players.cache.get(minecraftUUID)?.ign ?? (await mojang.getName(IGN).catch(logger.error)) ?? minecraftUUID;
+			const notes = reducedNotes[minecraftUUID].join('\n');
 
 			playerList += '\n' + stripIndent`
 				#${`${index + 1}`.padStart(3, '0')} : ${IGN}
-					 > ${client.formatNumber(amount)}
+					 > ${client.formatNumber(amount)}${notes.length ? `\n	   ${notes}` : ''}
 			`;
 
 			totalAmount += amount;
