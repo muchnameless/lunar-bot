@@ -48,6 +48,13 @@ class Command {
 	}
 
 	/**
+	 * prefix name usage
+	 */
+	get usageInfo() {
+		return `\`${this.client.config.get('PREFIX')}${this.aliases?.[0] ?? this.name}\` ${this.usage}`;
+	}
+
+	/**
 	 * @returns {?string[]}
 	 */
 	get requiredRoles() {

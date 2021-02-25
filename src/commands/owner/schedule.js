@@ -48,7 +48,7 @@ module.exports = class ScheduleCommand extends Command {
 		}
 
 		// create a new cron job
-		if (!args.length) return message.reply(`\`${config.get('PREFIX')}${this.aliases?.[0] ?? this.name}\` ${this.usage}`);
+		if (!args.length) return message.reply(this.usageInfo);
 
 		const command = client.commands.getByName(args[0]);
 

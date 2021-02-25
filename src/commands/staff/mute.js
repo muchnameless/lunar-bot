@@ -27,7 +27,7 @@ module.exports = class MuteCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		if (args.length < 2) return message.reply(`${config.get('PREFIX')}${this.usage}`);
+		if (args.length < 2) return message.reply(this.usageInfo);
 
 		const { players } = client;
 		const [ TARGET_INPUT, DURATION_INPUT ] = args;

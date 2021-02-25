@@ -34,7 +34,7 @@ module.exports = class TaxAhCommand extends Command {
 
 		args.forEach(arg => /add|rem(?:ove)?/i.test(arg) ? type = arg.toLowerCase() : ign = arg);
 
-		if (!type.length || !ign.length || args.length !== 2) return message.reply(`\`${config.get('PREFIX')}${this.aliases?.[0] ?? this.name}\` ${this.usage}`);
+		if (!type.length || !ign.length || args.length !== 2) return message.reply(this.usageInfo);
 
 		const player = message.mentions.users.size
 			? client.players.getByID(message.mentions.users.first().id)
