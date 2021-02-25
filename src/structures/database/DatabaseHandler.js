@@ -142,7 +142,7 @@ class DatabaseHandler {
 
 					auctionsAmount += taxAuctions.length;
 
-					taxAuctions.forEach(auction => {
+					await Promise.all(taxAuctions.map(async auction => {
 						const { bidder, amount } = auction.bids[auction.bids.length - 1];
 						const player = players.cache.get(bidder);
 
@@ -151,13 +151,13 @@ class DatabaseHandler {
 						paidLog.push(`${player.ign}: ${amount.toLocaleString(config.get('NUMBER_FORMAT'))}`);
 						if (config.getBoolean('EXTENDED_LOGGING')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${amount.toLocaleString(config.get('NUMBER_FORMAT'))} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
 
-						player.setToPaid({
+						return player.setToPaid({
 							amount,
 							collectedBy: taxCollector.minecraftUUID,
 							auctionID: auction.uuid,
 							shouldAdd: true,
 						});
-					});
+					}));
 
 					if (!paidLog.length) return;
 
