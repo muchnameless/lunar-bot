@@ -949,56 +949,51 @@ class Player extends Model {
 	}
 
 	/**
+	 * @typedef {object} setToPaidOptions
+	 * @property {?number} [amount] paid amount
+	 * @property {?string} [collectedBy] minecraft uuid of the player who collected
+	 * @property {?string} [auctionID] hypixel auction uuid
+	 */
+
+	/**
 	 * set the player to paid
-	 * @param {object} options
-	 * @param {?number} [options.amount] paid amount
-	 * @param {?string} [options.collectedBy] minecraft uuid of the player who collected
-	 * @param {?string} [options.auctionID] hypixel auction uuid
+	 * @param {setToPaidOptions} param0
 	 */
 	async setToPaid({ amount = this.client.config.getNumber('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null } = {}) {
 		if (this.paid) {
-			await Promise.all([
-				this.client.taxCollectors.cache.get(collectedBy)?.addAmount(amount, 'donation'), // update taxCollector
-				this.client.db.models.Transaction.create({
-					from: this.minecraftUUID,
-					to: collectedBy,
-					amount,
-					auctionID,
-					type: 'donation',
-				}),
-			]);
+			await Promise.all(this.addTransfer({ amount, collectedBy, auctionID, type: 'donation' }));
 		} else {
 			const overflow = Math.max(amount - this.client.config.getNumber('TAX_AMOUNT'), 0); // >=
 			const taxAmount = amount - overflow;
+			const promises = this.addTransfer({ amount: taxAmount, collectedBy, auctionID, type: 'tax' });
+
+			if (overflow) promises.push(...this.addTransfer({ amount: overflow, collectedBy, auctionID, type: 'donation' }));
+
+			await Promise.all(promises);
 
 			this.paid = true;
-
-			// update database
-			await Promise.all([
-				this.client.taxCollectors.cache.get(collectedBy)?.addAmount(taxAmount, 'tax'), // update taxCollector
-				this.client.db.models.Transaction.create({
-					from: this.minecraftUUID,
-					to: collectedBy,
-					amount: taxAmount,
-					auctionID,
-					type: 'tax',
-				}),
-				this.save(),
-			]).catch(error => logger.error(`[PLAYER SET TO PAID]: ${error.name}: ${error.message}`));
-
-			if (overflow) await Promise.all([
-				this.client.taxCollectors.cache.get(collectedBy)?.addAmount(overflow, 'donation'), // update taxCollector
-				this.client.db.models.Transaction.create({
-					from: this.minecraftUUID,
-					to: collectedBy,
-					amount: overflow,
-					auctionID,
-					type: 'donation',
-				}),
-			]);
 		}
 
-		return this;
+		return this.save();
+	}
+
+	/**
+	 * set the player to paid
+	 * @param {setToPaidOptions} options
+	 * @param {?string} [options.type=tax]
+	 * @returns {[Promise<import('./TaxCollector')>, Promise<(import('./Transaction'))>]}
+	 */
+	addTransfer({ amount, collectedBy, auctionID = null, type = 'tax' } = {}) {
+		return [
+			this.client.taxCollectors.cache.get(collectedBy)?.addAmount(amount, type), // update taxCollector
+			this.client.db.models.Transaction.create({
+				from: this.minecraftUUID,
+				to: collectedBy,
+				amount,
+				auctionID,
+				type,
+			}),
+		];
 	}
 
 	/**
