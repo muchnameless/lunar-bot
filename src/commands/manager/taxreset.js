@@ -59,14 +59,14 @@ module.exports = class TaxResetCommand extends Command {
 			const OLD_AMOUNT = await player.taxAmount;
 
 			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
-				const ANSWER = await message.awaitReply(`reset tax paid from \`${player.ign}\` (amount: ${client.formatNumber(OLD_AMOUNT)})? Warning, this action cannot be undone.`, 30);
+				const ANSWER = await message.awaitReply(`reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? client.formatNumber(OLD_AMOUNT) : 'unknown'})? Warning, this action cannot be undone.`, 30);
 
 				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
 			await player.resetTax();
 
-			result = `reset tax paid from \`${player.ign}\` (amount: ${client.formatNumber(OLD_AMOUNT)})`;
+			result = `reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? client.formatNumber(OLD_AMOUNT) : 'unknown'})`;
 
 		// all players
 		} else {
