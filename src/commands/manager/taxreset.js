@@ -111,7 +111,7 @@ module.exports = class TaxResetCommand extends Command {
 						taxCollector.remove();
 					}
 				}),
-				players.model.prototype.update( // reset players that left
+				client.db.Sequelize.Model.update.call(players.model, // reset players that left
 					{ paid: false },
 					{
 						where: {
@@ -126,6 +126,8 @@ module.exports = class TaxResetCommand extends Command {
 				}),
 				config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up untill now
 			]);
+
+			await Promise.all(taxCollectors.cache.map(async taxCollector => taxCollector.player?.setToPaid()));
 
 			// delete players who left the guild
 			players.sweepDb();

@@ -67,13 +67,13 @@ class TaxCollector extends Model {
 	}
 
 	/**
-	 * resets the collected tax back to the default tax amount
+	 * resets the specified amount back to 0
 	 * @param {string} type
 	 */
 	async resetAmount(type = 'tax') {
 		switch (type) {
 			case 'tax':
-				this.collectedTax = this.client.config.getNumber('TAX_AMOUNT');
+				this.collectedTax = 0;
 				return this.save();
 
 			case 'donation':

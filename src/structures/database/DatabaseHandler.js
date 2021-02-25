@@ -121,7 +121,7 @@ class DatabaseHandler {
 		await Promise.all(taxCollectors.activeCollectors
 			.map(async taxCollector => {
 				try {
-					const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID)
+					const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID);
 					const taxAuctions = [];
 					const paidLog = [];
 

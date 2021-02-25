@@ -940,7 +940,7 @@ class Player extends Model {
 	 * @param {?string} [options.auctionID] hypixel auction uuid
 	 */
 	async setToPaid({ amount = this.client.config.getNumber('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null } = {}) {
-		if (player.paid) {
+		if (this.paid) {
 			await Promise.all([
 				this.client.taxCollectors.cache.get(collectedBy)?.addAmount(amount, 'donation'), // update taxCollector
 				this.client.db.models.Transaction.create({
@@ -950,7 +950,7 @@ class Player extends Model {
 					auctionID,
 					type: 'donation',
 				}),
-			])
+			]);
 		} else {
 			const overflow = Math.max(amount - this.client.config.getNumber('TAX_AMOUNT'), 0); // >=
 
