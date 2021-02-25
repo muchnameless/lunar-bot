@@ -7,7 +7,7 @@ const logger = require('../../functions/logger');
 module.exports = class TaxCollectedCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [ 'collected' ],
+			aliases: [],
 			description: 'show a list of taxahs and their collected tax amount',
 			usage: '',
 			cooldown: 0,

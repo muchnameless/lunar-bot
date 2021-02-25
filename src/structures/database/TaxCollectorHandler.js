@@ -1,5 +1,6 @@
 'use strict';
 
+const { stripIndents } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
 const { escapeIgn } = require('../../functions/util');
 const ModelHandler = require('./ModelHandler');
@@ -67,13 +68,23 @@ class TaxCollectorHandler extends ModelHandler {
 		const embed = new MessageEmbed()
 			.setColor(this.client.config.get('EMBED_BLUE'))
 			.setTitle('Collected Guild Tax')
-			.setDescription(`Total amount: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0), 0)}\n\u200b`)
+			.setDescription(stripIndents`
+				**combined**
+				tax: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0), 0)}
+				donations: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0), 0)}
+				total: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax + collector.collectedDonations, 0), 0)}
+				\u200b
+			`)
 			.setTimestamp();
 
 		for (const taxCollector of this.cache.values()) {
 			embed.addField(
 				`${escapeIgn(taxCollector.ign)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
-				this.client.formatNumber(taxCollector.collectedTax),
+				stripIndents`
+					tax: ${this.client.formatNumber(taxCollector.collectedTax)}
+					donations: ${this.client.formatNumber(taxCollector.collectedDonations)}
+					total: ${this.client.formatNumber(taxCollector.collectedTax + taxCollector.collectedDonations)}
+				`,
 			);
 		}
 
