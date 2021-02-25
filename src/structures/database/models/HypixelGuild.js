@@ -241,7 +241,7 @@ class HypixelGuild extends Model {
 						discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
 
 						if (!discordMember) {
-							if (/\D/.test(player.discordID)) player.discordID = discordTag; // save tag if no id is known
+							if (/\D/.test(player.discordID)) await player.setValidDiscordID(discordTag).catch(logger.error); // save tag if no id is known
 							player.inDiscord = false;
 							joinedLog.push(player.discordID.includes('#')
 								? `-\xa0${player.ign}: unknown discord tag ${player.discordID}`

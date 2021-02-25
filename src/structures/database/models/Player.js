@@ -570,13 +570,29 @@ class Player extends Model {
 	}
 
 	/**
+	 * validates the discordID and only updates it if the validation passes
+	 * @param {string} value
+	 */
+	async setValidDiscordID(value) {
+		const OLD_DISCORD_ID = this.discordID;
+
+		try {
+			this.discordID = value;
+			await this.validate({ fields: [ 'discordID' ] });
+		} catch (error) {
+			this.discordID = OLD_DISCORD_ID;
+			throw error;
+		}
+	}
+
+	/**
 	 * links a player to the provided discord guild member, updating roles and nickname
 	 * @param {LunarGuildMember|string} idOrDiscordMember the member to link the player to
 	 * @param {string} reason reason for discord's audit logs
 	 */
 	async link(idOrDiscordMember, reason = null) {
 		if (idOrDiscordMember instanceof LunarGuildMember) {
-			this.discordID = idOrDiscordMember.id;
+			await this.setValidDiscordID(idOrDiscordMember.id);
 			this.inDiscord = true;
 			this.discordMember = idOrDiscordMember;
 
@@ -587,7 +603,7 @@ class Player extends Model {
 				reason,
 			});
 		} else if (typeof idOrDiscordMember === 'string' && /\D/.test(idOrDiscordMember)) {
-			this.discordID = idOrDiscordMember;
+			await this.setValidDiscordID(idOrDiscordMember);
 			this.inDiscord = false;
 		} else {
 			throw new Error('[LINK]: input must be either a discord GuildMember or a discord ID');
