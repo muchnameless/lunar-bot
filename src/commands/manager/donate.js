@@ -65,12 +65,12 @@ module.exports = class DonateCommand extends Command {
 			type: 'donation',
 		}));
 
-		message.reply(`registered a donation from \`${player.ign}\` of \`${client.formatNumber(AMOUNT_OR_TEXT)}\`.`);
+		message.reply(`registered a donation from \`${player.ign}\` of \`${client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}.`);
 
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Donations')
-			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${client.formatNumber(AMOUNT_OR_TEXT)} (manually)\`\`\``)
+			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}\`\`\``)
 			.setTimestamp(),
 		);
 	}
