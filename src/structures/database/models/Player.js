@@ -986,13 +986,16 @@ class Player extends Model {
 				this.save(),
 			]).catch(error => logger.error(`[PLAYER SET TO PAID]: ${error.name}: ${error.message}`));
 
-			if (overflow) await this.client.db.models.Transaction.create({
-				from: this.minecraftUUID,
-				to: collectedBy,
-				amount: overflow,
-				auctionID,
-				type: 'donation',
-			});
+			if (overflow) await Promise.all([
+				this.client.taxCollectors.cache.get(collectedBy)?.addAmount(overflow, 'donation'), // update taxCollector
+				this.client.db.models.Transaction.create({
+					from: this.minecraftUUID,
+					to: collectedBy,
+					amount: overflow,
+					auctionID,
+					type: 'donation',
+				}),
+			]);
 		}
 
 		return this;
