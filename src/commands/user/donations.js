@@ -44,30 +44,34 @@ module.exports = class MyCommand extends Command {
 		}
 
 		// transform and prettify data
-		let playerList = '';
+		const embed = new MessageEmbed()
+			.setColor(config.get('EMBED_BLUE'))
+			.setTitle('Guild Donations')
+			.setTimestamp();
 		let totalAmount = 0;
 
-		await Promise.all([ ...Object.entries(reducedAmount) ].map(async ([ minecraftUUID, amount ], index) => {
+		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([_, a], [__, b]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
 			const IGN = client.players.cache.get(minecraftUUID)?.ign ?? (await mojang.getName(IGN).catch(logger.error)) ?? minecraftUUID;
 			const notes = reducedNotes[minecraftUUID].join('\n');
+			const inline = Boolean(notes);
 
-			playerList += '\n' + stripIndent`
+			embed.addField('\u200b', stripIndent`
+				\`\`\`ada
 				#${`${index + 1}`.padStart(3, '0')} : ${IGN}
-					 > ${client.formatNumber(amount)}${notes.length ? `\n	   ${notes}` : ''}
-			`;
+					 > ${client.formatNumber(amount)}
+				\`\`\`
+			`, inline);
+
+			if (inline) {
+				embed
+					.addField('\u200b', notes, inline)
+					.padFields();
+			}
 
 			totalAmount += amount;
 		}));
 
 		// create and send embed
-		message.reply(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
-			.setTitle('Guild Donations')
-			.setDescription(stripIndent`
-				Total: ${client.formatNumber(totalAmount)}
-				\`\`\`ada${playerList}\`\`\`
-			`)
-			.setTimestamp(),
-		);
+		message.reply(embed.setDescription(`Total: ${client.formatNumber(totalAmount)}`));
 	}
 };
