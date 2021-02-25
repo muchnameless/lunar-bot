@@ -578,7 +578,7 @@ class Player extends Model {
 
 		try {
 			this.discordID = value;
-			await this.validate({ fields: [ 'discordID' ] });
+			await this.save({ fields: [ 'discordID' ] });
 		} catch (error) {
 			this.discordID = OLD_DISCORD_ID;
 			throw error;
