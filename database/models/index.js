@@ -2,6 +2,10 @@
 
 const fs = require('fs');
 const path = require('path');
+
+// to get bigints as numbers instead of strings
+require('pg').defaults.parseInt8 = true;
+
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV ?? 'production';
