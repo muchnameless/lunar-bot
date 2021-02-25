@@ -55,32 +55,17 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: true,
 			allowNull: false,
 		},
+		notes: {
+			type: DataTypes.TEXT,
+			defaultValue: null,
+			allowNull: true,
+		},
 
 		// tax stats
 		paid: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 			allowNull: false,
-		},
-		// amount: {
-		// 	type: DataTypes.INTEGER,
-		// 	defaultValue: 0,
-		// 	allowNull: false,
-		// },
-		// collectedBy: { // uuid of tax collector
-		// 	type: DataTypes.STRING,
-		// 	defaultValue: null,
-		// 	allowNull: true,
-		// },
-		// auctionID: { // hypixel api auction uuid
-		// 	type: DataTypes.ARRAY(DataTypes.STRING),
-		// 	defaultValue: null,
-		// 	allowNull: true,
-		// },
-		notes: {
-			type: DataTypes.TEXT,
-			defaultValue: null,
-			allowNull: true,
 		},
 
 		// xp stats reference
