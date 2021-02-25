@@ -2,6 +2,7 @@
 
 const ms = require('ms');
 const logger = require('../../../functions/logger');
+// const commandHandler = require('../commandHandler');
 
 
 /**
@@ -9,7 +10,7 @@ const logger = require('../../../functions/logger');
  * @param {import('../HypixelMessage')} message
  */
 module.exports = async (chatBridge, message) => {
-	if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[${message.position}]: ${message.rawContent}`);
+	if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[${message.position} #${chatBridge.mcAccount}]: ${message.rawContent}`);
 
 	if (!chatBridge.guild) {
 		/**
@@ -33,6 +34,9 @@ module.exports = async (chatBridge, message) => {
 	switch (message.type) {
 		case 'guild': {
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
+
+			// commandHandler(chatBridge, message);
+
 			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: webhook unavailable`);
 
 			return message.forwardToDiscord();
