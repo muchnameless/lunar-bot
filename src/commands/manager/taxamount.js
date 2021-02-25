@@ -39,7 +39,10 @@ module.exports = class TaxAmountCommand extends Command {
 		await config.set('TAX_AMOUNT', newAmount);
 
 		// update tax collectors
-		await Promise.all(client.taxCollectors.activeCollectors.map(async taxCollector => taxCollector.resetAmount('tax')));
+		await Promise.all(client.taxCollectors.activeCollectors.map(async taxCollector => {
+			taxCollector.collectedTax += newAmount - OLD_AMOUNT;
+			return taxCollector.save();
+		}));
 
 		// logging
 		client.log(new MessageEmbed()
