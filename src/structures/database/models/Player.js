@@ -981,9 +981,10 @@ class Player extends Model {
 	 * set the player to paid
 	 * @param {setToPaidOptions} options
 	 * @param {?string} [options.type=tax]
+	 * @param {?string} [options.notes]
 	 * @returns {[Promise<import('./TaxCollector')>, Promise<(import('./Transaction'))>]}
 	 */
-	addTransfer({ amount, collectedBy, auctionID = null, type = 'tax' } = {}) {
+	addTransfer({ amount, collectedBy, auctionID = null, notes = null, type = 'tax' } = {}) {
 		return [
 			this.client.taxCollectors.cache.get(collectedBy)?.addAmount(amount, type), // update taxCollector
 			this.client.db.models.Transaction.create({
@@ -991,6 +992,7 @@ class Player extends Model {
 				to: collectedBy,
 				amount,
 				auctionID,
+				notes,
 				type,
 			}),
 		];
