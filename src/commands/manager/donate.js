@@ -12,7 +12,7 @@ module.exports = class DonateCommand extends Command {
 			aliases: [],
 			description: 'register a donation from a player',
 			args: true,
-			usage: '[`IGN`|`@mention`] [`amount`]',
+			usage: '[`IGN`|`@mention`] [`amount` / `text`]',
 			cooldown: 0,
 		});
 	}
@@ -27,14 +27,14 @@ module.exports = class DonateCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		if (args.length !== 2) return message.reply(this.usageInfo);
+		if (args.length < 2) return message.reply(this.usageInfo);
 
 		const { players } = client;
 		const collector = client.taxCollectors.getByID(message.author.id);
 
 		if (!collector?.isCollecting) return message.reply('this command is restricted to tax collectors.');
 
-		const IGN = args[0];
+		const [ IGN, AMOUNT_OR_TEXT, ...textInput ] = args;
 		const player = message.mentions.users.size
 			? players.getByID(message.mentions.users.first().id)
 			: players.getByIGN(IGN);
@@ -47,22 +47,30 @@ module.exports = class DonateCommand extends Command {
 			: `with the IGN \`${IGN}\``
 		} found.`);
 
-		const AMOUNT = Number(removeNumberFormatting(args[1]));
+		let amount = removeNumberFormatting(AMOUNT_OR_TEXT);
+		let notes;
 
-		if (isNaN(AMOUNT) || !isFinite(AMOUNT)) return message.reply(`\`${args[1]}\` is not a valid number.`);
+		if (/^\d+$/.test(amount)) {
+			amount = Number(amount);
+			notes = textInput.length ? textInput.join(' ') : null;
+		} else {
+			amount = 0;
+			notes = [ AMOUNT_OR_TEXT, ...textInput ].join(' ');
+		}
 
 		await Promise.all(player.addTransfer({
-			amount: AMOUNT,
+			amount,
 			collectedBy: collector.minecraftUUID,
+			notes,
 			type: 'donation',
 		}));
 
-		message.reply(`registered a donation from \`${player.ign}\` of \`${client.formatNumber(AMOUNT)}\`.`);
+		message.reply(`registered a donation from \`${player.ign}\` of \`${client.formatNumber(AMOUNT_OR_TEXT)}\`.`);
 
 		client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Donations')
-			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${client.formatNumber(AMOUNT)} (manually)\`\`\``)
+			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${client.formatNumber(AMOUNT_OR_TEXT)} (manually)\`\`\``)
 			.setTimestamp(),
 		);
 	}
