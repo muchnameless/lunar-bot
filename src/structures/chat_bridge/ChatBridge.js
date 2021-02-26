@@ -383,10 +383,9 @@ class ChatBridge extends EventEmitter {
 	/**
 	 * send a message both to discord and the ingame guild chat
 	 * @param {string} message
+	 * @returns {Promise<[import('../extensions/Message'), void]>}
 	 */
 	async broadcast(message) {
-		if (!this.ready) throw new Error('chatBridge not ready');
-
 		return Promise.all([
 			this.channel?.send(message),
 			this.gchat(message),
