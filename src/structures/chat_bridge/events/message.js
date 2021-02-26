@@ -1,8 +1,9 @@
 'use strict';
 
 const ms = require('ms');
-const logger = require('../../../functions/logger');
+const { messageTypes: { WHISPER, GUILD } } = require('../../../constants/chatBridge');
 const commandHandler = require('../commandHandler');
+const logger = require('../../../functions/logger');
 
 
 /**
@@ -32,16 +33,16 @@ module.exports = async (chatBridge, message) => {
 	if (!message.rawContent.length) return;
 
 	switch (message.type) {
-		case 'guild': {
+		case GUILD: {
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
 			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: not ready`);
 
-			message.forwardToDiscord();
+			await message.forwardToDiscord();
 
 			return commandHandler(chatBridge, message);
 		}
 
-		case 'whisper': {
+		case WHISPER: {
 			return commandHandler(chatBridge, message);
 		}
 

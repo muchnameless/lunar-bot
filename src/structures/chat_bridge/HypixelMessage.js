@@ -2,6 +2,7 @@
 
 const { Util } = require('discord.js');
 const ChatMessage = require('prismarine-chat')(require('../../constants/chatBridge').VERSION);
+const { messageTypes: { WHISPER, GUILD, PARTY } } = require('../../constants/chatBridge');
 const { nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
 
@@ -39,7 +40,7 @@ class HypixelMessage extends ChatMessage {
 				ign: matched.groups.ign,
 				guildRank: matched.groups.guildRank,
 			});
-			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? 'whisper' : null);
+			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? WHISPER : null);
 			this.content = this.rawContent.slice(matched[0].length).replace(/ࠀ|⭍/g, '').trim();
 		} else {
 			this.author = null;
@@ -103,13 +104,13 @@ class HypixelMessage extends ChatMessage {
 	 */
 	async reply(message) {
 		switch (this.type) {
-			case 'guild':
+			case GUILD:
 				return this.chatBridge.broadcast(message);
 
-			case 'party':
+			case PARTY:
 				return this.chatBridge.pchat(message);
 
-			case 'whisper':
+			case WHISPER:
 				return this.author.send(message);
 
 			default:

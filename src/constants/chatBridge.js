@@ -16,4 +16,10 @@ module.exports = {
 		skinParts: 0,
 		mainHand: 1,
 	},
+
+	messageTypes: {
+		WHISPER: 'whisper',
+		GUILD: 'guild',
+		PARTY: 'party',
+	},
 };
