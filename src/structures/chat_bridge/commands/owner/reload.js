@@ -1,12 +1,12 @@
 'use strict';
 
 const { basename } = require('path');
-const { getAllJsFiles } = require('../../functions/files');
-const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+const { getAllJsFiles } = require('../../../../functions/files');
+const IngameCommand = require('../../IngameCommand');
+const logger = require('../../../../functions/logger');
 
 
-module.exports = class ReloadCommand extends Command {
+module.exports = class MyCommand extends IngameCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'r', 'load' ],
@@ -19,9 +19,9 @@ module.exports = class ReloadCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/ConfigHandler')} config
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
+	 * @param {import('../../../LunarClient')} client
+	 * @param {import('../../../database/ConfigHandler')} config
+	 * @param {import('../../HypixelMessage')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -32,8 +32,8 @@ module.exports = class ReloadCommand extends Command {
 		switch (INPUT) {
 			case 'all':
 			case 'commands':
-				await client.commands.unloadAll().loadAll();
-				return message.reply(`${client.commands.size} command${client.commands.size !== 1 ? 's' : ''} were reloaded successfully.`);
+				await client.chatBridges.commands.unloadAll().loadAll();
+				return message.reply(`${client.chatBridges.commands.size} command${client.chatBridges.commands.size !== 1 ? 's' : ''} were reloaded successfully.`);
 
 			case 'db':
 			case 'database':
@@ -42,11 +42,11 @@ module.exports = class ReloadCommand extends Command {
 
 			case 'cooldown':
 			case 'cooldowns':
-				client.commands.cooldowns.clear();
+				client.chatBridges.commands.cooldowns.clear();
 				return message.reply('cooldowns reset successfully.');
 
 			default: {
-				const command = client.commands.getByName(INPUT);
+				const command = client.chatBridges.commands.getByName(INPUT);
 
 				let commandName;
 
@@ -58,18 +58,18 @@ module.exports = class ReloadCommand extends Command {
 				}
 
 				try {
-					const commandFiles = await getAllJsFiles(client.commands.dirPath);
+					const commandFiles = await getAllJsFiles(client.chatBridges.commands.dirPath);
 					const NEW_PATH = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
 
-					if (!NEW_PATH) return message.reply(`no command with the name or alias \`${INPUT}\` found`);
+					if (!NEW_PATH) return message.reply(`no command with the name or alias '${INPUT}' found`);
 
-					client.commands.load(NEW_PATH);
+					client.chatBridges.commands.load(NEW_PATH);
 
 					logger.info(`command ${commandName} was reloaded successfully`);
-					return message.reply(`command \`${commandName}\` was reloaded successfully.`);
+					return message.reply(`command '${commandName}' was reloaded successfully.`);
 				} catch (error) {
 					logger.error('An error occurred while reloading:\n', error);
-					return message.reply(`an error occurred while reloading \`${commandName}\`:\n\`\`\`xl\n${error.message}\`\`\``);
+					return message.reply(`an error occurred while reloading '${commandName}':\n\n${error.message}`);
 				}
 			}
 		}
