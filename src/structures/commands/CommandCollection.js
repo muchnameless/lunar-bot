@@ -57,6 +57,14 @@ class CommandCollection extends Collection {
 	}
 
 	/**
+	 * help command run method
+	 * @type {Function}
+	 */
+	get help() {
+		return this.get('help').run;
+	}
+
+	/**
 	 * returns the commands from the provided category
 	 * @param {string} category
 	 */
@@ -86,14 +94,6 @@ class CommandCollection extends Collection {
 		// return command if it is visible
 		command = this.get(result.value) ?? this.get(this.aliases.get(result.value));
 		return command.visible ? command : null;
-	}
-
-	/**
-	 * execute the help command
-	 * @param  {...any} args
-	 */
-	help(...args) {
-		return this.get('help').run(...args);
 	}
 
 	/**
