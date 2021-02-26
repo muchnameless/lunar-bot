@@ -1,5 +1,15 @@
 'use strict';
 
+/**
+ * @typedef {object} CommandInfo additional information about the command
+ * @property {string[]} [aliases] command aliases
+ * @property {string} [description] command description
+ * @property {boolean} [guildOnly] wether this command can only be executed on servers
+ * @property {boolean} [args] wether arguments are required or not
+ * @property {string|Function} [usage] argument usage
+ * @property {number} [cooldown] command cooldown
+ */
+
 
 class Command {
 	/**
@@ -8,13 +18,7 @@ class Command {
 	 * @param {import('../LunarClient')} param0.client discord client that instantiated this command
 	 * @param {string} param0.name the name of the command
 	 * @param {string} param0.category the category of the command
-	 * @param {object} param1 additional information about the command
-	 * @param {string[]} [param1.aliases] command aliases
-	 * @param {string} [param1.description] command description
-	 * @param {boolean} [param1.guildOnly] wether this command can only be executed on servers
-	 * @param {boolean} [param1.args] wether arguments are required or not
-	 * @param {string|Function} [param1.usage] argument usage
-	 * @param {number} [param1.cooldown] command cooldown
+	 * @param {CommandInfo} param1
 	 */
 	constructor({ client, name, category }, { aliases, description, guildOnly, args, usage, cooldown }) {
 		this.client = client;
