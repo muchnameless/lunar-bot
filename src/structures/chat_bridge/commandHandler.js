@@ -99,25 +99,27 @@ module.exports = async (chatBridge, message) => {
 		}
 
 		// command cooldowns
-		if	(!client.commands.cooldowns.has(command.name)) client.commands.cooldowns.set(command.name, new Collection());
+		if (command.cooldown) {
+			if	(!client.commands.cooldowns.has(command.name)) client.commands.cooldowns.set(command.name, new Collection());
 
-		const NOW = Date.now();
-		const timestamps = client.commands.cooldowns.get(command.name);
-		const COOLDOWN_TIME = (command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1000;
+			const NOW = Date.now();
+			const timestamps = client.commands.cooldowns.get(command.name);
+			const COOLDOWN_TIME = (command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1000;
 
-		if (timestamps.has(message.author.ign)) {
-			const expirationTime = timestamps.get(message.author.ign) + COOLDOWN_TIME;
+			if (timestamps.has(message.author.ign)) {
+				const expirationTime = timestamps.get(message.author.ign) + COOLDOWN_TIME;
 
-			if (NOW < expirationTime) {
-				const timeLeft = ms(expirationTime - NOW, { long: true });
+				if (NOW < expirationTime) {
+					const timeLeft = ms(expirationTime - NOW, { long: true });
 
-				logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${timeLeft} before the cooldown expires`);
-				return message.reply(`'${command.name}' is on cooldown for another ${timeLeft}`);
+					logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${timeLeft} before the cooldown expires`);
+					return message.reply(`'${command.name}' is on cooldown for another ${timeLeft}`);
+				}
 			}
-		}
 
-		timestamps.set(message.author.ign, NOW);
-		setTimeout(() => timestamps.delete(message.author.ign), COOLDOWN_TIME);
+			timestamps.set(message.author.ign, NOW);
+			setTimeout(() => timestamps.delete(message.author.ign), COOLDOWN_TIME);
+		}
 	}
 
 	// argument handling
