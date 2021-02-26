@@ -2,6 +2,7 @@
 
 const { commaListsOr } = require('common-tags');
 const { escapeRegex } = require('../../functions/util');
+const { messageTypes: { GUILD } } = require('../../constants/chatBridge');
 const logger = require('../../functions/logger');
 
 
@@ -18,7 +19,7 @@ module.exports = async (chatBridge, message) => {
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), escapeRegex(config.get('INGAME_PREFIX')), `@${chatBridge.bot.username}` ].join('|')})`, 'i').exec(message.content); // PREFIX, INGAME_PREFIX, @mention
 
 	// must use prefix for commands in guild
-	if (message.type === 'guild' && !prefixMatched) return;
+	if (message.type === GUILD && !prefixMatched) return;
 
 	// command, args, flags
 	const rawArgs = message.content.slice(prefixMatched?.[0].length ?? 0).trim().split(/ +/); // command arguments
@@ -49,7 +50,7 @@ module.exports = async (chatBridge, message) => {
 	}
 
 	// server only command in DMs
-	if (command.guildOnly && message.type !== 'guild') {
+	if (command.guildOnly && message.type !== GUILD) {
 		logger.info(`${message.author.tag} tried to execute '${message.content}' in whispers which is a guild-chat-only command`);
 		return message.reply(`the '${command.name}' command can only be executed in guild chat.`);
 	}
