@@ -389,7 +389,7 @@ class HypixelGuild extends Model {
 
 	/**
 	 * determine the requested rank and compare the player's weight with the rank's requirement
-	 * @param {import('../../extensions/Message')} message discord message which was send in #rank-requests channel
+	 * @param {import('../../extensions/Message')} message discord message which was send in the #guild-general channel
 	 */
 	async handleRankRequestMessage(message) {
 		if (message.mentions.users.size) return true; // ignore messages with tagged users
@@ -517,7 +517,7 @@ class HypixelGuild extends Model {
 
 	/**
 	 * forwards a message to the ingame chat if neither the player nor the whole guild chat is muted
-	 * @param {import('../../extensions/Message')} message discord message which was send in #rank-requests channel
+	 * @param {import('../../extensions/Message')} message discord message which was send in the #rank-requests channel
 	 */
 	async handleChatBridgeMessage(message) {
 		// chatbridge disabled or no message.content to chat
