@@ -4,7 +4,6 @@ const { Collection } = require('discord.js');
 const { dirname, basename } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
 const { autocorrect } = require('../../functions/util');
-const Command = require('./Command');
 const logger = require('../../functions/logger');
 
 
@@ -20,6 +19,7 @@ class CommandCollection extends Collection {
 		this.client = client;
 		this.dirPath = dirPath;
 		this.aliases = new Map();
+		this.cooldowns = new Collection();
 	}
 
 	/**

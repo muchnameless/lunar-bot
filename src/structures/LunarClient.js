@@ -1,6 +1,6 @@
 'use strict';
 
-const { Client, Collection, Constants } = require('discord.js');
+const { Client, Constants } = require('discord.js');
 const { CronJob } = require('cron');
 const { join, basename } = require('path');
 const { getAllJsFiles } = require('../functions/files');
@@ -28,7 +28,6 @@ class LunarClient extends Client {
 		this.logHandler = new LogHandler(this);
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'));
-		this.cooldowns = new Collection();
 	}
 
 	set webhook(value) {

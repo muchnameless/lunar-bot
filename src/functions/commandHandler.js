@@ -109,10 +109,10 @@ module.exports = async (client, message) => {
 		}
 
 		// command cooldowns
-		if	(!client.cooldowns.has(command.name)) client.cooldowns.set(command.name, new Collection());
+		if	(!client.commands.cooldowns.has(command.name)) client.commands.cooldowns.set(command.name, new Collection());
 
 		const NOW = Date.now();
-		const timestamps = client.cooldowns.get(command.name);
+		const timestamps = client.commands.cooldowns.get(command.name);
 		const COOLDOWN_TIME = (command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1000;
 
 		if (timestamps.has(message.author.id)) {
