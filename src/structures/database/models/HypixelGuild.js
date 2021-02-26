@@ -392,7 +392,7 @@ class HypixelGuild extends Model {
 	 * @param {import('../../extensions/Message')} message discord message which was send in the #guild-general channel
 	 */
 	async handleRankRequestMessage(message) {
-		if (message.mentions.users.size) return true; // ignore messages with tagged users
+		if (message.mentions.users.size) return; // ignore messages with tagged users
 
 		const { config } = this.client;
 		const result = message.content
@@ -402,7 +402,7 @@ class HypixelGuild extends Model {
 			.map(word => autocorrect(word, this.ranks, 'name'))
 			.sort((a, b) => b.similarity - a.similarity)[0]; // element with the highest similarity
 
-		if (!result || result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return true;
+		if (!result || result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return;
 
 		const {
 			name: RANK_NAME,
@@ -421,31 +421,26 @@ class HypixelGuild extends Model {
 			if (!player) {
 				logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' but could not be found in the player db`);
 
-				message.reply(
+				return message.reply(
 					`unable to find you in the ${this.name} player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
 					{ sameChannel: true },
 				);
-
-				return true;
 			}
 
 			// player found in other guild
 			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' from '${this.name}' but is in '${player.guildName}'`);
 
-			message.reply(
+			return message.reply(
 				`you need to be in ${this.name} in order to request this rank. If you just joined use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
 				{ sameChannel: true },
 			);
-
-			return true;
 		}
 
 		// non-requestable rank
 		if (!ROLE_ID) {
 			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank which is non-requestable`);
 			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
-			message.reactSafely(CLOWN);
-			return true;
+			return message.reactSafely(CLOWN);
 		}
 
 		let { totalWeight } = player.getWeight();
@@ -454,8 +449,7 @@ class HypixelGuild extends Model {
 		if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
 			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
 			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
-			message.reactSafely(CLOWN);
-			return true;
+			return message.reactSafely(CLOWN);
 		}
 
 		const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));
@@ -479,7 +473,7 @@ class HypixelGuild extends Model {
 
 			logger.info(`[RANK REQUEST]: ${player.ign} requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
-			if (totalWeight < WEIGHT_REQ) return true;
+			if (totalWeight < WEIGHT_REQ) return;
 
 			if (player.isStaff) {
 				// set rank role to requested rank
@@ -511,8 +505,6 @@ class HypixelGuild extends Model {
 		} catch (error) {
 			logger.error(`[RANK REQUEST]: ${player.logInfo}: ${error.name}: ${error.message}`);
 		}
-
-		return true;
 	}
 
 	/**
@@ -521,7 +513,7 @@ class HypixelGuild extends Model {
 	 */
 	async handleChatBridgeMessage(message) {
 		// chatbridge disabled or no message.content to chat
-		if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return true;
+		if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return;
 
 		const player = this.client.players.getByID(message.author.id);
 
@@ -532,8 +524,7 @@ class HypixelGuild extends Model {
 					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
 					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error.name}: ${error.message}`),
 				);
-				message.reactSafely(MUTED);
-				return true;
+				return message.reactSafely(MUTED);
 			}
 
 			player.chatBridgeMutedUntil = 0;
@@ -547,8 +538,7 @@ class HypixelGuild extends Model {
 					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed guild chat muted`),
 					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing guild chat muted: ${error.name}: ${error.message}`),
 				);
-				message.reactSafely(MUTED);
-				return true;
+				return message.reactSafely(MUTED);
 			}
 
 			this.chatMutedUntil = 0;
@@ -561,8 +551,6 @@ class HypixelGuild extends Model {
 			logger.warn(`[GUILD CHATBRIDGE]: ${error.message}`);
 			message.reactSafely(X_EMOJI);
 		}
-
-		return true;
 	}
 }
 

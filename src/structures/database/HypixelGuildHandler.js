@@ -108,6 +108,22 @@ class HypixelGuildHandler extends ModelHandler {
 
 		return null;
 	}
+
+	/**
+	 * checks if the message is a bridge message to be forwarded to ingame chat and handle it if true
+	 * @param {import('../extensions/Message')} message
+	 */
+	checkIfChatBridgeMessage(message) {
+		return this.cache.find(hGuild => hGuild.chatBridgeChannelID === message.channel.id)?.handleChatBridgeMessage(message);
+	}
+
+	/**
+	 * check if the message is a rank request and handle it if true
+	 * @param {import('../extensions/Message')} message
+	 */
+	checkIfRankRequestMessage(message) {
+		return this.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message);
+	}
 }
 
 module.exports = HypixelGuildHandler;

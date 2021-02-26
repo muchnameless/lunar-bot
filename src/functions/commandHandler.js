@@ -24,14 +24,11 @@ module.exports = async (client, message) => {
 	const { config } = client;
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').exec(message.content); // PREFIX, @mention, no prefix
 
-	// must use prefix for commands in guild
-	if (message.guild && !prefixMatched) {
-		// channel-specific triggers
-		if (await client.hypixelGuilds.cache.find(hGuild => hGuild.chatBridgeChannelID === message.channel.id)?.handleChatBridgeMessage(message)) return;
-		if (await client.hypixelGuilds.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message)) return;
+	client.hypixelGuilds.checkIfChatBridgeMessage(message);
+	client.hypixelGuilds.checkIfRankRequestMessage(message);
 
-		return;
-	}
+	// must use prefix for commands in guild
+	if (message.guild && !prefixMatched) return;
 
 	// command, args, flags
 	const rawArgs = message.content.slice(prefixMatched?.[0].length ?? 0).trim().split(/ +/); // command arguments
@@ -83,6 +80,9 @@ module.exports = async (client, message) => {
 				return message.reply(commaListsOr`the \`${command.name}\` command requires a role (${requiredRoles}) from the Lunar Guard Discord server which is unreachable at the moment.`);
 			}
 
+			/**
+			 * @type {?import('../structures/extensions/GuildMember')}
+			 */
 			const member = message.member ?? await lgGuild.members.fetch(message.author.id).catch(error => logger.error(`error while fetching member to test for permissions: ${error.name}: ${error.message}`));
 
 			if (!member) {
@@ -91,7 +91,7 @@ module.exports = async (client, message) => {
 			}
 
 			// check for req roles
-			if (!member.roles.cache.some(role => requiredRoles.includes(role.id))) {
+			if (!member.roles.cache.some((_, roleID) => requiredRoles.includes(roleID))) {
 				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} without a required role`);
 				return message.reply(commaListsOr`the \`${command.name}\` command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)})${message.guild?.id === lgGuild.id ? '' : 'from the Lunar Guard Discord Server'}.`);
 			}
