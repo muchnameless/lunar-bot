@@ -73,10 +73,12 @@ class TaxCollector extends Model {
 	async resetAmount(type = 'tax') {
 		switch (type) {
 			case 'tax':
+			case 'taxes':
 				this.collectedTax = 0;
 				return this.save();
 
 			case 'donation':
+			case 'donations':
 				this.collectedDonations = 0;
 				return this.save();
 
