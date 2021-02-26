@@ -1,7 +1,7 @@
 'use strict';
 
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const { join } = require('path');
+require('dotenv').config({ path: join(__dirname, '.env') });
 const { Constants } = require('discord.js');
 const { requireAll } = require('./src/functions/files');
 const db = require('./database/models/index');
@@ -24,11 +24,12 @@ process
 // init
 (async () => {
 	// discord.js structure extensions
-	await requireAll(path.join(__dirname, 'src', 'structures', 'extensions'));
+	await requireAll(join(__dirname, 'src', 'structures', 'extensions'));
 
 	// initiate bot client
 	const client = new LunarClient({
 		db,
+		restTimeOffset: 0,
 		fetchAllMembers: true, // enable when discord.js removes that feature
 		disableMentions: 'everyone',
 		partials: [
