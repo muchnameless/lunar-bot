@@ -1,7 +1,7 @@
 'use strict';
 
 const { Collection } = require('discord.js');
-const path = require('path');
+const { dirname, basename } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
 const { autocorrect } = require('../../functions/util');
 const Command = require('./Command');
@@ -11,13 +11,23 @@ const logger = require('../../functions/logger');
 class CommandCollection extends Collection {
 	/**
 	 * @param {import('../LunarClient')} client
+	 * @param {string} dirPath the path to the commands folder
 	 * @param {*} entries
 	 */
-	constructor(client, entries) {
+	constructor(client, dirPath, entries) {
 		super(entries);
 
 		this.client = client;
+		this.dirPath = dirPath;
 		this.aliases = new Map();
+	}
+
+	/**
+	 * built-in methods will use this as the constructor
+	 * that way <CommandCollection>.filter returns a standard Collection
+	 */
+	static get [Symbol.species]() {
+		return Collection;
 	}
 
 	get invisibleCategories() {
@@ -91,8 +101,8 @@ class CommandCollection extends Collection {
 	 * @param {string} file command file to load
 	 */
 	load(file) {
-		const name = path.basename(file, '.js');
-		const category = path.basename(path.dirname(file));
+		const name = basename(file, '.js');
+		const category = basename(dirname(file));
 		const commandConstructor = require(file);
 
 		if (Object.getPrototypeOf(commandConstructor) !== Command) throw new Error(`[LOAD COMMAND]: invalid input: ${file}`);
@@ -103,30 +113,36 @@ class CommandCollection extends Collection {
 		const command = new commandConstructor({
 			client: this.client,
 			name,
-			category,
+			category: category !== 'commands' ? category : null,
 		});
 
 		command.load();
+
+		delete require.cache[require.resolve(file)];
+
+		return this;
 	}
 
 	/**
 	 * loads all commands into the collection
 	 */
 	async loadAll() {
-		const commandFiles = await getAllJsFiles(path.join(__dirname, '..', '..', 'commands'));
+		const commandFiles = await getAllJsFiles(this.dirPath);
 
 		for (const file of commandFiles) {
 			this.load(file);
 		}
 
 		logger.debug(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
+
+		return this;
 	}
 
 	/**
 	 * unload all commands
 	 */
 	unloadAll() {
-		this.forEach(command => command.unload());
+		return this.each(command => command.unload());
 	}
 }
 

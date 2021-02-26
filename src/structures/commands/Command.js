@@ -86,17 +86,10 @@ class Command {
 	}
 
 	/**
-	 * removes all aliases, deletes the require.cache and the command from the commandsCollection
+	 * removes all aliases and the command from the commandsCollection
 	 */
 	unload() {
 		this.aliases?.forEach(alias => this.client.commands.aliases.delete(alias.toLowerCase()));
-
-		const PATH = Object.keys(require.cache)
-			.filter(key => key.includes('commands'))
-			.find(key => key.includes(this.name));
-
-		delete require.cache[PATH];
-
 		this.client.commands.delete(this.name.toLowerCase());
 	}
 

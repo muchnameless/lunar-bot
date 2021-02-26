@@ -2,7 +2,7 @@
 
 const { Util, MessageEmbed, DiscordAPIError } = require('discord.js');
 const { EventEmitter } = require('events');
-const path = require('path');
+const { join, basename } = require('path');
 const emojiRegex = require('emoji-regex');
 const ms = require('ms');
 const { sleep, trim } = require('../../functions/util');
@@ -74,14 +74,13 @@ class ChatBridge extends EventEmitter {
 		 */
 		this.ready = false;
 		/**
-		 * wether the chatBridge mc bot is currently reconnecting (prevents executing multiple reconnections)
+		 * wether the chatBridge mc bot is currently isReconnecting (prevents executing multiple reconnections)
 		 */
-		this.reconnecting = false;
+		this.isReconnecting = false;
 		/**
-		 * no webhooks in channel or wrong minecraft account credentials,
-		 * prevents chatBridge from trying to endlessly reconnect
+		 * to prevent chatBridge from reconnecting at <MinecraftBot>.end
 		 */
-		this.criticalError = false;
+		this.shouldReconnect = true;
 
 		this._loadEvents();
 	}
@@ -101,7 +100,8 @@ class ChatBridge extends EventEmitter {
 	 * create and log the bot into hypixel
 	 */
 	async connect() {
-		if (this.criticalError) throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
+		if (!this.shouldReconnect) throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
+		if (this.ready) return console.log(`[CHATBRIDGE]: ${this.logInfo}: already connected`);
 
 		// reconnect the bot if it hasn't successfully spawned in 60 seconds
 		this.abortLoginTimeout = setTimeout(() => {
@@ -111,7 +111,7 @@ class ChatBridge extends EventEmitter {
 
 		await this._createBot();
 
-		this.reconnecting = false;
+		this.isReconnecting = false;
 	}
 
 	/**
@@ -119,8 +119,8 @@ class ChatBridge extends EventEmitter {
 	 */
 	reconnect(loginDelay) {
 		// prevent multiple reconnections
-		if (this.reconnecting) return;
-		this.reconnecting = true;
+		if (this.isReconnecting) return;
+		this.isReconnecting = true;
 
 		this.disconnect();
 
@@ -156,7 +156,7 @@ class ChatBridge extends EventEmitter {
 
 		await this._fetchAndCacheWebhook();
 
-		if (this.criticalError) throw new Error(`[CHATBRIDGE]: ${this.logInfo}: critical error`);
+		if (!this.shouldReconnect) throw new Error(`[CHATBRIDGE]: ${this.logInfo}: critical error`);
 	}
 
 	/**
@@ -179,7 +179,7 @@ class ChatBridge extends EventEmitter {
 		this.abortLoginTimeout = null;
 
 		try {
-			this.bot?.quit?.();
+			this.bot?.quit();
 		} catch (error) {
 			logger.error('[CHATBRIDGE DISCONNECT]:', error);
 		}
@@ -218,7 +218,7 @@ class ChatBridge extends EventEmitter {
 					.setDescription(`**Error**: ${error.message}${error.channel ? `in ${error.channel}` : ''}`)
 					.setTimestamp(),
 				);
-				this.criticalError = true;
+				this.shouldReconnect = false;
 
 				return this.disconnect();
 			}
@@ -253,11 +253,11 @@ class ChatBridge extends EventEmitter {
 	 * load chatBridge events
 	 */
 	async _loadEvents() {
-		const eventFiles = await getAllJsFiles(path.join(__dirname, 'events'));
+		const eventFiles = await getAllJsFiles(join(__dirname, 'events'));
 
 		for (const file of eventFiles) {
 			const event = require(file);
-			const EVENT_NAME = path.basename(file, '.js');
+			const EVENT_NAME = basename(file, '.js');
 
 			this.on(EVENT_NAME, event.bind(null, this));
 		}

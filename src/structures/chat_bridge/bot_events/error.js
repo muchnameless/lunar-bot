@@ -11,7 +11,7 @@ module.exports = (chatBridge, error) => {
 
 	if (error.message.includes('Invalid credentials')) {
 		chatBridge.ready = false;
-		chatBridge.criticalError = true;
+		chatBridge.shouldReconnect = false;
 		return logger.error('[CHATBRIDGE]: invalid credentials detected');
 	}
 

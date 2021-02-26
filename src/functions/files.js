@@ -1,7 +1,7 @@
 'use strict';
 
 const { promises: fs } = require('fs');
-const path = require('path');
+const { join, basename, extname } = require('path');
 
 
 const self = module.exports = {
@@ -15,11 +15,11 @@ const self = module.exports = {
 		const files = await fs.readdir(dirPath);
 
 		await Promise.all(files.map(async file => {
-			if ((await fs.stat(path.join(dirPath, file))).isDirectory()) return arrayOfFiles = await self.getAllJsFiles(path.join(dirPath, file), arrayOfFiles);
-			arrayOfFiles.push(path.join(dirPath, file));
+			if ((await fs.stat(join(dirPath, file))).isDirectory()) return arrayOfFiles = await self.getAllJsFiles(join(dirPath, file), arrayOfFiles);
+			arrayOfFiles.push(join(dirPath, file));
 		}));
 
-		return arrayOfFiles.filter(file => !path.basename(file).startsWith('~') && path.extname(file) === '.js');
+		return arrayOfFiles.filter(file => !basename(file).startsWith('~') && extname(file) === '.js');
 	},
 
 	/**

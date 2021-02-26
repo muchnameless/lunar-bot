@@ -1,6 +1,6 @@
 'use strict';
 
-const path = require('path');
+const { join, basename } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -34,9 +34,8 @@ module.exports = class ReloadCommand extends Command {
 			command.unload();
 
 			try {
-				const commandFiles = await getAllJsFiles(path.join(__dirname, '..'));
-				const nameRegex = new RegExp(command.name, 'i');
-				const NEW_PATH = commandFiles.find(file => nameRegex.test(file));
+				const commandFiles = await getAllJsFiles(join(__dirname, '..'));
+				const NEW_PATH = commandFiles.find(file => basename(file, '.js').toLowerCase() === command.name.toLowerCase());
 
 				client.commands.load(NEW_PATH);
 
@@ -51,8 +50,7 @@ module.exports = class ReloadCommand extends Command {
 		switch (INPUT) {
 			case 'all':
 			case 'commands':
-				client.commands.unloadAll();
-				await client.commands.loadAll();
+				await client.commands.unloadAll().loadAll();
 				return message.reply(`${client.commands.size} command${client.commands.size !== 1 ? 's' : ''} were reloaded successfully.`);
 
 			case 'db':

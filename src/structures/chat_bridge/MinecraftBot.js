@@ -1,7 +1,7 @@
 'use strict';
 
 const { createClient } = require('minecraft-protocol');
-const path = require('path');
+const { join, basename } = require('path');
 const { SPAWN_EVENTS } = require('../../constants/chatBridge');
 const { getAllJsFiles } = require('../../functions/files');
 const logger = require('../../functions/logger');
@@ -24,11 +24,11 @@ module.exports = async (chatBridge, options) => {
 	/**
 	 * load bot events
 	 */
-	const eventFiles = await getAllJsFiles(path.join(__dirname, 'bot_events'));
+	const eventFiles = await getAllJsFiles(join(__dirname, 'bot_events'));
 
 	for (const file of eventFiles) {
 		const event = require(file);
-		const EVENT_NAME = path.basename(file, '.js');
+		const EVENT_NAME = basename(file, '.js');
 
 		bot[SPAWN_EVENTS.includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, chatBridge));
 	}

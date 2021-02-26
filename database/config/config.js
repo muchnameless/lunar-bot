@@ -1,7 +1,7 @@
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
+const { join } = require('path');
+require('dotenv').config({ path: join(__dirname, '..', '..', '.env') });
 const Sequelize = require('sequelize');
-// const { logger } = require('./functions/logger');
+// const logger = require('./functions/logger');
 
 // use floats instead of strings as decimal representation
 // Sequelize.postgres.DECIMAL.parse = parseFloat;

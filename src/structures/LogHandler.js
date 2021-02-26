@@ -1,7 +1,7 @@
 'use strict';
 
 const { MessageEmbed, SnowflakeUtil, DiscordAPIError } = require('discord.js');
-const path = require('path');
+const { join } = require('path');
 const { promises: fs } = require('fs');
 const { cleanLoggingEmbedString } = require('../functions/util');
 const logger = require('../functions/logger');
@@ -13,7 +13,7 @@ class LogHandler {
 	 */
 	constructor(client) {
 		this.client = client;
-		this.logBufferPath = path.join(__dirname, '..', '..', 'log_buffer');
+		this.logBufferPath = join(__dirname, '..', '..', 'log_buffer');
 		/**
 		 * @type {import('discord.js').Webhook}
 		 */
@@ -118,7 +118,7 @@ class LogHandler {
 		try {
 			await this._createLogBufferFolder();
 			await fs.writeFile(
-				path.join(this.logBufferPath, `${new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(', ', '_').replace(/:/g, '.')}_${SnowflakeUtil.generate()}`),
+				join(this.logBufferPath, `${new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(', ', '_').replace(/:/g, '.')}_${SnowflakeUtil.generate()}`),
 				data,
 			);
 		} catch (error) {
@@ -139,7 +139,7 @@ class LogHandler {
 			if (!logBufferFiles) return;
 
 			for (const file of logBufferFiles) {
-				const FILE_PATH = path.join(this.logBufferPath, file);
+				const FILE_PATH = join(this.logBufferPath, file);
 				const FILE_CONTENT = await fs.readFile(FILE_PATH, 'utf8');
 
 				await this.log(...FILE_CONTENT.split('\n').map(x => new MessageEmbed(JSON.parse(x))));

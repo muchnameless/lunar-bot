@@ -1,13 +1,13 @@
 'use strict';
 
 const fs = require('fs');
-const path = require('path');
+const { join, basename } = require('path');
 
 // to get bigints as numbers instead of strings
 require('pg').defaults.parseInt8 = true;
 
 const Sequelize = require('sequelize');
-const basename = path.basename(__filename);
+const fileBasename = basename(__filename);
 const env = process.env.NODE_ENV ?? 'production';
 const config = require('../config/config')[env];
 
@@ -27,10 +27,10 @@ const db = {
 	// read models
 	...Object.fromEntries(
 		fs
-			.readdirSync(path.join(__dirname))
-			.filter(file => !file.startsWith('~') && file.endsWith('.js') && file !== basename)
+			.readdirSync(join(__dirname))
+			.filter(file => !file.startsWith('~') && file.endsWith('.js') && file !== fileBasename)
 			.map(file => {
-				const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+				const model = require(join(__dirname, file))(sequelize, Sequelize.DataTypes);
 				return [model.name, model];
 			}),
 	),
