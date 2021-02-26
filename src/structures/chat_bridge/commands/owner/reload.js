@@ -12,7 +12,7 @@ module.exports = class MyCommand extends IngameCommand {
 			aliases: [ 'r', 'load' ],
 			description: '(re)load a command',
 			args: true,
-			usage: '[`command name` to reload, `all`|`commands` for all commands, `database`|`db` cache, `cooldown(s)`]',
+			usage: '[\'command name\' to reload, \'all\'|\'commands\' for all commands, \'database\'|\'db\' cache, \'cooldown(s)\']',
 			cooldown: 0,
 		});
 	}

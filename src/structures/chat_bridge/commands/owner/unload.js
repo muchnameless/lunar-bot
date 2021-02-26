@@ -10,7 +10,7 @@ module.exports = class MyCommand extends IngameCommand {
 			aliases: [],
 			description: 'unload a command',
 			args: true,
-			usage: '[`command name` to unload]',
+			usage: '[\'command name\' to unload]',
 			cooldown: 0,
 		});
 	}
