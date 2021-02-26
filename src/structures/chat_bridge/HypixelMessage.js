@@ -57,6 +57,13 @@ class HypixelMessage extends ChatMessage {
 	}
 
 	/**
+	 * the message author's guild object, if the message was sent in guild chat
+	 */
+	get guild() {
+		return this.type === GUILD ? this.player?.guild : null;
+	}
+
+	/**
 	 * prettify message for discord, tries to replace :emoji: and others with the actually working discord render string
 	 */
 	get parsedContent() {
