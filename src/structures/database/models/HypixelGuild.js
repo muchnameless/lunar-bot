@@ -516,7 +516,7 @@ class HypixelGuild extends Model {
 	}
 
 	/**
-	 * determine the requested rank and compare the player's weight with the rank's requirement
+	 * forwards a message to the ingame chat if neither the player nor the whole guild chat is muted
 	 * @param {import('../../extensions/Message')} message discord message which was send in #rank-requests channel
 	 */
 	async handleChatBridgeMessage(message) {
