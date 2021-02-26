@@ -104,9 +104,6 @@ class CommandCollection extends Collection {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
 		const commandConstructor = require(file);
-
-		if (Object.getPrototypeOf(commandConstructor) !== Command) throw new Error(`[LOAD COMMAND]: invalid input: ${file}`);
-
 		/**
 		 * @type {import('./Command')}
 		 */
