@@ -34,23 +34,15 @@ module.exports = async (chatBridge, message) => {
 	switch (message.type) {
 		case 'guild': {
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
+			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: not ready`);
 
-			commandHandler(chatBridge, message);
+			message.forwardToDiscord();
 
-			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: webhook unavailable`);
-
-			return message.forwardToDiscord();
+			return commandHandler(chatBridge, message);
 		}
 
 		case 'whisper': {
-			if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: whisper from ${message.author.ign}`);
-
-			commandHandler(chatBridge, message);
-
-			// auto 'o/' reply
-			if (/\( ﾟ◡ﾟ\)\/|o\//.test(message.content)) return message.author.send('o/');
-
-			return;
+			return commandHandler(chatBridge, message);
 		}
 
 		default: {
