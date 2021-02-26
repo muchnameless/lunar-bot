@@ -98,13 +98,13 @@ class HypixelMessage extends ChatMessage {
 	}
 
 	/**
-	 * replies ingame to the message
+	 * replies ingame (and on discord if guild chat) to the message
 	 * @param {string} message
 	 */
 	async reply(message) {
 		switch (this.type) {
 			case 'guild':
-				return this.chatBridge.gchat(message);
+				return this.chatBridge.broadcast(message);
 
 			case 'party':
 				return this.chatBridge.pchat(message);
