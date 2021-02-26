@@ -33,17 +33,17 @@ module.exports = class MyCommand extends IngameCommand {
 			case 'all':
 			case 'commands':
 				await client.chatBridges.commands.unloadAll().loadAll();
-				return message.reply(`${client.chatBridges.commands.size} command${client.chatBridges.commands.size !== 1 ? 's' : ''} were reloaded successfully.`);
+				return message.reply(`${client.chatBridges.commands.size} command${client.chatBridges.commands.size !== 1 ? 's' : ''} were reloaded successfully`);
 
 			case 'db':
 			case 'database':
 				await client.db.loadCache();
-				return message.reply('database cache reloaded successfully.');
+				return message.reply('database cache reloaded successfully');
 
 			case 'cooldown':
 			case 'cooldowns':
 				client.chatBridges.commands.cooldowns.clear();
-				return message.reply('cooldowns reset successfully.');
+				return message.reply('cooldowns reset successfully');
 
 			default: {
 				const command = client.chatBridges.commands.getByName(INPUT);
@@ -66,10 +66,10 @@ module.exports = class MyCommand extends IngameCommand {
 					client.chatBridges.commands.load(NEW_PATH);
 
 					logger.info(`command ${commandName} was reloaded successfully`);
-					return message.reply(`command '${commandName}' was reloaded successfully.`);
+					return message.reply(`command '${commandName}' was reloaded successfully`);
 				} catch (error) {
 					logger.error('An error occurred while reloading:\n', error);
-					return message.reply(`an error occurred while reloading '${commandName}':\n\n${error.message}`);
+					return message.reply(`an error occurred while reloading '${commandName}': ${error.name}: ${error.message}`);
 				}
 			}
 		}
