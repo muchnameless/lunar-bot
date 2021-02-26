@@ -55,7 +55,7 @@ class Command {
 	 * prefix name usage
 	 */
 	get usageInfo() {
-		return `\`${this.client.config.get('PREFIX')}${this.aliases?.[0] ?? this.name}\` ${this.usage}`;
+		return `\`${this.client.config.get('PREFIX')}${this.aliases?.[0].length < this.name ? this.aliases[0] : this.name}\` ${this.usage}`;
 	}
 
 	/**

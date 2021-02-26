@@ -6,6 +6,13 @@ const logger = require('../../functions/logger');
 
 class IngameCommand extends Command {
 	/**
+	 * prefix name usage
+	 */
+	get usageInfo() {
+		return `${this.client.config.get('PREFIX')}${this.aliases?.[0].length < this.name ? this.aliases[0] : this.name} ${this.usage}`;
+	}
+
+	/**
 	 * loads the command and possible aliases into their collections
 	 */
 	load() {

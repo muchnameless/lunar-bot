@@ -145,7 +145,7 @@ module.exports = class HelpCommand extends Command {
 		}
 
 		if (command.description) helpEmbed.setDescription(`${command.description}`);
-		if (command.usage) helpEmbed.addField('**Usage:**', `\`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage}`);
+		if (command.usage) helpEmbed.addField('**Usage:**', command.usageInfo);
 
 		const COOLDOWN = command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT');
 

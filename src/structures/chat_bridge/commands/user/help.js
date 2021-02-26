@@ -82,7 +82,7 @@ module.exports = class MyCommand extends IngameCommand {
 		}
 
 		if (command.description) reply.push(command.description);
-		if (command.usage) reply.push(`Usage: ${config.get('PREFIX')}${command.aliases?.[0] ?? command.name} ${command.usage}`);
+		if (command.usage) reply.push(`Usage: ${command.usageInfo}`);
 
 		reply.push(`Cooldown: ${ms((command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 

@@ -137,7 +137,7 @@ module.exports = async (client, message) => {
 		const reply = [];
 
 		reply.push(`the \`${command.name}\` command has mandatory arguments.`);
-		if (command.usage) reply.push(`\nUse: \`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage}`);
+		if (command.usage) reply.push(`\nUse: ${command.usageInfo}`);
 
 		logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} without providing the mandatory arguments`);
 		return message.reply(reply);

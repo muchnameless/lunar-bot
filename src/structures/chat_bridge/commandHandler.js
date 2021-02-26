@@ -127,10 +127,10 @@ module.exports = async (chatBridge, message) => {
 		const reply = [];
 
 		reply.push(`the '${command.name}' command has mandatory arguments`);
-		if (command.usage) reply.push(`\nUse: \`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage}`);
+		if (command.usage) reply.push(`\nUse: ${command.usageInfo}`);
 
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' without providing the mandatory arguments`);
-		return message.reply(reply);
+		return message.reply(reply.join('; \n'));
 	}
 
 	// execute command
