@@ -20,7 +20,7 @@ module.exports = class MyCommand extends IngameCommand {
 	 * @param {import('../../ChatBridge')} chatBridge
 	 * @param {import('../../../LunarClient')} client
 	 * @param {import('../../../database/ConfigHandler')} config
-	 * @param {import('../../../extensions/Message')} message message that triggered the command
+	 * @param {import('../../HypixelMessage')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
