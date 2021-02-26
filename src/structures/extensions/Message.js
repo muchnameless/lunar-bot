@@ -16,6 +16,13 @@ class LunarMessage extends Message {
 	}
 
 	/**
+	 * wether the command was send by a non-bot user account
+	 */
+	get isUserMessage() {
+		return !this.author.bot && !this.webhookID && !this.system;
+	}
+
+	/**
 	 * scans the message.content for a 'channel' flag
 	 */
 	get shouldReplyInSameChannel() {
