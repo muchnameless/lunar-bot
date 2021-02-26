@@ -2,7 +2,7 @@
 
 const ms = require('ms');
 const logger = require('../../../functions/logger');
-// const commandHandler = require('../commandHandler');
+const commandHandler = require('../commandHandler');
 
 
 /**
@@ -35,7 +35,7 @@ module.exports = async (chatBridge, message) => {
 		case 'guild': {
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
 
-			// commandHandler(chatBridge, message);
+			commandHandler(chatBridge, message);
 
 			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: webhook unavailable`);
 
@@ -45,10 +45,10 @@ module.exports = async (chatBridge, message) => {
 		case 'whisper': {
 			if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: whisper from ${message.author.ign}`);
 
+			commandHandler(chatBridge, message);
+
 			// auto 'o/' reply
 			if (/\( ﾟ◡ﾟ\)\/|o\//.test(message.content)) return message.author.send('o/');
-
-			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: webhook unavailable`);
 
 			return;
 		}
