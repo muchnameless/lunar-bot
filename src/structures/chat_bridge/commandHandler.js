@@ -1,6 +1,8 @@
 'use strict';
 
+const { Collection } = require('discord.js');
 const { commaListsOr } = require('common-tags');
+const ms = require('ms');
 const { escapeRegex } = require('../../functions/util');
 const { messageTypes: { GUILD } } = require('../../constants/chatBridge');
 const logger = require('../../functions/logger');
@@ -79,7 +81,7 @@ module.exports = async (chatBridge, message) => {
 			}
 
 			// check for req roles
-			if (!member.roles.cache.some(role => requiredRoles.includes(role.id))) {
+			if (!member.roles.cache.some((_, roleID) => requiredRoles.includes(roleID))) {
 				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in '${message.type}' without a required role`);
 				return message.reply(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}) from the Lunar Guard Discord Server`);
 			}
@@ -95,6 +97,27 @@ module.exports = async (chatBridge, message) => {
 			logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is an owner only command`);
 			return message.reply(`the '${command.name}' command is only for the bot owners`);
 		}
+
+		// command cooldowns
+		if	(!client.commands.cooldowns.has(command.name)) client.commands.cooldowns.set(command.name, new Collection());
+
+		const NOW = Date.now();
+		const timestamps = client.commands.cooldowns.get(command.name);
+		const COOLDOWN_TIME = (command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1000;
+
+		if (timestamps.has(message.author.ign)) {
+			const expirationTime = timestamps.get(message.author.ign) + COOLDOWN_TIME;
+
+			if (NOW < expirationTime) {
+				const timeLeft = ms(expirationTime - NOW, { long: true });
+
+				logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${timeLeft} before the cooldown expires`);
+				return message.reply(`'${command.name}' is on cooldown for another ${timeLeft}`);
+			}
+		}
+
+		timestamps.set(message.author.ign, NOW);
+		setTimeout(() => timestamps.delete(message.author.ign), COOLDOWN_TIME);
 	}
 
 	// argument handling
