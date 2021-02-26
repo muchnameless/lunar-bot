@@ -47,7 +47,7 @@ module.exports = async (client, message) => {
 	// no command, only ping or prefix
 	if (!COMMAND_NAME.length) {
 		logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} which is not a valid command`);
-		return client.commands.help(message, args, flags).catch(logger.error);
+		return client.commands.help(client, client.config, message, args, flags).catch(logger.error);
 	}
 
 	if (config.getArray('REPLY_CONFIRMATION').includes(COMMAND_NAME)) return;
@@ -99,7 +99,7 @@ module.exports = async (client, message) => {
 			// guild role is always a req for higher commands
 			if (!member.roles.cache.has(config.get('GUILD_ROLE_ID'))) {
 				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} without being in the guild`);
-				return message.reply(`the \`${command.name}\` command requires you to have the ${lgGuild.roles.cache.get(config.get('GUILD_ROLE_ID'))?.name ?? config.get('GUILD_ROLE_ID')} role ${message.guild?.id === lgGuild.id ? '' : 'from the Lunar Guard Discord Server '}.`);
+				return message.reply(`the \`${command.name}\` command requires you to have the ${lgGuild.roles.cache.get(config.get('GUILD_ROLE_ID'))?.name ?? config.get('GUILD_ROLE_ID')} role ${message.guild?.id === lgGuild.id ? '' : 'from the Lunar Guard Discord Server'}.`);
 			}
 
 		// prevent from executing owner only command
