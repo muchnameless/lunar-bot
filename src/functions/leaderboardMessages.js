@@ -507,7 +507,8 @@ const self = module.exports = {
 					zombie: 'Revenant',
 					spider: 'Tarantula',
 					wolf: 'Sven',
-				}[type] ?? upperCaseFirstChar(type)} XP Leaderboard`);
+					guild: 'Guild',
+				}[type]} XP Leaderboard`);
 				const XP_ARGUMENT = `${type}Xp${offset}`;
 				dataConverter = player => ({
 					ign: player.ign,
