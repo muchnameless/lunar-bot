@@ -19,7 +19,7 @@ module.exports = async (client, message) => {
 		return logger.error('error while fetching partial message:\n', error);
 	}
 
-	if (message.author.bot || message.system || message.webhookID || !message.content) return; // filter out bot, system & webhook messages
+	if (!message.isUserMessage || !message.content) return; // filter out bot, system & webhook and empty (attachments, embeds) messages
 
 	const { config } = client;
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').exec(message.content); // PREFIX, @mention, no prefix
