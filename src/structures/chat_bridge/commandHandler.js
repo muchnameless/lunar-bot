@@ -21,7 +21,7 @@ module.exports = async (chatBridge, message) => {
 	if (message.type === 'guild' && !prefixMatched) return;
 
 	// command, args, flags
-	const rawArgs = message.content.slice(prefixMatched[0].length).trim().split(/ +/); // command arguments
+	const rawArgs = message.content.slice(prefixMatched?.[0].length ?? 0).trim().split(/ +/); // command arguments
 	const COMMAND_NAME = rawArgs.shift().toLowerCase(); // extract first word
 	const args = [];
 	const flags = [];
