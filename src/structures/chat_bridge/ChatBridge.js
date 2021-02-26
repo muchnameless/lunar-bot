@@ -16,7 +16,7 @@ const MessageCollector = require('./MessageCollector');
 const logger = require('../../functions/logger');
 
 /**
- * @typedef {MessageCollectorOptions} AwaitMessagesOptions
+ * @typedef {MessageCollector.MessageCollectorOptions} AwaitMessagesOptions
  * @property {?string[]} [errors] Stop/end reasons that cause the promise to reject
  */
 
@@ -423,7 +423,7 @@ class ChatBridge extends EventEmitter {
 	 * promisified MessageCollector
 	 * @param {import('./MessageCollector').CollectorFilter} filter
 	 * @param {AwaitMessagesOptions} options
-	 * @returns {Promise<import('./MessageCollector').CollectedMessage[]>}
+	 * @returns {Promise<import('./HypixelMessage')[]>}
 	 */
 	awaitMessages(filter, options = {}) {
 		return new Promise((resolve, reject) => {
