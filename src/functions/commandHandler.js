@@ -22,10 +22,10 @@ module.exports = async (client, message) => {
 	if (message.author.bot || message.system || message.webhookID || !message.content) return; // filter out bot, system & webhook messages
 
 	const { config } = client;
-	const [ MATCHED_PREFIX ] = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), `<@!?${client.user.id}>`, '' ].join('|')})`, 'i').exec(message.content); // PREFIX, @mention, no prefix
+	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').exec(message.content); // PREFIX, @mention, no prefix
 
 	// must use prefix for commands in guild
-	if (message.guild && !MATCHED_PREFIX.length) {
+	if (message.guild && !prefixMatched) {
 		// channel-specific triggers
 		if (await client.hypixelGuilds.cache.find(hGuild => hGuild.chatBridgeChannelID === message.channel.id)?.handleChatBridgeMessage(message)) return;
 		if (await client.hypixelGuilds.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message)) return;
@@ -34,7 +34,7 @@ module.exports = async (client, message) => {
 	}
 
 	// command, args, flags
-	const rawArgs = message.content.slice(MATCHED_PREFIX.length).trim().split(/ +/); // command arguments
+	const rawArgs = message.content.slice(prefixMatched?.[0].length ?? 0).trim().split(/ +/); // command arguments
 	const COMMAND_NAME = rawArgs.shift().toLowerCase(); // extract first word
 	const args = [];
 	const flags = [];
