@@ -52,7 +52,7 @@ module.exports = async (chatBridge, message) => {
 	// server only command in DMs
 	if (command.guildOnly && message.type !== GUILD) {
 		logger.info(`${message.author.tag} tried to execute '${message.content}' in whispers which is a guild-chat-only command`);
-		return message.reply(`the '${command.name}' command can only be executed in guild chat.`);
+		return message.reply(`the '${command.name}' command can only be executed in guild chat`);
 	}
 
 	const player = message.player;
@@ -68,32 +68,32 @@ module.exports = async (chatBridge, message) => {
 
 			if (!lgGuild) {
 				logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' with the Lunar Guard Discord server being unreachable`);
-				return message.reply(commaListsOr`the '${command.name}' command requires a role (${requiredRoles}) from the Lunar Guard Discord server which is unreachable at the moment.`);
+				return message.reply(commaListsOr`the '${command.name}' command requires a role (${requiredRoles}) from the Lunar Guard Discord server which is unreachable at the moment`);
 			}
 
 			const member = await player?.discordMember;
 
 			if (!member) {
 				logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' and could not be found within the Lunar Guard Discord Server`);
-				return message.reply(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}) from the ${lgGuild.name} Discord server which you can not be found in.`);
+				return message.reply(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}) from the ${lgGuild.name} Discord server which you can not be found in`);
 			}
 
 			// check for req roles
 			if (!member.roles.cache.some(role => requiredRoles.includes(role.id))) {
 				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in '${message.type}' without a required role`);
-				return message.reply(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}) from the Lunar Guard Discord Server.`);
+				return message.reply(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}) from the Lunar Guard Discord Server`);
 			}
 
 			// guild role is always a req for higher commands
 			if (!member.roles.cache.has(config.get('GUILD_ROLE_ID'))) {
 				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in '${message.type}' without being in the guild`);
-				return message.reply(`the '${command.name}' command requires you to have the ${lgGuild.roles.cache.get(config.get('GUILD_ROLE_ID'))?.name ?? config.get('GUILD_ROLE_ID')} role from the Lunar Guard Discord Server.`);
+				return message.reply(`the '${command.name}' command requires you to have the ${lgGuild.roles.cache.get(config.get('GUILD_ROLE_ID'))?.name ?? config.get('GUILD_ROLE_ID')} role from the Lunar Guard Discord Server`);
 			}
 
 		// prevent from executing owner only command
 		} else if (command.category === 'owner') {
 			logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is an owner only command`);
-			return message.reply(`the '${command.name}' command is only for the bot owners.`);
+			return message.reply(`the '${command.name}' command is only for the bot owners`);
 		}
 	}
 
@@ -101,7 +101,7 @@ module.exports = async (chatBridge, message) => {
 	if (command.args && !args.length) {
 		const reply = [];
 
-		reply.push(`the '${command.name}' command has mandatory arguments.`);
+		reply.push(`the '${command.name}' command has mandatory arguments`);
 		if (command.usage) reply.push(`\nUse: \`${config.get('PREFIX')}${command.aliases?.[0] ?? command.name}\` ${command.usage}`);
 
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' without providing the mandatory arguments`);
