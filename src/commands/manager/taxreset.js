@@ -104,12 +104,12 @@ module.exports = class TaxResetCommand extends Command {
 
 			// update database
 			await Promise.all([
-				...taxCollectors.cache.map(async taxCollector => { // remove retired collectors
-					if (taxCollector.isCollecting) {
-						taxCollector.resetAmount('tax');
-					} else {
-						taxCollector.remove();
-					}
+				...taxCollectors.cache.map(async taxCollector => { // remove retired collectors and reset active ones
+					if (!taxCollector.isCollecting) return taxCollector.remove();
+					return Promise.all([
+						taxCollector.resetAmount('tax'),
+						taxCollector.resetAmount('donation'),
+					]);
 				}),
 				client.db.Sequelize.Model.update.call(players.model, // reset players that left
 					{ paid: false },
