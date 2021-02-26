@@ -2,27 +2,32 @@
 
 const { Client, Collection, Constants } = require('discord.js');
 const { CronJob } = require('cron');
-const path = require('path');
+const { join, basename } = require('path');
 const { getAllJsFiles } = require('../functions/files');
 const DatabaseHandler = require('./database/DatabaseHandler');
 const LogHandler = require('./LogHandler');
-const ChatBridge = require('./chat_bridge/ChatBridge');
+const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const CommandCollection = require('./commands/CommandCollection');
 const logger = require('../functions/logger');
 
 
+/**
+ * @typedef {import('discord.js').ClientOptions} LunarClientOptions
+ * @property {object} db
+ */
+
 class LunarClient extends Client {
+	/**
+	 * @param {LunarClientOptions} options
+	 */
 	constructor(options = {}) {
 		super(options);
 
 		this.ownerID = process.env.OWNER ?? null;
 		this.db = new DatabaseHandler({ client: this, db: options.db });
 		this.logHandler = new LogHandler(this);
-		/**
-		 * @type {ChatBridge[]}
-		 */
-		this.chatBridges = [];
-		this.commands = new CommandCollection(this);
+		this.chatBridges = new ChatBridgeArray(this);
+		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'));
 		this.cooldowns = new Collection();
 	}
 
@@ -81,6 +86,7 @@ class LunarClient extends Client {
 
 	/**
 	 * the main chatBridge
+	 * @returns {import('./chat_bridge/ChatBridge')}
 	 */
 	get chatBridge() {
 		return this.chatBridges[0];
@@ -219,15 +225,7 @@ class LunarClient extends Client {
 		}));
 
 		// chatBridges
-		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) {
-			// instantiate chatBridges
-			for (let i = 0; i < process.env.MINECRAFT_ACCOUNT_TYPE.split(' ').length; ++i) {
-				this.chatBridges.push(new ChatBridge(this, i));
-			}
-
-			// connect chatBridges
-			await Promise.all(this.chatBridges.map(async chatBridge => chatBridge.connect()));
-		}
+		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.chatBridges.connect();
 
 		// log ready
 		logger.debug(`[READY]: startup complete. ${cronJobs.size} CronJobs running. Logging webhook available: ${this.logHandler.webhookAvailable}`);
@@ -248,11 +246,11 @@ class LunarClient extends Client {
 	 * loads all event-callbacks and binds them to their respective events
 	 */
 	async _loadEvents() {
-		const eventFiles = await getAllJsFiles(path.join(__dirname, '..', 'events'));
+		const eventFiles = await getAllJsFiles(join(__dirname, '..', 'events'));
 
 		for (const file of eventFiles) {
 			const event = require(file);
-			const EVENT_NAME = path.basename(file, '.js');
+			const EVENT_NAME = basename(file, '.js');
 
 			this.on(EVENT_NAME, event.bind(null, this));
 
