@@ -34,7 +34,7 @@ module.exports = async (chatBridge, message) => {
 	// no command, only ping or prefix
 	if (!COMMAND_NAME.length) {
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
-		return client.chatBridges.commands.help(chatBridge, client, client.config, message, args, flags).catch(logger.error);
+		return client.chatBridges.commands.help(client, config, message, args, flags).catch(logger.error);
 	}
 
 	const command = client.chatBridges.commands.getByName(COMMAND_NAME);
