@@ -1,20 +1,20 @@
 'use strict';
 
 const { CronJob } = require('cron');
-const ModelHandler = require('./ModelHandler');
-const logger = require('../../functions/logger');
+const ModelManager = require('./ModelManager');
+const logger = require('../../../functions/logger');
 
 
-class CronJobHandler extends ModelHandler {
+class CronJobManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('./models/CronJob')}
+		 * @type {import('discord.js').Collection<string, import('../models/CronJob')}
 		 */
 		this.cache;
 		/**
-		 * @type {import('./models/CronJob')}
+		 * @type {import('../models/CronJob')}
 		 */
 		this.model;
 	}
@@ -24,7 +24,7 @@ class CronJobHandler extends ModelHandler {
 	 * @param {object} param0
 	 * @param {string} param0.name
 	 * @param {Date} param0.date
-	 * @param {import('../commands/Command')} param0.command
+	 * @param {import('../../commands/Command')} param0.command
 	 * @param {string} param0.authorID
 	 * @param {string} param0.messageID
 	 * @param {string} param0.channelID
@@ -59,7 +59,7 @@ class CronJobHandler extends ModelHandler {
 
 	/**
 	 * stops and removes a cronJob
-	 * @param {string|import('./models/CronJob')} instanceOrId
+	 * @param {string|import('../models/CronJob')} instanceOrId
 	 */
 	async remove(instanceOrId) {
 		const cronJob = this.resolve(instanceOrId);
@@ -81,4 +81,4 @@ class CronJobHandler extends ModelHandler {
 	}
 }
 
-module.exports = CronJobHandler;
+module.exports = CronJobManager;

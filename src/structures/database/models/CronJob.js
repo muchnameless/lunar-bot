@@ -1,11 +1,11 @@
 'use strict';
 
-const { Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const LunarMessage = require('../../extensions/Message');
 const logger = require('../../../functions/logger');
 
 
-class CronJob extends Model {
+module.exports = class CronJob extends Model {
 	constructor(...args) {
 		super(...args);
 
@@ -48,12 +48,47 @@ class CronJob extends Model {
 	}
 
 	/**
-	 * Helper method for defining associations.
-	 * This method is not a part of Sequelize lifecycle.
-	 * The `models/index` file will call this method automatically.
+	 * @param {import('sequelize')} sequelize
 	 */
-	static associate(models) {
-		// define associations here
+	static init(sequelize) {
+		return super.init({
+			name: {
+				type: DataTypes.TEXT,
+				primaryKey: true,
+			},
+			date: {
+				type: DataTypes.BIGINT,
+				allowNull: false,
+			},
+			command: {
+				type: DataTypes.TEXT,
+				allowNull: false,
+			},
+			authorID: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			messageID: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			channelID: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			args: {
+				type: DataTypes.TEXT,
+				allowNull: true,
+			},
+			flags: {
+				type: DataTypes.TEXT,
+				allowNull: true,
+			},
+		}, {
+			sequelize,
+			modelName: 'CronJob',
+			timestamps: false,
+		});
 	}
 
 	/**
@@ -97,6 +132,4 @@ class CronJob extends Model {
 			start: true,
 		}));
 	}
-}
-
-module.exports = CronJob;
+};

@@ -65,7 +65,7 @@ const self = module.exports = {
 
 	/**
 	 * autocorrect an offset-flag using short names
-	 * @param {import('../../structures/database/ConfigHandler')} config the bot's config
+	 * @param {import('../../structures/database/managers/ConfigManager')} config the bot's config
 	 * @param {string[]} flags message flags
 	 * @returns {string}
 	 */

@@ -42,7 +42,7 @@ module.exports = class EvalCommand extends Command {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/ConfigHandler')} config
+	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags

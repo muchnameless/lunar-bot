@@ -1,13 +1,13 @@
 'use strict';
 
 const { Collection } = require('discord.js');
-const logger = require('../../functions/logger');
+const logger = require('../../../functions/logger');
 
 
-class ModelHandler {
+class ModelManager {
 	/**
 	 * @param {object} param0
-	 * @param {import('../LunarClient')} param0.client
+	 * @param {import('../../LunarClient')} param0.client
 	 * @param {import('sequelize').Model} param0.model
 	 */
 	constructor({ client, model }) {
@@ -93,4 +93,4 @@ class ModelHandler {
 	}
 }
 
-module.exports = ModelHandler;
+module.exports = ModelManager;

@@ -1,9 +1,9 @@
 'use strict';
 
-const { Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 
 
-class Config extends Model {
+module.exports = class Config extends Model {
 	constructor(...args) {
 		super(...args);
 
@@ -22,13 +22,23 @@ class Config extends Model {
 	}
 
 	/**
-	 * Helper method for defining associations.
-	 * This method is not a part of Sequelize lifecycle.
-	 * The `models/index` file will call this method automatically.
+	 * @param {import('sequelize')} sequelize
 	 */
-	static associate(models) {
-		// define associations here
+	static init(sequelize) {
+		return super.init({
+			key: {
+				type: DataTypes.STRING,
+				primaryKey: true,
+			},
+			value: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+		}, {
+			sequelize,
+			modelName: 'Config',
+			timestamps: false,
+			freezeTableName: true,
+		});
 	}
-}
-
-module.exports = Config;
+};

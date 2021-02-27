@@ -1,9 +1,9 @@
 'use strict';
 
-const { Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 
 
-class Transaction extends Model {
+module.exports = class Transaction extends Model {
 	constructor(...args) {
 		super(...args);
 
@@ -14,13 +14,41 @@ class Transaction extends Model {
 	}
 
 	/**
-	 * Helper method for defining associations.
-	 * This method is not a part of Sequelize lifecycle.
-	 * The `models/index` file will call this method automatically.
+	 * @param {import('sequelize')} sequelize
 	 */
-	static associate(models) {
-		// define associations here
+	static init(sequelize) {
+		return super.init({
+			from: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			to: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			amount: {
+				type: DataTypes.BIGINT,
+				defaultValue: 0,
+				allowNull: false,
+			},
+			auctionID: { // hypixel api auction uuid
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			notes: {
+				type: DataTypes.TEXT,
+				defaultValue: null,
+				allowNull: true,
+			},
+			type: {
+				type: DataTypes.ENUM([ 'tax', 'donation' ]),
+				defaultValue: 'tax',
+				allowNull: false,
+			},
+		}, {
+			sequelize,
+			modelName: 'Transaction',
+		});
 	}
-}
-
-module.exports = Transaction;
+};

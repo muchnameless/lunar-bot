@@ -1,21 +1,21 @@
 'use strict';
 
-const { GUILD_ID_BRIDGER, GUILD_ID_ERROR } = require('../../constants/database');
-const { autocorrect } = require('../../functions/util');
-const ModelHandler = require('./ModelHandler');
-const logger = require('../../functions/logger');
+const { GUILD_ID_BRIDGER, GUILD_ID_ERROR } = require('../../../constants/database');
+const { autocorrect } = require('../../../functions/util');
+const ModelManager = require('./ModelManager');
+const logger = require('../../../functions/logger');
 
 
-class HypixelGuildHandler extends ModelHandler {
+class HypixelGuildManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('./models/HypixelGuild')}
+		 * @type {import('discord.js').Collection<string, import('../models/HypixelGuild')}
 		 */
 		this.cache;
 		/**
-		 * @type {import('./models/HypixelGuild')}
+		 * @type {import('../models/HypixelGuild')}
 		 */
 		this.model;
 	}
@@ -59,7 +59,7 @@ class HypixelGuildHandler extends ModelHandler {
 
 	/**
 	 * sweeps the player cache
-	 * @param {?string|import('./models/HypixelGuild')} idOrGuild
+	 * @param {?string|import('../models/HypixelGuild')} idOrGuild
 	 */
 	sweepPlayerCache(idOrGuild) {
 		if (idOrGuild) {
@@ -78,7 +78,7 @@ class HypixelGuildHandler extends ModelHandler {
 	/**
 	 * get a hypixel guild by its name, case insensitive and with auto-correction
 	 * @param {string} name name of the hypixel guild
-	 * @returns {?import('./models/HypixelGuild')}
+	 * @returns {?import('../models/HypixelGuild')}
 	 */
 	getByName(name) {
 		if (!name) return null;
@@ -93,7 +93,7 @@ class HypixelGuildHandler extends ModelHandler {
 	/**
 	 * autocorrect all flags to the hypixel guilds names and returns the most likely math or null, or 'false' for the 'all'-flag
 	 * @param {string[]} array message flags
-	 * @returns {?import('./models/HypixelGuild')|boolean}
+	 * @returns {?import('../models/HypixelGuild')|boolean}
 	 */
 	getFromArray(array) {
 		for (const element of array) {
@@ -126,4 +126,4 @@ class HypixelGuildHandler extends ModelHandler {
 	}
 }
 
-module.exports = HypixelGuildHandler;
+module.exports = HypixelGuildManager;

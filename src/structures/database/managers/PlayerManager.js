@@ -2,23 +2,23 @@
 
 const { MessageEmbed } = require('discord.js');
 const { CronJob } = require('cron');
-const { MAYOR_CHANGE_INTERVAL } = require('../../constants/skyblock');
-const { offsetFlags } = require('../../constants/database');
-const { autocorrect, getWeekOfYear } = require('../../functions/util');
-const ModelHandler = require('./ModelHandler');
-const logger = require('../../functions/logger');
+const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
+const { offsetFlags } = require('../../../constants/database');
+const { autocorrect, getWeekOfYear } = require('../../../functions/util');
+const ModelManager = require('./ModelManager');
+const logger = require('../../../functions/logger');
 
 
-class PlayerHandler extends ModelHandler {
+class PlayerManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('./models/Player')>}
+		 * @type {import('discord.js').Collection<string, import('../models/Player')>}
 		 */
 		this.cache;
 		/**
-		 * @type {import('./models/Player')}
+		 * @type {import('../models/Player')}
 		 */
 		this.model;
 	}
@@ -53,7 +53,7 @@ class PlayerHandler extends ModelHandler {
 	/**
 	 * add a player to the cache and sweep the player's hypixelGuild's player cache
 	 * @param {string} key
-	 * @param {import('./models/Player')} value
+	 * @param {import('../models/Player')} value
 	 */
 	set(key, value) {
 		this.client.hypixelGuilds.sweepPlayerCache(value.guildID);
@@ -63,7 +63,7 @@ class PlayerHandler extends ModelHandler {
 
 	/**
 	 * delete a player from the cache and sweep the player's hypixelGuild's player cache
-	 * @param {string|import('./models/Player')} idOrPlayer
+	 * @param {string|import('../models/Player')} idOrPlayer
 	 */
 	delete(idOrPlayer) {
 		const player = this.resolve(idOrPlayer);
@@ -155,7 +155,7 @@ class PlayerHandler extends ModelHandler {
 	/**
 	 * get a player by their IGN, case insensitive and with auto-correction
 	 * @param {string} ign ign of the player
-	 * @returns {?import('./models/Player')}
+	 * @returns {?import('../models/Player')}
 	 */
 	getByIGN(ign) {
 		if (!ign) return null;
@@ -170,7 +170,7 @@ class PlayerHandler extends ModelHandler {
 	/**
 	 * get a player by their discord ID
 	 * @param {string} id discord id of the player
-	 * @returns {?import('./models/Player')}
+	 * @returns {?import('.../models/Player')}
 	 */
 	getByID(id) {
 		if (!id) return null;
@@ -392,4 +392,4 @@ class PlayerHandler extends ModelHandler {
 	}
 }
 
-module.exports = PlayerHandler;
+module.exports = PlayerManager;

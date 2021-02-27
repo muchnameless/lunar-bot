@@ -1,9 +1,9 @@
 'use strict';
 
-const { Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 
 
-class TaxCollector extends Model {
+module.exports = class TaxCollector extends Model {
 	constructor(...args) {
 		super(...args);
 
@@ -30,12 +30,33 @@ class TaxCollector extends Model {
 	}
 
 	/**
-	 * Helper method for defining associations.
-	 * This method is not a part of Sequelize lifecycle.
-	 * The `models/index` file will call this method automatically.
+	 * @param {import('sequelize')} sequelize
 	 */
-	static associate(models) {
-		// define associations here
+	static init(sequelize) {
+		return super.init({
+			minecraftUUID: {
+				type: DataTypes.STRING,
+				primaryKey: true,
+			},
+			isCollecting: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: true,
+				allowNull: false,
+			},
+			collectedTax: {
+				type: DataTypes.BIGINT,
+				defaultValue: 0,
+				allowNull: false,
+			},
+			collectedDonations: {
+				type: DataTypes.BIGINT,
+				defaultValue: 0,
+				allowNull: false,
+			},
+		}, {
+			sequelize,
+			modelName: 'TaxCollector',
+		});
 	}
 
 	get player() {
@@ -98,6 +119,4 @@ class TaxCollector extends Model {
 	async update() {
 		throw new Error('WIP');
 	}
-}
-
-module.exports = TaxCollector;
+};

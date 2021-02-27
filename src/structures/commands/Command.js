@@ -100,7 +100,7 @@ class Command {
 	/**
 	 * execute the command
 	 * @param {import('../LunarClient')} client
-	 * @param {import('../database/ConfigHandler')} config
+	 * @param {import('../database/managers/ConfigManager')} config
 	 * @param {import('../extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags

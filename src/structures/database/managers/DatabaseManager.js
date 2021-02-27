@@ -4,37 +4,37 @@ const { CronJob: CronJobConstructor } = require('cron');
 const { stripIndents, commaLists } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
 const _ = require('lodash');
-const { X_EMOJI, Y_EMOJI_ALT } = require('../../constants/emojiCharacters');
-const { asyncFilter } = require('../../functions/util');
-const hypixel = require('../../api/hypixel');
-const ConfigHandler = require('./ConfigHandler');
-const CronJobHandler = require('./CronJobHandler');
-const HypixelGuildHandler = require('./HypixelGuildHandler');
-const PlayerHandler = require('./PlayerHandler');
-const TaxCollectorHandler = require('./TaxCollectorHandler');
-const Config = require('./models/Config');
-const CronJob = require('./models/CronJob');
-const HypixelGuild = require('./models/HypixelGuild');
-const Player = require('./models/Player');
-const TaxCollector = require('./models/TaxCollector');
-const logger = require('../../functions/logger');
+const { X_EMOJI, Y_EMOJI_ALT } = require('../../../constants/emojiCharacters');
+const { asyncFilter } = require('../../../functions/util');
+const hypixel = require('../../../api/hypixel');
+const ConfigManager = require('./ConfigManager');
+const CronJobManager = require('./CronJobManager');
+const HypixelGuildManager = require('./HypixelGuildManager');
+const PlayerManager = require('./PlayerManager');
+const TaxCollectorManager = require('./TaxCollectorManager');
+const Config = require('../models/Config');
+const CronJob = require('../models/CronJob');
+const HypixelGuild = require('../models/HypixelGuild');
+const Player = require('../models/Player');
+const TaxCollector = require('../models/TaxCollector');
+const logger = require('../../../functions/logger');
 
 
-class DatabaseHandler {
+class DatabaseManager {
 	/**
 	 * @param {object} param0
-	 * @param {import('../LunarClient')} param0.client
+	 * @param {import('../../LunarClient')} param0.client
 	 * @param {object} db
 	 */
 	constructor({ client, db }) {
 		this.client = client;
 
-		this.handlers = {
-			config: new ConfigHandler({ client, model: Config }),
-			cronJobs: new CronJobHandler({ client, model: CronJob }),
-			hypixelGuilds: new HypixelGuildHandler({ client, model: HypixelGuild }),
-			players: new PlayerHandler({ client, model: Player }),
-			taxCollectors: new TaxCollectorHandler({ client, model: TaxCollector }),
+		this.modelManagers = {
+			config: new ConfigManager({ client, model: Config }),
+			cronJobs: new CronJobManager({ client, model: CronJob }),
+			hypixelGuilds: new HypixelGuildManager({ client, model: HypixelGuild }),
+			players: new PlayerManager({ client, model: Player }),
+			taxCollectors: new TaxCollectorManager({ client, model: TaxCollector }),
 		};
 
 		const models = {};
@@ -55,7 +55,7 @@ class DatabaseHandler {
 	 * update player database and tax message every x min starting at the full hour
 	 */
 	schedule() {
-		const { config } = this.handlers;
+		const { config } = this.modelManagers;
 
 		this.client.schedule('updatePlayerDatabase', new CronJobConstructor({
 			cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
@@ -63,7 +63,7 @@ class DatabaseHandler {
 			start: true,
 		}));
 
-		this.handlers.players.scheduleXpResets();
+		this.modelManagers.players.scheduleXpResets();
 	}
 
 	/**
@@ -71,7 +71,7 @@ class DatabaseHandler {
 	 */
 	async loadCache() {
 		return Promise.all(
-			Object.values(this.handlers).map(async handler => handler.loadCache()),
+			Object.values(this.modelManagers).map(async handler => handler.loadCache()),
 		);
 	}
 
@@ -79,7 +79,7 @@ class DatabaseHandler {
 	 * sweeps all db caches
 	 */
 	sweepCache() {
-		for (const handler of Object.values(this.handlers)) {
+		for (const handler of Object.values(this.modelManagers)) {
 			handler.sweepCache();
 		}
 	}
@@ -106,7 +106,7 @@ class DatabaseHandler {
 	 * @returns {Promise<string[]>}
 	 */
 	async _updateTaxDatabase() {
-		const { config, players, taxCollectors } = this.handlers;
+		const { config, players, taxCollectors } = this.modelManagers;
 		const TAX_AUCTIONS_START_TIME = config.getNumber('TAX_AUCTIONS_START_TIME');
 		const TAX_AMOUNT = config.getNumber('TAX_AMOUNT');
 		const TAX_AUCTIONS_ITEMS = config.getArray('TAX_AUCTIONS_ITEMS');
@@ -191,7 +191,7 @@ class DatabaseHandler {
 	 * @param {?string[]} availableAuctionsLog
 	 */
 	createTaxEmbed(availableAuctionsLog = null) {
-		const { config, hypixelGuilds, players, taxCollectors } = this.handlers;
+		const { config, hypixelGuilds, players, taxCollectors } = this.modelManagers;
 		const activeTaxCollectors = taxCollectors.activeCollectors; // eslint-disable-line no-shadow
 		const playersInGuild = players.inGuild;
 		const PLAYER_COUNT = playersInGuild.size;
@@ -250,10 +250,10 @@ class DatabaseHandler {
 
 	/**
 	 * updates the player database and the corresponding tax message
-	 * @param {import('../structures/LunarClient')} client
+	 * @param {import('../../LunarClient')} client
 	 */
 	async update() {
-		const { config, players } = this.handlers;
+		const { config, players } = this.modelManagers;
 
 		// update player db
 		await this.client.hypixelGuilds.update();
@@ -293,4 +293,4 @@ class DatabaseHandler {
 	}
 }
 
-module.exports = DatabaseHandler;
+module.exports = DatabaseManager;

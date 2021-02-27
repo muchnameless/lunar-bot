@@ -1,19 +1,19 @@
 'use strict';
 
-const ModelHandler = require('./ModelHandler');
-const logger = require('../../functions/logger');
+const ModelManager = require('./ModelManager');
+const logger = require('../../../functions/logger');
 
 
-class ConfigHandler extends ModelHandler {
+class ConfigManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('./models/Config')}
+		 * @type {import('discord.js').Collection<string, import('../models/Config')}
 		 */
 		this.cache;
 		/**
-		 * @type {import('./models/Config')}
+		 * @type {import('../models/Config')}
 		 */
 		this.model;
 	}
@@ -89,4 +89,4 @@ class ConfigHandler extends ModelHandler {
 	}
 }
 
-module.exports = ConfigHandler;
+module.exports = ConfigManager;

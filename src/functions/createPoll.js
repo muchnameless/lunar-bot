@@ -1,6 +1,7 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
+const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { messageTypes: { GUILD, WHISPER } } = require('../constants/chatBridge');
 const { upperCaseFirstChar } = require('./util');
@@ -42,7 +43,11 @@ module.exports = async (chatBridge, message, args, ign) => {
 	);
 
 	// post message to both chats
-	chatBridge.broadcast(`poll by ${ign}: type a number to vote\n${question}\n${options.map(({ option }, index) => `${index + 1}: ${option}`).join('\n')}`);
+	chatBridge.broadcast(stripIndents`
+		poll by ${ign}: type a number to vote
+		${question}
+		${options.map(({ option }, index) => `${index + 1}: ${option}`).join('\n')}
+	`);
 
 	// aquire ingame votes
 	for (const msg of await ingameMessages) {

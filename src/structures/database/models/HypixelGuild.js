@@ -1,6 +1,6 @@
 'use strict';
 
-const { Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
 const ms = require('ms');
 const { autocorrect, getHypixelClient } = require('../../../functions/util');
@@ -19,7 +19,7 @@ const logger = require('../../../functions/logger');
  */
 
 
-class HypixelGuild extends Model {
+module.exports = class HypixelGuild extends Model {
 	constructor(...args) {
 		super(...args);
 
@@ -74,12 +74,58 @@ class HypixelGuild extends Model {
 	}
 
 	/**
-	 * Helper method for defining associations.
-	 * This method is not a part of Sequelize lifecycle.
-	 * The `models/index` file will call this method automatically.
+	 * @param {import('sequelize')} sequelize
 	 */
-	static associate(models) {
-		// define associations here
+	static init(sequelize) {
+		return super.init({
+			guildID: {
+				type: DataTypes.STRING,
+				primaryKey: true,
+			},
+			roleID: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			name: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			weightReq: {
+				type: DataTypes.INTEGER,
+				defaultValue: 0,
+				allowNull: true,
+			},
+			chatBridgeEnabled: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: true,
+				allowNull: false,
+			},
+			chatMutedUntil: {
+				type: DataTypes.BIGINT,
+				defaultValue: 0,
+				allowNull: false,
+			},
+			chatBridgeChannelID: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			rankRequestChannelID: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			ranks: {
+				type: DataTypes.ARRAY(DataTypes.JSONB), // { name: string, priority: int, weightReq: int, roleID: string }
+				defaultValue: null,
+				allowNull: true,
+			},
+		}, {
+			sequelize,
+			modelName: 'HypixelGuild',
+			timestamps: false,
+		});
 	}
 
 	set players(value) {
@@ -555,6 +601,4 @@ class HypixelGuild extends Model {
 			message.reactSafely(X_EMOJI);
 		}
 	}
-}
-
-module.exports = HypixelGuild;
+};

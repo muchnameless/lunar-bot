@@ -1,7 +1,7 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
-const { Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER } = require('../../../constants/database');
 const { LEVELING_XP, SKILL_XP_PAST_50, SKILLS_CAP, RUNECRAFTING_XP, DUNGEON_XP, SLAYER_XP, SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../../constants/skyblock');
@@ -12,7 +12,7 @@ const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
 
 
-class Player extends Model {
+module.exports = class Player extends Model {
 	constructor(...args) {
 		super(...args);
 
@@ -92,12 +92,135 @@ class Player extends Model {
 	}
 
 	/**
-	 * Helper method for defining associations.
-	 * This method is not a part of Sequelize lifecycle.
-	 * The `models/index` file will call this method automatically.
+	 * @param {import('sequelize')} sequelize
 	 */
-	static associate(models) {
-		// define associations here
+	static init(sequelize) {
+		const dataObject = {
+			// general information
+			minecraftUUID: {
+				type: DataTypes.STRING,
+				primaryKey: true,
+			},
+			ign: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			discordID: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			guildID: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			guildRankPriority: {
+				type: DataTypes.INTEGER,
+				defaultValue: 0,
+				allowNull: false,
+			},
+			inDiscord: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: false,
+				allowNull: false,
+				set(value) {
+					if (!value) this._discordMember = null;
+					this.setDataValue('inDiscord', value);
+				},
+			},
+			chatBridgeMutedUntil: {
+				type: DataTypes.BIGINT,
+				defaultValue: 0,
+				allowNull: false,
+			},
+			hasDiscordPingPermission: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: true,
+				allowNull: false,
+			},
+			notes: {
+				type: DataTypes.TEXT,
+				defaultValue: null,
+				allowNull: true,
+			},
+
+			// tax stats
+			paid: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: false,
+				allowNull: false,
+			},
+
+			// xp stats reference
+			mainProfileID: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			mainProfileName: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			xpLastUpdatedAt: {
+				type: DataTypes.BIGINT,
+				defaultValue: null,
+				allowNull: true,
+			},
+
+			// Individual Max Lvl Cap
+			farmingLvlCap: {
+				type: DataTypes.INTEGER,
+				defaultValue: 50,
+				allowNull: false,
+			},
+
+			// hypixel guild exp
+			guildXpDay: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+				allowNull: true,
+			},
+			guildXpDaily: {
+				type: DataTypes.INTEGER,
+				defaultValue: 0,
+				allowNull: false,
+			},
+		};
+
+		// add xp types
+		XP_TYPES.forEach(type => {
+			dataObject[`${type}Xp`] = {
+				type: DataTypes.DECIMAL,
+				defaultValue: 0,
+				allowNull: false,
+			};
+
+			dataObject[`${type}XpHistory`] = {
+				type: DataTypes.ARRAY(DataTypes.DECIMAL),
+				defaultValue: new Array(30).fill(0),
+				allowNull: false,
+			};
+
+			XP_OFFSETS.forEach(offset => {
+				dataObject[`${type}Xp${offset}`] = {
+					type: DataTypes.DECIMAL,
+					defaultValue: 0,
+					allowNull: false,
+				};
+			});
+		});
+
+		return super.init(dataObject, {
+			sequelize,
+			modelName: 'Player',
+			indexes: [{ // setting unique down here works with `sync --alter`
+				unique: true,
+				fields: [ 'discordID' ],
+			}],
+		});
 	}
 
 	/**
@@ -149,7 +272,7 @@ class Player extends Model {
 	 * @returns {?import('./HypixelGuild').GuildRank}
 	 */
 	get guildRank() {
-		return this.guild?.ranks.find(rank => rank.priority === this.guildRankPriority) ?? null;
+		return this.guild?.ranks?.find(rank => rank.priority === this.guildRankPriority) ?? null;
 	}
 
 	/**
@@ -1189,6 +1312,4 @@ class Player extends Model {
 	toString() {
 		return this.ign;
 	}
-}
-
-module.exports = Player;
+};

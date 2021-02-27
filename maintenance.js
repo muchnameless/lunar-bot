@@ -3,7 +3,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { Client } = require('discord.js');
 const { escapeRegex } = require('./src/functions/util');
-const db = require('./database/models/index');
+const db = require('./src/structures/database/index');
 const logger = require('./src/functions/logger');
 
 

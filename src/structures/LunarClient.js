@@ -4,7 +4,7 @@ const { Client, Constants } = require('discord.js');
 const { CronJob } = require('cron');
 const { join, basename } = require('path');
 const { getAllJsFiles } = require('../functions/files');
-const DatabaseHandler = require('./database/DatabaseHandler');
+const DatabaseManager = require('./database/managers/DatabaseManager');
 const LogHandler = require('./LogHandler');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const CommandCollection = require('./commands/CommandCollection');
@@ -24,7 +24,7 @@ class LunarClient extends Client {
 		super(options);
 
 		this.ownerID = process.env.OWNER ?? null;
-		this.db = new DatabaseHandler({ client: this, db: options.db });
+		this.db = new DatabaseManager({ client: this, db: options.db });
 		this.logHandler = new LogHandler(this);
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'));
@@ -39,23 +39,23 @@ class LunarClient extends Client {
 	}
 
 	get config() {
-		return this.db.handlers.config;
+		return this.db.modelManagers.config;
 	}
 
 	get cronJobs() {
-		return this.db.handlers.cronJobs;
+		return this.db.modelManagers.cronJobs;
 	}
 
 	get hypixelGuilds() {
-		return this.db.handlers.hypixelGuilds;
+		return this.db.modelManagers.hypixelGuilds;
 	}
 
 	get players() {
-		return this.db.handlers.players;
+		return this.db.modelManagers.players;
 	}
 
 	get taxCollectors() {
-		return this.db.handlers.taxCollectors;
+		return this.db.modelManagers.taxCollectors;
 	}
 
 	/**

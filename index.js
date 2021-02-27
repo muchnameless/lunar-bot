@@ -4,7 +4,7 @@ const { join } = require('path');
 require('dotenv').config({ path: join(__dirname, '.env') });
 const { Constants } = require('discord.js');
 const { requireAll } = require('./src/functions/files');
-const db = require('./database/models/index');
+const db = require('./src/structures/database/index');
 const LunarClient = require('./src/structures/LunarClient');
 const logger = require('./src/functions/logger');
 
