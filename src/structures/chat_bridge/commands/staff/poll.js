@@ -11,7 +11,7 @@ module.exports = class PollCommand extends IngameCommand {
 			aliases: [ 'polls' ],
 			description: 'create a poll for both ingame and discord guild chat',
 			args: false,
-			usage: '<\'time\'> ["option1" "option2" ...]',
+			usage: '<\'time\'> ["question" "option1" "option2" ...]',
 			cooldown: 30,
 		});
 	}
