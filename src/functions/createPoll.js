@@ -33,7 +33,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 
 	const optionsCount = options.length;
 	const ingameMessages = chatBridge.awaitMessages(
-		msg => msg.author.ign !== chatBridge.bot.username && (msg.type === GUILD || msg.type === WHISPER),
+		msg => (msg.type === GUILD || msg.type === WHISPER) && msg.author.ign !== chatBridge.bot.username,
 		{ time: duration },
 	);
 	const discordMessages = chatBridge.channel.awaitMessages(
