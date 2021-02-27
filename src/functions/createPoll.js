@@ -23,13 +23,12 @@ module.exports = async (chatBridge, message, args, ign) => {
 	let options = message.content
 		.slice(startingIndex)
 		.split('"')
-		.map(x => x.trim());
+		.map(x => x.trim())
+		.filter(x => x.length);
 
 	const question = options.shift();
 
-	options = options
-		.filter(x => x.length)
-		.map(x => ({ option: x, votes: new Set() }));
+	options = options.map(x => ({ option: x, votes: new Set() }));
 
 	const optionsCount = options.length;
 	const ingameMessages = chatBridge.awaitMessages(
