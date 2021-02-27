@@ -9,6 +9,7 @@ require('pg').defaults.parseInt8 = true;
 
 const Sequelize = require('sequelize');
 
+// use floats instead of strings as decimal representation (1/2)
 class CustomDecimal extends Sequelize.DataTypes.DECIMAL {
 	static parse(value) {
 		return parseFloat(value);
@@ -18,12 +19,9 @@ class CustomDecimal extends Sequelize.DataTypes.DECIMAL {
 const sequelize = new Sequelize(
 	process.env.DATABASE_URL,
 	{
-		// eslint-disable-next-line camelcase
-		use_env_variable: 'DATABASE_URL',
-
 		logging: false,
 
-		// use floats instead of strings as decimal representation (cleaner way) (2/2)
+		// use floats instead of strings as decimal representation (2/2)
 		hooks: {
 			afterConnect: function() {
 				const dTypes = {
@@ -43,8 +41,12 @@ const db = {
 		.filter(file => !file.startsWith('~') && file.endsWith('.js'))
 		.map(file => {
 			const model = require(join(__dirname, 'models', file));
+
+			if (Object.getPrototypeOf(model) !== Sequelize.Model) return null;
+
 			return [model.name, model.init(sequelize)];
-		}),
+		})
+		.filter(Boolean),
 	),
 
 	// add sequelize
