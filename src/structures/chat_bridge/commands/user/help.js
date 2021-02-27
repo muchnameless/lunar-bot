@@ -33,10 +33,10 @@ module.exports = class HelpCommand extends IngameCommand {
 			const reply = [ `gchat prefix: ${[ config.get('PREFIX'), config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.username}` ].join(', ')}` ];
 
 			for (const category of commands.visibleCategories) {
-				reply.push(`${category}: ${commands.filterByCategory(category).map(command => [ command.name, command.aliases?.join(' | ') ].filter(Boolean).join(' | ')).join(', \n')}`);
+				reply.push(`${category}: ${[ ...commands.filterByCategory(category).keys() ].join(', ')}`);
 			}
 
-			return message.reply(reply.join('; \n'));
+			return message.reply(reply.join('\n'));
 		}
 
 		const INPUT = args[0].toLowerCase();
@@ -56,9 +56,9 @@ module.exports = class HelpCommand extends IngameCommand {
 				reply.push(`Required ID: ${client.ownerID}`);
 			}
 
-			reply.push(`Commands: ${categoryCommands.map(command => [ command.name, command.aliases?.join(' | ') ].filter(Boolean).join(' | ')).join(', \n')}`);
+			reply.push(`Commands: ${[ ...categoryCommands.keys() ].join(', ')}`);
 
-			return message.reply(reply.join('; \n'));
+			return message.reply(reply.join('\n'));
 		}
 
 
@@ -86,6 +86,6 @@ module.exports = class HelpCommand extends IngameCommand {
 
 		reply.push(`Cooldown: ${ms((command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
-		message.reply(reply.join('; \n'));
+		message.reply(reply.join('\n'));
 	}
 };
