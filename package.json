@@ -8,7 +8,7 @@
     "start": "node --trace-warnings .",
     "lint": "eslint .",
     "maintenance": "node maintenance.js",
-    "db": "node ./database/dbInit.js -a"
+    "db": "node ./src/structures/database/dbInit.js -a"
   },
   "author": "muchnameless",
   "license": "ISC",

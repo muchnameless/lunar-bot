@@ -1,7 +1,7 @@
 'use strict';
 
 const { join } = require('path');
-require('dotenv').config({ path: join(__dirname, '..', '..', '.env') });
+require('dotenv').config({ path: join(__dirname, '..', '..', '..', '.env') });
 const fs = require('fs');
 
 // to get bigints as numbers instead of strings
