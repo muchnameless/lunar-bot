@@ -7,7 +7,7 @@ const mojang = require('../../api/mojang');
 const logger = require('../../functions/logger');
 
 
-module.exports = class MyCommand extends Command {
+module.exports = class DonationsCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [],

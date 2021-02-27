@@ -6,7 +6,7 @@ const IngameCommand = require('../../IngameCommand');
 const logger = require('../../../../functions/logger');
 
 
-module.exports = class MyCommand extends IngameCommand {
+module.exports = class ReloadCommand extends IngameCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'r', 'load' ],

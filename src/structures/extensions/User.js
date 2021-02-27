@@ -25,7 +25,7 @@ class LunarUser extends User {
 	 * hypixelGuild object associated with the discord user
 	 */
 	get hypixelGuild() {
-		return this.player?.guild;
+		return this.player?.guild ?? null;
 	}
 }
 
