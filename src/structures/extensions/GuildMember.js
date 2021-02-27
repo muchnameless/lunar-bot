@@ -16,6 +16,13 @@ class LunarGuildMember extends GuildMember {
 	}
 
 	/**
+	 * player object associated with the discord user
+	 */
+	get player() {
+		return this.user.player;
+	}
+
+	/**
 	 * returns an array with the member's roles that the bot manages
 	 * @returns {string[]}
 	 */
