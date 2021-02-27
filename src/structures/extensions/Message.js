@@ -13,6 +13,16 @@ class LunarMessage extends Message {
 
 		this.sendReplyChannel = true;
 		this.replyMessageID = null;
+
+		/**
+		 * @type {import('./User')}
+		 */
+		this.author;
+
+		// /**
+		//  * @type {import('discord.js').Collection<string, import('./User')>}
+		//  */
+		// this.mentions.users;
 	}
 
 	/**
