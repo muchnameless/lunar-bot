@@ -415,7 +415,7 @@ class HypixelGuild extends Model {
 
 		// no player db entry in this guild
 		if (!player) {
-			player = this.client.players.getByID(message.author.id);
+			player = message.author.player;
 
 			// no player db entry in all guilds
 			if (!player) {
@@ -515,7 +515,10 @@ class HypixelGuild extends Model {
 		// chatbridge disabled or no message.content to chat
 		if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return;
 
-		const player = this.client.players.getByID(message.author.id);
+		/**
+		 * @type {import('./Player')}
+		 */
+		const player = message.author.player;
 
 		// check if player is muted
 		if (player?.chatBridgeMutedUntil) {

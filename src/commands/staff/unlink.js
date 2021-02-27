@@ -29,11 +29,14 @@ module.exports = class UnlinkCommand extends Command {
 	async run(client, config, message, args, flags, rawArgs) {
 		const { players } = client;
 
+		/**
+		 * @type {import('../../structures/database/models/Player')}
+		 */
 		let player;
 
 		// message includes @mention
 		if (message.mentions.users.size) {
-			player = players.getByID(message.mentions.users.first().id);
+			player = message.author.player;
 
 		// no @mentions
 		} else {
@@ -44,7 +47,7 @@ module.exports = class UnlinkCommand extends Command {
 
 					if (!discordMember) continue;
 
-					player = players.getByID(discordMember.id);
+					player = discordMember.player;
 
 				// no discord tag -> ign or discord id
 				} else {

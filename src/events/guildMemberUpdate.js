@@ -16,7 +16,7 @@ module.exports = async (client, oldMember, newMember) => {
 
 	if (newMember.guild.id !== config.get('DISCORD_GUILD_ID')) return;
 
-	const player = client.players.getByID(newMember.user.id);
+	const player = newMember.player;
 
 	if (!player) return;
 

@@ -27,8 +27,6 @@ module.exports = class TracklistCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { id: userID } = message.author;
-
 		let page;
 
 		for (const arg of args) {
@@ -41,8 +39,8 @@ module.exports = class TracklistCommand extends Command {
 		page ??= Infinity;
 
 		const reply = await message.reply(createGainedStatsEmbed(client, {
-			userID,
-			hypixelGuild: client.hypixelGuilds.getFromArray(flags) ?? client.players.getByID(userID)?.guild,
+			userID: message.author.id,
+			hypixelGuild: client.hypixelGuilds.getFromArray(flags) ?? message.author.hypixelGuild,
 			type: 'track',
 			offset: getOffsetFromFlags(config, flags) ?? XP_OFFSETS_SHORT.week,
 			shouldShowOnlyBelowReqs: true,

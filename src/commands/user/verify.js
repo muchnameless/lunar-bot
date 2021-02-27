@@ -38,7 +38,10 @@ module.exports = class VerifyCommand extends Command {
 
 		let player = players.getByIGN(ign);
 
-		const playerLinkedToID = players.getByID(message.author.id);
+		/**
+		 * @type {import('../../structures/database/models/Player')}
+		 */
+		const playerLinkedToID = message.author.player;
 
 		// already linked to this discord user
 		if (player.minecraftUUID === playerLinkedToID?.minecraftUUID) return message.reply('you are already linked with this discord account.');

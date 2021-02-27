@@ -76,7 +76,7 @@ module.exports = class PollCommand extends IngameCommand {
 
 			if (votedFor < 1 || votedFor > optionsCount) continue;
 
-			options[votedFor - 1].votes.add(client.players.getByID(msg.author.id)?.minecraftUUID ?? msg.author.id);
+			options[votedFor - 1].votes.add(msg.author.player?.minecraftUUID ?? msg.author.id);
 		}
 
 		// count votes and sort options by them

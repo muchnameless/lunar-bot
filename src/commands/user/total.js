@@ -38,8 +38,6 @@ module.exports = class TotalCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { id: userID } = message.author;
-
 		let type;
 		let page;
 
@@ -86,8 +84,8 @@ module.exports = class TotalCommand extends Command {
 		}
 
 		const reply = await message.reply(createTotalStatsEmbed(client, {
-			userID,
-			hypixelGuild: client.hypixelGuilds.getFromArray(flags) ?? client.players.getByID(userID)?.guild,
+			userID: message.author.id,
+			hypixelGuild: client.hypixelGuilds.getFromArray(flags) ?? message.author.hypixelGuild,
 			type,
 			offset: getOffsetFromFlags(config, flags),
 			shouldShowOnlyBelowReqs: flags.some(flag => [ 't', 'track' ].includes(flag)),

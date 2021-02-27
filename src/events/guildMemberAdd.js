@@ -16,8 +16,10 @@ module.exports = async (client, member) => {
 	if (member.guild.id !== config.get('DISCORD_GUILD_ID')) return;
 
 	// check new discord members for tag in player database and link them if found
-	const { user } = member;
-	const player = client.players.getByID(user.id) ?? client.players.getByID(user.tag);
+	/**
+	 * @type {import()}
+	 */
+	const player = member.player ?? client.players.getByID(member.user.tag);
 
 	if (!player) return;
 
@@ -33,7 +35,7 @@ module.exports = async (client, member) => {
 
 	client.log(new MessageEmbed()
 		.setColor(config.get('EMBED_GREEN'))
-		.setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }), player.url)
+		.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
 		.setThumbnail(player.image)
 		.setDescription(description)
 		.setTimestamp(),

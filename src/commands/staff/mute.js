@@ -40,12 +40,12 @@ module.exports = class MuteCommand extends Command {
 
 		if (guild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 			target = 'everyone';
-			guild ??= players.getByID(message.author.id)?.guild;
+			guild ??= message.author.hypixelGuild;
 
 			if (!guild) return message.reply('unable to find your guild.');
 		} else {
 			target = (message.mentions.users.size
-				? players.getByID(message.mentions.users.first().id)
+				? message.mentions.users.first().player
 				: players.getByIGN(TARGET_INPUT))
 				?? players.getByID(TARGET_INPUT);
 

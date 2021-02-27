@@ -26,7 +26,10 @@ module.exports = class InviteCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const playerInviting = client.players.getByID(message.author.id);
+		/**
+		 * @type {import('../../structures/database/models/Player')}
+		 */
+		const playerInviting = message.author.player;
 
 		if (!playerInviting) return message.reply('unable to find you in the player database, so the guild to invite to could not be determined.');
 

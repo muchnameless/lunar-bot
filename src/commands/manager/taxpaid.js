@@ -33,8 +33,11 @@ module.exports = class TaxPaidCommand extends Command {
 		if (!collector?.isCollecting) return message.reply('this command is restricted to tax collectors.');
 
 		const IGN = args.shift();
+		/**
+		 * @type {import('../../structures/database/models/Player')}
+		 */
 		const player = message.mentions.users.size
-			? players.getByID(message.mentions.users.first().id)
+			? message.mentions.users.first().player
 			: players.getByIGN(IGN);
 
 		if (!player) return message.reply(`no player ${message.mentions.users.size

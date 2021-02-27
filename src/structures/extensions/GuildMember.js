@@ -16,10 +16,18 @@ class LunarGuildMember extends GuildMember {
 	}
 
 	/**
-	 * player object associated with the discord user
+	 * player object associated with the discord member
+	 * @type {import('../database/models/Player')}
 	 */
 	get player() {
 		return this.user.player;
+	}
+
+	/**
+	 * hypixelGuild object associated with the discord member
+	 */
+	get hypixelGuild() {
+		return this.player?.guild;
 	}
 
 	/**

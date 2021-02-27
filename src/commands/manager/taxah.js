@@ -36,8 +36,11 @@ module.exports = class TaxAhCommand extends Command {
 
 		if (!type.length || !ign.length || args.length !== 2) return message.reply(this.usageInfo);
 
+		/**
+		 * @type {import('../../structures/database/models/Player')}
+		 */
 		const player = message.mentions.users.size
-			? client.players.getByID(message.mentions.users.first().id)
+			? message.mentions.users.first().player
 			: client.players.getByIGN(ign);
 
 		if (!player) return message.reply(`no player ${message.mentions.users.size

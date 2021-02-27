@@ -16,8 +16,7 @@ module.exports = async (client, member) => {
 	if (member.guild.id !== config.get('DISCORD_GUILD_ID')) return;
 
 	// check discord members that left for id in player database
-	const { user } = member;
-	const player = client.players.getByID(user.id);
+	const player = member.player;
 
 	if (!player) return;
 
@@ -26,7 +25,7 @@ module.exports = async (client, member) => {
 
 	client.log(new MessageEmbed()
 		.setColor(config.get('EMBED_RED'))
-		.setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }), player.url)
+		.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
 		.setThumbnail(player.image)
 		.setDescription(stripIndents`
 			${member} left the discord server

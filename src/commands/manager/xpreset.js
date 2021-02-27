@@ -35,7 +35,7 @@ module.exports = class XpResetCommand extends Command {
 		// individual player
 		if (args.length) {
 			const player = (message.mentions.users.size
-				? players.getByID(message.mentions.users.first().id)
+				? message.mentions.users.first().player
 				: players.getByIGN(args[0]))
 				?? await players.model.findOne({
 					where: {

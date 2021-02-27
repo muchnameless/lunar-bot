@@ -20,6 +20,13 @@ class LunarUser extends User {
 	get player() {
 		return this.client.players.getByID(this.id);
 	}
+
+	/**
+	 * hypixelGuild object associated with the discord user
+	 */
+	get hypixelGuild() {
+		return this.player?.guild;
+	}
 }
 
 Structures.extend('User', User => LunarUser); // eslint-disable-line no-shadow, no-unused-vars

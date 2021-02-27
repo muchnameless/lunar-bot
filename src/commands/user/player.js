@@ -30,12 +30,14 @@ module.exports = class PlayerCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { players } = client;
+		/**
+		 * @type {import('../../structures/database/models/Player')}
+		 */
 		const player = message.mentions.users.size
-			? players.getByID(message.mentions.users.first().id)
+			? message.mentions.users.first().player
 			: args.length
-				? players.getByIGN(args[0])
-				: players.getByID(message.author.id);
+				? client.players.getByIGN(args[0])
+				: message.author.player;
 
 		if (!player) {
 			return message.reply(oneLine`${message.mentions.users.size
