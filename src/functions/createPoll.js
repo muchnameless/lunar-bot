@@ -33,7 +33,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 
 	const optionsCount = options.length;
 	const ingameMessages = chatBridge.awaitMessages(
-		msg => msg.type === GUILD || msg.type === WHISPER,
+		msg => msg.author.ign !== chatBridge.bot.username && (msg.type === GUILD || msg.type === WHISPER),
 		{ time: duration },
 	);
 	const discordMessages = chatBridge.channel.awaitMessages(
@@ -46,7 +46,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 
 	// aquire ingame votes
 	for (const msg of await ingameMessages) {
-		const votedFor = parseInt(msg, 10);
+		const votedFor = parseInt(msg.content, 10);
 
 		// doesn't start with a number or out of range
 		if (isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
@@ -56,7 +56,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 
 	// aquire discord votes
 	for (const msg of (await discordMessages).values()) {
-		const votedFor = parseInt(msg, 10);
+		const votedFor = parseInt(msg.content, 10);
 
 		// doesn't start with a number or out of range
 		if (isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
