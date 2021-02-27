@@ -91,6 +91,7 @@ class ChatBridge extends EventEmitter {
 
 	/**
 	 * the logging webhook's channel
+	 * @type {import('../extensions/TextChannel')}
 	 */
 	get channel() {
 		return this.client.channels.cache.get(this.webhook?.channelID) ?? null;
@@ -349,17 +350,17 @@ class ChatBridge extends EventEmitter {
 	 * @param {?string} prefix
 	 */
 	async chat(message, prefix = '') {
-		let messageParts;
+		const messageParts = message.split('\n').flatMap(part => {
+			try {
+				return Util.splitMessage(part, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
+			} catch {
+				// fallback in case the splitMessage throws if it doesn't contain any ' '
+				return trim(message, this.maxMessageLength - prefix.length);
+			}
+		});
 
-		try {
-			messageParts = Util.splitMessage(message, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
-		} catch {
-			// fallback in case the splitMessage throws if it doesn't contain any ' '
-			messageParts = [ trim(message, this.maxMessageLength - prefix.length) ];
-		}
-
-		for (const contentPart of messageParts) {
-			await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${contentPart}`));
+		for (const part of messageParts) {
+			await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
 		}
 	}
 
