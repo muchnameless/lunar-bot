@@ -20,12 +20,17 @@ module.exports = async (chatBridge, message, args, ign) => {
 	// no '"' found
 	if (startingIndex === -1) return message.reply('specify poll options to vote for');
 
-	const options = message.content
+	let options = message.content
 		.slice(startingIndex)
 		.split('"')
-		.map(x => x.trim())
+		.map(x => x.trim());
+
+	const question = options.shift();
+
+	options = options
 		.filter(x => x.length)
 		.map(x => ({ option: x, votes: new Set() }));
+
 	const optionsCount = options.length;
 	const ingameMessages = chatBridge.awaitMessages(
 		msg => msg.type === GUILD || msg.type === WHISPER,
@@ -37,7 +42,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 	);
 
 	// post message to both chats
-	chatBridge.broadcast(`poll by ${ign}: type a number to vote\n${options.map(({ option }, index) => `${index + 1}: ${option}`).join('\n')}`);
+	chatBridge.broadcast(`poll by ${ign}: type a number to vote\n${question}\n${options.map(({ option }, index) => `${index + 1}: ${option}`).join('\n')}`);
 
 	// aquire ingame votes
 	for (const msg of await ingameMessages) {
@@ -67,6 +72,8 @@ module.exports = async (chatBridge, message, args, ign) => {
 		.sort((a, b) => b.votes - a.votes);
 	const TOTAL_VOTES = result.reduce((acc, { votes }) => acc + votes, 0);
 	const resultString = result.map(({ option, votes }, index) => `#${index + 1}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
+
+	resultString.unshift(question);
 
 	// reply with result
 	chatBridge.channel.send(new MessageEmbed()
