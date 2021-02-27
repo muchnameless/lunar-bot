@@ -3,6 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const ms = require('ms');
 const { messageTypes: { GUILD, WHISPER } } = require('../constants/chatBridge');
+const { upperCaseFirstChar } = require('./util');
 const logger = require('./logger');
 
 
@@ -26,7 +27,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 		.map(x => x.trim())
 		.filter(x => x.length);
 
-	const question = options.shift();
+	const question = upperCaseFirstChar(options.shift());
 
 	options = options.map(x => ({ option: x, votes: new Set() }));
 
@@ -45,22 +46,20 @@ module.exports = async (chatBridge, message, args, ign) => {
 
 	// aquire ingame votes
 	for (const msg of await ingameMessages) {
-		if (/\D/.test(msg.content)) continue;
+		const votedFor = parseInt(msg, 10);
 
-		const votedFor = Number(msg.content);
-
-		if (votedFor < 1 || votedFor > optionsCount) continue;
+		// doesn't start with a number or out of range
+		if (isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
 		options[votedFor - 1].votes.add(msg.player?.minecraftUUID ?? msg.author.ign);
 	}
 
 	// aquire discord votes
 	for (const msg of (await discordMessages).values()) {
-		if (/\D/.test(msg.content)) continue;
+		const votedFor = parseInt(msg, 10);
 
-		const votedFor = Number(msg.content);
-
-		if (votedFor < 1 || votedFor > optionsCount) continue;
+		// doesn't start with a number or out of range
+		if (isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
 		options[votedFor - 1].votes.add(msg.author.player?.minecraftUUID ?? msg.author.id);
 	}
@@ -72,16 +71,15 @@ module.exports = async (chatBridge, message, args, ign) => {
 	const TOTAL_VOTES = result.reduce((acc, { votes }) => acc + votes, 0);
 	const resultString = result.map(({ option, votes }, index) => `#${index + 1}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
 
-	resultString.unshift(question);
-
 	// reply with result
 	chatBridge.channel.send(new MessageEmbed()
 		.setColor(chatBridge.client.config.get('EMBED_BLUE'))
-		.setTitle(`Poll by ${ign} - Result`)
+		.setTitle(question)
 		.setDescription(resultString.join('\n\n'))
+		.setFooter(`Poll by ${ign}`)
 		.setTimestamp(),
 	);
 
-	// chatBridge.gchat(resultString.join('; \n\n'));
-	resultString.forEach(res => chatBridge.gchat(res));
+	resultString.unshift(question);
+	chatBridge.gchat(resultString.join('\n'));
 };
