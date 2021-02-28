@@ -44,7 +44,7 @@ module.exports = async (chatBridge, message) => {
 		}
 
 		case WHISPER: {
-			handleRankRequest(message);
+			handleRankRequest(message).catch(error => logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`));
 			return commandHandler(chatBridge, message);
 		}
 
