@@ -446,12 +446,12 @@ module.exports = class HypixelGuild extends Model {
 
 		if (!result || result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return;
 
-		const {
+		const { value: {
 			name: RANK_NAME,
 			weightReq: WEIGHT_REQ,
 			roleID: ROLE_ID,
 			priority: RANK_PRIORITY,
-		} = result.value; // rank
+		} } = result; // rank
 
 		let player = this.players.find(p => p.discordID === message.author.id);
 
@@ -461,7 +461,7 @@ module.exports = class HypixelGuild extends Model {
 
 			// no player db entry in all guilds
 			if (!player) {
-				logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' but could not be found in the player db`);
+				logger.info(`[RANK REQUEST]: ${this.name}: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' but could not be found in the player db`);
 
 				return message.reply(
 					`unable to find you in the ${this.name} player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
@@ -470,7 +470,7 @@ module.exports = class HypixelGuild extends Model {
 			}
 
 			// player found in other guild
-			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' from '${this.name}' but is in '${player.guildName}'`);
+			logger.info(`[RANK REQUEST]: ${this.name}: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' from '${this.name}' but is in '${player.guildName}'`);
 
 			return message.reply(
 				`you need to be in ${this.name} in order to request this rank. If you just joined use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
@@ -480,7 +480,7 @@ module.exports = class HypixelGuild extends Model {
 
 		// non-requestable rank
 		if (!ROLE_ID) {
-			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank which is non-requestable`);
+			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank which is non-requestable`);
 			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
 			return message.reactSafely(CLOWN);
 		}
@@ -489,7 +489,7 @@ module.exports = class HypixelGuild extends Model {
 
 		// player meets reqs and already has the rank or is staff and has the rank's role
 		if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
-			logger.info(`[RANK REQUEST]: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
+			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
 			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
 			return message.reactSafely(CLOWN);
 		}
@@ -498,7 +498,7 @@ module.exports = class HypixelGuild extends Model {
 
 		// player data could be outdated -> update data when player does not meet reqs
 		if (totalWeight < WEIGHT_REQ) {
-			logger.info(`[RANK REQUEST]: ${player.ign} requested ${RANK_NAME} but only had ${this.client.formatDecimalNumber(totalWeight, 0)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
+			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} but only had ${this.client.formatDecimalNumber(totalWeight, 0)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
 			await player.updateXp({ shouldSkipQueue: true });
 			({ totalWeight } = player.getWeight());
 		}
@@ -513,7 +513,7 @@ module.exports = class HypixelGuild extends Model {
 				{ reply: false, sameChannel: true },
 			);
 
-			logger.info(`[RANK REQUEST]: ${player.ign} requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
+			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
 			if (totalWeight < WEIGHT_REQ) return;
 
@@ -565,7 +565,7 @@ module.exports = class HypixelGuild extends Model {
 		// check if player is muted
 		if (player?.chatBridgeMutedUntil) {
 			if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
-				message.author.send(`you are currently muted ${player.chatBridgeMutedUntil ? `until ${new Date(player.chatBridgeMutedUntil).toUTCString()}` : 'for an unspecified amount of time'}`).then(
+				message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
 					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
 					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error.name}: ${error.message}`),
 				);
@@ -580,8 +580,8 @@ module.exports = class HypixelGuild extends Model {
 		if (this.chatMutedUntil && !player?.isStaff) {
 			if (Date.now() < this.chatMutedUntil) {
 				message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
-					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed guild chat muted`),
-					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing guild chat muted: ${error.name}: ${error.message}`),
+					() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
+					error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error.name}: ${error.message}`),
 				);
 				return message.reactSafely(MUTED);
 			}
