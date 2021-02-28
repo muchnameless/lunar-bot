@@ -632,27 +632,66 @@ module.exports = class Player extends Model {
 		// dungeons
 		const { trueLevel: CATACOMBS_LVL } = this.getSkillLevel('catacombs');
 
-		if (CATACOMBS_LVL >= 35) {
+		if (CATACOMBS_LVL >= 50) {
+			if (!member.roles.cache.has(config.get('CATACOMBS_50_ROLE_ID'))) rolesToAdd.push(config.get('CATACOMBS_50_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_45_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_45_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_40_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_40_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_35_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_35_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_30_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_30_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_25_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_25_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_20_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_20_ROLE_ID'));
+		} else if (CATACOMBS_LVL >= 45) {
+			if (member.roles.cache.has(config.get('CATACOMBS_50_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_50_ROLE_ID'));
+			if (!member.roles.cache.has(config.get('CATACOMBS_45_ROLE_ID'))) rolesToAdd.push(config.get('CATACOMBS_45_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_40_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_40_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_35_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_35_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_30_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_30_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_25_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_25_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_20_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_20_ROLE_ID'));
+		} else if (CATACOMBS_LVL >= 40) {
+			if (member.roles.cache.has(config.get('CATACOMBS_50_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_50_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_45_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_45_ROLE_ID'));
+			if (!member.roles.cache.has(config.get('CATACOMBS_40_ROLE_ID'))) rolesToAdd.push(config.get('CATACOMBS_40_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_35_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_35_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_30_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_30_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_25_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_25_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_20_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_20_ROLE_ID'));
+		} else if (CATACOMBS_LVL >= 35) {
+			if (member.roles.cache.has(config.get('CATACOMBS_50_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_50_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_45_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_45_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_40_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_40_ROLE_ID'));
 			if (!member.roles.cache.has(config.get('CATACOMBS_35_ROLE_ID'))) rolesToAdd.push(config.get('CATACOMBS_35_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_30_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_30_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_25_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_25_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_20_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_20_ROLE_ID'));
 		} else if (CATACOMBS_LVL >= 30) {
+			if (member.roles.cache.has(config.get('CATACOMBS_50_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_50_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_45_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_45_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_40_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_40_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_35_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_35_ROLE_ID'));
 			if (!member.roles.cache.has(config.get('CATACOMBS_30_ROLE_ID'))) rolesToAdd.push(config.get('CATACOMBS_30_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_25_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_25_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_20_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_20_ROLE_ID'));
 		} else if (CATACOMBS_LVL >= 25) {
+			if (member.roles.cache.has(config.get('CATACOMBS_50_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_50_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_45_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_45_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_40_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_40_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_35_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_35_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_30_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_30_ROLE_ID'));
 			if (!member.roles.cache.has(config.get('CATACOMBS_25_ROLE_ID'))) rolesToAdd.push(config.get('CATACOMBS_25_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_20_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_20_ROLE_ID'));
 		} else if (CATACOMBS_LVL >= 20) {
+			if (member.roles.cache.has(config.get('CATACOMBS_50_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_50_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_45_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_45_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_40_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_40_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_35_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_35_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_30_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_30_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_25_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_25_ROLE_ID'));
 			if (!member.roles.cache.has(config.get('CATACOMBS_20_ROLE_ID'))) rolesToAdd.push(config.get('CATACOMBS_20_ROLE_ID'));
 		} else { // cata lvl < 20
+			if (member.roles.cache.has(config.get('CATACOMBS_50_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_50_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_45_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_45_ROLE_ID'));
+			if (member.roles.cache.has(config.get('CATACOMBS_40_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_40_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_35_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_35_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_30_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_30_ROLE_ID'));
 			if (member.roles.cache.has(config.get('CATACOMBS_25_ROLE_ID'))) rolesToRemove.push(config.get('CATACOMBS_25_ROLE_ID'));
