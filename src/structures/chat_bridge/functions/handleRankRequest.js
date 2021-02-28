@@ -81,6 +81,9 @@ module.exports = async message => {
 		// set rank role to requested rank
 		if (player.isStaff) {
 			const discordMember = await player.discordMember;
+
+			if (!discordMember) throw new Error('unknown discord member');
+
 			const otherRequestableRankRoles = guild.ranks.flatMap(({ roleID }) => roleID && roleID !== ROLE_ID ? roleID : []);
 			const rolesToRemove = [ ...discordMember.roles.cache.keys() ].filter(roleID => otherRequestableRankRoles.includes(roleID));
 
@@ -102,6 +105,7 @@ module.exports = async message => {
 
 		await message.reply(Y_EMOJI_ALT);
 	} catch (error) {
+		message.reply(`an error occurred while executing that command: ${error.message}`);
 		logger.error(`[RANK REQUEST]: ${player.logInfo}: ${error.name}: ${error.message}`);
 	}
 };
