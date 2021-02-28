@@ -434,8 +434,6 @@ module.exports = class HypixelGuild extends Model {
 	 * @param {import('../../extensions/Message')} message discord message which was send in the #guild-general channel
 	 */
 	async handleRankRequestMessage(message) {
-		if (message.mentions.users.size) return; // ignore messages with tagged users
-
 		const { config } = this.client;
 		const result = message.content
 			?.replace(/[^a-zA-Z ]/g, '') // delete all non alphabetical characters
@@ -470,7 +468,7 @@ module.exports = class HypixelGuild extends Model {
 			}
 
 			// player found in other guild
-			logger.info(`[RANK REQUEST]: ${this.name}: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' from '${this.name}' but is in '${player.guildName}'`);
+			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' from '${this.name}' but is in '${player.guildName}'`);
 
 			return message.reply(
 				`you need to be in ${this.name} in order to request this rank. If you just joined use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
@@ -525,17 +523,11 @@ module.exports = class HypixelGuild extends Model {
 				await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
 			} else {
 				// set ingame rank and discord role
-				const chatBridge = this.chatBridge;
-				const filterRegex = new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`);
-
-				// listen for ingame promotion message
-				await Promise.all([
-					chatBridge.awaitMessages(
-						msg => filterRegex.test(msg.content),
-						{ max: 1, time: 5_000, errors: [ 'time' ] },
-					),
-					this.chatBridge.queueForMinecraftChat(`/g setrank ${player.ign} ${RANK_NAME}`),
-				]);
+				await this.chatBridge.awaitCommandResponse({
+					command: `g setrank ${player.ign} ${RANK_NAME}`,
+					responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
+					rejectOnTimeout: true,
+				});
 
 				// ingame chat message received
 				player.guildRankPriority = RANK_PRIORITY;

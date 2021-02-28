@@ -122,6 +122,7 @@ class HypixelGuildManager extends ModelManager {
 	 * @param {import('../extensions/Message')} message
 	 */
 	checkIfRankRequestMessage(message) {
+		if (message.mentions.users.size) return; // ignore messages with tagged users
 		return this.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message);
 	}
 }
