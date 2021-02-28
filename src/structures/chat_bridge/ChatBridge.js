@@ -447,6 +447,36 @@ class ChatBridge extends EventEmitter {
 			});
 		});
 	}
+
+	/**
+	 * sends a message to ingame chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter
+	 * @param {object} options
+	 * @param {string} options.command
+	 * @param {RegExp} options.responseRegex regex to use as a filter for the message collector
+	 * @param {boolean} [options.rejectOnTimeout=false]
+	 */
+	async awaitCommandResponse({ command, responseRegex, rejectOnTimeout = false }) {
+		try {
+			const result = await Promise.all([
+				this.awaitMessages(
+					msg => responseRegex.test(msg.content),
+					{ max: 1, time: this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), errors: [ 'time' ] },
+				),
+				this.command(command),
+			]);
+
+			return result[0][0].content;
+		} catch (error) {
+			// collector ended with reason 'time' -> collected nothing
+			if (Array.isArray(error)) {
+				if (rejectOnTimeout) throw new Error(`no ingame response after ${ms(this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), { long: true })}`);
+				return `no ingame response after ${ms(this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), { long: true })}`;
+			}
+
+			// a different error occurred
+			throw error;
+		}
+	}
 }
 
 module.exports = ChatBridge;

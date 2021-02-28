@@ -81,17 +81,14 @@ module.exports = class MuteCommand extends Command {
 		}
 
 		try {
-			const result = await Promise.all([
-				chatBridge.awaitMessages(
-					msg => /^(?:\[.+?\] )?\w+ has muted (?:(?:\[.+?\] )?\w+|the guild chat) for/.test(msg.content),
-					{ max: 1, time: 5_000 },
-				),
-				chatBridge.queueForMinecraftChat(`/g mute ${target} ${DURATION_INPUT}`),
-			]);
+			const response = await chatBridge.awaitCommandResponse({
+				command: `g mute ${target} ${DURATION_INPUT}`,
+				responseRegex: /^(?:\[.+?\] )?\w+ has muted (?:(?:\[.+?\] )?\w+|the guild chat) for/,
+			});
 
 			message.reply(stripIndent`
 				muted ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`} for \`${DURATION_INPUT}\`
-				 > ${result[0][0]?.content ?? 'no ingame result'}
+				 > ${response}
 			`);
 		} catch (error) {
 			logger.error(error);

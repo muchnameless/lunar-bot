@@ -72,17 +72,14 @@ module.exports = class UnmuteCommand extends Command {
 		}
 
 		try {
-			const result = await Promise.all([
-				chatBridge.awaitMessages(
-					msg => /^(?:\[.+?\] )?\w+ has unmuted (?:(?:\[.+?\] )?\w+|the guild chat)|^(?:This player|The guild) is not muted!$/.test(msg.content),
-					{ max: 1, time: 5_000 },
-				),
-				chatBridge.queueForMinecraftChat(`/g unmute ${target}`),
-			]);
+			const response = await chatBridge.awaitCommandResponse({
+				command: `g unmute ${target}`,
+				responseRegex: /^(?:\[.+?\] )?\w+ has unmuted (?:(?:\[.+?\] )?\w+|the guild chat)|^(?:This player|The guild) is not muted!$/,
+			});
 
 			message.reply(stripIndent`
 				unmuted ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`}
-				 > ${result[0][0]?.content ?? 'no ingame result'}
+				 > ${response}
 			`);
 		} catch (error) {
 			logger.error(error);

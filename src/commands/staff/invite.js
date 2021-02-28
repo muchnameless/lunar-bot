@@ -44,23 +44,14 @@ module.exports = class InviteCommand extends Command {
 		const [ ign ] = args;
 
 		try {
-			const result = await Promise.all([
-				Promise.race([
-					chatBridge.awaitMessages(
-						msg => /^You invited (?:\[.+?\] )?\w+ to your guild\. They have 5 minutes to accept\.$|^You sent an offline invite to (?:\[.+?\] )?\w+! They will have 5 minutes to accept once they come online!$/.test(msg.content),
-						{ max: 1, time: 5_000 },
-					),
-					chatBridge.awaitMessages(
-						msg => /^You've already invited (?:\[.+?\] )?\w+ to your guild! Wait for them to accept!$|^(?:\[.+?\] )?\w+ is already in another guild!$/.test(msg.content),
-						{ max: 1, time: 5_000 },
-					),
-				]),
-				chatBridge.queueForMinecraftChat(`/g invite ${ign}`),
-			]);
+			const response = await chatBridge.awaitCommandResponse({
+				command: `g invite ${ign}`,
+				responseRegex: /^You invited (?:\[.+?\] )?\w+ to your guild\. They have 5 minutes to accept\.$|^You sent an offline invite to (?:\[.+?\] )?\w+! They will have 5 minutes to accept once they come online!$|^You've already invited (?:\[.+?\] )?\w+ to your guild! Wait for them to accept!$|^(?:\[.+?\] )?\w+ is already in another guild!$/,
+			});
 
 			message.reply(stripIndent`
 				invited \`${ign}\` into \`${guild.name}\`
-				 > ${result[0][0]?.content ?? 'no ingame result'}
+				 > ${response}
 			`);
 		} catch (error) {
 			logger.error(error);
