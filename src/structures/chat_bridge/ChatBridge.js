@@ -8,7 +8,7 @@ const ms = require('ms');
 const { sleep, trim } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { VERSION } = require('../../constants/chatBridge');
-const { unicodeToName } = require('../../constants/emojiNameUnicodeConverter');
+const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
 const MinecraftBot = require('./MinecraftBot');
 const WebhookError = require('../errors/WebhookError');
 const AsyncQueue = require('../AsyncQueue');
@@ -319,6 +319,42 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
+	 * replaces names with discord renders
+	 * @param {string} string
+	 */
+	_parseMinecraftMessageToDiscord(string) {
+		return Util.escapeMarkdown(
+			string
+				.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
+				.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
+				.replace(/#([a-z-]+)/gi, (match, p1) => this.chatBridge.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+				.replace(/(?<!<)@(!|&)?(\S+)(?!\d+>)/g, (match, p1, p2) => {
+					switch (p1) {
+						case '!': // members/users
+							return this.chatBridge.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+								?? this.chatBridge.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+								?? match;
+
+						case '&': // roles
+							return this.chatBridge.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+								?? match;
+
+						default: { // players, members/users, roles
+							const player = this.chatBridge.client.players.cache.find(p => p.ign.toLowerCase() === p2.toLowerCase());
+
+							if (player?.inDiscord) return `<@${player.discordID}>`;
+
+							return this.chatBridge.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+								?? this.chatBridge.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+								?? this.chatBridge.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+								?? match;
+						}
+					}
+				}),
+		);
+	}
+
+	/**
 	 * forwards a discord message to ingame guild chat, prettifying discord renders
 	 * @param {import('../extensions/Message')} message
 	 * @param {import('../database/models/Player')} player
@@ -386,14 +422,14 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * send a message both to discord and the ingame guild chat
+	 * send a message both to discord and the ingame guild chat, parsing both
 	 * @param {string} message
 	 * @returns {Promise<[import('../extensions/Message'), void]>}
 	 */
 	async broadcast(message) {
 		return Promise.all([
-			this.channel?.send(message),
-			this.gchat(message),
+			this.channel?.send(this._parseMinecraftMessageToDiscord(message)),
+			this.gchat(this._parseDiscordMessageToMinecraft(message)),
 		]);
 	}
 
@@ -445,14 +481,14 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * sends a message to ingame chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter
+	 * sends a message to ingame chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
 	 * @param {object} options
-	 * @param {string} options.command
+	 * @param {string} options.command can also directly be used as the only parameter
 	 * @param {RegExp} [options.responseRegex] regex to use as a filter for the message collector
 	 * @param {number} [options.timeout]
 	 * @param {boolean} [options.rejectOnTimeout=false]
 	 */
-	async command({ command, responseRegex = new RegExp(), timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+	async command({ command = arguments[0], responseRegex = new RegExp(), timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		try {
 			const result = await Promise.all([
 				this.awaitMessages(
