@@ -1,7 +1,7 @@
 'use strict';
 
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
-const { autocorrect } = require('../../../functions/util');
+const { autocorrect, cleanFormattedNumber } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
 
@@ -72,7 +72,7 @@ module.exports = async message => {
 	const WEIGHT_STRING = client.formatDecimalNumber(totalWeight, 0);
 
 	try {
-		await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [${RANK_NAME}]`);
+		await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${cleanFormattedNumber(WEIGHT_STRING)} / ${cleanFormattedNumber(WEIGHT_REQ_STRING)} [${RANK_NAME}]`);
 
 		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 

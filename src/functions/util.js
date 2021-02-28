@@ -65,6 +65,12 @@ module.exports = {
 	checkIfDiscordTag: string => /.{2,32}#\d{4}/.test(string),
 
 	/**
+	 * replaces non number chars with a whitespace
+	 * @param {string} string
+	 */
+	cleanFormattedNumber: string => string.replace(/[^0-9.,]/g, ' '),
+
+	/**
 	 * returns the hypixel client
 	 * @param {boolean} shouldSkipQueue wether to use the hypixel aux client when the main one's request queue is filled
 	 */
