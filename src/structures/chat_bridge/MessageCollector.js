@@ -257,7 +257,7 @@ class MessageCollector extends EventEmitter {
 	 * handles stopping the collector when the bot got disconnected
 	 */
 	_handleBotDisconnection() {
-		this.stop('botDisconnected');
+		this.stop('disconnect');
 	}
 }
 

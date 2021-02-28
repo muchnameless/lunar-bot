@@ -445,17 +445,18 @@ class ChatBridge extends EventEmitter {
 	 * @param {object} options
 	 * @param {string} options.command
 	 * @param {RegExp} options.responseRegex regex to use as a filter for the message collector
+	 * @param {number} [options.timeout]
 	 * @param {boolean} [options.rejectOnTimeout=false]
 	 */
-	async command({ command, responseRegex, rejectOnTimeout = false }) {
+	async command({ command, responseRegex, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		try {
 			const result = await Promise.all([
 				this.awaitMessages(
 					msg => responseRegex.test(msg.content),
 					{
 						max: 1,
-						time: this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'),
-						errors: [ 'time', 'botDisconnected' ],
+						time: timeout *= 1_000,
+						errors: [ 'time', 'disconnect' ],
 					},
 				),
 				this.queueForMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)),
@@ -465,8 +466,8 @@ class ChatBridge extends EventEmitter {
 		} catch (error) {
 			// collector ended with reason 'time' -> collected nothing
 			if (Array.isArray(error)) {
-				if (rejectOnTimeout) throw new Error(`no ingame response after ${ms(this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), { long: true })}`);
-				return `no ingame response after ${ms(this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), { long: true })}`;
+				if (rejectOnTimeout) throw new Error(`no ingame response after ${ms(timeout, { long: true })}`);
+				return `no ingame response after ${ms(timeout, { long: true })}`;
 			}
 
 			// a different error occurred
