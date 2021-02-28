@@ -27,7 +27,7 @@ module.exports = async message => {
 		priority: RANK_PRIORITY,
 	} } = result; // rank
 
-	let player = guild.players.find(p => p.discordID === message.author.id);
+	let player = guild.players.find(p => p.ign === message.author.ign);
 
 	// no player db entry in this guild
 	if (!player) {
@@ -72,7 +72,7 @@ module.exports = async message => {
 	const WEIGHT_STRING = client.formatDecimalNumber(totalWeight, 0);
 
 	try {
-		await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} ['${RANK_NAME}']`);
+		await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [${RANK_NAME}]`);
 
 		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
