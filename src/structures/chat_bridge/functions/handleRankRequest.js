@@ -1,6 +1,6 @@
 'use strict';
 
-const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
+const { Y_EMOJI, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
 const { autocorrect, cleanFormattedNumber } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
@@ -101,6 +101,4 @@ module.exports = async message => {
 		player.save();
 		await player.updateRoles(`requested ${RANK_NAME}`);
 	}
-
-	await message.reply(Y_EMOJI_ALT);
 };
