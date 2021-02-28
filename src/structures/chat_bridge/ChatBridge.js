@@ -365,6 +365,14 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
+	 * sends the message as a command to ingame chat, without altering it
+	 * @param {string} message
+	 */
+	async command(message) {
+		return this.queueForMinecraftChat(trim(`/${message}`, this.maxMessageLength - 1));
+	}
+
+	/**
 	 * send a message to the ingame chat, without changing it, 600 ms queue cooldown
 	 * @param {string} message
 	 */
