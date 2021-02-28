@@ -88,7 +88,7 @@ module.exports = async message => {
 
 		// set ingame rank and discord role
 		} else {
-			await chatBridge.awaitCommandResponse({
+			await chatBridge.command({
 				command: `g setrank ${player.ign} ${RANK_NAME}`,
 				responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
 				rejectOnTimeout: true,

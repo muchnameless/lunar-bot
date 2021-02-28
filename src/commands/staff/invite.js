@@ -44,7 +44,7 @@ module.exports = class InviteCommand extends Command {
 		const [ ign ] = args;
 
 		try {
-			const response = await chatBridge.awaitCommandResponse({
+			const response = await chatBridge.command({
 				command: `g invite ${ign}`,
 				responseRegex: /^You invited (?:\[.+?\] )?\w+ to your guild\. They have 5 minutes to accept\.$|^You sent an offline invite to (?:\[.+?\] )?\w+! They will have 5 minutes to accept once they come online!$|^You've already invited (?:\[.+?\] )?\w+ to your guild! Wait for them to accept!$|^(?:\[.+?\] )?\w+ is already in another guild!$/,
 			});

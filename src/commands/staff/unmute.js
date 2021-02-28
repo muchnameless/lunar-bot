@@ -72,7 +72,7 @@ module.exports = class UnmuteCommand extends Command {
 		}
 
 		try {
-			const response = await chatBridge.awaitCommandResponse({
+			const response = await chatBridge.command({
 				command: `g unmute ${target}`,
 				responseRegex: /^(?:\[.+?\] )?\w+ has unmuted (?:(?:\[.+?\] )?\w+|the guild chat)|^(?:This player|The guild) is not muted!$/,
 			});

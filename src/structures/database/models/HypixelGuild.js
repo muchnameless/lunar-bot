@@ -523,7 +523,7 @@ module.exports = class HypixelGuild extends Model {
 				await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
 			} else {
 				// set ingame rank and discord role
-				await this.chatBridge.awaitCommandResponse({
+				await this.chatBridge.command({
 					command: `g setrank ${player.ign} ${RANK_NAME}`,
 					responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
 					rejectOnTimeout: true,
