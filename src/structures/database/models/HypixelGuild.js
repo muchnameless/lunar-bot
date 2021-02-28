@@ -485,10 +485,8 @@ module.exports = class HypixelGuild extends Model {
 
 		let { totalWeight } = player.getWeight();
 
-		const member = message.member ?? await player.discordMember;
-
 		// player meets reqs and already has the rank or is staff and has the rank's role
-		if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && member?.roles.cache.has(ROLE_ID)))) {
+		if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && (message.member ?? await player.discordMember)?.roles.cache.has(ROLE_ID)))) {
 			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
 			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
 			return message.reactSafely(CLOWN);
@@ -518,6 +516,8 @@ module.exports = class HypixelGuild extends Model {
 
 		// set rank role to requested rank
 		if (player.isStaff) {
+			const member = message.member ?? await player.discordMember;
+
 			if (!member) throw new Error('unknown discord member');
 
 			const otherRequestableRankRoles = this.ranks.flatMap(({ roleID }) => roleID && roleID !== ROLE_ID ? roleID : []);
