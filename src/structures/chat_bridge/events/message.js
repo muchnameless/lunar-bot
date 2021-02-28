@@ -3,6 +3,7 @@
 const ms = require('ms');
 const { messageTypes: { WHISPER, GUILD } } = require('../../../constants/chatBridge');
 const commandHandler = require('../commandHandler');
+const handleRankRequest = require('../functions/handleRankRequest');
 const logger = require('../../../functions/logger');
 
 
@@ -43,6 +44,7 @@ module.exports = async (chatBridge, message) => {
 		}
 
 		case WHISPER: {
+			handleRankRequest(message);
 			return commandHandler(chatBridge, message);
 		}
 
