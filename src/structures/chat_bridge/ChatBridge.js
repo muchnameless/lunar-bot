@@ -66,6 +66,10 @@ class ChatBridge extends EventEmitter {
 			? 256
 			: 100;
 		/**
+		 * time to wait between ingame chat messages are sent, ('you can only send a message once every half second')
+		 */
+		this.ingameChatDelay = 600;
+		/**
 		 * increases each login, reset to 0 on successfull spawn
 		 */
 		this.loginAttempts = 0;
@@ -365,7 +369,7 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * send a message to the ingame chat, without changing it, 600 ms queue cooldown
+	 * send a message to the ingame chat, without changing it, this.ingameChatDelay ms queue cooldown
 	 * @param {string} message
 	 */
 	async queueForMinecraftChat(message) {
@@ -373,7 +377,7 @@ class ChatBridge extends EventEmitter {
 
 		try {
 			this.bot.chat(message);
-			await sleep(600); // sends each part 600 ms apart ('you can only send a message once every half second')
+			await sleep(this.ingameChatDelay);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
 		} finally {
@@ -455,7 +459,7 @@ class ChatBridge extends EventEmitter {
 					msg => responseRegex.test(msg.content),
 					{
 						max: 1,
-						time: timeout *= 1_000,
+						time: timeout *= 1_000 + this.queue.remaining * this.ingameChatDelay,
 						errors: [ 'time', 'disconnect' ],
 					},
 				),
