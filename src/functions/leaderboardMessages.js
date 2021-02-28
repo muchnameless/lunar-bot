@@ -1,8 +1,8 @@
 'use strict';
 
-const ms = require('ms');
 const { stripIndent, oneLine } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
+const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_SHORT, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../constants/database');
 const { upperCaseFirstChar, autocorrect } = require('./util');
