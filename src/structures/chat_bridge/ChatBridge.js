@@ -444,11 +444,11 @@ class ChatBridge extends EventEmitter {
 	 * sends a message to ingame chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter
 	 * @param {object} options
 	 * @param {string} options.command
-	 * @param {RegExp} options.responseRegex regex to use as a filter for the message collector
+	 * @param {RegExp} [options.responseRegex] regex to use as a filter for the message collector
 	 * @param {number} [options.timeout]
 	 * @param {boolean} [options.rejectOnTimeout=false]
 	 */
-	async command({ command, responseRegex, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+	async command({ command, responseRegex = new RegExp(), timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		try {
 			const result = await Promise.all([
 				this.awaitMessages(
