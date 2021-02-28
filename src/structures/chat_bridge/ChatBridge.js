@@ -464,7 +464,7 @@ class ChatBridge extends EventEmitter {
 
 			return result[0][0].content;
 		} catch (error) {
-			// collector ended with reason 'time' -> collected nothing
+			// collector ended with reason 'time' or 'disconnect' -> collected nothing
 			if (Array.isArray(error)) {
 				if (rejectOnTimeout) throw new Error(`no ingame response after ${ms(timeout, { long: true })}`);
 				return `no ingame response after ${ms(timeout, { long: true })}`;
