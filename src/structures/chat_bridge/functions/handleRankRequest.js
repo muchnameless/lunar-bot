@@ -55,7 +55,7 @@ module.exports = async message => {
 	let { totalWeight } = player.getWeight();
 
 	// player meets reqs and already has the rank or is staff and has the rank's role
-	if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
+	if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && (await player.discordMember)?.roles.cache.has(ROLE_ID)))) {
 		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
 		return message.reply(CLOWN);
 	}
@@ -71,41 +71,36 @@ module.exports = async message => {
 
 	const WEIGHT_STRING = client.formatDecimalNumber(totalWeight, 0);
 
-	try {
-		await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${cleanFormattedNumber(WEIGHT_STRING)} / ${cleanFormattedNumber(WEIGHT_REQ_STRING)} [${RANK_NAME}]`);
+	await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${cleanFormattedNumber(WEIGHT_STRING)} / ${cleanFormattedNumber(WEIGHT_REQ_STRING)} [${RANK_NAME}]`);
 
-		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
+	logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
-		if (totalWeight < WEIGHT_REQ) return;
+	if (totalWeight < WEIGHT_REQ) return;
 
-		// set rank role to requested rank
-		if (player.isStaff) {
-			const discordMember = await player.discordMember;
+	// set rank role to requested rank
+	if (player.isStaff) {
+		const discordMember = await player.discordMember;
 
-			if (!discordMember) throw new Error('unknown discord member');
+		if (!discordMember) throw new Error('unknown discord member');
 
-			const otherRequestableRankRoles = guild.ranks.flatMap(({ roleID }) => roleID && roleID !== ROLE_ID ? roleID : []);
-			const rolesToRemove = [ ...discordMember.roles.cache.keys() ].filter(roleID => otherRequestableRankRoles.includes(roleID));
+		const otherRequestableRankRoles = guild.ranks.flatMap(({ roleID }) => roleID && roleID !== ROLE_ID ? roleID : []);
+		const rolesToRemove = [ ...discordMember.roles.cache.keys() ].filter(roleID => otherRequestableRankRoles.includes(roleID));
 
-			await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
+		await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
 
-		// set ingame rank and discord role
-		} else {
-			await chatBridge.command({
-				command: `g setrank ${player.ign} ${RANK_NAME}`,
-				responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
-				rejectOnTimeout: true,
-			});
+	// set ingame rank and discord role
+	} else {
+		await chatBridge.command({
+			command: `g setrank ${player.ign} ${RANK_NAME}`,
+			responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
+			rejectOnTimeout: true,
+		});
 
-			// ingame chat message received
-			player.guildRankPriority = RANK_PRIORITY;
-			player.save();
-			await player.updateRoles(`requested ${RANK_NAME}`);
-		}
-
-		await message.reply(Y_EMOJI_ALT);
-	} catch (error) {
-		message.reply(`an error occurred while executing that command: ${error.message}`);
-		logger.error(`[RANK REQUEST]: ${player.logInfo}: ${error.name}: ${error.message}`);
+		// ingame chat message received
+		player.guildRankPriority = RANK_PRIORITY;
+		player.save();
+		await player.updateRoles(`requested ${RANK_NAME}`);
 	}
+
+	await message.reply(Y_EMOJI_ALT);
 };
