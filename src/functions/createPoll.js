@@ -44,7 +44,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 
 	// post message to both chats
 	chatBridge.broadcast(stripIndents`
-		poll by ${ign}: type a number to vote
+		poll by ${ign}: type a number to vote (${ms(duration, { long: true })})
 		${question}
 		${options.map(({ option }, index) => `${index + 1}: ${option}`).join('\n')}
 	`);
