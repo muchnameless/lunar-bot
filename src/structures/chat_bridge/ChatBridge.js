@@ -68,7 +68,7 @@ class ChatBridge extends EventEmitter {
 		/**
 		 * time to wait between ingame chat messages are sent, ('you can only send a message once every half second')
 		 */
-		this.ingameChatDelay = 600;
+		this.ingameChatDelay = 500;
 		/**
 		 * increases each login, reset to 0 on successfull spawn
 		 */
