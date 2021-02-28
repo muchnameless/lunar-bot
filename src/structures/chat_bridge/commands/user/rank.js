@@ -10,9 +10,9 @@ module.exports = class RankCommand extends IngameCommand {
 		super(data, {
 			aliases: [ 'request' ],
 			description: 'request a guild rank',
-			args: false,
-			usage: '',
-			cooldown: 0,
+			args: true,
+			usage: '[rank name]',
+			cooldown: 1,
 		});
 	}
 
