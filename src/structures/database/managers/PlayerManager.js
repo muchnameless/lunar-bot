@@ -170,7 +170,7 @@ class PlayerManager extends ModelManager {
 	/**
 	 * get a player by their discord ID
 	 * @param {string} id discord id of the player
-	 * @returns {?import('.../models/Player')}
+	 * @returns {?import('../models/Player')}
 	 */
 	getByID(id) {
 		if (!id) return null;
