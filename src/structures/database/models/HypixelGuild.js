@@ -485,8 +485,10 @@ module.exports = class HypixelGuild extends Model {
 
 		let { totalWeight } = player.getWeight();
 
+		const member = message.member ?? await player.discordMember;
+
 		// player meets reqs and already has the rank or is staff and has the rank's role
-		if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && message.member.roles.cache.has(ROLE_ID)))) {
+		if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && member?.roles.cache.has(ROLE_ID)))) {
 			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
 			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
 			return message.reactSafely(CLOWN);
@@ -505,40 +507,38 @@ module.exports = class HypixelGuild extends Model {
 
 		if (message.reactions.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error.name}: ${error.message}`)); // get clowned
 
-		try {
-			await message.reply(
-				`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
-				{ reply: false, sameChannel: true },
-			);
+		await message.reply(
+			`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
+			{ reply: false, sameChannel: true },
+		);
 
-			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
+		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
-			if (totalWeight < WEIGHT_REQ) return;
+		if (totalWeight < WEIGHT_REQ) return;
 
-			if (player.isStaff) {
-				// set rank role to requested rank
-				const otherRequestableRankRoles = this.ranks.flatMap(({ roleID }) => roleID && roleID !== ROLE_ID ? roleID : []);
-				const rolesToRemove = [ ...message.member.roles.cache.keys() ].filter(roleID => otherRequestableRankRoles.includes(roleID));
+		// set rank role to requested rank
+		if (player.isStaff) {
+			if (!member) throw new Error('unknown discord member');
 
-				await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
-			} else {
-				// set ingame rank and discord role
-				await this.chatBridge.command({
-					command: `g setrank ${player.ign} ${RANK_NAME}`,
-					responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
-					rejectOnTimeout: true,
-				});
+			const otherRequestableRankRoles = this.ranks.flatMap(({ roleID }) => roleID && roleID !== ROLE_ID ? roleID : []);
+			const rolesToRemove = [ ...member.roles.cache.keys() ].filter(roleID => otherRequestableRankRoles.includes(roleID));
 
-				// ingame chat message received
-				player.guildRankPriority = RANK_PRIORITY;
-				player.save();
-				await player.updateRoles(`requested ${RANK_NAME}`);
-			}
+			await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
+		} else {
+			// set ingame rank and discord role
+			await this.chatBridge.command({
+				command: `g setrank ${player.ign} ${RANK_NAME}`,
+				responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
+				rejectOnTimeout: true,
+			});
 
-			await message.react(Y_EMOJI_ALT);
-		} catch (error) {
-			logger.error(`[RANK REQUEST]: ${player.logInfo}: ${error.name}: ${error.message}`);
+			// ingame chat message received
+			player.guildRankPriority = RANK_PRIORITY;
+			player.save();
+			await player.updateRoles(`requested ${RANK_NAME}`);
 		}
+
+		await message.reactSafely(Y_EMOJI_ALT);
 	}
 
 	/**

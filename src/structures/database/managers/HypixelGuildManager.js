@@ -121,9 +121,14 @@ class HypixelGuildManager extends ModelManager {
 	 * check if the message is a rank request and handle it if true
 	 * @param {import('../extensions/Message')} message
 	 */
-	checkIfRankRequestMessage(message) {
+	async checkIfRankRequestMessage(message) {
 		if (message.mentions.users.size) return; // ignore messages with tagged users
-		return this.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message);
+
+		try {
+			await this.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message);
+		} catch (error) {
+			logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`);
+		}
 	}
 }
 
