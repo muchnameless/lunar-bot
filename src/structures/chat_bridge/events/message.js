@@ -2,7 +2,7 @@
 
 const ms = require('ms');
 const { messageTypes: { WHISPER, GUILD } } = require('../../../constants/chatBridge');
-const commandHandler = require('../commandHandler');
+const commandHandler = require('../functions/commandHandler');
 const handleRankRequest = require('../functions/handleRankRequest');
 const logger = require('../../../functions/logger');
 

@@ -3,15 +3,15 @@
 const { Collection } = require('discord.js');
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
-const { escapeRegex } = require('../../functions/util');
-const { messageTypes: { GUILD } } = require('../../constants/chatBridge');
-const logger = require('../../functions/logger');
+const { escapeRegex } = require('../../../functions/util');
+const { messageTypes: { GUILD } } = require('../../../constants/chatBridge');
+const logger = require('../../../functions/logger');
 
 
 /**
  * command handler for the chatBridge
- * @param {import('./ChatBridge')} chatBridge
- * @param {import('./HypixelMessage')} message
+ * @param {import('../ChatBridge')} chatBridge
+ * @param {import('../HypixelMessage')} message
  */
 module.exports = async (chatBridge, message) => {
 	if (!message.author || !message.content.length) return;
