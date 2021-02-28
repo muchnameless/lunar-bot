@@ -5,7 +5,7 @@ const { MessageEmbed, Util } = require('discord.js');
 const ms = require('ms');
 const { autocorrect, getHypixelClient } = require('../../../functions/util');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED } = require('../../../constants/emojiCharacters');
-const { offsetFlags, UNKNOWN_IGN } = require('../../../constants/database');
+const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH }, UNKNOWN_IGN } = require('../../../constants/database');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
@@ -180,14 +180,14 @@ module.exports = class HypixelGuild extends Model {
 	 */
 	async update() {
 		const { players, config } = this.client;
-		const hypixelGuildData = await hypixel.guild.id(this.guildID);
+		const { meta: { cached }, name, ranks, chatMute, members: currentGuildMembers } = await hypixel.guild.id(this.guildID);
 
-		if (hypixelGuildData.meta.cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
+		if (cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
 
 		// update guild data
-		this.name = hypixelGuildData.name;
+		this.name = name;
 
-		for (const rank of hypixelGuildData.ranks) {
+		for (const rank of ranks) {
 			const dbEntryRank = this.ranks?.find(r => r.priority === rank.priority);
 
 			if (!dbEntryRank) {
@@ -209,8 +209,8 @@ module.exports = class HypixelGuild extends Model {
 			}
 		}
 
-		if (hypixelGuildData.chatMute) {
-			this.chatMutedUntil = Date.now() + hypixelGuildData.chatMute;
+		if (chatMute) {
+			this.chatMutedUntil = Date.now() + chatMute;
 		} else {
 			this.chatMutedUntil = 0;
 		}
@@ -218,10 +218,7 @@ module.exports = class HypixelGuild extends Model {
 		this.save();
 
 		// update guild players
-		const { members: currentGuildMembers } = hypixelGuildData;
-
-		// API error
-		if (!currentGuildMembers.length) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: guild data did not include any members`);
+		if (!currentGuildMembers.length) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: guild data did not include any members`); // API error
 
 		const guildPlayers = this.players;
 		const playersLeft = guildPlayers.filter((_, minecraftUUID) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUUID));
@@ -311,11 +308,11 @@ module.exports = class HypixelGuild extends Model {
 				await player.resetXp({ offsetToReset: 'current' });
 
 				// to trigger the xp gained reset if global reset happened after the player left the guild
-				if (config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: offsetFlags.COMPETITION_START });
-				if (config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: offsetFlags.COMPETITION_END });
-				if (config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: offsetFlags.MAYOR });
-				if (config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: offsetFlags.WEEK });
-				if (config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: offsetFlags.MONTH });
+				if (config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: COMPETITION_START });
+				if (config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: COMPETITION_END });
+				if (config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: MAYOR });
+				if (config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: WEEK });
+				if (config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: MONTH });
 
 				// shift the daily array for the amount of daily resets missed
 				const DAYS_PASSED_SINCE_LAST_XP_UPDATE = Math.max(0, Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - xpLastUpdatedAt) / (24 * 60 * 60 * 1000)));
@@ -329,8 +326,7 @@ module.exports = class HypixelGuild extends Model {
 			}),
 
 			// add all players to the db that joined
-			...membersJoinedNew.map(async hypixelGuildMember => { // eslint-disable-line no-shadow
-				const { uuid: minecraftUUID } = hypixelGuildMember;
+			...membersJoinedNew.map(async ({ uuid: minecraftUUID }) => { // eslint-disable-line no-shadow
 				const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${minecraftUUID}: ${error.name}: ${error.message}`)) ?? UNKNOWN_IGN;
 
 				joinedLog.push(`+\xa0${IGN}`);

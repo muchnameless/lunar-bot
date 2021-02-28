@@ -2,7 +2,7 @@
 
 const { MessageEmbed, SnowflakeUtil, DiscordAPIError } = require('discord.js');
 const { join } = require('path');
-const { promises: fs } = require('fs');
+const { promises: { mkdir, writeFile, readdir, readFile, unlink } } = require('fs');
 const { cleanLoggingEmbedString } = require('../functions/util');
 const logger = require('../functions/logger');
 
@@ -104,7 +104,7 @@ class LogHandler {
 	 * create log_buffer folder if it is non-existent
 	 */
 	async _createLogBufferFolder() {
-		return fs.mkdir(this.logBufferPath).then(
+		return mkdir(this.logBufferPath).then(
 			() => logger.debug('[LOG BUFFER]: created \'log_buffer\' folder'),
 			() => null, // rejects if folder already exists
 		);
@@ -117,7 +117,7 @@ class LogHandler {
 	async _logToFile(data) {
 		try {
 			await this._createLogBufferFolder();
-			await fs.writeFile(
+			await writeFile(
 				join(this.logBufferPath, `${new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(', ', '_').replace(/:/g, '.')}_${SnowflakeUtil.generate()}`),
 				data,
 			);
@@ -134,16 +134,16 @@ class LogHandler {
 		try {
 			await this._createLogBufferFolder();
 
-			const logBufferFiles = await fs.readdir(this.logBufferPath);
+			const logBufferFiles = await readdir(this.logBufferPath);
 
 			if (!logBufferFiles) return;
 
 			for (const file of logBufferFiles) {
 				const FILE_PATH = join(this.logBufferPath, file);
-				const FILE_CONTENT = await fs.readFile(FILE_PATH, 'utf8');
+				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
 				await this.log(...FILE_CONTENT.split('\n').map(x => new MessageEmbed(JSON.parse(x))));
-				await fs.unlink(FILE_PATH);
+				await unlink(FILE_PATH);
 			}
 		} catch (error) {
 			logger.error(`[POST LOG FILES]: ${error.name}: ${error.message}`);

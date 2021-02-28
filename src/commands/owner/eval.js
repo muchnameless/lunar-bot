@@ -52,10 +52,8 @@ module.exports = class EvalCommand extends Command {
 		/* eslint-disable no-unused-vars */
 		const { Util, MessageEmbed } = Discord;
 		const { cleanOutput } = functionsUtil;
-		const { channel, guild, author, member } = message;
+		const { channel, channel: ch, guild, guild: g, author, member } = message;
 		const msg = message;
-		const ch = channel;
-		const g = guild;
 		const { hypixelGuilds, players, taxCollectors, db } = client;
 		const lgGuild = client.lgGuild;
 		const asyncFlags = [ 'a', 'async' ];

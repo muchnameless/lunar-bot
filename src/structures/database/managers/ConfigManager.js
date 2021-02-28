@@ -40,10 +40,7 @@ class ConfigManager extends ModelManager {
 	 * @returns {?string} config value
 	 */
 	get(key) {
-		return this.cache.get(key?.toUpperCase())?.value
-			?? (/^[a-z]+_(?:55|60)_ROLE_ID$/.test(key)
-				? null
-				: logger.warn(`[CONFIG VALUE] ${key} is not a valid config key`));
+		return this.cache.get(key?.toUpperCase())?.value ?? logger.warn(`[CONFIG VALUE]: '${key}' is not a valid config key`);
 	}
 
 	/**

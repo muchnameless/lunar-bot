@@ -16,8 +16,7 @@ const logger = require('../../functions/logger');
 module.exports = async (chatBridge, message) => {
 	if (!message.author || !message.content.length) return;
 
-	const { client } = chatBridge;
-	const { config } = client;
+	const { client, client: { config } } = chatBridge;
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), escapeRegex(config.get('INGAME_PREFIX')), `@${chatBridge.bot.username}` ].join('|')})`, 'i').exec(message.content); // PREFIX, INGAME_PREFIX, @mention
 
 	// must use prefix for commands in guild
@@ -130,7 +129,7 @@ module.exports = async (chatBridge, message) => {
 		if (command.usage) reply.push(`\nUse: ${command.usageInfo}`);
 
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' without providing the mandatory arguments`);
-		return message.reply(reply.join('; \n'));
+		return message.reply(reply.join('\n'));
 	}
 
 	// execute command

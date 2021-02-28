@@ -91,7 +91,7 @@ class HypixelGuildManager extends ModelManager {
 	}
 
 	/**
-	 * autocorrect all flags to the hypixel guilds names and returns the most likely math or null, or 'false' for the 'all'-flag
+	 * autocorrect all flags to the hypixel guilds names and returns the most likely match or null, or 'false' for the 'all'-flag
 	 * @param {string[]} array message flags
 	 * @returns {?import('../models/HypixelGuild')|boolean}
 	 */

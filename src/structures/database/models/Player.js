@@ -373,16 +373,16 @@ module.exports = class Player extends Model {
 			if (!this.mainProfileID) await this.fetchMainProfile(shouldSkipQueue); // detect main profile if it is unknown
 
 			// hypixel API call (if shouldSkipQueue and hypixelMain queue already filled use hypixelAux)
-			const profileData = (await getHypixelClient(shouldSkipQueue).skyblock.profile(this.mainProfileID));
+			const { meta: { cached }, members } = (await getHypixelClient(shouldSkipQueue).skyblock.profile(this.mainProfileID));
 
-			if (profileData.meta.cached) throw new Error('cached data');
+			if (cached) throw new Error('cached data');
 
-			const playerData = profileData.members[this.minecraftUUID];
+			const playerData = members[this.minecraftUUID];
 
 			if (!playerData) {
 				this.mainProfileID = null;
 				this.save();
-				throw new Error(`unable to find main profile named ${this.mainProfileName} -> resetting name`);
+				throw new Error(`unable to find main profile named '${this.mainProfileName}' -> resetting name`);
 			}
 
 			this.xpLastUpdatedAt = Date.now();
@@ -982,13 +982,6 @@ module.exports = class Player extends Model {
 		await this.save();
 
 		this.syncIgnWithDisplayName();
-
-		const taxCollector = this.client.taxCollectors.cache.get(this.minecraftUUID);
-
-		if (taxCollector) {
-			taxCollector.ign = PLAYER_IGN_CURRENT;
-			await taxCollector.save();
-		}
 
 		return {
 			oldIgn: ign,

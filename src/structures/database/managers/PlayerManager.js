@@ -3,7 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
-const { offsetFlags } = require('../../../constants/database');
+const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH } } = require('../../../constants/database');
 const { autocorrect, getWeekOfYear } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
 const logger = require('../../../functions/logger');
@@ -293,7 +293,7 @@ class PlayerManager extends ModelManager {
 	startCompetition() {
 		const { config } = this.client;
 
-		this.resetXp({ offsetToReset: offsetFlags.COMPETITION_START });
+		this.resetXp({ offsetToReset: COMPETITION_START });
 		config.set('COMPETITION_RUNNING', 'true');
 		config.set('COMPETITION_SCHEDULED', 'false');
 		this.client.log(new MessageEmbed()
@@ -310,7 +310,7 @@ class PlayerManager extends ModelManager {
 	endCompetition() {
 		const { config } = this.client;
 
-		this.resetXp({ offsetToReset: offsetFlags.COMPETITION_END });
+		this.resetXp({ offsetToReset: COMPETITION_END });
 		config.set('COMPETITION_RUNNING', 'false');
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
@@ -328,7 +328,7 @@ class PlayerManager extends ModelManager {
 		const CURRENT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
 		config.set('LAST_MAYOR_XP_RESET_TIME', CURRENT_MAYOR_TIME);
-		this.resetXp({ offsetToReset: offsetFlags.MAYOR });
+		this.resetXp({ offsetToReset: MAYOR });
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Current Mayor XP Tracking')
@@ -366,7 +366,7 @@ class PlayerManager extends ModelManager {
 		const { config } = this.client;
 
 		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
-		this.resetXp({ offsetToReset: offsetFlags.WEEK });
+		this.resetXp({ offsetToReset: WEEK });
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Weekly XP Tracking')
@@ -382,7 +382,7 @@ class PlayerManager extends ModelManager {
 		const { config } = this.client;
 
 		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
-		this.resetXp({ offsetToReset: offsetFlags.MONTH });
+		this.resetXp({ offsetToReset: MONTH });
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Monthly XP Tracking')

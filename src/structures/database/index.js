@@ -2,7 +2,7 @@
 
 const { join } = require('path');
 require('dotenv').config({ path: join(__dirname, '..', '..', '..', '.env') });
-const fs = require('fs');
+const { readdirSync } = require('fs');
 
 // to get bigints as numbers instead of strings
 require('pg').defaults.parseInt8 = true;
@@ -36,17 +36,17 @@ const sequelize = new Sequelize(
 const db = {
 
 	// read models
-	...Object.fromEntries(fs
-		.readdirSync(join(__dirname, 'models'))
-		.filter(file => !file.startsWith('~') && file.endsWith('.js'))
-		.map(file => {
-			const model = require(join(__dirname, 'models', file));
+	...Object.fromEntries(
+		readdirSync(join(__dirname, 'models'))
+			.filter(file => !file.startsWith('~') && file.endsWith('.js'))
+			.map(file => {
+				const model = require(join(__dirname, 'models', file));
 
-			if (Object.getPrototypeOf(model) !== Sequelize.Model) return null;
+				if (Object.getPrototypeOf(model) !== Sequelize.Model) return null;
 
-			return [model.name, model.init(sequelize)];
-		})
-		.filter(Boolean),
+				return [model.name, model.init(sequelize)];
+			})
+			.filter(Boolean),
 	),
 
 	// add sequelize

@@ -61,7 +61,7 @@ class ChatBridgeArray extends Array {
 		if (!this.commands.size) await this.commands.loadAll();
 
 		// single
-		if (typeof index === 'number') {
+		if (typeof index === 'number' && index >= 0 && index < this._accounts.length) {
 			if (!(this[index] instanceof ChatBridge)) this._initSingle(index);
 			return this[index].connect();
 		}

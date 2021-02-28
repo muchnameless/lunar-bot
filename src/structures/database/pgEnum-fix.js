@@ -14,8 +14,8 @@ PostgresQueryGenerator.prototype.pgEnum = function(tableName, attr, dataType, op
 	}
 
 	let sql = `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_${ tableName }_${ attr }') THEN CREATE TYPE ${ enumName } AS ${ values }; END IF; END$$;`;
-	if (!!options && options.force === true) {
-		sql = this.pgEnumDrop(tableName, attr) + sql;
-	}
+
+	if (options?.force) sql = `${this.pgEnumDrop(tableName, attr)}${sql}`;
+
 	return sql;
 };

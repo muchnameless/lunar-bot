@@ -1,5 +1,6 @@
 'use strict';
 
+const { promisify } = require('util');
 const { exec } = require('child_process');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -26,14 +27,21 @@ module.exports = class ExecCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		exec(`${rawArgs.join(' ')}`, (err, stdout, stderr) => {
-			if (err) {
-				logger.error(err);
-				return message.reply(stderr, { code: 'xl' });
+		try {
+			const { stdout, stderr } = await promisify(exec)(rawArgs.join(' '));
+
+			if (stdout) {
+				logger.info(stdout);
+				message.reply(stdout, { code: 'bash' });
 			}
 
-			logger.debug(stdout);
-			message.reply(stdout, { code: 'bash' });
-		});
+			if (stderr) {
+				logger.error(stderr);
+				message.reply(`${stderr.name}: ${stderr.message}`, { code: 'xl' });
+			}
+		} catch (error) {
+			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
+			message.reply(`${error.name}: ${error.message}`, { code: 'xl' });
+		}
 	}
 };

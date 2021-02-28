@@ -46,17 +46,16 @@ class Mojang {
 	 * @param {string} path
 	 * @param {string} query
 	 * @param {string} resultField
+	 * @param {boolean} [param3.cache]
+	 * @param {boolean} [param3.force]
 	 */
-	async _makeRequest(path, query, resultField = null, options) {
-		if (typeof options !== 'object' || options === null) throw new TypeError('[Mojang Client]: options must be an object');
-		const { cache = true, force = false } = options;
-
+	async _makeRequest(path, query, resultField = null, { cache = true, force = false } = {}) {
 		if (this.cache && !force) {
 			const cachedResponse = await this.cache.get(query);
 			if (cachedResponse) return cachedResponse;
 		}
 
-		const res = await fetch(path + query);
+		const res = await fetch(`${path}${query}`);
 
 		if (res.status !== 200) throw new Error(`Error ${res.status}: ${res.statusText}`);
 

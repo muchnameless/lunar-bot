@@ -28,7 +28,7 @@ module.exports = class XpResetCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(client, config, message, args, flags, rawArgs) {
-		const { players, db } = client;
+		const { players, db: { Sequelize: { Op } } } = client;
 
 		let result;
 
@@ -40,7 +40,7 @@ module.exports = class XpResetCommand extends Command {
 				?? await players.model.findOne({
 					where: {
 						guildID: null,
-						ign: { [db.Sequelize.Op.iLike]: `%${args[0]}%` },
+						ign: { [Op.iLike]: `%${args[0]}%` },
 					},
 				});
 

@@ -85,8 +85,7 @@ class AsyncQueue {
    * Frees the queue's lock for the next item to process.
    */
 	shift() {
-		const deferred = this.promises.shift();
-		if (typeof deferred !== 'undefined') deferred.resolve();
+		this.promises.shift()?.resolve();
 	}
 }
 

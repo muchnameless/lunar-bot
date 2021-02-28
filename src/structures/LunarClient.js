@@ -1,6 +1,6 @@
 'use strict';
 
-const { Client, Constants } = require('discord.js');
+const { Client, Constants: { Events: { CLIENT_READY } } } = require('discord.js');
 const { CronJob } = require('cron');
 const { join, basename } = require('path');
 const { getAllJsFiles } = require('../functions/files');
@@ -132,7 +132,7 @@ class LunarClient extends Client {
 			this._loadEvents(),
 		]);
 
-		this.once(Constants.Events.CLIENT_READY, this.onReady);
+		this.once(CLIENT_READY, this.onReady);
 
 		return super.login(token);
 	}
