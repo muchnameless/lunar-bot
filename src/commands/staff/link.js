@@ -128,7 +128,7 @@ module.exports = class LinkCommand extends Command {
 		if (playerLinkedToID) {
 			let isDeleted = false;
 
-			const linkedUser = await client.users.fetch(playerLinkedToID.discordID).catch(error => {
+			const linkedUser = await playerLinkedToID.discordUser.catch(error => {
 				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
 					isDeleted = true;
 					return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: deleted discord user: ${playerLinkedToID.discordID}`);
@@ -163,7 +163,7 @@ module.exports = class LinkCommand extends Command {
 		if (/^\d+$/.test(player.discordID)) {
 			let isDeleted = false;
 
-			const linkedUser = await client.users.fetch(player.discordID).catch(error => {
+			const linkedUser = await player.discordUser.catch(error => {
 				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
 					isDeleted = true;
 					return logger.error(`[LINK]: ${player.logInfo}: deleted discord user: ${player.discordID}`);

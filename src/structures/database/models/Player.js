@@ -240,7 +240,7 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * fetches the discord member if the id is valid and the player is in lg discord
+	 * fetches the discord member if the discord id is valid and the player is in lg discord
 	 * @returns {?LunarGuildMember|Promise<?LunarGuildMember>}
 	 */
 	get discordMember() {
@@ -258,6 +258,16 @@ module.exports = class Player extends Model {
 		})();
 
 		return this._discordMember;
+	}
+
+	/**
+	 * fetches the discord user if the discord id is valid
+	 * @returns {Promise<?import('../../extensions/User')>}
+	 */
+	get discordUser() {
+		return /^\d+$/.test(this.discordID)
+			? this.client.users.fetch(this.discordID)
+			: null;
 	}
 
 	/**
