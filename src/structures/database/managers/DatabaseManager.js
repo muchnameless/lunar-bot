@@ -259,7 +259,7 @@ class DatabaseManager {
 		await this.client.hypixelGuilds.update();
 
 		// update tax db
-		const availableAuctionsLog = config.getBoolean('TAX_TRACKING_ENABLED') && await this._updateTaxDatabase();
+		const availableAuctionsLog = config.getBoolean('TAX_TRACKING_ENABLED') ? await this._updateTaxDatabase() : null;
 
 		// update Xp
 		if (config.getBoolean('XP_TRACKING_ENABLED')) players.update();
