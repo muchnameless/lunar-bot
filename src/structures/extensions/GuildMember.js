@@ -2,6 +2,7 @@
 
 const { Structures, GuildMember } = require('discord.js');
 const { SKILLS, SLAYERS } = require('../../constants/skyblock');
+const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../constants/roles');
 const logger = require('../../functions/logger');
 
 
@@ -38,31 +39,46 @@ class LunarGuildMember extends GuildMember {
 		const { config,	hypixelGuilds } = this.client;
 		const rolesToRemove = [];
 
+		// guild
 		[
-			config.get('GUILD_DELIMITER_ROLE_ID'),
 			...hypixelGuilds.cache.array().flatMap(hGuild => hGuild.ranks.map(rank => rank.roleID)),
-			config.get('GUILD_ROLE_ID'),
 			...hypixelGuilds.cache.map(hGuild => hGuild.roleID),
-			config.get('SKILL_DELIMITER_ROLE_ID'),
-			config.get('AVERAGE_LVL_50_ROLE_ID'), config.get('AVERAGE_LVL_45_ROLE_ID'), config.get('AVERAGE_LVL_40_ROLE_ID'),
-			config.get('SLAYER_DELIMITER_ROLE_ID'),
-			config.get('SLAYER_999_ROLE_ID'), config.get('SLAYER_888_ROLE_ID'), config.get('SLAYER_777_ROLE_ID'),
-			config.get('DUNGEON_DELIMITER_ROLE_ID'),
-			config.get('CATACOMBS_35_ROLE_ID'), config.get('CATACOMBS_30_ROLE_ID'), config.get('CATACOMBS_25_ROLE_ID'), config.get('CATACOMBS_20_ROLE_ID'),
-			config.get('MISC_DELIMITER_ROLE_ID'),
+			config.get('GUILD_ROLE_ID'),
 		].forEach(roleID => this.roles.cache.has(roleID) && rolesToRemove.push(roleID));
 
-		SKILLS.forEach(skill => {
-			if (this.roles.cache.has(config.get(`${skill}_60_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_60_ROLE_ID`));
-			if (this.roles.cache.has(config.get(`${skill}_55_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_55_ROLE_ID`));
-			if (this.roles.cache.has(config.get(`${skill}_50_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_50_ROLE_ID`));
-			if (this.roles.cache.has(config.get(`${skill}_45_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_45_ROLE_ID`));
-		});
+		// delimiter
+		for (const type of delimiterRoles) {
+			if (this.roles.cache.has(config.get(`${type}_DELIMITER_ROLE_ID`))) rolesToRemove.push(config.get(`${type}_DELIMITER_ROLE_ID`));
+		}
 
-		SLAYERS.forEach(slayer => {
-			if (this.roles.cache.has(config.get(`${slayer}_9_ROLE_ID`))) rolesToRemove.push(config.get(`${slayer}_9_ROLE_ID`));
-			if (this.roles.cache.has(config.get(`${slayer}_8_ROLE_ID`))) rolesToRemove.push(config.get(`${slayer}_8_ROLE_ID`));
-		});
+		// skill average
+		for (const level of skillAverageRoles) {
+			if (this.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
+		}
+
+		// individual skills
+		for (const skill of SKILLS) {
+			for (const level of skillRoles) {
+				if (this.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
+			}
+		}
+
+		// total slayer
+		for (const level of slayerTotalRoles) {
+			if (this.roles.cache.has(config.get(`SLAYER_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`SLAYER_${level}_ROLE_ID`));
+		}
+
+		// individual slayer
+		for (const slayer of SLAYERS) {
+			for (const level of slayerRoles) {
+				if (this.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
+			}
+		}
+
+		// catacombs
+		for (const level of catacombsRoles) {
+			if (this.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
+		}
 
 		return rolesToRemove;
 	}
