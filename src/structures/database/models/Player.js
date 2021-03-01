@@ -1276,6 +1276,133 @@ module.exports = class Player extends Model {
 	}
 
 	/**
+	 * returns the true and progression level for the provided skill type
+	 * @param {string} type the skill or dungeon type
+	 * @param {number} index xpHistory array index
+	 */
+	getSkillLevelHistory(type, index) {
+		const xp = this[`${type}XpHistory`][index];
+
+		let xpTable = [ ...DUNGEON_CLASSES, ...DUNGEON_TYPES ].includes(type) ? DUNGEON_XP : type === 'runecrafting' ? RUNECRAFTING_XP : LEVELING_XP;
+		let maxLevel = Math.max(...Object.keys(xpTable));
+		let maxLevelCap = maxLevel;
+
+		if (Object.hasOwnProperty.call(SKILLS_CAP, type) && SKILLS_CAP[type] > maxLevel) {
+			xpTable = { ...SKILL_XP_PAST_50, ...xpTable };
+			maxLevel = Math.max(...Object.keys(xpTable));
+			maxLevelCap = Object.hasOwnProperty.call(this, `${type}LvlCap`) ? this[`${type}LvlCap`] : maxLevel;
+		}
+
+		let xpTotal = 0;
+		let trueLevel = 0;
+
+		for (let x = 1; x <= maxLevelCap; ++x) {
+			xpTotal += xpTable[x];
+
+			if (xpTotal > xp) {
+				xpTotal -= xpTable[x];
+				break;
+			} else {
+				trueLevel = x;
+			}
+		}
+
+		if (trueLevel < maxLevel) {
+			const nonFlooredLevel = trueLevel + Math.floor(xp - xpTotal) / xpTable[trueLevel + 1];
+
+			return {
+				trueLevel,
+				progressLevel: Math.floor(nonFlooredLevel * 100) / 100,
+				nonFlooredLevel,
+			};
+		}
+
+		return {
+			trueLevel,
+			progressLevel: trueLevel,
+			nonFlooredLevel: trueLevel,
+		};
+	}
+
+	/**
+	 * returns the true and progression skill average
+	 * @param {number} index xpHistory array index
+	 */
+	getSkillAverageHistory(index) {
+		const SKILL_COUNT = SKILLS.length;
+
+		let skillAverage = 0;
+		let trueAverage = 0;
+
+		SKILLS.forEach(skill => {
+			const { trueLevel, nonFlooredLevel } = this.getSkillLevelHistory(skill, index);
+
+			skillAverage += nonFlooredLevel;
+			trueAverage += trueLevel;
+		});
+
+		return {
+			skillAverage: Number((skillAverage / SKILL_COUNT).toFixed(2)),
+			trueAverage: Number((trueAverage / SKILL_COUNT).toFixed(2)),
+		};
+	}
+
+	/**
+	 * returns the total slayer xp
+	 * @param {string} offset optional offset value to use instead of the current xp value
+	 * @param {number} index xpHistory array index
+	 */
+	getSlayerTotalHistory(index) {
+		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}XpHistory`][index], 0);
+	}
+
+	/**
+	 * calculates the player's weight using Senither's formula
+	 * @param {number} index xpHistory array index
+	 */
+	getWeightHistory(index) {
+		let weight = 0;
+		let overflow = 0;
+
+		for (const skill of SKILLS) {
+			const { nonFlooredLevel: level } = this.getSkillLevelHistory(skill, index);
+			const xp = this[`${skill}XpHistory`][index];
+
+			let maxXp = Object.values(LEVELING_XP).reduce((acc, currentXp) => acc + currentXp, 0);
+
+			if (SKILLS_CAP[skill] > 50) maxXp += Object.values(SKILL_XP_PAST_50).reduce((acc, currentXp) => acc + currentXp, 0);
+
+			weight += Math.pow(level * 10, 0.5 + SKILL_EXPONENTS[skill] + (level / 100)) / 1250;
+			if (xp > maxXp) overflow += Math.pow((xp - maxXp) / SKILL_DIVIDER[skill], 0.968);
+		}
+
+		for (const slayer of SLAYERS) {
+			const experience = this[`${slayer}XpHistory`][index];
+
+			weight += experience <= 1_000_000
+				? experience / SLAYER_DIVIDER[slayer]
+				: 1_000_000 / SLAYER_DIVIDER[slayer] + Math.pow((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5), 0.942);
+		}
+
+		const maxXp = Object.values(DUNGEON_XP).reduce((acc, xp) => acc + xp, 0);
+
+		for (const type of [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ]) {
+			const { nonFlooredLevel: level } = this.getSkillLevelHistory(type, index);
+			const base = Math.pow(level, 4.5) * DUNGEON_EXPONENTS[type];
+			const xp = this[`${type}XpHistory`][index];
+
+			weight += base;
+			if (xp > maxXp) overflow += Math.pow((xp - maxXp) / (4 * maxXp / base), 0.968);
+		}
+
+		return {
+			weight,
+			overflow,
+			totalWeight: weight + overflow,
+		};
+	}
+
+	/**
 	 * player nickname
 	 */
 	toString() {
