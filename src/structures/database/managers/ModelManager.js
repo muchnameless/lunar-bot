@@ -62,6 +62,8 @@ class ModelManager {
 	async remove(idOrInstance) {
 		const element = this.resolve(idOrInstance);
 
+		if (!(element instanceof this.model)) return logger.warn(`[MODEL MANAGER REMOVE]: unknown element: ${idOrInstance}`);
+
 		this.cache.delete(element[this.primaryKey]);
 		return element.destroy();
 	}
