@@ -996,9 +996,12 @@ module.exports = class Player extends Model {
 			case 'day':
 				// append current xp to the beginning of the xpHistory-Array and pop of the last value
 				typesToReset.forEach(type => {
+					/**
+					 * @type {number[]}
+					 */
 					const xpHistory = this[`${type}XpHistory`];
-					xpHistory.pop();
-					xpHistory.unshift(this[`${type}Xp`]);
+					xpHistory.shift();
+					xpHistory.push(this[`${type}Xp`]);
 					this.changed(`${type}XpHistory`, true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
 				});
 				break;
