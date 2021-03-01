@@ -56,7 +56,7 @@ module.exports = async message => {
 	// 'commandName -h' -> 'h commandName'
 	if (flags.some(flag => [ 'h', 'help' ].includes(flag))) {
 		logger.info(`'${message.content}' was executed by ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}`);
-		return client.commands.help(client, config, message, [ command?.name ?? COMMAND_NAME ], []).catch(logger.error);
+		return client.commands.help(message, [ command?.name ?? COMMAND_NAME ], []).catch(logger.error);
 	}
 
 	// server only command in DMs

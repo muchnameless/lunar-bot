@@ -36,7 +36,7 @@ module.exports = async message => {
 	// no command, only ping or prefix
 	if (!COMMAND_NAME.length) {
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
-		return prefixMatched?.[0] !== config.get('INGAME_PREFIX') && client.chatBridges.commands.help(client, config, message, args, flags).catch(logger.error);
+		return prefixMatched?.[0] !== config.get('INGAME_PREFIX') && client.chatBridges.commands.help(message, args, flags).catch(logger.error);
 	}
 
 	const command = client.chatBridges.commands.getByName(COMMAND_NAME);
@@ -47,7 +47,7 @@ module.exports = async message => {
 	// 'commandName -h' -> 'h commandName'
 	if (flags.some(flag => [ 'h', 'help' ].includes(flag))) {
 		logger.info(`'${message.content}' was executed by ${message.author.ign} in '${message.type}'`);
-		return client.chatBridges.commands.help(client, config, message, [ command?.name ?? COMMAND_NAME ], []).catch(logger.error);
+		return client.chatBridges.commands.help(message, [ command?.name ?? COMMAND_NAME ], []).catch(logger.error);
 	}
 
 	// server only command in DMs
