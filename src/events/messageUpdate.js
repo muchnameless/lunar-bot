@@ -12,6 +12,7 @@ const logger = require('../functions/logger');
  */
 module.exports = async (client, oldMessage, newMessage) => {
 	if (oldMessage.content === newMessage.content) return; // pin or added embed
+	if (Date.now() - newMessage.createdTimestamp > 24 * 60 * 60 * 1_000) return; // ignore messages older than a day
 
-	commandHandler(client, newMessage);
+	commandHandler(newMessage);
 };

@@ -9,4 +9,4 @@ const logger = require('../functions/logger');
  * @param {import('../structures/LunarClient')} client
  * @param {import('../structures/extensions/Message')} message
  */
-module.exports = async (client, message) => commandHandler(client, message);
+module.exports = async (client, message) => commandHandler(message);

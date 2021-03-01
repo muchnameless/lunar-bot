@@ -9,10 +9,9 @@ const logger = require('../functions/logger');
 
 /**
  * command handler
- * @param {import('../structures/LunarClient')} client
  * @param {import('../structures/extensions/Message')} message
  */
-module.exports = async (client, message) => {
+module.exports = async message => {
 	try {
 		if (message.partial) await message.fetch();
 	} catch (error) {
@@ -21,7 +20,7 @@ module.exports = async (client, message) => {
 
 	if (!message.isUserMessage || !message.content) return; // filter out bot, system & webhook and empty (attachments, embeds) messages
 
-	const { config } = client;
+	const { client, client: { config } } = message;
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').exec(message.content); // PREFIX, @mention, no prefix
 
 	client.hypixelGuilds.checkIfChatBridgeMessage(message);
