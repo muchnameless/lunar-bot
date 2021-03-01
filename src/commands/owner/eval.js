@@ -48,6 +48,7 @@ module.exports = class EvalCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) {
 		/* eslint-disable no-unused-vars */
+		const { client } = this;
 		const { Util, MessageEmbed } = Discord;
 		const { cleanOutput } = functionsUtil;
 		const { channel, channel: ch, guild, guild: g, author, member } = message;
