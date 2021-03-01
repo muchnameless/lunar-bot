@@ -17,15 +17,13 @@ module.exports = class PurgeRolesCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
-		const lgGuild = client.lgGuild;
+	async run(message, args, flags, rawArgs) {
+		const lgGuild = this.client.lgGuild;
 
 		if (!lgGuild) return;
 		if (lgGuild.members.cache.size !== lgGuild.memberCount) await lgGuild.members.fetch();
@@ -33,7 +31,7 @@ module.exports = class PurgeRolesCommand extends Command {
 		let index = -1;
 
 		lgGuild.members.cache.forEach(member => {
-			if (member.roles.cache.has(config.get('GUILD_ROLE_ID'))) return;
+			if (member.roles.cache.has(this.client.config.get('GUILD_ROLE_ID'))) return;
 
 			/**
 			 * @type {string[]}
@@ -42,7 +40,7 @@ module.exports = class PurgeRolesCommand extends Command {
 
 			if (!rolesToRemove.length) return;
 
-			client.setTimeout(() => {
+			this.client.setTimeout(() => {
 				member.roles.remove(rolesToRemove).then(
 					() => logger.info(`removed ${rolesToRemove.length} role(s) from ${member.user.tag} | ${member.displayName}`),
 					logger.error,

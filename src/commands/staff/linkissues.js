@@ -17,26 +17,24 @@ module.exports = class LinkIssuesCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
-		const { players, hypixelGuilds } = client;
-		const lgGuild = client.lgGuild;
+	async run(message, args, flags, rawArgs) {
+		const { players, hypixelGuilds } = this.client;
+		const lgGuild = this.client.lgGuild;
 
 		if (!lgGuild) return message.reply('discord guild is currently unavailable.');
 		if (lgGuild.members.cache.size !== lgGuild.memberCount) await lgGuild.members.fetch();
 
 		// discord members with wrong roles
 		const embed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+			.setColor(this.client.config.get('EMBED_BLUE'))
 			.setTimestamp();
-		const GUILD_ROLE_ID = config.get('GUILD_ROLE_ID');
-		const VERIFIED_ROLE_ID = config.get('VERIFIED_ROLE_ID');
+		const GUILD_ROLE_ID = this.client.config.get('GUILD_ROLE_ID');
+		const VERIFIED_ROLE_ID = this.client.config.get('VERIFIED_ROLE_ID');
 		const guildRoleWithoutDbEntry = [];
 		const missingVerifiedRole = [];
 

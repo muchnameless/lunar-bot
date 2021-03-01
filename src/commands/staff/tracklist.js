@@ -19,14 +19,12 @@ module.exports = class TracklistCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		let page;
 
 		for (const arg of args) {
@@ -38,11 +36,11 @@ module.exports = class TracklistCommand extends Command {
 
 		page ??= Infinity;
 
-		const reply = await message.reply(createGainedStatsEmbed(client, {
+		const reply = await message.reply(createGainedStatsEmbed(this.client, {
 			userID: message.author.id,
-			hypixelGuild: client.hypixelGuilds.getFromArray(flags) ?? message.author.hypixelGuild,
+			hypixelGuild: this.client.hypixelGuilds.getFromArray(flags) ?? message.author.hypixelGuild,
 			type: 'track',
-			offset: getOffsetFromFlags(config, flags) ?? XP_OFFSETS_SHORT.week,
+			offset: getOffsetFromFlags(this.client.config, flags) ?? XP_OFFSETS_SHORT.week,
 			shouldShowOnlyBelowReqs: true,
 			page: page > 0 ? page : 1,
 		}));

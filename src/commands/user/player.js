@@ -22,21 +22,19 @@ module.exports = class PlayerCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		/**
 		 * @type {import('../../structures/database/models/Player')}
 		 */
 		const player = message.mentions.users.size
 			? message.mentions.users.first().player
 			: args.length
-				? client.players.getByIGN(args[0])
+				? this.client.players.getByIGN(args[0])
 				: message.author.player;
 
 		if (!player) {
@@ -54,12 +52,12 @@ module.exports = class PlayerCommand extends Command {
 		// update db?
 		if (flags.some(flag => [ 'f', 'force' ].includes(flag))) await player.updateXp({ shouldSkipQueue: true });
 
-		const offset = getOffsetFromFlags(config, flags) ?? (config.getBoolean('COMPETITION_RUNNING') || (Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
+		const offset = getOffsetFromFlags(this.client.config, flags) ?? (this.client.config.getBoolean('COMPETITION_RUNNING') || (Date.now() - this.client.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.client.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
 			? offsetFlags.COMPETITION_START
-			: config.get('DEFAULT_XP_OFFSET'));
-		const startingDate = new Date(Math.max(config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
+			: this.client.config.get('DEFAULT_XP_OFFSET'));
+		const startingDate = new Date(Math.max(this.client.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
 		const embed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+			.setColor(this.client.config.get('EMBED_BLUE'))
 			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
 			// .setTitle(`${escapeIgn(player.ign)}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`)
 			// .setURL(player.url)
@@ -77,8 +75,8 @@ module.exports = class PlayerCommand extends Command {
 
 			embed.addField(upperCaseFirstChar(skill), stripIndents`
 				**LvL:** ${progressLevel}
-				**XP:** ${client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
-				**Δ:** ${client.formatNumber(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT], 0, Math.round)}
+				**XP:** ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
+				**Δ:** ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT], 0, Math.round)}
 			`, true);
 		});
 
@@ -89,12 +87,12 @@ module.exports = class PlayerCommand extends Command {
 				${`Δ: change since ${startingDate.toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT`/* .replace(/ /g, '\xa0') */.padEnd(105, '\xa0') + '\u200b'}
 				
 				\`\`\`Skills\`\`\`
-				Average skill level: **${client.formatDecimalNumber(skillAverage, 0)}** [**${client.formatDecimalNumber(trueAverage, 0)}**] - **Δ**: **${client.formatDecimalNumber(skillAverage - skillAverageOffset, 0)}** [**${client.formatDecimalNumber(trueAverage - trueAverageOffset, 0)}**]
+				Average skill level: **${this.client.formatDecimalNumber(skillAverage, 0)}** [**${this.client.formatDecimalNumber(trueAverage, 0)}**] - **Δ**: **${this.client.formatDecimalNumber(skillAverage - skillAverageOffset, 0)}** [**${this.client.formatDecimalNumber(trueAverage - trueAverageOffset, 0)}**]
 			`)
 			.padFields()
 			.addField('\u200b', stripIndents`
 				\`\`\`Slayer\`\`\`
-				Total slayer xp: **${client.formatNumber(TOTAL_SLAYER_XP)}** - **Δ**: **${client.formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(offset))}**
+				Total slayer xp: **${this.client.formatNumber(TOTAL_SLAYER_XP)}** - **Δ**: **${this.client.formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(offset))}**
 			`, false);
 
 		// slayer
@@ -103,8 +101,8 @@ module.exports = class PlayerCommand extends Command {
 
 			embed.addField(upperCaseFirstChar(slayer), stripIndents`
 				**LvL:** ${player.getSlayerLevel(slayer)}
-				**XP:** ${client.formatNumber(player[SLAYER_ARGUMENT])}
-				**Δ:** ${client.formatNumber(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${offset}`], 0, Math.round)}
+				**XP:** ${this.client.formatNumber(player[SLAYER_ARGUMENT])}
+				**Δ:** ${this.client.formatNumber(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${offset}`], 0, Math.round)}
 			`, true);
 		});
 
@@ -121,8 +119,8 @@ module.exports = class PlayerCommand extends Command {
 
 			embed.addField(upperCaseFirstChar(type), stripIndents`
 				**LvL:** ${progressLevel}
-				**XP:** ${client.formatNumber(player[DUNGEON_ARGUMENT], 0, Math.round)}
-				**Δ:** ${client.formatNumber(player[DUNGEON_ARGUMENT] - player[`${type}Xp${offset}`], 0, Math.round)}
+				**XP:** ${this.client.formatNumber(player[DUNGEON_ARGUMENT], 0, Math.round)}
+				**Δ:** ${this.client.formatNumber(player[DUNGEON_ARGUMENT] - player[`${type}Xp${offset}`], 0, Math.round)}
 			`, true);
 		});
 
@@ -134,12 +132,12 @@ module.exports = class PlayerCommand extends Command {
 			.addFields(
 				{ name: '\u200b', value: '```Miscellaneous```\u200b', inline: false },
 				{ name: 'Hypixel Guild XP', value: stripIndents`
-					**Total:** ${client.formatNumber(player.guildXp)}
-					**Δ:** ${client.formatNumber(player.guildXp - player[`guildXp${offset}`])}
+					**Total:** ${this.client.formatNumber(player.guildXp)}
+					**Δ:** ${this.client.formatNumber(player.guildXp - player[`guildXp${offset}`])}
 				`, inline: true },
 				{ name: 'Weight', value: stripIndents`
-					**Total**: ${client.formatDecimalNumber(totalWeight)} [ ${client.formatDecimalNumber(weight)} + ${client.formatDecimalNumber(overflow)} ]
-					**Δ:** ${client.formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${client.formatDecimalNumber(weight - weightOffset)} + ${client.formatDecimalNumber(overflow - overflowOffset)} ]
+					**Total**: ${this.client.formatDecimalNumber(totalWeight)} [ ${this.client.formatDecimalNumber(weight)} + ${this.client.formatDecimalNumber(overflow)} ]
+					**Δ:** ${this.client.formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${this.client.formatDecimalNumber(weight - weightOffset)} + ${this.client.formatDecimalNumber(overflow - overflowOffset)} ]
 				`, inline: true },
 			);
 		// .padFields();
@@ -150,8 +148,8 @@ module.exports = class PlayerCommand extends Command {
 
 		// 	embed.addField(upperCaseFirstChar(skill), stripIndents`
 		// 		**LvL:** ${progressLevel}
-		// 		**XP:** ${client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
-		// 		**Δ:** ${client.formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${offset}`], 0, Math.round)}
+		// 		**XP:** ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
+		// 		**Δ:** ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${offset}`], 0, Math.round)}
 		// 	`, true);
 		// });
 

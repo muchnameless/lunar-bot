@@ -31,14 +31,12 @@ module.exports = class LeaderboardCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		const { id: userID } = message.author;
 
 		let type;
@@ -53,10 +51,10 @@ module.exports = class LeaderboardCommand extends Command {
 		if (type) {
 			const result = autocorrect(type, [ ...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES, ...DUNGEON_CLASSES, 'skill', 'slayer', 'revenant', 'tarantula', 'sven', 'dungeon', 'guild', 'gxp', 'weight' ]);
 
-			if (result.similarity < config.get('AUTOCORRECT_THRESHOLD') && !flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+			if (result.similarity < this.client.config.get('AUTOCORRECT_THRESHOLD') && !flags.some(flag => [ 'f', 'force' ].includes(flag))) {
 				const ANSWER = await message.awaitReply(`there is currently no lb for \`${type}\`. Did you mean \`${result.value}\`?`, 30);
 
-				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return;
+				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return;
 			}
 
 			switch (result.value) {
@@ -84,14 +82,14 @@ module.exports = class LeaderboardCommand extends Command {
 					type = result.value;
 			}
 		} else {
-			type = config.get('CURRENT_COMPETITION');
+			type = this.client.config.get('CURRENT_COMPETITION');
 		}
 
-		const reply = await message.reply(createGainedStatsEmbed(client, {
+		const reply = await message.reply(createGainedStatsEmbed(this.client, {
 			userID,
-			hypixelGuild: client.hypixelGuilds.getFromArray(flags),
+			hypixelGuild: this.client.hypixelGuilds.getFromArray(flags),
 			type,
-			offset: getOffsetFromFlags(config, flags),
+			offset: getOffsetFromFlags(this.client.config, flags),
 			shouldShowOnlyBelowReqs: flags.some(flag => [ 't', 'track' ].includes(flag)),
 			page: page > 0 ? page : 1,
 		}));

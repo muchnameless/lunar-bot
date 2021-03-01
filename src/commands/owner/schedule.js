@@ -18,15 +18,13 @@ module.exports = class ScheduleCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
-		const { cronJobs } = client;
+	async run(message, args, flags, rawArgs) {
+		const { cronJobs } = this.client;
 
 		// list all running cron jobs
 		if (flags.some(flag => [ 'l', 'list' ].includes(flag))) return message.reply(cronJobs.cache.keyArray().join('\n'), { code: 'prolog', split: { char: '\n' } });
@@ -36,7 +34,7 @@ module.exports = class ScheduleCommand extends Command {
 			const name = args.join(' ');
 			const result = autocorrect(name, cronJobs.cache, 'name');
 
-			if (result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return message.reply(`no cron job with the name \`${name}\` found.`);
+			if (result.similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return message.reply(`no cron job with the name \`${name}\` found.`);
 
 			const { value: cronJob } = result;
 
@@ -50,7 +48,7 @@ module.exports = class ScheduleCommand extends Command {
 		// create a new cron job
 		if (!args.length) return message.reply(this.usageInfo);
 
-		const command = client.commands.getByName(args[0]);
+		const command = this.client.commands.getByName(args[0]);
 
 		if (!command) return message.reply(`unknown command \`${args[0]}\`.`);
 

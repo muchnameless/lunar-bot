@@ -20,17 +20,15 @@ module.exports = class VerifyCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		message.channel.startTyping(10);
 
-		const { hypixelGuilds, players } = client;
+		const { hypixelGuilds, players } = this.client;
 
 		let ign = args[0].replace(/\W/g, ''); // filter out all non alphanumerical characters
 
@@ -90,7 +88,7 @@ module.exports = class VerifyCommand extends Command {
 					30,
 				);
 
-				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
 			await playerLinkedToID.unlink(`linked account switched to ${message.author.tag}`);
@@ -104,12 +102,12 @@ module.exports = class VerifyCommand extends Command {
 			});
 		} catch (error) {
 			logger.error(`[VERIFY]: database: ${error.name}: ${error.message}`);
-			return message.reply(`an error occurred while updating the guild player database. Contact <@${client.ownerID}>`);
+			return message.reply(`an error occurred while updating the guild player database. Contact <@${this.client.ownerID}>`);
 		}
 
 		player.guildID = GUILD_ID;
 
-		const discordMember = message.member ?? await client.lgGuild?.members.fetch(message.author.id).catch(error => logger.error(`[VERIFY]: guild member fetch: ${error.name}: ${error.message}`)) ?? null;
+		const discordMember = message.member ?? await this.client.lgGuild?.members.fetch(message.author.id).catch(error => logger.error(`[VERIFY]: guild member fetch: ${error.name}: ${error.message}`)) ?? null;
 
 		await player.link(discordMember ?? message.author.id, 'verified with the bot');
 

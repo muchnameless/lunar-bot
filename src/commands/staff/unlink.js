@@ -19,15 +19,13 @@ module.exports = class UnlinkCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
-		const { players } = client;
+	async run(message, args, flags, rawArgs) {
+		const { players } = this.client;
 
 		/**
 		 * @type {import('../../structures/database/models/Player')}
@@ -43,7 +41,7 @@ module.exports = class UnlinkCommand extends Command {
 			for (const arg of args) {
 				// discord tag
 				if (checkIfDiscordTag(arg)) {
-					const discordMember = await client.lgGuild?.findMemberByTag(arg);
+					const discordMember = await this.client.lgGuild?.findMemberByTag(arg);
 
 					if (!discordMember) continue;
 

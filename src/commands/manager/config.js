@@ -22,14 +22,14 @@ module.exports = class ConfigCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
+		const { client: { config } } = this;
+
 		// list all config entries
 		if (!args.length) {
 			return message.reply(

@@ -17,21 +17,19 @@ module.exports = class RankIssuesCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		const embed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+			.setColor(this.client.config.get('EMBED_BLUE'))
 			.setTimestamp();
 
 		let issuesAmount = 0;
 
-		for (const hypixelGuild of client.hypixelGuilds.cache.values()) {
+		for (const hypixelGuild of this.client.hypixelGuilds.cache.values()) {
 			const belowWeightReq = [];
 
 			for (const player of hypixelGuild.players.values()) {
@@ -61,7 +59,7 @@ module.exports = class RankIssuesCommand extends Command {
 						value: trim(
 							belowWeightReq
 								.sort((a, b) => a.rank.name.toLowerCase().localeCompare(b.rank.name.toLowerCase()))
-								.map(({ player, totalWeight, rank }) => `${escapeIgn(player.ign)}: ${client.formatDecimalNumber(totalWeight)}/${client.formatDecimalNumber(rank.weightReq)} [${rank.name}]`)
+								.map(({ player, totalWeight, rank }) => `${escapeIgn(player.ign)}: ${this.client.formatDecimalNumber(totalWeight)}/${this.client.formatDecimalNumber(rank.weightReq)} [${rank.name}]`)
 								.join('\n'),
 							1024,
 						),

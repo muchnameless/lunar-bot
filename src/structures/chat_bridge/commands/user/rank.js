@@ -1,11 +1,11 @@
 'use strict';
 
 const handleRankRequest = require('../../functions/handleRankRequest');
-const IngameCommand = require('../../IngameCommand');
+const Command = require('../../../commands/Command');
 const logger = require('../../../../functions/logger');
 
 
-module.exports = class RankCommand extends IngameCommand {
+module.exports = class RankCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'request' ],
@@ -18,14 +18,12 @@ module.exports = class RankCommand extends IngameCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../../LunarClient')} client
-	 * @param {import('../../../database/managers/ConfigManager')} config
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		handleRankRequest(message);
 	}
 };

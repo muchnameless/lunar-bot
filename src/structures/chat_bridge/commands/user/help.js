@@ -2,11 +2,11 @@
 
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
-const IngameCommand = require('../../IngameCommand');
+const Command = require('../../../commands/Command');
 const logger = require('../../../../functions/logger');
 
 
-module.exports = class HelpCommand extends IngameCommand {
+module.exports = class HelpCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'h' ],
@@ -18,19 +18,17 @@ module.exports = class HelpCommand extends IngameCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../../LunarClient')} client
-	 * @param {import('../../../database/managers/ConfigManager')} config
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
-		const { commands } = client.chatBridges;
+	async run(message, args, flags, rawArgs) {
+		const { commands } = this.client.chatBridges;
 
 		// default help
 		if (!args.length) {
-			const reply = [ `gchat prefix: ${[ config.get('PREFIX'), config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.username}` ].join(', ')}` ];
+			const reply = [ `gchat prefix: ${[ this.client.config.get('PREFIX'), this.client.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.username}` ].join(', ')}` ];
 
 			for (const category of commands.visibleCategories) {
 				reply.push(`${category}: ${[ ...commands.filterByCategory(category).keys() ].join(', ')}`);
@@ -51,9 +49,9 @@ module.exports = class HelpCommand extends IngameCommand {
 			const requiredRoles = categoryCommands.first().requiredRoles;
 
 			if (requiredRoles) {
-				reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleID => client.lgGuild?.roles.cache.get(roleID)?.name ?? roleID)}`);
+				reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleID => this.client.lgGuild?.roles.cache.get(roleID)?.name ?? roleID)}`);
 			} else if (INPUT === 'owner') {
-				reply.push(`Required ID: ${client.ownerID}`);
+				reply.push(`Required ID: ${this.client.ownerID}`);
 			}
 
 			reply.push(`Commands: ${[ ...categoryCommands.keys() ].join(', ')}`);
@@ -76,15 +74,15 @@ module.exports = class HelpCommand extends IngameCommand {
 		const requiredRoles = command.requiredRoles;
 
 		if (requiredRoles) {
-			reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleID => client.lgGuild?.roles.cache.get(roleID)?.name ?? roleID)}`);
+			reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleID => this.client.lgGuild?.roles.cache.get(roleID)?.name ?? roleID)}`);
 		} else if (INPUT === 'owner') {
-			reply.push(`Required ID: ${client.ownerID}`);
+			reply.push(`Required ID: ${this.client.ownerID}`);
 		}
 
 		if (command.description) reply.push(command.description);
 		if (command.usage) reply.push(`Usage: ${command.usageInfo}`);
 
-		reply.push(`Cooldown: ${ms((command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
+		reply.push(`Cooldown: ${ms((command.cooldown ?? this.client.config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
 		message.reply(reply.join('\n'));
 	}

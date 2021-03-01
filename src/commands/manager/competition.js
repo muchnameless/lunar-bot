@@ -23,14 +23,12 @@ module.exports = class CompetitionCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		const collector = message.channel.createMessageCollector(
 			msg => msg.author.id === message.author.id,
 			{ idle: 30_000 },
@@ -53,11 +51,11 @@ module.exports = class CompetitionCommand extends Command {
 
 				const result = autocorrect(collected.content, COMPETITION_TYPES);
 
-				if (result.similarity >= config.get('AUTOCORRECT_THRESHOLD')) {
+				if (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) {
 					type = result.value;
 					retries = 0;
 				} else {
-					if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+					if (++retries >= this.client.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
 
 					message.reply(
 						`\`${collected.content}\` is not a valid type`,
@@ -78,7 +76,7 @@ module.exports = class CompetitionCommand extends Command {
 					startingTime = result;
 					retries = 0;
 				} else {
-					if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+					if (++retries >= this.client.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
 
 					message.reply(
 						`\`${collected.content}\` is not a valid date`,
@@ -102,7 +100,7 @@ module.exports = class CompetitionCommand extends Command {
 					endingTime = result;
 					retries = 0;
 				} else {
-					if (++retries >= config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+					if (++retries >= this.client.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
 
 					message.reply(
 						`\`${collected.content}\` is not a valid date`,

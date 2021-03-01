@@ -20,15 +20,13 @@ module.exports = class XpResetCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
-		const { players, db: { Sequelize: { Op } } } = client;
+	async run(message, args, flags, rawArgs) {
+		const { players, db: { Sequelize: { Op } } } = this.client;
 
 		let result;
 
@@ -55,7 +53,7 @@ module.exports = class XpResetCommand extends Command {
 			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
 				const ANSWER = await message.awaitReply(`reset xp gained from \`${player.ign}\`? Warning, this action cannot be undone.`, 30);
 
-				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
 			await player.resetXp({ offsetToReset });
@@ -69,7 +67,7 @@ module.exports = class XpResetCommand extends Command {
 			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
 				const ANSWER = await message.awaitReply(`reset competition xp gained from all ${PLAYER_COUNT} guild members? Warning, this action cannot be undone.`, 30);
 
-				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
 			// delete players who left the guild
@@ -80,15 +78,15 @@ module.exports = class XpResetCommand extends Command {
 					if (player.notes === 'skill api disabled') player.notes = null;
 					return player.resetXp({ offsetToReset });
 				}),
-				config.set('COMPETITION_START_TIME', Date.now()),
+				this.client.config.set('COMPETITION_START_TIME', Date.now()),
 			]);
 
 			result = `reset the competition xp gained from all ${PLAYER_COUNT} guild members`;
 		}
 
 		// logging
-		client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(new MessageEmbed()
+			.setColor(this.client.config.get('EMBED_BLUE'))
 			.setTitle('XP Tracking')
 			.setDescription(`${message.author.tag} | ${message.author} ${result}`)
 			.setTimestamp(),

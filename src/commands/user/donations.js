@@ -20,16 +20,14 @@ module.exports = class DonationsCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		// aquire donations from db
-		const donations = await client.db.models.Transaction.findAll({
+		const donations = await this.client.db.models.Transaction.findAll({
 			where: { type: 'donation' },
 		});
 
@@ -45,20 +43,20 @@ module.exports = class DonationsCommand extends Command {
 
 		// transform and prettify data
 		const embed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+			.setColor(this.client.config.get('EMBED_BLUE'))
 			.setTitle('Guild Donations')
 			.setTimestamp();
 		let totalAmount = 0;
 
 		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([_, a], [__, b]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
-			const IGN = client.players.cache.get(minecraftUUID)?.ign ?? (await mojang.getName(IGN).catch(logger.error)) ?? minecraftUUID;
+			const IGN = this.client.players.cache.get(minecraftUUID)?.ign ?? (await mojang.getName(IGN).catch(logger.error)) ?? minecraftUUID;
 			const notes = reducedNotes[minecraftUUID].join('\n');
 			const inline = Boolean(notes);
 
 			embed.addField('\u200b', stripIndent`
 				\`\`\`ada
 				#${`${index + 1}`.padStart(3, '0')} : ${IGN}
-					 > ${client.formatNumber(amount)}
+					 > ${this.client.formatNumber(amount)}
 				\`\`\`
 			`, inline);
 
@@ -72,6 +70,6 @@ module.exports = class DonationsCommand extends Command {
 		}));
 
 		// create and send embed
-		message.reply(embed.setDescription(`Total: ${client.formatNumber(totalAmount)}`));
+		message.reply(embed.setDescription(`Total: ${this.client.formatNumber(totalAmount)}`));
 	}
 };

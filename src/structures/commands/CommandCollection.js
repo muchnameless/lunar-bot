@@ -9,7 +9,7 @@ const logger = require('../../functions/logger');
 
 class CommandCollection extends Collection {
 	/**
-	 * @param {import('../LunarClient')} client
+	 * @param {import('../LunartClient')} client
 	 * @param {string} dirPath the path to the commands folder
 	 * @param {*} entries
 	 */
@@ -18,7 +18,13 @@ class CommandCollection extends Collection {
 
 		this.client = client;
 		this.dirPath = dirPath;
+		/**
+		 * @type {Map<string, string>}
+		 */
 		this.aliases = new Map();
+		/**
+		 * @type {Collection<string, Collection<string, number>>}
+		 */
 		this.cooldowns = new Collection();
 	}
 
@@ -109,6 +115,7 @@ class CommandCollection extends Collection {
 		 */
 		const command = new commandConstructor({
 			client: this.client,
+			commandCollection: this,
 			name,
 			category: category !== 'commands' ? category : null,
 		});

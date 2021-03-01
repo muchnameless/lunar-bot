@@ -19,18 +19,17 @@ module.exports = class TaxAmountCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		let newAmount = removeNumberFormatting(args.shift());
 
 		if (/\D/.test(newAmount)) return message.reply(`\`${newAmount}\` is not a number.`);
 
+		const { client: { config } } = this;
 		const OLD_AMOUNT = config.getNumber('TAX_AMOUNT');
 
 		newAmount = Number(newAmount);
@@ -39,13 +38,13 @@ module.exports = class TaxAmountCommand extends Command {
 		await config.set('TAX_AMOUNT', newAmount);
 
 		// update tax collectors
-		await Promise.all(client.taxCollectors.activeCollectors.map(async taxCollector => {
+		await Promise.all(this.client.taxCollectors.activeCollectors.map(async taxCollector => {
 			taxCollector.collectedTax += newAmount - OLD_AMOUNT;
 			return taxCollector.save();
 		}));
 
 		// logging
-		client.log(new MessageEmbed()
+		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')
 			.setDescription(`${message.author.tag} | ${message.author} changed the guild tax amount`)

@@ -19,17 +19,15 @@ module.exports = class TaxReminderCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'gp', 'ghost', 'ghostping' ].includes(arg));
-		const hGuild = client.hypixelGuilds.getFromArray(flags);
-		const playersToRemind = (hGuild ? hGuild.players : client.players.inGuild).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
+		const hGuild = this.client.hypixelGuilds.getFromArray(flags);
+		const playersToRemind = (hGuild ? hGuild.players : this.client.players.inGuild).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
 		const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(player => player.inDiscord && /^\d+$/.test(player.discordID));
 		const AMOUNT_TO_PING = playersPingable.size;
 
@@ -40,7 +38,7 @@ module.exports = class TaxReminderCommand extends Command {
 				{ sameChannel: true },
 			);
 
-			if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply(
+			if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply(
 				'the command has been cancelled.',
 				{ sameChannel: true },
 			);
@@ -62,9 +60,9 @@ module.exports = class TaxReminderCommand extends Command {
 		const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error(`[TAX REMINDER]: ghost ping: ${error.name}: ${error.message}`));
 
 		if (!fetched) return;
-		if (!message.channel.checkBotPermissions('MANAGE_MESSAGES')) return fetched.filter(msg => msg.author.id === client.user.id).forEach(msg => msg.delete().catch(logger.error));
+		if (!message.channel.checkBotPermissions('MANAGE_MESSAGES')) return fetched.filter(msg => msg.author.id === this.client.user.id).forEach(msg => msg.delete().catch(logger.error));
 
-		message.channel.bulkDelete([ message.id, ...fetched.filter(fetchedMsg => [ client.user.id, message.author.id ].includes(fetchedMsg.author.id)).keys() ]).catch(logger.error);
+		message.channel.bulkDelete([ message.id, ...fetched.filter(fetchedMsg => [ this.client.user.id, message.author.id ].includes(fetchedMsg.author.id)).keys() ]).catch(logger.error);
 
 		message.channel.stopTyping(true);
 	}

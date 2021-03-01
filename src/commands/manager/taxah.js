@@ -18,15 +18,13 @@ module.exports = class TaxAhCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
-		const { taxCollectors } = client;
+	async run(message, args, flags, rawArgs) {
+		const { taxCollectors } = this.client;
 
 		// identify input arguments
 		let type = '';
@@ -41,7 +39,7 @@ module.exports = class TaxAhCommand extends Command {
 		 */
 		const player = message.mentions.users.size
 			? message.mentions.users.first().player
-			: client.players.getByIGN(ign);
+			: this.client.players.getByIGN(ign);
 
 		if (!player) return message.reply(`no player ${message.mentions.users.size
 			? `linked to \`${message.guild
@@ -69,7 +67,7 @@ module.exports = class TaxAhCommand extends Command {
 				if (!taxCollector?.isCollecting) return message.reply(`\`${player.ign}\` is not a tax collector.`);
 
 				// remove self paid if only the collector paid the default amount at his own ah
-				if (taxCollector.collectedTax === config.getNumber('TAX_AMOUNT') && player.collectedBy === player.minecraftUUID) {
+				if (taxCollector.collectedTax === this.client.config.getNumber('TAX_AMOUNT') && player.collectedBy === player.minecraftUUID) {
 					logger.info(`[TAX AH]: ${player.ign}: removed and reset tax paid`);
 					await player.resetTax();
 					await taxCollector.remove();
@@ -86,8 +84,8 @@ module.exports = class TaxAhCommand extends Command {
 				return message.reply('specify wether to `add` or `remove` the tax collector.');
 		}
 
-		client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(new MessageEmbed()
+			.setColor(this.client.config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')
 			.setDescription(log)
 			.setTimestamp(),

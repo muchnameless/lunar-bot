@@ -43,7 +43,7 @@ module.exports = async message => {
 	// no command, only ping or prefix
 	if (!COMMAND_NAME.length) {
 		logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} which is not a valid command`);
-		return client.commands.help(client, client.config, message, args, flags).catch(logger.error);
+		return client.commands.help(message, args, flags).catch(logger.error);
 	}
 
 	if (config.getArray('REPLY_CONFIRMATION').includes(COMMAND_NAME)) return;
@@ -145,7 +145,7 @@ module.exports = async message => {
 	// execute command
 	try {
 		logger.info(`'${message.content}' was executed by ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}`);
-		await command.run(client, config, message, args, flags, rawArgs);
+		await command.run(message, args, flags, rawArgs);
 	} catch (error) {
 		logger.error(`An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}:`, error);
 		message.reply(`an error occured while executing the \`${command.name}\` command:\n${error.name}: ${error.message}`);

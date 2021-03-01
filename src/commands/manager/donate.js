@@ -19,18 +19,15 @@ module.exports = class DonateCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		if (args.length < 2) return message.reply(this.usageInfo);
 
-		const { players } = client;
-		const collector = client.taxCollectors.getByID(message.author.id);
+		const collector = this.client.taxCollectors.getByID(message.author.id);
 
 		if (!collector?.isCollecting) return message.reply('this command is restricted to tax collectors.');
 
@@ -40,7 +37,7 @@ module.exports = class DonateCommand extends Command {
 		 */
 		const player = message.mentions.users.size
 			? message.mentions.users.first().player
-			: players.getByIGN(IGN);
+			: this.client.players.getByIGN(IGN);
 
 		if (!player) return message.reply(`no player ${message.mentions.users.size
 			? `linked to \`${message.guild
@@ -68,12 +65,12 @@ module.exports = class DonateCommand extends Command {
 			type: 'donation',
 		}));
 
-		message.reply(`registered a donation from \`${player.ign}\` of \`${client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}.`);
+		message.reply(`registered a donation from \`${player.ign}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}.`);
 
-		client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(new MessageEmbed()
+			.setColor(this.client.config.get('EMBED_BLUE'))
 			.setTitle('Guild Donations')
-			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}\`\`\``)
+			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}\`\`\``)
 			.setTimestamp(),
 		);
 	}

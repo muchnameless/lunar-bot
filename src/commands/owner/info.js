@@ -20,22 +20,20 @@ module.exports = class InfoCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		message.reply(
 			stripIndents`
-				Guilds: ${client.guilds.cache.size.toLocaleString(config.get('NUMBER_FORMAT'))}
-				Channels: ${client.channels.cache.size.toLocaleString(config.get('NUMBER_FORMAT'))}
-				Members: ${client.guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0).toLocaleString(config.get('NUMBER_FORMAT'))}
-				Users: ${client.users.cache.size.toLocaleString(config.get('NUMBER_FORMAT'))}
-				Ready at: ${client.readyAt.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-				Uptime: ${ms(client.uptime)}
+				Guilds: ${this.client.guilds.cache.size.toLocaleString(this.client.config.get('NUMBER_FORMAT'))}
+				Channels: ${this.client.channels.cache.size.toLocaleString(this.client.config.get('NUMBER_FORMAT'))}
+				Members: ${this.client.guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0).toLocaleString(this.client.config.get('NUMBER_FORMAT'))}
+				Users: ${this.client.users.cache.size.toLocaleString(this.client.config.get('NUMBER_FORMAT'))}
+				Ready at: ${this.client.readyAt.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+				Uptime: ${ms(this.client.uptime)}
 				Discord.js v${version}
 			`,
 			{ code: 'js' },

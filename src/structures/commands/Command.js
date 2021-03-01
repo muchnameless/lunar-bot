@@ -15,13 +15,15 @@ class Command {
 	/**
 	 * create a new command
 	 * @param {object} param0
-	 * @param {import('../LunarClient')} param0.client discord client that instantiated this command
+	 * @param {import('../LunarClient')} param0.client discord this.client that instantiated this command
+	 * @param {import('./CommandCollection')} param0.commandCollection
 	 * @param {string} param0.name the name of the command
 	 * @param {string} param0.category the category of the command
 	 * @param {CommandInfo} param1
 	 */
-	constructor({ client, name, category }, { aliases, description, guildOnly, args, usage, cooldown }) {
+	constructor({ client, commandCollection, name, category }, { aliases, description, guildOnly, args, usage, cooldown }) {
 		this.client = client;
+		this.commandCollection = commandCollection;
 		this.name = name;
 		this.category = category;
 
@@ -78,35 +80,33 @@ class Command {
 	 * wether the command is part of a visible category
 	 */
 	get visible() {
-		return !this.client.commands.invisibleCategories.includes(this.category);
+		return !this.commandCollection.invisibleCategories.includes(this.category);
 	}
 
 	/**
 	 * loads the command and possible aliases into their collections
 	 */
 	load() {
-		this.client.commands.set(this.name.toLowerCase(), this);
-		this.aliases?.forEach(alias => this.client.commands.aliases.set(alias.toLowerCase(), this.name.toLowerCase()));
+		this.commandCollection.set(this.name.toLowerCase(), this);
+		this.aliases?.forEach(alias => this.commandCollection.aliases.set(alias.toLowerCase(), this.name.toLowerCase()));
 	}
 
 	/**
 	 * removes all aliases and the command from the commandsCollection
 	 */
 	unload() {
-		this.aliases?.forEach(alias => this.client.commands.aliases.delete(alias.toLowerCase()));
-		this.client.commands.delete(this.name.toLowerCase());
+		this.aliases?.forEach(alias => this.commandCollection.aliases.delete(alias.toLowerCase()));
+		this.commandCollection.delete(this.name.toLowerCase());
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../LunarClient')} client
-	 * @param {import('../database/managers/ConfigManager')} config
 	 * @param {import('../extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
 }

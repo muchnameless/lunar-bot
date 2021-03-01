@@ -135,7 +135,7 @@ module.exports = async message => {
 	// execute command
 	try {
 		logger.info(`'${message.content}' was executed by ${message.author.ign} in '${message.type}'`);
-		await command.run(client, config, message, args, flags, rawArgs);
+		await command.run(message, args, flags, rawArgs);
 	} catch (error) {
 		logger.error(`An error occured while ${message.author.ign} tried to execute ${message.content} in '${message.type}':`, error);
 		message.reply(`an error occured while executing the '${command.name}' command:\n${error.name}: ${error.message}`);

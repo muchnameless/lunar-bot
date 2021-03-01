@@ -22,17 +22,15 @@ module.exports = class LinkCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/LunarClient')} client
-	 * @param {import('../../structures/database/managers/ConfigManager')} config
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(client, config, message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) {
 		message.channel.startTyping(10);
 
-		const { players, hypixelGuilds } = client;
+		const { players, hypixelGuilds } = this.client;
 
 		/**
 		 * @type {import('../../structures/database/models/Player')}
@@ -91,7 +89,7 @@ module.exports = class LinkCommand extends Command {
 
 			if (!player) return message.reply(stripIndents`
 				error while creating new db entry for ${IGN} (${minecraftUUID}).
-				Wait for the next automatic database update (check ${client.loggingChannel ?? '#lunar-logs'})
+				Wait for the next automatic database update (check ${this.client.loggingChannel ?? '#lunar-logs'})
 			`);
 
 			break;
@@ -100,7 +98,7 @@ module.exports = class LinkCommand extends Command {
 		// no player to link found
 		if (!player) return message.reply(stripIndents`
 			${oneLineCommaListsOr`${args.map(arg => `\`${arg}\``)}`} does not contain a known IGN.
-			Make sure to provide the full ign if the player database is not already updated (check ${client.loggingChannel ?? '#lunar-logs'})
+			Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 		`);
 
 		// try to find the discord account to link the player to
@@ -108,13 +106,13 @@ module.exports = class LinkCommand extends Command {
 			? message.mentions.users.first().id
 			: await (async () => {
 				for (const tag of rawArgs.filter(arg => checkIfDiscordTag(arg))) {
-					const res = await client.lgGuild?.findMemberByTag(tag);
+					const res = await this.client.lgGuild?.findMemberByTag(tag);
 					if (res) return res.id;
 				}
 
 				// try to fetch a discord user from all integer only args as IDs to determine if one arg is a discord user ID
 				for (const number of args.filter(arg => /^\d+$/.test(arg))) {
-					const res = await client.users.fetch(number).catch(() => null);
+					const res = await this.client.users.fetch(number).catch(() => null);
 					if (res) return res.id;
 				}
 			})();
@@ -141,13 +139,13 @@ module.exports = class LinkCommand extends Command {
 					const ANSWER = await message.awaitReply(
 						stripIndents`
 							${linkedUser ?? `\`${DISCORD_ID}\``} is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?
-							Make sure to provide the full ign if the player database is not already updated (check ${client.loggingChannel ?? '#lunar-logs'})
+							Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 						`,
 						30,
 						{ allowedMentions: { parse: [] } },
 					);
 
-					if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+					if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 				}
 			}
 
@@ -181,13 +179,13 @@ module.exports = class LinkCommand extends Command {
 					const ANSWER = await message.awaitReply(
 						stripIndents`
 							\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}. Overwrite this?
-							Make sure to provide the full ign if the player database is not already updated (check ${client.loggingChannel ?? '#lunar-logs'})
+							Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 						`,
 						30,
 						{ allowedMentions: { parse: [] } },
 					);
 
-					if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+					if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 				}
 			}
 
@@ -202,7 +200,7 @@ module.exports = class LinkCommand extends Command {
 		// try to find the linked users member data
 		const discordMember = message.mentions.members?.size
 			? message.mentions.members.first()
-			: await client.lgGuild?.members.fetch(DISCORD_ID).catch(error => logger.error(`[LINK]: error fetching member to link: ${error.name}: ${error.message}`));
+			: await this.client.lgGuild?.members.fetch(DISCORD_ID).catch(error => logger.error(`[LINK]: error fetching member to link: ${error.name}: ${error.message}`));
 
 		// no discord member for the user to link found
 		if (!discordMember) {
@@ -215,8 +213,8 @@ module.exports = class LinkCommand extends Command {
 
 		let reply = `\`${player.ign}\` linked to ${discordMember}`;
 
-		if (!discordMember.roles.cache.has(config.get('VERIFIED_ROLE_ID')))
-			reply += ` (missing ${client.lgGuild?.roles.cache.get(config.get('VERIFIED_ROLE_ID'))?.name ?? config.get('VERIFIED_ROLE_ID')} role)`;
+		if (!discordMember.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID')))
+			reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.client.config.get('VERIFIED_ROLE_ID'))?.name ?? this.client.config.get('VERIFIED_ROLE_ID')} role)`;
 
 		message.reply(
 			`${reply}.`,
