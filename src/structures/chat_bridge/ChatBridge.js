@@ -325,28 +325,28 @@ class ChatBridge extends EventEmitter {
 	_parseMinecraftMessageToDiscord(string) {
 		return Util.escapeMarkdown(
 			string
-				.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
-				.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.chatBridge.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
-				.replace(/#([a-z-]+)/gi, (match, p1) => this.chatBridge.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+				.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
+				.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
+				.replace(/#([a-z-]+)/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
 				.replace(/(?<!<)@(!|&)?(\S+)(?!\d+>)/g, (match, p1, p2) => {
 					switch (p1) {
 						case '!': // members/users
-							return this.chatBridge.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-								?? this.chatBridge.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+							return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+								?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
 								?? match;
 
 						case '&': // roles
-							return this.chatBridge.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+							return this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
 								?? match;
 
 						default: { // players, members/users, roles
-							const player = this.chatBridge.client.players.cache.find(p => p.ign.toLowerCase() === p2.toLowerCase());
+							const player = this.client.players.cache.find(p => p.ign.toLowerCase() === p2.toLowerCase());
 
 							if (player?.inDiscord) return `<@${player.discordID}>`;
 
-							return this.chatBridge.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-								?? this.chatBridge.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
-								?? this.chatBridge.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+							return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+								?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+								?? this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
 								?? match;
 						}
 					}
