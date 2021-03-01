@@ -36,16 +36,18 @@ module.exports = async (chatBridge, message) => {
 	switch (message.type) {
 		case GUILD: {
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
-			if (!chatBridge.ready) return logger.warn(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: not ready`);
 
-			await message.forwardToDiscord();
+			if (chatBridge.ready) await message.forwardToDiscord();
 
-			return commandHandler(chatBridge, message);
+			return commandHandler(message);
 		}
 
 		case WHISPER: {
+			if (!message.author.inGuild) return; // ignore messages from non guild players
+
 			handleRankRequest(message).catch(error => logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`));
-			return commandHandler(chatBridge, message);
+
+			return commandHandler(message);
 		}
 
 		default: {
