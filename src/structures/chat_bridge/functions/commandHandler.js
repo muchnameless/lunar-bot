@@ -10,12 +10,12 @@ const logger = require('../../../functions/logger');
 
 /**
  * command handler for the chatBridge
- * @param {import('../ChatBridge')} chatBridge
  * @param {import('../HypixelMessage')} message
  */
-module.exports = async (chatBridge, message) => {
+module.exports = async message => {
 	if (!message.author || !message.content.length) return;
 
+	const { chatBridge } = message;
 	const { client, client: { config } } = chatBridge;
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), escapeRegex(config.get('INGAME_PREFIX')), `@${chatBridge.bot.username}` ].join('|')})`, 'i').exec(message.content); // PREFIX, INGAME_PREFIX, @mention
 
