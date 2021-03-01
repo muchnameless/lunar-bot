@@ -245,18 +245,18 @@ module.exports = class Player extends Model {
 	 * @returns {?LunarGuildMember|Promise<?LunarGuildMember>}
 	 */
 	get discordMember() {
-		if (!this._discordMember) this._discordMember = (() => {
-			if (!this.inDiscord) return null;
-
-			return this.client.lgGuild?.members
-				.fetch(this.discordID)
-				.catch(error => {
-					this.inDiscord = false; // prevent further fetches and try to link via cache in the next xpUpdate iterations
+		if (!this._discordMember && this.inDiscord) {
+			this._discordMember = (async () => {
+				try {
+					return this._discordMember = await this.client.lgGuild?.members.fetch(this.discordID) ?? null;
+				} catch (error) {
+					this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
 					this.save();
-					return logger.error(`[GET DISCORD MEMBER]: error while fetching ${this.ign}'s discord data: ${error.name}: ${error.message}`);
-				})
-				?? null;
-		})();
+					logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error.name}: ${error.message}`);
+					return this._discordMember = null;
+				}
+			})();
+		}
 
 		return this._discordMember;
 	}
