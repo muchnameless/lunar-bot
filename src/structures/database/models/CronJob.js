@@ -1,6 +1,7 @@
 'use strict';
 
 const { Model, DataTypes } = require('sequelize');
+const { CronJob: CronJobConstructor } = require('cron');
 const LunarMessage = require('../../extensions/Message');
 const logger = require('../../../functions/logger');
 
@@ -118,16 +119,22 @@ module.exports = class CronJob extends Model {
 		// expired while bot was offline
 		if (Date.now() > this.date - 10_000) { // -10_000 cause CronJob throws error if times are too close
 			logger.info(`[CRONJOB]: ${this.name}`);
-			this.client.cronJobs.model.destroy({ where: { name: this.name } });
-			return this.client.commands.getByName(this.command).run(this.client, this.client.config, await this.restoreCommandMessage(), this.args?.split(' ') ?? [], this.flags?.split(' ') ?? []).catch(logger.error);
+
+			try {
+				return await this.client.commands.getByName(this.command).run(await this.restoreCommandMessage(), this.args?.split(' ') ?? [], this.flags?.split(' ') ?? []);
+			} catch (error) {
+				return logger.error(error);
+			} finally {
+				this.client.cronJobs.model.destroy({ where: { name: this.name } });
+			}
 		}
 
-		this.client.schedule(this.name, new CronJob({
+		this.client.schedule(this.name, new CronJobConstructor({
 			cronTime: new Date(this.date),
 			onTick: async () => {
 				logger.info(`[CRONJOB]: ${this.name}`);
 				this.client.cronJobs.remove(this);
-				this.client.commands.getByName(this.command).run(this.client, this.client.config, await this.restoreCommandMessage(), this.args?.split(' ') ?? [], this.flags?.split(' ') ?? []).catch(logger.error);
+				this.client.commands.getByName(this.command).run(await this.restoreCommandMessage(), this.args?.split(' ') ?? [], this.flags?.split(' ') ?? []).catch(logger.error);
 			},
 			start: true,
 		}));

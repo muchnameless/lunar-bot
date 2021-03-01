@@ -10,7 +10,7 @@ class CronJobManager extends ModelManager {
 		super(options);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('../models/CronJob')}
+		 * @type {import('discord.js').Collection<string, CronJob>}
 		 */
 		this.cache;
 		/**
@@ -49,26 +49,52 @@ class CronJobManager extends ModelManager {
 			cronTime: date,
 			onTick: async () => {
 				logger.info(`[CRONJOB]: ${name}`);
-				command.run(this.client, this.client.config, await (await this.model.findOne({ where: { name } })).restoreCommandMessage(), args, flags).catch(logger.error);
-				this.cache.delete(name);
-				this.model.destroy({ where: { name } });
+
+				try {
+					const dbEntry = await this.model.findOne({ where: { name } });
+					const message = await dbEntry.restoreCommandMessage();
+					await command.run(message, args, flags);
+					await this.model.destroy({ where: { name } });
+					this.cache.delete(name);
+				} catch (error) {
+					logger.error(error);
+				}
 			},
 			start: true,
 		}));
 	}
 
 	/**
+	 * Resolves a data entry to a data Object.
+	 * @param {string|Object} idOrInstance The id or instance of something in this Manager
+	 * @returns {?Object} An instance from this Manager
+	 */
+	resolve(idOrInstance) {
+		if (idOrInstance instanceof CronJob) return idOrInstance;
+		if (idOrInstance instanceof this.model) return this.cache.get(idOrInstance[this.primaryKey]) ?? null;
+		if (typeof idOrInstance === 'string') return this.cache.get(idOrInstance) ?? null;
+		return null;
+	}
+
+	/**
 	 * stops and removes a cronJob
-	 * @param {string|import('../models/CronJob')} instanceOrId
+	 * @param {string|CronJob} instanceOrId
 	 */
 	async remove(instanceOrId) {
+		/**
+		 * @type {CronJob}
+		 */
 		const cronJob = this.resolve(instanceOrId);
 
 		if (!cronJob) throw new Error(`[CRONJOB REMOVE]: invalid input: ${instanceOrId}`);
 
 		cronJob.stop();
 
-		return super.remove(cronJob);
+		const name = this.cache.findKey(x => x === cronJob);
+
+		this.cache.delete(name);
+
+		return this.model.destroy({ where: { name } });
 	}
 
 	/**
