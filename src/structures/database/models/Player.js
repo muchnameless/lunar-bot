@@ -557,6 +557,7 @@ module.exports = class Player extends Model {
 				const { progressLevel } = this.getSkillLevel(skill);
 				const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
 
+				// individual skills
 				for (const level of skillRoles) {
 					if (level === CURRENT_LEVEL_MILESTONE) {
 						if (!member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`)))
