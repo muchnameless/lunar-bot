@@ -114,13 +114,16 @@ module.exports = class EvalCommand extends Command {
 					})()`)
 				: eval(INPUT);
 
-			if (evaled instanceof Promise) evaled = await evaled;
+			let isPromise;
+
+			// eslint-disable-next-line no-cond-assign
+			if (isPromise = evaled instanceof Promise) evaled = await evaled;
 
 			const hrStop = process.hrtime(hrStart);
 			const OUTPUT_ARRAY = SHOULD_INSPECT
 				? Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, util.format(evaled))), { maxLength: 1015, char: '\n' })
 				: Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, evaled)), { maxLength: 1015, char: '\n' });
-			const INFO = `d.js ${Discord.version} • type: \`${typeof evaled}\` • time taken: \`${(((hrStop[0] * 1e9) + hrStop[1])) / 1e6} ms\``;
+			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${(((hrStop[0] * 1e9) + hrStop[1])) / 1e6} ms\``;
 
 			message.replyMessageID = REPLY_MESSAGE_ID_TEMP;
 			embedCharacterCount += INFO.length;
