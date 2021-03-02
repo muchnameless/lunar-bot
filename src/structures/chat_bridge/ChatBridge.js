@@ -400,7 +400,11 @@ class ChatBridge extends EventEmitter {
 		});
 
 		for (const part of messageParts) {
-			await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
+			if (/[\w.?!^]/.test(part)) { // filter out spam messages
+				await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
+			} else {
+				logger.debug(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+			}
 		}
 	}
 
