@@ -25,7 +25,7 @@ module.exports = class EvalCommand extends Command {
 			description: 'call js native eval-function on the args',
 			args: true,
 			usage: stripIndents`
-				<\`-a\`|\`--async\` (requires explicit return statement)> [\`expression\`]
+				<\`-a\`|\`--async\` (requires explicit return statement)> <\`i\`|\`inspect\` to call util.format on the result> [\`expression\`]
 
 				available vars:
 				from d.js: Util, MessageEmbed, message / msg, this.client, ch(annel), g(uild), author, member
@@ -56,9 +56,8 @@ module.exports = class EvalCommand extends Command {
 		const { hypixelGuilds, players, taxCollectors, db } = this.client;
 		const lgGuild = this.client.lgGuild;
 		const asyncFlags = [ 'a', 'async' ];
-		const stackTraceFlags = [ 's', 'stacktrace' ];
 		const inspectFlags = [ 'i', 'inspect' ];
-		const totalFlags = [ 'c', 'ch', 'channel', ...asyncFlags, ...stackTraceFlags, ...inspectFlags ];
+		const totalFlags = [ 'c', 'ch', 'channel', ...asyncFlags, ...inspectFlags ];
 		const IS_ASYNC = flags.some(flag => asyncFlags.includes(flag));
 		const SHOULD_INSPECT = flags.some(flag => inspectFlags.includes(flag));
 		/* eslint-enable no-unused-vars */
@@ -140,24 +139,12 @@ module.exports = class EvalCommand extends Command {
 			);
 
 		} catch (error) {
-			if (flags.some(flag => stackTraceFlags.includes(flag))) {
-				logger.error('[EVAL ERROR]', error);
-			} else {
-				logger.error(`[EVAL ERROR]: ${error.name}: ${error.message}`);
-			}
+			logger.error(`[EVAL ERROR]: ${error.name}: ${error.message}`);
 
-			const ERROR_ARRAY = Util.splitMessage(Util.escapeCodeBlock(cleanOutput(this.client, `${error.name}: ${error.message}`)), { maxLength: 1015, char: '\n' });
-
-			ERROR_ARRAY.forEach((output, index) => {
-				responseEmbed.addField(index ? '\u200b' : 'Error', `\`\`\`xl\n${output}\`\`\``);
-			});
-
-			if (error.stack) {
-				responseEmbed.addField(
-					'Stacktrace',
-					`\`\`\`xl\n${error.stackTrace}\`\`\``,
-				);
-			}
+			Util.splitMessage(Util.escapeCodeBlock(cleanOutput(this.client, error)), { maxLength: 1015, char: '\n' })
+				.forEach((output, index) => {
+					responseEmbed.addField(index ? '\u200b' : 'Error', `\`\`\`xl\n${output}\`\`\``);
+				});
 
 			message.reply(responseEmbed
 				.addField('\u200b', `d.js ${Discord.version} • type: \`${typeof error}\``)
