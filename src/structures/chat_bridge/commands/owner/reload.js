@@ -44,24 +44,40 @@ module.exports = class ReloadCommand extends Command {
 				return message.reply('cooldowns reset successfully');
 
 			default: {
-				const command = this.commandCollection.getByName(INPUT);
-
-				let commandName;
-
-				if (command) {
-					command.unload();
-					commandName = command.name.toLowerCase();
-				} else {
-					commandName = INPUT;
-				}
+				let commandName = INPUT;
 
 				try {
 					const commandFiles = await getAllJsFiles(this.commandCollection.dirPath);
-					const NEW_PATH = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
 
-					if (!NEW_PATH) return message.reply(`no command with the name or alias '${INPUT}' found`);
+					// try to find file with INPUT name
+					let commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
+					let command;
 
-					this.commandCollection.load(NEW_PATH);
+					// no file found
+					if (!commandFile) {
+						// try to autocorrect input
+						command = this.commandCollection.getByName(commandName);
+
+						if (command) {
+							commandName = command.name;
+							commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
+						}
+
+					// file with exact name match found
+					} else {
+						commandName = basename(commandFile, '.js').toLowerCase();
+						command = this.commandCollection.get(commandName); // try to find already loaded command
+					}
+
+					if (!commandFile) return message.reply(`no command with the name or alias \`${INPUT}\` found`);
+
+					// command already loaded
+					if (command) {
+						command.unload();
+						commandName = command.name;
+					}
+
+					this.commandCollection.load(commandFile);
 
 					logger.info(`command ${commandName} was reloaded successfully`);
 					return message.reply(`command '${commandName}' was reloaded successfully`);
