@@ -834,7 +834,7 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * check if the discord member's display name includes the player ign and tries to change it if it doesn't
+	 * check if the discord member's display name includes the player ign and is unique. Tries to change it if it doesn't / isn't
 	 * @param {boolean} shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async syncIgnWithDisplayName(shouldSendDm = false) {
@@ -843,17 +843,23 @@ module.exports = class Player extends Model {
 		const member = await this.discordMember;
 
 		if (!member) return;
-		if (member.displayName.toLowerCase().includes(this.ign.toLowerCase())) return; // nickname includes ign
+
+		let reason = 0;
+
+		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 1; // nickname doesn't include ign
+		if (member.guild.members.cache.find(m => m.displayName === member.displayName && m.id !== member.id)?.player) reason = 2; // two guild members share the same display name
+
+		if (!reason) return;
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
 
-		return this.makeNickApiCall(this.ign, shouldSendDm, 'display name didn\'t contain ign');
+		return this.makeNickApiCall(this.ign, shouldSendDm, reason);
 	}
 
 	/**
 	 * sets a nickname for the player's discord member
 	 * @param {?string} newNick new nickname, null to remove the current nickname
 	 * @param {boolean} shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
-	 * @param {?string} reason reason for discord's audit logs
+	 * @param {?number|string} reason reason for discord's audit logs and the DM
 	 * @returns {Promise<boolean>} wether the API call was successful
 	 */
 	async makeNickApiCall(newNick = null, shouldSendDm = false, reason = null) {
@@ -867,7 +873,16 @@ module.exports = class Player extends Model {
 		const { displayName: PREV_NAME } = member;
 
 		try {
-			this.discordMember = await member.setNickname(newNick, reason);
+			this.discordMember = await member.setNickname(
+				newNick,
+				reason == null
+					? null
+					: typeof reason === 'string'
+						? reason
+						: reason === 1
+							? 'name didn\'t contain ign'
+							: 'name already taken',
+			);
 
 			await this.client.log(new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_BLUE'))
@@ -886,11 +901,16 @@ module.exports = class Player extends Model {
 
 			if (shouldSendDm) {
 				await member
-					.send(stripIndents`
-						include your ign \`${newNick}\` somewhere in your nickname.
-						If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${this.client.user} will automatically change your discord nickname
-					`)
-					.then(
+					.send(reason === 1
+						? stripIndents`
+							include your ign \`${newNick}\` somewhere in your nickname.
+							If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${this.client.user} will automatically change your discord nickname
+						`
+						: stripIndents`
+							the name \`${PREV_NAME}\` is already taken by another guild member.
+							Your name should be unique to allow staff members to easily identify you
+						`,
+					).then(
 						() => logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`),
 						error => logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: unable to DM: ${error.name}: ${error.message}`),
 					);
