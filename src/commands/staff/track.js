@@ -14,7 +14,7 @@ module.exports = class TracklistCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'gained weight from members below reqs',
+			description: 'stats graph from the last 30 days',
 			args: false,
 			usage: () => stripIndents`
 				<\`IGN\`|\`@mention\`> <\`type\`>

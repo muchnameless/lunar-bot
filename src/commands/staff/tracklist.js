@@ -9,8 +9,8 @@ const logger = require('../../functions/logger');
 module.exports = class TracklistCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [],
-			description: 'gained weight from members below reqs',
+			aliases: [ 'purgelist' ],
+			description: 'gained and total weight from members below reqs',
 			args: false,
 			usage: '',
 			cooldown: 0,
