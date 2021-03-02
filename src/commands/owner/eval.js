@@ -152,14 +152,15 @@ module.exports = class EvalCommand extends Command {
 				responseEmbed.addField(index ? '\u200b' : 'Error', `\`\`\`xl\n${output}\`\`\``);
 			});
 
+			if (error.stack) {
+				responseEmbed.addField(
+					'Stacktrace',
+					`\`\`\`xl\n${error.stackTrace}\`\`\``,
+				);
+			}
+
 			message.reply(responseEmbed
-				.addFields({
-					name: 'Stacktrace',
-					value: `\`\`\`xl\n${error.stackTrace}\`\`\``,
-				}, {
-					name: '\u200b',
-					value: `d.js ${Discord.version} • type: \`${typeof error}\``,
-				})
+				.addField('\u200b', `d.js ${Discord.version} • type: \`${typeof error}\``)
 				.setTimestamp(),
 			);
 		}
