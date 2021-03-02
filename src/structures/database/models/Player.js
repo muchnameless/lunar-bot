@@ -847,7 +847,7 @@ module.exports = class Player extends Model {
 		let reason = 0;
 
 		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 1; // nickname doesn't include ign
-		if (member.guild.members.cache.find(m => m.displayName === member.displayName && m.id !== member.id)?.player) reason = 2; // two guild members share the same display name
+		if (member.guild.members.cache.find(m => m.displayName.toLowerCase() === member.displayName.toLowerCase() && m.id !== member.id)?.player) reason = 2; // two guild members share the same display name
 
 		if (!reason) return;
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
