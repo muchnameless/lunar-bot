@@ -153,7 +153,13 @@ module.exports = class EvalCommand extends Command {
 			});
 
 			message.reply(responseEmbed
-				.addField('\u200b', `d.js ${Discord.version} • type: \`${typeof error}\``)
+				.addFields({
+					name: 'Stacktrace',
+					value: `\`\`\`xl\n${error.stackTrace}\`\`\``,
+				}, {
+					name: '\u200b',
+					value: `d.js ${Discord.version} • type: \`${typeof error}\``,
+				})
 				.setTimestamp(),
 			);
 		}
