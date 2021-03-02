@@ -177,15 +177,6 @@ module.exports = class TracklistCommand extends Command {
 				labels: [ ...Array(days).keys() ].map(x => days - 1 - x),
 				datasets,
 			},
-			options: {
-				scales: {
-					yAxes: [{
-						ticks: {
-							beginAtZero: true,
-						},
-					}],
-				},
-			},
 		});
 
 		message.reply(new MessageEmbed()
