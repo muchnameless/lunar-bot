@@ -13,5 +13,5 @@ module.exports = async chatBridge => {
 	chatBridge.bot.write('settings', defaultSettings);
 
 	// send bot to limbo (forbidden character in chat)
-	chatBridge.queueForMinecraftChat('§');
+	chatBridge.queueForMinecraftChat('/ac §');
 };
