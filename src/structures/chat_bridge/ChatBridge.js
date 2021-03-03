@@ -20,6 +20,12 @@ const logger = require('../../functions/logger');
  * @property {?string[]} [errors] Stop/end reasons that cause the promise to reject
  */
 
+/**
+ * @typedef {object} ChatOptions
+ * @property {?string} [prefix='']
+ * @property {?number} [maxParts=10]
+ */
+
 
 class ChatBridge extends EventEmitter {
 	/**
@@ -68,7 +74,7 @@ class ChatBridge extends EventEmitter {
 		/**
 		 * time to wait between ingame chat messages are sent, ('you can only send a message once every half second')
 		 */
-		this.ingameChatDelay = 500;
+		this.ingameChatDelay = 550;
 		/**
 		 * increases each login, reset to 0 on successfull spawn
 		 */
@@ -99,6 +105,14 @@ class ChatBridge extends EventEmitter {
 	 */
 	get channel() {
 		return this.client.channels.cache.get(this.webhook?.channelID) ?? null;
+	}
+
+	/**
+	 * player object associated with the chatBridge's bot
+	 * @type {import('../database/models/Player')}
+	 */
+	get player() {
+		return this.bot?.player ?? null;
 	}
 
 	/**
@@ -370,38 +384,38 @@ class ChatBridge extends EventEmitter {
 	async forwardDiscordMessageToHypixelGuildChat(message, player) {
 		return this.gchat(
 			this.constructor._escapeEz(this._parseDiscordMessageToMinecraft(message.content)),
-			`${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}:`,
+			{ prefix: `${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}:` },
 		);
 	}
 
 	/**
 	 * send a message to ingame guild chat
 	 * @param {string} message
-	 * @param {?string} prefix
+	 * @param {ChatOptions} options
 	 */
-	async gchat(message, prefix = '') {
-		return this.chat(message, `/gc ${prefix}${prefix.length ? ' ' : ''}`);
+	async gchat(message, { prefix = '', ...options } = {}) {
+		return this.chat(message, { prefix: `/gc ${prefix}${prefix.length ? ' ' : ''}`, ...options });
 	}
 
 	/**
 	 * send a message to ingame party chat
 	 * @param {string} message
-	 * @param {?string} prefix
+	 * @param {ChatOptions} options
 	 */
-	async pchat(message, prefix = '') {
-		return this.chat(message, `/pc ${prefix}${prefix.length ? ' ' : ''}`);
+	async pchat(message, { prefix = '', ...options } = {}) {
+		return this.chat(message, { prefix: `/pc ${prefix}${prefix.length ? ' ' : ''}`, ...options });
 	}
 
 	/**
 	 * splits the message into the max ingame chat length, prefixes all parts and sends them
 	 * @param {string} message
-	 * @param {?string} prefix
+	 * @param {ChatOptions} options
 	 * @returns {Promise<boolean>} success - wether all message parts were send
 	 */
-	async chat(message, prefix = '') {
+	async chat(message, { prefix = '', maxParts = this.client.config.getNumber('DEFAULT_MAX_PARTS') } = {}) {
 		let success = true;
 
-		const messageParts = message
+		let messageParts = message
 			.split('\n')
 			.flatMap(part => {
 				try {
@@ -413,21 +427,25 @@ class ChatBridge extends EventEmitter {
 			.filter(part => {
 				if (part.length && /\S/.test(part)) { // filter out white space only parts
 					if (this.isSpam(part)) {
-						logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+						if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 						return success = false;
 					}
 					return true;
 				} else {
-					logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+					if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 					return false;
 				}
 			});
 
-		if (messageParts.length > 10) success = false;
+		// prevent sending more than 'maxParts' messages
+		if (messageParts.length > maxParts) {
+			messageParts = messageParts.slice(0, maxParts);
+			success = false;
+		}
 
 		// waits between queueing each part to not clog up the queue if someone spams
-		for (const part of messageParts.slice(0, 10)) {
-			await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
+		for (const part of messageParts) {
+			await this.sendToMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
 		}
 
 		return success;
@@ -437,7 +455,7 @@ class ChatBridge extends EventEmitter {
 	 * send a message to the ingame chat, without changing it, this.ingameChatDelay ms queue cooldown
 	 * @param {string} message
 	 */
-	async queueForMinecraftChat(message) {
+	async sendToMinecraftChat(message) {
 		await this.queue.wait();
 
 		try {
@@ -458,7 +476,7 @@ class ChatBridge extends EventEmitter {
 	async broadcast(message) {
 		return Promise.all([
 			this.channel?.send(this._parseMinecraftMessageToDiscord(message)),
-			this.gchat(this._parseDiscordMessageToMinecraft(message)),
+			this.gchat(this._parseDiscordMessageToMinecraft(message), { maxParts: Infinity }),
 		]);
 	}
 
@@ -528,7 +546,7 @@ class ChatBridge extends EventEmitter {
 						errors: [ 'time', 'disconnect' ],
 					},
 				),
-				this.queueForMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)),
+				this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)),
 			]);
 
 			return result[0][0].content;

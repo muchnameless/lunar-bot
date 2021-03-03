@@ -1,5 +1,6 @@
 'use strict';
 
+
 class HypixelMessageAuthor {
 	/**
 	 * @param {import('./ChatBridge')} chatBridge
@@ -32,9 +33,10 @@ class HypixelMessageAuthor {
 	/**
 	 * whisper a message to the author
 	 * @param {string} message
+	 * @param {?import('./ChatBridge').ChatOptions} options
 	 */
-	async send(message) {
-		return this.chatBridge.chat(message, `/w ${this.ign} `);
+	async send(message, { prefix = '', ...options } = {}) {
+		return this.chatBridge.chat(message, { prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`, ...options });
 	}
 }
 

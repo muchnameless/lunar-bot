@@ -86,5 +86,5 @@ module.exports = async (chatBridge, message, args, ign) => {
 	);
 
 	resultString.unshift(question);
-	chatBridge.gchat(resultString.join('\n'));
+	chatBridge.gchat(resultString.join('\n'), { maxParts: Infinity });
 };

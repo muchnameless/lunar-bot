@@ -36,6 +36,10 @@ module.exports = async (chatBridge, options) => {
 	logger.debug(`[CHATBRIDGE BOT EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 
 	Object.defineProperties(bot, {
+		client: {
+			value: chatBridge.client,
+		},
+
 		/**
 		 * @type {Function}
 		 * @param {string} message
@@ -55,6 +59,16 @@ module.exports = async (chatBridge, options) => {
 			value: reason => {
 				reason ??= 'disconnect.quitting';
 				bot.end(reason);
+			},
+		},
+
+		/**
+		 * the bot's player object
+		 * @type {import('../database/models/Player')}
+		 */
+		player: {
+			get: function() {
+				return this.client.players.cache.get(this.uuid.replace(/-/g, '')) ?? null;
 			},
 		},
 	});

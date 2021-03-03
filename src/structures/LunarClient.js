@@ -104,7 +104,7 @@ class LunarClient extends Client {
 	 * @type {Function}
 	 */
 	get chat() {
-		return this.chatBridge.queueForMinecraftChat.bind(this.chatBridge);
+		return this.chatBridge.sendToMinecraftChat.bind(this.chatBridge);
 	}
 
 	/**
@@ -174,7 +174,7 @@ class LunarClient extends Client {
 					status: 'online',
 				});
 
-				if (config.getBoolean('EXTENDED_LOGGING')) logger.info(`Activity set to ${presence.activities[0].name}`);
+				if (config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`Activity set to ${presence.activities[0].name}`);
 			} catch (error) {
 				logger.error('error while setting activity:\n', error);
 			}

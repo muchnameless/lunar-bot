@@ -12,7 +12,7 @@ const logger = require('../../../functions/logger');
  * @param {import('../HypixelMessage')} message
  */
 module.exports = async (chatBridge, message) => {
-	if (chatBridge.client.config.getBoolean('EXTENDED_LOGGING')) logger.debug(`[${message.position} #${chatBridge.mcAccount}]: ${message.rawContent}`);
+	if (chatBridge.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.debug(`[${message.position} #${chatBridge.mcAccount}]: ${message.rawContent}`);
 
 	if (!chatBridge.guild) {
 		/**
@@ -23,6 +23,7 @@ module.exports = async (chatBridge, message) => {
 		if (guildJoinMatched) {
 			const [ guildName ] = guildJoinMatched;
 
+			chatBridge.client.hypixelGuilds.getByName(guildName)?.update().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
 			logger.info(`[CHATBRIDGE]: ${chatBridge.bot.username}: joined ${guildName}`);
 			return chatBridge.link(guildName);
 		}
@@ -72,6 +73,7 @@ module.exports = async (chatBridge, message) => {
 			 */
 			if (message.content === 'You left the guild') {
 				logger.warn(`[CHATBRIDGE]: ${chatBridge.logInfo}: bot left the guild`);
+				chatBridge.bot.player?.guild?.update().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
 				await message.forwardToDiscord();
 				return chatBridge.unlink();
 			}
@@ -123,7 +125,7 @@ module.exports = async (chatBridge, message) => {
 				if (!player?.guildID) return logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: denying f request from ${ign}`);
 
 				logger.info(`[CHATBRIDGE MESSAGE]: ${chatBridge.logInfo}: accepting f request from ${ign}`);
-				return chatBridge.queueForMinecraftChat(`/f add ${ign}`);
+				return chatBridge.sendToMinecraftChat(`/f add ${ign}`);
 			}
 
 			/**

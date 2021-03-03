@@ -85,13 +85,13 @@ class HypixelMessage extends ChatMessage {
 				return this.chatBridge.broadcast(message);
 
 			case PARTY:
-				return this.chatBridge.pchat(message);
+				return this.chatBridge.pchat(message, { maxParts: Infinity });
 
 			case WHISPER:
-				return this.author.send(message);
+				return this.author.send(message, { maxParts: Infinity });
 
 			default:
-				throw new Error('unknown type to reply to');
+				throw new Error(`unknown type to reply to: ${this.type}: ${this.rawContent}`);
 		}
 	}
 
