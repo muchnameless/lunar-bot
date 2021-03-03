@@ -10,7 +10,7 @@ const logger = require('../functions/logger');
  * @param {import('discord.js').User} user
  */
 module.exports = async (client, reaction, user) => {
-	if (!client.config.getBoolean('EXTENDED_LOGGING')) return;
+	if (!client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) return;
 
 	try {
 		if (reaction.message.partial) await reaction.message.fetch();

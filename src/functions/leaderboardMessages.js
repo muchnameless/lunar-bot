@@ -143,7 +143,7 @@ const self = module.exports = {
 		});
 
 		message.edit(content, statsEmbed);
-		if (message.client.config.getBoolean('EXTENDED_LOGGING')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
+		if (message.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
 	},
 
 	/**

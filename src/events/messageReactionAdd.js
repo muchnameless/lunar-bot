@@ -26,7 +26,7 @@ module.exports = async (client, reaction, user) => {
 
 	if (!message.embeds.length) return;
 
-	if (client.config.getBoolean('EXTENDED_LOGGING')) logger.info(`[EVENT]: ${user.tag}${message.guild ? ` | ${(await message.guild.members.fetch(user.id)).displayName}` : ''} reacted with ${emoji.name}`);
+	if (client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[EVENT]: ${user.tag}${message.guild ? ` | ${(await message.guild.members.fetch(user.id)).displayName}` : ''} reacted with ${emoji.name}`);
 
 	if (!message.embeds[0].title.includes('Leaderboard')) return;
 
