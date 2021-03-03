@@ -36,6 +36,12 @@ module.exports = class HypixelGuild extends Model {
 		 */
 		this.client;
 		/**
+		 * wether a player db update is currently running
+		 * @type {boolean}
+		 */
+		this._isUpdatingPlayers = false;
+
+		/**
 		 * @type {string}
 		 */
 		this.guildID;
@@ -183,11 +189,31 @@ module.exports = class HypixelGuild extends Model {
 
 		if (cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
 
-		const { players, config } = this.client;
+		this._updateGuildData({ name, ranks, chatMute });
 
-		// update guild data
+		return this.updatePlayers(currentGuildMembers);
+	}
+
+	/**
+	 * updates the guild data
+	 * @param {object} data
+	 * @param {string} data.name
+	 * @param {import('@zikeji/hypixel').Components.Schemas.GuildRank[]} data.ranks
+	 * @param {?number} chatMute
+	 */
+	async _updateGuildData({ name, ranks, chatMute } = {}) {
+		if (!name) {
+			let cached;
+
+			({ meta: { cached }, name, ranks, chatMute } = await hypixel.guild.id(this.guildID));
+
+			if (cached) return logger.info(`[UPDATE GUILD DATA]: ${this.name}: cached data`);
+		}
+
+		// update name
 		this.name = name;
 
+		// update ranks
 		for (const rank of ranks) {
 			const dbEntryRank = this.ranks?.find(r => r.priority === rank.priority);
 
@@ -210,224 +236,250 @@ module.exports = class HypixelGuild extends Model {
 			}
 		}
 
+		// update chatMute
 		if (chatMute) {
 			this.chatMutedUntil = Date.now() + chatMute;
 		} else {
 			this.chatMutedUntil = 0;
 		}
 
-		this.save();
+		return this.save();
+	}
 
-		// update guild players
-		if (!currentGuildMembers.length) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: guild data did not include any members`); // API error
+	/**
+	 * updates the guild player database
+	 * @param {import('@zikeji/hypixel').Components.Schemas.GuildMember[]} currentGuildMembers
+	 */
+	async updatePlayers(currentGuildMembers) {
+		if (this._isUpdatingPlayers) return;
+		this._isUpdatingPlayers = true;
 
-		const guildPlayers = this.players;
-		const playersLeft = guildPlayers.filter((_, minecraftUUID) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUUID));
-		const PLAYERS_LEFT_AMOUNT = playersLeft.size;
-		const PLAYERS_OLD_AMOUNT = guildPlayers.size;
+		try {
+			if (!currentGuildMembers) {
+				let cached;
 
-		// all old players left (???)
-		if (PLAYERS_LEFT_AMOUNT && PLAYERS_LEFT_AMOUNT === PLAYERS_OLD_AMOUNT) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: aborting guild player update request due to the possibility of an error from the fetched data`);
+				({ meta: { cached }, members: currentGuildMembers } = await hypixel.guild.id(this.guildID));
 
-		const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.inGuild.has(uuid));
-		const playersJoinedAgain = [];
-		const membersJoinedNew = [];
+				if (cached) return logger.info(`[UPDATE PLAYERS]: ${this.name}: cached data`);
+			}
 
-		await Promise.all(membersJoined.map(async hypixelGuildMember => {
-			const dbEntry = await this.client.players.model.findByPk(hypixelGuildMember.uuid);
-			if (dbEntry) return playersJoinedAgain.push(dbEntry);
-			return membersJoinedNew.push(hypixelGuildMember);
-		}));
+			const { players, config } = this.client;
 
-		let leftLog = [];
-		let joinedLog = [];
-		let ignChangedLog = [];
-		let hasError = false;
+			// update guild players
+			if (!currentGuildMembers.length) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: guild data did not include any members`); // API error
 
-		// update player database
-		await Promise.all([
-			// update IGNs
-			...guildPlayers.map(async player => {
-				const result = await player.updateIgn();
-				if (result) ignChangedLog.push(`${result.oldIgn} -> ${result.newIgn}`);
-			}),
+			const guildPlayers = this.players;
+			const playersLeft = guildPlayers.filter((_, minecraftUUID) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUUID));
+			const PLAYERS_LEFT_AMOUNT = playersLeft.size;
+			const PLAYERS_OLD_AMOUNT = guildPlayers.size;
 
-			// player left the guild
-			...playersLeft.map(async player => {
-				leftLog.push(`-\xa0${player.ign}`);
+			// all old players left (???)
+			if (PLAYERS_LEFT_AMOUNT && PLAYERS_LEFT_AMOUNT === PLAYERS_OLD_AMOUNT) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: aborting guild player update request due to the possibility of an error from the fetched data`);
 
-				if (await player.removeFromGuild()) return; // return if successful
+			const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.inGuild.has(uuid));
+			const playersJoinedAgain = [];
+			const membersJoinedNew = [];
 
-				leftLog.push(`-\xa0${player.ign}: error updating roles`);
-				hasError = true;
-			}),
+			await Promise.all(membersJoined.map(async hypixelGuildMember => {
+				const dbEntry = await this.client.players.model.findByPk(hypixelGuildMember.uuid);
+				if (dbEntry) return playersJoinedAgain.push(dbEntry);
+				return membersJoinedNew.push(hypixelGuildMember);
+			}));
 
-			// player joined again and is still in db
-			...playersJoinedAgain.map(async player => {
-				player.guildID = this.guildID;
+			let leftLog = [];
+			let joinedLog = [];
+			let ignChangedLog = [];
+			let hasError = false;
 
-				await player.updateIgn();
-				joinedLog.push(`+\xa0${player.ign}`);
+			// update player database
+			await Promise.all([
+				// update IGNs
+				...guildPlayers.map(async player => {
+					const result = await player.updateIgn();
+					if (result) ignChangedLog.push(`${result.oldIgn} -> ${result.newIgn}`);
+				}),
 
-				// try to link new player to discord
-				await (async () => {
-					let discordMember = await player.discordMember;
+				// player left the guild
+				...playersLeft.map(async player => {
+					leftLog.push(`-\xa0${player.ign}`);
 
-					if (!discordMember) {
-						const discordTag = await player.fetchDiscordTag(true);
+					if (await player.removeFromGuild()) return; // return if successful
+
+					leftLog.push(`-\xa0${player.ign}: error updating roles`);
+					hasError = true;
+				}),
+
+				// player joined again and is still in db
+				...playersJoinedAgain.map(async player => {
+					player.guildID = this.guildID;
+
+					await player.updateIgn();
+					joinedLog.push(`+\xa0${player.ign}`);
+
+					// try to link new player to discord
+					await (async () => {
+						let discordMember = await player.discordMember;
+
+						if (!discordMember) {
+							const discordTag = await player.fetchDiscordTag(true);
+
+							if (!discordTag) {
+								player.inDiscord = false;
+								joinedLog.push(`-\xa0${player.ign}: no linked discord`);
+								return hasError = true;
+							}
+
+							discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
+
+							if (!discordMember) {
+								if (/\D/.test(player.discordID)) await player.setValidDiscordID(discordTag).catch(logger.error); // save tag if no id is known
+								player.inDiscord = false;
+								joinedLog.push(player.discordID.includes('#')
+									? `-\xa0${player.ign}: unknown discord tag ${player.discordID}`
+									: `-\xa0${player.ign}: unknown discord ID ${player.discordID}`,
+								);
+
+								return hasError = true;
+							}
+						}
+
+						return player.link(discordMember);
+					})();
+
+					await player.save();
+
+					players.set(player.minecraftUUID, player);
+
+					const { xpLastUpdatedAt } = player;
+
+					// reset current xp to 0
+					await player.resetXp({ offsetToReset: 'current' });
+
+					// to trigger the xp gained reset if global reset happened after the player left the guild
+					if (config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: COMPETITION_START });
+					if (config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: COMPETITION_END });
+					if (config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: MAYOR });
+					if (config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: WEEK });
+					if (config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: MONTH });
+
+					// shift the daily array for the amount of daily resets missed
+					const DAYS_PASSED_SINCE_LAST_XP_UPDATE = Math.max(0, Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - xpLastUpdatedAt) / (24 * 60 * 60 * 1000)));
+
+					for (let index = DAYS_PASSED_SINCE_LAST_XP_UPDATE + 1; --index;) await player.resetXp({ offsetToReset: 'day' });
+
+					return player.update({
+						shouldSkipQueue: true,
+						reason: `joined ${this.name}`,
+					});
+				}),
+
+				// add all players to the db that joined
+				...membersJoinedNew.map(async ({ uuid: minecraftUUID }) => { // eslint-disable-line no-shadow
+					const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${minecraftUUID}: ${error.name}: ${error.message}`)) ?? UNKNOWN_IGN;
+
+					joinedLog.push(`+\xa0${IGN}`);
+
+					let discordTag;
+					let discordMember = null;
+
+					// try to link new player to discord
+					await (async () => {
+						discordTag = (await getHypixelClient(true).player.uuid(minecraftUUID)
+							.catch(error => logger.error(`[GET DISCORD TAG]: ${IGN} (${this.name}): ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))
+							?.socialMedia?.links?.DISCORD;
 
 						if (!discordTag) {
-							player.inDiscord = false;
-							joinedLog.push(`-\xa0${player.ign}: no linked discord`);
+							joinedLog.push(`-\xa0${IGN}: no linked discord`);
 							return hasError = true;
 						}
 
 						discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
 
-						if (!discordMember) {
-							if (/\D/.test(player.discordID)) await player.setValidDiscordID(discordTag).catch(logger.error); // save tag if no id is known
-							player.inDiscord = false;
-							joinedLog.push(player.discordID.includes('#')
-								? `-\xa0${player.ign}: unknown discord tag ${player.discordID}`
-								: `-\xa0${player.ign}: unknown discord ID ${player.discordID}`,
-							);
+						if (discordMember) return;
 
-							return hasError = true;
-						}
-					}
+						joinedLog.push(`-\xa0${IGN}: unknown discord tag ${discordTag}`);
+						hasError = true;
+					})();
 
-					return player.link(discordMember);
-				})();
+					const player = await players.add({
+						minecraftUUID,
+						ign: IGN,
+						discordID: discordMember?.id ?? discordTag,
+						guildID: this.guildID,
+						inDiscord: Boolean(discordMember),
+					}, false);
 
-				await player.save();
+					player.discordMember = discordMember;
 
-				players.set(player.minecraftUUID, player);
+					return player.update({
+						shouldSkipQueue: true,
+						reason: `joined ${this.name}`,
+					});
+				}),
+			]).catch(error => logger.error(`[UPDATE GUILD PLAYERS]: ${this.name}: db update error: ${error.name}: ${error.message}`));
 
-				const { xpLastUpdatedAt } = player;
+			// update guild xp gained and ingame ranks
+			currentGuildMembers.forEach(async hypixelGuildMember => {
+				const player = players.cache.get(hypixelGuildMember.uuid);
 
-				// reset current xp to 0
-				await player.resetXp({ offsetToReset: 'current' });
+				if (!player) return logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
 
-				// to trigger the xp gained reset if global reset happened after the player left the guild
-				if (config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: COMPETITION_START });
-				if (config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: COMPETITION_END });
-				if (config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: MAYOR });
-				if (config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: WEEK });
-				if (config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt) await player.resetXp({ offsetToReset: MONTH });
+				player.syncWithGuildData(hypixelGuildMember);
+				player.guildRankPriority = this.ranks.find(rank => rank.name === hypixelGuildMember.rank)?.priority ?? (/guild ?master/i.test(hypixelGuildMember.rank) ? this.ranks.length + 1 : 0);
+				player.save();
+			});
 
-				// shift the daily array for the amount of daily resets missed
-				const DAYS_PASSED_SINCE_LAST_XP_UPDATE = Math.max(0, Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - xpLastUpdatedAt) / (24 * 60 * 60 * 1000)));
+			const CHANGES = ignChangedLog.length + PLAYERS_LEFT_AMOUNT + playersJoinedAgain.length + membersJoinedNew.length;
 
-				for (let index = DAYS_PASSED_SINCE_LAST_XP_UPDATE + 1; --index;) await player.resetXp({ offsetToReset: 'day' });
+			if (!CHANGES) return;
 
-				return player.update({
-					shouldSkipQueue: true,
-					reason: `joined ${this.name}`,
-				});
-			}),
+			players.sortAlphabetically();
 
-			// add all players to the db that joined
-			...membersJoinedNew.map(async ({ uuid: minecraftUUID }) => { // eslint-disable-line no-shadow
-				const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${minecraftUUID}: ${error.name}: ${error.message}`)) ?? UNKNOWN_IGN;
+			// logging
+			const sortAlphabetically = arr => arr.sort((a, b) => a.slice(2).toLowerCase().localeCompare(b.slice(2).toLowerCase()));
 
-				joinedLog.push(`+\xa0${IGN}`);
+			joinedLog = Util.splitMessage(sortAlphabetically(joinedLog).join('\n'), { maxLength: 1011, char: '\n' });
+			leftLog = Util.splitMessage(sortAlphabetically(leftLog).join('\n'), { maxLength: 1011, char: '\n' });
+			ignChangedLog = Util.splitMessage(sortAlphabetically(ignChangedLog).join('\n'), { maxLength: 1015, char: '\n' });
 
-				let discordTag;
-				let discordMember = null;
+			const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length, ignChangedLog.length);
+			const getInlineFieldLineCount = string => string.length
+				? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 24), 0) // max shown is 24, number can be tweaked
+				: 0;
 
-				// try to link new player to discord
-				await (async () => {
-					discordTag = (await getHypixelClient(true).player.uuid(minecraftUUID)
-						.catch(error => logger.error(`[GET DISCORD TAG]: ${IGN} (${this.name}): ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))
-						?.socialMedia?.links?.DISCORD;
+			// create and send logging embed(s)
+			for (let index = 0; index < EMBED_COUNT; ++index) {
+				let joinedLogElement = joinedLog[index] ?? '';
+				let leftLogElement = leftLog[index] ?? '';
+				let ignChangedLogElement = ignChangedLog[index] ?? '';
 
-					if (!discordTag) {
-						joinedLog.push(`-\xa0${IGN}: no linked discord`);
-						return hasError = true;
-					}
+				const IGNS_JOINED_LOG_LINE_COUNT = getInlineFieldLineCount(joinedLogElement);
+				const PLAYERS_LEFT_LOG_LINE_COUNT = getInlineFieldLineCount(leftLogElement);
+				const IGNS_CHANGED_LOG_LINE_COUNT = getInlineFieldLineCount(ignChangedLogElement);
+				const MAX_VALUE_LINES = Math.max(IGNS_JOINED_LOG_LINE_COUNT, PLAYERS_LEFT_LOG_LINE_COUNT, IGNS_CHANGED_LOG_LINE_COUNT);
 
-					discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
+				// // empty line padding
+				for (let i = 1 + MAX_VALUE_LINES - IGNS_JOINED_LOG_LINE_COUNT; --i;) joinedLogElement += '\n\u200b';
+				for (let i = 1 + MAX_VALUE_LINES - PLAYERS_LEFT_LOG_LINE_COUNT; --i;) leftLogElement += '\n\u200b';
+				for (let i = 1 + MAX_VALUE_LINES - IGNS_CHANGED_LOG_LINE_COUNT; --i;) ignChangedLogElement += '\n\u200b';
 
-					if (discordMember) return;
-
-					joinedLog.push(`-\xa0${IGN}: unknown discord tag ${discordTag}`);
-					hasError = true;
-				})();
-
-				const player = await players.add({
-					minecraftUUID,
-					ign: IGN,
-					discordID: discordMember?.id ?? discordTag,
-					guildID: this.guildID,
-					inDiscord: Boolean(discordMember),
-				}, false);
-
-				player.discordMember = discordMember;
-
-				return player.update({
-					shouldSkipQueue: true,
-					reason: `joined ${this.name}`,
-				});
-			}),
-		]).catch(error => logger.error(`[UPDATE GUILD PLAYERS]: ${this.name}: db update error: ${error.name}: ${error.message}`));
-
-		// update guild xp gained and ingame ranks
-		currentGuildMembers.forEach(async hypixelGuildMember => {
-			const player = players.cache.get(hypixelGuildMember.uuid);
-
-			if (!player) return logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
-
-			player.syncWithGuildData(hypixelGuildMember);
-			player.guildRankPriority = this.ranks.find(rank => rank.name === hypixelGuildMember.rank)?.priority ?? (/guild ?master/i.test(hypixelGuildMember.rank) ? this.ranks.length + 1 : 0);
-			player.save();
-		});
-
-		const CHANGES = ignChangedLog.length + PLAYERS_LEFT_AMOUNT + playersJoinedAgain.length + membersJoinedNew.length;
-
-		if (!CHANGES) return;
-
-		players.sortAlphabetically();
-
-		// logging
-		const sortAlphabetically = arr => arr.sort((a, b) => a.slice(2).toLowerCase().localeCompare(b.slice(2).toLowerCase()));
-
-		joinedLog = Util.splitMessage(sortAlphabetically(joinedLog).join('\n'), { maxLength: 1011, char: '\n' });
-		leftLog = Util.splitMessage(sortAlphabetically(leftLog).join('\n'), { maxLength: 1011, char: '\n' });
-		ignChangedLog = Util.splitMessage(sortAlphabetically(ignChangedLog).join('\n'), { maxLength: 1015, char: '\n' });
-
-		const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length, ignChangedLog.length);
-		const getInlineFieldLineCount = string => string.length
-			? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 24), 0) // max shown is 24, number can be tweaked
-			: 0;
-
-		// create and send logging embed(s)
-		for (let index = 0; index < EMBED_COUNT; ++index) {
-			let joinedLogElement = joinedLog[index] ?? '';
-			let leftLogElement = leftLog[index] ?? '';
-			let ignChangedLogElement = ignChangedLog[index] ?? '';
-
-			const IGNS_JOINED_LOG_LINE_COUNT = getInlineFieldLineCount(joinedLogElement);
-			const PLAYERS_LEFT_LOG_LINE_COUNT = getInlineFieldLineCount(leftLogElement);
-			const IGNS_CHANGED_LOG_LINE_COUNT = getInlineFieldLineCount(ignChangedLogElement);
-			const MAX_VALUE_LINES = Math.max(IGNS_JOINED_LOG_LINE_COUNT, PLAYERS_LEFT_LOG_LINE_COUNT, IGNS_CHANGED_LOG_LINE_COUNT);
-
-			// // empty line padding
-			for (let i = 1 + MAX_VALUE_LINES - IGNS_JOINED_LOG_LINE_COUNT; --i;) joinedLogElement += '\n\u200b';
-			for (let i = 1 + MAX_VALUE_LINES - PLAYERS_LEFT_LOG_LINE_COUNT; --i;) leftLogElement += '\n\u200b';
-			for (let i = 1 + MAX_VALUE_LINES - IGNS_CHANGED_LOG_LINE_COUNT; --i;) ignChangedLogElement += '\n\u200b';
-
-			this.client.log(new MessageEmbed()
-				.setColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE'))
-				.setTitle(`${this.name} Player Database: ${CHANGES} change${CHANGES !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${PLAYERS_OLD_AMOUNT} -> ${this.playerCount}`)
-				.addFields( // max value#length is 1024
-					{ name: `${'joined'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${IGNS_JOINED_LOG_LINE_COUNT ? `diff\n${joinedLogElement}` : `\n${joinedLogElement}`}\`\`\``, inline: true },
-					{ name: `${'left'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${PLAYERS_LEFT_LOG_LINE_COUNT ? `diff\n${leftLogElement}` : `\n${leftLogElement}`}\`\`\``, inline: true },
-					{ name: `${'new ign'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`\n${ignChangedLogElement}\`\`\``, inline: true },
-				)
-				.setTimestamp(),
-			);
+				await this.client.log(new MessageEmbed()
+					.setColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE'))
+					.setTitle(`${this.name} Player Database: ${CHANGES} change${CHANGES !== 1 ? 's' : ''}`)
+					.setDescription(`Number of players: ${PLAYERS_OLD_AMOUNT} -> ${this.playerCount}`)
+					.addFields( // max value#length is 1024
+						{ name: `${'joined'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${IGNS_JOINED_LOG_LINE_COUNT ? `diff\n${joinedLogElement}` : `\n${joinedLogElement}`}\`\`\``, inline: true },
+						{ name: `${'left'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`${PLAYERS_LEFT_LOG_LINE_COUNT ? `diff\n${leftLogElement}` : `\n${leftLogElement}`}\`\`\``, inline: true },
+						{ name: `${'new ign'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`\n${ignChangedLogElement}\`\`\``, inline: true },
+					)
+					.setTimestamp(),
+				);
+			}
+		} finally {
+			this._isUpdatingPlayers = false;
 		}
+
+
 	}
 
 	/**

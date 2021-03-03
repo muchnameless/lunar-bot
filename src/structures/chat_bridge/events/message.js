@@ -23,7 +23,7 @@ module.exports = async (chatBridge, message) => {
 		if (guildJoinMatched) {
 			const [ guildName ] = guildJoinMatched;
 
-			chatBridge.client.hypixelGuilds.getByName(guildName)?.update().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
+			chatBridge.client.hypixelGuilds.getByName(guildName)?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
 			logger.info(`[CHATBRIDGE]: ${chatBridge.bot.username}: joined ${guildName}`);
 			return chatBridge.link(guildName);
 		}
@@ -57,7 +57,7 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN joined the guild!
 			 */
 			if (message.content.includes('joined the guild')) {
-				chatBridge.bot.player?.guild?.update().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
+				chatBridge.bot.player?.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
 				await message.forwardToDiscord();
 				return chatBridge.broadcast('welcome');
 			}
@@ -66,7 +66,7 @@ module.exports = async (chatBridge, message) => {
 			 * [HypixelRank] IGN left the guild!
 			 */
 			if (message.content.includes('left the guild!')) {
-				chatBridge.bot.player?.guild?.update().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
+				chatBridge.bot.player?.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
 				return message.forwardToDiscord();
 			}
 
@@ -75,7 +75,7 @@ module.exports = async (chatBridge, message) => {
 			 */
 			if (message.content === 'You left the guild') {
 				logger.warn(`[CHATBRIDGE]: ${chatBridge.logInfo}: bot left the guild`);
-				chatBridge.bot.player?.guild?.update().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
+				chatBridge.bot.player?.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
 				await message.forwardToDiscord();
 				return chatBridge.unlink();
 			}
@@ -85,7 +85,7 @@ module.exports = async (chatBridge, message) => {
 			 */
 
 			if (message.content.includes('was kicked from the guild by')) {
-				chatBridge.bot.player?.guild?.update().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
+				chatBridge.bot.player?.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
 				return message.forwardToDiscord();
 			}
 
@@ -94,7 +94,7 @@ module.exports = async (chatBridge, message) => {
 			 */
 			if (message.content.startsWith('You were kicked from the guild by')) {
 				logger.warn(`[CHATBRIDGE]: ${chatBridge.logInfo}: bot was kicked from the guild`);
-				chatBridge.bot.player?.guild?.update().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
+				chatBridge.bot.player?.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
 				await message.forwardToDiscord();
 				return chatBridge.unlink();
 			}
