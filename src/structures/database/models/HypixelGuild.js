@@ -179,10 +179,11 @@ module.exports = class HypixelGuild extends Model {
 	 * updates the player database
 	 */
 	async update() {
-		const { players, config } = this.client;
 		const { meta: { cached }, name, ranks, chatMute, members: currentGuildMembers } = await hypixel.guild.id(this.guildID);
 
 		if (cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
+
+		const { players, config } = this.client;
 
 		// update guild data
 		this.name = name;
