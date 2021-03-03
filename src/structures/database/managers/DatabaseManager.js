@@ -149,7 +149,7 @@ class DatabaseManager {
 						if (!player) return ++unknownPlayers;
 
 						paidLog.push(`${player.ign}: ${amount.toLocaleString(config.get('NUMBER_FORMAT'))}`);
-						if (config.getBoolean('EXTENDED_LOGGING')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${amount.toLocaleString(config.get('NUMBER_FORMAT'))} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
+						if (config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${amount.toLocaleString(config.get('NUMBER_FORMAT'))} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
 
 						return player.setToPaid({
 							amount,
@@ -173,7 +173,7 @@ class DatabaseManager {
 		).catch(error => logger.error(`[UPDATE TAX DB]: ${error.name}: ${error.message}`));
 
 		// logging
-		if (auctionsAmount && (config.getBoolean('EXTENDED_LOGGING') || (unknownPlayers && new Date().getMinutes() < config.getNumber('DATABASE_UPDATE_INTERVAL')))) logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);
+		if (auctionsAmount && (config.getBoolean('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.getNumber('DATABASE_UPDATE_INTERVAL')))) logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);
 		if (taxPaidLog.length) this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')
