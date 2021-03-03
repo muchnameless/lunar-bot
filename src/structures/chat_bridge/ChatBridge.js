@@ -388,6 +388,7 @@ class ChatBridge extends EventEmitter {
 	 * splits the message into the max ingame chat length, prefixes all parts and sends them
 	 * @param {string} message
 	 * @param {?string} prefix
+	 * @returns {Promise<boolean>} wether one of the parts was being blocked as spam from sending to chat
 	 */
 	async chat(message, prefix = '') {
 		const messageParts = message.split('\n').flatMap(part => {
@@ -399,13 +400,18 @@ class ChatBridge extends EventEmitter {
 			}
 		});
 
+		let blocked = false;
+
 		for (const part of messageParts) {
 			if (/[⠁⠂⠃⠅⠇⠈⠊⠌⠎⠐⠑⠔⠕⠘⠚⠜⠝⠟⠠⠡⠢⠣⠥⠧⠨⠪⠫⠬⠮⠯⠰⠱⠸⠹⠻⠼⠿⡀⡁⡂⡃⡄⡅⡇⡈⡊⡌⡎⡏⡐⡑⡒⡔⡕⡗⡘⡜⡝⡟⡠⡡⡢⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡵⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢂⢃⢄⢅⢆⢇⢈⢉⢊⢌⢎⢏⢐⢑⢔⢕⢗⢘⢚⢜⢝⢞⢟⢠⢡⢢⢤⢥⢦⢨⢩⢪⢬⢭⢮⢯⢰⢱⢳⢴⢵⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣃⣅⣆⣇⣎⣐⣑⣔⣕⣗⣘⣜⣝⣞⣟⣣⣤⣦⣨⣪⣫⣬⣯⣰⣱⣲⣳⣴⣵⣷⣹⣺⣻⣽⣾⣿]/.test(part)) {
+				blocked = true;
 				logger.debug(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 			} else if (part.length) {
 				await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
 			}
 		}
+
+		return blocked;
 	}
 
 	/**
