@@ -16,7 +16,7 @@ const logger = require('./logger');
  * @param {string} ign
  */
 module.exports = async (chatBridge, message, args, ign) => {
-	const duration = ms(args[0]) ?? 60_000;
+	const duration = Math.min(Math.max(ms(args[0]), 30_000), 10 * 60_000) || 60_000;
 	const startingIndex = message.content.indexOf('"');
 
 	// no '"' found
