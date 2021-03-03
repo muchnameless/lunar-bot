@@ -102,6 +102,8 @@ module.exports = class EvalCommand extends Command {
 		embedCharacterCount += responseEmbed.fields.reduce((acc, field) => field.name.length + field.value.length, 0);
 
 		try {
+			let isPromise;
+
 			const REPLY_MESSAGE_ID_TEMP = message.replyMessageID;
 			const hrStart = process.hrtime();
 
@@ -113,10 +115,7 @@ module.exports = class EvalCommand extends Command {
 					})()`)
 				: eval(INPUT);
 
-			let isPromise;
-
-			// eslint-disable-next-line no-cond-assign
-			if (isPromise = evaled instanceof Promise) evaled = await evaled;
+			if ((isPromise = evaled instanceof Promise)) evaled = await evaled;
 
 			const hrStop = process.hrtime(hrStart);
 			const OUTPUT_ARRAY = SHOULD_INSPECT
