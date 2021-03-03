@@ -412,9 +412,13 @@ class ChatBridge extends EventEmitter {
 			})
 			.filter(part => {
 				if (part.length && /\S/.test(part)) { // filter out white space only parts
-					if (this.isSpam(part)) return success = false;
+					if (this.isSpam(part)) {
+						logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+						return success = false;
+					}
 					return true;
 				} else {
+					logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 					return false;
 				}
 			});
