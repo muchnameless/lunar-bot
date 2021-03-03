@@ -23,7 +23,7 @@
     "cron": "^1.8.2",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
-    "emoji-regex": "^9.2.1",
+    "emoji-regex": "^9.2.2",
     "eslint": "^7.21.0",
     "jaro-winkler": "^0.2.8",
     "lodash": "^4.17.21",
