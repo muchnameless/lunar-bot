@@ -56,6 +56,7 @@ class LunarMessage extends Message {
 	 * @param {import('discord.js').EmojiResolvable} emoji
 	 */
 	async reactSafely(emoji) {
+		if (this.deleted) return this;
 		if (!this.channel.checkBotPermissions('ADD_REACTIONS')) return this;
 		return super.react(emoji).catch(error => logger.error(`[REACT SAFELY]: ${error.name}: ${error.message}`));
 	}
