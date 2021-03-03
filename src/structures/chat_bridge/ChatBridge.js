@@ -399,7 +399,9 @@ class ChatBridge extends EventEmitter {
 	 * @returns {Promise<boolean>} success - wether all message parts were send
 	 */
 	async chat(message, prefix = '') {
-		return (await Promise.all(message
+		let success = true;
+
+		const messageParts = message
 			.split('\n')
 			.flatMap(part => {
 				try {
@@ -407,17 +409,24 @@ class ChatBridge extends EventEmitter {
 				} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '
 					return trim(message, this.maxMessageLength - prefix.length);
 				}
-			}).filter(part => part.length && /\S/.test(part)) // filter out withe space only parts
-			.map(async part => {
-				if (this.isSpam(part)) {
-					logger.debug(`[CHATBRIDGE CHAT]: ignored '${part}'`);
-					return false;
-				} else {
-					await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
+			})
+			.filter(part => {
+				if (part.length && /\S/.test(part)) { // filter out white space only parts
+					if (this.isSpam(part)) return success = false;
 					return true;
+				} else {
+					return false;
 				}
-			}),
-		)).reduce((acc, cur) => acc && cur, true);
+			});
+
+		if (messageParts.length > 10) success = false;
+
+		// waits between queueing each part to not clog up the queue if someone spams
+		for (const part of messageParts.slice(0, 10)) {
+			await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
+		}
+
+		return success;
 	}
 
 	/**

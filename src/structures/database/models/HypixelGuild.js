@@ -4,7 +4,7 @@ const { Model, DataTypes } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
 const ms = require('ms');
 const { autocorrect, getHypixelClient } = require('../../../functions/util');
-const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED } = require('../../../constants/emojiCharacters');
+const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED, STOP } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH }, UNKNOWN_IGN } = require('../../../constants/database');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
@@ -583,7 +583,7 @@ module.exports = class HypixelGuild extends Model {
 		}
 
 		try {
-			if (!(await this.chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(X_EMOJI);
+			if (!(await this.chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(STOP);
 		} catch (error) {
 			logger.warn(`[GUILD CHATBRIDGE]: ${error.message}`);
 			message.reactSafely(X_EMOJI);
