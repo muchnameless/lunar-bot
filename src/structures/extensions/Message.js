@@ -183,7 +183,10 @@ class LunarMessage extends Message {
 		// guild -> requires permission
 		const requiredChannelPermissions = [ 'VIEW_CHANNEL', 'SEND_MESSAGES' ];
 
-		if (options.embed) requiredChannelPermissions.push('EMBED_LINKS');
+		if (options.embed) {
+			requiredChannelPermissions.push('EMBED_LINKS');
+			if (options.embed.files?.length) requiredChannelPermissions.push('ATTACH_FILES');
+		}
 
 		// commands channel / reply in same channel option or flag
 		if (this.channel.name.includes('commands') || options.sameChannel || this.shouldReplyInSameChannel) {
