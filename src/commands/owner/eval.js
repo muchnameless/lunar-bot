@@ -28,8 +28,8 @@ module.exports = class EvalCommand extends Command {
 				<\`-a\`|\`--async\` (requires explicit return statement)> <\`i\`|\`inspect\` to call util.format on the result> [\`expression\`]
 
 				available vars:
-				from d.js: Util, MessageEmbed, message / msg, this.client, ch(annel), g(uild), author, member
-				from this.client: this.client.config, players, taxCollectors, db
+				from d.js: Util, MessageEmbed, message / msg, client, ch(annel), g(uild), author, member
+				from client: (main) chatBridge, hypixelGuilds, players, taxCollectors, db
 
 				required:
 				Discord, lodash, similarity, ms, util,
@@ -49,12 +49,13 @@ module.exports = class EvalCommand extends Command {
 	async run(message, args, flags, rawArgs) {
 		/* eslint-disable no-unused-vars */
 		const { client } = this;
+		const chatBridge = client.chatBridge;
 		const { Util, MessageEmbed } = Discord;
 		const { cleanOutput } = functionsUtil;
 		const { channel, channel: ch, guild, guild: g, author, member } = message;
 		const msg = message;
-		const { hypixelGuilds, players, taxCollectors, db } = this.client;
-		const lgGuild = this.client.lgGuild;
+		const { hypixelGuilds, players, taxCollectors, db } = client;
+		const lgGuild = client.lgGuild;
 		const asyncFlags = [ 'a', 'async' ];
 		const inspectFlags = [ 'i', 'inspect' ];
 		const totalFlags = [ 'c', 'ch', 'channel', ...asyncFlags, ...inspectFlags ];
@@ -74,8 +75,8 @@ module.exports = class EvalCommand extends Command {
 		const INPUT = rawArgs.join(' ');
 		const inputArray = Util.splitMessage(Util.escapeCodeBlock(INPUT), { maxLength: 1015, char: '\n' });
 		const responseEmbed = new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
-			.setFooter(`${guild ? guild.me.displayName : this.client.user.username}`, this.client.user.displayAvatarURL());
+			.setColor(client.config.get('EMBED_BLUE'))
+			.setFooter(`${guild ? guild.me.displayName : client.user.username}`, client.user.displayAvatarURL());
 
 		let embedCharacterCount = responseEmbed.footer.text.length;
 		let hypixel;
@@ -119,8 +120,8 @@ module.exports = class EvalCommand extends Command {
 
 			const hrStop = process.hrtime(hrStart);
 			const OUTPUT_ARRAY = SHOULD_INSPECT
-				? Util.splitMessage(Util.escapeCodeBlock(cleanOutput(this.client, util.format(evaled))), { maxLength: 1015, char: '\n' })
-				: Util.splitMessage(Util.escapeCodeBlock(cleanOutput(this.client, evaled)), { maxLength: 1015, char: '\n' });
+				? Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, util.format(evaled))), { maxLength: 1015, char: '\n' })
+				: Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, evaled)), { maxLength: 1015, char: '\n' });
 			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${(((hrStop[0] * 1e9) + hrStop[1])) / 1e6} ms\``;
 
 			message.replyMessageID = REPLY_MESSAGE_ID_TEMP;
@@ -141,7 +142,7 @@ module.exports = class EvalCommand extends Command {
 		} catch (error) {
 			logger.error(`[EVAL ERROR]: ${error.name}: ${error.message}`);
 
-			Util.splitMessage(Util.escapeCodeBlock(cleanOutput(this.client, error)), { maxLength: 1015, char: '\n' })
+			Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, error)), { maxLength: 1015, char: '\n' })
 				.forEach((output, index) => {
 					responseEmbed.addField(index ? '\u200b' : 'Error', `\`\`\`xl\n${output}\`\`\``);
 				});
