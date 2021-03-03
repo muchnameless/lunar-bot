@@ -355,6 +355,14 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
+	 * checks if the message includes special characters used in certain "memes"
+	 * @param {string} message
+	 */
+	isSpam(message) {
+		return /[⠁-⣿]/.test(message);
+	}
+
+	/**
 	 * forwards a discord message to ingame guild chat, prettifying discord renders
 	 * @param {import('../extensions/Message')} message
 	 * @param {import('../database/models/Player')} player
@@ -388,30 +396,28 @@ class ChatBridge extends EventEmitter {
 	 * splits the message into the max ingame chat length, prefixes all parts and sends them
 	 * @param {string} message
 	 * @param {?string} prefix
-	 * @returns {Promise<boolean>} wether one of the parts was being blocked as spam from sending to chat
+	 * @returns {Promise<boolean>} success - wether all message parts were send
 	 */
 	async chat(message, prefix = '') {
-		const messageParts = message.split('\n').flatMap(part => {
-			try {
-				return Util.splitMessage(part, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
-			} catch {
-				// fallback in case the splitMessage throws if it doesn't contain any ' '
-				return trim(message, this.maxMessageLength - prefix.length);
-			}
-		});
-
-		let blocked = false;
-
-		for (const part of messageParts) {
-			if (/[⠁⠂⠃⠅⠇⠈⠊⠌⠎⠐⠑⠔⠕⠘⠚⠜⠝⠟⠠⠡⠢⠣⠥⠧⠨⠪⠫⠬⠮⠯⠰⠱⠸⠹⠻⠼⠿⡀⡁⡂⡃⡄⡅⡇⡈⡊⡌⡎⡏⡐⡑⡒⡔⡕⡗⡘⡜⡝⡟⡠⡡⡢⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡵⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢂⢃⢄⢅⢆⢇⢈⢉⢊⢌⢎⢏⢐⢑⢔⢕⢗⢘⢚⢜⢝⢞⢟⢠⢡⢢⢤⢥⢦⢨⢩⢪⢬⢭⢮⢯⢰⢱⢳⢴⢵⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣃⣅⣆⣇⣎⣐⣑⣔⣕⣗⣘⣜⣝⣞⣟⣣⣤⣦⣨⣪⣫⣬⣯⣰⣱⣲⣳⣴⣵⣷⣹⣺⣻⣽⣾⣿]/.test(part)) {
-				blocked = true;
-				logger.debug(`[CHATBRIDGE CHAT]: ignored '${part}'`);
-			} else if (part.length) {
-				await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
-			}
-		}
-
-		return blocked;
+		return (await Promise.all(message
+			.split('\n')
+			.flatMap(part => {
+				try {
+					return Util.splitMessage(part, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
+				} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '
+					return trim(message, this.maxMessageLength - prefix.length);
+				}
+			}).filter(part => part.length && /\S/.test(part)) // filter out withe space only parts
+			.map(async part => {
+				if (this.isSpam(part)) {
+					logger.debug(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+					return false;
+				} else {
+					await this.queueForMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
+					return true;
+				}
+			}),
+		)).reduce((acc, cur) => acc && cur, true);
 	}
 
 	/**

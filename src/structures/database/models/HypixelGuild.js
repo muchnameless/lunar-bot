@@ -583,7 +583,7 @@ module.exports = class HypixelGuild extends Model {
 		}
 
 		try {
-			if (await this.chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player)) message.reactSafely(X_EMOJI);
+			if (!(await this.chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(X_EMOJI);
 		} catch (error) {
 			logger.warn(`[GUILD CHATBRIDGE]: ${error.message}`);
 			message.reactSafely(X_EMOJI);
