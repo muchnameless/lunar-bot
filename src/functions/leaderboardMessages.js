@@ -5,7 +5,7 @@ const { MessageEmbed } = require('discord.js');
 const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_SHORT, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../constants/database');
-const { upperCaseFirstChar, autocorrect } = require('./util');
+const { upperCaseFirstChar, autocorrect, autocorrectToOffset, autocorrectToType } = require('./util');
 const logger = require('../functions/logger');
 
 
@@ -61,6 +61,84 @@ const self = module.exports = {
 		} catch (error) {
 			logger.error(`[ADD PAGE REACTIONS]: ${error.name}: ${error.message}`);
 		}
+
+		return message;
+	},
+
+	/**
+	 * handles a leaderbaord message
+	 * @param {import('../structures/extensions/Message')} message the message to add the reactions to
+	 * @param {string[]} args
+	 * @param {string[]} flags
+	 * @param {Function} createLeaderboard
+	 * @param {?object} defaults
+	 * @param {string} [defaults.typeDefault]
+	 * @param {number} [defaults.pageDefault=1]
+	 */
+	handleLeaderboardCommandMessage: async (message, args, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) => {
+		const { client: { config } } = message;
+
+		// offset input
+		const offsetInput = args.map((arg, index) => ({ index, ...autocorrectToOffset(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+		const offset = offsetInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
+			? (() => {
+				args.splice(offsetInput.index, 1);
+				return offsetInput.value;
+			})()
+			: config.get('DEFAULT_XP_OFFSET');
+
+		// page input
+		let page;
+
+		for (const [ index, arg ] of args.entries()) {
+			const numberInput = parseInt(arg, 10);
+
+			if (isNaN(numberInput)) continue;
+
+			page = Math.max(numberInput, 1);
+			args.splice(index, 1);
+			break;
+		}
+
+		page ??= pageDefault;
+
+		// hypixel guild input
+		const hypixelGuildInput = args.map((arg, index) => ({ index, ...message.client.hypixelGuilds.autocorrectToGuild(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+		const hypixelGuild = hypixelGuildInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
+			? (() => {
+				args.splice(hypixelGuildInput.index, 1);
+				return hypixelGuildInput.value;
+			})()
+			: message.author.player?.guild;
+
+		// type input
+		let type;
+
+		if (args.length) {
+			const typeInput = args.map((arg, index) => ({ index, arg, ...autocorrectToType(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+
+			if (typeInput.similarity < config.get('AUTOCORRECT_THRESHOLD') && !flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+				const ANSWER = await message.awaitReply(`there is currently no lb for \`${typeInput.arg}\`. Did you mean \`${typeInput.value}\`?`, 30);
+
+				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return;
+			}
+
+			args.splice(typeInput.index, 1);
+			type = typeInput.value;
+		} else {
+			type = typeDefault;
+		}
+
+		return message
+			.reply(createLeaderboard(message.client, {
+				userID: message.author.id,
+				hypixelGuild,
+				type,
+				offset,
+				shouldShowOnlyBelowReqs: flags.some(flag => [ 't', 'track' ].includes(flag)),
+				page,
+			}))
+			.then(self.addPageReactions);
 	},
 
 	/**

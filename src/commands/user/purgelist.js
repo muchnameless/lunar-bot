@@ -1,7 +1,6 @@
 'use strict';
 
-const { addPageReactions, getOffsetFromFlags, createGainedStatsEmbed } = require('../../functions/leaderboardMessages');
-const { XP_OFFSETS_SHORT } = require('../../constants/database');
+const { createGainedStatsEmbed, handleLeaderboardCommandMessage } = require('../../functions/leaderboardMessages');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -25,26 +24,6 @@ module.exports = class TracklistCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
-		let page;
-
-		for (const arg of args) {
-			if (/^\d/.test(arg)) {
-				page = parseInt(arg, 10);
-				break;
-			}
-		}
-
-		page ??= Infinity;
-
-		const reply = await message.reply(createGainedStatsEmbed(this.client, {
-			userID: message.author.id,
-			hypixelGuild: this.client.hypixelGuilds.getFromArray(flags) ?? message.author.hypixelGuild,
-			type: 'track',
-			offset: getOffsetFromFlags(this.client.config, flags) ?? XP_OFFSETS_SHORT.week,
-			shouldShowOnlyBelowReqs: true,
-			page: page > 0 ? page : 1,
-		}));
-
-		addPageReactions(reply);
+		handleLeaderboardCommandMessage(message, args, flags, createGainedStatsEmbed, { typeDefault: 'track', pageDefault: Infinity });
 	}
 };
