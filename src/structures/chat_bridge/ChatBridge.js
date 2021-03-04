@@ -471,11 +471,11 @@ class ChatBridge extends EventEmitter {
 	/**
 	 * send a message both to discord and the ingame guild chat, parsing both
 	 * @param {string} message
-	 * @returns {Promise<[import('../extensions/Message'), void]>}
+	 * @returns {Promise<[boolean|import('../extensions/Message'), void]>}
 	 */
 	async broadcast(message) {
 		return Promise.all([
-			this.channel?.send(this._parseMinecraftMessageToDiscord(message)),
+			this.guild?.chatBridgeEnabled && this.channel?.send(this._parseMinecraftMessageToDiscord(message)),
 			this.gchat(this._parseDiscordMessageToMinecraft(message), { maxParts: Infinity }),
 		]);
 	}
@@ -485,6 +485,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {import('discord.js').WebhookMessageOptions} toSend
 	 */
 	async sendViaWebhook(toSend) {
+		if (!this.guild?.chatBridgeEnabled) return;
 		if (!toSend.content?.length) return logger.warn(`[CHATBRIDGE]: ${this.logInfo}: prevented sending empty message`);
 
 		try {

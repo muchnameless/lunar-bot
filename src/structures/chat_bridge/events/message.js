@@ -13,29 +13,11 @@ const logger = require('../../../functions/logger');
  */
 module.exports = async (chatBridge, message) => {
 	if (chatBridge.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.debug(`[${message.position} #${chatBridge.mcAccount}]: ${message.rawContent}`);
-
-	if (!chatBridge.guild) {
-		/**
-		 * You joined GUILD_NAME!
-		 */
-		const guildJoinMatched = message.content.match(/(?<=^You joined ).+(?=!)/);
-
-		if (guildJoinMatched) {
-			const [ guildName ] = guildJoinMatched;
-
-			chatBridge.client.hypixelGuilds.getByName(guildName)?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
-			logger.info(`[CHATBRIDGE]: ${chatBridge.bot.username}: joined ${guildName}`);
-			return chatBridge.link(guildName);
-		}
-
-		return;
-	}
-
-	if (!chatBridge.guild.chatBridgeEnabled) return;
 	if (!message.rawContent.length) return;
 
 	switch (message.type) {
 		case GUILD: {
+			if (!chatBridge.guild?.chatBridgeEnabled) return;
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
 
 			if (chatBridge.ready) await message.forwardToDiscord();
@@ -44,6 +26,7 @@ module.exports = async (chatBridge, message) => {
 		}
 
 		case WHISPER: {
+			if (!chatBridge.guild?.chatBridgeEnabled) return;
 			if (!message.author.inGuild) return; // ignore messages from non guild players
 
 			handleRankRequest(message).catch(error => logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`));
