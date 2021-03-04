@@ -116,7 +116,7 @@ module.exports = async message => {
 
 		const msDuration = ms(duration);
 
-		if (!msDuration) return;
+		if (!msDuration) return logger.error(`[CHATBRIDGE]: unknown ms duration: ${duration}`);
 
 		player.message.chatBridgeMutedUntil = Date.now() + msDuration;
 		player.save();
