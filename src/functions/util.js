@@ -2,12 +2,13 @@
 
 const { promisify, inspect } = require('util');
 const jaroWinklerSimilarity = require('jaro-winkler');
+const { XP_TYPES, XP_OFFSETS_SHORT } = require('../constants/database');
 const hypixel = require('../api/hypixel');
 const hypixelAux = require('../api/hypixelAux');
 const logger = require('./logger');
 
 
-module.exports = {
+const self = module.exports = {
 
 	/**
 	 * usage: await sleep(milliseconds)
@@ -187,5 +188,43 @@ module.exports = {
 		return (await Promise.all(arr.map(async item => (await callback(item)) ? item : fail))).filter(i=>i !== fail);
 	},
 
+	/**
+	 * autocorrects a string to one of the supported types
+	 * @param {string} input
+	 */
+	autocorrectToType: input => {
+		const result = self.autocorrect(input, [ 'skill', 'slayer', 'revenant', 'tarantula', 'sven', 'dungeon', 'gxp', 'weight', ...XP_TYPES ]);
 
+		switch (result.value) {
+			case 'revenant':
+				result.value = 'zombie';
+				break;
+			case 'tarantula':
+				result.value = 'spider';
+				break;
+			case 'sven':
+				result.value = 'wolf';
+				break;
+			case 'dungeon':
+				result.value = 'catacombs';
+				break;
+			case 'gxp':
+				result.value = 'guild';
+				break;
+		}
+
+		return result;
+	},
+
+	/**
+	 * autocorrects a string to a db offset using short names
+	 * @param {string} input message flags
+	 */
+	autocorrectToOffset: input => {
+		const result = self.autocorrect(input, Object.keys(XP_OFFSETS_SHORT));
+
+		result.value = XP_OFFSETS_SHORT[result.value];
+
+		return result;
+	},
 };
