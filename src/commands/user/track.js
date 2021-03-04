@@ -38,17 +38,50 @@ module.exports = class TracklistCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
+		let type;
 		/**
 		 * @type {import('../../structures/database/models/Player')}
 		 */
-		const player = message.mentions.users.size
-			? message.mentions.users.first().player
-			: (() => {
-				for (const arg of args) {
-					const result = this.client.players.getByIGN(arg);
-					if (result) return result;
+		let player = message.mentions.users.first()?.player;
+
+		// get input from args
+		for (const arg of args) {
+			// get type from args
+			if (!type) {
+				const result = autocorrect(arg, [ 'skill', 'slayer', 'revenant', 'tarantula', 'sven', 'dungeon', 'gxp', 'weight', ...XP_TYPES ]);
+
+				if (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) {
+					type = result.value;
+
+					switch (type) {
+						case 'revenant':
+							type = 'zombie';
+							break;
+						case 'tarantula':
+							type = 'spider';
+							break;
+						case 'sven':
+							type = 'wolf';
+							break;
+						case 'dungeon':
+							type = 'catacombs';
+							break;
+						case 'gxp':
+							type = 'guild';
+							break;
+					}
+
+					break;
 				}
-			})() ?? message.author.player;
+			}
+
+			// get player from args
+			player ??= this.client.players.getByIGN(arg);
+		}
+
+		// apply default values
+		type ??= 'weight';
+		player ??= message.author.player; // get player from author
 
 		if (!player) {
 			return message.reply(oneLine`${message.mentions.users.size
@@ -56,38 +89,8 @@ module.exports = class TracklistCommand extends Command {
 					? message.mentions.members.first().displayName
 					: message.mentions.users.first().username}\`
 					 is`
-				: args.length
-					? `\`${args[0]}\` is`
-					: 'you are'
+				: 'you are'
 			} not in the player db.`);
-		}
-
-		let type = 'weight';
-
-		for (const arg of args) {
-			const result = autocorrect(arg, [ 'skill', 'slayer', 'revenant', 'tarantula', 'sven', 'dungeon', 'gxp', 'weight', ...XP_TYPES ]);
-
-			if (result.similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) continue;
-
-			type = result.value;
-
-			switch (type) {
-				case 'revenant':
-					type = 'zombie';
-					break;
-				case 'tarantula':
-					type = 'spider';
-					break;
-				case 'sven':
-					type = 'wolf';
-					break;
-				case 'dungeon':
-					type = 'catacombs';
-					break;
-				case 'gxp':
-					type = 'guild';
-					break;
-			}
 		}
 
 		const days = 30;
