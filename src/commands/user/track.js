@@ -3,11 +3,11 @@
 const { MessageEmbed, MessageAttachment } = require('discord.js');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { oneLine, stripIndents } = require('common-tags');
-const { autocorrect, upperCaseFirstChar } = require('../../functions/util');
-const { XP_TYPES } = require('../../constants/database');
+const { upperCaseFirstChar, autocorrectToType, autocorrect } = require('../../functions/util');
 const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
+const { autocorrectToType: getType } = require('../../functions/leaderboardMessages');
 
 
 module.exports = class TracklistCommand extends Command {
@@ -38,50 +38,28 @@ module.exports = class TracklistCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
-		let type;
+		// type input
+		const typeInput = args.map((arg, index) => ({ index, ...autocorrectToType(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+		const type = typeInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+			? (() => {
+				args.splice(typeInput.index, 1);
+				return typeInput.value;
+			})()
+			: 'weight';
+
+		// player input
 		/**
 		 * @type {import('../../structures/database/models/Player')}
 		 */
-		let player = message.mentions.users.first()?.player;
+		const player = message.mentions.users.size
+			? message.mentions.users.first().player
+			: (() => {
+				const playerInput = args.map(arg => autocorrect(arg, this.client.players.cache, 'ign')).sort((a, b) => a.similarity - b.similarity).pop();
 
-		// get input from args
-		for (const arg of args) {
-			// get type from args
-			if (!type) {
-				const result = autocorrect(arg, [ 'skill', 'slayer', 'revenant', 'tarantula', 'sven', 'dungeon', 'gxp', 'weight', ...XP_TYPES ]);
-
-				if (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) {
-					type = result.value;
-
-					switch (type) {
-						case 'revenant':
-							type = 'zombie';
-							break;
-						case 'tarantula':
-							type = 'spider';
-							break;
-						case 'sven':
-							type = 'wolf';
-							break;
-						case 'dungeon':
-							type = 'catacombs';
-							break;
-						case 'gxp':
-							type = 'guild';
-							break;
-					}
-
-					break;
-				}
-			}
-
-			// get player from args
-			player ??= this.client.players.getByIGN(arg);
-		}
-
-		// apply default values
-		type ??= 'weight';
-		player ??= message.author.player; // get player from author
+				return playerInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+					? playerInput.value
+					: message.author.player;
+			})();
 
 		if (!player) {
 			return message.reply(oneLine`${message.mentions.users.size
