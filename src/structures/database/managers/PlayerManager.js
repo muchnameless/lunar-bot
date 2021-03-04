@@ -160,11 +160,20 @@ class PlayerManager extends ModelManager {
 	getByIGN(ign) {
 		if (!ign) return null;
 
-		const result = autocorrect(ign, this.cache, 'ign');
+		const result = this.autocorrectToPlayer(ign);
 
 		return (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD'))
 			? result.value
 			: null;
+	}
+
+	/**
+	 * autocorrects the input to a player ign
+	 * @param {string} input
+	 * @returns {import('../models/Player')}
+	 */
+	autocorrectToPlayer(input) {
+		return autocorrect(input, this.cache, 'ign');
 	}
 
 	/**

@@ -3,11 +3,10 @@
 const { MessageEmbed, MessageAttachment } = require('discord.js');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { oneLine, stripIndents } = require('common-tags');
-const { upperCaseFirstChar, autocorrectToType, autocorrect } = require('../../functions/util');
+const { upperCaseFirstChar, autocorrectToType } = require('../../functions/util');
 const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
-const { autocorrectToType: getType } = require('../../functions/leaderboardMessages');
 
 
 module.exports = class TracklistCommand extends Command {
@@ -54,7 +53,7 @@ module.exports = class TracklistCommand extends Command {
 		const player = message.mentions.users.size
 			? message.mentions.users.first().player
 			: (() => {
-				const playerInput = args.map(arg => autocorrect(arg, this.client.players.cache, 'ign')).sort((a, b) => a.similarity - b.similarity).pop();
+				const playerInput = args.map(arg => this.client.players.autocorrectToPlayer(arg)).sort((a, b) => a.similarity - b.similarity).pop();
 
 				return playerInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
 					? playerInput.value

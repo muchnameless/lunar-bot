@@ -110,9 +110,9 @@ class HypixelGuildManager extends ModelManager {
 	}
 
 	/**
-	 * autocorrects all flags to the hypixel guilds names and returns the most likely match or null, or 'false' for the 'all'-flag
+	 * autocorrects the input to a hypixel guild name
 	 * @param {string} input
-	 * @returns {?import('../models/HypixelGuild')|boolean}
+	 * @returns {import('../models/HypixelGuild')|boolean}
 	 */
 	autocorrectToGuild(input) {
 		const result = autocorrect(input, [ ...this.cache.values(), { name: 'all' } ], 'name');
