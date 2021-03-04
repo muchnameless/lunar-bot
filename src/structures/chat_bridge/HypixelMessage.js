@@ -96,7 +96,7 @@ class HypixelMessage extends ChatMessage {
 	}
 
 	/**
-	 * forwards the message to discord via the chatBridge's webhook
+	 * forwards the message to discord via the chatBridge's webhook, if the guild has the chatBridge enabled
 	 */
 	async forwardToDiscord() {
 		if (this.author) {
