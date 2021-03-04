@@ -4,8 +4,8 @@ const { stripIndent, oneLine } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
 const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
-const { offsetFlags, XP_OFFSETS_SHORT, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../constants/database');
-const { upperCaseFirstChar, autocorrect, autocorrectToOffset, autocorrectToType } = require('./util');
+const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../constants/database');
+const { upperCaseFirstChar, autocorrectToOffset, autocorrectToType } = require('./util');
 const logger = require('../functions/logger');
 
 
@@ -139,27 +139,6 @@ const self = module.exports = {
 				page,
 			}))
 			.then(self.addPageReactions);
-	},
-
-	/**
-	 * autocorrect an offset-flag using short names
-	 * @param {import('../../structures/database/managers/ConfigManager')} config the bot's config
-	 * @param {string[]} flags message flags
-	 * @returns {string}
-	 */
-	getOffsetFromFlags: (config, flags) => {
-		let offset;
-
-		for (const flag of flags) {
-			const result = autocorrect(flag, Object.keys(XP_OFFSETS_SHORT));
-
-			if (result.similarity < config.get('AUTOCORRECT_THRESHOLD')) continue;
-
-			offset = XP_OFFSETS_SHORT[result.value];
-			break;
-		}
-
-		return offset;
 	},
 
 	/**

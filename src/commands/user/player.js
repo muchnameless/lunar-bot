@@ -3,9 +3,8 @@
 const { MessageEmbed } = require('discord.js');
 const { oneLine, stripIndents } = require('common-tags');
 const { SKILLS, /* COSMETIC_SKILLS, */ SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
-const { offsetFlags, XP_OFFSETS_TIME } = require('../../constants/database');
-const { /* escapeIgn, */ upperCaseFirstChar } = require('../../functions/util');
-const { getOffsetFromFlags } = require('../../functions/leaderboardMessages');
+const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../../constants/database');
+const { /* escapeIgn, */ upperCaseFirstChar, autocorrectToOffset } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -28,14 +27,31 @@ module.exports = class PlayerCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
+		// type input
+		const offsetInput = args.map((arg, index) => ({ index, ...autocorrectToOffset(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+		const offset = offsetInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+			? (() => {
+				args.splice(offsetInput.index, 1);
+				return offsetInput.value;
+			})()
+			: (this.client.config.getBoolean('COMPETITION_RUNNING') || (Date.now() - this.client.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.client.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
+				? offsetFlags.COMPETITION_START
+				: this.client.config.get('DEFAULT_XP_OFFSET')
+			);
+
+		// player input
 		/**
 		 * @type {import('../../structures/database/models/Player')}
 		 */
 		const player = message.mentions.users.size
 			? message.mentions.users.first().player
-			: args.length
-				? this.client.players.getByIGN(args[0])
-				: message.author.player;
+			: (() => {
+				const playerInput = args.map(arg => this.client.players.autocorrectToPlayer(arg)).sort((a, b) => a.similarity - b.similarity).pop();
+
+				return playerInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+					? playerInput.value
+					: message.author.player;
+			})();
 
 		if (!player) {
 			return message.reply(oneLine`${message.mentions.users.size
@@ -43,18 +59,13 @@ module.exports = class PlayerCommand extends Command {
 					? message.mentions.members.first().displayName
 					: message.mentions.users.first().username}\`
 					 is`
-				: args.length
-					? `\`${args[0]}\` is`
-					: 'you are'
+				: 'you are'
 			} not in the player db.`);
 		}
 
 		// update db?
 		if (flags.some(flag => [ 'f', 'force' ].includes(flag))) await player.updateXp({ shouldSkipQueue: true });
 
-		const offset = getOffsetFromFlags(this.client.config, flags) ?? (this.client.config.getBoolean('COMPETITION_RUNNING') || (Date.now() - this.client.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.client.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
-			? offsetFlags.COMPETITION_START
-			: this.client.config.get('DEFAULT_XP_OFFSET'));
 		const startingDate = new Date(Math.max(this.client.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
 		const embed = new MessageEmbed()
 			.setColor(this.client.config.get('EMBED_BLUE'))
@@ -84,7 +95,7 @@ module.exports = class PlayerCommand extends Command {
 
 		embed
 			.setDescription(stripIndents`
-				${`Δ: change since ${startingDate.toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT`/* .replace(/ /g, '\xa0') */.padEnd(105, '\xa0') + '\u200b'}
+				${`Δ: change since ${startingDate.toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`.padEnd(105, '\xa0') + '\u200b'}
 				
 				\`\`\`Skills\`\`\`
 				Average skill level: **${this.client.formatDecimalNumber(skillAverage, 0)}** [**${this.client.formatDecimalNumber(trueAverage, 0)}**] - **Δ**: **${this.client.formatDecimalNumber(skillAverage - skillAverageOffset, 0)}** [**${this.client.formatDecimalNumber(trueAverage - trueAverageOffset, 0)}**]
