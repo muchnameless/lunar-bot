@@ -3,7 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const { oneLine, stripIndents } = require('common-tags');
 const { SKILLS, /* COSMETIC_SKILLS, */ SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
-const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../../constants/database');
+const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
 const { /* escapeIgn, */ upperCaseFirstChar, autocorrectToOffset } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -14,7 +14,7 @@ module.exports = class PlayerCommand extends Command {
 		super(data, {
 			aliases: [ 'xp' ],
 			description: 'check a player\'s xp gained',
-			usage: '<`IGN` to check someone other than yourself>',
+			usage: `<\`IGN\` to check someone other than yourself> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`${offset}\``).join('|')} Δ>`,
 			cooldown: 1,
 		});
 	}
