@@ -402,7 +402,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	shouldBlock(string) {
-		return /[⠁-⣿]/.test(string) || /sex/i.test(string);
+		return /[⠁-⣿]/.test(string) || /\bsex\b/i.test(string);
 	}
 
 	/**
