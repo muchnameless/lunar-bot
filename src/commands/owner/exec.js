@@ -12,7 +12,7 @@ module.exports = class ExecCommand extends Command {
 			aliases: [ 'ex' ],
 			description: 'executes bash code',
 			args: true,
-			usage: '[`command name` to reload, `all`|`commands` for all commands, `database`|`db` cache, `cooldown(s)`]',
+			usage: '[`code` to execute]',
 			cooldown: 0,
 		});
 	}
