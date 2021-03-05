@@ -91,22 +91,19 @@ class HypixelGuildManager extends ModelManager {
 	}
 
 	/**
-	 * autocorrect all flags to the hypixel guilds names and returns the most likely match or null, or 'false' for the 'all'-flag
-	 * @param {string[]} array message flags
+	 * autocorrects all elements to the hypixel guilds names and returns the most likely match or null, or 'false' for the 'all'-flag
+	 * @param {string[]} args
 	 * @returns {?import('../models/HypixelGuild')|boolean}
 	 */
-	getFromArray(array) {
-		for (const element of array) {
-			const hypixelGuild = this.getByName(element);
+	getFromArray(args) {
+		const hypixelGuildInput = args.map((arg, index) => ({ index, ...this.autocorrectToGuild(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
 
-			if (hypixelGuild) return hypixelGuild;
-
-			const { similarity } = autocorrect(element, [ 'all' ]);
-
-			if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return false;
-		}
-
-		return null;
+		return hypixelGuildInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+			? (() => {
+				args.splice(hypixelGuildInput.index, 1);
+				return hypixelGuildInput.value;
+			})()
+			: null;
 	}
 
 	/**

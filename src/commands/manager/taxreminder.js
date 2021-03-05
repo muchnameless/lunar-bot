@@ -12,7 +12,7 @@ module.exports = class TaxReminderCommand extends Command {
 			description: 'ping all who have not paid',
 			guildOnly: true,
 			args: false,
-			usage: '<`-g` or `--ghostping` to ghost ping>\n<`IGNs` or `IDs` to exclude from the ping>',
+			usage: () => `<\`-g\`|\`--ghostping\` to ghost ping> <\`IGNs\`|\`IDs\` to exclude from the ping> <${this.client.hypixelGuilds.guildNames}>`,
 			cooldown: 60,
 		});
 	}
@@ -25,15 +25,15 @@ module.exports = class TaxReminderCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
-		const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'gp', 'ghost', 'ghostping' ].includes(arg));
-		const hGuild = this.client.hypixelGuilds.getFromArray(flags);
-		const playersToRemind = (hGuild ? hGuild.players : this.client.players.inGuild).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
+		const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'ghostping' ].includes(arg));
+		const hypixelGuild = this.client.hypixelGuilds.getFromArray(args);
+		const playersToRemind = (hypixelGuild ? hypixelGuild.players : this.client.players.inGuild).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
 		const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(player => player.inDiscord && /^\d+$/.test(player.discordID));
 		const AMOUNT_TO_PING = playersPingable.size;
 
 		if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
 			const ANSWER = await message.awaitReply(
-				`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hGuild?.name ?? 'all guilds'}?`,
+				`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hypixelGuild?.name ?? 'all guilds'}?`,
 				60,
 				{ sameChannel: true },
 			);

@@ -24,21 +24,11 @@ module.exports = class InviteCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
-		/**
-		 * @type {import('../../structures/database/models/Player')}
-		 */
-		const playerInviting = message.author.player;
+		const hypixelGuild = this.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
 
-		if (!playerInviting) return message.reply('unable to find you in the player database, so the guild to invite to could not be determined.');
+		if (!hypixelGuild) return message.reply('unable to find your guild.');
 
-		/**
-		 * @type {import('../../structures/database/models/HypixelGuild')}
-		 */
-		const guild = this.client.hypixelGuilds.getFromArray(flags) ?? playerInviting.guild;
-
-		if (!guild) return message.reply('unable to find your guild.');
-
-		const chatBridge = guild.chatBridge;
+		const chatBridge = hypixelGuild.chatBridge;
 		const [ ign ] = args;
 
 		try {
@@ -48,12 +38,12 @@ module.exports = class InviteCommand extends Command {
 			});
 
 			message.reply(stripIndent`
-				invited \`${ign}\` into \`${guild.name}\`
+				invited \`${ign}\` into \`${hypixelGuild.name}\`
 				 > ${response}
 			`);
 		} catch (error) {
 			logger.error(error);
-			message.reply(`an unknown error occurred while inviting \`${ign}\` into \`${guild.name}\`.`);
+			message.reply(`an unknown error occurred while inviting \`${ign}\` into \`${hypixelGuild.name}\`.`);
 		}
 	}
 };

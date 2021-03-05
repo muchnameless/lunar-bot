@@ -103,13 +103,7 @@ const self = module.exports = {
 		page ??= pageDefault;
 
 		// hypixel guild input
-		const hypixelGuildInput = args.map((arg, index) => ({ index, ...message.client.hypixelGuilds.autocorrectToGuild(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
-		const hypixelGuild = hypixelGuildInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
-			? (() => {
-				args.splice(hypixelGuildInput.index, 1);
-				return hypixelGuildInput.value;
-			})()
-			: message.author.player?.guild;
+		const hypixelGuild = message.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
 
 		// type input
 		let type;
