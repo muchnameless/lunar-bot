@@ -24,6 +24,6 @@ module.exports = class TracklistCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
-		handleLeaderboardCommandMessage(message, args, flags, createGainedStatsEmbed, { typeDefault: 'track', pageDefault: Infinity });
+		return handleLeaderboardCommandMessage(message, args, flags, createGainedStatsEmbed, { typeDefault: 'track', pageDefault: Infinity });
 	}
 };

@@ -35,6 +35,6 @@ module.exports = class TotalCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
-		handleLeaderboardCommandMessage(message, args, flags, createTotalStatsEmbed);
+		return handleLeaderboardCommandMessage(message, args, flags, createTotalStatsEmbed);
 	}
 };
