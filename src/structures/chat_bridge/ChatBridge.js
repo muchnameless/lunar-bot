@@ -406,6 +406,14 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
+	 * checks the string for any non-whitespace character
+	 * @param {string} string
+	 */
+	includesNonWhitespace(string) {
+		return /[^\s|\u{2003}|\u{2800}|\u{0020}|\u{180E}|\u{200B}]/u.test(string);
+	}
+
+	/**
 	 * splits the message into the max ingame chat length, prefixes all parts and sends them
 	 * @param {string} message
 	 * @param {ChatOptions} options
@@ -424,13 +432,13 @@ class ChatBridge extends EventEmitter {
 				}
 			})
 			.filter(part => {
-				if (part.length && /[^\s|\u{2003}|\u{2800}]/u.test(part)) { // filter out white space only parts
+				if (this.includesNonWhitespace(part)) { // filter out white space only parts
 					if (this.shouldBlock(part)) {
 						if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 						return success = false;
 					}
 					return true;
-				} else {
+				} else { // part does not include any non-whitespace character
 					if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 					return false;
 				}
