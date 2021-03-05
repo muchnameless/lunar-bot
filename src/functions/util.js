@@ -1,6 +1,7 @@
 'use strict';
 
 const { promisify, inspect } = require('util');
+const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const { XP_TYPES, XP_OFFSETS_SHORT } = require('../constants/database');
 const hypixel = require('../api/hypixel');
@@ -70,6 +71,12 @@ const self = module.exports = {
 	 * @param {string} string
 	 */
 	cleanFormattedNumber: string => string.replace(/[^0-9.,]/g, ' '),
+
+	/**
+	 * '30d1193h71585m4295001s' -> 15_476_901_000
+	 * @param {string} string
+	 */
+	stringToMS: string => string.split(/(?<=[a-z])(?=\d)/).reduce((acc, cur) => acc + ms(cur), 0),
 
 	/**
 	 * returns the hypixel client

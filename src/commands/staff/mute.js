@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndent } = require('common-tags');
-const ms = require('ms');
+const { stringToMS } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -61,7 +61,7 @@ module.exports = class MuteCommand extends Command {
 		}
 
 		const chatBridge = guild.chatBridge;
-		const DURATION = ms(DURATION_INPUT);
+		const DURATION = stringToMS(DURATION_INPUT);
 
 		if (isNaN(DURATION)) return message.reply(`\`${DURATION_INPUT}\` is not a valid duration.`);
 

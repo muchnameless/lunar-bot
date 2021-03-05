@@ -1,6 +1,6 @@
 'use strict';
 
-const ms = require('ms');
+const { stringToMS } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
 
@@ -117,8 +117,11 @@ module.exports = async message => {
 
 		if (target === 'the guild chat') {
 			const guild = message.chatBridge.guild;
+			const msDuration = stringToMS(duration);
 
-			guild.chatMutedUntil = Date.now() + ms(duration);
+			guild.chatMutedUntil = isNaN(msDuration)
+				? Infinity
+				: Date.now() + msDuration;
 			guild.save();
 
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was muted for ${duration}`);
@@ -128,11 +131,11 @@ module.exports = async message => {
 
 		if (!player) return;
 
-		const msDuration = ms(duration);
+		const msDuration = stringToMS(duration);
 
-		if (!msDuration) return logger.error(`[CHATBRIDGE]: unknown ms duration: ${duration}`);
-
-		player.message.chatBridgeMutedUntil = Date.now() + msDuration;
+		player.chatBridgeMutedUntil = isNaN(msDuration)
+			? Infinity
+			: Date.now() + msDuration;
 		player.save();
 
 		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: ${target} was muted for ${duration}`);
@@ -163,7 +166,7 @@ module.exports = async message => {
 
 		if (!player) return;
 
-		player.message.chatBridgeMutedUntil = 0;
+		player.chatBridgeMutedUntil = 0;
 		player.save();
 
 		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: ${target} was unmuted`);
