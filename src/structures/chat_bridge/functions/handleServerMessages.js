@@ -74,6 +74,13 @@ module.exports = async message => {
 	}
 
 	/**
+	 * We blocked your comment "aFate: its because i said the sex word" as it is breaking our rules because it contains inappropriate content with adult themes. http://www.hypixel.net/rules/
+	 */
+	if (message.content.startsWith('We bocked your comment')) {
+		return logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: ${message.content}`);
+	}
+
+	/**
 	 * accept f reqs from guild members
 	 * Friend request from [HypixelRank] IGN\n
 	 */
