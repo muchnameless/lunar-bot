@@ -10,7 +10,7 @@ module.exports = class TestCommand extends Command {
 			aliases: [ 'debug' ],
 			description: 'dynamic test function',
 			args: false,
-			usage: '<test arguments>',
+			usage: '<test `arguments`>',
 			cooldown: 0,
 		});
 	}
