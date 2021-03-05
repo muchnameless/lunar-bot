@@ -208,11 +208,10 @@ class ChatBridge extends EventEmitter {
 	 * fetches the chat bridge discord webhook
 	 */
 	async _fetchAndCacheWebhook() {
-		if (this.webhook) {
-			return this.ready = true;
-		} else {
-			this.ready = false;
-		}
+		if (this.webhook) return this.ready = true;
+
+		this.ready = false;
+
 		if (!this.guild) return logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
 
 		try {
