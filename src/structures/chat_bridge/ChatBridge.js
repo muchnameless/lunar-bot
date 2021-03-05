@@ -425,7 +425,7 @@ class ChatBridge extends EventEmitter {
 				}
 			})
 			.filter(part => {
-				if (part.length && /\S/.test(part)) { // filter out white space only parts
+				if (part.length && /[^\s|\u{2003}|\u{2800}]/u.test(part)) { // filter out white space only parts
 					if (this.isSpam(part)) {
 						if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 						return success = false;
