@@ -78,6 +78,16 @@ const self = module.exports = {
 	handleLeaderboardCommandMessage: async (message, args, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) => {
 		const { client: { config } } = message;
 
+		// type input
+		const typeInput = args.map((arg, index) => ({ index, arg, ...autocorrectToType(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+
+		let type = typeInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
+			? (() => {
+				args.splice(typeInput.index, 1);
+				return typeInput.value;
+			})()
+			: null;
+
 		// offset input
 		const offsetInput = args.map((arg, index) => ({ index, ...autocorrectToOffset(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
 		const offset = offsetInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
@@ -106,20 +116,18 @@ const self = module.exports = {
 		const hypixelGuild = message.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
 
 		// type input
-		let type;
-
 		if (args.length) {
-			const typeInput = args.map((arg, index) => ({ index, arg, ...autocorrectToType(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+			if (!type) {
+				if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+					const ANSWER = await message.awaitReply(`there is currently no lb for \`${typeInput.arg}\`. Did you mean \`${typeInput.value}\`?`, 30);
 
-			if (typeInput.similarity < config.get('AUTOCORRECT_THRESHOLD') && !flags.some(flag => [ 'f', 'force' ].includes(flag))) {
-				const ANSWER = await message.awaitReply(`there is currently no lb for \`${typeInput.arg}\`. Did you mean \`${typeInput.value}\`?`, 30);
+					if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return;
+				}
 
-				if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return;
+				args.splice(typeInput.index, 1);
+				type = typeInput.value;
 			}
-
-			args.splice(typeInput.index, 1);
-			type = typeInput.value;
-		} else {
+		} else if (!type) {
 			type = typeDefault;
 		}
 

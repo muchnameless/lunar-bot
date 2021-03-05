@@ -223,9 +223,6 @@ const self = module.exports = {
 	autocorrectToOffset: input => {
 		const result = self.autocorrect(input, Object.keys(XP_OFFSETS_SHORT));
 
-		// little "hack" to make sure 'we' is autocorrected to 'weight' in lb/top
-		if (input.toLowerCase() === 'we') result.similarity = 0;
-
 		result.value = XP_OFFSETS_SHORT[result.value];
 
 		return result;
