@@ -3,7 +3,7 @@
 const { Util, MessageEmbed, DiscordAPIError } = require('discord.js');
 const { EventEmitter } = require('events');
 const { join, basename } = require('path');
-const emojiRegex = require('emoji-regex');
+const emojiRegex = require('emoji-regex/es2015');
 const ms = require('ms');
 const { sleep, trim } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
