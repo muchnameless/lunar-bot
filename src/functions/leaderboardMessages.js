@@ -85,7 +85,7 @@ const self = module.exports = {
 				args.splice(offsetInput.index, 1);
 				return offsetInput.value;
 			})()
-			: config.get('DEFAULT_XP_OFFSET');
+			: undefined;
 
 		// page input
 		let page;
