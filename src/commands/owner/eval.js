@@ -51,7 +51,7 @@ module.exports = class EvalCommand extends Command {
 		const { client } = this;
 		const chatBridge = client.chatBridge;
 		const { Util, MessageEmbed } = Discord;
-		const { cleanOutput } = functionsUtil;
+		const { cleanOutput, trim } = functionsUtil;
 		const { channel, channel: ch, guild, guild: g, author, member } = message;
 		const msg = message;
 		const { hypixelGuilds, players, taxCollectors, db } = client;
@@ -119,8 +119,20 @@ module.exports = class EvalCommand extends Command {
 
 			const hrStop = process.hrtime(hrStart);
 			const OUTPUT_ARRAY = SHOULD_INSPECT
-				? Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, util.format(evaled))), { maxLength: 1015, char: '\n' })
-				: Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, evaled)), { maxLength: 1015, char: '\n' });
+				? (() => {
+					try {
+						return Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, util.format(evaled))), { maxLength: 1015, char: '\n' });
+					} catch {
+						return [ trim(Util.escapeCodeBlock(cleanOutput(client, util.format(evaled))), 1015) ];
+					}
+				})()
+				: (() => {
+					try {
+						return Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, evaled)), { maxLength: 1015, char: '\n' });
+					} catch {
+						return [ trim(Util.escapeCodeBlock(cleanOutput(client, evaled)), 1015) ];
+					}
+				})();
 			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${(((hrStop[0] * 1e9) + hrStop[1])) / 1e6} ms\``;
 
 			message.replyMessageID = REPLY_MESSAGE_ID_TEMP;
