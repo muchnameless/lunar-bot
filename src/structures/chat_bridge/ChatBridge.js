@@ -368,14 +368,6 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * checks if the message includes special characters used in certain "memes"
-	 * @param {string} message
-	 */
-	isSpam(message) {
-		return /[⠁-⣿]/.test(message);
-	}
-
-	/**
 	 * forwards a discord message to ingame guild chat, prettifying discord renders
 	 * @param {import('../extensions/Message')} message
 	 * @param {import('../database/models/Player')} player
@@ -406,6 +398,14 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
+	 * checks if the message includes special characters used in certain "memes" or blocked words
+	 * @param {string} string
+	 */
+	shouldBlock(string) {
+		return /[⠁-⣿]/.test(string) || /sex/i.test(string);
+	}
+
+	/**
 	 * splits the message into the max ingame chat length, prefixes all parts and sends them
 	 * @param {string} message
 	 * @param {ChatOptions} options
@@ -425,7 +425,7 @@ class ChatBridge extends EventEmitter {
 			})
 			.filter(part => {
 				if (part.length && /[^\s|\u{2003}|\u{2800}]/u.test(part)) { // filter out white space only parts
-					if (this.isSpam(part)) {
+					if (this.shouldBlock(part)) {
 						if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 						return success = false;
 					}
