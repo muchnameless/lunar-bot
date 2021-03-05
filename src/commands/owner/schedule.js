@@ -1,5 +1,6 @@
 'use strict';
 
+const { stripIndents } = require('common-tags');
 const { reverseDateInput, autocorrect } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -11,7 +12,11 @@ module.exports = class ScheduleCommand extends Command {
 			aliases: [ 's' ],
 			description: 'schedule a command to be executed at a later time',
 			args: false,
-			usage: '[`command`] [`@time`]\n<`-l`, `--list`> to list all active cron jobs\n<`-r`, `--remove`, `-d`, `--delete`> <`name`> to delete a cron job',
+			usage: stripIndents`
+				[\`command\`] [\`@time\`]
+				<\`-l\`|\`--list\`> to list all active cron jobs
+				<\`-r\`|\`--remove\`|\`-d\`|\`--delete\`> <\`name\`> to delete a user created cron job
+			`,
 			cooldown: 0,
 		});
 	}
