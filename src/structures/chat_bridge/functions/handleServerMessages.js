@@ -74,6 +74,13 @@ module.exports = async message => {
 	}
 
 	/**
+	 * You cannot say the same message twice!
+	 */
+	if (message.content === 'You cannot say the same message twice!') {
+		return logger.error('[CHATBRIDGE]: anti spam failed');
+	}
+
+	/**
 	 * We blocked your comment "aFate: its because i said the sex word" as it is breaking our rules because it contains inappropriate content with adult themes. http://www.hypixel.net/rules/
 	 */
 	if (message.content.startsWith('We bocked your comment')) {
