@@ -78,6 +78,9 @@ const self = module.exports = {
 	handleLeaderboardCommandMessage: async (message, args, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) => {
 		const { client: { config } } = message;
 
+		// hypixel guild input
+		const hypixelGuild = message.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
+
 		// type input
 		const typeInput = args.map((arg, index) => ({ index, arg, ...autocorrectToType(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
 
@@ -111,9 +114,6 @@ const self = module.exports = {
 		}
 
 		page ??= pageDefault;
-
-		// hypixel guild input
-		const hypixelGuild = message.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
 
 		// type input
 		if (args.length) {
