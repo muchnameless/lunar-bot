@@ -576,7 +576,7 @@ module.exports = class HypixelGuild extends Model {
 			// set ingame rank and discord role
 			await this.chatBridge.command({
 				command: `g setrank ${player.ign} ${RANK_NAME}`,
-				responseRegex: new RegExp(`${HYPIXEL_RANK_REGEX}${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
+				responseRegex: new RegExp(`${HYPIXEL_RANK_REGEX}${player.ign} was promoted from ${player.guildRank?.name ?? '[a-zA-Z]+'} to ${RANK_NAME}`), // listen for ingame promotion message
 				rejectOnTimeout: true,
 			});
 
