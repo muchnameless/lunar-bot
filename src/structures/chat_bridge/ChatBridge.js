@@ -291,7 +291,7 @@ class ChatBridge extends EventEmitter {
 		const invisChars = [ '⭍', 'ࠀ' ]; // those don't render in the mc client
 
 		// max message length is 256 post 1.11, 100 pre 1.11
-		for (let index = 0; index < this.maxMessageLength - string.length; ++index) {
+		for (let index = this.maxMessageLength - string.length + 1; --index;) {
 			string += invisChars[Math.floor(Math.random() * invisChars.length)];
 		}
 
