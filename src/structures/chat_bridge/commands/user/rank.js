@@ -11,7 +11,7 @@ module.exports = class RankCommand extends Command {
 			aliases: [ 'request' ],
 			description: 'request a guild rank',
 			args: true,
-			usage: '[rank name]',
+			usage: '[\'rank\' name]',
 			cooldown: 1,
 		});
 	}
