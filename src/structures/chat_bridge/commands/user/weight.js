@@ -14,7 +14,7 @@ module.exports = class MyCommand extends Command {
 		super(data, {
 			aliases: [ 'we' ],
 			description: 'shows the player\'s total weight, weight and overflow for the profile with the most weight',
-			args: true,
+			args: false,
 			usage: '[`IGN`]',
 			cooldown: 1,
 		});
@@ -45,16 +45,17 @@ module.exports = class MyCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) {
 		try {
-			const [ IGN ] = args;
-			const uuid = this.formatUUID(await mojang.getUUID(IGN));
-			const { code, reason, data } = await (await fetch(`${BASE_URL}/profiles/${uuid}/weight?key=${process.env.HYPIXEL_KEY_AUX_2}`)).json();
+			const uuid = args.length
+				? await mojang.getUUID(args[0])
+				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
+			const { code, reason, data } = await (await fetch(`${BASE_URL}/profiles/${this.formatUUID(uuid)}/weight?key=${process.env.HYPIXEL_KEY_AUX_2}`)).json();
 
-			if (reason) throw new Error(`[ERROR ${code}]: ${reason}`);
+			if (reason) throw new Error(`[Error ${code}]: ${reason}`);
 
 			return message.reply(`${data.username} (${data.name}): ${this.formatNumber(data.weight + data.weight_overflow)} [${this.formatNumber(data.weight)} + ${this.formatNumber(data.weight_overflow)}]`);
 		} catch (error) {
-			logger.error(error);
-			return message.reply(`${error.name}: ${error.message}`);
+			logger.error(`[WEIGHT]: ${error.message}`);
+			return message.reply(error.message);
 		}
 	}
 };
