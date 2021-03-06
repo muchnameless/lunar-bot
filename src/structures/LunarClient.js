@@ -263,9 +263,9 @@ class LunarClient extends Client {
 	/**
 	 * space-padding at the beginning and '0'-padding at the end
 	 * @param {number} number number to format
-	 * @param {number} paddingAmount amount to space-pad at the start (default 2)
+	 * @param {number} [paddingAmount=0] amount to space-pad at the start
 	 */
-	formatDecimalNumber(number, paddingAmount = 2) {
+	formatDecimalNumber(number, paddingAmount = 0) {
 		const NUMBER_ARRAY = number.toFixed(2).split('.');
 		return `${Number(NUMBER_ARRAY[0]).toLocaleString(this.config.get('NUMBER_FORMAT')).padStart(paddingAmount, ' ')}.${NUMBER_ARRAY[1]}`;
 	}

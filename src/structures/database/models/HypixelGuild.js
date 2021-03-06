@@ -549,12 +549,12 @@ module.exports = class HypixelGuild extends Model {
 
 		// player data could be outdated -> update data when player does not meet reqs
 		if (totalWeight < WEIGHT_REQ) {
-			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} but only had ${this.client.formatDecimalNumber(totalWeight, 0)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
+			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} but only had ${this.client.formatDecimalNumber(totalWeight)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
 			await player.updateXp({ shouldSkipQueue: true });
 			({ totalWeight } = player.getWeight());
 		}
 
-		const WEIGHT_STRING = this.client.formatDecimalNumber(totalWeight, 0);
+		const WEIGHT_STRING = this.client.formatDecimalNumber(totalWeight);
 
 		if (message.reactions.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error.name}: ${error.message}`)); // get clowned
 

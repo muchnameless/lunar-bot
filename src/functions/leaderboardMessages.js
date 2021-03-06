@@ -553,8 +553,8 @@ const self = module.exports = {
 				guildPlayers = guildPlayers
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.skillAverage, 0) / PLAYER_COUNT)}** [**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.trueAverage, 0) / PLAYER_COUNT)}**]`;
-				getEntry = player => `${client.formatDecimalNumber(player.skillAverage)} [${client.formatDecimalNumber(player.trueAverage)}]`;
+				totalStats = `**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.skillAverage, 0) / PLAYER_COUNT, 2)}** [**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.trueAverage, 0) / PLAYER_COUNT, 2)}**]`;
+				getEntry = player => `${client.formatDecimalNumber(player.skillAverage, 2)} [${client.formatDecimalNumber(player.trueAverage, 2)}]`;
 				break;
 			}
 
@@ -626,7 +626,7 @@ const self = module.exports = {
 					.sort((a, b) => b.sortingStat - a.sortingStat);
 				totalStats = `**${(guildPlayers.reduce((acc, player) => acc + player.progressLevel, 0) / PLAYER_COUNT).toFixed(2)}** [**${client.formatNumber(guildPlayers.reduce((acc, player) => acc + player.xp, 0) / PLAYER_COUNT, 0, Math.round)}** XP]`;
 				const PADDING_AMOUNT_XP = Math.round(guildPlayers[0]?.xp).toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => `${client.formatDecimalNumber(player.progressLevel)} [${client.formatNumber(player.xp, PADDING_AMOUNT_XP, Math.round)} XP]`;
+				getEntry = player => `${client.formatDecimalNumber(player.progressLevel, 2)} [${client.formatNumber(player.xp, PADDING_AMOUNT_XP, Math.round)} XP]`;
 				break;
 			}
 		}

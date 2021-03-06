@@ -98,7 +98,7 @@ module.exports = class PlayerCommand extends Command {
 				${`Δ: change since ${startingDate.toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`.padEnd(105, '\xa0') + '\u200b'}
 				
 				\`\`\`Skills\`\`\`
-				Average skill level: **${this.client.formatDecimalNumber(skillAverage, 0)}** [**${this.client.formatDecimalNumber(trueAverage, 0)}**] - **Δ**: **${this.client.formatDecimalNumber(skillAverage - skillAverageOffset, 0)}** [**${this.client.formatDecimalNumber(trueAverage - trueAverageOffset, 0)}**]
+				Average skill level: **${this.client.formatDecimalNumber(skillAverage)}** [**${this.client.formatDecimalNumber(trueAverage)}**] - **Δ**: **${this.client.formatDecimalNumber(skillAverage - skillAverageOffset)}** [**${this.client.formatDecimalNumber(trueAverage - trueAverageOffset)}**]
 			`)
 			.padFields()
 			.addField('\u200b', stripIndents`
