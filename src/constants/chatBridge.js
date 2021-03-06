@@ -22,4 +22,8 @@ module.exports = {
 		GUILD: 'guild',
 		PARTY: 'party',
 	},
+
+	HYPIXEL_RANK_REGEX: '(?:\\[.+?\\] )?',
+
+	GUILD_RANK_REGEX: '(?:\\w+)\\])?',
 };

@@ -1,6 +1,7 @@
 'use strict';
 
 const { stripIndent } = require('common-tags');
+const { HYPIXEL_RANK_REGEX } = require('../../constants/chatBridge');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -24,6 +25,9 @@ module.exports = class InviteCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
+		/**
+		 * @type {import('../../structures/database/models/HypixelGuild')}
+		 */
 		const hypixelGuild = this.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
 
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
@@ -34,7 +38,15 @@ module.exports = class InviteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g invite ${ign}`,
-				responseRegex: /^You invited (?:\[.+?\] )?\w+ to your guild\. They have 5 minutes to accept\.$|^You sent an offline invite to (?:\[.+?\] )?\w+! They will have 5 minutes to accept once they come online!$|^You've already invited (?:\[.+?\] )?\w+ to your guild! Wait for them to accept!$|^(?:\[.+?\] )?\w+ is already in another guild!$|^You do not have permission to invite players!$/,
+				responseRegex: new RegExp([
+					`^You invited ${HYPIXEL_RANK_REGEX}${ign} to your guild\\. They have 5 minutes to accept\\.$`,
+					`^You sent an offline invite to ${HYPIXEL_RANK_REGEX}${ign}! They will have 5 minutes to accept once they come online!$`,
+					`^You've already invited ${HYPIXEL_RANK_REGEX}${ign} to your guild! Wait for them to accept!$`,
+					`^${HYPIXEL_RANK_REGEX}${ign} is already in another guild!$`,
+					'^You do not have permission to invite players!$',
+					'You cannot invite this player to your guild!', // g invites disabled
+					// '', // guild full
+				].join('|'), 'i'),
 			});
 
 			message.reply(stripIndent`
