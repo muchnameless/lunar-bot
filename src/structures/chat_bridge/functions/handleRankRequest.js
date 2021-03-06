@@ -52,15 +52,9 @@ module.exports = async message => {
 		return message.reply(CLOWN);
 	}
 
-	let { totalWeight } = player.getWeight();
-
-	// player meets reqs and already has the rank or is staff and has the rank's role
-	if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && (await player.discordMember)?.roles.cache.has(ROLE_ID)))) {
-		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
-		return message.reply(CLOWN);
-	}
-
 	const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));
+
+	let { totalWeight } = player.getWeight();
 
 	// player data could be outdated -> update data when player does not meet reqs
 	if (totalWeight < WEIGHT_REQ) {
@@ -75,7 +69,8 @@ module.exports = async message => {
 
 	logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
-	if (totalWeight < WEIGHT_REQ) return;
+	// player doesn't meet reqs or meets reqs and already has the rank or is staff and has the rank's role
+	if (totalWeight < WEIGHT_REQ || (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && (await player.discordMember)?.roles.cache.has(ROLE_ID))))) return;
 
 	// set rank role to requested rank
 	if (player.isStaff) {
