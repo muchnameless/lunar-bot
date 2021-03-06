@@ -81,11 +81,11 @@ module.exports = class MuteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g mute ${target} ${DURATION_INPUT}`,
-				responseRegex: /^(?:\[.+?\] )?\w+ has muted (?:(?:\[.+?\] )?\w+|the guild chat) for/,
+				responseRegex: /^(?:\[.+?\] )?\w+ has muted (?:(?:\[.+?\] )?\w+|the guild chat) for|^You cannot mute the guild master!$|^You cannot mute yourself from the guild!$/,
 			});
 
 			message.reply(stripIndent`
-				muted ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`} for \`${DURATION_INPUT}\`
+				\`/g mute ${target} ${DURATION_INPUT}\`
 				 > ${response}
 			`);
 		} catch (error) {

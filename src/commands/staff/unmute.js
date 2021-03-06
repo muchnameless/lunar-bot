@@ -76,7 +76,7 @@ module.exports = class UnmuteCommand extends Command {
 			});
 
 			message.reply(stripIndent`
-				unmuted ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`}
+				\`/g unmute ${target}\`
 				 > ${response}
 			`);
 		} catch (error) {

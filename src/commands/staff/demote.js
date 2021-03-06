@@ -52,7 +52,7 @@ module.exports = class DemoteCommand extends Command {
 			});
 
 			message.reply(stripIndent`
-				demoted \`${IGN}\`
+				\`/g demote ${IGN}\`
 				 > ${response}
 			`);
 		} catch (error) {

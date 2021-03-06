@@ -52,7 +52,7 @@ module.exports = class PromoteCommand extends Command {
 			});
 
 			message.reply(stripIndent`
-				promoted \`${IGN}\`
+				\`/g promote ${IGN}\`
 				 > ${response}
 			`);
 		} catch (error) {

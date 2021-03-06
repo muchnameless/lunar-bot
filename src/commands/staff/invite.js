@@ -42,7 +42,7 @@ module.exports = class InviteCommand extends Command {
 					`^You invited ${HYPIXEL_RANK_REGEX}${IGN} to your guild\\. They have 5 minutes to accept\\.$`,
 					`^You sent an offline invite to ${HYPIXEL_RANK_REGEX}${IGN}! They will have 5 minutes to accept once they come online!$`,
 					`^You've already invited ${HYPIXEL_RANK_REGEX}${IGN} to your guild! Wait for them to accept!$`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is already in another guild!$`,
+					`^${HYPIXEL_RANK_REGEX}${IGN} is already in (?:another|your) guild!$`,
 					'^You do not have permission to invite players!$',
 					'You cannot invite this player to your guild!', // g invites disabled
 					// '', // guild full
@@ -50,7 +50,7 @@ module.exports = class InviteCommand extends Command {
 			});
 
 			message.reply(stripIndent`
-				invited \`${IGN}\` into \`${hypixelGuild.name}\`
+				\`/g invite ${IGN}\`
 				 > ${response}
 			`);
 		} catch (error) {

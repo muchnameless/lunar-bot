@@ -59,7 +59,7 @@ module.exports = class DemoteCommand extends Command {
 			});
 
 			message.reply(stripIndent`
-				setrank \`${IGN}\` ${args[1]}
+				\`/g setrank ${IGN} ${args[1]}\`
 				 > ${response}
 			`);
 		} catch (error) {

@@ -557,7 +557,7 @@ class ChatBridge extends EventEmitter {
 				this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)),
 			]);
 
-			return result[0][0].content;
+			return result[0][0].content.replace(/^-+|-+$/, '');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
 			if (Array.isArray(error)) {
