@@ -1,7 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
-const { cleanFormattedNumber } = require('../../../../functions/util');
+const { cleanFormattedNumber, upperCaseFirstChar } = require('../../../../functions/util');
 const { BASE_URL } = require('../../../../constants/weight');
 const mojang = require('../../../../api/mojang');
 const Command = require('../../../commands/Command');
@@ -12,9 +12,9 @@ module.exports = class WeightCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'we' ],
-			description: 'shows a player\'s total weight, weight and overflow for the profile with the most weight',
+			description: 'shows a player\'s total weight, weight and overflow',
 			args: false,
-			usage: '[`IGN`]',
+			usage: '<\'IGN\'> <\'profile\' name>',
 			cooldown: 1,
 		});
 	}
@@ -47,11 +47,13 @@ module.exports = class WeightCommand extends Command {
 			const uuid = args.length
 				? await mojang.getUUID(args[0])
 				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
-			const { code, reason, data } = await (await fetch(`${BASE_URL}/profiles/${this.formatUUID(uuid)}/weight?key=${process.env.HYPIXEL_KEY_AUX_2}`)).json();
+			const { code, reason, data } = await (await fetch(`${BASE_URL}/profiles/${this.formatUUID(uuid)}${args.length < 2 ? '/weight' : ''}?key=${process.env.HYPIXEL_KEY_AUX_2}`)).json();
 
 			if (reason) throw new Error(`[Error ${code}]: ${reason}`);
 
-			return message.reply(`${data.username} (${data.name}): ${this.formatNumber(data.weight + data.weight_overflow)} [${this.formatNumber(data.weight)} + ${this.formatNumber(data.weight_overflow)}]`);
+			const { username, name, weight, weight_overflow: overflow } = args.length < 2 ? data : data.find(x => x.name.toLowerCase() === args[1].toLowerCase()) ?? (() => { throw new Error(`unknown profile name '${upperCaseFirstChar(args[1].toLowerCase())}'`); })();
+
+			return message.reply(`${username} (${name}): ${this.formatNumber(weight + overflow)} [${this.formatNumber(weight)} + ${this.formatNumber(overflow)}]`);
 		} catch (error) {
 			logger.error(`[WEIGHT]: ${error.message}`);
 			return message.reply(error.message);
