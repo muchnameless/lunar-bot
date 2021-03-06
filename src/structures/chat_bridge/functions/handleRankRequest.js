@@ -64,12 +64,12 @@ module.exports = async message => {
 
 	// player data could be outdated -> update data when player does not meet reqs
 	if (totalWeight < WEIGHT_REQ) {
-		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} but only had ${client.formatDecimalNumber(totalWeight, 0)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
+		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} but only had ${client.formatDecimalNumber(totalWeight)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
 		await player.updateXp({ shouldSkipQueue: true });
 		({ totalWeight } = player.getWeight());
 	}
 
-	const WEIGHT_STRING = client.formatDecimalNumber(totalWeight, 0);
+	const WEIGHT_STRING = client.formatDecimalNumber(totalWeight);
 
 	await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${cleanFormattedNumber(WEIGHT_STRING)} / ${cleanFormattedNumber(WEIGHT_REQ_STRING)} [${RANK_NAME}]`);
 
