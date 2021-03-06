@@ -70,10 +70,10 @@ module.exports = async message => {
 	if (message.author.id !== client.ownerID) {
 
 		// role permissions
-		const requiredRoles = command.requiredRoles;
+		const { requiredRoles } = command;
 
 		if (requiredRoles) {
-			const lgGuild = client.lgGuild;
+			const { lgGuild } = client;
 
 			if (!lgGuild) {
 				logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} with the Lunar Guard Discord server being unreachable`);

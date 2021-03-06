@@ -52,12 +52,12 @@ module.exports = class UnmuteCommand extends Command {
 				: `with the IGN \`${TARGET_INPUT}\``
 			} found.`);
 
-			guild = target.guild;
+			({ guild } = target);
 
 			if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
 		}
 
-		const chatBridge = guild.chatBridge;
+		const { chatBridge } = guild;
 
 		if (target instanceof players.model) {
 			target.chatBridgeMutedUntil = 0;

@@ -90,7 +90,7 @@ const self = module.exports = {
 	 * returns the ISO week number of the given date
 	 * @param {Date} date to analyze
 	 */
-	getWeekOfYear: date => {
+	getWeekOfYear(date) {
 		const target = new Date(date.valueOf());
 		const dayNumber = (date.getUTCDay() + 6) % 7;
 
@@ -111,7 +111,7 @@ const self = module.exports = {
 	 * cleans a string from an embed for console logging
 	 * @param {string} string the string to clean
 	 */
-	cleanLoggingEmbedString: string => {
+	cleanLoggingEmbedString(string) {
 		if (!string || typeof string !== 'string') return null;
 		return string.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '').replace(/`|\*|\n?\u200b|\\(?=_)/g, '').replace(/\n+/g, '\n');
 	},
@@ -121,7 +121,7 @@ const self = module.exports = {
 	 * @param {import('../structures/LunarClient')} client discord client to get the token from
 	 * @param {string} text to clean
 	 */
-	cleanOutput: (client, text) => {
+	cleanOutput(client, text) {
 		if (typeof text !== 'string') text = inspect(text, { depth: 1 });
 
 		return text
@@ -136,7 +136,7 @@ const self = module.exports = {
 	 * @param {any[]} validInput
 	 * @param {string} attributeToQuery
 	 */
-	autocorrect: (query, validInput, attributeToQuery = null) => {
+	autocorrect(query, validInput, attributeToQuery = null) {
 		let currentBestElement;
 		let currentBestSimilarity = 0;
 
@@ -190,7 +190,7 @@ const self = module.exports = {
 	 * @param {Array} arr
 	 * @param {Function} callback
 	 */
-	asyncFilter: async (arr, callback) => {
+	async asyncFilter(arr, callback) {
 		const fail = Symbol();
 		return (await Promise.all(arr.map(async item => (await callback(item)) ? item : fail))).filter(i=>i !== fail);
 	},
@@ -199,7 +199,7 @@ const self = module.exports = {
 	 * autocorrects a string to one of the supported types
 	 * @param {string} input
 	 */
-	autocorrectToType: input => {
+	autocorrectToType(input) {
 		const result = self.autocorrect(input, [ 'skill', 'slayer', 'revenant', 'tarantula', 'sven', 'dungeon', 'gxp', 'weight', ...XP_TYPES ]);
 
 		switch (result.value) {
@@ -227,7 +227,7 @@ const self = module.exports = {
 	 * autocorrects a string to a db offset using short names
 	 * @param {string} input message flags
 	 */
-	autocorrectToOffset: input => {
+	autocorrectToOffset(input) {
 		const result = self.autocorrect(input, Object.keys(XP_OFFSETS_SHORT));
 
 		result.value = XP_OFFSETS_SHORT[result.value];

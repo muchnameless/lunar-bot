@@ -16,7 +16,7 @@ module.exports = async (client, member) => {
 	if (member.guild.id !== config.get('DISCORD_GUILD_ID')) return;
 
 	// check discord members that left for id in player database
-	const player = member.player;
+	const { player } = member;
 
 	if (!player) return;
 

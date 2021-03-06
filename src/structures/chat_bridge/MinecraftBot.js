@@ -45,7 +45,7 @@ module.exports = async (chatBridge, options) => {
 		 * @param {string} message
 		 */
 		chat: {
-			value: message => {
+			value(message) {
 				if (typeof message !== 'string') throw new Error(`[BOT CHAT]: input must be a string but received ${typeof message}`);
 				bot.write('chat', { message });
 			},
@@ -56,7 +56,7 @@ module.exports = async (chatBridge, options) => {
 		 * @param {string} reason
 		 */
 		quit: {
-			value: reason => {
+			value(reason) {
 				reason ??= 'disconnect.quitting';
 				bot.end(reason);
 			},
@@ -67,7 +67,7 @@ module.exports = async (chatBridge, options) => {
 		 * @type {import('../database/models/Player')}
 		 */
 		player: {
-			get: function() {
+			get() {
 				return this.client.players.cache.get(this.uuid.replace(/-/g, '')) ?? null;
 			},
 		},

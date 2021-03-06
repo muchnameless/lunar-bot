@@ -55,12 +55,12 @@ module.exports = class MuteCommand extends Command {
 				: `with the IGN \`${TARGET_INPUT}\``
 			} found.`);
 
-			guild = target.guild;
+			({ guild } = target);
 
 			if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
 		}
 
-		const chatBridge = guild.chatBridge;
+		const { chatBridge } = guild;
 		const DURATION = stringToMS(DURATION_INPUT);
 
 		if (isNaN(DURATION)) return message.reply(`\`${DURATION_INPUT}\` is not a valid duration.`);

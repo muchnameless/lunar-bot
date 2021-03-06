@@ -190,7 +190,7 @@ class LunarClient extends Client {
 
 				if (!mainGuild) return;
 
-				const stats = mainGuild.stats;
+				const { stats } = mainGuild;
 
 				if (!stats) return;
 

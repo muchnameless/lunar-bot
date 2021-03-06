@@ -23,8 +23,7 @@ module.exports = class LinkIssuesCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
-		const { players, hypixelGuilds } = this.client;
-		const lgGuild = this.client.lgGuild;
+		const { players, hypixelGuilds, lgGuild } = this.client;
 
 		if (!lgGuild) return message.reply('discord guild is currently unavailable.');
 		if (lgGuild.members.cache.size !== lgGuild.memberCount) await lgGuild.members.fetch();

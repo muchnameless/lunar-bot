@@ -32,7 +32,7 @@ module.exports = class DemoteCommand extends Command {
 
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
 
-		const chatBridge = hypixelGuild.chatBridge;
+		const { chatBridge } = hypixelGuild;
 
 		const IGN = message.mentions.users.size
 			? message.messages.users.first().player?.ign

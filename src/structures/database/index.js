@@ -23,7 +23,7 @@ const sequelize = new Sequelize(
 
 		// use floats instead of strings as decimal representation (2/2)
 		hooks: {
-			afterConnect: function() {
+			afterConnect() {
 				const dTypes = {
 					DECIMAL: CustomDecimal,
 				};
@@ -56,7 +56,7 @@ const db = {
 	/**
 	 * closes the sequelize connection to the sqlite db and exits the process optionally with an error based on the db response
 	 */
-	closeConnectionAndExit: async () => {
+	async closeConnectionAndExit() {
 		try {
 			const output = await sequelize.close();
 			if (output) console.log(output);

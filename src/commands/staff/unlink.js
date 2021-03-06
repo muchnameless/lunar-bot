@@ -34,7 +34,7 @@ module.exports = class UnlinkCommand extends Command {
 
 		// message includes @mention
 		if (message.mentions.users.size) {
-			player = message.author.player;
+			({ player } = message.author);
 
 		// no @mentions
 		} else {
@@ -45,7 +45,7 @@ module.exports = class UnlinkCommand extends Command {
 
 					if (!discordMember) continue;
 
-					player = discordMember.player;
+					({ player } = discordMember);
 
 				// no discord tag -> ign or discord id
 				} else {

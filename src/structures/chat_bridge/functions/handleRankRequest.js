@@ -31,7 +31,7 @@ module.exports = async message => {
 
 	// no player db entry in this guild
 	if (!player) {
-		player = message.author.player;
+		({ player } = message.author);
 
 		// no player db entry in all guilds
 		if (!player) {

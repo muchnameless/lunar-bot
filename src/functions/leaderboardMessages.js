@@ -47,7 +47,7 @@ const self = module.exports = {
 	 * adds reactions to navigate in pagination
 	 * @param {import('../structures/extensions/Message')} message the message to add the reactions to
 	 */
-	addPageReactions: async message => {
+	async addPageReactions(message) {
 		if (!message) return logger.warn('[ADD PAGE REACTIONS]: no message');
 		if (!message.channel.checkBotPermissions('ADD_REACTIONS')) return logger.warn(`[ADD PAGE REACTIONS]: missing 'ADD_REACTIONS' permission in #${message.channel.name}`);
 
@@ -75,7 +75,7 @@ const self = module.exports = {
 	 * @param {string} [defaults.typeDefault]
 	 * @param {number} [defaults.pageDefault=1]
 	 */
-	handleLeaderboardCommandMessage: async (message, args, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) => {
+	async handleLeaderboardCommandMessage(message, args, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) {
 		const { client: { config } } = message;
 
 		// hypixel guild input
@@ -148,7 +148,7 @@ const self = module.exports = {
 	 * @param {import('../structures/extensions/Message')} message leaderboard message to update
 	 * @param {string} emojiName emoji that triggered the update
 	 */
-	updateLeaderboardMessage: (message, emojiName) => {
+	updateLeaderboardMessage(message, emojiName) {
 		const PAGE_FIELD = message.embeds[0].fields[message.embeds[0].fields.length - 1].value;
 		const CURRENT_PAGE = Number(PAGE_FIELD.match(/(\d+) \/ \d+/)[1]);
 		const PAGE = getPage(CURRENT_PAGE, emojiName);
@@ -171,7 +171,7 @@ const self = module.exports = {
 		const USER_ID = message.guild ? message.mentions.users.first()?.id : message.channel.recipient.id;
 
 		let type = matchedTitle.groups.type.toLowerCase();
-		let gained = matchedTitle.groups.gained;
+		let { gained } = matchedTitle.groups;
 
 		switch (type) {
 			case 'revenant':
@@ -216,7 +216,7 @@ const self = module.exports = {
 	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
 	 * @param {number} [param1.page]
 	 */
-	createGainedStatsEmbed: (client, { userID, hypixelGuild = null, type, offset, shouldShowOnlyBelowReqs = false, page = 1 }) => {
+	createGainedStatsEmbed(client, { userID, hypixelGuild = null, type, offset, shouldShowOnlyBelowReqs = false, page = 1 }) {
 		const { config } = client;
 		const COMPETITION_RUNNING = config.getBoolean('COMPETITION_RUNNING');
 		const COMPETITION_END_TIME = config.getNumber('COMPETITION_END_TIME');
@@ -397,10 +397,10 @@ const self = module.exports = {
 		for (let index = Math.max(0, page - 1) * ELEMENTS_PER_PAGE ; index < page * ELEMENTS_PER_PAGE; ++index) {
 			if (index < PLAYER_COUNT) {
 				const player = guildPlayers[index];
-				playerList += '\n' + stripIndent`
+				playerList += `\n${stripIndent`
 					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${IS_COMPETITION_LB && player.paid ? ` ${Y_EMOJI_ALT}` : ''}
 						 > ${getEntry(player)}
-				`;
+				`}`;
 			} else {
 				playerList += '\n\u200b\n\u200b';
 			}
@@ -487,7 +487,7 @@ const self = module.exports = {
 	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
 	 * @param {number} [param1.page]
 	 */
-	createTotalStatsEmbed: (client, { userID, hypixelGuild = null, type, offset = '', shouldShowOnlyBelowReqs = false, page = 1 }) => {
+	createTotalStatsEmbed(client, { userID, hypixelGuild = null, type, offset = '', shouldShowOnlyBelowReqs = false, page = 1 }) {
 		const { config } = client;
 
 		type ??= config.get('CURRENT_COMPETITION');
@@ -545,8 +545,8 @@ const self = module.exports = {
 					return {
 						ign: player.ign,
 						discordID: player.discordID,
-						skillAverage: skillAverage,
-						trueAverage: trueAverage,
+						skillAverage,
+						trueAverage,
 						sortingStat: skillAverage,
 					};
 				};
@@ -637,10 +637,10 @@ const self = module.exports = {
 		for (let index = (page - 1) * ELEMENTS_PER_PAGE ; index < page * ELEMENTS_PER_PAGE; ++index) {
 			if (index < PLAYER_COUNT) {
 				const player = guildPlayers[index];
-				playerList += '\n' + stripIndent`
+				playerList += `\n${stripIndent`
 					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}
 						 > ${getEntry(player)}
-				`;
+				`}`;
 			} else {
 				playerList += '\n\u200b\n\u200b';
 			}

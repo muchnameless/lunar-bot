@@ -76,7 +76,7 @@ module.exports = class HelpCommand extends Command {
 
 			helpEmbed.setTitle(`Category: ${upperCaseFirstChar(INPUT)}`);
 
-			let requiredRoles = categoryCommands.first().requiredRoles;
+			let { requiredRoles } = categoryCommands.first();
 
 			if (requiredRoles) {
 				requiredRoles = requiredRoles.map(roleID => this.client.lgGuild?.roles.cache.get(roleID));
@@ -127,10 +127,11 @@ module.exports = class HelpCommand extends Command {
 
 		helpEmbed.addField('**Category**:', `${upperCaseFirstChar(command.category)}`);
 
-		const requiredRoles = command.requiredRoles;
+		const { requiredRoles } = command;
 
 		if (requiredRoles) {
-			const lgGuild = this.client.lgGuild;
+			const { lgGuild } = this.client;
+
 			if (message.guild?.id === this.client.config.get('DISCORD_GUILD_ID')) {
 				helpEmbed.addField('**Required Role:**', commaListsOr`${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID) ?? roleID)}`);
 			} else {

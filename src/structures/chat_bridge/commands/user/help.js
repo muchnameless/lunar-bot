@@ -46,7 +46,7 @@ module.exports = class HelpCommand extends Command {
 		if (requestedCategory) {
 			const reply = [ `Category: ${INPUT}` ];
 			const categoryCommands = commands.filterByCategory(INPUT);
-			const requiredRoles = categoryCommands.first().requiredRoles;
+			const { requiredRoles } = categoryCommands.first();
 
 			if (requiredRoles) {
 				reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleID => this.client.lgGuild?.roles.cache.get(roleID)?.name ?? roleID)}`);
@@ -71,7 +71,7 @@ module.exports = class HelpCommand extends Command {
 
 		reply.push(`Category: ${command.category}`);
 
-		const requiredRoles = command.requiredRoles;
+		const { requiredRoles } = command;
 
 		if (requiredRoles) {
 			reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleID => this.client.lgGuild?.roles.cache.get(roleID)?.name ?? roleID)}`);

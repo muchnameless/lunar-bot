@@ -171,7 +171,7 @@ module.exports = class HypixelGuild extends Model {
 	 * returns various average stats
 	 */
 	get stats() {
-		const players = this.players;
+		const { players } = this;
 		const PLAYER_COUNT = players.size;
 
 		return ({
@@ -509,7 +509,7 @@ module.exports = class HypixelGuild extends Model {
 
 		// no player db entry in this guild
 		if (!player) {
-			player = message.author.player;
+			({ player } = message.author);
 
 			// no player db entry in all guilds
 			if (!player) {
@@ -598,7 +598,7 @@ module.exports = class HypixelGuild extends Model {
 			// chatbridge disabled, message is from bot or no message.content to chat
 			if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length || message.author.id === this.client.user.id) return;
 
-			const chatBridge = this.chatBridge;
+			const { chatBridge } = this;
 
 			// message is from chatBridge webhook
 			if (message.webhookID === chatBridge.webhook.id) return;
@@ -606,7 +606,7 @@ module.exports = class HypixelGuild extends Model {
 			/**
 			 * @type {import('./Player')}
 			 */
-			const player = message.author.player;
+			const { player } = message.author;
 
 			// check if player is muted
 			if (player?.chatBridgeMutedUntil) {

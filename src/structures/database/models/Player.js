@@ -536,7 +536,7 @@ module.exports = class Player extends Model {
 		}
 
 		// hypixel guild ranks
-		const guildRank = this.guildRank;
+		const { guildRank } = this;
 
 		if (guildRank) {
 			if (guildRank.roleID && !member.roles.cache.has(guildRank.roleID)) {
@@ -630,7 +630,7 @@ module.exports = class Player extends Model {
 	 * @returns {Promise<?LunarGuildMember>}
 	 */
 	async linkUsingCache() {
-		const lgGuild = this.client.lgGuild;
+		const { lgGuild } = this.client;
 
 		if (!lgGuild) return null;
 
@@ -722,7 +722,7 @@ module.exports = class Player extends Model {
 
 		if (currentLinkedMember) {
 			// remove roles that the bot manages
-			const rolesToPurge = currentLinkedMember.rolesToPurge;
+			const { rolesToPurge } = currentLinkedMember;
 
 			if (rolesToPurge.length)
 				wasSuccessful = await this.makeRoleApiCall([], rolesToPurge, reason);
@@ -1125,7 +1125,7 @@ module.exports = class Player extends Model {
 	 */
 	async syncWithGuildData({ expHistory = {}, mutedTill } = {}) {
 		// update guild xp
-		const currentDay = Object.keys(expHistory)[0];
+		const [ currentDay ] = Object.keys(expHistory);
 
 		if (currentDay) {
 			const xp = expHistory[currentDay];
@@ -1265,8 +1265,8 @@ module.exports = class Player extends Model {
 
 			if (SKILLS_CAP[skill] > 50) maxXp += Object.values(SKILL_XP_PAST_50).reduce((acc, currentXp) => acc + currentXp, 0);
 
-			weight += Math.pow(level * 10, 0.5 + SKILL_EXPONENTS[skill] + (level / 100)) / 1250;
-			if (xp > maxXp) overflow += Math.pow((xp - maxXp) / SKILL_DIVIDER[skill], 0.968);
+			weight += (level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100)) / 1250;
+			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
 		}
 
 		for (const slayer of SLAYERS) {
@@ -1274,18 +1274,18 @@ module.exports = class Player extends Model {
 
 			weight += experience <= 1_000_000
 				? experience / SLAYER_DIVIDER[slayer]
-				: 1_000_000 / SLAYER_DIVIDER[slayer] + Math.pow((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5), 0.942);
+				: 1_000_000 / SLAYER_DIVIDER[slayer] + ((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942;
 		}
 
 		const maxXp = Object.values(DUNGEON_XP).reduce((acc, xp) => acc + xp, 0);
 
 		for (const type of [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ]) {
 			const { nonFlooredLevel: level } = this.getSkillLevel(type, offset);
-			const base = Math.pow(level, 4.5) * DUNGEON_EXPONENTS[type];
+			const base = level ** 4.5 * DUNGEON_EXPONENTS[type];
 			const xp = this[`${type}Xp${offset}`];
 
 			weight += base;
-			if (xp > maxXp) overflow += Math.pow((xp - maxXp) / (4 * maxXp / base), 0.968);
+			if (xp > maxXp) overflow += ((xp - maxXp) / (4 * maxXp / base)) ** 0.968;
 		}
 
 		return {
@@ -1392,8 +1392,8 @@ module.exports = class Player extends Model {
 
 			if (SKILLS_CAP[skill] > 50) maxXp += Object.values(SKILL_XP_PAST_50).reduce((acc, currentXp) => acc + currentXp, 0);
 
-			weight += Math.pow(level * 10, 0.5 + SKILL_EXPONENTS[skill] + (level / 100)) / 1250;
-			if (xp > maxXp) overflow += Math.pow((xp - maxXp) / SKILL_DIVIDER[skill], 0.968);
+			weight += (level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100)) / 1250;
+			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
 		}
 
 		for (const slayer of SLAYERS) {
@@ -1401,18 +1401,18 @@ module.exports = class Player extends Model {
 
 			weight += experience <= 1_000_000
 				? experience / SLAYER_DIVIDER[slayer]
-				: 1_000_000 / SLAYER_DIVIDER[slayer] + Math.pow((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5), 0.942);
+				: 1_000_000 / SLAYER_DIVIDER[slayer] + ((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942;
 		}
 
 		const maxXp = Object.values(DUNGEON_XP).reduce((acc, xp) => acc + xp, 0);
 
 		for (const type of [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ]) {
 			const { nonFlooredLevel: level } = this.getSkillLevelHistory(type, index);
-			const base = Math.pow(level, 4.5) * DUNGEON_EXPONENTS[type];
+			const base = level ** 4.5 * DUNGEON_EXPONENTS[type];
 			const xp = this[`${type}XpHistory`][index];
 
 			weight += base;
-			if (xp > maxXp) overflow += Math.pow((xp - maxXp) / (4 * maxXp / base), 0.968);
+			if (xp > maxXp) overflow += ((xp - maxXp) / (4 * maxXp / base)) ** 0.968;
 		}
 
 		return {

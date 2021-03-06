@@ -32,8 +32,7 @@ module.exports = class PromoteCommand extends Command {
 
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
 
-		const chatBridge = hypixelGuild.chatBridge;
-
+		const { chatBridge } = hypixelGuild;
 		const IGN = message.mentions.users.size
 			? message.messages.users.first().player?.ign
 			: this.client.players.getByIGN(args[0])?.ign ?? this.client.players.getByID(args[0])?.ign ?? args[0];

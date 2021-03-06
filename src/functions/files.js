@@ -11,7 +11,7 @@ const self = module.exports = {
 	 * @param {string} dirPath path to search in
 	 * @param {string[]} arrayOfFiles accumulator
 	 */
-	getAllJsFiles: async (dirPath, arrayOfFiles = []) => {
+	async getAllJsFiles(dirPath, arrayOfFiles = []) {
 		const files = await fs.readdir(dirPath);
 
 		await Promise.all(files.map(async file => {
@@ -27,7 +27,7 @@ const self = module.exports = {
 	 * @param {string} dirPath path of the files to require
 	 * @param {any[]} args arguments to call the required files with
 	 */
-	requireAll: async (dirPath, ...args) => {
+	async requireAll(dirPath, ...args) {
 		const files = await self.getAllJsFiles(dirPath);
 
 		if (args.length) {

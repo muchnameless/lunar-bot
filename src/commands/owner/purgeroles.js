@@ -23,7 +23,7 @@ module.exports = class PurgeRolesCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) {
-		const lgGuild = this.client.lgGuild;
+		const { lgGuild } = this.client;
 
 		if (!lgGuild) return;
 		if (lgGuild.members.cache.size !== lgGuild.memberCount) await lgGuild.members.fetch();

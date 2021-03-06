@@ -32,7 +32,7 @@ module.exports = class InviteCommand extends Command {
 
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
 
-		const chatBridge = hypixelGuild.chatBridge;
+		const { chatBridge } = hypixelGuild;
 		const [ IGN ] = args;
 
 		try {

@@ -49,13 +49,11 @@ module.exports = class EvalCommand extends Command {
 	async run(message, args, flags, rawArgs) {
 		/* eslint-disable no-unused-vars */
 		const { client } = this;
-		const chatBridge = client.chatBridge;
 		const { Util, MessageEmbed } = Discord;
 		const { cleanOutput, trim } = functionsUtil;
 		const { channel, channel: ch, guild, guild: g, author, member } = message;
 		const msg = message;
-		const { hypixelGuilds, players, taxCollectors, db } = client;
-		const lgGuild = client.lgGuild;
+		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
 		const asyncFlags = [ 'a', 'async' ];
 		const inspectFlags = [ 'i', 'inspect' ];
 		const totalFlags = [ 'c', 'ch', 'channel', ...asyncFlags, ...inspectFlags ];

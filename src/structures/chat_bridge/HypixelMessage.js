@@ -101,7 +101,7 @@ class HypixelMessage extends ChatMessage {
 	 */
 	async forwardToDiscord() {
 		if (this.author) {
-			const player = this.player;
+			const { player } = this;
 			const member = await player?.discordMember;
 			const message = await this.chatBridge.sendViaWebhook({
 				username: member?.displayName ?? player?.ign ?? this.author.ign,

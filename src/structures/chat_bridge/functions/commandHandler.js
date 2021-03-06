@@ -56,16 +56,16 @@ module.exports = async message => {
 		return message.reply(`the '${command.name}' command can only be executed in guild chat`);
 	}
 
-	const player = message.player;
+	const { player } = message;
 
 	// message author not a bot owner
 	if (player?.discordID !== client.ownerID) {
 
 		// role permissions
-		const requiredRoles = command.requiredRoles;
+		const { requiredRoles } = command;
 
 		if (requiredRoles) {
-			const lgGuild = client.lgGuild;
+			const { lgGuild } = client;
 
 			if (!lgGuild) {
 				logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' with the Lunar Guard Discord server being unreachable`);

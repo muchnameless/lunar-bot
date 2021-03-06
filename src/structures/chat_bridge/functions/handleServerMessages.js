@@ -116,7 +116,7 @@ module.exports = async message => {
 		const [, target, duration ] = muteMatched;
 
 		if (target === 'the guild chat') {
-			const guild = message.chatBridge.guild;
+			const { guild } = message.chatBridge;
 			const msDuration = stringToMS(duration);
 
 			guild.chatMutedUntil = isNaN(msDuration)
@@ -154,7 +154,7 @@ module.exports = async message => {
 		const [, target ] = unMuteMatched;
 
 		if (target === 'the guild chat') {
-			const guild = message.chatBridge.guild;
+			const { guild } = message.chatBridge;
 
 			guild.chatMutedUntil = 0;
 			guild.save();

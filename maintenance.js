@@ -33,7 +33,7 @@ process
 	const presence = { activity: { name: 'nothing due to maintenance', type: 'LISTENING' }, status: 'dnd' };
 	const client = new Client({
 		disableMentions: 'everyone',
-		presence: presence,
+		presence,
 		ws: {
 			intents: [
 				'DIRECT_MESSAGES',

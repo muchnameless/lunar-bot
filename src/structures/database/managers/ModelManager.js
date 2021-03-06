@@ -14,7 +14,7 @@ class ModelManager {
 		this.client = client;
 		this.model = model;
 		this.cache = new Collection();
-		this.primaryKey = this.model.primaryKeyAttributes[0];
+		[ this.primaryKey ] = this.model.primaryKeyAttributes;
 	}
 
 	/**
