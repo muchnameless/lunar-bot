@@ -6,13 +6,13 @@ const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
 
-module.exports = class InviteCommand extends Command {
+module.exports = class PromoteCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'invite someone into the guild',
+			description: 'promote a guild member',
 			args: true,
-			usage: () => `[\`IGN\`] <${this.client.hypixelGuilds.guildNameFlags}>`,
+			usage: '[`ign`|`discord id`|`@mention`]',
 			cooldown: 0,
 		});
 	}
@@ -33,29 +33,31 @@ module.exports = class InviteCommand extends Command {
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
 
 		const chatBridge = hypixelGuild.chatBridge;
-		const [ IGN ] = args;
+
+		const IGN = message.mentions.users.size
+			? message.messages.users.first().player?.ign
+			: this.client.players.getByIGN(args[0])?.ign ?? this.client.players.getByID(args[0])?.ign ?? args[0];
 
 		try {
 			const response = await chatBridge.command({
-				command: `g invite ${IGN}`,
+				command: `g promote ${IGN}`,
 				responseRegex: new RegExp([
-					`^You invited ${HYPIXEL_RANK_REGEX}${IGN} to your guild\\. They have 5 minutes to accept\\.$`,
-					`^You sent an offline invite to ${HYPIXEL_RANK_REGEX}${IGN}! They will have 5 minutes to accept once they come online!$`,
-					`^You've already invited ${HYPIXEL_RANK_REGEX}${IGN} to your guild! Wait for them to accept!$`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is already in another guild!$`,
-					'^You do not have permission to invite players!$',
-					'You cannot invite this player to your guild!', // g invites disabled
-					// '', // guild full
+					`^${HYPIXEL_RANK_REGEX}${IGN} was promoted from [a-z]+ to [a-z]+$`,
+					`^${HYPIXEL_RANK_REGEX}${IGN} is already the highest rank`,
+					`^${HYPIXEL_RANK_REGEX}${IGN} is the guild master so can't be promoted anymore!`,
+					'^You can only promote up to your own rank!',
+					'^You must be the Guild Master to use that command!',
+					`Can't find a player by the name of '${IGN}'`,
 				].join('|'), 'i'),
 			});
 
 			message.reply(stripIndent`
-				invited \`${IGN}\` into \`${hypixelGuild.name}\`
+				promoted \`${IGN}\`
 				 > ${response}
 			`);
 		} catch (error) {
 			logger.error(error);
-			message.reply(`an unknown error occurred while inviting \`${IGN}\` into \`${hypixelGuild.name}\`.`);
+			message.reply(`an unknown error occurred while promoting \`${IGN}\`.`);
 		}
 	}
 };
