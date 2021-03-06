@@ -44,7 +44,7 @@ module.exports = class InviteCommand extends Command {
 					`^You've already invited ${HYPIXEL_RANK_REGEX}${IGN} to your guild! Wait for them to accept!$`,
 					`^${HYPIXEL_RANK_REGEX}${IGN} is already in (?:another|your) guild!$`,
 					'^You do not have permission to invite players!$',
-					'You cannot invite this player to your guild!', // g invites disabled
+					'^You cannot invite this player to your guild!$', // g invites disabled
 					// '', // guild full
 				].join('|'), 'i'),
 			});
