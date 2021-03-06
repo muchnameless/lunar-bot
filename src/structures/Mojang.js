@@ -57,7 +57,10 @@ class Mojang {
 
 		const res = await fetch(`${path}${query}`);
 
-		if (res.status !== 200) throw new Error(`Error ${res.status}: ${res.statusText}`);
+		if (res.status !== 200) {
+			if (res.status === 204) throw new Error(`Error ${res.status}: invalid ${resultField === 'id' ? 'IGN' : resultField === 'name' ? 'uuid' : 'input'}`);
+			throw new Error(`Error ${res.status}: ${res.statusText}`);
+		}
 
 		const parsedRes = await res.json().catch(() => {
 			throw new Error('An error occurred while converting to JSON');
