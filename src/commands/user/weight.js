@@ -1,11 +1,10 @@
 'use strict';
 
 const fetch = require('node-fetch');
-const { cleanFormattedNumber } = require('../../../../functions/util');
-const { BASE_URL } = require('../../../../constants/weight');
-const mojang = require('../../../../api/mojang');
-const Command = require('../../../commands/Command');
-const logger = require('../../../../functions/logger');
+const { BASE_URL } = require('../../constants/weight');
+const mojang = require('../../api/mojang');
+const Command = require('../../structures/commands/Command');
+const logger = require('../../functions/logger');
 
 
 module.exports = class WeightCommand extends Command {
@@ -32,12 +31,12 @@ module.exports = class WeightCommand extends Command {
 	 * @param {number} number
 	 */
 	formatNumber(number) {
-		return cleanFormattedNumber(this.client.formatDecimalNumber(Math.floor(number * 100) / 100));
+		return this.client.formatDecimalNumber(Math.floor(number * 100) / 100);
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -46,7 +45,7 @@ module.exports = class WeightCommand extends Command {
 		try {
 			const uuid = args.length
 				? await mojang.getUUID(args[0])
-				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
+				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.guild ? message.member.displayName : message.author.username);
 			const { code, reason, data } = await (await fetch(`${BASE_URL}/profiles/${this.formatUUID(uuid)}/weight?key=${process.env.HYPIXEL_KEY_AUX_2}`)).json();
 
 			if (reason) throw new Error(`[Error ${code}]: ${reason}`);
