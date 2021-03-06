@@ -490,13 +490,14 @@ class ChatBridge extends EventEmitter {
 	/**
 	 * send via the chatBridge webhook
 	 * @param {import('discord.js').WebhookMessageOptions} toSend
+	 * @returns {Promise<import('../extensions/Message')>}
 	 */
 	async sendViaWebhook(toSend) {
 		if (!this.guild?.chatBridgeEnabled) return;
 		if (!toSend.content?.length) return logger.warn(`[CHATBRIDGE]: ${this.logInfo}: prevented sending empty message`);
 
 		try {
-			await this.webhook.send(toSend);
+			return await this.webhook.send(toSend);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE MESSAGE]: ${this.logInfo}: ${error.name}: ${error.message}`);
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {

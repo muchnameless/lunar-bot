@@ -2,6 +2,7 @@
 
 const ChatMessage = require('prismarine-chat')(require('../../constants/chatBridge').VERSION);
 const { messageTypes: { WHISPER, GUILD, PARTY } } = require('../../constants/chatBridge');
+const { NO_BELL } = require('../../constants/emojiCharacters');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
 
 /**
@@ -102,13 +103,17 @@ class HypixelMessage extends ChatMessage {
 		if (this.author) {
 			const player = this.player;
 			const member = await player?.discordMember;
-
-			return this.chatBridge.sendViaWebhook({
+			const message = await this.chatBridge.sendViaWebhook({
 				username: member?.displayName ?? player?.ign ?? this.author.ign,
 				avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
 				content: this.parsedContent,
 				allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
 			});
+
+			// inform user if user and role pings don't actually ping (can't use message.mentions cause that is empty)
+			if ((!player?.hasDiscordPingPermission && /<@!?\d+>/.test(message.content)) || /<@&\d+>/.test(message.content)) message.reactSafely(NO_BELL);
+
+			return message;
 		}
 
 		return this.chatBridge.sendViaWebhook({

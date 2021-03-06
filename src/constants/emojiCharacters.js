@@ -25,4 +25,5 @@ module.exports = {
 	LOCK: '🔒',
 	MUTED: '🔇',
 	STOP: '🛑',
+	NO_BELL: '🔕',
 };
