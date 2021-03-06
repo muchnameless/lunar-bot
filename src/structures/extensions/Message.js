@@ -206,17 +206,18 @@ class LunarMessage extends Message {
 				return null;
 			}
 
+			try {
+				hypixelGuild?.chatBridge.gchat(content);
+			} catch (error) {
+				logger.error(`[REPLY]: ${error.message}`);
+			}
+
 			// send reply
 			return (this.replyMessageID && this.channel.messages.cache.has(this.replyMessageID)
 				? this.channel.messages.cache.get(this.replyMessageID).edit(content, options)
 				: this.channel.send(content, options))
 				.then(message => {
 					if (options.saveReplyMessageID) this.replyMessageID = message.id;
-					try {
-						hypixelGuild?.chatBridge.forwardDiscordMessageToHypixelGuildChat(message);
-					} catch (error) {
-						logger.error(`[REPLY]: ${error.message}`);
-					}
 					return message;
 				});
 		}
