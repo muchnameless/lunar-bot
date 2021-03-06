@@ -370,12 +370,12 @@ class ChatBridge extends EventEmitter {
 	/**
 	 * forwards a discord message to ingame guild chat, prettifying discord renders
 	 * @param {import('../extensions/Message')} message
-	 * @param {boolean|import('../database/models/Player')} player
+	 * @param {import('../database/models/Player')} player
 	 */
-	async forwardDiscordMessageToHypixelGuildChat(message, player = false) {
+	async forwardDiscordMessageToHypixelGuildChat(message, player) {
 		return this.gchat(
 			this.constructor._escapeEz(this._parseDiscordMessageToMinecraft(message.content)),
-			{ prefix: player ? `${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}:` : '' },
+			{ prefix: `${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}:` },
 		);
 	}
 
