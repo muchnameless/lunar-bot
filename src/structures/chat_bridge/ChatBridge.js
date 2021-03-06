@@ -422,7 +422,7 @@ class ChatBridge extends EventEmitter {
 	async chat(message, { prefix = '', maxParts = this.client.config.getNumber('DEFAULT_MAX_PARTS') } = {}) {
 		let success = true;
 
-		let messageParts = message
+		let messageParts = [ ...new Set(message
 			.split('\n')
 			.flatMap(part => {
 				try {
@@ -442,7 +442,7 @@ class ChatBridge extends EventEmitter {
 					if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 					return false;
 				}
-			});
+			})) ];
 
 		// prevent sending more than 'maxParts' messages
 		if (messageParts.length > maxParts) {
