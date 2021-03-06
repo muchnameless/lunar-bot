@@ -39,4 +39,6 @@ module.exports = {
 		tank: 0.0000045254834,
 	},
 
+	BASE_URL: 'https://hypixel-api.senither.com/v1',
+
 };
