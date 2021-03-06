@@ -18,11 +18,10 @@ class LunarMessage extends Message {
 		 * @type {import('./User')}
 		 */
 		this.author;
-
-		// /**
-		//  * @type {import('discord.js').Collection<string, import('./User')>}
-		//  */
-		// this.mentions.users;
+		/**
+		 * @type {import('../LunarClient')}
+		 */
+		this.client;
 	}
 
 	/**
@@ -188,8 +187,10 @@ class LunarMessage extends Message {
 			if (options.embed.files?.length) requiredChannelPermissions.push('ATTACH_FILES');
 		}
 
+		const hypixelGuild = this.client.hypixelGuilds.cache.find(hGuild => hGuild.chatBridgeChannelID === this.channel.id);
+
 		// commands channel / reply in same channel option or flag
-		if (this.channel.name.includes('commands') || options.sameChannel || this.shouldReplyInSameChannel) {
+		if (this.channel.name.includes('commands') || options.sameChannel || this.shouldReplyInSameChannel || hypixelGuild) {
 			// permission checks
 			if (!this.channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)) {
 				const missingChannelPermissions = requiredChannelPermissions.filter(permission => !this.channel.permissionsFor(this.guild.me).has(permission));
@@ -200,19 +201,24 @@ class LunarMessage extends Message {
 					.send(commaListsAnd`
 						missing ${missingChannelPermissions.map(permission => `\`${permission}\``)} permission${missingChannelPermissions.length === 1 ? '' : 's'} in #${this.channel}
 					`)
-					.catch(() => logger.error(`[SEND CORRECT CHANNEL]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
+					.catch(() => logger.error(`[REPLY]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
 
 				return null;
 			}
 
 			// send reply
-			return this.replyMessageID && this.channel.messages.cache.has(this.replyMessageID)
+			return (this.replyMessageID && this.channel.messages.cache.has(this.replyMessageID)
 				? this.channel.messages.cache.get(this.replyMessageID).edit(content, options)
-				: this.channel.send(content, options)
-					.then(message => {
-						if (options.saveReplyMessageID) this.replyMessageID = message.id;
-						return message;
-					});
+				: this.channel.send(content, options))
+				.then(message => {
+					if (options.saveReplyMessageID) this.replyMessageID = message.id;
+					try {
+						hypixelGuild?.chatBridge.forwardDiscordMessageToHypixelGuildChat(message);
+					} catch (error) {
+						logger.error(`[REPLY]: ${error.message}`);
+					}
+					return message;
+				});
 		}
 
 		// redirect reply to nearest #bot-commands channel
@@ -234,7 +240,7 @@ class LunarMessage extends Message {
 					no #bot-commands channel with the required permission${requiredChannelPermissions.length === 1 ? '' : 's'} ${requiredChannelPermissions.map(permission => `\`${permission}\``)} found.
 					Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.
 				`)
-				.catch(() => logger.error(`[SEND CORRECT CHANNEL]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
+				.catch(() => logger.error(`[REPLY]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
 
 			return null;
 		}
@@ -253,7 +259,7 @@ class LunarMessage extends Message {
 
 						this.channel
 							.bulkDelete([ commandsChannelMessage.id, this.id ])
-							.catch(error => logger.error(`[SEND CORRECT CHANNEL]: unable to bulk delete: ${error.name}: ${error.message}`));
+							.catch(error => logger.error(`[REPLY]: unable to bulk delete: ${error.name}: ${error.message}`));
 					}, 10_000);
 				});
 		} else if (this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES')) { // only delete author's message

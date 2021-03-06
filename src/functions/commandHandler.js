@@ -18,12 +18,13 @@ module.exports = async message => {
 		return logger.error('error while fetching partial message:\n', error);
 	}
 
+	message.client.hypixelGuilds.checkIfChatBridgeMessage(message);
+
 	if (!message.isUserMessage || !message.content) return; // filter out bot, system & webhook and empty (attachments, embeds) messages
 
 	const { client, client: { config } } = message;
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').exec(message.content); // PREFIX, @mention, no prefix
 
-	client.hypixelGuilds.checkIfChatBridgeMessage(message);
 	client.hypixelGuilds.checkIfRankRequestMessage(message);
 
 	// must use prefix for commands in guild
