@@ -4,6 +4,7 @@ const { Model, DataTypes } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
 const ms = require('ms');
 const { autocorrect, getHypixelClient } = require('../../../functions/util');
+const { HYPIXEL_RANK_REGEX } = require('../../../constants/chatBridge');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED, STOP } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH }, UNKNOWN_IGN } = require('../../../constants/database');
 const hypixel = require('../../../api/hypixel');
@@ -536,16 +537,9 @@ module.exports = class HypixelGuild extends Model {
 			return message.reactSafely(CLOWN);
 		}
 
-		let { totalWeight } = player.getWeight();
-
-		// player meets reqs and already has the rank or is staff and has the rank's role
-		if (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && (message.member ?? await player.discordMember)?.roles.cache.has(ROLE_ID)))) {
-			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank but is '${player.guildRank?.name ?? player.guildRankPriority}'`);
-			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
-			return message.reactSafely(CLOWN);
-		}
-
 		const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));
+
+		let { totalWeight } = player.getWeight();
 
 		// player data could be outdated -> update data when player does not meet reqs
 		if (totalWeight < WEIGHT_REQ) {
@@ -556,7 +550,7 @@ module.exports = class HypixelGuild extends Model {
 
 		const WEIGHT_STRING = this.client.formatDecimalNumber(totalWeight);
 
-		if (message.reactions.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error.name}: ${error.message}`)); // get clowned
+		if (message.reactions.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error.name}: ${error.message}`)); // remove clown reaction
 
 		await message.reply(
 			`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
@@ -565,7 +559,8 @@ module.exports = class HypixelGuild extends Model {
 
 		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
-		if (totalWeight < WEIGHT_REQ) return;
+		// player doesn't meet reqs or meets reqs and already has the rank or is staff and has the rank's role
+		if (totalWeight < WEIGHT_REQ || (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && (message.member ?? await player.discordMember)?.roles.cache.has(ROLE_ID))))) return;
 
 		// set rank role to requested rank
 		if (player.isStaff) {
@@ -581,7 +576,7 @@ module.exports = class HypixelGuild extends Model {
 			// set ingame rank and discord role
 			await this.chatBridge.command({
 				command: `g setrank ${player.ign} ${RANK_NAME}`,
-				responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
+				responseRegex: new RegExp(`${HYPIXEL_RANK_REGEX}${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
 				rejectOnTimeout: true,
 			});
 
@@ -599,44 +594,49 @@ module.exports = class HypixelGuild extends Model {
 	 * @param {import('../../extensions/Message')} message discord message which was send in the #rank-requests channel
 	 */
 	async handleChatBridgeMessage(message) {
-		// chatbridge disabled or no message.content to chat
-		if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length) return;
-
-		/**
-		 * @type {import('./Player')}
-		 */
-		const player = message.author.player;
-
-		// check if player is muted
-		if (player?.chatBridgeMutedUntil) {
-			if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
-				message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
-					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
-					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error.name}: ${error.message}`),
-				);
-				return message.reactSafely(MUTED);
-			}
-
-			player.chatBridgeMutedUntil = 0;
-			player.save();
-		}
-
-		// check if guild chat is muted
-		if (this.chatMutedUntil && !player?.isStaff) {
-			if (Date.now() < this.chatMutedUntil) {
-				message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
-					() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
-					error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error.name}: ${error.message}`),
-				);
-				return message.reactSafely(MUTED);
-			}
-
-			this.chatMutedUntil = 0;
-			this.save();
-		}
-
 		try {
-			if (!(await this.chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(STOP);
+			// chatbridge disabled, message is from bot or no message.content to chat
+			if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || !message.content.length || message.author.id === this.client.user.id) return;
+
+			const chatBridge = this.chatBridge;
+
+			// message is from chatBridge webhook
+			if (message.webhookID === chatBridge.webhook.id) return;
+
+			/**
+			 * @type {import('./Player')}
+			 */
+			const player = message.author.player;
+
+			// check if player is muted
+			if (player?.chatBridgeMutedUntil) {
+				if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
+					message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
+						() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
+						error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error.name}: ${error.message}`),
+					);
+					return message.reactSafely(MUTED);
+				}
+
+				player.chatBridgeMutedUntil = 0;
+				player.save();
+			}
+
+			// check if guild chat is muted
+			if (this.chatMutedUntil && !player?.isStaff) {
+				if (Date.now() < this.chatMutedUntil) {
+					message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
+						() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
+						error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error.name}: ${error.message}`),
+					);
+					return message.reactSafely(MUTED);
+				}
+
+				this.chatMutedUntil = 0;
+				this.save();
+			}
+
+			if (!(await chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(STOP);
 		} catch (error) {
 			logger.warn(`[GUILD CHATBRIDGE]: ${error.message}`);
 			message.reactSafely(X_EMOJI);
