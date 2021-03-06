@@ -1,7 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
-const { cleanFormattedNumber, upperCaseFirstChar } = require('../../../../functions/util');
+const { upperCaseFirstChar } = require('../../../../functions/util');
 const { BASE_URL } = require('../../../../constants/weight');
 const mojang = require('../../../../api/mojang');
 const Command = require('../../../commands/Command');
@@ -32,7 +32,7 @@ module.exports = class WeightCommand extends Command {
 	 * @param {number} number
 	 */
 	formatNumber(number) {
-		return cleanFormattedNumber(this.client.formatDecimalNumber(Math.floor(number * 100) / 100));
+		return this.client.formatDecimalNumberClean(Math.floor(number * 100) / 100);
 	}
 
 	/**

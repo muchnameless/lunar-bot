@@ -1,7 +1,7 @@
 'use strict';
 
 const { Y_EMOJI, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
-const { autocorrect, cleanFormattedNumber } = require('../../../functions/util');
+const { autocorrect } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
 
@@ -52,7 +52,7 @@ module.exports = async message => {
 		return message.reply(CLOWN);
 	}
 
-	const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));
+	const WEIGHT_REQ_STRING = client.formatNumberClean(WEIGHT_REQ);
 
 	let { totalWeight } = player.getWeight();
 
@@ -63,9 +63,9 @@ module.exports = async message => {
 		({ totalWeight } = player.getWeight());
 	}
 
-	const WEIGHT_STRING = client.formatDecimalNumber(totalWeight);
+	const WEIGHT_STRING = client.formatDecimalNumberClean(totalWeight);
 
-	await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${cleanFormattedNumber(WEIGHT_STRING)} / ${cleanFormattedNumber(WEIGHT_REQ_STRING)} [${RANK_NAME}]`);
+	await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [${RANK_NAME}]`);
 
 	logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
@@ -87,7 +87,7 @@ module.exports = async message => {
 	} else {
 		await chatBridge.command({
 			command: `g setrank ${player.ign} ${RANK_NAME}`,
-			responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank.name} to ${RANK_NAME}`), // listen for ingame promotion message
+			responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank?.name ?? '[a-zA-Z]+'} to ${RANK_NAME}`), // listen for ingame promotion message
 			rejectOnTimeout: true,
 		});
 
