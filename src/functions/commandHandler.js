@@ -18,9 +18,11 @@ module.exports = async (message) => {
 		return logger.error('error while fetching partial message:\n', error);
 	}
 
+	if (!message.content?.length) return; // ignore empty messages (attachments, embeds)
+
 	message.client.hypixelGuilds.checkIfChatBridgeMessage(message);
 
-	if (!message.isUserMessage || !message.content) return; // filter out bot, system & webhook and empty (attachments, embeds) messages
+	if (!message.isUserMessage) return; // filter out bot, system & webhook messages
 
 	const { client, client: { config } } = message;
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').exec(message.content); // PREFIX, @mention, no prefix
