@@ -95,7 +95,7 @@ module.exports = async (message) => {
 	const friendReqMatched = message.content.match(/Friend request from (?:\[.+?\] )?(\w+)/);
 
 	if (friendReqMatched) {
-		const [, ign ] = friendReqMatched;
+		const [ , ign ] = friendReqMatched;
 		const player = message.chatBridge.client.players.cache.find(p => p.ign === ign);
 
 		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: denying f request from ${ign}`);
@@ -114,13 +114,13 @@ module.exports = async (message) => {
 	if (muteMatched) {
 		message.forwardToDiscord();
 
-		const [, target, duration ] = muteMatched;
+		const [ , target, duration ] = muteMatched;
 
 		if (target === 'the guild chat') {
 			const { guild } = message.chatBridge;
 			const msDuration = stringToMS(duration);
 
-			guild.chatMutedUntil = isNaN(msDuration)
+			guild.chatMutedUntil = Number.isNaN(msDuration)
 				? Infinity
 				: Date.now() + msDuration;
 			guild.save();
@@ -134,7 +134,7 @@ module.exports = async (message) => {
 
 		const msDuration = stringToMS(duration);
 
-		player.chatBridgeMutedUntil = isNaN(msDuration)
+		player.chatBridgeMutedUntil = Number.isNaN(msDuration)
 			? Infinity
 			: Date.now() + msDuration;
 		player.save();
@@ -152,7 +152,7 @@ module.exports = async (message) => {
 	if (unMuteMatched) {
 		message.forwardToDiscord();
 
-		const [, target ] = unMuteMatched;
+		const [ , target ] = unMuteMatched;
 
 		if (target === 'the guild chat') {
 			const { guild } = message.chatBridge;

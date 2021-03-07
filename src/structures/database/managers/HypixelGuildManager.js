@@ -115,7 +115,7 @@ class HypixelGuildManager extends ModelManager {
 	 * @returns {import('../models/HypixelGuild')|boolean}
 	 */
 	autocorrectToGuild(input) {
-		const result = autocorrect(input, [ ...this.cache.values(), { name: 'all' } ], 'name');
+		const result = autocorrect(input, [ ...this.cache.values(), { name: 'all' }], 'name');
 
 		if (result.value.name === 'all') return { ...result, value: false };
 

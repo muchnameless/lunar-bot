@@ -112,7 +112,7 @@ const self = module.exports = {
 		for (const [ index, arg ] of args.entries()) {
 			const numberInput = parseInt(arg, 10);
 
-			if (isNaN(numberInput)) continue;
+			if (Number.isNaN(numberInput)) continue;
 
 			page = Math.max(numberInput, 1);
 			args.splice(index, 1);

@@ -29,7 +29,7 @@ class LunarGuild extends Guild {
 					if (role.comparePositionTo(highestBotRole) >= 0) return logger.warn(`[CHECK ROLE IDS]: '${role.name}' is higher than the bot's highest role`);
 					return true;
 				})
-				.sort(([, a ], [, b ]) => b.comparePositionTo(a)),
+				.sort(([ , a ], [ , b ]) => b.comparePositionTo(a)),
 		);
 	}
 

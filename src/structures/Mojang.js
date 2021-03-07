@@ -4,7 +4,6 @@ const fetch = require('node-fetch');
 
 
 class Mojang {
-
 	/**
 	 * @param {object} options
 	 */
@@ -73,7 +72,6 @@ class Mojang {
 
 		return response;
 	}
-
 }
 
 module.exports = Mojang;

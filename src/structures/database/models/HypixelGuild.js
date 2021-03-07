@@ -471,8 +471,6 @@ module.exports = class HypixelGuild extends Model {
 		} finally {
 			this._isUpdatingPlayers = false;
 		}
-
-
 	}
 
 	/**

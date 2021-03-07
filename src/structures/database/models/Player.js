@@ -341,7 +341,7 @@ module.exports = class Player extends Model {
 				from: this.minecraftUUID,
 				type: 'tax',
 			},
-			order: [[ 'createdAt', 'DESC' ]],
+			order: [ [ 'createdAt', 'DESC' ] ],
 			attributes: [ 'amount' ],
 			raw: true,
 		}).then(result => (result.lengh ? result[0].amount : null));
@@ -505,7 +505,7 @@ module.exports = class Player extends Model {
 		let reason = reasonInput;
 
 		// individual hypixel guild roles
-		for (const [ guildID, { roleID } ] of this.client.hypixelGuilds.cache) {
+		for (const [ guildID, { roleID }] of this.client.hypixelGuilds.cache) {
 			// player is in the guild
 			if (guildID === this.guildID) {
 				if (!member.roles.cache.has(roleID)) rolesToAdd.push(roleID);
@@ -1045,7 +1045,7 @@ module.exports = class Player extends Model {
 				from: this.minecraftUUID,
 				type: 'tax',
 			},
-			order: [[ 'createdAt', 'DESC' ]],
+			order: [ [ 'createdAt', 'DESC' ] ],
 			attributes: [ 'to', 'amount' ],
 			raw: true,
 		});

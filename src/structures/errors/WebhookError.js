@@ -12,7 +12,6 @@ class WebhookError extends Error {
 		this.channel = channel;
 		this.hypixelGuild = hypixelGuild;
 	}
-
 }
 
 module.exports = WebhookError;

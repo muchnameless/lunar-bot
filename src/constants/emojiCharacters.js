@@ -4,7 +4,7 @@ module.exports = {
 	// basic
 	X_EMOJI: '❌',
 	Y_EMOJI: '✅',
-	Y_EMOJI_ALT:'✔️',
+	Y_EMOJI_ALT: '✔️',
 
 	// arrows
 	SORT_ASCENDING_EMOJI: '⬆️',

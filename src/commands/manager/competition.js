@@ -72,7 +72,7 @@ module.exports = class CompetitionCommand extends Command {
 
 				const result = new Date(collected.content);
 
-				if (!isNaN(result)) {
+				if (!Number.isNaN(result.getTime())) {
 					startingTime = result;
 					retries = 0;
 				} else {
@@ -96,7 +96,7 @@ module.exports = class CompetitionCommand extends Command {
 
 				const result = new Date(collected.content);
 
-				if (!isNaN(result)) {
+				if (!Number.isNaN(result.getTime())) {
 					endingTime = result;
 					retries = 0;
 				} else {
@@ -113,7 +113,6 @@ module.exports = class CompetitionCommand extends Command {
 				`type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
 				{ saveReplyMessageID: false },
 			);
-
 		} catch (error) {
 			logger.error(error);
 			message.reply('the command has been cancelled.');

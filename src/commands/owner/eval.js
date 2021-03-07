@@ -147,7 +147,6 @@ module.exports = class EvalCommand extends Command {
 				.addField('\u200b', INFO)
 				.setTimestamp(),
 			);
-
 		} catch (error) {
 			logger.error(`[EVAL ERROR]: ${error.name}: ${error.message}`);
 

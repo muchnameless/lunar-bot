@@ -109,11 +109,11 @@ class CommandCollection extends Collection {
 	load(file) {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
-		const commandConstructor = require(file);
+		const Command = require(file);
 		/**
 		 * @type {import('./Command')}
 		 */
-		const command = new commandConstructor({
+		const command = new Command({
 			client: this.client,
 			commandCollection: this,
 			name,

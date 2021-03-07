@@ -17,14 +17,14 @@ const { upperCaseFirstChar, stringToMS } = require('./util');
  */
 module.exports = async (chatBridge, message, args, ign) => {
 	const duration = Math.min(Math.max(stringToMS(args[0]), 30_000), 10 * 60_000) || 60_000;
-	const startingIndex = Math.max(message.content.indexOf('"'), message.content.indexOf('“'));
+	const startingIndex = Math.max(message.content.indexOf('"'), message.content.indexOf('“'), message.content.indexOf('”'));
 
 	// no '"' found
 	if (startingIndex === -1) return message.reply('specify poll options to vote for');
 
 	let options = message.content
 		.slice(startingIndex)
-		.split(/"|“/)
+		.split(/"|“|”/)
 		.map(x => x.trim())
 		.filter(x => x.length);
 
@@ -54,7 +54,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 		const votedFor = parseInt(msg.content, 10);
 
 		// doesn't start with a number or out of range
-		if (isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
+		if (Number.isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
 		options[votedFor - 1].votes.add(msg.player?.minecraftUUID ?? msg.author.ign);
 	}
@@ -64,7 +64,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 		const votedFor = parseInt(msg.content, 10);
 
 		// doesn't start with a number or out of range
-		if (isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
+		if (Number.isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
 		options[votedFor - 1].votes.add(msg.author.player?.minecraftUUID ?? msg.author.id);
 	}

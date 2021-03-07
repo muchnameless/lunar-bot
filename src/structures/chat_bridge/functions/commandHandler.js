@@ -63,7 +63,6 @@ module.exports = async (message) => {
 
 	// message author not a bot owner
 	if (player?.discordID !== client.ownerID) {
-
 		// role permissions
 		const { requiredRoles } = command;
 

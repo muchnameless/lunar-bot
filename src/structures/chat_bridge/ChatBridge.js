@@ -9,7 +9,7 @@ const { sleep, trim } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { VERSION } = require('../../constants/chatBridge');
 const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
-const MinecraftBot = require('./MinecraftBot');
+const minecraftBot = require('./MinecraftBot');
 const WebhookError = require('../errors/WebhookError');
 const AsyncQueue = require('../AsyncQueue');
 const MessageCollector = require('./MessageCollector');
@@ -256,7 +256,7 @@ class ChatBridge extends EventEmitter {
 	 * create bot instance, loads and binds it's events and logs it into hypixel
 	 */
 	async _createBot() {
-		return this.bot = await MinecraftBot(this, {
+		return this.bot = await minecraftBot(this, {
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
 			username: process.env.MINECRAFT_USERNAME.split(' ')[this.mcAccount],

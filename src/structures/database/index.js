@@ -44,7 +44,7 @@ const db = {
 
 				if (Object.getPrototypeOf(model) !== Sequelize.Model) return null;
 
-				return [model.name, model.init(sequelize)];
+				return [ model.name, model.init(sequelize) ];
 			})
 			.filter(Boolean),
 	),

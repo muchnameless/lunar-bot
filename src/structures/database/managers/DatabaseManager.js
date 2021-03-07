@@ -270,7 +270,7 @@ class DatabaseManager {
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 		if (!taxChannel?.guild?.available) return logger.warn('[TAX MESSAGE]: channel not found');
-		if (!taxChannel.checkBotPermissions(['VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS'])) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+		if (!taxChannel.checkBotPermissions([ 'VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS' ])) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
 

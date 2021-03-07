@@ -43,7 +43,6 @@ module.exports = class ConfigCommand extends Command {
 
 		// search the config
 		if (args.length === 1) {
-
 			// delete an existing entry
 			if (flags.some(flag => [ 'r', 'remove', 'd', 'delete' ].includes(flag))) {
 				const KEY = args[0].toUpperCase();

@@ -63,7 +63,7 @@ module.exports = class MuteCommand extends Command {
 		const { chatBridge } = guild;
 		const DURATION = stringToMS(DURATION_INPUT);
 
-		if (isNaN(DURATION)) return message.reply(`\`${DURATION_INPUT}\` is not a valid duration.`);
+		if (Number.isNaN(DURATION)) return message.reply(`\`${DURATION_INPUT}\` is not a valid duration.`);
 
 		const EXPIRES_AT = Date.now() + DURATION;
 

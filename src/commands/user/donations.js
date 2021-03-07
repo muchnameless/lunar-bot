@@ -48,7 +48,7 @@ module.exports = class DonationsCommand extends Command {
 			.setTimestamp();
 		let totalAmount = 0;
 
-		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([, a], [, b]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
+		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([ , a ], [ , b ]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
 			const IGN = this.client.players.cache.get(minecraftUUID)?.ign ?? (await mojang.getName(IGN).catch(logger.error)) ?? minecraftUUID;
 			const notes = reducedNotes[minecraftUUID].join('\n');
 			const inline = Boolean(notes);
