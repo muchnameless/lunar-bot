@@ -17,10 +17,17 @@ const { upperCaseFirstChar, stringToMS } = require('./util');
  */
 module.exports = async (chatBridge, message, args, ign) => {
 	const duration = Math.min(Math.max(stringToMS(args[0]), 30_000), 10 * 60_000) || 60_000;
-	const startingIndex = Math.max(message.content.indexOf('"'), message.content.indexOf('“'), message.content.indexOf('”'));
+	const QUOTE_1_INDEX = message.content.indexOf('"');
+	const QUOTE_2_INDEX = message.content.indexOf('“');
+	const QUOTE_3_INDEX = message.content.indexOf('”');
+	const startingIndex = Math.min(
+		QUOTE_1_INDEX === -1 ? Infinity : QUOTE_1_INDEX,
+		QUOTE_2_INDEX === -1 ? Infinity : QUOTE_2_INDEX,
+		QUOTE_3_INDEX === -1 ? Infinity : QUOTE_3_INDEX,
+	);
 
-	// no '"' found
-	if (startingIndex === -1) return message.reply('specify poll options to vote for');
+	// no quote found
+	if (!Number.isFinite(startingIndex)) return message.reply('specify poll options to vote for');
 
 	let options = message.content
 		.slice(startingIndex)
