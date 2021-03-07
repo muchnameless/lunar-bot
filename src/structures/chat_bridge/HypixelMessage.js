@@ -27,7 +27,9 @@ class HypixelMessage extends ChatMessage {
 
 		this.chatBridge = chatBridge;
 		this.position = { 0: 'chat', 1: 'system', 2: 'gameInfo' }[position];
-		this.rawContent = this.toString().trim();
+		this.rawContent = this.toString()
+			.replace(/ࠀ|⭍/g, '')
+			.trim();
 
 		/**
 		 * Guild > [HypixelRank] ign [GuildRank]
@@ -42,14 +44,11 @@ class HypixelMessage extends ChatMessage {
 				guildRank: matched.groups.guildRank,
 			});
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? WHISPER : null);
-			this.content = this.rawContent
-				.slice(matched[0].length)
-				.replace(/ࠀ|⭍/g, '')
-				.trim();
+			this.content = this.rawContent.slice(matched[0].length);
 		} else {
 			this.author = null;
 			this.type = null;
-			this.content = this.rawContent.replace(/ࠀ|⭍/g, '').trim();
+			this.content = this.rawContent;
 		}
 	}
 
