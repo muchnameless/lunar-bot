@@ -403,7 +403,8 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	shouldBlock(string) {
-		return /[⠁-⣿]/.test(string) || /\bsex\b/i.test(string);
+		return /[⠁-⣿]/.test(string) // memes
+			|| /\bsex\b|\bk+ys+\b|\bk+il+ yourself+\b/i.test(string); // blocked words
 	}
 
 	/**
