@@ -28,7 +28,7 @@ module.exports = class CompetitionCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message) {
 		const collector = message.channel.createMessageCollector(
 			msg => msg.author.id === message.author.id,
 			{ idle: 30_000 },

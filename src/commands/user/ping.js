@@ -2,7 +2,7 @@
 
 const ms = require('ms');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class PingCommand extends Command {
@@ -21,7 +21,7 @@ module.exports = class PingCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message) {
 		const pingMessage = await message.reply('awaiting ping...', { reply: false });
 
 		if (!pingMessage) return;

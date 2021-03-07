@@ -11,7 +11,7 @@ const logger = require('../functions/logger');
  * command handler
  * @param {import('../structures/extensions/Message')} message
  */
-module.exports = async message => {
+module.exports = async (message) => {
 	try {
 		if (message.partial) await message.fetch();
 	} catch (error) {
@@ -31,14 +31,17 @@ module.exports = async message => {
 	if (message.guild && !prefixMatched) return;
 
 	// command, args, flags
-	const rawArgs = message.content.slice(prefixMatched?.[0].length ?? 0).trim().split(/ +/); // command arguments
+	const rawArgs = message.content // command arguments
+		.slice(prefixMatched?.[0].length ?? 0)
+		.trim()
+		.split(/ +/);
 	const COMMAND_NAME = rawArgs.shift().toLowerCase(); // extract first word
 	const args = [];
 	const flags = [];
 
-	rawArgs.forEach(arg => arg.startsWith('-') && arg.length > 1
+	rawArgs.forEach(arg => (arg.startsWith('-') && arg.length > 1
 		? flags.push(arg.toLowerCase().replace(/^-+/, ''))
-		: args.push(arg),
+		: args.push(arg)),
 	);
 
 	// no command, only ping or prefix

@@ -2,7 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
-const logger = require('../functions/logger');
+// const logger = require('../functions/logger');
 
 
 /**

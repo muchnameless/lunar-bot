@@ -270,7 +270,7 @@ module.exports = class HypixelGuild extends Model {
 			const playersJoinedAgain = [];
 			const membersJoinedNew = [];
 
-			await Promise.all(membersJoined.map(async hypixelGuildMember => {
+			await Promise.all(membersJoined.map(async (hypixelGuildMember) => {
 				const dbEntry = await this.client.players.model.findByPk(hypixelGuildMember.uuid);
 				if (dbEntry) return playersJoinedAgain.push(dbEntry);
 				return membersJoinedNew.push(hypixelGuildMember);
@@ -284,13 +284,13 @@ module.exports = class HypixelGuild extends Model {
 			// update player database
 			await Promise.all([
 				// update IGNs
-				...guildPlayers.map(async player => {
+				...guildPlayers.map(async (player) => {
 					const result = await player.updateIgn();
 					if (result) ignChangedLog.push(`${result.oldIgn} -> ${result.newIgn}`);
 				}),
 
 				// player left the guild
-				...playersLeft.map(async player => {
+				...playersLeft.map(async (player) => {
 					leftLog.push(`-\xa0${player.ign}`);
 
 					if (await player.removeFromGuild()) return; // return if successful
@@ -300,7 +300,7 @@ module.exports = class HypixelGuild extends Model {
 				}),
 
 				// player joined again and is still in db
-				...playersJoinedAgain.map(async player => {
+				...playersJoinedAgain.map(async (player) => {
 					player.guildID = this.guildID;
 
 					await player.updateIgn();
@@ -409,7 +409,7 @@ module.exports = class HypixelGuild extends Model {
 			]).catch(error => logger.error(`[UPDATE GUILD PLAYERS]: ${this.name}: db update error: ${error.name}: ${error.message}`));
 
 			// update guild xp gained and ingame ranks
-			currentGuildMembers.forEach(async hypixelGuildMember => {
+			currentGuildMembers.forEach(async (hypixelGuildMember) => {
 				const player = players.cache.get(hypixelGuildMember.uuid);
 
 				if (!player) return logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
@@ -426,16 +426,19 @@ module.exports = class HypixelGuild extends Model {
 			players.sortAlphabetically();
 
 			// logging
-			const sortAlphabetically = arr => arr.sort((a, b) => a.slice(2).toLowerCase().localeCompare(b.slice(2).toLowerCase()));
+			const sortAlphabetically = arr => arr.sort((a, b) => a
+				.slice(2)
+				.toLowerCase()
+				.localeCompare(b.slice(2).toLowerCase()));
 
 			joinedLog = Util.splitMessage(sortAlphabetically(joinedLog).join('\n'), { maxLength: 1011, char: '\n' });
 			leftLog = Util.splitMessage(sortAlphabetically(leftLog).join('\n'), { maxLength: 1011, char: '\n' });
 			ignChangedLog = Util.splitMessage(sortAlphabetically(ignChangedLog).join('\n'), { maxLength: 1015, char: '\n' });
 
 			const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length, ignChangedLog.length);
-			const getInlineFieldLineCount = string => string.length
+			const getInlineFieldLineCount = string => (string.length
 				? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 24), 0) // max shown is 24, number can be tweaked
-				: 0;
+				: 0);
 
 			// create and send logging embed(s)
 			for (let index = 0; index < EMBED_COUNT; ++index) {
@@ -557,7 +560,7 @@ module.exports = class HypixelGuild extends Model {
 
 			if (!member) throw new Error('unknown discord member');
 
-			const otherRequestableRankRoles = this.ranks.flatMap(({ roleID }) => roleID && roleID !== ROLE_ID ? roleID : []);
+			const otherRequestableRankRoles = this.ranks.flatMap(({ roleID }) => (roleID && roleID !== ROLE_ID ? roleID : []));
 			const rolesToRemove = [ ...member.roles.cache.keys() ].filter(roleID => otherRequestableRankRoles.includes(roleID));
 
 			await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);

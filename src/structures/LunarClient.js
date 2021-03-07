@@ -267,7 +267,10 @@ class LunarClient extends Client {
 	 */
 	formatDecimalNumber(number, paddingAmount = 0) {
 		const NUMBER_ARRAY = number.toFixed(2).split('.');
-		return `${Number(NUMBER_ARRAY[0]).toLocaleString(this.config.get('NUMBER_FORMAT')).padStart(paddingAmount, ' ')}.${NUMBER_ARRAY[1]}`;
+		return `${Number(NUMBER_ARRAY[0])
+			.toLocaleString(this.config.get('NUMBER_FORMAT'))
+			.padStart(paddingAmount, ' ')
+		}.${NUMBER_ARRAY[1]}`;
 	}
 
 	/**
@@ -287,7 +290,9 @@ class LunarClient extends Client {
 	 * @returns {string}
 	 */
 	formatNumber(number, paddingAmount = 0, converterFunction = x => x) {
-		return converterFunction(number).toLocaleString(this.config.get('NUMBER_FORMAT')).padStart(paddingAmount, ' ');
+		return converterFunction(number)
+			.toLocaleString(this.config.get('NUMBER_FORMAT'))
+			.padStart(paddingAmount, ' ');
 	}
 
 	/**

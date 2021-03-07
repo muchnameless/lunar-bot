@@ -1,7 +1,7 @@
 'use strict';
 
 const { Structures, User } = require('discord.js');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 class LunarUser extends User {

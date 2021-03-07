@@ -22,7 +22,7 @@ module.exports = class TaxResetCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		const { db, players, taxCollectors } = this.client;
 
 		let currentTaxEmbed;
@@ -102,7 +102,7 @@ module.exports = class TaxResetCommand extends Command {
 
 			// update database
 			await Promise.all([
-				...taxCollectors.cache.map(async taxCollector => { // remove retired collectors and reset active ones
+				...taxCollectors.cache.map(async (taxCollector) => { // remove retired collectors and reset active ones
 					if (!taxCollector.isCollecting) return taxCollector.remove();
 					return Promise.all([
 						taxCollector.resetAmount('tax'),
@@ -118,7 +118,7 @@ module.exports = class TaxResetCommand extends Command {
 						},
 					},
 				),
-				...players.cache.map(async player => { // reset current players
+				...players.cache.map(async (player) => { // reset current players
 					player.paid = false;
 					return player.save();
 				}),
@@ -143,18 +143,22 @@ module.exports = class TaxResetCommand extends Command {
 					.setTitle('Guild Tax')
 					.setDescription(`${message.author.tag} | ${message.author} ${result}`)
 					.setTimestamp(),
-			).then(async logMessage => {
+			)
+			.then(async (logMessage) => {
 				if (!currentTaxEmbed) return;
 				if (!logMessage.channel.checkBotPermissions('MANAGE_MESSAGES')) return;
 
 				const pinnedMessages = await logMessage.channel.messages.fetchPinned().catch(logger.error);
-				if (pinnedMessages?.size >= 50) await pinnedMessages.last().unpin({ reason: 'reached max pin amount' }).then(
-					() => logger.info('[TAX RESET]: unpinned old tax embed'),
-					error => logger.error(`[TAX RESET]: error unpinning old tax embed: ${error.name}: ${error.message}`),
-				);
+				if (pinnedMessages?.size >= 50) await pinnedMessages.last()
+					.unpin({ reason: 'reached max pin amount' })
+					.then(
+						() => logger.info('[TAX RESET]: unpinned old tax embed'),
+						error => logger.error(`[TAX RESET]: error unpinning old tax embed: ${error.name}: ${error.message}`),
+					);
 
 				logMessage.pin({ reason: '#sheet-logs' }).catch(logger.error);
-			}).catch(logger.error);
+			})
+			.catch(logger.error);
 
 		message.reply(`${result}.`);
 	}

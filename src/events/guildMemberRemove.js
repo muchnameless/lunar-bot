@@ -2,7 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
-const logger = require('../functions/logger');
+// const logger = require('../functions/logger');
 
 
 /**
@@ -33,7 +33,13 @@ module.exports = async (client, member) => {
 		`)
 		.addField(
 			'Roles',
-			`\`\`\`\n${member.roles?.cache.filter(role => role.id !== member.guild.id).sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join('\n') ?? 'unknown'}\`\`\``,
+			`\`\`\`\n${member.roles?.cache
+				.filter(role => role.id !== member.guild.id)
+				.sort((a, b) => b.comparePositionTo(a))
+				.map(role => role.name)
+				.join('\n')
+				?? 'unknown'
+			}\`\`\``,
 		)
 		.padFields(2)
 		.setTimestamp(),

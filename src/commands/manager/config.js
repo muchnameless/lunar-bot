@@ -2,7 +2,7 @@
 
 const { stripIndents } = require('common-tags');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class ConfigCommand extends Command {
@@ -27,13 +27,16 @@ module.exports = class ConfigCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		const { client: { config } } = this;
 
 		// list all config entries
 		if (!args.length) {
 			return message.reply(
-				config.cache.sorted((a, b) => a.key.localeCompare(b.key)).map(cfg => `${cfg.key}: ${cfg.value}`).join('\n'),
+				config.cache
+					.sorted((a, b) => a.key.localeCompare(b.key))
+					.map(cfg => `${cfg.key}: ${cfg.value}`)
+					.join('\n'),
 				{ code: 'apache', split: { char: '\n' } },
 			);
 		}
@@ -56,7 +59,11 @@ module.exports = class ConfigCommand extends Command {
 			const configEntries = config.cache.filter(cfg => queryRegex.test(cfg.key) || queryRegex.test(cfg.value));
 
 			return message.reply(
-				configEntries.sorted((a, b) => a.key.localeCompare(b.key)).map(cfg => `${cfg.key}: ${cfg.value}`).join('\n') || `no config entries for '${args[0]}' found`,
+				configEntries
+					.sorted((a, b) => a.key.localeCompare(b.key))
+					.map(cfg => `${cfg.key}: ${cfg.value}`)
+					.join('\n')
+					|| `no config entries for '${args[0]}' found`,
 				{ code: 'apache', split: { char: '\n' } },
 			);
 		}

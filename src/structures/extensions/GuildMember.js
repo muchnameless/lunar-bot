@@ -3,7 +3,7 @@
 const { Structures, GuildMember } = require('discord.js');
 const { SKILLS, SLAYERS } = require('../../constants/skyblock');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../constants/roles');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 class LunarGuildMember extends GuildMember {

@@ -11,10 +11,10 @@ const logger = require('./src/functions/logger');
 
 // catch rejections
 process
-	.on('unhandledRejection', error => {
+	.on('unhandledRejection', (error) => {
 		logger.error('[UNCAUGHT PROMISE REJECTION]:', error);
 	})
-	.on('uncaughtException', error => {
+	.on('uncaughtException', (error) => {
 		logger.error('[UNCAUGHT EXCEPTION]:', error);
 		db.closeConnectionAndExit();
 	})
@@ -69,7 +69,7 @@ process
 	});
 
 	// connect to Discord
-	client.login().catch(error => {
+	client.login().catch((error) => {
 		logger.error('[INIT]: login error:', error);
 		db.closeConnectionAndExit();
 	});

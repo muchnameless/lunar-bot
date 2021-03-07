@@ -25,7 +25,7 @@ module.exports = class VerifyCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		message.channel.startTyping(10);
 
 		const { hypixelGuilds, players } = this.client;

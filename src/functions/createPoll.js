@@ -5,7 +5,7 @@ const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { messageTypes: { GUILD, WHISPER } } = require('../constants/chatBridge');
 const { upperCaseFirstChar, stringToMS } = require('./util');
-const logger = require('./logger');
+// const logger = require('./logger');
 
 
 /**

@@ -1,7 +1,7 @@
 'use strict';
 
 const commandHandler = require('../functions/commandHandler');
-const logger = require('../functions/logger');
+// const logger = require('../functions/logger');
 
 
 /**

@@ -6,7 +6,7 @@ const { SKILLS, /* COSMETIC_SKILLS, */ SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES }
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
 const { /* escapeIgn, */ upperCaseFirstChar, autocorrectToOffset } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class PlayerCommand extends Command {
@@ -14,7 +14,11 @@ module.exports = class PlayerCommand extends Command {
 		super(data, {
 			aliases: [ 'xp' ],
 			description: 'check a player\'s xp gained',
-			usage: `<\`IGN\` to check someone other than yourself> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`${offset}\``).join('|')} Δ>`,
+			usage: `<\`IGN\` to check someone other than yourself> <${
+				Object.keys(XP_OFFSETS_SHORT)
+					.map(offset => `\`${offset}\``)
+					.join('|')
+			} Δ>`,
 			cooldown: 1,
 		});
 	}
@@ -26,9 +30,12 @@ module.exports = class PlayerCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		// type input
-		const offsetInput = args.map((arg, index) => ({ index, ...autocorrectToOffset(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+		const offsetInput = args
+			.map((arg, index) => ({ index, ...autocorrectToOffset(arg) }))
+			.sort((a, b) => a.similarity - b.similarity)
+			.pop();
 		const offset = offsetInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {
 				args.splice(offsetInput.index, 1);
@@ -46,7 +53,10 @@ module.exports = class PlayerCommand extends Command {
 		const player = message.mentions.users.size
 			? message.mentions.users.first().player
 			: (() => {
-				const playerInput = args.map(arg => this.client.players.autocorrectToPlayer(arg)).sort((a, b) => a.similarity - b.similarity).pop();
+				const playerInput = args
+					.map(arg => this.client.players.autocorrectToPlayer(arg))
+					.sort((a, b) => a.similarity - b.similarity)
+					.pop();
 
 				return playerInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
 					? playerInput.value
@@ -79,7 +89,7 @@ module.exports = class PlayerCommand extends Command {
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(offset);
 
 		// skills
-		SKILLS.forEach(skill => {
+		SKILLS.forEach((skill) => {
 			const SKILL_ARGUMENT = `${skill}Xp`;
 			const OFFSET_ARGUMENT = `${skill}Xp${offset}`;
 			const { progressLevel } = player.getSkillLevel(skill);
@@ -107,7 +117,7 @@ module.exports = class PlayerCommand extends Command {
 			`, false);
 
 		// slayer
-		SLAYERS.forEach(slayer => {
+		SLAYERS.forEach((slayer) => {
 			const SLAYER_ARGUMENT = `${slayer}Xp`;
 
 			embed.addField(upperCaseFirstChar(slayer), stripIndents`
@@ -124,7 +134,7 @@ module.exports = class PlayerCommand extends Command {
 		const DUNGEONS = [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ];
 
 		// dungeons
-		DUNGEONS.forEach(type => {
+		DUNGEONS.forEach((type) => {
 			const DUNGEON_ARGUMENT = `${type}Xp`;
 			const { progressLevel } = player.getSkillLevel(type);
 

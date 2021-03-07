@@ -3,7 +3,7 @@
 const { stripIndents, oneLineCommaListsOr, oneLine } = require('common-tags');
 const { checkIfDiscordTag } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class UnlinkCommand extends Command {
@@ -24,7 +24,7 @@ module.exports = class UnlinkCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		const { players } = this.client;
 
 		/**

@@ -5,7 +5,7 @@ const { handleLeaderboardCommandMessage, createTotalStatsEmbed } = require('../.
 const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class TotalCommand extends Command {
@@ -14,7 +14,11 @@ module.exports = class TotalCommand extends Command {
 			aliases: [ 't', 'top' ],
 			description: 'guild member leaderboard for total skill lvl / slayer xp',
 			usage: () => stripIndents`
-				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.guildNames}|\`all\`> <${Object.keys(XP_OFFSETS_SHORT).map(offset => `\`${offset}\``).join('|')}>
+				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.guildNames}|\`all\`> <${
+					Object.keys(XP_OFFSETS_SHORT)
+						.map(offset => `\`${offset}\``)
+						.join('|')
+				}>
 
 				currently supported types:
 				skill, ${SKILLS.join(', ')}
@@ -34,7 +38,7 @@ module.exports = class TotalCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		return handleLeaderboardCommandMessage(message, args, flags, createTotalStatsEmbed);
 	}
 };

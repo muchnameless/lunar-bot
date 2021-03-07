@@ -192,7 +192,7 @@ module.exports = class Player extends Model {
 		};
 
 		// add xp types
-		XP_TYPES.forEach(type => {
+		XP_TYPES.forEach((type) => {
 			dataObject[`${type}Xp`] = {
 				type: DataTypes.DECIMAL,
 				defaultValue: 0,
@@ -205,7 +205,7 @@ module.exports = class Player extends Model {
 				allowNull: false,
 			};
 
-			XP_OFFSETS.forEach(offset => {
+			XP_OFFSETS.forEach((offset) => {
 				dataObject[`${type}Xp${offset}`] = {
 					type: DataTypes.DECIMAL,
 					defaultValue: 0,
@@ -344,7 +344,7 @@ module.exports = class Player extends Model {
 			order: [[ 'createdAt', 'DESC' ]],
 			attributes: [ 'amount' ],
 			raw: true,
-		}).then(result => result.lengh ? result[0].amount : null);
+		}).then(result => (result.lengh ? result[0].amount : null));
 	}
 
 	/**
@@ -453,8 +453,9 @@ module.exports = class Player extends Model {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no dungeons data found`);
 			}
 
-			if (!Object.hasOwnProperty.call(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL'))
+			if (!Object.hasOwnProperty.call(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
+			}
 
 			await this.save();
 		} catch (error) {
@@ -556,15 +557,14 @@ module.exports = class Player extends Model {
 
 		// skills
 		const skillAverage = SKILLS
-			.map(skill => { // individual skill lvl 45+ / 50+ / 55+ / 60
+			.map((skill) => { // individual skill lvl 45+ / 50+ / 55+ / 60
 				const { progressLevel } = this.getSkillLevel(skill);
 				const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
 
 				// individual skills
 				for (const level of skillRoles) {
 					if (level === CURRENT_LEVEL_MILESTONE) {
-						if (!member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`)))
-							rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
+						if (!member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
 					} else if (member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
 						rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
 					}
@@ -579,22 +579,20 @@ module.exports = class Player extends Model {
 
 		for (const level of skillAverageRoles) {
 			if (level === currentLvlMilestone) {
-				if (!member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`)))
-					rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
+				if (!member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 			} else if (member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 			}
 		}
 
 		// slayers
-		const LOWEST_SLAYER_LVL = Math.min(...SLAYERS.map(slayer => {
+		const LOWEST_SLAYER_LVL = Math.min(...SLAYERS.map((slayer) => {
 			const SLAYER_LVL = this.getSlayerLevel(slayer);
 
 			// individual slayer
 			for (const level of slayerRoles) {
 				if (level === SLAYER_LVL) {
-					if (!member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`)))
-						rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
+					if (!member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
 				} else if (member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
 					rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
 				}
@@ -606,8 +604,7 @@ module.exports = class Player extends Model {
 		// total slayer
 		for (const level of slayerTotalRoles) {
 			if (level % 10 === LOWEST_SLAYER_LVL) {
-				if (!member.roles.cache.has(config.get(`SLAYER_${level}_ROLE_ID`)))
-					rolesToAdd.push(config.get(`SLAYER_${level}_ROLE_ID`));
+				if (!member.roles.cache.has(config.get(`SLAYER_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`SLAYER_${level}_ROLE_ID`));
 			} else if (member.roles.cache.has(config.get(`SLAYER_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`SLAYER_${level}_ROLE_ID`));
 			}
@@ -618,8 +615,7 @@ module.exports = class Player extends Model {
 
 		for (const level of catacombsRoles) {
 			if (level === currentLvlMilestone) {
-				if (!member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`)))
-					rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
+				if (!member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 			} else if (member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 			}
@@ -727,12 +723,10 @@ module.exports = class Player extends Model {
 			// remove roles that the bot manages
 			const { rolesToPurge } = currentLinkedMember;
 
-			if (rolesToPurge.length)
-				wasSuccessful = await this.makeRoleApiCall([], rolesToPurge, reason);
+			if (rolesToPurge.length) wasSuccessful = await this.makeRoleApiCall([], rolesToPurge, reason);
 
 			// reset nickname if it is set to the player's ign
-			if (currentLinkedMember.nickname === this.ign)
-				wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
+			if (currentLinkedMember.nickname === this.ign) wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
 		}
 
 		// unlink 2/2
@@ -947,13 +941,13 @@ module.exports = class Player extends Model {
 		const mainProfile = profiles[
 			profiles.length > 1
 				? profiles
-					.map(profile => {
+					.map((profile) => {
 						const member = profile.members[this.minecraftUUID];
 						// calculate weight of this profile
-						return Math.max(...SKILLS.map(skill => member[`experience_skill_${skill}`] ?? 0)) / 100 // highest skill xp / 100
+						return (Math.max(...SKILLS.map(skill => member[`experience_skill_${skill}`] ?? 0)) / 100) // highest skill xp / 100
 							+ SLAYERS.reduce((acc, slayer) => acc + (member.slayer_bosses?.[slayer]?.xp ?? 0), 0); // total slayer xp
 					})
-					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar, 0)
+					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => (currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar), 0)
 				: 0
 		];
 
@@ -1016,7 +1010,7 @@ module.exports = class Player extends Model {
 
 			case 'day':
 				// append current xp to the beginning of the xpHistory-Array and pop of the last value
-				typesToReset.forEach(type => {
+				typesToReset.forEach((type) => {
 					/**
 					 * @type {number[]}
 					 */
@@ -1186,7 +1180,7 @@ module.exports = class Player extends Model {
 		}
 
 		if (trueLevel < maxLevel) {
-			const nonFlooredLevel = trueLevel + Math.floor(xp - xpTotal) / xpTable[trueLevel + 1];
+			const nonFlooredLevel = trueLevel + (Math.floor(xp - xpTotal) / xpTable[trueLevel + 1]);
 
 			return {
 				trueLevel,
@@ -1212,7 +1206,7 @@ module.exports = class Player extends Model {
 		let skillAverage = 0;
 		let trueAverage = 0;
 
-		SKILLS.forEach(skill => {
+		SKILLS.forEach((skill) => {
 			const { trueLevel, nonFlooredLevel } = this.getSkillLevel(skill, offset);
 
 			skillAverage += nonFlooredLevel;
@@ -1266,7 +1260,7 @@ module.exports = class Player extends Model {
 
 			if (SKILLS_CAP[skill] > 50) maxXp += Object.values(SKILL_XP_PAST_50).reduce((acc, currentXp) => acc + currentXp, 0);
 
-			weight += (level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100)) / 1250;
+			weight += ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250;
 			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
 		}
 
@@ -1275,14 +1269,14 @@ module.exports = class Player extends Model {
 
 			weight += experience <= 1_000_000
 				? experience / SLAYER_DIVIDER[slayer]
-				: 1_000_000 / SLAYER_DIVIDER[slayer] + ((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942;
+				: (1_000_000 / SLAYER_DIVIDER[slayer]) + (((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942);
 		}
 
 		const maxXp = Object.values(DUNGEON_XP).reduce((acc, xp) => acc + xp, 0);
 
 		for (const type of [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ]) {
 			const { nonFlooredLevel: level } = this.getSkillLevel(type, offset);
-			const base = level ** 4.5 * DUNGEON_EXPONENTS[type];
+			const base = (level ** 4.5) * DUNGEON_EXPONENTS[type];
 			const xp = this[`${type}Xp${offset}`];
 
 			weight += base;
@@ -1329,7 +1323,7 @@ module.exports = class Player extends Model {
 		}
 
 		if (trueLevel < maxLevel) {
-			const nonFlooredLevel = trueLevel + Math.floor(xp - xpTotal) / xpTable[trueLevel + 1];
+			const nonFlooredLevel = trueLevel + (Math.floor(xp - xpTotal) / xpTable[trueLevel + 1]);
 
 			return {
 				trueLevel,
@@ -1355,7 +1349,7 @@ module.exports = class Player extends Model {
 		let skillAverage = 0;
 		let trueAverage = 0;
 
-		SKILLS.forEach(skill => {
+		SKILLS.forEach((skill) => {
 			const { trueLevel, nonFlooredLevel } = this.getSkillLevelHistory(skill, index);
 
 			skillAverage += nonFlooredLevel;
@@ -1393,7 +1387,7 @@ module.exports = class Player extends Model {
 
 			if (SKILLS_CAP[skill] > 50) maxXp += Object.values(SKILL_XP_PAST_50).reduce((acc, currentXp) => acc + currentXp, 0);
 
-			weight += (level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100)) / 1250;
+			weight += ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250;
 			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
 		}
 
@@ -1402,14 +1396,14 @@ module.exports = class Player extends Model {
 
 			weight += experience <= 1_000_000
 				? experience / SLAYER_DIVIDER[slayer]
-				: 1_000_000 / SLAYER_DIVIDER[slayer] + ((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942;
+				: (1_000_000 / SLAYER_DIVIDER[slayer]) + (((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942);
 		}
 
 		const maxXp = Object.values(DUNGEON_XP).reduce((acc, xp) => acc + xp, 0);
 
 		for (const type of [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ]) {
 			const { nonFlooredLevel: level } = this.getSkillLevelHistory(type, index);
-			const base = level ** 4.5 * DUNGEON_EXPONENTS[type];
+			const base = (level ** 4.5) * DUNGEON_EXPONENTS[type];
 			const xp = this[`${type}XpHistory`][index];
 
 			weight += base;

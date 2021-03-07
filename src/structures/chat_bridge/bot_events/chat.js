@@ -1,7 +1,7 @@
 'use strict';
 
 const HypixelMessage = require('../HypixelMessage');
-const logger = require('../../../functions/logger');
+// const logger = require('../../../functions/logger');
 
 
 /**

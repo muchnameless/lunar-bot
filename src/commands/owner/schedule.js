@@ -3,7 +3,7 @@
 const { stripIndents } = require('common-tags');
 const { reverseDateInput, autocorrect } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class ScheduleCommand extends Command {
@@ -28,7 +28,7 @@ module.exports = class ScheduleCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		const { cronJobs } = this.client;
 
 		// list all running cron jobs
@@ -62,7 +62,7 @@ module.exports = class ScheduleCommand extends Command {
 		const commandArgs = [];
 		const dateArgs = [];
 
-		args.forEach(arg => arg.startsWith('@') ? dateArgs.push(arg.replace('@', '')) : commandArgs.push(arg));
+		args.forEach(arg => (arg.startsWith('@') ? dateArgs.push(arg.replace('@', '')) : commandArgs.push(arg)));
 
 		let hasDate = false;
 

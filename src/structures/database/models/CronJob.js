@@ -134,7 +134,10 @@ module.exports = class CronJob extends Model {
 			onTick: async () => {
 				logger.info(`[CRONJOB]: ${this.name}`);
 				this.client.cronJobs.remove(this);
-				this.client.commands.getByName(this.command).run(await this.restoreCommandMessage(), this.args?.split(' ') ?? [], this.flags?.split(' ') ?? []).catch(logger.error);
+				this.client.commands
+					.getByName(this.command)
+					.run(await this.restoreCommandMessage(), this.args?.split(' ') ?? [], this.flags?.split(' ') ?? [])
+					.catch(logger.error);
 			},
 			start: true,
 		}));

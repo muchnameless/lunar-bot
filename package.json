@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --trace-warnings .",
     "lint": "eslint .",
+    "lintFix": "eslint --fix .",
     "maintenance": "node maintenance.js",
     "db": "node ./src/structures/database/dbInit.js -a"
   },

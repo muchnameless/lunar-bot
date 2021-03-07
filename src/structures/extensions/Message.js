@@ -35,7 +35,12 @@ class LunarMessage extends Message {
 	 * scans the message.content for a 'channel' flag
 	 */
 	get shouldReplyInSameChannel() {
-		return this.channel.isTicket || (this.content?.split(/ +/).filter(x => x.startsWith('-')).some(x => [ 'c', 'ch', 'channel' ].includes(x.toLowerCase().replace(/^-+/, ''))) ?? false);
+		return this.channel.isTicket
+			|| (this.content
+				?.split(/ +/)
+				.filter(x => x.startsWith('-'))
+				.some(x => [ 'c', 'ch', 'channel' ].includes(x.toLowerCase().replace(/^-+/, '')))
+			?? false);
 	}
 
 	/**
@@ -162,7 +167,7 @@ class LunarMessage extends Message {
 			return this.replyMessageID && this.channel.messages.cache.has(this.replyMessageID)
 				? this.channel.messages.cache.get(this.replyMessageID).edit(content, options)
 				: this.channel.send(content, options)
-					.then(message => {
+					.then((message) => {
 						if (options.saveReplyMessageID) this.replyMessageID = message.id;
 						return message;
 					});
@@ -220,7 +225,7 @@ class LunarMessage extends Message {
 			return (this.replyMessageID && this.channel.messages.cache.has(this.replyMessageID)
 				? this.channel.messages.cache.get(this.replyMessageID).edit(content, options)
 				: this.channel.send(content, options))
-				.then(message => {
+				.then((message) => {
 					if (options.saveReplyMessageID) this.replyMessageID = message.id;
 					return message;
 				});
@@ -254,13 +259,11 @@ class LunarMessage extends Message {
 		if (this.sendReplyChannel) { // notify author and delete messages
 			super
 				.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.`)
-				.then(async commandsChannelMessage => {
-					if (!this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES'))
-						return commandsChannelMessage.delete({ timeout: 10_000 });
+				.then(async (commandsChannelMessage) => {
+					if (!this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES'))	return commandsChannelMessage.delete({ timeout: 10_000 });
 
 					this.client.setTimeout(() => {
-						if (!this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES') || this.shouldReplyInSameChannel)
-							return commandsChannelMessage.delete();
+						if (!this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES') || this.shouldReplyInSameChannel) return commandsChannelMessage.delete();
 
 						this.channel
 							.bulkDelete([ commandsChannelMessage.id, this.id ])

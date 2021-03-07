@@ -5,7 +5,7 @@ const { commaListsOr, stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class HelpCommand extends Command {
@@ -25,7 +25,7 @@ module.exports = class HelpCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		const { commands } = this.client;
 		const helpEmbed = new MessageEmbed()
 			.setColor(this.client.config.get('EMBED_BLUE'));
@@ -98,7 +98,7 @@ module.exports = class HelpCommand extends Command {
 
 			helpEmbed.addField('\u200b', '```Commands```');
 
-			categoryCommands.forEach(command => {
+			categoryCommands.forEach((command) => {
 				const commandName = [ command.name ];
 				if (command.aliases) commandName.push(command.aliases.join(' | '));
 				helpEmbed.addField(`${commandName.join(' | ')}`, `${command.description ?? '\u200b'}`, true);

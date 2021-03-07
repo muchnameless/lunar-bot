@@ -9,7 +9,7 @@ const logger = require('../../../functions/logger');
  * checks ingame messages for rank requests
  * @param {import('../HypixelMessage')} message
  */
-module.exports = async message => {
+module.exports = async (message) => {
 	const { chatBridge, chatBridge: { guild, client, client: { config } }, content } = message;
 	const result = content
 		?.replace(/[^a-zA-Z ]/g, '') // delete all non alphabetical characters
@@ -78,7 +78,7 @@ module.exports = async message => {
 
 		if (!discordMember) throw new Error('unknown discord member');
 
-		const otherRequestableRankRoles = guild.ranks.flatMap(({ roleID }) => roleID && roleID !== ROLE_ID ? roleID : []);
+		const otherRequestableRankRoles = guild.ranks.flatMap(({ roleID }) => (roleID && roleID !== ROLE_ID ? roleID : []));
 		const rolesToRemove = [ ...discordMember.roles.cache.keys() ].filter(roleID => otherRequestableRankRoles.includes(roleID));
 
 		await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);

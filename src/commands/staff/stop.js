@@ -20,7 +20,7 @@ module.exports = class StopCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message) {
 		await message.reply('stopping the bot.').catch(logger.error);
 		this.client.db.closeConnectionAndExit();
 	}

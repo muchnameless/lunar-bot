@@ -6,7 +6,7 @@ const logger = require('../../../functions/logger');
 /**
  * @param {import('../ChatBridge')} chatBridge
  */
-module.exports = chatBridge => {
+module.exports = (chatBridge) => {
 	logger.warn('[CHATBRIDGE END]: Minecraft bot disconnected from server');
 	chatBridge.reconnect();
 };

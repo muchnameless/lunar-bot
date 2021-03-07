@@ -119,7 +119,7 @@ class DatabaseManager {
 
 		// update db
 		await Promise.all(taxCollectors.activeCollectors
-			.map(async taxCollector => {
+			.map(async (taxCollector) => {
 				try {
 					const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID);
 					const taxAuctions = [];
@@ -131,9 +131,9 @@ class DatabaseManager {
 						auctions,
 						auction => TAX_AUCTIONS_ITEMS.includes(auction.item_name) && auction.start >= TAX_AUCTIONS_START_TIME && this._validateAuctionID(auction.uuid), // correct item & started after last reset & no outbid from already logged auction
 					))
-						.forEach(auction => auction.highest_bid_amount >= TAX_AMOUNT
+						.forEach(auction => (auction.highest_bid_amount >= TAX_AMOUNT
 							? auction.bids.length && taxAuctions.push(auction)
-							: auction.end > NOW && ++availableAuctions,
+							: auction.end > NOW && ++availableAuctions),
 						);
 
 					availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: ${availableAuctions}`);
@@ -142,7 +142,7 @@ class DatabaseManager {
 
 					auctionsAmount += taxAuctions.length;
 
-					await Promise.all(taxAuctions.map(async auction => {
+					await Promise.all(taxAuctions.map(async (auction) => {
 						const { bidder, amount } = auction.bids[auction.bids.length - 1];
 						const player = players.cache.get(bidder);
 
@@ -214,7 +214,7 @@ class DatabaseManager {
 			.setTimestamp();
 
 		// add guild specific fields
-		hypixelGuilds.cache.forEach(hypixelGuild => {
+		hypixelGuilds.cache.forEach((hypixelGuild) => {
 			const GUILD_PLAYER_COUNT = hypixelGuild.playerCount;
 			const ENTRIES_PER_ROW = Math.ceil(GUILD_PLAYER_COUNT / 3);
 			const values = [ '', '', '' ];

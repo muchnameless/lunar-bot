@@ -6,7 +6,7 @@ const logger = require('../../../functions/logger');
 /**
  * @param {import('../ChatBridge')} chatBridge
  */
-module.exports = async chatBridge => {
+module.exports = async (chatBridge) => {
 	// stop abort controller
 	clearTimeout(chatBridge.abortLoginTimeout);
 

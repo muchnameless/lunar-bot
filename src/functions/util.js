@@ -52,13 +52,17 @@ const self = module.exports = {
 	 * @param {string} string to trim
 	 * @param {number} max maximum length
 	 */
-	trim: (string, max) => string.length > max ? `${string.slice(0, max - 3)}...` : string,
+	trim: (string, max) => (string.length > max ? `${string.slice(0, max - 3)}...` : string),
 
 	/**
 	 * day.month.year -> year/month/day
 	 * @param {string} string to convert
 	 */
-	reverseDateInput: string => string.split('.').reverse().join('/'),
+	reverseDateInput: (string => string
+		.split('.')
+		.reverse()
+		.join('/')
+	),
 
 	/**
 	 * checks the input string if it could be a discord tag
@@ -82,19 +86,21 @@ const self = module.exports = {
 	 * returns the hypixel client
 	 * @param {boolean} shouldSkipQueue wether to use the hypixel aux client when the main one's request queue is filled
 	 */
-	getHypixelClient: (shouldSkipQueue = false) => (shouldSkipQueue && hypixel.queue.promises.length > hypixelAux.queue.promises.length)
+	getHypixelClient: ((shouldSkipQueue = false) => ((shouldSkipQueue && hypixel.queue.promises.length > hypixelAux.queue.promises.length)
 		? hypixelAux
-		: hypixel,
+		: hypixel)
+	),
 
 	/**
 	 * replaces the client's token in 'text' and escapes ` and @mentions
 	 * @param {import('../structures/LunarClient')} client discord client to get the token from
 	 * @param {string} text to clean
 	 */
-	cleanOutput: (client, text) => (typeof text === 'string' ? text : inspect(text, { depth: 1 }))
+	cleanOutput: ((client, text) => (typeof text === 'string' ? text : inspect(text, { depth: 1 }))
 		.replace(/`/g, `\`${String.fromCharCode(8203)}`)
 		.replace(/@/g, `@${String.fromCharCode(8203)}`)
-		.replace(new RegExp(client.token, 'gi'), '****'),
+		.replace(new RegExp(client.token, 'gi'), '****')
+	),
 
 	/**
 	 * returns the ISO week number of the given date
@@ -111,7 +117,7 @@ const self = module.exports = {
 		target.setUTCMonth(0, 1);
 
 		if (target.getUTCDay() !== 4) {
-			target.setUTCMonth(0, 1 + ((4 - target.getUTCDay()) + 7) % 7);
+			target.setUTCMonth(0, 1 + (((4 - target.getUTCDay()) + 7) % 7));
 		}
 
 		return Math.ceil((firstThursday - target) / (7 * 24 * 3_600_000)) + 1;
@@ -122,8 +128,12 @@ const self = module.exports = {
 	 * @param {string} string the string to clean
 	 */
 	cleanLoggingEmbedString(string) {
-		if (!string || typeof string !== 'string') return null;
-		return string.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '').replace(/`|\*|\n?\u200b|\\(?=_)/g, '').replace(/\n+/g, '\n');
+		return typeof string === 'string'
+			? string
+				.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
+				.replace(/`|\*|\n?\u200b|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
+				.replace(/\n{2,}/g, '\n') // consecutive line-breaks
+			: null;
 	},
 
 	/**
@@ -188,7 +198,7 @@ const self = module.exports = {
 	 */
 	async asyncFilter(arr, callback) {
 		const fail = Symbol();
-		return (await Promise.all(arr.map(async item => (await callback(item)) ? item : fail))).filter(i=>i !== fail);
+		return (await Promise.all(arr.map(async item => ((await callback(item)) ? item : fail)))).filter(i => i !== fail);
 	},
 
 	/**

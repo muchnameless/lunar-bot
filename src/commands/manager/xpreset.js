@@ -3,7 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const { offsetFlags } = require('../../constants/database');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 const offsetToReset = offsetFlags.COMPETITION_START;
 
@@ -25,7 +25,7 @@ module.exports = class XpResetCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		const { players, db: { Sequelize: { Op } } } = this.client;
 
 		let result;
@@ -74,7 +74,7 @@ module.exports = class XpResetCommand extends Command {
 			await players.sweepDb();
 
 			await Promise.all([
-				...players.cache.map(async player => {
+				...players.cache.map(async (player) => {
 					if (player.notes === 'skill api disabled') player.notes = null;
 					return player.resetXp({ offsetToReset });
 				}),

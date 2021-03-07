@@ -118,7 +118,11 @@ class LogHandler {
 		try {
 			await this._createLogBufferFolder();
 			await writeFile(
-				join(this.logBufferPath, `${new Date().toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(', ', '_').replace(/:/g, '.')}_${SnowflakeUtil.generate()}`),
+				join(this.logBufferPath, `${new Date()
+					.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
+					.replace(', ', '_')
+					.replace(/:/g, '.')
+				}_${SnowflakeUtil.generate()}`),
 				data,
 			);
 		} catch (error) {

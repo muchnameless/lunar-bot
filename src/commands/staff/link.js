@@ -126,7 +126,7 @@ module.exports = class LinkCommand extends Command {
 		if (playerLinkedToID) {
 			let isDeleted = false;
 
-			const linkedUser = await playerLinkedToID.discordUser.catch(error => {
+			const linkedUser = await playerLinkedToID.discordUser.catch((error) => {
 				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
 					isDeleted = true;
 					return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: deleted discord user: ${playerLinkedToID.discordID}`);
@@ -161,7 +161,7 @@ module.exports = class LinkCommand extends Command {
 		if (/^\d+$/.test(player.discordID)) {
 			let isDeleted = false;
 
-			const linkedUser = await player.discordUser.catch(error => {
+			const linkedUser = await player.discordUser.catch((error) => {
 				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
 					isDeleted = true;
 					return logger.error(`[LINK]: ${player.logInfo}: deleted discord user: ${player.discordID}`);
@@ -213,8 +213,9 @@ module.exports = class LinkCommand extends Command {
 
 		let reply = `\`${player.ign}\` linked to ${discordMember}`;
 
-		if (!discordMember.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID')))
+		if (!discordMember.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID')))	{
 			reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.client.config.get('VERIFIED_ROLE_ID'))?.name ?? this.client.config.get('VERIFIED_ROLE_ID')} role)`;
+		}
 
 		message.reply(
 			`${reply}.`,

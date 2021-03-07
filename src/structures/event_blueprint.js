@@ -1,6 +1,6 @@
 'use strict';
 
-const logger = require('../functions/logger');
+// const logger = require('../functions/logger');
 
 
 /**
@@ -8,6 +8,6 @@ const logger = require('../functions/logger');
  * @param {import('../structures/LunarClient')} client
  * @param {...any} args
  */
-module.exports = async (client, ...args) => {
+module.exports = async (client, ...args) => { // eslint-disable-line no-unused-vars
 	// do stuff
 };

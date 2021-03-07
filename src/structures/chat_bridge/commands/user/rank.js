@@ -3,7 +3,7 @@
 const { stripIndents } = require('common-tags');
 const handleRankRequest = require('../../functions/handleRankRequest');
 const Command = require('../../../commands/Command');
-const logger = require('../../../../functions/logger');
+// const logger = require('../../../../functions/logger');
 
 
 module.exports = class RankCommand extends Command {
@@ -24,13 +24,17 @@ module.exports = class RankCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		if (!args.length) {
 			const { chatBridge: { guild } } = message;
 
 			message.reply(stripIndents`
 				Requestable guild ranks:
-				${guild.ranks.filter(rank => rank.roleID).map(({ name, weightReq }) => ` > ${name}: ${this.client.formatNumberClean(weightReq)} weight`).join('\n')}
+				${guild.ranks
+					.filter(rank => rank.roleID)
+					.map(({ name, weightReq }) => ` > ${name}: ${this.client.formatNumberClean(weightReq)} weight`)
+					.join('\n')
+				}
 			`);
 		}
 

@@ -3,7 +3,7 @@
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
 const Command = require('../../../commands/Command');
-const logger = require('../../../../functions/logger');
+// const logger = require('../../../../functions/logger');
 
 
 module.exports = class HelpCommand extends Command {
@@ -23,7 +23,7 @@ module.exports = class HelpCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		const { commands } = this.client.chatBridges;
 
 		// default help

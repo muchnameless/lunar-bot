@@ -39,7 +39,7 @@ const db = {
 	...Object.fromEntries(
 		readdirSync(join(__dirname, 'models'))
 			.filter(file => !file.startsWith('~') && file.endsWith('.js'))
-			.map(file => {
+			.map((file) => {
 				const model = require(join(__dirname, 'models', file));
 
 				if (Object.getPrototypeOf(model) !== Sequelize.Model) return null;

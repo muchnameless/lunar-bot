@@ -1,7 +1,7 @@
 'use strict';
 
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class TaxCollectedCommand extends Command {
@@ -21,7 +21,7 @@ module.exports = class TaxCollectedCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message) {
 		message.reply(this.client.taxCollectors.createTaxCollectedEmbed());
 	}
 };

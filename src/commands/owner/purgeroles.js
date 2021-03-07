@@ -22,7 +22,7 @@ module.exports = class PurgeRolesCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run() {
 		const { lgGuild } = this.client;
 
 		if (!lgGuild) return;
@@ -30,7 +30,7 @@ module.exports = class PurgeRolesCommand extends Command {
 
 		let index = -1;
 
-		lgGuild.members.cache.forEach(member => {
+		lgGuild.members.cache.forEach((member) => {
 			if (member.roles.cache.has(this.client.config.get('GUILD_ROLE_ID'))) return;
 
 			/**

@@ -23,7 +23,7 @@ module.exports = class UnmuteCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		const { players } = this.client;
 		const [ TARGET_INPUT ] = args;
 

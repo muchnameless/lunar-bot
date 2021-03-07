@@ -3,7 +3,7 @@
 const { MessageEmbed, Util } = require('discord.js');
 const { escapeIgn } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class LinkIssuesCommand extends Command {
@@ -22,7 +22,7 @@ module.exports = class LinkIssuesCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message) {
 		const { players, hypixelGuilds, lgGuild } = this.client;
 
 		if (!lgGuild) return message.reply('discord guild is currently unavailable.');
@@ -49,7 +49,7 @@ module.exports = class LinkIssuesCommand extends Command {
 				missingVerifiedRole.map(member => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`).join('\n') || 'none',
 				{ char: '\n', maxLength: 1024 },
 			)
-			.forEach(string => {
+			.forEach((string) => {
 				embed.addField(
 					`**Missing Verified Role:**${missingVerifiedRole.length ? ` [display name | tag] (${missingVerifiedRole.length})` : ''}`,
 					string,
@@ -61,7 +61,7 @@ module.exports = class LinkIssuesCommand extends Command {
 				guildRoleWithoutDbEntry.map(member => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`).join('\n') || 'none',
 				{ char: '\n', maxLength: 1024 },
 			)
-			.forEach(string => {
+			.forEach((string) => {
 				embed.addField(
 					`**Guild Role and no DB entry:**${guildRoleWithoutDbEntry.length ? ` [display name | tag] (${guildRoleWithoutDbEntry.length})` : ''}`,
 					string,
@@ -72,7 +72,7 @@ module.exports = class LinkIssuesCommand extends Command {
 		const unlinkedPlayers = [];
 		const linkedAndNotInDiscord = [];
 
-		hypixelGuilds.cache.forEach(hypixelGuild => {
+		hypixelGuilds.cache.forEach((hypixelGuild) => {
 			// db entries with issues
 			const [ unlinkedGuildPlayers, linkedPlayers ] = hypixelGuild.players.partition(player => /\D/.test(player.discordID));
 			const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(player => !player.inDiscord);
@@ -103,7 +103,7 @@ module.exports = class LinkIssuesCommand extends Command {
 		});
 
 		unlinkedPlayers.forEach(({ guildName, amount, values }) => {
-			values.forEach(value => {
+			values.forEach((value) => {
 				embed.addField(
 					`**Unlinked Players (${guildName}):**${amount ? ` [ign | tag] (${amount})` : ''}`,
 					value,
@@ -112,7 +112,7 @@ module.exports = class LinkIssuesCommand extends Command {
 		});
 
 		linkedAndNotInDiscord.forEach(({ guildName, amount, values }) => {
-			values.forEach(value => {
+			values.forEach((value) => {
 				embed.addField(
 					`**Linked and not in Discord (${guildName}):**${amount ? ` (${amount})` : ''}`,
 					value,

@@ -6,7 +6,7 @@ const { oneLine, stripIndents } = require('common-tags');
 const { upperCaseFirstChar, autocorrectToType } = require('../../functions/util');
 const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class TracklistCommand extends Command {
@@ -36,9 +36,12 @@ module.exports = class TracklistCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		// type input
-		const typeInput = args.map((arg, index) => ({ index, ...autocorrectToType(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+		const typeInput = args
+			.map((arg, index) => ({ index, ...autocorrectToType(arg) }))
+			.sort((a, b) => a.similarity - b.similarity)
+			.pop();
 		const type = typeInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {
 				args.splice(typeInput.index, 1);
@@ -53,7 +56,10 @@ module.exports = class TracklistCommand extends Command {
 		const player = message.mentions.users.size
 			? message.mentions.users.first().player
 			: (() => {
-				const playerInput = args.map(arg => this.client.players.autocorrectToPlayer(arg)).sort((a, b) => a.similarity - b.similarity).pop();
+				const playerInput = args
+					.map(arg => this.client.players.autocorrectToPlayer(arg))
+					.sort((a, b) => a.similarity - b.similarity)
+					.pop();
 
 				return playerInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
 					? playerInput.value

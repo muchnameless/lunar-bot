@@ -38,8 +38,8 @@ module.exports = async (client, reaction, user) => {
 		if (![ AUTHOR_ID, client.ownerID ].includes(user.id)) return;
 
 		// message locked by author
-		if (message.reactions.cache.has(LOCK) &&
-			(message.reactions.cache.get(LOCK).users.cache.size
+		if (message.reactions.cache.has(LOCK)
+			&& (message.reactions.cache.get(LOCK).users.cache.size
 				? message.reactions.cache.get(LOCK).users.cache
 				: (await message.reactions.cache.get(LOCK).users.fetch().catch(logger.error)))?.has(AUTHOR_ID)
 		) return;

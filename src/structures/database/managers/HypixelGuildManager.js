@@ -96,7 +96,10 @@ class HypixelGuildManager extends ModelManager {
 	 * @returns {?import('../models/HypixelGuild')|boolean}
 	 */
 	getFromArray(args) {
-		const hypixelGuildInput = args.map((arg, index) => ({ index, ...this.autocorrectToGuild(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+		const hypixelGuildInput = args
+			.map((arg, index) => ({ index, ...this.autocorrectToGuild(arg) }))
+			.sort((a, b) => a.similarity - b.similarity)
+			.pop();
 
 		return hypixelGuildInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {

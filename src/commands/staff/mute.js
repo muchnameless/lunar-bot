@@ -24,7 +24,7 @@ module.exports = class MuteCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		if (args.length < 2) return message.reply(this.usageInfo);
 
 		const { players } = this.client;

@@ -9,10 +9,10 @@ const logger = require('./src/functions/logger');
 
 // catch rejections
 process
-	.on('unhandledRejection', error => {
+	.on('unhandledRejection', (error) => {
 		logger.error('[UNCAUGHT PROMISE REJECTION]:', error);
 	})
-	.on('uncaughtException', error => {
+	.on('uncaughtException', (error) => {
 		logger.error('[UNCAUGHT EXCEPTION]:', error);
 		process.exit(1);
 	});
@@ -68,7 +68,7 @@ process
 	});
 
 	// message
-	client.on('message', async message => {
+	client.on('message', async (message) => {
 		if (message.author.bot || message.system || message.webhookID) return; // filter out bot, system & webhook messages
 		if (message.guild && !prefixRegex.test(message)) return;
 

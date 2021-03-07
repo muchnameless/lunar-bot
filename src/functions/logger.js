@@ -47,7 +47,7 @@ const logger = createLogger({
 	level: 'debug',
 });
 
-logger.on('error', error => {
+logger.on('error', (error) => {
 	console.error(error);
 	process.kill(process.pid, 'SIGINT');
 });

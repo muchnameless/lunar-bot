@@ -24,7 +24,7 @@ module.exports = class TaxReminderCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags) {
 		const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'ghostping' ].includes(arg));
 		const hypixelGuild = this.client.hypixelGuilds.getFromArray(args);
 		const playersToRemind = (hypixelGuild ? hypixelGuild.players : this.client.players.inGuild).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));

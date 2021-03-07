@@ -1,7 +1,7 @@
 'use strict';
 
 const EventEmitter = require('events');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 /**
  * Filter to be applied to the collector.
@@ -145,7 +145,7 @@ class MessageCollector extends EventEmitter {
 				this.removeListener('end', onEnd);
 			};
 
-			const onCollect = item => {
+			const onCollect = (item) => {
 				cleanup();
 				resolve(item);
 			};
@@ -226,7 +226,7 @@ class MessageCollector extends EventEmitter {
 				if (queue.length) {
 					yield queue.shift();
 				} else {
-					await new Promise(resolve => {
+					await new Promise((resolve) => {
 						const tick = () => {
 							this.removeListener('collect', tick);
 							this.removeListener('end', tick);

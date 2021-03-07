@@ -4,7 +4,7 @@ const { stripIndents } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
 const { escapeIgn } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
-const logger = require('../../../functions/logger');
+// const logger = require('../../../functions/logger');
 
 
 class TaxCollectorManager extends ModelManager {

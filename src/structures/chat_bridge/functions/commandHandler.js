@@ -12,7 +12,7 @@ const logger = require('../../../functions/logger');
  * command handler for the chatBridge
  * @param {import('../HypixelMessage')} message
  */
-module.exports = async message => {
+module.exports = async (message) => {
 	if (!message.author || !message.content.length) return;
 
 	const { chatBridge } = message;
@@ -23,14 +23,17 @@ module.exports = async message => {
 	if (message.type === GUILD && !prefixMatched) return;
 
 	// command, args, flags
-	const rawArgs = message.content.slice(prefixMatched?.[0].length ?? 0).trim().split(/ +/); // command arguments
+	const rawArgs = message.content // command arguments
+		.slice(prefixMatched?.[0].length ?? 0)
+		.trim()
+		.split(/ +/);
 	const COMMAND_NAME = rawArgs.shift().toLowerCase(); // extract first word
 	const args = [];
 	const flags = [];
 
-	rawArgs.forEach(arg => arg.startsWith('-') && arg.length > 1
+	rawArgs.forEach(arg => (arg.startsWith('-') && arg.length > 1
 		? flags.push(arg.toLowerCase().replace(/^-+/, ''))
-		: args.push(arg),
+		: args.push(arg)),
 	);
 
 	// no command, only ping or prefix

@@ -1,14 +1,10 @@
 'use strict';
 
 const { Structures, TextChannel } = require('discord.js');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 class LunarTextChannel extends TextChannel {
-	constructor(...args) {
-		super(...args);
-	}
-
 	/**
 	 * wether the channel is a ticket by yagpdb
 	 */

@@ -8,7 +8,7 @@ const logger = require('../../../functions/logger');
  * handles a hypixel server message (non user message)
  * @param {import('../HypixelMessage')} message
  */
-module.exports = async message => {
+module.exports = async (message) => {
 	/**
 	 * auto '/gc welcome'
 	 * [HypixelRank] IGN joined the guild!
@@ -60,8 +60,9 @@ module.exports = async message => {
 	 * [HypixelRank] IGN was promoted from PREV to NOW
 	 * The guild has completed Tier 3 of this week's Guild Quest!
 	 * The Guild has reached Level 36!
+	 * The Guild has unlocked Winners III!
 	 */
-	if (message.content.includes('was promoted from') || message.content.startsWith('The guild has completed ') || message.content.startsWith('The Guild has reached Level')) {
+	if (message.content.includes('was promoted from') || message.content.startsWith('The guild has completed ') || message.content.startsWith('The Guild has ')) {
 		await message.forwardToDiscord();
 		return message.chatBridge.broadcast('gg');
 	}
@@ -180,7 +181,10 @@ module.exports = async message => {
 	if (guildJoinMatched) {
 		const [ guildName ] = guildJoinMatched;
 
-		message.chatBridge.client.hypixelGuilds.getByName(guildName)?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
+		message.chatBridge.client.hypixelGuilds
+			.getByName(guildName)
+			?.updatePlayers()
+			.catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
 		logger.info(`[CHATBRIDGE]: ${message.chatBridge.bot.username}: joined ${guildName}`);
 		return message.chatBridge.link(guildName);
 	}

@@ -2,7 +2,7 @@
 
 const createPoll = require('../../functions/createPoll');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class PollCommand extends Command {
@@ -23,7 +23,7 @@ module.exports = class PollCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		const chatBridge = message.author.hypixelGuild?.chatBridge;
 
 		if (!chatBridge) return message.reply(`unable to find a chat bridge for ${message.author.player?.guildName ?? 'unknown player'}`);

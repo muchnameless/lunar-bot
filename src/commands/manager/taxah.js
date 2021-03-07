@@ -23,14 +23,14 @@ module.exports = class TaxAhCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		const { taxCollectors } = this.client;
 
 		// identify input arguments
 		let type;
 		let ign;
 
-		args.forEach(arg => /add|rem(?:ove)?/i.test(arg) ? type ??= arg.toLowerCase() : ign ??= arg);
+		args.forEach(arg => (/add|rem(?:ove)?/i.test(arg) ? type ??= arg.toLowerCase() : ign ??= arg));
 
 		if (!type?.length || !ign?.length || args.length !== 2) return message.reply(this.usageInfo);
 

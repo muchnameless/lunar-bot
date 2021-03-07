@@ -1,7 +1,7 @@
 'use strict';
 
 const Command = require('../../../commands/Command');
-const logger = require('../../../../functions/logger');
+// const logger = require('../../../../functions/logger');
 
 
 module.exports = class MyCommand extends Command {
@@ -22,7 +22,7 @@ module.exports = class MyCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
 };

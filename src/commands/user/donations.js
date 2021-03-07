@@ -25,7 +25,7 @@ module.exports = class DonationsCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message) {
 		// aquire donations from db
 		const donations = await this.client.db.models.Transaction.findAll({
 			where: { type: 'donation' },
@@ -48,7 +48,7 @@ module.exports = class DonationsCommand extends Command {
 			.setTimestamp();
 		let totalAmount = 0;
 
-		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([_, a], [__, b]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
+		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([, a], [, b]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
 			const IGN = this.client.players.cache.get(minecraftUUID)?.ign ?? (await mojang.getName(IGN).catch(logger.error)) ?? minecraftUUID;
 			const notes = reducedNotes[minecraftUUID].join('\n');
 			const inline = Boolean(notes);

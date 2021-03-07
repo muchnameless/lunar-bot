@@ -2,7 +2,7 @@
 
 const { stripIndents } = require('common-tags');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class RankCommand extends Command {
@@ -23,13 +23,16 @@ module.exports = class RankCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		const hypixelGuild = message.author.player?.guild ?? this.client.hypixelGuilds.cache.first();
 
 		if (!args.length) {
 			message.reply(stripIndents`
 				Requestable guild ranks:
-				${hypixelGuild.ranks.filter(rank => rank.roleID).map(({ name, weightReq }) => ` • ${name}: ${this.client.formatNumber(weightReq)} weight`).join('\n')}
+				${hypixelGuild.ranks
+					.filter(rank => rank.roleID)
+					.map(({ name, weightReq }) => ` • ${name}: ${this.client.formatNumber(weightReq)} weight`)
+					.join('\n')}
 			`);
 		}
 

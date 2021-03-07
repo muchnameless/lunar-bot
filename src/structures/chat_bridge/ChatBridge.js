@@ -425,24 +425,25 @@ class ChatBridge extends EventEmitter {
 
 		let messageParts = [ ...new Set(message
 			.split('\n')
-			.flatMap(part => {
+			.flatMap((part) => {
 				try {
 					return Util.splitMessage(part, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
 				} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '
 					return trim(message, this.maxMessageLength - prefix.length);
 				}
 			})
-			.filter(part => {
+			.filter((part) => {
 				if (this.includesNonWhitespace(part)) { // filter out white space only parts
 					if (this.shouldBlock(part)) {
 						if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 						return success = false;
 					}
 					return true;
-				} else { // part does not include any non-whitespace character
-					if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
-					return false;
 				}
+
+				// part consists of only whitespace characters -> ignore
+				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+				return false;
 			})) ];
 
 		// prevent sending more than 'maxParts' messages
@@ -554,7 +555,7 @@ class ChatBridge extends EventEmitter {
 					msg => responseRegex.test(msg.content),
 					{
 						max: 1,
-						time: TIMEOUT_MS + this.queue.remaining * this.ingameChatDelay,
+						time: TIMEOUT_MS + (this.queue.remaining * this.ingameChatDelay),
 						errors: [ 'time', 'disconnect' ],
 					},
 				),

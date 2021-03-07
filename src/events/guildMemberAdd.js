@@ -2,7 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
-const logger = require('../functions/logger');
+// const logger = require('../functions/logger');
 
 
 /**
@@ -30,8 +30,9 @@ module.exports = async (client, member) => {
 		${player.info}
 	`;
 
-	if (!member.roles.cache.has(config.get('VERIFIED_ROLE_ID')))
+	if (!member.roles.cache.has(config.get('VERIFIED_ROLE_ID'))) {
 		description += `\n\nwaiting for ${member.guild.roles.cache.get(config.get('VERIFIED_ROLE_ID')) ?? config.get('VERIFIED_ROLE_ID')} role`;
+	}
 
 	client.log(new MessageEmbed()
 		.setColor(config.get('EMBED_GREEN'))

@@ -128,7 +128,7 @@ class Collector extends EventEmitter {
 				this.removeListener('end', onEnd);
 			};
 
-			const onCollect = item => {
+			const onCollect = (item) => {
 				cleanup();
 				resolve(item);
 			};
@@ -210,7 +210,7 @@ class Collector extends EventEmitter {
 					yield queue.shift();
 				} else {
 					// eslint-disable-next-line no-await-in-loop
-					await new Promise(resolve => {
+					await new Promise((resolve) => {
 						const tick = () => {
 							this.removeListener('collect', tick);
 							this.removeListener('end', tick);

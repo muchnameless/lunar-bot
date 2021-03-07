@@ -3,7 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const { removeNumberFormatting } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class TaxAmountCommand extends Command {
@@ -24,7 +24,7 @@ module.exports = class TaxAmountCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		let newAmount = removeNumberFormatting(args.shift());
 
 		if (/\D/.test(newAmount)) return message.reply(`\`${newAmount}\` is not a number.`);
@@ -38,7 +38,7 @@ module.exports = class TaxAmountCommand extends Command {
 		await config.set('TAX_AMOUNT', newAmount);
 
 		// update tax collectors
-		await Promise.all(this.client.taxCollectors.activeCollectors.map(async taxCollector => {
+		await Promise.all(this.client.taxCollectors.activeCollectors.map(async (taxCollector) => {
 			taxCollector.collectedTax += newAmount - OLD_AMOUNT;
 			return taxCollector.save();
 		}));

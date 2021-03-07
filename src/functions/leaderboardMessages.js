@@ -82,7 +82,10 @@ const self = module.exports = {
 		const hypixelGuild = message.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
 
 		// type input
-		const typeInput = args.map((arg, index) => ({ index, arg, ...autocorrectToType(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+		const typeInput = args
+			.map((arg, index) => ({ index, arg, ...autocorrectToType(arg) }))
+			.sort((a, b) => a.similarity - b.similarity)
+			.pop();
 
 		let type = typeInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {
@@ -92,7 +95,10 @@ const self = module.exports = {
 			: null;
 
 		// offset input
-		const offsetInput = args.map((arg, index) => ({ index, ...autocorrectToOffset(arg) })).sort((a, b) => a.similarity - b.similarity).pop();
+		const offsetInput = args
+			.map((arg, index) => ({ index, ...autocorrectToOffset(arg) }))
+			.sort((a, b) => a.similarity - b.similarity)
+			.pop();
 		const offset = offsetInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {
 				args.splice(offsetInput.index, 1);
@@ -282,7 +288,7 @@ const self = module.exports = {
 
 			case 'skill': {
 				embed.setTitle('Skill Average Gained Leaderboard');
-				dataConverter = player => {
+				dataConverter = (player) => {
 					const { skillAverage, trueAverage } = player.getSkillAverage(CURRENT_OFFSET);
 					const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(offset);
 					const skillAverageGain = skillAverage - skillAverageOffset;
@@ -307,7 +313,7 @@ const self = module.exports = {
 
 			case 'track': {
 				embed.setTitle('Weight Tracking Leaderboard');
-				dataConverter = player => {
+				dataConverter = (player) => {
 					const { totalWeight } = player.getWeight();
 					const { totalWeight: totalWeightOffet } = player.getWeight(offset);
 					const gainedWeight = totalWeight - totalWeightOffet;
@@ -336,7 +342,7 @@ const self = module.exports = {
 
 			case 'weight': {
 				embed.setTitle('Weight Gained Leaderboard');
-				dataConverter = player => {
+				dataConverter = (player) => {
 					const { weight, overflow, totalWeight } = player.getWeight(CURRENT_OFFSET);
 					const { weight: weightOffset, overflow: overflowOffset, totalWeight: totalWeightOffet } = player.getWeight(offset);
 					const totalWeightGain = totalWeight - totalWeightOffet;
@@ -532,7 +538,7 @@ const self = module.exports = {
 
 			case 'skill': {
 				embed.setTitle('Skill Average Leaderboard');
-				dataConverter = player => {
+				dataConverter = (player) => {
 					const { skillAverage, trueAverage } = player.getSkillAverage(offset);
 					return {
 						ign: player.ign,
@@ -577,7 +583,7 @@ const self = module.exports = {
 
 			case 'weight': {
 				embed.setTitle('Weight Leaderboard');
-				dataConverter = player => {
+				dataConverter = (player) => {
 					const { weight, overflow, totalWeight } = player.getWeight(offset);
 					return {
 						ign: player.ign,

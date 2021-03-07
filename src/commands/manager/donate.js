@@ -3,7 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const { removeNumberFormatting } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class DonateCommand extends Command {
@@ -24,7 +24,7 @@ module.exports = class DonateCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) {
+	async run(message, args) {
 		if (args.length < 2) return message.reply(this.usageInfo);
 
 		const collector = this.client.taxCollectors.getByID(message.author.id);
