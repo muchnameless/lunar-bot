@@ -234,9 +234,9 @@ const self = module.exports = {
 		const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END
 			? offsetFlags.COMPETITION_END
 			: '';
-		const hypixelGuild = hypixelGuildInput ?? IS_COMPETITION_LB
+		const hypixelGuild = hypixelGuildInput ?? (IS_COMPETITION_LB
 			? null
-			: client.players.getByID(userID)?.guild;
+			: client.players.getByID(userID)?.guild);
 
 		/**
 		 * @type {import('../structures/database/models/Player')[]}
