@@ -12,7 +12,7 @@ module.exports = class InviteCommand extends Command {
 			aliases: [],
 			description: 'invite someone into the guild',
 			args: true,
-			usage: () => `[\`IGN\`] <${this.client.hypixelGuilds.guildNameFlags}>`,
+			usage: () => `[\`IGN\`] <${this.client.hypixelGuilds.guildNames}>`,
 			cooldown: 0,
 		});
 	}
