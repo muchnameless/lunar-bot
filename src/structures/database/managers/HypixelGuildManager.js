@@ -27,13 +27,6 @@ class HypixelGuildManager extends ModelManager {
 		return this.cache.map(hGuild => `\`${hGuild.name.replace(/ /g, '')}\``).join('|');
 	}
 
-	/**
-	 * `-NameOne`|`-NameTwo`|`-NameThree`
-	 */
-	get guildNameFlags() {
-		return this.cache.map(hGuild => `\`-${hGuild.name.replace(/ /g, '')}\``).join('|');
-	}
-
 	async loadCache(condition) {
 		await super.loadCache(condition);
 
