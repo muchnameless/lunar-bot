@@ -135,15 +135,14 @@ class ChatBridge extends EventEmitter {
 
 	/**
 	 * destroys the connection to the guild and reconnects the bot
+	 * @param {?number} loginDelay delay in ms
 	 */
-	reconnect(loginDelay) {
+	reconnect(loginDelay = Math.min(this.loginAttempts * 5_000, 300_000)) {
 		// prevent multiple reconnections
 		if (this.isReconnecting) return;
 		this.isReconnecting = true;
 
 		this.disconnect();
-
-		loginDelay ??= Math.min(this.loginAttempts * 5_000, 300_000);
 
 		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
 
@@ -290,12 +289,14 @@ class ChatBridge extends EventEmitter {
 	hypixelSpamBypass(string) {
 		const invisChars = [ '⭍', 'ࠀ' ]; // those don't render in the mc client
 
+		let paddedString = string;
+
 		// max message length is 256 post 1.11, 100 pre 1.11
-		for (let index = this.maxMessageLength - string.length + 1; --index;) {
-			string += invisChars[Math.floor(Math.random() * invisChars.length)];
+		for (let index = this.maxMessageLength - paddedString.length + 1; --index;) {
+			paddedString += invisChars[Math.floor(Math.random() * invisChars.length)];
 		}
 
-		return string;
+		return paddedString;
 	}
 
 	/**
@@ -545,13 +546,15 @@ class ChatBridge extends EventEmitter {
 	 * @param {boolean} [options.rejectOnTimeout=false]
 	 */
 	async command({ command = arguments[0], responseRegex = new RegExp(), timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+		const TIMEOUT_MS = timeout * 1_000;
+
 		try {
 			const result = await Promise.all([
 				this.awaitMessages(
 					msg => responseRegex.test(msg.content),
 					{
 						max: 1,
-						time: timeout *= 1_000 + this.queue.remaining * this.ingameChatDelay,
+						time: TIMEOUT_MS + this.queue.remaining * this.ingameChatDelay,
 						errors: [ 'time', 'disconnect' ],
 					},
 				),
@@ -562,8 +565,8 @@ class ChatBridge extends EventEmitter {
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
 			if (Array.isArray(error)) {
-				if (rejectOnTimeout) throw new Error(`no ingame response after ${ms(timeout, { long: true })}`);
-				return `no ingame response after ${ms(timeout, { long: true })}`;
+				if (rejectOnTimeout) throw new Error(`no ingame response after ${ms(TIMEOUT_MS, { long: true })}`);
+				return `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
 
 			// a different error occurred

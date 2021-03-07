@@ -46,10 +46,10 @@ class LogHandler {
 
 	/**
 	 * logs the embeds to console and via the logging webhook
-	 * @param {...MessageEmbed|string} embeds embeds to log
+	 * @param {...MessageEmbed|string} embedsInput embeds to log
 	 */
-	async log(...embeds) {
-		embeds = embeds.filter(x => x != null); // filter out null, undefined, ...
+	async log(...embedsInput) {
+		const embeds = embedsInput.filter(x => x != null); // filter out null, undefined, ...
 
 		if (!embeds.length) throw new TypeError('[CLIENT LOG]: cannot send an empty message');
 		if (embeds.length > 10) throw new RangeError('[CLIENT LOG]: exceeded maximum embed count of 10');

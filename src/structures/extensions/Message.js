@@ -125,26 +125,29 @@ class LunarMessage extends Message {
 
 	/**
 	 * replies in nearest #bot-commands or in message's channel if DMs or '-c' flag set
-	 * @param {string} content message reply content
+	 * @param {string} contentInput message reply content
 	 * @param {MessageReplyOptions} [optionsInput] message reply options
 	 * @returns {Promise<?LunarMessage>}
 	 */
-	async reply(content, optionsInput = {}) {
+	async reply(contentInput, optionsInput = {}) {
 		// analyze input and create (content, options)-argument
-		if (typeof content == undefined) throw new TypeError('content must be defined');
+		if (typeof contentInput == undefined) throw new TypeError('content must be defined');
 		if (typeof optionsInput !== 'object' || optionsInput === null) throw new TypeError('options must be an Object');
 
 		const options = optionsInput;
 
+		let content;
+
 		// only object as first arg provided
-		if (typeof content === 'object') {
-			if (content instanceof MessageEmbed) {
-				options.embed = content;
+		if (typeof contentInput === 'object') {
+			if (contentInput instanceof MessageEmbed) {
+				options.embed = contentInput;
 				content = '';
-			} else if (!Array.isArray(content)) { // unknown options object
-				optionsInput = content;
-				content = optionsInput.content ?? '';
+			} else if (!Array.isArray(contentInput)) { // unknown options object
+				content = contentInput.content ?? '';
 			}
+		} else {
+			content = contentInput;
 		}
 
 		// add embed structure generated from options if it is an embed but not from the default constructor

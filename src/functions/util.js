@@ -87,6 +87,16 @@ const self = module.exports = {
 		: hypixel,
 
 	/**
+	 * replaces the client's token in 'text' and escapes ` and @mentions
+	 * @param {import('../structures/LunarClient')} client discord client to get the token from
+	 * @param {string} text to clean
+	 */
+	cleanOutput: (client, text) => (typeof text === 'string' ? text : inspect(text, { depth: 1 }))
+		.replace(/`/g, `\`${String.fromCharCode(8203)}`)
+		.replace(/@/g, `@${String.fromCharCode(8203)}`)
+		.replace(new RegExp(client.token, 'gi'), '****'),
+
+	/**
 	 * returns the ISO week number of the given date
 	 * @param {Date} date to analyze
 	 */
@@ -114,20 +124,6 @@ const self = module.exports = {
 	cleanLoggingEmbedString(string) {
 		if (!string || typeof string !== 'string') return null;
 		return string.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '').replace(/`|\*|\n?\u200b|\\(?=_)/g, '').replace(/\n+/g, '\n');
-	},
-
-	/**
-	 * replaces the client's token in 'text' and escapes ` and @mentions
-	 * @param {import('../structures/LunarClient')} client discord client to get the token from
-	 * @param {string} text to clean
-	 */
-	cleanOutput(client, text) {
-		if (typeof text !== 'string') text = inspect(text, { depth: 1 });
-
-		return text
-			.replace(/`/g, `\`${String.fromCharCode(8203)}`)
-			.replace(/@/g, `@${String.fromCharCode(8203)}`)
-			.replace(new RegExp(client.token, 'gi'), '****');
 	},
 
 	/**

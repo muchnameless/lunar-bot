@@ -216,23 +216,19 @@ const self = module.exports = {
 	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
 	 * @param {number} [param1.page]
 	 */
-	createGainedStatsEmbed(client, { userID, hypixelGuild = null, type, offset, shouldShowOnlyBelowReqs = false, page = 1 }) {
+	createGainedStatsEmbed(client, { userID, hypixelGuild: hypixelGuildInput = null, type = client.config.get('CURRENT_COMPETITION'), offset: offsetInput, shouldShowOnlyBelowReqs = false, page: pageInput = 1 }) {
 		const { config } = client;
 		const COMPETITION_RUNNING = config.getBoolean('COMPETITION_RUNNING');
 		const COMPETITION_END_TIME = config.getNumber('COMPETITION_END_TIME');
-
-		type ??= config.get('CURRENT_COMPETITION');
-		offset ??= COMPETITION_RUNNING || (Date.now() - COMPETITION_END_TIME >= 0 && Date.now() - COMPETITION_END_TIME <= 24 * 60 * 60 * 1000)
+		const offset = offsetInput ?? (COMPETITION_RUNNING || (Date.now() - COMPETITION_END_TIME >= 0 && Date.now() - COMPETITION_END_TIME <= 24 * 60 * 60 * 1000)
 			? offsetFlags.COMPETITION_START
-			: config.get('DEFAULT_XP_OFFSET');
-
+			: config.get('DEFAULT_XP_OFFSET'));
 		const IS_COMPETITION_LB = offset === offsetFlags.COMPETITION_START;
 		const SHOULD_USE_COMPETITION_END = !COMPETITION_RUNNING && IS_COMPETITION_LB;
 		const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END
 			? offsetFlags.COMPETITION_END
 			: '';
-
-		hypixelGuild ??= IS_COMPETITION_LB
+		const hypixelGuild = hypixelGuildInput ?? IS_COMPETITION_LB
 			? null
 			: client.players.getByID(userID)?.guild;
 
@@ -256,12 +252,11 @@ const self = module.exports = {
 			? COMPETITION_END_TIME
 			: Math.min(...guildPlayers.map(player => Number(player.xpLastUpdatedAt)));
 		const STARTING_TIME = new Date(config.getNumber(XP_OFFSETS_TIME[offset])).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+		const PAGE = Math.max(Math.min(pageInput, PAGES_TOTAL), 1);
 		const embed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setFooter('Updated at')
 			.setTimestamp(new Date(LAST_UPDATED_AT));
-
-		page = Math.max(Math.min(page, PAGES_TOTAL), 1);
 
 		let totalStats;
 		let dataConverter;
@@ -394,7 +389,7 @@ const self = module.exports = {
 		let playerList = '';
 
 		// get the page elements
-		for (let index = Math.max(0, page - 1) * ELEMENTS_PER_PAGE ; index < page * ELEMENTS_PER_PAGE; ++index) {
+		for (let index = Math.max(0, PAGE - 1) * ELEMENTS_PER_PAGE ; index < PAGE * ELEMENTS_PER_PAGE; ++index) {
 			if (index < PLAYER_COUNT) {
 				const player = guildPlayers[index];
 				playerList += `\n${stripIndent`
@@ -418,7 +413,7 @@ const self = module.exports = {
 					#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
 					     > ${getEntry(playerRequesting)}
 					\`\`\`
-					Page: ${page} / ${PAGES_TOTAL}
+					Page: ${PAGE} / ${PAGES_TOTAL}
 				`,
 			);
 		} else {
@@ -435,7 +430,7 @@ const self = module.exports = {
 						#${`${guildPlayers.findIndex(player => player.sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
 						     > ${getEntry(playerRequesting)}
 						\`\`\`
-						Page: ${page} / ${PAGES_TOTAL}
+						Page: ${PAGE} / ${PAGES_TOTAL}
 					`,
 				);
 			} else {
@@ -446,7 +441,7 @@ const self = module.exports = {
 						#??? : unknown ign
 						     > link your discord tag on hypixel
 						\`\`\`
-						Page: ${page} / ${PAGES_TOTAL}
+						Page: ${PAGE} / ${PAGES_TOTAL}
 					`,
 				);
 			}
@@ -487,11 +482,7 @@ const self = module.exports = {
 	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
 	 * @param {number} [param1.page]
 	 */
-	createTotalStatsEmbed(client, { userID, hypixelGuild = null, type, offset = '', shouldShowOnlyBelowReqs = false, page = 1 }) {
-		const { config } = client;
-
-		type ??= config.get('CURRENT_COMPETITION');
-
+	createTotalStatsEmbed(client, { userID, hypixelGuild = null, type = client.config.get('CURRENT_COMPETITION'), offset = '', shouldShowOnlyBelowReqs = false, page: pageInput = 1 }) {
 		/**
 		 * @type {import('../structures/database/models/Player')[]}
 		 */
@@ -503,6 +494,8 @@ const self = module.exports = {
 		} else {
 			guildPlayers = client.players.inGuild.array();
 		}
+
+		const { config } = client;
 		const PLAYER_COUNT = guildPlayers.length;
 		const ELEMENTS_PER_PAGE = config.getNumber('ELEMENTS_PER_PAGE');
 		const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
@@ -510,12 +503,11 @@ const self = module.exports = {
 		const LAST_UPDATED_AT = offset
 			? config.getNumber(XP_OFFSETS_TIME[offset])
 			: Math.min(...guildPlayers.map(player => Number(player.xpLastUpdatedAt)));
+		const PAGE = Math.max(Math.min(pageInput, PAGES_TOTAL), 1);
 		const embed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setFooter('Updated at')
 			.setTimestamp(new Date(LAST_UPDATED_AT));
-
-		page = Math.max(Math.min(page, PAGES_TOTAL), 1);
 
 		let totalStats;
 		let dataConverter;
@@ -634,7 +626,7 @@ const self = module.exports = {
 		let playerList = '';
 
 		// get the page elements
-		for (let index = (page - 1) * ELEMENTS_PER_PAGE ; index < page * ELEMENTS_PER_PAGE; ++index) {
+		for (let index = (PAGE - 1) * ELEMENTS_PER_PAGE ; index < PAGE * ELEMENTS_PER_PAGE; ++index) {
 			if (index < PLAYER_COUNT) {
 				const player = guildPlayers[index];
 				playerList += `\n${stripIndent`
@@ -659,7 +651,7 @@ const self = module.exports = {
 					#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
 					     > ${getEntry(playerRequesting)}
 					\`\`\`
-					Page: ${page} / ${PAGES_TOTAL}
+					Page: ${PAGE} / ${PAGES_TOTAL}
 				`,
 			);
 		} else {
@@ -676,7 +668,7 @@ const self = module.exports = {
 						#${`${guildPlayers.findIndex(player => player.sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
 						     > ${getEntry(playerRequesting)}
 						\`\`\`
-						Page: ${page} / ${PAGES_TOTAL}
+						Page: ${PAGE} / ${PAGES_TOTAL}
 					`,
 				);
 			} else {
@@ -687,7 +679,7 @@ const self = module.exports = {
 						#??? : unknown ign
 						     > link your discord tag on hypixel
 						\`\`\`
-						Page: ${page} / ${PAGES_TOTAL}
+						Page: ${PAGE} / ${PAGES_TOTAL}
 					`,
 				);
 			}

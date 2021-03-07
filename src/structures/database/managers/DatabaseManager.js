@@ -230,16 +230,18 @@ class DatabaseManager {
 
 			// add rows to tax embed
 			values.forEach((value, fieldIndex) => {
+				let paddedValue = value;
+
 				// fill up with empty lines if rows have different size
-				for (let emptyLine = ENTRIES_PER_ROW - (value.match(/\n/g)?.length ?? 0) + 1; --emptyLine;) {
-					value += '\n\u200b';
+				for (let emptyLine = ENTRIES_PER_ROW - (paddedValue.match(/\n/g)?.length ?? 0) + 1; --emptyLine;) {
+					paddedValue += '\n\u200b';
 				}
 
 				taxEmbed.addField(
 					fieldIndex % 2
 						? `${hypixelGuild.name} (${GUILD_PLAYER_COUNT})`
 						: '\u200b',
-					`\`\`\`\n${value}\`\`\``, // put everything in a code block
+					`\`\`\`\n${paddedValue}\`\`\``, // put everything in a code block
 					true,
 				);
 			});

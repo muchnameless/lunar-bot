@@ -13,7 +13,7 @@ PostgresQueryGenerator.prototype.pgEnum = function(tableName, attr, dataType, op
 		[ values ] = dataType.toString().match(/^ENUM\(.+\)/);
 	}
 
-	let sql = `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_${ tableName }_${ attr }') THEN CREATE TYPE ${ enumName } AS ${ values }; END IF; END$$;`;
+	let sql = `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_${tableName}_${attr}') THEN CREATE TYPE ${enumName} AS ${values}; END IF; END$$;`;
 
 	if (options?.force) sql = `${this.pgEnumDrop(tableName, attr)}${sql}`;
 

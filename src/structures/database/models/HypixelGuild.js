@@ -186,42 +186,35 @@ module.exports = class HypixelGuild extends Model {
 	 * updates the player database
 	 */
 	async update() {
-		const { meta: { cached }, name, ranks, chatMute, members: currentGuildMembers } = await hypixel.guild.id(this.guildID);
+		const data = await hypixel.guild.id(this.guildID);
 
-		if (cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
+		if (data.meta.cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
 
-		this._updateGuildData({ name, ranks, chatMute });
+		this._updateGuildData(data);
 
-		return this.updatePlayers(currentGuildMembers);
+		return this.updatePlayers(data);
 	}
 
 	/**
 	 * updates the guild data
-	 * @param {object} data
-	 * @param {string} data.name
-	 * @param {import('@zikeji/hypixel').Components.Schemas.GuildRank[]} data.ranks
-	 * @param {?number} chatMute
+	 * @param {?import('@zikeji/hypixel').Components.Schemas.GuildResponse} data
 	 */
-	async _updateGuildData({ name, ranks, chatMute } = {}) {
-		if (!name) {
-			let cached;
+	async _updateGuildData(data) {
+		const { meta: { cached }, name: guildName, ranks, chatMute } = data ?? await hypixel.guild.id(this.guildID);
 
-			({ meta: { cached }, name, ranks, chatMute } = await hypixel.guild.id(this.guildID));
-
-			if (cached) return logger.info(`[UPDATE GUILD DATA]: ${this.name}: cached data`);
-		}
+		if (cached) return logger.info(`[UPDATE GUILD DATA]: ${this.name}: cached data`);
 
 		// update name
-		this.name = name;
+		this.name = guildName;
 
 		// update ranks
-		for (const rank of ranks) {
-			const dbEntryRank = this.ranks?.find(r => r.priority === rank.priority);
+		for (const { name, priority } of ranks) {
+			const dbEntryRank = this.ranks?.find(r => r.priority === priority);
 
 			if (!dbEntryRank) {
 				const newRank = {
-					name: rank.name,
-					priority: rank.priority,
+					name,
+					priority,
 					weightReq: Infinity,
 					roleID: null,
 				};
@@ -230,9 +223,9 @@ module.exports = class HypixelGuild extends Model {
 				this.ranks ??= [];
 				this.ranks.push(newRank);
 				this.changed('ranks', true);
-			} else if (dbEntryRank.name !== rank.name) {
-				logger.info(`[UPDATE GUILD]: ${this.name}: rank name changed: '${dbEntryRank.name}' -> '${rank.name}'`);
-				dbEntryRank.name = rank.name;
+			} else if (dbEntryRank.name !== name) {
+				logger.info(`[UPDATE GUILD]: ${this.name}: rank name changed: '${dbEntryRank.name}' -> '${name}'`);
+				dbEntryRank.name = name;
 				this.changed('ranks', true);
 			}
 		}
@@ -249,20 +242,16 @@ module.exports = class HypixelGuild extends Model {
 
 	/**
 	 * updates the guild player database
-	 * @param {import('@zikeji/hypixel').Components.Schemas.GuildMember[]} currentGuildMembers
+	 * @param {?import('@zikeji/hypixel').Components.Schemas.GuildResponse} data
 	 */
-	async updatePlayers(currentGuildMembers) {
+	async updatePlayers(data) {
 		if (this._isUpdatingPlayers) return;
 		this._isUpdatingPlayers = true;
 
 		try {
-			if (!currentGuildMembers) {
-				let cached;
+			const { meta: { cached }, members: currentGuildMembers } = data ?? await hypixel.guild.id(this.guildID);
 
-				({ meta: { cached }, members: currentGuildMembers } = await hypixel.guild.id(this.guildID));
-
-				if (cached) return logger.info(`[UPDATE PLAYERS]: ${this.name}: cached data`);
-			}
+			if (cached) return logger.info(`[UPDATE PLAYERS]: ${this.name}: cached data`);
 
 			const { players, config } = this.client;
 

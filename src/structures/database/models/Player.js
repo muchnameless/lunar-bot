@@ -471,8 +471,10 @@ module.exports = class Player extends Model {
 	 * @param {?string} [options.reason] role update reason for discord's audit logs
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
-	async updateDiscordMember({ reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
+	async updateDiscordMember({ reason: reasonInput = 'synced with ingame stats', shouldSendDm = false } = {}) {
 		if (this.guildID === GUILD_ID_BRIDGER) return;
+
+		let reason = reasonInput;
 
 		const member = await this.discordMember ?? (reason = 'found linked discord tag', await this.linkUsingCache());
 
@@ -487,9 +489,9 @@ module.exports = class Player extends Model {
 
 	/**
 	 * updates the skyblock related discord roles using the db data
-	 * @param {?string} reason reason for discord's audit logs
+	 * @param {?string} reasonInput reason for discord's audit logs
 	 */
-	async updateRoles(reason = null) {
+	async updateRoles(reasonInput = null) {
 		const member = await this.discordMember;
 
 		if (!member) return;
@@ -499,6 +501,7 @@ module.exports = class Player extends Model {
 		const rolesToRemove = [];
 
 		let inGuild = false;
+		let reason = reasonInput;
 
 		// individual hypixel guild roles
 		for (const [ guildID, { roleID } ] of this.client.hypixelGuilds.cache) {
@@ -752,20 +755,20 @@ module.exports = class Player extends Model {
 		if (!member) return;
 
 		// check if valid IDs are provided
-		rolesToAdd = rolesToAdd.filter(x => x != null);
-		rolesToRemove = rolesToRemove.filter(x => x != null);
-		if (!rolesToAdd.length && !rolesToRemove.length) return;
+		let filteredRolesToAdd = rolesToAdd.filter(x => x != null);
+		let filteredRolesToRemove = rolesToRemove.filter(x => x != null);
+		if (!filteredRolesToAdd.length && !filteredRolesToRemove.length) return;
 
 		// permission check
 		if (!member.guild.me.hasPermission('MANAGE_ROLES')) return logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`);
 
 		const { config } = member.client;
-		const IS_ADDING_GUILD_ROLE = rolesToAdd.includes(config.get('GUILD_ROLE_ID'));
+		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));
 
 		// check if IDs are proper roles and managable by the bot
-		rolesToAdd = member.guild.verifyRoleIDs(rolesToAdd);
-		rolesToRemove = member.guild.verifyRoleIDs(rolesToRemove);
-		if (!rolesToAdd.size && !rolesToRemove.size) return;
+		filteredRolesToAdd = member.guild.verifyRoleIDs(filteredRolesToAdd);
+		filteredRolesToRemove = member.guild.verifyRoleIDs(filteredRolesToRemove);
+		if (!filteredRolesToAdd.size && !filteredRolesToRemove.size) return;
 
 		const loggingEmbed = new MessageEmbed()
 			.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
@@ -778,12 +781,12 @@ module.exports = class Player extends Model {
 
 		try {
 			// api call
-			this.discordMember = await member.roles.set(member.roles.cache.filter((_, roleID) => !rolesToRemove.has(roleID)).concat(rolesToAdd), reason);
+			this.discordMember = await member.roles.set(member.roles.cache.filter((_, roleID) => !filteredRolesToRemove.has(roleID)).concat(filteredRolesToAdd), reason);
 
 			// was successful
 			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
-			if (rolesToAdd.size) loggingEmbed.addField('Added', `\`\`\`\n${rolesToAdd.map(role => role.name).join('\n')}\`\`\``, true);
-			if (rolesToRemove.size) loggingEmbed.addField('Removed', `\`\`\`\n${rolesToRemove.map(role => role.name).join('\n')}\`\`\``, true);
+			if (filteredRolesToAdd.size) loggingEmbed.addField('Added', `\`\`\`\n${filteredRolesToAdd.map(role => role.name).join('\n')}\`\`\``, true);
+			if (filteredRolesToRemove.size) loggingEmbed.addField('Removed', `\`\`\`\n${filteredRolesToRemove.map(role => role.name).join('\n')}\`\`\``, true);
 			return true;
 		} catch (error) {
 			// was not successful
@@ -792,8 +795,8 @@ module.exports = class Player extends Model {
 			loggingEmbed
 				.setColor(config.get('EMBED_RED'))
 				.addField(error.name, error.message);
-			if (rolesToAdd.size) loggingEmbed.addField('Failed to add', `\`\`\`\n${rolesToAdd.map(role => role.name).join('\n')}\`\`\``, true);
-			if (rolesToRemove.size) loggingEmbed.addField('Failed to remove', `\`\`\`\n${rolesToRemove.map(role => role.name).join('\n')}\`\`\``, true);
+			if (filteredRolesToAdd.size) loggingEmbed.addField('Failed to add', `\`\`\`\n${filteredRolesToAdd.map(role => role.name).join('\n')}\`\`\``, true);
+			if (filteredRolesToRemove.size) loggingEmbed.addField('Failed to remove', `\`\`\`\n${filteredRolesToRemove.map(role => role.name).join('\n')}\`\`\``, true);
 			return false;
 		} finally {
 			// logging
@@ -989,9 +992,7 @@ module.exports = class Player extends Model {
 	 * @param {string} options.to
 	 * @param {?string[]} [options.types]
 	 */
-	async transferXp({ from, to, types }) {
-		types ??= XP_TYPES;
-
+	async transferXp({ from, to, types = XP_TYPES }) {
 		for (const type of types) {
 			this[`${type}Xp${to}`] = this[`${type}Xp${from}`];
 		}

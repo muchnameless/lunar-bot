@@ -15,7 +15,7 @@ const self = module.exports = {
 		const files = await fs.readdir(dirPath);
 
 		await Promise.all(files.map(async file => {
-			if ((await fs.stat(join(dirPath, file))).isDirectory()) return arrayOfFiles = await self.getAllJsFiles(join(dirPath, file), arrayOfFiles);
+			if ((await fs.stat(join(dirPath, file))).isDirectory()) return self.getAllJsFiles(join(dirPath, file), arrayOfFiles);
 			arrayOfFiles.push(join(dirPath, file));
 		}));
 

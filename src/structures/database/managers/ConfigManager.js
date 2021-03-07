@@ -24,11 +24,10 @@ class ConfigManager extends ModelManager {
 	 * @param {string} value new value
 	 */
 	async set(key, value) {
-		key = key.toUpperCase();
+		const UPPERCASED_KEY = key.toUpperCase();
+		const dbEntry = this.cache.get(UPPERCASED_KEY);
 
-		const dbEntry = this.cache.get(key);
-
-		if (!dbEntry) return super.add({ key, value });
+		if (!dbEntry) return super.add({ key: UPPERCASED_KEY, value });
 
 		dbEntry.value = value;
 		return dbEntry.save();
