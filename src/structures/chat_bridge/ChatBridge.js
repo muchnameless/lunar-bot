@@ -404,7 +404,7 @@ class ChatBridge extends EventEmitter {
 	 */
 	shouldBlock(string) {
 		return /[⠁-⣿]/.test(string) // memes
-			|| /\b(?:sex|k+ys+|k+il+ yourself+|n+igger+)\b/i.test(string); // blocked words
+			|| /\bsex\b|\bcum\b|\bk+ys+\b|kil.+? yourself+\b|\bn+igger+\b/i.test(string); // blocked words
 	}
 
 	/**
