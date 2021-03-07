@@ -17,14 +17,14 @@ const { upperCaseFirstChar, stringToMS } = require('./util');
  */
 module.exports = async (chatBridge, message, args, ign) => {
 	const duration = Math.min(Math.max(stringToMS(args[0]), 30_000), 10 * 60_000) || 60_000;
-	const startingIndex = message.content.indexOf('"');
+	const startingIndex = Math.max(message.content.indexOf('"'), message.content.indexOf('“'));
 
 	// no '"' found
 	if (startingIndex === -1) return message.reply('specify poll options to vote for');
 
 	let options = message.content
 		.slice(startingIndex)
-		.split('"')
+		.split(/"|“/)
 		.map(x => x.trim())
 		.filter(x => x.length);
 
