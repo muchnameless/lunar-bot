@@ -3,7 +3,9 @@
 const ChatMessage = require('prismarine-chat')(require('../../constants/chatBridge').VERSION);
 const { messageTypes: { WHISPER, GUILD, PARTY } } = require('../../constants/chatBridge');
 const { NO_BELL } = require('../../constants/emojiCharacters');
+const mojang = require('../../api/mojang');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
+const logger = require('../../functions/logger');
 
 /**
  * @typedef {string} HypixelMessageType
@@ -107,10 +109,17 @@ class HypixelMessage extends ChatMessage {
 			const { player } = this;
 			const member = await player?.discordMember;
 			const message = await this.chatBridge.sendViaWebhook({
-				username: member?.displayName ?? player?.ign ?? this.author.ign,
-				avatarURL: member?.user.displayAvatarURL({ dynamic: true }) ?? player?.image ?? this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+				username: member?.displayName
+					?? player?.ign
+					?? this.author.ign,
+				avatarURL: member?.user.displayAvatarURL({ dynamic: true })
+					?? player?.image
+					?? await mojang.getUUID(this.author.ign).then(uuid => `https://visage.surgeplay.com/bust/${uuid}`, error => logger.error(`[HYPIXEL MESSAGE]: ${error.name}: ${error.message}`))
+					?? this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
 				content: this.parsedContent,
-				allowedMentions: { parse: player?.hasDiscordPingPermission ? [ 'users' ] : [] },
+				allowedMentions: {
+					parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
+				},
 			});
 
 			// inform user if user and role pings don't actually ping (can't use message.mentions cause that is empty)
