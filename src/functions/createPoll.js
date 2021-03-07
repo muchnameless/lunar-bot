@@ -17,21 +17,18 @@ const { upperCaseFirstChar, stringToMS } = require('./util');
  */
 module.exports = async (chatBridge, message, args, ign) => {
 	const duration = Math.min(Math.max(stringToMS(args[0]), 30_000), 10 * 60_000) || 60_000;
-	const QUOTE_1_INDEX = message.content.indexOf('"');
-	const QUOTE_2_INDEX = message.content.indexOf('“');
-	const QUOTE_3_INDEX = message.content.indexOf('”');
-	const startingIndex = Math.min(
-		QUOTE_1_INDEX === -1 ? Infinity : QUOTE_1_INDEX,
-		QUOTE_2_INDEX === -1 ? Infinity : QUOTE_2_INDEX,
-		QUOTE_3_INDEX === -1 ? Infinity : QUOTE_3_INDEX,
-	);
+	const quoteChars = [ '\u{0022}', '\u{0027}', '\u{0060}', '\u{00B4}', '\u{2018}', '\u{2019}', '\u{201C}', '\u{201D}' ];
+	const STARTING_INDEX = quoteChars.reduce((acc, cur) => {
+		const CUR_INDEX = message.content.indexOf(cur);
+		return Math.min(acc, CUR_INDEX === -1 ? Infinity : CUR_INDEX);
+	}, Infinity);
 
 	// no quote found
-	if (!Number.isFinite(startingIndex)) return message.reply('specify poll options to vote for');
+	if (!Number.isFinite(STARTING_INDEX)) return message.reply('specify poll options to vote for');
 
 	let options = message.content
-		.slice(startingIndex)
-		.split(/"|“|”/)
+		.slice(STARTING_INDEX)
+		.split(new RegExp(quoteChars.join('|'), 'u'))
 		.map(x => x.trim())
 		.filter(x => x.length);
 
