@@ -5,13 +5,13 @@ const { fetchur: { items, DAY_0, INTERVAL } } = require('../constants/skyblock')
 
 
 module.exports = () => {
-	const NOW = Date.now();
-	const TIME = (NOW - DAY_0) / INTERVAL;
+	const TIME = (Date.now() - DAY_0) / INTERVAL;
+	const TIME_FLOORED = Math.floor(TIME);
 
 	return {
-		item: items[Math.floor(TIME) % items.length],
+		item: items[TIME_FLOORED % items.length],
 		timeLeft: ms(
-			(1 - TIME + Math.floor(TIME)) * INTERVAL,
+			(1 + TIME_FLOORED - TIME) * INTERVAL,
 			{ long: true },
 		),
 	};
