@@ -1,7 +1,7 @@
 'use strict';
 
 const { Structures, GuildMember } = require('discord.js');
-const { SKILLS, SLAYERS } = require('../../constants/skyblock');
+const { skills, slayers } = require('../../constants/skyblock');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../constants/roles');
 // const logger = require('../../functions/logger');
 
@@ -57,7 +57,7 @@ class LunarGuildMember extends GuildMember {
 		}
 
 		// individual skills
-		for (const skill of SKILLS) {
+		for (const skill of skills) {
 			for (const level of skillRoles) {
 				if (this.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
 			}
@@ -69,7 +69,7 @@ class LunarGuildMember extends GuildMember {
 		}
 
 		// individual slayer
-		for (const slayer of SLAYERS) {
+		for (const slayer of slayers) {
 			for (const level of slayerRoles) {
 				if (this.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
 			}

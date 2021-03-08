@@ -2,7 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { oneLine, stripIndents } = require('common-tags');
-const { SKILLS, /* COSMETIC_SKILLS, */ SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
+const { skills, /* cosmeticSkills, */ slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
 const { /* escapeIgn, */ upperCaseFirstChar, autocorrectToOffset } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
@@ -89,7 +89,7 @@ module.exports = class PlayerCommand extends Command {
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(offset);
 
 		// skills
-		SKILLS.forEach((skill) => {
+		skills.forEach((skill) => {
 			const SKILL_ARGUMENT = `${skill}Xp`;
 			const OFFSET_ARGUMENT = `${skill}Xp${offset}`;
 			const { progressLevel } = player.getSkillLevel(skill);
@@ -117,7 +117,7 @@ module.exports = class PlayerCommand extends Command {
 			`, false);
 
 		// slayer
-		SLAYERS.forEach((slayer) => {
+		slayers.forEach((slayer) => {
 			const SLAYER_ARGUMENT = `${slayer}Xp`;
 
 			embed.addField(upperCaseFirstChar(slayer), stripIndents`
@@ -131,7 +131,7 @@ module.exports = class PlayerCommand extends Command {
 			.padFields()
 			.addField('\u200b', '```Dungeons```\u200b', false);
 
-		const DUNGEONS = [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ];
+		const DUNGEONS = [ ...dungeonTypes, ...dungeonClasses ];
 
 		// dungeons
 		DUNGEONS.forEach((type) => {
@@ -163,7 +163,7 @@ module.exports = class PlayerCommand extends Command {
 			);
 		// .padFields();
 
-		// COSMETIC_SKILLS.forEach(skill => {
+		// cosmeticSkills.forEach(skill => {
 		// 	const SKILL_ARGUMENT = `${skill}Xp`;
 		// 	const { progressLevel } = player.getSkillLevel(skill);
 

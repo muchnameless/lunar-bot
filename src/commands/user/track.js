@@ -4,7 +4,7 @@ const { MessageEmbed, MessageAttachment } = require('discord.js');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { oneLine, stripIndents } = require('common-tags');
 const { upperCaseFirstChar, autocorrectToType } = require('../../functions/util');
-const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
+const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
@@ -19,10 +19,10 @@ module.exports = class TracklistCommand extends Command {
 				<\`IGN\`|\`@mention\`> <\`type\`>
 
 				currently supported types:
-				skill, ${SKILLS.join(', ')}
-				${COSMETIC_SKILLS.join(', ')}
-				slayer, revenant, tarantula, sven, ${SLAYERS.join(', ')}
-				dungeon, ${[ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ].join(', ')}
+				skill, ${skills.join(', ')}
+				${cosmeticSkills.join(', ')}
+				slayer, revenant, tarantula, sven, ${slayers.join(', ')}
+				dungeon, ${[ ...dungeonTypes, ...dungeonClasses ].join(', ')}
 				weight
 			`,
 			cooldown: 1,

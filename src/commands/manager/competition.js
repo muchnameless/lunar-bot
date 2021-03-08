@@ -2,11 +2,11 @@
 
 const { commaListsOr } = require('common-tags');
 const { autocorrect } = require('../../functions/util');
-const { SKILLS, DUNGEON_TYPES } = require('../../constants/skyblock');
+const { skills, dungeonTypes } = require('../../constants/skyblock');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
-const COMPETITION_TYPES = [ ...SKILLS, 'slayer', ...DUNGEON_TYPES ];
+const COMPETITION_TYPES = [ ...skills, 'slayer', ...dungeonTypes ];
 
 
 module.exports = class CompetitionCommand extends Command {

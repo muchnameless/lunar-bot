@@ -5,7 +5,7 @@ module.exports = {
 
 	MAYOR_CHANGE_INTERVAL: 446_400_000,
 
-	SKILLS: [
+	skills: [
 		'taming',
 		'farming',
 		'mining',
@@ -16,22 +16,22 @@ module.exports = {
 		'alchemy',
 	],
 
-	COSMETIC_SKILLS: [
+	cosmeticSkills: [
 		'carpentry',
 		'runecrafting',
 	],
 
-	SLAYERS: [
+	slayers: [
 		'zombie',
 		'spider',
 		'wolf',
 	],
 
-	DUNGEON_TYPES: [
+	dungeonTypes: [
 		'catacombs',
 	],
 
-	DUNGEON_CLASSES: [
+	dungeonClasses: [
 		'healer',
 		'mage',
 		'berserk',
@@ -39,27 +39,7 @@ module.exports = {
 		'tank',
 	],
 
-	DA_ITEMS: [
-		'Midas\' Sword',
-		'Midas\' Sword [50M]',
-		'Spirit Mask',
-		'Ender Artifact',
-		'Wither Artifact',
-		'Parrot Pet [Epic]',
-		'Parrot Pet [Legendary]',
-		'Turtle Pet [Epic]',
-		'Turtle Pet [Legendary]',
-		'Jellyfish Pet [Epic]',
-		'Jellyfish Pet [Legendary]',
-		'Travel Scroll',
-		'Sharpness 6',
-		'Giant Killer 6',
-		'Protection 6',
-		'Growth 6',
-		'Power 6',
-	],
-
-	LEVELING_XP: {
+	levelingXp: {
 		1: 50,
 		2: 125,
 		3: 200,
@@ -112,7 +92,7 @@ module.exports = {
 		50: 4_000_000,
 	},
 
-	SKILL_XP_PAST_50: {
+	skillXpPast50: {
 		51: 4_300_000,
 		52: 4_600_000,
 		53: 4_900_000,
@@ -125,7 +105,7 @@ module.exports = {
 		60: 7_000_000,
 	},
 
-	RUNECRAFTING_XP: {
+	runecraftingXp: {
 		1: 50,
 		2: 100,
 		3: 125,
@@ -153,18 +133,7 @@ module.exports = {
 		25: 19_050,
 	},
 
-	SKILLS_ACHIEVEMENTS: {
-		farming: 'skyblock_harvester',
-		mining: 'skyblock_excavator',
-		combat: 'skyblock_combat',
-		foraging: 'skyblock_gatherer',
-		fishing: 'skyblock_angler',
-		enchanting: 'skyblock_augmentation',
-		alchemy: 'skyblock_concoctor',
-		taming: 'skyblock_domesticator',
-	},
-
-	SKILLS_CAP: {
+	skillsCap: {
 		taming: 50,
 		farming: 60,
 		mining: 60,
@@ -178,7 +147,7 @@ module.exports = {
 		dungeons: 50,
 	},
 
-	DUNGEON_XP: {
+	dungeonXp: {
 		1: 50,
 		2: 75,
 		3: 110,
@@ -231,7 +200,7 @@ module.exports = {
 		50: 116_250_000,
 	},
 
-	SLAYER_XP: {
+	slayerXp: {
 		1: 5,
 		2: 15,
 		3: 200,
@@ -243,12 +212,25 @@ module.exports = {
 		9: 1_000_000,
 	},
 
-	PET_SCORE: {
-		COMMON: 1,
-		UNCOMMON: 2,
-		RARE: 3,
-		EPIC: 4,
-		LEGENDARY: 5,
-	},
+	fetchur: {
+		items: [
+			'20 yellow glass (Wool Weaver near builder merch in hub)',
+			'1 compass (4 iron + 1 redstone)',
+			'20 mithril',
+			'1 firework (1 gunpowder + 1 paper)',
+			'cheap coffee (bartender in hub)',
+			'door',
+			'SuperBoomt TNT',
+			'1 pumpkin',
+			'1 flint and steel',
+			'50 quartz ore (mine with silk touch)',
+			'16 enderpearls',
+			'50 red wool (Wool Weaver near builder merch in hub)',
+			'3 rabbit feet',
+		],
 
+		DAY_0: 1_614_142_800_000,
+
+		INTERVAL: 86_400_000,
+	},
 };

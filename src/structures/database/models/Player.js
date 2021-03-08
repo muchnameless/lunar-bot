@@ -4,7 +4,7 @@ const { MessageEmbed } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER } = require('../../../constants/database');
-const { LEVELING_XP, SKILL_XP_PAST_50, SKILLS_CAP, RUNECRAFTING_XP, DUNGEON_XP, SLAYER_XP, SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../../constants/skyblock');
+const { levelingXp, skillXpPast50, skillsCap, runecraftingXp, dungeonXp, slayerXp, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { escapeIgn, getHypixelClient } = require('../../../functions/util');
@@ -400,15 +400,15 @@ module.exports = class Player extends Model {
 
 			// update xp
 			if (Object.prototype.hasOwnProperty.call(playerData, 'experience_skill_alchemy')) {
-				SKILLS.forEach(skill => this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0);
-				COSMETIC_SKILLS.forEach(skill => this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0);
+				skills.forEach(skill => this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0);
+				cosmeticSkills.forEach(skill => this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0);
 
 				// reset skill xp if no taming xp offset
 				if (this.tamingXp !== 0) {
 					for (const offset of XP_OFFSETS) {
 						if (this[`tamingXp${offset}`] === 0) {
 							logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' skill xp`);
-							await this.resetXp({ offsetToReset: offset, typesToReset: [ ...SKILLS, ...COSMETIC_SKILLS ] });
+							await this.resetXp({ offsetToReset: offset, typesToReset: [ ...skills, ...cosmeticSkills ] });
 						}
 					}
 				}
@@ -421,14 +421,14 @@ module.exports = class Player extends Model {
 			this.farmingLvlCap = 50 + (playerData.jacob2?.perks.farming_level_cap ?? 0);
 
 			if (Object.prototype.hasOwnProperty.call(playerData.slayer_bosses?.zombie ?? {}, 'xp')) {
-				SLAYERS.forEach(slayer => this[`${slayer}Xp`] = playerData.slayer_bosses[slayer].xp ?? 0);
+				slayers.forEach(slayer => this[`${slayer}Xp`] = playerData.slayer_bosses[slayer].xp ?? 0);
 
 				// reset slayer xp if no zombie xp offset
 				if (this.zombieXp !== 0) {
 					for (const offset of XP_OFFSETS) {
 						if (this[`zombieXp${offset}`] === 0) {
 							logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' slayer xp`);
-							await this.resetXp({ offsetToReset: offset, typesToReset: SLAYERS });
+							await this.resetXp({ offsetToReset: offset, typesToReset: slayers });
 						}
 					}
 				}
@@ -437,15 +437,15 @@ module.exports = class Player extends Model {
 			}
 
 			if (Object.hasOwnProperty.call(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience')) {
-				DUNGEON_TYPES.forEach(dungeonType => this[`${dungeonType}Xp`] = playerData.dungeons.dungeon_types[dungeonType]?.experience ?? 0);
-				DUNGEON_CLASSES.forEach(dugeonClass => this[`${dugeonClass}Xp`] = playerData.dungeons.player_classes[dugeonClass]?.experience ?? 0);
+				dungeonTypes.forEach(dungeonType => this[`${dungeonType}Xp`] = playerData.dungeons.dungeon_types[dungeonType]?.experience ?? 0);
+				dungeonClasses.forEach(dugeonClass => this[`${dugeonClass}Xp`] = playerData.dungeons.player_classes[dugeonClass]?.experience ?? 0);
 
 				// reset dungeon xp if no catacombs xp offset
 				if (this.catacombsXp !== 0) {
 					for (const offset of XP_OFFSETS) {
 						if (this[`catacombsXp${offset}`] === 0) {
 							logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' dungeon xp`);
-							await this.resetXp({ offsetToReset: offset, typesToReset: [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ] });
+							await this.resetXp({ offsetToReset: offset, typesToReset: [ ...dungeonTypes, ...dungeonClasses ] });
 						}
 					}
 				}
@@ -556,7 +556,7 @@ module.exports = class Player extends Model {
 		}
 
 		// skills
-		const skillAverage = SKILLS
+		const skillAverage = skills
 			.map((skill) => { // individual skill lvl 45+ / 50+ / 55+ / 60
 				const { progressLevel } = this.getSkillLevel(skill);
 				const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
@@ -572,7 +572,7 @@ module.exports = class Player extends Model {
 
 				return progressLevel;
 			})
-			.reduce((acc, level) => acc + level, 0) / SKILLS.length;
+			.reduce((acc, level) => acc + level, 0) / skills.length;
 
 		// average skill
 		let currentLvlMilestone = Math.floor(skillAverage / 5) * 5; // round down to nearest divisible by 5
@@ -586,7 +586,7 @@ module.exports = class Player extends Model {
 		}
 
 		// slayers
-		const LOWEST_SLAYER_LVL = Math.min(...SLAYERS.map((slayer) => {
+		const LOWEST_SLAYER_LVL = Math.min(...slayers.map((slayer) => {
 			const SLAYER_LVL = this.getSlayerLevel(slayer);
 
 			// individual slayer
@@ -944,8 +944,8 @@ module.exports = class Player extends Model {
 					.map((profile) => {
 						const member = profile.members[this.minecraftUUID];
 						// calculate weight of this profile
-						return (Math.max(...SKILLS.map(skill => member[`experience_skill_${skill}`] ?? 0)) / 100) // highest skill xp / 100
-							+ SLAYERS.reduce((acc, slayer) => acc + (member.slayer_bosses?.[slayer]?.xp ?? 0), 0); // total slayer xp
+						return (Math.max(...skills.map(skill => member[`experience_skill_${skill}`] ?? 0)) / 100) // highest skill xp / 100
+							+ slayers.reduce((acc, slayer) => acc + (member.slayer_bosses?.[slayer]?.xp ?? 0), 0); // total slayer xp
 					})
 					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => (currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar), 0)
 				: 0
@@ -1155,12 +1155,12 @@ module.exports = class Player extends Model {
 	getSkillLevel(type, offset = '') {
 		const xp = this[`${type}Xp${offset}`];
 
-		let xpTable = [ ...DUNGEON_CLASSES, ...DUNGEON_TYPES ].includes(type) ? DUNGEON_XP : type === 'runecrafting' ? RUNECRAFTING_XP : LEVELING_XP;
+		let xpTable = [ ...dungeonClasses, ...dungeonTypes ].includes(type) ? dungeonXp : type === 'runecrafting' ? runecraftingXp : levelingXp;
 		let maxLevel = Math.max(...Object.keys(xpTable));
 		let maxLevelCap = maxLevel;
 
-		if (Object.hasOwnProperty.call(SKILLS_CAP, type) && SKILLS_CAP[type] > maxLevel) {
-			xpTable = { ...SKILL_XP_PAST_50, ...xpTable };
+		if (Object.hasOwnProperty.call(skillsCap, type) && skillsCap[type] > maxLevel) {
+			xpTable = { ...skillXpPast50, ...xpTable };
 			maxLevel = Math.max(...Object.keys(xpTable));
 			maxLevelCap = Object.hasOwnProperty.call(this, `${type}LvlCap`) ? this[`${type}LvlCap`] : maxLevel;
 		}
@@ -1201,12 +1201,12 @@ module.exports = class Player extends Model {
 	 * @param {string} offset optional offset value to use instead of the current xp value
 	 */
 	getSkillAverage(offset = '') {
-		const SKILL_COUNT = SKILLS.length;
+		const SKILL_COUNT = skills.length;
 
 		let skillAverage = 0;
 		let trueAverage = 0;
 
-		SKILLS.forEach((skill) => {
+		skills.forEach((skill) => {
 			const { trueLevel, nonFlooredLevel } = this.getSkillLevel(skill, offset);
 
 			skillAverage += nonFlooredLevel;
@@ -1225,11 +1225,11 @@ module.exports = class Player extends Model {
 	 */
 	getSlayerLevel(type) {
 		const xp = this[`${type}Xp`];
-		const maxLevel = Math.max(...Object.keys(SLAYER_XP));
+		const maxLevel = Math.max(...Object.keys(slayerXp));
 
 		let level = 0;
 
-		for (let x = 1; x <= maxLevel && SLAYER_XP[x] <= xp; ++x) {
+		for (let x = 1; x <= maxLevel && slayerXp[x] <= xp; ++x) {
 			level = x;
 		}
 
@@ -1241,7 +1241,7 @@ module.exports = class Player extends Model {
 	 * @param {string} offset optional offset value to use instead of the current xp value
 	 */
 	getSlayerTotal(offset = '') {
-		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}Xp${offset}`], 0);
+		return slayers.reduce((acc, slayer) => acc + this[`${slayer}Xp${offset}`], 0);
 	}
 
 	/**
@@ -1252,19 +1252,19 @@ module.exports = class Player extends Model {
 		let weight = 0;
 		let overflow = 0;
 
-		for (const skill of SKILLS) {
+		for (const skill of skills) {
 			const { nonFlooredLevel: level } = this.getSkillLevel(skill, offset);
 			const xp = this[`${skill}Xp${offset}`];
 
-			let maxXp = Object.values(LEVELING_XP).reduce((acc, currentXp) => acc + currentXp, 0);
+			let maxXp = Object.values(levelingXp).reduce((acc, currentXp) => acc + currentXp, 0);
 
-			if (SKILLS_CAP[skill] > 50) maxXp += Object.values(SKILL_XP_PAST_50).reduce((acc, currentXp) => acc + currentXp, 0);
+			if (skillsCap[skill] > 50) maxXp += Object.values(skillXpPast50).reduce((acc, currentXp) => acc + currentXp, 0);
 
 			weight += ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250;
 			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
 		}
 
-		for (const slayer of SLAYERS) {
+		for (const slayer of slayers) {
 			const experience = this[`${slayer}Xp${offset}`];
 
 			weight += experience <= 1_000_000
@@ -1272,9 +1272,9 @@ module.exports = class Player extends Model {
 				: (1_000_000 / SLAYER_DIVIDER[slayer]) + (((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942);
 		}
 
-		const maxXp = Object.values(DUNGEON_XP).reduce((acc, xp) => acc + xp, 0);
+		const maxXp = Object.values(dungeonXp).reduce((acc, xp) => acc + xp, 0);
 
-		for (const type of [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ]) {
+		for (const type of [ ...dungeonTypes, ...dungeonClasses ]) {
 			const { nonFlooredLevel: level } = this.getSkillLevel(type, offset);
 			const base = (level ** 4.5) * DUNGEON_EXPONENTS[type];
 			const xp = this[`${type}Xp${offset}`];
@@ -1298,12 +1298,12 @@ module.exports = class Player extends Model {
 	getSkillLevelHistory(type, index) {
 		const xp = this[`${type}XpHistory`][index];
 
-		let xpTable = [ ...DUNGEON_CLASSES, ...DUNGEON_TYPES ].includes(type) ? DUNGEON_XP : type === 'runecrafting' ? RUNECRAFTING_XP : LEVELING_XP;
+		let xpTable = [ ...dungeonClasses, ...dungeonTypes ].includes(type) ? dungeonXp : type === 'runecrafting' ? runecraftingXp : levelingXp;
 		let maxLevel = Math.max(...Object.keys(xpTable));
 		let maxLevelCap = maxLevel;
 
-		if (Object.hasOwnProperty.call(SKILLS_CAP, type) && SKILLS_CAP[type] > maxLevel) {
-			xpTable = { ...SKILL_XP_PAST_50, ...xpTable };
+		if (Object.hasOwnProperty.call(skillsCap, type) && skillsCap[type] > maxLevel) {
+			xpTable = { ...skillXpPast50, ...xpTable };
 			maxLevel = Math.max(...Object.keys(xpTable));
 			maxLevelCap = Object.hasOwnProperty.call(this, `${type}LvlCap`) ? this[`${type}LvlCap`] : maxLevel;
 		}
@@ -1344,12 +1344,12 @@ module.exports = class Player extends Model {
 	 * @param {number} index xpHistory array index
 	 */
 	getSkillAverageHistory(index) {
-		const SKILL_COUNT = SKILLS.length;
+		const SKILL_COUNT = skills.length;
 
 		let skillAverage = 0;
 		let trueAverage = 0;
 
-		SKILLS.forEach((skill) => {
+		skills.forEach((skill) => {
 			const { trueLevel, nonFlooredLevel } = this.getSkillLevelHistory(skill, index);
 
 			skillAverage += nonFlooredLevel;
@@ -1368,7 +1368,7 @@ module.exports = class Player extends Model {
 	 * @param {number} index xpHistory array index
 	 */
 	getSlayerTotalHistory(index) {
-		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}XpHistory`][index], 0);
+		return slayers.reduce((acc, slayer) => acc + this[`${slayer}XpHistory`][index], 0);
 	}
 
 	/**
@@ -1379,19 +1379,19 @@ module.exports = class Player extends Model {
 		let weight = 0;
 		let overflow = 0;
 
-		for (const skill of SKILLS) {
+		for (const skill of skills) {
 			const { nonFlooredLevel: level } = this.getSkillLevelHistory(skill, index);
 			const xp = this[`${skill}XpHistory`][index];
 
-			let maxXp = Object.values(LEVELING_XP).reduce((acc, currentXp) => acc + currentXp, 0);
+			let maxXp = Object.values(levelingXp).reduce((acc, currentXp) => acc + currentXp, 0);
 
-			if (SKILLS_CAP[skill] > 50) maxXp += Object.values(SKILL_XP_PAST_50).reduce((acc, currentXp) => acc + currentXp, 0);
+			if (skillsCap[skill] > 50) maxXp += Object.values(skillXpPast50).reduce((acc, currentXp) => acc + currentXp, 0);
 
 			weight += ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250;
 			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
 		}
 
-		for (const slayer of SLAYERS) {
+		for (const slayer of slayers) {
 			const experience = this[`${slayer}XpHistory`][index];
 
 			weight += experience <= 1_000_000
@@ -1399,9 +1399,9 @@ module.exports = class Player extends Model {
 				: (1_000_000 / SLAYER_DIVIDER[slayer]) + (((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942);
 		}
 
-		const maxXp = Object.values(DUNGEON_XP).reduce((acc, xp) => acc + xp, 0);
+		const maxXp = Object.values(dungeonXp).reduce((acc, xp) => acc + xp, 0);
 
-		for (const type of [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ]) {
+		for (const type of [ ...dungeonTypes, ...dungeonClasses ]) {
 			const { nonFlooredLevel: level } = this.getSkillLevelHistory(type, index);
 			const base = (level ** 4.5) * DUNGEON_EXPONENTS[type];
 			const xp = this[`${type}XpHistory`][index];

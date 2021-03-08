@@ -1,6 +1,6 @@
 'use strict';
 
-const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('./skyblock');
+const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('./skyblock');
 
 
 module.exports = {
@@ -51,7 +51,7 @@ module.exports = {
 		day: 'LAST_DAILY_XP_RESET_TIME',
 	},
 
-	XP_TYPES: [ ...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES, ...DUNGEON_CLASSES, 'guild' ],
+	XP_TYPES: [ ...skills, ...cosmeticSkills, ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ],
 
 	UNKNOWN_IGN: 'unknown ign',
 

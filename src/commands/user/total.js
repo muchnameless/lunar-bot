@@ -2,7 +2,7 @@
 
 const { stripIndents } = require('common-tags');
 const { handleLeaderboardCommandMessage, createTotalStatsEmbed } = require('../../functions/leaderboardMessages');
-const { SKILLS, COSMETIC_SKILLS, SLAYERS, DUNGEON_TYPES, DUNGEON_CLASSES } = require('../../constants/skyblock');
+const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
@@ -21,10 +21,10 @@ module.exports = class TotalCommand extends Command {
 				}>
 
 				currently supported types:
-				skill, ${SKILLS.join(', ')}
-				${COSMETIC_SKILLS.join(', ')}
-				slayer, revenant, tarantula, sven, ${SLAYERS.join(', ')}
-				dungeon, ${[ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ].join(', ')}
+				skill, ${skills.join(', ')}
+				${cosmeticSkills.join(', ')}
+				slayer, revenant, tarantula, sven, ${slayers.join(', ')}
+				dungeon, ${[ ...dungeonTypes, ...dungeonClasses ].join(', ')}
 				weight
 			`,
 			cooldown: 1,
