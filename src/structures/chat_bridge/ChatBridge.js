@@ -1,6 +1,6 @@
 'use strict';
 
-const { Util, MessageEmbed, DiscordAPIError } = require('discord.js');
+const { Util: { escapeMarkdown, splitMessage }, MessageEmbed, DiscordAPIError } = require('discord.js');
 const { EventEmitter } = require('events');
 const { join, basename } = require('path');
 const emojiRegex = require('emoji-regex/es2015');
@@ -303,7 +303,7 @@ class ChatBridge extends EventEmitter {
 	 * escapes all standalone occurrences of 'ez', case-insensitive
 	 * @param {string} string
 	 */
-	static _escapeEz(string) {
+	_escapeEz(string) {
 		return string.replace(/(?<=\be+)(?=z+\b)/gi, 'ࠀ');
 	}
 
@@ -337,7 +337,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	_parseMinecraftMessageToDiscord(string) {
-		return Util.escapeMarkdown(
+		return escapeMarkdown(
 			string
 				.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
 				.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
@@ -375,8 +375,8 @@ class ChatBridge extends EventEmitter {
 	 */
 	async forwardDiscordMessageToHypixelGuildChat(message, player) {
 		return this.gchat(
-			this.constructor._escapeEz(this._parseDiscordMessageToMinecraft(message.content)),
-			{ prefix: `${player?.ign ?? this.constructor._escapeEz(message.member?.displayName ?? message.author.username)}:` },
+			message.content,
+			{ prefix: `${player?.ign ?? this._escapeEz(message.member?.displayName ?? message.author.username)}:` },
 		);
 	}
 
@@ -424,37 +424,43 @@ class ChatBridge extends EventEmitter {
 	async chat(message, { prefix = '', maxParts = this.client.config.getNumber('DEFAULT_MAX_PARTS') } = {}) {
 		let success = true;
 
-		let messageParts = [ ...new Set(message
-			.split('\n')
-			.flatMap((part) => {
-				try {
-					return Util.splitMessage(part, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
-				} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '
-					return trim(message, this.maxMessageLength - prefix.length);
-				}
-			})
-			.filter((part) => {
-				if (this.includesNonWhitespace(part)) { // filter out white space only parts
-					if (this.shouldBlock(part)) {
-						if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
-						return success = false;
+		const messageParts = new Set(
+			this._escapeEz(this._parseDiscordMessageToMinecraft(message))
+				.split('\n')
+				.flatMap((part) => {
+					try {
+						return splitMessage(part, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
+					} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '
+						if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: trimmed '${part}'`);
+						success = false;
+						return trim(message, this.maxMessageLength - prefix.length);
 					}
-					return true;
-				}
+				})
+				.filter((part) => {
+					if (this.includesNonWhitespace(part)) { // filter out white space only parts
+						if (this.shouldBlock(part)) {
+							if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
+							return success = false;
+						}
+						return true;
+					}
 
-				// part consists of only whitespace characters -> ignore
-				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
-				return false;
-			})) ];
+					// part consists of only whitespace characters -> ignore
+					if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+					return false;
+				}),
+		);
 
-		// prevent sending more than 'maxParts' messages
-		if (messageParts.length > maxParts) {
-			messageParts = messageParts.slice(0, maxParts);
-			success = false;
-		}
+		let partCount = 0;
 
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of messageParts) {
+			// prevent sending more than 'maxParts' messages
+			if (++partCount > maxParts) {
+				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) [ ...messageParts ].slice(maxParts).forEach(skippedPart => logger.warn(`[CHATBRIDGE CHAT]: skipped '${skippedPart}'`));
+				return false;
+			}
+
 			await this.sendToMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
 		}
 
@@ -486,7 +492,7 @@ class ChatBridge extends EventEmitter {
 	async broadcast(message) {
 		return Promise.all([
 			this.guild?.chatBridgeEnabled && this.channel?.send(this._parseMinecraftMessageToDiscord(message)),
-			this.gchat(this._parseDiscordMessageToMinecraft(message), { maxParts: Infinity }),
+			this.gchat(message, { maxParts: Infinity }),
 		]);
 	}
 
