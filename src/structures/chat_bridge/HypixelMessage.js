@@ -26,16 +26,24 @@ class HypixelMessage extends ChatMessage {
 		super(message, displayWarning);
 
 		this.chatBridge = chatBridge;
-		this.position = { 0: 'chat', 1: 'system', 2: 'gameInfo' }[position];
-		this.rawContent = this.toString()
-			.replace(/ࠀ|⭍/g, '')
-			.trim();
+		/**
+		 * @type {?HypixelMessageType}
+		 */
+		this.position = { 0: 'chat', 1: 'system', 2: 'gameInfo' }[position] ?? null;
+		/**
+		 * raw content string
+		 */
+		this.rawContent = this.toString();
+		/**
+		 * content with invis chars removed
+		 */
+		this.cleanedContent = this.rawContent.replace(/ࠀ|⭍/g, '').trim();
 
 		/**
 		 * Guild > [HypixelRank] ign [GuildRank]
 		 * From [HypixelRank] ign
 		 */
-		const matched = this.rawContent.match(/^(?:(?<type>Guild|Party) > |(?<whisper>From) )(?:\[(?<hypixelRank>.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
+		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Party) > |(?<whisper>From) )(?:\[(?<hypixelRank>.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
 			this.author = new HypixelMessageAuthor(this.chatBridge, {
@@ -44,11 +52,11 @@ class HypixelMessage extends ChatMessage {
 				guildRank: matched.groups.guildRank,
 			});
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? WHISPER : null);
-			this.content = this.rawContent.slice(matched[0].length);
+			this.content = this.cleanedContent.slice(matched[0].length).trimLeft();
 		} else {
 			this.author = null;
 			this.type = null;
-			this.content = this.rawContent;
+			this.content = this.cleanedContent;
 		}
 	}
 
