@@ -160,7 +160,7 @@ module.exports = class EvalCommand extends Command {
 				.setTimestamp(),
 			);
 		} catch (error) {
-			logger.error(`[EVAL ERROR]: ${error.name}: ${error.message}`);
+			logger.error(`[EVAL ERROR]: ${error?.name}: ${error?.message}`);
 
 			Util.splitMessage(Util.escapeCodeBlock(this.cleanOutput(error)), { maxLength: 1015, char: '\n' })
 				.forEach((output, index) => {
