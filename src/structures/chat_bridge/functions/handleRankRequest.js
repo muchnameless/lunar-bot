@@ -52,7 +52,7 @@ module.exports = async (message) => {
 		return message.reply(CLOWN);
 	}
 
-	const WEIGHT_REQ_STRING = client.formatNumberClean(WEIGHT_REQ);
+	const WEIGHT_REQ_STRING = client.formatNumber(WEIGHT_REQ);
 
 	let { totalWeight } = player.getWeight();
 
@@ -63,7 +63,7 @@ module.exports = async (message) => {
 		({ totalWeight } = player.getWeight());
 	}
 
-	const WEIGHT_STRING = client.formatDecimalNumberClean(totalWeight);
+	const WEIGHT_STRING = client.formatDecimalNumber(totalWeight);
 
 	await message.reply(`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} your weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [${RANK_NAME}]`);
 

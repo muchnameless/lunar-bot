@@ -71,10 +71,10 @@ const self = module.exports = {
 	checkIfDiscordTag: string => /.{2,32}#\d{4}/.test(string),
 
 	/**
-	 * replaces non number chars with a whitespace
+	 * replaces toLocaleString('fr-FR') separator with a normal space
 	 * @param {string} string
 	 */
-	cleanFormattedNumber: string => string.replace(/[^0-9.,]/g, ' '),
+	cleanFormattedNumber: string => string.replace(/\u{202F}/ug, ' '),
 
 	/**
 	 * '30d1193h71585m4295001s' -> 15_476_901_000

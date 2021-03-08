@@ -5,7 +5,7 @@ const { EventEmitter } = require('events');
 const { join, basename } = require('path');
 const emojiRegex = require('emoji-regex/es2015');
 const ms = require('ms');
-const { sleep, trim } = require('../../functions/util');
+const { sleep, trim, cleanFormattedNumber } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { VERSION } = require('../../constants/chatBridge');
 const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
@@ -338,8 +338,7 @@ class ChatBridge extends EventEmitter {
 	 */
 	_parseMinecraftMessageToDiscord(string) {
 		return escapeMarkdown(
-			string
-				.replace(/\u{202F}/ug, ' ') // toLocaleString('fr-FR') separator
+			cleanFormattedNumber(string)
 				.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
 				.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
 				.replace(/#([a-z-]+)/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels

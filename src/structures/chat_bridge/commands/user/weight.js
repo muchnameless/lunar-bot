@@ -32,7 +32,7 @@ module.exports = class WeightCommand extends Command {
 	 * @param {number} number
 	 */
 	formatNumber(number) {
-		return this.client.formatDecimalNumberClean(Math.floor(number * 100) / 100);
+		return this.client.formatDecimalNumber(Math.floor(number * 100) / 100);
 	}
 
 	/**
