@@ -40,6 +40,18 @@ module.exports = class EvalCommand extends Command {
 	}
 
 	/**
+	 * replaces the client's token in 'text' and escapes ` and @mentions
+	 * @param {import('../structures/LunarClient')} client discord client to get the token from
+	 * @param {string} text to clean
+	 */
+	cleanOutput(text) {
+		return (typeof text === 'string' ? text : util.inspect(text, { depth: 1 }))
+			.replace(/`/g, '`\u200b')
+			.replace(/@/g, '@\u200b')
+			.replace(new RegExp(this.client.token, 'gi'), '****');
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
@@ -50,7 +62,7 @@ module.exports = class EvalCommand extends Command {
 		/* eslint-disable no-unused-vars */
 		const { client } = this;
 		const { Util, MessageEmbed } = Discord;
-		const { cleanOutput, trim } = functionsUtil;
+		const { trim } = functionsUtil;
 		const { channel, channel: ch, guild, guild: g, author, member } = message;
 		const msg = message;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
@@ -119,16 +131,16 @@ module.exports = class EvalCommand extends Command {
 			const OUTPUT_ARRAY = SHOULD_INSPECT
 				? (() => {
 					try {
-						return Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, util.format(evaled))), { maxLength: 1015, char: '\n' });
+						return Util.splitMessage(Util.escapeCodeBlock(this.cleanOutput(util.format(evaled))), { maxLength: 1015, char: '\n' });
 					} catch {
-						return [ trim(Util.escapeCodeBlock(cleanOutput(client, util.format(evaled))), 1015) ];
+						return [ trim(Util.escapeCodeBlock(this.cleanOutput(util.format(evaled))), 1015) ];
 					}
 				})()
 				: (() => {
 					try {
-						return Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, evaled)), { maxLength: 1015, char: '\n' });
+						return Util.splitMessage(Util.escapeCodeBlock(this.cleanOutput(evaled)), { maxLength: 1015, char: '\n' });
 					} catch {
-						return [ trim(Util.escapeCodeBlock(cleanOutput(client, evaled)), 1015) ];
+						return [ trim(Util.escapeCodeBlock(this.cleanOutput(evaled)), 1015) ];
 					}
 				})();
 			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${(((hrStop[0] * 1e9) + hrStop[1])) / 1e6} ms\``;
@@ -150,7 +162,7 @@ module.exports = class EvalCommand extends Command {
 		} catch (error) {
 			logger.error(`[EVAL ERROR]: ${error.name}: ${error.message}`);
 
-			Util.splitMessage(Util.escapeCodeBlock(cleanOutput(client, error)), { maxLength: 1015, char: '\n' })
+			Util.splitMessage(Util.escapeCodeBlock(this.cleanOutput(error)), { maxLength: 1015, char: '\n' })
 				.forEach((output, index) => {
 					responseEmbed.addField(index ? '\u200b' : 'Error', `\`\`\`xl\n${output}\`\`\``);
 				});

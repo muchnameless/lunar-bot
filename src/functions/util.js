@@ -1,6 +1,6 @@
 'use strict';
 
-const { promisify, inspect } = require('util');
+const { promisify } = require('util');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const { XP_TYPES, XP_OFFSETS_SHORT } = require('../constants/database');
@@ -89,17 +89,6 @@ const self = module.exports = {
 	getHypixelClient: ((shouldSkipQueue = false) => ((shouldSkipQueue && hypixel.queue.promises.length > hypixelAux.queue.promises.length)
 		? hypixelAux
 		: hypixel)
-	),
-
-	/**
-	 * replaces the client's token in 'text' and escapes ` and @mentions
-	 * @param {import('../structures/LunarClient')} client discord client to get the token from
-	 * @param {string} text to clean
-	 */
-	cleanOutput: ((client, text) => (typeof text === 'string' ? text : inspect(text, { depth: 1 }))
-		.replace(/`/g, `\`${String.fromCharCode(8203)}`)
-		.replace(/@/g, `@${String.fromCharCode(8203)}`)
-		.replace(new RegExp(client.token, 'gi'), '****')
 	),
 
 	/**
