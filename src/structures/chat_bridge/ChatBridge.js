@@ -506,7 +506,7 @@ class ChatBridge extends EventEmitter {
 		try {
 			return await this.webhook.send(toSend);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE MESSAGE]: ${this.logInfo}: ${error.name}: ${error.message}`);
+			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: ${error.name}: ${error.message}`);
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
 				this.uncacheWebhook();
 				this.reconnect();

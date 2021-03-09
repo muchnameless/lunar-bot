@@ -585,14 +585,10 @@ module.exports = class HypixelGuild extends Model {
 	 */
 	async handleChatBridgeMessage(message) {
 		try {
-			// chatbridge disabled, message is from bot or no message.content to chat
-			if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || message.author.id === this.client.user.id) return;
+			// message is from chatBridge webhook or chatbridge disabled, message is from bot
+			if (message.webhookID === chatBridge.webhook.id || !this.client.config.getBoolean('CHATBRIDGE_ENABLED') || message.author.id === this.client.user.id) return;
 
 			const { chatBridge } = this;
-
-			// message is from chatBridge webhook
-			if (message.webhookID === chatBridge.webhook.id) return;
-
 			/**
 			 * @type {import('./Player')}
 			 */
