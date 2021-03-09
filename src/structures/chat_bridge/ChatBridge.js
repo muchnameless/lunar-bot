@@ -410,7 +410,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	includesNonWhitespace(string) {
-		return /[^\s|\u{2003}|\u{2800}|\u{0020}|\u{180E}|\u{200B}]/u.test(string);
+		return /[^\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u.test(string);
 	}
 
 	/**
@@ -548,18 +548,19 @@ class ChatBridge extends EventEmitter {
 	 * @param {object} options
 	 * @param {string} options.command can also directly be used as the only parameter
 	 * @param {RegExp} [options.responseRegex] regex to use as a filter for the message collector
+	 * @param {number} [options.max=1]
 	 * @param {number} [options.timeout]
 	 * @param {boolean} [options.rejectOnTimeout=false]
 	 */
-	async command({ command = arguments[0], responseRegex = new RegExp(), timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+	async command({ command = arguments[0], responseRegex = /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u, max = 1, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		const TIMEOUT_MS = timeout * 1_000;
 
 		try {
 			const result = await Promise.all([
 				this.awaitMessages(
-					msg => responseRegex.test(msg.content),
+					msg => !msg.type && responseRegex.test(msg.content),
 					{
-						max: 1,
+						max,
 						time: TIMEOUT_MS + (this.queue.remaining * this.ingameChatDelay),
 						errors: [ 'time', 'disconnect' ],
 					},
@@ -567,12 +568,25 @@ class ChatBridge extends EventEmitter {
 				this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)),
 			]);
 
-			return result[0][0].content.replace(/^-+|-+$/g, '').trim();
+			return result[0]
+				.map(x => x.content.replace(/^-{53}}|-{53}$/g, '').trim())
+				.join('\n');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
 			if (Array.isArray(error)) {
-				if (rejectOnTimeout) throw new Error(`no ingame response after ${ms(TIMEOUT_MS, { long: true })}`);
-				return `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
+				if (rejectOnTimeout) Promise.reject(
+					error.length
+						? error
+							.map(x => x.content.replace(/^-{53}}|-{53}$/g, '').trim())
+							.join('\n')
+						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
+				);
+
+				return error.length
+					? error
+						.map(x => x.content.replace(/^-{53}}|-{53}$/g, '').trim())
+						.join('\n')
+					: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
 
 			// a different error occurred
