@@ -204,11 +204,11 @@ class PlayerManager extends ModelManager {
 			if (new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
 				this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
 			} else {
-				return logger.warn('[PLAYERS UPDATE]: auto updates disabled');
+				logger.warn('[PLAYERS UPDATE]: auto updates disabled');
 			}
+		} else {
+			this.cache.forEach(player => player.update(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`)));
 		}
-
-		this.cache.forEach(player => player.update(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`)));
 		return this;
 	}
 
