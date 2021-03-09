@@ -7,7 +7,7 @@ const emojiRegex = require('emoji-regex/es2015');
 const ms = require('ms');
 const { sleep, trim, cleanFormattedNumber } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
-const { VERSION } = require('../../constants/chatBridge');
+const { VERSION, invisibleCharacters } = require('../../constants/chatBridge');
 const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
 const minecraftBot = require('./MinecraftBot');
 const WebhookError = require('../errors/WebhookError');
@@ -287,13 +287,11 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	hypixelSpamBypass(string) {
-		const invisChars = [ '⭍', 'ࠀ' ]; // those don't render in the mc client
-
 		let paddedString = string;
 
 		// max message length is 256 post 1.11, 100 pre 1.11
 		for (let index = this.maxMessageLength - paddedString.length + 1; --index;) {
-			paddedString += invisChars[Math.floor(Math.random() * invisChars.length)];
+			paddedString += invisibleCharacters[Math.floor(Math.random() * invisibleCharacters.length)];
 		}
 
 		return paddedString;

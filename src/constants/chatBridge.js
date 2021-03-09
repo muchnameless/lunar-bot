@@ -1,9 +1,15 @@
 'use strict';
 
 module.exports = {
+	/**
+	 * mc client version
+	 */
 	VERSION: '1.16.5',
 
-	SPAWN_EVENTS: [
+	/**
+	 * bot events that should only be listened to once
+	 */
+	spawnEvents: [
 		'login',
 		'update_health',
 	],
@@ -26,4 +32,12 @@ module.exports = {
 	HYPIXEL_RANK_REGEX: '(?:\\[.+?\\] )?',
 
 	GUILD_RANK_REGEX: '(?:\\w+)\\])?',
+
+	/**
+	 * characters that don't render in mc chat
+	 */
+	invisibleCharacters: [
+		'⭍',
+		'ࠀ',
+	],
 };

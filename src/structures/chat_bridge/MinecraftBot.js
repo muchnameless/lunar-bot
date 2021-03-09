@@ -2,7 +2,7 @@
 
 const { createClient } = require('minecraft-protocol');
 const { join, basename } = require('path');
-const { SPAWN_EVENTS } = require('../../constants/chatBridge');
+const { spawnEvents } = require('../../constants/chatBridge');
 const { getAllJsFiles } = require('../../functions/files');
 const logger = require('../../functions/logger');
 
@@ -30,7 +30,7 @@ module.exports = async (chatBridge, options) => {
 		const event = require(file);
 		const EVENT_NAME = basename(file, '.js');
 
-		bot[SPAWN_EVENTS.includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, chatBridge));
+		bot[spawnEvents.includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, chatBridge));
 	}
 
 	logger.debug(`[CHATBRIDGE BOT EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
