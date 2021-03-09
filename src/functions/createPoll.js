@@ -34,6 +34,8 @@ module.exports = async (chatBridge, message, args, ign) => {
 
 	const question = upperCaseFirstChar(options.shift());
 
+	if (!options.length) return message.reply('specify poll options to vote for');
+
 	options = options.map(x => ({ option: x, votes: new Set() }));
 
 	const optionsCount = options.length;
