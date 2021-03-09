@@ -384,7 +384,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {ChatOptions} options
 	 */
 	async gchat(message, { prefix = '', ...options } = {}) {
-		return this.chat(message, { prefix: `/gc ${prefix}${prefix.length ? ' ' : ''}`, ...options });
+		return this.chat(message, { prefix: `/gc ${prefix}${prefix.length ? ' ' : invisibleCharacters[0]}`, ...options });
 	}
 
 	/**
