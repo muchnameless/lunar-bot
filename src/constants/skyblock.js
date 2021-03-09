@@ -212,25 +212,19 @@ module.exports = {
 		9: 1_000_000,
 	},
 
-	fetchur: {
-		items: [
-			'20 yellow glass (Wool Weaver near builder merch in hub)',
-			'1 compass (4 iron + 1 redstone)',
-			'20 mithril',
-			'1 firework (1 gunpowder + 1 paper)',
-			'cheap coffee (bartender in hub)',
-			'door',
-			'SuperBoomt TNT',
-			'1 pumpkin',
-			'1 flint and steel',
-			'50 quartz ore (mine with silk touch)',
-			'16 enderpearls',
-			'50 red wool (Wool Weaver near builder merch in hub)',
-			'3 rabbit feet',
-		],
-
-		DAY_0: 1_614_142_800_000,
-
-		INTERVAL: 86_400_000,
-	},
+	fetchurItems: [
+		'50 red wool (Wool Weaver near builder merch in hub)',
+		'20 yellow glass (Wool Weaver near builder merch in hub)',
+		'1 compass (4 iron + 1 redstone)',
+		'20 mithril',
+		'1 firework (1 gunpowder + 1 paper)',
+		'cheap coffee (bartender in hub)',
+		'door',
+		'3 rabbit feet', // 08.03.
+		'SuperBoomt TNT', // 09.03.
+		'1 pumpkin',
+		'1 flint and steel',
+		'50 quartz ore (mine with silk touch)',
+		'16 enderpearls',
+	],
 };

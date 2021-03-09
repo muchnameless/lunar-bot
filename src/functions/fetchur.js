@@ -1,17 +1,34 @@
 'use strict';
 
 const ms = require('ms');
-const { fetchur: { items, DAY_0, INTERVAL } } = require('../constants/skyblock');
+const { fetchurItems } = require('../constants/skyblock');
+// const logger = require('./logger');
 
 
+/**
+ * fetchur resets every day at midnight EST (UTC+5) and every month to the start of the list
+ */
 module.exports = () => {
-	const TIME = (Date.now() - DAY_0) / INTERVAL;
-	const TIME_FLOORED = Math.floor(TIME);
+	const [{ value: DAY }] = new Intl.DateTimeFormat(undefined, { timeZone: 'America/New_York', day: 'numeric' }).formatToParts(new Date());
+
+	const tomorrow = new Date();
+	tomorrow.setDate(tomorrow.getDate() + 1);
+	tomorrow.setUTCHours(5, 0, 0, 0);
+
+	const today = new Date();
+	today.setUTCHours(5, 0, 0, 0);
+
+	const RESET_TIME = Math.min(
+		...[
+			tomorrow.getTime() - Date.now(),
+			today.getTime() - Date.now(),
+		].filter(time => time >= 0),
+	);
 
 	return {
-		item: items[TIME_FLOORED % items.length],
+		item: fetchurItems[(DAY - 1) % fetchurItems.length],
 		timeLeft: ms(
-			(1 + TIME_FLOORED - TIME) * INTERVAL,
+			RESET_TIME,
 			{ long: true },
 		),
 	};
