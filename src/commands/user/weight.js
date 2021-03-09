@@ -4,6 +4,7 @@ const fetch = require('node-fetch');
 const { upperCaseFirstChar } = require('../../functions/util');
 const { BASE_URL } = require('../../constants/weight');
 const mojang = require('../../api/mojang');
+const MojangAPIError = require('../../structures/errors/MojangAPIError');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -55,8 +56,16 @@ module.exports = class WeightCommand extends Command {
 
 			return message.reply(`${username} (${name}): ${this.formatNumber(weight + overflow)} [${this.formatNumber(weight)} + ${this.formatNumber(overflow)}]`);
 		} catch (error) {
-			logger.error(`[WEIGHT]: ${error.message}`);
-			return message.reply(error.message);
+			logger.error(`[WEIGHT]: ${error instanceof MojangAPIError
+					? `${error.name} ${error.code}: ${error.message}`
+					: error.message
+			}`);
+
+			return message.reply(
+				error instanceof MojangAPIError
+					? `${error.name} ${error.code}: ${error.message}`
+					: error.message,
+			);
 		}
 	}
 };

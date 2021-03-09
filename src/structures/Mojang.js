@@ -1,6 +1,8 @@
 'use strict';
 
 const fetch = require('node-fetch');
+const MojangAPIError = require('./errors/MojangAPIError');
+const logger = require('../functions/logger');
 
 
 class Mojang {
@@ -10,6 +12,7 @@ class Mojang {
 	constructor(options = {}) {
 		this._validateOptions(options);
 		this.cache = options.cache;
+		this.wrongInputCache = new Map();
 	}
 
 	/**
@@ -54,11 +57,17 @@ class Mojang {
 			if (cachedResponse) return cachedResponse;
 		}
 
+		if (this.wrongInputCache.has(query)) {
+			logger.error(`[MOJANG]: cached error for '${query}' in '${resultField}'`);
+			throw new MojangAPIError(this.wrongInputCache.get(query), resultField);
+		}
+
 		const res = await fetch(`${path}${query}`);
 
 		if (res.status !== 200) {
-			if (res.status === 204) throw new Error(`Error ${res.status}: invalid ${resultField === 'id' ? 'IGN' : resultField === 'name' ? 'uuid' : 'input'}`);
-			throw new Error(`Error ${res.status}: ${res.statusText}`);
+			this.wrongInputCache.set(query, res);
+			setTimeout(() => this.wrongInputCache.delete(query), 30 * 60_000);
+			throw new MojangAPIError(res, resultField);
 		}
 
 		const parsedRes = await res.json().catch(() => {

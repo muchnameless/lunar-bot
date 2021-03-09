@@ -49,7 +49,7 @@ module.exports = class LinkCommand extends Command {
 				if (/\W/.test(arg)) break; // non alpha-numerical-char -> no minecraft ign
 
 				// try to fetch the minecraft-uuid of that ign, in case players.getByIGN() found a (wrong) close ign that is already in guild via autocorrection
-				minecraftUUID = await mojang.getUUID(arg).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name}: ${error.message}`));
+				minecraftUUID = await mojang.getUUID(arg).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name} ${error.code}: ${error.message}`));
 
 				if (!minecraftUUID || minecraftUUID === player.minecraftUUID) break; // continue with player from players.getByIGN()
 
@@ -58,7 +58,7 @@ module.exports = class LinkCommand extends Command {
 				if (/\W/.test(arg)) continue; // non alpha-numerical-char -> no minecraft ign
 
 				// try to fetch additional info about the ign
-				minecraftUUID = await mojang.getUUID(arg).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name}: ${error.message}`));
+				minecraftUUID = await mojang.getUUID(arg).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name} ${error.code}: ${error.message}`));
 
 				if (!minecraftUUID) continue;
 			}
@@ -77,7 +77,7 @@ module.exports = class LinkCommand extends Command {
 			}
 
 			// create new db entry
-			const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name}: ${error.message}`)) ?? UNKNOWN_IGN;
+			const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name} ${error.code}: ${error.message}`)) ?? UNKNOWN_IGN;
 
 			player = await players.model
 				.create({
