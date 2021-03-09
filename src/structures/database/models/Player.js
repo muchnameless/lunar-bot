@@ -461,9 +461,8 @@ module.exports = class Player extends Model {
 			await this.save();
 		} catch (error) {
 			if (error instanceof NonAPIError) return logger.warn(`[UPDATE XP]: ${this.logInfo}: ${error.name}: ${error.message}`);
-
 			logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name} ${error.code}: ${error.message}`);
-			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
+			if (!error.name.includes('Sequelize')) this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
 		}
 	}
 
