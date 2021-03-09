@@ -257,6 +257,16 @@ class DatabaseManager {
 	async update() {
 		const { config, players } = this.modelManagers;
 
+		// the hypxiel api encountered an error before
+		if (this.client.config.getBoolean('HYPIXEL_API_ERROR')) {
+			// reset error every full hour
+			if (new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+				this.client.config.set('HYPIXEL_API_ERROR', false);
+			} else {
+				return logger.warn('[DB UPDATE]: auto updates disabled');
+			}
+		}
+
 		// update player db
 		await this.client.hypixelGuilds.update();
 

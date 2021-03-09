@@ -38,6 +38,8 @@ class HypixelGuildManager extends ModelManager {
 	 * @returns {Promise<boolean>} success
 	 */
 	async update() {
+		if (this.client.config.getBoolean('HYPIXEL_API_ERROR')) return logger.warn('[GUILDS UPDATE]: auto updates disabled');
+
 		try {
 			for (const hypixelGuild of this.cache.values()) {
 				await hypixelGuild.update();
@@ -45,7 +47,8 @@ class HypixelGuildManager extends ModelManager {
 
 			return true;
 		} catch (error) {
-			logger.error(`[UPDATE GUILD PLAYERS]: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
+			this.client.config.set('HYPIXEL_API_ERROR', 'true');
+			logger.error(`[GUILDS UPDATE]: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
 			return false;
 		}
 	}
