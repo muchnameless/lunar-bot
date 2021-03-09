@@ -410,7 +410,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	includesNonWhitespace(string) {
-		return /[^\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u.test(string);
+		return /[^\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}ࠀ⭍]/u.test(string);
 	}
 
 	/**
