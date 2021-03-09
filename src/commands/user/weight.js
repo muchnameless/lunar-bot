@@ -48,9 +48,9 @@ module.exports = class WeightCommand extends Command {
 			const uuid = args.length
 				? await mojang.getUUID(args[0])
 				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
-			const { status, reason, data } = await (await fetch(`${BASE_URL}/profiles/${this.formatUUID(uuid)}${args.length < 2 ? '/weight' : ''}?key=${process.env.HYPIXEL_KEY_AUX_2}`)).json();
+			const { status, reason, data } = await (await fetch(`${BASE_URL}/profiles/${this.formatUUID(uuid)}${args.length < 2 ? '/weight' : ''}`, { headers: { 'Authorization': process.env.HYPIXEL_KEY_AUX_2 } })).json();
 
-			if (reason) throw new Error(`[Error ${status}]: ${reason.replace(new RegExp(process.env.HYPIXEL_KEY_AUX_2, 'g'), '*****')}`);
+			if (reason) throw new Error(`[Error ${status}]: ${reason}`);
 
 			const { username, name, weight, weight_overflow: overflow } = args.length < 2 ? data : data.find(x => x.name.toLowerCase() === args[1].toLowerCase()) ?? (() => { throw new Error(`unknown profile name '${upperCaseFirstChar(args[1].toLowerCase())}'`); })();
 
