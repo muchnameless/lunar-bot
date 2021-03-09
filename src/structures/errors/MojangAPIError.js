@@ -10,6 +10,7 @@ class MojangAPIError extends Error {
 	constructor({ status, statusText }, resultField) {
 		super();
 
+		this.name = 'MojangAPIError';
 		this.code = status;
 		this.message = statusText;
 

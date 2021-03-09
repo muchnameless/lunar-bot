@@ -9,6 +9,7 @@ class WebhookError extends Error {
 	constructor(message, channel, hypixelGuild) {
 		super(message);
 
+		this.name = 'WebhookError';
 		this.channel = channel;
 		this.hypixelGuild = hypixelGuild;
 	}
