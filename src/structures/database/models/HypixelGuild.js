@@ -7,6 +7,7 @@ const { autocorrect, getHypixelClient } = require('../../../functions/util');
 const { HYPIXEL_RANK_REGEX } = require('../../../constants/chatBridge');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED, STOP } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH }, UNKNOWN_IGN } = require('../../../constants/database');
+const ChatBridgeError = require('../../errors/ChatBridgeError');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
@@ -155,7 +156,7 @@ module.exports = class HypixelGuild extends Model {
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
 	get chatBridge() {
-		if (!this._chatBridge?.ready) throw new Error(`${this.name}: chat bridge ${this._chatBridge ? 'not ready' : 'not found'}`);
+		if (!this._chatBridge?.ready) throw new ChatBridgeError(`${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`);
 		return this._chatBridge;
 	}
 
@@ -628,7 +629,9 @@ module.exports = class HypixelGuild extends Model {
 
 			if (!(await chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(STOP);
 		} catch (error) {
-			logger.warn(`[GUILD CHATBRIDGE]: ${error.message}`);
+			if (error instanceof ChatBridgeError) return logger.warn(`[GUILD CHATBRIDGE]: ${error.name}: ${error.message}`);
+
+			logger.warn(`[GUILD CHATBRIDGE]: ${this.name}: ${error.name}: ${error.message}`);
 			message.reactSafely(X_EMOJI);
 		}
 	}
