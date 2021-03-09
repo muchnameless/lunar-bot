@@ -47,7 +47,8 @@ module.exports = class DemoteCommand extends Command {
 					`^${HYPIXEL_RANK_REGEX}${IGN} is the guild master so can't be demoted!`,
 					'^You can only demote up to your own rank!',
 					'^You must be the Guild Master to use that command!',
-					`Can't find a player by the name of '${IGN}'`,
+					`^Can't find a player by the name of '${IGN}'`,
+					`^${HYPIXEL_RANK_REGEX}${IGN} is not in your guild!`,
 				].join('|'), 'i'),
 			});
 
