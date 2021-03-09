@@ -8,6 +8,7 @@ const { levelingXp, skillXpPast50, skillsCap, runecraftingXp, dungeonXp, slayerX
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { escapeIgn, getHypixelClient } = require('../../../functions/util');
+const NonAPIError = require('../../errors/NonAPIError');
 const LunarGuildMember = require('../../extensions/GuildMember');
 const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
@@ -386,14 +387,14 @@ module.exports = class Player extends Model {
 			// hypixel API call (if shouldSkipQueue and hypixelMain queue already filled use hypixelAux)
 			const { meta: { cached }, members } = (await getHypixelClient(shouldSkipQueue).skyblock.profile(this.mainProfileID));
 
-			if (cached) throw new Error('cached data');
+			if (cached) throw new NonAPIError('cached data');
 
 			const playerData = members[this.minecraftUUID];
 
 			if (!playerData) {
 				this.mainProfileID = null;
 				this.save();
-				throw new Error(`unable to find main profile named '${this.mainProfileName}' -> resetting name`);
+				throw new NonAPIError(`unable to find main profile named '${this.mainProfileName}' -> resetting name`);
 			}
 
 			this.xpLastUpdatedAt = Date.now();
@@ -459,10 +460,10 @@ module.exports = class Player extends Model {
 
 			await this.save();
 		} catch (error) {
-			logger.log(
-				error.message === 'cached data' ? 'info' : 'error',
-				`[UPDATE XP]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`,
-			);
+			if (error instanceof NonAPIError) return logger.warn(`[UPDATE XP]: ${this.logInfo}: ${error.name}: ${error.message}`);
+
+			logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name} ${error.code}: ${error.message}`);
+			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
 		}
 	}
 

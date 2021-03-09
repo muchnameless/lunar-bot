@@ -198,7 +198,18 @@ class PlayerManager extends ModelManager {
 	 * update db entries and linked discord members of all players
 	 */
 	update(options = {}) {
-		return this.cache.each(player => player.update(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`)));
+		// the hypxiel api encountered an error before
+		if (this.client.config.getBoolean('HYPIXEL_SKYBLOCK_API_ERROR')) {
+			// reset error every full hour
+			if (new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+				this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
+			} else {
+				return logger.warn('[PLAYERS UPDATE]: auto updates disabled');
+			}
+		}
+
+		this.cache.forEach(player => player.update(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`)));
+		return this;
 	}
 
 	/**
@@ -206,7 +217,8 @@ class PlayerManager extends ModelManager {
 	 * @param {object} options transfer options
 	 */
 	transferXp(options = {}) {
-		return this.cache.each(player => player.transferXp(options).catch(error => logger.error(`[TRANSFER XP]: ${error.name}: ${error.message}`)));
+		this.cache.forEach(player => player.transferXp(options).catch(error => logger.error(`[TRANSFER XP]: ${error.name}: ${error.message}`)));
+		return this;
 	}
 
 	/**
@@ -214,7 +226,8 @@ class PlayerManager extends ModelManager {
 	 * @param {object} options reset options
 	 */
 	resetXp(options = {}) {
-		return this.cache.each(player => player.resetXp(options).catch(error => logger.error(`[RESET XP]: ${error.name}: ${error.message}`)));
+		this.cache.forEach(player => player.resetXp(options).catch(error => logger.error(`[RESET XP]: ${error.name}: ${error.message}`)));
+		return this;
 	}
 
 	/**
