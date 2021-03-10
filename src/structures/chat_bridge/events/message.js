@@ -1,6 +1,6 @@
 'use strict';
 
-const { messageTypes: { WHISPER, GUILD } } = require('../../../constants/chatBridge');
+const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('../../../constants/chatBridge');
 const commandHandler = require('../functions/commandHandler');
 const handleRankRequest = require('../functions/handleRankRequest');
 const handleServerMessages = require('../functions/handleServerMessages');
@@ -21,6 +21,14 @@ module.exports = async (chatBridge, message) => {
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
 
 			if (chatBridge.ready) message.forwardToDiscord().catch(error => logger.error('[CHATBRIDGE MESSAGE]', error));
+
+			return commandHandler(message);
+		}
+
+		case OFFICER:
+		case PARTY: {
+			if (!chatBridge.enabled) return;
+			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
 
 			return commandHandler(message);
 		}

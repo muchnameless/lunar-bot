@@ -4,7 +4,7 @@ const { Collection } = require('discord.js');
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
 const { escapeRegex } = require('../../../functions/util');
-const { messageTypes: { GUILD } } = require('../../../constants/chatBridge');
+const { messageTypes: { GUILD, WHISPER } } = require('../../../constants/chatBridge');
 const logger = require('../../../functions/logger');
 
 
@@ -20,7 +20,7 @@ module.exports = async (message) => {
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), escapeRegex(config.get('INGAME_PREFIX')), `@${chatBridge.bot.username}` ].join('|')})`, 'i').exec(message.content); // PREFIX, INGAME_PREFIX, @mention
 
 	// must use prefix for commands in guild
-	if (message.type === GUILD && !prefixMatched) return;
+	if (!prefixMatched && message.type !== WHISPER) return;
 
 	// command, args, flags
 	const rawArgs = message.content // command arguments
