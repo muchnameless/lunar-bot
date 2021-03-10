@@ -17,7 +17,7 @@ module.exports = async (chatBridge, message) => {
 
 	switch (message.type) {
 		case GUILD: {
-			if (!chatBridge.guild?.chatBridgeEnabled) return;
+			if (!chatBridge.enabled) return;
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
 
 			if (chatBridge.ready) await message.forwardToDiscord().catch(error => logger.error('[CHATBRIDGE MESSAGE]', error));
@@ -26,7 +26,7 @@ module.exports = async (chatBridge, message) => {
 		}
 
 		case WHISPER: {
-			if (!chatBridge.guild?.chatBridgeEnabled) return;
+			if (!chatBridge.enabled) return;
 			if (!message.author.inGuild) return; // ignore messages from non guild players
 
 			handleRankRequest(message).catch(error => logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`));

@@ -100,6 +100,13 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
+	 * wether the guild has the chatBridge feature enabled
+	 */
+	get enabled() {
+		return this.guild?.chatBridgeEnabled ?? false;
+	}
+
+	/**
 	 * the logging webhook's channel
 	 * @type {import('../extensions/TextChannel')}
 	 */
@@ -489,7 +496,7 @@ class ChatBridge extends EventEmitter {
 	 */
 	async broadcast(message) {
 		return Promise.all([
-			this.guild?.chatBridgeEnabled && this.channel?.send(this._parseMinecraftMessageToDiscord(message)),
+			this.enabled && this.channel?.send(this._parseMinecraftMessageToDiscord(message)),
 			this.gchat(message, { maxParts: Infinity }),
 		]);
 	}
@@ -500,7 +507,7 @@ class ChatBridge extends EventEmitter {
 	 * @returns {Promise<import('../extensions/Message')>}
 	 */
 	async sendViaWebhook(toSend) {
-		if (!this.guild?.chatBridgeEnabled) return;
+		if (!this.enabled) return;
 		if (!toSend.content?.length) return logger.warn(`[CHATBRIDGE]: ${this.logInfo}: prevented sending empty message`);
 
 		try {
