@@ -492,12 +492,13 @@ class ChatBridge extends EventEmitter {
 	/**
 	 * send a message both to discord and the ingame guild chat, parsing both
 	 * @param {string} message
+	 * @param {ChatOptions} param1
 	 * @returns {Promise<[boolean|import('../extensions/Message'), void]>}
 	 */
-	async broadcast(message) {
+	async broadcast(message, { prefix = '', maxParts = Infinity, ...options }) {
 		return Promise.all([
 			this.enabled && this.channel?.send(this._parseMinecraftMessageToDiscord(message)),
-			this.gchat(message, { maxParts: Infinity }),
+			this.gchat(message, { prefix, maxParts, ...options }),
 		]);
 	}
 
