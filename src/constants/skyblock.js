@@ -221,7 +221,7 @@ module.exports = {
 		'cheap coffee (bartender in hub)',
 		'door',
 		'3 rabbit feet', // 08.03.
-		'SuperBoomt TNT', // 09.03.
+		'SuperBoom TNT', // 09.03.
 		'1 pumpkin',
 		'1 flint and steel',
 		'50 quartz ore (mine with silk touch)',
