@@ -2,6 +2,10 @@
 
 module.exports = {
 
+	/**
+	 * https://github.com/Senither/Hypixel-Skyblock-Assistant/find/master and search for 'weight'
+	 */
+
 	SKILL_EXPONENTS: {
 		taming: 1.14744,
 		farming: 1.217848139,
