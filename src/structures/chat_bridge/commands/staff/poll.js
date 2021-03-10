@@ -10,7 +10,7 @@ module.exports = class PollCommand extends Command {
 		super(data, {
 			aliases: [ 'polls' ],
 			description: 'create a poll for both ingame and discord guild chat',
-			args: false,
+			args: true,
 			usage: '<30s <= \'duration\' <= 10m> ["question" "option1" "option2" ...]',
 			cooldown: 30,
 		});
