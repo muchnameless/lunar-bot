@@ -26,4 +26,5 @@ module.exports = {
 	MUTED: '🔇',
 	STOP: '🛑',
 	NO_BELL: '🔕',
+	FORWARD_TO_GC: '📣',
 };

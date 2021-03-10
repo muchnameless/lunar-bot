@@ -1,7 +1,7 @@
 'use strict';
 
 const { updateLeaderboardMessage } = require('../functions/leaderboardMessages');
-const { LOCK } = require('../constants/emojiCharacters');
+const { X_EMOJI, LOCK, FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const logger = require('../functions/logger');
 
 
@@ -20,20 +20,35 @@ module.exports = async (client, reaction, user) => {
 		return logger.error('[MESSAGE REACTION ADD]: error while fetching partial', error);
 	}
 
-	if (user.id === client.user.id || reaction.message.author.id !== client.user.id) return; // ignore own reactions or on not owned messages
+	if (user.id === client.user.id) return; // ignore own reactions or on not owned messages
 
-	const { message, emoji } = reaction;
+	const { message, emoji: { name: EMOJI_NAME } } = reaction;
 
-	if (!message.embeds.length) return;
+	if (client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[MESSAGE REACTION ADD]: ${user.tag}${message.guild ? ` | ${(await message.guild.members.fetch(user.id)).displayName}` : ''} reacted with ${EMOJI_NAME}`);
 
-	if (client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[EVENT]: ${user.tag}${message.guild ? ` | ${(await message.guild.members.fetch(user.id)).displayName}` : ''} reacted with ${emoji.name}`);
+	if (message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') && EMOJI_NAME === FORWARD_TO_GC && user.id === message.author.id) {
+		try {
+			await client.hypixelGuilds.mainGuild?.chatBridge.broadcast(
+				message.content,
+				{
+					prefix: 'Guild_Announcement:',
+					maxParts: Infinity,
+				},
+			);
+		} catch (error) {
+			logger.error(`[MESSAGE REACTION ADD]: ${error.name}: ${error.message}`);
+			message.reactSafely(X_EMOJI);
+		}
 
-	if (!message.embeds[0].title.includes('Leaderboard')) return;
+		return;
+	}
+
+	if (message.author.id !== client.user.id || !message.embeds[0]?.title.includes('Leaderboard')) return;
 
 	if (message.guild) {
 		const AUTHOR_ID = message.mentions.users.first()?.id;
 
-		if ((user.id !== AUTHOR_ID || emoji.name !== LOCK) && message.channel.checkBotPermissions('MANAGE_MESSAGES')) reaction.users.remove(user).catch(error => logger.error(`[REMOVE REACTION]: ${error.name}: ${error.message}`));
+		if ((user.id !== AUTHOR_ID || EMOJI_NAME !== LOCK) && message.channel.checkBotPermissions('MANAGE_MESSAGES')) reaction.users.remove(user).catch(error => logger.error(`[REMOVE REACTION]: ${error.name}: ${error.message}`));
 
 		if (![ AUTHOR_ID, client.ownerID ].includes(user.id)) return;
 
@@ -47,5 +62,5 @@ module.exports = async (client, reaction, user) => {
 		return;
 	}
 
-	updateLeaderboardMessage(message, emoji.name);
+	updateLeaderboardMessage(message, EMOJI_NAME);
 };
