@@ -399,6 +399,15 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
+	 * send a message to ingame guild chat
+	 * @param {string} message
+	 * @param {ChatOptions} options
+	 */
+	async ochat(message, { prefix = '', ...options } = {}) {
+		return this.chat(message, { prefix: `/oc ${prefix}${prefix.length ? ' ' : ''}`, ...options });
+	}
+
+	/**
 	 * send a message to ingame party chat
 	 * @param {string} message
 	 * @param {ChatOptions} options

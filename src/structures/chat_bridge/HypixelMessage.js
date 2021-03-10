@@ -1,7 +1,7 @@
 'use strict';
 
 const ChatMessage = require('prismarine-chat')(require('../../constants/chatBridge').VERSION);
-const { messageTypes: { WHISPER, GUILD, PARTY } } = require('../../constants/chatBridge');
+const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('../../constants/chatBridge');
 const { NO_BELL } = require('../../constants/emojiCharacters');
 const mojang = require('../../api/mojang');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
@@ -40,10 +40,12 @@ class HypixelMessage extends ChatMessage {
 		this.cleanedContent = this.rawContent.replace(/ࠀ|⭍/g, '').trim();
 
 		/**
-		 * Guild > [HypixelRank] ign [GuildRank]
-		 * From [HypixelRank] ign
+		 * Guild > [HypixelRank] ign [GuildRank]: message
+		 * Party > [HypixelRank] ign [GuildRank]: message
+		 * Officer > [HypixelRank] ign [GuildRank]: message
+		 * From [HypixelRank] ign: message
 		 */
-		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Party) > |(?<whisper>From) )(?:\[(?<hypixelRank>.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
+		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From) )(?:\[(?<hypixelRank>.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
 			this.author = new HypixelMessageAuthor(this.chatBridge, {
@@ -96,6 +98,9 @@ class HypixelMessage extends ChatMessage {
 		switch (this.type) {
 			case GUILD:
 				return this.chatBridge.broadcast(message);
+
+			case OFFICER:
+				return this.chatBridge.ochat(message);
 
 			case PARTY:
 				return this.chatBridge.pchat(message, { maxParts: Infinity });

@@ -26,6 +26,7 @@ module.exports = {
 	messageTypes: {
 		WHISPER: 'whisper',
 		GUILD: 'guild',
+		OFFICER: 'officer',
 		PARTY: 'party',
 	},
 
