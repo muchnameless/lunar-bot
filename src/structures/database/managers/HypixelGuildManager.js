@@ -145,12 +145,26 @@ class HypixelGuildManager extends ModelManager {
 	 * schedules the CronJob for the daily stats save for each guild
 	 */
 	scheduleDailyStatsSave() {
+		// daily reset
+		if (new Date(this.client.config.getNumber('LAST_DAILY_STATS_SAVE_TIME')).getUTCDay() !== new Date().getUTCDay()) this.performDailyStatsSave();
+
+		// each day at 00:00:00
 		this.client.schedule('guildDailyStats', new CronJob({
 			cronTime: '0 0 0 * * *',
 			timeZone: 'GMT',
-			onTick: () => this.cache.forEach(hypixelGuild => hypixelGuild.saveDailyStats()),
+			onTick: () => this.performDailyStatsSave(),
 			start: true,
 		}));
+	}
+
+	/**
+	 * shifts the daily stats array and updates the config
+	 */
+	performDailyStatsSave() {
+		this.config.set('LAST_DAILY_STATS_SAVE_TIME', Date.now());
+		this.cache.forEach(hypixelGuild => hypixelGuild.saveDailyStats());
+
+		logger.debug('[GUILD DAILY STATS]: performed daily stats saves');
 	}
 }
 

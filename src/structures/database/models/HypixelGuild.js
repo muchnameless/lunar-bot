@@ -223,8 +223,6 @@ module.exports = class HypixelGuild extends Model {
 		statsHistory.push({ playerCount: this.playerCount, ...this.stats });
 		this.changed('statsHistory', true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
 
-		logger.debug(`[GUILD DAILY STATS]: ${this.name}: shifted daily stats array`);
-
 		return this.save();
 	}
 
