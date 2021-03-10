@@ -172,6 +172,7 @@ module.exports = class HypixelGuild extends Model {
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
 	get chatBridge() {
+		if (!this.chatBridgeEnabled) throw new ChatBridgeError(`${this.name}: chat bridge disabled`);
 		if (!this._chatBridge?.ready) throw new ChatBridgeError(`${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`);
 		return this._chatBridge;
 	}
@@ -630,7 +631,7 @@ module.exports = class HypixelGuild extends Model {
 	async handleChatBridgeMessage(message) {
 		try {
 			// chatbridge disabled, message is from bot or no message.content to chat
-			if (!this.client.config.getBoolean('CHATBRIDGE_ENABLED') || message.author.id === this.client.user.id) return;
+			if (message.author.id === this.client.user.id) return;
 
 			const { chatBridge } = this;
 
