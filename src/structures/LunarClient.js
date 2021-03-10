@@ -185,7 +185,7 @@ class LunarClient extends Client {
 			onTick: async () => {
 				if (!this.config.getBoolean('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
 
-				const mainGuild = this.hypixelGuilds.cache.get(this.config.get('MAIN_GUILD_ID'));
+				const { mainGuild } = this.hypixelGuilds;
 
 				if (!mainGuild) return;
 

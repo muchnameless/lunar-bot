@@ -28,6 +28,13 @@ class HypixelGuildManager extends ModelManager {
 		return this.cache.map(hGuild => `\`${hGuild.name.replace(/ /g, '')}\``).join('|');
 	}
 
+	/**
+	 * the main guild's hypixelGuild object
+	 */
+	get mainGuild() {
+		return this.cache.get(this.config.get('MAIN_GUILD_ID'));
+	}
+
 	async loadCache(condition) {
 		await super.loadCache(condition);
 
