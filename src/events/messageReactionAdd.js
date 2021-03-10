@@ -31,12 +31,17 @@ module.exports = async (client, reaction, user) => {
 			await client.hypixelGuilds.mainGuild?.chatBridge.broadcast(
 				message.content,
 				{
-					prefix: 'Guild_Announcement:',
-					maxParts: Infinity,
+					discord: {
+						allowedMentions: { parse: [] },
+					},
+					ingame: {
+						prefix: 'Guild_Announcement:',
+						maxParts: Infinity,
+					},
 				},
 			);
 		} catch (error) {
-			logger.error(`[MESSAGE REACTION ADD]: ${error.name}: ${error.message}`);
+			logger.error(`[MESSAGE REACTION ADD]: announcement: ${error.name}: ${error.message}`);
 			message.reactSafely(X_EMOJI);
 		}
 
