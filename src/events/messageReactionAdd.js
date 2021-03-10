@@ -24,7 +24,7 @@ module.exports = async (client, reaction, user) => {
 
 	const { message, emoji: { name: EMOJI_NAME } } = reaction;
 
-	if (client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[MESSAGE REACTION ADD]: ${user.tag}${message.guild ? ` | ${(await message.guild.members.fetch(user.id)).displayName}` : ''} reacted with ${EMOJI_NAME}`);
+	if (client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[MESSAGE REACTION ADD]: ${user.tag}${message.guild ? ` | ${(await message.guild.members.fetch(user.id).catch(logger.error))?.displayName ?? ''}` : ''} reacted with ${EMOJI_NAME}`);
 
 	if (message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') && EMOJI_NAME === FORWARD_TO_GC && user.id === message.author.id) {
 		try {
