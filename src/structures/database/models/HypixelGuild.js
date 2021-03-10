@@ -3,7 +3,7 @@
 const { Model, DataTypes } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
 const ms = require('ms');
-const { autocorrect, getHypixelClient } = require('../../../functions/util');
+const { autocorrect, getHypixelClient, cleanFormattedNumber } = require('../../../functions/util');
 const { HYPIXEL_RANK_REGEX } = require('../../../constants/chatBridge');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED, STOP } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH }, UNKNOWN_IGN } = require('../../../constants/database');
@@ -79,6 +79,10 @@ module.exports = class HypixelGuild extends Model {
 		 * @type {GuildRank[]}
 		 */
 		this.ranks;
+		/**
+		 * @type {object[]}
+		 */
+		this.statsHistory;
 	}
 
 	/**
@@ -129,6 +133,18 @@ module.exports = class HypixelGuild extends Model {
 				defaultValue: null,
 				allowNull: true,
 			},
+			statsHistory: {
+				type: DataTypes.ARRAY(DataTypes.JSONB),
+				defaultValue: new Array(30).fill(null)
+					.map(() => ({
+						playerCount: 0,
+						weightAverage: 0,
+						skillAverage: 0,
+						slayerAverage: 0,
+						catacombsAverage: 0,
+					})),
+				allowNull: false,
+			},
 		}, {
 			sequelize,
 			modelName: 'HypixelGuild',
@@ -176,11 +192,40 @@ module.exports = class HypixelGuild extends Model {
 		const PLAYER_COUNT = players.size;
 
 		return ({
-			weightAverage: this.client.formatDecimalNumber(players.reduce((acc, player) => acc + player.getWeight().totalWeight, 0) / PLAYER_COUNT),
-			skillAverage: this.client.formatDecimalNumber(players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT),
-			slayerAverage: this.client.formatNumber(players.reduce((acc, player) => acc + player.getSlayerTotal(), 0) / PLAYER_COUNT, 0, Math.round),
-			catacombsAverage: this.client.formatDecimalNumber(players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT),
+			weightAverage: players.reduce((acc, player) => acc + player.getWeight().totalWeight, 0) / PLAYER_COUNT,
+			skillAverage: players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT,
+			slayerAverage: players.reduce((acc, player) => acc + player.getSlayerTotal(), 0) / PLAYER_COUNT,
+			catacombsAverage: players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT,
 		});
+	}
+
+	/**
+	 * returns various average stats, formatted as strings
+	 */
+	get formattedStats() {
+		const { weightAverage, skillAverage, slayerAverage, catacombsAverage } = this.stats;
+
+		return ({
+			weightAverage: cleanFormattedNumber(this.client.formatDecimalNumber(weightAverage)),
+			skillAverage: cleanFormattedNumber(this.client.formatDecimalNumber(skillAverage)),
+			slayerAverage: cleanFormattedNumber(this.client.formatNumber(slayerAverage, 0, Math.round)),
+			catacombsAverage: cleanFormattedNumber(this.client.formatDecimalNumber(catacombsAverage)),
+		});
+	}
+
+	/**
+	 * shifts the daily stats history
+	 */
+	async saveDailyStats() {
+		// append current xp to the beginning of the statsHistory-Array and pop of the last value
+		const { statsHistory } = this;
+		statsHistory.shift();
+		statsHistory.push({ playerCount: this.playerCount, ...this.stats });
+		this.changed('statsHistory', true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+
+		logger.debug(`[GUILD DAILY STATS]: ${this.name}: shifted daily stats array`);
+
+		return this.save();
 	}
 
 	/**

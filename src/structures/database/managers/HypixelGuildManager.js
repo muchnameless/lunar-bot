@@ -1,5 +1,6 @@
 'use strict';
 
+const { CronJob } = require('cron');
 const { GUILD_ID_BRIDGER, GUILD_ID_ERROR } = require('../../../constants/database');
 const { autocorrect } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
@@ -138,6 +139,18 @@ class HypixelGuildManager extends ModelManager {
 		} catch (error) {
 			logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`);
 		}
+	}
+
+	/**
+	 * schedules the CronJob for the daily stats save for each guild
+	 */
+	scheduleDailyStatsSave() {
+		this.client.schedule('guildDailyStats', new CronJob({
+			cronTime: '0 0 0 * * *',
+			timeZone: 'GMT',
+			onTick: () => this.cache.forEach(hypixelGuild => hypixelGuild.saveDailyStats()),
+			start: true,
+		}));
 	}
 }
 

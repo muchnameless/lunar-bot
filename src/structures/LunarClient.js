@@ -4,7 +4,6 @@ const { Client, Constants: { Events: { CLIENT_READY } } } = require('discord.js'
 const { CronJob } = require('cron');
 const { join, basename } = require('path');
 const { getAllJsFiles } = require('../functions/files');
-const { cleanFormattedNumber } = require('../functions/util');
 const DatabaseManager = require('./database/managers/DatabaseManager');
 const LogHandler = require('./LogHandler');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
@@ -190,9 +189,9 @@ class LunarClient extends Client {
 
 				if (!mainGuild) return;
 
-				const { stats } = mainGuild;
+				const { formattedStats } = mainGuild;
 
-				if (!stats) return;
+				if (!formattedStats) return;
 
 				try {
 					for (const type of [ 'weight', 'skill', 'slayer', 'catacombs' ]) {
@@ -203,7 +202,7 @@ class LunarClient extends Client {
 
 						if (!channel) continue; // no channel found
 
-						const newName = `${type} avg: ${cleanFormattedNumber(stats[`${type}Average`])}`;
+						const newName = `${type} avg: ${formattedStats[`${type}Average`]}`;
 						const { name: oldName } = channel;
 
 						if (newName === oldName) continue; // no update needed

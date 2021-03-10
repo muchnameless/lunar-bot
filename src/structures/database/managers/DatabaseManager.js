@@ -64,6 +64,8 @@ class DatabaseManager {
 		}));
 
 		this.modelManagers.players.scheduleXpResets();
+
+		this.modelManagers.hypixelGuilds.scheduleDailyStatsSave();
 	}
 
 	/**
