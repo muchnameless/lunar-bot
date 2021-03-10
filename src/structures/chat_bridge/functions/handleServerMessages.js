@@ -15,7 +15,7 @@ module.exports = async (message) => {
 	 */
 	if (message.content.includes('joined the guild')) {
 		message.chatBridge.bot.player?.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
-		await message.forwardToDiscord();
+		message.forwardToDiscord();
 		return message.chatBridge.broadcast('welcome');
 	}
 
@@ -33,7 +33,7 @@ module.exports = async (message) => {
 	if (message.content === 'You left the guild') {
 		logger.warn(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: bot left the guild`);
 		message.chatBridge.bot.player?.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
-		await message.forwardToDiscord();
+		message.forwardToDiscord();
 		return message.chatBridge.unlink();
 	}
 
@@ -51,7 +51,7 @@ module.exports = async (message) => {
 	if (message.content.startsWith('You were kicked from the guild by')) {
 		logger.warn(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: bot was kicked from the guild`);
 		message.chatBridge.bot.player?.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));
-		await message.forwardToDiscord();
+		message.forwardToDiscord();
 		return message.chatBridge.unlink();
 	}
 
@@ -63,7 +63,7 @@ module.exports = async (message) => {
 	 * The Guild has unlocked Winners III!
 	 */
 	if (message.content.includes('was promoted from') || message.content.startsWith('The guild has completed ') || message.content.startsWith('The Guild has ')) {
-		await message.forwardToDiscord();
+		message.forwardToDiscord();
 		return message.chatBridge.broadcast('gg');
 	}
 

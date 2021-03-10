@@ -20,7 +20,7 @@ module.exports = async (chatBridge, message) => {
 			if (!chatBridge.enabled) return;
 			if (message.author.ign === chatBridge.bot.username) return; // ignore own messages
 
-			if (chatBridge.ready) await message.forwardToDiscord().catch(error => logger.error('[CHATBRIDGE MESSAGE]', error));
+			if (chatBridge.ready) message.forwardToDiscord().catch(error => logger.error('[CHATBRIDGE MESSAGE]', error));
 
 			return commandHandler(message);
 		}

@@ -112,35 +112,41 @@ class HypixelMessage extends ChatMessage {
 	 * forwards the message to discord via the chatBridge's webhook, if the guild has the chatBridge enabled
 	 */
 	async forwardToDiscord() {
-		if (this.author) {
-			const { player } = this;
-			const member = await player?.discordMember;
-			const message = await this.chatBridge.sendViaWebhook({
-				username: member?.displayName
-					?? player?.ign
-					?? this.author.ign,
-				avatarURL: member?.user.displayAvatarURL({ dynamic: true })
-					?? player?.image
-					?? await mojang.getUUID(this.author.ign).then(uuid => `https://visage.surgeplay.com/bust/${uuid}`, error => logger.error(`[HYPIXEL MESSAGE]: ${error.name} ${error.code}: ${error.message}`))
-					?? this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-				content: this.parsedContent,
-				allowedMentions: {
-					parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
-				},
+		await this.chatBridge.discordQueue.wait();
+
+		try {
+			if (this.author) {
+				const { player } = this;
+				const member = await player?.discordMember;
+				const message = await this.chatBridge.sendViaWebhook({
+					username: member?.displayName
+						?? player?.ign
+						?? this.author.ign,
+					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
+						?? player?.image
+						?? await mojang.getUUID(this.author.ign).then(uuid => `https://visage.surgeplay.com/bust/${uuid}`, error => logger.error(`[HYPIXEL MESSAGE]: ${error.name} ${error.code}: ${error.message}`))
+						?? this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+					content: this.parsedContent,
+					allowedMentions: {
+						parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
+					},
+				});
+
+				// inform user if user and role pings don't actually ping (can't use message.mentions cause that is empty)
+				if ((!player?.hasDiscordPingPermission && /<@!?\d+>/.test(message.content)) || /<@&\d+>/.test(message.content)) message.reactSafely(NO_BELL);
+
+				return message;
+			}
+
+			return await this.chatBridge.sendViaWebhook({
+				username: this.chatBridge.guild.name,
+				avatarURL: this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+				content: this.content,
+				allowedMentions: { parse: [] },
 			});
-
-			// inform user if user and role pings don't actually ping (can't use message.mentions cause that is empty)
-			if ((!player?.hasDiscordPingPermission && /<@!?\d+>/.test(message.content)) || /<@&\d+>/.test(message.content)) message.reactSafely(NO_BELL);
-
-			return message;
+		} finally {
+			this.chatBridge.discordQueue.shift();
 		}
-
-		return this.chatBridge.sendViaWebhook({
-			username: this.chatBridge.guild.name,
-			avatarURL: this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
-			content: this.content,
-			allowedMentions: { parse: [] },
-		});
 	}
 }
 

@@ -63,7 +63,11 @@ class ChatBridge extends EventEmitter {
 		/**
 		 * async queue for ingame chat messages
 		 */
-		this.queue = new AsyncQueue();
+		this.ingameQueue = new AsyncQueue();
+		/**
+		 * async queue for discord chat
+		 */
+		this.discordQueue = new AsyncQueue();
 		/**
 		 * 100 pre 1.10.2, 256 post 1.10.2
 		 * @type {number}
@@ -477,7 +481,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} message
 	 */
 	async sendToMinecraftChat(message) {
-		await this.queue.wait();
+		await this.ingameQueue.wait();
 
 		try {
 			this.bot.chat(message);
@@ -485,20 +489,32 @@ class ChatBridge extends EventEmitter {
 		} catch (error) {
 			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
 		} finally {
-			this.queue.shift();
+			this.ingameQueue.shift();
 		}
 	}
 
 	/**
 	 * send a message both to discord and the ingame guild chat, parsing both
 	 * @param {string} message
-	 * @param {ChatOptions} param1
-	 * @returns {Promise<[boolean|import('../extensions/Message'), void]>}
+	 * @param {object} param1
+	 * @param {import('discord.js').MessageOptions} [param1.discord]
+	 * @param {ChatOptions} [param1.ingame]
+	 * @returns {Promise<[boolean, import('../extensions/Message')]>}
 	 */
-	async broadcast(message, { prefix = '', maxParts = Infinity, ...options }) {
+	async broadcast(message, { discord, ingame: { prefix = '', maxParts = Infinity, ...options } = {} } = {}) {
 		return Promise.all([
-			this.enabled && this.channel?.send(this._parseMinecraftMessageToDiscord(message)),
 			this.gchat(message, { prefix, maxParts, ...options }),
+			(async () => {
+				if (!this.enabled) return null;
+
+				await this.discordQueue.wait();
+
+				try {
+					return await this.channel?.send(this._parseMinecraftMessageToDiscord(message), discord);
+				} finally {
+					this.discordQueue.shift();
+				}
+			})(),
 		]);
 	}
 
@@ -569,7 +585,7 @@ class ChatBridge extends EventEmitter {
 					msg => !msg.type && responseRegex.test(msg.content),
 					{
 						max,
-						time: TIMEOUT_MS + (this.queue.remaining * this.ingameChatDelay),
+						time: TIMEOUT_MS + (this.ingameQueue.remaining * this.ingameChatDelay),
 						errors: [ 'time', 'disconnect' ],
 					},
 				),
