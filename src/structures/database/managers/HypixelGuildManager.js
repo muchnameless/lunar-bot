@@ -161,7 +161,7 @@ class HypixelGuildManager extends ModelManager {
 	 * shifts the daily stats array and updates the config
 	 */
 	performDailyStatsSave() {
-		this.config.set('LAST_DAILY_STATS_SAVE_TIME', Date.now());
+		this.client.config.set('LAST_DAILY_STATS_SAVE_TIME', Date.now());
 		this.cache.forEach(hypixelGuild => hypixelGuild.saveDailyStats());
 
 		logger.debug('[GUILD DAILY STATS]: performed daily stats saves');
