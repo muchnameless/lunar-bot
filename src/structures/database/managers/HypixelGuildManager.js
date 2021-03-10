@@ -32,7 +32,7 @@ class HypixelGuildManager extends ModelManager {
 	 * the main guild's hypixelGuild object
 	 */
 	get mainGuild() {
-		return this.cache.get(this.config.get('MAIN_GUILD_ID'));
+		return this.cache.get(this.client.config.get('MAIN_GUILD_ID'));
 	}
 
 	async loadCache(condition) {
