@@ -10,7 +10,7 @@ module.exports = {
 		taming: 1.14744,
 		farming: 1.217848139,
 		mining: 1.18207448,
-		combat: 1.22307,
+		combat: 1.15797687265,
 		foraging: 1.232826,
 		fishing: 1.406418,
 		enchanting: 0.96976583,
