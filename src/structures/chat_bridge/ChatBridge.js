@@ -602,7 +602,7 @@ class ChatBridge extends EventEmitter {
 			]);
 
 			return result[0]
-				.map(x => x.content.replace(/^-{53}}|-{53}$/g, '').trim())
+				.map(x => x.content.replace(/^-{53}|-{53}$/g, '').trim())
 				.join('\n');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
@@ -610,14 +610,14 @@ class ChatBridge extends EventEmitter {
 				if (rejectOnTimeout) Promise.reject(
 					error.length
 						? error
-							.map(x => x.content.replace(/^-{53}}|-{53}$/g, '').trim())
+							.map(x => x.content.replace(/^-{53}|-{53}$/g, '').trim())
 							.join('\n')
 						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
 				);
 
 				return error.length
 					? error
-						.map(x => x.content.replace(/^-{53}}|-{53}$/g, '').trim())
+						.map(x => x.content.replace(/^-{53}|-{53}$/g, '').trim())
 						.join('\n')
 					: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
