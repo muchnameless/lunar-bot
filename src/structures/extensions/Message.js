@@ -136,16 +136,16 @@ class LunarMessage extends Message {
 	 */
 	async reply(contentInput, optionsInput = {}) {
 		// analyze input and create (content, options)-argument
-		if (typeof contentInput == undefined) throw new TypeError('content must be defined');
+		if (typeof contentInput === 'undefined') throw new TypeError('content must be defined');
 		if (typeof optionsInput !== 'object' || optionsInput === null) throw new TypeError('options must be an Object');
 
-		const options = optionsInput;
+		const options = { ...optionsInput };
 
 		let content;
 
 		// only object as first arg provided
 		if (typeof contentInput === 'object') {
-			if (contentInput instanceof MessageEmbed) {
+			if (contentInput instanceof MessageEmbed || !_.isEqual(new MessageEmbed(), new MessageEmbed(contentInput))) {
 				options.embed = contentInput;
 				content = '';
 			} else if (!Array.isArray(contentInput)) { // unknown options object
