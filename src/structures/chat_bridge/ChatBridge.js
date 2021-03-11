@@ -298,14 +298,14 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	hypixelSpamBypass(string) {
-		let paddedString = string;
+		let padding = '';
 
 		// max message length is 256 post 1.11, 100 pre 1.11
-		for (let index = this.maxMessageLength - paddedString.length + 1; --index;) {
-			paddedString += invisibleCharacters[Math.floor(Math.random() * invisibleCharacters.length)];
+		for (let index = this.maxMessageLength - string.length + 1; --index;) {
+			padding += invisibleCharacters[Math.floor(Math.random() * invisibleCharacters.length)];
 		}
 
-		return paddedString;
+		return `${string}${padding}`;
 	}
 
 	/**
