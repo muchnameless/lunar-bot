@@ -131,7 +131,10 @@ class ChatBridge extends EventEmitter {
 	 */
 	async connect() {
 		if (!this.shouldReconnect) throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
-		if (this.ready) return console.log(`[CHATBRIDGE]: ${this.logInfo}: already connected`);
+		if (this.ready) {
+			logger.info(`[CHATBRIDGE]: ${this.logInfo}: already connected`);
+			return this;
+		}
 
 		// reconnect the bot if it hasn't successfully spawned in 60 seconds
 		this.abortLoginTimeout = setTimeout(() => {
@@ -142,6 +145,8 @@ class ChatBridge extends EventEmitter {
 		await this._createBot();
 
 		this.isReconnecting = false;
+
+		return this;
 	}
 
 	/**
@@ -150,7 +155,7 @@ class ChatBridge extends EventEmitter {
 	 */
 	reconnect(loginDelay = Math.min(this.loginAttempts * 5_000, 300_000)) {
 		// prevent multiple reconnections
-		if (this.isReconnecting) return;
+		if (this.isReconnecting) return this;
 		this.isReconnecting = true;
 
 		this.disconnect();
@@ -161,6 +166,8 @@ class ChatBridge extends EventEmitter {
 			this.connect();
 			this.reconnectTimeout = null;
 		}, loginDelay);
+
+		return this;
 	}
 
 	/**
@@ -186,6 +193,8 @@ class ChatBridge extends EventEmitter {
 		await this._fetchAndCacheWebhook();
 
 		if (!this.shouldReconnect) throw new Error(`[CHATBRIDGE]: ${this.logInfo}: critical error`);
+
+		return this;
 	}
 
 	/**
@@ -195,6 +204,8 @@ class ChatBridge extends EventEmitter {
 		this.ready = false;
 		if (this.guild) this.guild.chatBridge = null;
 		this.guild = null;
+
+		return this;
 	}
 
 	/**
@@ -212,6 +223,8 @@ class ChatBridge extends EventEmitter {
 		} catch (error) {
 			logger.error('[CHATBRIDGE DISCONNECT]:', error);
 		}
+
+		return this;
 	}
 
 	/**
@@ -261,6 +274,8 @@ class ChatBridge extends EventEmitter {
 	uncacheWebhook() {
 		this.webhook = null;
 		this.ready = false;
+
+		return this;
 	}
 
 	/**
