@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndents, oneLineCommaListsOr, oneLine } = require('common-tags');
-const { checkIfDiscordTag } = require('../../functions/util');
+const { validateDiscordTag } = require('../../functions/stringValidators');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
@@ -40,7 +40,7 @@ module.exports = class UnlinkCommand extends Command {
 		} else {
 			for (const arg of args) {
 				// discord tag
-				if (checkIfDiscordTag(arg)) {
+				if (validateDiscordTag(arg)) {
 					const discordMember = await this.client.lgGuild?.findMemberByTag(arg);
 
 					if (!discordMember) continue;
