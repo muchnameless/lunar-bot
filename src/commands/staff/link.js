@@ -29,72 +29,60 @@ module.exports = class LinkCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) {
 		try {
-			message.channel.startTyping(10);
+			message.channel.startTyping();
 
 			const { players, hypixelGuilds } = this.client;
-
+			const [ unknownPlayerInGuild ] = (await Promise.all(
+				(await Promise.all(
+					args
+						.filter(arg => /^\w+$/.test(arg))
+						.map(async arg => mojang.getUUID(arg).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name} ${error.code}: ${error.message}`))),
+				))
+					.filter(uuid => uuid != null)
+					.map(async uuid => ({
+						uuid,
+						hypixelGuild: await getHypixelClient(true).guild.player(uuid).catch(error => logger.error(`[LINK]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)),
+					})),
+			)).filter(({ hypixelGuild }) => hypixelGuilds.cache.keyArray().includes(hypixelGuild?._id));
 			/**
-			 * @type {import('../../structures/database/models/Player')}
+			 * @type {?import('../../structures/database/models/Player')}
 			 */
-			let player;
+			const player = unknownPlayerInGuild
+				? await (async () => {
+					// try to find player in the db
+					let dbEntry = await players.model.findByPk(unknownPlayerInGuild.uuid).catch(error => logger.error(`[LINK]: ${error.name}: ${error.message}`));
 
-			// try to find the player to link
-			for (const arg of args) {
-				let minecraftUUID;
+					if (dbEntry) {
+						dbEntry.guildID = unknownPlayerInGuild.hypixelGuild._id;
+						return dbEntry.save();
+					}
 
-				// try to find player in players-collection
-				player = players.getByIGN(arg);
+					// create new db entry
+					const IGN = await mojang.getName(unknownPlayerInGuild.uuid).catch(error => logger.error(`[LINK]: mojang with '${unknownPlayerInGuild.uuid}': ${error.name} ${error.code}: ${error.message}`)) ?? UNKNOWN_IGN;
 
-				// player with the ign found
-				if (player) {
-					if (/\W/.test(arg)) break; // non alpha-numerical-char -> no minecraft ign
+					dbEntry = await players.model
+						.create({
+							minecraftUUID: unknownPlayerInGuild.uuid,
+							ign: IGN,
+							guildID: unknownPlayerInGuild.hypixelGuild._id,
+						})
+						.catch(error => logger.error(`[LINK]: ${error.name}: ${error.message}`));
 
-					// try to fetch the minecraft-uuid of that ign, in case players.getByIGN() found a (wrong) close ign that is already in guild via autocorrection
-					minecraftUUID = await mojang.getUUID(arg).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name} ${error.code}: ${error.message}`));
+					if (!dbEntry) throw new Error(stripIndents`
+						error while creating new db entry for ${IGN} (${unknownPlayerInGuild.uuid}).
+						Wait for the next automatic database update (check ${this.client.loggingChannel ?? '#lunar-logs'})
+					`);
+				})()
+				: (() => {
+					const playerInput = args
+						.map(arg => this.client.players.autocorrectToPlayer(arg))
+						.sort((a, b) => a.similarity - b.similarity)
+						.pop();
 
-					if (!minecraftUUID || minecraftUUID === player.minecraftUUID) break; // continue with player from players.getByIGN()
-
-				// unknown player
-				} else {
-					if (/\W/.test(arg)) continue; // non alpha-numerical-char -> no minecraft ign
-
-					// try to fetch additional info about the ign
-					minecraftUUID = await mojang.getUUID(arg).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name} ${error.code}: ${error.message}`));
-
-					if (!minecraftUUID) continue;
-				}
-
-				const hypixelGuild = await getHypixelClient(true).guild.player(minecraftUUID).catch(error => logger.error(`[LINK]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
-
-				if (!hypixelGuild || !hypixelGuilds.cache.keyArray().includes(hypixelGuild._id)) continue;
-
-				// try to find player in the db
-				player = await players.model.findByPk(minecraftUUID).catch(error => logger.error(`[LINK]: ${error.name}: ${error.message}`));
-
-				if (player) {
-					player.guildID = hypixelGuild._id;
-					player.save();
-					break;
-				}
-
-				// create new db entry
-				const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name} ${error.code}: ${error.message}`)) ?? UNKNOWN_IGN;
-
-				player = await players.model
-					.create({
-						minecraftUUID,
-						ign: IGN,
-						guildID: hypixelGuild._id,
-					})
-					.catch(error => logger.error(`[LINK]: ${error.name}: ${error.message}`));
-
-				if (!player) return message.reply(stripIndents`
-					error while creating new db entry for ${IGN} (${minecraftUUID}).
-					Wait for the next automatic database update (check ${this.client.loggingChannel ?? '#lunar-logs'})
-				`);
-
-				break;
-			}
+					return playerInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+						? playerInput.value
+						: null;
+				})();
 
 			// no player to link found
 			if (!player) return message.reply(stripIndents`
@@ -106,7 +94,7 @@ module.exports = class LinkCommand extends Command {
 			const DISCORD_ID = message.mentions.users.size
 				? message.mentions.users.first().id
 				: await (async () => {
-					for (const tag of rawArgs.filter(arg => checkIfDiscordTag(arg))) {
+					for (const tag of rawArgs.filter(checkIfDiscordTag)) {
 						const res = await this.client.lgGuild?.findMemberByTag(tag);
 						if (res) return res.id;
 					}
