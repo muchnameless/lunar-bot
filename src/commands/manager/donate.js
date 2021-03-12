@@ -1,6 +1,7 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
+const { validateNumber } = require('../../functions/stringValidators');
 const { removeNumberFormatting } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
@@ -50,7 +51,7 @@ module.exports = class DonateCommand extends Command {
 		let amount = removeNumberFormatting(AMOUNT_OR_TEXT);
 		let notes;
 
-		if (/^\d+$/.test(amount)) {
+		if (validateNumber(amount)) {
 			amount = Number(amount);
 			notes = textInput.length ? textInput.join(' ') : null;
 		} else {

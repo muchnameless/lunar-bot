@@ -1,6 +1,7 @@
 'use strict';
 
 const { escapeIgn } = require('../../functions/util');
+const { validateNumber } = require('../../functions/stringValidators');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -29,7 +30,7 @@ module.exports = class TaxReminderCommand extends Command {
 			const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'ghostping' ].includes(arg));
 			const hypixelGuild = this.client.hypixelGuilds.getFromArray(args);
 			const playersToRemind = (hypixelGuild ? hypixelGuild.players : this.client.players.inGuild).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
-			const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(player => player.inDiscord && /^\d+$/.test(player.discordID));
+			const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(player => player.inDiscord && validateNumber(player.discordID));
 			const AMOUNT_TO_PING = playersPingable.size;
 
 			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {

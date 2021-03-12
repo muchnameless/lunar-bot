@@ -1,6 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
+const { validateMinecraftIGN, validateMinecraftUUID } = require('../functions/stringValidators');
 const MojangAPIError = require('./errors/MojangAPIError');
 const logger = require('../functions/logger');
 
@@ -30,7 +31,7 @@ class Mojang {
 	 */
 	getUUID(username, options = {}) {
 		if (typeof username !== 'string') throw new TypeError('[Mojang Client]: username must be a string');
-		if (!/^\w{3,16}$/.test(username)) return Promise.reject(new MojangAPIError({}, 'id', username));
+		if (!validateMinecraftIGN(username)) return Promise.reject(new MojangAPIError({}, 'id', username));
 		return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', username.toLowerCase(), 'id', options);
 	}
 
@@ -41,7 +42,7 @@ class Mojang {
 	 */
 	getName(uuid, options = {}) {
 		if (typeof uuid !== 'string') throw new TypeError('[Mojang Client]: uuid must be a string');
-		if (!/^[0-9a-f]{8}-?(?:[0-9a-f]{4}-?){3}[0-9a-f]{12}$/i.test(uuid)) return Promise.reject(new MojangAPIError({}, 'name', uuid));
+		if (!validateMinecraftUUID(uuid)) return Promise.reject(new MojangAPIError({}, 'name', uuid));
 		return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'name', options);
 	}
 

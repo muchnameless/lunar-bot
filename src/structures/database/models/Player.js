@@ -8,6 +8,7 @@ const { levelingXp, skillXpPast50, skillsCap, runecraftingXp, dungeonXp, slayerX
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { escapeIgn, getHypixelClient } = require('../../../functions/util');
+const { validateNumber } = require('../../../functions/stringValidators');
 const NonAPIError = require('../../errors/NonAPIError');
 const LunarGuildMember = require('../../extensions/GuildMember');
 const mojang = require('../../../api/mojang');
@@ -267,7 +268,7 @@ module.exports = class Player extends Model {
 	 * @returns {Promise<?import('../../extensions/User')>}
 	 */
 	get discordUser() {
-		return /^\d+$/.test(this.discordID)
+		return validateNumber(this.discordID)
 			? this.client.users.fetch(this.discordID)
 			: null;
 	}
@@ -697,7 +698,7 @@ module.exports = class Player extends Model {
 				shouldSkipQueue: true,
 				reason,
 			});
-		} else if (typeof idOrDiscordMember === 'string' && /^\d+$/.test(idOrDiscordMember)) {
+		} else if (typeof idOrDiscordMember === 'string' && validateNumber(idOrDiscordMember)) {
 			await this.setValidDiscordID(idOrDiscordMember);
 			this.inDiscord = false;
 		} else {

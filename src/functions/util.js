@@ -65,12 +65,6 @@ const self = module.exports = {
 	),
 
 	/**
-	 * checks the input string if it could be a discord tag
-	 * @param {string} string to check
-	 */
-	checkIfDiscordTag: string => /.{2,32}#\d{4}/.test(string),
-
-	/**
 	 * replaces toLocaleString('fr-FR') separator with a normal space
 	 * @param {string} string
 	 */
