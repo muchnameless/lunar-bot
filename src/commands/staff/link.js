@@ -3,7 +3,8 @@
 const { DiscordAPIError, Constants } = require('discord.js');
 const { stripIndents, oneLineCommaListsOr } = require('common-tags');
 const { UNKNOWN_IGN } = require('../../constants/database');
-const { checkIfDiscordTag, getHypixelClient } = require('../../functions/util');
+const { getHypixelClient } = require('../../functions/util');
+const { validateDiscordTag, validateNumber, validateMinecraftUUID } = require('../../functions/stringValidators');
 const mojang = require('../../api/mojang');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -15,7 +16,7 @@ module.exports = class LinkCommand extends Command {
 			aliases: [],
 			description: 'link a discord user to a minecraft ign',
 			args: true,
-			usage: '[`IGN`] [`discord id`|`discord tag`|`@mention`]',
+			usage: '[`IGN`|`UUID`] [`discord id`|`discord tag`|`@mention`]',
 			cooldown: 1,
 		});
 	}
@@ -31,48 +32,29 @@ module.exports = class LinkCommand extends Command {
 		try {
 			message.channel.startTyping();
 
-			const { players, hypixelGuilds } = this.client;
-			const [ unknownPlayerInGuild ] = (await Promise.all(
-				(await Promise.all(
-					args
-						.filter(arg => /^\w+$/.test(arg))
-						.map(async arg => mojang.getUUID(arg).catch(error => logger.error(`[LINK]: ${error}`))),
-				))
-					.filter(uuid => uuid != null)
-					.map(async uuid => ({
-						uuid,
-						hypixelGuild: await getHypixelClient(true).guild.player(uuid).catch(error => logger.error(`[LINK]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)),
-					})),
-			)).filter(({ hypixelGuild }) => hypixelGuilds.cache.keyArray().includes(hypixelGuild?._id));
+			const { players } = this.client;
+			const uuidInput = (await Promise.all(
+				[
+					...args.filter(validateMinecraftUUID),
+					...(await Promise.all(args.map(async arg => mojang.getUUID(arg).catch(error => logger.error(`[LINK]: ${error}`))))).filter(x => x != null),
+				].map(async minecraftUUID => ({
+					minecraftUUID,
+					guildID: (await getHypixelClient(true).guild.player(minecraftUUID).catch(error => logger.error(`[LINK]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))?._id,
+				})),
+			)).filter(({ guildID }) => this.client.hypixelGuilds.cache.keyArray().includes(guildID));
 			/**
 			 * @type {?import('../../structures/database/models/Player')}
 			 */
-			const player = unknownPlayerInGuild
-				? await (async () => {
-					// try to find player in the db
-					let dbEntry = await players.model.findByPk(unknownPlayerInGuild.uuid).catch(error => logger.error(`[LINK]: ${error.name}: ${error.message}`));
-
-					if (dbEntry) {
-						dbEntry.guildID = unknownPlayerInGuild.hypixelGuild._id;
-						return dbEntry.save();
-					}
-
-					// create new db entry
-					const IGN = await mojang.getName(unknownPlayerInGuild.uuid).catch(error => logger.error(`[LINK]: ${error}`)) ?? UNKNOWN_IGN;
-
-					dbEntry = await players.model
-						.create({
-							minecraftUUID: unknownPlayerInGuild.uuid,
-							ign: IGN,
-							guildID: unknownPlayerInGuild.hypixelGuild._id,
-						})
-						.catch(error => logger.error(`[LINK]: ${error.name}: ${error.message}`));
-
-					if (!dbEntry) throw new Error(stripIndents`
-						error while creating new db entry for ${IGN} (${unknownPlayerInGuild.uuid}).
-						Wait for the next automatic database update (check ${this.client.loggingChannel ?? '#lunar-logs'})
-					`);
-				})()
+			const player = uuidInput.length
+				// input contains uuids which are in guild
+				? ((await Promise.all(uuidInput.map(async ({ minecraftUUID }) => players.cache.get(minecraftUUID) ?? players.model.findByPk(minecraftUUID).catch(error => logger.error(`[LINK]: ${error.name}: ${error.message}`)))))
+					.filter(x => x != null)[0]
+					?? await (async ({ minecraftUUID, guildID }) => players.model.create({
+						minecraftUUID,
+						ign: await mojang.getName(minecraftUUID).catch(error => logger.error(`[LINK]: ${error}`)) ?? UNKNOWN_IGN,
+						guildID,
+					}))(uuidInput[0]))
+				// search for player ign input
 				: (() => {
 					const playerInput = args
 						.map(arg => this.client.players.autocorrectToPlayer(arg))
@@ -90,40 +72,41 @@ module.exports = class LinkCommand extends Command {
 				Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 			`);
 
-			// try to find the discord account to link the player to
+			// try to find the discord id to link the player to
 			const DISCORD_ID = message.mentions.users.size
 				? message.mentions.users.first().id
 				: await (async () => {
-					for (const tag of rawArgs.filter(checkIfDiscordTag)) {
+					// search args for discord tag
+					for (const tag of rawArgs.filter(validateDiscordTag)) {
 						const res = await this.client.lgGuild?.findMemberByTag(tag);
 						if (res) return res.id;
 					}
 
 					// try to fetch a discord user from all integer only args as IDs to determine if one arg is a discord user ID
-					for (const number of args.filter(arg => /^\d+$/.test(arg))) {
+					for (const number of args.filter(validateNumber)) {
 						const res = await this.client.users.fetch(number).catch(() => null);
 						if (res) return res.id;
 					}
 				})();
 
-			// no discord account to link found
+			// no discord id to link found
 			if (!DISCORD_ID) return message.reply('either provide the user\'s discord id, tag or @mention them.');
 
 			// discordID already linked to another player
 			const playerLinkedToID = players.getByID(DISCORD_ID);
 
 			if (playerLinkedToID) {
-				let isDeleted = false;
+				let linkedUserIsDeleted = false;
 
 				const linkedUser = await playerLinkedToID.discordUser.catch((error) => {
 					if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
-						isDeleted = true;
+						linkedUserIsDeleted = true;
 						return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: deleted discord user: ${playerLinkedToID.discordID}`);
 					}
 					return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: error fetching already linked user: ${error.name}: ${error.message}`);
 				});
 
-				if (!isDeleted) {
+				if (!linkedUserIsDeleted) {
 					if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
 						const ANSWER = await message.awaitReply(
 							stripIndents`
@@ -147,18 +130,18 @@ module.exports = class LinkCommand extends Command {
 			}
 
 			// player already linked
-			if (/^\d+$/.test(player.discordID)) {
-				let isDeleted = false;
+			if (validateNumber(player.discordID)) {
+				let linkedUserIsDeleted = false;
 
 				const linkedUser = await player.discordUser.catch((error) => {
 					if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
-						isDeleted = true;
+						linkedUserIsDeleted = true;
 						return logger.error(`[LINK]: ${player.logInfo}: deleted discord user: ${player.discordID}`);
 					}
 					return logger.error(`[LINK]: ${player.logInfo}: error fetching already linked user: ${error.name}: ${error.message}`);
 				});
 
-				if (!isDeleted) {
+				if (!linkedUserIsDeleted) {
 					if (player.discordID === DISCORD_ID) return message.reply(
 						`\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}.`,
 						{ allowedMentions: { parse: [] } },
