@@ -2,7 +2,8 @@
 
 const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
-// const logger = require('../functions/logger');
+const { GUILD_ID_BRIDGER } = require('../constants/database');
+const logger = require('../functions/logger');
 
 
 /**
@@ -15,6 +16,20 @@ module.exports = async (client, oldMember, newMember) => {
 	const { config } = client;
 
 	if (newMember.guild.id !== config.get('DISCORD_GUILD_ID')) return;
+
+	// received bridger role -> update player db
+	const BRIDGER_ROLE_ID = config.get('BRIDGER_ROLE_ID');
+
+	if (!oldMember.roles.cache.has(BRIDGER_ROLE_ID) && newMember.roles.cache.has(BRIDGER_ROLE_ID)) {
+		const player = newMember.player ?? await client.players.model.findOne({ where: { discordID: newMember.id } });
+
+		if (!player) return logger.info(`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`);
+
+		player.guildID = GUILD_ID_BRIDGER;
+		player.save();
+
+		client.players.set(player.minecraftUUID, player);
+	}
 
 	const { player } = newMember;
 
