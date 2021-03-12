@@ -7,7 +7,7 @@ class MojangAPIError extends Error {
 	 * @param {string} [param1.statusText]
 	 * @param {string} resultField
 	 */
-	constructor({ status, statusText }, resultField) {
+	constructor({ status, statusText }, resultField, input) {
 		super();
 
 		this.name = 'MojangAPIError';
@@ -16,17 +16,21 @@ class MojangAPIError extends Error {
 
 		switch (resultField) {
 			case 'id':
-				this.message = 'invalid IGN';
+				this.message = `invalid IGN '${input}'`;
 				break;
 
 			case 'name':
-				this.message = 'invalid uuid';
+				this.message = `invalid uuid '${input}'`;
 				break;
 
 			default:
-				this.message = statusText;
+				this.message = `${statusText} '${input}'`;
 				break;
 		}
+	}
+
+	toString() {
+		return `${this.name}${this.code ? ` ${this.code}` : ''}: ${this.message}`;
 	}
 }
 

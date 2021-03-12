@@ -962,7 +962,7 @@ module.exports = class Player extends Model {
 	 * @returns {Promise<object?>} { oldIgn, newIgn }
 	 */
 	async updateIgn() {
-		const PLAYER_IGN_CURRENT = await mojang.getName(this.minecraftUUID).catch(error => logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error.name} ${error.code}: ${error.message}`));
+		const PLAYER_IGN_CURRENT = await mojang.getName(this.minecraftUUID).catch(error => logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`));
 
 		if (!PLAYER_IGN_CURRENT || PLAYER_IGN_CURRENT === this.ign) return null;
 

@@ -36,7 +36,7 @@ module.exports = class LinkCommand extends Command {
 				(await Promise.all(
 					args
 						.filter(arg => /^\w+$/.test(arg))
-						.map(async arg => mojang.getUUID(arg).catch(error => logger.error(`[LINK]: mojang with '${arg}': ${error.name} ${error.code}: ${error.message}`))),
+						.map(async arg => mojang.getUUID(arg).catch(error => logger.error(`[LINK]: ${error}`))),
 				))
 					.filter(uuid => uuid != null)
 					.map(async uuid => ({
@@ -58,7 +58,7 @@ module.exports = class LinkCommand extends Command {
 					}
 
 					// create new db entry
-					const IGN = await mojang.getName(unknownPlayerInGuild.uuid).catch(error => logger.error(`[LINK]: mojang with '${unknownPlayerInGuild.uuid}': ${error.name} ${error.code}: ${error.message}`)) ?? UNKNOWN_IGN;
+					const IGN = await mojang.getName(unknownPlayerInGuild.uuid).catch(error => logger.error(`[LINK]: ${error}`)) ?? UNKNOWN_IGN;
 
 					dbEntry = await players.model
 						.create({

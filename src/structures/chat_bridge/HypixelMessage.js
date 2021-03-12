@@ -129,7 +129,7 @@ class HypixelMessage extends ChatMessage {
 						?? this.author.ign,
 					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
 						?? player?.image
-						?? await mojang.getUUID(this.author.ign).then(uuid => `https://visage.surgeplay.com/bust/${uuid}`, error => logger.error(`[HYPIXEL MESSAGE]: ${error.name} ${error.code}: ${error.message}`))
+						?? await mojang.getUUID(this.author.ign).then(uuid => `https://visage.surgeplay.com/bust/${uuid}`, error => logger.error(`[FORWARD TO DC]: ${error}`))
 						?? this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
 					content: this.parsedContent,
 					allowedMentions: {

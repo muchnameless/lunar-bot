@@ -46,7 +46,7 @@ module.exports = class VerifyCommand extends Command {
 			if (player.minecraftUUID === playerLinkedToID?.minecraftUUID) return message.reply('you are already linked with this discord account.');
 
 			const ERROR_STRING = 'Try again in a few minutes if you believe this is an error.';
-			const MINECRAFT_UUID = await mojang.getUUID(ign).catch(error => logger.error(`[VERIFY]: ign fetch: ${error.name} ${error.code}: ${error.message}`));
+			const MINECRAFT_UUID = await mojang.getUUID(ign).catch(error => logger.error(`[VERIFY]: ign fetch: ${error}`));
 
 			// non existing ign
 			if (!MINECRAFT_UUID) return message.reply(`unable to find the minecraft UUID of \`${ign}\`. ${ERROR_STRING}`);

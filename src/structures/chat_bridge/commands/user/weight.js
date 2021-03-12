@@ -57,13 +57,13 @@ module.exports = class WeightCommand extends Command {
 			return message.reply(`${username} (${name}): ${this.formatNumber(weight + overflow)} [${this.formatNumber(weight)} + ${this.formatNumber(overflow)}]`);
 		} catch (error) {
 			logger.error(`[WEIGHT]: ${error instanceof MojangAPIError
-					? `${error.name} ${error.code}: ${error.message}`
+					? `${error}`
 					: error.message
 			}`);
 
 			return message.reply(
 				error instanceof MojangAPIError
-					? `${error.name} ${error.code}: ${error.message}`
+					? `${error}`
 					: error.message,
 			);
 		}

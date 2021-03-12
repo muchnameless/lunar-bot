@@ -28,8 +28,9 @@ class Mojang {
 	 * @param {string} username
 	 * @returns {Promise<string>} uuid
 	 */
-	async getUUID(username, options = {}) {
-		if (typeof username !== 'string' || !/^\w{3,16}$/.test(username)) throw new TypeError('[Mojang Client]: invalid username');
+	getUUID(username, options = {}) {
+		if (typeof username !== 'string') throw new TypeError('[Mojang Client]: username must be a string');
+		if (!/^\w{3,16}$/.test(username)) return Promise.reject(new MojangAPIError({}, 'id', username));
 		return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', username.toLowerCase(), 'id', options);
 	}
 
@@ -38,8 +39,9 @@ class Mojang {
 	 * @param {string} uuid
 	 * @returns {Promise<string>} username
 	 */
-	async getName(uuid, options = {}) {
-		if (typeof uuid !== 'string' || !/^[0-9a-f]{8}-?(?:[0-9a-f]{4}-?){3}[0-9a-f]{12}$/i.test(uuid)) throw new TypeError('[Mojang Client]: invalid uuid');
+	getName(uuid, options = {}) {
+		if (typeof uuid !== 'string') throw new TypeError('[Mojang Client]: uuid must be a string');
+		if (!/^[0-9a-f]{8}-?(?:[0-9a-f]{4}-?){3}[0-9a-f]{12}$/i.test(uuid)) return Promise.reject(new MojangAPIError({}, 'name', uuid));
 		return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'name', options);
 	}
 
@@ -59,7 +61,7 @@ class Mojang {
 
 		if (this.wrongInputCache.has(query)) {
 			logger.error(`[MOJANG]: cached error for '${query}' in '${resultField}'`);
-			throw new MojangAPIError(this.wrongInputCache.get(query), resultField);
+			throw new MojangAPIError(this.wrongInputCache.get(query), resultField, query);
 		}
 
 		const res = await fetch(`${path}${query}`);
@@ -67,7 +69,7 @@ class Mojang {
 		if (res.status !== 200) {
 			this.wrongInputCache.set(query, res);
 			setTimeout(() => this.wrongInputCache.delete(query), 30 * 60_000);
-			throw new MojangAPIError(res, resultField);
+			throw new MojangAPIError(res, resultField, query);
 		}
 
 		const parsedRes = await res.json().catch(() => {

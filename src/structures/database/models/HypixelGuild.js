@@ -410,7 +410,7 @@ module.exports = class HypixelGuild extends Model {
 
 				// add all players to the db that joined
 				...membersJoinedNew.map(async ({ uuid: minecraftUUID }) => { // eslint-disable-line no-shadow
-					const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${minecraftUUID}: ${error.name} ${error.code}: ${error.message}`)) ?? UNKNOWN_IGN;
+					const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${error}`)) ?? UNKNOWN_IGN;
 
 					joinedLog.push(`+\xa0${IGN}`);
 
