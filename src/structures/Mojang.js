@@ -28,7 +28,7 @@ class Mojang {
 	 * @param {string} username
 	 * @returns {Promise<string>} uuid
 	 */
-	getUUID(username, options = {}) {
+	async getUUID(username, options = {}) {
 		if (typeof username !== 'string' || !/^\w{3,16}$/.test(username)) throw new TypeError('[Mojang Client]: invalid username');
 		return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', username.toLowerCase(), 'id', options);
 	}
@@ -38,7 +38,7 @@ class Mojang {
 	 * @param {string} uuid
 	 * @returns {Promise<string>} username
 	 */
-	getName(uuid, options = {}) {
+	async getName(uuid, options = {}) {
 		if (typeof uuid !== 'string' || !/^[0-9a-f]{8}-?(?:[0-9a-f]{4}-?){3}[0-9a-f]{12}$/i.test(uuid)) throw new TypeError('[Mojang Client]: invalid uuid');
 		return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'name', options);
 	}
