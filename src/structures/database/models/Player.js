@@ -697,7 +697,7 @@ module.exports = class Player extends Model {
 				shouldSkipQueue: true,
 				reason,
 			});
-		} else if (typeof idOrDiscordMember === 'string' && /\D/.test(idOrDiscordMember)) {
+		} else if (typeof idOrDiscordMember === 'string' && /^\d+$/.test(idOrDiscordMember)) {
 			await this.setValidDiscordID(idOrDiscordMember);
 			this.inDiscord = false;
 		} else {
