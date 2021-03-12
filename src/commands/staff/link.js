@@ -57,7 +57,7 @@ module.exports = class LinkCommand extends Command {
 				// search for player ign input
 				: (() => {
 					const playerInput = args
-						.map(arg => this.client.players.autocorrectToPlayer(arg))
+						.map(arg => players.autocorrectToPlayer(arg))
 						.sort((a, b) => a.similarity - b.similarity)
 						.pop();
 
