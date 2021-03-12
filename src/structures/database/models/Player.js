@@ -1156,20 +1156,24 @@ module.exports = class Player extends Model {
 	getSkillLevel(type, offset = '') {
 		const xp = this[`${type}Xp${offset}`];
 
-		let xpTable = [ ...dungeonClasses, ...dungeonTypes ].includes(type) ? dungeonXp : type === 'runecrafting' ? runecraftingXp : levelingXp;
+		let xpTable = [ ...dungeonClasses, ...dungeonTypes ].includes(type)
+			? dungeonXp
+			: type === 'runecrafting'
+				? runecraftingXp
+				: levelingXp;
 		let maxLevel = Math.max(...Object.keys(xpTable));
-		let maxLevelCap = maxLevel;
 
-		if (Object.hasOwnProperty.call(skillsCap, type) && skillsCap[type] > maxLevel) {
+		if (skillsCap[type] > maxLevel) {
 			xpTable = { ...skillXpPast50, ...xpTable };
-			maxLevel = Math.max(...Object.keys(xpTable));
-			maxLevelCap = Object.hasOwnProperty.call(this, `${type}LvlCap`) ? this[`${type}LvlCap`] : maxLevel;
+			maxLevel = Object.hasOwnProperty.call(this.dataValues, `${type}LvlCap`)
+				? this[`${type}LvlCap`]
+				: Math.max(...Object.keys(xpTable));
 		}
 
 		let xpTotal = 0;
 		let trueLevel = 0;
 
-		for (let x = 1; x <= maxLevelCap; ++x) {
+		for (let x = 1; x <= maxLevel; ++x) {
 			xpTotal += xpTable[x];
 
 			if (xpTotal > xp) {
