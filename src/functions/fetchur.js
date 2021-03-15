@@ -9,7 +9,9 @@ const { fetchurItems } = require('../constants/skyblock');
  * fetchur resets every day at midnight EST (UTC-5) and every month to the start of the list
  */
 module.exports = () => {
-	const [{ value: DAY }] = new Intl.DateTimeFormat(undefined, { timeZone: 'America/New_York', day: 'numeric' }).formatToParts(new Date());
+	const date = new Date();
+	date.setUTCHours(date.getUTCHours() - 5); // EST
+	const DAY = date.getUTCDate();
 
 	const tomorrow = new Date();
 	tomorrow.setDate(tomorrow.getDate() + 1);
