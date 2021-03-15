@@ -214,12 +214,12 @@ module.exports = {
 
 	fetchurItems: [
 		'50 red wool (Wool Weaver near builder merch in hub)',
-		'20 yellow glass (Wool Weaver near builder merch in hub)',
+		'20 yellow stained glass (Wool Weaver near builder merch in hub)',
 		'1 compass (4 iron + 1 redstone)',
 		'20 mithril',
 		'1 firework (1 gunpowder + 1 paper)',
 		'cheap coffee (bartender in hub)',
-		'door',
+		'door (wooden or iron)',
 		'3 rabbit feet',
 		'SuperBoom TNT',
 		'1 pumpkin',
