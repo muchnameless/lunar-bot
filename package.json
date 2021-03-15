@@ -29,7 +29,7 @@
     "jaro-winkler": "^0.2.8",
     "lodash": "^4.17.21",
     "minecraft-data": "^2.79.0",
-    "minecraft-protocol": "^1.23.2",
+    "minecraft-protocol": "^1.23.3",
     "ms": "^2.1.3",
     "pg": "^8.5.1",
     "pg-hstore": "^2.3.3",
