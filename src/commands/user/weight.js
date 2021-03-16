@@ -12,7 +12,7 @@ const logger = require('../../functions/logger');
 module.exports = class WeightCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [ 'we' ],
+			aliases: [ 'w', 'we' ],
 			description: 'shows a player\'s total weight, weight and overflow',
 			args: false,
 			usage: '<`IGN`> <`profile` name>',
