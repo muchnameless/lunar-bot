@@ -336,7 +336,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	_parseDiscordMessageToMinecraft(string) {
-		return string
+		return cleanFormattedNumber(string)
 			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // custom emojis
 			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
 			.replace(/<#(\d+)>/g, (match, p1) => { // channels
@@ -361,34 +361,33 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	_parseMinecraftMessageToDiscord(string) {
-		return escapeMarkdown(
-			cleanFormattedNumber(string)
-				.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
-				.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
-				.replace(/#([a-z-]+)/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
-				.replace(/(?<!<)@(!|&)?(\S+)(?!\d+>)/g, (match, p1, p2) => {
-					switch (p1) {
-						case '!': // members/users
-							return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-								?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
-								?? match;
+		return escapeMarkdown(string
+			.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
+			.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
+			.replace(/#([a-z-]+)/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+			.replace(/(?<!<)@(!|&)?(\S+)(?!\d+>)/g, (match, p1, p2) => {
+				switch (p1) {
+					case '!': // members/users
+						return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+							?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+							?? match;
 
-						case '&': // roles
-							return this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-								?? match;
+					case '&': // roles
+						return this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+							?? match;
 
-						default: { // players, members/users, roles
-							const player = this.client.players.cache.find(p => p.ign.toLowerCase() === p2.toLowerCase());
+					default: { // players, members/users, roles
+						const player = this.client.players.cache.find(p => p.ign.toLowerCase() === p2.toLowerCase());
 
-							if (player?.inDiscord) return `<@${player.discordID}>`;
+						if (player?.inDiscord) return `<@${player.discordID}>`;
 
-							return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-								?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
-								?? this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-								?? match;
-						}
+						return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+							?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+							?? this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+							?? match;
 					}
-				}),
+				}
+			}),
 		);
 	}
 
