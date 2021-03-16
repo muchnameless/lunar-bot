@@ -1,25 +1,28 @@
 'use strict';
 
 const ms = require('ms');
+const tc = require('timezonecomplete');
 const { fetchurItems } = require('../constants/skyblock');
 // const logger = require('./logger');
 
-const OFFSET = 4;
 
 /**
- * fetchur resets every day at midnight EST (UTC-5) and every month to the start of the list
+ * fetchur resets every day at midnight ET (UTC-4/5) and every month to the start of the list
  */
 module.exports = () => {
 	const date = new Date();
-	date.setUTCHours(date.getUTCHours() - OFFSET); // EST
+	const OFFSET = tc.zone('America/New_York').offsetForUtcDate(date) / 60;
+	date.setUTCHours(date.getUTCHours() + OFFSET); // EST
 	const DAY = date.getUTCDate();
+
+	tc.zone('America/New_York');
 
 	const tomorrow = new Date();
 	tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-	tomorrow.setUTCHours(OFFSET, 0, 0, 0);
+	tomorrow.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
 
 	const today = new Date();
-	today.setUTCHours(OFFSET, 0, 0, 0);
+	today.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
 
 	const RESET_TIME = Math.min(
 		...[
