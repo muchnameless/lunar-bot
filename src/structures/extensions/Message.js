@@ -150,6 +150,8 @@ class LunarMessage extends Message {
 				content = '';
 			} else if (!Array.isArray(contentInput)) { // unknown options object
 				content = contentInput.content ?? '';
+			} else {
+				content = contentInput;
 			}
 		} else {
 			content = contentInput;
