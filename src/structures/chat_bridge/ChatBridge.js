@@ -8,7 +8,7 @@ const ms = require('ms');
 const { sleep, trim, cleanFormattedNumber } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { MC_CLIENT_VERSION } = require('./constants/settings');
-const { invisibleCharacters } = require('./constants/NAME_PLACEHOLDER');
+const { invisibleCharacters, defaultResponseRegExp, memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp } = require('./constants/chatBridge');
 const { unicodeToName, nameToUnicode } = require('./constants/emojiNameUnicodeConverter');
 const minecraftBot = require('./MinecraftBot');
 const WebhookError = require('../errors/WebhookError');
@@ -441,8 +441,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	shouldBlock(string) {
-		return /[⠁-⣿]/.test(string) // memes
-			|| /\bsex\b|\bcum\b|nutted|\bpedo(?:phile)?\b|\bk+ys+\b|kil.+? yourself+\b|\bn+igger+\b|\bk{3,}\b|\br+ape+\b|s+hoot yourself+\b/i.test(string); // blocked words
+		return memeRegExp.test(string) || blockedWordsRegExp.test(string);
 	}
 
 	/**
@@ -450,7 +449,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	includesNonWhitespace(string) {
-		return /[^\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}ࠀ⭍]/u.test(string);
+		return nonWhiteSpaceRegExp.test(string);
 	}
 
 	/**
@@ -493,13 +492,12 @@ class ChatBridge extends EventEmitter {
 
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of messageParts) {
-			// prevent sending more than 'maxParts' messages
-			if (++partCount > maxParts) {
-				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) [ ...messageParts ].slice(maxParts).forEach(skippedPart => logger.warn(`[CHATBRIDGE CHAT]: skipped '${skippedPart}'`));
-				return false;
+			if (++partCount <= maxParts) { // prevent sending more than 'maxParts' messages
+				await this.sendToMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
+			} else {
+				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: skipped '${part}'`);
+				success = false;
 			}
-
-			await this.sendToMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
 		}
 
 		return success;
@@ -601,12 +599,12 @@ class ChatBridge extends EventEmitter {
 	 * sends a message to ingame chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
 	 * @param {object} options
 	 * @param {string} options.command can also directly be used as the only parameter
-	 * @param {RegExp} [options.responseRegex] regex to use as a filter for the message collector
+	 * @param {RegExp} [options.responseRegex=defaultResponseRegExp] regex to use as a filter for the message collector
 	 * @param {number} [options.max=1]
 	 * @param {number} [options.timeout]
 	 * @param {boolean} [options.rejectOnTimeout=false]
 	 */
-	async command({ command = arguments[0], responseRegex = /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u, max = 1, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+	async command({ command = arguments[0], responseRegex = defaultResponseRegExp, max = 1, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		const TIMEOUT_MS = timeout * 1_000;
 
 		try {

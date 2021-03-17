@@ -1,6 +1,6 @@
 'use strict';
 
-const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('../constants/NAME_PLACEHOLDER');
+const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('../constants/chatBridge');
 const commandHandler = require('../functions/commandHandler');
 const handleRankRequest = require('../functions/handleRankRequest');
 const handleServerMessages = require('../functions/handleServerMessages');

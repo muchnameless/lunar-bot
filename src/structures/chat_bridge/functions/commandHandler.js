@@ -4,7 +4,7 @@ const { Collection } = require('discord.js');
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
 const { escapeRegex } = require('../../../functions/util');
-const { messageTypes: { GUILD, WHISPER } } = require('../constants/NAME_PLACEHOLDER');
+const { messageTypes: { GUILD, WHISPER } } = require('../constants/chatBridge');
 const logger = require('../../../functions/logger');
 
 

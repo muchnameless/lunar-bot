@@ -1,7 +1,7 @@
 'use strict';
 
 const ChatMessage = require('prismarine-chat')(require('./constants/settings').MC_CLIENT_VERSION);
-const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('./constants/NAME_PLACEHOLDER');
+const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('./constants/chatBridge');
 const { NO_BELL } = require('../../constants/emojiCharacters');
 const mojang = require('../../api/mojang');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
