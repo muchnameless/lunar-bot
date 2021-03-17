@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndent } = require('common-tags');
-const { commandResponsesRegExp: { promote } } = require('../../constants/chatBridge');
+const { promote: { regExp: promote } } = require('../../structures/chat_bridge/constants/commandResponses');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 

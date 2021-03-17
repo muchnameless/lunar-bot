@@ -2,7 +2,7 @@
 
 const { stripIndent } = require('common-tags');
 const { stringToMS } = require('../../functions/util');
-const { commandResponsesRegExp: { mute } } = require('../../constants/chatBridge');
+const { mute: { regExp: mute } } = require('../../structures/chat_bridge/constants/commandResponses');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 

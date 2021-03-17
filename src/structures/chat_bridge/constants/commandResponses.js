@@ -81,60 +81,30 @@ const inviteResponses = [
 
 
 module.exports = {
-	commandResponses: {
-		genericErrors,
-		demote,
-		promote,
-		mute,
-		unmute,
-		invite,
+	genericErrors: {
+		string: genericErrors,
 	},
-
-	commandResponsesRegExp: {
-		demote: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => new RegExp(demoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
-		promote: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
-		setRank: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => new RegExp(setRankResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
-		mute: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(muteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
-		unmute: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(unmuteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
-		invite: (ign = IGN_DEFAULT) => new RegExp(inviteResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
+	demote: {
+		string: demote,
+		regExp: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => new RegExp(demoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
 	},
-
-	/**
-	 * mc client version
-	 */
-	VERSION: '1.16.5',
-
-	/**
-	 * bot events that should only be listened to once
-	 */
-	spawnEvents: [
-		'login',
-		'update_health',
-	],
-
-	defaultSettings: {
-		locale: 'en_US',
-		viewDistance: 6, // tiny
-		chatFlags: 0, // enabled
-		chatColors: true,
-		skinParts: 0,
-		mainHand: 1,
+	promote: {
+		string: promote,
+		regExp: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
 	},
-
-	messageTypes: {
-		WHISPER: 'whisper',
-		GUILD: 'guild',
-		OFFICER: 'officer',
-		PARTY: 'party',
+	setRank: {
+		regExp: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => new RegExp(setRankResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
 	},
-
-	HYPIXEL_RANK_REGEX: HYPIXEL_RANK,
-
-	/**
-	 * characters that don't render in mc chat
-	 */
-	invisibleCharacters: [
-		'⭍',
-		'ࠀ',
-	],
+	mute: {
+		string: mute,
+		regExp: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(muteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
+	},
+	unmute: {
+		string: mute,
+		regExp: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(unmuteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
+	},
+	invite: {
+		string: invite,
+		regExp: (ign = IGN_DEFAULT) => new RegExp(inviteResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
+	},
 };

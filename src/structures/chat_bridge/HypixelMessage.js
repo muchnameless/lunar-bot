@@ -1,7 +1,7 @@
 'use strict';
 
-const ChatMessage = require('prismarine-chat')(require('../../constants/chatBridge').VERSION);
-const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('../../constants/chatBridge');
+const ChatMessage = require('prismarine-chat')(require('./constants/settings').MC_CLIENT_VERSION);
+const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('./constants/NAME_PLACEHOLDER');
 const { NO_BELL } = require('../../constants/emojiCharacters');
 const mojang = require('../../api/mojang');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
@@ -60,6 +60,20 @@ class HypixelMessage extends ChatMessage {
 			this.type = null;
 			this.content = this.cleanedContent;
 		}
+	}
+
+	/**
+	 * wether the message was sent by the bot
+	 */
+	get me() {
+		return this.author?.ign === this.chatBridge.bot.username;
+	}
+
+	/**
+	 * wether the message was sent by a non-bot user
+	 */
+	get isUserMessage() {
+		return this.type && !this.me;
 	}
 
 	/**
@@ -149,6 +163,8 @@ class HypixelMessage extends ChatMessage {
 				content: this.content,
 				allowedMentions: { parse: [] },
 			});
+		} catch (error) {
+			logger.error(`[FORWARD TO DC]: ${error.name}: ${error.message}`);
 		} finally {
 			this.chatBridge.discordQueue.shift();
 		}

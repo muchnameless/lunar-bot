@@ -7,8 +7,9 @@ const emojiRegex = require('emoji-regex/es2015');
 const ms = require('ms');
 const { sleep, trim, cleanFormattedNumber } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
-const { VERSION, invisibleCharacters } = require('../../constants/chatBridge');
-const { unicodeToName, nameToUnicode } = require('../../constants/emojiNameUnicodeConverter');
+const { MC_CLIENT_VERSION } = require('./constants/settings');
+const { invisibleCharacters } = require('./constants/NAME_PLACEHOLDER');
+const { unicodeToName, nameToUnicode } = require('./constants/emojiNameUnicodeConverter');
 const minecraftBot = require('./MinecraftBot');
 const WebhookError = require('../errors/WebhookError');
 const AsyncQueue = require('../AsyncQueue');
@@ -72,7 +73,7 @@ class ChatBridge extends EventEmitter {
 		 * 100 pre 1.10.2, 256 post 1.10.2
 		 * @type {number}
 		 */
-		this.maxMessageLength = require('minecraft-data')(VERSION).version.version > require('minecraft-data')('1.10.2').version.version
+		this.maxMessageLength = require('minecraft-data')(MC_CLIENT_VERSION).version.version > require('minecraft-data')('1.10.2').version.version
 			? 256
 			: 100;
 		/**
@@ -292,7 +293,7 @@ class ChatBridge extends EventEmitter {
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
 			username: process.env.MINECRAFT_USERNAME.split(' ')[this.mcAccount],
 			password: process.env.MINECRAFT_PASSWORD.split(' ')[this.mcAccount],
-			version: VERSION,
+			version: MC_CLIENT_VERSION,
 			auth: process.env.MINECRAFT_ACCOUNT_TYPE.split(' ')[this.mcAccount],
 		});
 	}
@@ -563,6 +564,7 @@ class ChatBridge extends EventEmitter {
 				this.uncacheWebhook();
 				this.reconnect();
 			}
+			throw error;
 		}
 	}
 

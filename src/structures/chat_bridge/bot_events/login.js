@@ -1,6 +1,6 @@
 'use strict';
 
-const { defaultSettings } = require('../../../constants/chatBridge');
+const { defaultSettings } = require('../constants/settings');
 const logger = require('../../../functions/logger');
 
 

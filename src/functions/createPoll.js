@@ -3,7 +3,6 @@
 const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
-const { messageTypes: { GUILD, WHISPER } } = require('../constants/chatBridge');
 const { upperCaseFirstChar, stringToMS } = require('./util');
 // const logger = require('./logger');
 
@@ -46,7 +45,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 
 		const optionsCount = options.length;
 		const ingameMessages = chatBridge.awaitMessages(
-			msg => (msg.type === GUILD || msg.type === WHISPER) && msg.author.ign !== chatBridge.bot.username,
+			msg => msg.isUserMessage,
 			{ time: duration },
 		);
 		const discordMessages = chatBridge.channel.awaitMessages(

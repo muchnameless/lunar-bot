@@ -1,7 +1,7 @@
 'use strict';
 
 const { Y_EMOJI, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
-const { commandResponses: { promote: { success } } } = require('../../../constants/chatBridge');
+const { promote: { string: { success } } } = require('../constants/commandResponses');
 const { autocorrect } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
