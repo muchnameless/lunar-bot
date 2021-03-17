@@ -84,6 +84,11 @@ class ChatBridge extends EventEmitter {
 		 */
 		this.loginAttempts = 0;
 		/**
+		 * timestamp of the end of the current poll, if existing
+		 * @type {?number}
+		 */
+		this.pollUntil = null;
+		/**
 		 * wether the bot and webhook are both present
 		 */
 		this.ready = false;
