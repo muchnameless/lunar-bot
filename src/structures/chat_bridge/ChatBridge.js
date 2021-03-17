@@ -616,7 +616,7 @@ class ChatBridge extends EventEmitter {
 			]);
 
 			return result[0]
-				.map(x => x.content.replace(/^-{53}|-{53}$/g, '').trim())
+				.map(x => this.cleanCommandResponse(x.content))
 				.join('\n');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
@@ -624,14 +624,14 @@ class ChatBridge extends EventEmitter {
 				if (rejectOnTimeout) Promise.reject(
 					error.length
 						? error
-							.map(x => x.content.replace(/^-{53}|-{53}$/g, '').trim())
+							.map(x => this.cleanCommandResponse(x.content))
 							.join('\n')
 						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
 				);
 
 				return error.length
 					? error
-						.map(x => x.content.replace(/^-{53}|-{53}$/g, '').trim())
+						.map(x => this.cleanCommandResponse(x.content))
 						.join('\n')
 					: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
@@ -639,6 +639,14 @@ class ChatBridge extends EventEmitter {
 			// a different error occurred
 			throw error;
 		}
+	}
+
+	/**
+	 * removes line formatters from the beginning and end
+	 * @param {string} string
+	 */
+	cleanCommandResponse(string) {
+		return string.replace(/^-{50,}|-{50,}$/g, '').trim();
 	}
 }
 
