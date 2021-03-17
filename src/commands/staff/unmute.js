@@ -1,6 +1,7 @@
 'use strict';
 
 const { stripIndent } = require('common-tags');
+const { commandResponsesRegExp: { unmute } } = require('../../constants/chatBridge');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -72,7 +73,7 @@ module.exports = class UnmuteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g unmute ${target}`,
-				responseRegex: /^(?:\[.+?\] )?\w+ has unmuted (?:(?:\[.+?\] )?\w+|the guild chat)|^(?:This player|The guild) is not muted!$/,
+				responseRegex: unmute(target instanceof players.model ? target.ign : 'the guild chat', chatBridge.bot.username),
 			});
 
 			message.reply(stripIndent`

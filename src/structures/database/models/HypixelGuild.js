@@ -4,7 +4,7 @@ const { Model, DataTypes } = require('sequelize');
 const { MessageEmbed, Util } = require('discord.js');
 const ms = require('ms');
 const { autocorrect, getHypixelClient, cleanFormattedNumber } = require('../../../functions/util');
-const { HYPIXEL_RANK_REGEX } = require('../../../constants/chatBridge');
+const { commandResponses: { promote: { success } } } = require('../../../constants/chatBridge');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED, STOP } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH }, UNKNOWN_IGN } = require('../../../constants/database');
 const ChatBridgeError = require('../../errors/ChatBridgeError');
@@ -611,7 +611,7 @@ module.exports = class HypixelGuild extends Model {
 			// set ingame rank and discord role
 			await this.chatBridge.command({
 				command: `g setrank ${player.ign} ${RANK_NAME}`,
-				responseRegex: new RegExp(`${HYPIXEL_RANK_REGEX}${player.ign} was promoted from ${player.guildRank?.name ?? '[a-zA-Z]+'} to ${RANK_NAME}`), // listen for ingame promotion message
+				responseRegex: new RegExp(success(player.ign, player.guildRank?.name, RANK_NAME), 'i'), // listen for successful ingame promotion message
 				rejectOnTimeout: true,
 			});
 

@@ -2,6 +2,7 @@
 
 const { stripIndent } = require('common-tags');
 const { stringToMS } = require('../../functions/util');
+const { commandResponsesRegExp: { mute } } = require('../../constants/chatBridge');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -81,7 +82,7 @@ module.exports = class MuteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g mute ${target} ${DURATION_INPUT}`,
-				responseRegex: /^(?:\[.+?\] )?\w+ has muted (?:(?:\[.+?\] )?\w+|the guild chat) for|^You cannot mute the guild master!$|^You cannot mute yourself from the guild!$/,
+				responseRegex: mute(target instanceof players.model ? target.ign : 'the guild chat', chatBridge.bot.username),
 			});
 
 			message.reply(stripIndent`

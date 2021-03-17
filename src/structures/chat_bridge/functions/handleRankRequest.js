@@ -1,6 +1,7 @@
 'use strict';
 
 const { Y_EMOJI, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
+const { commandResponses: { promote: { success } } } = require('../../../constants/chatBridge');
 const { autocorrect } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
@@ -87,7 +88,7 @@ module.exports = async (message) => {
 	} else {
 		await chatBridge.command({
 			command: `g setrank ${player.ign} ${RANK_NAME}`,
-			responseRegex: new RegExp(`(?:\\[.+?\\] )?${player.ign} was promoted from ${player.guildRank?.name ?? '[a-zA-Z]+'} to ${RANK_NAME}`), // listen for ingame promotion message
+			responseRegex: new RegExp(success(player.ign, player.guildRank?.name, RANK_NAME), 'i'), // listen for successful ingame promotion message
 			rejectOnTimeout: true,
 		});
 

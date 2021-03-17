@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndent } = require('common-tags');
-const { HYPIXEL_RANK_REGEX } = require('../../constants/chatBridge');
+const { commandResponsesRegExp: { setRank } } = require('../../constants/chatBridge');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -42,19 +42,7 @@ module.exports = class DemoteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g setrank ${IGN} ${args[1]}`,
-				responseRegex: new RegExp([
-					`^${HYPIXEL_RANK_REGEX}${IGN} was promoted from [a-z]+ to [a-z]+$`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is already the highest rank`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is the guild master so can't be promoted anymore!`,
-					'^You can only promote up to your own rank!',
-					`^${HYPIXEL_RANK_REGEX}${IGN} was demoted from [a-z]+ to [a-z]+$`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is already the lowest rank`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is the guild master so can't be demoted!`,
-					'^You can only demote up to your own rank!',
-					'^You must be the Guild Master to use that command!',
-					`Can't find a player by the name of '${IGN}'`,
-					`I couldn't find a rank by the name of '${args[1]}'!`,
-				].join('|'), 'i'),
+				responseRegex: setRank(IGN, undefined, args[1]),
 			});
 
 			message.reply(stripIndent`

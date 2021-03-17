@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndent } = require('common-tags');
-const { HYPIXEL_RANK_REGEX } = require('../../constants/chatBridge');
+const { commandResponsesRegExp: { promote } } = require('../../constants/chatBridge');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -40,15 +40,7 @@ module.exports = class PromoteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g promote ${IGN}`,
-				responseRegex: new RegExp([
-					`^${HYPIXEL_RANK_REGEX}${IGN} was promoted from [a-z]+ to [a-z]+$`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is already the highest rank`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is the guild master so can't be promoted anymore!`,
-					'^You can only promote up to your own rank!',
-					'^You must be the Guild Master to use that command!',
-					`^Can't find a player by the name of '${IGN}'`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is not in your guild!`,
-				].join('|'), 'i'),
+				responseRegex: promote(IGN),
 			});
 
 			message.reply(stripIndent`

@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndent } = require('common-tags');
-const { HYPIXEL_RANK_REGEX } = require('../../constants/chatBridge');
+const { commandResponsesRegExp: { invite } } = require('../../constants/chatBridge');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -38,15 +38,7 @@ module.exports = class InviteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g invite ${IGN}`,
-				responseRegex: new RegExp([
-					`^You invited ${HYPIXEL_RANK_REGEX}${IGN} to your guild\\. They have 5 minutes to accept\\.$`,
-					`^You sent an offline invite to ${HYPIXEL_RANK_REGEX}${IGN}! They will have 5 minutes to accept once they come online!$`,
-					`^You've already invited ${HYPIXEL_RANK_REGEX}${IGN} to your guild! Wait for them to accept!$`,
-					`^${HYPIXEL_RANK_REGEX}${IGN} is already in (?:another|your) guild!$`,
-					'^You do not have permission to invite players!$',
-					'^You cannot invite this player to your guild!$', // g invites disabled
-					// '', // guild full
-				].join('|'), 'i'),
+				responseRegex: invite(IGN),
 			});
 
 			message.reply(stripIndent`
