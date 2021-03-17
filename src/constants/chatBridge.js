@@ -12,14 +12,14 @@ const genericErrors = {
 };
 const demote = {
 	ERROR_SELF: '^You can only demote up to your own rank!',
-	errorLowest: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is already the lowest rank`,
-	errorGm: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is the guild master so can't be demoted!`,
+	errorAlreadyLowest: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is already the lowest rank`,
+	errorGM: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is the guild master so can't be demoted!`,
 	success: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => `^${HYPIXEL_RANK}${ign} was demoted from ${from} to ${to}$`,
 };
 const promote = {
 	ERROR_SELF: '^You can only promote up to your own rank!',
-	errorHigest: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is already the highest rank`,
-	errorGm: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is the guild master so can't be promoted anymore!`,
+	errorAlreadyHighest: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is already the highest rank`,
+	errorGM: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is the guild master so can't be promoted anymore!`,
 	success: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => `^${HYPIXEL_RANK}${ign} was promoted from ${from} to ${to}$`,
 };
 const mute = {
