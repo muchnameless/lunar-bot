@@ -21,14 +21,6 @@ module.exports = class WeightCommand extends Command {
 	}
 
 	/**
-	 * inserts '-' into a uuid string
-	 * @param {string} string
-	 */
-	formatUUID(string) {
-		return string.replace(/([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})/i, (_, p1, p2, p3, p4, p5) => [ p1, p2, p3, p4, p5 ].join('-'));
-	}
-
-	/**
 	 * rounds and toLocaleStrings a number
 	 * @param {number} number
 	 */
@@ -48,7 +40,7 @@ module.exports = class WeightCommand extends Command {
 			const uuid = args.length
 				? await mojang.getUUID(args[0])
 				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
-			const { status, reason, data } = await (await fetch(`${BASE_URL}/profiles/${this.formatUUID(uuid)}${args.length < 2 ? '/weight' : ''}`, { headers: { 'Authorization': process.env.HYPIXEL_KEY_AUX_2 } })).json();
+			const { status, reason, data } = await (await fetch(`${BASE_URL}/profiles/${uuid}${args.length < 2 ? '/weight' : ''}`, { headers: { 'Authorization': process.env.HYPIXEL_KEY_AUX_2 } })).json();
 
 			if (reason) throw new Error(`[Error ${status}]: ${reason}`);
 
