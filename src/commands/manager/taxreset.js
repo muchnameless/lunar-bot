@@ -122,7 +122,7 @@ module.exports = class TaxResetCommand extends Command {
 					player.paid = false;
 					return player.save();
 				}),
-				this.client.config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up untill now
+				this.client.config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up until now
 			]);
 
 			await Promise.all(taxCollectors.cache.map(async taxCollector => taxCollector.player?.setToPaid()));
@@ -130,7 +130,7 @@ module.exports = class TaxResetCommand extends Command {
 			// delete players who left the guild
 			players.sweepDb();
 
-			result = 'reset the tax database. All auctions up untill now will be ignored';
+			result = 'reset the tax database. All auctions up until now will be ignored';
 		}
 
 		// logging

@@ -10,7 +10,7 @@ const mojang = new Mojang({
 			return apiCache.get(`mojang:${key}`);
 		},
 		set(key, value) {
-			// ttl: seconds untill cache sweep
+			// ttl: seconds until cache sweep
 			return apiCache.set(`mojang:${key}`, value, { ttl: 4 * 60 });
 		},
 	},
