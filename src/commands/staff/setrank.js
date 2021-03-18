@@ -12,7 +12,7 @@ module.exports = class DemoteCommand extends Command {
 			aliases: [],
 			description: 'set a rank of a guild member',
 			args: 2,
-			usage: '[`ign`|`discord id`|`@mention`] [`rank` name]',
+			usage: '[`ign`|`discord id`|`@mention`] [`rank` name] <`-f`|`--force` to disable IGN autocorrection>',
 			cooldown: 0,
 		});
 	}

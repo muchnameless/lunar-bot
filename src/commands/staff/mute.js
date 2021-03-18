@@ -13,7 +13,7 @@ module.exports = class MuteCommand extends Command {
 			aliases: [],
 			description: 'mute a single guild member or guild chat both ingame and for the chat bridge',
 			args: 2,
-			usage: () => `[\`ign\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format]`,
+			usage: () => `[\`ign\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format] <\`-f\`|\`--force\` to disable IGN autocorrection>`,
 			cooldown: 0,
 		});
 	}

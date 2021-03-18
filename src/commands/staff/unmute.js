@@ -12,7 +12,7 @@ module.exports = class UnmuteCommand extends Command {
 			aliases: [],
 			description: 'unmute a single guild member or guild chat both ingame and for the chat bridge',
 			args: true,
-			usage: () => `[\`ign\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat]`,
+			usage: () => `[\`ign\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] <\`-f\`|\`--force\` to disable IGN autocorrection>`,
 			cooldown: 0,
 		});
 	}

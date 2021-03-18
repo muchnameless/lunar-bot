@@ -12,7 +12,7 @@ module.exports = class DemoteCommand extends Command {
 			aliases: [],
 			description: 'demote a guild member',
 			args: true,
-			usage: '[`ign`|`discord id`|`@mention`]',
+			usage: '[`ign`|`discord id`|`@mention`] <`-f`|`--force` to disable IGN autocorrection>',
 			cooldown: 0,
 		});
 	}
