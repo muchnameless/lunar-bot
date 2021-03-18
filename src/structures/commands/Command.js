@@ -5,7 +5,7 @@
  * @property {string[]} [aliases] command aliases
  * @property {string} [description] command description
  * @property {boolean} [guildOnly] wether this command can only be executed on servers
- * @property {boolean} [args] wether arguments are required or not
+ * @property {number|boolean} [args] wether arguments are required or not (or the number of required arguments)
  * @property {string|Function} [usage] argument usage
  * @property {number} [cooldown] command cooldown
  */
@@ -81,6 +81,14 @@ class Command {
 	 */
 	get visible() {
 		return !this.commandCollection.invisibleCategories.includes(this.category);
+	}
+
+	/**
+	 * checks wether the array includes 'f' or 'force'
+	 * @param {string[]} array
+	 */
+	get force() {
+		return this.commandCollection.constructor.force;
 	}
 
 	/**

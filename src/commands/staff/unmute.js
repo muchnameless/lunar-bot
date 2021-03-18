@@ -24,7 +24,7 @@ module.exports = class UnmuteCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const { players } = this.client;
 		const [ TARGET_INPUT ] = args;
 
@@ -40,10 +40,9 @@ module.exports = class UnmuteCommand extends Command {
 
 			if (!guild) return message.reply('unable to find your guild.');
 		} else {
-			target = (message.mentions.users.size
+			target = message.mentions.users.size
 				? message.mentions.users.first().player
-				: players.getByIGN(TARGET_INPUT))
-				?? players.getByID(TARGET_INPUT);
+				: (this.force(flags) ? TARGET_INPUT : players.getByIGN(TARGET_INPUT) ?? players.getByID(TARGET_INPUT) ?? TARGET_INPUT);
 
 			if (!target) return message.reply(`no player ${message.mentions.users.size
 				? `linked to \`${message.guild
@@ -53,9 +52,15 @@ module.exports = class UnmuteCommand extends Command {
 				: `with the IGN \`${TARGET_INPUT}\``
 			} found.`);
 
-			({ guild } = target);
+			if (target instanceof players.model) {
+				({ guild } = target);
 
-			if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
+				if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
+			} else {
+				guild ??= message.author.hypixelGuild;
+
+				if (!guild) return message.reply('unable to find your guild.');
+			}
 		}
 
 		const { chatBridge } = guild;
@@ -65,7 +70,7 @@ module.exports = class UnmuteCommand extends Command {
 			await target.save();
 
 			if (target.notInGuild) return message.reply(`unmuted \`${target}\`.`);
-		} else {
+		} else if (target === 'everyone') {
 			guild.chatMutedUntil = 0;
 			await guild.save();
 		}
@@ -73,7 +78,7 @@ module.exports = class UnmuteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g unmute ${target}`,
-				responseRegex: unmute(target instanceof players.model ? target.ign : 'the guild chat', chatBridge.bot.username),
+				responseRegex: unmute(target === 'everyone' ? 'the guild chat' : target.toString(), chatBridge.bot.username),
 			});
 
 			message.reply(stripIndent`
@@ -82,7 +87,7 @@ module.exports = class UnmuteCommand extends Command {
 			`);
 		} catch (error) {
 			logger.error(error);
-			message.reply(`an unknown error occurred while unmuting ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`}.`);
+			message.reply(`an unknown error occurred while unmuting ${target === 'everyone' ? `\`${guild.name}\` guild chat` : `\`${target}\``}.`);
 		}
 	}
 };

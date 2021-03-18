@@ -29,6 +29,14 @@ class CommandCollection extends Collection {
 	}
 
 	/**
+	 * checks wether the array includes 'f' or 'force'
+	 * @param {string[]} array
+	 */
+	static force(array) {
+		return array.some(x => [ 'f', 'force' ].includes(x));
+	}
+
+	/**
 	 * built-in methods will use this as the constructor
 	 * that way <CommandCollection>.filter returns a standard Collection
 	 */

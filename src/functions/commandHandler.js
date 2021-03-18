@@ -149,7 +149,7 @@ module.exports = async (message) => {
 	}
 
 	// argument handling
-	if (command.args && !args.length) {
+	if (command.args && typeof command.args === 'boolean' ? !args.length : args.length < command.args) {
 		const reply = [];
 
 		reply.push(`the \`${command.name}\` command has mandatory arguments.`);

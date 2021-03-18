@@ -11,7 +11,7 @@ module.exports = class DemoteCommand extends Command {
 		super(data, {
 			aliases: [],
 			description: 'set a rank of a guild member',
-			args: true,
+			args: 2,
 			usage: '[`ign`|`discord id`|`@mention`] [`rank` name]',
 			cooldown: 0,
 		});
@@ -24,9 +24,7 @@ module.exports = class DemoteCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args) {
-		if (args.length !== 2) return message.reply(this.usageInfo);
-
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		/**
 		 * @type {import('../../structures/database/models/HypixelGuild')}
 		 */
@@ -37,7 +35,7 @@ module.exports = class DemoteCommand extends Command {
 		const { chatBridge } = hypixelGuild;
 		const IGN = message.mentions.users.size
 			? message.messages.users.first().player?.ign
-			: this.client.players.getByIGN(args[0])?.ign ?? this.client.players.getByID(args[0])?.ign ?? args[0];
+			: (this.force(flags) ? args[0] : this.client.players.getByIGN(args[0])?.ign ?? this.client.players.getByID(args[0])?.ign ?? args[0]);
 
 		try {
 			const response = await chatBridge.command({

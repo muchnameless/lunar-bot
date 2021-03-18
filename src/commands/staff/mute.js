@@ -12,7 +12,7 @@ module.exports = class MuteCommand extends Command {
 		super(data, {
 			aliases: [],
 			description: 'mute a single guild member or guild chat both ingame and for the chat bridge',
-			args: true,
+			args: 2,
 			usage: () => `[\`ign\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format]`,
 			cooldown: 0,
 		});
@@ -25,9 +25,7 @@ module.exports = class MuteCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags) {
-		if (args.length < 2) return message.reply(this.usageInfo);
-
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const { players } = this.client;
 		const [ TARGET_INPUT, DURATION_INPUT ] = args;
 
@@ -43,10 +41,9 @@ module.exports = class MuteCommand extends Command {
 
 			if (!guild) return message.reply('unable to find your guild.');
 		} else {
-			target = (message.mentions.users.size
+			target = message.mentions.users.size
 				? message.mentions.users.first().player
-				: players.getByIGN(TARGET_INPUT))
-				?? players.getByID(TARGET_INPUT);
+				: (this.force(flags) ? TARGET_INPUT : players.getByIGN(TARGET_INPUT) ?? players.getByID(TARGET_INPUT) ?? TARGET_INPUT);
 
 			if (!target) return message.reply(`no player ${message.mentions.users.size
 				? `linked to \`${message.guild
@@ -56,9 +53,15 @@ module.exports = class MuteCommand extends Command {
 				: `with the IGN \`${TARGET_INPUT}\``
 			} found.`);
 
-			({ guild } = target);
+			if (target instanceof players.model) {
+				({ guild } = target);
 
-			if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
+				if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
+			} else {
+				guild ??= message.author.hypixelGuild;
+
+				if (!guild) return message.reply('unable to find your guild.');
+			}
 		}
 
 		const { chatBridge } = guild;
@@ -74,7 +77,7 @@ module.exports = class MuteCommand extends Command {
 			await target.save();
 
 			if (target.notInGuild) return message.reply(`muted \`${target}\` for \`${DURATION_INPUT}\`.`);
-		} else {
+		} else if (target === 'everyone') {
 			guild.chatMutedUntil = EXPIRES_AT;
 			await guild.save();
 		}
@@ -82,7 +85,7 @@ module.exports = class MuteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g mute ${target} ${DURATION_INPUT}`,
-				responseRegex: mute(target instanceof players.model ? target.ign : 'the guild chat', chatBridge.bot.username),
+				responseRegex: mute(target === 'everyone' ? 'the guild chat' : target.toString(), chatBridge.bot.username),
 			});
 
 			message.reply(stripIndent`
@@ -91,7 +94,7 @@ module.exports = class MuteCommand extends Command {
 			`);
 		} catch (error) {
 			logger.error(error);
-			message.reply(`an unknown error occurred while muting ${target instanceof players.model ? `\`${target}\`` : `\`${guild.name}\` guild chat`}.`);
+			message.reply(`an unknown error occurred while muting ${target === 'everyone' ? `\`${guild.name}\` guild chat` : `\`${target}\``}.`);
 		}
 	}
 };
