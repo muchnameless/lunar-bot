@@ -70,6 +70,18 @@ class ChatBridgeArray extends Array {
 		if (this.length !== this._accounts.length) this._init();
 		return Promise.all(this.map(async chatBridge => chatBridge.connect()));
 	}
+
+	/**
+	 * send a message via all chatBridges both to discord and the ingame guild chat, parsing both
+	 * @param {string} message
+	 * @param {object} options
+	 * @param {import('discord.js').MessageOptions} [options.discord]
+	 * @param {import('./ChatBridge').ChatOptions} [options.ingame]
+	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]][]>}
+	 */
+	async broadcast(message, options) {
+		return Promise.all(this.map(async chatBridge => chatBridge.broadcast(message, options)));
+	}
 }
 
 module.exports = ChatBridgeArray;

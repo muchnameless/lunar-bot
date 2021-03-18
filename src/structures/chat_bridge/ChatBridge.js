@@ -526,7 +526,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {object} param1
 	 * @param {import('discord.js').MessageOptions} [param1.discord]
 	 * @param {ChatOptions} [param1.ingame]
-	 * @returns {Promise<[boolean, import('../extensions/Message')]>}
+	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]]>}
 	 */
 	async broadcast(message, { discord, ingame: { prefix = '', maxParts = Infinity, ...options } = {} } = {}) {
 		return Promise.all([
