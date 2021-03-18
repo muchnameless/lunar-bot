@@ -1,9 +1,8 @@
 'use strict';
 
 const { updateLeaderboardMessage } = require('../functions/leaderboardMessages');
-const { X_EMOJI, LOCK, FORWARD_TO_GC } = require('../constants/emojiCharacters');
+const { LOCK, FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const logger = require('../functions/logger');
-const { stripIndent } = require('common-tags');
 
 
 /**
@@ -28,33 +27,7 @@ module.exports = async (client, reaction, user) => {
 	if (client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[MESSAGE REACTION ADD]: ${user.tag}${message.guild ? ` | ${(await message.guild.members.fetch(user.id).catch(logger.error))?.displayName ?? ''}` : ''} reacted with ${EMOJI_NAME}`);
 
 	if (message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') && EMOJI_NAME === FORWARD_TO_GC && user.id === message.author.id) {
-		if (!client.chatBridges.length) return message.reactSafely(X_EMOJI);
-
-		try {
-			const result = await client.chatBridges.broadcast(
-				stripIndent`
-					${message.content}
-					~ ${message.author.player?.ign ?? message.member?.displayName ?? message.author.username}
-				`,
-				{
-					discord: {
-						split: { char: '\n' },
-						allowedMentions: { parse: [] },
-					},
-					ingame: {
-						prefix: 'Guild_Announcement:',
-						maxParts: Infinity,
-					},
-				},
-			);
-
-			if (!result.every(([ ingame, discord ]) => ingame && (Array.isArray(discord) ? discord.length : discord))) message.reactSafely(X_EMOJI);
-		} catch (error) {
-			logger.error(`[MESSAGE REACTION ADD]: announcement: ${error.name}: ${error.message}`);
-			message.reactSafely(X_EMOJI);
-		}
-
-		return;
+		return client.chatBridges.handleAnnouncementMessage(message);
 	}
 
 	if (message.author.id !== client.user.id || !message.embeds[0]?.title.includes('Leaderboard')) return;

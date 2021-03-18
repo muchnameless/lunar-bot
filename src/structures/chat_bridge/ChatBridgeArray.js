@@ -1,8 +1,11 @@
 'use strict';
 
+const { stripIndent } = require('common-tags');
 const { join } = require('path');
+const { X_EMOJI } = require('../../constants/emojiCharacters');
 const CommandCollection = require('../commands/CommandCollection');
 const ChatBridge = require('./ChatBridge');
+const logger = require('../../functions/logger');
 
 
 /**
@@ -81,6 +84,45 @@ class ChatBridgeArray extends Array {
 	 */
 	async broadcast(message, options) {
 		return Promise.all(this.map(async chatBridge => chatBridge.broadcast(message, options)));
+	}
+
+	/**
+	 * forwards announcement messages to all chatBridges (via broadcast)
+	 * @param {import('../extensions/Message')} message
+	 */
+	async handleAnnouncementMessage(message) {
+		if (!this.length) return message.reactSafely(X_EMOJI);
+
+		try {
+			const result = await this.broadcast(
+				stripIndent`
+					${message.content}
+					~ ${message.author.player?.ign ?? message.member?.displayName ?? message.author.username}
+				`,
+				{
+					discord: {
+						split: { char: '\n' },
+						allowedMentions: { parse: [] },
+					},
+					ingame: {
+						prefix: 'Guild_Announcement:',
+						maxParts: Infinity,
+					},
+				},
+			);
+
+			if (result.every(([ ingame, discord ]) => ingame && (Array.isArray(discord) ? discord.length : discord))) {
+				if (message.reactions.cache.get(X_EMOJI)?.me) {
+					message.reactions.cache.get(X_EMOJI).users.remove(this.client.user.id)
+						.catch(error => `[HANDLE ANNOUNCEMENT MSG]: ${error.name}: ${error.message}`);
+				}
+			} else {
+				message.reactSafely(X_EMOJI);
+			}
+		} catch (error) {
+			logger.error(`[HANDLE ANNOUNCEMENT MSG]: ${error.name}: ${error.message}`);
+			message.reactSafely(X_EMOJI);
+		}
 	}
 }
 
