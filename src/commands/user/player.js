@@ -30,7 +30,7 @@ module.exports = class PlayerCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		// type input
 		const offsetInput = args
 			.map((arg, index) => ({ index, ...autocorrectToOffset(arg) }))
@@ -74,7 +74,7 @@ module.exports = class PlayerCommand extends Command {
 		}
 
 		// update db?
-		if (flags.some(flag => [ 'f', 'force' ].includes(flag))) await player.updateXp({ shouldSkipQueue: true });
+		if (this.force(flags)) await player.updateXp({ shouldSkipQueue: true });
 
 		const startingDate = new Date(Math.max(this.client.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
 		const embed = new MessageEmbed()

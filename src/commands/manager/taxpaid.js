@@ -24,7 +24,7 @@ module.exports = class TaxPaidCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const { players } = this.client;
 		const collector = this.client.taxCollectors.getByID(message.author.id);
 
@@ -47,7 +47,7 @@ module.exports = class TaxPaidCommand extends Command {
 		} found.`);
 
 		if (player.paid) {
-			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+			if (!this.force(flags)) {
 				const OLD_AMOUNT = await player.taxAmount;
 				const ANSWER = await message.awaitReply(`\`${player.ign}\` is already set to paid with an amount of \`${this.client.formatNumber(OLD_AMOUNT)}\`. Overwrite this?`, 30);
 

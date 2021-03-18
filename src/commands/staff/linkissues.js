@@ -22,7 +22,7 @@ module.exports = class LinkIssuesCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const { players, hypixelGuilds, lgGuild } = this.client;
 
 		if (!lgGuild) return message.reply('discord guild is currently unavailable.');

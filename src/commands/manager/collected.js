@@ -21,7 +21,7 @@ module.exports = class TaxCollectedCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		message.reply(this.client.taxCollectors.createTaxCollectedEmbed());
 	}
 };

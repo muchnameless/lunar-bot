@@ -10,7 +10,7 @@ module.exports = class TaxAhCommand extends Command {
 		super(data, {
 			aliases: [ 'ah' ],
 			description: 'add / remove a player as tax collector',
-			args: true,
+			args: 2,
 			usage: '[`add`|`remove`] [`IGN`|`@mention`]',
 			cooldown: 1,
 		});
@@ -23,7 +23,7 @@ module.exports = class TaxAhCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const { taxCollectors } = this.client;
 
 		// identify input arguments
@@ -32,7 +32,7 @@ module.exports = class TaxAhCommand extends Command {
 
 		args.forEach(arg => (/add|rem(?:ove)?/i.test(arg) ? type ??= arg.toLowerCase() : ign ??= arg));
 
-		if (!type?.length || !ign?.length || args.length !== 2) return message.reply(this.usageInfo);
+		if (!type?.length || !ign?.length) return message.reply(this.usageInfo);
 
 		/**
 		 * @type {import('../../structures/database/models/Player')}

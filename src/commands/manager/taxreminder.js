@@ -25,7 +25,7 @@ module.exports = class TaxReminderCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		try {
 			const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'ghostping' ].includes(arg));
 			const hypixelGuild = this.client.hypixelGuilds.getFromArray(args);
@@ -33,7 +33,7 @@ module.exports = class TaxReminderCommand extends Command {
 			const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(player => player.inDiscord && validateNumber(player.discordID));
 			const AMOUNT_TO_PING = playersPingable.size;
 
-			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+			if (!this.force(flags)) {
 				const ANSWER = await message.awaitReply(
 					`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hypixelGuild?.name ?? 'all guilds'}?`,
 					60,

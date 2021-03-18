@@ -23,7 +23,7 @@ module.exports = class PollCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const chatBridge = message.author.hypixelGuild?.chatBridge;
 
 		if (!chatBridge) return message.reply(`unable to find a chat bridge for ${message.author.player?.guildName ?? 'unknown player'}`);

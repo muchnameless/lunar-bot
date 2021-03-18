@@ -25,7 +25,7 @@ module.exports = class DonationsCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		// aquire donations from db
 		const donations = await this.client.db.models.Transaction.findAll({
 			where: { type: 'donation' },

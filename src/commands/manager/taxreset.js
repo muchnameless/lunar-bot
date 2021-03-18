@@ -22,7 +22,7 @@ module.exports = class TaxResetCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const { db, players, taxCollectors } = this.client;
 
 		let currentTaxEmbed;
@@ -56,7 +56,7 @@ module.exports = class TaxResetCommand extends Command {
 
 			const OLD_AMOUNT = await player.taxAmount;
 
-			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+			if (!this.force(flags)) {
 				const ANSWER = await message.awaitReply(`reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})? Warning, this action cannot be undone.`, 30);
 
 				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
@@ -68,7 +68,7 @@ module.exports = class TaxResetCommand extends Command {
 
 		// all players
 		} else {
-			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+			if (!this.force(flags)) {
 				const ANSWER = await message.awaitReply('reset tax paid from all guild members? Warning, this action cannot be undone.', 30);
 
 				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
@@ -88,7 +88,7 @@ module.exports = class TaxResetCommand extends Command {
 			})();
 
 			if (!currentTaxEmbed) {
-				if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+				if (!this.force(flags)) {
 					const ANSWER = await message.awaitReply(`unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.client.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`, 30);
 
 					if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');

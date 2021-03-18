@@ -24,7 +24,7 @@ module.exports = class TaxAmountCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		let newAmount = removeNumberFormatting(args.shift());
 
 		if (/\D/.test(newAmount)) return message.reply(`\`${newAmount}\` is not a number.`);

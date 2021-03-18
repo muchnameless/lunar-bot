@@ -25,7 +25,7 @@ module.exports = class XpResetCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const { players, db: { Sequelize: { Op } } } = this.client;
 
 		let result;
@@ -50,7 +50,7 @@ module.exports = class XpResetCommand extends Command {
 				: `with the IGN \`${args[0]}\``
 			} found.`);
 
-			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+			if (!this.force(flags)) {
 				const ANSWER = await message.awaitReply(`reset xp gained from \`${player.ign}\`? Warning, this action cannot be undone.`, 30);
 
 				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
@@ -64,7 +64,7 @@ module.exports = class XpResetCommand extends Command {
 		} else {
 			const PLAYER_COUNT = players.size;
 
-			if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+			if (!this.force(flags)) {
 				const ANSWER = await message.awaitReply(`reset competition xp gained from all ${PLAYER_COUNT} guild members? Warning, this action cannot be undone.`, 30);
 
 				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');

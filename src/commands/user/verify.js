@@ -25,7 +25,7 @@ module.exports = class VerifyCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		try {
 			message.channel.startTyping(10);
 
@@ -83,7 +83,7 @@ module.exports = class VerifyCommand extends Command {
 
 			// already linked to another discord user
 			if (playerLinkedToID) {
-				if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+				if (!this.force(flags)) {
 					const ANSWER = await message.awaitReply(
 						`your discord account is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?`,
 						30,

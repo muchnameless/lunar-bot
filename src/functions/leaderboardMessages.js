@@ -124,7 +124,7 @@ const self = module.exports = {
 		// type input
 		if (args.length) {
 			if (!type) {
-				if (!flags.some(flag => [ 'f', 'force' ].includes(flag))) {
+				if (!message.client.commands.constructor.force(flags)) {
 					const ANSWER = await message.awaitReply(`there is currently no lb for \`${typeInput.arg}\`. Did you mean \`${typeInput.value}\`?`, 30);
 
 					if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return;

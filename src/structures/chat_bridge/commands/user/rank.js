@@ -24,7 +24,7 @@ module.exports = class RankCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		if (!args.length) {
 			const { chatBridge: { guild } } = message;
 

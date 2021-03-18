@@ -24,7 +24,7 @@ module.exports = class InviteCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		/**
 		 * @type {import('../../structures/database/models/HypixelGuild')}
 		 */

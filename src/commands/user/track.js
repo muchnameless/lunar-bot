@@ -36,7 +36,7 @@ module.exports = class TracklistCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		// type input
 		const typeInput = args
 			.map((arg, index) => ({ index, ...autocorrectToType(arg) }))

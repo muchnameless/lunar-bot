@@ -12,7 +12,7 @@ module.exports = class DonateCommand extends Command {
 		super(data, {
 			aliases: [],
 			description: 'register a donation from a player',
-			args: true,
+			args: 2,
 			usage: '[`IGN`|`@mention`] [`amount` / `text`]',
 			cooldown: 0,
 		});
@@ -25,9 +25,7 @@ module.exports = class DonateCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args) {
-		if (args.length < 2) return message.reply(this.usageInfo);
-
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const collector = this.client.taxCollectors.getByID(message.author.id);
 
 		if (!collector?.isCollecting) return message.reply('this command is restricted to tax collectors.');

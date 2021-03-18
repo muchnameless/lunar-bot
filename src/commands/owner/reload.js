@@ -24,7 +24,7 @@ module.exports = class ReloadCommand extends Command {
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args) {
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const INPUT = args[0].toLowerCase();
 
 		switch (INPUT) {
