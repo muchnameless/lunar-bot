@@ -659,7 +659,7 @@ module.exports = class HypixelGuild extends Model {
 
 			// check if guild chat is muted
 			if (this.chatMutedUntil && !player?.isStaff) {
-				if (Date.now() < this.chatMutedUntil) {
+				if (Date.now() < this.chatMutedUntil) { // mute hasn't expired
 					message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
 						() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
 						error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error.name}: ${error.message}`),
@@ -669,6 +669,20 @@ module.exports = class HypixelGuild extends Model {
 
 				this.chatMutedUntil = 0;
 				this.save();
+			}
+
+			// check if the chatBridge bot is muted
+			if (chatBridge.bot.player.chatBridgeMutedUntil) {
+				if (Date.now() < chatBridge.bot.player.chatBridgeMutedUntil) { // mute hasn't expired
+					message.author.send(`the bot is currently muted for ${ms(chatBridge.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
+						() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed bot muted`),
+						error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing bot muted: ${error.name}: ${error.message}`),
+					);
+					return message.reactSafely(MUTED);
+				}
+
+				chatBridge.bot.player.chatBridgeMutedUntil = 0;
+				chatBridge.bot.player.save();
 			}
 
 			if (!(await chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(STOP);
