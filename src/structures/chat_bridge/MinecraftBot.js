@@ -67,7 +67,8 @@ module.exports = async (chatBridge, options) => {
 		 */
 		player: {
 			get() {
-				return this.client.players.cache.get(this.uuid.replace(/-/g, '')) ?? null;
+				if (!this._player) this._player = this.client.players.cache.get(this.uuid) ?? null;
+				return this._player;
 			},
 		},
 	});
