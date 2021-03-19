@@ -110,8 +110,14 @@ class HypixelMessage extends ChatMessage {
 	 */
 	async reply(message) {
 		switch (this.type) {
-			case GUILD:
-				return this.chatBridge.broadcast(message);
+			case GUILD: {
+				const result = await this.chatBridge.broadcast(message, { discord: { prefix: `${await this.player?.discordMember ?? `@${this.player.ign}`}, `, allowedMentions: { parse: [] } } });
+
+				// DM author the message if sending to gchat failed
+				if (!result[0]) this.author.send(`an error occurred while replying in gchat\n${message}`);
+
+				return result;
+			}
 
 			case OFFICER:
 				return this.chatBridge.ochat(message);

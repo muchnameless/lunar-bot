@@ -531,14 +531,19 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
+	 * @typedef {import('discord.js').MessageOptions} DiscordMessageOptions
+	 * @property {string} [prefix]
+	 */
+
+	/**
 	 * send a message both to discord and the ingame guild chat, parsing both
 	 * @param {string} message
 	 * @param {object} param1
-	 * @param {import('discord.js').MessageOptions} [param1.discord]
+	 * @param {DiscordMessageOptions} [param1.discord]
 	 * @param {ChatOptions} [param1.ingame]
 	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]]>}
 	 */
-	async broadcast(message, { discord, ingame: { prefix = '', maxParts = Infinity, ...options } = {} } = {}) {
+	async broadcast(message, { discord: { prefix: discordPrefix = '', ...discord } = {}, ingame: { prefix = '', maxParts = Infinity, ...options } = {} } = {}) {
 		return Promise.all([
 			this.gchat(message, { prefix, maxParts, ...options }),
 			(async () => {
@@ -547,7 +552,7 @@ class ChatBridge extends EventEmitter {
 				await this.discordQueue.wait();
 
 				try {
-					return await this.channel?.send(this._parseMinecraftMessageToDiscord(message), discord);
+					return await this.channel?.send(this._parseMinecraftMessageToDiscord(`${discordPrefix}${message}`), discord);
 				} finally {
 					this.discordQueue.shift();
 				}
