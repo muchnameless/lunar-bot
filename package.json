@@ -14,7 +14,7 @@
   "author": "muchnameless",
   "license": "ISC",
   "dependencies": {
-    "@zikeji/hypixel": "^2.1.1",
+    "@zikeji/hypixel": "^2.1.2",
     "bufferutil": "^4.0.3",
     "cache-manager": "^3.4.1",
     "chalk": "^4.1.0",
