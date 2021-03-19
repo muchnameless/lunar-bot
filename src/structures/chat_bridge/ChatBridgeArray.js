@@ -1,6 +1,6 @@
 'use strict';
 
-const { stripIndent } = require('common-tags');
+const { stripIndents } = require('common-tags');
 const { join } = require('path');
 const { X_EMOJI } = require('../../constants/emojiCharacters');
 const CommandCollection = require('../commands/CommandCollection');
@@ -95,7 +95,7 @@ class ChatBridgeArray extends Array {
 
 		try {
 			const result = await this.broadcast(
-				stripIndent`
+				stripIndents`
 					${message.content}
 					~ ${message.author.player?.ign ?? message.member?.displayName ?? message.author.username}
 				`,
