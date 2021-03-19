@@ -41,8 +41,8 @@ class LunarGuildMember extends GuildMember {
 
 		// guild
 		[
-			...hypixelGuilds.cache.array().flatMap(hGuild => hGuild.ranks.map(rank => rank.roleID)),
-			...hypixelGuilds.cache.map(hGuild => hGuild.roleID),
+			...hypixelGuilds.cache.array().flatMap(hGuild => hGuild.ranks.map(({ roleID }) => roleID)),
+			...hypixelGuilds.cache.map(({ roleID }) => roleID),
 			config.get('GUILD_ROLE_ID'),
 		].forEach(roleID => this.roles.cache.has(roleID) && rolesToRemove.push(roleID));
 

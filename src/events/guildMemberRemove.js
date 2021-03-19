@@ -34,9 +34,9 @@ module.exports = async (client, member) => {
 		.addField(
 			'Roles',
 			`\`\`\`\n${member.roles?.cache
-				.filter(role => role.id !== member.guild.id)
+				.filter(({ id }) => id !== member.guild.id)
 				.sort((a, b) => b.comparePositionTo(a))
-				.map(role => role.name)
+				.map(({ name }) => name)
 				.join('\n')
 				?? 'unknown'
 			}\`\`\``,

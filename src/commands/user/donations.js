@@ -32,8 +32,8 @@ module.exports = class DonationsCommand extends Command {
 		});
 
 		// construct { donator: amount } object
-		const reducedAmount = Object.fromEntries([ ...new Set(donations.map(d => d.from)) ].map(x => [ x, 0 ]));
-		const reducedNotes = Object.fromEntries([ ...new Set(donations.map(d => d.from)) ].map(x => [ x, [] ]));
+		const reducedAmount = Object.fromEntries([ ...new Set(donations.map(({ from }) => from)) ].map(x => [ x, 0 ]));
+		const reducedNotes = Object.fromEntries([ ...new Set(donations.map(({ from }) => from)) ].map(x => [ x, [] ]));
 
 		// fill said object
 		for (const { from, amount, notes } of donations) {

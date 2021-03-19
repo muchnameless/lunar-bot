@@ -29,8 +29,8 @@ module.exports = class TaxReminderCommand extends Command {
 		try {
 			const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'ghostping' ].includes(arg));
 			const hypixelGuild = this.client.hypixelGuilds.getFromArray(args);
-			const playersToRemind = (hypixelGuild ? hypixelGuild.players : this.client.players.inGuild).filter(player => !player.paid && !args.includes(player.discordID) && !args.some(arg => arg.toLowerCase() === player.ign.toLowerCase()));
-			const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(player => player.inDiscord && validateNumber(player.discordID));
+			const playersToRemind = (hypixelGuild ? hypixelGuild.players : this.client.players.inGuild).filter(({ paid, discordID, ign }) => !paid && !args.includes(discordID) && !args.some(arg => arg.toLowerCase() === ign.toLowerCase()));
+			const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordID }) => inDiscord && validateNumber(discordID));
 			const AMOUNT_TO_PING = playersPingable.size;
 
 			if (!this.force(flags)) {
@@ -62,9 +62,9 @@ module.exports = class TaxReminderCommand extends Command {
 			const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error(`[TAX REMINDER]: ghost ping: ${error.name}: ${error.message}`));
 
 			if (!fetched) return;
-			if (!message.channel.checkBotPermissions('MANAGE_MESSAGES')) return fetched.filter(msg => msg.author.id === this.client.user.id).forEach(msg => msg.delete().catch(logger.error));
+			if (!message.channel.checkBotPermissions('MANAGE_MESSAGES')) return fetched.filter(({ author: { id } }) => id === this.client.user.id).forEach(msg => msg.delete().catch(logger.error));
 
-			message.channel.bulkDelete([ message.id, ...fetched.filter(fetchedMsg => [ this.client.user.id, message.author.id ].includes(fetchedMsg.author.id)).keys() ]).catch(logger.error);
+			message.channel.bulkDelete([ message.id, ...fetched.filter(({ author: { id } }) => [ this.client.user.id, message.author.id ].includes(id)).keys() ]).catch(logger.error);
 		} finally {
 			message.channel.stopTyping(true);
 		}

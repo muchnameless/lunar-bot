@@ -25,7 +25,7 @@ class HypixelGuildManager extends ModelManager {
 	 * `NameOne`|`NameTwo`|`NameThree`
 	 */
 	get guildNames() {
-		return this.cache.map(hGuild => `\`${hGuild.name.replace(/ /g, '')}\``).join('|');
+		return this.cache.map(({ name }) => `\`${name.replace(/ /g, '')}\``).join('|');
 	}
 
 	/**
@@ -131,7 +131,7 @@ class HypixelGuildManager extends ModelManager {
 	 * @param {import('../extensions/Message')} message
 	 */
 	checkIfChatBridgeMessage(message) {
-		return this.cache.find(hGuild => hGuild.chatBridgeChannelID === message.channel.id)?.handleChatBridgeMessage(message);
+		return this.cache.find(({ chatBridgeChannelID }) => chatBridgeChannelID === message.channel.id)?.handleChatBridgeMessage(message);
 	}
 
 	/**
@@ -142,7 +142,7 @@ class HypixelGuildManager extends ModelManager {
 		if (message.mentions.users.size) return; // ignore messages with tagged users
 
 		try {
-			await this.cache.find(hGuild => hGuild.rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message);
+			await this.cache.find(({ rankRequestChannelID }) => rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message);
 		} catch (error) {
 			logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`);
 		}

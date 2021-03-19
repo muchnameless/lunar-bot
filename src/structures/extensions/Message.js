@@ -198,7 +198,7 @@ class LunarMessage extends Message {
 			if (options.embed.files?.length) requiredChannelPermissions.push('ATTACH_FILES');
 		}
 
-		const hypixelGuild = this.client.hypixelGuilds.cache.find(hGuild => hGuild.chatBridgeChannelID === this.channel.id);
+		const hypixelGuild = this.client.hypixelGuilds.cache.find(({ chatBridgeChannelID }) => chatBridgeChannelID === this.channel.id);
 
 		// commands channel / reply in same channel option or flag
 		if (this.channel.name.includes('commands') || options.sameChannel || this.shouldReplyInSameChannel || hypixelGuild) {

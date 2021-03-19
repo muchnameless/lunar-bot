@@ -20,14 +20,14 @@ class HypixelMessageAuthor {
 	 * wether the message author is in the guild player db
 	 */
 	get inGuild() {
-		return this.chatBridge.client.players.cache.some(player => player.ign === this.ign);
+		return this.chatBridge.client.players.cache.some(({ ign }) => ign === this.ign);
 	}
 
 	/**
 	 * the message author's player object
 	 */
 	get player() {
-		return this.chatBridge.client.players.cache.find(player => player.ign === this.ign);
+		return this.chatBridge.client.players.cache.find(({ ign }) => ign === this.ign);
 	}
 
 	/**

@@ -35,7 +35,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 			.slice(STARTING_INDEX)
 			.split(new RegExp(quoteChars.join('|'), 'u'))
 			.map(x => x.trim())
-			.filter(x => x.length);
+			.filter(({ length }) => length);
 
 		const question = upperCaseFirstChar(options.shift());
 

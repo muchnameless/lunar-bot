@@ -62,11 +62,11 @@ class LogHandler {
 				throw new TypeError(`[CLIENT LOG]: provided argument '${embed}' is a ${typeof embed} instead of an Object or String`);
 			}
 
-			const FIELDS_LOG = embed.fields?.filter(field => field.name !== '\u200b' || field.value !== '\u200b');
+			const FIELDS_LOG = embed.fields?.filter(({ name, value }) => name !== '\u200b' || value !== '\u200b');
 
 			logger.info([
 				[ embed.title, cleanLoggingEmbedString(embed.description), embed.author?.name ].filter(x => x != null).join(': '),
-				FIELDS_LOG?.length ? FIELDS_LOG.map(field => `${field.name !== '\u200b' ? `${field.name.replace(/\u200b/g, '').trim()}: ` : ''}${cleanLoggingEmbedString(field.value).replace(/\n/g, ', ')}`).join('\n') : null,
+				FIELDS_LOG?.length ? FIELDS_LOG.map(({ name, value }) => `${name !== '\u200b' ? `${name.replace(/\u200b/g, '').trim()}: ` : ''}${cleanLoggingEmbedString(value).replace(/\n/g, ', ')}`).join('\n') : null,
 			].filter(x => x != null).join('\n'));
 		}
 

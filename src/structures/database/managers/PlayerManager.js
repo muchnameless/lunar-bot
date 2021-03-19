@@ -34,7 +34,7 @@ class PlayerManager extends ModelManager {
 	 * get players from all guilds (no bridgers or errors)
 	 */
 	get inGuild() {
-		return this.cache.filter(player => !player.notInGuild);
+		return this.cache.filter(({ notInGuild }) => !notInGuild);
 	}
 
 	async loadCache() {
@@ -136,7 +136,7 @@ class PlayerManager extends ModelManager {
 				paid: false,
 			},
 		});
-		const sweepedIgns = playersToSweep.map(player => player.ign).join(', ');
+		const sweepedIgns = playersToSweep.map(({ ign }) => ign).join(', ');
 		const AMOUNT = playersToSweep.length;
 
 		playersToSweep.forEach(player => player.destroy());
@@ -183,7 +183,7 @@ class PlayerManager extends ModelManager {
 	 */
 	getByID(id) {
 		if (!id) return null;
-		return this.cache.find(player => player.discordID === id) ?? null;
+		return this.cache.find(({ discordID }) => discordID === id) ?? null;
 	}
 
 	/**

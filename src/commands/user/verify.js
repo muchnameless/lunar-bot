@@ -60,7 +60,7 @@ module.exports = class VerifyCommand extends Command {
 
 			// not in one of the guilds that the bot manages
 			if (!hypixelGuilds.cache.keyArray().includes(GUILD_ID)) return message.reply(commaListsOr`
-				according to the hypixel API, \`${ign}\` is not in ${hypixelGuilds.cache.map(hGuild => hGuild.name)}. ${ERROR_STRING}
+				according to the hypixel API, \`${ign}\` is not in ${hypixelGuilds.cache.map(({ name }) => name)}. ${ERROR_STRING}
 			`);
 
 			const hypixelPlayer = await getHypixelClient(true).player.uuid(MINECRAFT_UUID).catch(error => logger.error(`[VERIFY]: player fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));

@@ -256,7 +256,7 @@ const self = module.exports = {
 		const PAGES_TOTAL = Math.ceil(PLAYER_COUNT / ELEMENTS_PER_PAGE);
 		const LAST_UPDATED_AT = SHOULD_USE_COMPETITION_END
 			? COMPETITION_END_TIME
-			: Math.min(...guildPlayers.map(player => Number(player.xpLastUpdatedAt)));
+			: Math.min(...guildPlayers.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
 		const STARTING_TIME = new Date(config.getNumber(XP_OFFSETS_TIME[offset])).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
 		const PAGE = Math.max(Math.min(pageInput, PAGES_TOTAL), 1);
 		const embed = new MessageEmbed()
@@ -306,7 +306,7 @@ const self = module.exports = {
 					.sort((a, b) => b.sortingStat - a.sortingStat);
 				totalStats = `**${(guildPlayers.reduce((acc, player) => acc + player.skillAverageGain, 0) / PLAYER_COUNT).toFixed(2)}** [**${(guildPlayers.reduce((acc, player) => acc + player.trueAverageGain, 0) / PLAYER_COUNT).toFixed(2)}**]`;
 				const PADDING_AMOUNT_SA = Math.floor(guildPlayers[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_TRUE = Math.floor(Math.max(...guildPlayers.map(player => player.trueAverageGain))).toLocaleString(NUMBER_FORMAT).length;
+				const PADDING_AMOUNT_TRUE = Math.floor(Math.max(...guildPlayers.map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length;
 				getEntry = player => `${client.formatDecimalNumber(player.skillAverageGain, PADDING_AMOUNT_SA)} [${client.formatDecimalNumber(player.trueAverageGain, PADDING_AMOUNT_TRUE)}]`;
 				break;
 			}
@@ -331,7 +331,7 @@ const self = module.exports = {
 					.sort((a, b) => b.totalWeight - a.totalWeight)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
 				const PADDING_AMOUNT_GAIN = Math.floor(guildPlayers[0]?.gainedWeight).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...guildPlayers.map(player => player.totalWeight))).toLocaleString(NUMBER_FORMAT).length;
+				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...guildPlayers.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
 				getEntry = player => `${client.formatDecimalNumber(player.gainedWeight, PADDING_AMOUNT_GAIN)} [${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)}]`;
 				totalStats = oneLine`
 					${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT, PADDING_AMOUNT_GAIN)} 
@@ -363,8 +363,8 @@ const self = module.exports = {
 					[**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.weightGain, 0) / PLAYER_COUNT)}** +
 					**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.overflowGain, 0) / PLAYER_COUNT)}**]`;
 				const PADDING_AMOUNT_TOTAL = Math.floor(guildPlayers[0]?.totalWeightGain).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_WEIGHT = Math.floor(Math.max(...guildPlayers.map(player => player.weightGain))).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_OVERFLOW = Math.floor(Math.max(...guildPlayers.map(player => player.overflowGain))).toLocaleString(NUMBER_FORMAT).length;
+				const PADDING_AMOUNT_WEIGHT = Math.floor(Math.max(...guildPlayers.map(({ weightGain }) => weightGain))).toLocaleString(NUMBER_FORMAT).length;
+				const PADDING_AMOUNT_OVERFLOW = Math.floor(Math.max(...guildPlayers.map(({ overflowGain }) => overflowGain))).toLocaleString(NUMBER_FORMAT).length;
 				getEntry = player => `${client.formatDecimalNumber(player.totalWeightGain, PADDING_AMOUNT_TOTAL)} [${client.formatDecimalNumber(player.weightGain, PADDING_AMOUNT_WEIGHT)} + ${client.formatDecimalNumber(player.overflowGain, PADDING_AMOUNT_OVERFLOW)}]`;
 				break;
 			}
@@ -508,7 +508,7 @@ const self = module.exports = {
 		const PAGES_TOTAL = Math.ceil(PLAYER_COUNT / ELEMENTS_PER_PAGE);
 		const LAST_UPDATED_AT = offset
 			? config.getNumber(XP_OFFSETS_TIME[offset])
-			: Math.min(...guildPlayers.map(player => Number(player.xpLastUpdatedAt)));
+			: Math.min(...guildPlayers.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
 		const PAGE = Math.max(Math.min(pageInput, PAGES_TOTAL), 1);
 		const embed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
@@ -603,8 +603,8 @@ const self = module.exports = {
 					**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.overflow, 0) / PLAYER_COUNT)}**]
 				`;
 				const PADDING_AMOUNT_TOTAL = Math.floor(guildPlayers[0]?.totalWeight).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_WEIGHT = Math.floor(Math.max(...guildPlayers.map(player => player.weight))).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_OVERFLOW = Math.floor(Math.max(...guildPlayers.map(player => player.overflow))).toLocaleString(NUMBER_FORMAT).length;
+				const PADDING_AMOUNT_WEIGHT = Math.floor(Math.max(...guildPlayers.map(({ weight }) => weight))).toLocaleString(NUMBER_FORMAT).length;
+				const PADDING_AMOUNT_OVERFLOW = Math.floor(Math.max(...guildPlayers.map(({ overflow }) => overflow))).toLocaleString(NUMBER_FORMAT).length;
 				getEntry = player => `${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)} [${client.formatDecimalNumber(player.weight, PADDING_AMOUNT_WEIGHT)} + ${client.formatDecimalNumber(player.overflow, PADDING_AMOUNT_OVERFLOW)}]`;
 				break;
 			}

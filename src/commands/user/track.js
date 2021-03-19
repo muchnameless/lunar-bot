@@ -88,17 +88,17 @@ module.exports = class TracklistCommand extends Command {
 					label: 'Weight',
 					backgroundColor: 'rgba(0, 0, 255, 0.25)',
 					borderColor: 'rgb(0, 0, 128)',
-					data: weightHistory.map(x => x.weight),
+					data: weightHistory.map(({ weight }) => weight),
 				}, {
 					label: 'Overflow',
 					backgroundColor: 'rgba(0, 255, 0, 0.25)',
 					borderColor: 'rgb(0, 128, 0)',
-					data: weightHistory.map(x => x.overflow),
+					data: weightHistory.map(({ overflow }) => overflow),
 				}, {
 					label: 'Total Weight',
 					backgroundColor: 'rgba(255, 0, 0, 0.25)',
 					borderColor: 'rgb(128, 0, 0)',
-					data: weightHistory.map(x => x.totalWeight),
+					data: weightHistory.map(({ totalWeight }) => totalWeight),
 				}];
 				break;
 			}
@@ -110,12 +110,12 @@ module.exports = class TracklistCommand extends Command {
 					label: 'Skill Average',
 					backgroundColor: 'rgba(0, 0, 255, 0.25)',
 					borderColor: 'rgb(0, 0, 128)',
-					data: skillAverageHistory.map(x => x.skillAverage),
+					data: skillAverageHistory.map(({ skillAverage }) => skillAverage),
 				}, {
 					label: 'True Average',
 					backgroundColor: 'rgba(0, 255, 0, 0.25)',
 					borderColor: 'rgb(0, 128, 0)',
-					data: skillAverageHistory.map(x => x.trueAverage),
+					data: skillAverageHistory.map(({ trueAverage }) => trueAverage),
 				}];
 				break;
 			}

@@ -38,7 +38,7 @@ module.exports = class LinkIssuesCommand extends Command {
 		const missingVerifiedRole = [];
 
 		lgGuild.members.cache.forEach((member, id) => {
-			if (players.cache.some(player => player.discordID === id)) return !member.roles.cache.has(VERIFIED_ROLE_ID) && missingVerifiedRole.push(member);
+			if (players.cache.some(({ discordID }) => discordID === id)) return !member.roles.cache.has(VERIFIED_ROLE_ID) && missingVerifiedRole.push(member);
 			if (member.roles.cache.has(GUILD_ROLE_ID)) return guildRoleWithoutDbEntry.push(member);
 		});
 
@@ -74,8 +74,8 @@ module.exports = class LinkIssuesCommand extends Command {
 
 		hypixelGuilds.cache.forEach((hypixelGuild) => {
 			// db entries with issues
-			const [ unlinkedGuildPlayers, linkedPlayers ] = hypixelGuild.players.partition(player => /\D/.test(player.discordID));
-			const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(player => !player.inDiscord);
+			const [ unlinkedGuildPlayers, linkedPlayers ] = hypixelGuild.players.partition(({ discordID }) => /\D/.test(discordID));
+			const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(({ inDiscord }) => !inDiscord);
 
 			issuesAmount += unlinkedGuildPlayers.size + linkedAndNotInDiscordCurrentGuild.size;
 
@@ -84,7 +84,7 @@ module.exports = class LinkIssuesCommand extends Command {
 				amount: unlinkedGuildPlayers.size,
 				values: Util.splitMessage(
 					unlinkedGuildPlayers
-						.map(player => `${escapeIgn(player.ign)} | ${player.discordID ? Util.escapeMarkdown(player.discordID) : 'unknown tag'}`)
+						.map(({ ign, discordID }) => `${escapeIgn(ign)} | ${discordID ? Util.escapeMarkdown(discordID) : 'unknown tag'}`)
 						.join('\n') || 'none',
 					{ char: '\n', maxLength: 1024 },
 				),
@@ -95,7 +95,7 @@ module.exports = class LinkIssuesCommand extends Command {
 				amount: linkedAndNotInDiscordCurrentGuild.size,
 				values: Util.splitMessage(
 					linkedAndNotInDiscordCurrentGuild
-						.map(player => `<@${player.discordID}> | ${escapeIgn(player.ign)}`)
+						.map(({ discordID, ign }) => `<@${discordID}> | ${escapeIgn(ign)}`)
 						.join('\n') || 'none',
 					{ char: '\n', maxLength: 1024 },
 				),

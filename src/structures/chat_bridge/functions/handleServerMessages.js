@@ -104,13 +104,13 @@ module.exports = async (message) => {
 	const friendReqMatched = message.content.match(/Friend request from (?:\[.+?\] )?(\w+)/);
 
 	if (friendReqMatched) {
-		const [ , ign ] = friendReqMatched;
-		const player = message.chatBridge.client.players.cache.find(p => p.ign === ign);
+		const [ , IGN ] = friendReqMatched;
+		const player = message.chatBridge.client.players.cache.find(({ ign }) => ign === IGN);
 
-		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: denying f request from ${ign}`);
+		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: denying f request from ${IGN}`);
 
-		logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: accepting f request from ${ign}`);
-		return message.chatBridge.sendToMinecraftChat(`/f add ${ign}`);
+		logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: accepting f request from ${IGN}`);
+		return message.chatBridge.sendToMinecraftChat(`/f add ${IGN}`);
 	}
 
 	/**
@@ -137,7 +137,7 @@ module.exports = async (message) => {
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 		}
 
-		const player = message.chatBridge.client.players.cache.find(p => p.ign === target);
+		const player = message.chatBridge.client.players.cache.find(({ ign }) => ign === target);
 
 		if (!player) return;
 
@@ -172,7 +172,7 @@ module.exports = async (message) => {
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was unmuted`);
 		}
 
-		const player = message.chatBridge.client.players.cache.find(p => p.ign === target);
+		const player = message.chatBridge.client.players.cache.find(({ ign }) => ign === target);
 
 		if (!player) return;
 

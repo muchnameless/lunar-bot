@@ -285,7 +285,7 @@ module.exports = class Player extends Model {
 	 * @returns {?import('./HypixelGuild').GuildRank}
 	 */
 	get guildRank() {
-		return this.guild?.ranks?.find(rank => rank.priority === this.guildRankPriority) ?? null;
+		return this.guild?.ranks?.find(({ priority }) => priority === this.guildRankPriority) ?? null;
 	}
 
 	/**
@@ -550,7 +550,7 @@ module.exports = class Player extends Model {
 			}
 
 			if (!this.isStaff) { // non staff rank -> remove other ranks
-				for (const rank of this.guild.ranks.filter(r => r.roleID && r.priority !== this.guildRankPriority)) {
+				for (const rank of this.guild.ranks.filter(({ roleID, priority }) => roleID && priority !== this.guildRankPriority)) {
 					if (member.roles.cache.has(rank.roleID)) rolesToRemove.push(rank.roleID);
 				}
 			}
@@ -638,7 +638,7 @@ module.exports = class Player extends Model {
 
 		if (this.discordID) { // tag or ID known
 			member = /\D/.test(this.discordID)
-				? lgGuild.members.cache.find(m => m.user.tag === this.discordID) // tag known
+				? lgGuild.members.cache.find(({ user: { tag } }) => tag === this.discordID) // tag known
 				: lgGuild.members.cache.get(this.discordID); // id known
 
 			if (!member) {
@@ -646,14 +646,14 @@ module.exports = class Player extends Model {
 
 				if (!DISCORD_TAG) return null;
 
-				member = lgGuild.members.cache.find(m => m.user.tag === DISCORD_TAG);
+				member = lgGuild.members.cache.find(({ user: { tag } }) => tag === DISCORD_TAG);
 			}
 		} else { // unknown tag
 			const DISCORD_TAG = await this.fetchDiscordTag();
 
 			if (!DISCORD_TAG) return null;
 
-			member = lgGuild.members.cache.find(m => m.user.tag === DISCORD_TAG);
+			member = lgGuild.members.cache.find(({ user: { tag } }) => tag === DISCORD_TAG);
 		}
 
 		if (!member) return null;
@@ -780,8 +780,8 @@ module.exports = class Player extends Model {
 
 			// was successful
 			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
-			if (filteredRolesToAdd.size) loggingEmbed.addField('Added', `\`\`\`\n${filteredRolesToAdd.map(role => role.name).join('\n')}\`\`\``, true);
-			if (filteredRolesToRemove.size) loggingEmbed.addField('Removed', `\`\`\`\n${filteredRolesToRemove.map(role => role.name).join('\n')}\`\`\``, true);
+			if (filteredRolesToAdd.size) loggingEmbed.addField('Added', `\`\`\`\n${filteredRolesToAdd.map(({ name }) => name).join('\n')}\`\`\``, true);
+			if (filteredRolesToRemove.size) loggingEmbed.addField('Removed', `\`\`\`\n${filteredRolesToRemove.map(({ name }) => name).join('\n')}\`\`\``, true);
 			return true;
 		} catch (error) {
 			// was not successful
@@ -790,8 +790,8 @@ module.exports = class Player extends Model {
 			loggingEmbed
 				.setColor(config.get('EMBED_RED'))
 				.addField(error.name, error.message);
-			if (filteredRolesToAdd.size) loggingEmbed.addField('Failed to add', `\`\`\`\n${filteredRolesToAdd.map(role => role.name).join('\n')}\`\`\``, true);
-			if (filteredRolesToRemove.size) loggingEmbed.addField('Failed to remove', `\`\`\`\n${filteredRolesToRemove.map(role => role.name).join('\n')}\`\`\``, true);
+			if (filteredRolesToAdd.size) loggingEmbed.addField('Failed to add', `\`\`\`\n${filteredRolesToAdd.map(({ name }) => name).join('\n')}\`\`\``, true);
+			if (filteredRolesToRemove.size) loggingEmbed.addField('Failed to remove', `\`\`\`\n${filteredRolesToRemove.map(({ name }) => name).join('\n')}\`\`\``, true);
 			return false;
 		} finally {
 			// logging
@@ -845,7 +845,7 @@ module.exports = class Player extends Model {
 		let reason = 0;
 
 		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 1; // nickname doesn't include ign
-		if (member.guild.members.cache.find(m => m.displayName.toLowerCase() === member.displayName.toLowerCase() && m.id !== member.id)?.player) reason = 2; // two guild members share the same display name
+		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id)?.player) reason = 2; // two guild members share the same display name
 
 		if (!reason) return;
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
@@ -942,8 +942,8 @@ module.exports = class Player extends Model {
 		const mainProfile = profiles[
 			profiles.length > 1
 				? profiles
-					.map((profile) => {
-						const member = profile.members[this.minecraftUUID];
+					.map(({ members }) => {
+						const member = members[this.minecraftUUID];
 						// calculate weight of this profile
 						return (Math.max(...skills.map(skill => member[`experience_skill_${skill}`] ?? 0)) / 100) // highest skill xp / 100
 							+ slayers.reduce((acc, slayer) => acc + (member.slayer_bosses?.[slayer]?.xp ?? 0), 0); // total slayer xp

@@ -34,8 +34,8 @@ module.exports = class ConfigCommand extends Command {
 		if (!args.length) {
 			return message.reply(
 				config.cache
-					.sorted((a, b) => a.key.localeCompare(b.key))
-					.map(cfg => `${cfg.key}: ${cfg.value}`)
+					.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
+					.map(({ key, value }) => `${key}: ${value}`)
 					.join('\n'),
 				{ code: 'apache', split: { char: '\n' } },
 			);
@@ -55,12 +55,12 @@ module.exports = class ConfigCommand extends Command {
 			}
 
 			const queryRegex = new RegExp(args[0], 'i');
-			const configEntries = config.cache.filter(cfg => queryRegex.test(cfg.key) || queryRegex.test(cfg.value));
+			const configEntries = config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value));
 
 			return message.reply(
 				configEntries
-					.sorted((a, b) => a.key.localeCompare(b.key))
-					.map(cfg => `${cfg.key}: ${cfg.value}`)
+					.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
+					.map(({ key, value }) => `${key}: ${value}`)
 					.join('\n')
 					|| `no config entries for '${args[0]}' found`,
 				{ code: 'apache', split: { char: '\n' } },

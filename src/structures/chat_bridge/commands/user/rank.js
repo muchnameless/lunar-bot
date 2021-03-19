@@ -31,7 +31,7 @@ module.exports = class RankCommand extends Command {
 			message.reply(stripIndents`
 				Requestable guild ranks:
 				${guild.ranks
-					.filter(rank => rank.roleID)
+					.filter(({ roleID }) => roleID)
 					.map(({ name, weightReq }) => ` > ${name}: ${this.client.formatNumber(weightReq)} weight`)
 					.join('\n')
 				}

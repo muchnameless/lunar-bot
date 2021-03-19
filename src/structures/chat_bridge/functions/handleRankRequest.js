@@ -15,7 +15,7 @@ module.exports = async (message) => {
 	const result = content
 		?.replace(/[^a-zA-Z ]/g, '') // delete all non alphabetical characters
 		.split(/ +/)
-		.filter(word => word.length >= 3) // filter out short words like 'am'
+		.filter(({ length }) => length >= 3) // filter out short words like 'am'
 		.map(word => autocorrect(word, guild.ranks, 'name'))
 		.sort((a, b) => b.similarity - a.similarity)[0]; // element with the highest similarity
 
@@ -28,7 +28,7 @@ module.exports = async (message) => {
 		priority: RANK_PRIORITY,
 	} } = result; // rank
 
-	let player = guild.players.find(p => p.ign === message.author.ign);
+	let player = guild.players.find(({ ign }) => ign === message.author.ign);
 
 	// no player db entry in this guild
 	if (!player) {

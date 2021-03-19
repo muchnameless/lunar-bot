@@ -35,16 +35,16 @@ class LunarGuild extends Guild {
 
 	/**
 	 * tries to find a discord member by a discord tag
-	 * @param {string} tag
+	 * @param {string} tagInput
 	 */
-	async findMemberByTag(tag) {
-		const discordMember = this.members.cache.find(member => member.user.tag === tag);
+	async findMemberByTag(tagInput) {
+		const discordMember = this.members.cache.find(({ user: { tag } }) => tag === tagInput);
 
 		if (discordMember) return discordMember;
 
-		const fetched = await this.members.fetch({ query: tag.split('#')[0] }).catch(error => logger.error(`[UPDATE GUILD PLAYERS]: ${error.name}: ${error.message}`));
+		const fetched = await this.members.fetch({ query: tagInput.split('#')[0] }).catch(error => logger.error(`[UPDATE GUILD PLAYERS]: ${error.name}: ${error.message}`));
 
-		return fetched?.find(member => member.user.tag === tag) ?? null;
+		return fetched?.find(({ user: { tag } }) => tag === tagInput) ?? null;
 	}
 }
 

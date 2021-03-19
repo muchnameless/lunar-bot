@@ -160,7 +160,7 @@ module.exports = class HypixelGuild extends Model {
 	 * returns the filtered <LunarClient>.players containing all players from this guild
 	 */
 	get players() {
-		if (!this._players) this._players = this.client.players.cache.filter(player => player.guildID === this.guildID);
+		if (!this._players) this._players = this.client.players.cache.filter(({ guildID }) => guildID === this.guildID);
 		return this._players;
 	}
 
@@ -254,7 +254,7 @@ module.exports = class HypixelGuild extends Model {
 
 		// update ranks
 		for (const { name, priority } of ranks) {
-			const dbEntryRank = this.ranks?.find(r => r.priority === priority);
+			const dbEntryRank = this.ranks?.find(({ priority: rankPriority }) => rankPriority === priority);
 
 			if (!dbEntryRank) {
 				const newRank = {
@@ -460,7 +460,7 @@ module.exports = class HypixelGuild extends Model {
 				if (!player) return logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
 
 				player.syncWithGuildData(hypixelGuildMember);
-				player.guildRankPriority = this.ranks.find(rank => rank.name === hypixelGuildMember.rank)?.priority ?? (/guild ?master/i.test(hypixelGuildMember.rank) ? this.ranks.length + 1 : 0);
+				player.guildRankPriority = this.ranks.find(({ name }) => name === hypixelGuildMember.rank)?.priority ?? (/guild ?master/i.test(hypixelGuildMember.rank) ? this.ranks.length + 1 : 0);
 				player.save();
 			});
 
@@ -527,7 +527,7 @@ module.exports = class HypixelGuild extends Model {
 		const result = message.content
 			?.replace(/[^a-zA-Z ]/g, '') // delete all non alphabetical characters
 			.split(/ +/)
-			.filter(word => word.length >= 3) // filter out short words like 'am'
+			.filter(({ length }) => length >= 3) // filter out short words like 'am'
 			.map(word => autocorrect(word, this.ranks, 'name'))
 			.sort((a, b) => b.similarity - a.similarity)[0]; // element with the highest similarity
 
@@ -540,7 +540,7 @@ module.exports = class HypixelGuild extends Model {
 			priority: RANK_PRIORITY,
 		} } = result; // rank
 
-		let player = this.players.find(p => p.discordID === message.author.id);
+		let player = this.players.find(({ discordID }) => discordID === message.author.id);
 
 		// no player db entry in this guild
 		if (!player) {

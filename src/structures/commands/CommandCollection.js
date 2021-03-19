@@ -52,7 +52,7 @@ class CommandCollection extends Collection {
 	 * returns all non-hidden commands
 	 */
 	get visible() {
-		return this.filter(command => !this.invisibleCategories.includes(command.category));
+		return this.filter(({ category }) => !this.invisibleCategories.includes(category));
 	}
 
 	/**
@@ -60,7 +60,7 @@ class CommandCollection extends Collection {
 	 * @returns {string[]}
 	 */
 	get categories() {
-		return [ ...new Set(this.map(command => command.category)) ];
+		return [ ...new Set(this.map(({ category }) => category)) ];
 	}
 
 	/**
@@ -80,10 +80,10 @@ class CommandCollection extends Collection {
 
 	/**
 	 * returns the commands from the provided category
-	 * @param {string} category
+	 * @param {string} categoryInput
 	 */
-	filterByCategory(category) {
-		return this.filter(command => command.category === category);
+	filterByCategory(categoryInput) {
+		return this.filter(({ category }) => category === categoryInput);
 	}
 
 	/**
@@ -102,11 +102,11 @@ class CommandCollection extends Collection {
 		if (name.length <= 1) return null;
 
 		// autocorrect input
-		const result = autocorrect(name, [ ...this.keys(), ...this.aliases.keys() ].filter(x => x.length > 1));
-		if (result.similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
+		const { value, similarity } = autocorrect(name, [ ...this.keys(), ...this.aliases.keys() ]);
+		if (similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
 
 		// return command if it is visible
-		command = this.get(result.value) ?? this.get(this.aliases.get(result.value));
+		command = this.get(value) ?? this.get(this.aliases.get(value));
 		return command.visible ? command : null;
 	}
 

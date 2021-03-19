@@ -197,8 +197,8 @@ class DatabaseManager {
 		const activeTaxCollectors = taxCollectors.activeCollectors; // eslint-disable-line no-shadow
 		const playersInGuild = players.inGuild;
 		const PLAYER_COUNT = playersInGuild.size;
-		const PAID_COUNT = playersInGuild.filter(player => player.paid).size;
-		const TOTAL_COINS = taxCollectors.cache.reduce((acc, taxCollector) => acc + taxCollector.collectedTax, 0);
+		const PAID_COUNT = playersInGuild.filter(({ paid }) => paid).size;
+		const TOTAL_COINS = taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0);
 		const taxEmbed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')

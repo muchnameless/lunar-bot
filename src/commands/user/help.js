@@ -38,7 +38,7 @@ module.exports = class HelpCommand extends Command {
 					`${upperCaseFirstChar(category)} commands`,
 					` • ${commands
 						.filterByCategory(category)
-						.map(command => [ command.name, command.aliases?.join(' | ') ].filter(Boolean).join(' | '))
+						.map(({ name, aliases }) => [ name, aliases?.join(' | ') ].filter(Boolean).join(' | '))
 						.join('\n • ')
 					}`,
 					true,
@@ -82,7 +82,7 @@ module.exports = class HelpCommand extends Command {
 				requiredRoles = requiredRoles.map(roleID => this.client.lgGuild?.roles.cache.get(roleID));
 				helpEmbed.setDescription(stripIndents`
 					**Required Roles:**
-					${commaListsOr`${message.guild?.id === this.client.config.get('DISCORD_GUILD_ID') ? requiredRoles : requiredRoles.map(role => role.name)}`}
+					${commaListsOr`${message.guild?.id === this.client.config.get('DISCORD_GUILD_ID') ? requiredRoles : requiredRoles.map(({ name }) => name)}`}
 				`);
 			} else if (INPUT === 'owner') {
 				helpEmbed.setDescription(stripIndents`

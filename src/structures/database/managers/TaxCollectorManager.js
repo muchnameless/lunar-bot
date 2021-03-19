@@ -25,7 +25,7 @@ class TaxCollectorManager extends ModelManager {
 	 * returns a collection of all currently active collectors
 	 */
 	get activeCollectors() {
-		return this.cache.filter(taxCollector => taxCollector.isCollecting);
+		return this.cache.filter(({ isCollecting }) => isCollecting);
 	}
 
 	/**

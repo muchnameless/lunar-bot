@@ -44,7 +44,7 @@ module.exports = class WeightCommand extends Command {
 
 			if (reason) throw new Error(`[Error ${status}]: ${reason}`);
 
-			const { username, name, weight, weight_overflow: overflow } = args.length < 2 ? data : data.find(x => x.name.toLowerCase() === args[1].toLowerCase()) ?? (() => { throw new Error(`unknown profile name '${upperCaseFirstChar(args[1].toLowerCase())}'`); })();
+			const { username, name, weight, weight_overflow: overflow } = args.length < 2 ? data : data.find(({ name: profileName }) => profileName.toLowerCase() === args[1].toLowerCase()) ?? (() => { throw new Error(`unknown profile name '${upperCaseFirstChar(args[1].toLowerCase())}'`); })();
 
 			return message.reply(`${username} (${name}): ${this.formatNumber(weight + overflow)} [${this.formatNumber(weight)} + ${this.formatNumber(overflow)}]`);
 		} catch (error) {
