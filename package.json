@@ -36,7 +36,7 @@
     "prismarine-chat": "^1.0.3",
     "sequelize": "^6.5.1",
     "sequelize-cli": "^6.2.0",
-    "timezonecomplete": "^5.12.1",
+    "timezonecomplete": "^5.12.2",
     "utf-8-validate": "^5.0.4",
     "winston": "^3.3.3"
   }
