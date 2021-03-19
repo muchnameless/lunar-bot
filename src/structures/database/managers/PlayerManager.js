@@ -168,6 +168,14 @@ class PlayerManager extends ModelManager {
 	}
 
 	/**
+	 * find a player by their IGN, case sensitive and without auto-correction
+	 * @param {string} ignInput ign of the player
+	 */
+	findByIGN(ignInput) {
+		return this.cache.find(({ ign }) => ign === ignInput) ?? null;
+	}
+
+	/**
 	 * autocorrects the input to a player ign
 	 * @param {string} input
 	 * @returns {import('../models/Player')}

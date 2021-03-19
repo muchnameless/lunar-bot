@@ -27,7 +27,7 @@ class HypixelMessageAuthor {
 	 * the message author's player object
 	 */
 	get player() {
-		return this.chatBridge.client.players.cache.find(({ ign }) => ign === this.ign);
+		return this.chatBridge.client.players.findByIGN(this.ign);
 	}
 
 	/**
