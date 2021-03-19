@@ -1,8 +1,19 @@
 'use strict';
 
+const {
+	promote: { string: { success: promote } },
+	demote: { string: { success: demote } },
+	mute: { string: { success: mute } },
+	unmute: { string: { success: unmute } },
+} = require('../constants/commandResponses');
 const { stringToMS } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
+
+const demoteRegExp = new RegExp(demote(), 'i');
+const promoteRegExp = new RegExp(promote(), 'i');
+const muteRegExp = new RegExp(mute(), 'i');
+const unmuteRegExp = new RegExp(unmute(), 'i');
 
 /**
  * handles a hypixel server message (non user message)
@@ -56,29 +67,18 @@ module.exports = async (message) => {
 	}
 
 	/**
-	 * auto '/gc gg' for promotions / quest completions
-	 * [HypixelRank] IGN was promoted from PREV to NOW
-	 * The guild has completed Tier 3 of this week's Guild Quest!
-	 * The Guild has reached Level 36!
-	 * The Guild has unlocked Winners III!
-	 */
-	if (message.content.includes('was promoted from') || message.content.startsWith('The guild has completed ') || message.content.startsWith('The Guild has ')) {
-		message.forwardToDiscord();
-		return message.chatBridge.broadcast('gg');
-	}
-
-	/**
-	 * [HypixelRank] IGN was demoted from PREV to NOW
-	 */
-	if (message.content.includes('was demoted from')) {
-		return message.forwardToDiscord();
-	}
-
-	/**
 	 * You cannot say the same message twice!
 	 */
 	if (message.content === 'You cannot say the same message twice!') {
-		return logger.error('[CHATBRIDGE]: anti spam failed');
+		try {
+			await message.chatBridge.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.content}`);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner anti spam failed`);
+		} finally {
+			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: anti spam failed: ${message.content}`);
+		}
+
+		return;
 	}
 
 	/**
@@ -86,8 +86,7 @@ module.exports = async (message) => {
 	 */
 	if (message.content.startsWith('We blocked your comment')) {
 		try {
-			const owner = await message.chatBridge.client.users.fetch(message.chatBridge.client.ownerID);
-			await owner.send(`${message.chatBridge.logInfo}: blocked message: ${message.content}`, { split: { char: ' ' } });
+			await message.chatBridge.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.content}`);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner blocked message`);
 		} finally {
@@ -98,6 +97,66 @@ module.exports = async (message) => {
 	}
 
 	/**
+	 * auto '/gc gg' for quest completions
+	 * The guild has completed Tier 3 of this week's Guild Quest!
+	 * The Guild has reached Level 36!
+	 * The Guild has unlocked Winners III!
+	 */
+	if (/^the guild has (?:completed|reached|unlocked)/i.test(message.content)) {
+		message.forwardToDiscord();
+		return message.chatBridge.broadcast('gg');
+	}
+
+	/**
+	 * auto '/gc gg' for promotions
+	 * [HypixelRank] IGN was promoted from PREV to NOW
+	 */
+	const promoteMatched = message.content.match(promoteRegExp);
+
+	if (promoteMatched) {
+		message.forwardToDiscord();
+		message.chatBridge.broadcast('gg');
+
+		const { groups: { target, newRank } } = promoteMatched;
+		const player = message.chatBridge.client.players.findByIGN(target);
+
+		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}' but not in the db`);
+
+		const GUILD_RANK_PRIO = (message.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
+
+		if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to an unknown rank '${newRank}'`);
+
+		player.guildRankPriority = GUILD_RANK_PRIO;
+		player.save();
+
+		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}'`);
+	}
+
+	/**
+	 * demote
+	 * [HypixelRank] IGN was demoted from PREV to NOW
+	 */
+	const demotedMatched = message.content.match(demoteRegExp);
+
+	if (demotedMatched) {
+		message.forwardToDiscord();
+
+		const { groups: { target, newRank } } = demotedMatched;
+		const player = message.chatBridge.client.players.findByIGN(target);
+
+		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}' but not in the db`);
+
+		const GUILD_RANK_PRIO = (message.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
+
+		if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to an unknown rank '${newRank}'`);
+
+		player.guildRankPriority = GUILD_RANK_PRIO;
+		player.save();
+
+		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}'`);
+	}
+
+	/**
 	 * accept f reqs from guild members
 	 * Friend request from [HypixelRank] IGN\n
 	 */
@@ -105,7 +164,7 @@ module.exports = async (message) => {
 
 	if (friendReqMatched) {
 		const [ , IGN ] = friendReqMatched;
-		const player = message.chatBridge.client.players.cache.find(({ ign }) => ign === IGN);
+		const player = message.chatBridge.client.players.findByIGN(IGN);
 
 		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: denying f request from ${IGN}`);
 
@@ -118,12 +177,12 @@ module.exports = async (message) => {
 	 * [HypixelRank] IGN has muted [HypixelRank] IGN for 10s
 	 * [HypixelRank] IGN has muted the guild chat for 10M
 	 */
-	const muteMatched = message.content.match(/(?:\[.+?\] )?\w+ has muted (?:\[.+?\] )?(the guild chat|\w+) for (\w+)/);
+	const muteMatched = message.content.match(muteRegExp);
 
 	if (muteMatched) {
 		message.forwardToDiscord();
 
-		const [ , target, duration ] = muteMatched;
+		const { groups: { target, duration } } = muteMatched;
 
 		if (target === 'the guild chat') {
 			const { guild } = message.chatBridge;
@@ -137,7 +196,7 @@ module.exports = async (message) => {
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 		}
 
-		const player = message.chatBridge.client.players.cache.find(({ ign }) => ign === target);
+		const player = message.chatBridge.client.players.findByIGN(target);
 
 		if (!player) return;
 
@@ -156,12 +215,12 @@ module.exports = async (message) => {
 	 * [HypixelRank] IGN has unmuted [HypixelRank] IGN
 	 * [HypixelRank] IGN has unmuted the guild chat!
 	 */
-	const unMuteMatched = message.content.match(/(?:\[.+?\] )?\w+ has unmuted (?:\[.+?\] )?(the guild chat|\w+)/);
+	const unmuteMatched = message.content.match(unmuteRegExp);
 
-	if (unMuteMatched) {
+	if (unmuteMatched) {
 		message.forwardToDiscord();
 
-		const [ , target ] = unMuteMatched;
+		const { groups: { target } } = unmuteMatched;
 
 		if (target === 'the guild chat') {
 			const { guild } = message.chatBridge;
@@ -172,7 +231,7 @@ module.exports = async (message) => {
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was unmuted`);
 		}
 
-		const player = message.chatBridge.client.players.cache.find(({ ign }) => ign === target);
+		const player = message.chatBridge.client.players.findByIGN(target);
 
 		if (!player) return;
 

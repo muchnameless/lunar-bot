@@ -14,22 +14,22 @@ const demote = {
 	ERROR_SELF: '^You can only demote up to your own rank!',
 	errorAlreadyLowest: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is already the lowest rank`,
 	errorGM: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is the guild master so can't be demoted!`,
-	success: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => `^${HYPIXEL_RANK}${ign} was demoted from ${from} to ${to}$`,
+	success: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => `^${HYPIXEL_RANK}(?<target>${ign}) was demoted from (?<oldRank>${from}) to (?<newRank>${to})$`,
 };
 const promote = {
 	ERROR_SELF: '^You can only promote up to your own rank!',
 	errorAlreadyHighest: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is already the highest rank`,
 	errorGM: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is the guild master so can't be promoted anymore!`,
-	success: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => `^${HYPIXEL_RANK}${ign} was promoted from ${from} to ${to}$`,
+	success: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => `^${HYPIXEL_RANK}(?<target>${ign}) was promoted from (?<oldRank>${from}) to (?<newRank>${to})$`,
 };
 const mute = {
 	ERROR_GM: '^You cannot mute the guild master!$',
 	ERROR_SELF: '^You cannot mute yourself from the guild!$',
-	success: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => `^${HYPIXEL_RANK}${executor} has muted ${HYPIXEL_RANK}${target} for`,
+	success: (target = `${IGN_DEFAULT}|the guild chat`, executor = IGN_DEFAULT) => `^${HYPIXEL_RANK}(?<executor>${executor}) has muted ${HYPIXEL_RANK}(?<target>${target}) for (?<duration>\\w+)`,
 };
 const unmute = {
 	ERROR_NOT_MUTED: '^(?:This player|The guild) is not muted!$',
-	success: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => `^${HYPIXEL_RANK}${executor} has unmuted ${HYPIXEL_RANK}${target}`,
+	success: (target = `${IGN_DEFAULT}|the guild chat`, executor = IGN_DEFAULT) => `^${HYPIXEL_RANK}(?<executor>${executor}) has unmuted ${HYPIXEL_RANK}(?<target>${target})`,
 };
 const invite = {
 	ERROR_PERMS: '^You do not have permission to invite players!$',
@@ -100,7 +100,7 @@ module.exports = {
 		regExp: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(muteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
 	},
 	unmute: {
-		string: mute,
+		string: unmute,
 		regExp: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(unmuteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
 	},
 	invite: {
