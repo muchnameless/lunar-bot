@@ -231,6 +231,14 @@ class LunarClient extends Client {
 	}
 
 	/**
+	 * sends a DM to the bot owner
+	 * @param {string} message
+	 */
+	async dmOwner(message) {
+		await (await this.users.fetch(this.ownerID)).send(message, { split: { char: ' ' } });
+	}
+
+	/**
 	 * starts and caches a cronJob
 	 * @param {string} name
 	 * @param {import('cron').CronJob} cronJob
