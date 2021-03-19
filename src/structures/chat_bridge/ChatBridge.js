@@ -182,8 +182,8 @@ class ChatBridge extends EventEmitter {
 	 */
 	async link(guildName = null) {
 		const guild = guildName
-			? this.client.hypixelGuilds.cache.find(hGuild => hGuild.name === guildName)
-			: this.client.hypixelGuilds.cache.find(hGuild => hGuild.players.has(this.bot.uuid.replace(/-/g, '')));
+			? this.client.hypixelGuilds.cache.find(({ name }) => name === guildName)
+			: this.client.hypixelGuilds.cache.find(({ players }) => players.has(this.bot.uuid.replace(/-/g, '')));
 
 		if (!guild) {
 			this.ready = false;
@@ -368,28 +368,28 @@ class ChatBridge extends EventEmitter {
 	 */
 	_parseMinecraftMessageToDiscord(string) {
 		return escapeMarkdown(string
-			.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
-			.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(e => e.name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
-			.replace(/#([a-z-]+)/gi, (match, p1) => this.client.channels.cache.find(ch => ch.name === p1.toLowerCase())?.toString() ?? match) // channels
+			.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
+			.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
+			.replace(/#([a-z-]+)/gi, (match, p1) => this.client.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match) // channels
 			.replace(/(?<!<)@(!|&)?(\S+)(?!\d+>)/g, (match, p1, p2) => {
 				switch (p1) {
 					case '!': // members/users
-						return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-							?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
+						return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+							?? this.client.users.cache.find(({ username }) => username.toLowerCase() === p2.toLowerCase())?.toString() // users
 							?? match;
 
 					case '&': // roles
-						return this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+						return this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
 							?? match;
 
 					default: { // players, members/users, roles
-						const player = this.client.players.cache.find(p => p.ign.toLowerCase() === p2.toLowerCase());
+						const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === p2.toLowerCase());
 
 						if (player?.inDiscord) return `<@${player.discordID}>`;
 
-						return this.client.lgGuild?.members.cache.find(m => m.displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-							?? this.client.users.cache.find(u => u.username.toLowerCase() === p2.toLowerCase())?.toString() // users
-							?? this.client.lgGuild?.roles.cache.find(r => r.name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+						return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+							?? this.client.users.cache.find(({ username }) => username.toLowerCase() === p2.toLowerCase())?.toString() // users
+							?? this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
 							?? match;
 					}
 				}
@@ -415,6 +415,16 @@ class ChatBridge extends EventEmitter {
 	 * @param {ChatOptions} options
 	 */
 	async gchat(message, { prefix = '', ...options } = {}) {
+		if (this.bot.player.chatBridgeMutedUntil) {
+			if (Date.now() < this.bot.player.chatBridgeMutedUntil) { // mute hasn't expired
+				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${message}`);
+				return false;
+			}
+
+			this.bot.player.chatBridgeMutedUntil = 0;
+			this.bot.player.save();
+		}
+
 		return this.chat(message, { prefix: `/gc ${prefix}${prefix.length ? ' ' : invisibleCharacters[0]}`, ...options });
 	}
 
@@ -621,7 +631,7 @@ class ChatBridge extends EventEmitter {
 			]);
 
 			return result[0]
-				.map(x => this.cleanCommandResponse(x.content))
+				.map(({ content }) => this.cleanCommandResponse(content))
 				.join('\n');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
@@ -629,14 +639,14 @@ class ChatBridge extends EventEmitter {
 				if (rejectOnTimeout) Promise.reject(
 					error.length
 						? error
-							.map(x => this.cleanCommandResponse(x.content))
+							.map(({ content }) => this.cleanCommandResponse(content))
 							.join('\n')
 						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
 				);
 
 				return error.length
 					? error
-						.map(x => this.cleanCommandResponse(x.content))
+						.map(({ content }) => this.cleanCommandResponse(content))
 						.join('\n')
 					: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
