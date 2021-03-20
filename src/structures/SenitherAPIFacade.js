@@ -51,8 +51,8 @@ class Profiles extends Method {
 	 * @param {Strategy} strategy
 	 * @param {FetchOptions} options
 	 */
-	uuid(uuid, strategy = '', options = {}) {
-		return this.client._makeRequest(`profiles/${uuid}${strategy.length ? `/${strategy}` : ''}`, options);
+	uuid(uuid, strategy = null, options = {}) {
+		return this.client._makeRequest(`profiles/${uuid}${strategy ? `/${strategy}` : ''}`, options);
 	}
 }
 
