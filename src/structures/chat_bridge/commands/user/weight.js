@@ -1,8 +1,7 @@
 'use strict';
 
-const fetch = require('node-fetch');
 const { upperCaseFirstChar } = require('../../../../functions/util');
-const { BASE_URL } = require('../../../../constants/weight');
+const senither = require('../../../../api/senither');
 const mojang = require('../../../../api/mojang');
 const MojangAPIError = require('../../../errors/MojangAPIError');
 const Command = require('../../../commands/Command');
@@ -40,10 +39,7 @@ module.exports = class WeightCommand extends Command {
 			const uuid = args.length
 				? await mojang.getUUID(args[0])
 				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
-			const { status, reason, data } = await (await fetch(`${BASE_URL}/profiles/${uuid}${args.length < 2 ? '/weight' : ''}`, { headers: { 'Authorization': process.env.HYPIXEL_KEY_AUX_2 } })).json();
-
-			if (reason) throw new Error(`[Error ${status}]: ${reason}`);
-
+			const data = await senither.profiles.uuid(uuid, args.length < 2 ? 'weight' : '');
 			const { username, name, weight, weight_overflow: overflow } = args.length < 2 ? data : data.find(({ name: profileName }) => profileName.toLowerCase() === args[1].toLowerCase()) ?? (() => { throw new Error(`unknown profile name '${upperCaseFirstChar(args[1].toLowerCase())}'`); })();
 
 			return message.reply(`${username} (${name}): ${this.formatNumber(weight + overflow)} [${this.formatNumber(weight)} + ${this.formatNumber(overflow)}]`);

@@ -12,6 +12,7 @@ const functionsUtil = require('../../functions/util');
 const functionsFiles = require('../../functions/files');
 const hypixelMain = require('../../api/hypixel');
 const hypixelAux = require('../../api/hypixelAux');
+const senither = require('../../api/senither');
 const mojang = require('../../api/mojang');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
