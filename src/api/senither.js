@@ -19,7 +19,7 @@ const senither = new SenitherAPIFacade(process.env.HYPIXEL_KEY_AUX, {
 });
 
 senither
-	.on('limited', (limit, reset) => logger.warn(`[HYPIXEL API AUX]: ratelimit hit: ${limit} requests. Until: ${reset.toLocaleTimeString('de-DE')}`))
-	.on('reset', () => logger.info('[HYPIXEL API AUX]: ratelimit reset'));
+	.on('limited', (limit, reset) => logger.warn(`[SENITHER]: ratelimit hit: ${limit} requests. Until: ${reset.toLocaleTimeString('de-DE')}`))
+	.on('reset', () => logger.info('[SENITHER]: ratelimit reset'));
 
 module.exports = senither;
