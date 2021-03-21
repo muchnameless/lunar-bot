@@ -143,7 +143,7 @@ const self = module.exports = {
 				hypixelGuild,
 				type,
 				offset,
-				shouldShowOnlyBelowReqs: flags.some(flag => [ 't', 'track' ].includes(flag)),
+				shouldShowOnlyBelowReqs: type === 'track' || flags.some(flag => [ 't', 'track' ].includes(flag)),
 				page,
 			}))
 			.then(self.addPageReactions);
