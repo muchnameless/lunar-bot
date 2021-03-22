@@ -28,12 +28,10 @@ module.exports = class ConfigCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const { client: { config } } = this;
-
 		// list all config entries
 		if (!args.length) {
 			return message.reply(
-				config.cache
+				this.config.cache
 					.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
 					.map(({ key, value }) => `${key}: ${value}`)
 					.join('\n'),
@@ -46,16 +44,16 @@ module.exports = class ConfigCommand extends Command {
 			// delete an existing entry
 			if (flags.some(flag => [ 'r', 'remove', 'd', 'delete' ].includes(flag))) {
 				const KEY = args[0].toUpperCase();
-				const VALUE = config.get(KEY);
+				const VALUE = this.config.get(KEY);
 
 				if (VALUE === null) return message.reply(`\`${KEY}\` is not in the config.`);
 
-				await config.remove(KEY);
+				await this.config.remove(KEY);
 				return message.reply(`removed \`${KEY}\`: \`${VALUE}\``);
 			}
 
 			const queryRegex = new RegExp(args[0], 'i');
-			const configEntries = config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value));
+			const configEntries = this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value));
 
 			return message.reply(
 				configEntries
@@ -69,8 +67,8 @@ module.exports = class ConfigCommand extends Command {
 
 		// set a config entry
 		const KEY = args.shift().toUpperCase();
-		const OLD_VALUE = config.get(KEY);
-		const entry = await config.set(KEY, args.join(' '));
+		const OLD_VALUE = this.config.get(KEY);
+		const entry = await this.config.set(KEY, args.join(' '));
 
 		return message.reply(
 			`${entry.key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${entry.value}'`,

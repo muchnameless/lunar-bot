@@ -32,7 +32,7 @@ module.exports = class DocsCommand extends Command {
 		for (const flag of flags) {
 			const result = autocorrect(flag, projects);
 
-			if (result.similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) continue;
+			if (result.similarity < this.config.get('AUTOCORRECT_THRESHOLD')) continue;
 
 			project = result.value;
 			break;

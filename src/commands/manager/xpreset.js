@@ -53,7 +53,7 @@ module.exports = class XpResetCommand extends Command {
 			if (!this.force(flags)) {
 				const ANSWER = await message.awaitReply(`reset xp gained from \`${player.ign}\`? Warning, this action cannot be undone.`, 30);
 
-				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
 			await player.resetXp({ offsetToReset });
@@ -67,7 +67,7 @@ module.exports = class XpResetCommand extends Command {
 			if (!this.force(flags)) {
 				const ANSWER = await message.awaitReply(`reset competition xp gained from all ${PLAYER_COUNT} guild members? Warning, this action cannot be undone.`, 30);
 
-				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
 			// delete players who left the guild
@@ -78,7 +78,7 @@ module.exports = class XpResetCommand extends Command {
 					if (player.notes === 'skill api disabled') player.notes = null;
 					return player.resetXp({ offsetToReset });
 				}),
-				this.client.config.set('COMPETITION_START_TIME', Date.now()),
+				this.config.set('COMPETITION_START_TIME', Date.now()),
 			]);
 
 			result = `reset the competition xp gained from all ${PLAYER_COUNT} guild members`;
@@ -86,7 +86,7 @@ module.exports = class XpResetCommand extends Command {
 
 		// logging
 		this.client.log(new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setTitle('XP Tracking')
 			.setDescription(`${message.author.tag} | ${message.author} ${result}`)
 			.setTimestamp(),

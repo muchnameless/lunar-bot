@@ -36,14 +36,14 @@ module.exports = class PlayerCommand extends Command {
 			.map((arg, index) => ({ index, ...autocorrectToOffset(arg) }))
 			.sort((a, b) => a.similarity - b.similarity)
 			.pop();
-		const offset = offsetInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+		const offset = offsetInput?.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {
 				args.splice(offsetInput.index, 1);
 				return offsetInput.value;
 			})()
-			: (this.client.config.getBoolean('COMPETITION_RUNNING') || (Date.now() - this.client.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.client.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
+			: (this.config.getBoolean('COMPETITION_RUNNING') || (Date.now() - this.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
 				? offsetFlags.COMPETITION_START
-				: this.client.config.get('DEFAULT_XP_OFFSET')
+				: this.config.get('DEFAULT_XP_OFFSET')
 			);
 
 		// player input
@@ -58,7 +58,7 @@ module.exports = class PlayerCommand extends Command {
 					.sort((a, b) => a.similarity - b.similarity)
 					.pop();
 
-				return playerInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+				return playerInput?.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')
 					? playerInput.value
 					: message.author.player;
 			})();
@@ -76,9 +76,9 @@ module.exports = class PlayerCommand extends Command {
 		// update db?
 		if (this.force(flags)) await player.updateXp({ shouldSkipQueue: true });
 
-		const startingDate = new Date(Math.max(this.client.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
+		const startingDate = new Date(Math.max(this.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
 		const embed = new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
 			// .setTitle(`${escapeIgn(player.ign)}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`)
 			// .setURL(player.url)

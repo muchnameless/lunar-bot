@@ -40,7 +40,7 @@ module.exports = class TaxReminderCommand extends Command {
 					{ sameChannel: true },
 				);
 
-				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply(
+				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply(
 					'the command has been cancelled.',
 					{ sameChannel: true },
 				);

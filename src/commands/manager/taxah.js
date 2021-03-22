@@ -67,7 +67,7 @@ module.exports = class TaxAhCommand extends Command {
 				if (!taxCollector?.isCollecting) return message.reply(`\`${player.ign}\` is not a tax collector.`);
 
 				// remove self paid if only the collector paid the default amount at his own ah
-				if (taxCollector.collectedTax === this.client.config.getNumber('TAX_AMOUNT') && player.collectedBy === player.minecraftUUID) {
+				if (taxCollector.collectedTax === this.config.getNumber('TAX_AMOUNT') && player.collectedBy === player.minecraftUUID) {
 					logger.info(`[TAX AH]: ${player.ign}: removed and reset tax paid`);
 					await player.resetTax();
 					await taxCollector.remove();
@@ -85,7 +85,7 @@ module.exports = class TaxAhCommand extends Command {
 		}
 
 		this.client.log(new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')
 			.setDescription(log)
 			.setTimestamp(),

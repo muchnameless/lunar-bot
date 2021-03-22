@@ -57,7 +57,7 @@ class Command {
 	 * prefix name usage
 	 */
 	get usageInfo() {
-		return `\`${this.client.config.get('PREFIX')}${this.aliases?.[0].length < this.name ? this.aliases[0] : this.name}\` ${this.usage}`;
+		return `\`${this.config.get('PREFIX')}${this.aliases?.[0].length < this.name ? this.aliases[0] : this.name}\` ${this.usage}`;
 	}
 
 	/**
@@ -66,10 +66,10 @@ class Command {
 	get requiredRoles() {
 		switch (this.category) {
 			case 'staff':
-				return [ this.client.config.get('SHRUG_ROLE_ID'), this.client.config.get('TRIAL_MODERATOR_ROLE_ID'), this.client.config.get('MODERATOR_ROLE_ID'), this.client.config.get('SENIOR_STAFF_ROLE_ID'), this.client.config.get('MANAGER_ROLE_ID') ];
+				return [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ];
 
 			case 'manager':
-				return [ this.client.config.get('MANAGER_ROLE_ID') ];
+				return [ this.config.get('MANAGER_ROLE_ID') ];
 
 			default:
 				return null;

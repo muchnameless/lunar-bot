@@ -59,7 +59,7 @@ module.exports = class TaxResetCommand extends Command {
 			if (!this.force(flags)) {
 				const ANSWER = await message.awaitReply(`reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})? Warning, this action cannot be undone.`, 30);
 
-				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
 			await player.resetTax();
@@ -71,16 +71,16 @@ module.exports = class TaxResetCommand extends Command {
 			if (!this.force(flags)) {
 				const ANSWER = await message.awaitReply('reset tax paid from all guild members? Warning, this action cannot be undone.', 30);
 
-				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
 			// get current tax embed from #guild-tax channel
 			currentTaxEmbed = await (async () => {
-				const taxChannel = this.client.lgGuild?.channels.cache.get(this.client.config.get('TAX_CHANNEL_ID'));
+				const taxChannel = this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
 
 				if (!taxChannel) return logger.warn('[TAX RESET] tax channel error');
 
-				const taxMessage = await taxChannel.messages.fetch(this.client.config.get('TAX_MESSAGE_ID')).catch(logger.error);
+				const taxMessage = await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID')).catch(logger.error);
 
 				if (!taxMessage) return logger.warn('[TAX RESET] TAX_MESSAGE fetch error');
 
@@ -89,9 +89,9 @@ module.exports = class TaxResetCommand extends Command {
 
 			if (!currentTaxEmbed) {
 				if (!this.force(flags)) {
-					const ANSWER = await message.awaitReply(`unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.client.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`, 30);
+					const ANSWER = await message.awaitReply(`unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`, 30);
 
-					if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+					if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 				}
 
 				currentTaxEmbed = this.client.db.createTaxEmbed();
@@ -122,7 +122,7 @@ module.exports = class TaxResetCommand extends Command {
 					player.paid = false;
 					return player.save();
 				}),
-				this.client.config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up until now
+				this.config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up until now
 			]);
 
 			await Promise.all(taxCollectors.cache.map(async ({ player }) => player?.setToPaid()));
@@ -139,7 +139,7 @@ module.exports = class TaxResetCommand extends Command {
 				currentTaxEmbed,
 				currentTaxCollectedEmbed,
 				new MessageEmbed()
-					.setColor(this.client.config.get('EMBED_BLUE'))
+					.setColor(this.config.get('EMBED_BLUE'))
 					.setTitle('Guild Tax')
 					.setDescription(`${message.author.tag} | ${message.author} ${result}`)
 					.setTimestamp(),

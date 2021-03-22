@@ -24,7 +24,7 @@ module.exports = class RankIssuesCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const embed = new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setTimestamp();
 
 		let issuesAmount = 0;

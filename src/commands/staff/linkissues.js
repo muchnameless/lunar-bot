@@ -30,10 +30,10 @@ module.exports = class LinkIssuesCommand extends Command {
 
 		// discord members with wrong roles
 		const embed = new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setTimestamp();
-		const GUILD_ROLE_ID = this.client.config.get('GUILD_ROLE_ID');
-		const VERIFIED_ROLE_ID = this.client.config.get('VERIFIED_ROLE_ID');
+		const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
+		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID');
 		const guildRoleWithoutDbEntry = [];
 		const missingVerifiedRole = [];
 

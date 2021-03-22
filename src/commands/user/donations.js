@@ -43,7 +43,7 @@ module.exports = class DonationsCommand extends Command {
 
 		// transform and prettify data
 		const embed = new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setTitle('Guild Donations')
 			.setTimestamp();
 		let totalAmount = 0;

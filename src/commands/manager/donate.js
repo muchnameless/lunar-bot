@@ -67,7 +67,7 @@ module.exports = class DonateCommand extends Command {
 		message.reply(`registered a donation from \`${player.ign}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}.`);
 
 		this.client.log(new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setTitle('Guild Donations')
 			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}\`\`\``)
 			.setTimestamp(),

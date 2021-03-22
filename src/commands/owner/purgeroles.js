@@ -31,7 +31,7 @@ module.exports = class PurgeRolesCommand extends Command {
 		let index = -1;
 
 		lgGuild.members.cache.forEach((member) => {
-			if (member.roles.cache.has(this.client.config.get('GUILD_ROLE_ID'))) return;
+			if (member.roles.cache.has(this.config.get('GUILD_ROLE_ID'))) return;
 
 			/**
 			 * @type {string[]}

@@ -28,7 +28,7 @@ module.exports = class HelpCommand extends Command {
 
 		// default help
 		if (!args.length) {
-			const reply = [ `gchat prefix: ${[ this.client.config.get('PREFIX'), this.client.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.username}` ].join(', ')}` ];
+			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.username}` ].join(', ')}` ];
 
 			for (const category of commands.visibleCategories) {
 				reply.push(`${category}: ${[ ...commands.filterByCategory(category).keys() ].join(', ')}`);
@@ -82,7 +82,7 @@ module.exports = class HelpCommand extends Command {
 		if (command.description) reply.push(`Description: ${command.description}`);
 		if (command.usage) reply.push(`Usage: ${command.usageInfo}`);
 
-		reply.push(`Cooldown: ${ms((command.cooldown ?? this.client.config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
+		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
 		message.reply(reply.join('\n'));
 	}

@@ -86,7 +86,7 @@ module.exports = class EvalCommand extends Command {
 		const INPUT = rawArgs.join(' ');
 		const inputArray = Util.splitMessage(Util.escapeCodeBlock(INPUT), { maxLength: 1015, char: '\n' });
 		const responseEmbed = new MessageEmbed()
-			.setColor(client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setFooter(`${guild ? guild.me.displayName : client.user.username}`, client.user.displayAvatarURL());
 
 		let embedCharacterCount = responseEmbed.footer.text.length;

@@ -39,7 +39,7 @@ module.exports = class ScheduleCommand extends Command {
 			const name = args.join(' ');
 			const result = autocorrect(name, cronJobs.cache, 'name');
 
-			if (result.similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return message.reply(`no cron job with the name \`${name}\` found.`);
+			if (result.similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return message.reply(`no cron job with the name \`${name}\` found.`);
 
 			const { value: cronJob } = result;
 

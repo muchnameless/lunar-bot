@@ -12,7 +12,7 @@ module.exports = class TaxPaidCommand extends Command {
 			aliases: [ 'paid' ],
 			description: 'manually set a player to paid',
 			args: true,
-			usage: () => `[\`IGN\`|\`@mention\`] <custom \`amount\` to overwrite the default of ${this.client.config.getNumber('TAX_AMOUNT')?.toLocaleString(this.client.config.get('NUMBER_FORMAT')) ?? 'none set'}>`,
+			usage: () => `[\`IGN\`|\`@mention\`] <custom \`amount\` to overwrite the default of ${this.config.getNumber('TAX_AMOUNT')?.toLocaleString(this.config.get('NUMBER_FORMAT')) ?? 'none set'}>`,
 			cooldown: 0,
 		});
 	}
@@ -51,24 +51,24 @@ module.exports = class TaxPaidCommand extends Command {
 				const OLD_AMOUNT = await player.taxAmount;
 				const ANSWER = await message.awaitReply(`\`${player.ign}\` is already set to paid with an amount of \`${this.client.formatNumber(OLD_AMOUNT)}\`. Overwrite this?`, 30);
 
-				if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
 			await player.resetTax();
 		}
 
 		const CUSTOM_AMOUNT = removeNumberFormatting(args.shift());
-		const AMOUNT = /\D/.test(CUSTOM_AMOUNT) ? this.client.config.getNumber('TAX_AMOUNT') : Number(CUSTOM_AMOUNT);
+		const AMOUNT = /\D/.test(CUSTOM_AMOUNT) ? this.config.getNumber('TAX_AMOUNT') : Number(CUSTOM_AMOUNT);
 
 		await player.setToPaid({
 			amount: AMOUNT,
 			collectedBy: collector.minecraftUUID,
 		});
 
-		message.reply(`\`${player.ign}\` manually set to paid with ${AMOUNT === this.client.config.getNumber('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\`.`);
+		message.reply(`\`${player.ign}\` manually set to paid with ${AMOUNT === this.config.getNumber('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\`.`);
 
 		this.client.log(new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')
 			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${this.client.formatNumber(AMOUNT)} (manually)\`\`\``)
 			.setTimestamp(),

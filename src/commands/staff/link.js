@@ -61,7 +61,7 @@ module.exports = class LinkCommand extends Command {
 						.sort((a, b) => a.similarity - b.similarity)
 						.pop();
 
-					return playerInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+					return playerInput?.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')
 						? playerInput.value
 						: null;
 				})();
@@ -117,7 +117,7 @@ module.exports = class LinkCommand extends Command {
 							{ allowedMentions: { parse: [] } },
 						);
 
-						if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+						if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 					}
 				}
 
@@ -157,7 +157,7 @@ module.exports = class LinkCommand extends Command {
 							{ allowedMentions: { parse: [] } },
 						);
 
-						if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+						if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 					}
 				}
 
@@ -185,8 +185,8 @@ module.exports = class LinkCommand extends Command {
 
 			let reply = `\`${player.ign}\` linked to ${discordMember}`;
 
-			if (!discordMember.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID')))	{
-				reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.client.config.get('VERIFIED_ROLE_ID'))?.name ?? this.client.config.get('VERIFIED_ROLE_ID')} role)`;
+			if (!discordMember.roles.cache.has(this.config.get('VERIFIED_ROLE_ID')))	{
+				reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.config.get('VERIFIED_ROLE_ID'))?.name ?? this.config.get('VERIFIED_ROLE_ID')} role)`;
 			}
 
 			message.reply(

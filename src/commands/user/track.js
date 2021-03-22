@@ -42,7 +42,7 @@ module.exports = class TracklistCommand extends Command {
 			.map((arg, index) => ({ index, ...autocorrectToType(arg) }))
 			.sort((a, b) => a.similarity - b.similarity)
 			.pop();
-		const type = typeInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+		const type = typeInput?.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {
 				args.splice(typeInput.index, 1);
 				return typeInput.value;
@@ -61,7 +61,7 @@ module.exports = class TracklistCommand extends Command {
 					.sort((a, b) => a.similarity - b.similarity)
 					.pop();
 
-				return playerInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
+				return playerInput?.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')
 					? playerInput.value
 					: message.author.player;
 			})();
@@ -166,7 +166,7 @@ module.exports = class TracklistCommand extends Command {
 		});
 
 		message.reply(new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
 			.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
 			.attachFiles(new MessageAttachment(image))

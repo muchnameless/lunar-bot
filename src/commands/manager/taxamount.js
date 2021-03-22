@@ -29,13 +29,12 @@ module.exports = class TaxAmountCommand extends Command {
 
 		if (/\D/.test(newAmount)) return message.reply(`\`${newAmount}\` is not a number.`);
 
-		const { client: { config } } = this;
-		const OLD_AMOUNT = config.getNumber('TAX_AMOUNT');
+		const OLD_AMOUNT = this.config.getNumber('TAX_AMOUNT');
 
 		newAmount = Number(newAmount);
 
 		// update tax amount
-		await config.set('TAX_AMOUNT', newAmount);
+		await this.config.set('TAX_AMOUNT', newAmount);
 
 		// update tax collectors
 		await Promise.all(this.client.taxCollectors.activeCollectors.map(async (taxCollector) => {
@@ -45,16 +44,16 @@ module.exports = class TaxAmountCommand extends Command {
 
 		// logging
 		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setTitle('Guild Tax')
 			.setDescription(`${message.author.tag} | ${message.author} changed the guild tax amount`)
 			.addFields(
-				{ name: 'Old amount', value: `\`\`\`\n${OLD_AMOUNT.toLocaleString(config.get('NUMBER_FORMAT'))}\`\`\``, inline: true },
-				{ name: 'New amount', value: `\`\`\`\n${newAmount.toLocaleString(config.get('NUMBER_FORMAT'))}\`\`\``, inline: true },
+				{ name: 'Old amount', value: `\`\`\`\n${this.client.formatNumber(OLD_AMOUNT)}\`\`\``, inline: true },
+				{ name: 'New amount', value: `\`\`\`\n${this.client.formatNumber(newAmount)}\`\`\``, inline: true },
 			)
 			.setTimestamp(),
 		);
 
-		message.reply(`changed the guild tax amount from \`${OLD_AMOUNT.toLocaleString(config.get('NUMBER_FORMAT'))}\` to \`${newAmount.toLocaleString(config.get('NUMBER_FORMAT'))}\``);
+		message.reply(`changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(newAmount)}\``);
 	}
 };

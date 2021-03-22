@@ -28,7 +28,7 @@ module.exports = class HelpCommand extends Command {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const { commands } = this.client;
 		const helpEmbed = new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'));
+			.setColor(this.config.get('EMBED_BLUE'));
 
 
 		// default help
@@ -49,12 +49,12 @@ module.exports = class HelpCommand extends Command {
 				.setAuthor('Simple Discord Bot by muchnameless#7217')
 				.setDescription(stripIndents`
 					List of all currently available commands and their aliases:
-					Use \`${this.client.config.get('PREFIX')}\` or ${this.client.user} as prefix in servers.
+					Use \`${this.config.get('PREFIX')}\` or ${this.client.user} as prefix in servers.
 					\u200b
 				`)
 				.padFields()
 				.addField('\u200b', stripIndents`
-					Use \`${this.client.config.get('PREFIX')}help <command/category name>\` to get additional information on a specific command/category.
+					Use \`${this.config.get('PREFIX')}help <command/category name>\` to get additional information on a specific command/category.
 					Arguments: \`[required]\` \`<optional>\`
 					
 					Feel free to tag me <@${this.client.ownerID}> with or DM me any bugs or feature requests.
@@ -82,7 +82,7 @@ module.exports = class HelpCommand extends Command {
 				requiredRoles = requiredRoles.map(roleID => this.client.lgGuild?.roles.cache.get(roleID));
 				helpEmbed.setDescription(stripIndents`
 					**Required Roles:**
-					${commaListsOr`${message.guild?.id === this.client.config.get('DISCORD_GUILD_ID') ? requiredRoles : requiredRoles.map(({ name }) => name)}`}
+					${commaListsOr`${message.guild?.id === this.config.get('DISCORD_GUILD_ID') ? requiredRoles : requiredRoles.map(({ name }) => name)}`}
 				`);
 			} else if (INPUT === 'owner') {
 				helpEmbed.setDescription(stripIndents`
@@ -107,7 +107,7 @@ module.exports = class HelpCommand extends Command {
 			helpEmbed
 				.padFields()
 				.addField('\u200B\n\u200b', stripIndents`
-					Use \`${this.client.config.get('PREFIX')}help <command name>\` to get additional information on a specific command.
+					Use \`${this.config.get('PREFIX')}help <command name>\` to get additional information on a specific command.
 					Arguments: \`[required]\` \`<optional>\`
 				`)
 				.setTimestamp();
@@ -132,7 +132,7 @@ module.exports = class HelpCommand extends Command {
 		if (requiredRoles) {
 			const { lgGuild } = this.client;
 
-			if (message.guild?.id === this.client.config.get('DISCORD_GUILD_ID')) {
+			if (message.guild?.id === this.config.get('DISCORD_GUILD_ID')) {
 				helpEmbed.addField('**Required Role:**', commaListsOr`${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID) ?? roleID)}`);
 			} else {
 				helpEmbed.addField('**Required Role:**', commaListsOr`${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}`);
@@ -146,7 +146,7 @@ module.exports = class HelpCommand extends Command {
 		if (command.description) helpEmbed.setDescription(`${command.description}`);
 		if (command.usage) helpEmbed.addField('**Usage:**', command.usageInfo);
 
-		const COOLDOWN = command.cooldown ?? this.client.config.getNumber('COMMAND_COOLDOWN_DEFAULT');
+		const COOLDOWN = command.cooldown ?? this.config.getNumber('COMMAND_COOLDOWN_DEFAULT');
 
 		helpEmbed.addField('**Cooldown:**', ms(COOLDOWN * 1_000, { long: true }));
 

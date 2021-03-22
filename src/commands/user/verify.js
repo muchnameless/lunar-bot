@@ -89,7 +89,7 @@ module.exports = class VerifyCommand extends Command {
 						30,
 					);
 
-					if (!this.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
+					if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 				}
 
 				await playerLinkedToID.unlink(`linked account switched to ${message.author.tag}`);
