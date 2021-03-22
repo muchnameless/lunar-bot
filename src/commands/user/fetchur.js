@@ -9,7 +9,7 @@ const Command = require('../../structures/commands/Command');
 module.exports = class MyCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [],
+			aliases: [ 'f' ],
 			description: 'shows current fetchur item',
 			args: false,
 			usage: '',
