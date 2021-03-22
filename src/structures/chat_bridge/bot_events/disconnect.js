@@ -9,5 +9,5 @@ const logger = require('../../../functions/logger');
  * @param {string} param1.reason
  */
 module.exports = (chatBridge, { reason }) => {
-	logger.warn(`[CHATBRIDGE KICKED]: ${chatBridge.logInfo}: disconnect while not logged in, reason: ${reason}`);
+	logger.error(`[CHATBRIDGE KICKED]: ${chatBridge.logInfo}: disconnect while not logged in, reason: ${reason}`);
 };
