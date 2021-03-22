@@ -92,6 +92,13 @@ class Command {
 	}
 
 	/**
+	 * client config
+	 */
+	get config() {
+		return this.client.config;
+	}
+
+	/**
 	 * loads the command and possible aliases into their collections
 	 */
 	load() {
