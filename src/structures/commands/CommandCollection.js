@@ -74,8 +74,13 @@ class CommandCollection extends Collection {
 	 * help command run method
 	 * @type {Function}
 	 */
-	get help() {
-		return this.get('help').run;
+	async help(message, ...args) {
+		try {
+			return await this.get('help').run(message, ...args);
+		} catch (error) {
+			logger.error(`[CMD HANDLER]: An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}:`, error);
+			message.reply(`an error occured while executing the \`help\` command:\n${error.name}: ${error.message}`);
+		}
 	}
 
 	/**
