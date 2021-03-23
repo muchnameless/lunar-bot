@@ -23,7 +23,9 @@ module.exports = class MathCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const INPUT = rawArgs.join('').replace(/[^\d+\-*/%.()]/g, '');
+		const INPUT = rawArgs.join('')
+			.replace(/\^/g, '**')
+			.replace(/[^\d+\-*/%.()]/g, '');
 		const OUTPUT = eval(INPUT);
 
 		message.reply(`${INPUT} = ${OUTPUT}`);
