@@ -24,14 +24,12 @@ module.exports = class HelpCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const { commands } = this.client.chatBridges;
-
 		// default help
 		if (!args.length) {
 			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.username}` ].join(', ')}` ];
 
-			for (const category of commands.visibleCategories) {
-				reply.push(`${category}: ${[ ...commands.filterByCategory(category).keys() ].join(', ')}`);
+			for (const category of this.commandCollection.visibleCategories) {
+				reply.push(`${category}: ${[ ...this.commandCollection.filterByCategory(category).keys() ].join(', ')}`);
 			}
 
 			return message.reply(reply.join('\n'));
@@ -41,11 +39,11 @@ module.exports = class HelpCommand extends Command {
 
 
 		// category help
-		const requestedCategory = commands.categories.find(categoryName => categoryName === INPUT);
+		const requestedCategory = this.commandCollection.categories.find(categoryName => categoryName === INPUT);
 
 		if (requestedCategory) {
 			const reply = [ `Category: ${INPUT}` ];
-			const categoryCommands = commands.filterByCategory(INPUT);
+			const categoryCommands = this.commandCollection.filterByCategory(INPUT);
 			const { requiredRoles } = categoryCommands.first();
 
 			if (requiredRoles) {
@@ -61,7 +59,7 @@ module.exports = class HelpCommand extends Command {
 
 
 		// single command help
-		const command = commands.getByName(INPUT);
+		const command = this.commandCollection.getByName(INPUT);
 
 		if (!command) return message.reply(`'${INPUT}' is neither a valid command nor category`);
 

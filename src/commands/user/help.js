@@ -26,17 +26,15 @@ module.exports = class HelpCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const { commands } = this.client;
-		const helpEmbed = new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'));
+		const helpEmbed = new MessageEmbed().setColor(this.config.get('EMBED_BLUE'));
 
 
 		// default help
 		if (!args.length) {
-			for (const category of commands.visibleCategories) {
+			for (const category of this.commandCollection.visibleCategories) {
 				helpEmbed.addField(
 					`${upperCaseFirstChar(category)} commands`,
-					` • ${commands
+					` • ${this.commandCollection
 						.filterByCategory(category)
 						.map(({ name, aliases }) => [ name, aliases?.join(' | ') ].filter(Boolean).join(' | '))
 						.join('\n • ')
@@ -69,10 +67,10 @@ module.exports = class HelpCommand extends Command {
 
 
 		// category help
-		const requestedCategory = commands.categories.find(categoryName => categoryName === INPUT);
+		const requestedCategory = this.commandCollection.categories.find(categoryName => categoryName === INPUT);
 
 		if (requestedCategory) {
-			const categoryCommands = commands.filterByCategory(INPUT);
+			const categoryCommands = this.commandCollection.filterByCategory(INPUT);
 
 			helpEmbed.setTitle(`Category: ${upperCaseFirstChar(INPUT)}`);
 
@@ -117,7 +115,7 @@ module.exports = class HelpCommand extends Command {
 
 
 		// single command help
-		const command = commands.getByName(INPUT);
+		const command = this.commandCollection.getByName(INPUT);
 
 		if (!command) return message.reply(`\`${INPUT}\` is neither a valid command nor category.`);
 
