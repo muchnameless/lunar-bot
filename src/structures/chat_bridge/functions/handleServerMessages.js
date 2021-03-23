@@ -71,7 +71,7 @@ module.exports = async (message) => {
 	 */
 	if (message.content === 'You cannot say the same message twice!') {
 		try {
-			await message.chatBridge.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.content}`);
+			await message.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.content}`);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner anti spam failed`);
 		} finally {
@@ -86,7 +86,7 @@ module.exports = async (message) => {
 	 */
 	if (message.content.startsWith('We blocked your comment')) {
 		try {
-			await message.chatBridge.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.content}`);
+			await message.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.content}`);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner blocked message`);
 		} finally {
@@ -118,7 +118,7 @@ module.exports = async (message) => {
 		message.chatBridge.broadcast('gg');
 
 		const { groups: { target, newRank } } = promoteMatched;
-		const player = message.chatBridge.client.players.findByIGN(target);
+		const player = message.client.players.findByIGN(target);
 
 		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}' but not in the db`);
 
@@ -142,7 +142,7 @@ module.exports = async (message) => {
 		message.forwardToDiscord();
 
 		const { groups: { target, newRank } } = demotedMatched;
-		const player = message.chatBridge.client.players.findByIGN(target);
+		const player = message.client.players.findByIGN(target);
 
 		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}' but not in the db`);
 
@@ -164,7 +164,7 @@ module.exports = async (message) => {
 
 	if (friendReqMatched) {
 		const [ , IGN ] = friendReqMatched;
-		const player = message.chatBridge.client.players.findByIGN(IGN);
+		const player = message.client.players.findByIGN(IGN);
 
 		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: denying f request from ${IGN}`);
 
@@ -196,7 +196,7 @@ module.exports = async (message) => {
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 		}
 
-		const player = message.chatBridge.client.players.findByIGN(target);
+		const player = message.client.players.findByIGN(target);
 
 		if (!player) return;
 
@@ -231,7 +231,7 @@ module.exports = async (message) => {
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was unmuted`);
 		}
 
-		const player = message.chatBridge.client.players.findByIGN(target);
+		const player = message.client.players.findByIGN(target);
 
 		if (!player) return;
 
@@ -249,7 +249,7 @@ module.exports = async (message) => {
 	if (guildJoinMatched) {
 		const [ guildName ] = guildJoinMatched;
 
-		message.chatBridge.client.hypixelGuilds
+		message.client.hypixelGuilds
 			.getByName(guildName)
 			?.updatePlayers()
 			.catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error.name}: ${error.message}`));

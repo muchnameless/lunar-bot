@@ -15,8 +15,8 @@ const logger = require('../../../functions/logger');
 module.exports = async (message) => {
 	if (!message.author || !message.content.length) return;
 
-	const { chatBridge } = message;
-	const { client, client: { config } } = chatBridge;
+	const { chatBridge, client } = message;
+	const { config } = client;
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), escapeRegex(config.get('INGAME_PREFIX')), `@${chatBridge.bot.username}` ].join('|')})`, 'i').exec(message.content); // PREFIX, INGAME_PREFIX, @mention
 
 	// must use prefix for commands in guild

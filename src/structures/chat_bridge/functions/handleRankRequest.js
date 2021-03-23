@@ -11,7 +11,7 @@ const logger = require('../../../functions/logger');
  * @param {import('../HypixelMessage')} message
  */
 module.exports = async (message) => {
-	const { chatBridge, chatBridge: { guild, client, client: { config } }, content } = message;
+	const { chatBridge, client, client: { config }, chatBridge: { guild }, content } = message;
 	const result = content
 		?.replace(/[^a-zA-Z ]/g, '') // delete all non alphabetical characters
 		.split(/ +/)

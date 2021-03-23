@@ -63,6 +63,13 @@ class HypixelMessage extends ChatMessage {
 	}
 
 	/**
+	 * discord client that instantiated the chatBridge
+	 */
+	get client() {
+		return this.chatBridge.client;
+	}
+
+	/**
 	 * wether the message was sent by the bot
 	 */
 	get me() {
@@ -150,7 +157,7 @@ class HypixelMessage extends ChatMessage {
 					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
 						?? player?.image
 						?? await mojang.getUUID(this.author.ign).then(uuid => `https://visage.surgeplay.com/bust/${uuid}`, error => logger.error(`[FORWARD TO DC]: ${error}`))
-						?? this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+						?? this.client.user.displayAvatarURL({ dynamic: true }),
 					content: this.parsedContent,
 					allowedMentions: {
 						parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
@@ -165,7 +172,7 @@ class HypixelMessage extends ChatMessage {
 
 			return await this.chatBridge.sendViaWebhook({
 				username: this.chatBridge.guild.name,
-				avatarURL: this.chatBridge.client.user.displayAvatarURL({ dynamic: true }),
+				avatarURL: this.client.user.displayAvatarURL({ dynamic: true }),
 				content: this.content,
 				allowedMentions: { parse: [] },
 			});
