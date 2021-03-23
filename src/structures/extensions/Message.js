@@ -12,7 +12,14 @@ class LunarMessage extends Message {
 		super(...args);
 
 		this.sendReplyChannel = true;
+		/**
+		 * @type {?string}
+		 */
 		this.replyMessageID = null;
+		/**
+		 * @type {?string}
+		 */
+		this.replyChannelID = null;
 
 		/**
 		 * @type {import('./User')}
@@ -228,7 +235,10 @@ class LunarMessage extends Message {
 				? this.channel.messages.cache.get(this.replyMessageID).edit(content, options)
 				: this.channel.send(content, options))
 				.then((message) => {
-					if (options.saveReplyMessageID) this.replyMessageID = message.id;
+					if (options.saveReplyMessageID) {
+						this.replyChannelID = message.channel.id;
+						this.replyMessageID = message.id;
+					}
 					return message;
 				});
 		}
@@ -280,9 +290,16 @@ class LunarMessage extends Message {
 		}
 
 		// send reply
-		return this.replyMessageID && commandsChannel.messages.cache.has(this.replyMessageID)
+		return (this.replyMessageID && commandsChannel.messages.cache.has(this.replyMessageID)
 			? commandsChannel.messages.cache.get(this.replyMessageID).edit(content, options)
-			: commandsChannel.send(content, options);
+			: commandsChannel.send(content, options))
+			.then((message) => {
+				if (options.saveReplyMessageID) {
+					this.replyChannelID = message.channel.id;
+					this.replyMessageID = message.id;
+				}
+				return message;
+			});
 	}
 }
 
