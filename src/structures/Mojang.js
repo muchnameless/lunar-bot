@@ -3,7 +3,7 @@
 const fetch = require('node-fetch');
 const { validateMinecraftIGN, validateMinecraftUUID } = require('../functions/stringValidators');
 const MojangAPIError = require('./errors/MojangAPIError');
-const logger = require('../functions/logger');
+// const logger = require('../functions/logger');
 
 
 class Mojang {
@@ -13,7 +13,6 @@ class Mojang {
 	constructor(options = {}) {
 		this._validateOptions(options);
 		this.cache = options.cache;
-		this.wrongInputCache = new Map();
 	}
 
 	/**
@@ -55,21 +54,18 @@ class Mojang {
 	 * @param {boolean} [param3.force]
 	 */
 	async _makeRequest(path, query, resultField = null, { cache = true, force = false } = {}) {
-		if (this.cache && !force) {
-			const cachedResponse = await this.cache.get(query);
-			if (cachedResponse) return cachedResponse;
-		}
-
-		if (this.wrongInputCache.has(query)) {
-			logger.error(`[MOJANG]: cached error for '${query}' in '${resultField}'`);
-			throw new MojangAPIError(this.wrongInputCache.get(query), resultField, query);
+		if (!force) {
+			const cachedResponse = await this.cache?.get(query);
+			if (cachedResponse) {
+				if (typeof cachedResponse === 'string') return cachedResponse;
+				throw new MojangAPIError({ status: '(cached)', ...cachedResponse }, resultField, query);
+			}
 		}
 
 		const res = await fetch(`${path}${query}`);
 
 		if (res.status !== 200) {
-			this.wrongInputCache.set(query, res);
-			setTimeout(() => this.wrongInputCache.delete(query), 30 * 60_000);
+			if (cache) this.cache?.set(query, res);
 			throw new MojangAPIError(res, resultField, query);
 		}
 
@@ -78,9 +74,7 @@ class Mojang {
 		});
 		const response = resultField ? parsedRes[resultField] : parsedRes;
 
-		if (this.cache && cache) {
-			await this.cache.set(query, response);
-		}
+		if (cache) this.cache?.set(query, response);
 
 		return response;
 	}
