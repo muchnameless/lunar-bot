@@ -6,7 +6,7 @@ const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class MyCommand extends Command {
+module.exports = class FetchurCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'f' ],
