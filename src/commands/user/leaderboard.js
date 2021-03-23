@@ -11,7 +11,7 @@ const Command = require('../../structures/commands/Command');
 module.exports = class LeaderboardCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [ 'lb' ],
+			aliases: [ 'lb', 'gained' ],
 			description: 'guild member leaderboard for skill / slayer xp gained',
 			usage: () => stripIndents`
 				<\`type\`> <page \`number\`> <${this.client.hypixelGuilds.guildNames}|\`all\`> <${
