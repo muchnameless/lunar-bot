@@ -346,7 +346,7 @@ module.exports = class Player extends Model {
 			order: [ [ 'createdAt', 'DESC' ] ],
 			attributes: [ 'amount' ],
 			raw: true,
-		}).then(result => (result.lengh ? result[0].amount : null));
+		}).then(result => (result.length ? result[0].amount : null));
 	}
 
 	/**
