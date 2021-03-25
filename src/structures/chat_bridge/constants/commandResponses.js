@@ -34,7 +34,7 @@ const unmute = {
 const invite = {
 	ERROR_PERMS: '^You do not have permission to invite players!$',
 	ERROR_CANNOT_INVITE: '^You cannot invite this player to your guild!$', // g invites disabled
-	// ERROR_GUILD_FULL: '', // guild is currently full
+	ERROR_GUILD_FULL: '^Your guild is full!$',
 	successOnline: (ign = IGN_DEFAULT) => `^You invited ${HYPIXEL_RANK}${ign} to your guild\\. They have 5 minutes to accept\\.$`,
 	successOffline: (ign = IGN_DEFAULT) => `^You sent an offline invite to ${HYPIXEL_RANK}${ign}! They will have 5 minutes to accept once they come online!$`,
 	errorAlreadyInvited: (ign = IGN_DEFAULT) => `^You've already invited ${HYPIXEL_RANK}${ign} to your guild! Wait for them to accept!$`,
