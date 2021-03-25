@@ -18,7 +18,7 @@ module.exports = class LeaderboardCommand extends Command {
 					Object.keys(XP_OFFSETS_SHORT)
 						.map(offset => `\`${offset}\``)
 						.join('|')
-				} Δ>
+				} Δ> <\`purge\` to only show members below reqs>
 
 				currently supported types:
 				skill, ${skills.join(', ')}

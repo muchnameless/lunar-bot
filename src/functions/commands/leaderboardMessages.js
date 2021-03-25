@@ -2,6 +2,7 @@
 
 const { stripIndent, oneLine } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
+const jaroWinklerSimilarity = require('jaro-winkler');
 const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../../constants/database');
@@ -78,6 +79,18 @@ const self = module.exports = {
 	async handleLeaderboardCommandMessage(message, args, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) {
 		const { client: { config } } = message;
 
+		// should show only below reqs
+		const shouldShowOnlyBelowReqsInput = args
+			.map((arg, index) => ({ index, arg, similarity: jaroWinklerSimilarity(arg, 'purge', { caseSensitive: false }) }))
+			.sort((a, b) => a.similarity - b.similarity)
+			.pop();
+		const SHOULD_SHOW_ONLY_BELOW_REQS = shouldShowOnlyBelowReqsInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
+			? (() => {
+				args.splice(shouldShowOnlyBelowReqsInput.index, 1);
+				return true;
+			})()
+			: false;
+
 		// hypixel guild input
 		const hypixelGuild = message.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
 
@@ -143,7 +156,7 @@ const self = module.exports = {
 				hypixelGuild,
 				type,
 				offset,
-				shouldShowOnlyBelowReqs: type === 'track' || flags.some(flag => [ 't', 'track' ].includes(flag)),
+				shouldShowOnlyBelowReqs: SHOULD_SHOW_ONLY_BELOW_REQS || type === 'purge' || flags.some(flag => [ 'p', 'purge' ].includes(flag)),
 				page,
 			}))
 			.then(self.addPageReactions);
@@ -193,7 +206,7 @@ const self = module.exports = {
 				break;
 
 			case 'weight tracking':
-				type = 'track';
+				type = 'purge';
 				gained = true;
 				break;
 		}
@@ -311,7 +324,7 @@ const self = module.exports = {
 				break;
 			}
 
-			case 'track': {
+			case 'purge': {
 				embed.setTitle('Weight Tracking Leaderboard');
 				dataConverter = (player) => {
 					const { totalWeight } = player.getWeight();
