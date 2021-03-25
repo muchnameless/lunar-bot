@@ -171,7 +171,7 @@ class HypixelMessage extends ChatMessage {
 			}
 
 			return await this.chatBridge.sendViaWebhook({
-				username: this.chatBridge.guild.name,
+				username: this.chatBridge.guild?.name ?? this.client.user.username,
 				avatarURL: this.client.user.displayAvatarURL({ dynamic: true }),
 				content: this.content,
 				allowedMentions: { parse: [] },
