@@ -22,6 +22,20 @@ class LunarTextChannel extends TextChannel {
 
 		return this.permissionsFor?.(this.guild?.me).has(permFlag) ?? false;
 	}
+
+	/**
+	 * deletes all provided messages from the channel with as few API calls as possible
+	 * @param {string|string[]} IDs
+	 */
+	deleteMessages(IDs) {
+		if (Array.isArray(IDs)) {
+			if (this.checkBotPermissions('MANAGE_MESSAGES')) return this.bulkDelete(IDs);
+
+			return Promise.all(IDs.map(async id => this.messages.delete(id)));
+		}
+
+		return this.messages.delete(IDs);
+	}
 }
 
 Structures.extend('TextChannel', TextChannel => LunarTextChannel); // eslint-disable-line no-shadow, no-unused-vars

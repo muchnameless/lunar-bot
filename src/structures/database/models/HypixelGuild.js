@@ -568,7 +568,7 @@ module.exports = class HypixelGuild extends Model {
 		// non-requestable rank
 		if (!ROLE_ID) {
 			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank which is non-requestable`);
-			if (message.replyMessageID) message.channel.messages.delete(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
+			if (message.replyMessageID) message.channel.deleteMessages(message.replyMessageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
 			return message.reactSafely(CLOWN);
 		}
 

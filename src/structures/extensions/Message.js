@@ -1,7 +1,7 @@
 'use strict';
 
 const { commaListsAnd } = require('common-tags');
-const { Structures, MessageEmbed, Message, User } = require('discord.js');
+const { Structures, MessageEmbed, Message, User, Util: { splitMessage } } = require('discord.js');
 const _ = require('lodash');
 const LunarGuildMember = require('./GuildMember');
 const logger = require('../../functions/logger');
@@ -13,7 +13,7 @@ class LunarMessage extends Message {
 
 		this.sendReplyChannel = true;
 		/**
-		 * @type {?string}
+		 * @type {?string|string[]}
 		 */
 		this.replyMessageID = null;
 		/**
@@ -172,21 +172,7 @@ class LunarMessage extends Message {
 		options.saveReplyMessageID ??= true;
 
 		// DMs
-		if (!this.guild) {
-			return this.replyMessageID && this.channel.messages.cache.has(this.replyMessageID)
-				? this.channel.messages.cache.get(this.replyMessageID).edit(content, options)
-				: this.channel.send(content, options)
-					.then((message) => {
-						if (options.saveReplyMessageID) {
-							if (Array.isArray(message)) {
-								this.replyMessageID = message[0].id;
-							} else {
-								this.replyMessageID = message.id;
-							}
-						}
-						return message;
-					});
-		}
+		if (!this.guild) return this._sendReply(content, options);
 
 		// add reply if it is not present
 		options.reply ??= this.author.id;
@@ -237,21 +223,7 @@ class LunarMessage extends Message {
 			}
 
 			// send reply
-			return (this.replyMessageID && this.channel.messages.cache.has(this.replyMessageID)
-				? this.channel.messages.cache.get(this.replyMessageID).edit(content, options)
-				: this.channel.send(content, options))
-				.then((message) => {
-					if (options.saveReplyMessageID) {
-						if (Array.isArray(message)) {
-							this.replyChannelID = message[0].channel.id;
-							this.replyMessageID = message[0].id;
-						} else {
-							this.replyChannelID = message.channel.id;
-							this.replyMessageID = message.id;
-						}
-					}
-					return message;
-				});
+			return this._sendReply(content, options);
 		}
 
 		// redirect reply to nearest #bot-commands channel
@@ -301,21 +273,59 @@ class LunarMessage extends Message {
 		}
 
 		// send reply
-		return (this.replyMessageID && commandsChannel.messages.cache.has(this.replyMessageID)
-			? commandsChannel.messages.cache.get(this.replyMessageID).edit(content, options)
-			: commandsChannel.send(content, options))
-			.then((message) => {
-				if (options.saveReplyMessageID) {
-					if (Array.isArray(message)) {
-						this.replyChannelID = message[0].channel.id;
-						this.replyMessageID = message[0].id;
-					} else {
-						this.replyChannelID = message.channel.id;
-						this.replyMessageID = message.id;
-					}
-				}
-				return message;
-			});
+		return this._sendReply(content, options, commandsChannel);
+	}
+
+	/**
+	 * send a reply in the provided channel and saves the IDs of that reply message
+	 * @param {?string} content
+	 * @param {?MessageReplyOptions} [options={}]
+	 * @param {import('./TextChannel')} [channel=this.channel]
+	 */
+	async _sendReply(content, options = {}, channel = this.channel) {
+		// determine reply ID and IDs to delete
+		let oldReplyMessageID;
+		let IDsToDelete;
+
+		if (this.replyMessageID) {
+			if (Array.isArray(this.replyMessageID)) {
+				[ oldReplyMessageID, ...IDsToDelete ] = this.replyMessageID;
+			} else {
+				oldReplyMessageID = this.replyMessageID;
+			}
+		}
+
+		let message;
+
+		if (options?.split && splitMessage(content, options.split).length > 1) { // send multiple messages
+			if (oldReplyMessageID) {
+				IDsToDelete ??= [];
+				IDsToDelete.push(oldReplyMessageID);
+			}
+
+			message = await channel.send(content, options);
+
+			if (options.saveReplyMessageID) {
+				this.replyChannelID = message[0].channel.id;
+				this.replyMessageID = message.map(({ id }) => id);
+			}
+		} else { // send 1 message
+			message = await (channel.messages.cache.get(oldReplyMessageID)?.edit(content, options) ?? channel.send(content, options));
+
+			if (options.saveReplyMessageID) {
+				this.replyChannelID = message.channel.id;
+				this.replyMessageID = message.id;
+			}
+		}
+
+		// cleanup channel (delete old replies)
+		if (IDsToDelete?.length && this.replyChannelID) {
+			this.client.channels.cache.get(this.replyChannelID)
+				?.deleteMessages(IDsToDelete)
+				.catch(error => logger.error(`[SEND REPLY]: IDs: ${IDsToDelete.map(x => `'${x}'`).join(', ')}: ${error.name}: ${error.message}`));
+		}
+
+		return message;
 	}
 }
 

@@ -36,6 +36,16 @@ class LunarDMChannel extends DMChannel {
 				return false;
 		}
 	}
+
+	/**
+	 * deletes all provided messages from the channel with as few API calls as possible
+	 * @param {string|string[]} IDs
+	 */
+	deleteMessages(IDs) {
+		if (Array.isArray(IDs)) return Promise.all(IDs.map(async id => this.messages.delete(id)));
+
+		return this.messages.delete(IDs);
+	}
 }
 
 Structures.extend('DMChannel', DMChannel => LunarDMChannel); // eslint-disable-line no-shadow, no-unused-vars
