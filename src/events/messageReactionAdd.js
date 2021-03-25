@@ -1,6 +1,6 @@
 'use strict';
 
-const { updateLeaderboardMessage } = require('../functions/leaderboardMessages');
+const { updateLeaderboardMessage } = require('../functions/commands/leaderboardMessages');
 const { LOCK, FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const logger = require('../functions/logger');
 

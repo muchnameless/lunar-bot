@@ -1,6 +1,6 @@
 'use strict';
 
-const weight = require('../../../../functions/weight');
+const weight = require('../../../../functions/commands/weight');
 const Command = require('../../../commands/Command');
 // const logger = require('../../../../functions/logger');
 

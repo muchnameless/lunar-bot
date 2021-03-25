@@ -3,14 +3,14 @@
 const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
-const { upperCaseFirstChar, stringToMS } = require('./util');
-// const logger = require('./logger');
+const { upperCaseFirstChar, stringToMS } = require('../util');
+// const logger = require('../logger');
 
 
 /**
  * create a poll for both ingame chat and the chatBridge channel
- * @param {import('../structures/chat_bridge/ChatBridge')} chatBridge
- * @param {import('../structures/chat_bridge/HypixelMessage')|import('../structures/extensions/Message')}
+ * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
+ * @param {import('../../structures/chat_bridge/HypixelMessage')|import('../../structures/extensions/Message')}
  * @param {string[]} args
  * @param {string} ign
  */

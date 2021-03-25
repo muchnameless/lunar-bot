@@ -1,6 +1,6 @@
 'use strict';
 
-const createPoll = require('../../functions/createPoll');
+const createPoll = require('../../functions/commands/createPoll');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 

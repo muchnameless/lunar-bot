@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndents } = require('common-tags');
-const { handleLeaderboardCommandMessage, createGainedStatsEmbed } = require('../../functions/leaderboardMessages');
+const { handleLeaderboardCommandMessage, createGainedStatsEmbed } = require('../../functions/commands/leaderboardMessages');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
 const Command = require('../../structures/commands/Command');

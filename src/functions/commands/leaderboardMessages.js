@@ -3,10 +3,10 @@
 const { stripIndent, oneLine } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
 const ms = require('ms');
-const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
-const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../constants/database');
-const { upperCaseFirstChar, autocorrectToOffset, autocorrectToType } = require('./util');
-const logger = require('../functions/logger');
+const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../../constants/emojiCharacters');
+const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../../constants/database');
+const { upperCaseFirstChar, autocorrectToOffset, autocorrectToType } = require('../util');
+const logger = require('../logger');
 
 
 /**
@@ -45,7 +45,7 @@ const self = module.exports = {
 
 	/**
 	 * adds reactions to navigate in pagination
-	 * @param {import('../structures/extensions/Message')} message the message to add the reactions to
+	 * @param {import('../../structures/extensions/Message')} message the message to add the reactions to
 	 */
 	async addPageReactions(message) {
 		if (!message) return logger.warn('[ADD PAGE REACTIONS]: no message');
@@ -67,7 +67,7 @@ const self = module.exports = {
 
 	/**
 	 * handles a leaderbaord message
-	 * @param {import('../structures/extensions/Message')} message the message to add the reactions to
+	 * @param {import('../../structures/extensions/Message')} message the message to add the reactions to
 	 * @param {string[]} args
 	 * @param {string[]} flags
 	 * @param {Function} createLeaderboard
@@ -151,7 +151,7 @@ const self = module.exports = {
 
 	/**
 	 * updates a xp leaderboard message
-	 * @param {import('../structures/extensions/Message')} message leaderboard message to update
+	 * @param {import('../../structures/extensions/Message')} message leaderboard message to update
 	 * @param {string} emojiName emoji that triggered the update
 	 */
 	updateLeaderboardMessage(message, emojiName) {
@@ -169,7 +169,7 @@ const self = module.exports = {
 		const matchedDescription = message.embeds[0].description.match(/^(?<guildName>.+) (?:total|average|(?<belowReqs>below reqs)) \(/m);
 		const GUILD_NAME = matchedDescription.groups.guildName.trim();
 		/**
-		 * @type {?import('../structures/database/models/HypixelGuild')}
+		 * @type {?import('../../structures/database/models/HypixelGuild')}
 		 */
 		const hypixelGuild = GUILD_NAME === 'Guilds'
 			? false
@@ -213,10 +213,10 @@ const self = module.exports = {
 
 	/**
 	 * constructs a xp leaderboard message embed
-	 * @param {import('../structures/LunarClient')} client
+	 * @param {import('../../structures/LunarClient')} client
 	 * @param {object} param1
 	 * @param {string} param1.userID
-	 * @param {import('../structures/database/models/HypixelGuild')} [param1.hypixelGuild]
+	 * @param {import('../../structures/database/models/HypixelGuild')} [param1.hypixelGuild]
 	 * @param {string} [param1.type]
 	 * @param {string} [param1.offset]
 	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
@@ -239,7 +239,7 @@ const self = module.exports = {
 			: client.players.getByID(userID)?.guild);
 
 		/**
-		 * @type {import('../structures/database/models/Player')[]}
+		 * @type {import('../../structures/database/models/Player')[]}
 		 */
 		let guildPlayers;
 
@@ -479,10 +479,10 @@ const self = module.exports = {
 
 	/**
 	 * constructs a total xp leaderboard message embed
-	 * @param {import('../structures/LunarClient')} client
+	 * @param {import('../../structures/LunarClient')} client
 	 * @param {object} param1
 	 * @param {string} param1.userID
-	 * @param {import('../structures/database/models/HypixelGuild')} [param1.hypixelGuild]
+	 * @param {import('../../structures/database/models/HypixelGuild')} [param1.hypixelGuild]
 	 * @param {string} [param1.type]
 	 * @param {string} [param1.offset]
 	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
@@ -490,7 +490,7 @@ const self = module.exports = {
 	 */
 	createTotalStatsEmbed(client, { userID, hypixelGuild = null, type = client.config.get('CURRENT_COMPETITION'), offset = '', shouldShowOnlyBelowReqs = false, page: pageInput = 1 }) {
 		/**
-		 * @type {import('../structures/database/models/Player')[]}
+		 * @type {import('../../structures/database/models/Player')[]}
 		 */
 		let guildPlayers;
 

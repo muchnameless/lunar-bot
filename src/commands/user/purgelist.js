@@ -1,6 +1,6 @@
 'use strict';
 
-const { createGainedStatsEmbed, handleLeaderboardCommandMessage } = require('../../functions/leaderboardMessages');
+const { createGainedStatsEmbed, handleLeaderboardCommandMessage } = require('../../functions/commands/leaderboardMessages');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 

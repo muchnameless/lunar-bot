@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndents } = require('common-tags');
-const fetchur = require('../../functions/fetchur');
+const fetchur = require('../../functions/commands/fetchur');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 

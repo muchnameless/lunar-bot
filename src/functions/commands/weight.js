@@ -1,15 +1,15 @@
 'use strict';
-const { upperCaseFirstChar } = require('../functions/util');
-const { X_EMOJI } = require('../constants/emojiCharacters');
-const mojang = require('../api/mojang');
-const senither = require('../api/senither');
-const MojangAPIError = require('../structures/errors/MojangAPIError');
-const logger = require('../functions/logger');
+const { upperCaseFirstChar } = require('../util');
+const { X_EMOJI } = require('../../constants/emojiCharacters');
+const mojang = require('../../api/mojang');
+const senither = require('../../api/senither');
+const MojangAPIError = require('../../structures/errors/MojangAPIError');
+const logger = require('../logger');
 
 
 /**
  * weight command
- * @param {import('../structures/extensions/Message')|import('../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+ * @param {import('../../structures/extensions/Message')|import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
  * @param {string[]} args command arguments
  */
 module.exports = async (message, args) => {
