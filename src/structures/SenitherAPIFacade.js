@@ -52,7 +52,7 @@ class Profiles extends Method {
 	 * @param {FetchOptions} options
 	 */
 	uuid(uuid, strategy = null, options = {}) {
-		return this.client._makeRequest(`profiles/${uuid}${strategy ? `/${strategy}` : ''}`, options);
+		return this.client._makeRequest(`profiles/${uuid}${strategy ? `/${strategy}` : ''}`, { requestAmount: 2, ...options });
 	}
 }
 
@@ -104,7 +104,7 @@ class SenitherAPIFacade extends EventEmitter {
 	 * @param {string} path
 	 * @param {FetchOptions} options
 	 */
-	async _makeRequest(path, { cache = true, force = false } = {}) {
+	async _makeRequest(path, { cache = true, force = false, requestAmount = 1 } = {}) {
 		const key = path.replaceAll('/', ':');
 
 		// cached response
@@ -117,7 +117,7 @@ class SenitherAPIFacade extends EventEmitter {
 			await this.queue.wait();
 
 			// rate limit handling
-			if (!this.rateLimit.remaining) {
+			if (this.rateLimit.remaining < requestAmount) {
 				const timeout = this.rateLimit.reset * 1_000;
 				this.emit('limited', this.rateLimit.limit, new Date(Date.now() + timeout));
 				await sleep(timeout);
