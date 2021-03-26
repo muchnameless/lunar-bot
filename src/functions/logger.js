@@ -64,21 +64,33 @@ const log = (...input) => {
 	return null;
 };
 
+/**
+ * @returns {null}
+ */
 const error = (...input) => {
 	input.forEach(i => logger.error(util.format(i)));
 	return null;
 };
 
+/**
+ * @returns {null}
+ */
 const warn = (...input) => {
 	input.forEach(i => logger.warn(util.format(i)));
 	return null;
 };
 
+/**
+ * @returns {null}
+ */
 const info = (...input) => {
 	input.forEach(i => logger.info(util.format(i)));
 	return null;
 };
 
+/**
+ * @returns {null}
+ */
 const debug = (...input) => {
 	input.forEach(i => logger.debug(util.format(i)));
 	return null;
