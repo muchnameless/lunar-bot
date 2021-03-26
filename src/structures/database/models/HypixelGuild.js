@@ -160,8 +160,7 @@ module.exports = class HypixelGuild extends Model {
 	 * returns the filtered <LunarClient>.players containing all players from this guild
 	 */
 	get players() {
-		if (!this._players) this._players = this.client.players.cache.filter(({ guildID }) => guildID === this.guildID);
-		return this._players;
+		return this._players ??= this.client.players.cache.filter(({ guildID }) => guildID === this.guildID);
 	}
 
 	set chatBridge(value) {
@@ -410,7 +409,7 @@ module.exports = class HypixelGuild extends Model {
 
 				// add all players to the db that joined
 				...membersJoinedNew.map(async ({ uuid: minecraftUUID }) => { // eslint-disable-line no-shadow
-					const IGN = await mojang.getName(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${error}`)) ?? UNKNOWN_IGN;
+					const IGN = await mojang.getIGN(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${error}`)) ?? UNKNOWN_IGN;
 
 					joinedLog.push(`+\xa0${IGN}`);
 
