@@ -14,6 +14,7 @@ class HypixelMessageAuthor {
 		this.hypixelRank = hypixelRank ?? null;
 		this.ign = ign ?? null;
 		this.guildRank = guildRank ?? null;
+		this._player = null;
 	}
 
 	/**
@@ -27,7 +28,7 @@ class HypixelMessageAuthor {
 	 * the message author's player object
 	 */
 	get player() {
-		return this.chatBridge.client.players.findByIGN(this.ign);
+		return this._player ??= this.chatBridge.client.players.findByIGN(this.ign);
 	}
 
 	/**
