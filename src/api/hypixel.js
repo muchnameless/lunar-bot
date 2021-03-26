@@ -2,6 +2,7 @@
 
 const { Client } = require('@zikeji/hypixel');
 const { redisCache } = require('./cache');
+const hypixelTTL = require('./hypixelTTL');
 const logger = require('../functions/logger');
 
 
@@ -14,27 +15,8 @@ const hypixel = new Client(process.env.HYPIXEL_KEY_MAIN, {
 		set(key, value) {
 			if (key.startsWith('guild')) return;
 
-			// default 5 minute ttl - useful for alost of endpoints
-			let ttl = 5 * 60;
-
-			if (key.startsWith('skyblock:profile') || key.startsWith('player')) {
-				ttl = 20;
-			} else if (key.startsWith('skyblock:auction')) {
-				ttl = 4 * 60;
-
-			// the following endpoints don't require API keys and won't eat into your rate limit
-			} else if (key.startsWith('resources:')) {
-				ttl = 24 * 60 * 60; // 24 hours as resources don't update often, if at all
-			} else if (key === 'skyblock:bazaar') {
-				// this endpoint is cached by cloudflare and updates every 10 seconds
-				ttl = 10;
-			} else if (key.startsWith('skyblock:auctions:')) {
-				// this endpoint is cached by cloudflare and updates every 60 seconds
-				ttl = 60;
-			}
-
 			// prepend our key with "hypixel" so we don't conflict with anyone else
-			return redisCache.set(`hypixel:${key}`, value, { ttl });
+			return redisCache.set(`hypixel:${key}`, value, { ttl: hypixelTTL(key) });
 		},
 	},
 });
