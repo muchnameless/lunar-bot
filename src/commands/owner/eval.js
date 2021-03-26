@@ -144,7 +144,7 @@ module.exports = class EvalCommand extends Command {
 						return [ trim(Util.escapeCodeBlock(this.cleanOutput(evaled)), 1015) ];
 					}
 				})();
-			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${(((hrStop[0] * 1e9) + hrStop[1])) / 1e6} ms\``;
+			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${((hrStop[0] * 1e9) + hrStop[1]) / 1e6} ms\``;
 
 			message.replyMessageID = REPLY_MESSAGE_ID_TEMP;
 			embedCharacterCount += INFO.length;
