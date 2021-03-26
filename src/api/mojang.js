@@ -11,7 +11,7 @@ const mojang = new Mojang({
 		},
 		set(key, value) {
 			// ttl: seconds until cache sweep
-			return multiCache.set(`mojang:${key}`, value, { ttl: (typeof value === 'string' ? 4 : 30) * 60 });
+			return multiCache.set(`mojang:${key}`, value, { ttl: (typeof value === 'string' ? 4 : 20) * 60 });
 		},
 	},
 });

@@ -12,11 +12,13 @@ const hypixel = new Client(process.env.HYPIXEL_KEY_AUX_2, {
 			return redisCache.get(`hypixel:${key}`);
 		},
 		set(key, value) {
+			if (key.startsWith('guild')) return;
+
 			// default 5 minute ttl - useful for alost of endpoints
 			let ttl = 5 * 60;
 
-			if (key.startsWith('skyblock:profile') || key.startsWith('player') || key.startsWith('guild')) {
-				ttl = 60;
+			if (key.startsWith('skyblock:profile') || key.startsWith('player')) {
+				ttl = 20;
 			} else if (key.startsWith('skyblock:auction')) {
 				ttl = 4 * 60;
 
