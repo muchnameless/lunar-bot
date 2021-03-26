@@ -54,7 +54,7 @@ class LunarMessage extends Message {
 	 * @returns {Promise<?ReplyData>}
 	 */
 	get replyData() {
-		return multiCache.get(`reply_${this.id}`);
+		return multiCache.get(`reply_${this.guild?.id ?? 'DM'}_${this.channel.id}_${this.id}`);
 	}
 
 	/**
@@ -63,13 +63,13 @@ class LunarMessage extends Message {
 	 */
 	set replyData({ channelID, messageID }) {
 		multiCache.set(
-			`reply_${this.id}`,
+			`reply_${this.guild?.id ?? 'DM'}_${this.channel.id}_${this.id}`,
 			{
 				channelID,
 				messageID,
 			},
 			{
-				ttl: 3_600,
+				ttl: 30 * 60, // 30 min
 			},
 		);
 	}
