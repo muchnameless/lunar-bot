@@ -1,7 +1,7 @@
 'use strict';
 
 const SenitherAPIFacade = require('../structures/SenitherAPIFacade');
-const cache = require('./cache');
+const { multiCache } = require('./cache');
 const logger = require('../functions/logger');
 
 
@@ -9,11 +9,11 @@ const senither = new SenitherAPIFacade(process.env.HYPIXEL_KEY_AUX, {
 	cache: {
 		// these don't need to be async since cache.get / cache.set will return a promise
 		get(key) {
-			return cache.get(`senither:${key}`);
+			return multiCache.get(`senither:${key}`);
 		},
 		set(key, value) {
 			// prepend our key with "senither" so we don't conflict with anyone else
-			return cache.set(`senither:${key}`, value, { ttl: 5 * 60 });
+			return multiCache.set(`senither:${key}`, value, { ttl: 5 * 60 });
 		},
 	},
 });

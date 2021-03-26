@@ -7,7 +7,7 @@ const logger = require('../functions/logger');
 
 const memoryCache = cacheManager.caching({
 	store: 'memory',
-	max: 100,
+	max: 250,
 	ttl: 60,
 });
 
@@ -21,6 +21,10 @@ const redisCache = cacheManager.caching({
 
 redisCache.store.events.on('redisError', error => logger.error(error));
 
-const apiCache = cacheManager.multiCaching([ memoryCache, redisCache ]);
+const multiCache = cacheManager.multiCaching([ memoryCache, redisCache ]);
 
-module.exports = apiCache;
+module.exports = {
+	multiCache,
+	memoryCache,
+	redisCache,
+};

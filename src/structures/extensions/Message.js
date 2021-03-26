@@ -2,6 +2,7 @@
 
 const { commaListsAnd } = require('common-tags');
 const { Structures, MessageEmbed, Message, User, Util: { splitMessage } } = require('discord.js');
+const { multiCache } = require('../../api/cache');
 const _ = require('lodash');
 const LunarGuildMember = require('./GuildMember');
 const logger = require('../../functions/logger');
@@ -12,14 +13,6 @@ class LunarMessage extends Message {
 		super(...args);
 
 		this.sendReplyChannel = true;
-		/**
-		 * @type {?string|string[]}
-		 */
-		this.replyMessageID = null;
-		/**
-		 * @type {?string}
-		 */
-		this.replyChannelID = null;
 
 		/**
 		 * @type {import('./User')}
@@ -48,6 +41,37 @@ class LunarMessage extends Message {
 				.filter(x => x.startsWith('-'))
 				.some(x => [ 'c', 'ch', 'channel' ].includes(x.toLowerCase().replace(/^-+/, '')))
 			?? false);
+	}
+
+	/**
+	 * @typedef {object} ReplyData
+	 * @property {string} channelID
+	 * @property {string|string[]} messageID
+	 */
+
+	/**
+	 * cached message reply data
+	 * @returns {Promise<?ReplyData>}
+	 */
+	get replyData() {
+		return multiCache.get(`reply_${this.id}`);
+	}
+
+	/**
+	 * caches the reply data for 1 hour
+	 * @param {ReplyData} input
+	 */
+	set replyData({ channelID, messageID }) {
+		multiCache.set(
+			`reply_${this.id}`,
+			{
+				channelID,
+				messageID,
+			},
+			{
+				ttl: 3_600,
+			},
+		);
 	}
 
 	/**
@@ -284,14 +308,16 @@ class LunarMessage extends Message {
 	 */
 	async _sendReply(content, options = {}, channel = this.channel) {
 		// determine reply ID and IDs to delete
+		const replyData = await this.replyData;
+
 		let oldReplyMessageID;
 		let IDsToDelete;
 
-		if (this.replyMessageID) {
-			if (Array.isArray(this.replyMessageID)) {
-				[ oldReplyMessageID, ...IDsToDelete ] = this.replyMessageID;
+		if (replyData) {
+			if (Array.isArray(replyData.messageID)) {
+				[ oldReplyMessageID, ...IDsToDelete ] = replyData.messageID;
 			} else {
-				oldReplyMessageID = this.replyMessageID;
+				oldReplyMessageID = replyData.messageID;
 			}
 		}
 
@@ -306,21 +332,25 @@ class LunarMessage extends Message {
 			message = await channel.send(content, options);
 
 			if (options.saveReplyMessageID) {
-				this.replyChannelID = message[0].channel.id;
-				this.replyMessageID = message.map(({ id }) => id);
+				this.replyData = {
+					channelID: message[0].channel.id,
+					messageID: message.map(({ id }) => id),
+				};
 			}
 		} else { // send 1 message
-			message = await (channel.messages.cache.get(oldReplyMessageID)?.edit(content, options) ?? channel.send(content, options));
+			message = await ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error(`[SEND REPLY]: ${error.name}: ${error.message}`)))?.edit(content, options) ?? channel.send(content, options));
 
 			if (options.saveReplyMessageID) {
-				this.replyChannelID = message.channel.id;
-				this.replyMessageID = message.id;
+				this.replyData = {
+					channelID: message.channel.id,
+					messageID: message.id,
+				};
 			}
 		}
 
 		// cleanup channel (delete old replies)
-		if (IDsToDelete?.length && this.replyChannelID) {
-			this.client.channels.cache.get(this.replyChannelID)
+		if (IDsToDelete?.length && replyData.channelID) {
+			this.client.channels.cache.get(replyData.channelID)
 				?.deleteMessages(IDsToDelete)
 				.catch(error => logger.error(`[SEND REPLY]: IDs: ${IDsToDelete.map(x => `'${x}'`).join(', ')}: ${error.name}: ${error.message}`));
 		}

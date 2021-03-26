@@ -1,17 +1,17 @@
 'use strict';
 
-const apiCache = require('./cache');
+const { multiCache } = require('./cache');
 const Mojang = require('../structures/Mojang');
 
 
 const mojang = new Mojang({
 	cache: {
 		get(key) {
-			return apiCache.get(`mojang:${key}`);
+			return multiCache.get(`mojang:${key}`);
 		},
 		set(key, value) {
 			// ttl: seconds until cache sweep
-			return apiCache.set(`mojang:${key}`, value, { ttl: (typeof value === 'string' ? 4 : 30) * 60 });
+			return multiCache.set(`mojang:${key}`, value, { ttl: (typeof value === 'string' ? 4 : 30) * 60 });
 		},
 	},
 });

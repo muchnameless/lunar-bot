@@ -14,6 +14,7 @@ const hypixelMain = require('../../api/hypixel');
 const hypixelAux = require('../../api/hypixelAux');
 const senither = require('../../api/senither');
 const mojang = require('../../api/mojang');
+const { cache, redisCache, memoryCache, multiCache } = require('../../api/cache');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 /* eslint-enable no-unused-vars */
@@ -115,7 +116,6 @@ module.exports = class EvalCommand extends Command {
 		try {
 			let isPromise;
 
-			const REPLY_MESSAGE_ID_TEMP = message.replyMessageID;
 			const hrStart = process.hrtime();
 
 			// eval args
@@ -146,7 +146,6 @@ module.exports = class EvalCommand extends Command {
 				})();
 			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${((hrStop[0] * 1e9) + hrStop[1]) / 1e6} ms\``;
 
-			message.replyMessageID = REPLY_MESSAGE_ID_TEMP;
 			embedCharacterCount += INFO.length;
 
 			// add output fields till embed character limit of 6000 is reached

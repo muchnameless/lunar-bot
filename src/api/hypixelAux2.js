@@ -1,7 +1,7 @@
 'use strict';
 
 const { Client } = require('@zikeji/hypixel');
-const cache = require('./cache');
+const { redisCache } = require('./cache');
 const logger = require('../functions/logger');
 
 
@@ -9,7 +9,7 @@ const hypixel = new Client(process.env.HYPIXEL_KEY_AUX_2, {
 	cache: {
 		// these don't need to be async since cache.get / cache.set will return a promise
 		get(key) {
-			return cache.get(`hypixel:${key}`);
+			return redisCache.get(`hypixel:${key}`);
 		},
 		set(key, value) {
 			// default 5 minute ttl - useful for alost of endpoints
@@ -34,7 +34,7 @@ const hypixel = new Client(process.env.HYPIXEL_KEY_AUX_2, {
 			}
 
 			// prepend our key with "hypixel" so we don't conflict with anyone else
-			return cache.set(`hypixel:${key}`, value, { ttl });
+			return redisCache.set(`hypixel:${key}`, value, { ttl });
 		},
 	},
 });

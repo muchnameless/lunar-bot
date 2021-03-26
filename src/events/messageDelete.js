@@ -9,10 +9,12 @@ const logger = require('../functions/logger');
  * @param {import('../structures/extensions/Message')} message
  */
 module.exports = async (client, message) => {
-	if (!message.replyMessageID) return;
+	const replyData = await message.replyData;
+
+	if (!replyData) return;
 
 	try {
-		await client.channels.cache.get(message.replyChannelID).deleteMessages(message.replyMessageID);
+		await client.channels.cache.get(replyData.channelID).deleteMessages(replyData.messageID);
 
 		logger.info(`[REPLY MESSAGE DELETE]: ${message.author.tag}: ${message.content}`);
 	} catch (error) {
