@@ -338,7 +338,9 @@ class LunarMessage extends Message {
 				};
 			}
 		} else { // send 1 message
-			message = await ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error(`[SEND REPLY]: ${error.name}: ${error.message}`)))?.edit(content, options) ?? channel.send(content, options));
+			message = await (oldReplyMessageID
+				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error(`[SEND REPLY]: ${error.name}: ${error.message}`)))?.edit(content, options) ?? channel.send(content, options))
+				: channel.send(content, options));
 
 			if (options.saveReplyMessageID) {
 				this.replyData = {
