@@ -51,7 +51,7 @@ module.exports = class LinkCommand extends Command {
 					.filter(x => x != null)[0]
 					?? await (async ({ minecraftUUID, guildID }) => players.model.create({
 						minecraftUUID,
-						ign: await mojang.getName(minecraftUUID).catch(error => logger.error(`[LINK]: ${error}`)) ?? UNKNOWN_IGN,
+						ign: await mojang.getIGN(minecraftUUID).catch(error => logger.error(`[LINK]: ${error}`)) ?? UNKNOWN_IGN,
 						guildID,
 					}))(uuidInput[0]))
 				// search for player ign input

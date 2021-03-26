@@ -39,7 +39,7 @@ class Mojang {
 	 * @param {string} uuid
 	 * @returns {Promise<string>} username
 	 */
-	getName(uuid, options = {}) {
+	getIGN(uuid, options = {}) {
 		if (typeof uuid !== 'string') throw new TypeError('[Mojang Client]: uuid must be a string');
 		if (!validateMinecraftUUID(uuid)) return Promise.reject(new MojangAPIError({}, 'name', uuid));
 		return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'name', options);
@@ -55,7 +55,7 @@ class Mojang {
 	 */
 	async _makeRequest(path, query, resultField = null, { cache = true, force = false } = {}) {
 		if (!force) {
-			const cachedResponse = await this.cache?.get(query);
+			const cachedResponse = await this.cache?.get(`${resultField}:${query}`);
 			if (cachedResponse) {
 				if (typeof cachedResponse === 'string') return cachedResponse;
 				throw new MojangAPIError({ status: '(cached)', ...cachedResponse }, resultField, query);
@@ -65,7 +65,7 @@ class Mojang {
 		const res = await fetch(`${path}${query}`);
 
 		if (res.status !== 200) {
-			if (cache) this.cache?.set(query, res);
+			if (cache) this.cache?.set(`${resultField}:${query}`, res);
 			throw new MojangAPIError(res, resultField, query);
 		}
 
@@ -74,7 +74,7 @@ class Mojang {
 		});
 		const response = resultField ? parsedRes[resultField] : parsedRes;
 
-		if (cache) this.cache?.set(query, response);
+		if (cache) this.cache?.set(`${resultField}:${query}`, response);
 
 		return response;
 	}
