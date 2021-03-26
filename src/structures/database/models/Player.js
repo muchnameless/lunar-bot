@@ -960,7 +960,6 @@ module.exports = class Player extends Model {
 
 	/**
 	 * updates the player's IGN via the mojang API
-	 * @returns {Promise<object?>} { oldIgn, newIgn }
 	 */
 	async updateIgn() {
 		const PLAYER_IGN_CURRENT = await mojang.getIGN(this.minecraftUUID).catch(error => logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`));
