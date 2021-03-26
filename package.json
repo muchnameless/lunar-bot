@@ -29,7 +29,7 @@
     "eslint": "^7.22.0",
     "jaro-winkler": "^0.2.8",
     "lodash": "^4.17.21",
-    "minecraft-data": "^2.80.0",
+    "minecraft-data": "^2.81.0",
     "minecraft-protocol": "^1.24.1",
     "ms": "^2.1.3",
     "pg": "^8.5.1",
