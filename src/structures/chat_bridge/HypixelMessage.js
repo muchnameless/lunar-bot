@@ -85,6 +85,7 @@ class HypixelMessage extends ChatMessage {
 
 	/**
 	 * the message author's player object
+	 * @returns {import('../database/models/Player')}
 	 */
 	get player() {
 		return this.author?.player ?? null;
@@ -118,8 +119,7 @@ class HypixelMessage extends ChatMessage {
 	async reply(message) {
 		switch (this.type) {
 			case GUILD: {
-				const { player } = this;
-				const result = await this.chatBridge.broadcast(message, { discord: { prefix: player ? `${await player.discordMember ?? `@${player.ign}`}, ` : undefined, allowedMentions: { parse: [] } } });
+				const result = await this.chatBridge.broadcast(message, { discord: { prefix: `${await this.player?.discordMember ?? `@${this.author.ign}`}, `, allowedMentions: { parse: [] } } });
 
 				// DM author the message if sending to gchat failed
 				if (!result[0]) this.author.send(`an error occurred while replying in gchat\n${message}`);
