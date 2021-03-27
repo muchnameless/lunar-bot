@@ -1,26 +1,26 @@
 'use strict';
 
 const HYPIXEL_RANK = '(?:\\[.+?\\] )?';
-const IGN_DEFAULT = '\\w+';
-const RANK_DEFAULT = '[a-z]+';
+const IGN_DEFAULT = '\\w{3,16}';
+const GUILD_RANK_DEFAULT = '[a-z]+';
 
 const genericErrors = {
 	MUST_BE_GM: '^You must be the Guild Master to use that command!',
 	unknownIgn: (ign = IGN_DEFAULT) => `^Can't find a player by the name of '${ign}'`,
 	playerNotInGuild: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is not in your guild!`,
-	unknownRank: (_0, _1, to = IGN_DEFAULT) => `^I couldn't find a rank by the name of '${to}'!`,
+	unknownRank: (_0, _1, to = GUILD_RANK_DEFAULT) => `^I couldn't find a rank by the name of '${to}'!`,
 };
 const demote = {
 	ERROR_SELF: '^You can only demote up to your own rank!',
 	errorAlreadyLowest: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is already the lowest rank`,
 	errorGM: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is the guild master so can't be demoted!`,
-	success: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => `^${HYPIXEL_RANK}(?<target>${ign}) was demoted from (?<oldRank>${from}) to (?<newRank>${to})$`,
+	success: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => `^${HYPIXEL_RANK}(?<target>${ign}) was demoted from (?<oldRank>${from}) to (?<newRank>${to})$`,
 };
 const promote = {
 	ERROR_SELF: '^You can only promote up to your own rank!',
 	errorAlreadyHighest: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is already the highest rank`,
 	errorGM: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is the guild master so can't be promoted anymore!`,
-	success: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => `^${HYPIXEL_RANK}(?<target>${ign}) was promoted from (?<oldRank>${from}) to (?<newRank>${to})$`,
+	success: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => `^${HYPIXEL_RANK}(?<target>${ign}) was promoted from (?<oldRank>${from}) to (?<newRank>${to})$`,
 };
 const mute = {
 	ERROR_GM: '^You cannot mute the guild master!$',
@@ -83,19 +83,24 @@ const inviteResponses = [
 
 
 module.exports = {
+	defaults: {
+		ign: IGN_DEFAULT,
+		guildRank: GUILD_RANK_DEFAULT,
+		hypixelRank: HYPIXEL_RANK,
+	},
 	genericErrors: {
 		string: genericErrors,
 	},
 	demote: {
 		string: demote,
-		regExp: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => new RegExp(demoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
+		regExp: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(demoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
 	},
 	promote: {
 		string: promote,
-		regExp: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
+		regExp: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
 	},
 	setRank: {
-		regExp: (ign = IGN_DEFAULT, from = RANK_DEFAULT, to = RANK_DEFAULT) => new RegExp(setRankResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
+		regExp: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(setRankResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
 	},
 	mute: {
 		string: mute,
