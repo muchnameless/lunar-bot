@@ -28,6 +28,7 @@
     "emoji-regex": "^9.2.2",
     "eslint": "^7.22.0",
     "jaro-winkler": "^0.2.8",
+    "lex": "^1.7.9",
     "lodash": "^4.17.21",
     "minecraft-data": "^2.81.0",
     "minecraft-protocol": "^1.24.1",
@@ -37,6 +38,7 @@
     "prismarine-chat": "^1.0.3",
     "sequelize": "^6.6.2",
     "sequelize-cli": "^6.2.0",
+    "sinful-math": "^0.0.1",
     "timezonecomplete": "^5.12.2",
     "utf-8-validate": "^5.0.4",
     "winston": "^3.3.3"

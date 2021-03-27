@@ -9,7 +9,7 @@ module.exports = class MathCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'calc' ],
-			description: '',
+			description: 'supports `+`, `-`, `*`, `/`, `^`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
 			args: false,
 			usage: '',
 			cooldown: 0,
@@ -24,6 +24,6 @@ module.exports = class MathCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return math(message, rawArgs.join(''));
+		return math(message, rawArgs.join(' '));
 	}
 };
