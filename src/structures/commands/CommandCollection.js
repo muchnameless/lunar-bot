@@ -1,7 +1,7 @@
 'use strict';
 
 const { Collection } = require('discord.js');
-const { dirname, basename } = require('path');
+const { dirname, basename, join } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
 const { autocorrect } = require('../../functions/util');
 const logger = require('../../functions/logger');
@@ -135,7 +135,18 @@ class CommandCollection extends Collection {
 
 		command.load();
 
-		delete require.cache[require.resolve(file)];
+		if (!this.dirPath.includes('chat_bridge')) {
+			try {
+				require(file.replace('commands', join('structures', 'chat_bridge', 'commands')));
+				command.isBridgeCommand = true;
+			} catch {
+				command.isBridgeCommand = false;
+			}
+
+			if (!command.isBridgeCommand) delete require.cache[require.resolve(file)];
+		} else {
+			delete require.cache[require.resolve(file)];
+		}
 
 		return this;
 	}

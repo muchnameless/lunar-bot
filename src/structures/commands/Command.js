@@ -33,6 +33,8 @@ class Command {
 		this.args = args ?? false;
 		this.usage = usage;
 		this.cooldown = cooldown ?? null;
+
+		this.isBridgeCommand = null;
 	}
 
 	/**
