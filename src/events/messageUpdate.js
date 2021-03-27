@@ -53,7 +53,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 				return; // moved reply message(s) to newMessage's channel -> don't call commandHandler
 			} catch (error) {
 				logger.error(`[MESSAGE UPDATE]: ${error.name}: ${error.message}`);
-				multiCache.del(`reply_${newMessage.guild?.id ?? 'DM'}_${newMessage.channel.id}_${newMessage.id}`);
+				multiCache.del(`reply:${newMessage.guild?.id ?? 'DM'}:${newMessage.channel.id}:${newMessage.id}`);
 			}
 		}
 	}
