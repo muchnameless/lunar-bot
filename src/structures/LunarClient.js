@@ -27,7 +27,7 @@ class LunarClient extends Client {
 		this.db = new DatabaseManager({ client: this, db: options.db });
 		this.logHandler = new LogHandler(this);
 		this.chatBridges = new ChatBridgeArray(this);
-		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'));
+		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'), true);
 	}
 
 	set webhook(value) {

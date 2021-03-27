@@ -30,7 +30,7 @@ module.exports = class ReloadCommand extends Command {
 		switch (INPUT) {
 			case 'all':
 			case 'commands':
-				await this.commandCollection.unloadAll().loadAll();
+				await this.commandCollection.unloadAll().loadAll(true);
 				return message.reply(`${this.commandCollection.size} command${this.commandCollection.size !== 1 ? 's' : ''} were reloaded successfully.`);
 
 			case 'db':
@@ -51,6 +51,9 @@ module.exports = class ReloadCommand extends Command {
 
 					// try to find file with INPUT name
 					let commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
+					/**
+					 * @type {?Command}
+					 */
 					let command;
 
 					// no file found
@@ -77,7 +80,7 @@ module.exports = class ReloadCommand extends Command {
 						commandName = command.name;
 					}
 
-					this.commandCollection.load(commandFile);
+					this.commandCollection.loadFromFile(commandFile, true);
 
 					logger.info(`command ${commandName} was reloaded successfully`);
 					return message.reply(`command \`${commandName}\` was reloaded successfully.`);

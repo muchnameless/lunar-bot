@@ -102,10 +102,19 @@ class Command {
 
 	/**
 	 * loads the command and possible aliases into their collections
+	 * @param {Boolean} [isReload=false]
 	 */
-	load() {
+	load(isReload = false) {
 		this.commandCollection.set(this.name.toLowerCase(), this);
 		this.aliases?.forEach(alias => this.commandCollection.aliases.set(alias.toLowerCase(), this.name.toLowerCase()));
+
+		if (isReload && this.isBridgeCommand) {
+			if (this.commandCollection.isMainCollection) {
+				if (!this.client.chatBridges.commands.has(this.name)) this.client.chatBridges.commands.loadByName(this.name);
+			} else if (!this.client.commands.has(this.name)) {
+				this.client.commands.loadByName(this.name);
+			}
+		}
 	}
 
 	/**
@@ -114,6 +123,18 @@ class Command {
 	unload() {
 		this.aliases?.forEach(alias => this.commandCollection.aliases.delete(alias.toLowerCase()));
 		this.commandCollection.delete(this.name.toLowerCase());
+
+		if (this.isBridgeCommand) {
+			if (this.commandCollection.isMainCollection) {
+				this.client.chatBridges.commands.get(this.name)?.unload();
+			} else {
+				this.client.commands.get(this.name)?.unload();
+			}
+		}
+
+		for (const path of Object.keys(require.cache).filter(filePath => !filePath.includes('node_modules') && !filePath.includes('functions') && filePath.includes('commands') && filePath.endsWith(`${this.name}.js`))) {
+			delete require.cache[path];
+		}
 	}
 
 	/**

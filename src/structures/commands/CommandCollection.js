@@ -11,13 +11,21 @@ class CommandCollection extends Collection {
 	/**
 	 * @param {import('../LunartClient')} client
 	 * @param {string} dirPath the path to the commands folder
-	 * @param {*} entries
+	 * @param {Boolean} [isMainCollection=false]
+	 * @param {*} [entries]
 	 */
-	constructor(client, dirPath, entries) {
+	constructor(client, dirPath, isMainCollection = false, entries = undefined) {
 		super(entries);
 
 		this.client = client;
+		/**
+		 * path to the command files
+		 */
 		this.dirPath = dirPath;
+		/**
+		 * wether the collection is the main collection directly attached to the discord client
+		 */
+		this.isMainCollection = isMainCollection;
 		/**
 		 * @type {Map<string, string>}
 		 */
@@ -115,11 +123,21 @@ class CommandCollection extends Collection {
 		return command.visible ? command : null;
 	}
 
+	async loadByName(commandName) {
+		const commandFiles = await getAllJsFiles(this.dirPath);
+		const commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
+
+		if (!commandFile) return;
+
+		this.loadFromFile(commandFile);
+	}
+
 	/**
 	 * loads a single command into the collection
 	 * @param {string} file command file to load
+	 * @param {Boolean} [isReload=false]
 	 */
-	load(file) {
+	loadFromFile(file, isReload = false) {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
 		const Command = require(file);
@@ -133,9 +151,7 @@ class CommandCollection extends Collection {
 			category: category !== 'commands' ? category : null,
 		});
 
-		command.load();
-
-		if (!this.dirPath.includes('chat_bridge')) {
+		if (this.isMainCollection) {
 			try {
 				require(file.replace('commands', join('structures', 'chat_bridge', 'commands')));
 				command.isBridgeCommand = true;
@@ -143,9 +159,21 @@ class CommandCollection extends Collection {
 				command.isBridgeCommand = false;
 			}
 
+			command.load(isReload);
+
+			// delete if command won't be loaded again
 			if (!command.isBridgeCommand) delete require.cache[require.resolve(file)];
 		} else {
+			command.isBridgeCommand = true;
+			command.load(isReload);
+
+			// delete from chat_bridge/commands
 			delete require.cache[require.resolve(file)];
+
+			// delete from src/commands
+			const path = Object.keys(require.cache).find(filePath => !filePath.includes('node_modules') && !filePath.includes('functions') && filePath.includes('commands') && filePath.endsWith(`${command.name}.js`));
+
+			if (path) delete require.cache[path];
 		}
 
 		return this;
@@ -153,12 +181,13 @@ class CommandCollection extends Collection {
 
 	/**
 	 * loads all commands into the collection
+	 * @param {Boolean} [isReload=false]
 	 */
-	async loadAll() {
+	async loadAll(isReload = false) {
 		const commandFiles = await getAllJsFiles(this.dirPath);
 
 		for (const file of commandFiles) {
-			this.load(file);
+			this.loadFromFile(file, isReload);
 		}
 
 		logger.debug(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
