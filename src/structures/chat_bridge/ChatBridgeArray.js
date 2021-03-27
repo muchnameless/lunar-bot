@@ -58,6 +58,7 @@ class ChatBridgeArray extends Array {
 	/**
 	 * connects a single or all bridges, instantiating them first if not already done
 	 * @param {?number} index
+	 * @returns {Promise<ChatBridge|ChatBridge[]>}
 	 */
 	async connect(index) {
 		// load commands if none are present
@@ -72,6 +73,22 @@ class ChatBridgeArray extends Array {
 		// all
 		if (this.length !== this._accounts.length) this._init();
 		return Promise.all(this.map(async chatBridge => chatBridge.connect()));
+	}
+
+	/**
+	 * disconnects a single or all bridges
+	 * @param {?number} index
+	 * @returns {ChatBridge|ChatBridge[]}
+	 */
+	disconnect(index) {
+		// single
+		if (typeof index === 'number' && index >= 0 && index < this._accounts.length) {
+			if (!(this[index] instanceof ChatBridge)) throw new Error(`no chatBridge with index #${index}`);
+			return this[index].disconnect();
+		}
+
+		// all
+		return this.map(chatBridge => chatBridge.disconnect());
 	}
 
 	/**
