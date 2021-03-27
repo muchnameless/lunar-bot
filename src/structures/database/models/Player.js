@@ -462,7 +462,7 @@ module.exports = class Player extends Model {
 			await this.save();
 		} catch (error) {
 			if (error instanceof NonAPIError) return logger.warn(`[UPDATE XP]: ${this.logInfo}: ${error.name}: ${error.message}`);
-			if (error.name.includes('Sequelize')) {
+			if (error.name.startsWith('Sequelize')) {
 				logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name}: ${error.message}`);
 			} else {
 				logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name} ${error.code}: ${error.message}`);
