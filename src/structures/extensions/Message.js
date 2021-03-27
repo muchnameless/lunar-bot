@@ -1,7 +1,7 @@
 'use strict';
 
 const { commaListsAnd } = require('common-tags');
-const { Structures, MessageEmbed, Message, User, Util: { splitMessage } } = require('discord.js');
+const { Structures, MessageEmbed, Message, User } = require('discord.js');
 const { multiCache } = require('../../api/cache');
 const _ = require('lodash');
 const LunarGuildMember = require('./GuildMember');
@@ -323,7 +323,7 @@ class LunarMessage extends Message {
 
 		let message;
 
-		if (options?.split && splitMessage(content, options.split).length > 1) { // send multiple messages
+		if (options?.split) { // send multiple messages
 			if (oldReplyMessageID) {
 				IDsToDelete ??= [];
 				IDsToDelete.push(oldReplyMessageID);
