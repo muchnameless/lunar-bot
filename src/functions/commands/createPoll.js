@@ -22,7 +22,7 @@ module.exports = async (chatBridge, message, args, ign) => {
 
 		chatBridge.pollUntil = Date.now() + duration;
 
-		const quoteChars = [ '\u{0022}', '\u{0027}', '\u{0060}', '\u{00B4}', '\u{2018}', '\u{2019}', '\u{201C}', '\u{201D}' ];
+		const quoteChars = [ '\u{0022}', '\u{201C}', '\u{201D}' ];
 		const STARTING_INDEX = quoteChars.reduce((acc, cur) => {
 			const CUR_INDEX = message.content.indexOf(cur);
 			return Math.min(acc, CUR_INDEX === -1 ? Infinity : CUR_INDEX);
