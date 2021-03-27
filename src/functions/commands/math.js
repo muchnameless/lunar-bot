@@ -42,7 +42,7 @@ class Parser {
 							const { precedence } = operator;
 							const antecedence = table[punctuator].precedence;
 
-							if (precedence > antecedence || (precedence === antecedence && operator.associativity) === 'right') break;
+							if (precedence > antecedence || (precedence === antecedence && operator.associativity === 'right')) break;
 
 							output.push(stack.shift());
 						}
@@ -65,13 +65,13 @@ class Parser {
 const lexer = new Lexer()
 	.addRule(/[\s,]/, () => void 0)
 	.addRule(/\d+(?:\.\d+)?|\.\d+|[(+\-*/)^]/, lexeme => lexeme)
-	.addRule(/sin(?:e|us)?/i, () => 's')
-	.addRule(/cos(?:ine|inus)?/i, () => 'c')
-	.addRule(/tan(?:gen[st])?/i, () => 't')
-	.addRule(/sqrt|squareroot/i, () => 'r')
-	.addRule(/exp/i, () => 'e')
-	.addRule(/ln/, () => 'n')
-	.addRule(/log/, () => 'l')
+	.addRule(/sin(?:e|us)?/i, () => 'sin')
+	.addRule(/cos(?:ine|inus)?/i, () => 'cos')
+	.addRule(/tan(?:gen[st])?/i, () => 'tan')
+	.addRule(/sqrt|squareroot/i, () => 'sqrt')
+	.addRule(/exp/i, () => 'exp')
+	.addRule(/ln/, () => 'ln')
+	.addRule(/log/, () => 'log')
 	.addRule(/pi/i, () => Math.PI)
 	.addRule(/e/i, () => Math.E);
 
@@ -101,13 +101,13 @@ const parser = new Parser({
 	'-': term,
 	'*': factor,
 	'/': factor,
-	's': func,
-	'c': func,
-	't': func,
-	'r': func,
-	'e': func,
-	'n': func,
-	'l': func,
+	'sin': func,
+	'cos': func,
+	'tan': func,
+	'sqrt': func,
+	'exp': func,
+	'ln': func,
+	'log': func,
 });
 
 function parse(input) {
@@ -125,17 +125,17 @@ const args2 = {
 	'-': sub,
 	'*': mul,
 	'/': (a, b) => (b !== '0' ? div(a, b) : NaN),
-	'l': (a, b) => div(Math.log(a), Math.log(b)),
+	'log': (a, b) => div(Math.log(a), Math.log(b)),
 };
 const args2Arr = Object.keys(args2);
 
 const args1 = {
-	's': Math.sin,
-	'c': Math.cos,
-	't': Math.tan,
-	'r': Math.sqrt,
-	'e': Math.exp,
-	'n': Math.log,
+	'sin': Math.sin,
+	'cos': Math.cos,
+	'tan': Math.tan,
+	'sqrt': Math.sqrt,
+	'exp': Math.exp,
+	'ln': Math.log,
 };
 const args1Arr = Object.keys(args1);
 
@@ -150,7 +150,15 @@ module.exports = async (message, inputString) => {
 		.replace(/:/g, '/'); // 5:3 -> 5/3
 	const stack = [];
 
-	parse(INPUT).forEach((c) => {
+	let parsed;
+
+	try {
+		parsed = parse(INPUT);
+	} catch (error) {
+		return message.reply(`${error.message.replace(/^[A-Z]/, match => match.toLowerCase()).replace(/\.$/, '')}, input: '${INPUT}'`);
+	}
+
+	parsed.forEach((c) => {
 		if (args2Arr.includes(c)) {
 			const b = stack.pop();
 			const a = stack.pop();
@@ -169,7 +177,7 @@ module.exports = async (message, inputString) => {
 	const PRETTIFIED_INPUT = INPUT
 		.replace(/pi/gi, '\u{03C0}');
 
-	// logger.debug({ input, output })
+	// logger.debug({ input: PRETTIFIED_INPUT, output })
 
 	if (Number.isNaN(Number(output)) || Number.isFinite(Number(output))) return message.reply(`${PRETTIFIED_INPUT} = ${output}`);
 
