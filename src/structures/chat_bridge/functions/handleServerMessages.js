@@ -1,15 +1,18 @@
 'use strict';
 
 const {
+	defaults: { ign: IGN_REGEX },
 	promote: { string: { success: promote } },
 	demote: { string: { success: demote } },
 	mute: { string: { success: mute } },
 	unmute: { string: { success: unmute } },
 } = require('../constants/commandResponses');
+const { STOP } = require('../../../constants/emojiCharacters');
 const { stringToMS } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
 
+const blockedRegExp = new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_REGEX}): )?(?<blockedContent>[\\s\\S]+)" as it is breaking our rules because it`);
 const demoteRegExp = new RegExp(demote(), 'i');
 const promoteRegExp = new RegExp(promote(), 'i');
 const muteRegExp = new RegExp(mute(), 'i');
@@ -82,9 +85,32 @@ module.exports = async (message) => {
 	}
 
 	/**
+	 * auto '/gc gg' for quest completions
+	 * The guild has completed Tier 3 of this week's Guild Quest!
+	 * The Guild has reached Level 36!
+	 * The Guild has unlocked Winners III!
+	 */
+	if (/^the guild has (?:completed|reached|unlocked)/i.test(message.content)) {
+		message.forwardToDiscord();
+		return message.chatBridge.broadcast('gg');
+	}
+
+	/**
 	 * We blocked your comment "aFate: its because i said the sex word" as it is breaking our rules because it contains inappropriate content with adult themes. http://www.hypixel.net/rules/
 	 */
-	if (message.content.startsWith('We blocked your comment')) {
+	const blockedMatched = message.content.match(blockedRegExp);
+
+	if (blockedMatched) {
+		const { groups: { sender, blockedContent } } = blockedMatched;
+		const senderDiscordID = message.client.players.findByIGN(sender)?.discordID;
+
+		// react to latest message from 'sender' with that content
+		message.chatBridge.channel?.messages.cache
+			.sorted(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
+			.find(({ content, author: { id } }) => content.includes(blockedContent) && (senderDiscordID ? id === senderDiscordID : true))
+			?.reactSafely(STOP);
+
+		// DM owner to add the blocked content to the filter
 		try {
 			await message.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.content}`);
 		} catch (error) {
@@ -94,17 +120,6 @@ module.exports = async (message) => {
 		}
 
 		return;
-	}
-
-	/**
-	 * auto '/gc gg' for quest completions
-	 * The guild has completed Tier 3 of this week's Guild Quest!
-	 * The Guild has reached Level 36!
-	 * The Guild has unlocked Winners III!
-	 */
-	if (/^the guild has (?:completed|reached|unlocked)/i.test(message.content)) {
-		message.forwardToDiscord();
-		return message.chatBridge.broadcast('gg');
 	}
 
 	/**
