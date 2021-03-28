@@ -108,13 +108,22 @@ class SenitherAPIFacade extends EventEmitter {
 		const key = path.replaceAll('/', ':');
 
 		// cached response
-		if (this.cache && !force) {
-			const cachedResponse = await this.cache.get(key);
+		if (!force) {
+			const cachedResponse = await this.cache?.get(key);
 			if (cachedResponse) return cachedResponse;
 		}
 
+		let result;
+
 		try {
+			const RECHECK_CACHE = this.queue.remaining !== 0 && !force;
+
 			await this.queue.wait();
+
+			if (RECHECK_CACHE) {
+				const cachedResponse = await this.cache?.get(key);
+				if (cachedResponse) return cachedResponse;
+			}
 
 			// rate limit handling
 			if (this.rateLimit.remaining < requestAmount) {
@@ -125,24 +134,22 @@ class SenitherAPIFacade extends EventEmitter {
 			}
 
 			// API call
-			const result = await fetch(`${BASE_URL}/${path}`, { headers: { 'Authorization': this.key } });
+			result = await fetch(`${BASE_URL}/${path}`, { headers: { 'Authorization': this.key } });
 
 			// parse rate limit headers
 			this._getRateLimitHeaders(result.headers);
-
-			// analyze API result
-			const parsedResult = await result.json();
-
-			if (Object.hasOwnProperty.call(parsedResult, 'status') && parsedResult.status !== 200) throw new Error(`[Error ${parsedResult.status}]: ${parsedResult.reason}`);
-
-			if (this.cache && cache) {
-				await this.cache.set(key, parsedResult.data);
-			}
-
-			return parsedResult.data;
 		} finally {
 			this.queue.shift();
 		}
+
+		// analyze API result
+		const parsedResult = await result.json();
+
+		if (Object.hasOwnProperty.call(parsedResult, 'status') && parsedResult.status !== 200) throw new Error(`[Error ${parsedResult.status}]: ${parsedResult.reason}`);
+
+		if (cache) this.cache?.set(key, parsedResult.data);
+
+		return parsedResult.data;
 	}
 }
 
