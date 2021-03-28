@@ -1,22 +1,10 @@
 'use strict';
 
-const { stripIndents } = require('common-tags');
-const handleRankRequest = require('../../functions/handleRankRequest');
-const Command = require('../../../commands/Command');
+const RankCommand = require('../../../../commands/user/rank');
 // const logger = require('../../../../functions/logger');
 
 
-module.exports = class RankCommand extends Command {
-	constructor(data) {
-		super(data, {
-			aliases: [ 'request' ],
-			description: 'request a guild rank or list all requestable ranks',
-			args: false,
-			usage: '<\'rank name\' to request>',
-			cooldown: 1,
-		});
-	}
-
+module.exports = class BridgeRankCommand extends RankCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
@@ -25,19 +13,6 @@ module.exports = class RankCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		if (!args.length) {
-			const { chatBridge: { guild } } = message;
-
-			return message.reply(stripIndents`
-				Requestable guild ranks:
-				${guild.ranks
-					.filter(({ roleID }) => roleID)
-					.map(({ name, weightReq }) => ` • ${name}: ${this.client.formatNumber(weightReq)} weight`)
-					.join('\n')
-				}
-			`);
-		}
-
-		handleRankRequest(message);
+		return this._run(message, !args.length, message.chatBridge.guild);
 	}
 };

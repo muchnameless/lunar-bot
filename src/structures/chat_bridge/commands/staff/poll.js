@@ -1,21 +1,11 @@
 'use strict';
 
 const createPoll = require('../../../../functions/commands/createPoll');
-const Command = require('../../../commands/Command');
+const PollCommand = require('../../../../commands/staff/poll');
 // const logger = require('../../../../functions/logger');
 
 
-module.exports = class PollCommand extends Command {
-	constructor(data) {
-		super(data, {
-			aliases: [ 'polls' ],
-			description: 'create a poll for both ingame and discord guild chat',
-			args: true,
-			usage: '<30s <= \'duration\' <= 10m> ["question" "option1" "option2" ...]',
-			cooldown: 30,
-		});
-	}
-
+module.exports = class BridgePollCommand extends PollCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../HypixelMessage')} message message that triggered the command

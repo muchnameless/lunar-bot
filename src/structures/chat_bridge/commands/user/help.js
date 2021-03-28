@@ -2,20 +2,11 @@
 
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
-const Command = require('../../../commands/Command');
+const HelpCommand = require('../../../../commands/user/help');
 // const logger = require('../../../../functions/logger');
 
 
-module.exports = class HelpCommand extends Command {
-	constructor(data) {
-		super(data, {
-			aliases: [ 'h' ],
-			description: 'list of all commands or info about a specific command',
-			usage: '<\'command\'|\'category\' name>',
-			cooldown: 1,
-		});
-	}
-
+module.exports = class BridgeHelpCommand extends HelpCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
