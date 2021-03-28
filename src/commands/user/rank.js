@@ -27,7 +27,7 @@ module.exports = class RankCommand extends Command {
 		const hypixelGuild = message.author.player?.guild ?? this.client.hypixelGuilds.cache.first();
 
 		if (!args.length) {
-			message.reply(stripIndents`
+			return message.reply(stripIndents`
 				Requestable guild ranks:
 				${hypixelGuild.ranks
 					.filter(({ roleID }) => roleID)

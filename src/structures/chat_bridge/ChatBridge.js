@@ -3,7 +3,7 @@
 const { Util: { escapeMarkdown, splitMessage }, MessageEmbed, DiscordAPIError } = require('discord.js');
 const { EventEmitter } = require('events');
 const { join, basename } = require('path');
-const emojiRegex = require('emoji-regex/es2015');
+const emojiRegex = require('emoji-regex/es2015')();
 const ms = require('ms');
 const { sleep, trim, cleanFormattedNumber } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
@@ -344,7 +344,8 @@ class ChatBridge extends EventEmitter {
 	_parseDiscordMessageToMinecraft(string) {
 		return cleanFormattedNumber(string)
 			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // custom emojis
-			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
+			.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
+			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
 			.replace(/<#(\d+)>/g, (match, p1) => { // channels
 				const channelName = this.client.channels.cache.get(p1)?.name;
 				if (channelName) return `#${channelName}`;

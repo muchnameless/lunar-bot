@@ -28,11 +28,11 @@ module.exports = class RankCommand extends Command {
 		if (!args.length) {
 			const { chatBridge: { guild } } = message;
 
-			message.reply(stripIndents`
+			return message.reply(stripIndents`
 				Requestable guild ranks:
 				${guild.ranks
 					.filter(({ roleID }) => roleID)
-					.map(({ name, weightReq }) => ` > ${name}: ${this.client.formatNumber(weightReq)} weight`)
+					.map(({ name, weightReq }) => ` • ${name}: ${this.client.formatNumber(weightReq)} weight`)
 					.join('\n')
 				}
 			`);
