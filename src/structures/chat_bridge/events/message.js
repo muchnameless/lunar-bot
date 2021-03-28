@@ -2,7 +2,6 @@
 
 const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('../constants/chatBridge');
 const commandHandler = require('../functions/commandHandler');
-const handleRankRequest = require('../functions/handleRankRequest');
 const handleServerMessages = require('../functions/handleServerMessages');
 const logger = require('../../../functions/logger');
 
@@ -37,7 +36,7 @@ module.exports = async (chatBridge, message) => {
 			if (!chatBridge.enabled) return;
 			if (!message.author.inGuild) return; // ignore messages from non guild players
 
-			handleRankRequest(message).catch(error => logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`));
+			chatBridge.guild?.handleRankRequestMessage(message).catch(error => logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`));
 
 			return commandHandler(message);
 		}
