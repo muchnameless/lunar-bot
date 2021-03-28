@@ -113,8 +113,6 @@ class SenitherAPIFacade extends EventEmitter {
 			if (cachedResponse) return cachedResponse;
 		}
 
-		let result;
-
 		try {
 			const RECHECK_CACHE = this.queue.remaining !== 0 && !force;
 
@@ -134,22 +132,22 @@ class SenitherAPIFacade extends EventEmitter {
 			}
 
 			// API call
-			result = await fetch(`${BASE_URL}/${path}`, { headers: { 'Authorization': this.key } });
+			const result = await fetch(`${BASE_URL}/${path}`, { headers: { 'Authorization': this.key } });
 
 			// parse rate limit headers
 			this._getRateLimitHeaders(result.headers);
+
+			// analyze API result
+			const parsedResult = await result.json();
+
+			if (Object.hasOwnProperty.call(parsedResult, 'status') && parsedResult.status !== 200) throw new Error(`[Error ${parsedResult.status}]: ${parsedResult.reason}`);
+
+			if (cache) this.cache?.set(key, parsedResult.data);
+
+			return parsedResult.data;
 		} finally {
 			this.queue.shift();
 		}
-
-		// analyze API result
-		const parsedResult = await result.json();
-
-		if (Object.hasOwnProperty.call(parsedResult, 'status') && parsedResult.status !== 200) throw new Error(`[Error ${parsedResult.status}]: ${parsedResult.reason}`);
-
-		if (cache) this.cache?.set(key, parsedResult.data);
-
-		return parsedResult.data;
 	}
 }
 
