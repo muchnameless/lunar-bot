@@ -519,7 +519,7 @@ module.exports = class HypixelGuild extends Model {
 
 	/**
 	 * determine the requested rank and compare the player's weight with the rank's requirement
-	 * @param {import('../../extensions/Message')} message discord message which was send in the #guild-general channel
+	 * @param {import('../../extensions/Message')|import('../../chat_bridge/HypixelMessage')} message message which was send in the #rank-requests channel, or that triggered the 'rank' command
 	 */
 	async handleRankRequestMessage(message) {
 		const { config } = this.client;
@@ -538,28 +538,14 @@ module.exports = class HypixelGuild extends Model {
 			roleID: ROLE_ID,
 			priority: RANK_PRIORITY,
 		} } = result; // rank
+		const { player } = message.author;
 
-		let player = this.players.find(({ discordID }) => discordID === message.author.id);
-
-		// no player db entry in this guild
+		// no player db entry
 		if (!player) {
-			({ player } = message.author);
-
-			// no player db entry in all guilds
-			if (!player) {
-				logger.info(`[RANK REQUEST]: ${this.name}: ${message.author.tag} | ${message.member.displayName} requested '${RANK_NAME}' but could not be found in the player db`);
-
-				return message.reply(
-					`unable to find you in the ${this.name} player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
-					{ sameChannel: true },
-				);
-			}
-
-			// player found in other guild
-			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' from '${this.name}' but is in '${player.guildName}'`);
+			logger.info(`[RANK REQUEST]: ${this.name}: ${message.logInfo} requested '${RANK_NAME}' but could not be found in the player db`);
 
 			return message.reply(
-				`you need to be in ${this.name} in order to request this rank. If you just joined use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel() ?? '#bot-commands'}`,
+				`unable to find you in the ${this.name} player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel?.() ?? '#bot-commands'}`,
 				{ sameChannel: true },
 			);
 		}
@@ -588,7 +574,8 @@ module.exports = class HypixelGuild extends Model {
 
 		const WEIGHT_STRING = this.client.formatDecimalNumber(totalWeight);
 
-		if (message.reactions.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error.name}: ${error.message}`)); // remove clown reaction
+		// remove clown reaction if it exists, optional chaining to handle  mc messages
+		if (message.reactions?.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error.name}: ${error.message}`));
 
 		await message.reply(
 			`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
@@ -624,12 +611,12 @@ module.exports = class HypixelGuild extends Model {
 			await player.updateRoles(`requested ${RANK_NAME}`);
 		}
 
-		await message.reactSafely(Y_EMOJI_ALT);
+		return message.reactSafely(Y_EMOJI_ALT);
 	}
 
 	/**
 	 * forwards a message to the ingame chat if neither the player nor the whole guild chat is muted
-	 * @param {import('../../extensions/Message')} message discord message which was send in the #rank-requests channel
+	 * @param {import('../../extensions/Message')} message discord message which was send in the #guild-general channel
 	 */
 	async handleChatBridgeMessage(message) {
 		try {
