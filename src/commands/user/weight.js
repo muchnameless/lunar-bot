@@ -33,7 +33,7 @@ module.exports = class WeightCommand extends Command {
 				? await mojang.getUUID(args[0])
 				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
 			const data = await senither.profiles.uuid(uuid, args.length < 2 ? 'weight' : null);
-			const { username, name, weight, weight_overflow: overflow, skills: { apiEnabled } } = args.length < 2
+			const { username, name, weight, weight_overflow: overflow, skills: { apiEnabled = false } = {} } = args.length < 2
 				? data
 				: (data.find(({ name: profileName }) => profileName.toLowerCase() === args[1].toLowerCase()) ?? (() => { throw new Error(`unknown profile name '${upperCaseFirstChar(args[1].toLowerCase())}'`); })());
 
