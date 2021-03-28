@@ -62,6 +62,10 @@ class HypixelMessage extends ChatMessage {
 		}
 	}
 
+	get logInfo() {
+		return this.author.ign ?? 'unknown author';
+	}
+
 	/**
 	 * discord client that instantiated the chatBridge
 	 */
@@ -110,6 +114,21 @@ class HypixelMessage extends ChatMessage {
 	 */
 	get formattedContent() {
 		return this.toMotd().trim();
+	}
+
+	/**
+	 * to make methods for dc messages compatible with mc messages
+	 * @returns {null}
+	 */
+	get member() {
+		return null;
+	}
+
+	/**
+	 * alias for reply, to make methods for dc messages compatible with mc messages
+	 */
+	get reactSafely() {
+		return this.reply;
 	}
 
 	/**
