@@ -26,7 +26,7 @@ process
 				key: 'PREFIX',
 			},
 		}).catch(logger.error)
-	)?.value;
+	)?.value ?? 'lg!';
 
 	db.sequelize.close().catch(logger.error);
 
