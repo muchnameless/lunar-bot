@@ -24,6 +24,10 @@ class LunarMessage extends Message {
 		this.client;
 	}
 
+	get logInfo() {
+		return `${this.author.tag}${this.guild ? ` | ${this.member.displayName}` : ''}`;
+	}
+
 	/**
 	 * wether the command was send by a non-bot user account
 	 */
@@ -89,7 +93,7 @@ class LunarMessage extends Message {
 	/**
 	 * message.react with deleted and permission check and promise rejection catch
 	 * @param {import('discord.js').EmojiResolvable} emoji
-	 * @returns {Promise<?MessageReaction>}
+	 * @returns {Promise<?import('discord.js').MessageReaction>}
 	 */
 	async reactSafely(emoji) {
 		if (this.deleted) return null;
