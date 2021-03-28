@@ -75,7 +75,7 @@ const lexer = new Lexer()
 	.addRule(/exp/i, () => 'exp')
 	.addRule(/ln/, () => 'ln')
 	.addRule(/log/, () => 'log')
-	.addRule(/pi/i, () => Math.PI) // constants
+	.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 	.addRule(/e(?:uler)?/i, () => Math.E);
 
 const power = {
@@ -165,7 +165,6 @@ module.exports = class MathCommand extends Command {
 		const INPUT = rawArgs.join(' ')
 			.replace(/\*\*/g, '^')
 			.replace(/:/g, '/') // 5:3 -> 5/3
-			.replace(/\u{03C0}/gu, 'pi')
 			.replace(/(?<=\d\s*)(?=[a-z])/gi, '*'); // add implicit '*'
 		const stack = [];
 
