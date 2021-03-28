@@ -123,22 +123,57 @@ function parse(input) {
 }
 
 const args2 = {
-	'^': (a, b) => a ** b,
-	'+': (a = 0, b = 0) => add(a, b), // default values to allow unary operators
-	'-': (a = 0, b = 0) => sub(a, b),
-	'*': mul,
-	'/': (a, b) => (b !== '0' ? div(a, b) : NaN),
-	'log': (a, b) => div(Math.log(a), Math.log(b)),
+	'^'(a, b) {
+		if (typeof a === 'undefined') throw new Error('`^` is not an unary operator');
+		if (a == '0' && b == '0') return NaN;
+		return a ** b;
+	},
+	'+': (a, b) => (typeof a !== 'undefined' ? add(a, b) : b),
+	'-': (a, b) => (typeof a !== 'undefined' ? sub(a, b) : -b),
+	'*'(a, b) {
+		if (typeof a === 'undefined') throw new Error('`*` is not an unary operator');
+		return mul(a, b);
+	},
+	'/'(a, b) {
+		if (typeof a === 'undefined') throw new Error('`/` is not an unary operator');
+		if (b == '0') return NaN;
+		return div(a, b);
+	},
+	log(a, b) {
+		if (typeof a === 'undefined') throw new Error('`log` requires two arguments (use `ln` for base e)');
+		if (a <= 0 || b <= 0) return NaN;
+		return div(Math.log(a), Math.log(b));
+	},
 };
 const args2Arr = Object.keys(args2);
 
 const args1 = {
-	'sin': x => (div(x, Math.PI) === Math.floor(div(x, Math.PI)) ? 0 : Math.sin(x)),
-	'cos': x => (div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI)) ? 0 : Math.cos(x)),
-	'tan': Math.tan,
-	'sqrt': Math.sqrt,
-	'exp': Math.exp,
-	'ln': Math.log,
+	sin(x) {
+		if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
+		if (div(x, Math.PI) === Math.floor(div(x, Math.PI))) return 0;
+		return Math.sin(x);
+	},
+	cos(x) {
+		if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
+		if (div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI))) return 0;
+		return Math.cos(x);
+	},
+	tan(x) {
+		if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
+		return Math.tan(x);
+	},
+	sqrt(x) {
+		if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
+		return Math.sqrt(x);
+	},
+	exp(x) {
+		if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
+		return Math.exp(x);
+	},
+	ln(x) {
+		if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
+		return Math.log(x);
+	},
 };
 const args1Arr = Object.keys(args1);
 
@@ -170,25 +205,31 @@ module.exports = class MathCommand extends Command {
 
 		let parsed;
 
+		// parse
 		try {
 			parsed = parse(INPUT);
 		} catch (error) {
-			return message.reply(`${error.message.replace(/^[A-Z]/, match => match.toLowerCase()).replace(/\.$/, '')}, input: '${INPUT}'`);
+			return message.reply(`ParseError: ${error.message.replace(/^[A-Z]/, match => match.toLowerCase()).replace(/\.$/, '')}, input: '${INPUT}'`);
 		}
 
-		for (const c of parsed) {
-			if (args2Arr.includes(c)) {
-				const temp = stack.pop();
-				stack.push(args2[c](stack.pop(), temp));
-				continue;
-			}
+		// calculate
+		try {
+			for (const c of parsed) {
+				if (args2Arr.includes(c)) {
+					const temp = stack.pop();
+					stack.push(args2[c](stack.pop(), temp));
+					continue;
+				}
 
-			if (args1Arr.includes(c)) {
-				stack.push(args1[c](stack.pop()));
-				continue;
-			}
+				if (args1Arr.includes(c)) {
+					stack.push(args1[c](stack.pop()));
+					continue;
+				}
 
-			stack.push(c);
+				stack.push(c);
+			}
+		} catch (error) {
+			return message.reply(`CalculationError: ${error.message}, input: '${INPUT}'`);
 		}
 
 		const output = stack.pop();
