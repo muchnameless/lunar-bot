@@ -22,6 +22,7 @@ class ConfigManager extends ModelManager {
 	 * upserts a config entry
 	 * @param {string} key config key
 	 * @param {string} value new value
+	 * @returns {Promise<import('../models/Config')>}
 	 */
 	async set(key, value) {
 		const UPPERCASED_KEY = key.toUpperCase();
