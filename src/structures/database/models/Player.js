@@ -852,7 +852,7 @@ module.exports = class Player extends Model {
 
 		let reason = 0;
 
-		if (!member.displayName.includes(this.ign)) reason = 1; // nickname doesn't include ign
+		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 1; // nickname doesn't include ign
 		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id)?.player) reason = 2; // two guild members share the same display name
 
 		if (!reason) return;
