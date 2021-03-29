@@ -263,6 +263,21 @@ module.exports = class Player extends Model {
 	}
 
 	/**
+	 * populates the discord member cache
+	 */
+	set discordMember(member) {
+		if (member == null) return;
+		if (!(member instanceof LunarGuildMember)) throw new TypeError(`[SET DISCORD MEMBER]: ${this.logInfo}: member must be a LunarGuildMember`);
+
+		this._discordMember = member;
+
+		if (this.inDiscord) return;
+
+		this.inDiscord = true;
+		this.save({ fields: [ 'inDiscord' ] });
+	}
+
+	/**
 	 * fetches the discord user if the discord id is valid
 	 * @returns {Promise<?import('../../extensions/User')>}
 	 */
@@ -270,13 +285,6 @@ module.exports = class Player extends Model {
 		return validateNumber(this.discordID)
 			? this.client.users.fetch(this.discordID)
 			: null;
-	}
-
-	/**
-	 * populates the discord member cache
-	 */
-	set discordMember(member) {
-		this._discordMember = member;
 	}
 
 	/**
