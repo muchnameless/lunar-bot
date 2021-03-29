@@ -35,6 +35,10 @@ class HypixelGuildManager extends ModelManager {
 		return this.cache.get(this.client.config.get('MAIN_GUILD_ID'));
 	}
 
+	get pseudoGuildIDs() {
+		return [ GUILD_ID_BRIDGER, GUILD_ID_ERROR ];
+	}
+
 	async loadCache(condition) {
 		await super.loadCache(condition);
 
@@ -67,7 +71,7 @@ class HypixelGuildManager extends ModelManager {
 	 */
 	sweepPlayerCache(idOrGuild) {
 		if (idOrGuild) {
-			if (typeof idOrGuild === 'string' && [ GUILD_ID_BRIDGER, GUILD_ID_ERROR ].includes(idOrGuild)) return;
+			if (this.pseudoGuildIDs.includes(idOrGuild)) return;
 
 			const hypixelGuild = this.resolve(idOrGuild);
 
