@@ -126,7 +126,7 @@ function parse(input) {
 const args2 = {
 	'^'(a, b) {
 		if (typeof a === 'undefined') throw new Error('`^` is not an unary operator');
-		if (a == '0' && b == '0') return NaN;
+		if (a == 0 && b == 0) return NaN;
 		return a ** b;
 	},
 	'+': (a, b) => (typeof a !== 'undefined' ? add(a, b) : b),
@@ -137,7 +137,7 @@ const args2 = {
 	},
 	'/'(a, b) {
 		if (typeof a === 'undefined') throw new Error('`/` is not an unary operator');
-		if (b == '0') return NaN;
+		if (b == 0) return NaN;
 		return div(a, b);
 	},
 	log(a, b) {
