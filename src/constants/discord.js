@@ -1,0 +1,8 @@
+'use strict';
+
+module.exports = {
+	EMBED_MAX_CHARS: 6_000,
+	EMBED_MAX_FIELDS: 25,
+	EMBED_FIELD_MAX_CHARS: 1_024,
+	MESSAGE_MAX_CHARS: 2_000,
+};

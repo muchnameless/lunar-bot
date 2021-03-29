@@ -1,6 +1,7 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
+const { EMBED_FIELD_MAX_CHARS } = require('../../constants/discord');
 const { escapeIgn, trim } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
@@ -61,7 +62,7 @@ module.exports = class RankIssuesCommand extends Command {
 								.sort((a, b) => a.rank.name.toLowerCase().localeCompare(b.rank.name.toLowerCase()))
 								.map(({ player, totalWeight, rank }) => `${escapeIgn(player.ign)}: ${this.client.formatDecimalNumber(totalWeight)}/${this.client.formatDecimalNumber(rank.weightReq)} [${rank.name}]`)
 								.join('\n'),
-							1024,
+							EMBED_FIELD_MAX_CHARS,
 						),
 					}
 					: {

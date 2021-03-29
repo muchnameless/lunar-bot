@@ -1,9 +1,11 @@
 'use strict';
 
+const { Util: { splitMessage, escapeCodeBlock } } = require('discord.js');
 const { promisify } = require('util');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const { XP_TYPES, XP_OFFSETS_SHORT } = require('../constants/database');
+const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
 const hypixel = require('../api/hypixel');
 const hypixelAux = require('../api/hypixelAux');
 const logger = require('./logger');
@@ -233,5 +235,22 @@ const self = module.exports = {
 	 */
 	compareAlphabetically(a, b) {
 		return collator.compare(a, b);
+	},
+
+	/**
+	 * generates an array of code blocks
+	 * @param {string} input
+	 * @param {string} [code='']
+	 * @param {string} [char='\n']
+	 * @param {Function} [formatter=escapeCodeBlock]
+	 */
+	splitForEmbedFields(input, code = '', char = '\n', formatter = escapeCodeBlock) {
+		const TO_SPLIT = `\`\`\`${code}\n${formatter(input)}\`\`\``;
+
+		try {
+			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char, prepend: `\`\`\`${code}\n`, append: '```' });
+		} catch {
+			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char: '', prepend: `\`\`\`${code}\n`, append: '```' });
+		}
 	},
 };
