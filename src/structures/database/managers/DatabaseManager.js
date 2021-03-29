@@ -275,8 +275,10 @@ class DatabaseManager {
 		// update tax db
 		const availableAuctionsLog = config.getBoolean('TAX_TRACKING_ENABLED') ? await this._updateTaxDatabase() : null;
 
+		players.updateIGN();
+
 		// update Xp
-		if (config.getBoolean('XP_TRACKING_ENABLED')) players.update();
+		if (config.getBoolean('XP_TRACKING_ENABLED')) players.updateXp();
 
 		// update taxMessage
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
