@@ -7,6 +7,9 @@ const _ = require('lodash');
 const similarity = require('jaro-winkler');
 const ms = require('ms');
 const util = require('util');
+const { EMBED_MAX_CHARS } = require('../../constants/discord');
+const { CHANNEL_FLAGS } = require('../../constants/bot');
+const { cache, redisCache, memoryCache, multiCache } = require('../../api/cache');
 const skyblock = require('../../constants/skyblock');
 const functionsUtil = require('../../functions/util');
 const functionsFiles = require('../../functions/files');
@@ -14,7 +17,6 @@ const hypixelMain = require('../../api/hypixel');
 const hypixelAux = require('../../api/hypixelAux');
 const senither = require('../../api/senither');
 const mojang = require('../../api/mojang');
-const { cache, redisCache, memoryCache, multiCache } = require('../../api/cache');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 /* eslint-enable no-unused-vars */
@@ -64,13 +66,13 @@ module.exports = class EvalCommand extends Command {
 		/* eslint-disable no-unused-vars */
 		const { client } = this;
 		const { Util, MessageEmbed } = Discord;
-		const { trim } = functionsUtil;
+		const { trim, splitForEmbedFields } = functionsUtil;
 		const { channel, channel: ch, guild, guild: g, author, member } = message;
 		const msg = message;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
 		const asyncFlags = [ 'a', 'async' ];
 		const inspectFlags = [ 'i', 'inspect' ];
-		const totalFlags = [ 'c', 'ch', 'channel', ...asyncFlags, ...inspectFlags ];
+		const totalFlags = [ ...CHANNEL_FLAGS, ...asyncFlags, ...inspectFlags ];
 		const IS_ASYNC = flags.some(flag => asyncFlags.includes(flag));
 		const SHOULD_INSPECT = flags.some(flag => inspectFlags.includes(flag));
 		/* eslint-enable no-unused-vars */
@@ -85,12 +87,11 @@ module.exports = class EvalCommand extends Command {
 		}
 
 		const INPUT = rawArgs.join(' ');
-		const inputArray = Util.splitMessage(Util.escapeCodeBlock(INPUT), { maxLength: 1015, char: '\n' });
+		const inputArray = splitForEmbedFields(INPUT, 'js');
 		const responseEmbed = new MessageEmbed()
 			.setColor(this.config.get('EMBED_BLUE'))
 			.setFooter(`${guild ? guild.me.displayName : client.user.username}`, client.user.displayAvatarURL());
 
-		let embedCharacterCount = responseEmbed.footer.text.length;
 		let hypixel;
 
 		// eslint-disable-next-line no-unused-vars
@@ -103,15 +104,9 @@ module.exports = class EvalCommand extends Command {
 					: IS_ASYNC
 						? 'Async Input'
 						: 'Input',
-				stripIndents`
-					\`\`\`js
-					${input}
-					\`\`\`
-				`,
+				input,
 			);
 		});
-
-		embedCharacterCount += responseEmbed.fields.reduce((acc, field) => field.name.length + field.value.length, 0);
 
 		try {
 			let isPromise;
@@ -129,30 +124,16 @@ module.exports = class EvalCommand extends Command {
 			if ((isPromise = evaled instanceof Promise)) evaled = await evaled;
 
 			const hrStop = process.hrtime(hrStart);
-			const OUTPUT_ARRAY = SHOULD_INSPECT
-				? (() => {
-					try {
-						return Util.splitMessage(Util.escapeCodeBlock(this.cleanOutput(util.format(evaled))), { maxLength: 1015, char: '\n' });
-					} catch {
-						return [ trim(Util.escapeCodeBlock(this.cleanOutput(util.format(evaled))), 1015) ];
-					}
-				})()
-				: (() => {
-					try {
-						return Util.splitMessage(Util.escapeCodeBlock(this.cleanOutput(evaled)), { maxLength: 1015, char: '\n' });
-					} catch {
-						return [ trim(Util.escapeCodeBlock(this.cleanOutput(evaled)), 1015) ];
-					}
-				})();
+			const OUTPUT_ARRAY = splitForEmbedFields(this.cleanOutput(SHOULD_INSPECT ? util.format(evaled) : evaled), 'js');
 			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${((hrStop[0] * 1e9) + hrStop[1]) / 1e6} ms\``;
 
-			embedCharacterCount += INFO.length;
+			// add output fields till embed character limit is reached
+			for (const [ index, value ] of OUTPUT_ARRAY.entries()) {
+				const name = index ? '\u200b' : `Output${SHOULD_INSPECT ? ' (inspected)' : ''}`;
 
-			// add output fields till embed character limit of 6000 is reached
-			for (const [ index, output ] of OUTPUT_ARRAY.entries()) {
-				embedCharacterCount += output.length + 9;
-				if (embedCharacterCount > 6_000) break;
-				responseEmbed.addField(index ? '\u200b' : `Output${SHOULD_INSPECT ? ' (inspected)' : ''}`, `\`\`\`js\n${output}\`\`\``);
+				if (responseEmbed.length + INFO.length + 1 + name.length + value.length > EMBED_MAX_CHARS) break;
+
+				responseEmbed.addField(name, value);
 			}
 
 			await message.reply(responseEmbed
@@ -162,13 +143,18 @@ module.exports = class EvalCommand extends Command {
 		} catch (error) {
 			logger.error(`[EVAL ERROR]: ${error?.name}: ${error?.message}`);
 
-			Util.splitMessage(Util.escapeCodeBlock(this.cleanOutput(error)), { maxLength: 1015, char: '\n' })
-				.forEach((output, index) => {
-					responseEmbed.addField(index ? '\u200b' : 'Error', `\`\`\`xl\n${output}\`\`\``);
-				});
+			const FOOTER = `d.js ${Discord.version} • type: \`${typeof error}\``;
+
+			for (const [ index, value ] of splitForEmbedFields(this.cleanOutput(error), 'xl').entries()) {
+				const name = index ? '\u200b' : 'Error';
+
+				if (responseEmbed.length + FOOTER.length + 1 + name.length + value.length > EMBED_MAX_CHARS) break;
+
+				responseEmbed.addField(name, value);
+			}
 
 			message.reply(responseEmbed
-				.addField('\u200b', `d.js ${Discord.version} • type: \`${typeof error}\``)
+				.addField('\u200b', FOOTER)
 				.setTimestamp(),
 			);
 		}
