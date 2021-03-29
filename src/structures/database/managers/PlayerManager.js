@@ -263,11 +263,15 @@ class PlayerManager extends ModelManager {
 		 * @type {MessageEmbed[]}
 		 */
 		const embeds = [];
+		/**
+		 * @param {import('../models/HypixelGuild')|string} guild
+		 * @param {number} ignChangesAmount
+		 */
 		const createEmbed = (guild, ignChangesAmount) => {
 			const embed = new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_BLUE'))
-				.setTitle(`${typeof guild === 'string' ? upperCaseFirstChar(guild) : guild} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${this.client.hypixelGuilds.cache.find(({ name }) => name === guild)?.playerCount ?? 0}`)
+				.setTitle(`${typeof guild !== 'string' ? guild : upperCaseFirstChar(guild)} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
+				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildID }) => guildID === guild).size}`)
 				.setTimestamp();
 
 			embeds.push(embed);
