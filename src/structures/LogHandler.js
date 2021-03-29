@@ -47,9 +47,9 @@ class LogHandler {
 
 	/**
 	 * logs an unspecified amount of embeds to console and via the logging webhook
-	 * @param {...MessageEmbed|string} embedsInput embeds to log
+	 * @param {MessageEmbed[]|string[]} embedsInput embeds to log
 	 */
-	async logMany(...embedsInput) {
+	async logMany(embedsInput) {
 		const embeds = this._prepareEmbeds(embedsInput);
 		const TOTAL_AMOUNT = embeds.length;
 		const returnValue = [];
