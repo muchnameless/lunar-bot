@@ -918,7 +918,7 @@ module.exports = class Player extends Model {
 				await member
 					.send(reason === 1
 						? stripIndents`
-							include your ign \`${newNick}\` somewhere in your nickname.
+							include your ign \`${this.ign}\` somewhere in your nickname.
 							If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${this.client.user} will automatically change your discord nickname
 						`
 						: stripIndents`
