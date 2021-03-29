@@ -8,6 +8,8 @@ const hypixel = require('../api/hypixel');
 const hypixelAux = require('../api/hypixelAux');
 const logger = require('./logger');
 
+const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
+
 
 const self = module.exports = {
 
@@ -222,5 +224,14 @@ const self = module.exports = {
 		result.value = XP_OFFSETS_SHORT[result.value];
 
 		return result;
+	},
+
+	/**
+	 * compares to strings alphabetically, case insensitive
+	 * @param {string} a
+	 * @param {string} b
+	 */
+	compareAlphabetically(a, b) {
+		return collator.compare(a, b);
 	},
 };
