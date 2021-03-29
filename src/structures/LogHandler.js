@@ -3,6 +3,7 @@
 const { MessageEmbed, SnowflakeUtil, DiscordAPIError } = require('discord.js');
 const { join } = require('path');
 const { promises: { mkdir, writeFile, readdir, readFile, unlink } } = require('fs');
+const { EMBED_MAX_CHARS } = require('../constants/discord');
 const { cleanLoggingEmbedString } = require('../functions/util');
 const logger = require('../functions/logger');
 
@@ -45,23 +46,80 @@ class LogHandler {
 	}
 
 	/**
-	 * logs the embeds to console and via the logging webhook
+	 * logs an unspecified amount of embeds to console and via the logging webhook
 	 * @param {...MessageEmbed|string} embedsInput embeds to log
 	 */
-	async log(...embedsInput) {
-		const embeds = embedsInput.filter(x => x != null); // filter out null, undefined, ...
+	async logMany(...embedsInput) {
+		const embeds = this._prepareEmbeds(embedsInput);
+		const TOTAL_AMOUNT = embeds.length;
+		const returnValue = [];
 
-		if (!embeds.length) throw new TypeError('[CLIENT LOG]: cannot send an empty message');
-		if (embeds.length > 10) throw new RangeError('[CLIENT LOG]: exceeded maximum embed count of 10');
+		for (let total = 0; total < TOTAL_AMOUNT; ++total) {
+			const embedChunk = [];
 
-		// log to console
-		for (let embed of embeds) {
-			if (typeof embed === 'string') {
-				embed = embeds[embeds.indexOf(embed)] = new MessageEmbed({ color: this.client.config.get('EMBED_BLUE'), description: embed });
-			} else if (typeof embed !== 'object' || !embed) {
-				throw new TypeError(`[CLIENT LOG]: provided argument '${embed}' is a ${typeof embed} instead of an Object or String`);
+			let embedChunkLength = 0;
+
+			for (let current = 0; current < 10 && total < TOTAL_AMOUNT; ++current, ++total) {
+				embedChunkLength += embeds[total].length;
+
+				// adding the new embed would exceed the max char count
+				if (embedChunkLength > EMBED_MAX_CHARS) {
+					--total;
+					break;
+				}
+
+				embedChunk.push(embeds[total]);
 			}
 
+			returnValue.push(this._sendViaWebhook(embedChunk));
+		}
+
+		return Promise.all(returnValue);
+	}
+
+	/**
+	 * logs up to 10 embeds to console and via the logging webhook
+	 * @param {...MessageEmbed} embedsInput embeds to log
+	 */
+	async log(...embedsInput) {
+		return this._sendViaWebhook(this._prepareEmbeds(embedsInput));
+	}
+
+	/**
+	 * make sure all elements are instances of MessageEmbed
+	 * @param {MessageEmbed[]} embedsInput
+	 */
+	_prepareEmbeds(embedsInput) {
+		const embeds = embedsInput.filter(x => x != null); // filter out null & undefined
+
+		// make sure all elements in embeds are instances of MessageEmbed
+		for (const [ index, embed ] of embeds.entries()) {
+			if (embed instanceof MessageEmbed) continue;
+
+			if (typeof embed === 'string') {
+				embeds[index] = new MessageEmbed({ color: this.client.config.get('EMBED_BLUE'), description: embed });
+				continue;
+			}
+
+			if (typeof embed !== 'object') {
+				throw new TypeError(`[CLIENT LOG MANY]: provided argument '${embed}' is a ${typeof embed} instead of an Object or String`);
+			}
+
+			embeds[index] = new MessageEmbed(embed);
+		}
+
+		if (!embeds.length) throw new TypeError('[CLIENT LOG MANY]: cannot send an empty message');
+
+		return embeds;
+	}
+
+	/**
+	 * log to console and send via webhook
+	 * @param {MessageEmbed[]} embedsInput
+	 */
+	async _sendViaWebhook(embeds) {
+		// log to console
+		for (const embed of embeds) {
 			const FIELDS_LOG = embed.fields?.filter(({ name, value }) => name !== '\u200b' || value !== '\u200b');
 
 			logger.info([
@@ -78,13 +136,11 @@ class LogHandler {
 
 		// API call
 		try {
-			const res = await this.webhook.send({
+			return await this.webhook.send({
 				username: `${this.client.user.username} Log`,
 				avatarURL: this.client.user.displayAvatarURL(),
 				embeds,
 			});
-
-			return res;
 		} catch (error) {
 			logger.error(`[CLIENT LOG]: ${error.name}: ${error.message}`);
 
@@ -104,10 +160,13 @@ class LogHandler {
 	 * create log_buffer folder if it is non-existent
 	 */
 	async _createLogBufferFolder() {
-		return mkdir(this.logBufferPath).then(
-			() => logger.debug('[LOG BUFFER]: created \'log_buffer\' folder'),
-			() => null, // rejects if folder already exists
-		);
+		try {
+			await mkdir(this.logBufferPath);
+			logger.debug('[LOG BUFFER]: created \'log_buffer\' folder');
+			return true;
+		} catch { // rejects if folder already exists
+			return false;
+		}
 	}
 
 	/**

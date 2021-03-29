@@ -75,12 +75,21 @@ class LunarClient extends Client {
 	}
 
 	/**
-	 * logs the embeds to console and via the logging webhook
+	 * logs up to 10 embeds to console and via the logging webhook
 	 * @type {Function(...embeds)}
 	 * @param {...string|import('discord.js').MessageEmbed} embeds embeds to log
 	 */
 	get log() {
 		return this.logHandler.log.bind(this.logHandler);
+	}
+
+	/**
+	 * logs an unspecified amount of embeds to console and via the logging webhook
+	 * @type {Function(...embeds)}
+	 * @param {...string|import('discord.js').MessageEmbed} embeds embeds to log
+	 */
+	get logMany() {
+		return this.logHandler.logMany.bind(this.logHandler);
 	}
 
 	/**
