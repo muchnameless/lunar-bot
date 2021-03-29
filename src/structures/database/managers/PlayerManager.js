@@ -1,10 +1,11 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH } } = require('../../../constants/database');
-const { autocorrect, getWeekOfYear } = require('../../../functions/util');
+const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
+const { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
 const logger = require('../../../functions/logger');
 
@@ -108,6 +109,7 @@ class PlayerManager extends ModelManager {
 	 * add a player to the db and db cache
 	 * @param {object} options options for the new db entry
 	 * @param {boolean} isAddingSingleEntry wether to call sortAlphabetically() and updateXp() after adding the new entry
+	 * @returns {Promise<import('../models/Player')>}
 	 */
 	async add(options = {}, isAddingSingleEntry = true) {
 		const newPlayer = await super.add(options);
@@ -195,17 +197,30 @@ class PlayerManager extends ModelManager {
 	}
 
 	/**
-	 * sort alphabetically by IGNs
+	 * sort players alphabetically by IGNs
 	 */
 	sortAlphabetically() {
 		this.cache._array = null;
-		return this.cache.sort((a, b) => a.ign.toLowerCase().localeCompare(b.ign.toLowerCase()));
+		this.cache.sort(compareAlphabetically);
+		return this;
 	}
 
 	/**
 	 * update db entries and linked discord members of all players
 	 */
-	update(options = {}) {
+	async update(options = {}) {
+		await Promise.all(
+			this.updateXp(options),
+			this.updateIGN(),
+		);
+
+		return this;
+	}
+
+	/**
+	 * update Xp for all players
+	 */
+	async updateXp(options) {
 		// the hypxiel api encountered an error before
 		if (this.client.config.getBoolean('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
@@ -215,8 +230,77 @@ class PlayerManager extends ModelManager {
 				logger.warn('[PLAYERS UPDATE]: auto updates disabled');
 			}
 		} else {
-			this.cache.forEach(player => player.update(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`)));
+			await Promise.all(this.cache.map(async player => player.update(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`))));
 		}
+
+		return this;
+	}
+
+	async updateIGN() {
+		/** @type {Record<string, string>[]} */
+		const log = [];
+
+		await Promise.all(this.cache.map(async (player) => {
+			const result = await player.updateIgn();
+			if (result) {
+				log.push({
+					guildID: player.guildID,
+					ignChange: `${result.oldIgn} -> ${result.newIgn}`,
+				});
+			}
+		}));
+
+		if (!log.length) return this;
+
+		/** @type {[string, string[]][]} */
+		const affectedGuilds = Object.fromEntries([ ...new Set(log.map(({ guildID }) => guildID)) ].map(id => [ id, [] ]));
+
+		for (const { guildID, ignChange } of log) {
+			affectedGuilds[guildID].push(ignChange);
+		}
+
+		/**
+		 * @type {MessageEmbed[]}
+		 */
+		const embeds = [];
+		const createEmbed = (guild, ignChangesAmount) => {
+			const embed = new MessageEmbed()
+				.setColor(this.client.config.get('EMBED_BLUE'))
+				.setTitle(`${typeof guild === 'string' ? upperCaseFirstChar(guild) : guild} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
+				.setDescription(`Number of players: ${this.client.hypixelGuilds.cache.find(({ name }) => name === guild)?.playerCount ?? 0}`)
+				.setTimestamp();
+
+			embeds.push(embed);
+
+			return embed;
+		};
+
+		for (const [ guild, ignChanges ] of Object.entries(affectedGuilds)
+			.map(([ guildID, data ]) => [ this.client.hypixelGuilds.cache.get(guildID) ?? guildID, data ])
+			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
+		) {
+			const logParts = splitMessage(`\`\`\`\n${ignChanges.sort(compareAlphabetically).join('\n')}\`\`\``, { maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' });
+
+			let embed = createEmbed(guild, ignChanges.length);
+			let currentLength = embed.length;
+
+			while (logParts.length) {
+				const name = `${'new ign'.padEnd(150, '\xa0')}\u200b`;
+				const value = logParts.shift();
+
+				if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
+					embed.addField(name, value);
+					currentLength += name.length + value.length;
+				} else {
+					embed = createEmbed(guild, ignChanges.length);
+					embed.addField(name, value);
+					currentLength = embed.length;
+				}
+			}
+		}
+
+		this.client.logMany(embeds);
+
 		return this;
 	}
 
@@ -224,8 +308,8 @@ class PlayerManager extends ModelManager {
 	 * transfers xp of all players
 	 * @param {object} options transfer options
 	 */
-	transferXp(options = {}) {
-		this.cache.forEach(player => player.transferXp(options).catch(error => logger.error(`[TRANSFER XP]: ${error.name}: ${error.message}`)));
+	async transferXp(options = {}) {
+		await Promise.all(this.cache.map(async player => player.transferXp(options).catch(error => logger.error(`[TRANSFER XP]: ${error.name}: ${error.message}`))));
 		return this;
 	}
 
@@ -233,8 +317,8 @@ class PlayerManager extends ModelManager {
 	 * reset xp of all players
 	 * @param {object} options reset options
 	 */
-	resetXp(options = {}) {
-		this.cache.forEach(player => player.resetXp(options).catch(error => logger.error(`[RESET XP]: ${error.name}: ${error.message}`)));
+	async resetXp(options = {}) {
+		await Promise.all(this.cache.map(async player => player.resetXp(options).catch(error => logger.error(`[RESET XP]: ${error.name}: ${error.message}`))));
 		return this;
 	}
 
@@ -320,12 +404,14 @@ class PlayerManager extends ModelManager {
 	/**
 	 * resets competitionStart xp, updates the config and logs the event
 	 */
-	startCompetition() {
+	async startCompetition() {
 		const { config } = this.client;
 
-		this.resetXp({ offsetToReset: COMPETITION_START });
+		await this.resetXp({ offsetToReset: COMPETITION_START });
+
 		config.set('COMPETITION_RUNNING', 'true');
 		config.set('COMPETITION_SCHEDULED', 'false');
+
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Competition')
@@ -337,11 +423,13 @@ class PlayerManager extends ModelManager {
 	/**
 	 * resets competitionEnd xp, updates the config and logs the event
 	 */
-	endCompetition() {
+	async endCompetition() {
 		const { config } = this.client;
 
-		this.resetXp({ offsetToReset: COMPETITION_END });
+		await this.resetXp({ offsetToReset: COMPETITION_END });
+
 		config.set('COMPETITION_RUNNING', 'false');
+
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Guild Competition')
@@ -353,12 +441,14 @@ class PlayerManager extends ModelManager {
 	/**
 	 * resets offsetMayor xp, updates the config and logs the event
 	 */
-	performMayorXpReset() {
+	async performMayorXpReset() {
 		const { config } = this.client;
 		const CURRENT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
+		await this.resetXp({ offsetToReset: MAYOR });
+
 		config.set('LAST_MAYOR_XP_RESET_TIME', CURRENT_MAYOR_TIME);
-		this.resetXp({ offsetToReset: MAYOR });
+
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Current Mayor XP Tracking')
@@ -376,11 +466,13 @@ class PlayerManager extends ModelManager {
 	/**
 	 * shifts the daily xp array, updates the config and logs the event
 	 */
-	performDailyXpReset() {
+	async performDailyXpReset() {
 		const { config } = this.client;
 
+		await this.resetXp({ offsetToReset: 'day' });
+
 		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
-		this.resetXp({ offsetToReset: 'day' });
+
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Daily XP Tracking')
@@ -392,11 +484,13 @@ class PlayerManager extends ModelManager {
 	/**
 	 * resets offsetWeek xp, updates the config and logs the event
 	 */
-	performWeeklyXpReset() {
+	async performWeeklyXpReset() {
 		const { config } = this.client;
 
+		await this.resetXp({ offsetToReset: WEEK });
+
 		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
-		this.resetXp({ offsetToReset: WEEK });
+
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Weekly XP Tracking')
@@ -408,11 +502,13 @@ class PlayerManager extends ModelManager {
 	/**
 	 * resets offsetMonth xp, updates the config and logs the event
 	 */
-	performMonthlyXpReset() {
+	async performMonthlyXpReset() {
 		const { config } = this.client;
 
+		await this.resetXp({ offsetToReset: MONTH });
+
 		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
-		this.resetXp({ offsetToReset: MONTH });
+
 		this.client.log(new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setTitle('Monthly XP Tracking')
