@@ -479,9 +479,7 @@ class ChatBridge extends EventEmitter {
 					try {
 						return splitMessage(part, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
 					} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '
-						if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: trimmed '${part}'`);
-						success = false;
-						return trim(message, this.maxMessageLength - prefix.length);
+						return splitMessage(part, { char: '', maxLength: this.maxMessageLength - prefix.length });
 					}
 				})
 				.filter((part) => {
