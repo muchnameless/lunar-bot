@@ -16,7 +16,7 @@ module.exports = async (client, message) => {
 	try {
 		await client.channels.cache.get(replyData.channelID).deleteMessages(replyData.messageID);
 
-		logger.info(`[REPLY MESSAGE DELETE]: ${message.author.tag}: ${message.content}`);
+		logger.info(`[REPLY MESSAGE DELETE]: ${message.logInfo}: ${message.content}`);
 	} catch (error) {
 		logger.error(`[REPLY MESSAGE DELETE]: ${error.name}: ${error.message}`);
 	}

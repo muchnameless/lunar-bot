@@ -26,7 +26,7 @@ class LunarMessage extends Message {
 	}
 
 	get logInfo() {
-		return `${this.author.tag}${this.guild ? ` | ${this.member.displayName}` : ''}`;
+		return `${this.author?.tag ?? 'unknown author'}${this.guild ? ` | ${this.member?.displayName ?? 'unknown member'}` : ''}`;
 	}
 
 	/**
