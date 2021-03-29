@@ -7,7 +7,8 @@ const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER } = 
 const { levelingXp, skillXpPast50, skillsCap, runecraftingXp, dungeonXp, slayerXp, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
-const { escapeIgn, getHypixelClient } = require('../../../functions/util');
+const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
+const { escapeIgn, getHypixelClient, trim } = require('../../../functions/util');
 const { validateNumber } = require('../../../functions/stringValidators');
 const NonAPIError = require('../../errors/NonAPIError');
 const LunarGuildMember = require('../../extensions/GuildMember');
@@ -851,13 +852,22 @@ module.exports = class Player extends Model {
 
 		let reason = 0;
 
-		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 1; // nickname doesn't include ign
+		if (!member.displayName.toLowerCase().includes(this.ign)) reason = 1; // nickname doesn't include ign
 		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id)?.player) reason = 2; // two guild members share the same display name
 
 		if (!reason) return;
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
 
-		return this.makeNickApiCall(this.ign, shouldSendDm, reason);
+		let newNick = member.nickname
+			? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - 3)} (${this.ign})`
+			: this.ign;
+
+		// 'nick (ign)' already exists
+		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === newNick.toLowerCase() && id !== member.id)?.player) {
+			newNick = this.ign;
+		}
+
+		return this.makeNickApiCall(newNick, shouldSendDm, reason);
 	}
 
 	/**
