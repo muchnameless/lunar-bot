@@ -15,6 +15,13 @@ class LunarUser extends User {
 	}
 
 	/**
+	 * boolean check for '.player'
+	 */
+	get isPlayer() {
+		return this.client.players.cache.some(({ discordID }) => discordID === this.id);
+	}
+
+	/**
 	 * player object associated with the discord user
 	 */
 	get player() {

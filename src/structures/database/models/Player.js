@@ -853,17 +853,18 @@ module.exports = class Player extends Model {
 		let reason = 0;
 
 		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 1; // nickname doesn't include ign
-		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id)?.player) reason = 2; // two guild members share the same display name
+		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id)?.isPlayer) reason = 2; // two guild members share the same display name
 
 		if (!reason) return;
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
 
+		// check if member already has a nick which is not just the current ign (case insensitive)
 		let newNick = member.nickname && member.nickname.toLowerCase() !== this.ign.toLowerCase()
 			? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - 3)} (${this.ign})`
 			: this.ign;
 
 		// 'nick (ign)' already exists
-		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === newNick.toLowerCase() && id !== member.id)?.player) {
+		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === newNick.toLowerCase() && id !== member.id)?.isPlayer) {
 			newNick = this.ign;
 		}
 
@@ -979,7 +980,7 @@ module.exports = class Player extends Model {
 	 * updates the player's IGN via the mojang API
 	 */
 	async updateIgn() {
-		const PLAYER_IGN_CURRENT = await mojang.getIGN(this.minecraftUUID).catch(error => logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`));
+		const PLAYER_IGN_CURRENT = await mojang.getIGN(this.minecraftUUID, { force: true }).catch(error => logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`));
 
 		if (!PLAYER_IGN_CURRENT || PLAYER_IGN_CURRENT === this.ign) return null;
 
@@ -993,7 +994,7 @@ module.exports = class Player extends Model {
 			return logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error.name}: ${error.message}`);
 		}
 
-		this.syncIgnWithDisplayName();
+		this.syncIgnWithDisplayName(false);
 
 		return {
 			oldIgn: ign,

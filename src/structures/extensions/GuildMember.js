@@ -14,11 +14,21 @@ class LunarGuildMember extends GuildMember {
 		 * @type {import('../LunarClient')}
 		 */
 		this.client;
+		/**
+		 * @type {import('./User')}
+		 */
+		this.user;
+	}
+
+	/**
+	 * boolean check for '.player'
+	 */
+	get isPlayer() {
+		return this.user.isPlayer;
 	}
 
 	/**
 	 * player object associated with the discord member
-	 * @type {import('../database/models/Player')}
 	 */
 	get player() {
 		return this.user.player;
