@@ -858,7 +858,7 @@ module.exports = class Player extends Model {
 		if (!reason) return;
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
 
-		let newNick = member.nickname
+		let newNick = member.nickname && member.nickname.toLowerCase() !== this.ign.toLowerCase()
 			? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - 3)} (${this.ign})`
 			: this.ign;
 
