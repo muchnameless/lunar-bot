@@ -43,7 +43,7 @@ const self = module.exports = {
 	 * abc -> Abc
 	 * @param {string} string to convert
 	 */
-	upperCaseFirstChar: string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`,
+	upperCaseFirstChar: string => `${string.charAt(0).toUpperCase()}${string.slice(1).toLowerCase()}`,
 
 	/**
 	 * removes ',', '.' and '_' from the input string
@@ -245,7 +245,7 @@ const self = module.exports = {
 	 * @param {Function} [formatter=escapeCodeBlock]
 	 */
 	splitForEmbedFields(input, code = '', char = '\n', formatter = escapeCodeBlock) {
-		const TO_SPLIT = `\`\`\`${code}\n${formatter(input?.toString?.())}\`\`\``;
+		const TO_SPLIT = `\`\`\`${code}\n${formatter(input)}\`\`\``;
 
 		try {
 			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char, prepend: `\`\`\`${code}\n`, append: '```' });
