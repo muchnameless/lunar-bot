@@ -3,6 +3,7 @@
 const { commaListsAnd } = require('common-tags');
 const { Structures, MessageEmbed, Message, User } = require('discord.js');
 const { multiCache } = require('../../api/cache');
+const { CHANNEL_FLAGS } = require('../../constants/bot');
 const _ = require('lodash');
 const LunarGuildMember = require('./GuildMember');
 const logger = require('../../functions/logger');
@@ -43,7 +44,7 @@ class LunarMessage extends Message {
 			|| (this.content
 				?.split(/ +/)
 				.filter(x => x.startsWith('-'))
-				.some(x => [ 'c', 'ch', 'channel' ].includes(x.toLowerCase().replace(/^-+/, '')))
+				.some(x => CHANNEL_FLAGS.includes(x.toLowerCase().replace(/^-+/, '')))
 			?? false);
 	}
 
