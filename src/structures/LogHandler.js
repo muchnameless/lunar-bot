@@ -3,7 +3,7 @@
 const { MessageEmbed, SnowflakeUtil, DiscordAPIError } = require('discord.js');
 const { join } = require('path');
 const { promises: { mkdir, writeFile, readdir, readFile, unlink } } = require('fs');
-const { EMBED_MAX_CHARS } = require('../constants/discord');
+const { EMBED_MAX_CHARS, EMBEDS_PER_WH_MESSAGE } = require('../constants/discord');
 const { cleanLoggingEmbedString } = require('../functions/util');
 const logger = require('../functions/logger');
 
@@ -59,7 +59,7 @@ class LogHandler {
 
 			let embedChunkLength = 0;
 
-			for (let current = 0; current < 10 && total < TOTAL_AMOUNT; ++current, ++total) {
+			for (let current = 0; current < EMBEDS_PER_WH_MESSAGE && total < TOTAL_AMOUNT; ++current, ++total) {
 				embedChunkLength += embeds[total].length;
 
 				// adding the new embed would exceed the max char count
