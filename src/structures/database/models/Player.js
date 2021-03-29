@@ -231,7 +231,6 @@ module.exports = class Player extends Model {
 	 * @returns {?import('./HypixelGuild')}
 	 */
 	get guild() {
-		if (this.guildID === GUILD_ID_BRIDGER) return this.client.hypixelGuilds.cache.get(this.client.config.get('MAIN_GUILD_ID')) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
 		return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
 	}
 
@@ -293,7 +292,16 @@ module.exports = class Player extends Model {
 	 * @returns {string}
 	 */
 	get guildName() {
-		return this.guild?.name ?? 'unknown guild';
+		switch (this.guildID) {
+			case GUILD_ID_BRIDGER:
+				return 'Bridger';
+
+			case GUILD_ID_ERROR:
+				return 'Error';
+
+			default:
+				return this.guild?.name ?? 'unknown guild';
+		}
 	}
 
 	/**
@@ -357,21 +365,8 @@ module.exports = class Player extends Model {
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async update({ shouldSkipQueue = false, reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
-		if (this.guildID === GUILD_ID_BRIDGER) { // bridgers
-			const result = await this.updateIgn();
-			return result && this.client.log(new MessageEmbed()
-				.setColor(this.client.config.get('EMBED_BLUE'))
-				.setTitle('Bridger Database: 1 change')
-				.addFields( // max value#length is 1024
-					{ name: `${'joined'.padEnd(75, '\xa0')}\u200b`, value: '```\u200b```', inline: true },
-					{ name: `${'left'.padEnd(75, '\xa0')}\u200b`, value: '```\u200b```', inline: true },
-					{ name: `${'new ign'.padEnd(75, '\xa0')}\u200b`, value: `\`\`\`\n${`${result.oldIgn} -> ${result.newIgn}`}\`\`\``, inline: true },
-				)
-				.setTimestamp(),
-			);
-		}
-
-		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp({ shouldSkipQueue }); // only query hypixel skyblock api for guild players error
+		if (this.guildID === GUILD_ID_BRIDGER) return;
+		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp({ shouldSkipQueue }); // only query hypixel skyblock api for guild players without errors
 
 		await this.updateDiscordMember({ reason, shouldSendDm });
 	}
@@ -972,8 +967,13 @@ module.exports = class Player extends Model {
 
 		const { ign } = this;
 
-		this.ign = PLAYER_IGN_CURRENT;
-		await this.save();
+		try {
+			this.ign = PLAYER_IGN_CURRENT;
+			await this.save();
+		} catch (error) {
+			this.ign = ign;
+			return logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error.name}: ${error.message}`);
+		}
 
 		this.syncIgnWithDisplayName();
 
