@@ -245,7 +245,7 @@ const self = module.exports = {
 	 * @param {Function} [formatter=escapeCodeBlock]
 	 */
 	splitForEmbedFields(input, code = '', char = '\n', formatter = escapeCodeBlock) {
-		const TO_SPLIT = `\`\`\`${code}\n${formatter(input)}\`\`\``;
+		const TO_SPLIT = `\`\`\`${code}\n${formatter(input?.toString?.())}\`\`\``;
 
 		try {
 			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char, prepend: `\`\`\`${code}\n`, append: '```' });
