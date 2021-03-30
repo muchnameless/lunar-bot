@@ -181,9 +181,23 @@ class ChatBridge extends EventEmitter {
 	 * @param {?string} guildName
 	 */
 	async link(guildName = null) {
+		// link bot to db entry (create if non existant)
+		this.bot.player ??= await (async () => {
+			const [ player, created ] = await this.client.players.model.findOrCreate({
+				where: { minecraftUUID: this.bot.uuid },
+				defaults: {
+					ign: this.bot.username,
+				},
+			});
+
+			if (created) this.client.players.set(player.minecraftUUID, player);
+
+			return player;
+		})();
+
 		const guild = guildName
 			? this.client.hypixelGuilds.cache.find(({ name }) => name === guildName)
-			: this.client.hypixelGuilds.cache.find(({ players }) => players.has(this.bot.uuid.replace(/-/g, '')));
+			: this.client.hypixelGuilds.cache.find(({ players }) => players.has(this.bot.uuid));
 
 		if (!guild) {
 			this.ready = false;
