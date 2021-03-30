@@ -184,9 +184,12 @@ class HypixelMessage extends ChatMessage {
 					},
 				});
 
-				// inform user if user and role pings don't actually ping (can't use message.mentions cause that is empty)
-				if ((!player?.hasDiscordPingPermission && /<@!?\d+>/.test(message.content)) || /<@&\d+>/.test(message.content)) {
-					this.author.send('an @mention you send didn\'t actually ping, because it was either a role mention (disabled for everyone) or you don\'t have permission to @ users from ingame chat (because you were muted via \'lg!mute\' at some time)');
+				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
+				if (/<@&\d+>/.test(message.content)) {
+					this.author.send('you do not have permission to @ roles from in game chat');
+					message.reactSafely(NO_BELL);
+				} else if ((!player?.hasDiscordPingPermission && /<@!?\d+>/.test(message.content))) {
+					this.author.send('you do not have permission to @ users from in game chat since you were muted via \'lg!mute\' in the past');
 					message.reactSafely(NO_BELL);
 				}
 
