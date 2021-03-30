@@ -44,7 +44,7 @@ module.exports = class HelpCommand extends Command {
 			}
 
 			helpEmbed
-				.setAuthor('Simple Discord Bot by muchnameless#7217')
+				.setAuthor('Discord Bot for the Lunar Guard Discord Server')
 				.setDescription(stripIndents`
 					List of all currently available commands and their aliases:
 					Use \`${this.config.get('PREFIX')}\` or ${this.client.user} as prefix in servers.
@@ -55,9 +55,9 @@ module.exports = class HelpCommand extends Command {
 					Use \`${this.config.get('PREFIX')}help <command/category name>\` to get additional information on a specific command/category.
 					Arguments: \`[required]\` \`<optional>\`
 					
-					Feel free to tag me <@${this.client.ownerID}> with or DM me any bugs or feature requests.
+					Bugs or feature requests: ${await this.client.ownerInfo}
 				`)
-				.setFooter(`Discord.js ${version}`)
+				.setFooter(`discord.js ${version}`)
 				.setTimestamp();
 
 			return message.reply(helpEmbed);
@@ -85,7 +85,7 @@ module.exports = class HelpCommand extends Command {
 			} else if (INPUT === 'owner') {
 				helpEmbed.setDescription(stripIndents`
 					**Required ID:**
-					<@${this.client.ownerID}>
+					${this.client.ownerID}
 				`);
 			} else {
 				helpEmbed.setDescription(stripIndents`
@@ -136,7 +136,7 @@ module.exports = class HelpCommand extends Command {
 				helpEmbed.addField('**Required Role:**', commaListsOr`${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}`);
 			}
 		} else if (command.category === 'owner') {
-			helpEmbed.addField('**Required ID:**', `<@${this.client.ownerID}>`);
+			helpEmbed.addField('**Required ID:**', this.client.ownerID);
 		} else {
 			helpEmbed.addField('**Required Role:**', 'none');
 		}

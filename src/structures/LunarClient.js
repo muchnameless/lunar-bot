@@ -131,6 +131,23 @@ class LunarClient extends Client {
 	}
 
 	/**
+	 * @returns {Promise<import('./extensions/User')>}
+	 */
+	get owner() {
+		return this.users.fetch(this.ownerID);
+	}
+
+	/**
+	 * tag and @mention
+	 */
+	get ownerInfo() {
+		return this.owner.then(
+			owner => `${owner.tag} ${owner}`,
+			() => `<@${this.ownerID}>`,
+		);
+	}
+
+	/**
 	 * loads all commands, events, db caches and logs the client in
 	 * @param {?string} token discord bot token
 	 */
@@ -244,7 +261,7 @@ class LunarClient extends Client {
 	 * @param {string} message
 	 */
 	async dmOwner(message) {
-		await (await this.users.fetch(this.ownerID)).send(message, { split: { char: ' ' } });
+		return await (await this.owner).send(message, { split: { char: ' ' } });
 	}
 
 	/**

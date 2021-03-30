@@ -103,7 +103,7 @@ module.exports = class VerifyCommand extends Command {
 				});
 			} catch (error) {
 				logger.error(`[VERIFY]: database: ${error.name}: ${error.message}`);
-				return message.reply(`an error occurred while updating the guild player database. Contact <@${this.client.ownerID}>`);
+				return message.reply(`an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
 			}
 
 			player.guildID = GUILD_ID;
