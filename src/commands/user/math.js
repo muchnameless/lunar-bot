@@ -68,7 +68,7 @@ class Parser {
 
 const lexer = new Lexer()
 	.addRule(/[\s,]/, () => void 0) // ignore whitespaces and ','
-	.addRule(/(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^]/, lexeme => lexeme)
+	.addRule(/(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!]/, lexeme => lexeme)
 	.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
 	.addRule(/cos(?:ine|inus)?/i, () => 'cos')
 	.addRule(/tan(?:gen[st])?/i, () => 'tan')
@@ -76,8 +76,19 @@ const lexer = new Lexer()
 	.addRule(/exp/i, () => 'exp')
 	.addRule(/ln/, () => 'ln')
 	.addRule(/log/, () => 'log')
+	.addRule(/fac(?:ulty)?/, () => 'fac')
 	.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 	.addRule(/e(?:uler)?/i, () => Math.E);
+
+const facultyPost = {
+	precedence: 5,
+	associativity: 'right',
+};
+
+const facultyPre = {
+	precedence: 5,
+	associativity: 'left',
+};
 
 const power = {
 	precedence: 4,
@@ -101,6 +112,8 @@ const term = {
 
 const parser = new Parser({
 	'^': power,
+	'!': facultyPost,
+	'fac': facultyPre,
 	'+': term,
 	'-': term,
 	'*': factor,
@@ -148,7 +161,24 @@ const args2 = {
 };
 const args2Arr = Object.keys(args2);
 
+function factorial(start) {
+	let temp = 1;
+	let iterations = start;
+	while (iterations > 0) temp *= iterations--;
+	return temp;
+}
+
 const args1 = {
+	'!'(x) {
+		if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+		if (x < 0) return NaN;
+		return factorial(x);
+	},
+	fac(x) {
+		if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+		if (x < 0) return NaN;
+		return factorial(x);
+	},
 	sin(x) {
 		if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
 		if (div(x, Math.PI) === Math.floor(div(x, Math.PI))) return 0;
@@ -183,7 +213,7 @@ module.exports = class MathCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'calc' ],
-			description: 'supports `+`, `-`, `*`, `/`, `^`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
+			description: 'supports `+`, `-`, `*`, `/`, `^`, `!`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
 			args: false,
 			usage: '',
 			cooldown: 0,
@@ -212,7 +242,7 @@ module.exports = class MathCommand extends Command {
 		const INPUT = rawArgs.join(' ')
 			.replace(/\*\*/g, '^')
 			.replace(/:/g, '/') // 5:3 -> 5/3
-			.replace(/(?<=\d\s*)(?=[a-z])/gi, '*'); // add implicit '*'
+			.replace(/(?<=\d\s*)(?=[a-z(])/gi, '*'); // add implicit '*' between numbers before letters and '('
 		const stack = [];
 
 		let parsed;
