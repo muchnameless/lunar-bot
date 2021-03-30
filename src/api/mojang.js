@@ -11,7 +11,7 @@ const mojang = new Mojang({
 		},
 		set(key, value) { // ttl: seconds until cache sweep
 			if (key.startsWith('name')) { // -> getIGN
-				return redisCache.set(`mojang:${key}`, value, { ttl: (typeof value === 'string' ? 4 : 20) * 60 });
+				return redisCache.set(`mojang:${key}`, value, { ttl: (typeof value === 'string' ? 1 : 20) * 60 });
 			}
 
 			// key.startsWith('id') -> getUUID
