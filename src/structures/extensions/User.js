@@ -12,20 +12,17 @@ class LunarUser extends User {
 		 * @type {import('../LunarClient')}
 		 */
 		this.client;
-	}
-
-	/**
-	 * boolean check for '.player'
-	 */
-	get isPlayer() {
-		return this.client.players.cache.some(({ discordID }) => discordID === this.id);
+		/**
+		 * @type {import('../database/models/Player')}
+		 */
+		this._player = null;
 	}
 
 	/**
 	 * player object associated with the discord user
 	 */
 	get player() {
-		return this.client.players.getByID(this.id);
+		return this._player ??= this.client.players.getByID(this.id);
 	}
 
 	/**

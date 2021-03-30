@@ -21,13 +21,6 @@ class LunarGuildMember extends GuildMember {
 	}
 
 	/**
-	 * boolean check for '.player'
-	 */
-	get isPlayer() {
-		return this.user.isPlayer;
-	}
-
-	/**
 	 * player object associated with the discord member
 	 */
 	get player() {

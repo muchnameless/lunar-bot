@@ -247,8 +247,8 @@ module.exports = class Player extends Model {
 	 * @returns {?LunarGuildMember|Promise<?LunarGuildMember>}
 	 */
 	get discordMember() {
-		if (!this._discordMember && this.inDiscord) {
-			this._discordMember = (async () => {
+		return this._discordMember ??= this.inDiscord
+			? (async () => {
 				try {
 					return this._discordMember = await this.client.lgGuild?.members.fetch(this.discordID) ?? null;
 				} catch (error) {
@@ -257,10 +257,8 @@ module.exports = class Player extends Model {
 					logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error.name}: ${error.message}`);
 					return this._discordMember = null;
 				}
-			})();
-		}
-
-		return this._discordMember;
+			})()
+			: null;
 	}
 
 	/**
@@ -853,7 +851,7 @@ module.exports = class Player extends Model {
 		let reason = 0;
 
 		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 1; // nickname doesn't include ign
-		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id)?.isPlayer) reason = 2; // two guild members share the same display name
+		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id)?.player) reason = 2; // two guild members share the same display name
 
 		if (!reason) return;
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
@@ -864,7 +862,7 @@ module.exports = class Player extends Model {
 			: this.ign;
 
 		// 'nick (ign)' already exists
-		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === newNick.toLowerCase() && id !== member.id)?.isPlayer) {
+		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === newNick.toLowerCase() && id !== member.id)?.player) {
 			newNick = this.ign;
 		}
 
