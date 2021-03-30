@@ -24,6 +24,41 @@ class Mojang {
 	}
 
 	/**
+	 * @typedef UUIDsResult
+	 * @property {string} id
+	 * @property {string} name
+	 */
+
+	/**
+	 * bulk convertion (1 <= amount  <= 10) for ign -> uuid
+	 * @param {string[]} usernames
+	 * @returns {Promise<UUIDsResult[]>}
+	 */
+	getUUIDs(usernames) {
+		if (!Array.isArray(usernames)) throw new TypeError('[Mojang Client]: uuids must be an array');
+		if (!usernames.length || usernames.length > 10) return Promise.reject(new MojangAPIError());
+
+		return (async () => {
+			const res = await fetch(
+				'https://api.mojang.com/profiles/minecraft',
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(usernames),
+				},
+			);
+
+			if (res.status !== 200) {
+				throw new MojangAPIError(res);
+			}
+
+			return await res.json().catch(() => {
+				throw new Error('An error occurred while converting to JSON');
+			});
+		});
+	}
+
+	/**
 	 * @description converts a username to a uuid
 	 * @param {string} username
 	 * @returns {Promise<string>} uuid
