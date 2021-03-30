@@ -64,7 +64,7 @@ module.exports = class EvalCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		/* eslint-disable no-unused-vars */
-		const { client } = this;
+		const { client, config } = this;
 		const { Util, MessageEmbed } = Discord;
 		const { trim, splitForEmbedFields } = functionsUtil;
 		const { channel, channel: ch, guild, guild: g, author, member } = message;
@@ -89,7 +89,7 @@ module.exports = class EvalCommand extends Command {
 		const INPUT = rawArgs.join(' ');
 		const inputArray = splitForEmbedFields(INPUT, 'js');
 		const responseEmbed = new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+			.setColor(config.get('EMBED_BLUE'))
 			.setFooter(`${guild ? guild.me.displayName : client.user.username}`, client.user.displayAvatarURL());
 
 		let hypixel;
