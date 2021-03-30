@@ -39,6 +39,6 @@ module.exports = class TotalCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return handleLeaderboardCommandMessage(message, args, flags, createTotalStatsEmbed);
+		return handleLeaderboardCommandMessage(message, rawArgs, flags, createTotalStatsEmbed);
 	}
 };

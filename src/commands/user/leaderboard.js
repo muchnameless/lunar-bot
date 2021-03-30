@@ -40,6 +40,6 @@ module.exports = class LeaderboardCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return handleLeaderboardCommandMessage(message, args, flags, createGainedStatsEmbed);
+		return handleLeaderboardCommandMessage(message, rawArgs, flags, createGainedStatsEmbed);
 	}
 };

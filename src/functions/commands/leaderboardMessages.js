@@ -69,52 +69,52 @@ const self = module.exports = {
 	/**
 	 * handles a leaderbaord message
 	 * @param {import('../../structures/extensions/Message')} message the message to add the reactions to
-	 * @param {string[]} args
+	 * @param {string[]} rawArgs
 	 * @param {string[]} flags
 	 * @param {Function} createLeaderboard
 	 * @param {?object} defaults
 	 * @param {string} [defaults.typeDefault]
 	 * @param {number} [defaults.pageDefault=1]
 	 */
-	async handleLeaderboardCommandMessage(message, args, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) {
+	async handleLeaderboardCommandMessage(message, rawArgs, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) {
 		const { client: { config } } = message;
 
 		// should show only below reqs
-		const shouldShowOnlyBelowReqsInput = args
+		const shouldShowOnlyBelowReqsInput = rawArgs
 			.map((arg, index) => ({ index, arg, similarity: jaroWinklerSimilarity(arg, 'purge', { caseSensitive: false }) }))
 			.sort((a, b) => a.similarity - b.similarity)
 			.pop();
 		const SHOULD_SHOW_ONLY_BELOW_REQS = shouldShowOnlyBelowReqsInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {
-				args.splice(shouldShowOnlyBelowReqsInput.index, 1);
+				rawArgs.splice(shouldShowOnlyBelowReqsInput.index, 1);
 				return true;
 			})()
 			: false;
 
 		// hypixel guild input
-		const hypixelGuild = message.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
+		const hypixelGuild = message.client.hypixelGuilds.getFromArray(rawArgs) ?? message.author.player?.guild;
 
 		// type input
-		const typeInput = args
+		const typeInput = rawArgs
 			.map((arg, index) => ({ index, arg, ...autocorrectToType(arg) }))
 			.sort((a, b) => a.similarity - b.similarity)
 			.pop();
 
 		let type = typeInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {
-				args.splice(typeInput.index, 1);
+				rawArgs.splice(typeInput.index, 1);
 				return typeInput.value;
 			})()
 			: null;
 
 		// offset input
-		const offsetInput = args
+		const offsetInput = rawArgs
 			.map((arg, index) => ({ index, ...autocorrectToOffset(arg) }))
 			.sort((a, b) => a.similarity - b.similarity)
 			.pop();
 		const offset = offsetInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
 			? (() => {
-				args.splice(offsetInput.index, 1);
+				rawArgs.splice(offsetInput.index, 1);
 				return offsetInput.value;
 			})()
 			: undefined;
@@ -122,20 +122,20 @@ const self = module.exports = {
 		// page input
 		let page;
 
-		for (const [ index, arg ] of args.entries()) {
+		for (const [ index, arg ] of rawArgs.entries()) {
 			const numberInput = parseInt(arg, 10);
 
 			if (Number.isNaN(numberInput)) continue;
 
 			page = Math.max(numberInput, 1);
-			args.splice(index, 1);
+			rawArgs.splice(index, 1);
 			break;
 		}
 
 		page ??= pageDefault;
 
 		// type input
-		if (args.length) {
+		if (rawArgs.length) {
 			if (!type) {
 				if (!message.client.commands.constructor.force(flags)) {
 					const ANSWER = await message.awaitReply(`there is currently no lb for \`${typeInput.arg}\`. Did you mean \`${typeInput.value}\`?`, 30);
@@ -143,7 +143,7 @@ const self = module.exports = {
 					if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return;
 				}
 
-				args.splice(typeInput.index, 1);
+				rawArgs.splice(typeInput.index, 1);
 				type = typeInput.value;
 			}
 		} else if (!type) {
