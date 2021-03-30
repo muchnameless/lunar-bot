@@ -6,6 +6,7 @@ const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const { XP_TYPES, XP_OFFSETS_SHORT } = require('../constants/database');
 const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
+const { CHANNEL_FLAGS } = require('../constants/bot');
 const hypixel = require('../api/hypixel');
 const hypixelAux = require('../api/hypixelAux');
 const logger = require('./logger');
@@ -251,6 +252,22 @@ const self = module.exports = {
 			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char, prepend: `\`\`\`${code}\n`, append: '```' });
 		} catch {
 			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char: '', prepend: `\`\`\`${code}\n`, append: '```' });
+		}
+	},
+
+	/**
+	 * removes all found elements from the source array, defaults to channel flags
+	 * @param {any[]} sourceArray
+	 * @param {any[]} [toRemoveArray=CHANNEL_FLAGS]
+	 */
+	removeFlagsFromArray(sourceArray, toRemoveArray = CHANNEL_FLAGS) {
+		let i = -1;
+
+		while (++i < sourceArray.length) {
+			if (sourceArray[i].startsWith('-') && toRemoveArray.includes(sourceArray[i].replace(/^-+/, ''))) {
+				sourceArray.splice(i, 1);
+				--i;
+			}
 		}
 	},
 };

@@ -6,7 +6,7 @@ const jaroWinklerSimilarity = require('jaro-winkler');
 const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../../constants/database');
-const { upperCaseFirstChar, autocorrectToOffset, autocorrectToType } = require('../util');
+const { upperCaseFirstChar, autocorrectToOffset, autocorrectToType, removeFlagsFromArray } = require('../util');
 const logger = require('../logger');
 
 
@@ -77,6 +77,8 @@ const self = module.exports = {
 	 * @param {number} [defaults.pageDefault=1]
 	 */
 	async handleLeaderboardCommandMessage(message, rawArgs, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) {
+		removeFlagsFromArray(rawArgs);
+
 		const { client: { config } } = message;
 
 		// should show only below reqs

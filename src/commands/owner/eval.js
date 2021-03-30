@@ -66,25 +66,18 @@ module.exports = class EvalCommand extends Command {
 		/* eslint-disable no-unused-vars */
 		const { client, config } = this;
 		const { Util, MessageEmbed } = Discord;
-		const { trim, splitForEmbedFields } = functionsUtil;
+		const { trim, splitForEmbedFields, removeFlagsFromArray } = functionsUtil;
 		const { channel, channel: ch, guild, guild: g, author, member } = message;
 		const msg = message;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
+		/* eslint-enable no-unused-vars */
 		const asyncFlags = [ 'a', 'async' ];
 		const inspectFlags = [ 'i', 'inspect' ];
 		const totalFlags = [ ...CHANNEL_FLAGS, ...asyncFlags, ...inspectFlags ];
 		const IS_ASYNC = flags.some(flag => asyncFlags.includes(flag));
 		const SHOULD_INSPECT = flags.some(flag => inspectFlags.includes(flag));
-		/* eslint-enable no-unused-vars */
 
-		let i = -1;
-
-		while (++i < rawArgs.length) {
-			if (rawArgs[i].startsWith('-') && totalFlags.includes(rawArgs[i].replace(/^-+/, ''))) {
-				rawArgs.splice(i, 1);
-				--i;
-			}
-		}
+		removeFlagsFromArray(rawArgs, totalFlags);
 
 		const INPUT = rawArgs.join(' ');
 		const inputArray = splitForEmbedFields(INPUT, 'js');

@@ -2,8 +2,8 @@
 
 const { add, sub, mul, div } = require('sinful-math');
 const Lexer = require('lex');
-const { CHANNEL_FLAGS } = require('../../constants/bot');
 const Command = require('../../structures/commands/Command');
+const { removeFlagsFromArray } = require('../../functions/util');
 // const logger = require('../../functions/logger');
 
 
@@ -229,14 +229,7 @@ module.exports = class MathCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		// remove channel flags from rawArgs
-		let i = -1;
-
-		while (++i < rawArgs.length) {
-			if (rawArgs[i].startsWith('-') && CHANNEL_FLAGS.includes(rawArgs[i].replace(/^-+/, ''))) {
-				rawArgs.splice(i, 1);
-				--i;
-			}
-		}
+		removeFlagsFromArray(rawArgs);
 
 		// generate input string
 		const INPUT = rawArgs.join(' ')
