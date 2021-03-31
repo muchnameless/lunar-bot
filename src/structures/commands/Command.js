@@ -27,7 +27,7 @@ class Command {
 		this.name = name;
 		this.category = category;
 
-		this.aliases = aliases?.length ? aliases : null;
+		this.aliases = aliases?.length ? aliases.filter(Boolean) : null;
 		this.description = description?.length ? description : null;
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;
