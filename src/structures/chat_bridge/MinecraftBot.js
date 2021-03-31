@@ -7,10 +7,13 @@ const { getAllJsFiles } = require('../../functions/files');
 const logger = require('../../functions/logger');
 const Player = require('../database/models/Player');
 
+// {import('minecraft-protocol').Client}
+
 /**
- * @typedef {import('minecraft-protocol').Client} MinecraftBot
- * @method [chat]
- * @method [quit]
+ * @typedef {object} MinecraftBot
+ * @property {import('../LunarClient')} client
+ * @property {import('../database/models/Player')} player
+ * @function [chat]
  */
 
 /**
@@ -64,7 +67,6 @@ module.exports = async (chatBridge, options) => {
 
 		/**
 		 * the bot's cached player object
-		 * @type {import('../database/models/Player')}
 		 */
 		_player: {
 			value: null,
@@ -75,16 +77,9 @@ module.exports = async (chatBridge, options) => {
 		 * the bot's player object
 		 */
 		player: {
-			/**
-			 * the bot's player object
-			 * @type {Player}
-			 */
 			get() {
 				return this._player ??= this.client.players.cache.get(this.uuid) ?? null;
 			},
-			/**
-			 * @param {Player} value
-			 */
 			set(value) {
 				if (!(value instanceof Player)) throw new TypeError(`[BOT]: player must be a Player but received '${value}'`);
 
