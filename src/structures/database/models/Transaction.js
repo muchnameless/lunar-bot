@@ -2,6 +2,16 @@
 
 const { Model, DataTypes } = require('sequelize');
 
+/**
+ * @typedef {object} Transaction
+ * @property {string} from
+ * @property {string} to
+ * @property {number} amount
+ * @property {?string} auctionID
+ * @property {?string} notes
+ * @property {string} type
+ */
+
 
 module.exports = class Transaction extends Model {
 	constructor(...args) {

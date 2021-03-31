@@ -349,6 +349,7 @@ module.exports = class Player extends Model {
 	}
 
 	/**
+	 * amount of the last tax transaction from that player
 	 * @returns {Promise<?number>}
 	 */
 	get taxAmount() {
@@ -362,6 +363,30 @@ module.exports = class Player extends Model {
 			attributes: [ 'amount' ],
 			raw: true,
 		}).then(result => (result.length ? result[0].amount : null));
+	}
+
+	/**
+	 * @typedef {import('./Transaction').Transaction} ParsedTransaction
+	 * @property {string} fromIGN
+	 * @property {?string} toIGN
+	 */
+
+	/**
+	 * all transactions from that player
+	 * @returns {Promise<ParsedTransaction[]>}
+	 */
+	get transactions() {
+		return this.client.db.models.Transaction.findAll({
+			where: {
+				from: this.minecraftUUID,
+			},
+			order: [ [ 'createdAt', 'DESC' ] ],
+			raw: true,
+		}).then(async result => Promise.all(result.map(async transaction => ({
+			...transaction,
+			fromIGN: this.ign,
+			toIGN: this.client.players.cache.get(transaction.to)?.ign ?? await mojang.getIGN(transaction.to).catch(logger.error),
+		}))));
 	}
 
 	/**
