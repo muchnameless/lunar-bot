@@ -1,7 +1,7 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
-const { removeNumberFormatting } = require('../../functions/util');
+const { removeNumberFormatting, safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
@@ -33,14 +33,16 @@ module.exports = class TaxAmountCommand extends Command {
 
 		newAmount = Number(newAmount);
 
-		// update tax amount
-		await this.config.set('TAX_AMOUNT', newAmount);
+		await safePromiseAll([
+			// update tax amount
+			this.config.set('TAX_AMOUNT', newAmount),
 
-		// update tax collectors
-		await Promise.all(this.client.taxCollectors.activeCollectors.map(async (taxCollector) => {
-			taxCollector.collectedTax += newAmount - OLD_AMOUNT;
-			return taxCollector.save();
-		}));
+			// update tax collectors
+			...this.client.taxCollectors.activeCollectors.map(async (taxCollector) => {
+				taxCollector.collectedTax += newAmount - OLD_AMOUNT;
+				return taxCollector.save();
+			}),
+		]);
 
 		// logging
 		this.client.log(new MessageEmbed()

@@ -5,7 +5,7 @@ const { stripIndents, commaLists } = require('common-tags');
 const { MessageEmbed } = require('discord.js');
 const _ = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../../../constants/emojiCharacters');
-const { asyncFilter } = require('../../../functions/util');
+const { asyncFilter, safePromiseAll } = require('../../../functions/util');
 const hypixel = require('../../../api/hypixel');
 const ConfigManager = require('./ConfigManager');
 const CronJobManager = require('./CronJobManager');
@@ -126,59 +126,57 @@ class DatabaseManager {
 		let unknownPlayers = 0;
 
 		// update db
-		await Promise.all(taxCollectors.activeCollectors
-			.map(async (taxCollector) => {
-				try {
-					const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID);
-					const taxAuctions = [];
-					const paidLog = [];
+		await safePromiseAll(taxCollectors.activeCollectors.map(async (taxCollector) => {
+			try {
+				const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID);
+				const taxAuctions = [];
+				const paidLog = [];
 
-					let availableAuctions = 0;
+				let availableAuctions = 0;
 
-					(await asyncFilter(
-						auctions,
-						auction => TAX_AUCTIONS_ITEMS.includes(auction.item_name) && auction.start >= TAX_AUCTIONS_START_TIME && this._validateAuctionID(auction.uuid), // correct item & started after last reset & no outbid from already logged auction
-					))
-						.forEach(auction => (auction.highest_bid_amount >= TAX_AMOUNT
-							? auction.bids.length && taxAuctions.push(auction)
-							: auction.end > NOW && ++availableAuctions),
-						);
-
-					availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: ${availableAuctions}`);
-
-					if (auctions.meta.cached) return logger.info(`[UPDATE TAX DB]: ${taxCollector.ign}: cached data`);
-
-					auctionsAmount += taxAuctions.length;
-
-					await Promise.all(taxAuctions.map(async (auction) => {
-						const { bidder, amount } = auction.bids[auction.bids.length - 1];
-						const player = players.cache.get(bidder);
-
-						if (!player) return ++unknownPlayers;
-
-						paidLog.push(`${player.ign}: ${amount.toLocaleString(config.get('NUMBER_FORMAT'))}`);
-						if (config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${amount.toLocaleString(config.get('NUMBER_FORMAT'))} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
-
-						return player.setToPaid({
-							amount,
-							collectedBy: taxCollector.minecraftUUID,
-							auctionID: auction.uuid,
-							shouldAdd: true,
-						});
-					}));
-
-					if (!paidLog.length) return;
-
-					taxPaidLog.push({
-						name: `/ah ${taxCollector.ign}`,
-						value: `\`\`\`\n${paidLog.join('\n')}\`\`\`` },
+				(await asyncFilter(
+					auctions,
+					auction => TAX_AUCTIONS_ITEMS.includes(auction.item_name) && auction.start >= TAX_AUCTIONS_START_TIME && this._validateAuctionID(auction.uuid), // correct item & started after last reset & no outbid from already logged auction
+				))
+					.forEach(auction => (auction.highest_bid_amount >= TAX_AMOUNT
+						? auction.bids.length && taxAuctions.push(auction)
+						: auction.end > NOW && ++availableAuctions),
 					);
-				} catch (error) {
-					logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
-					availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: API Error`);
-				}
-			}),
-		).catch(error => logger.error(`[UPDATE TAX DB]: ${error.name}: ${error.message}`));
+
+				availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: ${availableAuctions}`);
+
+				if (auctions.meta.cached) return logger.info(`[UPDATE TAX DB]: ${taxCollector.ign}: cached data`);
+
+				auctionsAmount += taxAuctions.length;
+
+				await safePromiseAll(taxAuctions.map(async (auction) => {
+					const { bidder, amount } = auction.bids[auction.bids.length - 1];
+					const player = players.cache.get(bidder);
+
+					if (!player) return ++unknownPlayers;
+
+					paidLog.push(`${player.ign}: ${amount.toLocaleString(config.get('NUMBER_FORMAT'))}`);
+					if (config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${amount.toLocaleString(config.get('NUMBER_FORMAT'))} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
+
+					return player.setToPaid({
+						amount,
+						collectedBy: taxCollector.minecraftUUID,
+						auctionID: auction.uuid,
+						shouldAdd: true,
+					});
+				}));
+
+				if (!paidLog.length) return;
+
+				taxPaidLog.push({
+					name: `/ah ${taxCollector.ign}`,
+					value: `\`\`\`\n${paidLog.join('\n')}\`\`\`` },
+				);
+			} catch (error) {
+				logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
+				availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: API Error`);
+			}
+		}));
 
 		// logging
 		if (auctionsAmount && (config.getBoolean('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.getNumber('DATABASE_UPDATE_INTERVAL')))) logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);

@@ -1,6 +1,7 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
+const { safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -101,10 +102,10 @@ module.exports = class TaxResetCommand extends Command {
 
 
 			// update database
-			await Promise.all([
+			await safePromiseAll([
 				...taxCollectors.cache.map(async (taxCollector) => { // remove retired collectors and reset active ones
 					if (!taxCollector.isCollecting) return taxCollector.remove();
-					return Promise.all([
+					return safePromiseAll([
 						taxCollector.resetAmount('tax'),
 						taxCollector.resetAmount('donation'),
 					]);
@@ -125,7 +126,7 @@ module.exports = class TaxResetCommand extends Command {
 				this.config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up until now
 			]);
 
-			await Promise.all(taxCollectors.cache.map(async ({ player }) => player?.setToPaid()));
+			await safePromiseAll(taxCollectors.cache.map(async ({ player }) => player?.setToPaid()));
 
 			// delete players who left the guild
 			players.sweepDb();

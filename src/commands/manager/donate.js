@@ -2,7 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { validateNumber } = require('../../functions/stringValidators');
-const { removeNumberFormatting } = require('../../functions/util');
+const { removeNumberFormatting, safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
@@ -57,7 +57,7 @@ module.exports = class DonateCommand extends Command {
 			notes = [ AMOUNT_OR_TEXT, ...textInput ].join(' ');
 		}
 
-		await Promise.all(player.addTransfer({
+		await safePromiseAll(player.addTransfer({
 			amount,
 			collectedBy: collector.minecraftUUID,
 			notes,

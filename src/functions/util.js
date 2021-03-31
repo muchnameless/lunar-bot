@@ -270,4 +270,12 @@ const self = module.exports = {
 			}
 		}
 	},
+
+	/**
+	 * waits for all promises to settle and logs the errored ones
+	 * @param {Promise<any>[]} arr
+	 */
+	async safePromiseAll(arr) {
+		(await Promise.allSettled(arr)).forEach(({ status, reason }) => status === 'rejected' && logger.error(reason));
+	},
 };

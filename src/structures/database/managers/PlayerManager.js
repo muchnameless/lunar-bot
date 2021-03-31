@@ -5,7 +5,7 @@ const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH } } = require('../../../constants/database');
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
-const { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar } = require('../../../functions/util');
+const { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar, safePromiseAll } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
 const logger = require('../../../functions/logger');
 
@@ -209,10 +209,10 @@ class PlayerManager extends ModelManager {
 	 * update db entries and linked discord members of all players
 	 */
 	async update(options = {}) {
-		await Promise.all(
+		await Promise.all([
 			this.updateXp(options),
 			this.updateIGN(),
-		);
+		]);
 
 		return this;
 	}
@@ -230,7 +230,7 @@ class PlayerManager extends ModelManager {
 				logger.warn('[PLAYERS UPDATE]: auto updates disabled');
 			}
 		} else {
-			await Promise.all(this.cache.map(async player => player.update(options).catch(error => logger.error(`[UPDATE XP]: ${error.name}: ${error.message}`))));
+			await safePromiseAll(this.cache.map(async player => player.update(options)));
 		}
 
 		return this;
@@ -313,7 +313,7 @@ class PlayerManager extends ModelManager {
 	 * @param {object} options transfer options
 	 */
 	async transferXp(options = {}) {
-		await Promise.all(this.cache.map(async player => player.transferXp(options).catch(error => logger.error(`[TRANSFER XP]: ${error.name}: ${error.message}`))));
+		await safePromiseAll(this.cache.map(async player => player.transferXp(options)));
 		return this;
 	}
 
@@ -322,7 +322,7 @@ class PlayerManager extends ModelManager {
 	 * @param {object} options reset options
 	 */
 	async resetXp(options = {}) {
-		await Promise.all(this.cache.map(async player => player.resetXp(options).catch(error => logger.error(`[RESET XP]: ${error.name}: ${error.message}`))));
+		await safePromiseAll(this.cache.map(async player => player.resetXp(options)));
 		return this;
 	}
 

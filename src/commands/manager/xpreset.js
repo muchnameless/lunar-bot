@@ -2,6 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { offsetFlags } = require('../../constants/database');
+const { safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
@@ -73,7 +74,7 @@ module.exports = class XpResetCommand extends Command {
 			// delete players who left the guild
 			await players.sweepDb();
 
-			await Promise.all([
+			await safePromiseAll([
 				...players.cache.map(async (player) => {
 					if (player.notes === 'skill api disabled') player.notes = null;
 					return player.resetXp({ offsetToReset });
