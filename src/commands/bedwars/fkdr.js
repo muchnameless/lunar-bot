@@ -10,7 +10,7 @@ const logger = require('../../functions/logger');
 module.exports = class FkdrCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [ '' ],
+			aliases: [],
 			description: 'shows a player\'s bed wars fkdr',
 			args: false,
 			usage: '<`IGN`>',
