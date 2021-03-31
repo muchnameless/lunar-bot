@@ -52,7 +52,7 @@ module.exports = class XpResetCommand extends Command {
 			} found.`);
 
 			if (!this.force(flags)) {
-				const ANSWER = await message.awaitReply(`reset xp gained from \`${player.ign}\`? Warning, this action cannot be undone.`, 30);
+				const ANSWER = await message.awaitReply(`reset xp gained from \`${player.ign}\`?`, 30);
 
 				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
@@ -66,7 +66,7 @@ module.exports = class XpResetCommand extends Command {
 			const PLAYER_COUNT = players.size;
 
 			if (!this.force(flags)) {
-				const ANSWER = await message.awaitReply(`reset competition xp gained from all ${PLAYER_COUNT} guild members? Warning, this action cannot be undone.`, 30);
+				const ANSWER = await message.awaitReply(`reset competition xp gained from all ${PLAYER_COUNT} guild members?`, 30);
 
 				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}

@@ -58,7 +58,7 @@ module.exports = class TaxResetCommand extends Command {
 			const OLD_AMOUNT = await player.taxAmount;
 
 			if (!this.force(flags)) {
-				const ANSWER = await message.awaitReply(`reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})? Warning, this action cannot be undone.`, 30);
+				const ANSWER = await message.awaitReply(`reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})?`, 30);
 
 				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
@@ -70,7 +70,7 @@ module.exports = class TaxResetCommand extends Command {
 		// all players
 		} else {
 			if (!this.force(flags)) {
-				const ANSWER = await message.awaitReply('reset tax paid from all guild members? Warning, this action cannot be undone.', 30);
+				const ANSWER = await message.awaitReply('reset tax paid from all guild members?', 30);
 
 				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
