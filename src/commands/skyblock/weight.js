@@ -21,6 +21,15 @@ module.exports = class WeightCommand extends Command {
 	}
 
 	/**
+	 * rounds and toLocaleStrings a number
+	 * @param {number} number
+	 * @returns {string}
+	 */
+	formatNumber(number) {
+		return this.client.formatDecimalNumber(Math.floor(number * 100) / 100);
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
@@ -37,14 +46,7 @@ module.exports = class WeightCommand extends Command {
 				? data
 				: (data.find(({ name: profileName }) => profileName.toLowerCase() === args[1].toLowerCase()) ?? (() => { throw new Error(`unknown profile name '${upperCaseFirstChar(args[1].toLowerCase())}'`); })());
 
-			/**
-			 * rounds and toLocaleStrings a number
-			 * @param {number} number
-			 * @returns {string}
-			 */
-			const formatNumber = number => message.client.formatDecimalNumber(Math.floor(number * 100) / 100);
-
-			return message.reply(`${username} (${name}): ${formatNumber(weight + overflow)} [${formatNumber(weight)} + ${formatNumber(overflow)}]${apiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`);
+			return message.reply(`${username} (${name}): ${this.formatNumber(weight + overflow)} [${this.formatNumber(weight)} + ${this.formatNumber(overflow)}]${apiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`);
 		} catch (error) {
 			logger.error(`[WEIGHT]: ${error instanceof MojangAPIError
 					? `${error}`
