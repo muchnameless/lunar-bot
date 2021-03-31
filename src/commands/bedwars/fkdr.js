@@ -11,7 +11,7 @@ module.exports = class FkdrCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'shows a player\'s bed wars fkdr',
+			description: 'shows a player\'s BedWars fkdr',
 			args: false,
 			usage: '<`IGN`>',
 			cooldown: 1,
