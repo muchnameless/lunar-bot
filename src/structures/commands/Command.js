@@ -68,6 +68,7 @@ class Command {
 	get requiredRoles() {
 		switch (this.category) {
 			case 'staff':
+			case 'moderation':
 				return [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ];
 
 			case 'manager':
