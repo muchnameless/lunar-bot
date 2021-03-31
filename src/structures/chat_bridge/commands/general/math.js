@@ -1,3 +1,3 @@
 'use strict';
 
-module.exports = require('../../../../commands/user/math');
+module.exports = require('../../../../commands/general/math');

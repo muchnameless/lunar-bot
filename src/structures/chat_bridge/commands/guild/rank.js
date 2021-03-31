@@ -1,6 +1,6 @@
 'use strict';
 
-const RankCommand = require('../../../../commands/user/rank');
+const RankCommand = require('../../../../commands/guild/rank');
 // const logger = require('../../../../functions/logger');
 
 

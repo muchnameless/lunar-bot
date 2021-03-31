@@ -1,3 +1,3 @@
 'use strict';
 
-module.exports = require('../../../../commands/user/coinflip');
+module.exports = require('../../../../commands/general/coinflip');

@@ -1,3 +1,3 @@
 'use strict';
 
-module.exports = require('../../../../commands/user/fetchur');
+module.exports = require('../../../../commands/skyblock/fetchur');

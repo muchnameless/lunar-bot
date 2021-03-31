@@ -1,3 +1,3 @@
 'use strict';
 
-module.exports = require('../../../../commands/user/weight');
+module.exports = require('../../../../commands/skyblock/weight');

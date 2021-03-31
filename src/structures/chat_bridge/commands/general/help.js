@@ -2,7 +2,7 @@
 
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
-const HelpCommand = require('../../../../commands/user/help');
+const HelpCommand = require('../../../../commands/general/help');
 // const logger = require('../../../../functions/logger');
 
 
