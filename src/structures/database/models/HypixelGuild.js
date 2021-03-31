@@ -475,8 +475,6 @@ module.exports = class HypixelGuild extends Model {
 
 			const CHANGES = PLAYERS_LEFT_AMOUNT + membersJoined.length;
 
-			logger.debug({ CHANGES, playersLeft, membersJoined })
-
 			if (!CHANGES) return;
 
 			players.sortAlphabetically();
