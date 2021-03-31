@@ -299,11 +299,14 @@ class LunarClient extends Client {
 	 * @param {number} [paddingAmount=0] amount to space-pad at the start
 	 */
 	formatDecimalNumber(number, paddingAmount = 0) {
-		const NUMBER_ARRAY = number.toFixed(2).split('.');
-		return `${Number(NUMBER_ARRAY[0])
+		if (Number.isNaN(number)) return 'NaN'.padStart(paddingAmount, ' ');
+
+		const [ BEFORE_DOT, AFTER_DOT ] = number.toFixed(2).split('.');
+
+		return `${Number(BEFORE_DOT)
 			.toLocaleString(this.config.get('NUMBER_FORMAT'))
 			.padStart(paddingAmount, ' ')
-		}.${NUMBER_ARRAY[1]}`;
+		}.${AFTER_DOT}`;
 	}
 
 	/**
