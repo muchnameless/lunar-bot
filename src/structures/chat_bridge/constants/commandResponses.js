@@ -6,6 +6,7 @@ const GUILD_RANK_DEFAULT = '[a-z]+';
 
 const genericErrors = {
 	MUST_BE_GM: '^You must be the Guild Master to use that command!',
+	MISSING_PERMS: '^You do not have permission to use this command!$',
 	unknownIgn: (ign = IGN_DEFAULT) => `^Can't find a player by the name of '${ign}'`,
 	playerNotInGuild: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is not in your guild!`,
 	unknownRank: (_0, _1, to = GUILD_RANK_DEFAULT) => `^I couldn't find a rank by the name of '${to}'!`,
@@ -46,12 +47,14 @@ const invite = {
 const demoteResponses = [
 	...Object.values(demote),
 	genericErrors.MUST_BE_GM,
+	genericErrors.MISSING_PERMS,
 	genericErrors.unknownIgn,
 	genericErrors.playerNotInGuild,
 ];
 const promoteResponses = [
 	...Object.values(promote),
 	genericErrors.MUST_BE_GM,
+	genericErrors.MISSING_PERMS,
 	genericErrors.unknownIgn,
 	genericErrors.playerNotInGuild,
 ];
@@ -59,6 +62,7 @@ const setRankResponses = [
 	...Object.values(demote),
 	...Object.values(promote),
 	genericErrors.MUST_BE_GM,
+	genericErrors.MISSING_PERMS,
 	genericErrors.unknownIgn,
 	genericErrors.playerNotInGuild,
 	genericErrors.unknownRank,
@@ -66,18 +70,21 @@ const setRankResponses = [
 const muteResponses = [
 	...Object.values(mute),
 	genericErrors.MUST_BE_GM,
+	genericErrors.MISSING_PERMS,
 	genericErrors.unknownIgn,
 	genericErrors.playerNotInGuild,
 ];
 const unmuteResponses = [
 	...Object.values(unmute),
 	genericErrors.MUST_BE_GM,
+	genericErrors.MISSING_PERMS,
 	genericErrors.unknownIgn,
 	genericErrors.playerNotInGuild,
 ];
 const inviteResponses = [
 	...Object.values(invite),
 	genericErrors.MUST_BE_GM,
+	genericErrors.MISSING_PERMS,
 	genericErrors.unknownIgn,
 ];
 
@@ -90,6 +97,7 @@ module.exports = {
 	},
 	genericErrors: {
 		string: genericErrors,
+		regExp: (ign = IGN_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(genericErrors.map(x => (typeof x === 'function' ? x(ign, undefined, to) : x)).join('|'), 'i'),
 	},
 	demote: {
 		string: demote,
