@@ -183,6 +183,7 @@ class ChatBridge extends EventEmitter {
 	async link(guildName = null) {
 		// link bot to db entry (create if non existant)
 		this.bot.player ??= await (async () => {
+			/** @type {[import('../database/models/Player'), boolean]} */
 			const [ player, created ] = await this.client.players.model.findOrCreate({
 				where: { minecraftUUID: this.bot.uuid },
 				defaults: {
