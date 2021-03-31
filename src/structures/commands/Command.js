@@ -71,6 +71,7 @@ class Command {
 			case 'moderation':
 				return [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ];
 
+			case 'tax':
 			case 'manager':
 				return [ this.config.get('MANAGER_ROLE_ID') ];
 
