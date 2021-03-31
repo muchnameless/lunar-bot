@@ -5,13 +5,7 @@ const redisStore = require('cache-manager-redis');
 const logger = require('../functions/logger');
 
 
-const memoryCache = cacheManager.caching({
-	store: 'memory',
-	max: 250,
-	ttl: 60,
-});
-
-const redisCache = cacheManager.caching({
+const cache = cacheManager.caching({
 	store: redisStore,
 	host: 'localhost', // default value
 	port: 6379, // default value
@@ -19,12 +13,6 @@ const redisCache = cacheManager.caching({
 	ttl: 600,
 });
 
-redisCache.store.events.on('redisError', error => logger.error(error));
+cache.store.events.on('redisError', error => logger.error(error));
 
-const multiCache = cacheManager.multiCaching([ memoryCache, redisCache ]);
-
-module.exports = {
-	multiCache,
-	memoryCache,
-	redisCache,
-};
+module.exports = cache;

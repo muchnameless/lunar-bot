@@ -2,7 +2,7 @@
 
 const { commaListsAnd } = require('common-tags');
 const { Structures, MessageEmbed, Message, User } = require('discord.js');
-const { multiCache } = require('../../api/cache');
+const cache = require('../../api/cache');
 const { CHANNEL_FLAGS } = require('../../constants/bot');
 const _ = require('lodash');
 const LunarGuildMember = require('./GuildMember');
@@ -59,7 +59,7 @@ class LunarMessage extends Message {
 	 * @returns {Promise<?ReplyData>}
 	 */
 	get replyData() {
-		return multiCache.get(`reply:${this.guild?.id ?? 'DM'}:${this.channel.id}:${this.id}`);
+		return cache.get(`reply:${this.guild?.id ?? 'DM'}:${this.channel.id}:${this.id}`);
 	}
 
 	/**
@@ -67,7 +67,7 @@ class LunarMessage extends Message {
 	 * @param {ReplyData} input
 	 */
 	set replyData({ channelID, messageID }) {
-		multiCache.set(
+		cache.set(
 			`reply:${this.guild?.id ?? 'DM'}:${this.channel.id}:${this.id}`,
 			{
 				channelID,

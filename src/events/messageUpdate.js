@@ -1,7 +1,7 @@
 'use strict';
 
 const { MessageEmbed } = require('discord.js');
-const { multiCache } = require('../api/cache');
+const cache = require('../api/cache');
 const commandHandler = require('../functions/commandHandler');
 const logger = require('../functions/logger');
 
@@ -53,7 +53,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 				return; // moved reply message(s) to newMessage's channel -> don't call commandHandler
 			} catch (error) {
 				logger.error(`[MESSAGE UPDATE]: ${error.name}: ${error.message}`);
-				multiCache.del(`reply:${newMessage.guild?.id ?? 'DM'}:${newMessage.channel.id}:${newMessage.id}`);
+				cache.del(`reply:${newMessage.guild?.id ?? 'DM'}:${newMessage.channel.id}:${newMessage.id}`);
 			}
 		}
 	}
