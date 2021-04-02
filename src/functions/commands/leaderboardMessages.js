@@ -365,7 +365,11 @@ const self = module.exports = {
 		try {
 			const reply = await message.reply(self.createLeaderboardEmbed(message.client, leaderboardType, leaderboardArguments, leaderbaordData));
 
-			await cache.set(`${LB_KEY}:${reply.cachingKey}`, { type: leaderboardType, args: leaderboardArguments, data: leaderbaordData });
+			await cache.set(
+				`${LB_KEY}:${reply.cachingKey}`,
+				{ type: leaderboardType, args: leaderboardArguments, data: leaderbaordData },
+				message.client.config.getNumber('DATABASE_UPDATE_INTERVAL') * 60_000,
+			);
 			await self.addPageReactions(reply);
 
 			return reply;
@@ -410,11 +414,19 @@ const self = module.exports = {
 				const leaderbaordData = self.getLeaderboardDataCreater(type)(message.client, args);
 				const reply = await message.edit(content, self.createLeaderboardEmbed(message.client, type, args, leaderbaordData));
 
-				await cache.set(`${LB_KEY}:${reply.cachingKey}`, { data: leaderbaordData, ...cached });
+				await cache.set(
+					`${LB_KEY}:${reply.cachingKey}`,
+					{ data: leaderbaordData, ...cached },
+					message.client.config.getNumber('DATABASE_UPDATE_INTERVAL') * 60_000,
+				);
 				await self.addPageReactions(reply);
 			} else {
 				await message.edit(content, self.createLeaderboardEmbed(message.client, cached.type, cached.args, cached.data));
-				await cache.set(`${LB_KEY}:${message.cachingKey}`, cached); // update cached page
+				await cache.set(
+					`${LB_KEY}:${message.cachingKey}`,
+					cached,
+					message.client.config.getNumber('DATABASE_UPDATE_INTERVAL') * 60_000,
+				); // update cached page
 			}
 
 			if (message.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
