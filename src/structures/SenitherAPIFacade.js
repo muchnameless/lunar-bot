@@ -111,6 +111,8 @@ class SenitherAPIFacade extends EventEmitter {
 	 * @param {FetchOptions} options
 	 */
 	async _makeRequest(path, { cache = true, force = false, requestAmount = 1 } = {}) {
+		throw new Error('temporarily disabled');
+
 		const key = path.replaceAll('/', ':');
 
 		// cached response
