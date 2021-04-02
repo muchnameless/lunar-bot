@@ -30,7 +30,7 @@ class RedisListener {
 	 * @param {string} key redis key
 	 */
 	async onMessage(channel, key) {
-		if (this.client.config.get('EXTENDED_LOGGING_ENABLED')) logger.debug({ channel, key });
+		if (this.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.debug({ channel, key });
 
 		const keyMatched = key.match(this.keyRegExp);
 
