@@ -80,12 +80,12 @@ const lexer = new Lexer()
 	.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 	.addRule(/e(?:uler)?/i, () => Math.E);
 
-const facultyPost = {
+const factorialPost = {
 	precedence: 5,
 	associativity: 'right',
 };
 
-const facultyPre = {
+const factorialPre = {
 	precedence: 5,
 	associativity: 'left',
 };
@@ -112,8 +112,8 @@ const term = {
 
 const parser = new Parser({
 	'^': power,
-	'!': facultyPost,
-	'fac': facultyPre,
+	'!': factorialPost,
+	'fac': factorialPre,
 	'+': term,
 	'-': term,
 	'*': factor,
