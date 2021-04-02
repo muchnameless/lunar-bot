@@ -723,9 +723,7 @@ module.exports = class Player extends Model {
 
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
 
-			if (reason) await this.update({
-				reason,
-			});
+			if (reason) await this.update({ reason });
 		} else if (typeof idOrDiscordMember === 'string' && validateNumber(idOrDiscordMember)) {
 			await this.setValidDiscordID(idOrDiscordMember);
 			this.inDiscord = false;
