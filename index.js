@@ -8,7 +8,7 @@ const db = require('./src/structures/database/index');
 const LunarClient = require('./src/structures/LunarClient');
 const logger = require('./src/functions/logger');
 
-
+/** @type {LunarClient} */
 let client;
 
 // catch rejections
