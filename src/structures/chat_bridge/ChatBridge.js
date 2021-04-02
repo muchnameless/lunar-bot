@@ -383,33 +383,52 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	_parseMinecraftMessageToDiscord(string) {
-		return escapeMarkdown(string
-			.replace(/(?<!<a?):(\S+):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
-			.replace(/(?<!<a?):(\S+?):(?!\d+>)/g, (match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match) // emojis (custom and default)
-			.replace(/#([a-z-]+)/gi, (match, p1) => this.client.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match) // channels
-			.replace(/(?<!<)@(!|&)?(\S+)(?!\d+>)/g, (match, p1, p2) => {
-				switch (p1) {
-					case '!': // members/users
-						return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-							?? this.client.users.cache.find(({ username }) => username.toLowerCase() === p2.toLowerCase())?.toString() // users
-							?? match;
+		return escapeMarkdown(
+			string
+				.replace( // emojis (custom and default)
+					/(?<!<a?):(\S+):(?!\d+>)/g,
+					(match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match,
+				)
+				.replace( // emojis (custom and default)
+					/(?<!<a?):(\S+?):(?!\d+>)/g,
+					(match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match,
+				)
+				.replace( // channels
+					/#([a-z-]+)/gi,
+					(match, p1) => this.client.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match,
+				)
+				.replace( // @mentions
+					/(?<!<)@(!|&)?(\S+)(?!\d+>)/g,
+					(match, p1, p2) => {
+						switch (p1) {
+							case '!': // members/users
+								return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+									?? this.client.users.cache.find(({ username }) => username.toLowerCase() === p2.toLowerCase())?.toString() // users
+									?? match;
 
-					case '&': // roles
-						return this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-							?? match;
+							case '&': // roles
+								return this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+									?? match;
 
-					default: { // players, members/users, roles
-						const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === p2.toLowerCase());
+							default: { // players, members/users, roles
+								const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === p2.toLowerCase());
 
-						if (player?.inDiscord) return `<@${player.discordID}>`;
+								if (player?.inDiscord) return `<@${player.discordID}>`;
 
-						return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-							?? this.client.users.cache.find(({ username }) => username.toLowerCase() === p2.toLowerCase())?.toString() // users
-							?? this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-							?? match;
-					}
-				}
-			}),
+								return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+									?? this.client.users.cache.find(({ username }) => username.toLowerCase() === p2.toLowerCase())?.toString() // users
+									?? this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+									?? match;
+							}
+						}
+					},
+				),
+			{
+				codeBlock: false,
+				inlineCode: false,
+				codeBlockContent: false,
+				inlineCodeContent: false,
+			},
 		);
 	}
 
@@ -420,7 +439,7 @@ class ChatBridge extends EventEmitter {
 	 */
 	async forwardDiscordMessageToHypixelGuildChat(message, player) {
 		return this.gchat(
-			message.content,
+			message.attachments.size ? [ message.content, ...message.attachments.map(({ url }) => url) ].join(' ') : message.content,
 			{ prefix: `${player?.ign ?? this._escapeEz(message.member?.displayName ?? message.author.username)}:` },
 		);
 	}
