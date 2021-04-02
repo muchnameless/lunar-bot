@@ -14,8 +14,8 @@ const logger = require('../functions/logger');
  * @param {string} rateLimitInfo.path Path used for request that triggered this event
  * @param {string} rateLimitInfo.route Route used for request that triggered this event
  */
-module.exports = (client, rateLimitInfo) => {
-	if (rateLimitInfo.method === 'put' && rateLimitInfo.route.includes('reaction')) return; // reaction add rateLimit fires everytime the bot reacts with multiple emojis
+module.exports = (client, { route, timeout, method, path }) => {
+	if (route.endsWith('reactions') && timeout <= 250) return; // adding and removing single reactions are 1/250ms, so get rate limited each time
 
-	logger.warn(`[RATE LIMIT]: timeout: ${ms(rateLimitInfo.timeout)}, method: ${rateLimitInfo.method}, path: ${rateLimitInfo.path}`);
+	logger.warn(`[RATE LIMIT]: timeout: ${ms(timeout)}, method: ${method}, path: ${path}`);
 };
