@@ -377,41 +377,50 @@ const self = module.exports = {
 	/**
 	 * updates a xp leaderboard message
 	 * @param {import('../../structures/extensions/Message')} message leaderboard message to update
-	 * @param {string} emojiName emoji that triggered the update
+	 * @param {import('discord.js').MessageReaction} reaction
+	 * @param {import('../../structures/extensions/User')} user
 	 */
-	async updateLeaderboardMessage(message, emojiName) {
+	async updateLeaderboardMessage(message, reaction, { id: userID }) {
 		/** @type {CachedLeaderboard} */
 		const cached = await cache.get(`${LB_KEY}:${message.cachingKey}`);
 
+		// edits alredy expired
 		if (!cached) return;
 
-		const { page, reload } = handleReaction(cached.args.page, emojiName);
+		// remove reaction from user
+		if (message.channel.checkBotPermissions('MANAGE_MESSAGES')) reaction.users.remove(userID).catch(error => logger.error(`[REMOVE REACTION]: ${error.name}: ${error.message}`));
 
+		// user is not command author
+		if (userID !== cached.args.userID) return;
+
+		// get new page
+		const { page, reload } = handleReaction(cached.args.page, reaction.emoji.name);
+
+		// invalid page emoji
 		if (page === null) return;
 
+		// update page
 		cached.args.page = page;
 
 		const { content } = message;
 
-		if (reload) {
-			try {
+		try {
+			if (reload) {
 				const { type, args } = cached;
 				const leaderbaordData = self.getLeaderboardDataCreater(type)(message.client, args);
 				const reply = await message.edit(content, self.createLeaderboardEmbed(message.client, type, args, leaderbaordData));
 
 				await cache.set(`${LB_KEY}:${reply.cachingKey}`, { data: leaderbaordData, ...cached });
 				await self.addPageReactions(reply);
-			} catch (error) {
-				logger.error(error);
+			} else {
+				await message.edit(content, self.createLeaderboardEmbed(message.client, cached.type, cached.args, cached.data));
+				await cache.set(`${LB_KEY}:${message.cachingKey}`, cached); // update cached page
 			}
-		} else {
-			await message.edit(content, self.createLeaderboardEmbed(message.client, cached.type, cached.args, cached.data));
 
-			// update cached page
-			await cache.set(`${LB_KEY}:${message.cachingKey}`, cached);
+			if (message.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
+		} catch (error) {
+			logger.error(`[UPDATE LB]: ${error.name}: ${error.message}`);
 		}
-
-		if (message.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
 	},
 
 	/**

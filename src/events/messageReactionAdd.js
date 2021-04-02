@@ -1,7 +1,7 @@
 'use strict';
 
 const { updateLeaderboardMessage } = require('../functions/commands/leaderboardMessages');
-const { LOCK, FORWARD_TO_GC } = require('../constants/emojiCharacters');
+const { FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const logger = require('../functions/logger');
 
 
@@ -22,32 +22,15 @@ module.exports = async (client, reaction, user) => {
 
 	if (user.id === client.user.id) return; // ignore own reactions or on not owned messages
 
-	const { message, emoji: { name: EMOJI_NAME } } = reaction;
+	const { message } = reaction;
 
-	if (client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[MESSAGE REACTION ADD]: ${user.tag}${message.guild ? ` | ${(await message.guild.members.fetch(user.id).catch(logger.error))?.displayName ?? ''}` : ''} reacted with ${EMOJI_NAME}`);
+	if (client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[MESSAGE REACTION ADD]: ${user.tag}${message.guild ? ` | ${(await message.guild.members.fetch(user.id).catch(logger.error))?.displayName ?? ''}` : ''} reacted with ${reaction.emoji.name}`);
 
-	if (message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') && EMOJI_NAME === FORWARD_TO_GC && user.id === message.author.id) {
+	if (message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') && reaction.emoji.name === FORWARD_TO_GC && user.id === message.author.id) {
 		return client.chatBridges.handleAnnouncementMessage(message);
 	}
 
 	if (message.author.id !== client.user.id || !message.embeds[0]?.title.includes('Leaderboard')) return;
 
-	if (message.guild) {
-		const AUTHOR_ID = message.mentions.users.first()?.id;
-
-		if ((user.id !== AUTHOR_ID || EMOJI_NAME !== LOCK) && message.channel.checkBotPermissions('MANAGE_MESSAGES')) reaction.users.remove(user).catch(error => logger.error(`[REMOVE REACTION]: ${error.name}: ${error.message}`));
-
-		if (![ AUTHOR_ID, client.ownerID ].includes(user.id)) return;
-
-		// message locked by author
-		if (message.reactions.cache.has(LOCK)
-			&& (message.reactions.cache.get(LOCK).users.cache.size
-				? message.reactions.cache.get(LOCK).users.cache
-				: (await message.reactions.cache.get(LOCK).users.fetch().catch(logger.error)))?.has(AUTHOR_ID)
-		) return;
-	} else if (message.reactions.cache.has(LOCK)) { // DMs
-		return;
-	}
-
-	updateLeaderboardMessage(message, EMOJI_NAME);
+	updateLeaderboardMessage(message, reaction, user);
 };
