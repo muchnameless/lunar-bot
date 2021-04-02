@@ -2,9 +2,10 @@
 
 const { commaListsAnd } = require('common-tags');
 const { Structures, MessageEmbed, Message, User } = require('discord.js');
-const cache = require('../../api/cache');
+const { isEqual } = require('lodash');
 const { CHANNEL_FLAGS } = require('../../constants/bot');
-const _ = require('lodash');
+const { DM_KEY, REPLY_KEY } = require('../../constants/redis');
+const cache = require('../../api/cache');
 const LunarGuildMember = require('./GuildMember');
 const logger = require('../../functions/logger');
 
@@ -59,7 +60,7 @@ class LunarMessage extends Message {
 	 * @returns {Promise<?ReplyData>}
 	 */
 	get replyData() {
-		return cache.get(`reply:${this.guild?.id ?? 'DM'}:${this.channel.id}:${this.id}`);
+		return cache.get(`${REPLY_KEY}:${this.cachingKey}`);
 	}
 
 	/**
@@ -68,15 +69,20 @@ class LunarMessage extends Message {
 	 */
 	set replyData({ channelID, messageID }) {
 		cache.set(
-			`reply:${this.guild?.id ?? 'DM'}:${this.channel.id}:${this.id}`,
+			`${REPLY_KEY}:${this.cachingKey}`,
 			{
 				channelID,
 				messageID,
 			},
-			{
-				ttl: 30 * 60, // 30 min
-			},
+			30 * 60_000, // 30 min ttl
 		);
+	}
+
+	/**
+	 * part of the caching key unique to the message
+	 */
+	get cachingKey() {
+		return `${this.guild?.id ?? DM_KEY}:${this.channel.id}:${this.id}`;
 	}
 
 	/**
@@ -181,7 +187,7 @@ class LunarMessage extends Message {
 
 		// only object as first arg provided
 		if (typeof contentInput === 'object') {
-			if (contentInput instanceof MessageEmbed || !_.isEqual(new MessageEmbed(), new MessageEmbed(contentInput))) {
+			if (contentInput instanceof MessageEmbed || !isEqual(new MessageEmbed(), new MessageEmbed(contentInput))) {
 				options.embed = contentInput;
 				content = '';
 			} else if (!Array.isArray(contentInput)) { // unknown options object
@@ -194,7 +200,7 @@ class LunarMessage extends Message {
 		}
 
 		// add embed structure generated from options if it is an embed but not from the default constructor
-		options.embed ??= _.isEqual(new MessageEmbed(), new MessageEmbed(options))
+		options.embed ??= isEqual(new MessageEmbed(), new MessageEmbed(options))
 			? null
 			: options;
 

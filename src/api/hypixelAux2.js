@@ -16,7 +16,7 @@ const hypixel = new Client(process.env.HYPIXEL_KEY_AUX_2, {
 			if (key.startsWith('guild')) return;
 
 			// prepend our key with "hypixel" so we don't conflict with anyone else
-			return cache.set(`hypixel:${key}`, value, { ttl: hypixelTTL(key) });
+			return cache.set(`hypixel:${key}`, value, hypixelTTL(key));
 		},
 	},
 });

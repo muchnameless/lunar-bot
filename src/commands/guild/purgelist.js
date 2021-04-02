@@ -1,6 +1,6 @@
 'use strict';
 
-const { createGainedStatsEmbed, handleLeaderboardCommandMessage } = require('../../functions/commands/leaderboardMessages');
+const { handleLeaderboardCommandMessage } = require('../../functions/commands/leaderboardMessages');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
@@ -24,6 +24,6 @@ module.exports = class TracklistCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return handleLeaderboardCommandMessage(message, rawArgs, flags, createGainedStatsEmbed, { typeDefault: 'purge', pageDefault: Infinity });
+		return handleLeaderboardCommandMessage(message, rawArgs, flags, 'gained', { typeDefault: 'purge', pageDefault: Infinity });
 	}
 };

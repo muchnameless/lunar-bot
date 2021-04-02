@@ -8,6 +8,7 @@ const DatabaseManager = require('./database/managers/DatabaseManager');
 const LogHandler = require('./LogHandler');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const CommandCollection = require('./commands/CommandCollection');
+const RedisListener = require('./RedisListener');
 const logger = require('../functions/logger');
 
 
@@ -28,6 +29,7 @@ class LunarClient extends Client {
 		this.logHandler = new LogHandler(this);
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'), true);
+		this.redisListener = new RedisListener(this);
 	}
 
 	set webhook(value) {

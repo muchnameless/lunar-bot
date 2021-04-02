@@ -6,43 +6,162 @@ const jaroWinklerSimilarity = require('jaro-winkler');
 const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../../constants/database');
+const { LB_KEY } = require('../../constants/redis');
 const { upperCaseFirstChar, autocorrectToOffset, autocorrectToType, removeFlagsFromArray } = require('../util');
 const logger = require('../logger');
-
+const cache = require('../../api/cache');
 
 /**
- * returns a (new) page number or null if the emoji is not a valid page navigation emoji
+ * @typedef {object} LeaderboardArguments
+ * @property {boolean} shouldShowOnlyBelowReqs
+ * @property {boolean|string} hypixelGuildID
+ * @property {string|undefined} type
+ * @property {{value: string, arg: string}} typeInput
+ * @property {string|undefined} offset
+ * @property {number} page
+ * @property {string} userID
+ */
+
+/**
+ * @typedef {object} LeaderboardData
+ * @property {string} title
+ * @property {string} description
+ * @property {PlayerData[]} playerData
+ * @property {number} playerCount
+ * @property {string} playerRequestingEntry
+ * @property {number[]} getEntryArgs
+ * @property {boolean} isCompetition
+ * @property {number} lastUpdatedAt
+ */
+
+/**
+ * @typedef {object} PlayerData
+ * @property {string} ign
+ * @property {string} discordID
+ * @property {?boolean} [paid]
+ * @property {number} sortingStat
+ */
+
+/**
+ * @typedef {Function} DataConverter
+ * @param {import('../../structures/database/models/Player')} player
+ * @returns {PlayerData}
+ */
+
+/**
+ * @typedef {object} CachedLeaderboard
+ * @property {LeaderboardArguments} args
+ * @property {string} type
+ * @property {LeaderboardData} data
+ */
+
+/**
+ * new page number and reload check
  * @param {number} currentPage the current page
  * @param {string} emojiName the emoji that triggered the page update
  */
-function getPage(currentPage, emojiName) {
+function handleReaction(currentPage, emojiName) {
 	switch (emojiName) {
 		case DOUBLE_LEFT_EMOJI:
 		case DOUBLE_LEFT_EMOJI_ALT:
-			return 1;
+			return {
+				page: 1,
+				reload: false,
+			};
 
 		case LEFT_EMOJI:
 		case LEFT_EMOJI_ALT:
-			return currentPage > 1 ? currentPage - 1 : 1;
+			return {
+				page: currentPage > 1 ? currentPage - 1 : 1,
+				reload: false,
+			};
 
 		case RIGHT_EMOJI:
 		case RIGHT_EMOJI_ALT:
-			return currentPage + 1;
+			return {
+				page: currentPage + 1,
+				reload: false,
+			};
 
 		case DOUBLE_RIGHT_EMOJI:
 		case DOUBLE_RIGHT_EMOJI_ALT:
-			return Infinity;
+			return {
+				page: Infinity,
+				reload: false,
+			};
 
 		case RELOAD_EMOJI:
-			return currentPage;
+			return {
+				page: currentPage,
+				reload: true,
+			};
 
 		default:
-			return null;
+			return {
+				page: null,
+				reload: null,
+			};
 	}
 }
 
 
 const self = module.exports = {
+
+	/**
+	 * getEntry function to turn an element of PlayerData to a lb entry string
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {string} leaderboardType
+	 * @param {string} statsType
+	 * @param {?number} paddingAmount0
+	 * @param {?number} paddingAmount1
+	 * @param {?number} paddingAmount2
+	 */
+	getEntry(client, leaderboardType, statsType, paddingAmount0, paddingAmount1, paddingAmount2) {
+		switch (leaderboardType) {
+			case 'gained':
+				switch (statsType) {
+					case 'slayer':
+						return player => client.formatNumber(player.sortingStat, paddingAmount0);
+
+					case 'skill':
+						return player => `${client.formatDecimalNumber(player.skillAverageGain, paddingAmount0)} [${client.formatDecimalNumber(player.trueAverageGain, paddingAmount1)}]`;
+
+					case 'purge':
+						return player => `${client.formatDecimalNumber(player.gainedWeight, paddingAmount0)} [${client.formatDecimalNumber(player.totalWeight, paddingAmount1)}]`;
+
+					case 'weight':
+						return player => `${client.formatDecimalNumber(player.totalWeightGain, paddingAmount0)} [${client.formatDecimalNumber(player.weightGain, paddingAmount1)} + ${client.formatDecimalNumber(player.overflowGain, paddingAmount2)}]`;
+
+					default:
+						return player => client.formatNumber(player.sortingStat, paddingAmount0, Math.round);
+				}
+
+			case 'total':
+				switch (statsType) {
+					case 'slayer':
+					case 'zombie':
+					case 'spider':
+					case 'wolf':
+					case 'guild':
+						return player => client.formatNumber(player.sortingStat, paddingAmount0);
+
+					case 'skill':
+						return player => `${client.formatDecimalNumber(player.skillAverageGain, paddingAmount0)} [${client.formatDecimalNumber(player.trueAverageGain, paddingAmount1)}]`;
+
+					case 'purge':
+						return player => `${client.formatDecimalNumber(player.gainedWeight, paddingAmount0)} [${client.formatDecimalNumber(player.totalWeight, paddingAmount1)}]`;
+
+					case 'weight':
+						return player => `${client.formatDecimalNumber(player.totalWeightGain, paddingAmount0)} [${client.formatDecimalNumber(player.weightGain, paddingAmount1)} + ${client.formatDecimalNumber(player.overflowGain, paddingAmount2)}]`;
+
+					default:
+						return player => `${client.formatDecimalNumber(player.progressLevel, paddingAmount0)} [${client.formatNumber(player.xp, paddingAmount1, Math.round)} XP]`;
+				}
+
+			default:
+				throw new Error(`[GET LB DATA CREATOR]: unsupported type '${leaderboardType}'`);
+		}
+	},
 
 	/**
 	 * adds reactions to navigate in pagination
@@ -54,11 +173,9 @@ const self = module.exports = {
 
 		// add reactions in order
 		try {
-			await message.react(DOUBLE_LEFT_EMOJI);
-			await message.react(LEFT_EMOJI);
-			await message.react(RIGHT_EMOJI);
-			await message.react(DOUBLE_RIGHT_EMOJI);
-			await message.react(RELOAD_EMOJI);
+			for (const emoji of [ DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI ]) {
+				if (!message.reactions.cache.has(emoji)) await message.react(emoji);
+			}
 		} catch (error) {
 			logger.error(`[ADD PAGE REACTIONS]: ${error.name}: ${error.message}`);
 		}
@@ -67,31 +184,32 @@ const self = module.exports = {
 	},
 
 	/**
-	 * handles a leaderbaord message
-	 * @param {import('../../structures/extensions/Message')} message the message to add the reactions to
+	 * parses leaderboard arguments
+	 * @param {import('../../structures/extensions/Message')} message
 	 * @param {string[]} rawArgs
 	 * @param {string[]} flags
-	 * @param {Function} createLeaderboard
 	 * @param {?object} defaults
 	 * @param {string} [defaults.typeDefault]
 	 * @param {number} [defaults.pageDefault=1]
+	 * @returns {Promise<?LeaderboardArguments>}
 	 */
-	async handleLeaderboardCommandMessage(message, rawArgs, flags, createLeaderboard, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) {
+	async parseLeaderboardArguments(message, rawArgs, flags, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) {
 		removeFlagsFromArray(rawArgs);
 
-		const { client: { config } } = message;
+		const AUTOCORRECT_THRESHOLD = message.client.config.getNumber('AUTOCORRECT_THRESHOLD');
 
 		// should show only below reqs
 		const shouldShowOnlyBelowReqsInput = rawArgs
 			.map((arg, index) => ({ index, arg, similarity: jaroWinklerSimilarity(arg, 'purge', { caseSensitive: false }) }))
 			.sort((a, b) => a.similarity - b.similarity)
 			.pop();
-		const SHOULD_SHOW_ONLY_BELOW_REQS = shouldShowOnlyBelowReqsInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
+
+		const SHOULD_SHOW_ONLY_BELOW_REQS = shouldShowOnlyBelowReqsInput?.similarity >= AUTOCORRECT_THRESHOLD
 			? (() => {
 				rawArgs.splice(shouldShowOnlyBelowReqsInput.index, 1);
 				return true;
 			})()
-			: false;
+			: flags.some(flag => [ 'p', 'purge' ].includes(flag));
 
 		// hypixel guild input
 		const hypixelGuild = message.client.hypixelGuilds.getFromArray(rawArgs) ?? message.author.player?.guild;
@@ -102,7 +220,7 @@ const self = module.exports = {
 			.sort((a, b) => a.similarity - b.similarity)
 			.pop();
 
-		let type = typeInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
+		let type = typeInput?.similarity >= AUTOCORRECT_THRESHOLD
 			? (() => {
 				rawArgs.splice(typeInput.index, 1);
 				return typeInput.value;
@@ -114,7 +232,7 @@ const self = module.exports = {
 			.map((arg, index) => ({ index, ...autocorrectToOffset(arg) }))
 			.sort((a, b) => a.similarity - b.similarity)
 			.pop();
-		const offset = offsetInput?.similarity >= config.get('AUTOCORRECT_THRESHOLD')
+		const offset = offsetInput?.similarity >= AUTOCORRECT_THRESHOLD
 			? (() => {
 				rawArgs.splice(offsetInput.index, 1);
 				return offsetInput.value;
@@ -142,7 +260,7 @@ const self = module.exports = {
 				if (!message.client.commands.constructor.force(flags)) {
 					const ANSWER = await message.awaitReply(`there is currently no lb for \`${typeInput.arg}\`. Did you mean \`${typeInput.value}\`?`, 30);
 
-					if (!config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return;
+					if (!message.client.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return null;
 				}
 
 				rawArgs.splice(typeInput.index, 1);
@@ -152,16 +270,108 @@ const self = module.exports = {
 			type = typeDefault;
 		}
 
-		return message
-			.reply(createLeaderboard(message.client, {
-				userID: message.author.id,
-				hypixelGuild,
-				type,
-				offset,
-				shouldShowOnlyBelowReqs: SHOULD_SHOW_ONLY_BELOW_REQS || type === 'purge' || flags.some(flag => [ 'p', 'purge' ].includes(flag)),
-				page,
-			}))
-			.then(self.addPageReactions);
+		return {
+			shouldShowOnlyBelowReqs: SHOULD_SHOW_ONLY_BELOW_REQS || type === 'purge',
+			hypixelGuildID: typeof hypixelGuild === 'boolean' ? hypixelGuild : hypixelGuild.guildID,
+			type,
+			typeInput,
+			offset,
+			page,
+			userID: message.author.id,
+		};
+	},
+
+	/**
+	 * creates an embed from the LeaderboardData
+	 * @param {import('../../structures/LunarClient')} client
+	 * @param {string} leaderboardType
+	 * @param {LeaderboardArguments} args
+	 * @param {LeaderboardData} param3
+	 */
+	createLeaderboardEmbed(client, leaderboardType, args, { title, description, playerData, playerCount, playerRequestingEntry, getEntryArgs, isCompetition, lastUpdatedAt }) {
+		const { config } = client;
+		const ELEMENTS_PER_PAGE = config.getNumber('ELEMENTS_PER_PAGE');
+		const PAGES_TOTAL = Math.ceil(playerCount / ELEMENTS_PER_PAGE);
+		const PAGE = args.page = Math.max(Math.min(args.page, PAGES_TOTAL), 1);
+		const getEntry = self.getEntry(client, leaderboardType, args.type, ...getEntryArgs);
+
+		let playerList = '';
+
+		// get the page elements
+		for (let index = Math.max(0, PAGE - 1) * ELEMENTS_PER_PAGE ; index < PAGE * ELEMENTS_PER_PAGE; ++index) {
+			if (index < playerCount) {
+				const player = playerData[index];
+				playerList += `\n${stripIndent`
+					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${Y_EMOJI_ALT}` : ''}
+						 > ${getEntry(player)}
+				`}`;
+			} else {
+				playerList += '\n\u200b\n\u200b';
+			}
+		}
+
+		return new MessageEmbed()
+			.setColor(config.get('EMBED_BLUE'))
+			.setTitle(title)
+			.setFooter('Updated at')
+			.setDescription(stripIndent`
+				${description}
+				\`\`\`ada${playerList}\`\`\`
+			`)
+			.addField(
+				'Your placement',
+				stripIndent`
+					${playerRequestingEntry}
+					Page: ${PAGE} / ${PAGES_TOTAL}
+				`,
+			)
+			.setTimestamp(new Date(lastUpdatedAt));
+	},
+
+	/**
+	 * gets the create[type]LeaderboardData function
+	 * @param {string} type
+	 */
+	getLeaderboardDataCreater(type) {
+		switch (type) {
+			case 'gained':
+				return self.createGainedLeaderboardData;
+
+			case 'total':
+				return self.createTotalLeaderboardData;
+
+			default:
+				throw new Error(`[GET LB DATA CREATOR]: unsupported type '${type}'`);
+		}
+	},
+
+	/**
+	 * handles a leaderbaord message
+	 * @param {import('../../structures/extensions/Message')} message the message to add the reactions to
+	 * @param {string[]} rawArgs
+	 * @param {string[]} flags
+	 * @param {string} leaderboardType
+	 * @param {?object} defaults
+	 * @param {string} [defaults.typeDefault]
+	 * @param {number} [defaults.pageDefault=1]
+	 */
+	async handleLeaderboardCommandMessage(message, rawArgs, flags, leaderboardType, { typeDefault = message.client.config.get('CURRENT_COMPETITION'), pageDefault = 1 } = {}) {
+		const leaderboardArguments = await self.parseLeaderboardArguments(message, rawArgs, flags, { typeDefault, pageDefault });
+
+		if (!leaderboardArguments) return;
+
+		const leaderbaordData = self.getLeaderboardDataCreater(leaderboardType)(message.client, leaderboardArguments);
+
+		try {
+			const reply = await message.reply(self.createLeaderboardEmbed(message.client, leaderboardType, leaderboardArguments, leaderbaordData));
+
+			await cache.set(`${LB_KEY}:${reply.cachingKey}`, { type: leaderboardType, args: leaderboardArguments, data: leaderbaordData });
+			await self.addPageReactions(reply);
+
+			return reply;
+		} catch (error) {
+			logger.error(error);
+		}
 	},
 
 	/**
@@ -169,75 +379,48 @@ const self = module.exports = {
 	 * @param {import('../../structures/extensions/Message')} message leaderboard message to update
 	 * @param {string} emojiName emoji that triggered the update
 	 */
-	updateLeaderboardMessage(message, emojiName) {
-		const PAGE_FIELD = message.embeds[0].fields[message.embeds[0].fields.length - 1].value;
-		const CURRENT_PAGE = Number(PAGE_FIELD.match(/(\d+) \/ \d+/)[1]);
-		const PAGE = getPage(CURRENT_PAGE, emojiName);
+	async updateLeaderboardMessage(message, emojiName) {
+		/** @type {CachedLeaderboard} */
+		const cached = await cache.get(`${LB_KEY}:${message.cachingKey}`);
 
-		if (!PAGE) return;
+		if (!cached) return;
 
-		const matchedTitle = message.embeds[0].title.match(/^(?<type>.+?) (?:XP|Xp|LvL|Average)? ?(?<gained>Gained )?Leaderboard(?: \((?:Last|Current) (?<offset>.+)\))?/);
+		const { page, reload } = handleReaction(cached.args.page, emojiName);
 
-		if (!matchedTitle) return;
+		if (page === null) return;
+
+		cached.args.page = page;
 
 		const { content } = message;
-		const matchedDescription = message.embeds[0].description.match(/^(?<guildName>.+) (?:total|average|(?<belowReqs>below reqs)) \(/m);
-		const GUILD_NAME = matchedDescription.groups.guildName.trim();
-		/**
-		 * @type {?import('../../structures/database/models/HypixelGuild')}
-		 */
-		const hypixelGuild = GUILD_NAME === 'Guilds'
-			? false
-			: message.client.hypixelGuilds.getByName(GUILD_NAME);
-		const USER_ID = message.guild ? message.mentions.users.first()?.id : message.channel.recipient.id;
 
-		let type = matchedTitle.groups.type.toLowerCase();
-		let { gained } = matchedTitle.groups;
+		if (reload) {
+			try {
+				const { type, args } = cached;
+				const leaderbaordData = self.getLeaderboardDataCreater(type)(message.client, args);
+				const reply = await message.edit(content, self.createLeaderboardEmbed(message.client, type, args, leaderbaordData));
 
-		switch (type) {
-			case 'revenant':
-				type = 'zombie';
-				break;
+				await cache.set(`${LB_KEY}:${reply.cachingKey}`, { data: leaderbaordData, ...cached });
+				await self.addPageReactions(reply);
+			} catch (error) {
+				logger.error(error);
+			}
+		} else {
+			await message.edit(content, self.createLeaderboardEmbed(message.client, cached.type, cached.args, cached.data));
 
-			case 'tarantula':
-				type = 'spider';
-				break;
-
-			case 'sven':
-				type = 'wolf';
-				break;
-
-			case 'weight tracking':
-				type = 'purge';
-				gained = true;
-				break;
+			// update cached page
+			await cache.set(`${LB_KEY}:${message.cachingKey}`, cached);
 		}
 
-		const statsEmbed = (gained ? self.createGainedStatsEmbed : self.createTotalStatsEmbed)(message.client, {
-			userID: USER_ID,
-			hypixelGuild,
-			type,
-			offset: XP_OFFSETS_CONVERTER[matchedTitle.groups.offset?.toLowerCase()],
-			shouldShowOnlyBelowReqs: matchedDescription.groups.belowReqs,
-			page: PAGE,
-		});
-
-		message.edit(content, statsEmbed);
 		if (message.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
 	},
 
 	/**
-	 * constructs a xp leaderboard message embed
+	 * create gained leaderboard data
 	 * @param {import('../../structures/LunarClient')} client
-	 * @param {object} param1
-	 * @param {string} param1.userID
-	 * @param {import('../../structures/database/models/HypixelGuild')} [param1.hypixelGuild]
-	 * @param {string} [param1.type]
-	 * @param {string} [param1.offset]
-	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
-	 * @param {number} [param1.page]
+	 * @param {LeaderboardArguments} param1
+	 * @returns {LeaderboardData}
 	 */
-	createGainedStatsEmbed(client, { userID, hypixelGuild: hypixelGuildInput = null, type = client.config.get('CURRENT_COMPETITION'), offset: offsetInput, shouldShowOnlyBelowReqs = false, page: pageInput = 1 }) {
+	createGainedLeaderboardData(client, { hypixelGuildID, userID, offset: offsetInput, shouldShowOnlyBelowReqs, type }) {
 		const { config } = client;
 		const COMPETITION_RUNNING = config.getBoolean('COMPETITION_RUNNING');
 		const COMPETITION_END_TIME = config.getNumber('COMPETITION_END_TIME');
@@ -249,60 +432,54 @@ const self = module.exports = {
 		const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END
 			? offsetFlags.COMPETITION_END
 			: '';
-		const hypixelGuild = hypixelGuildInput ?? (IS_COMPETITION_LB
+		const hypixelGuild = (typeof hypixelGuildID === 'string' ? client.hypixelGuilds.cache.get(hypixelGuildID) : hypixelGuildID) ?? (IS_COMPETITION_LB
 			? null
 			: client.players.getByID(userID)?.guild);
 
-		/**
-		 * @type {import('../../structures/database/models/Player')[]}
-		 */
-		let guildPlayers;
+		/** @type {import('../../structures/database/models/Player')[]} */
+		let playerDataRaw;
 
 		if (hypixelGuild) {
-			guildPlayers = hypixelGuild.players.array();
-			if (shouldShowOnlyBelowReqs) guildPlayers = guildPlayers.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
+			playerDataRaw = hypixelGuild.players.array();
+			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
 		} else {
-			guildPlayers = client.players.inGuild.array();
+			playerDataRaw = client.players.inGuild.array();
 		}
 
-		const PLAYER_COUNT = guildPlayers.length;
-		const ELEMENTS_PER_PAGE = config.getNumber('ELEMENTS_PER_PAGE');
+		const PLAYER_COUNT = playerDataRaw.length;
 		const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
-		const PAGES_TOTAL = Math.ceil(PLAYER_COUNT / ELEMENTS_PER_PAGE);
 		const LAST_UPDATED_AT = SHOULD_USE_COMPETITION_END
 			? COMPETITION_END_TIME
-			: Math.min(...guildPlayers.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
+			: Math.min(...playerDataRaw.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
 		const STARTING_TIME = new Date(config.getNumber(XP_OFFSETS_TIME[offset])).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
-		const PAGE = Math.max(Math.min(pageInput, PAGES_TOTAL), 1);
-		const embed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
-			.setFooter('Updated at')
-			.setTimestamp(new Date(LAST_UPDATED_AT));
 
+		/** @type {PlayerData[]} */
+		let playerData;
 		let totalStats;
 		let dataConverter;
-		let getEntry;
+		let getEntryArgs;
+		let title;
 
+		// type specific stuff
 		switch (type) {
 			case 'slayer': {
-				embed.setTitle('Slayer XP Gained Leaderboard');
+				title = 'Slayer XP Gained Leaderboard';
 				dataConverter = player => ({
 					ign: player.ign,
 					discordID: player.discordID,
 					paid: player.paid,
 					sortingStat: player.getSlayerTotal(CURRENT_OFFSET) - player.getSlayerTotal(offset),
 				});
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatNumber(guildPlayers.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round)}**`;
-				const PADDING_AMOUNT = guildPlayers[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => client.formatNumber(player.sortingStat, PADDING_AMOUNT);
+				totalStats = `**${client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round)}**`;
+				getEntryArgs = [ playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length ];
 				break;
 			}
 
 			case 'skill': {
-				embed.setTitle('Skill Average Gained Leaderboard');
+				title = 'Skill Average Gained Leaderboard';
 				dataConverter = (player) => {
 					const { skillAverage, trueAverage } = player.getSkillAverage(CURRENT_OFFSET);
 					const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(offset);
@@ -316,18 +493,19 @@ const self = module.exports = {
 						sortingStat: skillAverageGain,
 					};
 				};
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${(guildPlayers.reduce((acc, player) => acc + player.skillAverageGain, 0) / PLAYER_COUNT).toFixed(2)}** [**${(guildPlayers.reduce((acc, player) => acc + player.trueAverageGain, 0) / PLAYER_COUNT).toFixed(2)}**]`;
-				const PADDING_AMOUNT_SA = Math.floor(guildPlayers[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_TRUE = Math.floor(Math.max(...guildPlayers.map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => `${client.formatDecimalNumber(player.skillAverageGain, PADDING_AMOUNT_SA)} [${client.formatDecimalNumber(player.trueAverageGain, PADDING_AMOUNT_TRUE)}]`;
+				totalStats = `**${(playerData.reduce((acc, player) => acc + player.skillAverageGain, 0) / PLAYER_COUNT).toFixed(2)}** [**${(playerData.reduce((acc, player) => acc + player.trueAverageGain, 0) / PLAYER_COUNT).toFixed(2)}**]`;
+				getEntryArgs = [
+					Math.floor(playerData[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length,
+					Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length,
+				];
 				break;
 			}
 
 			case 'purge': {
-				embed.setTitle('Weight Tracking Leaderboard');
+				title = 'Weight Tracking Leaderboard';
 				dataConverter = (player) => {
 					const { totalWeight } = player.getWeight();
 					const { totalWeight: totalWeightOffet } = player.getWeight(offset);
@@ -341,22 +519,22 @@ const self = module.exports = {
 						sortingStat: gainedWeight,
 					};
 				};
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.totalWeight - a.totalWeight)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				const PADDING_AMOUNT_GAIN = Math.floor(guildPlayers[0]?.gainedWeight).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...guildPlayers.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => `${client.formatDecimalNumber(player.gainedWeight, PADDING_AMOUNT_GAIN)} [${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)}]`;
+				const PADDING_AMOUNT_GAIN = Math.floor(playerData[0]?.gainedWeight).toLocaleString(NUMBER_FORMAT).length;
+				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...playerData.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
+				getEntryArgs = [ PADDING_AMOUNT_GAIN, PADDING_AMOUNT_TOTAL ];
 				totalStats = oneLine`
-					${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT, PADDING_AMOUNT_GAIN)} 
-					[${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT, PADDING_AMOUNT_TOTAL)}]
+					${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT, PADDING_AMOUNT_GAIN)} 
+					[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT, PADDING_AMOUNT_TOTAL)}]
 				`;
 				break;
 			}
 
 			case 'weight': {
-				embed.setTitle('Weight Gained Leaderboard');
+				title = 'Weight Gained Leaderboard';
 				dataConverter = (player) => {
 					const { weight, overflow, totalWeight } = player.getWeight(CURRENT_OFFSET);
 					const { weight: weightOffset, overflow: overflowOffset, totalWeight: totalWeightOffet } = player.getWeight(offset);
@@ -371,25 +549,26 @@ const self = module.exports = {
 						sortingStat: totalWeightGain,
 					};
 				};
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = oneLine`**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.totalWeightGain, 0) / PLAYER_COUNT)}**
-					[**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.weightGain, 0) / PLAYER_COUNT)}** +
-					**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.overflowGain, 0) / PLAYER_COUNT)}**]`;
-				const PADDING_AMOUNT_TOTAL = Math.floor(guildPlayers[0]?.totalWeightGain).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_WEIGHT = Math.floor(Math.max(...guildPlayers.map(({ weightGain }) => weightGain))).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_OVERFLOW = Math.floor(Math.max(...guildPlayers.map(({ overflowGain }) => overflowGain))).toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => `${client.formatDecimalNumber(player.totalWeightGain, PADDING_AMOUNT_TOTAL)} [${client.formatDecimalNumber(player.weightGain, PADDING_AMOUNT_WEIGHT)} + ${client.formatDecimalNumber(player.overflowGain, PADDING_AMOUNT_OVERFLOW)}]`;
+				totalStats = oneLine`**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeightGain, 0) / PLAYER_COUNT)}**
+					[**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weightGain, 0) / PLAYER_COUNT)}** +
+					**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflowGain, 0) / PLAYER_COUNT)}**]`;
+				getEntryArgs = [
+					Math.floor(playerData[0]?.totalWeightGain).toLocaleString(NUMBER_FORMAT).length,
+					Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain))).toLocaleString(NUMBER_FORMAT).length,
+					Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain))).toLocaleString(NUMBER_FORMAT).length,
+				];
 				break;
 			}
 
 			default: {
-				embed.setTitle({
+				title = {
 					zombie: 'Revenant XP Gained Leaderboard',
 					spider: 'Tarantula XP Gained Leaderboard',
 					wolf: 'Sven XP Gained Leaderboard',
-				}[type] ?? `${upperCaseFirstChar(type)} XP Gained Leaderboard`);
+				}[type] ?? `${upperCaseFirstChar(type)} XP Gained Leaderboard`;
 				const XP_ARGUMENT = `${type}Xp${CURRENT_OFFSET}`;
 				const OFFSET_ARGUMENT = `${type}Xp${offset}`;
 				dataConverter = player => ({
@@ -398,76 +577,15 @@ const self = module.exports = {
 					paid: player.paid,
 					sortingStat: player[XP_ARGUMENT] - player[OFFSET_ARGUMENT],
 				});
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatNumber(guildPlayers.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round)}**`;
-				const PADDING_AMOUNT = Math.round(guildPlayers[0]?.sortingStat).toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => client.formatNumber(player.sortingStat, PADDING_AMOUNT, Math.round);
+				totalStats = `**${client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round)}**`;
+				getEntryArgs = [ Math.round(playerData[0]?.sortingStat).toLocaleString(NUMBER_FORMAT).length ];
 			}
 		}
 
-		let playerList = '';
-
-		// get the page elements
-		for (let index = Math.max(0, PAGE - 1) * ELEMENTS_PER_PAGE ; index < PAGE * ELEMENTS_PER_PAGE; ++index) {
-			if (index < PLAYER_COUNT) {
-				const player = guildPlayers[index];
-				playerList += `\n${stripIndent`
-					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${IS_COMPETITION_LB && player.paid ? ` ${Y_EMOJI_ALT}` : ''}
-						 > ${getEntry(player)}
-				`}`;
-			} else {
-				playerList += '\n\u200b\n\u200b';
-			}
-		}
-
-		const playerRequestingIndex = guildPlayers.findIndex(player => player.discordID === userID);
-
-		if (playerRequestingIndex !== -1) {
-			const playerRequesting = guildPlayers[playerRequestingIndex];
-
-			embed.addField(
-				'Your placement',
-				stripIndent`
-					\`\`\`ada
-					#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
-					     > ${getEntry(playerRequesting)}
-					\`\`\`
-					Page: ${PAGE} / ${PAGES_TOTAL}
-				`,
-			);
-		} else {
-			let playerRequesting = client.players.getByID(userID);
-
-			// put playerreq into guildplayers and sort then do the above again
-			if (playerRequesting) {
-				playerRequesting = dataConverter(playerRequesting);
-
-				embed.addField(
-					'Your placement',
-					stripIndent`
-						\`\`\`ada
-						#${`${guildPlayers.findIndex(player => player.sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
-						     > ${getEntry(playerRequesting)}
-						\`\`\`
-						Page: ${PAGE} / ${PAGES_TOTAL}
-					`,
-				);
-			} else {
-				embed.addField(
-					'Your placement',
-					stripIndent`
-						\`\`\`ada
-						#??? : unknown ign
-						     > link your discord tag on hypixel
-						\`\`\`
-						Page: ${PAGE} / ${PAGES_TOTAL}
-					`,
-				);
-			}
-		}
-
+		// description
 		let description = '';
 
 		if (IS_COMPETITION_LB) {
@@ -481,78 +599,109 @@ const self = module.exports = {
 			description += `Tracking xp gained since ${STARTING_TIME} GMT\n`;
 		}
 
-		description += stripIndent`
-			${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}
-			\`\`\`ada${playerList}\`\`\`
-		`;
+		// player requesting entry
+		const playerRequestingIndex = playerData.findIndex(player => player.discordID === userID);
 
-		embed.title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
-		embed.setDescription(description);
+		let playerRequestingEntry;
 
-		return embed;
+		if (playerRequestingIndex !== -1) {
+			const playerRequesting = playerData[playerRequestingIndex];
+
+			playerRequestingEntry = stripIndent`
+				\`\`\`ada
+				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
+					 > ${self.getEntry(client, 'gained', type, ...getEntryArgs)(playerRequesting)}
+				\`\`\`
+			`;
+		} else {
+			let playerRequesting = client.players.getByID(userID);
+
+			// put playerreq into guildplayers and sort then do the above again
+			if (playerRequesting) {
+				playerRequesting = dataConverter(playerRequesting);
+				playerRequestingEntry = stripIndent`
+					\`\`\`ada
+					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
+						 > ${self.getEntry(client, 'gained', type, ...getEntryArgs)(playerRequesting)}
+					\`\`\`
+				`;
+			} else {
+				playerRequestingEntry = stripIndent`
+					\`\`\`ada
+					#??? : unknown ign
+						 > link your discord tag on hypixel
+					\`\`\`
+				`;
+			}
+		}
+
+		description += `${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}`;
+		title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
+
+		return {
+			title,
+			description,
+			playerData,
+			playerCount: playerData.length,
+			playerRequestingEntry,
+			getEntryArgs,
+			isCompetition: IS_COMPETITION_LB,
+			lastUpdatedAt: LAST_UPDATED_AT,
+		};
 	},
 
 	/**
-	 * constructs a total xp leaderboard message embed
+	 * create total leaderboard data
 	 * @param {import('../../structures/LunarClient')} client
-	 * @param {object} param1
-	 * @param {string} param1.userID
-	 * @param {import('../../structures/database/models/HypixelGuild')} [param1.hypixelGuild]
-	 * @param {string} [param1.type]
-	 * @param {string} [param1.offset]
-	 * @param {boolean} [param1.shouldShowOnlyBelowReqs]
-	 * @param {number} [param1.page]
+	 * @param {LeaderboardArguments} param1
+	 * @returns {LeaderboardData}
 	 */
-	createTotalStatsEmbed(client, { userID, hypixelGuild = null, type = client.config.get('CURRENT_COMPETITION'), offset = '', shouldShowOnlyBelowReqs = false, page: pageInput = 1 }) {
-		/**
-		 * @type {import('../../structures/database/models/Player')[]}
-		 */
-		let guildPlayers;
+	createTotalLeaderboardData(client, { hypixelGuildID, userID, offset = '', shouldShowOnlyBelowReqs, type }) {
+		const { config } = client;
+		const hypixelGuild = (typeof hypixelGuildID === 'string' ? client.hypixelGuilds.cache.get(hypixelGuildID) : hypixelGuildID) ?? client.players.getByID(userID)?.guild;
+
+		/** @type {import('../../structures/database/models/Player')[]} */
+		let playerDataRaw;
 
 		if (hypixelGuild) {
-			guildPlayers = hypixelGuild.players.array();
-			if (shouldShowOnlyBelowReqs) guildPlayers = guildPlayers.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
+			playerDataRaw = hypixelGuild.players.array();
+			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
 		} else {
-			guildPlayers = client.players.inGuild.array();
+			playerDataRaw = client.players.inGuild.array();
 		}
 
-		const { config } = client;
-		const PLAYER_COUNT = guildPlayers.length;
-		const ELEMENTS_PER_PAGE = config.getNumber('ELEMENTS_PER_PAGE');
+		const PLAYER_COUNT = playerDataRaw.length;
 		const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
-		const PAGES_TOTAL = Math.ceil(PLAYER_COUNT / ELEMENTS_PER_PAGE);
 		const LAST_UPDATED_AT = offset
 			? config.getNumber(XP_OFFSETS_TIME[offset])
-			: Math.min(...guildPlayers.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
-		const PAGE = Math.max(Math.min(pageInput, PAGES_TOTAL), 1);
-		const embed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
-			.setFooter('Updated at')
-			.setTimestamp(new Date(LAST_UPDATED_AT));
+			: Math.min(...playerDataRaw.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
 
+		/** @type {PlayerData[]} */
+		let playerData;
 		let totalStats;
 		let dataConverter;
-		let getEntry;
+		let getEntryArgs;
+		let title;
 
+		// type specific stuff
 		switch (type) {
 			case 'slayer': {
-				embed.setTitle('Slayer XP Leaderboard');
+				title = 'Slayer XP Leaderboard';
 				dataConverter = player => ({
 					ign: player.ign,
 					discordID: player.discordID,
 					sortingStat: player.getSlayerTotal(offset),
 				});
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatNumber(guildPlayers.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round)}**`;
-				const PADDING_AMOUNT = guildPlayers[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => client.formatNumber(player.sortingStat, PADDING_AMOUNT);
+				totalStats = `**${client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round)}**`;
+				getEntryArgs = [ playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length ];
 				break;
 			}
 
 			case 'skill': {
-				embed.setTitle('Skill Average Leaderboard');
+				title = 'Skill Average Leaderboard';
 				dataConverter = (player) => {
 					const { skillAverage, trueAverage } = player.getSkillAverage(offset);
 					return {
@@ -563,11 +712,11 @@ const self = module.exports = {
 						sortingStat: skillAverage,
 					};
 				};
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.skillAverage, 0) / PLAYER_COUNT, 2)}** [**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.trueAverage, 0) / PLAYER_COUNT, 2)}**]`;
-				getEntry = player => `${client.formatDecimalNumber(player.skillAverage, 2)} [${client.formatDecimalNumber(player.trueAverage, 2)}]`;
+				totalStats = `**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.skillAverage, 0) / PLAYER_COUNT, 2)}** [**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.trueAverage, 0) / PLAYER_COUNT, 2)}**]`;
+				getEntryArgs = [ 2, 2 ];
 				break;
 			}
 
@@ -575,29 +724,28 @@ const self = module.exports = {
 			case 'spider':
 			case 'wolf':
 			case 'guild': {
-				embed.setTitle(`${{
+				title = `${{
 					zombie: 'Revenant',
 					spider: 'Tarantula',
 					wolf: 'Sven',
 					guild: 'Guild',
-				}[type]} XP Leaderboard`);
+				}[type]} XP Leaderboard`;
 				const XP_ARGUMENT = `${type}Xp${offset}`;
 				dataConverter = player => ({
 					ign: player.ign,
 					discordID: player.discordID,
 					sortingStat: player[XP_ARGUMENT],
 				});
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatNumber(guildPlayers.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round)}**`;
-				const PADDING_AMOUNT = guildPlayers[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => client.formatNumber(player.sortingStat, PADDING_AMOUNT);
+				totalStats = `**${client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round)}**`;
+				getEntryArgs = [ playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length ];
 				break;
 			}
 
 			case 'weight': {
-				embed.setTitle('Weight Leaderboard');
+				title = 'Weight Leaderboard';
 				dataConverter = (player) => {
 					const { weight, overflow, totalWeight } = player.getWeight(offset);
 					return {
@@ -609,23 +757,24 @@ const self = module.exports = {
 						sortingStat: totalWeight,
 					};
 				};
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
 				totalStats = oneLine`
-					**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT)}**
-					[**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.weight, 0) / PLAYER_COUNT)}** + 
-					**${client.formatDecimalNumber(guildPlayers.reduce((acc, player) => acc + player.overflow, 0) / PLAYER_COUNT)}**]
+					**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT)}**
+					[**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight, 0) / PLAYER_COUNT)}** + 
+					**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow, 0) / PLAYER_COUNT)}**]
 				`;
-				const PADDING_AMOUNT_TOTAL = Math.floor(guildPlayers[0]?.totalWeight).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_WEIGHT = Math.floor(Math.max(...guildPlayers.map(({ weight }) => weight))).toLocaleString(NUMBER_FORMAT).length;
-				const PADDING_AMOUNT_OVERFLOW = Math.floor(Math.max(...guildPlayers.map(({ overflow }) => overflow))).toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => `${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)} [${client.formatDecimalNumber(player.weight, PADDING_AMOUNT_WEIGHT)} + ${client.formatDecimalNumber(player.overflow, PADDING_AMOUNT_OVERFLOW)}]`;
+				getEntryArgs = [
+					Math.floor(playerData[0]?.totalWeight).toLocaleString(NUMBER_FORMAT).length,
+					Math.floor(Math.max(...playerData.map(({ weight }) => weight))).toLocaleString(NUMBER_FORMAT).length,
+					Math.floor(Math.max(...playerData.map(({ overflow }) => overflow))).toLocaleString(NUMBER_FORMAT).length,
+				];
 				break;
 			}
 
 			default: {
-				embed.setTitle(`${upperCaseFirstChar(type)} LvL Leaderboard`);
+				title = `${upperCaseFirstChar(type)} LvL Leaderboard`;
 				const XP_ARGUMENT = `${type}Xp${offset}`;
 				dataConverter = player => ({
 					ign: player.ign,
@@ -634,85 +783,63 @@ const self = module.exports = {
 					progressLevel: player.getSkillLevel(type, offset).progressLevel,
 					sortingStat: player[XP_ARGUMENT],
 				});
-				guildPlayers = guildPlayers
+				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${(guildPlayers.reduce((acc, player) => acc + player.progressLevel, 0) / PLAYER_COUNT).toFixed(2)}** [**${client.formatNumber(guildPlayers.reduce((acc, player) => acc + player.xp, 0) / PLAYER_COUNT, 0, Math.round)}** XP]`;
-				const PADDING_AMOUNT_XP = Math.round(guildPlayers[0]?.xp).toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => `${client.formatDecimalNumber(player.progressLevel, 2)} [${client.formatNumber(player.xp, PADDING_AMOUNT_XP, Math.round)} XP]`;
+				totalStats = `**${(playerData.reduce((acc, player) => acc + player.progressLevel, 0) / PLAYER_COUNT).toFixed(2)}** [**${client.formatNumber(playerData.reduce((acc, player) => acc + player.xp, 0) / PLAYER_COUNT, 0, Math.round)}** XP]`;
+				const PADDING_AMOUNT_XP = Math.round(playerData[0]?.xp).toLocaleString(NUMBER_FORMAT).length;
+				getEntryArgs = [ 2, PADDING_AMOUNT_XP ];
 				break;
 			}
 		}
 
-		let playerList = '';
-
-		// get the page elements
-		for (let index = (PAGE - 1) * ELEMENTS_PER_PAGE ; index < PAGE * ELEMENTS_PER_PAGE; ++index) {
-			if (index < PLAYER_COUNT) {
-				const player = guildPlayers[index];
-				playerList += `\n${stripIndent`
-					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}
-						 > ${getEntry(player)}
-				`}`;
-			} else {
-				playerList += '\n\u200b\n\u200b';
-			}
-		}
-
 		// 'your placement'
-		const playerRequestingIndex = guildPlayers.findIndex(player => player.discordID === userID);
+		const playerRequestingIndex = playerData.findIndex(player => player.discordID === userID);
+
+		let playerRequestingEntry;
 
 		if (playerRequestingIndex !== -1) {
-			const playerRequesting = guildPlayers[playerRequestingIndex];
+			const playerRequesting = playerData[playerRequestingIndex];
 
-			embed.addField(
-				'Your placement',
-				stripIndent`
-					\`\`\`ada
-					#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
-					     > ${getEntry(playerRequesting)}
-					\`\`\`
-					Page: ${PAGE} / ${PAGES_TOTAL}
-				`,
-			);
+			playerRequestingEntry = stripIndent`
+				\`\`\`ada
+				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
+					 > ${self.getEntry(client, 'total', type, ...getEntryArgs)(playerRequesting)}
+				\`\`\`
+			`;
 		} else {
 			let playerRequesting = client.players.getByID(userID);
 
 			// put playerreq into guildplayers and sort then do the above again
 			if (playerRequesting) {
 				playerRequesting = dataConverter(playerRequesting);
-
-				embed.addField(
-					'Your placement',
-					stripIndent`
-						\`\`\`ada
-						#${`${guildPlayers.findIndex(player => player.sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
-						     > ${getEntry(playerRequesting)}
-						\`\`\`
-						Page: ${PAGE} / ${PAGES_TOTAL}
-					`,
-				);
+				playerRequestingEntry = stripIndent`
+					\`\`\`ada
+					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
+						 > ${self.getEntry(client, 'total', type, ...getEntryArgs)(playerRequesting)}
+					\`\`\`
+				`;
 			} else {
-				embed.addField(
-					'Your placement',
-					stripIndent`
-						\`\`\`ada
-						#??? : unknown ign
-						     > link your discord tag on hypixel
-						\`\`\`
-						Page: ${PAGE} / ${PAGES_TOTAL}
-					`,
-				);
+				playerRequestingEntry = stripIndent`
+					\`\`\`ada
+					#??? : unknown ign
+						 > link your discord tag on hypixel
+					\`\`\`
+				`;
 			}
 		}
 
-		if (offset) embed.title += ` (Last ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
-		embed.setDescription(stripIndent`
-			${`${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'average'} (${PLAYER_COUNT} members): ${totalStats}`.padEnd(62, '\xa0')}\u200b
-			\`\`\`ada${playerList}\`\`\`
-		`);
+		if (offset) title += ` (Last ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
 
-		return embed;
+		return {
+			title,
+			description: `${`${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'average'} (${PLAYER_COUNT} members): ${totalStats}`.padEnd(62, '\xa0')}\u200b`,
+			playerData,
+			playerCount: playerData.length,
+			playerRequestingEntry,
+			getEntryArgs,
+			lastUpdatedAt: LAST_UPDATED_AT,
+		};
 	},
 
 };

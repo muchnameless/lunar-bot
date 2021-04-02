@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndents } = require('common-tags');
-const { handleLeaderboardCommandMessage, createTotalStatsEmbed } = require('../../functions/commands/leaderboardMessages');
+const { handleLeaderboardCommandMessage } = require('../../functions/commands/leaderboardMessages');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
 const Command = require('../../structures/commands/Command');
@@ -25,6 +25,7 @@ module.exports = class TotalCommand extends Command {
 				${cosmeticSkills.join(', ')}
 				slayer, revenant, tarantula, sven, ${slayers.join(', ')}
 				dungeon, ${[ ...dungeonTypes, ...dungeonClasses ].join(', ')}
+				guildxp
 				weight
 			`,
 			cooldown: 1,
@@ -39,6 +40,6 @@ module.exports = class TotalCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return handleLeaderboardCommandMessage(message, rawArgs, flags, createTotalStatsEmbed);
+		return handleLeaderboardCommandMessage(message, rawArgs, flags, 'total');
 	}
 };

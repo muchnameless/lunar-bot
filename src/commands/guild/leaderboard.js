@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndents } = require('common-tags');
-const { handleLeaderboardCommandMessage, createGainedStatsEmbed } = require('../../functions/commands/leaderboardMessages');
+const { handleLeaderboardCommandMessage } = require('../../functions/commands/leaderboardMessages');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { XP_OFFSETS_SHORT } = require('../../constants/database');
 const Command = require('../../structures/commands/Command');
@@ -40,6 +40,6 @@ module.exports = class LeaderboardCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return handleLeaderboardCommandMessage(message, rawArgs, flags, createGainedStatsEmbed);
+		return handleLeaderboardCommandMessage(message, rawArgs, flags, 'gained');
 	}
 };

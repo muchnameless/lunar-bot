@@ -13,7 +13,7 @@ const senither = new SenitherAPIFacade(process.env.HYPIXEL_KEY_AUX, {
 		},
 		set(key, value) {
 			// prepend our key with "senither" so we don't conflict with anyone else
-			return cache.set(`senither:${key}`, value, { ttl: 10 });
+			return cache.set(`senither:${key}`, value, 10_000);
 		},
 	},
 });

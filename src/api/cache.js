@@ -1,18 +1,14 @@
 'use strict';
 
-const cacheManager = require('cache-manager');
-const redisStore = require('cache-manager-redis');
+const Keyv = require('keyv');
+
 const logger = require('../functions/logger');
-
-
-const cache = cacheManager.caching({
-	store: redisStore,
-	host: 'localhost', // default value
-	port: 6379, // default value
-	db: 0,
-	ttl: 600,
+const keyv = new Keyv(process.env.REDIS_URI, {
+	namespace: process.env.NAMESPACE,
+	ttl: 10 * 60_000,
 });
 
-cache.store.events.on('redisError', error => logger.error(error));
+keyv.on('error', logger.error);
 
-module.exports = cache;
+
+module.exports = keyv;
