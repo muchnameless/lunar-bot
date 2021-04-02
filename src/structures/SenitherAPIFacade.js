@@ -58,7 +58,10 @@ class Profiles extends Method {
 
 class SenitherAPIFacade extends EventEmitter {
 	/**
-	 * @param {object} options
+	 * @param {string} key
+	 * @param {object} [options]
+	 * @param {{set:Function, get:Function}} [options.cache] caching method
+	 * @param {number} [options.limitOffset] reduces the api key limit by this amount, to use the same key with different clients
 	 */
 	constructor(key, options = {}) {
 		super();
@@ -68,6 +71,7 @@ class SenitherAPIFacade extends EventEmitter {
 
 		this.profiles = new Profiles(this);
 		this.queue = new AsyncQueue();
+		this.limitOffset = options.limitOffset ?? 0;
 		this.rateLimit = {
 			remaining: 5,
 			reset: 60,
@@ -97,6 +101,8 @@ class SenitherAPIFacade extends EventEmitter {
 			const value = headers.get(`ratelimit-${key}`);
 			if (value != null) this.rateLimit[key] = parseInt(value, 10);
 		}
+
+		this.rateLimit.limit -= this.limitOffset;
 	}
 
 	/**

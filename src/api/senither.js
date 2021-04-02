@@ -16,6 +16,7 @@ const senither = new SenitherAPIFacade(process.env.HYPIXEL_KEY, {
 			return cache.set(`senither:${key}`, value, 60_000);
 		},
 	},
+	limitOffset: 10,
 });
 
 senither
