@@ -12,7 +12,7 @@ class RedisListener {
 		this.client = client;
 		this.redis = createClient(...args);
 		this.namespace = process.env.NAMESPACE;
-		this.keyRegExp = new RegExp(`^${[ process.env.namespace, '(?<type>.+)(?::.+)*', '(?<guildID>.+)', '(?<channelID>\\d+)', '(?<messageID>\\d+)' ].join(':')}$`);
+		this.keyRegExp = new RegExp(`^${[ process.env.NAMESPACE, '(?<type>.+)(?::.+)*', '(?<guildID>.+)', '(?<channelID>\\d+)', '(?<messageID>\\d+)' ].join(':')}$`);
 
 		this.redis.config('set', 'notify-keyspace-events', 'Exe');
 
