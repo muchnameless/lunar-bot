@@ -146,13 +146,13 @@ const self = module.exports = {
 						return player => client.formatNumber(player.sortingStat, paddingAmount0);
 
 					case 'skill':
-						return player => `${client.formatDecimalNumber(player.skillAverageGain, paddingAmount0)} [${client.formatDecimalNumber(player.trueAverageGain, paddingAmount1)}]`;
+						return player => `${client.formatDecimalNumber(player.skillAverage, paddingAmount0)} [${client.formatDecimalNumber(player.trueAverage, paddingAmount1)}]`;
 
 					case 'purge':
 						return player => `${client.formatDecimalNumber(player.gainedWeight, paddingAmount0)} [${client.formatDecimalNumber(player.totalWeight, paddingAmount1)}]`;
 
 					case 'weight':
-						return player => `${client.formatDecimalNumber(player.totalWeightGain, paddingAmount0)} [${client.formatDecimalNumber(player.weightGain, paddingAmount1)} + ${client.formatDecimalNumber(player.overflowGain, paddingAmount2)}]`;
+						return player => `${client.formatDecimalNumber(player.totalWeight, paddingAmount0)} [${client.formatDecimalNumber(player.weight, paddingAmount1)} + ${client.formatDecimalNumber(player.overflow, paddingAmount2)}]`;
 
 					default:
 						return player => `${client.formatDecimalNumber(player.progressLevel, paddingAmount0)} [${client.formatNumber(player.xp, paddingAmount1, Math.round)} XP]`;
