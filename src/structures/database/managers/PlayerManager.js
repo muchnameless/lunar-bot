@@ -210,10 +210,11 @@ class PlayerManager extends ModelManager {
 
 	/**
 	 * update db entries and linked discord members of all players
+	 * @param {import('../models/Player').PlayerUpdateOptions} options
 	 */
 	async update(options = {}) {
 		await Promise.all([
-			this.updateXp(options),
+			this.updateXp({ shouldOnlyAwaitUpdateXp: true, ...options }),
 			this.updateIGN(),
 		]);
 
@@ -246,12 +247,6 @@ class PlayerManager extends ModelManager {
 	 * updates all IGNs and logs changes via the webhook
 	 */
 	async updateIGN() {
-		// delete redis uuid->name cache
-		await safePromiseAll(
-			(await cache.opts.store.redis.keys(`${process.env.NAMESPACE}:mojang:name:*`))
-				.map(async key => cache.opts.store.redis.unlink(key)),
-		);
-
 		/** @type {Record<string, string>[]} */
 		const log = [];
 

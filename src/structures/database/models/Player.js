@@ -391,19 +391,24 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * updates the player data and discord member
-	 * @param {object} options
-	 * @param {?string} [options.reason] role update reason for discord's audit logs
-	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
+	 * @typedef {object} PlayerUpdateOptions
+	 * @property {?string} [reason] role update reason for discord's audit logs
+	 * @property {boolean} [shouldSendDm=false] wether to dm the user that they should include their ign somewhere in their nickname
+	 * @property {boolean} [shouldOnlyAwaitUpdateXp=false] wether to only await the updateXp call and not updateDiscordMember
 	 */
-	async update({ reason = 'synced with ingame stats', shouldSendDm = false, shouldAwaitAll = true } = {}) {
+
+	/**
+	 * updates the player data and discord member
+	 * @param {PlayerUpdateOptions} options
+	 */
+	async update({ reason = 'synced with ingame stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false } = {}) {
 		if (this.guildID === GUILD_ID_BRIDGER) return;
 		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp(); // only query hypixel skyblock api for guild players without errors
 
-		if (shouldAwaitAll) {
-			await this.updateDiscordMember({ reason, shouldSendDm });
-		} else {
+		if (shouldOnlyAwaitUpdateXp) {
 			this.updateDiscordMember({ reason, shouldSendDm });
+		} else {
+			await this.updateDiscordMember({ reason, shouldSendDm });
 		}
 	}
 
