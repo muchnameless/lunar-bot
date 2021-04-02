@@ -68,11 +68,14 @@ class PlayerManager extends ModelManager {
 	 * @param {string|import('../models/Player')} idOrPlayer
 	 */
 	delete(idOrPlayer) {
+		/** @type {import('../models/Player')} */
 		const player = this.resolve(idOrPlayer);
 
 		if (!player) throw new Error(`[PLAYER HANDLER DELETE]: invalid input: ${idOrPlayer}`);
 
-		this.client.hypixelGuilds.sweepPlayerCache(player.guildID);
+		this.client.hypixelGuilds.sweepPlayerCache(player.guildID); // sweep hypixel guild player cache
+		const user = this.client.users.cache.get(player.discordID); // sweep user player cache
+		if (user) user.player = null;
 
 		return this.cache.delete(player.minecraftUUID);
 	}
