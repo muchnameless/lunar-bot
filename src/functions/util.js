@@ -7,8 +7,6 @@ const jaroWinklerSimilarity = require('jaro-winkler');
 const { XP_TYPES, XP_OFFSETS_SHORT } = require('../constants/database');
 const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
 const { CHANNEL_FLAGS } = require('../constants/bot');
-const hypixel = require('../api/hypixel');
-const hypixelAux = require('../api/hypixelAux');
 const logger = require('./logger');
 
 const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
@@ -80,15 +78,6 @@ const self = module.exports = {
 	 * @param {string} string
 	 */
 	stringToMS: string => string.split(/(?<=[a-z])(?=\d)/).reduce((acc, cur) => acc + ms(cur), 0),
-
-	/**
-	 * returns the hypixel client
-	 * @param {boolean} shouldSkipQueue wether to use the hypixel aux client when the main one's request queue is filled
-	 */
-	getHypixelClient: ((shouldSkipQueue = false) => ((shouldSkipQueue && hypixel.queue.promises.length > hypixelAux.queue.promises.length)
-		? hypixelAux
-		: hypixel)
-	),
 
 	/**
 	 * returns the ISO week number of the given date

@@ -5,7 +5,7 @@ const cache = require('./cache');
 const logger = require('../functions/logger');
 
 
-const senither = new SenitherAPIFacade(process.env.HYPIXEL_KEY_AUX, {
+const senither = new SenitherAPIFacade(process.env.HYPIXEL_KEY, {
 	cache: {
 		// these don't need to be async since cache.get / cache.set will return a promise
 		get(key) {
@@ -13,7 +13,7 @@ const senither = new SenitherAPIFacade(process.env.HYPIXEL_KEY_AUX, {
 		},
 		set(key, value) {
 			// prepend our key with "senither" so we don't conflict with anyone else
-			return cache.set(`senither:${key}`, value, 10_000);
+			return cache.set(`senither:${key}`, value, 60_000);
 		},
 	},
 });

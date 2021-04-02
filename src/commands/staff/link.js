@@ -3,8 +3,8 @@
 const { DiscordAPIError, Constants } = require('discord.js');
 const { stripIndents, oneLineCommaListsOr } = require('common-tags');
 const { UNKNOWN_IGN } = require('../../constants/database');
-const { getHypixelClient } = require('../../functions/util');
 const { validateDiscordTag, validateNumber, validateMinecraftUUID } = require('../../functions/stringValidators');
+const hypixel = require('../../api/hypixel');
 const mojang = require('../../api/mojang');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -39,7 +39,7 @@ module.exports = class LinkCommand extends Command {
 					...(await Promise.all(args.map(async arg => mojang.getUUID(arg).catch(error => logger.error(`[LINK]: ${error}`))))).filter(x => x != null),
 				].map(async minecraftUUID => ({
 					minecraftUUID,
-					guildID: (await getHypixelClient(true).guild.player(minecraftUUID).catch(error => logger.error(`[LINK]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))?._id,
+					guildID: (await hypixel.guild.player(minecraftUUID).catch(error => logger.error(`[LINK]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))?._id,
 				})),
 			)).filter(({ guildID }) => this.client.hypixelGuilds.cache.keyArray().includes(guildID));
 			/**

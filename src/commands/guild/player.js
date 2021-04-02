@@ -74,7 +74,7 @@ module.exports = class PlayerCommand extends Command {
 		}
 
 		// update db?
-		if (this.force(flags)) await player.updateXp({ shouldSkipQueue: true });
+		if (this.force(flags)) await player.updateXp();
 
 		const startingDate = new Date(Math.max(this.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
 		const embed = new MessageEmbed()

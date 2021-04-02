@@ -6,7 +6,7 @@ const hypixelTTL = require('./hypixelTTL');
 const logger = require('../functions/logger');
 
 
-const hypixel = new Client(process.env.HYPIXEL_KEY_MAIN, {
+const hypixel = new Client(process.env.HYPIXEL_KEY, {
 	cache: {
 		// these don't need to be async since cache.get / cache.set will return a promise
 		get(key) {

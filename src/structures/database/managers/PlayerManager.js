@@ -120,7 +120,6 @@ class PlayerManager extends ModelManager {
 			this.sortAlphabetically();
 
 			newPlayer.update({
-				shouldSkipQueue: true,
 				reason: `joined ${newPlayer.guild?.name}`,
 			});
 		}
@@ -230,12 +229,18 @@ class PlayerManager extends ModelManager {
 				logger.warn('[PLAYERS UPDATE]: auto updates disabled');
 			}
 		} else {
-			await safePromiseAll(this.cache.map(async player => player.update(options)));
+			// await safePromiseAll(this.cache.map(async player => player.update(options)));
+			for (const player of this.cache.values()) {
+				await player.update(options).catch(logger.error);
+			}
 		}
 
 		return this;
 	}
 
+	/**
+	 * updates all IGNs and logs changes via the webhook
+	 */
 	async updateIGN() {
 		/** @type {Record<string, string>[]} */
 		const log = [];

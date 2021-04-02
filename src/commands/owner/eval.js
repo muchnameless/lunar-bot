@@ -13,8 +13,7 @@ const cache = require('../../api/cache');
 const skyblock = require('../../constants/skyblock');
 const functionsUtil = require('../../functions/util');
 const functionsFiles = require('../../functions/files');
-const hypixelMain = require('../../api/hypixel');
-const hypixelAux = require('../../api/hypixelAux');
+const hypixel = require('../../api/hypixel');
 const senither = require('../../api/senither');
 const mojang = require('../../api/mojang');
 const Command = require('../../structures/commands/Command');
@@ -84,11 +83,6 @@ module.exports = class EvalCommand extends Command {
 		const responseEmbed = new MessageEmbed()
 			.setColor(config.get('EMBED_BLUE'))
 			.setFooter(`${guild ? guild.me.displayName : client.user.username}`, client.user.displayAvatarURL());
-
-		let hypixel;
-
-		// eslint-disable-next-line no-unused-vars
-		if (message.content.includes('hypixel')) hypixel = functionsUtil.getHypixelClient(true);
 
 		inputArray.forEach((input, index) => {
 			responseEmbed.addField(

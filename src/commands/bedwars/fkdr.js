@@ -1,6 +1,6 @@
 'use strict';
 
-const { getHypixelClient } = require('../../functions/util');
+const hypixel = require('../../api/hypixel');
 const mojang = require('../../api/mojang');
 const MojangAPIError = require('../../structures/errors/MojangAPIError');
 const Command = require('../../structures/commands/Command');
@@ -72,7 +72,7 @@ module.exports = class FkdrCommand extends Command {
 			const uuid = args.length
 				? await mojang.getUUID(args[0])
 				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
-			const { playername, stats: { Bedwars } } = await getHypixelClient(true).player.uuid(uuid);
+			const { playername, stats: { Bedwars } } = await hypixel.player.uuid(uuid);
 
 			return message.reply(this.generateReply(playername, Bedwars));
 		} catch (error) {

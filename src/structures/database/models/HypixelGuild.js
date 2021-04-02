@@ -3,7 +3,7 @@
 const { Model, DataTypes } = require('sequelize');
 const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
 const ms = require('ms');
-const { autocorrect, getHypixelClient, cleanFormattedNumber, compareAlphabetically, safePromiseAll } = require('../../../functions/util');
+const { autocorrect, cleanFormattedNumber, compareAlphabetically, safePromiseAll } = require('../../../functions/util');
 const { promote: { string: { success } } } = require('../../chat_bridge/constants/commandResponses');
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED, STOP } = require('../../../constants/emojiCharacters');
@@ -338,7 +338,7 @@ module.exports = class HypixelGuild extends Model {
 
 						// try to link new player to discord
 						await (async () => {
-							discordTag = (await getHypixelClient(true).player.uuid(minecraftUUID)
+							discordTag = (await hypixel.player.uuid(minecraftUUID)
 								.catch(error => logger.error(`[GET DISCORD TAG]: ${IGN} (${this.name}): ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))
 								?.socialMedia?.links?.DISCORD;
 
@@ -368,7 +368,6 @@ module.exports = class HypixelGuild extends Model {
 								player.save();
 
 								player.update({
-									shouldSkipQueue: true,
 									reason: `joined ${this.name}`,
 								});
 							}),
@@ -440,7 +439,6 @@ module.exports = class HypixelGuild extends Model {
 								]);
 
 								player.update({
-									shouldSkipQueue: true,
 									reason: `joined ${this.name}`,
 								});
 							}),
@@ -594,7 +592,7 @@ module.exports = class HypixelGuild extends Model {
 		// player data could be outdated -> update data when player does not meet reqs
 		if (totalWeight < WEIGHT_REQ) {
 			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} but only had ${this.client.formatDecimalNumber(totalWeight)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
-			await player.updateXp({ shouldSkipQueue: true });
+			await player.updateXp();
 			({ totalWeight } = player.getWeight());
 		}
 

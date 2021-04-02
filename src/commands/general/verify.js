@@ -1,7 +1,7 @@
 'use strict';
 
 const { oneLine, commaListsOr } = require('common-tags');
-const { getHypixelClient } = require('../../functions/util');
+const hypixel = require('../../api/hypixel');
 const mojang = require('../../api/mojang');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -51,7 +51,7 @@ module.exports = class VerifyCommand extends Command {
 			// non existing ign
 			if (!MINECRAFT_UUID) return message.reply(`unable to find the minecraft UUID of \`${ign}\`. ${ERROR_STRING}`);
 
-			const hypixelGuild = await getHypixelClient(true).guild.player(MINECRAFT_UUID).catch(error => logger.error(`[VERIFY]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
+			const hypixelGuild = await hypixel.guild.player(MINECRAFT_UUID).catch(error => logger.error(`[VERIFY]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
 
 			// not in a guild
 			if (!hypixelGuild) return message.reply(`unable to find the hypixel guild of \`${ign}\`. ${ERROR_STRING}`);
@@ -63,7 +63,7 @@ module.exports = class VerifyCommand extends Command {
 				according to the hypixel API, \`${ign}\` is not in ${hypixelGuilds.cache.map(({ name }) => name)}. ${ERROR_STRING}
 			`);
 
-			const hypixelPlayer = await getHypixelClient(true).player.uuid(MINECRAFT_UUID).catch(error => logger.error(`[VERIFY]: player fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
+			const hypixelPlayer = await hypixel.player.uuid(MINECRAFT_UUID).catch(error => logger.error(`[VERIFY]: player fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
 
 			// hypixel player api error
 			if (!hypixelPlayer) return message.reply(`unable to find \`${ign}\` on hypixel. ${ERROR_STRING}`);

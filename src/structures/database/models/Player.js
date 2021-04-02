@@ -8,10 +8,11 @@ const { levelingXp, skillXpPast50, skillsCap, runecraftingXp, dungeonXp, slayerX
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
-const { escapeIgn, getHypixelClient, trim } = require('../../../functions/util');
+const { escapeIgn, trim } = require('../../../functions/util');
 const { validateNumber } = require('../../../functions/stringValidators');
 const NonAPIError = require('../../errors/NonAPIError');
 const LunarGuildMember = require('../../extensions/GuildMember');
+const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
 
@@ -392,28 +393,25 @@ module.exports = class Player extends Model {
 	/**
 	 * updates the player data and discord member
 	 * @param {object} options
-	 * @param {boolean} [options.shouldSkipQueue] wether to use the hypixel aux client when the main one's request queue is filled
 	 * @param {?string} [options.reason] role update reason for discord's audit logs
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
-	async update({ shouldSkipQueue = false, reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
+	async update({ reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
 		if (this.guildID === GUILD_ID_BRIDGER) return;
-		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp({ shouldSkipQueue }); // only query hypixel skyblock api for guild players without errors
+		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp(); // only query hypixel skyblock api for guild players without errors
 
 		await this.updateDiscordMember({ reason, shouldSendDm });
 	}
 
 	/**
 	 * updates skill and slayer xp
-	 * @param {object} options
-	 * @param {boolean} [options.shouldSkipQueue] wether to use the hypixel aux client when the main one's request queue is filled
 	 */
-	async updateXp({ shouldSkipQueue = false } = {}) {
+	async updateXp() {
 		try {
-			if (!this.mainProfileID) await this.fetchMainProfile(shouldSkipQueue); // detect main profile if it is unknown
+			if (!this.mainProfileID) await this.fetchMainProfile(); // detect main profile if it is unknown
 
-			// hypixel API call (if shouldSkipQueue and hypixelMain queue already filled use hypixelAux)
-			const { meta: { cached }, members } = (await getHypixelClient(shouldSkipQueue).skyblock.profile(this.mainProfileID));
+			// hypixel API call
+			const { meta: { cached }, members } = (await hypixel.skyblock.profile(this.mainProfileID));
 
 			if (cached) throw new NonAPIError('cached data');
 
@@ -726,7 +724,6 @@ module.exports = class Player extends Model {
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
 
 			if (reason) await this.update({
-				shouldSkipQueue: true,
 				reason,
 			});
 		} else if (typeof idOrDiscordMember === 'string' && validateNumber(idOrDiscordMember)) {
@@ -965,18 +962,16 @@ module.exports = class Player extends Model {
 
 	/**
 	 * fetches the discord tag from hypixel
-	 * @param {boolean} shouldSkipQueue wether to use the hypixel aux client when the main one's request queue is filled
 	 */
-	async fetchDiscordTag(shouldSkipQueue = false) {
-		return (await getHypixelClient(shouldSkipQueue).player.uuid(this.minecraftUUID).catch(error => logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))?.socialMedia?.links?.DISCORD ?? null;
+	async fetchDiscordTag() {
+		return (await hypixel.player.uuid(this.minecraftUUID).catch(error => logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))?.socialMedia?.links?.DISCORD ?? null;
 	}
 
 	/**
 	 * determines the player's main profile (profile with the most progress)
-	 * @param {boolean} shouldSkipQueue wether to use the hypixel aux client when the main one's request queue is filled
 	 */
-	async fetchMainProfile(shouldSkipQueue = false) {
-		const profiles = await getHypixelClient(shouldSkipQueue).skyblock.profiles.uuid(this.minecraftUUID);
+	async fetchMainProfile() {
+		const profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUUID);
 
 		if (!profiles.length) throw new Error(`[MAIN PROFILE]: ${this.logInfo}: unable to detect main profile name`);
 
