@@ -396,11 +396,15 @@ module.exports = class Player extends Model {
 	 * @param {?string} [options.reason] role update reason for discord's audit logs
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
-	async update({ reason = 'synced with ingame stats', shouldSendDm = false } = {}) {
+	async update({ reason = 'synced with ingame stats', shouldSendDm = false, shouldAwaitAll = true } = {}) {
 		if (this.guildID === GUILD_ID_BRIDGER) return;
 		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp(); // only query hypixel skyblock api for guild players without errors
 
-		await this.updateDiscordMember({ reason, shouldSendDm });
+		if (shouldAwaitAll) {
+			await this.updateDiscordMember({ reason, shouldSendDm });
+		} else {
+			this.updateDiscordMember({ reason, shouldSendDm });
+		}
 	}
 
 	/**
