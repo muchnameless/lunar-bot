@@ -9,6 +9,8 @@ const LunarClient = require('./src/structures/LunarClient');
 const logger = require('./src/functions/logger');
 
 
+let client;
+
 // catch rejections
 process
 	.on('unhandledRejection', (error) => {
@@ -16,9 +18,9 @@ process
 	})
 	.on('uncaughtException', (error) => {
 		logger.error('[UNCAUGHT EXCEPTION]:', error);
-		db.closeConnectionAndExit();
+		client?.exit(-1) ?? process.exit(-1);
 	})
-	.on('SIGINT', db.closeConnectionAndExit);
+	.on('SIGINT', () => client?.exit(0) ?? process.exit(0));
 
 
 // init
@@ -27,7 +29,7 @@ process
 	await requireAll(join(__dirname, 'src', 'structures', 'extensions'));
 
 	// initiate bot client
-	const client = new LunarClient({
+	client = new LunarClient({
 		db,
 		restTimeOffset: 0,
 		messageEditHistoryMaxSize: 0,
@@ -71,6 +73,6 @@ process
 	// connect to Discord
 	client.login().catch((error) => {
 		logger.error('[INIT]: login error:', error);
-		db.closeConnectionAndExit();
+		client.exit(1);
 	});
 })();

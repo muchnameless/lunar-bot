@@ -9,6 +9,7 @@ const LogHandler = require('./LogHandler');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const CommandCollection = require('./commands/CommandCollection');
 const RedisListener = require('./RedisListener');
+const cache = require('../api/cache');
 const logger = require('../functions/logger');
 
 
@@ -322,6 +323,31 @@ class LunarClient extends Client {
 		return converterFunction(number)
 			.toLocaleString(this.config.get('NUMBER_FORMAT'))
 			.padStart(paddingAmount, ' ');
+	}
+
+	/**
+	 * closes all db connections and exits the process
+	 * @param {number} code exit code
+	 */
+	async exit(code = 0) {
+		try {
+			let output = await Promise.allSettled([
+				this.db.sequelize.close(),
+				cache.opts.store.redis.quit(),
+				this.redisListener.redis.quit(),
+			]);
+
+			if (output.some(({ status }) => status === 'rejected')) throw output;
+
+			output = output.filter(({ reason }) => reason != null);
+
+			if (output.length) console.log(output);
+
+			process.exit(code);
+		} catch (error) {
+			console.error(error);
+			process.exit(1);
+		}
 	}
 }
 

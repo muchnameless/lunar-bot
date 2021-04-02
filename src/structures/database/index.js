@@ -52,20 +52,6 @@ const db = {
 	// add sequelize
 	sequelize,
 	Sequelize,
-
-	/**
-	 * closes the sequelize connection to the sqlite db and exits the process optionally with an error based on the db response
-	 */
-	async closeConnectionAndExit() {
-		try {
-			const output = await sequelize.close();
-			if (output) console.log(output);
-			process.exit(0);
-		} catch (error) {
-			console.error(error);
-			process.exit(1);
-		}
-	},
 };
 
 for (const dbEntry of Object.values(db).filter(value => Object.getPrototypeOf(value) === Sequelize.Model)) {

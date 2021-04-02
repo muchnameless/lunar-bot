@@ -22,6 +22,6 @@ module.exports = class StopCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		await message.reply('stopping the bot.').catch(logger.error);
-		this.client.db.closeConnectionAndExit();
+		this.client.exit();
 	}
 };
