@@ -7,6 +7,7 @@ const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH } 
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
 const { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar, safePromiseAll } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
+const cache = require('../../../api/cache');
 const logger = require('../../../functions/logger');
 
 
@@ -242,6 +243,12 @@ class PlayerManager extends ModelManager {
 	 * updates all IGNs and logs changes via the webhook
 	 */
 	async updateIGN() {
+		// delete redis uuid->name cache
+		await safePromiseAll(
+			(await cache.opts.store.redis.keys(`${process.env.NAMESPACE}:mojang:name:*`))
+				.map(async key => cache.opts.store.redis.unlink(key)),
+		);
+
 		/** @type {Record<string, string>[]} */
 		const log = [];
 
