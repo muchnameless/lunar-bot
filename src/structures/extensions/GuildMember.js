@@ -28,6 +28,13 @@ class LunarGuildMember extends GuildMember {
 	}
 
 	/**
+	 * player object associated with the discord member
+	 */
+	set player(value) {
+		this.user.player = value;
+	}
+
+	/**
 	 * hypixelGuild object associated with the discord member
 	 */
 	get hypixelGuild() {

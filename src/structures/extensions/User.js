@@ -26,6 +26,13 @@ class LunarUser extends User {
 	}
 
 	/**
+	 * player object associated with the discord user
+	 */
+	set player(value) {
+		this._player = value;
+	}
+
+	/**
 	 * hypixelGuild object associated with the discord user
 	 */
 	get hypixelGuild() {
