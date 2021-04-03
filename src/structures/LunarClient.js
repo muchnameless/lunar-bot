@@ -30,7 +30,7 @@ class LunarClient extends Client {
 		this.logHandler = new LogHandler(this);
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'), true);
-		this.redisListener = new RedisListener(this);
+		this.redisListener = new RedisListener(this, process.env.REDIS_URI);
 	}
 
 	set webhook(value) {

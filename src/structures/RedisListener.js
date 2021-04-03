@@ -1,5 +1,5 @@
 'use strict';
-const { createClient } = require('redis');
+const Redis = require('ioredis');
 const { LB_KEY } = require('../constants/redis');
 const logger = require('../functions/logger');
 
@@ -10,7 +10,7 @@ class RedisListener {
 	 */
 	constructor(client, ...args) {
 		this.client = client;
-		this.redis = createClient(...args);
+		this.redis = new Redis(...args);
 		this.namespace = process.env.NAMESPACE;
 		this.keyRegExp = new RegExp(`^${[ process.env.NAMESPACE, '(?<type>.+)(?::.+)*', '(?<guildID>.+)', '(?<channelID>\\d+)', '(?<messageID>\\d+)' ].join(':')}$`);
 
