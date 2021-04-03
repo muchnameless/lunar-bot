@@ -41,7 +41,7 @@ class LogHandler {
 			this._postFileLogs(); // repost webhook logs that failed to be posted during the last uptime
 		} catch (error) {
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) this.client.config.set('LOGGING_WEBHOOK_DELETED', 'true');
-			logger.error(`[LOGGING WEBHOOK]: ${error.name}: ${error.message}`);
+			logger.error(`[LOGGING WEBHOOK]: ${error}`);
 		}
 	}
 
@@ -142,7 +142,7 @@ class LogHandler {
 				embeds,
 			});
 		} catch (error) {
-			logger.error(`[CLIENT LOG]: ${error.name}: ${error.message}`);
+			logger.error(`[CLIENT LOG]: ${error}`);
 
 			// webhook doesn't exist anymore
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
@@ -186,7 +186,7 @@ class LogHandler {
 			);
 		} catch (error) {
 			logger.error(error);
-			logger.error(`[LOG TO FILE]: ${error.name}: ${error.message}`);
+			logger.error(`[LOG TO FILE]: ${error}`);
 		}
 	}
 
@@ -209,7 +209,7 @@ class LogHandler {
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {
-			logger.error(`[POST LOG FILES]: ${error.name}: ${error.message}`);
+			logger.error(`[POST LOG FILES]: ${error}`);
 		}
 	}
 }

@@ -177,7 +177,7 @@ const self = module.exports = {
 				if (!message.reactions.cache.has(emoji)) await message.react(emoji);
 			}
 		} catch (error) {
-			logger.error(`[ADD PAGE REACTIONS]: ${error.name}: ${error.message}`);
+			logger.error(`[ADD PAGE REACTIONS]: ${error}`);
 		}
 
 		return message;
@@ -392,7 +392,7 @@ const self = module.exports = {
 		if (!cached) return;
 
 		// remove reaction from user
-		if (message.channel.checkBotPermissions('MANAGE_MESSAGES')) reaction.users.remove(userID).catch(error => logger.error(`[REMOVE REACTION]: ${error.name}: ${error.message}`));
+		if (message.channel.checkBotPermissions('MANAGE_MESSAGES')) reaction.users.remove(userID).catch(error => logger.error(`[REMOVE REACTION]: ${error}`));
 
 		// user is not command author
 		if (userID !== cached.args.userID) return;
@@ -431,7 +431,7 @@ const self = module.exports = {
 
 			if (message.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
 		} catch (error) {
-			logger.error(`[UPDATE LB]: ${error.name}: ${error.message}`);
+			logger.error(`[UPDATE LB]: ${error}`);
 		}
 	},
 

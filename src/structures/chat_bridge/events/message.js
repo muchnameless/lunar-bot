@@ -36,7 +36,7 @@ module.exports = async (chatBridge, message) => {
 			if (!chatBridge.enabled) return;
 			if (!message.author.inGuild) return; // ignore messages from non guild players
 
-			chatBridge.guild?.handleRankRequestMessage(message).catch(error => logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`));
+			chatBridge.guild?.handleRankRequestMessage(message).catch(error => logger.error(`[RANK REQUEST]: ${error}`));
 
 			return commandHandler(message);
 		}

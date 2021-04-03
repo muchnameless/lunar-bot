@@ -154,7 +154,7 @@ module.exports = class TaxResetCommand extends Command {
 					.unpin({ reason: 'reached max pin amount' })
 					.then(
 						() => logger.info('[TAX RESET]: unpinned old tax embed'),
-						error => logger.error(`[TAX RESET]: error unpinning old tax embed: ${error.name}: ${error.message}`),
+						error => logger.error(`[TAX RESET]: error unpinning old tax embed: ${error}`),
 					);
 
 				logMessage.pin({ reason: '#sheet-logs' }).catch(logger.error);

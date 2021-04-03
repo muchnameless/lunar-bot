@@ -246,7 +246,7 @@ class LunarClient extends Client {
 						logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
 					}
 				} catch (error) {
-					logger.error(`[GUILD STATS CHANNEL UPDATE]: ${error.name}: ${error.message}`);
+					logger.error(`[GUILD STATS CHANNEL UPDATE]: ${error}`);
 				}
 			},
 			start: true,

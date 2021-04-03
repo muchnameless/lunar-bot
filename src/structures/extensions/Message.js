@@ -105,7 +105,7 @@ class LunarMessage extends Message {
 	async reactSafely(emoji) {
 		if (this.deleted) return null;
 		if (!this.channel.checkBotPermissions('ADD_REACTIONS')) return null;
-		return super.react(emoji).catch(error => logger.error(`[REACT SAFELY]: ${error.name}: ${error.message}`));
+		return super.react(emoji).catch(error => logger.error(`[REACT SAFELY]: ${error}`));
 	}
 
 	/**
@@ -297,7 +297,7 @@ class LunarMessage extends Message {
 
 						this.channel
 							.bulkDelete([ commandsChannelMessage.id, this.id ])
-							.catch(error => logger.error(`[REPLY]: unable to bulk delete: ${error.name}: ${error.message}`));
+							.catch(error => logger.error(`[REPLY]: unable to bulk delete: ${error}`));
 					}, 10_000);
 				});
 		} else if (this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES')) { // only delete author's message
@@ -350,7 +350,7 @@ class LunarMessage extends Message {
 			}
 		} else { // send 1 message
 			message = await (oldReplyMessageID
-				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error(`[SEND REPLY]: ${error.name}: ${error.message}`)))?.edit(content, options) ?? channel.send(content, options))
+				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error(`[SEND REPLY]: ${error}`)))?.edit(content, options) ?? channel.send(content, options))
 				: channel.send(content, options));
 
 			if (options.saveReplyMessageID) {
@@ -365,7 +365,7 @@ class LunarMessage extends Message {
 		if (IDsToDelete?.length && replyData.channelID) {
 			this.client.channels.cache.get(replyData.channelID)
 				?.deleteMessages(IDsToDelete)
-				.catch(error => logger.error(`[SEND REPLY]: IDs: ${IDsToDelete.map(x => `'${x}'`).join(', ')}: ${error.name}: ${error.message}`));
+				.catch(error => logger.error(`[SEND REPLY]: IDs: ${IDsToDelete.map(x => `'${x}'`).join(', ')}: ${error}`));
 		}
 
 		return message;

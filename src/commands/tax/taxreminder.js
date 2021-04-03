@@ -59,7 +59,7 @@ module.exports = class TaxReminderCommand extends Command {
 			// optional ghost ping (delete ping message(s))
 			if (!SHOULD_GHOST_PING) return message.channel.stopTyping(true);
 
-			const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error(`[TAX REMINDER]: ghost ping: ${error.name}: ${error.message}`));
+			const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error(`[TAX REMINDER]: ghost ping: ${error}`));
 
 			if (!fetched) return;
 			if (!message.channel.checkBotPermissions('MANAGE_MESSAGES')) return fetched.filter(({ author: { id } }) => id === this.client.user.id).forEach(msg => msg.delete().catch(logger.error));

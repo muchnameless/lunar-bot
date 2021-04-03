@@ -99,7 +99,7 @@ module.exports = async (message) => {
 			/**
 			 * @type {?import('../structures/extensions/GuildMember')}
 			 */
-			const member = message.member ?? await lgGuild.members.fetch(message.author.id).catch(error => logger.error(`[CMD HANDLER]: error while fetching member to test for permissions: ${error.name}: ${error.message}`));
+			const member = message.member ?? await lgGuild.members.fetch(message.author.id).catch(error => logger.error(`[CMD HANDLER]: error while fetching member to test for permissions: ${error}`));
 
 			if (!member) {
 				logger.info(`[CMD HANDLER]: ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} and could not be found within the Lunar Guard Discord Server`);
@@ -165,6 +165,6 @@ module.exports = async (message) => {
 		await command.run(message, args, flags, rawArgs);
 	} catch (error) {
 		logger.error(`[CMD HANDLER]: An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}:`, error);
-		message.reply(`an error occured while executing the \`${command.name}\` command:\n${error.name}: ${error.message}`);
+		message.reply(`an error occured while executing the \`${command.name}\` command:\n${error}`);
 	}
 };

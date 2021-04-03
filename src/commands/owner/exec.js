@@ -39,7 +39,7 @@ module.exports = class ExecCommand extends Command {
 			}
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
-			message.reply(`${error.name}: ${error.message}`, { code: 'xl' });
+			message.reply(`${error}`, { code: 'xl' });
 		}
 	}
 };

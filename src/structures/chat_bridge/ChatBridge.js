@@ -285,7 +285,7 @@ class ChatBridge extends EventEmitter {
 				return this.disconnect();
 			}
 
-			logger.error(`[CHATBRIDGE]: ${this.guild.name}: error fetching webhook: ${error.name}: ${error.message}`);
+			logger.error(`[CHATBRIDGE]: ${this.guild.name}: error fetching webhook: ${error}`);
 		}
 	}
 
@@ -605,7 +605,7 @@ class ChatBridge extends EventEmitter {
 		try {
 			return await this.webhook.send(toSend);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: ${error.name}: ${error.message}`);
+			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: ${error}`);
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
 				this.uncacheWebhook();
 				this.reconnect();

@@ -97,16 +97,16 @@ module.exports = class CronJob extends Model {
 	 * @returns {Promise<LunarMessage>}
 	 */
 	async restoreCommandMessage() {
-		const channel = await this.client.channels.fetch(this.channelID).catch(error => logger.error(`[CRON JOB RESUME]: channel: ${error.name}: ${error.message}`));
-		const message = await channel?.messages.fetch(this.messageID).catch(error => logger.error(`[CRON JOB RESUME]: message: ${error.name}: ${error.message}`))
+		const channel = await this.client.channels.fetch(this.channelID).catch(error => logger.error(`[CRON JOB RESUME]: channel: ${error}`));
+		const message = await channel?.messages.fetch(this.messageID).catch(error => logger.error(`[CRON JOB RESUME]: message: ${error}`))
 			?? new LunarMessage(this.client, {
 				// mock 'data'
 				id: this.messageID,
 				channel,
 				content: `${this.name}${this.flags?.length ? ` -${this.flags.join(' -')}` : ''}${this.args?.length ? ` ${this.args.join(' ')}` : ''}`,
-				author: await this.client.users.fetch(this.authorID).catch(error => logger.error(`[CRON JOB RESUME]: user: ${error.name}: ${error.message}`)),
+				author: await this.client.users.fetch(this.authorID).catch(error => logger.error(`[CRON JOB RESUME]: user: ${error}`)),
 				guild: channel?.guild,
-				member: await channel?.guild?.members.fetch(this.author).catch(error => logger.error(`[CRON JOB RESUME]: member: ${error.name}: ${error.message}`)) ?? null,
+				member: await channel?.guild?.members.fetch(this.author).catch(error => logger.error(`[CRON JOB RESUME]: member: ${error}`)) ?? null,
 			}, channel);
 
 		return message;

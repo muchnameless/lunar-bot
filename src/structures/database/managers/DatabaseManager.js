@@ -292,10 +292,10 @@ class DatabaseManager {
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
 
-		let taxMessage = await taxChannel.messages.fetch(config.get('TAX_MESSAGE_ID')).catch(error => logger.error(`[TAX MESSAGE]: ${error.name}: ${error.message}`));
+		let taxMessage = await taxChannel.messages.fetch(config.get('TAX_MESSAGE_ID')).catch(error => logger.error(`[TAX MESSAGE]: ${error}`));
 
 		if (!taxMessage || taxMessage.deleted) { // taxMessage deleted
-			taxMessage = await taxChannel.send(taxEmbed).catch(error => logger.error(`[TAX MESSAGE]: ${error.name}: ${error.message}`));
+			taxMessage = await taxChannel.send(taxEmbed).catch(error => logger.error(`[TAX MESSAGE]: ${error}`));
 
 			if (!taxMessage) return; // failed to retreive old and send new taxMessage
 
@@ -308,7 +308,7 @@ class DatabaseManager {
 
 		taxMessage.edit(content, taxEmbed).then(
 			() => logger.info('[TAX MESSAGE]: updated taxMessage'),
-			error => logger.error(`[TAX MESSAGE]: ${error.name}: ${error.message}`),
+			error => logger.error(`[TAX MESSAGE]: ${error}`),
 		);
 	}
 }

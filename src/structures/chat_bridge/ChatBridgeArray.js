@@ -131,13 +131,13 @@ class ChatBridgeArray extends Array {
 			if (result.every(([ ingame, discord ]) => ingame && (Array.isArray(discord) ? discord.length : discord))) {
 				if (message.reactions.cache.get(X_EMOJI)?.me) {
 					message.reactions.cache.get(X_EMOJI).users.remove(this.client.user.id)
-						.catch(error => `[HANDLE ANNOUNCEMENT MSG]: ${error.name}: ${error.message}`);
+						.catch(error => `[HANDLE ANNOUNCEMENT MSG]: ${error}`);
 				}
 			} else {
 				message.reactSafely(X_EMOJI);
 			}
 		} catch (error) {
-			logger.error(`[HANDLE ANNOUNCEMENT MSG]: ${error.name}: ${error.message}`);
+			logger.error(`[HANDLE ANNOUNCEMENT MSG]: ${error}`);
 			message.reactSafely(X_EMOJI);
 		}
 	}

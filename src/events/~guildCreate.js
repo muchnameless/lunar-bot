@@ -16,6 +16,6 @@ module.exports = async (client, guild) => {
 		await guild.members.fetch();
 		logger.debug(`[GUILD CREATE]: ${guild.name}: fetched all members`);
 	} catch (error) {
-		logger.error(`[GUILD CREATE]: ${guild.name}: failed to fetch all members: ${error.name}: ${error.message}`);
+		logger.error(`[GUILD CREATE]: ${guild.name}: failed to fetch all members: ${error}`);
 	}
 };

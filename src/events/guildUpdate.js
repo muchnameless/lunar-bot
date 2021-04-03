@@ -20,7 +20,7 @@ module.exports = async (client, oldGuild, newGuild) => {
 			await newGuild.members.fetch();
 			logger.debug(`[GUILD UPDATE]: ${newGuild.name}: fetched all members`);
 		} catch (error) {
-			logger.error(`[GUILD UPDATE]: ${newGuild.name}: failed to fetch all members: ${error.name}: ${error.message}`);
+			logger.error(`[GUILD UPDATE]: ${newGuild.name}: failed to fetch all members: ${error}`);
 		}
 	}
 
@@ -30,7 +30,7 @@ module.exports = async (client, oldGuild, newGuild) => {
 			await client.user.setAvatar(newGuild.iconURL());
 			logger.info(`[GUILD UPDATE]: updated bot avatar to ${newGuild.iconURL()}`);
 		} catch (error) {
-			logger.error(`[GUILD UPDATE]: error updating bot avatar to ${newGuild.iconURL()}: ${error.name}: ${error.message}`);
+			logger.error(`[GUILD UPDATE]: error updating bot avatar to ${newGuild.iconURL()}: ${error}`);
 		}
 	}
 };

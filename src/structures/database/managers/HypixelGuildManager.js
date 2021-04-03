@@ -148,7 +148,7 @@ class HypixelGuildManager extends ModelManager {
 		try {
 			await this.cache.find(({ rankRequestChannelID }) => rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message);
 		} catch (error) {
-			logger.error(`[RANK REQUEST]: ${error.name}: ${error.message}`);
+			logger.error(`[RANK REQUEST]: ${error}`);
 		}
 	}
 
