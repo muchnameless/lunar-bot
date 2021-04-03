@@ -176,7 +176,7 @@ class HypixelMessage extends ChatMessage {
 						?? this.author.ign,
 					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
 						?? player?.image
-						?? await mojang.getUUID(this.author.ign).then(uuid => `https://visage.surgeplay.com/bust/${uuid}`, error => logger.error(`[FORWARD TO DC]: ${error}`))
+						?? await mojang.ign(this.author.ign).then(({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`, error => logger.error(`[FORWARD TO DC]: ${error}`))
 						?? this.client.user.displayAvatarURL({ dynamic: true }),
 					content: this.parsedContent,
 					allowedMentions: {
@@ -203,7 +203,7 @@ class HypixelMessage extends ChatMessage {
 				allowedMentions: { parse: [] },
 			});
 		} catch (error) {
-			logger.error(`[FORWARD TO DC]: ${error.name}: ${error.message}`);
+			logger.error(`[FORWARD TO DC]: ${error}`);
 		} finally {
 			this.chatBridge.discordQueue.shift();
 		}

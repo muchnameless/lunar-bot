@@ -1,10 +1,10 @@
 'use strict';
 
 const { upperCaseFirstChar } = require('../../functions/util');
+const { getWeight } = require('../../functions/skyblock');
+const { getUuidAndIgn } = require('../../functions/commands/input');
 const { X_EMOJI } = require('../../constants/emojiCharacters');
-const mojang = require('../../api/mojang');
-const senither = require('../../api/senither');
-const MojangAPIError = require('../../structures/errors/MojangAPIError');
+const hypixel = require('../../api/hypixel');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -38,26 +38,37 @@ module.exports = class WeightCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		try {
-			const uuid = args.length
-				? await mojang.getUUID(args[0])
-				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
-			const data = await senither.profiles.uuid(uuid, args.length < 2 ? 'weight' : null);
-			const { username, name, weight, weight_overflow: overflow, skills } = args.length < 2
-				? data
-				: (data.find(({ name: profileName }) => profileName.toLowerCase() === args[1].toLowerCase()) ?? (() => { throw new Error(`unknown profile name '${upperCaseFirstChar(args[1].toLowerCase())}'`); })());
+			const { uuid, ign } = await getUuidAndIgn(message, args);
+			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
 
-			return message.reply(`${username} (${name}): ${this.formatNumber(weight + overflow)} [${this.formatNumber(weight)} + ${this.formatNumber(overflow)}]${skills?.apiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`);
-		} catch (error) {
-			logger.error(`[WEIGHT]: ${error instanceof MojangAPIError
-					? `${error}`
-					: error.message
-			}`);
+			if (!profiles.length) return message.reply(`${ign} has no skyblock profiles`);
+
+			let weightData;
+
+			if (args.length < 2) {
+				weightData = profiles
+					.map(({ cute_name: name, members }) => ({ name, ...getWeight(members[uuid]) }))
+					.sort(({ total: aTotal }, { total: bTotal }) => aTotal - bTotal)
+					.pop();
+			} else {
+				const PROFILE_NAME = args[1].toLowerCase();
+				const profile = profiles.find(({ cute_name: name }) => name.toLowerCase() === PROFILE_NAME);
+
+				if (!profile) return message.reply(`${ign} has no profile named '${upperCaseFirstChar(PROFILE_NAME)}'`);
+
+				weightData = {
+					name: profile.cute_name,
+					...getWeight(profile.members[uuid]),
+				};
+			}
 
 			return message.reply(
-				error instanceof MojangAPIError
-					? `${error}`
-					: error.message,
+				`${ign} (${weightData.name}): ${this.formatNumber(weightData.total)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillApiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`,
 			);
+		} catch (error) {
+			logger.error(`[WEIGHT]: ${error}`);
+
+			return message.reply(`${error}`);
 		}
 	}
 };

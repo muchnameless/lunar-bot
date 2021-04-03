@@ -1,8 +1,7 @@
 'use strict';
 
+const { getUuidAndIgn } = require('../../functions/commands/input');
 const hypixel = require('../../api/hypixel');
-const mojang = require('../../api/mojang');
-const MojangAPIError = require('../../structures/errors/MojangAPIError');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -29,11 +28,11 @@ module.exports = class FkdrCommand extends Command {
 	}
 
 	/**
-	 * @param {string} playername
+	 * @param {string} ign
 	 * @param {import('@zikeji/hypixel').Components.Schemas.PlayerStatsBedwars} bedwarsData
 	 */
-	generateReply(playername, bedwarsData) {
-		if (!bedwarsData) return `\`${playername}\` has no bed wars stats`;
+	generateReply(ign, bedwarsData) {
+		if (!bedwarsData) return `\`${ign}\` has no bed wars stats`;
 
 		const {
 			final_kills_bedwars: finalKills = null,
@@ -55,9 +54,9 @@ module.exports = class FkdrCommand extends Command {
 			{ name: '4s', kd: this.calculateKD(fourFourFinalKills, fourFourFinalDeaths) },
 		].filter(({ kd }) => kd !== null);
 
-		if (!kds.length) return `\`${playername}\` has no bed wars stats`;
+		if (!kds.length) return `\`${ign}\` has no bed wars stats`;
 
-		return `${playername}: ${kds.map(({ name, kd }) => `${name}: ${kd}`).join(', ')}`;
+		return `${ign}: ${kds.map(({ name, kd }) => `${name}: ${kd}`).join(', ')}`;
 	}
 
 	/**
@@ -69,23 +68,14 @@ module.exports = class FkdrCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		try {
-			const uuid = args.length
-				? await mojang.getUUID(args[0])
-				: message.author.player?.minecraftUUID ?? await mojang.getUUID(message.author.ign);
-			const { playername, stats: { Bedwars } } = await hypixel.player.uuid(uuid);
+			const { uuid, ign } = await getUuidAndIgn(message, args);
+			const { stats: { Bedwars } } = await hypixel.player.uuid(uuid);
 
-			return message.reply(this.generateReply(playername, Bedwars));
+			return message.reply(this.generateReply(ign, Bedwars));
 		} catch (error) {
-			logger.error(`[FKDR]: ${error instanceof MojangAPIError
-					? `${error}`
-					: error.message
-			}`);
+			logger.error(`[FKDR]: ${error}`);
 
-			return message.reply(
-				error instanceof MojangAPIError
-					? `${error}`
-					: error.message,
-			);
+			return message.reply(`${error}`);
 		}
 	}
 };

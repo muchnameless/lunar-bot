@@ -5,21 +5,20 @@ class MojangAPIError extends Error {
 	 * @param {object} param1
 	 * @param {number} [param1.status]
 	 * @param {string} [param1.statusText]
-	 * @param {string} resultField
+	 * @param {string} queryType
 	 */
-	constructor({ status, statusText }, resultField, input) {
+	constructor({ status, statusText }, queryType, input) {
 		super();
 
 		this.name = 'MojangAPIError';
 		this.code = status;
-		this.message = statusText;
 
-		switch (resultField) {
-			case 'id':
+		switch (queryType) {
+			case 'ign':
 				this.message = `invalid IGN '${input}'`;
 				break;
 
-			case 'name':
+			case 'uuid':
 				this.message = `invalid uuid '${input}'`;
 				break;
 

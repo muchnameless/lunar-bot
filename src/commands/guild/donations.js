@@ -49,22 +49,23 @@ module.exports = class DonationsCommand extends Command {
 		let totalAmount = 0;
 
 		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([ , a ], [ , b ]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
-			const IGN = this.client.players.cache.get(minecraftUUID)?.ign ?? (await mojang.getIGN(IGN).catch(logger.error)) ?? minecraftUUID;
+			const IGN = this.client.players.cache.get(minecraftUUID)?.ign ?? (await mojang.uuid(minecraftUUID).catch(logger.error))?.ign ?? minecraftUUID;
 			const notes = reducedNotes[minecraftUUID].join('\n');
-			const inline = Boolean(notes);
 
-			embed.addField('\u200b', stripIndent`
-				\`\`\`ada
-				#${`${index + 1}`.padStart(3, '0')} : ${IGN}
-					 > ${this.client.formatNumber(amount)}
-				\`\`\`
-			`, inline);
+			embed.addField(
+				'\u200b',
+				stripIndent`
+					\`\`\`ada
+					#${`${index + 1}`.padStart(3, '0')} : ${IGN}
+						> ${this.client.formatNumber(amount)}
+					\`\`\`
+				`,
+				true,
+			);
 
-			if (inline) {
-				embed
-					.addField('\u200b', notes, inline)
-					.padFields();
-			}
+			if (notes) embed.addField('\u200b', notes, true);
+
+			embed.padFields();
 
 			totalAmount += amount;
 		}));

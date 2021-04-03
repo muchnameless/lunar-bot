@@ -24,9 +24,9 @@ class Mojang {
 	}
 
 	/**
-	 * @typedef UUIDsResult
-	 * @property {string} id
-	 * @property {string} name
+	 * @typedef MojangResult
+	 * @property {string} uuid
+	 * @property {string} ign
 	 */
 
 	/**
@@ -34,7 +34,7 @@ class Mojang {
 	 * @param {string[]} usernames
 	 * @returns {Promise<UUIDsResult[]>}
 	 */
-	getUUIDs(usernames) {
+	igns(usernames) {
 		if (!Array.isArray(usernames)) throw new TypeError('[Mojang Client]: uuids must be an array');
 		if (!usernames.length || usernames.length > 10) return Promise.reject(new MojangAPIError());
 
@@ -59,57 +59,65 @@ class Mojang {
 	}
 
 	/**
-	 * @description converts a username to a uuid
-	 * @param {string} username
-	 * @returns {Promise<string>} uuid
+	 * query by ign
+	 * @param {string} ign
+	 * @returns {Promise<MojangResult>}
 	 */
-	getUUID(username, options = {}) {
-		if (typeof username !== 'string') throw new TypeError('[Mojang Client]: username must be a string');
-		if (!validateMinecraftIGN(username)) return Promise.reject(new MojangAPIError({}, 'id', username));
-		return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', username.toLowerCase(), 'id', options);
+	ign(ign, options = {}) {
+		if (typeof ign !== 'string') throw new TypeError('[Mojang Client]: username must be a string');
+		if (!validateMinecraftIGN(ign)) return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'ign', ign));
+		return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', ign.toLowerCase(), 'ign', options);
 	}
 
 	/**
-	 * @description converts a uuid to a username
+	 * query by uuid
 	 * @param {string} uuid
-	 * @returns {Promise<string>} username
+	 * @returns {Promise<MojangResult>} username
 	 */
-	getIGN(uuid, options = {}) {
+	uuid(uuid, options = {}) {
 		if (typeof uuid !== 'string') throw new TypeError('[Mojang Client]: uuid must be a string');
-		if (!validateMinecraftUUID(uuid)) return Promise.reject(new MojangAPIError({}, 'name', uuid));
-		return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'name', options);
+		if (!validateMinecraftUUID(uuid)) return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'uuid', uuid));
+		return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
 	}
 
 	/**
 	 * @private
 	 * @param {string} path
 	 * @param {string} query
-	 * @param {string} resultField
+	 * @param {string} queryType
 	 * @param {boolean} [param3.cache]
 	 * @param {boolean} [param3.force]
 	 */
-	async _makeRequest(path, query, resultField = null, { cache = true, force = false } = {}) {
+	async _makeRequest(path, query, queryType = null, { cache = true, force = false } = {}) {
 		if (!force) {
-			const cachedResponse = await this.cache?.get(`${resultField}:${query}`);
+			const cachedResponse = await this.cache?.get(query);
+
 			if (cachedResponse) {
-				if (typeof cachedResponse === 'string') return cachedResponse;
-				throw new MojangAPIError({ status: '(cached)', ...cachedResponse }, resultField, query);
+				if (Object.hasOwnProperty.call(cachedResponse, 'status')) throw new MojangAPIError({ status: '(cached)', ...cachedResponse }, queryType, query);
+				return cachedResponse;
 			}
 		}
 
 		const res = await fetch(`${path}${query}`);
 
 		if (res.status !== 200) {
-			if (cache) this.cache?.set(`${resultField}:${query}`, res);
-			throw new MojangAPIError(res, resultField, query);
+			if (cache) this.cache?.set(query, res);
+			throw new MojangAPIError(res, queryType, query);
 		}
 
 		const parsedRes = await res.json().catch(() => {
 			throw new Error('An error occurred while converting to JSON');
 		});
-		const response = resultField ? parsedRes[resultField] : parsedRes;
 
-		if (cache) this.cache?.set(`${resultField}:${query}`, response);
+		const response = {
+			uuid: parsedRes.id,
+			ign: parsedRes.name,
+		};
+
+		if (cache) {
+			this.cache?.set(response.uuid, response);
+			this.cache?.set(response.ign.toLowerCase(), response);
+		}
 
 		return response;
 	}

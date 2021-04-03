@@ -329,7 +329,7 @@ module.exports = class HypixelGuild extends Model {
 
 					// unknown player
 					if (created) {
-						const IGN = await mojang.getIGN(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${error}`)) ?? UNKNOWN_IGN;
+						const IGN = (await mojang.uuid(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${error}`)))?.ign ?? UNKNOWN_IGN;
 
 						joinedLog.push(`+\xa0${IGN}`);
 
@@ -415,7 +415,7 @@ module.exports = class HypixelGuild extends Model {
 						setTimeout(
 							(async () => {
 								// reset current xp to 0
-								await player.resetXp({ offsetToReset: 'current' }).catch(error => logger.error(`${error.name}: ${error.message}`));
+								await player.resetXp({ offsetToReset: 'current' }).catch(error => logger.error(`${error}`));
 
 								const { xpLastUpdatedAt } = player;
 								// shift the daily array for the amount of daily resets missed
@@ -580,7 +580,7 @@ module.exports = class HypixelGuild extends Model {
 
 			const replyData = await message.replyData;
 
-			if (replyData) message.channel.deleteMessages(replyData.messageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error.name}: ${error.message}`));
+			if (replyData) message.channel.deleteMessages(replyData.messageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error}`));
 
 			return message.reactSafely(CLOWN);
 		}
@@ -599,7 +599,7 @@ module.exports = class HypixelGuild extends Model {
 		const WEIGHT_STRING = this.client.formatDecimalNumber(totalWeight);
 
 		// remove clown reaction if it exists, optional chaining to handle  mc messages
-		if (message.reactions?.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error.name}: ${error.message}`));
+		if (message.reactions?.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error}`));
 
 		await message.reply(
 			`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
@@ -662,7 +662,7 @@ module.exports = class HypixelGuild extends Model {
 				if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
 					message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
 						() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
-						error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error.name}: ${error.message}`),
+						error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error}`),
 					);
 					return message.reactSafely(MUTED);
 				}
@@ -676,7 +676,7 @@ module.exports = class HypixelGuild extends Model {
 				if (Date.now() < this.chatMutedUntil) { // mute hasn't expired
 					message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
 						() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
-						error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error.name}: ${error.message}`),
+						error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error}`),
 					);
 					return message.reactSafely(MUTED);
 				}
@@ -690,7 +690,7 @@ module.exports = class HypixelGuild extends Model {
 				if (Date.now() < chatBridge.bot.player.chatBridgeMutedUntil) { // mute hasn't expired
 					message.author.send(`the bot is currently muted for ${ms(chatBridge.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
 						() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed bot muted`),
-						error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing bot muted: ${error.name}: ${error.message}`),
+						error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing bot muted: ${error}`),
 					);
 					return message.reactSafely(MUTED);
 				}
@@ -701,9 +701,9 @@ module.exports = class HypixelGuild extends Model {
 
 			if (!(await chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(STOP);
 		} catch (error) {
-			if (error instanceof ChatBridgeError) return logger.warn(`[GUILD CHATBRIDGE]: ${error.name}: ${error.message}`);
+			if (error instanceof ChatBridgeError) return logger.warn(`[GUILD CHATBRIDGE]: ${error}`);
 
-			logger.warn(`[GUILD CHATBRIDGE]: ${this.name}: ${error.name}: ${error.message}`);
+			logger.warn(`[GUILD CHATBRIDGE]: ${this.name}: ${error}`);
 			message.reactSafely(X_EMOJI);
 		}
 	}

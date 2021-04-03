@@ -9,13 +9,8 @@ const mojang = new Mojang({
 		get(key) {
 			return cache.get(`mojang:${key}`);
 		},
-		set(key, value) { // ttl: seconds until cache sweep
-			if (key.startsWith('name')) { // -> getIGN
-				return cache.set(`mojang:${key}`, value, (typeof value === 'string' ? 10 : 20) * 60_000);
-			}
-
-			// key.startsWith('id') -> getUUID
-			return cache.set(`mojang:${key}`, value, (typeof value === 'string' ? 15 : 30) * 60_000);
+		set(key, value) {
+			return cache.set(`mojang:${key}`, value, 30 * 60_000);
 		},
 	},
 });

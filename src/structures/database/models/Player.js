@@ -4,11 +4,12 @@ const { MessageEmbed } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER } = require('../../../constants/database');
-const { levelingXp, skillXpPast50, skillsCap, runecraftingXp, dungeonXp, slayerXp, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
+const { levelingXp, skillXpPast50, skillsCap, dungeonXp, slayerXp, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
 const { escapeIgn, trim } = require('../../../functions/util');
+const { getSkillLevel } = require('../../../functions/skyblock');
 const { validateNumber } = require('../../../functions/stringValidators');
 const NonAPIError = require('../../errors/NonAPIError');
 const LunarGuildMember = require('../../extensions/GuildMember');
@@ -94,6 +95,20 @@ module.exports = class Player extends Model {
 		 * @type {number}
 		 */
 		this.guildXpDaily;
+
+		// this.skills = Object.fromEntries(
+		// 	skills.map(skill => [ skill, () => getSkillLevel(skill, this[`${skill}Xp`], this[`${skill}LvlCap`]) ]),
+		// );
+
+		// this.skills = {};
+
+		// for (const skill of skills) {
+		// 	Object.defineProperty(this.skills, skill, {
+		// 		get() {
+		// 			return getSkillLevel(skill, this[`${skill}Xp`], this[`${skill}LvlCap`]);
+		// 		},
+		// 	});
+		// }
 	}
 
 	/**
@@ -228,6 +243,14 @@ module.exports = class Player extends Model {
 		});
 	}
 
+	// get weight() {
+	// 	return {
+	// 		weekly: get ,
+	// 		monthly
+	// 		mayor
+	// 	}
+	// }
+
 	/**
 	 * returns the hypixel guild db object associated with the player
 	 * @returns {?import('./HypixelGuild')}
@@ -255,7 +278,7 @@ module.exports = class Player extends Model {
 				} catch (error) {
 					this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
 					this.save();
-					logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error.name}: ${error.message}`);
+					logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error}`);
 					return this._discordMember = null;
 				}
 			})()
@@ -386,7 +409,7 @@ module.exports = class Player extends Model {
 		}).then(async result => Promise.all(result.map(async transaction => ({
 			...transaction,
 			fromIGN: this.ign,
-			toIGN: this.client.players.cache.get(transaction.to)?.ign ?? await mojang.getIGN(transaction.to).catch(logger.error),
+			toIGN: (this.client.players.cache.get(transaction.to) ?? await mojang.uuid(transaction.to).catch(logger.error))?.ign,
 		}))));
 	}
 
@@ -454,7 +477,7 @@ module.exports = class Player extends Model {
 				this.notes = 'skill api disabled';
 			}
 
-			this.farmingLvlCap = 50 + (playerData.jacob2?.perks.farming_level_cap ?? 0);
+			this.farmingLvlCap = 50 + (playerData.jacob2?.perks?.farming_level_cap ?? 0);
 
 			if (Object.prototype.hasOwnProperty.call(playerData.slayer_bosses?.zombie ?? {}, 'xp')) {
 				slayers.forEach(slayer => this[`${slayer}Xp`] = playerData.slayer_bosses[slayer].xp ?? 0);
@@ -495,9 +518,9 @@ module.exports = class Player extends Model {
 
 			await this.save();
 		} catch (error) {
-			if (error instanceof NonAPIError) return logger.warn(`[UPDATE XP]: ${this.logInfo}: ${error.name}: ${error.message}`);
+			if (error instanceof NonAPIError) return logger.warn(`[UPDATE XP]: ${this.logInfo}: ${error}`);
 			if (error.name.startsWith('Sequelize')) {
-				logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name}: ${error.message}`);
+				logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
 			} else {
 				logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name} ${error.code}: ${error.message}`);
 				this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
@@ -821,7 +844,7 @@ module.exports = class Player extends Model {
 		} catch (error) {
 			// was not successful
 			this.discordMember = null;
-			logger.error(`[ROLE API CALL]: ${error.name}: ${error.message}`);
+			logger.error(`[ROLE API CALL]: ${error}`);
 			loggingEmbed
 				.setColor(config.get('EMBED_RED'))
 				.addField(error.name, error.message);
@@ -955,13 +978,13 @@ module.exports = class Player extends Model {
 						`,
 					).then(
 						() => logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`),
-						error => logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: unable to DM: ${error.name}: ${error.message}`),
+						error => logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: unable to DM: ${error}`),
 					);
 			}
 
 			return true;
 		} catch (error) {
-			logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: ${error.name}: ${error.message}`);
+			logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: ${error}`);
 			this.discordMember = null;
 			return false;
 		}
@@ -1005,26 +1028,30 @@ module.exports = class Player extends Model {
 	 * updates the player's IGN via the mojang API
 	 */
 	async updateIgn() {
-		const PLAYER_IGN_CURRENT = await mojang.getIGN(this.minecraftUUID, { force: true }).catch(error => logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`));
-
-		if (!PLAYER_IGN_CURRENT || PLAYER_IGN_CURRENT === this.ign) return null;
-
-		const { ign } = this;
-
 		try {
-			this.ign = PLAYER_IGN_CURRENT;
-			await this.save();
+			const { ign: CURRENT_IGN } = await mojang.uuid(this.minecraftUUID, { force: true });
+
+			if (CURRENT_IGN === this.ign) return null;
+
+			const { ign: OLD_IGN } = this;
+
+			try {
+				this.ign = CURRENT_IGN;
+				await this.save();
+			} catch (error) {
+				this.ign = OLD_IGN;
+				return logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`);
+			}
+
+			this.syncIgnWithDisplayName(false);
+
+			return {
+				oldIgn: OLD_IGN,
+				newIgn: CURRENT_IGN,
+			};
 		} catch (error) {
-			this.ign = ign;
-			return logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error.name}: ${error.message}`);
+			logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`);
 		}
-
-		this.syncIgnWithDisplayName(false);
-
-		return {
-			oldIgn: ign,
-			newIgn: PLAYER_IGN_CURRENT,
-		};
 	}
 
 	/**
@@ -1201,51 +1228,7 @@ module.exports = class Player extends Model {
 	 * @param {string} offset optional offset value to use instead of the current xp value
 	 */
 	getSkillLevel(type, offset = '') {
-		const xp = this[`${type}Xp${offset}`];
-
-		let xpTable = [ ...dungeonClasses, ...dungeonTypes ].includes(type)
-			? dungeonXp
-			: type === 'runecrafting'
-				? runecraftingXp
-				: levelingXp;
-		let maxLevel = Math.max(...Object.keys(xpTable));
-
-		if (skillsCap[type] > maxLevel) {
-			xpTable = { ...skillXpPast50, ...xpTable };
-			maxLevel = Object.hasOwnProperty.call(this.dataValues, `${type}LvlCap`)
-				? this[`${type}LvlCap`]
-				: Math.max(...Object.keys(xpTable));
-		}
-
-		let xpTotal = 0;
-		let trueLevel = 0;
-
-		for (let x = 1; x <= maxLevel; ++x) {
-			xpTotal += xpTable[x];
-
-			if (xpTotal > xp) {
-				xpTotal -= xpTable[x];
-				break;
-			} else {
-				trueLevel = x;
-			}
-		}
-
-		if (trueLevel < maxLevel) {
-			const nonFlooredLevel = trueLevel + (Math.floor(xp - xpTotal) / xpTable[trueLevel + 1]);
-
-			return {
-				trueLevel,
-				progressLevel: Math.floor(nonFlooredLevel * 100) / 100,
-				nonFlooredLevel,
-			};
-		}
-
-		return {
-			trueLevel,
-			progressLevel: trueLevel,
-			nonFlooredLevel: trueLevel,
-		};
+		return getSkillLevel(type, this[`${type}Xp${offset}`], type === 'farming' ? this.farmingLvlCap : null);
 	}
 
 	/**
@@ -1348,51 +1331,7 @@ module.exports = class Player extends Model {
 	 * @param {number} index xpHistory array index
 	 */
 	getSkillLevelHistory(type, index) {
-		const xp = this[`${type}XpHistory`][index];
-
-		let xpTable = [ ...dungeonClasses, ...dungeonTypes ].includes(type)
-			? dungeonXp
-			: type === 'runecrafting'
-				? runecraftingXp
-				: levelingXp;
-		let maxLevel = Math.max(...Object.keys(xpTable));
-
-		if (skillsCap[type] > maxLevel) {
-			xpTable = { ...skillXpPast50, ...xpTable };
-			maxLevel = Object.hasOwnProperty.call(this.dataValues, `${type}LvlCap`)
-				? this[`${type}LvlCap`]
-				: Math.max(...Object.keys(xpTable));
-		}
-
-		let xpTotal = 0;
-		let trueLevel = 0;
-
-		for (let x = 1; x <= maxLevel; ++x) {
-			xpTotal += xpTable[x];
-
-			if (xpTotal > xp) {
-				xpTotal -= xpTable[x];
-				break;
-			} else {
-				trueLevel = x;
-			}
-		}
-
-		if (trueLevel < maxLevel) {
-			const nonFlooredLevel = trueLevel + (Math.floor(xp - xpTotal) / xpTable[trueLevel + 1]);
-
-			return {
-				trueLevel,
-				progressLevel: Math.floor(nonFlooredLevel * 100) / 100,
-				nonFlooredLevel,
-			};
-		}
-
-		return {
-			trueLevel,
-			progressLevel: trueLevel,
-			nonFlooredLevel: trueLevel,
-		};
+		return getSkillLevel(type, this[`${type}XpHistory`][index], type === 'farming' ? this.farmingLvlCap : null);
 	}
 
 	/**
