@@ -648,11 +648,13 @@ class ChatBridge extends EventEmitter {
 	 * @param {object} options
 	 * @param {string} options.command can also directly be used as the only parameter
 	 * @param {RegExp} [options.responseRegex=defaultResponseRegExp] regex to use as a filter for the message collector
-	 * @param {number} [options.max=1]
+	 * @param {number} [options.max=1] stop the collector after receiving this amount of messages
 	 * @param {number} [options.timeout]
-	 * @param {boolean} [options.rejectOnTimeout=false]
+	 * @param {boolean} [options.rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
+	 * @param {boolean} [options.raw=false] wether to return the full message object instead of the content
+	 * @returns {Promise<string|import('./HypixelMessage')[]>}
 	 */
-	async command({ command = arguments[0], responseRegex = defaultResponseRegExp, max = 1, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+	async command({ command = arguments[0], responseRegex = defaultResponseRegExp, max = 1, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false, raw = false }) {
 		const TIMEOUT_MS = timeout * 1_000;
 
 		try {
@@ -668,25 +670,31 @@ class ChatBridge extends EventEmitter {
 				this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)),
 			]);
 
-			return result[0]
-				.map(({ content }) => this.cleanCommandResponse(content))
-				.join('\n');
+			return raw
+				? result[0]
+				: result[0]
+					.map(({ content }) => this.cleanCommandResponse(content))
+					.join('\n');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
 			if (Array.isArray(error)) {
 				if (rejectOnTimeout) Promise.reject(
-					error.length
+					raw
+						? error
+						: error.length
+							? error
+								.map(({ content }) => this.cleanCommandResponse(content))
+								.join('\n')
+							: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
+				);
+
+				return raw
+					? error
+					: error.length
 						? error
 							.map(({ content }) => this.cleanCommandResponse(content))
 							.join('\n')
-						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
-				);
-
-				return error.length
-					? error
-						.map(({ content }) => this.cleanCommandResponse(content))
-						.join('\n')
-					: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
+						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
 
 			// a different error occurred
