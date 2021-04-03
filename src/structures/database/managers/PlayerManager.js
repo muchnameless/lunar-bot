@@ -7,7 +7,6 @@ const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH } 
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
 const { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar, safePromiseAll } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
-const cache = require('../../../api/cache');
 const logger = require('../../../functions/logger');
 
 
