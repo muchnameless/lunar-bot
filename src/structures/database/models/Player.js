@@ -142,7 +142,7 @@ module.exports = class Player extends Model {
 
 				this._discordMember = member;
 
-				if (!this.inDiscord) return;
+				if (this.inDiscord) return;
 
 				this.inDiscord = true;
 				this.save({ fields: [ 'inDiscord' ] });
@@ -185,7 +185,7 @@ module.exports = class Player extends Model {
 				defaultValue: false,
 				allowNull: false,
 				set(value) {
-					if (!value) this.discordMember = null;
+					if (!value) this._discordMember = null;
 					this.setDataValue('inDiscord', value);
 				},
 			},
