@@ -179,7 +179,6 @@ module.exports = class HypixelGuild extends Model {
 
 	/**
 	 * returns the amount of players in the guild
-	 * @returns {number}
 	 */
 	get playerCount() {
 		return this.players.size;
