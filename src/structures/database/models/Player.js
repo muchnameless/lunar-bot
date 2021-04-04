@@ -120,7 +120,7 @@ module.exports = class Player extends Model {
 				if (!this.inDiscord) return null;
 
 				try {
-					return this._discordMember = await this.client.lgGuild?.members.fetch(this.discordID) ?? null;
+					return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordID ?? (() => { throw new TypeError('discordID must be a string'); })) ?? null;
 				} catch (error) {
 					this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
 					this.save();
@@ -129,12 +129,20 @@ module.exports = class Player extends Model {
 				}
 			},
 			set(member) {
-				if (member == null) return;
+				if (member == null) {
+					if (!this.inDiscord) return;
+
+					this.inDiscord = false;
+					this.save({ fields: [ 'inDiscord' ] });
+
+					return;
+				}
+
 				if (!(member instanceof LunarGuildMember)) throw new TypeError(`[SET DISCORD MEMBER]: ${this.logInfo}: member must be a LunarGuildMember`);
 
 				this._discordMember = member;
 
-				if (this.inDiscord) return;
+				if (!this.inDiscord) return;
 
 				this.inDiscord = true;
 				this.save({ fields: [ 'inDiscord' ] });
@@ -177,7 +185,7 @@ module.exports = class Player extends Model {
 				defaultValue: false,
 				allowNull: false,
 				set(value) {
-					if (!value) this._discordMember = null;
+					if (!value) this.discordMember = null;
 					this.setDataValue('inDiscord', value);
 				},
 			},
