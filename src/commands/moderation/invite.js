@@ -12,7 +12,7 @@ module.exports = class InviteCommand extends Command {
 			aliases: [],
 			description: 'invite someone into the guild',
 			args: true,
-			usage: () => `[\`IGN\`] <${this.client.hypixelGuilds.guildNames}>`,
+			usage: () => `[\`IGN\`] <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 0,
 		});
 	}
@@ -28,7 +28,7 @@ module.exports = class InviteCommand extends Command {
 		/**
 		 * @type {import('../../structures/database/models/HypixelGuild')}
 		 */
-		const hypixelGuild = this.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
+		const hypixelGuild = this.client.hypixelGuilds.getFromArray(flags) ?? message.author.player?.guild;
 
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
 

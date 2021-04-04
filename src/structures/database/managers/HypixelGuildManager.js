@@ -29,6 +29,13 @@ class HypixelGuildManager extends ModelManager {
 	}
 
 	/**
+	 * `-NameOne`|`-NameTwo`|`-NameThree`
+	 */
+	get guildNamesAsFlags() {
+		return this.cache.map(({ name }) => `\`-${name.replace(/ /g, '')}\``).join('|');
+	}
+
+	/**
 	 * the main guild's hypixelGuild object
 	 */
 	get mainGuild() {
