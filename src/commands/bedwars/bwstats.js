@@ -60,7 +60,7 @@ module.exports = class FkdrCommand extends Command {
 			const { stats: { Bedwars } = {} } = await hypixel.player.uuid(uuid);
 
 			if (!Bedwars) return message.reply(`\`${ign}\` has no bed wars stats`);
-			return message.reply(this.generateReply(ign, Bedwars)).then(msg => logger.debug(msg.content.length));
+			return message.reply(this.generateReply(ign, Bedwars));
 		} catch (error) {
 			logger.error(`[BW CMD]: ${error}`);
 
