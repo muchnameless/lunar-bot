@@ -23,7 +23,7 @@ module.exports = class Player extends Model {
 		super(...args);
 
 		/**
-		 * @type {?LunarGuildMember|Promise<?LunarGuildMember>}
+		 * @type {?LunarGuildMember}
 		 */
 		this._discordMember = null;
 		/**
@@ -109,6 +109,37 @@ module.exports = class Player extends Model {
 		// 		},
 		// 	});
 		// }
+
+		Object.defineProperty(this, 'discordMember', {
+			/**
+			 * fetches the discord member if the discord id is valid and the player is in lg discord
+			 * @type {Promise<?LunarGuildMember>}
+			 */
+			async get() {
+				if (this._discordMember) return this._discordMember;
+				if (!this.inDiscord) return null;
+
+				try {
+					return this._discordMember = await this.client.lgGuild?.members.fetch(this.discordID) ?? null;
+				} catch (error) {
+					this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
+					this.save();
+					logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error}`);
+					return this._discordMember = null;
+				}
+			},
+			set(member) {
+				if (member == null) return;
+				if (!(member instanceof LunarGuildMember)) throw new TypeError(`[SET DISCORD MEMBER]: ${this.logInfo}: member must be a LunarGuildMember`);
+
+				this._discordMember = member;
+
+				if (this.inDiscord) return;
+
+				this.inDiscord = true;
+				this.save({ fields: [ 'inDiscord' ] });
+			},
+		});
 	}
 
 	/**
@@ -266,39 +297,13 @@ module.exports = class Player extends Model {
 		return [ GUILD_ID_BRIDGER, GUILD_ID_ERROR ].includes(this.guildID);
 	}
 
+	// the following is just for JSDOC's sake
+
 	/**
 	 * fetches the discord member if the discord id is valid and the player is in lg discord
-	 * @returns {?LunarGuildMember|Promise<?LunarGuildMember>}
+	 * @type {Promise<?LunarGuildMember>}
 	 */
-	get discordMember() {
-		return this._discordMember ??= this.inDiscord
-			? (async () => {
-				try {
-					return this._discordMember = await this.client.lgGuild?.members.fetch(this.discordID) ?? null;
-				} catch (error) {
-					this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
-					this.save();
-					logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error}`);
-					return this._discordMember = null;
-				}
-			})()
-			: null;
-	}
-
-	/**
-	 * populates the discord member cache
-	 */
-	set discordMember(member) {
-		if (member == null) return;
-		if (!(member instanceof LunarGuildMember)) throw new TypeError(`[SET DISCORD MEMBER]: ${this.logInfo}: member must be a LunarGuildMember`);
-
-		this._discordMember = member;
-
-		if (this.inDiscord) return;
-
-		this.inDiscord = true;
-		this.save({ fields: [ 'inDiscord' ] });
-	}
+	get discordMember() {} // eslint-disable-line getter-return, no-empty-function
 
 	/**
 	 * fetches the discord user if the discord id is valid
