@@ -10,7 +10,7 @@ const mojang = new Mojang({
 			return cache.get(`mojang:${key}`);
 		},
 		set(key, value) {
-			return cache.set(`mojang:${key}`, value, 30 * 60_000);
+			return cache.set(`mojang:${key}`, value, 3 * 60 * 60_000); // 3 hours
 		},
 	},
 });
