@@ -2,7 +2,7 @@
 
 const { Client } = require('@zikeji/hypixel');
 const cache = require('./cache');
-const hypixelTTL = require('./hypixelTTL');
+const getHypixelTTL = require('./getHypixelTTL');
 const logger = require('../functions/logger');
 
 
@@ -16,7 +16,7 @@ const hypixel = new Client(process.env.HYPIXEL_KEY, {
 			if (key.startsWith('guild')) return;
 
 			// prepend our key with "hypixel" so we don't conflict with anyone else
-			return cache.set(`hypixel:${key}`, value, hypixelTTL(key));
+			return cache.set(`hypixel:${key}`, value, getHypixelTTL(key));
 		},
 	},
 });
