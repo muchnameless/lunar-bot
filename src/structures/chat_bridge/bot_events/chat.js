@@ -19,5 +19,5 @@ module.exports = async (chatBridge, { position, message }) => {
 		hypixelMessage = new HypixelMessage(chatBridge, position, message);
 	}
 
-	chatBridge.emit('message', hypixelMessage);
+	chatBridge.emit('message', await hypixelMessage.init());
 };

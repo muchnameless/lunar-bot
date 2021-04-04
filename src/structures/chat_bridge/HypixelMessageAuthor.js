@@ -1,5 +1,8 @@
 'use strict';
 
+const mojang = require('../../api/mojang');
+const logger = require('../../functions/logger');
+
 
 class HypixelMessageAuthor {
 	/**
@@ -14,21 +17,42 @@ class HypixelMessageAuthor {
 		this.hypixelRank = hypixelRank ?? null;
 		this.ign = ign ?? null;
 		this.guildRank = guildRank ?? null;
-		this._player = null;
+
+		/**
+		 * @type {?import('../database/models/Player')}
+		 */
+		this.player = null;
+		/**
+		 * @type {?import('../extensions/GuildMember')}
+		 */
+		this.member = null;
+	}
+
+	get client() {
+		return this.chatBridge.client;
 	}
 
 	/**
-	 * wether the message author is in the guild player db
+	 * set player and member
 	 */
-	get inGuild() {
-		return this.chatBridge.client.players.cache.some(({ ign }) => ign === this.ign);
-	}
+	async init() {
+		// check if player with that ign is in the db
+		const player = this.client.players.findByIGN(this.ign);
 
-	/**
-	 * the message author's player object
-	 */
-	get player() {
-		return this._player ??= this.chatBridge.client.players.findByIGN(this.ign);
+		if (player) {
+			this.player = player;
+			this.member = await player.discordMember;
+			return;
+		}
+
+		// check mojang (API/cache) for the uuid associated with that ign
+		try {
+			const { uuid } = await mojang.ign(this.ign);
+			this.player = this.client.players.cache.get(uuid) ?? null;
+			this.member = await this.player?.discordMember;
+		} catch (error) {
+			logger.error(`[AUTHOR PLAYER]: ${error}`);
+		}
 	}
 
 	/**

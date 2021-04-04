@@ -89,7 +89,6 @@ class HypixelMessage extends ChatMessage {
 
 	/**
 	 * the message author's player object
-	 * @returns {import('../database/models/Player')}
 	 */
 	get player() {
 		return this.author?.player ?? null;
@@ -118,10 +117,17 @@ class HypixelMessage extends ChatMessage {
 
 	/**
 	 * to make methods for dc messages compatible with mc messages
-	 * @returns {null}
 	 */
 	get member() {
-		return null;
+		return this.author?.member;
+	}
+
+	/**
+	 * fetch all missing data
+	 */
+	async init() {
+		await this.author?.init();
+		return this;
 	}
 
 	/**
@@ -138,7 +144,7 @@ class HypixelMessage extends ChatMessage {
 	async reply(message) {
 		switch (this.type) {
 			case GUILD: {
-				const result = await this.chatBridge.broadcast(message, { discord: { prefix: `${await this.player?.discordMember ?? `@${this.author.ign}`}, `, allowedMentions: { parse: [] } } });
+				const result = await this.chatBridge.broadcast(message, { discord: { prefix: `${this.member ?? `@${this.author.ign}`}, `, allowedMentions: { parse: [] } } });
 
 				// DM author the message if sending to gchat failed
 				if (!result[0]) this.author.send(`an error occurred while replying in gchat\n${message}`);
@@ -168,8 +174,7 @@ class HypixelMessage extends ChatMessage {
 
 		try {
 			if (this.author) {
-				const { player } = this;
-				const member = await player?.discordMember;
+				const { player, member } = this;
 				const message = await this.chatBridge.sendViaWebhook({
 					username: member?.displayName
 						?? player?.ign
