@@ -90,7 +90,7 @@ class Mojang {
 	 */
 	async _makeRequest(path, query, queryType = null, { cache = true, force = false } = {}) {
 		if (!force) {
-			const cachedResponse = await this.cache?.get(query);
+			const cachedResponse = await this.cache?.get(`${queryType}:${query}`);
 
 			if (cachedResponse) {
 				if (Object.hasOwnProperty.call(cachedResponse, 'status')) throw new MojangAPIError({ status: '(cached)', ...cachedResponse }, queryType, query);
@@ -101,7 +101,7 @@ class Mojang {
 		const res = await fetch(`${path}${query}`);
 
 		if (res.status !== 200) {
-			if (cache) this.cache?.set(query, res);
+			if (cache) this.cache?.set(`${queryType}:${query}`, res);
 			throw new MojangAPIError(res, queryType, query);
 		}
 
@@ -115,8 +115,8 @@ class Mojang {
 		};
 
 		if (cache) {
-			this.cache?.set(response.uuid, response);
-			this.cache?.set(response.ign.toLowerCase(), response);
+			this.cache?.set(`uuid:${response.uuid}`, response);
+			this.cache?.set(`ign:${response.ign.toLowerCase()}`, response);
 		}
 
 		return response;
