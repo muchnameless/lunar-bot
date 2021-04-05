@@ -93,7 +93,7 @@ class Mojang {
 			const cachedResponse = await this.cache?.get(`${queryType}:${query}`);
 
 			if (cachedResponse) {
-				if (Object.hasOwnProperty.call(cachedResponse, 'status')) throw new MojangAPIError({ status: '(cached)', ...cachedResponse }, queryType, query);
+				if (cachedResponse.error) throw new MojangAPIError({ status: cachedResponse.status?.length ? `${cachedResponse.status} (cached)` : '(cached)', ...cachedResponse }, queryType, query);
 				return cachedResponse;
 			}
 		}
@@ -101,7 +101,7 @@ class Mojang {
 		const res = await fetch(`${path}${query}`);
 
 		if (res.status !== 200) {
-			if (cache) this.cache?.set(`${queryType}:${query}`, res);
+			if (cache) this.cache?.set(`${queryType}:${query}`, { error: true, res });
 			throw new MojangAPIError(res, queryType, query);
 		}
 
