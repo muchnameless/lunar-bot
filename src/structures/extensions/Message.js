@@ -252,7 +252,7 @@ class LunarMessage extends Message {
 			}
 
 			try {
-				if (hypixelGuild && this.author.player?.chatBridgeMutedUntil !== 0) hypixelGuild?.chatBridge.gchat(content);
+				if (hypixelGuild && this.author.player?.chatBridgeMutedUntil !== 0) hypixelGuild.chatBridge.gchat(content);
 			} catch (error) {
 				logger.error(`[REPLY]: ${error.message}`);
 			}
