@@ -152,11 +152,11 @@ module.exports = async (message) => {
 	if (command.args && typeof command.args === 'boolean' ? !args.length : args.length < command.args) {
 		const reply = [];
 
-		reply.push(`the \`${command.name}\` command has mandatory arguments.`);
+		reply.push(`the \`${command.name}\` command has${typeof command.args === 'number' ? ` ${command.args}` : ''} mandatory arguments.`);
 		if (command.usage) reply.push(`\nUse: ${command.usageInfo}`);
 
 		logger.info(`[CMD HANDLER]: ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} without providing the mandatory arguments`);
-		return message.reply(reply);
+		return message.reply(reply.join('\n'));
 	}
 
 	// execute command
