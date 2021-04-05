@@ -34,6 +34,12 @@ module.exports = {
 		wolf: 1962,
 	},
 
+	SLAYER_MODIFIER: {
+		zombie: 0.15,
+		spider: 0.08,
+		wolf: 0.015,
+	},
+
 	DUNGEON_EXPONENTS: {
 		catacombs: 0.0002149604615,
 		healer: 0.0000045254834,

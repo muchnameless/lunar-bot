@@ -1,6 +1,6 @@
 'use strict';
 const { dungeonClasses, dungeonTypes, dungeonXp, runecraftingXp, levelingXp, skillsCap, skillXpPast50, skills, slayers } = require('../constants/skyblock');
-const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../constants/weight');
+const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../constants/weight');
 
 
 /**
@@ -78,9 +78,25 @@ function getWeight(skyblockMember) {
 	for (const slayer of slayers) {
 		const experience = skyblockMember.slayer_bosses?.[slayer]?.xp ?? 0;
 
-		weight += experience <= 1_000_000
-			? experience / SLAYER_DIVIDER[slayer]
-			: (1_000_000 / SLAYER_DIVIDER[slayer]) + (((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942);
+		if (experience <= 1_000_000) {
+			weight += experience === 0
+				? 0
+				: experience / SLAYER_DIVIDER[slayer];
+		} else {
+			weight += 1_000_000 / SLAYER_DIVIDER[slayer];
+
+			// calculate overflow
+			let remaining = experience - 1_000_000;
+			let modifier = SLAYER_MODIFIER[slayer];
+
+			while (remaining > 0) {
+				const left = Math.min(remaining, 1_000_000);
+
+				weight += (left / (SLAYER_DIVIDER[slayer] * (1.5 + modifier))) ** 0.942;
+				modifier += SLAYER_MODIFIER[slayer];
+				remaining -= left;
+			}
+		}
 	}
 
 	const maxXp = Object.values(dungeonXp).reduce((acc, xp) => acc + xp, 0);

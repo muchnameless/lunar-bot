@@ -5,7 +5,7 @@ const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER } = require('../../../constants/database');
 const { levelingXp, skillXpPast50, skillsCap, dungeonXp, slayerXp, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
-const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
+const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
 const { escapeIgn, trim } = require('../../../functions/util');
@@ -169,6 +169,10 @@ module.exports = class Player extends Model {
 				type: DataTypes.STRING,
 				defaultValue: null,
 				allowNull: true,
+				set(value) {
+					if (!value) this._discordMember = null;
+					this.setDataValue('discordID', value);
+				},
 			},
 			guildID: {
 				type: DataTypes.STRING,
@@ -1315,10 +1319,27 @@ module.exports = class Player extends Model {
 		for (const slayer of slayers) {
 			const experience = this[`${slayer}Xp${offset}`];
 
-			weight += experience <= 1_000_000
-				? experience / SLAYER_DIVIDER[slayer]
-				: (1_000_000 / SLAYER_DIVIDER[slayer]) + (((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942);
+			if (experience <= 1_000_000) {
+				weight += experience === 0
+					? 0
+					: experience / SLAYER_DIVIDER[slayer];
+			} else {
+				weight += 1_000_000 / SLAYER_DIVIDER[slayer];
+
+				// calculate overflow
+				let remaining = experience - 1_000_000;
+				let modifier = SLAYER_MODIFIER[slayer];
+
+				while (remaining > 0) {
+					const left = Math.min(remaining, 1_000_000);
+
+					weight += (left / (SLAYER_DIVIDER[slayer] * (1.5 + modifier))) ** 0.942;
+					modifier += SLAYER_MODIFIER[slayer];
+					remaining -= left;
+				}
+			}
 		}
+
 
 		const maxXp = Object.values(dungeonXp).reduce((acc, xp) => acc + xp, 0);
 
@@ -1402,9 +1423,25 @@ module.exports = class Player extends Model {
 		for (const slayer of slayers) {
 			const experience = this[`${slayer}XpHistory`][index];
 
-			weight += experience <= 1_000_000
-				? experience / SLAYER_DIVIDER[slayer]
-				: (1_000_000 / SLAYER_DIVIDER[slayer]) + (((experience - 1_000_000) / (SLAYER_DIVIDER[slayer] * 1.5)) ** 0.942);
+			if (experience <= 1_000_000) {
+				weight += experience === 0
+					? 0
+					: experience / SLAYER_DIVIDER[slayer];
+			} else {
+				weight += 1_000_000 / SLAYER_DIVIDER[slayer];
+
+				// calculate overflow
+				let remaining = experience - 1_000_000;
+				let modifier = SLAYER_MODIFIER[slayer];
+
+				while (remaining > 0) {
+					const left = Math.min(remaining, 1_000_000);
+
+					weight += (left / (SLAYER_DIVIDER[slayer] * (1.5 + modifier))) ** 0.942;
+					modifier += SLAYER_MODIFIER[slayer];
+					remaining -= left;
+				}
+			}
 		}
 
 		const maxXp = Object.values(dungeonXp).reduce((acc, xp) => acc + xp, 0);
