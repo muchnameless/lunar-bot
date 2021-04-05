@@ -231,6 +231,15 @@ module.exports = class MathCommand extends Command {
 	}
 
 	/**
+	 * throws if the input is larger than Number.MAX_SAFE_INTEGER, returns the value otherwise
+	 * @param {any} x
+	 */
+	validateNumber(x) {
+		if (x > Number.MAX_SAFE_INTEGER) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
+		return x;
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
@@ -246,7 +255,6 @@ module.exports = class MathCommand extends Command {
 			.replace(/\*\*/g, '^')
 			.replace(/:/g, '/') // 5:3 -> 5/3
 			.replace(/(?<=\d\s*)(?=[a-z(])/gi, '*'); // add implicit '*' between numbers before letters and '('
-		const stack = [];
 
 		let parsed;
 
@@ -257,34 +265,39 @@ module.exports = class MathCommand extends Command {
 			return message.reply(`ParseError: ${error.message.replace(/^[A-Z]/, match => match.toLowerCase()).replace(/\.$/, '')}, input: '${INPUT}'`);
 		}
 
+		const stack = [];
+
+		let output;
+
 		// calculate
 		try {
+			const pop = () => this.validateNumber(stack.pop());
+
 			for (const c of parsed) {
 				if (args2Arr.includes(c)) {
-					const temp = stack.pop();
-					stack.push(args2[c](stack.pop(), temp));
+					const temp = pop();
+					stack.push(args2[c](pop(), temp));
 					continue;
 				}
 
 				if (args1Arr.includes(c)) {
-					stack.push(args1[c](stack.pop()));
+					stack.push(args1[c](pop()));
 					continue;
 				}
 
 				stack.push(c);
 			}
+
+			output = pop();
 		} catch (error) {
 			return message.reply(`CalculationError: ${error.message}, input: '${INPUT}'`);
 		}
 
-		const output = stack.pop();
 		const PRETTIFIED_INPUT = INPUT
 			.replace(/pi/gi, '\u{03C0}'); // prettify 'pi'
 
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
-		if (Number.isNaN(Number(output)) || Number.isFinite(Number(output))) return message.reply(`${PRETTIFIED_INPUT} = ${output}`);
-
-		message.reply(`input evaluates to a value larger than ${message.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
+		return message.reply(`${PRETTIFIED_INPUT} = ${output}`);
 	}
 };
