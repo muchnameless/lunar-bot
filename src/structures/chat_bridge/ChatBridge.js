@@ -395,7 +395,7 @@ class ChatBridge extends EventEmitter {
 				)
 				.replace( // channels
 					/#([a-z-]+)/gi,
-					(match, p1) => this.client.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match,
+					(match, p1) => this.client.lgGuild?.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match,
 				)
 				.replace( // @mentions
 					/(?<!<)@(!|&)?(\S+)(?!\d+>)/g,
