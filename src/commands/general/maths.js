@@ -68,7 +68,7 @@ class Parser {
 
 const lexer = new Lexer()
 	.addRule(/[\s,]/, () => void 0) // ignore whitespaces and ','
-	.addRule(/(?:(?<=[(+\-*/^]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!]/, lexeme => lexeme)
+	.addRule(/(?:(?<=[(+\-*/^]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!°]/, lexeme => lexeme)
 	.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
 	.addRule(/cos(?:ine|inus)?/i, () => 'cos')
 	.addRule(/tan(?:gen[st])?/i, () => 'tan')
@@ -79,6 +79,11 @@ const lexer = new Lexer()
 	.addRule(/fac(?:ulty)?/, () => 'fac')
 	.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 	.addRule(/e(?:uler)?/i, () => Math.E);
+
+const degree = {
+	precedence: 6,
+	associativity: 'right',
+};
 
 const factorialPost = {
 	precedence: 5,
@@ -111,6 +116,7 @@ const term = {
 };
 
 const parser = new Parser({
+	'°': degree,
 	'^': power,
 	'!': factorialPost,
 	'fac': factorialPre,
@@ -169,6 +175,10 @@ function factorial(start) {
 }
 
 const args1 = {
+	'°'(x) {
+		if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
+		return mul(x, div(Math.PI, 2));
+	},
 	'!'(x) {
 		if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
 		if (x < 0) return NaN;
@@ -212,7 +222,7 @@ const args1Arr = Object.keys(args1);
 module.exports = class MathCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [ 'calc' ],
+			aliases: [ 'm', 'calc' ],
 			description: 'supports `+`, `-`, `*`, `/`, `^`, `!`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
 			args: false,
 			usage: '',

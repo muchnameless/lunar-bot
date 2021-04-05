@@ -7,7 +7,7 @@ const Command = require('../../structures/commands/Command');
 module.exports = class MemoryCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [ 'm' ],
+			aliases: [ 'mem' ],
 			description: 'shows the bot\'s current memory usage',
 			args: false,
 			usage: '',
