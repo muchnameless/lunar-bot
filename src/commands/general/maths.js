@@ -68,7 +68,7 @@ class Parser {
 
 const lexer = new Lexer()
 	.addRule(/[\s,]/, () => void 0) // ignore whitespaces and ','
-	.addRule(/(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!]/, lexeme => lexeme)
+	.addRule(/(?:(?<=\D\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!]/, lexeme => lexeme)
 	.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
 	.addRule(/cos(?:ine|inus)?/i, () => 'cos')
 	.addRule(/tan(?:gen[st])?/i, () => 'tan')
