@@ -4,6 +4,7 @@ const { Model, DataTypes } = require('sequelize');
 const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
 const ms = require('ms');
 const { autocorrect, cleanFormattedNumber, compareAlphabetically, safePromiseAll } = require('../../../functions/util');
+const { mutedCheck } = require('../../../functions/database');
 const { promote: { string: { success } } } = require('../../chat_bridge/constants/commandResponses');
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED, STOP } = require('../../../constants/emojiCharacters');
@@ -211,6 +212,13 @@ module.exports = class HypixelGuild extends Model {
 			slayerAverage: cleanFormattedNumber(this.client.formatNumber(slayerAverage, 0, Math.round)),
 			catacombsAverage: cleanFormattedNumber(this.client.formatDecimalNumber(catacombsAverage)),
 		});
+	}
+
+	/**
+	 * wether the player is muted and that mute is not expired
+	 */
+	get muted() {
+		return mutedCheck.bind(this)();
 	}
 
 	/**
@@ -651,51 +659,36 @@ module.exports = class HypixelGuild extends Model {
 			// message is from chatBridge webhook
 			if (message.webhookID === chatBridge.webhook.id) return;
 
-			/**
-			 * @type {import('./Player')}
-			 */
 			const { player } = message.author;
 
 			// check if player is muted
-			if (player?.chatBridgeMutedUntil) {
-				if (Date.now() < player.chatBridgeMutedUntil) { // mute hasn't expired
-					message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
-						() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
-						error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error}`),
-					);
-					return message.reactSafely(MUTED);
-				}
+			if (player?.muted) {
+				message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
+					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
+					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error}`),
+				);
 
-				player.chatBridgeMutedUntil = 0;
-				player.save();
+				return message.reactSafely(MUTED);
 			}
 
 			// check if guild chat is muted
-			if (this.chatMutedUntil && !player?.isStaff) {
-				if (Date.now() < this.chatMutedUntil) { // mute hasn't expired
-					message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
-						() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
-						error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error}`),
-					);
-					return message.reactSafely(MUTED);
-				}
+			if (this.muted && !player.isStaff) {
+				message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
+					() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
+					error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error}`),
+				);
 
-				this.chatMutedUntil = 0;
-				this.save();
+				return message.reactSafely(MUTED);
 			}
 
 			// check if the chatBridge bot is muted
-			if (chatBridge.bot.player.chatBridgeMutedUntil) {
-				if (Date.now() < chatBridge.bot.player.chatBridgeMutedUntil) { // mute hasn't expired
-					message.author.send(`the bot is currently muted for ${ms(chatBridge.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
-						() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed bot muted`),
-						error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing bot muted: ${error}`),
-					);
-					return message.reactSafely(MUTED);
-				}
+			if (chatBridge.bot.player.muted) {
+				message.author.send(`the bot is currently muted for ${ms(chatBridge.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
+					() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo}: DMed bot muted`),
+					error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo}: error DMing bot muted: ${error}`),
+				);
 
-				chatBridge.bot.player.chatBridgeMutedUntil = 0;
-				chatBridge.bot.player.save();
+				return message.reactSafely(MUTED);
 			}
 
 			if (!(await chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(STOP);

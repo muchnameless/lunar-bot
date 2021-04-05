@@ -450,14 +450,12 @@ class ChatBridge extends EventEmitter {
 	 * @param {ChatOptions} options
 	 */
 	async gchat(message, { prefix = '', ...options } = {}) {
-		if (this.bot.player.chatBridgeMutedUntil) {
-			if (Date.now() < this.bot.player.chatBridgeMutedUntil) { // mute hasn't expired
-				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${message}`);
-				return false;
+		if (this.bot.player.muted) {
+			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) {
+				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${message}`);
 			}
 
-			this.bot.player.chatBridgeMutedUntil = 0;
-			this.bot.player.save();
+			return false;
 		}
 
 		return this.chat(message, { prefix: `/gc ${prefix}${prefix.length ? ' ' : invisibleCharacters[0]}`, ...options });

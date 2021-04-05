@@ -11,6 +11,7 @@ const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
 const { escapeIgn, trim } = require('../../../functions/util');
 const { getSkillLevel } = require('../../../functions/skyblock');
 const { validateNumber } = require('../../../functions/stringValidators');
+const { mutedCheck } = require('../../../functions/database');
 const NonAPIError = require('../../errors/NonAPIError');
 const LunarGuildMember = require('../../extensions/GuildMember');
 const hypixel = require('../../../api/hypixel');
@@ -428,6 +429,13 @@ module.exports = class Player extends Model {
 			fromIGN: this.ign,
 			toIGN: (this.client.players.cache.get(transaction.to) ?? await mojang.uuid(transaction.to).catch(logger.error))?.ign,
 		}))));
+	}
+
+	/**
+	 * wether the player is muted and that mute is not expired
+	 */
+	get muted() {
+		return mutedCheck.bind(this)();
 	}
 
 	/**
