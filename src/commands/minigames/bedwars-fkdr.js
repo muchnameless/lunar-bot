@@ -20,22 +20,26 @@ module.exports = class FkdrCommand extends BwStatsCommand {
 	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} data
 	 */
 	generateReply(ign, data) {
-		const kds = [
-			{ name: 'Overall', key: '' },
-			{ name: 'Solo', key: 'eight_one_' },
-			{ name: 'Doubles', key: 'eight_two_' },
-			{ name: '3s', key: 'four_three_' },
-			{ name: '4s', key: 'four_four_' },
-		].flatMap(({ name, key }) => {
-			const kd = this.calculateKD(data.stats.Bedwars[`${key}final_kills_bedwars`], data.stats.Bedwars[`${key}final_deaths_bedwars`]);
+		try {
+			const kds = [
+				{ name: 'Overall', key: '' },
+				{ name: 'Solo', key: 'eight_one_' },
+				{ name: 'Doubles', key: 'eight_two_' },
+				{ name: '3s', key: 'four_three_' },
+				{ name: '4s', key: 'four_four_' },
+			].flatMap(({ name, key }) => {
+				const kd = this.calculateKD(data.stats.Bedwars[`${key}final_kills_bedwars`], data.stats.Bedwars[`${key}final_deaths_bedwars`]);
 
-			return kd !== null
-				? ({ name, kd })
-				: [];
-		});
+				return kd !== null
+					? ({ name, kd })
+					: [];
+			});
 
-		if (!kds.length) return `\`${ign}\` has no BedWars stats`;
+			if (!kds.length) return `\`${ign}\` has no BedWars stats`;
 
-		return `${ign}: BedWars: ${kds.map(({ name, kd }) => `${name}: ${kd}`).join(', ')}`;
+			return `${ign}: BedWars: ${kds.map(({ name, kd }) => `${name}: ${kd}`).join(', ')}`;
+		} catch {
+			return `\`${ign}\` has no BedWars stats`;
+		}
 	}
 };
