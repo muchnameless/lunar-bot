@@ -1,6 +1,5 @@
 'use strict';
 
-const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const tc = require('timezonecomplete');
 const { fetchurItems } = require('../../constants/skyblock');
@@ -48,9 +47,6 @@ module.exports = class FetchurCommand extends Command {
 			].filter(time => time >= 0),
 		);
 
-		message.reply(stripIndents`
-			item: ${fetchurItems[(DAY - 1) % fetchurItems.length]}
-			time left: ${ms(RESET_TIME, { long: true })}
-		`);
+		message.reply(`item: ${fetchurItems[(DAY - 1) % fetchurItems.length]}, time left: ${ms(RESET_TIME, { long: true })}`);
 	}
 };
