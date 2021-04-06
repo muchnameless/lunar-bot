@@ -1,3 +1,3 @@
 'use strict';
 
-module.exports = require('../../../../commands/minigames/skywars-stats');
+module.exports = require('../../../../commands/minigames/bedwars-stats');
