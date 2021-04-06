@@ -40,7 +40,7 @@ module.exports = class BwStatsCommand extends Command {
 
 			return oneLine`
 				${ign}:
-				BedWards:
+				BedWars:
 				level: ${this.client.formatNumber(getBedwarsLevelInfo(data).level)},
 				wins: ${this.client.formatNumber(wins)},
 				losses: ${this.client.formatNumber(losses)},
