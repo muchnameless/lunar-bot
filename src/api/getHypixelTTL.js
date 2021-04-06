@@ -6,7 +6,7 @@
  */
 module.exports = (key) => {
 	if (key.startsWith('skyblock:profile')) return 30_000;
-	if (key.startsWith('player'))	return 60_000;
+	if (key.startsWith('player')) return 60_000;
 	if (key.startsWith('skyblock:auction')) return 4 * 60_000;
 
 	// the following endpoints don't require API keys and won't eat into your rate limit
