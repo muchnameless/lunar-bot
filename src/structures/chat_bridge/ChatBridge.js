@@ -439,7 +439,7 @@ class ChatBridge extends EventEmitter {
 	 */
 	async forwardDiscordMessageToHypixelGuildChat(message, player) {
 		return this.gchat(
-			message.attachments.size ? [ message.content, ...message.attachments.map(({ url }) => url) ].join(' ') : message.content,
+			message.attachments.size ? [ message.content?.length ? message.content : null, ...message.attachments.map(({ url }) => url) ].filter(Boolean).join(' ') : message.content,
 			{ prefix: `${player?.ign ?? this._escapeEz(message.member?.displayName ?? message.author.username)}:` },
 		);
 	}
@@ -528,6 +528,8 @@ class ChatBridge extends EventEmitter {
 					return false;
 				}),
 		);
+
+		if (!messageParts.size) return false;
 
 		let partCount = 0;
 

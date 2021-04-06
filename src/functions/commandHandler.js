@@ -19,8 +19,6 @@ module.exports = async (message) => {
 		return logger.error('[CMD HANDLER]: error while fetching partial message:\n', error);
 	}
 
-	if (!message.content?.length) return; // ignore empty messages (attachments, embeds)
-
 	const { client } = message;
 
 	/**
@@ -35,6 +33,7 @@ module.exports = async (message) => {
 	 * commands
 	 */
 
+	if (!message.content?.length) return; // ignore empty messages (attachments, embeds)
 	if (!message.isUserMessage) return; // filter out bot, system & webhook messages
 
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(client.config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').exec(message.content); // PREFIX, @mention, no prefix
