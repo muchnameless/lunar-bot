@@ -114,7 +114,7 @@ class ChatBridge extends EventEmitter {
 			/**
 			 * maximum attempts to resend to in game chat
 			 */
-			maxRetries: 2,
+			maxRetries: 3,
 			/**
 			 * listen for error messages in mc chat
 			 */
@@ -122,7 +122,7 @@ class ChatBridge extends EventEmitter {
 			/**
 			 * normal delay to listen for error messages
 			 */
-			delay: 250,
+			delay: 100,
 			/**
 			 * increased delay which can be used to send messages to in game chat continously
 			 */
@@ -627,7 +627,7 @@ class ChatBridge extends EventEmitter {
 		// listen for errors / await queue cooldown
 		const error = await Promise.race([
 			this.ingameChat.errorListener.listener,
-			sleep(++this.ingameChat.messageCounter < 8
+			sleep(++this.ingameChat.messageCounter <= 5
 				? this.ingameChat.delay
 				: this.ingameChat.safeDelay,
 			),
@@ -763,7 +763,7 @@ class ChatBridge extends EventEmitter {
 					msg => !msg.type && responseRegex.test(msg.content),
 					{
 						max,
-						time: TIMEOUT_MS + (this.ingameQueue.remaining * this.ingameChat.delay),
+						time: TIMEOUT_MS + (this.ingameQueue.remaining * this.ingameChat.safeDelay),
 						errors: [ 'time', 'disconnect' ],
 					},
 				),
