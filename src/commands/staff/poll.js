@@ -17,6 +17,8 @@ module.exports = class PollCommand extends Command {
 			usage: '<30s <= `duration` <= 10m> [`"question" "option1" "option2"` ...]',
 			cooldown: 1,
 		});
+
+		this.quoteChars = [ '\u{0022}', '\u{201C}', '\u{201D}' ];
 	}
 
 	/**
@@ -34,26 +36,16 @@ module.exports = class PollCommand extends Command {
 
 			chatBridge.pollUntil = Date.now() + duration;
 
-			const quoteChars = [ '\u{0022}', '\u{201C}', '\u{201D}' ];
-			const STARTING_INDEX = quoteChars.reduce((acc, cur) => {
-				const CUR_INDEX = message.content.indexOf(cur);
-				return Math.min(acc, CUR_INDEX === -1 ? Infinity : CUR_INDEX);
-			}, Infinity);
+			const inputMatched = message.content.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'));
 
-			// no quote found
-			if (!Number.isFinite(STARTING_INDEX)) return message.reply('specify poll options to vote for');
+			if (!inputMatched) return message.reply(this.usageInfo);
 
-			let options = message.content
-				.slice(STARTING_INDEX)
-				.split(new RegExp(quoteChars.join('|'), 'u'))
-				.map(x => x.trim())
-				.filter(({ length }) => length);
+			inputMatched.shift();
 
-			const question = upperCaseFirstChar(options.shift());
+			const question = upperCaseFirstChar(inputMatched.shift());
+			const options = inputMatched.flatMap(x => (x.length && /\S/.test(x) ? ({ option: x.trim(), votes: new Set() }) : []));
 
 			if (!options.length) return message.reply('specify poll options to vote for');
-
-			options = options.map(x => ({ option: x, votes: new Set() }));
 
 			const optionsCount = options.length;
 			const ingameMessages = chatBridge.awaitMessages(
