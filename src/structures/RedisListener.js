@@ -1,6 +1,6 @@
 'use strict';
 const Redis = require('ioredis');
-const { LB_KEY } = require('../constants/redis');
+const { LB_KEY, DM_KEY } = require('../constants/redis');
 const logger = require('../functions/logger');
 
 
@@ -12,7 +12,7 @@ class RedisListener {
 		this.client = client;
 		this.redis = new Redis(...args);
 		this.namespace = process.env.NAMESPACE;
-		this.keyRegExp = new RegExp(`^${[ process.env.NAMESPACE, '(?<type>.+)(?::.+)*', '(?<guildID>.+)', '(?<channelID>\\d+)', '(?<messageID>\\d+)' ].join(':')}$`);
+		this.keyRegExp = new RegExp(`^${[ process.env.NAMESPACE, '(?<type>.+)(?::.+)*', `(?<guildID>${DM_KEY}|\\d{17,19})`, '(?<channelID>\\d{17,19})', '(?<messageID>\\d{17,19})' ].join(':')}$`);
 
 		this.redis.config('set', 'notify-keyspace-events', 'Exe');
 
