@@ -115,8 +115,8 @@ class Mojang {
 		};
 
 		if (cache) {
-			this.cache?.set(`uuid:${response.uuid}`, response);
 			this.cache?.set(`ign:${response.ign.toLowerCase()}`, response);
+			this.cache?.set(`uuid:${response.uuid}`, response);
 		}
 
 		return response;
