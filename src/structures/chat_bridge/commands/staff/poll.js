@@ -1,6 +1,5 @@
 'use strict';
 
-const createPoll = require('../../../../functions/commands/createPoll');
 const PollCommand = require('../../../../commands/staff/poll');
 // const logger = require('../../../../functions/logger');
 
@@ -14,6 +13,6 @@ module.exports = class BridgePollCommand extends PollCommand {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		createPoll(message.chatBridge, message, args, message.author.ign);
+		this.createPoll(message.chatBridge, message, args, message.author.ign);
 	}
 };
