@@ -44,7 +44,7 @@ module.exports = class BwStatsCommand extends Command {
 				level: ${this.client.formatNumber(getBedwarsLevelInfo(data).level)},
 				wins: ${this.client.formatNumber(wins)},
 				losses: ${this.client.formatNumber(losses)},
-				win rate: ${this.client.formatDecimalNumber(wins / losses)},
+				win rate: ${this.client.formatDecimalNumber(wins / (wins + losses))},
 				games played: ${this.client.formatNumber(data.stats.Bedwars.games_played_bedwars ?? 0)},
 				final kills: ${this.client.formatNumber(data.stats.Bedwars.final_kills_bedwars ?? 0)},
 				final deaths: ${this.client.formatNumber(data.stats.Bedwars.final_deaths_bedwars ?? 0)},

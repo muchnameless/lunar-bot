@@ -23,10 +23,7 @@ module.exports = class FkdrCommand extends BwStatsCommand {
 	 */
 	generateReply(ign, data) {
 		try {
-			const wins = data.stats.SkyWars.wins ?? 0;
-			const losses = data.stats.SkyWars.losses ?? 0;
-			const kills = data.stats.SkyWars.kills ?? 0;
-			const deaths = data.stats.SkyWars.deaths ?? 0;
+			const { stats: { SkyWars: { wins = 0, losses = 0, games_played_skywars: games = 0, kills = 0, deaths = 0, win_streak: winStreak = 0 } } } = data;
 
 			return oneLine`
 				${ign}:
@@ -34,12 +31,12 @@ module.exports = class FkdrCommand extends BwStatsCommand {
 				level: ${this.client.formatNumber(getSkyWarsLevelInfo(data).level)},
 				wins: ${this.client.formatNumber(wins)},
 				losses: ${this.client.formatNumber(losses)},
-				win rate: ${this.client.formatDecimalNumber(wins / losses)},
+				win rate: ${this.client.formatDecimalNumber(wins / (wins + losses))},
 				kills: ${this.client.formatNumber(kills)},
 				deaths: ${this.client.formatNumber(deaths)},
 				K/D: ${this.calculateKD(kills, deaths) ?? '-/-'},
-				games played: ${this.client.formatNumber(data.stats.SkyWars.games)},
-				win streak: ${this.client.formatNumber(data.stats.SkyWars.winstreak ?? 0)}
+				games played: ${this.client.formatNumber(games)},
+				win streak: ${this.client.formatNumber(winStreak)}
 			`;
 		} catch {
 			return `\`${ign}\` has no SkyWars stats`;
