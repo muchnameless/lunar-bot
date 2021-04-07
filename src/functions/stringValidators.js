@@ -16,7 +16,7 @@ module.exports.validateDiscordTag = string => /^.{2,32}#\d{4}$/.test(string);
  * checks if the string can be a minecraft IGN
  * @param {string} string
  */
-module.exports.validateMinecraftIGN = string => /^\w{3,16}$/.test(string);
+module.exports.validateMinecraftIGN = string => /^\w{1,16}$/.test(string);
 
 /**
  * checks if the string can be a minecraft IGN
