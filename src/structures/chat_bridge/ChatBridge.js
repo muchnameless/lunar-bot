@@ -8,8 +8,9 @@ const ms = require('ms');
 const { sleep, trim, cleanFormattedNumber } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { MC_CLIENT_VERSION } = require('./constants/settings');
-const { invisibleCharacters, defaultResponseRegExp, memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp } = require('./constants/chatBridge');
+const { defaultResponseRegExp, memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, randomInvisibleCharacter } = require('./constants/chatBridge');
 const { unicodeToName, nameToUnicode } = require('./constants/emojiNameUnicodeConverter');
+const { STOP } = require('../../constants/emojiCharacters');
 const minecraftBot = require('./MinecraftBot');
 const WebhookError = require('../errors/WebhookError');
 const AsyncQueue = require('../AsyncQueue');
@@ -77,10 +78,6 @@ class ChatBridge extends EventEmitter {
 			? 256
 			: 100;
 		/**
-		 * time to wait between ingame chat messages are sent, ('you can only send a message once every half second')
-		 */
-		this.ingameChatDelay = 600;
-		/**
 		 * increases each login, reset to 0 on successfull spawn
 		 */
 		this.loginAttempts = 0;
@@ -101,6 +98,40 @@ class ChatBridge extends EventEmitter {
 		 * to prevent chatBridge from reconnecting at <MinecraftBot>.end
 		 */
 		this.shouldReconnect = true;
+		/**
+		 * in game chat related information
+		 */
+		this.ingameChat = {
+			/**
+			 * message that is currently being forwarded to in game chat
+			 * @type {?import('../extensions/Message')}
+			 */
+			discordMessage: null,
+			/**
+			 * current retry when resending messages
+			 */
+			retries: 0,
+			/**
+			 * maximum attempts to resend to in game chat
+			 */
+			maxRetries: 2,
+			/**
+			 * listen for error messages in mc chat
+			 */
+			errorListener: this._createMcErrorListener(),
+			/**
+			 * normal delay to listen for error messages
+			 */
+			delay: 250,
+			/**
+			 * increased delay which can be used to send messages to in game chat continously
+			 */
+			safeDelay: 600,
+			/**
+			 * how many messages have been sent to in game chat in the last 10 seconds
+			 */
+			messageCounter: 0,
+		};
 
 		this._loadEvents();
 	}
@@ -332,16 +363,17 @@ class ChatBridge extends EventEmitter {
 	/**
 	 * pads the input string with random invisible chars to bypass the hypixel spam filter
 	 * @param {string} string
+	 * @param {string} [prefix='']
 	 */
-	hypixelSpamBypass(string) {
-		let padding = '';
+	_hypixelSpamBypass(string, prefix = '') {
+		const input = string.split('');
 
 		// max message length is 256 post 1.11, 100 pre 1.11
-		for (let index = this.maxMessageLength - string.length + 1; --index;) {
-			padding += invisibleCharacters[Math.floor(Math.random() * invisibleCharacters.length)];
+		for (let index = this.maxMessageLength - string.length - prefix.length + 1; --index;) {
+			input.splice(Math.floor(Math.random() * input.length), 0, randomInvisibleCharacter());
 		}
 
-		return `${string}${padding}`;
+		return `${prefix}${input.join('')}`;
 	}
 
 	/**
@@ -349,7 +381,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	_escapeEz(string) {
-		return string.replace(/(?<=\be+)(?=z+\b)/gi, 'ࠀ');
+		return string.replace(/(?<=\be+)(?=z+\b)/gi, randomInvisibleCharacter());
 	}
 
 	/**
@@ -358,20 +390,20 @@ class ChatBridge extends EventEmitter {
 	 */
 	_parseDiscordMessageToMinecraft(string) {
 		return cleanFormattedNumber(string)
-			.replace(/<?(a)?:?(\w{2,32}):(\d{17,19})>?/g, ':$2:') // custom emojis
+			.replace(/<?(?:a)?:?(\w{2,32}):(?:\d{17,19})>?/g, ':$1:') // custom emojis
 			.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
 			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
-			.replace(/<#(\d+)>/g, (match, p1) => { // channels
+			.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
 				const channelName = this.client.channels.cache.get(p1)?.name;
 				if (channelName) return `#${channelName}`;
 				return match;
 			})
-			.replace(/<@&(\d+)>/g, (match, p1) => { // roles
+			.replace(/<@&(\d{17,19})>/g, (match, p1) => { // roles
 				const roleName = this.client.lgGuild?.roles.cache.get(p1)?.name;
 				if (roleName) return `@${roleName}`;
 				return match;
 			})
-			.replace(/<@!?(\d+)>/g, (match, p1) => { // users
+			.replace(/<@!?(\d{17,19})>/g, (match, p1) => { // users
 				const displayName = this.client.lgGuild?.members.cache.get(p1)?.displayName ?? this.client.users.cache.get(p1)?.username;
 				if (displayName) return `@${displayName}`;
 				return match;
@@ -386,11 +418,11 @@ class ChatBridge extends EventEmitter {
 		return escapeMarkdown(
 			string
 				.replace( // emojis (custom and default)
-					/(?<!<a?):(\S+):(?!\d+>)/g,
+					/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
 					(match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match,
 				)
 				.replace( // emojis (custom and default)
-					/(?<!<a?):(\S+?):(?!\d+>)/g,
+					/(?<!<a?):(\S+?):(?!\d{17,19}>)/g,
 					(match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match,
 				)
 				.replace( // channels
@@ -398,7 +430,7 @@ class ChatBridge extends EventEmitter {
 					(match, p1) => this.client.lgGuild?.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match,
 				)
 				.replace( // @mentions
-					/(?<!<)@(!|&)?(\S+)(?!\d+>)/g,
+					/(?<!<)@(!|&)?(\S+)(?!\d{17,19}>)/g,
 					(match, p1, p2) => {
 						switch (p1) {
 							case '!': // members/users
@@ -434,13 +466,16 @@ class ChatBridge extends EventEmitter {
 
 	/**
 	 * forwards a discord message to ingame guild chat, prettifying discord renders
-	 * @param {import('../extensions/Message')} message
+	 * @param {import('../extensions/Message')} discordMessage
 	 * @param {import('../database/models/Player')} player
 	 */
-	async forwardDiscordMessageToHypixelGuildChat(message, player) {
+	async forwardDiscordMessageToHypixelGuildChat(discordMessage, player) {
 		return this.gchat(
-			message.attachments.size ? [ message.content?.length ? message.content : null, ...message.attachments.map(({ url }) => url) ].filter(Boolean).join(' ') : message.content,
-			{ prefix: `${player?.ign ?? this._escapeEz(message.member?.displayName ?? message.author.username)}:` },
+			discordMessage.attachments.size ? [ discordMessage.content?.length ? discordMessage.content : null, ...discordMessage.attachments.map(({ url }) => url) ].filter(Boolean).join(' ') : discordMessage.content,
+			{
+				prefix: `${player?.ign ?? this._escapeEz(discordMessage.member?.displayName ?? discordMessage.author.username)}:`,
+				discordMessage,
+			},
 		);
 	}
 
@@ -458,7 +493,7 @@ class ChatBridge extends EventEmitter {
 			return false;
 		}
 
-		return this.chat(message, { prefix: `/gc ${prefix}${prefix.length ? ' ' : invisibleCharacters[0]}`, ...options });
+		return this.chat(message, { prefix: `/gc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
 	}
 
 	/**
@@ -501,9 +536,10 @@ class ChatBridge extends EventEmitter {
 	 * @param {ChatOptions} options
 	 * @returns {Promise<boolean>} success - wether all message parts were send
 	 */
-	async chat(message, { prefix = '', maxParts = this.client.config.getNumber('DEFAULT_MAX_PARTS') } = {}) {
+	async chat(message, { prefix = '', maxParts = this.client.config.getNumber('DEFAULT_MAX_PARTS'), discordMessage } = {}) {
 		let success = true;
 
+		/** @type {Set<string>} */
 		const messageParts = new Set(
 			this._escapeEz(this._parseDiscordMessageToMinecraft(message))
 				.split('\n')
@@ -536,7 +572,7 @@ class ChatBridge extends EventEmitter {
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of messageParts) {
 			if (++partCount <= maxParts) { // prevent sending more than 'maxParts' messages
-				await this.sendToMinecraftChat(this.hypixelSpamBypass(`${prefix}${part}`));
+				await this.sendToMinecraftChat(part, { prefix, discordMessage, shouldUseSpamByPass: true });
 			} else {
 				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: skipped '${part}'`);
 				success = false;
@@ -547,20 +583,84 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * send a message to the ingame chat, without changing it, this.ingameChatDelay ms queue cooldown
+	 * queue a message for the ingame chat
 	 * @param {string} message
+	 * @param {object} [options]
+	 * @param {string} [options.prefix='']
+	 * @param {boolean} [options.shouldUseSpamByPass=false]
+	 * @param {import('../extensions/Message')} [options.discordMessage=null]
 	 */
-	async sendToMinecraftChat(message) {
+	async sendToMinecraftChat(message, { discordMessage = null, ...options } = {}) {
 		await this.ingameQueue.wait();
 
 		try {
-			this.bot.chat(message);
-			await sleep(this.ingameChatDelay);
+			this.ingameChat.discordMessage = discordMessage;
+			this.ingameChat.retries = 0;
+
+			if (!(await this._chat(message, options))) discordMessage?.reactSafely(STOP);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
 		} finally {
+			this.ingameChat.discordMessage = null;
 			this.ingameQueue.shift();
 		}
+	}
+
+	/**
+	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToMinecraftChat'
+	 * @private
+	 * @param {string} message
+	 * @param {object} [options]
+	 * @param {string} [options.prefix]
+	 * @param {boolean} [options.shouldUseSpamByPass=false]
+	 * @returns {Promise<boolean>}
+	 */
+	async _chat(message, { prefix, shouldUseSpamByPass = false } = {}) {
+		if (this.ingameChat.retries === this.ingameChat.maxRetries) return false;
+
+		// send message to in game chat
+		this.bot.chat(shouldUseSpamByPass
+			? this._hypixelSpamBypass(message, prefix)
+			: `${prefix}${message}`,
+		);
+
+		// listen for errors / await queue cooldown
+		const error = await Promise.race([
+			this.ingameChat.errorListener.listener,
+			sleep(++this.ingameChat.messageCounter < 8
+				? this.ingameChat.delay
+				: this.ingameChat.safeDelay,
+			),
+		]);
+
+		setTimeout(() => --this.ingameChat.messageCounter, 10_000);
+
+		// error while sending the message
+		if (error) {
+			await sleep(++this.ingameChat.retries * this.ingameChat.safeDelay);
+			return this._chat.apply(this, arguments); // eslint-disable-line prefer-spread
+		}
+
+		return true;
+	}
+
+	/**
+	 * returns a listener that will resolve with 'true' if the trigger is called
+	 */
+	_createMcErrorListener() {
+		let resolve;
+
+		/** @type {Promise<true>} */
+		const listener = new Promise(res => resolve = res);
+		const trigger = () => {
+			this.ingameChat.errorListener = this._createMcErrorListener();
+			resolve(true);
+		};
+
+		return {
+			listener,
+			trigger,
+		};
 	}
 
 	/**
@@ -663,7 +763,7 @@ class ChatBridge extends EventEmitter {
 					msg => !msg.type && responseRegex.test(msg.content),
 					{
 						max,
-						time: TIMEOUT_MS + (this.ingameQueue.remaining * this.ingameChatDelay),
+						time: TIMEOUT_MS + (this.ingameQueue.remaining * this.ingameChat.delay),
 						errors: [ 'time', 'disconnect' ],
 					},
 				),

@@ -1,5 +1,13 @@
 'use strict';
 
+/**
+ * characters that don't render in mc chat
+ */
+const invisibleCharacters = [
+	'\u{2B4D}', // '⭍'
+	'\u{800}', // 'ࠀ'
+];
+
 module.exports = {
 	/**
 	 * bot events that should only be listened to once
@@ -16,13 +24,11 @@ module.exports = {
 		PARTY: 'party',
 	},
 
-	/**
-	 * characters that don't render in mc chat
-	 */
-	invisibleCharacters: [
-		'⭍',
-		'ࠀ',
-	],
+	invisibleCharacters,
+
+	randomInvisibleCharacter: () => invisibleCharacters[Math.floor(Math.random() * invisibleCharacters.length)],
+
+	invisibleCharacterRegExp: new RegExp(invisibleCharacters.join('|'), 'gu'),
 
 	/**
 	 * any non-'-' and non-whitespace
@@ -33,5 +39,5 @@ module.exports = {
 
 	memeRegExp: /[⠁-⣿]/,
 
-	nonWhiteSpaceRegExp: /[^\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}ࠀ⭍]/u,
+	nonWhiteSpaceRegExp: new RegExp(`[^\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}${invisibleCharacters.join('')}]`, 'u'),
 };

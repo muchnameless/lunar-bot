@@ -1,7 +1,6 @@
 'use strict';
 
 const {
-	defaults: { ign: IGN_REGEX },
 	promote: { string: { success: promote } },
 	demote: { string: { success: demote } },
 	mute: { string: { success: mute } },
@@ -12,7 +11,6 @@ const { stringToMS } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
 
-const blockedRegExp = new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_REGEX}): )?(?<blockedContent>[\\s\\S]+)" as it is breaking our rules because it`);
 const demoteRegExp = new RegExp(demote(), 'i');
 const promoteRegExp = new RegExp(promote(), 'i');
 const muteRegExp = new RegExp(mute(), 'i');
@@ -71,14 +69,36 @@ module.exports = async (message) => {
 
 	/**
 	 * You cannot say the same message twice!
+	 * You can only send a message once every half second!
 	 */
-	if (message.content === 'You cannot say the same message twice!') {
+	if (message.content === 'You cannot say the same message twice!' || message.content === 'You can only send a message once every half second!' || message.content === 'Blocked excessive spam!') {
+		message.chatBridge.ingameChat.errorListener.trigger();
+
 		try {
 			await message.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.content}`);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner anti spam failed`);
 		} finally {
 			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: anti spam failed: ${message.content}`);
+		}
+
+		return;
+	}
+
+	/**
+	 * We blocked your comment "aFate: its because i said the sex word" as it is breaking our rules because it contains inappropriate content with adult themes. http://www.hypixel.net/rules/
+	 */
+	if (message.content.startsWith('We blocked your comment ')) {
+		// react to latest message from 'sender' with that content
+		message.chatBridge.ingameChat.discordMessage?.reactSafely(STOP);
+
+		// DM owner to add the blocked content to the filter
+		try {
+			await message.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.content}`);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner blocked message`);
+		} finally {
+			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: blocked message: ${message.content}`);
 		}
 
 		return;
@@ -93,33 +113,6 @@ module.exports = async (message) => {
 	if (/^the guild has (?:completed|reached|unlocked)/i.test(message.content)) {
 		message.forwardToDiscord();
 		return message.chatBridge.broadcast('gg');
-	}
-
-	/**
-	 * We blocked your comment "aFate: its because i said the sex word" as it is breaking our rules because it contains inappropriate content with adult themes. http://www.hypixel.net/rules/
-	 */
-	const blockedMatched = message.content.match(blockedRegExp);
-
-	if (blockedMatched) {
-		const { groups: { sender, blockedContent } } = blockedMatched;
-		const senderDiscordID = message.client.players.findByIGN(sender)?.discordID;
-
-		// react to latest message from 'sender' with that content
-		message.chatBridge.channel?.messages.cache
-			.sorted(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
-			.find(({ content, author: { id } }) => content.includes(blockedContent) && (senderDiscordID ? id === senderDiscordID : true))
-			?.reactSafely(STOP);
-
-		// DM owner to add the blocked content to the filter
-		try {
-			await message.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.content}`);
-		} catch (error) {
-			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner blocked message`);
-		} finally {
-			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: blocked message: ${message.content}`);
-		}
-
-		return;
 	}
 
 	/**

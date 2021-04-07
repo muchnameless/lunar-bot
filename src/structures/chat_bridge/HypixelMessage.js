@@ -1,7 +1,7 @@
 'use strict';
 
 const ChatMessage = require('prismarine-chat')(require('./constants/settings').MC_CLIENT_VERSION);
-const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('./constants/chatBridge');
+const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY }, invisibleCharacterRegExp } = require('./constants/chatBridge');
 const { NO_BELL } = require('../../constants/emojiCharacters');
 const mojang = require('../../api/mojang');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
@@ -37,7 +37,7 @@ class HypixelMessage extends ChatMessage {
 		/**
 		 * content with invis chars removed
 		 */
-		this.cleanedContent = this.rawContent.replace(/ࠀ|⭍/g, '').trim();
+		this.cleanedContent = this.rawContent.replace(invisibleCharacterRegExp, '').trim();
 
 		/**
 		 * Guild > [HypixelRank] ign [GuildRank]: message
@@ -190,10 +190,10 @@ class HypixelMessage extends ChatMessage {
 				});
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
-				if (/<@&\d+>/.test(message.content)) {
+				if (/<@&\d{17,19}>/.test(message.content)) {
 					this.author.send('you do not have permission to @ roles from in game chat');
 					message.reactSafely(NO_BELL);
-				} else if ((!player?.hasDiscordPingPermission && /<@!?\d+>/.test(message.content))) {
+				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(message.content))) {
 					this.author.send('you do not have permission to @ users from in game chat since you were muted via \'lg!mute\' in the past');
 					message.reactSafely(NO_BELL);
 				}
