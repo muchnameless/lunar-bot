@@ -611,11 +611,11 @@ class ChatBridge extends EventEmitter {
 	 * @private
 	 * @param {string} message
 	 * @param {object} [options]
-	 * @param {string} [options.prefix]
+	 * @param {string} [options.prefix='']
 	 * @param {boolean} [options.shouldUseSpamByPass=false]
 	 * @returns {Promise<boolean>}
 	 */
-	async _chat(message, { prefix, shouldUseSpamByPass = false } = {}) {
+	async _chat(message, { prefix = '', shouldUseSpamByPass = false } = {}) {
 		if (this.ingameChat.retries === this.ingameChat.maxRetries) return false;
 
 		// send message to in game chat
