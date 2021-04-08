@@ -30,7 +30,7 @@ module.exports = async (client, reaction, user) => {
 		return client.chatBridges.handleAnnouncementMessage(message);
 	}
 
-	if (message.author.id !== client.user.id || !message.embeds[0]?.title.includes('Leaderboard')) return;
+	if (message.author.id !== client.user.id || !message.embeds[0]?.title?.includes('Leaderboard')) return;
 
 	updateLeaderboardMessage(message, reaction, user);
 };
