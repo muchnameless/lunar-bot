@@ -36,14 +36,18 @@ module.exports = class PollCommand extends Command {
 
 			chatBridge.pollUntil = Date.now() + duration;
 
-			const inputMatched = message.content.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'));
+			const inputMatched = message.content
+				.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
+				?.flatMap((x) => {
+					const input = x.trim();
+					if (!input.length) return [];
+					return input;
+				});
 
-			if (!inputMatched) return message.reply(this.usageInfo);
-
-			inputMatched.shift();
+			if (!inputMatched?.length) return message.reply(this.usageInfo);
 
 			const question = upperCaseFirstChar(inputMatched.shift());
-			const options = inputMatched.flatMap(x => (x.length && /\S/.test(x) ? ({ option: x.trim(), votes: new Set() }) : []));
+			const options = inputMatched.map(x => ({ option: x.trim(), votes: new Set() }));
 
 			if (!options.length) return message.reply('specify poll options to vote for');
 
