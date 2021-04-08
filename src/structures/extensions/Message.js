@@ -105,6 +105,7 @@ class LunarMessage extends Message {
 	async reactSafely(emoji) {
 		if (this.deleted) return null;
 		if (!this.channel.checkBotPermissions('ADD_REACTIONS')) return null;
+		if (this.reactions.cache.get(this.client.emojis.resolveID(emoji))?.me) return Promise.resolve(this.reactions.cache.get(this.client.emojis.resolveID(emoji)));
 		return super.react(emoji).catch(error => logger.error(`[REACT SAFELY]: ${error}`));
 	}
 
