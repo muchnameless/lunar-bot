@@ -26,6 +26,7 @@ const logger = require('../../functions/logger');
  * @typedef {object} ChatOptions
  * @property {?string} [prefix='']
  * @property {?number} [maxParts=10]
+ * @property {import('../extensions/Message')} [discordMessage]
  */
 
 
@@ -566,6 +567,8 @@ class ChatBridge extends EventEmitter {
 		);
 
 		if (!messageParts.size) return false;
+
+		if (!success) discordMessage?.reactSafely(STOP);
 
 		let partCount = 0;
 
