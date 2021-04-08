@@ -28,6 +28,7 @@ const mute = {
 	ERROR_SELF: '^You cannot mute yourself from the guild!$',
 	ERROR_DURATION_TOO_LONG: '^You cannot mute someone for more than one month$',
 	ERROR_DURATION_TOO_SHORT: '^You cannot mute someone for less than a minute$',
+	ERROR_ALREADY_MUTED: '^This player is already muted!$',
 	success: (target = `${IGN_DEFAULT}|the guild chat`, executor = IGN_DEFAULT) => `^${HYPIXEL_RANK}(?<executor>${executor}) has muted ${HYPIXEL_RANK}(?<target>${target}) for (?<duration>\\w+)`,
 };
 const unmute = {
