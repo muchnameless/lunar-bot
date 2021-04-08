@@ -40,6 +40,25 @@ module.exports = async (message) => {
 	}
 
 	/**
+	 * We blocked your comment "aFate: its because i said the sex word" as it is breaking our rules because it contains inappropriate content with adult themes. http://www.hypixel.net/rules/
+	 */
+	if (message.content.startsWith('We blocked your comment ')) {
+		// react to latest message from 'sender' with that content
+		message.chatBridge.ingameChat.discordMessage?.reactSafely(STOP);
+
+		// DM owner to add the blocked content to the filter
+		try {
+			await message.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.content}`);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner blocked message`);
+		} finally {
+			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: blocked message: ${message.content}`);
+		}
+
+		return;
+	}
+
+	/**
 	 * auto '/gc welcome'
 	 * [HypixelRank] IGN joined the guild!
 	 */
@@ -86,25 +105,6 @@ module.exports = async (message) => {
 	}
 
 	/**
-	 * We blocked your comment "aFate: its because i said the sex word" as it is breaking our rules because it contains inappropriate content with adult themes. http://www.hypixel.net/rules/
-	 */
-	if (message.content.startsWith('We blocked your comment ')) {
-		// react to latest message from 'sender' with that content
-		message.chatBridge.ingameChat.discordMessage?.reactSafely(STOP);
-
-		// DM owner to add the blocked content to the filter
-		try {
-			await message.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.content}`);
-		} catch (error) {
-			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner blocked message`);
-		} finally {
-			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: blocked message: ${message.content}`);
-		}
-
-		return;
-	}
-
-	/**
 	 * auto '/gc gg' for quest completions
 	 * The guild has completed Tier 3 of this week's Guild Quest!
 	 * The Guild has reached Level 36!
@@ -112,71 +112,6 @@ module.exports = async (message) => {
 	 */
 	if (/^the guild has (?:completed|reached|unlocked)/i.test(message.content)) {
 		return message.forwardToDiscord();
-	}
-
-	/**
-	 * auto '/gc gg' for promotions
-	 * [HypixelRank] IGN was promoted from PREV to NOW
-	 */
-	const promoteMatched = message.content.match(promoteRegExp);
-
-	if (promoteMatched) {
-		message.forwardToDiscord();
-		message.chatBridge.broadcast('gg');
-
-		const { groups: { target, newRank } } = promoteMatched;
-		const player = message.client.players.findByIGN(target);
-
-		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}' but not in the db`);
-
-		const GUILD_RANK_PRIO = (message.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
-
-		if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to an unknown rank '${newRank}'`);
-
-		player.guildRankPriority = GUILD_RANK_PRIO;
-		player.save();
-
-		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}'`);
-	}
-
-	/**
-	 * demote
-	 * [HypixelRank] IGN was demoted from PREV to NOW
-	 */
-	const demotedMatched = message.content.match(demoteRegExp);
-
-	if (demotedMatched) {
-		message.forwardToDiscord();
-
-		const { groups: { target, newRank } } = demotedMatched;
-		const player = message.client.players.findByIGN(target);
-
-		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}' but not in the db`);
-
-		const GUILD_RANK_PRIO = (message.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
-
-		if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to an unknown rank '${newRank}'`);
-
-		player.guildRankPriority = GUILD_RANK_PRIO;
-		player.save();
-
-		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}'`);
-	}
-
-	/**
-	 * accept f reqs from guild members
-	 * Friend request from [HypixelRank] IGN\n
-	 */
-	const friendReqMatched = message.content.match(/Friend request from (?:\[.+?\] )?(\w+)/);
-
-	if (friendReqMatched) {
-		const [ , IGN ] = friendReqMatched;
-		const player = message.client.players.findByIGN(IGN);
-
-		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: denying f request from ${IGN}`);
-
-		logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: accepting f request from ${IGN}`);
-		return message.chatBridge.sendToMinecraftChat(`/f add ${IGN}`);
 	}
 
 	/**
@@ -249,6 +184,55 @@ module.exports = async (message) => {
 	}
 
 	/**
+	 * auto '/gc gg' for promotions
+	 * [HypixelRank] IGN was promoted from PREV to NOW
+	 */
+	const promoteMatched = message.content.match(promoteRegExp);
+
+	if (promoteMatched) {
+		message.forwardToDiscord();
+		message.chatBridge.broadcast('gg');
+
+		const { groups: { target, newRank } } = promoteMatched;
+		const player = message.client.players.findByIGN(target);
+
+		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}' but not in the db`);
+
+		const GUILD_RANK_PRIO = (message.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
+
+		if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to an unknown rank '${newRank}'`);
+
+		player.guildRankPriority = GUILD_RANK_PRIO;
+		player.save();
+
+		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}'`);
+	}
+
+	/**
+	 * demote
+	 * [HypixelRank] IGN was demoted from PREV to NOW
+	 */
+	const demotedMatched = message.content.match(demoteRegExp);
+
+	if (demotedMatched) {
+		message.forwardToDiscord();
+
+		const { groups: { target, newRank } } = demotedMatched;
+		const player = message.client.players.findByIGN(target);
+
+		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}' but not in the db`);
+
+		const GUILD_RANK_PRIO = (message.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
+
+		if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to an unknown rank '${newRank}'`);
+
+		player.guildRankPriority = GUILD_RANK_PRIO;
+		player.save();
+
+		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}'`);
+	}
+
+	/**
 	 * You joined GUILD_NAME!
 	 */
 	const guildJoinMatched = message.content.match(/(?<=^You joined ).+(?=!)/);
@@ -262,5 +246,21 @@ module.exports = async (message) => {
 			.catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error}`));
 		logger.info(`[CHATBRIDGE]: ${message.chatBridge.bot.username}: joined ${guildName}`);
 		return message.chatBridge.link(guildName);
+	}
+
+	/**
+	 * accept f reqs from guild members
+	 * Friend request from [HypixelRank] IGN\n
+	 */
+	const friendReqMatched = message.content.match(/Friend request from (?:\[.+?\] )?(\w+)/);
+
+	if (friendReqMatched) {
+		const [ , IGN ] = friendReqMatched;
+		const player = message.client.players.findByIGN(IGN);
+
+		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: denying f request from ${IGN}`);
+
+		logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: accepting f request from ${IGN}`);
+		return message.chatBridge.sendToMinecraftChat(`/f add ${IGN}`);
 	}
 };
