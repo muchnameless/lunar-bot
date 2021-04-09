@@ -11,6 +11,8 @@ module.exports = {
 		MAYOR: 'OffsetMayor',
 		WEEK: 'OffsetWeek',
 		MONTH: 'OffsetMonth',
+		CURRENT: 'current',
+		DAY: 'day',
 	},
 
 	XP_OFFSETS: [
@@ -26,7 +28,6 @@ module.exports = {
 		mayor: 'OffsetMayor',
 		week: 'OffsetWeek',
 		month: 'OffsetMonth',
-		// day: 'day',
 	},
 
 	XP_OFFSETS_CONVERTER: {
@@ -34,7 +35,6 @@ module.exports = {
 		mayor: 'OffsetMayor',
 		week: 'OffsetWeek',
 		month: 'OffsetMonth',
-		// day: 'day',
 
 		CompetitionStart: 'competition',
 		OffsetMayor: 'mayor',

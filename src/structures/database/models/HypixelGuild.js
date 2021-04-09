@@ -8,7 +8,7 @@ const { mutedCheck } = require('../../../functions/database');
 const { promote: { string: { success } } } = require('../../chat_bridge/constants/commandResponses');
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED, STOP } = require('../../../constants/emojiCharacters');
-const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH }, UNKNOWN_IGN } = require('../../../constants/database');
+const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, CURRENT, DAY }, UNKNOWN_IGN } = require('../../../constants/database');
 const ChatBridgeError = require('../../errors/ChatBridgeError');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
@@ -422,7 +422,7 @@ module.exports = class HypixelGuild extends Model {
 						setTimeout(
 							(async () => {
 								// reset current xp to 0
-								await player.resetXp({ offsetToReset: 'current' }).catch(error => logger.error(`${error}`));
+								await player.resetXp({ offsetToReset: CURRENT }).catch(error => logger.error(`${error}`));
 
 								const { xpLastUpdatedAt } = player;
 								// shift the daily array for the amount of daily resets missed
@@ -442,7 +442,7 @@ module.exports = class HypixelGuild extends Model {
 									config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: WEEK }),
 									config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: MONTH }),
 									...new Array(DAYS_PASSED_SINCE_LAST_XP_UPDATE).fill(null)
-										.map(() => player.resetXp({ offsetToReset: 'day' })),
+										.map(() => player.resetXp({ offsetToReset: DAY })),
 								]);
 
 								player.update({
