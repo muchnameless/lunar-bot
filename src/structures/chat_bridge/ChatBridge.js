@@ -582,7 +582,7 @@ class ChatBridge extends EventEmitter {
 
 		if (!messageParts.size) return false;
 
-		if (!success) discordMessage?.reactSafely(STOP);
+		if (messageParts.size > maxParts || !success) discordMessage?.reactSafely(STOP);
 
 		let partCount = 0;
 
@@ -591,7 +591,7 @@ class ChatBridge extends EventEmitter {
 			if (++partCount <= maxParts) { // prevent sending more than 'maxParts' messages
 				await this.sendToMinecraftChat(part, { prefix, discordMessage, shouldUseSpamByPass: true });
 			} else {
-				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: skipped '${part}'`);
+				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: skipped '${prefix}${part}'`);
 				success = false;
 			}
 		}
@@ -608,6 +608,11 @@ class ChatBridge extends EventEmitter {
 	 * @param {import('../extensions/Message')} [options.discordMessage=null]
 	 */
 	async sendToMinecraftChat(message, { discordMessage = null, ...options } = {}) {
+		if (discordMessage?.deleted) {
+			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${options.prefix ?? ''}${message}'`);
+			return;
+		}
+
 		await this.ingameQueue.wait();
 
 		try {
