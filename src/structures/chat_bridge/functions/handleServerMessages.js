@@ -25,7 +25,12 @@ module.exports = async (message) => {
 	 * You cannot say the same message twice!
 	 * You can only send a message once every half second!
 	 */
-	if (message.content === 'You cannot say the same message twice!' || message.content === 'You can only send a message once every half second!' || message.content === 'Blocked excessive spam!') {
+	if (
+		message.content === 'You cannot say the same message twice!'
+		|| message.content === 'You can only send a message once every half second!'
+		|| message.content === 'Blocked excessive spam!'
+		|| message.content === 'You are sending commands too fast! Please slow down.'
+	) {
 		message.chatBridge.ingameChat.errorListener.trigger();
 
 		try {
