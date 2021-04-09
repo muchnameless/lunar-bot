@@ -3,13 +3,13 @@
 const { MessageEmbed } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
-const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER } = require('../../../constants/database');
+const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
 const { levelingXp, skillXpPast50, skillsCap, dungeonXp, slayerXp, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
 const { escapeIgn, trim } = require('../../../functions/util');
-const { getSkillLevel } = require('../../../functions/skyblock');
+const { getSkillLevel, getWeight } = require('../../../functions/skyblock');
 const { validateNumber } = require('../../../functions/stringValidators');
 const { mutedCheck } = require('../../../functions/database');
 const NonAPIError = require('../../errors/NonAPIError');
@@ -1023,30 +1023,40 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * determines the player's main profile (profile with the most progress)
+	 * determines the player's main profile (profile with the most weight)
 	 */
 	async fetchMainProfile() {
 		const profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUUID);
 
-		if (!profiles.length) throw new Error(`[MAIN PROFILE]: ${this.logInfo}: unable to detect main profile name`);
+		if (!profiles.length) {
+			this.mainProfileID = null;
+			this.save();
 
-		const mainProfile = profiles[
+			throw new NonAPIError(`${this.logInfo}: no SkyBlock profiles`);
+		}
+
+		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = profiles[
 			profiles.length > 1
 				? profiles
-					.map(({ members }) => {
-						const member = members[this.minecraftUUID];
-						// calculate weight of this profile
-						return (Math.max(...skills.map(skill => member[`experience_skill_${skill}`] ?? 0)) / 100) // highest skill xp / 100
-							+ slayers.reduce((acc, slayer) => acc + (member.slayer_bosses?.[slayer]?.xp ?? 0), 0); // total slayer xp
-					})
+					.map(({ members }) => getWeight(members[this.minecraftUUID]).total)
 					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => (currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar), 0)
 				: 0
 		];
 
-		this.mainProfileID = mainProfile.profile_id;
-		this.mainProfileName = mainProfile.cute_name;
+		if (PROFILE_ID === this.mainProfileID) return null;
 
-		logger.info(`[MAIN PROFILE]: ${this.logInfo} -> ${this.mainProfileName}`);
+		const { mainProfileName } = this;
+
+		this.mainProfileID = PROFILE_ID;
+		this.mainProfileName = PROFILE_NAME;
+		this.save();
+
+		logger.info(`[MAIN PROFILE]: ${this.logInfo} -> ${PROFILE_NAME}`);
+
+		return {
+			oldProfileName: mainProfileName,
+			newProfileName: PROFILE_NAME,
+		};
 	}
 
 	/**
@@ -1106,9 +1116,9 @@ module.exports = class Player extends Model {
 			case null:
 				// no offset type specifies -> resetting everything
 				await Promise.all(XP_OFFSETS.map(async offset => this.resetXp({ offsetToReset: offset, typesToReset })));
-				return this.resetXp({ offsetToReset: 'day', typesToReset });
+				return this.resetXp({ offsetToReset: DAY, typesToReset });
 
-			case 'day':
+			case DAY:
 				// append current xp to the beginning of the xpHistory-Array and pop of the last value
 				typesToReset.forEach((type) => {
 					/**
@@ -1121,7 +1131,7 @@ module.exports = class Player extends Model {
 				});
 				break;
 
-			case 'current':
+			case CURRENT:
 				typesToReset.forEach(type => this[`${type}Xp`] = 0);
 				break;
 

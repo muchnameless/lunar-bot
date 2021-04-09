@@ -3,9 +3,10 @@
 const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
-const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH } } = require('../../../constants/database');
+const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, DAY } } = require('../../../constants/database');
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
 const { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar, safePromiseAll } = require('../../../functions/util');
+const NonAPIError = require('../../errors/NonAPIError');
 const ModelManager = require('./ModelManager');
 const logger = require('../../../functions/logger');
 
@@ -233,7 +234,6 @@ class PlayerManager extends ModelManager {
 				logger.warn('[PLAYERS UPDATE]: auto updates disabled');
 			}
 		} else {
-			// await safePromiseAll(this.cache.map(async player => player.update(options)));
 			for (const player of this.cache.values()) {
 				await player.update(options).catch(logger.error);
 			}
@@ -292,7 +292,7 @@ class PlayerManager extends ModelManager {
 			.map(([ guildID, data ]) => [ this.client.hypixelGuilds.cache.get(guildID) ?? guildID, data ])
 			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
 		) {
-			const logParts = splitMessage(`\`\`\`\n${ignChanges.sort(compareAlphabetically).join('\n')}\`\`\``, { maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' });
+			const logParts = splitMessage(`\`\`\`\n${ignChanges.sort(compareAlphabetically).join('\n')}\`\`\``, { maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```\n' });
 
 			let embed = createEmbed(guild, ignChanges.length);
 			let currentLength = embed.length;
@@ -482,7 +482,7 @@ class PlayerManager extends ModelManager {
 	async performDailyXpReset() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: 'day' });
+		await this.resetXp({ offsetToReset: DAY });
 
 		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
 
@@ -492,6 +492,8 @@ class PlayerManager extends ModelManager {
 			.setDescription(`reset the xp gained from all ${this.size} guild members`)
 			.setTimestamp(),
 		);
+
+		this.updateMainProfiles();
 	}
 
 	/**
@@ -528,6 +530,94 @@ class PlayerManager extends ModelManager {
 			.setDescription(`reset the xp gained from all ${this.size} guild members`)
 			.setTimestamp(),
 		);
+	}
+
+	/**
+	 * checks all players if their current main profile is still valid
+	 */
+	async updateMainProfiles() {
+		const log = [];
+
+		for (const player of this.cache.values()) {
+			if (player.notInGuild) continue;
+
+			try {
+				const result = await player.fetchMainProfile();
+
+				if (!result) continue;
+
+				log.push({
+					guildID: player.guildID,
+					mainProfileUpdate: `-\xa0${player.ign}: ${result.oldProfileName} -> ${result.newProfileName}`,
+				});
+			} catch (error) {
+				logger.error(`[UPDATE MAIN PROFILE]: ${error}`);
+
+				if (error instanceof NonAPIError) {
+					log.push({
+						guildID: player.guildID,
+						mainProfileUpdate: `-\xa0${player.ign}: ${error.message}`,
+					});
+				}
+			}
+		}
+
+		if (!log.length) return this;
+
+		/** @type {[string, string[]][]} */
+		const affectedGuilds = Object.fromEntries([ ...new Set(log.map(({ guildID }) => guildID)) ].map(id => [ id, [] ]));
+
+		for (const { guildID, mainProfileUpdate } of log) {
+			affectedGuilds[guildID].push(mainProfileUpdate);
+		}
+
+		/**
+		 * @type {MessageEmbed[]}
+		 */
+		const embeds = [];
+		/**
+		 * @param {import('../models/HypixelGuild')|string} guild
+		 * @param {number} mainProfileChangesAmount
+		 */
+		const createEmbed = (guild, mainProfileChangesAmount) => {
+			const embed = new MessageEmbed()
+				.setColor(this.client.config.get('EMBED_RED'))
+				.setTitle(`${typeof guild !== 'string' ? guild : upperCaseFirstChar(guild)} Player Database: ${mainProfileChangesAmount} change${mainProfileChangesAmount !== 1 ? 's' : ''}`)
+				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildID }) => guildID === guild).size}`)
+				.setTimestamp();
+
+			embeds.push(embed);
+
+			return embed;
+		};
+
+		for (const [ guild, mainProfileUpdate ] of Object.entries(affectedGuilds)
+			.map(([ guildID, data ]) => [ this.client.hypixelGuilds.cache.get(guildID) ?? guildID, data ])
+			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
+		) {
+			const logParts = splitMessage(`\`\`\`diff\n${mainProfileUpdate.sort(compareAlphabetically).join('\n')}\`\`\``, { maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```diff\n' });
+
+			let embed = createEmbed(guild, mainProfileUpdate.length);
+			let currentLength = embed.length;
+
+			while (logParts.length) {
+				const name = `${'main profile update'.padEnd(150, '\xa0')}\u200b`;
+				const value = logParts.shift();
+
+				if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
+					embed.addField(name, value);
+					currentLength += name.length + value.length;
+				} else {
+					embed = createEmbed(guild, mainProfileUpdate.length);
+					embed.addField(name, value);
+					currentLength = embed.length;
+				}
+			}
+		}
+
+		this.client.logMany(embeds);
+
+		return this;
 	}
 }
 
