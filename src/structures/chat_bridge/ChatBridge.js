@@ -123,7 +123,14 @@ class ChatBridge extends EventEmitter {
 			/**
 			 * normal delay to listen for error messages
 			 */
-			delay: 100,
+			delays: [
+				null,
+				100,
+				100,
+				100,
+				120,
+				150,
+			],
 			/**
 			 * increased delay which can be used to send messages to in game chat continously
 			 */
@@ -132,6 +139,13 @@ class ChatBridge extends EventEmitter {
 			 * how many messages have been sent to in game chat in the last 10 seconds
 			 */
 			messageCounter: 0,
+			/**
+			 * increasing delay
+			 */
+			get delay() {
+				setTimeout(() => --this.messageCounter, 10_000);
+				return this.delays[++this.messageCounter] ?? this.safeDelay;
+			},
 		};
 
 		this._loadEvents();
@@ -630,13 +644,8 @@ class ChatBridge extends EventEmitter {
 		// listen for errors / await queue cooldown
 		const error = await Promise.race([
 			this.ingameChat.errorListener.listener,
-			sleep(++this.ingameChat.messageCounter <= 5
-				? this.ingameChat.delay
-				: this.ingameChat.safeDelay,
-			),
+			sleep(this.ingameChat.delay),
 		]);
-
-		setTimeout(() => --this.ingameChat.messageCounter, 10_000);
 
 		// error while sending the message
 		if (error) {
