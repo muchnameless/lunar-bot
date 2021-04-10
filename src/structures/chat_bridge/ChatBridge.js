@@ -661,8 +661,6 @@ class ChatBridge extends EventEmitter {
 
 			// collector collected nothing
 			if (!response) {
-				logger.error(`no response from '${prefix}${message}'`);
-				this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
 				this.ingameChat.tempIncrementCounter();
 				return false;
 			}
