@@ -8,7 +8,7 @@ const ms = require('ms');
 const { sleep, trim, cleanFormattedNumber } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { MC_CLIENT_VERSION } = require('./constants/settings');
-const { defaultResponseRegExp, memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, randomInvisibleCharacter } = require('./constants/chatBridge');
+const { defaultResponseRegExp, memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('./constants/chatBridge');
 const { unicodeToName, nameToUnicode } = require('./constants/emojiNameUnicodeConverter');
 const { spamMessages } = require('./constants/commandResponses');
 const { STOP, X_EMOJI } = require('../../constants/emojiCharacters');
@@ -661,6 +661,7 @@ class ChatBridge extends EventEmitter {
 
 			// collector collected nothing
 			if (!response) {
+				logger.error(`no response from '${prefix}${message}'`);
 				this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
 				this.ingameChat.tempIncrementCounter();
 				return false;
@@ -689,7 +690,7 @@ class ChatBridge extends EventEmitter {
 			}
 
 			// message sent successfully
-			await sleep(prefix.test(/^\/[gpoa]c/)
+			await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
 				? this.ingameChat.delay
 				: (this.ingameChat.tempIncrementCounter(), this.ingameChat.safeDelay),
 			);
