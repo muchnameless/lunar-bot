@@ -25,7 +25,6 @@
     "discord.js": "^12.5.3",
     "dotenv": "^8.2.0",
     "emoji-regex": "^9.2.2",
-    "eslint": "^7.23.0",
     "ioredis": "^4.26.0",
     "jaro-winkler": "^0.2.8",
     "keyv": "^4.0.3",
@@ -43,5 +42,8 @@
     "timezonecomplete": "^5.12.2",
     "utf-8-validate": "^5.0.4",
     "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.24.0"
   }
 }
