@@ -125,11 +125,12 @@ class ChatBridge extends EventEmitter {
 			 */
 			delays: [
 				null,
-				100,
-				100,
-				100,
-				120,
-				150,
+				200,
+				200,
+				200,
+				200,
+				200,
+				600,
 			],
 			/**
 			 * increased delay which can be used to send messages to in game chat continously
