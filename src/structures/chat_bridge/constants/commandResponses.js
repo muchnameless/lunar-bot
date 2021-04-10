@@ -1,7 +1,7 @@
 'use strict';
 
 const HYPIXEL_RANK = '(?:\\[.+?\\] )?';
-const IGN_DEFAULT = '\\w{3,16}';
+const IGN_DEFAULT = '\\w{1,16}';
 const GUILD_RANK_DEFAULT = '[a-z]+';
 
 const genericErrors = {
