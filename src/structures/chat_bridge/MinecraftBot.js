@@ -51,7 +51,7 @@ module.exports = async (chatBridge, options) => {
 		chat: {
 			value(message) {
 				if (typeof message !== 'string') throw new Error(`[BOT CHAT]: input must be a string but received ${typeof message}`);
-				this.write('chat', { message });
+				return this.write('chat', { message });
 			},
 		},
 
