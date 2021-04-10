@@ -45,19 +45,25 @@ class HypixelMessage extends ChatMessage {
 		 * Officer > [HypixelRank] ign [GuildRank]: message
 		 * From [HypixelRank] ign: message
 		 */
-		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From) )(?:\[(?<hypixelRank>.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
+		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[(?<hypixelRank>.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
-			this.author = new HypixelMessageAuthor(this.chatBridge, {
-				hypixelRank: matched.groups.hypixelRank,
-				ign: matched.groups.ign,
-				guildRank: matched.groups.guildRank,
-			});
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? WHISPER : null);
+			this.author = matched.groups.whisper !== 'To'
+				? new HypixelMessageAuthor(this.chatBridge, {
+					hypixelRank: matched.groups.hypixelRank,
+					ign: matched.groups.ign,
+					guildRank: matched.groups.guildRank,
+				})
+				: new HypixelMessageAuthor(this.chatBridge, {
+					hypixelRank: null,
+					ign: this.chatBridge.bot.ign,
+					guildRank: null,
+				});
 			this.content = this.cleanedContent.slice(matched[0].length).trimLeft();
 		} else {
-			this.author = null;
 			this.type = null;
+			this.author = null;
 			this.content = this.cleanedContent;
 		}
 	}
@@ -77,7 +83,7 @@ class HypixelMessage extends ChatMessage {
 	 * wether the message was sent by the bot
 	 */
 	get me() {
-		return this.author?.ign === this.chatBridge.bot.username;
+		return this.author?.ign === this.chatBridge.bot.ign;
 	}
 
 	/**
