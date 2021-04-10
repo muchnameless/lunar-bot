@@ -35,7 +35,7 @@ module.exports = {
 	 */
 	defaultResponseRegExp: /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u,
 
-	blockedWordsRegExp: /\bsex\b|\bcum\b|nutted|\bthot\b|\bpedo(?:phile)?\b|\byou'?r+?e? gay+\b|\bk+ys+\b|kil.+? yourself+\b|\bsuicide\b|\bn+ig{2,}er+\b|\bk{3,}\b|\br+ape+\b|s+hoot yourself+\b|kkr|hope you die|\bmomo\b/i,
+	blockedWordsRegExp: /\bsex\b|\bcum\b|nutted|\bthot\b|\bpedo(?:phile)?\b|\byou'?r+?e? gay+\b|kys|kil.+? yourself+\b|\bsuicide\b|\bn+ig{2,}er+\b|\bk{3,}\b|\br+ape+\b|s+hoot yourself+\b|kkr|hope you die|\bmomo\b/i,
 
 	memeRegExp: /[⠁-⣿]/,
 
