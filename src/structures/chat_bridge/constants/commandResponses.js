@@ -123,4 +123,10 @@ module.exports = {
 		string: invite,
 		regExp: (ign = IGN_DEFAULT) => new RegExp(inviteResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
 	},
+	spamMessages: [
+		'You cannot say the same message twice!',
+		'You can only send a message once every half second!',
+		'Blocked excessive spam!',
+		'You are sending commands too fast! Please slow down.',
+	],
 };
