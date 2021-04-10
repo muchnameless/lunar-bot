@@ -651,7 +651,7 @@ class ChatBridge extends EventEmitter {
 		// listen for responses
 		try {
 			const [ response ] = await this.awaitMessages(
-				msg => (msg.author?.ign === this.bot.ign && msg.content.endsWith(message)) || (!msg.type && (spamMessages.includes(msg.content) || msg.content.startsWith('We blocked your comment'))),
+				msg => (msg.me && msg.content.endsWith(message)) || (!msg.type && (spamMessages.includes(msg.content) || msg.content.startsWith('We blocked your comment'))),
 				{
 					max: 1,
 					time: this.ingameChat.safeDelay,
@@ -689,7 +689,10 @@ class ChatBridge extends EventEmitter {
 			}
 
 			// message sent successfully
-			await sleep(this.ingameChat.delay);
+			await sleep(prefix.startsWith('/gc')
+				? this.ingameChat.delay
+				: (this.ingameChat.tempIncrementCounter(), this.ingameChat.safeDelay),
+			);
 			return true;
 
 		// bot disconnected
