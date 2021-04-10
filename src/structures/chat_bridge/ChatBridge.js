@@ -689,7 +689,7 @@ class ChatBridge extends EventEmitter {
 			}
 
 			// message sent successfully
-			await sleep(prefix.test(/^[gpoa]c/)
+			await sleep(prefix.test(/^\/[gpoa]c/)
 				? this.ingameChat.delay
 				: (this.ingameChat.tempIncrementCounter(), this.ingameChat.safeDelay),
 			);
