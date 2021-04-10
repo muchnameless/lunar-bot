@@ -32,8 +32,6 @@ module.exports = async (message) => {
 		|| message.content === 'Blocked excessive spam!'
 		|| message.content === 'You are sending commands too fast! Please slow down.'
 	) {
-		message.chatBridge.ingameChat.errorListener.trigger();
-
 		try {
 			await message.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.content}`);
 		} catch (error) {
@@ -262,7 +260,7 @@ module.exports = async (message) => {
 			.getByName(guildName)
 			?.updatePlayers()
 			.catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error}`));
-		logger.info(`[CHATBRIDGE]: ${message.chatBridge.bot.username}: joined ${guildName}`);
+		logger.info(`[CHATBRIDGE]: ${message.chatBridge.bot.ign}: joined ${guildName}`);
 		return message.chatBridge.link(guildName);
 	}
 
