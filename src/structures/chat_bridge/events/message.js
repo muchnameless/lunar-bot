@@ -16,8 +16,7 @@ module.exports = async (chatBridge, message) => {
 
 	switch (message.type) {
 		case GUILD: {
-			if (!chatBridge.enabled) return;
-			if (message.me) return; // ignore own messages
+			if (!chatBridge.enabled || message.me) return;
 
 			if (chatBridge.ready) message.forwardToDiscord();
 
@@ -26,14 +25,13 @@ module.exports = async (chatBridge, message) => {
 
 		case OFFICER:
 		case PARTY: {
-			if (!chatBridge.enabled) return;
-			if (message.me) return; // ignore own messages
+			if (!chatBridge.enabled || message.me) return;
 
 			return commandHandler(message);
 		}
 
 		case WHISPER: {
-			if (!chatBridge.enabled) return;
+			if (!chatBridge.enabled || message.me) return;
 			if (message.author.player?.guildID !== chatBridge.guild.guildID) return logger.info(`[MESSAGE]: ignored whisper from '${message.author.ign}': ${message.content}`); // ignore messages from non guild players
 
 			chatBridge.guild.handleRankRequestMessage(message).catch(error => logger.error(`[RANK REQUEST]: ${error}`));
