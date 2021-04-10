@@ -7,7 +7,7 @@ const { autocorrect, cleanFormattedNumber, compareAlphabetically, safePromiseAll
 const { mutedCheck } = require('../../../functions/database');
 const { promote: { string: { success } } } = require('../../chat_bridge/constants/commandResponses');
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
-const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED, STOP } = require('../../../constants/emojiCharacters');
+const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, CURRENT, DAY }, UNKNOWN_IGN } = require('../../../constants/database');
 const ChatBridgeError = require('../../errors/ChatBridgeError');
 const hypixel = require('../../../api/hypixel');
@@ -691,7 +691,7 @@ module.exports = class HypixelGuild extends Model {
 				return message.reactSafely(MUTED);
 			}
 
-			if (!(await chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(STOP);
+			await chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player);
 		} catch (error) {
 			if (error.status === 'disabled') return;
 
