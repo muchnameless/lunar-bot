@@ -1,10 +1,11 @@
 'use strict';
 
 class ChatBridgeError extends Error {
-	constructor(message) {
+	constructor(message, status) {
 		super(message);
 
 		this.name = 'ChatBridgeError';
+		this.status = status;
 	}
 }
 

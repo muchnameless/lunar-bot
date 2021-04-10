@@ -173,8 +173,8 @@ module.exports = class HypixelGuild extends Model {
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
 	get chatBridge() {
-		if (!this.chatBridgeEnabled) throw new ChatBridgeError(`${this.name}: chat bridge disabled`);
-		if (!this._chatBridge?.ready) throw new ChatBridgeError(`${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`);
+		if (!this.chatBridgeEnabled) throw new ChatBridgeError(`${this.name}: chat bridge disabled`, 'disabled');
+		if (!this._chatBridge?.ready) throw new ChatBridgeError(`${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`, this._chatBridge ? 'not ready' : 'missing');
 		return this._chatBridge;
 	}
 
@@ -693,7 +693,7 @@ module.exports = class HypixelGuild extends Model {
 
 			if (!(await chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player))) message.reactSafely(STOP);
 		} catch (error) {
-			if (error instanceof ChatBridgeError) return logger.warn(`[GUILD CHATBRIDGE]: ${error}`);
+			if (error.status === 'disabled') return;
 
 			logger.warn(`[GUILD CHATBRIDGE]: ${this.name}: ${error}`);
 			message.reactSafely(X_EMOJI);
