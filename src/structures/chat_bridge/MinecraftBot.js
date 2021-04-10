@@ -13,6 +13,7 @@ const Player = require('../database/models/Player');
  * @typedef {object} MinecraftBot
  * @property {import('../LunarClient')} client
  * @property {import('../database/models/Player')} player
+ * @property {string} ign
  * @function [chat]
  */
 
@@ -84,6 +85,12 @@ module.exports = async (chatBridge, options) => {
 				if (!(value instanceof Player)) throw new TypeError(`[BOT]: player must be a Player but received '${value}'`);
 
 				this._player = value;
+			},
+		},
+
+		ign: {
+			get() {
+				return this.username;
 			},
 		},
 	});

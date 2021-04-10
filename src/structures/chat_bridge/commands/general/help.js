@@ -17,7 +17,7 @@ module.exports = class BridgeHelpCommand extends HelpCommand {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		// default help
 		if (!args.length) {
-			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.username}` ].join(', ')}` ];
+			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.ign}` ].join(', ')}` ];
 
 			for (const category of this.commandCollection.visibleCategories) {
 				reply.push(`${category}: ${[ ...this.commandCollection.filterByCategory(category).keys() ].join(', ')}`);

@@ -78,7 +78,7 @@ module.exports = class UnmuteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g unmute ${target}`,
-				responseRegex: unmute(target === 'everyone' ? 'the guild chat' : target.toString(), chatBridge.bot.username),
+				responseRegex: unmute(target === 'everyone' ? 'the guild chat' : target.toString(), chatBridge.bot.ign),
 			});
 
 			message.reply(stripIndent`

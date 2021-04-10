@@ -23,5 +23,5 @@ module.exports = async (chatBridge) => {
 	// most likely webhook fetching timed out -> simple reconnect
 	if (!chatBridge.ready) return chatBridge.reconnect();
 
-	logger.debug(`[CHATBRIDGE]: ${chatBridge.guild.name}: ${chatBridge.bot.username} spawned and ready`);
+	logger.debug(`[CHATBRIDGE]: ${chatBridge.guild.name}: ${chatBridge.bot.ign} spawned and ready`);
 };

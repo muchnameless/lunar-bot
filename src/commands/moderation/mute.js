@@ -85,7 +85,7 @@ module.exports = class MuteCommand extends Command {
 		try {
 			const response = await chatBridge.command({
 				command: `g mute ${target} ${DURATION_INPUT}`,
-				responseRegex: mute(target === 'everyone' ? 'the guild chat' : target.toString(), chatBridge.bot.username),
+				responseRegex: mute(target === 'everyone' ? 'the guild chat' : target.toString(), chatBridge.bot.ign),
 			});
 
 			message.reply(stripIndent`
