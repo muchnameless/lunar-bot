@@ -10,7 +10,8 @@ const { getAllJsFiles } = require('../../functions/files');
 const { MC_CLIENT_VERSION } = require('./constants/settings');
 const { defaultResponseRegExp, memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, randomInvisibleCharacter } = require('./constants/chatBridge');
 const { unicodeToName, nameToUnicode } = require('./constants/emojiNameUnicodeConverter');
-const { STOP } = require('../../constants/emojiCharacters');
+const { spamMessages } = require('./constants/commandResponses');
+const { STOP, X_EMOJI } = require('../../constants/emojiCharacters');
 const minecraftBot = require('./MinecraftBot');
 const WebhookError = require('../errors/WebhookError');
 const AsyncQueue = require('../AsyncQueue');
@@ -117,19 +118,15 @@ class ChatBridge extends EventEmitter {
 			 */
 			maxRetries: 3,
 			/**
-			 * listen for error messages in mc chat
-			 */
-			errorListener: this._createMcErrorListener(),
-			/**
 			 * normal delay to listen for error messages
 			 */
 			delays: [
 				null,
-				200,
-				200,
-				200,
-				200,
-				200,
+				100,
+				100,
+				100,
+				120,
+				150,
 				600,
 			],
 			/**
@@ -141,11 +138,17 @@ class ChatBridge extends EventEmitter {
 			 */
 			messageCounter: 0,
 			/**
+			 * increments messageCounter for 10 seconds
+			 */
+			tempIncrementCounter() {
+				setTimeout(() => --this.messageCounter, 10_000);
+				return ++this.messageCounter;
+			},
+			/**
 			 * increasing delay
 			 */
 			get delay() {
-				setTimeout(() => --this.messageCounter, 10_000);
-				return this.delays[++this.messageCounter] ?? this.safeDelay;
+				return this.delays[this.tempIncrementCounter()] ?? this.safeDelay;
 			},
 		};
 
@@ -234,7 +237,7 @@ class ChatBridge extends EventEmitter {
 			const [ player, created ] = await this.client.players.model.findOrCreate({
 				where: { minecraftUUID: this.bot.uuid },
 				defaults: {
-					ign: this.bot.username,
+					ign: this.bot.ign,
 				},
 			});
 
@@ -250,13 +253,13 @@ class ChatBridge extends EventEmitter {
 		if (!guild) {
 			this.ready = false;
 
-			throw new Error(`[CHATBRIDGE]: ${this.bot.username}: no matching guild found`);
+			throw new Error(`[CHATBRIDGE]: ${this.bot.ign}: no matching guild found`);
 		}
 
 		guild.chatBridge = this;
 		this.guild = guild;
 
-		logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${this.bot.username}`);
+		logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${this.bot.ign}`);
 
 		await this._fetchAndCacheWebhook();
 
@@ -620,7 +623,7 @@ class ChatBridge extends EventEmitter {
 			this.ingameChat.discordMessage = discordMessage;
 			this.ingameChat.retries = 0;
 
-			if (!(await this._chat(message, options))) discordMessage?.reactSafely(STOP);
+			return await this._chat(message, options);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
 		} finally {
@@ -639,46 +642,58 @@ class ChatBridge extends EventEmitter {
 	 * @returns {Promise<boolean>}
 	 */
 	async _chat(message, { prefix = '', shouldUseSpamByPass = false } = {}) {
-		if (this.ingameChat.retries === this.ingameChat.maxRetries) return false;
-
 		// send message to in game chat
 		this.bot.chat(shouldUseSpamByPass
 			? this._hypixelSpamBypass(message, prefix)
 			: `${prefix}${message}`,
 		);
 
-		// listen for errors / await queue cooldown
-		const error = await Promise.race([
-			this.ingameChat.errorListener.listener,
-			sleep(this.ingameChat.delay),
-		]);
+		try {
+			const [ response ] = await this.awaitMessages(
+				msg => (msg.author?.ign === this.bot.ign && msg.content.endsWith(message)) || (!msg.type && (spamMessages.includes(msg.content) || msg.content.startsWith('We blocked your comment'))),
+				{
+					max: 1,
+					time: this.ingameChat.safeDelay,
+					errors: [ 'disconnect' ],
+				},
+			);
 
-		// error while sending the message
-		if (error) {
-			await sleep(++this.ingameChat.retries * this.ingameChat.safeDelay);
-			return this._chat.apply(this, arguments); // eslint-disable-line prefer-spread
+			// collector collected nothing
+			if (!response) {
+				this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+				this.ingameChat.tempIncrementCounter();
+				return false;
+			}
+
+			// anti spam failed -> retry
+			if (spamMessages.includes(response.content)) {
+				this.ingameChat.tempIncrementCounter();
+
+				// max retries reached
+				if (++this.ingameChat.retries === this.ingameChat.maxRetries) {
+					this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+					await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
+					return false;
+				}
+
+				await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
+				return this._chat.apply(this, arguments); // eslint-disable-line prefer-spread
+			}
+
+			// hypixel content filter
+			if (response.content.startsWith('We blocked your comment')) {
+				this.ingameChat.discordMessage?.reactSafely(STOP);
+				await sleep(this.ingameChat.delay);
+				return false;
+			}
+
+			await sleep(this.ingameChat.delay);
+			return true;
+		} catch {
+			this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+			await sleep(this.ingameChat.delay);
+			return false;
 		}
-
-		return true;
-	}
-
-	/**
-	 * returns a listener that will resolve with 'true' if the trigger is called
-	 */
-	_createMcErrorListener() {
-		let resolve;
-
-		/** @type {Promise<true>} */
-		const listener = new Promise(res => resolve = res);
-		const trigger = () => {
-			this.ingameChat.errorListener = this._createMcErrorListener();
-			resolve(true);
-		};
-
-		return {
-			listener,
-			trigger,
-		};
 	}
 
 	/**
