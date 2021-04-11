@@ -7,7 +7,7 @@ const Command = require('../../structures/commands/Command');
 module.exports = class WeightCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [ 'flip' ],
+			aliases: [ 'cf', 'flip' ],
 			description: 'heads or tails or ?',
 			args: false,
 			usage: '',
