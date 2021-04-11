@@ -653,47 +653,47 @@ class ChatBridge extends EventEmitter {
 		);
 
 		// listen for responses
-		try {
-			const response = await Promise.race([
-				this.nextMessage.listenFor(message),
-				sleep(this.ingameChat.safeDelay),
-			]);
+		const response = await Promise.race([
+			this.nextMessage.listenFor(message),
+			sleep(this.ingameChat.safeDelay),
+		]);
 
-			// collector collected nothing
-			if (!response) {
-				this.ingameChat.tempIncrementCounter();
-				this.nextMessage.resetFilter();
+		// collector collected nothing
+		if (!response) {
+			if (!this.ready) this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+			this.ingameChat.tempIncrementCounter();
+			this.nextMessage.resetFilter();
+			return false;
+		}
+
+		// anti spam failed -> retry
+		if (response === 'spam') {
+			this.ingameChat.tempIncrementCounter();
+
+			// max retries reached
+			if (++this.ingameChat.retries === this.ingameChat.maxRetries) {
+				this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+				await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
 				return false;
 			}
 
-			// anti spam failed -> retry
-			if (response === 'spam') {
-				this.ingameChat.tempIncrementCounter();
+			await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
+			return this._chat.apply(this, arguments); // eslint-disable-line prefer-spread
+		}
 
-				// max retries reached
-				if (++this.ingameChat.retries === this.ingameChat.maxRetries) {
-					this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
-					await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
-					return false;
-				}
-
-				await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
-				return this._chat.apply(this, arguments); // eslint-disable-line prefer-spread
-			}
-
-			// message sent successfully
-			await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
-				? this.ingameChat.delay
-				: (this.ingameChat.tempIncrementCounter(), this.ingameChat.safeDelay),
-			);
-			return true;
-
-		// bot disconnected
-		} catch (error) {
-			this.ingameChat.discordMessage?.reactSafely(error === 'blocked' ? STOP : X_EMOJI);
+		// hypixel filter blocked message
+		if (response === 'blocked') {
+			this.ingameChat.discordMessage?.reactSafely(STOP);
 			await sleep(this.ingameChat.delay);
 			return false;
 		}
+
+		// message sent successfully
+		await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
+			? this.ingameChat.delay
+			: (this.ingameChat.tempIncrementCounter(), this.ingameChat.safeDelay),
+		);
+		return true;
 	}
 
 	/**
@@ -701,15 +701,11 @@ class ChatBridge extends EventEmitter {
 	 */
 	_createNextMessageListener() {
 		let resolve;
-		let reject;
 
 		/**
-		 * @type {Promise<'spam'|import('./HypixelMessage')>}
+		 * @type {Promise<'spam'|'blocked'|import('./HypixelMessage')>}
 		 */
-		const promise = new Promise((res, rej) => {
-			resolve = res;
-			reject = rej;
-		});
+		const promise = new Promise(res => resolve = res);
 		/**
 		 * @param {import('./HypixelMessage')} message
 		 */
@@ -721,15 +717,9 @@ class ChatBridge extends EventEmitter {
 				return resolve(message);
 			}
 
-			if (!message.type) {
-				if (spamMessages.includes(message.content)) {
-					return resolve('spam');
-				}
-
-				if (message.content.startsWith('We blocked your comment')) {
-					return reject('blocked');
-				}
-			}
+			if (message.type) return;
+			if (spamMessages.includes(message.content)) return resolve('spam');
+			if (message.content.startsWith('We blocked your comment')) return resolve('blocked');
 		};
 
 		return {
