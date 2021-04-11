@@ -255,7 +255,8 @@ module.exports = class MathCommand extends Command {
 			.replace(/\*\*/g, '^')
 			.replace(/:/g, '/') // 5:3 -> 5/3
 			.replace(/(?<=\d\s*)(?=[a-z(])/gi, '*') // add implicit '*' between numbers before letters and '('
-			.replace(/(?<=\*)x/gi, ''); // 5x3 -> 5*3
+			.replace(/(?<=\*)x/gi, '') // 5x3 -> 5*3
+			.replace(/=\s*$/, ''); // 5*3= -> 5*3
 
 		let parsed;
 
