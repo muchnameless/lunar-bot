@@ -44,19 +44,18 @@ module.exports = async (message) => {
 	 */
 	if (message.content.startsWith('We blocked your comment ')) {
 		// react to latest message from 'sender' with that content
-		(message.chatBridge.ingameChat.discordMessage ?? (() => {
-			const blockedMatched = message.content.match(new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_REGEXP}): )?(?<blockedContent>[\\s\\S]+)" as it is breaking our rules because it`));
+		const blockedMatched = message.content.match(new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_REGEXP}): )?(?<blockedContent>[\\s\\S]+)" as it is breaking our rules because it`));
 
-			if (blockedMatched) {
-				const { groups: { sender, blockedContent } } = blockedMatched;
-				const senderDiscordID = message.client.players.findByIGN(sender)?.discordID;
+		if (blockedMatched) {
+			const { groups: { sender, blockedContent } } = blockedMatched;
+			const senderDiscordID = message.client.players.findByIGN(sender)?.discordID;
 
-				// react to latest message from 'sender' with that content
-				return message.chatBridge.channel?.messages.cache
-					.sorted(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
-					.find(({ content, author: { id } }) => content.includes(blockedContent) && (senderDiscordID ? id === senderDiscordID : true));
-			}
-		})())?.reactSafely(STOP);
+			// react to latest message from 'sender' with that content
+			message.chatBridge.channel?.messages.cache
+				.sorted(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
+				.find(({ content, author: { id } }) => content.includes(blockedContent) && (senderDiscordID ? id === senderDiscordID : true))
+				?.reactSafely(STOP);
+		}
 
 		// DM owner to add the blocked content to the filter
 		try {
