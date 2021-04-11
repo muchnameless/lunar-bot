@@ -646,6 +646,9 @@ class ChatBridge extends EventEmitter {
 	 * @returns {Promise<boolean>}
 	 */
 	async _chat(message, { prefix = '', shouldUseSpamByPass = false } = {}) {
+		// create listener
+		const listener = this.nextMessage.listenFor(message);
+
 		// send message to in game chat
 		this.bot.chat(shouldUseSpamByPass
 			? this._hypixelSpamBypass(message, prefix)
@@ -654,7 +657,7 @@ class ChatBridge extends EventEmitter {
 
 		// listen for responses
 		const response = await Promise.race([
-			this.nextMessage.listenFor(message),
+			listener,
 			sleep(this.ingameChat.safeDelay),
 		]);
 
