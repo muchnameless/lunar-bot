@@ -151,10 +151,51 @@ class ChatBridge extends EventEmitter {
 				return this.delays[this.tempIncrementCounter()] ?? this.safeDelay;
 			},
 		};
+
+		let resolve;
+
 		/**
 		 * response listener for _chat
 		 */
-		this.nextMessage = this._createNextMessageListener();
+		this.nextMessage = {
+			/**
+			 * @type {?string}
+			 */
+			_contentFilter: null,
+			_collecting: false,
+			/**
+			 * @type {Promise<'spam'|'blocked'|import('./HypixelMessage')>}
+			 */
+			_promise: new Promise(res => resolve = res),
+			_resolveAndReset(value) {
+				resolve(value);
+				this.resetFilter();
+				this._promise = new Promise(res => resolve = res);
+			},
+			/**
+			 * @param {import('./HypixelMessage')} message
+			 */
+			collect(message) {
+				if (!this._collecting) return;
+				if (message.me && message.content.endsWith(this._contentFilter)) return this._resolveAndReset(message);
+				if (message.type) return;
+				if (spamMessages.includes(message.content)) return this._resolveAndReset('spam');
+				if (message.content.startsWith('We blocked your comment')) return this._resolveAndReset('blocked');
+			},
+			/**
+			 * returns a Promise that resolves with a message that ends with the provided content
+			 * @param {string} content
+			 */
+			listenFor(content) {
+				this._contentFilter = content;
+				this._collecting = true;
+				return this._promise;
+			},
+			resetFilter() {
+				this._contentFilter = null;
+				this._collecting = false;
+			},
+		};
 
 		this._loadEvents();
 	}
@@ -697,53 +738,6 @@ class ChatBridge extends EventEmitter {
 			: (this.ingameChat.tempIncrementCounter(), this.ingameChat.safeDelay),
 		);
 		return true;
-	}
-
-	/**
-	 * returns a listener
-	 */
-	_createNextMessageListener() {
-		let resolve;
-
-		/**
-		 * @type {Promise<'spam'|'blocked'|import('./HypixelMessage')>}
-		 */
-		const promise = new Promise(res => resolve = res);
-		/**
-		 * @param {import('./HypixelMessage')} message
-		 */
-		const collect = (message) => {
-			if (!this.nextMessage.collecting) return;
-
-			if (message.me && message.content.endsWith(this.nextMessage.contentFilter)) {
-				this.nextMessage = this._createNextMessageListener();
-				return resolve(message);
-			}
-
-			if (message.type) return;
-			if (spamMessages.includes(message.content)) return resolve('spam');
-			if (message.content.startsWith('We blocked your comment')) return resolve('blocked');
-		};
-
-		return {
-			collect,
-			/** @type {?string} */
-			contentFilter: null,
-			collecting: false,
-			/**
-			 * returns a Promise that resolves with a message that ends with the provided content
-			 * @param {string} content
-			 */
-			listenFor(content) {
-				this.contentFilter = content;
-				this.collecting = true;
-				return promise;
-			},
-			resetFilter() {
-				this.contentFilter = null;
-				this.collecting = false;
-			},
-		};
 	}
 
 	/**
