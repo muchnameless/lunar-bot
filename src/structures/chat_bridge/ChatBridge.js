@@ -690,11 +690,19 @@ class ChatBridge extends EventEmitter {
 		// create listener
 		const listener = this.nextMessage.listenFor(message);
 
-		// send message to in game chat
-		this.bot.chat(shouldUseSpamByPass
-			? this._hypixelSpamBypass(message, prefix)
-			: `${prefix}${message}`,
-		);
+		try {
+			// send message to in game chat
+			this.bot.chat(shouldUseSpamByPass
+				? this._hypixelSpamBypass(message, prefix)
+				: `${prefix}${message}`,
+			);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE _CHAT]: ${error}`);
+			this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+			this.ingameChat.tempIncrementCounter();
+			this.nextMessage.resetFilter();
+			return false;
+		}
 
 		// listen for responses
 		const response = await Promise.race([
