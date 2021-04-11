@@ -151,6 +151,10 @@ class ChatBridge extends EventEmitter {
 				return this.delays[this.tempIncrementCounter()] ?? this.safeDelay;
 			},
 		};
+		/**
+		 * response listener for _chat
+		 */
+		this.nextMessage = this._createNextMessageListener();
 
 		this._loadEvents();
 	}
@@ -650,23 +654,20 @@ class ChatBridge extends EventEmitter {
 
 		// listen for responses
 		try {
-			const [ response ] = await this.awaitMessages(
-				msg => (msg.me && msg.content.endsWith(message)) || (!msg.type && (spamMessages.includes(msg.content) || msg.content.startsWith('We blocked your comment'))),
-				{
-					max: 1,
-					time: this.ingameChat.safeDelay,
-					errors: [ 'disconnect' ],
-				},
-			);
+			const response = await Promise.race([
+				this.nextMessage.listenFor(message),
+				sleep(this.ingameChat.safeDelay),
+			]);
 
 			// collector collected nothing
 			if (!response) {
 				this.ingameChat.tempIncrementCounter();
+				this.nextMessage.resetFilter();
 				return false;
 			}
 
 			// anti spam failed -> retry
-			if (spamMessages.includes(response.content)) {
+			if (response === 'spam') {
 				this.ingameChat.tempIncrementCounter();
 
 				// max retries reached
@@ -680,13 +681,6 @@ class ChatBridge extends EventEmitter {
 				return this._chat.apply(this, arguments); // eslint-disable-line prefer-spread
 			}
 
-			// hypixel content filter
-			if (response.content.startsWith('We blocked your comment')) {
-				this.ingameChat.discordMessage?.reactSafely(STOP);
-				await sleep(this.ingameChat.delay);
-				return false;
-			}
-
 			// message sent successfully
 			await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
 				? this.ingameChat.delay
@@ -695,11 +689,68 @@ class ChatBridge extends EventEmitter {
 			return true;
 
 		// bot disconnected
-		} catch {
-			this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+		} catch (error) {
+			this.ingameChat.discordMessage?.reactSafely(error === 'blocked' ? STOP : X_EMOJI);
 			await sleep(this.ingameChat.delay);
 			return false;
 		}
+	}
+
+	/**
+	 * returns a listener
+	 */
+	_createNextMessageListener() {
+		let resolve;
+		let reject;
+
+		/**
+		 * @type {Promise<'spam'|import('./HypixelMessage')>}
+		 */
+		const promise = new Promise((res, rej) => {
+			resolve = res;
+			reject = rej;
+		});
+		/**
+		 * @param {import('./HypixelMessage')} message
+		 */
+		const collect = (message) => {
+			if (!this.nextMessage.collecting) return;
+
+			if (message.me && message.content.endsWith(this.nextMessage.contentFilter)) {
+				this.nextMessage = this._createNextMessageListener();
+				return resolve(message);
+			}
+
+			if (!message.type) {
+				if (spamMessages.includes(message.content)) {
+					return resolve('spam');
+				}
+
+				if (message.content.startsWith('We blocked your comment')) {
+					return reject('blocked');
+				}
+			}
+		};
+
+		return {
+			collect,
+			/** @type {?string} */
+			contentFilter: null,
+			collecting: false,
+			/**
+			 * returns a Promise that resolves with a message that ends with the provided content
+			 * @param {string} content
+			 */
+			listenFor(content) {
+				this.contentFilter = content;
+				this.collecting = true;
+				return promise;
+			},
+			resetFilter() {
+				this.contentFilter = null;
+				this.collecting = false;
+			},
+		};
 	}
 
 	/**
