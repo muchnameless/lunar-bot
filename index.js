@@ -44,7 +44,7 @@ process
 		],
 		presence: {
 			activity: {
-				name: `${(await db.Config.findOne({ where: { key: 'PREFIX' } }))?.value}help`,
+				name: `${(await db.Config.findOne({ where: { key: 'PREFIX' } }))?.value ?? 'lg!'}help`,
 				type: 'LISTENING',
 			},
 			status: 'online',
