@@ -34,7 +34,7 @@ process
 		restTimeOffset: 0,
 		messageEditHistoryMaxSize: 0,
 		fetchAllMembers: true, // enable when discord.js removes that feature
-		disableMentions: 'everyone',
+		allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: true },
 		partials: [
 			Constants.PartialTypes.CHANNEL,
 			// Constants.PartialTypes.GUILD_MEMBER,
