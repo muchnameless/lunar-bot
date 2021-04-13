@@ -33,7 +33,7 @@ class Parser {
 						else output.push(token);
 					}
 
-					if (token !== '(') throw new Error('Mismatched parentheses.');
+					if (token !== '(') throw new Error('ParserError: mismatched parentheses');
 					break;
 				default:
 					if (Object.hasOwnProperty.call(table, token)) {
@@ -59,14 +59,15 @@ class Parser {
 		while (stack.length) {
 			const token = stack.shift();
 			if (token !== '(') output.push(token);
-			else throw new Error('Mismatched parentheses.');
+			else throw new Error('ParserError: mismatched parentheses');
 		}
 
 		return output;
 	}
 }
 
-const lexer = new Lexer()
+// eslint-disable-next-line prefer-arrow-callback
+const lexer = new Lexer(function(c) { throw new Error(`LexerError: unexpected character at index ${this.index - 1}: '${c}'`); })
 	.addRule(/[\s,]/, () => void 0) // ignore whitespaces and ','
 	.addRule(/(?:(?<=[(+\-*/^]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!°]/, lexeme => lexeme)
 	.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
@@ -240,6 +241,14 @@ module.exports = class MathCommand extends Command {
 	}
 
 	/**
+	 * formats a number string
+	 * @param {string} x
+	 */
+	formatNumberString(x) {
+		return x.replace(/(?<!\.[\s\S]*)\B(?=(\d{3})+(?!\d))/g, '\u{202F}');
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
@@ -251,7 +260,7 @@ module.exports = class MathCommand extends Command {
 		removeFlagsFromArray(rawArgs);
 
 		// generate input string
-		const INPUT = rawArgs.join(' ')
+		const INPUT = rawArgs.join('')
 			.replace(/\*\*/g, '^')
 			.replace(/:/g, '/') // 5:3 -> 5/3
 			.replace(/(?<=\d\s*)(?=[a-z(])/gi, '*') // add implicit '*' between numbers before letters and '('
@@ -264,7 +273,7 @@ module.exports = class MathCommand extends Command {
 		try {
 			parsed = parse(INPUT);
 		} catch (error) {
-			return message.reply(`ParseError: ${error.message.replace(/^[A-Z]/, match => match.toLowerCase()).replace(/\.$/, '')}, input: '${INPUT}'`);
+			return message.reply(`${error.message}, input: '${INPUT}'`);
 		}
 
 		const stack = [];
@@ -295,11 +304,13 @@ module.exports = class MathCommand extends Command {
 			return message.reply(`CalculationError: ${error.message}, input: '${INPUT}'`);
 		}
 
-		const PRETTIFIED_INPUT = INPUT
-			.replace(/pi/gi, '\u{03C0}'); // prettify 'pi'
-
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
-		return message.reply(`${PRETTIFIED_INPUT} = ${output}`);
+		return message.reply(`${
+				this.formatNumberString(INPUT)
+					.replace(/[+\-*/]/g, ' $& ') // add spaces around operators
+					.replace(/,/g, '$& ') // add space after commas
+					.replace(/pi/gi, '\u{03C0}') // prettify 'pi'
+			} = ${this.formatNumberString(output.toString())}`.replace(/ +/g, ' '));
 	}
 };
