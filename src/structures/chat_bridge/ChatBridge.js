@@ -710,42 +710,46 @@ class ChatBridge extends EventEmitter {
 			sleep(this.ingameChat.safeDelay),
 		]);
 
-		// collector collected nothing
-		if (!response) {
-			if (!this.ready) this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
-			this.ingameChat.tempIncrementCounter();
-			this.nextMessage.resetFilter();
-			return false;
-		}
-
-		// anti spam failed -> retry
-		if (response === 'spam') {
-			this.ingameChat.tempIncrementCounter();
-
-			// max retries reached
-			if (++this.ingameChat.retries === this.ingameChat.maxRetries) {
-				this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
-				await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
+		switch (response) {
+			// collector collected nothing, sleep won the race
+			case undefined: {
+				if (!this.ready) this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+				this.ingameChat.tempIncrementCounter();
+				this.nextMessage.resetFilter();
 				return false;
 			}
 
-			await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
-			return this._chat.apply(this, arguments); // eslint-disable-line prefer-spread
-		}
+			// anti spam failed -> retry
+			case 'spam': {
+				this.ingameChat.tempIncrementCounter();
 
-		// hypixel filter blocked message
-		if (response === 'blocked') {
-			this.ingameChat.discordMessage?.reactSafely(STOP);
-			await sleep(this.ingameChat.delay);
-			return false;
-		}
+				// max retries reached
+				if (++this.ingameChat.retries === this.ingameChat.maxRetries) {
+					this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+					await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
+					return false;
+				}
 
-		// message sent successfully
-		await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
-			? this.ingameChat.delay
-			: (this.ingameChat.tempIncrementCounter(), this.ingameChat.safeDelay),
-		);
-		return true;
+				await sleep(this.ingameChat.retries * this.ingameChat.safeDelay);
+				return this._chat.apply(this, arguments); // eslint-disable-line prefer-spread
+			}
+
+			// hypixel filter blocked message
+			case 'blocked': {
+				this.ingameChat.discordMessage?.reactSafely(STOP);
+				await sleep(this.ingameChat.delay);
+				return false;
+			}
+
+			// message sent successfully
+			default: {
+				await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
+					? this.ingameChat.delay
+					: (this.ingameChat.tempIncrementCounter(), this.ingameChat.safeDelay),
+				);
+				return true;
+			}
+		}
 	}
 
 	/**
