@@ -322,6 +322,7 @@ class LunarClient extends Client {
 	formatNumber(number, paddingAmount = 0, converterFunction = x => x) {
 		return converterFunction(number)
 			.toLocaleString(this.config.get('NUMBER_FORMAT'))
+			.replace(',', '.')
 			.padStart(paddingAmount, ' ');
 	}
 
