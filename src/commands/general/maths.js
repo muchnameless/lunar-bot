@@ -226,6 +226,7 @@ module.exports = class MathCommand extends Command {
 		let token;
 		while ((token = this.lexer.lex())) tokens.push(token);
 		// logger.debug({ tokens, parsed: parser.parse(tokens) })
+		if (!tokens.length) throw new Error('LexerError: token list empty');
 		return this.parser.parse(tokens);
 	}
 
