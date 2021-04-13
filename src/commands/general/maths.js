@@ -170,6 +170,10 @@ module.exports = class MathCommand extends Command {
 			return temp;
 		};
 
+		const isMultipleOfPi = x => div(x, Math.PI) === Math.floor(div(x, Math.PI));
+
+		const isMultipleOfPiHalf = x => div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI));
+
 		this.unaryOperators = {
 			'°'(x) {
 				if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
@@ -187,16 +191,18 @@ module.exports = class MathCommand extends Command {
 			},
 			sin(x) {
 				if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
-				if (div(x, Math.PI) === Math.floor(div(x, Math.PI))) return 0;
+				if (isMultipleOfPi(x)) return 0;
 				return Math.sin(x);
 			},
 			cos(x) {
 				if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
-				if (div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI))) return 0;
+				if (isMultipleOfPiHalf(x)) return 0;
 				return Math.cos(x);
 			},
 			tan(x) {
 				if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
+				if (isMultipleOfPi(x)) return 0;
+				if (isMultipleOfPiHalf(x)) return NaN;
 				return Math.tan(x);
 			},
 			sqrt(x) {
