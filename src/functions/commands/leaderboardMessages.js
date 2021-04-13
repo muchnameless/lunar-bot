@@ -272,7 +272,7 @@ const self = module.exports = {
 
 		return {
 			shouldShowOnlyBelowReqs: SHOULD_SHOW_ONLY_BELOW_REQS || type === 'purge',
-			hypixelGuildID: typeof hypixelGuild === 'boolean' ? hypixelGuild : hypixelGuild.guildID,
+			hypixelGuildID: typeof hypixelGuild === 'boolean' ? hypixelGuild : hypixelGuild?.guildID ?? null,
 			type,
 			typeInput,
 			offset,
