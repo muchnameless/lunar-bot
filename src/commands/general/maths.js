@@ -66,159 +66,6 @@ class Parser {
 	}
 }
 
-// eslint-disable-next-line prefer-arrow-callback
-const lexer = new Lexer(function(c) { throw new Error(`LexerError: unexpected character at index ${this.index - 1}: '${c}'`); })
-	.addRule(/[\s,]/, () => void 0) // ignore whitespaces and ','
-	.addRule(/(?:(?<=[(+\-*/^]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!°]/, lexeme => lexeme)
-	.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
-	.addRule(/cos(?:ine|inus)?/i, () => 'cos')
-	.addRule(/tan(?:gen[st])?/i, () => 'tan')
-	.addRule(/sqrt|squareroot/i, () => 'sqrt')
-	.addRule(/exp/i, () => 'exp')
-	.addRule(/ln/, () => 'ln')
-	.addRule(/log/, () => 'log')
-	.addRule(/fac(?:ulty)?/, () => 'fac')
-	.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
-	.addRule(/e(?:uler)?/i, () => Math.E);
-
-const degree = {
-	precedence: 6,
-	associativity: 'right',
-};
-
-const factorialPost = {
-	precedence: 5,
-	associativity: 'right',
-};
-
-const factorialPre = {
-	precedence: 5,
-	associativity: 'left',
-};
-
-const power = {
-	precedence: 4,
-	associativity: 'left',
-};
-
-const func = {
-	precedence: 3,
-	associativity: 'left',
-};
-
-const factor = {
-	precedence: 2,
-	associativity: 'left',
-};
-
-const term = {
-	precedence: 1,
-	associativity: 'left',
-};
-
-const parser = new Parser({
-	'°': degree,
-	'^': power,
-	'!': factorialPost,
-	'fac': factorialPre,
-	'+': term,
-	'-': term,
-	'*': factor,
-	'/': factor,
-	'sin': func,
-	'cos': func,
-	'tan': func,
-	'sqrt': func,
-	'exp': func,
-	'ln': func,
-	'log': func,
-});
-
-function parse(input) {
-	lexer.setInput(input);
-	const tokens = [];
-	let token;
-	while ((token = lexer.lex())) tokens.push(token);
-	// logger.debug({ tokens, parsed: parser.parse(tokens) })
-	return parser.parse(tokens);
-}
-
-const args2 = {
-	'^'(a, b) {
-		if (typeof a === 'undefined') throw new Error('`^` is not an unary operator');
-		if (a == 0 && b == 0) return NaN;
-		return a ** b;
-	},
-	'+': (a, b) => (typeof a !== 'undefined' ? add(a, b) : b),
-	'-': (a, b) => (typeof a !== 'undefined' ? sub(a, b) : -b),
-	'*'(a, b) {
-		if (typeof a === 'undefined') throw new Error('`*` is not an unary operator');
-		return mul(a, b);
-	},
-	'/'(a, b) {
-		if (typeof a === 'undefined') throw new Error('`/` is not an unary operator');
-		if (b == 0) return NaN;
-		return div(a, b);
-	},
-	log(a, b) {
-		if (typeof a === 'undefined') throw new Error('`log` requires two arguments (use `ln` for base e)');
-		if (a <= 0 || b <= 0) return NaN;
-		return div(Math.log(a), Math.log(b));
-	},
-};
-const args2Arr = Object.keys(args2);
-
-function factorial(start) {
-	let temp = 1;
-	let iterations = start;
-	while (iterations > 0) temp *= iterations--;
-	return temp;
-}
-
-const args1 = {
-	'°'(x) {
-		if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
-		return mul(x, div(Math.PI, 2));
-	},
-	'!'(x) {
-		if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
-		if (x < 0) return NaN;
-		return factorial(x);
-	},
-	fac(x) {
-		if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
-		if (x < 0) return NaN;
-		return factorial(x);
-	},
-	sin(x) {
-		if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
-		if (div(x, Math.PI) === Math.floor(div(x, Math.PI))) return 0;
-		return Math.sin(x);
-	},
-	cos(x) {
-		if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
-		if (div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI))) return 0;
-		return Math.cos(x);
-	},
-	tan(x) {
-		if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
-		return Math.tan(x);
-	},
-	sqrt(x) {
-		if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
-		return Math.sqrt(x);
-	},
-	exp(x) {
-		if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
-		return Math.exp(x);
-	},
-	ln(x) {
-		if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
-		return Math.log(x);
-	},
-};
-const args1Arr = Object.keys(args1);
-
 
 module.exports = class MathCommand extends Command {
 	constructor(data) {
@@ -229,15 +76,164 @@ module.exports = class MathCommand extends Command {
 			usage: '',
 			cooldown: 0,
 		});
+
+		// eslint-disable-next-line prefer-arrow-callback
+		this.lexer = new Lexer(function(c) { throw new Error(`LexerError: unexpected character at index ${this.index}: '${c}'`); })
+			.addRule(/,/, () => void 0) // ignore ','
+			.addRule(/(?:(?<=[(+\-*/^]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!°]/, lexeme => lexeme)
+			.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
+			.addRule(/cos(?:ine|inus)?/i, () => 'cos')
+			.addRule(/tan(?:gen[st])?/i, () => 'tan')
+			.addRule(/sqrt|squareroot/i, () => 'sqrt')
+			.addRule(/exp/i, () => 'exp')
+			.addRule(/ln/, () => 'ln')
+			.addRule(/log/, () => 'log')
+			.addRule(/fac(?:ulty)?/, () => 'fac')
+			.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
+			.addRule(/e(?:uler)?/i, () => Math.E);
+
+		this.degree = {
+			precedence: 6,
+			associativity: 'right',
+		};
+		this.factorialPost = {
+			precedence: 5,
+			associativity: 'right',
+		};
+		this.factorialPre = {
+			precedence: 5,
+			associativity: 'left',
+		};
+		this.power = {
+			precedence: 4,
+			associativity: 'left',
+		};
+		this.func = {
+			precedence: 3,
+			associativity: 'left',
+		};
+		this.factor = {
+			precedence: 2,
+			associativity: 'left',
+		};
+		this.term = {
+			precedence: 1,
+			associativity: 'left',
+		};
+
+		this.parser = new Parser({
+			'°': this.degree,
+			'^': this.power,
+			'!': this.factorialPost,
+			'fac': this.factorialPre,
+			'+': this.term,
+			'-': this.term,
+			'*': this.factor,
+			'/': this.factor,
+			'sin': this.func,
+			'cos': this.func,
+			'tan': this.func,
+			'sqrt': this.func,
+			'exp': this.func,
+			'ln': this.func,
+			'log': this.func,
+		});
+
+		this.binaryOperators = {
+			'^'(a, b) {
+				if (typeof a === 'undefined') throw new Error('`^` is not an unary operator');
+				if (a == 0 && b == 0) return NaN;
+				return a ** b;
+			},
+			'+': (a, b) => (typeof a !== 'undefined' ? add(a, b) : b),
+			'-': (a, b) => (typeof a !== 'undefined' ? sub(a, b) : -b),
+			'*'(a, b) {
+				if (typeof a === 'undefined') throw new Error('`*` is not an unary operator');
+				return mul(a, b);
+			},
+			'/'(a, b) {
+				if (typeof a === 'undefined') throw new Error('`/` is not an unary operator');
+				if (b == 0) return NaN;
+				return div(a, b);
+			},
+			log(a, b) {
+				if (typeof a === 'undefined') throw new Error('`log` requires two arguments (use `ln` for base e)');
+				if (a <= 0 || b <= 0) return NaN;
+				return div(Math.log(a), Math.log(b));
+			},
+		};
+
+		const factorial = (start) => {
+			let temp = 1;
+			let iterations = start;
+			while (iterations > 0) temp *= iterations--;
+			return temp;
+		};
+
+		this.unaryOperators = {
+			'°'(x) {
+				if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
+				return mul(x, div(Math.PI, 2));
+			},
+			'!'(x) {
+				if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+				if (x < 0) return NaN;
+				return factorial(x);
+			},
+			fac(x) {
+				if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+				if (x < 0) return NaN;
+				return factorial(x);
+			},
+			sin(x) {
+				if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
+				if (div(x, Math.PI) === Math.floor(div(x, Math.PI))) return 0;
+				return Math.sin(x);
+			},
+			cos(x) {
+				if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
+				if (div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI))) return 0;
+				return Math.cos(x);
+			},
+			tan(x) {
+				if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
+				return Math.tan(x);
+			},
+			sqrt(x) {
+				if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
+				return Math.sqrt(x);
+			},
+			exp(x) {
+				if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
+				return Math.exp(x);
+			},
+			ln(x) {
+				if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
+				return Math.log(x);
+			},
+		};
+	}
+
+	parse(input) {
+		this.lexer.setInput(input);
+		const tokens = [];
+		let token;
+		while ((token = this.lexer.lex())) tokens.push(token);
+		// logger.debug({ tokens, parsed: parser.parse(tokens) })
+		return this.parser.parse(tokens);
 	}
 
 	/**
 	 * throws if the input is larger than Number.MAX_SAFE_INTEGER, returns the value otherwise
-	 * @param {any} x
+	 * @param {any} value
 	 */
-	validateNumber(x) {
-		if (x > Number.MAX_SAFE_INTEGER) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
-		return x;
+	validateNumber(value) {
+		if (value > Number.MAX_VALUE) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_VALUE)}`);
+
+		return {
+			value,
+			warning: value > Number.MAX_SAFE_INTEGER,
+		};
 	}
 
 	/**
@@ -271,7 +267,7 @@ module.exports = class MathCommand extends Command {
 
 		// parse
 		try {
-			parsed = parse(INPUT);
+			parsed = this.parse(INPUT);
 		} catch (error) {
 			return message.reply(`${error.message}, input: '${INPUT}'`);
 		}
@@ -279,38 +275,56 @@ module.exports = class MathCommand extends Command {
 		const stack = [];
 
 		let output;
+		let warning = false;
 
 		// calculate
 		try {
 			const pop = () => this.validateNumber(stack.pop());
 
-			for (const c of parsed) {
-				if (args2Arr.includes(c)) {
-					const temp = pop();
-					stack.push(args2[c](pop(), temp));
+			for (const token of parsed) {
+				if (Reflect.has(this.binaryOperators, token)) {
+					const b = pop();
+					const a = pop();
+
+					warning ||= b.warning || a.warning;
+
+					stack.push(this.binaryOperators[token](a.value, b.value));
 					continue;
 				}
 
-				if (args1Arr.includes(c)) {
-					stack.push(args1[c](pop()));
+				if (Reflect.has(this.unaryOperators, token)) {
+					const a = pop();
+
+					warning ||= a.warning;
+
+					stack.push(this.unaryOperators[token](a.value));
 					continue;
 				}
 
-				stack.push(c);
+				stack.push(token);
 			}
 
 			output = pop();
+
+			warning ||= output.warning;
+			output = output.value;
+
+			if (stack.length !== 0) throw new Error('unprocessed parts');
 		} catch (error) {
 			return message.reply(`CalculationError: ${error.message}, input: '${INPUT}'`);
 		}
 
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
-		return message.reply(`${
-				this.formatNumberString(INPUT)
-					.replace(/[+\-*/]/g, ' $& ') // add spaces around operators
-					.replace(/,/g, '$& ') // add space after commas
-					.replace(/pi/gi, '\u{03C0}') // prettify 'pi'
-			} = ${this.formatNumberString(output.toString())}`.replace(/ +/g, ' '));
+		return message.reply(
+			`${this.formatNumberString(INPUT)
+				.replace(/[+\-*/]/g, ' $& ') // add spaces around operators
+				.replace(/,/g, '$& ') // add space after commas
+				.replace(/pi/gi, '\u{03C0}') // prettify 'pi'
+			} = ${this.formatNumberString(output?.toString())}${warning
+				? `\nwarning: (intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}, calculation may be incorrect`
+				: ''
+			}`,
+		);
 	}
 };
