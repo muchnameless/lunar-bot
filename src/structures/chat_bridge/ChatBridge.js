@@ -630,9 +630,9 @@ class ChatBridge extends EventEmitter {
 				}),
 		);
 
-		if (!messageParts.size) return false;
-
 		if (!success) this._handleBlockedWord(discordMessage);
+
+		if (!messageParts.size) return false;
 
 		if (messageParts.size > maxParts) {
 			discordMessage?.reactSafely(STOP);
