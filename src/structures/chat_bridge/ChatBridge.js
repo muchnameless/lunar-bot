@@ -3,6 +3,7 @@
 const { Util: { escapeMarkdown, splitMessage }, MessageEmbed, DiscordAPIError } = require('discord.js');
 const { EventEmitter } = require('events');
 const { join, basename } = require('path');
+const { stripIndents } = require('common-tags');
 const emojiRegex = require('emoji-regex/es2015')();
 const ms = require('ms');
 const { sleep, trim, cleanFormattedNumber } = require('../../functions/util');
@@ -631,7 +632,15 @@ class ChatBridge extends EventEmitter {
 
 		if (!messageParts.size) return false;
 
-		if (messageParts.size > maxParts || !success) discordMessage?.reactSafely(STOP);
+		if (!success) this._handleBlockedWord(discordMessage);
+
+		if (messageParts.size > maxParts) {
+			discordMessage?.reactSafely(STOP);
+			discordMessage?.author.send(stripIndents`
+				you are only allowed to send up to ${maxParts} messages at once (therefore the bridge skipped ${messageParts.size - maxParts} part${messageParts.size - maxParts !== 1 ? 's' : ''} of your message)
+				(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
+			`);
+		}
 
 		let partCount = 0;
 
@@ -736,7 +745,7 @@ class ChatBridge extends EventEmitter {
 
 			// hypixel filter blocked message
 			case 'blocked': {
-				this.ingameChat.discordMessage?.reactSafely(STOP);
+				this._handleBlockedWord(this.ingameChat.discordMessage);
 				await sleep(this.ingameChat.delay);
 				return false;
 			}
@@ -750,6 +759,25 @@ class ChatBridge extends EventEmitter {
 				return true;
 			}
 		}
+	}
+
+	/**
+	 * reacts to the message and DMs the author
+	 * @param {import('../extensions/Message')} discordMessage
+	 */
+	_handleBlockedWord(discordMessage) {
+		if (!discordMessage) return;
+
+		discordMessage.reactSafely(STOP);
+		discordMessage.author
+			.send(stripIndents`
+				your message (or parts of it) were blocked because you used a banned word or character
+				(the bannned word filter is to comply with hypixel's chat rules)
+			`)
+			.then(
+				() => logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`),
+				error => logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}: ${error}`),
+			);
 	}
 
 	/**
