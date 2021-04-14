@@ -707,12 +707,12 @@ class ChatBridge extends EventEmitter {
 		// listen for responses
 		const response = await Promise.race([
 			listener,
-			sleep(this.ingameChat.safeDelay),
+			sleep(this.ingameChat.safeDelay, 'timeout'),
 		]);
 
 		switch (response) {
 			// collector collected nothing, sleep won the race
-			case undefined: {
+			case 'timeout': {
 				if (!this.ready) this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
 				this.ingameChat.tempIncrementCounter();
 				this.nextMessage.resetFilter();
