@@ -9,9 +9,9 @@ const mojang = new Mojang({
 		get(key) {
 			return cache.get(`mojang:${key}`);
 		},
-		set(key, value) {
-			if (value.error) return cache.set(`mojang:${key}`, value, 60 * 60_000); // 1 hour for errors
-			return cache.set(`mojang:${key}`, value, 24 * 60 * 60_000); // 24 hours for successful requests (changed IGNs are reserved for 37 days (30 days name change cooldown + 1 week))
+		set(type, key, value) {
+			if (value.error) return cache.set(`mojang:${type}:${key}`, value, 60 * 60_000); // 1 hour for errors
+			return cache.set(`mojang:${type}:${key}`, value, (type === 'ign' ? 24 : 1) * 60 * 60_000); // 24 hours for successful requests (changed IGNs are reserved for 37 days (30 days name change cooldown + 1 week))
 		},
 	},
 });

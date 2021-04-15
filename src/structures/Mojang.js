@@ -101,7 +101,7 @@ class Mojang {
 		const res = await fetch(`${path}${query}`);
 
 		if (res.status !== 200) {
-			if (cache) this.cache?.set(`${queryType}:${query}`, { error: true, res });
+			if (cache) this.cache?.set(queryType, query, { error: true, res });
 			throw new MojangAPIError(res, queryType, query);
 		}
 
@@ -115,8 +115,8 @@ class Mojang {
 		};
 
 		if (cache) {
-			this.cache?.set(`ign:${response.ign.toLowerCase()}`, response);
-			this.cache?.set(`uuid:${response.uuid}`, response);
+			this.cache?.set('ign', response.ign.toLowerCase(), response);
+			this.cache?.set('uuid', response.uuid, response);
 		}
 
 		return response;
