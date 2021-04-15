@@ -14,6 +14,7 @@ const Player = require('../database/models/Player');
  * @property {import('../LunarClient')} client
  * @property {import('../database/models/Player')} player
  * @property {string} ign
+ * @property {string} uuid
  * @function [chat]
  */
 
