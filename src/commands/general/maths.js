@@ -2,21 +2,22 @@
 
 const { add, sub, mul, div } = require('sinful-math');
 const Lexer = require('lex');
-const Command = require('../../structures/commands/Command');
 const { removeFlagsFromArray } = require('../../functions/util');
+const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
 
 class Parser {
-	constructor(table) {
+	constructor(table, unaryOperators) {
 		this.table = table;
+		this.unaryOperators = unaryOperators;
 	}
 
 	parse(input) {
 		const { length } = input;
-		const { table } = this;
 		const output = [];
 		const stack = [];
+
 		let index = 0;
 
 		while (index < length) {
@@ -26,33 +27,53 @@ class Parser {
 				case '(':
 					stack.unshift(token);
 					break;
+
 				case ')':
 					while (stack.length) {
 						token = stack.shift();
 						if (token === '(') break;
-						else output.push(token);
+						output.push(token);
 					}
 
 					if (token !== '(') throw new Error('ParserError: mismatched parentheses');
 					break;
+
 				default:
-					if (Object.hasOwnProperty.call(table, token)) {
+					if (Reflect.has(this.table, token)) {
+						let shouldWriteToStack = true;
+
 						while (stack.length) {
 							const [ punctuator ] = stack;
+							const operator = this.table[token];
 
-							if (punctuator === '(') break;
+							if (punctuator === '(') {
+								if (operator.associativity === 'right') {
+									shouldWriteToStack = false;
+									output.push(token);
+								}
+								break;
+							}
 
-							const operator = table[token];
 							const { precedence } = operator;
-							const antecedence = table[punctuator].precedence;
+							const antecedence = this.table[punctuator].precedence;
 
 							if (precedence > antecedence || (precedence === antecedence && operator.associativity === 'right')) break;
 
 							output.push(stack.shift());
 						}
 
-						stack.unshift(token);
-					} else output.push(token);
+						if (shouldWriteToStack) stack.unshift(token);
+					} else {
+						output.push(token);
+
+						let i = 0;
+
+						while (stack[i] === '(') ++i;
+
+						if (Reflect.has(this.unaryOperators, stack[i])) {
+							output.push(stack.splice(i, 1)[0]);
+						}
+					}
 			}
 		}
 
@@ -61,6 +82,8 @@ class Parser {
 			if (token !== '(') output.push(token);
 			else throw new Error('ParserError: mismatched parentheses');
 		}
+
+		// logger.debug({ stack, output })
 
 		return output;
 	}
@@ -120,24 +143,6 @@ module.exports = class MathCommand extends Command {
 			precedence: 1,
 			associativity: 'left',
 		};
-
-		this.parser = new Parser({
-			'°': this.degree,
-			'^': this.power,
-			'!': this.factorialPost,
-			'fac': this.factorialPre,
-			'+': this.term,
-			'-': this.term,
-			'*': this.factor,
-			'/': this.factor,
-			'sin': this.func,
-			'cos': this.func,
-			'tan': this.func,
-			'sqrt': this.func,
-			'exp': this.func,
-			'ln': this.func,
-			'log': this.func,
-		});
 
 		this.binaryOperators = {
 			'^'(a, b) {
@@ -218,6 +223,27 @@ module.exports = class MathCommand extends Command {
 				return Math.log(x);
 			},
 		};
+
+		this.parser = new Parser(
+			{
+				'°': this.degree,
+				'^': this.power,
+				'!': this.factorialPost,
+				'fac': this.factorialPre,
+				'+': this.term,
+				'-': this.term,
+				'*': this.factor,
+				'/': this.factor,
+				'sin': this.func,
+				'cos': this.func,
+				'tan': this.func,
+				'sqrt': this.func,
+				'exp': this.func,
+				'ln': this.func,
+				'log': this.func,
+			},
+			this.unaryOperators,
+		);
 	}
 
 	parse(input) {
@@ -225,7 +251,7 @@ module.exports = class MathCommand extends Command {
 		const tokens = [];
 		let token;
 		while ((token = this.lexer.lex())) tokens.push(token);
-		// logger.debug({ tokens, parsed: parser.parse(tokens) })
+		// logger.debug({ tokens, parsed: this.parser.parse(tokens) })
 		if (!tokens.length) throw new Error('LexerError: token list empty');
 		return this.parser.parse(tokens);
 	}
