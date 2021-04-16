@@ -234,8 +234,12 @@ class PlayerManager extends ModelManager {
 				logger.warn('[PLAYERS UPDATE]: auto updates disabled');
 			}
 		} else {
-			for (const player of this.cache.values()) {
-				await player.update(options).catch(logger.error);
+			try {
+				for (const player of this.cache.values()) {
+					await player.update(options).catch(logger.error);
+				}
+			} catch (error) {
+				logger.error(`[PLAYERS UPDATE XP]: ${error}`);
 			}
 		}
 
