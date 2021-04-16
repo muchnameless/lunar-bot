@@ -3,6 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
+const { GenericHTTPError, RateLimitError } = require('@zikeji/hypixel');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
 const { levelingXp, skillXpPast50, skillsCap, dungeonXp, slayerXp, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
@@ -443,15 +444,16 @@ module.exports = class Player extends Model {
 	 * @property {?string} [reason] role update reason for discord's audit logs
 	 * @property {boolean} [shouldSendDm=false] wether to dm the user that they should include their ign somewhere in their nickname
 	 * @property {boolean} [shouldOnlyAwaitUpdateXp=false] wether to only await the updateXp call and not updateDiscordMember
+	 * @property {boolean} [rejectOnAPIError=false]
 	 */
 
 	/**
 	 * updates the player data and discord member
 	 * @param {PlayerUpdateOptions} options
 	 */
-	async update({ reason = 'synced with ingame stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false } = {}) {
+	async update({ reason = 'synced with ingame stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false, rejectOnAPIError = false } = {}) {
 		if (this.guildID === GUILD_ID_BRIDGER) return;
-		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp(); // only query hypixel skyblock api for guild players without errors
+		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
 		if (shouldOnlyAwaitUpdateXp) {
 			this.updateDiscordMember({ reason, shouldSendDm });
@@ -462,8 +464,9 @@ module.exports = class Player extends Model {
 
 	/**
 	 * updates skill and slayer xp
+	 * @param {boolean} [rejectOnAPIError=false]
 	 */
-	async updateXp() {
+	async updateXp(rejectOnAPIError = false) {
 		try {
 			if (!this.mainProfileID) await this.fetchMainProfile(); // detect main profile if it is unknown
 
@@ -547,10 +550,12 @@ module.exports = class Player extends Model {
 
 			if (error.name.startsWith('Sequelize')) return logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
 
-			logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name} ${error.code}: ${error.message}`);
-			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
+			logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
 
-			throw error;
+			if (error instanceof GenericHTTPError || error instanceof RateLimitError) {
+				this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
+				if (rejectOnAPIError) throw error;
+			}
 		}
 	}
 
