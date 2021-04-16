@@ -5,7 +5,10 @@ require('dotenv').config({ path: join(__dirname, '..', '..', '..', '.env') });
 const { readdirSync } = require('fs');
 
 // to get bigints as numbers instead of strings
-require('pg').defaults.parseInt8 = true;
+const pg = require('pg');
+
+pg.defaults.parseInt8 = true;
+pg.types.setTypeParser(1700, parseFloat);
 
 const Sequelize = require('sequelize');
 
