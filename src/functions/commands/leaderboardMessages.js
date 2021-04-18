@@ -361,21 +361,16 @@ const self = module.exports = {
 		if (!leaderboardArguments) return;
 
 		const leaderbaordData = self.getLeaderboardDataCreater(leaderboardType)(message.client, leaderboardArguments);
+		const reply = await message.reply(self.createLeaderboardEmbed(message.client, leaderboardType, leaderboardArguments, leaderbaordData));
 
-		try {
-			const reply = await message.reply(self.createLeaderboardEmbed(message.client, leaderboardType, leaderboardArguments, leaderbaordData));
+		await cache.set(
+			`${LB_KEY}:${reply.cachingKey}`,
+			{ type: leaderboardType, args: leaderboardArguments, data: leaderbaordData },
+			message.client.config.getNumber('DATABASE_UPDATE_INTERVAL') * 60_000,
+		);
+		await self.addPageReactions(reply);
 
-			await cache.set(
-				`${LB_KEY}:${reply.cachingKey}`,
-				{ type: leaderboardType, args: leaderboardArguments, data: leaderbaordData },
-				message.client.config.getNumber('DATABASE_UPDATE_INTERVAL') * 60_000,
-			);
-			await self.addPageReactions(reply);
-
-			return reply;
-		} catch (error) {
-			logger.error(error);
-		}
+		return reply;
 	},
 
 	/**
