@@ -61,10 +61,9 @@ function getSkillLevel(type, xp, individualCap) {
 function getWeight(skyblockMember) {
 	let weight = 0;
 	let overflow = 0;
-	let skillApiEnabled = true;
 
 	for (const skill of skills) {
-		const xp = skyblockMember[`experience_skill_${skill}`] ?? ((skillApiEnabled = false) || 0);
+		const xp = skyblockMember[`experience_skill_${skill}`] ?? 0;
 		const { nonFlooredLevel: level } = getSkillLevel(skill, xp, skill === 'farming' ? 50 + (skyblockMember.jacob2?.perks?.farming_level_cap ?? 0) : null);
 
 		let maxXp = Object.values(levelingXp).reduce((acc, currentXp) => acc + currentXp, 0);
@@ -120,7 +119,7 @@ function getWeight(skyblockMember) {
 	}
 
 	return {
-		skillApiEnabled,
+		skillApiEnabled: Reflect.has(skyblockMember, 'experience_skill_alchemy'),
 		weight,
 		overflow,
 		total: weight + overflow,
