@@ -916,12 +916,16 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * @param {object} options
-	 * @param {string} options.command can also directly be used as the only parameter
-	 * @param {RegExp} [options.responseRegex=defaultResponseRegExp] regex to use as a filter for the message collector
+	 * sends a command and returns all server messages within the next two separators ('-----------...')
+	 * @param {string} command can also directly be used as the only parameter
 	 */
-	async multilineCommand({ command = arguments[0], responseRegex = new RegExp() }) {
-		const collector = this.createMessageCollector(msg => !msg.type && (responseRegex.test(msg.content) || /^-{50,}/.test(msg.content)));
+	async multilineCommand(command) {
+		const collector = this.createMessageCollector(
+			msg => !msg.type,
+			{
+				time: (this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT') * 1_000) + (this.ingameQueue.remaining * this.ingameChat.safeDelay),
+			},
+		);
 
 		let resolve;
 
@@ -942,7 +946,10 @@ class ChatBridge extends EventEmitter {
 			resolve(collected);
 		});
 
-		if (!(await this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)))) return Promise.reject('error sending to in game chat');
+		if (!(await this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)))) {
+			collector.stop();
+			return Promise.reject('error sending command to in game chat');
+		}
 
 		return promise;
 	}
