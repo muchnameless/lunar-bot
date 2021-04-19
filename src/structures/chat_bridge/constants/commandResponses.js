@@ -2,7 +2,7 @@
 
 const HYPIXEL_RANK = '(?:\\[.+?\\] )?';
 const IGN_DEFAULT = '\\w{1,16}';
-const GUILD_RANK_DEFAULT = '[a-z]+';
+const GUILD_RANK_DEFAULT = '[a-z-]+';
 
 const genericErrors = {
 	MUST_BE_GM: '^You must be the Guild Master to use that command!',
