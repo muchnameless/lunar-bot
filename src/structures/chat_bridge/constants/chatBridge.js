@@ -6,6 +6,7 @@
 const invisibleCharacters = [
 	'\u{2B4D}', // '⭍'
 	'\u{800}', // 'ࠀ'
+	'\u{58F}', // '֏'
 ];
 
 module.exports = {
