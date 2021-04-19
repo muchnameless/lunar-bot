@@ -39,7 +39,7 @@
     "sequelize": "^6.6.2",
     "sequelize-cli": "^6.2.0",
     "sinful-math": "^0.0.1",
-    "timezonecomplete": "^5.12.2",
+    "timezonecomplete": "^5.12.3",
     "utf-8-validate": "^5.0.4",
     "winston": "^3.3.3"
   },
