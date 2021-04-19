@@ -722,10 +722,13 @@ class ChatBridge extends EventEmitter {
 		switch (response) {
 			// collector collected nothing, sleep won the race
 			case 'timeout': {
-				if (!this.ready) this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
 				this.ingameChat.tempIncrementCounter();
 				this.nextMessage.resetFilter();
-				return false;
+				if (!this.ready) {
+					this.ingameChat.discordMessage?.reactSafely(X_EMOJI);
+					return false;
+				}
+				return true;
 			}
 
 			// anti spam failed -> retry
@@ -868,10 +871,9 @@ class ChatBridge extends EventEmitter {
 	 * @param {number} [options.max=1] stop the collector after receiving this amount of messages
 	 * @param {number} [options.timeout]
 	 * @param {boolean} [options.rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
-	 * @param {boolean} [options.raw=false] wether to return the full message object instead of the content
 	 * @returns {Promise<string|import('./HypixelMessage')[]>}
 	 */
-	async command({ command = arguments[0], responseRegex = defaultResponseRegExp, max = 1, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false, raw = false }) {
+	async command({ command = arguments[0], responseRegex = defaultResponseRegExp, max = 1, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		const TIMEOUT_MS = timeout * 1_000;
 
 		try {
@@ -887,36 +889,62 @@ class ChatBridge extends EventEmitter {
 				this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)),
 			]);
 
-			return raw
-				? result[0]
-				: result[0]
-					.map(({ content }) => this.cleanCommandResponse(content))
-					.join('\n');
+			return result[0]
+				.map(({ content }) => this.cleanCommandResponse(content))
+				.join('\n');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
 			if (Array.isArray(error)) {
 				if (rejectOnTimeout) Promise.reject(
-					raw
-						? error
-						: error.length
-							? error
-								.map(({ content }) => this.cleanCommandResponse(content))
-								.join('\n')
-							: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
-				);
-
-				return raw
-					? error
-					: error.length
+					error.length
 						? error
 							.map(({ content }) => this.cleanCommandResponse(content))
 							.join('\n')
-						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
+						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
+				);
+
+				return error.length
+					? error
+						.map(({ content }) => this.cleanCommandResponse(content))
+						.join('\n')
+					: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
 
 			// a different error occurred
 			throw error;
 		}
+	}
+
+	/**
+	 * @param {object} options
+	 * @param {string} options.command can also directly be used as the only parameter
+	 * @param {RegExp} [options.responseRegex=defaultResponseRegExp] regex to use as a filter for the message collector
+	 */
+	async multilineCommand({ command = arguments[0], responseRegex = new RegExp() }) {
+		const collector = this.createMessageCollector(msg => !msg.type && (responseRegex.test(msg.content) || /^-{50,}/.test(msg.content)));
+
+		let resolve;
+
+		/** @type {Promise<import('./HypixelMessage')[]>} */
+		const promise = new Promise(res => resolve = res);
+
+		let firstLimiter = true;
+
+		collector.on('collect', (msg) => {
+			if (!/^-{50,}/.test(msg.content)) return;
+			if (firstLimiter) return firstLimiter = false;
+			collector.stop();
+		});
+
+		collector.on('end', (collected) => {
+			collected.pop();
+			collected.shift();
+			resolve(collected);
+		});
+
+		if (!(await this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)))) return Promise.reject('error sending to in game chat');
+
+		return promise;
 	}
 
 	/**
