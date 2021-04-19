@@ -1,6 +1,6 @@
 'use strict';
 
-const { upperCaseFirstChar } = require('../../functions/util');
+const { upperCaseFirstChar, autocorrect } = require('../../functions/util');
 const { getWeight } = require('../../functions/skyblock');
 const { getUuidAndIgn } = require('../../functions/commands/input');
 const { X_EMOJI } = require('../../constants/emojiCharacters');
@@ -51,10 +51,10 @@ module.exports = class WeightCommand extends Command {
 					.sort(({ total: aTotal }, { total: bTotal }) => aTotal - bTotal)
 					.pop();
 			} else {
-				const PROFILE_NAME = args[1].toLowerCase();
-				const profile = profiles.find(({ cute_name: name }) => name.toLowerCase() === PROFILE_NAME);
+				const [ , PROFILE_NAME ] = args;
+				const { value: profile, similarity } = autocorrect(PROFILE_NAME, profiles, 'cute_name');
 
-				if (!profile) return message.reply(`${ign} has no profile named '${upperCaseFirstChar(PROFILE_NAME)}'`);
+				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return message.reply(`${ign} has no profile named '${upperCaseFirstChar(PROFILE_NAME)}'`);
 
 				weightData = {
 					name: profile.cute_name,
