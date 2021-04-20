@@ -76,7 +76,9 @@ class Command {
 				return [ this.config.get('MANAGER_ROLE_ID') ];
 
 			case 'guild':
-				return [ this.config.get('GUILD_ROLE_ID') ];
+				return this.commandCollection.isMainCollection
+					? [ this.config.get('GUILD_ROLE_ID') ]
+					: null;
 
 			default:
 				return null;
