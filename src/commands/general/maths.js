@@ -18,15 +18,10 @@ class Parser {
 	 * @param {string[]} input
 	 */
 	parse(input) {
-		const { length } = input;
 		const output = [];
 		const stack = [];
 
-		let index = -1;
-
-		while (++index < length) {
-			let token = input[index];
-
+		for (let token of input) {
 			switch (token) {
 				case '(':
 					stack.unshift(token);
