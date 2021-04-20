@@ -75,6 +75,9 @@ class Command {
 			case 'manager':
 				return [ this.config.get('MANAGER_ROLE_ID') ];
 
+			case 'guild':
+				return [ this.config.get('GUILD_ROLE_ID') ];
+
 			default:
 				return null;
 		}
