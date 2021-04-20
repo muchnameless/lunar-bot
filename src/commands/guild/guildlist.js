@@ -33,7 +33,7 @@ module.exports = class GuildListCommand extends Command {
 
 		const data = await hypixelGuild.chatBridge.multilineCommand(command);
 
-		message.reply(
+		return message.reply(
 			new MessageEmbed()
 				.setColor(this.config.get('EMBED_BLUE'))
 				.setTitle(`/${command}`)
