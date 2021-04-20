@@ -50,6 +50,7 @@ module.exports = class BwStatsCommand extends Command {
 				final deaths: ${this.client.formatNumber(data.stats.Bedwars.final_deaths_bedwars ?? 0)},
 				overall fkdr: ${this.calculateKD(data.stats.Bedwars.final_kills_bedwars, data.stats.Bedwars.final_deaths_bedwars) ?? '-/-'},
 				win streak: ${this.client.formatNumber(data.stats.Bedwars.winstreak ?? 0)}
+				beds broken: ${this.client.formatNumber(data.stats.Bedwars.beds_broken_bedwars ?? 0)}
 			`;
 		} catch {
 			return `\`${ign}\` has no BedWars stats`;
