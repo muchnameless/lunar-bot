@@ -31,41 +31,41 @@
 class AsyncQueue {
 	constructor() {
 		/**
-     * The promises array.
-     * @type {Array<{promise: Promise<void>, resolve: Function}>}
-     * @private
-     */
+		 * The promises array.
+		 * @type {Array<{promise: Promise<void>, resolve: Function}>}
+		 * @private
+		 */
 		this.promises = [];
 	}
 
 	/**
-   * The remaining amount of queued promises
-   * @type {number}
-   */
+	 * The remaining amount of queued promises
+	 * @type {number}
+	 */
 	get remaining() {
 		return this.promises.length;
 	}
 
 	/**
-   * Waits for last promise and queues a new one.
-   * @returns {Promise<void>}
-   * @example
-   * const queue = new AsyncQueue();
-   * async function request(url, options) {
-   *     await queue.wait();
-   *     try {
-   *         const result = await fetch(url, options);
-   *         // Do some operations with 'result'
-   *     } finally {
-   *         // Remove first entry from the queue and resolve for the next entry
-   *         queue.shift();
-   *     }
-   * }
-   *
-   * request(someUrl1, someOptions1); // Will call fetch() immediately
-   * request(someUrl2, someOptions2); // Will call fetch() after the first finished
-   * request(someUrl3, someOptions3); // Will call fetch() after the second finished
-   */
+	 * Waits for last promise and queues a new one.
+	 * @returns {Promise<void>}
+	 * @example
+	 * const queue = new AsyncQueue();
+	 * async function request(url, options) {
+	 *     await queue.wait();
+	 *     try {
+	 *         const result = await fetch(url, options);
+	 *         // Do some operations with 'result'
+	 *     } finally {
+	 *         // Remove first entry from the queue and resolve for the next entry
+	 *         queue.shift();
+	 *     }
+	 * }
+	 *
+	 * request(someUrl1, someOptions1); // Will call fetch() immediately
+	 * request(someUrl2, someOptions2); // Will call fetch() after the first finished
+	 * request(someUrl3, someOptions3); // Will call fetch() after the second finished
+	 */
 	wait() {
 		const next = this.promises.length ? this.promises[this.promises.length - 1].promise : Promise.resolve();
 		let resolve;
@@ -82,8 +82,8 @@ class AsyncQueue {
 	}
 
 	/**
-   * Frees the queue's lock for the next item to process.
-   */
+	 * Frees the queue's lock for the next item to process.
+	 */
 	shift() {
 		this.promises.shift()?.resolve();
 	}
