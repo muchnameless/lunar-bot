@@ -13,15 +13,19 @@ class Parser {
 		this.unaryOperators = unaryOperators;
 	}
 
+	/**
+	 * parses a token list into reverse polish notation
+	 * @param {string[]} input
+	 */
 	parse(input) {
 		const { length } = input;
 		const output = [];
 		const stack = [];
 
-		let index = 0;
+		let index = -1;
 
-		while (index < length) {
-			let token = input[index++];
+		while (++index < length) {
+			let token = input[index];
 
 			switch (token) {
 				case '(':
@@ -38,7 +42,8 @@ class Parser {
 					if (token !== '(') throw new Error('ParserError: mismatched parentheses');
 					break;
 
-				default:
+				default: {
+					// token is an operator
 					if (Reflect.has(this.table, token)) {
 						let shouldWriteToStack = true;
 
@@ -63,27 +68,26 @@ class Parser {
 						}
 
 						if (shouldWriteToStack) stack.unshift(token);
-					} else {
-						output.push(token);
 
-						let i = 0;
-
-						while (stack[i] === '(') ++i;
-
-						if (Reflect.has(this.unaryOperators, stack[i])) {
-							output.push(stack.splice(i, 1)[0]);
-						}
+						continue;
 					}
+
+					// token is not an operator
+					output.push(token);
+
+					// check if token is followed by a unary operator
+					const nonBracketIndex = stack.findIndex(x => x !== '(');
+
+					if (nonBracketIndex !== -1 && Reflect.has(this.unaryOperators, stack[nonBracketIndex])) {
+						output.push(stack.splice(nonBracketIndex, 1)[0]);
+					}
+				}
 			}
 		}
 
-		while (stack.length) {
-			const token = stack.shift();
-			if (token !== '(') output.push(token);
-			else throw new Error('ParserError: mismatched parentheses');
-		}
+		if (stack.includes('(')) throw new Error('ParserError: mismatched parentheses');
 
-		// logger.debug({ stack, output })
+		output.push(...stack);
 
 		return output;
 	}
