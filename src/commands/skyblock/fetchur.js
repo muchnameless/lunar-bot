@@ -28,10 +28,8 @@ module.exports = class FetchurCommand extends Command {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const date = new Date();
 		const OFFSET = tc.zone('America/New_York').offsetForUtcDate(date) / 60;
-		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
-		const DAY = date.getUTCDate();
 
-		tc.zone('America/New_York');
+		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
 
 		const tomorrow = new Date();
 		tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
@@ -47,6 +45,6 @@ module.exports = class FetchurCommand extends Command {
 			].filter(time => time >= 0),
 		);
 
-		message.reply(`item: ${fetchurItems[(DAY - 1) % fetchurItems.length]}, time left: ${ms(RESET_TIME, { long: true })}`);
+		message.reply(`item: ${fetchurItems[(date.getUTCDate() - 1) % fetchurItems.length]}, time left: ${ms(RESET_TIME, { long: true })}`);
 	}
 };
