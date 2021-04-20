@@ -28,7 +28,6 @@ module.exports = class FetchurCommand extends Command {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const date = new Date();
 		const OFFSET = tc.zone('America/New_York').offsetForUtcDate(date) / 60;
-
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
 
 		const tomorrow = new Date();
