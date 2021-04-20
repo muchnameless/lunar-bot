@@ -23,7 +23,7 @@ module.exports = class FkdrCommand extends BwStatsCommand {
 	 */
 	generateReply(ign, data) {
 		try {
-			const { stats: { SkyWars: { wins = 0, losses = 0, games_played_skywars: games = 0, kills = 0, deaths = 0, win_streak: winStreak = 0 } } } = data;
+			const { stats: { SkyWars: { wins = 0, losses = 0, assists, games_played_skywars: games = 0, kills = 0, deaths = 0, win_streak: winStreak = 0 } } } = data;
 
 			return oneLine`
 				${ign}:
@@ -33,6 +33,7 @@ module.exports = class FkdrCommand extends BwStatsCommand {
 				losses: ${this.client.formatNumber(losses)},
 				win rate: ${this.client.formatDecimalNumber(wins / (wins + losses))},
 				kills: ${this.client.formatNumber(kills)},
+				assists: ${this.client.formatNumber(assists)},
 				deaths: ${this.client.formatNumber(deaths)},
 				K/D: ${this.calculateKD(kills, deaths) ?? '-/-'},
 				games played: ${this.client.formatNumber(games)},
