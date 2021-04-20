@@ -6,7 +6,7 @@ const BwStatsCommand = require('./bedwars-stats');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class FkdrCommand extends BwStatsCommand {
+module.exports = class SwStatsCommand extends BwStatsCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'swstats' ],
