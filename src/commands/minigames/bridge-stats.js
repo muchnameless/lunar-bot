@@ -21,7 +21,7 @@ module.exports = class BridgeStatsCommand extends BwStatsCommand {
 	 * @param {string} stat
 	 */
 	calculateStats(duelStats, stat) {
-		return [ 'duels', 'doubles', 'four' ].reduce((acc, cur) => acc + (duelStats?.[`bridge_${cur}_${stat}`] ?? 0), 0);
+		return [ 'duel', 'doubles', 'four' ].reduce((acc, cur) => acc + (duelStats[`bridge_${cur}_${stat}`] ?? 0), 0);
 	}
 
 	/**
