@@ -44,7 +44,8 @@ module.exports = class GuildListCommand extends Command {
 								? removeMcFormatting(
 									msg.formattedContent
 										.replace(/§r§c ●/g, ' 🔴')
-										.replace(/§r§a ●/g, ' 🟢'),
+										.replace(/§r§a ●/g, ' 🟢')
+										.replace(/\[.+?\] /g, ''),
 								)
 								: msg.content),
 							)
