@@ -25,6 +25,8 @@ module.exports = async (client, oldMember, newMember) => {
 
 		if (!player) return logger.info(`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`);
 
+		logger.info(`[GUILD MEMBER UPDATE]: ${player.ign} | ${newMember.user.tag} received bridger role`);
+
 		player.guildID = GUILD_ID_BRIDGER;
 		player.save();
 
