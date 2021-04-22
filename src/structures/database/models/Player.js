@@ -172,7 +172,7 @@ module.exports = class Player extends Model {
 				defaultValue: null,
 				allowNull: true,
 				set(value) {
-					if (!value) this._discordMember = null;
+					if (!value) this.inDiscord = false;
 					this.setDataValue('discordID', value);
 				},
 			},
