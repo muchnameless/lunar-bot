@@ -25,12 +25,12 @@ module.exports = class PingUnmuteCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		/** @type {import('../../structures/database/models/Player')} */
-		const player = message.mentions.users.size
+		const player = message.mentions?.users.size
 			? message.mentions.users.first().player
 			: (this.client.players.getByID(args[0]) ?? this.client.players.getByIGN(args[0]));
 
 		if (!player) {
-			return message.reply(oneLine`${message.mentions.users.size
+			return message.reply(oneLine`${message.mentions?.users.size
 				? `\`${message.guild
 					? message.mentions.members.first().displayName
 					: message.mentions.users.first().username}\`
@@ -42,6 +42,6 @@ module.exports = class PingUnmuteCommand extends Command {
 		player.hasDiscordPingPermission = true;
 		await player.save();
 
-		return message.reply(`\`${player.ign}\` can now ping members via the chat bridge`);
+		return message.reply(`\`${player.ign}\` can now ping members via the chat bridge.`);
 	}
 };
