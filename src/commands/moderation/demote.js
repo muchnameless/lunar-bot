@@ -35,7 +35,10 @@ module.exports = class DemoteCommand extends Command {
 		const { chatBridge } = hypixelGuild;
 		const IGN = message.mentions.users.size
 			? message.messages.users.first().player?.ign
-			: (this.force(flags) ? args[0] : this.client.players.getByIGN(args[0])?.ign ?? this.client.players.getByID(args[0])?.ign ?? args[0]);
+			: (this.force(flags)
+				? args[0]
+				: (this.client.players.getByID(args[0])?.ign ?? this.client.players.getByIGN(args[0])?.ign ?? args[0])
+			);
 
 		try {
 			const response = await chatBridge.command({

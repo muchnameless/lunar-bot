@@ -43,7 +43,10 @@ module.exports = class MuteCommand extends Command {
 		} else {
 			target = message.mentions.users.size
 				? message.mentions.users.first().player
-				: (this.force(flags) ? TARGET_INPUT : players.getByIGN(TARGET_INPUT) ?? players.getByID(TARGET_INPUT) ?? TARGET_INPUT);
+				: (this.force(flags)
+					? TARGET_INPUT
+					: (players.getByID(TARGET_INPUT) ?? players.getByIGN(TARGET_INPUT) ?? TARGET_INPUT)
+				);
 
 			if (!target) return message.reply(`no player ${message.mentions.users.size
 				? `linked to \`${message.guild
@@ -73,7 +76,6 @@ module.exports = class MuteCommand extends Command {
 
 		if (target instanceof players.model) {
 			target.chatBridgeMutedUntil = EXPIRES_AT;
-			target.hasDiscordPingPermission = false;
 			await target.save();
 
 			if (target.notInGuild) return message.reply(`muted \`${target}\` for \`${DURATION_INPUT}\`.`);

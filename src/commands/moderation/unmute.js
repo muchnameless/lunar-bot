@@ -42,7 +42,10 @@ module.exports = class UnmuteCommand extends Command {
 		} else {
 			target = message.mentions.users.size
 				? message.mentions.users.first().player
-				: (this.force(flags) ? TARGET_INPUT : players.getByIGN(TARGET_INPUT) ?? players.getByID(TARGET_INPUT) ?? TARGET_INPUT);
+				: (this.force(flags)
+					? TARGET_INPUT
+					: (players.getByID(TARGET_INPUT) ?? players.getByIGN(TARGET_INPUT) ?? TARGET_INPUT)
+				);
 
 			if (!target) return message.reply(`no player ${message.mentions.users.size
 				? `linked to \`${message.guild
