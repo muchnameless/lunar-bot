@@ -23,6 +23,11 @@ class PlayerManager extends ModelManager {
 		 * @type {import('../models/Player')}
 		 */
 		this.model;
+		/**
+		 * wether a player db update is currently running
+		 * @type {boolean}
+		 */
+		this._isUpdatingXp = false;
 	}
 
 	/**
@@ -226,26 +231,33 @@ class PlayerManager extends ModelManager {
 	 * @param {import('../models/Player').PlayerUpdateOptions} options
 	 */
 	async updateXp(options) {
-		// the hypxiel api encountered an error before
-		if (this.client.config.getBoolean('HYPIXEL_SKYBLOCK_API_ERROR')) {
-			// reset error every full hour
-			if (new Date().getMinutes() >= this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
-				logger.warn('[PLAYERS UPDATE]: auto updates disabled');
-				return this;
-			}
-
-			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
-		}
+		if (this._isUpdatingXp) return;
+		this._isUpdatingXp = true;
 
 		try {
-			for (const player of this.cache.values()) {
-				await player.update({ rejectOnAPIError: true, ...options }).catch(() => null);
-			}
-		} catch (error) {
-			logger.error(`[PLAYERS UPDATE XP]: ${error}`);
-		}
+			// the hypxiel api encountered an error before
+			if (this.client.config.getBoolean('HYPIXEL_SKYBLOCK_API_ERROR')) {
+				// reset error every full hour
+				if (new Date().getMinutes() >= this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+					logger.warn('[PLAYERS UPDATE]: auto updates disabled');
+					return this;
+				}
 
-		return this;
+				this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
+			}
+
+			try {
+				for (const player of this.cache.values()) {
+					await player.update({ rejectOnAPIError: true, ...options }).catch(() => null);
+				}
+			} catch (error) {
+				logger.error(`[PLAYERS UPDATE XP]: ${error}`);
+			}
+
+			return this;
+		} finally {
+			this._isUpdatingXp = false;
+		}
 	}
 
 	/**
