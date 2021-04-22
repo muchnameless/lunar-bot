@@ -231,7 +231,7 @@ class PlayerManager extends ModelManager {
 	 * @param {import('../models/Player').PlayerUpdateOptions} options
 	 */
 	async updateXp(options) {
-		if (this._isUpdatingXp) return;
+		if (this._isUpdatingXp) return this;
 		this._isUpdatingXp = true;
 
 		try {
