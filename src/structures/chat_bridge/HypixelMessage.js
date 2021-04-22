@@ -200,7 +200,7 @@ class HypixelMessage extends ChatMessage {
 					this.author.send('you do not have permission to @ roles from in game chat');
 					message.reactSafely(NO_BELL);
 				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(message.content))) {
-					this.author.send('you do not have permission to @ users from in game chat since you were muted via \'lg!mute\' in the past');
+					this.author.send('you do not have permission to @ users from in game chat');
 					message.reactSafely(NO_BELL);
 				}
 
