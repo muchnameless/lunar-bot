@@ -73,7 +73,7 @@ class Parser {
 					// check if token is followed by a unary operator
 					const nonBracketIndex = stack.findIndex(x => x !== '(');
 
-					if (nonBracketIndex !== -1 && Reflect.has(this.unaryOperators, stack[nonBracketIndex])) {
+					if (nonBracketIndex !== -1 && this.unaryOperators[stack[nonBracketIndex]]?.precedence === 'right') {
 						output.push(stack.splice(nonBracketIndex, 1)[0]);
 					}
 				}
@@ -250,7 +250,7 @@ module.exports = class MathCommand extends Command {
 		const tokens = [];
 		let token;
 		while ((token = this.lexer.lex())) tokens.push(token);
-		// logger.debug({ tokens, parsed: this.parser.parse(tokens) })
+		// logger.debug({ tokens })
 		if (!tokens.length) throw new Error('LexerError: token list empty');
 		return this.parser.parse(tokens);
 	}
@@ -305,6 +305,8 @@ module.exports = class MathCommand extends Command {
 		} catch (error) {
 			return message.reply(`${error.message}, input: '${INPUT}'`);
 		}
+
+		// logger.debug({ parsed })
 
 		const stack = [];
 
