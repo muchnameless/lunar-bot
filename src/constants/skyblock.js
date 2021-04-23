@@ -222,7 +222,7 @@ module.exports = {
 		'door (wooden or iron)',
 		'3 rabbit feet',
 		'SuperBoom TNT',
-		'1 pumpkin',
+		'https://youtu.be/9L7Y681bKz8', // @underappreciated '1 pumpkin'
 		'1 flint and steel',
 		'50 quartz ore (mine with silk touch)',
 		'16 enderpearls',
