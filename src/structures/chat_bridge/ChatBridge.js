@@ -431,14 +431,29 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} [prefix='']
 	 */
 	_hypixelSpamBypass(string, prefix = '') {
-		const input = string.split('');
+		// string is already at or above max length
+		if (string.length + prefix.length >= this.maxMessageLength) return trim(string, this.maxMessageLength - prefix.length);
 
-		// max message length is 256 post 1.11, 100 pre 1.11
-		for (let index = this.maxMessageLength - string.length - prefix.length + 1; --index;) {
-			input.splice(Math.floor(Math.random() * input.length), 0, randomInvisibleCharacter());
+		// padding failed at least once -> splice the entire input string with random invisible chars
+		if (this.ingameChat.retries) {
+			const input = string.split('');
+
+			// max message length is 256 post 1.11, 100 pre 1.11
+			for (let index = this.maxMessageLength - string.length - prefix.length + 1; --index;) {
+				input.splice(Math.floor(Math.random() * input.length), 0, randomInvisibleCharacter());
+			}
+
+			return `${prefix}${input.join('')}`;
 		}
 
-		return `${prefix}${input.join('')}`;
+		// default padding (only add the end)
+		let padding = '';
+
+		for (let index = this.maxMessageLength - string.length - prefix.length; --index;) {
+			padding += randomInvisibleCharacter();
+		}
+
+		return `${prefix}${string} ${padding}`;
 	}
 
 	/**
