@@ -181,7 +181,7 @@ module.exports = class MathCommand extends Command {
 		this.unaryOperators = {
 			'°'(x) {
 				if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
-				return mul(x, div(Math.PI, 2));
+				return mul(x, div(Math.PI, 180));
 			},
 			'!'(x) {
 				if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
