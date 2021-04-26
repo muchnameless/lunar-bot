@@ -12,7 +12,7 @@ const Command = require('../../structures/commands/Command');
 module.exports = class PlayerCommand extends Command {
 	constructor(data) {
 		super(data, {
-			aliases: [ 'xp', 'stats' ],
+			aliases: [ 'stats' ],
 			description: 'check a player\'s xp gained',
 			usage: `<\`IGN\` to check someone other than yourself> <${
 				Object.keys(XP_OFFSETS_SHORT)
