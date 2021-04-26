@@ -29,11 +29,11 @@ module.exports = async (message) => {
 	 */
 	if (spamMessages.includes(message.content)) {
 		try {
-			await message.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.content}`);
+			await message.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.rawContent}`);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner anti spam failed`);
 		} finally {
-			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: anti spam failed: ${message.content}`);
+			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: anti spam failed: ${message.rawContent}`);
 		}
 
 		return;
@@ -59,11 +59,11 @@ module.exports = async (message) => {
 
 		// DM owner to add the blocked content to the filter
 		try {
-			await message.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.content}`);
+			await message.client.dmOwner(`${message.chatBridge.logInfo}: blocked message: ${message.rawContent}`);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner blocked message`);
 		} finally {
-			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: blocked message: ${message.content}`);
+			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: blocked message: ${message.rawContent}`);
 		}
 
 		return;
