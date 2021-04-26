@@ -813,6 +813,9 @@ module.exports = class Player extends Model {
 
 			// reset nickname if it is set to the player's ign
 			if (currentLinkedMember.nickname === this.ign) wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
+
+			// unlink player from member
+			currentLinkedMember.player = null;
 		}
 
 		// unlink 2/2
