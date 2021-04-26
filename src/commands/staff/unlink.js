@@ -49,7 +49,7 @@ module.exports = class UnlinkCommand extends Command {
 
 				// no discord tag -> ign or discord id
 				} else {
-					player = players.getByIGN(arg) ?? players.getByID(arg);
+					player = players.getByID(arg) ?? players.getByIGN(arg);
 				}
 
 				if (player) break;
