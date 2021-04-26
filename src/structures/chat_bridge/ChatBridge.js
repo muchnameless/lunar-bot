@@ -9,7 +9,7 @@ const ms = require('ms');
 const { sleep, trim, cleanFormattedNumber } = require('../../functions/util');
 const { getAllJsFiles } = require('../../functions/files');
 const { MC_CLIENT_VERSION } = require('./constants/settings');
-const { defaultResponseRegExp, memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('./constants/chatBridge');
+const { defaultResponseRegExp, memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('./constants/chatBridge');
 const { unicodeToName, nameToUnicode } = require('./constants/emojiNameUnicodeConverter');
 const { spamMessages } = require('./constants/commandResponses');
 const { STOP, X_EMOJI } = require('../../constants/emojiCharacters');
@@ -470,6 +470,7 @@ class ChatBridge extends EventEmitter {
 	 */
 	_parseDiscordMessageToMinecraft(string) {
 		return cleanFormattedNumber(string)
+			.replace(invisibleCharacterRegExp, '')
 			.replace(/<?(?:a)?:?(\w{2,32}):(?:\d{17,19})>?/g, ':$1:') // custom emojis
 			.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
 			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
