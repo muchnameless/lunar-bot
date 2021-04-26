@@ -554,6 +554,17 @@ class PlayerManager extends ModelManager {
 	 * checks all players if their current main profile is still valid
 	 */
 	async updateMainProfiles() {
+		// the hypxiel api encountered an error before
+		if (this.client.config.getBoolean('HYPIXEL_SKYBLOCK_API_ERROR')) {
+			// reset error every full hour
+			if (new Date().getMinutes() >= this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+				logger.warn('[PLAYERS UPDATE MAIN PROFILE]: API error');
+				return this;
+			}
+
+			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
+		}
+
 		const log = [];
 
 		for (const player of this.cache.values()) {
