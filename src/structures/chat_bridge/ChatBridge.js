@@ -500,6 +500,7 @@ class ChatBridge extends EventEmitter {
 	_parseMinecraftMessageToDiscord(string) {
 		return escapeMarkdown(
 			string
+				.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
 				.replace( // emojis (custom and default)
 					/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
 					(match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match,
