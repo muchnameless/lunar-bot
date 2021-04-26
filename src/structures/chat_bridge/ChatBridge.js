@@ -469,26 +469,28 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	_parseDiscordMessageToMinecraft(string) {
-		return cleanFormattedNumber(string)
-			.replace(invisibleCharacterRegExp, '')
-			.replace(/<?(?:a)?:?(\w{2,32}):(?:\d{17,19})>?/g, ':$1:') // custom emojis
-			.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
-			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
-			.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
-				const channelName = this.client.channels.cache.get(p1)?.name;
-				if (channelName) return `#${channelName}`;
-				return match;
-			})
-			.replace(/<@&(\d{17,19})>/g, (match, p1) => { // roles
-				const roleName = this.client.lgGuild?.roles.cache.get(p1)?.name;
-				if (roleName) return `@${roleName}`;
-				return match;
-			})
-			.replace(/<@!?(\d{17,19})>/g, (match, p1) => { // users
-				const displayName = this.client.lgGuild?.members.cache.get(p1)?.displayName ?? this.client.users.cache.get(p1)?.username;
-				if (displayName) return `@${displayName}`;
-				return match;
-			});
+		return this._escapeEz(
+			cleanFormattedNumber(string)
+				.replace(invisibleCharacterRegExp, '')
+				.replace(/<?(?:a)?:?(\w{2,32}):(?:\d{17,19})>?/g, ':$1:') // custom emojis
+				.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
+				.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
+				.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
+					const channelName = this.client.channels.cache.get(p1)?.name;
+					if (channelName) return `#${channelName}`;
+					return match;
+				})
+				.replace(/<@&(\d{17,19})>/g, (match, p1) => { // roles
+					const roleName = this.client.lgGuild?.roles.cache.get(p1)?.name;
+					if (roleName) return `@${roleName}`;
+					return match;
+				})
+				.replace(/<@!?(\d{17,19})>/g, (match, p1) => { // users
+					const displayName = this.client.lgGuild?.members.cache.get(p1)?.displayName ?? this.client.users.cache.get(p1)?.username;
+					if (displayName) return `@${displayName}`;
+					return match;
+				}),
+		);
 	}
 
 	/**
@@ -622,7 +624,7 @@ class ChatBridge extends EventEmitter {
 
 		/** @type {Set<string>} */
 		const messageParts = new Set(
-			this._escapeEz(this._parseDiscordMessageToMinecraft(message))
+			this._parseDiscordMessageToMinecraft(message)
 				.split('\n')
 				.flatMap((part) => {
 					try {
