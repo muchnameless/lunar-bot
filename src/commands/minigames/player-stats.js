@@ -27,6 +27,13 @@ module.exports = class PlayerCommand extends Command {
 	}
 
 	/**
+	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} player
+	 */
+	getFirstPurchase({ levelUp_VIP: vip = Infinity, levelUp_VIP_PLUS: vipPlus = Infinity, levelUp_MVP: mvp = Infinity, levelUp_MVP_PLUS: mvpPlus = Infinity }) {
+		return Math.min(vip, vipPlus, mvp, mvpPlus);
+	}
+
+	/**
 	 * @param {string} ign
 	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} player
 	 * @param {import('@zikeji/hypixel').Components.Schemas.Guild} guild
@@ -47,7 +54,7 @@ module.exports = class PlayerCommand extends Command {
 			level: ${level},
 			achievement points: ${this.client.formatNumber(achievementPoints)},
 			karma: ${this.client.formatNumber(karma)},
-			first joined: ${this.timestampToDate(firstLogin)},
+			first joined: ${this.timestampToDate(firstLogin ?? this.getFirstPurchase(player))},
 			last joined: ${this.timestampToDate(lastLogin)}
 		`;
 	}
