@@ -248,7 +248,7 @@ class PlayerManager extends ModelManager {
 
 			try {
 				for (const player of this.cache.values()) {
-					await player.update({ rejectOnAPIError: true, ...options }).catch(() => null);
+					await player.update({ rejectOnAPIError: true, ...options });
 				}
 			} catch (error) {
 				logger.error(`[PLAYERS UPDATE XP]: ${error}`);
