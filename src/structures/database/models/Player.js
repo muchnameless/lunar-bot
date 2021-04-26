@@ -3,7 +3,6 @@
 const { MessageEmbed } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
-const { GenericHTTPError, RateLimitError } = require('@zikeji/hypixel');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
 const { levelingXp, skillXpPast50, skillsCap, dungeonXp, slayerXp, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
@@ -551,11 +550,8 @@ module.exports = class Player extends Model {
 			if (error.name.startsWith('Sequelize')) return logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
 
 			logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
-
-			if (error instanceof GenericHTTPError || error instanceof RateLimitError) {
-				this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
-				if (rejectOnAPIError) throw error;
-			}
+			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
+			if (rejectOnAPIError) throw error;
 		}
 	}
 

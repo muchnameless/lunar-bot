@@ -1,7 +1,6 @@
 'use strict';
 
 const { CronJob } = require('cron');
-const { GenericHTTPError, RateLimitError } = require('@zikeji/hypixel');
 const { GUILD_ID_BRIDGER, GUILD_ID_ERROR } = require('../../../constants/database');
 const { autocorrect } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
@@ -67,7 +66,7 @@ class HypixelGuildManager extends ModelManager {
 
 			return true;
 		} catch (error) {
-			if (error instanceof GenericHTTPError || error instanceof RateLimitError) this.client.config.set('HYPIXEL_API_ERROR', 'true');
+			if (!error.name.startsWith('Sequelize')) this.client.config.set('HYPIXEL_API_ERROR', 'true');
 			logger.error(`[GUILDS UPDATE]: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
 			return false;
 		}
