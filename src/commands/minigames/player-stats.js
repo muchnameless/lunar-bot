@@ -45,8 +45,8 @@ module.exports = class PlayerCommand extends Command {
 			status: ${status.online ? 'online' : 'offline'},
 			friends: ${this.client.formatNumber(friends?.length ?? 0)},
 			level: ${level},
-			achievement points: ${achievementPoints},
-			karma: ${karma},
+			achievement points: ${this.client.formatNumber(achievementPoints)},
+			karma: ${this.client.formatNumber(karma)},
 			first joined: ${this.timestampToDate(firstLogin)},
 			last joined: ${this.timestampToDate(lastLogin)}
 		`;
