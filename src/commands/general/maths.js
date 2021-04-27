@@ -94,7 +94,7 @@ module.exports = class MathCommand extends Command {
 		super(data, {
 			aliases: [ 'm', 'calc' ],
 			description: 'supports `+`, `-`, `*`, `/`, `^`, `!`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
-			args: true,
+			args: false,
 			usage: '',
 			cooldown: 0,
 		});
