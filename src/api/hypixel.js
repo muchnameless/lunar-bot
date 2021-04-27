@@ -15,7 +15,7 @@ const hypixel = new Client(process.env.HYPIXEL_KEY, {
 
 			let ttl;
 
-			if (key.startsWith('skyblock:profile')) { // profile & profiles
+			if (key.startsWith('skyblock:profile') || key.startsWith('status')) { // profile & profiles
 				ttl = 30_000;
 			} else if (key.startsWith('player')) {
 				ttl = 60_000;
