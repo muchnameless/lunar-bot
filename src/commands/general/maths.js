@@ -354,7 +354,7 @@ module.exports = class MathCommand extends Command {
 
 		return message.reply(
 			`${this.formatNumberString(INPUT)
-				.replace(/[+\-*/]/g, ' $& ') // add spaces around operators
+				.replace(/(?<=.)[+\-*/]/g, ' $& ') // add spaces around operators
 				.replace(/,/g, '$& ') // add space after commas
 				.replace(/pi/gi, '\u{03C0}') // prettify 'pi'
 			} = ${this.formatNumberString(output?.toString())}${warning
