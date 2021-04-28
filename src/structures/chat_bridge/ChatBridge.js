@@ -460,7 +460,7 @@ class ChatBridge extends EventEmitter {
 	 * escapes all standalone occurrences of 'ez', case-insensitive
 	 * @param {string} string
 	 */
-	_escapeEz(string) {
+	static _escapeEz(string) {
 		return string.replace(/(?<=\be+)(?=z+\b)/gi, randomInvisibleCharacter());
 	}
 
@@ -469,7 +469,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	_parseDiscordMessageToMinecraft(string) {
-		return this._escapeEz(
+		return this.constructor._escapeEz(
 			cleanFormattedNumber(string)
 				.replace(invisibleCharacterRegExp, '')
 				.replace(/<?(?:a)?:?(\w{2,32}):(?:\d{17,19})>?/g, ':$1:') // custom emojis
@@ -493,6 +493,16 @@ class ChatBridge extends EventEmitter {
 		);
 	}
 
+	static cleanEmojiName(name) {
+		return name.replace(/_/g, '').toLowerCase();
+	}
+
+	findEmojiByName(fullMatch, inColon) {
+		const cleanedName = this.constructor.cleanEmojiName(inColon);
+
+		return this.client.emojis.cache.find(({ name }) => this.constructor.cleanEmojiName(name) === cleanedName)?.toString() ?? nameToUnicode[this.constructor.cleanEmojiName(fullMatch)] ?? fullMatch;
+	}
+
 	/**
 	 * replaces names with discord renders
 	 * @param {string} string
@@ -503,11 +513,11 @@ class ChatBridge extends EventEmitter {
 				.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
 				.replace( // emojis (custom and default)
 					/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
-					(match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match,
+					(match, p1) => this.findEmojiByName(match, p1),
 				)
 				.replace( // emojis (custom and default)
 					/(?<!<a?):(\S+?):(?!\d{17,19}>)/g,
-					(match, p1) => this.client.emojis.cache.find(({ name }) => name.toLowerCase() === p1.toLowerCase())?.toString() ?? nameToUnicode[match.replace(/_/g, '').toLowerCase()] ?? match,
+					(match, p1) => this.findEmojiByName(match, p1),
 				)
 				.replace( // channels
 					/#([a-z-]+)/gi,
@@ -544,8 +554,16 @@ class ChatBridge extends EventEmitter {
 				inlineCode: false,
 				codeBlockContent: false,
 				inlineCodeContent: false,
+				italic: false,
+				underline: false,
 			},
-		);
+		)
+			.replace(/\*/g, '\\*') // escape italic 1/2
+			.replace(/([^\s_]*)_([^\s_]*)/g, (match, p1, p2) => { // escape italic 2/2 & underline
+				if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
+				if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
+				return `${p1}\\_${p2}`;
+			});
 	}
 
 	/**
@@ -557,7 +575,7 @@ class ChatBridge extends EventEmitter {
 		return this.gchat(
 			discordMessage.attachments.size ? [ discordMessage.content?.length ? discordMessage.content : null, ...discordMessage.attachments.map(({ url }) => url) ].filter(Boolean).join(' ') : discordMessage.content,
 			{
-				prefix: `${player?.ign ?? this._escapeEz(discordMessage.member?.displayName ?? discordMessage.author.username)}:`,
+				prefix: `${player?.ign ?? this.constructor._escapeEz(discordMessage.member?.displayName ?? discordMessage.author.username)}:`,
 				discordMessage,
 			},
 		);
@@ -602,7 +620,7 @@ class ChatBridge extends EventEmitter {
 	 * checks if the message includes special characters used in certain "memes" or blocked words
 	 * @param {string} string
 	 */
-	shouldBlock(string) {
+	static shouldBlock(string) {
 		return memeRegExp.test(string) || blockedWordsRegExp.test(string);
 	}
 
@@ -610,7 +628,7 @@ class ChatBridge extends EventEmitter {
 	 * checks the string for any non-whitespace character
 	 * @param {string} string
 	 */
-	includesNonWhitespace(string) {
+	static includesNonWhitespace(string) {
 		return nonWhiteSpaceRegExp.test(string);
 	}
 
@@ -635,8 +653,8 @@ class ChatBridge extends EventEmitter {
 					}
 				})
 				.filter((part) => {
-					if (this.includesNonWhitespace(part)) { // filter out white space only parts
-						if (this.shouldBlock(part)) {
+					if (this.constructor.includesNonWhitespace(part)) { // filter out white space only parts
+						if (this.constructor.shouldBlock(part)) {
 							if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
 							return success = false;
 						}
@@ -649,7 +667,7 @@ class ChatBridge extends EventEmitter {
 				}),
 		);
 
-		if (!success) this._handleBlockedWord(discordMessage);
+		if (!success) this.constructor._handleBlockedWord(discordMessage);
 
 		if (!messageParts.size) return false;
 
@@ -767,7 +785,7 @@ class ChatBridge extends EventEmitter {
 
 			// hypixel filter blocked message
 			case 'blocked': {
-				this._handleBlockedWord(this.ingameChat.discordMessage);
+				this.constructor._handleBlockedWord(this.ingameChat.discordMessage);
 				await sleep(this.ingameChat.delay);
 				return false;
 			}
@@ -787,7 +805,7 @@ class ChatBridge extends EventEmitter {
 	 * reacts to the message and DMs the author
 	 * @param {import('../extensions/Message')} discordMessage
 	 */
-	_handleBlockedWord(discordMessage) {
+	static _handleBlockedWord(discordMessage) {
 		if (!discordMessage) return;
 
 		discordMessage.reactSafely(STOP);
@@ -909,7 +927,7 @@ class ChatBridge extends EventEmitter {
 			]);
 
 			return result[0]
-				.map(({ content }) => this.cleanCommandResponse(content))
+				.map(({ content }) => this.constructor.cleanCommandResponse(content))
 				.join('\n');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
@@ -917,14 +935,14 @@ class ChatBridge extends EventEmitter {
 				if (rejectOnTimeout) Promise.reject(
 					error.length
 						? error
-							.map(({ content }) => this.cleanCommandResponse(content))
+							.map(({ content }) => this.constructor.cleanCommandResponse(content))
 							.join('\n')
 						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
 				);
 
 				return error.length
 					? error
-						.map(({ content }) => this.cleanCommandResponse(content))
+						.map(({ content }) => this.constructor.cleanCommandResponse(content))
 						.join('\n')
 					: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
@@ -977,7 +995,7 @@ class ChatBridge extends EventEmitter {
 	 * removes line formatters from the beginning and end
 	 * @param {string} string
 	 */
-	cleanCommandResponse(string) {
+	static cleanCommandResponse(string) {
 		return string.replace(/^-{50,}|-{50,}$/g, '').trim();
 	}
 }
