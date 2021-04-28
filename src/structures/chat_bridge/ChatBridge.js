@@ -493,10 +493,20 @@ class ChatBridge extends EventEmitter {
 		);
 	}
 
+	/**
+	 * replaces underscores and toLowerCases the input
+	 * @param {string} name
+	 */
 	static cleanEmojiName(name) {
 		return name.replace(/_/g, '').toLowerCase();
 	}
 
+	/**
+	 * custom or basic emoji search by name
+	 * @param {string} fullMatch
+	 * @param {string} inColon
+	 * @returns {string}
+	 */
 	findEmojiByName(fullMatch, inColon) {
 		const cleanedName = this.constructor.cleanEmojiName(inColon);
 
