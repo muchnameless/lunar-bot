@@ -846,28 +846,20 @@ class ChatBridge extends EventEmitter {
 	async broadcast(message, { discord: { prefix: discordPrefix = '', ...discord } = {}, ingame: { prefix = '', maxParts = Infinity, ...options } = {} } = {}) {
 		return Promise.all([
 			this.gchat(message, { prefix, maxParts, ...options }),
-			(async () => {
-				if (!this.enabled) return null;
-
-				await this.discordQueue.wait();
-
-				try {
-					return await this.channel?.send(this._parseMinecraftMessageToDiscord(`${discordPrefix}${message}`), discord);
-				} finally {
-					this.discordQueue.shift();
-				}
-			})(),
+			this.sendViaDiscordBot(this._parseMinecraftMessageToDiscord(`${discordPrefix}${message}`), discord),
 		]);
 	}
 
 	/**
-	 * send via the chatBridge webhook
+	 * sends a message via the chatBridge webhook
 	 * @param {import('discord.js').WebhookMessageOptions} toSend
 	 * @returns {Promise<import('../extensions/Message')>}
 	 */
 	async sendViaWebhook(toSend) {
-		if (!this.enabled) return;
+		if (!this.enabled) return null;
 		if (!toSend.content?.length) return logger.warn(`[CHATBRIDGE]: ${this.logInfo}: prevented sending empty message`);
+
+		await this.discordQueue.wait();
 
 		try {
 			return await this.webhook.send(toSend);
@@ -878,6 +870,25 @@ class ChatBridge extends EventEmitter {
 				this.reconnect();
 			}
 			throw error;
+		} finally {
+			this.discordQueue.shift();
+		}
+	}
+
+	/**
+	 * sends a message via the bot in the chatBridge channel
+	 * @param {string} message
+	 * @param {import('discord.js').MessageOptions} options
+	 */
+	async sendViaDiscordBot(message, options) {
+		if (!this.enabled) return null;
+
+		await this.discordQueue.wait();
+
+		try {
+			return await this.channel?.send(message, options);
+		} finally {
+			this.discordQueue.shift();
 		}
 	}
 

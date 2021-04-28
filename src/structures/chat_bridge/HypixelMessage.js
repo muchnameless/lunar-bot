@@ -176,8 +176,6 @@ class HypixelMessage extends ChatMessage {
 	 * forwards the message to discord via the chatBridge's webhook, if the guild has the chatBridge enabled
 	 */
 	async forwardToDiscord() {
-		await this.chatBridge.discordQueue.wait();
-
 		try {
 			if (this.author) {
 				const { player, member } = this;
@@ -187,7 +185,10 @@ class HypixelMessage extends ChatMessage {
 						?? this.author.ign,
 					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
 						?? player?.image
-						?? await mojang.ign(this.author.ign).then(({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`, error => logger.error(`[FORWARD TO DC]: ${error}`))
+						?? await mojang.ign(this.author.ign).then(
+							({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`,
+							error => logger.error(`[FORWARD TO DC]: ${error}`),
+						)
 						?? this.client.user.displayAvatarURL({ dynamic: true }),
 					content: this.parsedContent,
 					allowedMentions: {
@@ -207,16 +208,12 @@ class HypixelMessage extends ChatMessage {
 				return message;
 			}
 
-			return await this.chatBridge.sendViaWebhook({
-				username: this.chatBridge.guild?.name ?? this.client.user.username,
-				avatarURL: this.client.user.displayAvatarURL({ dynamic: true }),
-				content: this.content,
-				allowedMentions: { parse: [] },
-			});
+			return await this.chatBridge.sendViaDiscordBot(
+				this.content,
+				{ allowedMentions: { parse: [] } },
+			);
 		} catch (error) {
 			logger.error(`[FORWARD TO DC]: ${error}`);
-		} finally {
-			this.chatBridge.discordQueue.shift();
 		}
 	}
 }
