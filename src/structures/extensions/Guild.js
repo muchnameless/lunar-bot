@@ -26,6 +26,7 @@ class LunarGuild extends Guild {
 				.map(roleID => [ roleID, this.roles.cache.get(roleID) ])
 				.filter(([ roleID, role ]) => {
 					if (!role) return logger.warn(`[CHECK ROLE IDS]: '${roleID}' is not a valid role id`);
+					if (role.managed) return logger.warn(`[CHECK ROLE IDS]: '${roleID}' is a managed role`);
 					if (role.comparePositionTo(highestBotRole) >= 0) return logger.warn(`[CHECK ROLE IDS]: '${role.name}' is higher than the bot's highest role`);
 					return true;
 				})
