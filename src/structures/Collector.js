@@ -23,7 +23,7 @@ const EventEmitter = require('events');
  * Abstract class for defining a new Collector.
  * @abstract
  */
-class Collector extends EventEmitter {
+module.exports = class Collector extends EventEmitter {
 	constructor(client, filter, options = {}) {
 		super();
 
@@ -226,7 +226,7 @@ class Collector extends EventEmitter {
 		}
 	}
 
-	/* eslint-disable no-empty-function, valid-jsdoc */
+	/* eslint-disable no-empty-function, valid-jsdoc, class-methods-use-this */
 	/**
 	 * Handles incoming events from the `handleCollect` function. Returns null if the event should not
 	 * be collected, or returns an object describing the data that should be stored.
@@ -243,7 +243,5 @@ class Collector extends EventEmitter {
 	 * @abstract
 	 */
 	endReason() {}
-	/* eslint-enable no-empty-function, valid-jsdoc */
-}
-
-module.exports = Collector;
+	/* eslint-enable no-empty-function, valid-jsdoc, class-methods-use-this */
+};

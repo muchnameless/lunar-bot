@@ -38,6 +38,6 @@ class LunarNewsChannel extends NewsChannel {
 	}
 }
 
-Structures.extend('NewsChannel', NewsChannel => LunarNewsChannel); // eslint-disable-line no-shadow, no-unused-vars
+Structures.extend('NewsChannel', () => LunarNewsChannel);
 
 module.exports = LunarNewsChannel;

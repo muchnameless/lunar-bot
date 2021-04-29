@@ -22,16 +22,12 @@ module.exports = class PlayerCommand extends Command {
 	/**
 	 * @param {number} timestamp
 	 */
-	timestampToDate(timestamp) {
-		return new Date(timestamp).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
-	}
+	static timestampToDate = timestamp => new Date(timestamp).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 
 	/**
 	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} player
 	 */
-	getFirstPurchase({ levelUp_VIP: vip = Infinity, levelUp_VIP_PLUS: vipPlus = Infinity, levelUp_MVP: mvp = Infinity, levelUp_MVP_PLUS: mvpPlus = Infinity }) {
-		return Math.min(vip, vipPlus, mvp, mvpPlus);
-	}
+	static getFirstPurchase = ({ levelUp_VIP: vip = Infinity, levelUp_VIP_PLUS: vipPlus = Infinity, levelUp_MVP: mvp = Infinity, levelUp_MVP_PLUS: mvpPlus = Infinity }) => Math.min(vip, vipPlus, mvp, mvpPlus);
 
 	/**
 	 * @param {string} ign
@@ -54,8 +50,8 @@ module.exports = class PlayerCommand extends Command {
 			level: ${level},
 			achievement points: ${this.client.formatNumber(achievementPoints)},
 			karma: ${this.client.formatNumber(karma)},
-			first joined: ${this.timestampToDate(firstLogin ?? this.getFirstPurchase(player))},
-			last joined: ${this.timestampToDate(lastLogin)}
+			first joined: ${PlayerCommand.timestampToDate(firstLogin ?? PlayerCommand.getFirstPurchase(player))},
+			last joined: ${PlayerCommand.timestampToDate(lastLogin)}
 		`;
 	}
 

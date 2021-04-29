@@ -5,8 +5,6 @@ const { autocorrect } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
-const projects = [ 'stable', 'master', 'commando', 'rpc', 'akairo', 'akairo-master', 'collection' ];
-
 
 module.exports = class DocsCommand extends Command {
 	constructor(data) {
@@ -14,10 +12,12 @@ module.exports = class DocsCommand extends Command {
 			aliases: [],
 			description: 'search discord.js docs',
 			args: true,
-			usage: `[\`query\`] <\`-${projects.join('`|`')}\` to use another source than 'stable'>`,
+			usage: `[\`query\`] <\`-${DocsCommand.PROJECTS.join('`|`')}\` to use another source than 'stable'>`,
 			cooldown: 0,
 		});
 	}
+
+	static PROJECTS = [ 'stable', 'master', 'commando', 'rpc', 'akairo', 'akairo-master', 'collection' ];
 
 	/**
 	 * execute the command
@@ -30,7 +30,7 @@ module.exports = class DocsCommand extends Command {
 		let project;
 
 		for (const flag of flags) {
-			const result = autocorrect(flag, projects);
+			const result = autocorrect(flag, DocsCommand.PROJECTS);
 
 			if (result.similarity < this.config.get('AUTOCORRECT_THRESHOLD')) continue;
 
@@ -38,7 +38,7 @@ module.exports = class DocsCommand extends Command {
 			break;
 		}
 
-		project ??= projects[0];
+		project ??= DocsCommand.PROJECTS[0];
 
 		const embed = await fetch(`https://djsdocs.sorta.moe/v2/embed?src=${project}&q=${args.join('.').replace(/#/g, '.')}`).then(
 			res => res.json(),

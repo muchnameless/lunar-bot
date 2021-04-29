@@ -7,7 +7,7 @@ const ModelManager = require('./ModelManager');
 const logger = require('../../../functions/logger');
 
 
-class HypixelGuildManager extends ModelManager {
+module.exports = class HypixelGuildManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
@@ -184,6 +184,4 @@ class HypixelGuildManager extends ModelManager {
 
 		logger.debug('[GUILD DAILY STATS]: performed daily stats saves');
 	}
-}
-
-module.exports = HypixelGuildManager;
+};

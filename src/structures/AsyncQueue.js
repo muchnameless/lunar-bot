@@ -28,7 +28,7 @@
  * An async queue that preserves the stack and prevents lock-ups.
  * @private
  */
-class AsyncQueue {
+module.exports = class AsyncQueue {
 	constructor() {
 		/**
 		 * The promises array.
@@ -87,6 +87,4 @@ class AsyncQueue {
 	shift() {
 		this.promises.shift()?.resolve();
 	}
-}
-
-module.exports = AsyncQueue;
+};

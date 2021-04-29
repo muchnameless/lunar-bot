@@ -4,7 +4,7 @@ const ModelManager = require('./ModelManager');
 const logger = require('../../../functions/logger');
 
 
-class ConfigManager extends ModelManager {
+module.exports = class ConfigManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
@@ -84,6 +84,4 @@ class ConfigManager extends ModelManager {
 	getArray(key) {
 		return this.get(key?.toUpperCase())?.split(',') ?? [];
 	}
-}
-
-module.exports = ConfigManager;
+};

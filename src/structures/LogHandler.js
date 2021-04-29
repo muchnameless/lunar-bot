@@ -8,18 +8,19 @@ const { cleanLoggingEmbedString } = require('../functions/util');
 const logger = require('../functions/logger');
 
 
-class LogHandler {
+module.exports = class LogHandler {
 	/**
 	 * @param {import('./LunarClient')} client
 	 */
 	constructor(client) {
 		this.client = client;
-		this.logBufferPath = join(__dirname, '..', '..', 'log_buffer');
 		/**
 		 * @type {import('discord.js').Webhook}
 		 */
 		this.webhook = null;
 	}
+
+	static LOG_PATH = join(__dirname, '..', '..', 'log_buffer');
 
 	/**
 	 * wether the logging webhook is properly loaded and cached
@@ -161,7 +162,7 @@ class LogHandler {
 	 */
 	async _createLogBufferFolder() {
 		try {
-			await mkdir(this.logBufferPath);
+			await mkdir(this.LogHandler.PATH);
 			logger.debug('[LOG BUFFER]: created \'log_buffer\' folder');
 			return true;
 		} catch { // rejects if folder already exists
@@ -177,7 +178,7 @@ class LogHandler {
 		try {
 			await this._createLogBufferFolder();
 			await writeFile(
-				join(this.logBufferPath, `${new Date()
+				join(LogHandler.LOG_PATH, `${new Date()
 					.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
 					.replace(', ', '_')
 					.replace(/:/g, '.')
@@ -197,12 +198,12 @@ class LogHandler {
 		try {
 			await this._createLogBufferFolder();
 
-			const logBufferFiles = await readdir(this.logBufferPath);
+			const logBufferFiles = await readdir(LogHandler.LOG_PATH);
 
 			if (!logBufferFiles) return;
 
 			for (const file of logBufferFiles) {
-				const FILE_PATH = join(this.logBufferPath, file);
+				const FILE_PATH = join(LogHandler.LOG_PATH, file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
 				await this.log(...FILE_CONTENT.split('\n').map(x => new MessageEmbed(JSON.parse(x))));
@@ -212,6 +213,4 @@ class LogHandler {
 			logger.error(`[POST LOG FILES]: ${error}`);
 		}
 	}
-}
-
-module.exports = LogHandler;
+};

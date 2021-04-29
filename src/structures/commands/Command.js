@@ -11,7 +11,7 @@
  */
 
 
-class Command {
+module.exports = class Command {
 	/**
 	 * create a new command
 	 * @param {object} param0
@@ -154,6 +154,4 @@ class Command {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
-}
-
-module.exports = Command;
+};

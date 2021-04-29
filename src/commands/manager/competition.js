@@ -6,8 +6,6 @@ const { skills, dungeonTypes } = require('../../constants/skyblock');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
-const COMPETITION_TYPES = [ ...skills, 'slayer', ...dungeonTypes ];
-
 
 module.exports = class CompetitionCommand extends Command {
 	constructor(data) {
@@ -20,6 +18,11 @@ module.exports = class CompetitionCommand extends Command {
 			cooldown: 1,
 		});
 	}
+
+	/**
+	 * possible types for a competition
+	 */
+	static COMPETITION_TYPES = [ ...skills, 'slayer', ...dungeonTypes ];
 
 	/**
 	 * execute the command
@@ -41,7 +44,7 @@ module.exports = class CompetitionCommand extends Command {
 
 		try {
 			await message.reply(
-				commaListsOr`competition type? ${COMPETITION_TYPES}`,
+				commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`,
 				{ saveReplyMessageID: false },
 			);
 
@@ -49,7 +52,7 @@ module.exports = class CompetitionCommand extends Command {
 				const collected = await collector.next;
 				if (collected.content === 'cancel') throw new Error('command cancelled');
 
-				const result = autocorrect(collected.content, COMPETITION_TYPES);
+				const result = autocorrect(collected.content, CompetitionCommand.COMPETITION_TYPES);
 
 				if (result.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')) {
 					type = result.value;

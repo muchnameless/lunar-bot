@@ -32,7 +32,7 @@ const logger = require('../../functions/logger');
  */
 
 
-class ChatBridge extends EventEmitter {
+module.exports = class ChatBridge extends EventEmitter {
 	/**
 	 * @param {import('../LunarClient')} client
 	 */
@@ -73,13 +73,6 @@ class ChatBridge extends EventEmitter {
 		 * async queue for discord chat
 		 */
 		this.discordQueue = new AsyncQueue();
-		/**
-		 * 100 pre 1.10.2, 256 post 1.10.2
-		 * @type {number}
-		 */
-		this.maxMessageLength = require('minecraft-data')(MC_CLIENT_VERSION).version.version > require('minecraft-data')('1.10.2').version.version
-			? 256
-			: 100;
 		/**
 		 * increases each login, reset to 0 on successfull spawn
 		 */
@@ -200,6 +193,14 @@ class ChatBridge extends EventEmitter {
 
 		this._loadEvents();
 	}
+
+	/**
+	 * 100 pre 1.10.2, 256 post 1.10.2
+	 * @type {number}
+	 */
+	static MAX_MESSAGE_LENGTH = require('minecraft-data')(MC_CLIENT_VERSION).version.version > require('minecraft-data')('1.10.2').version.version
+		? 256
+		: 100;
 
 	get logInfo() {
 		return `${this.bot?.username ?? 'no bot'} | ${this.guild?.name ?? 'no guild'}`;
@@ -432,14 +433,14 @@ class ChatBridge extends EventEmitter {
 	 */
 	_hypixelSpamBypass(string, prefix = '') {
 		// string is already at or above max length
-		if (string.length + prefix.length >= this.maxMessageLength) return trim(string, this.maxMessageLength - prefix.length);
+		if (string.length + prefix.length >= ChatBridge.MAX_MESSAGE_LENGTH) return trim(string, ChatBridge.MAX_MESSAGE_LENGTH - prefix.length);
 
 		// padding failed at least once -> splice the entire input string with random invisible chars
 		if (this.ingameChat.retries) {
 			const input = string.split('');
 
 			// max message length is 256 post 1.11, 100 pre 1.11
-			for (let index = this.maxMessageLength - string.length - prefix.length + 1; --index;) {
+			for (let index = ChatBridge.MAX_MESSAGE_LENGTH - string.length - prefix.length + 1; --index;) {
 				input.splice(Math.floor(Math.random() * input.length), 0, randomInvisibleCharacter());
 			}
 
@@ -449,7 +450,7 @@ class ChatBridge extends EventEmitter {
 		// default padding (only add the end)
 		let padding = '';
 
-		for (let index = this.maxMessageLength - string.length - prefix.length; --index;) {
+		for (let index = ChatBridge.MAX_MESSAGE_LENGTH - string.length - prefix.length; --index;) {
 			padding += randomInvisibleCharacter();
 		}
 
@@ -469,7 +470,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {string} string
 	 */
 	_parseDiscordMessageToMinecraft(string) {
-		return this.constructor._escapeEz(
+		return ChatBridge._escapeEz(
 			cleanFormattedNumber(string)
 				.replace(invisibleCharacterRegExp, '')
 				.replace(/<?(?:a)?:?(\w{2,32}):(?:\d{17,19})>?/g, ':$1:') // custom emojis
@@ -508,9 +509,9 @@ class ChatBridge extends EventEmitter {
 	 * @returns {string}
 	 */
 	findEmojiByName(fullMatch, inColon) {
-		const cleanedName = this.constructor.cleanEmojiName(inColon);
+		const cleanedName = ChatBridge.cleanEmojiName(inColon);
 
-		return this.client.emojis.cache.find(({ name }) => this.constructor.cleanEmojiName(name) === cleanedName)?.toString() ?? nameToUnicode[this.constructor.cleanEmojiName(fullMatch)] ?? fullMatch;
+		return this.client.emojis.cache.find(({ name }) => ChatBridge.cleanEmojiName(name) === cleanedName)?.toString() ?? nameToUnicode[ChatBridge.cleanEmojiName(fullMatch)] ?? fullMatch;
 	}
 
 	/**
@@ -585,7 +586,7 @@ class ChatBridge extends EventEmitter {
 		return this.gchat(
 			discordMessage.attachments.size ? [ discordMessage.content?.length ? discordMessage.content : null, ...discordMessage.attachments.map(({ url }) => url) ].filter(Boolean).join(' ') : discordMessage.content,
 			{
-				prefix: `${player?.ign ?? this.constructor._escapeEz(discordMessage.member?.displayName ?? discordMessage.author.username)}:`,
+				prefix: `${player?.ign ?? ChatBridge._escapeEz(discordMessage.member?.displayName ?? discordMessage.author.username)}:`,
 				discordMessage,
 			},
 		);
@@ -641,9 +642,9 @@ class ChatBridge extends EventEmitter {
 				.split('\n')
 				.flatMap((part) => {
 					try {
-						return splitMessage(part, { char: ' ', maxLength: this.maxMessageLength - prefix.length });
+						return splitMessage(part, { char: ' ', maxLength: ChatBridge.MAX_MESSAGE_LENGTH - prefix.length });
 					} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '
-						return splitMessage(part, { char: '', maxLength: this.maxMessageLength - prefix.length });
+						return splitMessage(part, { char: '', maxLength: ChatBridge.MAX_MESSAGE_LENGTH - prefix.length });
 					}
 				})
 				.filter((part) => {
@@ -661,7 +662,7 @@ class ChatBridge extends EventEmitter {
 				}),
 		);
 
-		if (!success) this.constructor._handleBlockedWord(discordMessage);
+		if (!success) ChatBridge._handleBlockedWord(discordMessage);
 
 		if (!messageParts.size) return false;
 
@@ -779,7 +780,7 @@ class ChatBridge extends EventEmitter {
 
 			// hypixel filter blocked message
 			case 'blocked': {
-				this.constructor._handleBlockedWord(this.ingameChat.discordMessage);
+				ChatBridge._handleBlockedWord(this.ingameChat.discordMessage);
 				await sleep(this.ingameChat.delay);
 				return false;
 			}
@@ -917,6 +918,7 @@ class ChatBridge extends EventEmitter {
 	 * @param {boolean} [options.rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
 	 * @returns {Promise<string|import('./HypixelMessage')[]>}
 	 */
+	// eslint-disable-next-line no-undef
 	async command({ command = arguments[0], responseRegex = defaultResponseRegExp, max = 1, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		const TIMEOUT_MS = timeout * 1_000;
 
@@ -930,11 +932,11 @@ class ChatBridge extends EventEmitter {
 						errors: [ 'time', 'disconnect' ],
 					},
 				),
-				this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)),
+				this.sendToMinecraftChat(trim(`/${command}`, ChatBridge.MAX_MESSAGE_LENGTH - 1)),
 			]);
 
 			return result[0]
-				.map(({ content }) => this.constructor._cleanCommandResponse(content))
+				.map(({ content }) => ChatBridge._cleanCommandResponse(content))
 				.join('\n');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
@@ -942,14 +944,14 @@ class ChatBridge extends EventEmitter {
 				if (rejectOnTimeout) Promise.reject(
 					error.length
 						? error
-							.map(({ content }) => this.constructor._cleanCommandResponse(content))
+							.map(({ content }) => ChatBridge._cleanCommandResponse(content))
 							.join('\n')
 						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
 				);
 
 				return error.length
 					? error
-						.map(({ content }) => this.constructor._cleanCommandResponse(content))
+						.map(({ content }) => ChatBridge._cleanCommandResponse(content))
 						.join('\n')
 					: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
@@ -990,7 +992,7 @@ class ChatBridge extends EventEmitter {
 			resolve(collected);
 		});
 
-		if (!(await this.sendToMinecraftChat(trim(`/${command}`, this.maxMessageLength - 1)))) {
+		if (!(await this.sendToMinecraftChat(trim(`/${command}`, ChatBridge.MAX_MESSAGE_LENGTH - 1)))) {
 			collector.stop();
 			return Promise.reject('error sending command to in game chat');
 		}
@@ -1005,6 +1007,4 @@ class ChatBridge extends EventEmitter {
 	static _cleanCommandResponse(string) {
 		return string.replace(/^-{50,}|-{50,}$/g, '').trim();
 	}
-}
-
-module.exports = ChatBridge;
+};

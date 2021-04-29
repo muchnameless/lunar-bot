@@ -7,7 +7,7 @@ const { autocorrect } = require('../../functions/util');
 const logger = require('../../functions/logger');
 
 
-class CommandCollection extends Collection {
+module.exports = class CommandCollection extends Collection {
 	/**
 	 * @param {import('../LunartClient')} client
 	 * @param {string} dirPath the path to the commands folder
@@ -201,6 +201,4 @@ class CommandCollection extends Collection {
 	unloadAll() {
 		return this.each(command => command.unload());
 	}
-}
-
-module.exports = CommandCollection;
+};

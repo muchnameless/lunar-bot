@@ -4,7 +4,7 @@ const mojang = require('../../api/mojang');
 const logger = require('../../functions/logger');
 
 
-class HypixelMessageAuthor {
+module.exports = class HypixelMessageAuthor {
 	/**
 	 * @param {import('./ChatBridge')} chatBridge
 	 * @param {object} param1
@@ -63,6 +63,4 @@ class HypixelMessageAuthor {
 	async send(message, { prefix = '', ...options } = {}) {
 		return this.chatBridge.chat(message, { prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`, ...options });
 	}
-}
-
-module.exports = HypixelMessageAuthor;
+};

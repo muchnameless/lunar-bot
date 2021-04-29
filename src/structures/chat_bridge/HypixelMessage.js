@@ -15,7 +15,7 @@ const logger = require('../../functions/logger');
  */
 
 
-class HypixelMessage extends ChatMessage {
+module.exports = class HypixelMessage extends ChatMessage {
 	/**
 	 * @param {import('./ChatBridge')} chatBridge
 	 * @param {number} position
@@ -216,6 +216,4 @@ class HypixelMessage extends ChatMessage {
 			logger.error(`[FORWARD TO DC]: ${error}`);
 		}
 	}
-}
-
-module.exports = HypixelMessage;
+};

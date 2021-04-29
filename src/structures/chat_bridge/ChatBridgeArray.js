@@ -11,7 +11,7 @@ const logger = require('../../functions/logger');
 /**
  * @type {ChatBridge[]}
  */
-class ChatBridgeArray extends Array {
+module.exports = class ChatBridgeArray extends Array {
 	/**
 	 * @param {import('../LunarClient')} client
 	 */
@@ -141,6 +141,4 @@ class ChatBridgeArray extends Array {
 			message.reactSafely(X_EMOJI);
 		}
 	}
-}
-
-module.exports = ChatBridgeArray;
+};

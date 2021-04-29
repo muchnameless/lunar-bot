@@ -4,7 +4,7 @@ const { Collection } = require('discord.js');
 const logger = require('../../../functions/logger');
 
 
-class ModelManager {
+module.exports = class ModelManager {
 	/**
 	 * @param {object} param0
 	 * @param {import('../../LunarClient')} param0.client
@@ -93,6 +93,4 @@ class ModelManager {
 	valueOf() {
 		return this.cache;
 	}
-}
-
-module.exports = ModelManager;
+};

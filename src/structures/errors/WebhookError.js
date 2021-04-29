@@ -1,6 +1,6 @@
 'use strict';
 
-class WebhookError extends Error {
+module.exports = class WebhookError extends Error {
 	/**
 	 * @param {string} message
 	 * @param {import('../extensions/TextChannel')} textChannel
@@ -13,6 +13,4 @@ class WebhookError extends Error {
 		this.channel = channel;
 		this.hypixelGuild = hypixelGuild;
 	}
-}
-
-module.exports = WebhookError;
+};

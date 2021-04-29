@@ -6,8 +6,6 @@ const { safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
-const offsetToReset = offsetFlags.COMPETITION_START;
-
 
 module.exports = class XpResetCommand extends Command {
 	constructor(data) {
@@ -18,6 +16,8 @@ module.exports = class XpResetCommand extends Command {
 			cooldown: 5,
 		});
 	}
+
+	static OFFSET_TO_RESET = offsetFlags.COMPETITION_START;
 
 	/**
 	 * execute the command
@@ -33,6 +33,7 @@ module.exports = class XpResetCommand extends Command {
 
 		// individual player
 		if (args.length) {
+			/** @type {import('../../structures/database/models/Player')} */
 			const player = (message.mentions.users.size
 				? message.mentions.users.first().player
 				: players.getByIGN(args[0]))
@@ -57,7 +58,7 @@ module.exports = class XpResetCommand extends Command {
 				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return message.reply('the command has been cancelled.');
 			}
 
-			await player.resetXp({ offsetToReset });
+			await player.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
 
 			result = `reset xp gained from \`${player.ign}\``;
 
@@ -77,7 +78,7 @@ module.exports = class XpResetCommand extends Command {
 			await safePromiseAll([
 				...players.cache.map(async (player) => {
 					if (player.notes === 'skill api disabled') player.notes = null;
-					return player.resetXp({ offsetToReset });
+					return player.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
 				}),
 				this.config.set('COMPETITION_START_TIME', Date.now()),
 			]);

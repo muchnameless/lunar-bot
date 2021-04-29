@@ -11,7 +11,7 @@ const ModelManager = require('./ModelManager');
 const logger = require('../../../functions/logger');
 
 
-class PlayerManager extends ModelManager {
+module.exports = class PlayerManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
@@ -648,6 +648,4 @@ class PlayerManager extends ModelManager {
 
 		return this;
 	}
-}
-
-module.exports = PlayerManager;
+};

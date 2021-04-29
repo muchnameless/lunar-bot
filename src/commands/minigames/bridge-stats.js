@@ -17,10 +17,10 @@ module.exports = class BridgeStatsCommand extends BwStatsCommand {
 	}
 
 	/**
-	 * @param {object} duelStats
+	 * @param {import('@zikeji/hypixel').Components.Schemas.PlayerStats.Duels} duelStats
 	 * @param {string} stat
 	 */
-	calculateStats(duelStats, stat) {
+	static calculateStats(duelStats, stat) {
 		return [ 'duel', 'doubles', 'four' ].reduce((acc, cur) => acc + (duelStats[`bridge_${cur}_${stat}`] ?? 0), 0);
 	}
 
@@ -34,9 +34,9 @@ module.exports = class BridgeStatsCommand extends BwStatsCommand {
 
 			if (deaths == null || kills == null) return `\`${ign}\` has no Bridge stats`;
 
-			const wins = this.calculateStats(data.stats.Duels, 'wins');
-			const losses = this.calculateStats(data.stats.Duels, 'losses');
-			const gamesPlayed = this.calculateStats(data.stats.Duels, 'rounds_played');
+			const wins = BridgeStatsCommand.calculateStats(data.stats.Duels, 'wins');
+			const losses = BridgeStatsCommand.calculateStats(data.stats.Duels, 'losses');
+			const gamesPlayed = BridgeStatsCommand.calculateStats(data.stats.Duels, 'rounds_played');
 
 			return oneLine`
 				${ign}:
@@ -49,7 +49,7 @@ module.exports = class BridgeStatsCommand extends BwStatsCommand {
 				kills: ${this.client.formatNumber(kills)},
 				deaths: ${this.client.formatNumber(deaths)},
 				kd ratio: ${this.calculateKD(kills, deaths) ?? '-/-'},
-				goals: ${this.client.formatNumber(this.calculateStats(data.stats.Duels, 'goals'))}
+				goals: ${this.client.formatNumber(BridgeStatsCommand.calculateStats(data.stats.Duels, 'goals'))}
 			`;
 		} catch {
 			return `\`${ign}\` has no Bridge stats`;

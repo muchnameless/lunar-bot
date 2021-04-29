@@ -5,19 +5,19 @@ const { autocorrect } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
-const types = [ 'xp', 'tax' ];
 
-
-module.exports = class resetCommand extends Command {
+module.exports = class ResetCommand extends Command {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: commaListsAnd`alternative way to call ${types.map(type => `${type}reset`)}`,
+			description: commaListsAnd`alternative way to call ${ResetCommand.TYPES.map(type => `${type}reset`)}`,
 			args: true,
-			usage: () => types.map(type => `[\`${type}\`] ${this.commandCollection.getByName(`${type}reset`)?.usage}`).join('\n\n'),
+			usage: () => ResetCommand.TYPES.map(type => `[\`${type}\`] ${this.commandCollection.getByName(`${type}reset`)?.usage}`).join('\n\n'),
 			cooldown: 5,
 		});
 	}
+
+	static TYPES = [ 'xp', 'tax' ];
 
 	/**
 	 * execute the command
@@ -28,7 +28,7 @@ module.exports = class resetCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const TYPE = args.shift().toLowerCase();
-		const { value, similarity } = autocorrect(TYPE, types);
+		const { value, similarity } = autocorrect(TYPE, ResetCommand.TYPES);
 
 		if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return message.reply(`unknown type \`${TYPE}\`.`);
 

@@ -5,7 +5,7 @@ const ModelManager = require('./ModelManager');
 const logger = require('../../../functions/logger');
 
 
-class CronJobManager extends ModelManager {
+module.exports = class CronJobManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
@@ -105,6 +105,4 @@ class CronJobManager extends ModelManager {
 			(await this.model.findAll()).map(async cronJob => cronJob.resume()),
 		);
 	}
-}
-
-module.exports = CronJobManager;
+};

@@ -20,7 +20,7 @@ const TaxCollector = require('../models/TaxCollector');
 const logger = require('../../../functions/logger');
 
 
-class DatabaseManager {
+module.exports = class DatabaseManager {
 	/**
 	 * @param {object} param0
 	 * @param {import('../../LunarClient')} param0.client
@@ -311,6 +311,4 @@ class DatabaseManager {
 			error => logger.error(`[TAX MESSAGE]: ${error}`),
 		);
 	}
-}
-
-module.exports = DatabaseManager;
+};

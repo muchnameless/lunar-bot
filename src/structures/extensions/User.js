@@ -40,6 +40,6 @@ class LunarUser extends User {
 	}
 }
 
-Structures.extend('User', User => LunarUser); // eslint-disable-line no-shadow, no-unused-vars
+Structures.extend('User', () => LunarUser);
 
 module.exports = LunarUser;

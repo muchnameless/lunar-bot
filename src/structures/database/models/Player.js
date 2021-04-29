@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Permissions: { FLAGS: { MANAGE_ROLES } } } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
@@ -316,7 +316,7 @@ module.exports = class Player extends Model {
 	 * fetches the discord member if the discord id is valid and the player is in lg discord
 	 * @type {Promise<?LunarGuildMember>}
 	 */
-	get discordMember() {} // eslint-disable-line getter-return, no-empty-function
+	get discordMember() {} // eslint-disable-line getter-return, no-empty-function, class-methods-use-this
 
 	/**
 	 * fetches the discord user if the discord id is valid
@@ -843,7 +843,7 @@ module.exports = class Player extends Model {
 		if (!filteredRolesToAdd.length && !filteredRolesToRemove.length) return;
 
 		// permission check
-		if (!member.guild.me.permissions.has('MANAGE_ROLES')) return logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`);
+		if (!member.guild.me.permissions.has(MANAGE_ROLES)) return logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`);
 
 		const { config } = member.client;
 		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));

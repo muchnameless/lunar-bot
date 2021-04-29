@@ -1,6 +1,6 @@
 'use strict';
 
-class MojangAPIError extends Error {
+module.exports = class MojangAPIError extends Error {
 	/**
 	 * @param {object} param1
 	 * @param {number} [param1.status]
@@ -31,6 +31,4 @@ class MojangAPIError extends Error {
 	toString() {
 		return `${this.name}${this.code ? ` ${this.code}` : ''}: ${this.message}`;
 	}
-}
-
-module.exports = MojangAPIError;
+};

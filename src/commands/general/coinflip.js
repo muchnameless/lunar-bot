@@ -15,7 +15,7 @@ module.exports = class WeightCommand extends Command {
 		});
 	}
 
-	generateReply() {
+	static generateReply() {
 		const randomNumber = Math.floor(Math.random() * 1001);
 
 		if (randomNumber === 0) return 'edge';
@@ -31,6 +31,6 @@ module.exports = class WeightCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return message.reply(this.generateReply());
+		return message.reply(WeightCommand.generateReply());
 	}
 };

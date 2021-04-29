@@ -34,11 +34,6 @@ const AsyncQueue = require('./AsyncQueue');
  * * `cata`
  */
 
-/**
- * v1 base url
- */
-const BASE_URL = 'https://hypixel-api.senither.com/v1';
-
 class Method {
 	constructor(client) {
 		this.client = client;
@@ -56,7 +51,8 @@ class Profiles extends Method {
 	}
 }
 
-class SenitherAPIFacade extends EventEmitter {
+
+module.exports = class SenitherAPIFacade extends EventEmitter {
 	/**
 	 * @param {string} key
 	 * @param {object} [options]
@@ -65,7 +61,7 @@ class SenitherAPIFacade extends EventEmitter {
 	 */
 	constructor(key, options = {}) {
 		super();
-		this._validateInput(key, options);
+		SenitherAPIFacade._validateInput(key, options);
 		this.key = key;
 		this.cache = options.cache;
 
@@ -80,10 +76,15 @@ class SenitherAPIFacade extends EventEmitter {
 	}
 
 	/**
+	 * v1 base url
+	 */
+	static BASE_URL = 'https://hypixel-api.senither.com/v1';
+
+	/**
 	 * @private
 	 * @description validates the client options
 	 */
-	_validateInput(key, options) {
+	static _validateInput(key, options) {
 		if (typeof key !== 'string') throw new TypeError('[SENITHER]: key must be a string');
 		if (typeof options !== 'object' || options === null) throw new TypeError('[SENITHER]: options must be an object');
 	}
@@ -140,7 +141,7 @@ class SenitherAPIFacade extends EventEmitter {
 			}
 
 			// API call
-			const result = await fetch(`${BASE_URL}/${path}`, { headers: { 'Authorization': this.key } });
+			const result = await fetch(`${SenitherAPIFacade.BASE_URL}/${path}`, { headers: { 'Authorization': this.key } });
 
 			// parse rate limit headers
 			this._getRateLimitHeaders(result.headers);
@@ -157,6 +158,4 @@ class SenitherAPIFacade extends EventEmitter {
 			this.queue.shift();
 		}
 	}
-}
-
-module.exports = SenitherAPIFacade;
+};

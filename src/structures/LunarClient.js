@@ -18,7 +18,7 @@ const logger = require('../functions/logger');
  * @property {object} db
  */
 
-class LunarClient extends Client {
+module.exports = class LunarClient extends Client {
 	/**
 	 * @param {LunarClientOptions} options
 	 */
@@ -350,6 +350,4 @@ class LunarClient extends Client {
 			process.exit(1);
 		}
 	}
-}
-
-module.exports = LunarClient;
+};

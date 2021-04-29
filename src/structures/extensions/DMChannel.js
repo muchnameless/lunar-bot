@@ -48,6 +48,6 @@ class LunarDMChannel extends DMChannel {
 	}
 }
 
-Structures.extend('DMChannel', DMChannel => LunarDMChannel); // eslint-disable-line no-shadow, no-unused-vars
+Structures.extend('DMChannel', () => LunarDMChannel);
 
 module.exports = LunarDMChannel;

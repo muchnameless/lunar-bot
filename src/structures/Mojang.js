@@ -6,12 +6,12 @@ const MojangAPIError = require('./errors/MojangAPIError');
 // const logger = require('../functions/logger');
 
 
-class Mojang {
+module.exports = class Mojang {
 	/**
 	 * @param {object} options
 	 */
 	constructor(options = {}) {
-		this._validateOptions(options);
+		Mojang._validateOptions(options);
 		this.cache = options.cache;
 	}
 
@@ -19,7 +19,7 @@ class Mojang {
 	 * @private
 	 * @description validates the client options
 	 */
-	_validateOptions(options) {
+	static _validateOptions(options) {
 		if (typeof options !== 'object' || options === null) throw new TypeError('[Mojang Client]: options must be an object');
 	}
 
@@ -34,7 +34,7 @@ class Mojang {
 	 * @param {string[]} usernames
 	 * @returns {Promise<UUIDsResult[]>}
 	 */
-	igns(usernames) {
+	igns(usernames, { cache = true } = {}) {
 		if (!Array.isArray(usernames)) throw new TypeError('[Mojang Client]: uuids must be an array');
 		if (!usernames.length || usernames.length > 10) return Promise.reject(new MojangAPIError());
 
@@ -52,10 +52,21 @@ class Mojang {
 				throw new MojangAPIError(res);
 			}
 
-			return await res.json().catch(() => {
+			const parsedRes = await res.json().catch(() => {
 				throw new Error('An error occurred while converting to JSON');
 			});
-		});
+
+			const responses = parsedRes.map(({ id, name }) => ({ uuid: id, ign: name }));
+
+			if (cache) {
+				for (const response of responses) {
+					this.cache?.set('ign', response.ign.toLowerCase(), response);
+					this.cache?.set('uuid', response.uuid, response);
+				}
+			}
+
+			return responses;
+		})();
 	}
 
 	/**
@@ -100,27 +111,61 @@ class Mojang {
 
 		const res = await fetch(`${path}${query}`);
 
-		if (res.status !== 200) {
-			if (cache) this.cache?.set(queryType, query, { error: true, res });
-			throw new MojangAPIError(res, queryType, query);
+		switch (res.status) {
+			case 200: {
+				const { id, name } = await res.json().catch(() => {
+					throw new Error('An error occurred while converting to JSON');
+				});
+
+				const response = {
+					uuid: id,
+					ign: name,
+				};
+
+				if (cache) {
+					this.cache?.set('ign', response.ign.toLowerCase(), response);
+					this.cache?.set('uuid', response.uuid, response);
+				}
+
+				return response;
+			}
+
+			/**
+			 * mojang api currently ignores ?at=
+			 */
+			// case 204: {
+			// 	if (queryType === 'ign') { // retry a past date if name was queried
+			// 		let timestamp = Date.now();
+
+			// 		// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
+			// 		while (((timestamp -= 2_592_000_000) >= 1_423_008_000_000)) {
+			// 			const pastRes = await fetch(`${path}${query}?at=${timestamp}`);
+
+			// 			if (pastRes.status === 200) {
+			// 				const { id, name } = await res.json().catch(() => {
+			// 					throw new Error('An error occurred while converting to JSON');
+			// 				});
+
+			// 				const response = {
+			// 					uuid: id,
+			// 					ign: name,
+			// 				};
+
+			// 				if (cache) {
+			// 					this.cache?.set('ign', response.ign.toLowerCase(), response);
+			// 					// this.cache?.set('uuid', response.uuid, response);
+			// 				}
+
+			// 				return response;
+			// 			}
+			// 		}
+			// 	}
+			// }
+
+			// eslint-disable-next-line no-fallthrough
+			default:
+				if (cache) this.cache?.set(queryType, query, { error: true, res });
+				throw new MojangAPIError(res, queryType, query);
 		}
-
-		const parsedRes = await res.json().catch(() => {
-			throw new Error('An error occurred while converting to JSON');
-		});
-
-		const response = {
-			uuid: parsedRes.id,
-			ign: parsedRes.name,
-		};
-
-		if (cache) {
-			this.cache?.set('ign', response.ign.toLowerCase(), response);
-			this.cache?.set('uuid', response.uuid, response);
-		}
-
-		return response;
 	}
-}
-
-module.exports = Mojang;
+};

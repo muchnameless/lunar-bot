@@ -373,6 +373,6 @@ class LunarMessage extends Message {
 	}
 }
 
-Structures.extend('Message', Message => LunarMessage); // eslint-disable-line no-shadow, no-unused-vars
+Structures.extend('Message', () => LunarMessage);
 
 module.exports = LunarMessage;

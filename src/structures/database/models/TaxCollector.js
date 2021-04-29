@@ -114,9 +114,4 @@ module.exports = class TaxCollector extends Model {
 	async remove() {
 		return this.client.taxCollectors.remove(this);
 	}
-
-	// todo
-	async update() {
-		throw new Error('WIP');
-	}
 };

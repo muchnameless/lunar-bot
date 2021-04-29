@@ -38,6 +38,6 @@ class LunarTextChannel extends TextChannel {
 	}
 }
 
-Structures.extend('TextChannel', TextChannel => LunarTextChannel); // eslint-disable-line no-shadow, no-unused-vars
+Structures.extend('TextChannel', () => LunarTextChannel);
 
 module.exports = LunarTextChannel;

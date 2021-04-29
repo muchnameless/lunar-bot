@@ -24,7 +24,7 @@ const EventEmitter = require('events');
 /**
  * MessageCollector
  */
-class MessageCollector extends EventEmitter {
+module.exports = class MessageCollector extends EventEmitter {
 	/**
 	 * @param {import('./ChatBridge')} chatBridge
 	 * @param {CollectorFilter} filter
@@ -259,6 +259,4 @@ class MessageCollector extends EventEmitter {
 	_handleBotDisconnection() {
 		this.stop('disconnect');
 	}
-}
-
-module.exports = MessageCollector;
+};

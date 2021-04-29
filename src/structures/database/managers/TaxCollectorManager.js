@@ -7,7 +7,7 @@ const ModelManager = require('./ModelManager');
 // const logger = require('../../../functions/logger');
 
 
-class TaxCollectorManager extends ModelManager {
+module.exports = class TaxCollectorManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
@@ -90,6 +90,4 @@ class TaxCollectorManager extends ModelManager {
 
 		return embed;
 	}
-}
-
-module.exports = TaxCollectorManager;
+};
