@@ -32,13 +32,14 @@ module.exports = class Mojang {
 	/**
 	 * bulk convertion (1 <= amount  <= 10) for ign -> uuid
 	 * @param {string[]} usernames
-	 * @returns {Promise<UUIDsResult[]>}
+	 * @returns {Promise<MojangResult[]>}
 	 */
 	igns(usernames, { cache = true } = {}) {
 		if (!Array.isArray(usernames)) throw new TypeError('[Mojang Client]: uuids must be an array');
-		if (!usernames.length || usernames.length > 10) return Promise.reject(new MojangAPIError());
 
 		return (async () => {
+			if (!usernames.length || usernames.length > 10) throw new MojangAPIError();
+
 			const res = await fetch(
 				'https://api.mojang.com/profiles/minecraft',
 				{
