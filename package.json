@@ -45,6 +45,10 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.13.14",
+    "@babel/eslint-plugin": "^7.13.16",
+    "@babel/plugin-syntax-class-properties": "^7.12.13",
+    "@babel/preset-env": "^7.13.15",
     "eslint": "^7.25.0"
   }
 }
