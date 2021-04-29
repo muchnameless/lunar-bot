@@ -627,22 +627,6 @@ class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * checks if the message includes special characters used in certain "memes" or blocked words
-	 * @param {string} string
-	 */
-	static shouldBlock(string) {
-		return memeRegExp.test(string) || blockedWordsRegExp.test(string);
-	}
-
-	/**
-	 * checks the string for any non-whitespace character
-	 * @param {string} string
-	 */
-	static includesNonWhitespace(string) {
-		return nonWhiteSpaceRegExp.test(string);
-	}
-
-	/**
 	 * splits the message into the max ingame chat length, prefixes all parts and sends them
 	 * @param {string} message
 	 * @param {ChatOptions} options
@@ -663,8 +647,8 @@ class ChatBridge extends EventEmitter {
 					}
 				})
 				.filter((part) => {
-					if (this.constructor.includesNonWhitespace(part)) { // filter out white space only parts
-						if (this.constructor.shouldBlock(part)) {
+					if (nonWhiteSpaceRegExp.test(part)) { // filter out white space only parts
+						if (blockedWordsRegExp.test(part) || memeRegExp.test(part)) {
 							if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
 							return success = false;
 						}
@@ -948,7 +932,7 @@ class ChatBridge extends EventEmitter {
 			]);
 
 			return result[0]
-				.map(({ content }) => this.constructor.cleanCommandResponse(content))
+				.map(({ content }) => this.constructor._cleanCommandResponse(content))
 				.join('\n');
 		} catch (error) {
 			// collector ended with reason 'time' or 'disconnect' -> collected nothing
@@ -956,14 +940,14 @@ class ChatBridge extends EventEmitter {
 				if (rejectOnTimeout) Promise.reject(
 					error.length
 						? error
-							.map(({ content }) => this.constructor.cleanCommandResponse(content))
+							.map(({ content }) => this.constructor._cleanCommandResponse(content))
 							.join('\n')
 						: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`,
 				);
 
 				return error.length
 					? error
-						.map(({ content }) => this.constructor.cleanCommandResponse(content))
+						.map(({ content }) => this.constructor._cleanCommandResponse(content))
 						.join('\n')
 					: `no ingame response after ${ms(TIMEOUT_MS, { long: true })}`;
 			}
@@ -1016,7 +1000,7 @@ class ChatBridge extends EventEmitter {
 	 * removes line formatters from the beginning and end
 	 * @param {string} string
 	 */
-	static cleanCommandResponse(string) {
+	static _cleanCommandResponse(string) {
 		return string.replace(/^-{50,}|-{50,}$/g, '').trim();
 	}
 }
