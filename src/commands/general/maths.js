@@ -1,5 +1,6 @@
 'use strict';
 
+const { oneLine } = require('common-tags');
 const { add, sub, mul, div } = require('sinful-math');
 const Lexer = require('lex');
 const { removeFlagsFromArray } = require('../../functions/util');
@@ -8,9 +9,11 @@ const Command = require('../../structures/commands/Command');
 
 
 class Parser {
-	constructor(table, unaryOperators) {
+	/**
+	 * @param {Record<string, Record>} table
+	 */
+	constructor(table) {
 		this.table = table;
-		this.unaryOperators = unaryOperators;
 	}
 
 	/**
@@ -73,7 +76,7 @@ class Parser {
 					// check if token is followed by a unary operator
 					const nonBracketIndex = stack.findIndex(x => x !== '(');
 
-					if (nonBracketIndex !== -1 && this.unaryOperators[stack[nonBracketIndex]]?.precedence === 'right') {
+					if (nonBracketIndex !== -1 && this.table[stack[nonBracketIndex]]?.associativity === 'right') {
 						output.push(stack.splice(nonBracketIndex, 1)[0]);
 					}
 				}
@@ -98,161 +101,176 @@ module.exports = class MathCommand extends Command {
 			usage: '',
 			cooldown: 0,
 		});
-
-		// eslint-disable-next-line prefer-arrow-callback
-		this.lexer = new Lexer(function(c) { throw new Error(`LexerError: unexpected character at index ${this.index}: '${c}'`); })
-			.addRule(/,/, () => void 0) // ignore ','
-			.addRule(/(?:(?<=[(+\-*/^]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!°]/, lexeme => lexeme)
-			.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
-			.addRule(/cos(?:ine|inus)?/i, () => 'cos')
-			.addRule(/tan(?:gen[st])?/i, () => 'tan')
-			.addRule(/sqrt|squareroot/i, () => 'sqrt')
-			.addRule(/exp/i, () => 'exp')
-			.addRule(/ln/, () => 'ln')
-			.addRule(/log/, () => 'log')
-			.addRule(/fac(?:ulty)?/, () => 'fac')
-			.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
-			.addRule(/e(?:uler)?/i, () => Math.E);
-
-		this.degree = {
-			precedence: 6,
-			associativity: 'right',
-		};
-		this.factorialPost = {
-			precedence: 5,
-			associativity: 'right',
-		};
-		this.factorialPre = {
-			precedence: 5,
-			associativity: 'left',
-		};
-		this.power = {
-			precedence: 4,
-			associativity: 'left',
-		};
-		this.func = {
-			precedence: 3,
-			associativity: 'left',
-		};
-		this.factor = {
-			precedence: 2,
-			associativity: 'left',
-		};
-		this.term = {
-			precedence: 1,
-			associativity: 'left',
-		};
-
-		this.binaryOperators = {
-			'^'(a, b) {
-				if (typeof a === 'undefined') throw new Error('`^` is not an unary operator');
-				if (a == 0 && b == 0) return NaN;
-				return a ** b;
-			},
-			'+': (a, b) => (typeof a !== 'undefined' ? add(a, b) : b),
-			'-': (a, b) => (typeof a !== 'undefined' ? sub(a, b) : -b),
-			'*'(a, b) {
-				if (typeof a === 'undefined') throw new Error('`*` is not an unary operator');
-				return mul(a, b);
-			},
-			'/'(a, b) {
-				if (typeof a === 'undefined') throw new Error('`/` is not an unary operator');
-				if (b == 0) return NaN;
-				return div(a, b);
-			},
-			log(a, b) {
-				if (typeof a === 'undefined') throw new Error('`log` requires two arguments (use `ln` for base e)');
-				if (a <= 0 || b <= 0) return NaN;
-				return div(Math.log(a), Math.log(b));
-			},
-		};
-
-		const factorial = (start) => {
-			let temp = 1;
-			let iterations = start;
-			while (iterations > 0) temp *= iterations--;
-			return temp;
-		};
-
-		const isMultipleOfPi = x => div(x, Math.PI) === Math.floor(div(x, Math.PI));
-
-		const isMultipleOfPiHalf = x => div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI));
-
-		this.unaryOperators = {
-			'°'(x) {
-				if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
-				return mul(x, div(Math.PI, 180));
-			},
-			'!'(x) {
-				if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
-				if (x < 0) return NaN;
-				return factorial(x);
-			},
-			fac(x) {
-				if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
-				if (x < 0) return NaN;
-				return factorial(x);
-			},
-			sin(x) {
-				if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
-				if (isMultipleOfPi(x)) return 0;
-				return Math.sin(x);
-			},
-			cos(x) {
-				if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
-				if (isMultipleOfPiHalf(x)) return 0;
-				return Math.cos(x);
-			},
-			tan(x) {
-				if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
-				if (isMultipleOfPi(x)) return 0;
-				if (isMultipleOfPiHalf(x)) return NaN;
-				return Math.tan(x);
-			},
-			sqrt(x) {
-				if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
-				return Math.sqrt(x);
-			},
-			exp(x) {
-				if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
-				return Math.exp(x);
-			},
-			ln(x) {
-				if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
-				return Math.log(x);
-			},
-		};
-
-		this.parser = new Parser(
-			{
-				'°': this.degree,
-				'^': this.power,
-				'!': this.factorialPost,
-				'fac': this.factorialPre,
-				'+': this.term,
-				'-': this.term,
-				'*': this.factor,
-				'/': this.factor,
-				'sin': this.func,
-				'cos': this.func,
-				'tan': this.func,
-				'sqrt': this.func,
-				'exp': this.func,
-				'ln': this.func,
-				'log': this.func,
-			},
-			this.unaryOperators,
-		);
 	}
 
-	parse(input) {
-		this.lexer.setInput(input);
+	static multiplier = {
+		precedence: 7,
+		associativity: 'right',
+	};
+	static degree = {
+		precedence: 6,
+		associativity: 'right',
+	};
+	static factorialPost = {
+		precedence: 5,
+		associativity: 'right',
+	};
+	static factorialPre = {
+		precedence: 5,
+		associativity: 'left',
+	};
+	static power = {
+		precedence: 4,
+		associativity: 'left',
+	};
+	static func = {
+		precedence: 3,
+		associativity: 'left',
+	};
+	static factor = {
+		precedence: 2,
+		associativity: 'left',
+	};
+	static term = {
+		precedence: 1,
+		associativity: 'left',
+	};
+
+	static binaryOperators = {
+		'^'(a, b) {
+			if (typeof a === 'undefined') throw new Error('`^` is not an unary operator');
+			if (a == 0 && b == 0) return NaN;
+			return a ** b;
+		},
+		'+': (a, b) => (typeof a !== 'undefined' ? add(a, b) : b),
+		'-': (a, b) => (typeof a !== 'undefined' ? sub(a, b) : -b),
+		'*'(a, b) {
+			if (typeof a === 'undefined') throw new Error('`*` is not an unary operator');
+			return mul(a, b);
+		},
+		'/'(a, b) {
+			if (typeof a === 'undefined') throw new Error('`/` is not an unary operator');
+			if (b == 0) return NaN;
+			return div(a, b);
+		},
+		log(a, b) {
+			if (typeof a === 'undefined') throw new Error('`log` requires two arguments (use `ln` for base e)');
+			if (a <= 0 || b <= 0) return NaN;
+			return div(Math.log(a), Math.log(b));
+		},
+	};
+
+	static factorial = (start) => {
+		let temp = 1;
+		let iterations = start;
+		while (iterations > 0) temp *= iterations--;
+		return temp;
+	};
+
+	static isMultipleOfPi = x => div(x, Math.PI) === Math.floor(div(x, Math.PI));
+
+	static isMultipleOfPiHalf = x => div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI));
+
+	static unaryOperators = {
+		m(x = 1) {
+			return mul(x, 1_000_000);
+		},
+		k(x = 1) {
+			return mul(x, 1_000);
+		},
+		'°'(x) {
+			if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
+			return mul(x, div(Math.PI, 180));
+		},
+		'!'(x) {
+			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+			if (x < 0) return NaN;
+			return MathCommand.factorial(x);
+		},
+		fac(x) {
+			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+			if (x < 0) return NaN;
+			return MathCommand.factorial(x);
+		},
+		sin(x) {
+			if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
+			if (MathCommand.isMultipleOfPi(x)) return 0;
+			return Math.sin(x);
+		},
+		cos(x) {
+			if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
+			if (MathCommand.isMultipleOfPiHalf(x)) return 0;
+			return Math.cos(x);
+		},
+		tan(x) {
+			if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
+			if (MathCommand.isMultipleOfPi(x)) return 0;
+			if (MathCommand.isMultipleOfPiHalf(x)) return NaN;
+			return Math.tan(x);
+		},
+		sqrt(x) {
+			if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
+			return Math.sqrt(x);
+		},
+		exp(x) {
+			if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
+			return Math.exp(x);
+		},
+		ln(x) {
+			if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
+			return Math.log(x);
+		},
+	};
+
+	/**
+	 * lexer for mathematical expressions
+	 */
+	static lexer = new Lexer(function(c) { throw new Error(`LexerError: unexpected character at index ${this.index}: '${c}'`); }) // eslint-disable-line prefer-arrow-callback
+		.addRule(/,/, () => void 0) // ignore ','
+		.addRule(/(?:(?<=[(+\-*/^]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[(+\-*/)^!°]/, lexeme => lexeme)
+		.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
+		.addRule(/cos(?:ine|inus)?/i, () => 'cos')
+		.addRule(/tan(?:gen[st])?/i, () => 'tan')
+		.addRule(/sqrt|squareroot/i, () => 'sqrt')
+		.addRule(/exp/i, () => 'exp')
+		.addRule(/ln/, () => 'ln')
+		.addRule(/log/, () => 'log')
+		.addRule(/fac(?:ulty)?/, () => 'fac')
+		.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
+		.addRule(/e(?:uler)?/i, () => Math.E)
+		.addRule(/m|k/i, lexeme => lexeme.toLowerCase()); // multiplier
+
+	/**
+	 * parser for reverse polish notation
+	 */
+	static parser = new Parser({
+		m: this.multiplier,
+		k: this.multiplier,
+		'°': this.degree,
+		'^': this.power,
+		'!': this.factorialPost,
+		fac: this.factorialPre,
+		'+': this.term,
+		'-': this.term,
+		'*': this.factor,
+		'/': this.factor,
+		sin: this.func,
+		cos: this.func,
+		tan: this.func,
+		sqrt: this.func,
+		exp: this.func,
+		ln: this.func,
+		log: this.func,
+	});
+
+	static parse(input) {
+		MathCommand.lexer.setInput(input);
 		const tokens = [];
 		let token;
-		while ((token = this.lexer.lex())) tokens.push(token);
+		while ((token = MathCommand.lexer.lex())) tokens.push(token);
 		// logger.debug({ tokens })
 		if (!tokens.length) throw new Error('LexerError: token list empty');
-		return this.parser.parse(tokens);
+		return MathCommand.parser.parse(tokens);
 	}
 
 	/**
@@ -272,9 +290,7 @@ module.exports = class MathCommand extends Command {
 	 * formats a number string
 	 * @param {string} x
 	 */
-	formatNumberString(x) {
-		return x.replace(/(?<!\.[\s\S]*)\B(?=(\d{3})+(?!\d))/g, '\u{202F}');
-	}
+	static formatNumberString = x => x.replace(/(?<!\.[\s\S]*)\B(?=(\d{3})+(?!\d))/g, '\u{202F}');
 
 	/**
 	 * execute the command
@@ -289,11 +305,9 @@ module.exports = class MathCommand extends Command {
 
 		// generate input string
 		const INPUT = rawArgs.join('')
-			.replace(/(?<=\dk*)k/gi, '*1000') // 5k -> 5_000
-			.replace(/(?<=\dm*)m/gi, '*1000000') // 5m -> 5_000_000
 			.replace(/\*\*/g, '^') // 5**3 -> 5^3
 			.replace(/:/g, '/') // 5:3 -> 5/3
-			.replace(/(?<=\d\s*)(?=[a-z(])/gi, '*') // add implicit '*' between numbers before letters and '('
+			.replace(/(?<=\d\s*)(?=[a-jln-z(])/gi, '*') // add implicit '*' between numbers before letters and '('
 			.replace(/(?<=\*)x/gi, '') // 5x3 -> 5*3
 			.replace(/=$/, ''); // 5*3= -> 5*3
 
@@ -301,7 +315,7 @@ module.exports = class MathCommand extends Command {
 
 		// parse
 		try {
-			parsed = this.parse(INPUT);
+			parsed = MathCommand.parse(INPUT);
 		} catch (error) {
 			return message.reply(`${error.message}, input: '${INPUT}'`);
 		}
@@ -318,22 +332,22 @@ module.exports = class MathCommand extends Command {
 			const pop = () => this.validateNumber(stack.pop());
 
 			for (const token of parsed) {
-				if (Reflect.has(this.binaryOperators, token)) {
+				if (Reflect.has(MathCommand.binaryOperators, token)) {
 					const b = pop();
 					const a = pop();
 
 					warning ||= b.warning || a.warning;
 
-					stack.push(this.binaryOperators[token](a.value, b.value));
+					stack.push(MathCommand.binaryOperators[token](a.value, b.value));
 					continue;
 				}
 
-				if (Reflect.has(this.unaryOperators, token)) {
+				if (Reflect.has(MathCommand.unaryOperators, token)) {
 					const a = pop();
 
 					warning ||= a.warning;
 
-					stack.push(this.unaryOperators[token](a.value));
+					stack.push(MathCommand.unaryOperators[token](a.value));
 					continue;
 				}
 
@@ -352,12 +366,15 @@ module.exports = class MathCommand extends Command {
 
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
-		return message.reply(
-			`${this.formatNumberString(INPUT)
+		return message.reply(oneLine`
+			${MathCommand.formatNumberString(INPUT)
 				.replace(/(?<=.)[+\-*/]/g, ' $& ') // add spaces around operators
 				.replace(/,/g, '$& ') // add space after commas
 				.replace(/pi/gi, '\u{03C0}') // prettify 'pi'
-			} = ${this.formatNumberString(output?.toString())}${warning
+			}
+			 = 
+			${MathCommand.formatNumberString(output?.toString())}
+			${warning
 				? `\nwarning: (intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}, calculation may be incorrect`
 				: ''
 			}`,
