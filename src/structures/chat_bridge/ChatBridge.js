@@ -799,19 +799,21 @@ class ChatBridge extends EventEmitter {
 	 * reacts to the message and DMs the author
 	 * @param {import('../extensions/Message')} discordMessage
 	 */
-	static _handleBlockedWord(discordMessage) {
+	static async _handleBlockedWord(discordMessage) {
 		if (!discordMessage) return;
 
 		discordMessage.reactSafely(STOP);
-		discordMessage.author
-			.send(stripIndents`
+
+		try {
+			await discordMessage.author.send(stripIndents`
 				your message (or parts of it) were blocked because you used a banned word or character
 				(the bannned word filter is to comply with hypixel's chat rules)
-			`)
-			.then(
-				() => logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`),
-				error => logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}: ${error}`),
-			);
+			`);
+
+			logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}: ${error}`);
+		}
 	}
 
 	/**
