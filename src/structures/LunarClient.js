@@ -202,11 +202,11 @@ module.exports = class LunarClient extends Client {
 					status: 'online',
 				});
 
-				if (config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`Activity set to ${presence.activities[0].name}`);
+				if (config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[SET PRESENCE]: activity set to ${presence.activities[0].name}`);
 			} catch (error) {
-				logger.error('error while setting activity:\n', error);
+				logger.error(`[SET PRESENCE]: error while setting presence: ${error}`);
 			}
-		}, 20 * 60 * 1_000); // 20 min
+		}, 20 * 60_000); // 20 min
 
 		// schedule guild stats channel update
 		this.schedule('guildStatsChannelUpdate', new CronJob({
