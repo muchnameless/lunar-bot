@@ -1,6 +1,7 @@
 'use strict';
 const { dungeonClasses, dungeonTypes, dungeonXp, runecraftingXp, levelingXp, skillsCap, skillXpPast50, skills, slayers } = require('../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../constants/weight');
+// const logger = require('./logger');
 
 
 /**
@@ -64,7 +65,7 @@ function getWeight(skyblockMember) {
 
 	for (const skill of skills) {
 		const xp = skyblockMember[`experience_skill_${skill}`] ?? 0;
-		const { nonFlooredLevel: level } = getSkillLevel(skill, xp, skill === 'farming' ? 50 + (skyblockMember.jacob2?.perks?.farming_level_cap ?? 0) : null);
+		const { nonFlooredLevel: level } = getSkillLevel(skill, xp);
 
 		let maxXp = Object.values(levelingXp).reduce((acc, currentXp) => acc + currentXp, 0);
 
