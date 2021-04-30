@@ -1265,10 +1265,11 @@ module.exports = class Player extends Model {
 	/**
 	 * returns the true and progression level for the provided skill type
 	 * @param {string} type the skill or dungeon type
-	 * @param {string} offset optional offset value to use instead of the current xp value
+	 * @param {string} [offset=''] optional offset value to use instead of the current xp value
+	 * @param {boolean} [useIndividualCap=true] wether to use the individual max level cap if existing
 	 */
-	getSkillLevel(type, offset = '') {
-		return getSkillLevel(type, this[`${type}Xp${offset}`], type === 'farming' ? this.farmingLvlCap : null);
+	getSkillLevel(type, offset = '', useIndividualCap = true) {
+		return getSkillLevel(type, this[`${type}Xp${offset}`], type === 'farming' && useIndividualCap ? this.farmingLvlCap : null);
 	}
 
 	/**
@@ -1328,7 +1329,7 @@ module.exports = class Player extends Model {
 		let overflow = 0;
 
 		for (const skill of skills) {
-			const { nonFlooredLevel: level } = this.getSkillLevel(skill, offset);
+			const { nonFlooredLevel: level } = this.getSkillLevel(skill, offset, false);
 			const xp = this[`${skill}Xp${offset}`];
 
 			let maxXp = Object.values(levelingXp).reduce((acc, currentXp) => acc + currentXp, 0);
