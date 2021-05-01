@@ -6,8 +6,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class TracklistCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'purge' ],
 			description: 'gained and total weight from members below reqs',
 			args: false,

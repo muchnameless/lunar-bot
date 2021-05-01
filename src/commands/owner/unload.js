@@ -5,8 +5,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class UnloadCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'unload a command',
 			args: true,

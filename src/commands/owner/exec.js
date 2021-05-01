@@ -7,8 +7,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class ExecCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'ex' ],
 			description: 'executes bash code',
 			args: true,

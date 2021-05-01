@@ -9,8 +9,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class HelpCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'h' ],
 			description: 'list of all commands or info about a specific command',
 			usage: '<`command`|`category` name>',

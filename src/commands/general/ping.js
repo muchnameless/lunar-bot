@@ -6,8 +6,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class PingCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'p' ],
 			description: 'check API latency and WebSocket ping',
 			cooldown: 1,

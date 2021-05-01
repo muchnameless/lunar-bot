@@ -9,8 +9,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class TotalCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 't', 'top' ],
 			description: 'guild member leaderboard for total skill lvl / slayer xp',
 			usage: () => stripIndents`

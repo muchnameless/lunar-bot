@@ -6,8 +6,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class BbCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'qt' ],
 			description: 'flushed',
 			args: false,

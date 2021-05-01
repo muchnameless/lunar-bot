@@ -7,8 +7,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class DemoteCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'set a rank of a guild member',
 			args: 2,

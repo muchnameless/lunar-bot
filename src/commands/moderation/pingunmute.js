@@ -6,8 +6,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class PingUnmuteCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'allow a guild member to @mentioning via the chat bridge',
 			args: 1,

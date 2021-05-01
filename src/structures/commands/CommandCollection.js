@@ -52,15 +52,13 @@ module.exports = class CommandCollection extends Collection {
 		return Collection;
 	}
 
-	get invisibleCategories() {
-		return [ 'hidden', 'owner' ];
-	}
+	static INVISIBLE_CATEGORIES = [ 'hidden', 'owner' ];
 
 	/**
 	 * returns all non-hidden commands
 	 */
 	get visible() {
-		return this.filter(({ category }) => !this.invisibleCategories.includes(category));
+		return this.filter(({ category }) => !CommandCollection.INVISIBLE_CATEGORIES.includes(category));
 	}
 
 	/**
@@ -75,7 +73,7 @@ module.exports = class CommandCollection extends Collection {
 	 * returns all visible command categories
 	 */
 	get visibleCategories() {
-		return this.categories.filter(category => !this.invisibleCategories.includes(category)).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+		return this.categories.filter(category => !CommandCollection.INVISIBLE_CATEGORIES.includes(category)).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 	}
 
 	/**

@@ -7,8 +7,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class PurgeRolesCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'removes all roles that the bot manages from non guild members',
 			args: false,

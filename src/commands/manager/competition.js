@@ -8,8 +8,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class CompetitionCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'comp' ],
 			description: 'WIP',
 			guildOnly: false,

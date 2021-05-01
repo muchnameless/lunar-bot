@@ -7,8 +7,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class TaxReminderCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'ping all who have not paid',
 			guildOnly: true,

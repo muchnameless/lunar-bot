@@ -7,8 +7,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class UnlinkCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'delete a link between a discord user and a minecraft ign',
 			args: true,

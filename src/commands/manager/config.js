@@ -6,8 +6,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class ConfigCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'c', 'settings' ],
 			description: 'show and edit the bot\'s config',
 			usage: stripIndents`

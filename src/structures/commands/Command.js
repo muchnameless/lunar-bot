@@ -89,7 +89,7 @@ module.exports = class Command {
 	 * wether the command is part of a visible category
 	 */
 	get visible() {
-		return !this.commandCollection.invisibleCategories.includes(this.category);
+		return !this.commandCollection.constructor.INVISIBLE_CATEGORIES.includes(this.category);
 	}
 
 	/**

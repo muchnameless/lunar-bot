@@ -11,8 +11,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class LinkCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'link a discord user to a minecraft ign',
 			args: true,

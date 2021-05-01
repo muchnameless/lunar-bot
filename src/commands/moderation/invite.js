@@ -7,8 +7,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class InviteCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'invite someone into the guild',
 			args: true,

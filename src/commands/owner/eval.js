@@ -22,8 +22,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class EvalCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'e', 'ev' ],
 			description: 'call js native eval-function on the args',
 			args: true,

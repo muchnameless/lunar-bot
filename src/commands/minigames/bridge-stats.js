@@ -6,8 +6,8 @@ const BwStatsCommand = require('./bedwars-stats');
 
 
 module.exports = class BridgeStatsCommand extends BwStatsCommand {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'bridge' ],
 			description: 'shows a player\'s Bridge stats',
 			args: false,

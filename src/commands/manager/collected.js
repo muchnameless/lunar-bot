@@ -5,8 +5,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class TaxCollectedCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'show a list of taxahs and their collected tax amount',
 			usage: '',

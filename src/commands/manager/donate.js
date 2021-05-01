@@ -8,8 +8,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class DonateCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'register a donation from a player',
 			args: 2,

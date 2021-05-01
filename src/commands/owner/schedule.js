@@ -7,8 +7,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class ScheduleCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 's' ],
 			description: 'schedule a command to be executed at a later time',
 			args: false,

@@ -7,8 +7,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class LinkIssuesCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'issues' ],
 			description: 'list player db and discord role discrepancies',
 			cooldown: 0,

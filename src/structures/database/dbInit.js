@@ -11,10 +11,8 @@ const alter = process.argv.includes('--alter') || process.argv.includes('-a');
 
 sequelize
 	.sync({ force, alter })
-	.then(
-		() => {
-			logger.info('Database synced');
-			sequelize.close();
-		},
-		logger.error,
-	);
+	.then(() => {
+		logger.info('Database synced');
+		return sequelize.close();
+	})
+	.catch(logger.error);

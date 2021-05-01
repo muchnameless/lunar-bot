@@ -7,8 +7,8 @@ const BwStatsCommand = require('./bedwars-stats');
 
 
 module.exports = class SwStatsCommand extends BwStatsCommand {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'swstats' ],
 			description: 'shows a player\'s SkyWars stats',
 			args: false,

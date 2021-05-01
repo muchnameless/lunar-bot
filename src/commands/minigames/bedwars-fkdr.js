@@ -5,8 +5,8 @@ const BwStatsCommand = require('./bedwars-stats');
 
 
 module.exports = class FkdrCommand extends BwStatsCommand {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'fkdr' ],
 			description: 'shows a player\'s BedWars fkdr',
 			args: false,

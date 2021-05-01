@@ -7,8 +7,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class DocsCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'search discord.js docs',
 			args: true,

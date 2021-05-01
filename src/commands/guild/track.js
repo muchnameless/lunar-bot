@@ -10,8 +10,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class TracklistCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'stats graph from the last 30 days',
 			args: false,

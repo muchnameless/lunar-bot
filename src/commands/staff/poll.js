@@ -9,8 +9,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class PollCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'polls' ],
 			description: 'create a poll for both ingame and discord guild chat',
 			args: true,

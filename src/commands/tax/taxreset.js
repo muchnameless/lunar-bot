@@ -7,8 +7,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class TaxResetCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'resettax' ],
 			description: 'reset the tax database',
 			usage: 'no arguments to reset everyone\n<`IGN`|`@mention`> to reset individual tax paid',

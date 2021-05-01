@@ -9,8 +9,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class LeaderboardCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'lb', 'gained' ],
 			description: 'guild member leaderboard for skill / slayer xp gained',
 			usage: () => stripIndents`

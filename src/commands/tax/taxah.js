@@ -6,8 +6,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class TaxAhCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'ah' ],
 			description: 'add / remove a player as tax collector',
 			args: 2,

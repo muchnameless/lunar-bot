@@ -8,8 +8,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class XpResetCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'resetxp' ],
 			description: 'reset the competition xp gained',
 			usage: 'no arguments to reset everyone\n<`IGN`|`@mention`> to reset individual xp gained',

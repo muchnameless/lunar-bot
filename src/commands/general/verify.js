@@ -8,8 +8,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class VerifyCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'link your discord id to your current hypixel discord tag (guild members only)',
 			args: true,

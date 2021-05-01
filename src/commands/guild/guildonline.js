@@ -5,8 +5,8 @@ const GuildListCommand = require('./guildlist');
 
 
 module.exports = class GuildOnlineCommand extends GuildListCommand {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'online' ],
 			description: 'guild online',
 			args: false,

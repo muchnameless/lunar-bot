@@ -7,8 +7,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class TaxPaidCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'paid' ],
 			description: 'manually set a player to paid',
 			args: true,

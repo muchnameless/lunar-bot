@@ -8,8 +8,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class MuteCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'mute a single guild member or guild chat both ingame and for the chat bridge',
 			args: 2,

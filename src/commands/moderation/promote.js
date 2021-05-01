@@ -7,8 +7,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class PromoteCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'promote a guild member',
 			args: true,

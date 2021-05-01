@@ -8,8 +8,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class InfoCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'i' ],
 			description: 'shows general information about the bot',
 			args: false,

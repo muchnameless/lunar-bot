@@ -7,8 +7,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class UnmuteCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'unmute a single guild member or guild chat both ingame and for the chat bridge',
 			args: true,

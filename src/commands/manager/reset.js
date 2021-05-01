@@ -7,8 +7,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class ResetCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: commaListsAnd`alternative way to call ${ResetCommand.TYPES.map(type => `${type}reset`)}`,
 			args: true,

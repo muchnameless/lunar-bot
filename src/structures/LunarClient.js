@@ -184,25 +184,23 @@ module.exports = class LunarClient extends Client {
 
 		await this.logHandler.init();
 
-		const { config, cronJobs } = this;
-
 		this.db.schedule();
 
 		// resume command cron jobs
-		await cronJobs.resume().catch(logger.error);
+		await this.cronJobs.resume().catch(logger.error);
 
 		// set presence again every 20 min cause it get's lost sometimes
 		this.setInterval(async () => {
 			try {
 				const presence = await this.user.setPresence({
 					activity: {
-						name: `${config.get('PREFIX')}help`,
+						name: `${this.config.get('PREFIX')}help`,
 						type: 'LISTENING',
 					},
 					status: 'online',
 				});
 
-				if (config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[SET PRESENCE]: activity set to ${presence.activities[0].name}`);
+				if (this.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[SET PRESENCE]: activity set to ${presence.activities[0].name}`);
 			} catch (error) {
 				logger.error(`[SET PRESENCE]: error while setting presence: ${error}`);
 			}
@@ -256,7 +254,7 @@ module.exports = class LunarClient extends Client {
 		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.chatBridges.connect();
 
 		// log ready
-		logger.debug(`[READY]: startup complete. ${cronJobs.size} CronJobs running. Logging webhook available: ${this.logHandler.webhookAvailable}`);
+		logger.debug(`[READY]: startup complete. ${this.cronJobs.size} CronJobs running. Logging webhook available: ${this.logHandler.webhookAvailable}`);
 	}
 
 	/**

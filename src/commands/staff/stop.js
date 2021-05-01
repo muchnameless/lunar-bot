@@ -5,8 +5,8 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class StopCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'stop the bot. It should restart immediatly',
 			cooldown: 0,
