@@ -49,10 +49,11 @@ module.exports = class PurgeRanksCommand extends RankIssuesCommand {
 		let successCounter = 0;
 
 		for (const { totalWeight, player: { ign } } of belowWeightReq) {
-			const NEW_RANK = hypixelGuild.ranks
-				.filter(({ weightReq }) => totalWeight >= weightReq)
+			const NEW_RANK = (hypixelGuild.ranks
+				.filter(({ weightReq }) => weightReq !== null && totalWeight >= weightReq)
 				.sort((a, b) => a.weightReq - b.weightReq)
 				.pop()
+				?? hypixelGuild.ranks[0])
 				?.name;
 
 			if (!NEW_RANK) {
