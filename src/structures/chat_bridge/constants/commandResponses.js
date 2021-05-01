@@ -109,7 +109,13 @@ module.exports = {
 		regExp: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
 	},
 	setRank: {
-		regExp: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(setRankResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
+		regExp: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(
+			setRankResponses
+				.map(x => (typeof x === 'function' ? x(ign, from, to) : x))
+				.join('|')
+				.replace(/\?<.+?>/g, ''), // remove named capture groups as there would be multiple groups with the same name which is not allowed
+			'i',
+		),
 	},
 	mute: {
 		string: mute,
