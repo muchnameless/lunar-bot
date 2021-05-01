@@ -8,11 +8,34 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class RankIssuesCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [],
 			description: 'list ingame guild rank discrepancies',
 			cooldown: 0,
+		});
+	}
+
+	/**
+	 *
+	 * @param {import('../../structures/database/models/HypixelGuild')} hypixelGuild
+	 * @returns {{ player: import('../../structures/database/models/Player'), totalWeight: number, rank: import('../../structures/database/models/HypixelGuild').GuildRank }[]}
+	 */
+	static getBelowRankReqs(hypixelGuild) {
+		return hypixelGuild.players.array().flatMap((player) => {
+			const rank = player.guildRank;
+
+			if (!rank?.roleID) return []; // unkown or non-requestable rank
+
+			const { totalWeight } = player.getWeight();
+
+			if (totalWeight >= rank.weightReq) return [];
+
+			return {
+				player,
+				totalWeight,
+				rank,
+			};
 		});
 	}
 
@@ -31,24 +54,7 @@ module.exports = class RankIssuesCommand extends Command {
 		let issuesAmount = 0;
 
 		for (const hypixelGuild of this.client.hypixelGuilds.cache.values()) {
-			const belowWeightReq = [];
-
-			for (const player of hypixelGuild.players.values()) {
-				const rank = player.guildRank;
-
-				if (!rank?.roleID) continue; // unkown or non-requestable rank
-
-				const { totalWeight } = player.getWeight();
-
-				if (totalWeight >= rank.weightReq) continue;
-
-				belowWeightReq.push({
-					player,
-					totalWeight,
-					rank,
-				});
-			}
-
+			const belowWeightReq = RankIssuesCommand.getBelowRankReqs(hypixelGuild);
 			const BELOW_WEIGHT_REQ_AMOUNT = belowWeightReq.length;
 
 			issuesAmount += BELOW_WEIGHT_REQ_AMOUNT;
