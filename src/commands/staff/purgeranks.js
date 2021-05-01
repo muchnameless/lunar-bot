@@ -58,8 +58,8 @@ module.exports = class PurgeRanksCommand extends RankIssuesCommand {
 
 			try {
 				await chatBridge.command({
-					command: `g setrank ${ign} ${args[1]}`,
-					responseRegex: demote(ign, undefined, args[1]),
+					command: `g setrank ${ign} ${NEW_RANK}`,
+					responseRegex: demote(ign, undefined, NEW_RANK),
 					rejectOnTimeout: true,
 				});
 
