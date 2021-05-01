@@ -35,7 +35,7 @@ module.exports = class PurgeRanksCommand extends RankIssuesCommand {
 
 		if (!this.force(flags)) {
 			const ANSWER = await message.awaitReply(
-				`demote ${BELOW_WEIGHT_REQ_AMOUNT} from ${hypixelGuild.name}?`,
+				`demote ${BELOW_WEIGHT_REQ_AMOUNT} players from ${hypixelGuild.name}?`,
 				60,
 				{ sameChannel: true },
 			);
