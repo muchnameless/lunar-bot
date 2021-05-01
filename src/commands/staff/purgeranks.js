@@ -1,6 +1,6 @@
 'use strict';
 
-const { setRank: { regExp: setRank } } = require('../../structures/chat_bridge/constants/commandResponses');
+const { demote: { regExp: demote } } = require('../../structures/chat_bridge/constants/commandResponses');
 const RankIssuesCommand = require('./rankissues');
 const logger = require('../../functions/logger');
 
@@ -59,7 +59,7 @@ module.exports = class PurgeRanksCommand extends RankIssuesCommand {
 			try {
 				await chatBridge.command({
 					command: `g setrank ${ign} ${args[1]}`,
-					responseRegex: setRank(ign, undefined, args[1]),
+					responseRegex: demote(ign, undefined, args[1]),
 					rejectOnTimeout: true,
 				});
 
