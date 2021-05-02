@@ -18,19 +18,20 @@ module.exports = async (client, oldMember, newMember) => {
 	if (newMember.guild.id !== config.get('DISCORD_GUILD_ID')) return;
 
 	// received bridger role -> update player db
-	const BRIDGER_ROLE_ID = config.get('BRIDGER_ROLE_ID');
-
-	if (!oldMember.roles.cache.has(BRIDGER_ROLE_ID) && newMember.roles.cache.has(BRIDGER_ROLE_ID)) {
+	if (newMember.roles.cache.has(config.get('BRIDGER_ROLE_ID')) && !oldMember.roles.cache.has(config.get('BRIDGER_ROLE_ID'))) {
+		/** @type {import('../structures/database/models/Player')} */
 		const player = newMember.player ?? await client.players.model.findOne({ where: { discordID: newMember.id } });
 
 		if (!player) return logger.info(`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`);
 
 		logger.info(`[GUILD MEMBER UPDATE]: ${player.ign} | ${newMember.user.tag} received bridger role`);
 
-		player.guildID = GUILD_ID_BRIDGER;
-		player.save();
+		if (player.notInGuild) {
+			player.guildID = GUILD_ID_BRIDGER;
+			player.save();
 
-		client.players.set(player.minecraftUUID, player);
+			client.players.set(player.minecraftUUID, player);
+		}
 	}
 
 	const { player } = newMember;
