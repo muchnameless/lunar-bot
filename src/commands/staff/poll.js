@@ -48,7 +48,8 @@ module.exports = class PollCommand extends Command {
 			if (!inputMatched?.length) return message.reply(this.usageInfo);
 
 			const question = upperCaseFirstChar(inputMatched.shift());
-			const options = inputMatched.map(x => ({ option: x.trim(), votes: new Set() }));
+			/** @type {{number:number,option:string,votes:Set<string>}[]} */
+			const options = inputMatched.map((x, index) => ({ number: index + 1, option: x.trim(), votes: new Set() }));
 
 			if (!options.length) return message.reply('specify poll options to vote for');
 
@@ -67,7 +68,7 @@ module.exports = class PollCommand extends Command {
 			chatBridge.broadcast(stripIndents`
 				poll by ${ign}: type a number to vote (${ms(duration, { long: true })})
 				${question}
-				${options.map(({ option }, index) => `${index + 1}: ${option}`).join('\n')}
+				${options.map(({ number, option }) => `${number}: ${option}`).join('\n')}
 			`);
 
 			// aquire ingame votes
@@ -92,10 +93,10 @@ module.exports = class PollCommand extends Command {
 
 			// count votes and sort options by them
 			const result = options
-				.map(({ option, votes }) => ({ option, votes: votes.size }))
-				.sort((a, b) => b.votes - a.votes);
+				.map(({ votes, ...rest }) => ({ votes: votes.size, ...rest }))
+				.sort(({ votes: votesA }, { votes: votesB }) => votesB - votesA);
 			const TOTAL_VOTES = result.reduce((acc, { votes }) => acc + votes, 0);
-			const resultString = result.map(({ option, votes }, index) => `#${index + 1}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
+			const resultString = result.map(({ number, option, votes }) => `#${number}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
 
 			// reply with result
 			discordChannel.send(new MessageEmbed()
