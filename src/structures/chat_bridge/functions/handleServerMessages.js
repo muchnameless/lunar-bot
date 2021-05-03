@@ -9,6 +9,7 @@ const {
 	spamMessages,
 } = require('../constants/commandResponses');
 const { STOP } = require('../../../constants/emojiCharacters');
+const { invisibleCharacters } = require('../constants/chatBridge');
 const { stringToMS } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
@@ -42,17 +43,20 @@ module.exports = async (message) => {
 	 */
 	if (message.content.startsWith('We blocked your comment ')) {
 		// react to latest message from 'sender' with that content
-		const blockedMatched = message.content.match(new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_REGEXP}): )?(?<blockedContent>[\\s\\S]+)" as it is breaking our rules because it`));
+		const blockedMatched = message.rawContent.match(new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_REGEXP}): )?(?<blockedContent>.+) [${invisibleCharacters.join('')}]*" as it is breaking our rules because it`, 'su'));
 
 		if (blockedMatched) {
 			const { groups: { sender, blockedContent } } = blockedMatched;
 			const senderDiscordID = message.client.players.findByIGN(sender)?.discordID;
 
 			// react to latest message from 'sender' with that content
-			message.chatBridge.discord.get(message.type)?.channel?.messages.cache
-				.sorted(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
-				.find(({ content, author: { id } }) => content.includes(blockedContent) && (senderDiscordID ? id === senderDiscordID : true))
-				?.reactSafely(STOP);
+			for (const { channel } of message.chatBridge.discord.channels.values()) {
+				channel?.messages.cache
+					.filter(({ content, author: { id } }) => (senderDiscordID ? id === senderDiscordID : true) && message.chatBridge.minecraft.parseContent(content).includes(blockedContent))
+					.sort(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
+					.first()
+					?.reactSafely(STOP);
+			}
 		}
 
 		// DM owner to add the blocked content to the filter
