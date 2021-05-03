@@ -68,7 +68,7 @@ process
 	// message
 	client.on('message', async (message) => {
 		if (message.author.bot || message.system || message.webhookID) return; // filter out bot, system & webhook messages
-		if (message.guild && !new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i').test(message)) return; // allow PREFIX and @bot.id
+		if (message.guild && !new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i').test(message.content)) return; // allow PREFIX and @bot.id
 
 		message.reply(`${client.user} is currently unavailable due to maintenance.`);
 		logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} during maintenance`);
