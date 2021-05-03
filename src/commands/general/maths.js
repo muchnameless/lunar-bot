@@ -372,7 +372,7 @@ module.exports = class MathCommand extends Command {
 				.replace(/,/g, '$& ') // add space after commas
 				.replace(/pi/gi, '\u{03C0}') // prettify 'pi'
 			}
-			 = 
+			 =
 			${MathCommand.formatNumberString(output?.toString())}
 			${warning
 				? `\nwarning: (intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}, calculation may be incorrect`
