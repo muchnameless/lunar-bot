@@ -45,7 +45,7 @@ module.exports = class ModelManager {
 
 	/**
 	 * create a new database entry and adds it to the cache
-	 * @param {object} options
+	 * @param {import('sequelize').CreateOptions} options
 	 */
 	async add(options) {
 		const newEntry = await this.model.create(options);
@@ -57,7 +57,7 @@ module.exports = class ModelManager {
 
 	/**
 	 * destroys the db entry and removes it from the collection
-	 * @param {string|Object} idOrInstance The id or instance of something in this Manager
+	 * @param {string|import('sequelize').Model} idOrInstance The id or instance of something in this Manager
 	 */
 	async remove(idOrInstance) {
 		const element = this.resolve(idOrInstance);
@@ -70,8 +70,8 @@ module.exports = class ModelManager {
 
 	/**
 	 * Resolves a data entry to a data Object.
-	 * @param {string|Object} idOrInstance The id or instance of something in this Manager
-	 * @returns {?Object} An instance from this Manager
+	 * @param {string|import('sequelize').Model} idOrInstance The id or instance of something in this Manager
+	 * @returns {?import('sequelize').Model} An instance from this Manager
 	 */
 	resolve(idOrInstance) {
 		if (idOrInstance instanceof this.model) return idOrInstance;
