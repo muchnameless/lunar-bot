@@ -36,9 +36,9 @@ module.exports = class InviteCommand extends Command {
 		const [ IGN ] = args;
 
 		try {
-			const response = await chatBridge.command({
+			const response = await chatBridge.minecraft.command({
 				command: `g invite ${IGN}`,
-				responseRegex: invite(IGN),
+				responseRegExp: invite(IGN),
 			});
 
 			message.reply(stripIndent`

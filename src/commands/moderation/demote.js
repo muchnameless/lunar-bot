@@ -41,9 +41,9 @@ module.exports = class DemoteCommand extends Command {
 			);
 
 		try {
-			const response = await chatBridge.command({
+			const response = await chatBridge.minecraft.command({
 				command: `g demote ${IGN}`,
-				responseRegex: demote(IGN),
+				responseRegExp: demote(IGN),
 			});
 
 			message.reply(stripIndent`

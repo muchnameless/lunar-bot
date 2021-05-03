@@ -62,9 +62,9 @@ module.exports = class PurgeRanksCommand extends RankIssuesCommand {
 			}
 
 			try {
-				await chatBridge.command({
+				await chatBridge.minecraft.command({
 					command: `g setrank ${ign} ${NEW_RANK}`,
-					responseRegex: demote(ign, undefined, NEW_RANK),
+					responseRegExp: demote(ign, undefined, NEW_RANK),
 					rejectOnTimeout: true,
 				});
 

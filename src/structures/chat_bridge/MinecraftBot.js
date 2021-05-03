@@ -15,6 +15,7 @@ const Player = require('../database/models/Player');
  * @property {import('../database/models/Player')} player
  * @property {string} ign
  * @property {string} uuid
+ * @property {boolean} ready
  * @function [chat]
  */
 
@@ -93,6 +94,14 @@ module.exports = async (chatBridge, options) => {
 			get() {
 				return this.username;
 			},
+		},
+
+		/**
+		 * wether the bot is logged in and ready to receive and send chat messages
+		 */
+		ready: {
+			value: false,
+			writable: true,
 		},
 	});
 

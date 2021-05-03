@@ -8,5 +8,5 @@ const logger = require('../../../functions/logger');
  */
 module.exports = (chatBridge) => {
 	logger.error('[CHATBRIDGE END]: Minecraft bot disconnected from server');
-	chatBridge.reconnect();
+	chatBridge.minecraft.reconnect();
 };

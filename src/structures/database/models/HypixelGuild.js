@@ -2,12 +2,11 @@
 
 const { Model, DataTypes } = require('sequelize');
 const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
-const ms = require('ms');
 const { autocorrect, cleanFormattedNumber, compareAlphabetically, safePromiseAll } = require('../../../functions/util');
 const { mutedCheck } = require('../../../functions/database');
 const { promote: { string: { success } } } = require('../../chat_bridge/constants/commandResponses');
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
-const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN, MUTED } = require('../../../constants/emojiCharacters');
+const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, CURRENT, DAY }, UNKNOWN_IGN } = require('../../../constants/database');
 const ChatBridgeError = require('../../errors/ChatBridgeError');
 const hypixel = require('../../../api/hypixel');
@@ -20,6 +19,12 @@ const logger = require('../../../functions/logger');
  * @property {?string} roleID discord role ID associated with the guild rank
  * @property {number} priority hypixel guild rank priority
  * @property {?number} weightReq weight requirement for the guild rank
+ */
+
+/**
+ * @typedef {object} ChatBridgeChannel
+ * @property {string} type
+ * @property {string} channelID
  */
 
 
@@ -70,9 +75,9 @@ module.exports = class HypixelGuild extends Model {
 		 */
 		this.chatMutedUntil;
 		/**
-		 * @type {string}
+		 * @type {ChatBridgeChannel[]}
 		 */
-		this.chatBridgeChannelID;
+		this.chatBridgeChannels;
 		/**
 		 * @type {string}
 		 */
@@ -120,10 +125,10 @@ module.exports = class HypixelGuild extends Model {
 				defaultValue: 0,
 				allowNull: false,
 			},
-			chatBridgeChannelID: {
-				type: DataTypes.STRING,
-				defaultValue: null,
-				allowNull: true,
+			chatBridgeChannels: {
+				type: DataTypes.ARRAY(DataTypes.JSONB), // { channelID: string, type: string }
+				defaultValue: [],
+				allowNull: false,
 			},
 			rankRequestChannelID: {
 				type: DataTypes.STRING,
@@ -174,7 +179,7 @@ module.exports = class HypixelGuild extends Model {
 	 */
 	get chatBridge() {
 		if (!this.chatBridgeEnabled) throw new ChatBridgeError(`${this.name}: chat bridge disabled`, 'disabled');
-		if (!this._chatBridge?.ready) throw new ChatBridgeError(`${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`, this._chatBridge ? 'not ready' : 'missing');
+		if (!this._chatBridge?.minecraft.ready) throw new ChatBridgeError(`${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`, this._chatBridge ? 'not ready' : 'missing');
 		return this._chatBridge;
 	}
 
@@ -218,7 +223,28 @@ module.exports = class HypixelGuild extends Model {
 	 * wether the player is muted and that mute is not expired
 	 */
 	get muted() {
-		return mutedCheck.bind(this)();
+		return mutedCheck(this);
+	}
+
+	/**
+	 * guild players that have a requestable rank without meeting the requirements
+	 */
+	get playersBelowRankReqs() {
+		return this.players.array().flatMap((player) => {
+			const rank = player.guildRank;
+
+			if (!rank?.roleID) return []; // unkown or non-requestable rank
+
+			const { totalWeight } = player.getWeight();
+
+			if (totalWeight >= rank.weightReq) return [];
+
+			return {
+				player,
+				totalWeight,
+				rank,
+			};
+		});
 	}
 
 	/**
@@ -468,15 +494,8 @@ module.exports = class HypixelGuild extends Model {
 			]);
 
 			// update guild xp gained and ingame ranks
-			currentGuildMembers.forEach(async (hypixelGuildMember) => {
-				const player = players.cache.get(hypixelGuildMember.uuid);
-
-				if (!player) return logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
-
-				player.syncWithGuildData(hypixelGuildMember);
-				player.guildRankPriority = this.ranks.find(({ name }) => name === hypixelGuildMember.rank)?.priority ?? (/guild ?master/i.test(hypixelGuildMember.rank) ? this.ranks.length + 1 : 0);
-				player.save();
-			});
+			currentGuildMembers.forEach(hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember)
+				?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`));
 
 			const CHANGES = PLAYERS_LEFT_AMOUNT + membersJoined.length;
 
@@ -630,9 +649,9 @@ module.exports = class HypixelGuild extends Model {
 			await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
 		} else {
 			// set ingame rank and discord role
-			await this.chatBridge.command({
+			await this.chatBridge.minecraft.command({
 				command: `g setrank ${player.ign} ${RANK_NAME}`,
-				responseRegex: new RegExp(success(player.ign, player.guildRank?.name, RANK_NAME), 'i'), // listen for successful ingame promotion message
+				responseRegExp: new RegExp(success(player.ign, player.guildRank?.name, RANK_NAME), 'i'), // listen for successful ingame promotion message
 				rejectOnTimeout: true,
 			});
 
@@ -646,60 +665,8 @@ module.exports = class HypixelGuild extends Model {
 	}
 
 	/**
-	 * forwards a message to the ingame chat if neither the player nor the whole guild chat is muted
-	 * @param {import('../../extensions/Message')} message discord message which was send in the #guild-general channel
+	 * the name of the guild
 	 */
-	async handleChatBridgeMessage(message) {
-		try {
-			// message is from bot
-			if (message.author.id === this.client.user.id) return;
-
-			const { chatBridge } = this;
-
-			// message is from chatBridge webhook
-			if (message.webhookID === chatBridge.webhook.id) return;
-
-			const { player } = message.author;
-
-			// check if player is muted
-			if (player?.muted) {
-				message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
-					() => logger.info(`[GUILD CHATBRIDGE]: ${player.logInfo}: DMed muted user`),
-					error => logger.error(`[GUILD CHATBRIDGE]: ${player.logInfo}: error DMing muted user: ${error}`),
-				);
-
-				return message.reactSafely(MUTED);
-			}
-
-			// check if guild chat is muted
-			if (this.muted && !player.isStaff) {
-				message.author.send(`${this.name}'s guild chat is currently muted for ${ms(this.chatMutedUntil - Date.now(), { long: true })}`).then(
-					() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
-					error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error}`),
-				);
-
-				return message.reactSafely(MUTED);
-			}
-
-			// check if the chatBridge bot is muted
-			if (chatBridge.bot.player.muted) {
-				message.author.send(`the bot is currently muted for ${ms(chatBridge.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
-					() => logger.info(`[GUILD CHATBRIDGE]: ${player?.logInfo}: DMed bot muted`),
-					error => logger.error(`[GUILD CHATBRIDGE]: ${player?.logInfo}: error DMing bot muted: ${error}`),
-				);
-
-				return message.reactSafely(MUTED);
-			}
-
-			await chatBridge.forwardDiscordMessageToHypixelGuildChat(message, player);
-		} catch (error) {
-			if (error.status === 'disabled') return;
-
-			logger.warn(`[GUILD CHATBRIDGE]: ${this.name}: ${error}`);
-			message.reactSafely(X_EMOJI);
-		}
-	}
-
 	toString() {
 		return this.name;
 	}

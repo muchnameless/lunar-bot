@@ -41,9 +41,9 @@ module.exports = class DemoteCommand extends Command {
 			);
 
 		try {
-			const response = await chatBridge.command({
+			const response = await chatBridge.minecraft.command({
 				command: `g setrank ${IGN} ${args[1]}`,
-				responseRegex: setRank(IGN, undefined, args[1]),
+				responseRegExp: setRank(IGN, undefined, args[1]),
 			});
 
 			message.reply(stripIndent`

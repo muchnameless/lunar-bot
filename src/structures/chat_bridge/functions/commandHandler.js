@@ -15,9 +15,9 @@ const logger = require('../../../functions/logger');
 module.exports = async (message) => {
 	if (!message.author || !message.content.length) return;
 
-	const { chatBridge, client } = message;
+	const { client } = message;
 	const { config } = client;
-	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), escapeRegex(config.get('INGAME_PREFIX')), `@${chatBridge.bot.ign}` ].join('|')})`, 'i').exec(message.content); // PREFIX, INGAME_PREFIX, @mention
+	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), escapeRegex(config.get('INGAME_PREFIX')), `@${message.chatBridge.bot.ign}` ].join('|')})`, 'i').exec(message.content); // PREFIX, INGAME_PREFIX, @mention
 
 	// must use prefix for commands in guild
 	if (!prefixMatched && message.type !== WHISPER) return;

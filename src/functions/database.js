@@ -3,16 +3,17 @@ const logger = require('./logger');
 
 
 /**
- * checks wether the caller is currently muted
+ * checks wether the model instance is currently muted
+ * @param {import('sequelize').Model} model
  */
-module.exports.mutedCheck = function() {
-	if (this.chatBridgeMutedUntil) {
+module.exports.mutedCheck = function(model) {
+	if (model.chatBridgeMutedUntil) {
 		// mute hasn't expired
-		if (Date.now() < this.chatBridgeMutedUntil) return true;
+		if (Date.now() < model.chatBridgeMutedUntil) return true;
 
 		// mute has expired
-		this.chatBridgeMutedUntil = 0;
-		this.save().catch(logger.error);
+		model.chatBridgeMutedUntil = 0;
+		model.save().catch(logger.error);
 	}
 
 	return false;

@@ -8,6 +8,7 @@ class LunarDMChannel extends DMChannel {
 	/**
 	 * wether the channel is a ticket by yagpdb
 	 */
+	// eslint-disable-next-line class-methods-use-this
 	get isTicket() {
 		return false;
 	}

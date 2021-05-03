@@ -1,0 +1,705 @@
+'use strict';
+
+const { Util: { splitMessage } } = require('discord.js');
+const { stripIndents } = require('common-tags');
+const ms = require('ms');
+const emojiRegex = require('emoji-regex/es2015')();
+const { sleep, trim, cleanFormattedNumber } = require('../../../functions/util');
+const { unicodeToName } = require('../constants/emojiNameUnicodeConverter');
+const { memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
+const { spamMessages } = require('../constants/commandResponses');
+const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
+const { MC_CLIENT_VERSION } = require('../constants/settings');
+const minecraftBot = require('../MinecraftBot');
+const AsyncQueue = require('../../AsyncQueue');
+const MessageCollector = require('../MessageCollector');
+const ChatManager = require('./ChatManager');
+const logger = require('../../../functions/logger');
+
+
+module.exports = class MinecraftChatManager extends ChatManager {
+	constructor(...args) {
+		super(...args);
+
+		/**
+		 * message that is currently being forwarded to in game chat
+		 * @type {?import('../../extensions/Message')}
+		 */
+		this.discordMessage = null;
+		/**
+		 * current retry when resending messages
+		 */
+		this.retries = 0;
+		/**
+		 * how many messages have been sent to in game chat in the last 10 seconds
+		 */
+		this.messageCounter = 0;
+		/**
+		 * @type {?string}
+		 */
+		this._contentFilter = null;
+		/**
+		 * wether the message sent collector is active
+		 */
+		this._collecting = false;
+		/**
+		 * resolves this._promise
+		 */
+		this._resolve;
+		/**
+		 * @type {Promise<'spam'|'blocked'|import('../HypixelMessage')>}
+		 */
+		this._promise = new Promise(res => this._resolve = res);
+		/**
+		 * async queue for minecraft commands, prevents multiple response collectors
+		 */
+		this.commandQueue = new AsyncQueue();
+		/**
+		 * @type {import('../MinecraftBot').MinecraftBot}
+		 */
+		this.bot = null;
+		/**
+		 * disconnect the bot if it hasn't successfully spawned in 60 seconds
+		 */
+		this.abortLoginTimeout = null;
+		/**
+		  * scheduled reconnection
+		  */
+		this._reconnectTimeout = null;
+		/**
+		  * increases each login, reset to 0 on successfull spawn
+		  */
+		this.loginAttempts = 0;
+		/**
+		 * wether the chatBridge mc bot is currently isReconnecting (prevents executing multiple reconnections)
+		 */
+		this._isReconnecting = false;
+		/**
+		  * to prevent chatBridge from reconnecting at <MinecraftBot>.end
+		  */
+		this.shouldReconnect = true;
+
+		Object.defineProperties(this, {
+			server: {
+				async get() {
+					try {
+						const result = await this.command({
+							command: 'locraw',
+							responseRegExp: /^{.+}$/,
+							force: true,
+							max: 1,
+						});
+
+						return JSON.parse(result).server ?? null;
+					} catch (error) {
+						logger.error(`[GET SERVER]: ${error}`);
+						return null;
+					}
+				},
+			},
+			chatReady: {
+				async get() {
+					if (!this.bot) return false;
+
+					try {
+						await this.command({
+							command: `w ${this.chatBridge.bot.ign} o/`,
+							responseRegExp: /^You cannot message this player\.$/,
+							timeout: 1,
+							rejectOnTimeout: true,
+							max: 1,
+						});
+
+						return true;
+					} catch {
+						return false;
+					}
+				},
+			},
+		});
+	}
+
+	get ready() {
+		return this.bot?.ready ?? false;
+	}
+
+	set ready(value) {
+		if (this.bot) {
+			this.bot.ready = value;
+		}
+	}
+
+	/**
+	 * @returns {Promise<string>}
+	 */
+	get server() {} // eslint-disable-line no-empty-function, class-methods-use-this, getter-return
+
+	/**
+	 * wether the minecraft bot can send chat messages
+	 * @returns {Promise<boolean>}
+	 */
+	get chatReady() {} // eslint-disable-line no-empty-function, class-methods-use-this, getter-return
+
+	/**
+	 * create bot instance, loads and binds it's events and logs it into hypixel
+	 */
+	async _createBot() {
+		return this.bot = await minecraftBot(this.chatBridge, {
+			host: process.env.MINECRAFT_SERVER_HOST,
+			port: Number(process.env.MINECRAFT_SERVER_PORT),
+			username: process.env.MINECRAFT_USERNAME.split(' ')[this.mcAccount],
+			password: process.env.MINECRAFT_PASSWORD.split(' ')[this.mcAccount],
+			version: MC_CLIENT_VERSION,
+			auth: process.env.MINECRAFT_ACCOUNT_TYPE.split(' ')[this.mcAccount],
+		});
+	}
+
+	/**
+	 * create and log the bot into hypixel
+	 */
+	async connect() {
+		if (!this.shouldReconnect) throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
+
+		if (this.ready) {
+			logger.info(`[CHATBRIDGE]: ${this.logInfo}: already connected`);
+			return this.chatBridge;
+		}
+
+		// reconnect the bot if it hasn't successfully spawned in 60 seconds
+		this.abortLoginTimeout = setTimeout(() => {
+			logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
+			this.reconnect(0);
+		}, Math.min(++this.loginAttempts * 60_000, 300_000));
+
+		await this._createBot();
+
+		this._isReconnecting = false;
+
+		return this.chatBridge;
+	}
+
+	/**
+	 * reconnects the bot
+	 * @param {?number} loginDelay delay in ms
+	 */
+	reconnect(loginDelay = Math.min(this.loginAttempts * 5_000, 300_000)) {
+		// prevent multiple reconnections
+		if (this._isReconnecting) return this.chatBridge;
+		this._isReconnecting = true;
+
+		this.disconnect();
+
+		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
+
+		this._reconnectTimeout = setTimeout(() => {
+			this.connect();
+			this._reconnectTimeout = null;
+		}, loginDelay);
+
+		return this.chatBridge;
+	}
+
+	/**
+	 * disconnects the bot
+	 */
+	disconnect() {
+		clearTimeout(this._reconnectTimeout);
+		clearTimeout(this.abortLoginTimeout);
+		this._reconnectTimeout = null;
+		this.abortLoginTimeout = null;
+
+		try {
+			this.bot?.quit() ?? logger.warn('[CHATBRIDGE DISCONNECT]: no bot to disconnect');
+		} catch (error) {
+			logger.error('[CHATBRIDGE DISCONNECT]:', error);
+		}
+
+		return this.chatBridge;
+	}
+
+	/**
+	 * @param {string|import('../HypixelMessage')} value
+	 */
+	_resolveAndReset(value) {
+		this._resolve(value);
+		this._resetFilter();
+		this._promise = new Promise(res => this._resolve = res);
+	}
+
+	/**
+	 * @param {import('../HypixelMessage')} message
+	 */
+	collect(message) {
+		if (!this._collecting) return;
+		if (message.me && message.content.endsWith(this._contentFilter)) return this._resolveAndReset(message);
+		if (message.type) return;
+		if (spamMessages.includes(message.content)) return this._resolveAndReset('spam');
+		if (message.content.startsWith('We blocked your comment')) return this._resolveAndReset('blocked');
+	}
+
+	/**
+	 * returns a Promise that resolves with a message that ends with the provided content
+	 * @param {string} content
+	 */
+	listenFor(content) {
+		this._contentFilter = content;
+		this._collecting = true;
+		return this._promise;
+	}
+
+	/**
+	 * resets the listener filter
+	 */
+	_resetFilter() {
+		this._contentFilter = null;
+		this._collecting = false;
+	}
+
+	/**
+	 * maximum attempts to resend to in game chat
+	 */
+	static maxRetries = 3;
+
+	/**
+	 * normal delay to listen for error messages
+	 */
+	static delays = [
+		null,
+		100,
+		100,
+		100,
+		120,
+		150,
+		600,
+	];
+
+	/**
+	 * increased delay which can be used to send messages to in game chat continously
+	 */
+	static SAFE_DELAY = 600;
+
+	/**
+	 * 100 pre 1.10.2, 256 post 1.10.2
+	 * @type {number}
+	 */
+	static MAX_MESSAGE_LENGTH = require('minecraft-data')(MC_CLIENT_VERSION).version.version > require('minecraft-data')('1.10.2').version.version
+		? 256
+		: 100;
+
+	/**
+	 * increasing delay
+	 */
+	get delay() {
+		return MinecraftChatManager.delays[this._tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
+	}
+
+	/**
+	 * increments messageCounter for 10 seconds
+	 */
+	_tempIncrementCounter() {
+		setTimeout(() => --this.messageCounter, 10_000);
+		return ++this.messageCounter;
+	}
+
+	/**
+	 * collects chat messages from the bot
+	 * @param {import('../MessageCollector').CollectorFilter} filter
+	 * @param {import('../MessageCollector').MessageCollectorOptions} options
+	 */
+	createMessageCollector(filter, options = {}) {
+		return new MessageCollector(this.chatBridge, filter, options);
+	}
+
+	/**
+	 * pads the input string with random invisible chars to bypass the hypixel spam filter
+	 * @param {string} string
+	 * @param {string} [prefix='']
+	 */
+	_hypixelSpamBypass(string, prefix = '') {
+		// string is already at or above max length
+		if (string.length + prefix.length >= MinecraftChatManager.MAX_MESSAGE_LENGTH) return trim(string, MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length);
+
+		// padding failed at least once -> splice the entire input string with random invisible chars
+		if (this.retries) {
+			const input = string.split('');
+
+			// max message length is 256 post 1.11, 100 pre 1.11
+			for (let index = MinecraftChatManager.MAX_MESSAGE_LENGTH - string.length - prefix.length + 1; --index;) {
+				input.splice(Math.floor(Math.random() * input.length), 0, randomInvisibleCharacter());
+			}
+
+			return `${prefix}${input.join('')}`;
+		}
+
+		// default padding (only add the end)
+		let padding = '';
+
+		for (let index = MinecraftChatManager.MAX_MESSAGE_LENGTH - string.length - prefix.length; --index;) {
+			padding += randomInvisibleCharacter();
+		}
+
+		return `${prefix}${string} ${padding}`;
+	}
+
+	/**
+	 * escapes all standalone occurrences of 'ez', case-insensitive
+	 * @param {string} string
+	 */
+	static escapeEz(string) {
+		return string.replace(/(?<=\be+)(?=z+\b)/gi, randomInvisibleCharacter());
+	}
+
+	/**
+	 * discord renders -> readable string
+	 * @param {string} string
+	 */
+	parseContent(string) {
+		return MinecraftChatManager.escapeEz(
+			cleanFormattedNumber(string)
+				.replace(invisibleCharacterRegExp, '')
+				.replace(/<?(?:a)?:?(\w{2,32}):(?:\d{17,19})>?/g, ':$1:') // custom emojis
+				.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
+				.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
+				.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
+					const channelName = this.client.channels.cache.get(p1)?.name;
+					if (channelName) return `#${channelName}`;
+					return match;
+				})
+				.replace(/<@&(\d{17,19})>/g, (match, p1) => { // roles
+					const roleName = this.client.lgGuild?.roles.cache.get(p1)?.name;
+					if (roleName) return `@${roleName}`;
+					return match;
+				})
+				.replace(/<@!?(\d{17,19})>/g, (match, p1) => { // users
+					const displayName = this.client.lgGuild?.members.cache.get(p1)?.displayName ?? this.client.users.cache.get(p1)?.username;
+					if (displayName) return `@${displayName}`;
+					return match;
+				}),
+		);
+	}
+
+	/**
+	 * send a message to ingame guild chat
+	 * @param {string} content
+	 * @param {import('../ChatBridge').ChatOptions} options
+	 */
+	async gchat(content, { prefix = '', ...options } = {}) {
+		if (this.bot.player.muted) {
+			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) {
+				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${content}`);
+			}
+
+			return false;
+		}
+
+		return this.chat(content, { prefix: `/gc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
+	}
+
+	/**
+	 * send a message to ingame guild chat
+	 * @param {string} content
+	 * @param {import('../ChatBridge').ChatOptions} options
+	 */
+	async ochat(content, { prefix = '', ...options } = {}) {
+		return this.chat(content, { prefix: `/oc ${prefix}${prefix.length ? ' ' : ''}`, ...options });
+	}
+
+	/**
+	 * send a message to ingame party chat
+	 * @param {string} content
+	 * @param {import('../ChatBridge').ChatOptions} options
+	 */
+	async pchat(content, { prefix = '', ...options } = {}) {
+		return this.chat(content, { prefix: `/pc ${prefix}${prefix.length ? ' ' : ''}`, ...options });
+	}
+
+	/**
+	 * splits the message into the max ingame chat length, prefixes all parts and sends them
+	 * @param {string} content
+	 * @param {import('../ChatBridge').ChatOptions} options
+	 * @returns {Promise<boolean>} success - wether all message parts were send
+	 */
+	async chat(content, { prefix = '', maxParts = this.client.config.getNumber('DEFAULT_MAX_PARTS'), discordMessage } = {}) {
+		let success = true;
+
+		/** @type {Set<string>} */
+		const messageParts = new Set(
+			this.parseContent(content)
+				.split('\n')
+				.flatMap((part) => {
+					try {
+						return splitMessage(part, { char: ' ', maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length });
+					} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '
+						return splitMessage(part, { char: '', maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length });
+					}
+				})
+				.filter((part) => {
+					if (nonWhiteSpaceRegExp.test(part)) { // filter out white space only parts
+						if (blockedWordsRegExp.test(part) || memeRegExp.test(part)) {
+							if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
+							return success = false;
+						}
+						return true;
+					}
+
+					// part consists of only whitespace characters -> ignore
+					if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+					return false;
+				}),
+		);
+
+		if (!success) MinecraftChatManager._handleBlockedWord(discordMessage);
+
+		if (!messageParts.size) return false;
+
+		if (messageParts.size > maxParts) {
+			discordMessage?.reactSafely(STOP);
+			discordMessage?.author
+				.send(stripIndents`
+					you are only allowed to send up to ${maxParts} messages at once (therefore the bridge skipped ${messageParts.size - maxParts} part${messageParts.size - maxParts !== 1 ? 's' : ''} of your message)
+					(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
+				`)
+				.then(
+					() => logger.info(`[CHAT BRIDGE CHAT]: DMed ${discordMessage.author.tag}`),
+					error => logger.error(`[CHAT BRIDGE CHAT]: error DMing ${discordMessage.author.tag}: ${error}`),
+				);
+		}
+
+		let partCount = 0;
+
+		// waits between queueing each part to not clog up the queue if someone spams
+		for (const part of messageParts) {
+			if (++partCount <= maxParts) { // prevent sending more than 'maxParts' messages
+				await this.sendToChat(part, { prefix, discordMessage, shouldUseSpamByPass: true });
+			} else {
+				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: skipped '${prefix}${part}'`);
+				success = false;
+			}
+		}
+
+		return success;
+	}
+
+	/**
+	 * queue a message for the ingame chat
+	 * @param {string} content
+	 * @param {object} [options]
+	 * @param {string} [options.prefix='']
+	 * @param {boolean} [options.shouldUseSpamByPass=false]
+	 * @param {import('../extensions/Message')} [options.discordMessage=null]
+	 */
+	async sendToChat(content, { discordMessage = null, ...options } = {}) {
+		if (discordMessage?.deleted) {
+			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${options.prefix ?? ''}${content}'`);
+			return;
+		}
+
+		await this.queue.wait();
+
+		try {
+			this.discordMessage = discordMessage;
+			this.retries = 0;
+
+			return await this._sendToChat(content, options);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
+		} finally {
+			this.discordMessage = null;
+			this.queue.shift();
+		}
+	}
+
+	/**
+	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat'
+	 * @private
+	 * @param {string} content
+	 * @param {object} [options]
+	 * @param {string} [options.prefix='']
+	 * @param {boolean} [options.shouldUseSpamByPass=false]
+	 * @returns {Promise<boolean>}
+	 */
+	async _sendToChat(content, { prefix = '', shouldUseSpamByPass = false } = {}) {
+		// create listener
+		const listener = this.listenFor(content);
+
+		try {
+			// send message to in game chat
+			this.bot.chat(shouldUseSpamByPass
+				? this._hypixelSpamBypass(content, prefix)
+				: `${prefix}${content}`,
+			);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE _CHAT]: ${error}`);
+			this.discordMessage?.reactSafely(X_EMOJI);
+			this._tempIncrementCounter();
+			this._resetFilter();
+			return false;
+		}
+
+		// listen for responses
+		const response = await Promise.race([
+			listener,
+			sleep(MinecraftChatManager.SAFE_DELAY, 'timeout'),
+		]);
+
+		switch (response) {
+			// collector collected nothing, sleep won the race
+			case 'timeout': {
+				this._tempIncrementCounter();
+				this._resetFilter();
+
+				if (!this.ready) {
+					this.discordMessage?.reactSafely(X_EMOJI);
+					return false;
+				}
+
+				return true;
+			}
+
+			// anti spam failed -> retry
+			case 'spam': {
+				this._tempIncrementCounter();
+
+				// max retries reached
+				if (++this.retries === MinecraftChatManager.maxRetries) {
+					this.discordMessage?.reactSafely(X_EMOJI);
+					await sleep(this.retries * MinecraftChatManager.SAFE_DELAY);
+					return false;
+				}
+
+				await sleep(this.retries * MinecraftChatManager.SAFE_DELAY);
+				return this._sendToChat.apply(this, arguments); // eslint-disable-line prefer-spread
+			}
+
+			// hypixel filter blocked message
+			case 'blocked': {
+				MinecraftChatManager._handleBlockedWord(this.discordMessage);
+				await sleep(this.delay);
+				return false;
+			}
+
+			// message sent successfully
+			default: {
+				await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
+					? this.delay
+					: (this._tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY),
+				);
+				return true;
+			}
+		}
+	}
+
+	/**
+	 * reacts to the message and DMs the author
+	 * @param {import('../extensions/Message')} discordMessage
+	 */
+	static async _handleBlockedWord(discordMessage) {
+		if (!discordMessage) return;
+
+		discordMessage.reactSafely(STOP);
+
+		try {
+			await discordMessage.author.send(stripIndents`
+				your message (or parts of it) were blocked because you used a banned word or character
+				(the bannned word filter is to comply with hypixel's chat rules)
+			`);
+
+			logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}: ${error}`);
+		}
+	}
+
+	/**
+	 * sends a message to ingame chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
+	 * @param {object} options
+	 * @param {string} options.command can also directly be used as the only parameter
+	 * @param {RegExp} [options.responseRegExp=new RegExp()] regex to use as a filter for the message collector
+	 * @param {number} [options.max=-1] maximum amount of response messages, -1 or Infinity for an infinite amount
+	 * @param {boolean} [options.raw=false] wether to return the full hypixel message instead of just the content
+	 * @param {number} [options.timeout=config.getNumber('INGAME_RESPONSE_TIMEOUT')] response collector timeout in seconds
+	 * @param {boolean} [options.rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
+	 */
+	// eslint-disable-next-line no-undef
+	async command({ command = arguments[0], responseRegExp = new RegExp(), max = -1, raw = false, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+		await this.commandQueue.wait();
+
+		const collector = this.createMessageCollector(
+			message => !message.type && (responseRegExp.test(message.content) || /^-{50,}/.test(message.content)),
+			{
+				time: timeout * 1_000,
+			},
+		);
+
+		let resolve;
+		let reject;
+
+		/** @type {Promise<string|import('../HypixelMessage')[]>} */
+		const promise = new Promise((res, rej) => {
+			resolve = res;
+			reject = rej;
+		});
+
+		collector.on('collect', (/** @type {import('../HypixelMessage')} */ message) => {
+			// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
+			if (/^-{50,}[^-]+-{50,}$/.test(message.content)) return collector.stop();
+
+			if (/^-{50,}$/.test(message.content)) { // is line separator
+				collector.collected.pop();
+				if (collector.collected.length) collector.stop();
+			} else if (collector.collected.length === max) { // message is not a line separator
+				collector.stop();
+			}
+		});
+
+		collector.once('end', (/** @type {import('../HypixelMessage')[]} */ collected, /** @type {string} */ reason) => {
+			this.commandQueue.shift();
+
+			switch (reason) {
+				case 'time':
+				case 'disconnect': {
+					if (rejectOnTimeout && !collected.length) {
+						return reject(raw
+							? collected
+							: `no ingame response after ${ms(timeout * 1_000, { long: true })}`,
+						);
+					}
+
+					return resolve(raw
+						? collected
+						: collected.length
+							? MinecraftChatManager._cleanCommandResponse(collected)
+							: `no ingame response after ${ms(timeout * 1_000, { long: true })}`);
+				}
+
+				default:
+					return resolve(raw
+						? collected
+						: MinecraftChatManager._cleanCommandResponse(collected),
+					);
+			}
+		});
+
+		this.sendToChat(trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1));
+
+		return promise;
+	}
+
+	/**
+	 * removes line formatters from the beginning and end
+	 * @param {string} string
+	 */
+	static _cleanSingleCommandResponse(string) {
+		return string.replace(/^-{50,}|-{50,}$/g, '').trim();
+	}
+
+	/**
+	 * returns a single string from all cleaned contents
+	 * @param {import('../HypixelMessage')} messages
+	 */
+	static _cleanCommandResponse(messages) {
+		return messages
+			.map(({ content }) => this._cleanSingleCommandResponse(content))
+			.join('\n');
+	}
+};

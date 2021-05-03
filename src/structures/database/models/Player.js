@@ -111,42 +111,88 @@ module.exports = class Player extends Model {
 		// 	});
 		// }
 
-		Object.defineProperty(this, 'discordMember', {
-			/**
-			 * fetches the discord member if the discord id is valid and the player is in lg discord
-			 * @type {Promise<?LunarGuildMember>}
-			 */
-			async get() {
-				if (this._discordMember) return this._discordMember;
-				if (!this.inDiscord) return null;
+		Object.defineProperties(this, {
+			discordMember: {
+				/**
+				 * @type {Promise<?LunarGuildMember>}
+				 */
+				async get() {
+					if (this._discordMember) return this._discordMember;
+					if (!this.inDiscord) return null;
 
-				try {
-					return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordID ?? (() => { throw new TypeError('discordID must be a string'); })) ?? null;
-				} catch (error) {
-					this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
-					this.save();
-					logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error}`);
-					return this._discordMember = null;
-				}
-			},
-			set(member) {
-				if (member == null) {
-					if (!this.inDiscord) return;
+					try {
+						return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordID ?? (() => { throw new TypeError('discordID must be a string'); })) ?? null;
+					} catch (error) {
+						this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
+						this.save();
+						logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error}`);
+						return this._discordMember = null;
+					}
+				},
+				set(member) {
+					if (member == null) {
+						if (!this.inDiscord) return;
 
-					this.inDiscord = false;
+						this.inDiscord = false;
+						this.save({ fields: [ 'inDiscord' ] });
+
+						return;
+					}
+
+					if (!(member instanceof LunarGuildMember)) throw new TypeError(`[SET DISCORD MEMBER]: ${this.logInfo}: member must be a LunarGuildMember`);
+
+					this._discordMember = member;
+
+					if (this.inDiscord) return;
+
+					this.inDiscord = true;
 					this.save({ fields: [ 'inDiscord' ] });
+				},
+			},
 
-					return;
-				}
+			taxAmount: {
+				/**
+				 * @returns {Promise<number>}
+				 */
+				async get() {
+					const result = await this.client.db.models.Transaction.findAll({
+						limit: 1,
+						where: {
+							from: this.minecraftUUID,
+							type: 'tax',
+						},
+						order: [ [ 'createdAt', 'DESC' ] ],
+						attributes: [ 'amount' ],
+						raw: true,
+					});
 
-				if (!(member instanceof LunarGuildMember)) throw new TypeError(`[SET DISCORD MEMBER]: ${this.logInfo}: member must be a LunarGuildMember`);
+					return result.length
+						? result[0].amount
+						: null;
+				},
 
-				this._discordMember = member;
+			},
 
-				if (this.inDiscord) return;
-
-				this.inDiscord = true;
-				this.save({ fields: [ 'inDiscord' ] });
+			transactions: {
+				/**
+				 * @returns {Promise<ParsedTransaction[]>}
+				 */
+				async get() {
+					return Promise.all(
+						(await this.client.db.models.Transaction.findAll({
+							where: {
+								from: this.minecraftUUID,
+							},
+							order: [ [ 'createdAt', 'DESC' ] ],
+							raw: true,
+						}))
+							.map(async transaction => ({
+								...transaction,
+								fromIGN: this.ign,
+								toIGN: (this.client.players.cache.get(transaction.to) ?? await mojang.uuid(transaction.to).catch(logger.error))?.ign,
+							})),
+					);
+				},
 			},
 		});
 	}
@@ -307,7 +353,7 @@ module.exports = class Player extends Model {
 	 * wether the player is a bridger or error case
 	 */
 	get notInGuild() {
-		return [ GUILD_ID_BRIDGER, GUILD_ID_ERROR ].includes(this.guildID);
+		return [ null, GUILD_ID_BRIDGER, GUILD_ID_ERROR ].includes(this.guildID);
 	}
 
 	// the following is just for JSDOC's sake
@@ -338,7 +384,6 @@ module.exports = class Player extends Model {
 
 	/**
 	 * returns the player's guild name
-	 * @returns {string}
 	 */
 	get guildName() {
 		switch (this.guildID) {
@@ -362,7 +407,6 @@ module.exports = class Player extends Model {
 
 	/**
 	 * returns a string with the ign and guild name
-	 * @returns {string}
 	 */
 	get logInfo() {
 		return `${this.ign} (${this.guildName})`;
@@ -394,18 +438,7 @@ module.exports = class Player extends Model {
 	 * amount of the last tax transaction from that player
 	 * @returns {Promise<?number>}
 	 */
-	get taxAmount() {
-		return this.client.db.models.Transaction.findAll({
-			limit: 1,
-			where: {
-				from: this.minecraftUUID,
-				type: 'tax',
-			},
-			order: [ [ 'createdAt', 'DESC' ] ],
-			attributes: [ 'amount' ],
-			raw: true,
-		}).then(result => (result.length ? result[0].amount : null));
-	}
+	get taxAmount() {} // eslint-disable-line getter-return, no-empty-function, class-methods-use-this
 
 	/**
 	 * @typedef {import('./Transaction').Transaction} ParsedTransaction
@@ -417,25 +450,13 @@ module.exports = class Player extends Model {
 	 * all transactions from that player
 	 * @returns {Promise<ParsedTransaction[]>}
 	 */
-	get transactions() {
-		return this.client.db.models.Transaction.findAll({
-			where: {
-				from: this.minecraftUUID,
-			},
-			order: [ [ 'createdAt', 'DESC' ] ],
-			raw: true,
-		}).then(async result => Promise.all(result.map(async transaction => ({
-			...transaction,
-			fromIGN: this.ign,
-			toIGN: (this.client.players.cache.get(transaction.to) ?? await mojang.uuid(transaction.to).catch(logger.error))?.ign,
-		}))));
-	}
+	get transactions() {} // eslint-disable-line getter-return, no-empty-function, class-methods-use-this
 
 	/**
 	 * wether the player is muted and that mute is not expired
 	 */
 	get muted() {
-		return mutedCheck.bind(this)();
+		return mutedCheck(this);
 	}
 
 	/**
@@ -894,6 +915,8 @@ module.exports = class Player extends Model {
 	async removeFromGuild() {
 		const member = await this.discordMember;
 
+		let isBridger = false;
+
 		if (member) {
 			const { config } = this.client;
 			const rolesToAdd = (Date.now() - this.createdAt >= 7 * 24 * 60 * 60_000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
@@ -908,14 +931,20 @@ module.exports = class Player extends Model {
 				this.save();
 				return false;
 			}
+
+			isBridger = member.roles.cache.has(config.get('BRIDGER_ROLE_ID'));
 		} else {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 		}
 
-		this.guildID = null;
+		this.guildID = isBridger
+			? GUILD_ID_BRIDGER
+			: null;
 		this.guildRankPriority = 0;
 		this.save();
-		this.client.players.delete(this);
+
+		if (!isBridger) this.client.players.delete(this);
+
 		return true;
 	}
 
@@ -1229,11 +1258,10 @@ module.exports = class Player extends Model {
 
 	/**
 	 * updates the guild xp and syncs guild mutes
-	 * @param {object} data from the hypixel guild API
-	 * @param {object} data.expHistory member.expHistory
-	 * @param {?number} data.mutedTill member.mutedTill
+	 * @param {import('@zikeji/hypixel').Components.Schemas.GuildMember} data from the hypixel guild API
+	 * @param {import('./HypixelGuild')} hypixelGuilds
 	 */
-	async syncWithGuildData({ expHistory = {}, mutedTill } = {}) {
+	async syncWithGuildData({ expHistory = {}, mutedTill, rank }, hypixelGuild = this.guild) {
 		// update guild xp
 		const [ currentDay ] = Object.keys(expHistory);
 
@@ -1258,6 +1286,9 @@ module.exports = class Player extends Model {
 		if (mutedTill) {
 			this.chatBridgeMutedUntil = mutedTill;
 		}
+
+		// update guild rank
+		this.guildRankPriority = hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ?? (/guild ?master/i.test(rank) ? hypixelGuild.ranks.length : 1);
 
 		return this.save();
 	}

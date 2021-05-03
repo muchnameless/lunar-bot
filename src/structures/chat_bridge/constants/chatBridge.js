@@ -16,7 +16,7 @@ module.exports = {
 	 */
 	spawnEvents: [
 		'login',
-		'update_health',
+		'keep_alive',
 	],
 
 	messageTypes: {
@@ -24,6 +24,12 @@ module.exports = {
 		GUILD: 'guild',
 		OFFICER: 'officer',
 		PARTY: 'party',
+	},
+
+	prefixByType: {
+		guild: '/gc',
+		officer: '/oc',
+		party: '/pc',
 	},
 
 	invisibleCharacters,
@@ -37,7 +43,7 @@ module.exports = {
 	 */
 	defaultResponseRegExp: /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u,
 
-	blockedWordsRegExp: /\bsex\b|\bcum\b|nutte(?:d|r)|\bthot\b|pussy|\bpedo(?:phile|s)?\b|\byou'?r+?e? gay+\b|fa(g+o+|g{2,})t|cocain|\bk+ys+\b|kil.+? yourself+\b|get aids|\bsuicide\b|braindead|\bchang\b|\bn+i[bg]{2,}(?:er+|a+)\b|\bk{3,}\b|\br+ape+\b|shoot yourself+\b|kkr|hope you die|\bmomo\b/i,
+	blockedWordsRegExp: /\bsex\b|\bcum\b|nutte(?:d|r)|\bthot\b|pussy|\bp+ornhub+(?:\..+)?\b|\bxhamster(?:\..+)?\b|\bpedo(?:phile|s)?\b|\byou'?r+?e? gay+\b|fa(g+o+|g{2,})t|cocain|\bk+ys+\b|kil.+? yourself+\b|school\s*shoot|get aids|\bsuicide\b|braindead|\bchang\b|\bn+i[bg]{2,}(?:er+|a+)\b|\bk{3,}\b|\br+ape+\b|shoot yourself+\b|kkr|hope you die|\bmomo\b/i,
 
 	memeRegExp: /[⠁-⣿]/,
 

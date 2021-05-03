@@ -42,9 +42,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 		return this.cache.get(this.client.config.get('MAIN_GUILD_ID'));
 	}
 
-	get pseudoGuildIDs() {
-		return [ GUILD_ID_BRIDGER, GUILD_ID_ERROR ];
-	}
+	static PSEUDO_GUILD_IDS = [ GUILD_ID_BRIDGER, GUILD_ID_ERROR ];
 
 	async loadCache(condition) {
 		await super.loadCache(condition);
@@ -78,7 +76,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 	 */
 	sweepPlayerCache(idOrGuild) {
 		if (idOrGuild) {
-			if (this.pseudoGuildIDs.includes(idOrGuild)) return;
+			if (HypixelGuildManager.PSEUDO_GUILD_IDS.includes(idOrGuild)) return;
 
 			const hypixelGuild = this.resolve(idOrGuild);
 
@@ -135,14 +133,6 @@ module.exports = class HypixelGuildManager extends ModelManager {
 		if (result.value.name === 'all') return { ...result, value: false };
 
 		return result;
-	}
-
-	/**
-	 * checks if the message is a bridge message to be forwarded to ingame chat and handle it if true
-	 * @param {import('../extensions/Message')} message
-	 */
-	checkIfChatBridgeMessage(message) {
-		return this.cache.find(({ chatBridgeChannelID }) => chatBridgeChannelID === message.channel.id)?.handleChatBridgeMessage(message);
 	}
 
 	/**

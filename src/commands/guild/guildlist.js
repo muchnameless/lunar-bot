@@ -31,7 +31,10 @@ module.exports = class GuildListCommand extends Command {
 
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
 
-		const data = await hypixelGuild.chatBridge.multilineCommand(command);
+		const data = await hypixelGuild.chatBridge.minecraft.command({
+			command,
+			raw: true,
+		});
 
 		return message.reply(
 			new MessageEmbed()

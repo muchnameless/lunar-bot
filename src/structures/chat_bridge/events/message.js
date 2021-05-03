@@ -12,21 +12,21 @@ const logger = require('../../../functions/logger');
  */
 module.exports = async (chatBridge, message) => {
 	// check if the message is a response for ChatBridge#_chat
-	chatBridge.nextMessage.collect(message);
+	chatBridge.minecraft.collect(message);
 
 	if (chatBridge.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.debug(`[${message.position} #${chatBridge.mcAccount}]: ${message.cleanedContent}`);
 	if (!message.rawContent.length) return;
 
 	switch (message.type) {
-		case GUILD: {
+		case GUILD:
+		case OFFICER: {
 			if (!chatBridge.enabled || message.me) return;
 
-			if (chatBridge.ready) message.forwardToDiscord();
+			message.forwardToDiscord();
 
 			return commandHandler(message);
 		}
 
-		case OFFICER:
 		case PARTY: {
 			if (!chatBridge.enabled || message.me) return;
 

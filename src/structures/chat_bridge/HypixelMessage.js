@@ -45,18 +45,16 @@ module.exports = class HypixelMessage extends ChatMessage {
 		 * Officer > [HypixelRank] ign [GuildRank]: message
 		 * From [HypixelRank] ign: message
 		 */
-		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[(?<hypixelRank>.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
+		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[(?:.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? WHISPER : null);
 			this.author = matched.groups.whisper !== 'To'
 				? new HypixelMessageAuthor(this.chatBridge, {
-					hypixelRank: matched.groups.hypixelRank,
 					ign: matched.groups.ign,
 					guildRank: matched.groups.guildRank,
 				})
 				: new HypixelMessageAuthor(this.chatBridge, {
-					hypixelRank: null,
 					ign: this.chatBridge.bot.ign,
 					guildRank: null,
 				});
@@ -108,13 +106,6 @@ module.exports = class HypixelMessage extends ChatMessage {
 	}
 
 	/**
-	 * prettify message for discord, tries to replace :emoji: and others with the actually working discord render string
-	 */
-	get parsedContent() {
-		return this.chatBridge._parseMinecraftMessageToDiscord(this.content);
-	}
-
-	/**
 	 * content with minecraft formatting codes
 	 */
 	get formattedContent() {
@@ -149,20 +140,27 @@ module.exports = class HypixelMessage extends ChatMessage {
 	 */
 	async reply(message) {
 		switch (this.type) {
-			case GUILD: {
-				const result = await this.chatBridge.broadcast(message, { discord: { prefix: `${this.member ?? `@${this.author.ign}`}, `, allowedMentions: { parse: [] } } });
+			case GUILD:
+			case OFFICER: {
+				const result = await this.chatBridge.broadcast(
+					message,
+					{
+						type: this.type,
+						discord: {
+							prefix: `${this.member ?? `@${this.author.ign}`}, `,
+							allowedMentions: { parse: [] },
+						},
+					},
+				);
 
 				// DM author the message if sending to gchat failed
-				if (!result[0]) this.author.send(`an error occurred while replying in gchat\n${message}`);
+				if (!result[0]) this.author.send(`an error occurred while replying in ${this.type} chat\n${message}`);
 
 				return result;
 			}
 
-			case OFFICER:
-				return this.chatBridge.ochat(message);
-
 			case PARTY:
-				return this.chatBridge.pchat(message, { maxParts: Infinity });
+				return this.chatBridge.minecraft.pchat(message, { maxParts: Infinity });
 
 			case WHISPER:
 				return this.author.send(message, { maxParts: Infinity });
@@ -179,22 +177,25 @@ module.exports = class HypixelMessage extends ChatMessage {
 		try {
 			if (this.author) {
 				const { player, member } = this;
-				const message = await this.chatBridge.sendViaWebhook({
-					username: member?.displayName
-						?? player?.ign
-						?? this.author.ign,
-					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
-						?? player?.image
-						?? await mojang.ign(this.author.ign).then(
-							({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`,
-							error => logger.error(`[FORWARD TO DC]: ${error}`),
-						)
-						?? this.client.user.displayAvatarURL({ dynamic: true }),
-					content: this.parsedContent,
-					allowedMentions: {
-						parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
+
+				const message = await this.chatBridge.discord.get(this.type).sendViaWebhook(
+					this.content,
+					{
+						username: member?.displayName
+							?? player?.ign
+							?? this.author.ign,
+						avatarURL: member?.user.displayAvatarURL({ dynamic: true })
+							?? player?.image
+							?? await mojang.ign(this.author.ign).then(
+								({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`,
+								error => logger.error(`[FORWARD TO DC]: ${error}`),
+							)
+							?? this.client.user.displayAvatarURL({ dynamic: true }),
+						allowedMentions: {
+							parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
+						},
 					},
-				});
+				);
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 				if (/<@&\d{17,19}>/.test(message.content)) {
@@ -208,7 +209,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 				return message;
 			}
 
-			return await this.chatBridge.sendViaDiscordBot(
+			return await this.chatBridge.discord.get(this.type).sendViaBot(
 				this.content,
 				{ allowedMentions: { parse: [] } },
 			);

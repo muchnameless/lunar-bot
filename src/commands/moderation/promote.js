@@ -41,9 +41,9 @@ module.exports = class PromoteCommand extends Command {
 			);
 
 		try {
-			const response = await chatBridge.command({
+			const response = await chatBridge.minecraft.command({
 				command: `g promote ${IGN}`,
-				responseRegex: promote(IGN),
+				responseRegExp: promote(IGN),
 			});
 
 			message.reply(stripIndent`

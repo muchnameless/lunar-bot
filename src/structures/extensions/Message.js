@@ -38,6 +38,13 @@ class LunarMessage extends Message {
 	}
 
 	/**
+	 * wether the message was sent by the bot
+	 */
+	get me() {
+		return this.author?.id === this.client.user.id;
+	}
+
+	/**
 	 * scans the message.content for a 'channel' flag
 	 */
 	get shouldReplyInSameChannel() {
@@ -184,6 +191,7 @@ class LunarMessage extends Message {
 
 		const options = { ...optionsInput };
 
+		/** @type {string} */
 		let content;
 
 		// only object as first arg provided
@@ -233,10 +241,8 @@ class LunarMessage extends Message {
 			if (options.embed.files?.length) requiredChannelPermissions.push('ATTACH_FILES');
 		}
 
-		const hypixelGuild = this.client.hypixelGuilds.cache.find(({ chatBridgeChannelID }) => chatBridgeChannelID === this.channel.id);
-
 		// commands channel / reply in same channel option or flag
-		if (this.channel.name.includes('commands') || options.sameChannel || this.shouldReplyInSameChannel || hypixelGuild) {
+		if (this.channel.name.includes('commands') || options.sameChannel || this.shouldReplyInSameChannel) {
 			// permission checks
 			if (!this.channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)) {
 				const missingChannelPermissions = requiredChannelPermissions.filter(permission => !this.channel.permissionsFor(this.guild.me).has(permission));
@@ -252,14 +258,15 @@ class LunarMessage extends Message {
 				return null;
 			}
 
-			try {
-				if (hypixelGuild && !this.author.player?.muted) hypixelGuild.chatBridge.gchat(content);
-			} catch (error) {
-				logger.error(`[REPLY]: ${error.message}`);
+			// send reply
+			const message = await this._sendReply(content, options);
+
+			if (!this.author.player?.muted) {
+				this.client.chatBridges.handleDiscordMessage(this, false);
+				if (content.length) this.client.chatBridges.handleDiscordMessage(message, false);
 			}
 
-			// send reply
-			return this._sendReply(content, options);
+			return message;
 		}
 
 		// redirect reply to nearest #bot-commands channel

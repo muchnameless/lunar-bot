@@ -8,13 +8,11 @@ module.exports = class HypixelMessageAuthor {
 	/**
 	 * @param {import('./ChatBridge')} chatBridge
 	 * @param {object} param1
-	 * @param {string} [param1.hypixelRank]
 	 * @param {string} [param1.ign]
 	 * @param {string} [param1.guildRank]
 	 */
-	constructor(chatBridge, { hypixelRank, ign, guildRank }) {
+	constructor(chatBridge, { ign, guildRank }) {
 		this.chatBridge = chatBridge;
-		this.hypixelRank = hypixelRank ?? null;
 		this.ign = ign ?? null;
 		this.guildRank = guildRank ?? null;
 
@@ -61,6 +59,6 @@ module.exports = class HypixelMessageAuthor {
 	 * @param {?import('./ChatBridge').ChatOptions} options
 	 */
 	async send(message, { prefix = '', ...options } = {}) {
-		return this.chatBridge.chat(message, { prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`, ...options });
+		return this.chatBridge.minecraft.chat(message, { prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`, ...options });
 	}
 };

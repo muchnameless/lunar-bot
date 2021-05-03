@@ -51,10 +51,13 @@ module.exports = async (client, oldMessage, newMessage) => {
 					messageID: newReply.id,
 				};
 
+				client.chatBridges.handleDiscordMessage(newMessage, false);
+				client.chatBridges.handleDiscordMessage(newReply, false);
+
 				return; // moved reply message(s) to newMessage's channel -> don't call commandHandler
 			} catch (error) {
 				logger.error(`[MESSAGE UPDATE]: ${error}`);
-				cache.del(`${REPLY_KEY}:${newMessage.guild?.id ?? DM_KEY}:${newMessage.channel.id}:${newMessage.id}`);
+				cache.delete(`${REPLY_KEY}:${newMessage.guild?.id ?? DM_KEY}:${newMessage.channel.id}:${newMessage.id}`);
 			}
 		}
 	}

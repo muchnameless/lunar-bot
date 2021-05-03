@@ -115,7 +115,7 @@ module.exports = class LunarClient extends Client {
 	 * @type {Function}
 	 */
 	get chat() {
-		return this.chatBridge.sendToMinecraftChat.bind(this.chatBridge);
+		return this.chatBridge.minecraft.sendToChat.bind(this.chatBridge);
 	}
 
 	/**
@@ -123,7 +123,7 @@ module.exports = class LunarClient extends Client {
 	 * @type {Function}
 	 */
 	get gchat() {
-		return this.chatBridge.gchat.bind(this.chatBridge);
+		return this.chatBridge.minecraft.gchat.bind(this.chatBridge);
 	}
 
 	/**
@@ -160,6 +160,8 @@ module.exports = class LunarClient extends Client {
 			this.commands.loadAll(),
 			this._loadEvents(),
 		]);
+
+		this.chatBridges.loadChannelIDs();
 
 		this.once(CLIENT_READY, this.onReady);
 
