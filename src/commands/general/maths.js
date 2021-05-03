@@ -290,7 +290,7 @@ module.exports = class MathCommand extends Command {
 	 * formats a number string
 	 * @param {string} x
 	 */
-	static formatNumberString = x => x.replace(/(?<!\.[\s\S]*)\B(?=(\d{3})+(?!\d))/g, '\u{202F}');
+	static formatNumberString = x => x.replace(/(?<!\..*)\B(?=(\d{3})+(?!\d))/gs, '\u{202F}');
 
 	/**
 	 * execute the command
