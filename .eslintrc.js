@@ -54,7 +54,7 @@ module.exports = {
 		'no-restricted-globals': [ 'error', 'isNaN', 'isFinite' ],
 		'no-shadow': [ 'error', { allow: [ 'err', 'resolve', 'reject' ] }],
 		'no-trailing-spaces': [ 'error' ],
-		'no-unused-vars': 'error',
+		'no-unused-vars': [ 'error', { varsIgnorePattern: 'arguments', argsIgnorePattern: 'arguments' }],
 		'no-useless-call': 'error',
 		'no-useless-constructor': 'error',
 		'no-useless-rename': 'error',
