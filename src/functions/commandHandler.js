@@ -31,14 +31,14 @@ module.exports = async (message) => {
 	 * commands
 	 */
 
-	if (!message.content?.length || !message.isUserMessage) return client.chatBridges.handleDiscordMessage(message, true); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
+	if (!message.content?.length || !message.isUserMessage) return client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: true }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
 
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(client.config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').exec(message.content); // PREFIX, @mention, no prefix
 
 	client.hypixelGuilds.checkIfRankRequestMessage(message);
 
 	// must use prefix for commands in guild
-	if (message.guild && !prefixMatched) return client.chatBridges.handleDiscordMessage(message, true);
+	if (message.guild && !prefixMatched) return client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: true });
 
 	// command, args, flags
 	const rawArgs = message.content // command arguments

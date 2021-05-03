@@ -51,8 +51,8 @@ module.exports = async (client, oldMessage, newMessage) => {
 					messageID: newReply.id,
 				};
 
-				client.chatBridges.handleDiscordMessage(newMessage, false);
-				client.chatBridges.handleDiscordMessage(newReply, false);
+				client.chatBridges.handleDiscordMessage(newMessage, { checkifNotFromBot: false });
+				client.chatBridges.handleDiscordMessage(newReply, { checkifNotFromBot: false });
 
 				return; // moved reply message(s) to newMessage's channel -> don't call commandHandler
 			} catch (error) {
@@ -61,6 +61,8 @@ module.exports = async (client, oldMessage, newMessage) => {
 			}
 		}
 	}
+
+	if (newMessage.me) client.chatBridges.handleDiscordMessage(newMessage, { checkifNotFromBot: false });
 
 	commandHandler(newMessage);
 };

@@ -258,13 +258,12 @@ class LunarMessage extends Message {
 				return null;
 			}
 
+			this.client.chatBridges.handleDiscordMessage(this, { checkifNotFromBot: false });
+
 			// send reply
 			const message = await this._sendReply(content, options);
 
-			if (!this.author.player?.muted) {
-				this.client.chatBridges.handleDiscordMessage(this, false);
-				if (content.length) this.client.chatBridges.handleDiscordMessage(message, false);
-			}
+			if (content.length) this.client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: false, player: this.author.player });
 
 			return message;
 		}

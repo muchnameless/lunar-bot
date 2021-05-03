@@ -28,6 +28,12 @@ const { sleep } = require('../../functions/util');
  * @property {string} [prefix]
  */
 
+/**
+ * @typedef {object} MessageForwardOptions
+ * @property {boolean} [options.checkifNotFromBot=true] wether to not forward messages from the client.user
+ * @property {import('../database/models/Player')} [player=message.author.player] player for muted and isStaff check
+ */
+
 
 module.exports = class ChatBridge extends EventEmitter {
 	/**
@@ -234,10 +240,10 @@ module.exports = class ChatBridge extends EventEmitter {
 	/**
 	 * forwards a discord message to ingame guild chat, prettifying discord renders, if neither the player nor the whole guild chat is muted
 	 * @param {import('../extensions/Message')} message
-	 * @param {boolean} [checkifNotFromBot=true]
+	 * @param {MessageForwardOptions} [options={}]
 	 */
 	// eslint-disable-next-line no-undef
-	async forwardDiscordToMinecraft(message, checkifNotFromBot = true) {
+	async forwardDiscordToMinecraft(message, { player = message.author.player, checkifNotFromBot = true } = {}) {
 		if (!this.minecraft.ready) return message.reactSafely(X_EMOJI);
 
 		if (!this.enabled) return;
@@ -250,8 +256,6 @@ module.exports = class ChatBridge extends EventEmitter {
 			if (message.me) return;
 			if (message.webhookID === discordChatManager.webhook?.id) return;
 		}
-
-		const { player } = message.author;
 
 		// check if player is muted
 		if (player?.muted) {

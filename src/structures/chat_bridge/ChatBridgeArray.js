@@ -166,15 +166,15 @@ module.exports = class ChatBridgeArray extends Array {
 	/**
 	 * forwards the discord message if a chat bridge for that channel is found
 	 * @param {import('../extensions/Message')} message
-	 * @param {boolean} [checkifNotFromBot=true]
+	 * @param {import('./ChatBridge').MessageForwardOptions} [options]
 	 */
-	async handleDiscordMessage(message, checkifNotFromBot = true) {
+	async handleDiscordMessage(message, options) {
 		if (!this.channelIDs.has(message.channel.id)) return;
 
 		if (!this.length && this.client.config.getBoolean('CHATBRIDGE_ENABLED')) return message.reactSafely(X_EMOJI);
 
 		try {
-			await Promise.all(this.map(async (/** @type {ChatBridge} */ chatBridge) => chatBridge.forwardDiscordToMinecraft(message, checkifNotFromBot)));
+			await Promise.all(this.map(async (/** @type {ChatBridge} */ chatBridge) => chatBridge.forwardDiscordToMinecraft(message, options)));
 		} catch (error) {
 			logger.error(`[CHAT BRIDGES]: ${error}`);
 			message.reactSafely(X_EMOJI);
