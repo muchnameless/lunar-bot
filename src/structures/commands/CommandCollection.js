@@ -90,7 +90,7 @@ module.exports = class CommandCollection extends Collection {
 	 * @param {string} categoryInput
 	 */
 	filterByCategory(categoryInput) {
-		return this.filter(({ category }) => category === categoryInput);
+		return this.filter((/** @type {import('./Command')} */ { category, aliases }, name) => category === categoryInput && !aliases?.some(alias => alias.toLowerCase() === name));
 	}
 
 	/**
