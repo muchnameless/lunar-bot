@@ -32,6 +32,12 @@ module.exports = {
 		party: '/pc',
 	},
 
+	chatFunctionByType: {
+		guild: 'gchat',
+		officer: 'ochat',
+		party: 'pchat',
+	},
+
 	invisibleCharacters,
 
 	randomInvisibleCharacter: () => invisibleCharacters[Math.floor(Math.random() * invisibleCharacters.length)],

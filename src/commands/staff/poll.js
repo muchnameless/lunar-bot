@@ -57,7 +57,8 @@ module.exports = class PollCommand extends Command {
 				msg => msg.isUserMessage && msg.type === GUILD,
 				{ time: duration },
 			);
-			const discordMessages = chatBridge.discord.get(GUILD).channel.awaitMessages(
+			const discordChannel = chatBridge.discord.get(GUILD).channel;
+			const discordMessages = discordChannel.awaitMessages(
 				msg => msg.isUserMessage,
 				{ time: duration },
 			);
@@ -97,7 +98,7 @@ module.exports = class PollCommand extends Command {
 			const resultString = result.map(({ option, votes }, index) => `#${index + 1}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
 
 			// reply with result
-			chatBridge.channel.send(new MessageEmbed()
+			discordChannel.send(new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_BLUE'))
 				.setTitle(question)
 				.setDescription(resultString.join('\n\n'))
@@ -106,7 +107,7 @@ module.exports = class PollCommand extends Command {
 			);
 
 			resultString.unshift(question);
-			chatBridge.gchat(resultString.join('\n'), { maxParts: Infinity });
+			chatBridge.minecraft.gchat(resultString.join('\n'), { maxParts: Infinity });
 		} finally {
 			chatBridge.pollUntil = null; // unlock poll command
 		}

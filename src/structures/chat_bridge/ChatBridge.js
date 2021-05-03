@@ -5,7 +5,7 @@ const { join, basename } = require('path');
 const ms = require('ms');
 const { getAllJsFiles } = require('../../functions/files');
 const { X_EMOJI, MUTED } = require('../../constants/emojiCharacters');
-const { prefixByType, messageTypes: { GUILD }, blockedWordsRegExp } = require('./constants/chatBridge');
+const { prefixByType, messageTypes: { GUILD }, blockedWordsRegExp, chatFunctionByType } = require('./constants/chatBridge');
 const MinecraftChatManager = require('./managers/MinecraftChatManager');
 const logger = require('../../functions/logger');
 const DiscordManager = require('./managers/DiscordManager');
@@ -312,19 +312,20 @@ module.exports = class ChatBridge extends EventEmitter {
 
 	/**
 	 * send a message both to discord and the ingame guild chat, parsing both
-	 * @param {string} message
+	 * @param {string} content
 	 * @param {object} param1
 	 * @param {string|import('./managers/DiscordChatManager')} [param1.type]
 	 * @param {DiscordMessageOptions} [param1.discord]
 	 * @param {ChatOptions} [param1.minecraft]
 	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]]>}
 	 */
-	async broadcast(message, { type = GUILD, discord: { prefix: discordPrefix = '', ...discord } = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = {}) {
+	async broadcast(content, { type = GUILD, discord: { prefix: discordPrefix = '', ...discord } = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = {}) {
 		const discordChatManager = this.discord.resolve(type);
 
 		return Promise.all([
-			this.minecraft.chat(message, { prefix: `${prefixByType[discordChatManager?.type ?? type]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : ''}`, maxParts, ...options }),
-			discordChatManager?.sendViaBot(`${discordPrefix}${message}`, discord),
+			this.minecraft[chatFunctionByType[discordChatManager?.type ?? type]]?.(content, { prefix: minecraftPrefix, maxParts, ...options })
+				?? this.minecraft.chat(content, { prefix: `${prefixByType[discordChatManager?.type ?? type]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : ''}`, maxParts, ...options }),
+			discordChatManager?.sendViaBot(`${discordPrefix}${content}`, discord),
 		]);
 	}
 

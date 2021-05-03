@@ -401,7 +401,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {import('../ChatBridge').ChatOptions} options
 	 */
 	async ochat(content, { prefix = '', ...options } = {}) {
-		return this.chat(content, { prefix: `/oc ${prefix}${prefix.length ? ' ' : ''}`, ...options });
+		return this.chat(content, { prefix: `/oc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
 	}
 
 	/**
@@ -410,7 +410,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {import('../ChatBridge').ChatOptions} options
 	 */
 	async pchat(content, { prefix = '', ...options } = {}) {
-		return this.chat(content, { prefix: `/pc ${prefix}${prefix.length ? ' ' : ''}`, ...options });
+		return this.chat(content, { prefix: `/pc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
 	}
 
 	/**
