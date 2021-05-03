@@ -4,13 +4,13 @@ const GuildLogCommand = require('../moderation/guildlog');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class GuildListCommand extends GuildLogCommand {
+module.exports = class GuildHistoryCommand extends GuildLogCommand {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [ 'ghistory' ],
 			description: 'guild history',
 			args: false,
-			usage: '',
+			usage: () => `<${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 1,
 		});
 	}

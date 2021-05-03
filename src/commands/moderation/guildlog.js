@@ -5,7 +5,7 @@ const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class GuildListCommand extends Command {
+module.exports = class GuildLogCommand extends Command {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [ 'glog' ],
