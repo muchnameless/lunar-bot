@@ -21,9 +21,9 @@ module.exports = class GuildListCommand extends Command {
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {string} command
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
+	async _run(message, args, flags, command) {
 		/**
 		 * @type {import('../../structures/database/models/HypixelGuild')}
 		 */
@@ -31,17 +31,26 @@ module.exports = class GuildListCommand extends Command {
 
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
 
-		const command = `g log ${args.join(' ')}`;
 		const data = await hypixelGuild.chatBridge.minecraft.command({
 			command,
 		});
 
-		return message.reply(
-			new MessageEmbed()
-				.setColor(this.config.get('EMBED_BLUE'))
-				.setTitle(`/${command}`)
-				.setDescription(`\`\`\`\n${data}\`\`\``)
-				.setTimestamp(),
+		return message.reply(new MessageEmbed()
+			.setColor(this.config.get('EMBED_BLUE'))
+			.setTitle(`/${command}`)
+			.setDescription(`\`\`\`\n${data}\`\`\``)
+			.setTimestamp(),
 		);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 * @param {string[]} flags command flags
+	 * @param {string[]} rawArgs arguments and flags
+	 */
+	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
+		return this._run(message, args, flags, `g log ${args.join(' ')}`);
 	}
 };
