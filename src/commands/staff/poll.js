@@ -4,6 +4,7 @@ const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar, stringToMS } = require('../../functions/util');
+const { messageTypes: { GUILD } } = require('../../structures/chat_bridge/constants/chatBridge');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
@@ -52,11 +53,11 @@ module.exports = class PollCommand extends Command {
 			if (!options.length) return message.reply('specify poll options to vote for');
 
 			const optionsCount = options.length;
-			const ingameMessages = chatBridge.awaitMessages(
-				msg => msg.isUserMessage,
+			const ingameMessages = chatBridge.minecraft.awaitMessages(
+				msg => msg.isUserMessage && msg.type === GUILD,
 				{ time: duration },
 			);
-			const discordMessages = chatBridge.channel.awaitMessages(
+			const discordMessages = chatBridge.discord.get(GUILD).channel.awaitMessages(
 				msg => msg.isUserMessage,
 				{ time: duration },
 			);
