@@ -105,13 +105,13 @@ module.exports = async (message) => {
 			// check for req roles
 			if (!member.roles.cache.some((_, roleID) => requiredRoles.includes(roleID))) {
 				logger.info(`[CMD HANDLER]: ${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} without a required role`);
-				return message.reply(commaListsOr`the \`${command.name}\` command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)})${message.guild?.id === lgGuild.id ? '' : 'from the Lunar Guard Discord Server'}.`);
+				return message.reply(commaListsOr`the \`${command.name}\` command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)})${message.guild?.id === lgGuild.id ? '' : ' from the Lunar Guard Discord Server'}.`);
 			}
 
 			// guild role is always a req for higher commands
 			if (!member.roles.cache.has(client.config.get('GUILD_ROLE_ID'))) {
 				logger.info(`[CMD HANDLER]: ${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} without being in the guild`);
-				return message.reply(`the \`${command.name}\` command requires you to have the ${lgGuild.roles.cache.get(client.config.get('GUILD_ROLE_ID'))?.name ?? client.config.get('GUILD_ROLE_ID')} role ${message.guild?.id === lgGuild.id ? '' : 'from the Lunar Guard Discord Server'}.`);
+				return message.reply(`the \`${command.name}\` command requires you to have the ${lgGuild.roles.cache.get(client.config.get('GUILD_ROLE_ID'))?.name ?? client.config.get('GUILD_ROLE_ID')} role${message.guild?.id === lgGuild.id ? '' : ' from the Lunar Guard Discord Server'}.`);
 			}
 
 		// prevent from executing owner only command
