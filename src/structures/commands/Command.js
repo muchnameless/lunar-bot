@@ -94,7 +94,7 @@ module.exports = class Command {
 
 	/**
 	 * checks wether the array includes 'f' or 'force'
-	 * @param {string[]} array
+	 * @returns {string[]} array
 	 */
 	get force() {
 		return this.commandCollection.constructor.force;
