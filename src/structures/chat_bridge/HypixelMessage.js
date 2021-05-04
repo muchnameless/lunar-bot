@@ -178,7 +178,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 			if (this.author) {
 				const { player, member } = this;
 
-				const message = await this.chatBridge.discord.get(this.type).sendViaWebhook(
+				const message = await this.chatBridge.discord.get(this.type)?.sendViaWebhook(
 					this.content,
 					{
 						username: member?.displayName
@@ -209,7 +209,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 				return message;
 			}
 
-			return await this.chatBridge.discord.get(this.type).sendViaBot(
+			return await this.chatBridge.discord.get(this.type)?.sendViaBot(
 				this.content,
 				{ allowedMentions: { parse: [] } },
 			);
