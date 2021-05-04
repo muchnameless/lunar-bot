@@ -1,15 +1,15 @@
 'use strict';
 
-const GuildLogCommand = require('../moderation/guildlog');
+const GuildCommand = require('./guild');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class GuildMemberCommand extends GuildLogCommand {
+module.exports = class GuildMemberCommand extends GuildCommand {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [ 'gmember' ],
 			description: 'guild member',
-			args: 1,
+			args: false,
 			usage: () => `<\`IGN\`> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 1,
 		});
@@ -23,6 +23,12 @@ module.exports = class GuildMemberCommand extends GuildLogCommand {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return this._run(message, args, flags, `g member ${args[0]}`);
+		const IGN = args.length
+			? args[0]
+			: message.author.player?.ign;
+
+		if (!IGN) return message.reply(this.usageInfo);
+
+		return this._run(message, flags, `g member ${IGN}`);
 	}
 };

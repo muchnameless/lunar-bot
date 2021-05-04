@@ -1,10 +1,10 @@
 'use strict';
 
-const GuildLogCommand = require('../moderation/guildlog');
+const GuildCommand = require('./guild');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class GuildHistoryCommand extends GuildLogCommand {
+module.exports = class GuildHistoryCommand extends GuildCommand {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [ 'ghistory' ],
@@ -23,6 +23,6 @@ module.exports = class GuildHistoryCommand extends GuildLogCommand {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return this._run(message, args, flags, 'g history');
+		return this._run(message, flags, 'g history');
 	}
 };
