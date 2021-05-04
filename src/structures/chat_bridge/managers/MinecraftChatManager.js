@@ -616,7 +616,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {string} options.command can also directly be used as the only parameter
 	 * @param {RegExp} [options.responseRegExp=new RegExp()] regex to use as a filter for the message collector
 	 * @param {number} [options.max=-1] maximum amount of response messages, -1 or Infinity for an infinite amount
-	 * @param {boolean} [options.raw=false] wether to return the full hypixel message instead of just the content
+	 * @param {boolean} [options.raw=false] wether to return an array of the collected hypixel message objects instead of just the content
 	 * @param {number} [options.timeout=config.getNumber('INGAME_RESPONSE_TIMEOUT')] response collector timeout in seconds
 	 * @param {boolean} [options.rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
 	 */
@@ -660,7 +660,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				case 'disconnect': {
 					if (rejectOnTimeout && !collected.length) {
 						return reject(raw
-							? collected
+							? [{ content: `no ingame response after ${ms(timeout * 1_000, { long: true })}` }]
 							: `no ingame response after ${ms(timeout * 1_000, { long: true })}`,
 						);
 					}
