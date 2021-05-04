@@ -1,5 +1,6 @@
 'use strict';
 
+const { randomInvisibleCharacter } = require('../constants/chatBridge');
 const AsyncQueue = require('../../AsyncQueue');
 
 
@@ -13,6 +14,14 @@ module.exports = class ChatManager {
 		 * chat queue
 		 */
 		this.queue = new AsyncQueue();
+	}
+
+	/**
+	 * escapes all standalone occurrences of 'ez', case-insensitive
+	 * @param {string} string
+	 */
+	static escapeEz(string) {
+		return string.replace(/(?<=\be+)(?=z+\b)/gi, randomInvisibleCharacter());
 	}
 
 	get mcAccount() {

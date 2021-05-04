@@ -22,11 +22,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		super(...args);
 
 		/**
-		 * message that is currently being forwarded to in game chat
-		 * @type {?import('../../extensions/Message')}
-		 */
-		this.discordMessage = null;
-		/**
 		 * current retry when resending messages
 		 */
 		this.retries = 0;
@@ -120,7 +115,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	get ready() {
-		return this.bot?.ready ?? false;
+		return (this.bot?.ready && !this.bot.ended) ?? false;
 	}
 
 	set ready(value) {
@@ -139,6 +134,75 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @returns {Promise<boolean>}
 	 */
 	get chatReady() {} // eslint-disable-line no-empty-function, class-methods-use-this, getter-return
+
+	/**
+	 * maximum attempts to resend to in game chat
+	 */
+	static maxRetries = 3;
+
+	/**
+	 * normal delay to listen for error messages
+	 */
+	static delays = [
+		null,
+		100,
+		100,
+		100,
+		120,
+		150,
+		600,
+	];
+
+	/**
+	 * increased delay which can be used to send messages to in game chat continously
+	 */
+	static SAFE_DELAY = 600;
+
+	/**
+	 * 100 pre 1.10.2, 256 post 1.10.2
+	 * @type {number}
+	 */
+	static MAX_MESSAGE_LENGTH = require('minecraft-data')(MC_CLIENT_VERSION).version.version > require('minecraft-data')('1.10.2').version.version
+		? 256
+		: 100;
+
+	/**
+	 * reacts to the message and DMs the author
+	 * @param {import('../extensions/Message')} discordMessage
+	 */
+	static async _handleBlockedWord(discordMessage) {
+		if (!discordMessage) return;
+
+		discordMessage.reactSafely(STOP);
+
+		try {
+			await discordMessage.author.send(stripIndents`
+				your message (or parts of it) were blocked because you used a banned word or character
+				(the bannned word filter is to comply with hypixel's chat rules)
+			`);
+
+			logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`);
+		} catch (error) {
+			logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}: ${error}`);
+		}
+	}
+
+	/**
+	 * removes line formatters from the beginning and end
+	 * @param {import('../HypixelMessage')} messages
+	 */
+	static _cleanCommandResponse(messages) {
+		return messages
+			.map(({ content }) => content.replace(/^-{50,}|-{50,}$/g, '').trim())
+			.join('\n');
+	}
+
+	/**
+	 * increasing delay
+	 */
+	get delay() {
+		return MinecraftChatManager.delays[this._tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
+	}
 
 	/**
 	 * create bot instance, loads and binds it's events and logs it into hypixel
@@ -209,10 +273,12 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		this.abortLoginTimeout = null;
 
 		try {
-			this.bot?.quit() ?? logger.warn('[CHATBRIDGE DISCONNECT]: no bot to disconnect');
+			this.bot?.quit();
 		} catch (error) {
 			logger.error('[CHATBRIDGE DISCONNECT]:', error);
 		}
+
+		this.bot = null;
 
 		return this.chatBridge;
 	}
@@ -253,44 +319,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	_resetFilter() {
 		this._contentFilter = null;
 		this._collecting = false;
-	}
-
-	/**
-	 * maximum attempts to resend to in game chat
-	 */
-	static maxRetries = 3;
-
-	/**
-	 * normal delay to listen for error messages
-	 */
-	static delays = [
-		null,
-		100,
-		100,
-		100,
-		120,
-		150,
-		600,
-	];
-
-	/**
-	 * increased delay which can be used to send messages to in game chat continously
-	 */
-	static SAFE_DELAY = 600;
-
-	/**
-	 * 100 pre 1.10.2, 256 post 1.10.2
-	 * @type {number}
-	 */
-	static MAX_MESSAGE_LENGTH = require('minecraft-data')(MC_CLIENT_VERSION).version.version > require('minecraft-data')('1.10.2').version.version
-		? 256
-		: 100;
-
-	/**
-	 * increasing delay
-	 */
-	get delay() {
-		return MinecraftChatManager.delays[this._tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
 	}
 
 	/**
@@ -339,14 +367,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		}
 
 		return `${prefix}${string} ${padding}`;
-	}
-
-	/**
-	 * escapes all standalone occurrences of 'ez', case-insensitive
-	 * @param {string} string
-	 */
-	static escapeEz(string) {
-		return string.replace(/(?<=\be+)(?=z+\b)/gi, randomInvisibleCharacter());
 	}
 
 	/**
@@ -481,30 +501,32 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
+	 * @typedef {object} SendToChatOptions
+	 * @property {string} [prefix='']
+	 * @property {boolean} [shouldUseSpamByPass=false]
+	 * @property {?import('../../extensions/Message')} [discordMessage=null]
+	 */
+
+	/**
 	 * queue a message for the ingame chat
 	 * @param {string} content
-	 * @param {object} [options]
-	 * @param {string} [options.prefix='']
-	 * @param {boolean} [options.shouldUseSpamByPass=false]
-	 * @param {import('../extensions/Message')} [options.discordMessage=null]
+	 * @param {SendToChatOptions} [options]
 	 */
-	async sendToChat(content, { discordMessage = null, ...options } = {}) {
-		if (discordMessage?.deleted) {
+	async sendToChat(content, options = {}) {
+		if (options.discordMessage?.deleted) {
 			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${options.prefix ?? ''}${content}'`);
-			return;
+			return false;
 		}
 
 		await this.queue.wait();
 
-		try {
-			this.discordMessage = discordMessage;
-			this.retries = 0;
+		this.retries = 0;
 
+		try {
 			return await this._sendToChat(content, options);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
 		} finally {
-			this.discordMessage = null;
 			this.queue.shift();
 		}
 	}
@@ -513,12 +535,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat'
 	 * @private
 	 * @param {string} content
-	 * @param {object} [options]
-	 * @param {string} [options.prefix='']
-	 * @param {boolean} [options.shouldUseSpamByPass=false]
+	 * @param {SendToChatOptions} options
 	 * @returns {Promise<boolean>}
 	 */
-	async _sendToChat(content, { prefix = '', shouldUseSpamByPass = false } = {}) {
+	async _sendToChat(content, { prefix = '', shouldUseSpamByPass = false, discordMessage = null } = {}) {
 		// create listener
 		const listener = this.listenFor(content);
 
@@ -530,7 +550,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE _CHAT]: ${error}`);
-			this.discordMessage?.reactSafely(X_EMOJI);
+			discordMessage?.reactSafely(X_EMOJI);
 			this._tempIncrementCounter();
 			this._resetFilter();
 			return false;
@@ -549,7 +569,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				this._resetFilter();
 
 				if (!this.ready) {
-					this.discordMessage?.reactSafely(X_EMOJI);
+					discordMessage?.reactSafely(X_EMOJI);
 					return false;
 				}
 
@@ -562,7 +582,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 				// max retries reached
 				if (++this.retries === MinecraftChatManager.maxRetries) {
-					this.discordMessage?.reactSafely(X_EMOJI);
+					discordMessage?.reactSafely(X_EMOJI);
 					await sleep(this.retries * MinecraftChatManager.SAFE_DELAY);
 					return false;
 				}
@@ -573,7 +593,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			// hypixel filter blocked message
 			case 'blocked': {
-				MinecraftChatManager._handleBlockedWord(this.discordMessage);
+				MinecraftChatManager._handleBlockedWord(discordMessage);
 				await sleep(this.delay);
 				return false;
 			}
@@ -586,27 +606,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				);
 				return true;
 			}
-		}
-	}
-
-	/**
-	 * reacts to the message and DMs the author
-	 * @param {import('../extensions/Message')} discordMessage
-	 */
-	static async _handleBlockedWord(discordMessage) {
-		if (!discordMessage) return;
-
-		discordMessage.reactSafely(STOP);
-
-		try {
-			await discordMessage.author.send(stripIndents`
-				your message (or parts of it) were blocked because you used a banned word or character
-				(the bannned word filter is to comply with hypixel's chat rules)
-			`);
-
-			logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`);
-		} catch (error) {
-			logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}: ${error}`);
 		}
 	}
 
@@ -683,23 +682,5 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		this.sendToChat(trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1));
 
 		return promise;
-	}
-
-	/**
-	 * removes line formatters from the beginning and end
-	 * @param {string} string
-	 */
-	static _cleanSingleCommandResponse(string) {
-		return string.replace(/^-{50,}|-{50,}$/g, '').trim();
-	}
-
-	/**
-	 * returns a single string from all cleaned contents
-	 * @param {import('../HypixelMessage')} messages
-	 */
-	static _cleanCommandResponse(messages) {
-		return messages
-			.map(({ content }) => this._cleanSingleCommandResponse(content))
-			.join('\n');
 	}
 };

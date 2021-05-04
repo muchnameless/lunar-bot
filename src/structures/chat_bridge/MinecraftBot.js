@@ -10,13 +10,19 @@ const Player = require('../database/models/Player');
 // {import('minecraft-protocol').Client}
 
 /**
- * @typedef {object} MinecraftBot
+ * @typedef {object} MinecraftBotAdditions
  * @property {import('../LunarClient')} client
  * @property {import('../database/models/Player')} player
  * @property {string} ign
  * @property {string} uuid
  * @property {boolean} ready
- * @function [chat]
+ * @property {boolean} ended
+ * @property {Function} chat sends a message to chat
+ * @property {Function} quit disconnects from the server
+ */
+
+/**
+ * @typedef {import('minecraft-protocol').Client & MinecraftBotAdditions} MinecraftBot
  */
 
 /**
@@ -64,7 +70,8 @@ module.exports = async (chatBridge, options) => {
 		 */
 		quit: {
 			value(reason = 'disconnect.quitting') {
-				this.end(reason);
+				this.ready = false;
+				return this.end(reason);
 			},
 		},
 

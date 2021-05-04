@@ -1,6 +1,9 @@
 'use strict';
 
 const { MessageEmbed, DiscordAPIError, MessageCollector } = require('discord.js');
+const ms = require('ms');
+const { prefixByType, blockedWordsRegExp } = require('../constants/chatBridge');
+const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
 const logger = require('../../../functions/logger');
@@ -11,7 +14,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('../ChatBridge')} chatBridge
 	 * @param {import('../../database/models/HypixelGuild').ChatBridgeChannel} param1
 	 */
-	constructor(chatBridge, { type, channelID, prefix }) {
+	constructor(chatBridge, { type, channelID }) {
 		super(chatBridge);
 
 		/**
@@ -25,7 +28,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 		/**
 		 * hypixel chat prefix
 		 */
-		this.prefix = prefix;
+		this.prefix = prefixByType[type];
 		/**
 		 * channel webhook
 		 */
@@ -37,11 +40,31 @@ module.exports = class DiscordChatManager extends ChatManager {
 	}
 
 	/**
+	 * player ign or member displayName or author username, ez escaped and *blocked* if blockedWordsRegExp check doesn't pass
+	 * @param {import('../extensions/Message')} message
+	 */
+	static getPlayerName(message) {
+		/** @type {string} */
+		const name = message.author.player?.ign ?? DiscordChatManager.escapeEz(message.member?.displayName ?? message.author.username);
+
+		return blockedWordsRegExp.test(name)
+			? '*blocked*'
+			: name;
+	}
+
+	/**
 	 * chat bridge channel
 	 * @type {import('../../extensions/TextChannel')}
 	 */
 	get channel() {
 		return this.client.channels.cache.get(this.channelID);
+	}
+
+	/**
+	 * MinecraftChatManager
+	 */
+	get minecraft() {
+		return this.chatBridge.minecraft;
 	}
 
 	/**
@@ -154,6 +177,74 @@ module.exports = class DiscordChatManager extends ChatManager {
 		} finally {
 			this.queue.shift();
 		}
+	}
+
+	/**
+	 * forwards a discord message to ingame guild chat, prettifying discord renders, if neither the player nor the whole guild chat is muted
+	 * @param {import('../../extensions/Message')} message
+	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
+	 */
+	async forwardToMinecraft(message, { player = message.author.player, checkifNotFromBot = true } = {}) {
+		if (!this.chatBridge.enabled) return;
+		if (!this.minecraft.ready) return message.reactSafely(X_EMOJI);
+
+		if (checkifNotFromBot) {
+			if (message.me) return; // message was sent from the bot
+			if (message.webhookID === this.webhook?.id) return; // message was sent from the ChatBridge's webhook
+		}
+
+		// check if player is muted
+		if (player?.muted) {
+			if (!message.me) message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
+				() => logger.info(`[FORWARD DC TO MC]: ${player.logInfo}: DMed muted user`),
+				error => logger.error(`[FORWARD DC TO MC]: ${player.logInfo}: error DMing muted user: ${error}`),
+			);
+
+			return message.reactSafely(MUTED);
+		}
+
+		// check if guild chat is muted
+		if (this.guild.muted && !player?.isStaff) {
+			if (!message.me) message.author.send(`${this.guild.name}'s guild chat is currently muted for ${ms(this.guild.chatMutedUntil - Date.now(), { long: true })}`).then(
+				() => logger.info(`[FORWARD DC TO MC]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
+				error => logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error}`),
+			);
+
+			return message.reactSafely(MUTED);
+		}
+
+		// check if the chatBridge bot is muted
+		if (this.minecraft.bot.player?.muted) {
+			if (!message.me) message.author.send(`the bot is currently muted for ${ms(this.minecraft.bot.player?.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
+				() => logger.info(`[FORWARD DC TO MC]: ${player?.logInfo}: DMed bot muted`),
+				error => logger.error(`[FORWARD DC TO MC]: ${player?.logInfo}: error DMing bot muted: ${error}`),
+			);
+
+			return message.reactSafely(MUTED);
+		}
+
+		return this.minecraft.chat(
+			[
+				message.reference // @referencedMessageAuthor
+					? await (async () => {
+						try {
+							/** @type {import('../extensions/Message')} */
+							const referencedMessage = await this.client.channels.cache.get(message.reference.channelID)?.messages.fetch(message.reference.messageID);
+							return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
+						} catch (error) {
+							logger.error(`[FORWARD DC TO MC]: error fetching reference: ${error}`);
+							return null;
+						}
+					})()
+					: null,
+				message.content, // actual content
+				...message.attachments.map(({ url }) => url), // links of attachments
+			].filter(Boolean).join(' '),
+			{
+				prefix: `${this.prefix} ${DiscordChatManager.getPlayerName(message)}: `,
+				discordMessage: message,
+			},
+		);
 	}
 
 	/**

@@ -169,14 +169,16 @@ module.exports = class ChatBridgeArray extends Array {
 	 * @param {import('./ChatBridge').MessageForwardOptions} [options]
 	 */
 	async handleDiscordMessage(message, options) {
-		if (!this.channelIDs.has(message.channel.id)) return;
-
-		if (!this.length && this.client.config.getBoolean('CHATBRIDGE_ENABLED')) return message.reactSafely(X_EMOJI);
+		if (!this.channelIDs.has(message.channel.id) || !this.client.config.getBoolean('CHATBRIDGE_ENABLED')) return;
 
 		try {
-			await Promise.all(this.map(async (/** @type {ChatBridge} */ chatBridge) => chatBridge.forwardDiscordToMinecraft(message, options)));
+			// a ChatBridge for the message's channel was found
+			if (this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
+
+			// no ChatBridge for the message's channel found
+			message.reactSafely(X_EMOJI);
 		} catch (error) {
-			logger.error(`[CHAT BRIDGES]: ${error}`);
+			logger.error('[CHAT BRIDGES]: handleDiscordMessage', error);
 			message.reactSafely(X_EMOJI);
 		}
 	}
