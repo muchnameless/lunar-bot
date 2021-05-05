@@ -18,7 +18,7 @@ module.exports = class GuildCommand extends Command {
 		});
 	}
 
-	static COMMANDS = [ 'history', 'info', 'list', 'log', 'member', 'motd', 'online', 'quest', 'top' ];
+	static COMMANDS = [ 'demote', 'history', 'info', 'invite', 'list', 'log', 'member', 'motd', 'mute', 'online', 'promote', 'quest', 'setrank', 'top', 'unmute' ];
 
 	/**
 	 * execute the command

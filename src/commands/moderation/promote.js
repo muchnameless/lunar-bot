@@ -1,18 +1,17 @@
 'use strict';
 
-const { stripIndent } = require('common-tags');
 const { promote: { regExp: promote } } = require('../../structures/chat_bridge/constants/commandResponses');
-const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+const SetRankCommand = require('./setrank');
+// const logger = require('../../functions/logger');
 
 
-module.exports = class PromoteCommand extends Command {
+module.exports = class PromoteCommand extends SetRankCommand {
 	constructor(data, options) {
 		super(data, options ?? {
-			aliases: [],
+			aliases: [ 'guildpromote' ],
 			description: 'promote a guild member',
 			args: true,
-			usage: '[`ign`|`discord id`|`@mention`] <`-f`|`--force` to disable IGN autocorrection>',
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\`] <\`-f\`|\`--force\` to disable IGN autocorrection> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 0,
 		});
 	}
@@ -25,34 +24,8 @@ module.exports = class PromoteCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		/**
-		 * @type {import('../../structures/database/models/HypixelGuild')}
-		 */
-		const hypixelGuild = this.client.hypixelGuilds.getFromArray(args) ?? message.author.player?.guild;
+		const IGN = this.getIGN(message, args, flags);
 
-		if (!hypixelGuild) return message.reply('unable to find your guild.');
-
-		const { chatBridge } = hypixelGuild;
-		const IGN = message.mentions.users.size
-			? message.messages.users.first().player?.ign
-			: (this.force(flags)
-				? args[0]
-				: (this.client.players.getByID(args[0])?.ign ?? this.client.players.getByIGN(args[0])?.ign ?? args[0])
-			);
-
-		try {
-			const response = await chatBridge.minecraft.command({
-				command: `g promote ${IGN}`,
-				responseRegExp: promote(IGN),
-			});
-
-			message.reply(stripIndent`
-				\`/g promote ${IGN}\`
-				 > ${response}
-			`);
-		} catch (error) {
-			logger.error(error);
-			message.reply(`an unknown error occurred while promoting \`${IGN}\`.`);
-		}
+		return this._run(message, flags, `g promote ${IGN}`, promote(IGN));
 	}
 };

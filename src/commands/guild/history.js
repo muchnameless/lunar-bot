@@ -4,11 +4,11 @@ const GuildCommand = require('./guild');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class GuildInfoCommand extends GuildCommand {
+module.exports = class GuildHistoryCommand extends GuildCommand {
 	constructor(data, options) {
 		super(data, options ?? {
-			aliases: [ 'ginfo' ],
-			description: 'guild info',
+			aliases: [ 'guildhistory' ],
+			description: 'guild history',
 			args: false,
 			usage: () => `<${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 1,
@@ -23,6 +23,6 @@ module.exports = class GuildInfoCommand extends GuildCommand {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return this._run(message, flags, 'g info');
+		return this._run(message, flags, 'g history');
 	}
 };

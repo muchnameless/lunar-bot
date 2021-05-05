@@ -1,18 +1,17 @@
 'use strict';
 
-const { stripIndent } = require('common-tags');
 const { unmute: { regExp: unmute } } = require('../../structures/chat_bridge/constants/commandResponses');
-const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+const SetRankCommand = require('./setrank');
+// const logger = require('../../functions/logger');
 
 
-module.exports = class UnmuteCommand extends Command {
+module.exports = class UnmuteCommand extends SetRankCommand {
 	constructor(data, options) {
 		super(data, options ?? {
-			aliases: [],
+			aliases: [ 'guildunmute' ],
 			description: 'unmute a single guild member or guild chat both ingame and for the chat bridge',
 			args: true,
-			usage: () => `[\`ign\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] <\`-f\`|\`--force\` to disable IGN autocorrection>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] <\`-f\`|\`--force\` to disable IGN autocorrection>`,
 			cooldown: 0,
 		});
 	}
@@ -32,13 +31,13 @@ module.exports = class UnmuteCommand extends Command {
 		/**
 		 * @type {import('../../structures/database/models/HypixelGuild')}
 		 */
-		let guild = this.client.hypixelGuilds.getFromArray([ ...flags, ...args ]);
+		let hypixelGuild = this.client.hypixelGuilds.getFromArray([ ...flags, ...args ]);
 
-		if (guild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+		if (hypixelGuild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 			target = 'everyone';
-			guild ??= message.author.hypixelGuild;
+			hypixelGuild ??= message.author.hypixelGuild;
 
-			if (!guild) return message.reply('unable to find your guild.');
+			if (!hypixelGuild) return message.reply('unable to find your guild.');
 		} else {
 			target = message.mentions.users.size
 				? message.mentions.users.first().player
@@ -56,17 +55,15 @@ module.exports = class UnmuteCommand extends Command {
 			} found.`);
 
 			if (target instanceof players.model) {
-				({ guild } = target);
+				({ guild: hypixelGuild } = target);
 
-				if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
+				if (!hypixelGuild) return message.reply(`unable to find the guild for \`${target.ign}\``);
 			} else {
-				guild ??= message.author.hypixelGuild;
+				hypixelGuild ??= message.author.hypixelGuild;
 
-				if (!guild) return message.reply('unable to find your guild.');
+				if (!hypixelGuild) return message.reply('unable to find your guild.');
 			}
 		}
-
-		const { chatBridge } = guild;
 
 		if (target instanceof players.model) {
 			target.chatBridgeMutedUntil = 0;
@@ -74,23 +71,10 @@ module.exports = class UnmuteCommand extends Command {
 
 			if (target.notInGuild) return message.reply(`unmuted \`${target}\`.`);
 		} else if (target === 'everyone') {
-			guild.chatMutedUntil = 0;
-			await guild.save();
+			hypixelGuild.chatMutedUntil = 0;
+			await hypixelGuild.save();
 		}
 
-		try {
-			const response = await chatBridge.minecraft.command({
-				command: `g unmute ${target}`,
-				responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : target.toString(), chatBridge.bot.ign),
-			});
-
-			message.reply(stripIndent`
-				\`/g unmute ${target}\`
-				 > ${response}
-			`);
-		} catch (error) {
-			logger.error(error);
-			message.reply(`an unknown error occurred while unmuting ${target === 'everyone' ? `\`${guild.name}\` guild chat` : `\`${target}\``}.`);
-		}
+		return this._run(message, flags, `g unmute ${target}`, unmute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign), hypixelGuild);
 	}
 };

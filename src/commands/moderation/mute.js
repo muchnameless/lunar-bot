@@ -1,19 +1,18 @@
 'use strict';
 
-const { stripIndent } = require('common-tags');
 const { stringToMS } = require('../../functions/util');
 const { mute: { regExp: mute } } = require('../../structures/chat_bridge/constants/commandResponses');
-const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+const SetRankCommand = require('./setrank');
+// const logger = require('../../functions/logger');
 
 
-module.exports = class MuteCommand extends Command {
+module.exports = class MuteCommand extends SetRankCommand {
 	constructor(data, options) {
 		super(data, options ?? {
-			aliases: [],
+			aliases: [ 'guildmute' ],
 			description: 'mute a single guild member or guild chat both ingame and for the chat bridge',
 			args: 2,
-			usage: () => `[\`ign\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format] <\`-f\`|\`--force\` to disable IGN autocorrection>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format] <\`-f\`|\`--force\` to disable IGN autocorrection>`,
 			cooldown: 0,
 		});
 	}
@@ -33,13 +32,13 @@ module.exports = class MuteCommand extends Command {
 		/**
 		 * @type {import('../../structures/database/models/HypixelGuild')}
 		 */
-		let guild = this.client.hypixelGuilds.getFromArray([ ...flags, ...args ]);
+		let hypixelGuild = this.client.hypixelGuilds.getFromArray([ ...flags, ...args ]);
 
-		if (guild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+		if (hypixelGuild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 			target = 'everyone';
-			guild ??= message.author.hypixelGuild;
+			hypixelGuild ??= message.author.hypixelGuild;
 
-			if (!guild) return message.reply('unable to find your guild.');
+			if (!hypixelGuild) return message.reply('unable to find your guild.');
 		} else {
 			target = message.mentions.users.size
 				? message.mentions.users.first().player
@@ -57,17 +56,16 @@ module.exports = class MuteCommand extends Command {
 			} found.`);
 
 			if (target instanceof players.model) {
-				({ guild } = target);
+				({ guild: hypixelGuild } = target);
 
-				if (!guild) return message.reply(`unable to find the guild for \`${target.ign}\``);
+				if (!hypixelGuild) return message.reply(`unable to find the guild for \`${target.ign}\``);
 			} else {
-				guild ??= message.author.hypixelGuild;
+				hypixelGuild ??= message.author.hypixelGuild;
 
-				if (!guild) return message.reply('unable to find your guild.');
+				if (!hypixelGuild) return message.reply('unable to find your guild.');
 			}
 		}
 
-		const { chatBridge } = guild;
 		const DURATION = stringToMS(DURATION_INPUT);
 
 		if (Number.isNaN(DURATION)) return message.reply(`\`${DURATION_INPUT}\` is not a valid duration.`);
@@ -80,23 +78,10 @@ module.exports = class MuteCommand extends Command {
 
 			if (target.notInGuild) return message.reply(`muted \`${target}\` for \`${DURATION_INPUT}\`.`);
 		} else if (target === 'everyone') {
-			guild.chatMutedUntil = EXPIRES_AT;
-			await guild.save();
+			hypixelGuild.chatMutedUntil = EXPIRES_AT;
+			await hypixelGuild.save();
 		}
 
-		try {
-			const response = await chatBridge.minecraft.command({
-				command: `g mute ${target} ${DURATION_INPUT}`,
-				responseRegExp: mute(target === 'everyone' ? 'the guild chat' : target.toString(), chatBridge.bot.ign),
-			});
-
-			message.reply(stripIndent`
-				\`/g mute ${target} ${DURATION_INPUT}\`
-				 > ${response}
-			`);
-		} catch (error) {
-			logger.error(error);
-			message.reply(`an unknown error occurred while muting ${target === 'everyone' ? `\`${guild.name}\` guild chat` : `\`${target}\``}.`);
-		}
+		return this._run(message, flags, `g mute ${target} ${DURATION_INPUT}`, mute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign), hypixelGuild);
 	}
 };
