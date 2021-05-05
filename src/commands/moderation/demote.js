@@ -11,7 +11,7 @@ module.exports = class DemoteCommand extends SetRankCommand {
 			aliases: [ 'guilddemote' ],
 			description: 'demote a guild member',
 			args: true,
-			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\`] <\`-f\`|\`--force\` to disable IGN autocorrection> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\`] <${this.commandCollection.constructor.forceFlagsAsFlags} to disable IGN autocorrection> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 0,
 		});
 	}

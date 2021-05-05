@@ -33,11 +33,21 @@ module.exports = class CommandCollection extends Collection {
 	}
 
 	/**
-	 * checks wether the array includes 'f' or 'force'
+	 * categories that are excluded from the help command and autocorrection
+	 */
+	static INVISIBLE_CATEGORIES = [ 'hidden', 'owner' ];
+
+	/**
+	 * command flags to change certain behaviours
+	 */
+	static FORCE_FLAGS = [ 'f', 'force' ];
+
+	/**
+	 * checks wether the array includes any of the FORCE_FLAGS
 	 * @param {string[]} array
 	 */
 	static force(array) {
-		return array.some(x => [ 'f', 'force' ].includes(x));
+		return array.some(x => CommandCollection.FORCE_FLAGS.includes(x));
 	}
 
 	/**
@@ -48,7 +58,9 @@ module.exports = class CommandCollection extends Collection {
 		return Collection;
 	}
 
-	static INVISIBLE_CATEGORIES = [ 'hidden', 'owner' ];
+	static get forceFlagsAsFlags() {
+		return this.FORCE_FLAGS.map(flag => `\`-${flag}\``).join('|');
+	}
 
 	/**
 	 * returns all non-hidden commands

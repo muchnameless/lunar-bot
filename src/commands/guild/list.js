@@ -9,7 +9,7 @@ const Command = require('../../structures/commands/Command');
 module.exports = class GuildListCommand extends Command {
 	constructor(data, options) {
 		super(data, options ?? {
-			aliases: [ 'guildlist' ],
+			aliases: [ 'guildlist', 'members', 'guildmembers' ],
 			description: 'guild list',
 			args: false,
 			usage: '',

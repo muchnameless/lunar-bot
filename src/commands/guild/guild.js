@@ -13,12 +13,12 @@ module.exports = class GuildCommand extends Command {
 			aliases: [ 'g' ],
 			description: 'hypixel /guild commands',
 			args: true,
-			usage: () => `[${GuildCommand.COMMANDS.map(command => `\`${command}\``).join('|')}] <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
+			usage: () => `[${GuildCommand.SUB_COMMANDS.map(command => `\`${command}\``).join('|')}] <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 1,
 		});
 	}
 
-	static COMMANDS = [ 'demote', 'history', 'info', 'invite', 'list', 'log', 'member', 'motd', 'mute', 'online', 'promote', 'quest', 'setrank', 'top', 'unmute' ];
+	static SUB_COMMANDS = [ 'demote', 'history', 'info', 'invite', 'list', 'log', 'member', 'members', 'motd', 'mute', 'online', 'promote', 'quest', 'setrank', 'top', 'unmute' ];
 
 	/**
 	 * execute the command
@@ -55,7 +55,7 @@ module.exports = class GuildCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const INPUT = args.shift();
-		const { value, similarity } = autocorrect(INPUT, GuildCommand.COMMANDS);
+		const { value, similarity } = autocorrect(INPUT, GuildCommand.SUB_COMMANDS);
 
 		if (similarity < this.config.get('AUTOCORRECT_THRESHOLD') && !this.force(flags)) {
 			const ANSWER = await message.awaitReply(`there is currently no guild command for \`${INPUT.toLowerCase()}\`. Did you mean \`${value}\`?`, 30);
