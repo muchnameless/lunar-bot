@@ -9,7 +9,7 @@ const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerR
 const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
 const { escapeIgn, trim } = require('../../../functions/util');
 const { getSkillLevel, getWeight, getSkillWeight, getSlayerWeight, getDungeonWeight } = require('../../../functions/skyblock');
-const { validateNumber } = require('../../../functions/stringValidators');
+const { validateNumber, validateDiscordID } = require('../../../functions/stringValidators');
 const { mutedCheck } = require('../../../functions/database');
 const NonAPIError = require('../../errors/NonAPIError');
 const LunarGuildMember = require('../../extensions/GuildMember');
@@ -95,91 +95,6 @@ module.exports = class Player extends Model {
 		 * @type {number}
 		 */
 		this.guildXpDaily;
-
-		Object.defineProperties(this, {
-			discordMember: {
-				/**
-				 * @type {Promise<?LunarGuildMember>}
-				 */
-				async get() {
-					if (this._discordMember) return this._discordMember;
-					if (!this.inDiscord) return null;
-
-					try {
-						return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordID ?? (() => { throw new TypeError('discordID must be a string'); })) ?? null;
-					} catch (error) {
-						this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
-						this.save();
-						logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error}`);
-						return this._discordMember = null;
-					}
-				},
-				set(member) {
-					if (member == null) {
-						if (!this.inDiscord) return;
-
-						this.inDiscord = false;
-						this.save({ fields: [ 'inDiscord' ] });
-
-						return;
-					}
-
-					if (!(member instanceof LunarGuildMember)) throw new TypeError(`[SET DISCORD MEMBER]: ${this.logInfo}: member must be a LunarGuildMember`);
-
-					this._discordMember = member;
-
-					if (this.inDiscord) return;
-
-					this.inDiscord = true;
-					this.save({ fields: [ 'inDiscord' ] });
-				},
-			},
-
-			taxAmount: {
-				/**
-				 * @returns {Promise<number>}
-				 */
-				async get() {
-					const result = await this.client.db.models.Transaction.findAll({
-						limit: 1,
-						where: {
-							from: this.minecraftUUID,
-							type: 'tax',
-						},
-						order: [ [ 'createdAt', 'DESC' ] ],
-						attributes: [ 'amount' ],
-						raw: true,
-					});
-
-					return result.length
-						? result[0].amount
-						: null;
-				},
-
-			},
-
-			transactions: {
-				/**
-				 * @returns {Promise<ParsedTransaction[]>}
-				 */
-				async get() {
-					return Promise.all(
-						(await this.client.db.models.Transaction.findAll({
-							where: {
-								from: this.minecraftUUID,
-							},
-							order: [ [ 'createdAt', 'DESC' ] ],
-							raw: true,
-						}))
-							.map(async transaction => ({
-								...transaction,
-								fromIGN: this.ign,
-								toIGN: (this.client.players.cache.get(transaction.to) ?? await mojang.uuid(transaction.to).catch(logger.error))?.ign,
-							})),
-					);
-				},
-			},
-		});
 	}
 
 	/**
@@ -333,13 +248,48 @@ module.exports = class Player extends Model {
 		return [ null, GUILD_ID_BRIDGER, GUILD_ID_ERROR ].includes(this.guildID);
 	}
 
-	// the following is just for JSDOC's sake
-
 	/**
 	 * fetches the discord member if the discord id is valid and the player is in lg discord
 	 * @type {Promise<?LunarGuildMember>}
 	 */
-	get discordMember() {} // eslint-disable-line getter-return, no-empty-function, class-methods-use-this
+	get discordMember() {
+		return (async () => {
+			if (this._discordMember) return this._discordMember;
+			if (!this.inDiscord || !validateDiscordID(this.discordID)) return null;
+
+			try {
+				return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordID) ?? null;
+			} catch (error) {
+				this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
+				this.save();
+				logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error}`);
+				return this._discordMember = null;
+			}
+		})();
+	}
+
+	/**
+	 * @param {?LunarGuildMember} member
+	 */
+	set discordMember(member) {
+		if (member == null) {
+			if (!this.inDiscord) return;
+
+			this.inDiscord = false;
+			this.save({ fields: [ 'inDiscord' ] });
+
+			return;
+		}
+
+		if (!(member instanceof LunarGuildMember)) throw new TypeError(`[SET DISCORD MEMBER]: ${this.logInfo}: member must be a LunarGuildMember`);
+
+		this._discordMember = member;
+
+		if (this.inDiscord) return;
+
+		this.inDiscord = true;
+		this.save({ fields: [ 'inDiscord' ] });
+	}
 
 	/**
 	 * fetches the discord user if the discord id is valid
@@ -415,7 +365,24 @@ module.exports = class Player extends Model {
 	 * amount of the last tax transaction from that player
 	 * @returns {Promise<?number>}
 	 */
-	get taxAmount() {} // eslint-disable-line getter-return, no-empty-function, class-methods-use-this
+	get taxAmount() {
+		return (async () => {
+			const result = await this.client.db.models.Transaction.findAll({
+				limit: 1,
+				where: {
+					from: this.minecraftUUID,
+					type: 'tax',
+				},
+				order: [ [ 'createdAt', 'DESC' ] ],
+				attributes: [ 'amount' ],
+				raw: true,
+			});
+
+			return result.length
+				? result[0].amount
+				: null;
+		})();
+	}
 
 	/**
 	 * @typedef {import('./Transaction').Transaction} ParsedTransaction
@@ -427,7 +394,22 @@ module.exports = class Player extends Model {
 	 * all transactions from that player
 	 * @returns {Promise<ParsedTransaction[]>}
 	 */
-	get transactions() {} // eslint-disable-line getter-return, no-empty-function, class-methods-use-this
+	get transactions() {
+		return (async () => Promise.all(
+			(await this.client.db.models.Transaction.findAll({
+				where: {
+					from: this.minecraftUUID,
+				},
+				order: [ [ 'createdAt', 'DESC' ] ],
+				raw: true,
+			}))
+				.map(async transaction => ({
+					...transaction,
+					fromIGN: this.ign,
+					toIGN: (this.client.players.cache.get(transaction.to) ?? await mojang.uuid(transaction.to).catch(logger.error))?.ign ?? transaction.to,
+				})),
+		))();
+	}
 
 	/**
 	 * wether the player is muted and that mute is not expired

@@ -73,45 +73,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		  * to prevent chatBridge from reconnecting at <MinecraftBot>.end
 		  */
 		this.shouldReconnect = true;
-
-		Object.defineProperties(this, {
-			server: {
-				async get() {
-					try {
-						const result = await this.command({
-							command: 'locraw',
-							responseRegExp: /^{.+}$/,
-							force: true,
-							max: 1,
-						});
-
-						return JSON.parse(result).server ?? null;
-					} catch (error) {
-						logger.error(`[GET SERVER]: ${error}`);
-						return null;
-					}
-				},
-			},
-			chatReady: {
-				async get() {
-					if (!this.bot) return false;
-
-					try {
-						await this.command({
-							command: `w ${this.chatBridge.bot.ign} o/`,
-							responseRegExp: /^You cannot message this player\.$/,
-							timeout: 1,
-							rejectOnTimeout: true,
-							max: 1,
-						});
-
-						return true;
-					} catch {
-						return false;
-					}
-				},
-			},
-		});
 	}
 
 	get ready() {
@@ -127,13 +88,47 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	/**
 	 * @returns {Promise<string>}
 	 */
-	get server() {} // eslint-disable-line no-empty-function, class-methods-use-this, getter-return
+	get server() {
+		return (async () => {
+			try {
+				const result = await this.command({
+					command: 'locraw',
+					responseRegExp: /^{.+}$/s,
+					force: true,
+					max: 1,
+				});
+
+				return JSON.parse(result).server ?? null;
+			} catch (error) {
+				logger.error(`[GET SERVER]: ${error}`);
+				return null;
+			}
+		})();
+	}
 
 	/**
 	 * wether the minecraft bot can send chat messages
 	 * @returns {Promise<boolean>}
 	 */
-	get chatReady() {} // eslint-disable-line no-empty-function, class-methods-use-this, getter-return
+	get chatReady() {
+		return (async () => {
+			if (!this.bot) return false;
+
+			try {
+				await this.command({
+					command: `w ${this.chatBridge.bot.ign} o/`,
+					responseRegExp: /^You cannot message this player\.$/,
+					timeout: 1,
+					rejectOnTimeout: true,
+					max: 1,
+				});
+
+				return true;
+			} catch {
+				return false;
+			}
+		})();
+	}
 
 	/**
 	 * maximum attempts to resend to in game chat
