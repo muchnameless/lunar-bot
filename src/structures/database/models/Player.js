@@ -4,7 +4,7 @@ const { MessageEmbed, Permissions: { FLAGS: { MANAGE_ROLES } } } = require('disc
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
-const { levelingXp, skillXpPast50, skillsCap, dungeonXp, slayerXp, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
+const { skillsCap, dungeonXp, slayerXp, skills, cosmeticSkills, skillsAchievements, levelingXpTotal, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
@@ -491,7 +491,7 @@ module.exports = class Player extends Model {
 			if (!this.mainProfileID) await this.fetchMainProfile(); // detect main profile if it is unknown
 
 			// hypixel API call
-			const { meta: { cached }, members } = (await hypixel.skyblock.profile(this.mainProfileID));
+			const { meta: { cached }, members } = await hypixel.skyblock.profile(this.mainProfileID);
 
 			if (cached && Date.now() - this.xpLastUpdatedAt < (this.client.config.getNumber('DATABASE_UPDATE_INTERVAL') - 1) * 60_000) throw new NonAPIError('cached data');
 
@@ -520,45 +520,68 @@ module.exports = class Player extends Model {
 					}
 				}
 			} else {
-			// log once every hour (during the first update)
+				// log once every hour (during the first update)
 				if (!(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) logger.warn(`[UPDATE XP]: ${this.logInfo}: skill API disabled`);
 				this.notes = 'skill api disabled';
+
+				/**
+				 * request achievements api
+				 */
+				const { achievements } = await hypixel.player.uuid(this.minecraftUUID);
+
+				for (const skill of skills) {
+					this[`${skill}Xp`] = levelingXpTotal[achievements[skillsAchievements[skill]]] ?? 0;
+				}
 			}
 
 			this.farmingLvlCap = 50 + (playerData.jacob2?.perks?.farming_level_cap ?? 0);
 
-			if (Object.prototype.hasOwnProperty.call(playerData.slayer_bosses?.zombie ?? {}, 'xp')) {
-				slayers.forEach(slayer => this[`${slayer}Xp`] = playerData.slayer_bosses[slayer].xp ?? 0);
+			/**
+			 * slayer
+			 */
 
-				// reset slayer xp if no zombie xp offset
-				if (this.zombieXp !== 0) {
-					for (const offset of XP_OFFSETS) {
-						if (this[`zombieXp${offset}`] === 0) {
-							logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' slayer xp`);
-							await this.resetXp({ offsetToReset: offset, typesToReset: slayers });
-						}
+			slayers.forEach(slayer => this[`${slayer}Xp`] = playerData.slayer_bosses[slayer].xp ?? 0);
+
+			// reset slayer xp if no zombie xp offset
+			if (this.zombieXp !== 0) {
+				for (const offset of XP_OFFSETS) {
+					if (this[`zombieXp${offset}`] === 0) {
+						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' slayer xp`);
+						await this.resetXp({ offsetToReset: offset, typesToReset: slayers });
 					}
 				}
-			} else if (!(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+			}
+
+			// no slayer data found logging
+			if (!Object.prototype.hasOwnProperty.call(playerData.slayer_bosses?.zombie ?? {}, 'xp') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no slayer data found`);
 			}
 
-			if (Object.hasOwnProperty.call(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience')) {
-				dungeonTypes.forEach(dungeonType => this[`${dungeonType}Xp`] = playerData.dungeons.dungeon_types[dungeonType]?.experience ?? 0);
-				dungeonClasses.forEach(dugeonClass => this[`${dugeonClass}Xp`] = playerData.dungeons.player_classes[dugeonClass]?.experience ?? 0);
+			/**
+			 * dungeons
+			 */
 
-				// reset dungeon xp if no catacombs xp offset
-				if (this.catacombsXp !== 0) {
-					for (const offset of XP_OFFSETS) {
-						if (this[`catacombsXp${offset}`] === 0) {
-							logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' dungeon xp`);
-							await this.resetXp({ offsetToReset: offset, typesToReset: [ ...dungeonTypes, ...dungeonClasses ] });
-						}
+			dungeonTypes.forEach(dungeonType => this[`${dungeonType}Xp`] = playerData.dungeons.dungeon_types[dungeonType]?.experience ?? 0);
+			dungeonClasses.forEach(dugeonClass => this[`${dugeonClass}Xp`] = playerData.dungeons.player_classes[dugeonClass]?.experience ?? 0);
+
+			// reset dungeons xp if no catacombs xp offset
+			if (this.catacombsXp !== 0) {
+				for (const offset of XP_OFFSETS) {
+					if (this[`catacombsXp${offset}`] === 0) {
+						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' dungeon xp`);
+						await this.resetXp({ offsetToReset: offset, typesToReset: [ ...dungeonTypes, ...dungeonClasses ] });
 					}
 				}
-			} else if (!(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+			}
+
+			// no dungeons data found logging
+			if (!Object.hasOwnProperty.call(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no dungeons data found`);
 			}
+
+			/**
+			 * collections
+			 */
 
 			if (!Object.hasOwnProperty.call(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
@@ -1366,10 +1389,7 @@ module.exports = class Player extends Model {
 		for (const skill of skills) {
 			const { nonFlooredLevel: level } = this.getSkillLevel(skill, offset, false);
 			const xp = this[`${skill}Xp${offset}`];
-
-			let maxXp = Object.values(levelingXp).reduce((acc, currentXp) => acc + currentXp, 0);
-
-			if (skillsCap[skill] > 50) maxXp += Object.values(skillXpPast50).reduce((acc, currentXp) => acc + currentXp, 0);
+			const maxXp = levelingXpTotal[skillsCap[skill]];
 
 			weight += ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250;
 			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
@@ -1470,10 +1490,7 @@ module.exports = class Player extends Model {
 		for (const skill of skills) {
 			const { nonFlooredLevel: level } = this.getSkillLevelHistory(skill, index);
 			const xp = this[`${skill}XpHistory`][index];
-
-			let maxXp = Object.values(levelingXp).reduce((acc, currentXp) => acc + currentXp, 0);
-
-			if (skillsCap[skill] > 50) maxXp += Object.values(skillXpPast50).reduce((acc, currentXp) => acc + currentXp, 0);
+			const maxXp = levelingXpTotal[skillsCap[skill]];
 
 			weight += ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250;
 			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
