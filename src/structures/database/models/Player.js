@@ -495,7 +495,7 @@ module.exports = class Player extends Model {
 
 			if (cached && Date.now() - this.xpLastUpdatedAt < (this.client.config.getNumber('DATABASE_UPDATE_INTERVAL') - 1) * 60_000) throw new NonAPIError('cached data');
 
-			const playerData = members[this.minecraftUUID];
+			const playerData = members?.[this.minecraftUUID];
 
 			if (!playerData) {
 				this.mainProfileID = null;
@@ -569,6 +569,10 @@ module.exports = class Player extends Model {
 			if (error instanceof NonAPIError) return logger.warn(`[UPDATE XP]: ${this.logInfo}: ${error}`);
 
 			if (error.name.startsWith('Sequelize')) return logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
+
+			if (error instanceof TypeError || error instanceof RangeError) {
+				return logger.error(`[UPDATE XP]: ${this.logInfo}:`, error);
+			}
 
 			logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
 			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
