@@ -1091,7 +1091,8 @@ module.exports = class Player extends Model {
 
 		if (!profiles.length) {
 			this.mainProfileID = null;
-			this.save();
+
+			await this.resetXp({ offsetToReset: 'current' });
 
 			throw new NonAPIError(`${this.logInfo}: no SkyBlock profiles`);
 		}
