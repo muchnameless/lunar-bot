@@ -4,6 +4,9 @@ const { createLogger, transports, format } = require('winston');
 const util = require('util');
 const chalk = require('chalk');
 
+/**
+  * @param {{ timestamp: number, level: string, message: string }} param0
+  */
 const getFormattedText = ({ timestamp, level, message }) => {
 	let colour;
 
@@ -53,7 +56,10 @@ logger.on('error', (error) => {
 });
 
 
-// extending log method of logger to suppport single argument in log function.
+/**
+ * extending log method of logger to suppport single argument in log function.
+ * @returns {null}
+ */
 const log = (...input) => {
 	if (input.length > 1) {
 		const level = input.shift();
@@ -97,7 +103,7 @@ const debug = (...input) => {
 };
 
 module.exports = {
-	error, // logger.error.bind(logger) <- returns logger instead of null,
+	error,
 	warn,
 	info,
 	debug,
