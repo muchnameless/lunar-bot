@@ -590,12 +590,8 @@ module.exports = class Player extends Model {
 			await this.save();
 		} catch (error) {
 			if (error instanceof NonAPIError) return logger.warn(`[UPDATE XP]: ${this.logInfo}: ${error}`);
-
 			if (error.name.startsWith('Sequelize')) return logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
-
-			if (error instanceof TypeError || error instanceof RangeError) {
-				return logger.error(`[UPDATE XP]: ${this.logInfo}:`, error);
-			}
+			if (error instanceof TypeError || error instanceof RangeError) return logger.error(`[UPDATE XP]: ${this.logInfo}:`, error);
 
 			logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
 			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
