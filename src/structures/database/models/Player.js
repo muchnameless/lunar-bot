@@ -505,7 +505,9 @@ module.exports = class Player extends Model {
 
 			this.xpLastUpdatedAt = Date.now();
 
-			// update xp
+			/**
+			 * skills
+			 */
 			if (Object.prototype.hasOwnProperty.call(playerData, 'experience_skill_alchemy')) {
 				skills.forEach(skill => this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0);
 				cosmeticSkills.forEach(skill => this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0);
@@ -539,7 +541,6 @@ module.exports = class Player extends Model {
 			/**
 			 * slayer
 			 */
-
 			slayers.forEach(slayer => this[`${slayer}Xp`] = playerData.slayer_bosses[slayer].xp ?? 0);
 
 			// reset slayer xp if no zombie xp offset
@@ -560,7 +561,6 @@ module.exports = class Player extends Model {
 			/**
 			 * dungeons
 			 */
-
 			dungeonTypes.forEach(dungeonType => this[`${dungeonType}Xp`] = playerData.dungeons.dungeon_types[dungeonType]?.experience ?? 0);
 			dungeonClasses.forEach(dugeonClass => this[`${dugeonClass}Xp`] = playerData.dungeons.player_classes[dugeonClass]?.experience ?? 0);
 
@@ -582,7 +582,6 @@ module.exports = class Player extends Model {
 			/**
 			 * collections
 			 */
-
 			if (!Object.hasOwnProperty.call(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
 			}
