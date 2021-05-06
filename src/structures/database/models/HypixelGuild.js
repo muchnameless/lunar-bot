@@ -494,8 +494,9 @@ module.exports = class HypixelGuild extends Model {
 			]);
 
 			// update guild xp gained and ingame ranks
-			currentGuildMembers.forEach(hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember)
-				?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`));
+			for (const hypixelGuildMember of currentGuildMembers) {
+				players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember) ?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
+			}
 
 			const CHANGES = PLAYERS_LEFT_AMOUNT + membersJoined.length;
 

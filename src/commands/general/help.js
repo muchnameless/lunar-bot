@@ -96,11 +96,11 @@ module.exports = class HelpCommand extends Command {
 
 			helpEmbed.addField('\u200b', '```Commands```');
 
-			categoryCommands.forEach((command) => {
+			for (const command of categoryCommands) {
 				const commandName = [ command.name ];
 				if (command.aliases) commandName.push(command.aliases.join(' | '));
 				helpEmbed.addField(`${commandName.join(' | ')}`, `${command.description ?? '\u200b'}`, true);
-			});
+			}
 
 			helpEmbed
 				.padFields()

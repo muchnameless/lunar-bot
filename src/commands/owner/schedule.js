@@ -62,7 +62,9 @@ module.exports = class ScheduleCommand extends Command {
 		const commandArgs = [];
 		const dateArgs = [];
 
-		args.forEach(arg => (arg.startsWith('@') ? dateArgs.push(arg.replace('@', '')) : commandArgs.push(arg)));
+		for (const arg of args) arg.startsWith('@')
+			? dateArgs.push(arg.replace('@', ''))
+			: commandArgs.push(arg);
 
 		let hasDate = false;
 

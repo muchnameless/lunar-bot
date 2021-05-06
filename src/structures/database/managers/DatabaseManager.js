@@ -134,14 +134,12 @@ module.exports = class DatabaseManager {
 
 				let availableAuctions = 0;
 
-				(await asyncFilter(
+				for (const auction of await asyncFilter(
 					auctions,
-					auction => TAX_AUCTIONS_ITEMS.includes(auction.item_name) && auction.start >= TAX_AUCTIONS_START_TIME && this._validateAuctionID(auction.uuid), // correct item & started after last reset & no outbid from already logged auction
-				))
-					.forEach(auction => (auction.highest_bid_amount >= TAX_AMOUNT
-						? auction.bids.length && taxAuctions.push(auction)
-						: auction.end > NOW && ++availableAuctions),
-					);
+					auc => TAX_AUCTIONS_ITEMS.includes(auc.item_name) && auc.start >= TAX_AUCTIONS_START_TIME && this._validateAuctionID(auc.uuid), // correct item & started after last reset & no outbid from already logged auction
+				)) auction.highest_bid_amount >= TAX_AMOUNT
+					? auction.bids.length && taxAuctions.push(auction)
+					: auction.end > NOW && ++availableAuctions;
 
 				availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: ${availableAuctions}`);
 
@@ -220,22 +218,20 @@ module.exports = class DatabaseManager {
 			.setTimestamp();
 
 		// add guild specific fields
-		hypixelGuilds.cache.forEach((hypixelGuild) => {
+		for (const hypixelGuild of hypixelGuilds.cache.values()) {
 			const GUILD_PLAYER_COUNT = hypixelGuild.playerCount;
 			const ENTRIES_PER_ROW = Math.ceil(GUILD_PLAYER_COUNT / 3);
 			const values = [ '', '', '' ];
 
-			let index = -1;
-
 			// construct player list in three rows: paid emoji + non line-breaking space + player ign, slice to keep everything in one line
 			if (config.getBoolean('TAX_TRACKING_ENABLED')) {
-				hypixelGuild.players.forEach(player => values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\xa0${player.ign.slice(0, 15)}`);
+				for (const [ index, player ] of hypixelGuild.players) values[Math.floor(index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\xa0${player.ign.slice(0, 15)}`;
 			} else {
-				hypixelGuild.players.forEach(player => values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n•\xa0${player.ign.slice(0, 15)}`);
+				for (const [ index, player ] of hypixelGuild.players) values[Math.floor(index / ENTRIES_PER_ROW)] += `\n•\xa0${player.ign.slice(0, 15)}`;
 			}
 
 			// add rows to tax embed
-			values.forEach((value, fieldIndex) => {
+			for (const [ index, value ] of values.entries()) {
 				let paddedValue = value;
 
 				// fill up with empty lines if rows have different size
@@ -244,14 +240,14 @@ module.exports = class DatabaseManager {
 				}
 
 				taxEmbed.addField(
-					fieldIndex % 2
+					index % 2
 						? `${hypixelGuild.name} (${GUILD_PLAYER_COUNT})`
 						: '\u200b',
 					`\`\`\`\n${paddedValue}\`\`\``, // put everything in a code block
 					true,
 				);
-			});
-		});
+			}
+		}
 
 		return taxEmbed;
 	}

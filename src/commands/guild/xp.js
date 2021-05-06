@@ -89,7 +89,7 @@ module.exports = class PlayerCommand extends Command {
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(offset);
 
 		// skills
-		skills.forEach((skill) => {
+		for (const skill of skills) {
 			const SKILL_ARGUMENT = `${skill}Xp`;
 			const OFFSET_ARGUMENT = `${skill}Xp${offset}`;
 			const { progressLevel } = player.getSkillLevel(skill);
@@ -99,7 +99,7 @@ module.exports = class PlayerCommand extends Command {
 				**XP:** ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
 				**Δ:** ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT], 0, Math.round)}
 			`, true);
-		});
+		}
 
 		const TOTAL_SLAYER_XP = player.getSlayerTotal();
 
@@ -117,7 +117,7 @@ module.exports = class PlayerCommand extends Command {
 			`, false);
 
 		// slayer
-		slayers.forEach((slayer) => {
+		for (const slayer of slayers) {
 			const SLAYER_ARGUMENT = `${slayer}Xp`;
 
 			embed.addField(upperCaseFirstChar(slayer), stripIndents`
@@ -125,16 +125,14 @@ module.exports = class PlayerCommand extends Command {
 				**XP:** ${this.client.formatNumber(player[SLAYER_ARGUMENT])}
 				**Δ:** ${this.client.formatNumber(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${offset}`], 0, Math.round)}
 			`, true);
-		});
+		}
 
 		embed
 			.padFields()
 			.addField('\u200b', '```Dungeons```\u200b', false);
 
-		const DUNGEONS = [ ...dungeonTypes, ...dungeonClasses ];
-
 		// dungeons
-		DUNGEONS.forEach((type) => {
+		for (const type of [ ...dungeonTypes, ...dungeonClasses ]) {
 			const DUNGEON_ARGUMENT = `${type}Xp`;
 			const { progressLevel } = player.getSkillLevel(type);
 
@@ -143,7 +141,7 @@ module.exports = class PlayerCommand extends Command {
 				**XP:** ${this.client.formatNumber(player[DUNGEON_ARGUMENT], 0, Math.round)}
 				**Δ:** ${this.client.formatNumber(player[DUNGEON_ARGUMENT] - player[`${type}Xp${offset}`], 0, Math.round)}
 			`, true);
-		});
+		}
 
 		const { totalWeight, weight, overflow } = player.getWeight();
 		const { totalWeight: totalWeightOffet, weight: weightOffset, overflow: overflowOffset } = player.getWeight(offset);
@@ -163,7 +161,7 @@ module.exports = class PlayerCommand extends Command {
 			);
 		// .padFields();
 
-		// cosmeticSkills.forEach(skill => {
+		// for (const skill of cosmeticSkills) {
 		// 	const SKILL_ARGUMENT = `${skill}Xp`;
 		// 	const { progressLevel } = player.getSkillLevel(skill);
 
@@ -172,7 +170,7 @@ module.exports = class PlayerCommand extends Command {
 		// 		**XP:** ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
 		// 		**Δ:** ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${offset}`], 0, Math.round)}
 		// 	`, true);
-		// });
+		// }
 
 		message.reply(embed /* .padFields() */);
 	}

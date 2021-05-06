@@ -265,6 +265,8 @@ const self = module.exports = {
 	 * @param {Promise<any>[]} arr
 	 */
 	async safePromiseAll(arr) {
-		(await Promise.allSettled(arr)).forEach(x => x.status === 'rejected' && logger.error(x.reason));
+		for (const x of await Promise.allSettled(arr)) {
+			if (x.status === 'rejected') logger.error(x.reason);
+		}
 	},
 };

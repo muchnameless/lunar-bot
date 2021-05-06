@@ -37,42 +37,38 @@ module.exports = class LinkIssuesCommand extends Command {
 		const guildRoleWithoutDbEntry = [];
 		const missingVerifiedRole = [];
 
-		lgGuild.members.cache.forEach((member, id) => {
+		for (const [ id, member ] of lgGuild.members.cache) {
 			if (players.cache.some(({ discordID }) => discordID === id)) return !member.roles.cache.has(VERIFIED_ROLE_ID) && missingVerifiedRole.push(member);
 			if (member.roles.cache.has(GUILD_ROLE_ID)) return guildRoleWithoutDbEntry.push(member);
-		});
+		}
 
 		let issuesAmount = missingVerifiedRole.length + guildRoleWithoutDbEntry.length;
 
-		Util
-			.splitMessage(
-				missingVerifiedRole.map(member => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`).join('\n') || 'none',
-				{ char: '\n', maxLength: 1024 },
-			)
-			.forEach((string) => {
-				embed.addField(
-					`**Missing Verified Role:**${missingVerifiedRole.length ? ` [display name | tag] (${missingVerifiedRole.length})` : ''}`,
-					string,
-				);
-			});
+		for (const value of Util.splitMessage(
+			missingVerifiedRole.map(member => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`).join('\n') || 'none',
+			{ char: '\n', maxLength: 1024 },
+		)) {
+			embed.addField(
+				`**Missing Verified Role:**${missingVerifiedRole.length ? ` [display name | tag] (${missingVerifiedRole.length})` : ''}`,
+				value,
+			);
+		}
 
-		Util
-			.splitMessage(
-				guildRoleWithoutDbEntry.map(member => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`).join('\n') || 'none',
-				{ char: '\n', maxLength: 1024 },
-			)
-			.forEach((string) => {
-				embed.addField(
-					`**Guild Role and no DB entry:**${guildRoleWithoutDbEntry.length ? ` [display name | tag] (${guildRoleWithoutDbEntry.length})` : ''}`,
-					string,
-				);
-			});
+		for (const value of Util.splitMessage(
+			guildRoleWithoutDbEntry.map(member => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`).join('\n') || 'none',
+			{ char: '\n', maxLength: 1024 },
+		)) {
+			embed.addField(
+				`**Guild Role and no DB entry:**${guildRoleWithoutDbEntry.length ? ` [display name | tag] (${guildRoleWithoutDbEntry.length})` : ''}`,
+				value,
+			);
+		}
 
 		// guild players that are either unlinked or not in the discord server
 		const unlinkedPlayers = [];
 		const linkedAndNotInDiscord = [];
 
-		hypixelGuilds.cache.forEach((hypixelGuild) => {
+		for (const hypixelGuild of hypixelGuilds.cache.values()) {
 			// db entries with issues
 			const [ unlinkedGuildPlayers, linkedPlayers ] = hypixelGuild.players.partition(({ discordID }) => /\D/.test(discordID));
 			const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(({ inDiscord }) => !inDiscord);
@@ -100,25 +96,25 @@ module.exports = class LinkIssuesCommand extends Command {
 					{ char: '\n', maxLength: 1024 },
 				),
 			});
-		});
+		}
 
-		unlinkedPlayers.forEach(({ guildName, amount, values }) => {
-			values.forEach((value) => {
+		for (const { guildName, amount, values } of unlinkedPlayers) {
+			for (const value of values) {
 				embed.addField(
 					`**Unlinked Players (${guildName}):**${amount ? ` [ign | tag] (${amount})` : ''}`,
 					value,
 				);
-			});
-		});
+			}
+		}
 
-		linkedAndNotInDiscord.forEach(({ guildName, amount, values }) => {
-			values.forEach((value) => {
+		for (const { guildName, amount, values } of linkedAndNotInDiscord) {
+			for (const value of values) {
 				embed.addField(
 					`**Linked and not in Discord (${guildName}):**${amount ? ` (${amount})` : ''}`,
 					value,
 				);
-			});
-		});
+			}
+		}
 
 		message.reply(embed
 			.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`),

@@ -140,17 +140,19 @@ module.exports = class PlayerManager extends ModelManager {
 	 * deletes all unnecessary db entries
 	 */
 	async sweepDb() {
+		/** @type {import('../models/Player')[]} */
 		const playersToSweep = await this.model.findAll({
 			where: {
 				guildID: null,
 				paid: false,
 			},
 		});
-		const sweepedIgns = playersToSweep.map(({ ign }) => ign).join(', ');
+
+		for (const player of playersToSweep) player.destroy();
+
 		const AMOUNT = playersToSweep.length;
 
-		playersToSweep.forEach(player => player.destroy());
-		logger.warn(`[SWEEP DB]: removed ${AMOUNT} entr${AMOUNT === 1 ? 'y' : 'ies'} from the player db: ${sweepedIgns}`);
+		logger.warn(`[SWEEP DB]: removed ${AMOUNT} entr${AMOUNT === 1 ? 'y' : 'ies'} from the player db: ${playersToSweep.map(({ ign }) => ign).join(', ')}`);
 
 		return AMOUNT;
 	}

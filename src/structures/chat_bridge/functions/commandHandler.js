@@ -31,10 +31,9 @@ module.exports = async (message) => {
 	const args = [];
 	const flags = [];
 
-	rawArgs.forEach(arg => (arg.startsWith('-') && arg.length > 1
+	for (const arg of rawArgs) arg.startsWith('-') && arg.length > 1
 		? flags.push(arg.toLowerCase().replace(/^-+/, ''))
-		: args.push(arg)),
-	);
+		: args.push(arg);
 
 	// no command, only ping or prefix
 	if (!COMMAND_NAME.length) {

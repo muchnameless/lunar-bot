@@ -84,7 +84,7 @@ module.exports = class EvalCommand extends Command {
 			.setColor(config.get('EMBED_BLUE'))
 			.setFooter(`${guild ? guild.me.displayName : client.user.username}`, client.user.displayAvatarURL());
 
-		inputArray.forEach((input, index) => {
+		for (const [ index, input ] of inputArray.entries()) {
 			responseEmbed.addField(
 				index
 					? '\u200b'
@@ -93,7 +93,7 @@ module.exports = class EvalCommand extends Command {
 						: 'Input',
 				input,
 			);
-		});
+		}
 
 		try {
 			let isPromise;

@@ -50,11 +50,11 @@ class LunarGuildMember extends GuildMember {
 		const rolesToRemove = [];
 
 		// guild
-		[
+		for (const id of [
 			...hypixelGuilds.cache.array().flatMap(hGuild => hGuild.ranks.map(({ roleID }) => roleID)),
 			...hypixelGuilds.cache.map(({ roleID }) => roleID),
 			config.get('GUILD_ROLE_ID'),
-		].forEach(roleID => this.roles.cache.has(roleID) && rolesToRemove.push(roleID));
+		]) this.roles.cache.has(id) && rolesToRemove.push(id);
 
 		// delimiter
 		for (const type of delimiterRoles) {

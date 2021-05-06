@@ -29,7 +29,8 @@ module.exports = class TaxReminderCommand extends Command {
 		try {
 			const SHOULD_GHOST_PING = flags.some(arg => [ 'g', 'ghostping' ].includes(arg));
 			const hypixelGuild = this.client.hypixelGuilds.getFromArray(args);
-			const playersToRemind = (hypixelGuild ? hypixelGuild.players : this.client.players.inGuild).filter(({ paid, discordID, ign }) => !paid && !args.includes(discordID) && !args.some(arg => arg.toLowerCase() === ign.toLowerCase()));
+			const playersToRemind = (hypixelGuild ? hypixelGuild.players : this.client.players.inGuild)
+				.filter(({ paid, discordID, ign }) => !paid && !args.includes(discordID) && !args.some(arg => arg.toLowerCase() === ign.toLowerCase()));
 			const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordID }) => inDiscord && validateNumber(discordID));
 			const AMOUNT_TO_PING = playersPingable.size;
 
@@ -50,8 +51,8 @@ module.exports = class TaxReminderCommand extends Command {
 
 			let pingMessage = '';
 
-			playersPingable.forEach(player => pingMessage += ` <@${player.discordID}>`);
-			playersOnlyIgn.forEach(player => pingMessage += ` ${escapeIgn(player.ign)}`);
+			for (const player of playersPingable) pingMessage += ` <@${player.discordID}>`;
+			for (const player of playersOnlyIgn) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 			// send ping message and split between pings if too many chars
 			await message.reply(pingMessage, { reply: false, sameChannel: true, split: { char: ' ' } });
@@ -62,9 +63,13 @@ module.exports = class TaxReminderCommand extends Command {
 			const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error(`[TAX REMINDER]: ghost ping: ${error}`));
 
 			if (!fetched) return;
-			if (!message.channel.checkBotPermissions('MANAGE_MESSAGES')) return fetched.filter(({ author: { id } }) => id === this.client.user.id).forEach(msg => msg.delete().catch(logger.error));
+			if (message.channel.checkBotPermissions('MANAGE_MESSAGES')) {
+				return message.channel.bulkDelete([ message.id, ...fetched.filter(({ author: { id } }) => [ this.client.user.id, message.author.id ].includes(id)).keys() ]).catch(logger.error);
+			}
 
-			message.channel.bulkDelete([ message.id, ...fetched.filter(({ author: { id } }) => [ this.client.user.id, message.author.id ].includes(id)).keys() ]).catch(logger.error);
+			for (const msg of fetched.values()) {
+				if (msg.me) msg.delete().catch(logger.error);
+			}
 		} finally {
 			message.channel.stopTyping(true);
 		}

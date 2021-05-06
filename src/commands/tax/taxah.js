@@ -30,7 +30,9 @@ module.exports = class TaxAhCommand extends Command {
 		let type;
 		let ign;
 
-		args.forEach(arg => (/add|rem(?:ove)?/i.test(arg) ? type ??= arg.toLowerCase() : ign ??= arg));
+		for (const arg of args) /add|rem(?:ove)?/i.test(arg)
+			? type ??= arg.toLowerCase()
+			: ign ??= arg;
 
 		if (!type?.length || !ign?.length) return message.reply(this.usageInfo);
 

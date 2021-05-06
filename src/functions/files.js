@@ -31,9 +31,9 @@ const self = module.exports = {
 		const files = await self.getAllJsFiles(dirPath);
 
 		if (args.length) {
-			files.forEach(file => require(file)(...args));
+			for (const file of files) require(file)(...args);
 		} else {
-			files.forEach(file => require(file));
+			for (const file of files) require(file);
 		}
 	},
 

@@ -63,7 +63,7 @@ logger.on('error', (error) => {
 const log = (...input) => {
 	if (input.length > 1) {
 		const level = input.shift();
-		input.forEach(arg => logger.log(level, util.format(arg)));
+		for (const i of input) logger.log(level, util.format(i));
 	} else {
 		logger.info(util.format(input[0]));
 	}
@@ -74,7 +74,7 @@ const log = (...input) => {
  * @returns {null}
  */
 const error = (...input) => {
-	input.forEach(i => logger.error(util.format(i)));
+	for (const i of input) logger.error(util.format(i));
 	return null;
 };
 
@@ -82,7 +82,7 @@ const error = (...input) => {
  * @returns {null}
  */
 const warn = (...input) => {
-	input.forEach(i => logger.warn(util.format(i)));
+	for (const i of input) logger.warn(util.format(i));
 	return null;
 };
 
@@ -90,7 +90,7 @@ const warn = (...input) => {
  * @returns {null}
  */
 const info = (...input) => {
-	input.forEach(i => logger.info(util.format(i)));
+	for (const i of input) logger.info(util.format(i));
 	return null;
 };
 
@@ -98,7 +98,7 @@ const info = (...input) => {
  * @returns {null}
  */
 const debug = (...input) => {
-	input.forEach(i => logger.debug(util.format(i)));
+	for (const i of input) logger.debug(util.format(i));
 	return null;
 };
 

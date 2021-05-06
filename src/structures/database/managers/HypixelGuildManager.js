@@ -170,7 +170,8 @@ module.exports = class HypixelGuildManager extends ModelManager {
 	 */
 	performDailyStatsSave() {
 		this.client.config.set('LAST_DAILY_STATS_SAVE_TIME', Date.now());
-		this.cache.forEach(hypixelGuild => hypixelGuild.saveDailyStats());
+
+		for (const hypixelGuild of this.cache.values()) hypixelGuild.saveDailyStats();
 
 		logger.debug('[GUILD DAILY STATS]: performed daily stats saves');
 	}
