@@ -28,6 +28,7 @@ module.exports = {
 		'dot-notation': 'error',
 		'eol-last': [ 'error', 'always' ],
 		'func-call-spacing': 'error',
+		'guard-for-in': 'error',
 		'handle-callback-err': 'off',
 		'implicit-arrow-linebreak': [ 'error', 'beside' ],
 		'indent': [ 'error', 'tab', { SwitchCase: 1, ignoredNodes: [ 'TemplateLiteral *' ] }],
