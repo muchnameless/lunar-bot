@@ -1,6 +1,6 @@
 'use strict';
 
-const levelingXp = {
+const skillXp = {
 	1: 50,
 	2: 125,
 	3: 200,
@@ -66,10 +66,99 @@ const skillXpPast50 = {
 	60: 7_000_000,
 };
 
+const dungeonXp = {
+	1: 50,
+	2: 75,
+	3: 110,
+	4: 160,
+	5: 230,
+	6: 330,
+	7: 470,
+	8: 670,
+	9: 950,
+	10: 1_340,
+	11: 1_890,
+	12: 2_665,
+	13: 3_760,
+	14: 5_260,
+	15: 7_380,
+	16: 10_300,
+	17: 14_400,
+	18: 20_000,
+	19: 27_600,
+	20: 38_000,
+	21: 52_500,
+	22: 71_500,
+	23: 97_000,
+	24: 132_000,
+	25: 180_000,
+	26: 243_000,
+	27: 328_000,
+	28: 445_000,
+	29: 600_000,
+	30: 800_000,
+	31: 1_065_000,
+	32: 1_410_000,
+	33: 1_900_000,
+	34: 2_500_000,
+	35: 3_300_000,
+	36: 4_300_000,
+	37: 5_600_000,
+	38: 7_200_000,
+	39: 9_200_000,
+	40: 12_000_000,
+	41: 15_000_000,
+	42: 19_000_000,
+	43: 24_000_000,
+	44: 30_000_000,
+	45: 38_000_000,
+	46: 48_000_000,
+	47: 60_000_000,
+	48: 75_000_000,
+	49: 93_000_000,
+	50: 116_250_000,
+};
+
+const dungeonTypes = [
+	'catacombs',
+];
+
+const dungeonClasses = [
+	'healer',
+	'mage',
+	'berserk',
+	'archer',
+	'tank',
+];
+
 module.exports = {
+	/**
+	 * misc
+	 */
+
 	SKYBLOCK_YEAR_0: 1_560_275_700_000,
 
 	MAYOR_CHANGE_INTERVAL: 446_400_000,
+
+	fetchurItems: [
+		'50 red wool (Wool Weaver near builder merch in hub)',
+		'20 yellow stained glass (Wool Weaver near builder merch in hub)',
+		'1 compass (4 iron + 1 redstone)',
+		'20 mithril',
+		'1 firework (1 gunpowder + 1 paper)',
+		'cheap coffee (bartender in hub)',
+		'door (wooden or iron)',
+		'3 rabbit feet',
+		'SuperBoom TNT',
+		'https://youtu.be/9L7Y681bKz8', // @underappreciated '1 pumpkin'
+		'1 flint and steel',
+		'50 quartz ore (mine with silk touch)',
+		'16 enderpearls',
+	],
+
+	/**
+	 * skills
+	 */
 
 	skills: [
 		'taming',
@@ -98,29 +187,11 @@ module.exports = {
 		taming: 'skyblock_domesticator',
 	},
 
-	slayers: [
-		'zombie',
-		'spider',
-		'wolf',
-	],
-
-	dungeonTypes: [
-		'catacombs',
-	],
-
-	dungeonClasses: [
-		'healer',
-		'mage',
-		'berserk',
-		'archer',
-		'tank',
-	],
-
-	levelingXp,
+	skillXp,
 
 	skillXpPast50,
 
-	levelingXpTotal: Object.fromEntries([ ...Object.entries(levelingXp), ...Object.entries(skillXpPast50) ].map(([ level ], index) => [ level, [ ...Object.values(levelingXp), ...Object.values(skillXpPast50) ].slice(0, index + 1).reduce((acc, curr) => acc + curr, 0) ])),
+	skillXpTotal: Object.fromEntries([ ...Object.entries(skillXp), ...Object.entries(skillXpPast50) ].map(([ level ], index) => [ level, [ ...Object.values(skillXp), ...Object.values(skillXpPast50) ].slice(0, index + 1).reduce((acc, curr) => acc + curr, 0) ])),
 
 	runecraftingXp: {
 		1: 50,
@@ -150,7 +221,7 @@ module.exports = {
 		25: 19_050,
 	},
 
-	skillsCap: {
+	skillCap: {
 		taming: 50,
 		farming: 60,
 		mining: 60,
@@ -164,58 +235,38 @@ module.exports = {
 		dungeons: 50,
 	},
 
-	dungeonXp: {
-		1: 50,
-		2: 75,
-		3: 110,
-		4: 160,
-		5: 230,
-		6: 330,
-		7: 470,
-		8: 670,
-		9: 950,
-		10: 1_340,
-		11: 1_890,
-		12: 2_665,
-		13: 3_760,
-		14: 5_260,
-		15: 7_380,
-		16: 10_300,
-		17: 14_400,
-		18: 20_000,
-		19: 27_600,
-		20: 38_000,
-		21: 52_500,
-		22: 71_500,
-		23: 97_000,
-		24: 132_000,
-		25: 180_000,
-		26: 243_000,
-		27: 328_000,
-		28: 445_000,
-		29: 600_000,
-		30: 800_000,
-		31: 1_065_000,
-		32: 1_410_000,
-		33: 1_900_000,
-		34: 2_500_000,
-		35: 3_300_000,
-		36: 4_300_000,
-		37: 5_600_000,
-		38: 7_200_000,
-		39: 9_200_000,
-		40: 12_000_000,
-		41: 15_000_000,
-		42: 19_000_000,
-		43: 24_000_000,
-		44: 30_000_000,
-		45: 38_000_000,
-		46: 48_000_000,
-		47: 60_000_000,
-		48: 75_000_000,
-		49: 93_000_000,
-		50: 116_250_000,
+	/**
+	 * dungeons
+	 */
+
+	dungeonXp,
+
+	dungeonXpTotal: Object.fromEntries(Object.entries(dungeonXp).map(([ level ], index) => [ level, Object.values(dungeonXp).slice(0, index + 1).reduce((acc, curr) => acc + curr, 0) ])), // eslint-disable-line newline-per-chained-call
+
+	dungeonCap: {
+		catacombs: 50,
+		healer: 50,
+		mage: 50,
+		berserk: 50,
+		archer: 50,
+		tank: 50,
 	},
+
+	dungeonTypes,
+
+	dungeonClasses,
+
+	dungeonTypesAndClasses: [ ...dungeonTypes, ...dungeonClasses ],
+
+	/**
+	 * slayers
+	 */
+
+	slayers: [
+		'zombie',
+		'spider',
+		'wolf',
+	],
 
 	slayerXp: {
 		1: 5,
@@ -228,20 +279,4 @@ module.exports = {
 		8: 400_000,
 		9: 1_000_000,
 	},
-
-	fetchurItems: [
-		'50 red wool (Wool Weaver near builder merch in hub)',
-		'20 yellow stained glass (Wool Weaver near builder merch in hub)',
-		'1 compass (4 iron + 1 redstone)',
-		'20 mithril',
-		'1 firework (1 gunpowder + 1 paper)',
-		'cheap coffee (bartender in hub)',
-		'door (wooden or iron)',
-		'3 rabbit feet',
-		'SuperBoom TNT',
-		'https://youtu.be/9L7Y681bKz8', // @underappreciated '1 pumpkin'
-		'1 flint and steel',
-		'50 quartz ore (mine with silk touch)',
-		'16 enderpearls',
-	],
 };

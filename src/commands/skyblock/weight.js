@@ -48,7 +48,7 @@ module.exports = class WeightCommand extends Command {
 			if (args.length < 2) {
 				weightData = profiles
 					.map(({ cute_name: name, members }) => ({ name, ...getWeight(members[uuid]) }))
-					.sort(({ total: aTotal }, { total: bTotal }) => aTotal - bTotal)
+					.sort(({ totalWeight: aTotal }, { totalWeight: bTotal }) => aTotal - bTotal)
 					.pop();
 			} else {
 				const [ , PROFILE_NAME ] = args;
@@ -63,7 +63,7 @@ module.exports = class WeightCommand extends Command {
 			}
 
 			return message.reply(
-				`${ign} (${weightData.name}): ${this.formatNumber(weightData.total)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillApiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`,
+				`${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillApiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`,
 			);
 		} catch (error) {
 			logger.error(`[WEIGHT]: ${error}`);

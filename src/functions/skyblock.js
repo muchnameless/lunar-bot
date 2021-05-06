@@ -1,5 +1,5 @@
 'use strict';
-const { dungeonClasses, dungeonTypes, dungeonXp, runecraftingXp, levelingXp, levelingXpTotal, skillsCap, skillXpPast50, skills, slayers } = require('../constants/skyblock');
+const { dungeonClasses, dungeonTypes, dungeonXp, dungeonXpTotal, dungeonCap, runecraftingXp, skillXp, skillXpTotal, skillCap, skillXpPast50, skills, slayers } = require('../constants/skyblock');
 const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../constants/weight');
 // const logger = require('./logger');
 
@@ -15,10 +15,10 @@ function getSkillLevel(type, xp, individualCap) {
 		? dungeonXp
 		: type === 'runecrafting'
 			? runecraftingXp
-			: levelingXp;
+			: skillXp;
 	let maxLevel = Math.max(...Object.keys(xpTable));
 
-	if (skillsCap[type] > maxLevel) {
+	if (skillCap[type] > maxLevel) {
 		xpTable = { ...skillXpPast50, ...xpTable };
 		maxLevel = individualCap != null
 			? individualCap
@@ -64,63 +64,105 @@ function getWeight(skyblockMember) {
 	let overflow = 0;
 
 	for (const skill of skills) {
-		const xp = skyblockMember[`experience_skill_${skill}`] ?? 0;
-		const { nonFlooredLevel: level } = getSkillLevel(skill, xp);
-		const maxXp = levelingXpTotal[skillsCap[skill]];
+		const { skillWeight, skillOverflow } = getSkillWeight(skill, skyblockMember[`experience_skill_${skill}`] ?? 0);
 
-		weight += ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250;
-		if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
+		weight += skillWeight;
+		overflow += skillOverflow;
 	}
 
 	for (const slayer of slayers) {
-		const experience = skyblockMember.slayer_bosses?.[slayer]?.xp ?? 0;
+		const { slayerWeight, slayerOverflow } = getSlayerWeight(slayer, skyblockMember.slayer_bosses?.[slayer]?.xp ?? 0);
 
-		if (experience <= 1_000_000) {
-			weight += experience === 0
-				? 0
-				: experience / SLAYER_DIVIDER[slayer];
-		} else {
-			weight += 1_000_000 / SLAYER_DIVIDER[slayer];
-
-			// calculate overflow
-			let remaining = experience - 1_000_000;
-			let modifier = SLAYER_MODIFIER[slayer];
-
-			while (remaining > 0) {
-				const left = Math.min(remaining, 1_000_000);
-
-				weight += (left / (SLAYER_DIVIDER[slayer] * (1.5 + modifier))) ** 0.942;
-				modifier += SLAYER_MODIFIER[slayer];
-				remaining -= left;
-			}
-		}
+		weight += slayerWeight;
+		overflow += slayerOverflow;
 	}
 
-	const maxXp = Object.values(dungeonXp).reduce((acc, xp) => acc + xp, 0);
-
 	for (const type of dungeonTypes) {
-		const xp = skyblockMember.dungeons?.dungeon_types?.[type]?.experience ?? 0;
-		const { nonFlooredLevel: level } = getSkillLevel(type, xp);
-		const base = (level ** 4.5) * DUNGEON_EXPONENTS[type];
+		const { dungeonWeight, dungeonOverflow } = getDungeonWeight(type, skyblockMember.dungeons?.dungeon_types?.[type]?.experience ?? 0);
 
-		weight += base;
-		if (xp > maxXp) overflow += ((xp - maxXp) / (4 * maxXp / base)) ** 0.968;
+		weight += dungeonWeight;
+		overflow += dungeonOverflow;
 	}
 
 	for (const dungeonClass of dungeonClasses) {
-		const xp = skyblockMember.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0;
-		const { nonFlooredLevel: level } = getSkillLevel(dungeonClass, xp);
-		const base = (level ** 4.5) * DUNGEON_EXPONENTS[dungeonClass];
+		const { dungeonWeight, dungeonOverflow } = getDungeonWeight(dungeonClass, skyblockMember.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0);
 
-		weight += base;
-		if (xp > maxXp) overflow += ((xp - maxXp) / (4 * maxXp / base)) ** 0.968;
+		weight += dungeonWeight;
+		overflow += dungeonOverflow;
 	}
 
 	return {
 		skillApiEnabled: Reflect.has(skyblockMember, 'experience_skill_alchemy'),
 		weight,
 		overflow,
-		total: weight + overflow,
+		totalWeight: weight + overflow,
+	};
+}
+
+/**
+ * @param {string} skill
+ * @param {number} xp
+ */
+function getSkillWeight(skill, xp) {
+	const { nonFlooredLevel: level } = getSkillLevel(skill, xp);
+	const maxXp = skillXpTotal[skillCap[skill]];
+
+	return {
+		skillWeight: ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250,
+		skillOverflow: xp > maxXp
+			? ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968
+			: 0,
+	};
+}
+
+/**
+ * @param {string} slayer
+ * @param {number} xp
+ */
+function getSlayerWeight(slayer, xp) {
+	if (xp <= 1_000_000) {
+		return {
+			slayerWeight: xp === 0
+				? 0
+				: xp / SLAYER_DIVIDER[slayer],
+			slayerOverflow: 0,
+		};
+	}
+
+	let slayerWeight = 1_000_000 / SLAYER_DIVIDER[slayer];
+
+	// calculate overflow
+	let remaining = xp - 1_000_000;
+	let modifier = SLAYER_MODIFIER[slayer];
+
+	while (remaining > 0) {
+		const left = Math.min(remaining, 1_000_000);
+
+		slayerWeight += (left / (SLAYER_DIVIDER[slayer] * (1.5 + modifier))) ** 0.942;
+		modifier += SLAYER_MODIFIER[slayer];
+		remaining -= left;
+	}
+
+	return {
+		slayerWeight,
+		slayerOverflow: 0,
+	};
+}
+
+/**
+ * @param {string} type
+ * @param {number} xp
+ */
+function getDungeonWeight(type, xp) {
+	const { nonFlooredLevel: level } = getSkillLevel(type, xp);
+	const dungeonWeight = (level ** 4.5) * DUNGEON_EXPONENTS[type];
+	const maxXp = dungeonXpTotal[dungeonCap[type]];
+
+	return {
+		dungeonWeight,
+		dungeonOverflow: xp > maxXp
+			? ((xp - maxXp) / (4 * maxXp / dungeonWeight)) ** 0.968
+			: 0,
 	};
 }
 
@@ -128,4 +170,7 @@ function getWeight(skyblockMember) {
 module.exports = {
 	getSkillLevel,
 	getWeight,
+	getSkillWeight,
+	getSlayerWeight,
+	getDungeonWeight,
 };

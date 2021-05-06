@@ -4,12 +4,11 @@ const { MessageEmbed, Permissions: { FLAGS: { MANAGE_ROLES } } } = require('disc
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
-const { skillsCap, dungeonXp, slayerXp, skills, cosmeticSkills, skillsAchievements, levelingXpTotal, slayers, dungeonTypes, dungeonClasses } = require('../../../constants/skyblock');
-const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../../../constants/weight');
+const { slayerXp, skills, cosmeticSkills, skillsAchievements, skillXpTotal, slayers, dungeonTypes, dungeonClasses, dungeonTypesAndClasses } = require('../../../constants/skyblock');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
 const { escapeIgn, trim } = require('../../../functions/util');
-const { getSkillLevel, getWeight } = require('../../../functions/skyblock');
+const { getSkillLevel, getWeight, getSkillWeight, getSlayerWeight, getDungeonWeight } = require('../../../functions/skyblock');
 const { validateNumber } = require('../../../functions/stringValidators');
 const { mutedCheck } = require('../../../functions/database');
 const NonAPIError = require('../../errors/NonAPIError');
@@ -96,20 +95,6 @@ module.exports = class Player extends Model {
 		 * @type {number}
 		 */
 		this.guildXpDaily;
-
-		// this.skills = Object.fromEntries(
-		// 	skills.map(skill => [ skill, () => getSkillLevel(skill, this[`${skill}Xp`], this[`${skill}LvlCap`]) ]),
-		// );
-
-		// this.skills = {};
-
-		// for (const skill of skills) {
-		// 	Object.defineProperty(this.skills, skill, {
-		// 		get() {
-		// 			return getSkillLevel(skill, this[`${skill}Xp`], this[`${skill}LvlCap`]);
-		// 		},
-		// 	});
-		// }
 
 		Object.defineProperties(this, {
 			discordMember: {
@@ -301,7 +286,7 @@ module.exports = class Player extends Model {
 		};
 
 		// add xp types
-		XP_TYPES.forEach((type) => {
+		for (const type of XP_TYPES) {
 			dataObject[`${type}Xp`] = {
 				type: DataTypes.DECIMAL,
 				defaultValue: 0,
@@ -314,14 +299,14 @@ module.exports = class Player extends Model {
 				allowNull: false,
 			};
 
-			XP_OFFSETS.forEach((offset) => {
+			for (const offset of XP_OFFSETS) {
 				dataObject[`${type}Xp${offset}`] = {
 					type: DataTypes.DECIMAL,
 					defaultValue: 0,
 					allowNull: false,
 				};
-			});
-		});
+			}
+		}
 
 		return super.init(dataObject, {
 			sequelize,
@@ -332,14 +317,6 @@ module.exports = class Player extends Model {
 			}],
 		});
 	}
-
-	// get weight() {
-	// 	return {
-	// 		weekly: get ,
-	// 		monthly
-	// 		mayor
-	// 	}
-	// }
 
 	/**
 	 * returns the hypixel guild db object associated with the player
@@ -509,8 +486,8 @@ module.exports = class Player extends Model {
 			 * skills
 			 */
 			if (Object.prototype.hasOwnProperty.call(playerData, 'experience_skill_alchemy')) {
-				skills.forEach(skill => this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0);
-				cosmeticSkills.forEach(skill => this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0);
+				for (const skill of skills) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
+				for (const skill of cosmeticSkills) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
 
 				// reset skill xp if no taming xp offset
 				if (this.tamingXp !== 0) {
@@ -531,9 +508,7 @@ module.exports = class Player extends Model {
 				 */
 				const { achievements } = await hypixel.player.uuid(this.minecraftUUID);
 
-				for (const skill of skills) {
-					this[`${skill}Xp`] = levelingXpTotal[achievements[skillsAchievements[skill]]] ?? 0;
-				}
+				for (const skill of skills) this[`${skill}Xp`] = skillXpTotal[achievements?.[skillsAchievements[skill]] ?? 0] ?? 0;
 			}
 
 			this.farmingLvlCap = 50 + (playerData.jacob2?.perks?.farming_level_cap ?? 0);
@@ -541,7 +516,7 @@ module.exports = class Player extends Model {
 			/**
 			 * slayer
 			 */
-			slayers.forEach(slayer => this[`${slayer}Xp`] = playerData.slayer_bosses[slayer].xp ?? 0);
+			for (const slayer of slayers) this[`${slayer}Xp`] = playerData.slayer_bosses[slayer].xp ?? 0;
 
 			// reset slayer xp if no zombie xp offset
 			if (this.zombieXp !== 0) {
@@ -561,8 +536,8 @@ module.exports = class Player extends Model {
 			/**
 			 * dungeons
 			 */
-			dungeonTypes.forEach(dungeonType => this[`${dungeonType}Xp`] = playerData.dungeons.dungeon_types[dungeonType]?.experience ?? 0);
-			dungeonClasses.forEach(dugeonClass => this[`${dugeonClass}Xp`] = playerData.dungeons.player_classes[dugeonClass]?.experience ?? 0);
+			for (const dungeonType of dungeonTypes) this[`${dungeonType}Xp`] = playerData.dungeons.dungeon_types[dungeonType]?.experience ?? 0;
+			for (const dungeonClass of dungeonClasses) this[`${dungeonClass}Xp`] = playerData.dungeons.player_classes[dungeonClass]?.experience ?? 0;
 
 			// reset dungeons xp if no catacombs xp offset
 			if (this.catacombsXp !== 0) {
@@ -1176,7 +1151,7 @@ module.exports = class Player extends Model {
 
 			case DAY:
 				// append current xp to the beginning of the xpHistory-Array and pop of the last value
-				typesToReset.forEach((type) => {
+				for (const type of typesToReset) {
 					/**
 					 * @type {number[]}
 					 */
@@ -1184,15 +1159,15 @@ module.exports = class Player extends Model {
 					xpHistory.shift();
 					xpHistory.push(this[`${type}Xp`]);
 					this.changed(`${type}XpHistory`, true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
-				});
+				}
 				break;
 
 			case CURRENT:
-				typesToReset.forEach(type => this[`${type}Xp`] = 0);
+				for (const type of typesToReset) this[`${type}Xp`] = 0;
 				break;
 
 			default:
-				typesToReset.forEach(type => this[`${type}Xp${offsetToReset}`] = this[`${type}Xp`]);
+				for (const type of typesToReset) this[`${type}Xp${offsetToReset}`] = this[`${type}Xp`];
 				break;
 		}
 
@@ -1330,17 +1305,17 @@ module.exports = class Player extends Model {
 	 * @param {string} offset optional offset value to use instead of the current xp value
 	 */
 	getSkillAverage(offset = '') {
-		const SKILL_COUNT = skills.length;
-
 		let skillAverage = 0;
 		let trueAverage = 0;
 
-		skills.forEach((skill) => {
+		for (const skill of skills) {
 			const { trueLevel, nonFlooredLevel } = this.getSkillLevel(skill, offset);
 
 			skillAverage += nonFlooredLevel;
 			trueAverage += trueLevel;
-		});
+		}
+
+		const SKILL_COUNT = skills.length;
 
 		return {
 			skillAverage: Number((skillAverage / SKILL_COUNT).toFixed(2)),
@@ -1382,48 +1357,24 @@ module.exports = class Player extends Model {
 		let overflow = 0;
 
 		for (const skill of skills) {
-			const { nonFlooredLevel: level } = this.getSkillLevel(skill, offset, false);
-			const xp = this[`${skill}Xp${offset}`];
-			const maxXp = levelingXpTotal[skillsCap[skill]];
+			const { skillWeight, skillOverflow } = getSkillWeight(skill, this[`${skill}Xp${offset}`]);
 
-			weight += ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250;
-			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
+			weight += skillWeight;
+			overflow += skillOverflow;
 		}
 
 		for (const slayer of slayers) {
-			const experience = this[`${slayer}Xp${offset}`];
+			const { slayerWeight, slayerOverflow } = getSlayerWeight(slayer, this[`${slayer}Xp${offset}`]);
 
-			if (experience <= 1_000_000) {
-				weight += experience === 0
-					? 0
-					: experience / SLAYER_DIVIDER[slayer];
-			} else {
-				weight += 1_000_000 / SLAYER_DIVIDER[slayer];
-
-				// calculate overflow
-				let remaining = experience - 1_000_000;
-				let modifier = SLAYER_MODIFIER[slayer];
-
-				while (remaining > 0) {
-					const left = Math.min(remaining, 1_000_000);
-
-					weight += (left / (SLAYER_DIVIDER[slayer] * (1.5 + modifier))) ** 0.942;
-					modifier += SLAYER_MODIFIER[slayer];
-					remaining -= left;
-				}
-			}
+			weight += slayerWeight;
+			overflow += slayerOverflow;
 		}
 
+		for (const type of dungeonTypesAndClasses) {
+			const { dungeonWeight, dungeonOverflow } = getDungeonWeight(type, this[`${type}Xp${offset}`]);
 
-		const maxXp = Object.values(dungeonXp).reduce((acc, xp) => acc + xp, 0);
-
-		for (const type of [ ...dungeonTypes, ...dungeonClasses ]) {
-			const { nonFlooredLevel: level } = this.getSkillLevel(type, offset);
-			const base = (level ** 4.5) * DUNGEON_EXPONENTS[type];
-			const xp = this[`${type}Xp${offset}`];
-
-			weight += base;
-			if (xp > maxXp) overflow += ((xp - maxXp) / (4 * maxXp / base)) ** 0.968;
+			weight += dungeonWeight;
+			overflow += dungeonOverflow;
 		}
 
 		return {
@@ -1447,17 +1398,17 @@ module.exports = class Player extends Model {
 	 * @param {number} index xpHistory array index
 	 */
 	getSkillAverageHistory(index) {
-		const SKILL_COUNT = skills.length;
-
 		let skillAverage = 0;
 		let trueAverage = 0;
 
-		skills.forEach((skill) => {
+		for (const skill of skills) {
 			const { trueLevel, nonFlooredLevel } = this.getSkillLevelHistory(skill, index);
 
 			skillAverage += nonFlooredLevel;
 			trueAverage += trueLevel;
-		});
+		}
+
+		const SKILL_COUNT = skills.length;
 
 		return {
 			skillAverage: Number((skillAverage / SKILL_COUNT).toFixed(2)),
@@ -1483,47 +1434,24 @@ module.exports = class Player extends Model {
 		let overflow = 0;
 
 		for (const skill of skills) {
-			const { nonFlooredLevel: level } = this.getSkillLevelHistory(skill, index);
-			const xp = this[`${skill}XpHistory`][index];
-			const maxXp = levelingXpTotal[skillsCap[skill]];
+			const { skillWeight, skillOverflow } = getSkillWeight(skill, this[`${skill}XpHistory`][index]);
 
-			weight += ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250;
-			if (xp > maxXp) overflow += ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968;
+			weight += skillWeight;
+			overflow += skillOverflow;
 		}
 
 		for (const slayer of slayers) {
-			const experience = this[`${slayer}XpHistory`][index];
+			const { slayerWeight, slayerOverflow } = getSlayerWeight(slayer, this[`${slayer}XpHistory`][index]);
 
-			if (experience <= 1_000_000) {
-				weight += experience === 0
-					? 0
-					: experience / SLAYER_DIVIDER[slayer];
-			} else {
-				weight += 1_000_000 / SLAYER_DIVIDER[slayer];
-
-				// calculate overflow
-				let remaining = experience - 1_000_000;
-				let modifier = SLAYER_MODIFIER[slayer];
-
-				while (remaining > 0) {
-					const left = Math.min(remaining, 1_000_000);
-
-					weight += (left / (SLAYER_DIVIDER[slayer] * (1.5 + modifier))) ** 0.942;
-					modifier += SLAYER_MODIFIER[slayer];
-					remaining -= left;
-				}
-			}
+			weight += slayerWeight;
+			overflow += slayerOverflow;
 		}
 
-		const maxXp = Object.values(dungeonXp).reduce((acc, xp) => acc + xp, 0);
+		for (const type of dungeonTypesAndClasses) {
+			const { dungeonWeight, dungeonOverflow } = getDungeonWeight(type, this[`${type}XpHistory`][index]);
 
-		for (const type of [ ...dungeonTypes, ...dungeonClasses ]) {
-			const { nonFlooredLevel: level } = this.getSkillLevelHistory(type, index);
-			const base = (level ** 4.5) * DUNGEON_EXPONENTS[type];
-			const xp = this[`${type}XpHistory`][index];
-
-			weight += base;
-			if (xp > maxXp) overflow += ((xp - maxXp) / (4 * maxXp / base)) ** 0.968;
+			weight += dungeonWeight;
+			overflow += dungeonOverflow;
 		}
 
 		return {
