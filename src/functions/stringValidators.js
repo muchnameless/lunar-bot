@@ -10,7 +10,13 @@ module.exports.validateNumber = string => /^\d+$/.test(string);
  * checks if the string can be a discord tag
  * @param {string} string
  */
-module.exports.validateDiscordTag = string => /^.{2,32}#\d{4}$/.test(string);
+module.exports.validateDiscordTag = string => /^.{2,32}#\d{4}$/s.test(string);
+
+/**
+ * checks if the string can be a discord ID
+ * @param {string} string
+ */
+module.exports.validateDiscordID = string => /^\d{17,19}$/.test(string);
 
 /**
  * checks if the string can be a minecraft IGN
