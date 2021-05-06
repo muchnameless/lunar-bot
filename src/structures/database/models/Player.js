@@ -853,15 +853,15 @@ module.exports = class Player extends Model {
 	async makeRoleApiCall(rolesToAdd = [], rolesToRemove = [], reason = null) {
 		const member = await this.discordMember;
 
-		if (!member) return;
+		if (!member) return false;
 
 		// check if valid IDs are provided
 		let filteredRolesToAdd = rolesToAdd.filter(x => x != null);
 		let filteredRolesToRemove = rolesToRemove.filter(x => x != null);
-		if (!filteredRolesToAdd.length && !filteredRolesToRemove.length) return;
+		if (!filteredRolesToAdd.length && !filteredRolesToRemove.length) return true;
 
 		// permission check
-		if (!member.guild.me.permissions.has(MANAGE_ROLES)) return logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`);
+		if (!member.guild.me.permissions.has(MANAGE_ROLES)) return (logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false);
 
 		const { config } = member.client;
 		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));
@@ -869,7 +869,7 @@ module.exports = class Player extends Model {
 		// check if IDs are proper roles and managable by the bot
 		filteredRolesToAdd = member.guild.verifyRoleIDs(filteredRolesToAdd);
 		filteredRolesToRemove = member.guild.verifyRoleIDs(filteredRolesToRemove);
-		if (!filteredRolesToAdd.size && !filteredRolesToRemove.size) return;
+		if (!filteredRolesToAdd.size && !filteredRolesToRemove.size) return true;
 
 		const loggingEmbed = new MessageEmbed()
 			.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
