@@ -225,9 +225,11 @@ module.exports = class DatabaseManager {
 
 			// construct player list in three rows: paid emoji + non line-breaking space + player ign, slice to keep everything in one line
 			if (config.getBoolean('TAX_TRACKING_ENABLED')) {
-				for (const [ index, player ] of hypixelGuild.players) values[Math.floor(index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\xa0${player.ign.slice(0, 15)}`;
+				let index = -1;
+				for (const player of hypixelGuild.players.values()) values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\xa0${player.ign.slice(0, 15)}`;
 			} else {
-				for (const [ index, player ] of hypixelGuild.players) values[Math.floor(index / ENTRIES_PER_ROW)] += `\n•\xa0${player.ign.slice(0, 15)}`;
+				let index = -1;
+				for (const player of hypixelGuild.players.values()) values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n•\xa0${player.ign.slice(0, 15)}`;
 			}
 
 			// add rows to tax embed
