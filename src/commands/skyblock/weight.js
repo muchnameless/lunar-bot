@@ -41,7 +41,7 @@ module.exports = class WeightCommand extends Command {
 			const { uuid, ign } = await getUuidAndIgn(message, args);
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
 
-			if (!profiles.length) return message.reply(`${ign} has no skyblock profiles`);
+			if (!profiles.length) return message.reply(`${ign} has no SkyBlock profiles`);
 
 			let weightData;
 
