@@ -45,7 +45,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 		 * Officer > [HypixelRank] ign [GuildRank]: message
 		 * From [HypixelRank] ign: message
 		 */
-		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[(?:.+?)\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
+		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? WHISPER : null);
