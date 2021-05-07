@@ -238,9 +238,9 @@ const self = module.exports = {
 		const TO_SPLIT = `\`\`\`${code}\n${formatter(input)}\`\`\``;
 
 		try {
-			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char, prepend: `\`\`\`${code}\n`, append: '```\n' });
+			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char, prepend: `\`\`\`${code}\n`, append: '```' });
 		} catch {
-			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char: '', prepend: `\`\`\`${code}\n`, append: '```\n' });
+			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char: '', prepend: `\`\`\`${code}\n`, append: '```' });
 		}
 	},
 
