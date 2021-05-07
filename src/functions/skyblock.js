@@ -10,7 +10,7 @@ const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON
  * @param {number} xp
  * @param {number} individualCap individual level cap for the player
  */
-function getSkillLevel(type, xp, individualCap) {
+function getSkillLevel(type, xp = 0, individualCap = null) {
 	let xpTable = [ ...dungeonClasses, ...dungeonTypes ].includes(type)
 		? dungeonXp
 		: type === 'runecrafting'
@@ -103,7 +103,7 @@ function getWeight(skyblockMember) {
  * @param {string} skill
  * @param {number} xp
  */
-function getSkillWeight(skill, xp) {
+function getSkillWeight(skill, xp = 0) {
 	const { nonFlooredLevel: level } = getSkillLevel(skill, xp);
 	const maxXp = skillXpTotal[skillCap[skill]];
 
@@ -119,7 +119,7 @@ function getSkillWeight(skill, xp) {
  * @param {string} slayer
  * @param {number} xp
  */
-function getSlayerWeight(slayer, xp) {
+function getSlayerWeight(slayer, xp = 0) {
 	if (xp <= 1_000_000) {
 		return {
 			slayerWeight: xp === 0
@@ -153,7 +153,7 @@ function getSlayerWeight(slayer, xp) {
  * @param {string} type
  * @param {number} xp
  */
-function getDungeonWeight(type, xp) {
+function getDungeonWeight(type, xp = 0) {
 	const { nonFlooredLevel: level } = getSkillLevel(type, xp);
 	const dungeonWeight = (level ** 4.5) * DUNGEON_EXPONENTS[type];
 	const maxXp = dungeonXpTotal[dungeonCap[type]];
