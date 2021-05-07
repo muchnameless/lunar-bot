@@ -10,16 +10,19 @@ module.exports = class HypixelMessageAuthor {
 	 * @param {object} param1
 	 * @param {string} [param1.ign]
 	 * @param {string} [param1.guildRank]
+	 * @param {string} [param1.uuid]
 	 */
-	constructor(chatBridge, { ign, guildRank }) {
+	constructor(chatBridge, { ign, guildRank, uuid }) {
 		this.chatBridge = chatBridge;
 		this.ign = ign ?? null;
 		this.guildRank = guildRank ?? null;
 
 		/**
-		 * @type {?import('../database/models/Player')}
+		 * player object of the message author
 		 */
-		this.player = null;
+		this.player = uuid
+			? this.client.players.cache.get(uuid)
+			: this.client.players.findByIGN(ign);
 		/**
 		 * @type {?import('../extensions/GuildMember')}
 		 */
@@ -34,19 +37,13 @@ module.exports = class HypixelMessageAuthor {
 	 * set player and member
 	 */
 	async init() {
-		// check if player with that ign is in the db
-		const player = this.client.players.findByIGN(this.ign);
-
-		if (player) {
-			this.player = player;
-			this.member = await player.discordMember;
-			return;
-		}
-
-		// check mojang (API/cache) for the uuid associated with that ign
 		try {
-			const { uuid } = await mojang.ign(this.ign);
-			this.player = this.client.players.cache.get(uuid) ?? null;
+			if (!this.player) {
+				// check mojang API / cache for the uuid associated with that ign
+				const { uuid } = await mojang.ign(this.ign);
+				this.player = this.client.players.cache.get(uuid) ?? null;
+			}
+
 			this.member = await this.player?.discordMember;
 		} catch (error) {
 			logger.error(`[AUTHOR PLAYER]: ${error}`);

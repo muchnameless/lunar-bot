@@ -49,15 +49,25 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 		if (matched) {
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? WHISPER : null);
-			this.author = matched.groups.whisper !== 'To'
-				? new HypixelMessageAuthor(this.chatBridge, {
-					ign: matched.groups.ign,
-					guildRank: matched.groups.guildRank,
-				})
-				: new HypixelMessageAuthor(this.chatBridge, {
-					ign: this.chatBridge.bot.ign,
-					guildRank: null,
-				});
+
+			/** @type {string|undefined} */
+			const authorInfo = this.extra?.[0].clickEvent?.value;
+
+			this.author = new HypixelMessageAuthor(
+				this.chatBridge,
+				matched.groups.whisper !== 'To'
+					? {
+						ign: matched.groups.ign,
+						guildRank: matched.groups.guildRank,
+						uuid: authorInfo?.slice(authorInfo.indexOf(' ') + 1).replace(/-/g, ''),
+					}
+					: {
+						ign: this.chatBridge.bot.ign,
+						guildRank: null,
+						uuid: this.chatBridge.bot.uuid,
+					},
+			);
+
 			this.content = this.cleanedContent.slice(matched[0].length).trimLeft();
 		} else {
 			this.type = null;
