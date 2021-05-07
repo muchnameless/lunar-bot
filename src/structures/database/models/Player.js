@@ -518,8 +518,8 @@ module.exports = class Player extends Model {
 			/**
 			 * dungeons
 			 */
-			for (const dungeonType of dungeonTypes) this[`${dungeonType}Xp`] = playerData.dungeons.dungeon_types[dungeonType]?.experience ?? 0;
-			for (const dungeonClass of dungeonClasses) this[`${dungeonClass}Xp`] = playerData.dungeons.player_classes[dungeonClass]?.experience ?? 0;
+			for (const dungeonType of dungeonTypes) this[`${dungeonType}Xp`] = playerData.dungeons?.dungeon_types?.[dungeonType]?.experience ?? 0;
+			for (const dungeonClass of dungeonClasses) this[`${dungeonClass}Xp`] = playerData.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0;
 
 			// reset dungeons xp if no catacombs xp offset
 			if (this.catacombsXp !== 0) {
@@ -1051,7 +1051,7 @@ module.exports = class Player extends Model {
 		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = profiles[
 			profiles.length > 1
 				? profiles
-					.map(({ members }) => getWeight(members[this.minecraftUUID]).total)
+					.map(({ members }) => getWeight(members[this.minecraftUUID]).totalWeight)
 					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => (currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar), 0)
 				: 0
 		];
