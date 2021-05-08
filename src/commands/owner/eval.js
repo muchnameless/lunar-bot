@@ -102,7 +102,7 @@ module.exports = class EvalCommand extends Command {
 
 			// eval args
 			let evaled = IS_ASYNC
-				? await eval(
+				? eval(
 					`(async () => {
 						${INPUT}
 					})()`)
