@@ -84,6 +84,9 @@ module.exports = class DiscordChatManager extends ChatManager {
 		return this.fetchOrCreateWebhook();
 	}
 
+	/**
+	 * fetches or creates the webhook for the channel
+	 */
 	async fetchOrCreateWebhook() {
 		if (this.webhook) return this.ready = true;
 
