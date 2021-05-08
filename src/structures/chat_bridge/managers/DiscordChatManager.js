@@ -4,6 +4,7 @@ const { MessageEmbed, DiscordAPIError, MessageCollector } = require('discord.js'
 const ms = require('ms');
 const { prefixByType, blockedWordsRegExp } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
+const { urlToImgurLink } = require('../../../functions/imgur');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
 const logger = require('../../../functions/logger');
@@ -50,6 +51,15 @@ module.exports = class DiscordChatManager extends ChatManager {
 		return blockedWordsRegExp.test(name)
 			? '*blocked*'
 			: name;
+	}
+
+	/**
+	 * tries to upload all URLs to imgur, replacing all successfully uplaoded URLs with the imgur URLs
+	 * @param {string[]} urls
+	 * @returns {Promise<string[]>}
+	 */
+	static async _uploadAttachments(urls) {
+		return (await Promise.allSettled(urls.map(urlToImgurLink))).flatMap(({ value }, index) => value ?? urls[index]);
 	}
 
 	/**
@@ -238,7 +248,9 @@ module.exports = class DiscordChatManager extends ChatManager {
 					})()
 					: null,
 				message.content, // actual content
-				...message.attachments.map(({ url }) => url), // links of attachments
+				message.attachments.size
+					? await DiscordChatManager._uploadAttachments(message.attachments.map(({ url }) => url)) // links of attachments
+					: null,
 			].filter(Boolean).join(' '),
 			{
 				prefix: `${this.prefix} ${DiscordChatManager.getPlayerName(message)}: `,

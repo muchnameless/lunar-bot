@@ -24,6 +24,7 @@
     "discord.js": "^12.5.3",
     "dotenv": "^9.0.0",
     "emoji-regex": "^9.2.2",
+    "form-data": "^4.0.0",
     "ioredis": "^4.27.2",
     "jaro-winkler": "^0.2.8",
     "keyv": "^4.0.3",
