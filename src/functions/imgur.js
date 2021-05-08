@@ -2,7 +2,7 @@
 
 const FormData = require('form-data');
 const fetch = require('node-fetch');
-// const logger = require('./logger');
+const logger = require('./logger');
 
 /**
  * @typedef {object} ImgurResponse
@@ -58,7 +58,8 @@ module.exports.urlToImgurLink = async (url) => {
 	});
 
 	if (res.status !== 200) {
-		throw new Error(res);
+		logger.error('IMGUR', res);
+		throw new Error('error uploading to imgur');
 	}
 
 	return (await res.json()).data.link;
