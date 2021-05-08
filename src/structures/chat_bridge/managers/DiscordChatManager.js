@@ -55,11 +55,11 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 	/**
 	 * tries to upload all URLs to imgur, replacing all successfully uplaoded URLs with the imgur URLs
-	 * @param {string[]} urls
+	 * @param {import('discord.js').MessageAttachment[]} attachments
 	 * @returns {Promise<string[]>}
 	 */
-	static async _uploadAttachments(urls) {
-		return (await Promise.allSettled(urls.map(urlToImgurLink))).flatMap(({ value }, index) => value ?? urls[index]);
+	static async _uploadAttachments(attachments) {
+		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? urlToImgurLink(attachment.url) : attachment.url)))).flatMap(({ value }, index) => value ?? attachments[index].url);
 	}
 
 	/**
@@ -252,7 +252,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 					: null,
 				message.content, // actual content
 				message.attachments.size
-					? await DiscordChatManager._uploadAttachments(message.attachments.map(({ url }) => url)) // links of attachments
+					? await DiscordChatManager._uploadAttachments(message.attachments.array()) // links of attachments
 					: null,
 			].filter(Boolean).join(' '),
 			{
