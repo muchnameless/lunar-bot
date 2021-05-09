@@ -9,7 +9,7 @@ const logger = require('../../functions/logger');
 
 module.exports = class CommandCollection extends Collection {
 	/**
-	 * @param {import('../LunartClient')} client
+	 * @param {import('../LunarClient')} client
 	 * @param {string} dirPath the path to the commands folder
 	 * @param {Boolean} [isMainCollection=false]
 	 * @param {*} [entries]
