@@ -2,7 +2,7 @@
 
 const { join } = require('path');
 require('dotenv').config({ path: join(__dirname, '.env') });
-const { Constants } = require('discord.js');
+const { Constants, Intents } = require('discord.js');
 const { requireAll } = require('./src/functions/files');
 const db = require('./src/structures/database/index');
 const LunarClient = require('./src/structures/LunarClient');
@@ -32,8 +32,7 @@ process
 	client = new LunarClient({
 		db,
 		restTimeOffset: 0,
-		messageEditHistoryMaxSize: 0,
-		fetchAllMembers: true, // enable when discord.js removes that feature
+		fetchAllMembers: true,
 		allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: true },
 		partials: [
 			Constants.PartialTypes.CHANNEL,
@@ -43,31 +42,29 @@ process
 			// Constants.PartialTypes.USER,
 		],
 		presence: {
-			activity: {
+			activities: [{
 				name: `${(await db.Config.findOne({ where: { key: 'PREFIX' } }))?.value ?? 'lg!'}help`,
 				type: 'LISTENING',
-			},
+			}],
 			status: 'online',
 		},
-		ws: {
-			intents: [
-				'DIRECT_MESSAGES',
-				'DIRECT_MESSAGE_REACTIONS',
-				// 'DIRECT_MESSAGE_TYPING',
-				'GUILDS',
-				// 'GUILD_BANS',
-				// 'GUILD_EMOJIS',
-				// 'GUILD_INTEGRATIONS',
-				// 'GUILD_INVITES',
-				'GUILD_MEMBERS',
-				'GUILD_MESSAGES',
-				'GUILD_MESSAGE_REACTIONS',
-				// 'GUILD_MESSAGE_TYPING',
-				// 'GUILD_PRESENCES',
-				// 'GUILD_VOICE_STATES',
-				'GUILD_WEBHOOKS',
-			],
-		},
+		intents: [
+			Intents.FLAGS.DIRECT_MESSAGES,
+			Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+			// Intents.FLAGS.DIRECT_MESSAGE_TYPING,
+			Intents.FLAGS.GUILDS,
+			// Intents.FLAGS.GUILD_BANS,
+			// Intents.FLAGS.GUILD_EMOJIS,
+			// Intents.FLAGS.GUILD_INTEGRATIONS,
+			// Intents.FLAGS.GUILD_INVITES,
+			Intents.FLAGS.GUILD_MEMBERS,
+			Intents.FLAGS.GUILD_MESSAGES,
+			Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+			// Intents.FLAGS.GUILD_MESSAGE_TYPING,
+			// Intents.FLAGS.GUILD_PRESENCES,
+			// Intents.FLAGS.GUILD_VOICE_STATES,
+			Intents.FLAGS.GUILD_WEBHOOKS,
+		],
 	});
 
 	// connect to Discord
