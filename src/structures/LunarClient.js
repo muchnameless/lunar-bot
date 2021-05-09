@@ -8,6 +8,7 @@ const DatabaseManager = require('./database/managers/DatabaseManager');
 const LogHandler = require('./LogHandler');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const CommandCollection = require('./commands/CommandCollection');
+const SlashCommandCollection = require('./commands/SlashCommandCollection');
 const RedisListener = require('./RedisListener');
 const cache = require('../api/cache');
 const logger = require('../functions/logger');
@@ -30,6 +31,7 @@ module.exports = class LunarClient extends Client {
 		this.logHandler = new LogHandler(this);
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'), true);
+		this.slashCommands = new SlashCommandCollection(this, join(__dirname, '..', 'slash_commands'));
 		this.redisListener = new RedisListener(this, process.env.REDIS_URI);
 	}
 
@@ -144,10 +146,15 @@ module.exports = class LunarClient extends Client {
 	 * tag and @mention
 	 */
 	get ownerInfo() {
-		return this.owner.then(
-			owner => `${owner.tag} ${owner}`,
-			() => `<@${this.ownerID}>`,
-		);
+		return (async () => {
+			try {
+				const owner = await this.owner;
+				return `${owner.tag} ${owner}`;
+			} catch (error) {
+				logger.error(`[OWNER INFO]: ${error}`);
+				return `<@${this.ownerID}>`;
+			}
+		})();
 	}
 
 	/**
@@ -158,6 +165,7 @@ module.exports = class LunarClient extends Client {
 		await Promise.all([
 			this.db.loadCache(),
 			this.commands.loadAll(),
+			this.slashCommands.loadAll(),
 			this._loadEvents(),
 		]);
 
@@ -175,14 +183,18 @@ module.exports = class LunarClient extends Client {
 		logger.debug(`[READY]: logged in as ${this.user.tag}`);
 
 		// Fetch all members for initially available guilds
-		// if (this.options.fetchAllMembers) {
-		// 	try {
-		// 		const promises = this.guilds.cache.map(guild => guild.available ? guild.members.fetch().then(() => logger.debug(`[READY]: ${guild.name}: fetched all ${guild.memberCount} members`)) : Promise.resolve());
-		// 		await Promise.all(promises);
-		// 	} catch (error) {
-		// 		logger.error(`Failed to fetch all members before ready! ${error}`);
-		// 	}
-		// }
+		if (this.options.fetchAllMembers) {
+			await Promise.all(this.guilds.cache.map(async (guild) => {
+				if (!guild.available) return logger.warn(`[READY]: ${guild.name} not available`);
+
+				try {
+					await guild.members.fetch();
+					logger.debug(`[READY]: ${guild.name}: fetched ${guild.memberCount} members`);
+				} catch (error) {
+					logger.error(`[READY]: ${guild.name}: error fetching all members`, error);
+				}
+			}));
+		}
 
 		await this.logHandler.init();
 
@@ -194,11 +206,11 @@ module.exports = class LunarClient extends Client {
 		// set presence again every 20 min cause it get's lost sometimes
 		this.setInterval(async () => {
 			try {
-				const presence = await this.user.setPresence({
-					activity: {
+				const presence = this.user.setPresence({
+					activities: [{
 						name: `${this.config.get('PREFIX')}help`,
 						type: 'LISTENING',
-					},
+					}],
 					status: 'online',
 				});
 
@@ -255,6 +267,9 @@ module.exports = class LunarClient extends Client {
 		// chatBridges
 		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.chatBridges.connect();
 
+		// slash commands
+		// await this.slashCommands.init();
+
 		// log ready
 		logger.debug(`[READY]: startup complete. ${this.cronJobs.size} CronJobs running. Logging webhook available: ${this.logHandler.webhookAvailable}`);
 	}
@@ -264,7 +279,7 @@ module.exports = class LunarClient extends Client {
 	 * @param {string} message
 	 */
 	async dmOwner(message) {
-		return await (await this.owner).send(message, { split: { char: ' ' } });
+		return (await this.owner).send(message, { split: { char: ' ' } });
 	}
 
 	/**
