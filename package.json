@@ -49,6 +49,7 @@
     "@babel/eslint-plugin": "^7.13.16",
     "@babel/plugin-syntax-class-properties": "^7.12.13",
     "@babel/preset-env": "^7.14.1",
+    "discord-api-types": "^0.18.1",
     "eslint": "^7.25.0"
   }
 }
