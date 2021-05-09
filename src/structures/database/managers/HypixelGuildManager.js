@@ -125,7 +125,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 	/**
 	 * autocorrects the input to a hypixel guild name
 	 * @param {string} input
-	 * @returns {import('../models/HypixelGuild')|boolean}
+	 * @returns {{ value: import('../models/HypixelGuild')|boolean, similarity: number }}
 	 */
 	autocorrectToGuild(input) {
 		const result = autocorrect(input, [ ...this.cache.values(), { name: 'all' }], 'name');
