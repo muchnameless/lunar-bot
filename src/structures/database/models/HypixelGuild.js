@@ -630,7 +630,7 @@ module.exports = class HypixelGuild extends Model {
 
 		await message.reply(
 			`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
-			{ reply: false, sameChannel: true },
+			{ replyTo: false, sameChannel: true },
 		);
 
 		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);

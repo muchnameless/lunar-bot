@@ -22,7 +22,7 @@ module.exports = class PingCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const pingMessage = await message.reply('awaiting ping...', { reply: false });
+		const pingMessage = await message.reply('awaiting ping...', { replyTo: false });
 
 		if (!pingMessage) return;
 

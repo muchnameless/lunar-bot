@@ -148,6 +148,6 @@ module.exports = class HelpCommand extends Command {
 
 		helpEmbed.addField('**Cooldown:**', ms(COOLDOWN * 1_000, { long: true }));
 
-		message.reply(helpEmbed, { reply: false });
+		message.reply(helpEmbed, { replyTo: false });
 	}
 };
