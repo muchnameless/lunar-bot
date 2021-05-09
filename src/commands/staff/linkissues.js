@@ -26,7 +26,7 @@ module.exports = class LinkIssuesCommand extends Command {
 		const { players, hypixelGuilds, lgGuild } = this.client;
 
 		if (!lgGuild) return message.reply('discord guild is currently unavailable.');
-		if (lgGuild.members.cache.size !== lgGuild.memberCount) await lgGuild.members.fetch();
+		await lgGuild.members.fetch();
 
 		// discord members with wrong roles
 		const embed = new MessageEmbed()

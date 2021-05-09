@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
 const { safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -147,7 +147,7 @@ module.exports = class TaxResetCommand extends Command {
 			)
 			.then(async (logMessage) => {
 				if (!currentTaxEmbed) return;
-				if (!logMessage.channel.checkBotPermissions('MANAGE_MESSAGES')) return;
+				if (!logMessage.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) return;
 
 				const pinnedMessages = await logMessage.channel.messages.fetchPinned().catch(logger.error);
 				if (pinnedMessages?.size >= 50) await pinnedMessages.last()
