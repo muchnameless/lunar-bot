@@ -541,8 +541,8 @@ const self = module.exports = {
 				};
 				playerData = playerDataRaw
 					.map(dataConverter)
-					.sort((a, b) => b.totalWeight - a.totalWeight)
-					.sort((a, b) => b.sortingStat - a.sortingStat);
+					.sort((a, b) => a.totalWeight - b.totalWeight)
+					.sort((a, b) => a.sortingStat - b.sortingStat);
 				const PADDING_AMOUNT_GAIN = Math.floor(playerData[0]?.gainedWeight).toLocaleString(NUMBER_FORMAT).length;
 				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...playerData.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
 				getEntryArgs = [ PADDING_AMOUNT_GAIN, PADDING_AMOUNT_TOTAL ];
