@@ -3,6 +3,10 @@
 const { randomInvisibleCharacter } = require('../constants/chatBridge');
 const AsyncQueue = require('../../AsyncQueue');
 
+/**
+ * @typedef {import('../MessageCollector').MessageCollectorOptions & { errors: ?string[] }} AwaitMessagesOptions
+ */
+
 
 module.exports = class ChatManager {
 	/**
@@ -42,7 +46,7 @@ module.exports = class ChatManager {
 
 	/**
 	 * promisified MessageCollector
-	 * @param {import('./MessageCollector').CollectorFilter} filter
+	 * @param {import('../MessageCollector').CollectorFilter} filter
 	 * @param {AwaitMessagesOptions} options
 	 * @returns {Promise<import('./HypixelMessage')[]>}
 	 */

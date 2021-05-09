@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, DiscordAPIError, MessageCollector } = require('discord.js');
+const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions } = require('discord.js');
 const ms = require('ms');
 const { prefixByType, blockedWordsRegExp } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
@@ -102,7 +102,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				throw new WebhookError('unknown channel', channel, this.guild);
 			}
 
-			if (!channel.checkBotPermissions('MANAGE_WEBHOOKS')) {
+			if (!channel.checkBotPermissions(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
 				this.chatBridge.shouldRetryLinking = false;
 				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.guild);
 			}
@@ -129,7 +129,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			this.client.log(new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_RED'))
 				.setTitle(error.hypixelGuild ? `${error.hypixelGuild.name} Chat Bridge` : 'Chat Bridge')
-				.setDescription(`**Error**: ${error.message}${error.channel ? `in ${error.channel}` : ''}`)
+				.setDescription(`**Error**: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
 				.setTimestamp(),
 			);
 

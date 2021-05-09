@@ -27,6 +27,11 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 		this.chatBridge = chatBridge;
 		/**
+		 * forwarded message
+		 * @type {Promise<?import('../extensions/Message')>}
+		 */
+		this.discordMessage = Promise.resolve(null);
+		/**
 		 * @type {?HypixelMessageType}
 		 */
 		this.position = { 0: 'chat', 1: 'system', 2: 'gameInfo' }[position] ?? null;
@@ -139,9 +144,33 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 	/**
 	 * alias for reply, to make methods for dc messages compatible with mc messages
+	 * @param {string} emoji
+	 * @returns {Promise<[boolean, ?import('discord.js').MessageReaction|import('../extensions/Message')]>}
 	 */
-	get reactSafely() {
-		return this.reply;
+	async reactSafely(emoji) {
+		switch (this.type) {
+			case GUILD:
+			case OFFICER: {
+				return Promise.all([
+					this.author.send(emoji),
+					(async () => {
+						let discordMessage;
+
+						try {
+							discordMessage = await this.discordMessage;
+						} catch {
+							discordMessage = null;
+						}
+
+						return discordMessage?.reactSafely(emoji)
+							?? this.chatBridge.discord.get(this.type)?.sendViaBot(`${this.member ?? `@${this.author.ign}`} ${emoji}`);
+					})(),
+				]);
+			}
+
+			default:
+				return this.reply(emoji);
+		}
 	}
 
 	/**
@@ -155,9 +184,8 @@ module.exports = class HypixelMessage extends ChatMessage {
 				const result = await this.chatBridge.broadcast(
 					message,
 					{
-						type: this.type,
+						hypixelMessage: this,
 						discord: {
-							prefix: `${this.member ?? `@${this.author.ign}`}, `,
 							allowedMentions: { parse: [] },
 						},
 					},
@@ -188,7 +216,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 			if (this.author) {
 				const { player, member } = this;
 
-				const message = await this.chatBridge.discord.get(this.type)?.sendViaWebhook(
+				this.discordMessage = this.chatBridge.discord.get(this.type)?.sendViaWebhook(
 					this.content,
 					{
 						username: member?.displayName
@@ -207,6 +235,8 @@ module.exports = class HypixelMessage extends ChatMessage {
 					},
 				);
 
+				const message = await this.discordMessage;
+
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 				if (/<@&\d{17,19}>/.test(message.content)) {
 					this.author.send('you do not have permission to @ roles from in game chat');
@@ -219,10 +249,12 @@ module.exports = class HypixelMessage extends ChatMessage {
 				return message;
 			}
 
-			return await this.chatBridge.discord.get(this.type)?.sendViaBot(
+			this.discordMessage = this.chatBridge.discord.get(this.type)?.sendViaBot(
 				this.content,
 				{ allowedMentions: { parse: [] } },
 			);
+
+			return await this.discordMessage;
 		} catch (error) {
 			logger.error(`[FORWARD TO DC]: ${error}`);
 		}
