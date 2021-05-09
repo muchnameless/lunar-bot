@@ -128,8 +128,8 @@ module.exports = class Command {
 	 * removes all aliases and the command from the commandsCollection
 	 */
 	unload() {
-		this.aliases?.forEach(alias => this.commandCollection.delete(alias.toLowerCase()));
 		this.commandCollection.delete(this.name.toLowerCase());
+		this.aliases?.forEach(alias => this.commandCollection.delete(alias.toLowerCase()));
 
 		if (this.isBridgeCommand) {
 			if (this.commandCollection.isMainCollection) {
