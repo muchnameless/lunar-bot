@@ -1,7 +1,7 @@
 'use strict';
 
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-const { Client } = require('discord.js');
+const { Client, Intents } = require('discord.js');
 const { escapeRegex } = require('./src/functions/util');
 const db = require('./src/structures/database/index');
 const logger = require('./src/functions/logger');
@@ -30,35 +30,39 @@ process
 
 	db.sequelize.close().catch(logger.error);
 
-	const presence = { activity: { name: 'nothing due to maintenance', type: 'LISTENING' }, status: 'dnd' };
+	const presence = {
+		activities: [{
+			name: 'nothing due to maintenance',
+			type: 'LISTENING',
+		}],
+		status: 'dnd',
+	};
 	const client = new Client({
 		disableMentions: 'everyone',
 		presence,
-		ws: {
-			intents: [
-				'DIRECT_MESSAGES',
-				// 'DIRECT_MESSAGE_REACTIONS',
-				// 'DIRECT_MESSAGE_TYPING',
-				'GUILDS',
-				// 'GUILD_BANS',
-				// 'GUILD_EMOJIS',
-				// 'GUILD_INTEGRATIONS',
-				// 'GUILD_INVITES',
-				// 'GUILD_MEMBERS',
-				'GUILD_MESSAGES',
-				// 'GUILD_MESSAGE_REACTIONS',
-				// 'GUILD_MESSAGE_TYPING',
-				// 'GUILD_PRESENCES',
-				// 'GUILD_VOICE_STATES',
-				// 'GUILD_WEBHOOKS',
-			],
-		},
+		intents: [
+			Intents.FLAGS.DIRECT_MESSAGES,
+			// Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+			// Intents.FLAGS.DIRECT_MESSAGE_TYPING,
+			Intents.FLAGS.GUILDS,
+			// Intents.FLAGS.GUILD_BANS,
+			// Intents.FLAGS.GUILD_EMOJIS,
+			// Intents.FLAGS.GUILD_INTEGRATIONS,
+			// Intents.FLAGS.GUILD_INVITES,
+			// Intents.FLAGS.GUILD_MEMBERS,
+			Intents.FLAGS.GUILD_MESSAGES,
+			// Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+			// Intents.FLAGS.GUILD_MESSAGE_TYPING,
+			// Intents.FLAGS.GUILD_PRESENCES,
+			// Intents.FLAGS.GUILD_VOICE_STATES,
+			// Intents.FLAGS.GUILD_WEBHOOKS,
+		],
 	});
 
 	// ready
 	client.once('ready', () => {
 		client.setInterval(() => {
-			client.user.setPresence(presence).catch(error => logger.error('error while setting activity:\n', error));
+			client.user.setPresence(presence);
 		}, 20 * 60_000); // 20 min
 
 		// log
