@@ -108,12 +108,6 @@ module.exports = async (message) => {
 				return message.reply(commaListsOr`the \`${command.name}\` command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)})${message.guild?.id === lgGuild.id ? '' : ' from the Lunar Guard Discord Server'}.`);
 			}
 
-			// guild role is always a req for higher commands
-			if (!member.roles.cache.has(client.config.get('GUILD_ROLE_ID'))) {
-				logger.info(`[CMD HANDLER]: ${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} without being in the guild`);
-				return message.reply(`the \`${command.name}\` command requires you to have the ${lgGuild.roles.cache.get(client.config.get('GUILD_ROLE_ID'))?.name ?? client.config.get('GUILD_ROLE_ID')} role${message.guild?.id === lgGuild.id ? '' : ' from the Lunar Guard Discord Server'}.`);
-			}
-
 		// prevent from executing owner only command
 		} else if (command.category === 'owner') {
 			logger.info(`[CMD HANDLER]: ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} which is an owner only command`);

@@ -86,12 +86,6 @@ module.exports = async (message) => {
 				return message.reply(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}) from the Lunar Guard Discord Server`);
 			}
 
-			// guild role is always a req for higher commands
-			if (!member.roles.cache.has(config.get('GUILD_ROLE_ID'))) {
-				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in '${message.type}' without being in the guild`);
-				return message.reply(`the '${command.name}' command requires you to have the ${lgGuild.roles.cache.get(config.get('GUILD_ROLE_ID'))?.name ?? config.get('GUILD_ROLE_ID')} role from the Lunar Guard Discord Server`);
-			}
-
 		// prevent from executing owner only command
 		} else if (command.category === 'owner') {
 			logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is an owner only command`);
