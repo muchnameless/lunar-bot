@@ -59,7 +59,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @returns {Promise<string[]>}
 	 */
 	static async _uploadAttachments(attachments) {
-		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? urlToImgurLink(attachment.url) : attachment.url)))).flatMap(({ value }, index) => value ?? attachments[index].url);
+		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? urlToImgurLink(attachment.url) : attachment.url)))).map(({ value }, index) => value ?? attachments[index].url);
 	}
 
 	/**
