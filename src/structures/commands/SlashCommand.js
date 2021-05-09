@@ -42,7 +42,7 @@ module.exports = class SlashCommand {
 	 * @returns {boolean}
 	 */
 	static checkForce(options) {
-		return options.find(({ name }) => name === 'force')?.value ?? false;
+		return options?.find(({ name }) => name === 'force')?.value ?? false;
 	}
 
 	/**
