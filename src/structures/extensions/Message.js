@@ -103,10 +103,13 @@ class LunarMessage extends Message {
 			&& channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)
 			&& channel.permissionsFor(this.member).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]),
 		)
-			?? this.guild.channels.cache.find((/** @type {import('./TextChannel')} */ channel) => channel.name.includes('commands')
-				&& channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)
-				&& channel.permissionsFor(this.member).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]),
-			);
+			?? this.guild.channels.cache
+				.filter((/** @type {import('./TextChannel')} */ channel) => channel.name.includes('commands')
+					&& channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)
+					&& channel.permissionsFor(this.member).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]),
+				)
+				.sort((a, b) => Math.abs(a.rawPosition - this.rawPosition) - Math.abs(b.rawPosition - this.rawPosition))
+				.first();
 	}
 
 	/**
