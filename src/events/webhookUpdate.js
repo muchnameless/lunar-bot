@@ -1,5 +1,6 @@
 'use strict';
 
+const { Permissions } = require('discord.js');
 const logger = require('../functions/logger');
 
 
@@ -10,7 +11,7 @@ const logger = require('../functions/logger');
  */
 module.exports = async (client, channel) => {
 	if (channel.id !== client.webhook?.channelID) return;
-	if (!channel.checkBotPermissions('MANAGE_WEBHOOKS')) return logger.warn(`[WEBHOOK UPDATE]: missing 'MANAGE_WEBHOOKS' in #${channel.name}`);
+	if (!channel.checkBotPermissions(Permissions.FLAGS.MANAGE_WEBHOOKS)) return logger.warn(`[WEBHOOK UPDATE]: missing 'MANAGE_WEBHOOKS' in #${channel.name}`);
 
 	const webhooks = await channel.fetchWebhooks().catch(logger.error);
 

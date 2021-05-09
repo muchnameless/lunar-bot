@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, Permissions: { FLAGS: { MANAGE_ROLES } } } = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
@@ -843,7 +843,7 @@ module.exports = class Player extends Model {
 		if (!filteredRolesToAdd.length && !filteredRolesToRemove.length) return true;
 
 		// permission check
-		if (!member.guild.me.permissions.has(MANAGE_ROLES)) return (logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false);
+		if (!member.guild.me.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) return (logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false);
 
 		const { config } = member.client;
 		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));
@@ -972,7 +972,7 @@ module.exports = class Player extends Model {
 		if (!member) return;
 		if (member.guild.me.roles.highest.comparePositionTo(member.roles.highest) < 1) return; // member's highest role is above bot's highest role
 		if (member.guild.ownerID === member.id) return; // can't change nick of owner
-		if (!member.guild.me.permissions.has('MANAGE_NICKNAMES')) return logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' permission`);
+		if (!member.guild.me.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' permission`);
 
 		const { displayName: PREV_NAME } = member;
 

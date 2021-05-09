@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndent, oneLine } = require('common-tags');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../../constants/emojiCharacters');
@@ -169,7 +169,7 @@ const self = module.exports = {
 	 */
 	async addPageReactions(message) {
 		if (!message) return logger.warn('[ADD PAGE REACTIONS]: no message');
-		if (!message.channel.checkBotPermissions('ADD_REACTIONS')) return logger.warn(`[ADD PAGE REACTIONS]: missing 'ADD_REACTIONS' permission in #${message.channel.name}`);
+		if (!message.channel.checkBotPermissions(Permissions.FLAGS.ADD_REACTIONS)) return logger.warn(`[ADD PAGE REACTIONS]: missing 'ADD_REACTIONS' permission in #${message.channel.name}`);
 
 		// add reactions in order
 		try {
@@ -387,7 +387,7 @@ const self = module.exports = {
 		if (!cached) return;
 
 		// remove reaction from user
-		if (message.channel.checkBotPermissions('MANAGE_MESSAGES')) reaction.users.remove(userID).catch(error => logger.error(`[REMOVE REACTION]: ${error}`));
+		if (message.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) reaction.users.remove(userID).catch(error => logger.error(`[REMOVE REACTION]: ${error}`));
 
 		// user is not command author
 		if (userID !== cached.args.userID) return;

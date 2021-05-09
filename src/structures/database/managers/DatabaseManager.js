@@ -2,7 +2,7 @@
 
 const { CronJob: CronJobConstructor } = require('cron');
 const { stripIndents, commaLists } = require('common-tags');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
 const _ = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../../../constants/emojiCharacters');
 const { asyncFilter, safePromiseAll } = require('../../../functions/util');
@@ -284,7 +284,7 @@ module.exports = class DatabaseManager {
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 		if (!taxChannel?.guild?.available) return logger.warn('[TAX MESSAGE]: channel not found');
-		if (!taxChannel.checkBotPermissions([ 'VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS' ])) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+		if (!taxChannel.checkBotPermissions([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
 
