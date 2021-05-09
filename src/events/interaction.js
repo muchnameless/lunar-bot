@@ -1,7 +1,9 @@
 'use strict';
 
+const { commaListsOr } = require('common-tags');
 const { Collection } = require('discord.js');
 const ms = require('ms');
+const MissingPermissionsError = require('../structures/errors/MissingPermissionsError');
 const ChatBridgeError = require('../structures/errors/ChatBridgeError');
 const logger = require('../functions/logger');
 
@@ -49,17 +51,19 @@ module.exports = async (client, interaction) => {
 		await command.run(interaction);
 	} catch (error) {
 		try {
-			logger.error(error);
-			if (interaction.replied || interaction.deferred) return await interaction.editReply(
-				error instanceof ChatBridgeError
-					? `${error}`
-					: `an error occurred while executing the command: ${error}`,
-			);
-			await interaction.reply(
-				error instanceof ChatBridgeError
-					? `${error}`
-					: `an error occurred while executing the command: ${error}`,
-			);
+			if (error instanceof MissingPermissionsError) {
+				logger.error(`${error}`);
+
+				const requiredRoles = error.requiredRoles.map(roleID => client.lgGuild?.roles.cache.get(roleID) ?? roleID);
+
+				await interaction.safeReply(commaListsOr`missing permissions for \`${error.command}\` (${interaction.guildID === client.config.get('MAIN_GUILD_ID') ? requiredRoles.map(r => `${r}`) : requiredRoles.map(r => r.name ?? r)}): ${error.message}`, { ephemeral: true });
+			} else if (error instanceof ChatBridgeError) {
+				logger.error(`${error}`);
+				await interaction.safeReply(`${error}`);
+			} else {
+				logger.error(error);
+				await interaction.safeReply(`an error occurred while executing the command: ${error}`);
+			}
 		} catch (err) {
 			logger.error(err);
 		}
