@@ -39,7 +39,7 @@ module.exports = class SlashCommandCollection extends Collection {
 	 */
 	async init() {
 		try {
-			const commands = await this.client.lgGuild?.commands.set(this.map(({ data }) => data));
+			const commands = await this.client.lgGuild?.commands.set(this.map(({ data }, name) => ({ ...data, name })));
 
 			for (const [ id, applicationCommand ] of commands) {
 				/** @type {import('./SlashCommand')} */

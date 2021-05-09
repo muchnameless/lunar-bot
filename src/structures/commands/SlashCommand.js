@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('discord.js').ApplicationCommandData & { permissions: import('discord.js').ApplicationCommandPermissions, cooldown: ?number }} CommandData
+ * @typedef {import('discord.js').ApplicationCommandData & { aliases: ?string[], permissions: import('discord.js').ApplicationCommandPermissions, cooldown: ?number }} CommandData
  */
 
 
@@ -14,18 +14,35 @@ module.exports = class SlashCommand {
 	 * @param {string} param0.name command name
 	 * @param {CommandData} param1
 	 */
-	constructor({ client, commandCollection, name }, { description, options, defaultPermission, permissions, cooldown }) {
+	constructor({ client, commandCollection, name }, { aliases, description, options, defaultPermission, permissions, cooldown }) {
 		this.client = client;
 		this.commandCollection = commandCollection;
 		this.name = name;
 		/** @type {?string} */
 		this.id = null;
+		this.aliases = aliases?.length ? aliases.filter(Boolean) : null;
 
 		this.description = description?.length ? description : null;
 		this.options = options ?? null;
 		this.defaultPermission = defaultPermission ?? true;
-		this.permissions = permissions ?? null;
+
+		this.permissions = permissions ?? [];
+		this.permissions.push({
+			id: this.client.ownerID,
+			type: 'USER',
+			permission: true,
+		});
+
 		this.cooldown = cooldown ?? null;
+	}
+
+	/**
+	 * wether the force option was set to true
+	 * @param {import('discord.js').CommandInteractionOption[]} options
+	 * @returns {boolean}
+	 */
+	static checkForce(options) {
+		return options.find(({ name }) => name === 'force')?.value ?? false;
 	}
 
 	/**
@@ -52,6 +69,7 @@ module.exports = class SlashCommand {
 	 */
 	load() {
 		this.commandCollection.set(this.name.toLowerCase(), this);
+		this.aliases?.forEach(alias => this.commandCollection.set(alias.toLowerCase(), this));
 	}
 
 	/**
@@ -59,6 +77,7 @@ module.exports = class SlashCommand {
 	 */
 	unload() {
 		this.commandCollection.delete(this.name.toLowerCase());
+		this.aliases?.forEach(alias => this.commandCollection.delete(alias.toLowerCase()));
 
 		for (const path of Object.keys(require.cache).filter(filePath => !filePath.includes('node_modules') && !filePath.includes('functions') && filePath.includes('commands') && filePath.endsWith(`${this.name}.js`))) {
 			delete require.cache[path];
