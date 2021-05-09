@@ -36,10 +36,11 @@ module.exports = class SlashCommandCollection extends Collection {
 
 	/**
 	 * registers all slash commands
+	 * @param {import('discord.js').GuildApplicationCommandManager|import('discord.js').ApplicationCommandManager} [commandManager]
 	 */
-	async init() {
+	async init(commandManager = this.client.lgGuild?.commands) {
 		try {
-			const commands = await this.client.lgGuild?.commands.set(this.map(({ data }, name) => ({ ...data, name })));
+			const commands = await commandManager.set(this.map(({ data }, name) => ({ ...data, name })));
 			const permissions = [];
 
 			for (const [ id, applicationCommand ] of commands) {
@@ -56,7 +57,7 @@ module.exports = class SlashCommandCollection extends Collection {
 				}
 			}
 
-			if (permissions.length) await this.client.lgGuild?.commands.setPermissions(permissions);
+			if (permissions.length) await commandManager.setPermissions(permissions);
 		} catch (error) {
 			logger.error(error);
 		}
