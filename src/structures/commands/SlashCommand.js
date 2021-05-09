@@ -26,8 +26,8 @@ module.exports = class SlashCommand {
 		this.options = options ?? null;
 		this.defaultPermission = defaultPermission ?? true;
 
-		this.permissions = permissions ?? [];
-		this.permissions.push({
+		this.permissions = permissions ?? null;
+		if (this.permissions?.length) this.permissions.push({
 			id: this.client.ownerID,
 			type: 'USER',
 			permission: true,

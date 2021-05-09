@@ -40,6 +40,7 @@ module.exports = class SlashCommandCollection extends Collection {
 	async init() {
 		try {
 			const commands = await this.client.lgGuild?.commands.set(this.map(({ data }, name) => ({ ...data, name })));
+			const permissions = [];
 
 			for (const [ id, applicationCommand ] of commands) {
 				/** @type {import('./SlashCommand')} */
@@ -48,9 +49,14 @@ module.exports = class SlashCommandCollection extends Collection {
 				slashCommand.id = id;
 
 				if (slashCommand.permissions) {
-					applicationCommand.setPermissions(slashCommand.permissions);
+					permissions.push({
+						id: applicationCommand.id,
+						permissions: slashCommand.permissions,
+					});
 				}
 			}
+
+			if (permissions.length) await this.client.lgGuild?.commands.setPermissions(permissions);
 		} catch (error) {
 			logger.error(error);
 		}
