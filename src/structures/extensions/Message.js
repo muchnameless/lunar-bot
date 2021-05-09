@@ -211,7 +211,7 @@ class LunarMessage extends Message {
 		options.saveReplyMessageID ??= true;
 
 		// DMs
-		if (!this.guild) return this._sendReply(content, options);
+		if (!this.guild) return this._sendReply(content, { replyTo: this.id, ...options });
 
 		options.sameChannel ??= false;
 
