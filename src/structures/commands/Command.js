@@ -77,7 +77,7 @@ module.exports = class Command {
 
 			case 'guild':
 				return this.commandCollection.isMainCollection
-					? [ this.config.get('GUILD_ROLE_ID') ]
+					? [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ]
 					: null;
 
 			default:
