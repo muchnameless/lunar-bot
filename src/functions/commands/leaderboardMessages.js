@@ -14,7 +14,7 @@ const cache = require('../../api/cache');
 /**
  * @typedef {object} LeaderboardArguments
  * @property {boolean} shouldShowOnlyBelowReqs
- * @property {boolean|string} hypixelGuildID
+ * @property {false|string} hypixelGuildID
  * @property {string|undefined} type
  * @property {{value: string, arg: string}} typeInput
  * @property {string|undefined} offset
@@ -319,9 +319,11 @@ const self = module.exports = {
 				\`\`\`ada${playerList}\`\`\`
 			`)
 			.addField(
-				'Your placement',
+				playerRequestingEntry
+					? 'Your placement'
+					: '\u200b',
 				stripIndent`
-					${playerRequestingEntry}
+					${playerRequestingEntry ?? ''}
 					Page: ${PAGE} / ${PAGES_TOTAL}
 				`,
 			)
@@ -460,6 +462,7 @@ const self = module.exports = {
 			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
 		} else {
 			playerDataRaw = client.players.inGuild.array();
+			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => !player.notInGuild && (player.getWeight().totalWeight < player.guild.weightReq));
 		}
 
 		const PLAYER_COUNT = playerDataRaw.length;
@@ -521,10 +524,11 @@ const self = module.exports = {
 			}
 
 			case 'purge': {
-				title = 'Weight Tracking Leaderboard';
+				title = `${hypixelGuild || ''} Purge List (${config.get('PURGE_LIST_OFFSET')} days interval)`;
 				dataConverter = (player) => {
 					const { totalWeight } = player.getWeight();
-					const { totalWeight: totalWeightOffet } = player.getWeight(offset);
+					const startIndex = player.alchemyXpHistory.length - 1 - config.get('PURGE_LIST_OFFSET');
+					const { totalWeight: totalWeightOffet } = player.getWeightHistory(player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0));
 					const gainedWeight = totalWeight - totalWeightOffet;
 					return {
 						ign: player.ign,
@@ -604,15 +608,30 @@ const self = module.exports = {
 		// description
 		let description = '';
 
-		if (IS_COMPETITION_LB) {
-			description += `Start: ${STARTING_TIME} GMT\n`;
-			if (COMPETITION_RUNNING) {
-				description += `Time left: ${ms(COMPETITION_END_TIME - Date.now(), { long: true })}\n`;
-			} else { // competition already ended
-				description += `Ended: ${new Date(COMPETITION_END_TIME).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT\n`;
+		if (type !== 'purge') {
+			if (IS_COMPETITION_LB) {
+				description += `Start: ${STARTING_TIME} GMT\n`;
+				if (COMPETITION_RUNNING) {
+					description += `Time left: ${ms(COMPETITION_END_TIME - Date.now(), { long: true })}\n`;
+				} else { // competition already ended
+					description += `Ended: ${new Date(COMPETITION_END_TIME).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT\n`;
+				}
+			} else {
+				description += `Tracking xp gained since ${STARTING_TIME} GMT\n`;
 			}
+
+			description += `${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}`;
+			title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
+		} else if (hypixelGuild) { // purge list
+			description += stripIndent`
+				Current weight requirement: ${client.formatNumber(hypixelGuild.weightReq)}
+				Below reqs (${PLAYER_COUNT} / ${hypixelGuild.players.size} members): ${totalStats}
+			`;
 		} else {
-			description += `Tracking xp gained since ${STARTING_TIME} GMT\n`;
+			description += stripIndent`
+				Current weight requirements: ${client.hypixelGuilds.cache.map(({ name, weightReq }) => `${name} (${client.formatNumber(weightReq)})`).join(', ')}
+				Guilds below reqs (${PLAYER_COUNT} / ${client.players.inGuild.size} members): ${totalStats}
+			`;
 		}
 
 		// player requesting entry
@@ -629,7 +648,7 @@ const self = module.exports = {
 					 > ${self.getEntry(client, 'gained', type, ...getEntryArgs)(playerRequesting)}
 				\`\`\`
 			`;
-		} else {
+		} else if (type !== 'purge') {
 			let playerRequesting = client.players.getByID(userID);
 
 			// put playerreq into guildplayers and sort then do the above again
@@ -650,9 +669,6 @@ const self = module.exports = {
 				`;
 			}
 		}
-
-		description += `${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}`;
-		title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
 
 		return {
 			title,
