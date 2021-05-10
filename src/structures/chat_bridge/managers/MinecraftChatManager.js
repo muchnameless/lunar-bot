@@ -616,8 +616,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	// eslint-disable-next-line no-undef
 	async command({ command = arguments[0], responseRegExp = new RegExp(), max = -1, raw = false, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
-		await this.commandQueue.wait();
-		await this.queue.wait();
+		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
+		await this.queue.wait(); // only start the collector if the chat queue is free
 
 		const collector = this.createMessageCollector(
 			message => !message.type && (responseRegExp.test(message.content) || /^-{50,}/.test(message.content)),
