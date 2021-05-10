@@ -321,13 +321,12 @@ class LunarMessage extends Message {
 			}, 10_000);
 		}
 
-		// add reply if it is not present
-		if (options.reply !== false) {
-			content = `\u{200b}${this.author}${content.length ? `, ${content}` : ''}`;
-		}
-
-		// send reply
-		return this._sendReply(content, options, commandsChannel);
+		// send reply with an @mention
+		return this._sendReply(
+			`\u{200b}${this.author}${content.length ? `, ${content}` : ''}`,
+			options,
+			commandsChannel,
+		);
 	}
 
 	/**
@@ -388,6 +387,22 @@ class LunarMessage extends Message {
 		}
 
 		return message;
+	}
+
+	/**
+	 * edits a message, preserving @mention pings at the beginning
+	 */
+	async edit(content, options) {
+		if (typeof content !== 'string') return super.edit(content, options);
+
+		const pingMatched = this.content?.match(/^\u{200b}<@!?\d{17,19}>(?:, )?/u);
+
+		return super.edit(
+			pingMatched && !content.startsWith(pingMatched[0])
+				? `${pingMatched[0]}${content}`
+				: content,
+			options,
+		);
 	}
 }
 
