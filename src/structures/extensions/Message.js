@@ -108,7 +108,7 @@ class LunarMessage extends Message {
 					&& channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)
 					&& channel.permissionsFor(this.member).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]),
 				)
-				.sort((a, b) => Math.abs(a.rawPosition - this.rawPosition) - Math.abs(b.rawPosition - this.rawPosition))
+				.sort((a, b) => Math.abs(a.rawPosition - this.channel.rawPosition) - Math.abs(b.rawPosition - this.channel.rawPosition))
 				.first();
 	}
 
