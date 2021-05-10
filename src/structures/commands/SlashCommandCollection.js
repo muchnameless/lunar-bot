@@ -81,14 +81,13 @@ module.exports = class SlashCommandCollection extends Collection {
 	/**
 	 * loads a single command into the collection
 	 * @param {string} file command file to load
-	 * @param {Boolean} [isReload=false]
 	 */
-	loadFromFile(file, isReload = false) {
+	loadFromFile(file) {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
 		const Command = require(file);
 		/**
-		 * @type {import('./Command')}
+		 * @type {import('./SlashCommand')}
 		 */
 		const command = new Command({
 			client: this.client,
@@ -97,7 +96,7 @@ module.exports = class SlashCommandCollection extends Collection {
 			category: category !== 'commands' ? category : null,
 		});
 
-		command.load(isReload);
+		command.load();
 
 		// delete if command won't be loaded again
 		delete require.cache[require.resolve(file)];
@@ -107,13 +106,12 @@ module.exports = class SlashCommandCollection extends Collection {
 
 	/**
 	 * loads all commands into the collection
-	 * @param {Boolean} [isReload=false]
 	 */
-	async loadAll(isReload = false) {
+	async loadAll() {
 		const commandFiles = await getAllJsFiles(this.dirPath);
 
 		for (const file of commandFiles) {
-			this.loadFromFile(file, isReload);
+			this.loadFromFile(file);
 		}
 
 		logger.debug(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
