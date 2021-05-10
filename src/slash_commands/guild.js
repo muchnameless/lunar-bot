@@ -430,7 +430,11 @@ module.exports = class SetRankCommand extends SlashCommand {
 			case 'log': {
 				await this.checkPermissions(interaction, { roleIDs: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ] });
 
-				return this._run(interaction, options, `g log ${options?.flatMap(({ name: arg, value }) => (arg === 'ign' || arg === 'page' ? value : [])).join(' ') ?? ''}`);
+				const IGN_INPUT = options?.find(({ name: arg }) => arg === 'ign')?.value;
+				const IGN = IGN_INPUT && this.getIGN(IGN_INPUT, options);
+				const PAGE = options?.find(({ name: arg }) => arg === 'page')?.value;
+
+				return this._run(interaction, options, `g log ${[ IGN, PAGE ].filter(Boolean).join(' ')}`);
 			}
 
 			case 'member': {
