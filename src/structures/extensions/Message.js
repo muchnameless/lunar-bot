@@ -114,7 +114,7 @@ class LunarMessage extends Message {
 
 	/**
 	 * react in order if the message is not deleted and the client has 'ADD_REACTIONS', catching promise rejections
-	 * @param {import('discord.js').EmojiResolvable[]} emojis
+	 * @param {import('discord.js').EmojiIdentifierResolvable[]} emojis
 	 * @returns {Promise<?import('discord.js').MessageReaction[]>}
 	 */
 	async react(...emojis) {
