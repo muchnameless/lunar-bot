@@ -26,7 +26,7 @@ module.exports = async (message) => {
 	 * channel specific triggers
 	 */
 
-	if (message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) message.reactSafely(FORWARD_TO_GC);
+	if (message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) message.react(FORWARD_TO_GC);
 
 	/**
 	 * commands

@@ -168,18 +168,7 @@ const self = module.exports = {
 	 * @param {import('../../structures/extensions/Message')} message the message to add the reactions to
 	 */
 	async addPageReactions(message) {
-		if (!message) return logger.warn('[ADD PAGE REACTIONS]: no message');
-		if (!message.channel.checkBotPermissions(Permissions.FLAGS.ADD_REACTIONS)) return logger.warn(`[ADD PAGE REACTIONS]: missing 'ADD_REACTIONS' permission in #${message.channel.name}`);
-
-		// add reactions in order
-		try {
-			for (const emoji of [ DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI ]) {
-				if (!message.reactions.cache.has(emoji)) await message.react(emoji);
-			}
-		} catch (error) {
-			logger.error(`[ADD PAGE REACTIONS]: ${error}`);
-		}
-
+		await message.react(DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI);
 		return message;
 	},
 

@@ -168,7 +168,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	static async _handleBlockedWord(discordMessage) {
 		if (!discordMessage) return;
 
-		discordMessage.reactSafely(STOP);
+		discordMessage.react(STOP);
 
 		try {
 			await discordMessage.author.send(stripIndents`
@@ -468,7 +468,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		if (!messageParts.size) return false;
 
 		if (messageParts.size > maxParts) {
-			discordMessage?.reactSafely(STOP);
+			discordMessage?.react(STOP);
 			discordMessage?.author
 				.send(stripIndents`
 					you are only allowed to send up to ${maxParts} messages at once (therefore the bridge skipped ${messageParts.size - maxParts} part${messageParts.size - maxParts !== 1 ? 's' : ''} of your message)
@@ -545,7 +545,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE _CHAT]: ${error}`);
-			discordMessage?.reactSafely(X_EMOJI);
+			discordMessage?.react(X_EMOJI);
 			this._tempIncrementCounter();
 			this._resetFilter();
 			return false;
@@ -564,7 +564,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				this._resetFilter();
 
 				if (!this.ready) {
-					discordMessage?.reactSafely(X_EMOJI);
+					discordMessage?.react(X_EMOJI);
 					return false;
 				}
 
@@ -577,7 +577,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 				// max retries reached
 				if (++this.retries === MinecraftChatManager.maxRetries) {
-					discordMessage?.reactSafely(X_EMOJI);
+					discordMessage?.react(X_EMOJI);
 					await sleep(this.retries * MinecraftChatManager.SAFE_DELAY);
 					return false;
 				}

@@ -55,7 +55,7 @@ module.exports = async (message) => {
 					.filter(({ content, author: { id } }) => (senderDiscordID ? id === senderDiscordID : true) && message.chatBridge.minecraft.parseContent(content).includes(blockedContent))
 					.sort(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
 					.first()
-					?.reactSafely(STOP);
+					?.react(STOP);
 			}
 		}
 

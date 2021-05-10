@@ -113,15 +113,29 @@ class LunarMessage extends Message {
 	}
 
 	/**
-	 * message.react with deleted and permission check and promise rejection catch
-	 * @param {import('discord.js').EmojiResolvable} emoji
-	 * @returns {Promise<?import('discord.js').MessageReaction>}
+	 * react in order if the message is not deleted and the client has 'ADD_REACTIONS', catching promise rejections
+	 * @param {import('discord.js').EmojiResolvable[]} emojis
+	 * @returns {Promise<?import('discord.js').MessageReaction[]>}
 	 */
-	async reactSafely(emoji) {
+	async react(...emojis) {
 		if (this.deleted) return null;
 		if (!this.channel.checkBotPermissions(Permissions.FLAGS.ADD_REACTIONS)) return null;
-		if (this.reactions.cache.get(this.client.emojis.resolveID(emoji))?.me) return Promise.resolve(this.reactions.cache.get(this.client.emojis.resolveID(emoji)));
-		return super.react(emoji).catch(error => logger.error(`[REACT SAFELY]: ${error}`));
+
+		const res = [];
+
+		try {
+			for (const emoji of emojis) {
+				if (this.reactions.cache.get(this.client.emojis.resolveID(emoji))?.me) {
+					res.push(this.reactions.cache.get(this.client.emojis.resolveID(emoji)));
+				} else {
+					res.push(await super.react(emoji));
+				}
+			}
+		} catch (error) {
+			logger.error(`[REACT SAFELY]: ${error}`);
+		}
+
+		return res;
 	}
 
 	/**

@@ -147,7 +147,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 	 * @param {string} emoji
 	 * @returns {Promise<[boolean, ?import('discord.js').MessageReaction|import('../extensions/Message')]>}
 	 */
-	async reactSafely(emoji) {
+	async react(emoji) {
 		switch (this.type) {
 			case GUILD:
 			case OFFICER: {
@@ -162,14 +162,14 @@ module.exports = class HypixelMessage extends ChatMessage {
 							discordMessage = null;
 						}
 
-						return discordMessage?.reactSafely(emoji)
+						return discordMessage?.react(emoji)
 							?? this.chatBridge.discord.get(this.type)?.sendViaBot(`${this.member ?? `@${this.author.ign}`} ${emoji}`);
 					})(),
 				]);
 			}
 
 			default:
-				return this.reply(emoji);
+				return this.author?.send(emoji) ?? this.reply(emoji);
 		}
 	}
 
@@ -240,10 +240,10 @@ module.exports = class HypixelMessage extends ChatMessage {
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 				if (/<@&\d{17,19}>/.test(message.content)) {
 					this.author.send('you do not have permission to @ roles from in game chat');
-					message.reactSafely(NO_BELL);
+					message.react(NO_BELL);
 				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(message.content))) {
 					this.author.send('you do not have permission to @ users from in game chat');
-					message.reactSafely(NO_BELL);
+					message.react(NO_BELL);
 				}
 
 				return message;

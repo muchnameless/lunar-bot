@@ -199,7 +199,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 */
 	async forwardToMinecraft(message, { player = message.author.player, checkifNotFromBot = true } = {}) {
 		if (!this.chatBridge.enabled) return;
-		if (!this.minecraft.ready) return message.reactSafely(X_EMOJI);
+		if (!this.minecraft.ready) return message.react(X_EMOJI);
 
 		if (checkifNotFromBot) {
 			if (message.me) return; // message was sent from the bot
@@ -213,7 +213,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				error => logger.error(`[FORWARD DC TO MC]: ${player.logInfo}: error DMing muted user: ${error}`),
 			);
 
-			return message.reactSafely(MUTED);
+			return message.react(MUTED);
 		}
 
 		// check if guild chat is muted
@@ -223,7 +223,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				error => logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error}`),
 			);
 
-			return message.reactSafely(MUTED);
+			return message.react(MUTED);
 		}
 
 		// check if the chatBridge bot is muted
@@ -233,7 +233,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				error => logger.error(`[FORWARD DC TO MC]: ${player?.logInfo}: error DMing bot muted: ${error}`),
 			);
 
-			return message.reactSafely(MUTED);
+			return message.react(MUTED);
 		}
 
 		return this.minecraft.chat(

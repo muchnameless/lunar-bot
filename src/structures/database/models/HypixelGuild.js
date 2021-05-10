@@ -609,7 +609,7 @@ module.exports = class HypixelGuild extends Model {
 
 			if (replyData) message.channel.deleteMessages(replyData.messageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error}`));
 
-			return message.reactSafely(CLOWN);
+			return message.react(CLOWN);
 		}
 
 		const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));
@@ -668,7 +668,7 @@ module.exports = class HypixelGuild extends Model {
 			await player.updateRoles(`requested ${RANK_NAME}`);
 		}
 
-		return message.reactSafely(Y_EMOJI_ALT);
+		return message.react(Y_EMOJI_ALT);
 	}
 
 	/**
