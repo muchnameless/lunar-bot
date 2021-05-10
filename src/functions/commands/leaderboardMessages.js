@@ -403,13 +403,11 @@ const self = module.exports = {
 		// update page
 		cached.args.page = page;
 
-		const { content } = message;
-
 		try {
 			if (reload) {
 				const { type, args } = cached;
 				const leaderbaordData = self.getLeaderboardDataCreater(type)(message.client, args);
-				const reply = await message.edit(content, self.createLeaderboardEmbed(message.client, type, args, leaderbaordData));
+				const reply = await message.edit(message.content, self.createLeaderboardEmbed(message.client, type, args, leaderbaordData));
 
 				await cache.set(
 					`${LB_KEY}:${reply.cachingKey}`,
@@ -418,7 +416,7 @@ const self = module.exports = {
 				);
 				await self.addPageReactions(reply);
 			} else {
-				await message.edit(content, self.createLeaderboardEmbed(message.client, cached.type, cached.args, cached.data));
+				await message.edit(message.content, self.createLeaderboardEmbed(message.client, cached.type, cached.args, cached.data));
 				await cache.set(
 					`${LB_KEY}:${message.cachingKey}`,
 					cached,

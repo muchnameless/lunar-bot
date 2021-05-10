@@ -300,11 +300,11 @@ module.exports = class DatabaseManager {
 		}
 		if (taxMessage.embeds[0]?.description === taxEmbed.description && _.isEqual(taxMessage.embeds[0].fields, taxEmbed.fields)) return; // no changes to taxMessage
 
-		const { content } = taxMessage;
-
-		taxMessage.edit(content, taxEmbed).then(
-			() => logger.info('[TAX MESSAGE]: updated taxMessage'),
-			error => logger.error(`[TAX MESSAGE]: ${error}`),
-		);
+		try {
+			await taxMessage.edit(taxMessage.content, taxEmbed);
+			logger.info('[TAX MESSAGE]: updated taxMessage');
+		} catch (error) {
+			logger.error(`[TAX MESSAGE]: ${error}`);
+		}
 	}
 };
