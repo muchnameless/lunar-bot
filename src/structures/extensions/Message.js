@@ -214,7 +214,18 @@ class LunarMessage extends Message {
 		options.saveReplyMessageID ??= true;
 
 		// DMs
-		if (!this.guild) return this._sendReply(content, { replyTo: this.id, ...options });
+		if (!this.guild) {
+			return this._sendReply(
+				content,
+				{
+					reply: {
+						messageReference: this,
+						failIfNotExists: false,
+					},
+					...options,
+				},
+			);
+		}
 
 		options.sameChannel ??= false;
 
@@ -248,7 +259,16 @@ class LunarMessage extends Message {
 			this.client.chatBridges.handleDiscordMessage(this, { checkifNotFromBot: false });
 
 			// send reply
-			const message = await this._sendReply(content, { replyTo: this.id, ...options });
+			const message = await this._sendReply(
+				content,
+				{
+					reply: {
+						messageReference: this,
+						failIfNotExists: false,
+					},
+					...options,
+				},
+			);
 
 			if (content.length) this.client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: false, player: this.author.player });
 
@@ -302,7 +322,7 @@ class LunarMessage extends Message {
 		}
 
 		// add reply if it is not present
-		if (options.replyTo !== false) {
+		if (options.reply !== false) {
 			content = `\u{200b}${this.author}${content.length ? `, ${content}` : ''}`;
 		}
 

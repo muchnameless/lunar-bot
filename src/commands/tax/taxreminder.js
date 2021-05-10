@@ -56,7 +56,7 @@ module.exports = class TaxReminderCommand extends Command {
 			for (const player of playersOnlyIgn) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 			// send ping message and split between pings if too many chars
-			await message.reply(pingMessage, { replyTo: false, sameChannel: true, split: { char: ' ' } });
+			await message.reply(pingMessage, { sameChannel: true, split: { char: ' ' } });
 
 			// optional ghost ping (delete ping message(s))
 			if (!SHOULD_GHOST_PING) return message.channel.stopTyping(true);

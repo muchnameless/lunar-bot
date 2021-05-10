@@ -254,17 +254,33 @@ module.exports = class ChatBridge extends EventEmitter {
 
 		return Promise.all([
 			this.minecraft[chatFunctionByType[(discordChatManager?.type ?? type)]]?.(content, { prefix: minecraftPrefix, maxParts, ...options })
-				?? this.minecraft.chat(content, { prefix: `${prefixByType[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : ''}`, maxParts, ...options }),
+				?? this.minecraft.chat(
+					content,
+					{
+						prefix: `${prefixByType[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : ''}`,
+						maxParts,
+						...options,
+					},
+				),
 			(async () => {
-				let replyTo;
+				let discordMessage;
 
 				try {
-					replyTo = await hypixelMessage.discordMessage;
+					discordMessage = await hypixelMessage.discordMessage;
 				} catch {
-					replyTo = null;
+					discordMessage = null;
 				}
 
-				return discordChatManager?.sendViaBot(`${replyTo || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author.ign}`}, `}${discordPrefix}${content}`, { replyTo: replyTo?.id, ...discord });
+				return discordChatManager?.sendViaBot(
+					`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author.ign}`}, `}${discordPrefix}${content}`,
+					{
+						reply: {
+							messageReference: discordMessage,
+							failIfNotExists: false,
+						},
+						...discord,
+					},
+				);
 			})(),
 		]);
 	}
