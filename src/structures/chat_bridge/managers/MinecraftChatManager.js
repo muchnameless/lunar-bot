@@ -617,6 +617,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	// eslint-disable-next-line no-undef
 	async command({ command = arguments[0], responseRegExp = new RegExp(), max = -1, raw = false, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		await this.commandQueue.wait();
+		await this.queue.wait();
 
 		const collector = this.createMessageCollector(
 			message => !message.type && (responseRegExp.test(message.content) || /^-{50,}/.test(message.content)),
@@ -634,6 +635,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			reject = rej;
 		});
 
+		// collect message
 		collector.on('collect', (/** @type {import('../HypixelMessage')} */ message) => {
 			// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
 			if (/^-{50,}[^-]+-{50,}$/.test(message.content)) return collector.stop();
@@ -646,6 +648,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			}
 		});
 
+		// end collection
 		collector.once('end', (/** @type {import('../HypixelMessage')[]} */ collected, /** @type {string} */ reason) => {
 			this.commandQueue.shift();
 
@@ -674,7 +677,18 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			}
 		});
 
-		this.sendToChat(trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1));
+		// send command to chat
+		this.retries = 0;
+
+		(async () => {
+			try {
+				await this._sendToChat(trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1));
+			} catch (error) {
+				logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
+			} finally {
+				this.queue.shift();
+			}
+		})();
 
 		return promise;
 	}
