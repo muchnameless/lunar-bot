@@ -147,7 +147,7 @@ class LunarMessage extends Message {
 		if (this.deleted) return this; // message already deleted check
 
 		if (!this.deletable) { // permission check
-			logger.warn(`[MESSAGE DELETE]: missing permission to delete message from ${this.author.tag} in ${this.channel.name}`);
+			logger.warn(`[MESSAGE DELETE]: missing permission to delete message from ${this.author.tag} in #${this.channel.name}`);
 			return this;
 		}
 
