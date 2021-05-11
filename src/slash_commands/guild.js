@@ -310,26 +310,19 @@ module.exports = class SetRankCommand extends SlashCommand {
 			})()
 			: interaction.user.player?.guild);
 
-		if (!hypixelGuild) return interaction.editReply('unable to find your guild');
+		if (!hypixelGuild) return interaction.editReply(`unable to find ${hypixelGuildInput ? `a guild called \`${hypixelGuildInput}\`` : 'your guild'}`);
 
-		const { chatBridge } = hypixelGuild;
+		const response = await hypixelGuild.chatBridge.minecraft.command({
+			command,
+			responseRegExp,
+		});
 
-		try {
-			const response = await chatBridge.minecraft.command({
-				command,
-				responseRegExp,
-			});
-
-			return interaction.editReply(new MessageEmbed()
-				.setColor(this.config.get('EMBED_BLUE'))
-				.setTitle(`/${command}`)
-				.setDescription(`\`\`\`\n${response}\`\`\``)
-				.setTimestamp(),
-			);
-		} catch (error) {
-			logger.error(`[MODERATION]: '${command}'`, error);
-			interaction.editReply(`an error occurred while executing \`${command}\``);
-		}
+		return interaction.editReply(new MessageEmbed()
+			.setColor(this.config.get('EMBED_BLUE'))
+			.setTitle(`/${command}`)
+			.setDescription(`\`\`\`\n${response}\`\`\``)
+			.setTimestamp(),
+		);
 	}
 
 	/**
@@ -355,9 +348,9 @@ module.exports = class SetRankCommand extends SlashCommand {
 			})()
 			: interaction.user.player?.guild;
 
-		if (!hypixelGuild) return interaction.editReply('unable to find your guild');
+		if (!hypixelGuild) return interaction.editReply(`unable to find ${hypixelGuildInput ? `a guild called \`${hypixelGuildInput}\`` : 'your guild'}`);
 
-		const data = await hypixelGuild.chatBridge.minecraft.command({
+		const response = await hypixelGuild.chatBridge.minecraft.command({
 			command,
 			raw: true,
 		});
@@ -367,7 +360,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 			.setTitle(`/${command}`)
 			.setDescription(
 				`\`\`\`${
-					data
+					response
 						.map(msg => (msg.content.includes('●')
 							? removeMcFormatting(
 								msg.formattedContent
@@ -422,7 +415,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 			case 'list':
 			case 'members':
 			case 'online': {
-				await this.checkPermissions(interaction, { roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ] });
+				await this.checkPermissions(interaction, { roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('BRIDGER_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ] });
 
 				return this._runList(interaction, options, `g ${name}`);
 			}
