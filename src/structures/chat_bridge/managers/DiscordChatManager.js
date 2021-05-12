@@ -223,8 +223,8 @@ module.exports = class DiscordChatManager extends ChatManager {
 		if (!this.minecraft.ready) return message.react(X_EMOJI);
 
 		if (checkifNotFromBot) {
-			if (message.me) return; // message was sent from the bot
-			if (message.webhookID === this.webhook?.id) return; // message was sent from the ChatBridge's webhook
+			if (message.me) return; // message was sent by the bot
+			if (message.webhookID === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		}
 
 		// check if player is muted
