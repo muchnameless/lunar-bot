@@ -3,7 +3,7 @@
 const { commaListsAnd } = require('common-tags');
 const { Structures, MessageEmbed, Message, Permissions } = require('discord.js');
 const { isEqual } = require('lodash');
-const { CHANNEL_FLAGS } = require('../../constants/bot');
+const { CHANNEL_FLAGS, replyPingRegExp } = require('../../constants/bot');
 const { DM_KEY, REPLY_KEY } = require('../../constants/redis');
 const cache = require('../../api/cache');
 const logger = require('../../functions/logger');
@@ -409,7 +409,7 @@ class LunarMessage extends Message {
 	async edit(content, options) {
 		if (typeof content !== 'string') return super.edit(content, options);
 
-		const pingMatched = this.content?.match(/^\u{200b}<@!?\d{17,19}>(?:, )?/u);
+		const pingMatched = this.content?.match(replyPingRegExp);
 
 		return super.edit(
 			pingMatched && !content.startsWith(pingMatched[0])

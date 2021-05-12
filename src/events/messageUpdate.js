@@ -2,6 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { DM_KEY, REPLY_KEY } = require('../constants/redis');
+const { replyPingRegExp } = require('../constants/bot');
 const cache = require('../api/cache');
 const commandHandler = require('../functions/commandHandler');
 const logger = require('../functions/logger');
@@ -41,9 +42,28 @@ module.exports = async (client, oldMessage, newMessage) => {
 					return; // moved reply message(s) to newMessage's channel -> don't call commandHandler
 				}
 
+				/** @type {import('../structures/extensions/Message')} */
 				const oldReply = await client.channels.cache.get(replyData.channelID).messages.fetch(replyData.messageID);
-				const newReply = await newMessage.channel.send(oldReply.content, { embed: oldReply.embeds.length ? new MessageEmbed(oldReply.embeds[0]) : null });
+				const pingMatched = oldReply.content.match(replyPingRegExp);
+				/** @type {import('../structures/extensions/Message')} */
+				const newReply = await newMessage.channel.send(
+					pingMatched
+						? oldReply.content.slice(pingMatched[0].length)
+						: oldReply.content,
+					{
+						reply: pingMatched
+							? {
+								messageReference: newMessage,
+								failIfNotExists: false,
+							}
+							: null,
+						embed: oldReply.embeds.length
+							? oldReply.embeds[0]
+							: null,
+					},
+				);
 
+				newReply.react(...oldReply.reactions.cache.filter(({ me }) => me).map(({ emoji }) => emoji));
 				oldReply.delete().catch(error => logger.error('[MESSAGE UPDATE]', error));
 
 				newMessage.replyData = {
