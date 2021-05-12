@@ -378,7 +378,7 @@ const self = module.exports = {
 		if (!cached) return;
 
 		// remove reaction from user
-		if (message.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) reaction.users.remove(userID).catch(error => logger.error(`[REMOVE REACTION]: ${error}`));
+		if (message.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) reaction.users.remove(userID).catch(error => logger.error('[REMOVE REACTION]', error));
 
 		// user is not command author
 		if (userID !== cached.args.userID) return;
@@ -415,7 +415,7 @@ const self = module.exports = {
 
 			if (message.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
 		} catch (error) {
-			logger.error(`[UPDATE LB]: ${error}`);
+			logger.error('[UPDATE LB]', error);
 		}
 	},
 

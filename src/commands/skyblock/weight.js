@@ -66,7 +66,7 @@ module.exports = class WeightCommand extends Command {
 				`${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillApiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`,
 			);
 		} catch (error) {
-			logger.error(`[WEIGHT]: ${error}`);
+			logger.error('[WEIGHT]', error);
 
 			return message.reply(`${error}`);
 		}

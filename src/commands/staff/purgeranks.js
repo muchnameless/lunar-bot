@@ -70,7 +70,7 @@ module.exports = class PurgeRanksCommand extends RankIssuesCommand {
 
 				++successCounter;
 			} catch (error) {
-				logger.error(`[PURGE RANKS]: ${error}`);
+				logger.error('[PURGE RANKS]', error);
 			}
 		}
 

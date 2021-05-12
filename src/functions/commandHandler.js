@@ -95,7 +95,7 @@ module.exports = async (message) => {
 			/**
 			 * @type {?import('../structures/extensions/GuildMember')}
 			 */
-			const member = message.member ?? await lgGuild.members.fetch(message.author.id).catch(error => logger.error(`[CMD HANDLER]: error while fetching member to test for permissions: ${error}`));
+			const member = message.member ?? await lgGuild.members.fetch(message.author.id).catch(error => logger.error('[CMD HANDLER]: error while fetching member to test for permissions', error));
 
 			if (!member) {
 				logger.info(`[CMD HANDLER]: ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} and could not be found within the Lunar Guard Discord Server`);

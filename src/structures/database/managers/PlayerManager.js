@@ -253,7 +253,7 @@ module.exports = class PlayerManager extends ModelManager {
 					await player.update({ rejectOnAPIError: true, ...options });
 				}
 			} catch (error) {
-				logger.error(`[PLAYERS UPDATE XP]: ${error}`);
+				logger.error('[PLAYERS UPDATE XP]', error);
 			}
 
 			return this;
@@ -582,7 +582,7 @@ module.exports = class PlayerManager extends ModelManager {
 					mainProfileUpdate: `-\xa0${player.ign}: ${result.oldProfileName} -> ${result.newProfileName}`,
 				});
 			} catch (error) {
-				logger.error(`[UPDATE MAIN PROFILE]: ${error}`);
+				logger.error('[UPDATE MAIN PROFILE]', error);
 
 				if (error instanceof NonAPIError) {
 					log.push({

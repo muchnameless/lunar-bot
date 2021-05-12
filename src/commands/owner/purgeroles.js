@@ -50,7 +50,7 @@ module.exports = class PurgeRolesCommand extends Command {
 							await member.roles.remove(rolesToPurge);
 							logger.info(`[PURGE ROLES]: removed ${rolesToPurge.length} role(s) from ${member.user.tag} | ${member.displayName}`);
 						} catch (error) {
-							logger.error(`[PURGE ROLES]: ${error}`);
+							logger.error('[PURGE ROLES]', error);
 						} finally {
 							resolve();
 						}

@@ -226,7 +226,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 							?? player?.image
 							?? await mojang.ign(this.author.ign).then(
 								({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`,
-								error => logger.error(`[FORWARD TO DC]: ${error}`),
+								error => logger.error('[FORWARD TO DC]', error),
 							)
 							?? this.client.user.displayAvatarURL({ dynamic: true }),
 						allowedMentions: {
@@ -256,7 +256,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 			return await this.discordMessage;
 		} catch (error) {
-			logger.error(`[FORWARD TO DC]: ${error}`);
+			logger.error('[FORWARD TO DC]', error);
 		}
 	}
 };

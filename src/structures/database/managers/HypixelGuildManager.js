@@ -65,7 +65,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 			return true;
 		} catch (error) {
 			if (!error.name.startsWith('Sequelize')) this.client.config.set('HYPIXEL_API_ERROR', 'true');
-			logger.error(`[GUILDS UPDATE]: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
+			logger.error('[GUILDS UPDATE]', error);
 			return false;
 		}
 	}
@@ -145,7 +145,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 		try {
 			await this.cache.find(({ rankRequestChannelID }) => rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message);
 		} catch (error) {
-			logger.error(`[RANK REQUEST]: ${error}`);
+			logger.error('[RANK REQUEST]', error);
 		}
 	}
 

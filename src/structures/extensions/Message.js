@@ -132,7 +132,7 @@ class LunarMessage extends Message {
 				}
 			}
 		} catch (error) {
-			logger.error(`[REACT SAFELY]: ${error}`);
+			logger.error('[MESSAGE REACT]', error);
 		}
 
 		return res;
@@ -325,7 +325,7 @@ class LunarMessage extends Message {
 
 						this.channel
 							.bulkDelete([ commandsChannelMessage.id, this.id ])
-							.catch(error => logger.error(`[REPLY]: unable to bulk delete: ${error}`));
+							.catch(error => logger.error('[REPLY]: unable to bulk delete', error));
 					}, 10_000);
 				});
 		} else if (this.channel.permissionsFor(this.guild.me).has(Permissions.FLAGS.MANAGE_MESSAGES)) { // only delete author's message
@@ -382,7 +382,7 @@ class LunarMessage extends Message {
 			}
 		} else { // send 1 message
 			message = await (oldReplyMessageID
-				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error(`[SEND REPLY]: ${error}`)))?.edit(content, options) ?? channel.send(content, options))
+				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error('[_SEND REPLY]', error)))?.edit(content, options) ?? channel.send(content, options))
 				: channel.send(content, options));
 
 			if (options.saveReplyMessageID) {
@@ -397,7 +397,7 @@ class LunarMessage extends Message {
 		if (IDsToDelete?.length && replyData.channelID) {
 			this.client.channels.cache.get(replyData.channelID)
 				?.deleteMessages(IDsToDelete)
-				.catch(error => logger.error(`[SEND REPLY]: IDs: ${IDsToDelete.map(x => `'${x}'`).join(', ')}: ${error}`));
+				.catch(error => logger.error(`[_SEND REPLY]: IDs: ${IDsToDelete.map(x => `'${x}'`).join(', ')}`, error));
 		}
 
 		return message;

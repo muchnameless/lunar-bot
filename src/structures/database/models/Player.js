@@ -238,7 +238,13 @@ module.exports = class Player extends Model {
 	 * @returns {?import('./HypixelGuild')}
 	 */
 	get guild() {
-		return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
+		switch (this.guildID) {
+			case GUILD_ID_BRIDGER:
+				return this.client.hypixelGuilds.mainGuild;
+
+			default:
+				return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
+		}
 	}
 
 	/**
@@ -262,7 +268,7 @@ module.exports = class Player extends Model {
 			} catch (error) {
 				this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
 				this.save();
-				logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error}`);
+				logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}`, error);
 				return this._discordMember = null;
 			}
 		})();
@@ -545,11 +551,9 @@ module.exports = class Player extends Model {
 
 			await this.save();
 		} catch (error) {
-			if (error instanceof NonAPIError) return logger.warn(`[UPDATE XP]: ${this.logInfo}: ${error}`);
-			if (error.name.startsWith('Sequelize')) return logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
-			if (error instanceof TypeError || error instanceof RangeError) return logger.error(`[UPDATE XP]: ${this.logInfo}:`, error);
+			if (error instanceof NonAPIError || error.name.startsWith('Sequelize') || error instanceof TypeError || error instanceof RangeError) return logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
 
-			logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
+			logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
 			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
 			if (rejectOnAPIError) throw error;
 		}
@@ -874,7 +878,7 @@ module.exports = class Player extends Model {
 		} catch (error) {
 			// was not successful
 			this.discordMember = null;
-			logger.error(`[ROLE API CALL]: ${error}`);
+			logger.error('[ROLE API CALL]', error);
 			loggingEmbed
 				.setColor(config.get('EMBED_RED'))
 				.addField(error.name, error.message);
@@ -1016,13 +1020,13 @@ module.exports = class Player extends Model {
 						`,
 					).then(
 						() => logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`),
-						error => logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: unable to DM: ${error}`),
+						error => logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: unable to DM`, error),
 					);
 			}
 
 			return true;
 		} catch (error) {
-			logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: ${error}`);
+			logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}`, error);
 			this.discordMember = null;
 			return false;
 		}
@@ -1032,7 +1036,7 @@ module.exports = class Player extends Model {
 	 * fetches the discord tag from hypixel
 	 */
 	async fetchDiscordTag() {
-		return (await hypixel.player.uuid(this.minecraftUUID).catch(error => logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))?.socialMedia?.links?.DISCORD ?? null;
+		return (await hypixel.player.uuid(this.minecraftUUID).catch(error => logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}`, error)))?.socialMedia?.links?.DISCORD ?? null;
 	}
 
 	/**
@@ -1088,7 +1092,7 @@ module.exports = class Player extends Model {
 				await this.save();
 			} catch (error) {
 				this.ign = OLD_IGN;
-				return logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`);
+				return logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
 			}
 
 			this.syncIgnWithDisplayName(false);
@@ -1098,7 +1102,7 @@ module.exports = class Player extends Model {
 				newIgn: CURRENT_IGN,
 			};
 		} catch (error) {
-			logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`);
+			logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
 		}
 	}
 

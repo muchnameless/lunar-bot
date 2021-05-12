@@ -153,13 +153,13 @@ module.exports = class ChatBridgeArray extends Array {
 			if (result.every(([ minecraft, discord ]) => minecraft && (Array.isArray(discord) ? discord.length : discord))) {
 				if (message.reactions.cache.get(X_EMOJI)?.me) {
 					message.reactions.cache.get(X_EMOJI).users.remove(this.client.user.id)
-						.catch(error => `[HANDLE ANNOUNCEMENT MSG]: ${error}`);
+						.catch(error => logger.error('[HANDLE ANNOUNCEMENT MSG]', error));
 				}
 			} else {
 				message.react(X_EMOJI);
 			}
 		} catch (error) {
-			logger.error(`[HANDLE ANNOUNCEMENT MSG]: ${error}`);
+			logger.error('[HANDLE ANNOUNCEMENT MSG]', error);
 			message.react(X_EMOJI);
 		}
 	}

@@ -100,7 +100,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 				return JSON.parse(result).server ?? null;
 			} catch (error) {
-				logger.error(`[GET SERVER]: ${error}`);
+				logger.error('[GET SERVER]', error);
 				return null;
 			}
 		})();
@@ -178,7 +178,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}: ${error}`);
+			logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}`, error);
 		}
 	}
 
@@ -476,7 +476,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				`)
 				.then(
 					() => logger.info(`[CHAT BRIDGE CHAT]: DMed ${discordMessage.author.tag}`),
-					error => logger.error(`[CHAT BRIDGE CHAT]: error DMing ${discordMessage.author.tag}: ${error}`),
+					error => logger.error(`[CHAT BRIDGE CHAT]: error DMing ${discordMessage.author.tag}`, error),
 				);
 		}
 
@@ -520,14 +520,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		try {
 			return await this._sendToChat(content, options);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
+			logger.error('[CHATBRIDGE MC CHAT]', error);
 		} finally {
 			this.queue.shift();
 		}
 	}
 
 	/**
-	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat'
+	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat' or 'command'
 	 * @private
 	 * @param {string} content
 	 * @param {SendToChatOptions} options
@@ -544,7 +544,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				: `${prefix}${content}`,
 			);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE _CHAT]: ${error}`);
+			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
 			discordMessage?.react(X_EMOJI);
 			this._tempIncrementCounter();
 			this._resetFilter();
@@ -684,7 +684,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			try {
 				await this._sendToChat(trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1));
 			} catch (error) {
-				logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
+				logger.error('[CHATBRIDGE MC CHAT]', error);
 			} finally {
 				this.queue.shift();
 			}

@@ -150,7 +150,7 @@ module.exports = class LunarClient extends Client {
 				const owner = await this.owner;
 				return `${owner.tag} ${owner}`;
 			} catch (error) {
-				logger.error(`[OWNER INFO]: ${error}`);
+				logger.error('[OWNER INFO]', error);
 				return `<@${this.ownerID}>`;
 			}
 		})();

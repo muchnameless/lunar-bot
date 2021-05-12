@@ -126,7 +126,7 @@ module.exports = class DatabaseManager {
 		let unknownPlayers = 0;
 
 		// update db
-		await safePromiseAll(taxCollectors.activeCollectors.map(async (taxCollector) => {
+		await Promise.all(taxCollectors.activeCollectors.map(async (taxCollector) => {
 			try {
 				const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID);
 				const taxAuctions = [];
@@ -171,7 +171,7 @@ module.exports = class DatabaseManager {
 					value: `\`\`\`\n${paidLog.join('\n')}\`\`\`` },
 				);
 			} catch (error) {
-				logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
+				logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}`, error);
 				availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: API Error`);
 			}
 		}));
@@ -288,10 +288,10 @@ module.exports = class DatabaseManager {
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
 
-		let taxMessage = await taxChannel.messages.fetch(config.get('TAX_MESSAGE_ID')).catch(error => logger.error(`[TAX MESSAGE]: ${error}`));
+		let taxMessage = await taxChannel.messages.fetch(config.get('TAX_MESSAGE_ID')).catch(error => logger.error('[TAX MESSAGE]', error));
 
 		if (!taxMessage || taxMessage.deleted) { // taxMessage deleted
-			taxMessage = await taxChannel.send(taxEmbed).catch(error => logger.error(`[TAX MESSAGE]: ${error}`));
+			taxMessage = await taxChannel.send(taxEmbed).catch(error => logger.error('[TAX MESSAGE]', error));
 
 			if (!taxMessage) return; // failed to retreive old and send new taxMessage
 
@@ -304,7 +304,7 @@ module.exports = class DatabaseManager {
 			await taxMessage.edit(taxMessage.content, taxEmbed);
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 		} catch (error) {
-			logger.error(`[TAX MESSAGE]: ${error}`);
+			logger.error('[TAX MESSAGE]', error);
 		}
 	}
 };

@@ -45,12 +45,12 @@ module.exports = class VerifyCommand extends Command {
 			if (player?.minecraftUUID === playerLinkedToID?.minecraftUUID) return message.reply('you are already linked with this discord account.');
 
 			const ERROR_STRING = 'Try again in a few minutes if you believe this is an error.';
-			const { uuid, ign = IGN_INPUT } = await mojang.ign(IGN_INPUT).catch(error => logger.error(`[VERIFY]: ign fetch: ${error}`) ?? {});
+			const { uuid, ign = IGN_INPUT } = await mojang.ign(IGN_INPUT).catch(error => logger.error('[VERIFY]: ign fetch', error) ?? {});
 
 			// non existing ign
 			if (!uuid) return message.reply(`unable to find the minecraft UUID of \`${ign}\`. ${ERROR_STRING}`);
 
-			const hypixelGuild = await hypixel.guild.player(uuid).catch(error => logger.error(`[VERIFY]: guild fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
+			const hypixelGuild = await hypixel.guild.player(uuid).catch(error => logger.error('[VERIFY]: guild fetch', error));
 
 			// not in a guild
 			if (!hypixelGuild) return message.reply(`unable to find the hypixel guild of \`${ign}\`. ${ERROR_STRING}`);
@@ -62,7 +62,7 @@ module.exports = class VerifyCommand extends Command {
 				according to the hypixel API, \`${ign}\` is not in ${hypixelGuilds.cache.map(({ name }) => name)}. ${ERROR_STRING}
 			`);
 
-			const hypixelPlayer = await hypixel.player.uuid(uuid).catch(error => logger.error(`[VERIFY]: player fetch: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`));
+			const hypixelPlayer = await hypixel.player.uuid(uuid).catch(error => logger.error('[VERIFY]: player fetch', error));
 
 			// hypixel player api error
 			if (!hypixelPlayer) return message.reply(`unable to find \`${ign}\` on hypixel. ${ERROR_STRING}`);
@@ -99,13 +99,13 @@ module.exports = class VerifyCommand extends Command {
 					defaults: { ign },
 				});
 			} catch (error) {
-				logger.error(`[VERIFY]: database: ${error}`);
+				logger.error('[VERIFY]: database', error);
 				return message.reply(`an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
 			}
 
 			player.guildID = GUILD_ID;
 
-			const discordMember = message.member ?? await this.client.lgGuild?.members.fetch(message.author.id).catch(error => logger.error(`[VERIFY]: guild member fetch: ${error}`)) ?? null;
+			const discordMember = message.member ?? await this.client.lgGuild?.members.fetch(message.author.id).catch(error => logger.error('[VERIFY]: guild member fetch', error)) ?? null;
 
 			await player.link(discordMember ?? message.author.id, 'verified with the bot');
 

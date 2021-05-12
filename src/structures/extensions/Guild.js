@@ -43,8 +43,8 @@ class LunarGuild extends Guild {
 
 		if (discordMember) return discordMember;
 
-		const fetched = await this.members.search({ query: tagInput.split('#')[0], limit: 10 }).catch(error => logger.error(`[UPDATE GUILD PLAYERS]: ${error}`));
-		// const fetched = await this.members.fetch({ query: tagInput.split('#')[0] }).catch(error => logger.error(`[UPDATE GUILD PLAYERS]: ${error}`));
+		const fetched = await this.members.search({ query: tagInput.split('#')[0], limit: 10 }).catch(error => logger.error('[UPDATE GUILD PLAYERS]', error));
+		// const fetched = await this.members.fetch({ query: tagInput.split('#')[0] }).catch(error => logger.error(`[UPDATE GUILD PLAYERS]`, error));
 
 		return fetched?.find(({ user: { tag } }) => tag === tagInput) ?? null;
 	}

@@ -128,7 +128,7 @@ module.exports = class EvalCommand extends Command {
 				.setTimestamp(),
 			);
 		} catch (error) {
-			logger.error(`[EVAL ERROR]: ${error?.name}: ${error?.message}`);
+			logger.error('[EVAL ERROR]', error);
 
 			const FOOTER = `d.js ${Discord.version} • type: \`${typeof error}\``;
 

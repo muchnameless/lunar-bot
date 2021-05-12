@@ -18,6 +18,6 @@ module.exports = async (client, message) => {
 
 		logger.info(`[REPLY MESSAGE DELETE]: ${message.logInfo}: ${message.content}`);
 	} catch (error) {
-		logger.error(`[REPLY MESSAGE DELETE]: ${error}`);
+		logger.error('[REPLY MESSAGE DELETE]', error);
 	}
 };

@@ -74,7 +74,7 @@ const log = (...input) => {
  * @returns {null}
  */
 const error = (...input) => {
-	for (const i of input) logger.error(util.format(i));
+	for (const i of input) logger.error(i?.stack && !(i instanceof TypeError || i instanceof RangeError) ? util.format(`${i}`) : util.format(i));
 	return null;
 };
 

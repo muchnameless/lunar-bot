@@ -46,7 +46,7 @@ module.exports = class HypixelMessageAuthor {
 
 			this.member = await this.player?.discordMember;
 		} catch (error) {
-			logger.error(`[AUTHOR PLAYER]: ${error}`);
+			logger.error('[AUTHOR PLAYER]', error);
 		}
 	}
 

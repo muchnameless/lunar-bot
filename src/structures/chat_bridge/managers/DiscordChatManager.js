@@ -7,6 +7,7 @@ const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
 const { urlToImgurLink } = require('../../../functions/imgur');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
+const cache = require('../../../api/cache');
 const logger = require('../../../functions/logger');
 
 
@@ -63,6 +64,26 @@ module.exports = class DiscordChatManager extends ChatManager {
 	}
 
 	/**
+	 * DMs the message author with the content if they have not been DMed in the last 15 min
+	 * @param {import('../../extensions/Message')} message
+	 * @param {import('../../database/models/Player')} player
+	 * @param {string} content
+	 */
+	static async _dmMuteInfo(message, player, content) {
+		if (message.me) return;
+		if (await cache.get(`chatbridge:mute:dm:${message.author.id}`)) return;
+
+		try {
+			await message.author.send(content);
+			logger.info(`[DM MUTE INFO]: ${player?.logInfo ?? ''}: DMed muted user`);
+		} catch (error) {
+			logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? ''}: error DMing muted user`, error);
+		}
+
+		cache.set(`chatbridge:mute:dm:${message.author.id}`, true, 15 * 60_000);
+	}
+
+	/**
 	 * chat bridge channel
 	 * @type {import('../../extensions/TextChannel')}
 	 */
@@ -81,13 +102,13 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * initialize the discord chat manager
 	 */
 	async init() {
-		return this.fetchOrCreateWebhook();
+		return this._fetchOrCreateWebhook();
 	}
 
 	/**
 	 * fetches or creates the webhook for the channel
 	 */
-	async fetchOrCreateWebhook() {
+	async _fetchOrCreateWebhook() {
 		if (this.webhook) return this.ready = true;
 
 		this.ready = false;
@@ -140,7 +161,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	/**
 	 * uncaches the webhook
 	 */
-	uncacheWebhook() {
+	_uncacheWebhook() {
 		this.webhook = null;
 		this.ready = false;
 
@@ -162,11 +183,11 @@ module.exports = class DiscordChatManager extends ChatManager {
 		try {
 			return await this.webhook.send(this.chatBridge.discord.parseContent(content), options);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: ${error}`);
+			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}`, error);
 
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
-				this.uncacheWebhook();
-				this.fetchOrCreateWebhook();
+				this._uncacheWebhook();
+				this._fetchOrCreateWebhook();
 			}
 
 			throw error;
@@ -208,31 +229,19 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		// check if player is muted
 		if (player?.muted) {
-			if (!message.me) message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
-				() => logger.info(`[FORWARD DC TO MC]: ${player.logInfo}: DMed muted user`),
-				error => logger.error(`[FORWARD DC TO MC]: ${player.logInfo}: error DMing muted user: ${error}`),
-			);
-
+			DiscordChatManager._dmMuteInfo(message, player, `you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`);
 			return message.react(MUTED);
 		}
 
 		// check if guild chat is muted
 		if (this.guild.muted && !player?.isStaff) {
-			if (!message.me) message.author.send(`${this.guild.name}'s guild chat is currently muted for ${ms(this.guild.chatMutedUntil - Date.now(), { long: true })}`).then(
-				() => logger.info(`[FORWARD DC TO MC]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
-				error => logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error}`),
-			);
-
+			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat is currently muted for ${ms(this.guild.chatMutedUntil - Date.now(), { long: true })}`);
 			return message.react(MUTED);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.bot.player?.muted) {
-			if (!message.me) message.author.send(`the bot is currently muted for ${ms(this.minecraft.bot.player?.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
-				() => logger.info(`[FORWARD DC TO MC]: ${player?.logInfo}: DMed bot muted`),
-				error => logger.error(`[FORWARD DC TO MC]: ${player?.logInfo}: error DMing bot muted: ${error}`),
-			);
-
+			DiscordChatManager._dmMuteInfo(message, player, `the bot is currently muted for ${ms(this.minecraft.bot.player?.chatBridgeMutedUntil - Date.now(), { long: true })}`);
 			return message.react(MUTED);
 		}
 
@@ -245,7 +254,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 							const referencedMessage = await message.fetchReference();
 							return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
 						} catch (error) {
-							logger.error(`[FORWARD DC TO MC]: error fetching reference: ${error}`);
+							logger.error('[FORWARD DC TO MC]: error fetching reference', error);
 							return null;
 						}
 					})()

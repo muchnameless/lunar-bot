@@ -30,7 +30,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 					await Promise.all(replyData.messageID.map(async (id) => {
 						const oldReply = await oldReplyChannel.messages.fetch(id);
 						newReplies.push(await newMessage.channel.send(oldReply.content, { embed: oldReply.embeds.length ? new MessageEmbed(oldReply.embeds[0]) : null }));
-						oldReply.delete().catch(error => logger.error(`[MESSAGE UPDATE]: ${error}`));
+						oldReply.delete().catch(error => logger.error('[MESSAGE UPDATE]', error));
 					}));
 
 					newMessage.replyData = {
@@ -44,7 +44,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 				const oldReply = await client.channels.cache.get(replyData.channelID).messages.fetch(replyData.messageID);
 				const newReply = await newMessage.channel.send(oldReply.content, { embed: oldReply.embeds.length ? new MessageEmbed(oldReply.embeds[0]) : null });
 
-				oldReply.delete().catch(error => logger.error(`[MESSAGE UPDATE]: ${error}`));
+				oldReply.delete().catch(error => logger.error('[MESSAGE UPDATE]', error));
 
 				newMessage.replyData = {
 					channelID: newReply.channel.id,
@@ -56,7 +56,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 
 				return; // moved reply message(s) to newMessage's channel -> don't call commandHandler
 			} catch (error) {
-				logger.error(`[MESSAGE UPDATE]: ${error}`);
+				logger.error('[MESSAGE UPDATE]', error);
 				cache.delete(`${REPLY_KEY}:${newMessage.guild?.id ?? DM_KEY}:${newMessage.channel.id}:${newMessage.id}`);
 			}
 		}

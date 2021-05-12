@@ -135,31 +135,32 @@ module.exports = class TaxResetCommand extends Command {
 		}
 
 		// logging
-		this.client
-			.log(
-				currentTaxEmbed,
-				currentTaxCollectedEmbed,
-				new MessageEmbed()
-					.setColor(this.config.get('EMBED_BLUE'))
-					.setTitle('Guild Tax')
-					.setDescription(`${message.author.tag} | ${message.author} ${result}`)
-					.setTimestamp(),
-			)
-			.then(async (logMessage) => {
+		(async () => {
+			try {
+				const logMessage = await this.client.log(
+					currentTaxEmbed,
+					currentTaxCollectedEmbed,
+					new MessageEmbed()
+						.setColor(this.config.get('EMBED_BLUE'))
+						.setTitle('Guild Tax')
+						.setDescription(`${message.author.tag} | ${message.author} ${result}`)
+						.setTimestamp(),
+				);
+
 				if (!currentTaxEmbed) return;
 				if (!logMessage.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) return;
 
-				const pinnedMessages = await logMessage.channel.messages.fetchPinned().catch(logger.error);
-				if (pinnedMessages?.size >= 50) await pinnedMessages.last()
-					.unpin({ reason: 'reached max pin amount' })
-					.then(
-						() => logger.info('[TAX RESET]: unpinned old tax embed'),
-						error => logger.error(`[TAX RESET]: error unpinning old tax embed: ${error}`),
-					);
+				const pinnedMessages = await logMessage.channel.messages.fetchPinned();
 
-				logMessage.pin({ reason: '#sheet-logs' }).catch(logger.error);
-			})
-			.catch(logger.error);
+				if (pinnedMessages.size >= 50) await pinnedMessages.last().unpin({ reason: 'reached max pin amount' });
+
+				logger.info('[TAX RESET]: unpinned old tax embed');
+
+				await logMessage.pin({ reason: '#sheet-logs' });
+			} catch (error) {
+				logger.error('[TAX RESET]: logging', error);
+			}
+		})();
 
 		message.reply(`${result}.`);
 	}

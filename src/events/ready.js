@@ -45,7 +45,7 @@ module.exports = async (client) => {
 
 			if (client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[SET PRESENCE]: activity set to ${presence.activities[0].name}`);
 		} catch (error) {
-			logger.error(`[SET PRESENCE]: error while setting presence: ${error}`);
+			logger.error('[SET PRESENCE]: error while setting presence', error);
 		}
 	}, 20 * 60_000); // 20 min
 
@@ -87,7 +87,7 @@ module.exports = async (client) => {
 					logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
 				}
 			} catch (error) {
-				logger.error(`[GUILD STATS CHANNEL UPDATE]: ${error}`);
+				logger.error('[GUILD STATS CHANNEL UPDATE]', error);
 			}
 		},
 		start: true,
