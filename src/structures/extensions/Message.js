@@ -270,7 +270,7 @@ class LunarMessage extends Message {
 				return null;
 			}
 
-			this.client.chatBridges.handleDiscordMessage(this, { checkifNotFromBot: false });
+			if (content.length) this.client.chatBridges.handleDiscordMessage(this, { checkifNotFromBot: false });
 
 			// send reply
 			const message = await this._sendReply(
