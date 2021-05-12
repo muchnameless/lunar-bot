@@ -63,7 +63,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 					},
 				);
 
-				newReply.react(...oldReply.reactions.cache.filter(({ me }) => me).map(({ emoji }) => emoji));
+				newReply.react(...oldReply.reactions.cache.filter(({ me }) => me).map(({ emoji }) => emoji.identifier));
 				oldReply.delete().catch(error => logger.error('[MESSAGE UPDATE]', error));
 
 				newMessage.replyData = {
@@ -72,7 +72,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 				};
 
 				client.chatBridges.handleDiscordMessage(newMessage, { checkifNotFromBot: false });
-				client.chatBridges.handleDiscordMessage(newReply, { checkifNotFromBot: false });
+				if (newReply.content.length) client.chatBridges.handleDiscordMessage(newReply, { checkifNotFromBot: false });
 
 				return; // moved reply message(s) to newMessage's channel -> don't call commandHandler
 			} catch (error) {
