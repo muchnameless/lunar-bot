@@ -291,18 +291,16 @@ module.exports = class SetRankCommand extends SlashCommand {
 	 * @param {import('discord.js').CommandInteractionOption[]} options
 	 * @param {string} command
 	 * @param {RegExp} [responseRegExp]
-	 * @param {?import('../structures/database/models/HypixelGuild')} [hypixelGuildInput]
+	 * @param {?import('../structures/database/models/HypixelGuild')} [hypixelGuildOverwrite]
 	 */
-	async _run(interaction, options, command, responseRegExp, hypixelGuildInput) {
-		await interaction.defer();
-
-		const hypixelGuildArgInput = options?.find(({ name }) => name === 'guild')?.value;
+	async _run(interaction, options, command, responseRegExp, hypixelGuildOverwrite) {
+		const hypixelGuildInput = options?.find(({ name }) => name === 'guild')?.value;
 		/**
 		 * @type {import('../structures/database/models/HypixelGuild')}
 		 */
-		const hypixelGuild = hypixelGuildInput ?? (hypixelGuildArgInput
+		const hypixelGuild = hypixelGuildOverwrite ?? (hypixelGuildInput
 			? (() => {
-				const { value, similarity } = this.client.hypixelGuilds.autocorrectToGuild(hypixelGuildArgInput);
+				const { value, similarity } = this.client.hypixelGuilds.autocorrectToGuild(hypixelGuildInput);
 
 				if (similarity <= this.config.get('AUTOCORRECT_THRESHOLD')) return null;
 
@@ -310,7 +308,9 @@ module.exports = class SetRankCommand extends SlashCommand {
 			})()
 			: interaction.user.player?.guild);
 
-		if (!hypixelGuild) return interaction.editReply(`unable to find ${hypixelGuildInput ? `a guild called \`${hypixelGuildInput}\`` : 'your guild'}`);
+		if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+
+		await interaction.defer();
 
 		const response = await hypixelGuild.chatBridge.minecraft.command({
 			command,
@@ -332,8 +332,6 @@ module.exports = class SetRankCommand extends SlashCommand {
 	 * @param {string} command
 	 */
 	async _runList(interaction, options, command) {
-		await interaction.defer();
-
 		const hypixelGuildInput = options?.find(({ name }) => name === 'guild')?.value;
 		/**
 		 * @type {import('../structures/database/models/HypixelGuild')}
@@ -348,7 +346,9 @@ module.exports = class SetRankCommand extends SlashCommand {
 			})()
 			: interaction.user.player?.guild;
 
-		if (!hypixelGuild) return interaction.editReply(`unable to find ${hypixelGuildInput ? `a guild called \`${hypixelGuildInput}\`` : 'your guild'}`);
+		if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+
+		await interaction.defer();
 
 		const response = await hypixelGuild.chatBridge.minecraft.command({
 			command,
