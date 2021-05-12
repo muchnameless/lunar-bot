@@ -239,18 +239,18 @@ module.exports = class HypixelMessage extends ChatMessage {
 					},
 				);
 
-				const message = await this.discordMessage;
+				const discordMessage = await this.discordMessage;
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
-				if (/<@&\d{17,19}>/.test(message.content)) {
+				if (/<@&\d{17,19}>/.test(discordMessage.content)) {
 					this.author.send('you do not have permission to @ roles from in game chat');
-					message.react(NO_BELL);
-				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(message.content))) {
+					discordMessage.react(NO_BELL);
+				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content))) {
 					this.author.send('you do not have permission to @ users from in game chat');
-					message.react(NO_BELL);
+					discordMessage.react(NO_BELL);
 				}
 
-				return message;
+				return discordMessage;
 			}
 
 			this.discordMessage = discordChatManager.sendViaBot(
