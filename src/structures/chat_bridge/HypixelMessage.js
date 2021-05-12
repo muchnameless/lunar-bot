@@ -214,9 +214,13 @@ module.exports = class HypixelMessage extends ChatMessage {
 	async forwardToDiscord() {
 		try {
 			if (this.author) {
+				const discordChatManager = this.chatBridge.discord.get(this.type);
+
+				if (!discordChatManager) return null;
+
 				const { player, member } = this;
 
-				this.discordMessage = this.chatBridge.discord.get(this.type)?.sendViaWebhook(
+				this.discordMessage = discordChatManager.sendViaWebhook(
 					this.content,
 					{
 						username: member?.displayName
