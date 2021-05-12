@@ -212,12 +212,12 @@ module.exports = class HypixelMessage extends ChatMessage {
 	 * forwards the message to discord via the chatBridge's webhook, if the guild has the chatBridge enabled
 	 */
 	async forwardToDiscord() {
+		const discordChatManager = this.chatBridge.discord.get(this.type);
+
+		if (!discordChatManager) return null;
+
 		try {
 			if (this.author) {
-				const discordChatManager = this.chatBridge.discord.get(this.type);
-
-				if (!discordChatManager) return null;
-
 				const { player, member } = this;
 
 				this.discordMessage = discordChatManager.sendViaWebhook(
@@ -253,7 +253,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 				return message;
 			}
 
-			this.discordMessage = this.chatBridge.discord.get(this.type)?.sendViaBot(
+			this.discordMessage = discordChatManager.sendViaBot(
 				this.content,
 				{ allowedMentions: { parse: [] } },
 			);
