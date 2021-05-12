@@ -74,11 +74,19 @@ const log = (...input) => {
  * @returns {null}
  */
 const error = (...input) => {
-	for (const i of input) logger.error(
-		i?.stack && !(i instanceof TypeError || i instanceof SyntaxError || i instanceof ReferenceError || i instanceof RangeError)
-			? util.format(`${i}`)
-			: util.format(i),
-	);
+	// stringify certain errors
+	for (const [ index, element ] of input.entries()) {
+		if (element?.stack && !(element instanceof TypeError || element instanceof SyntaxError || element instanceof ReferenceError || element instanceof RangeError)) {
+			if (typeof input[index - 1] === 'string') {
+				input[index - 1] += `: ${element}`;
+				input.splice(index, 1);
+			} else {
+				input[index] += `${element}`;
+			}
+		}
+	}
+
+	for (const i of input) logger.error(util.format(i));
 	return null;
 };
 
