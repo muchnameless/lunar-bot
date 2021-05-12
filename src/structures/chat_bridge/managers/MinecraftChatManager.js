@@ -172,13 +172,35 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		try {
 			await discordMessage.author.send(stripIndents`
-				your message (or parts of it) were blocked because you used a banned word or character
+				your message was blocked because you used a banned word or character
 				(the bannned word filter is to comply with hypixel's chat rules)
 			`);
 
 			logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`);
 		} catch (error) {
 			logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}`, error);
+		}
+	}
+
+	/**
+	 * reacts to the message and DMs the author
+	 * @param {import('../extensions/Message')} discordMessage
+	 * @param {number} maxParts
+	 */
+	static async _handleTooManyParts(discordMessage, maxParts) {
+		if (!discordMessage) return;
+
+		discordMessage.react(STOP);
+
+		try {
+			await discordMessage.author.send(stripIndents`
+				you are only allowed to send up to ${maxParts} messages at once
+				(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
+			`);
+
+			logger.info(`[CHAT BRIDGE CHAT]: DMed ${discordMessage.author.tag}`);
+		} catch (error) {
+			logger.error(`[CHAT BRIDGE CHAT]: error DMing ${discordMessage.author.tag}`, error);
 		}
 	}
 
@@ -463,33 +485,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				}),
 		);
 
-		if (!success) MinecraftChatManager._handleBlockedWord(discordMessage);
-
+		if (!success) return (MinecraftChatManager._handleBlockedWord(discordMessage), false);
 		if (!messageParts.size) return false;
-
-		if (messageParts.size > maxParts) {
-			discordMessage?.react(STOP);
-			discordMessage?.author
-				.send(stripIndents`
-					you are only allowed to send up to ${maxParts} messages at once (therefore the bridge skipped ${messageParts.size - maxParts} part${messageParts.size - maxParts !== 1 ? 's' : ''} of your message)
-					(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
-				`)
-				.then(
-					() => logger.info(`[CHAT BRIDGE CHAT]: DMed ${discordMessage.author.tag}`),
-					error => logger.error(`[CHAT BRIDGE CHAT]: error DMing ${discordMessage.author.tag}`, error),
-				);
-		}
-
-		let partCount = 0;
+		if (messageParts.size > maxParts) return (MinecraftChatManager._handleTooManyParts(discordMessage, maxParts), false);
 
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of messageParts) {
-			if (++partCount <= maxParts) { // prevent sending more than 'maxParts' messages
-				await this.sendToChat(part, { prefix, discordMessage, shouldUseSpamByPass: true });
-			} else {
-				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: skipped '${prefix}${part}'`);
-				success = false;
-			}
+			success = await this.sendToChat(part, { prefix, discordMessage, shouldUseSpamByPass: true }) && success;
 		}
 
 		return success;
