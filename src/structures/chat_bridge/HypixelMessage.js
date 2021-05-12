@@ -219,8 +219,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 		try {
 			if (this.author) {
 				const { player, member } = this;
-
-				this.discordMessage = discordChatManager.sendViaWebhook(
+				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook(
 					this.content,
 					{
 						username: member?.displayName
@@ -237,9 +236,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 							parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
 						},
 					},
-				);
-
-				const discordMessage = await this.discordMessage;
+				));
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 				if (/<@&\d{17,19}>/.test(discordMessage.content)) {
@@ -253,12 +250,10 @@ module.exports = class HypixelMessage extends ChatMessage {
 				return discordMessage;
 			}
 
-			this.discordMessage = discordChatManager.sendViaBot(
+			return await (this.discordMessage = discordChatManager.sendViaBot(
 				this.content,
 				{ allowedMentions: { parse: [] } },
-			);
-
-			return await this.discordMessage;
+			));
 		} catch (error) {
 			logger.error('[FORWARD TO DC]', error);
 		}
