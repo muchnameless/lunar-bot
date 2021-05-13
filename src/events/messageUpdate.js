@@ -63,7 +63,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 					},
 				);
 
-				newReply.react(...oldReply.reactions.cache.filter(({ me }) => me).map(({ emoji }) => emoji.identifier));
+				newReply.react(...oldReply.reactions.cache.filter(({ me }) => me).map(({ emoji }) => emoji));
 				oldReply.delete().catch(error => logger.error('[MESSAGE UPDATE]', error));
 
 				newMessage.replyData = {
