@@ -253,6 +253,7 @@ module.exports = class ChatBridge extends EventEmitter {
 		const discordChatManager = this.discord.resolve(type);
 
 		return Promise.all([
+			// minecraft
 			this.minecraft[chatFunctionByType[(discordChatManager?.type ?? type)]]?.(content, { prefix: minecraftPrefix, maxParts, ...options })
 				?? this.minecraft.chat(
 					content,
@@ -262,6 +263,8 @@ module.exports = class ChatBridge extends EventEmitter {
 						...options,
 					},
 				),
+
+			// discord
 			(async () => {
 				let discordMessage;
 
