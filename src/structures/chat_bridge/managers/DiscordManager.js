@@ -28,6 +28,7 @@ module.exports = class DiscordManager {
 	/**
 	 * escapes '*' and '_' if those are neither within an URL nor a code block or inline code
 	 * @param {string} string
+	 * @param {number} [block=0]
 	 */
 	static _escapeNonURL(string, block = 0) {
 		switch (block) {
