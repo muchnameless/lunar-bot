@@ -97,6 +97,9 @@ module.exports = class DiscordManager {
 		return this.get(input);
 	}
 
+	/**
+	 * instantiates the DiscordChatManagers
+	 */
 	async init() {
 		const promises = [];
 
