@@ -56,6 +56,6 @@ module.exports = class HypixelMessageAuthor {
 	 * @param {?import('./ChatBridge').ChatOptions} options
 	 */
 	async send(message, { prefix = '', ...options } = {}) {
-		return this.chatBridge.minecraft.chat(message, { prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`, ...options });
+		return this.chatBridge.minecraft.chat(message, { prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`, maxParts: Infinity, ...options });
 	}
 };
