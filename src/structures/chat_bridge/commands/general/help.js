@@ -23,7 +23,7 @@ module.exports = class BridgeHelpCommand extends HelpCommand {
 				reply.push(`${category}: ${[ ...this.commandCollection.filterByCategory(category).keys() ].join(', ')}`);
 			}
 
-			return message.reply(reply.join('\n'));
+			return message.author.send(reply.join('\n'));
 		}
 
 		const INPUT = args[0].toLowerCase();
@@ -45,14 +45,14 @@ module.exports = class BridgeHelpCommand extends HelpCommand {
 
 			reply.push(`Commands: ${[ ...categoryCommands.keys() ].join(', ')}`);
 
-			return message.reply(reply.join('\n'));
+			return message.author.send(reply.join('\n'));
 		}
 
 
 		// single command help
 		const command = this.commandCollection.getByName(INPUT);
 
-		if (!command) return message.reply(`'${INPUT}' is neither a valid command nor category`);
+		if (!command) return message.author.send(`'${INPUT}' is neither a valid command nor category`);
 
 		const reply = [ `Name: ${command.name}` ];
 
@@ -73,6 +73,6 @@ module.exports = class BridgeHelpCommand extends HelpCommand {
 
 		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
-		message.reply(reply.join('\n'));
+		message.author.send(reply.join('\n'));
 	}
 };
