@@ -3,7 +3,7 @@
 const { EventEmitter } = require('events');
 const { join, basename } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
-const { prefixByType, messageTypes: { GUILD }, chatFunctionByType } = require('./constants/chatBridge');
+const { prefixByType, messageTypes: { GUILD }, chatFunctionByType, randomInvisibleCharacter } = require('./constants/chatBridge');
 const MinecraftChatManager = require('./managers/MinecraftChatManager');
 const logger = require('../../functions/logger');
 const DiscordManager = require('./managers/DiscordManager');
@@ -258,7 +258,7 @@ module.exports = class ChatBridge extends EventEmitter {
 				?? this.minecraft.chat(
 					content,
 					{
-						prefix: `${prefixByType[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : ''}`,
+						prefix: `${discordChatManager?.prefix ?? prefixByType[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : randomInvisibleCharacter()}`,
 						maxParts,
 						...options,
 					},
@@ -269,7 +269,7 @@ module.exports = class ChatBridge extends EventEmitter {
 				let discordMessage;
 
 				try {
-					discordMessage = await hypixelMessage.discordMessage;
+					discordMessage = await hypixelMessage?.discordMessage;
 				} catch {
 					discordMessage = null;
 				}
