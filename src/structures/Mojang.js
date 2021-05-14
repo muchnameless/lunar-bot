@@ -162,8 +162,8 @@ module.exports = class Mojang {
 			// 		}
 			// 	}
 			// }
+			// falls through
 
-			// eslint-disable-next-line no-fallthrough
 			default:
 				if (cache) this.cache?.set(queryType, query, { error: true, res });
 				throw new MojangAPIError(res, queryType, query);
