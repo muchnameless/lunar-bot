@@ -231,6 +231,9 @@ module.exports = class MinecraftChatManager extends ChatManager {
 						(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
 					`;
 					break;
+
+				default:
+					throw new Error('invalid rejection case');
 			}
 
 			await discordMessage.author.send(info);
