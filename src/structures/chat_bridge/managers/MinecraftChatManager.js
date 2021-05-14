@@ -1,6 +1,6 @@
 'use strict';
 
-const { Util: { splitMessage } } = require('discord.js');
+const { Util: { splitMessage }, SnowflakeUtil } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const emojiRegex = require('emoji-regex/es2015')();
@@ -10,11 +10,20 @@ const { memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, invisibleCharacterR
 const { spamMessages } = require('../constants/commandResponses');
 const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
 const { MC_CLIENT_VERSION } = require('../constants/settings');
+const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database');
 const minecraftBot = require('../MinecraftBot');
 const AsyncQueue = require('../../AsyncQueue');
 const MessageCollector = require('../MessageCollector');
 const ChatManager = require('./ChatManager');
+const cache = require('../../../api/cache');
 const logger = require('../../../functions/logger');
+
+/**
+ * @typedef {object} SendToChatOptions
+ * @property {string} [prefix='']
+ * @property {boolean} [shouldUseSpamByPass=false]
+ * @property {?import('../../extensions/Message')} [discordMessage=null]
+ */
 
 
 module.exports = class MinecraftChatManager extends ChatManager {
@@ -163,44 +172,72 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * reacts to the message and DMs the author
-	 * @param {import('../extensions/Message')} discordMessage
+	 * @param {import('../../extensions/Message')} discordMessage
+	 * @param {string} reason
+	 * @param {?Record<string, any>}
 	 */
-	static async _handleBlockedWord(discordMessage) {
+	async _handleForwardRejection(discordMessage, reason, data) {
 		if (!discordMessage) return;
 
 		discordMessage.react(STOP);
 
 		try {
-			await discordMessage.author.send(stripIndents`
-				your message was blocked because you used a banned word or character
-				(the bannned word filter is to comply with hypixel's chat rules)
-			`);
+			let info;
 
-			logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`);
+			switch (reason) {
+				case 'blocked': {
+					const infractions = 1 + (await cache.get(`chatbridge:infractions:${discordMessage.author.id}`).catch(error => logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error)) ?? 0);
+
+					cache.set(`chatbridge:infractions:${discordMessage.author.id}`, infractions, 30 * 60_000);
+
+					if (infractions >= this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+						const player = discordMessage.author.player ?? await this.client.players.model.findOrCreate({
+							where: { discordID: discordMessage.author.id },
+							defaults: {
+								minecraftUUID: SnowflakeUtil.generate(),
+								guildID: GUILD_ID_BRIDGER,
+								ign: UNKNOWN_IGN,
+							},
+						}).catch(error => logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error));
+						const MUTE_DURATION = this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_DURATION') * 60_000;
+
+						if (player) {
+							player.chatBridgeMutedUntil = Date.now() + MUTE_DURATION;
+							player.save();
+						}
+
+						info = stripIndents`
+							you were automatically muted for ${ms(MUTE_DURATION, { long: true })} due to continues infractions
+						`;
+					} else {
+						info = stripIndents`
+							continuing to do so will result in an automatic temporary mute
+						`;
+					}
+				}
+				// fallthrough
+				case 'filterBlocked':
+					info = stripIndents`
+						your message was blocked because you used a blocked word or character
+						(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
+
+						${info ?? ''}
+					`;
+					break;
+
+				case 'messageCount':
+					info = stripIndents`
+						your message was blocked because you are only allowed to send up to ${data?.maxParts ?? this.client.config.getNumber('CHATBRIDGE_DEFAULT_MAX_PARTS')} messages at once
+						(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
+					`;
+					break;
+			}
+
+			await discordMessage.author.send(info);
+
+			logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}`, error);
-		}
-	}
-
-	/**
-	 * reacts to the message and DMs the author
-	 * @param {import('../extensions/Message')} discordMessage
-	 * @param {number} maxParts
-	 */
-	static async _handleTooManyParts(discordMessage, maxParts) {
-		if (!discordMessage) return;
-
-		discordMessage.react(STOP);
-
-		try {
-			await discordMessage.author.send(stripIndents`
-				you are only allowed to send up to ${maxParts} messages at once
-				(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
-			`);
-
-			logger.info(`[CHAT BRIDGE CHAT]: DMed ${discordMessage.author.tag}`);
-		} catch (error) {
-			logger.error(`[CHAT BRIDGE CHAT]: error DMing ${discordMessage.author.tag}`, error);
+			logger.error(`[FORWARD REJECTION]: error DMing ${discordMessage.author.tag}`, error);
 		}
 	}
 
@@ -456,7 +493,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {import('../ChatBridge').ChatOptions} options
 	 * @returns {Promise<boolean>} success - wether all message parts were send
 	 */
-	async chat(content, { prefix = '', maxParts = this.client.config.getNumber('DEFAULT_MAX_PARTS'), discordMessage } = {}) {
+	async chat(content, { prefix = '', maxParts = this.client.config.getNumber('CHATBRIDGE_DEFAULT_MAX_PARTS'), discordMessage } = {}) {
 		let success = true;
 
 		/** @type {Set<string>} */
@@ -485,9 +522,17 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				}),
 		);
 
-		if (!success) return (MinecraftChatManager._handleBlockedWord(discordMessage), false);
+		if (!success) { // messageParts blocked
+			this._handleForwardRejection(discordMessage, 'filterBlocked');
+			return false;
+		}
+
 		if (!messageParts.size) return false;
-		if (messageParts.size > maxParts) return (MinecraftChatManager._handleTooManyParts(discordMessage, maxParts), false);
+
+		if (messageParts.size > maxParts) {
+			this._handleForwardRejection(discordMessage, 'messageCount', { maxParts });
+			return false;
+		}
 
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of messageParts) {
@@ -496,13 +541,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		return success;
 	}
-
-	/**
-	 * @typedef {object} SendToChatOptions
-	 * @property {string} [prefix='']
-	 * @property {boolean} [shouldUseSpamByPass=false]
-	 * @property {?import('../../extensions/Message')} [discordMessage=null]
-	 */
 
 	/**
 	 * queue a message for the ingame chat
@@ -590,7 +628,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			// hypixel filter blocked message
 			case 'blocked': {
-				MinecraftChatManager._handleBlockedWord(discordMessage);
+				this._handleForwardRejection(discordMessage, 'blocked');
 				await sleep(this.delay);
 				return false;
 			}
