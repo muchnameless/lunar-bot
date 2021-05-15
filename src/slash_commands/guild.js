@@ -385,7 +385,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					)
 					.setTimestamp(),
 			],
-			ephemeral: true,
+			ephemeral: false,
 		});
 	}
 
