@@ -5,6 +5,18 @@ const { validateMinecraftIGN, validateMinecraftUUID } = require('../functions/st
 const MojangAPIError = require('./errors/MojangAPIError');
 // const logger = require('../functions/logger');
 
+/**
+ * @typedef MojangResult
+ * @property {string} uuid
+ * @property {string} ign
+ */
+
+/**
+ * @typedef MojangFetchOptions
+ * @property {boolean} [cache=true]
+ * @property {boolean} [force=false]
+ */
+
 
 module.exports = class Mojang {
 	/**
@@ -24,72 +36,71 @@ module.exports = class Mojang {
 	}
 
 	/**
-	 * @typedef MojangResult
-	 * @property {string} uuid
-	 * @property {string} ign
-	 */
-
-	/**
 	 * bulk convertion (1 <= amount  <= 10) for ign -> uuid
 	 * @param {string[]} usernames
 	 * @returns {Promise<MojangResult[]>}
 	 */
-	igns(usernames, { cache = true } = {}) {
-		if (!Array.isArray(usernames)) throw new TypeError('[Mojang Client]: uuids must be an array');
+	async igns(usernames, { cache = true } = {}) {
+		if (!usernames.length || usernames.length > 10) throw new MojangAPIError();
 
-		return (async () => {
-			if (!usernames.length || usernames.length > 10) throw new MojangAPIError();
+		const res = await fetch(
+			'https://api.mojang.com/profiles/minecraft',
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(usernames),
+			},
+		);
 
-			const res = await fetch(
-				'https://api.mojang.com/profiles/minecraft',
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(usernames),
-				},
-			);
+		if (res.status !== 200) {
+			throw new MojangAPIError(res);
+		}
 
-			if (res.status !== 200) {
-				throw new MojangAPIError(res);
+		const parsedRes = await res.json().catch(() => {
+			throw new Error('An error occurred while converting to JSON');
+		});
+
+		const responses = parsedRes.map(({ id, name }) => ({ uuid: id, ign: name }));
+
+		if (cache) {
+			for (const response of responses) {
+				this.cache?.set('ign', response.ign.toLowerCase(), response);
+				this.cache?.set('uuid', response.uuid, response);
 			}
+		}
 
-			const parsedRes = await res.json().catch(() => {
-				throw new Error('An error occurred while converting to JSON');
-			});
-
-			const responses = parsedRes.map(({ id, name }) => ({ uuid: id, ign: name }));
-
-			if (cache) {
-				for (const response of responses) {
-					this.cache?.set('ign', response.ign.toLowerCase(), response);
-					this.cache?.set('uuid', response.uuid, response);
-				}
-			}
-
-			return responses;
-		})();
+		return responses;
 	}
 
 	/**
 	 * query by ign
 	 * @param {string} ign
-	 * @returns {Promise<MojangResult>}
+	 * @param {MojangFetchOptions} [options]
 	 */
-	ign(ign, options = {}) {
-		if (typeof ign !== 'string') throw new TypeError('[Mojang Client]: username must be a string');
-		if (!validateMinecraftIGN(ign)) return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'ign', ign));
-		return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', ign.toLowerCase(), 'ign', options);
+	async ign(ign, options = {}) {
+		if (validateMinecraftIGN(ign)) return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', ign.toLowerCase(), 'ign', options);
+		throw new MojangAPIError({ status: '(validation)' }, 'ign', ign);
 	}
 
 	/**
 	 * query by uuid
 	 * @param {string} uuid
-	 * @returns {Promise<MojangResult>} username
+	 * @param {MojangFetchOptions} [options]
 	 */
-	uuid(uuid, options = {}) {
-		if (typeof uuid !== 'string') throw new TypeError('[Mojang Client]: uuid must be a string');
-		if (!validateMinecraftUUID(uuid)) return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'uuid', uuid));
-		return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
+	async uuid(uuid, options = {}) {
+		if (validateMinecraftUUID(uuid)) return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
+		throw new MojangAPIError({ status: '(validation)' }, 'uuid', uuid);
+	}
+
+	/**
+	 * query by ign or uuid
+	 * @param {string} ignOrUuid
+	 * @param {MojangFetchOptions} [options]
+	 */
+	async ignOrUuid(ignOrUuid, options = {}) {
+		if (validateMinecraftIGN(ignOrUuid)) return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', ignOrUuid.toLowerCase(), 'ign', options);
+		if (validateMinecraftUUID(ignOrUuid)) return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', ignOrUuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
+		throw new MojangAPIError({ status: '(validation)' }, 'ignOrUuid', ignOrUuid);
 	}
 
 	/**
@@ -97,8 +108,8 @@ module.exports = class Mojang {
 	 * @param {string} path
 	 * @param {string} query
 	 * @param {string} queryType
-	 * @param {boolean} [param3.cache]
-	 * @param {boolean} [param3.force]
+	 * @param {MojangFetchOptions} [options]
+	 * @returns {Promise<MojangResult>}
 	 */
 	async _makeRequest(path, query, queryType = null, { cache = true, force = false } = {}) {
 		if (!force) {

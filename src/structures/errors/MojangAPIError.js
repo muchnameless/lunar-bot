@@ -15,15 +15,19 @@ module.exports = class MojangAPIError extends Error {
 
 		switch (queryType) {
 			case 'ign':
-				this.message = `invalid IGN '${input}'`;
+				this.message = `invalid IGN \`${input}\``;
 				break;
 
 			case 'uuid':
-				this.message = `invalid uuid '${input}'`;
+				this.message = `invalid uuid \`${input}\``;
+				break;
+
+			case 'ignOrUuid':
+				this.message = `invalid IGN or uuid \`${input}\``;
 				break;
 
 			default:
-				this.message = `${statusText} '${input}'`;
+				this.message = `${statusText} \`${input}\``;
 				break;
 		}
 	}
