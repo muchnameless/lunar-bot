@@ -47,7 +47,9 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 */
 	static getPlayerName(message) {
 		/** @type {string} */
-		const name = message.author.player?.ign ?? DiscordChatManager.escapeEz(message.member?.displayName ?? message.author.username);
+		const name = message.webhookID
+			? message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.player?.ign ?? DiscordChatManager.escapeEz(message.author.username)
+			: message.author.player?.ign ?? DiscordChatManager.escapeEz(message.member?.displayName ?? message.author.username);
 
 		return blockedWordsRegExp.test(name)
 			? '*blocked*'
