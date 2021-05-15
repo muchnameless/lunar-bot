@@ -38,7 +38,13 @@ module.exports = async (client, interaction) => {
 					const timeLeft = ms(expirationTime - NOW, { long: true });
 
 					logger.info(`[CMD HANDLER]: ${interaction.user.tag}${interaction.guildID ? ` | ${interaction.member.displayName}` : ''} tried to execute '${interaction.commandName}' in ${interaction.guildID ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'} ${timeLeft} before the cooldown expires`);
-					return interaction.reply(`\`${command.name}\` is on cooldown for another \`${timeLeft}\`.`);
+
+					return interaction.reply(
+						`\`${command.name}\` is on cooldown for another \`${timeLeft}\``,
+						{
+							ephemeral: true,
+						},
+					);
 				}
 			}
 
@@ -56,11 +62,26 @@ module.exports = async (client, interaction) => {
 			if (error instanceof MissingPermissionsError) {
 				const requiredRoles = error.requiredRoles.map(roleID => client.lgGuild?.roles.cache.get(roleID) ?? roleID);
 
-				await interaction.safeReply(commaListsOr`missing permissions for \`${error.command}\` (${interaction.guildID === client.config.get('MAIN_GUILD_ID') ? requiredRoles.map(r => `${r}`) : requiredRoles.map(r => r.name ?? r)}): ${error.message}`, { ephemeral: true });
+				await interaction.safeReply(
+					commaListsOr`missing permissions for \`${error.command}\` (${interaction.guildID === client.config.get('MAIN_GUILD_ID') ? requiredRoles.map(r => `${r}`) : requiredRoles.map(r => r.name ?? r)}): ${error.message}`,
+					{
+						ephemeral: true,
+					},
+				);
 			} else if (error instanceof ChatBridgeError) {
-				await interaction.safeReply(`${error}`);
+				await interaction.safeReply(
+					`${error}`,
+					{
+						ephemeral: true,
+					},
+				);
 			} else {
-				await interaction.safeReply(`an error occurred while executing the command: ${error}`);
+				await interaction.safeReply(
+					`an error occurred while executing the command: ${error}`,
+					{
+						ephemeral: true,
+					},
+				);
 			}
 		} catch (err) {
 			logger.error(err);
