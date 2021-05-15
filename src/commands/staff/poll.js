@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar, stringToMS } = require('../../functions/util');
@@ -99,12 +98,10 @@ module.exports = class PollCommand extends Command {
 			const resultString = result.map(({ number, option, votes }) => `#${number}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
 
 			// reply with result
-			discordChannel.send(new MessageEmbed()
-				.setColor(this.client.config.get('EMBED_BLUE'))
+			discordChannel.send(this.client.defaultEmbed
 				.setTitle(question)
 				.setDescription(resultString.join('\n\n'))
-				.setFooter(`Poll by ${ign}`)
-				.setTimestamp(),
+				.setFooter(`Poll by ${ign}`),
 			);
 
 			resultString.unshift(question);

@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, version } = require('discord.js');
+const { version } = require('discord.js');
 const { commaListsOr, stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar } = require('../../functions/util');
@@ -26,7 +26,7 @@ module.exports = class HelpCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const helpEmbed = new MessageEmbed().setColor(this.config.get('EMBED_BLUE'));
+		const helpEmbed = this.client.defaultEmbed;
 
 
 		// default help
@@ -57,8 +57,7 @@ module.exports = class HelpCommand extends Command {
 					
 					Bugs or feature requests: ${await this.client.ownerInfo}
 				`)
-				.setFooter(`discord.js ${version}`)
-				.setTimestamp();
+				.setFooter(`discord.js ${version}`);
 
 			return message.reply(helpEmbed);
 		}
@@ -107,8 +106,7 @@ module.exports = class HelpCommand extends Command {
 				.addField('\u200B\n\u200b', stripIndents`
 					Use \`${this.config.get('PREFIX')}help <command name>\` to get additional information on a specific command.
 					Arguments: \`[required]\` \`<optional>\`
-				`)
-				.setTimestamp();
+				`);
 
 			return message.reply(helpEmbed);
 		}

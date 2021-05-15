@@ -1,7 +1,6 @@
 'use strict';
 
 const { stripIndents } = require('common-tags');
-const { MessageEmbed } = require('discord.js');
 const { EMBED_DESCRIPTION_MAX_CHARS } = require('../../constants/discord');
 const { trim } = require('../../functions/util');
 const hypixel = require('../../api/hypixel');
@@ -32,8 +31,7 @@ module.exports = class StopCommand extends Command {
 		const { uuid, ign: IGN } = await mojang.ignOrUuid(args[0]);
 		const friends = (await hypixel.friends.uuid(uuid)).map(x => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender));
 
-		return message.reply(new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		return message.reply(this.client.defaultEmbed
 			.setTitle(`${IGN}'s friends in the guild`)
 			.setDescription(stripIndents`\`\`\`
 				${trim(
@@ -44,8 +42,7 @@ module.exports = class StopCommand extends Command {
 					EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])
 				)}
 				\`\`\`
-			`)
-			.setTimestamp(),
+			`),
 		);
 	}
 };

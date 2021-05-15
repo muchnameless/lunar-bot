@@ -316,7 +316,7 @@ const self = module.exports = {
 					Page: ${PAGE} / ${PAGES_TOTAL}
 				`,
 			)
-			.setTimestamp(new Date(lastUpdatedAt));
+			.setTimestamp(lastUpdatedAt);
 	},
 
 	/**

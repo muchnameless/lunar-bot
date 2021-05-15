@@ -11,9 +11,7 @@ const { stripIndents } = require('common-tags');
  * @param {import('../structures/extensions/GuildMember')} member
  */
 module.exports = async (client, member) => {
-	const { config } = client;
-
-	if (member.guild.id !== config.get('DISCORD_GUILD_ID')) return;
+	if (member.guild.id !== client.config.get('DISCORD_GUILD_ID')) return;
 
 	// check discord members that left for id in player database
 	const { player } = member;
@@ -24,7 +22,7 @@ module.exports = async (client, member) => {
 	player.save();
 
 	client.log(new MessageEmbed()
-		.setColor(config.get('EMBED_RED'))
+		.setColor(client.config.get('EMBED_RED'))
 		.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
 		.setThumbnail(player.image)
 		.setDescription(stripIndents`

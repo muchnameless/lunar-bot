@@ -992,8 +992,7 @@ module.exports = class Player extends Model {
 							: 'name already taken',
 			);
 
-			await this.client.log(new MessageEmbed()
-				.setColor(this.client.config.get('EMBED_BLUE'))
+			await this.client.log(this.client.defaultEmbed
 				.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
 				.setThumbnail(this.image)
 				.setDescription(stripIndents`
@@ -1003,8 +1002,7 @@ module.exports = class Player extends Model {
 				.addFields(
 					{ name: 'Old nickname', value: `\`\`\`${PREV_NAME}\`\`\``, inline: true },
 					{ name: 'New nickname', value: `\`\`\`${newNick ?? member.user.username}\`\`\``, inline: true },
-				)
-				.setTimestamp(),
+				),
 			);
 
 			if (shouldSendDm) {

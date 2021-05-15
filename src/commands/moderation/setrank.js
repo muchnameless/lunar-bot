@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { setRank: { regExp: setRank } } = require('../../structures/chat_bridge/constants/commandResponses');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -56,11 +55,9 @@ module.exports = class SetRankCommand extends Command {
 				responseRegExp,
 			});
 
-			return message.reply(new MessageEmbed()
-				.setColor(this.config.get('EMBED_BLUE'))
+			return message.reply(this.client.defaultEmbed
 				.setTitle(`/${command}`)
-				.setDescription(`\`\`\`\n${response}\`\`\``)
-				.setTimestamp(),
+				.setDescription(`\`\`\`\n${response}\`\`\``),
 			);
 		} catch (error) {
 			logger.error(`[MODERATION]: '${command}'`, error);

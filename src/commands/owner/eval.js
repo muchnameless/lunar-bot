@@ -80,8 +80,7 @@ module.exports = class EvalCommand extends Command {
 
 		const INPUT = rawArgs.join(' ');
 		const inputArray = splitForEmbedFields(INPUT, 'js');
-		const responseEmbed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		const responseEmbed = this.client.defaultEmbed
 			.setFooter(`${guild ? guild.me.displayName : client.user.username}`, client.user.displayAvatarURL());
 
 		for (const [ index, input ] of inputArray.entries()) {
@@ -124,8 +123,7 @@ module.exports = class EvalCommand extends Command {
 			}
 
 			await message.reply(responseEmbed
-				.addField('\u200b', INFO)
-				.setTimestamp(),
+				.addField('\u200b', INFO),
 			);
 		} catch (error) {
 			logger.error('[EVAL ERROR]', error);
@@ -141,8 +139,7 @@ module.exports = class EvalCommand extends Command {
 			}
 
 			message.reply(responseEmbed
-				.addField('\u200b', FOOTER)
-				.setTimestamp(),
+				.addField('\u200b', FOOTER),
 			);
 		}
 	}

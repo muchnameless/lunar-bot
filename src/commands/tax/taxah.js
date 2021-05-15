@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
 
@@ -86,11 +85,9 @@ module.exports = class TaxAhCommand extends Command {
 				return message.reply('specify wether to `add` or `remove` the tax collector.');
 		}
 
-		this.client.log(new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Tax')
-			.setDescription(log)
-			.setTimestamp(),
+			.setDescription(log),
 		);
 
 		return message.reply(`${log}.`);

@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { removeNumberFormatting } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
@@ -67,11 +66,9 @@ module.exports = class TaxPaidCommand extends Command {
 
 		message.reply(`\`${player.ign}\` manually set to paid with ${AMOUNT === this.config.getNumber('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\`.`);
 
-		this.client.log(new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Tax')
-			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${this.client.formatNumber(AMOUNT)} (manually)\`\`\``)
-			.setTimestamp(),
+			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${this.client.formatNumber(AMOUNT)} (manually)\`\`\``),
 		);
 	}
 };

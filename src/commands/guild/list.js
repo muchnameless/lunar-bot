@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { removeMcFormatting } = require('../../structures/chat_bridge/functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
@@ -36,26 +35,23 @@ module.exports = class GuildListCommand extends Command {
 			raw: true,
 		});
 
-		return message.reply(
-			new MessageEmbed()
-				.setColor(this.config.get('EMBED_BLUE'))
-				.setTitle(`/${command}`)
-				.setDescription(
-					`\`\`\`${
-						data
-							.map(msg => (msg.content.includes('●')
-								? removeMcFormatting(
-									msg.formattedContent
-										.replace(/§r§c ●/g, ' 🔴')
-										.replace(/§r§a ●/g, ' 🟢')
-										.replace(/\[.+?\] /g, ''),
-								)
-								: msg.content),
+		return message.reply(this.client.defaultEmbed
+			.setTitle(`/${command}`)
+			.setDescription(
+				`\`\`\`${
+					data
+						.map(msg => (msg.content.includes('●')
+							? removeMcFormatting(
+								msg.formattedContent
+									.replace(/§r§c ●/g, ' 🔴')
+									.replace(/§r§a ●/g, ' 🟢')
+									.replace(/\[.+?\] /g, ''),
 							)
-							.join('\n')
-					}\`\`\``,
-				)
-				.setTimestamp(),
+							: msg.content),
+						)
+						.join('\n')
+				}\`\`\``,
+			),
 		);
 	}
 

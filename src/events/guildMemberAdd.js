@@ -16,9 +16,6 @@ module.exports = async (client, member) => {
 	if (member.guild.id !== config.get('DISCORD_GUILD_ID')) return;
 
 	// check new discord members for tag in player database and link them if found
-	/**
-	 * @type {import()}
-	 */
 	const player = member.player ?? client.players.getByID(member.user.tag);
 
 	if (!player) return;

@@ -1,6 +1,6 @@
 'use strict';
 
-const { Client, Constants: { Events: { CLIENT_READY } } } = require('discord.js');
+const { Client, MessageEmbed, Constants: { Events: { CLIENT_READY } } } = require('discord.js');
 const { join, basename } = require('path');
 const { getAllJsFiles } = require('../functions/files');
 const DatabaseManager = require('./database/managers/DatabaseManager');
@@ -60,6 +60,16 @@ module.exports = class LunarClient extends Client {
 
 	get taxCollectors() {
 		return this.db.modelManagers.taxCollectors;
+	}
+
+	/**
+	 * default embed, blue border and current timestamp
+	 */
+	get defaultEmbed() {
+		return new MessageEmbed({
+			color: this.config.get('EMBED_BLUE'),
+			timestamp: Date.now(),
+		});
 	}
 
 	/**

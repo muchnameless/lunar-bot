@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, Util } = require('discord.js');
+const { Util } = require('discord.js');
 const { escapeIgn } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
@@ -29,9 +29,7 @@ module.exports = class LinkIssuesCommand extends Command {
 		await lgGuild.members.fetch();
 
 		// discord members with wrong roles
-		const embed = new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
-			.setTimestamp();
+		const embed = this.client.defaultEmbed;
 		const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID');
 		const guildRoleWithoutDbEntry = [];

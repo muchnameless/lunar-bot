@@ -297,11 +297,9 @@ module.exports = class PlayerManager extends ModelManager {
 		 * @param {number} ignChangesAmount
 		 */
 		const createEmbed = (guild, ignChangesAmount) => {
-			const embed = new MessageEmbed()
-				.setColor(this.client.config.get('EMBED_BLUE'))
+			const embed = this.client.defaultEmbed
 				.setTitle(`${typeof guild !== 'string' ? guild : upperCaseFirstChar(guild)} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildID }) => guildID === guild).size}`)
-				.setTimestamp();
+				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildID }) => guildID === guild).size}`);
 
 			embeds.push(embed);
 
@@ -445,11 +443,9 @@ module.exports = class PlayerManager extends ModelManager {
 		config.set('COMPETITION_RUNNING', 'true');
 		config.set('COMPETITION_SCHEDULED', 'false');
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')
-			.setDescription('started')
-			.setTimestamp(),
+			.setDescription('started'),
 		);
 	}
 
@@ -463,11 +459,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('COMPETITION_RUNNING', 'false');
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')
-			.setDescription('ended')
-			.setTimestamp(),
+			.setDescription('ended'),
 		);
 	}
 
@@ -482,11 +476,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('LAST_MAYOR_XP_RESET_TIME', CURRENT_MAYOR_TIME);
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Current Mayor XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.size} guild members`)
-			.setTimestamp(),
+			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 
 		this.client.schedule('mayorXpReset', new CronJob({
@@ -506,11 +498,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Daily XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.size} guild members`)
-			.setTimestamp(),
+			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 
 		this.updateMainProfiles();
@@ -526,11 +516,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Weekly XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.size} guild members`)
-			.setTimestamp(),
+			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 	}
 
@@ -544,11 +532,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Monthly XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.size} guild members`)
-			.setTimestamp(),
+			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 	}
 

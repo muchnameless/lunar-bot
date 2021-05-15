@@ -88,7 +88,7 @@ module.exports = class LogHandler {
 
 	/**
 	 * make sure all elements are instances of MessageEmbed
-	 * @param {MessageEmbed[]} embedsInput
+	 * @param {MessageEmbed[]|string[]} embedsInput
 	 */
 	_prepareEmbeds(embedsInput) {
 		const embeds = embedsInput.filter(x => x != null); // filter out null & undefined
@@ -98,7 +98,7 @@ module.exports = class LogHandler {
 			if (embed instanceof MessageEmbed) continue;
 
 			if (typeof embed === 'string') {
-				embeds[index] = new MessageEmbed({ color: this.client.config.get('EMBED_BLUE'), description: embed });
+				embeds[index] = this.client.defaultEmbed.setDescription(embed);
 				continue;
 			}
 

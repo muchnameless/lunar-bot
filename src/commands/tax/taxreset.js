@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, Permissions } = require('discord.js');
+const { Permissions } = require('discord.js');
 const { safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -140,11 +140,9 @@ module.exports = class TaxResetCommand extends Command {
 				const logMessage = await this.client.log(
 					currentTaxEmbed,
 					currentTaxCollectedEmbed,
-					new MessageEmbed()
-						.setColor(this.config.get('EMBED_BLUE'))
+					this.client.defaultEmbed
 						.setTitle('Guild Tax')
-						.setDescription(`${message.author.tag} | ${message.author} ${result}`)
-						.setTimestamp(),
+						.setDescription(`${message.author.tag} | ${message.author} ${result}`),
 				);
 
 				if (!currentTaxEmbed) return;

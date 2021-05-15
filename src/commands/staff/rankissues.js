@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { EMBED_FIELD_MAX_CHARS } = require('../../constants/discord');
 const { escapeIgn, trim } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
@@ -47,9 +46,7 @@ module.exports = class RankIssuesCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const embed = new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
-			.setTimestamp();
+		const embed = this.client.defaultEmbed;
 
 		let issuesAmount = 0;
 

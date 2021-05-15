@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, Constants } = require('discord.js');
+const { Constants } = require('discord.js');
 const {
 	demote: { regExp: demote },
 	invite: { regExp: invite },
@@ -320,11 +320,9 @@ module.exports = class SetRankCommand extends SlashCommand {
 
 		return interaction.safeReply({
 			embeds: [
-				new MessageEmbed()
-					.setColor(this.config.get('EMBED_BLUE'))
+				this.client.defaultEmbed
 					.setTitle(`/${command}`)
-					.setDescription(`\`\`\`\n${response}\`\`\``)
-					.setTimestamp(),
+					.setDescription(`\`\`\`\n${response}\`\`\``),
 			],
 			ephemeral: false,
 		});
@@ -362,8 +360,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 
 		return interaction.safeReply({
 			embeds: [
-				new MessageEmbed()
-					.setColor(this.config.get('EMBED_BLUE'))
+				this.client.defaultEmbed
 					.setTitle(`/${command}`)
 					.setDescription(
 						`\`\`\`${
@@ -382,8 +379,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 								EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])
 							)
 						}\`\`\``,
-					)
-					.setTimestamp(),
+					),
 			],
 			ephemeral: false,
 		});

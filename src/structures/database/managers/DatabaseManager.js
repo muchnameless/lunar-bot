@@ -2,7 +2,7 @@
 
 const { CronJob: CronJobConstructor } = require('cron');
 const { stripIndents, commaLists } = require('common-tags');
-const { MessageEmbed, Permissions } = require('discord.js');
+const { Permissions } = require('discord.js');
 const _ = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../../../constants/emojiCharacters');
 const { asyncFilter, safePromiseAll } = require('../../../functions/util');
@@ -177,13 +177,16 @@ module.exports = class DatabaseManager {
 		}));
 
 		// logging
-		if (auctionsAmount && (config.getBoolean('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.getNumber('DATABASE_UPDATE_INTERVAL')))) logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);
-		if (taxPaidLog.length) this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
-			.setTitle('Guild Tax')
-			.addFields(...taxPaidLog)
-			.setTimestamp(),
-		);
+		if (auctionsAmount && (config.getBoolean('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.getNumber('DATABASE_UPDATE_INTERVAL')))) {
+			logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);
+		}
+
+		if (taxPaidLog.length) {
+			this.client.log(this.client.defaultEmbed
+				.setTitle('Guild Tax')
+				.addFields(...taxPaidLog),
+			);
+		}
 
 		return availableAuctionsLog
 			.sort((a, b) => a.split(':')[0].toLowerCase().localeCompare(b.split(':')[0].toLowerCase())) // alphabetically
@@ -201,8 +204,7 @@ module.exports = class DatabaseManager {
 		const PLAYER_COUNT = playersInGuild.size;
 		const PAID_COUNT = playersInGuild.filter(({ paid }) => paid).size;
 		const TOTAL_COINS = taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0);
-		const taxEmbed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		const taxEmbed = this.client.defaultEmbed
 			.setTitle('Guild Tax')
 			.setDescription(stripIndents(commaLists`
 				\`\`\`cs
@@ -214,8 +216,7 @@ module.exports = class DatabaseManager {
 				${availableAuctionsLog?.join('\n') ?? '\u200b -'}
 				\`\`\`
 			`))
-			.setFooter('Last updated at')
-			.setTimestamp();
+			.setFooter('Last updated at');
 
 		// add guild specific fields
 		for (const hypixelGuild of hypixelGuilds.cache.values()) {

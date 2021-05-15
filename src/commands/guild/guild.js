@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { autocorrect } = require('../../functions/util');
 const commandHandler = require('../../functions/commandHandler');
 const Command = require('../../structures/commands/Command');
@@ -38,11 +37,9 @@ module.exports = class GuildCommand extends Command {
 			command,
 		});
 
-		return message.reply(new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		return message.reply(this.client.defaultEmbed
 			.setTitle(`/${command}`)
-			.setDescription(`\`\`\`\n${data}\`\`\``)
-			.setTimestamp(),
+			.setDescription(`\`\`\`\n${data}\`\`\``),
 		);
 	}
 

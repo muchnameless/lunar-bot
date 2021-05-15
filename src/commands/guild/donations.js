@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/commands/Command');
 const mojang = require('../../api/mojang');
@@ -42,10 +41,7 @@ module.exports = class DonationsCommand extends Command {
 		}
 
 		// transform and prettify data
-		const embed = new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
-			.setTitle('Guild Donations')
-			.setTimestamp();
+		const embed = this.client.defaultEmbed.setTitle('Guild Donations');
 		let totalAmount = 0;
 
 		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([ , a ], [ , b ]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
