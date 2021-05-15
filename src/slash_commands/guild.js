@@ -394,7 +394,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		// await interaction.defer(true);
+		await interaction.defer();
 
 		const [{ name, options }] = interaction.options;
 
@@ -509,10 +509,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target.chatBridgeMutedUntil = EXPIRES_AT;
 					await target.save();
 
-					if (target.notInGuild) {
-						// await interaction.editReply('success');
-						return interaction.safeReply(`muted \`${target}\` for \`${DURATION_INPUT}\``, { ephemeral: false });
-					}
+					if (target.notInGuild) return interaction.safeReply(`muted \`${target}\` for \`${DURATION_INPUT}\``, { ephemeral: false });
 				} else if (target === 'everyone') {
 					hypixelGuild.chatMutedUntil = EXPIRES_AT;
 					await hypixelGuild.save();
@@ -585,10 +582,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target.chatBridgeMutedUntil = 0;
 					await target.save();
 
-					if (target.notInGuild) {
-						// await interaction.editReply('success');
-						return interaction.safeReply(`unmuted \`${target}\``, { ephemeral: false });
-					}
+					if (target.notInGuild) return interaction.safeReply(`unmuted \`${target}\``, { ephemeral: false });
 				} else if (target === 'everyone') {
 					hypixelGuild.chatMutedUntil = 0;
 					await hypixelGuild.save();
