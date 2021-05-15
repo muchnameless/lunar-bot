@@ -3,7 +3,7 @@
 const { DiscordAPIError, Constants } = require('discord.js');
 const { stripIndents, oneLineCommaListsOr } = require('common-tags');
 const { UNKNOWN_IGN } = require('../../constants/database');
-const { validateDiscordTag, validateNumber, validateMinecraftUUID } = require('../../functions/stringValidators');
+const { validateDiscordTag, validateNumber } = require('../../functions/stringValidators');
 const hypixel = require('../../api/hypixel');
 const mojang = require('../../api/mojang');
 const Command = require('../../structures/commands/Command');
@@ -33,15 +33,25 @@ module.exports = class LinkCommand extends Command {
 			message.channel.startTyping();
 
 			const { players } = this.client;
-			const uuidInput = (await Promise.all(
-				[
-					...args.filter(validateMinecraftUUID),
-					...(await Promise.all(args.map(async arg => mojang.ign(arg).catch(error => logger.error('[LINK]', error))))).flatMap(x => (x != null ? x.uuid : [])),
-				].map(async minecraftUUID => ({
-					minecraftUUID,
-					guildID: (await hypixel.guild.player(minecraftUUID).catch(error => logger.error('[LINK]: guild fetch', error)))?._id,
-				})),
-			)).filter(({ guildID }) => this.client.hypixelGuilds.cache.keyArray().includes(guildID));
+			/** @type {{minecraftUUID: string, guildID: string}[]} */
+			const uuidInput = (await Promise.allSettled(args.map(async (arg) => {
+				const { uuid } = await mojang.ignOrUuid(arg);
+
+				return {
+					minecraftUUID: uuid,
+					guildID: (await hypixel.guild.player(uuid))._id,
+				};
+			})))
+				.flatMap((x) => {
+					if (x.status === 'rejected') {
+						logger.error('[LINK]', x.reason);
+						return [];
+					}
+
+					return this.client.hypixelGuilds.cache.keyArray().includes(x.value.guildID)
+						? x.value
+						: [];
+				});
 			/**
 			 * @type {?import('../../structures/database/models/Player')}
 			 */
