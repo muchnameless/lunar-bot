@@ -77,11 +77,11 @@ const error = (...input) => {
 	// stringify certain errors
 	for (const [ index, element ] of input.entries()) {
 		if (element?.stack && !(element instanceof TypeError || element instanceof SyntaxError || element instanceof ReferenceError || element instanceof RangeError)) {
-			if (typeof input[index - 1] === 'string') {
+			if (index >= 1 && typeof input[index - 1] === 'string') {
 				input[index - 1] += `: ${element}`;
 				input.splice(index, 1);
 			} else {
-				input[index] += `${element}`;
+				input[index] = `${element}`;
 			}
 		}
 	}
