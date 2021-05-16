@@ -147,7 +147,7 @@ module.exports = class PlayerManager extends ModelManager {
 			},
 		});
 
-		for (const player of playersToSweep) player.destroy();
+		await safePromiseAll(playersToSweep.map(async player => player.destroy()));
 
 		const AMOUNT = playersToSweep.length;
 
