@@ -14,10 +14,10 @@ let client;
 // catch rejections
 process
 	.on('unhandledRejection', (error) => {
-		logger.error('[UNCAUGHT PROMISE REJECTION]:', error);
+		logger.error('[UNCAUGHT PROMISE REJECTION]', error);
 	})
 	.on('uncaughtException', (error) => {
-		logger.error('[UNCAUGHT EXCEPTION]:', error);
+		logger.error('[UNCAUGHT EXCEPTION]', error);
 		client?.exit(-1) ?? process.exit(-1);
 	})
 	.on('SIGINT', () => client?.exit(0) ?? process.exit(0));
