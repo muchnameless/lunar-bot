@@ -64,8 +64,9 @@ module.exports = class PlayerManager extends ModelManager {
 	 */
 	set(key, value) {
 		this.client.hypixelGuilds.sweepPlayerCache(value.guildID);
+		this.cache.set(key, value);
 
-		return this.cache.set(key, value);
+		return this;
 	}
 
 	/**
@@ -76,13 +77,11 @@ module.exports = class PlayerManager extends ModelManager {
 		/** @type {import('../models/Player')} */
 		const player = this.resolve(idOrPlayer);
 
-		if (!player) throw new Error(`[PLAYER HANDLER DELETE]: invalid input: ${idOrPlayer}`);
+		if (!player) throw new Error(`[PLAYER HANDLER UNCACHE]: invalid input: ${idOrPlayer}`);
 
-		this.client.hypixelGuilds.sweepPlayerCache(player.guildID); // sweep hypixel guild player cache
-		const user = this.client.users.cache.get(player.discordID); // sweep user player cache
-		if (user) user.player = null;
+		player.uncache();
 
-		return this.cache.delete(player.minecraftUUID);
+		return this;
 	}
 
 	/**

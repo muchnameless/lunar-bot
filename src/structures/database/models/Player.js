@@ -356,7 +356,7 @@ module.exports = class Player extends Model {
 	 * returns a sky.shiiyu.moe link for the player
 	 */
 	get url() {
-		return `https://sky.shiiyu.moe/stats/${this.ign}/${this.mainProfileName}`;
+		return `https://sky.shiiyu.moe/stats/${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUUID}/${this.mainProfileName ?? ''}`;
 	}
 
 	/**
@@ -926,7 +926,7 @@ module.exports = class Player extends Model {
 		this.guildRankPriority = 0;
 		this.save();
 
-		if (!isBridger) this.client.players.delete(this);
+		if (!isBridger) this.uncache();
 
 		return true;
 	}
@@ -1231,10 +1231,32 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * destroys the db entry and removes it from the client.players collection
+	 * removes the element from member, user, guild, client cache
 	 */
-	async delete() {
-		return this.client.players.remove(this);
+	async uncache() {
+		if (this.discordID) {
+			// remove from member player cache
+			const member = await this.discordMember;
+			if (member) member.player = null;
+
+			// remove from user player cache
+			const user = this.client.users.cache.get(this.discordID);
+			if (user) user.player = null;
+		}
+
+		// remove from guild / client player cache
+		this.client.hypixelGuilds.sweepPlayerCache(this.guildID); // sweep hypixel guild player cache
+		this.client.players.cache.delete(this.minecraftUUID);
+
+		return this;
+	}
+
+	/**
+	 * destroys the db entry and removes it from cache
+	 */
+	async destroy() {
+		await this.uncache();
+		return super.destroy();
 	}
 
 	/**
