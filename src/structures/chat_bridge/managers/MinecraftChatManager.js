@@ -188,27 +188,41 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				case 'blocked': {
 					const infractions = 1 + (await cache.get(`chatbridge:infractions:${discordMessage.author.id}`).catch(error => logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error)) ?? 0);
 
-					cache.set(`chatbridge:infractions:${discordMessage.author.id}`, infractions, 30 * 60_000);
+					cache.set(`chatbridge:infractions:${discordMessage.author.id}`, infractions, this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_RESET_TIME') * 60_000);
 
 					if (infractions >= this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
-						const player = discordMessage.author.player ?? await this.client.players.model.findOrCreate({
+						/** @type {import('../../database/models/Player')} */
+						const player = discordMessage.author.player ?? (await this.client.players.model.findOrCreate({
 							where: { discordID: discordMessage.author.id },
 							defaults: {
 								minecraftUUID: SnowflakeUtil.generate(),
 								guildID: GUILD_ID_BRIDGER,
 								ign: UNKNOWN_IGN,
+								inDiscord: true,
 							},
-						}).catch(error => logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error));
-						const MUTE_DURATION = this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_DURATION') * 60_000;
+						}).catch(error => logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error)))?.[0];
 
-						if (player) {
+						if (player && !player.muted) {
+							const MUTE_DURATION = this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_DURATION') * 60_000;
+
 							player.chatBridgeMutedUntil = Date.now() + MUTE_DURATION;
 							player.save();
-						}
 
-						info = stripIndents`
-							you were automatically muted for ${ms(MUTE_DURATION, { long: true })} due to continues infractions
-						`;
+							const MUTE_DURATION_LONG = ms(MUTE_DURATION, { long: true });
+
+							this.client.log(this.client.defaultEmbed
+								.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
+								.setThumbnail(player.image)
+								.setDescription(stripIndents`
+									**Auto Muted** for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_RESET_TIME') * 60_000, { long: true })}
+									${player.info}
+								`),
+							);
+
+							info = stripIndents`
+								you were automatically muted for ${MUTE_DURATION_LONG} due to continues infractions
+							`;
+						}
 					} else {
 						info = stripIndents`
 							continuing to do so will result in an automatic temporary mute
