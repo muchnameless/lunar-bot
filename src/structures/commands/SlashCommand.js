@@ -10,13 +10,13 @@ module.exports = class SlashCommand {
 	 * create a new command
 	 * @param {object} param0
 	 * @param {import('../LunarClient')} param0.client discord this.client that instantiated this command
-	 * @param {import('./CommandCollection')} param0.commandCollection
+	 * @param {import('./CommandCollection')} param0.collection
 	 * @param {string} param0.name command name
 	 * @param {CommandData} param1
 	 */
-	constructor({ client, commandCollection, name }, { aliases, description, options, defaultPermission, permissions, cooldown }) {
+	constructor({ client, collection, name }, { aliases, description, options, defaultPermission, permissions, cooldown }) {
 		this.client = client;
-		this.commandCollection = commandCollection;
+		this.collection = collection;
 		this.name = name;
 		/** @type {?string} */
 		this.id = null;
@@ -68,16 +68,16 @@ module.exports = class SlashCommand {
 	 * loads the command and possible aliases into their collections
 	 */
 	load() {
-		this.commandCollection.set(this.name.toLowerCase(), this);
-		this.aliases?.forEach(alias => this.commandCollection.set(alias.toLowerCase(), this));
+		this.collection.set(this.name.toLowerCase(), this);
+		this.aliases?.forEach(alias => this.collection.set(alias.toLowerCase(), this));
 	}
 
 	/**
 	 * removes all aliases and the command from the commandsCollection
 	 */
 	unload() {
-		this.commandCollection.delete(this.name.toLowerCase());
-		this.aliases?.forEach(alias => this.commandCollection.delete(alias.toLowerCase()));
+		this.collection.delete(this.name.toLowerCase());
+		this.aliases?.forEach(alias => this.collection.delete(alias.toLowerCase()));
 
 		for (const path of Object.keys(require.cache).filter(filePath => !filePath.includes('node_modules') && !filePath.includes('functions') && filePath.includes('commands') && filePath.endsWith(`${this.name}.js`))) {
 			delete require.cache[path];

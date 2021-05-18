@@ -16,14 +16,14 @@ module.exports = class Command {
 	 * create a new command
 	 * @param {object} param0
 	 * @param {import('../LunarClient')} param0.client discord this.client that instantiated this command
-	 * @param {import('./CommandCollection')} param0.commandCollection
+	 * @param {import('./CommandCollection')} param0.collection
 	 * @param {string} param0.name the name of the command
 	 * @param {string} param0.category the category of the command
 	 * @param {CommandInfo} param1
 	 */
-	constructor({ client, commandCollection, name, category }, { aliases, description, guildOnly, args, usage, cooldown }) {
+	constructor({ client, collection, name, category }, { aliases, description, guildOnly, args, usage, cooldown }) {
 		this.client = client;
-		this.commandCollection = commandCollection;
+		this.collection = collection;
 		this.name = name;
 		this.category = category;
 
@@ -76,7 +76,7 @@ module.exports = class Command {
 				return [ this.config.get('MANAGER_ROLE_ID') ];
 
 			case 'guild':
-				return this.commandCollection.isMainCollection
+				return this.collection.isMainCollection
 					? [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ]
 					: null;
 
@@ -89,7 +89,7 @@ module.exports = class Command {
 	 * wether the command is part of a visible category
 	 */
 	get visible() {
-		return !this.commandCollection.constructor.INVISIBLE_CATEGORIES.includes(this.category);
+		return !this.collection.constructor.INVISIBLE_CATEGORIES.includes(this.category);
 	}
 
 	/**
@@ -97,7 +97,7 @@ module.exports = class Command {
 	 * @returns {string[]} array
 	 */
 	get force() {
-		return this.commandCollection.constructor.force;
+		return this.collection.constructor.force;
 	}
 
 	/**
@@ -112,11 +112,11 @@ module.exports = class Command {
 	 * @param {Boolean} [isReload=false]
 	 */
 	load(isReload = false) {
-		this.commandCollection.set(this.name.toLowerCase(), this);
-		this.aliases?.forEach(alias => this.commandCollection.set(alias.toLowerCase(), this));
+		this.collection.set(this.name.toLowerCase(), this);
+		this.aliases?.forEach(alias => this.collection.set(alias.toLowerCase(), this));
 
 		if (isReload && this.isBridgeCommand) {
-			if (this.commandCollection.isMainCollection) {
+			if (this.collection.isMainCollection) {
 				if (!this.client.chatBridges.commands.has(this.name)) this.client.chatBridges.commands.loadByName(this.name);
 			} else if (!this.client.commands.has(this.name)) {
 				this.client.commands.loadByName(this.name);
@@ -128,11 +128,11 @@ module.exports = class Command {
 	 * removes all aliases and the command from the commandsCollection
 	 */
 	unload() {
-		this.commandCollection.delete(this.name.toLowerCase());
-		this.aliases?.forEach(alias => this.commandCollection.delete(alias.toLowerCase()));
+		this.collection.delete(this.name.toLowerCase());
+		this.aliases?.forEach(alias => this.collection.delete(alias.toLowerCase()));
 
 		if (this.isBridgeCommand) {
-			if (this.commandCollection.isMainCollection) {
+			if (this.collection.isMainCollection) {
 				this.client.chatBridges.commands.get(this.name)?.unload();
 			} else {
 				this.client.commands.get(this.name)?.unload();

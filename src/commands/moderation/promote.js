@@ -11,7 +11,7 @@ module.exports = class PromoteCommand extends SetRankCommand {
 			aliases: [ 'guildpromote' ],
 			description: 'promote a guild member',
 			args: true,
-			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\`] <${this.commandCollection.constructor.forceFlagsAsFlags} to disable IGN autocorrection> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\`] <${this.collection.constructor.forceFlagsAsFlags} to disable IGN autocorrection> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 0,
 		});
 	}

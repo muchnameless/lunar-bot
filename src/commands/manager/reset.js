@@ -12,7 +12,7 @@ module.exports = class ResetCommand extends Command {
 			aliases: [],
 			description: commaListsAnd`alternative way to call ${ResetCommand.TYPES.map(type => `${type}reset`)}`,
 			args: true,
-			usage: () => ResetCommand.TYPES.map(type => `[\`${type}\`] ${this.commandCollection.getByName(`${type}reset`)?.usage}`).join('\n\n'),
+			usage: () => ResetCommand.TYPES.map(type => `[\`${type}\`] ${this.collection.getByName(`${type}reset`)?.usage}`).join('\n\n'),
 			cooldown: 5,
 		});
 	}
@@ -32,6 +32,6 @@ module.exports = class ResetCommand extends Command {
 
 		if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return message.reply(`unknown type \`${TYPE}\`.`);
 
-		return this.commandCollection.getByName(`${value}reset`).run(message, args, flags, rawArgs);
+		return this.collection.getByName(`${value}reset`).run(message, args, flags, rawArgs);
 	}
 };

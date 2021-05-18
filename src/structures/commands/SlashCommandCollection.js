@@ -3,6 +3,7 @@
 const { Collection } = require('discord.js');
 const { dirname, basename } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
+const CooldownCollection = require('./CooldownCollection');
 const logger = require('../../functions/logger');
 
 
@@ -21,9 +22,9 @@ module.exports = class SlashCommandCollection extends Collection {
 		 */
 		this.dirPath = dirPath;
 		/**
-		 * @type {Collection<string, Collection<string, number>>}
+		 * cooldown timestamps for each command
 		 */
-		this.cooldowns = new Collection();
+		this.cooldowns = new CooldownCollection();
 	}
 
 	/**
@@ -86,12 +87,10 @@ module.exports = class SlashCommandCollection extends Collection {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
 		const Command = require(file);
-		/**
-		 * @type {import('./SlashCommand')}
-		 */
+		/** @type {import('./SlashCommand')} */
 		const command = new Command({
 			client: this.client,
-			commandCollection: this,
+			collection: this,
 			name,
 			category: category !== 'commands' ? category : null,
 		});

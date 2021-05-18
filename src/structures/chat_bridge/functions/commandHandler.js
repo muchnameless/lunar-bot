@@ -1,6 +1,5 @@
 'use strict';
 
-const { Collection } = require('discord.js');
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
 const { escapeRegex } = require('../../../functions/util');
@@ -93,21 +92,19 @@ module.exports = async (message) => {
 		}
 
 		// command cooldowns
-		if (command.cooldown) {
-			if	(!client.commands.cooldowns.has(command.name)) client.commands.cooldowns.set(command.name, new Collection());
-
+		if (command.cooldown !== 0) {
 			const NOW = Date.now();
-			const timestamps = client.commands.cooldowns.get(command.name);
-			const COOLDOWN_TIME = (command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1000;
+			const timestamps = command.collection.cooldowns.get(command.name);
+			const COOLDOWN_TIME = (command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000;
 
 			if (timestamps.has(message.author.ign)) {
-				const expirationTime = timestamps.get(message.author.ign) + COOLDOWN_TIME;
+				const EXPIRATION_TIME = timestamps.get(message.author.ign) + COOLDOWN_TIME;
 
-				if (NOW < expirationTime) {
-					const timeLeft = ms(expirationTime - NOW, { long: true });
+				if (NOW < EXPIRATION_TIME) {
+					const TIME_LEFT = ms(EXPIRATION_TIME - NOW, { long: true });
 
-					logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${timeLeft} before the cooldown expires`);
-					return message.reply(`'${command.name}' is on cooldown for another ${timeLeft}`);
+					logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${TIME_LEFT} before the cooldown expires`);
+					return message.reply(`'${command.name}' is on cooldown for another ${TIME_LEFT}`);
 				}
 			}
 

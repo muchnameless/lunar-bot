@@ -4,6 +4,7 @@ const { Collection } = require('discord.js');
 const { dirname, basename, join } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
 const { autocorrect } = require('../../functions/util');
+const CooldownCollection = require('./CooldownCollection');
 const logger = require('../../functions/logger');
 
 
@@ -27,9 +28,9 @@ module.exports = class CommandCollection extends Collection {
 		 */
 		this.isMainCollection = isMainCollection;
 		/**
-		 * @type {Collection<string, Collection<string, number>>}
+		 * cooldown timestamps for each command
 		 */
-		this.cooldowns = new Collection();
+		this.cooldowns = new CooldownCollection();
 	}
 
 	/**
@@ -147,12 +148,10 @@ module.exports = class CommandCollection extends Collection {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
 		const Command = require(file);
-		/**
-		 * @type {import('./Command')}
-		 */
+		/** @type {import('./Command')} */
 		const command = new Command({
 			client: this.client,
-			commandCollection: this,
+			collection: this,
 			name,
 			category: category !== 'commands' ? category : null,
 		});

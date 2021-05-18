@@ -19,8 +19,8 @@ module.exports = class BridgeHelpCommand extends HelpCommand {
 		if (!args.length) {
 			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.ign}` ].join(', ')}` ];
 
-			for (const category of this.commandCollection.visibleCategories) {
-				reply.push(`${category}: ${[ ...this.commandCollection.filterByCategory(category).keys() ].join(', ')}`);
+			for (const category of this.collection.visibleCategories) {
+				reply.push(`${category}: ${[ ...this.collection.filterByCategory(category).keys() ].join(', ')}`);
 			}
 
 			return message.author.send(reply.join('\n'));
@@ -30,11 +30,11 @@ module.exports = class BridgeHelpCommand extends HelpCommand {
 
 
 		// category help
-		const requestedCategory = this.commandCollection.categories.find(categoryName => categoryName === INPUT);
+		const requestedCategory = this.collection.categories.find(categoryName => categoryName === INPUT);
 
 		if (requestedCategory) {
 			const reply = [ `Category: ${INPUT}` ];
-			const categoryCommands = this.commandCollection.filterByCategory(INPUT);
+			const categoryCommands = this.collection.filterByCategory(INPUT);
 			const { requiredRoles } = categoryCommands.first();
 
 			if (requiredRoles) {
@@ -50,7 +50,7 @@ module.exports = class BridgeHelpCommand extends HelpCommand {
 
 
 		// single command help
-		const command = this.commandCollection.getByName(INPUT);
+		const command = this.collection.getByName(INPUT);
 
 		if (!command) return message.author.send(`'${INPUT}' is neither a valid command nor category`);
 

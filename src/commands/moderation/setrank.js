@@ -11,7 +11,7 @@ module.exports = class SetRankCommand extends Command {
 			aliases: [ 'guildsetrank' ],
 			description: 'set a rank of a guild member',
 			args: 2,
-			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\`] [\`rank\` name] <${this.commandCollection.constructor.forceFlagsAsFlags} to disable IGN autocorrection> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\`] [\`rank\` name] <${this.collection.constructor.forceFlagsAsFlags} to disable IGN autocorrection> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 0,
 		});
 	}
