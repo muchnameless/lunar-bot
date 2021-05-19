@@ -156,7 +156,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	/**
 	 * maximum attempts to resend to in game chat
 	 */
-	static maxRetries = 3;
+	static MAX_RETRIES = 3;
 
 	/**
 	 * normal delay to listen for error messages
@@ -172,9 +172,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	];
 
 	/**
-	 * increased delay which can be used to send messages to in game chat continously
+	 * delay which can be used to send messages to in game chat continously
 	 */
 	static SAFE_DELAY = 600;
+
+	/**
+	 * delay which can be used after triggering anti spam
+	 */
+	static ANTI_SPAM_DELAY = 1_000;
 
 	/**
 	 * 100 pre 1.10.2, 256 post 1.10.2
@@ -647,13 +652,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				this._tempIncrementCounter();
 
 				// max retries reached
-				if (++this.retries === MinecraftChatManager.maxRetries) {
+				if (++this.retries === MinecraftChatManager.MAX_RETRIES) {
 					discordMessage?.react(X_EMOJI);
-					await sleep(this.retries * MinecraftChatManager.SAFE_DELAY);
+					await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 					return false;
 				}
 
-				await sleep(this.retries * MinecraftChatManager.SAFE_DELAY);
+				await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 				return this._sendToChat.apply(this, arguments); // eslint-disable-line prefer-spread
 			}
 
