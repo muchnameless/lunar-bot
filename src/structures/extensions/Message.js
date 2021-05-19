@@ -1,8 +1,9 @@
 'use strict';
 
-const { commaListsAnd } = require('common-tags');
+const { stripIndents } = require('common-tags');
 const { Structures, MessageEmbed, Message, Permissions } = require('discord.js');
 const { isEqual } = require('lodash');
+const { permissionsToString } = require('../../functions/util');
 const { CHANNEL_FLAGS, replyPingRegExp } = require('../../constants/bot');
 const { DM_KEY, REPLY_KEY } = require('../../constants/redis');
 const cache = require('../../api/cache');
@@ -258,13 +259,12 @@ class LunarMessage extends Message {
 			// permission checks
 			if (!this.channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)) {
 				const missingChannelPermissions = requiredChannelPermissions.filter(permission => !this.channel.permissionsFor(this.guild.me).has(permission));
+				const errorMessage = `missing ${permissionsToString(missingChannelPermissions)} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
 
-				logger.warn(`missing ${missingChannelPermissions.map(permission => `'${permission}'`)} permission${missingChannelPermissions.length === 1 ? '' : 's'} in #${this.channel.name}`);
+				logger.warn(`${errorMessage} #${this.channel.name}`);
 
 				this.author
-					.send(commaListsAnd`
-						missing ${missingChannelPermissions.map(permission => `\`${permission}\``)} permission${missingChannelPermissions.length === 1 ? '' : 's'} in #${this.channel}
-					`)
+					.send(`${errorMessage} ${this.channel}`)
 					.catch(() => logger.error(`[REPLY]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
 
 				return null;
@@ -301,11 +301,13 @@ class LunarMessage extends Message {
 				}, 10_000);
 			}
 
-			logger.warn(commaListsAnd`no #bot-commands channel with the required permission${requiredChannelPermissions.length === 1 ? '' : 's'} ${requiredChannelPermissions.map(permission => `'${permission}'`)}`);
+			const errorMessage = `no #bot-commands channel with the required permission${requiredChannelPermissions.length === 1 ? '' : 's'} ${permissionsToString(requiredChannelPermissions)} found`;
+
+			logger.error(errorMessage);
 
 			this.author
-				.send(commaListsAnd`
-					no #bot-commands channel with the required permission${requiredChannelPermissions.length === 1 ? '' : 's'} ${requiredChannelPermissions.map(permission => `\`${permission}\``)} found.
+				.send(stripIndents`
+					${errorMessage}.
 					Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.
 				`)
 				.catch(() => logger.error(`[REPLY]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
