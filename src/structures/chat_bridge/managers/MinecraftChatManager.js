@@ -25,6 +25,17 @@ const logger = require('../../../functions/logger');
  * @property {?import('../../extensions/Message')} [discordMessage=null]
  */
 
+/**
+ * @typedef {object} CommandOptions
+ * @property {string} command can also directly be used as the only parameter
+ * @property {?RegExp} [responseRegExp] regex to use as a filter for the message collector
+ * @property {?RegExp} [abortRegExp] regex to detect an abortion response
+ * @property {number} [max=-1] maximum amount of response messages, -1 or Infinity for an infinite amount
+ * @property {boolean} [raw=false] wether to return an array of the collected hypixel message objects instead of just the content
+ * @property {number} [timeout=config.getNumber('INGAME_RESPONSE_TIMEOUT')] response collector timeout in seconds
+ * @property {boolean} [rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
+ */
+
 
 module.exports = class MinecraftChatManager extends ChatManager {
 	constructor(...args) {
@@ -663,21 +674,15 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * sends a message to ingame chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
-	 * @param {object} options
-	 * @param {string} options.command can also directly be used as the only parameter
-	 * @param {RegExp} [options.responseRegExp=new RegExp()] regex to use as a filter for the message collector
-	 * @param {number} [options.max=-1] maximum amount of response messages, -1 or Infinity for an infinite amount
-	 * @param {boolean} [options.raw=false] wether to return an array of the collected hypixel message objects instead of just the content
-	 * @param {number} [options.timeout=config.getNumber('INGAME_RESPONSE_TIMEOUT')] response collector timeout in seconds
-	 * @param {boolean} [options.rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
+	 * @param {CommandOptions} commandOptions
 	 */
 	// eslint-disable-next-line no-undef
-	async command({ command = arguments[0], responseRegExp = new RegExp(), max = -1, raw = false, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+	async command({ command = arguments[0], responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
 		const collector = this.createMessageCollector(
-			message => !message.type && (responseRegExp.test(message.content) || /^-{50,}/.test(message.content)),
+			message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{50,}/.test(message.content)),
 			{
 				time: timeout * 1_000,
 			},
@@ -694,13 +699,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		// collect message
 		collector.on('collect', (/** @type {import('../HypixelMessage')} */ message) => {
-			// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
-			if (/^-{50,}[^-]+-{50,}$/.test(message.content)) return collector.stop();
-
 			if (/^-{50,}$/.test(message.content)) { // is line separator
+				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
+				if (/[^-]-{50,}$/.test(message.content)) return collector.stop();
+
 				collector.collected.pop();
 				if (collector.collected.length) collector.stop();
-			} else if (collector.collected.length === max) { // message is not a line separator
+			} else if (collector.collected.length === max || abortRegExp?.test(message.content)) { // message is not a line separator
 				collector.stop();
 			}
 		});
