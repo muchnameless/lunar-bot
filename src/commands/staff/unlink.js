@@ -34,7 +34,7 @@ module.exports = class UnlinkCommand extends Command {
 
 		// message includes @mention
 		if (message.mentions.users.size) {
-			({ player } = message.author);
+			({ player } = message.mentions.users.first());
 
 		// no @mentions
 		} else {
