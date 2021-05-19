@@ -201,15 +201,29 @@ module.exports = class DiscordChatManager extends ChatManager {
 	/**
 	 * sends a message via the bot in the chatBridge channel
 	 * @param {string} content
-	 * @param {import('discord.js').MessageOptions} options
+	 * @param {object} [param1={}]
+	 * @param {string} [param1.prefix='']
+	 * @param {import('../HypixelMessage')} [param1.hypixelMessage]
+	 * @param {import('discord.js').MessageOptions} [param1.options]
 	 */
-	async sendViaBot(content, options) {
+	async sendViaBot(content, { prefix = '', hypixelMessage, ...options } = {}) {
 		if (!this.chatBridge.enabled) return null;
 
 		await this.queue.wait();
 
+		const discordMessage = await hypixelMessage?.discordMessage.catch(logger.error);
+
 		try {
-			return await this.channel.send(this.chatBridge.discord.parseContent(content), options);
+			return await this.channel.send(
+				this.chatBridge.discord.parseContent(`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author.ign}`}, `}${prefix}${content}`),
+				{
+					reply: {
+						messageReference: discordMessage,
+						failIfNotExists: false,
+					},
+					...options,
+				},
+			);
 		} finally {
 			this.queue.shift();
 		}

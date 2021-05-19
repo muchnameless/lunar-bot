@@ -18,7 +18,7 @@ const { sleep } = require('../../functions/util');
  */
 
 /**
- * @typedef {import('discord.js').MessageOptions & { prefix: string, discordMessage: Promise<?import('../extensions/Message')> }} DiscordMessageOptions
+ * @typedef {import('discord.js').MessageOptions & { prefix: string }} DiscordMessageOptions
  */
 
 /**
@@ -249,7 +249,7 @@ module.exports = class ChatBridge extends EventEmitter {
 	 * @param {ChatOptions} [param1.minecraft]
 	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]]>}
 	 */
-	async broadcast(content, { hypixelMessage, type = hypixelMessage?.type ?? GUILD, discord: { prefix: discordPrefix = '', ...discord } = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = {}) {
+	async broadcast(content, { hypixelMessage, type = hypixelMessage?.type ?? GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = {}) {
 		const discordChatManager = this.discord.resolve(type);
 
 		return Promise.all([
@@ -265,26 +265,13 @@ module.exports = class ChatBridge extends EventEmitter {
 				),
 
 			// discord
-			(async () => {
-				let discordMessage;
-
-				try {
-					discordMessage = await hypixelMessage?.discordMessage;
-				} catch {
-					discordMessage = null;
-				}
-
-				return discordChatManager?.sendViaBot(
-					`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author.ign}`}, `}${discordPrefix}${content}`,
-					{
-						reply: {
-							messageReference: discordMessage,
-							failIfNotExists: false,
-						},
-						...discord,
-					},
-				);
-			})(),
+			discordChatManager?.sendViaBot(
+				content,
+				{
+					hypixelMessage,
+					...discord,
+				},
+			),
 		]);
 	}
 };
