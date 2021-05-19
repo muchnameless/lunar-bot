@@ -153,18 +153,8 @@ module.exports = class HypixelMessage extends ChatMessage {
 			case OFFICER: {
 				return Promise.all([
 					this.author.send(emoji),
-					(async () => {
-						let discordMessage;
-
-						try {
-							discordMessage = await this.discordMessage;
-						} catch {
-							discordMessage = null;
-						}
-
-						return discordMessage?.react(emoji)
-							?? this.chatBridge.discord.get(this.type)?.sendViaBot(`${this.member ?? `@${this.author.ign}`} ${emoji}`);
-					})(),
+					(await this.discordMessage.catch(() => null))?.react(emoji)
+							?? this.chatBridge.discord.get(this.type)?.sendViaBot(`${this.member ?? `@${this.author.ign}`} ${emoji}`),
 				]);
 			}
 
