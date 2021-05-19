@@ -36,8 +36,15 @@ module.exports = class LinkIssuesCommand extends Command {
 		const missingVerifiedRole = [];
 
 		for (const [ id, member ] of lgGuild.members.cache) {
-			if (players.cache.some(({ discordID }) => discordID === id)) return !member.roles.cache.has(VERIFIED_ROLE_ID) && missingVerifiedRole.push(member);
-			if (member.roles.cache.has(GUILD_ROLE_ID)) return guildRoleWithoutDbEntry.push(member);
+			if (players.cache.some(({ discordID }) => discordID === id)) {
+				!member.roles.cache.has(VERIFIED_ROLE_ID) && missingVerifiedRole.push(member);
+				continue;
+			}
+
+			if (member.roles.cache.has(GUILD_ROLE_ID)) {
+				guildRoleWithoutDbEntry.push(member);
+				continue;
+			}
 		}
 
 		let issuesAmount = missingVerifiedRole.length + guildRoleWithoutDbEntry.length;
