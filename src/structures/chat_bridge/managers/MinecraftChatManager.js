@@ -699,7 +699,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		// collect message
 		collector.on('collect', (/** @type {import('../HypixelMessage')} */ message) => {
-			if (/^-{50,}$/.test(message.content)) { // is line separator
+			if (/^-{50,}/.test(message.content)) { // is line separator
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
 				if (/[^-]-{50,}$/.test(message.content)) return collector.stop();
 
