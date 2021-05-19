@@ -973,10 +973,10 @@ module.exports = class Player extends Model {
 	async makeNickApiCall(newNick = null, shouldSendDm = false, reason = null) {
 		const member = await this.discordMember;
 
-		if (!member) return;
-		if (member.guild.me.roles.highest.comparePositionTo(member.roles.highest) < 1) return; // member's highest role is above bot's highest role
-		if (member.guild.ownerID === member.id) return; // can't change nick of owner
-		if (!member.guild.me.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' permission`);
+		if (!member) return false;
+		if (member.guild.me.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
+		if (member.guild.ownerID === member.id) return false; // can't change nick of owner
+		if (!member.guild.me.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return (logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`), false);
 
 		const { displayName: PREV_NAME } = member;
 
