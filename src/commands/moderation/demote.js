@@ -26,6 +26,9 @@ module.exports = class DemoteCommand extends SetRankCommand {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const IGN = this.getIGN(message, args, flags);
 
-		return this._run(message, flags, `g demote ${IGN}`, demote(IGN));
+		return this._run(message, flags, {
+			command: `g demote ${IGN}`,
+			responseRegExp: demote(IGN),
+		});
 	}
 };

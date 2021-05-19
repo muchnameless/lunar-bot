@@ -1,5 +1,6 @@
 'use strict';
 
+const { topErrors: { regExp: topErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
 const GuildCommand = require('./guild');
 // const logger = require('../../functions/logger');
 
@@ -10,7 +11,7 @@ module.exports = class GuildTopCommand extends GuildCommand {
 			aliases: [ 'guildtop' ],
 			description: 'guild top',
 			args: false,
-			usage: () => `<${this.client.hypixelGuilds.guildNamesAsFlags}>`,
+			usage: () => `<\`number\` days ago> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 1,
 		});
 	}
@@ -23,6 +24,9 @@ module.exports = class GuildTopCommand extends GuildCommand {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return this._run(message, flags, 'g top');
+		return this._run(message, flags, {
+			command: `g top ${args.length ? args.join(' ') : ''}`,
+			abortRegExp: topErrors(),
+		});
 	}
 };

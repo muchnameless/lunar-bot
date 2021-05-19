@@ -8,6 +8,9 @@ const {
 	promote: { regExp: promote },
 	setRank: { regExp: setRank },
 	unmute: { regExp: unmute },
+	historyErrors: { regExp: historyErrors },
+	logErrors: { regExp: logErrors },
+	topErrors: { regExp: topErrors },
 } = require('../structures/chat_bridge/constants/commandResponses');
 const { removeMcFormatting } = require('../structures/chat_bridge/functions/util');
 const { EMBED_DESCRIPTION_MAX_CHARS } = require('../constants/discord');
@@ -53,7 +56,14 @@ module.exports = class SetRankCommand extends SlashCommand {
 				name: 'history',
 				type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 				description: 'guild history',
-				options: [],
+				options: [
+					{
+						name: 'page',
+						type: 'INTEGER',
+						description: 'log page',
+						required: false,
+					},
+				],
 			},
 			{
 				name: 'info',
@@ -191,7 +201,14 @@ module.exports = class SetRankCommand extends SlashCommand {
 				name: 'top',
 				type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 				description: 'guild top',
-				options: [],
+				options: [
+					{
+						name: 'days_ago',
+						type: 'INTEGER',
+						description: 'obtain data from x days ago',
+						required: false,
+					},
+				],
 			},
 			{
 				name: 'unmute',
@@ -290,11 +307,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {import('discord.js').CommandInteractionOption[]} options
-	 * @param {string} command
-	 * @param {RegExp} [responseRegExp]
+	 * @param {import('../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 * @param {?import('../structures/database/models/HypixelGuild')} [hypixelGuildOverwrite]
 	 */
-	async _run(interaction, options, command, responseRegExp, hypixelGuildOverwrite) {
+	async _run(interaction, options, commandOptions, hypixelGuildOverwrite) {
 		const hypixelGuildInput = options?.find(({ name }) => name === 'guild')?.value;
 		/**
 		 * @type {import('../structures/database/models/HypixelGuild')}
@@ -311,18 +327,11 @@ module.exports = class SetRankCommand extends SlashCommand {
 
 		if (!hypixelGuild) return interaction.safeReply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
 
-		const response = await hypixelGuild.chatBridge.minecraft.command({
-			command,
-			responseRegExp,
-		});
-
-		// await interaction.editReply('success');
-
 		return interaction.safeReply({
 			embeds: [
 				this.client.defaultEmbed
-					.setTitle(`/${command}`)
-					.setDescription(`\`\`\`\n${response}\`\`\``),
+					.setTitle(`/${commandOptions.command}`)
+					.setDescription(`\`\`\`\n${await hypixelGuild.chatBridge.minecraft.command(commandOptions)}\`\`\``),
 			],
 			ephemeral: false,
 		});
@@ -332,9 +341,9 @@ module.exports = class SetRankCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {import('discord.js').CommandInteractionOption[]} options
-	 * @param {string} command
+	 * @param {import('../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 */
-	async _runList(interaction, options, command) {
+	async _runList(interaction, options, commandOptions) {
 		const hypixelGuildInput = options?.find(({ name }) => name === 'guild')?.value;
 		/**
 		 * @type {import('../structures/database/models/HypixelGuild')}
@@ -351,21 +360,17 @@ module.exports = class SetRankCommand extends SlashCommand {
 
 		if (!hypixelGuild) return interaction.safeReply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
 
-		const response = await hypixelGuild.chatBridge.minecraft.command({
-			command,
-			raw: true,
-		});
-
-		// await interaction.editReply('success');
-
 		return interaction.safeReply({
 			embeds: [
 				this.client.defaultEmbed
-					.setTitle(`/${command}`)
+					.setTitle(`/${commandOptions.command}`)
 					.setDescription(
 						`\`\`\`${
 							trim(
-								response
+								(await hypixelGuild.chatBridge.minecraft.command({
+									raw: true,
+									...commandOptions,
+								}))
 									.map(msg => (msg.content.includes('●')
 										? removeMcFormatting(
 											msg.formattedContent
@@ -401,17 +406,42 @@ module.exports = class SetRankCommand extends SlashCommand {
 				const [{ value: IGN_INPUT }] = options;
 				const IGN = this.getIGN(IGN_INPUT, options);
 
-				return this._run(interaction, options, `g demote ${IGN}`, demote(IGN));
+				return this._run(interaction, options, {
+					command: `g demote ${IGN}`,
+					responseRegExp: demote(IGN),
+				});
 			}
 
-			case 'history':
+			case 'history': {
+				await this.checkPermissions(interaction, { roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ] });
+
+				const PAGE = options?.find(({ name: arg }) => arg === 'page')?.value;
+
+				return this._run(interaction, options, {
+					command: `g history ${PAGE ?? ''}`,
+					abortRegExp: historyErrors(),
+				});
+			}
+
 			case 'info':
 			case 'motd':
-			case 'quest':
+			case 'quest': {
+				await this.checkPermissions(interaction, { roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ] });
+
+				return this._run(interaction, options, {
+					command: `g ${name}`,
+				});
+			}
+
 			case 'top': {
 				await this.checkPermissions(interaction, { roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ] });
 
-				return this._run(interaction, options, `g ${name}`);
+				const DAYS_AGO = options?.find(({ name: arg }) => arg === 'days_ago')?.value;
+
+				return this._run(interaction, options, {
+					command: `g top ${DAYS_AGO ?? ''}`,
+					abortRegExp: topErrors(),
+				});
 			}
 
 			case 'invite': {
@@ -419,7 +449,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 
 				const [{ value: IGN }] = options;
 
-				return this._run(interaction, options, `g invite ${IGN}`, invite(IGN));
+				return this._run(interaction, options, {
+					comand: `g invite ${IGN}`,
+					responseRegExp: invite(IGN),
+				});
 			}
 
 			case 'list':
@@ -427,7 +460,9 @@ module.exports = class SetRankCommand extends SlashCommand {
 			case 'online': {
 				await this.checkPermissions(interaction, { roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('BRIDGER_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ] });
 
-				return this._runList(interaction, options, `g ${name}`);
+				return this._runList(interaction, options, {
+					command: `g ${name}`,
+				});
 			}
 
 			case 'log': {
@@ -437,7 +472,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 				const IGN = IGN_INPUT && this.getIGN(IGN_INPUT, options);
 				const PAGE = options?.find(({ name: arg }) => arg === 'page')?.value;
 
-				return this._run(interaction, options, `g log ${[ IGN, PAGE ].filter(Boolean).join(' ')}`);
+				return this._run(interaction, options, {
+					command: `g log ${[ IGN, PAGE ].filter(Boolean).join(' ')}`,
+					abortRegExp: logErrors(),
+				});
 			}
 
 			case 'member': {
@@ -450,7 +488,9 @@ module.exports = class SetRankCommand extends SlashCommand {
 
 				if (!IGN) return interaction.safeReply(`${IGN_INPUT ? `\`${IGN_INPUT}\` is` : 'you are'} not in the player db`, { ephemeral: true });
 
-				return this._run(interaction, options, `g member ${IGN}`);
+				return this._run(interaction, options, {
+					command: `g member ${IGN}`,
+				});
 			}
 
 			case 'mute': {
@@ -511,7 +551,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 					await hypixelGuild.save();
 				}
 
-				return this._run(interaction, options, `g mute ${target} ${DURATION_INPUT}`, mute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign), hypixelGuild);
+				return this._run(interaction, options, {
+					command: `g mute ${target} ${DURATION_INPUT}`,
+					responseRegExp: mute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign),
+				}, hypixelGuild);
 			}
 
 			case 'promote': {
@@ -520,7 +563,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 				const [{ value: IGN_INPUT }] = options;
 				const IGN = this.getIGN(IGN_INPUT, options);
 
-				return this._run(interaction, options, `g promote ${IGN}`, promote(IGN));
+				return this._run(interaction, options, {
+					command: `g promote ${IGN}`,
+					responseRegExp: promote(IGN),
+				});
 			}
 
 			case 'setrank': {
@@ -529,7 +575,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 				const [{ value: IGN_INPUT }, { value: RANK }] = options;
 				const IGN = this.getIGN(IGN_INPUT, options);
 
-				return this._run(interaction, options, `g setrank ${IGN} ${RANK}`, setRank(IGN, undefined, RANK));
+				return this._run(interaction, options, {
+					command: `g setrank ${IGN} ${RANK}`,
+					responseRegExp: setRank(IGN, undefined, RANK),
+				});
 			}
 
 			case 'unmute': {
@@ -584,7 +633,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 					await hypixelGuild.save();
 				}
 
-				return this._run(interaction, options, `g unmute ${target}`, unmute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign), hypixelGuild);
+				return this._run(interaction, options, {
+					command: `g unmute ${target}`,
+					responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+				}, hypixelGuild);
 			}
 
 			default:

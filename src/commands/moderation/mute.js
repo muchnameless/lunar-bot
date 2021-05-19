@@ -82,6 +82,9 @@ module.exports = class MuteCommand extends SetRankCommand {
 			await hypixelGuild.save();
 		}
 
-		return this._run(message, flags, `g mute ${target} ${DURATION_INPUT}`, mute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign), hypixelGuild);
+		return this._run(message, flags, {
+			command: `g mute ${target} ${DURATION_INPUT}`,
+			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+		}, hypixelGuild);
 	}
 };

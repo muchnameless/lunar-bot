@@ -1,5 +1,6 @@
 'use strict';
 
+const { historyErrors: { regExp: historyErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
 const GuildCommand = require('./guild');
 // const logger = require('../../functions/logger');
 
@@ -10,7 +11,7 @@ module.exports = class GuildHistoryCommand extends GuildCommand {
 			aliases: [ 'guildhistory' ],
 			description: 'guild history',
 			args: false,
-			usage: () => `<${this.client.hypixelGuilds.guildNamesAsFlags}>`,
+			usage: () => `<page \`number\`> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 1,
 		});
 	}
@@ -23,6 +24,9 @@ module.exports = class GuildHistoryCommand extends GuildCommand {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return this._run(message, flags, 'g history');
+		return this._run(message, flags, {
+			command: `g history ${args.length ? args.join(' ') : ''}`,
+			abortRegExp: historyErrors(),
+		});
 	}
 };

@@ -23,6 +23,6 @@ module.exports = class GuildOnlineCommand extends GuildListCommand {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return this._run(message, rawArgs, 'g online');
+		return this._run(message, rawArgs, { command: 'g online' });
 	}
 };

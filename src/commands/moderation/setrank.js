@@ -1,11 +1,11 @@
 'use strict';
 
 const { setRank: { regExp: setRank } } = require('../../structures/chat_bridge/constants/commandResponses');
-const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+const GuildCommand = require('../guild/guild');
+// const logger = require('../../functions/logger');
 
 
-module.exports = class SetRankCommand extends Command {
+module.exports = class SetRankCommand extends GuildCommand {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [ 'guildsetrank' ],
@@ -34,40 +34,6 @@ module.exports = class SetRankCommand extends Command {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} flags command flags
-	 * @param {string} command
-	 * @param {RegExp} responseRegExp
-	 * @param {import('../../structures/database/models/HypixelGuild')} hypixelGuildInput
-	 */
-	async _run(message, flags, command, responseRegExp, hypixelGuildInput) {
-		/**
-		 * @type {import('../../structures/database/models/HypixelGuild')}
-		 */
-		const hypixelGuild = hypixelGuildInput ?? this.client.hypixelGuilds.getFromArray(flags) ?? message.author.player?.guild;
-
-		if (!hypixelGuild) return message.reply('unable to find your guild.');
-
-		const { chatBridge } = hypixelGuild;
-
-		try {
-			const response = await chatBridge.minecraft.command({
-				command,
-				responseRegExp,
-			});
-
-			return message.reply(this.client.defaultEmbed
-				.setTitle(`/${command}`)
-				.setDescription(`\`\`\`\n${response}\`\`\``),
-			);
-		} catch (error) {
-			logger.error(`[MODERATION]: '${command}'`, error);
-			message.reply(`an unknown error occurred while executing \`${command}\`.`);
-		}
-	}
-
-	/**
-	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 * @param {string[]} flags command flags
 	 * @param {string[]} rawArgs arguments and flags
@@ -75,6 +41,9 @@ module.exports = class SetRankCommand extends Command {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const IGN = this.getIGN(message, args, flags);
 
-		return this._run(message, flags, `g setrank ${IGN} ${args[1]}`, setRank(IGN, undefined, args[1]));
+		return this._run(message, flags, {
+			command: `g setrank ${IGN} ${args[1]}`,
+			responseRegExp: setRank(IGN, undefined, args[1]),
+		});
 	}
 };

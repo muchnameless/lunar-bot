@@ -23,23 +23,15 @@ module.exports = class GuildCommand extends Command {
 	 * execute the command
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} flags command flags
-	 * @param {string} command
+	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
+	 * @param {import('../../structures/database/models/HypixelGuild')} [hypixelGuild]
 	 */
-	async _run(message, flags, command) {
-		/**
-		 * @type {import('../../structures/database/models/HypixelGuild')}
-		 */
-		const hypixelGuild = this.client.hypixelGuilds.getFromArray(flags) ?? message.author.player?.guild;
-
+	async _run(message, flags, commandOptions, hypixelGuild = this.client.hypixelGuilds.getFromArray(flags) ?? message.author.player?.guild) {
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
 
-		const data = await hypixelGuild.chatBridge.minecraft.command({
-			command,
-		});
-
 		return message.reply(this.client.defaultEmbed
-			.setTitle(`/${command}`)
-			.setDescription(`\`\`\`\n${data}\`\`\``),
+			.setTitle(`/${commandOptions.command}`)
+			.setDescription(`\`\`\`\n${await hypixelGuild.chatBridge.minecraft.command(commandOptions)}\`\`\``),
 		);
 	}
 

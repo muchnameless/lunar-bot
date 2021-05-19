@@ -26,6 +26,9 @@ module.exports = class InviteCommand extends SetRankCommand {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const [ IGN ] = args;
 
-		return this._run(message, flags, `g invite ${IGN}`, invite(IGN));
+		return this._run(message, flags, {
+			command: `g invite ${IGN}`,
+			responseRegExp: invite(IGN),
+		});
 	}
 };

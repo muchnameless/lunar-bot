@@ -26,6 +26,9 @@ module.exports = class PromoteCommand extends SetRankCommand {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const IGN = this.getIGN(message, args, flags);
 
-		return this._run(message, flags, `g promote ${IGN}`, promote(IGN));
+		return this._run(message, flags, {
+			command: `g promote ${IGN}`,
+			responseRegExp: promote(IGN),
+		});
 	}
 };

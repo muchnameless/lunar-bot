@@ -75,6 +75,9 @@ module.exports = class UnmuteCommand extends SetRankCommand {
 			await hypixelGuild.save();
 		}
 
-		return this._run(message, flags, `g unmute ${target}`, unmute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign), hypixelGuild);
+		return this._run(message, flags, {
+			command: `g unmute ${target}`,
+			responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+		}, hypixelGuild);
 	}
 };
