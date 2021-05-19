@@ -170,10 +170,11 @@ module.exports = {
 		string: topErrorResponses,
 		regExp: (ign = IGN_DEFAULT) => new RegExp(topErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
 	},
-	spamMessages: [
-		'You cannot say the same message twice[.!]?',
-		'You can only send a message once every half second[.!]?',
-		'Blocked excessive spam[.!]?',
-		'You are sending commands too fast[.!]? Please slow down[.!]?',
-	],
+	spamMessages: new RegExp([
+		'You cannot say the same message twice',
+		'You can only send a message once every half second',
+		'Blocked excessive spam',
+		'You are sending commands too fast[.!]? Please slow down',
+		'Please wait before doing that again',
+	].map(x => `^${x}[.!]?$`).join('|'), 'i'),
 };

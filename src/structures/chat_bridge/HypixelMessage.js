@@ -2,6 +2,7 @@
 
 const ChatMessage = require('prismarine-chat')(require('./constants/settings').MC_CLIENT_VERSION);
 const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY }, invisibleCharacterRegExp } = require('./constants/chatBridge');
+const { spamMessages } = require('./constants/commandResponses');
 const { NO_BELL } = require('../../constants/emojiCharacters');
 const mojang = require('../../api/mojang');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
@@ -74,10 +75,12 @@ module.exports = class HypixelMessage extends ChatMessage {
 			);
 
 			this.content = this.cleanedContent.slice(matched[0].length).trimLeft();
+			this.spam = false;
 		} else {
 			this.type = null;
 			this.author = null;
 			this.content = this.cleanedContent;
+			this.spam = spamMessages.test(this.content);
 		}
 	}
 

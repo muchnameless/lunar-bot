@@ -6,7 +6,6 @@ const {
 	demote: { string: { success: demote } },
 	mute: { string: { success: mute } },
 	unmute: { string: { success: unmute } },
-	spamMessages,
 } = require('../constants/commandResponses');
 const { STOP } = require('../../../constants/emojiCharacters');
 const { invisibleCharacters } = require('../constants/chatBridge');
@@ -28,7 +27,7 @@ module.exports = async (message) => {
 	 * You cannot say the same message twice!
 	 * You can only send a message once every half second!
 	 */
-	if (spamMessages.includes(message.content)) {
+	if (message.spam) {
 		try {
 			await message.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.rawContent}`);
 		} catch (error) {

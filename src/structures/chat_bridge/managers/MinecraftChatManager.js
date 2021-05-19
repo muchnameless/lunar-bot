@@ -7,7 +7,6 @@ const emojiRegex = require('emoji-regex/es2015')();
 const { sleep, trim, cleanFormattedNumber } = require('../../../functions/util');
 const { unicodeToName } = require('../constants/emojiNameUnicodeConverter');
 const { memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
-const { spamMessages } = require('../constants/commandResponses');
 const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
 const { MC_CLIENT_VERSION } = require('../constants/settings');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database');
@@ -93,6 +92,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		  * to prevent chatBridge from reconnecting at <MinecraftBot>.end
 		  */
 		this.shouldReconnect = true;
+		/**
+		 * command response collector
+		 */
+		this._commandCollector = null;
 	}
 
 	get ready() {
@@ -381,7 +384,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		if (!this._collecting) return;
 		if (message.me && message.content.endsWith(this._contentFilter)) return this._resolveAndReset(message);
 		if (message.type) return;
-		if (spamMessages.includes(message.content)) return this._resolveAndReset('spam');
+		if (message.spam) return this._resolveAndReset('spam');
 		if (message.content.startsWith('We blocked your comment')) return this._resolveAndReset('blocked');
 	}
 
@@ -681,7 +684,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
-		const collector = this.createMessageCollector(
+		const collector = this._commandCollector = this.createMessageCollector(
 			message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{50,}/.test(message.content)),
 			{
 				time: timeout * 1_000,
@@ -707,6 +710,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				if (collector.collected.length) collector.stop();
 			} else if (collector.collected.length === max || abortRegExp?.test(message.content)) { // message is not a line separator
 				collector.stop();
+			} else if (message.spam) { // don't collect anti spam messages
+				collector.collected.pop();
 			}
 		});
 
