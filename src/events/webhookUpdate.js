@@ -11,7 +11,7 @@ const logger = require('../functions/logger');
  */
 module.exports = async (client, channel) => {
 	if (channel.id !== client.webhook?.channelID) return;
-	if (!channel.checkBotPermissions(Permissions.FLAGS.MANAGE_WEBHOOKS)) return logger.warn(`[WEBHOOK UPDATE]: missing 'MANAGE_WEBHOOKS' in #${channel.name}`);
+	if (!channel.checkBotPermissions(Permissions.FLAGS.MANAGE_WEBHOOKS)) return logger.error(`[WEBHOOK UPDATE]: missing 'MANAGE_WEBHOOKS' in #${channel.name}`);
 
 	const webhooks = await channel.fetchWebhooks().catch(logger.error);
 

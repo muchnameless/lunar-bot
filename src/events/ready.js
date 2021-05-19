@@ -78,7 +78,7 @@ module.exports = async (client) => {
 					if (newName === oldName) continue; // no update needed
 
 					if (!channel.editable) {
-						logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
+						logger.error(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
 						continue;
 					}
 
