@@ -111,7 +111,7 @@ module.exports = class LinkCommand extends Command {
 				const linkedUser = await playerLinkedToID.discordUser.catch((error) => {
 					if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
 						linkedUserIsDeleted = true;
-						return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: deleted discord user: ${playerLinkedToID.discordID}`);
+						return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: deleted discord user: ${playerLinkedToID.discordID}`, error);
 					}
 					return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: error fetching already linked user`, error);
 				});
