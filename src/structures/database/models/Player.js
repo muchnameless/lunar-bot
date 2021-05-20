@@ -1245,6 +1245,9 @@ module.exports = class Player extends Model {
 		// remove from user player cache
 		const user = this.client.users.cache.get(this.discordID);
 		if (user) user.player = null;
+
+		// remove cached member
+		this._discordMember = null;
 	}
 
 	/**
