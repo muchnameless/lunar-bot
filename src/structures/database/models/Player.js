@@ -136,7 +136,7 @@ module.exports = class Player extends Model {
 				defaultValue: false,
 				allowNull: false,
 				set(value) {
-					if (!value) this._discordMember = null;
+					if (!value) this.uncacheMember();
 					this.setDataValue('inDiscord', value);
 				},
 			},
@@ -802,28 +802,31 @@ module.exports = class Player extends Model {
 	 * @param {string} reason reason for discord's audit logs
 	 */
 	async unlink(reason = null) {
-		const currentLinkedMember = await this.discordMember;
-
-		// unlink 1/2
-		this.discordID = null; // needs to be set before so that client.on('guildMemberUpdate', ...) doesn't change the nickname back to the ign
+		const currentlyLinkedMember = await this.discordMember;
 
 		let wasSuccessful = true;
 
-		if (currentLinkedMember) {
+		const { guildID } = this; // 1/3
+
+		if (currentlyLinkedMember) {
 			// remove roles that the bot manages
-			const { rolesToPurge } = currentLinkedMember;
+			const { rolesToPurge } = currentlyLinkedMember;
 
 			if (rolesToPurge.length) wasSuccessful = await this.makeRoleApiCall([], rolesToPurge, reason);
 
 			// reset nickname if it is set to the player's ign
-			if (currentLinkedMember.nickname === this.ign) wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
+			if (currentlyLinkedMember.nickname === this.ign) {
+				// 2/3 needs to be set before so that client.on('guildMemberUpdate', ...) doesn't change the nickname back to the ign
+				this.guildID = GUILD_ID_ERROR;
 
-			// unlink player from member
-			currentLinkedMember.player = null;
+				wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
+			}
 		}
 
-		// unlink 2/2
-		this.inDiscord = false;
+		if (this.guildID === GUILD_ID_ERROR) this.guildID = guildID; // 3/3
+
+		this.discordID = null;
+
 		await this.save();
 
 		return wasSuccessful;
@@ -936,7 +939,7 @@ module.exports = class Player extends Model {
 	 * @param {boolean} shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async syncIgnWithDisplayName(shouldSendDm = false) {
-		if (this.guildID === GUILD_ID_BRIDGER) return;
+		if (this.notInGuild) return;
 
 		const member = await this.discordMember;
 
@@ -1231,18 +1234,25 @@ module.exports = class Player extends Model {
 	}
 
 	/**
+	 * removes the dual link between a discord member / user and the player
+	 */
+	async uncacheMember() {
+		if (!this.discordID) return;
+
+		// remove from member player cache
+		const member = await this.discordMember;
+		if (member) member.player = null;
+
+		// remove from user player cache
+		const user = this.client.users.cache.get(this.discordID);
+		if (user) user.player = null;
+	}
+
+	/**
 	 * removes the element from member, user, guild, client cache
 	 */
 	async uncache() {
-		if (this.discordID) {
-			// remove from member player cache
-			const member = await this.discordMember;
-			if (member) member.player = null;
-
-			// remove from user player cache
-			const user = this.client.users.cache.get(this.discordID);
-			if (user) user.player = null;
-		}
+		await this.uncacheMember();
 
 		// remove from guild / client player cache
 		this.client.hypixelGuilds.sweepPlayerCache(this.guildID); // sweep hypixel guild player cache
