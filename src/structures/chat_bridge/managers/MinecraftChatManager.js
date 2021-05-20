@@ -283,7 +283,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	static _cleanCommandResponse(messages) {
 		return messages
-			.map(({ content }) => content.replace(/^-{50,}|-{50,}$/g, '').trim())
+			.map(({ content }) => content.replace(/^-{29,}|-{29,}$/g, '').trim())
 			.join('\n');
 	}
 
@@ -690,7 +690,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
 		const collector = this._commandCollector = this.createMessageCollector(
-			message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{50,}/.test(message.content)),
+			message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{29,}/.test(message.content)),
 			{
 				time: timeout * 1_000,
 			},
@@ -707,9 +707,9 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		// collect message
 		collector.on('collect', (/** @type {import('../HypixelMessage')} */ message) => {
-			if (/^-{50,}/.test(message.content)) { // is line separator
+			if (/^-{29,}/.test(message.content)) { // is line separator
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
-				if (/[^-]-{50,}$/.test(message.content)) return collector.stop();
+				if (/[^-]-{29,}$/.test(message.content)) return collector.stop();
 
 				collector.collected.pop();
 				if (collector.collected.length) collector.stop();
