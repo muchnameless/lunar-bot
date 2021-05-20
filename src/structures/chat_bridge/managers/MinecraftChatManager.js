@@ -471,18 +471,31 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
 				.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
 				.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
-					const channelName = this.client.channels.cache.get(p1)?.name;
-					if (channelName) return `#${channelName}`;
+					const CHANNEL_NAME = this.client.channels.cache.get(p1)?.name;
+					if (CHANNEL_NAME) return `#${CHANNEL_NAME}`;
 					return match;
 				})
 				.replace(/<@&(\d{17,19})>/g, (match, p1) => { // roles
-					const roleName = this.client.lgGuild?.roles.cache.get(p1)?.name;
-					if (roleName) return `@${roleName}`;
+					const ROLE_NAME = this.client.lgGuild?.roles.cache.get(p1)?.name;
+					if (ROLE_NAME) return `@${ROLE_NAME}`;
 					return match;
 				})
 				.replace(/<@!?(\d{17,19})>/g, (match, p1) => { // users
-					const displayName = this.client.lgGuild?.members.cache.get(p1)?.displayName ?? this.client.users.cache.get(p1)?.username;
-					if (displayName) return `@${displayName}`;
+					const member = this.client.lgGuild?.members.cache.get(p1);
+					if (member) {
+						const { player } = member;
+						if (player) return `@${player.ign}`;
+					}
+
+					const user = this.client.users.cache.get(p1);
+					if (user) {
+						const { player } = user;
+						if (player) return `@${player.ign}`;
+					}
+
+					const NAME = member?.displayName ?? user?.username;
+					if (NAME) return `@${NAME}`;
+
 					return match;
 				}),
 		);
