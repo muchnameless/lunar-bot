@@ -450,7 +450,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 				const [{ value: IGN }] = options;
 
 				return this._run(interaction, options, {
-					comand: `g invite ${IGN}`,
+					command: `g invite ${IGN}`,
 					responseRegExp: invite(IGN),
 				});
 			}
@@ -514,7 +514,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					: null;
 				let target;
 
-				if (hypixelGuild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 					target = 'everyone';
 					hypixelGuild ??= interaction.user.hypixelGuild;
 
@@ -602,7 +602,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					: null;
 				let target;
 
-				if (hypixelGuild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 					target = 'everyone';
 					hypixelGuild ??= interaction.user.hypixelGuild;
 

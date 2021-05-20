@@ -12,7 +12,7 @@ module.exports = class MuteCommand extends SetRankCommand {
 			aliases: [ 'guildmute' ],
 			description: 'mute a single guild member or guild chat both ingame and for the chat bridge',
 			args: 2,
-			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format] <${this.collection.constructor.forceFlagsAsFlags} to disable IGN autocorrection>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member | \`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format] <${this.collection.constructor.forceFlagsAsFlags} to disable IGN autocorrection>`,
 			cooldown: 0,
 		});
 	}
@@ -34,7 +34,7 @@ module.exports = class MuteCommand extends SetRankCommand {
 		 */
 		let hypixelGuild = this.client.hypixelGuilds.getFromArray([ ...flags, ...args ]);
 
-		if (hypixelGuild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+		if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 			target = 'everyone';
 			hypixelGuild ??= message.author.hypixelGuild;
 

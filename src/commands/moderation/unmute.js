@@ -11,7 +11,7 @@ module.exports = class UnmuteCommand extends SetRankCommand {
 			aliases: [ 'guildunmute' ],
 			description: 'unmute a single guild member or guild chat both ingame and for the chat bridge',
 			args: true,
-			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] <${this.collection.constructor.forceFlagsAsFlags} to disable IGN autocorrection>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member | \`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] <${this.collection.constructor.forceFlagsAsFlags} to disable IGN autocorrection>`,
 			cooldown: 0,
 		});
 	}
@@ -33,7 +33,7 @@ module.exports = class UnmuteCommand extends SetRankCommand {
 		 */
 		let hypixelGuild = this.client.hypixelGuilds.getFromArray([ ...flags, ...args ]);
 
-		if (hypixelGuild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+		if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 			target = 'everyone';
 			hypixelGuild ??= message.author.hypixelGuild;
 
