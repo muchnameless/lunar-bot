@@ -49,7 +49,7 @@ module.exports = {
 	 */
 	defaultResponseRegExp: /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u,
 
-	blockedWordsRegExp: /\bsex\b|\bcum\b|nutte(?:d|r)|\bthot\b|pussy|suck my dick|nude|\bp+ornhub+(?:\..+)?\b|\bxhamster(?:\..+)?\b|\bpedo(?:phile|s)?\b|\b(?:you'?r+?e?|ur)(?: mom| dad)? gay+\b|fa(g+o+|g{2,})t|cocain|\bh+e+r+o+i+n+\b|\bk+ys+\b|kil.+? yourself+\b|school\s*shoot|get aids|\bsuicide\b|\bslave\b|braindead|\bchang\b|\bn+i[bg]{2,}(?:er+|a+)\b|\bk{3,}\b|\br+ape+\b|shoot yourself+\b|kkr|hope you die|\bmomo\b/i,
+	blockedWordsRegExp: /\bsex\b|\bcum\b|nutte(?:d|r)|\bthot\b|pussy|suck my dick|nude|\bp+ornhub+(?:\..+)?\b|\bxhamster(?:\..+)?\b|\bpedo(?:phile|s)?\b|\b(?:you'?r+?e?|ur)(?: mom| dad)? gay+\b|fa(g+o+|g{2,})t|cocain|\bh+e+r+o+i+n+\b|\bk+ys+\b|kil.+? yourself+\b|school\s*shoot|get aids|autist|\bsuicide\b|\bslave\b|braindead|\bchang\b|\bn+i[bg]{2,}(?:er+|a+)\b|\bk{3,}\b|\br+ape+\b|shoot yourself+\b|kkr|hope you die|\bmomo\b/i,
 
 	memeRegExp: /[⠁-⣿]/,
 
