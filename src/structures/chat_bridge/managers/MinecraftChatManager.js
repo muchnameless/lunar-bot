@@ -1,6 +1,6 @@
 'use strict';
 
-const { Util: { splitMessage }, SnowflakeUtil } = require('discord.js');
+const { MessageEmbed, Util: { splitMessage }, SnowflakeUtil } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const emojiRegex = require('emoji-regex/es2015')();
@@ -229,13 +229,15 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 							const MUTE_DURATION_LONG = ms(MUTE_DURATION, { long: true });
 
-							this.client.log(this.client.defaultEmbed
+							this.client.log(new MessageEmbed()
+								.setColor(this.client.config.get('EMBED_RED'))
 								.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
 								.setThumbnail(player.image)
 								.setDescription(stripIndents`
 									**Auto Muted** for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_RESET_TIME') * 60_000, { long: true })}
 									${player.info}
-								`),
+								`)
+								.setTimestamp(),
 							);
 
 							info = stripIndents`
