@@ -806,8 +806,6 @@ module.exports = class Player extends Model {
 
 		let wasSuccessful = true;
 
-		const { guildID } = this; // 1/3
-
 		if (currentlyLinkedMember) {
 			// remove roles that the bot manages
 			const { rolesToPurge } = currentlyLinkedMember;
@@ -816,14 +814,15 @@ module.exports = class Player extends Model {
 
 			// reset nickname if it is set to the player's ign
 			if (currentlyLinkedMember.nickname === this.ign) {
-				// 2/3 needs to be set before so that client.on('guildMemberUpdate', ...) doesn't change the nickname back to the ign
-				this.guildID = GUILD_ID_ERROR;
+				// needs to changed temporarily so that client.on('guildMemberUpdate', ...) doesn't change the nickname back to the ign
+				const { guildID } = this; // 1/3
+				this.guildID = GUILD_ID_ERROR; // 2/3
 
 				wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
+
+				if (this.guildID === GUILD_ID_ERROR) this.guildID = guildID; // 3/3
 			}
 		}
-
-		if (this.guildID === GUILD_ID_ERROR) this.guildID = guildID; // 3/3
 
 		this.discordID = null;
 
