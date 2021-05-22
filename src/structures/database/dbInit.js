@@ -9,10 +9,15 @@ sequelize.options.logging = x => logger.debug(x);
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 const alter = process.argv.includes('--alter') || process.argv.includes('-a');
 
-sequelize
-	.sync({ force, alter })
-	.then(() => {
+
+(async () => {
+	try {
+		await sequelize.sync({ force, alter });
 		logger.info('Database synced');
-		return sequelize.close();
-	})
-	.catch(logger.error);
+		await sequelize.close();
+		process.exit(0);
+	} catch (error) {
+		logger.error(error);
+		process.exit(-1);
+	}
+})();
