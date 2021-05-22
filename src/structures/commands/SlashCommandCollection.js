@@ -1,6 +1,6 @@
 'use strict';
 
-const { Collection } = require('discord.js');
+const { Collection, GuildApplicationCommandManager } = require('discord.js');
 const { dirname, basename } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
 const CooldownCollection = require('./CooldownCollection');
@@ -58,7 +58,15 @@ module.exports = class SlashCommandCollection extends Collection {
 				}
 			}
 
-			if (permissions.length) await commandManager.setPermissions(permissions);
+			if (permissions.length) {
+				if (commandManager instanceof GuildApplicationCommandManager) {
+					await commandManager.setPermissions(permissions);
+				} else { // permissions for global commands must be set per guild
+					for (const guild of this.client.guilds.cache.values()) {
+						guild.commands.setPermissions(permissions);
+					}
+				}
+			}
 		} catch (error) {
 			logger.error(error);
 		}
