@@ -21,11 +21,11 @@
     "chartjs-node-canvas": "^3.2.0",
     "common-tags": "^1.8.0",
     "cron": "^1.8.2",
-    "discord.js": "github:discordjs/discord.js#c8d20a456b635ce6081ed8ad17315a9a0c0244bc",
-    "dotenv": "^9.0.2",
+    "discord.js": "github:discordjs/discord.js#f8703e3e59839d7380795ecf719d5bac691860a4",
+    "dotenv": "^10.0.0",
     "emoji-regex": "^9.2.2",
     "form-data": "^4.0.0",
-    "ioredis": "^4.27.2",
+    "ioredis": "^4.27.3",
     "jaro-winkler": "^0.2.8",
     "keyv": "^4.0.3",
     "lex": "^1.7.9",
@@ -50,6 +50,6 @@
     "@babel/plugin-syntax-class-properties": "^7.12.13",
     "@babel/preset-env": "^7.14.2",
     "discord-api-types": "^0.18.1",
-    "eslint": "^7.26.0"
+    "eslint": "^7.27.0"
   }
 }
