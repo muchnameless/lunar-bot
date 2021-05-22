@@ -82,7 +82,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? ''}: error DMing muted user`, error);
 		}
 
-		cache.set(`chatbridge:mute:dm:${message.author.id}`, true, 15 * 60_000);
+		cache.set(`chatbridge:mute:dm:${message.author.id}`, true, 30 * 60_000);
 	}
 
 	/**
