@@ -542,12 +542,12 @@ module.exports = class SetRankCommand extends SlashCommand {
 				const EXPIRES_AT = Date.now() + DURATION;
 
 				if (target instanceof players.model) {
-					target.chatBridgeMutedUntil = EXPIRES_AT;
+					target.mutedUntil = EXPIRES_AT;
 					await target.save();
 
 					if (target.notInGuild) return interaction.safeReply(`muted \`${target}\` for \`${DURATION_INPUT}\``, { ephemeral: false });
 				} else if (target === 'everyone') {
-					hypixelGuild.chatMutedUntil = EXPIRES_AT;
+					hypixelGuild.mutedUntil = EXPIRES_AT;
 					await hypixelGuild.save();
 				}
 
@@ -624,12 +624,12 @@ module.exports = class SetRankCommand extends SlashCommand {
 				}
 
 				if (target instanceof players.model) {
-					target.chatBridgeMutedUntil = 0;
+					target.mutedUntil = 0;
 					await target.save();
 
 					if (target.notInGuild) return interaction.safeReply(`unmuted \`${target}\``, { ephemeral: false });
 				} else if (target === 'everyone') {
-					hypixelGuild.chatMutedUntil = 0;
+					hypixelGuild.mutedUntil = 0;
 					await hypixelGuild.save();
 				}
 

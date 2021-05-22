@@ -73,7 +73,7 @@ module.exports = class HypixelGuild extends Model {
 		/**
 		 * @type {number}
 		 */
-		this.chatMutedUntil;
+		this.mutedUntil;
 		/**
 		 * @type {ChatBridgeChannel[]}
 		 */
@@ -120,7 +120,7 @@ module.exports = class HypixelGuild extends Model {
 				defaultValue: true,
 				allowNull: false,
 			},
-			chatMutedUntil: {
+			mutedUntil: {
 				type: DataTypes.BIGINT,
 				defaultValue: 0,
 				allowNull: false,
@@ -310,9 +310,9 @@ module.exports = class HypixelGuild extends Model {
 
 		// update chatMute
 		if (chatMute) {
-			this.chatMutedUntil = Date.now() + chatMute;
+			this.mutedUntil = Date.now() + chatMute;
 		} else {
-			this.chatMutedUntil = 0;
+			this.mutedUntil = 0;
 		}
 
 		return this.save();

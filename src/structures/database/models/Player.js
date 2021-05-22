@@ -57,7 +57,7 @@ module.exports = class Player extends Model {
 		/**
 		 * @type {number}
 		 */
-		this.chatBridgeMutedUntil;
+		this.mutedUntil;
 		/**
 		 * @type {boolean}
 		 */
@@ -140,7 +140,7 @@ module.exports = class Player extends Model {
 					this.setDataValue('inDiscord', value);
 				},
 			},
-			chatBridgeMutedUntil: {
+			mutedUntil: {
 				type: DataTypes.BIGINT,
 				defaultValue: 0,
 				allowNull: false,
@@ -1299,7 +1299,7 @@ module.exports = class Player extends Model {
 
 		// sync guild mutes
 		if (mutedTill) {
-			this.chatBridgeMutedUntil = mutedTill;
+			this.mutedUntil = mutedTill;
 		}
 
 		// update guild rank

@@ -73,12 +73,12 @@ module.exports = class MuteCommand extends SetRankCommand {
 		const EXPIRES_AT = Date.now() + DURATION;
 
 		if (target instanceof players.model) {
-			target.chatBridgeMutedUntil = EXPIRES_AT;
+			target.mutedUntil = EXPIRES_AT;
 			await target.save();
 
 			if (target.notInGuild) return message.reply(`muted \`${target}\` for \`${DURATION_INPUT}\`.`);
 		} else if (target === 'everyone') {
-			hypixelGuild.chatMutedUntil = EXPIRES_AT;
+			hypixelGuild.mutedUntil = EXPIRES_AT;
 			await hypixelGuild.save();
 		}
 

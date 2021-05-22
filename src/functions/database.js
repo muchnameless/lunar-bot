@@ -8,12 +8,12 @@ const logger = require('./logger');
  * @param {import('sequelize').Model} model
  */
 module.exports.mutedCheck = function(model) {
-	if (model.chatBridgeMutedUntil) {
+	if (model.mutedUntil) {
 		// mute hasn't expired
-		if (Date.now() < model.chatBridgeMutedUntil) return true;
+		if (Date.now() < model.mutedUntil) return true;
 
 		// mute has expired
-		model.chatBridgeMutedUntil = 0;
+		model.mutedUntil = 0;
 		model.save().catch(logger.error);
 	}
 
