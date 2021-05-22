@@ -5,15 +5,15 @@ const logger = require('./logger');
 
 /**
  * checks wether the model instance is currently muted
- * @param {import('sequelize').Model} model
+ * @param {import('../structures/database/models/Player')|import('../structures/database/models/HypixelGuild')} model
  */
 module.exports.mutedCheck = function(model) {
-	if (model.mutedUntil) {
+	if (model.mutedTill) {
 		// mute hasn't expired
-		if (Date.now() < model.mutedUntil) return true;
+		if (Date.now() < model.mutedTill) return true;
 
 		// mute has expired
-		model.mutedUntil = 0;
+		model.mutedTill = 0;
 		model.save().catch(logger.error);
 	}
 

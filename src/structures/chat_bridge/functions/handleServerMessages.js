@@ -140,7 +140,7 @@ module.exports = async (message) => {
 			const { guild } = message.chatBridge;
 			const msDuration = stringToMS(duration);
 
-			guild.mutedUntil = Number.isNaN(msDuration)
+			guild.mutedTill = Number.isNaN(msDuration)
 				? Infinity
 				: Date.now() + msDuration;
 			guild.save();
@@ -154,7 +154,7 @@ module.exports = async (message) => {
 
 		const msDuration = stringToMS(duration);
 
-		player.mutedUntil = Number.isNaN(msDuration)
+		player.mutedTill = Number.isNaN(msDuration)
 			? Infinity
 			: Date.now() + msDuration;
 		player.save();
@@ -177,7 +177,7 @@ module.exports = async (message) => {
 		if (target === 'the guild chat') {
 			const { guild } = message.chatBridge;
 
-			guild.mutedUntil = 0;
+			guild.mutedTill = 0;
 			guild.save();
 
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was unmuted`);
@@ -187,7 +187,7 @@ module.exports = async (message) => {
 
 		if (!player) return;
 
-		player.mutedUntil = 0;
+		player.mutedTill = 0;
 		player.save();
 
 		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: ${target} was unmuted`);

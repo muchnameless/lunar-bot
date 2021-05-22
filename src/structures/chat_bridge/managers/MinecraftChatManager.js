@@ -224,7 +224,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 						if (player && !player.muted) {
 							const MUTE_DURATION = this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_DURATION') * 60_000;
 
-							player.mutedUntil = Date.now() + MUTE_DURATION;
+							player.mutedTill = Date.now() + MUTE_DURATION;
 							player.save();
 
 							const MUTE_DURATION_LONG = ms(MUTE_DURATION, { long: true });
@@ -511,7 +511,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	async gchat(content, { prefix = '', ...options } = {}) {
 		if (this.bot.player.muted) {
 			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) {
-				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.mutedUntil - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${content}`);
+				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.mutedTill - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${content}`);
 			}
 
 			return false;

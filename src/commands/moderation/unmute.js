@@ -66,12 +66,12 @@ module.exports = class UnmuteCommand extends SetRankCommand {
 		}
 
 		if (target instanceof players.model) {
-			target.mutedUntil = 0;
+			target.mutedTill = 0;
 			await target.save();
 
 			if (target.notInGuild) return message.reply(`unmuted \`${target}\`.`);
 		} else if (target === 'everyone') {
-			hypixelGuild.mutedUntil = 0;
+			hypixelGuild.mutedTill = 0;
 			await hypixelGuild.save();
 		}
 

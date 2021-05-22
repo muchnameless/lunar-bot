@@ -57,7 +57,7 @@ module.exports = class Player extends Model {
 		/**
 		 * @type {number}
 		 */
-		this.mutedUntil;
+		this.mutedTill;
 		/**
 		 * @type {boolean}
 		 */
@@ -140,10 +140,13 @@ module.exports = class Player extends Model {
 					this.setDataValue('inDiscord', value);
 				},
 			},
-			mutedUntil: {
+			mutedTill: {
 				type: DataTypes.BIGINT,
 				defaultValue: 0,
 				allowNull: false,
+				set(value) {
+					this.setDataValue('mutedTill', value ?? 0);
+				},
 			},
 			hasDiscordPingPermission: {
 				type: DataTypes.BOOLEAN,
@@ -1298,9 +1301,7 @@ module.exports = class Player extends Model {
 		}
 
 		// sync guild mutes
-		if (mutedTill) {
-			this.mutedUntil = mutedTill;
-		}
+		this.mutedTill = mutedTill;
 
 		// update guild rank
 		this.guildRankPriority = hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ?? (/guild ?master/i.test(rank) ? hypixelGuild.ranks.length : 1);

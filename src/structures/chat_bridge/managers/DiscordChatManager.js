@@ -245,19 +245,19 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		// check if player is muted
 		if (player?.muted) {
-			DiscordChatManager._dmMuteInfo(message, player, `you are currently muted for ${ms(player.mutedUntil - Date.now(), { long: true })}`);
+			DiscordChatManager._dmMuteInfo(message, player, `you are currently muted for ${ms(player.mutedTill - Date.now(), { long: true })}`);
 			return message.react(MUTED);
 		}
 
 		// check if guild chat is muted
 		if (this.guild.muted && !player?.isStaff) {
-			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat is currently muted for ${ms(this.guild.mutedUntil - Date.now(), { long: true })}`);
+			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat is currently muted for ${ms(this.guild.mutedTill - Date.now(), { long: true })}`);
 			return message.react(MUTED);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.bot.player?.muted) {
-			DiscordChatManager._dmMuteInfo(message, player, `the bot is currently muted for ${ms(this.minecraft.bot.player.mutedUntil - Date.now(), { long: true })}`);
+			DiscordChatManager._dmMuteInfo(message, player, `the bot is currently muted for ${ms(this.minecraft.bot.player.mutedTill - Date.now(), { long: true })}`);
 			return message.react(MUTED);
 		}
 
