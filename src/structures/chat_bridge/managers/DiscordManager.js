@@ -171,14 +171,15 @@ module.exports = class DiscordManager {
 											?? match;
 
 								default: { // players, members/users, roles
-									const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === p2.toLowerCase());
+									const IGN = p2.replace(/\W/g, '').toLowerCase();
 
-									if (player?.inDiscord) return `<@${player.discordID}>`;
+									if (!IGN.length) return match;
 
-									return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-											?? this.client.users.cache.find(({ username }) => username?.toLowerCase() === p2.toLowerCase())?.toString() // users
-											?? this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-											?? match;
+									const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === IGN);
+
+									if (player?.inDiscord) return `<@${player.discordID}>`; // player can be pinged
+
+									return match;
 								}
 							}
 						},
