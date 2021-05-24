@@ -25,7 +25,7 @@
     "dotenv": "^9.0.2",
     "emoji-regex": "^9.2.2",
     "form-data": "^4.0.0",
-    "ioredis": "^4.27.2",
+    "ioredis": "^4.27.3",
     "jaro-winkler": "^0.2.8",
     "keyv": "^4.0.3",
     "lex": "^1.7.9",
