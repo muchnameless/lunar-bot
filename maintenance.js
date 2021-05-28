@@ -10,10 +10,10 @@ const logger = require('./src/functions/logger');
 // catch rejections
 process
 	.on('unhandledRejection', (error) => {
-		logger.error('[UNCAUGHT PROMISE REJECTION]:', error);
+		logger.error('[UNCAUGHT PROMISE REJECTION]', error);
 	})
 	.on('uncaughtException', (error) => {
-		logger.error('[UNCAUGHT EXCEPTION]:', error);
+		logger.error('[UNCAUGHT EXCEPTION]', error);
 		process.exit(1);
 	});
 

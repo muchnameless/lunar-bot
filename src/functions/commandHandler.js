@@ -153,7 +153,7 @@ module.exports = async (message) => {
 	} catch (error) {
 		if (error instanceof ChatBridgeError) return message.reply(`${error}`);
 
-		logger.error(`[CMD HANDLER]: An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}:`, error);
+		logger.error(`[CMD HANDLER]: An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}`, error);
 		message.reply(`an error occured while executing the \`${command.name}\` command:\n${error}`);
 	}
 };

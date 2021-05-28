@@ -8,4 +8,4 @@ const logger = require('../functions/logger');
  * @param {import('../structures/LunarClient')} client
  * @param {*} error
  */
-module.exports = (client, error) => logger.error('[SHARD ERROR]:', error);
+module.exports = (client, error) => logger.error('[SHARD ERROR]', error);

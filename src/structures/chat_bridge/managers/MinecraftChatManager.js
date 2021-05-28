@@ -367,7 +367,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		try {
 			this.bot?.quit();
 		} catch (error) {
-			logger.error('[CHATBRIDGE DISCONNECT]:', error);
+			logger.error('[CHATBRIDGE DISCONNECT]', error);
 		}
 
 		this.bot = null;

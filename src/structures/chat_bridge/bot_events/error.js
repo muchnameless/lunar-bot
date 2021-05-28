@@ -7,7 +7,7 @@ const logger = require('../../../functions/logger');
  * @param {import('../ChatBridge')} chatBridge
  */
 module.exports = (chatBridge, error) => {
-	logger.error('[CHATBRIDGE ERROR]:', error);
+	logger.error('[CHATBRIDGE ERROR]', error);
 
 	if (error.message.includes('Invalid credentials')) {
 		chatBridge.minecraft.shouldReconnect = false;
