@@ -333,10 +333,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * reconnects the bot
-	 * @param {?number} loginDelay delay in ms
+	 * reconnects the bot, exponential login delay up to 10 min
+	 * @param {number} [loginDelay] delay in ms
 	 */
-	reconnect(loginDelay = Math.min(Math.exp(this.loginAttempts), 300_000)) {
+	reconnect(loginDelay = Math.min(Math.exp(this.loginAttempts) * 1_000, 600_000)) {
 		// prevent multiple reconnections
 		if (this._isReconnecting) return this.chatBridge;
 		this._isReconnecting = true;
