@@ -1,7 +1,7 @@
 'use strict';
 
+const { AsyncQueue } = require('@sapphire/async-queue');
 const { randomInvisibleCharacter } = require('../constants/chatBridge');
-const AsyncQueue = require('../../AsyncQueue');
 
 /**
  * @typedef {import('../MessageCollector').MessageCollectorOptions & { errors: ?string[] }} AwaitMessagesOptions

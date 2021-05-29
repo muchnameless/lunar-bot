@@ -1,9 +1,9 @@
 'use strict';
 
 const { EventEmitter } = require('events');
+const { AsyncQueue } = require('@sapphire/async-queue');
 const fetch = require('node-fetch');
 const { sleep } = require('../functions/util');
-const AsyncQueue = require('./AsyncQueue');
 // const logger = require('../functions/logger');
 
 /**
