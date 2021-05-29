@@ -790,8 +790,7 @@ module.exports = class Player extends Model {
 		const OLD_DISCORD_ID = this.discordID;
 
 		try {
-			this.discordID = value;
-			await this.save({ fields: [ 'discordID' ] });
+			await super.update({ discordID: value });
 		} catch (error) {
 			this.discordID = OLD_DISCORD_ID;
 			throw error;
@@ -1061,7 +1060,12 @@ module.exports = class Player extends Model {
 	 * fetches the discord tag from hypixel
 	 */
 	async fetchDiscordTag() {
-		return (await hypixel.player.uuid(this.minecraftUUID).catch(error => logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}`, error)))?.socialMedia?.links?.DISCORD ?? null;
+		try {
+			return (await hypixel.player.uuid(this.minecraftUUID)).socialMedia?.links?.DISCORD ?? null;
+		} catch (error) {
+			logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}`, error);
+			return null;
+		}
 	}
 
 	/**
