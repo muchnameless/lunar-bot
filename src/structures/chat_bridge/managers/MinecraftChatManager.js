@@ -1,6 +1,7 @@
 'use strict';
 
 const { MessageEmbed, Util: { splitMessage }, SnowflakeUtil } = require('discord.js');
+const { AsyncQueue } = require('@sapphire/async-queue');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const emojiRegex = require('emoji-regex/es2015')();
@@ -11,10 +12,8 @@ const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
 const { MC_CLIENT_VERSION } = require('../constants/settings');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database');
 const minecraftBot = require('../MinecraftBot');
-const AsyncQueue = require('../../AsyncQueue');
 const MessageCollector = require('../MessageCollector');
 const ChatManager = require('./ChatManager');
-const cache = require('../../../api/cache');
 const logger = require('../../../functions/logger');
 
 /**
@@ -31,7 +30,7 @@ const logger = require('../../../functions/logger');
  * @property {?RegExp} [abortRegExp] regex to detect an abortion response
  * @property {number} [max=-1] maximum amount of response messages, -1 or Infinity for an infinite amount
  * @property {boolean} [raw=false] wether to return an array of the collected hypixel message objects instead of just the content
- * @property {number} [timeout=config.getNumber('INGAME_RESPONSE_TIMEOUT')] response collector timeout in seconds
+ * @property {number} [timeout=config.getNumber('INGAME_RESPONSE_TIMEOUT')] response collector timeout in milliseconds
  * @property {boolean} [rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
  */
 
@@ -141,7 +140,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				await this.command({
 					command: `w ${this.chatBridge.bot.ign} o/`,
 					responseRegExp: /^You cannot message this player\.$/,
-					timeout: 1,
+					timeout: 1_000,
 					rejectOnTimeout: true,
 					max: 1,
 				});
@@ -205,24 +204,25 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			switch (reason) {
 				case 'blocked': {
-					const infractions = 1 + (await cache.get(`chatbridge:infractions:${discordMessage.author.id}`).catch(error => logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error)) ?? 0);
-
-					cache.set(`chatbridge:infractions:${discordMessage.author.id}`, infractions, this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_RESET_TIME') * 60_000);
-
-					if (infractions >= this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+					try {
 						/** @type {import('../../database/models/Player')} */
-						const player = discordMessage.author.player ?? (await this.client.players.model.findOrCreate({
-							where: { discordID: discordMessage.author.id },
-							defaults: {
-								minecraftUUID: SnowflakeUtil.generate(),
-								guildID: GUILD_ID_BRIDGER,
-								ign: UNKNOWN_IGN,
-								inDiscord: true,
-							},
-						}).catch(error => logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error)))?.[0];
+						const player = discordMessage.author.player
+							?? (await this.client.players.model.findOrCreate({
+								where: { discordID: discordMessage.author.id },
+								defaults: {
+									minecraftUUID: SnowflakeUtil.generate(),
+									guildID: GUILD_ID_BRIDGER,
+									ign: UNKNOWN_IGN,
+									inDiscord: true,
+								},
+							}))[0];
 
-						if (player && !player.muted) {
-							const MUTE_DURATION = this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_DURATION') * 60_000;
+						player.addInfraction();
+
+						const { infractions } = player;
+
+						if (infractions >= this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS') && !player.muted) {
+							const MUTE_DURATION = this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_DURATION');
 
 							player.mutedTill = Date.now() + MUTE_DURATION;
 							player.save();
@@ -234,21 +234,19 @@ module.exports = class MinecraftChatManager extends ChatManager {
 								.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
 								.setThumbnail(player.image)
 								.setDescription(stripIndents`
-									**Auto Muted** for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_RESET_TIME') * 60_000, { long: true })}
+									**Auto Muted** for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.getNumber('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
 									${player.info}
 								`)
 								.setTimestamp(),
 							);
 
-							info = stripIndents`
-								you were automatically muted for ${MUTE_DURATION_LONG} due to continues infractions
-							`;
+							info = `you were automatically muted for ${MUTE_DURATION_LONG} due to continues infractions`;
 						}
-					} else {
-						info = stripIndents`
-							continuing to do so will result in an automatic temporary mute
-						`;
+					} catch (error) {
+						logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error);
 					}
+
+					info ??= 'continuing to do so will result in an automatic temporary mute';
 				}
 				// fallthrough
 				case 'filterBlocked':
@@ -707,7 +705,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		const collector = this._commandCollector = this.createMessageCollector(
 			message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{29,}/.test(message.content)),
 			{
-				time: timeout * 1_000,
+				time: timeout,
 			},
 		);
 
@@ -744,8 +742,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				case 'disconnect': {
 					if (rejectOnTimeout && !collected.length) {
 						return reject(raw
-							? [{ content: `no ingame response after ${ms(timeout * 1_000, { long: true })}` }]
-							: `no ingame response after ${ms(timeout * 1_000, { long: true })}`,
+							? [{ content: `no ingame response after ${ms(timeout, { long: true })}` }]
+							: `no ingame response after ${ms(timeout, { long: true })}`,
 						);
 					}
 
@@ -753,7 +751,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 						? collected
 						: collected.length
 							? MinecraftChatManager._cleanCommandResponse(collected)
-							: `no ingame response after ${ms(timeout * 1_000, { long: true })}`);
+							: `no ingame response after ${ms(timeout, { long: true })}`);
 				}
 
 				default:

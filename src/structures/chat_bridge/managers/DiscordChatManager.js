@@ -66,7 +66,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * DMs the message author with the content if they have not been DMed in the last 15 min
+	 * DMs the message author with the content if they have not been DMed in the last hour
 	 * @param {import('../../extensions/Message')} message
 	 * @param {import('../../database/models/Player')} player
 	 * @param {string} content
@@ -82,7 +82,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? ''}: error DMing muted user`, error);
 		}
 
-		cache.set(`chatbridge:mute:dm:${message.author.id}`, true, 30 * 60_000);
+		cache.set(`chatbridge:mute:dm:${message.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
 	}
 
 	/**
@@ -249,6 +249,12 @@ module.exports = class DiscordChatManager extends ChatManager {
 			return message.react(MUTED);
 		}
 
+		// check if the player is auto muted
+		if (player?.infractions >= this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+			DiscordChatManager._dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
+			return message.react(MUTED);
+		}
+
 		// check if guild chat is muted
 		if (this.guild.muted && !player?.isStaff) {
 			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat is currently muted for ${ms(this.guild.mutedTill - Date.now(), { long: true })}`);
@@ -277,7 +283,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 					: null,
 				message.content, // actual content
 				message.attachments.size
-					? await DiscordChatManager._uploadAttachments(message.attachments.array()) // links of attachments
+					? await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ]) // links of attachments
 					: null,
 			].filter(Boolean).join(' '),
 			{

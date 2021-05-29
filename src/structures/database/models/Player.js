@@ -148,6 +148,11 @@ module.exports = class Player extends Model {
 					this.setDataValue('mutedTill', value ?? 0);
 				},
 			},
+			_infractions: {
+				type: DataTypes.ARRAY(DataTypes.BIGINT),
+				defaultValue: null,
+				allowNull: true,
+			},
 			hasDiscordPingPermission: {
 				type: DataTypes.BOOLEAN,
 				defaultValue: true,
@@ -234,6 +239,26 @@ module.exports = class Player extends Model {
 				fields: [ 'discordID' ],
 			}],
 		});
+	}
+
+	/**
+	 * returns the number of infractions that have not already expired
+	 * @return {number}
+	 */
+	get infractions() {
+		if (!this._infractions) return 0;
+
+		// remove expired infractions
+		this._infractions = this._infractions.filter(timestamp => timestamp + this.client.config.getNumber('INFRACTIONS_EXPIRATION_TIME') >= Date.now());
+
+		// all infractions expired
+		if (!this._infractions.length) {
+			this._infractions = null;
+			this.save();
+			return 0;
+		}
+
+		return this._infractions.length;
 	}
 
 	/**
@@ -1478,6 +1503,16 @@ module.exports = class Player extends Model {
 			overflow,
 			totalWeight: weight + overflow,
 		};
+	}
+
+	/**
+	 * adds the current timestamp to infractions
+	 */
+	addInfraction() {
+		this._infractions ??= []; // create infractions array if non-existent
+		this._infractions.push(Date.now()); // add current time
+		this.changed('_infractions', true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+		return this.save();
 	}
 
 	/**
