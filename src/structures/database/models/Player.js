@@ -248,11 +248,8 @@ module.exports = class Player extends Model {
 	get infractions() {
 		if (!this._infractions) return 0;
 
-		// remove expired infractions
-		this._infractions = this._infractions.filter(timestamp => timestamp + this.client.config.getNumber('INFRACTIONS_EXPIRATION_TIME') >= Date.now());
-
-		// all infractions expired
-		if (!this._infractions.length) {
+		// last infraction expired -> remove all infractions
+		if (this._infractions[this._infractions.length - 1] + this.client.config.getNumber('INFRACTIONS_EXPIRATION_TIME') >= Date.now()) {
 			this._infractions = null;
 			this.save();
 			return 0;
