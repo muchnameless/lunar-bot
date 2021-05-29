@@ -234,7 +234,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('../../extensions/Message')} message
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */
-	async forwardToMinecraft(message, { player: playerInput = message.author.player, checkifNotFromBot = true } = {}) {
+	async forwardToMinecraft(message, { player: playerInput, checkifNotFromBot = true } = {}) {
 		if (!this.chatBridge.enabled) return;
 		if (!this.minecraft.ready) return message.react(X_EMOJI);
 
@@ -243,7 +243,9 @@ module.exports = class DiscordChatManager extends ChatManager {
 			if (message.webhookID === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		}
 
-		const player = playerInput ?? (message.author && (await this.client.players.model.findOne({ where: { discordID: message.author.id } })).catch(error => logger.error(`[FORWARD DC TO MC]: ${message.author.tag}`, error)));
+		const player = playerInput
+			?? message.author.player // cached player
+			?? (await this.client.players.model.findOne({ where: { discordID: message.author.id } })).catch(error => logger.error(`[FORWARD DC TO MC]: ${message.author.tag}`, error)); // uncached player
 
 		// check if player is muted
 		if (player?.muted) {
