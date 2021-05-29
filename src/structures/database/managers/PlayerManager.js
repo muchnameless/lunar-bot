@@ -64,8 +64,9 @@ module.exports = class PlayerManager extends ModelManager {
 	 */
 	set(key, value) {
 		this.client.hypixelGuilds.sweepPlayerCache(value.guildID);
+		this.cache.set(key, value);
 
-		return this.cache.set(key, value);
+		return this;
 	}
 
 	/**
@@ -76,13 +77,11 @@ module.exports = class PlayerManager extends ModelManager {
 		/** @type {import('../models/Player')} */
 		const player = this.resolve(idOrPlayer);
 
-		if (!player) throw new Error(`[PLAYER HANDLER DELETE]: invalid input: ${idOrPlayer}`);
+		if (!player) throw new Error(`[PLAYER HANDLER UNCACHE]: invalid input: ${idOrPlayer}`);
 
-		this.client.hypixelGuilds.sweepPlayerCache(player.guildID); // sweep hypixel guild player cache
-		const user = this.client.users.cache.get(player.discordID); // sweep user player cache
-		if (user) user.player = null;
+		player.uncache();
 
-		return this.cache.delete(player.minecraftUUID);
+		return this;
 	}
 
 	/**
@@ -148,7 +147,7 @@ module.exports = class PlayerManager extends ModelManager {
 			},
 		});
 
-		for (const player of playersToSweep) player.destroy();
+		await safePromiseAll(playersToSweep.map(async player => player.destroy()));
 
 		const AMOUNT = playersToSweep.length;
 
@@ -253,7 +252,7 @@ module.exports = class PlayerManager extends ModelManager {
 					await player.update({ rejectOnAPIError: true, ...options });
 				}
 			} catch (error) {
-				logger.error(`[PLAYERS UPDATE XP]: ${error}`);
+				logger.error('[PLAYERS UPDATE XP]', error);
 			}
 
 			return this;
@@ -297,11 +296,9 @@ module.exports = class PlayerManager extends ModelManager {
 		 * @param {number} ignChangesAmount
 		 */
 		const createEmbed = (guild, ignChangesAmount) => {
-			const embed = new MessageEmbed()
-				.setColor(this.client.config.get('EMBED_BLUE'))
+			const embed = this.client.defaultEmbed
 				.setTitle(`${typeof guild !== 'string' ? guild : upperCaseFirstChar(guild)} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildID }) => guildID === guild).size}`)
-				.setTimestamp();
+				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildID }) => guildID === guild).size}`);
 
 			embeds.push(embed);
 
@@ -445,11 +442,9 @@ module.exports = class PlayerManager extends ModelManager {
 		config.set('COMPETITION_RUNNING', 'true');
 		config.set('COMPETITION_SCHEDULED', 'false');
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')
-			.setDescription('started')
-			.setTimestamp(),
+			.setDescription('started'),
 		);
 	}
 
@@ -463,11 +458,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('COMPETITION_RUNNING', 'false');
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')
-			.setDescription('ended')
-			.setTimestamp(),
+			.setDescription('ended'),
 		);
 	}
 
@@ -482,11 +475,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('LAST_MAYOR_XP_RESET_TIME', CURRENT_MAYOR_TIME);
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Current Mayor XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.size} guild members`)
-			.setTimestamp(),
+			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 
 		this.client.schedule('mayorXpReset', new CronJob({
@@ -506,11 +497,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Daily XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.size} guild members`)
-			.setTimestamp(),
+			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 
 		this.updateMainProfiles();
@@ -526,11 +515,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Weekly XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.size} guild members`)
-			.setTimestamp(),
+			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 	}
 
@@ -544,11 +531,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
 
-		this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Monthly XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.size} guild members`)
-			.setTimestamp(),
+			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 	}
 
@@ -582,7 +567,7 @@ module.exports = class PlayerManager extends ModelManager {
 					mainProfileUpdate: `-\xa0${player.ign}: ${result.oldProfileName} -> ${result.newProfileName}`,
 				});
 			} catch (error) {
-				logger.error(`[UPDATE MAIN PROFILE]: ${error}`);
+				logger.error('[UPDATE MAIN PROFILE]', error);
 
 				if (error instanceof NonAPIError) {
 					log.push({

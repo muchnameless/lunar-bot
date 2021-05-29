@@ -1,5 +1,6 @@
 'use strict';
 
+const { Permissions } = require('discord.js');
 const { escapeIgn } = require('../../functions/util');
 const { validateNumber } = require('../../functions/stringValidators');
 const Command = require('../../structures/commands/Command');
@@ -55,15 +56,15 @@ module.exports = class TaxReminderCommand extends Command {
 			for (const player of playersOnlyIgn) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 			// send ping message and split between pings if too many chars
-			await message.reply(pingMessage, { reply: false, sameChannel: true, split: { char: ' ' } });
+			await message.reply(pingMessage, { sameChannel: true, split: { char: ' ' } });
 
 			// optional ghost ping (delete ping message(s))
 			if (!SHOULD_GHOST_PING) return message.channel.stopTyping(true);
 
-			const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error(`[TAX REMINDER]: ghost ping: ${error}`));
+			const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error('[TAX REMINDER]: ghost ping', error));
 
 			if (!fetched) return;
-			if (message.channel.checkBotPermissions('MANAGE_MESSAGES')) {
+			if (message.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) {
 				return message.channel.bulkDelete([ message.id, ...fetched.filter(({ author: { id } }) => [ this.client.user.id, message.author.id ].includes(id)).keys() ]).catch(logger.error);
 			}
 

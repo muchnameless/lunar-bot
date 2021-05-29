@@ -3,16 +3,12 @@
 const { EventEmitter } = require('events');
 const { join, basename } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
-const { prefixByType, messageTypes: { GUILD }, chatFunctionByType } = require('./constants/chatBridge');
+const { prefixByType, messageTypes: { GUILD }, chatFunctionByType, randomInvisibleCharacter } = require('./constants/chatBridge');
 const MinecraftChatManager = require('./managers/MinecraftChatManager');
 const logger = require('../../functions/logger');
 const DiscordManager = require('./managers/DiscordManager');
 const { sleep } = require('../../functions/util');
 
-/**
- * @typedef {MessageCollector.MessageCollectorOptions} AwaitMessagesOptions
- * @property {?string[]} [errors] Stop/end reasons that cause the promise to reject
- */
 
 /**
  * @typedef {object} ChatOptions
@@ -22,8 +18,7 @@ const { sleep } = require('../../functions/util');
  */
 
 /**
- * @typedef {import('discord.js').MessageOptions} DiscordMessageOptions
- * @property {string} [prefix]
+ * @typedef {import('discord.js').MessageOptions & { prefix: string }} DiscordMessageOptions
  */
 
 /**
@@ -191,7 +186,7 @@ module.exports = class ChatBridge extends EventEmitter {
 
 			return this;
 		} catch (error) {
-			logger.error(`[CHATBRIDGE LINK]: #${this.mcAccount}: ${error}`);
+			logger.error(`[CHATBRIDGE LINK]: #${this.mcAccount}`, error);
 
 			if (!this.shouldRetryLinking) {
 				logger.error(`[CHATBRIDGE LINK]: #${this.mcAccount}: aborting retry due to a critical error`);
@@ -249,17 +244,34 @@ module.exports = class ChatBridge extends EventEmitter {
 	 * @param {string} content
 	 * @param {object} param1
 	 * @param {string|import('./managers/DiscordChatManager')} [param1.type]
+	 * @param {import('./HypixelMessage')} [param1.hypixelMessage]
 	 * @param {DiscordMessageOptions} [param1.discord]
 	 * @param {ChatOptions} [param1.minecraft]
 	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]]>}
 	 */
-	async broadcast(content, { type = GUILD, discord: { prefix: discordPrefix = '', ...discord } = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = {}) {
+	async broadcast(content, { hypixelMessage, type = hypixelMessage?.type ?? GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = {}) {
 		const discordChatManager = this.discord.resolve(type);
 
 		return Promise.all([
-			this.minecraft[chatFunctionByType[discordChatManager?.type ?? type]]?.(content, { prefix: minecraftPrefix, maxParts, ...options })
-				?? this.minecraft.chat(content, { prefix: `${prefixByType[discordChatManager?.type ?? type]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : ''}`, maxParts, ...options }),
-			discordChatManager?.sendViaBot(`${discordPrefix}${content}`, discord),
+			// minecraft
+			this.minecraft[chatFunctionByType[(discordChatManager?.type ?? type)]]?.(content, { prefix: minecraftPrefix, maxParts, ...options })
+				?? this.minecraft.chat(
+					content,
+					{
+						prefix: `${discordChatManager?.prefix ?? prefixByType[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : randomInvisibleCharacter()}`,
+						maxParts,
+						...options,
+					},
+				),
+
+			// discord
+			discordChatManager?.sendViaBot(
+				content,
+				{
+					hypixelMessage,
+					...discord,
+				},
+			),
 		]);
 	}
 };

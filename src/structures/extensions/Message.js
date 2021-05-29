@@ -1,12 +1,12 @@
 'use strict';
 
-const { commaListsAnd } = require('common-tags');
-const { Structures, MessageEmbed, Message, User } = require('discord.js');
+const { stripIndents } = require('common-tags');
+const { Structures, MessageEmbed, Message, Permissions } = require('discord.js');
 const { isEqual } = require('lodash');
-const { CHANNEL_FLAGS } = require('../../constants/bot');
+const { permissionsToString } = require('../../functions/util');
+const { CHANNEL_FLAGS, replyPingRegExp } = require('../../constants/bot');
 const { DM_KEY, REPLY_KEY } = require('../../constants/redis');
 const cache = require('../../api/cache');
-const LunarGuildMember = require('./GuildMember');
 const logger = require('../../functions/logger');
 
 
@@ -97,53 +97,66 @@ class LunarMessage extends Message {
 	 * @param {string[]} requiredChannelPermissions
 	 * @returns {import('./TextChannel')}
 	 */
-	findNearestCommandsChannel(requiredChannelPermissions = [ 'VIEW_CHANNEL', 'SEND_MESSAGES' ]) {
+	findNearestCommandsChannel(requiredChannelPermissions = [ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]) {
 		if (!this.guild) return null;
 
-		return this.channel.parent.children.find(channel => channel.name.includes('commands') && channel.permissionsFor(this.guild.me).has(requiredChannelPermissions) && channel.permissionsFor(this.member).has([ 'VIEW_CHANNEL', 'SEND_MESSAGES' ]))
-			?? this.guild.channels.cache.find(channel => channel.name.includes('bot-commands') && channel.permissionsFor(this.guild.me).has(requiredChannelPermissions) && channel.permissionsFor(this.member).has([ 'VIEW_CHANNEL', 'SEND_MESSAGES' ]));
+		return this.channel.parent.children.find((/** @type {import('./TextChannel')} */ channel) => channel.name.includes('commands')
+			&& channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)
+			&& channel.permissionsFor(this.member).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]),
+		)
+			?? this.guild.channels.cache
+				.filter((/** @type {import('./TextChannel')} */ channel) => channel.name.includes('commands')
+					&& channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)
+					&& channel.permissionsFor(this.member).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]),
+				)
+				.sort((a, b) => Math.abs(a.rawPosition - this.channel.rawPosition) - Math.abs(b.rawPosition - this.channel.rawPosition))
+				.first();
 	}
 
 	/**
-	 * message.react with deleted and permission check and promise rejection catch
-	 * @param {import('discord.js').EmojiResolvable} emoji
-	 * @returns {Promise<?import('discord.js').MessageReaction>}
+	 * react in order if the message is not deleted and the client has 'ADD_REACTIONS', catching promise rejections
+	 * @param {import('discord.js').EmojiIdentifierResolvable[]} emojis
+	 * @returns {Promise<?import('discord.js').MessageReaction[]>}
 	 */
-	async reactSafely(emoji) {
+	async react(...emojis) {
 		if (this.deleted) return null;
-		if (!this.channel.checkBotPermissions('ADD_REACTIONS')) return null;
-		if (this.reactions.cache.get(this.client.emojis.resolveID(emoji))?.me) return Promise.resolve(this.reactions.cache.get(this.client.emojis.resolveID(emoji)));
-		return super.react(emoji).catch(error => logger.error(`[REACT SAFELY]: ${error}`));
+		if (!this.channel.checkBotPermissions(Permissions.FLAGS.ADD_REACTIONS)) return null;
+
+		const res = [];
+
+		try {
+			for (const emoji of emojis) {
+				if (this.reactions.cache.get(this.client.emojis.resolveID(emoji))?.me) {
+					res.push(this.reactions.cache.get(this.client.emojis.resolveID(emoji)));
+				} else {
+					res.push(await super.react(emoji));
+				}
+			}
+		} catch (error) {
+			logger.error('[MESSAGE REACT]', error);
+		}
+
+		return res;
 	}
 
 	/**
 	 * delete the message, added check for already deleted after timeout
 	 * @param {object} options message delete options
 	 * @param {number} [options.timeout] delay in ms
-	 * @param {string} [options.reason] reason for discord's audit logs
 	 */
-	async delete(options = {}) {
-		if (typeof options !== 'object') throw new TypeError('INVALID_TYPE', 'options', 'object', true);
+	async delete({ timeout = 0 } = {}) {
+		if (this.deleted) return this; // message already deleted check
 
-		const { timeout = 0, reason } = options;
-
-		// message already deleted check
-		if (this.deleted) return this;
-
-		// permission check
-		if (this.author.id !== this.client.user.id && !this.channel.permissionsFor?.(this.guild?.me).has('MANAGE_MESSAGES')) {
-			logger.warn(`[MESSAGE DELETE]: missing permission to delete message from ${this.author.tag} in ${this.channel.name}`);
+		if (!this.deletable) { // permission check
+			logger.warn(`[MESSAGE DELETE]: missing permission to delete message from ${this.author.tag} in #${this.channel.name}`);
 			return this;
 		}
 
 		// no timeout
-		if (timeout <= 0) return this.channel.messages.delete(this.id, reason).then(() => this);
+		if (timeout <= 0) return super.delete();
 
 		// timeout
-		return this.client.setTimeout(() => {
-			if (this.deleted) return this;
-			return this.delete({ reason });
-		}, timeout);
+		return this.client.setTimeout(() => this.delete(), timeout);
 	}
 
 	/**
@@ -216,17 +229,17 @@ class LunarMessage extends Message {
 		options.saveReplyMessageID ??= true;
 
 		// DMs
-		if (!this.guild) return this._sendReply(content, options);
-
-		// add reply if it is not present
-		options.reply ??= this.author.id;
-
-		if (options.reply && typeof options.reply !== 'string') {
-			if (options.reply instanceof User || options.reply instanceof LunarGuildMember) {
-				options.reply = options.reply.id;
-			} else if (options.reply instanceof LunarMessage) {
-				options.reply = options.reply.author.id;
-			}
+		if (!this.guild) {
+			return this._sendReply(
+				content,
+				{
+					reply: {
+						messageReference: this,
+						failIfNotExists: false,
+					},
+					...options,
+				},
+			);
 		}
 
 		options.sameChannel ??= false;
@@ -234,7 +247,7 @@ class LunarMessage extends Message {
 		// if (options.reply) content = `\u200b<@${options.reply}>${content.length ? ', ' : ''}${content}`;
 
 		// guild -> requires permission
-		const requiredChannelPermissions = [ 'VIEW_CHANNEL', 'SEND_MESSAGES' ];
+		const requiredChannelPermissions = [ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ];
 
 		if (options.embed) {
 			requiredChannelPermissions.push('EMBED_LINKS');
@@ -246,22 +259,30 @@ class LunarMessage extends Message {
 			// permission checks
 			if (!this.channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)) {
 				const missingChannelPermissions = requiredChannelPermissions.filter(permission => !this.channel.permissionsFor(this.guild.me).has(permission));
+				const errorMessage = `missing ${permissionsToString(missingChannelPermissions)} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
 
-				logger.warn(`missing ${missingChannelPermissions.map(permission => `'${permission}'`)} permission${missingChannelPermissions.length === 1 ? '' : 's'} in #${this.channel.name}`);
+				logger.warn(`${errorMessage} #${this.channel.name}`);
 
 				this.author
-					.send(commaListsAnd`
-						missing ${missingChannelPermissions.map(permission => `\`${permission}\``)} permission${missingChannelPermissions.length === 1 ? '' : 's'} in #${this.channel}
-					`)
+					.send(`${errorMessage} ${this.channel}`)
 					.catch(() => logger.error(`[REPLY]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
 
 				return null;
 			}
 
-			this.client.chatBridges.handleDiscordMessage(this, { checkifNotFromBot: false });
+			if (content.length) this.client.chatBridges.handleDiscordMessage(this, { checkifNotFromBot: false });
 
 			// send reply
-			const message = await this._sendReply(content, options);
+			const message = await this._sendReply(
+				content,
+				{
+					reply: {
+						messageReference: this,
+						failIfNotExists: false,
+					},
+					...options,
+				},
+			);
 
 			if (content.length) this.client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: false, player: this.author.player });
 
@@ -273,18 +294,20 @@ class LunarMessage extends Message {
 
 		// no #bot-commands channel found
 		if (!commandsChannel) {
-			if (this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES')) {
+			if (this.channel.permissionsFor(this.guild.me).has(Permissions.FLAGS.MANAGE_MESSAGES)) {
 				this.client.setTimeout(() => {
 					if (this.shouldReplyInSameChannel) return;
 					this.delete().catch(logger.error);
 				}, 10_000);
 			}
 
-			logger.warn(commaListsAnd`no #bot-commands channel with the required permission${requiredChannelPermissions.length === 1 ? '' : 's'} ${requiredChannelPermissions.map(permission => `'${permission}'`)}`);
+			const errorMessage = `no #bot-commands channel with the required permission${requiredChannelPermissions.length === 1 ? '' : 's'} ${permissionsToString(requiredChannelPermissions)} found`;
+
+			logger.error(errorMessage);
 
 			this.author
-				.send(commaListsAnd`
-					no #bot-commands channel with the required permission${requiredChannelPermissions.length === 1 ? '' : 's'} ${requiredChannelPermissions.map(permission => `\`${permission}\``)} found.
+				.send(stripIndents`
+					${errorMessage}.
 					Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.
 				`)
 				.catch(() => logger.error(`[REPLY]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
@@ -297,25 +320,29 @@ class LunarMessage extends Message {
 			super
 				.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.`)
 				.then(async (commandsChannelMessage) => {
-					if (!this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES'))	return commandsChannelMessage.delete({ timeout: 10_000 });
+					if (!this.channel.permissionsFor(this.guild.me).has(Permissions.FLAGS.MANAGE_MESSAGES))	return commandsChannelMessage.delete({ timeout: 10_000 });
 
 					this.client.setTimeout(() => {
-						if (!this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES') || this.shouldReplyInSameChannel) return commandsChannelMessage.delete();
+						if (!this.channel.permissionsFor(this.guild.me).has(Permissions.FLAGS.MANAGE_MESSAGES) || this.shouldReplyInSameChannel) return commandsChannelMessage.delete();
 
 						this.channel
 							.bulkDelete([ commandsChannelMessage.id, this.id ])
-							.catch(error => logger.error(`[REPLY]: unable to bulk delete: ${error}`));
+							.catch(error => logger.error('[REPLY]: unable to bulk delete', error));
 					}, 10_000);
 				});
-		} else if (this.channel.permissionsFor(this.guild.me).has('MANAGE_MESSAGES')) { // only delete author's message
+		} else if (this.channel.permissionsFor(this.guild.me).has(Permissions.FLAGS.MANAGE_MESSAGES)) { // only delete author's message
 			this.client.setTimeout(() => {
 				if (this.shouldReplyInSameChannel) return;
 				this.delete().catch(logger.error);
 			}, 10_000);
 		}
 
-		// send reply
-		return this._sendReply(content, options, commandsChannel);
+		// send reply with an @mention
+		return this._sendReply(
+			`\u{200b}${this.author}${content.length ? `, ${content}` : ''}`,
+			options,
+			commandsChannel,
+		);
 	}
 
 	/**
@@ -357,7 +384,7 @@ class LunarMessage extends Message {
 			}
 		} else { // send 1 message
 			message = await (oldReplyMessageID
-				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error(`[SEND REPLY]: ${error}`)))?.edit(content, options) ?? channel.send(content, options))
+				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error('[_SEND REPLY]', error)))?.edit(content, options) ?? channel.send(content, options))
 				: channel.send(content, options));
 
 			if (options.saveReplyMessageID) {
@@ -372,10 +399,26 @@ class LunarMessage extends Message {
 		if (IDsToDelete?.length && replyData.channelID) {
 			this.client.channels.cache.get(replyData.channelID)
 				?.deleteMessages(IDsToDelete)
-				.catch(error => logger.error(`[SEND REPLY]: IDs: ${IDsToDelete.map(x => `'${x}'`).join(', ')}: ${error}`));
+				.catch(error => logger.error(`[_SEND REPLY]: IDs: ${IDsToDelete.map(x => `'${x}'`).join(', ')}`, error));
 		}
 
 		return message;
+	}
+
+	/**
+	 * edits a message, preserving @mention pings at the beginning
+	 */
+	async edit(content, options) {
+		if (typeof content !== 'string') return super.edit(content, options);
+
+		const pingMatched = this.content?.match(replyPingRegExp);
+
+		return super.edit(
+			pingMatched && !content.startsWith(pingMatched[0])
+				? `${pingMatched[0]}${content}`
+				: content,
+			options,
+		);
 	}
 }
 

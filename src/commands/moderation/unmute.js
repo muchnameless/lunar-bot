@@ -11,7 +11,7 @@ module.exports = class UnmuteCommand extends SetRankCommand {
 			aliases: [ 'guildunmute' ],
 			description: 'unmute a single guild member or guild chat both ingame and for the chat bridge',
 			args: true,
-			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] <${this.commandCollection.constructor.forceFlagsAsFlags} to disable IGN autocorrection>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member | \`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] <${this.collection.constructor.forceFlagsAsFlags} to disable IGN autocorrection>`,
 			cooldown: 0,
 		});
 	}
@@ -33,7 +33,7 @@ module.exports = class UnmuteCommand extends SetRankCommand {
 		 */
 		let hypixelGuild = this.client.hypixelGuilds.getFromArray([ ...flags, ...args ]);
 
-		if (hypixelGuild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+		if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 			target = 'everyone';
 			hypixelGuild ??= message.author.hypixelGuild;
 
@@ -66,15 +66,18 @@ module.exports = class UnmuteCommand extends SetRankCommand {
 		}
 
 		if (target instanceof players.model) {
-			target.chatBridgeMutedUntil = 0;
+			target.mutedTill = 0;
 			await target.save();
 
 			if (target.notInGuild) return message.reply(`unmuted \`${target}\`.`);
 		} else if (target === 'everyone') {
-			hypixelGuild.chatMutedUntil = 0;
+			hypixelGuild.mutedTill = 0;
 			await hypixelGuild.save();
 		}
 
-		return this._run(message, flags, `g unmute ${target}`, unmute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign), hypixelGuild);
+		return this._run(message, flags, {
+			command: `g unmute ${target}`,
+			responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+		}, hypixelGuild);
 	}
 };

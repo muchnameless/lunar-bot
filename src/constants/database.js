@@ -53,7 +53,7 @@ module.exports = {
 
 	XP_TYPES: [ ...skills, ...cosmeticSkills, ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ],
 
-	UNKNOWN_IGN: 'unknown ign',
+	UNKNOWN_IGN: 'UNKNOWN_IGN',
 
 	GUILD_ID_ERROR: 'ERROR',
 

@@ -11,7 +11,7 @@ module.exports = class PromoteCommand extends SetRankCommand {
 			aliases: [ 'guildpromote' ],
 			description: 'promote a guild member',
 			args: true,
-			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\`] <${this.commandCollection.constructor.forceFlagsAsFlags} to disable IGN autocorrection> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\`] <${this.collection.constructor.forceFlagsAsFlags} to disable IGN autocorrection> <${this.client.hypixelGuilds.guildNamesAsFlags}>`,
 			cooldown: 0,
 		});
 	}
@@ -26,6 +26,9 @@ module.exports = class PromoteCommand extends SetRankCommand {
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const IGN = this.getIGN(message, args, flags);
 
-		return this._run(message, flags, `g promote ${IGN}`, promote(IGN));
+		return this._run(message, flags, {
+			command: `g promote ${IGN}`,
+			responseRegExp: promote(IGN),
+		});
 	}
 };

@@ -22,9 +22,7 @@ module.exports = class PingCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const pingMessage = await message.reply('awaiting ping...', { reply: false });
-
-		if (!pingMessage) return;
+		const pingMessage = await message.reply('awaiting ping...');
 
 		pingMessage.edit(`Api Latency: ${ms(pingMessage.createdTimestamp - message.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}.`);
 	}

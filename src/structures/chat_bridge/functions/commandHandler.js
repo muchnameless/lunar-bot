@@ -1,6 +1,5 @@
 'use strict';
 
-const { Collection } = require('discord.js');
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
 const { escapeRegex } = require('../../../functions/util');
@@ -86,12 +85,6 @@ module.exports = async (message) => {
 				return message.reply(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}) from the Lunar Guard Discord Server`);
 			}
 
-			// guild role is always a req for higher commands
-			if (!member.roles.cache.has(config.get('GUILD_ROLE_ID'))) {
-				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in '${message.type}' without being in the guild`);
-				return message.reply(`the '${command.name}' command requires you to have the ${lgGuild.roles.cache.get(config.get('GUILD_ROLE_ID'))?.name ?? config.get('GUILD_ROLE_ID')} role from the Lunar Guard Discord Server`);
-			}
-
 		// prevent from executing owner only command
 		} else if (command.category === 'owner') {
 			logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is an owner only command`);
@@ -99,21 +92,19 @@ module.exports = async (message) => {
 		}
 
 		// command cooldowns
-		if (command.cooldown) {
-			if	(!client.commands.cooldowns.has(command.name)) client.commands.cooldowns.set(command.name, new Collection());
-
+		if (command.cooldown !== 0) {
 			const NOW = Date.now();
-			const timestamps = client.commands.cooldowns.get(command.name);
-			const COOLDOWN_TIME = (command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1000;
+			const timestamps = command.collection.cooldowns.get(command.name);
+			const COOLDOWN_TIME = (command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000;
 
 			if (timestamps.has(message.author.ign)) {
-				const expirationTime = timestamps.get(message.author.ign) + COOLDOWN_TIME;
+				const EXPIRATION_TIME = timestamps.get(message.author.ign) + COOLDOWN_TIME;
 
-				if (NOW < expirationTime) {
-					const timeLeft = ms(expirationTime - NOW, { long: true });
+				if (NOW < EXPIRATION_TIME) {
+					const TIME_LEFT = ms(EXPIRATION_TIME - NOW, { long: true });
 
-					logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${timeLeft} before the cooldown expires`);
-					return message.reply(`'${command.name}' is on cooldown for another ${timeLeft}`);
+					logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${TIME_LEFT} before the cooldown expires`);
+					return message.reply(`'${command.name}' is on cooldown for another ${TIME_LEFT}`);
 				}
 			}
 
@@ -138,7 +129,7 @@ module.exports = async (message) => {
 		logger.info(`'${message.content}' was executed by ${message.author.ign} in '${message.type}'`);
 		await command.run(message, args, flags, rawArgs);
 	} catch (error) {
-		logger.error(`An error occured while ${message.author.ign} tried to execute ${message.content} in '${message.type}':`, error);
+		logger.error(`An error occured while ${message.author.ign} tried to execute ${message.content} in '${message.type}'`, error);
 		message.reply(`an error occured while executing the '${command.name}' command:\n${error}`);
 	}
 };

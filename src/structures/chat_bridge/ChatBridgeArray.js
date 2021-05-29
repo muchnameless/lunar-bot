@@ -130,7 +130,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 * @param {import('../extensions/Message')} message
 	 */
 	async handleAnnouncementMessage(message) {
-		if (!this.length) return message.reactSafely(X_EMOJI);
+		if (!this.length) return message.react(X_EMOJI);
 
 		try {
 			const result = await this.broadcast(
@@ -153,14 +153,14 @@ module.exports = class ChatBridgeArray extends Array {
 			if (result.every(([ minecraft, discord ]) => minecraft && (Array.isArray(discord) ? discord.length : discord))) {
 				if (message.reactions.cache.get(X_EMOJI)?.me) {
 					message.reactions.cache.get(X_EMOJI).users.remove(this.client.user.id)
-						.catch(error => `[HANDLE ANNOUNCEMENT MSG]: ${error}`);
+						.catch(error => logger.error('[HANDLE ANNOUNCEMENT MSG]', error));
 				}
 			} else {
-				message.reactSafely(X_EMOJI);
+				message.react(X_EMOJI);
 			}
 		} catch (error) {
-			logger.error(`[HANDLE ANNOUNCEMENT MSG]: ${error}`);
-			message.reactSafely(X_EMOJI);
+			logger.error('[HANDLE ANNOUNCEMENT MSG]', error);
+			message.react(X_EMOJI);
 		}
 	}
 
@@ -177,10 +177,10 @@ module.exports = class ChatBridgeArray extends Array {
 			if (this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
 
 			// no ChatBridge for the message's channel found
-			message.reactSafely(X_EMOJI);
+			message.react(X_EMOJI);
 		} catch (error) {
 			logger.error('[CHAT BRIDGES]: handleDiscordMessage', error);
-			message.reactSafely(X_EMOJI);
+			message.react(X_EMOJI);
 		}
 	}
 };

@@ -46,7 +46,7 @@ module.exports = class HypixelMessageAuthor {
 
 			this.member = await this.player?.discordMember;
 		} catch (error) {
-			logger.error(`[AUTHOR PLAYER]: ${error}`);
+			logger.error('[AUTHOR PLAYER]', error);
 		}
 	}
 
@@ -56,6 +56,6 @@ module.exports = class HypixelMessageAuthor {
 	 * @param {?import('./ChatBridge').ChatOptions} options
 	 */
 	async send(message, { prefix = '', ...options } = {}) {
-		return this.chatBridge.minecraft.chat(message, { prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`, ...options });
+		return this.chatBridge.minecraft.chat(message, { prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`, maxParts: Infinity, ...options });
 	}
 };

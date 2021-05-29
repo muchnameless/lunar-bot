@@ -1,6 +1,6 @@
 'use strict';
 
-const { Structures, TextChannel } = require('discord.js');
+const { Structures, TextChannel, Permissions } = require('discord.js');
 // const logger = require('../../functions/logger');
 
 
@@ -14,13 +14,12 @@ class LunarTextChannel extends TextChannel {
 
 	/**
 	 * checks wether the bot has the provided permission(s) in the channel
-	 * @param {string|string[]} permFlag
+	 * @param {BigInt|BigInt[]} permFlag
 	 */
 	checkBotPermissions(permFlag) {
 		if (Array.isArray(permFlag)) return permFlag.every(flag => this.checkBotPermissions(flag));
-		if (typeof permFlag !== 'string') throw new TypeError('permFlag must be either a string or an Array of strings');
 
-		return this.permissionsFor?.(this.guild?.me).has(permFlag) ?? false;
+		return this.permissionsFor(this.guild?.me).has(permFlag) ?? false;
 	}
 
 	/**
@@ -29,7 +28,7 @@ class LunarTextChannel extends TextChannel {
 	 */
 	deleteMessages(IDs) {
 		if (Array.isArray(IDs)) {
-			if (this.checkBotPermissions('MANAGE_MESSAGES')) return this.bulkDelete(IDs);
+			if (this.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) return this.bulkDelete(IDs);
 
 			return Promise.all(IDs.map(async id => this.messages.delete(id)));
 		}

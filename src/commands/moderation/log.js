@@ -1,5 +1,6 @@
 'use strict';
 
+const { logErrors: { regExp: logErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
 const GuildCommand = require('../guild/guild');
 // const logger = require('../../functions/logger');
 
@@ -23,6 +24,9 @@ module.exports = class GuildLogCommand extends GuildCommand {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return this._run(message, flags, `g log ${args.join(' ')}`);
+		return this._run(message, flags, {
+			command: `g log ${args.join(' ')}`,
+			abortRegExp: logErrors(),
+		});
 	}
 };

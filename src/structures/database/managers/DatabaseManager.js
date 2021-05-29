@@ -2,7 +2,7 @@
 
 const { CronJob: CronJobConstructor } = require('cron');
 const { stripIndents, commaLists } = require('common-tags');
-const { MessageEmbed } = require('discord.js');
+const { Permissions } = require('discord.js');
 const _ = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../../../constants/emojiCharacters');
 const { asyncFilter, safePromiseAll } = require('../../../functions/util');
@@ -126,7 +126,7 @@ module.exports = class DatabaseManager {
 		let unknownPlayers = 0;
 
 		// update db
-		await safePromiseAll(taxCollectors.activeCollectors.map(async (taxCollector) => {
+		await Promise.all(taxCollectors.activeCollectors.map(async (taxCollector) => {
 			try {
 				const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID);
 				const taxAuctions = [];
@@ -171,19 +171,22 @@ module.exports = class DatabaseManager {
 					value: `\`\`\`\n${paidLog.join('\n')}\`\`\`` },
 				);
 			} catch (error) {
-				logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
+				logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}`, error);
 				availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: API Error`);
 			}
 		}));
 
 		// logging
-		if (auctionsAmount && (config.getBoolean('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.getNumber('DATABASE_UPDATE_INTERVAL')))) logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);
-		if (taxPaidLog.length) this.client.log(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
-			.setTitle('Guild Tax')
-			.addFields(...taxPaidLog)
-			.setTimestamp(),
-		);
+		if (auctionsAmount && (config.getBoolean('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.getNumber('DATABASE_UPDATE_INTERVAL')))) {
+			logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);
+		}
+
+		if (taxPaidLog.length) {
+			this.client.log(this.client.defaultEmbed
+				.setTitle('Guild Tax')
+				.addFields(...taxPaidLog),
+			);
+		}
 
 		return availableAuctionsLog
 			.sort((a, b) => a.split(':')[0].toLowerCase().localeCompare(b.split(':')[0].toLowerCase())) // alphabetically
@@ -201,8 +204,7 @@ module.exports = class DatabaseManager {
 		const PLAYER_COUNT = playersInGuild.size;
 		const PAID_COUNT = playersInGuild.filter(({ paid }) => paid).size;
 		const TOTAL_COINS = taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0);
-		const taxEmbed = new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE'))
+		const taxEmbed = this.client.defaultEmbed
 			.setTitle('Guild Tax')
 			.setDescription(stripIndents(commaLists`
 				\`\`\`cs
@@ -214,8 +216,7 @@ module.exports = class DatabaseManager {
 				${availableAuctionsLog?.join('\n') ?? '\u200b -'}
 				\`\`\`
 			`))
-			.setFooter('Last updated at')
-			.setTimestamp();
+			.setFooter('Last updated at');
 
 		// add guild specific fields
 		for (const hypixelGuild of hypixelGuilds.cache.values()) {
@@ -284,14 +285,14 @@ module.exports = class DatabaseManager {
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 		if (!taxChannel?.guild?.available) return logger.warn('[TAX MESSAGE]: channel not found');
-		if (!taxChannel.checkBotPermissions([ 'VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS' ])) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+		if (!taxChannel.checkBotPermissions([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
 
-		let taxMessage = await taxChannel.messages.fetch(config.get('TAX_MESSAGE_ID')).catch(error => logger.error(`[TAX MESSAGE]: ${error}`));
+		let taxMessage = await taxChannel.messages.fetch(config.get('TAX_MESSAGE_ID')).catch(error => logger.error('[TAX MESSAGE]', error));
 
 		if (!taxMessage || taxMessage.deleted) { // taxMessage deleted
-			taxMessage = await taxChannel.send(taxEmbed).catch(error => logger.error(`[TAX MESSAGE]: ${error}`));
+			taxMessage = await taxChannel.send(taxEmbed).catch(error => logger.error('[TAX MESSAGE]', error));
 
 			if (!taxMessage) return; // failed to retreive old and send new taxMessage
 
@@ -300,11 +301,11 @@ module.exports = class DatabaseManager {
 		}
 		if (taxMessage.embeds[0]?.description === taxEmbed.description && _.isEqual(taxMessage.embeds[0].fields, taxEmbed.fields)) return; // no changes to taxMessage
 
-		const { content } = taxMessage;
-
-		taxMessage.edit(content, taxEmbed).then(
-			() => logger.info('[TAX MESSAGE]: updated taxMessage'),
-			error => logger.error(`[TAX MESSAGE]: ${error}`),
-		);
+		try {
+			await taxMessage.edit(taxMessage.content, taxEmbed);
+			logger.info('[TAX MESSAGE]: updated taxMessage');
+		} catch (error) {
+			logger.error('[TAX MESSAGE]', error);
+		}
 	}
 };

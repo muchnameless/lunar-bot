@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { offsetFlags } = require('../../constants/database');
 const { safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
@@ -87,11 +86,9 @@ module.exports = class XpResetCommand extends Command {
 		}
 
 		// logging
-		this.client.log(new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('XP Tracking')
-			.setDescription(`${message.author.tag} | ${message.author} ${result}`)
-			.setTimestamp(),
+			.setDescription(`${message.author.tag} | ${message.author} ${result}`),
 		);
 
 		message.reply(`${result}.`);

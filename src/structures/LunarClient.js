@@ -1,13 +1,13 @@
 'use strict';
 
-const { Client, Constants: { Events: { CLIENT_READY } } } = require('discord.js');
-const { CronJob } = require('cron');
+const { Client, MessageEmbed, Constants: { Events: { CLIENT_READY } } } = require('discord.js');
 const { join, basename } = require('path');
 const { getAllJsFiles } = require('../functions/files');
 const DatabaseManager = require('./database/managers/DatabaseManager');
 const LogHandler = require('./LogHandler');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const CommandCollection = require('./commands/CommandCollection');
+const SlashCommandCollection = require('./commands/SlashCommandCollection');
 const RedisListener = require('./RedisListener');
 const cache = require('../api/cache');
 const logger = require('../functions/logger');
@@ -30,6 +30,7 @@ module.exports = class LunarClient extends Client {
 		this.logHandler = new LogHandler(this);
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'), true);
+		this.slashCommands = new SlashCommandCollection(this, join(__dirname, '..', 'slash_commands'));
 		this.redisListener = new RedisListener(this, process.env.REDIS_URI);
 	}
 
@@ -59,6 +60,16 @@ module.exports = class LunarClient extends Client {
 
 	get taxCollectors() {
 		return this.db.modelManagers.taxCollectors;
+	}
+
+	/**
+	 * default embed, blue border and current timestamp
+	 */
+	get defaultEmbed() {
+		return new MessageEmbed({
+			color: this.config.get('EMBED_BLUE'),
+			timestamp: Date.now(),
+		});
 	}
 
 	/**
@@ -144,10 +155,15 @@ module.exports = class LunarClient extends Client {
 	 * tag and @mention
 	 */
 	get ownerInfo() {
-		return this.owner.then(
-			owner => `${owner.tag} ${owner}`,
-			() => `<@${this.ownerID}>`,
-		);
+		return (async () => {
+			try {
+				const owner = await this.owner;
+				return `${owner.tag} ${owner}`;
+			} catch (error) {
+				logger.error('[OWNER INFO]', error);
+				return `<@${this.ownerID}>`;
+			}
+		})();
 	}
 
 	/**
@@ -158,105 +174,13 @@ module.exports = class LunarClient extends Client {
 		await Promise.all([
 			this.db.loadCache(),
 			this.commands.loadAll(),
+			this.slashCommands.loadAll(),
 			this._loadEvents(),
 		]);
 
 		this.chatBridges.loadChannelIDs();
 
-		this.once(CLIENT_READY, this.onReady);
-
 		return super.login(token);
-	}
-
-	/**
-	 * initialize logging webhook, resume cronJobs, start renew presence interval
-	 */
-	async onReady() {
-		logger.debug(`[READY]: logged in as ${this.user.tag}`);
-
-		// Fetch all members for initially available guilds
-		// if (this.options.fetchAllMembers) {
-		// 	try {
-		// 		const promises = this.guilds.cache.map(guild => guild.available ? guild.members.fetch().then(() => logger.debug(`[READY]: ${guild.name}: fetched all ${guild.memberCount} members`)) : Promise.resolve());
-		// 		await Promise.all(promises);
-		// 	} catch (error) {
-		// 		logger.error(`Failed to fetch all members before ready! ${error}`);
-		// 	}
-		// }
-
-		await this.logHandler.init();
-
-		this.db.schedule();
-
-		// resume command cron jobs
-		await this.cronJobs.resume().catch(logger.error);
-
-		// set presence again every 20 min cause it get's lost sometimes
-		this.setInterval(async () => {
-			try {
-				const presence = await this.user.setPresence({
-					activity: {
-						name: `${this.config.get('PREFIX')}help`,
-						type: 'LISTENING',
-					},
-					status: 'online',
-				});
-
-				if (this.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[SET PRESENCE]: activity set to ${presence.activities[0].name}`);
-			} catch (error) {
-				logger.error(`[SET PRESENCE]: error while setting presence: ${error}`);
-			}
-		}, 20 * 60_000); // 20 min
-
-		// schedule guild stats channel update
-		this.schedule('guildStatsChannelUpdate', new CronJob({
-			cronTime: '0 0 * * * *',
-			onTick: async () => {
-				if (!this.config.getBoolean('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
-
-				const { mainGuild } = this.hypixelGuilds;
-
-				if (!mainGuild) return;
-
-				const { formattedStats } = mainGuild;
-
-				if (!formattedStats) return;
-
-				try {
-					for (const type of [ 'weight', 'skill', 'slayer', 'catacombs' ]) {
-						/**
-						 * @type {import('discord.js').VoiceChannel}
-						 */
-						const channel = this.channels.cache.get(this.config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
-
-						if (!channel) continue; // no channel found
-
-						const newName = `${type} avg: ${formattedStats[`${type}Average`]}`;
-						const { name: oldName } = channel;
-
-						if (newName === oldName) continue; // no update needed
-
-						if (!channel.editable) {
-							logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
-							continue;
-						}
-
-						await channel.setName(newName, `synced with ${mainGuild.name}'s average stats`);
-
-						logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
-					}
-				} catch (error) {
-					logger.error(`[GUILD STATS CHANNEL UPDATE]: ${error}`);
-				}
-			},
-			start: true,
-		}));
-
-		// chatBridges
-		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.chatBridges.connect();
-
-		// log ready
-		logger.debug(`[READY]: startup complete. ${this.cronJobs.size} CronJobs running. Logging webhook available: ${this.logHandler.webhookAvailable}`);
 	}
 
 	/**
@@ -264,7 +188,7 @@ module.exports = class LunarClient extends Client {
 	 * @param {string} message
 	 */
 	async dmOwner(message) {
-		return await (await this.owner).send(message, { split: { char: ' ' } });
+		return (await this.owner).send(message, { split: { char: ' ' } });
 	}
 
 	/**
@@ -288,7 +212,7 @@ module.exports = class LunarClient extends Client {
 			const event = require(file);
 			const EVENT_NAME = basename(file, '.js');
 
-			this.on(EVENT_NAME, event.bind(null, this));
+			this[EVENT_NAME !== CLIENT_READY ? 'on' : 'once'](EVENT_NAME, event.bind(null, this));
 
 			delete require.cache[require.resolve(file)];
 		}

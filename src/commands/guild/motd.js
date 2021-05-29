@@ -23,6 +23,6 @@ module.exports = class GuildMotdCommand extends GuildCommand {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return this._run(message, flags, 'g motd');
+		return this._run(message, flags, { command: 'g motd' });
 	}
 };

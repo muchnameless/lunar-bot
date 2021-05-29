@@ -2,6 +2,7 @@
 
 const ChatMessage = require('prismarine-chat')(require('./constants/settings').MC_CLIENT_VERSION);
 const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY }, invisibleCharacterRegExp } = require('./constants/chatBridge');
+const { spamMessages } = require('./constants/commandResponses');
 const { NO_BELL } = require('../../constants/emojiCharacters');
 const mojang = require('../../api/mojang');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
@@ -26,6 +27,11 @@ module.exports = class HypixelMessage extends ChatMessage {
 		super(message, displayWarning);
 
 		this.chatBridge = chatBridge;
+		/**
+		 * forwarded message
+		 * @type {Promise<?import('../extensions/Message')>}
+		 */
+		this.discordMessage = Promise.resolve(null);
 		/**
 		 * @type {?HypixelMessageType}
 		 */
@@ -69,10 +75,12 @@ module.exports = class HypixelMessage extends ChatMessage {
 			);
 
 			this.content = this.cleanedContent.slice(matched[0].length).trimLeft();
+			this.spam = false;
 		} else {
 			this.type = null;
 			this.author = null;
 			this.content = this.cleanedContent;
+			this.spam = spamMessages.test(this.content);
 		}
 	}
 
@@ -139,9 +147,23 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 	/**
 	 * alias for reply, to make methods for dc messages compatible with mc messages
+	 * @param {string} emoji
+	 * @returns {Promise<[boolean, ?import('discord.js').MessageReaction|import('../extensions/Message')]>}
 	 */
-	get reactSafely() {
-		return this.reply;
+	async react(emoji) {
+		switch (this.type) {
+			case GUILD:
+			case OFFICER: {
+				return Promise.all([
+					this.author.send(emoji),
+					(await this.discordMessage.catch(() => null))?.react(emoji)
+							?? this.chatBridge.discord.get(this.type)?.sendViaBot(`${this.member ?? `@${this.author.ign}`} ${emoji}`),
+				]);
+			}
+
+			default:
+				return this.author?.send(emoji) ?? this.reply(emoji);
+		}
 	}
 
 	/**
@@ -155,9 +177,8 @@ module.exports = class HypixelMessage extends ChatMessage {
 				const result = await this.chatBridge.broadcast(
 					message,
 					{
-						type: this.type,
+						hypixelMessage: this,
 						discord: {
-							prefix: `${this.member ?? `@${this.author.ign}`}, `,
 							allowedMentions: { parse: [] },
 						},
 					},
@@ -184,11 +205,14 @@ module.exports = class HypixelMessage extends ChatMessage {
 	 * forwards the message to discord via the chatBridge's webhook, if the guild has the chatBridge enabled
 	 */
 	async forwardToDiscord() {
+		const discordChatManager = this.chatBridge.discord.get(this.type);
+
+		if (!discordChatManager) return null;
+
 		try {
 			if (this.author) {
 				const { player, member } = this;
-
-				const message = await this.chatBridge.discord.get(this.type)?.sendViaWebhook(
+				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook(
 					this.content,
 					{
 						username: member?.displayName
@@ -198,33 +222,33 @@ module.exports = class HypixelMessage extends ChatMessage {
 							?? player?.image
 							?? await mojang.ign(this.author.ign).then(
 								({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`,
-								error => logger.error(`[FORWARD TO DC]: ${error}`),
+								error => logger.error('[FORWARD TO DC]', error),
 							)
 							?? this.client.user.displayAvatarURL({ dynamic: true }),
 						allowedMentions: {
 							parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
 						},
 					},
-				);
+				));
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
-				if (/<@&\d{17,19}>/.test(message.content)) {
+				if (/<@&\d{17,19}>/.test(discordMessage.content)) {
 					this.author.send('you do not have permission to @ roles from in game chat');
-					message.reactSafely(NO_BELL);
-				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(message.content))) {
+					discordMessage.react(NO_BELL);
+				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content))) {
 					this.author.send('you do not have permission to @ users from in game chat');
-					message.reactSafely(NO_BELL);
+					discordMessage.react(NO_BELL);
 				}
 
-				return message;
+				return discordMessage;
 			}
 
-			return await this.chatBridge.discord.get(this.type)?.sendViaBot(
+			return await (this.discordMessage = discordChatManager.sendViaBot(
 				this.content,
 				{ allowedMentions: { parse: [] } },
-			);
+			));
 		} catch (error) {
-			logger.error(`[FORWARD TO DC]: ${error}`);
+			logger.error('[FORWARD TO DC]', error);
 		}
 	}
 };

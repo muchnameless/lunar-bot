@@ -29,6 +29,6 @@ module.exports = class GuildMemberCommand extends GuildCommand {
 
 		if (!IGN) return message.reply(this.usageInfo);
 
-		return this._run(message, flags, `g member ${IGN}`);
+		return this._run(message, flags, { command: `g member ${IGN}` });
 	}
 };

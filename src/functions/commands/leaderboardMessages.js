@@ -1,7 +1,7 @@
 'use strict';
 
 const { stripIndent, oneLine } = require('common-tags');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_LEFT_EMOJI_ALT, DOUBLE_RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI_ALT, LEFT_EMOJI, LEFT_EMOJI_ALT, RIGHT_EMOJI, RIGHT_EMOJI_ALT, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../../constants/emojiCharacters');
@@ -14,7 +14,7 @@ const cache = require('../../api/cache');
 /**
  * @typedef {object} LeaderboardArguments
  * @property {boolean} shouldShowOnlyBelowReqs
- * @property {boolean|string} hypixelGuildID
+ * @property {false|string} hypixelGuildID
  * @property {string|undefined} type
  * @property {{value: string, arg: string}} typeInput
  * @property {string|undefined} offset
@@ -168,18 +168,7 @@ const self = module.exports = {
 	 * @param {import('../../structures/extensions/Message')} message the message to add the reactions to
 	 */
 	async addPageReactions(message) {
-		if (!message) return logger.warn('[ADD PAGE REACTIONS]: no message');
-		if (!message.channel.checkBotPermissions('ADD_REACTIONS')) return logger.warn(`[ADD PAGE REACTIONS]: missing 'ADD_REACTIONS' permission in #${message.channel.name}`);
-
-		// add reactions in order
-		try {
-			for (const emoji of [ DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI ]) {
-				if (!message.reactions.cache.has(emoji)) await message.react(emoji);
-			}
-		} catch (error) {
-			logger.error(`[ADD PAGE REACTIONS]: ${error}`);
-		}
-
+		await message.react(DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI);
 		return message;
 	},
 
@@ -319,13 +308,15 @@ const self = module.exports = {
 				\`\`\`ada${playerList}\`\`\`
 			`)
 			.addField(
-				'Your placement',
+				playerRequestingEntry
+					? 'Your placement'
+					: '\u200b',
 				stripIndent`
-					${playerRequestingEntry}
+					${playerRequestingEntry ?? ''}
 					Page: ${PAGE} / ${PAGES_TOTAL}
 				`,
 			)
-			.setTimestamp(new Date(lastUpdatedAt));
+			.setTimestamp(lastUpdatedAt);
 	},
 
 	/**
@@ -387,7 +378,7 @@ const self = module.exports = {
 		if (!cached) return;
 
 		// remove reaction from user
-		if (message.channel.checkBotPermissions('MANAGE_MESSAGES')) reaction.users.remove(userID).catch(error => logger.error(`[REMOVE REACTION]: ${error}`));
+		if (message.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) reaction.users.remove(userID).catch(error => logger.error('[REMOVE REACTION]', error));
 
 		// user is not command author
 		if (userID !== cached.args.userID) return;
@@ -401,13 +392,11 @@ const self = module.exports = {
 		// update page
 		cached.args.page = page;
 
-		const { content } = message;
-
 		try {
 			if (reload) {
 				const { type, args } = cached;
 				const leaderbaordData = self.getLeaderboardDataCreater(type)(message.client, args);
-				const reply = await message.edit(content, self.createLeaderboardEmbed(message.client, type, args, leaderbaordData));
+				const reply = await message.edit(message.content, self.createLeaderboardEmbed(message.client, type, args, leaderbaordData));
 
 				await cache.set(
 					`${LB_KEY}:${reply.cachingKey}`,
@@ -416,7 +405,7 @@ const self = module.exports = {
 				);
 				await self.addPageReactions(reply);
 			} else {
-				await message.edit(content, self.createLeaderboardEmbed(message.client, cached.type, cached.args, cached.data));
+				await message.edit(message.content, self.createLeaderboardEmbed(message.client, cached.type, cached.args, cached.data));
 				await cache.set(
 					`${LB_KEY}:${message.cachingKey}`,
 					cached,
@@ -426,7 +415,7 @@ const self = module.exports = {
 
 			if (message.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info('[UPDATE LB]: edited xpLeaderboardMessage');
 		} catch (error) {
-			logger.error(`[UPDATE LB]: ${error}`);
+			logger.error('[UPDATE LB]', error);
 		}
 	},
 
@@ -460,6 +449,7 @@ const self = module.exports = {
 			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
 		} else {
 			playerDataRaw = client.players.inGuild.array();
+			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => !player.notInGuild && (player.getWeight().totalWeight < player.guild.weightReq));
 		}
 
 		const PLAYER_COUNT = playerDataRaw.length;
@@ -521,10 +511,11 @@ const self = module.exports = {
 			}
 
 			case 'purge': {
-				title = 'Weight Tracking Leaderboard';
+				title = `${hypixelGuild || ''} Purge List (${config.get('PURGE_LIST_OFFSET')} days interval)`;
 				dataConverter = (player) => {
 					const { totalWeight } = player.getWeight();
-					const { totalWeight: totalWeightOffet } = player.getWeight(offset);
+					const startIndex = player.alchemyXpHistory.length - 1 - config.get('PURGE_LIST_OFFSET');
+					const { totalWeight: totalWeightOffet } = player.getWeightHistory(player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0));
 					const gainedWeight = totalWeight - totalWeightOffet;
 					return {
 						ign: player.ign,
@@ -537,8 +528,8 @@ const self = module.exports = {
 				};
 				playerData = playerDataRaw
 					.map(dataConverter)
-					.sort((a, b) => b.totalWeight - a.totalWeight)
-					.sort((a, b) => b.sortingStat - a.sortingStat);
+					.sort((a, b) => a.totalWeight - b.totalWeight)
+					.sort((a, b) => a.sortingStat - b.sortingStat);
 				const PADDING_AMOUNT_GAIN = Math.floor(playerData[0]?.gainedWeight).toLocaleString(NUMBER_FORMAT).length;
 				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...playerData.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
 				getEntryArgs = [ PADDING_AMOUNT_GAIN, PADDING_AMOUNT_TOTAL ];
@@ -604,15 +595,30 @@ const self = module.exports = {
 		// description
 		let description = '';
 
-		if (IS_COMPETITION_LB) {
-			description += `Start: ${STARTING_TIME} GMT\n`;
-			if (COMPETITION_RUNNING) {
-				description += `Time left: ${ms(COMPETITION_END_TIME - Date.now(), { long: true })}\n`;
-			} else { // competition already ended
-				description += `Ended: ${new Date(COMPETITION_END_TIME).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT\n`;
+		if (type !== 'purge') {
+			if (IS_COMPETITION_LB) {
+				description += `Start: ${STARTING_TIME} GMT\n`;
+				if (COMPETITION_RUNNING) {
+					description += `Time left: ${ms(COMPETITION_END_TIME - Date.now(), { long: true })}\n`;
+				} else { // competition already ended
+					description += `Ended: ${new Date(COMPETITION_END_TIME).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT\n`;
+				}
+			} else {
+				description += `Tracking xp gained since ${STARTING_TIME} GMT\n`;
 			}
+
+			description += `${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}`;
+			title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
+		} else if (hypixelGuild) { // purge list
+			description += stripIndent`
+				Current weight requirement: ${client.formatNumber(hypixelGuild.weightReq)}
+				Below reqs (${PLAYER_COUNT} / ${hypixelGuild.players.size} members): ${totalStats}
+			`;
 		} else {
-			description += `Tracking xp gained since ${STARTING_TIME} GMT\n`;
+			description += stripIndent`
+				Current weight requirements: ${client.hypixelGuilds.cache.map(({ name, weightReq }) => `${name} (${client.formatNumber(weightReq)})`).join(', ')}
+				Guilds below reqs (${PLAYER_COUNT} / ${client.players.inGuild.size} members): ${totalStats}
+			`;
 		}
 
 		// player requesting entry
@@ -629,7 +635,7 @@ const self = module.exports = {
 					 > ${self.getEntry(client, 'gained', type, ...getEntryArgs)(playerRequesting)}
 				\`\`\`
 			`;
-		} else {
+		} else if (type !== 'purge') {
 			let playerRequesting = client.players.getByID(userID);
 
 			// put playerreq into guildplayers and sort then do the above again
@@ -650,9 +656,6 @@ const self = module.exports = {
 				`;
 			}
 		}
-
-		description += `${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}`;
-		title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
 
 		return {
 			title,

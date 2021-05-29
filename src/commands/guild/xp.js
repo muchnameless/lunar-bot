@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { oneLine, stripIndents } = require('common-tags');
 const { skills, /* cosmeticSkills, */ slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
@@ -77,14 +76,13 @@ module.exports = class PlayerCommand extends Command {
 		if (this.force(flags)) await player.updateXp();
 
 		const startingDate = new Date(Math.max(this.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
-		const embed = new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		const embed = this.client.defaultEmbed
 			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
 			// .setTitle(`${escapeIgn(player.ign)}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`)
 			// .setURL(player.url)
 			// .setThumbnail(player.image)
 			.setFooter('\u200b\nUpdated at')
-			.setTimestamp(new Date(Number(player.xpLastUpdatedAt)));
+			.setTimestamp(player.xpLastUpdatedAt);
 		const { skillAverage, trueAverage } = player.getSkillAverage();
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(offset);
 

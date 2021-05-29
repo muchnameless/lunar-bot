@@ -6,7 +6,6 @@ const {
 	demote: { string: { success: demote } },
 	mute: { string: { success: mute } },
 	unmute: { string: { success: unmute } },
-	spamMessages,
 } = require('../constants/commandResponses');
 const { STOP } = require('../../../constants/emojiCharacters');
 const { invisibleCharacters } = require('../constants/chatBridge');
@@ -28,7 +27,7 @@ module.exports = async (message) => {
 	 * You cannot say the same message twice!
 	 * You can only send a message once every half second!
 	 */
-	if (spamMessages.includes(message.content)) {
+	if (message.spam) {
 		try {
 			await message.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.rawContent}`);
 		} catch (error) {
@@ -55,7 +54,7 @@ module.exports = async (message) => {
 					.filter(({ content, author: { id } }) => (senderDiscordID ? id === senderDiscordID : true) && message.chatBridge.minecraft.parseContent(content).includes(blockedContent))
 					.sort(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
 					.first()
-					?.reactSafely(STOP);
+					?.react(STOP);
 			}
 		}
 
@@ -74,7 +73,7 @@ module.exports = async (message) => {
 	 * [HypixelRank] IGN joined the guild!
 	 */
 	if (message.content.includes('joined the guild')) {
-		message.chatBridge.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error}`));
+		message.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 		message.forwardToDiscord();
 		return message.chatBridge.broadcast('welcome');
 	}
@@ -83,7 +82,7 @@ module.exports = async (message) => {
 	 * [HypixelRank] IGN left the guild!
 	 */
 	if (message.content.includes('left the guild!')) {
-		message.chatBridge.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error}`));
+		message.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 		return message.forwardToDiscord();
 	}
 
@@ -92,7 +91,7 @@ module.exports = async (message) => {
 	 */
 	if (message.content === 'You left the guild') {
 		logger.warn(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: bot left the guild`);
-		message.chatBridge.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error}`));
+		message.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 		message.forwardToDiscord();
 		return message.chatBridge.unlink();
 	}
@@ -101,7 +100,7 @@ module.exports = async (message) => {
 	 * [HypixelRank] IGN was kicked from the guild by [HypixelRank] IGN!
 	 */
 	if (message.content.includes('was kicked from the guild by')) {
-		message.chatBridge.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error}`));
+		message.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 		return message.forwardToDiscord();
 	}
 
@@ -110,7 +109,7 @@ module.exports = async (message) => {
 	 */
 	if (message.content.startsWith('You were kicked from the guild by')) {
 		logger.warn(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: bot was kicked from the guild`);
-		message.chatBridge.guild?.updatePlayers().catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error}`));
+		message.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 		message.forwardToDiscord();
 		return message.chatBridge.unlink();
 	}
@@ -141,7 +140,7 @@ module.exports = async (message) => {
 			const { guild } = message.chatBridge;
 			const msDuration = stringToMS(duration);
 
-			guild.chatMutedUntil = Number.isNaN(msDuration)
+			guild.mutedTill = Number.isNaN(msDuration)
 				? Infinity
 				: Date.now() + msDuration;
 			guild.save();
@@ -155,7 +154,7 @@ module.exports = async (message) => {
 
 		const msDuration = stringToMS(duration);
 
-		player.chatBridgeMutedUntil = Number.isNaN(msDuration)
+		player.mutedTill = Number.isNaN(msDuration)
 			? Infinity
 			: Date.now() + msDuration;
 		player.save();
@@ -178,7 +177,7 @@ module.exports = async (message) => {
 		if (target === 'the guild chat') {
 			const { guild } = message.chatBridge;
 
-			guild.chatMutedUntil = 0;
+			guild.mutedTill = 0;
 			guild.save();
 
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was unmuted`);
@@ -188,7 +187,7 @@ module.exports = async (message) => {
 
 		if (!player) return;
 
-		player.chatBridgeMutedUntil = 0;
+		player.mutedTill = 0;
 		player.save();
 
 		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: ${target} was unmuted`);
@@ -254,7 +253,7 @@ module.exports = async (message) => {
 		message.client.hypixelGuilds
 			.getByName(guildName)
 			?.updatePlayers()
-			.catch(error => logger.error(`[CHATBRIDGE]: guild update: ${error}`));
+			.catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 		logger.info(`[CHATBRIDGE]: ${message.chatBridge.bot.ign}: joined ${guildName}`);
 		return message.chatBridge.link(guildName);
 	}

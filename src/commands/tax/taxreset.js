@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
+const { Permissions } = require('discord.js');
 const { safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');
@@ -135,31 +135,30 @@ module.exports = class TaxResetCommand extends Command {
 		}
 
 		// logging
-		this.client
-			.log(
-				currentTaxEmbed,
-				currentTaxCollectedEmbed,
-				new MessageEmbed()
-					.setColor(this.config.get('EMBED_BLUE'))
-					.setTitle('Guild Tax')
-					.setDescription(`${message.author.tag} | ${message.author} ${result}`)
-					.setTimestamp(),
-			)
-			.then(async (logMessage) => {
+		(async () => {
+			try {
+				const logMessage = await this.client.log(
+					currentTaxEmbed,
+					currentTaxCollectedEmbed,
+					this.client.defaultEmbed
+						.setTitle('Guild Tax')
+						.setDescription(`${message.author.tag} | ${message.author} ${result}`),
+				);
+
 				if (!currentTaxEmbed) return;
-				if (!logMessage.channel.checkBotPermissions('MANAGE_MESSAGES')) return;
+				if (!logMessage.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) return;
 
-				const pinnedMessages = await logMessage.channel.messages.fetchPinned().catch(logger.error);
-				if (pinnedMessages?.size >= 50) await pinnedMessages.last()
-					.unpin({ reason: 'reached max pin amount' })
-					.then(
-						() => logger.info('[TAX RESET]: unpinned old tax embed'),
-						error => logger.error(`[TAX RESET]: error unpinning old tax embed: ${error}`),
-					);
+				const pinnedMessages = await logMessage.channel.messages.fetchPinned();
 
-				logMessage.pin({ reason: '#sheet-logs' }).catch(logger.error);
-			})
-			.catch(logger.error);
+				if (pinnedMessages.size >= 50) await pinnedMessages.last().unpin({ reason: 'reached max pin amount' });
+
+				logger.info('[TAX RESET]: unpinned old tax embed');
+
+				await logMessage.pin({ reason: '#sheet-logs' });
+			} catch (error) {
+				logger.error('[TAX RESET]: logging', error);
+			}
+		})();
 
 		message.reply(`${result}.`);
 	}

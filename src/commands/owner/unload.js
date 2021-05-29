@@ -24,7 +24,7 @@ module.exports = class UnloadCommand extends Command {
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
 		const INPUT = args[0].toLowerCase();
-		const command = this.commandCollection.getByName(INPUT);
+		const command = this.collection.getByName(INPUT);
 
 		if (!command) return message.reply(`no command with the name or alias \`${INPUT}\` found.`);
 

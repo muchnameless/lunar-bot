@@ -25,6 +25,42 @@ module.exports = class DiscordManager {
 		this.channelsByType = new Collection();
 	}
 
+	/**
+	 * escapes '*' and '_' if those are neither within an URL nor a code block or inline code
+	 * @param {string} string
+	 * @param {number} [block=0]
+	 */
+	static _escapeNonURL(string, block = 0) {
+		switch (block) {
+			case 0:
+				return string
+					.split('```')
+					.map((subString, index, array) => {
+						if (index % 2 && index !== array.length - 1) return subString;
+						return this._escapeNonURL(subString, 1);
+					})
+					.join('```');
+
+			case 1:
+				return string
+					.split(/(?<=^|[^`])`(?=[^`]|$)/g)
+					.map((subString, index, array) => {
+						if (index % 2 && index !== array.length - 1) return subString;
+						return this._escapeNonURL(subString, 2);
+					})
+					.join('`');
+
+			case 2:
+				return string
+					.replace(/\*/g, '\\*') // escape italic 1/2
+					.replace(/(\S*)_([^\s_]*)/g, (match, p1, p2) => { // escape italic 2/2 & underline
+						if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
+						if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
+						return `${p1.replace(/_/g, '\\_')}\\_${p2}`;
+					});
+		}
+	}
+
 	get client() {
 		return this.chatBridge.client;
 	}
@@ -62,6 +98,9 @@ module.exports = class DiscordManager {
 		return this.get(input);
 	}
 
+	/**
+	 * instantiates the DiscordChatManagers
+	 */
 	async init() {
 		const promises = [];
 
@@ -102,61 +141,58 @@ module.exports = class DiscordManager {
 	 * @param {string} string
 	 */
 	parseContent(string) {
-		return escapeMarkdown(
-			string
-				.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
-				.replace( // emojis (custom and default)
-					/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
-					(match, p1) => this.findEmojiByName(match, p1),
-				)
-				.replace( // emojis (custom and default)
-					/(?<!<a?):(\S+?):(?!\d{17,19}>)/g,
-					(match, p1) => this.findEmojiByName(match, p1),
-				)
-				.replace( // channels
-					/#([a-z-]+)/gi,
-					(match, p1) => this.client.lgGuild?.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match,
-				)
-				.replace( // @mentions
-					/(?<!<)@(!|&)?(\S+)(?!\d{17,19}>)/g,
-					(match, p1, p2) => {
-						switch (p1) {
-							case '!': // members/users
-								return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-										?? this.client.users.cache.find(({ username }) => username.toLowerCase() === p2.toLowerCase())?.toString() // users
-										?? match;
+		return DiscordManager._escapeNonURL(
+			escapeMarkdown(
+				string
+					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
+					.replace( // emojis (custom and default)
+						/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
+						(match, p1) => this.findEmojiByName(match, p1),
+					)
+					.replace( // emojis (custom and default)
+						/(?<!<a?):(\S+?):(?!\d{17,19}>)/g,
+						(match, p1) => this.findEmojiByName(match, p1),
+					)
+					.replace( // channels
+						/#([a-z-]+)/gi,
+						(match, p1) => this.client.lgGuild?.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match,
+					)
+					.replace( // @mentions
+						/(?<!<)@(!|&)?(\S+)(?!\d{17,19}>)/g,
+						(match, p1, p2) => {
+							switch (p1) {
+								case '!': // members/users
+									return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
+											?? this.client.users.cache.find(({ username }) => username.toLowerCase() === p2.toLowerCase())?.toString() // users
+											?? match;
 
-							case '&': // roles
-								return this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-										?? match;
+								case '&': // roles
+									return this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
+											?? match;
 
-							default: { // players, members/users, roles
-								const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === p2.toLowerCase());
+								default: { // players, members/users, roles
+									const IGN = p2.replace(/\W/g, '').toLowerCase();
 
-								if (player?.inDiscord) return `<@${player.discordID}>`;
+									if (!IGN.length) return match;
 
-								return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-										?? this.client.users.cache.find(({ username }) => username?.toLowerCase() === p2.toLowerCase())?.toString() // users
-										?? this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-										?? match;
+									const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === IGN);
+
+									if (player?.inDiscord) return `<@${player.discordID}>`; // player can be pinged
+
+									return match;
+								}
 							}
-						}
-					},
-				),
-			{
-				codeBlock: false,
-				inlineCode: false,
-				codeBlockContent: false,
-				inlineCodeContent: false,
-				italic: false,
-				underline: false,
-			},
-		)
-			.replace(/\*/g, '\\*') // escape italic 1/2
-			.replace(/(\S*)_([^\s_]*)/g, (match, p1, p2) => { // escape italic 2/2 & underline
-				if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
-				if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
-				return `${p1.replace(/_/g, '\\_')}\\_${p2}`;
-			});
+						},
+					),
+				{
+					codeBlock: false,
+					inlineCode: false,
+					codeBlockContent: false,
+					inlineCodeContent: false,
+					italic: false,
+					underline: false,
+				},
+			),
+		);
 	}
 };

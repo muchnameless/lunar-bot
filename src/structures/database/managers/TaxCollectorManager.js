@@ -1,7 +1,6 @@
 'use strict';
 
 const { stripIndents } = require('common-tags');
-const { MessageEmbed } = require('discord.js');
 const { escapeIgn } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
 // const logger = require('../../../functions/logger');
@@ -65,8 +64,7 @@ module.exports = class TaxCollectorManager extends ModelManager {
 	 * returns a tax collected embed
 	 */
 	createTaxCollectedEmbed() {
-		const embed = new MessageEmbed()
-			.setColor(this.client.config.get('EMBED_BLUE'))
+		const embed = this.client.defaultEmbed
 			.setTitle('Collected Guild Tax')
 			.setDescription(stripIndents`
 				**combined**
@@ -74,8 +72,7 @@ module.exports = class TaxCollectorManager extends ModelManager {
 				donations: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0), 0)}
 				total: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax + collector.collectedDonations, 0), 0)}
 				\u200b
-			`)
-			.setTimestamp();
+			`);
 
 		for (const taxCollector of this.cache.values()) {
 			embed.addField(

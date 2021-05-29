@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, Permissions: { FLAGS: { MANAGE_ROLES } } } = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
@@ -57,7 +57,7 @@ module.exports = class Player extends Model {
 		/**
 		 * @type {number}
 		 */
-		this.chatBridgeMutedUntil;
+		this.mutedTill;
 		/**
 		 * @type {boolean}
 		 */
@@ -136,14 +136,22 @@ module.exports = class Player extends Model {
 				defaultValue: false,
 				allowNull: false,
 				set(value) {
-					if (!value) this._discordMember = null;
+					if (!value) this.uncacheMember();
 					this.setDataValue('inDiscord', value);
 				},
 			},
-			chatBridgeMutedUntil: {
+			mutedTill: {
 				type: DataTypes.BIGINT,
 				defaultValue: 0,
 				allowNull: false,
+				set(value) {
+					this.setDataValue('mutedTill', value ?? 0);
+				},
+			},
+			_infractions: {
+				type: DataTypes.ARRAY(DataTypes.BIGINT),
+				defaultValue: null,
+				allowNull: true,
 			},
 			hasDiscordPingPermission: {
 				type: DataTypes.BOOLEAN,
@@ -234,11 +242,34 @@ module.exports = class Player extends Model {
 	}
 
 	/**
+	 * returns the number of infractions that have not already expired
+	 * @return {number}
+	 */
+	get infractions() {
+		if (!this._infractions) return 0;
+
+		// last infraction expired -> remove all infractions
+		if (this._infractions[this._infractions.length - 1] + this.client.config.getNumber('INFRACTIONS_EXPIRATION_TIME') >= Date.now()) {
+			this._infractions = null;
+			this.save();
+			return 0;
+		}
+
+		return this._infractions.length;
+	}
+
+	/**
 	 * returns the hypixel guild db object associated with the player
 	 * @returns {?import('./HypixelGuild')}
 	 */
 	get guild() {
-		return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
+		switch (this.guildID) {
+			case GUILD_ID_BRIDGER:
+				return this.client.hypixelGuilds.mainGuild;
+
+			default:
+				return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
+		}
 	}
 
 	/**
@@ -262,7 +293,7 @@ module.exports = class Player extends Model {
 			} catch (error) {
 				this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
 				this.save();
-				logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}: ${error}`);
+				logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}`, error);
 				return this._discordMember = null;
 			}
 		})();
@@ -350,7 +381,7 @@ module.exports = class Player extends Model {
 	 * returns a sky.shiiyu.moe link for the player
 	 */
 	get url() {
-		return `https://sky.shiiyu.moe/stats/${this.ign}/${this.mainProfileName}`;
+		return `https://sky.shiiyu.moe/stats/${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUUID}/${this.mainProfileName ?? ''}`;
 	}
 
 	/**
@@ -545,11 +576,9 @@ module.exports = class Player extends Model {
 
 			await this.save();
 		} catch (error) {
-			if (error instanceof NonAPIError) return logger.warn(`[UPDATE XP]: ${this.logInfo}: ${error}`);
-			if (error.name.startsWith('Sequelize')) return logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
-			if (error instanceof TypeError || error instanceof RangeError) return logger.error(`[UPDATE XP]: ${this.logInfo}:`, error);
+			if (error instanceof NonAPIError || error.name.startsWith('Sequelize') || error instanceof TypeError || error instanceof RangeError) return logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
 
-			logger.error(`[UPDATE XP]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`);
+			logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
 			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
 			if (rejectOnAPIError) throw error;
 		}
@@ -761,8 +790,7 @@ module.exports = class Player extends Model {
 		const OLD_DISCORD_ID = this.discordID;
 
 		try {
-			this.discordID = value;
-			await this.save({ fields: [ 'discordID' ] });
+			await super.update({ discordID: value });
 		} catch (error) {
 			this.discordID = OLD_DISCORD_ID;
 			throw error;
@@ -798,28 +826,30 @@ module.exports = class Player extends Model {
 	 * @param {string} reason reason for discord's audit logs
 	 */
 	async unlink(reason = null) {
-		const currentLinkedMember = await this.discordMember;
-
-		// unlink 1/2
-		this.discordID = null; // needs to be set before so that client.on('guildMemberUpdate', ...) doesn't change the nickname back to the ign
+		const currentlyLinkedMember = await this.discordMember;
 
 		let wasSuccessful = true;
 
-		if (currentLinkedMember) {
+		if (currentlyLinkedMember) {
 			// remove roles that the bot manages
-			const { rolesToPurge } = currentLinkedMember;
+			const { rolesToPurge } = currentlyLinkedMember;
 
 			if (rolesToPurge.length) wasSuccessful = await this.makeRoleApiCall([], rolesToPurge, reason);
 
 			// reset nickname if it is set to the player's ign
-			if (currentLinkedMember.nickname === this.ign) wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
+			if (currentlyLinkedMember.nickname === this.ign) {
+				// needs to changed temporarily so that client.on('guildMemberUpdate', ...) doesn't change the nickname back to the ign
+				const { guildID } = this; // 1/3
+				this.guildID = GUILD_ID_ERROR; // 2/3
 
-			// unlink player from member
-			currentLinkedMember.player = null;
+				wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
+
+				if (this.guildID === GUILD_ID_ERROR) this.guildID = guildID; // 3/3
+			}
 		}
 
-		// unlink 2/2
-		this.inDiscord = false;
+		this.discordID = null;
+
 		await this.save();
 
 		return wasSuccessful;
@@ -843,7 +873,7 @@ module.exports = class Player extends Model {
 		if (!filteredRolesToAdd.length && !filteredRolesToRemove.length) return true;
 
 		// permission check
-		if (!member.guild.me.permissions.has(MANAGE_ROLES)) return (logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false);
+		if (!member.guild.me.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) return (logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false);
 
 		const { config } = member.client;
 		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));
@@ -874,7 +904,7 @@ module.exports = class Player extends Model {
 		} catch (error) {
 			// was not successful
 			this.discordMember = null;
-			logger.error(`[ROLE API CALL]: ${error}`);
+			logger.error('[ROLE API CALL]', error);
 			loggingEmbed
 				.setColor(config.get('EMBED_RED'))
 				.addField(error.name, error.message);
@@ -922,7 +952,7 @@ module.exports = class Player extends Model {
 		this.guildRankPriority = 0;
 		this.save();
 
-		if (!isBridger) this.client.players.delete(this);
+		if (!isBridger) this.uncache();
 
 		return true;
 	}
@@ -932,7 +962,7 @@ module.exports = class Player extends Model {
 	 * @param {boolean} shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async syncIgnWithDisplayName(shouldSendDm = false) {
-		if (this.guildID === GUILD_ID_BRIDGER) return;
+		if (this.notInGuild) return;
 
 		const member = await this.discordMember;
 
@@ -969,10 +999,10 @@ module.exports = class Player extends Model {
 	async makeNickApiCall(newNick = null, shouldSendDm = false, reason = null) {
 		const member = await this.discordMember;
 
-		if (!member) return;
-		if (member.guild.me.roles.highest.comparePositionTo(member.roles.highest) < 1) return; // member's highest role is above bot's highest role
-		if (member.guild.ownerID === member.id) return; // can't change nick of owner
-		if (!member.guild.me.permissions.has('MANAGE_NICKNAMES')) return logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' permission`);
+		if (!member) return false;
+		if (member.guild.me.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
+		if (member.guild.ownerID === member.id) return false; // can't change nick of owner
+		if (!member.guild.me.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return (logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`), false);
 
 		const { displayName: PREV_NAME } = member;
 
@@ -988,8 +1018,7 @@ module.exports = class Player extends Model {
 							: 'name already taken',
 			);
 
-			await this.client.log(new MessageEmbed()
-				.setColor(this.client.config.get('EMBED_BLUE'))
+			await this.client.log(this.client.defaultEmbed
 				.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
 				.setThumbnail(this.image)
 				.setDescription(stripIndents`
@@ -999,8 +1028,7 @@ module.exports = class Player extends Model {
 				.addFields(
 					{ name: 'Old nickname', value: `\`\`\`${PREV_NAME}\`\`\``, inline: true },
 					{ name: 'New nickname', value: `\`\`\`${newNick ?? member.user.username}\`\`\``, inline: true },
-				)
-				.setTimestamp(),
+				),
 			);
 
 			if (shouldSendDm) {
@@ -1016,13 +1044,13 @@ module.exports = class Player extends Model {
 						`,
 					).then(
 						() => logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`),
-						error => logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: unable to DM: ${error}`),
+						error => logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: unable to DM`, error),
 					);
 			}
 
 			return true;
 		} catch (error) {
-			logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: ${error}`);
+			logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}`, error);
 			this.discordMember = null;
 			return false;
 		}
@@ -1032,7 +1060,12 @@ module.exports = class Player extends Model {
 	 * fetches the discord tag from hypixel
 	 */
 	async fetchDiscordTag() {
-		return (await hypixel.player.uuid(this.minecraftUUID).catch(error => logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}: ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))?.socialMedia?.links?.DISCORD ?? null;
+		try {
+			return (await hypixel.player.uuid(this.minecraftUUID)).socialMedia?.links?.DISCORD ?? null;
+		} catch (error) {
+			logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}`, error);
+			return null;
+		}
 	}
 
 	/**
@@ -1088,7 +1121,7 @@ module.exports = class Player extends Model {
 				await this.save();
 			} catch (error) {
 				this.ign = OLD_IGN;
-				return logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`);
+				return logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
 			}
 
 			this.syncIgnWithDisplayName(false);
@@ -1098,7 +1131,7 @@ module.exports = class Player extends Model {
 				newIgn: CURRENT_IGN,
 			};
 		} catch (error) {
-			logger.error(`[UPDATE IGN]: ${this.logInfo}: ${error}`);
+			logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
 		}
 	}
 
@@ -1229,10 +1262,42 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * destroys the db entry and removes it from the client.players collection
+	 * removes the dual link between a discord member / user and the player
 	 */
-	async delete() {
-		return this.client.players.remove(this);
+	async uncacheMember() {
+		if (!this.discordID) return;
+
+		// remove from member player cache
+		const member = await this.discordMember;
+		if (member) member.player = null;
+
+		// remove from user player cache
+		const user = this.client.users.cache.get(this.discordID);
+		if (user) user.player = null;
+
+		// remove cached member
+		this._discordMember = null;
+	}
+
+	/**
+	 * removes the element from member, user, guild, client cache
+	 */
+	async uncache() {
+		await this.uncacheMember();
+
+		// remove from guild / client player cache
+		this.client.hypixelGuilds.sweepPlayerCache(this.guildID); // sweep hypixel guild player cache
+		this.client.players.cache.delete(this.minecraftUUID);
+
+		return this;
+	}
+
+	/**
+	 * destroys the db entry and removes it from cache
+	 */
+	async destroy() {
+		await this.uncache();
+		return super.destroy();
 	}
 
 	/**
@@ -1262,9 +1327,7 @@ module.exports = class Player extends Model {
 		}
 
 		// sync guild mutes
-		if (mutedTill) {
-			this.chatBridgeMutedUntil = mutedTill;
-		}
+		this.mutedTill = mutedTill;
 
 		// update guild rank
 		this.guildRankPriority = hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ?? (/guild ?master/i.test(rank) ? hypixelGuild.ranks.length : 1);
@@ -1441,6 +1504,16 @@ module.exports = class Player extends Model {
 			overflow,
 			totalWeight: weight + overflow,
 		};
+	}
+
+	/**
+	 * adds the current timestamp to infractions
+	 */
+	addInfraction() {
+		this._infractions ??= []; // create infractions array if non-existent
+		this._infractions.push(Date.now()); // add current time
+		this.changed('_infractions', true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+		return this.save();
 	}
 
 	/**

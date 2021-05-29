@@ -1,6 +1,7 @@
 'use strict';
 
-const { Util: { splitMessage, escapeCodeBlock } } = require('discord.js');
+const { Util: { splitMessage, escapeCodeBlock }, Permissions } = require('discord.js');
+const { commaListsAnd } = require('common-tags');
 const { promisify } = require('util');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
@@ -268,5 +269,16 @@ const self = module.exports = {
 		for (const x of await Promise.allSettled(arr)) {
 			if (x.status === 'rejected') logger.error(x.reason);
 		}
+	},
+
+	/**
+	 * converts permissions to a readable strings
+	 * @param {BigInt[]} permissions
+	 */
+	permissionsToString(permissions) {
+		return commaListsAnd`${new Permissions(permissions)
+			.toArray()
+			.map(permission => `'${permission}'`)
+		}`;
 	},
 };

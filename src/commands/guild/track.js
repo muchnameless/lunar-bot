@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, MessageAttachment } = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { oneLine, stripIndents } = require('common-tags');
 const { upperCaseFirstChar, autocorrectToType } = require('../../functions/util');
@@ -165,13 +165,11 @@ module.exports = class TracklistCommand extends Command {
 			},
 		});
 
-		message.reply(new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		message.reply(this.client.defaultEmbed
 			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
 			.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
 			.attachFiles(new MessageAttachment(image))
-			.setImage('attachment://file.jpg')
-			.setTimestamp(),
+			.setImage('attachment://file.jpg'),
 		);
 	}
 };

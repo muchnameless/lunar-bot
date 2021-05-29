@@ -1,12 +1,13 @@
 'use strict';
 
-const { MessageEmbed, DiscordAPIError, MessageCollector } = require('discord.js');
+const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions } = require('discord.js');
 const ms = require('ms');
 const { prefixByType, blockedWordsRegExp } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
 const { urlToImgurLink } = require('../../../functions/imgur');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
+const cache = require('../../../api/cache');
 const logger = require('../../../functions/logger');
 
 
@@ -46,7 +47,9 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 */
 	static getPlayerName(message) {
 		/** @type {string} */
-		const name = message.author.player?.ign ?? DiscordChatManager.escapeEz(message.member?.displayName ?? message.author.username);
+		const name = message.webhookID
+			? message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.player?.ign ?? DiscordChatManager.escapeEz(message.author.username)
+			: message.author.player?.ign ?? DiscordChatManager.escapeEz(message.member?.displayName ?? message.author.username);
 
 		return blockedWordsRegExp.test(name)
 			? '*blocked*'
@@ -59,7 +62,27 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @returns {Promise<string[]>}
 	 */
 	static async _uploadAttachments(attachments) {
-		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? urlToImgurLink(attachment.url) : attachment.url)))).flatMap(({ value }, index) => value ?? attachments[index].url);
+		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? urlToImgurLink(attachment.url) : attachment.url)))).map(({ value }, index) => value ?? attachments[index].url);
+	}
+
+	/**
+	 * DMs the message author with the content if they have not been DMed in the last hour
+	 * @param {import('../../extensions/Message')} message
+	 * @param {import('../../database/models/Player')} player
+	 * @param {string} content
+	 */
+	static async _dmMuteInfo(message, player, content) {
+		if (message.me) return;
+		if (await cache.get(`chatbridge:mute:dm:${message.author.id}`)) return;
+
+		try {
+			await message.author.send(content);
+			logger.info(`[DM MUTE INFO]: ${player?.logInfo ?? ''}: DMed muted user`);
+		} catch (error) {
+			logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? ''}: error DMing muted user`, error);
+		}
+
+		cache.set(`chatbridge:mute:dm:${message.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
 	}
 
 	/**
@@ -81,13 +104,13 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * initialize the discord chat manager
 	 */
 	async init() {
-		return this.fetchOrCreateWebhook();
+		return this._fetchOrCreateWebhook();
 	}
 
 	/**
 	 * fetches or creates the webhook for the channel
 	 */
-	async fetchOrCreateWebhook() {
+	async _fetchOrCreateWebhook() {
 		if (this.webhook) return this.ready = true;
 
 		this.ready = false;
@@ -102,7 +125,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				throw new WebhookError('unknown channel', channel, this.guild);
 			}
 
-			if (!channel.checkBotPermissions('MANAGE_WEBHOOKS')) {
+			if (!channel.checkBotPermissions(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
 				this.chatBridge.shouldRetryLinking = false;
 				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.guild);
 			}
@@ -129,7 +152,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			this.client.log(new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_RED'))
 				.setTitle(error.hypixelGuild ? `${error.hypixelGuild.name} Chat Bridge` : 'Chat Bridge')
-				.setDescription(`**Error**: ${error.message}${error.channel ? `in ${error.channel}` : ''}`)
+				.setDescription(`**Error**: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
 				.setTimestamp(),
 			);
 
@@ -140,7 +163,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	/**
 	 * uncaches the webhook
 	 */
-	uncacheWebhook() {
+	_uncacheWebhook() {
 		this.webhook = null;
 		this.ready = false;
 
@@ -162,11 +185,11 @@ module.exports = class DiscordChatManager extends ChatManager {
 		try {
 			return await this.webhook.send(this.chatBridge.discord.parseContent(content), options);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: ${error}`);
+			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}`, error);
 
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
-				this.uncacheWebhook();
-				this.fetchOrCreateWebhook();
+				this._uncacheWebhook();
+				this._fetchOrCreateWebhook();
 			}
 
 			throw error;
@@ -178,15 +201,29 @@ module.exports = class DiscordChatManager extends ChatManager {
 	/**
 	 * sends a message via the bot in the chatBridge channel
 	 * @param {string} content
-	 * @param {import('discord.js').MessageOptions} options
+	 * @param {object} [param1={}]
+	 * @param {string} [param1.prefix='']
+	 * @param {import('../HypixelMessage')} [param1.hypixelMessage]
+	 * @param {import('discord.js').MessageOptions} [param1.options]
 	 */
-	async sendViaBot(content, options) {
+	async sendViaBot(content, { prefix = '', hypixelMessage, ...options } = {}) {
 		if (!this.chatBridge.enabled) return null;
 
 		await this.queue.wait();
 
+		const discordMessage = await hypixelMessage?.discordMessage.catch(logger.error);
+
 		try {
-			return await this.channel.send(this.chatBridge.discord.parseContent(content), options);
+			return await this.channel.send(
+				this.chatBridge.discord.parseContent(`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author.ign}`}, `}${prefix}${content}`),
+				{
+					reply: {
+						messageReference: discordMessage,
+						failIfNotExists: false,
+					},
+					...options,
+				},
+			);
 		} finally {
 			this.queue.shift();
 		}
@@ -197,43 +234,42 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('../../extensions/Message')} message
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */
-	async forwardToMinecraft(message, { player = message.author.player, checkifNotFromBot = true } = {}) {
+	async forwardToMinecraft(message, { player: playerInput, checkifNotFromBot = true } = {}) {
 		if (!this.chatBridge.enabled) return;
-		if (!this.minecraft.ready) return message.reactSafely(X_EMOJI);
+		if (!this.minecraft.ready) return message.react(X_EMOJI);
 
 		if (checkifNotFromBot) {
-			if (message.me) return; // message was sent from the bot
-			if (message.webhookID === this.webhook?.id) return; // message was sent from the ChatBridge's webhook
+			if (message.me) return; // message was sent by the bot
+			if (message.webhookID === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		}
+
+		/** @type {import('../../database/models/Player')} */
+		const player = playerInput
+			?? message.author.player // cached player
+			?? (await this.client.players.model.findOne({ where: { discordID: message.author.id } })).catch(error => logger.error(`[FORWARD DC TO MC]: ${message.author.tag}`, error)); // uncached player
 
 		// check if player is muted
 		if (player?.muted) {
-			if (!message.me) message.author.send(`you are currently muted for ${ms(player.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
-				() => logger.info(`[FORWARD DC TO MC]: ${player.logInfo}: DMed muted user`),
-				error => logger.error(`[FORWARD DC TO MC]: ${player.logInfo}: error DMing muted user: ${error}`),
-			);
+			DiscordChatManager._dmMuteInfo(message, player, `you are currently muted for ${ms(player.mutedTill - Date.now(), { long: true })}`);
+			return message.react(MUTED);
+		}
 
-			return message.reactSafely(MUTED);
+		// check if the player is auto muted
+		if (player?.infractions >= this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+			DiscordChatManager._dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
+			return message.react(MUTED);
 		}
 
 		// check if guild chat is muted
 		if (this.guild.muted && !player?.isStaff) {
-			if (!message.me) message.author.send(`${this.guild.name}'s guild chat is currently muted for ${ms(this.guild.chatMutedUntil - Date.now(), { long: true })}`).then(
-				() => logger.info(`[FORWARD DC TO MC]: ${player?.logInfo ?? message.author.tag}: DMed guild chat muted`),
-				error => logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? message.author.tag}: error DMing guild chat muted: ${error}`),
-			);
-
-			return message.reactSafely(MUTED);
+			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat is currently muted for ${ms(this.guild.mutedTill - Date.now(), { long: true })}`);
+			return message.react(MUTED);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.bot.player?.muted) {
-			if (!message.me) message.author.send(`the bot is currently muted for ${ms(this.minecraft.bot.player?.chatBridgeMutedUntil - Date.now(), { long: true })}`).then(
-				() => logger.info(`[FORWARD DC TO MC]: ${player?.logInfo}: DMed bot muted`),
-				error => logger.error(`[FORWARD DC TO MC]: ${player?.logInfo}: error DMing bot muted: ${error}`),
-			);
-
-			return message.reactSafely(MUTED);
+			DiscordChatManager._dmMuteInfo(message, player, `the bot is currently muted for ${ms(this.minecraft.bot.player.mutedTill - Date.now(), { long: true })}`);
+			return message.react(MUTED);
 		}
 
 		return this.minecraft.chat(
@@ -242,17 +278,17 @@ module.exports = class DiscordChatManager extends ChatManager {
 					? await (async () => {
 						try {
 							/** @type {import('../extensions/Message')} */
-							const referencedMessage = await this.client.channels.cache.get(message.reference.channelID)?.messages.fetch(message.reference.messageID);
+							const referencedMessage = await message.fetchReference();
 							return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
 						} catch (error) {
-							logger.error(`[FORWARD DC TO MC]: error fetching reference: ${error}`);
+							logger.error('[FORWARD DC TO MC]: error fetching reference', error);
 							return null;
 						}
 					})()
 					: null,
 				message.content, // actual content
 				message.attachments.size
-					? await DiscordChatManager._uploadAttachments(message.attachments.array()) // links of attachments
+					? await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ]) // links of attachments
 					: null,
 			].filter(Boolean).join(' '),
 			{

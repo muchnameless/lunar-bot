@@ -42,7 +42,7 @@ module.exports = class LogHandler {
 			this._postFileLogs(); // repost webhook logs that failed to be posted during the last uptime
 		} catch (error) {
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) this.client.config.set('LOGGING_WEBHOOK_DELETED', 'true');
-			logger.error(`[LOGGING WEBHOOK]: ${error}`);
+			logger.error('[LOGGING WEBHOOK]', error);
 		}
 	}
 
@@ -88,7 +88,7 @@ module.exports = class LogHandler {
 
 	/**
 	 * make sure all elements are instances of MessageEmbed
-	 * @param {MessageEmbed[]} embedsInput
+	 * @param {MessageEmbed[]|string[]} embedsInput
 	 */
 	_prepareEmbeds(embedsInput) {
 		const embeds = embedsInput.filter(x => x != null); // filter out null & undefined
@@ -98,7 +98,7 @@ module.exports = class LogHandler {
 			if (embed instanceof MessageEmbed) continue;
 
 			if (typeof embed === 'string') {
-				embeds[index] = new MessageEmbed({ color: this.client.config.get('EMBED_BLUE'), description: embed });
+				embeds[index] = this.client.defaultEmbed.setDescription(embed);
 				continue;
 			}
 
@@ -143,7 +143,7 @@ module.exports = class LogHandler {
 				embeds,
 			});
 		} catch (error) {
-			logger.error(`[CLIENT LOG]: ${error}`);
+			logger.error('[CLIENT LOG]', error);
 
 			// webhook doesn't exist anymore
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
@@ -162,7 +162,7 @@ module.exports = class LogHandler {
 	 */
 	async _createLogBufferFolder() {
 		try {
-			await mkdir(this.LogHandler.PATH);
+			await mkdir(LogHandler.LOG_PATH);
 			logger.debug('[LOG BUFFER]: created \'log_buffer\' folder');
 			return true;
 		} catch { // rejects if folder already exists
@@ -187,7 +187,7 @@ module.exports = class LogHandler {
 			);
 		} catch (error) {
 			logger.error(error);
-			logger.error(`[LOG TO FILE]: ${error}`);
+			logger.error('[LOG TO FILE]', error);
 		}
 	}
 
@@ -210,7 +210,7 @@ module.exports = class LogHandler {
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {
-			logger.error(`[POST LOG FILES]: ${error}`);
+			logger.error('[POST LOG FILES]', error);
 		}
 	}
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, version } = require('discord.js');
+const { version } = require('discord.js');
 const { commaListsOr, stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar } = require('../../functions/util');
@@ -26,15 +26,15 @@ module.exports = class HelpCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const helpEmbed = new MessageEmbed().setColor(this.config.get('EMBED_BLUE'));
+		const helpEmbed = this.client.defaultEmbed;
 
 
 		// default help
 		if (!args.length) {
-			for (const category of this.commandCollection.visibleCategories) {
+			for (const category of this.collection.visibleCategories) {
 				helpEmbed.addField(
 					`${upperCaseFirstChar(category)} commands`,
-					` • ${this.commandCollection
+					` • ${this.collection
 						.filterByCategory(category)
 						.map(({ name, aliases }) => [ name, aliases?.join(' | ') ].filter(Boolean).join(' | '))
 						.join('\n • ')
@@ -57,8 +57,7 @@ module.exports = class HelpCommand extends Command {
 					
 					Bugs or feature requests: ${await this.client.ownerInfo}
 				`)
-				.setFooter(`discord.js ${version}`)
-				.setTimestamp();
+				.setFooter(`discord.js ${version}`);
 
 			return message.reply(helpEmbed);
 		}
@@ -67,10 +66,10 @@ module.exports = class HelpCommand extends Command {
 
 
 		// category help
-		const requestedCategory = this.commandCollection.categories.find(categoryName => categoryName === INPUT);
+		const requestedCategory = this.collection.categories.find(categoryName => categoryName === INPUT);
 
 		if (requestedCategory) {
-			const categoryCommands = this.commandCollection.filterByCategory(INPUT);
+			const categoryCommands = this.collection.filterByCategory(INPUT);
 
 			helpEmbed.setTitle(`Category: ${upperCaseFirstChar(INPUT)}`);
 
@@ -107,15 +106,14 @@ module.exports = class HelpCommand extends Command {
 				.addField('\u200B\n\u200b', stripIndents`
 					Use \`${this.config.get('PREFIX')}help <command name>\` to get additional information on a specific command.
 					Arguments: \`[required]\` \`<optional>\`
-				`)
-				.setTimestamp();
+				`);
 
 			return message.reply(helpEmbed);
 		}
 
 
 		// single command help
-		const command = this.commandCollection.getByName(INPUT);
+		const command = this.collection.getByName(INPUT);
 
 		if (!command) return message.reply(`\`${INPUT}\` is neither a valid command nor category.`);
 
@@ -148,6 +146,6 @@ module.exports = class HelpCommand extends Command {
 
 		helpEmbed.addField('**Cooldown:**', ms(COOLDOWN * 1_000, { long: true }));
 
-		message.reply(helpEmbed, { reply: false });
+		message.reply(helpEmbed);
 	}
 };

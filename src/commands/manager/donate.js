@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { validateNumber } = require('../../functions/stringValidators');
 const { removeNumberFormatting, safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
@@ -66,11 +65,9 @@ module.exports = class DonateCommand extends Command {
 
 		message.reply(`registered a donation from \`${player.ign}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}.`);
 
-		this.client.log(new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Donations')
-			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}\`\`\``)
-			.setTimestamp(),
+			.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}\`\`\``),
 		);
 	}
 };

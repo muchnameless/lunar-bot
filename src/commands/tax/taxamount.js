@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { removeNumberFormatting, safePromiseAll } = require('../../functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
@@ -45,15 +44,13 @@ module.exports = class TaxAmountCommand extends Command {
 		]);
 
 		// logging
-		this.client.log(new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Tax')
 			.setDescription(`${message.author.tag} | ${message.author} changed the guild tax amount`)
 			.addFields(
 				{ name: 'Old amount', value: `\`\`\`\n${this.client.formatNumber(OLD_AMOUNT)}\`\`\``, inline: true },
 				{ name: 'New amount', value: `\`\`\`\n${this.client.formatNumber(newAmount)}\`\`\``, inline: true },
-			)
-			.setTimestamp(),
+			),
 		);
 
 		message.reply(`changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(newAmount)}\``);

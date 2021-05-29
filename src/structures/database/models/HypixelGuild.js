@@ -73,7 +73,7 @@ module.exports = class HypixelGuild extends Model {
 		/**
 		 * @type {number}
 		 */
-		this.chatMutedUntil;
+		this.mutedTill;
 		/**
 		 * @type {ChatBridgeChannel[]}
 		 */
@@ -120,10 +120,13 @@ module.exports = class HypixelGuild extends Model {
 				defaultValue: true,
 				allowNull: false,
 			},
-			chatMutedUntil: {
+			mutedTill: {
 				type: DataTypes.BIGINT,
 				defaultValue: 0,
 				allowNull: false,
+				set(value) {
+					this.setDataValue('mutedTill', value ?? 0);
+				},
 			},
 			chatBridgeChannels: {
 				type: DataTypes.ARRAY(DataTypes.JSONB), // { channelID: string, type: string }
@@ -308,12 +311,8 @@ module.exports = class HypixelGuild extends Model {
 			}
 		}
 
-		// update chatMute
-		if (chatMute) {
-			this.chatMutedUntil = Date.now() + chatMute;
-		} else {
-			this.chatMutedUntil = 0;
-		}
+		// sync guild mutes
+		this.mutedTill = chatMute;
 
 		return this.save();
 	}
@@ -362,7 +361,14 @@ module.exports = class HypixelGuild extends Model {
 
 					// unknown player
 					if (created) {
-						const IGN = (await mojang.uuid(minecraftUUID).catch(error => logger.error(`[GET IGN]: ${error}`)))?.ign ?? UNKNOWN_IGN;
+						const IGN = await (async () => {
+							try {
+								return (await mojang.uuid(minecraftUUID)).ign;
+							} catch (error) {
+								logger.error('[GET IGN]', error);
+								return UNKNOWN_IGN;
+							}
+						})();
 
 						joinedLog.push(`+\xa0${IGN}`);
 
@@ -372,7 +378,7 @@ module.exports = class HypixelGuild extends Model {
 						// try to link new player to discord
 						await (async () => {
 							discordTag = (await hypixel.player.uuid(minecraftUUID)
-								.catch(error => logger.error(`[GET DISCORD TAG]: ${IGN} (${this.name}): ${error.name}${error.code ? ` ${error.code}` : ''}: ${error.message}`)))
+								.catch(error => logger.error(`[GET DISCORD TAG]: ${IGN} (${this.name})`, error)))
 								?.socialMedia?.links?.DISCORD;
 
 							if (!discordTag) {
@@ -448,7 +454,7 @@ module.exports = class HypixelGuild extends Model {
 						setTimeout(
 							(async () => {
 								// reset current xp to 0
-								await player.resetXp({ offsetToReset: CURRENT }).catch(error => logger.error(`${error}`));
+								await player.resetXp({ offsetToReset: CURRENT }).catch(error => logger.error(error));
 
 								const { xpLastUpdatedAt } = player;
 								// shift the daily array for the amount of daily resets missed
@@ -607,9 +613,9 @@ module.exports = class HypixelGuild extends Model {
 
 			const replyData = await message.replyData;
 
-			if (replyData) message.channel.deleteMessages(replyData.messageID).catch(error => logger.error(`[RANK REQUEST]: delete: ${error}`));
+			if (replyData) message.channel.deleteMessages(replyData.messageID).catch(error => logger.error('[RANK REQUEST]: delete', error));
 
-			return message.reactSafely(CLOWN);
+			return message.react(CLOWN);
 		}
 
 		const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));
@@ -626,11 +632,17 @@ module.exports = class HypixelGuild extends Model {
 		const WEIGHT_STRING = this.client.formatDecimalNumber(totalWeight);
 
 		// remove clown reaction if it exists, optional chaining to handle  mc messages
-		if (message.reactions?.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error(`[RANK REQUEST]: remove reaction: ${error}`));
+		if (message.reactions?.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error('[RANK REQUEST]: remove reaction', error));
 
 		await message.reply(
 			`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
-			{ reply: false, sameChannel: true },
+			{
+				reply: {
+					messageReference: message,
+					failIfNotExists: false,
+				},
+				sameChannel: true,
+			},
 		);
 
 		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
@@ -662,7 +674,7 @@ module.exports = class HypixelGuild extends Model {
 			await player.updateRoles(`requested ${RANK_NAME}`);
 		}
 
-		return message.reactSafely(Y_EMOJI_ALT);
+		return message.react(Y_EMOJI_ALT);
 	}
 
 	/**

@@ -74,7 +74,7 @@ module.exports = class PlayerCommand extends Command {
 
 			return message.reply(this.generateReply(ign, player, guild, friends, status));
 		} catch (error) {
-			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
+			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
 			return message.reply(`${error}`);
 		}

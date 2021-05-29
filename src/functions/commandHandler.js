@@ -1,7 +1,6 @@
 'use strict';
 
 const { commaListsOr } = require('common-tags');
-const { Collection } = require('discord.js');
 const ms = require('ms');
 const { FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const { escapeRegex } = require('./util');
@@ -26,7 +25,7 @@ module.exports = async (message) => {
 	 * channel specific triggers
 	 */
 
-	if (message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) message.reactSafely(FORWARD_TO_GC);
+	if (message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) message.react(FORWARD_TO_GC);
 
 	/**
 	 * commands
@@ -95,7 +94,7 @@ module.exports = async (message) => {
 			/**
 			 * @type {?import('../structures/extensions/GuildMember')}
 			 */
-			const member = message.member ?? await lgGuild.members.fetch(message.author.id).catch(error => logger.error(`[CMD HANDLER]: error while fetching member to test for permissions: ${error}`));
+			const member = message.member ?? await lgGuild.members.fetch(message.author.id).catch(error => logger.error('[CMD HANDLER]: error while fetching member to test for permissions', error));
 
 			if (!member) {
 				logger.info(`[CMD HANDLER]: ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} and could not be found within the Lunar Guard Discord Server`);
@@ -108,12 +107,6 @@ module.exports = async (message) => {
 				return message.reply(commaListsOr`the \`${command.name}\` command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)})${message.guild?.id === lgGuild.id ? '' : ' from the Lunar Guard Discord Server'}.`);
 			}
 
-			// guild role is always a req for higher commands
-			if (!member.roles.cache.has(client.config.get('GUILD_ROLE_ID'))) {
-				logger.info(`[CMD HANDLER]: ${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} without being in the guild`);
-				return message.reply(`the \`${command.name}\` command requires you to have the ${lgGuild.roles.cache.get(client.config.get('GUILD_ROLE_ID'))?.name ?? client.config.get('GUILD_ROLE_ID')} role${message.guild?.id === lgGuild.id ? '' : ' from the Lunar Guard Discord Server'}.`);
-			}
-
 		// prevent from executing owner only command
 		} else if (command.category === 'owner') {
 			logger.info(`[CMD HANDLER]: ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} which is an owner only command`);
@@ -121,21 +114,19 @@ module.exports = async (message) => {
 		}
 
 		// command cooldowns
-		if (command.cooldown) {
-			if	(!client.commands.cooldowns.has(command.name)) client.commands.cooldowns.set(command.name, new Collection());
-
+		if (command.cooldown !== 0) {
 			const NOW = Date.now();
-			const timestamps = client.commands.cooldowns.get(command.name);
+			const timestamps = command.collection.cooldowns.get(command.name);
 			const COOLDOWN_TIME = (command.cooldown ?? client.config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1000;
 
 			if (timestamps.has(message.author.id)) {
-				const expirationTime = timestamps.get(message.author.id) + COOLDOWN_TIME;
+				const EXPIRATION_TIME = timestamps.get(message.author.id) + COOLDOWN_TIME;
 
-				if (NOW < expirationTime) {
-					const timeLeft = ms(expirationTime - NOW, { long: true });
+				if (NOW < EXPIRATION_TIME) {
+					const TIME_LEFT = ms(EXPIRATION_TIME - NOW, { long: true });
 
-					logger.info(`[CMD HANDLER]: ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${timeLeft} before the cooldown expires`);
-					return message.reply(`\`${command.name}\` is on cooldown for another \`${timeLeft}\`.`);
+					logger.info(`[CMD HANDLER]: ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${TIME_LEFT} before the cooldown expires`);
+					return message.reply(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\`.`);
 				}
 			}
 
@@ -162,7 +153,7 @@ module.exports = async (message) => {
 	} catch (error) {
 		if (error instanceof ChatBridgeError) return message.reply(`${error}`);
 
-		logger.error(`[CMD HANDLER]: An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}:`, error);
+		logger.error(`[CMD HANDLER]: An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}`, error);
 		message.reply(`an error occured while executing the \`${command.name}\` command:\n${error}`);
 	}
 };

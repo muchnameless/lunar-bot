@@ -5,8 +5,8 @@ const Command = require('../../structures/commands/Command');
 
 
 module.exports = class TestCommand extends Command {
-	constructor(data) {
-		super(data, {
+	constructor(data, options) {
+		super(data, options ?? {
 			aliases: [ 'debug' ],
 			description: 'dynamic test function',
 			args: false,

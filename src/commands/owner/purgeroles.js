@@ -28,7 +28,7 @@ module.exports = class PurgeRolesCommand extends Command {
 		const { lgGuild } = this.client;
 
 		if (!lgGuild) return message.reply('discord server is currently unavailable');
-		if (lgGuild.members.cache.size !== lgGuild.memberCount) await lgGuild.members.fetch();
+		await lgGuild.members.fetch();
 
 		let index = -1;
 
@@ -50,7 +50,7 @@ module.exports = class PurgeRolesCommand extends Command {
 							await member.roles.remove(rolesToPurge);
 							logger.info(`[PURGE ROLES]: removed ${rolesToPurge.length} role(s) from ${member.user.tag} | ${member.displayName}`);
 						} catch (error) {
-							logger.error(`[PURGE ROLES]: ${error}`);
+							logger.error('[PURGE ROLES]', error);
 						} finally {
 							resolve();
 						}

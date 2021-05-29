@@ -1,20 +1,38 @@
 'use strict';
 
-const { Util: { splitMessage } } = require('discord.js');
+const { MessageEmbed, Util: { splitMessage }, SnowflakeUtil } = require('discord.js');
+const { AsyncQueue } = require('@sapphire/async-queue');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const emojiRegex = require('emoji-regex/es2015')();
 const { sleep, trim, cleanFormattedNumber } = require('../../../functions/util');
 const { unicodeToName } = require('../constants/emojiNameUnicodeConverter');
 const { memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
-const { spamMessages } = require('../constants/commandResponses');
 const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
 const { MC_CLIENT_VERSION } = require('../constants/settings');
+const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database');
 const minecraftBot = require('../MinecraftBot');
-const AsyncQueue = require('../../AsyncQueue');
 const MessageCollector = require('../MessageCollector');
 const ChatManager = require('./ChatManager');
 const logger = require('../../../functions/logger');
+
+/**
+ * @typedef {object} SendToChatOptions
+ * @property {string} [prefix='']
+ * @property {boolean} [shouldUseSpamByPass=false]
+ * @property {?import('../../extensions/Message')} [discordMessage=null]
+ */
+
+/**
+ * @typedef {object} CommandOptions
+ * @property {string} command can also directly be used as the only parameter
+ * @property {?RegExp} [responseRegExp] regex to use as a filter for the message collector
+ * @property {?RegExp} [abortRegExp] regex to detect an abortion response
+ * @property {number} [max=-1] maximum amount of response messages, -1 or Infinity for an infinite amount
+ * @property {boolean} [raw=false] wether to return an array of the collected hypixel message objects instead of just the content
+ * @property {number} [timeout=config.getNumber('INGAME_RESPONSE_TIMEOUT')] response collector timeout in milliseconds
+ * @property {boolean} [rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
+ */
 
 
 module.exports = class MinecraftChatManager extends ChatManager {
@@ -73,6 +91,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		  * to prevent chatBridge from reconnecting at <MinecraftBot>.end
 		  */
 		this.shouldReconnect = true;
+		/**
+		 * command response collector
+		 */
+		this._commandCollector = null;
 	}
 
 	get ready() {
@@ -100,7 +122,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 				return JSON.parse(result).server ?? null;
 			} catch (error) {
-				logger.error(`[GET SERVER]: ${error}`);
+				logger.error('[GET SERVER]', error);
 				return null;
 			}
 		})();
@@ -118,7 +140,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				await this.command({
 					command: `w ${this.chatBridge.bot.ign} o/`,
 					responseRegExp: /^You cannot message this player\.$/,
-					timeout: 1,
+					timeout: 1_000,
 					rejectOnTimeout: true,
 					max: 1,
 				});
@@ -133,7 +155,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	/**
 	 * maximum attempts to resend to in game chat
 	 */
-	static maxRetries = 3;
+	static MAX_RETRIES = 3;
 
 	/**
 	 * normal delay to listen for error messages
@@ -149,9 +171,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	];
 
 	/**
-	 * increased delay which can be used to send messages to in game chat continously
+	 * delay which can be used to send messages to in game chat continously
 	 */
 	static SAFE_DELAY = 600;
+
+	/**
+	 * delay which can be used after triggering anti spam
+	 */
+	static ANTI_SPAM_DELAY = 1_000;
 
 	/**
 	 * 100 pre 1.10.2, 256 post 1.10.2
@@ -163,22 +190,90 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * reacts to the message and DMs the author
-	 * @param {import('../extensions/Message')} discordMessage
+	 * @param {import('../../extensions/Message')} discordMessage
+	 * @param {string} reason
+	 * @param {?Record<string, any>}
 	 */
-	static async _handleBlockedWord(discordMessage) {
+	async _handleForwardRejection(discordMessage, reason, data) {
 		if (!discordMessage) return;
 
-		discordMessage.reactSafely(STOP);
+		discordMessage.react(STOP);
 
 		try {
-			await discordMessage.author.send(stripIndents`
-				your message (or parts of it) were blocked because you used a banned word or character
-				(the bannned word filter is to comply with hypixel's chat rules)
-			`);
+			let info;
 
-			logger.info(`[CHATBRIDGE BANNED WORD]: DMed ${discordMessage.author.tag}`);
+			switch (reason) {
+				case 'blocked': {
+					try {
+						/** @type {import('../../database/models/Player')} */
+						const player = discordMessage.author.player
+							?? (await this.client.players.model.findOrCreate({
+								where: { discordID: discordMessage.author.id },
+								defaults: {
+									minecraftUUID: SnowflakeUtil.generate(),
+									guildID: GUILD_ID_BRIDGER,
+									ign: UNKNOWN_IGN,
+									inDiscord: true,
+								},
+							}))[0];
+
+						player.addInfraction();
+
+						const { infractions } = player;
+
+						if (infractions >= this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS') && !player.muted) {
+							const MUTE_DURATION = this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_DURATION');
+
+							player.mutedTill = Date.now() + MUTE_DURATION;
+							player.save();
+
+							const MUTE_DURATION_LONG = ms(MUTE_DURATION, { long: true });
+
+							this.client.log(new MessageEmbed()
+								.setColor(this.client.config.get('EMBED_RED'))
+								.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
+								.setThumbnail(player.image)
+								.setDescription(stripIndents`
+									**Auto Muted** for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.getNumber('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
+									${player.info}
+								`)
+								.setTimestamp(),
+							);
+
+							info = `you were automatically muted for ${MUTE_DURATION_LONG} due to continues infractions`;
+						}
+					} catch (error) {
+						logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error);
+					}
+
+					info ??= 'continuing to do so will result in an automatic temporary mute';
+				}
+				// fallthrough
+				case 'filterBlocked':
+					info = stripIndents`
+						your message was blocked because you used a blocked word or character
+						(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
+
+						${info ?? ''}
+					`;
+					break;
+
+				case 'messageCount':
+					info = stripIndents`
+						your message was blocked because you are only allowed to send up to ${data?.maxParts ?? this.client.config.getNumber('CHATBRIDGE_DEFAULT_MAX_PARTS')} messages at once
+						(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
+					`;
+					break;
+
+				default:
+					throw new Error('invalid rejection case');
+			}
+
+			await discordMessage.author.send(info);
+
+			logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE BANNED WORD]: error DMing ${discordMessage.author.tag}: ${error}`);
+			logger.error(`[FORWARD REJECTION]: error DMing ${discordMessage.author.tag}`, error);
 		}
 	}
 
@@ -188,7 +283,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	static _cleanCommandResponse(messages) {
 		return messages
-			.map(({ content }) => content.replace(/^-{50,}|-{50,}$/g, '').trim())
+			.map(({ content }) => content.replace(/^-{29,}|-{29,}$/g, '').trim())
 			.join('\n');
 	}
 
@@ -203,6 +298,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * create bot instance, loads and binds it's events and logs it into hypixel
 	 */
 	async _createBot() {
+		++this.loginAttempts;
+
 		return this.bot = await minecraftBot(this.chatBridge, {
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
@@ -224,13 +321,15 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			return this.chatBridge;
 		}
 
-		// reconnect the bot if it hasn't successfully spawned in 60 seconds
-		this.abortLoginTimeout = setTimeout(() => {
-			logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
-			this.reconnect(0);
-		}, Math.min(++this.loginAttempts * 60_000, 300_000));
-
 		await this._createBot();
+
+		// reconnect the bot if it hasn't successfully spawned in 60 seconds
+		if (!this.bot?.ready) {
+			this.abortLoginTimeout = setTimeout(() => {
+				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
+				this.reconnect(0);
+			}, Math.min(this.loginAttempts * 60_000, 600_000));
+		}
 
 		this._isReconnecting = false;
 
@@ -238,10 +337,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * reconnects the bot
-	 * @param {?number} loginDelay delay in ms
+	 * reconnects the bot, exponential login delay up to 10 min
+	 * @param {number} [loginDelay] delay in ms
 	 */
-	reconnect(loginDelay = Math.min(this.loginAttempts * 5_000, 300_000)) {
+	reconnect(loginDelay = Math.min(Math.exp(this.loginAttempts) * 1_000, 600_000)) {
 		// prevent multiple reconnections
 		if (this._isReconnecting) return this.chatBridge;
 		this._isReconnecting = true;
@@ -270,7 +369,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		try {
 			this.bot?.quit();
 		} catch (error) {
-			logger.error('[CHATBRIDGE DISCONNECT]:', error);
+			logger.error('[CHATBRIDGE DISCONNECT]', error);
 		}
 
 		this.bot = null;
@@ -294,7 +393,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		if (!this._collecting) return;
 		if (message.me && message.content.endsWith(this._contentFilter)) return this._resolveAndReset(message);
 		if (message.type) return;
-		if (spamMessages.includes(message.content)) return this._resolveAndReset('spam');
+		if (message.spam) return this._resolveAndReset('spam');
 		if (message.content.startsWith('We blocked your comment')) return this._resolveAndReset('blocked');
 	}
 
@@ -376,18 +475,31 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
 				.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
 				.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
-					const channelName = this.client.channels.cache.get(p1)?.name;
-					if (channelName) return `#${channelName}`;
+					const CHANNEL_NAME = this.client.channels.cache.get(p1)?.name;
+					if (CHANNEL_NAME) return `#${CHANNEL_NAME}`;
 					return match;
 				})
 				.replace(/<@&(\d{17,19})>/g, (match, p1) => { // roles
-					const roleName = this.client.lgGuild?.roles.cache.get(p1)?.name;
-					if (roleName) return `@${roleName}`;
+					const ROLE_NAME = this.client.lgGuild?.roles.cache.get(p1)?.name;
+					if (ROLE_NAME) return `@${ROLE_NAME}`;
 					return match;
 				})
 				.replace(/<@!?(\d{17,19})>/g, (match, p1) => { // users
-					const displayName = this.client.lgGuild?.members.cache.get(p1)?.displayName ?? this.client.users.cache.get(p1)?.username;
-					if (displayName) return `@${displayName}`;
+					const member = this.client.lgGuild?.members.cache.get(p1);
+					if (member) {
+						const { player } = member;
+						if (player) return `@${player.ign}`;
+					}
+
+					const user = this.client.users.cache.get(p1);
+					if (user) {
+						const { player } = user;
+						if (player) return `@${player.ign}`;
+					}
+
+					const NAME = member?.displayName ?? user?.username;
+					if (NAME) return `@${NAME}`;
+
 					return match;
 				}),
 		);
@@ -401,7 +513,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	async gchat(content, { prefix = '', ...options } = {}) {
 		if (this.bot.player.muted) {
 			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) {
-				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.chatBridgeMutedUntil - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${content}`);
+				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.mutedTill - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${content}`);
 			}
 
 			return false;
@@ -434,7 +546,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {import('../ChatBridge').ChatOptions} options
 	 * @returns {Promise<boolean>} success - wether all message parts were send
 	 */
-	async chat(content, { prefix = '', maxParts = this.client.config.getNumber('DEFAULT_MAX_PARTS'), discordMessage } = {}) {
+	async chat(content, { prefix = '', maxParts = this.client.config.getNumber('CHATBRIDGE_DEFAULT_MAX_PARTS'), discordMessage } = {}) {
 		let success = true;
 
 		/** @type {Set<string>} */
@@ -463,44 +575,25 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				}),
 		);
 
-		if (!success) MinecraftChatManager._handleBlockedWord(discordMessage);
+		if (!success) { // messageParts blocked
+			this._handleForwardRejection(discordMessage, 'filterBlocked');
+			return false;
+		}
 
 		if (!messageParts.size) return false;
 
 		if (messageParts.size > maxParts) {
-			discordMessage?.reactSafely(STOP);
-			discordMessage?.author
-				.send(stripIndents`
-					you are only allowed to send up to ${maxParts} messages at once (therefore the bridge skipped ${messageParts.size - maxParts} part${messageParts.size - maxParts !== 1 ? 's' : ''} of your message)
-					(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
-				`)
-				.then(
-					() => logger.info(`[CHAT BRIDGE CHAT]: DMed ${discordMessage.author.tag}`),
-					error => logger.error(`[CHAT BRIDGE CHAT]: error DMing ${discordMessage.author.tag}: ${error}`),
-				);
+			this._handleForwardRejection(discordMessage, 'messageCount', { maxParts });
+			return false;
 		}
-
-		let partCount = 0;
 
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of messageParts) {
-			if (++partCount <= maxParts) { // prevent sending more than 'maxParts' messages
-				await this.sendToChat(part, { prefix, discordMessage, shouldUseSpamByPass: true });
-			} else {
-				if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: skipped '${prefix}${part}'`);
-				success = false;
-			}
+			success = await this.sendToChat(part, { prefix, discordMessage, shouldUseSpamByPass: true }) && success;
 		}
 
 		return success;
 	}
-
-	/**
-	 * @typedef {object} SendToChatOptions
-	 * @property {string} [prefix='']
-	 * @property {boolean} [shouldUseSpamByPass=false]
-	 * @property {?import('../../extensions/Message')} [discordMessage=null]
-	 */
 
 	/**
 	 * queue a message for the ingame chat
@@ -520,14 +613,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		try {
 			return await this._sendToChat(content, options);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE MC CHAT]: ${error}`);
+			logger.error('[CHATBRIDGE MC CHAT]', error);
 		} finally {
 			this.queue.shift();
 		}
 	}
 
 	/**
-	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat'
+	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat' or 'command'
 	 * @private
 	 * @param {string} content
 	 * @param {SendToChatOptions} options
@@ -544,8 +637,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				: `${prefix}${content}`,
 			);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE _CHAT]: ${error}`);
-			discordMessage?.reactSafely(X_EMOJI);
+			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
+			discordMessage?.react(X_EMOJI);
 			this._tempIncrementCounter();
 			this._resetFilter();
 			return false;
@@ -564,7 +657,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				this._resetFilter();
 
 				if (!this.ready) {
-					discordMessage?.reactSafely(X_EMOJI);
+					discordMessage?.react(X_EMOJI);
 					return false;
 				}
 
@@ -576,19 +669,19 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				this._tempIncrementCounter();
 
 				// max retries reached
-				if (++this.retries === MinecraftChatManager.maxRetries) {
-					discordMessage?.reactSafely(X_EMOJI);
-					await sleep(this.retries * MinecraftChatManager.SAFE_DELAY);
+				if (++this.retries === MinecraftChatManager.MAX_RETRIES) {
+					discordMessage?.react(X_EMOJI);
+					await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 					return false;
 				}
 
-				await sleep(this.retries * MinecraftChatManager.SAFE_DELAY);
+				await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 				return this._sendToChat.apply(this, arguments); // eslint-disable-line prefer-spread
 			}
 
 			// hypixel filter blocked message
 			case 'blocked': {
-				MinecraftChatManager._handleBlockedWord(discordMessage);
+				this._handleForwardRejection(discordMessage, 'blocked');
 				await sleep(this.delay);
 				return false;
 			}
@@ -606,22 +699,17 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * sends a message to ingame chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
-	 * @param {object} options
-	 * @param {string} options.command can also directly be used as the only parameter
-	 * @param {RegExp} [options.responseRegExp=new RegExp()] regex to use as a filter for the message collector
-	 * @param {number} [options.max=-1] maximum amount of response messages, -1 or Infinity for an infinite amount
-	 * @param {boolean} [options.raw=false] wether to return an array of the collected hypixel message objects instead of just the content
-	 * @param {number} [options.timeout=config.getNumber('INGAME_RESPONSE_TIMEOUT')] response collector timeout in seconds
-	 * @param {boolean} [options.rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
+	 * @param {CommandOptions} commandOptions
 	 */
 	// eslint-disable-next-line no-undef
-	async command({ command = arguments[0], responseRegExp = new RegExp(), max = -1, raw = false, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
-		await this.commandQueue.wait();
+	async command({ command = arguments[0], responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
+		await this.queue.wait(); // only start the collector if the chat queue is free
 
-		const collector = this.createMessageCollector(
-			message => !message.type && (responseRegExp.test(message.content) || /^-{50,}/.test(message.content)),
+		const collector = this._commandCollector = this.createMessageCollector(
+			message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{29,}/.test(message.content)),
 			{
-				time: timeout * 1_000,
+				time: timeout,
 			},
 		);
 
@@ -634,18 +722,22 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			reject = rej;
 		});
 
+		// collect message
 		collector.on('collect', (/** @type {import('../HypixelMessage')} */ message) => {
-			// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
-			if (/^-{50,}[^-]+-{50,}$/.test(message.content)) return collector.stop();
+			if (/^-{29,}/.test(message.content)) { // is line separator
+				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
+				if (/[^-]-{29,}$/.test(message.content)) return collector.stop();
 
-			if (/^-{50,}$/.test(message.content)) { // is line separator
 				collector.collected.pop();
 				if (collector.collected.length) collector.stop();
-			} else if (collector.collected.length === max) { // message is not a line separator
+			} else if (collector.collected.length === max || abortRegExp?.test(message.content)) { // message is not a line separator
 				collector.stop();
+			} else if (message.spam) { // don't collect anti spam messages
+				collector.collected.pop();
 			}
 		});
 
+		// end collection
 		collector.once('end', (/** @type {import('../HypixelMessage')[]} */ collected, /** @type {string} */ reason) => {
 			this.commandQueue.shift();
 
@@ -654,8 +746,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				case 'disconnect': {
 					if (rejectOnTimeout && !collected.length) {
 						return reject(raw
-							? [{ content: `no ingame response after ${ms(timeout * 1_000, { long: true })}` }]
-							: `no ingame response after ${ms(timeout * 1_000, { long: true })}`,
+							? [{ content: `no ingame response after ${ms(timeout, { long: true })}` }]
+							: `no ingame response after ${ms(timeout, { long: true })}`,
 						);
 					}
 
@@ -663,7 +755,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 						? collected
 						: collected.length
 							? MinecraftChatManager._cleanCommandResponse(collected)
-							: `no ingame response after ${ms(timeout * 1_000, { long: true })}`);
+							: `no ingame response after ${ms(timeout, { long: true })}`);
 				}
 
 				default:
@@ -674,7 +766,18 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			}
 		});
 
-		this.sendToChat(trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1));
+		// send command to chat
+		this.retries = 0;
+
+		(async () => {
+			try {
+				await this._sendToChat(trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1));
+			} catch (error) {
+				logger.error('[CHATBRIDGE MC CHAT]', error);
+			} finally {
+				this.queue.shift();
+			}
+		})();
 
 		return promise;
 	}

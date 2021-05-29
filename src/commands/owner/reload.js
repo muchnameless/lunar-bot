@@ -30,8 +30,8 @@ module.exports = class ReloadCommand extends Command {
 		switch (INPUT) {
 			case 'all':
 			case 'commands':
-				await this.commandCollection.unloadAll().loadAll(true);
-				return message.reply(`${this.commandCollection.size} command${this.commandCollection.size !== 1 ? 's' : ''} were reloaded successfully.`);
+				await this.collection.unloadAll().loadAll(true);
+				return message.reply(`${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully.`);
 
 			case 'db':
 			case 'database':
@@ -40,14 +40,14 @@ module.exports = class ReloadCommand extends Command {
 
 			case 'cooldown':
 			case 'cooldowns':
-				this.commandCollection.cooldowns.clear();
+				this.collection.cooldowns.clear();
 				return message.reply('cooldowns reset successfully.');
 
 			default: {
 				let commandName = INPUT;
 
 				try {
-					const commandFiles = await getAllJsFiles(this.commandCollection.dirPath);
+					const commandFiles = await getAllJsFiles(this.collection.dirPath);
 
 					// try to find file with INPUT name
 					let commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
@@ -59,7 +59,7 @@ module.exports = class ReloadCommand extends Command {
 					// no file found
 					if (!commandFile) {
 						// try to autocorrect input
-						command = this.commandCollection.getByName(commandName);
+						command = this.collection.getByName(commandName);
 
 						if (command) {
 							commandName = command.name;
@@ -69,7 +69,7 @@ module.exports = class ReloadCommand extends Command {
 					// file with exact name match found
 					} else {
 						commandName = basename(commandFile, '.js').toLowerCase();
-						command = this.commandCollection.get(commandName); // try to find already loaded command
+						command = this.collection.get(commandName); // try to find already loaded command
 					}
 
 					if (!commandFile) return message.reply(`no command with the name or alias \`${INPUT}\` found`);
@@ -80,7 +80,7 @@ module.exports = class ReloadCommand extends Command {
 						commandName = command.name;
 					}
 
-					this.commandCollection.loadFromFile(commandFile, true);
+					this.collection.loadFromFile(commandFile, true);
 
 					logger.info(`command ${commandName} was reloaded successfully`);
 					return message.reply(`command \`${commandName}\` was reloaded successfully.`);

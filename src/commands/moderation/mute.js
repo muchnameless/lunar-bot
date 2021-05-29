@@ -12,7 +12,7 @@ module.exports = class MuteCommand extends SetRankCommand {
 			aliases: [ 'guildmute' ],
 			description: 'mute a single guild member or guild chat both ingame and for the chat bridge',
 			args: 2,
-			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member] [\`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format] <${this.commandCollection.constructor.forceFlagsAsFlags} to disable IGN autocorrection>`,
+			usage: () => `[\`IGN\`|\`discord id\`|\`@mention\` for a single member | \`guild\`|\`everyone\`|${this.client.hypixelGuilds.guildNames} for the guild chat] [\`time\` in ms lib format] <${this.collection.constructor.forceFlagsAsFlags} to disable IGN autocorrection>`,
 			cooldown: 0,
 		});
 	}
@@ -34,7 +34,7 @@ module.exports = class MuteCommand extends SetRankCommand {
 		 */
 		let hypixelGuild = this.client.hypixelGuilds.getFromArray([ ...flags, ...args ]);
 
-		if (hypixelGuild || [ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+		if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 			target = 'everyone';
 			hypixelGuild ??= message.author.hypixelGuild;
 
@@ -73,15 +73,18 @@ module.exports = class MuteCommand extends SetRankCommand {
 		const EXPIRES_AT = Date.now() + DURATION;
 
 		if (target instanceof players.model) {
-			target.chatBridgeMutedUntil = EXPIRES_AT;
+			target.mutedTill = EXPIRES_AT;
 			await target.save();
 
 			if (target.notInGuild) return message.reply(`muted \`${target}\` for \`${DURATION_INPUT}\`.`);
 		} else if (target === 'everyone') {
-			hypixelGuild.chatMutedUntil = EXPIRES_AT;
+			hypixelGuild.mutedTill = EXPIRES_AT;
 			await hypixelGuild.save();
 		}
 
-		return this._run(message, flags, `g mute ${target} ${DURATION_INPUT}`, mute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign), hypixelGuild);
+		return this._run(message, flags, {
+			command: `g mute ${target} ${DURATION_INPUT}`,
+			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+		}, hypixelGuild);
 	}
 };

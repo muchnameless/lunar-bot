@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageEmbed } = require('discord.js');
 const { removeMcFormatting } = require('../../structures/chat_bridge/functions/util');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
@@ -21,9 +20,9 @@ module.exports = class GuildListCommand extends Command {
 	 * execute the command
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
 	 * @param {string[]} rawArgs arguments and flags
-	 * @param {string} command
+	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 */
-	async _run(message, rawArgs, command) {
+	async _run(message, rawArgs, commandOptions) {
 		/**
 		 * @type {import('../../structures/database/models/HypixelGuild')}
 		 */
@@ -32,30 +31,27 @@ module.exports = class GuildListCommand extends Command {
 		if (!hypixelGuild) return message.reply('unable to find your guild.');
 
 		const data = await hypixelGuild.chatBridge.minecraft.command({
-			command,
 			raw: true,
+			...commandOptions,
 		});
 
-		return message.reply(
-			new MessageEmbed()
-				.setColor(this.config.get('EMBED_BLUE'))
-				.setTitle(`/${command}`)
-				.setDescription(
-					`\`\`\`${
-						data
-							.map(msg => (msg.content.includes('●')
-								? removeMcFormatting(
-									msg.formattedContent
-										.replace(/§r§c ●/g, ' 🔴')
-										.replace(/§r§a ●/g, ' 🟢')
-										.replace(/\[.+?\] /g, ''),
-								)
-								: msg.content),
+		return message.reply(this.client.defaultEmbed
+			.setTitle(`/${commandOptions.command}`)
+			.setDescription(
+				`\`\`\`${
+					data
+						.map(msg => (msg.content.includes('●')
+							? removeMcFormatting(
+								msg.formattedContent
+									.replace(/§r§c ●/g, ' 🔴')
+									.replace(/§r§a ●/g, ' 🟢')
+									.replace(/\[.+?\] /g, ''),
 							)
-							.join('\n')
-					}\`\`\``,
-				)
-				.setTimestamp(),
+							: msg.content),
+						)
+						.join('\n')
+				}\`\`\``,
+			),
 		);
 	}
 
@@ -67,6 +63,6 @@ module.exports = class GuildListCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return this._run(message, rawArgs, 'g list');
+		return this._run(message, rawArgs, { command: 'g list' });
 	}
 };

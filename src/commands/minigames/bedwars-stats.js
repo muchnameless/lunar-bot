@@ -71,7 +71,7 @@ module.exports = class BwStatsCommand extends Command {
 
 			return message.reply(this.generateReply(ign, data));
 		} catch (error) {
-			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
+			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
 			return message.reply(`${error}`);
 		}

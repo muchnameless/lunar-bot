@@ -1,4 +1,5 @@
 'use strict';
+const { Permissions } = require('discord.js');
 const Redis = require('ioredis');
 const { LB_KEY, DM_KEY } = require('../constants/redis');
 const logger = require('../functions/logger');
@@ -45,7 +46,7 @@ module.exports = class RedisListener {
 						/** @type {import('./extensions/Message')} */
 						const message = await (await this.client.channels.fetch(channelID)).messages.fetch(messageID);
 
-						if (message.channel.checkBotPermissions('MANAGE_MESSAGES')) {
+						if (message.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) {
 							await message.reactions.removeAll();
 						} else {
 							await Promise.all(message.reactions.cache.map(async reaction => reaction.users.remove()));

@@ -4,12 +4,13 @@ const { Collection } = require('discord.js');
 const { dirname, basename, join } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
 const { autocorrect } = require('../../functions/util');
+const CooldownCollection = require('./CooldownCollection');
 const logger = require('../../functions/logger');
 
 
 module.exports = class CommandCollection extends Collection {
 	/**
-	 * @param {import('../LunartClient')} client
+	 * @param {import('../LunarClient')} client
 	 * @param {string} dirPath the path to the commands folder
 	 * @param {Boolean} [isMainCollection=false]
 	 * @param {*} [entries]
@@ -27,9 +28,9 @@ module.exports = class CommandCollection extends Collection {
 		 */
 		this.isMainCollection = isMainCollection;
 		/**
-		 * @type {Collection<string, Collection<string, number>>}
+		 * cooldown timestamps for each command
 		 */
-		this.cooldowns = new Collection();
+		this.cooldowns = new CooldownCollection();
 	}
 
 	/**
@@ -92,7 +93,7 @@ module.exports = class CommandCollection extends Collection {
 		try {
 			return await this.get('help').run(message, ...args);
 		} catch (error) {
-			logger.error(`[CMD HANDLER]: An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}:`, error);
+			logger.error(`[CMD HANDLER]: An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}`, error);
 			message.reply(`an error occured while executing the \`help\` command:\n${error}`);
 		}
 	}
@@ -147,12 +148,10 @@ module.exports = class CommandCollection extends Collection {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
 		const Command = require(file);
-		/**
-		 * @type {import('./Command')}
-		 */
+		/** @type {import('./Command')} */
 		const command = new Command({
 			client: this.client,
-			commandCollection: this,
+			collection: this,
 			name,
 			category: category !== 'commands' ? category : null,
 		});
