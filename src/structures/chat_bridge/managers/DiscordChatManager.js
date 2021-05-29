@@ -243,6 +243,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			if (message.webhookID === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		}
 
+		/** @type {import('../../database/models/Player')} */
 		const player = playerInput
 			?? message.author.player // cached player
 			?? (await this.client.players.model.findOne({ where: { discordID: message.author.id } })).catch(error => logger.error(`[FORWARD DC TO MC]: ${message.author.tag}`, error)); // uncached player
