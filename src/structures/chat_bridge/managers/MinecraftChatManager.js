@@ -298,6 +298,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * create bot instance, loads and binds it's events and logs it into hypixel
 	 */
 	async _createBot() {
+		++this.loginAttempts;
+
 		return this.bot = await minecraftBot(this.chatBridge, {
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
@@ -319,13 +321,15 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			return this.chatBridge;
 		}
 
-		// reconnect the bot if it hasn't successfully spawned in 60 seconds
-		this.abortLoginTimeout = setTimeout(() => {
-			logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
-			this.reconnect(0);
-		}, Math.min(++this.loginAttempts * 60_000, 600_000));
-
 		await this._createBot();
+
+		// reconnect the bot if it hasn't successfully spawned in 60 seconds
+		if (!this.bot?.ready) {
+			this.abortLoginTimeout = setTimeout(() => {
+				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
+				this.reconnect(0);
+			}, Math.min(this.loginAttempts * 60_000, 600_000));
+		}
 
 		this._isReconnecting = false;
 
