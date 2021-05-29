@@ -322,8 +322,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		// reconnect the bot if it hasn't successfully spawned in 60 seconds
 		this.abortLoginTimeout = setTimeout(() => {
 			logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
-			this.reconnect();
-		}, Math.min(++this.loginAttempts * 60_000, 300_000));
+			this.reconnect(0);
+		}, Math.min(++this.loginAttempts * 60_000, 600_000));
 
 		await this._createBot();
 
