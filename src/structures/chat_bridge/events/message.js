@@ -27,15 +27,10 @@ module.exports = async (chatBridge, message) => {
 			return commandHandler(message);
 		}
 
-		case PARTY: {
-			if (!chatBridge.enabled || message.me) return;
-
-			return commandHandler(message);
-		}
-
+		case PARTY:
 		case WHISPER: {
 			if (!chatBridge.enabled || message.me) return;
-			if (message.author.player?.guildID !== chatBridge.guild.guildID) return logger.info(`[MESSAGE]: ignored whisper from '${message.author.ign}': ${message.content}`); // ignore messages from non guild players
+			if (message.author.player?.guildID !== chatBridge.guild.guildID) return logger.info(`[MESSAGE]: ignored message from '${message.author.ign}': ${message.content}`); // ignore messages from non guild players
 
 			return commandHandler(message);
 		}
