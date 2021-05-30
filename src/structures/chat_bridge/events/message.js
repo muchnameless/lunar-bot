@@ -37,8 +37,6 @@ module.exports = async (chatBridge, message) => {
 			if (!chatBridge.enabled || message.me) return;
 			if (message.author.player?.guildID !== chatBridge.guild.guildID) return logger.info(`[MESSAGE]: ignored whisper from '${message.author.ign}': ${message.content}`); // ignore messages from non guild players
 
-			chatBridge.guild.handleRankRequestMessage(message).catch(error => logger.error('[RANK REQUEST]', error));
-
 			return commandHandler(message);
 		}
 
