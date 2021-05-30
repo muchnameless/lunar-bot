@@ -167,14 +167,22 @@ module.exports = class ChatBridgeArray extends Array {
 	/**
 	 * forwards the discord message if a chat bridge for that channel is found
 	 * @param {import('../extensions/Message')} message
-	 * @param {import('./ChatBridge').MessageForwardOptions} [options]
+	 * @param {import('./ChatBridge').MessageForwardOptions} [options={}]
 	 */
-	async handleDiscordMessage(message, options) {
+	async handleDiscordMessage(message, options = {}) {
 		if (!this.channelIDs.has(message.channel.id) || !this.client.config.getBoolean('CHATBRIDGE_ENABLED')) return;
 
 		try {
 			// a ChatBridge for the message's channel was found
 			if (this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
+
+			// check if the message was sent from the bot, don't react with X_EMOJI in this case
+			if (options.checkifNotFromBot) {
+				if (message.me) return; // message was sent by the bot
+				if (message.webhookID
+					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookID === chatBridge.discord.channelsByIDs.get(message.channel.id)?.webhook?.id), false)
+				) return; // message was sent by one of the ChatBridges's webhook
+			}
 
 			// no ChatBridge for the message's channel found
 			message.react(X_EMOJI);
