@@ -328,7 +328,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			this.abortLoginTimeout = setTimeout(() => {
 				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
 				this.reconnect(0);
-			}, Math.min(this.loginAttempts * 60_000, 600_000));
+			}, 60_000);
 		}
 
 		this._isReconnecting = false;
@@ -362,8 +362,9 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	disconnect() {
 		clearTimeout(this._reconnectTimeout);
-		clearTimeout(this.abortLoginTimeout);
 		this._reconnectTimeout = null;
+
+		clearTimeout(this.abortLoginTimeout);
 		this.abortLoginTimeout = null;
 
 		try {
