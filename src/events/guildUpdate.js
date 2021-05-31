@@ -23,14 +23,4 @@ module.exports = async (client, oldGuild, newGuild) => {
 			logger.error(`[GUILD UPDATE]: ${newGuild.name}: failed to fetch all members`, error);
 		}
 	}
-
-	// sync the bot's avatar with the discord server icon
-	if (newGuild.id === client.config.get('DISCORD_GUILD_ID') && oldGuild.iconURL() !== newGuild.iconURL()) {
-		try {
-			await client.user.setAvatar(newGuild.iconURL());
-			logger.info(`[GUILD UPDATE]: updated bot avatar to ${newGuild.iconURL()}`);
-		} catch (error) {
-			logger.error(`[GUILD UPDATE]: error updating bot avatar to ${newGuild.iconURL()}`, error);
-		}
-	}
 };
