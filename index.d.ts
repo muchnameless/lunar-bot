@@ -30,4 +30,8 @@ declare module 'discord.js' {
 	interface Base {
 		// client: import('./src/structures/LunarClient');
 	}
+
+	interface MessageEmbed {
+		padFields(numberOfRows?: number): this;
+	}
 }
