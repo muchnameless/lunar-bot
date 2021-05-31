@@ -25,6 +25,7 @@
     "discord.js": "github:discordjs/discord.js#0b169792afeadb556289640d17556b297de83fd4",
     "dotenv": "^10.0.0",
     "emoji-regex": "^9.2.2",
+    "erlpack": "github:discord/erlpack",
     "form-data": "^4.0.0",
     "ioredis": "^4.27.3",
     "jaro-winkler": "^0.2.8",
@@ -43,7 +44,8 @@
     "sinful-math": "^0.0.1",
     "timezonecomplete": "^5.12.4",
     "utf-8-validate": "^5.0.5",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.14.4",
