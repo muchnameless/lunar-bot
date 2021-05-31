@@ -266,6 +266,7 @@ module.exports = {
 		'zombie',
 		'spider',
 		'wolf',
+		'enderman',
 	],
 
 	slayerXp: {

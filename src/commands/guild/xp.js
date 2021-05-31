@@ -148,10 +148,10 @@ module.exports = class PlayerCommand extends Command {
 			.padFields()
 			.addFields(
 				{ name: '\u200b', value: '```Miscellaneous```\u200b', inline: false },
-				{ name: 'Hypixel Guild XP', value: stripIndents`
-					**Total:** ${this.client.formatNumber(player.guildXp)}
-					**Δ:** ${this.client.formatNumber(player.guildXp - player[`guildXp${offset}`])}
-				`, inline: true },
+				// { name: 'Hypixel Guild XP', value: stripIndents`
+				// 	**Total:** ${this.client.formatNumber(player.guildXp)}
+				// 	**Δ:** ${this.client.formatNumber(player.guildXp - player[`guildXp${offset}`])}
+				// `, inline: true },
 				{ name: 'Weight', value: stripIndents`
 					**Total**: ${this.client.formatDecimalNumber(totalWeight)} [ ${this.client.formatDecimalNumber(weight)} + ${this.client.formatDecimalNumber(overflow)} ]
 					**Δ:** ${this.client.formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${this.client.formatDecimalNumber(weight - weightOffset)} + ${this.client.formatDecimalNumber(overflow - overflowOffset)} ]

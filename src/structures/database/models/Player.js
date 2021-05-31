@@ -529,7 +529,7 @@ module.exports = class Player extends Model {
 			/**
 			 * slayer
 			 */
-			for (const slayer of slayers) this[`${slayer}Xp`] = playerData.slayer_bosses[slayer].xp ?? 0;
+			for (const slayer of slayers) this[`${slayer}Xp`] = playerData.slayer_bosses[slayer]?.xp ?? 0;
 
 			// reset slayer xp if no zombie xp offset
 			if (this.zombieXp !== 0) {
