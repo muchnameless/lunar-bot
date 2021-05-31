@@ -34,7 +34,7 @@ module.exports = async (interaction) => {
 				if (NOW < expirationTime) {
 					const timeLeft = ms(expirationTime - NOW, { long: true });
 
-					logger.info(`[CMD HANDLER]: ${interaction.user.tag}${interaction.guildID ? ` | ${interaction.member.displayName}` : ''} tried to execute '${interaction.commandName}' in ${interaction.guildID ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'} ${timeLeft} before the cooldown expires`);
+					logger.info(`[CMD HANDLER]: ${interaction.user.tag}${interaction.guildID ? ` | ${interaction.member.displayName}` : ''} tried to execute '${interaction.logInfo}' in ${interaction.guildID ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'} ${timeLeft} before the cooldown expires`);
 
 					return interaction.reply(
 						`\`${command.name}\` is on cooldown for another \`${timeLeft}\``,
@@ -49,7 +49,7 @@ module.exports = async (interaction) => {
 			setTimeout(() => timestamps.delete(interaction.user.id), COOLDOWN_TIME);
 		}
 
-		logger.info(`[CMD HANDLER]: '${interaction.commandName}' was executed by ${interaction.user.tag}${interaction.guildID ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildID ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'}`);
+		logger.info(`[CMD HANDLER]: '${interaction.logInfo}' was executed by ${interaction.user.tag}${interaction.guildID ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildID ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'}`);
 
 		await command.run(interaction);
 	} catch (error) {

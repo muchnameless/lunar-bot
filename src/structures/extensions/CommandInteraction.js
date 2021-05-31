@@ -20,6 +20,28 @@ class LunarCommandInteraction extends CommandInteraction {
 	}
 
 	/**
+	 * @param {import('discord.js').CommandInteractionOption[]} options
+	 */
+	static stringifyOptions(options) {
+		return options
+			?.reduce(
+				(acc, cur) => {
+					if (cur.type === 'SUB_COMMAND' || cur.type === 'SUB_COMMAND_GROUP') {
+						return `${acc} ${cur.name}${this.stringifyOptions(cur.options)}`;
+					}
+
+					return `${acc} ${cur.name}: ${cur.value}`;
+				},
+				'',
+			)
+			?? '';
+	}
+
+	get logInfo() {
+		return `${this.commandName}${LunarCommandInteraction.stringifyOptions(this.options)}`;
+	}
+
+	/**
 	 * @param {import('discord.js').InteractionDeferOptions} options
 	 */
 	async defer(options) {
