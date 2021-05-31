@@ -1,10 +1,8 @@
 'use strict';
 
 const { basename } = require('path');
-const { stripIndents } = require('common-tags');
+const { stripIndents, commaListsAnd } = require('common-tags');
 const { Structures, MessageEmbed, Message, Permissions } = require('discord.js');
-const { isEqual } = require('lodash');
-const { permissionsToString } = require('../../functions/util');
 const { CHANNEL_FLAGS, replyPingRegExp } = require('../../constants/bot');
 const { DM_KEY, REPLY_KEY } = require('../../constants/redis');
 const cache = require('../../api/cache');
@@ -17,6 +15,8 @@ class LunarMessage extends Message {
 
 		this.sendReplyChannel = true;
 	}
+
+	static DEFAULT_COMMAND_CHANNEL_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
 
 	get logInfo() {
 		return `${this.author?.tag ?? 'unknown author'}${this.guild ? ` | ${this.member?.displayName ?? 'unknown member'}` : ''}`;
@@ -89,17 +89,17 @@ class LunarMessage extends Message {
 	 * @param {string[]} requiredChannelPermissions
 	 * @returns {import('./TextChannel')}
 	 */
-	findNearestCommandsChannel(requiredChannelPermissions = [ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]) {
+	findNearestCommandsChannel(requiredChannelPermissions = LunarMessage.DEFAULT_COMMAND_CHANNEL_PERMISSIONS) {
 		if (!this.guild) return null;
 
 		return this.channel.parent.children.find((/** @type {import('./TextChannel')} */ channel) => channel.name.includes('commands')
-			&& channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)
-			&& channel.permissionsFor(this.member).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]),
+			&& channel.botPermissions.has(requiredChannelPermissions)
+			&& channel.permissionsFor(this.member).has(LunarMessage.DEFAULT_COMMAND_CHANNEL_PERMISSIONS),
 		)
 			?? this.guild.channels.cache
 				.filter((/** @type {import('./TextChannel')} */ channel) => channel.name.includes('commands')
-					&& channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)
-					&& channel.permissionsFor(this.member).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]),
+					&& channel.botPermissions.has(requiredChannelPermissions)
+					&& channel.permissionsFor(this.member).has(LunarMessage.DEFAULT_COMMAND_CHANNEL_PERMISSIONS),
 				)
 				.sort((a, b) => Math.abs(a.rawPosition - this.channel.rawPosition) - Math.abs(b.rawPosition - this.channel.rawPosition))
 				.first();
@@ -191,17 +191,19 @@ class LunarMessage extends Message {
 	 */
 	async reply(contentInput, optionsInput = {}) {
 		// analyze input and create (content, options)-argument
-		if (typeof contentInput === 'undefined') throw new TypeError('content must be defined');
-		if (typeof optionsInput !== 'object' || optionsInput === null) throw new TypeError('options must be an Object');
-
-		const options = { ...optionsInput };
+		const options = {
+			embed: null,
+			saveReplyMessageID: true,
+			sameChannel: false,
+			...optionsInput, // create a deep copy to not modify the source object
+		};
 
 		/** @type {string} */
 		let content;
 
 		// only object as first arg provided
 		if (typeof contentInput === 'object') {
-			if (contentInput instanceof MessageEmbed || !isEqual(new MessageEmbed(), new MessageEmbed(contentInput))) {
+			if (contentInput instanceof MessageEmbed) {
 				options.embed = contentInput;
 				content = '';
 			} else if (!Array.isArray(contentInput)) { // unknown options object
@@ -212,13 +214,6 @@ class LunarMessage extends Message {
 		} else {
 			content = contentInput;
 		}
-
-		// add embed structure generated from options if it is an embed but not from the default constructor
-		options.embed ??= isEqual(new MessageEmbed(), new MessageEmbed(options))
-			? null
-			: options;
-
-		options.saveReplyMessageID ??= true;
 
 		// DMs
 		if (!this.guild) {
@@ -234,24 +229,22 @@ class LunarMessage extends Message {
 			);
 		}
 
-		options.sameChannel ??= false;
-
-		// if (options.reply) content = `\u200b<@${options.reply}>${content.length ? ', ' : ''}${content}`;
-
 		// guild -> requires permission
-		const requiredChannelPermissions = [ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ];
+		let requiredChannelPermissions = LunarMessage.DEFAULT_COMMAND_CHANNEL_PERMISSIONS;
 
 		if (options.embed) {
-			requiredChannelPermissions.push('EMBED_LINKS');
-			if (options.embed.files?.length) requiredChannelPermissions.push('ATTACH_FILES');
+			requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
+			if (options.embed.files?.length) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
 		}
 
 		// commands channel / reply in same channel option or flag
 		if (this.channel.name.includes('commands') || options.sameChannel || this.shouldReplyInSameChannel) {
 			// permission checks
-			if (!this.channel.permissionsFor(this.guild.me).has(requiredChannelPermissions)) {
-				const missingChannelPermissions = requiredChannelPermissions.filter(permission => !this.channel.permissionsFor(this.guild.me).has(permission));
-				const errorMessage = `missing ${permissionsToString(missingChannelPermissions)} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
+			if (!this.channel.botPermissions.has(requiredChannelPermissions)) {
+				const missingChannelPermissions = this.channel.botPermissions
+					.missing(requiredChannelPermissions)
+					.map(permission => `'${permission}'`);
+				const errorMessage = commaListsAnd`missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
 
 				logger.warn(`${errorMessage} #${this.channel.name}`);
 
@@ -286,14 +279,17 @@ class LunarMessage extends Message {
 
 		// no #bot-commands channel found
 		if (!commandsChannel) {
-			if (this.channel.permissionsFor(this.guild.me).has(Permissions.FLAGS.MANAGE_MESSAGES)) {
+			if (this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) {
 				this.client.setTimeout(() => {
 					if (this.shouldReplyInSameChannel) return;
 					this.delete().catch(logger.error);
 				}, 10_000);
 			}
 
-			const errorMessage = `no #bot-commands channel with the required permission${requiredChannelPermissions.length === 1 ? '' : 's'} ${permissionsToString(requiredChannelPermissions)} found`;
+			const readableRequiredChannelPermissions = new Permissions(requiredChannelPermissions)
+				.toArray()
+				.map(permission => `'${permission}'`);
+			const errorMessage = commaListsAnd`no #bot-commands channel with the required permission${readableRequiredChannelPermissions.length === 1 ? '' : 's'} ${readableRequiredChannelPermissions} found`;
 
 			logger.error(errorMessage);
 
@@ -312,17 +308,17 @@ class LunarMessage extends Message {
 			super
 				.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.`)
 				.then(async (commandsChannelMessage) => {
-					if (!this.channel.permissionsFor(this.guild.me).has(Permissions.FLAGS.MANAGE_MESSAGES))	return commandsChannelMessage.delete({ timeout: 10_000 });
+					if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES))	return commandsChannelMessage.delete({ timeout: 10_000 });
 
 					this.client.setTimeout(() => {
-						if (!this.channel.permissionsFor(this.guild.me).has(Permissions.FLAGS.MANAGE_MESSAGES) || this.shouldReplyInSameChannel) return commandsChannelMessage.delete();
+						if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES) || this.shouldReplyInSameChannel) return commandsChannelMessage.delete();
 
 						this.channel
 							.bulkDelete([ commandsChannelMessage.id, this.id ])
 							.catch(error => logger.error('[REPLY]: unable to bulk delete', error));
 					}, 10_000);
 				});
-		} else if (this.channel.permissionsFor(this.guild.me).has(Permissions.FLAGS.MANAGE_MESSAGES)) { // only delete author's message
+		} else if (this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) { // only delete author's message
 			this.client.setTimeout(() => {
 				if (this.shouldReplyInSameChannel) return;
 				this.delete().catch(logger.error);
