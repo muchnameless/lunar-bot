@@ -4,7 +4,7 @@ const { MessageEmbed } = require('discord.js');
 const { DM_KEY, REPLY_KEY } = require('../constants/redis');
 const { replyPingRegExp } = require('../constants/bot');
 const cache = require('../api/cache');
-const commandHandler = require('../functions/commandHandler');
+const handleCommandMessage = require('../functions/handleCommandMessage');
 const logger = require('../functions/logger');
 
 
@@ -39,7 +39,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 						messageID: newReplies.map(({ id }) => id),
 					};
 
-					return; // moved reply message(s) to newMessage's channel -> don't call commandHandler
+					return; // moved reply message(s) to newMessage's channel -> don't call handleCommandMessage
 				}
 
 				/** @type {import('../structures/extensions/Message')} */
@@ -76,7 +76,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 					client.chatBridges.handleDiscordMessage(newReply, { checkifNotFromBot: false });
 				}
 
-				return; // moved reply message(s) to newMessage's channel -> don't call commandHandler
+				return; // moved reply message(s) to newMessage's channel -> don't call handleCommandMessage
 			} catch (error) {
 				logger.error('[MESSAGE UPDATE]', error);
 				cache.delete(`${REPLY_KEY}:${newMessage.guild?.id ?? DM_KEY}:${newMessage.channel.id}:${newMessage.id}`);
@@ -86,5 +86,5 @@ module.exports = async (client, oldMessage, newMessage) => {
 
 	if (newMessage.me) client.chatBridges.handleDiscordMessage(newMessage, { checkifNotFromBot: false });
 
-	commandHandler(newMessage);
+	handleCommandMessage(newMessage);
 };

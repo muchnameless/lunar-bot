@@ -1,6 +1,6 @@
 'use strict';
 
-const commandHandler = require('../functions/commandHandler');
+const handleCommandMessage = require('../functions/handleCommandMessage');
 // const logger = require('../functions/logger');
 
 
@@ -9,4 +9,4 @@ const commandHandler = require('../functions/commandHandler');
  * @param {import('../structures/LunarClient')} client
  * @param {import('../structures/extensions/Message')} message
  */
-module.exports = async (client, message) => commandHandler(message);
+module.exports = async (client, message) => handleCommandMessage(message);

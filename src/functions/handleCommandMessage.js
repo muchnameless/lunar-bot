@@ -5,7 +5,7 @@ const ms = require('ms');
 const { FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const { escapeRegex } = require('./util');
 const ChatBridgeError = require('../structures/errors/ChatBridgeError');
-const logger = require('../functions/logger');
+const logger = require('./logger');
 
 
 /**

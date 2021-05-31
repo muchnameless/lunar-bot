@@ -1,7 +1,7 @@
 'use strict';
 
 const { autocorrect } = require('../../functions/util');
-const commandHandler = require('../../functions/commandHandler');
+const handleCommandMessage = require('../../functions/handleCommandMessage');
 const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
@@ -59,7 +59,7 @@ module.exports = class GuildCommand extends Command {
 			rawArgs.splice(0, 1, `guild${value}`);
 			message.content = `${this.config.get('PREFIX')}${rawArgs.join(' ')}`;
 
-			return await commandHandler(message);
+			return await handleCommandMessage(message);
 		} finally {
 			message.content = content;
 		}
