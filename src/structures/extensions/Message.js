@@ -177,10 +177,7 @@ class LunarMessage extends Message {
 	}
 
 	/**
-	 * @typedef {import('discord.js').MessageOptions} MessageReplyOptions
-	 * @property {boolean} [sameChannel=false]
-	 * @property {boolean} [sendReplyChannel=true]
-	 * @property {boolean} [saveReplyMessageID=true]
+	 * @typedef {import('discord.js').MessageOptions & { sameChannel: boolean, saveReplyMessageID: boolean, editPreviousMessage: boolean }} MessageReplyOptions
 	 */
 
 	/**
@@ -193,8 +190,9 @@ class LunarMessage extends Message {
 		// analyze input and create (content, options)-argument
 		const options = {
 			embed: null,
-			saveReplyMessageID: true,
 			sameChannel: false,
+			saveReplyMessageID: true,
+			editPreviousMessage: true,
 			...optionsInput, // create a deep copy to not modify the source object
 		};
 
@@ -357,7 +355,7 @@ class LunarMessage extends Message {
 		let message;
 
 		if (options?.split) { // send multiple messages
-			if (oldReplyMessageID) {
+			if (oldReplyMessageID && options.editPreviousMessage) {
 				IDsToDelete ??= [];
 				IDsToDelete.push(oldReplyMessageID);
 			}
@@ -371,7 +369,7 @@ class LunarMessage extends Message {
 				};
 			}
 		} else { // send 1 message
-			message = await (oldReplyMessageID
+			message = await (oldReplyMessageID && options.editPreviousMessage
 				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error('[_SEND REPLY]', error)))?.edit(content, options) ?? channel.send(content, options))
 				: channel.send(content, options));
 

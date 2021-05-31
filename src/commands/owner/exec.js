@@ -30,12 +30,18 @@ module.exports = class ExecCommand extends Command {
 
 			if (stdout) {
 				logger.info(stdout);
-				message.reply(stdout, { code: 'bash' });
+				message.reply(stdout, {
+					code: 'bash',
+					editPreviousMessage: true,
+				});
 			}
 
 			if (stderr) {
 				logger.error(stderr);
-				message.reply(`${stderr.name}: ${stderr.message}`, { code: 'xl' });
+				message.reply(`${stderr.name}: ${stderr.message}`, {
+					code: 'xl',
+					editPreviousMessage: false,
+				});
 			}
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
