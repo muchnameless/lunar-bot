@@ -273,7 +273,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {import('discord.js').CommandInteraction} interaction
+	 * @param {import('../structures/extensions/CommandInteraction')} interaction
 	 * @param {{ userIDs: string[], roleIDs: string[] }} permissions
 	 */
 	async checkPermissions(interaction, { userIDs = [ this.client.ownerID ], roleIDs = [] }) {
@@ -305,7 +305,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('discord.js').CommandInteraction} interaction
+	 * @param {import('../structures/extensions/CommandInteraction')} interaction
 	 * @param {import('discord.js').CommandInteractionOption[]} options
 	 * @param {import('../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 * @param {?import('../structures/database/models/HypixelGuild')} [hypixelGuildOverwrite]
@@ -325,9 +325,9 @@ module.exports = class SetRankCommand extends SlashCommand {
 			})()
 			: interaction.user.player?.guild);
 
-		if (!hypixelGuild) return interaction.safeReply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+		if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
 
-		return interaction.safeReply({
+		return interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
@@ -339,7 +339,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('discord.js').CommandInteraction} interaction
+	 * @param {import('../structures/extensions/CommandInteraction')} interaction
 	 * @param {import('discord.js').CommandInteractionOption[]} options
 	 * @param {import('../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 */
@@ -358,9 +358,9 @@ module.exports = class SetRankCommand extends SlashCommand {
 			})()
 			: interaction.user.player?.guild;
 
-		if (!hypixelGuild) return interaction.safeReply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+		if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
 
-		return interaction.safeReply({
+		return interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
@@ -392,10 +392,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('discord.js').CommandInteraction} interaction
+	 * @param {import('../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		await interaction.defer();
+		interaction.defer();
 
 		const [{ name, options }] = interaction.options;
 
@@ -486,7 +486,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					? this.getIGN(IGN_INPUT, options)
 					: interaction.user.player?.ign;
 
-				if (!IGN) return interaction.safeReply(`${IGN_INPUT ? `\`${IGN_INPUT}\` is` : 'you are'} not in the player db`, { ephemeral: true });
+				if (!IGN) return interaction.reply(`${IGN_INPUT ? `\`${IGN_INPUT}\` is` : 'you are'} not in the player db`, { ephemeral: true });
 
 				return this._run(interaction, options, {
 					command: `g member ${IGN}`,
@@ -518,26 +518,26 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target = 'everyone';
 					hypixelGuild ??= interaction.user.hypixelGuild;
 
-					if (!hypixelGuild) return interaction.safeReply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+					if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
 				} else {
 					target = this.getPlayer(TARGET_INPUT, options);
 
-					if (!target) return interaction.safeReply(`no player with the IGN \`${TARGET_INPUT}\` found`, { ephemeral: true });
+					if (!target) return interaction.reply(`no player with the IGN \`${TARGET_INPUT}\` found`, { ephemeral: true });
 
 					if (target instanceof players.model) {
 						({ guild: hypixelGuild } = target);
 
-						if (!hypixelGuild) return interaction.safeReply(`unable to find the guild for \`${target.ign}\``, { ephemeral: true });
+						if (!hypixelGuild) return interaction.reply(`unable to find the guild for \`${target.ign}\``, { ephemeral: true });
 					} else {
 						hypixelGuild ??= interaction.user.hypixelGuild;
 
-						if (!hypixelGuild) return interaction.safeReply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+						if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
 					}
 				}
 
 				const DURATION = stringToMS(DURATION_INPUT);
 
-				if (Number.isNaN(DURATION)) return interaction.safeReply(`\`${DURATION_INPUT}\` is not a valid duration`, { ephemeral: true });
+				if (Number.isNaN(DURATION)) return interaction.reply(`\`${DURATION_INPUT}\` is not a valid duration`, { ephemeral: true });
 
 				const EXPIRES_AT = Date.now() + DURATION;
 
@@ -545,7 +545,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target.mutedTill = EXPIRES_AT;
 					await target.save();
 
-					if (target.notInGuild) return interaction.safeReply(`muted \`${target}\` for \`${DURATION_INPUT}\``, { ephemeral: false });
+					if (target.notInGuild) return interaction.reply(`muted \`${target}\` for \`${DURATION_INPUT}\``, { ephemeral: false });
 				} else if (target === 'everyone') {
 					hypixelGuild.mutedTill = EXPIRES_AT;
 					await hypixelGuild.save();
@@ -606,20 +606,20 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target = 'everyone';
 					hypixelGuild ??= interaction.user.hypixelGuild;
 
-					if (!hypixelGuild) return interaction.safeReply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+					if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
 				} else {
 					target = this.getPlayer(TARGET_INPUT, options);
 
-					if (!target) return interaction.safeReply(`no player with the IGN \`${TARGET_INPUT}\` found`, { ephemeral: true });
+					if (!target) return interaction.reply(`no player with the IGN \`${TARGET_INPUT}\` found`, { ephemeral: true });
 
 					if (target instanceof players.model) {
 						({ guild: hypixelGuild } = target);
 
-						if (!hypixelGuild) return interaction.safeReply(`unable to find the guild for \`${target.ign}\``, { ephemeral: true });
+						if (!hypixelGuild) return interaction.reply(`unable to find the guild for \`${target.ign}\``, { ephemeral: true });
 					} else {
 						hypixelGuild ??= interaction.user.hypixelGuild;
 
-						if (!hypixelGuild) return interaction.safeReply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+						if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
 					}
 				}
 
@@ -627,7 +627,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target.mutedTill = 0;
 					await target.save();
 
-					if (target.notInGuild) return interaction.safeReply(`unmuted \`${target}\``, { ephemeral: false });
+					if (target.notInGuild) return interaction.reply(`unmuted \`${target}\``, { ephemeral: false });
 				} else if (target === 'everyone') {
 					hypixelGuild.mutedTill = 0;
 					await hypixelGuild.save();

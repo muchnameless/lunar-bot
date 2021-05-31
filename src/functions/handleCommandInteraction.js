@@ -59,21 +59,21 @@ module.exports = async (interaction) => {
 			if (error instanceof MissingPermissionsError) {
 				const requiredRoles = error.requiredRoles.map(roleID => client.lgGuild?.roles.cache.get(roleID) ?? roleID);
 
-				await interaction.safeReply(
+				await interaction.reply(
 					commaListsOr`missing permissions for \`${error.command}\` (${interaction.guildID === client.config.get('MAIN_GUILD_ID') ? requiredRoles.map(r => `${r}`) : requiredRoles.map(r => r.name ?? r)}): ${error.message}`,
 					{
 						ephemeral: true,
 					},
 				);
 			} else if (error instanceof ChatBridgeError) {
-				await interaction.safeReply(
+				await interaction.reply(
 					`${error}`,
 					{
 						ephemeral: true,
 					},
 				);
 			} else {
-				await interaction.safeReply(
+				await interaction.reply(
 					`an error occurred while executing the command: ${error}`,
 					{
 						ephemeral: true,

@@ -1,22 +1,68 @@
 'use strict';
 
-const { CommandInteraction } = require('discord.js');
+const { basename } = require('path');
+const { Structures, CommandInteraction } = require('discord.js');
+// const logger = require('../../functions/logger');
 
-// chooses the correct reply method
-Object.defineProperty(CommandInteraction.prototype, 'followUpFixed', {
-	async value(content, options) {
-		if (options?.ephemeral && (this.deferred || this.replied)) await this.deleteReply();
-		return this.followUp(content, options);
-	},
-});
 
-Object.defineProperty(CommandInteraction.prototype, 'safeReply', {
-	async value(content, options) {
-		if (this.deferred || this.replied) {
-			if (!options?.ephemeral) return this.editReply(content, options);
-			await this.deleteReply();
-			return this.followUp(content, options);
+class LunarCommandInteraction extends CommandInteraction {
+	constructor(...args) {
+		super(...args);
+
+		/**
+		 * wether the first reply was ephemeral
+		 */
+		this.ephemeral = null;
+		/**
+		 * deferring promise
+		 */
+		this._deferring = null;
+	}
+
+	/**
+	 * @param {import('discord.js').InteractionDeferOptions} options
+	 */
+	async defer(options) {
+		this.ephemeral = options?.ephemeral ?? false;
+
+		return this._deferring = super.defer(options);
+	}
+
+	/**
+	 *
+	 * @param {string} content
+	 * @param {import('discord.js').InteractionReplyOptions} options
+	 */
+	async reply(content, options) {
+		await this._deferring;
+
+		if (this.deferred) {
+			// ephemeral defer
+			if (this.ephemeral) {
+				if (options?.ephemeral) return this.editReply(content, options);
+
+				// ephemeral defer and non-ephemeral followUp
+				await this.deleteReply();
+				return this.followUp(content, options);
+			}
+
+			// non-ephemeral defer
+			if (options?.ephemeral) {
+				await this.deleteReply();
+				return this.followUp(content, options);
+			}
+
+			return this.editReply(content, options);
 		}
+
+		if (this.replied) return this.followUp(content, options);
+
+		this.ephemeral = options?.ephemeral ?? false;
+
 		return this.reply(content, options);
-	},
-});
+	}
+}
+
+Structures.extend(basename(__filename, '.js'), () => LunarCommandInteraction);
+
+module.exports = LunarCommandInteraction;
