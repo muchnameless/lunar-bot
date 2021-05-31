@@ -125,7 +125,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				throw new WebhookError('unknown channel', channel, this.guild);
 			}
 
-			if (!channel.checkBotPermissions(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
+			if (!channel.botPermissions.has(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
 				this.chatBridge.shouldRetryLinking = false;
 				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.guild);
 			}

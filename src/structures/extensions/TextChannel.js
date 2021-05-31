@@ -1,10 +1,18 @@
 'use strict';
 
+const { basename } = require('path');
 const { Structures, TextChannel, Permissions } = require('discord.js');
 // const logger = require('../../functions/logger');
 
 
 class LunarTextChannel extends TextChannel {
+	/**
+	 * Permissions instance for the bot in that channel
+	 */
+	get botPermissions() {
+		return this.permissionsFor(this.guild.me);
+	}
+
 	/**
 	 * wether the channel is a ticket by yagpdb
 	 */
@@ -13,30 +21,30 @@ class LunarTextChannel extends TextChannel {
 	}
 
 	/**
-	 * checks wether the bot has the provided permission(s) in the channel
-	 * @param {BigInt|BigInt[]} permFlag
-	 */
-	checkBotPermissions(permFlag) {
-		if (Array.isArray(permFlag)) return permFlag.every(flag => this.checkBotPermissions(flag));
-
-		return this.permissionsFor(this.guild?.me).has(permFlag) ?? false;
-	}
-
-	/**
 	 * deletes all provided messages from the channel with as few API calls as possible
 	 * @param {string|string[]} IDs
 	 */
 	deleteMessages(IDs) {
 		if (Array.isArray(IDs)) {
-			if (this.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) return this.bulkDelete(IDs);
+			if (this.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return this.bulkDelete(IDs);
 
-			return Promise.all(IDs.map(async id => this.messages.delete(id)));
+			return Promise.all(IDs.map(async (id) => {
+				const message = this.messages.cache.get(id);
+
+				if (message?.deleted || !(message?.deletable ?? true)) return;
+
+				this.messages.delete(id);
+			}));
 		}
+
+		const message = this.messages.cache.get(IDs);
+
+		if (message?.deleted || !(message?.deletable ?? true)) return;
 
 		return this.messages.delete(IDs);
 	}
 }
 
-Structures.extend('TextChannel', () => LunarTextChannel);
+Structures.extend(basename(__filename, '.js'), () => LunarTextChannel);
 
 module.exports = LunarTextChannel;

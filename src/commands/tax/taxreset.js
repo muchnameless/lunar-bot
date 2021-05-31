@@ -137,6 +137,7 @@ module.exports = class TaxResetCommand extends Command {
 		// logging
 		(async () => {
 			try {
+				/** @type {import('../../structures/extensions/Message')} */
 				const logMessage = await this.client.log(
 					currentTaxEmbed,
 					currentTaxCollectedEmbed,
@@ -146,7 +147,7 @@ module.exports = class TaxResetCommand extends Command {
 				);
 
 				if (!currentTaxEmbed) return;
-				if (!logMessage.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) return;
+				if (!logMessage.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return;
 
 				const pinnedMessages = await logMessage.channel.messages.fetchPinned();
 

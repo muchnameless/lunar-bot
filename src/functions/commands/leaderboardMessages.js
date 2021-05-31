@@ -378,7 +378,7 @@ const self = module.exports = {
 		if (!cached) return;
 
 		// remove reaction from user
-		if (message.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) reaction.users.remove(userID).catch(error => logger.error('[REMOVE REACTION]', error));
+		if (message.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) reaction.users.remove(userID).catch(error => logger.error('[REMOVE REACTION]', error));
 
 		// user is not command author
 		if (userID !== cached.args.userID) return;

@@ -64,7 +64,7 @@ module.exports = class TaxReminderCommand extends Command {
 			const fetched = await message.channel.messages.fetch({ after: message.id }).catch(error => logger.error('[TAX REMINDER]: ghost ping', error));
 
 			if (!fetched) return;
-			if (message.channel.checkBotPermissions(Permissions.FLAGS.MANAGE_MESSAGES)) {
+			if (message.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) {
 				return message.channel.bulkDelete([ message.id, ...fetched.filter(({ author: { id } }) => [ this.client.user.id, message.author.id ].includes(id)).keys() ]).catch(logger.error);
 			}
 
