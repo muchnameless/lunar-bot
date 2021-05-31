@@ -307,7 +307,7 @@ module.exports = class MathCommand extends Command {
 		const INPUT = rawArgs.join('')
 			.replace(/\*\*/g, '^') // 5**3 -> 5^3
 			.replace(/:/g, '/') // 5:3 -> 5/3
-			.replace(/(?<=\d\s*)(?=[a-jln-z(])/gi, '*') // add implicit '*' between numbers before letters and '('
+			.replace(/(?<=(?:\d|\))\s*)(?=[a-jln-z(])/gi, '*') // add implicit '*' between numbers before letters and '('
 			.replace(/(?<=\*)x/gi, '') // 5x3 -> 5*3
 			.replace(/=$/, ''); // 5*3= -> 5*3
 
