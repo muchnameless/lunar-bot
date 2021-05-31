@@ -273,7 +273,7 @@ const self = module.exports = {
 
 	/**
 	 * converts permissions to a readable strings
-	 * @param {BigInt[]} permissions
+	 * @param {import('discord.js').PermissionResolvable} permissions
 	 */
 	permissionsToString(permissions) {
 		return commaListsAnd`${new Permissions(permissions)
