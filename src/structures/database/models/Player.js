@@ -721,10 +721,10 @@ module.exports = class Player extends Model {
 
 		// total slayer
 		for (const level of slayerTotalRoles) {
-			if (level % 10 === LOWEST_SLAYER_LVL) {
-				if (!member.roles.cache.has(config.get(`SLAYER_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`SLAYER_${level}_ROLE_ID`));
-			} else if (member.roles.cache.has(config.get(`SLAYER_${level}_ROLE_ID`))) {
-				rolesToRemove.push(config.get(`SLAYER_${level}_ROLE_ID`));
+			if (level === LOWEST_SLAYER_LVL) {
+				if (!member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
+			} else if (member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
+				rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 			}
 		}
 

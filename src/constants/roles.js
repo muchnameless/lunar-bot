@@ -5,7 +5,7 @@ module.exports = {
 
 	skillRoles: [ 45, 50, 55, 60 ],
 
-	slayerTotalRoles: [ 777, 888, 999 ],
+	slayerTotalRoles: [ 7, 8, 9 ],
 
 	slayerRoles: [ 8, 9 ],
 

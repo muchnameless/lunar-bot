@@ -63,7 +63,7 @@ class LunarGuildMember extends GuildMember {
 
 		// total slayer
 		for (const level of slayerTotalRoles) {
-			if (this.roles.cache.has(config.get(`SLAYER_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`SLAYER_${level}_ROLE_ID`));
+			if (this.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 		}
 
 		// individual slayer
