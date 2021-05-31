@@ -1,19 +1,11 @@
 'use strict';
 
+const { basename } = require('path');
 const { Structures, Guild, Collection } = require('discord.js');
 const logger = require('../../functions/logger');
 
 
 class LunarGuild extends Guild {
-	constructor(...args) {
-		super(...args);
-
-		/**
-		 * @type {Collection<string, import('./GuildMember')}
-		 */
-		this.members.cache;
-	}
-
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
 	 * @param {string[]} roleIDs role IDs to verify
@@ -50,6 +42,6 @@ class LunarGuild extends Guild {
 	}
 }
 
-Structures.extend('Guild', () => LunarGuild);
+Structures.extend(basename(__filename, '.js'), () => LunarGuild);
 
 module.exports = LunarGuild;

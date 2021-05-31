@@ -1,5 +1,6 @@
 'use strict';
 
+const { basename } = require('path');
 const { Structures, GuildMember } = require('discord.js');
 const { skills, slayers } = require('../../constants/skyblock');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../constants/roles');
@@ -7,19 +8,6 @@ const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerR
 
 
 class LunarGuildMember extends GuildMember {
-	constructor(...args) {
-		super(...args);
-
-		/**
-		 * @type {import('../LunarClient')}
-		 */
-		this.client;
-		/**
-		 * @type {import('./User')}
-		 */
-		this.user;
-	}
-
 	/**
 	 * player object associated with the discord member
 	 */
@@ -94,6 +82,6 @@ class LunarGuildMember extends GuildMember {
 	}
 }
 
-Structures.extend('GuildMember', () => LunarGuildMember);
+Structures.extend(basename(__filename, '.js'), () => LunarGuildMember);
 
 module.exports = LunarGuildMember;

@@ -1,5 +1,6 @@
 'use strict';
 
+const { basename } = require('path');
 const { Structures, User } = require('discord.js');
 // const logger = require('../../functions/logger');
 
@@ -8,10 +9,6 @@ class LunarUser extends User {
 	constructor(...args) {
 		super(...args);
 
-		/**
-		 * @type {import('../LunarClient')}
-		 */
-		this.client;
 		/**
 		 * @type {import('../database/models/Player')}
 		 */
@@ -40,6 +37,6 @@ class LunarUser extends User {
 	}
 }
 
-Structures.extend('User', () => LunarUser);
+Structures.extend(basename(__filename, '.js'), () => LunarUser);
 
 module.exports = LunarUser;

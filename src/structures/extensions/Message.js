@@ -1,5 +1,6 @@
 'use strict';
 
+const { basename } = require('path');
 const { stripIndents } = require('common-tags');
 const { Structures, MessageEmbed, Message, Permissions } = require('discord.js');
 const { isEqual } = require('lodash');
@@ -15,15 +16,6 @@ class LunarMessage extends Message {
 		super(...args);
 
 		this.sendReplyChannel = true;
-
-		/**
-		 * @type {import('./User')}
-		 */
-		this.author;
-		/**
-		 * @type {import('../LunarClient')}
-		 */
-		this.client;
 	}
 
 	get logInfo() {
@@ -120,7 +112,7 @@ class LunarMessage extends Message {
 	 */
 	async react(...emojis) {
 		if (this.deleted) return null;
-		if (!this.channel.checkBotPermissions(Permissions.FLAGS.ADD_REACTIONS)) return null;
+		if (!this.channel.botPermissions.has(Permissions.FLAGS.ADD_REACTIONS)) return null;
 
 		const res = [];
 
@@ -422,6 +414,6 @@ class LunarMessage extends Message {
 	}
 }
 
-Structures.extend('Message', () => LunarMessage);
+Structures.extend(basename(__filename, '.js'), () => LunarMessage);
 
 module.exports = LunarMessage;

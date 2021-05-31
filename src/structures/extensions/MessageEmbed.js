@@ -2,6 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { EMBED_MAX_FIELDS } = require('../../constants/discord');
+// const logger = require('../../functions/logger');
 
 
 // adds additional blank inline fields such that each line is filled with 'numberOfRows = 3' of them
