@@ -172,7 +172,7 @@ module.exports = class LunarClient extends Client {
 	 */
 	async login(token) {
 		await Promise.all([
-			this.db.loadCache(),
+			this.db.init(),
 			this.commands.loadAll(),
 			this.slashCommands.loadAll(),
 			this._loadEvents(),

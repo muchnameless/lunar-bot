@@ -3,8 +3,9 @@
 const { CronJob: CronJobConstructor } = require('cron');
 const { stripIndents, commaLists } = require('common-tags');
 const { Permissions } = require('discord.js');
-const _ = require('lodash');
+const { isEqual } = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../../../constants/emojiCharacters');
+const { DEFAULT_CONFIG } = require('../../../constants/database');
 const { asyncFilter, safePromiseAll } = require('../../../functions/util');
 const hypixel = require('../../../api/hypixel');
 const ConfigManager = require('./ConfigManager');
@@ -75,11 +76,19 @@ module.exports = class DatabaseManager {
 	}
 
 	/**
+	 * initialises the database and cache
+	 */
+	async init() {
+		await this.loadCache();
+		await Promise.all(Object.entries(DEFAULT_CONFIG).map(async ([ key, value ]) => (this.modelManagers.config.get(key) ? null : this.modelManagers.config.set(key, value))));
+	}
+
+	/**
 	 * loads all db caches (performs a sweep first)
 	 */
 	async loadCache() {
 		return Promise.all(
-			Object.values(this.modelManagers).map(async handler => handler.loadCache()),
+			Object.values(this.modelManagers).map(async manager => manager.loadCache()),
 		);
 	}
 
@@ -299,7 +308,7 @@ module.exports = class DatabaseManager {
 			config.set('TAX_MESSAGE_ID', taxMessage.id);
 			return logger.info('[TAX MESSAGE]: created new taxMessage');
 		}
-		if (taxMessage.embeds[0]?.description === taxEmbed.description && _.isEqual(taxMessage.embeds[0].fields, taxEmbed.fields)) return; // no changes to taxMessage
+		if (taxMessage.embeds[0]?.description === taxEmbed.description && isEqual(taxMessage.embeds[0].fields, taxEmbed.fields)) return; // no changes to taxMessage
 
 		try {
 			await taxMessage.edit(taxMessage.content, taxEmbed);
