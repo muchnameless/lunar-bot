@@ -32,12 +32,14 @@ module.exports = {
 		zombie: 2208,
 		spider: 2118,
 		wolf: 1962,
+		enderman: Infinity,
 	},
 
 	SLAYER_MODIFIER: {
 		zombie: 0.15,
 		spider: 0.08,
 		wolf: 0.015,
+		enderman: 0,
 	},
 
 	DUNGEON_EXPONENTS: {
