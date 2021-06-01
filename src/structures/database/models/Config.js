@@ -32,7 +32,7 @@ module.exports = class Config extends Model {
 			},
 			value: {
 				type: DataTypes.STRING,
-				allowNull: false,
+				allowNull: true,
 			},
 		}, {
 			sequelize,

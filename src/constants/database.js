@@ -7,32 +7,32 @@ const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerR
 const DEFAULT_CONFIG = {
 	AUTOCORRECT_THRESHOLD: 0.75,
 	AVERAGE_STATS_CHANNEL_UPDATE_ENABLED: true,
-	BRIDGER_ROLE_ID: 0,
-	CATACOMBS_AVERAGE_STATS_CHANNEL_ID: 0,
+	BRIDGER_ROLE_ID: null,
+	CATACOMBS_AVERAGE_STATS_CHANNEL_ID: null,
 	CHAT_LOGGING_ENABLED: true,
 	CHATBRIDGE_AUTOMUTE_DURATION: 1800000,
 	CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS: 3,
 	CHATBRIDGE_DEFAULT_MAX_PARTS: 5,
 	CHATBRIDGE_ENABLED: true,
 	COMMAND_COOLDOWN_DEFAULT: 1,
-	COMPETITION_END_TIME: 0,
+	COMPETITION_END_TIME: Infinity,
 	COMPETITION_RUNNING: false,
 	COMPETITION_SCHEDULED: false,
-	COMPETITION_START_TIME: 0,
+	COMPETITION_START_TIME: Infinity,
 	CURRENT_COMPETITION: 'weight',
 	DATABASE_UPDATE_INTERVAL: 5,
 	DEFAULT_MAX_PARTS: 5,
 	DEFAULT_XP_OFFSET: 'OffsetWeek',
-	DISCORD_GUILD_ID: 0,
+	DISCORD_GUILD_ID: null,
 	ELEMENTS_PER_PAGE: 10,
 	EMBED_BLUE: '#3498DB',
 	EMBED_GREEN: '#2EDD30',
 	EMBED_RED: '#E8410E',
-	EVENT_ORGANIZER_ROLE_ID: 0,
-	EX_GUILD_ROLE_ID: 0,
+	EVENT_ORGANIZER_ROLE_ID: null,
+	EX_GUILD_ROLE_ID: null,
 	EXTENDED_LOGGING_ENABLED: false,
-	GUILD_ANNOUNCEMENTS_CHANNEL_ID: 0,
-	GUILD_ROLE_ID: 0,
+	GUILD_ANNOUNCEMENTS_CHANNEL_ID: null,
+	GUILD_ROLE_ID: null,
 	HYPIXEL_API_ERROR: false,
 	HYPIXEL_SKYBLOCK_API_ERROR: false,
 	INFRACTIONS_EXPIRATION_TIME: 3600000,
@@ -40,48 +40,48 @@ const DEFAULT_CONFIG = {
 	INGAME_RESPONSE_TIMEOUT: 5000,
 	LAST_DAILY_STATS_SAVE_TIME: 0,
 	LAST_DAILY_XP_RESET_TIME: 0,
-	LAST_MAYOR_XP_RESET_TIME: 0,
+	LAST_MAYOR_XP_RESET_TIME: Infinity,
 	LAST_MONTHLY_XP_RESET_TIME: 0,
 	LAST_WEEKLY_XP_RESET_TIME: 0,
 	LOGGING_WEBHOOK_DELETED: false,
-	MAIN_GUILD_ID: 0,
-	MANAGER_ROLE_ID: 0,
-	MODERATOR_ROLE_ID: 0,
-	MUTED_ROLE_ID: 0,
+	MAIN_GUILD_ID: null,
+	MANAGER_ROLE_ID: null,
+	MODERATOR_ROLE_ID: null,
+	MUTED_ROLE_ID: null,
 	NUMBER_FORMAT: 'fr-FR',
 	PLAYER_DB_UPDATE_ENABLED: true,
 	PREFIX: 'lg!',
 	PURGE_LIST_OFFSET: 7,
 	REPLY_CONFIRMATION: 'y,ye,yes',
-	SENIOR_STAFF_ROLE_ID: 0,
-	SHRUG_ROLE_ID: 0,
-	SKILL_AVERAGE_STATS_CHANNEL_ID: 0,
-	SLAYER_AVERAGE_STATS_CHANNEL_ID: 0,
+	SENIOR_STAFF_ROLE_ID: null,
+	SHRUG_ROLE_ID: null,
+	SKILL_AVERAGE_STATS_CHANNEL_ID: null,
+	SLAYER_AVERAGE_STATS_CHANNEL_ID: null,
 	TAX_AMOUNT: 1000000,
 	TAX_AUCTIONS_ITEMS: 'Stone Bricks,Stone Brick Slab,Spirit Leap',
-	TAX_AUCTIONS_START_TIME: 0,
-	TAX_CHANNEL_ID: 0,
-	TAX_MESSAGE_ID: 0,
+	TAX_AUCTIONS_START_TIME: Infinity,
+	TAX_CHANNEL_ID: null,
+	TAX_MESSAGE_ID: null,
 	TAX_TRACKING_ENABLED: true,
-	TICKET_CHANNELS_CATEGORY_ID: 0,
-	TRIAL_MODERATOR_ROLE_ID: 0,
+	TICKET_CHANNELS_CATEGORY_ID: null,
+	TRIAL_MODERATOR_ROLE_ID: null,
 	USER_INPUT_MAX_RETRIES: 3,
-	VERIFIED_ROLE_ID: 0,
-	WEIGHT_AVERAGE_STATS_CHANNEL_ID: 0,
+	VERIFIED_ROLE_ID: null,
+	WEIGHT_AVERAGE_STATS_CHANNEL_ID: null,
 	XP_TRACKING_ENABLED: true,
 };
 
-for (const type of delimiterRoles) DEFAULT_CONFIG[`${type}_DELIMITER_ROLE_ID`] = 0; // delimiter
+for (const type of delimiterRoles) DEFAULT_CONFIG[`${type}_DELIMITER_ROLE_ID`] = null; // delimiter
 
-for (const level of skillAverageRoles) DEFAULT_CONFIG[`AVERAGE_LVL_${level}_ROLE_ID`] = 0; // skill average
+for (const level of skillAverageRoles) DEFAULT_CONFIG[`AVERAGE_LVL_${level}_ROLE_ID`] = null; // skill average
 
-for (const skill of skills) for (const level of skillRoles) DEFAULT_CONFIG[`${skill}_${level}_ROLE_ID`] = 0; // individual skills
+for (const skill of skills) for (const level of skillRoles) DEFAULT_CONFIG[`${skill}_${level}_ROLE_ID`] = null; // individual skills
 
-for (const level of slayerTotalRoles) DEFAULT_CONFIG[`SLAYER_ALL_${level}_ROLE_ID`] = 0; // total slayer
+for (const level of slayerTotalRoles) DEFAULT_CONFIG[`SLAYER_ALL_${level}_ROLE_ID`] = null; // total slayer
 
-for (const slayer of slayers) for (const level of slayerRoles) DEFAULT_CONFIG[`${slayer}_${level}_ROLE_ID`] = 0; // individual slayer
+for (const slayer of slayers) for (const level of slayerRoles) DEFAULT_CONFIG[`${slayer}_${level}_ROLE_ID`] = null; // individual slayer
 
-for (const level of catacombsRoles) DEFAULT_CONFIG[`CATACOMBS_${level}_ROLE_ID`] = 0; // catacombs
+for (const level of catacombsRoles) DEFAULT_CONFIG[`CATACOMBS_${level}_ROLE_ID`] = null; // catacombs
 
 Object.freeze(DEFAULT_CONFIG);
 

@@ -80,7 +80,7 @@ module.exports = class DatabaseManager {
 	 */
 	async init() {
 		await this.loadCache();
-		await Promise.all(Object.entries(DEFAULT_CONFIG).map(async ([ key, value ]) => (this.modelManagers.config.get(key) ? null : this.modelManagers.config.set(key, value))));
+		await Promise.all(Object.entries(DEFAULT_CONFIG).map(async ([ key, value ]) => (this.modelManagers.config.get(key) !== null ? null : this.modelManagers.config.set(key, value))));
 	}
 
 	/**
