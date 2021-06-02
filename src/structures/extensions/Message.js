@@ -254,7 +254,7 @@ class LunarMessage extends Message {
 				return null;
 			}
 
-			if (content.length) this.client.chatBridges.handleDiscordMessage(this, { checkifNotFromBot: false });
+			if (content) this.client.chatBridges.handleDiscordMessage(this, { checkifNotFromBot: false });
 
 			// send reply
 			const message = await this._sendReply(
@@ -268,7 +268,7 @@ class LunarMessage extends Message {
 				},
 			);
 
-			if (content.length) this.client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: false, player: this.author.player });
+			if (content) this.client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: false, player: this.author.player });
 
 			return message;
 		}
@@ -307,7 +307,7 @@ class LunarMessage extends Message {
 			super
 				.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.`)
 				.then(async (commandsChannelMessage) => {
-					if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES))	return commandsChannelMessage.delete({ timeout: 10_000 });
+					if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return commandsChannelMessage.delete({ timeout: 10_000 });
 
 					this.client.setTimeout(() => {
 						if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES) || this.shouldReplyInSameChannel) return commandsChannelMessage.delete();
