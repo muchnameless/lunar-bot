@@ -203,9 +203,9 @@ class LunarMessage extends Message {
 		if (typeof contentInput === 'object') {
 			if (contentInput instanceof MessageEmbed) {
 				options.embed = contentInput;
-				content = '';
+				content = null;
 			} else if (!Array.isArray(contentInput)) { // unknown options object
-				content = contentInput.content ?? '';
+				content = contentInput.content ?? null;
 			} else {
 				content = contentInput;
 			}
