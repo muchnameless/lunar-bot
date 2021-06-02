@@ -135,6 +135,7 @@ class LunarMessage extends Message {
 	 * delete the message, added check for already deleted after timeout
 	 * @param {object} options message delete options
 	 * @param {number} [options.timeout] delay in ms
+	 * @returns {Promise<this>}
 	 */
 	async delete({ timeout = 0 } = {}) {
 		if (this.deleted) return this; // message already deleted check
@@ -148,7 +149,7 @@ class LunarMessage extends Message {
 		if (timeout <= 0) return super.delete();
 
 		// timeout
-		return this.client.setTimeout(() => this.delete(), timeout);
+		return new Promise(resolve => this.client.setTimeout(() => resolve(this.delete()), timeout));
 	}
 
 	/**
