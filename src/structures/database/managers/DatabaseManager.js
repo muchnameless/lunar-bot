@@ -291,10 +291,11 @@ module.exports = class DatabaseManager {
 		await players.updateIGN();
 
 		// update taxMessage
+		/** @type {import('../../extensions/TextChannel')} */
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 		if (!taxChannel?.guild?.available) return logger.warn('[TAX MESSAGE]: channel not found');
-		if (!taxChannel.botPermissions.has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+		if (!taxChannel.botPermissions.has(Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS)) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
 
@@ -311,7 +312,7 @@ module.exports = class DatabaseManager {
 		if (taxMessage.embeds[0]?.description === taxEmbed.description && isEqual(taxMessage.embeds[0].fields, taxEmbed.fields)) return; // no changes to taxMessage
 
 		try {
-			await taxMessage.edit(taxMessage.content, taxEmbed);
+			await taxMessage.edit(taxEmbed);
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 		} catch (error) {
 			logger.error('[TAX MESSAGE]', error);
