@@ -49,7 +49,7 @@ module.exports = {
 	 */
 	defaultResponseRegExp: /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u,
 
-	blockedWordsRegExp: /\bsex\b|\bcum\b|nutte(?:d|r)|\bthot\b|pussy|\ba+n+a+l+\b|suck +my +dick|nude|\bp+ornhub+(?:\..+)?\b|\bxhamster(?:\..+)?\b|\bpedo(?:phile|s)?\b|(?:you'?r+?e?|(?:your|ur) +(?:m[uo]m|dad)) +gay+\b|fa(g+o+|g{2,})t|cocain|\bh+e+r+o+i+n+\b|\bk+ys+\b|(?:kill.+?|sho{2,}t+) +y *o *u *r *s *e *l *f+\b|school *shoot|get +aids|autist|\bsuicide\b|\bslave\b|brain *dead|retarted|\bn+i[bg]{2,}(?:er+|a+)\b|\bchang\b|\bcoon+\b|\bhurri\b|\bk{3,}\b|\br+ape+\b|kkr|hope +you +die|\bmomo\b/i,
+	blockedWordsRegExp: /\bsex\b|\bcum\b|nutte(?:d|r)|\bthot\b|pussy|\ba+n+a+l+\b|suck +my +dick|nude|\bp+ornhub+(?:\..+)?\b|\bxhamster(?:\..+)?\b|\bpedo(?:phile|s)?\b|(?:you'?r+?e?|(?:your|ur) +(?:m[uo]m|dad)) +gay+\b|fa(g+o+|g{2,})t|cocain|\bh+e+r+o+i+n+\b|\bk+ys+\b|(?:kill.+?|sho{2,}t+) +y *o *u *r *s *e *l *f+\b|school *shoot|get +aids|autist|\bsuicide\b|\bslave\b|brain *dead|retarted|\bn+i[bg]{2,}(?:er+|a+)\b|\bniga*\b|\bchang\b|\bcoon+\b|\bhurri\b|\bk{3,}\b|\br+ape+\b|kkr|hope +you +die|\bmomo\b/i,
 
 	memeRegExp: /[⠁-⣿]/,
 
