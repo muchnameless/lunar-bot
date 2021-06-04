@@ -326,7 +326,7 @@ class LunarMessage extends Message {
 
 		// send reply with an @mention
 		return this._sendReply(
-			`\u{200b}${this.author}${content.length ? `, ${content}` : ''}`,
+			`\u{200b}${this.author}${content ? `, ${content}` : ''}`,
 			options,
 			commandsChannel,
 		);
