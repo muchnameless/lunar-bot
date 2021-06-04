@@ -555,6 +555,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			this.parseContent(content)
 				.split('\n')
 				.flatMap((part) => {
+					if (!part.length) return '';
+
 					try {
 						return splitMessage(part, { char: ' ', maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length });
 					} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '

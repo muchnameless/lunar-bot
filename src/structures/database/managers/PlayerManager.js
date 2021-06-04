@@ -309,7 +309,10 @@ module.exports = class PlayerManager extends ModelManager {
 			.map(([ guildID, data ]) => [ this.client.hypixelGuilds.cache.get(guildID) ?? guildID, data ])
 			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
 		) {
-			const logParts = splitMessage(`\`\`\`\n${ignChanges.sort(compareAlphabetically).join('\n')}\`\`\``, { maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' });
+			const logParts = splitMessage(
+				`\`\`\`\n${ignChanges.sort(compareAlphabetically).join('\n')}\`\`\``,
+				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' },
+			);
 
 			let embed = createEmbed(guild, ignChanges.length);
 			let currentLength = embed.length;
@@ -611,7 +614,10 @@ module.exports = class PlayerManager extends ModelManager {
 			.map(([ guildID, data ]) => [ this.client.hypixelGuilds.cache.get(guildID) ?? guildID, data ])
 			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
 		) {
-			const logParts = splitMessage(`\`\`\`diff\n${mainProfileUpdate.sort(compareAlphabetically).join('\n')}\`\`\``, { maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' });
+			const logParts = splitMessage(
+				`\`\`\`diff\n${mainProfileUpdate.sort(compareAlphabetically).join('\n')}\`\`\``,
+				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' },
+			);
 
 			let embed = createEmbed(guild, mainProfileUpdate.length);
 			let currentLength = embed.length;
