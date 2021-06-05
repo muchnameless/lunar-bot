@@ -229,19 +229,6 @@ const self = module.exports = {
 	},
 
 	/**
-	 * transformes a log array
-	 * @param {string[]} logArray
-	 */
-	transformLogArray(logArray) {
-		if (!logArray.length) return logArray;
-
-		return splitMessage(
-			logArray.sort(self.compareAlphabetically).join('\n'),
-			{ maxLength: EMBED_FIELD_MAX_CHARS - 11, char: '\n' },
-		);
-	},
-
-	/**
 	 * generates an array of code blocks
 	 * @param {string} input
 	 * @param {string} [code='']

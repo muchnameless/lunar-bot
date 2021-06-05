@@ -1,11 +1,11 @@
 'use strict';
 
 const { Model, DataTypes } = require('sequelize');
-const { MessageEmbed } = require('discord.js');
-const { autocorrect, cleanFormattedNumber, transformLogArray, safePromiseAll } = require('../../../functions/util');
+const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
+const { autocorrect, cleanFormattedNumber, compareAlphabetically, safePromiseAll } = require('../../../functions/util');
 const { mutedCheck } = require('../../../functions/database');
 const { promote: { string: { success } } } = require('../../chat_bridge/constants/commandResponses');
-const { EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
+const { EMBED_MAX_CHARS, EMBED_MAX_FIELDS, EMBED_FIELD_MAX_CHARS } = require('../../../constants/discord');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, CURRENT, DAY }, UNKNOWN_IGN } = require('../../../constants/database');
 const ChatBridgeError = require('../../errors/ChatBridgeError');
@@ -160,6 +160,19 @@ module.exports = class HypixelGuild extends Model {
 			modelName: 'HypixelGuild',
 			timestamps: false,
 		});
+	}
+
+	/**
+	 * transformes a log array
+	 * @param {string[]} logArray
+	 */
+	static transformLogArray(logArray) {
+		if (!logArray.length) return logArray;
+
+		return splitMessage(
+			logArray.sort(compareAlphabetically).join('\n'),
+			{ maxLength: EMBED_FIELD_MAX_CHARS - 11, char: '\n' },
+		);
 	}
 
 	set players(value) {
@@ -511,8 +524,8 @@ module.exports = class HypixelGuild extends Model {
 			players.sortAlphabetically();
 
 			// logging
-			joinedLog = transformLogArray(joinedLog);
-			leftLog = transformLogArray(leftLog);
+			joinedLog = HypixelGuild.transformLogArray(joinedLog);
+			leftLog = HypixelGuild.transformLogArray(leftLog);
 
 			const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length);
 			const getInlineFieldLineCount = string => (string.length
