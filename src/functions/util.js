@@ -235,7 +235,7 @@ const self = module.exports = {
 	transformLogArray(logArray) {
 		if (!logArray.length) return logArray;
 
-		splitMessage(
+		return splitMessage(
 			logArray.sort(self.compareAlphabetically).join('\n'),
 			{ maxLength: EMBED_FIELD_MAX_CHARS - 11, char: '\n' },
 		);
