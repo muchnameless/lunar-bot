@@ -100,47 +100,51 @@ function getWeight(skyblockMember) {
 }
 
 /**
- * @param {string} skill
+ * @param {string} skillType
  * @param {number} xp
  */
-function getSkillWeight(skill, xp = 0) {
-	const { nonFlooredLevel: level } = getSkillLevel(skill, xp);
-	const maxXp = skillXpTotal[skillCap[skill]];
+function getSkillWeight(skillType, xp = 0) {
+	const { nonFlooredLevel: LEVEL } = getSkillLevel(skillType, xp);
+	const MAX_XP = skillXpTotal[skillCap[skillType]] ?? Infinity;
 
 	return {
-		skillWeight: ((level * 10) ** (0.5 + SKILL_EXPONENTS[skill] + (level / 100))) / 1250,
-		skillOverflow: xp > maxXp
-			? ((xp - maxXp) / SKILL_DIVIDER[skill]) ** 0.968
+		skillWeight: ((LEVEL * 10) ** (0.5 + (SKILL_EXPONENTS[skillType] ?? -Infinity) + (LEVEL / 100))) / 1250,
+		skillOverflow: xp > MAX_XP
+			? ((xp - MAX_XP) / (SKILL_DIVIDER[skillType] ?? Infinity)) ** 0.968
 			: 0,
 	};
 }
 
 /**
- * @param {string} slayer
+ * @param {string} slayerType
  * @param {number} xp
  */
-function getSlayerWeight(slayer, xp = 0) {
+function getSlayerWeight(slayerType, xp = 0) {
 	if (xp <= 1_000_000) {
 		return {
 			slayerWeight: xp === 0
 				? 0
-				: xp / SLAYER_DIVIDER[slayer],
+				: xp / (SLAYER_DIVIDER[slayerType] ?? Infinity),
 			slayerOverflow: 0,
 		};
 	}
 
-	let slayerWeight = 1_000_000 / SLAYER_DIVIDER[slayer];
+	const DIVIDER = SLAYER_DIVIDER[slayerType] ?? Infinity;
+
+	let slayerWeight = 1_000_000 / DIVIDER;
 
 	// calculate overflow
 	let remaining = xp - 1_000_000;
-	let modifier = SLAYER_MODIFIER[slayer];
+	let modifier;
+
+	const BASE_MODIFIER = modifier = SLAYER_MODIFIER[slayerType] ?? 0;
 
 	while (remaining > 0) {
-		const left = Math.min(remaining, 1_000_000);
+		const LEFT = Math.min(remaining, 1_000_000);
 
-		slayerWeight += (left / (SLAYER_DIVIDER[slayer] * (1.5 + modifier))) ** 0.942;
-		modifier += SLAYER_MODIFIER[slayer];
-		remaining -= left;
+		slayerWeight += (LEFT / (DIVIDER * (1.5 + modifier))) ** 0.942;
+		modifier += BASE_MODIFIER;
+		remaining -= LEFT;
 	}
 
 	return {
@@ -150,18 +154,18 @@ function getSlayerWeight(slayer, xp = 0) {
 }
 
 /**
- * @param {string} type
+ * @param {string} dungeonType
  * @param {number} xp
  */
-function getDungeonWeight(type, xp = 0) {
-	const { nonFlooredLevel: level } = getSkillLevel(type, xp);
-	const dungeonWeight = (level ** 4.5) * DUNGEON_EXPONENTS[type];
-	const maxXp = dungeonXpTotal[dungeonCap[type]];
+function getDungeonWeight(dungeonType, xp = 0) {
+	const { nonFlooredLevel: LEVEL } = getSkillLevel(dungeonType, xp);
+	const DUNGEON_WEIGHT = (LEVEL ** 4.5) * (DUNGEON_EXPONENTS[dungeonType] ?? 0);
+	const MAX_XP = dungeonXpTotal[dungeonCap[dungeonType]] ?? Infinity;
 
 	return {
-		dungeonWeight,
-		dungeonOverflow: xp > maxXp
-			? ((xp - maxXp) / (4 * maxXp / dungeonWeight)) ** 0.968
+		dungeonWeight: DUNGEON_WEIGHT,
+		dungeonOverflow: xp > MAX_XP
+			? ((xp - MAX_XP) / (4 * MAX_XP / DUNGEON_WEIGHT)) ** 0.968
 			: 0,
 	};
 }
