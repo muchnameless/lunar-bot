@@ -25,7 +25,7 @@ module.exports = class PlayerCommand extends Command {
 	static timestampToDate = timestamp => new Date(timestamp).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 
 	/**
-	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} player
+	 * @param {string} objectId
 	 */
 	static objectIdToDate = objectId => new Date(parseInt(objectId.slice(0, 8), 16) * 1_000);
 
