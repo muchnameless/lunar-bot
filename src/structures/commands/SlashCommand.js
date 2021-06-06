@@ -56,6 +56,13 @@ module.exports = class SlashCommand {
 		required: false,
 	};
 
+	static EPHEMERAL_OPTION = {
+		name: 'ephemeral',
+		type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+		description: 'wether the response should be ephemeral when not in a commands channel',
+		required: false,
+	}
+
 	/**
 	 * wether the force option was set to true
 	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
@@ -69,10 +76,14 @@ module.exports = class SlashCommand {
 	 * @returns {import('discord.js').ApplicationCommandData}
 	 */
 	get data() {
+		const options = this.options ?? [];
+
+		options.push(SlashCommand.EPHEMERAL_OPTION);
+
 		return {
 			name: this.name,
 			description: this.description,
-			options: this.options,
+			options,
 			defaultPermission: this.defaultPermission,
 		};
 	}
