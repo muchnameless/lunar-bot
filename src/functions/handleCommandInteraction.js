@@ -33,12 +33,10 @@ module.exports = async (interaction) => {
 
 					logger.info(`[CMD HANDLER]: ${interaction.user.tag}${interaction.guildID ? ` | ${interaction.member.displayName}` : ''} tried to execute '${interaction.logInfo}' in ${interaction.guildID ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'} ${timeLeft} before the cooldown expires`);
 
-					return interaction.reply(
-						`\`${command.name}\` is on cooldown for another \`${timeLeft}\``,
-						{
-							ephemeral: true,
-						},
-					);
+					return interaction.reply({
+						content: `\`${command.name}\` is on cooldown for another \`${timeLeft}\``,
+						ephemeral: true,
+					});
 				}
 			}
 
@@ -54,19 +52,15 @@ module.exports = async (interaction) => {
 
 		try {
 			if (typeof error === 'string') {
-				await interaction.reply(
-					`${error}`,
-					{
-						ephemeral: true,
-					},
-				);
+				await interaction.reply({
+					content: `${error}`,
+					ephemeral: true,
+				});
 			} else {
-				await interaction.reply(
-					`an error occurred while executing the command: ${error}`,
-					{
-						ephemeral: true,
-					},
-				);
+				await interaction.reply({
+					content: `an error occurred while executing the command: ${error}`,
+					ephemeral: true,
+				});
 			}
 		} catch (err) {
 			logger.error(err);

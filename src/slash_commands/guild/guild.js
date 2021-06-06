@@ -202,7 +202,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 			})()
 			: interaction.user.player?.guild);
 
-		if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+		if (!hypixelGuild) return interaction.reply({
+			content: `unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`,
+			ephemeral: true,
+		});
 
 		return interaction.reply({
 			embeds: [
@@ -210,7 +213,6 @@ module.exports = class SetRankCommand extends SlashCommand {
 					.setTitle(`/${commandOptions.command}`)
 					.setDescription(`\`\`\`\n${await hypixelGuild.chatBridge.minecraft.command(commandOptions)}\`\`\``),
 			],
-			ephemeral: false,
 		});
 	}
 
@@ -235,7 +237,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 			})()
 			: interaction.user.player?.guild;
 
-		if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+		if (!hypixelGuild) return interaction.reply({
+			content: `unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`,
+			ephemeral: true,
+		});
 
 		return interaction.reply({
 			embeds: [
@@ -263,7 +268,6 @@ module.exports = class SetRankCommand extends SlashCommand {
 						}\`\`\``,
 					),
 			],
-			ephemeral: false,
 		});
 	}
 
@@ -370,7 +374,10 @@ module.exports = class SetRankCommand extends SlashCommand {
 				});
 
 				const IGN = this.getIGN(options) ?? interaction.user.player?.ign;
-				if (!IGN) return interaction.reply('you are not in the player db', { ephemeral: true });
+				if (!IGN) return interaction.reply({
+					content: 'you are not in the player db',
+					ephemeral: true,
+				});
 
 				return this._run(interaction, options, {
 					command: `g member ${IGN}`,
@@ -405,26 +412,41 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target = 'everyone';
 					hypixelGuild ??= interaction.user.hypixelGuild;
 
-					if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+					if (!hypixelGuild) return interaction.reply({
+						content: `unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`,
+						ephemeral: true,
+					});
 				} else {
 					target = this.getPlayer(TARGET_INPUT, options);
 
-					if (!target) return interaction.reply(`no player with the IGN \`${TARGET_INPUT}\` found`, { ephemeral: true });
+					if (!target) return interaction.reply({
+						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
+						ephemeral: true,
+					});
 
 					if (target instanceof players.model) {
 						({ guild: hypixelGuild } = target);
 
-						if (!hypixelGuild) return interaction.reply(`unable to find the guild for \`${target.ign}\``, { ephemeral: true });
+						if (!hypixelGuild) return interaction.reply({
+							content: `unable to find the guild for \`${target.ign}\``,
+							ephemeral: true,
+						});
 					} else {
 						hypixelGuild ??= interaction.user.hypixelGuild;
 
-						if (!hypixelGuild) return interaction.reply(`unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`, { ephemeral: true });
+						if (!hypixelGuild) return interaction.reply({
+							content: `unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`,
+							ephemeral: true,
+						});
 					}
 				}
 
 				const DURATION = stringToMS(DURATION_INPUT);
 
-				if (Number.isNaN(DURATION)) return interaction.reply(`\`${DURATION_INPUT}\` is not a valid duration`, { ephemeral: true });
+				if (Number.isNaN(DURATION)) return interaction.reply({
+					content: `\`${DURATION_INPUT}\` is not a valid duration`,
+					ephemeral: true,
+				});
 
 				const EXPIRES_AT = Date.now() + DURATION;
 
@@ -432,7 +454,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target.mutedTill = EXPIRES_AT;
 					await target.save();
 
-					if (target.notInGuild) return interaction.reply(`muted \`${target}\` for \`${DURATION_INPUT}\``, { ephemeral: false });
+					if (target.notInGuild) return interaction.reply(`muted \`${target}\` for \`${DURATION_INPUT}\``);
 				} else if (target === 'everyone') {
 					hypixelGuild.mutedTill = EXPIRES_AT;
 					await hypixelGuild.save();
@@ -498,20 +520,32 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target = 'everyone';
 					hypixelGuild ??= interaction.user.hypixelGuild;
 
-					if (!hypixelGuild) return interaction.reply(`unable to find ${HYPIXEL_GUILD_INPUT ? `a guild with the name \`${HYPIXEL_GUILD_INPUT}\`` : 'your guild'}`, { ephemeral: true });
+					if (!hypixelGuild) return interaction.reply({
+						content: `unable to find ${HYPIXEL_GUILD_INPUT ? `a guild with the name \`${HYPIXEL_GUILD_INPUT}\`` : 'your guild'}`,
+						ephemeral: true,
+					});
 				} else {
 					target = this.getPlayer(TARGET_INPUT, options);
 
-					if (!target) return interaction.reply(`no player with the IGN \`${TARGET_INPUT}\` found`, { ephemeral: true });
+					if (!target) return interaction.reply({
+						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
+						ephemeral: true,
+					});
 
 					if (target instanceof players.model) {
 						({ guild: hypixelGuild } = target);
 
-						if (!hypixelGuild) return interaction.reply(`unable to find the guild for \`${target.ign}\``, { ephemeral: true });
+						if (!hypixelGuild) return interaction.reply({
+							content: `unable to find the guild for \`${target.ign}\``,
+							ephemeral: true,
+						});
 					} else {
 						hypixelGuild ??= interaction.user.hypixelGuild;
 
-						if (!hypixelGuild) return interaction.reply(`unable to find ${HYPIXEL_GUILD_INPUT ? `a guild with the name \`${HYPIXEL_GUILD_INPUT}\`` : 'your guild'}`, { ephemeral: true });
+						if (!hypixelGuild) return interaction.reply({
+							content: `unable to find ${HYPIXEL_GUILD_INPUT ? `a guild with the name \`${HYPIXEL_GUILD_INPUT}\`` : 'your guild'}`,
+							ephemeral: true,
+						});
 					}
 				}
 
@@ -519,7 +553,7 @@ module.exports = class SetRankCommand extends SlashCommand {
 					target.mutedTill = 0;
 					await target.save();
 
-					if (target.notInGuild) return interaction.reply(`unmuted \`${target}\``, { ephemeral: false });
+					if (target.notInGuild) return interaction.reply(`unmuted \`${target}\``);
 				} else if (target === 'everyone') {
 					hypixelGuild.mutedTill = 0;
 					await hypixelGuild.save();

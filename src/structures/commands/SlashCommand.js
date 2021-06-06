@@ -113,7 +113,7 @@ module.exports = class SlashCommand {
 		if (!options) return null;
 
 		const INPUT = (options.get('player') || options.get('target') || options.get('ign'))?.value;
-		const DISCORD_ID = getIDFromString(INPUT);
+		const DISCORD_ID = INPUT && getIDFromString(INPUT);
 
 		return (DISCORD_ID
 			? this.client.players.getByID(DISCORD_ID)
@@ -132,7 +132,7 @@ module.exports = class SlashCommand {
 		if (!options) return null;
 
 		const INPUT = (options.get('player') || options.get('target') || options.get('ign'))?.value;
-		const DISCORD_ID = getIDFromString(INPUT);
+		const DISCORD_ID = INPUT && getIDFromString(INPUT);
 
 		return DISCORD_ID
 			? this.client.players.getByID(DISCORD_ID)?.ign

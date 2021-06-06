@@ -17,6 +17,15 @@ class LunarCommandInteraction extends CommandInteraction {
 		 * deferring promise
 		 */
 		this._deferring = null;
+
+		const { channel } = this;
+
+		/**
+		 * wether to use ephemeral replies and deferring
+		 */
+		this.useEphemeral = channel !== null && channel.type !== 'dm'
+			? !(channel.name.includes('command') || channel.isTicket || (this.options.get('ephemeral')?.value ?? false)) // guild channel
+			: false; // DM channel
 	}
 
 	/**
@@ -50,46 +59,49 @@ class LunarCommandInteraction extends CommandInteraction {
 	}
 
 	/**
-	 * @param {import('discord.js').InteractionDeferOptions} options
+	 * @param {import('discord.js').InteractionDeferOptions} param0
 	 */
-	async defer(options) {
-		this.ephemeral = options?.ephemeral ?? false;
+	async defer({ ephemeral = this.useEphemeral, ...options } = {}) {
+		this.ephemeral = ephemeral;
 
-		return this._deferring = super.defer(options);
+		return this._deferring = super.defer({ ephemeral, ...options });
 	}
 
 	/**
 	 *
-	 * @param {string} content
-	 * @param {import('discord.js').InteractionReplyOptions} options
+	 * @param {string | import('discord.js').InteractionReplyOptions} contentOrOptions
 	 */
-	async reply(content, options) {
+	async reply(contentOrOptions) {
+		const data = typeof contentOrOptions === 'string'
+			? { ephemeral: this.useEphemeral, content: contentOrOptions }
+			: { ephemeral: this.useEphemeral, ...contentOrOptions };
+
 		await this._deferring;
 
 		if (this.deferred) {
 			// ephemeral defer
 			if (this.ephemeral) {
-				if (options?.ephemeral) return this.editReply(content, options);
+				if (data.ephemeral) return this.editReply(data);
 
 				// ephemeral defer and non-ephemeral followUp
 				await this.deleteReply();
-				return this.followUp(content, options);
+				return this.followUp(data);
 			}
 
 			// non-ephemeral defer
-			if (options?.ephemeral) {
+			if (data.ephemeral) {
 				await this.deleteReply();
-				return this.followUp(content, options);
+				return this.followUp(data);
 			}
 
-			return this.editReply(content, options);
+			return this.editReply(data);
 		}
 
-		if (this.replied) return this.followUp(content, options);
+		if (this.replied) return this.followUp(data);
 
-		this.ephemeral = options?.ephemeral ?? false;
+		this.ephemeral = data.ephemeral;
 
-		return this.reply(content, options);
+		return super.reply(data);
 	}
 }
 
