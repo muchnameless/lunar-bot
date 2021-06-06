@@ -1,10 +1,7 @@
 'use strict';
 
 const { Collection } = require('discord.js');
-const { commaListsOr } = require('common-tags');
 const ms = require('ms');
-const ChatBridgeError = require('../structures/errors/ChatBridgeError');
-const MissingPermissionsError = require('../structures/errors/MissingPermissionsError');
 const logger = require('./logger');
 
 
@@ -56,16 +53,7 @@ module.exports = async (interaction) => {
 		logger.error(error);
 
 		try {
-			if (error instanceof MissingPermissionsError) {
-				const requiredRoles = error.requiredRoles.map(roleID => client.lgGuild?.roles.cache.get(roleID) ?? roleID);
-
-				await interaction.reply(
-					commaListsOr`missing permissions for \`${error.command}\` (${interaction.guildID === client.config.get('MAIN_GUILD_ID') ? requiredRoles.map(r => `${r}`) : requiredRoles.map(r => r.name ?? r)}): ${error.message}`,
-					{
-						ephemeral: true,
-					},
-				);
-			} else if (error instanceof ChatBridgeError) {
+			if (typeof error === 'string') {
 				await interaction.reply(
 					`${error}`,
 					{

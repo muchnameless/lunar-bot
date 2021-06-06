@@ -42,6 +42,14 @@ class LunarCommandInteraction extends CommandInteraction {
 	}
 
 	/**
+	 * appends the first option name if the command is a sub command or sub command group
+	 */
+	get fullCommandName() {
+		const firstOption = this.options?.first();
+		return `${this.commandName}${firstOption?.type === 'SUB_COMMAND' || firstOption.type === 'SUB_COMMAND_GROUP' ? ` ${firstOption.name}` : ''}`;
+	}
+
+	/**
 	 * @param {import('discord.js').InteractionDeferOptions} options
 	 */
 	async defer(options) {

@@ -8,7 +8,6 @@ const { promote: { string: { success } } } = require('../../chat_bridge/constant
 const { EMBED_MAX_CHARS, EMBED_MAX_FIELDS, EMBED_FIELD_MAX_CHARS } = require('../../../constants/discord');
 const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, CURRENT, DAY }, UNKNOWN_IGN } = require('../../../constants/database');
-const ChatBridgeError = require('../../errors/ChatBridgeError');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
@@ -194,8 +193,8 @@ module.exports = class HypixelGuild extends Model {
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
 	get chatBridge() {
-		if (!this.chatBridgeEnabled) throw new ChatBridgeError(`${this.name}: chat bridge disabled`, 'disabled');
-		if (!this._chatBridge?.minecraft.ready) throw new ChatBridgeError(`${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`, this._chatBridge ? 'not ready' : 'missing');
+		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
+		if (!this._chatBridge?.minecraft.ready) throw `${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`;
 		return this._chatBridge;
 	}
 

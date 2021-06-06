@@ -6,7 +6,6 @@ const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, DAY } } = require('../../../constants/database');
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
 const { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar, safePromiseAll } = require('../../../functions/util');
-const NonAPIError = require('../../errors/NonAPIError');
 const ModelManager = require('./ModelManager');
 const logger = require('../../../functions/logger');
 
@@ -572,7 +571,7 @@ module.exports = class PlayerManager extends ModelManager {
 			} catch (error) {
 				logger.error('[UPDATE MAIN PROFILE]', error);
 
-				if (error instanceof NonAPIError) {
+				if (typeof error === 'string') {
 					log.push({
 						guildID: player.guildID,
 						mainProfileUpdate: `-\xa0${player.ign}: ${error.message}`,

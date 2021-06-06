@@ -11,7 +11,6 @@ const { escapeIgn, trim } = require('../../../functions/util');
 const { getSkillLevel, getWeight, getSkillWeight, getSlayerWeight, getDungeonWeight } = require('../../../functions/skyblock');
 const { validateNumber, validateDiscordID } = require('../../../functions/stringValidators');
 const { mutedCheck } = require('../../../functions/database');
-const NonAPIError = require('../../errors/NonAPIError');
 const LunarGuildMember = require('../../extensions/GuildMember');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
@@ -483,14 +482,14 @@ module.exports = class Player extends Model {
 			// hypixel API call
 			const { meta: { cached }, members } = await hypixel.skyblock.profile(this.mainProfileID);
 
-			if (cached && Date.now() - this.xpLastUpdatedAt < (this.client.config.getNumber('DATABASE_UPDATE_INTERVAL') - 1) * 60_000) throw new NonAPIError('cached data');
+			if (cached && Date.now() - this.xpLastUpdatedAt < (this.client.config.getNumber('DATABASE_UPDATE_INTERVAL') - 1) * 60_000) throw 'cached data';
 
 			const playerData = members?.[this.minecraftUUID];
 
 			if (!playerData) {
 				this.mainProfileID = null;
 				this.save();
-				throw new NonAPIError(`unable to find main profile named '${this.mainProfileName}' -> resetting name`);
+				throw `unable to find main profile named '${this.mainProfileName}' -> resetting name`;
 			}
 
 			this.xpLastUpdatedAt = Date.now();
@@ -576,7 +575,8 @@ module.exports = class Player extends Model {
 
 			await this.save();
 		} catch (error) {
-			if (error instanceof NonAPIError || error.name.startsWith('Sequelize') || error instanceof TypeError || error instanceof RangeError) return logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
+			if (typeof error === 'string') return logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
+			if (error.name.startsWith('Sequelize') || error instanceof TypeError || error instanceof RangeError) return logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
 
 			logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
 			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
@@ -1078,7 +1078,7 @@ module.exports = class Player extends Model {
 			this.mainProfileID = null;
 			await this.resetXp({ offsetToReset: 'current' });
 
-			throw new NonAPIError(`${this.logInfo}: no SkyBlock profiles`);
+			throw `${this.logInfo}: no SkyBlock profiles`;
 		}
 
 		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = profiles[

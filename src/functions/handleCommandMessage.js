@@ -4,7 +4,6 @@ const { commaListsOr } = require('common-tags');
 const ms = require('ms');
 const { FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const { escapeRegex } = require('./util');
-const ChatBridgeError = require('../structures/errors/ChatBridgeError');
 const logger = require('./logger');
 
 
@@ -151,7 +150,7 @@ module.exports = async (message) => {
 		logger.info(`[CMD HANDLER]: '${message.content}' was executed by ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}`);
 		await command.run(message, args, flags, rawArgs);
 	} catch (error) {
-		if (error instanceof ChatBridgeError) return message.reply(`${error}`);
+		if (typeof error === 'string') return message.reply(`${error}`);
 
 		logger.error(`[CMD HANDLER]: An error occured while ${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'}`, error);
 		message.reply(`an error occured while executing the \`${command.name}\` command:\n${error}`);

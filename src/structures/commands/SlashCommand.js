@@ -2,7 +2,7 @@
 
 const { Constants } = require('discord.js');
 const { getIDFromString } = require('../../functions/util');
-const MissingPermissionsError = require('../errors/MissingPermissionsError');
+const missingPermissionsError = require('../errors/MissingPermissionsError');
 const logger = require('../../functions/logger');
 
 
@@ -156,21 +156,19 @@ module.exports = class SlashCommand {
 			: await (async () => {
 				const { lgGuild } = this.client;
 
-				if (!lgGuild) {
-					throw new MissingPermissionsError('discord server unreachable', { interaction, requiredRoles: roleIDs });
-				}
+				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIDs);
 
 				try {
 					return await lgGuild.members.fetch(interaction.user.id);
 				} catch (error) {
 					logger.error('[CHECK PERMISSIONS]: error while fetching member to test for permissions', error);
-					throw new MissingPermissionsError('unknown discord member', { interaction, requiredRoles: roleIDs });
+					throw missingPermissionsError('unknown discord member', interaction, roleIDs);
 				}
 			})();
 
 		// check for req roles
 		if (!member.roles.cache.some((_, roleID) => roleIDs.includes(roleID))) {
-			throw new MissingPermissionsError('missing required role', { interaction, requiredRoles: roleIDs });
+			throw missingPermissionsError('missing required role', interaction, roleIDs);
 		}
 	}
 
