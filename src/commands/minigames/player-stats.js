@@ -27,7 +27,7 @@ module.exports = class PlayerCommand extends Command {
 	/**
 	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} player
 	 */
-	static getFirstPurchase = ({ levelUp_VIP: vip = Infinity, levelUp_VIP_PLUS: vipPlus = Infinity, levelUp_MVP: mvp = Infinity, levelUp_MVP_PLUS: mvpPlus = Infinity }) => Math.min(vip, vipPlus, mvp, mvpPlus);
+	static objectIdToDate = objectId => new Date(parseInt(objectId.slice(0, 8), 16) * 1_000);
 
 	/**
 	 * @param {string} ign
@@ -39,7 +39,7 @@ module.exports = class PlayerCommand extends Command {
 	generateReply(ign, player, guild, friends, status) {
 		const { cleanName: RANK_NAME } = getPlayerRank(player);
 		const level = Number(getNetworkLevel(player).preciseLevel.toFixed(2));
-		const { firstLogin, lastLogin, achievementPoints = 0, karma = 0 } = player;
+		const { _id, lastLogin, achievementPoints = 0, karma = 0 } = player;
 
 		return oneLine`
 			${ign}:
@@ -50,7 +50,7 @@ module.exports = class PlayerCommand extends Command {
 			level: ${level},
 			achievement points: ${this.client.formatNumber(achievementPoints)},
 			karma: ${this.client.formatNumber(karma)},
-			first joined: ${PlayerCommand.timestampToDate(firstLogin ?? PlayerCommand.getFirstPurchase(player))},
+			first joined: ${PlayerCommand.timestampToDate(PlayerCommand.objectIdToDate(_id))},
 			last joined: ${PlayerCommand.timestampToDate(lastLogin)}
 		`;
 	}
