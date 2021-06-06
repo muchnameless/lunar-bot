@@ -1,5 +1,11 @@
 'use strict';
 
+const { Constants } = require('discord.js');
+const { getIDFromString } = require('../../functions/util');
+const MissingPermissionsError = require('../errors/MissingPermissionsError');
+const logger = require('../../functions/logger');
+
+
 /**
  * @typedef {import('discord.js').ApplicationCommandData & { aliases: ?string[], permissions: import('discord.js').ApplicationCommandPermissions, cooldown: ?number }} CommandData
  */
@@ -36,13 +42,27 @@ module.exports = class SlashCommand {
 		this.cooldown = cooldown ?? null;
 	}
 
+	static GUILD_OPTION = {
+		name: 'guild',
+		type: Constants.ApplicationCommandOptionTypes.STRING,
+		description: 'hypixel guild',
+		required: false,
+	};
+
+	static FORCE_OPTION = {
+		name: 'force',
+		type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+		description: 'disable IGN autocorrection',
+		required: false,
+	};
+
 	/**
 	 * wether the force option was set to true
-	 * @param {import('discord.js').CommandInteractionOption[]} options
+	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
 	 * @returns {boolean}
 	 */
 	static checkForce(options) {
-		return options?.find(({ name }) => name === 'force')?.value ?? false;
+		return options?.get('force')?.value ?? false;
 	}
 
 	/**
@@ -85,8 +105,78 @@ module.exports = class SlashCommand {
 	}
 
 	/**
+	 * returns the player object
+	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * @returns {?import('../structures/database/models/Player')}
+	 */
+	getPlayer(options) {
+		if (!options) return null;
+
+		const INPUT = (options.get('player') || options.get('target') || options.get('ign'))?.value;
+		const DISCORD_ID = getIDFromString(INPUT);
+
+		return (DISCORD_ID
+			? this.client.players.getByID(DISCORD_ID)
+			: SlashCommand.checkForce(options)
+				? this.client.players.findByIGN(INPUT)
+				: this.client.players.getByID(INPUT) ?? this.client.players.getByIGN(INPUT)
+		) ?? INPUT;
+	}
+
+	/**
+	 * returns the player object
+	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * @returns {?string}
+	 */
+	getIGN(options) {
+		if (!options) return null;
+
+		const INPUT = (options.get('player') || options.get('target') || options.get('ign'))?.value;
+		const DISCORD_ID = getIDFromString(INPUT);
+
+		return DISCORD_ID
+			? this.client.players.getByID(DISCORD_ID)?.ign
+			: (SlashCommand.checkForce(options)
+				? INPUT
+				: (this.client.players.getByID(INPUT)?.ign ?? this.client.players.getByIGN(INPUT)?.ign ?? INPUT)
+			);
+	}
+
+	/**
+	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @param {{ userIDs: import('discord.js').Snowflake[], roleIDs: import('discord.js').Snowflake[] }} permissions
+	 */
+	async checkPermissions(interaction, { userIDs = [ this.client.ownerID ], roleIDs = [] }) {
+		if (!userIDs.length && !roleIDs.length) return;
+		if (userIDs.includes(interaction.user.id)) return; // user id bypass
+
+		/** @type {import('../extensions/GuildMember')} */
+		const member = interaction.guildID === this.config.get('MAIN_GUILD_ID')
+			? interaction.member
+			: await (async () => {
+				const { lgGuild } = this.client;
+
+				if (!lgGuild) {
+					throw new MissingPermissionsError('discord server unreachable', { interaction, requiredRoles: roleIDs });
+				}
+
+				try {
+					return await lgGuild.members.fetch(interaction.user.id);
+				} catch (error) {
+					logger.error('[CHECK PERMISSIONS]: error while fetching member to test for permissions', error);
+					throw new MissingPermissionsError('unknown discord member', { interaction, requiredRoles: roleIDs });
+				}
+			})();
+
+		// check for req roles
+		if (!member.roles.cache.some((_, roleID) => roleIDs.includes(roleID))) {
+			throw new MissingPermissionsError('missing required role', { interaction, requiredRoles: roleIDs });
+		}
+	}
+
+	/**
 	 * execute the command
-	 * @param {import('../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('../extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
