@@ -19,7 +19,7 @@ module.exports = {
 		'arrow-spacing': 'error',
 		'brace-style': [ 'error', '1tbs', { allowSingleLine: true }],
 		'camelcase': 'error',
-		'class-methods-use-this': [ 'error', { exceptMethods: [ 'run' ] }],
+		'class-methods-use-this': [ 'error', { exceptMethods: [ 'run', 'runInGame', '_run' ] }],
 		'comma-dangle': [ 'error', 'always-multiline' ],
 		'comma-spacing': [ 'error', { before: false, after: true }],
 		'comma-style': 'error',
