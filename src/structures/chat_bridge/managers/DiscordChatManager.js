@@ -246,7 +246,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 		/** @type {import('../../database/models/Player')} */
 		const player = playerInput
 			?? message.author.player // cached player
-			?? (await this.client.players.model.findOne({ where: { discordID: message.author.id } })).catch(error => logger.error(`[FORWARD DC TO MC]: ${message.author.tag}`, error)); // uncached player
+			?? await this.client.players.model.findOne({ where: { discordID: message.author.id } }); // uncached player
 
 		// check if player is muted
 		if (player?.muted) {
