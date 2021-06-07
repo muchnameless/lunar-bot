@@ -73,12 +73,29 @@ module.exports = class SlashCommand {
 	}
 
 	/**
+	 * @param {import('discord.js').ApplicationCommandOptionData} option
+	 */
+	static isSubCommandOption(option) {
+		return (option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND || option.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP) ?? false;
+	}
+
+	/**
 	 * @returns {import('discord.js').ApplicationCommandData}
 	 */
 	get data() {
-		const options = this.options ?? [];
+		/** @type {import('discord.js').ApplicationCommandOptionData[]} */
+		let options = this.options ?? [];
 
-		options.push(SlashCommand.EPHEMERAL_OPTION);
+		const [ firstOption ] = options;
+
+		if (SlashCommand.isSubCommandOption(firstOption)) {
+			options = options.map((option) => {
+				if (option.options[option.options.length - 1].name !== 'ephemeral') option.options.push(SlashCommand.EPHEMERAL_OPTION);
+				return option;
+			});
+		} else if (options[options.length - 1].name !== 'ephemeral') {
+			options.push(SlashCommand.EPHEMERAL_OPTION);
+		}
 
 		return {
 			name: this.name,

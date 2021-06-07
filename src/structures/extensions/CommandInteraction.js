@@ -29,13 +29,20 @@ class LunarCommandInteraction extends CommandInteraction {
 	}
 
 	/**
+	 * @param {import('discord.js').ApplicationCommandOptionData} option
+	 */
+	static isSubCommandOption(option) {
+		return (option?.type === 'SUB_COMMAND' || option.type === 'SUB_COMMAND_GROUP') ?? false;
+	}
+
+	/**
 	 * @param {import('discord.js').CommandInteractionOption[]} options
 	 */
 	static stringifyOptions(options) {
 		return options
 			?.reduce(
 				(acc, cur) => {
-					if (cur.type === 'SUB_COMMAND' || cur.type === 'SUB_COMMAND_GROUP') {
+					if (LunarCommandInteraction.isSubCommandOption(cur)) {
 						return `${acc} ${cur.name}${this.stringifyOptions(cur.options)}`;
 					}
 
@@ -55,7 +62,7 @@ class LunarCommandInteraction extends CommandInteraction {
 	 */
 	get fullCommandName() {
 		const firstOption = this.options?.first();
-		return `${this.commandName}${firstOption?.type === 'SUB_COMMAND' || firstOption.type === 'SUB_COMMAND_GROUP' ? ` ${firstOption.name}` : ''}`;
+		return `${this.commandName}${LunarCommandInteraction.isSubCommandOption(firstOption) ? ` ${firstOption.name}` : ''}`;
 	}
 
 	/**

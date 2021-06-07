@@ -28,6 +28,14 @@ const commonOptions = new Map([ [
 		required: true,
 	},
 ], [
+	'player_optional',
+	{
+		name: 'player',
+		type: Constants.ApplicationCommandOptionTypes.STRING,
+		description: 'IGN | minecraftUUID | discordID | @mention',
+		required: false,
+	},
+], [
 	'ign',
 	{
 		name: 'ign',
@@ -112,12 +120,12 @@ module.exports = class SetRankCommand extends SlashCommand {
 			name: 'log',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 			description: 'guild log',
-			options: [ 'player', 'page' ],
+			options: [ 'player_optional', 'page' ],
 		}, {
 			name: 'member',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 			description: 'guild member',
-			options: [ 'player' ],
+			options: [ 'player_optional' ],
 		}, {
 			name: 'members',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,

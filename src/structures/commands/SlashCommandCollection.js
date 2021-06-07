@@ -40,38 +40,34 @@ module.exports = class SlashCommandCollection extends Collection {
 	 * @param {import('discord.js').GuildApplicationCommandManager|import('discord.js').ApplicationCommandManager} [commandManager]
 	 */
 	async init(commandManager = this.client.lgGuild?.commands) {
-		try {
-			const commands = await commandManager.set(this.map(({ data }, name) => ({ ...data, name })));
-			const permissions = [];
+		const commands = await commandManager.set(this.map(({ data }, name) => ({ ...data, name })));
+		const permissions = [];
 
-			for (const [ id, applicationCommand ] of commands) {
-				/** @type {import('./SlashCommand')} */
-				const slashCommand = this.get(applicationCommand.name);
+		for (const [ id, applicationCommand ] of commands) {
+			/** @type {import('./SlashCommand')} */
+			const slashCommand = this.get(applicationCommand.name);
 
-				slashCommand.id = id;
+			slashCommand.id = id;
 
-				if (slashCommand.permissions) {
-					permissions.push({
-						id: applicationCommand.id,
-						permissions: slashCommand.permissions,
-					});
-				}
+			if (slashCommand.permissions) {
+				permissions.push({
+					id: applicationCommand.id,
+					permissions: slashCommand.permissions,
+				});
 			}
-
-			if (permissions.length) {
-				if (commandManager instanceof GuildApplicationCommandManager) {
-					await commandManager.setPermissions(permissions);
-				} else { // permissions for global commands must be set per guild
-					for (const guild of this.client.guilds.cache.values()) {
-						guild.commands.setPermissions(permissions);
-					}
-				}
-			}
-		} catch (error) {
-			logger.error(error);
 		}
 
-		return this;
+		if (permissions.length) {
+			if (commandManager instanceof GuildApplicationCommandManager) {
+				await commandManager.setPermissions(permissions);
+			} else { // permissions for global commands must be set per guild
+				for (const guild of this.client.guilds.cache.values()) {
+					guild.commands.setPermissions(permissions);
+				}
+			}
+		}
+
+		return commands;
 	}
 
 	/**
