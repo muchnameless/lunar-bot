@@ -43,7 +43,7 @@ process
 		],
 		presence: {
 			activities: [{
-				name: `${(await db.Config.findOne({ where: { key: 'PREFIX' } }))?.value ?? 'lg!'}help`,
+				name: '/commands',
 				type: 'LISTENING',
 			}],
 			status: 'online',
