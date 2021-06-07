@@ -1,8 +1,8 @@
 'use strict';
 
 const { basename } = require('path');
-const { Structures, CommandInteraction } = require('discord.js');
-// const logger = require('../../functions/logger');
+const { Structures, CommandInteraction, Permissions } = require('discord.js');
+const logger = require('../../functions/logger');
 
 
 class LunarCommandInteraction extends CommandInteraction {
@@ -58,6 +58,13 @@ class LunarCommandInteraction extends CommandInteraction {
 	}
 
 	/**
+	 * the user who started the interaction (for compatibility with message methods)
+	 */
+	get author() {
+		return this.user;
+	}
+
+	/**
 	 * appends the first option name if the command is a sub command or sub command group
 	 */
 	get fullCommandName() {
@@ -109,6 +116,42 @@ class LunarCommandInteraction extends CommandInteraction {
 		this.ephemeral = data.ephemeral;
 
 		return super.reply(data);
+	}
+
+	/**
+	 * posts question in same channel and returns content of first reply or null if timeout
+	 * @param {string} question the question to ask the message author
+	 * @param {number} timeoutSeconds secods before the question timeouts
+	 */
+	async awaitReply(question, timeoutSeconds = 60) {
+		try {
+			await this.reply(question);
+
+			const collected = await this.channel.awaitMessages(
+				msg => msg.author.id === this.user.id,
+				{ max: 1, time: timeoutSeconds * 1_000, errors: [ 'time' ] },
+			);
+
+			return collected.first().content;
+		} catch {
+			return null;
+		}
+	}
+
+	/**
+	 * react in order if the message is not deleted and the client has 'ADD_REACTIONS', catching promise rejections
+	 * @param {import('discord.js').EmojiIdentifierResolvable[]} emojis
+	 * @returns {Promise<?import('discord.js').MessageReaction[]>}
+	 */
+	async react(...emojis) {
+		if (this.ephemeral) return null;
+		if (!this.channel?.botPermissions.has(Permissions.FLAGS.ADD_REACTIONS)) return null;
+
+		try {
+			return (await this.fetchReply()).react(...emojis);
+		} catch (error) {
+			return logger.error('[MESSAGE REACT]', error);
+		}
 	}
 }
 
