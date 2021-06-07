@@ -76,7 +76,7 @@ module.exports = class SlashCommand {
 	 * @param {import('discord.js').ApplicationCommandOptionData} option
 	 */
 	static isSubCommandOption(option) {
-		return (option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND || option.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP) ?? false;
+		return option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND || option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP;
 	}
 
 	/**
@@ -90,10 +90,10 @@ module.exports = class SlashCommand {
 
 		if (SlashCommand.isSubCommandOption(firstOption)) {
 			options = options.map((option) => {
-				if (option.options[option.options.length - 1].name !== 'ephemeral') option.options.push(SlashCommand.EPHEMERAL_OPTION);
+				if (option.options[option.options.length - 1]?.name !== 'ephemeral') option.options.push(SlashCommand.EPHEMERAL_OPTION);
 				return option;
 			});
-		} else if (options[options.length - 1].name !== 'ephemeral') {
+		} else if (options[options.length - 1]?.name !== 'ephemeral') {
 			options.push(SlashCommand.EPHEMERAL_OPTION);
 		}
 
