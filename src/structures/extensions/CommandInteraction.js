@@ -1,7 +1,7 @@
 'use strict';
 
 const { basename } = require('path');
-const { Structures, CommandInteraction, Permissions } = require('discord.js');
+const { Structures, CommandInteraction, Permissions, APIMessage } = require('discord.js');
 const logger = require('../../functions/logger');
 
 
@@ -89,6 +89,16 @@ class LunarCommandInteraction extends CommandInteraction {
 		const data = typeof contentOrOptions === 'string'
 			? { ephemeral: this.useEphemeral, content: contentOrOptions }
 			: { ephemeral: this.useEphemeral, ...contentOrOptions };
+
+		/**
+		 * allow split option for CommandInteraction#reply
+		 */
+		if (data.split) {
+			for (const content of APIMessage.create(this, data).makeContent()) {
+				await this.reply({ ...data, content, split: false, code: false });
+			}
+			return;
+		}
 
 		await this._deferring;
 
