@@ -4,7 +4,7 @@ const Command = require('../../structures/commands/Command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class WeightCommand extends Command {
+module.exports = class CoinFlipCommand extends Command {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [ 'cf', 'flip' ],
@@ -31,6 +31,6 @@ module.exports = class WeightCommand extends Command {
 	 * @param {string[]} rawArgs arguments and flags
 	 */
 	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return message.reply(WeightCommand.generateReply());
+		return message.reply(CoinFlipCommand.generateReply());
 	}
 };

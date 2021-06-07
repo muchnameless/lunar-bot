@@ -92,7 +92,7 @@ class Parser {
 }
 
 
-module.exports = class MathCommand extends Command {
+module.exports = class MathsCommand extends Command {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [ 'm', 'calc' ],
@@ -185,27 +185,27 @@ module.exports = class MathCommand extends Command {
 		'!'(x) {
 			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
 			if (x < 0) return NaN;
-			return MathCommand.factorial(x);
+			return MathsCommand.factorial(x);
 		},
 		fac(x) {
 			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
 			if (x < 0) return NaN;
-			return MathCommand.factorial(x);
+			return MathsCommand.factorial(x);
 		},
 		sin(x) {
 			if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
-			if (MathCommand.isMultipleOfPi(x)) return 0;
+			if (MathsCommand.isMultipleOfPi(x)) return 0;
 			return Math.sin(x);
 		},
 		cos(x) {
 			if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
-			if (MathCommand.isMultipleOfPiHalf(x)) return 0;
+			if (MathsCommand.isMultipleOfPiHalf(x)) return 0;
 			return Math.cos(x);
 		},
 		tan(x) {
 			if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
-			if (MathCommand.isMultipleOfPi(x)) return 0;
-			if (MathCommand.isMultipleOfPiHalf(x)) return NaN;
+			if (MathsCommand.isMultipleOfPi(x)) return 0;
+			if (MathsCommand.isMultipleOfPiHalf(x)) return NaN;
 			return Math.tan(x);
 		},
 		sqrt(x) {
@@ -264,13 +264,13 @@ module.exports = class MathCommand extends Command {
 	});
 
 	static parse(input) {
-		MathCommand.lexer.setInput(input);
+		MathsCommand.lexer.setInput(input);
 		const tokens = [];
 		let token;
-		while ((token = MathCommand.lexer.lex())) tokens.push(token);
+		while ((token = MathsCommand.lexer.lex())) tokens.push(token);
 		// logger.debug({ tokens })
 		if (!tokens.length) throw new Error('LexerError: token list empty');
-		return MathCommand.parser.parse(tokens);
+		return MathsCommand.parser.parse(tokens);
 	}
 
 	/**
@@ -315,7 +315,7 @@ module.exports = class MathCommand extends Command {
 
 		// parse
 		try {
-			parsed = MathCommand.parse(INPUT);
+			parsed = MathsCommand.parse(INPUT);
 		} catch (error) {
 			return message.reply(`${error.message}, input: '${INPUT}'`);
 		}
@@ -332,22 +332,22 @@ module.exports = class MathCommand extends Command {
 			const pop = () => this.validateNumber(stack.pop());
 
 			for (const token of parsed) {
-				if (Reflect.has(MathCommand.binaryOperators, token)) {
+				if (Reflect.has(MathsCommand.binaryOperators, token)) {
 					const b = pop();
 					const a = pop();
 
 					warning ||= b.warning || a.warning;
 
-					stack.push(MathCommand.binaryOperators[token](a.value, b.value));
+					stack.push(MathsCommand.binaryOperators[token](a.value, b.value));
 					continue;
 				}
 
-				if (Reflect.has(MathCommand.unaryOperators, token)) {
+				if (Reflect.has(MathsCommand.unaryOperators, token)) {
 					const a = pop();
 
 					warning ||= a.warning;
 
-					stack.push(MathCommand.unaryOperators[token](a.value));
+					stack.push(MathsCommand.unaryOperators[token](a.value));
 					continue;
 				}
 
@@ -367,13 +367,13 @@ module.exports = class MathCommand extends Command {
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
 		return message.reply(oneLine`
-			${MathCommand.formatNumberString(INPUT)
+			${MathsCommand.formatNumberString(INPUT)
 				.replace(/(?<=.)[+\-*/]/g, ' $& ') // add spaces around operators
 				.replace(/,/g, '$& ') // add space after commas
 				.replace(/pi/gi, '\u{03C0}') // prettify 'pi'
 			}
 			 =
-			${MathCommand.formatNumberString(output?.toString())}
+			${MathsCommand.formatNumberString(output?.toString())}
 			${warning
 				? `\nwarning: (intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}, calculation may be incorrect`
 				: ''
