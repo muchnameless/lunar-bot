@@ -160,7 +160,7 @@ module.exports = class LogHandler {
 	/**
 	 * create log_buffer folder if it is non-existent
 	 */
-	async _createLogBufferFolder() {
+	async _createLogBufferFolder() { // eslint-disable-line class-methods-use-this
 		try {
 			await mkdir(LogHandler.LOG_PATH);
 			logger.debug('[LOG BUFFER]: created \'log_buffer\' folder');
