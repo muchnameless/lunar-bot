@@ -588,16 +588,19 @@ module.exports = class HypixelGuild extends Model {
 
 	/**
 	 * determine the requested rank and compare the player's weight with the rank's requirement
-	 * @param {import('../../extensions/Message')|import('../../chat_bridge/HypixelMessage')} message message which was send in the #rank-requests channel, or that triggered the 'rank' command
+	 * @param {import('../../extensions/Message') | import('../../chat_bridge/HypixelMessage') | import('../../extensions/CommandInteraction')} ctx message which was send in the #rank-requests channel, or that triggered the 'rank' command
 	 */
-	async handleRankRequestMessage(message) {
+	async handleRankRequestMessage(ctx, rank) {
 		const { config } = this.client;
-		const result = message.content
-			?.replace(/[^a-zA-Z ]/g, '') // delete all non alphabetical characters
-			.split(/ +/)
-			.filter(({ length }) => length >= 3) // filter out short words like 'am'
-			.map(word => autocorrect(word, this.ranks, 'name'))
-			.sort((a, b) => b.similarity - a.similarity)[0]; // element with the highest similarity
+		const result = rank
+			? autocorrect(rank, this.ranks, 'name')
+			: ctx.content
+				?.replace(/[^a-zA-Z ]/g, '') // delete all non alphabetical characters
+				.split(/ +/)
+				.filter(({ length }) => length >= 3) // filter out short words like 'am'
+				.map(word => autocorrect(word, this.ranks, 'name'))
+				.sort((a, b) => a.similarity - b.similarity)
+				.pop();
 
 		if (!result || result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return;
 
@@ -607,27 +610,27 @@ module.exports = class HypixelGuild extends Model {
 			roleID: ROLE_ID,
 			priority: RANK_PRIORITY,
 		} } = result; // rank
-		const { player } = message.author;
+		const { player } = ctx.author;
 
 		// no player db entry
 		if (!player) {
-			logger.info(`[RANK REQUEST]: ${this.name}: ${message.logInfo} requested '${RANK_NAME}' but could not be found in the player db`);
+			logger.info(`[RANK REQUEST]: ${this.name}: ${ctx.logInfo} requested '${RANK_NAME}' but could not be found in the player db`);
 
-			return message.reply(
-				`unable to find you in the ${this.name} player database, use \`${config.get('PREFIX')}verify [your ign]\` in ${message.findNearestCommandsChannel?.() ?? '#bot-commands'}`,
-				{ sameChannel: true },
-			);
+			return ctx.reply({
+				content: `unable to find you in the ${this.name} player database, use \`/verify [your ign]\` in ${ctx.findNearestCommandsChannel?.() ?? '#bot-commands'}`,
+				sameChannel: true,
+			});
 		}
 
 		// non-requestable rank
 		if (!ROLE_ID) {
 			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank which is non-requestable`);
 
-			const replyData = await message.replyData;
+			const replyData = await ctx.replyData;
 
-			if (replyData) message.channel.deleteMessages(replyData.messageID).catch(error => logger.error('[RANK REQUEST]: delete', error));
+			if (replyData) ctx.channel.deleteMessages(replyData.messageID).catch(error => logger.error('[RANK REQUEST]: delete', error));
 
-			return message.react(CLOWN);
+			return ctx.react(CLOWN);
 		}
 
 		const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));
@@ -644,27 +647,25 @@ module.exports = class HypixelGuild extends Model {
 		const WEIGHT_STRING = this.client.formatDecimalNumber(totalWeight);
 
 		// remove clown reaction if it exists, optional chaining to handle  mc messages
-		if (message.reactions?.cache.get(CLOWN)?.me) message.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error('[RANK REQUEST]: remove reaction', error));
+		if (ctx.reactions?.cache.get(CLOWN)?.me) ctx.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error('[RANK REQUEST]: remove reaction', error));
 
-		await message.reply(
-			`${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
-			{
-				reply: {
-					messageReference: message,
-					failIfNotExists: false,
-				},
-				sameChannel: true,
+		await ctx.reply({
+			content: `${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
+			reply: {
+				messageReference: ctx,
+				failIfNotExists: false,
 			},
-		);
+			sameChannel: true,
+		});
 
 		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
 
 		// player doesn't meet reqs or meets reqs and already has the rank or is staff and has the rank's role
-		if (totalWeight < WEIGHT_REQ || (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && (message.member ?? await player.discordMember)?.roles.cache.has(ROLE_ID))))) return;
+		if (totalWeight < WEIGHT_REQ || (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && (ctx.member ?? await player.discordMember)?.roles.cache.has(ROLE_ID))))) return;
 
 		// set rank role to requested rank
 		if (player.isStaff) {
-			const member = message.member ?? await player.discordMember;
+			const member = ctx.member ?? await player.discordMember;
 
 			if (!member) throw new Error('unknown discord member');
 
@@ -686,7 +687,7 @@ module.exports = class HypixelGuild extends Model {
 			await player.updateRoles(`requested ${RANK_NAME}`);
 		}
 
-		return message.react(Y_EMOJI_ALT);
+		return ctx.react(Y_EMOJI_ALT);
 	}
 
 	/**
