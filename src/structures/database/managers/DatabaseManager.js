@@ -298,16 +298,19 @@ module.exports = class DatabaseManager {
 		if (!taxChannel.botPermissions.has(Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS)) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
-
-		let taxMessage = await taxChannel.messages.fetch(config.get('TAX_MESSAGE_ID')).catch(error => logger.error('[TAX MESSAGE]', error));
+		const taxMessage = await taxChannel.messages.fetch(config.get('TAX_MESSAGE_ID')).catch(error => logger.error('[TAX MESSAGE]', error));
 
 		if (!taxMessage || taxMessage.deleted) { // taxMessage deleted
-			taxMessage = await taxChannel.send(taxEmbed).catch(error => logger.error('[TAX MESSAGE]', error));
+			try {
+				const { id } = await taxChannel.send({
+					embed: taxEmbed,
+				});
 
-			if (!taxMessage) return; // failed to retreive old and send new taxMessage
-
-			config.set('TAX_MESSAGE_ID', taxMessage.id);
-			return logger.info('[TAX MESSAGE]: created new taxMessage');
+				config.set('TAX_MESSAGE_ID', id);
+				return logger.info('[TAX MESSAGE]: created new taxMessage');
+			} catch (error) {
+				return logger.error('[TAX MESSAGE]', error);
+			}
 		}
 		if (taxMessage.embeds[0]?.description === taxEmbed.description && isEqual(taxMessage.embeds[0].fields, taxEmbed.fields)) return; // no changes to taxMessage
 
