@@ -1,15 +1,15 @@
 'use strict';
 
 const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../functions/logger');
+// const logger = require('../../functions/logger');
 
 
 module.exports = class MyCommand extends SlashCommand {
 	/**
 	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
 	 */
-	constructor(data, commandData) {
-		super(data, commandData ?? {
+	constructor(data) {
+		super(data, {
 			aliases: [],
 			description: '',
 			options: [],

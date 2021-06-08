@@ -22,17 +22,11 @@ module.exports = async (message) => {
 	if (!prefixMatched && message.type !== WHISPER) return;
 
 	// command, args, flags
-	const rawArgs = message.content // command arguments
+	const args = message.content // command arguments
 		.slice(prefixMatched?.[0].length ?? 0)
 		.trim()
 		.split(/ +/);
-	const COMMAND_NAME = rawArgs.shift().toLowerCase(); // extract first word
-	const args = [];
-	const flags = [];
-
-	for (const arg of rawArgs) arg.startsWith('-') && arg.length > 1
-		? flags.push(arg.toLowerCase().replace(/^-+/, ''))
-		: args.push(arg);
+	const COMMAND_NAME = args.shift().toLowerCase(); // extract first word
 
 	// no command, only ping or prefix
 	if (!COMMAND_NAME.length) {
@@ -44,12 +38,6 @@ module.exports = async (message) => {
 
 	// wrong command
 	if (!command) return logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
-
-	// 'commandName -h' -> 'h commandName'
-	if (flags.some(flag => [ 'h', 'help' ].includes(flag))) {
-		logger.info(`'${message.content}' was executed by ${message.author.ign} in '${message.type}'`);
-		return client.chatBridges.commands.help(message, [ command?.name ?? COMMAND_NAME ], []).catch(logger.error);
-	}
 
 	// server only command in DMs
 	if (command.guildOnly && message.type !== GUILD) {
@@ -92,24 +80,25 @@ module.exports = async (message) => {
 		}
 
 		// command cooldowns
-		if (command.cooldown !== 0) {
+		if (command.cooldown) {
 			const NOW = Date.now();
-			const timestamps = command.collection.cooldowns.get(command.name);
-			const COOLDOWN_TIME = (command.cooldown ?? config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000;
+			const COOLDOWN_TIME = (command.cooldown ?? client.config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1000;
+			const IDENTIFIER = message.member?.id ?? message.author.ign;
 
-			if (timestamps.has(message.author.ign)) {
-				const EXPIRATION_TIME = timestamps.get(message.author.ign) + COOLDOWN_TIME;
+			if (command.timestamps.has(IDENTIFIER)) {
+				const EXPIRATION_TIME = command.timestamps.get(IDENTIFIER) + COOLDOWN_TIME;
 
 				if (NOW < EXPIRATION_TIME) {
 					const TIME_LEFT = ms(EXPIRATION_TIME - NOW, { long: true });
 
-					logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.guild ? `#${message.channel.name} | ${message.guild}` : 'DMs'} ${TIME_LEFT} before the cooldown expires`);
-					return message.reply(`'${command.name}' is on cooldown for another ${TIME_LEFT}`);
+					logger.info(`${message.author.ign}${message.member ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.type}-chat ${TIME_LEFT} before the cooldown expires`);
+
+					return message.reply(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\``);
 				}
 			}
 
-			timestamps.set(message.author.ign, NOW);
-			setTimeout(() => timestamps.delete(message.author.ign), COOLDOWN_TIME);
+			command.timestamps.set(IDENTIFIER, NOW);
+			setTimeout(() => command.timestamps.delete(IDENTIFIER), COOLDOWN_TIME);
 		}
 	}
 
@@ -118,7 +107,7 @@ module.exports = async (message) => {
 		const reply = [];
 
 		reply.push(`the '${command.name}' command has${typeof command.args === 'number' ? ` ${command.args}` : ''} mandatory arguments`);
-		if (command.usage) reply.push(`\nUse: ${command.usageInfo}`);
+		if (command.usage) reply.push(`Use: ${command.usageInfo}`);
 
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' without providing the mandatory arguments`);
 		return message.reply(reply.join('\n'));
@@ -127,7 +116,7 @@ module.exports = async (message) => {
 	// execute command
 	try {
 		logger.info(`'${message.content}' was executed by ${message.author.ign} in '${message.type}'`);
-		await command.run(message, args, flags, rawArgs);
+		await command.runInGame(message, args);
 	} catch (error) {
 		logger.error(`An error occured while ${message.author.ign} tried to execute ${message.content} in '${message.type}'`, error);
 		message.reply(`an error occured while executing the '${command.name}' command:\n${error}`);

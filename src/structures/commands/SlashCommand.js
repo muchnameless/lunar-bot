@@ -2,30 +2,29 @@
 
 const { Constants } = require('discord.js');
 const { getIDFromString } = require('../../functions/util');
+const { validateMinecraftUUID } = require('../../functions/stringValidators');
+const BaseCommand = require('./BaseCommand');
 const missingPermissionsError = require('../errors/MissingPermissionsError');
 const logger = require('../../functions/logger');
 
 
 /**
- * @typedef {import('discord.js').ApplicationCommandData & { aliases: ?string[], permissions: import('discord.js').ApplicationCommandPermissions, cooldown: ?number }} CommandData
+ * @typedef {import('discord.js').ApplicationCommandData & { aliases: ?string[], permissions: import('discord.js').ApplicationCommandPermissions, cooldown: ?number, requiredRoles: () => import('discord.js').Snowflake[] }} CommandData
  */
 
 
-module.exports = class SlashCommand {
+module.exports = class SlashCommand extends BaseCommand {
 	/**
 	 * create a new command
-	 * @param {object} param0
+	 * @param {BaseCommand.BaseCommandData} param0
 	 * @param {import('../LunarClient')} param0.client discord this.client that instantiated this command
-	 * @param {import('./CommandCollection')} param0.collection
 	 * @param {string} param0.name command name
 	 * @param {CommandData} param1
 	 */
-	constructor({ client, collection, name }, { aliases, description, options, defaultPermission, permissions, cooldown }) {
-		this.client = client;
-		this.collection = collection;
-		this.name = name;
+	constructor(param0, { aliases, description, options, defaultPermission, permissions, cooldown, requiredRoles }) {
+		super(param0, { cooldown, requiredRoles });
+
 		/** @type {?string} */
-		this.id = null;
 		this.aliases = aliases?.length ? aliases.filter(Boolean) : null;
 
 		this.description = description?.length ? description : null;
@@ -38,16 +37,18 @@ module.exports = class SlashCommand {
 			type: 'USER',
 			permission: true,
 		});
-
-		this.cooldown = cooldown ?? null;
 	}
 
-	static GUILD_OPTION = {
+	/**
+	 * @param {import('../LunarClient')} client
+	 */
+	static guildOptionBuilder = client => ({
 		name: 'guild',
 		type: Constants.ApplicationCommandOptionTypes.STRING,
 		description: 'hypixel guild',
 		required: false,
-	};
+		choices: client.hypixelGuilds.cache.map(({ guildID, name }) => ({ name, value: guildID })),
+	});
 
 	static FORCE_OPTION = {
 		name: 'force',
@@ -106,75 +107,45 @@ module.exports = class SlashCommand {
 	}
 
 	/**
-	 * client config
-	 */
-	get config() {
-		return this.client.config;
-	}
-
-	/**
-	 * loads the command and possible aliases into their collections
-	 */
-	load() {
-		this.collection.set(this.name.toLowerCase(), this);
-		this.aliases?.forEach(alias => this.collection.set(alias.toLowerCase(), this));
-	}
-
-	/**
-	 * removes all aliases and the command from the commandsCollection
-	 */
-	unload() {
-		this.collection.delete(this.name.toLowerCase());
-		this.aliases?.forEach(alias => this.collection.delete(alias.toLowerCase()));
-
-		for (const path of Object.keys(require.cache).filter(filePath => !filePath.includes('node_modules') && !filePath.includes('functions') && filePath.includes('commands') && filePath.endsWith(`${this.name}.js`))) {
-			delete require.cache[path];
-		}
-	}
-
-	/**
-	 * returns the player object
+	 * returns the player object, provide interaction parameter for a fallback to interaction.user.player
 	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
-	 * @returns {?import('../structures/database/models/Player')}
+	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @returns {?import('../database/models/Player')}
 	 */
-	getPlayer(options) {
+	getPlayer(options, interaction) {
 		if (!options) return null;
 
-		const INPUT = (options.get('player') || options.get('target') || options.get('ign'))?.value;
-		const DISCORD_ID = INPUT && getIDFromString(INPUT);
+		const INPUT = (options.get('player') || options.get('target'))?.value.toLowerCase();
+
+		if (!INPUT) return interaction?.user.player ?? null;
+
+		if (validateMinecraftUUID(INPUT)) return this.client.players.get(INPUT.replace(/-/g, ''));
+
+		const DISCORD_ID = getIDFromString(INPUT);
 
 		return (DISCORD_ID
 			? this.client.players.getByID(DISCORD_ID)
 			: SlashCommand.checkForce(options)
-				? this.client.players.findByIGN(INPUT)
-				: this.client.players.getByID(INPUT) ?? this.client.players.getByIGN(INPUT)
-		) ?? INPUT;
+				? this.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
+				: this.client.players.getByIGN(INPUT)
+		) ?? null;
 	}
 
 	/**
-	 * returns the player object
+	 * returns the player object, provide interaction parameter for a fallback to interaction.user.player.ign
 	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * @param {import('../extensions/CommandInteraction')} interaction
 	 * @returns {?string}
 	 */
-	getIGN(options) {
-		if (!options) return null;
-
-		const INPUT = (options.get('player') || options.get('target') || options.get('ign'))?.value;
-		const DISCORD_ID = INPUT && getIDFromString(INPUT);
-
-		return DISCORD_ID
-			? this.client.players.getByID(DISCORD_ID)?.ign
-			: (SlashCommand.checkForce(options)
-				? INPUT
-				: (this.client.players.getByID(INPUT)?.ign ?? this.client.players.getByIGN(INPUT)?.ign ?? INPUT)
-			);
+	getIGN(options, interaction) {
+		return this.getPlayer(options, interaction)?.ign ?? null;
 	}
 
 	/**
 	 * @param {import('../extensions/CommandInteraction')} interaction
 	 * @param {{ userIDs: import('discord.js').Snowflake[], roleIDs: import('discord.js').Snowflake[] }} permissions
 	 */
-	async checkPermissions(interaction, { userIDs = [ this.client.ownerID ], roleIDs = [] }) {
+	async checkPermissions(interaction, { userIDs = [ this.client.ownerID ], roleIDs = this.requiredRoles }) {
 		if (!userIDs.length && !roleIDs.length) return;
 		if (userIDs.includes(interaction.user.id)) return; // user id bypass
 

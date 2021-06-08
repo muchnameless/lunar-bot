@@ -6,7 +6,6 @@ const { getAllJsFiles } = require('../functions/files');
 const DatabaseManager = require('./database/managers/DatabaseManager');
 const LogHandler = require('./LogHandler');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
-const CommandCollection = require('./commands/CommandCollection');
 const SlashCommandCollection = require('./commands/SlashCommandCollection');
 const RedisListener = require('./RedisListener');
 const cache = require('../api/cache');
@@ -29,8 +28,8 @@ module.exports = class LunarClient extends Client {
 		this.db = new DatabaseManager({ client: this, db: options.db });
 		this.logHandler = new LogHandler(this);
 		this.chatBridges = new ChatBridgeArray(this);
-		this.commands = new CommandCollection(this, join(__dirname, '..', 'commands'), true);
-		this.slashCommands = new SlashCommandCollection(this, join(__dirname, '..', 'slash_commands'));
+		/** @type {SlashCommandCollection<string, import('./commands/SlashCommand')>} */
+		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
 		this.redisListener = new RedisListener(this, process.env.REDIS_URI);
 	}
 
@@ -172,23 +171,30 @@ module.exports = class LunarClient extends Client {
 	 */
 	async login(token) {
 		await Promise.all([
-			this.db.init(),
-			this.commands.loadAll(),
-			this.slashCommands.loadAll(),
+			(async () => {
+				await this.db.init();
+
+				// these need the db cache to be populated
+				return await Promise.all([
+					this.commands.loadAll(),
+					this.chatBridges.loadChannelIDs(),
+				]);
+			})(),
 			this._loadEvents(),
 		]);
-
-		this.chatBridges.loadChannelIDs();
 
 		return super.login(token);
 	}
 
 	/**
 	 * sends a DM to the bot owner
-	 * @param {string} message
+	 * @param {string} content
 	 */
-	async dmOwner(message) {
-		return (await this.owner).send(message, { split: { char: ' ' } });
+	async dmOwner(content) {
+		return (await this.owner).send({
+			content,
+			split: { char: ' ' },
+		});
 	}
 
 	/**
