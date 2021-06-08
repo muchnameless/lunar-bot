@@ -352,7 +352,9 @@ const self = module.exports = {
 		if (!leaderboardArguments) return;
 
 		const leaderbaordData = self.getLeaderboardDataCreater(leaderboardType)(message.client, leaderboardArguments);
-		const reply = await message.reply(self.createLeaderboardEmbed(message.client, leaderboardType, leaderboardArguments, leaderbaordData));
+		const reply = await message.reply({
+			embed: self.createLeaderboardEmbed(message.client, leaderboardType, leaderboardArguments, leaderbaordData),
+		});
 
 		await cache.set(
 			`${LB_KEY}:${reply.cachingKey}`,
@@ -396,7 +398,9 @@ const self = module.exports = {
 			if (reload) {
 				const { type, args } = cached;
 				const leaderbaordData = self.getLeaderboardDataCreater(type)(message.client, args);
-				const reply = await message.edit(self.createLeaderboardEmbed(message.client, type, args, leaderbaordData));
+				const reply = await message.edit({
+					embed: self.createLeaderboardEmbed(message.client, type, args, leaderbaordData),
+				});
 
 				await cache.set(
 					`${LB_KEY}:${reply.cachingKey}`,

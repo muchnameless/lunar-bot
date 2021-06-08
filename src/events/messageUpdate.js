@@ -30,7 +30,7 @@ module.exports = async (client, oldMessage, newMessage) => {
 
 					await Promise.all(replyData.messageID.map(async (id) => {
 						const oldReply = await oldReplyChannel.messages.fetch(id);
-						newReplies.push(await newMessage.channel.send(oldReply.content, { embed: oldReply.embeds.length ? new MessageEmbed(oldReply.embeds[0]) : null }));
+						newReplies.push(await newMessage.channel.send({ content: oldReply.content || null, embed: oldReply.embeds.length ? new MessageEmbed(oldReply.embeds[0]) : null }));
 						oldReply.delete().catch(error => logger.error('[MESSAGE UPDATE]', error));
 					}));
 
@@ -46,22 +46,20 @@ module.exports = async (client, oldMessage, newMessage) => {
 				const oldReply = await client.channels.cache.get(replyData.channelID).messages.fetch(replyData.messageID);
 				const pingMatched = oldReply.content.match(replyPingRegExp);
 				/** @type {import('../structures/extensions/Message')} */
-				const newReply = await newMessage.channel.send(
-					pingMatched
+				const newReply = await newMessage.channel.send({
+					content: (pingMatched
 						? oldReply.content.slice(pingMatched[0].length)
-						: oldReply.content,
-					{
-						reply: pingMatched
-							? {
-								messageReference: newMessage,
-								failIfNotExists: false,
-							}
-							: null,
-						embed: oldReply.embeds.length
-							? oldReply.embeds[0]
-							: null,
-					},
-				);
+						: oldReply.content) || null,
+					reply: pingMatched
+						? {
+							messageReference: newMessage,
+							failIfNotExists: false,
+						}
+						: null,
+					embed: oldReply.embeds.length
+						? oldReply.embeds[0]
+						: null,
+				});
 
 				newReply.react(...oldReply.reactions.cache.filter(({ me }) => me).map(({ emoji }) => emoji));
 				oldReply.delete().catch(error => logger.error('[MESSAGE UPDATE]', error));

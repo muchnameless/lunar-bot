@@ -6,12 +6,12 @@ const mojang = require('../../api/mojang');
 /**
  * message, args -> ign, uuid
  * @param {import('../../structures/extensions/Message')|import('../../structures/chat_bridge/HypixelMessage')} message
- * @param {string[]} args
- * @returns {Promise<{ uuid: string, ign: string }>}
+ * @param {string} ignOrUuid
+ * @returns {Promise<import('../../structures/Mojang').MojangResult>}
  */
-module.exports.getUuidAndIgn = async (message, args) => {
+module.exports.getUuidAndIgn = async (message, ignOrUuid) => {
 	// ign is first arg
-	if (args.length) return mojang.ign(args[0]);
+	if (ignOrUuid) return mojang.ign(ignOrUuid);
 
 	// no args -> try to get player object
 	const { player } = message.author;
@@ -27,5 +27,5 @@ module.exports.getUuidAndIgn = async (message, args) => {
 
 	if (ign) return mojang.ign(ign);
 
-	throw new Error('no ign specified and you are not in the player db');
+	throw 'no ign specified and you are not in the player db';
 };
