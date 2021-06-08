@@ -52,10 +52,17 @@ module.exports = class HypixelMessageAuthor {
 
 	/**
 	 * whisper a message to the author
-	 * @param {string} message
-	 * @param {?import('./ChatBridge').ChatOptions} options
+	 * @param {string | import('./ChatBridge').ChatOptions} contentOrOptions
 	 */
-	async send(message, { prefix = '', ...options } = {}) {
-		return this.chatBridge.minecraft.chat(message, { prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`, maxParts: Infinity, ...options });
+	async send(contentOrOptions) {
+		const { prefix = '', ...options } = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
+
+		return this.chatBridge.minecraft.chat({
+			prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`,
+			maxParts: Infinity,
+			...options,
+		});
 	}
 };

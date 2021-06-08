@@ -2,7 +2,7 @@
 
 const { basename } = require('path');
 const { stripIndents, commaListsAnd } = require('common-tags');
-const { Structures, MessageEmbed, Message, Permissions } = require('discord.js');
+const { Structures, Message, Permissions } = require('discord.js');
 const { CHANNEL_FLAGS, replyPingRegExp } = require('../../constants/bot');
 const { DM_KEY, REPLY_KEY } = require('../../constants/redis');
 const cache = require('../../api/cache');
@@ -160,7 +160,11 @@ class LunarMessage extends Message {
 	 */
 	async awaitReply(question, timeoutSeconds = 60, options = {}) {
 		try {
-			const questionMessage = await this.reply(question, { saveReplyMessageID: false, ...options });
+			const questionMessage = await this.reply({
+				content: question,
+				saveReplyMessageID: false,
+				...options,
+			});
 
 			if (!questionMessage) return null;
 
@@ -183,11 +187,14 @@ class LunarMessage extends Message {
 
 	/**
 	 * replies in nearest #bot-commands or in message's channel if DMs or '-c' flag set
-	 * @param {string} contentInput message reply content
-	 * @param {MessageReplyOptions} [optionsInput] message reply options
+	 * @param {string | MessageReplyOptions} contentOrOptions
 	 * @returns {Promise<?LunarMessage>}
 	 */
-	async reply(contentInput, optionsInput = {}) {
+	async reply(contentOrOptions) {
+		const { content, ...optionsInput } = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
+
 		// analyze input and create (content, options)-argument
 		const options = {
 			embed: null,
@@ -197,35 +204,16 @@ class LunarMessage extends Message {
 			...optionsInput, // create a deep copy to not modify the source object
 		};
 
-		/** @type {string} */
-		let content;
-
-		// only object as first arg provided
-		if (typeof contentInput === 'object') {
-			if (contentInput instanceof MessageEmbed) {
-				options.embed = contentInput;
-				content = null;
-			} else if (!Array.isArray(contentInput)) { // unknown options object
-				content = contentInput.content ?? null;
-			} else {
-				content = contentInput;
-			}
-		} else {
-			content = contentInput;
-		}
-
 		// DMs
 		if (!this.guild) {
-			return this._sendReply(
+			return this._sendReply({
 				content,
-				{
-					reply: {
-						messageReference: this,
-						failIfNotExists: false,
-					},
-					...options,
+				reply: {
+					messageReference: this,
+					failIfNotExists: false,
 				},
-			);
+				...options,
+			});
 		}
 
 		// guild -> requires permission
@@ -257,16 +245,14 @@ class LunarMessage extends Message {
 			if (content) this.client.chatBridges.handleDiscordMessage(this, { checkifNotFromBot: false });
 
 			// send reply
-			const message = await this._sendReply(
+			const message = await this._sendReply({
 				content,
-				{
-					reply: {
-						messageReference: this,
-						failIfNotExists: false,
-					},
-					...options,
+				reply: {
+					messageReference: this,
+					failIfNotExists: false,
 				},
-			);
+				...options,
+			});
 
 			if (content) this.client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: false, player: this.author.player });
 
@@ -325,22 +311,23 @@ class LunarMessage extends Message {
 		}
 
 		// send reply with an @mention
-		return this._sendReply(
-			`\u{200b}${this.author}${content ? `, ${content}` : ''}`,
-			options,
-			commandsChannel,
-		);
+		return this._sendReply({
+			content: `\u{200b}${this.author}${content ? `, ${content}` : ''}`,
+			...options,
+		}, commandsChannel);
 	}
 
 	/**
 	 * send a reply in the provided channel and saves the IDs of that reply message
-	 * @param {?string} content
-	 * @param {?MessageReplyOptions} [options={}]
+	 * @param {string | MessageReplyOptions} contentOrOptions
 	 * @param {import('./TextChannel')} [channel=this.channel]
 	 */
-	async _sendReply(content, options = {}, channel = this.channel) {
+	async _sendReply(contentOrOptions, channel = this.channel) {
 		// determine reply ID and IDs to delete
 		const replyData = await this.replyData;
+		const { content, ...options } = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
 
 		let oldReplyMessageID;
 		let IDsToDelete;
@@ -361,7 +348,7 @@ class LunarMessage extends Message {
 				IDsToDelete.push(oldReplyMessageID);
 			}
 
-			message = await channel.send(content, options);
+			message = await channel.send({ content, ...options });
 
 			if (options.saveReplyMessageID) {
 				this.replyData = {
@@ -371,8 +358,8 @@ class LunarMessage extends Message {
 			}
 		} else { // send 1 message
 			message = await (oldReplyMessageID && options.editPreviousMessage
-				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error('[_SEND REPLY]', error)))?.edit(content, options) ?? channel.send(content, options))
-				: channel.send(content, options));
+				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error('[_SEND REPLY]', error)))?.edit({ content, ...options }) ?? channel.send({ content, ...options }))
+				: channel.send({ content, ...options }));
 
 			if (options.saveReplyMessageID) {
 				this.replyData = {
@@ -394,18 +381,23 @@ class LunarMessage extends Message {
 
 	/**
 	 * edits a message, preserving @mention pings at the beginning
+	 * @param {string | import('discord.js').MessageEditOptions} contentOrOptions
 	 */
-	async edit(content, options) {
-		if (typeof content !== 'string') return super.edit(content, options);
+	async edit(contentOrOptions) {
+		const { content, ...options } = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
 
-		const pingMatched = this.content?.match(replyPingRegExp);
+		if (!content) return super.edit(options);
 
-		return super.edit(
-			pingMatched && !content.startsWith(pingMatched[0])
-				? `${pingMatched[0]}${content}`
+		const pingMatched = this.content?.match(replyPingRegExp)?.[0];
+
+		return super.edit({
+			content: pingMatched && !content.startsWith(pingMatched)
+				? `${pingMatched}${content}`
 				: content,
-			options,
-		);
+			...options,
+		});
 	}
 }
 

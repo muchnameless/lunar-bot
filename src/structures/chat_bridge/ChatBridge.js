@@ -12,9 +12,18 @@ const { sleep } = require('../../functions/util');
 
 /**
  * @typedef {object} ChatOptions
- * @property {?string} [prefix='']
- * @property {?number} [maxParts=10]
+ * @property {string} content
+ * @property {string} [prefix='']
+ * @property {number} [maxParts=10]
  * @property {import('../extensions/Message')} [discordMessage]
+ */
+
+/**
+ * @typedef {object} BroadcastOptions
+ * @property {string | import('./managers/DiscordChatManager')} type
+ * @property {import('./HypixelMessage')} hypixelMessage
+ * @property {DiscordMessageOptions} discord
+ * @property {ChatOptions} minecraft
  */
 
 /**
@@ -241,37 +250,31 @@ module.exports = class ChatBridge extends EventEmitter {
 
 	/**
 	 * send a message both to discord and the ingame guild chat, parsing both
-	 * @param {string} content
-	 * @param {object} param1
-	 * @param {string|import('./managers/DiscordChatManager')} [param1.type]
-	 * @param {import('./HypixelMessage')} [param1.hypixelMessage]
-	 * @param {DiscordMessageOptions} [param1.discord]
-	 * @param {ChatOptions} [param1.minecraft]
+	 * @param {string | BroadcastOptions} contentOrOptions
 	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]]>}
 	 */
-	async broadcast(content, { hypixelMessage, type = hypixelMessage?.type ?? GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = {}) {
+	async broadcast(contentOrOptions) {
+		const { content, hypixelMessage, type = hypixelMessage?.type ?? GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
 		const discordChatManager = this.discord.resolve(type);
 
 		return Promise.all([
 			// minecraft
-			this.minecraft[chatFunctionByType[(discordChatManager?.type ?? type)]]?.(content, { prefix: minecraftPrefix, maxParts, ...options })
-				?? this.minecraft.chat(
+			this.minecraft[chatFunctionByType[(discordChatManager?.type ?? type)]]?.({ content, prefix: minecraftPrefix, maxParts, ...options })
+				?? this.minecraft.chat({
 					content,
-					{
-						prefix: `${discordChatManager?.prefix ?? prefixByType[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : randomInvisibleCharacter()}`,
-						maxParts,
-						...options,
-					},
-				),
+					prefix: `${discordChatManager?.prefix ?? prefixByType[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : randomInvisibleCharacter()}`,
+					maxParts,
+					...options,
+				}),
 
 			// discord
-			discordChatManager?.sendViaBot(
+			discordChatManager?.sendViaBot({
 				content,
-				{
-					hypixelMessage,
-					...discord,
-				},
-			),
+				hypixelMessage,
+				...discord,
+			}),
 		]);
 	}
 };

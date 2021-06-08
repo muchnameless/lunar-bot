@@ -508,46 +508,62 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * send a message to ingame guild chat
-	 * @param {string} content
-	 * @param {import('../ChatBridge').ChatOptions} options
+	 * @param {string | import('../ChatBridge').ChatOptions} contentOrOptions
 	 */
-	async gchat(content, { prefix = '', ...options } = {}) {
+	async gchat(contentOrOptions) {
+		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
+
 		if (this.bot.player.muted) {
 			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) {
-				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.mutedTill - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${content}`);
+				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.mutedTill - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${options.content}`);
 			}
 
 			return false;
 		}
 
-		return this.chat(content, { prefix: `/gc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
+		return this.chat({ prefix: `/gc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
 	}
 
 	/**
 	 * send a message to ingame guild chat
-	 * @param {string} content
-	 * @param {import('../ChatBridge').ChatOptions} options
+	 * @param {string | import('../ChatBridge').ChatOptions} contentOrOptions
 	 */
-	async ochat(content, { prefix = '', ...options } = {}) {
-		return this.chat(content, { prefix: `/oc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
+	async ochat(contentOrOptions) {
+		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
+
+		return this.chat({ prefix: `/oc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
 	}
 
 	/**
 	 * send a message to ingame party chat
-	 * @param {string} content
-	 * @param {import('../ChatBridge').ChatOptions} options
+	 * @param {string | import('../ChatBridge').ChatOptions} contentOrOptions
 	 */
-	async pchat(content, { prefix = '', ...options } = {}) {
-		return this.chat(content, { prefix: `/pc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
+	async pchat(contentOrOptions) {
+		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
+
+		return this.chat({ prefix: `/pc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
+	}
+
+	/**
+	 * resolves content or options to an options object
+	 * @param {string | import('../ChatBridge').ChatOptions} contentOrOptions
+	 * @returns {import('../ChatBridge').ChatOptions}
+	 */
+	static resolveInput(contentOrOptions) {
+		return typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
 	}
 
 	/**
 	 * splits the message into the max ingame chat length, prefixes all parts and sends them
-	 * @param {string} content
-	 * @param {import('../ChatBridge').ChatOptions} options
+	 * @param {string | import('../ChatBridge').ChatOptions} contentOrOptions
+	 * @param {import('../ChatBridge').ChatOptions} [options]
 	 * @returns {Promise<boolean>} success - wether all message parts were send
 	 */
-	async chat(content, { prefix = '', maxParts = this.client.config.getNumber('CHATBRIDGE_DEFAULT_MAX_PARTS'), discordMessage } = {}) {
+	async chat(contentOrOptions) {
+		const { content, prefix = '', maxParts = this.client.config.getNumber('CHATBRIDGE_DEFAULT_MAX_PARTS'), discordMessage } = MinecraftChatManager.resolveInput(contentOrOptions);
+
 		let success = true;
 
 		/** @type {Set<string>} */

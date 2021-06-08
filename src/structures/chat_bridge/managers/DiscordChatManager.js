@@ -172,18 +172,25 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 	/**
 	 * sends a message via the chatBridge webhook
-	 * @param {string} content
-	 * @param {import('discord.js').WebhookMessageOptions} options
+	 * @param {string | import('discord.js').WebhookMessageOptions} contentOrOptions
 	 * @returns {Promise<import('../../extensions/Message')>}
 	 */
-	async sendViaWebhook(content, options) {
+	async sendViaWebhook(contentOrOptions) {
 		if (!this.chatBridge.enabled || !this.ready) return null;
+
+		const { content, ...options } = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
+
 		if (!content.length) return logger.warn(`[CHATBRIDGE]: ${this.logInfo}: prevented sending empty message`);
 
 		await this.queue.wait();
 
 		try {
-			return await this.webhook.send(this.chatBridge.discord.parseContent(content), options);
+			return await this.webhook.send({
+				content: this.chatBridge.discord.parseContent(content),
+				...options,
+			});
 		} catch (error) {
 			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}`, error);
 
@@ -200,30 +207,28 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 	/**
 	 * sends a message via the bot in the chatBridge channel
-	 * @param {string} content
-	 * @param {object} [param1={}]
-	 * @param {string} [param1.prefix='']
-	 * @param {import('../HypixelMessage')} [param1.hypixelMessage]
-	 * @param {import('discord.js').MessageOptions} [param1.options]
+	 * @param {string | { prefix: string, hypixelMessage: import('../HypixelMessage'), options: import('discord.js').MessageOptions }} contentOrOptions
 	 */
-	async sendViaBot(content, { prefix = '', hypixelMessage, ...options } = {}) {
+	async sendViaBot(contentOrOptions) {
 		if (!this.chatBridge.enabled) return null;
+
+		const { content, prefix = '', hypixelMessage, ...options } = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
 
 		await this.queue.wait();
 
 		const discordMessage = await hypixelMessage?.discordMessage.catch(logger.error);
 
 		try {
-			return await this.channel.send(
-				this.chatBridge.discord.parseContent(`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author.ign}`}, `}${prefix}${content}`),
-				{
-					reply: {
-						messageReference: discordMessage,
-						failIfNotExists: false,
-					},
-					...options,
+			return await this.channel.send({
+				content: this.chatBridge.discord.parseContent(`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author.ign}`}, `}${prefix}${content}`),
+				reply: {
+					messageReference: discordMessage,
+					failIfNotExists: false,
 				},
-			);
+				...options,
+			});
 		} finally {
 			this.queue.shift();
 		}
@@ -272,8 +277,8 @@ module.exports = class DiscordChatManager extends ChatManager {
 			return message.react(MUTED);
 		}
 
-		return this.minecraft.chat(
-			[
+		return this.minecraft.chat({
+			content: [
 				message.reference // @referencedMessageAuthor
 					? await (async () => {
 						try {
@@ -291,11 +296,9 @@ module.exports = class DiscordChatManager extends ChatManager {
 					? await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ]) // links of attachments
 					: null,
 			].filter(Boolean).join(' '),
-			{
-				prefix: `${this.prefix} ${DiscordChatManager.getPlayerName(message)}: `,
-				discordMessage: message,
-			},
-		);
+			prefix: `${this.prefix} ${DiscordChatManager.getPlayerName(message)}: `,
+			discordMessage: message,
+		});
 	}
 
 	/**

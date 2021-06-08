@@ -4,7 +4,7 @@ const { stripIndents } = require('common-tags');
 const { join } = require('path');
 const { X_EMOJI } = require('../../constants/emojiCharacters');
 const { getPlayerName } = require('./managers/DiscordChatManager');
-const CommandCollection = require('../commands/CommandCollection');
+const BridgeCommandCollection = require('../commands/BridgeCommandCollection');
 const ChatBridge = require('./ChatBridge');
 const logger = require('../../functions/logger');
 
@@ -26,7 +26,7 @@ module.exports = class ChatBridgeArray extends Array {
 		/**
 		 * minecraft command collection
 		 */
-		this.commands = new CommandCollection(this.client, join(__dirname, 'commands'));
+		this.commands = new BridgeCommandCollection(this.client, join(__dirname, 'commands'));
 		/**
 		 * discord channel IDs of all ChatBridge channels
 		 */
@@ -115,14 +115,11 @@ module.exports = class ChatBridgeArray extends Array {
 
 	/**
 	 * send a message via all chatBridges both to discord and the ingame guild chat, parsing both
-	 * @param {string} message
-	 * @param {object} options
-	 * @param {import('discord.js').MessageOptions} [options.discord]
-	 * @param {import('./ChatBridge').ChatOptions} [options.minecraft]
+	 * @param {string | ChatBridge.BroadcastOptions} contentOrOptions
 	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]][]>}
 	 */
-	async broadcast(message, options) {
-		return Promise.all(this.map(async (/** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.broadcast(message, options)));
+	async broadcast(contentOrOptions) {
+		return Promise.all(this.map(async (/** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.broadcast(contentOrOptions)));
 	}
 
 	/**
@@ -133,22 +130,20 @@ module.exports = class ChatBridgeArray extends Array {
 		if (!this.length) return message.react(X_EMOJI);
 
 		try {
-			const result = await this.broadcast(
-				stripIndents`
+			const result = await this.broadcast({
+				content: stripIndents`
 					${message.content}
 					~ ${getPlayerName(message)}
 				`,
-				{
-					discord: {
-						split: { char: '\n' },
-						allowedMentions: { parse: [] },
-					},
-					minecraft: {
-						prefix: 'Guild_Announcement:',
-						maxParts: Infinity,
-					},
+				discord: {
+					split: { char: '\n' },
+					allowedMentions: { parse: [] },
 				},
-			);
+				minecraft: {
+					prefix: 'Guild_Announcement:',
+					maxParts: Infinity,
+				},
+			});
 
 			if (result.every(([ minecraft, discord ]) => minecraft && (Array.isArray(discord) ? discord.length : discord))) {
 				if (message.reactions.cache.get(X_EMOJI)?.me) {

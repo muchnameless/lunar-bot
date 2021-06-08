@@ -168,33 +168,41 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 	/**
 	 * replies ingame (and on discord if guild chat) to the message
-	 * @param {string} message
+	 * @param {string | import('./ChatBridge').BroadcastOptions | import('./ChatBridge').ChatOptions } contentOrOptions
 	 */
-	async reply(message) {
+	async reply(contentOrOptions) {
+		const options = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
+
 		switch (this.type) {
 			case GUILD:
 			case OFFICER: {
-				const result = await this.chatBridge.broadcast(
-					message,
-					{
-						hypixelMessage: this,
-						discord: {
-							allowedMentions: { parse: [] },
-						},
+				const result = await this.chatBridge.broadcast({
+					hypixelMessage: this,
+					discord: {
+						allowedMentions: { parse: [] },
 					},
-				);
+					...options,
+				});
 
 				// DM author the message if sending to gchat failed
-				if (!result[0]) this.author.send(`an error occurred while replying in ${this.type} chat\n${message}`);
+				if (!result[0]) this.author.send(`an error occurred while replying in ${this.type} chat\n${options.content}`);
 
 				return result;
 			}
 
 			case PARTY:
-				return this.chatBridge.minecraft.pchat(message, { maxParts: Infinity });
+				return this.chatBridge.minecraft.pchat({
+					maxParts: Infinity,
+					...options,
+				});
 
 			case WHISPER:
-				return this.author.send(message, { maxParts: Infinity });
+				return this.author.send({
+					maxParts: Infinity,
+					...options,
+				});
 
 			default:
 				throw new Error(`unknown type to reply to: ${this.type}: ${this.rawContent}`);
@@ -212,24 +220,22 @@ module.exports = class HypixelMessage extends ChatMessage {
 		try {
 			if (this.author) {
 				const { player, member } = this;
-				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook(
-					this.content,
-					{
-						username: member?.displayName
-							?? player?.ign
-							?? this.author.ign,
-						avatarURL: member?.user.displayAvatarURL({ dynamic: true })
-							?? player?.image
-							?? await mojang.ign(this.author.ign).then(
-								({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`,
-								error => logger.error('[FORWARD TO DC]', error),
-							)
-							?? this.client.user.displayAvatarURL({ dynamic: true }),
-						allowedMentions: {
-							parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
-						},
+				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook({
+					content: this.content,
+					username: member?.displayName
+						?? player?.ign
+						?? this.author.ign,
+					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
+						?? player?.image
+						?? await mojang.ign(this.author.ign).then(
+							({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`,
+							error => logger.error('[FORWARD TO DC]', error),
+						)
+						?? this.client.user.displayAvatarURL({ dynamic: true }),
+					allowedMentions: {
+						parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
 					},
-				));
+				}));
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 				if (/<@&\d{17,19}>/.test(discordMessage.content)) {
@@ -243,10 +249,10 @@ module.exports = class HypixelMessage extends ChatMessage {
 				return discordMessage;
 			}
 
-			return await (this.discordMessage = discordChatManager.sendViaBot(
-				this.content,
-				{ allowedMentions: { parse: [] } },
-			));
+			return await (this.discordMessage = discordChatManager.sendViaBot({
+				content: this.content,
+				allowedMentions: { parse: [] },
+			}));
 		} catch (error) {
 			logger.error('[FORWARD TO DC]', error);
 		}
