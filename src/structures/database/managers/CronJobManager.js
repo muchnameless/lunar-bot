@@ -24,7 +24,7 @@ module.exports = class CronJobManager extends ModelManager {
 	 * @param {object} param0
 	 * @param {string} param0.name
 	 * @param {Date} param0.date
-	 * @param {import('../../commands/Command')} param0.command
+	 * @param {import('../../commands/SlashCommand')} param0.command
 	 * @param {string} param0.authorID
 	 * @param {string} param0.messageID
 	 * @param {string} param0.channelID
