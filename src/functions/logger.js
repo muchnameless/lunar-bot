@@ -55,12 +55,15 @@ logger.on('error', (error) => {
 	process.kill(process.pid, 'SIGINT');
 });
 
-const formatInput = input => inspect(
-	input,
-	{
-		depth: null,
-		colors: true,
-	},
+const formatInput = input => (typeof input === 'string'
+	? input
+	: inspect(
+		input,
+		{
+			depth: null,
+			colors: true,
+		},
+	)
 );
 
 /**
