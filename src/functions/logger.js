@@ -1,13 +1,13 @@
 'use strict';
 
 const { createLogger, transports, format } = require('winston');
-const util = require('util');
+const { inspect } = require('util');
 const chalk = require('chalk');
 
 /**
-  * @param {{ timestamp: number, level: string, message: string }} param0
+  * @param {import('logform').TransformableInfo} param0
   */
-const getFormattedText = ({ timestamp, level, message }) => {
+const formatText = ({ timestamp, level, message }) => {
 	let colour;
 
 	switch (level) {
@@ -44,7 +44,7 @@ const logger = createLogger({
 		format.timestamp({
 			format: 'DD.MM.YYYY HH:mm:ss',
 		}),
-		format.printf(getFormattedText),
+		format.printf(formatText),
 	),
 	exitOnError: false,
 	level: 'debug',
@@ -55,6 +55,13 @@ logger.on('error', (error) => {
 	process.kill(process.pid, 'SIGINT');
 });
 
+const formatInput = input => inspect(
+	input,
+	{
+		depth: null,
+		colors: true,
+	},
+);
 
 /**
  * extending log method of logger to suppport single argument in log function.
@@ -63,9 +70,9 @@ logger.on('error', (error) => {
 const log = (...input) => {
 	if (input.length > 1) {
 		const level = input.shift();
-		for (const i of input) logger.log(level, util.format(i));
+		for (const i of input) logger.log(level, formatInput(i));
 	} else {
-		logger.info(util.format(input[0]));
+		logger.info(formatInput(input[0]));
 	}
 	return null;
 };
@@ -74,19 +81,7 @@ const log = (...input) => {
  * @returns {null}
  */
 const error = (...input) => {
-	// stringify certain errors
-	for (const [ index, element ] of input.entries()) {
-		if (element?.stack && !(element.constructor.name === 'Error' || element instanceof TypeError || element instanceof SyntaxError || element instanceof ReferenceError || element instanceof RangeError)) {
-			if (index >= 1 && typeof input[index - 1] === 'string') {
-				input[index - 1] += `: ${element}`;
-				input.splice(index, 1);
-			} else {
-				input[index] = `${element}`;
-			}
-		}
-	}
-
-	for (const i of input) logger.error(util.format(i));
+	for (const i of input) logger.error(formatInput(i));
 	return null;
 };
 
@@ -94,7 +89,7 @@ const error = (...input) => {
  * @returns {null}
  */
 const warn = (...input) => {
-	for (const i of input) logger.warn(util.format(i));
+	for (const i of input) logger.warn(formatInput(i));
 	return null;
 };
 
@@ -102,7 +97,7 @@ const warn = (...input) => {
  * @returns {null}
  */
 const info = (...input) => {
-	for (const i of input) logger.info(util.format(i));
+	for (const i of input) logger.info(formatInput(i));
 	return null;
 };
 
@@ -110,7 +105,7 @@ const info = (...input) => {
  * @returns {null}
  */
 const debug = (...input) => {
-	for (const i of input) logger.debug(util.format(i));
+	for (const i of input) logger.debug(formatInput(i));
 	return null;
 };
 
