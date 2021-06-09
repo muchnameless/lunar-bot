@@ -142,6 +142,19 @@ module.exports = class SlashCommand extends BaseCommand {
 	}
 
 	/**
+	 * returns a HypixelGuild instance, throwing if none found
+	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * @param {import('../extensions/CommandInteraction')} interaction
+	 */
+	getHypixelGuild(options, interaction) {
+		const hypixelGuild = this.client.hypixelGuilds.cache.get(options?.get('guild')?.value) ?? interaction?.user.player?.guild;
+
+		if (!hypixelGuild) throw `unable to find ${options?.has('guild') ? `a guild with the id \`${options?.get('guild')?.value}\`` : 'your guild'}`;
+
+		return hypixelGuild;
+	}
+
+	/**
 	 * @param {import('../extensions/CommandInteraction')} interaction
 	 * @param {{ userIDs: import('discord.js').Snowflake[], roleIDs: import('discord.js').Snowflake[] }} permissions
 	 */
