@@ -18,6 +18,7 @@ const logger = require('../../../functions/logger');
 
 /**
  * @typedef {object} SendToChatOptions
+ * @property {string} content
  * @property {string} [prefix='']
  * @property {boolean} [shouldUseSpamByPass=false]
  * @property {?import('../../extensions/Message')} [discordMessage=null]
@@ -608,7 +609,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of messageParts) {
-			success = await this.sendToChat(part, { prefix, discordMessage, shouldUseSpamByPass: true }) && success;
+			success = await this.sendToChat({ content: part, prefix, discordMessage, shouldUseSpamByPass: true }) && success;
 		}
 
 		return success;
@@ -616,12 +617,15 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * queue a message for the ingame chat
-	 * @param {string} content
-	 * @param {SendToChatOptions} [options]
+	 * @param {string | SendToChatOptions} contentOrOptions
 	 */
-	async sendToChat(content, options = {}) {
-		if (options.discordMessage?.deleted) {
-			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${options.prefix ?? ''}${content}'`);
+	async sendToChat(contentOrOptions) {
+		const data = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions }
+			: contentOrOptions;
+
+		if (data.discordMessage?.deleted) {
+			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${data.prefix ?? ''}${data.content}'`);
 			return false;
 		}
 
@@ -630,7 +634,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		this.retries = 0;
 
 		try {
-			return await this._sendToChat(content, options);
+			return await this._sendToChat(data);
 		} catch (error) {
 			logger.error('[CHATBRIDGE MC CHAT]', error);
 		} finally {
@@ -641,11 +645,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	/**
 	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat' or 'command'
 	 * @private
-	 * @param {string} content
-	 * @param {SendToChatOptions} options
+	 * @param {SendToChatOptions} param0
 	 * @returns {Promise<boolean>}
 	 */
-	async _sendToChat(content, { prefix = '', shouldUseSpamByPass = false, discordMessage = null } = {}) {
+	async _sendToChat({ content, prefix = '', shouldUseSpamByPass = false, discordMessage = null } = {}) {
 		// create listener
 		const listener = this.listenFor(content);
 
@@ -790,7 +793,9 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		(async () => {
 			try {
-				await this._sendToChat(trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1));
+				await this._sendToChat({
+					content: trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1),
+				});
 			} catch (error) {
 				logger.error('[CHATBRIDGE MC CHAT]', error);
 			} finally {
