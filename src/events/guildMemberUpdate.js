@@ -42,7 +42,10 @@ module.exports = async (client, oldMember, newMember) => {
 
 	// changed nickname -> check if new name includes ign
 	if (oldMember.nickname !== newMember.nickname) {
-		player.syncIgnWithDisplayName(oldMember.nickname === null && newMember.nickname !== null);
+		player.syncIgnWithDisplayName(
+			newMember.nickname !== null // added or updated nickname
+			|| (oldMember.nickname !== null && newMember.nickname === null), // removed nickname
+		);
 	}
 
 	// changes in 'verified'-role
