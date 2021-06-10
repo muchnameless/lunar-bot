@@ -173,7 +173,7 @@ module.exports = class ChatBridgeArray extends Array {
 			if (this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
 
 			// check if the message was sent from the bot, don't react with X_EMOJI in this case
-			if (options.checkifNotFromBot) {
+			if (options.checkIfNotFromBot) {
 				if (message.me) return; // message was sent by the bot
 				if (message.webhookID
 					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookID === chatBridge.discord.channelsByIDs.get(message.channelID)?.webhook?.id), false)

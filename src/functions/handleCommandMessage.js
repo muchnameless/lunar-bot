@@ -26,7 +26,7 @@ module.exports = async (message) => {
 	/**
 	 * chat bridge
 	 */
-	client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: true }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
+	client.chatBridges.handleDiscordMessage(message, { checkIfNotFromBot: true }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
 
 	if (message.content?.length && message.isUserMessage) {
 		client.hypixelGuilds.checkIfRankRequestMessage(message);

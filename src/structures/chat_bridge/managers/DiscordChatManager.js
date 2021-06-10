@@ -239,11 +239,11 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('../../extensions/Message')} message
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */
-	async forwardToMinecraft(message, { player: playerInput, checkifNotFromBot = true } = {}) {
+	async forwardToMinecraft(message, { player: playerInput, discordMemberOrUser, checkIfNotFromBot = true } = {}) {
 		if (!this.chatBridge.enabled) return;
 		if (!this.minecraft.ready) return message.react(X_EMOJI);
 
-		if (checkifNotFromBot) {
+		if (checkIfNotFromBot) {
 			if (message.me) return; // message was sent by the bot
 			if (message.webhookID === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		}
@@ -290,7 +290,16 @@ module.exports = class DiscordChatManager extends ChatManager {
 							return null;
 						}
 					})()
-					: null,
+					: discordMemberOrUser // @discordMember
+						? `@${(() => {
+							/** @type {string} */
+							const name = discordMemberOrUser.player?.ign ?? DiscordChatManager.escapeEz(discordMemberOrUser.displayName ?? discordMemberOrUser.username);
+
+							return blockedWordsRegExp.test(name)
+								? '*blocked*'
+								: name;
+						})()}, `
+						: null,
 				message.content, // actual content
 				message.attachments.size
 					? await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ]) // links of attachments

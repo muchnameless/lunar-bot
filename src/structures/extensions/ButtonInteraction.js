@@ -111,7 +111,7 @@ class LunarButtonInteraction extends ButtonInteraction {
 
 		const message = messageInput ?? await this.fetchReply();
 
-		this.client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: false });
+		this.client.chatBridges.handleDiscordMessage(message, { checkIfNotFromBot: false });
 	}
 
 	/**

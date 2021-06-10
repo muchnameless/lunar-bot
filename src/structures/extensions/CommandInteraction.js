@@ -152,7 +152,8 @@ class LunarCommandInteraction extends CommandInteraction {
 			message,
 			{
 				player: this.user.player,
-				checkifNotFromBot: false,
+				discordMemberOrUser: this.member ?? this.user,
+				checkIfNotFromBot: false,
 			},
 		);
 	}
