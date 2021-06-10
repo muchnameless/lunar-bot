@@ -40,8 +40,10 @@ module.exports = async (client, oldMember, newMember) => {
 
 	player.discordMember = newMember;
 
-	// changed username or nickname -> check if new name includes ign
-	if (oldMember.displayName !== newMember.displayName) player.syncIgnWithDisplayName(newMember.nickname !== null || (oldMember.nickname !== null && newMember.nickname === null));
+	// changed nickname -> check if new name includes ign
+	if (oldMember.nickname !== newMember.nickname) {
+		player.syncIgnWithDisplayName(oldMember.nickname === null && newMember.nickname !== null);
+	}
 
 	// changes in 'verified'-role
 	const VERIFIED_ROLE_ID = config.get('VERIFIED_ROLE_ID');
