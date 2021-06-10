@@ -2,7 +2,7 @@
 
 const { oneLine } = require('common-tags');
 const { getPlayerRank, getNetworkLevel } = require('@zikeji/hypixel');
-const { getUuidAndIgn } = require('../../functions/commands/input');
+const { getUuidAndIgn } = require('../../functions/input');
 const hypixel = require('../../api/hypixel');
 const Command = require('../../structures/commands/Command');
 const logger = require('../../functions/logger');

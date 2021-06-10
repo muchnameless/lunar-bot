@@ -1,20 +1,20 @@
 'use strict';
 
-const mojang = require('../../api/mojang');
+const mojang = require('../api/mojang');
 
 
 /**
  * message, args -> ign, uuid
- * @param {import('../../structures/extensions/Message')|import('../../structures/chat_bridge/HypixelMessage')} message
+ * @param {import('../structures/extensions/CommandInteraction') | import('../structures/chat_bridge/HypixelMessage')} ctx
  * @param {string} ignOrUuid
- * @returns {Promise<import('../../structures/Mojang').MojangResult>}
+ * @returns {Promise<import('../structures/Mojang').MojangResult>}
  */
-module.exports.getUuidAndIgn = async (message, ignOrUuid) => {
+module.exports.getUuidAndIgn = async (ctx, ignOrUuid) => {
 	// ign is first arg
-	if (ignOrUuid) return mojang.ign(ignOrUuid);
+	if (ignOrUuid) return mojang.ignOrUuid(ignOrUuid);
 
 	// no args -> try to get player object
-	const { player } = message.author;
+	const { player } = ctx.author;
 
 	// author is linked to player
 	if (player) return {
@@ -23,7 +23,7 @@ module.exports.getUuidAndIgn = async (message, ignOrUuid) => {
 	};
 
 	// no linked player -> try to get ign from author (HypixelMessageAuthor)
-	const { ign } = message.author;
+	const { ign } = ctx.author;
 
 	if (ign) return mojang.ign(ign);
 

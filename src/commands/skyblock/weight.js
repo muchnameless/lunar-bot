@@ -3,7 +3,7 @@
 const { Constants } = require('discord.js');
 const { upperCaseFirstChar, autocorrect } = require('../../functions/util');
 const { getWeight } = require('../../functions/skyblock');
-const { getUuidAndIgn } = require('../../functions/commands/input');
+const { getUuidAndIgn } = require('../../functions/input');
 const { X_EMOJI } = require('../../constants/emojiCharacters');
 const hypixel = require('../../api/hypixel');
 const DualCommand = require('../../structures/commands/DualCommand');
