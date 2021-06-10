@@ -76,6 +76,8 @@ class LunarCommandInteraction extends CommandInteraction {
 	 * @param {import('discord.js').InteractionDeferOptions} param0
 	 */
 	async defer({ ephemeral = this.useEphemeral, ...options } = {}) {
+		if (this._deferring) return this._deferring;
+
 		this.ephemeral = ephemeral;
 
 		return this._deferring = super.defer({ ephemeral, ...options });
