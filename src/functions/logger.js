@@ -60,7 +60,7 @@ const formatInput = input => (typeof input === 'string'
 	: inspect(
 		input,
 		{
-			depth: null,
+			depth: 3,
 			colors: true,
 		},
 	)
