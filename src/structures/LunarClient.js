@@ -93,7 +93,7 @@ module.exports = class LunarClient extends Client {
 	 * @param {...string|import('discord.js').MessageEmbed} embeds embeds to log
 	 */
 	get log() {
-		return this.logHandler.log.bind(this.logHandler);
+		return (...args) => this.logHandler.log(...args);
 	}
 
 	/**
@@ -102,7 +102,7 @@ module.exports = class LunarClient extends Client {
 	 * @param {...string|import('discord.js').MessageEmbed} embeds embeds to log
 	 */
 	get logMany() {
-		return this.logHandler.logMany.bind(this.logHandler);
+		return arg => this.logHandler.logMany(arg);
 	}
 
 	/**
@@ -125,7 +125,7 @@ module.exports = class LunarClient extends Client {
 	 * @type {Function}
 	 */
 	get chat() {
-		return this.chatBridge.minecraft.sendToChat.bind(this.chatBridge);
+		return arg => this.chatBridge.minecraft.sendToChat(arg);
 	}
 
 	/**
@@ -133,14 +133,14 @@ module.exports = class LunarClient extends Client {
 	 * @type {Function}
 	 */
 	get gchat() {
-		return this.chatBridge.minecraft.gchat.bind(this.chatBridge);
+		return arg => this.chatBridge.minecraft.gchat(arg);
 	}
 
 	/**
 	 * send a message both to discord and the ingame guild chat
 	 */
 	get broadcast() {
-		return this.chatBridge.broadcast.bind(this.chatBridge);
+		return arg => this.chatBridge.broadcast(arg);
 	}
 
 	/**

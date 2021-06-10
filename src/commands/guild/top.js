@@ -13,14 +13,18 @@ module.exports = class TopCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'guild members below requirements, sorted by total and gained weight',
-			options: [{
-				name: 'page',
-				type: Constants.ApplicationCommandOptionTypes.INTEGER,
-				description: 'page number',
-				required: false,
-			},
-			SlashCommand.guildOptionBuilder(data.client),
+			description: 'total leaderboard',
+			options: [
+				SlashCommand.XP_TYPE_OPTION,
+				SlashCommand.PAGE_OPTION,
+				SlashCommand.OFFSET_OPTION,
+				SlashCommand.guildOptionBuilder(data.client),
+				{
+					name: 'purge',
+					type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+					description: 'show only players below guild requirements',
+					required: false,
+				},
 			],
 			defaultPermission: true,
 			cooldown: 1,
@@ -35,13 +39,13 @@ module.exports = class TopCommand extends SlashCommand {
 		return handleLeaderboardCommandInteraction(
 			interaction,
 			{
-				lbType: 'gained',
-				xpType: 'purge',
+				lbType: 'total',
+				xpType: interaction.options.get('type')?.value ?? this.config.get('CURRENT_COMPETITION'),
 				page: interaction.options.get('page')?.value ?? 1,
 				offset: interaction.options.get('offset')?.value ?? '',
 				hypixelGuild: this.getHypixelGuild(interaction.options, interaction),
 				user: interaction.user,
-				shouldShowOnlyBelowReqs: true,
+				shouldShowOnlyBelowReqs: interaction.options.get('purge')?.value ?? false,
 			},
 		);
 	}

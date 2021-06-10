@@ -2,19 +2,26 @@
 
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
-const HelpCommand = require('../../../../commands/general/help');
+const BridgeCommand = require('../../../commands/BridgeCommand');
 // const logger = require('../../../../functions/logger');
 
 
-module.exports = class BridgeHelpCommand extends HelpCommand {
+module.exports = class HelpBridgeCommand extends BridgeCommand {
+	constructor(data, options) {
+		super(data, options ?? {
+			aliases: [ 'h' ],
+			description: 'list of all commands or info about a specific command',
+			usage: '<`command`|`category` name>',
+			cooldown: 1,
+		});
+	}
+
 	/**
 	 * execute the command
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
 	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
+	async run(message, args) { // eslint-disable-line no-unused-vars
 		// default help
 		if (!args.length) {
 			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.ign}` ].join(', ')}` ];
@@ -73,6 +80,6 @@ module.exports = class BridgeHelpCommand extends HelpCommand {
 
 		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
-		message.author.send(reply.join('\n'));
+		return message.author.send(reply.join('\n'));
 	}
 };

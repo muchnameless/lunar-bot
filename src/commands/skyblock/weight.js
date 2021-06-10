@@ -1,23 +1,42 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const { upperCaseFirstChar, autocorrect } = require('../../functions/util');
 const { getWeight } = require('../../functions/skyblock');
 const { getUuidAndIgn } = require('../../functions/commands/input');
 const { X_EMOJI } = require('../../constants/emojiCharacters');
 const hypixel = require('../../api/hypixel');
-const Command = require('../../structures/commands/Command');
+const DualCommand = require('../../structures/commands/DualCommand');
 const logger = require('../../functions/logger');
 
 
-module.exports = class WeightCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'w' ],
-			description: 'shows a player\'s total weight, weight and overflow',
-			args: false,
-			usage: '<`IGN`> <`profile` name>',
-			cooldown: 1,
-		});
+module.exports = class WeightCommand extends DualCommand {
+	constructor(data) {
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'shows a player\'s total weight, weight and overflow',
+				options: [{
+					name: 'ign',
+					type: Constants.ApplicationCommandOptionTypes.STRING,
+					description: 'IGN',
+					required: false,
+				}, {
+					name: 'profile',
+					type: Constants.ApplicationCommandOptionTypes.STRING,
+					description: 'skyblock profile name',
+					required: false,
+				}],
+				defaultPermission: true,
+				cooldown: 1,
+			},
+			{
+				aliases: [ 'w' ],
+				args: false,
+				usage: '<`IGN`> <`profile` name>',
+			},
+		);
 	}
 
 	/**
@@ -31,30 +50,28 @@ module.exports = class WeightCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {string} ignOrUuid command arguments
+	 * @param {string} [profileName]
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
+	async _run(ctx, ignOrUuid, profileName) {
 		try {
-			const { uuid, ign } = await getUuidAndIgn(message, args);
+			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
 
-			if (!profiles.length) return message.reply(`${ign} has no SkyBlock profiles`);
+			if (!profiles.length) return ctx.reply(`${ign} has no SkyBlock profiles`);
 
 			let weightData;
 
-			if (args.length < 2) {
+			if (!profileName) {
 				weightData = profiles
 					.map(({ cute_name: name, members }) => ({ name, ...getWeight(members[uuid]) }))
 					.sort(({ totalWeight: aTotal }, { totalWeight: bTotal }) => aTotal - bTotal)
 					.pop();
 			} else {
-				const [ , PROFILE_NAME ] = args;
-				const { value: profile, similarity } = autocorrect(PROFILE_NAME, profiles, 'cute_name');
+				const { value: profile, similarity } = autocorrect(profileName, profiles, 'cute_name');
 
-				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return message.reply(`${ign} has no profile named '${upperCaseFirstChar(PROFILE_NAME)}'`);
+				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return ctx.reply(`${ign} has no profile named '${upperCaseFirstChar(profileName)}'`);
 
 				weightData = {
 					name: profile.cute_name,
@@ -62,13 +79,30 @@ module.exports = class WeightCommand extends Command {
 				};
 			}
 
-			return message.reply(
+			return ctx.reply(
 				`${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillApiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`,
 			);
 		} catch (error) {
 			logger.error('[WEIGHT]', error);
 
-			return message.reply(`${error}`);
+			return ctx.reply(`${error}`);
 		}
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 */
+	async run(interaction) { // eslint-disable-line no-unused-vars
+		return this._run(interaction, interaction.options.get('ign')?.value, interaction.options.get('profile')?.value);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 */
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+		return this._run(message, ...args);
 	}
 };

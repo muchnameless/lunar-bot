@@ -1,29 +1,29 @@
 'use strict';
 
 const ms = require('ms');
-const Command = require('../../structures/commands/Command');
+const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class PingCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'p' ],
+module.exports = class PingCommand extends SlashCommand {
+	/**
+	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
+	 */
+	constructor(data) {
+		super(data, {
+			aliases: [],
 			description: 'check API latency and WebSocket ping',
-			cooldown: 1,
+			options: [],
+			defaultPermission: true,
+			cooldown: 0,
 		});
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		const pingMessage = await message.reply('awaiting ping...');
-
-		pingMessage.edit(`Api Latency: ${ms(pingMessage.createdTimestamp - message.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}.`);
+	async run(interaction) { // eslint-disable-line no-unused-vars
+		return interaction.reply(`Api Latency: ${ms(Date.now() - interaction.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}`);
 	}
 };

@@ -1,27 +1,27 @@
 'use strict';
 
-const Command = require('../../structures/commands/Command');
+const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class TaxCollectedCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
+module.exports = class CollectedCommand extends SlashCommand {
+	constructor(data) {
+		super(data, {
 			aliases: [],
 			description: 'show a list of taxahs and their collected tax amount',
-			usage: '',
+			options: [],
+			defaultPermission: true,
 			cooldown: 0,
 		});
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		message.reply(this.client.taxCollectors.createTaxCollectedEmbed());
+	async run(interaction) { // eslint-disable-line no-unused-vars
+		return interaction.reply({
+			embeds: [ this.client.taxCollectors.createTaxCollectedEmbed() ],
+		});
 	}
 };

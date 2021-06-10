@@ -1,30 +1,30 @@
 'use strict';
 
 const { stripIndent } = require('common-tags');
-const Command = require('../../structures/commands/Command');
 const mojang = require('../../api/mojang');
+const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
 
 
-module.exports = class DonationsCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
+module.exports = class DonationsCommand extends SlashCommand {
+	/**
+	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
+	 */
+	constructor(data) {
+		super(data, {
 			aliases: [],
 			description: 'donations leaderboard',
-			args: false,
-			usage: '',
+			options: [],
+			defaultPermission: true,
 			cooldown: 0,
 		});
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
+	async run(interaction) { // eslint-disable-line no-unused-vars
 		// aquire donations from db
 		const donations = await this.client.db.models.Transaction.findAll({
 			where: { type: 'donation' },
@@ -42,6 +42,7 @@ module.exports = class DonationsCommand extends Command {
 
 		// transform and prettify data
 		const embed = this.client.defaultEmbed.setTitle('Guild Donations');
+
 		let totalAmount = 0;
 
 		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([ , a ], [ , b ]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
@@ -66,7 +67,9 @@ module.exports = class DonationsCommand extends Command {
 			totalAmount += amount;
 		}));
 
+		embed.setDescription(`Total: ${this.client.formatNumber(totalAmount)}`);
+
 		// create and send embed
-		message.reply(embed.setDescription(`Total: ${this.client.formatNumber(totalAmount)}`));
+		return interaction.reply({ embeds: [ embed ] });
 	}
 };

@@ -1,77 +1,45 @@
 'use strict';
 
-const { MessageAttachment } = require('discord.js');
+const { MessageAttachment, Constants } = require('discord.js');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const { oneLine, stripIndents } = require('common-tags');
-const { upperCaseFirstChar, autocorrectToType } = require('../../functions/util');
-const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
-const Command = require('../../structures/commands/Command');
+const { oneLine } = require('common-tags');
+const { upperCaseFirstChar } = require('../../functions/util');
+const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class TracklistCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
+module.exports = class TrackCommand extends SlashCommand {
+	/**
+	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
+	 */
+	constructor(data) {
+		super(data, {
 			aliases: [],
 			description: 'stats graph from the last 30 days',
-			args: false,
-			usage: () => stripIndents`
-				<\`IGN\`|\`@mention\`> <\`type\`>
-
-				currently supported types:
-				skill, ${skills.join(', ')}
-				${cosmeticSkills.join(', ')}
-				slayer, revenant, tarantula, sven, ${slayers.join(', ')}
-				dungeon, ${[ ...dungeonTypes, ...dungeonClasses ].join(', ')}
-				weight
-			`,
+			options: [{
+				name: 'player',
+				type: Constants.ApplicationCommandOptionTypes.STRING,
+				description: 'IGN | minecraftUUID | discordID | @mention',
+				required: false,
+			},
+			SlashCommand.XP_TYPE_OPTION,
+			],
+			defaultPermission: true,
 			cooldown: 1,
 		});
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		// type input
-		const typeInput = args
-			.map((arg, index) => ({ index, ...autocorrectToType(arg) }))
-			.sort((a, b) => a.similarity - b.similarity)
-			.pop();
-		const type = typeInput?.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')
-			? (() => {
-				args.splice(typeInput.index, 1);
-				return typeInput.value;
-			})()
-			: 'weight';
-
-		// player input
-		/**
-		 * @type {import('../../structures/database/models/Player')}
-		 */
-		const player = message.mentions.users.size
-			? message.mentions.users.first().player
-			: (() => {
-				const playerInput = args
-					.map(arg => this.client.players.autocorrectToPlayer(arg))
-					.sort((a, b) => a.similarity - b.similarity)
-					.pop();
-
-				return playerInput?.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')
-					? playerInput.value
-					: message.author.player;
-			})();
+	async run(interaction) { // eslint-disable-line no-unused-vars
+		const type = interaction.options.get('type')?.value ?? 'weight';
+		const player = this.getPlayer(interaction.options, interaction);
 
 		if (!player) {
-			return message.reply(oneLine`${message.mentions.users.size
-				? `\`${message.guild
-					? message.mentions.members.first().displayName
-					: message.mentions.users.first().username}\`
-					 is`
+			return interaction.reply(oneLine`${interaction.options.has('player')
+				? `\`${interaction.options.get('player').value}\` is`
 				: 'you are'
 			} not in the player db.`);
 		}
@@ -165,11 +133,14 @@ module.exports = class TracklistCommand extends Command {
 			},
 		});
 
-		message.reply(this.client.defaultEmbed
-			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
-			.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
-			.attachFiles(new MessageAttachment(image))
-			.setImage('attachment://file.jpg'),
-		);
+		return interaction.reply({
+			embeds: [
+				this.client.defaultEmbed
+					.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
+					.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
+					.attachFiles(new MessageAttachment(image))
+					.setImage('attachment://file.jpg'),
+			],
+		});
 	}
 };

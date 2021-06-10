@@ -1,21 +1,35 @@
 'use strict';
 
-const Command = require('../../structures/commands/Command');
+const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class CoinFlipCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'cf', 'flip' ],
-			description: 'heads or tails or ?',
-			args: false,
-			usage: '',
-			cooldown: 0,
-		});
+module.exports = class CoinFlipCommand extends DualCommand {
+	/**
+	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
+	 */
+	constructor(data) {
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'heads, tails or ???',
+				options: [],
+				defaultPermission: true,
+				cooldown: 0,
+			},
+			{
+				aliases: [ 'cf', 'flip' ],
+				args: false,
+				usage: '',
+			},
+		);
 	}
 
-	static generateReply() {
+	/**
+	 * coinflip result
+	 */
+	static _generateReply() {
 		const randomNumber = Math.floor(Math.random() * 1001);
 
 		if (randomNumber === 0) return 'edge';
@@ -25,12 +39,26 @@ module.exports = class CoinFlipCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		return message.reply(CoinFlipCommand.generateReply());
+	async _run(ctx) { // eslint-disable-line no-unused-vars
+		return ctx.reply(CoinFlipCommand._generateReply());
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 */
+	async run(interaction) { // eslint-disable-line no-unused-vars
+		return this._run(interaction);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 */
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+		return this._run(message);
 	}
 };

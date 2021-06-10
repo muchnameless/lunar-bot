@@ -3,29 +3,34 @@
 const ms = require('ms');
 const tc = require('timezonecomplete');
 const { fetchurItems } = require('../../constants/skyblock');
-const Command = require('../../structures/commands/Command');
+const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class FetchurCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'f' ],
-			description: 'shows current fetchur item',
-			args: false,
-			usage: '',
-			cooldown: 0,
-		});
+module.exports = class FetchurCommand extends DualCommand {
+	constructor(data) {
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'shows the current fetchur item',
+				options: [],
+				defaultPermission: true,
+				cooldown: 0,
+			},
+			{
+				aliases: [ 'f' ],
+				args: false,
+				usage: '',
+			},
+		);
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
+	async run(ctx) { // eslint-disable-line no-unused-vars
 		const date = new Date();
 		const OFFSET = tc.zone('America/New_York').offsetForUtcDate(date) / 60;
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
@@ -44,6 +49,15 @@ module.exports = class FetchurCommand extends Command {
 			].filter(time => time >= 0),
 		);
 
-		message.reply(`item: ${fetchurItems[(date.getUTCDate() - 1) % fetchurItems.length]}, time left: ${ms(RESET_TIME, { long: true })}`);
+		return ctx.reply(`item: ${fetchurItems[(date.getUTCDate() - 1) % fetchurItems.length]}, time left: ${ms(RESET_TIME, { long: true })}`);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 */
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+		return this.run(message);
 	}
 };

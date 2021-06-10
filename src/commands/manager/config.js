@@ -1,78 +1,88 @@
 'use strict';
 
-const { stripIndents } = require('common-tags');
-const Command = require('../../structures/commands/Command');
+const { Constants } = require('discord.js');
+const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class ConfigCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'c', 'settings' ],
+module.exports = class ConfigCommand extends SlashCommand {
+	constructor(data) {
+		super(data, {
+			aliases: [],
 			description: 'show and edit the bot\'s config',
-			usage: stripIndents`
-				no args to show all configs
-				<\`query\`> to show search results from all entries
-				<\`key\`> <\`value\`> to upsert a key-value-pair
-				<\`-r\`|\`-d\`|\`--remove\`|\`--delete\`> <\`key\`> to remove a key-value-pair
-			`,
-			cooldown: 1,
+			options: [{
+				name: 'key',
+				type: Constants.ApplicationCommandOptionTypes.STRING,
+				description: 'new / existing config key',
+				required: false,
+			}, {
+				name: 'value',
+				type: Constants.ApplicationCommandOptionTypes.STRING,
+				description: 'new config value',
+				required: false,
+			}, {
+				name: 'delete',
+				type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+				description: 'delete the selected key',
+				required: false,
+			}],
+			defaultPermission: true,
+			cooldown: 0,
 		});
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
+	async run(interaction) { // eslint-disable-line no-unused-vars
 		// list all config entries
-		if (!args.length) {
-			return message.reply(
-				this.config.cache
+		if (!interaction.options.size) {
+			return interaction.reply({
+				content: this.config.cache
 					.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
 					.map(({ key, value }) => `${key}: ${value}`)
 					.join('\n'),
-				{ code: 'apache', split: { char: '\n' } },
-			);
+				code: 'apache',
+				split: { char: '\n' },
+			});
 		}
 
+		const KEY = interaction.options.get('key')?.value.toUpperCase() ?? (() => { throw 'specifiy a config key to edit'; })();
+
 		// search the config
-		if (args.length === 1) {
+		if (!interaction.options.has('value')) {
 			// delete an existing entry
-			if (flags.some(flag => [ 'r', 'remove', 'd', 'delete' ].includes(flag))) {
-				const KEY = args[0].toUpperCase();
+			if (interaction.options.get('delete')?.value) {
 				const VALUE = this.config.get(KEY);
 
-				if (VALUE === null) return message.reply(`\`${KEY}\` is not in the config.`);
+				if (VALUE === null) return interaction.reply(`\`${KEY}\` is not in the config.`);
 
 				await this.config.remove(KEY);
-				return message.reply(`removed \`${KEY}\`: \`${VALUE}\``);
+				return interaction.reply(`removed \`${KEY}\`: \`${VALUE}\``);
 			}
 
-			const queryRegex = new RegExp(args[0], 'i');
-			const configEntries = this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value));
+			const queryRegex = new RegExp(KEY, 'i');
 
-			return message.reply(
-				configEntries
+			return interaction.reply({
+				content: this.config.cache
+					.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))
 					.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
 					.map(({ key, value }) => `${key}: ${value}`)
 					.join('\n')
-					|| `no config entries for '${args[0]}' found`,
-				{ code: 'apache', split: { char: '\n' } },
-			);
+					|| `no config entries for '${KEY}' found`,
+				code: 'apache',
+				split: { char: '\n' },
+			});
 		}
 
 		// set a config entry
-		const KEY = args.shift().toUpperCase();
 		const OLD_VALUE = this.config.get(KEY);
-		const entry = await this.config.set(KEY, args.join(' '));
+		const { key, value } = await this.config.set(KEY, interaction.options.get('value').value);
 
-		return message.reply(
-			`${entry.key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${entry.value}'`,
-			{ code: 'apache' },
-		);
+		return interaction.reply({
+			content: `${key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${value}'`,
+			code: 'apache',
+		});
 	}
 };

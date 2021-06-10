@@ -1,73 +1,106 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar, stringToMS } = require('../../functions/util');
 const { messageTypes: { GUILD } } = require('../../structures/chat_bridge/constants/chatBridge');
-const Command = require('../../structures/commands/Command');
+const LunarCommandInteraction = require('../../structures/extensions/CommandInteraction');
+const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class PollCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'polls' ],
-			description: 'create a poll for both ingame and discord guild chat',
-			args: true,
-			usage: '<30s <= `duration` <= 10m> [`"question" "option1" "option2"` ...]',
-			cooldown: 1,
-		});
+module.exports = class PollCommand extends DualCommand {
+	constructor(data) {
+		const options = [{
+			name: 'question',
+			type: Constants.ApplicationCommandOptionTypes.STRING,
+			description: 'poll question',
+			required: true,
+		}];
+
+		// add choices
+		for (let i = 1; i <= 10; ++i) {
+			options.push({
+				name: `choice_${i}`,
+				type: Constants.ApplicationCommandOptionTypes.STRING,
+				description: `choice ${i}`,
+				required: i <= 1,
+			});
+		}
+
+		options.push(
+			{
+				name: 'duration',
+				type: Constants.ApplicationCommandOptionTypes.STRING,
+				description: 'number of s[econds] | m[inutes], must be between 30s and 10m',
+				required: false,
+			},
+			DualCommand.guildOptionBuilder(data.client),
+		);
+
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'create a poll for both in game and discord guild chat',
+				options,
+				defaultPermission: true,
+				cooldown: 1,
+			},
+			{
+				aliases: [],
+				args: true,
+				usage: '<30s <= `duration` <= 10m> [`"question" "choice_1" "choice_2"` ...]',
+			},
+		);
 
 		this.quoteChars = [ '\u{0022}', '\u{201C}', '\u{201D}' ];
 	}
 
 	/**
 	 * create a poll for both ingame chat and the chatBridge channel
-	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')|import('../../structures/extensions/Message')}
-	 * @param {string[]} args
-	 * @param {string} ign
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {object} param1
+	 * @param {import('../../structures/chat_bridge/ChatBridge')} param1.chatBridge
+	 * @param {string} param1.question
+	 * @param {string[]} param1.pollOptionNames
+	 * @param {number} param1.duration
+	 * @param {string} param1.ign
 	 */
-	async createPoll(chatBridge, message, args, ign) {
-		if (chatBridge.pollUntil) return message.reply(`poll already in progress, wait ${ms(chatBridge.pollUntil - Date.now(), { long: true })} until it ends`);
+	async _run(ctx, { chatBridge, question, pollOptionNames, duration, ign }) {
+		if (chatBridge.pollUntil) return ctx.reply(`poll already in progress, wait ${ms(chatBridge.pollUntil - Date.now(), { long: true })} until it ends`);
 
 		try {
-			const duration = Math.min(Math.max(stringToMS(args[0]), 30_000), 10 * 60_000) || 60_000;
+			const DURATION = duration
+				? Math.min(Math.max(stringToMS(duration), 30_000), 10 * 60_000) || 60_000
+				: 60_000;
 
-			chatBridge.pollUntil = Date.now() + duration;
+			chatBridge.pollUntil = Date.now() + Math.min(Math.max(DURATION, 30_000), 10 * 60_000);
 
-			const inputMatched = message.content
-				.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
-				?.flatMap((x) => {
-					const input = x.trim();
-					if (!input.length) return [];
-					return input;
-				});
+			if (ctx instanceof LunarCommandInteraction) ctx.reply({
+				content: 'poll started',
+				ephemeral: true,
+			});
 
-			if (!inputMatched?.length) return message.reply(this.usageInfo);
-
-			const question = upperCaseFirstChar(inputMatched.shift());
-			/** @type {{number:number,option:string,votes:Set<string>}[]} */
-			const options = inputMatched.map((x, index) => ({ number: index + 1, option: x.trim(), votes: new Set() }));
-
-			if (!options.length) return message.reply('specify poll options to vote for');
-
-			const optionsCount = options.length;
+			/** @type {{ number: number, option: string, votes: Set<string> }[]} */
+			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set() }));
+			const optionsCount = pollOptions.length;
 			const ingameMessages = chatBridge.minecraft.awaitMessages(
 				msg => msg.isUserMessage && msg.type === GUILD,
-				{ time: duration },
+				{ time: DURATION },
 			);
 			const discordChannel = chatBridge.discord.get(GUILD).channel;
 			const discordMessages = discordChannel.awaitMessages(
 				msg => msg.isUserMessage,
-				{ time: duration },
+				{ time: DURATION },
 			);
 
 			// post message to both chats
 			chatBridge.broadcast(stripIndents`
-				poll by ${ign}: type a number to vote (${ms(duration, { long: true })})
+				poll by ${ign}: type a number to vote (${ms(DURATION, { long: true })})
 				${question}
-				${options.map(({ number, option }) => `${number}: ${option}`).join('\n')}
+				${pollOptions.map(({ number, option }) => `${number}: ${option}`).join('\n')}
 			`);
 
 			// aquire ingame votes
@@ -77,7 +110,7 @@ module.exports = class PollCommand extends Command {
 				// doesn't start with a number or out of range
 				if (Number.isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
-				options[votedFor - 1].votes.add(msg.player?.minecraftUUID ?? msg.author.ign);
+				pollOptions[votedFor - 1].votes.add(msg.player?.minecraftUUID ?? msg.author.ign);
 			}
 
 			// aquire discord votes
@@ -87,25 +120,30 @@ module.exports = class PollCommand extends Command {
 				// doesn't start with a number or out of range
 				if (Number.isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
-				options[votedFor - 1].votes.add(msg.author.player?.minecraftUUID ?? msg.author.id);
+				pollOptions[votedFor - 1].votes.add(msg.author.player?.minecraftUUID ?? msg.author.id);
 			}
 
 			// count votes and sort options by them
-			const result = options
+			const result = pollOptions
 				.map(({ votes, ...rest }) => ({ votes: votes.size, ...rest }))
 				.sort(({ votes: votesA }, { votes: votesB }) => votesB - votesA);
 			const TOTAL_VOTES = result.reduce((acc, { votes }) => acc + votes, 0);
 			const resultString = result.map(({ number, option, votes }) => `#${number}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
 
 			// reply with result
-			discordChannel.send(this.client.defaultEmbed
-				.setTitle(question)
-				.setDescription(resultString.join('\n\n'))
-				.setFooter(`Poll by ${ign}`),
-			);
+			discordChannel.send({
+				embed: this.client.defaultEmbed
+					.setTitle(question)
+					.setDescription(resultString.join('\n\n'))
+					.setFooter(`Poll by ${ign}`),
+			});
 
 			resultString.unshift(question);
-			chatBridge.minecraft.gchat(resultString.join('\n'), { maxParts: Infinity });
+
+			chatBridge.minecraft.gchat({
+				content: resultString.join('\n'),
+				maxParts: Infinity,
+			});
 		} finally {
 			chatBridge.pollUntil = null; // unlock poll command
 		}
@@ -113,19 +151,48 @@ module.exports = class PollCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		/**
-		 * @type {import('../../structures/database/models/HypixelGuild')}
-		 */
-		const hypixelGuild = this.client.hypixelGuilds.getFromArray(flags) ?? message.author.player?.guild;
+	async run(interaction) { // eslint-disable-line no-unused-vars
+		interaction.defer();
 
-		if (!hypixelGuild) return message.reply('unable to find your guild.');
+		return this._run(
+			interaction,
+			{
+				chatBridge: this.getHypixelGuild(interaction.options, interaction).chatBridge,
+				question: interaction.options.get('question').value,
+				pollOptionNames: interaction.options.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value),
+				duration: interaction.options.get('duration')?.value,
+				ign: interaction.user.player?.ign ?? interaction.member?.displayName ?? interaction.user.tag,
+			},
+		);
+	}
 
-		this.createPoll(hypixelGuild.chatBridge, message, args, message.author.player.ign);
+	/**
+	 * execute the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 */
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+		const inputMatched = message.content
+			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
+			?.flatMap((x) => {
+				const input = x.trim();
+				if (!input.length) return [];
+				return input;
+			});
+
+		if (inputMatched.length < 2) return message.reply(this.inGameData.usageInfo);
+
+		return this._run(
+			message,
+			{
+				chatBridge: message.chatBridge,
+				question: upperCaseFirstChar(inputMatched.shift()),
+				pollOptionNames: inputMatched,
+				duration: args[0],
+				ign: message.author.ign,
+			},
+		);
 	}
 };

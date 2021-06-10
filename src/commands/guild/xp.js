@@ -1,88 +1,77 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const { oneLine, stripIndents } = require('common-tags');
-const { skills, /* cosmeticSkills, */ slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
+const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
-const { /* escapeIgn, */ upperCaseFirstChar, autocorrectToOffset } = require('../../functions/util');
-const Command = require('../../structures/commands/Command');
+const { /* escapeIgn, */ upperCaseFirstChar } = require('../../functions/util');
+const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class PlayerCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'stats' ],
+module.exports = class XpCommand extends SlashCommand {
+	/**
+	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
+	 */
+	constructor(data) {
+		super(data, {
+			aliases: [],
 			description: 'check a player\'s xp gained',
-			usage: `<\`IGN\` to check someone other than yourself> <${
-				Object.keys(XP_OFFSETS_SHORT)
-					.map(offset => `\`${offset}\``)
-					.join('|')
-			} Δ>`,
-			cooldown: 1,
+			options: [{
+				name: 'player',
+				type: Constants.ApplicationCommandOptionTypes.STRING,
+				description: 'IGN | minecraftUUID | discordID | @mention',
+				required: false,
+			}, {
+				name: 'offset',
+				type: Constants.ApplicationCommandOptionTypes.STRING,
+				description: 'Δ offset',
+				required: false,
+				choices: Object.keys(XP_OFFSETS_SHORT).map(x => ({ name: x, value: XP_OFFSETS_CONVERTER[x] })),
+			}, {
+				name: 'update',
+				type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+				description: 'update xp before running the command',
+				required: false,
+			}],
+			defaultPermission: true,
+			cooldown: 0,
 		});
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		// type input
-		const offsetInput = args
-			.map((arg, index) => ({ index, ...autocorrectToOffset(arg) }))
-			.sort((a, b) => a.similarity - b.similarity)
-			.pop();
-		const offset = offsetInput?.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')
-			? (() => {
-				args.splice(offsetInput.index, 1);
-				return offsetInput.value;
-			})()
-			: (this.config.getBoolean('COMPETITION_RUNNING') || (Date.now() - this.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
+	async run(interaction) { // eslint-disable-line no-unused-vars
+		const offset = interaction.options.get('offset')?.value
+			?? (this.config.getBoolean('COMPETITION_RUNNING') || (Date.now() - this.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
 				? offsetFlags.COMPETITION_START
 				: this.config.get('DEFAULT_XP_OFFSET')
 			);
-
-		// player input
-		/**
-		 * @type {import('../../structures/database/models/Player')}
-		 */
-		const player = message.mentions.users.size
-			? message.mentions.users.first().player
-			: (() => {
-				const playerInput = args
-					.map(arg => this.client.players.autocorrectToPlayer(arg))
-					.sort((a, b) => a.similarity - b.similarity)
-					.pop();
-
-				return playerInput?.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')
-					? playerInput.value
-					: message.author.player;
-			})();
+		const player = this.getPlayer(interaction.options, interaction);
 
 		if (!player) {
-			return message.reply(oneLine`${message.mentions.users.size
-				? `\`${message.guild
-					? message.mentions.members.first().displayName
-					: message.mentions.users.first().username}\`
-					 is`
+			return interaction.reply(oneLine`${interaction.options.has('player')
+				? `\`${interaction.options.get('player').value}\` is`
 				: 'you are'
 			} not in the player db.`);
 		}
 
 		// update db?
-		if (this.force(flags)) await player.updateXp();
+		if (interaction.options.get('force')) {
+			interaction.defer(); // update may take a while
+			await player.updateXp();
+		}
 
 		const startingDate = new Date(Math.max(this.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()));
-		const embed = this.client.defaultEmbed
-			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
+		const embeds = [];
+
+		let embed = this.client.defaultEmbed
+			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url);
 			// .setTitle(`${escapeIgn(player.ign)}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`)
 			// .setURL(player.url)
 			// .setThumbnail(player.image)
-			.setFooter('\u200b\nUpdated at')
-			.setTimestamp(player.xpLastUpdatedAt);
 		const { skillAverage, trueAverage } = player.getSkillAverage();
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(offset);
 
@@ -96,6 +85,19 @@ module.exports = class PlayerCommand extends Command {
 				**LvL:** ${progressLevel}
 				**XP:** ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
 				**Δ:** ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT], 0, Math.round)}
+			`, true);
+		}
+
+		embed.padFields();
+
+		for (const skill of cosmeticSkills) {
+			const SKILL_ARGUMENT = `${skill}Xp`;
+			const { progressLevel } = player.getSkillLevel(skill);
+
+			embed.addField(upperCaseFirstChar(skill), stripIndents`
+				**LvL:** ${progressLevel}
+				**XP:** ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
+				**Δ:** ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${offset}`], 0, Math.round)}
 			`, true);
 		}
 
@@ -125,9 +127,12 @@ module.exports = class PlayerCommand extends Command {
 			`, true);
 		}
 
-		embed
-			.padFields()
-			.addField('\u200b', '```Dungeons```\u200b', false);
+		embeds.push(embed);
+
+		embed = this.client.defaultEmbed
+			.setDescription('```Dungeons```\u200b')
+			.setFooter('\u200b\nUpdated at')
+			.setTimestamp(player.xpLastUpdatedAt);
 
 		// dungeons
 		for (const type of [ ...dungeonTypes, ...dungeonClasses ]) {
@@ -148,28 +153,19 @@ module.exports = class PlayerCommand extends Command {
 			.padFields()
 			.addFields(
 				{ name: '\u200b', value: '```Miscellaneous```\u200b', inline: false },
-				// { name: 'Hypixel Guild XP', value: stripIndents`
-				// 	**Total:** ${this.client.formatNumber(player.guildXp)}
-				// 	**Δ:** ${this.client.formatNumber(player.guildXp - player[`guildXp${offset}`])}
-				// `, inline: true },
+				{ name: 'Hypixel Guild XP', value: stripIndents`
+					**Total:** ${this.client.formatNumber(player.guildXp)}
+					**Δ:** ${this.client.formatNumber(player.guildXp - player[`guildXp${offset}`])}
+				`, inline: true },
 				{ name: 'Weight', value: stripIndents`
 					**Total**: ${this.client.formatDecimalNumber(totalWeight)} [ ${this.client.formatDecimalNumber(weight)} + ${this.client.formatDecimalNumber(overflow)} ]
 					**Δ:** ${this.client.formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${this.client.formatDecimalNumber(weight - weightOffset)} + ${this.client.formatDecimalNumber(overflow - overflowOffset)} ]
 				`, inline: true },
-			);
-		// .padFields();
+			)
+			.padFields();
 
-		// for (const skill of cosmeticSkills) {
-		// 	const SKILL_ARGUMENT = `${skill}Xp`;
-		// 	const { progressLevel } = player.getSkillLevel(skill);
+		embeds.push(embed);
 
-		// 	embed.addField(upperCaseFirstChar(skill), stripIndents`
-		// 		**LvL:** ${progressLevel}
-		// 		**XP:** ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
-		// 		**Δ:** ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${offset}`], 0, Math.round)}
-		// 	`, true);
-		// }
-
-		message.reply(embed /* .padFields() */);
+		return interaction.reply({ embeds });
 	}
 };

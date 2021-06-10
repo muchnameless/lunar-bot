@@ -29,6 +29,7 @@ module.exports = class ChatBridgeArray extends Array {
 		this.commands = new BridgeCommandCollection(this.client, join(__dirname, 'commands'));
 		/**
 		 * discord channel IDs of all ChatBridge channels
+		 * @type {Set<import('discord.js').Snowflake>}
 		 */
 		this.channelIDs = new Set();
 	}
@@ -84,7 +85,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 */
 	async connect(index) {
 		// load commands if none are present
-		if (!this.commands.size) await this.commands.loadAll();
+		// await this.commands.loadAll();
 
 		// single
 		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray._accounts.length) {
@@ -165,7 +166,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 * @param {import('./ChatBridge').MessageForwardOptions} [options={}]
 	 */
 	async handleDiscordMessage(message, options = {}) {
-		if (!this.channelIDs.has(message.channel.id) || !this.client.config.getBoolean('CHATBRIDGE_ENABLED')) return;
+		if (!this.channelIDs.has(message.channelID) || !this.client.config.getBoolean('CHATBRIDGE_ENABLED')) return;
 
 		try {
 			// a ChatBridge for the message's channel was found
@@ -175,7 +176,7 @@ module.exports = class ChatBridgeArray extends Array {
 			if (options.checkifNotFromBot) {
 				if (message.me) return; // message was sent by the bot
 				if (message.webhookID
-					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookID === chatBridge.discord.channelsByIDs.get(message.channel.id)?.webhook?.id), false)
+					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookID === chatBridge.discord.channelsByIDs.get(message.channelID)?.webhook?.id), false)
 				) return; // message was sent by one of the ChatBridges's webhook
 			}
 

@@ -1,10 +1,10 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
 const { add, sub, mul, div } = require('sinful-math');
 const Lexer = require('lex');
-const { removeFlagsFromArray } = require('../../functions/util');
-const Command = require('../../structures/commands/Command');
+const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
 
@@ -92,15 +92,31 @@ class Parser {
 }
 
 
-module.exports = class MathsCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'm', 'calc' ],
-			description: 'supports `+`, `-`, `*`, `/`, `^`, `!`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
-			args: false,
-			usage: '',
-			cooldown: 0,
-		});
+module.exports = class MathsCommand extends DualCommand {
+	/**
+	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
+	 */
+	constructor(data) {
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'supports `+`, `-`, `*`, `/`, `^`, `!`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
+				options: [{
+					name: 'input',
+					type: Constants.ApplicationCommandOptionTypes.STRING,
+					description: 'mathematical expression to evaluate',
+					required: true,
+				}],
+				defaultPermission: true,
+				cooldown: 0,
+			},
+			{
+				aliases: [ 'm', 'calc' ],
+				args: false,
+				usage: '',
+			},
+		);
 	}
 
 	static multiplier = {
@@ -294,17 +310,15 @@ module.exports = class MathsCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
-	 * @param {string[]} flags command flags
-	 * @param {string[]} rawArgs arguments and flags
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {string} rawInput
 	 */
-	async run(message, args, flags, rawArgs) { // eslint-disable-line no-unused-vars
-		// remove channel flags from rawArgs
-		removeFlagsFromArray(rawArgs);
-
-		// generate input string
-		const INPUT = rawArgs.join('')
+	async _run(ctx, rawInput) {
+		/**
+		 * generate input string
+		 * @type {string}
+		 */
+		const INPUT = rawInput
 			.replace(/\*\*/g, '^') // 5**3 -> 5^3
 			.replace(/:/g, '/') // 5:3 -> 5/3
 			.replace(/(?<=(?:\d|\))\s*)(?=[a-jln-z(])/gi, '*') // add implicit '*' between numbers before letters and '('
@@ -317,7 +331,7 @@ module.exports = class MathsCommand extends Command {
 		try {
 			parsed = MathsCommand.parse(INPUT);
 		} catch (error) {
-			return message.reply(`${error.message}, input: '${INPUT}'`);
+			return ctx.reply(`${error.message}, input: '${INPUT}'`);
 		}
 
 		// logger.debug({ parsed })
@@ -361,12 +375,12 @@ module.exports = class MathsCommand extends Command {
 
 			if (stack.length !== 0) throw new Error('unprocessed parts');
 		} catch (error) {
-			return message.reply(`CalculationError: ${error.message}, input: '${INPUT}'`);
+			return ctx.reply(`CalculationError: ${error.message}, input: '${INPUT}'`);
 		}
 
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
-		return message.reply(oneLine`
+		return ctx.reply(oneLine`
 			${MathsCommand.formatNumberString(INPUT)
 				.replace(/(?<=.)[+\-*/]/g, ' $& ') // add spaces around operators
 				.replace(/,/g, '$& ') // add space after commas
@@ -379,5 +393,22 @@ module.exports = class MathsCommand extends Command {
 				: ''
 			}`,
 		);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 */
+	async run(interaction) { // eslint-disable-line no-unused-vars
+		return this._run(interaction, interaction.options.get('input').value);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 */
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+		return this._run(message, args.join(''));
 	}
 };

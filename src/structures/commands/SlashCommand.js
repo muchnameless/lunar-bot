@@ -1,6 +1,8 @@
 'use strict';
 
 const { Constants } = require('discord.js');
+const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
+const { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
 const { getIDFromString } = require('../../functions/util');
 const { validateMinecraftUUID } = require('../../functions/stringValidators');
 const BaseCommand = require('./BaseCommand');
@@ -42,26 +44,61 @@ module.exports = class SlashCommand extends BaseCommand {
 	/**
 	 * @param {import('../LunarClient')} client
 	 */
-	static guildOptionBuilder = client => ({
-		name: 'guild',
-		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'hypixel guild',
-		required: false,
-		choices: client.hypixelGuilds.cache.map(({ guildID, name }) => ({ name, value: guildID })),
-	});
+	static get guildOptionBuilder() {
+		return client => ({
+			name: 'guild',
+			type: Constants.ApplicationCommandOptionTypes.STRING,
+			description: 'hypixel guild',
+			required: false,
+			choices: client.hypixelGuilds.cache.map(({ guildID, name }) => ({ name, value: guildID })),
+		});
+	}
 
-	static FORCE_OPTION = {
-		name: 'force',
-		type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-		description: 'disable IGN autocorrection',
-		required: false,
-	};
+	static get FORCE_OPTION() {
+		return {
+			name: 'force',
+			type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+			description: 'disable IGN autocorrection',
+			required: false,
+		};
+	}
 
-	static EPHEMERAL_OPTION = {
-		name: 'ephemeral',
-		type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-		description: 'wether the response should be ephemeral when not in a commands channel',
-		required: false,
+	static get EPHEMERAL_OPTION() {
+		return {
+			name: 'ephemeral',
+			type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+			description: 'wether the response should be ephemeral when not in a commands channel',
+			required: false,
+		};
+	}
+
+	static get XP_TYPE_OPTION() {
+		return {
+			name: 'type',
+			type: Constants.ApplicationCommandOptionTypes.STRING,
+			description: 'xp type',
+			required: false,
+			choices: [ 'weight', 'skill', ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses ].map(x => ({ name: x, value: x })),
+		};
+	}
+
+	static get PAGE_OPTION() {
+		return {
+			name: 'page',
+			type: Constants.ApplicationCommandOptionTypes.INTEGER,
+			description: 'page number',
+			required: false,
+		};
+	}
+
+	static get OFFSET_OPTION() {
+		return {
+			name: 'offset',
+			type: Constants.ApplicationCommandOptionTypes.STRING,
+			description: 'Δ offset',
+			required: false,
+			choices: Object.keys(XP_OFFSETS_SHORT).map(x => ({ name: x, value: XP_OFFSETS_CONVERTER[x] })),
+		};
 	}
 
 	/**
