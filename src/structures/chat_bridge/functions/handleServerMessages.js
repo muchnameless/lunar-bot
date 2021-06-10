@@ -120,7 +120,7 @@ module.exports = async (message) => {
 	 * The Guild has reached Level 36!
 	 * The Guild has unlocked Winners III!
 	 */
-	if (/^the guild has (?:completed|reached|unlocked)/i.test(message.content)) {
+	if (message.content === 'LEVEL UP!' || /^the guild has (?:completed|reached|unlocked)/i.test(message.content)) {
 		return message.forwardToDiscord();
 	}
 
