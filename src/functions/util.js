@@ -5,9 +5,7 @@ const { commaListsAnd } = require('common-tags');
 const { promisify } = require('util');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
-const { XP_TYPES, XP_OFFSETS_SHORT } = require('../constants/database');
 const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
-const { CHANNEL_FLAGS } = require('../constants/bot');
 const logger = require('./logger');
 
 const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
@@ -57,16 +55,6 @@ const self = module.exports = {
 	 * @param {number} max maximum length
 	 */
 	trim: (string, max) => (string.length > max ? `${string.slice(0, max - 3)}...` : string),
-
-	/**
-	 * day.month.year -> year/month/day
-	 * @param {string} string to convert
-	 */
-	reverseDateInput: (string => string
-		.split('.')
-		.reverse()
-		.join('/')
-	),
 
 	/**
 	 * replaces toLocaleString('fr-FR') separator with a normal space
@@ -147,29 +135,6 @@ const self = module.exports = {
 	},
 
 	/**
-	 * checks the query agains the validInput and returns the most likely match
-	 * @param {string} query
-	 * @param {any[]} validInput
-	 * @param {string} attributeToQuery
-	 */
-	autocorrectV2(query, validInput = [], attributeToQuery = null) {
-		return (attributeToQuery
-			? validInput.map(value => ({
-				value,
-				similarity: jaroWinklerSimilarity(query, value[attributeToQuery], { caseSensitive: false }),
-			}))
-			: validInput.map(value => ({
-				value,
-				similarity: jaroWinklerSimilarity(query, value, { caseSensitive: false }),
-			})))
-			.sort((a, b) => {
-				if (a.similarity < b.similarity) return 1;
-				if (a.similarity > b.similarity) return -1;
-				return 0;
-			})[0];
-	},
-
-	/**
 	 * <Array>.filter with an asynchronous callback function
 	 * @param {Array} arr
 	 * @param {Function} callback
@@ -180,52 +145,84 @@ const self = module.exports = {
 	},
 
 	/**
-	 * autocorrects a string to one of the supported types
-	 * @param {string} input
-	 */
-	autocorrectToType(input) {
-		const result = self.autocorrect(input, [ 'skill', 'slayer', 'revenant', 'tarantula', 'sven', 'dungeon', 'gxp', 'weight', ...XP_TYPES ]);
-
-		switch (result.value) {
-			case 'revenant':
-				result.value = 'zombie';
-				break;
-			case 'tarantula':
-				result.value = 'spider';
-				break;
-			case 'sven':
-				result.value = 'wolf';
-				break;
-			case 'dungeon':
-				result.value = 'catacombs';
-				break;
-			case 'gxp':
-				result.value = 'guild';
-				break;
-		}
-
-		return result;
-	},
-
-	/**
-	 * autocorrects a string to a db offset using short names
-	 * @param {string} input message flags
-	 */
-	autocorrectToOffset(input) {
-		const result = self.autocorrect(input, Object.keys(XP_OFFSETS_SHORT));
-
-		result.value = XP_OFFSETS_SHORT[result.value];
-
-		return result;
-	},
-
-	/**
 	 * compares to strings alphabetically, case insensitive
 	 * @param {string} a
 	 * @param {string} b
 	 */
 	compareAlphabetically(a, b) {
 		return collator.compare(a, b);
+	},
+
+	/**
+	 * Splits a string into multiple chunks at a designated character that do not exceed a specific length.
+	 * @param {string} text Content to split
+	 * @param {import('discord.js').SplitOptions} [options] Options controlling the behavior of the split
+	 * @returns {string[]}
+	 */
+	splitMessage(text, { maxLength = 2_000, char = '\n', prepend = '', append = '' } = {}) {
+		if (text.length <= maxLength) return [ text ];
+
+		let splitText = [ text ];
+
+		if (Array.isArray(char)) {
+			while (char.length && splitText.some(({ length }) => length > maxLength)) {
+				const currentChar = char.shift();
+
+				if (currentChar instanceof RegExp) {
+					splitText = splitText.flatMap((chunk) => {
+						if (chunk.length <= maxLength) return chunk;
+
+						if (currentChar.global) {
+							const matched = chunk.match(currentChar);
+
+							if (!matched) return chunk;
+
+							return matched.map(match => self._concatMessageChunks(chunk.split(match), { maxLength, char: match, prepend, append }));
+						}
+
+						// no global flag
+						const matched = chunk.match(currentChar)?.[0];
+
+						if (!matched) return chunk;
+
+						return self._concatMessageChunks(chunk.split(matched), { maxLength, char: matched, prepend, append });
+					});
+				} else {
+					splitText = splitText.flatMap(chunk => (chunk.length > maxLength ? self._concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append }) : chunk));
+				}
+			}
+
+			if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
+
+			return splitText;
+		}
+
+		splitText = text.split(char);
+
+		if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
+
+		return self._concatMessageChunks(splitText, { maxLength, char, append, prepend });
+	},
+
+	/**
+	 * @param {string[]} splitText
+	 * @param {import('discord.js').SplitOptions} [options] Options controlling the behavior of the split
+	 * @returns {string[]}
+	 */
+	_concatMessageChunks(splitText, { maxLength, char, append, prepend }) {
+		const messages = [];
+
+		let msg = '';
+
+		for (const chunk of splitText) {
+			if (msg && `${msg}${char}${chunk}${append}`.length > maxLength) {
+				messages.push(`${msg}${append}`);
+				msg = prepend;
+			}
+
+			msg += (msg && msg !== prepend ? char : '') + chunk;
+		}
+		return messages.concat(msg).filter(m => m);
 	},
 
 	/**
@@ -242,22 +239,6 @@ const self = module.exports = {
 			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char, prepend: `\`\`\`${code}\n`, append: '```' });
 		} catch {
 			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char: '', prepend: `\`\`\`${code}\n`, append: '```' });
-		}
-	},
-
-	/**
-	 * removes all found elements from the source array, defaults to channel flags
-	 * @param {any[]} sourceArray
-	 * @param {any[]} [toRemoveArray=CHANNEL_FLAGS]
-	 */
-	removeFlagsFromArray(sourceArray, toRemoveArray = CHANNEL_FLAGS) {
-		let i = -1;
-
-		while (++i < sourceArray.length) {
-			if (sourceArray[i].startsWith('-') && toRemoveArray.includes(sourceArray[i].replace(/^-+/, ''))) {
-				sourceArray.splice(i, 1);
-				--i;
-			}
 		}
 	},
 
