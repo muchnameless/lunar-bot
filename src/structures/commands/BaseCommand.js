@@ -25,7 +25,7 @@ module.exports = class BaseCommand {
 
 		this.cooldown = cooldown ?? null;
 		/** @type {() => import('discord.js').Snowflake[]} */
-		this._requiredRoles = requiredRoles ?? (() => []);
+		this._requiredRoles = requiredRoles ?? null;
 		/** @type {Collection<import('discord.js').Snowflake, number>} */
 		this.timestamps = this.cooldown !== null
 			? new Collection()
@@ -43,7 +43,23 @@ module.exports = class BaseCommand {
 	 * roles required to run this command
 	 */
 	get requiredRoles() {
-		return this._requiredRoles();
+		if (this._requiredRoles) return this._requiredRoles();
+
+		switch (this.category) {
+			case 'staff':
+			case 'moderation':
+				return [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ];
+
+			case 'tax':
+			case 'manager':
+				return [ this.config.get('MANAGER_ROLE_ID') ];
+
+			case 'guild':
+				return null;
+
+			default:
+				return null;
+		}
 	}
 
 	/**

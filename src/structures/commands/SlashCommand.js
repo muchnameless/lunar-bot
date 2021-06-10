@@ -196,8 +196,8 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @param {{ userIDs: import('discord.js').Snowflake[], roleIDs: import('discord.js').Snowflake[] }} permissions
 	 */
 	async checkPermissions(interaction, { userIDs = [ this.client.ownerID ], roleIDs = this.requiredRoles }) {
-		if (!userIDs.length && !roleIDs.length) return;
-		if (userIDs.includes(interaction.user.id)) return; // user id bypass
+		if (userIDs?.includes(interaction.user.id)) return; // user id bypass
+		if (!roleIDs?.length) return; // no role requirements
 
 		/** @type {import('../extensions/GuildMember')} */
 		const member = interaction.guildID === this.config.get('MAIN_GUILD_ID')

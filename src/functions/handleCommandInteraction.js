@@ -17,6 +17,19 @@ module.exports = async (interaction) => {
 
 		if (!command) return;
 
+		if (interaction.user.id !== interaction.client.ownerID) {
+			interaction.defer();
+
+			// role permissions
+			await command.checkPermissions(interaction);
+		} else if (command.category === 'owner') { // prevent from executing owner only command
+			logger.info(`[CMD HANDLER]: ${interaction.user.tag}${interaction.guildID ? ` | ${interaction.member.displayName}` : ''} tried to execute '${interaction.logInfo}' in ${interaction.guildID ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'} which is an owner only command`);
+			return await interaction.reply({
+				content: `the \`${command.name}\` command is only for the bot owners.`,
+				ephemeral: true,
+			});
+		}
+
 		// command cooldowns
 		if (command.cooldown) {
 			const NOW = Date.now();
