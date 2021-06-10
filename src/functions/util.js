@@ -16,8 +16,6 @@ const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
  * @returns {string[]}
  */
 function _concatMessageChunks(splitText, { maxLength, char, append, prepend }) {
-	logger.debug({ splitText, maxLength, char, append, prepend })
-
 	const messages = [];
 
 	let msg = '';
@@ -30,8 +28,6 @@ function _concatMessageChunks(splitText, { maxLength, char, append, prepend }) {
 
 		msg += (msg && msg !== prepend ? char : '') + chunk;
 	}
-
-	logger.debug('final', messages.concat(msg).filter(m => m))
 
 	return messages.concat(msg).filter(m => m);
 }
@@ -186,8 +182,6 @@ const self = module.exports = {
 	 * @returns {string[]}
 	 */
 	splitMessage(text, { maxLength = 2_000, char = '\n', prepend = '', append = '' } = {}) {
-		logger.debug({ text, maxLength, char, prepend, append })
-
 		if (text.length <= maxLength) return [ text ];
 
 		let splitText = [ text ];
