@@ -50,7 +50,7 @@ process
 		},
 		intents: [
 			Intents.FLAGS.DIRECT_MESSAGES,
-			Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+			// Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
 			// Intents.FLAGS.DIRECT_MESSAGE_TYPING,
 			Intents.FLAGS.GUILDS,
 			// Intents.FLAGS.GUILD_BANS,
