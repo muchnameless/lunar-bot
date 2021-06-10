@@ -87,9 +87,6 @@ const commonOptions = new Map([ [
 
 
 module.exports = class GuildCommand extends SlashCommand {
-	/**
-	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
-	 */
 	constructor(data) {
 		const guildOption = SlashCommand.guildOptionBuilder(data.client);
 

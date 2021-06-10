@@ -15,7 +15,7 @@ module.exports = class BedWarsFkdrCommand extends BedWarsStatsCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN',
+					description: 'IGN | minecraftUUID',
 					required: false,
 				}],
 				defaultPermission: true,

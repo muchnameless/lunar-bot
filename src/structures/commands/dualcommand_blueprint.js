@@ -5,9 +5,6 @@ const DualCommand = require('../../structures/commands/DualCommand');
 
 
 module.exports = class MyCommand extends DualCommand {
-	/**
-	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
-	 */
 	constructor(data) {
 		super(
 			data,

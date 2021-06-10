@@ -10,9 +10,6 @@ const SlashCommand = require('../../structures/commands/SlashCommand');
 
 
 module.exports = class XpCommand extends SlashCommand {
-	/**
-	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
-	 */
 	constructor(data) {
 		super(data, {
 			aliases: [],

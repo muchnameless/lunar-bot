@@ -7,9 +7,6 @@ const logger = require('../../functions/logger');
 
 
 module.exports = class DonationsCommand extends SlashCommand {
-	/**
-	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
-	 */
 	constructor(data) {
 		super(data, {
 			aliases: [],

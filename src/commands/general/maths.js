@@ -93,9 +93,6 @@ class Parser {
 
 
 module.exports = class MathsCommand extends DualCommand {
-	/**
-	 * @param {import('../../structures/commands/SlashCommand').CommandData} commandData
-	 */
 	constructor(data) {
 		super(
 			data,
