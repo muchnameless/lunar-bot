@@ -5,6 +5,7 @@ const { join, basename } = require('path');
 const { getAllJsFiles } = require('../functions/files');
 const DatabaseManager = require('./database/managers/DatabaseManager');
 const LogHandler = require('./LogHandler');
+const CronJobManager = require('./CronJobManager');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const SlashCommandCollection = require('./commands/SlashCommandCollection');
 const cache = require('../api/cache');
@@ -26,8 +27,8 @@ module.exports = class LunarClient extends Client {
 		this.ownerID = process.env.OWNER ?? null;
 		this.db = new DatabaseManager({ client: this, db: options.db });
 		this.logHandler = new LogHandler(this);
+		this.cronJobs = new CronJobManager(this);
 		this.chatBridges = new ChatBridgeArray(this);
-		/** @type {SlashCommandCollection<string, import('./commands/SlashCommand')>} */
 		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
 	}
 
@@ -41,10 +42,6 @@ module.exports = class LunarClient extends Client {
 
 	get config() {
 		return this.db.modelManagers.config;
-	}
-
-	get cronJobs() {
-		return this.db.modelManagers.cronJobs;
 	}
 
 	get hypixelGuilds() {
@@ -87,8 +84,6 @@ module.exports = class LunarClient extends Client {
 
 	/**
 	 * logs up to 10 embeds to console and via the logging webhook
-	 * @type {Function(...embeds)}
-	 * @param {...string|import('discord.js').MessageEmbed} embeds embeds to log
 	 */
 	get log() {
 		return (...args) => this.logHandler.log(...args);
@@ -96,11 +91,16 @@ module.exports = class LunarClient extends Client {
 
 	/**
 	 * logs an unspecified amount of embeds to console and via the logging webhook
-	 * @type {Function(...embeds)}
-	 * @param {...string|import('discord.js').MessageEmbed} embeds embeds to log
 	 */
 	get logMany() {
 		return arg => this.logHandler.logMany(arg);
+	}
+
+	/**
+	 * starts and caches a cronJob
+	 */
+	get schedule() {
+		return (name, cronJob) => this.cronJobs.schedule(name, cronJob);
 	}
 
 	/**
@@ -120,7 +120,6 @@ module.exports = class LunarClient extends Client {
 
 	/**
 	 * send to ingame chat via the main guild's chatBridge
-	 * @type {Function}
 	 */
 	get chat() {
 		return arg => this.chatBridge.minecraft.sendToChat(arg);
@@ -128,7 +127,6 @@ module.exports = class LunarClient extends Client {
 
 	/**
 	 * send to ingame guild chat via the main guild's chatBridge
-	 * @type {Function}
 	 */
 	get gchat() {
 		return arg => this.chatBridge.minecraft.gchat(arg);
@@ -193,17 +191,6 @@ module.exports = class LunarClient extends Client {
 			content,
 			split: { char: ' ' },
 		});
-	}
-
-	/**
-	 * starts and caches a cronJob
-	 * @param {string} name
-	 * @param {import('cron').CronJob} cronJob
-	 */
-	schedule(name, cronJob) {
-		if (!cronJob.running) cronJob.start();
-
-		this.cronJobs.cache.set(name, cronJob);
 	}
 
 	/**

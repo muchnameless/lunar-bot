@@ -9,12 +9,10 @@ const { DEFAULT_CONFIG } = require('../../../constants/database');
 const { asyncFilter, safePromiseAll } = require('../../../functions/util');
 const hypixel = require('../../../api/hypixel');
 const ConfigManager = require('./ConfigManager');
-const CronJobManager = require('./CronJobManager');
 const HypixelGuildManager = require('./HypixelGuildManager');
 const PlayerManager = require('./PlayerManager');
 const TaxCollectorManager = require('./TaxCollectorManager');
 const Config = require('../models/Config');
-const CronJob = require('../models/CronJob');
 const HypixelGuild = require('../models/HypixelGuild');
 const Player = require('../models/Player');
 const TaxCollector = require('../models/TaxCollector');
@@ -32,7 +30,6 @@ module.exports = class DatabaseManager {
 
 		this.modelManagers = {
 			config: new ConfigManager({ client, model: Config }),
-			cronJobs: new CronJobManager({ client, model: CronJob }),
 			hypixelGuilds: new HypixelGuildManager({ client, model: HypixelGuild }),
 			players: new PlayerManager({ client, model: Player }),
 			taxCollectors: new TaxCollectorManager({ client, model: TaxCollector }),

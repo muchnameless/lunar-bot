@@ -34,9 +34,6 @@ module.exports = async (client) => {
 
 	client.db.schedule();
 
-	// resume command cron jobs
-	await client.cronJobs.resume().catch(logger.error);
-
 	// set presence again every 20 min cause it get's lost sometimes
 	client.setInterval(async () => {
 		try {
