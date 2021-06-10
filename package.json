@@ -26,7 +26,6 @@
     "dotenv": "^10.0.0",
     "emoji-regex": "^9.2.2",
     "form-data": "^4.0.0",
-    "ioredis": "^4.27.5",
     "jaro-winkler": "^0.2.8",
     "keyv": "^4.0.3",
     "lex": "^1.7.9",
@@ -47,10 +46,10 @@
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.14.4",
-    "@babel/eslint-plugin": "^7.13.16",
+    "@babel/eslint-parser": "^7.14.5",
+    "@babel/eslint-plugin": "^7.14.5",
     "@babel/plugin-syntax-class-properties": "^7.12.13",
-    "@babel/preset-env": "^7.14.4",
+    "@babel/preset-env": "^7.14.5",
     "eslint": "^7.28.0"
   }
 }

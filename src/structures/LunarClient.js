@@ -7,7 +7,6 @@ const DatabaseManager = require('./database/managers/DatabaseManager');
 const LogHandler = require('./LogHandler');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const SlashCommandCollection = require('./commands/SlashCommandCollection');
-const RedisListener = require('./RedisListener');
 const cache = require('../api/cache');
 const logger = require('../functions/logger');
 
@@ -30,7 +29,6 @@ module.exports = class LunarClient extends Client {
 		this.chatBridges = new ChatBridgeArray(this);
 		/** @type {SlashCommandCollection<string, import('./commands/SlashCommand')>} */
 		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
-		this.redisListener = new RedisListener(this, process.env.REDIS_URI);
 	}
 
 	set webhook(value) {
@@ -265,7 +263,6 @@ module.exports = class LunarClient extends Client {
 			let output = await Promise.allSettled([
 				this.db.sequelize.close(),
 				cache.opts.store.redis.quit(),
-				this.redisListener.redis.quit(),
 			]);
 
 			if (output.some(({ status }) => status === 'rejected')) throw output;
