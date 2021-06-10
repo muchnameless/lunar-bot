@@ -1,6 +1,6 @@
 'use strict';
 
-const { Util: { splitMessage, escapeCodeBlock }, Permissions } = require('discord.js');
+const { Util: { escapeCodeBlock }, Permissions } = require('discord.js');
 const { commaListsAnd } = require('common-tags');
 const { promisify } = require('util');
 const ms = require('ms');
@@ -9,6 +9,32 @@ const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
 const logger = require('./logger');
 
 const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
+
+/**
+ * @param {string[]} splitText
+ * @param {import('discord.js').SplitOptions} [options] Options controlling the behavior of the split
+ * @returns {string[]}
+ */
+function _concatMessageChunks(splitText, { maxLength, char, append, prepend }) {
+	logger.debug({ splitText, maxLength, char, append, prepend })
+
+	const messages = [];
+
+	let msg = '';
+
+	for (const chunk of splitText) {
+		if (msg && `${msg}${char}${chunk}${append}`.length > maxLength) {
+			messages.push(`${msg}${append}`);
+			msg = prepend;
+		}
+
+		msg += (msg && msg !== prepend ? char : '') + chunk;
+	}
+
+	logger.debug('final', messages.concat(msg).filter(m => m))
+
+	return messages.concat(msg).filter(m => m);
+}
 
 
 const self = module.exports = {
@@ -160,6 +186,8 @@ const self = module.exports = {
 	 * @returns {string[]}
 	 */
 	splitMessage(text, { maxLength = 2_000, char = '\n', prepend = '', append = '' } = {}) {
+		logger.debug({ text, maxLength, char, prepend, append })
+
 		if (text.length <= maxLength) return [ text ];
 
 		let splitText = [ text ];
@@ -177,7 +205,7 @@ const self = module.exports = {
 
 							if (!matched) return chunk;
 
-							return matched.map(match => self._concatMessageChunks(chunk.split(match), { maxLength, char: match, prepend, append }));
+							return matched.map(match => _concatMessageChunks(chunk.split(match), { maxLength, char: match, prepend, append }));
 						}
 
 						// no global flag
@@ -185,10 +213,10 @@ const self = module.exports = {
 
 						if (!matched) return chunk;
 
-						return self._concatMessageChunks(chunk.split(matched), { maxLength, char: matched, prepend, append });
+						return _concatMessageChunks(chunk.split(matched), { maxLength, char: matched, prepend, append });
 					});
 				} else {
-					splitText = splitText.flatMap(chunk => (chunk.length > maxLength ? self._concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append }) : chunk));
+					splitText = splitText.flatMap(chunk => (chunk.length > maxLength ? _concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append }) : chunk));
 				}
 			}
 
@@ -201,28 +229,7 @@ const self = module.exports = {
 
 		if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
 
-		return self._concatMessageChunks(splitText, { maxLength, char, append, prepend });
-	},
-
-	/**
-	 * @param {string[]} splitText
-	 * @param {import('discord.js').SplitOptions} [options] Options controlling the behavior of the split
-	 * @returns {string[]}
-	 */
-	_concatMessageChunks(splitText, { maxLength, char, append, prepend }) {
-		const messages = [];
-
-		let msg = '';
-
-		for (const chunk of splitText) {
-			if (msg && `${msg}${char}${chunk}${append}`.length > maxLength) {
-				messages.push(`${msg}${append}`);
-				msg = prepend;
-			}
-
-			msg += (msg && msg !== prepend ? char : '') + chunk;
-		}
-		return messages.concat(msg).filter(m => m);
+		return _concatMessageChunks(splitText, { maxLength, char, append, prepend });
 	},
 
 	/**
@@ -235,11 +242,7 @@ const self = module.exports = {
 	splitForEmbedFields(input, code = '', char = '\n', formatter = escapeCodeBlock) {
 		const TO_SPLIT = `\`\`\`${code}\n${formatter(input)}\`\`\``;
 
-		try {
-			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char, prepend: `\`\`\`${code}\n`, append: '```' });
-		} catch {
-			return splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char: '', prepend: `\`\`\`${code}\n`, append: '```' });
-		}
+		return self.splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char: [ char, '' ], prepend: `\`\`\`${code}\n`, append: '```' });
 	},
 
 	/**
