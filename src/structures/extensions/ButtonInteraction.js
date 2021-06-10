@@ -1,11 +1,11 @@
 'use strict';
 
 const { basename } = require('path');
-const { Structures, CommandInteraction, Permissions, APIMessage } = require('discord.js');
+const { Structures, ButtonInteraction, Permissions, APIMessage } = require('discord.js');
 const logger = require('../../functions/logger');
 
 
-class LunarCommandInteraction extends CommandInteraction {
+class LunarButtonInteraction extends ButtonInteraction {
 	constructor(...args) {
 		super(...args);
 
@@ -24,37 +24,8 @@ class LunarCommandInteraction extends CommandInteraction {
 		 * wether to use ephemeral replies and deferring
 		 */
 		this.useEphemeral = channel !== null && channel.type !== 'dm'
-			? !(channel.name.includes('command') || channel.isTicket || !(this.options.get('ephemeral')?.value ?? true)) // guild channel
+			? !(channel.name.includes('command') || channel.isTicket) // guild channel
 			: false; // DM channel
-	}
-
-	/**
-	 * @param {import('discord.js').ApplicationCommandOptionData} option
-	 */
-	static isSubCommandOption(option) {
-		return (option?.type === 'SUB_COMMAND' || option.type === 'SUB_COMMAND_GROUP') ?? false;
-	}
-
-	/**
-	 * @param {import('discord.js').CommandInteractionOption[]} options
-	 */
-	static stringifyOptions(options) {
-		return options
-			?.reduce(
-				(acc, cur) => {
-					if (LunarCommandInteraction.isSubCommandOption(cur)) {
-						return `${acc} ${cur.name}${this.stringifyOptions(cur.options)}`;
-					}
-
-					return `${acc} ${cur.name}: ${cur.value}`;
-				},
-				'',
-			)
-			?? '';
-	}
-
-	get logInfo() {
-		return `${this.commandName}${LunarCommandInteraction.stringifyOptions(this.options)}`;
 	}
 
 	/**
@@ -62,14 +33,6 @@ class LunarCommandInteraction extends CommandInteraction {
 	 */
 	get author() {
 		return this.user;
-	}
-
-	/**
-	 * appends the first option name if the command is a sub command or sub command group
-	 */
-	get fullCommandName() {
-		const firstOption = this.options?.first();
-		return `${this.commandName}${LunarCommandInteraction.isSubCommandOption(firstOption) ? ` ${firstOption.name}` : ''}`;
 	}
 
 	/**
@@ -181,13 +144,13 @@ class LunarCommandInteraction extends CommandInteraction {
 		if (!this.channel?.botPermissions.has(Permissions.FLAGS.ADD_REACTIONS)) return null;
 
 		try {
-			return (await this.fetchReply()).react(...emojis);
+			return await this.message.react(...emojis);
 		} catch (error) {
 			return logger.error('[MESSAGE REACT]', error);
 		}
 	}
 }
 
-Structures.extend(basename(__filename, '.js'), () => LunarCommandInteraction);
+Structures.extend(basename(__filename, '.js'), () => LunarButtonInteraction);
 
-module.exports = LunarCommandInteraction;
+module.exports = LunarButtonInteraction;

@@ -4,7 +4,7 @@ declare module 'discord.js' {
 		// author: import('./src/structures/extensions/User');
 	}
 
-	interface CommandInteraction {
+	interface Interaction {
 		client: import('./src/structures/LunarClient');
 	}
 

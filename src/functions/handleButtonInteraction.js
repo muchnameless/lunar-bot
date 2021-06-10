@@ -1,12 +1,13 @@
 'use strict';
 
-const logger = require('./logger');
+const { handleLeaderboardButtonInteraction } = require('./leaderboards');
+const { LB_KEY } = require('../constants/redis');
+// const logger = require('./logger');
 
 
 /**
- * @param {import('discord.js').MessageComponentInteraction} interaction
+ * @param {import('discord.js').ButtonInteraction} interaction
  */
 module.exports = (interaction) => {
-	logger.debug(interaction);
-	interaction.deferUpdate();
+	if (interaction.customID.startsWith(LB_KEY)) return handleLeaderboardButtonInteraction(interaction);
 };

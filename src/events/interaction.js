@@ -14,11 +14,6 @@ module.exports = async (client, interaction) => {
 	// commands
 	if (interaction.isCommand()) return handleCommandInteraction(interaction);
 
-	// message components
-	if (interaction.isMessageComponent()) {
-		switch (interaction.componentType) {
-			case 'BUTTON':
-				return handleButtonInteraction(interaction);
-		}
-	}
+	// buttons
+	if (interaction.isButton()) return handleButtonInteraction(interaction);
 };
