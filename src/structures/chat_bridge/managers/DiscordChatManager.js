@@ -218,7 +218,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		await this.queue.wait();
 
-		const discordMessage = await hypixelMessage?.discordMessage?.catch(logger.error);
+		const discordMessage = await hypixelMessage?.discordMessage.catch(logger.error);
 
 		try {
 			return await this.channel.send({
