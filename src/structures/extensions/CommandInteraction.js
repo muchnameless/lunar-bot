@@ -144,11 +144,17 @@ class LunarCommandInteraction extends CommandInteraction {
 	 * @param {import('./Message')} [messageInput]
 	 */
 	async _handleReplyMessage({ ephemeral, content }, messageInput) {
-		if (ephemeral || !content || this.client.chatBridges.channelIDs.has(this.channelID)) return;
+		if (ephemeral || !content || !this.client.chatBridges.channelIDs.has(this.channelID)) return;
 
 		const message = messageInput ?? await this.fetchReply();
 
-		this.client.chatBridges.handleDiscordMessage(message, { checkifNotFromBot: false });
+		this.client.chatBridges.handleDiscordMessage(
+			message,
+			{
+				player: this.user.player,
+				checkifNotFromBot: false,
+			},
+		);
 	}
 
 	/**
