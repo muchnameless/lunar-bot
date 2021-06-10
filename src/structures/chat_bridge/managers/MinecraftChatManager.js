@@ -1,11 +1,11 @@
 'use strict';
 
-const { MessageEmbed, Util: { splitMessage }, SnowflakeUtil } = require('discord.js');
+const { MessageEmbed, SnowflakeUtil } = require('discord.js');
 const { AsyncQueue } = require('@sapphire/async-queue');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const emojiRegex = require('emoji-regex/es2015')();
-const { sleep, trim, cleanFormattedNumber } = require('../../../functions/util');
+const { sleep, trim, cleanFormattedNumber, splitMessage } = require('../../../functions/util');
 const { unicodeToName } = require('../constants/emojiNameUnicodeConverter');
 const { memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
 const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
@@ -441,7 +441,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	_hypixelSpamBypass(string, prefix = '') {
 		// string is already at or above max length
-		if (string.length + prefix.length >= MinecraftChatManager.MAX_MESSAGE_LENGTH) return trim(string, MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length);
+		if (string.length + prefix.length >= MinecraftChatManager.MAX_MESSAGE_LENGTH) return trim(`${prefix}${string}`, MinecraftChatManager.MAX_MESSAGE_LENGTH);
 
 		// padding failed at least once -> splice the entire input string with random invisible chars
 		if (this.retries) {
@@ -568,18 +568,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		let success = true;
 
 		/** @type {Set<string>} */
-		const messageParts = new Set(
+		const contentParts = new Set(
 			this.parseContent(content)
 				.split('\n')
-				.flatMap((part) => {
-					if (!part.length) return '';
-
-					try {
-						return splitMessage(part, { char: ' ', maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length });
-					} catch { // fallback in case the splitMessage throws if it doesn't contain any ' '
-						return splitMessage(part, { char: '', maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length });
-					}
-				})
+				.flatMap(part => splitMessage(part, { char: [ ' ', '' ], maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length }))
 				.filter((part) => {
 					if (nonWhiteSpaceRegExp.test(part)) { // filter out white space only parts
 						if (blockedWordsRegExp.test(part) || memeRegExp.test(part)) {
@@ -600,15 +592,15 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			return false;
 		}
 
-		if (!messageParts.size) return false;
+		if (!contentParts.size) return false;
 
-		if (messageParts.size > maxParts) {
+		if (contentParts.size > maxParts) {
 			this._handleForwardRejection(discordMessage, 'messageCount', { maxParts });
 			return false;
 		}
 
 		// waits between queueing each part to not clog up the queue if someone spams
-		for (const part of messageParts) {
+		for (const part of contentParts) {
 			success = await this.sendToChat({ content: part, prefix, discordMessage, shouldUseSpamByPass: true }) && success;
 		}
 
