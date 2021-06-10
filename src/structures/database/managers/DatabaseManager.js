@@ -315,7 +315,9 @@ module.exports = class DatabaseManager {
 		if (taxMessage.embeds[0]?.description === taxEmbed.description && isEqual(taxMessage.embeds[0].fields, taxEmbed.fields)) return; // no changes to taxMessage
 
 		try {
-			await taxMessage.edit(taxEmbed);
+			await taxMessage.edit({
+				embed: taxEmbed,
+			});
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 		} catch (error) {
 			logger.error('[TAX MESSAGE]', error);
