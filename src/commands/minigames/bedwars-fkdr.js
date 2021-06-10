@@ -1,18 +1,32 @@
 'use strict';
 
-const BwStatsCommand = require('./bedwars-stats');
+const { Constants } = require('discord.js');
+const BedWarsStatsCommand = require('./bedwars-stats');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class FkdrCommand extends BwStatsCommand {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'fkdr' ],
-			description: 'shows a player\'s BedWars fkdr',
-			args: false,
-			usage: '<`IGN`>',
-			cooldown: 1,
-		});
+module.exports = class BedWarsFkdrCommand extends BedWarsStatsCommand {
+	constructor(data) {
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'shows a player\'s BedWars fkdr',
+				options: [{
+					name: 'ign',
+					type: Constants.ApplicationCommandOptionTypes.STRING,
+					description: 'IGN',
+					required: false,
+				}],
+				defaultPermission: true,
+				cooldown: 1,
+			},
+			{
+				aliases: [ 'fkdr' ],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	/**

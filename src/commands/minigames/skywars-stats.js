@@ -1,20 +1,34 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
 const { getSkyWarsLevelInfo } = require('@zikeji/hypixel');
-const BwStatsCommand = require('./bedwars-stats');
+const BedWarsStatsCommand = require('./bedwars-stats');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class SwStatsCommand extends BwStatsCommand {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'swstats' ],
-			description: 'shows a player\'s SkyWars stats',
-			args: false,
-			usage: '<`IGN`>',
-			cooldown: 1,
-		});
+module.exports = class SkyWarsStatsCommand extends BedWarsStatsCommand {
+	constructor(data) {
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'shows a player\'s SkyWars stats',
+				options: [{
+					name: 'ign',
+					type: Constants.ApplicationCommandOptionTypes.STRING,
+					description: 'IGN',
+					required: false,
+				}],
+				defaultPermission: true,
+				cooldown: 1,
+			},
+			{
+				aliases: [ 'swstats' ],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	/**

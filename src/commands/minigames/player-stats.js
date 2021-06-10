@@ -1,22 +1,36 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
 const { getPlayerRank, getNetworkLevel } = require('@zikeji/hypixel');
 const { getUuidAndIgn } = require('../../functions/input');
 const hypixel = require('../../api/hypixel');
-const Command = require('../../structures/commands/Command');
+const DualCommand = require('../../structures/commands/DualCommand');
 const logger = require('../../functions/logger');
 
 
-module.exports = class PlayerCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'player' ],
-			description: 'shows a player\'s hypixel stats',
-			args: false,
-			usage: '<`IGN`>',
-			cooldown: 1,
-		});
+module.exports = class PlayerCommand extends DualCommand {
+	constructor(data) {
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'shows a player\'s hypixel stats',
+				options: [{
+					name: 'ign',
+					type: Constants.ApplicationCommandOptionTypes.STRING,
+					description: 'IGN',
+					required: false,
+				}],
+				defaultPermission: true,
+				cooldown: 0,
+			},
+			{
+				aliases: [ 'player' ],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	/**
@@ -57,12 +71,12 @@ module.exports = class PlayerCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {string} [ignOrUuid]
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async _run(ctx, ignOrUuid) {
 		try {
-			const { uuid, ign } = await getUuidAndIgn(message, args);
+			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const [ player, guild, friends, status ] = await Promise.all([
 				hypixel.player.uuid(uuid),
 				hypixel.guild.player(uuid),
@@ -70,11 +84,30 @@ module.exports = class PlayerCommand extends Command {
 				hypixel.status.uuid(uuid),
 			]);
 
-			return message.reply(this.generateReply(ign, player, guild, friends, status));
+			return ctx.reply(this.generateReply(ign, player, guild, friends, status));
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
-			return message.reply(`${error}`);
+			return ctx.reply(`${error}`);
 		}
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 */
+	async run(interaction) {
+		interaction.defer();
+
+		return this._run(interaction, interaction.options.get('ign')?.value);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 */
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+		return this._run(message, ...args);
 	}
 };

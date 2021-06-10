@@ -1,22 +1,36 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
 const { getBedwarsLevelInfo } = require('@zikeji/hypixel');
 const { getUuidAndIgn } = require('../../functions/input');
 const hypixel = require('../../api/hypixel');
-const Command = require('../../structures/commands/Command');
+const DualCommand = require('../../structures/commands/DualCommand');
 const logger = require('../../functions/logger');
 
 
-module.exports = class BwStatsCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'bwstats' ],
-			description: 'shows a player\'s BedWars stats',
-			args: false,
-			usage: '<`IGN`>',
-			cooldown: 1,
-		});
+module.exports = class BedWarsStatsCommand extends DualCommand {
+	constructor(data, param1, param2) {
+		super(
+			data,
+			param1 ?? {
+				aliases: [],
+				description: 'shows a player\'s BedWars stats',
+				options: [{
+					name: 'ign',
+					type: Constants.ApplicationCommandOptionTypes.STRING,
+					description: 'IGN',
+					required: false,
+				}],
+				defaultPermission: true,
+				cooldown: 1,
+			},
+			param2 ?? {
+				aliases: [ 'bwstats' ],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	/**
@@ -59,19 +73,38 @@ module.exports = class BwStatsCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {string} [ignOrUuid]
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async _run(ctx, ignOrUuid) {
 		try {
-			const { uuid, ign } = await getUuidAndIgn(message, args);
+			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const data = await hypixel.player.uuid(uuid);
 
-			return message.reply(this.generateReply(ign, data));
+			return ctx.reply(this.generateReply(ign, data));
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
-			return message.reply(`${error}`);
+			return ctx.reply(`${error}`);
 		}
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 */
+	async run(interaction) {
+		interaction.defer();
+
+		return this._run(interaction, interaction.options.get('ign')?.value);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 */
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+		return this._run(message, ...args);
 	}
 };

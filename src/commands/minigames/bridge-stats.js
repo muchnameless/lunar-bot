@@ -1,19 +1,33 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
-const BwStatsCommand = require('./bedwars-stats');
+const BedWarsStatsCommand = require('./bedwars-stats');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class BridgeStatsCommand extends BwStatsCommand {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'bridge' ],
-			description: 'shows a player\'s Bridge stats',
-			args: false,
-			usage: '<`IGN`>',
-			cooldown: 1,
-		});
+module.exports = class BridgeStatsCommand extends BedWarsStatsCommand {
+	constructor(data) {
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'shows a player\'s Bridge stats',
+				options: [{
+					name: 'ign',
+					type: Constants.ApplicationCommandOptionTypes.STRING,
+					description: 'IGN',
+					required: false,
+				}],
+				defaultPermission: true,
+				cooldown: 1,
+			},
+			{
+				aliases: [ 'bridge' ],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	/**

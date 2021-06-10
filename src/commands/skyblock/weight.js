@@ -93,7 +93,7 @@ module.exports = class WeightCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		return this._run(interaction, interaction.options.get('ign')?.value, interaction.options.get('profile')?.value);
 	}
 
@@ -102,7 +102,7 @@ module.exports = class WeightCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message, args) {
 		return this._run(message, ...args);
 	}
 };
