@@ -366,18 +366,12 @@ module.exports = class GuildCommand extends SlashCommand {
 				const { players } = this.client;
 				const TARGET_INPUT = options.get('target').value;
 				const DURATION_INPUT = options.get('duration').value;
-				const hypixelGuild = this.getHypixelGuild(options, interaction);
 
+				let hypixelGuild = this.getHypixelGuild(options, interaction);
 				let target;
 
 				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 					target = 'everyone';
-					hypixelGuild ??= interaction.user.hypixelGuild;
-
-					if (!hypixelGuild) return interaction.reply({
-						content: `unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`,
-						ephemeral: true,
-					});
 				} else {
 					target = this.getPlayer(options) ?? (SlashCommand.checkForce(options) && TARGET_INPUT);
 
@@ -391,13 +385,6 @@ module.exports = class GuildCommand extends SlashCommand {
 
 						if (!hypixelGuild) return interaction.reply({
 							content: `unable to find the guild for \`${target.ign}\``,
-							ephemeral: true,
-						});
-					} else {
-						hypixelGuild ??= interaction.user.hypixelGuild;
-
-						if (!hypixelGuild) return interaction.reply({
-							content: `unable to find ${hypixelGuildInput ? `a guild with the name \`${hypixelGuildInput}\`` : 'your guild'}`,
 							ephemeral: true,
 						});
 					}
@@ -462,30 +449,12 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				const { players } = this.client;
 				const TARGET_INPUT = options.get('target').value;
-				const HYPIXEL_GUILD_INPUT = options.get('guild')?.value;
 
-				/**
-				 * @type {import('../../structures/database/models/HypixelGuild')}
-				 */
-				let hypixelGuild = HYPIXEL_GUILD_INPUT
-					? (() => {
-						const { value, similarity } = this.client.hypixelGuilds.autocorrectToGuild(HYPIXEL_GUILD_INPUT);
-
-						if (similarity <= this.config.get('AUTOCORRECT_THRESHOLD')) return null;
-
-						return value;
-					})()
-					: null;
+				let hypixelGuild = this.getHypixelGuild(options, interaction);
 				let target;
 
 				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 					target = 'everyone';
-					hypixelGuild ??= interaction.user.hypixelGuild;
-
-					if (!hypixelGuild) return interaction.reply({
-						content: `unable to find ${HYPIXEL_GUILD_INPUT ? `a guild with the name \`${HYPIXEL_GUILD_INPUT}\`` : 'your guild'}`,
-						ephemeral: true,
-					});
 				} else {
 					target = this.getPlayer(options) ?? (SlashCommand.checkForce(options) && TARGET_INPUT);
 
@@ -499,13 +468,6 @@ module.exports = class GuildCommand extends SlashCommand {
 
 						if (!hypixelGuild) return interaction.reply({
 							content: `unable to find the guild for \`${target.ign}\``,
-							ephemeral: true,
-						});
-					} else {
-						hypixelGuild ??= interaction.user.hypixelGuild;
-
-						if (!hypixelGuild) return interaction.reply({
-							content: `unable to find ${HYPIXEL_GUILD_INPUT ? `a guild with the name \`${HYPIXEL_GUILD_INPUT}\`` : 'your guild'}`,
 							ephemeral: true,
 						});
 					}
