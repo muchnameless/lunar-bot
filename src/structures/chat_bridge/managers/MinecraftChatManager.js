@@ -514,7 +514,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	async gchat(contentOrOptions) {
 		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
 
-		if (this.bot.player.muted) {
+		if (this.bot.player?.muted) {
 			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) {
 				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.mutedTill - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${options.content}`);
 			}
