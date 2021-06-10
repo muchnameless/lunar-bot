@@ -63,7 +63,7 @@ process
 			// Intents.FLAGS.GUILD_MESSAGE_TYPING,
 			// Intents.FLAGS.GUILD_PRESENCES,
 			// Intents.FLAGS.GUILD_VOICE_STATES,
-			Intents.FLAGS.GUILD_WEBHOOKS,
+			// Intents.FLAGS.GUILD_WEBHOOKS,
 		],
 	});
 
