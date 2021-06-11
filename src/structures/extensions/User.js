@@ -35,6 +35,15 @@ class LunarUser extends User {
 	get hypixelGuild() {
 		return this.player?.guild ?? null;
 	}
+
+	/**
+	 * Creates a DM channel between the client and this user if the user is not a bot
+	 * @param {boolean} [force=false]
+	 */
+	async createDM(force) {
+		if (this.bot) throw new Error(`${this.tag} is a bot and can't be DMed`);
+		return super.createDM(force);
+	}
 }
 
 Structures.extend(basename(__filename, '.js'), () => LunarUser);
