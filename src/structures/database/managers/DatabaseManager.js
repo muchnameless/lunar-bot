@@ -300,7 +300,9 @@ module.exports = class DatabaseManager {
 		if (!taxMessage || taxMessage.deleted) { // taxMessage deleted
 			try {
 				const { id } = await taxChannel.send({
-					embed: taxEmbed,
+					embeds: [
+						taxEmbed,
+					],
 				});
 
 				config.set('TAX_MESSAGE_ID', id);
@@ -313,7 +315,9 @@ module.exports = class DatabaseManager {
 
 		try {
 			await taxMessage.edit({
-				embed: taxEmbed,
+				embeds: [
+					taxEmbed,
+				],
 			});
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 		} catch (error) {

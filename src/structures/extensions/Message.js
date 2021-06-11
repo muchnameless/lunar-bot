@@ -204,7 +204,6 @@ class LunarMessage extends Message {
 
 		// analyze input and create (content, options)-argument
 		const options = {
-			embed: null,
 			sameChannel: false,
 			saveReplyMessageID: true,
 			editPreviousMessage: true,
@@ -226,10 +225,8 @@ class LunarMessage extends Message {
 		// guild -> requires permission
 		let requiredChannelPermissions = LunarMessage.DEFAULT_COMMAND_CHANNEL_PERMISSIONS;
 
-		if (options.embed) {
-			requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
-			if (options.embed.files?.length) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
-		}
+		if (Reflect.has(options, 'embeds')) requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
+		if (Reflect.has(options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
 
 		// commands channel / reply in same channel option or flag
 		if (this.channel.name.includes('commands') || options.sameChannel || this.shouldReplyInSameChannel) {
@@ -394,6 +391,27 @@ class LunarMessage extends Message {
 		const { content, ...options } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
+
+		// permission checks
+		let requiredChannelPermissions = LunarMessage.DEFAULT_COMMAND_CHANNEL_PERMISSIONS;
+
+		if (Reflect.has(options, 'embeds')) requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
+		if (Reflect.has(options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
+
+		if (!this.channel.botPermissions.has(requiredChannelPermissions)) {
+			const missingChannelPermissions = this.channel.botPermissions
+				.missing(requiredChannelPermissions)
+				.map(permission => `'${permission}'`);
+			const errorMessage = commaListsAnd`missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
+
+			logger.warn(`${errorMessage} #${this.channel.name}`);
+
+			this.author
+				.send(`${errorMessage} ${this.channel}`)
+				.catch(() => logger.error(`[EDIT]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
+
+			return null;
+		}
 
 		if (!content) return super.edit(options);
 
