@@ -450,11 +450,7 @@ const self = module.exports = {
 			}
 
 			default: {
-				title = {
-					zombie: 'Revenant XP Gained Leaderboard',
-					spider: 'Tarantula XP Gained Leaderboard',
-					wolf: 'Sven XP Gained Leaderboard',
-				}[xpType] ?? `${upperCaseFirstChar(xpType)} XP Gained Leaderboard`;
+				title = `${upperCaseFirstChar(xpType)} XP Gained Leaderboard`;
 				const XP_ARGUMENT = `${xpType}Xp${CURRENT_OFFSET}`;
 				const OFFSET_ARGUMENT = `${xpType}Xp${offset}`;
 				dataConverter = player => ({
@@ -619,13 +615,9 @@ const self = module.exports = {
 			case 'zombie':
 			case 'spider':
 			case 'wolf':
+			case 'enderman':
 			case 'guild': {
-				title = `${{
-						zombie: 'Revenant',
-						spider: 'Tarantula',
-						wolf: 'Sven',
-						guild: 'Guild',
-					}[xpType]} XP Leaderboard`;
+				title = `${upperCaseFirstChar(xpType)} XP Leaderboard`;
 				const XP_ARGUMENT = `${xpType}Xp${offset}`;
 				dataConverter = player => ({
 					ign: player.ign,
