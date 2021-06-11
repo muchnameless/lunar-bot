@@ -11,11 +11,6 @@ const logger = require('../functions/logger');
 module.exports = async (client) => {
 	logger.debug(`[READY]: logged in as ${client.user.tag}`);
 
-	// client.commands.init(client.lgGuild.commands).catch((err) => {
-	// 	logger.error(err);
-	// 	logger.error(err.requestData.json.flatMap(x => [ x.name, x.options ]));
-	// })
-
 	await client.logHandler.init();
 
 	// Fetch all members for initially available guilds
