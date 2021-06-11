@@ -44,7 +44,7 @@ module.exports = class DocsCommand extends Command {
 		);
 
 		message.reply(embed
-			? { embed }
+			? { embeds: [ embed ] }
 			: 'no response from the discord.js-docs-api.',
 		);
 	}

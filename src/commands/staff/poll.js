@@ -132,10 +132,12 @@ module.exports = class PollCommand extends DualCommand {
 
 			// reply with result
 			discordChannel.send({
-				embed: this.client.defaultEmbed
-					.setTitle(question)
-					.setDescription(resultString.join('\n\n'))
-					.setFooter(`Poll by ${ign}`),
+				embeds: [
+					this.client.defaultEmbed
+						.setTitle(question)
+						.setDescription(resultString.join('\n\n'))
+						.setFooter(`Poll by ${ign}`),
+				],
 			});
 
 			resultString.unshift(question);

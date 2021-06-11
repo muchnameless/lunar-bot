@@ -75,6 +75,6 @@ module.exports = class RankIssuesCommand extends Command {
 
 		embed.setTitle(`Rank Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);
 
-		message.reply({ embed });
+		message.reply({ embeds: [ embed ] });
 	}
 };

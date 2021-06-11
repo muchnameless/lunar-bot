@@ -138,6 +138,6 @@ module.exports = class LinkIssuesCommand extends Command {
 
 		embed.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);
 
-		message.reply({ embed });
+		message.reply({ embeds: [ embed ] });
 	}
 };
