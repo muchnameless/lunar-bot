@@ -135,8 +135,10 @@ module.exports = class TrackCommand extends SlashCommand {
 				this.client.defaultEmbed
 					.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
 					.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
-					.attachFiles(new MessageAttachment(image))
 					.setImage('attachment://file.jpg'),
+			],
+			files: [
+				new MessageAttachment(image),
 			],
 		});
 	}
