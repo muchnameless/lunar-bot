@@ -185,8 +185,40 @@ const self = module.exports = {
 			: await cache.get(CACHE_KEY);
 
 		if (!embeds) {
-			return interaction.update({
-				components: null,
+			await interaction.update({
+				components: [ new MessageActionRow()
+					.addComponents(
+						new MessageButton()
+							.setCustomID(`${CACHE_KEY}:${page}:${DOUBLE_LEFT_EMOJI}`)
+							.setEmoji(DOUBLE_LEFT_EMOJI)
+							.setStyle(Constants.MessageButtonStyles.SECONDARY)
+							.setDisabled(true),
+						new MessageButton()
+							.setCustomID(`${CACHE_KEY}:${page}:${LEFT_EMOJI}`)
+							.setEmoji(LEFT_EMOJI)
+							.setStyle(Constants.MessageButtonStyles.SECONDARY)
+							.setDisabled(true),
+						new MessageButton()
+							.setCustomID(`${CACHE_KEY}:${page}:${RIGHT_EMOJI}`)
+							.setEmoji(RIGHT_EMOJI)
+							.setStyle(Constants.MessageButtonStyles.SECONDARY)
+							.setDisabled(true),
+						new MessageButton()
+							.setCustomID(`${CACHE_KEY}:${page}:${DOUBLE_RIGHT_EMOJI}`)
+							.setEmoji(DOUBLE_RIGHT_EMOJI)
+							.setStyle(Constants.MessageButtonStyles.SECONDARY)
+							.setDisabled(true),
+						new MessageButton()
+							.setCustomID(`${CACHE_KEY}:${page}:${RELOAD_EMOJI}`)
+							.setEmoji(RELOAD_EMOJI)
+							.setStyle(Constants.MessageButtonStyles.DANGER),
+					),
+				],
+			});
+
+			return interaction.reply({
+				content: `leaderboard timed out, use [${RELOAD_EMOJI}](${interaction.message.url}) to refresh the data`,
+				ephemeral: true,
 			});
 		}
 
