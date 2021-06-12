@@ -184,11 +184,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @param {import('../extensions/CommandInteraction')} interaction
 	 */
 	getHypixelGuild(options, interaction) {
-		const hypixelGuild = this.client.hypixelGuilds.cache.get(options?.get('guild')?.value) ?? interaction?.user.player?.guild;
-
-		if (!hypixelGuild) throw `unable to find ${options?.has('guild') ? `a guild with the id \`${options?.get('guild')?.value}\`` : 'your guild'}`;
-
-		return hypixelGuild;
+		return this.client.hypixelGuilds.cache.get(options?.get('guild')?.value) ?? interaction?.user.player?.guild ?? this.client.hypixelGuilds.mainGuild;
 	}
 
 	/**
