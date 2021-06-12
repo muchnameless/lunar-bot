@@ -1,7 +1,8 @@
 'use strict';
 
 const { basename } = require('path');
-const { Structures, CommandInteraction, Permissions, APIMessage } = require('discord.js');
+const { Structures, CommandInteraction, Permissions, APIMessage, MessageActionRow, MessageButton, SnowflakeUtil, Constants, MessageEmbed } = require('discord.js');
+const { Y_EMOJI, X_EMOJI } = require('../../constants/emojiCharacters');
 const logger = require('../../functions/logger');
 
 
@@ -177,6 +178,74 @@ class LunarCommandInteraction extends CommandInteraction {
 			return collected.first().content;
 		} catch {
 			return null;
+		}
+	}
+
+	/**
+	 * confirms the action via a button collector
+	 * @param {string} [question]
+	 * @param {number} [timeoutSeconds=60]
+	 */
+	async awaitConfirmation(question = 'confirm this action?', timeoutSeconds = 60) {
+		try {
+			if (!this.channel) await this.client.channels.fetch(this.channelID);
+
+			const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
+			const CANCLE_ID = `confirm:${SnowflakeUtil.generate()}`;
+
+			await this.reply({
+				embeds: [
+					this.client.defaultEmbed
+						.setDescription(question),
+				],
+				components: [
+					new MessageActionRow()
+						.addComponents(
+							new MessageButton()
+								.setCustomID(SUCCESS_ID)
+								.setStyle(Constants.MessageButtonStyles.SUCCESS)
+								.setEmoji(Y_EMOJI),
+							new MessageButton()
+								.setCustomID(CANCLE_ID)
+								.setStyle(Constants.MessageButtonStyles.DANGER)
+								.setEmoji(X_EMOJI),
+						),
+				],
+			});
+
+			const result = await this.channel.awaitMessageComponentInteraction(
+				interaction => (interaction.user.id === this.user.id && [ SUCCESS_ID, CANCLE_ID ].includes(interaction.customID)
+					? true
+					: (async () => {
+						try {
+							await interaction.reply({
+								content: 'that is not up to you to decide',
+								ephemeral: true,
+							});
+						} catch (error) {
+							logger.error(error);
+						}
+						return false;
+					})()),
+				timeoutSeconds * 1_000,
+			);
+
+			const success = result.customID === SUCCESS_ID;
+
+			result.update({
+				embeds: [
+					new MessageEmbed()
+						.setColor(this.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
+						.setDescription(success ? 'confirmed' : 'cancelled')
+						.setTimestamp(),
+				],
+				components: [],
+			});
+
+			return success;
+		} catch (error) {
+			logger.debug(error);
+			return false;
 		}
 	}
 
