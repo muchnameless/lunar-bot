@@ -29,17 +29,17 @@ module.exports = {
 	},
 
 	SLAYER_DIVIDER: {
-		zombie: 2208,
-		spider: 2118,
-		wolf: 1962,
-		enderman: Infinity,
+		zombie: 2_208,
+		spider: 2_118,
+		wolf: 1_962,
+		enderman: 1_430,
 	},
 
 	SLAYER_MODIFIER: {
 		zombie: 0.15,
 		spider: 0.08,
 		wolf: 0.015,
-		enderman: 0,
+		enderman: 0.017,
 	},
 
 	DUNGEON_EXPONENTS: {
