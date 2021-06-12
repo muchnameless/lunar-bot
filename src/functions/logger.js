@@ -4,119 +4,129 @@ const { createLogger, transports, format } = require('winston');
 const { inspect } = require('util');
 const chalk = require('chalk');
 
-/**
-  * @param {import('logform').TransformableInfo} param0
-  */
-const formatText = ({ timestamp, level, message }) => {
-	let colour;
 
-	switch (level) {
-		case 'error':
-			colour = chalk.red;
-			break;
+class Logger {
+	constructor() {
+		/**
+		 * @type {import('winston').Logger}
+		 */
+		this._logger = createLogger({
+			transports: [
+				new transports.Console({
+					stderrLevels: [ 'error' ],
+				}),
+			],
+			format: format.combine(
+				format.timestamp({
+					format: 'DD.MM.YYYY HH:mm:ss',
+				}),
+				format.printf(Logger._formatText),
+			),
+			exitOnError: false,
+			level: 'debug',
+		})
+			.on('error', (error) => {
+				console.error(error);
+				process.kill(process.pid, 'SIGINT');
+			});
 
-		case 'warn':
-			colour = chalk.yellow;
-			break;
-
-		case 'info':
-			colour = chalk.green;
-			break;
-
-		case 'debug':
-			colour = chalk.blue;
-			break;
-
-		default:
-			colour = x => x;
+		this.depth = Logger.DEFAULT_DEPTH;
 	}
 
-	return `[${timestamp}] [${colour(level.toUpperCase())}]: ${message}`;
-};
+	static DEFAULT_DEPTH = 3;
 
-const logger = createLogger({
-	transports: [
-		new transports.Console({
-			stderrLevels: [ 'error' ],
-		}),
-	],
-	format: format.combine(
-		format.timestamp({
-			format: 'DD.MM.YYYY HH:mm:ss',
-		}),
-		format.printf(formatText),
-	),
-	exitOnError: false,
-	level: 'debug',
-});
+	/**
+	 * @param {import('logform').TransformableInfo} param0
+	 */
+	static _formatText = ({ timestamp, level, message }) => {
+		let colour;
 
-logger.on('error', (error) => {
-	console.error(error);
-	process.kill(process.pid, 'SIGINT');
-});
+		switch (level) {
+			case 'error':
+				colour = chalk.red;
+				break;
 
-const formatInput = input => (typeof input === 'string'
-	? input
-	: inspect(
-		input,
-		{
-			depth: 3,
-			colors: true,
-		},
-	)
-);
+			case 'warn':
+				colour = chalk.yellow;
+				break;
 
-/**
- * extending log method of logger to suppport single argument in log function.
- * @returns {null}
- */
-const log = (...input) => {
-	if (input.length > 1) {
-		const level = input.shift();
-		for (const i of input) logger.log(level, formatInput(i));
-	} else {
-		logger.info(formatInput(input[0]));
+			case 'info':
+				colour = chalk.green;
+				break;
+
+			case 'debug':
+				colour = chalk.blue;
+				break;
+
+			default:
+				colour = x => x;
+		}
+
+		return `[${timestamp}] [${colour(level.toUpperCase())}]: ${message}`;
 	}
-	return null;
-};
 
-/**
- * @returns {null}
- */
-const error = (...input) => {
-	for (const i of input) logger.error(formatInput(i));
-	return null;
-};
+	/**
+	 * strinigifies the input, inspecting non-strings
+	 * @param {*} input
+	 */
+	_formatInput(input) {
+		return typeof input === 'string'
+			? input
+			: inspect(
+				input,
+				{
+					depth: this.depth,
+					colors: true,
+				},
+			);
+	}
 
-/**
- * @returns {null}
- */
-const warn = (...input) => {
-	for (const i of input) logger.warn(formatInput(i));
-	return null;
-};
 
-/**
- * @returns {null}
- */
-const info = (...input) => {
-	for (const i of input) logger.info(formatInput(i));
-	return null;
-};
+	/**
+	 * extending log method of logger to suppport single argument in log function.
+	 * @returns {null}
+	 */
+	log(...input) {
+		if (input.length > 1) {
+			const level = input.shift();
+			for (const i of input) this._logger.log(level, this._formatInput(i));
+		} else {
+			this._logger.info(this._formatInput(input[0]));
+		}
+		return null;
+	}
 
-/**
- * @returns {null}
- */
-const debug = (...input) => {
-	for (const i of input) logger.debug(formatInput(i));
-	return null;
-};
+	/**
+	 * @returns {null}
+	 */
+	error(...input) {
+		for (const i of input) this._logger.error(this._formatInput(i));
+		return null;
+	}
 
-module.exports = {
-	error,
-	warn,
-	info,
-	debug,
-	log,
-	logger,
-};
+	/**
+	 * @returns {null}
+	 */
+	warn(...input) {
+		for (const i of input) this._logger.warn(this._formatInput(i));
+		return null;
+	}
+
+	/**
+	 * @returns {null}
+	 */
+	info(...input) {
+		for (const i of input) this._logger.info(this._formatInput(i));
+		return null;
+	}
+
+	/**
+	 * @returns {null}
+	 */
+	debug(...input) {
+		for (const i of input) this._logger.debug(this._formatInput(i));
+		return null;
+	}
+}
+
+module.exports = new Logger();
