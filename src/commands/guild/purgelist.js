@@ -17,7 +17,7 @@ module.exports = class TopCommand extends SlashCommand {
 				description: 'page number',
 				required: false,
 			},
-			SlashCommand.guildOptionBuilder(data.client),
+			SlashCommand.guildOptionBuilder(data.client, true),
 			],
 			defaultPermission: true,
 			cooldown: 1,

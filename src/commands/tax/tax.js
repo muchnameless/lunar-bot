@@ -68,7 +68,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
 					description: 'wether to immediatly delete the pings after sending them',
 					required: false,
-				}, SlashCommand.guildOptionBuilder(data.client), {
+				}, SlashCommand.guildOptionBuilder(data.client, true), {
 					name: 'exclude',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
 					description: 'IGNs to exclude from the ping',

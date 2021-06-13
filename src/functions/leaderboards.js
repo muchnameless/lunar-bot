@@ -4,7 +4,7 @@ const { stripIndent, oneLine } = require('common-tags');
 const { MessageEmbed, MessageActionRow, MessageButton, Constants } = require('discord.js');
 const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
-const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } = require('../constants/database');
+const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, GUILD_ID_ALL } = require('../constants/database');
 const { LB_KEY } = require('../constants/redis');
 const { upperCaseFirstChar } = require('./util');
 const cache = require('../api/cache');
@@ -36,7 +36,7 @@ const cache = require('../api/cache');
  * returns the key for the redis cache
  * @param {LeaderboardArgs} leaderboardArgs
  */
-const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild: { guildID }, lbType, xpType, offset, shouldShowOnlyBelowReqs }) => `${LB_KEY}:${USER_ID}:${guildID}:${lbType}:${xpType}:${offset}:${shouldShowOnlyBelowReqs}`;
+const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild: { guildID = GUILD_ID_ALL }, lbType, xpType, offset, shouldShowOnlyBelowReqs }) => `${LB_KEY}:${USER_ID}:${guildID}:${lbType}:${xpType}:${offset}:${shouldShowOnlyBelowReqs}`;
 
 /**
  * returns a message action row with pagination buttons
@@ -286,7 +286,7 @@ const self = module.exports = {
 		/** @type {import('../../structures/database/models/Player')[]} */
 		let playerDataRaw;
 
-		if (hypixelGuild) {
+		if (hypixelGuild !== GUILD_ID_ALL) {
 			playerDataRaw = hypixelGuild.players.array();
 			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
 		} else {
@@ -511,7 +511,7 @@ const self = module.exports = {
 		/** @type {import('../../structures/database/models/Player')[]} */
 		let playerDataRaw;
 
-		if (hypixelGuild) {
+		if (hypixelGuild !== GUILD_ID_ALL) {
 			playerDataRaw = hypixelGuild.players.array();
 			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
 		} else {

@@ -2,7 +2,7 @@
 
 const { Constants } = require('discord.js');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
-const { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
+const { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT, GUILD_ID_ALL } = require('../../constants/database');
 const { getIDFromString } = require('../../functions/util');
 const { validateMinecraftUUID } = require('../../functions/stringValidators');
 const BaseCommand = require('./BaseCommand');
@@ -41,17 +41,27 @@ module.exports = class SlashCommand extends BaseCommand {
 		});
 	}
 
-	/**
-	 * @param {import('../LunarClient')} client
-	 */
 	static get guildOptionBuilder() {
-		return client => ({
-			name: 'guild',
-			type: Constants.ApplicationCommandOptionTypes.STRING,
-			description: 'hypixel guild',
-			required: false,
-			choices: client.hypixelGuilds.cache.map(({ guildID, name }) => ({ name, value: guildID })),
-		});
+		/**
+		 * @param {import('../LunarClient')} client
+		 * @param {boolean} [includeAll=false]
+		 */
+		return (client, includeAll = false) => {
+			const choices = client.hypixelGuilds.cache.map(({ guildID, name }) => ({ name, value: guildID }));
+
+			if (includeAll) choices.push({
+				name: 'all',
+				value: GUILD_ID_ALL,
+			});
+
+			return ({
+				name: 'guild',
+				type: Constants.ApplicationCommandOptionTypes.STRING,
+				description: 'hypixel guild',
+				required: false,
+				choices,
+			});
+		};
 	}
 
 	static get FORCE_OPTION() {
@@ -73,12 +83,34 @@ module.exports = class SlashCommand extends BaseCommand {
 	}
 
 	static get XP_TYPE_OPTION() {
+		const choices = [ 'weight', 'skill', ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses ].map(x => ({ name: x, value: x }));
+
+		choices.push({
+			name: 'revenant',
+			value: 'zombie',
+		}, {
+			name: 'tarantula',
+			value: 'spider',
+		}, {
+			name: 'sven',
+			value: 'wolf',
+		}, {
+			name: 'voidgloom',
+			value: 'enderman',
+		}, {
+			name: 'skill-average',
+			value: 'skill',
+		}, {
+			name: 'dungeon',
+			value: 'catacombs',
+		});
+
 		return {
 			name: 'type',
 			type: Constants.ApplicationCommandOptionTypes.STRING,
 			description: 'xp type',
 			required: false,
-			choices: [ 'weight', 'skill', ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses ].map(x => ({ name: x, value: x })),
+			choices,
 		};
 	}
 

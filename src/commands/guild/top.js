@@ -15,7 +15,7 @@ module.exports = class TopCommand extends SlashCommand {
 				SlashCommand.XP_TYPE_OPTION,
 				SlashCommand.PAGE_OPTION,
 				SlashCommand.OFFSET_OPTION,
-				SlashCommand.guildOptionBuilder(data.client),
+				SlashCommand.guildOptionBuilder(data.client, true),
 				{
 					name: 'purge',
 					type: Constants.ApplicationCommandOptionTypes.BOOLEAN,

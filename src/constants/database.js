@@ -142,6 +142,8 @@ module.exports = {
 
 	GUILD_ID_BRIDGER: 'BRIDGER',
 
+	GUILD_ID_ALL: 'ALL',
+
 	DEFAULT_CONFIG,
 
 };
