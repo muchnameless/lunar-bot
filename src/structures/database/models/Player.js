@@ -952,7 +952,11 @@ module.exports = class Player extends Model {
 		this.guildRankPriority = 0;
 		this.save();
 
-		if (!isBridger) this.uncache();
+		if (isBridger) {
+			this.client.hypixelGuilds.sweepPlayerCache(this.guildID); // sweep hypixel guild player cache (uncache light)
+		} else {
+			this.uncache(); // uncache everything
+		}
 
 		return true;
 	}
