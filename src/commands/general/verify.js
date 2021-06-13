@@ -77,7 +77,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 		// linked discord tag doesn't match author's tag
 		if (LINKED_DISCORD_TAG !== interaction.user.tag) return interaction.reply(oneLine`
 			the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\`.
-			Keep in mind that discord tags are case sensitive.
+			Keep in mind that discord tags are case sensitive
 		`);
 
 		logger.debug({playerLinkedToID})

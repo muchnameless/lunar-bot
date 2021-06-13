@@ -285,7 +285,7 @@ class LunarMessage extends Message {
 			this.author
 				.send(stripIndents`
 					${errorMessage}.
-					Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.
+					Use \`${this.content} -c\` if you want the reply in ${this.channel} instead
 				`)
 				.catch(() => logger.error(`[REPLY]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
 
