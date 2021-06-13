@@ -1,6 +1,6 @@
 'use strict';
 
-const handleCommandMessage = require('../functions/handleCommandMessage');
+const handleDiscordMessage = require('../functions/handleDiscordMessage');
 // const logger = require('../functions/logger');
 
 
@@ -9,4 +9,4 @@ const handleCommandMessage = require('../functions/handleCommandMessage');
  * @param {import('../structures/LunarClient')} client
  * @param {import('../structures/extensions/Message')} message
  */
-module.exports = async (client, message) => handleCommandMessage(message);
+module.exports = async (client, message) => handleDiscordMessage(message);

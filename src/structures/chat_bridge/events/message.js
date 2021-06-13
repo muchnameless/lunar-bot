@@ -2,7 +2,7 @@
 
 const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY } } = require('../constants/chatBridge');
 const handleServerMessages = require('../functions/handleServerMessages');
-const handleCommandMessage = require('../functions/handleCommandMessage');
+const handleDiscordMessage = require('../functions/handleDiscordMessage');
 const logger = require('../../../functions/logger');
 
 
@@ -24,7 +24,7 @@ module.exports = async (chatBridge, message) => {
 
 			message.forwardToDiscord();
 
-			return handleCommandMessage(message);
+			return handleDiscordMessage(message);
 		}
 
 		case PARTY:
@@ -32,7 +32,7 @@ module.exports = async (chatBridge, message) => {
 			if (!chatBridge.enabled || message.me) return;
 			if (message.author.player?.guildID !== chatBridge.guild.guildID) return logger.info(`[MESSAGE]: ignored message from '${message.author.ign}': ${message.content}`); // ignore messages from non guild players
 
-			return handleCommandMessage(message);
+			return handleDiscordMessage(message);
 		}
 
 		default:

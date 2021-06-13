@@ -1,6 +1,6 @@
 'use strict';
 
-const handleCommandMessage = require('../functions/handleCommandMessage');
+const handleDiscordMessage = require('../functions/handleDiscordMessage');
 // const logger = require('../functions/logger');
 
 
@@ -15,5 +15,5 @@ module.exports = async (client, oldMessage, newMessage) => {
 
 	if (newMessage.me) client.chatBridges.handleDiscordMessage(newMessage, { checkifNotFromBot: false });
 
-	handleCommandMessage(newMessage);
+	handleDiscordMessage(newMessage);
 };

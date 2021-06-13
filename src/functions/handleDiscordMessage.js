@@ -28,7 +28,7 @@ module.exports = async (message) => {
 	 */
 	client.chatBridges.handleDiscordMessage(message, { checkIfNotFromBot: true }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
 
-	if (message.content?.length && message.isUserMessage) {
+	if (message.content.length && message.isUserMessage) {
 		client.hypixelGuilds.checkIfRankRequestMessage(message);
 
 		if (new RegExp(`^(?:${[ escapeRegex(client.config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').test(message.content)) {
