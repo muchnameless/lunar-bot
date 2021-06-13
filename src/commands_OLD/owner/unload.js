@@ -24,10 +24,10 @@ module.exports = class UnloadCommand extends Command {
 		const INPUT = args[0].toLowerCase();
 		const command = this.collection.getByName(INPUT);
 
-		if (!command) return message.reply(`no command with the name or alias \`${INPUT}\` found.`);
+		if (!command) return message.reply(`no command with the name or alias \`${INPUT}\` found`);
 
 		command.unload();
 
-		message.reply(`command \`${command.name}\` was unloaded successfully.`);
+		message.reply(`command \`${command.name}\` was unloaded successfully`);
 	}
 };

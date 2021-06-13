@@ -38,7 +38,7 @@ module.exports = class TrackCommand extends SlashCommand {
 			return interaction.reply(oneLine`${interaction.options.has('player')
 				? `\`${interaction.options.get('player').value}\` is`
 				: 'you are'
-			} not in the player db.`);
+			} not in the player db`);
 		}
 
 		const days = 30;

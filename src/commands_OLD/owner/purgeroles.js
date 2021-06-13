@@ -57,13 +57,13 @@ module.exports = class PurgeRolesCommand extends Command {
 			});
 		const PURGE_AMOUNT = toPurge.length;
 
-		if (!PURGE_AMOUNT) return message.reply('no roles need to be purged.');
+		if (!PURGE_AMOUNT) return message.reply('no roles need to be purged');
 
 		await safePromiseAll([
-			message.reply(`purging roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * TIMEOUT, { long: true })}.`),
+			message.reply(`purging roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * TIMEOUT, { long: true })}`),
 			...toPurge,
 		]);
 
-		message.reply(`done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}.`);
+		message.reply(`done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`);
 	}
 };

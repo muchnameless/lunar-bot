@@ -295,7 +295,7 @@ class LunarMessage extends Message {
 		// clean up channel after 10s
 		if (this.sendReplyChannel) { // notify author and delete messages
 			super
-				.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${this.channel} instead.`)
+				.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${this.channel} instead`)
 				.then(async (commandsChannelMessage) => {
 					if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return commandsChannelMessage.delete({ timeout: 10_000 });
 

@@ -52,7 +52,7 @@ module.exports = class XpCommand extends SlashCommand {
 			return interaction.reply(oneLine`${interaction.options.has('player')
 				? `\`${interaction.options.get('player').value}\` is`
 				: 'you are'
-			} not in the player db.`);
+			} not in the player db`);
 		}
 
 		// update db?

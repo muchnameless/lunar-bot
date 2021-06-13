@@ -29,17 +29,17 @@ module.exports = class ReloadCommand extends Command {
 			case 'all':
 			case 'commands':
 				await this.collection.unloadAll().loadAll(true);
-				return message.reply(`${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully.`);
+				return message.reply(`${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`);
 
 			case 'db':
 			case 'database':
 				await this.client.db.loadCache();
-				return message.reply('database cache reloaded successfully.');
+				return message.reply('database cache reloaded successfully');
 
 			case 'cooldown':
 			case 'cooldowns':
 				this.collection.cooldowns.clear();
-				return message.reply('cooldowns reset successfully.');
+				return message.reply('cooldowns reset successfully');
 
 			default: {
 				let commandName = INPUT;
@@ -81,7 +81,7 @@ module.exports = class ReloadCommand extends Command {
 					this.collection.loadFromFile(commandFile, true);
 
 					logger.info(`command ${commandName} was reloaded successfully`);
-					return message.reply(`command \`${commandName}\` was reloaded successfully.`);
+					return message.reply(`command \`${commandName}\` was reloaded successfully`);
 				} catch (error) {
 					logger.error('An error occurred while reloading:\n', error);
 					return message.reply(`an error occurred while reloading \`${commandName}\`:\n\`\`\`xl\n${error.message}\`\`\``);

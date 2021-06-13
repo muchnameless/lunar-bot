@@ -64,7 +64,7 @@ module.exports = class DonateCommand extends SlashCommand {
 			type: 'donation',
 		}));
 
-		interaction.reply(`registered a donation from \`${player.ign}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}.`);
+		interaction.reply(`registered a donation from \`${player.ign}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Donations')

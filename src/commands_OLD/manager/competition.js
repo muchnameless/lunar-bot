@@ -56,7 +56,7 @@ module.exports = class CompetitionCommand extends Command {
 					type = result.value;
 					retries = 0;
 				} else {
-					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
 					message.reply({
 						content: `\`${collected.content}\` is not a valid type`,
@@ -77,7 +77,7 @@ module.exports = class CompetitionCommand extends Command {
 					startingTime = result;
 					retries = 0;
 				} else {
-					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
 					message.reply({
 						content: `\`${collected.content}\` is not a valid date`,
@@ -101,7 +101,7 @@ module.exports = class CompetitionCommand extends Command {
 					endingTime = result;
 					retries = 0;
 				} else {
-					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled.');
+					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
 					message.reply({
 						content: `\`${collected.content}\` is not a valid date`,
@@ -116,7 +116,7 @@ module.exports = class CompetitionCommand extends Command {
 			});
 		} catch (error) {
 			logger.error(error);
-			message.reply('the command has been cancelled.');
+			message.reply('the command has been cancelled');
 		} finally {
 			collector.stop();
 		}

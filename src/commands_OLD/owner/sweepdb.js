@@ -23,6 +23,6 @@ module.exports = class SweepDbCommand extends Command {
 	async run(message, args) { // eslint-disable-line no-unused-vars
 		const DELETED_AMOUNT = await this.client.players.sweepDb();
 
-		message.reply(`removed \`${DELETED_AMOUNT}\` entr${DELETED_AMOUNT === 1 ? 'y' : 'ies'} from the player database.`);
+		message.reply(`removed \`${DELETED_AMOUNT}\` entr${DELETED_AMOUNT === 1 ? 'y' : 'ies'} from the player database`);
 	}
 };

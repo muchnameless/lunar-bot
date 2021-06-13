@@ -56,7 +56,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 			if (interaction.options.get('delete')?.value) {
 				const VALUE = this.config.get(KEY);
 
-				if (VALUE === null) return interaction.reply(`\`${KEY}\` is not in the config.`);
+				if (VALUE === null) return interaction.reply(`\`${KEY}\` is not in the config`);
 
 				await this.config.remove(KEY);
 				return interaction.reply(`removed \`${KEY}\`: \`${VALUE}\``);

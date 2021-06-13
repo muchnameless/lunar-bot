@@ -120,7 +120,7 @@ module.exports = class LinkCommand extends SlashCommand {
 
 			if (!linkedUserIsDeleted) {
 				if (player.discordID === user.id) return interaction.reply({
-					content: `\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}.`,
+					content: `\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}`,
 					allowedMentions: { parse: [] },
 				});
 
