@@ -206,6 +206,7 @@ module.exports = class TaxCommand extends SlashCommand {
 
 				if (player.paid) {
 					await interaction.awaitConfirmation(`\`${player.ign}\` is already set to paid with an amount of \`${this.client.formatNumber(await player.taxAmount ?? NaN)}\`. Overwrite this?`);
+
 					await player.resetTax();
 				}
 
@@ -293,6 +294,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					const OLD_AMOUNT = await player.taxAmount;
 
 					await interaction.awaitConfirmation(`reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})?`);
+
 					await player.resetTax();
 
 					result = `reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})`;

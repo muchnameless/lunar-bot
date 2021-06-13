@@ -49,9 +49,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 
 			if (!player) return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
 
-			const ANSWER = await interaction.awaitReply(`reset xp gained from \`${player.ign}\`?`);
-
-			if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return interaction.reply('the command has been cancelled');
+			await interaction.awaitConfirmation(`reset xp gained from \`${player.ign}\`?`);
 
 			await player.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
 
@@ -61,9 +59,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 		} else {
 			const PLAYER_COUNT = players.size;
 
-			const ANSWER = await interaction.awaitReply(`reset competition xp gained from all ${PLAYER_COUNT} guild members?`);
-
-			if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return interaction.reply('the command has been cancelled');
+			await interaction.awaitConfirmation(`reset competition xp gained from all ${PLAYER_COUNT} guild members?`);
 
 			// delete players who left the guild
 			await players.sweepDb();

@@ -163,12 +163,18 @@ class LunarCommandInteraction extends CommandInteraction {
 
 	/**
 	 * posts question in same channel and returns content of first reply or null if timeout
-	 * @param {string} question the question to ask the message author
-	 * @param {number} timeoutSeconds secods before the question timeouts
+	 * @param {import('discord.js').InteractionReplyOptions & { question: string, timeoutSeconds: number }} questionOrOptions
 	 */
-	async awaitReply(question, timeoutSeconds = 60) {
+	async awaitReply(questionOrOptions) {
+		const { question = 'confirm this action?', timeoutSeconds = 60, ...options } = typeof questionOrOptions === 'string'
+			? { question: questionOrOptions }
+			: questionOrOptions;
+
 		try {
-			await this.reply(question);
+			await this.reply({
+				content: question,
+				...options,
+			});
 
 			const collected = await this.channel.awaitMessages(
 				msg => msg.author.id === this.user.id,
@@ -183,12 +189,13 @@ class LunarCommandInteraction extends CommandInteraction {
 
 	/**
 	 * confirms the action via a button collector
-	 * @param {string} [question]
-	 * @param {object} [options]
-	 * @param {number} [options.timeoutSeconds=60]
-	 * @param {string} [options.errorMessage]
+	 * @param {import('discord.js').InteractionReplyOptions & { question: string, timeoutSeconds: number, errorMessage: string }} [questionOrOptions]
 	 */
-	async awaitConfirmation(question = 'confirm this action?', { timeoutSeconds = 60, errorMessage = 'the command has been cancelled' } = {}) {
+	async awaitConfirmation(questionOrOptions = {}) {
+		const { question = 'confirm this action?', timeoutSeconds = 60, errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
+			? { question: questionOrOptions }
+			: questionOrOptions;
+
 		try {
 			if (!this.channel) await this.client.channels.fetch(this.channelID);
 
@@ -213,6 +220,7 @@ class LunarCommandInteraction extends CommandInteraction {
 								.setEmoji(X_EMOJI),
 						),
 				],
+				...options,
 			});
 
 			const result = await this.channel.awaitMessageComponentInteraction(

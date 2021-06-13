@@ -1,7 +1,8 @@
 'use strict';
 
 const { basename } = require('path');
-const { Structures, ButtonInteraction, Permissions, APIMessage } = require('discord.js');
+const { Structures, ButtonInteraction, Permissions, APIMessage, MessageActionRow, MessageButton, SnowflakeUtil, Constants, MessageEmbed } = require('discord.js');
+const { Y_EMOJI, X_EMOJI } = require('../../constants/emojiCharacters');
 const logger = require('../../functions/logger');
 
 
@@ -118,12 +119,18 @@ class LunarButtonInteraction extends ButtonInteraction {
 
 	/**
 	 * posts question in same channel and returns content of first reply or null if timeout
-	 * @param {string} question the question to ask the message author
-	 * @param {number} timeoutSeconds secods before the question timeouts
+	 * @param {import('discord.js').InteractionReplyOptions & { question: string, timeoutSeconds: number }} questionOrOptions
 	 */
-	async awaitReply(question, timeoutSeconds = 60) {
+	async awaitReply(questionOrOptions) {
+		const { question = 'confirm this action?', timeoutSeconds = 60, ...options } = typeof questionOrOptions === 'string'
+			? { question: questionOrOptions }
+			: questionOrOptions;
+
 		try {
-			await this.reply(question);
+			await this.reply({
+				content: question,
+				...options,
+			});
 
 			const collected = await this.channel.awaitMessages(
 				msg => msg.author.id === this.user.id,
@@ -133,6 +140,78 @@ class LunarButtonInteraction extends ButtonInteraction {
 			return collected.first().content;
 		} catch {
 			return null;
+		}
+	}
+
+	/**
+	 * confirms the action via a button collector
+	 * @param {import('discord.js').InteractionReplyOptions & { question: string, timeoutSeconds: number, errorMessage: string }} [questionOrOptions]
+	 */
+	async awaitConfirmation(questionOrOptions = {}) {
+		const { question = 'confirm this action?', timeoutSeconds = 60, errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
+			? { question: questionOrOptions }
+			: questionOrOptions;
+
+		try {
+			if (!this.channel) await this.client.channels.fetch(this.channelID);
+
+			const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
+			const CANCLE_ID = `confirm:${SnowflakeUtil.generate()}`;
+
+			await this.reply({
+				embeds: [
+					this.client.defaultEmbed
+						.setDescription(question),
+				],
+				components: [
+					new MessageActionRow()
+						.addComponents(
+							new MessageButton()
+								.setCustomID(SUCCESS_ID)
+								.setStyle(Constants.MessageButtonStyles.SUCCESS)
+								.setEmoji(Y_EMOJI),
+							new MessageButton()
+								.setCustomID(CANCLE_ID)
+								.setStyle(Constants.MessageButtonStyles.DANGER)
+								.setEmoji(X_EMOJI),
+						),
+				],
+				...options,
+			});
+
+			const result = await this.channel.awaitMessageComponentInteraction(
+				interaction => (interaction.user.id === this.user.id && [ SUCCESS_ID, CANCLE_ID ].includes(interaction.customID)
+					? true
+					: (async () => {
+						try {
+							await interaction.reply({
+								content: 'that is not up to you to decide',
+								ephemeral: true,
+							});
+						} catch (error) {
+							logger.error(error);
+						}
+						return false;
+					})()),
+				timeoutSeconds * 1_000,
+			);
+
+			const success = result.customID === SUCCESS_ID;
+
+			result.update({
+				embeds: [
+					new MessageEmbed()
+						.setColor(this.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
+						.setDescription(success ? 'confirmed' : 'cancelled')
+						.setTimestamp(),
+				],
+				components: [],
+			});
+
+			if (!success) throw errorMessage;
+		} catch (error) {
+			logger.debug(error);
+			throw errorMessage;
 		}
 	}
 

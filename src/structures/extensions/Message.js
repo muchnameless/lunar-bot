@@ -161,11 +161,13 @@ class LunarMessage extends Message {
 
 	/**
 	 * posts question in same channel and returns content of first reply or null if timeout
-	 * @param {string} question the question to ask the message author
-	 * @param {number} timeoutSeconds secods before the question timeouts
-	 * @param {object} options message reply options
+	 * @param {MessageReplyOptions & { question: string, timeoutSeconds: number }} questionOrOptions
 	 */
-	async awaitReply(question, timeoutSeconds = 60, options = {}) {
+	async awaitReply(questionOrOptions) {
+		const { question = 'confirm this action?', timeoutSeconds = 60, ...options } = typeof questionOrOptions === 'string'
+			? { question: questionOrOptions }
+			: questionOrOptions;
+
 		try {
 			const questionMessage = await this.reply({
 				content: question,
@@ -179,7 +181,7 @@ class LunarMessage extends Message {
 
 			const collected = await questionMessage.channel.awaitMessages(
 				msg => msg.author.id === this.author.id,
-				{ max: 1, time: timeoutSeconds * 1000, errors: [ 'time' ] },
+				{ max: 1, time: timeoutSeconds * 1_000, errors: [ 'time' ] },
 			);
 
 			return collected.first().content;

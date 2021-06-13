@@ -80,11 +80,10 @@ module.exports = class VerifyCommand extends SlashCommand {
 			Keep in mind that discord tags are case sensitive
 		`);
 
-		logger.debug({playerLinkedToID})
-
 		// already linked to another discord user
 		if (playerLinkedToID) {
 			await interaction.awaitConfirmation(`your discord account is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?`);
+
 			await playerLinkedToID.unlink(`linked account switched to ${interaction.user.tag}`);
 		}
 

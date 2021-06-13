@@ -90,12 +90,10 @@ module.exports = class LinkCommand extends SlashCommand {
 			});
 
 			if (!linkedUserIsDeleted) {
-				const ANSWER = await interaction.awaitReply(
-					`${linkedUser ?? `\`${user.id}\``} is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?`,
-					{ allowedMentions: { parse: [] } },
-				);
-
-				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return interaction.reply('the command has been cancelled');
+				await interaction.awaitConfirmation({
+					question: `${linkedUser ?? `\`${user.id}\``} is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?`,
+					allowedMentions: { parse: [] },
+				});
 			}
 
 			if (!await playerLinkedToID.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
@@ -124,15 +122,13 @@ module.exports = class LinkCommand extends SlashCommand {
 					allowedMentions: { parse: [] },
 				});
 
-				const ANSWER = await interaction.awaitReply(
-					stripIndents`
-							\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}. Overwrite this?
-							Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
-						`,
-					{ allowedMentions: { parse: [] } },
-				);
-
-				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return interaction.reply('the command has been cancelled');
+				await interaction.awaitConfirmation({
+					question: stripIndents`
+						\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}. Overwrite this?
+						Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
+					`,
+					allowedMentions: { parse: [] },
+				});
 			}
 
 			if (!await player.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
