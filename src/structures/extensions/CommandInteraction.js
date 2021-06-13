@@ -33,7 +33,7 @@ class LunarCommandInteraction extends CommandInteraction {
 	 * @param {import('discord.js').ApplicationCommandOptionData} option
 	 */
 	static isSubCommandOption(option) {
-		return (option?.type === 'SUB_COMMAND' || option.type === 'SUB_COMMAND_GROUP') ?? false;
+		return (option?.type === 'SUB_COMMAND' || option?.type === 'SUB_COMMAND_GROUP') ?? false;
 	}
 
 	/**
