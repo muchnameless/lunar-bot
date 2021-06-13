@@ -13,7 +13,7 @@ module.exports = class BaseCommandCollection extends Collection {
 	 * @param {Boolean} [isMainCollection=false]
 	 * @param {*} [entries]
 	 */
-	constructor(client, dirPath, entries = undefined) {
+	constructor(client, dirPath, entries) {
 		super(entries);
 
 		this.client = client;
@@ -29,6 +29,13 @@ module.exports = class BaseCommandCollection extends Collection {
 	 */
 	static get [Symbol.species]() {
 		return Collection;
+	}
+
+	/**
+	 * clears the cooldown timestamps collection for all commands
+	 */
+	clearCooldowns() {
+		return this.each(command => command.clearCooldowns());
 	}
 
 	/**

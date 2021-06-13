@@ -7,7 +7,7 @@ const chalk = require('chalk');
 /**
   * @param {import('logform').TransformableInfo} param0
   */
-const formatText = ({ timestamp, level, message }) => {
+const _formatText = ({ timestamp, level, message }) => {
 	let colour;
 
 	switch (level) {
@@ -44,7 +44,7 @@ const _logger = createLogger({
 		format.timestamp({
 			format: 'DD.MM.YYYY HH:mm:ss',
 		}),
-		format.printf(formatText),
+		format.printf(_formatText),
 	),
 	exitOnError: false,
 	level: 'debug',

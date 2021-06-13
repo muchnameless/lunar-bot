@@ -30,7 +30,7 @@ module.exports = class FriendCheckCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.get('ign').value);
 		const friends = (await hypixel.friends.uuid(uuid)).map(x => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender));
 

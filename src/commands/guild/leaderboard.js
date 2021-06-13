@@ -33,7 +33,7 @@ module.exports = class LeaderboardCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		return handleLeaderboardCommandInteraction(
 			interaction,
 			{

@@ -24,7 +24,7 @@ module.exports = class EvalCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'call js native eval-function on the args',
+			description: 'executes js code',
 			options: [{
 				name: 'input',
 				type: Discord.Constants.ApplicationCommandOptionTypes.STRING,

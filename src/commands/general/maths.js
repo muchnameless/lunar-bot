@@ -396,7 +396,7 @@ module.exports = class MathsCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		return this._run(interaction, interaction.options.get('input').value);
 	}
 

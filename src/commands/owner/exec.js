@@ -1,34 +1,39 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const { promisify } = require('util');
 const { exec } = require('child_process');
-const Command = require('../../structures/commands/Command');
+const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
 
 
-module.exports = class ExecCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'ex' ],
+module.exports = class ExecCommand extends SlashCommand {
+	constructor(data) {
+		super(data, {
+			aliases: [],
 			description: 'executes bash code',
-			args: true,
-			usage: '[`code` to execute]',
+			options: [{
+				name: 'input',
+				type: Constants.ApplicationCommandOptionTypes.STRING,
+				description: 'code input',
+				required: true,
+			}],
+			defaultPermission: true,
 			cooldown: 0,
 		});
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		try {
-			const { stdout, stderr } = await promisify(exec)(args.join(' '));
+			const { stdout, stderr } = await promisify(exec)(interaction.options.get('input').value);
 
 			if (stdout) {
 				logger.info(stdout);
-				message.reply({
+				await interaction.reply({
 					content: stdout,
 					code: 'bash',
 					editPreviousMessage: true,
@@ -37,7 +42,7 @@ module.exports = class ExecCommand extends Command {
 
 			if (stderr) {
 				logger.error(stderr);
-				message.reply({
+				await interaction.reply({
 					content: `${stderr.name}: ${stderr.message}`,
 					code: 'xl',
 					editPreviousMessage: false,
@@ -45,7 +50,7 @@ module.exports = class ExecCommand extends Command {
 			}
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
-			message.reply({
+			return interaction.reply({
 				content: `${error}`,
 				code: 'xl',
 			});

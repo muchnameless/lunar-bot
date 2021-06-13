@@ -52,7 +52,7 @@ module.exports = class RankCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		return this._run(
 			interaction,
 			interaction.user.player?.guild ?? this.client.hypixelGuilds.mainGuild,

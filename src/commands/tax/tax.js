@@ -95,7 +95,7 @@ module.exports = class TaxCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		// destructure sub command
+		// destructure subcommand
 		const { name, options } = interaction.options.first();
 
 		switch (name) {
@@ -139,7 +139,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					}
 
 					default:
-						throw new Error('unknown command');
+						throw new Error(`unknown subcommand '${action}'`);
 				}
 
 				this.client.log(this.client.defaultEmbed
@@ -388,7 +388,7 @@ module.exports = class TaxCommand extends SlashCommand {
 
 
 			default:
-				throw new Error('unknown command');
+				throw new Error(`unknown subcommand '${name}'`);
 		}
 	}
 };

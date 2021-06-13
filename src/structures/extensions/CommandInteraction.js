@@ -66,7 +66,7 @@ class LunarCommandInteraction extends CommandInteraction {
 	}
 
 	/**
-	 * appends the first option name if the command is a sub command or sub command group
+	 * appends the first option name if the command is a subcommand or subcommand group
 	 */
 	get fullCommandName() {
 		const firstOption = this.options?.first();

@@ -1,15 +1,14 @@
 'use strict';
 
-const ms = require('ms');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class PingCommand extends SlashCommand {
+module.exports = class MyCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'check API latency and WebSocket ping',
+			description: 'deletes unused player db entries',
 			options: [],
 			defaultPermission: true,
 			cooldown: 0,
@@ -21,6 +20,8 @@ module.exports = class PingCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return interaction.reply(`Api Latency: ${ms(Date.now() - interaction.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}`);
+		const DELETED_AMOUNT = await this.client.players.sweepDb();
+
+		return interaction.reply(`removed \`${DELETED_AMOUNT}\` entr${DELETED_AMOUNT === 1 ? 'y' : 'ies'} from the player database`);
 	}
 };

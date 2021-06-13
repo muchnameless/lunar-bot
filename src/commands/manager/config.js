@@ -56,7 +56,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		// destructure sub command
+		// destructure subcommand
 		const { name, options } = interaction.options.first();
 
 		switch (name) {
@@ -108,7 +108,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error('unknown command');
+				throw new Error(`unknown subcommand '${name}'`);
 		}
 	}
 };

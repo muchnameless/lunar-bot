@@ -29,7 +29,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		interaction.defer();
 
 		const IGN = interaction.options.get('ign').value;
@@ -104,7 +104,9 @@ module.exports = class VerifyCommand extends SlashCommand {
 
 		player.guildID = GUILD_ID;
 
-		const discordMember = interaction.member ?? await this.client.lgGuild?.members.fetch(interaction.user.id).catch(error => logger.error('[VERIFY]: guild member fetch', error)) ?? null;
+		const discordMember = interaction.member
+			?? await this.client.lgGuild?.members.fetch(interaction.user.id).catch(error => logger.error('[VERIFY]: guild member fetch', error))
+			?? null;
 
 		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
 

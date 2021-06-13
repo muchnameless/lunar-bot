@@ -30,7 +30,7 @@ module.exports = class TrackCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		const type = interaction.options.get('type')?.value ?? 'weight';
 		const player = this.getPlayer(interaction.options, interaction);
 

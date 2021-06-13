@@ -63,6 +63,14 @@ module.exports = class BaseCommand {
 	}
 
 	/**
+	 * clears the cooldown timestamps collection
+	 */
+	clearCooldowns() {
+		if (this.timestamps) this.timestamps = new Collection();
+		return this;
+	}
+
+	/**
 	 * loads the command and possible aliases into their collections
 	 */
 	load() {

@@ -35,7 +35,7 @@ module.exports = class LinkCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		interaction.defer();
 
 		const { user, member } = interaction.options.get('user');
