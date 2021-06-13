@@ -1,6 +1,7 @@
 'use strict';
 
 const { Constants } = require('discord.js');
+const { Op } = require('sequelize');
 const { offsetFlags } = require('../../constants/database');
 const { safePromiseAll } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
@@ -30,7 +31,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		const { players, db: { Sequelize: { Op } } } = this.client;
+		const { players } = this.client;
 
 		let result;
 

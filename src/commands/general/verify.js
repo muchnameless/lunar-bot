@@ -84,10 +84,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 
 		// already linked to another discord user
 		if (playerLinkedToID) {
-			if (!await interaction.awaitConfirmation(`your discord account is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?`)) {
-				return interaction.reply('the command has been cancelled');
-			}
-
+			await interaction.awaitConfirmation(`your discord account is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?`);
 			await playerLinkedToID.unlink(`linked account switched to ${interaction.user.tag}`);
 		}
 

@@ -2,28 +2,33 @@
 
 const { Util } = require('discord.js');
 const { escapeIgn } = require('../../functions/util');
-const Command = require('../../structures/commands/Command');
+const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class LinkIssuesCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'issues' ],
+module.exports = class LinkIssuesCommand extends SlashCommand {
+	constructor(data) {
+		super(data, {
+			aliases: [],
 			description: 'list player db and discord role discrepancies',
+			options: [],
+			defaultPermission: true,
 			cooldown: 0,
 		});
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		const { players, hypixelGuilds, lgGuild } = this.client;
 
-		if (!lgGuild) return message.reply('discord guild is currently unavailable.');
+		if (!lgGuild) return interaction.reply({
+			content: 'discord guild is currently unavailable',
+			ephemeral: true,
+		});
+
 		await lgGuild.members.fetch();
 
 		// discord members with wrong roles
@@ -138,6 +143,10 @@ module.exports = class LinkIssuesCommand extends Command {
 
 		embed.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);
 
-		message.reply({ embeds: [ embed ] });
+		return interaction.reply({
+			embeds: [
+				embed,
+			],
+		});
 	}
 };

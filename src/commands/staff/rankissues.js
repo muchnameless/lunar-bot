@@ -2,15 +2,17 @@
 
 const { EMBED_FIELD_MAX_CHARS } = require('../../constants/discord');
 const { escapeIgn, trim } = require('../../functions/util');
-const Command = require('../../structures/commands/Command');
+const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class RankIssuesCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
+module.exports = class RankIssuesCommand extends SlashCommand {
+	constructor(data) {
+		super(data, {
 			aliases: [],
 			description: 'list ingame guild rank discrepancies',
+			options: [],
+			defaultPermission: true,
 			cooldown: 0,
 		});
 	}
@@ -40,10 +42,9 @@ module.exports = class RankIssuesCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		const embed = this.client.defaultEmbed;
 
 		let issuesAmount = 0;
@@ -75,6 +76,10 @@ module.exports = class RankIssuesCommand extends Command {
 
 		embed.setTitle(`Rank Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);
 
-		message.reply({ embeds: [ embed ] });
+		return interaction.reply({
+			embeds: [
+				embed,
+			],
+		});
 	}
 };

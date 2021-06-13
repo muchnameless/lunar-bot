@@ -98,7 +98,7 @@ module.exports = class LinkCommand extends SlashCommand {
 				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return interaction.reply('the command has been cancelled');
 			}
 
-			if (!(await playerLinkedToID.unlink(`unlinked by ${interaction.user.tag}`)) && linkedUser) {
+			if (!await playerLinkedToID.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
 				await interaction.reply({
 					content: `unable to update roles and nickname for the currently linked member ${linkedUser}`,
 					allowedMentions: { parse: [] },
@@ -135,7 +135,7 @@ module.exports = class LinkCommand extends SlashCommand {
 				if (!this.config.getArray('REPLY_CONFIRMATION').includes(ANSWER?.toLowerCase())) return interaction.reply('the command has been cancelled');
 			}
 
-			if (!(await player.unlink(`unlinked by ${interaction.user.tag}`)) && linkedUser) {
+			if (!await player.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
 				await interaction.reply({
 					content: `unable to update roles and nickname for the currently linked member ${linkedUser}`,
 					allowedMentions: { parse: [] },

@@ -1,6 +1,7 @@
 'use strict';
 
 const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
+const { Op } = require('sequelize');
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, DAY } } = require('../../../constants/database');
@@ -48,7 +49,7 @@ module.exports = class PlayerManager extends ModelManager {
 			where: {
 				// player is in a guild that the bot tracks (guildID !== null)
 				guildID: {
-					[this.client.db.Sequelize.Op.ne]: null,
+					[Op.ne]: null,
 				},
 			},
 		});

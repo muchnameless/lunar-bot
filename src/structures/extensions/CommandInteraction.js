@@ -184,9 +184,11 @@ class LunarCommandInteraction extends CommandInteraction {
 	/**
 	 * confirms the action via a button collector
 	 * @param {string} [question]
-	 * @param {number} [timeoutSeconds=60]
+	 * @param {object} [options]
+	 * @param {number} [options.timeoutSeconds=60]
+	 * @param {string} [options.errorMessage]
 	 */
-	async awaitConfirmation(question = 'confirm this action?', timeoutSeconds = 60) {
+	async awaitConfirmation(question = 'confirm this action?', { timeoutSeconds = 60, errorMessage = 'the command has been cancelled' } = {}) {
 		try {
 			if (!this.channel) await this.client.channels.fetch(this.channelID);
 
@@ -242,10 +244,10 @@ class LunarCommandInteraction extends CommandInteraction {
 				components: [],
 			});
 
-			return success;
+			if (!success) throw errorMessage;
 		} catch (error) {
 			logger.debug(error);
-			return false;
+			throw errorMessage;
 		}
 	}
 

@@ -933,7 +933,7 @@ module.exports = class Player extends Model {
 				: [];
 			const rolesToRemove = member.rolesToPurge;
 
-			if (!(await this.makeRoleApiCall(rolesToAdd, rolesToRemove, `left ${this.guildName}`))) {
+			if (!await this.makeRoleApiCall(rolesToAdd, rolesToRemove, `left ${this.guildName}`)) {
 				// error updating roles
 				logger.warn(`[REMOVE FROM GUILD]: ${this.logInfo}: unable to update roles`);
 				this.guildID = GUILD_ID_ERROR;
