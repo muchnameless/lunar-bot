@@ -83,34 +83,12 @@ module.exports = class SlashCommand extends BaseCommand {
 	}
 
 	static get XP_TYPE_OPTION() {
-		const choices = [ 'weight', 'skill', ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses ].map(x => ({ name: x, value: x }));
-
-		choices.push({
-			name: 'revenant',
-			value: 'zombie',
-		}, {
-			name: 'tarantula',
-			value: 'spider',
-		}, {
-			name: 'sven',
-			value: 'wolf',
-		}, {
-			name: 'voidgloom',
-			value: 'enderman',
-		}, {
-			name: 'skill-average',
-			value: 'skill',
-		}, {
-			name: 'dungeon',
-			value: 'catacombs',
-		});
-
 		return {
 			name: 'type',
 			type: Constants.ApplicationCommandOptionTypes.STRING,
 			description: 'xp type',
 			required: false,
-			choices,
+			choices: [ 'weight', 'skill', ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses ].map(x => ({ name: x, value: x })),
 		};
 	}
 
