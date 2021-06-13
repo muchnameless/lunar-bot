@@ -14,7 +14,7 @@ module.exports = class ReloadCommand extends DualCommand {
 			data,
 			{
 				aliases: [],
-				description: '',
+				description: 'reload certain parts of the bot',
 				options: [{
 					name: 'command',
 					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,

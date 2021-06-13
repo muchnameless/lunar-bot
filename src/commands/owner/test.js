@@ -9,7 +9,7 @@ module.exports = class TestCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: '',
+			description: 'generic test command',
 			options: [{
 				name: 'input',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
