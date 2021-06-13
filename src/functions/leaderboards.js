@@ -25,7 +25,6 @@ const cache = require('../api/cache');
  * @typedef {object} LeaderboardArgs
  * @property {string} lbType
  * @property {string} xpType
- * @property {number} page
  * @property {string} offset
  * @property {import('../structures/database/models/HypixelGuild')} hypixelGuild
  * @property {import('../structures/extensions/User')} user
@@ -34,50 +33,63 @@ const cache = require('../api/cache');
 
 
 /**
- * new page number and reload check
- * @param {number} currentPage the current page
- * @param {string} emojiName the emoji that triggered the page update
- */
-function handleReaction(currentPage, emojiName) {
-	switch (emojiName) {
-		case DOUBLE_LEFT_EMOJI:
-			return {
-				page: 1,
-				reload: false,
-			};
-
-		case LEFT_EMOJI:
-			return {
-				page: currentPage - 1,
-				reload: false,
-			};
-
-		case RIGHT_EMOJI:
-			return {
-				page: currentPage + 1,
-				reload: false,
-			};
-
-		case DOUBLE_RIGHT_EMOJI:
-			return {
-				page: Infinity,
-				reload: false,
-			};
-
-		case RELOAD_EMOJI:
-			return {
-				page: currentPage,
-				reload: true,
-			};
-	}
-}
-
-/**
  * returns the key for the redis cache
  * @param {LeaderboardArgs} leaderboardArgs
  */
 const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild: { guildID }, lbType, xpType, offset, shouldShowOnlyBelowReqs }) => `${LB_KEY}:${USER_ID}:${guildID}:${lbType}:${xpType}:${offset}:${shouldShowOnlyBelowReqs}`;
 
+/**
+ * returns a message action row with pagination buttons
+ * @param {string} cacheKey
+ * @param {number} page
+ * @param {number} totalPages
+ * @param {boolean} [isExpired=false]
+ */
+function createActionRow(cacheKey, page, totalPages, isExpired = false) {
+	let decDisabled;
+	let incDisabled;
+	let pageStyle;
+	let reloadStyle;
+
+	if (isExpired) {
+		decDisabled = true;
+		incDisabled = true;
+		pageStyle = Constants.MessageButtonStyles.SECONDARY;
+		reloadStyle = Constants.MessageButtonStyles.DANGER;
+	} else {
+		decDisabled = page === 1;
+		incDisabled = page === totalPages;
+		pageStyle = reloadStyle = Constants.MessageButtonStyles.PRIMARY;
+	}
+
+	return new MessageActionRow()
+		.addComponents(
+			new MessageButton()
+				.setCustomID(`${cacheKey}:1`)
+				.setEmoji(DOUBLE_LEFT_EMOJI)
+				.setStyle(pageStyle)
+				.setDisabled(decDisabled),
+			new MessageButton()
+				.setCustomID(`${cacheKey}:${page - 1}`)
+				.setEmoji(LEFT_EMOJI)
+				.setStyle(pageStyle)
+				.setDisabled(decDisabled),
+			new MessageButton()
+				.setCustomID(`${cacheKey}:${page + 1}`)
+				.setEmoji(RIGHT_EMOJI)
+				.setStyle(pageStyle)
+				.setDisabled(incDisabled),
+			new MessageButton()
+				.setCustomID(`${cacheKey}:${totalPages}`)
+				.setEmoji(DOUBLE_RIGHT_EMOJI)
+				.setStyle(pageStyle)
+				.setDisabled(incDisabled),
+			new MessageButton()
+				.setCustomID(`${cacheKey}:${page}:reload`)
+				.setEmoji(RELOAD_EMOJI)
+				.setStyle(reloadStyle),
+		);
+}
 
 const self = module.exports = {
 
@@ -85,7 +97,7 @@ const self = module.exports = {
 	 * handles a leaderbaord message
 	 * @param {import('../structures/extensions/CommandInteraction')} interaction
 	 * @param {string} leaderboardType
-	 * @param {LeaderboardArgs} leaderboardArgs
+	 * @param {LeaderboardArgs & { page: number }} leaderboardArgs
 	 */
 	async handleLeaderboardCommandInteraction(interaction, leaderboardArgs) {
 		const CACHE_KEY = createCacheKey(leaderboardArgs);
@@ -96,54 +108,22 @@ const self = module.exports = {
 				self.getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 			);
 
-		const TOTAL_PAGES = embeds.length;
-
 		let { page } = leaderboardArgs;
 
 		if (page < 1) {
 			page = 1;
-		} else if (page > TOTAL_PAGES) {
-			page = TOTAL_PAGES;
+		} else if (page > embeds.length) {
+			page = embeds.length;
 		}
-
-		const row = new MessageActionRow()
-			.addComponents(
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${DOUBLE_LEFT_EMOJI}`)
-					.setEmoji(DOUBLE_LEFT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
-					.setDisabled(page === 1),
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${LEFT_EMOJI}`)
-					.setEmoji(LEFT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
-					.setDisabled(page === 1),
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${RIGHT_EMOJI}`)
-					.setEmoji(RIGHT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
-					.setDisabled(page === TOTAL_PAGES),
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${DOUBLE_RIGHT_EMOJI}`)
-					.setEmoji(DOUBLE_RIGHT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
-					.setDisabled(page === TOTAL_PAGES),
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${RELOAD_EMOJI}`)
-					.setEmoji(RELOAD_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY),
-			);
 
 		await interaction.reply({
 			embeds: [ embeds[ page - 1 ] ],
-			components: [ row ],
+			components: [ createActionRow(CACHE_KEY, page, embeds.length) ],
 		});
 
 		await cache.set(
 			CACHE_KEY,
-			embeds[0] instanceof MessageEmbed
-				? embeds.map(embed => embed.toJSON())
-				: embeds,
+			embeds.map(embed => embed.toJSON?.() ?? embed),
 			interaction.client.config.getNumber('DATABASE_UPDATE_INTERVAL') * 60_000,
 		);
 	},
@@ -153,7 +133,7 @@ const self = module.exports = {
 	 * @param {import('../structures/extensions/ButtonInteraction')} interaction
 	 */
 	async handleLeaderboardButtonInteraction(interaction) {
-		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PURGE, CURRENT_PAGE, REACTION ] = interaction.customID.split(':');
+		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PURGE, PAGE, IS_RELOAD ] = interaction.customID.split(':');
 
 		if (USER_ID !== interaction.user.id) {
 			return interaction.reply({
@@ -162,112 +142,56 @@ const self = module.exports = {
 			});
 		}
 
-		// eslint-disable-next-line prefer-const
-		let { page, reload } = handleReaction(Number(CURRENT_PAGE), REACTION);
-
 		const leaderboardArgs = {
 			lbType: LB_TYPE,
 			xpType: XP_TYPE,
-			page,
 			offset: OFFSET,
 			hypixelGuild: interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID),
 			user: interaction.user,
 			shouldShowOnlyBelowReqs: PURGE === 'true',
 		};
-
 		const CACHE_KEY = createCacheKey(leaderboardArgs);
 		/** @type {?MessageEmbed[]} */
-		const embeds = reload
+		const embeds = IS_RELOAD
 			? self.createLeaderboardEmbeds(
 				interaction.client,
 				self.getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 			)
 			: await cache.get(CACHE_KEY);
 
+		let page = Number(PAGE);
+
 		if (!embeds) {
 			await interaction.update({
-				components: [ new MessageActionRow()
-					.addComponents(
-						new MessageButton()
-							.setCustomID(`${CACHE_KEY}:${page}:${DOUBLE_LEFT_EMOJI}`)
-							.setEmoji(DOUBLE_LEFT_EMOJI)
-							.setStyle(Constants.MessageButtonStyles.SECONDARY)
-							.setDisabled(true),
-						new MessageButton()
-							.setCustomID(`${CACHE_KEY}:${page}:${LEFT_EMOJI}`)
-							.setEmoji(LEFT_EMOJI)
-							.setStyle(Constants.MessageButtonStyles.SECONDARY)
-							.setDisabled(true),
-						new MessageButton()
-							.setCustomID(`${CACHE_KEY}:${page}:${RIGHT_EMOJI}`)
-							.setEmoji(RIGHT_EMOJI)
-							.setStyle(Constants.MessageButtonStyles.SECONDARY)
-							.setDisabled(true),
-						new MessageButton()
-							.setCustomID(`${CACHE_KEY}:${page}:${DOUBLE_RIGHT_EMOJI}`)
-							.setEmoji(DOUBLE_RIGHT_EMOJI)
-							.setStyle(Constants.MessageButtonStyles.SECONDARY)
-							.setDisabled(true),
-						new MessageButton()
-							.setCustomID(`${CACHE_KEY}:${page}:${RELOAD_EMOJI}`)
-							.setEmoji(RELOAD_EMOJI)
-							.setStyle(Constants.MessageButtonStyles.DANGER),
-					),
-				],
+				components: [ createActionRow(CACHE_KEY, page, Infinity, true) ],
 			});
 
 			return interaction.reply({
-				content: `leaderboard timed out, use [${RELOAD_EMOJI}](${interaction.message.url}) to refresh the data`,
+				content: oneLine`
+					leaderboard timed out, use ${
+						interaction.message
+							? `[${RELOAD_EMOJI}](${interaction.message.url ?? `https://discord.com/channels/${interaction.message.guild_id ?? '@me'}/${interaction.message.channel_id}/${interaction.message.id}`})`
+							: RELOAD_EMOJI
+					} to refresh the data
+				`,
 				ephemeral: true,
 			});
 		}
 
-		const TOTAL_PAGES = embeds.length;
-
 		if (page < 1) {
 			page = 1;
-		} else if (page > TOTAL_PAGES) {
-			page = TOTAL_PAGES;
+		} else if (page > embeds.length) {
+			page = embeds.length;
 		}
-
-		const row = new MessageActionRow()
-			.addComponents(
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${DOUBLE_LEFT_EMOJI}`)
-					.setEmoji(DOUBLE_LEFT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
-					.setDisabled(page === 1),
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${LEFT_EMOJI}`)
-					.setEmoji(LEFT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
-					.setDisabled(page === 1),
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${RIGHT_EMOJI}`)
-					.setEmoji(RIGHT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
-					.setDisabled(page === TOTAL_PAGES),
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${DOUBLE_RIGHT_EMOJI}`)
-					.setEmoji(DOUBLE_RIGHT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
-					.setDisabled(page === TOTAL_PAGES),
-				new MessageButton()
-					.setCustomID(`${CACHE_KEY}:${page}:${RELOAD_EMOJI}`)
-					.setEmoji(RELOAD_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY),
-			);
 
 		await interaction.update({
 			embeds: [ embeds[ page - 1 ] ],
-			components: [ row ],
+			components: [ createActionRow(CACHE_KEY, page, embeds.length) ],
 		});
 
-		if (reload) await cache.set(
+		if (IS_RELOAD) await cache.set(
 			CACHE_KEY,
-			embeds[0] instanceof MessageEmbed
-				? embeds.map(embed => embed.toJSON())
-				: embeds,
+			embeds.map(embed => embed.toJSON?.() ?? embed),
 			interaction.client.config.getNumber('DATABASE_UPDATE_INTERVAL') * 60_000,
 		);
 	},
