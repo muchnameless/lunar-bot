@@ -4,7 +4,7 @@ const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class MyCommand extends SlashCommand {
+module.exports = class SweepDatabaseCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
