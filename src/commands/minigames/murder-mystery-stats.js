@@ -36,22 +36,25 @@ module.exports = class MurderMysteryStatsCommand extends BedWarsStatsCommand {
 	 */
 	generateReply(ign, data) {
 		try {
-			const { wins = 0, losses = 0 } = data.stats.MurderMystery ?? {};
+			const { games, wins = 0, kills, deaths } = data.stats.MurderMystery ?? {};
 
-			if (wins + losses === 0) return `\`${ign}\` has no MurderMystery stats`;
+			if (!games) return `\`${ign}\` has no MurderMystery stats`;
 
 			return oneLine`
 				${ign}:
 				MurderMystery:
 				wins: ${this.client.formatNumber(wins)},
-				losses: ${this.client.formatNumber(losses)},
-				games played: ${this.client.formatNumber(data.stats.MurderMystery.games ?? 0)},
-				K/D: ${this.calculateKD(data.stats.MurderMystery.kills, data.stats.MurderMystery.deaths)},
+				losses: ${this.client.formatNumber(games - wins)},
+				winrate: ${this.client.formatDecimalNumber(wins / games)},
+				games played: ${this.client.formatNumber(games)},
+				kills: ${this.client.formatNumber(kills ?? 0)},
+				deaths: ${this.client.formatNumber(deaths ?? 0)},
+				K/D: ${this.calculateKD(kills, deaths)},
 				murderer wins: ${this.client.formatNumber(data.stats.MurderMystery.murderer_wins ?? 0)},
 				detective wins: ${this.client.formatNumber(data.stats.MurderMystery.detective_wins ?? 0)},
 				coins: ${this.client.formatNumber(data.stats.MurderMystery.coins ?? 0)},
-				fastest murderer win: ${this.client.formatNumber(data.stats.MurderMystery.quickest_murderer_win_time_seconds ?? '-/-')},
-				fastest detective win: ${this.client.formatNumber(data.stats.MurderMystery.quickest_detective_win_time_seconds ?? '-/-')}
+				fastest murderer win: ${this.client.formatNumber(data.stats.MurderMystery.quickest_murderer_win_time_seconds ?? '-/-')} s,
+				fastest detective win: ${this.client.formatNumber(data.stats.MurderMystery.quickest_detective_win_time_seconds ?? '-/-')} s
 			`;
 		} catch {
 			return `\`${ign}\` has no MurderMystery stats`;
