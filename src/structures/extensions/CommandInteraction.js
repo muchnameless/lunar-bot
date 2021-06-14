@@ -24,22 +24,33 @@ class LunarCommandInteraction extends CommandInteraction {
 		/**
 		 * wether to use ephemeral replies and deferring
 		 */
-		this.useEphemeral = this.options.get('ephemeral')?.value
-			?? this.options.first()?.options?.get('ephemeral')?.value
+		this.useEphemeral = LunarCommandInteraction.checkEphemeralOption(this.options)
 			?? (channel !== null && channel.type !== 'dm'
 				? !(channel.name.includes('command') || channel.isTicket) // guild channel
 				: false); // DM channel
 	}
 
 	/**
-	 * @param {import('discord.js').ApplicationCommandOptionData} option
+	 * recursively checks the command options for the ephemeral option
+	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * @returns {?boolean}
+	 */
+	static checkEphemeralOption(options) {
+		return options
+			? options.get('ephemeral')?.value
+				?? this.checkEphemeralOption(options.first()?.options)
+			: null;
+	}
+
+	/**
+	 * @param {import('discord.js').CommandInteractionOption} option
 	 */
 	static isSubCommandOption(option) {
 		return (option?.type === 'SUB_COMMAND' || option?.type === 'SUB_COMMAND_GROUP') ?? false;
 	}
 
 	/**
-	 * @param {import('discord.js').CommandInteractionOption[]} options
+	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
 	 */
 	static stringifyOptions(options) {
 		return options
