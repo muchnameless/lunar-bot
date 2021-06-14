@@ -64,7 +64,7 @@ const commonOptions = new Map([ [
 	{
 		name: 'target',
 		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'player: IGN | uuid | discordID | @mention\nguild: \'guild\' | \'everyone\'',
+		description: 'IGN | uuid | discordID | @mention | \'guild\' | \'everyone\'',
 		required: true,
 	},
 ], [
@@ -72,7 +72,7 @@ const commonOptions = new Map([ [
 	{
 		name: 'duration',
 		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'number of s[econds] | m[inutes] | h[ours] | d[ays]',
+		description: 's[econds] | m[inutes] | h[ours] | d[ays]',
 		required: true,
 	},
 ], [
@@ -93,82 +93,82 @@ module.exports = class GuildCommand extends SlashCommand {
 		const options = [{
 			name: 'demote',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'demote a player',
+			description: 'demote',
 			options: [ 'player' ],
 		}, {
 			name: 'history',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild history',
+			description: 'history',
 			options: [ 'page' ],
 		}, {
 			name: 'info',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild info',
+			description: 'info',
 			options: [],
 		}, {
 			name: 'invite',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'invite a player',
+			description: 'invite',
 			options: [ 'ign' ],
 		}, {
 			name: 'list',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild list',
+			description: 'list',
 			options: [],
 		}, {
 			name: 'log',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild log',
+			description: 'log',
 			options: [ 'player_optional', 'page' ],
 		}, {
 			name: 'member',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild member',
+			description: 'member',
 			options: [ 'player_optional' ],
 		}, {
 			name: 'members',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild members',
+			description: 'members',
 			options: [],
 		}, {
 			name: 'motd',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild motd',
+			description: 'motd',
 			options: [],
 		}, {
 			name: 'mute',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'mute a player',
+			description: 'mute',
 			options: [ 'target', 'duration' ],
 		}, {
 			name: 'online',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild online',
+			description: 'online',
 			options: [],
 		}, {
 			name: 'promote',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'promote a player',
+			description: 'promote',
 			options: [ 'player' ],
 		}, {
 			name: 'quest',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild quest',
+			description: 'quest',
 			options: [],
 		}, {
 			name: 'setrank',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'set the rank of a player',
+			description: 'setrank',
 			options: [ 'player', 'rank' ],
 		}, {
 			name: 'top',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'guild top',
+			description: 'top',
 			options: [ 'days_ago' ],
 		}, {
 			name: 'unmute',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'unmute a player',
+			description: 'unmute',
 			options: [ 'target' ],
 		}].map((option) => {
 			const isPlayerCommand = option.options.includes('player') || option.options.includes('target');
@@ -180,7 +180,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 		super(data, {
 			aliases: [ 'g' ],
-			description: 'hypixel guild command',
+			description: 'hypixel',
 			options,
 			defaultPermission: true,
 			cooldown: 0,
