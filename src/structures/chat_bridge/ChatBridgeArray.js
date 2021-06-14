@@ -85,7 +85,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 */
 	async connect(index) {
 		// load commands if none are present
-		// await this.commands.loadAll();
+		await this.commands.loadAll();
 
 		// single
 		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray._accounts.length) {
