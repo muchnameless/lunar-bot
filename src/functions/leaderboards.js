@@ -26,7 +26,7 @@ const cache = require('../api/cache');
  * @property {string} lbType
  * @property {string} xpType
  * @property {string} offset
- * @property {import('../structures/database/models/HypixelGuild')} hypixelGuild
+ * @property {import('../structures/database/models/HypixelGuild') | GUILD_ID_ALL} hypixelGuild
  * @property {import('../structures/extensions/User')} user
  * @property {boolean} shouldShowOnlyBelowReqs
  */
@@ -142,11 +142,14 @@ const self = module.exports = {
 			});
 		}
 
+		/** @type {LeaderboardArgs} */
 		const leaderboardArgs = {
 			lbType: LB_TYPE,
 			xpType: XP_TYPE,
 			offset: OFFSET,
-			hypixelGuild: interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID),
+			hypixelGuild: HYPIXEL_GUILD_ID !== GUILD_ID_ALL
+				? interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID)
+				: HYPIXEL_GUILD_ID,
 			user: interaction.user,
 			shouldShowOnlyBelowReqs: PURGE === 'true',
 		};

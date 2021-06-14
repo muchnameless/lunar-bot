@@ -192,9 +192,12 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * returns a HypixelGuild instance, throwing if none found
 	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
 	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @returns {import('../database/models/HypixelGuild') | GUILD_ID_ALL}
 	 */
 	getHypixelGuild(options, interaction) {
-		return this.client.hypixelGuilds.cache.get(options?.get('guild')?.value) ?? interaction?.user.player?.guild ?? this.client.hypixelGuilds.mainGuild;
+		const INPUT = options?.get('guild')?.value;
+		if (INPUT === GUILD_ID_ALL) return INPUT;
+		return this.client.hypixelGuilds.cache.get(INPUT) ?? interaction?.user.player?.guild ?? this.client.hypixelGuilds.mainGuild;
 	}
 
 	/**
