@@ -132,7 +132,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 */
 	get data() {
 		/** @type {import('discord.js').ApplicationCommandOptionData[]} */
-		let options = this.options ?? [];
+		let options = [ ...(this.options ?? []) ];
 
 		const [ firstOption ] = options;
 
