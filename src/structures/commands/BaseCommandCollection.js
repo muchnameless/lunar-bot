@@ -120,6 +120,6 @@ module.exports = class BaseCommandCollection extends Collection {
 
 		// return command if it is visible
 		command = this.get(value);
-		return command.visible ? command : null;
+		return (command.visible ?? true) ? command : null;
 	}
 };
