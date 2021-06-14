@@ -71,7 +71,23 @@ module.exports = class EvalCommand extends SlashCommand {
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
 		/* eslint-enable no-unused-vars */
 
-		const INPUT = interaction.options.get('input')?.value;
+		let indentationCount = 0;
+
+		const INPUT = interaction.options.get('input').value
+			.replace(/(?<={)/g, '\n')
+			.split(/; *|\n/)
+			.map((line) => { // add indentation
+				let indentation = '';
+
+				indentationCount -= line.match(/}/g)?.length ?? 0;
+
+				for (let i = 0; i < indentationCount; ++i) indentation += '  ';
+
+				indentationCount += line.match(/{/g)?.length ?? 0;
+
+				return `${indentation}${line}`;
+			})
+			.reduce((acc, cur) => `${acc}${acc ? '\n' : ''}${cur}${cur.endsWith('{') ? '' : ';'}`, '');
 		const IS_ASYNC = interaction.options.get('async')?.value ?? false;
 		const INSPECT_DEPTH = interaction.options.get('inspect')?.value ?? 0;
 		const inputArray = splitForEmbedFields(INPUT, 'js');
