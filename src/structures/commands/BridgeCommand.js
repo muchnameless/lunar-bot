@@ -19,7 +19,7 @@ module.exports = class BridgeCommand extends BaseCommand {
 	 * @param {BaseCommand.BaseCommandData} param0
 	 * @param {CommandInfo} param1
 	 */
-	constructor(param0, { aliases, description, guildOnly, args, usage, cooldown, requiredRoles}) {
+	constructor(param0, { aliases, description, guildOnly, args, usage, cooldown, requiredRoles }) {
 		super(param0, { cooldown, requiredRoles });
 
 		this.aliases = aliases?.length ? aliases.filter(Boolean) : null;
