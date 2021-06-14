@@ -18,7 +18,7 @@ module.exports = class FriendCheckCommand extends SlashCommand {
 			options: [{
 				name: 'ign',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | minecraftUUID',
+				description: 'IGN | uuid',
 				required: true,
 			}],
 			defaultPermission: true,

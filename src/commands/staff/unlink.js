@@ -14,7 +14,7 @@ module.exports = class UnlinkCommand extends SlashCommand {
 			options: [{
 				name: 'player',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | minecraftUUID | discordID | @mention',
+				description: 'IGN | uuid | discordID | @mention',
 				required: true,
 			}],
 			defaultPermission: true,

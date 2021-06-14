@@ -20,7 +20,7 @@ module.exports = class WeightCommand extends DualCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | minecraftUUID',
+					description: 'IGN | uuid',
 					required: false,
 				}, {
 					name: 'profile',

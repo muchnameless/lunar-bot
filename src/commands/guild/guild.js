@@ -24,7 +24,7 @@ const commonOptions = new Map([ [
 	{
 		name: 'player',
 		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'IGN | minecraftUUID | discordID | @mention',
+		description: 'IGN | uuid | discordID | @mention',
 		required: true,
 	},
 ], [
@@ -32,7 +32,7 @@ const commonOptions = new Map([ [
 	{
 		name: 'player',
 		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'IGN | minecraftUUID | discordID | @mention',
+		description: 'IGN | uuid | discordID | @mention',
 		required: false,
 	},
 ], [
@@ -64,7 +64,7 @@ const commonOptions = new Map([ [
 	{
 		name: 'target',
 		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'player: IGN | minecraftUUID | discordID | @mention\nguild: \'guild\' | \'everyone\'',
+		description: 'player: IGN | uuid | discordID | @mention\nguild: \'guild\' | \'everyone\'',
 		required: true,
 	},
 ], [
@@ -158,7 +158,7 @@ module.exports = class GuildCommand extends SlashCommand {
 		}, {
 			name: 'setrank',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'sets the rank of a player',
+			description: 'set the rank of a player',
 			options: [ 'player', 'rank' ],
 		}, {
 			name: 'top',

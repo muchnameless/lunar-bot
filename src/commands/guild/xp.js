@@ -17,7 +17,7 @@ module.exports = class XpCommand extends SlashCommand {
 			options: [{
 				name: 'player',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | minecraftUUID | discordID | @mention',
+				description: 'IGN | uuid | discordID | @mention',
 				required: false,
 			}, {
 				name: 'offset',

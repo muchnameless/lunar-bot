@@ -26,7 +26,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				}, {
 					name: 'player',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | minecraftUUID | discordID | @mention',
+					description: 'IGN | uuid | discordID | @mention',
 					required: true,
 				}],
 			}, {
@@ -51,7 +51,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				options: [{
 					name: 'player',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | minecraftUUID | discordID | @mention',
+					description: 'IGN | uuid | discordID | @mention',
 					required: true,
 				}, {
 					name: 'amount',
@@ -81,7 +81,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				options: [{
 					name: 'player',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | minecraftUUID | discordID | @mention',
+					description: 'IGN | uuid | discordID | @mention',
 					required: false,
 				}],
 			}],

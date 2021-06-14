@@ -19,7 +19,7 @@ module.exports = class PlayerCommand extends DualCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | minecraftUUID',
+					description: 'IGN | uuid',
 					required: false,
 				}],
 				defaultPermission: true,

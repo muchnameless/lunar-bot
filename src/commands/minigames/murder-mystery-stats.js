@@ -16,7 +16,7 @@ module.exports = class MurderMysteryStatsCommand extends BedWarsStatsCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | minecraftUUID',
+					description: 'IGN | uuid',
 					required: false,
 				}],
 				defaultPermission: true,

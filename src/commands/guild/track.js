@@ -16,7 +16,7 @@ module.exports = class TrackCommand extends SlashCommand {
 			options: [{
 				name: 'player',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | minecraftUUID | discordID | @mention',
+				description: 'IGN | uuid | discordID | @mention',
 				required: false,
 			},
 			SlashCommand.XP_TYPE_OPTION,
