@@ -36,7 +36,7 @@ module.exports = class SlashCommand extends BaseCommand {
 		this.permissions = permissions ?? null;
 		if (this.permissions?.length) this.permissions.push({
 			id: this.client.ownerID,
-			type: 'USER',
+			type: Constants.ApplicationCommandPermissionTypes.USER,
 			permission: true,
 		});
 	}
