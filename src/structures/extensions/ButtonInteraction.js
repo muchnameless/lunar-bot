@@ -25,6 +25,7 @@ class LunarButtonInteraction extends ButtonInteraction {
 		 * wether to use ephemeral replies and deferring
 		 */
 		this.useEphemeral = this.options.get('ephemeral')?.value
+			?? this.options.first()?.options?.get('ephemeral')?.value
 			?? (channel !== null && channel.type !== 'dm'
 				? !(channel.name.includes('command') || channel.isTicket) // guild channel
 				: false); // DM channel
