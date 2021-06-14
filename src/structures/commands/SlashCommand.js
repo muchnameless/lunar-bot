@@ -154,6 +154,23 @@ module.exports = class SlashCommand extends BaseCommand {
 	}
 
 	/**
+	 * must not exceed 4k
+	 */
+	get dataLength() {
+		const { data } = this;
+		/**
+		 * recursively reduces options
+		 * @param {import('discord.js').ApplicationCommandData} options
+		 * @returns {number}
+		 */
+		const reduceOptions = options => options?.reduce((a1, c1) => a1 + c1.name.length + c1.description.length + (c1.choices?.reduce((a2, c2) => a2 + c2.name.length + c2.value.length, 0) ?? 0) + reduceOptions(c1.options), 0) ?? 0;
+
+		return data.name.length
+			+ data.description.length
+			+ reduceOptions(data.options);
+	}
+
+	/**
 	 * returns the player object, provide interaction parameter for a fallback to interaction.user.player
 	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
 	 * @param {import('../extensions/CommandInteraction')} interaction
