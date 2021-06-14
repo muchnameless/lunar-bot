@@ -22,7 +22,7 @@
     "chartjs-node-canvas": "^3.2.0",
     "common-tags": "^1.8.0",
     "cron": "^1.8.2",
-    "discord.js": "github:discordjs/discord.js#1ac9a2eb5bfef6d009de7c54d3fac5e3d4a5afdc",
+    "discord.js": "github:discordjs/discord.js#a1f94f670e5b6009b9c33932ce06ed512447b953",
     "dotenv": "^10.0.0",
     "emoji-regex": "^9.2.2",
     "form-data": "^4.0.0",
