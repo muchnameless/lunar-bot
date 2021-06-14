@@ -46,11 +46,17 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('../extensions/Message')} message
 	 */
 	static getPlayerName(message) {
-		/** @type {string} */
-		const name = message.webhookID
+		return this.formatAtMention(message.webhookID
 			? message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.player?.ign ?? DiscordChatManager.escapeEz(message.author.username)
-			: message.author.player?.ign ?? DiscordChatManager.escapeEz(message.member?.displayName ?? message.author.username);
+			: message.author.player?.ign ?? DiscordChatManager.escapeEz(message.member?.displayName ?? message.author.username),
+		);
+	}
 
+	/**
+	 * returns @name if the name passes the blockedWordsRegExp
+	 * @param {string} name
+	 */
+	static formatAtMention(name) {
 		return blockedWordsRegExp.test(name)
 			? '*blocked*'
 			: name;
@@ -291,21 +297,14 @@ module.exports = class DiscordChatManager extends ChatManager {
 						}
 					})()
 					: discordMemberOrUser // @discordMember
-						? `@${(() => {
-							/** @type {string} */
-							const name = discordMemberOrUser.player?.ign ?? DiscordChatManager.escapeEz(discordMemberOrUser.displayName ?? discordMemberOrUser.username);
-
-							return blockedWordsRegExp.test(name)
-								? '*blocked*'
-								: name;
-						})()}, `
+						? `@${DiscordChatManager.formatAtMention(discordMemberOrUser.player?.ign ?? DiscordChatManager.escapeEz(discordMemberOrUser.displayName ?? discordMemberOrUser.username))},`
 						: null,
 				message.content, // actual content
 				message.attachments.size
 					? await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ]) // links of attachments
 					: null,
 			].filter(Boolean).join(' '),
-			prefix: `${this.prefix} ${DiscordChatManager.getPlayerName(message)}: `,
+			prefix: `${this.prefix} ${discordMemberOrUser ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
 			discordMessage: message,
 		});
 	}
