@@ -14,8 +14,9 @@ module.exports = async (client) => {
 	await client.logHandler.init();
 
 	// TEMP
-	// const res = await client.commands.init(client.application.commands)
-	// logger.debug(res)
+	const res = await client.commands.init(client.application.commands)
+	logger.debug(res)
+	// logger.debug(client.commands.map(c => [ c.name, c.dataLength ]))
 	// TEMP
 
 	// Fetch all members for initially available guilds
