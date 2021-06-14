@@ -3,6 +3,7 @@
 const { Collection } = require('discord.js');
 const { dirname, basename } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
+const { autocorrect } = require('../../functions/util');
 const logger = require('../../functions/logger');
 
 
@@ -96,5 +97,29 @@ module.exports = class BaseCommandCollection extends Collection {
 	 */
 	unloadAll() {
 		return this.each(command => command.unload());
+	}
+
+	/**
+	 * get a command by name or by alias
+	 * @param {string} name
+	 * @returns {?import('./BridgeCommand')}
+	 */
+	getByName(name) {
+		/**
+		 * @type {?import('./BridgeCommand')}
+		 */
+		let command = this.get(name);
+		if (command) return command;
+
+		// don't autocorrect single letters
+		if (name.length <= 1) return null;
+
+		// autocorrect input
+		const { value, similarity } = autocorrect(name, this.keyArray().filter(({ length }) => length > 1));
+		if (similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
+
+		// return command if it is visible
+		command = this.get(value);
+		return command.visible ? command : null;
 	}
 };

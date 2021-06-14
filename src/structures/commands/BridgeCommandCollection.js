@@ -1,7 +1,6 @@
 'use strict';
 
 const { Collection } = require('discord.js');
-const { autocorrect } = require('../../functions/util');
 const BaseCommandCollection = require('./BaseCommandCollection');
 const logger = require('../../functions/logger');
 
@@ -78,29 +77,5 @@ module.exports = class BridgeCommandCollection extends BaseCommandCollection {
 	 */
 	filterByCategory(categoryInput) {
 		return this.filter((/** @type {import('./BridgeCommand')} */ { category, aliases }, name) => category === categoryInput && !aliases?.some(alias => alias.toLowerCase() === name));
-	}
-
-	/**
-	 * get a command by name or by alias
-	 * @param {string} name
-	 * @returns {?import('./BridgeCommand')}
-	 */
-	getByName(name) {
-		/**
-		 * @type {?import('./BridgeCommand')}
-		 */
-		let command = this.get(name);
-		if (command) return command;
-
-		// don't autocorrect single letters
-		if (name.length <= 1) return null;
-
-		// autocorrect input
-		const { value, similarity } = autocorrect(name, this.keyArray().filter(({ length }) => length > 1));
-		if (similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
-
-		// return command if it is visible
-		command = this.get(value);
-		return command.visible ? command : null;
 	}
 };
