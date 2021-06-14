@@ -100,8 +100,8 @@ class LunarButtonInteraction extends ButtonInteraction {
 
 		this.ephemeral = data.ephemeral;
 
-		await super.reply(data);
-		return this._handleReplyMessage(data);
+		const message = await super.reply(data);
+		return this._handleReplyMessage(data, message);
 	}
 
 	/**
