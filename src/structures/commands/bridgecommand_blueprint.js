@@ -1,10 +1,10 @@
 'use strict';
 
-const Command = require('../../../commands/Command');
+const BridgeCommand = require('../../../commands/BridgeCommand');
 // const logger = require('../../../../functions/logger');
 
 
-module.exports = class MyCommand extends Command {
+module.exports = class MyCommand extends BridgeCommand {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [],
@@ -20,7 +20,7 @@ module.exports = class MyCommand extends Command {
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
 };
