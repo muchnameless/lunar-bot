@@ -24,9 +24,10 @@ class LunarCommandInteraction extends CommandInteraction {
 		/**
 		 * wether to use ephemeral replies and deferring
 		 */
-		this.useEphemeral = channel !== null && channel.type !== 'dm'
-			? !(channel.name.includes('command') || channel.isTicket || !(this.options.get('ephemeral')?.value ?? true)) // guild channel
-			: false; // DM channel
+		this.useEphemeral = this.options.get('ephemeral')?.value
+			?? (channel !== null && channel.type !== 'dm'
+				? !(channel.name.includes('command') || channel.isTicket) // guild channel
+				: false); // DM channel
 	}
 
 	/**
