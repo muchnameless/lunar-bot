@@ -74,7 +74,7 @@ module.exports = class BridgeCommand extends BaseCommand {
 	 * @param {import('../extensions/Message')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
 };

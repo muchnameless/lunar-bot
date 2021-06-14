@@ -20,7 +20,7 @@ module.exports = class PingBridgeCommand extends BridgeCommand {
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
 		message.reply('o/');
 	}
 };

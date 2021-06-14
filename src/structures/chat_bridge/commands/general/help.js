@@ -21,7 +21,7 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
 	 * @param {string[]} args command arguments
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
 		// default help
 		if (!args.length) {
 			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.ign}` ].join(', ')}` ];
