@@ -250,7 +250,9 @@ class LunarCommandInteraction extends CommandInteraction {
 						}
 						return false;
 					})()),
-				timeoutSeconds * 1_000,
+				{
+					time: timeoutSeconds * 1_000,
+				},
 			);
 
 			const success = result.customID === SUCCESS_ID;
