@@ -34,6 +34,8 @@ module.exports = class PurgeRanksCommand extends SlashCommand {
 		try {
 			PurgeRanksCommand.running.add(hypixelGuild.guildID);
 
+			interaction.defer();
+
 			const { chatBridge } = hypixelGuild;
 			const belowWeightReq = PurgeRanksCommand.getBelowRankReqs(hypixelGuild);
 			const BELOW_WEIGHT_REQ_AMOUNT = belowWeightReq.length;

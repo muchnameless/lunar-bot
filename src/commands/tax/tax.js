@@ -388,7 +388,6 @@ module.exports = class TaxCommand extends SlashCommand {
 				return interaction.reply(result);
 			}
 
-
 			default:
 				throw new Error(`unknown subcommand '${name}'`);
 		}
