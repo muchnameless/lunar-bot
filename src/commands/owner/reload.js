@@ -139,7 +139,7 @@ module.exports = class ReloadCommand extends DualCommand {
 		// destructure subcommand
 		const { name, options } = interaction.options.first();
 
-		return this._run(interaction, name, options.get('name').value);
+		return this._run(interaction, name, options?.get('name').value);
 	}
 
 	/**
