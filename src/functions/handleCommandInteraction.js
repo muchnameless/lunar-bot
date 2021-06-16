@@ -1,5 +1,6 @@
 'use strict';
 
+// const { Constants } = require('discord.js');
 const ms = require('ms');
 const logger = require('./logger');
 
@@ -55,6 +56,8 @@ module.exports = async (interaction) => {
 		await command.run(interaction);
 	} catch (error) {
 		logger.error(error);
+
+		if (error.code === 50_027) return; // invalid webhook token, workaround until its in require('discord.js').Constants.APIErrors.INVALID_WEBHOOK_TOKEN
 
 		try {
 			await interaction.reply({
