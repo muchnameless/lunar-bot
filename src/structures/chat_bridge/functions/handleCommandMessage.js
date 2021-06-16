@@ -19,7 +19,10 @@ module.exports = async (message) => {
 	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), escapeRegex(config.get('INGAME_PREFIX')), `@${message.chatBridge.bot.ign}` ].join('|')})`, 'i').exec(message.content); // PREFIX, INGAME_PREFIX, @mention
 
 	// must use prefix for commands in guild
-	if (!prefixMatched && message.type !== WHISPER) return;
+	if (!prefixMatched && message.type !== WHISPER) {
+		if (/^(?:under(?:appreciated)?|jayce)$/i.test(message.content)) return message.reply('Underappreciated does not reply to his name being called, if you want his attention, tell him what you want.');
+		return;
+	}
 
 	// command, args, flags
 	const args = message.content // command arguments
