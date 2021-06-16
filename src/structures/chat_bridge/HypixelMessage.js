@@ -55,17 +55,13 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 		if (matched) {
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? WHISPER : null);
-
-			/** @type {string|undefined} */
-			const authorInfo = this.extra?.[0].clickEvent?.value;
-
 			this.author = new HypixelMessageAuthor(
 				this.chatBridge,
 				matched.groups.whisper !== 'To'
 					? {
 						ign: matched.groups.ign,
 						guildRank: matched.groups.guildRank,
-						uuid: authorInfo?.slice(authorInfo.indexOf(' ') + 1).replace(/-/g, ''),
+						uuid: this.extra?.[0].clickEvent?.value.slice(13).replace(/-/g, ''), // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
 					}
 					: {
 						ign: this.chatBridge.bot.ign,
@@ -73,7 +69,6 @@ module.exports = class HypixelMessage extends ChatMessage {
 						uuid: this.chatBridge.bot.uuid,
 					},
 			);
-
 			this.content = this.cleanedContent.slice(matched[0].length).trimLeft();
 			this.spam = false;
 		} else {

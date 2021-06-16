@@ -21,7 +21,7 @@ module.exports = class HypixelMessageAuthor {
 		 * player object of the message author
 		 */
 		this.player = uuid
-			? this.client.players.cache.get(uuid)
+			? this.client.players.cache.get(uuid) ?? logger.error(`[HYPIXEL AUTHOR CTOR]: unknown uuid '${uuid}'`) ?? this.client.players.findByIGN(ign)
 			: this.client.players.findByIGN(ign);
 		/**
 		 * @type {?import('../extensions/GuildMember')}
@@ -41,7 +41,7 @@ module.exports = class HypixelMessageAuthor {
 			if (!this.player) {
 				// check mojang API / cache for the uuid associated with that ign
 				const { uuid } = await mojang.ign(this.ign);
-				this.player = this.client.players.cache.get(uuid) ?? null;
+				this.player = this.client.players.cache.get(uuid) ?? logger.error(`[HYPIXEL AUTHOR INIT]: unknown uuid '${uuid}'`);
 			}
 
 			this.member = await this.player?.discordMember;
