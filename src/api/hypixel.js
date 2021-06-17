@@ -17,10 +17,8 @@ const hypixel = new Client(process.env.HYPIXEL_KEY, {
 
 			if (key.startsWith('skyblock:profile') || key.startsWith('status')) { // profile & profiles
 				ttl = 30_000;
-			} else if (key.startsWith('player')) {
+			} else if (key.startsWith('player') || key.startsWith('skyblock:auction')) {
 				ttl = 60_000;
-			} else if (key.startsWith('skyblock:auction')) {
-				ttl = 4 * 60_000;
 			// the following endpoints don't require API keys and won't eat into your rate limit
 			} else if (key.startsWith('resources:')) {
 				ttl = 24 * 60 * 60_000; // 24 hours as resources don't update often, if at all
