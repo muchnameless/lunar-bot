@@ -106,7 +106,9 @@ module.exports = class AhCommand extends SlashCommand {
 							: `Starting Bid: ${AhCommand.shortenNumber(startingBid)}`
 				} • ${
 					TIME_LEFT < 0
-						? (++endedAuctions, totalUnclaimedCoins += highestBid, ' ended')
+						? highestBid
+							? (++endedAuctions, totalUnclaimedCoins += highestBid, ' sold')
+							: ' expired'
 						: ` ends in ${ms(TIME_LEFT, { long: true })}`
 				}`,
 			);
