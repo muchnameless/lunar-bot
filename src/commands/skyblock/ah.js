@@ -63,7 +63,9 @@ module.exports = class AhCommand extends SlashCommand {
 		interaction.defer();
 
 		const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.get('ign')?.value);
-		const auctions = (await hypixel.skyblock.auction.player(uuid)).filter(({ claimed }) => !claimed);
+		const auctions = (await hypixel.skyblock.auction.player(uuid))
+			.filter(({ claimed }) => !claimed)
+			.sort((a, b) => a.end - b.end);
 		const embed = this.client.defaultEmbed
 			.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`);
 
