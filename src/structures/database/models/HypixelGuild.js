@@ -595,7 +595,7 @@ module.exports = class HypixelGuild extends Model {
 		const result = rank
 			? autocorrect(rank, this.ranks, 'name')
 			: ctx.content
-				?.replace(/[^a-zA-Z ]/g, '') // delete all non alphabetical characters
+				?.replace(/[^a-z ]/gi, '') // delete all non alphabetical characters
 				.split(/ +/)
 				.filter(({ length }) => length >= 3) // filter out short words like 'am'
 				.map(word => autocorrect(word, this.ranks, 'name'))
