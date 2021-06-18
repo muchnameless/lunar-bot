@@ -43,7 +43,7 @@ process
 		],
 		presence: {
 			activities: [{
-				name: '/commands',
+				name: 'slash commands',
 				type: 'LISTENING',
 			}],
 			status: 'online',

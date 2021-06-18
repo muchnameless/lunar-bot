@@ -32,7 +32,7 @@ module.exports = async (message) => {
 		client.hypixelGuilds.checkIfRankRequestMessage(message);
 
 		if (new RegExp(`^(?:${[ escapeRegex(client.config.get('PREFIX')), `<@!?${client.user.id}>` ].join('|')})`, 'i').test(message.content)) {
-			message.reply('all commands have been converted to /commands, type `/` to see them');
+			message.reply('all commands have been converted to slash commands, type (not send) `/` to see them');
 		}
 	}
 };

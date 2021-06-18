@@ -34,7 +34,7 @@ module.exports = async (client) => {
 		try {
 			const presence = client.user.setPresence({
 				activities: [{
-					name: '/commands',
+					name: 'slash commands',
 					type: 'LISTENING',
 				}],
 				status: 'online',
