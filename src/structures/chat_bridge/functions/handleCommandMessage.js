@@ -4,6 +4,7 @@ const { commaListsOr } = require('common-tags');
 const ms = require('ms');
 const { escapeRegex } = require('../../../functions/util');
 const { messageTypes: { GUILD, WHISPER } } = require('../constants/chatBridge');
+const cache = require('../../../api/cache');
 const logger = require('../../../functions/logger');
 
 
@@ -20,7 +21,12 @@ module.exports = async (message) => {
 
 	// must use prefix for commands in guild
 	if (!prefixMatched && message.type !== WHISPER) {
-		if (/^(?:under(?:appreciated)?|jayce)$/i.test(message.content)) return message.reply('Underappreciated does not reply to his name being called, if you want his attention, tell him what you want.');
+		// underappreciated trigger
+		if (/^(?:under(?:appreciated)?|jayce)$/i.test(message.content)) {
+			if (await cache.get('trigger:underappreciated')) return; // trigger on cooldown
+			await cache.set('trigger:underappreciated', true, 60_000);
+			return message.reply('Underappreciated does not reply to his name being called, if you want his attention, tell him what you want.');
+		}
 		return;
 	}
 
