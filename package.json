@@ -30,7 +30,7 @@
     "keyv": "^4.0.3",
     "lex": "^1.7.9",
     "lodash": "^4.17.21",
-    "minecraft-data": "^2.84.0",
+    "minecraft-data": "^2.85.1",
     "minecraft-protocol": "^1.25.0",
     "ms": "^2.1.3",
     "pg": "^8.6.0",
