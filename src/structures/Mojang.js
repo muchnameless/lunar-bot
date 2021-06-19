@@ -143,7 +143,7 @@ module.exports = class Mojang {
 			}
 
 			/**
-			 * mojang api currently ignores ?at=
+			 * mojang api currently ignores ?at= [https://bugs.mojang.com/browse/WEB-3367]
 			 */
 			// case 204: {
 			// 	if (queryType === 'ign') { // retry a past date if name was queried
@@ -172,8 +172,8 @@ module.exports = class Mojang {
 			// 			}
 			// 		}
 			// 	}
+			// 	// falls through
 			// }
-			// falls through
 
 			default:
 				if (cache) this.cache?.set(queryType, query, { error: true, res });
