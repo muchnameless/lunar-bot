@@ -29,13 +29,14 @@ module.exports = class DebugCommand extends SlashCommand {
 			General:
 			Ready at: ${this.client.readyAt.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
 			Uptime: ${ms(this.client.uptime)}
-
-			Discord:
-			Guilds: ${this.client.guilds.cache.size.toLocaleString(this.config.get('NUMBER_FORMAT'))}
-			Channels: ${this.client.channels.cache.size.toLocaleString(this.config.get('NUMBER_FORMAT'))}
-			Members: ${this.client.guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0).toLocaleString(this.config.get('NUMBER_FORMAT'))}
-			Users: ${this.client.users.cache.size.toLocaleString(this.config.get('NUMBER_FORMAT'))}
 			Discord.js v${version}
+
+			Cache:
+			Guilds: ${this.client.formatNumber(this.client.guilds.cache.size)}
+			Channels: ${this.client.formatNumber(this.client.channels.cache.size)}
+			Members: ${this.client.formatNumber(this.client.guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
+			Users: ${this.client.formatNumber(this.client.users.cache.size)}
+			Messages: ${this.client.formatNumber(this.client.channels.cache.reduce((acc, channel) => acc + (channel.messages?.cache.size ?? 0), 0))}
 
 			Memory:
 		`;
