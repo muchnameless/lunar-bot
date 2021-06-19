@@ -11,7 +11,10 @@ const logger = require('../functions/logger');
  * @param {import('../structures/extensions/Message')} reaction.message
  * @param {import('discord.js').User} user
  */
-module.exports = async (client, reaction, user) => {
+module.exports = async (client, reaction, { id: userID }) => {
+	// reaction.message is not from the announcement channel or not the broadcast emoji
+	if (reaction.message.channel.id !== client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') || reaction.emoji.name !== FORWARD_TO_GC) return;
+
 	try {
 		if (reaction.partial) await reaction.fetch();
 		if (reaction.message.partial) await reaction.message.fetch();
@@ -19,9 +22,5 @@ module.exports = async (client, reaction, user) => {
 		return logger.error('[MESSAGE REACTION ADD]: error while fetching partial', error);
 	}
 
-	if (user.id === client.user.id) return; // ignore own reactions or on not owned messages
-
-	if (reaction.message.channel.id === client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') && reaction.emoji.name === FORWARD_TO_GC && user.id === reaction.message.author.id) {
-		return client.chatBridges.handleAnnouncementMessage(reaction.message);
-	}
+	if (userID === reaction.message.author.id) return client.chatBridges.handleAnnouncementMessage(reaction.message);
 };
