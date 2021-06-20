@@ -1,15 +1,14 @@
 'use strict';
 
-const { basename } = require('path');
 const { stripIndents, commaListsAnd } = require('common-tags');
-const { Structures, Message, Permissions } = require('discord.js');
+const { Structures, Permissions } = require('discord.js');
 const { CHANNEL_FLAGS, replyPingRegExp } = require('../../constants/bot');
 const { DM_KEY, REPLY_KEY } = require('../../constants/redis');
 const cache = require('../../api/cache');
 const logger = require('../../functions/logger');
 
 
-class LunarMessage extends Message {
+class LunarMessage extends Structures.get('Message') {
 	constructor(...args) {
 		super(...args);
 
@@ -428,6 +427,6 @@ class LunarMessage extends Message {
 	}
 }
 
-Structures.extend(basename(__filename, '.js'), () => LunarMessage);
+Structures.extend('Message', () => LunarMessage);
 
 module.exports = LunarMessage;

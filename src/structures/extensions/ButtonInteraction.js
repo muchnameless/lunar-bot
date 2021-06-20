@@ -1,12 +1,11 @@
 'use strict';
 
-const { basename } = require('path');
-const { Structures, ButtonInteraction, Permissions, APIMessage, MessageActionRow, MessageButton, SnowflakeUtil, Constants, MessageEmbed } = require('discord.js');
+const { Structures, Permissions, APIMessage, MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } = require('discord.js');
 const { Y_EMOJI, X_EMOJI } = require('../../constants/emojiCharacters');
 const logger = require('../../functions/logger');
 
 
-class LunarButtonInteraction extends ButtonInteraction {
+class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 	constructor(...args) {
 		super(...args);
 
@@ -234,6 +233,6 @@ class LunarButtonInteraction extends ButtonInteraction {
 	}
 }
 
-Structures.extend(basename(__filename, '.js'), () => LunarButtonInteraction);
+Structures.extend('ButtonInteraction', () => LunarButtonInteraction);
 
 module.exports = LunarButtonInteraction;

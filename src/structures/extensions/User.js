@@ -1,11 +1,10 @@
 'use strict';
 
-const { basename } = require('path');
-const { Structures, User } = require('discord.js');
+const { Structures } = require('discord.js');
 // const logger = require('../../functions/logger');
 
 
-class LunarUser extends User {
+class LunarUser extends Structures.get('User') {
 	constructor(...args) {
 		super(...args);
 
@@ -46,6 +45,6 @@ class LunarUser extends User {
 	}
 }
 
-Structures.extend(basename(__filename, '.js'), () => LunarUser);
+Structures.extend('User', () => LunarUser);
 
 module.exports = LunarUser;

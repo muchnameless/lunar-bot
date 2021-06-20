@@ -1,11 +1,10 @@
 'use strict';
 
-const { basename } = require('path');
-const { Structures, NewsChannel, Permissions } = require('discord.js');
+const { Structures, Permissions } = require('discord.js');
 // const logger = require('../../functions/logger');
 
 
-class LunarNewsChannel extends NewsChannel {
+class LunarNewsChannel extends Structures.get('NewsChannel') {
 	/**
 	 * Permissions instance for the bot in that channel
 	 */
@@ -45,6 +44,6 @@ class LunarNewsChannel extends NewsChannel {
 	}
 }
 
-Structures.extend(basename(__filename, '.js'), () => LunarNewsChannel);
+Structures.extend('NewsChannel', () => LunarNewsChannel);
 
 module.exports = LunarNewsChannel;

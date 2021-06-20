@@ -1,12 +1,11 @@
 'use strict';
 
-const { basename } = require('path');
-const { Structures, CommandInteraction, Permissions, APIMessage, MessageActionRow, MessageButton, SnowflakeUtil, Constants, MessageEmbed } = require('discord.js');
+const { Structures, Permissions, APIMessage, MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } = require('discord.js');
 const { Y_EMOJI, X_EMOJI } = require('../../constants/emojiCharacters');
 const logger = require('../../functions/logger');
 
 
-class LunarCommandInteraction extends CommandInteraction {
+class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	constructor(...args) {
 		super(...args);
 
@@ -291,6 +290,6 @@ class LunarCommandInteraction extends CommandInteraction {
 	}
 }
 
-Structures.extend(basename(__filename, '.js'), () => LunarCommandInteraction);
+Structures.extend('CommandInteraction', () => LunarCommandInteraction);
 
 module.exports = LunarCommandInteraction;

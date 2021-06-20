@@ -1,11 +1,10 @@
 'use strict';
 
-const { basename } = require('path');
-const { Structures, DMChannel, Permissions } = require('discord.js');
+const { Structures, Permissions } = require('discord.js');
 // const logger = require('../../functions/logger');
 
 
-class LunarDMChannel extends DMChannel {
+class LunarDMChannel extends Structures.get('DMChannel') {
 	static BOT_PERMISSIONS = new Permissions();
 
 	// eslint-disable-next-line class-methods-use-this
@@ -46,6 +45,6 @@ LunarDMChannel.BOT_PERMISSIONS
 	])
 	.freeze();
 
-Structures.extend(basename(__filename, '.js'), () => LunarDMChannel);
+Structures.extend('DMChannel', () => LunarDMChannel);
 
 module.exports = LunarDMChannel;

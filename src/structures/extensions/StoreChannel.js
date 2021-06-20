@@ -1,11 +1,10 @@
 'use strict';
 
-const { basename } = require('path');
-const { Structures, StoreChannel } = require('discord.js');
+const { Structures } = require('discord.js');
 // const logger = require('../../functions/logger');
 
 
-class LunarStoreChannel extends StoreChannel {
+class LunarStoreChannel extends Structures.get('StoreChannel') {
 	/**
 	 * Permissions instance for the bot in that channel
 	 */
@@ -21,6 +20,6 @@ class LunarStoreChannel extends StoreChannel {
 	}
 }
 
-Structures.extend(basename(__filename, '.js'), () => LunarStoreChannel);
+Structures.extend('StoreChannel', () => LunarStoreChannel);
 
 module.exports = LunarStoreChannel;
