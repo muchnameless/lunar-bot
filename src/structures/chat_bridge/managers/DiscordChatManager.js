@@ -1,10 +1,11 @@
 'use strict';
 
 const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions } = require('discord.js');
+const FormData = require('form-data');
+const fetch = require('node-fetch');
 const ms = require('ms');
 const { prefixByType, blockedWordsRegExp } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
-const { urlToImgurLink } = require('../../../functions/imgur');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
 const cache = require('../../../api/cache');
@@ -68,7 +69,34 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @returns {Promise<string[]>}
 	 */
 	static async _uploadAttachments(attachments) {
-		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? urlToImgurLink(attachment.url) : attachment.url)))).map(({ value }, index) => value ?? attachments[index].url);
+		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? this.urlToImgurLink(attachment.url) : attachment.url))))
+			.map(({ value }, index) => value ?? attachments[index].url);
+	}
+
+	/**
+	 * @param {string} url
+	 * @returns {Promise<string>}
+	 */
+	static async urlToImgurLink(url) {
+		const form = new FormData();
+
+		form.append('image', url);
+		form.append('type', 'url');
+
+		const res = await fetch('https://api.imgur.com/3/upload', {
+			method: 'POST',
+			body: form,
+			headers: {
+				Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+			},
+		});
+
+		if (res.status !== 200) {
+			logger.error('IMGUR', res);
+			throw new Error('error uploading to imgur');
+		}
+
+		return (await res.json()).data.link;
 	}
 
 	/**
