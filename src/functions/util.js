@@ -1,7 +1,6 @@
 'use strict';
 
-const { Util: { escapeCodeBlock }, Permissions } = require('discord.js');
-const { commaListsAnd } = require('common-tags');
+const { Util: { escapeCodeBlock } } = require('discord.js');
 const { promisify } = require('util');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
@@ -109,19 +108,6 @@ const self = module.exports = {
 		}
 
 		return Math.ceil((firstThursday - target) / (7 * 24 * 3_600_000)) + 1;
-	},
-
-	/**
-	 * cleans a string from an embed for console logging
-	 * @param {string} string the string to clean
-	 */
-	cleanLoggingEmbedString(string) {
-		return typeof string === 'string'
-			? string
-				.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
-				.replace(/`|\*|\n?\u200b|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
-				.replace(/\n{2,}/g, '\n') // consecutive line-breaks
-			: null;
 	},
 
 	/**
@@ -247,16 +233,5 @@ const self = module.exports = {
 		for (const x of await Promise.allSettled(arr)) {
 			if (x.status === 'rejected') logger.error(x.reason);
 		}
-	},
-
-	/**
-	 * converts permissions to a readable strings
-	 * @param {import('discord.js').PermissionResolvable} permissions
-	 */
-	permissionsToString(permissions) {
-		return commaListsAnd`${new Permissions(permissions)
-			.toArray()
-			.map(permission => `'${permission}'`)
-		}`;
 	},
 };

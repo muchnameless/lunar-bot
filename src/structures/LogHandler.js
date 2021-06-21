@@ -4,7 +4,6 @@ const { MessageEmbed, SnowflakeUtil, DiscordAPIError } = require('discord.js');
 const { join } = require('path');
 const { promises: { mkdir, writeFile, readdir, readFile, unlink } } = require('fs');
 const { EMBED_MAX_CHARS, EMBEDS_PER_WH_MESSAGE } = require('../constants/discord');
-const { cleanLoggingEmbedString } = require('../functions/util');
 const logger = require('../functions/logger');
 
 
@@ -21,6 +20,19 @@ module.exports = class LogHandler {
 	}
 
 	static LOG_PATH = join(__dirname, '..', '..', 'log_buffer');
+
+	/**
+	 * cleans a string from an embed for console logging
+	 * @param {string} string the string to clean
+	 */
+	static cleanLoggingEmbedString(string) {
+		return typeof string === 'string'
+			? string
+				.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
+				.replace(/`|\*|\n?\u200b|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
+				.replace(/\n{2,}/g, '\n') // consecutive line-breaks
+			: null;
+	}
 
 	/**
 	 * wether the logging webhook is properly loaded and cached
@@ -124,9 +136,20 @@ module.exports = class LogHandler {
 			const FIELDS_LOG = embed.fields?.filter(({ name, value }) => name !== '\u200b' || value !== '\u200b');
 
 			logger.info([
-				[ embed.title, cleanLoggingEmbedString(embed.description), embed.author?.name ].filter(x => x != null).join(': '),
-				FIELDS_LOG?.length ? FIELDS_LOG.map(({ name, value }) => `${name !== '\u200b' ? `${name.replace(/\u200b/g, '').trim()}: ` : ''}${cleanLoggingEmbedString(value).replace(/\n/g, ', ')}`).join('\n') : null,
-			].filter(x => x != null).join('\n'));
+				[
+					embed.title,
+					LogHandler.cleanLoggingEmbedString(embed.description),
+					embed.author?.name,
+				].filter(x => x != null).join(': '),
+				FIELDS_LOG?.length
+					? FIELDS_LOG
+						.map(({ name, value }) => `${name !== '\u200b' ? `${name.replace(/\u200b/g, '').trim()}: ` : ''}${LogHandler.cleanLoggingEmbedString(value).replace(/\n/g, ', ')}`)
+						.join('\n')
+					: null,
+			]
+				.filter(x => x != null)
+				.join('\n'),
+			);
 		}
 
 		// no logging webhook
