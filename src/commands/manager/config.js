@@ -61,7 +61,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 
 		switch (name) {
 			case 'edit': {
-				const KEY = options.get('key').value.toUpperCase();
+				const KEY = options.get('key').value.toUpperCase().replace(/ +/g, '_');
 				const OLD_VALUE = this.config.get(KEY);
 				const { key, value } = await this.config.set(KEY, options.get('value').value);
 
@@ -72,7 +72,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 			}
 
 			case 'delete': {
-				const KEY = options.get('key').value.toUpperCase();
+				const KEY = options.get('key').value.toUpperCase().replace(/ +/g, '_');
 				const VALUE = this.config.get(KEY);
 
 				if (VALUE === null) return interaction.reply(`\`${KEY}\` is not in the config`);
@@ -82,7 +82,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 			}
 
 			case 'search': {
-				const query = options?.get('query')?.value;
+				const query = options?.get('query')?.value.replace(/ +/g, '_');
 
 				if (!query) return interaction.reply({
 					content: this.config.cache
