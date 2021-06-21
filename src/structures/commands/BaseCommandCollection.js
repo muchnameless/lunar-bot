@@ -11,7 +11,6 @@ module.exports = class BaseCommandCollection extends Collection {
 	/**
 	 * @param {import('../LunarClient')} client
 	 * @param {string} dirPath the path to the commands folder
-	 * @param {Boolean} [isMainCollection=false]
 	 * @param {*} [entries]
 	 */
 	constructor(client, dirPath, entries) {
@@ -78,13 +77,12 @@ module.exports = class BaseCommandCollection extends Collection {
 
 	/**
 	 * loads all commands into the collection
-	 * @param {Boolean} [isReload=false]
 	 */
-	async loadAll(isReload = false) {
+	async loadAll() {
 		const commandFiles = await getAllJsFiles(this.dirPath);
 
 		for (const file of commandFiles) {
-			this.loadFromFile(file, isReload);
+			this.loadFromFile(file);
 		}
 
 		logger.debug(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
