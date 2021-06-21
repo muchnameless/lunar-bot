@@ -24,7 +24,7 @@ PostrgeSQL ^13 (earlier versions do not accept Date.now() in BigInt arrays)
 
     # Update the package lists:
     
-    sudo apt-get update
+    sudo apt update
 
     # Install the latest version of PostgreSQL.
     
