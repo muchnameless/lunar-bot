@@ -12,7 +12,7 @@ Redis (as a LRU cache)
     
     CONFIG REWRITE
 
-PostrgeSQL ^13 (earlier versions do not accept Date.now() in BigInt arrays)
+PostgreSQL ^13 (earlier versions do not accept Date.now() in BigInt arrays)
 
     # Create the file repository configuration:
     
