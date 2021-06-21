@@ -13,8 +13,7 @@ const logger = require('../functions/logger');
 
 
 /**
- * @typedef {import('discord.js').ClientOptions} LunarClientOptions
- * @property {object} db
+ * @typedef {import('discord.js').ClientOptions & { db: Record<string, any> }} LunarClientOptions
  */
 
 module.exports = class LunarClient extends Client {
