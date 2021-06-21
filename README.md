@@ -4,9 +4,13 @@ lunar guard discord bot
 
 Redis (as a LRU cache)
 
+    redis-cli
+
     CONFIG SET maxmemory 100mb
 
     CONFIG SET maxmemory-policy volatile-lru
+    
+    CONFIG REWRITE
 
 PostrgeSQL ^13 (earlier versions do not accept Date.now() in BigInt arrays)
 
