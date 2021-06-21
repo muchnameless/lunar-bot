@@ -1,11 +1,22 @@
 'use strict';
 
+const Event = require('../structures/events/Event');
 const logger = require('../functions/logger');
 
 
-/**
- * warn
- * @param {import('../structures/LunarClient')} client
- * @param {*} warning
- */
-module.exports = (client, warning) => logger.warn(warning);
+module.exports = class WarnEvent extends Event {
+	constructor(data) {
+		super(data, {
+			once: false,
+			enabled: true,
+		});
+	}
+
+	/**
+	 * event listener callback
+	 * @param {string} warning
+	 */
+	async run(warning) {
+		logger.warn(warning);
+	}
+};

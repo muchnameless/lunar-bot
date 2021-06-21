@@ -1,21 +1,28 @@
 'use strict';
 
 const ms = require('ms');
+const Event = require('../structures/events/Event');
 const logger = require('../functions/logger');
 
 
-/**
- * rateLimit
- * @param {import('../structures/LunarClient')} client
- * @param {Object} rateLimitInfo Object containing the rate limit info
- * @param {number} rateLimitInfo.timeout Timeout in ms
- * @param {number} rateLimitInfo.limit Number of requests that can be made to this endpoint
- * @param {string} rateLimitInfo.method HTTP method used for request that triggered this event
- * @param {string} rateLimitInfo.path Path used for request that triggered this event
- * @param {string} rateLimitInfo.route Route used for request that triggered this event
- */
-module.exports = (client, { route, timeout, method, path }) => {
-	if (route.endsWith('reactions') && timeout <= 250) return; // adding and removing single reactions are 1/250ms, so get rate limited each time
+module.exports = class RateLimitEvent extends Event {
+	constructor(data) {
+		super(data, {
+			once: false,
+			enabled: true,
+		});
+	}
 
-	logger.warn(`[RATE LIMIT]: timeout: ${ms(timeout)}, method: ${method}, path: ${path}`);
+	/**
+	 * event listener callback
+	 * @param {import('discord.js').RateLimitData} rateLimitData
+	 */
+	async run(rateLimitData) {
+		if (rateLimitData.global) return logger.error('[GLOBAL RATELIMIT]', { timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData });
+
+		// adding and removing single reactions are 1/250ms, so get rate limited each time
+		if (rateLimitData.route.endsWith('reactions') && rateLimitData.timeout <= 250) return;
+
+		logger.warn('[RATE LIMIT]', { timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData });
+	}
 };

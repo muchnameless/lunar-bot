@@ -1,10 +1,10 @@
 'use strict';
 
 const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+// const logger = require('../functions/logger');
 
 
-module.exports = class InvalidatedEvent extends Event {
+module.exports = class MyEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -16,7 +16,6 @@ module.exports = class InvalidatedEvent extends Event {
 	 * event listener callback
 	 */
 	async run() {
-		logger.warn('[INVALIDATED]: the client became invalidated');
-		this.client.exit(1);
+		// do stuff
 	}
 };

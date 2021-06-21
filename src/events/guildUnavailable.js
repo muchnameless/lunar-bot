@@ -1,16 +1,25 @@
 'use strict';
 
+const Event = require('../structures/events/Event');
 const logger = require('../functions/logger');
 
 
-/**
- * guildUnavailable
- * @param {import('../structures/LunarClient')} client
- * @param {import('../structures/extensions/Guild')} guild
- */
-module.exports = async (client, guild) => {
-	logger.debug(`[GUILD UNAVAILABLE]: ${guild.name}`);
+module.exports = class GuildUnavailableEvent extends Event {
+	constructor(data) {
+		super(data, {
+			once: false,
+			enabled: true,
+		});
+	}
 
-	// sweep linked discord members cache
-	if (guild.id === client.config.get('DISCORD_GUILD_ID')) client.players.sweepDiscordMemberCache();
+	/**
+	 * event listener callback
+	 * @param {import('../structures/extensions/Guild')} guild
+	 */
+	async run(guild) {
+		logger.debug(`[GUILD UNAVAILABLE]: ${guild.name}`);
+
+		// sweep linked discord members cache
+		if (guild.id === this.config.get('DISCORD_GUILD_ID')) this.client.players.sweepDiscordMemberCache();
+	}
 };

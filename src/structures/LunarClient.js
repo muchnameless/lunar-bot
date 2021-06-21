@@ -1,13 +1,13 @@
 'use strict';
 
-const { Client, MessageEmbed, Constants: { Events: { CLIENT_READY } } } = require('discord.js');
-const { join, basename } = require('path');
-const { getAllJsFiles } = require('../functions/files');
+const { Client, MessageEmbed } = require('discord.js');
+const { join } = require('path');
 const DatabaseManager = require('./database/managers/DatabaseManager');
 const LogHandler = require('./LogHandler');
 const CronJobManager = require('./CronJobManager');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const SlashCommandCollection = require('./commands/SlashCommandCollection');
+const EventsCollection = require('./events/EventCollection');
 const cache = require('../api/cache');
 const logger = require('../functions/logger');
 
@@ -30,6 +30,7 @@ module.exports = class LunarClient extends Client {
 		this.cronJobs = new CronJobManager(this);
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
+		this.events = new EventsCollection(this, join(__dirname, '..', 'events'));
 	}
 
 	set webhook(value) {
@@ -166,17 +167,13 @@ module.exports = class LunarClient extends Client {
 	 * @param {?string} token discord bot token
 	 */
 	async login(token) {
-		await Promise.all([
-			(async () => {
-				await this.db.init();
+		await this.db.init();
 
-				// these need the db cache to be populated
-				return await Promise.all([
-					this.commands.loadAll(),
-					this.chatBridges.loadChannelIDs(),
-				]);
-			})(),
-			this._loadEvents(),
+		// these need the db cache to be populated
+		await Promise.all([
+			this.commands.loadAll(),
+			this.events.loadAll(),
+			this.chatBridges.loadChannelIDs(),
 		]);
 
 		return super.login(token);
@@ -191,24 +188,6 @@ module.exports = class LunarClient extends Client {
 			content,
 			split: { char: ' ' },
 		});
-	}
-
-	/**
-	 * loads all event-callbacks and binds them to their respective events
-	 */
-	async _loadEvents() {
-		const eventFiles = await getAllJsFiles(join(__dirname, '..', 'events'));
-
-		for (const file of eventFiles) {
-			const event = require(file);
-			const EVENT_NAME = basename(file, '.js');
-
-			this[EVENT_NAME !== CLIENT_READY ? 'on' : 'once'](EVENT_NAME, event.bind(null, this));
-
-			delete require.cache[require.resolve(file)];
-		}
-
-		logger.debug(`[EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 	}
 
 	/**
