@@ -1,6 +1,5 @@
 'use strict';
 
-const { CronJob } = require('cron');
 const Event = require('../structures/events/Event');
 const logger = require('../functions/logger');
 
@@ -53,50 +52,6 @@ module.exports = class ReadyEvent extends Event {
 				logger.error('[SET PRESENCE]: error while setting presence', error);
 			}
 		}, 20 * 60_000); // 20 min
-
-		// schedule guild stats channel update
-		this.client.schedule('guildStatsChannelUpdate', new CronJob({
-			cronTime: '0 0 * * * *',
-			async onTick() {
-				if (!this.config.getBoolean('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
-
-				const { mainGuild } = this.client.hypixelGuilds;
-
-				if (!mainGuild) return;
-
-				const { formattedStats } = mainGuild;
-
-				if (!formattedStats) return;
-
-				try {
-					for (const type of [ 'weight', 'skill', 'slayer', 'catacombs' ]) {
-					/**
-					 * @type {import('discord.js').VoiceChannel}
-					 */
-						const channel = this.client.channels.cache.get(this.config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
-
-						if (!channel) continue; // no channel found
-
-						const newName = `${type} avg: ${formattedStats[`${type}Average`]}`;
-						const { name: oldName } = channel;
-
-						if (newName === oldName) continue; // no update needed
-
-						if (!channel.editable) {
-							logger.error(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
-							continue;
-						}
-
-						await channel.setName(newName, `synced with ${mainGuild.name}'s average stats`);
-
-						logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
-					}
-				} catch (error) {
-					logger.error('[GUILD STATS CHANNEL UPDATE]', error);
-				}
-			},
-			start: true,
-		}));
 
 		// chatBridges
 		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.client.chatBridges.connect();
