@@ -7,7 +7,7 @@ const LogHandler = require('./LogHandler');
 const CronJobManager = require('./CronJobManager');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const SlashCommandCollection = require('./commands/SlashCommandCollection');
-const EventsCollection = require('./events/EventCollection');
+const EventCollection = require('./events/EventCollection');
 const cache = require('../api/cache');
 const logger = require('../functions/logger');
 
@@ -30,7 +30,7 @@ module.exports = class LunarClient extends Client {
 		this.cronJobs = new CronJobManager(this);
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
-		this.events = new EventsCollection(this, join(__dirname, '..', 'events'));
+		this.events = new EventCollection(this, join(__dirname, '..', 'events'));
 	}
 
 	set webhook(value) {
