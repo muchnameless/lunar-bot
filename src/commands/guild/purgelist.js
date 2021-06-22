@@ -6,7 +6,7 @@ const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class TopCommand extends SlashCommand {
+module.exports = class PurgeListCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
