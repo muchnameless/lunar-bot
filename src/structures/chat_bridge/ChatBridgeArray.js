@@ -3,7 +3,7 @@
 const { stripIndents } = require('common-tags');
 const { join } = require('path');
 const { X_EMOJI } = require('../../constants/emojiCharacters');
-const { getPlayerName } = require('./managers/DiscordChatManager');
+const DiscordChatManager = require('./managers/DiscordChatManager');
 const BridgeCommandCollection = require('../commands/BridgeCommandCollection');
 const ChatBridge = require('./ChatBridge');
 const logger = require('../../functions/logger');
@@ -134,7 +134,7 @@ module.exports = class ChatBridgeArray extends Array {
 			const result = await this.broadcast({
 				content: stripIndents`
 					${message.content}
-					~ ${getPlayerName(message)}
+					~ ${DiscordChatManager.getPlayerName(message)}
 				`,
 				discord: {
 					split: { char: '\n' },
