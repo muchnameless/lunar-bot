@@ -44,7 +44,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 	/**
 	 * player ign or member displayName or author username, ez escaped and *blocked* if blockedWordsRegExp check doesn't pass
-	 * @param {import('../extensions/Message')} message
+	 * @param {import('../../extensions/Message')} message
 	 */
 	static getPlayerName(message) {
 		return this.formatAtMention(message.webhookID
