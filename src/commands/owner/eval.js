@@ -63,6 +63,8 @@ module.exports = class EvalCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
+		interaction.defer();
+
 		/* eslint-disable no-unused-vars */
 		const { client, config } = this;
 		const { MessageEmbed } = Discord;
