@@ -16,11 +16,13 @@ module.exports = class DualCommand extends SlashCommand {
 	constructor(param0, param1, { aliases, guildOnly, args, usage }) {
 		super(param0, param1);
 
-		const { name, description } = this;
+		const { name, description, config } = this;
 
 		this.inGameData = {
 			name,
-			aliases: aliases?.length ? aliases.filter(Boolean) : null,
+			aliases: aliases?.length
+				? aliases.filter(Boolean)
+				: null,
 			description,
 			guildOnly: guildOnly ?? false,
 			args: args ?? false,
@@ -41,6 +43,7 @@ module.exports = class DualCommand extends SlashCommand {
 			get usageInfo() {
 				return `\`${this.config.get('PREFIX')}${this.aliases?.[0].length < this.name ? this.aliases[0] : this.name}\` ${this.usage}`;
 			},
+			config,
 		};
 	}
 
