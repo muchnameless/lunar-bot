@@ -184,7 +184,7 @@ module.exports = class PollCommand extends DualCommand {
 				return input;
 			});
 
-		if (inputMatched.length < 2) return message.reply(this.inGameData.usageInfo);
+		if (!inputMatched || inputMatched.length < 2) return message.reply(this.inGameData.usageInfo);
 
 		return this._run(
 			message,
