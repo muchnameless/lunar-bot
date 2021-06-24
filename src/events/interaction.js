@@ -1,5 +1,6 @@
 'use strict';
 
+const { Constants } = require('discord.js');
 const ms = require('ms');
 const { handleLeaderboardButtonInteraction } = require('../functions/leaderboards');
 const { LB_KEY } = require('../constants/redis');
@@ -66,7 +67,7 @@ module.exports = class InteractionEvent extends Event {
 		} catch (error) {
 			logger.error(error);
 
-			if (error.code === 50_027) return; // invalid webhook token, workaround until its in require('discord.js').Constants.APIErrors.INVALID_WEBHOOK_TOKEN
+			if (error.code === Constants.APIErrors.INVALID_WEBHOOK_TOKEN) return; // interaction expired
 
 			try {
 				await interaction.reply({

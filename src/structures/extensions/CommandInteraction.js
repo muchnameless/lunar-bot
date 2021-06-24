@@ -10,10 +10,6 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 		super(...args);
 
 		/**
-		 * wether the first reply was ephemeral
-		 */
-		this.ephemeral = null;
-		/**
 		 * deferring promise
 		 */
 		this._deferring = null;
@@ -91,8 +87,6 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	async defer({ ephemeral = this.useEphemeral, ...options } = {}) {
 		if (this._deferring) return this._deferring;
 
-		this.ephemeral = ephemeral;
-
 		return this._deferring = super.defer({ ephemeral, ...options });
 	}
 
@@ -146,8 +140,6 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 			const message = await this.followUp(data);
 			return this._handleReplyMessage(data, message);
 		}
-
-		this.ephemeral = data.ephemeral;
 
 		const message = await super.reply(data);
 		return this._handleReplyMessage(data, message);
