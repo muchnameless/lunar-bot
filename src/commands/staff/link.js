@@ -39,7 +39,7 @@ module.exports = class LinkCommand extends SlashCommand {
 		interaction.defer();
 
 		const { user, member } = interaction.options.get('user');
-		const IGN_INPUT = interaction.options.get('ign').value;
+		const IGN_OR_UUID = interaction.options.get('ign').value;
 
 		let uuid;
 		let ign;
@@ -48,22 +48,22 @@ module.exports = class LinkCommand extends SlashCommand {
 		let player;
 
 		try {
-			({ uuid, ign } = await mojang.ignOrUuid(IGN_INPUT));
+			({ uuid, ign } = await mojang.ignOrUuid(IGN_OR_UUID));
 			({ _id: guildID } = await hypixel.guild.player(uuid));
 		} catch (error) {
 			logger.error('[LINK]', error);
 		}
 
 		if (!this.client.hypixelGuilds.cache.keyArray().includes(guildID)) {
-			player = this.client.players.getByIGN(IGN_INPUT);
+			player = this.client.players.getByIGN(IGN_OR_UUID);
 
-			if (player) {
-				({ minecraftUUID: uuid, ign } = this.client.players.getByIGN(IGN_INPUT) ?? {});
-			}
+			if (player) ({ minecraftUUID: uuid, ign } = player);
+		} else if (uuid) {
+			player = this.client.players.cache.get(uuid);
 		}
 
 		if (!uuid) return interaction.reply(stripIndents`
-			\`${IGN_INPUT}\` is neither a valid IGN nor minecraft uuid.
+			\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
 			Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 		`);
 
