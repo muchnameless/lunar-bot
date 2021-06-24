@@ -44,8 +44,6 @@ module.exports = class LinkCommand extends SlashCommand {
 		let uuid;
 		let ign;
 		let guildID;
-		/** @type {?import('../../structures/database/models/Player')} */
-		let player;
 
 		try {
 			({ uuid, ign } = await mojang.ignOrUuid(IGN_OR_UUID));
@@ -54,26 +52,28 @@ module.exports = class LinkCommand extends SlashCommand {
 			logger.error('[LINK]', error);
 		}
 
-		if (!this.client.hypixelGuilds.cache.keyArray().includes(guildID)) {
+		/** @type {?import('../../structures/database/models/Player')} */
+		let player;
+
+		if (!this.client.hypixelGuilds.cache.keyArray().includes(guildID)) { // IGN_OR_UUID is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
 			player = this.client.players.getByIGN(IGN_OR_UUID);
 
 			if (player) ({ minecraftUUID: uuid, ign } = player);
-		} else if (uuid) {
-			player = this.client.players.cache.get(uuid);
+		} else if (uuid) { // IGN_OR_UUID could be resolved to a valid uuid in guild
+			player = this.client.players.cache.get(uuid)
+				?? (await this.client.players.model.findOrCreate({
+					where: { minecraftUUID: uuid },
+					defaults: {
+						ign,
+						guildID,
+					},
+				}))?.[0];
 		}
 
-		if (!uuid) return interaction.reply(stripIndents`
+		if (!player) return interaction.reply(stripIndents`
 			\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
 			Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 		`);
-
-		player ??= (await this.client.players.model.findOrCreate({
-			where: { minecraftUUID: uuid },
-			defaults: {
-				ign,
-				guildID,
-			},
-		}))?.[0];
 
 		// discordID already linked to another player
 		const playerLinkedToID = this.client.players.getByID(user.id)
