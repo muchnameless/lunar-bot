@@ -40,6 +40,11 @@ module.exports = class ReloadCommand extends DualCommand {
 					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 					description: 'reset all cooldowns',
 					options: [],
+				}, {
+					name: 'filter',
+					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
+					description: 'reload the blocked words filter',
+					options: [],
 				}],
 				defaultPermission: true,
 				cooldown: 0,
@@ -125,6 +130,16 @@ module.exports = class ReloadCommand extends DualCommand {
 				return ctx.reply('cooldowns reset successfully');
 			}
 
+			case 'filter': {
+				delete require.cache[require.resolve('../../structures/chat_bridge/constants/chatBridge')];
+
+				const { blockedWordsRegExp } = require('../../structures/chat_bridge/constants/chatBridge');
+				const ChatManager = require('../../structures/chat_bridge/managers/ChatManager');
+
+				ChatManager.BLOCKED_WORDS_REGEXP = blockedWordsRegExp;
+
+				return ctx.reply('filter reloaded successfully');
+			}
 
 			default:
 				throw new Error(`unknown subcommand '${mode}'`);

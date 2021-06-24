@@ -7,7 +7,7 @@ const ms = require('ms');
 const emojiRegex = require('emoji-regex/es2015')();
 const { sleep, trim, cleanFormattedNumber, splitMessage } = require('../../../functions/util');
 const { unicodeToName } = require('../constants/emojiNameUnicodeConverter');
-const { memeRegExp, blockedWordsRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
+const { memeRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
 const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
 const { MC_CLIENT_VERSION } = require('../constants/settings');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database');
@@ -574,7 +574,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				.flatMap(part => splitMessage(part, { char: [ ' ', '' ], maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length }))
 				.filter((part) => {
 					if (nonWhiteSpaceRegExp.test(part)) { // filter out white space only parts
-						if (blockedWordsRegExp.test(part) || memeRegExp.test(part)) {
+						if (ChatManager.BLOCKED_WORDS_REGEXP.test(part) || memeRegExp.test(part)) {
 							if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
 							return success = false;
 						}

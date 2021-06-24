@@ -4,7 +4,7 @@ const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions } = require
 const FormData = require('form-data');
 const fetch = require('node-fetch');
 const ms = require('ms');
-const { prefixByType, blockedWordsRegExp } = require('../constants/chatBridge');
+const { prefixByType } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
@@ -58,7 +58,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {string} name
 	 */
 	static formatAtMention(name) {
-		return blockedWordsRegExp.test(name)
+		return this.BLOCKED_WORDS_REGEXP.test(name)
 			? '*blocked*'
 			: name;
 	}
