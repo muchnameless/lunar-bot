@@ -167,7 +167,7 @@ module.exports = class LogHandler {
 		const { channel } = this;
 
 		// no logging channel
-		if (!channel) return this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
+		if (!channel) return this._logToFile(embeds);
 
 		// API call
 		try {
@@ -177,7 +177,7 @@ module.exports = class LogHandler {
 		} catch (error) {
 			logger.error('[CLIENT LOG]', error);
 
-			this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
+			this._logToFile(embeds);
 
 			return null;
 		}
@@ -198,9 +198,9 @@ module.exports = class LogHandler {
 
 	/**
 	 * write data in 'cwd/log_buffer'
-	 * @param {string} data file content
+	 * @param {MessageEmbed[]} embeds file content
 	 */
-	async _logToFile(data) {
+	async _logToFile(embeds) {
 		try {
 			await this._createLogBufferFolder();
 			await writeFile(
@@ -209,7 +209,7 @@ module.exports = class LogHandler {
 					.replace(', ', '_')
 					.replace(/:/g, '.')
 				}_${SnowflakeUtil.generate()}`),
-				data,
+				embeds.map(embed => JSON.stringify(embed)).join('\n'),
 			);
 		} catch (error) {
 			logger.error(error);
