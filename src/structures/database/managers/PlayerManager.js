@@ -442,8 +442,8 @@ module.exports = class PlayerManager extends ModelManager {
 
 		await this.resetXp({ offsetToReset: COMPETITION_START });
 
-		config.set('COMPETITION_RUNNING', 'true');
-		config.set('COMPETITION_SCHEDULED', 'false');
+		config.set('COMPETITION_RUNNING', true);
+		config.set('COMPETITION_SCHEDULED', false);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')
@@ -459,7 +459,7 @@ module.exports = class PlayerManager extends ModelManager {
 
 		await this.resetXp({ offsetToReset: COMPETITION_END });
 
-		config.set('COMPETITION_RUNNING', 'false');
+		config.set('COMPETITION_RUNNING', false);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')

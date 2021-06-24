@@ -3,6 +3,7 @@
 const { MessageEmbed, Permissions } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
+const { RateLimitError } = require('@zikeji/hypixel');
 const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
 const { slayerXp, skills, cosmeticSkills, skillsAchievements, skillXpTotal, slayers, dungeonTypes, dungeonClasses, dungeonTypesAndClasses } = require('../../../constants/skyblock');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
@@ -275,7 +276,7 @@ module.exports = class Player extends Model {
 	 * wether the player is a bridger or error case
 	 */
 	get notInGuild() {
-		return [ null, GUILD_ID_BRIDGER, GUILD_ID_ERROR ].includes(this.guildID);
+		return this.client.hypixelGuilds.constructor.PSEUDO_GUILD_IDS.includes(this.guildID);
 	}
 
 	/**
@@ -574,7 +575,7 @@ module.exports = class Player extends Model {
 			if (error.name.startsWith('Sequelize') || error instanceof TypeError || error instanceof RangeError) return logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
 
 			logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
-			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', 'true');
+			if (!(error instanceof RateLimitError)) this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', true);
 			if (rejectOnAPIError) throw error;
 		}
 	}

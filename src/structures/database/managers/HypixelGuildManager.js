@@ -21,6 +21,8 @@ module.exports = class HypixelGuildManager extends ModelManager {
 		this.model;
 	}
 
+	static PSEUDO_GUILD_IDS = [ null, GUILD_ID_BRIDGER, GUILD_ID_ERROR ];
+
 	/**
 	 * `NameOne`|`NameTwo`|`NameThree`
 	 */
@@ -42,8 +44,6 @@ module.exports = class HypixelGuildManager extends ModelManager {
 		return this.cache.get(this.client.config.get('MAIN_GUILD_ID'));
 	}
 
-	static PSEUDO_GUILD_IDS = [ GUILD_ID_BRIDGER, GUILD_ID_ERROR ];
-
 	async loadCache(condition) {
 		await super.loadCache(condition);
 
@@ -64,7 +64,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 
 			return true;
 		} catch (error) {
-			if (!error.name.startsWith('Sequelize')) this.client.config.set('HYPIXEL_API_ERROR', 'true');
+			if (!error.name.startsWith('Sequelize')) this.client.config.set('HYPIXEL_API_ERROR', true);
 			logger.error('[GUILDS UPDATE]', error);
 			return false;
 		}
@@ -101,38 +101,6 @@ module.exports = class HypixelGuildManager extends ModelManager {
 		return (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD'))
 			? result.value
 			: null;
-	}
-
-	/**
-	 * autocorrects all elements to the hypixel guilds names and returns the most likely match or null, or 'false' for the 'all'-flag
-	 * @param {string[]} args
-	 * @returns {?import('../models/HypixelGuild')|boolean}
-	 */
-	getFromArray(args) {
-		const hypixelGuildInput = args
-			.map((arg, index) => ({ index, ...this.autocorrectToGuild(arg) }))
-			.sort((a, b) => a.similarity - b.similarity)
-			.pop();
-
-		return hypixelGuildInput?.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
-			? (() => {
-				args.splice(hypixelGuildInput.index, 1);
-				return hypixelGuildInput.value;
-			})()
-			: null;
-	}
-
-	/**
-	 * autocorrects the input to a hypixel guild name
-	 * @param {string} input
-	 * @returns {{ value: import('../models/HypixelGuild')|boolean, similarity: number }}
-	 */
-	autocorrectToGuild(input) {
-		const result = autocorrect(input, [ ...this.cache.values(), { name: 'all' }], 'name');
-
-		if (result.value.name === 'all') return { ...result, value: false };
-
-		return result;
 	}
 
 	/**
