@@ -281,7 +281,7 @@ module.exports = class TaxCommand extends SlashCommand {
 						?? await players.model.findOne({
 							where: {
 								guildID: null,
-								ign: { [Op.iLike]: `%${options.get('player').value}%` },
+								ign: { [Op.iLike]: options.get('player').value },
 							},
 						});
 
