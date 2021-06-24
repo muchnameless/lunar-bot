@@ -303,11 +303,7 @@ module.exports = class Player extends Model {
 	 */
 	set discordMember(member) {
 		if (member == null) {
-			if (!this.inDiscord) return;
-
-			this.inDiscord = false;
-			this.save({ fields: [ 'inDiscord' ] });
-
+			super.update({ inDiscord: false }).catch(logger.error);
 			return;
 		}
 
@@ -317,8 +313,7 @@ module.exports = class Player extends Model {
 
 		if (this.inDiscord) return;
 
-		this.inDiscord = true;
-		this.save({ fields: [ 'inDiscord' ] });
+		super.update({ inDiscord: true }).catch(logger.error);
 	}
 
 	/**
