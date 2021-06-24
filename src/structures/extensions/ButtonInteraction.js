@@ -215,12 +215,12 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 	 */
 	async react(...emojis) {
 		if (this.ephemeral) return null;
-		if (!this.channel?.botPermissions.has(Permissions.FLAGS.ADD_REACTIONS)) return null;
+		if (!this.channel?.botPermissions.has(Permissions.FLAGS.ADD_REACTIONS)) return logger.error(`[INTERACTION REACT]: missing 'ADD_REACTIONS' in ${this.channel ?? this.channelID}`);
 
 		try {
 			return await this.message.react(...emojis);
 		} catch (error) {
-			return logger.error('[MESSAGE REACT]', error);
+			return logger.error('[INTERACTION REACT]', error);
 		}
 	}
 }
