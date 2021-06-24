@@ -212,7 +212,6 @@ module.exports = class LogHandler {
 				embeds.map(embed => JSON.stringify(embed)).join('\n'),
 			);
 		} catch (error) {
-			logger.error(error);
 			logger.error('[LOG TO FILE]', error);
 		}
 	}
@@ -236,7 +235,7 @@ module.exports = class LogHandler {
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {
-			logger.error('[POST LOG FILES]', error);
+			logger.error('[POST FILE LOGS]', error);
 		}
 	}
 };
