@@ -49,6 +49,13 @@ module.exports = class LogHandler {
 	}
 
 	/**
+	 * wether the log handler has a valid channel with all neccessary permissions
+	 */
+	get ready() {
+		return Boolean(this.channel);
+	}
+
+	/**
 	 * fetches and caches the logging webhook and posts all remaining file logs from the log_buffer
 	 */
 	async init() {

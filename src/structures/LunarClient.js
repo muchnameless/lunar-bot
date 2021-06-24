@@ -32,14 +32,6 @@ module.exports = class LunarClient extends Client {
 		this.events = new EventCollection(this, join(__dirname, '..', 'events'));
 	}
 
-	set webhook(value) {
-		this.logHandler.webhook = value;
-	}
-
-	get webhook() {
-		return this.logHandler.webhook;
-	}
-
 	get config() {
 		return this.db.modelManagers.config;
 	}
@@ -79,7 +71,7 @@ module.exports = class LunarClient extends Client {
 	 * returns the logging webhook's channel
 	 */
 	get loggingChannel() {
-		return this.channels.cache.get(this.webhook?.channelID) ?? null;
+		return this.logHandler.channel;
 	}
 
 	/**
