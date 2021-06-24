@@ -1,8 +1,9 @@
 'use strict';
 
-const { MessageEmbed, SnowflakeUtil, DiscordAPIError } = require('discord.js');
-const { join } = require('path');
+const { Permissions, MessageEmbed, SnowflakeUtil } = require('discord.js');
+const { commaListsAnd } = require('common-tags');
 const { promises: { mkdir, writeFile, readdir, readFile, unlink } } = require('fs');
+const { join } = require('path');
 const { EMBED_MAX_CHARS, EMBEDS_PER_WH_MESSAGE } = require('../constants/discord');
 const logger = require('../functions/logger');
 
@@ -10,51 +11,55 @@ const logger = require('../functions/logger');
 module.exports = class LogHandler {
 	/**
 	 * @param {import('./LunarClient')} client
+	 * @param {string} logPath
 	 */
-	constructor(client) {
+	constructor(client, logPath) {
 		this.client = client;
-		/**
-		 * @type {import('discord.js').Webhook}
-		 */
-		this.webhook = null;
+		this.logPath = logPath;
 	}
 
-	static LOG_PATH = join(__dirname, '..', '..', 'log_buffer');
+	static REQUIRED_CHANNEL_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS;
 
 	/**
 	 * cleans a string from an embed for console logging
 	 * @param {string} string the string to clean
 	 */
 	static cleanLoggingEmbedString(string) {
-		return typeof string === 'string'
-			? string
-				.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
-				.replace(/`|\*|\n?\u200b|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
-				.replace(/\n{2,}/g, '\n') // consecutive line-breaks
-			: null;
+		if (typeof string === 'string') return string
+			.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
+			.replace(/`|\*|\n?\u200b|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
+			.replace(/\n{2,}/g, '\n'); // consecutive line-breaks
+
+		return null;
 	}
 
 	/**
-	 * wether the logging webhook is properly loaded and cached
+	 * logging channel
 	 */
-	get webhookAvailable() {
-		return Boolean(this.webhook);
+	get channel() {
+		const channel = this.client.channels.cache.get(this.client.config.get('LOGGING_CHANNEL_ID'));
+
+		if (!channel?.isText()) return logger.error(`[LOG HANDLER]: ${channel ? `#${channel.name}` : this.client.config.get('LOGGING_CHANNEL_ID')} is not a cached text based channel (id)`);
+
+		if (!channel.botPermissions.has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)) {
+			return logger.error(commaListsAnd`[LOG HANDLER]: missing ${channel.botPermissions.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS).map(permission => `'${permission}'`)}`);
+		}
+
+		return channel;
 	}
 
 	/**
 	 * fetches and caches the logging webhook and posts all remaining file logs from the log_buffer
 	 */
 	async init() {
-		if (this.client.config.getBoolean('LOGGING_WEBHOOK_DELETED')) return logger.warn('[LOGGING WEBHOOK]: deleted');
+		const { channel } = this;
+
+		if (!channel) return;
 
 		try {
-			const loggingWebhook = await this.client.fetchWebhook(process.env.LOGGING_WEBHOOK_ID, process.env.LOGGING_WEBHOOK_TOKEN);
-
-			this.webhook = loggingWebhook;
-			this._postFileLogs(); // repost webhook logs that failed to be posted during the last uptime
+			return await this._postFileLogs(); // repost logs that failed to be posted during the last uptime
 		} catch (error) {
-			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) this.client.config.set('LOGGING_WEBHOOK_DELETED', 'true');
-			logger.error('[LOGGING WEBHOOK]', error);
+			logger.error('[LOG HANDLER]', error);
 		}
 	}
 
@@ -84,7 +89,7 @@ module.exports = class LogHandler {
 				embedChunk.push(embeds[total]);
 			}
 
-			returnValue.push(this._sendViaWebhook(embedChunk));
+			returnValue.push(this._log(embedChunk));
 		}
 
 		return Promise.all(returnValue);
@@ -95,7 +100,7 @@ module.exports = class LogHandler {
 	 * @param {...MessageEmbed} embedsInput embeds to log
 	 */
 	async log(...embedsInput) {
-		return this._sendViaWebhook(this._prepareEmbeds(embedsInput));
+		return this._log(this._prepareEmbeds(embedsInput));
 	}
 
 	/**
@@ -130,7 +135,7 @@ module.exports = class LogHandler {
 	 * log to console and send via webhook
 	 * @param {MessageEmbed[]} embedsInput
 	 */
-	async _sendViaWebhook(embeds) {
+	async _log(embeds) {
 		// log to console
 		for (const embed of embeds) {
 			const FIELDS_LOG = embed.fields?.filter(({ name, value }) => name !== '\u200b' || value !== '\u200b');
@@ -152,27 +157,18 @@ module.exports = class LogHandler {
 			);
 		}
 
-		// no logging webhook
-		if (!this.webhook) {
-			logger.warn('[CLIENT LOG]: webhook unavailable');
-			return this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
-		}
+		const { channel } = this;
+
+		// no logging channel
+		if (!channel) return this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
 
 		// API call
 		try {
-			return await this.webhook.send({
-				username: `${this.client.user.username} Log`,
-				avatarURL: this.client.user.displayAvatarURL(),
+			return await channel.send({
 				embeds,
 			});
 		} catch (error) {
 			logger.error('[CLIENT LOG]', error);
-
-			// webhook doesn't exist anymore
-			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
-				this.webhook = null;
-				this.client.config.set('LOGGING_WEBHOOK_DELETED', 'true');
-			}
 
 			this._logToFile(embeds.map(embed => JSON.stringify(embed)).join('\n'));
 
@@ -183,9 +179,9 @@ module.exports = class LogHandler {
 	/**
 	 * create log_buffer folder if it is non-existent
 	 */
-	async _createLogBufferFolder() { // eslint-disable-line class-methods-use-this
+	async _createLogBufferFolder() {
 		try {
-			await mkdir(LogHandler.LOG_PATH);
+			await mkdir(this.logPath);
 			logger.debug('[LOG BUFFER]: created \'log_buffer\' folder');
 			return true;
 		} catch { // rejects if folder already exists
@@ -201,7 +197,7 @@ module.exports = class LogHandler {
 		try {
 			await this._createLogBufferFolder();
 			await writeFile(
-				join(LogHandler.LOG_PATH, `${new Date()
+				join(this.logPath, `${new Date()
 					.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
 					.replace(', ', '_')
 					.replace(/:/g, '.')
@@ -221,12 +217,12 @@ module.exports = class LogHandler {
 		try {
 			await this._createLogBufferFolder();
 
-			const logBufferFiles = await readdir(LogHandler.LOG_PATH);
+			const logBufferFiles = await readdir(this.logPath);
 
 			if (!logBufferFiles) return;
 
 			for (const file of logBufferFiles) {
-				const FILE_PATH = join(LogHandler.LOG_PATH, file);
+				const FILE_PATH = join(this.logPath, file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
 				await this.log(...FILE_CONTENT.split('\n').map(x => new MessageEmbed(JSON.parse(x))));

@@ -25,7 +25,7 @@ module.exports = class LunarClient extends Client {
 
 		this.ownerID = process.env.OWNER ?? null;
 		this.db = new DatabaseManager({ client: this, db: options.db });
-		this.logHandler = new LogHandler(this);
+		this.logHandler = new LogHandler(this, join(__dirname, '..', '..', 'log_buffer'));
 		this.cronJobs = new CronJobManager(this);
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
