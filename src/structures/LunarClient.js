@@ -68,21 +68,21 @@ module.exports = class LunarClient extends Client {
 	}
 
 	/**
-	 * returns the logging webhook's channel
+	 * returns the log channel
 	 */
 	get loggingChannel() {
 		return this.logHandler.channel;
 	}
 
 	/**
-	 * logs up to 10 embeds to console and via the logging webhook
+	 * logs up to 10 embeds to console and via the log handler
 	 */
 	get log() {
 		return (...args) => this.logHandler.log(...args);
 	}
 
 	/**
-	 * logs an unspecified amount of embeds to console and via the logging webhook
+	 * logs an unspecified amount of embeds to console and via the log handler
 	 */
 	get logMany() {
 		return arg => this.logHandler.logMany(arg);

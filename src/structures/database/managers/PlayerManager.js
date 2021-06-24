@@ -262,7 +262,7 @@ module.exports = class PlayerManager extends ModelManager {
 	}
 
 	/**
-	 * updates all IGNs and logs changes via the webhook
+	 * updates all IGNs and logs changes via the log handler
 	 */
 	async updateIGN() {
 		/** @type {Record<string, string>[]} */

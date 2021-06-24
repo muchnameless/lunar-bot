@@ -57,6 +57,6 @@ module.exports = class ReadyEvent extends Event {
 		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.client.chatBridges.connect();
 
 		// log ready
-		logger.debug(`[READY]: startup complete. ${this.client.cronJobs.size} CronJobs running. Logging webhook available: ${this.client.logHandler.ready}`);
+		logger.debug(`[READY]: startup complete. ${this.client.cronJobs.size} CronJobs running. Logging channel available: ${this.client.logHandler.ready}`);
 	}
 };

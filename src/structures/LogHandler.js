@@ -56,7 +56,7 @@ module.exports = class LogHandler {
 	}
 
 	/**
-	 * fetches and caches the logging webhook and posts all remaining file logs from the log_buffer
+	 * posts all remaining file logs from the log_buffer
 	 */
 	async init() {
 		const { channel } = this;
@@ -71,7 +71,7 @@ module.exports = class LogHandler {
 	}
 
 	/**
-	 * logs an unspecified amount of embeds to console and via the logging webhook
+	 * logs an unspecified amount of embeds to console and to the logging channel
 	 * @param {MessageEmbed[]|string[]} embedsInput embeds to log
 	 */
 	async logMany(embedsInput) {
@@ -103,7 +103,7 @@ module.exports = class LogHandler {
 	}
 
 	/**
-	 * logs up to 10 embeds to console and via the logging webhook
+	 * logs up to 10 embeds to console and to the logging channel
 	 * @param {...MessageEmbed} embedsInput embeds to log
 	 */
 	async log(...embedsInput) {
@@ -139,7 +139,7 @@ module.exports = class LogHandler {
 	}
 
 	/**
-	 * log to console and send via webhook
+	 * log to console and send in the logging channel
 	 * @param {MessageEmbed[]} embedsInput
 	 */
 	async _log(embeds) {
@@ -218,7 +218,7 @@ module.exports = class LogHandler {
 	}
 
 	/**
-	 * read all files from 'cwd/log_buffer' and webhook log their parsed content
+	 * read all files from 'cwd/log_buffer' and log their parsed content in the logging channel
 	 */
 	async _postFileLogs() {
 		try {

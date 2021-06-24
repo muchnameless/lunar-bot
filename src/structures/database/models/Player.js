@@ -851,7 +851,7 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * adds and/or removes the provided roles and logs it via webhook, returns true or false depending on the success
+	 * adds and/or removes the provided roles and logs it via the log handler, returns true or false depending on the success
 	 * @param {string[]} rolesToAdd roles to add to the member
 	 * @param {string[]} rolesToRemove roles to remove from the member
 	 * @param {string} reason reason for discord's audit logs
