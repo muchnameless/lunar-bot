@@ -61,7 +61,9 @@ module.exports = class HypixelMessage extends ChatMessage {
 					? {
 						ign: matched.groups.ign,
 						guildRank: matched.groups.guildRank,
-						uuid: this.extra?.[0].clickEvent?.value.slice(13).replace(/-/g, ''), // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
+						uuid: matched.groups.type
+							? this.extra?.[0].clickEvent?.value.slice(13).replace(/-/g, '') // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
+							: null,
 					}
 					: {
 						ign: this.chatBridge.bot.ign,
