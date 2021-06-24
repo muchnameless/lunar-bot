@@ -76,7 +76,10 @@ module.exports = class LinkCommand extends SlashCommand {
 		}))?.[0];
 
 		// discordID already linked to another player
-		const playerLinkedToID = this.client.players.getByID(user.id);
+		const playerLinkedToID = this.client.players.getByID(user.id)
+			?? await this.client.players.model.findOne({
+				where: { discordID: user.id },
+			});
 
 		if (playerLinkedToID) {
 			let linkedUserIsDeleted = false;

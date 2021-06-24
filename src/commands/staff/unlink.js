@@ -1,6 +1,7 @@
 'use strict';
 
 const { Constants } = require('discord.js');
+const { Op } = require('sequelize');
 const { oneLine } = require('common-tags');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
@@ -27,9 +28,18 @@ module.exports = class UnlinkCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		const player = this.getPlayer(interaction.options);
+		const player = this.getPlayer(interaction.options)
+			?? await this.client.players.model.findOne({
+				where: {
+					[Op.or]: [{
+						ign: { [Op.iLike]: interaction.options.get('player').value },
+						minecraftUUID: interaction.options.get('player').value.toLowerCase(),
+						discordID: interaction.options.get('player').value,
+					}],
+				},
+			});
 
-		if (!player.discordID) return interaction.reply(`\`${player.ign}\` is not linked`);
+		if (!player?.discordID) return interaction.reply(`\`${interaction.options.get('player').value}\` is not linked`);
 
 		interaction.defer();
 
