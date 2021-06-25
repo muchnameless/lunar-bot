@@ -48,9 +48,11 @@ module.exports = class GuildOfCommand extends DualCommand {
 	async _run(ctx, ignOrUuid) {
 		try {
 			const { uuid, ign } = await mojang.ignOrUuid(ignOrUuid);
-			const { name, tag } = await hypixel.guild.player(uuid);
+			const { name, tag, members } = await hypixel.guild.player(uuid);
 
-			return ctx.reply(`${ign}: ${name ?? 'no guild'} ${tag ? `[${tag}]` : ''}`);
+			if (!name) return ctx.reply(`${ign}: no guild`);
+
+			return ctx.reply(`${ign}: ${name}${tag ? ` [${tag}] ` : ''}${members.length}/125 members`);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
