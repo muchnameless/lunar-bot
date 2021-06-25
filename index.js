@@ -68,8 +68,5 @@ process
 	});
 
 	// connect to Discord
-	client.login().catch((error) => {
-		logger.error('[INIT]: login error', error);
-		client.exit(1);
-	});
+	await client.login();
 })();

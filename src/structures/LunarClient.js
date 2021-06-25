@@ -167,7 +167,12 @@ module.exports = class LunarClient extends Client {
 			this.chatBridges.loadChannelIDs(),
 		]);
 
-		return super.login(token);
+		try {
+			return await super.login(token);
+		} catch (error) {
+			logger.error('[CLIENT LOGIN]', error);
+			this.exit(1);
+		}
 	}
 
 	/**
@@ -230,7 +235,7 @@ module.exports = class LunarClient extends Client {
 
 			process.exit(code);
 		} catch (error) {
-			console.error(error);
+			console.error('[CLIENT EXIT]', error);
 			process.exit(1);
 		}
 	}
