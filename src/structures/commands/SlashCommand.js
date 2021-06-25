@@ -177,7 +177,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @returns {?import('../database/models/Player')}
 	 */
 	getPlayer(options, interaction) {
-		if (!options) return null;
+		if (!options) return interaction?.user.player ?? null;
 
 		const INPUT = (options.get('player') || options.get('target'))?.value.toLowerCase();
 
