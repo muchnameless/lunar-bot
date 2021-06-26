@@ -580,7 +580,7 @@ module.exports = class HypixelGuild extends Model {
 				}
 			}
 
-			this.client.logMany(loggingEmbeds);
+			this.client.log(...loggingEmbeds);
 		} finally {
 			this._isUpdatingPlayers = false;
 		}

@@ -4,7 +4,7 @@ const { Permissions, MessageEmbed, SnowflakeUtil } = require('discord.js');
 const { commaListsAnd } = require('common-tags');
 const { promises: { mkdir, writeFile, readdir, readFile, unlink } } = require('fs');
 const { join } = require('path');
-const { EMBED_MAX_CHARS, EMBEDS_PER_WH_MESSAGE } = require('../constants/discord');
+const { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } = require('../constants/discord');
 const logger = require('../functions/logger');
 
 
@@ -71,11 +71,16 @@ module.exports = class LogHandler {
 	}
 
 	/**
-	 * logs an unspecified amount of embeds to console and to the logging channel
-	 * @param {MessageEmbed[]|string[]} embedsInput embeds to log
+	 * logs embeds to console and to the logging channel
+	 * @param {...MessageEmbed} embedsInput embeds to log
 	 */
-	async logMany(embedsInput) {
+	async log(...embedsInput) {
 		const embeds = this._prepareEmbeds(embedsInput);
+
+		// send 1 message
+		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) return this._log(embeds);
+
+		// split into multiple messages
 		const TOTAL_AMOUNT = embeds.length;
 		const returnValue = [];
 
@@ -84,7 +89,7 @@ module.exports = class LogHandler {
 
 			let embedChunkLength = 0;
 
-			for (let current = 0; current < EMBEDS_PER_WH_MESSAGE && total < TOTAL_AMOUNT; ++current, ++total) {
+			for (let current = 0; current < EMBEDS_MAX_AMOUNT && total < TOTAL_AMOUNT; ++current, ++total) {
 				embedChunkLength += embeds[total].length;
 
 				// adding the new embed would exceed the max char count
@@ -103,14 +108,6 @@ module.exports = class LogHandler {
 	}
 
 	/**
-	 * logs up to 10 embeds to console and to the logging channel
-	 * @param {...MessageEmbed} embedsInput embeds to log
-	 */
-	async log(...embedsInput) {
-		return this._log(this._prepareEmbeds(embedsInput));
-	}
-
-	/**
 	 * make sure all elements are instances of MessageEmbed
 	 * @param {MessageEmbed[]|string[]} embedsInput
 	 */
@@ -121,8 +118,8 @@ module.exports = class LogHandler {
 		for (const [ index, embed ] of embeds.entries()) {
 			if (embed instanceof MessageEmbed) continue;
 
-			if (typeof embed === 'string') {
-				embeds[index] = this.client.defaultEmbed.setDescription(embed);
+			if (typeof embed === 'string' || typeof embed === 'number') {
+				embeds[index] = this.client.defaultEmbed.setDescription(`${embed}`);
 				continue;
 			}
 

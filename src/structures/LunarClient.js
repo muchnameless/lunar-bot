@@ -82,13 +82,6 @@ module.exports = class LunarClient extends Client {
 	}
 
 	/**
-	 * logs an unspecified amount of embeds to console and via the log handler
-	 */
-	get logMany() {
-		return arg => this.logHandler.logMany(arg);
-	}
-
-	/**
 	 * starts and caches a cronJob
 	 */
 	get schedule() {

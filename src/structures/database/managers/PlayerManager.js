@@ -332,7 +332,7 @@ module.exports = class PlayerManager extends ModelManager {
 			}
 		}
 
-		this.client.logMany(embeds);
+		this.client.log(...embeds);
 
 		return this;
 	}
@@ -637,7 +637,7 @@ module.exports = class PlayerManager extends ModelManager {
 			}
 		}
 
-		this.client.logMany(embeds);
+		this.client.log(...embeds);
 
 		return this;
 	}
