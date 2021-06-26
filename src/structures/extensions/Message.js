@@ -178,10 +178,12 @@ class LunarMessage extends Structures.get('Message') {
 
 			this.sendReplyChannel = false; // to not ping the author with #bot-commands a second time
 
-			const collected = await questionMessage.channel.awaitMessages(
-				msg => msg.author.id === this.author.id,
-				{ max: 1, time: timeoutSeconds * 1_000, errors: [ 'time' ] },
-			);
+			const collected = await questionMessage.channel.awaitMessages({
+				filter: msg => msg.author.id === this.author.id,
+				max: 1,
+				time: timeoutSeconds * 1_000,
+				errors: [ 'time' ],
+			});
 
 			return collected.first().content;
 		} catch {

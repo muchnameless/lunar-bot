@@ -427,11 +427,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * collects chat messages from the bot
-	 * @param {import('../MessageCollector').CollectorFilter} filter
 	 * @param {import('../MessageCollector').MessageCollectorOptions} options
 	 */
-	createMessageCollector(filter, options = {}) {
-		return new MessageCollector(this.chatBridge, filter, options);
+	createMessageCollector(options = {}) {
+		return new MessageCollector(this.chatBridge, options);
 	}
 
 	/**
@@ -720,12 +719,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
-		const collector = this._commandCollector = this.createMessageCollector(
-			message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{29,}/.test(message.content)),
-			{
-				time: timeout,
-			},
-		);
+		const collector = this._commandCollector = this.createMessageCollector({
+			filter: message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{29,}/.test(message.content)),
+			time: timeout,
+		});
 
 		let resolve;
 		let reject;

@@ -30,10 +30,10 @@ module.exports = class CompetitionCommand extends Command {
 	 * @param {string[]} args command arguments
 	 */
 	async run(message, args) { // eslint-disable-line no-unused-vars
-		const collector = message.channel.createMessageCollector(
-			msg => msg.author.id === message.author.id,
-			{ idle: 30_000 },
-		);
+		const collector = message.channel.createMessageCollector({
+			filter: msg => msg.author.id === message.author.id,
+			idle: 30_000,
+		});
 
 		let type;
 		let startingTime;

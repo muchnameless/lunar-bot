@@ -7,13 +7,14 @@ const EventEmitter = require('events');
  * Filter to be applied to the collector.
  * @typedef {Function} CollectorFilter
  * @param {import('./HypixelMessage')} message
- * @param {import('./HypixelMessage')[]} collection The items collected by this collector
+ * @param {import('./HypixelMessage')[]} collected The items collected by this collector
  * @returns {boolean|Promise<boolean>}
  */
 
 /**
  * Options to be applied to the collector.
  * @typedef {object} MessageCollectorOptions
+ * @property {CollectorFilter} [filter]
  * @property {?number} [time] How long to run the collector for in milliseconds
  * @property {?number} [idle] How long to stop the collector after inactivity in milliseconds
  * @property {?number} [max] maximum amount of messages that pass the filter
@@ -30,7 +31,7 @@ module.exports = class MessageCollector extends EventEmitter {
 	 * @param {CollectorFilter} filter
 	 * @param {MessageCollectorOptions} options
 	 */
-	constructor(chatBridge, filter, options = {}) {
+	constructor(chatBridge, options = {}) {
 		super();
 
 		/**
@@ -41,8 +42,9 @@ module.exports = class MessageCollector extends EventEmitter {
 		/**
 		 * The filter applied to this collector
 		 * @type {CollectorFilter}
+		 * @returns {boolean | Promise<boolean>}
 		 */
-		this.filter = filter;
+		this.filter = options?.filter ?? (() => true);
 
 		/**
 		 * The options of this collector
@@ -76,8 +78,8 @@ module.exports = class MessageCollector extends EventEmitter {
 		 */
 		this._idletimeout = null;
 
-		if (typeof filter !== 'function') {
-			throw new TypeError('INVALID_TYPE: filter is not a function');
+		if (typeof this.filter !== 'function') {
+			throw new TypeError('INVALID_TYPE: options.filter is not a function');
 		}
 
 		/**
@@ -196,11 +198,11 @@ module.exports = class MessageCollector extends EventEmitter {
 	resetTimer({ time, idle } = {}) {
 		if (this._timeout) {
 			clearTimeout(this._timeout);
-			this._timeout = setTimeout(() => this.stop('time'), time || this.options.time);
+			this._timeout = setTimeout(() => this.stop('time'), time ?? this.options.time);
 		}
 		if (this._idletimeout) {
 			clearTimeout(this._idletimeout);
-			this._idletimeout = setTimeout(() => this.stop('idle'), idle || this.options.idle);
+			this._idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle);
 		}
 	}
 

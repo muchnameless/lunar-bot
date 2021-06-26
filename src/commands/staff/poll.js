@@ -86,15 +86,15 @@ module.exports = class PollCommand extends DualCommand {
 			/** @type {{ number: number, option: string, votes: Set<string> }[]} */
 			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set() }));
 			const optionsCount = pollOptions.length;
-			const ingameMessages = chatBridge.minecraft.awaitMessages(
-				msg => msg.isUserMessage && msg.type === GUILD,
-				{ time: DURATION },
-			);
+			const ingameMessages = chatBridge.minecraft.awaitMessages({
+				filter: msg => msg.isUserMessage && msg.type === GUILD,
+				time: DURATION,
+			});
 			const discordChannel = chatBridge.discord.get(GUILD).channel;
-			const discordMessages = discordChannel.awaitMessages(
-				msg => msg.isUserMessage,
-				{ time: DURATION },
-			);
+			const discordMessages = discordChannel.awaitMessages({
+				filter: msg => msg.isUserMessage,
+				time: DURATION,
+			});
 
 			// post message to both chats
 			chatBridge.broadcast(stripIndents`

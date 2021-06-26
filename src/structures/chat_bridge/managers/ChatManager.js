@@ -51,13 +51,12 @@ module.exports = class ChatManager {
 
 	/**
 	 * promisified MessageCollector
-	 * @param {import('../MessageCollector').CollectorFilter} filter
 	 * @param {AwaitMessagesOptions} options
 	 * @returns {Promise<import('./HypixelMessage')[]>}
 	 */
-	awaitMessages(filter, options = {}) {
+	awaitMessages(options = {}) {
 		return new Promise((resolve, reject) => {
-			const collector = this.createMessageCollector(filter, options);
+			const collector = this.createMessageCollector(options);
 
 			collector.once('end', (collection, reason) => {
 				if (options.errors?.includes(reason)) {

@@ -180,10 +180,12 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 				...options,
 			});
 
-			const collected = await this.channel.awaitMessages(
-				msg => msg.author.id === this.user.id,
-				{ max: 1, time: timeoutSeconds * 1_000, errors: [ 'time' ] },
-			);
+			const collected = await this.channel.awaitMessages({
+				filter: msg => msg.author.id === this.user.id,
+				max: 1,
+				time: timeoutSeconds * 1_000,
+				errors: [ 'time' ],
+			});
 
 			return collected.first().content;
 		} catch {
@@ -227,8 +229,8 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 				...options,
 			});
 
-			const result = await this.channel.awaitMessageComponentInteraction(
-				interaction => (interaction.user.id === this.user.id && [ SUCCESS_ID, CANCLE_ID ].includes(interaction.customID)
+			const result = await this.channel.awaitMessageComponentInteraction({
+				filter: interaction => (interaction.user.id === this.user.id && [ SUCCESS_ID, CANCLE_ID ].includes(interaction.customID)
 					? true
 					: (async () => {
 						try {
@@ -241,10 +243,8 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 						}
 						return false;
 					})()),
-				{
-					time: timeoutSeconds * 1_000,
-				},
-			);
+				time: timeoutSeconds * 1_000,
+			});
 
 			const success = result.customID === SUCCESS_ID;
 
