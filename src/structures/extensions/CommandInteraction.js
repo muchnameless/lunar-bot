@@ -111,7 +111,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 
 		await this._deferring;
 
-		if (this.deferred) {
+		if (this.deferred && !this.replied) {
 			// ephemeral defer
 			if (this.ephemeral) {
 				if (data.ephemeral) {

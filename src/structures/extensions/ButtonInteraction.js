@@ -61,7 +61,7 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 
 		await this._deferring;
 
-		if (this.deferred) {
+		if (this.deferred && !this.replied) {
 			// ephemeral defer
 			if (this.ephemeral) {
 				if (data.ephemeral) {
