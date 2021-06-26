@@ -3,7 +3,7 @@
 const { Constants } = require('discord.js');
 const { logErrors: { regExp: logErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
 const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+const logger = require('../../functions/logger');
 
 
 module.exports = class TestCommand extends SlashCommand {
@@ -34,21 +34,21 @@ module.exports = class TestCommand extends SlashCommand {
 		const dates = [];
 
 		for (const player of hypixelGuild.players.values()) {
-			let lastPage = await chatBridge.minecraft.command({
-				command: `g log ${player} 100`,
+			let page = await chatBridge.minecraft.command({
+				command: `g log ${player} 1`,
 				abortRegExp: logErrors(),
 			});
 
-			const LAST_PAGE_NUMBER = lastPage.match(/^Page must be between 1 and (\d+)[.!]?$/)?.[1];
+			const LAST_PAGE_NUMBER = page.match(/Guild Log \(Page 1 of (\d+)\)/)?.[1];
 
-			if (LAST_PAGE_NUMBER) {
-				lastPage = await chatBridge.minecraft.command({
+			if (LAST_PAGE_NUMBER !== 1) {
+				page = await chatBridge.minecraft.command({
 					command: `g log ${player} ${LAST_PAGE_NUMBER}`,
 					abortRegExp: logErrors(),
 				});
 			}
 
-			const matched = lastPage.match(/(?<time>.+): (?<inviter>\w{1,16}) invited \w{1,16}/);
+			const matched = page.match(/(?<time>.+): (?<inviter>\w{1,16}) invited \w{1,16}$/);
 
 			dates.push({
 				ign: player.ign,
@@ -56,6 +56,8 @@ module.exports = class TestCommand extends SlashCommand {
 				timestamp: new Date(matched?.groups.time).getTime(),
 			});
 		}
+
+		logger.debug(dates);
 
 		return interaction.reply({
 			content: dates
