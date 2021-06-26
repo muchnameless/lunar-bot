@@ -2,6 +2,7 @@
 
 const { Constants } = require('discord.js');
 const { logErrors: { regExp: logErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
+const { escapeIgn } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
 
@@ -48,7 +49,7 @@ module.exports = class TestCommand extends SlashCommand {
 				});
 			}
 
-			const matched = page.match(/(?<time>.+): (?<inviter>\w{1,16}) invited \w{1,16}$/);
+			const matched = page.match(/(?<time>.+): (?<inviter>\w{1,16}) joined(?=$|\n.+: \w{1,16} invited \w{1,16}$)/);
 
 			dates.push({
 				ign: player.ign,
@@ -62,7 +63,7 @@ module.exports = class TestCommand extends SlashCommand {
 		return interaction.reply({
 			content: dates
 				.sort((a, b) => b.timestamp - a.timestamp)
-				.map(({ ign, joined }) => `${joined}: ${ign}`)
+				.map(({ ign, joined }) => `${joined}: ${escapeIgn(ign)}`)
 				.join('\n'),
 			split: true,
 		});
