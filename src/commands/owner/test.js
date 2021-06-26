@@ -33,6 +33,7 @@ module.exports = class TestCommand extends SlashCommand {
 		const hypixelGuild = this.client.hypixelGuilds.mainGuild;
 		const { chatBridge } = hypixelGuild;
 		const dates = [];
+		const joinedRegExp = /(?<time>.+): \w{1,16} joined(?:\n.+: \w{1,16} invited \w{1,16})*$/;
 
 		for (const player of hypixelGuild.players.values()) {
 			let page = await chatBridge.minecraft.command({
@@ -49,7 +50,17 @@ module.exports = class TestCommand extends SlashCommand {
 				});
 			}
 
-			const matched = page.match(/(?<time>.+): (?<inviter>\w{1,16}) joined(?=$|\n.+: \w{1,16} invited \w{1,16}$)/);
+			let matched = page.match(joinedRegExp);
+
+			// last page didn't contain join, search page before that
+			if (!matched) {
+				page = await chatBridge.minecraft.command({
+					command: `g log ${player} ${LAST_PAGE_NUMBER - 1}`,
+					abortRegExp: logErrors(),
+				});
+
+				matched = page.match(joinedRegExp);
+			}
 
 			dates.push({
 				ign: player.ign,
