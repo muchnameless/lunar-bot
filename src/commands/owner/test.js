@@ -73,7 +73,7 @@ module.exports = class TestCommand extends SlashCommand {
 
 		return interaction.reply({
 			content: dates
-				.sort((a, b) => b.timestamp - a.timestamp)
+				.sort((a, b) => a.timestamp - b.timestamp)
 				.map(({ ign, joined }) => `${joined}: ${escapeIgn(ign)}`)
 				.join('\n'),
 			split: true,
