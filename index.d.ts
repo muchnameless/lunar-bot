@@ -27,6 +27,12 @@ declare module 'discord.js' {
 		// user: import('./src/structures/extensions/User');
 	}
 
+	interface ThreadMember {
+		client: import('./src/structures/LunarClient');
+		player: import('./src/structures/database/models/Player');
+		// user: import('./src/structures/extensions/User');
+	}
+
 	interface Base {
 		// client: import('./src/structures/LunarClient');
 	}
