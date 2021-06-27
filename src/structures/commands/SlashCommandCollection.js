@@ -46,4 +46,17 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 
 		return commands;
 	}
+
+	/**
+	 * create a new slash command on discord's side
+	 * @param {string} commandName
+	 */
+	async create(commandName) {
+		/** @type {import('./SlashCommand')} */
+		const command = this.get(commandName) ?? await this.loadByName(commandName);
+
+		if (!command) throw new Error(`[COMMANDS CREATE]: unknown command '${commandName}'`);
+
+		return this.client.application.commands.create(command.data);
+	}
 };
