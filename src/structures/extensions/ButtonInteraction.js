@@ -13,6 +13,10 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 		 * deferring promise
 		 */
 		this._deferring = null;
+		/**
+		 * deferring update promise
+		 */
+		this._deferringUpdate = null;
 
 		const { channel } = this;
 
@@ -38,6 +42,18 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 		if (this._deferring) return this._deferring;
 
 		return this._deferring = super.defer({ ephemeral, ...options });
+	}
+
+	async deferUpdate() {
+		if (this._deferringUpdate) return this._deferringUpdate;
+
+		return this._deferringUpdate = super.deferUpdate();
+	}
+
+	async update(options) {
+		await this._deferringUpdate;
+
+		return super.update(options);
 	}
 
 	/**

@@ -48,7 +48,7 @@ module.exports = class BaseCommandCollection extends Collection {
 
 		if (!commandFile) return;
 
-		this.loadFromFile(commandFile);
+		return this.loadFromFile(commandFile);
 	}
 
 	/**
@@ -72,7 +72,7 @@ module.exports = class BaseCommandCollection extends Collection {
 		// delete if command won't be loaded again
 		delete require.cache[require.resolve(file)];
 
-		return this;
+		return command;
 	}
 
 	/**
