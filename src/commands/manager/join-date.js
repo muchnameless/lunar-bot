@@ -1,6 +1,7 @@
 'use strict';
 
 const { Constants } = require('discord.js');
+const ms = require('ms');
 const { logErrors: { regExp: logErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
 const { escapeIgn } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
@@ -88,9 +89,16 @@ module.exports = class JoinDateCommand extends SlashCommand {
 			const hypixelGuild = this.getHypixelGuild(interaction.options, interaction);
 			const { chatBridge } = hypixelGuild;
 			const player = this.getPlayer(interaction.options);
-			const dates = player
-				? [ await JoinDateCommand._getJoinDate(chatBridge, player.ign) ]
-				: await Promise.all(hypixelGuild.players.map(({ ign }) => JoinDateCommand._getJoinDate(chatBridge, ign)));
+
+			let dates;
+
+			if (player) {
+				dates = [ await JoinDateCommand._getJoinDate(chatBridge, player.ign) ];
+			} else {
+				await interaction.awaitConfirmation(`the command will take approximately ${ms(hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
+
+				dates = await Promise.all(hypixelGuild.players.map(({ ign }) => JoinDateCommand._getJoinDate(chatBridge, ign)));
+			}
 
 			return interaction.reply({
 				content: dates
