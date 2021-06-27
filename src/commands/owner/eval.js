@@ -163,7 +163,7 @@ module.exports = class EvalCommand extends SlashCommand {
 				embeds: await this.eval(
 					interaction,
 					collected.first().content,
-					async !== 'undefined' ? async === 'true' : undefined,
+					async === 'true' || undefined,
 					Number(inspectDepth),
 				),
 			});
