@@ -19,4 +19,5 @@ module.exports = {
 	STOP: '🛑',
 	NO_BELL: '🔕',
 	FORWARD_TO_GC: '📣',
+	EDIT_MESSAGE: '⌨️',
 };

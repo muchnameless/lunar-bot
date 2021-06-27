@@ -87,7 +87,11 @@ module.exports = class InteractionEvent extends Event {
 	 */
 	// eslint-disable-next-line class-methods-use-this
 	_handleButtonInteraction(interaction) {
+		// leaderboards edit
 		if (interaction.customID.startsWith(LB_KEY)) return handleLeaderboardButtonInteraction(interaction);
+
+		// eval edit
+		if (interaction.customID.startsWith('EVAL')) return this.client.commands.get('eval')?.runButton(interaction);
 	}
 
 	/**
