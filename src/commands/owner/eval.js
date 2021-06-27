@@ -142,6 +142,11 @@ module.exports = class EvalCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/ButtonInteraction')} interaction
 	 */
 	async runButton(interaction) {
+		if (!interaction.channel?.botPermissions.has(Discord.Permissions.FLAGS.VIEW_CHANNEL)) return interaction.reply({
+			content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
+			ephemeral: true,
+		});
+
 		interaction.deferUpdate();
 
 		const { groups: { async, inspectDepth } } = interaction.customID.match(/EVAL:(?<async>.+):(?<inspectDepth>.+)/);
