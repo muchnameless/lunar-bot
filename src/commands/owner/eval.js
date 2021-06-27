@@ -142,6 +142,11 @@ module.exports = class EvalCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/ButtonInteraction')} interaction
 	 */
 	async runButton(interaction) {
+		if (interaction.user.id !== this.client.ownerID) return interaction.reply({
+			content: 'this command is only for the bot owners',
+			ephemeral: true,
+		});
+
 		if (!interaction.channel?.botPermissions.has(Discord.Permissions.FLAGS.VIEW_CHANNEL)) return interaction.reply({
 			content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
 			ephemeral: true,
