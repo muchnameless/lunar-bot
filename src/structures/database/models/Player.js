@@ -735,6 +735,14 @@ module.exports = class Player extends Model {
 			}
 		}
 
+		// weight
+		if (this.getWeight().totalWeight >= config.getNumber('WHALECUM_PASS_WEIGHT')) {
+			if (!member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToAdd.push(config.get('WHALECUM_PASS_ROLE_ID'));
+		} else if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) {
+			rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
+		}
+
+		// api call
 		return this.makeRoleApiCall(rolesToAdd, rolesToRemove, reason);
 	}
 
