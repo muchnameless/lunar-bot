@@ -51,15 +51,19 @@ module.exports = class ConfigManager extends ModelManager {
 	getBoolean(key) {
 		const VALUE = this.get(key?.toUpperCase());
 
+		if (typeof VALUE === 'boolean') return VALUE;
+
 		if (!VALUE) return null;
 
 		switch (VALUE.toLowerCase()) {
 			case 'true':
 			case '1':
+				this.cache.set(key.toUpperCase(), true);
 				return true;
 
 			case 'false':
 			case '0':
+				this.cache.set(key.toUpperCase(), false);
 				return false;
 
 			default:
