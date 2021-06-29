@@ -74,7 +74,7 @@ module.exports = class EvalCommand extends SlashCommand {
 		/* eslint-enable no-unused-vars */
 
 		const responseEmbed = this.client.defaultEmbed
-			.setFooter(`${ctx.guild?.me.displayName ?? this.client.user.username}`, this.client.user.displayAvatarURL());
+			.setFooter(ctx.guild?.me.displayName ?? this.client.user.username, this.client.user.displayAvatarURL());
 
 		for (const [ index, inputPart ] of functionsUtil.splitForEmbedFields(input, 'js').entries()) {
 			responseEmbed.addField(

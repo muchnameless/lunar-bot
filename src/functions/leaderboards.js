@@ -6,7 +6,7 @@ const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, GUILD_ID_ALL } = require('../constants/database');
 const { LB_KEY } = require('../constants/redis');
-const { upperCaseFirstChar } = require('./util');
+const { upperCaseFirstChar, timestampToDateRender } = require('./util');
 const cache = require('../api/cache');
 // const logger = require('./logger');
 
@@ -302,7 +302,7 @@ const self = module.exports = {
 		const LAST_UPDATED_AT = SHOULD_USE_COMPETITION_END
 			? COMPETITION_END_TIME
 			: Math.min(...playerDataRaw.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
-		const STARTING_TIME = offset && new Date(config.getNumber(XP_OFFSETS_TIME[offset])).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+		const STARTING_TIME = config.getNumber(XP_OFFSETS_TIME[offset]);
 
 		/** @type {PlayerData[]} */
 		let playerData;
@@ -431,14 +431,14 @@ const self = module.exports = {
 
 		if (xpType !== 'purge') {
 			if (IS_COMPETITION_LB) {
-				description += `Start: ${STARTING_TIME} GMT\n`;
+				description += `Start: ${timestampToDateRender(STARTING_TIME)}\n`;
 				if (COMPETITION_RUNNING) {
 					description += `Time left: ${ms(COMPETITION_END_TIME - Date.now(), { long: true })}\n`;
 				} else { // competition already ended
-					description += `Ended: ${new Date(COMPETITION_END_TIME).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} GMT\n`;
+					description += `Ended: ${timestampToDateRender(COMPETITION_END_TIME)}\n`;
 				}
 			} else {
-				description += `Tracking xp gained since ${STARTING_TIME} GMT\n`;
+				description += `Tracking xp gained since ${timestampToDateRender(STARTING_TIME)}\n`;
 			}
 
 			description += `${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}`;

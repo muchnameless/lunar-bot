@@ -32,15 +32,6 @@ module.exports = class GuildOfCommand extends DualCommand {
 	}
 
 	/**
-	 * rounds and toLocaleStrings a number
-	 * @param {number} number
-	 * @returns {string}
-	 */
-	formatNumber(number) {
-		return this.client.formatDecimalNumber(Math.floor(number * 100) / 100);
-	}
-
-	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} [ignOrUuid]
