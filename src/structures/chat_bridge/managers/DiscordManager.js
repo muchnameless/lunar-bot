@@ -137,7 +137,7 @@ module.exports = class DiscordManager {
 	}
 
 	/**
-	 * readable string -> discord renders
+	 * readable string -> discord markdown
 	 * @param {string} string
 	 */
 	parseContent(string) {

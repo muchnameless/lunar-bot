@@ -3,7 +3,7 @@
 const { version } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
-const { timestampToDateRender } = require('../../functions/util');
+const { timestampToDateMarkdown } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
@@ -36,7 +36,7 @@ module.exports = class DebugCommand extends SlashCommand {
 			.addFields({
 				name: 'General',
 				value: stripIndents`
-					Ready at: ${timestampToDateRender(this.client.readyAt, 'F')}
+					Ready at: ${timestampToDateMarkdown(this.client.readyAt, 'F')}
 					Uptime: ${ms(this.client.uptime)}
 					Discord.js v${version}
 				`,

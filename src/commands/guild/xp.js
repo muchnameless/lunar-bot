@@ -4,7 +4,7 @@ const { Constants } = require('discord.js');
 const { oneLine, stripIndents } = require('common-tags');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
-const { /* escapeIgn, */ upperCaseFirstChar, timestampToDateRender } = require('../../functions/util');
+const { /* escapeIgn, */ upperCaseFirstChar, timestampToDateMarkdown } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
@@ -101,7 +101,7 @@ module.exports = class XpCommand extends SlashCommand {
 
 		embed
 			.setDescription(stripIndents`
-				${`Δ: change since ${timestampToDateRender(Math.max(this.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`.padEnd(105, '\xa0')}\u200b
+				${`Δ: change since ${timestampToDateMarkdown(Math.max(this.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`.padEnd(105, '\xa0')}\u200b
 				
 				\`\`\`Skills\`\`\`
 				Average skill level: **${this.client.formatDecimalNumber(skillAverage)}** [**${this.client.formatDecimalNumber(trueAverage)}**] - **Δ**: **${this.client.formatDecimalNumber(skillAverage - skillAverageOffset)}** [**${this.client.formatDecimalNumber(trueAverage - trueAverageOffset)}**]

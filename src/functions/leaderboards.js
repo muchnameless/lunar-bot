@@ -6,7 +6,7 @@ const ms = require('ms');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, GUILD_ID_ALL } = require('../constants/database');
 const { LB_KEY } = require('../constants/redis');
-const { upperCaseFirstChar, timestampToDateRender } = require('./util');
+const { upperCaseFirstChar, timestampToDateMarkdown } = require('./util');
 const cache = require('../api/cache');
 // const logger = require('./logger');
 
@@ -431,14 +431,14 @@ const self = module.exports = {
 
 		if (xpType !== 'purge') {
 			if (IS_COMPETITION_LB) {
-				description += `Start: ${timestampToDateRender(STARTING_TIME)}\n`;
+				description += `Start: ${timestampToDateMarkdown(STARTING_TIME)}\n`;
 				if (COMPETITION_RUNNING) {
 					description += `Time left: ${ms(COMPETITION_END_TIME - Date.now(), { long: true })}\n`;
 				} else { // competition already ended
-					description += `Ended: ${timestampToDateRender(COMPETITION_END_TIME)}\n`;
+					description += `Ended: ${timestampToDateMarkdown(COMPETITION_END_TIME)}\n`;
 				}
 			} else {
-				description += `Tracking xp gained since ${timestampToDateRender(STARTING_TIME)}\n`;
+				description += `Tracking xp gained since ${timestampToDateMarkdown(STARTING_TIME)}\n`;
 			}
 
 			description += `${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}`;

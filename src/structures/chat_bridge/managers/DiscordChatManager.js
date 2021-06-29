@@ -269,7 +269,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * forwards a discord message to ingame guild chat, prettifying discord renders, if neither the player nor the whole guild chat is muted
+	 * forwards a discord message to ingame guild chat, prettifying discord markdown, if neither the player nor the whole guild chat is muted
 	 * @param {import('../../extensions/Message')} message
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */

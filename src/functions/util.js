@@ -94,7 +94,7 @@ const self = module.exports = {
 	 * @param {number} number
 	 * @param {string} style https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
 	 */
-	timestampToDateRender: (number, style = 'f') => `<t:${Math.round(number / 1_000)}:${style}>`,
+	timestampToDateMarkdown: (number, style = 'f') => `<t:${Math.round(number / 1_000)}:${style}>`,
 
 	/**
 	 * returns the ISO week number of the given date

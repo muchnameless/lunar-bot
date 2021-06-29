@@ -3,7 +3,7 @@
 const { Constants } = require('discord.js');
 const ms = require('ms');
 const { logErrors: { regExp: logErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
-const { escapeIgn } = require('../../functions/util');
+const { escapeIgn, timestampToDateMarkdown } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
@@ -28,12 +28,11 @@ module.exports = class JoinDateCommand extends SlashCommand {
 
 	static running = false;
 
-	static JOINED_REGEXP = /(?<time>.+): \w{1,16} joined(?:\n.+: \w{1,16} invited \w{1,16})*$/;
+	static JOINED_REGEXP = /(?<time>.+): \w{1,16} (?:joined|created the guild)(?:\n.+: \w{1,16} invited \w{1,16})*$/;
 
 	/**
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
 	 * @param {string} ign
-	 * @returns {Promise<{ ign: string, joined: string, timestamp: number }>}
 	 */
 	static async _getJoinDate(chatBridge, ign) {
 		// get first page
@@ -66,7 +65,6 @@ module.exports = class JoinDateCommand extends SlashCommand {
 
 		return {
 			ign,
-			joined: matched?.groups.time ?? 'unknown',
 			timestamp: new Date(matched?.groups.time).getTime(),
 		};
 	}
@@ -103,7 +101,7 @@ module.exports = class JoinDateCommand extends SlashCommand {
 			return interaction.reply({
 				content: dates
 					.sort((a, b) => a.timestamp - b.timestamp)
-					.map(({ ign, joined }) => `${joined}: ${escapeIgn(ign)}`)
+					.map(({ timestamp, ign }) => `${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'unknown date'}: ${escapeIgn(ign)}`)
 					.join('\n'),
 				split: true,
 			});

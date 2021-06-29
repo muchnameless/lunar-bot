@@ -465,7 +465,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * discord renders -> readable string
+	 * discord markdown -> readable string
 	 * @param {string} string
 	 */
 	parseContent(string) {
@@ -502,6 +502,39 @@ module.exports = class MinecraftChatManager extends ChatManager {
 					if (NAME) return `@${NAME}`;
 
 					return match;
+				})
+				.replace(/<t:(-?\d{1,13})(?::([tTdDfFR]))?>/g, (match, p1, p2) => { // dates
+					const date = new Date(p1 * 1_000);
+
+					if (Number.isNaN(date.getTime())) return match; // invalid date
+
+					switch (p2) { // https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
+						case 't':
+							return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
+
+						case 'T':
+							return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
+
+						case 'd':
+							return date.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+
+						case 'D':
+							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+						case 'f':
+							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
+
+						case 'F':
+							return date.toLocaleString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
+
+						case 'R': {
+							const TIME = date.getTime() - Date.now();
+							return `${ms(Math.abs(TIME), { long: true })}${TIME < 0 ? ' ago' : ''}`;
+						}
+
+						default:
+							return date.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+					}
 				}),
 		);
 	}
