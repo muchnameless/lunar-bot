@@ -32,14 +32,14 @@ module.exports = class EvalCommand extends SlashCommand {
 				description: 'code input',
 				required: true,
 			}, {
-				name: 'async',
-				type: Discord.Constants.ApplicationCommandOptionTypes.BOOLEAN,
-				description: 'wrap the code in an async IIFE',
-				required: false,
-			}, {
 				name: 'inspect',
 				type: Discord.Constants.ApplicationCommandOptionTypes.INTEGER,
 				description: 'util.inspect depth on the output',
+				required: false,
+			}, {
+				name: 'async',
+				type: Discord.Constants.ApplicationCommandOptionTypes.BOOLEAN,
+				description: 'wrap the code in an async IIFE',
 				required: false,
 			}],
 			defaultPermission: true,
