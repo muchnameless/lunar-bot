@@ -67,7 +67,7 @@ module.exports = class ReloadCommand extends DualCommand {
 			{
 				aliases: [],
 				args: true,
-				usage: '<`command` <command `name`>|`commands`|`database`|`cooldowns`>',
+				usage: '[`command` [command `name`]|`commands`|`event` [event `name`]|`events`|`database`|`cooldowns`]',
 			},
 		);
 	}
@@ -75,11 +75,13 @@ module.exports = class ReloadCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {string} mode
+	 * @param {string} name
 	 */
-	async _run(ctx, mode, input) { // eslint-disable-line no-unused-vars
+	async _run(ctx, mode, name) { // eslint-disable-line no-unused-vars
 		switch (mode) {
 			case 'command': {
-				let commandName = input;
+				let commandName = name;
 
 				try {
 					const commandFiles = await getAllJsFiles(this.collection.dirPath);
@@ -105,7 +107,7 @@ module.exports = class ReloadCommand extends DualCommand {
 						command = this.collection.get(commandName); // try to find already loaded command
 					}
 
-					if (!commandFile) return ctx.reply(`no command with the name or alias \`${input}\` found`);
+					if (!commandFile) return ctx.reply(`no command with the name or alias \`${name}\` found`);
 
 					// command already loaded
 					if (command) {
@@ -134,7 +136,7 @@ module.exports = class ReloadCommand extends DualCommand {
 			}
 
 			case 'event': {
-				let eventName = input;
+				let eventName = name;
 
 				try {
 					const eventFiles = await getAllJsFiles(this.client.events.dirPath);

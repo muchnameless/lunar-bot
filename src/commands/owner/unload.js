@@ -39,7 +39,7 @@ module.exports = class UnloadCommand extends DualCommand {
 			{
 				aliases: [],
 				args: true,
-				usage: '[`command name` to unload]',
+				usage: '[`command` [command `name`]|`event` [event `name`]]',
 			},
 		);
 	}
