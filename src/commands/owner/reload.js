@@ -31,6 +31,21 @@ module.exports = class ReloadCommand extends DualCommand {
 					description: 'reload all commands',
 					options: [],
 				}, {
+					name: 'event',
+					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
+					description: 'reload an event',
+					options: [{
+						name: 'name',
+						type: Constants.ApplicationCommandOptionTypes.STRING,
+						description: 'event name',
+						required: true,
+					}],
+				}, {
+					name: 'events',
+					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
+					description: 'reload all events',
+					options: [],
+				}, {
 					name: 'database',
 					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 					description: 'reload the database cache',
@@ -71,9 +86,7 @@ module.exports = class ReloadCommand extends DualCommand {
 
 					// try to find file with INPUT name
 					let commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
-					/**
-					 * @type {?Command}
-					 */
+					/** @type {?import('../../structures/commands/BaseCommand')} */
 					let command;
 
 					// no file found
@@ -100,7 +113,7 @@ module.exports = class ReloadCommand extends DualCommand {
 						commandName = command.name;
 					}
 
-					this.collection.loadFromFile(commandFile, true);
+					this.collection.loadFromFile(commandFile);
 
 					logger.info(`command ${commandName} was reloaded successfully`);
 					return ctx.reply(`command \`${commandName}\` was reloaded successfully`);
@@ -116,8 +129,40 @@ module.exports = class ReloadCommand extends DualCommand {
 			}
 
 			case 'commands': {
-				await this.collection.unloadAll().loadAll(true);
+				await this.collection.unloadAll().loadAll();
 				return ctx.reply(`${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`);
+			}
+
+			case 'event': {
+				let eventName = input;
+
+				try {
+					const eventFiles = await getAllJsFiles(this.client.events.dirPath);
+					const eventFile = eventFiles.find(file => basename(file, '.js').toLowerCase() === eventName); // try to find file with INPUT name
+
+					if (!eventFile) return ctx.reply(`no event with the name \`${eventName}\` found`); // no file found
+
+					// file with exact name match found
+					this.client.events.get(basename(eventFile, '.js').toLowerCase())?.unload(); // try to find already loaded event
+
+					({ name: eventName } = this.client.events.loadFromFile(eventFile, true));
+
+					logger.info(`event ${eventName} was reloaded successfully`);
+					return ctx.reply(`event \`${eventName}\` was reloaded successfully`);
+				} catch (error) {
+					logger.error('An error occurred while reloading:\n', error);
+					return ctx.reply(stripIndents`
+						an error occurred while reloading \`${eventName}\`:
+						\`\`\`xl
+						${error}
+						\`\`\`
+					`);
+				}
+			}
+
+			case 'events': {
+				await this.client.events.unloadAll().loadAll();
+				return ctx.reply(`${this.client.events.size} event${this.client.events.size !== 1 ? 's' : ''} were reloaded successfully`);
 			}
 
 			case 'database': {

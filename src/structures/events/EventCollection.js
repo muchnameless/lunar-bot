@@ -33,8 +33,9 @@ module.exports = class EventCollection extends Collection {
 	/**
 	 * loads a single command into the collection
 	 * @param {string} file command file to load
+	 * @param {boolean} [force=false] wether to also load disabled events
 	 */
-	loadFromFile(file) {
+	loadFromFile(file, force = false) {
 		const name = basename(file, '.js');
 		const Event = require(file);
 		/** @type {import('./Event')} */
@@ -46,12 +47,12 @@ module.exports = class EventCollection extends Collection {
 
 		this.set(name, event);
 
-		event.load();
+		event.load(force);
 
 		// delete if command won't be loaded again
 		delete require.cache[require.resolve(file)];
 
-		return this;
+		return event;
 	}
 
 	/**
