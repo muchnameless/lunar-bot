@@ -1,7 +1,7 @@
 'use strict';
 
+const { setTimeout } = require('timers/promises');
 const { Util: { escapeCodeBlock } } = require('discord.js');
-const { promisify } = require('util');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
@@ -38,7 +38,7 @@ const self = module.exports = {
 	 * usage: await sleep(milliseconds)
 	 * @param {number} milliseconds to sleep
 	 */
-	sleep: promisify(setTimeout),
+	sleep: setTimeout,
 
 	/**
 	 * lets you insert any string as the plain string into a regex
