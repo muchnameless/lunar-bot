@@ -472,7 +472,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		return MinecraftChatManager.escapeEz(
 			cleanFormattedNumber(string)
 				.replace(invisibleCharacterRegExp, '')
-				.replace(/<?(?:a)?:?(\w{2,32}):(?:\d{17,19})>?/g, ':$1:') // custom emojis
+				.replace(/<(?:a)?:(\w{2,32}):(?:\d{17,19})>/g, ':$1:') // custom emojis
 				.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
 				.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
 				.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
