@@ -39,10 +39,9 @@ module.exports = class ConfigManager extends ModelManager {
 	 * @param {string} key config key
 	 */
 	get(key) {
-		try {
-			return JSON.parse(this.cache.get(key?.toUpperCase())?.value ?? logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`));
-		} catch (error) {
-			logger.error(`[CONFIG GET]: '${key}'`, error);
-		}
+		return JSON.parse(
+			this.cache.get(key?.toUpperCase())?.value
+				?? logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`),
+		);
 	}
 };
