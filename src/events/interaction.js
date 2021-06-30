@@ -26,7 +26,10 @@ module.exports = class InteractionEvent extends Event {
 			/** @type {import('../structures/commands/SlashCommand')} */
 			const command = this.client.commands.get(interaction.commandName);
 
-			if (!command) return;
+			if (!command) return await interaction.reply({
+				content: `${interaction.commandName} is currently disabled`,
+				ephemeral: true,
+			});
 
 			if (interaction.user.id !== this.client.ownerID) {
 				interaction.defer();
