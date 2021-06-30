@@ -1,7 +1,8 @@
 'use strict';
 
-const { Structures, Permissions, APIMessage, MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } = require('discord.js');
+const { Structures, Permissions, MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } = require('discord.js');
 const { Y_EMOJI, X_EMOJI } = require('../../constants/emojiCharacters');
+const { makeContent } = require('../../functions/util');
 const logger = require('../../functions/logger');
 
 
@@ -68,8 +69,8 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 		/**
 		 * allow split option for CommandInteraction#reply
 		 */
-		if (data.split) {
-			for (const content of APIMessage.create(this, data).makeContent()) {
+		if (data.split || data.code) {
+			for (const content of makeContent(data.content ?? '', { split: data.split, code: data.code })) {
 				await this.reply({ ...data, content, split: false, code: false });
 			}
 			return;

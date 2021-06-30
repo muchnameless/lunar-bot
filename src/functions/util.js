@@ -1,7 +1,7 @@
 'use strict';
 
 const { setTimeout } = require('timers/promises');
-const { Util: { escapeCodeBlock } } = require('discord.js');
+const { Util } = require('discord.js');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
@@ -220,13 +220,39 @@ const self = module.exports = {
 	},
 
 	/**
+	 * TEMPORARY replacement until discordjs/builders includes a message builder
+	 * @param {string} text
+	 * @param {object} options
+	 */
+	makeContent(text = '', options = {}) {
+		const isSplit = typeof options.split !== 'undefined' && options.split !== false;
+		const isCode = typeof options.code !== 'undefined' && options.code !== false;
+		const splitOptions = isSplit ? { ...options.split } : undefined;
+
+		let content = text;
+
+		if (isCode) {
+			const codeName = typeof options.code === 'string' ? options.code : '';
+
+			content = `\`\`\`${codeName}\n${Util.cleanCodeBlockContent(content)}\n\`\`\``;
+
+			if (isSplit) {
+				splitOptions.prepend = `${splitOptions.prepend ?? ''}\`\`\`${codeName}\n`;
+				splitOptions.append = `\n\`\`\`${splitOptions.append ?? ''}`;
+			}
+		}
+
+		return self.splitMessage(content, splitOptions);
+	},
+
+	/**
 	 * generates an array of code blocks
 	 * @param {string} input
 	 * @param {string} [code='']
 	 * @param {string} [char='\n']
-	 * @param {Function} [formatter=escapeCodeBlock]
+	 * @param {Function} [formatter=Util.escapeCodeBlock]
 	 */
-	splitForEmbedFields(input, code = '', char = '\n', formatter = escapeCodeBlock) {
+	splitForEmbedFields(input, code = '', char = '\n', formatter = Util.escapeCodeBlock) {
 		const TO_SPLIT = `\`\`\`${code}\n${formatter(input)}\`\`\``;
 
 		return self.splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char: [ char, '' ], prepend: `\`\`\`${code}\n`, append: '```' });

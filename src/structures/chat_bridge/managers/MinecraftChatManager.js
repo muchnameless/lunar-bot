@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, SnowflakeUtil } = require('discord.js');
+const { MessageEmbed, SnowflakeUtil, Formatters: { TimestampStyles } } = require('discord.js');
 const { AsyncQueue } = require('@sapphire/async-queue');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
@@ -509,25 +509,25 @@ module.exports = class MinecraftChatManager extends ChatManager {
 					if (Number.isNaN(date.getTime())) return match; // invalid date
 
 					switch (p2) { // https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
-						case 't':
+						case TimestampStyles.ShortTime:
 							return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
 
-						case 'T':
+						case TimestampStyles.LongTime:
 							return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
 
-						case 'd':
+						case TimestampStyles.ShortDate:
 							return date.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 
-						case 'D':
+						case TimestampStyles.LongDate:
 							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
-						case 'f':
+						case TimestampStyles.ShortDateTime:
 							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
 
-						case 'F':
+						case TimestampStyles.LongDateTime:
 							return date.toLocaleString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
 
-						case 'R': {
+						case TimestampStyles.RelativeTime: {
 							const TIME = date.getTime() - Date.now();
 							return `${ms(Math.abs(TIME), { long: true })}${TIME < 0 ? ' ago' : ''}`;
 						}
