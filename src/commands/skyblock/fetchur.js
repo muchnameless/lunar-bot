@@ -2,7 +2,6 @@
 
 const ms = require('ms');
 const tc = require('timezonecomplete');
-const { fetchurItems } = require('../../constants/skyblock');
 const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
@@ -25,6 +24,22 @@ module.exports = class FetchurCommand extends DualCommand {
 			},
 		);
 	}
+
+	static FETCHUR_ITEMS = [
+		'50 red wool (Wool Weaver near builder merch in hub)',
+		'20 yellow stained glass (Wool Weaver near builder merch in hub)',
+		'1 compass (4 iron + 1 redstone)',
+		'20 mithril',
+		'1 firework (1 gunpowder + 1 paper)',
+		'cheap coffee (bartender in hub)',
+		'door (wooden or iron)',
+		'3 rabbit feet',
+		'SuperBoom TNT',
+		'1 https://youtu.be/9L7Y681bKz8', // @underappreciated '1 pumpkin'
+		'1 flint and steel',
+		'50 quartz ore (mine with silk touch)',
+		'16 enderpearls',
+	];
 
 	/**
 	 * execute the command
@@ -49,7 +64,7 @@ module.exports = class FetchurCommand extends DualCommand {
 			].filter(time => time >= 0),
 		);
 
-		return ctx.reply(`item: ${fetchurItems[(date.getUTCDate() - 1) % fetchurItems.length]}, time left: ${ms(RESET_TIME, { long: true })}`);
+		return ctx.reply(`item: ${FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]}, time left: ${ms(RESET_TIME, { long: true })}`);
 	}
 
 	/**
