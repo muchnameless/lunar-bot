@@ -19,6 +19,10 @@ module.exports = class Config extends Model {
 		 * @type {string}
 		 */
 		this.value;
+		/**
+		 * @type {*}
+		 */
+		this.parsedValue = JSON.parse(this.value);
 	}
 
 	/**
@@ -33,6 +37,10 @@ module.exports = class Config extends Model {
 			value: {
 				type: DataTypes.STRING,
 				allowNull: true,
+				set(value) {
+					this.parsedValue = value;
+					return this.setDataValue('value', JSON.stringify(value));
+				},
 			},
 		}, {
 			sequelize,

@@ -71,11 +71,9 @@ module.exports = class ConfigCommand extends SlashCommand {
 	 */
 	listEntries(entries) {
 		return entries.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
-			.map(({ key, value }) => {
-				const parsedValue = JSON.parse(value);
+			.map(({ key, parsedValue }) => {
 				const type = typeof parsedValue;
-
-				return `${key}: ${type === 'number' ? this.client.formatNumber(parsedValue) : parsedValue} [${Array.isArray(parsedValue) ? 'array' : type}]`;
+				return `${key}: ${type === 'number' ? this.client.formatNumber(parsedValue).replace(/\s/g, '_') : parsedValue} [${Array.isArray(parsedValue) ? 'array' : type}]`;
 			})
 			.join('\n');
 	}
@@ -143,7 +141,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 				const queryRegex = new RegExp(query, 'i');
 
 				return interaction.reply({
-					content: this.listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(JSON.parse(value)))),
+					content: this.listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))),
 					code: 'apache',
 					split: { char: '\n' },
 				});
