@@ -1,7 +1,8 @@
 'use strict';
 
-const ms = require('ms');
+const { Formatters } = require('discord.js');
 const tc = require('timezonecomplete');
+const { timestampToDateMarkdown } = require('../../functions/util');
 const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
@@ -59,12 +60,12 @@ module.exports = class FetchurCommand extends DualCommand {
 
 		const RESET_TIME = Math.min(
 			...[
-				tomorrow.getTime() - Date.now(),
-				today.getTime() - Date.now(),
-			].filter(time => time >= 0),
+				tomorrow.getTime(),
+				today.getTime(),
+			].filter(time => time >= Date.now()),
 		);
 
-		return ctx.reply(`item: ${FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]}, time left: ${ms(RESET_TIME, { long: true })}`);
+		return ctx.reply(`item: ${FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]}, changes ${timestampToDateMarkdown(RESET_TIME, Formatters.TimestampStyles.RelativeTime)}`);
 	}
 
 	/**

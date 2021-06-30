@@ -1,7 +1,7 @@
 'use strict';
 
 const { setTimeout } = require('timers/promises');
-const { Util } = require('discord.js');
+const { Formatters, Util } = require('discord.js');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
@@ -94,7 +94,7 @@ const self = module.exports = {
 	 * @param {number} number
 	 * @param {string} style https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
 	 */
-	timestampToDateMarkdown: (number, style = 'f') => `<t:${Math.round(number / 1_000)}:${style}>`,
+	timestampToDateMarkdown: (number, style = Formatters.TimestampStyles.ShortDateTime) => `<t:${Math.round(number / 1_000)}:${style}>`,
 
 	/**
 	 * returns the ISO week number of the given date

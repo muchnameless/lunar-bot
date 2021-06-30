@@ -1,6 +1,6 @@
 'use strict';
 
-const { version } = require('discord.js');
+const { Formatters, version } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { timestampToDateMarkdown } = require('../../functions/util');
@@ -36,7 +36,7 @@ module.exports = class DebugCommand extends SlashCommand {
 			.addFields({
 				name: 'General',
 				value: stripIndents`
-					Ready at: ${timestampToDateMarkdown(this.client.readyAt, 'F')}
+					Ready at: ${timestampToDateMarkdown(this.client.readyAt, Formatters.TimestampStyles.LongDateTime)}
 					Uptime: ${ms(this.client.uptime)}
 					Discord.js v${version}
 				`,

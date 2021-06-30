@@ -529,7 +529,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 						case TimestampStyles.RelativeTime: {
 							const TIME = date.getTime() - Date.now();
-							return `${ms(Math.abs(TIME), { long: true })}${TIME < 0 ? ' ago' : ''}`;
+							if (TIME > 0) return `in ${ms(Math.abs(TIME), { long: true })}`;
+							return `${ms(Math.abs(TIME), { long: true })} ago`;
 						}
 
 						default:
