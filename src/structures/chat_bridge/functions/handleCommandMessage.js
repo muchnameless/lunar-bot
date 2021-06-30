@@ -92,7 +92,7 @@ module.exports = async (message) => {
 		// command cooldowns
 		if (command.cooldown) {
 			const NOW = Date.now();
-			const COOLDOWN_TIME = (command.cooldown ?? client.config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1000;
+			const COOLDOWN_TIME = (command.cooldown ?? client.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1000;
 			const IDENTIFIER = message.member?.id ?? message.author.ign;
 
 			if (command.timestamps.has(IDENTIFIER)) {

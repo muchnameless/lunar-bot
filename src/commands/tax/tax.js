@@ -125,7 +125,7 @@ module.exports = class TaxCommand extends SlashCommand {
 						if (!taxCollector?.isCollecting) return interaction.reply(`\`${player.ign}\` is not a tax collector`);
 
 						// remove self paid if only the collector paid the default amount at his own ah
-						if (taxCollector.collectedTax === this.config.getNumber('TAX_AMOUNT') && player.collectedBy === player.minecraftUUID) {
+						if (taxCollector.collectedTax === this.config.get('TAX_AMOUNT') && player.collectedBy === player.minecraftUUID) {
 							logger.info(`[TAX AH]: ${player.ign}: removed and reset tax paid`);
 							await player.resetTax();
 							await taxCollector.remove();
@@ -158,7 +158,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				const OLD_AMOUNT = this.config.getNumber('TAX_AMOUNT');
+				const OLD_AMOUNT = this.config.get('TAX_AMOUNT');
 
 				await safePromiseAll([
 					// update tax amount
@@ -210,7 +210,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					await player.resetTax();
 				}
 
-				const AMOUNT = options.get('amount')?.value ?? this.config.getNumber('TAX_AMOUNT');
+				const AMOUNT = options.get('amount')?.value ?? this.config.get('TAX_AMOUNT');
 
 				await player.setToPaid({
 					amount: AMOUNT,
@@ -222,7 +222,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${this.client.formatNumber(AMOUNT)} (manually)\`\`\``),
 				);
 
-				return interaction.reply(`\`${player.ign}\` manually set to paid with ${AMOUNT === this.config.getNumber('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
+				return interaction.reply(`\`${player.ign}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
 			}
 
 			case 'reminder': {

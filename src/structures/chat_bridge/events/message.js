@@ -14,7 +14,7 @@ module.exports = async (chatBridge, message) => {
 	// check if the message is a response for ChatBridge#_chat
 	chatBridge.minecraft.collect(message);
 
-	if (chatBridge.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.debug(`[${message.position} #${chatBridge.mcAccount}]: ${message.cleanedContent}`);
+	if (chatBridge.client.config.get('CHAT_LOGGING_ENABLED')) logger.debug(`[${message.position} #${chatBridge.mcAccount}]: ${message.cleanedContent}`);
 	if (!message.rawContent.length) return;
 
 	switch (message.type) {

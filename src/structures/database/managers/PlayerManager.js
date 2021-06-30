@@ -237,9 +237,9 @@ module.exports = class PlayerManager extends ModelManager {
 
 		try {
 			// the hypxiel api encountered an error before
-			if (this.client.config.getBoolean('HYPIXEL_SKYBLOCK_API_ERROR')) {
+			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 				// reset error every full hour
-				if (new Date().getMinutes() >= this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+				if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 					logger.warn('[PLAYERS UPDATE]: auto updates disabled');
 					return this;
 				}
@@ -362,31 +362,31 @@ module.exports = class PlayerManager extends ModelManager {
 		const { config } = this.client;
 
 		// auto competition starting
-		if (config.getBoolean('COMPETITION_SCHEDULED')) {
-			if (config.getNumber('COMPETITION_START_TIME') - 10_000 > Date.now()) {
+		if (config.get('COMPETITION_SCHEDULED')) {
+			if (config.get('COMPETITION_START_TIME') - 10_000 > Date.now()) {
 				this.client.schedule('competitionStart', new CronJob({
-					cronTime: new Date(config.getNumber('COMPETITION_START_TIME')),
+					cronTime: new Date(config.get('COMPETITION_START_TIME')),
 					onTick: () => this.startCompetition(),
 					start: true,
 				}));
-			} else if (!config.getBoolean('COMPETITION_RUNNING')) {
+			} else if (!config.get('COMPETITION_RUNNING')) {
 				this.startCompetition();
 			}
 		}
 
 		// auto competition ending
-		if (config.getNumber('COMPETITION_END_TIME') - 10_000 > Date.now()) {
+		if (config.get('COMPETITION_END_TIME') - 10_000 > Date.now()) {
 			this.client.schedule('competitionEnd', new CronJob({
-				cronTime: new Date(config.getNumber('COMPETITION_END_TIME')),
+				cronTime: new Date(config.get('COMPETITION_END_TIME')),
 				onTick: () => this.endCompetition(),
 				start: true,
 			}));
-		} else if (config.getBoolean('COMPETITION_RUNNING')) {
+		} else if (config.get('COMPETITION_RUNNING')) {
 			this.endCompetition();
 		}
 
 		// mayor change reset
-		const NEXT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
+		const NEXT_MAYOR_TIME = config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
 		if (NEXT_MAYOR_TIME - 10_000 > Date.now()) {
 			this.client.schedule('mayorXpReset', new CronJob({
@@ -401,7 +401,7 @@ module.exports = class PlayerManager extends ModelManager {
 		const now = new Date();
 
 		// daily reset
-		if (new Date(config.getNumber('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.performDailyXpReset();
+		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.performDailyXpReset();
 
 		// each day at 00:00:00
 		this.client.schedule('dailyXpReset', new CronJob({
@@ -412,7 +412,7 @@ module.exports = class PlayerManager extends ModelManager {
 		}));
 
 		// weekly reset
-		if (getWeekOfYear(new Date(config.getNumber('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.performWeeklyXpReset();
+		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.performWeeklyXpReset();
 
 		// each monday at 00:00:00
 		this.client.schedule('weeklyXpReset', new CronJob({
@@ -423,7 +423,7 @@ module.exports = class PlayerManager extends ModelManager {
 		}));
 
 		// monthly reset
-		if (new Date(config.getNumber('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.performMonthlyXpReset();
+		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.performMonthlyXpReset();
 
 		// the first of each month at 00:00:00
 		this.client.schedule('monthlyXpReset', new CronJob({
@@ -472,7 +472,7 @@ module.exports = class PlayerManager extends ModelManager {
 	 */
 	async performMayorXpReset() {
 		const { config } = this.client;
-		const CURRENT_MAYOR_TIME = config.getNumber('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
+		const CURRENT_MAYOR_TIME = config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
 		await this.resetXp({ offsetToReset: MAYOR });
 
@@ -483,8 +483,12 @@ module.exports = class PlayerManager extends ModelManager {
 			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 
+		let next = CURRENT_MAYOR_TIME + MAYOR_CHANGE_INTERVAL;
+
+		while (next < Date.now()) next += MAYOR_CHANGE_INTERVAL;
+
 		this.client.schedule('mayorXpReset', new CronJob({
-			cronTime: new Date(CURRENT_MAYOR_TIME + MAYOR_CHANGE_INTERVAL),
+			cronTime: new Date(next),
 			onTick: () => this.performMayorXpReset(),
 			start: true,
 		}));
@@ -545,9 +549,9 @@ module.exports = class PlayerManager extends ModelManager {
 	 */
 	async updateMainProfiles() {
 		// the hypxiel api encountered an error before
-		if (this.client.config.getBoolean('HYPIXEL_SKYBLOCK_API_ERROR')) {
+		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() >= this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+			if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn('[PLAYERS UPDATE MAIN PROFILE]: API error');
 				return this;
 			}

@@ -31,7 +31,7 @@ const logger = require('../../../functions/logger');
  * @property {?RegExp} [abortRegExp] regex to detect an abortion response
  * @property {number} [max=-1] maximum amount of response messages, -1 or Infinity for an infinite amount
  * @property {boolean} [raw=false] wether to return an array of the collected hypixel message objects instead of just the content
- * @property {number} [timeout=config.getNumber('INGAME_RESPONSE_TIMEOUT')] response collector timeout in milliseconds
+ * @property {number} [timeout=config.get('INGAME_RESPONSE_TIMEOUT')] response collector timeout in milliseconds
  * @property {boolean} [rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
  */
 
@@ -222,8 +222,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 						const { infractions } = player;
 
-						if (infractions >= this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS') && !player.muted) {
-							const MUTE_DURATION = this.client.config.getNumber('CHATBRIDGE_AUTOMUTE_DURATION');
+						if (infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS') && !player.muted) {
+							const MUTE_DURATION = this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION');
 
 							player.mutedTill = Date.now() + MUTE_DURATION;
 							player.save();
@@ -235,7 +235,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 								.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
 								.setThumbnail(player.image)
 								.setDescription(stripIndents`
-									**Auto Muted** for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.getNumber('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
+									**Auto Muted** for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.get('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
 									${player.info}
 								`)
 								.setTimestamp(),
@@ -261,7 +261,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 				case 'messageCount':
 					info = stripIndents`
-						your message was blocked because you are only allowed to send up to ${data?.maxParts ?? this.client.config.getNumber('CHATBRIDGE_DEFAULT_MAX_PARTS')} messages at once
+						your message was blocked because you are only allowed to send up to ${data?.maxParts ?? this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS')} messages at once
 						(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
 					`;
 					break;
@@ -547,7 +547,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
 
 		if (this.bot.player?.muted) {
-			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) {
+			if (this.client.config.get('CHAT_LOGGING_ENABLED')) {
 				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.mutedTill - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${options.content}`);
 			}
 
@@ -595,7 +595,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @returns {Promise<boolean>} success - wether all message parts were send
 	 */
 	async chat(contentOrOptions) {
-		const { content, prefix = '', maxParts = this.client.config.getNumber('CHATBRIDGE_DEFAULT_MAX_PARTS'), discordMessage } = MinecraftChatManager.resolveInput(contentOrOptions);
+		const { content, prefix = '', maxParts = this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS'), discordMessage } = MinecraftChatManager.resolveInput(contentOrOptions);
 
 		let success = true;
 
@@ -607,14 +607,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				.filter((part) => {
 					if (nonWhiteSpaceRegExp.test(part)) { // filter out white space only parts
 						if (ChatManager.BLOCKED_WORDS_REGEXP.test(part) || memeRegExp.test(part)) {
-							if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
+							if (this.client.config.get('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
 							return success = false;
 						}
 						return true;
 					}
 
 					// part consists of only whitespace characters -> ignore
-					if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+					if (this.client.config.get('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 					return false;
 				}),
 		);
@@ -649,7 +649,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			: contentOrOptions;
 
 		if (data.discordMessage?.deleted) {
-			if (this.client.config.getBoolean('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${data.prefix ?? ''}${data.content}'`);
+			if (this.client.config.get('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${data.prefix ?? ''}${data.content}'`);
 			return false;
 		}
 
@@ -748,7 +748,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {CommandOptions} commandOptions
 	 */
 	// eslint-disable-next-line no-undef
-	async command({ command = arguments[0], responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.getNumber('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+	async command({ command = arguments[0], responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.get('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
 		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait(); // only start the collector if the chat queue is free
 

@@ -57,12 +57,12 @@ module.exports = class DatabaseManager {
 
 		this.client.schedule('updatePlayerDatabase', new CronJobConstructor({
 			cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
-			onTick: () => config.getBoolean('PLAYER_DB_UPDATE_ENABLED') && this.update(),
+			onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.update(),
 			start: true,
 		}));
 
 		// update hypixelGuilds if next scheduled update is over 1 min from now
-		if (config.getBoolean('PLAYER_DB_UPDATE_ENABLED')) {
+		if (config.get('PLAYER_DB_UPDATE_ENABLED')) {
 			const INTERVAL = config.get('DATABASE_UPDATE_INTERVAL');
 			if (INTERVAL - (new Date().getMinutes() % INTERVAL) > 1) this.modelManagers.hypixelGuilds.update();
 		}
@@ -71,7 +71,7 @@ module.exports = class DatabaseManager {
 		this.client.schedule('guildStatsChannelUpdate', new CronJobConstructor({
 			cronTime: '0 0 * * * *',
 			onTick: async () => {
-				if (!config.getBoolean('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
+				if (!config.get('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
 
 				const { mainGuild } = this.modelManagers.hypixelGuilds;
 
@@ -165,9 +165,9 @@ module.exports = class DatabaseManager {
 	 */
 	async _updateTaxDatabase() {
 		const { config, players, taxCollectors } = this.modelManagers;
-		const TAX_AUCTIONS_START_TIME = config.getNumber('TAX_AUCTIONS_START_TIME');
-		const TAX_AMOUNT = config.getNumber('TAX_AMOUNT');
-		const TAX_AUCTIONS_ITEMS = config.getArray('TAX_AUCTIONS_ITEMS');
+		const TAX_AUCTIONS_START_TIME = config.get('TAX_AUCTIONS_START_TIME');
+		const TAX_AMOUNT = config.get('TAX_AMOUNT');
+		const TAX_AUCTIONS_ITEMS = config.get('TAX_AUCTIONS_ITEMS');
 		const NOW = Date.now();
 		const availableAuctionsLog = [];
 		const taxPaidLog = [];
@@ -203,8 +203,8 @@ module.exports = class DatabaseManager {
 
 					if (!player) return ++unknownPlayers;
 
-					paidLog.push(`${player.ign}: ${amount.toLocaleString(config.get('NUMBER_FORMAT'))}`);
-					if (config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${amount.toLocaleString(config.get('NUMBER_FORMAT'))} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
+					paidLog.push(`${player.ign}: ${this.client.formatNumber(amount)}`);
+					if (config.get('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${this.client.formatNumber(amount)} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
 
 					return player.setToPaid({
 						amount,
@@ -227,7 +227,7 @@ module.exports = class DatabaseManager {
 		}));
 
 		// logging
-		if (auctionsAmount && (config.getBoolean('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.getNumber('DATABASE_UPDATE_INTERVAL')))) {
+		if (auctionsAmount && (config.get('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.get('DATABASE_UPDATE_INTERVAL')))) {
 			logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);
 		}
 
@@ -259,9 +259,9 @@ module.exports = class DatabaseManager {
 			.setDescription(stripIndents(commaLists`
 				\`\`\`cs
 				Collectors: # /ah ${activeTaxCollectors.map(player => player.ign).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))}
-				Amount: ${config.getNumber('TAX_AMOUNT').toLocaleString(config.get('NUMBER_FORMAT'))}
-				Items: ${config.getArray('TAX_AUCTIONS_ITEMS').map(item => `'${item}'`)}
-				Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round((PAID_COUNT / PLAYER_COUNT) * 100)} % | collected amount: ${TOTAL_COINS.toLocaleString(config.get('NUMBER_FORMAT'))} coins
+				Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT'))}
+				Items: ${config.get('TAX_AUCTIONS_ITEMS').map(item => `'${item}'`)}
+				Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round((PAID_COUNT / PLAYER_COUNT) * 100)} % | collected amount: ${this.client.formatNumber(TOTAL_COINS)} coins
 				Available auctions:
 				${availableAuctionsLog?.join('\n') ?? '\u200b -'}
 				\`\`\`
@@ -275,7 +275,7 @@ module.exports = class DatabaseManager {
 			const values = [ '', '', '' ];
 
 			// construct player list in three rows: paid emoji + non line-breaking space + player ign, slice to keep everything in one line
-			if (config.getBoolean('TAX_TRACKING_ENABLED')) {
+			if (config.get('TAX_TRACKING_ENABLED')) {
 				for (const [ index, player ] of hypixelGuild.players.array().entries()) values[Math.floor(index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\xa0${player.ign.slice(0, 15)}`;
 			} else {
 				for (const [ index, player ] of hypixelGuild.players.array().entries()) values[Math.floor(index / ENTRIES_PER_ROW)] += `\n•\xa0${player.ign.slice(0, 15)}`;
@@ -311,9 +311,9 @@ module.exports = class DatabaseManager {
 		const { config, players } = this.modelManagers;
 
 		// the hypxiel api encountered an error before
-		if (this.client.config.getBoolean('HYPIXEL_API_ERROR')) {
+		if (this.client.config.get('HYPIXEL_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() >= this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) return logger.warn('[DB UPDATE]: auto updates disabled');
+			if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) return logger.warn('[DB UPDATE]: auto updates disabled');
 
 			this.client.config.set('HYPIXEL_API_ERROR', false);
 		}
@@ -322,12 +322,12 @@ module.exports = class DatabaseManager {
 		await this.modelManagers.hypixelGuilds.update();
 
 		// update tax db
-		const availableAuctionsLog = config.getBoolean('TAX_TRACKING_ENABLED')
+		const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED')
 			? await this._updateTaxDatabase()
 			: null;
 
 		// update Xp
-		if (config.getBoolean('XP_TRACKING_ENABLED')) players.updateXp();
+		if (config.get('XP_TRACKING_ENABLED')) players.updateXp();
 
 		await players.updateIGN();
 

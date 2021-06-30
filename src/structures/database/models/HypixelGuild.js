@@ -633,7 +633,7 @@ module.exports = class HypixelGuild extends Model {
 			return ctx.react(CLOWN);
 		}
 
-		const WEIGHT_REQ_STRING = WEIGHT_REQ.toLocaleString(config.get('NUMBER_FORMAT'));
+		const WEIGHT_REQ_STRING = this.client.formatNumber(WEIGHT_REQ);
 
 		let { totalWeight } = player.getWeight();
 

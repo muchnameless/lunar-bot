@@ -57,7 +57,7 @@ const DEFAULT_CONFIG = {
 	SKILL_AVERAGE_STATS_CHANNEL_ID: null,
 	SLAYER_AVERAGE_STATS_CHANNEL_ID: null,
 	TAX_AMOUNT: 1_000_000,
-	TAX_AUCTIONS_ITEMS: 'Stone Bricks,Stone Brick Slab,Spirit Leap',
+	TAX_AUCTIONS_ITEMS: [ 'Stone Bricks', 'Stone Brick Slab', 'Spirit Leap' ],
 	TAX_AUCTIONS_START_TIME: Infinity,
 	TAX_CHANNEL_ID: null,
 	TAX_MESSAGE_ID: null,

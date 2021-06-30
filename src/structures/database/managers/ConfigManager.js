@@ -28,64 +28,21 @@ module.exports = class ConfigManager extends ModelManager {
 		const UPPERCASED_KEY = key.toUpperCase();
 		const dbEntry = this.cache.get(UPPERCASED_KEY);
 
-		if (!dbEntry) return super.add({ key: UPPERCASED_KEY, value });
+		if (!dbEntry) return super.add({ key: UPPERCASED_KEY, value: JSON.stringify(value) });
 
-		dbEntry.value = value;
+		dbEntry.value = JSON.stringify(value);
 		return dbEntry.save();
 	}
 
 	/**
 	 * get the value of a config entry or `null` if non-existent
 	 * @param {string} key config key
-	 * @returns {?string} config value
 	 */
 	get(key) {
-		return this.cache.get(key?.toUpperCase())?.value ?? logger.warn(`[CONFIG VALUE]: '${key}' is not a valid config key`);
-	}
-
-	/**
-	 * get the value of a config entry as a boolean
-	 * @param {string} key config key
-	 * @returns {?boolean} config value
-	 */
-	getBoolean(key) {
-		const VALUE = this.get(key?.toUpperCase());
-
-		if (typeof VALUE === 'boolean') return VALUE;
-
-		if (!VALUE) return null;
-
-		switch (VALUE.toLowerCase()) {
-			case 'true':
-			case '1':
-				this.cache.set(key.toUpperCase(), true);
-				return true;
-
-			case 'false':
-			case '0':
-				this.cache.set(key.toUpperCase(), false);
-				return false;
-
-			default:
-				return null;
+		try {
+			return JSON.parse(this.cache.get(key?.toUpperCase())?.value ?? logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`));
+		} catch (error) {
+			logger.error(`[CONFIG GET]: '${key}'`, error);
 		}
-	}
-
-	/**
-	 * get the value of a config entry as a number
-	 * @param {string} key config key
-	 * @returns {number} config number
-	 */
-	getNumber(key) {
-		return Number(this.get(key?.toUpperCase()));
-	}
-
-	/**
-	 * returns the value of a config entry as an array, split by ','
-	 * @param {string} key config key
-	 * @returns {arry} config value
-	 */
-	getArray(key) {
-		return this.get(key?.toUpperCase())?.split(',') ?? [];
 	}
 };

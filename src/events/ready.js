@@ -47,14 +47,14 @@ module.exports = class ReadyEvent extends Event {
 					status: 'online',
 				});
 
-				if (this.config.getBoolean('EXTENDED_LOGGING_ENABLED')) logger.info(`[SET PRESENCE]: activity set to ${presence.activities[0].name}`);
+				if (this.config.get('EXTENDED_LOGGING_ENABLED')) logger.info(`[SET PRESENCE]: activity set to ${presence.activities[0].name}`);
 			} catch (error) {
 				logger.error('[SET PRESENCE]: error while setting presence', error);
 			}
 		}, 20 * 60_000); // 20 min
 
 		// chatBridges
-		if (this.config.getBoolean('CHATBRIDGE_ENABLED')) await this.client.chatBridges.connect();
+		if (this.config.get('CHATBRIDGE_ENABLED')) await this.client.chatBridges.connect();
 
 		// log ready
 		logger.debug(`[READY]: startup complete. ${this.client.cronJobs.size} CronJobs running. Logging channel available: ${this.client.logHandler.ready}`);

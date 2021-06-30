@@ -124,7 +124,7 @@ const self = module.exports = {
 		await cache.set(
 			CACHE_KEY,
 			embeds.map(embed => embed.toJSON?.() ?? embed),
-			interaction.client.config.getNumber('DATABASE_UPDATE_INTERVAL') * 60_000,
+			interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
 		);
 	},
 
@@ -195,7 +195,7 @@ const self = module.exports = {
 		if (IS_RELOAD) await cache.set(
 			CACHE_KEY,
 			embeds.map(embed => embed.toJSON?.() ?? embed),
-			interaction.client.config.getNumber('DATABASE_UPDATE_INTERVAL') * 60_000,
+			interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
 		);
 	},
 
@@ -206,7 +206,7 @@ const self = module.exports = {
 	 */
 	createLeaderboardEmbeds(client, { title, description, playerData, playerRequestingEntry, getEntry, isCompetition, lastUpdatedAt }) {
 		const { config } = client;
-		const ELEMENTS_PER_PAGE = config.getNumber('ELEMENTS_PER_PAGE');
+		const ELEMENTS_PER_PAGE = config.get('ELEMENTS_PER_PAGE');
 		const PLAYER_COUNT = playerData.length;
 		const PAGES_TOTAL = PLAYER_COUNT
 			? Math.ceil(PLAYER_COUNT / ELEMENTS_PER_PAGE)
@@ -278,8 +278,8 @@ const self = module.exports = {
 	 */
 	createGainedLeaderboardData(client, { hypixelGuild, user, offset, shouldShowOnlyBelowReqs, xpType }) {
 		const { config } = client;
-		const COMPETITION_RUNNING = config.getBoolean('COMPETITION_RUNNING');
-		const COMPETITION_END_TIME = config.getNumber('COMPETITION_END_TIME');
+		const COMPETITION_RUNNING = config.get('COMPETITION_RUNNING');
+		const COMPETITION_END_TIME = config.get('COMPETITION_END_TIME');
 		const IS_COMPETITION_LB = offset === offsetFlags.COMPETITION_START;
 		const SHOULD_USE_COMPETITION_END = !COMPETITION_RUNNING && IS_COMPETITION_LB;
 		const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END
@@ -302,7 +302,7 @@ const self = module.exports = {
 		const LAST_UPDATED_AT = SHOULD_USE_COMPETITION_END
 			? COMPETITION_END_TIME
 			: Math.min(...playerDataRaw.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
-		const STARTING_TIME = config.getNumber(XP_OFFSETS_TIME[offset]);
+		const STARTING_TIME = config.get(XP_OFFSETS_TIME[offset]);
 
 		/** @type {PlayerData[]} */
 		let playerData;
@@ -524,7 +524,7 @@ const self = module.exports = {
 		const PLAYER_COUNT = playerDataRaw.length;
 		const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
 		const LAST_UPDATED_AT = offset
-			? config.getNumber(XP_OFFSETS_TIME[offset])
+			? config.get(XP_OFFSETS_TIME[offset])
 			: Math.min(...playerDataRaw.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
 
 		/** @type {PlayerData[]} */

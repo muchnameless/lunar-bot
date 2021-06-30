@@ -249,7 +249,7 @@ module.exports = class Player extends Model {
 		if (!this._infractions) return 0;
 
 		// last infraction expired -> remove all infractions
-		if (this._infractions[this._infractions.length - 1] + this.client.config.getNumber('INFRACTIONS_EXPIRATION_TIME') <= Date.now()) {
+		if (this._infractions[this._infractions.length - 1] + this.client.config.get('INFRACTIONS_EXPIRATION_TIME') <= Date.now()) {
 			this._infractions = null;
 			this.save();
 			return 0;
@@ -478,7 +478,7 @@ module.exports = class Player extends Model {
 			// hypixel API call
 			const { meta: { cached }, members } = await hypixel.skyblock.profile(this.mainProfileID);
 
-			if (cached && Date.now() - this.xpLastUpdatedAt < (this.client.config.getNumber('DATABASE_UPDATE_INTERVAL') - 1) * 60_000) throw 'cached data';
+			if (cached && Date.now() - this.xpLastUpdatedAt < (this.client.config.get('DATABASE_UPDATE_INTERVAL') - 1) * 60_000) throw 'cached data';
 
 			const playerData = members?.[this.minecraftUUID];
 
@@ -508,7 +508,7 @@ module.exports = class Player extends Model {
 				}
 			} else {
 				// log once every hour (during the first update)
-				if (!(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) logger.warn(`[UPDATE XP]: ${this.logInfo}: skill API disabled`);
+				if (!(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) logger.warn(`[UPDATE XP]: ${this.logInfo}: skill API disabled`);
 				this.notes = 'skill api disabled';
 
 				/**
@@ -537,7 +537,7 @@ module.exports = class Player extends Model {
 			}
 
 			// no slayer data found logging
-			if (!Object.prototype.hasOwnProperty.call(playerData.slayer_bosses?.zombie ?? {}, 'xp') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+			if (!Object.prototype.hasOwnProperty.call(playerData.slayer_bosses?.zombie ?? {}, 'xp') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no slayer data found`);
 			}
 
@@ -558,14 +558,14 @@ module.exports = class Player extends Model {
 			}
 
 			// no dungeons data found logging
-			if (!Object.hasOwnProperty.call(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+			if (!Object.hasOwnProperty.call(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no dungeons data found`);
 			}
 
 			/**
 			 * collections
 			 */
-			if (!Object.hasOwnProperty.call(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.getNumber('DATABASE_UPDATE_INTERVAL')) {
+			if (!Object.hasOwnProperty.call(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
 			}
 
@@ -736,7 +736,7 @@ module.exports = class Player extends Model {
 		}
 
 		// weight
-		if (this.getWeight().totalWeight >= config.getNumber('WHALECUM_PASS_WEIGHT')) {
+		if (this.getWeight().totalWeight >= config.get('WHALECUM_PASS_WEIGHT')) {
 			if (!member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToAdd.push(config.get('WHALECUM_PASS_ROLE_ID'));
 		} else if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) {
 			rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
@@ -1230,11 +1230,11 @@ module.exports = class Player extends Model {
 	 * set the player to paid
 	 * @param {setToPaidOptions} param0
 	 */
-	async setToPaid({ amount = this.client.config.getNumber('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null } = {}) {
+	async setToPaid({ amount = this.client.config.get('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null } = {}) {
 		if (this.paid) {
 			await Promise.all(this.addTransfer({ amount, collectedBy, auctionID, type: 'donation' }));
 		} else {
-			const overflow = Math.max(amount - this.client.config.getNumber('TAX_AMOUNT'), 0); // >=
+			const overflow = Math.max(amount - this.client.config.get('TAX_AMOUNT'), 0); // >=
 			const taxAmount = amount - overflow;
 			const promises = this.addTransfer({ amount: taxAmount, collectedBy, auctionID, type: 'tax' });
 
@@ -1330,7 +1330,7 @@ module.exports = class Player extends Model {
 				this.guildXpDaily = xp;
 				this.guildXp += xp;
 			}
-		} else if (this.client.config.getBoolean('EXTENDED_LOGGING_ENABLED')) {
+		} else if (this.client.config.get('EXTENDED_LOGGING_ENABLED')) {
 			logger.warn(`[UPDATE GUILD XP]: ${this.logInfo}: no guild xp found`);
 		}
 

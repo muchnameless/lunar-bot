@@ -78,7 +78,7 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 		if (command.description) reply.push(`Description: ${command.description}`);
 		if (command.usage) reply.push(`Usage: ${command.usageInfo}`);
 
-		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.getNumber('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
+		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
 		return message.author.send(reply.join('\n'));
 	}

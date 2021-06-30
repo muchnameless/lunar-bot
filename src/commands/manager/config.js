@@ -24,6 +24,12 @@ module.exports = class ConfigCommand extends SlashCommand {
 					type: Constants.ApplicationCommandOptionTypes.STRING,
 					description: 'new config value',
 					required: true,
+				}, {
+					name: 'type',
+					type: Constants.ApplicationCommandOptionTypes.STRING,
+					description: 'new config value type',
+					required: false,
+					choices: [ 'string', 'number', 'boolean', 'array' ].map(x => ({ name: x, value: x })),
 				}],
 			}, {
 				name: 'delete',
@@ -47,8 +53,31 @@ module.exports = class ConfigCommand extends SlashCommand {
 				}],
 			}],
 			defaultPermission: true,
+			// permissions: [{
+			// 	id: data.client.config.get('DISCORD_GUILD_ID'),
+			// 	type: Constants.ApplicationCommandPermissionTypes.ROLE,
+			// 	permission: false,
+			// }, {
+			// 	id: data.client.config.get('MANAGER_ROLE_ID'),
+			// 	type: Constants.ApplicationCommandPermissionTypes.ROLE,
+			// 	permission: true,
+			// }],
 			cooldown: 0,
 		});
+	}
+
+	/**
+	 * @param {import('discord.js').Collection} entries
+	 */
+	listEntries(entries) {
+		return entries.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
+			.map(({ key, value }) => {
+				const parsedValue = JSON.parse(value);
+				const type = typeof parsedValue;
+
+				return `${key}: ${type === 'number' ? this.client.formatNumber(parsedValue) : parsedValue} [${Array.isArray(parsedValue) ? 'array' : type}]`;
+			})
+			.join('\n');
 	}
 
 	/**
@@ -63,7 +92,28 @@ module.exports = class ConfigCommand extends SlashCommand {
 			case 'edit': {
 				const KEY = options.get('key').value.toUpperCase().replace(/ +/g, '_');
 				const OLD_VALUE = this.config.get(KEY);
-				const { key, value } = await this.config.set(KEY, options.get('value').value);
+
+				let { value: newValue } = options.get('value');
+
+				switch (options.get('type')?.value.toLowerCase()) {
+					case 'number':
+						newValue = Number(newValue.replaceAll('_', ''));
+						break;
+
+					case 'boolean':
+						newValue = newValue === 'true';
+						break;
+
+					case 'array':
+						newValue = newValue.split(',');
+						break;
+				}
+
+				if (typeof newValue !== typeof OLD_VALUE) {
+					await interaction.awaitConfirmation(`type change from ${OLD_VALUE} (${typeof OLD_VALUE}) to ${newValue} (${typeof newValue}). Confirm?`);
+				}
+
+				const { key, value } = await this.config.set(KEY, newValue);
 
 				return interaction.reply({
 					content: `${key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${value}'`,
@@ -85,10 +135,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 				const query = options?.get('query')?.value.replace(/ +/g, '_');
 
 				if (!query) return interaction.reply({
-					content: this.config.cache
-						.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
-						.map(({ key, value }) => `${key}: ${value}`)
-						.join('\n'),
+					content: this.listEntries(this.config.cache),
 					code: 'apache',
 					split: { char: '\n' },
 				});
@@ -96,12 +143,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 				const queryRegex = new RegExp(query, 'i');
 
 				return interaction.reply({
-					content: this.config.cache
-						.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))
-						.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
-						.map(({ key, value }) => `${key}: ${value}`)
-						.join('\n')
-						|| `no config entries for '${query}' found`,
+					content: this.listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(JSON.parse(value)))),
 					code: 'apache',
 					split: { char: '\n' },
 				});

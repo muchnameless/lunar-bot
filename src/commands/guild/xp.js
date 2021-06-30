@@ -42,7 +42,7 @@ module.exports = class XpCommand extends SlashCommand {
 	 */
 	async run(interaction) {
 		const offset = interaction.options.get('offset')?.value
-			?? (this.config.getBoolean('COMPETITION_RUNNING') || (Date.now() - this.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
+			?? (this.config.get('COMPETITION_RUNNING') || (Date.now() - this.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
 				? offsetFlags.COMPETITION_START
 				: this.config.get('DEFAULT_XP_OFFSET')
 			);
@@ -101,7 +101,7 @@ module.exports = class XpCommand extends SlashCommand {
 
 		embed
 			.setDescription(stripIndents`
-				${`Δ: change since ${timestampToDateMarkdown(Math.max(this.config.getNumber(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`.padEnd(105, '\xa0')}\u200b
+				${`Δ: change since ${timestampToDateMarkdown(Math.max(this.config.get(XP_OFFSETS_TIME[offset]), player.createdAt.getTime()))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`.padEnd(105, '\xa0')}\u200b
 				
 				\`\`\`Skills\`\`\`
 				Average skill level: **${this.client.formatDecimalNumber(skillAverage)}** [**${this.client.formatDecimalNumber(trueAverage)}**] - **Δ**: **${this.client.formatDecimalNumber(skillAverage - skillAverageOffset)}** [**${this.client.formatDecimalNumber(trueAverage - trueAverageOffset)}**]

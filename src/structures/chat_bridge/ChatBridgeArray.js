@@ -166,7 +166,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 * @param {import('./ChatBridge').MessageForwardOptions} [options={}]
 	 */
 	async handleDiscordMessage(message, options = {}) {
-		if (!this.channelIDs.has(message.channelID) || !this.client.config.getBoolean('CHATBRIDGE_ENABLED')) return;
+		if (!this.channelIDs.has(message.channelID) || !this.client.config.get('CHATBRIDGE_ENABLED')) return;
 
 		try {
 			// a ChatBridge for the message's channel was found

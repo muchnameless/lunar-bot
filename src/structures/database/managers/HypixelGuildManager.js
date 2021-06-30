@@ -55,7 +55,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 	 * @returns {Promise<boolean>} success
 	 */
 	async update() {
-		if (this.client.config.getBoolean('HYPIXEL_API_ERROR')) return logger.warn('[GUILDS UPDATE]: auto updates disabled');
+		if (this.client.config.get('HYPIXEL_API_ERROR')) return logger.warn('[GUILDS UPDATE]: auto updates disabled');
 
 		try {
 			for (const hypixelGuild of this.cache.values()) {
@@ -122,7 +122,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 	 */
 	scheduleDailyStatsSave() {
 		// daily reset
-		if (new Date(this.client.config.getNumber('LAST_DAILY_STATS_SAVE_TIME')).getUTCDay() !== new Date().getUTCDay()) this.performDailyStatsSave();
+		if (new Date(this.client.config.get('LAST_DAILY_STATS_SAVE_TIME')).getUTCDay() !== new Date().getUTCDay()) this.performDailyStatsSave();
 
 		// each day at 00:00:00
 		this.client.schedule('guildDailyStats', new CronJob({
