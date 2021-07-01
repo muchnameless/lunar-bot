@@ -88,7 +88,10 @@ module.exports = class DatabaseManager {
 					 */
 						const channel = this.client.channels.cache.get(config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
 
-						if (!channel) continue; // no channel found
+						if (!channel) { // no channel found
+							logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${type}: no channel found`);
+							continue;
+						}
 
 						const newName = `${type} avg: ${formattedStats[`${type}Average`]}`;
 						const { name: oldName } = channel;
