@@ -88,7 +88,8 @@ module.exports = class SlashCommand extends BaseCommand {
 			type: Constants.ApplicationCommandOptionTypes.STRING,
 			description: 'xp type',
 			required: false,
-			choices: [ 'weight', 'skill', ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses ].map(x => ({ name: x, value: x })),
+			choices: [ 'weight', { name: 'skill average', value: 'skill-average' }, ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ]
+				.map(x => (typeof x !== 'object' ? ({ name: x, value: x }) : x)),
 		};
 	}
 

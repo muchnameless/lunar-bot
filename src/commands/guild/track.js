@@ -68,7 +68,7 @@ module.exports = class TrackCommand extends SlashCommand {
 				break;
 			}
 
-			case 'skill': {
+			case 'skill-average': {
 				const skillAverageHistory = [ ...Array(days).keys() ].map(x => player.getSkillAverageHistory(x));
 
 				datasets = [{
@@ -99,7 +99,7 @@ module.exports = class TrackCommand extends SlashCommand {
 			case 'spider':
 			case 'wolf': {
 				datasets = [{
-					label: upperCaseFirstChar(type),
+					label: `${upperCaseFirstChar(type)} XP`,
 					backgroundColor: 'rgba(0, 0, 255, 0.25)',
 					borderColor: 'rgb(0, 0, 128)',
 					data: [ ...Array(days).keys() ].map(x => player[`${type}XpHistory`][x]),
@@ -109,7 +109,7 @@ module.exports = class TrackCommand extends SlashCommand {
 
 			default: {
 				datasets = [{
-					label: upperCaseFirstChar(type),
+					label: `${upperCaseFirstChar(type)} XP`,
 					backgroundColor: 'rgba(0, 0, 255, 0.25)',
 					borderColor: 'rgb(0, 0, 128)',
 					data: [ ...Array(days).keys() ].map(x => player.getSkillLevelHistory(type, x).nonFlooredLevel),

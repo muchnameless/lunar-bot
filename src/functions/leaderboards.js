@@ -329,7 +329,7 @@ const self = module.exports = {
 				break;
 			}
 
-			case 'skill': {
+			case 'skill-average': {
 				title = 'Skill Average Gained Leaderboard';
 				dataConverter = (player) => {
 					const { skillAverage, trueAverage } = player.getSkillAverage(CURRENT_OFFSET);
@@ -551,7 +551,7 @@ const self = module.exports = {
 				break;
 			}
 
-			case 'skill': {
+			case 'skill-average': {
 				title = 'Skill Average Leaderboard';
 				dataConverter = (player) => {
 					const { skillAverage, trueAverage } = player.getSkillAverage(offset);
