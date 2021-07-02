@@ -2,7 +2,7 @@
 
 const { Constants } = require('discord.js');
 const ms = require('ms');
-const { handleLeaderboardButtonInteraction } = require('../functions/leaderboards');
+const { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction } = require('../functions/leaderboards');
 const { LB_KEY } = require('../constants/redis');
 const Event = require('../structures/events/Event');
 const logger = require('../functions/logger');
@@ -86,15 +86,22 @@ module.exports = class InteractionEvent extends Event {
 	}
 
 	/**
-	 * @param {import('discord.js').ButtonInteraction} interaction
+	 * @param {import('../structures/extensions/ButtonInteraction')} interaction
 	 */
-	// eslint-disable-next-line class-methods-use-this
-	_handleButtonInteraction(interaction) {
+	_handleButtonInteraction(interaction) { // eslint-disable-line class-methods-use-this
 		// leaderboards edit
 		if (interaction.customID.startsWith(LB_KEY)) return handleLeaderboardButtonInteraction(interaction);
 
 		// eval edit
 		if (interaction.customID.startsWith('EVAL')) return this.client.commands.get('eval')?.runButton(interaction);
+	}
+
+	/**
+	 * @param {import('../structures/extensions/SelectMenuInteraction')} interaction
+	 */
+	_handleSelectMenuInteraction(interaction) { // eslint-disable-line class-methods-use-this
+		// leaderboards edit
+		if (interaction.customID.startsWith(LB_KEY)) return handleLeaderboardSelectMenuInteraction(interaction);
 	}
 
 	/**
@@ -107,5 +114,8 @@ module.exports = class InteractionEvent extends Event {
 
 		// buttons
 		if (interaction.isButton()) return this._handleButtonInteraction(interaction);
+
+		// select menus
+		if (interaction.isSelectMenu()) return this._handleSelectMenuInteraction(interaction);
 	}
 };

@@ -3,8 +3,9 @@
 const { Constants } = require('discord.js');
 const { oneLine, stripIndents } = require('common-tags');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
-const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
+const { XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
 const { /* escapeIgn, */ upperCaseFirstChar, timestampToDateMarkdown } = require('../../functions/util');
+const { getDefaultOffset } = require('../../functions/leaderboards');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
@@ -41,11 +42,7 @@ module.exports = class XpCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		const offset = interaction.options.get('offset')?.value
-			?? (this.config.get('COMPETITION_RUNNING') || (Date.now() - this.config.get('COMPETITION_END_TIME') >= 0 && Date.now() - this.config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1000)
-				? offsetFlags.COMPETITION_START
-				: this.config.get('DEFAULT_XP_OFFSET')
-			);
+		const offset = interaction.options.get('offset')?.value ?? getDefaultOffset(this.config);
 		const player = this.getPlayer(interaction.options, interaction);
 
 		if (!player) {

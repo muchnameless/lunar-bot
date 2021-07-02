@@ -1,9 +1,10 @@
 'use strict';
 
 const { stripIndent, oneLine } = require('common-tags');
-const { MessageEmbed, MessageActionRow, MessageButton, Formatters: { TimestampStyles }, Constants } = require('discord.js');
+const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Formatters: { TimestampStyles }, Constants } = require('discord.js');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
-const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, GUILD_ID_ALL } = require('../constants/database');
+const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_SHORT, XP_OFFSETS_CONVERTER, GUILD_ID_ALL } = require('../constants/database');
+const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../constants/skyblock');
 const { LB_KEY } = require('../constants/redis');
 const { upperCaseFirstChar, timestampToDateMarkdown } = require('./util');
 const cache = require('../api/cache');
@@ -38,12 +39,13 @@ const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild: { guildID = GUILD
 
 /**
  * returns a message action row with pagination buttons
+ * @param {import('../structures/LunarClient')} client
  * @param {string} cacheKey
- * @param {number} page
+ * @param {LeaderboardArgs} leaderboardArgs
  * @param {number} totalPages
  * @param {boolean} [isExpired=false]
  */
-function createActionRow(cacheKey, page, totalPages, isExpired = false) {
+function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypixelGuild }, totalPages, isExpired = false) {
 	let decDisabled;
 	let incDisabled;
 	let pageStyle;
@@ -60,36 +62,116 @@ function createActionRow(cacheKey, page, totalPages, isExpired = false) {
 		pageStyle = reloadStyle = Constants.MessageButtonStyles.PRIMARY;
 	}
 
-	return new MessageActionRow()
-		.addComponents(
-			new MessageButton()
-				.setCustomID(`${cacheKey}:1`)
-				.setEmoji(DOUBLE_LEFT_EMOJI)
-				.setStyle(pageStyle)
-				.setDisabled(decDisabled),
-			new MessageButton()
-				.setCustomID(`${cacheKey}:${page - 1}`)
-				.setEmoji(LEFT_EMOJI)
-				.setStyle(pageStyle)
-				.setDisabled(decDisabled),
-			new MessageButton()
-				.setCustomID(`${cacheKey}:${page + 1}`)
-				.setEmoji(RIGHT_EMOJI)
-				.setStyle(pageStyle)
-				.setDisabled(incDisabled),
-			new MessageButton()
-				.setCustomID(`${cacheKey}:${totalPages}`)
-				.setEmoji(DOUBLE_RIGHT_EMOJI)
-				.setStyle(pageStyle)
-				.setDisabled(incDisabled),
-			new MessageButton()
-				.setCustomID(`${cacheKey}:${page}:reload`)
-				.setEmoji(RELOAD_EMOJI)
-				.setStyle(reloadStyle),
+	const row = [];
+	const guildSelectMenu = new MessageSelectMenu()
+		.setCustomID(`${cacheKey}:guild`)
+		.setPlaceholder(
+			hypixelGuild !== GUILD_ID_ALL
+				? hypixelGuild.name
+				: 'All',
+		)
+		.addOptions(
+			client.hypixelGuilds.cache.map(({ guildID, name }) => ({ label: name, value: guildID })),
 		);
+
+	if (xpType !== 'purge') {
+		guildSelectMenu.addOptions({ label: 'All', value: GUILD_ID_ALL });
+
+		const offsetSelectMenu = new MessageSelectMenu()
+			.setCustomID(`${cacheKey}:offset`)
+			.setPlaceholder(
+				`Offset: ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset] ?? 'None')}`,
+			)
+			.addOptions(
+				Object.keys(XP_OFFSETS_SHORT).map(x => ({ label: upperCaseFirstChar(x), value: XP_OFFSETS_CONVERTER[x] })),
+			);
+
+		if (lbType === 'total') offsetSelectMenu.addOptions({ label: 'None', value: 'none' });
+
+		row.push(
+			new MessageActionRow()
+				.addComponents(
+					new MessageSelectMenu()
+						.setCustomID(`${cacheKey}:lbType`)
+						.setPlaceholder(
+							`Lb Type: ${upperCaseFirstChar(lbType)}`,
+						)
+						.addOptions(
+							{ label: 'Total XP', value: 'total' },
+							{ label: 'Gained XP', value: 'gained' },
+						),
+				),
+			new MessageActionRow()
+				.addComponents(
+					new MessageSelectMenu()
+						.setCustomID(`${cacheKey}:xpType`)
+						.setPlaceholder(
+							`XP Type: ${xpType
+								.split('-')
+								.map(x => upperCaseFirstChar(x))
+								.join(' ')}`,
+						)
+						.addOptions(
+							[ 'weight', { label: 'Skill Average', value: 'skill-average' }, ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ]
+								.map(x => (typeof x !== 'object' ? ({ label: upperCaseFirstChar(x), value: x }) : x)),
+						),
+				),
+			new MessageActionRow()
+				.addComponents(
+					offsetSelectMenu,
+				),
+		);
+	}
+
+	row.push(
+		new MessageActionRow()
+			.addComponents(
+				guildSelectMenu,
+			),
+		new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+					.setCustomID(`${cacheKey}:1`)
+					.setEmoji(DOUBLE_LEFT_EMOJI)
+					.setStyle(pageStyle)
+					.setDisabled(decDisabled),
+				new MessageButton()
+					.setCustomID(`${cacheKey}:${page - 1}`)
+					.setEmoji(LEFT_EMOJI)
+					.setStyle(pageStyle)
+					.setDisabled(decDisabled),
+				new MessageButton()
+					.setCustomID(`${cacheKey}:${page + 1}`)
+					.setEmoji(RIGHT_EMOJI)
+					.setStyle(pageStyle)
+					.setDisabled(incDisabled),
+				new MessageButton()
+					.setCustomID(`${cacheKey}:${totalPages}`)
+					.setEmoji(DOUBLE_RIGHT_EMOJI)
+					.setStyle(pageStyle)
+					.setDisabled(incDisabled),
+				new MessageButton()
+					.setCustomID(`${cacheKey}:${page}:reload`)
+					.setEmoji(RELOAD_EMOJI)
+					.setStyle(reloadStyle),
+			),
+	);
+
+	return row;
 }
 
 const self = module.exports = {
+
+	/**
+	 * default xp offset based on wether there is a current competition or not
+	 * @param {import('../structures/database/managers/ConfigManager')} config
+	 * @returns {string}
+	 */
+	getDefaultOffset(config) {
+		return (config.get('COMPETITION_RUNNING') || (Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1_000)
+			? offsetFlags.COMPETITION_START
+			: config.get('DEFAULT_XP_OFFSET'));
+	},
 
 	/**
 	 * handles a leaderbaord message
@@ -106,17 +188,15 @@ const self = module.exports = {
 				self.getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 			);
 
-		let { page } = leaderboardArgs;
-
-		if (page < 1) {
-			page = 1;
-		} else if (page > embeds.length) {
-			page = embeds.length;
+		if (leaderboardArgs.page < 1) {
+			leaderboardArgs.page = 1;
+		} else if (leaderboardArgs.page > embeds.length) {
+			leaderboardArgs.page = embeds.length;
 		}
 
 		await interaction.reply({
-			embeds: [ embeds[ page - 1 ] ],
-			components: [ createActionRow(CACHE_KEY, page, embeds.length) ],
+			embeds: [ embeds[ leaderboardArgs.page - 1 ] ],
+			components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 		});
 
 		await cache.set(
@@ -132,14 +212,6 @@ const self = module.exports = {
 	 */
 	async handleLeaderboardButtonInteraction(interaction) {
 		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, IS_RELOAD ] = interaction.customID.split(':');
-
-		if (USER_ID !== interaction.user.id) {
-			return interaction.reply({
-				content: 'you can only change your own leaderboards',
-				ephemeral: true,
-			});
-		}
-
 		/** @type {LeaderboardArgs} */
 		const leaderboardArgs = {
 			lbType: LB_TYPE,
@@ -149,7 +221,13 @@ const self = module.exports = {
 				? interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID)
 				: HYPIXEL_GUILD_ID,
 			user: interaction.user,
+			page: Number(PAGE),
 		};
+
+		if (USER_ID !== interaction.user.id) {
+			return self.handleLeaderboardCommandInteraction(interaction, { page: 1, ...leaderboardArgs });
+		}
+
 		const CACHE_KEY = createCacheKey(leaderboardArgs);
 		/** @type {?MessageEmbed[]} */
 		const embeds = IS_RELOAD
@@ -159,11 +237,9 @@ const self = module.exports = {
 			)
 			: await cache.get(CACHE_KEY);
 
-		let page = Number(PAGE);
-
 		if (!embeds) {
 			await interaction.update({
-				components: [ createActionRow(CACHE_KEY, page, Infinity, true) ],
+				components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, Infinity, true),
 			});
 
 			return interaction.reply({
@@ -178,18 +254,86 @@ const self = module.exports = {
 			});
 		}
 
-		if (page < 1) {
-			page = 1;
-		} else if (page > embeds.length) {
-			page = embeds.length;
+		if (leaderboardArgs.page < 1) {
+			leaderboardArgs.page = 1;
+		} else if (leaderboardArgs.page > embeds.length) {
+			leaderboardArgs.page = embeds.length;
 		}
 
 		await interaction.update({
-			embeds: [ embeds[ page - 1 ] ],
-			components: [ createActionRow(CACHE_KEY, page, embeds.length) ],
+			embeds: [ embeds[ leaderboardArgs.page - 1 ] ],
+			components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 		});
 
 		if (IS_RELOAD) await cache.set(
+			CACHE_KEY,
+			embeds.map(embed => embed.toJSON?.() ?? embed),
+			interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
+		);
+	},
+
+	/**
+	 * handles a leaderbaord message
+	 * @param {import('../structures/extensions/SelectMenuInteraction')} interaction
+	 */
+	async handleLeaderboardSelectMenuInteraction(interaction) {
+		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE ] = interaction.customID.split(':');
+		/** @type {LeaderboardArgs} */
+		const leaderboardArgs = {
+			lbType: LB_TYPE,
+			xpType: XP_TYPE,
+			offset: OFFSET,
+			hypixelGuild: HYPIXEL_GUILD_ID !== GUILD_ID_ALL
+				? interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID)
+				: HYPIXEL_GUILD_ID,
+			user: interaction.user,
+			page: 1,
+		};
+
+		switch (SELECT_TYPE) {
+			case 'lbType':
+				[ leaderboardArgs.lbType ] = interaction.values;
+				if (leaderboardArgs.lbType === 'gained' && !leaderboardArgs.offset) leaderboardArgs.offset = self.getDefaultOffset(interaction.client.config);
+				break;
+
+			case 'offset': {
+				const [ OFFSET_SELECT ] = interaction.values;
+				leaderboardArgs.offset = OFFSET_SELECT !== 'none'
+					? OFFSET_SELECT
+					: '';
+				break;
+			}
+
+			case 'guild': {
+				const [ HYPIXEL_GUILD_ID_SELECT ] = interaction.values;
+				leaderboardArgs.hypixelGuild = HYPIXEL_GUILD_ID_SELECT !== GUILD_ID_ALL
+					? interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID_SELECT)
+					: GUILD_ID_ALL;
+				break;
+			}
+
+			default:
+				[ leaderboardArgs[SELECT_TYPE] ] = interaction.values;
+		}
+
+		if (USER_ID !== interaction.user.id) {
+			return self.handleLeaderboardCommandInteraction(interaction, { page: 1, ...leaderboardArgs });
+		}
+
+		const CACHE_KEY = createCacheKey(leaderboardArgs);
+		/** @type {?MessageEmbed[]} */
+		const embeds = await cache.get(CACHE_KEY)
+			?? self.createLeaderboardEmbeds(
+				interaction.client,
+				self.getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
+			);
+
+		await interaction.update({
+			embeds: [ embeds[ leaderboardArgs.page - 1 ] ],
+			components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
+		});
+
+		await cache.set(
 			CACHE_KEY,
 			embeds.map(embed => embed.toJSON?.() ?? embed),
 			interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
