@@ -1,9 +1,8 @@
 'use strict';
 
-const { Constants } = require('discord.js');
+const { Formatters: { TimestampStyles }, Constants } = require('discord.js');
 const { stripIndents } = require('common-tags');
-const ms = require('ms');
-const { upperCaseFirstChar } = require('../../functions/util');
+const { upperCaseFirstChar, timestampToDateMarkdown } = require('../../functions/util');
 const { getUuidAndIgn } = require('../../functions/input');
 const hypixel = require('../../api/hypixel');
 const SlashCommand = require('../../structures/commands/SlashCommand');
@@ -81,10 +80,8 @@ module.exports = class AhCommand extends SlashCommand {
 		let totalUnclaimedCoins = 0;
 		let endedAuctions = 0;
 
-		const NOW = Date.now();
-
 		for (const { highest_bid_amount: highestBid, starting_bid: startingBid, bids, end, item_name: item, tier, bin, item_lore: lore } of auctions) {
-			const TIME_LEFT = end - NOW;
+			const TIME_LEFT = end;
 
 			embed.addField(
 				`${item}${
@@ -92,7 +89,7 @@ module.exports = class AhCommand extends SlashCommand {
 						? ` - ${upperCaseFirstChar(tier)}`
 						: item === 'Enchanted Book'
 							? (() => {
-								const matched = lore.match(/(?<=^§[a-f0-9]).+(?=\n)/)?.[0];
+								const matched = lore.match(/(?<=^(§[0-9a-gk-or])+)[^§\n]+/)?.[0];
 								if (matched) return ` - ${matched}`;
 								return '';
 							})()
@@ -105,12 +102,12 @@ module.exports = class AhCommand extends SlashCommand {
 							? (totalCoins += highestBid, `Highest Bid: ${AhCommand.shortenNumber(highestBid)}`)
 							: `Starting Bid: ${AhCommand.shortenNumber(startingBid)}`
 				} • ${
-					TIME_LEFT < 0
+					TIME_LEFT < Date.now()
 						? highestBid
-							? (++endedAuctions, totalUnclaimedCoins += highestBid, ' sold')
-							: ' expired'
-						: ` ends in ${ms(TIME_LEFT, { long: true })}`
-				}`,
+							? (++endedAuctions, totalUnclaimedCoins += highestBid, 'sold')
+							: 'expired'
+						: 'ends'
+				} ${timestampToDateMarkdown(TIME_LEFT, TimestampStyles.RelativeTime)}`,
 			);
 		}
 
