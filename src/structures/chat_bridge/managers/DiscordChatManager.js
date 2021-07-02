@@ -1,11 +1,11 @@
 'use strict';
 
-const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions } = require('discord.js');
+const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters: { TimestampStyles } } = require('discord.js');
 const FormData = require('form-data');
 const fetch = require('node-fetch');
-const ms = require('ms');
 const { prefixByType } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
+const { timestampToDateMarkdown } = require('../../../functions/util');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
 const cache = require('../../../api/cache');
@@ -289,7 +289,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		// check if player is muted
 		if (player?.muted) {
-			DiscordChatManager._dmMuteInfo(message, player, `you are currently muted for ${ms(player.mutedTill - Date.now(), { long: true })}`);
+			DiscordChatManager._dmMuteInfo(message, player, `your mute expires ${timestampToDateMarkdown(player.mutedTill, TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 
@@ -301,13 +301,13 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		// check if guild chat is muted
 		if (this.guild.muted && !player?.isStaff) {
-			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat is currently muted for ${ms(this.guild.mutedTill - Date.now(), { long: true })}`);
+			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat's mute expires ${timestampToDateMarkdown(this.guild.mutedTill, TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.bot.player?.muted) {
-			DiscordChatManager._dmMuteInfo(message, player, `the bot is currently muted for ${ms(this.minecraft.bot.player.mutedTill - Date.now(), { long: true })}`);
+			DiscordChatManager._dmMuteInfo(message, player, `the bot's mute expires ${timestampToDateMarkdown(this.minecraft.bot.player.mutedTill, TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 

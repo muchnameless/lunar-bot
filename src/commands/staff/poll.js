@@ -1,9 +1,9 @@
 'use strict';
 
-const { Constants } = require('discord.js');
+const { Formatters: { TimestampStyles }, Constants } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
-const { upperCaseFirstChar, stringToMS } = require('../../functions/util');
+const { upperCaseFirstChar, stringToMS, timestampToDateMarkdown } = require('../../functions/util');
 const { messageTypes: { GUILD } } = require('../../structures/chat_bridge/constants/chatBridge');
 const LunarCommandInteraction = require('../../structures/extensions/CommandInteraction');
 const DualCommand = require('../../structures/commands/DualCommand');
@@ -69,7 +69,7 @@ module.exports = class PollCommand extends DualCommand {
 	 * @param {string} param1.ign
 	 */
 	async _run(ctx, { chatBridge, question, pollOptionNames, duration, ign }) {
-		if (chatBridge.pollUntil) return ctx.reply(`poll already in progress, wait ${ms(chatBridge.pollUntil - Date.now(), { long: true })} until it ends`);
+		if (chatBridge.pollUntil) return ctx.reply(`poll already in progress, ends ${timestampToDateMarkdown(chatBridge.pollUntil, TimestampStyles.RelativeTime)}`);
 
 		try {
 			const DURATION = duration
