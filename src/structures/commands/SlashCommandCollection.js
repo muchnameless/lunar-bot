@@ -20,26 +20,26 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 	 */
 	async init(commandManager = this.client.lgGuild?.commands) {
 		const commands = await commandManager.set(this.map(({ data }, name) => ({ ...data, name })));
-		const permissions = [];
+		const fullPermissions = [];
 
 		for (const applicationCommand of commands.values()) {
 			/** @type {import('./DualCommand') | import('./SlashCommand')} */
 			const slashCommand = this.get(applicationCommand.name);
 
 			if (slashCommand.permissions) {
-				permissions.push({
+				fullPermissions.push({
 					id: applicationCommand.id,
 					permissions: slashCommand.permissions,
 				});
 			}
 		}
 
-		if (permissions.length) {
+		if (fullPermissions.length) {
 			if (commandManager instanceof GuildApplicationCommandManager) {
-				await commandManager.setPermissions(permissions);
+				await commandManager.permissions.set({ fullPermissions });
 			} else { // permissions for global commands must be set per guild
 				for (const guild of this.client.guilds.cache.values()) {
-					guild.commands.setPermissions(permissions);
+					await guild.commands.permissions.set({ fullPermissions });
 				}
 			}
 		}
@@ -57,6 +57,11 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 
 		if (!command) throw new Error(`[COMMANDS CREATE]: unknown command '${commandName}'`);
 
-		return this.client.application.commands.create(command.data);
+		const data = [ command.data ];
+
+		// add aliases if existent
+		command.aliases?.forEach(alias => data.push({ ...data[0], name: alias }));
+
+		return Promise.all(data.map(d => this.client.application.commands.create(d)));
 	}
 };
