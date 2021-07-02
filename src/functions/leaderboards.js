@@ -1,8 +1,7 @@
 'use strict';
 
 const { stripIndent, oneLine } = require('common-tags');
-const { MessageEmbed, MessageActionRow, MessageButton, Constants } = require('discord.js');
-const ms = require('ms');
+const { MessageEmbed, MessageActionRow, MessageButton, Formatters: { TimestampStyles }, Constants } = require('discord.js');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, GUILD_ID_ALL } = require('../constants/database');
 const { LB_KEY } = require('../constants/redis');
@@ -28,7 +27,6 @@ const cache = require('../api/cache');
  * @property {string} offset
  * @property {import('../structures/database/models/HypixelGuild') | GUILD_ID_ALL} hypixelGuild
  * @property {import('../structures/extensions/User')} user
- * @property {boolean} shouldShowOnlyBelowReqs
  */
 
 
@@ -36,7 +34,7 @@ const cache = require('../api/cache');
  * returns the key for the redis cache
  * @param {LeaderboardArgs} leaderboardArgs
  */
-const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild: { guildID = GUILD_ID_ALL }, lbType, xpType, offset, shouldShowOnlyBelowReqs }) => `${LB_KEY}:${USER_ID}:${guildID}:${lbType}:${xpType}:${offset}:${shouldShowOnlyBelowReqs}`;
+const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild: { guildID = GUILD_ID_ALL }, lbType, xpType, offset }) => `${LB_KEY}:${USER_ID}:${guildID}:${lbType}:${xpType}:${offset}`;
 
 /**
  * returns a message action row with pagination buttons
@@ -133,7 +131,7 @@ const self = module.exports = {
 	 * @param {import('../structures/extensions/ButtonInteraction')} interaction
 	 */
 	async handleLeaderboardButtonInteraction(interaction) {
-		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PURGE, PAGE, IS_RELOAD ] = interaction.customID.split(':');
+		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, IS_RELOAD ] = interaction.customID.split(':');
 
 		if (USER_ID !== interaction.user.id) {
 			return interaction.reply({
@@ -151,7 +149,6 @@ const self = module.exports = {
 				? interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID)
 				: HYPIXEL_GUILD_ID,
 			user: interaction.user,
-			shouldShowOnlyBelowReqs: PURGE === 'true',
 		};
 		const CACHE_KEY = createCacheKey(leaderboardArgs);
 		/** @type {?MessageEmbed[]} */
@@ -276,7 +273,7 @@ const self = module.exports = {
 	 * @param {LeaderboardArgs} param1
 	 * @returns {LeaderboardData}
 	 */
-	createGainedLeaderboardData(client, { hypixelGuild, user, offset, shouldShowOnlyBelowReqs, xpType }) {
+	createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpType }) {
 		const { config } = client;
 		const COMPETITION_RUNNING = config.get('COMPETITION_RUNNING');
 		const COMPETITION_END_TIME = config.get('COMPETITION_END_TIME');
@@ -285,18 +282,10 @@ const self = module.exports = {
 		const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END
 			? offsetFlags.COMPETITION_END
 			: '';
-
 		/** @type {import('../../structures/database/models/Player')[]} */
-		let playerDataRaw;
-
-		if (hypixelGuild !== GUILD_ID_ALL) {
-			playerDataRaw = hypixelGuild.players.array();
-			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
-		} else {
-			playerDataRaw = client.players.inGuild.array();
-			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => !player.notInGuild && (player.getWeight().totalWeight < player.guild.weightReq));
-		}
-
+		const playerDataRaw = hypixelGuild !== GUILD_ID_ALL
+			? hypixelGuild.players.array()
+			: client.players.inGuild.array();
 		const PLAYER_COUNT = playerDataRaw.length;
 		const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
 		const LAST_UPDATED_AT = SHOULD_USE_COMPETITION_END
@@ -433,7 +422,7 @@ const self = module.exports = {
 			if (IS_COMPETITION_LB) {
 				description += `Start: ${timestampToDateMarkdown(STARTING_TIME)}\n`;
 				if (COMPETITION_RUNNING) {
-					description += `Time left: ${ms(COMPETITION_END_TIME - Date.now(), { long: true })}\n`;
+					description += `Ends: ${timestampToDateMarkdown(COMPETITION_END_TIME, TimestampStyles.RelativeTime)}\n`;
 				} else { // competition already ended
 					description += `Ended: ${timestampToDateMarkdown(COMPETITION_END_TIME)}\n`;
 				}
@@ -441,7 +430,7 @@ const self = module.exports = {
 				description += `Tracking xp gained since ${timestampToDateMarkdown(STARTING_TIME)}\n`;
 			}
 
-			description += `${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'total'} (${PLAYER_COUNT} members): ${totalStats}`;
+			description += `${hypixelGuild?.name ?? 'Guilds'} total (${PLAYER_COUNT} members): ${totalStats}`;
 			title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
 		} else if (hypixelGuild) { // purge list
 			description += stripIndent`
@@ -508,19 +497,12 @@ const self = module.exports = {
 	 * @param {LeaderboardArgs} param1
 	 * @returns {LeaderboardData}
 	 */
-	createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', shouldShowOnlyBelowReqs, xpType }) {
+	createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', xpType }) {
 		const { config } = client;
-
 		/** @type {import('../../structures/database/models/Player')[]} */
-		let playerDataRaw;
-
-		if (hypixelGuild !== GUILD_ID_ALL) {
-			playerDataRaw = hypixelGuild.players.array();
-			if (shouldShowOnlyBelowReqs) playerDataRaw = playerDataRaw.filter(player => player.getWeight().totalWeight < hypixelGuild.weightReq);
-		} else {
-			playerDataRaw = client.players.inGuild.array();
-		}
-
+		const playerDataRaw = hypixelGuild !== GUILD_ID_ALL
+			? hypixelGuild.players.array()
+			: client.players.inGuild.array();
 		const PLAYER_COUNT = playerDataRaw.length;
 		const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
 		const LAST_UPDATED_AT = offset
@@ -675,7 +657,7 @@ const self = module.exports = {
 
 		return {
 			title,
-			description: `${`${hypixelGuild?.name ?? 'Guilds'} ${shouldShowOnlyBelowReqs ? 'below reqs' : 'average'} (${PLAYER_COUNT} members): ${totalStats}`.padEnd(62, '\xa0')}\u200b`,
+			description: `${`${hypixelGuild?.name ?? 'Guilds'} average (${PLAYER_COUNT} members): ${totalStats}`.padEnd(62, '\xa0')}\u200b`,
 			playerData,
 			playerRequestingEntry,
 			getEntry,

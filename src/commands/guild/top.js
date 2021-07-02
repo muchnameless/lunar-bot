@@ -1,6 +1,5 @@
 'use strict';
 
-const { Constants } = require('discord.js');
 const { handleLeaderboardCommandInteraction } = require('../../functions/leaderboards');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
@@ -16,12 +15,6 @@ module.exports = class TopCommand extends SlashCommand {
 				SlashCommand.PAGE_OPTION,
 				SlashCommand.OFFSET_OPTION,
 				SlashCommand.guildOptionBuilder(data.client, true),
-				{
-					name: 'purge',
-					type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-					description: 'show only players below guild requirements',
-					required: false,
-				},
 			],
 			defaultPermission: true,
 			cooldown: 1,
@@ -42,7 +35,6 @@ module.exports = class TopCommand extends SlashCommand {
 				offset: interaction.options.get('offset')?.value ?? '',
 				hypixelGuild: this.getHypixelGuild(interaction.options, interaction),
 				user: interaction.user,
-				shouldShowOnlyBelowReqs: interaction.options.get('purge')?.value ?? false,
 			},
 		);
 	}
