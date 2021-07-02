@@ -31,23 +31,8 @@ process
 	// initiate bot client
 	client = new LunarClient({
 		db,
-		restTimeOffset: 0,
 		fetchAllMembers: true,
 		allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: true },
-		partials: [
-			Constants.PartialTypes.CHANNEL,
-			// Constants.PartialTypes.GUILD_MEMBER,
-			Constants.PartialTypes.MESSAGE,
-			Constants.PartialTypes.REACTION,
-			// Constants.PartialTypes.USER,
-		],
-		presence: {
-			activities: [{
-				name: 'slash commands',
-				type: 'LISTENING',
-			}],
-			status: 'online',
-		},
 		intents: [
 			Intents.FLAGS.DIRECT_MESSAGES,
 			// Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
@@ -65,6 +50,21 @@ process
 			// Intents.FLAGS.GUILD_VOICE_STATES,
 			// Intents.FLAGS.GUILD_WEBHOOKS,
 		],
+		messageCacheMaxSize: 10,
+		partials: [
+			Constants.PartialTypes.CHANNEL,
+			// Constants.PartialTypes.GUILD_MEMBER,
+			Constants.PartialTypes.MESSAGE,
+			Constants.PartialTypes.REACTION,
+			// Constants.PartialTypes.USER,
+		],
+		presence: {
+			activities: [{
+				name: 'slash commands',
+				type: 'LISTENING',
+			}],
+			status: 'online',
+		},
 	});
 
 	// connect to Discord
