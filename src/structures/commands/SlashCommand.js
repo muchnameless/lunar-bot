@@ -26,7 +26,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	constructor(param0, { aliases, description, options, defaultPermission, permissions, cooldown, requiredRoles }) {
 		super(param0, { cooldown, requiredRoles });
 
-		/** @type {?string} */
+		/** @type {?string[]} */
 		this.aliases = aliases?.length ? aliases.filter(Boolean) : null;
 
 		this.description = description?.length ? description : null;
