@@ -90,10 +90,11 @@ module.exports = class ConfigCommand extends SlashCommand {
 			case 'edit': {
 				const KEY = options.get('key').value.toUpperCase().replace(/ +/g, '_');
 				const OLD_VALUE = this.config.get(KEY);
+				const OLD_TYPE = typeof OLD_VALUE;
 
 				let { value: newValue } = options.get('value');
 
-				switch (options.get('type')?.value.toLowerCase()) {
+				switch (options.get('type')?.value.toLowerCase() ?? OLD_TYPE) {
 					case 'number':
 						newValue = Number(newValue.replaceAll('_', ''));
 						break;
@@ -107,8 +108,8 @@ module.exports = class ConfigCommand extends SlashCommand {
 						break;
 				}
 
-				if (typeof newValue !== typeof OLD_VALUE) {
-					await interaction.awaitConfirmation(`type change from ${OLD_VALUE} (${typeof OLD_VALUE}) to ${newValue} (${typeof newValue}). Confirm?`);
+				if (typeof newValue !== OLD_TYPE) {
+					await interaction.awaitConfirmation(`type change from ${OLD_VALUE} (${OLD_TYPE}) to ${newValue} (${typeof newValue}). Confirm?`);
 				}
 
 				const { key, parsedValue } = await this.config.set(KEY, newValue);
