@@ -26,6 +26,7 @@ const promote = {
 const mute = {
 	ERROR_GM: '^You cannot mute the guild master[.!]?$',
 	ERROR_SELF: '^You cannot mute yourself from the guild[.!]?$',
+	ERROR_RANK: '^You cannot mute a guild member with a higher guild rank[.!]?$',
 	ERROR_DURATION_TOO_LONG: '^You cannot mute someone for more than one month[.!]?$',
 	ERROR_DURATION_TOO_SHORT: '^You cannot mute someone for less than a minute[.!]?$',
 	ERROR_ALREADY_MUTED: '^This player is already muted[.!]?$',
