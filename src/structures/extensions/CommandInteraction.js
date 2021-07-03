@@ -28,7 +28,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 
 	static _getEphemeralOption(options) {
 		return options
-			? options.get('vis')?.value
+			? options.get('visibility')?.value
 				?? this._getEphemeralOption(options.first()?.options)
 			: null;
 	}

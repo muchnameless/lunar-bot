@@ -75,7 +75,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 	static get EPHEMERAL_OPTION() {
 		return {
-			name: 'vis',
+			name: 'visibility',
 			type: Constants.ApplicationCommandOptionTypes.STRING,
 			description: 'visibility of the response message',
 			required: false,
@@ -146,10 +146,10 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		if (SlashCommand.isSubCommandOption(firstOption)) {
 			options = options.map((option) => {
-				if (option.options[option.options.length - 1]?.name !== 'vis') option.options.push(SlashCommand.EPHEMERAL_OPTION);
+				if (option.options[option.options.length - 1]?.name !== 'visibility') option.options.push(SlashCommand.EPHEMERAL_OPTION);
 				return option;
 			});
-		} else if (options[options.length - 1]?.name !== 'vis') {
+		} else if (options[options.length - 1]?.name !== 'visibility') {
 			options.push(SlashCommand.EPHEMERAL_OPTION);
 		}
 
