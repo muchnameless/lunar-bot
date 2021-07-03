@@ -26,8 +26,10 @@ module.exports = async (message) => {
 			}
 		}
 
-		for (const /** @type {import('../../database/models/ChatTrigger')} */ trigger of client.chatTriggers.cache.values()) {
-			trigger.testMessage(message);
+		if (client.config.get('CHATBRIDGE_CHATTRIGGERS_ENABLED')) {
+			for (const /** @type {import('../../database/models/ChatTrigger')} */ trigger of client.chatTriggers.cache.values()) {
+				trigger.testMessage(message);
+			}
 		}
 
 		if (message.type !== WHISPER) return; // no prefix and no whisper
