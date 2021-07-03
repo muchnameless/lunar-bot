@@ -15,7 +15,7 @@ module.exports = async (message) => {
 
 	// must use prefix for commands in guild
 	if (!message.commandData.prefix) {
-		if (/^[\d+*\-/^ ]+$/.test(message.content)) {
+		if (client.config.get('CHATBRIDGE_AUTO_MATH') && /^[\d+*\-/^ ]+$/.test(message.content)) {
 			try {
 				const { input, output, warning } = client.commands.get('maths').calculate(message.content.replaceAll(' ', ''));
 
