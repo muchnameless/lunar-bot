@@ -1,5 +1,6 @@
 'use strict';
 
+const { MessageFlags } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const { join } = require('path');
 const { X_EMOJI } = require('../../constants/emojiCharacters');
@@ -167,6 +168,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 */
 	async handleDiscordMessage(message, options = {}) {
 		if (!this.channelIDs.has(message.channelID) || !this.client.config.get('CHATBRIDGE_ENABLED')) return;
+		if (message.flags.any([ MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL ])) return; // ignore defer and ephemeral messages
 
 		try {
 			// a ChatBridge for the message's channel was found
