@@ -16,7 +16,7 @@ module.exports = async (message) => {
 	// must use prefix for commands in guild
 	if (!message.commandData.prefix) {
 		// auto math, ignore 0-0, 4/5 (dungeon parties)
-		if (client.config.get('CHATBRIDGE_AUTO_MATH') && /^[1-9+*\-/^ ]+$/.test(message.content) && !/[1-5] *\/ *5/.test(message.content)) {
+		if (client.config.get('CHATBRIDGE_AUTO_MATH') && /^[\d+*\-/^ ]+$/.test(message.content) && /[1-9]/.test(message.content) && !/[1-5] *\/ *5/.test(message.content)) {
 			try {
 				const { input, output, warning } = client.commands.get('maths').calculate(message.content.replaceAll(' ', ''));
 
