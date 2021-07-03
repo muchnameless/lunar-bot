@@ -26,16 +26,29 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 				: false); // DM channel
 	}
 
+	static _getEphemeralOption(options) {
+		return options
+			? options.get('vis')?.value
+				?? this._getEphemeralOption(options.first()?.options)
+			: null;
+	}
+
 	/**
 	 * recursively checks the command options for the ephemeral option
 	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
 	 * @returns {?boolean}
 	 */
 	static checkEphemeralOption(options) {
-		return options
-			? options.get('ephemeral')?.value
-				?? this.checkEphemeralOption(options.first()?.options)
-			: null;
+		switch (this._getEphemeralOption(options)) {
+			case 'everyone':
+				return false;
+
+			case 'just me':
+				return true;
+
+			default:
+				return null;
+		}
 	}
 
 	/**
@@ -232,7 +245,8 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 				...options,
 			});
 
-			const result = await this.channel.awaitMessageComponentInteraction({
+			const result = await this.channel.awaitMessageComponent({
+				componentType: Constants.MessageComponentTypes.BUTTON,
 				filter: interaction => (interaction.user.id === this.user.id && [ SUCCESS_ID, CANCLE_ID ].includes(interaction.customID)
 					? true
 					: (async () => {

@@ -196,7 +196,8 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 				...options,
 			});
 
-			const result = await this.channel.awaitMessageComponentInteraction({
+			const result = await this.channel.awaitMessageComponent({
+				componentType: Constants.MessageComponentTypes.BUTTON,
 				filter: interaction => (interaction.user.id === this.user.id && [ SUCCESS_ID, CANCLE_ID ].includes(interaction.customID)
 					? true
 					: (async () => {

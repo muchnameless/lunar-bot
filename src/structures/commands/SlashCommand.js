@@ -75,10 +75,17 @@ module.exports = class SlashCommand extends BaseCommand {
 
 	static get EPHEMERAL_OPTION() {
 		return {
-			name: 'ephemeral',
-			type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-			description: 'wether the response should be ephemeral when not in a commands channel',
+			name: 'vis',
+			type: Constants.ApplicationCommandOptionTypes.STRING,
+			description: 'visibility of the response message',
 			required: false,
+			choices: [{
+				name: 'everyone',
+				value: 'everyone',
+			}, {
+				name: 'just me',
+				value: 'just me',
+			}],
 		};
 	}
 
@@ -139,10 +146,10 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		if (SlashCommand.isSubCommandOption(firstOption)) {
 			options = options.map((option) => {
-				if (option.options[option.options.length - 1]?.name !== 'ephemeral') option.options.push(SlashCommand.EPHEMERAL_OPTION);
+				if (option.options[option.options.length - 1]?.name !== 'vis') option.options.push(SlashCommand.EPHEMERAL_OPTION);
 				return option;
 			});
-		} else if (options[options.length - 1]?.name !== 'ephemeral') {
+		} else if (options[options.length - 1]?.name !== 'vis') {
 			options.push(SlashCommand.EPHEMERAL_OPTION);
 		}
 
@@ -164,7 +171,7 @@ module.exports = class SlashCommand extends BaseCommand {
 		 * @param {import('discord.js').ApplicationCommandData} options
 		 * @returns {number}
 		 */
-		const reduceOptions = options => options?.reduce((a1, c1) => a1 + c1.name.length + c1.description.length + (c1.choices?.reduce((a2, c2) => a2 + c2.name.length + c2.value.length, 0) ?? 0) + reduceOptions(c1.options), 0) ?? 0;
+		const reduceOptions = options => options?.reduce((a1, c1) => a1 + c1.name.length + c1.description.length + (c1.choices?.reduce((a2, c2) => a2 + c2.name.length + `${c2.value}`.length, 0) ?? 0) + reduceOptions(c1.options), 0) ?? 0;
 
 		return data.name.length
 			+ data.description.length
