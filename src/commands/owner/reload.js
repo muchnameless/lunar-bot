@@ -81,7 +81,7 @@ module.exports = class ReloadCommand extends DualCommand {
 	async _run(ctx, mode, name) { // eslint-disable-line no-unused-vars
 		switch (mode) {
 			case 'command': {
-				let commandName = name;
+				let commandName = name.toLowerCase();
 
 				try {
 					const commandFiles = await getAllJsFiles(this.collection.dirPath);
@@ -136,7 +136,7 @@ module.exports = class ReloadCommand extends DualCommand {
 			}
 
 			case 'event': {
-				let eventName = name;
+				let eventName = name.toLowerCase();
 
 				try {
 					const eventFiles = await getAllJsFiles(this.client.events.dirPath);
