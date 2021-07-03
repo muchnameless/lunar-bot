@@ -6,7 +6,7 @@ const Event = require('../structures/events/Event');
 const logger = require('../functions/logger');
 
 
-module.exports = class MessageEvent extends Event {
+module.exports = class MessageCreateEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,

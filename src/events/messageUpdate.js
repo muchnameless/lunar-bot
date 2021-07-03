@@ -1,10 +1,10 @@
 'use strict';
 
-const MessageEvent = require('./message');
+const MessageCreateEvent = require('./messageCreate');
 // const logger = require('../functions/logger');
 
 
-module.exports = class MessageUpdateEvent extends MessageEvent {
+module.exports = class MessageUpdateEvent extends MessageCreateEvent {
 	constructor(data) {
 		super(data, {
 			once: false,
