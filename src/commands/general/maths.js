@@ -1,7 +1,6 @@
 'use strict';
 
 const { Constants } = require('discord.js');
-const { oneLine } = require('common-tags');
 const { add, sub, mul, div } = require('sinful-math');
 const Lexer = require('lex');
 const DualCommand = require('../../structures/commands/DualCommand');
@@ -305,12 +304,7 @@ module.exports = class MathsCommand extends DualCommand {
 	 */
 	static formatNumberString = x => x.replace(/(?<!\..*)\B(?=(\d{3})+(?!\d))/gs, '\u{202F}');
 
-	/**
-	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {string} rawInput
-	 */
-	async _run(ctx, rawInput) {
+	calculate(rawInput) {
 		/**
 		 * generate input string
 		 * @type {string}
@@ -328,13 +322,14 @@ module.exports = class MathsCommand extends DualCommand {
 		try {
 			parsed = MathsCommand.parse(INPUT);
 		} catch (error) {
-			return ctx.reply(`${error.message}, input: '${INPUT}'`);
+			throw `${error.message}, input: '${INPUT}'`;
 		}
 
 		// logger.debug({ parsed })
 
 		const stack = [];
 
+		/** @type {string} */
 		let output;
 		let warning = false;
 
@@ -372,24 +367,36 @@ module.exports = class MathsCommand extends DualCommand {
 
 			if (stack.length !== 0) throw new Error('unprocessed parts');
 		} catch (error) {
-			return ctx.reply(`CalculationError: ${error.message}, input: '${INPUT}'`);
+			throw `CalculationError: ${error.message}, input: '${INPUT}'`;
 		}
 
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
-		return ctx.reply(oneLine`
-			${MathsCommand.formatNumberString(INPUT)
+		return {
+			input: MathsCommand.formatNumberString(INPUT)
 				.replace(/(?<=.)[+\-*/]/g, ' $& ') // add spaces around operators
 				.replace(/,/g, '$& ') // add space after commas
-				.replace(/pi/gi, '\u{03C0}') // prettify 'pi'
-			}
-			 =
-			${MathsCommand.formatNumberString(output?.toString())}
-			${warning
+				.replace(/pi/gi, '\u{03C0}'), // prettify 'pi'
+			output: output?.toString() ?? '',
+			warning: warning
 				? `\nwarning: (intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}, calculation may be incorrect`
-				: ''
-			}`,
-		);
+				: '',
+		};
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {string} rawInput
+	 */
+	async _run(ctx, rawInput) {
+		try {
+			const { input, output, warning } = this.calculate(rawInput);
+
+			return ctx.reply(`${input} = ${output} ${warning}`);
+		} catch (error) {
+			return ctx.reply(`${error}`);
+		}
 	}
 
 	/**
