@@ -97,7 +97,7 @@ module.exports = class MathsCommand extends DualCommand {
 			data,
 			{
 				aliases: [],
-				description: '`+`, `-`, `*`, `/`, `^`, `!`, `%`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
+				description: 'supports: + - * / ^ ! % sin cos tan sqrt exp ln log pi e',
 				options: [{
 					name: 'input',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
