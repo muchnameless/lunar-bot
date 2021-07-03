@@ -67,8 +67,8 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 		.setCustomID(`${cacheKey}:guild`)
 		.setPlaceholder(
 			hypixelGuild !== GUILD_ID_ALL
-				? hypixelGuild.name
-				: 'All',
+				? `Guild: ${hypixelGuild.name}`
+				: 'Guilds: All',
 		)
 		.addOptions(
 			client.hypixelGuilds.cache.map(({ guildID, name }) => ({ label: name, value: guildID })),
