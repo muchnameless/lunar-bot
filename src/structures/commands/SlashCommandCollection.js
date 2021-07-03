@@ -18,7 +18,7 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 	 * registers all slash commands
 	 * @param {import('discord.js').GuildApplicationCommandManager|import('discord.js').ApplicationCommandManager} [commandManager]
 	 */
-	async init(commandManager = this.client.lgGuild?.commands) {
+	async init(commandManager = this.client.application.commands) {
 		const commands = await commandManager.set(this.map(({ data }, name) => ({ ...data, name })));
 		const fullPermissions = [];
 
