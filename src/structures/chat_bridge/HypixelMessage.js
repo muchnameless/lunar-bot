@@ -4,6 +4,7 @@ const ChatMessage = require('prismarine-chat')(require('./constants/settings').M
 const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY }, invisibleCharacterRegExp } = require('./constants/chatBridge');
 const { spamMessages } = require('./constants/commandResponses');
 const { NO_BELL } = require('../../constants/emojiCharacters');
+const { escapeRegex } = require('../../functions/util');
 const mojang = require('../../api/mojang');
 const HypixelMessageAuthor = require('./HypixelMessageAuthor');
 const logger = require('../../functions/logger');
@@ -73,16 +74,52 @@ module.exports = class HypixelMessage extends ChatMessage {
 			);
 			this.content = this.cleanedContent.slice(matched[0].length).trimLeft();
 			this.spam = false;
+
+			const prefixMatched = new RegExp(
+				`^(?:${[ escapeRegex(this.client.config.get('PREFIX')), ...this.client.config.get('INGAME_PREFIX').map(x => escapeRegex(x)), `@${this.chatBridge.bot.ign}` ].join('|')})`,
+				'i',
+			).exec(this.content)?.[0]; // PREFIX, INGAME_PREFIX, @mention
+
+			/** @type {string[]} */
+			const args = this.content // command arguments
+				.slice(prefixMatched?.length ?? 0)
+				.trim()
+				.split(/ +/);
+			const COMMAND_NAME = args.shift().toLowerCase(); // extract first word
+
+			// no command, only ping or prefix
+			if (!COMMAND_NAME.length) return this.commandData = {
+				name: null,
+				command: null,
+				args,
+				prefix: prefixMatched,
+			};
+
+			this.commandData = {
+				name: COMMAND_NAME,
+				command: this.client.chatBridges.commands.getByName(COMMAND_NAME),
+				args,
+				prefix: prefixMatched,
+			};
 		} else {
 			this.type = null;
 			this.author = null;
 			this.content = this.cleanedContent;
 			this.spam = spamMessages.test(this.content);
+			this.commandData = null;
 		}
 	}
 
 	get logInfo() {
 		return this.author.ign ?? 'unknown author';
+	}
+
+	get prefixReplacedContent() {
+		return this.commandData?.command
+			? this.content
+				.replace(this.commandData.prefix, '/')
+				.replace(this.commandData.name, this.commandData.command.name)
+			: this.content;
 	}
 
 	/**
@@ -218,7 +255,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 			if (this.author) {
 				const { player, member } = this;
 				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook({
-					content: this.content,
+					content: this.prefixReplacedContent,
 					username: member?.displayName
 						?? player?.ign
 						?? this.author.ign,

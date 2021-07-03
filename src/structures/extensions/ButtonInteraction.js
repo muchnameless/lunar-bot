@@ -122,7 +122,14 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 
 		const message = messageInput ?? await this.fetchReply();
 
-		this.client.chatBridges.handleDiscordMessage(message, { checkIfNotFromBot: false });
+		this.client.chatBridges.handleDiscordMessage(
+			message,
+			{
+				player: this.user.player,
+				interaction: this,
+				checkIfNotFromBot: false,
+			},
+		);
 	}
 
 	/**

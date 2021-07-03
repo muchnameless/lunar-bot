@@ -16,6 +16,8 @@ const Config = require('../models/Config');
 const HypixelGuild = require('../models/HypixelGuild');
 const Player = require('../models/Player');
 const TaxCollector = require('../models/TaxCollector');
+const ModelManager = require('./ModelManager');
+const ChatTrigger = require('../models/ChatTrigger');
 const logger = require('../../../functions/logger');
 
 
@@ -33,6 +35,7 @@ module.exports = class DatabaseManager {
 			hypixelGuilds: new HypixelGuildManager({ client, model: HypixelGuild }),
 			players: new PlayerManager({ client, model: Player }),
 			taxCollectors: new TaxCollectorManager({ client, model: TaxCollector }),
+			chatTriggers: new ModelManager({ client, model: ChatTrigger }),
 		};
 
 		const models = {};

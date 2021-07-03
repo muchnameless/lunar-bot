@@ -48,6 +48,10 @@ module.exports = class LunarClient extends Client {
 		return this.db.modelManagers.taxCollectors;
 	}
 
+	get chatTriggers() {
+		return this.db.modelManagers.chatTriggers;
+	}
+
 	/**
 	 * default embed, blue border and current timestamp
 	 */

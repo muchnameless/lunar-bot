@@ -2,9 +2,7 @@
 
 const { commaListsOr } = require('common-tags');
 const ms = require('ms');
-const { escapeRegex } = require('../../../functions/util');
 const { messageTypes: { GUILD, WHISPER } } = require('../constants/chatBridge');
-const cache = require('../../../api/cache');
 const logger = require('../../../functions/logger');
 
 
@@ -13,38 +11,36 @@ const logger = require('../../../functions/logger');
  * @param {import('../HypixelMessage')} message
  */
 module.exports = async (message) => {
-	if (!message.author || !message.content.length) return;
-
 	const { client } = message;
-	const { config } = client;
-	const prefixMatched = new RegExp(`^(?:${[ escapeRegex(config.get('PREFIX')), escapeRegex(config.get('INGAME_PREFIX')), `@${message.chatBridge.bot.ign}` ].join('|')})`, 'i').exec(message.content); // PREFIX, INGAME_PREFIX, @mention
 
 	// must use prefix for commands in guild
-	if (!prefixMatched && message.type !== WHISPER) {
-		// underappreciated trigger
-		if (/^(?:under(?:appreciated)?|jayce)$/i.test(message.content)) {
-			if (await cache.get('trigger:underappreciated')) return; // trigger on cooldown
-			await cache.set('trigger:underappreciated', true, 60_000);
-			return message.reply('Underappreciated does not reply to his name being called, if you want his attention, tell him what you want.');
-		}
-		return;
-	}
+	if (!message.commandData.prefix) {
+		if (/^[\d+*\-/^ ]+$/.test(message.content)) {
+			try {
+				const { input, output, warning } = client.commands.get('maths').calculate(message.content.replaceAll(' ', ''));
 
-	// command, args, flags
-	const args = message.content // command arguments
-		.slice(prefixMatched?.[0].length ?? 0)
-		.trim()
-		.split(/ +/);
-	const COMMAND_NAME = args.shift().toLowerCase(); // extract first word
+				// filter out stuff like +8 = 8
+				if (Number(output) !== Number(message.content) && !warning) message.reply(`${input} = ${output}`);
+			} catch (error) {
+				logger.error(error);
+			}
+		}
+
+		for (const /** @type {import('../../database/models/ChatTrigger')} */ trigger of client.chatTriggers.cache.values()) {
+			trigger.testMessage(message);
+		}
+
+		if (message.type !== WHISPER) return; // no prefix and no whisper
+	}
 
 	// no command, only ping or prefix
-	if (!COMMAND_NAME.length) {
+	if (!message.commandData.name) {
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
-		if (prefixMatched?.[0] !== config.get('INGAME_PREFIX')) client.chatBridges.commands.help(message, args);
+		if (!client.config.get('INGAME_PREFIX').includes(message.commandData.prefix)) client.chatBridges.commands.help(message, message.commandData.args);
 		return;
 	}
 
-	const command = client.chatBridges.commands.getByName(COMMAND_NAME);
+	const { command, args } = message.commandData;
 
 	// wrong command
 	if (!command) return logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);

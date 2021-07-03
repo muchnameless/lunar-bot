@@ -156,11 +156,13 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 
 		const message = messageInput ?? await this.fetchReply();
 
+		if (!message.content) return;
+
 		this.client.chatBridges.handleDiscordMessage(
 			message,
 			{
 				player: this.user.player,
-				discordMemberOrUser: this.member ?? this.user,
+				interaction: this,
 				checkIfNotFromBot: false,
 			},
 		);

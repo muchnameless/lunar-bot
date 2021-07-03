@@ -33,7 +33,7 @@ const { sleep } = require('../../functions/util');
 /**
  * @typedef {object} MessageForwardOptions
  * @property {import('../database/models/Player')} [player=message.author.player] player for muted and isStaff check
- * @property {import('../extensions/GuildMember') | import('../extensions/User')} [discordMemberOrUser] member or user to "mention" in in game chat
+ * @property {import('../extensions/CommandInteraction')} [interaction]
  * @property {boolean} [checkIfNotFromBot=true] wether to not forward messages from the client.user
  */
 

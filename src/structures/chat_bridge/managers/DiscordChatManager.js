@@ -273,7 +273,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('../../extensions/Message')} message
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */
-	async forwardToMinecraft(message, { player: playerInput, discordMemberOrUser, checkIfNotFromBot = true } = {}) {
+	async forwardToMinecraft(message, { player: playerInput, interaction, checkIfNotFromBot = true } = {}) {
 		if (!this.chatBridge.enabled) return;
 		if (!this.minecraft.ready) return message.react(X_EMOJI);
 
@@ -311,28 +311,35 @@ module.exports = class DiscordChatManager extends ChatManager {
 			return message.react(MUTED);
 		}
 
+		const content = [
+			message.reference // @referencedMessageAuthor
+				? await (async () => {
+					try {
+						/** @type {import('../extensions/Message')} */
+						const referencedMessage = await message.fetchReference();
+						return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
+					} catch (error) {
+						logger.error('[FORWARD DC TO MC]: error fetching reference', error);
+						return null;
+					}
+				})()
+				: null,
+			message.content, // actual content
+			message.attachments.size
+				? await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ]) // links of attachments
+				: null,
+		].filter(Boolean).join(' ');
+
+		if (!content) return message.react(X_EMOJI);
+
+		if (interaction) await this.minecraft.chat({
+			content: `${this.client.config.get('PREFIX')}${interaction.logInfo ?? ''}`,
+			prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? DiscordChatManager.escapeEz(interaction.member?.displayName ?? interaction.user.username))}: `,
+		});
+
 		return this.minecraft.chat({
-			content: [
-				message.reference // @referencedMessageAuthor
-					? await (async () => {
-						try {
-							/** @type {import('../extensions/Message')} */
-							const referencedMessage = await message.fetchReference();
-							return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
-						} catch (error) {
-							logger.error('[FORWARD DC TO MC]: error fetching reference', error);
-							return null;
-						}
-					})()
-					: discordMemberOrUser // @discordMember
-						? `@${DiscordChatManager.formatAtMention(discordMemberOrUser.player?.ign ?? DiscordChatManager.escapeEz(discordMemberOrUser.displayName ?? discordMemberOrUser.username))},`
-						: null,
-				message.content, // actual content
-				message.attachments.size
-					? await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ]) // links of attachments
-					: null,
-			].filter(Boolean).join(' '),
-			prefix: `${this.prefix} ${discordMemberOrUser ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
+			content,
+			prefix: `${this.prefix} ${interaction ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
 			discordMessage: message,
 		});
 	}
