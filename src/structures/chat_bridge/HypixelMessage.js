@@ -88,7 +88,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 			const COMMAND_NAME = args.shift().toLowerCase(); // extract first word
 
 			// no command, only ping or prefix
-			if (!COMMAND_NAME.length) return this.commandData = {
+			if ((!prefixMatched && this.type !== WHISPER) || !COMMAND_NAME) return this.commandData = {
 				name: null,
 				command: null,
 				args,
