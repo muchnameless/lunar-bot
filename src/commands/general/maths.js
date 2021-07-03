@@ -97,7 +97,7 @@ module.exports = class MathsCommand extends DualCommand {
 			data,
 			{
 				aliases: [],
-				description: 'supports `+`, `-`, `*`, `/`, `^`, `!`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
+				description: 'supports `+`, `-`, `*`, `/`, `^`, `!`, `%`, `sin`, `cos`, `tan`, `sqrt`, `exp`, `ln`, `log`, `pi`, `e`',
 				options: [{
 					name: 'input',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
@@ -115,6 +115,10 @@ module.exports = class MathsCommand extends DualCommand {
 		);
 	}
 
+	static percent = {
+		precedence: 8,
+		associativity: 'right',
+	};
 	static multiplier = {
 		precedence: 7,
 		associativity: 'right',
@@ -232,6 +236,10 @@ module.exports = class MathsCommand extends DualCommand {
 			if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
 			return Math.log(x);
 		},
+		percent(x) {
+			if (typeof x === 'undefined') throw new Error('`%` requires one argument');
+			return div(x, 100);
+		},
 	};
 
 	/**
@@ -248,6 +256,7 @@ module.exports = class MathsCommand extends DualCommand {
 		.addRule(/ln/, () => 'ln')
 		.addRule(/log/, () => 'log')
 		.addRule(/fac(?:ulty)?/, () => 'fac')
+		.addRule(/%/, () => 'percent')
 		.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 		.addRule(/e(?:uler)?/i, () => Math.E)
 		.addRule(/m|k/i, lexeme => lexeme.toLowerCase()); // multiplier
@@ -273,6 +282,7 @@ module.exports = class MathsCommand extends DualCommand {
 		exp: this.func,
 		ln: this.func,
 		log: this.func,
+		percent: this.percent,
 	});
 
 	static parse(input) {
