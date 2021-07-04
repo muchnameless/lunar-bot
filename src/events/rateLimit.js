@@ -21,7 +21,7 @@ module.exports = class RateLimitEvent extends Event {
 		if (rateLimitData.global) return logger.error('[GLOBAL RATELIMIT]', { timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData });
 
 		// adding and removing single reactions are 1/250ms, so get rate limited each time
-		if (rateLimitData.route.endsWith('reactions') && rateLimitData.timeout <= 250) return;
+		if (rateLimitData.route.endsWith('reactions') && rateLimitData.timeout <= 250 + this.client.options.restTimeOffset) return;
 
 		logger.warn('[RATE LIMIT]', { timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData });
 	}
