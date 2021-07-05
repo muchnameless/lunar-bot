@@ -110,7 +110,7 @@ module.exports = class PollCommand extends DualCommand {
 				// doesn't start with a number or out of range
 				if (Number.isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
-				pollOptions[votedFor - 1].votes.add(msg.player?.minecraftUUID ?? msg.author.ign);
+				pollOptions[votedFor - 1].votes.add(msg.player?.minecraftUuid ?? msg.author.ign);
 			}
 
 			// aquire discord votes
@@ -120,7 +120,7 @@ module.exports = class PollCommand extends DualCommand {
 				// doesn't start with a number or out of range
 				if (Number.isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
-				pollOptions[votedFor - 1].votes.add(msg.author.player?.minecraftUUID ?? msg.author.id);
+				pollOptions[votedFor - 1].votes.add(msg.author.player?.minecraftUuid ?? msg.author.id);
 			}
 
 			// count votes and sort options by them

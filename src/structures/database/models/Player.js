@@ -10,7 +10,7 @@ const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerR
 const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
 const { escapeIgn, trim } = require('../../../functions/util');
 const { getSkillLevel, getWeight, getSkillWeight, getSlayerWeight, getDungeonWeight } = require('../../../functions/skyblock');
-const { validateNumber, validateDiscordID } = require('../../../functions/stringValidators');
+const { validateNumber, validateDiscordId } = require('../../../functions/stringValidators');
 const { mutedCheck } = require('../../../functions/database');
 const LunarGuildMember = require('../../extensions/GuildMember');
 const hypixel = require('../../../api/hypixel');
@@ -33,7 +33,7 @@ module.exports = class Player extends Model {
 		/**
 		 * @type {string}
 		 */
-		this.minecraftUUID;
+		this.minecraftUuid;
 		/**
 		 * @type {string}
 		 */
@@ -41,11 +41,11 @@ module.exports = class Player extends Model {
 		/**
 		 * @type {string}
 		 */
-		this.discordID;
+		this.discordId;
 		/**
 		 * @type {string}
 		 */
-		this.guildID;
+		this.guildId;
 		/**
 		 * @type {number}
 		 */
@@ -73,7 +73,7 @@ module.exports = class Player extends Model {
 		/**
 		 * @type {string}
 		 */
-		this.mainProfileID;
+		this.mainProfileId;
 		/**
 		 * cuteName (fruit name)
 		 * @type {string}
@@ -103,7 +103,7 @@ module.exports = class Player extends Model {
 	static init(sequelize) {
 		const dataObject = {
 			// general information
-			minecraftUUID: {
+			minecraftUuid: {
 				type: DataTypes.STRING,
 				primaryKey: true,
 			},
@@ -112,16 +112,16 @@ module.exports = class Player extends Model {
 				defaultValue: null,
 				allowNull: true,
 			},
-			discordID: {
+			discordId: {
 				type: DataTypes.STRING,
 				defaultValue: null,
 				allowNull: true,
 				set(value) {
 					if (!value) this.inDiscord = false;
-					this.setDataValue('discordID', value);
+					this.setDataValue('discordId', value);
 				},
 			},
-			guildID: {
+			guildId: {
 				type: DataTypes.STRING,
 				defaultValue: null,
 				allowNull: true,
@@ -172,7 +172,7 @@ module.exports = class Player extends Model {
 			},
 
 			// xp stats reference
-			mainProfileID: {
+			mainProfileId: {
 				type: DataTypes.STRING,
 				defaultValue: null,
 				allowNull: true,
@@ -236,7 +236,7 @@ module.exports = class Player extends Model {
 			modelName: 'Player',
 			indexes: [{ // setting unique down here works with `sync --alter`
 				unique: true,
-				fields: [ 'discordID' ],
+				fields: [ 'discordId' ],
 			}],
 		});
 	}
@@ -263,12 +263,12 @@ module.exports = class Player extends Model {
 	 * @returns {?import('./HypixelGuild')}
 	 */
 	get guild() {
-		switch (this.guildID) {
+		switch (this.guildId) {
 			case GUILD_ID_BRIDGER:
 				return this.client.hypixelGuilds.mainGuild;
 
 			default:
-				return this.client.hypixelGuilds.cache.get(this.guildID) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildID}' found`);
+				return this.client.hypixelGuilds.cache.get(this.guildId) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`);
 		}
 	}
 
@@ -276,7 +276,7 @@ module.exports = class Player extends Model {
 	 * wether the player is a bridger or error case
 	 */
 	get notInGuild() {
-		return this.client.hypixelGuilds.constructor.PSEUDO_GUILD_IDS.includes(this.guildID);
+		return this.client.hypixelGuilds.constructor.PSEUDO_GUILD_IDS.includes(this.guildId);
 	}
 
 	/**
@@ -286,10 +286,10 @@ module.exports = class Player extends Model {
 	get discordMember() {
 		return (async () => {
 			if (this._discordMember) return this._discordMember;
-			if (!this.inDiscord || !validateDiscordID(this.discordID)) return null;
+			if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
 
 			try {
-				return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordID) ?? null;
+				return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordId) ?? null;
 			} catch (error) {
 				this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
 				this.save();
@@ -322,8 +322,8 @@ module.exports = class Player extends Model {
 	 * @returns {Promise<?import('../../extensions/User')>}
 	 */
 	get discordUser() {
-		return validateNumber(this.discordID)
-			? this.client.users.fetch(this.discordID)
+		return validateNumber(this.discordId)
+			? this.client.users.fetch(this.discordId)
 			: null;
 	}
 
@@ -339,7 +339,7 @@ module.exports = class Player extends Model {
 	 * returns the player's guild name
 	 */
 	get guildName() {
-		switch (this.guildID) {
+		switch (this.guildId) {
 			case GUILD_ID_BRIDGER:
 				return 'Bridger';
 
@@ -369,14 +369,14 @@ module.exports = class Player extends Model {
 	 * returs a rendered bust image of the player's skin
 	 */
 	get image() {
-		return `https://visage.surgeplay.com/bust/${this.minecraftUUID}`;
+		return `https://visage.surgeplay.com/bust/${this.minecraftUuid}`;
 	}
 
 	/**
 	 * returns a sky.shiiyu.moe link for the player
 	 */
 	get url() {
-		return `https://sky.shiiyu.moe/stats/${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUUID}/${this.mainProfileName ?? ''}`;
+		return `https://sky.shiiyu.moe/stats/${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUuid}/${this.mainProfileName ?? ''}`;
 	}
 
 	/**
@@ -396,7 +396,7 @@ module.exports = class Player extends Model {
 			const result = await this.client.db.models.Transaction.findAll({
 				limit: 1,
 				where: {
-					from: this.minecraftUUID,
+					from: this.minecraftUuid,
 					type: 'tax',
 				},
 				order: [ [ 'createdAt', 'DESC' ] ],
@@ -424,7 +424,7 @@ module.exports = class Player extends Model {
 		return (async () => Promise.all(
 			(await this.client.db.models.Transaction.findAll({
 				where: {
-					from: this.minecraftUUID,
+					from: this.minecraftUuid,
 				},
 				order: [ [ 'createdAt', 'DESC' ] ],
 				raw: true,
@@ -457,8 +457,8 @@ module.exports = class Player extends Model {
 	 * @param {PlayerUpdateOptions} options
 	 */
 	async update({ reason = 'synced with ingame stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false, rejectOnAPIError = false } = {}) {
-		if (this.guildID === GUILD_ID_BRIDGER) return;
-		if (this.guildID !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
+		if (this.guildId === GUILD_ID_BRIDGER) return;
+		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
 		if (shouldOnlyAwaitUpdateXp) {
 			this.updateDiscordMember({ reason, shouldSendDm });
@@ -473,17 +473,17 @@ module.exports = class Player extends Model {
 	 */
 	async updateXp(rejectOnAPIError = false) {
 		try {
-			if (!this.mainProfileID) await this.fetchMainProfile(); // detect main profile if it is unknown
+			if (!this.mainProfileId) await this.fetchMainProfile(); // detect main profile if it is unknown
 
 			// hypixel API call
-			const { meta: { cached }, members } = await hypixel.skyblock.profile(this.mainProfileID);
+			const { meta: { cached }, members } = await hypixel.skyblock.profile(this.mainProfileId);
 
 			if (cached && Date.now() - this.xpLastUpdatedAt < (this.client.config.get('DATABASE_UPDATE_INTERVAL') - 1) * 60_000) throw 'cached data';
 
-			const playerData = members?.[this.minecraftUUID];
+			const playerData = members?.[this.minecraftUuid];
 
 			if (!playerData) {
-				this.mainProfileID = null;
+				this.mainProfileId = null;
 				this.save();
 				throw `unable to find main profile named '${this.mainProfileName}' -> resetting name`;
 			}
@@ -514,7 +514,7 @@ module.exports = class Player extends Model {
 				/**
 				 * request achievements api
 				 */
-				const { achievements } = await hypixel.player.uuid(this.minecraftUUID);
+				const { achievements } = await hypixel.player.uuid(this.minecraftUuid);
 
 				for (const skill of skills) this[`${skill}Xp`] = skillXpTotal[achievements?.[skillsAchievements[skill]] ?? 0] ?? 0;
 			}
@@ -587,13 +587,13 @@ module.exports = class Player extends Model {
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async updateDiscordMember({ reason: reasonInput = 'synced with ingame stats', shouldSendDm = false } = {}) {
-		if (this.guildID === GUILD_ID_BRIDGER) return;
+		if (this.guildId === GUILD_ID_BRIDGER) return;
 
 		let reason = reasonInput;
 
 		const member = await this.discordMember ?? (reason = 'found linked discord tag', await this.linkUsingCache());
 
-		if (this.guildID === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
+		if (this.guildId === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
 
 		if (!member) return; // no linked available discord member to update
 		if (!member.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID'))) return logger.warn(`[UPDATE DISCORD MEMBER]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing verified role`);
@@ -619,15 +619,15 @@ module.exports = class Player extends Model {
 		let reason = reasonInput;
 
 		// individual hypixel guild roles
-		for (const [ guildID, { roleID }] of this.client.hypixelGuilds.cache) {
+		for (const [ guildId, { roleId }] of this.client.hypixelGuilds.cache) {
 			// player is in the guild
-			if (guildID === this.guildID) {
-				if (!member.roles.cache.has(roleID)) rolesToAdd.push(roleID);
+			if (guildId === this.guildId) {
+				if (!member.roles.cache.has(roleId)) rolesToAdd.push(roleId);
 				inGuild = true;
 
 			// player is not in the guild
-			} else if (member.roles.cache.has(roleID)) {
-				rolesToRemove.push(roleID);
+			} else if (member.roles.cache.has(roleId)) {
+				rolesToRemove.push(roleId);
 			}
 		}
 
@@ -657,14 +657,14 @@ module.exports = class Player extends Model {
 		const { guildRank } = this;
 
 		if (guildRank) {
-			if (guildRank.roleID && !member.roles.cache.has(guildRank.roleID)) {
+			if (guildRank.roleId && !member.roles.cache.has(guildRank.roleId)) {
 				reason = 'synced with ingame rank';
-				rolesToAdd.push(guildRank.roleID);
+				rolesToAdd.push(guildRank.roleId);
 			}
 
 			if (!this.isStaff) { // non staff rank -> remove other ranks
-				for (const rank of this.guild.ranks.filter(({ roleID, priority }) => roleID && priority !== this.guildRankPriority)) {
-					if (member.roles.cache.has(rank.roleID)) rolesToRemove.push(rank.roleID);
+				for (const rank of this.guild.ranks.filter(({ roleId, priority }) => roleId && priority !== this.guildRankPriority)) {
+					if (member.roles.cache.has(rank.roleId)) rolesToRemove.push(rank.roleId);
 				}
 			}
 		}
@@ -757,10 +757,10 @@ module.exports = class Player extends Model {
 
 		let member;
 
-		if (this.discordID) { // tag or ID known
-			member = /\D/.test(this.discordID)
-				? lgGuild.members.cache.find(({ user: { tag } }) => tag === this.discordID) // tag known
-				: lgGuild.members.cache.get(this.discordID); // id known
+		if (this.discordId) { // tag or ID known
+			member = /\D/.test(this.discordId)
+				? lgGuild.members.cache.find(({ user: { tag } }) => tag === this.discordId) // tag known
+				: lgGuild.members.cache.get(this.discordId); // id known
 
 			if (!member) {
 				const DISCORD_TAG = await this.fetchDiscordTag();
@@ -787,16 +787,16 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * validates the discordID and only updates it if the validation passes
+	 * validates the discordId and only updates it if the validation passes
 	 * @param {string} value
 	 */
-	async setValidDiscordID(value) {
-		const OLD_DISCORD_ID = this.discordID;
+	async setValidDiscordId(value) {
+		const OLD_DISCORD_ID = this.discordId;
 
 		try {
-			await super.update({ discordID: value });
+			await super.update({ discordId: value });
 		} catch (error) {
-			this.discordID = OLD_DISCORD_ID;
+			this.discordId = OLD_DISCORD_ID;
 			throw error;
 		}
 	}
@@ -808,7 +808,7 @@ module.exports = class Player extends Model {
 	 */
 	async link(idOrDiscordMember, reason = null) {
 		if (idOrDiscordMember instanceof LunarGuildMember) {
-			await this.setValidDiscordID(idOrDiscordMember.id);
+			await this.setValidDiscordId(idOrDiscordMember.id);
 			this.inDiscord = true;
 			this.discordMember = idOrDiscordMember;
 
@@ -816,7 +816,7 @@ module.exports = class Player extends Model {
 
 			if (reason) await this.update({ reason });
 		} else if (typeof idOrDiscordMember === 'string' && validateNumber(idOrDiscordMember)) {
-			await this.setValidDiscordID(idOrDiscordMember);
+			await this.setValidDiscordId(idOrDiscordMember);
 			this.inDiscord = false;
 		} else {
 			throw new Error('[LINK]: input must be either a discord GuildMember or a discord ID');
@@ -843,16 +843,16 @@ module.exports = class Player extends Model {
 			// reset nickname if it is set to the player's ign
 			if (currentlyLinkedMember.nickname === this.ign) {
 				// needs to changed temporarily so that client.on('guildMemberUpdate', ...) doesn't change the nickname back to the ign
-				const { guildID } = this; // 1/3
-				this.guildID = GUILD_ID_ERROR; // 2/3
+				const { guildId } = this; // 1/3
+				this.guildId = GUILD_ID_ERROR; // 2/3
 
 				wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
 
-				if (this.guildID === GUILD_ID_ERROR) this.guildID = guildID; // 3/3
+				if (this.guildId === GUILD_ID_ERROR) this.guildId = guildId; // 3/3
 			}
 		}
 
-		this.discordID = null;
+		this.discordId = null;
 
 		await this.save();
 
@@ -883,8 +883,8 @@ module.exports = class Player extends Model {
 		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));
 
 		// check if IDs are proper roles and managable by the bot
-		filteredRolesToAdd = member.guild.verifyRoleIDs(filteredRolesToAdd);
-		filteredRolesToRemove = member.guild.verifyRoleIDs(filteredRolesToRemove);
+		filteredRolesToAdd = member.guild.verifyRoleIds(filteredRolesToAdd);
+		filteredRolesToRemove = member.guild.verifyRoleIds(filteredRolesToRemove);
 		if (!filteredRolesToAdd.size && !filteredRolesToRemove.size) return true;
 
 		const loggingEmbed = new MessageEmbed()
@@ -898,7 +898,7 @@ module.exports = class Player extends Model {
 
 		try {
 			// api call
-			this.discordMember = await member.roles.set(member.roles.cache.filter((_, roleID) => !filteredRolesToRemove.has(roleID)).concat(filteredRolesToAdd), reason);
+			this.discordMember = await member.roles.set(member.roles.cache.filter((_, roleId) => !filteredRolesToRemove.has(roleId)).concat(filteredRolesToAdd), reason);
 
 			// was successful
 			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
@@ -940,7 +940,7 @@ module.exports = class Player extends Model {
 			if (!await this.makeRoleApiCall(rolesToAdd, rolesToRemove, `left ${this.guildName}`)) {
 				// error updating roles
 				logger.warn(`[REMOVE FROM GUILD]: ${this.logInfo}: unable to update roles`);
-				this.guildID = GUILD_ID_ERROR;
+				this.guildId = GUILD_ID_ERROR;
 				this.save();
 				return false;
 			}
@@ -950,14 +950,14 @@ module.exports = class Player extends Model {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 		}
 
-		this.guildID = isBridger
+		this.guildId = isBridger
 			? GUILD_ID_BRIDGER
 			: null;
 		this.guildRankPriority = 0;
 		this.save();
 
 		if (isBridger) {
-			this.client.hypixelGuilds.sweepPlayerCache(this.guildID); // sweep hypixel guild player cache (uncache light)
+			this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache (uncache light)
 		} else {
 			this.uncache(); // uncache everything
 		}
@@ -1009,7 +1009,7 @@ module.exports = class Player extends Model {
 
 		if (!member) return false;
 		if (member.guild.me.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
-		if (member.guild.ownerID === member.id) return false; // can't change nick of owner
+		if (member.guild.ownerId === member.id) return false; // can't change nick of owner
 		if (!member.guild.me.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return (logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`), false);
 
 		const { displayName: PREV_NAME } = member;
@@ -1069,7 +1069,7 @@ module.exports = class Player extends Model {
 	 */
 	async fetchDiscordTag() {
 		try {
-			return (await hypixel.player.uuid(this.minecraftUUID)).socialMedia?.links?.DISCORD ?? null;
+			return (await hypixel.player.uuid(this.minecraftUuid)).socialMedia?.links?.DISCORD ?? null;
 		} catch (error) {
 			logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}`, error);
 			return null;
@@ -1080,10 +1080,10 @@ module.exports = class Player extends Model {
 	 * determines the player's main profile (profile with the most weight)
 	 */
 	async fetchMainProfile() {
-		const profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUUID);
+		const profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
 
 		if (!profiles.length) {
-			this.mainProfileID = null;
+			this.mainProfileId = null;
 			await this.resetXp({ offsetToReset: 'current' });
 
 			throw `${this.logInfo}: no SkyBlock profiles`;
@@ -1092,16 +1092,16 @@ module.exports = class Player extends Model {
 		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = profiles[
 			profiles.length > 1
 				? profiles
-					.map(({ members }) => getWeight(members[this.minecraftUUID]).totalWeight)
+					.map(({ members }) => getWeight(members[this.minecraftUuid]).totalWeight)
 					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => (currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar), 0)
 				: 0
 		];
 
-		if (PROFILE_ID === this.mainProfileID) return null;
+		if (PROFILE_ID === this.mainProfileId) return null;
 
 		const { mainProfileName } = this;
 
-		this.mainProfileID = PROFILE_ID;
+		this.mainProfileId = PROFILE_ID;
 		this.mainProfileName = PROFILE_NAME;
 		await this.save();
 
@@ -1118,7 +1118,7 @@ module.exports = class Player extends Model {
 	 */
 	async updateIgn() {
 		try {
-			const { ign: CURRENT_IGN } = await mojang.uuid(this.minecraftUUID, { force: true });
+			const { ign: CURRENT_IGN } = await mojang.uuid(this.minecraftUuid, { force: true });
 
 			if (CURRENT_IGN === this.ign) return null;
 
@@ -1206,7 +1206,7 @@ module.exports = class Player extends Model {
 		const result = await this.client.db.models.Transaction.findAll({
 			limit: 1,
 			where: {
-				from: this.minecraftUUID,
+				from: this.minecraftUuid,
 				type: 'tax',
 			},
 			order: [ [ 'createdAt', 'DESC' ] ],
@@ -1223,22 +1223,22 @@ module.exports = class Player extends Model {
 	 * @typedef {object} setToPaidOptions
 	 * @property {?number} [amount] paid amount
 	 * @property {?string} [collectedBy] minecraft uuid of the player who collected
-	 * @property {?string} [auctionID] hypixel auction uuid
+	 * @property {?string} [auctionId] hypixel auction uuid
 	 */
 
 	/**
 	 * set the player to paid
 	 * @param {setToPaidOptions} param0
 	 */
-	async setToPaid({ amount = this.client.config.get('TAX_AMOUNT'), collectedBy = this.minecraftUUID, auctionID = null } = {}) {
+	async setToPaid({ amount = this.client.config.get('TAX_AMOUNT'), collectedBy = this.minecraftUuid, auctionId = null } = {}) {
 		if (this.paid) {
-			await Promise.all(this.addTransfer({ amount, collectedBy, auctionID, type: 'donation' }));
+			await Promise.all(this.addTransfer({ amount, collectedBy, auctionId, type: 'donation' }));
 		} else {
 			const overflow = Math.max(amount - this.client.config.get('TAX_AMOUNT'), 0); // >=
 			const taxAmount = amount - overflow;
-			const promises = this.addTransfer({ amount: taxAmount, collectedBy, auctionID, type: 'tax' });
+			const promises = this.addTransfer({ amount: taxAmount, collectedBy, auctionId, type: 'tax' });
 
-			if (overflow) promises.push(...this.addTransfer({ amount: overflow, collectedBy, auctionID, type: 'donation' }));
+			if (overflow) promises.push(...this.addTransfer({ amount: overflow, collectedBy, auctionId, type: 'donation' }));
 
 			await Promise.all(promises);
 
@@ -1255,14 +1255,14 @@ module.exports = class Player extends Model {
 	 * @param {?string} [options.notes]
 	 * @returns {[Promise<import('./TaxCollector')>, Promise<(import('./Transaction'))>]}
 	 */
-	addTransfer({ amount, collectedBy, auctionID = null, notes = null, type = 'tax' } = {}) {
+	addTransfer({ amount, collectedBy, auctionId = null, notes = null, type = 'tax' } = {}) {
 		return [
 			this.client.taxCollectors.cache.get(collectedBy)?.addAmount(amount, type), // update taxCollector
 			this.client.db.models.Transaction.create({
-				from: this.minecraftUUID,
+				from: this.minecraftUuid,
 				to: collectedBy,
 				amount,
-				auctionID,
+				auctionId,
 				notes,
 				type,
 			}),
@@ -1273,14 +1273,14 @@ module.exports = class Player extends Model {
 	 * removes the dual link between a discord member / user and the player
 	 */
 	async uncacheMember() {
-		if (!this.discordID) return;
+		if (!this.discordId) return;
 
 		// remove from member player cache
 		const member = await this.discordMember;
 		if (member) member.player = null;
 
 		// remove from user player cache
-		const user = this.client.users.cache.get(this.discordID);
+		const user = this.client.users.cache.get(this.discordId);
 		if (user) user.player = null;
 
 		// remove cached member
@@ -1294,8 +1294,8 @@ module.exports = class Player extends Model {
 		await this.uncacheMember();
 
 		// remove from guild / client player cache
-		this.client.hypixelGuilds.sweepPlayerCache(this.guildID); // sweep hypixel guild player cache
-		this.client.players.cache.delete(this.minecraftUUID);
+		this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache
+		this.client.players.cache.delete(this.minecraftUuid);
 
 		return this;
 	}

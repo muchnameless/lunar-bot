@@ -35,7 +35,7 @@ const cache = require('../api/cache');
  * returns the key for the redis cache
  * @param {LeaderboardArgs} leaderboardArgs
  */
-const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild: { guildID = GUILD_ID_ALL }, lbType, xpType, offset }) => `${LB_KEY}:${USER_ID}:${guildID}:${lbType}:${xpType}:${offset}`;
+const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild: { guildId = GUILD_ID_ALL }, lbType, xpType, offset }) => `${LB_KEY}:${USER_ID}:${guildId}:${lbType}:${xpType}:${offset}`;
 
 /**
  * returns a message action row with pagination buttons
@@ -64,21 +64,21 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 
 	const row = [];
 	const guildSelectMenu = new MessageSelectMenu()
-		.setCustomID(`${cacheKey}:guild`)
+		.setCustomId(`${cacheKey}:guild`)
 		.setPlaceholder(
 			hypixelGuild !== GUILD_ID_ALL
 				? `Guild: ${hypixelGuild.name}`
 				: 'Guilds: All',
 		)
 		.addOptions(
-			client.hypixelGuilds.cache.map(({ guildID, name }) => ({ label: name, value: guildID })),
+			client.hypixelGuilds.cache.map(({ guildId, name }) => ({ label: name, value: guildId })),
 		);
 
 	if (xpType !== 'purge') {
 		guildSelectMenu.addOptions({ label: 'All', value: GUILD_ID_ALL });
 
 		const offsetSelectMenu = new MessageSelectMenu()
-			.setCustomID(`${cacheKey}:offset`)
+			.setCustomId(`${cacheKey}:offset`)
 			.setPlaceholder(
 				`Offset: ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset] ?? 'None')}`,
 			)
@@ -92,7 +92,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 			new MessageActionRow()
 				.addComponents(
 					new MessageSelectMenu()
-						.setCustomID(`${cacheKey}:lbType`)
+						.setCustomId(`${cacheKey}:lbType`)
 						.setPlaceholder(
 							`Lb Type: ${upperCaseFirstChar(lbType)}`,
 						)
@@ -104,7 +104,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 			new MessageActionRow()
 				.addComponents(
 					new MessageSelectMenu()
-						.setCustomID(`${cacheKey}:xpType`)
+						.setCustomId(`${cacheKey}:xpType`)
 						.setPlaceholder(
 							`XP Type: ${xpType
 								.split('-')
@@ -131,27 +131,27 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 		new MessageActionRow()
 			.addComponents(
 				new MessageButton()
-					.setCustomID(`${cacheKey}:1`)
+					.setCustomId(`${cacheKey}:1`)
 					.setEmoji(DOUBLE_LEFT_EMOJI)
 					.setStyle(pageStyle)
 					.setDisabled(decDisabled),
 				new MessageButton()
-					.setCustomID(`${cacheKey}:${page - 1}`)
+					.setCustomId(`${cacheKey}:${page - 1}`)
 					.setEmoji(LEFT_EMOJI)
 					.setStyle(pageStyle)
 					.setDisabled(decDisabled),
 				new MessageButton()
-					.setCustomID(`${cacheKey}:${page + 1}`)
+					.setCustomId(`${cacheKey}:${page + 1}`)
 					.setEmoji(RIGHT_EMOJI)
 					.setStyle(pageStyle)
 					.setDisabled(incDisabled),
 				new MessageButton()
-					.setCustomID(`${cacheKey}:${totalPages}`)
+					.setCustomId(`${cacheKey}:${totalPages}`)
 					.setEmoji(DOUBLE_RIGHT_EMOJI)
 					.setStyle(pageStyle)
 					.setDisabled(incDisabled),
 				new MessageButton()
-					.setCustomID(`${cacheKey}:${page}:reload`)
+					.setCustomId(`${cacheKey}:${page}:reload`)
 					.setEmoji(RELOAD_EMOJI)
 					.setStyle(reloadStyle),
 			),
@@ -211,7 +211,7 @@ const self = module.exports = {
 	 * @param {import('../structures/extensions/ButtonInteraction')} interaction
 	 */
 	async handleLeaderboardButtonInteraction(interaction) {
-		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, IS_RELOAD ] = interaction.customID.split(':');
+		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, IS_RELOAD ] = interaction.customId.split(':');
 		/** @type {LeaderboardArgs} */
 		const leaderboardArgs = {
 			lbType: LB_TYPE,
@@ -277,7 +277,7 @@ const self = module.exports = {
 	 * @param {import('../structures/extensions/SelectMenuInteraction')} interaction
 	 */
 	async handleLeaderboardSelectMenuInteraction(interaction) {
-		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE ] = interaction.customID.split(':');
+		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE ] = interaction.customId.split(':');
 		/** @type {LeaderboardArgs} */
 		const leaderboardArgs = {
 			lbType: LB_TYPE,
@@ -450,7 +450,7 @@ const self = module.exports = {
 				title = 'Slayer XP Gained Leaderboard';
 				dataConverter = player => ({
 					ign: player.ign,
-					discordID: player.discordID,
+					discordId: player.discordId,
 					paid: player.paid,
 					sortingStat: player.getSlayerTotal(CURRENT_OFFSET) - player.getSlayerTotal(offset),
 				});
@@ -470,7 +470,7 @@ const self = module.exports = {
 					const skillAverageGain = skillAverage - skillAverageOffset;
 					return {
 						ign: player.ign,
-						discordID: player.discordID,
+						discordId: player.discordId,
 						paid: player.paid,
 						skillAverageGain,
 						trueAverageGain: trueAverage - trueAverageOffset,
@@ -494,7 +494,7 @@ const self = module.exports = {
 					const gainedWeight = totalWeight - totalWeightOffet;
 					return {
 						ign: player.ign,
-						discordID: player.discordID,
+						discordId: player.discordId,
 						paid: player.paid,
 						gainedWeight,
 						totalWeight,
@@ -523,7 +523,7 @@ const self = module.exports = {
 					const totalWeightGain = totalWeight - totalWeightOffet;
 					return {
 						ign: player.ign,
-						discordID: player.discordID,
+						discordId: player.discordId,
 						paid: player.paid,
 						weightGain: weight - weightOffset,
 						overflowGain: overflow - overflowOffset,
@@ -547,7 +547,7 @@ const self = module.exports = {
 				const OFFSET_ARGUMENT = `${xpType}Xp${offset}`;
 				dataConverter = player => ({
 					ign: player.ign,
-					discordID: player.discordID,
+					discordId: player.discordId,
 					paid: player.paid,
 					sortingStat: player[XP_ARGUMENT] - player[OFFSET_ARGUMENT],
 				});
@@ -589,7 +589,7 @@ const self = module.exports = {
 		}
 
 		// player requesting entry
-		const playerRequestingIndex = playerData.findIndex(player => player.discordID === user.id);
+		const playerRequestingIndex = playerData.findIndex(player => player.discordId === user.id);
 
 		let playerRequestingEntry;
 
@@ -666,7 +666,7 @@ const self = module.exports = {
 				title = 'Slayer XP Leaderboard';
 				dataConverter = player => ({
 					ign: player.ign,
-					discordID: player.discordID,
+					discordId: player.discordId,
 					sortingStat: player.getSlayerTotal(offset),
 				});
 				playerData = playerDataRaw
@@ -683,7 +683,7 @@ const self = module.exports = {
 					const { skillAverage, trueAverage } = player.getSkillAverage(offset);
 					return {
 						ign: player.ign,
-						discordID: player.discordID,
+						discordId: player.discordId,
 						skillAverage,
 						trueAverage,
 						sortingStat: skillAverage,
@@ -706,7 +706,7 @@ const self = module.exports = {
 				const XP_ARGUMENT = `${xpType}Xp${offset}`;
 				dataConverter = player => ({
 					ign: player.ign,
-					discordID: player.discordID,
+					discordId: player.discordId,
 					sortingStat: player[XP_ARGUMENT],
 				});
 				playerData = playerDataRaw
@@ -723,7 +723,7 @@ const self = module.exports = {
 					const { weight, overflow, totalWeight } = player.getWeight(offset);
 					return {
 						ign: player.ign,
-						discordID: player.discordID,
+						discordId: player.discordId,
 						weight,
 						overflow,
 						totalWeight,
@@ -747,7 +747,7 @@ const self = module.exports = {
 				const XP_ARGUMENT = `${xpType}Xp${offset}`;
 				dataConverter = player => ({
 					ign: player.ign,
-					discordID: player.discordID,
+					discordId: player.discordId,
 					xp: player[XP_ARGUMENT],
 					progressLevel: player.getSkillLevel(xpType, offset).progressLevel,
 					sortingStat: player[XP_ARGUMENT],
@@ -762,7 +762,7 @@ const self = module.exports = {
 		}
 
 		// 'your placement'
-		const playerRequestingIndex = playerData.findIndex(player => player.discordID === user.id);
+		const playerRequestingIndex = playerData.findIndex(player => player.discordId === user.id);
 
 		let playerRequestingEntry;
 

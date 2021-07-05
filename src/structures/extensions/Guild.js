@@ -7,17 +7,17 @@ const logger = require('../../functions/logger');
 class LunarGuild extends Structures.get('Guild') {
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
-	 * @param {string[]} roleIDs role IDs to verify
+	 * @param {string[]} roleIds role IDs to verify
 	 */
-	verifyRoleIDs(roleIDs) {
+	verifyRoleIds(roleIds) {
 		const highestBotRole = this.me.roles.highest;
 
 		return new Collection(
-			roleIDs
-				.map(roleID => [ roleID, this.roles.cache.get(roleID) ])
-				.filter(([ roleID, role ]) => {
-					if (!role) return logger.warn(`[CHECK ROLE IDS]: '${roleID}' is not a valid role id`);
-					if (role.managed) return logger.warn(`[CHECK ROLE IDS]: '${roleID}' is a managed role`);
+			roleIds
+				.map(roleId => [ roleId, this.roles.cache.get(roleId) ])
+				.filter(([ roleId, role ]) => {
+					if (!role) return logger.warn(`[CHECK ROLE IDS]: '${roleId}' is not a valid role id`);
+					if (role.managed) return logger.warn(`[CHECK ROLE IDS]: '${roleId}' is a managed role`);
 					if (role.comparePositionTo(highestBotRole) >= 0) return logger.warn(`[CHECK ROLE IDS]: '${role.name}' is higher than the bot's highest role`);
 					return true;
 				})

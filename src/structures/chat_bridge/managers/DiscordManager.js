@@ -18,7 +18,7 @@ module.exports = class DiscordManager {
 		/**
 		 * @type {Collection<string, DiscordChatManager>}
 		 */
-		this.channelsByIDs = new Collection();
+		this.channelsByIds = new Collection();
 		/**
 		 * @type {Collection<string, DiscordChatManager>}
 		 */
@@ -83,10 +83,10 @@ module.exports = class DiscordManager {
 
 	/**
 	 * gets the discord chat manager for the respective HypixelMessage type
-	 * @param {string} typeOrID
+	 * @param {string} typeOrId
 	 */
-	get(typeOrID) {
-		return this.channelsByType.get(typeOrID ?? GUILD) ?? this.channelsByIDs.get(typeOrID);
+	get(typeOrId) {
+		return this.channelsByType.get(typeOrId ?? GUILD) ?? this.channelsByIds.get(typeOrId);
 	}
 
 	/**
@@ -110,7 +110,7 @@ module.exports = class DiscordManager {
 			const channelManager = new DiscordChatManager(this.chatBridge, chatBridgeChannel);
 
 			this.channelsByType.set(chatBridgeChannel.type, channelManager);
-			this.channelsByIDs.set(chatBridgeChannel.channelID, channelManager);
+			this.channelsByIds.set(chatBridgeChannel.channelId, channelManager);
 
 			promises.push(channelManager.init());
 		}
@@ -177,7 +177,7 @@ module.exports = class DiscordManager {
 
 									const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === IGN);
 
-									if (player?.inDiscord) return `<@${player.discordID}>`; // player can be pinged
+									if (player?.inDiscord) return `<@${player.discordId}>`; // player can be pinged
 
 									return match;
 								}

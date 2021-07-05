@@ -69,7 +69,7 @@ process
 
 	// message
 	client.on('message', async (message) => {
-		if (message.author.bot || message.system || message.webhookID) return; // filter out bot, system & webhook messages
+		if (message.author.bot || message.system || message.webhookId) return; // filter out bot, system & webhook messages
 		if (message.guild && !new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i').test(message.content)) return; // allow PREFIX and @bot.id
 
 		message.reply(`${client.user} is currently unavailable due to maintenance`);

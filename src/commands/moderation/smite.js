@@ -69,7 +69,7 @@ module.exports = class SmiteCommand extends DualCommand {
 	 * @param {string[]} args command arguments
 	 */
 	async runInGame(message, args) { // eslint-disable-line no-unused-vars
-		const player = this.client.players.getByIGN(args[0]);
+		const player = this.client.players.getByIgn(args[0]);
 
 		if (!player) return message.reply(`\`${args[0]}\` not in the player db`);
 

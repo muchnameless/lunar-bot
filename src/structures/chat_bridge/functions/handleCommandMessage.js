@@ -57,7 +57,7 @@ module.exports = async (message) => {
 	const { player } = message;
 
 	// message author not a bot owner
-	if (player?.discordID !== client.ownerID) {
+	if (player?.discordId !== client.ownerId) {
 		// role permissions
 		const { requiredRoles } = command;
 
@@ -73,13 +73,13 @@ module.exports = async (message) => {
 
 			if (!member) {
 				logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' and could not be found within the Lunar Guard Discord Server`);
-				return message.reply(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}) from the ${lgGuild.name} Discord server which you can not be found in`);
+				return message.reply(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild.name} Discord server which you can not be found in`);
 			}
 
 			// check for req roles
-			if (!member.roles.cache.some((_, roleID) => requiredRoles.includes(roleID))) {
+			if (!member.roles.cache.some((_, roleId) => requiredRoles.includes(roleId))) {
 				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in '${message.type}' without a required role`);
-				return message.reply(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleID => lgGuild.roles.cache.get(roleID)?.name ?? roleID)}) from the Lunar Guard Discord Server`);
+				return message.reply(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the Lunar Guard Discord Server`);
 			}
 
 		// prevent from executing owner only command

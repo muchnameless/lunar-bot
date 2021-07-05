@@ -17,7 +17,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('../ChatBridge')} chatBridge
 	 * @param {import('../../database/models/HypixelGuild').ChatBridgeChannel} param1
 	 */
-	constructor(chatBridge, { type, channelID }) {
+	constructor(chatBridge, { type, channelId }) {
 		super(chatBridge);
 
 		/**
@@ -27,7 +27,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 		/**
 		 * discord channel id
 		 */
-		this.channelID = channelID;
+		this.channelId = channelId;
 		/**
 		 * hypixel chat prefix
 		 */
@@ -47,7 +47,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('../../extensions/Message')} message
 	 */
 	static getPlayerName(message) {
-		return this.formatAtMention(message.webhookID
+		return this.formatAtMention(message.webhookId
 			? message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.player?.ign ?? DiscordChatManager.escapeEz(message.author.username)
 			: message.author.player?.ign ?? DiscordChatManager.escapeEz(message.member?.displayName ?? message.author.username),
 		);
@@ -124,7 +124,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @type {import('../../extensions/TextChannel')}
 	 */
 	get channel() {
-		return this.client.channels.cache.get(this.channelID);
+		return this.client.channels.cache.get(this.channelId);
 	}
 
 	/**
@@ -279,13 +279,13 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		if (checkIfNotFromBot) {
 			if (message.me) return; // message was sent by the bot
-			if (message.webhookID === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
+			if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		}
 
 		/** @type {import('../../database/models/Player')} */
 		const player = playerInput
 			?? message.author.player // cached player
-			?? await this.client.players.model.findOne({ where: { discordID: message.author.id } }); // uncached player
+			?? await this.client.players.model.findOne({ where: { discordId: message.author.id } }); // uncached player
 
 		// check if player is muted
 		if (player?.muted) {

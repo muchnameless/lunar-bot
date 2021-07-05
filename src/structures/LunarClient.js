@@ -23,7 +23,7 @@ module.exports = class LunarClient extends Client {
 	constructor(options = {}) {
 		super(options);
 
-		this.ownerID = process.env.OWNER ?? null;
+		this.ownerId = process.env.OWNER ?? null;
 		this.db = new DatabaseManager({ client: this, db: options.db });
 		this.logHandler = new LogHandler(this, join(__dirname, '..', '..', 'log_buffer'));
 		this.cronJobs = new CronJobManager(this);
@@ -132,7 +132,7 @@ module.exports = class LunarClient extends Client {
 	 * @returns {Promise<import('./extensions/User')>}
 	 */
 	get owner() {
-		return this.users.fetch(this.ownerID);
+		return this.users.fetch(this.ownerId);
 	}
 
 	/**
@@ -145,7 +145,7 @@ module.exports = class LunarClient extends Client {
 				return `${owner.tag} ${owner}`;
 			} catch (error) {
 				logger.error('[OWNER INFO]', error);
-				return `<@${this.ownerID}>`;
+				return `<@${this.ownerId}>`;
 			}
 		})();
 	}
@@ -161,7 +161,7 @@ module.exports = class LunarClient extends Client {
 		await Promise.all([
 			this.commands.loadAll(),
 			this.events.loadAll(),
-			this.chatBridges.loadChannelIDs(),
+			this.chatBridges.loadChannelIds(),
 		]);
 
 		try {

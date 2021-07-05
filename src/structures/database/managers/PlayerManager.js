@@ -34,7 +34,7 @@ module.exports = class PlayerManager extends ModelManager {
 	 * @returns {string[]}
 	 */
 	get ignoredAuctions() {
-		return this.cache.array().flatMap(player => player.auctionID ?? []);
+		return this.cache.array().flatMap(player => player.auctionId ?? []);
 	}
 
 	/**
@@ -47,8 +47,8 @@ module.exports = class PlayerManager extends ModelManager {
 	async loadCache() {
 		await super.loadCache({
 			where: {
-				// player is in a guild that the bot tracks (guildID !== null)
-				guildID: {
+				// player is in a guild that the bot tracks (guildId !== null)
+				guildId: {
 					[Op.ne]: null,
 				},
 			},
@@ -63,7 +63,7 @@ module.exports = class PlayerManager extends ModelManager {
 	 * @param {import('../models/Player')} value
 	 */
 	set(key, value) {
-		this.client.hypixelGuilds.sweepPlayerCache(value.guildID);
+		this.client.hypixelGuilds.sweepPlayerCache(value.guildId);
 		this.cache.set(key, value);
 
 		return this;
@@ -122,7 +122,7 @@ module.exports = class PlayerManager extends ModelManager {
 	async add(options = {}, isAddingSingleEntry = true) {
 		const newPlayer = await super.add(options);
 
-		this.client.hypixelGuilds.sweepPlayerCache(newPlayer.guildID);
+		this.client.hypixelGuilds.sweepPlayerCache(newPlayer.guildId);
 
 		if (isAddingSingleEntry) {
 			this.sortAlphabetically();
@@ -142,7 +142,7 @@ module.exports = class PlayerManager extends ModelManager {
 		/** @type {import('../models/Player')[]} */
 		const playersToSweep = await this.model.findAll({
 			where: {
-				guildID: null,
+				guildId: null,
 				paid: false,
 			},
 		});
@@ -168,7 +168,7 @@ module.exports = class PlayerManager extends ModelManager {
 	 * @param {string} ign ign of the player
 	 * @returns {?import('../models/Player')}
 	 */
-	getByIGN(ign) {
+	getByIgn(ign) {
 		if (!ign) return null;
 
 		const result = this.autocorrectToPlayer(ign);
@@ -182,7 +182,7 @@ module.exports = class PlayerManager extends ModelManager {
 	 * find a player by their IGN, case sensitive and without auto-correction
 	 * @param {string} ignInput ign of the player
 	 */
-	findByIGN(ignInput) {
+	findByIgn(ignInput) {
 		return this.cache.find(({ ign }) => ign === ignInput) ?? null;
 	}
 
@@ -200,9 +200,9 @@ module.exports = class PlayerManager extends ModelManager {
 	 * @param {string} id discord id of the player
 	 * @returns {?import('../models/Player')}
 	 */
-	getByID(id) {
+	getById(id) {
 		if (!id) return null;
-		return this.cache.find(({ discordID }) => discordID === id) ?? null;
+		return this.cache.find(({ discordId }) => discordId === id) ?? null;
 	}
 
 	/**
@@ -272,7 +272,7 @@ module.exports = class PlayerManager extends ModelManager {
 			const result = await player.updateIgn();
 			if (result) {
 				log.push({
-					guildID: player.guildID,
+					guildId: player.guildId,
 					ignChange: `${result.oldIgn} -> ${result.newIgn}`,
 				});
 			}
@@ -281,10 +281,10 @@ module.exports = class PlayerManager extends ModelManager {
 		if (!log.length) return this;
 
 		/** @type {[string, string[]][]} */
-		const affectedGuilds = Object.fromEntries([ ...new Set(log.map(({ guildID }) => guildID)) ].map(id => [ id, [] ]));
+		const affectedGuilds = Object.fromEntries([ ...new Set(log.map(({ guildId }) => guildId)) ].map(id => [ id, [] ]));
 
-		for (const { guildID, ignChange } of log) {
-			affectedGuilds[guildID].push(ignChange);
+		for (const { guildId, ignChange } of log) {
+			affectedGuilds[guildId].push(ignChange);
 		}
 
 		/**
@@ -298,7 +298,7 @@ module.exports = class PlayerManager extends ModelManager {
 		const createEmbed = (guild, ignChangesAmount) => {
 			const embed = this.client.defaultEmbed
 				.setTitle(`${typeof guild !== 'string' ? guild : upperCaseFirstChar(guild)} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildID }) => guildID === guild).size}`);
+				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildId }) => guildId === guild).size}`);
 
 			embeds.push(embed);
 
@@ -306,7 +306,7 @@ module.exports = class PlayerManager extends ModelManager {
 		};
 
 		for (const [ guild, ignChanges ] of Object.entries(affectedGuilds)
-			.map(([ guildID, data ]) => [ this.client.hypixelGuilds.cache.get(guildID) ?? guildID, data ])
+			.map(([ guildId, data ]) => [ this.client.hypixelGuilds.cache.get(guildId) ?? guildId, data ])
 			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
 		) {
 			const logParts = splitMessage(
@@ -570,7 +570,7 @@ module.exports = class PlayerManager extends ModelManager {
 				if (!result) continue;
 
 				log.push({
-					guildID: player.guildID,
+					guildId: player.guildId,
 					mainProfileUpdate: `-\xa0${player.ign}: ${result.oldProfileName} -> ${result.newProfileName}`,
 				});
 			} catch (error) {
@@ -578,7 +578,7 @@ module.exports = class PlayerManager extends ModelManager {
 
 				if (typeof error === 'string') {
 					log.push({
-						guildID: player.guildID,
+						guildId: player.guildId,
 						mainProfileUpdate: `-\xa0${player.ign}: ${error.message}`,
 					});
 				}
@@ -588,10 +588,10 @@ module.exports = class PlayerManager extends ModelManager {
 		if (!log.length) return this;
 
 		/** @type {[string, string[]][]} */
-		const affectedGuilds = Object.fromEntries([ ...new Set(log.map(({ guildID }) => guildID)) ].map(id => [ id, [] ]));
+		const affectedGuilds = Object.fromEntries([ ...new Set(log.map(({ guildId }) => guildId)) ].map(id => [ id, [] ]));
 
-		for (const { guildID, mainProfileUpdate } of log) {
-			affectedGuilds[guildID].push(mainProfileUpdate);
+		for (const { guildId, mainProfileUpdate } of log) {
+			affectedGuilds[guildId].push(mainProfileUpdate);
 		}
 
 		/**
@@ -606,7 +606,7 @@ module.exports = class PlayerManager extends ModelManager {
 			const embed = new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_RED'))
 				.setTitle(`${typeof guild !== 'string' ? guild : upperCaseFirstChar(guild)} Player Database: ${mainProfileChangesAmount} change${mainProfileChangesAmount !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildID }) => guildID === guild).size}`)
+				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildId }) => guildId === guild).size}`)
 				.setTimestamp();
 
 			embeds.push(embed);
@@ -615,7 +615,7 @@ module.exports = class PlayerManager extends ModelManager {
 		};
 
 		for (const [ guild, mainProfileUpdate ] of Object.entries(affectedGuilds)
-			.map(([ guildID, data ]) => [ this.client.hypixelGuilds.cache.get(guildID) ?? guildID, data ])
+			.map(([ guildId, data ]) => [ this.client.hypixelGuilds.cache.get(guildId) ?? guildId, data ])
 			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
 		) {
 			const logParts = splitMessage(

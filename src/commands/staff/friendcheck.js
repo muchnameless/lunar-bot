@@ -43,7 +43,7 @@ module.exports = class FriendCheckCommand extends SlashCommand {
 					.setDescription(stripIndents`\`\`\`
 						${trim(
 							this.client.players.cache
-							.filter((_, minecraftUUID) => friends.includes(minecraftUUID))
+							.filter((_, minecraftUuid) => friends.includes(minecraftUuid))
 							.map(({ ign }) => ign)
 							.join('\n'),
 							EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])

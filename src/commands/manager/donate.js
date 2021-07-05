@@ -38,7 +38,7 @@ module.exports = class DonateCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		const collector = this.client.taxCollectors.getByID(interaction.user.id);
+		const collector = this.client.taxCollectors.getById(interaction.user.id);
 
 		if (!collector?.isCollecting) return interaction.reply('this command is restricted to (active) tax collectors');
 
@@ -59,7 +59,7 @@ module.exports = class DonateCommand extends SlashCommand {
 
 		await safePromiseAll(player.addTransfer({
 			amount,
-			collectedBy: collector.minecraftUUID,
+			collectedBy: collector.minecraftUuid,
 			notes,
 			type: 'donation',
 		}));

@@ -37,7 +37,7 @@ module.exports = class TaxCollectorManager extends ModelManager {
 		if (!player) throw new Error(`[TAX COLLECTOR ADD]: invalid input: ${uuidOrPlayer}`);
 
 		return super.add({
-			minecraftUUID: player.minecraftUUID,
+			minecraftUuid: player.minecraftUuid,
 			ign: player.ign,
 			isCollecting: true,
 			collectedTax: 0,
@@ -48,16 +48,16 @@ module.exports = class TaxCollectorManager extends ModelManager {
 	 * get a taxCollector by their discord ID
 	 * @param {string} id
 	 */
-	getByID(id) {
-		return this.cache.get(this.client.players.getByID(id)?.minecraftUUID) ?? null;
+	getById(id) {
+		return this.cache.get(this.client.players.getById(id)?.minecraftUuid) ?? null;
 	}
 
 	/**
 	 * get a taxCollector by their IGN, case insensitive and with auto-correction
 	 * @param {string} ign
 	 */
-	getByIGN(ign) {
-		return this.cache.get(this.client.players.getByIGN(ign)?.minecraftUUID) ?? null;
+	getByIgn(ign) {
+		return this.cache.get(this.client.players.getByIgn(ign)?.minecraftUuid) ?? null;
 	}
 
 	/**

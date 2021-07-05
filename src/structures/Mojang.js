@@ -1,7 +1,7 @@
 'use strict';
 
 const fetch = require('node-fetch');
-const { validateMinecraftIGN, validateMinecraftUUID } = require('../functions/stringValidators');
+const { validateMinecraftIgn, validateMinecraftUuid } = require('../functions/stringValidators');
 const MojangAPIError = require('./errors/MojangAPIError');
 // const logger = require('../functions/logger');
 
@@ -78,7 +78,7 @@ module.exports = class Mojang {
 	 * @param {MojangFetchOptions} [options]
 	 */
 	async ign(ign, options = {}) {
-		if (validateMinecraftIGN(ign)) return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', ign.toLowerCase(), 'ign', options);
+		if (validateMinecraftIgn(ign)) return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', ign.toLowerCase(), 'ign', options);
 		throw new MojangAPIError({ status: '(validation)' }, 'ign', ign);
 	}
 
@@ -88,7 +88,7 @@ module.exports = class Mojang {
 	 * @param {MojangFetchOptions} [options]
 	 */
 	async uuid(uuid, options = {}) {
-		if (validateMinecraftUUID(uuid)) return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
+		if (validateMinecraftUuid(uuid)) return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
 		throw new MojangAPIError({ status: '(validation)' }, 'uuid', uuid);
 	}
 
@@ -98,8 +98,8 @@ module.exports = class Mojang {
 	 * @param {MojangFetchOptions} [options]
 	 */
 	async ignOrUuid(ignOrUuid, options = {}) {
-		if (validateMinecraftIGN(ignOrUuid)) return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', ignOrUuid.toLowerCase(), 'ign', options);
-		if (validateMinecraftUUID(ignOrUuid)) return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', ignOrUuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
+		if (validateMinecraftIgn(ignOrUuid)) return this._makeRequest('https://api.mojang.com/users/profiles/minecraft/', ignOrUuid.toLowerCase(), 'ign', options);
+		if (validateMinecraftUuid(ignOrUuid)) return this._makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', ignOrUuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
 		throw new MojangAPIError({ status: '(validation)' }, 'ignOrUuid', ignOrUuid);
 	}
 

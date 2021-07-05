@@ -149,13 +149,13 @@ module.exports = class DatabaseManager {
 	}
 
 	/**
-	 * false if the auctionID is already in the transactions db, true if not
-	 * @param {string} auctionID
+	 * false if the auctionId is already in the transactions db, true if not
+	 * @param {string} auctionId
 	 */
-	async _validateAuctionID(auctionID) {
+	async _validateAuctionId(auctionId) {
 		try {
 			await this.models.Transaction.findOne({
-				where: { auctionID },
+				where: { auctionId },
 				rejectOnEmpty: true, // rejects the promise if nothing was found
 				raw: true, // to not parse an eventual result
 			});
@@ -184,7 +184,7 @@ module.exports = class DatabaseManager {
 		// update db
 		await Promise.all(taxCollectors.activeCollectors.map(async (taxCollector) => {
 			try {
-				const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUUID);
+				const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUuid);
 				const taxAuctions = [];
 				const paidLog = [];
 
@@ -192,7 +192,7 @@ module.exports = class DatabaseManager {
 
 				for (const auction of await asyncFilter(
 					auctions,
-					auc => TAX_AUCTIONS_ITEMS.includes(auc.item_name) && auc.start >= TAX_AUCTIONS_START_TIME && this._validateAuctionID(auc.uuid), // correct item & started after last reset & no outbid from already logged auction
+					auc => TAX_AUCTIONS_ITEMS.includes(auc.item_name) && auc.start >= TAX_AUCTIONS_START_TIME && this._validateAuctionId(auc.uuid), // correct item & started after last reset & no outbid from already logged auction
 				)) auction.highest_bid_amount >= TAX_AMOUNT
 					? auction.bids.length && taxAuctions.push(auction)
 					: auction.end > NOW && ++availableAuctions;
@@ -210,12 +210,12 @@ module.exports = class DatabaseManager {
 					if (!player) return ++unknownPlayers;
 
 					paidLog.push(`${player.ign}: ${this.client.formatNumber(amount)}`);
-					if (config.get('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${this.client.formatNumber(amount)} at /ah ${taxCollector.ign} [auctionID: ${auction.uuid}]`);
+					if (config.get('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${this.client.formatNumber(amount)} at /ah ${taxCollector.ign} [auctionId: ${auction.uuid}]`);
 
 					return player.setToPaid({
 						amount,
-						collectedBy: taxCollector.minecraftUUID,
-						auctionID: auction.uuid,
+						collectedBy: taxCollector.minecraftUuid,
+						auctionId: auction.uuid,
 						shouldAdd: true,
 					});
 				}));

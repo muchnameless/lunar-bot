@@ -111,7 +111,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 		if (message.mentions.users.size) return; // ignore messages with tagged users
 
 		try {
-			await this.cache.find(({ rankRequestChannelID }) => rankRequestChannelID === message.channel.id)?.handleRankRequestMessage(message);
+			await this.cache.find(({ rankRequestChannelId }) => rankRequestChannelId === message.channel.id)?.handleRankRequestMessage(message);
 		} catch (error) {
 			logger.error('[RANK REQUEST]', error);
 		}

@@ -14,7 +14,7 @@ module.exports = class TaxCollector extends Model {
 		/**
 		 * @type {string}
 		 */
-		this.minecraftUUID;
+		this.minecraftUuid;
 		/**
 		 * @type {boolean}
 		 */
@@ -34,7 +34,7 @@ module.exports = class TaxCollector extends Model {
 	 */
 	static init(sequelize) {
 		return super.init({
-			minecraftUUID: {
+			minecraftUuid: {
 				type: DataTypes.STRING,
 				primaryKey: true,
 			},
@@ -60,7 +60,7 @@ module.exports = class TaxCollector extends Model {
 	}
 
 	get player() {
-		return this.client.players.cache.get(this.minecraftUUID) ?? null;
+		return this.client.players.cache.get(this.minecraftUuid) ?? null;
 	}
 
 	get ign() {
@@ -83,7 +83,7 @@ module.exports = class TaxCollector extends Model {
 				return this.save();
 
 			default:
-				throw new Error(`[ADD AMOUNT]: ${this.ign ?? this.minecraftUUID}: unknown type '${type}'`);
+				throw new Error(`[ADD AMOUNT]: ${this.ign ?? this.minecraftUuid}: unknown type '${type}'`);
 		}
 	}
 
@@ -104,7 +104,7 @@ module.exports = class TaxCollector extends Model {
 				return this.save();
 
 			default:
-				throw new Error(`[RESET AMOUNT]: ${this.ign ?? this.minecraftUUID}: unknown type '${type}'`);
+				throw new Error(`[RESET AMOUNT]: ${this.ign ?? this.minecraftUuid}: unknown type '${type}'`);
 		}
 	}
 

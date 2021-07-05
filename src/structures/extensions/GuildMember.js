@@ -38,8 +38,8 @@ class LunarGuildMember extends Structures.get('GuildMember') {
 
 		// guild
 		for (const id of [
-			...hypixelGuilds.cache.array().flatMap(hGuild => hGuild.ranks.map(({ roleID }) => roleID)),
-			...hypixelGuilds.cache.map(({ roleID }) => roleID),
+			...hypixelGuilds.cache.array().flatMap(hGuild => hGuild.ranks.map(({ roleId }) => roleId)),
+			...hypixelGuilds.cache.map(({ roleId }) => roleId),
 			config.get('GUILD_ROLE_ID'),
 		]) this.roles.cache.has(id) && rolesToRemove.push(id);
 

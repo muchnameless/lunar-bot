@@ -42,9 +42,9 @@ module.exports = class DonationsCommand extends SlashCommand {
 
 		let totalAmount = 0;
 
-		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([ , a ], [ , b ]) => b - a).map(async ([ minecraftUUID, amount ], index) => {
-			const IGN = this.client.players.cache.get(minecraftUUID)?.ign ?? (await mojang.uuid(minecraftUUID).catch(logger.error))?.ign ?? minecraftUUID;
-			const notes = reducedNotes[minecraftUUID].join('\n');
+		await Promise.all([ ...Object.entries(reducedAmount) ].sort(([ , a ], [ , b ]) => b - a).map(async ([ minecraftUuid, amount ], index) => {
+			const IGN = this.client.players.cache.get(minecraftUuid)?.ign ?? (await mojang.uuid(minecraftUuid).catch(logger.error))?.ign ?? minecraftUuid;
+			const notes = reducedNotes[minecraftUuid].join('\n');
 
 			embed.addField(
 				'\u200b',

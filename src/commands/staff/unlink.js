@@ -33,17 +33,17 @@ module.exports = class UnlinkCommand extends SlashCommand {
 				where: {
 					[Op.or]: [{
 						ign: { [Op.iLike]: interaction.options.get('player').value },
-						minecraftUUID: interaction.options.get('player').value.toLowerCase(),
-						discordID: interaction.options.get('player').value,
+						minecraftUuid: interaction.options.get('player').value.toLowerCase(),
+						discordId: interaction.options.get('player').value,
 					}],
 				},
 			});
 
-		if (!player?.discordID) return interaction.reply(`\`${interaction.options.get('player').value}\` is not linked`);
+		if (!player?.discordId) return interaction.reply(`\`${interaction.options.get('player').value}\` is not linked`);
 
 		interaction.defer();
 
-		const { discordID: OLD_LINKED_ID } = player;
+		const { discordId: OLD_LINKED_ID } = player;
 		const currentLinkedMember = await player.discordMember;
 		const WAS_SUCCESSFUL = await player.unlink(`unlinked by ${interaction.user.tag}`);
 

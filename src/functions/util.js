@@ -56,7 +56,7 @@ const self = module.exports = {
 	 * extracts user IDs from @mentions
 	 * @param {string} string to analyze
 	 */
-	getIDFromString: string => string.match(/(?<=^(?:<@!?)?)\d{17,19}(?=>?$)/)?.[0] ?? null,
+	getIdFromString: string => string.match(/(?<=^(?:<@!?)?)\d{17,19}(?=>?$)/)?.[0] ?? null,
 
 	/**
 	 * abc -> Abc

@@ -45,9 +45,9 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 			const { requiredRoles } = categoryCommands.first();
 
 			if (requiredRoles) {
-				reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleID => this.client.lgGuild?.roles.cache.get(roleID)?.name ?? roleID)}`);
+				reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleId => this.client.lgGuild?.roles.cache.get(roleId)?.name ?? roleId)}`);
 			} else if (INPUT === 'owner') {
-				reply.push(`Required ID: ${this.client.ownerID}`);
+				reply.push(`Required ID: ${this.client.ownerId}`);
 			}
 
 			reply.push(`Commands: ${[ ...categoryCommands.keys() ].join(', ')}`);
@@ -70,9 +70,9 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 		const { requiredRoles } = command;
 
 		if (requiredRoles) {
-			reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleID => this.client.lgGuild?.roles.cache.get(roleID)?.name ?? roleID)}`);
+			reply.push(commaListsOr`Required Roles: ${requiredRoles.map(roleId => this.client.lgGuild?.roles.cache.get(roleId)?.name ?? roleId)}`);
 		} else if (INPUT === 'owner') {
-			reply.push(`Required ID: ${this.client.ownerID}`);
+			reply.push(`Required ID: ${this.client.ownerId}`);
 		}
 
 		if (command.description) reply.push(`Description: ${command.description}`);

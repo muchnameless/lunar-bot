@@ -34,25 +34,25 @@ module.exports = class VerifyCommand extends SlashCommand {
 
 		const IGN = interaction.options.get('ign').value;
 		/** @type {import('../../structures/database/models/Player')} */
-		const playerLinkedToID = interaction.user.player;
+		const playerLinkedToId = interaction.user.player;
 
-		let player = this.client.players.getByIGN(IGN)
+		let player = this.client.players.getByIgn(IGN)
 			?? await this.client.players.model.findOne({
 				where: {
 					[Op.or]: [{
 						ign: { [Op.iLike]: IGN },
-						minecraftUUID: IGN.toLowerCase(),
+						minecraftUuid: IGN.toLowerCase(),
 					}],
 				},
 			});
 
 		// already linked to this discord user
-		if (player?.minecraftUUID === playerLinkedToID?.minecraftUUID) return interaction.reply('you are already linked with this discord account');
+		if (player?.minecraftUuid === playerLinkedToId?.minecraftUuid) return interaction.reply('you are already linked with this discord account');
 
 		const { uuid, ign } = await mojang.ign(IGN).catch(error => logger.error('[VERIFY]: ign fetch', error) ?? {});
 
 		// non existing ign
-		if (!uuid) return interaction.reply(`unable to find the minecraft UUID of \`${ign}\``);
+		if (!uuid) return interaction.reply(`unable to find the minecraft Uuid of \`${ign}\``);
 
 		const hypixelGuild = await hypixel.guild.player(uuid).catch(error => logger.error('[VERIFY]: guild fetch', error));
 
@@ -81,19 +81,19 @@ module.exports = class VerifyCommand extends SlashCommand {
 		`);
 
 		// already linked to another discord user
-		if (playerLinkedToID) {
-			await interaction.awaitConfirmation(`your discord account is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?`);
+		if (playerLinkedToId) {
+			await interaction.awaitConfirmation(`your discord account is already linked to \`${playerLinkedToId.ign}\`. Overwrite this?`);
 
-			await playerLinkedToID.unlink(`linked account switched to ${interaction.user.tag}`);
+			await playerLinkedToId.unlink(`linked account switched to ${interaction.user.tag}`);
 		}
 
 		// create new db entry if non exitent
 		try {
 			if (!player) [ player ] = await this.client.players.model.findOrCreate({
-				where: { minecraftUUID: uuid },
+				where: { minecraftUuid: uuid },
 				defaults: {
 					ign,
-					guildID: GUILD_ID,
+					guildId: GUILD_ID,
 				},
 			});
 		} catch (error) {
@@ -101,7 +101,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 			return interaction.reply(`an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
 		}
 
-		player.guildID = GUILD_ID;
+		player.guildId = GUILD_ID;
 
 		const discordMember = interaction.member
 			?? await this.client.lgGuild?.members.fetch(interaction.user.id).catch(error => logger.error('[VERIFY]: guild member fetch', error))
