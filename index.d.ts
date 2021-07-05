@@ -14,7 +14,7 @@ declare module 'discord.js' {
 	}
 
 	interface Channel {
-		botPermissions: import('discord.js').Permissions
+		botPermissions: Permissions;
 	}
 
 	interface Guild {
