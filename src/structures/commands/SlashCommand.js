@@ -125,7 +125,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @returns {boolean}
 	 */
 	static checkForce(options) {
-		return options?.get('force')?.value ?? false;
+		return options.get('force')?.value ?? false;
 	}
 
 	/**
@@ -179,17 +179,23 @@ module.exports = class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * returns the player object, provide interaction parameter for a fallback to interaction.user.player
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * returns the player object, optional fallback to interaction.user.player
 	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @param {boolean} [fallbackToCurrentUser=false]
 	 * @returns {?import('../database/models/Player')}
 	 */
-	getPlayer(options, interaction) {
-		if (!options) return interaction?.user.player ?? null;
+	getPlayer(interaction, fallbackToCurrentUser = false) {
+		if (!interaction.options) {
+			if (fallbackToCurrentUser) return interaction.user.player;
+			return null;
+		}
 
-		const INPUT = (options.get('player') || options.get('target'))?.value.toLowerCase();
+		const INPUT = (interaction.options.get('player') || interaction.options.get('target'))?.value.toLowerCase();
 
-		if (!INPUT) return interaction?.user.player ?? null;
+		if (!INPUT) {
+			if (fallbackToCurrentUser) return interaction.user.player;
+			return null;
+		}
 
 		if (validateMinecraftUuid(INPUT)) return this.client.players.get(INPUT.replace(/-/g, ''));
 
@@ -197,32 +203,31 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		return (DISCORD_ID
 			? this.client.players.getById(DISCORD_ID)
-			: SlashCommand.checkForce(options)
+			: SlashCommand.checkForce(interaction.options)
 				? this.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
 				: this.client.players.getByIgn(INPUT)
 		) ?? null;
 	}
 
 	/**
-	 * returns the player object, provide interaction parameter for a fallback to interaction.user.player.ign
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * returns the player object's IGN, optional fallback to interaction.user.player
 	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @param {boolean} [fallbackToCurrentUser=false]
 	 * @returns {?string}
 	 */
-	getIGN(options, interaction) {
-		return this.getPlayer(options, interaction)?.ign ?? null;
+	getIgn(interaction, fallbackToCurrentUser = false) {
+		return this.getPlayer(interaction, fallbackToCurrentUser)?.ign ?? null;
 	}
 
 	/**
-	 * returns a HypixelGuild instance, throwing if none found
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * returns a HypixelGuild instance
 	 * @param {import('../extensions/CommandInteraction')} interaction
 	 * @returns {import('../database/models/HypixelGuild') | GUILD_ID_ALL}
 	 */
-	getHypixelGuild(options, interaction) {
-		const INPUT = options?.get('guild')?.value;
+	getHypixelGuild(interaction) {
+		const INPUT = interaction.options.get('guild')?.value;
 		if (INPUT === GUILD_ID_ALL) return INPUT;
-		return this.client.hypixelGuilds.cache.get(INPUT) ?? interaction?.user.player?.guild ?? this.client.hypixelGuilds.mainGuild;
+		return this.client.hypixelGuilds.cache.get(INPUT) ?? interaction.user.player?.guild ?? this.client.hypixelGuilds.mainGuild;
 	}
 
 	/**

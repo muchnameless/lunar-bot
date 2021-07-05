@@ -27,7 +27,7 @@ module.exports = class PurgeRanksCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		const hypixelGuild = this.getHypixelGuild(interaction.options, interaction);
+		const hypixelGuild = this.getHypixelGuild(interaction);
 
 		if (PurgeRanksCommand.running.has(hypixelGuild.guildId)) return interaction.reply(`a purge is already currently running for ${hypixelGuild.name}`);
 

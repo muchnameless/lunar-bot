@@ -95,18 +95,15 @@ module.exports = class TaxCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		// destructure subcommand
-		const { name, options } = interaction.options.first();
-
-		switch (name) {
+		switch (interaction.subCommand) {
 			case 'ah': {
-				const player = this.getPlayer(options);
+				const player = this.getPlayer(interaction);
 
 				if (!player) {
 					return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
 				}
 
-				const action = options.get('action').value;
+				const action = interaction.options.get('action').value;
 
 				let log;
 
@@ -151,7 +148,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			case 'amount': {
-				const NEW_AMOUNT = options.get('amount').value;
+				const NEW_AMOUNT = interaction.options.get('amount').value;
 
 				if (NEW_AMOUNT < 0) return interaction.reply({
 					content: 'tax amount must be a non-negative number',
@@ -198,7 +195,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				const player = this.getPlayer(options);
+				const player = this.getPlayer(interaction);
 
 				if (!player) {
 					return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
@@ -210,7 +207,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					await player.resetTax();
 				}
 
-				const AMOUNT = options.get('amount')?.value ?? this.config.get('TAX_AMOUNT');
+				const AMOUNT = interaction.options.get('amount')?.value ?? this.config.get('TAX_AMOUNT');
 
 				await player.setToPaid({
 					amount: AMOUNT,
@@ -226,11 +223,11 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			case 'reminder': {
-				const SHOULD_GHOST_PING = options?.get('ghostping')?.value ?? false;
-				const hypixelGuild = options?.has('guild')
-					? this.getHypixelGuild(options, interaction)
+				const SHOULD_GHOST_PING = interaction.options.get('ghostping')?.value ?? false;
+				const hypixelGuild = interaction.options.has('guild')
+					? this.getHypixelGuild(interaction)
 					: null;
-				const excluded = options?.get('exclude')?.value.split(/\W/g).flatMap(x => (x ? x.toLowerCase() : [])); // lower case IGN array
+				const excluded = interaction.options.get('exclude')?.value.split(/\W/g).flatMap(x => (x ? x.toLowerCase() : [])); // lower case IGN array
 				const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild)
 					.filter(({ paid, ign }) => !paid && excluded?.includes(ign.toLowerCase()));
 				const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordId }) => inDiscord && validateNumber(discordId));
@@ -276,17 +273,17 @@ module.exports = class TaxCommand extends SlashCommand {
 				let result;
 
 				// individual player
-				if (options?.has('player')) {
-					const player = this.getPlayer(options)
+				if (interaction.options.has('player')) {
+					const player = this.getPlayer(interaction)
 						?? await players.model.findOne({
 							where: {
 								guildId: null,
-								ign: { [Op.iLike]: options.get('player').value },
+								ign: { [Op.iLike]: interaction.options.get('player').value },
 							},
 						});
 
 					if (!player) {
-						return interaction.reply(`\`${options.get('player').value}\` is not in the player db`);
+						return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
 					}
 
 					if (!player.paid) return interaction.reply(`\`${player.ign}\` is not set to paid`);
@@ -389,7 +386,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${name}'`);
+				throw new Error(`unknown subcommand '${interaction.subCommand}'`);
 		}
 	}
 };

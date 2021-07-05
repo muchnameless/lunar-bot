@@ -20,26 +20,18 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 		/**
 		 * wether to use ephemeral replies and deferring
 		 */
-		this.useEphemeral = LunarCommandInteraction.checkEphemeralOption(this.options)
+		this.useEphemeral = this._checkEphemeralOption
 			?? (channel !== null && channel.type !== 'dm'
 				? !(channel.name.includes('command') || channel.isTicket) // guild channel
 				: false); // DM channel
 	}
 
-	static _getEphemeralOption(options) {
-		return options
-			? options.get('visibility')?.value
-				?? this._getEphemeralOption(options.first()?.options)
-			: null;
-	}
-
 	/**
 	 * recursively checks the command options for the ephemeral option
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
 	 * @returns {?boolean}
 	 */
-	static checkEphemeralOption(options) {
-		switch (this._getEphemeralOption(options)) {
+	get _checkEphemeralOption() {
+		switch (this.options.get('visibility')?.value) {
 			case 'everyone':
 				return false;
 
@@ -51,33 +43,13 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 		}
 	}
 
-	/**
-	 * @param {import('discord.js').CommandInteractionOption} option
-	 */
-	static isSubCommandOption(option) {
-		return (option?.type === 'SUB_COMMAND' || option?.type === 'SUB_COMMAND_GROUP') ?? false;
-	}
-
-	/**
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
-	 */
-	static stringifyOptions(options) {
-		return options
-			?.reduce(
-				(acc, cur) => {
-					if (LunarCommandInteraction.isSubCommandOption(cur)) {
-						return `${acc} ${cur.name}${this.stringifyOptions(cur.options)}`;
-					}
-
-					return `${acc} ${cur.name}: ${cur.value}`;
-				},
-				'',
-			)
-			?? '';
-	}
-
 	get logInfo() {
-		return `${this.commandName}${LunarCommandInteraction.stringifyOptions(this.options)}`;
+		return [
+			this.commandName,
+			this.subCommandGroup,
+			this.subCommand,
+			this.options.reduce((acc, { name, value }) => `${acc} ${name}: ${value}`, ''),
+		].filter(Boolean).join(' ');
 	}
 
 	/**
@@ -91,8 +63,11 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	 * appends the first option name if the command is a subcommand or subcommand group
 	 */
 	get fullCommandName() {
-		const firstOption = this.options?.first();
-		return `${this.commandName}${LunarCommandInteraction.isSubCommandOption(firstOption) ? ` ${firstOption.name}` : ''}`;
+		return [
+			this.commandName,
+			this.subCommandGroup,
+			this.subCommand,
+		].filter(Boolean).join(' ');
 	}
 
 	/**

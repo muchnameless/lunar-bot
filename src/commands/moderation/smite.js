@@ -58,7 +58,7 @@ module.exports = class SmiteCommand extends DualCommand {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/g mute ${IGN} 10m`)
-					.setDescription(`\`\`\`\n${await this._run(interaction, this.getHypixelGuild(interaction.options, interaction).chatBridge, IGN)}\`\`\``),
+					.setDescription(`\`\`\`\n${await this._run(interaction, this.getHypixelGuild(interaction).chatBridge, IGN)}\`\`\``),
 			],
 		});
 	}
