@@ -259,7 +259,6 @@ module.exports = class DiscordChatManager extends ChatManager {
 				content: this.chatBridge.discord.parseContent(`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author.ign}`}, `}${prefix}${content}`),
 				reply: {
 					messageReference: discordMessage,
-					failIfNotExists: false,
 				},
 				...options,
 			});

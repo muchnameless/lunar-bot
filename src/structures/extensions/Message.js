@@ -219,7 +219,6 @@ class LunarMessage extends Structures.get('Message') {
 				content,
 				reply: {
 					messageReference: this,
-					failIfNotExists: false,
 				},
 				...options,
 			});
@@ -256,7 +255,6 @@ class LunarMessage extends Structures.get('Message') {
 				content,
 				reply: {
 					messageReference: this,
-					failIfNotExists: false,
 				},
 				...options,
 			});

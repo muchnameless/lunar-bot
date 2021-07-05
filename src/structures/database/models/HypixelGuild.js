@@ -653,7 +653,6 @@ module.exports = class HypixelGuild extends Model {
 			content: `${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
 			reply: {
 				messageReference: ctx,
-				failIfNotExists: false,
 			},
 			sameChannel: true,
 		});
