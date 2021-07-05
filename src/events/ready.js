@@ -20,20 +20,6 @@ module.exports = class ReadyEvent extends Event {
 
 		await this.client.logHandler.init();
 
-		// Fetch all members for initially available guilds
-		if (this.client.options.fetchAllMembers) {
-			await Promise.all(this.client.guilds.cache.map(async (guild) => {
-				if (!guild.available) return logger.warn(`[READY]: ${guild.name} not available`);
-
-				try {
-					await guild.members.fetch();
-					logger.debug(`[READY]: ${guild.name}: fetched ${this.client.formatNumber(guild.memberCount)} members`);
-				} catch (error) {
-					logger.error(`[READY]: ${guild.name}: error fetching all members`, error);
-				}
-			}));
-		}
-
 		this.client.db.schedule();
 
 		// set presence again every 20 min cause it get's lost sometimes
