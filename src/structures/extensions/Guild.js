@@ -18,7 +18,7 @@ class LunarGuild extends Structures.get('Guild') {
 				.filter(([ roleId, role ]) => {
 					if (!role) return logger.warn(`[CHECK ROLE IDS]: '${roleId}' is not a valid role id`);
 					if (role.managed) return logger.warn(`[CHECK ROLE IDS]: '${roleId}' is a managed role`);
-					if (role.comparePositionTo(highestBotRole) >= 0) return logger.warn(`[CHECK ROLE IDS]: '${role.name}' is higher than the bot's highest role`);
+					if (highestBotRole.comparePositionTo(role) <= 0) return logger.warn(`[CHECK ROLE IDS]: '${role.name}' is higher than the bot's highest role`);
 					return true;
 				})
 				.sort(([ , a ], [ , b ]) => b.comparePositionTo(a)),
@@ -29,15 +29,16 @@ class LunarGuild extends Structures.get('Guild') {
 	 * tries to find a discord member by a discord tag
 	 * @param {string} tagInput
 	 */
-	async findMemberByTag(tagInput) {
-		const discordMember = this.members.cache.find(({ user: { tag } }) => tag === tagInput);
+	async fetchMemberByTag(tagInput) {
+		if (this.members.cache.size === this.memberCount) return this.members.cache.find(({ user: { tag } }) => tag === tagInput) ?? null;
 
-		if (discordMember) return discordMember;
-
-		const fetched = await this.members.search({ query: tagInput.split('#')[0], limit: 10 }).catch(error => logger.error('[UPDATE GUILD PLAYERS]', error));
-		// const fetched = await this.members.fetch({ query: tagInput.split('#')[0] }).catch(error => logger.error(`[UPDATE GUILD PLAYERS]`, error));
-
-		return fetched?.find(({ user: { tag } }) => tag === tagInput) ?? null;
+		try {
+			const fetched = await this.members.fetch({ query: tagInput.split('#')[0], limit: 1_000 });
+			return fetched.find(({ user: { tag } }) => tag === tagInput) ?? null;
+		} catch (error) {
+			logger.error('[FIND MEMBER BY TAG]', error);
+			return null;
+		}
 	}
 }
 

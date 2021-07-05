@@ -398,7 +398,7 @@ module.exports = class HypixelGuild extends Model {
 								return hasError = true;
 							}
 
-							discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
+							discordMember = await this.client.lgGuild?.fetchMemberByTag(discordTag);
 
 							if (discordMember) return;
 
@@ -445,7 +445,7 @@ module.exports = class HypixelGuild extends Model {
 									return hasError = true;
 								}
 
-								discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
+								discordMember = await this.client.lgGuild?.fetchMemberByTag(discordTag);
 
 								if (!discordMember) {
 									if (/\D/.test(player.discordId)) await player.setValidDiscordId(discordTag).catch(logger.error); // save tag if no id is known
