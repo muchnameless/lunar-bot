@@ -1,15 +1,9 @@
 declare module 'discord.js' {
 	interface Message {
-		client: import('./src/structures/LunarClient');
-		// author: import('./src/structures/extensions/User');
-	}
-
-	interface Interaction {
-		client: import('./src/structures/LunarClient');
+		author: import('./src/structures/extensions/User');
 	}
 
 	interface User {
-		client: import('./src/structures/LunarClient');
 		player: import('./src/structures/database/models/Player');
 	}
 
@@ -17,24 +11,18 @@ declare module 'discord.js' {
 		botPermissions: Permissions;
 	}
 
-	interface Guild {
-		client: import('./src/structures/LunarClient');
-	}
-
 	interface GuildMember {
-		client: import('./src/structures/LunarClient');
 		player: import('./src/structures/database/models/Player');
-		// user: import('./src/structures/extensions/User');
+		user: import('./src/structures/extensions/User');
 	}
 
 	interface ThreadMember {
-		client: import('./src/structures/LunarClient');
 		player: import('./src/structures/database/models/Player');
-		// user: import('./src/structures/extensions/User');
+		user: import('./src/structures/extensions/User');
 	}
 
 	interface Base {
-		// client: import('./src/structures/LunarClient');
+		client: import('./src/structures/LunarClient');
 	}
 
 	interface MessageEmbed {
