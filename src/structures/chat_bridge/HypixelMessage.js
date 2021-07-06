@@ -85,7 +85,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 				.slice(prefixMatched?.length ?? 0)
 				.trim()
 				.split(/ +/);
-			const COMMAND_NAME = args.shift().toLowerCase(); // extract first word
+			const COMMAND_NAME = args.shift(); // extract first word
 
 			// no command, only ping or prefix
 			if ((!prefixMatched && this.type !== WHISPER) || !COMMAND_NAME) {
@@ -98,7 +98,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 			} else {
 				this.commandData = {
 					name: COMMAND_NAME,
-					command: this.client.chatBridges.commands.getByName(COMMAND_NAME),
+					command: this.client.chatBridges.commands.getByName(COMMAND_NAME.toLowerCase()),
 					args,
 					prefix: prefixMatched,
 				};
