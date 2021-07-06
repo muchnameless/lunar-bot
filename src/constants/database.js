@@ -1,6 +1,6 @@
 'use strict';
 
-const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('./skyblock');
+const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses, SKYBLOCK_YEAR_0, MAYOR_CHANGE_INTERVAL } = require('./skyblock');
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('./roles');
 
 // generate default config
@@ -43,7 +43,7 @@ const DEFAULT_CONFIG = {
 	INGAME_RESPONSE_TIMEOUT: 5_000,
 	LAST_DAILY_STATS_SAVE_TIME: 0,
 	LAST_DAILY_XP_RESET_TIME: 0,
-	LAST_MAYOR_XP_RESET_TIME: Infinity,
+	LAST_MAYOR_XP_RESET_TIME: SKYBLOCK_YEAR_0,
 	LAST_MONTHLY_XP_RESET_TIME: 0,
 	LAST_WEEKLY_XP_RESET_TIME: 0,
 	LOGGING_CHANNEL_ID: null,
@@ -74,6 +74,8 @@ const DEFAULT_CONFIG = {
 	WEIGHT_AVERAGE_STATS_CHANNEL_ID: null,
 	XP_TRACKING_ENABLED: true,
 };
+
+while (DEFAULT_CONFIG.LAST_MAYOR_XP_RESET_TIME < Date.now()) DEFAULT_CONFIG.LAST_MAYOR_XP_RESET_TIME += MAYOR_CHANGE_INTERVAL;
 
 for (const type of delimiterRoles) DEFAULT_CONFIG[`${type}_DELIMITER_ROLE_ID`] = null; // delimiter
 

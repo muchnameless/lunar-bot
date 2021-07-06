@@ -472,23 +472,23 @@ module.exports = class PlayerManager extends ModelManager {
 	 */
 	async performMayorXpReset() {
 		const { config } = this.client;
-		const CURRENT_MAYOR_TIME = config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
+		const LAST_MAYOR_XP_RESET_TIME = config.get('LAST_MAYOR_XP_RESET_TIME');
+
+		// if the bot skipped a mayor change readd the interval time
+		let currentMayorTime = LAST_MAYOR_XP_RESET_TIME + MAYOR_CHANGE_INTERVAL;
+		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
 
 		await this.resetXp({ offsetToReset: MAYOR });
 
-		config.set('LAST_MAYOR_XP_RESET_TIME', CURRENT_MAYOR_TIME);
+		config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Current Mayor XP Tracking')
 			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 
-		let next = CURRENT_MAYOR_TIME + MAYOR_CHANGE_INTERVAL;
-
-		while (next < Date.now()) next += MAYOR_CHANGE_INTERVAL;
-
 		this.client.schedule('mayorXpReset', new CronJob({
-			cronTime: new Date(next),
+			cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
 			onTick: () => this.performMayorXpReset(),
 			start: true,
 		}));
