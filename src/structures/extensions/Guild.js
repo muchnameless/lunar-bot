@@ -11,15 +11,12 @@ class LunarGuild extends Structures.get('Guild') {
 	 * @returns {Collection<import('discord.js').Snowflake, import('discord.js').Role>}
 	 */
 	verifyRoleIds(roleIds) {
-		const highestBotRole = this.me.roles.highest;
-
 		return new Collection(
 			roleIds
 				.map(roleId => [ roleId, this.roles.cache.get(roleId) ])
 				.filter(([ roleId, role ]) => {
 					if (!role) return logger.warn(`[CHECK ROLE IDS]: '${roleId}' is not a valid role id`);
-					if (role.managed) return logger.warn(`[CHECK ROLE IDS]: '${roleId}' is a managed role`);
-					if (highestBotRole.comparePositionTo(role) <= 0) return logger.warn(`[CHECK ROLE IDS]: '${role.name}' is higher than the bot's highest role`);
+					if (!role.editable) return logger.warn(`[CHECK ROLE IDS]: can't edit '${role.name}'`);
 					return true;
 				})
 				.sort(([ , a ], [ , b ]) => b.comparePositionTo(a)),
