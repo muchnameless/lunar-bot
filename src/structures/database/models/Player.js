@@ -642,7 +642,7 @@ module.exports = class Player extends Model {
 		if (member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))) rolesToRemove.push(config.get('EX_GUILD_ROLE_ID'));
 
 		// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
-		if (member.roles.color?.comparePositionTo(member.guild.roles.cache.get(config.get('GUILD_DELIMITER_ROLE_ID'))) > 1) {
+		if (member.roles.color?.comparePositionTo(config.get('GUILD_DELIMITER_ROLE_ID') ?? member.guild.roles.highest) > 1) {
 			if (!member.roles.cache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_DELIMITER_ROLE_ID'));
 		} else if (member.roles.cache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) {
 			rolesToRemove.push(config.get('GUILD_DELIMITER_ROLE_ID'));
