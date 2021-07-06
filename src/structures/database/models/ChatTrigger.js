@@ -36,15 +36,6 @@ module.exports = class ChatTrigger extends Model {
 			: new RegExp(this.regExpString, 'i');
 	}
 
-	getRegExp(message) {
-		if (this._regExp) return this._regExp;
-
-		return new RegExp(
-			this.regExpString.replaceAll('{BOT_IGN}', message.chatBridge.bot.ign.replaceAll('_', '[_ ]?')),
-			'i',
-		);
-	}
-
 	/**
 	 * @param {import('sequelize')} sequelize
 	 */
@@ -81,6 +72,15 @@ module.exports = class ChatTrigger extends Model {
 			sequelize,
 			modelName: 'ChatTrigger',
 		});
+	}
+
+	getRegExp(message) {
+		if (this._regExp) return this._regExp;
+
+		return new RegExp(
+			this.regExpString.replaceAll('{BOT_IGN}', message.chatBridge.bot.ign.replaceAll('_', '[_ ]?')),
+			'i',
+		);
 	}
 
 	/**
