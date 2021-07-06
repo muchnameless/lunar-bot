@@ -2,10 +2,11 @@
 
 const { join } = require('path');
 require('dotenv').config({ path: join(__dirname, '.env') });
-const { Constants, Intents } = require('discord.js');
+const { Collection, Intents, Constants } = require('discord.js');
 const { requireAll } = require('./src/functions/files');
 const db = require('./src/structures/database/index');
 const LunarClient = require('./src/structures/LunarClient');
+const MessageCacheCollection = require('./src/structures/MessageCacheCollection');
 const logger = require('./src/functions/logger');
 
 /** @type {LunarClient} */
@@ -51,7 +52,10 @@ process
 			// Intents.FLAGS.GUILD_VOICE_STATES,
 			// Intents.FLAGS.GUILD_WEBHOOKS,
 		],
-		messageCacheMaxSize: 10,
+		makeCache(manager) {
+			if (manager.name === 'MessageManager') return new MessageCacheCollection(10);
+			return new Collection();
+		},
 		partials: [
 			Constants.PartialTypes.CHANNEL,
 			// Constants.PartialTypes.GUILD_MEMBER,
