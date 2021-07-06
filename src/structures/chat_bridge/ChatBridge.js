@@ -35,6 +35,7 @@ const { sleep } = require('../../functions/util');
  * @property {import('../database/models/Player')} [player=message.author.player] player for muted and isStaff check
  * @property {import('../extensions/CommandInteraction')} [interaction]
  * @property {boolean} [checkIfNotFromBot=true] wether to not forward messages from the client.user
+ * @property {boolean} [isEdit=false] wether the message is an edit instead of a new message
  */
 
 

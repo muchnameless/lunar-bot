@@ -272,7 +272,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('../../extensions/Message')} message
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */
-	async forwardToMinecraft(message, { player: playerInput, interaction, checkIfNotFromBot = true } = {}) {
+	async forwardToMinecraft(message, { player: playerInput, interaction, isEdit = false, checkIfNotFromBot = true } = {}) {
 		if (!this.chatBridge.enabled) return;
 		if (!this.minecraft.ready) return message.react(X_EMOJI);
 
@@ -337,7 +337,9 @@ module.exports = class DiscordChatManager extends ChatManager {
 		});
 
 		return this.minecraft.chat({
-			content,
+			content: isEdit && !content.startsWith('*')
+				? `*${content}` // add a leading * to indicate an edit if not already present
+				: content,
 			prefix: `${this.prefix} ${interaction ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
 			discordMessage: message,
 		});

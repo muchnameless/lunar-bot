@@ -17,12 +17,17 @@ module.exports = class MessageCreateEvent extends Event {
 
 	/**
 	 * @param {import('../structures/extensions/Message')} message
+	 * @param {boolean} [isEdit=false]
 	 */
-	async _handleDiscordMessage(message) {
-		try {
-			if (message.partial && !message.flags.has(MessageFlags.FLAGS.EPHEMERAL)) await message.fetch();
-		} catch (error) {
-			return logger.error('[CMD HANDLER]: error while fetching partial message:\n', error);
+	async _handleDiscordMessage(message, isEdit = false) {
+		if (message.flags.has(MessageFlags.FLAGS.EPHEMERAL)) return;
+
+		if (message.partial) {
+			try {
+				await message.fetch();
+			} catch (error) {
+				return logger.error('[CMD HANDLER]: error while fetching partial message', error);
+			}
 		}
 
 		/**
@@ -33,7 +38,7 @@ module.exports = class MessageCreateEvent extends Event {
 		/**
 		 * chat bridge
 		 */
-		this.client.chatBridges.handleDiscordMessage(message, { checkIfNotFromBot: true }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
+		this.client.chatBridges.handleDiscordMessage(message, { isEdit, checkIfNotFromBot: !isEdit }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
 
 		if (message.content.length && message.isUserMessage) {
 			this.client.hypixelGuilds.checkIfRankRequestMessage(message);
@@ -49,6 +54,6 @@ module.exports = class MessageCreateEvent extends Event {
 	 * @param {import('../structures/extensions/Message')} message
 	 */
 	async run(message) {
-		return this._handleDiscordMessage(message);
+		return this._handleDiscordMessage(message, false);
 	}
 };

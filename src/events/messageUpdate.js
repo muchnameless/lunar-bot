@@ -18,11 +18,11 @@ module.exports = class MessageUpdateEvent extends MessageCreateEvent {
 	 * @param {import('../structures/extensions/Message')} newMessage
 	 */
 	async run(oldMessage, newMessage) {
-		if (oldMessage.content === newMessage.content) return; // pin or added embed
-		if (Date.now() - newMessage.createdTimestamp >= 24 * 60 * 60_000) return; // original message is older than a day
+		if (
+			Date.now() - newMessage.createdTimestamp >= 10 * 60_000 // original message is older than 10 min
+			|| oldMessage.content === newMessage.content // pinned or embed added
+		) return;
 
-		if (newMessage.me) this.client.chatBridges.handleDiscordMessage(newMessage, { checkifNotFromBot: false });
-
-		this._handleDiscordMessage(newMessage);
+		this._handleDiscordMessage(newMessage, true);
 	}
 };
