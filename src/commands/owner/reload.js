@@ -75,11 +75,11 @@ module.exports = class ReloadCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {string} subCommand
+	 * @param {string} subCommandName
 	 * @param {string} input
 	 */
-	async _run(ctx, subCommand, input) { // eslint-disable-line no-unused-vars
-		switch (subCommand) {
+	async _run(ctx, subCommandName, input) { // eslint-disable-line no-unused-vars
+		switch (subCommandName) {
 			case 'command': {
 				let commandName = input.toLowerCase();
 
@@ -189,7 +189,7 @@ module.exports = class ReloadCommand extends DualCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${subCommand}'`);
+				throw new Error(`unknown subCommandName '${subCommandName}'`);
 		}
 	}
 
@@ -198,7 +198,7 @@ module.exports = class ReloadCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, interaction.subCommand, interaction.options.get('name').value);
+		return this._run(interaction, interaction.subCommandName, interaction.options.get('name').value);
 	}
 
 	/**

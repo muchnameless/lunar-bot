@@ -131,7 +131,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	/**
 	 * @param {import('discord.js').ApplicationCommandOptionData} option
 	 */
-	static isSubCommandOption(option) {
+	static issubCommandNameOption(option) {
 		return option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND || option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP;
 	}
 
@@ -144,7 +144,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		const [ firstOption ] = options;
 
-		if (SlashCommand.isSubCommandOption(firstOption)) {
+		if (SlashCommand.issubCommandNameOption(firstOption)) {
 			options = options.map((option) => {
 				if (option.options[option.options.length - 1]?.name !== 'visibility') option.options.push(SlashCommand.EPHEMERAL_OPTION);
 				return option;

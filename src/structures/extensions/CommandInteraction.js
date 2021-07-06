@@ -46,9 +46,9 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	get logInfo() {
 		return [
 			this.commandName,
-			this.subCommandGroup,
-			this.subCommand,
-			this.options.reduce((acc, { name, value }) => `${acc} ${name}: ${value}`, ''),
+			this.subCommandGroupName,
+			this.subCommandName,
+			...this.options.map(({ name, value }) => `${name}: ${value}`),
 		].filter(Boolean).join(' ');
 	}
 
@@ -60,13 +60,13 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	}
 
 	/**
-	 * appends the first option name if the command is a subcommand or subcommand group
+	 * appends the first option name if the command is a subCommandName or subCommandName group
 	 */
 	get fullCommandName() {
 		return [
 			this.commandName,
-			this.subCommandGroup,
-			this.subCommand,
+			this.subCommandGroupName,
+			this.subCommandName,
 		].filter(Boolean).join(' ');
 	}
 

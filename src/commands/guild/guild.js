@@ -247,7 +247,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		switch (interaction.subCommand) {
+		switch (interaction.subCommandName) {
 			case 'demote': {
 				await this.checkPermissions(interaction, {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
@@ -280,7 +280,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				return this._run(interaction, {
-					command: `g ${interaction.subCommand}`,
+					command: `g ${interaction.subCommandName}`,
 				});
 			}
 
@@ -316,7 +316,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				return this._runList(interaction, {
-					command: `g ${interaction.subCommand}`,
+					command: `g ${interaction.subCommandName}`,
 				});
 			}
 
@@ -482,7 +482,7 @@ module.exports = class GuildCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${interaction.subCommand}'`);
+				throw new Error(`unknown subCommandName '${interaction.subCommandName}'`);
 		}
 	}
 };
