@@ -345,9 +345,10 @@ module.exports = class DatabaseManager {
 		if (!taxChannel.botPermissions.has(Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS)) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
-		const taxMessage = await taxChannel.messages.fetch(config.get('TAX_MESSAGE_ID')).catch(error => logger.error('[TAX MESSAGE]', error));
+		const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');
+		const taxMessage = TAX_MESSAGE_ID && await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch(error => logger.error('[TAX MESSAGE]', error));
 
-		if (!taxMessage || taxMessage.deleted) { // taxMessage deleted
+		if (!taxMessage?.me || taxMessage.deleted) { // taxMessage deleted
 			try {
 				const { id } = await taxChannel.send({
 					embeds: [
@@ -361,6 +362,7 @@ module.exports = class DatabaseManager {
 				return logger.error('[TAX MESSAGE]', error);
 			}
 		}
+
 		if (taxMessage.embeds[0]?.description === taxEmbed.description && isEqual(taxMessage.embeds[0].fields, taxEmbed.fields)) return; // no changes to taxMessage
 
 		try {
