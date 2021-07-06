@@ -22,7 +22,7 @@ module.exports = class MessageDeleteEvent extends Event {
 		if (!replyData) return;
 
 		try {
-			await this.client.channels.cache.get(replyData.channelID).deleteMessages(replyData.messageID);
+			await this.client.channels.cache.get(replyData.channelId).deleteMessages(replyData.messageId);
 
 			logger.info(`[REPLY MESSAGE DELETE]: ${message.logInfo}: ${message.content}`);
 		} catch (error) {

@@ -41,7 +41,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 			const player = this.getPlayer(interaction.options)
 				?? await players.model.findOne({
 					where: {
-						guildID: null,
+						guildId: null,
 						ign: { [Op.iLike]: interaction.options.get('player').value },
 					},
 				});

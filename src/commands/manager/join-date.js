@@ -84,7 +84,7 @@ module.exports = class JoinDateCommand extends SlashCommand {
 
 			interaction.defer();
 
-			const hypixelGuild = this.getHypixelGuild(interaction.options, interaction);
+			const hypixelGuild = this.getHypixelGuild(interaction);
 			const { chatBridge } = hypixelGuild;
 			const player = this.getPlayer(interaction.options);
 

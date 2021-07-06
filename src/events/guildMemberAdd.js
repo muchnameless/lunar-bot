@@ -22,7 +22,7 @@ module.exports = class GuildMemberAddEvent extends Event {
 		if (member.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
 
 		// check new discord members for tag in player database and link them if found
-		const player = member.player ?? this.client.players.getByID(member.user.tag);
+		const player = member.player ?? this.client.players.getById(member.user.tag);
 
 		if (!player) return;
 

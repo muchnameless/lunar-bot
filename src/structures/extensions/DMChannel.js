@@ -22,12 +22,12 @@ class LunarDMChannel extends Structures.get('DMChannel') {
 
 	/**
 	 * deletes all provided messages from the channel with as few API calls as possible
-	 * @param {string|string[]} IDs
+	 * @param {string|string[]} Ids
 	 */
-	deleteMessages(IDs) {
-		if (Array.isArray(IDs)) return Promise.all(IDs.map(async id => this.messages.delete(id)));
+	deleteMessages(Ids) {
+		if (Array.isArray(Ids)) return Promise.all(Ids.map(async id => this.messages.delete(id)));
 
-		return this.messages.delete(IDs);
+		return this.messages.delete(Ids);
 	}
 }
 

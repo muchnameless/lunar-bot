@@ -209,10 +209,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 						/** @type {import('../../database/models/Player')} */
 						const player = discordMessage.author.player
 							?? (await this.client.players.model.findOrCreate({
-								where: { discordID: discordMessage.author.id },
+								where: { discordId: discordMessage.author.id },
 								defaults: {
-									minecraftUUID: SnowflakeUtil.generate(),
-									guildID: GUILD_ID_BRIDGER,
+									minecraftUuid: SnowflakeUtil.generate(),
+									guildId: GUILD_ID_BRIDGER,
 									ign: UNKNOWN_IGN,
 									inDiscord: true,
 								},

@@ -83,18 +83,15 @@ module.exports = class ConfigCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		// destructure subcommand
-		const { name, options } = interaction.options.first();
-
-		switch (name) {
+		switch (interaction.subCommandName) {
 			case 'edit': {
-				const KEY = options.get('key').value.toUpperCase().replace(/ +/g, '_');
+				const KEY = interaction.options.get('key').value.toUpperCase().replace(/ +/g, '_');
 				const OLD_VALUE = this.config.get(KEY);
 				const OLD_TYPE = typeof OLD_VALUE;
 
-				let { value: newValue } = options.get('value');
+				let { value: newValue } = interaction.options.get('value');
 
-				switch (options.get('type')?.value.toLowerCase() ?? OLD_TYPE) {
+				switch (interaction.options.get('type')?.value.toLowerCase() ?? OLD_TYPE) {
 					case 'number':
 						newValue = Number(newValue.replaceAll('_', ''));
 						break;
@@ -121,7 +118,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 			}
 
 			case 'delete': {
-				const KEY = options.get('key').value.toUpperCase().replace(/ +/g, '_');
+				const KEY = interaction.options.get('key').value.toUpperCase().replace(/ +/g, '_');
 				const VALUE = this.config.get(KEY);
 
 				if (VALUE === null) return interaction.reply(`\`${KEY}\` is not in the config`);
@@ -131,7 +128,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 			}
 
 			case 'search': {
-				const query = options?.get('query')?.value.replace(/ +/g, '_');
+				const query = interaction.options.get('query')?.value.replace(/ +/g, '_');
 
 				if (!query) return interaction.reply({
 					content: this.listEntries(this.config.cache),
@@ -149,7 +146,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${name}'`);
+				throw new Error(`unknown subCommandName '${interaction.subCommandName}'`);
 		}
 	}
 };

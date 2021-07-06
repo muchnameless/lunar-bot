@@ -1,43 +1,35 @@
-declare module 'discord.js' {
-	interface Message {
-		client: import('./src/structures/LunarClient');
-		// author: import('./src/structures/extensions/User');
-	}
-
-	interface Interaction {
-		client: import('./src/structures/LunarClient');
-	}
-
-	interface User {
-		client: import('./src/structures/LunarClient');
-		player: import('./src/structures/database/models/Player');
-	}
-
-	interface Channel {
-		botPermissions: import('discord.js').Permissions
-	}
-
-	interface Guild {
-		client: import('./src/structures/LunarClient');
-	}
-
-	interface GuildMember {
-		client: import('./src/structures/LunarClient');
-		player: import('./src/structures/database/models/Player');
-		// user: import('./src/structures/extensions/User');
-	}
-
-	interface ThreadMember {
-		client: import('./src/structures/LunarClient');
-		player: import('./src/structures/database/models/Player');
-		// user: import('./src/structures/extensions/User');
-	}
-
-	interface Base {
-		// client: import('./src/structures/LunarClient');
-	}
-
-	interface MessageEmbed {
-		padFields(numberOfRows?: number): this;
-	}
+export class Message extends (await import('discord.js')).Message {
+	author: import('./src/structures/extensions/User');
 }
+
+// declare module 'discord.js' {
+// 	interface Message {
+// 		author: import('./src/structures/extensions/User');
+// 	}
+
+// 	interface User {
+// 		player: import('./src/structures/database/models/Player');
+// 	}
+
+// 	interface Channel {
+// 		botPermissions: Permissions;
+// 	}
+
+// 	interface GuildMember {
+// 		player: import('./src/structures/database/models/Player');
+// 		user: import('./src/structures/extensions/User');
+// 	}
+
+// 	interface ThreadMember {
+// 		player: import('./src/structures/database/models/Player');
+// 		user: import('./src/structures/extensions/User');
+// 	}
+
+// 	interface Base {
+// 		client: import('./src/structures/LunarClient');
+// 	}
+
+// 	interface MessageEmbed {
+// 		padFields(numberOfRows?: number): this;
+// 	}
+// }

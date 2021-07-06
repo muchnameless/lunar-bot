@@ -39,7 +39,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 		const missingVerifiedRole = [];
 
 		for (const [ DISCORD_ID, member ] of lgGuild.members.cache) {
-			if (players.cache.some(({ discordID }) => discordID === DISCORD_ID)) {
+			if (players.cache.some(({ discordId }) => discordId === DISCORD_ID)) {
 				if (!member.roles.cache.has(VERIFIED_ROLE_ID)) missingVerifiedRole.push(member);
 				continue;
 			}
@@ -93,7 +93,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 
 		for (const { name, players: guildPlayers } of hypixelGuilds.cache.values()) {
 			// db entries with issues
-			const [ unlinkedGuildPlayers, linkedPlayers ] = guildPlayers.partition(({ discordID }) => /\D/.test(discordID));
+			const [ unlinkedGuildPlayers, linkedPlayers ] = guildPlayers.partition(({ discordId }) => /\D/.test(discordId));
 			const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(({ inDiscord }) => !inDiscord);
 			const UNLINKED_AMOUNT = unlinkedGuildPlayers.size;
 			const LINKED_NOT_DISCORD_AMOUNT = linkedAndNotInDiscordCurrentGuild.size;
@@ -106,7 +106,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 				values: UNLINKED_AMOUNT
 					? Util.splitMessage(
 						unlinkedGuildPlayers
-							.map(({ ign, discordID }) => `${escapeIgn(ign)} | ${discordID ? Util.escapeMarkdown(discordID) : 'unknown tag'}`)
+							.map(({ ign, discordId }) => `${escapeIgn(ign)} | ${discordId ? Util.escapeMarkdown(discordId) : 'unknown tag'}`)
 							.join('\n'),
 						{ char: '\n', maxLength: 1024 },
 					)
@@ -119,7 +119,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 				values: LINKED_NOT_DISCORD_AMOUNT
 					? Util.splitMessage(
 						linkedAndNotInDiscordCurrentGuild
-							.map(({ discordID, ign }) => `<@${discordID}> | ${escapeIgn(ign)}`)
+							.map(({ discordId, ign }) => `<@${discordId}> | ${escapeIgn(ign)}`)
 							.join('\n'),
 						{ char: '\n', maxLength: 1024 },
 					)

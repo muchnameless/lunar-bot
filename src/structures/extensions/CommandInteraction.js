@@ -20,26 +20,18 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 		/**
 		 * wether to use ephemeral replies and deferring
 		 */
-		this.useEphemeral = LunarCommandInteraction.checkEphemeralOption(this.options)
+		this.useEphemeral = this._checkEphemeralOption
 			?? (channel !== null && channel.type !== 'dm'
 				? !(channel.name.includes('command') || channel.isTicket) // guild channel
 				: false); // DM channel
 	}
 
-	static _getEphemeralOption(options) {
-		return options
-			? options.get('visibility')?.value
-				?? this._getEphemeralOption(options.first()?.options)
-			: null;
-	}
-
 	/**
 	 * recursively checks the command options for the ephemeral option
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
 	 * @returns {?boolean}
 	 */
-	static checkEphemeralOption(options) {
-		switch (this._getEphemeralOption(options)) {
+	get _checkEphemeralOption() {
+		switch (this.options.get('visibility')?.value) {
 			case 'everyone':
 				return false;
 
@@ -51,33 +43,13 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 		}
 	}
 
-	/**
-	 * @param {import('discord.js').CommandInteractionOption} option
-	 */
-	static isSubCommandOption(option) {
-		return (option?.type === 'SUB_COMMAND' || option?.type === 'SUB_COMMAND_GROUP') ?? false;
-	}
-
-	/**
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
-	 */
-	static stringifyOptions(options) {
-		return options
-			?.reduce(
-				(acc, cur) => {
-					if (LunarCommandInteraction.isSubCommandOption(cur)) {
-						return `${acc} ${cur.name}${this.stringifyOptions(cur.options)}`;
-					}
-
-					return `${acc} ${cur.name}: ${cur.value}`;
-				},
-				'',
-			)
-			?? '';
-	}
-
 	get logInfo() {
-		return `${this.commandName}${LunarCommandInteraction.stringifyOptions(this.options)}`;
+		return [
+			this.commandName,
+			this.subCommandGroupName,
+			this.subCommandName,
+			...this.options.map(({ name, value }) => `${name}: ${value}`),
+		].filter(Boolean).join(' ');
 	}
 
 	/**
@@ -88,11 +60,14 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	}
 
 	/**
-	 * appends the first option name if the command is a subcommand or subcommand group
+	 * appends the first option name if the command is a subCommandName or subCommandName group
 	 */
 	get fullCommandName() {
-		const firstOption = this.options?.first();
-		return `${this.commandName}${LunarCommandInteraction.isSubCommandOption(firstOption) ? ` ${firstOption.name}` : ''}`;
+		return [
+			this.commandName,
+			this.subCommandGroupName,
+			this.subCommandName,
+		].filter(Boolean).join(' ');
 	}
 
 	/**
@@ -165,7 +140,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	 * @param {import('./Message')} [messageInput]
 	 */
 	async _handleReplyMessage({ ephemeral, content }, messageInput) {
-		if (ephemeral || !content || !this.client.chatBridges.channelIDs.has(this.channelID)) return;
+		if (ephemeral || !content || !this.client.chatBridges.channelIds.has(this.channelId)) return;
 
 		const message = messageInput ?? await this.fetchReply();
 
@@ -219,7 +194,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 			: questionOrOptions;
 
 		try {
-			if (!this.channel) await this.client.channels.fetch(this.channelID);
+			if (!this.channel) await this.client.channels.fetch(this.channelId);
 
 			const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
 			const CANCLE_ID = `confirm:${SnowflakeUtil.generate()}`;
@@ -233,11 +208,11 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 					new MessageActionRow()
 						.addComponents(
 							new MessageButton()
-								.setCustomID(SUCCESS_ID)
+								.setCustomId(SUCCESS_ID)
 								.setStyle(Constants.MessageButtonStyles.SUCCESS)
 								.setEmoji(Y_EMOJI),
 							new MessageButton()
-								.setCustomID(CANCLE_ID)
+								.setCustomId(CANCLE_ID)
 								.setStyle(Constants.MessageButtonStyles.DANGER)
 								.setEmoji(X_EMOJI),
 						),
@@ -247,7 +222,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 
 			const result = await this.channel.awaitMessageComponent({
 				componentType: Constants.MessageComponentTypes.BUTTON,
-				filter: interaction => (interaction.user.id === this.user.id && [ SUCCESS_ID, CANCLE_ID ].includes(interaction.customID)
+				filter: interaction => (interaction.user.id === this.user.id && [ SUCCESS_ID, CANCLE_ID ].includes(interaction.customId)
 					? true
 					: (async () => {
 						try {
@@ -263,7 +238,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 				time: timeoutSeconds * 1_000,
 			});
 
-			const success = result.customID === SUCCESS_ID;
+			const success = result.customId === SUCCESS_ID;
 
 			result.update({
 				embeds: [
@@ -289,7 +264,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	 */
 	async react(...emojis) {
 		if (this.ephemeral) return null;
-		if (!this.channel?.botPermissions.has(Permissions.FLAGS.ADD_REACTIONS)) return logger.error(`[INTERACTION REACT]: missing 'ADD_REACTIONS' in ${this.channel ?? this.channelID}`);
+		if (!this.channel?.botPermissions.has(Permissions.FLAGS.ADD_REACTIONS)) return logger.error(`[INTERACTION REACT]: missing 'ADD_REACTIONS' in ${this.channel ?? this.channelId}`);
 
 		try {
 			return (await this.fetchReply()).react(...emojis);

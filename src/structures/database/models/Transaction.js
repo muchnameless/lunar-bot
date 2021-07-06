@@ -7,7 +7,7 @@ const { Model, DataTypes } = require('sequelize');
  * @property {string} from
  * @property {string} to
  * @property {number} amount
- * @property {?string} auctionID
+ * @property {?string} auctionId
  * @property {?string} notes
  * @property {string} type
  */
@@ -41,7 +41,7 @@ module.exports = class Transaction extends Model {
 				defaultValue: 0,
 				allowNull: false,
 			},
-			auctionID: { // hypixel api auction uuid
+			auctionId: { // hypixel api auction uuid
 				type: DataTypes.STRING,
 				defaultValue: null,
 				allowNull: true,

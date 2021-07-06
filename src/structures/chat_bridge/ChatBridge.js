@@ -154,13 +154,13 @@ module.exports = class ChatBridge extends EventEmitter {
 			this.bot.player ??= await (async () => {
 				/** @type {[import('../database/models/Player'), boolean]} */
 				const [ player, created ] = await this.client.players.model.findOrCreate({
-					where: { minecraftUUID: this.bot.uuid },
+					where: { minecraftUuid: this.bot.uuid },
 					defaults: {
 						ign: this.bot.ign,
 					},
 				});
 
-				if (created) this.client.players.set(player.minecraftUUID, player);
+				if (created) this.client.players.set(player.minecraftUuid, player);
 
 				return player;
 			})();
@@ -179,7 +179,7 @@ module.exports = class ChatBridge extends EventEmitter {
 			}
 
 			// already linked to this guild
-			if (guild.guildID === this.guild?.guildID) {
+			if (guild.guildId === this.guild?.guildId) {
 				logger.debug(`[CHATBRIDGE]: ${this.logInfo}: already linked`);
 				return this;
 			}
@@ -218,7 +218,7 @@ module.exports = class ChatBridge extends EventEmitter {
 		this.guild = null;
 
 		// clear DiscordChatManagers
-		this.discord.channelsByIDs.clear();
+		this.discord.channelsByIds.clear();
 		this.discord.channelsByType.clear();
 
 		return this;

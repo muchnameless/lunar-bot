@@ -15,9 +15,9 @@ module.exports = class ShardErrorEvent extends Event {
 	/**
 	 * event listener callback
 	 * @param {Error} error
-	 * @param {number} shardID
+	 * @param {number} shardId
 	 */
-	async run(error, shardID) {
-		logger.error(`[SHARD ERROR]: #${shardID}`, error);
+	async run(error, shardId) {
+		logger.error(`[SHARD ERROR]: #${shardId}`, error);
 	}
 };

@@ -33,7 +33,7 @@ module.exports = class TopCommand extends SlashCommand {
 				xpType: interaction.options.get('type')?.value ?? this.config.get('CURRENT_COMPETITION'),
 				page: interaction.options.get('page')?.value ?? 1,
 				offset: interaction.options.get('offset')?.value ?? '',
-				hypixelGuild: this.getHypixelGuild(interaction.options, interaction),
+				hypixelGuild: this.getHypixelGuild(interaction),
 				user: interaction.user,
 			},
 		);

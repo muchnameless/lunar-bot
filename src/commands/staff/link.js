@@ -43,11 +43,11 @@ module.exports = class LinkCommand extends SlashCommand {
 
 		let uuid;
 		let ign;
-		let guildID;
+		let guildId;
 
 		try {
 			({ uuid, ign } = await mojang.ignOrUuid(IGN_OR_UUID));
-			({ _id: guildID } = await hypixel.guild.player(uuid));
+			({ _id: guildId } = await hypixel.guild.player(uuid));
 		} catch (error) {
 			logger.error('[LINK]', error);
 		}
@@ -55,17 +55,17 @@ module.exports = class LinkCommand extends SlashCommand {
 		/** @type {?import('../../structures/database/models/Player')} */
 		let player;
 
-		if (!this.client.hypixelGuilds.cache.keyArray().includes(guildID)) { // IGN_OR_UUID is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
-			player = this.client.players.getByIGN(IGN_OR_UUID);
+		if (!this.client.hypixelGuilds.cache.keyArray().includes(guildId)) { // IGN_OR_Uuid is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
+			player = this.client.players.getByIgn(IGN_OR_UUID);
 
-			if (player) ({ minecraftUUID: uuid, ign } = player);
-		} else if (uuid) { // IGN_OR_UUID could be resolved to a valid uuid in guild
+			if (player) ({ minecraftUuid: uuid, ign } = player);
+		} else if (uuid) { // IGN_OR_Uuid could be resolved to a valid uuid in guild
 			player = this.client.players.cache.get(uuid)
 				?? (await this.client.players.model.findOrCreate({
-					where: { minecraftUUID: uuid },
+					where: { minecraftUuid: uuid },
 					defaults: {
 						ign,
-						guildID,
+						guildId,
 					},
 				}))?.[0];
 		}
@@ -75,31 +75,31 @@ module.exports = class LinkCommand extends SlashCommand {
 			Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 		`);
 
-		// discordID already linked to another player
-		const playerLinkedToID = this.client.players.getByID(user.id)
+		// discordId already linked to another player
+		const playerLinkedToId = this.client.players.getById(user.id)
 			?? await this.client.players.model.findOne({
-				where: { discordID: user.id },
+				where: { discordId: user.id },
 			});
 
-		if (playerLinkedToID) {
+		if (playerLinkedToId) {
 			let linkedUserIsDeleted = false;
 
-			const linkedUser = await playerLinkedToID.discordUser.catch((error) => {
+			const linkedUser = await playerLinkedToId.discordUser.catch((error) => {
 				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
 					linkedUserIsDeleted = true;
-					return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: deleted discord user: ${playerLinkedToID.discordID}`, error);
+					return logger.error(`[LINK]: ${playerLinkedToId.logInfo}: deleted discord user: ${playerLinkedToId.discordId}`, error);
 				}
-				return logger.error(`[LINK]: ${playerLinkedToID.logInfo}: error fetching already linked user`, error);
+				return logger.error(`[LINK]: ${playerLinkedToId.logInfo}: error fetching already linked user`, error);
 			});
 
 			if (!linkedUserIsDeleted) {
 				await interaction.awaitConfirmation({
-					question: `${linkedUser ?? `\`${user.id}\``} is already linked to \`${playerLinkedToID.ign}\`. Overwrite this?`,
+					question: `${linkedUser ?? `\`${user.id}\``} is already linked to \`${playerLinkedToId.ign}\`. Overwrite this?`,
 					allowedMentions: { parse: [] },
 				});
 			}
 
-			if (!await playerLinkedToID.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
+			if (!await playerLinkedToId.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
 				await interaction.reply({
 					content: `unable to update roles and nickname for the currently linked member ${linkedUser}`,
 					allowedMentions: { parse: [] },
@@ -108,26 +108,26 @@ module.exports = class LinkCommand extends SlashCommand {
 		}
 
 		// player already linked
-		if (validateNumber(player.discordID)) {
+		if (validateNumber(player.discordId)) {
 			let linkedUserIsDeleted = false;
 
 			const linkedUser = await player.discordUser.catch((error) => {
 				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
 					linkedUserIsDeleted = true;
-					return logger.error(`[LINK]: ${player.logInfo}: deleted discord user: ${player.discordID}`);
+					return logger.error(`[LINK]: ${player.logInfo}: deleted discord user: ${player.discordId}`);
 				}
 				return logger.error(`[LINK]: ${player.logInfo}: error fetching already linked user`, error);
 			});
 
 			if (!linkedUserIsDeleted) {
-				if (player.discordID === user.id) return interaction.reply({
-					content: `\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}`,
+				if (player.discordId === user.id) return interaction.reply({
+					content: `\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}`,
 					allowedMentions: { parse: [] },
 				});
 
 				await interaction.awaitConfirmation({
 					question: stripIndents`
-						\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordID}\``}. Overwrite this?
+						\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}. Overwrite this?
 						Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 					`,
 					allowedMentions: { parse: [] },

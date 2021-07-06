@@ -15,7 +15,7 @@ const logger = require('../../../functions/logger');
 /**
  * @typedef {object} GuildRank
  * @property {string} name name of the guild rank
- * @property {?string} roleID discord role ID associated with the guild rank
+ * @property {?string} roleId discord role ID associated with the guild rank
  * @property {number} priority hypixel guild rank priority
  * @property {?number} weightReq weight requirement for the guild rank
  */
@@ -23,7 +23,7 @@ const logger = require('../../../functions/logger');
 /**
  * @typedef {object} ChatBridgeChannel
  * @property {string} type
- * @property {string} channelID
+ * @property {string} channelId
  */
 
 
@@ -52,11 +52,11 @@ module.exports = class HypixelGuild extends Model {
 		/**
 		 * @type {string}
 		 */
-		this.guildID;
+		this.guildId;
 		/**
 		 * @type {string}
 		 */
-		this.roleID;
+		this.roleId;
 		/**
 		 * @type {string}
 		 */
@@ -80,7 +80,7 @@ module.exports = class HypixelGuild extends Model {
 		/**
 		 * @type {string}
 		 */
-		this.rankRequestChannelID;
+		this.rankRequestChannelId;
 		/**
 		 * @type {GuildRank[]}
 		 */
@@ -96,11 +96,11 @@ module.exports = class HypixelGuild extends Model {
 	 */
 	static init(sequelize) {
 		return super.init({
-			guildID: {
+			guildId: {
 				type: DataTypes.STRING,
 				primaryKey: true,
 			},
-			roleID: {
+			roleId: {
 				type: DataTypes.STRING,
 				defaultValue: null,
 				allowNull: true,
@@ -128,17 +128,17 @@ module.exports = class HypixelGuild extends Model {
 				},
 			},
 			chatBridgeChannels: {
-				type: DataTypes.ARRAY(DataTypes.JSONB), // { channelID: string, type: string }
+				type: DataTypes.ARRAY(DataTypes.JSONB), // { channelId: string, type: string }
 				defaultValue: [],
 				allowNull: false,
 			},
-			rankRequestChannelID: {
+			rankRequestChannelId: {
 				type: DataTypes.STRING,
 				defaultValue: null,
 				allowNull: true,
 			},
 			ranks: {
-				type: DataTypes.ARRAY(DataTypes.JSONB), // { name: string, priority: int, weightReq: int, roleID: string }
+				type: DataTypes.ARRAY(DataTypes.JSONB), // { name: string, priority: int, weightReq: int, roleId: string }
 				defaultValue: null,
 				allowNull: true,
 			},
@@ -182,7 +182,7 @@ module.exports = class HypixelGuild extends Model {
 	 * returns the filtered <LunarClient>.players containing all players from this guild
 	 */
 	get players() {
-		return this._players ??= this.client.players.cache.filter(({ guildID }) => guildID === this.guildID);
+		return this._players ??= this.client.players.cache.filter(({ guildId }) => guildId === this.guildId);
 	}
 
 	set chatBridge(value) {
@@ -248,7 +248,7 @@ module.exports = class HypixelGuild extends Model {
 		return this.players.array().flatMap((player) => {
 			const rank = player.guildRank;
 
-			if (!rank?.roleID) return []; // unkown or non-requestable rank
+			if (!rank?.roleId) return []; // unkown or non-requestable rank
 
 			const { totalWeight } = player.getWeight();
 
@@ -279,7 +279,7 @@ module.exports = class HypixelGuild extends Model {
 	 * updates the player database
 	 */
 	async update() {
-		const data = await hypixel.guild.id(this.guildID);
+		const data = await hypixel.guild.id(this.guildId);
 
 		if (data.meta.cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
 
@@ -293,7 +293,7 @@ module.exports = class HypixelGuild extends Model {
 	 * @param {?import('@zikeji/hypixel/src/util/ResultObject').ResultObject<import('@zikeji/hypixel').Components.Schemas.GuildResponse, ['guild']>} data
 	 */
 	async _updateGuildData(data) {
-		const { meta: { cached }, name: guildName, ranks, chatMute } = data ?? await hypixel.guild.id(this.guildID);
+		const { meta: { cached }, name: guildName, ranks, chatMute } = data ?? await hypixel.guild.id(this.guildId);
 
 		if (cached) return logger.info(`[UPDATE GUILD DATA]: ${this.name}: cached data`);
 
@@ -309,7 +309,7 @@ module.exports = class HypixelGuild extends Model {
 					name,
 					priority,
 					weightReq: Infinity,
-					roleID: null,
+					roleId: null,
 				};
 
 				logger.info(`[UPDATE GUILD]: ${this.name}: new rank`, newRank);
@@ -338,7 +338,7 @@ module.exports = class HypixelGuild extends Model {
 		this._isUpdatingPlayers = true;
 
 		try {
-			const { meta: { cached }, members: currentGuildMembers } = data ?? await hypixel.guild.id(this.guildID);
+			const { meta: { cached }, members: currentGuildMembers } = data ?? await hypixel.guild.id(this.guildId);
 
 			if (cached) return logger.info(`[UPDATE PLAYERS]: ${this.name}: cached data`);
 
@@ -348,7 +348,7 @@ module.exports = class HypixelGuild extends Model {
 			if (!currentGuildMembers.length) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: guild data did not include any members`); // API error
 
 			const guildPlayers = this.players;
-			const playersLeft = guildPlayers.filter((_, minecraftUUID) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUUID));
+			const playersLeft = guildPlayers.filter((_, minecraftUuid) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUuid));
 			const PLAYERS_LEFT_AMOUNT = playersLeft.size;
 			const PLAYERS_OLD_AMOUNT = guildPlayers.size;
 
@@ -362,12 +362,12 @@ module.exports = class HypixelGuild extends Model {
 			let hasError = false;
 
 			await safePromiseAll([
-				...membersJoined.map(async ({ uuid: minecraftUUID }) => {
+				...membersJoined.map(async ({ uuid: minecraftUuid }) => {
 					/** @type {[import('./Player'), boolean]} */
 					const [ player, created ] = await this.client.players.model.findOrCreate({
-						where: { minecraftUUID },
+						where: { minecraftUuid },
 						defaults: {
-							guildID: this.guildID,
+							guildId: this.guildId,
 						},
 					});
 
@@ -375,7 +375,7 @@ module.exports = class HypixelGuild extends Model {
 					if (created) {
 						const IGN = await (async () => {
 							try {
-								return (await mojang.uuid(minecraftUUID)).ign;
+								return (await mojang.uuid(minecraftUuid)).ign;
 							} catch (error) {
 								logger.error('[GET IGN]', error);
 								return UNKNOWN_IGN;
@@ -389,7 +389,7 @@ module.exports = class HypixelGuild extends Model {
 
 						// try to link new player to discord
 						await (async () => {
-							discordTag = (await hypixel.player.uuid(minecraftUUID)
+							discordTag = (await hypixel.player.uuid(minecraftUuid)
 								.catch(error => logger.error(`[GET DISCORD TAG]: ${IGN} (${this.name})`, error)))
 								?.socialMedia?.links?.DISCORD;
 
@@ -398,7 +398,7 @@ module.exports = class HypixelGuild extends Model {
 								return hasError = true;
 							}
 
-							discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
+							discordMember = await this.client.lgGuild?.fetchMemberByTag(discordTag);
 
 							if (discordMember) return;
 
@@ -410,7 +410,7 @@ module.exports = class HypixelGuild extends Model {
 						setTimeout(
 							(async () => {
 								try {
-									await player.setValidDiscordID(discordMember?.id ?? discordTag);
+									await player.setValidDiscordId(discordMember?.id ?? discordTag);
 								} catch (error) {
 									logger.error(error);
 								}
@@ -427,7 +427,7 @@ module.exports = class HypixelGuild extends Model {
 
 					// player already in the db
 					} else {
-						player.guildID = this.guildID;
+						player.guildId = this.guildId;
 
 						await player.updateIgn();
 						joinedLog.push(`+\xa0${player.ign}`);
@@ -445,14 +445,14 @@ module.exports = class HypixelGuild extends Model {
 									return hasError = true;
 								}
 
-								discordMember = await this.client.lgGuild?.findMemberByTag(discordTag);
+								discordMember = await this.client.lgGuild?.fetchMemberByTag(discordTag);
 
 								if (!discordMember) {
-									if (/\D/.test(player.discordID)) await player.setValidDiscordID(discordTag).catch(logger.error); // save tag if no id is known
+									if (/\D/.test(player.discordId)) await player.setValidDiscordId(discordTag).catch(logger.error); // save tag if no id is known
 									player.inDiscord = false;
-									joinedLog.push(player.discordID.includes('#')
-										? `-\xa0${player.ign}: unknown discord tag ${player.discordID}`
-										: `-\xa0${player.ign}: unknown discord ID ${player.discordID}`,
+									joinedLog.push(player.discordId.includes('#')
+										? `-\xa0${player.ign}: unknown discord tag ${player.discordId}`
+										: `-\xa0${player.ign}: unknown discord ID ${player.discordId}`,
 									);
 
 									return hasError = true;
@@ -497,7 +497,7 @@ module.exports = class HypixelGuild extends Model {
 						);
 					}
 
-					this.client.players.set(minecraftUUID, player);
+					this.client.players.set(minecraftUuid, player);
 				}),
 
 				// player left the guild
@@ -607,7 +607,7 @@ module.exports = class HypixelGuild extends Model {
 		const { value: {
 			name: RANK_NAME,
 			weightReq: WEIGHT_REQ,
-			roleID: ROLE_ID,
+			roleId: ROLE_ID,
 			priority: RANK_PRIORITY,
 		} } = result; // rank
 		const { player } = ctx.author;
@@ -628,7 +628,7 @@ module.exports = class HypixelGuild extends Model {
 
 			const replyData = await ctx.replyData;
 
-			if (replyData) ctx.channel.deleteMessages(replyData.messageID).catch(error => logger.error('[RANK REQUEST]: delete', error));
+			if (replyData) ctx.channel.deleteMessages(replyData.messageId).catch(error => logger.error('[RANK REQUEST]: delete', error));
 
 			return ctx.react(CLOWN);
 		}
@@ -653,7 +653,6 @@ module.exports = class HypixelGuild extends Model {
 			content: `${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
 			reply: {
 				messageReference: ctx,
-				failIfNotExists: false,
 			},
 			sameChannel: true,
 		});
@@ -669,8 +668,8 @@ module.exports = class HypixelGuild extends Model {
 
 			if (!member) throw new Error('unknown discord member');
 
-			const otherRequestableRankRoles = this.ranks.flatMap(({ roleID }) => (roleID && roleID !== ROLE_ID ? roleID : []));
-			const rolesToRemove = [ ...member.roles.cache.keys() ].filter(roleID => otherRequestableRankRoles.includes(roleID));
+			const otherRequestableRankRoles = this.ranks.flatMap(({ roleId }) => (roleId && roleId !== ROLE_ID ? roleId : []));
+			const rolesToRemove = [ ...member.roles.cache.keys() ].filter(roleId => otherRequestableRankRoles.includes(roleId));
 
 			await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
 		} else {

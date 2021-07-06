@@ -32,7 +32,7 @@ module.exports = class ChatBridgeArray extends Array {
 		 * discord channel IDs of all ChatBridge channels
 		 * @type {Set<import('discord.js').Snowflake>}
 		 */
-		this.channelIDs = new Set();
+		this.channelIds = new Set();
 	}
 
 	/**
@@ -51,12 +51,12 @@ module.exports = class ChatBridgeArray extends Array {
 	}
 
 	/**
-	 * loads channelIDs from hypixelGuilds
+	 * loads channelIds from hypixelGuilds
 	 */
-	loadChannelIDs() {
+	loadChannelIds() {
 		for (const { chatBridgeChannels } of this.client.hypixelGuilds.cache.values()) {
-			for (const { channelID } of chatBridgeChannels) {
-				this.channelIDs.add(channelID);
+			for (const { channelId } of chatBridgeChannels) {
+				this.channelIds.add(channelId);
 			}
 		}
 	}
@@ -167,7 +167,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 * @param {import('./ChatBridge').MessageForwardOptions} [options={}]
 	 */
 	async handleDiscordMessage(message, options = {}) {
-		if (!this.channelIDs.has(message.channelID) || !this.client.config.get('CHATBRIDGE_ENABLED')) return;
+		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return;
 		if (message.flags.any([ MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL ])) return; // ignore defer and ephemeral messages
 
 		try {
@@ -177,8 +177,8 @@ module.exports = class ChatBridgeArray extends Array {
 			// check if the message was sent from the bot, don't react with X_EMOJI in this case
 			if (options.checkIfNotFromBot) {
 				if (message.me) return; // message was sent by the bot
-				if (message.webhookID
-					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookID === chatBridge.discord.channelsByIDs.get(message.channelID)?.webhook?.id), false)
+				if (message.webhookId
+					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
 				) return; // message was sent by one of the ChatBridges's webhook
 			}
 

@@ -42,7 +42,7 @@ module.exports = class RankCommand extends DualCommand {
 		return ctx.reply(stripIndents`
 			Requestable guild ranks: (\`${this.config.get('PREFIX')}${this.name} [rank name]\`)
 			${hypixelGuild.ranks
-				.filter(({ roleID }) => roleID)
+				.filter(({ roleId }) => roleId)
 				.map(({ name, weightReq }) => ` • ${name}: ${this.client.formatNumber(weightReq)} weight`)
 				.join('\n')}
 		`);

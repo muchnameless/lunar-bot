@@ -18,7 +18,7 @@ module.exports = class MessageReactionAddEvent extends Event {
 	 * @param {import('discord.js').MessageReaction} reaction
 	 * @param {import('../structures/extensions/User')} user
 	 */
-	async run(reaction, { id: userID }) {
+	async run(reaction, { id: userId }) {
 	// reaction.message is not from the announcement channel or not the broadcast emoji
 		if (reaction.message.channel.id !== this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') || reaction.emoji.name !== FORWARD_TO_GC) return;
 
@@ -29,6 +29,6 @@ module.exports = class MessageReactionAddEvent extends Event {
 			return logger.error('[MESSAGE REACTION ADD]: error while fetching partial', error);
 		}
 
-		if (userID === reaction.message.author.id) return this.client.chatBridges.handleAnnouncementMessage(reaction.message);
+		if (userId === reaction.message.author.id) return this.client.chatBridges.handleAnnouncementMessage(reaction.message);
 	}
 };

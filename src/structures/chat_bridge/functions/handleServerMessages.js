@@ -46,12 +46,12 @@ module.exports = async (message) => {
 
 		if (blockedMatched) {
 			const { groups: { sender, blockedContent } } = blockedMatched;
-			const senderDiscordID = message.client.players.findByIGN(sender)?.discordID;
+			const senderDiscordId = message.client.players.findByIgn(sender)?.discordId;
 
 			// react to latest message from 'sender' with that content
 			for (const { channel } of message.chatBridge.discord.channels.values()) {
 				channel?.messages.cache
-					.filter(({ content, author: { id } }) => (senderDiscordID ? id === senderDiscordID : true) && message.chatBridge.minecraft.parseContent(content).includes(blockedContent))
+					.filter(({ content, author: { id } }) => (senderDiscordId ? id === senderDiscordId : true) && message.chatBridge.minecraft.parseContent(content).includes(blockedContent))
 					.sort(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
 					.first()
 					?.react(STOP);
@@ -148,7 +148,7 @@ module.exports = async (message) => {
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 		}
 
-		const player = message.client.players.findByIGN(target);
+		const player = message.client.players.findByIgn(target);
 
 		if (!player) return;
 
@@ -183,7 +183,7 @@ module.exports = async (message) => {
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was unmuted`);
 		}
 
-		const player = message.client.players.findByIGN(target);
+		const player = message.client.players.findByIgn(target);
 
 		if (!player) return;
 
@@ -204,9 +204,9 @@ module.exports = async (message) => {
 		message.chatBridge.broadcast('gg');
 
 		const { groups: { target, newRank } } = promoteMatched;
-		const player = message.client.players.findByIGN(target);
+		const player = message.client.players.findByIgn(target);
 
-		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}' but not in the db`);
+		if (!player?.guildId) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}' but not in the db`);
 
 		const GUILD_RANK_PRIO = (message.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
 
@@ -228,9 +228,9 @@ module.exports = async (message) => {
 		message.forwardToDiscord();
 
 		const { groups: { target, newRank } } = demotedMatched;
-		const player = message.client.players.findByIGN(target);
+		const player = message.client.players.findByIgn(target);
 
-		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}' but not in the db`);
+		if (!player?.guildId) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}' but not in the db`);
 
 		const GUILD_RANK_PRIO = (message.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
 
@@ -266,9 +266,9 @@ module.exports = async (message) => {
 
 	if (friendReqMatched) {
 		const [ , IGN ] = friendReqMatched;
-		const player = message.client.players.findByIGN(IGN);
+		const player = message.client.players.findByIgn(IGN);
 
-		if (!player?.guildID) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: denying f request from ${IGN}`);
+		if (!player?.guildId) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: denying f request from ${IGN}`);
 
 		logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: accepting f request from ${IGN}`);
 		return message.chatBridge.minecraft.sendToChat(`/f add ${IGN}`);

@@ -75,13 +75,13 @@ module.exports = class ReloadCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {string} mode
-	 * @param {string} name
+	 * @param {string} subCommandName
+	 * @param {string} input
 	 */
-	async _run(ctx, mode, name) { // eslint-disable-line no-unused-vars
-		switch (mode) {
+	async _run(ctx, subCommandName, input) { // eslint-disable-line no-unused-vars
+		switch (subCommandName) {
 			case 'command': {
-				let commandName = name.toLowerCase();
+				let commandName = input.toLowerCase();
 
 				try {
 					const commandFiles = await getAllJsFiles(this.collection.dirPath);
@@ -107,7 +107,7 @@ module.exports = class ReloadCommand extends DualCommand {
 						command = this.collection.get(commandName); // try to find already loaded command
 					}
 
-					if (!commandFile) return ctx.reply(`no command with the name or alias \`${name}\` found`);
+					if (!commandFile) return ctx.reply(`no command with the name or alias \`${input}\` found`);
 
 					// command already loaded
 					if (command) {
@@ -136,7 +136,7 @@ module.exports = class ReloadCommand extends DualCommand {
 			}
 
 			case 'event': {
-				let eventName = name.toLowerCase();
+				let eventName = input.toLowerCase();
 
 				try {
 					const eventFiles = await getAllJsFiles(this.client.events.dirPath);
@@ -189,7 +189,7 @@ module.exports = class ReloadCommand extends DualCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${mode}'`);
+				throw new Error(`unknown subCommandName '${subCommandName}'`);
 		}
 	}
 
@@ -198,10 +198,7 @@ module.exports = class ReloadCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		// destructure subcommand
-		const { name, options } = interaction.options.first();
-
-		return this._run(interaction, name, options?.get('name').value);
+		return this._run(interaction, interaction.subCommandName, interaction.options.get('name').value);
 	}
 
 	/**

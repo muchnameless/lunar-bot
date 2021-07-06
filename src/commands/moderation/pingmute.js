@@ -24,7 +24,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 			param2 ?? {
 				aliases: [],
 				args: 1,
-				usage: '[`IGN`|`minecraftUUID`|`discordID`|`@mention`]',
+				usage: '[`IGN`|`minecraftUuid`|`discordId`|`@mention`]',
 			},
 		);
 	}
@@ -56,7 +56,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 	 */
 	async runInGame(message, args) { // eslint-disable-line no-unused-vars
 		/** @type {import('../../structures/database/models/Player')} */
-		const player = this.client.players.getByID(args[0]) ?? this.client.players.getByIGN(args[0]);
+		const player = this.client.players.getById(args[0]) ?? this.client.players.getByIgn(args[0]);
 
 		if (!player) return message.reply(`\`${args[0]}\` not in the player db`);
 

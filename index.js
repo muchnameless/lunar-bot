@@ -32,6 +32,7 @@ process
 	client = new LunarClient({
 		db,
 		fetchAllMembers: true,
+		failIfNotExists: false,
 		allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: true },
 		intents: [
 			Intents.FLAGS.DIRECT_MESSAGES,

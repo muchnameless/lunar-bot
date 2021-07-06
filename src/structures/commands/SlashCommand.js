@@ -3,8 +3,8 @@
 const { Constants } = require('discord.js');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT, GUILD_ID_ALL } = require('../../constants/database');
-const { getIDFromString } = require('../../functions/util');
-const { validateMinecraftUUID } = require('../../functions/stringValidators');
+const { getIdFromString } = require('../../functions/util');
+const { validateMinecraftUuid } = require('../../functions/stringValidators');
 const BaseCommand = require('./BaseCommand');
 const missingPermissionsError = require('../errors/MissingPermissionsError');
 const logger = require('../../functions/logger');
@@ -35,7 +35,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		this.permissions = permissions ?? null;
 		if (this.permissions?.length) this.permissions.push({
-			id: this.client.ownerID,
+			id: this.client.ownerId,
 			type: Constants.ApplicationCommandPermissionTypes.USER,
 			permission: true,
 		});
@@ -47,7 +47,7 @@ module.exports = class SlashCommand extends BaseCommand {
 		 * @param {boolean} [includeAll=false]
 		 */
 		return (client, includeAll = false) => {
-			const choices = client.hypixelGuilds.cache.map(({ guildID, name }) => ({ name, value: guildID }));
+			const choices = client.hypixelGuilds.cache.map(({ guildId, name }) => ({ name, value: guildId }));
 
 			if (includeAll) choices.push({
 				name: 'all',
@@ -125,13 +125,13 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @returns {boolean}
 	 */
 	static checkForce(options) {
-		return options?.get('force')?.value ?? false;
+		return options.get('force')?.value ?? false;
 	}
 
 	/**
 	 * @param {import('discord.js').ApplicationCommandOptionData} option
 	 */
-	static isSubCommandOption(option) {
+	static issubCommandNameOption(option) {
 		return option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND || option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP;
 	}
 
@@ -144,7 +144,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		const [ firstOption ] = options;
 
-		if (SlashCommand.isSubCommandOption(firstOption)) {
+		if (SlashCommand.issubCommandNameOption(firstOption)) {
 			options = options.map((option) => {
 				if (option.options[option.options.length - 1]?.name !== 'visibility') option.options.push(SlashCommand.EPHEMERAL_OPTION);
 				return option;
@@ -179,79 +179,84 @@ module.exports = class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * returns the player object, provide interaction parameter for a fallback to interaction.user.player
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * returns the player object, optional fallback to interaction.user.player
 	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @param {boolean} [fallbackToCurrentUser=false]
 	 * @returns {?import('../database/models/Player')}
 	 */
-	getPlayer(options, interaction) {
-		if (!options) return interaction?.user.player ?? null;
+	getPlayer(interaction, fallbackToCurrentUser = false) {
+		if (!interaction.options) {
+			if (fallbackToCurrentUser) return interaction.user.player;
+			return null;
+		}
 
-		const INPUT = (options.get('player') || options.get('target'))?.value.toLowerCase();
+		const INPUT = (interaction.options.get('player') || interaction.options.get('target'))?.value.toLowerCase();
 
-		if (!INPUT) return interaction?.user.player ?? null;
+		if (!INPUT) {
+			if (fallbackToCurrentUser) return interaction.user.player;
+			return null;
+		}
 
-		if (validateMinecraftUUID(INPUT)) return this.client.players.get(INPUT.replace(/-/g, ''));
+		if (validateMinecraftUuid(INPUT)) return this.client.players.get(INPUT.replace(/-/g, ''));
 
-		const DISCORD_ID = getIDFromString(INPUT);
+		const DISCORD_ID = getIdFromString(INPUT);
 
 		return (DISCORD_ID
-			? this.client.players.getByID(DISCORD_ID)
-			: SlashCommand.checkForce(options)
+			? this.client.players.getById(DISCORD_ID)
+			: SlashCommand.checkForce(interaction.options)
 				? this.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
-				: this.client.players.getByIGN(INPUT)
+				: this.client.players.getByIgn(INPUT)
 		) ?? null;
 	}
 
 	/**
-	 * returns the player object, provide interaction parameter for a fallback to interaction.user.player.ign
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * returns the player object's IGN, optional fallback to interaction.user.player
 	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @param {boolean} [fallbackToCurrentUser=false]
 	 * @returns {?string}
 	 */
-	getIGN(options, interaction) {
-		return this.getPlayer(options, interaction)?.ign ?? null;
+	getIgn(interaction, fallbackToCurrentUser = false) {
+		return this.getPlayer(interaction, fallbackToCurrentUser)?.ign ?? null;
 	}
 
 	/**
-	 * returns a HypixelGuild instance, throwing if none found
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
+	 * returns a HypixelGuild instance
 	 * @param {import('../extensions/CommandInteraction')} interaction
 	 * @returns {import('../database/models/HypixelGuild') | GUILD_ID_ALL}
 	 */
-	getHypixelGuild(options, interaction) {
-		const INPUT = options?.get('guild')?.value;
+	getHypixelGuild(interaction) {
+		const INPUT = interaction.options.get('guild')?.value;
 		if (INPUT === GUILD_ID_ALL) return INPUT;
-		return this.client.hypixelGuilds.cache.get(INPUT) ?? interaction?.user.player?.guild ?? this.client.hypixelGuilds.mainGuild;
+		return this.client.hypixelGuilds.cache.get(INPUT) ?? interaction.user.player?.guild ?? this.client.hypixelGuilds.mainGuild;
 	}
 
 	/**
 	 * @param {import('../extensions/CommandInteraction')} interaction
-	 * @param {{ userIDs: import('discord.js').Snowflake[], roleIDs: import('discord.js').Snowflake[] }} [permissions]
+	 * @param {{ userIds: import('discord.js').Snowflake[], roleIds: import('discord.js').Snowflake[] }} [permissions]
 	 */
-	async checkPermissions(interaction, { userIDs = [ this.client.ownerID ], roleIDs = this.requiredRoles } = {}) {
-		if (userIDs?.includes(interaction.user.id)) return; // user id bypass
-		if (!roleIDs?.length) return; // no role requirements
+	async checkPermissions(interaction, { userIds = [ this.client.ownerId ], roleIds = this.requiredRoles } = {}) {
+		if (userIds?.includes(interaction.user.id)) return; // user id bypass
+		if (!roleIds?.length) return; // no role requirements
 
 		/** @type {import('../extensions/GuildMember')} */
-		const member = interaction.guildID === this.config.get('MAIN_GUILD_ID')
+		const member = interaction.guildId === this.config.get('MAIN_GUILD_ID')
 			? interaction.member
 			: await (async () => {
 				const { lgGuild } = this.client;
 
-				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIDs);
+				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
 
 				try {
 					return await lgGuild.members.fetch(interaction.user.id);
 				} catch (error) {
 					logger.error('[CHECK PERMISSIONS]: error while fetching member to test for permissions', error);
-					throw missingPermissionsError('unknown discord member', interaction, roleIDs);
+					throw missingPermissionsError('unknown discord member', interaction, roleIds);
 				}
 			})();
 
 		// check for req roles
-		if (!member.roles.cache.some((_, roleID) => roleIDs.includes(roleID))) {
-			throw missingPermissionsError('missing required role', interaction, roleIDs);
+		if (!member.roles.cache.some((_, roleId) => roleIds.includes(roleId))) {
+			throw missingPermissionsError('missing required role', interaction, roleIds);
 		}
 	}
 

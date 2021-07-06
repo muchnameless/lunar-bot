@@ -190,11 +190,10 @@ module.exports = class GuildCommand extends SlashCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
-	 * @param {import('discord.js').CommandInteractionOption[]} options
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 * @param {?import('../../structures/database/models/HypixelGuild')} [hypixelGuild]
 	 */
-	async _run(interaction, options, commandOptions, hypixelGuild = this.getHypixelGuild(options, interaction)) {
+	async _run(interaction, commandOptions, hypixelGuild = this.getHypixelGuild(interaction)) {
 		return interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
@@ -207,11 +206,10 @@ module.exports = class GuildCommand extends SlashCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
-	 * @param {import('discord.js').CommandInteractionOption[]} options
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 */
-	async _runList(interaction, options, commandOptions) {
-		const hypixelGuild = this.getHypixelGuild(options, interaction);
+	async _runList(interaction, commandOptions) {
+		const hypixelGuild = this.getHypixelGuild(interaction);
 
 		return interaction.reply({
 			embeds: [
@@ -249,18 +247,15 @@ module.exports = class GuildCommand extends SlashCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		// destructure subcommand
-		const { name, options } = interaction.options.first();
-
-		switch (name) {
+		switch (interaction.subCommandName) {
 			case 'demote': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIGN(options);
+				const IGN = this.getIgn(interaction);
 
-				return this._run(interaction, options, {
+				return this._run(interaction, {
 					command: `g demote ${IGN}`,
 					responseRegExp: demote(IGN),
 				});
@@ -268,11 +263,11 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'history': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				return this._run(interaction, options, {
-					command: `g history ${options?.get('page')?.value ?? ''}`,
+				return this._run(interaction, {
+					command: `g history ${interaction.options.get('page')?.value ?? ''}`,
 					abortRegExp: historyErrors(),
 				});
 			}
@@ -281,33 +276,33 @@ module.exports = class GuildCommand extends SlashCommand {
 			case 'motd':
 			case 'quest': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				return this._run(interaction, options, {
-					command: `g ${name}`,
+				return this._run(interaction, {
+					command: `g ${interaction.subCommandName}`,
 				});
 			}
 
 			case 'top': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				return this._run(interaction, options, {
-					command: `g top ${options?.get('days_ago')?.value ?? ''}`,
+				return this._run(interaction, {
+					command: `g top ${interaction.options.get('days_ago')?.value ?? ''}`,
 					abortRegExp: topErrors(),
 				});
 			}
 
 			case 'invite': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = options.get('ign').value;
+				const IGN = interaction.options.get('ign').value;
 
-				return this._run(interaction, options, {
+				return this._run(interaction, {
 					command: `g invite ${IGN}`,
 					responseRegExp: invite(IGN),
 				});
@@ -317,23 +312,23 @@ module.exports = class GuildCommand extends SlashCommand {
 			case 'members':
 			case 'online': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('BRIDGER_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('BRIDGER_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				return this._runList(interaction, options, {
-					command: `g ${name}`,
+				return this._runList(interaction, {
+					command: `g ${interaction.subCommandName}`,
 				});
 			}
 
 			case 'log': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIGN(options);
-				const PAGE = options?.get('page')?.value;
+				const IGN = this.getIgn(interaction);
+				const PAGE = interaction.options.get('page')?.value;
 
-				return this._run(interaction, options, {
+				return this._run(interaction, {
 					command: `g log ${[ IGN, PAGE ].filter(Boolean).join(' ')}`,
 					abortRegExp: logErrors(),
 				});
@@ -341,36 +336,36 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'member': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIGN(options, interaction);
+				const IGN = this.getIgn(interaction, true);
 				if (!IGN) return interaction.reply({
 					content: 'you are not in the player db',
 					ephemeral: true,
 				});
 
-				return this._run(interaction, options, {
+				return this._run(interaction, {
 					command: `g member ${IGN}`,
 				});
 			}
 
 			case 'mute': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				const { players } = this.client;
-				const TARGET_INPUT = options.get('target').value;
-				const DURATION_INPUT = options.get('duration').value;
+				const TARGET_INPUT = interaction.options.get('target').value;
+				const DURATION_INPUT = interaction.options.get('duration').value;
 
-				let hypixelGuild = this.getHypixelGuild(options, interaction);
+				let hypixelGuild = this.getHypixelGuild(interaction);
 				let target;
 
 				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 					target = 'everyone';
 				} else {
-					target = this.getPlayer(options) ?? (SlashCommand.checkForce(options) && TARGET_INPUT);
+					target = this.getPlayer(interaction.options) ?? (SlashCommand.checkForce(interaction.options) && TARGET_INPUT);
 
 					if (!target) return interaction.reply({
 						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
@@ -406,7 +401,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					await hypixelGuild.save();
 				}
 
-				return this._run(interaction, options, {
+				return this._run(interaction, {
 					command: `g mute ${target} ${DURATION_INPUT}`,
 					responseRegExp: mute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign),
 				}, hypixelGuild);
@@ -414,12 +409,12 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'promote': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIGN(options);
+				const IGN = this.getIgn(interaction.options);
 
-				return this._run(interaction, options, {
+				return this._run(interaction, {
 					command: `g promote ${IGN}`,
 					responseRegExp: promote(IGN),
 				});
@@ -427,13 +422,13 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'setrank': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIGN(options);
-				const RANK = options.get('rank').value;
+				const IGN = this.getIgn(interaction.options);
+				const RANK = interaction.options.get('rank').value;
 
-				return this._run(interaction, options, {
+				return this._run(interaction, {
 					command: `g setrank ${IGN} ${RANK}`,
 					responseRegExp: setRank(IGN, undefined, RANK),
 				});
@@ -441,19 +436,19 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'unmute': {
 				await this.checkPermissions(interaction, {
-					roleIDs: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				const { players } = this.client;
-				const TARGET_INPUT = options.get('target').value;
+				const TARGET_INPUT = interaction.options.get('target').value;
 
-				let hypixelGuild = this.getHypixelGuild(options, interaction);
+				let hypixelGuild = this.getHypixelGuild(interaction);
 				let target;
 
 				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 					target = 'everyone';
 				} else {
-					target = this.getPlayer(options) ?? (SlashCommand.checkForce(options) && TARGET_INPUT);
+					target = this.getPlayer(interaction.options) ?? (SlashCommand.checkForce(interaction.options) && TARGET_INPUT);
 
 					if (!target) return interaction.reply({
 						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
@@ -480,14 +475,14 @@ module.exports = class GuildCommand extends SlashCommand {
 					await hypixelGuild.save();
 				}
 
-				return this._run(interaction, options, {
+				return this._run(interaction, {
 					command: `g unmute ${target}`,
 					responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
 				}, hypixelGuild);
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${name}'`);
+				throw new Error(`unknown subCommandName '${interaction.subCommandName}'`);
 		}
 	}
 };

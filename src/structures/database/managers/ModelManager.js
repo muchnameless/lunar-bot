@@ -84,7 +84,7 @@ module.exports = class ModelManager {
 	 * @param {string|Object} idOrInstance The id or instance of something in this Manager
 	 * @returns {?string}
 	 */
-	resolveID(idOrInstance) {
+	resolveId(idOrInstance) {
 		if (idOrInstance instanceof this.model) return idOrInstance[this.primaryKey];
 		if (typeof idOrInstance === 'string') return idOrInstance;
 		return null;

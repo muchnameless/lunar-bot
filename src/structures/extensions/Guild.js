@@ -7,18 +7,16 @@ const logger = require('../../functions/logger');
 class LunarGuild extends Structures.get('Guild') {
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
-	 * @param {string[]} roleIDs role IDs to verify
+	 * @param {(?import('discord.js').Snowflake)[]} roleIds role IDs to verify
+	 * @returns {Collection<import('discord.js').Snowflake, import('discord.js').Role>}
 	 */
-	verifyRoleIDs(roleIDs) {
-		const highestBotRole = this.me.roles.highest;
-
+	verifyRoleIds(roleIds) {
 		return new Collection(
-			roleIDs
-				.map(roleID => [ roleID, this.roles.cache.get(roleID) ])
-				.filter(([ roleID, role ]) => {
-					if (!role) return logger.warn(`[CHECK ROLE IDS]: '${roleID}' is not a valid role id`);
-					if (role.managed) return logger.warn(`[CHECK ROLE IDS]: '${roleID}' is a managed role`);
-					if (role.comparePositionTo(highestBotRole) >= 0) return logger.warn(`[CHECK ROLE IDS]: '${role.name}' is higher than the bot's highest role`);
+			roleIds
+				.map(roleId => [ roleId, this.roles.cache.get(roleId) ])
+				.filter(([ roleId, role ]) => {
+					if (!role) return logger.warn(`[CHECK ROLE IDS]: '${roleId}' is not a valid role id`);
+					if (!role.editable) return logger.warn(`[CHECK ROLE IDS]: can't edit '${role.name}'`);
 					return true;
 				})
 				.sort(([ , a ], [ , b ]) => b.comparePositionTo(a)),
@@ -29,15 +27,16 @@ class LunarGuild extends Structures.get('Guild') {
 	 * tries to find a discord member by a discord tag
 	 * @param {string} tagInput
 	 */
-	async findMemberByTag(tagInput) {
-		const discordMember = this.members.cache.find(({ user: { tag } }) => tag === tagInput);
+	async fetchMemberByTag(tagInput) {
+		if (this.members.cache.size === this.memberCount) return this.members.cache.find(({ user: { tag } }) => tag === tagInput) ?? null;
 
-		if (discordMember) return discordMember;
-
-		const fetched = await this.members.search({ query: tagInput.split('#')[0], limit: 10 }).catch(error => logger.error('[UPDATE GUILD PLAYERS]', error));
-		// const fetched = await this.members.fetch({ query: tagInput.split('#')[0] }).catch(error => logger.error(`[UPDATE GUILD PLAYERS]`, error));
-
-		return fetched?.find(({ user: { tag } }) => tag === tagInput) ?? null;
+		try {
+			const fetched = await this.members.fetch({ query: tagInput.replace(/#\d{4}$/, ''), limit: 1_000 });
+			return fetched.find(({ user: { tag } }) => tag === tagInput) ?? null;
+		} catch (error) {
+			logger.error('[FIND MEMBER BY TAG]', error);
+			return null;
+		}
 	}
 }
 

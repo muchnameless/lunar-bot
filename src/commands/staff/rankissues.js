@@ -26,7 +26,7 @@ module.exports = class RankIssuesCommand extends SlashCommand {
 		return hypixelGuild.players.array().flatMap((player) => {
 			const rank = player.guildRank;
 
-			if (!rank?.roleID) return []; // unkown or non-requestable rank
+			if (!rank?.roleId) return []; // unkown or non-requestable rank
 
 			const { totalWeight } = player.getWeight();
 

@@ -43,7 +43,7 @@ module.exports = class CompetitionCommand extends Command {
 		try {
 			await message.reply({
 				content: commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`,
-				saveReplyMessageID: false,
+				saveReplyMessageId: false,
 			});
 
 			do {
@@ -60,7 +60,7 @@ module.exports = class CompetitionCommand extends Command {
 
 					message.reply({
 						content: `\`${collected.content}\` is not a valid type`,
-						saveReplyMessageID: false,
+						saveReplyMessageId: false,
 					});
 				}
 			} while (!type);
@@ -81,14 +81,14 @@ module.exports = class CompetitionCommand extends Command {
 
 					message.reply({
 						content: `\`${collected.content}\` is not a valid date`,
-						saveReplyMessageID: false,
+						saveReplyMessageId: false,
 					});
 				}
 			} while (!startingTime);
 
 			await message.reply({
 				content: 'ending time?',
-				saveReplyMessageID: false,
+				saveReplyMessageId: false,
 			});
 
 			do {
@@ -105,14 +105,14 @@ module.exports = class CompetitionCommand extends Command {
 
 					message.reply({
 						content: `\`${collected.content}\` is not a valid date`,
-						saveReplyMessageID: false,
+						saveReplyMessageId: false,
 					});
 				}
 			} while (!endingTime);
 
 			await message.reply({
 				content: `type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
-				saveReplyMessageID: false,
+				saveReplyMessageId: false,
 			});
 		} catch (error) {
 			logger.error(error);

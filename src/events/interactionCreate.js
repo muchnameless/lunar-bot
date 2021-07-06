@@ -21,7 +21,7 @@ module.exports = class InteractionCreateEvent extends Event {
 	 */
 	async _handleCommandInteraction(interaction) {
 		try {
-			logger.info(`[CMD HANDLER]: '${interaction.logInfo}' was executed by ${interaction.user.tag}${interaction.guildID ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildID ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'}`);
+			logger.info(`[CMD HANDLER]: '${interaction.logInfo}' was executed by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'}`);
 
 			/** @type {import('../structures/commands/SlashCommand')} */
 			const command = this.client.commands.get(interaction.commandName);
@@ -31,7 +31,7 @@ module.exports = class InteractionCreateEvent extends Event {
 				ephemeral: true,
 			});
 
-			if (interaction.user.id !== this.client.ownerID) {
+			if (interaction.user.id !== this.client.ownerId) {
 				interaction.defer();
 
 				// role permissions
@@ -90,10 +90,10 @@ module.exports = class InteractionCreateEvent extends Event {
 	 */
 	_handleButtonInteraction(interaction) { // eslint-disable-line class-methods-use-this
 		// leaderboards edit
-		if (interaction.customID.startsWith(LB_KEY)) return handleLeaderboardButtonInteraction(interaction);
+		if (interaction.customId.startsWith(LB_KEY)) return handleLeaderboardButtonInteraction(interaction);
 
 		// eval edit
-		if (interaction.customID.startsWith('EVAL')) return this.client.commands.get('eval')?.runButton(interaction);
+		if (interaction.customId.startsWith('EVAL')) return this.client.commands.get('eval')?.runButton(interaction);
 	}
 
 	/**
@@ -101,7 +101,7 @@ module.exports = class InteractionCreateEvent extends Event {
 	 */
 	_handleSelectMenuInteraction(interaction) { // eslint-disable-line class-methods-use-this
 		// leaderboards edit
-		if (interaction.customID.startsWith(LB_KEY)) return handleLeaderboardSelectMenuInteraction(interaction);
+		if (interaction.customId.startsWith(LB_KEY)) return handleLeaderboardSelectMenuInteraction(interaction);
 	}
 
 	/**

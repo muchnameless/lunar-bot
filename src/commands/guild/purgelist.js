@@ -36,7 +36,7 @@ module.exports = class PurgeListCommand extends SlashCommand {
 				xpType: 'purge',
 				page: interaction.options.get('page')?.value ?? 1,
 				offset: interaction.options.get('offset')?.value ?? '',
-				hypixelGuild: this.getHypixelGuild(interaction.options, interaction),
+				hypixelGuild: this.getHypixelGuild(interaction),
 				user: interaction.user,
 			},
 		);

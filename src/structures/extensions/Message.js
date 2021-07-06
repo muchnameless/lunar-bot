@@ -24,7 +24,7 @@ class LunarMessage extends Structures.get('Message') {
 	/**
 	 * id of the channel the message was sent in
 	 */
-	get channelID() {
+	get channelId() {
 		return this.channel.id;
 	}
 
@@ -32,7 +32,7 @@ class LunarMessage extends Structures.get('Message') {
 	 * wether the command was send by a non-bot user account
 	 */
 	get isUserMessage() {
-		return !this.author.bot && !this.webhookID && !this.system;
+		return !this.author.bot && !this.webhookId && !this.system;
 	}
 
 	/**
@@ -56,8 +56,8 @@ class LunarMessage extends Structures.get('Message') {
 
 	/**
 	 * @typedef {object} ReplyData
-	 * @property {string} channelID
-	 * @property {string|string[]} messageID
+	 * @property {string} channelId
+	 * @property {string|string[]} messageId
 	 */
 
 	/**
@@ -72,12 +72,12 @@ class LunarMessage extends Structures.get('Message') {
 	 * caches the reply data for 1 hour
 	 * @param {ReplyData} input
 	 */
-	set replyData({ channelID, messageID }) {
+	set replyData({ channelId, messageId }) {
 		cache.set(
 			`${REPLY_KEY}:${this.cachingKey}`,
 			{
-				channelID,
-				messageID,
+				channelId,
+				messageId,
 			},
 			30 * 60_000, // 30 min ttl
 		);
@@ -124,8 +124,8 @@ class LunarMessage extends Structures.get('Message') {
 
 		try {
 			for (const emoji of emojis) {
-				if (this.reactions.cache.get(this.client.emojis.resolveID(emoji))?.me) {
-					res.push(this.reactions.cache.get(this.client.emojis.resolveID(emoji)));
+				if (this.reactions.cache.get(this.client.emojis.resolveId(emoji))?.me) {
+					res.push(this.reactions.cache.get(this.client.emojis.resolveId(emoji)));
 				} else {
 					res.push(await super.react(emoji));
 				}
@@ -170,7 +170,7 @@ class LunarMessage extends Structures.get('Message') {
 		try {
 			const questionMessage = await this.reply({
 				content: question,
-				saveReplyMessageID: false,
+				saveReplyMessageId: false,
 				...options,
 			});
 
@@ -192,7 +192,7 @@ class LunarMessage extends Structures.get('Message') {
 	}
 
 	/**
-	 * @typedef {import('discord.js').MessageOptions & { sameChannel: boolean, saveReplyMessageID: boolean, editPreviousMessage: boolean }} MessageReplyOptions
+	 * @typedef {import('discord.js').MessageOptions & { sameChannel: boolean, saveReplyMessageId: boolean, editPreviousMessage: boolean }} MessageReplyOptions
 	 */
 
 	/**
@@ -208,7 +208,7 @@ class LunarMessage extends Structures.get('Message') {
 		// analyze input and create (content, options)-argument
 		const options = {
 			sameChannel: false,
-			saveReplyMessageID: true,
+			saveReplyMessageId: true,
 			editPreviousMessage: true,
 			...optionsInput, // create a deep copy to not modify the source object
 		};
@@ -219,7 +219,6 @@ class LunarMessage extends Structures.get('Message') {
 				content,
 				reply: {
 					messageReference: this,
-					failIfNotExists: false,
 				},
 				...options,
 			});
@@ -256,7 +255,6 @@ class LunarMessage extends Structures.get('Message') {
 				content,
 				reply: {
 					messageReference: this,
-					failIfNotExists: false,
 				},
 				...options,
 			});
@@ -336,51 +334,51 @@ class LunarMessage extends Structures.get('Message') {
 			? { content: contentOrOptions }
 			: contentOrOptions;
 
-		let oldReplyMessageID;
-		let IDsToDelete;
+		let oldReplyMessageId;
+		let IdsToDelete;
 
 		if (replyData) {
-			if (Array.isArray(replyData.messageID)) {
-				[ oldReplyMessageID, ...IDsToDelete ] = replyData.messageID;
+			if (Array.isArray(replyData.messageId)) {
+				[ oldReplyMessageId, ...IdsToDelete ] = replyData.messageId;
 			} else {
-				oldReplyMessageID = replyData.messageID;
+				oldReplyMessageId = replyData.messageId;
 			}
 		}
 
 		let message;
 
 		if (options?.split) { // send multiple messages
-			if (oldReplyMessageID && options.editPreviousMessage) {
-				IDsToDelete ??= [];
-				IDsToDelete.push(oldReplyMessageID);
+			if (oldReplyMessageId && options.editPreviousMessage) {
+				IdsToDelete ??= [];
+				IdsToDelete.push(oldReplyMessageId);
 			}
 
 			message = await channel.send({ content, ...options });
 
-			if (options.saveReplyMessageID) {
+			if (options.saveReplyMessageId) {
 				this.replyData = {
-					channelID: message[0].channel.id,
-					messageID: message.map(({ id }) => id),
+					channelId: message[0].channel.id,
+					messageId: message.map(({ id }) => id),
 				};
 			}
 		} else { // send 1 message
-			message = await (oldReplyMessageID && options.editPreviousMessage
-				? ((await channel.messages.fetch(oldReplyMessageID).catch(error => logger.error('[_SEND REPLY]', error)))?.edit({ content, ...options }) ?? channel.send({ content, ...options }))
+			message = await (oldReplyMessageId && options.editPreviousMessage
+				? ((await channel.messages.fetch(oldReplyMessageId).catch(error => logger.error('[_SEND REPLY]', error)))?.edit({ content, ...options }) ?? channel.send({ content, ...options }))
 				: channel.send({ content, ...options }));
 
-			if (options.saveReplyMessageID) {
+			if (options.saveReplyMessageId) {
 				this.replyData = {
-					channelID: message.channel.id,
-					messageID: message.id,
+					channelId: message.channel.id,
+					messageId: message.id,
 				};
 			}
 		}
 
 		// cleanup channel (delete old replies)
-		if (IDsToDelete?.length && replyData.channelID) {
-			this.client.channels.cache.get(replyData.channelID)
-				?.deleteMessages(IDsToDelete)
-				.catch(error => logger.error(`[_SEND REPLY]: IDs: ${IDsToDelete.map(x => `'${x}'`).join(', ')}`, error));
+		if (IdsToDelete?.length && replyData.channelId) {
+			this.client.channels.cache.get(replyData.channelId)
+				?.deleteMessages(IdsToDelete)
+				.catch(error => logger.error(`[_SEND REPLY]: IDs: ${IdsToDelete.map(x => `'${x}'`).join(', ')}`, error));
 		}
 
 		return message;

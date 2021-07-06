@@ -47,16 +47,16 @@ module.exports = class UnloadCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {string} mode
-	 * @param {string} name
+	 * @param {string} subCommandName
+	 * @param {string} input
 	 */
-	async _run(ctx, mode, name) {
-		switch (mode) {
+	async _run(ctx, subCommandName, input) {
+		switch (subCommandName) {
 			case 'command': {
 				/** @type {import('../../structures/commands/BaseCommand')} */
-				const command = this.collection.getByName(name);
+				const command = this.collection.getByName(input);
 
-				if (!command) return ctx.reply(`no command with the name or alias \`${name}\` found`);
+				if (!command) return ctx.reply(`no command with the name or alias \`${input}\` found`);
 
 				command.unload();
 
@@ -65,9 +65,9 @@ module.exports = class UnloadCommand extends DualCommand {
 
 			case 'event': {
 				/** @type {import('../../structures/commands/BaseCommand')} */
-				const event = this.client.events.get(name);
+				const event = this.client.events.get(input);
 
-				if (!event) return ctx.reply(`no event with the name \`${name}\` found`);
+				if (!event) return ctx.reply(`no event with the name \`${input}\` found`);
 
 				event.unload();
 
@@ -75,7 +75,7 @@ module.exports = class UnloadCommand extends DualCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${mode}'`);
+				throw new Error(`unknown subCommandName '${subCommandName}'`);
 		}
 	}
 
@@ -84,9 +84,7 @@ module.exports = class UnloadCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		const { name, options } = interaction.options.first();
-
-		return this._run(interaction, name, options.first().value);
+		return this._run(interaction, interaction.subCommandName, interaction.options.get('name').value);
 	}
 
 	/**

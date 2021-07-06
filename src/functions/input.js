@@ -18,7 +18,7 @@ module.exports.getUuidAndIgn = async (ctx, ignOrUuid) => {
 
 	// author is linked to player
 	if (player) return {
-		uuid: player.minecraftUUID,
+		uuid: player.minecraftUuid,
 		ign: player.ign,
 	};
 

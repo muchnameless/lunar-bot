@@ -95,24 +95,21 @@ module.exports = class TaxCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		// destructure subcommand
-		const { name, options } = interaction.options.first();
-
-		switch (name) {
+		switch (interaction.subCommandName) {
 			case 'ah': {
-				const player = this.getPlayer(options);
+				const player = this.getPlayer(interaction);
 
 				if (!player) {
 					return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
 				}
 
-				const action = options.get('action').value;
+				const action = interaction.options.get('action').value;
 
 				let log;
 
 				switch (action) {
 					case 'add':
-						if (this.client.taxCollectors.cache.get(player.minecraftUUID)?.isCollecting) return interaction.reply(`\`${player.ign}\` is already a tax collector`);
+						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) return interaction.reply(`\`${player.ign}\` is already a tax collector`);
 
 						await this.client.taxCollectors.add(player);
 						if (!player.paid) player.setToPaid(); // let collector collect their own tax if they have not paid already
@@ -120,12 +117,12 @@ module.exports = class TaxCommand extends SlashCommand {
 						break;
 
 					case 'remove': {
-						const taxCollector = this.client.taxCollectors.cache.get(player.minecraftUUID);
+						const taxCollector = this.client.taxCollectors.cache.get(player.minecraftUuid);
 
 						if (!taxCollector?.isCollecting) return interaction.reply(`\`${player.ign}\` is not a tax collector`);
 
 						// remove self paid if only the collector paid the default amount at his own ah
-						if (taxCollector.collectedTax === this.config.get('TAX_AMOUNT') && player.collectedBy === player.minecraftUUID) {
+						if (taxCollector.collectedTax === this.config.get('TAX_AMOUNT') && player.collectedBy === player.minecraftUuid) {
 							logger.info(`[TAX AH]: ${player.ign}: removed and reset tax paid`);
 							await player.resetTax();
 							await taxCollector.remove();
@@ -139,7 +136,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					}
 
 					default:
-						throw new Error(`unknown subcommand '${action}'`);
+						throw new Error(`unknown subCommandName '${action}'`);
 				}
 
 				this.client.log(this.client.defaultEmbed
@@ -151,7 +148,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			case 'amount': {
-				const NEW_AMOUNT = options.get('amount').value;
+				const NEW_AMOUNT = interaction.options.get('amount').value;
 
 				if (NEW_AMOUNT < 0) return interaction.reply({
 					content: 'tax amount must be a non-negative number',
@@ -191,14 +188,14 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			case 'paid': {
-				const collector = this.client.taxCollectors.getByID(interaction.user.id);
+				const collector = this.client.taxCollectors.getById(interaction.user.id);
 
 				if (!collector?.isCollecting) return interaction.reply({
 					content: 'this command is restricted to tax collectors',
 					ephemeral: true,
 				});
 
-				const player = this.getPlayer(options);
+				const player = this.getPlayer(interaction);
 
 				if (!player) {
 					return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
@@ -210,11 +207,11 @@ module.exports = class TaxCommand extends SlashCommand {
 					await player.resetTax();
 				}
 
-				const AMOUNT = options.get('amount')?.value ?? this.config.get('TAX_AMOUNT');
+				const AMOUNT = interaction.options.get('amount')?.value ?? this.config.get('TAX_AMOUNT');
 
 				await player.setToPaid({
 					amount: AMOUNT,
-					collectedBy: collector.minecraftUUID,
+					collectedBy: collector.minecraftUuid,
 				});
 
 				this.client.log(this.client.defaultEmbed
@@ -226,14 +223,14 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			case 'reminder': {
-				const SHOULD_GHOST_PING = options?.get('ghostping')?.value ?? false;
-				const hypixelGuild = options?.has('guild')
-					? this.getHypixelGuild(options, interaction)
+				const SHOULD_GHOST_PING = interaction.options.get('ghostping')?.value ?? false;
+				const hypixelGuild = interaction.options.has('guild')
+					? this.getHypixelGuild(interaction)
 					: null;
-				const excluded = options?.get('exclude')?.value.split(/\W/g).flatMap(x => (x ? x.toLowerCase() : [])); // lower case IGN array
+				const excluded = interaction.options.get('exclude')?.value.split(/\W/g).flatMap(x => (x ? x.toLowerCase() : [])); // lower case IGN array
 				const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild)
 					.filter(({ paid, ign }) => !paid && excluded?.includes(ign.toLowerCase()));
-				const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordID }) => inDiscord && validateNumber(discordID));
+				const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordId }) => inDiscord && validateNumber(discordId));
 				const AMOUNT_TO_PING = playersPingable.size;
 
 				if (!AMOUNT_TO_PING) return interaction.reply({
@@ -245,7 +242,7 @@ module.exports = class TaxCommand extends SlashCommand {
 
 				let pingMessage = '';
 
-				for (const player of playersPingable) pingMessage += ` <@${player.discordID}>`;
+				for (const player of playersPingable) pingMessage += ` <@${player.discordId}>`;
 				for (const player of playersOnlyIgn) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 				// send ping message and split between pings if too many chars
@@ -276,17 +273,17 @@ module.exports = class TaxCommand extends SlashCommand {
 				let result;
 
 				// individual player
-				if (options?.has('player')) {
-					const player = this.getPlayer(options)
+				if (interaction.options.has('player')) {
+					const player = this.getPlayer(interaction)
 						?? await players.model.findOne({
 							where: {
-								guildID: null,
-								ign: { [Op.iLike]: options.get('player').value },
+								guildId: null,
+								ign: { [Op.iLike]: interaction.options.get('player').value },
 							},
 						});
 
 					if (!player) {
-						return interaction.reply(`\`${options.get('player').value}\` is not in the player db`);
+						return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
 					}
 
 					if (!player.paid) return interaction.reply(`\`${player.ign}\` is not set to paid`);
@@ -338,7 +335,7 @@ module.exports = class TaxCommand extends SlashCommand {
 							{ paid: false },
 							{
 								where: {
-									guildID: null,
+									guildId: null,
 									paid: true,
 								},
 							},
@@ -389,7 +386,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${name}'`);
+				throw new Error(`unknown subCommandName '${interaction.subCommandName}'`);
 		}
 	}
 };

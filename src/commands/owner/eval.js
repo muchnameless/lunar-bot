@@ -142,7 +142,7 @@ module.exports = class EvalCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/ButtonInteraction')} interaction
 	 */
 	async runButton(interaction) {
-		if (interaction.user.id !== this.client.ownerID) return interaction.reply({
+		if (interaction.user.id !== this.client.ownerId) return interaction.reply({
 			content: 'this command is only for the bot owners',
 			ephemeral: true,
 		});
@@ -154,7 +154,7 @@ module.exports = class EvalCommand extends SlashCommand {
 
 		interaction.deferUpdate();
 
-		const { groups: { async, inspectDepth } } = interaction.customID.match(/EVAL:(?<async>.+):(?<inspectDepth>.+)/);
+		const { groups: { async, inspectDepth } } = interaction.customId.match(/EVAL:(?<async>.+):(?<inspectDepth>.+)/);
 
 		try {
 			const collected = await interaction.channel.awaitMessages({
@@ -206,7 +206,7 @@ module.exports = class EvalCommand extends SlashCommand {
 		const row = new Discord.MessageActionRow()
 			.addComponents(
 				new Discord.MessageButton()
-					.setCustomID(`EVAL:${IS_ASYNC}:${INSPECT_DEPTH}`)
+					.setCustomId(`EVAL:${IS_ASYNC}:${INSPECT_DEPTH}`)
 					.setEmoji(EDIT_MESSAGE)
 					.setStyle(Discord.Constants.MessageButtonStyles.SECONDARY),
 			);
