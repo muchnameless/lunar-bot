@@ -38,7 +38,7 @@ module.exports = class MessageCreateEvent extends Event {
 		/**
 		 * chat bridge
 		 */
-		this.client.chatBridges.handleDiscordMessage(message, { isEdit, checkIfNotFromBot: !isEdit }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
+		if (!message.interaction) this.client.chatBridges.handleDiscordMessage(message, { isEdit, checkIfNotFromBot: !isEdit }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
 
 		if (message.content.length && message.isUserMessage) {
 			this.client.hypixelGuilds.checkIfRankRequestMessage(message);
