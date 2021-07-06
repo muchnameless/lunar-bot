@@ -53,7 +53,7 @@ process
 			// Intents.FLAGS.GUILD_WEBHOOKS,
 		],
 		makeCache(manager) {
-			if (manager.name === 'MessageManager') return new MessageCacheCollection(10);
+			if (manager.name === 'MessageManager') return new MessageCacheCollection(50);
 			return new Collection();
 		},
 		partials: [
