@@ -362,9 +362,16 @@ class LunarMessage extends Structures.get('Message') {
 				};
 			}
 		} else { // send 1 message
-			message = await (oldReplyMessageId && options.editPreviousMessage
-				? ((await channel.messages.fetch(oldReplyMessageId).catch(error => logger.error('[_SEND REPLY]', error)))?.edit({ content, ...options }) ?? channel.send({ content, ...options }))
-				: channel.send({ content, ...options }));
+			message = oldReplyMessageId && options.editPreviousMessage
+				? await (async () => {
+					try {
+						return await channel.messages.edit(oldReplyMessageId, { content, ...options });
+					} catch (error) {
+						logger.error('[_SEND REPLY]', error);
+						return channel.send({ content, ...options });
+					}
+				})()
+				: await channel.send({ content, ...options });
 
 			if (options.saveReplyMessageId) {
 				this.replyData = {
