@@ -32,7 +32,7 @@ class LunarMessage extends Structures.get('Message') {
 	 * wether the command was send by a non-bot user account
 	 */
 	get isUserMessage() {
-		return !this.author.bot && !this.webhookId && !this.system;
+		return !this.author?.bot && !this.webhookId && !this.system;
 	}
 
 	/**
