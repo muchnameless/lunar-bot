@@ -1,5 +1,6 @@
 'use strict';
 
+const { MessageFlags } = require('discord.js');
 const { FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const { escapeRegex } = require('../functions/util');
 const Event = require('../structures/events/Event');
@@ -19,7 +20,7 @@ module.exports = class MessageCreateEvent extends Event {
 	 */
 	async _handleDiscordMessage(message) {
 		try {
-			if (message.partial) await message.fetch();
+			if (message.partial && !message.flags.has(MessageFlags.FLAGS.EPHEMERAL)) await message.fetch();
 		} catch (error) {
 			return logger.error('[CMD HANDLER]: error while fetching partial message:\n', error);
 		}
