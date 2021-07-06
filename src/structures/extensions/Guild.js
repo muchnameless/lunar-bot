@@ -33,7 +33,7 @@ class LunarGuild extends Structures.get('Guild') {
 		if (this.members.cache.size === this.memberCount) return this.members.cache.find(({ user: { tag } }) => tag === tagInput) ?? null;
 
 		try {
-			const fetched = await this.members.fetch({ query: tagInput.split('#')[0], limit: 1_000 });
+			const fetched = await this.members.fetch({ query: tagInput.replace(/#\d{4}$/, ''), limit: 1_000 });
 			return fetched.find(({ user: { tag } }) => tag === tagInput) ?? null;
 		} catch (error) {
 			logger.error('[FIND MEMBER BY TAG]', error);
