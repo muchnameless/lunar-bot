@@ -240,7 +240,7 @@ module.exports = class GuildCommand extends SlashCommand {
 							})()
 						)
 					)
-				: targetInput;
+				: this.client.players.getByIgn(targetInput) ?? targetInput;
 
 			if (!target) return ctx.reply({
 				content: `no player with the IGN \`${targetInput}\` found`,
