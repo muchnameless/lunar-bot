@@ -1,6 +1,8 @@
 'use strict';
 
-const { Constants } = require('discord.js');
+const { Interaction, SnowflakeUtil, Constants } = require('discord.js');
+const { Op } = require('sequelize');
+const ms = require('ms');
 const {
 	demote: { regExp: demote },
 	invite: { regExp: invite },
@@ -14,9 +16,10 @@ const {
 } = require('../../structures/chat_bridge/constants/commandResponses');
 const { removeMcFormatting } = require('../../structures/chat_bridge/functions/util');
 const { EMBED_DESCRIPTION_MAX_CHARS } = require('../../constants/discord');
-const { stringToMS, trim } = require('../../functions/util');
+const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../constants/database');
+const { stringToMS, trim, getIdFromString } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+const logger = require('../../functions/logger');
 
 
 const commonOptions = new Map([ [
@@ -188,6 +191,91 @@ module.exports = class GuildCommand extends SlashCommand {
 	}
 
 	/**
+	 * /g mute
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {{ targetInput: string, duration: number, hypixelGuildInput: import('../../structures/database/models/HypixelGuild') }} param1
+	 */
+	async runMute(ctx, { targetInput, duration, hypixelGuildInput = this.getHypixelGuild(ctx) }) {
+		const IS_INTERACTION = ctx instanceof Interaction;
+
+		let hypixelGuild = hypixelGuildInput;
+		let target;
+
+		if ([ 'guild', 'everyone' ].includes(targetInput)) {
+			target = 'everyone';
+		} else {
+			target = IS_INTERACTION
+				? this.getPlayer(ctx)
+					?? (SlashCommand.checkForce(ctx.options)
+						? targetInput // use input if force is set
+						: (await this.client.players.model.findOne({ // try to find by ign or uuid
+							where: {
+								[Op.or]: [{
+									ign: { [Op.iLike]: targetInput },
+									minecraftUuid: targetInput,
+								}],
+							},
+						})
+							?? await (async () => { // check if input is a discord id or @mention, find or create player db object if so
+								const ID = getIdFromString(targetInput);
+
+								if (!ID) return null;
+
+								try {
+									// check if ID is from a member in the guild
+									await this.client.lgGuild?.members.fetch(ID);
+
+									return (await this.client.players.model.findOrCreate({
+										where: { discordId: ID },
+										defaults: {
+											minecraftUuid: SnowflakeUtil.generate(),
+											guildId: GUILD_ID_BRIDGER,
+											ign: UNKNOWN_IGN,
+											inDiscord: true,
+										},
+									}))[0];
+								} catch (error) {
+									return logger.error(error);
+								}
+							})()
+						)
+					)
+				: targetInput;
+
+			if (!target) return ctx.reply({
+				content: `no player with the IGN \`${targetInput}\` found`,
+				ephemeral: true,
+			});
+
+			if (target instanceof this.client.players.model) {
+				({ guild: hypixelGuild } = target);
+			}
+		}
+
+		if (target instanceof this.client.players.model) {
+			target.mutedTill = Date.now() + duration;
+			await target.save();
+
+			if (target.notInGuild) return ctx.reply(`muted \`${target}\` for \`${duration}\``);
+		} else if (target === 'everyone') {
+			hypixelGuild.mutedTill = Date.now() + duration;
+			await hypixelGuild.save();
+		}
+
+		// interaction
+		if (IS_INTERACTION) return this._run(ctx, {
+			command: `g mute ${target} ${ms(duration)}`,
+			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+		}, hypixelGuild);
+
+		// hypixel message
+		return ctx.author.send(await hypixelGuild.chatBridge.minecraft.command({
+			command: `g mute ${target} ${ms(duration)}`,
+			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+		}));
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
@@ -355,56 +443,17 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const { players } = this.client;
-				const TARGET_INPUT = interaction.options.get('target').value;
-				const DURATION_INPUT = interaction.options.get('duration').value;
-
-				let hypixelGuild = this.getHypixelGuild(interaction);
-				let target;
-
-				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
-					target = 'everyone';
-				} else {
-					target = this.getPlayer(interaction) ?? (SlashCommand.checkForce(interaction.options) && TARGET_INPUT);
-
-					if (!target) return interaction.reply({
-						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
-						ephemeral: true,
-					});
-
-					if (target instanceof players.model) {
-						({ guild: hypixelGuild } = target);
-
-						if (!hypixelGuild) return interaction.reply({
-							content: `unable to find the guild for \`${target.ign}\``,
-							ephemeral: true,
-						});
-					}
-				}
-
-				const DURATION = stringToMS(DURATION_INPUT);
+				const DURATION = stringToMS(interaction.options.get('duration').value);
 
 				if (Number.isNaN(DURATION)) return interaction.reply({
-					content: `\`${DURATION_INPUT}\` is not a valid duration`,
+					content: `\`${interaction.options.get('duration').value}\` is not a valid duration`,
 					ephemeral: true,
 				});
 
-				const EXPIRES_AT = Date.now() + DURATION;
-
-				if (target instanceof players.model) {
-					target.mutedTill = EXPIRES_AT;
-					await target.save();
-
-					if (target.notInGuild) return interaction.reply(`muted \`${target}\` for \`${DURATION_INPUT}\``);
-				} else if (target === 'everyone') {
-					hypixelGuild.mutedTill = EXPIRES_AT;
-					await hypixelGuild.save();
-				}
-
-				return this._run(interaction, {
-					command: `g mute ${target} ${DURATION_INPUT}`,
-					responseRegExp: mute(target === 'everyone' ? 'the guild chat' : target.toString(), hypixelGuild.chatBridge.bot.ign),
-				}, hypixelGuild);
+				return this.runMute(interaction, {
+					targetInput: interaction.options.get('target').value.toLowerCase(),
+					duration: DURATION,
+				});
 			}
 
 			case 'promote': {
@@ -439,33 +488,46 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const { players } = this.client;
-				const TARGET_INPUT = interaction.options.get('target').value;
+				const TARGET_INPUT = interaction.options.get('target').value.toLowerCase();
 
 				let hypixelGuild = this.getHypixelGuild(interaction);
 				let target;
 
-				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
+				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT)) {
 					target = 'everyone';
 				} else {
-					target = this.getPlayer(interaction) ?? (SlashCommand.checkForce(interaction.options) && TARGET_INPUT);
+					target = this.getPlayer(interaction)
+							?? (SlashCommand.checkForce(interaction.options)
+								? TARGET_INPUT // use input if force is set
+								: await (async () => {
+									const queryParams = [{
+										ign: { [Op.iLike]: TARGET_INPUT },
+										minecraftUuid: TARGET_INPUT,
+									}];
+
+									// check if input is a discord id or @mention
+									const ID = getIdFromString(TARGET_INPUT);
+									if (ID) queryParams.push({ discordId: ID });
+
+									return this.client.players.model.findOne({
+										where: {
+											[Op.or]: queryParams,
+										},
+									});
+								})()
+							);
 
 					if (!target) return interaction.reply({
 						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
 						ephemeral: true,
 					});
 
-					if (target instanceof players.model) {
+					if (target instanceof this.client.players.model) {
 						({ guild: hypixelGuild } = target);
-
-						if (!hypixelGuild) return interaction.reply({
-							content: `unable to find the guild for \`${target.ign}\``,
-							ephemeral: true,
-						});
 					}
 				}
 
-				if (target instanceof players.model) {
+				if (target instanceof this.client.players.model) {
 					target.mutedTill = 0;
 					await target.save();
 
@@ -482,7 +544,7 @@ module.exports = class GuildCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subCommandName '${interaction.subCommandName}'`);
+				throw new Error(`unknown subcommand '${interaction.subCommandName}'`);
 		}
 	}
 };
