@@ -207,9 +207,15 @@ module.exports = class HypixelMessage extends ChatMessage {
 	 * @param {string | import('./ChatBridge').BroadcastOptions | import('./ChatBridge').ChatOptions } contentOrOptions
 	 */
 	async reply(contentOrOptions) {
-		const options = typeof contentOrOptions === 'string'
+		const { ephemeral, ...options } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
+
+		// to be compatible to Interactions
+		if (ephemeral) return this.author.send({
+			maxParts: Infinity,
+			...options,
+		});
 
 		switch (this.type) {
 			case GUILD:
@@ -223,7 +229,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 				});
 
 				// DM author the message if sending to gchat failed
-				if (!result[0]) this.author.send(`an error occurred while replying in ${this.type} chat\n${options.content}`);
+				if (!result[0]) this.author.send(`an error occurred while replying in ${this.type} chat\n${options.content ?? ''}`);
 
 				return result;
 			}
