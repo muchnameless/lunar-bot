@@ -118,7 +118,7 @@ module.exports = async (message) => {
 	) {
 		const reply = [];
 
-		reply.push(`the '${command.name}' command has${typeof command.args === 'number' ? ` ${command.args}` : ''} mandatory arguments`);
+		reply.push(`the '${command.name}' command has${typeof command.args === 'number' ? ` ${command.args}` : ''} mandatory argument${command.args === 1 ? '' : 's'}`);
 		if (command.usage) reply.push(`use: ${command.usageInfo}`);
 
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' without providing the mandatory arguments`);
