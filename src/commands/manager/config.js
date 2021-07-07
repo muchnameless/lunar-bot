@@ -146,7 +146,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subCommandName '${interaction.subCommandName}'`);
+				throw new Error(`unknown subcommand '${interaction.subCommandName}'`);
 		}
 	}
 };

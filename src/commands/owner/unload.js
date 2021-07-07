@@ -75,7 +75,7 @@ module.exports = class UnloadCommand extends DualCommand {
 			}
 
 			default:
-				throw new Error(`unknown subCommandName '${subCommandName}'`);
+				throw new Error(`unknown subcommand '${subCommandName}'`);
 		}
 	}
 

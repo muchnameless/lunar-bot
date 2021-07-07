@@ -136,7 +136,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					}
 
 					default:
-						throw new Error(`unknown subCommandName '${action}'`);
+						throw new Error(`unknown subcommand '${action}'`);
 				}
 
 				this.client.log(this.client.defaultEmbed
@@ -386,7 +386,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subCommandName '${interaction.subCommandName}'`);
+				throw new Error(`unknown subcommand '${interaction.subCommandName}'`);
 		}
 	}
 };

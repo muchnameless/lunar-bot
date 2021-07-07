@@ -189,7 +189,7 @@ module.exports = class ReloadCommand extends DualCommand {
 			}
 
 			default:
-				throw new Error(`unknown subCommandName '${subCommandName}'`);
+				throw new Error(`unknown subcommand '${subCommandName}'`);
 		}
 	}
 
