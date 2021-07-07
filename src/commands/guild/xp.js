@@ -43,7 +43,7 @@ module.exports = class XpCommand extends SlashCommand {
 	 */
 	async run(interaction) {
 		const offset = interaction.options.get('offset')?.value ?? getDefaultOffset(this.config);
-		const player = this.getPlayer(interaction.options, interaction);
+		const player = this.getPlayer(interaction, true);
 
 		if (!player) {
 			return interaction.reply(oneLine`${interaction.options.has('player')

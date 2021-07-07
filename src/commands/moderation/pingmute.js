@@ -46,7 +46,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, this.getPlayer(interaction.options));
+		return this._run(interaction, this.getPlayer(interaction));
 	}
 
 	/**

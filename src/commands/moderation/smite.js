@@ -47,7 +47,7 @@ module.exports = class SmiteCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) { // eslint-disable-line no-unused-vars
-		const IGN = this.getPlayer(interaction.options) ?? (DualCommand.checkForce(interaction.options) && interaction.options.get('player').value);
+		const IGN = this.getPlayer(interaction) ?? (DualCommand.checkForce(interaction.options) && interaction.options.get('player').value);
 
 		if (!IGN) return interaction.reply({
 			content: `no player with the IGN \`${interaction.options.get('player').value}\` found`,

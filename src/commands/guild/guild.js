@@ -365,7 +365,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 					target = 'everyone';
 				} else {
-					target = this.getPlayer(interaction.options) ?? (SlashCommand.checkForce(interaction.options) && TARGET_INPUT);
+					target = this.getPlayer(interaction) ?? (SlashCommand.checkForce(interaction.options) && TARGET_INPUT);
 
 					if (!target) return interaction.reply({
 						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
@@ -412,7 +412,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIgn(interaction.options);
+				const IGN = this.getIgn(interaction);
 
 				return this._run(interaction, {
 					command: `g promote ${IGN}`,
@@ -425,7 +425,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIgn(interaction.options);
+				const IGN = this.getIgn(interaction);
 				const RANK = interaction.options.get('rank').value;
 
 				return this._run(interaction, {
@@ -448,7 +448,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT.toLowerCase())) {
 					target = 'everyone';
 				} else {
-					target = this.getPlayer(interaction.options) ?? (SlashCommand.checkForce(interaction.options) && TARGET_INPUT);
+					target = this.getPlayer(interaction) ?? (SlashCommand.checkForce(interaction.options) && TARGET_INPUT);
 
 					if (!target) return interaction.reply({
 						content: `no player with the IGN \`${TARGET_INPUT}\` found`,

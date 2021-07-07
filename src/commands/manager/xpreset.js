@@ -38,7 +38,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 		// individual player
 		if (interaction.options.has('player')) {
 			/** @type {import('../../structures/database/models/Player')} */
-			const player = this.getPlayer(interaction.options)
+			const player = this.getPlayer(interaction)
 				?? await players.model.findOne({
 					where: {
 						guildId: null,

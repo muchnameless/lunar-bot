@@ -42,7 +42,7 @@ module.exports = class DonateCommand extends SlashCommand {
 
 		if (!collector?.isCollecting) return interaction.reply('this command is restricted to (active) tax collectors');
 
-		const player = this.getPlayer(interaction.options);
+		const player = this.getPlayer(interaction);
 		const AMOUNT_OR_TEXT = interaction.options.get('value')?.value;
 		const TEXT_INPUT = interaction.options.get('notes')?.value ?? null;
 

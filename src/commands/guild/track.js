@@ -32,7 +32,7 @@ module.exports = class TrackCommand extends SlashCommand {
 	 */
 	async run(interaction) {
 		const type = interaction.options.get('type')?.value ?? 'weight';
-		const player = this.getPlayer(interaction.options, interaction);
+		const player = this.getPlayer(interaction, true);
 
 		if (!player) {
 			return interaction.reply(oneLine`${interaction.options.has('player')

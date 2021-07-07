@@ -28,7 +28,7 @@ module.exports = class UnlinkCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		const player = this.getPlayer(interaction.options)
+		const player = this.getPlayer(interaction)
 			?? await this.client.players.model.findOne({
 				where: {
 					[Op.or]: [{
