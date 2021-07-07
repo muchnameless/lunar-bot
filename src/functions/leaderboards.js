@@ -72,11 +72,10 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 		)
 		.addOptions(
 			client.hypixelGuilds.cache.map(({ guildId, name }) => ({ label: name, value: guildId })),
+			{ label: 'All', value: GUILD_ID_ALL },
 		);
 
 	if (xpType !== 'purge') {
-		guildSelectMenu.addOptions({ label: 'All', value: GUILD_ID_ALL });
-
 		const offsetSelectMenu = new MessageSelectMenu()
 			.setCustomId(`${cacheKey}:offset`)
 			.setPlaceholder(
@@ -435,7 +434,6 @@ const self = module.exports = {
 		const LAST_UPDATED_AT = SHOULD_USE_COMPETITION_END
 			? COMPETITION_END_TIME
 			: Math.min(...playerDataRaw.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
-		const STARTING_TIME = config.get(XP_OFFSETS_TIME[offset]);
 
 		/** @type {PlayerData[]} */
 		let playerData;
@@ -490,12 +488,14 @@ const self = module.exports = {
 				dataConverter = (player) => {
 					const { totalWeight } = player.getWeight();
 					const startIndex = player.alchemyXpHistory.length - 1 - config.get('PURGE_LIST_OFFSET');
+					// use weight from the first time they got alch xp, assume player has not been tracked before
 					const { totalWeight: totalWeightOffet } = player.getWeightHistory(player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0));
 					const gainedWeight = totalWeight - totalWeightOffet;
 					return {
 						ign: player.ign,
 						discordId: player.discordId,
 						paid: player.paid,
+						guildId: player.guildId,
 						gainedWeight,
 						totalWeight,
 						sortingStat: gainedWeight,
@@ -509,8 +509,8 @@ const self = module.exports = {
 				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...playerData.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
 				getEntry = player => `${client.formatDecimalNumber(player.gainedWeight, PADDING_AMOUNT_GAIN)} [${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)}]`;
 				totalStats = oneLine`
-						${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT, PADDING_AMOUNT_GAIN)} 
-						[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT, PADDING_AMOUNT_TOTAL)}]
+						${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+						[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT)}]
 					`;
 				break;
 			}
@@ -563,6 +563,8 @@ const self = module.exports = {
 		let description = '';
 
 		if (xpType !== 'purge') {
+			const STARTING_TIME = config.get(XP_OFFSETS_TIME[offset]);
+
 			if (IS_COMPETITION_LB) {
 				description += `Start: ${timestampToDateMarkdown(STARTING_TIME)}\n`;
 				if (COMPETITION_RUNNING) {
@@ -576,15 +578,19 @@ const self = module.exports = {
 
 			description += `${hypixelGuild?.name ?? 'Guilds'} total (${PLAYER_COUNT} members): ${totalStats}`;
 			title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
-		} else if (hypixelGuild) { // purge list
+		} else if (hypixelGuild !== GUILD_ID_ALL) { // purge list
+			const { weightReq } = hypixelGuild;
+
 			description += stripIndent`
 					Current weight requirement: ${client.formatNumber(hypixelGuild.weightReq)}
-					Below reqs (${PLAYER_COUNT} / ${hypixelGuild.players.size} members): ${totalStats}
+					Guild average: ${totalStats}
+					Below reqs: ${playerData.filter(({ totalWeight }) => totalWeight < weightReq).length} / ${hypixelGuild.players.size} members
 				`;
 		} else {
 			description += stripIndent`
 					Current weight requirements: ${client.hypixelGuilds.cache.map(({ name, weightReq }) => `${name} (${client.formatNumber(weightReq)})`).join(', ')}
-					Guilds below reqs (${PLAYER_COUNT} / ${client.players.inGuild.size} members): ${totalStats}
+					Guilds average: ${totalStats}
+					Guilds below reqs: ${playerData.filter(({ totalWeight, guildId }) => totalWeight < client.hypixelGuilds.cache.get(guildId).weightReq).length} / ${client.players.inGuild.size} members
 				`;
 		}
 
