@@ -131,7 +131,7 @@ module.exports = class DiscordManager {
 
 		const { value, similarity } = autocorrect(inColon, this.client.emojis.cache, 'name');
 
-		if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return value.toString();
+		if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return `${value}`;
 
 		return fullMatch;
 	}
