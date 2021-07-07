@@ -50,7 +50,7 @@ module.exports = class PollCommand extends DualCommand {
 			},
 			{
 				aliases: [],
-				args: true,
+				args: 1,
 				usage: '<30s <= `duration` <= 10m> [`"question" "choice_1" "choice_2"` ...]',
 			},
 		);
@@ -191,7 +191,7 @@ module.exports = class PollCommand extends DualCommand {
 				return input;
 			});
 
-		if (!inputMatched || inputMatched.length < 2) return message.reply(this.inGameData.usageInfo);
+		if (!inputMatched || inputMatched.length < 2) return message.reply(this.usageInfo);
 
 		return this._run(
 			message,

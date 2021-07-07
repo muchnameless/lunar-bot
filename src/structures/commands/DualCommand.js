@@ -16,35 +16,39 @@ module.exports = class DualCommand extends SlashCommand {
 	constructor(param0, param1, { aliases, guildOnly, args, usage }) {
 		super(param0, param1);
 
-		const { name, description, config } = this;
+		this._usage = null;
 
-		this.inGameData = {
-			name,
-			aliases: aliases?.length
-				? aliases.filter(Boolean)
-				: null,
-			description,
-			guildOnly: guildOnly ?? false,
-			args: args ?? false,
-			_usage: typeof value === 'function' || usage?.length
-				? usage
-				: null,
-			/**
-			 * @returns {string} command argument usage
-			 */
-			get usage() {
-				return typeof this._usage === 'function'
-					? this._usage()
-					: this._usage;
-			},
-			/**
-			 * prefix name usage
-			 */
-			get usageInfo() {
-				return `\`${this.config.get('PREFIX')}${this.aliases?.[0].length < this.name ? this.aliases[0] : this.name}\` ${this.usage}`;
-			},
-			config,
-		};
+		this.aliasesInGame = aliases?.length
+			? aliases.filter(Boolean)
+			: null;
+		this.guildOnly = guildOnly ?? false;
+		this.args = args ?? false;
+		this.usage = usage;
+	}
+
+	/**
+	 * @param {string|Function} value
+	 */
+	set usage(value) {
+		this._usage = typeof value === 'function' || value?.length
+			? value
+			: null;
+	}
+
+	/**
+	 * @returns {string} command argument usage
+	 */
+	get usage() {
+		return typeof this._usage === 'function'
+			? this._usage()
+			: this._usage;
+	}
+
+	/**
+	 * prefix name usage
+	 */
+	get usageInfo() {
+		return `\`${this.config.get('PREFIX')}${this.aliasesInGame?.[0].length < this.name ? this.aliasesInGame[0] : this.name}\` ${this.usage}`;
 	}
 
 	/**
@@ -56,7 +60,7 @@ module.exports = class DualCommand extends SlashCommand {
 
 		// load into chatbridge command collection
 		this.client.chatBridges.commands.set(this.name.toLowerCase(), this);
-		this.inGameData.aliases?.forEach(alias => this.client.chatBridges.commands.set(alias.toLowerCase(), this));
+		this.aliasesInGame?.forEach(alias => this.client.chatBridges.commands.set(alias.toLowerCase(), this));
 	}
 
 	/**
@@ -68,7 +72,7 @@ module.exports = class DualCommand extends SlashCommand {
 
 		// unload from chatbridge command collection
 		this.client.chatBridges.commands.delete(this.name.toLowerCase());
-		this.inGameData.aliases?.forEach(alias => this.client.chatBridges.commands.delete(alias.toLowerCase()));
+		this.aliasesInGame?.forEach(alias => this.client.chatBridges.commands.delete(alias.toLowerCase()));
 	}
 
 	/**
