@@ -598,6 +598,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	async chat(contentOrOptions) {
 		const { content, prefix = '', maxParts = this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS'), discordMessage } = MinecraftChatManager.resolveInput(contentOrOptions);
 
+		if (!content) return false;
+
 		let success = true;
 
 		/** @type {Set<string>} */
