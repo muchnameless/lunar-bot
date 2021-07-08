@@ -65,7 +65,7 @@ module.exports = class JoinDateCommand extends SlashCommand {
 
 		return {
 			ign,
-			timestamp: new Date(matched?.groups.time).getTime(),
+			timestamp: Date.parse(matched?.groups.time),
 		};
 	}
 
