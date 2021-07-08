@@ -20,8 +20,8 @@ module.exports = async (message) => {
 			try {
 				const { input, output, formattedOutput, warning } = client.commands.get('maths').calculate(message.content.replaceAll(' ', ''));
 
-				// filter out stuff like +8 = 8
-				if (output !== Number(message.content) && !warning) message.reply(`${input} = ${formattedOutput}`);
+				// filter out stuff like +8 = 8, 1 7 = 17
+				if (output !== Number(message.content.replaceAll(' ', '')) && !warning) message.reply(`${input} = ${formattedOutput}`);
 			} catch (error) {
 				logger.error(error);
 			}
