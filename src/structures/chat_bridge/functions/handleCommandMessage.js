@@ -51,7 +51,7 @@ module.exports = async (message) => {
 	// server only command in DMs
 	if (command.guildOnly && message.type !== GUILD) {
 		logger.info(`${message.author.tag} tried to execute '${message.content}' in whispers which is a guild-chat-only command`);
-		return message.reply(`the '${command.name}' command can only be executed in guild chat`);
+		return message.author.send(`the '${command.name}' command can only be executed in guild chat`);
 	}
 
 	const { player } = message;
@@ -66,26 +66,26 @@ module.exports = async (message) => {
 
 			if (!lgGuild) {
 				logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' with the Lunar Guard Discord server being unreachable`);
-				return message.reply(commaListsOr`the '${command.name}' command requires a role (${requiredRoles}) from the Lunar Guard Discord server which is unreachable at the moment`);
+				return message.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles}) from the Lunar Guard Discord server which is unreachable at the moment`);
 			}
 
 			const member = await player?.discordMember;
 
 			if (!member) {
 				logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' and could not be found within the Lunar Guard Discord Server`);
-				return message.reply(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild.name} Discord server which you can not be found in`);
+				return message.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild.name} Discord server which you can not be found in`);
 			}
 
 			// check for req roles
 			if (!member.roles.cache.some((_, roleId) => requiredRoles.includes(roleId))) {
 				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in '${message.type}' without a required role`);
-				return message.reply(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the Lunar Guard Discord Server`);
+				return message.author.send(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the Lunar Guard Discord Server`);
 			}
 
 		// prevent from executing owner only command
 		} else if (command.category === 'owner') {
 			logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is an owner only command`);
-			return message.reply(`the '${command.name}' command is only for the bot owners`);
+			return message.author.send(`the '${command.name}' command is only for the bot owners`);
 		}
 
 		// command cooldowns
@@ -102,7 +102,7 @@ module.exports = async (message) => {
 
 					logger.info(`${message.author.ign}${message.member ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.type}-chat ${TIME_LEFT} before the cooldown expires`);
 
-					return message.reply(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\``);
+					return message.author.send(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\``);
 				}
 			}
 
@@ -122,7 +122,7 @@ module.exports = async (message) => {
 		if (command.usage) reply.push(`use: ${command.usageInfo}`);
 
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' without providing the mandatory arguments`);
-		return message.reply(reply.join('\n'));
+		return message.author.send(reply.join('\n'));
 	}
 
 	// execute command
@@ -131,6 +131,6 @@ module.exports = async (message) => {
 		await command.runInGame(message, args);
 	} catch (error) {
 		logger.error(`An error occured while ${message.author.ign} tried to execute ${message.content} in '${message.type}'`, error);
-		message.reply(`an error occured while executing the '${command.name}' command:\n${error}`);
+		message.author.send(`an error occured while executing the '${command.name}' command:\n${error}`);
 	}
 };
