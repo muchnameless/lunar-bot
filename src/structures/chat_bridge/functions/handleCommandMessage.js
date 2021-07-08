@@ -18,10 +18,10 @@ module.exports = async (message) => {
 		// auto math, ignore 0-0, 4/5 (dungeon parties)
 		if (client.config.get('CHATBRIDGE_AUTO_MATH') && /^[\d.+*x\-/^ ]+$/.test(message.content) && /[1-9]/.test(message.content) && !/[1-5] *\/ *5/.test(message.content)) {
 			try {
-				const { input, output, warning } = client.commands.get('maths').calculate(message.content.replaceAll(' ', ''));
+				const { input, output, formattedOutput, warning } = client.commands.get('maths').calculate(message.content.replaceAll(' ', ''));
 
 				// filter out stuff like +8 = 8
-				if (Number(output) !== Number(message.content) && !warning) message.reply(`${input} = ${output}`);
+				if (output !== Number(message.content) && !warning) message.reply(`${input} = ${formattedOutput}`);
 			} catch (error) {
 				logger.error(error);
 			}

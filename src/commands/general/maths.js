@@ -339,7 +339,6 @@ module.exports = class MathsCommand extends DualCommand {
 
 		const stack = [];
 
-		/** @type {string} */
 		let output;
 		let warning = false;
 
@@ -387,7 +386,8 @@ module.exports = class MathsCommand extends DualCommand {
 				.replace(/(?<=.)[+\-*/]/g, ' $& ') // add spaces around operators
 				.replace(/,/g, '$& ') // add space after commas
 				.replace(/pi/gi, '\u{03C0}'), // prettify 'pi'
-			output: output?.toString() ?? '',
+			output: Number(output),
+			formattedOutput: MathsCommand.formatNumberString(output?.toString() ?? ''),
 			warning: warning
 				? `\nwarning: (intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}, calculation may be incorrect`
 				: '',
@@ -401,9 +401,9 @@ module.exports = class MathsCommand extends DualCommand {
 	 */
 	async _run(ctx, rawInput) {
 		try {
-			const { input, output, warning } = this.calculate(rawInput);
+			const { input, formattedOutput, warning } = this.calculate(rawInput);
 
-			return ctx.reply(`${input} = ${output} ${warning}`);
+			return ctx.reply(`${input} = ${formattedOutput} ${warning}`);
 		} catch (error) {
 			return ctx.reply(`${error}`);
 		}
