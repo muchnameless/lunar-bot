@@ -5,7 +5,7 @@ const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerR
 
 // generate default config
 const DEFAULT_CONFIG = {
-	AUTOCORRECT_THRESHOLD: 0.85,
+	AUTOCORRECT_THRESHOLD: 0.8,
 	AVERAGE_STATS_CHANNEL_UPDATE_ENABLED: true,
 	BRIDGER_ROLE_ID: null,
 	CATACOMBS_AVERAGE_STATS_CHANNEL_ID: null,
