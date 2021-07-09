@@ -292,7 +292,17 @@ const self = module.exports = {
 		switch (SELECT_TYPE) {
 			case 'lbType':
 				[ leaderboardArgs.lbType ] = interaction.values;
-				if (leaderboardArgs.lbType === 'gained' && !leaderboardArgs.offset) leaderboardArgs.offset = self.getDefaultOffset(interaction.client.config);
+
+				// reset offsets to defaults
+				switch (leaderboardArgs.lbType) {
+					case 'gained':
+						leaderboardArgs.offset = self.getDefaultOffset(interaction.client.config);
+						break;
+
+					case 'total':
+						leaderboardArgs.offset = '';
+						break;
+				}
 				break;
 
 			case 'offset': {
