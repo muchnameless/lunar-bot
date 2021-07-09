@@ -33,3 +33,15 @@ export class Message extends (await import('discord.js')).Message {
 // 		padFields(numberOfRows?: number): this;
 // 	}
 // }
+
+declare module 'minecraft-protocol' {
+	interface Client {
+		readonly client: import('./src/structures/LunarClient');
+		chat(message: string): void
+		quit(reason: string): void
+		player: import('./src/structures/database/models/Player');
+		readonly ign: string;
+		ready: boolean;
+		ended: boolean;
+	}
+}

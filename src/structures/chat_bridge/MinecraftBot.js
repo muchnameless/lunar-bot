@@ -7,29 +7,11 @@ const { getAllJsFiles } = require('../../functions/files');
 const logger = require('../../functions/logger');
 const Player = require('../database/models/Player');
 
-// {import('minecraft-protocol').Client}
-
-/**
- * @typedef {object} MinecraftBotAdditions
- * @property {import('../LunarClient')} client
- * @property {import('../database/models/Player')} player
- * @property {string} ign
- * @property {string} uuid
- * @property {boolean} ready
- * @property {boolean} ended
- * @property {Function} chat sends a message to chat
- * @property {Function} quit disconnects from the server
- */
-
-/**
- * @typedef {import('minecraft-protocol').Client & MinecraftBotAdditions} MinecraftBot
- */
 
 /**
  * returns a mc bot client
  * @param {import('./ChatBridge')} chatBridge
  * @param {import('minecraft-protocol').ClientOptions} options
- * @returns {Promise<MinecraftBot>}
  */
 module.exports = async (chatBridge, options) => {
 	const bot = createClient(options);
@@ -60,6 +42,7 @@ module.exports = async (chatBridge, options) => {
 		chat: {
 			value(message) {
 				if (typeof message !== 'string') throw new Error(`[BOT CHAT]: input must be a string but received ${typeof message}`);
+				if (message.startsWith('/kick ')) throw new Error('kicking with the bot is disabled');
 				return this.write('chat', { message });
 			},
 		},

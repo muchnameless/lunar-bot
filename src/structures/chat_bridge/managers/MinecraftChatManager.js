@@ -69,7 +69,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		 */
 		this.commandQueue = new AsyncQueue();
 		/**
-		 * @type {import('../MinecraftBot').MinecraftBot}
+		 * @type {import('minecraft-protocol').Client}
 		 */
 		this.bot = null;
 		/**
