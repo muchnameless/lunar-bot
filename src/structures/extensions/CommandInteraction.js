@@ -21,7 +21,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 		 * wether to use ephemeral replies and deferring
 		 */
 		this.useEphemeral = this._checkEphemeralOption
-			?? (channel !== null && channel.type !== 'dm'
+			?? (channel !== null && channel.type !== 'DM'
 				? !(channel.name.includes('command') || channel.isTicket) // guild channel
 				: false); // DM channel
 	}

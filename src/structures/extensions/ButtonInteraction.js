@@ -24,7 +24,7 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 		/**
 		 * wether to use ephemeral replies and deferring
 		 */
-		this.useEphemeral = channel !== null && channel.type !== 'dm'
+		this.useEphemeral = channel !== null && channel.type !== 'DM'
 			? !(channel.name.includes('command') || channel.isTicket) // guild channel
 			: false; // DM channel
 	}
