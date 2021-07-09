@@ -47,7 +47,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 			});
 
 		// already linked to this discord user
-		if (player?.minecraftUuid === playerLinkedToId?.minecraftUuid) return interaction.reply('you are already linked with this discord account');
+		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return interaction.reply('you are already linked with this discord account');
 
 		const { uuid, ign } = await mojang.ign(IGN).catch(error => logger.error('[VERIFY]: ign fetch', error) ?? {});
 
