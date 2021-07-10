@@ -586,6 +586,7 @@ module.exports = class HypixelGuild extends Model {
 	 * syncs guild ranks with the weight leaderboard
 	 */
 	async syncGuildRanks() {
+		if (!this.client.config.get('AUTO_GUILD_RANKS')) return;
 		if (!this.chatBridgeEnabled) return;
 
 		try {
@@ -593,7 +594,7 @@ module.exports = class HypixelGuild extends Model {
 			const automatedRanks = this.ranks.filter(({ positionReq }) => positionReq != null);
 
 			for (const [ index, player ] of this.players.sort((p1, p2) => p1.getWeight().totalWeight - p2.getWeight().totalWeight).entries()) {
-				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReq <= index && acc?.positionReq <= cur.positionReq ? cur : acc), null);
+				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReq <= index && (acc?.positionReq ?? 0) <= cur.positionReq ? cur : acc), null);
 
 				logger.debug({
 					ign: player.ign,
