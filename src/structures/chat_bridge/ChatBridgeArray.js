@@ -116,7 +116,7 @@ module.exports = class ChatBridgeArray extends Array {
 	}
 
 	/**
-	 * send a message via all chatBridges both to discord and the ingame guild chat, parsing both
+	 * send a message via all chatBridges both to discord and the in game guild chat, parsing both
 	 * @param {string | ChatBridge.BroadcastOptions} contentOrOptions
 	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]][]>}
 	 */

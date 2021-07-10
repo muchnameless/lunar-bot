@@ -380,11 +380,11 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * wether the player has an ingame staff rank,
+	 * wether the player has an in game staff rank,
 	 * assumes the last two guild ranks are staff ranks
 	 */
 	get isStaff() {
-		return this.guildRankPriority && this.guildRankPriority >= this.guild?.ranks.length - 1;
+		return this.guildRankPriority >= this.guild?.ranks.length - 1;
 	}
 
 	/**
@@ -456,7 +456,7 @@ module.exports = class Player extends Model {
 	 * updates the player data and discord member
 	 * @param {PlayerUpdateOptions} options
 	 */
-	async update({ reason = 'synced with ingame stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false, rejectOnAPIError = false } = {}) {
+	async update({ reason = 'synced with in game stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false, rejectOnAPIError = false } = {}) {
 		if (this.guildId === GUILD_ID_BRIDGER) return;
 		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
@@ -493,7 +493,7 @@ module.exports = class Player extends Model {
 			/**
 			 * skills
 			 */
-			if (Object.prototype.hasOwnProperty.call(playerData, 'experience_skill_alchemy')) {
+			if (Reflect.has(playerData, 'experience_skill_alchemy')) {
 				for (const skill of skills) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
 				for (const skill of cosmeticSkills) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
 
@@ -537,7 +537,7 @@ module.exports = class Player extends Model {
 			}
 
 			// no slayer data found logging
-			if (!Object.prototype.hasOwnProperty.call(playerData.slayer_bosses?.zombie ?? {}, 'xp') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no slayer data found`);
 			}
 
@@ -558,14 +558,14 @@ module.exports = class Player extends Model {
 			}
 
 			// no dungeons data found logging
-			if (!Object.hasOwnProperty.call(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no dungeons data found`);
 			}
 
 			/**
 			 * collections
 			 */
-			if (!Object.hasOwnProperty.call(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (!Reflect.has(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
 			}
 
@@ -586,7 +586,7 @@ module.exports = class Player extends Model {
 	 * @param {?string} [options.reason] role update reason for discord's audit logs
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
-	async updateDiscordMember({ reason: reasonInput = 'synced with ingame stats', shouldSendDm = false } = {}) {
+	async updateDiscordMember({ reason: reasonInput = 'synced with in game stats', shouldSendDm = false } = {}) {
 		if (this.guildId === GUILD_ID_BRIDGER) return;
 
 		let reason = reasonInput;
@@ -658,7 +658,7 @@ module.exports = class Player extends Model {
 
 		if (guildRank) {
 			if (guildRank.roleId && !member.roles.cache.has(guildRank.roleId)) {
-				reason = 'synced with ingame rank';
+				reason = 'synced with in game rank';
 				rolesToAdd.push(guildRank.roleId);
 			}
 
@@ -922,7 +922,7 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * removes the discord server ingame guild role & all roles handled automatically by the bot
+	 * removes the discord server in game guild role & all roles handled automatically by the bot
 	 * @returns {Promise<boolean>} wether the discord role removal was successful or not
 	 */
 	async removeFromGuild() {
@@ -1338,7 +1338,7 @@ module.exports = class Player extends Model {
 		this.mutedTill = mutedTill;
 
 		// update guild rank
-		this.guildRankPriority = hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ?? (/guild ?master/i.test(rank) ? hypixelGuild.ranks.length : 1);
+		this.guildRankPriority = hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ?? (/^guild ?master$/i.test(rank) ? hypixelGuild.ranks.length : 1);
 
 		return this.save();
 	}

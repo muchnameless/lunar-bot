@@ -41,8 +41,6 @@ module.exports = class MessageCreateEvent extends Event {
 		if (!message.interaction) this.client.chatBridges.handleDiscordMessage(message, { isEdit, checkIfNotFromBot: !isEdit }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
 
 		if (message.content.length && message.isUserMessage) {
-			this.client.hypixelGuilds.checkIfRankRequestMessage(message);
-
 			if (new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIX')), `<@!?${this.client.user.id}>` ].join('|')})`, 'i').test(message.content)) {
 				message.reply('all commands have been converted to slash commands, type (not send) `/` to see them');
 			}

@@ -203,7 +203,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 	}
 
 	/**
-	 * replies ingame (and on discord if guild chat) to the message
+	 * replies in game (and on discord if guild chat) to the message
 	 * @param {string | import('./ChatBridge').BroadcastOptions | import('./ChatBridge').ChatOptions } contentOrOptions
 	 */
 	async reply(contentOrOptions) {

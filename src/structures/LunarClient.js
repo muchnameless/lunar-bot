@@ -108,21 +108,21 @@ module.exports = class LunarClient extends Client {
 	}
 
 	/**
-	 * send to ingame chat via the main guild's chatBridge
+	 * send to in game chat via the main guild's chatBridge
 	 */
 	get chat() {
 		return arg => this.chatBridge.minecraft.sendToChat(arg);
 	}
 
 	/**
-	 * send to ingame guild chat via the main guild's chatBridge
+	 * send to in game guild chat via the main guild's chatBridge
 	 */
 	get gchat() {
 		return arg => this.chatBridge.minecraft.gchat(arg);
 	}
 
 	/**
-	 * send a message both to discord and the ingame guild chat
+	 * send a message both to discord and the in game guild chat
 	 */
 	get broadcast() {
 		return arg => this.chatBridge.broadcast(arg);

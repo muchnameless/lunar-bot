@@ -541,7 +541,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * send a message to ingame guild chat
+	 * send a message to in game guild chat
 	 * @param {string | import('../ChatBridge').ChatOptions} contentOrOptions
 	 */
 	async gchat(contentOrOptions) {
@@ -559,7 +559,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * send a message to ingame guild chat
+	 * send a message to in game guild chat
 	 * @param {string | import('../ChatBridge').ChatOptions} contentOrOptions
 	 */
 	async ochat(contentOrOptions) {
@@ -569,7 +569,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * send a message to ingame party chat
+	 * send a message to in game party chat
 	 * @param {string | import('../ChatBridge').ChatOptions} contentOrOptions
 	 */
 	async pchat(contentOrOptions) {
@@ -590,7 +590,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * splits the message into the max ingame chat length, prefixes all parts and sends them
+	 * splits the message into the max in game chat length, prefixes all parts and sends them
 	 * @param {string | import('../ChatBridge').ChatOptions} contentOrOptions
 	 * @param {import('../ChatBridge').ChatOptions} [options]
 	 * @returns {Promise<boolean>} success - wether all message parts were send
@@ -643,7 +643,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * queue a message for the ingame chat
+	 * queue a message for the in game chat
 	 * @param {string | SendToChatOptions} contentOrOptions
 	 */
 	async sendToChat(contentOrOptions) {
@@ -747,7 +747,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * sends a message to ingame chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
+	 * sends a message to in game chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
 	 * @param {CommandOptions} commandOptions
 	 */
 	// eslint-disable-next-line no-undef
@@ -793,8 +793,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				case 'disconnect': {
 					if (rejectOnTimeout && !collected.length) {
 						return reject(raw
-							? [{ content: `no ingame response after ${ms(timeout, { long: true })}` }]
-							: `no ingame response after ${ms(timeout, { long: true })}`,
+							? [{ content: `no in game response after ${ms(timeout, { long: true })}` }]
+							: `no in game response after ${ms(timeout, { long: true })}`,
 						);
 					}
 
@@ -802,7 +802,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 						? collected
 						: collected.length
 							? MinecraftChatManager._cleanCommandResponse(collected)
-							: `no ingame response after ${ms(timeout, { long: true })}`);
+							: `no in game response after ${ms(timeout, { long: true })}`);
 				}
 
 				default:

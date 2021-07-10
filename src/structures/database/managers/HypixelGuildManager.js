@@ -104,20 +104,6 @@ module.exports = class HypixelGuildManager extends ModelManager {
 	}
 
 	/**
-	 * check if the message is a rank request and handle it if true
-	 * @param {import('../extensions/Message')} message
-	 */
-	async checkIfRankRequestMessage(message) {
-		if (message.mentions.users.size) return; // ignore messages with tagged users
-
-		try {
-			await this.cache.find(({ rankRequestChannelId }) => rankRequestChannelId === message.channel.id)?.handleRankRequestMessage(message);
-		} catch (error) {
-			logger.error('[RANK REQUEST]', error);
-		}
-	}
-
-	/**
 	 * schedules the CronJob for the daily stats save for each guild
 	 */
 	scheduleDailyStatsSave() {

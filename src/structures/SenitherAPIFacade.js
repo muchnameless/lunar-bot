@@ -149,7 +149,7 @@ module.exports = class SenitherAPIFacade extends EventEmitter {
 			// analyze API result
 			const parsedResult = await result.json();
 
-			if (Object.hasOwnProperty.call(parsedResult, 'status') && parsedResult.status !== 200) throw new Error(`[Error ${parsedResult.status}]: ${parsedResult.reason}`);
+			if (Reflect.has(parsedResult, 'status') && parsedResult.status !== 200) throw new Error(`[Error ${parsedResult.status}]: ${parsedResult.reason}`);
 
 			if (cache) this.cache?.set(key, parsedResult.data);
 

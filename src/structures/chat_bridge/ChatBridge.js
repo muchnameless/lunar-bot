@@ -251,7 +251,7 @@ module.exports = class ChatBridge extends EventEmitter {
 	}
 
 	/**
-	 * send a message both to discord and the ingame guild chat, parsing both
+	 * send a message both to discord and the in game guild chat, parsing both
 	 * @param {string | BroadcastOptions} contentOrOptions
 	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]]>}
 	 */

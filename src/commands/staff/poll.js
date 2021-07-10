@@ -59,7 +59,7 @@ module.exports = class PollCommand extends DualCommand {
 	}
 
 	/**
-	 * create a poll for both ingame chat and the chatBridge channel
+	 * create a poll for both in game chat and the chatBridge channel
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {object} param1
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} param1.chatBridge
@@ -103,7 +103,7 @@ module.exports = class PollCommand extends DualCommand {
 				${pollOptions.map(({ number, option }) => `${number}: ${option}`).join('\n')}
 			`);
 
-			// aquire ingame votes
+			// aquire in game votes
 			for (const msg of await ingameMessages) {
 				const votedFor = parseInt(msg.content, 10);
 

@@ -268,7 +268,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * forwards a discord message to ingame guild chat, prettifying discord markdown, if neither the player nor the whole guild chat is muted
+	 * forwards a discord message to in game guild chat, prettifying discord markdown, if neither the player nor the whole guild chat is muted
 	 * @param {import('../../extensions/Message')} message
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */
@@ -337,8 +337,8 @@ module.exports = class DiscordChatManager extends ChatManager {
 		});
 
 		return this.minecraft.chat({
-			content: isEdit && !content.startsWith('*')
-				? `*${content}` // add a leading * to indicate an edit if not already present
+			content: isEdit && !content.endsWith('*')
+				? `${content}*` // add a leading * to indicate an edit if not already present
 				: content,
 			prefix: `${this.prefix} ${interaction ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
 			discordMessage: message,

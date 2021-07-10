@@ -2,11 +2,10 @@
 
 const { Model, DataTypes } = require('sequelize');
 const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
-const { autocorrect, cleanFormattedNumber, compareAlphabetically, safePromiseAll } = require('../../../functions/util');
+const { cleanFormattedNumber, compareAlphabetically, safePromiseAll } = require('../../../functions/util');
 const { mutedCheck } = require('../../../functions/database');
-const { promote: { string: { success } } } = require('../../chat_bridge/constants/commandResponses');
+const { setRank: { regExp: setRank } } = require('../../chat_bridge/constants/commandResponses');
 const { EMBED_MAX_CHARS, EMBED_MAX_FIELDS, EMBED_FIELD_MAX_CHARS } = require('../../../constants/discord');
-const { Y_EMOJI, Y_EMOJI_ALT, X_EMOJI, CLOWN } = require('../../../constants/emojiCharacters');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, CURRENT, DAY }, UNKNOWN_IGN } = require('../../../constants/database');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
@@ -17,7 +16,7 @@ const logger = require('../../../functions/logger');
  * @property {string} name name of the guild rank
  * @property {?string} roleId discord role ID associated with the guild rank
  * @property {number} priority hypixel guild rank priority
- * @property {?number} weightReq weight requirement for the guild rank
+ * @property {?number} positionReq weight lb position requirement for the guild rank
  */
 
 /**
@@ -78,10 +77,6 @@ module.exports = class HypixelGuild extends Model {
 		 */
 		this.chatBridgeChannels;
 		/**
-		 * @type {string}
-		 */
-		this.rankRequestChannelId;
-		/**
 		 * @type {GuildRank[]}
 		 */
 		this.ranks;
@@ -128,17 +123,12 @@ module.exports = class HypixelGuild extends Model {
 				},
 			},
 			chatBridgeChannels: {
-				type: DataTypes.ARRAY(DataTypes.JSONB), // { channelId: string, type: string }
+				type: DataTypes.ARRAY(DataTypes.JSONB),
 				defaultValue: [],
 				allowNull: false,
 			},
-			rankRequestChannelId: {
-				type: DataTypes.STRING,
-				defaultValue: null,
-				allowNull: true,
-			},
 			ranks: {
-				type: DataTypes.ARRAY(DataTypes.JSONB), // { name: string, priority: int, weightReq: int, roleId: string }
+				type: DataTypes.ARRAY(DataTypes.JSONB),
 				defaultValue: null,
 				allowNull: true,
 			},
@@ -361,6 +351,7 @@ module.exports = class HypixelGuild extends Model {
 			let joinedLog = [];
 			let hasError = false;
 
+			// add / remove player db entries
 			await safePromiseAll([
 				...membersJoined.map(async ({ uuid: minecraftUuid }) => {
 					/** @type {[import('./Player'), boolean]} */
@@ -511,10 +502,15 @@ module.exports = class HypixelGuild extends Model {
 				}),
 			]);
 
-			// update guild xp gained and ingame ranks
-			for (const hypixelGuildMember of currentGuildMembers) {
-				players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember) ?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
-			}
+			// sync guild xp, mutedTill & guild ranks
+			(async () => {
+				await safePromiseAll(currentGuildMembers.map(
+					async hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember)
+						?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`)),
+				);
+
+				this.syncGuildRanks();
+			})();
 
 			const CHANGES = PLAYERS_LEFT_AMOUNT + membersJoined.length;
 
@@ -587,106 +583,60 @@ module.exports = class HypixelGuild extends Model {
 	}
 
 	/**
-	 * determine the requested rank and compare the player's weight with the rank's requirement
-	 * @param {import('../../extensions/Message') | import('../../chat_bridge/HypixelMessage') | import('../../extensions/CommandInteraction')} ctx message which was send in the #rank-requests channel, or that triggered the 'rank' command
+	 * syncs guild ranks with the weight leaderboard
 	 */
-	async handleRankRequestMessage(ctx, rank) {
-		const { config } = this.client;
-		const result = rank
-			? autocorrect(rank, this.ranks, 'name')
-			: ctx.content
-				?.replace(/[^a-z ]/gi, '') // delete all non alphabetical characters
-				.split(/ +/)
-				.filter(({ length }) => length >= 3) // filter out short words like 'am'
-				.map(word => autocorrect(word, this.ranks, 'name'))
-				.sort((a, b) => a.similarity - b.similarity)
-				.pop();
+	async syncGuildRanks() {
+		if (!this.chatBridgeEnabled) return;
 
-		if (!result || result.similarity < config.get('AUTOCORRECT_THRESHOLD')) return;
+		try {
+			const { chatBridge } = this;
+			const automatedRanks = this.ranks.filter(({ positionReq }) => positionReq != null);
 
-		const { value: {
-			name: RANK_NAME,
-			weightReq: WEIGHT_REQ,
-			roleId: ROLE_ID,
-			priority: RANK_PRIORITY,
-		} } = result; // rank
-		const { player } = ctx.author;
+			for (const [ index, player ] of this.players.sort((p1, p2) => p1.getWeight().totalWeight - p2.getWeight().totalWeight).entries()) {
+				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReq <= index && acc?.positionReq <= cur.positionReq ? cur : acc), null);
+				const { guildRank: oldRank } = player;
 
-		// no player db entry
-		if (!player) {
-			logger.info(`[RANK REQUEST]: ${this.name}: ${ctx.logInfo} requested '${RANK_NAME}' but could not be found in the player db`);
+				// player is staff -> only roles need to be adapted
+				if (player.isStaff) {
+					const member = await player.discordMember;
+					if (!member) continue;
 
-			return ctx.reply({
-				content: `unable to find you in the ${this.name} player database, use \`/verify [your ign]\` in ${ctx.findNearestCommandsChannel?.() ?? '#bot-commands'}`,
-				sameChannel: true,
-			});
+					logger.debug({
+						ign: player.ign,
+						rolesToAdd: member.roles.cache.has(newRank.roleId)
+							? [ newRank.roleId ]
+							: [],
+						rolesToRemove: [ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)),
+					});
+
+					// await player.makeRoleApiCall(
+					// 	member.roles.cache.has(newRank.roleId)
+					// 		? [ newRank.roleId ]
+					// 		: [],
+					// 	[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)),
+					// 	'synced with in game rank',
+					// );
+				}
+
+				// player already has the correct rank
+				if (oldRank?.priority === newRank.priority) continue;
+
+				logger.debug({
+					ign: player.ign,
+					command: `g setrank ${player.ign} ${newRank.name}`,
+					responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
+				});
+
+				// set player to the correct rank
+				// await chatBridge.minecraft.command({
+				// 	command: `g setrank ${player.ign} ${newRank.name}`,
+				// 	responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
+				// 	rejectOnTimeout: true,
+				// });
+			}
+		} catch (error) {
+			logger.error(error);
 		}
-
-		// non-requestable rank
-		if (!ROLE_ID) {
-			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested '${RANK_NAME}' rank which is non-requestable`);
-
-			const replyData = await ctx.replyData;
-
-			if (replyData) ctx.channel.deleteMessages(replyData.messageId).catch(error => logger.error('[RANK REQUEST]: delete', error));
-
-			return ctx.react(CLOWN);
-		}
-
-		const WEIGHT_REQ_STRING = this.client.formatNumber(WEIGHT_REQ);
-
-		let { totalWeight } = player.getWeight();
-
-		// player data could be outdated -> update data when player does not meet reqs
-		if (totalWeight < WEIGHT_REQ) {
-			logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} but only had ${this.client.formatDecimalNumber(totalWeight)} / ${WEIGHT_REQ_STRING} weight -> updating db`);
-			await player.updateXp();
-			({ totalWeight } = player.getWeight());
-		}
-
-		const WEIGHT_STRING = this.client.formatDecimalNumber(totalWeight);
-
-		// remove clown reaction if it exists, optional chaining to handle  mc messages
-		if (ctx.reactions?.cache.get(CLOWN)?.me) ctx.reactions.cache.get(CLOWN).users.remove().catch(error => logger.error('[RANK REQUEST]: remove reaction', error));
-
-		await ctx.reply({
-			content: `${totalWeight >= WEIGHT_REQ ? Y_EMOJI : X_EMOJI} \`${player.ign}\`'s weight: ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} [\`${RANK_NAME}\`]`,
-			reply: {
-				messageReference: ctx,
-			},
-			sameChannel: true,
-		});
-
-		logger.info(`[RANK REQUEST]: ${player.logInfo}: requested ${RANK_NAME} rank with ${WEIGHT_STRING} / ${WEIGHT_REQ_STRING} weight`);
-
-		// player doesn't meet reqs or meets reqs and already has the rank or is staff and has the rank's role
-		if (totalWeight < WEIGHT_REQ || (totalWeight >= WEIGHT_REQ && ((!player.isStaff && player.guildRankPriority >= RANK_PRIORITY) || (player.isStaff && (ctx.member ?? await player.discordMember)?.roles.cache.has(ROLE_ID))))) return;
-
-		// set rank role to requested rank
-		if (player.isStaff) {
-			const member = ctx.member ?? await player.discordMember;
-
-			if (!member) throw new Error('unknown discord member');
-
-			const otherRequestableRankRoles = this.ranks.flatMap(({ roleId }) => (roleId && roleId !== ROLE_ID ? roleId : []));
-			const rolesToRemove = [ ...member.roles.cache.keys() ].filter(roleId => otherRequestableRankRoles.includes(roleId));
-
-			await player.makeRoleApiCall([ ROLE_ID ], rolesToRemove, `requested ${RANK_NAME}`);
-		} else {
-			// set ingame rank and discord role
-			await this.chatBridge.minecraft.command({
-				command: `g setrank ${player.ign} ${RANK_NAME}`,
-				responseRegExp: new RegExp(success(player.ign, player.guildRank?.name, RANK_NAME), 'i'), // listen for successful ingame promotion message
-				rejectOnTimeout: true,
-			});
-
-			// ingame chat message received
-			player.guildRankPriority = RANK_PRIORITY;
-			player.save();
-			await player.updateRoles(`requested ${RANK_NAME}`);
-		}
-
-		return ctx.react(Y_EMOJI_ALT);
 	}
 
 	/**
