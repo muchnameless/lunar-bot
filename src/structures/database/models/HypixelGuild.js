@@ -594,6 +594,12 @@ module.exports = class HypixelGuild extends Model {
 
 			for (const [ index, player ] of this.players.sort((p1, p2) => p1.getWeight().totalWeight - p2.getWeight().totalWeight).entries()) {
 				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReq <= index && acc?.positionReq <= cur.positionReq ? cur : acc), null);
+
+				logger.debug({
+					ign: player.ign,
+					newRank: newRank?.name,
+				});
+
 				const { guildRank: oldRank } = player;
 
 				// player is staff -> only roles need to be adapted
