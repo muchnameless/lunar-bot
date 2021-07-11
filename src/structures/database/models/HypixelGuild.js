@@ -593,7 +593,7 @@ module.exports = class HypixelGuild extends Model {
 			const { chatBridge } = this;
 			const automatedRanks = this.ranks.filter(({ positionReq }) => positionReq != null);
 
-			for (const [ index, player ] of this.players.sort((p1, p2) => p1.getWeight().totalWeight - p2.getWeight().totalWeight).entries()) {
+			for (const [ index, player ] of this.players.array().sort((p1, p2) => p1.getWeight().totalWeight - p2.getWeight().totalWeight).entries()) {
 				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReq <= index && (acc?.positionReq ?? 0) <= cur.positionReq ? cur : acc), null);
 
 				logger.debug({
