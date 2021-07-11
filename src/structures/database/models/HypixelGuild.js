@@ -591,44 +591,74 @@ module.exports = class HypixelGuild extends Model {
 
 		try {
 			const { chatBridge } = this;
-			const automatedRanks = this.ranks.filter(({ positionReq }) => positionReq != null);
 
-			for (const [ index, player ] of this.players
+			let staffAmount = 0;
+
+			const playersSortedByWeight = this.players
 				.array()
 				.sort((p1, p2) => p1.getWeight().totalWeight - p2.getWeight().totalWeight) // from lowest to highest weight
-				.entries()
-			) {
-				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReq <= index && (acc?.positionReq ?? 0) <= cur.positionReq ? cur : acc), null);
+				.map((player, index) => ({
+					player,
+					isStaff: player.isStaff
+						? (++staffAmount, true)
+						: false,
+					posWithStaff: index,
+					posNonStaff: index - staffAmount,
+				}));
+			const nonStaffAmount = playersSortedByWeight.length - staffAmount;
+			/** @type {(GuildRank & { positionReqStaff: number, positionReqNonStaff: number })[]} */
+			const automatedRanks = this.ranks
+				.flatMap(rank => (rank.positionReq != null
+					? {
+						positionReqStaff: Math.ceil(rank.positionReq * playersSortedByWeight.length),
+						positionReqNonStaff: Math.ceil(rank.positionReq * nonStaffAmount),
+						...rank,
+					}
+					: []
+				));
 
-				if (!newRank) continue;
-
-				const { guildRank: oldRank } = player;
-
+			for (const { player, isStaff, posWithStaff, posNonStaff } of playersSortedByWeight) {
 				// player is staff -> only roles need to be adapted
-				if (player.isStaff) {
+				if (isStaff) {
+					const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReqStaff <= posWithStaff && (acc?.positionReqStaff ?? 0) <= cur.positionReqStaff ? cur : acc), null);
+					if (!newRank) continue;
+
 					const member = await player.discordMember;
 					if (!member) continue;
 
-					await player.makeRoleApiCall(
-						newRank.roleId && member.roles.cache.has(newRank.roleId)
-							? []
-							: [ newRank.roleId ],
-						[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)),
-						'synced with in game rank',
-					);
+					logger.debug({ ign: player.ign, toAdd: newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
+						? [ newRank.roleId ]
+						: [], toRemove: [ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId))
+					})
+
+					// await player.makeRoleApiCall(
+					// 	newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
+					// 		? [ newRank.roleId ]
+					// 		: [],
+					// 	[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)), // remove all other rank roles
+					// 	'synced with in game rank',
+					// );
 
 					continue;
 				}
 
+				// non staff
+				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReqNonStaff <= posNonStaff && (acc?.positionReqNonStaff ?? 0) <= cur.positionReqNonStaff ? cur : acc), null);
+				if (!newRank) continue;
+
+				const { oldRank } = player;
+
 				// player already has the correct rank
 				if (oldRank?.priority === newRank.priority) continue;
 
+				logger.debug(`g setrank ${player.ign} ${newRank.name}`)
+
 				// set player to the correct rank
-				await chatBridge.minecraft.command({
-					command: `g setrank ${player.ign} ${newRank.name}`,
-					responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
-					rejectOnTimeout: true,
-				});
+				// await chatBridge.minecraft.command({
+				// 	command: `g setrank ${player.ign} ${newRank.name}`,
+				// 	responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
+				// 	rejectOnTimeout: true,
+				// });
 			}
 		} catch (error) {
 			logger.error(error);
