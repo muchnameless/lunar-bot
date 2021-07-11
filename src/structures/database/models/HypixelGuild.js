@@ -593,13 +593,14 @@ module.exports = class HypixelGuild extends Model {
 			const { chatBridge } = this;
 			const automatedRanks = this.ranks.filter(({ positionReq }) => positionReq != null);
 
-			for (const [ index, player ] of this.players.array().sort((p1, p2) => p1.getWeight().totalWeight - p2.getWeight().totalWeight).entries()) {
+			for (const [ index, player ] of this.players
+				.array()
+				.sort((p1, p2) => p1.getWeight().totalWeight - p2.getWeight().totalWeight) // from lowest to highest weight
+				.entries()
+			) {
 				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReq <= index && (acc?.positionReq ?? 0) <= cur.positionReq ? cur : acc), null);
 
-				logger.debug({
-					ign: player.ign,
-					newRank: newRank?.name,
-				});
+				if (!newRank) continue;
 
 				const { guildRank: oldRank } = player;
 
@@ -608,21 +609,13 @@ module.exports = class HypixelGuild extends Model {
 					const member = await player.discordMember;
 					if (!member) continue;
 
-					logger.debug({
-						ign: player.ign,
-						rolesToAdd: member.roles.cache.has(newRank.roleId)
+					await player.makeRoleApiCall(
+						newRank.roleId && member.roles.cache.has(newRank.roleId)
 							? []
 							: [ newRank.roleId ],
-						rolesToRemove: [ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)),
-					});
-
-					// await player.makeRoleApiCall(
-					// 	member.roles.cache.has(newRank.roleId)
-					// 		? []
-					// 		: [ newRank.roleId ],
-					// 	[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)),
-					// 	'synced with in game rank',
-					// );
+						[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)),
+						'synced with in game rank',
+					);
 
 					continue;
 				}
@@ -630,17 +623,12 @@ module.exports = class HypixelGuild extends Model {
 				// player already has the correct rank
 				if (oldRank?.priority === newRank.priority) continue;
 
-				logger.debug({
-					ign: player.ign,
-					command: `g setrank ${player.ign} ${newRank.name}`,
-				});
-
 				// set player to the correct rank
-				// await chatBridge.minecraft.command({
-				// 	command: `g setrank ${player.ign} ${newRank.name}`,
-				// 	responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
-				// 	rejectOnTimeout: true,
-				// });
+				await chatBridge.minecraft.command({
+					command: `g setrank ${player.ign} ${newRank.name}`,
+					responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
+					rejectOnTimeout: true,
+				});
 			}
 		} catch (error) {
 			logger.error(error);
