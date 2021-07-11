@@ -40,7 +40,15 @@ module.exports = class ReadyEvent extends Event {
 		}, 20 * 60_000); // 20 min
 
 		// chatBridges
-		if (this.config.get('CHATBRIDGE_ENABLED')) await this.client.chatBridges.connect();
+		if (this.config.get('CHATBRIDGE_ENABLED')) {
+			await this.client.chatBridges.connect();
+
+			// update hypixelGuilds if next scheduled update is over 1 min from now
+			if (this.config.get('PLAYER_DB_UPDATE_ENABLED')) {
+				const INTERVAL = this.config.get('DATABASE_UPDATE_INTERVAL');
+				if (INTERVAL - (new Date().getMinutes() % INTERVAL) > 1) this.client.hypixelGuilds.update();
+			}
+		}
 
 		// log ready
 		logger.debug(`[READY]: startup complete. ${this.client.cronJobs.size} CronJobs running. Logging channel available: ${this.client.logHandler.ready}`);

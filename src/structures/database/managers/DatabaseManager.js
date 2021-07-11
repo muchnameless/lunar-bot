@@ -64,12 +64,6 @@ module.exports = class DatabaseManager {
 			start: true,
 		}));
 
-		// update hypixelGuilds if next scheduled update is over 1 min from now
-		if (config.get('PLAYER_DB_UPDATE_ENABLED')) {
-			const INTERVAL = config.get('DATABASE_UPDATE_INTERVAL');
-			if (INTERVAL - (new Date().getMinutes() % INTERVAL) > 1) this.modelManagers.hypixelGuilds.update();
-		}
-
 		// schedule guild stats channel update
 		this.client.schedule('guildStatsChannelUpdate', new CronJobConstructor({
 			cronTime: '0 0 * * * *',

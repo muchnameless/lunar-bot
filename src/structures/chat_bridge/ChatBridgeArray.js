@@ -85,18 +85,31 @@ module.exports = class ChatBridgeArray extends Array {
 	 * @returns {Promise<import('./ChatBridge')|import('./ChatBridge')[]>}
 	 */
 	async connect(index) {
+		let resolve;
+
+		const promise = new Promise(r => resolve = r);
+
 		// load commands if none are present
 		await this.commands.loadAll();
 
 		// single
 		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray._accounts.length) {
 			if (!(this[index] instanceof ChatBridge)) this._initSingle(index);
-			return this[index].connect();
+
+			(await this[index].connect())
+				.once('ready', () => resolve());
+
+			return promise;
 		}
 
 		// all
+		let resolved = 0;
+
 		if (this.length !== ChatBridgeArray._accounts.length) this._init();
-		return Promise.all(this.map(async (/** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.connect()));
+		(await Promise.all(this.map(async (/** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.connect())))
+			.map(chatBridge => chatBridge.once('ready', () => ++resolved === this.length && resolve()));
+
+		return promise;
 	}
 
 	/**

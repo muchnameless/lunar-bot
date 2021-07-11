@@ -37,4 +37,6 @@ module.exports = async (chatBridge) => {
 			logger.error(`[CHATBRIDGE]: ${chatBridge.logInfo}: error while sending to limbo`, error);
 		}
 	} while (--counter);
+
+	chatBridge.emit('ready');
 };
