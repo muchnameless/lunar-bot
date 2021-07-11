@@ -646,7 +646,7 @@ module.exports = class HypixelGuild extends Model {
 				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReqNonStaff <= posNonStaff && (acc?.positionReqNonStaff ?? 0) <= cur.positionReqNonStaff ? cur : acc), null);
 				if (!newRank) continue;
 
-				const { oldRank } = player;
+				const { guildRank: oldRank } = player;
 
 				// player already has the correct rank
 				if (oldRank?.priority === newRank.priority) continue;
