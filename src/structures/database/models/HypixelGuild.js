@@ -617,12 +617,6 @@ module.exports = class HypixelGuild extends Model {
 					: []
 				));
 
-			logger.debug({
-				staffAmount,
-				nonStaffAmount,
-				automatedRanks,
-			})
-
 			for (const { player, isStaff, posWithStaff, posNonStaff } of playersSortedByWeight) {
 				// player is staff -> only roles need to be adapted
 				if (isStaff) {
@@ -632,18 +626,13 @@ module.exports = class HypixelGuild extends Model {
 					const member = await player.discordMember;
 					if (!member) continue;
 
-					logger.debug({ ign: player.ign, toAdd: newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
-						? [ newRank.roleId ]
-						: [], toRemove: [ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId))
-					})
-
-					// await player.makeRoleApiCall(
-					// 	newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
-					// 		? [ newRank.roleId ]
-					// 		: [],
-					// 	[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)), // remove all other rank roles
-					// 	'synced with in game rank',
-					// );
+					await player.makeRoleApiCall(
+						newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
+							? [ newRank.roleId ]
+							: [],
+						[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)), // remove all other rank roles
+						'synced with in game rank',
+					);
 
 					continue;
 				}
@@ -657,14 +646,12 @@ module.exports = class HypixelGuild extends Model {
 				// player already has the correct rank
 				if (oldRank?.priority === newRank.priority) continue;
 
-				logger.debug(`g setrank ${player.ign} ${newRank.name}`)
-
 				// set player to the correct rank
-				// await chatBridge.minecraft.command({
-				// 	command: `g setrank ${player.ign} ${newRank.name}`,
-				// 	responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
-				// 	rejectOnTimeout: true,
-				// });
+				await chatBridge.minecraft.command({
+					command: `g setrank ${player.ign} ${newRank.name}`,
+					responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
+					rejectOnTimeout: true,
+				});
 			}
 		} catch (error) {
 			logger.error(error);
