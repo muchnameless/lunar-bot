@@ -611,18 +611,20 @@ module.exports = class HypixelGuild extends Model {
 					logger.debug({
 						ign: player.ign,
 						rolesToAdd: member.roles.cache.has(newRank.roleId)
-							? [ newRank.roleId ]
-							: [],
+							? []
+							: [ newRank.roleId ],
 						rolesToRemove: [ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)),
 					});
 
 					// await player.makeRoleApiCall(
 					// 	member.roles.cache.has(newRank.roleId)
-					// 		? [ newRank.roleId ]
-					// 		: [],
+					// 		? []
+					// 		: [ newRank.roleId ],
 					// 	[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)),
 					// 	'synced with in game rank',
 					// );
+
+					continue;
 				}
 
 				// player already has the correct rank
