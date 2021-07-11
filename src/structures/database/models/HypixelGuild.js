@@ -610,8 +610,8 @@ module.exports = class HypixelGuild extends Model {
 			const automatedRanks = this.ranks
 				.flatMap(rank => (rank.positionReq != null
 					? {
-						positionReqStaff: Math.ceil(rank.positionReq * playersSortedByWeight.length),
-						positionReqNonStaff: Math.ceil(rank.positionReq * nonStaffAmount),
+						positionReqStaff: Math.round(rank.positionReq * playersSortedByWeight.length),
+						positionReqNonStaff: Math.round(rank.positionReq * nonStaffAmount),
 						...rank,
 					}
 					: []
