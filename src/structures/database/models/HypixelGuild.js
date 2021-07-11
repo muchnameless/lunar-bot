@@ -617,6 +617,12 @@ module.exports = class HypixelGuild extends Model {
 					: []
 				));
 
+			logger.debug({
+				staffAmount,
+				nonStaffAmount,
+				automatedRanks,
+			})
+
 			for (const { player, isStaff, posWithStaff, posNonStaff } of playersSortedByWeight) {
 				// player is staff -> only roles need to be adapted
 				if (isStaff) {
