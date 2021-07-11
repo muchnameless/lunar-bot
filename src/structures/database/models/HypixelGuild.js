@@ -633,7 +633,6 @@ module.exports = class HypixelGuild extends Model {
 				logger.debug({
 					ign: player.ign,
 					command: `g setrank ${player.ign} ${newRank.name}`,
-					responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
 				});
 
 				// set player to the correct rank
