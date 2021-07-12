@@ -45,7 +45,12 @@ module.exports = class JoinDateCommand extends SlashCommand {
 		let matched = logEntry.match(JoinDateCommand.JOINED_REGEXP);
 
 		// last page didn't contain join, get next-to-last page
-		while (!matched && lastPage >= 1) matched = (await this._getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
+		while (!matched && lastPage >= 1) {
+			matched = (await this._getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
+
+			// entry does not end with invited message -> no joined / created message at all
+			if (!/\n.+: \w{1,16} invited \w{1,16}$/.test(logEntry)) break;
+		}
 
 		return {
 			ign,
