@@ -5,7 +5,7 @@ const ms = require('ms');
 const { logErrors: { regExp: logErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
 const { escapeIgn, timestampToDateMarkdown } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+const logger = require('../../functions/logger');
 
 
 module.exports = class JoinDateCommand extends SlashCommand {
@@ -36,37 +36,33 @@ module.exports = class JoinDateCommand extends SlashCommand {
 	 */
 	static async _getJoinDate(chatBridge, ign) {
 		// get first page
-		let page = await chatBridge.minecraft.command({
-			command: `g log ${ign} 1`,
-			abortRegExp: logErrors(),
-		});
-
-		const LAST_PAGE_NUMBER = page.match(/\(Page 1 of (\d+)\)/)?.[1];
+		let logEntry = await this._getLogEntry(chatBridge, ign, 1);
+		let lastPage = logEntry.match(/\(Page 1 of (\d+)\)/)?.[1];
 
 		// log has more than 1 page -> get latest page
-		if (LAST_PAGE_NUMBER !== 1) {
-			page = await chatBridge.minecraft.command({
-				command: `g log ${ign} ${LAST_PAGE_NUMBER}`,
-				abortRegExp: logErrors(),
-			});
-		}
+		if (lastPage !== 1) logEntry = await this._getLogEntry(chatBridge, ign, lastPage);
 
-		let matched = page.match(JoinDateCommand.JOINED_REGEXP);
+		let matched = logEntry.match(JoinDateCommand.JOINED_REGEXP);
 
 		// last page didn't contain join, get next-to-last page
-		if (!matched) {
-			page = await chatBridge.minecraft.command({
-				command: `g log ${ign} ${LAST_PAGE_NUMBER - 1}`,
-				abortRegExp: logErrors(),
-			});
-
-			matched = page.match(JoinDateCommand.JOINED_REGEXP);
-		}
+		while (!matched && lastPage >= 1) matched = (await this._getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
 
 		return {
 			ign,
 			timestamp: Date.parse(matched?.groups.time),
 		};
+	}
+
+	/**
+	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
+	 * @param {string} ign
+	 * @param {number} page
+	 */
+	static _getLogEntry(chatBridge, ign, page) {
+		return chatBridge.minecraft.command({
+			command: `g log ${ign} ${page}`,
+			abortRegExp: logErrors(),
+		});
 	}
 
 	/**
@@ -86,7 +82,10 @@ module.exports = class JoinDateCommand extends SlashCommand {
 
 			const hypixelGuild = this.getHypixelGuild(interaction);
 			const { chatBridge } = hypixelGuild;
-			const player = this.getPlayer(interaction);
+			const player = this.getPlayer(
+				interaction,
+				!(interaction.member ?? await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error)).roles.cache.has(this.config.get('MANAGER_ROLE_ID')),
+			);
 
 			let dates;
 
