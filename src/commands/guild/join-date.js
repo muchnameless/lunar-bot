@@ -4,29 +4,39 @@ const { Constants } = require('discord.js');
 const ms = require('ms');
 const { logErrors: { regExp: logErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
 const { escapeIgn, timestampToDateMarkdown } = require('../../functions/util');
-const SlashCommand = require('../../structures/commands/SlashCommand');
+const DualCommand = require('../../structures/commands/DualCommand');
 const logger = require('../../functions/logger');
 
 
-module.exports = class JoinDateCommand extends SlashCommand {
+module.exports = class JoinDateCommand extends DualCommand {
 	constructor(data) {
-		super(data, {
-			aliases: [],
-			description: 'guild member join date, parsed from `/g log ign`',
-			options: [{
-				name: 'player',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | uuid | discordID | @mention',
-				required: false,
+		super(
+			data,
+			{
+				aliases: [],
+				description: 'guild member join date, parsed from `/g log ign`',
+				options: [
+					{
+						name: 'player',
+						type: Constants.ApplicationCommandOptionTypes.STRING,
+						description: 'IGN | uuid | discordID | @mention',
+						required: false,
+					},
+					DualCommand.FORCE_OPTION,
+					DualCommand.guildOptionBuilder(data.client),
+				],
+				defaultPermission: true,
+				cooldown: 0,
 			},
-			SlashCommand.FORCE_OPTION,
-			SlashCommand.guildOptionBuilder(data.client) ],
-			defaultPermission: true,
-			cooldown: 0,
-		});
+			{
+				aliases: [ 'joined' ],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
-	static running = false;
+	static running = new Set();
 
 	static JOINED_REGEXP = /(?<time>.+): \w{1,16} (?:joined|created the guild)(?:\n.+: \w{1,16} invited \w{1,16})*$/;
 
@@ -72,42 +82,67 @@ module.exports = class JoinDateCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
+	 * @param {import('../../structures/database/models/Player')} player
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
-		if (JoinDateCommand.running) return interaction.reply({
+	async _run(ctx, chatBridge, player) { // eslint-disable-line no-unused-vars
+		if (player) { // single player
+			const { timestamp } = await JoinDateCommand._getJoinDate(chatBridge, player.ign);
+
+			return ctx.reply(`${player.ign}: joined at ${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'an unknown date'}`);
+		}
+
+		// all players
+		if (JoinDateCommand.running.has(chatBridge.guild.guildId)) return ctx.reply({
 			content: 'the command is already running',
 			ephemeral: true,
 		});
 
+		await ctx.awaitConfirmation(`the command will take approximately ${ms(chatBridge.guild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
+
+		let dates;
+
 		try {
-			JoinDateCommand.running = true;
-
-			interaction.defer();
-
-			const hypixelGuild = this.getHypixelGuild(interaction);
-			const { chatBridge } = hypixelGuild;
-			const player = this.getPlayer(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')));
-
-			let dates;
-
-			if (player) {
-				dates = [ await JoinDateCommand._getJoinDate(chatBridge, player.ign) ];
-			} else {
-				await interaction.awaitConfirmation(`the command will take approximately ${ms(hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
-
-				dates = await Promise.all(hypixelGuild.players.map(({ ign }) => JoinDateCommand._getJoinDate(chatBridge, ign)));
-			}
-
-			return interaction.reply({
-				content: dates
-					.sort((a, b) => a.timestamp - b.timestamp)
-					.map(({ timestamp, ign }) => `${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'unknown date'}: ${escapeIgn(ign)}`)
-					.join('\n'),
-				split: true,
-			});
+			JoinDateCommand.running.add(chatBridge.guild.guildId);
+			dates = await Promise.all(chatBridge.guild.players.map(({ ign }) => JoinDateCommand._getJoinDate(chatBridge, ign)));
 		} finally {
-			JoinDateCommand.running = false;
+			JoinDateCommand.running.delete(chatBridge.guild.guildId);
 		}
+
+		return ctx.reply({
+			content: dates
+				.sort((a, b) => a.timestamp - b.timestamp)
+				.map(({ timestamp, ign }) => `${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'unknown date'}: ${escapeIgn(ign)}`)
+				.join('\n'),
+			split: true,
+		});
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 */
+	async run(interaction) { // eslint-disable-line no-unused-vars
+		interaction.defer();
+
+		return this._run(
+			interaction,
+			this.getHypixelGuild(interaction).chatBridge,
+			this.getPlayer(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID'))),
+		);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {string[]} args command arguments
+	 */
+	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+		return this._run(
+			message,
+			message.chatBridge,
+			args[0] ?? message.author.ign,
+		);
 	}
 };
