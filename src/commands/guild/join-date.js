@@ -49,7 +49,7 @@ module.exports = class JoinDateCommand extends SlashCommand {
 			matched = (await this._getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
 
 			// entry does not end with invited message -> no joined / created message at all
-			if (!/\n.+: \w{1,16} invited \w{1,16}$/.test(logEntry)) break;
+			if (!new RegExp(`\\n.+: \\w{1,16} invited ${ign}$`).test(logEntry)) break;
 		}
 
 		return {
