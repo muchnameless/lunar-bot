@@ -84,11 +84,11 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
-	 * @param {import('../../structures/database/models/Player')} ign
+	 * @param {import('../../structures/database/models/Player')} ignInput
 	 */
-	async _run(ctx, chatBridge, ign) { // eslint-disable-line no-unused-vars
-		if (ign) { // single player
-			const { timestamp } = await JoinDateCommand._getJoinDate(chatBridge, ign);
+	async _run(ctx, chatBridge, ignInput) { // eslint-disable-line no-unused-vars
+		if (ignInput) { // single player
+			const { ign, timestamp } = await JoinDateCommand._getJoinDate(chatBridge, ignInput);
 
 			return ctx.reply(`${ign}: joined at ${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'an unknown date'}`);
 		}
@@ -105,7 +105,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 		try {
 			JoinDateCommand.running.add(chatBridge.guild.guildId);
-			dates = await Promise.all(chatBridge.guild.players.map(({ ign: playerIgn }) => JoinDateCommand._getJoinDate(chatBridge, playerIgn)));
+			dates = await Promise.all(chatBridge.guild.players.map(({ ign }) => JoinDateCommand._getJoinDate(chatBridge, ign)));
 		} finally {
 			JoinDateCommand.running.delete(chatBridge.guild.guildId);
 		}
@@ -113,7 +113,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 		return ctx.reply({
 			content: dates
 				.sort((a, b) => a.timestamp - b.timestamp)
-				.map(({ timestamp, ign: playerIgn }) => `${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'unknown date'}: ${escapeIgn(playerIgn)}`)
+				.map(({ timestamp, ign }) => `${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'unknown date'}: ${escapeIgn(ign)}`)
 				.join('\n'),
 			split: true,
 		});
