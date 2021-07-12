@@ -84,13 +84,13 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
-	 * @param {import('../../structures/database/models/Player')} player
+	 * @param {import('../../structures/database/models/Player')} ign
 	 */
-	async _run(ctx, chatBridge, player) { // eslint-disable-line no-unused-vars
-		if (player) { // single player
-			const { timestamp } = await JoinDateCommand._getJoinDate(chatBridge, player.ign);
+	async _run(ctx, chatBridge, ign) { // eslint-disable-line no-unused-vars
+		if (ign) { // single player
+			const { timestamp } = await JoinDateCommand._getJoinDate(chatBridge, ign);
 
-			return ctx.reply(`${player.ign}: joined at ${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'an unknown date'}`);
+			return ctx.reply(`${ign}: joined at ${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'an unknown date'}`);
 		}
 
 		// all players
@@ -105,7 +105,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 		try {
 			JoinDateCommand.running.add(chatBridge.guild.guildId);
-			dates = await Promise.all(chatBridge.guild.players.map(({ ign }) => JoinDateCommand._getJoinDate(chatBridge, ign)));
+			dates = await Promise.all(chatBridge.guild.players.map(({ ign: playerIgn }) => JoinDateCommand._getJoinDate(chatBridge, playerIgn)));
 		} finally {
 			JoinDateCommand.running.delete(chatBridge.guild.guildId);
 		}
@@ -113,7 +113,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 		return ctx.reply({
 			content: dates
 				.sort((a, b) => a.timestamp - b.timestamp)
-				.map(({ timestamp, ign }) => `${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'unknown date'}: ${escapeIgn(ign)}`)
+				.map(({ timestamp, ign: playerIgn }) => `${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'unknown date'}: ${escapeIgn(playerIgn)}`)
 				.join('\n'),
 			split: true,
 		});
@@ -129,7 +129,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 		return this._run(
 			interaction,
 			this.getHypixelGuild(interaction).chatBridge,
-			this.getPlayer(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID'))),
+			this.getIgn(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID'))),
 		);
 	}
 
