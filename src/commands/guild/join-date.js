@@ -82,7 +82,7 @@ module.exports = class JoinDateCommand extends SlashCommand {
 
 			const hypixelGuild = this.getHypixelGuild(interaction);
 			const { chatBridge } = hypixelGuild;
-			const player = this.getPlayer(interaction, !await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error)).roles.cache.has(this.config.get('MANAGER_ROLE_ID'));
+			const player = this.getPlayer(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')));
 
 			let dates;
 
