@@ -84,6 +84,14 @@ module.exports = class Player extends Model {
 		 */
 		this.xpLastUpdatedAt;
 		/**
+		 * @type {boolean}
+		 */
+		this.xpUpdatesDisabled;
+		/**
+		 * @type {boolean}
+		 */
+		this.discordMemberUpdatesDisabled;
+		/**
 		 * @type {number}
 		 */
 		this.farmingLvlCap;
@@ -186,6 +194,16 @@ module.exports = class Player extends Model {
 				type: DataTypes.BIGINT,
 				defaultValue: null,
 				allowNull: true,
+			},
+			xpUpdatesDisabled: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: false,
+				allowNull: false,
+			},
+			discordMemberUpdatesDisabled: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: false,
+				allowNull: false,
 			},
 
 			// Individual Max Lvl Cap
@@ -472,6 +490,8 @@ module.exports = class Player extends Model {
 	 * @param {boolean} [rejectOnAPIError=false]
 	 */
 	async updateXp(rejectOnAPIError = false) {
+		if (this.xpUpdatesDisabled) return;
+
 		try {
 			if (!this.mainProfileId) await this.fetchMainProfile(); // detect main profile if it is unknown
 
@@ -587,6 +607,7 @@ module.exports = class Player extends Model {
 	 * @param {boolean} [options.shouldSendDm] wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async updateDiscordMember({ reason: reasonInput = 'synced with in game stats', shouldSendDm = false } = {}) {
+		if (this.discordMemberUpdatesDisabled) return;
 		if (this.guildId === GUILD_ID_BRIDGER) return;
 
 		let reason = reasonInput;
@@ -1080,9 +1101,16 @@ module.exports = class Player extends Model {
 	 * determines the player's main profile (profile with the most weight)
 	 */
 	async fetchMainProfile() {
-		const profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
+		let profiles;
 
-		if (!profiles.length) {
+		try {
+			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
+		} catch (error) {
+			super.update({ xpUpdatesDisabled: true }).catch(logger.error);
+			logger.error('[MAIN PROFILE]', error);
+		}
+
+		if (!profiles?.length) {
 			this.mainProfileId = null;
 			await this.resetXp({ offsetToReset: 'current' });
 
@@ -1103,6 +1131,7 @@ module.exports = class Player extends Model {
 
 		this.mainProfileId = PROFILE_ID;
 		this.mainProfileName = PROFILE_NAME;
+		this.xpUpdatesDisabled = false;
 		await this.save();
 
 		logger.info(`[MAIN PROFILE]: ${this.logInfo} -> ${PROFILE_NAME}`);
