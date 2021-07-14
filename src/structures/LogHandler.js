@@ -75,7 +75,9 @@ module.exports = class LogHandler {
 	 * @param {...MessageEmbed} embedsInput embeds to log
 	 */
 	async log(...embedsInput) {
-		const embeds = this._prepareEmbeds(embedsInput);
+		const embeds = this._transformEmbeds(embedsInput);
+
+		if (!embeds.length) return null; // nothing to log
 
 		// send 1 message
 		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) return this._log(embeds);
@@ -111,7 +113,7 @@ module.exports = class LogHandler {
 	 * make sure all elements are instances of MessageEmbed
 	 * @param {MessageEmbed[]|string[]} embedsInput
 	 */
-	_prepareEmbeds(embedsInput) {
+	_transformEmbeds(embedsInput) {
 		const embeds = embedsInput.filter(x => x != null); // filter out null & undefined
 
 		// make sure all elements in embeds are instances of MessageEmbed
@@ -124,13 +126,13 @@ module.exports = class LogHandler {
 			}
 
 			if (typeof embed !== 'object') {
-				throw new TypeError(`[CLIENT LOG MANY]: provided argument '${embed}' is a ${typeof embed} instead of an Object or String`);
+				throw new TypeError(`[TRANSFORM EMBEDS]: provided argument '${embed}' is a ${typeof embed} instead of an Object or String`);
 			}
 
 			embeds[index] = new MessageEmbed(embed);
 		}
 
-		if (!embeds.length) throw new TypeError('[CLIENT LOG MANY]: cannot send an empty message');
+		if (!embeds.length) throw new TypeError('[TRANSFORM EMBEDS]: no embeds to return');
 
 		return embeds;
 	}

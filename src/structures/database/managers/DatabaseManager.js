@@ -319,7 +319,7 @@ module.exports = class DatabaseManager {
 		}
 
 		// update player db
-		await this.modelManagers.hypixelGuilds.update();
+		await this.modelManagers.hypixelGuilds.update({ syncRanks: true });
 
 		// update tax db
 		const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED')

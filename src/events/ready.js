@@ -46,7 +46,7 @@ module.exports = class ReadyEvent extends Event {
 			// update hypixelGuilds if next scheduled update is over 1 min from now
 			if (this.config.get('PLAYER_DB_UPDATE_ENABLED')) {
 				const INTERVAL = this.config.get('DATABASE_UPDATE_INTERVAL');
-				if (INTERVAL - (new Date().getMinutes() % INTERVAL) > 1) this.client.hypixelGuilds.update();
+				if (INTERVAL - (new Date().getMinutes() % INTERVAL) > 1) this.client.hypixelGuilds.update({ syncRanks: false });
 			}
 		}
 

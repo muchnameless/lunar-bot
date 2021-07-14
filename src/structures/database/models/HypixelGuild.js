@@ -25,6 +25,11 @@ const logger = require('../../../functions/logger');
  * @property {string} channelId
  */
 
+/**
+ * @typedef {object} UpdateOptions
+ * @property {boolean} [syncRanks] wether to sync in game ranks with the weight lb
+ */
+
 
 module.exports = class HypixelGuild extends Model {
 	constructor(...args) {
@@ -267,15 +272,16 @@ module.exports = class HypixelGuild extends Model {
 
 	/**
 	 * updates the player database
+	 * @param {UpdateOptions} [options]
 	 */
-	async update() {
+	async update(options = {}) {
 		const data = await hypixel.guild.id(this.guildId);
 
 		if (data.meta.cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
 
 		this._updateGuildData(data);
 
-		return this.updatePlayers(data);
+		return this.updatePlayers(data, options);
 	}
 
 	/**
@@ -321,9 +327,10 @@ module.exports = class HypixelGuild extends Model {
 
 	/**
 	 * updates the guild player database
-	 * @param {?import('@zikeji/hypixel/src/util/ResultObject').ResultObject<import('@zikeji/hypixel').Components.Schemas.GuildResponse, ['guild']>} data
+	 * @param {?import('@zikeji/hypixel/src/util/ResultObject').ResultObject<import('@zikeji/hypixel').Components.Schemas.GuildResponse, ['guild']>} [data]
+	 * @param {UpdateOptions} [options]
 	 */
-	async updatePlayers(data) {
+	async updatePlayers(data, { syncRanks = false } = {}) {
 		if (this._isUpdatingPlayers) return;
 		this._isUpdatingPlayers = true;
 
@@ -509,7 +516,7 @@ module.exports = class HypixelGuild extends Model {
 						?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`)),
 				);
 
-				this.syncGuildRanks();
+				if (syncRanks) this.syncGuildRanks();
 			})();
 
 			const CHANGES = PLAYERS_LEFT_AMOUNT + membersJoined.length;
@@ -616,6 +623,7 @@ module.exports = class HypixelGuild extends Model {
 					}
 					: []
 				));
+			const setRankLog = [];
 
 			for (const { player, isStaff, posWithStaff, posNonStaff } of playersSortedByWeight) {
 				// player is staff -> only roles need to be adapted
@@ -631,7 +639,7 @@ module.exports = class HypixelGuild extends Model {
 							? [ newRank.roleId ]
 							: [],
 						[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)), // remove all other rank roles
-						'synced with in game rank',
+						'synced with weight lb',
 					);
 
 					continue;
@@ -652,9 +660,26 @@ module.exports = class HypixelGuild extends Model {
 					responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
 					rejectOnTimeout: true,
 				});
+
+				setRankLog.push(this.client.defaultEmbed
+					.setThumbnail(player.image)
+					.setDescription(`**Auto Rank Sync** for ${player.info}`)
+					.addFields({
+						name: 'Old',
+						value: oldRank?.name ?? 'unknown',
+						inline: true,
+					}, {
+						name: 'New',
+						value: newRank.name,
+						inline: true,
+					})
+					.setTimestamp(),
+				);
 			}
+
+			this.client.log(...setRankLog);
 		} catch (error) {
-			logger.error(error);
+			logger.error('[SYNC GUILD RANKS]', error);
 		}
 	}
 

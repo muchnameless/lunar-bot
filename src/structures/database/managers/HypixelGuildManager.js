@@ -52,14 +52,15 @@ module.exports = class HypixelGuildManager extends ModelManager {
 
 	/**
 	 * update all guilds
+	 * @param {import('../models/HypixelGuild').UpdateOptions} [options]
 	 * @returns {Promise<boolean>} success
 	 */
-	async update() {
+	async update(options = {}) {
 		if (this.client.config.get('HYPIXEL_API_ERROR')) return logger.warn('[GUILDS UPDATE]: auto updates disabled');
 
 		try {
 			for (const hypixelGuild of this.cache.values()) {
-				await hypixelGuild.update();
+				await hypixelGuild.update(options);
 			}
 
 			return true;
