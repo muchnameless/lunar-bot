@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, Permissions } = require('discord.js');
+const { MessageEmbed, Permissions, Formatters } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { RateLimitError } = require('@zikeji/hypixel');
@@ -373,7 +373,7 @@ module.exports = class Player extends Model {
 	 * returns a string with the ign and guild name
 	 */
 	get info() {
-		return `${escapeIgn(this.ign)} | ${this.guildName}`; // •
+		return `${Formatters.hyperlink(escapeIgn(this.ign), this.url)} | ${this.guildName}`; // •
 	}
 
 	/**
