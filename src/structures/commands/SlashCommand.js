@@ -120,15 +120,6 @@ module.exports = class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * wether the force option was set to true
-	 * @param {import('discord.js').Collection<string, import('discord.js').CommandInteractionOption>} options
-	 * @returns {boolean}
-	 */
-	static checkForce(options) {
-		return options.get('force')?.value ?? false;
-	}
-
-	/**
 	 * @param {import('discord.js').ApplicationCommandOptionData} option
 	 */
 	static issubCommandNameOption(option) {
@@ -203,7 +194,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		return (DISCORD_ID
 			? this.client.players.getById(DISCORD_ID)
-			: SlashCommand.checkForce(interaction.options)
+			: interaction.checkForce
 				? this.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
 				: this.client.players.getByIgn(INPUT)
 		) ?? null;
@@ -216,6 +207,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @returns {?string}
 	 */
 	getIgn(interaction, fallbackToCurrentUser = false) {
+		if (interaction.checkForce) return (interaction.options.get('player') || interaction.options.get('target'))?.value.toLowerCase();
 		return this.getPlayer(interaction, fallbackToCurrentUser)?.ign ?? null;
 	}
 

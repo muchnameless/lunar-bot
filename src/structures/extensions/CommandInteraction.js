@@ -27,7 +27,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	}
 
 	/**
-	 * recursively checks the command options for the ephemeral option
+	 * checks the command options for the ephemeral option
 	 * @returns {?boolean}
 	 */
 	get _checkEphemeralOption() {
@@ -50,6 +50,14 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 			this.subCommandName,
 			...this.options.map(({ name, value }) => `${name}: ${value}`),
 		].filter(Boolean).join(' ');
+	}
+
+	/**
+	 * wether the force option was set to true
+	 * @returns {boolean}
+	 */
+	get checkForce() {
+		return this.options.get('force')?.value ?? false;
 	}
 
 	/**

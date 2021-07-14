@@ -192,7 +192,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 	/**
 	 * /g mute
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {{ targetInput: string, duration: number, hypixelGuildInput: import('../../structures/database/models/HypixelGuild') }} param1
 	 */
 	async runMute(ctx, { targetInput, duration, hypixelGuildInput = this.getHypixelGuild(ctx) }) {
@@ -206,7 +206,7 @@ module.exports = class GuildCommand extends SlashCommand {
 		} else {
 			target = IS_INTERACTION
 				? this.getPlayer(ctx)
-					?? (SlashCommand.checkForce(ctx.options)
+					?? (ctx.checkForce
 						? targetInput // use input if force is set
 						: (await this.client.players.model.findOne({ // try to find by ign or uuid
 							where: {
@@ -497,7 +497,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					target = 'everyone';
 				} else {
 					target = this.getPlayer(interaction)
-							?? (SlashCommand.checkForce(interaction.options)
+							?? (interaction.checkForce
 								? TARGET_INPUT // use input if force is set
 								: await (async () => {
 									const queryParams = [{
