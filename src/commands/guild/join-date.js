@@ -76,7 +76,8 @@ module.exports = class JoinDateCommand extends DualCommand {
 	static _getLogEntry(chatBridge, ign, page) {
 		return chatBridge.minecraft.command({
 			command: `g log ${ign} ${page}`,
-			abortRegExp: logErrors(),
+			abortRegExp: logErrors(ign),
+			rejectOnAbort: true,
 		});
 	}
 
@@ -88,9 +89,13 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 */
 	async _run(ctx, chatBridge, ignInput) { // eslint-disable-line no-unused-vars
 		if (ignInput) { // single player
-			const { ign, timestamp } = await JoinDateCommand._getJoinDate(chatBridge, ignInput);
+			try {
+				const { ign, timestamp } = await JoinDateCommand._getJoinDate(chatBridge, ignInput);
 
-			return ctx.reply(`${ign}: joined at ${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'an unknown date'}`);
+				return ctx.reply(`${ign}: joined at ${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'an unknown date'}`);
+			} catch {
+				return ctx.reply(`${ignInput}: never joined ${chatBridge.guild.name}`);
+			}
 		}
 
 		// all players
