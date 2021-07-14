@@ -33,6 +33,7 @@ const logger = require('../../../functions/logger');
  * @property {boolean} [raw=false] wether to return an array of the collected hypixel message objects instead of just the content
  * @property {number} [timeout=config.get('INGAME_RESPONSE_TIMEOUT')] response collector timeout in milliseconds
  * @property {boolean} [rejectOnTimeout=false] wether to reject the promise if the collected amount is less than max
+ * @property {boolean} [rejectOnAbort=false] wether to reject the promise if the abortRegExp triggered
  */
 
 
@@ -751,7 +752,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {CommandOptions} commandOptions
 	 */
 	// eslint-disable-next-line no-undef
-	async command({ command = arguments[0], responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.get('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false }) {
+	async command({ command = arguments[0], responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.get('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false, rejectOnAbort = false }) {
 		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
@@ -775,10 +776,12 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
 				if (/[^-]-{29,}$/.test(message.content)) return collector.stop();
 
-				collector.collected.pop();
-				if (collector.collected.length) collector.stop();
-			} else if (collector.collected.length === max || abortRegExp?.test(message.content)) { // message is not a line separator
+				collector.collected.pop(); // remove line separator from collected messages
+				if (collector.collected.length) collector.stop(); // stop collector if messages before this line separator were already collected
+			} else if (collector.collected.length === max) { // message is not a line separator
 				collector.stop();
+			} else if (abortRegExp?.test(message.content)) { // abortRegExp triggered
+				collector.stop('abort');
 			} else if (message.spam) { // don't collect anti spam messages
 				collector.collected.pop();
 			}
@@ -803,6 +806,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 						: collected.length
 							? MinecraftChatManager._cleanCommandResponse(collected)
 							: `no in game response after ${ms(timeout, { long: true })}`);
+				}
+
+				case 'abort': {
+					if (rejectOnAbort) reject(raw
+						? collected
+						: MinecraftChatManager._cleanCommandResponse(collected),
+					);
+					// fallthrough
 				}
 
 				default:
