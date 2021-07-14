@@ -42,7 +42,7 @@ module.exports = async (chatBridge, options) => {
 		chat: {
 			value(message) {
 				if (typeof message !== 'string') throw new Error(`[BOT CHAT]: input must be a string but received ${typeof message}`);
-				if (message.startsWith('/kick ')) throw new Error('kicking with the bot is disabled');
+				if (/^g(?:uild)? kick /.test(message)) throw new Error('kicking with the bot is disabled');
 				return this.write('chat', { message });
 			},
 		},
