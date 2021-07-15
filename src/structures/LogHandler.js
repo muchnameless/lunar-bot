@@ -132,8 +132,6 @@ module.exports = class LogHandler {
 			embeds[index] = new MessageEmbed(embed);
 		}
 
-		if (!embeds.length) throw new TypeError('[TRANSFORM EMBEDS]: no embeds to return');
-
 		return embeds;
 	}
 
