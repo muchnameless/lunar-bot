@@ -1,7 +1,8 @@
 'use strict';
 
+const { Collection } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
-const logger = require('../../../functions/logger');
+// const logger = require('../../../functions/logger');
 
 
 module.exports = class ChatTrigger extends Model {
@@ -12,10 +13,6 @@ module.exports = class ChatTrigger extends Model {
 		 * @type {import('../../LunarClient')}
 		 */
 		this.client;
-		/**
-		 * @type {number}
-		 */
-		this.lastTriggeredAt;
 		/**
 		 * @type {string[]}
 		 */
@@ -34,6 +31,12 @@ module.exports = class ChatTrigger extends Model {
 		this._regExp = this.regExpString.includes('{')
 			? null
 			: new RegExp(this.regExpString, 'i');
+		/**
+		 * @type {Collection<string, number>}
+		 */
+		this.timestamps = this.cooldown !== 0
+			? new Collection()
+			: null;
 	}
 
 	/**
@@ -57,11 +60,6 @@ module.exports = class ChatTrigger extends Model {
 			},
 			cooldown: {
 				type: DataTypes.INTEGER,
-				allowNull: true,
-			},
-			lastTriggeredAt: {
-				type: DataTypes.BIGINT,
-				defaultValue: null,
 				allowNull: true,
 			},
 			chatTypes: {
@@ -92,10 +90,14 @@ module.exports = class ChatTrigger extends Model {
 		const matched = this.getRegExp(message).exec(message.content);
 
 		if (!matched) return;
-		if (Date.now() < this.lastTriggeredAt + this.cooldown) return;
 
-		this.lastTriggeredAt = Date.now();
-		this.save().catch(logger.error);
+		// cooldowns
+		if (this.cooldown !== 0) {
+			if (this.timestamps.has(message.author.ign) && Date.now() < this.timestamps.get(message.author.ign) + this.cooldown) return;
+
+			this.timestamps.set(message.author.ign, Date.now());
+			setTimeout(() => this.timestamps.delete(message.author.ign), this.cooldown);
+		}
 
 		return message.reply(
 			this.response

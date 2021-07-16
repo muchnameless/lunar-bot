@@ -47,7 +47,7 @@ module.exports = class InteractionCreateEvent extends Event {
 			}
 
 			// command cooldowns
-			if (command.cooldown) {
+			if (command.cooldown !== 0) {
 				const NOW = Date.now();
 				const COOLDOWN_TIME = (command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1000;
 

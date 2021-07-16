@@ -27,7 +27,7 @@ module.exports = class BaseCommand {
 		/** @type {() => import('discord.js').Snowflake[]} */
 		this._requiredRoles = requiredRoles ?? null;
 		/** @type {Collection<import('discord.js').Snowflake, number>} */
-		this.timestamps = this.cooldown !== null
+		this.timestamps = this.cooldown !== 0
 			? new Collection()
 			: null;
 	}
