@@ -198,7 +198,7 @@ module.exports = class ReloadCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, interaction.subCommandName, interaction.options.get('name').value);
+		return this._run(interaction, interaction.subCommandName, interaction.options.get('name')?.value);
 	}
 
 	/**
