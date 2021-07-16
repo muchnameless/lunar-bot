@@ -155,7 +155,7 @@ class LunarMessage extends Structures.get('Message') {
 		if (timeout <= 0) return super.delete();
 
 		// timeout
-		return new Promise(resolve => this.client.setTimeout(() => resolve(this.delete()), timeout));
+		return new Promise(resolve => setTimeout(() => resolve(this.delete()), timeout));
 	}
 
 	/**
@@ -270,7 +270,7 @@ class LunarMessage extends Structures.get('Message') {
 		// no #bot-commands channel found
 		if (!commandsChannel) {
 			if (this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) {
-				this.client.setTimeout(() => {
+				setTimeout(() => {
 					if (this.shouldReplyInSameChannel) return;
 					this.delete().catch(logger.error);
 				}, 10_000);
@@ -300,7 +300,7 @@ class LunarMessage extends Structures.get('Message') {
 				.then(async (commandsChannelMessage) => {
 					if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return commandsChannelMessage.delete({ timeout: 10_000 });
 
-					this.client.setTimeout(() => {
+					setTimeout(() => {
 						if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES) || this.shouldReplyInSameChannel) return commandsChannelMessage.delete();
 
 						this.channel
@@ -309,7 +309,7 @@ class LunarMessage extends Structures.get('Message') {
 					}, 10_000);
 				});
 		} else if (this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) { // only delete author's message
-			this.client.setTimeout(() => {
+			setTimeout(() => {
 				if (this.shouldReplyInSameChannel) return;
 				this.delete().catch(logger.error);
 			}, 10_000);

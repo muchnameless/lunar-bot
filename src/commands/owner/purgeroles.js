@@ -61,7 +61,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 					if (!rolesToPurge.length) return [];
 
 					return new Promise((resolve) => {
-						this.client.setTimeout(async () => {
+						setTimeout(async () => {
 							try {
 								if (member.deleted) return;
 								await member.roles.remove(rolesToPurge);
