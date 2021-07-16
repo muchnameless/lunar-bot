@@ -75,6 +75,12 @@ module.exports = class HypixelMessage extends ChatMessage {
 			this.content = this.cleanedContent.slice(matched[0].length).trimLeft();
 			this.spam = false;
 
+			// message was sent from the bot -> don't parse input
+			if (this.me) {
+				this.commandData = {};
+				return;
+			}
+
 			const prefixMatched = new RegExp(
 				`^(?:${[ escapeRegex(this.client.config.get('PREFIX')), ...this.client.config.get('INGAME_PREFIX').map(x => escapeRegex(x)), `@${this.chatBridge.bot.ign}` ].join('|')})`,
 				'i',
