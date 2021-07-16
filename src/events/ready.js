@@ -23,7 +23,7 @@ module.exports = class ReadyEvent extends Event {
 		this.client.db.schedule();
 
 		// set presence again every 20 min cause it get's lost sometimes
-		this.client.setInterval(async () => {
+		setInterval(async () => {
 			try {
 				const presence = this.client.user.setPresence({
 					activities: [{
@@ -37,7 +37,7 @@ module.exports = class ReadyEvent extends Event {
 			} catch (error) {
 				logger.error('[SET PRESENCE]: error while setting presence', error);
 			}
-		}, 20 * 60_000); // 20 min
+		}, 20 * 60_000).unref(); // 20 min
 
 		// chatBridges
 		if (this.config.get('CHATBRIDGE_ENABLED')) {

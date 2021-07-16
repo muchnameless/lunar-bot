@@ -59,9 +59,9 @@ process
 
 	// ready
 	client.once('ready', () => {
-		client.setInterval(() => {
+		setInterval(() => {
 			client.user.setPresence(presence);
-		}, 20 * 60_000); // 20 min
+		}, 20 * 60_000).unref(); // 20 min
 
 		// log
 		logger.info(`Startup complete. Logged in as ${client.user.tag}`);
