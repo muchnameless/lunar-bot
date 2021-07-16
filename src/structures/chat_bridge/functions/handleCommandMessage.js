@@ -84,8 +84,7 @@ module.exports = async (message) => {
 
 		// prevent from executing owner only command
 		} else if (command.category === 'owner') {
-			logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is an owner only command`);
-			return message.author.send(`the '${command.name}' command is only for the bot owners`);
+			return logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is an owner only command`);
 		}
 
 		// command cooldowns
