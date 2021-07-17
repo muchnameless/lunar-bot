@@ -27,9 +27,8 @@ module.exports = class CompetitionCommand extends Command {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async run(message, args) { // eslint-disable-line no-unused-vars
+	async run(message) {
 		const collector = message.channel.createMessageCollector({
 			filter: msg => msg.author.id === message.author.id,
 			idle: 30_000,

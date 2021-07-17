@@ -35,7 +35,7 @@ module.exports = class SmiteCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		return this.client.commands.get('guild').runMute(interaction, {
 			targetInput: interaction.options.get('target').value.toLowerCase(),
 			duration: 10 * 60_000,
@@ -45,11 +45,10 @@ module.exports = class SmiteCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message) {
 		return this.client.commands.get('guild').runMute(message, {
-			targetInput: args[0],
+			targetInput: message.commandData.args[0],
 			duration: 10 * 60_000,
 			hypixelGuildInput: message.chatBridge.guild,
 		});

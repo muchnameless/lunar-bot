@@ -87,7 +87,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
 	 * @param {import('../../structures/database/models/Player')} ignInput
 	 */
-	async _run(ctx, chatBridge, ignInput) { // eslint-disable-line no-unused-vars
+	async _run(ctx, chatBridge, ignInput) {
 		if (ignInput) { // single player
 			try {
 				const { ign, timestamp } = await JoinDateCommand._getJoinDate(chatBridge, ignInput);
@@ -128,7 +128,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async run(interaction) {
 		interaction.defer();
 
 		return this._run(
@@ -141,13 +141,12 @@ module.exports = class JoinDateCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message) {
 		return this._run(
 			message,
 			message.chatBridge,
-			args[0] ?? message.author.ign,
+			message.commandData.args[0] ?? message.author.ign,
 		);
 	}
 };

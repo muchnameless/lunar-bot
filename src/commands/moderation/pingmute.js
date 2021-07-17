@@ -52,13 +52,12 @@ module.exports = class PingMuteCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
-		/** @type {import('../../structures/database/models/Player')} */
-		const player = this.client.players.getById(args[0]) ?? this.client.players.getByIgn(args[0]);
+	async runInGame(message) {
+		const [ INPUT ] = message.commandData.args;
+		const player = this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT);
 
-		if (!player) return message.reply(`\`${args[0]}\` not in the player db`);
+		if (!player) return message.reply(`\`${INPUT}\` not in the player db`);
 
 		return this._run(message, player);
 	}

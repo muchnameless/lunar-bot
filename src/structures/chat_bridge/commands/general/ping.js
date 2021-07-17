@@ -7,7 +7,7 @@ const BridgeCommand = require('../../../commands/BridgeCommand');
 module.exports = class PingBridgeCommand extends BridgeCommand {
 	constructor(data, options) {
 		super(data, options ?? {
-			aliases: [ 'o/', '( ﾟ◡ﾟ)/' ],
+			aliases: [ 'o/' ],
 			description: 'ping the bot',
 			args: false,
 			usage: '',
@@ -18,9 +18,8 @@ module.exports = class PingBridgeCommand extends BridgeCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
-		message.reply('o/');
+	async runInGame(message) {
+		return message.reply('o/');
 	}
 };

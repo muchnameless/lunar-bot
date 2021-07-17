@@ -101,9 +101,8 @@ module.exports = class PlayerCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
-		return this._run(message, ...args);
+	async runInGame(message) {
+		return this._run(message, ...message.commandData.args);
 	}
 };
