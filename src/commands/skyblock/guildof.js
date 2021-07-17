@@ -43,7 +43,7 @@ module.exports = class GuildOfCommand extends DualCommand {
 
 			if (!name) return ctx.reply(`${ign}: no guild`);
 
-			return ctx.reply(`${ign}: ${name}${tag ? ` [${tag}] ` : ''}${members.length}/125 members`);
+			return ctx.reply(`${ign}: ${name}${tag ? ` [${tag}]` : ''} ${members.length}/125 members`);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
