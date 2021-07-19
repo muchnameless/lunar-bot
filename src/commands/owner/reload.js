@@ -78,7 +78,7 @@ module.exports = class ReloadCommand extends DualCommand {
 	 * @param {string} subCommand
 	 * @param {string} input
 	 */
-	async _run(ctx, subCommand, input) { // eslint-disable-line no-unused-vars
+	async _run(ctx, subCommand, input) {
 		switch (subCommand) {
 			case 'command': {
 				let commandName = input.toLowerCase();
@@ -200,9 +200,8 @@ module.exports = class ReloadCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
-		return this._run(message, ...args);
+	async runInGame(message) {
+		return this._run(message, ...message.commandData.args);
 	}
 };

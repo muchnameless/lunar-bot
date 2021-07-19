@@ -43,7 +43,7 @@ module.exports = class GuildOfCommand extends DualCommand {
 
 			if (!name) return ctx.reply(`${ign}: no guild`);
 
-			return ctx.reply(`${ign}: ${name}${tag ? ` [${tag}] ` : ''}${members.length}/125 members`);
+			return ctx.reply(`${ign}: ${name}${tag ? ` [${tag}]` : ''} ${members.length}/125 members`);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
@@ -64,9 +64,8 @@ module.exports = class GuildOfCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
-		return this._run(message, ...args);
+	async runInGame(message) {
+		return this._run(message, ...message.commandData.args);
 	}
 };

@@ -180,9 +180,8 @@ module.exports = class PollCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message) {
 		const inputMatched = message.content
 			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
 			?.flatMap((x) => {
@@ -199,7 +198,7 @@ module.exports = class PollCommand extends DualCommand {
 				chatBridge: message.chatBridge,
 				question: upperCaseFirstChar(inputMatched.shift()),
 				pollOptionNames: inputMatched,
-				duration: args[0],
+				duration: message.commandData.args[0],
 				ign: message.author.ign,
 			},
 		);

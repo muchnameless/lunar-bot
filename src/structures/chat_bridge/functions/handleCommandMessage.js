@@ -43,7 +43,7 @@ module.exports = async (message) => {
 		return;
 	}
 
-	const { command, args } = message.commandData;
+	const { command } = message.commandData;
 
 	// wrong command
 	if (!command) return logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
@@ -112,8 +112,8 @@ module.exports = async (message) => {
 
 	// argument handling
 	if (typeof command.args === 'boolean'
-		? (command.args && !args.length)
-		: (args.length < command.args)
+		? (command.args && !message.commandData.args.length)
+		: (message.commandData.args.length < command.args)
 	) {
 		const reply = [];
 
@@ -127,7 +127,7 @@ module.exports = async (message) => {
 	// execute command
 	try {
 		logger.info(`'${message.content}' was executed by ${message.author.ign} in '${message.type}'`);
-		await command.runInGame(message, args);
+		await command.runInGame(message);
 	} catch (error) {
 		logger.error(`An error occured while ${message.author.ign} tried to execute ${message.content} in '${message.type}'`, error);
 		message.author.send(`an error occured while executing the '${command.name}' command:\n${error}`);

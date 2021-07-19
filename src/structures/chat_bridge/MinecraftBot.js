@@ -4,8 +4,8 @@ const { createClient } = require('minecraft-protocol');
 const { join, basename } = require('path');
 const { spawnEvents } = require('./constants/chatBridge');
 const { getAllJsFiles } = require('../../functions/files');
-const logger = require('../../functions/logger');
 const Player = require('../database/models/Player');
+const logger = require('../../functions/logger');
 
 
 /**

@@ -18,9 +18,8 @@ module.exports = class MyCommand extends BridgeCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
 };

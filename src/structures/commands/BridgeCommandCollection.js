@@ -62,9 +62,9 @@ module.exports = class BridgeCommandCollection extends BaseCommandCollection {
 	 * help command run method
 	 * @type {Function}
 	 */
-	async help(message, args) {
+	async help(message) {
 		try {
-			return await this.get('help').runInGame(message, args);
+			return await this.get('help').runInGame(message);
 		} catch (error) {
 			logger.error(`[CMD HANDLER]: An error occured while ${message.author.ign} tried to execute '${message.content}' in '${message.type}'`, error);
 			message.reply(`an error occured while executing the \`help\` command:\n${error}`);

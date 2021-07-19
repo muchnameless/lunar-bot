@@ -19,12 +19,11 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
+	async runInGame(message) {
 		// default help
-		if (!args.length) {
-			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.ign}` ].join(', ')}` ];
+		if (!message.commandData.args.length) {
+			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.ign}` ].flat().join(', ')}` ];
 
 			for (const category of this.collection.visibleCategories) {
 				reply.push(`${category}: ${[ ...this.collection.filterByCategory(category).keys() ].join(', ')}`);
@@ -33,7 +32,7 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 			return message.author.send(reply.join('\n'));
 		}
 
-		const INPUT = args[0].toLowerCase();
+		const INPUT = message.commandData.args[0].toLowerCase();
 
 
 		// category help

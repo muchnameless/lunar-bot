@@ -46,7 +46,7 @@ module.exports = class FetchurCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 */
-	async run(ctx) { // eslint-disable-line no-unused-vars
+	async _run(ctx) {
 		const date = new Date();
 		const OFFSET = tc.zone('America/New_York').offsetForUtcDate(date) / 60;
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
@@ -70,10 +70,17 @@ module.exports = class FetchurCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 * @param {string[]} args command arguments
+	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
-	async runInGame(message, args) { // eslint-disable-line no-unused-vars
-		return this.run(message);
+	async run(interaction) {
+		return this._run(interaction);
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 */
+	async runInGame(message) {
+		return this._run(message);
 	}
 };
