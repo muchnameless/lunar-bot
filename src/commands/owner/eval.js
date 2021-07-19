@@ -207,7 +207,7 @@ module.exports = class EvalCommand extends SlashCommand {
 				return `${indentation}${line}`;
 			})
 			.reduce((acc, cur) => `${acc}${acc ? '\n' : ''}${cur}${cur.endsWith('{') ? '' : ';'}`, '');
-		const IS_ASYNC = interaction.options.getBoolean('async');
+		const IS_ASYNC = interaction.options.getBoolean('async') ?? /\bawait\b/.test(INPUT);
 		const INSPECT_DEPTH = interaction.options.getInteger('inspect') ?? this.config.get('EVAL_INSPECT_DEPTH');
 		const row = new Discord.MessageActionRow()
 			.addComponents(
