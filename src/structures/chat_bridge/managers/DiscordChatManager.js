@@ -324,8 +324,11 @@ module.exports = class DiscordChatManager extends ChatManager {
 				})()
 				: null,
 			message.content, // actual content
-			message.attachments.size
-				? await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ]) // links of attachments
+			message.stickers.size // stickers
+				? message.stickers.map(({ name }) => `:${name}:`).join(' ')
+				: null,
+			message.attachments.size // attachments
+				? (await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ])).join(' ') // links of attachments
 				: null,
 		].filter(Boolean).join(' ');
 
