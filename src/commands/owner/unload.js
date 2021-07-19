@@ -47,11 +47,11 @@ module.exports = class UnloadCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {string} subCommandName
+	 * @param {string} subCommand
 	 * @param {string} input
 	 */
-	async _run(ctx, subCommandName, input) {
-		switch (subCommandName) {
+	async _run(ctx, subCommand, input) {
+		switch (subCommand) {
 			case 'command': {
 				/** @type {import('../../structures/commands/BaseCommand')} */
 				const command = this.collection.getByName(input);
@@ -75,7 +75,7 @@ module.exports = class UnloadCommand extends DualCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${subCommandName}'`);
+				throw new Error(`unknown subcommand '${subCommand}'`);
 		}
 	}
 
@@ -84,7 +84,7 @@ module.exports = class UnloadCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, interaction.subCommandName, interaction.options.get('name').value);
+		return this._run(interaction, interaction.options.getSubCommand(), interaction.options.getString('name', true));
 	}
 
 	/**

@@ -1,6 +1,6 @@
 'use strict';
 
-const { Interaction, SnowflakeUtil, Constants } = require('discord.js');
+const { Interaction, SnowflakeUtil, Formatters, Constants } = require('discord.js');
 const { Op } = require('sequelize');
 const ms = require('ms');
 const {
@@ -286,7 +286,7 @@ module.exports = class GuildCommand extends SlashCommand {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
-					.setDescription(`\`\`\`\n${await hypixelGuild.chatBridge.minecraft.command(commandOptions)}\`\`\``),
+					.setDescription(Formatters.codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions))),
 			],
 		});
 	}
@@ -303,27 +303,25 @@ module.exports = class GuildCommand extends SlashCommand {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
-					.setDescription(
-						`\`\`\`${
-							trim(
-								(await hypixelGuild.chatBridge.minecraft.command({
-									raw: true,
-									...commandOptions,
-								}))
-									.map(msg => (msg.content.includes('●')
-										? removeMcFormatting(
-											msg.formattedContent
-												.replace(/§r§c ●/g, ' 🔴') // prettify emojis
-												.replace(/§r§a ●/g, ' 🟢')
-												.replace(/\[.+?\] /g, ''), // remove hypixel ranks (helps with staying inside the character limit)
-										)
-										: msg.content),
+					.setDescription(Formatters.codeBlock(
+						trim(
+							(await hypixelGuild.chatBridge.minecraft.command({
+								raw: true,
+								...commandOptions,
+							}))
+								.map(msg => (msg.content.includes('●')
+									? removeMcFormatting(
+										msg.formattedContent
+											.replace(/§r§c ●/g, ' 🔴') // prettify emojis
+											.replace(/§r§a ●/g, ' 🟢')
+											.replace(/\[.+?\] /g, ''), // remove hypixel ranks (helps with staying inside the character limit)
 									)
-									.join('\n'),
-								EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])
-							)
-						}\`\`\``,
-					),
+									: msg.content),
+								)
+								.join('\n'),
+							EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])
+						),
+					)),
 			],
 		});
 	}
@@ -335,7 +333,9 @@ module.exports = class GuildCommand extends SlashCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		switch (interaction.subCommandName) {
+		const SUB_COMMAND = interaction.options.getSubCommand();
+
+		switch (SUB_COMMAND) {
 			case 'demote': {
 				await this.checkPermissions(interaction, {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
@@ -355,7 +355,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				return this._run(interaction, {
-					command: `g history ${interaction.options.get('page')?.value ?? ''}`,
+					command: `g history ${interaction.options.getInteger('page') ?? ''}`,
 					abortRegExp: historyErrors(),
 				});
 			}
@@ -368,7 +368,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				return this._run(interaction, {
-					command: `g ${interaction.subCommandName}`,
+					command: `g ${SUB_COMMAND}`,
 				});
 			}
 
@@ -378,7 +378,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				return this._run(interaction, {
-					command: `g top ${interaction.options.get('days_ago')?.value ?? ''}`,
+					command: `g top ${interaction.options.getInteger('days_ago') ?? ''}`,
 					abortRegExp: topErrors(),
 				});
 			}
@@ -388,7 +388,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = interaction.options.get('ign').value;
+				const IGN = interaction.options.getString('ign', true);
 
 				return this._run(interaction, {
 					command: `g invite ${IGN}`,
@@ -404,7 +404,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				return this._runList(interaction, {
-					command: `g ${interaction.subCommandName}`,
+					command: `g ${SUB_COMMAND}`,
 				});
 			}
 
@@ -414,10 +414,10 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				const IGN = this.getIgn(interaction);
-				const PAGE = interaction.options.get('page')?.value;
+				const PAGE = interaction.options.getInteger('page');
 
 				return this._run(interaction, {
-					command: `g log ${[ IGN, PAGE ].filter(Boolean).join(' ')}`,
+					command: `g log ${[ IGN, PAGE ].filter(x => x != null).join(' ')}`,
 					abortRegExp: logErrors(),
 				});
 			}
@@ -443,15 +443,16 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const DURATION = stringToMS(interaction.options.get('duration').value);
+				const DURATION_INPUT = interaction.options.getString('duration', true);
+				const DURATION = stringToMS(DURATION_INPUT);
 
 				if (Number.isNaN(DURATION)) return interaction.reply({
-					content: `\`${interaction.options.get('duration').value}\` is not a valid duration`,
+					content: `\`${DURATION_INPUT}\` is not a valid duration`,
 					ephemeral: true,
 				});
 
 				return this.runMute(interaction, {
-					targetInput: interaction.options.get('target').value.toLowerCase(),
+					targetInput: interaction.options.getString('target', true).toLowerCase(),
 					duration: DURATION,
 				});
 			}
@@ -475,7 +476,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				const IGN = this.getIgn(interaction);
-				const RANK = interaction.options.get('rank').value;
+				const RANK = interaction.options.getString('rank', true);
 
 				return this._run(interaction, {
 					command: `g setrank ${IGN} ${RANK}`,
@@ -488,7 +489,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const TARGET_INPUT = interaction.options.get('target').value.toLowerCase();
+				const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 
 				let hypixelGuild = this.getHypixelGuild(interaction);
 				let target;
@@ -544,7 +545,7 @@ module.exports = class GuildCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${interaction.subCommandName}'`);
+				throw new Error(`unknown subcommand '${SUB_COMMAND}'`);
 		}
 	}
 };

@@ -1,5 +1,6 @@
 'use strict';
 
+const { Formatters } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const mojang = require('../../api/mojang');
 const SlashCommand = require('../../structures/commands/SlashCommand');
@@ -46,18 +47,22 @@ module.exports = class DonationsCommand extends SlashCommand {
 			const IGN = this.client.players.cache.get(minecraftUuid)?.ign ?? (await mojang.uuid(minecraftUuid).catch(logger.error))?.ign ?? minecraftUuid;
 			const notes = reducedNotes[minecraftUuid].join('\n');
 
-			embed.addField(
-				'\u200b',
-				stripIndent`
-					\`\`\`ada
+			embed.addFields({
+				name: '\u200b',
+				value: Formatters.codeBlock('ada', stripIndent`
 					#${`${index + 1}`.padStart(3, '0')} : ${IGN}
 						> ${this.client.formatNumber(amount)}
-					\`\`\`
-				`,
-				true,
-			);
+				`),
+				inline: true,
+			});
 
-			if (notes) embed.addField('\u200b', notes, true);
+			if (notes) {
+				embed.addFields({
+					name: '\u200b',
+					value: notes,
+					inline: true,
+				});
+			}
 
 			embed.padFields();
 

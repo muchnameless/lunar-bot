@@ -31,12 +31,12 @@ module.exports = class TrackCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		const type = interaction.options.get('type')?.value ?? 'weight';
+		const type = interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION');
 		const player = this.getPlayer(interaction, true);
 
 		if (!player) {
-			return interaction.reply(oneLine`${interaction.options.has('player')
-				? `\`${interaction.options.get('player').value}\` is`
+			return interaction.reply(oneLine`${interaction.options.get('player')
+				? `\`${interaction.options.getString('player')}\` is`
 				: 'you are'
 			} not in the player db`);
 		}

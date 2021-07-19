@@ -31,7 +31,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	 * @returns {?boolean}
 	 */
 	get _checkEphemeralOption() {
-		switch (this.options.get('visibility')?.value) {
+		switch (this.options.getString('visibility')) {
 			case 'everyone':
 				return false;
 
@@ -45,11 +45,9 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 
 	get logInfo() {
 		return [
-			this.commandName,
-			this.subCommandGroupName,
-			this.subCommandName,
-			...this.options.map(({ name, value }) => `${name}: ${value}`),
-		].filter(Boolean).join(' ');
+			this.fullCommandName,
+			...this.options._options.map(({ name, value }) => `${name}: ${value}`),
+		].filter(x => x !== null).join(' ');
 	}
 
 	/**
@@ -57,7 +55,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	 * @returns {boolean}
 	 */
 	get checkForce() {
-		return this.options.get('force')?.value ?? false;
+		return this.options.getBoolean('force') ?? false;
 	}
 
 	/**
@@ -73,9 +71,9 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	get fullCommandName() {
 		return [
 			this.commandName,
-			this.subCommandGroupName,
-			this.subCommandName,
-		].filter(Boolean).join(' ');
+			this.options._group,
+			this.options._subCommand,
+		].filter(x => x !== null).join(' ');
 	}
 
 	/**

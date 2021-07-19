@@ -65,7 +65,7 @@ module.exports = class PollCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} param1.chatBridge
 	 * @param {string} param1.question
 	 * @param {string[]} param1.pollOptionNames
-	 * @param {number} param1.duration
+	 * @param {string} param1.duration
 	 * @param {string} param1.ign
 	 */
 	async _run(ctx, { chatBridge, question, pollOptionNames, duration, ign }) {
@@ -164,9 +164,9 @@ module.exports = class PollCommand extends DualCommand {
 			interaction,
 			{
 				chatBridge: this.getHypixelGuild(interaction).chatBridge,
-				question: interaction.options.get('question').value,
+				question: interaction.options.getString('question', true),
 				pollOptionNames: interaction.options.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value),
-				duration: interaction.options.get('duration')?.value,
+				duration: interaction.options.getString('duration'),
 				ign: interaction.user.player?.ign ?? interaction.member?.displayName ?? interaction.user.tag,
 			},
 		);

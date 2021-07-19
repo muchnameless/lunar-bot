@@ -37,7 +37,7 @@ module.exports = class SmiteCommand extends DualCommand {
 	 */
 	async run(interaction) { // eslint-disable-line no-unused-vars
 		return this.client.commands.get('guild').runMute(interaction, {
-			targetInput: interaction.options.get('target').value.toLowerCase(),
+			targetInput: interaction.options.getString('target', true).toLowerCase(),
 			duration: 10 * 60_000,
 		});
 	}

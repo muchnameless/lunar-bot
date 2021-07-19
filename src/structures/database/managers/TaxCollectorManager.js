@@ -75,14 +75,14 @@ module.exports = class TaxCollectorManager extends ModelManager {
 			`);
 
 		for (const taxCollector of this.cache.values()) {
-			embed.addField(
-				`${escapeIgn(taxCollector.ign)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
-				stripIndents`
+			embed.addFields({
+				name: `${escapeIgn(taxCollector.ign)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
+				value: stripIndents`
 					tax: ${this.client.formatNumber(taxCollector.collectedTax)}
 					donations: ${this.client.formatNumber(taxCollector.collectedDonations)}
 					total: ${this.client.formatNumber(taxCollector.collectedTax + taxCollector.collectedDonations)}
 				`,
-			);
+			});
 		}
 
 		return embed;

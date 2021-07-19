@@ -28,18 +28,19 @@ module.exports = class UnlinkCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
+		const PLAYER_INPUT = interaction.options.getString('player', true);
 		const player = this.getPlayer(interaction)
 			?? await this.client.players.model.findOne({
 				where: {
 					[Op.or]: [{
-						ign: { [Op.iLike]: interaction.options.get('player').value },
-						minecraftUuid: interaction.options.get('player').value.toLowerCase(),
-						discordId: interaction.options.get('player').value,
+						ign: { [Op.iLike]: PLAYER_INPUT },
+						minecraftUuid: PLAYER_INPUT.toLowerCase(),
+						discordId: PLAYER_INPUT,
 					}],
 				},
 			});
 
-		if (!player?.discordId) return interaction.reply(`\`${interaction.options.get('player').value}\` is not linked`);
+		if (!player?.discordId) return interaction.reply(`\`${PLAYER_INPUT}\` is not linked`);
 
 		interaction.defer();
 

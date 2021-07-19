@@ -1,6 +1,6 @@
 'use strict';
 
-const { Constants } = require('discord.js');
+const { Formatters, Constants } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const { basename } = require('path');
 const { getAllJsFiles } = require('../../functions/files');
@@ -75,11 +75,11 @@ module.exports = class ReloadCommand extends DualCommand {
 	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {string} subCommandName
+	 * @param {string} subCommand
 	 * @param {string} input
 	 */
-	async _run(ctx, subCommandName, input) { // eslint-disable-line no-unused-vars
-		switch (subCommandName) {
+	async _run(ctx, subCommand, input) { // eslint-disable-line no-unused-vars
+		switch (subCommand) {
 			case 'command': {
 				let commandName = input.toLowerCase();
 
@@ -123,9 +123,7 @@ module.exports = class ReloadCommand extends DualCommand {
 					logger.error('An error occurred while reloading:\n', error);
 					return ctx.reply(stripIndents`
 						an error occurred while reloading \`${commandName}\`:
-						\`\`\`xl
-						${error}
-						\`\`\`
+						${Formatters.codeBlock('xl', `${error}`)}
 					`);
 				}
 			}
@@ -155,9 +153,7 @@ module.exports = class ReloadCommand extends DualCommand {
 					logger.error('An error occurred while reloading:\n', error);
 					return ctx.reply(stripIndents`
 						an error occurred while reloading \`${eventName}\`:
-						\`\`\`xl
-						${error}
-						\`\`\`
+						${Formatters.codeBlock('xl', `${error}`)}
 					`);
 				}
 			}
@@ -189,7 +185,7 @@ module.exports = class ReloadCommand extends DualCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${subCommandName}'`);
+				throw new Error(`unknown subcommand '${subCommand}'`);
 		}
 	}
 
@@ -198,7 +194,7 @@ module.exports = class ReloadCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, interaction.subCommandName, interaction.options.get('name')?.value);
+		return this._run(interaction, interaction.options.getSubCommand(), interaction.options.getString('name'));
 	}
 
 	/**

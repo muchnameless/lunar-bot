@@ -96,7 +96,11 @@ module.exports = class WeightCommand extends DualCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		return this._run(interaction, interaction.options.get('ign')?.value, interaction.options.get('profile')?.value);
+		return this._run(
+			interaction,
+			interaction.options.getString('ign'),
+			interaction.options.getString('profile'),
+		);
 	}
 
 	/**

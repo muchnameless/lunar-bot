@@ -120,13 +120,6 @@ module.exports = class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * @param {import('discord.js').ApplicationCommandOptionData} option
-	 */
-	static issubCommandNameOption(option) {
-		return option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND || option?.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP;
-	}
-
-	/**
 	 * @returns {import('discord.js').ApplicationCommandData}
 	 */
 	get data() {
@@ -135,7 +128,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		const [ firstOption ] = options;
 
-		if (SlashCommand.issubCommandNameOption(firstOption)) {
+		if ([ Constants.ApplicationCommandOptionTypes.SUB_COMMAND, Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP ].includes(firstOption?.type)) {
 			options = options.map((option) => {
 				if (option.options[option.options.length - 1]?.name !== 'visibility') option.options.push(SlashCommand.EPHEMERAL_OPTION);
 				return option;
@@ -181,7 +174,7 @@ module.exports = class SlashCommand extends BaseCommand {
 			return null;
 		}
 
-		const INPUT = (interaction.options.get('player') || interaction.options.get('target'))?.value.toLowerCase();
+		const INPUT = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase();
 
 		if (!INPUT) {
 			if (fallbackToCurrentUser) return interaction.user.player;
@@ -207,7 +200,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @returns {?string}
 	 */
 	getIgn(interaction, fallbackToCurrentUser = false) {
-		if (interaction.checkForce) return (interaction.options.get('player') || interaction.options.get('target'))?.value.toLowerCase();
+		if (interaction.checkForce) return (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase();
 		return this.getPlayer(interaction, fallbackToCurrentUser)?.ign ?? null;
 	}
 
@@ -217,7 +210,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @returns {import('../database/models/HypixelGuild') | GUILD_ID_ALL}
 	 */
 	getHypixelGuild(interaction) {
-		const INPUT = interaction.options.get('guild')?.value;
+		const INPUT = interaction.options.getString('guild');
 		if (INPUT === GUILD_ID_ALL) return INPUT;
 		return this.client.hypixelGuilds.cache.get(INPUT) ?? interaction.user.player?.guild ?? this.client.hypixelGuilds.mainGuild;
 	}

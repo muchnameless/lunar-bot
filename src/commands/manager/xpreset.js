@@ -32,22 +32,23 @@ module.exports = class XpResetCommand extends SlashCommand {
 	 */
 	async run(interaction) {
 		const { players } = this.client;
+		const PLAYER_INPUT = interaction.options.getString('player');
 
 		let result;
 
 		// individual player
-		if (interaction.options.has('player')) {
+		if (PLAYER_INPUT) {
 			/** @type {import('../../structures/database/models/Player')} */
 			const player = this.getPlayer(interaction)
 				?? await players.model.findOne({
 					where: {
 						guildId: null,
-						ign: { [Op.iLike]: interaction.options.get('player').value },
+						ign: { [Op.iLike]: PLAYER_INPUT },
 					},
 				});
 
 
-			if (!player) return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
+			if (!player) return interaction.reply(`\`${PLAYER_INPUT}\` is not in the player db`);
 
 			await interaction.awaitConfirmation(`reset xp gained from \`${player.ign}\`?`);
 

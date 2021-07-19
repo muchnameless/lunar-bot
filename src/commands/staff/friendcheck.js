@@ -1,6 +1,6 @@
 'use strict';
 
-const { Constants } = require('discord.js');
+const { Formatters, Constants } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const { EMBED_DESCRIPTION_MAX_CHARS } = require('../../constants/discord');
 const { trim } = require('../../functions/util');
@@ -33,14 +33,14 @@ module.exports = class FriendCheckCommand extends SlashCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.get('ign').value);
+		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 		const friends = (await hypixel.friends.uuid(uuid)).map(x => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender));
 
 		return interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`${IGN}'s friends in the guild`)
-					.setDescription(stripIndents`\`\`\`
+					.setDescription(Formatters.codeBlock(stripIndents`
 						${trim(
 							this.client.players.cache
 							.filter((_, minecraftUuid) => friends.includes(minecraftUuid))
@@ -48,7 +48,7 @@ module.exports = class FriendCheckCommand extends SlashCommand {
 							.join('\n'),
 							EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])
 						)}
-					\`\`\``),
+					`)),
 			],
 		});
 	}

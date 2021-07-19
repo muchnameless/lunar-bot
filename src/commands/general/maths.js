@@ -414,7 +414,7 @@ module.exports = class MathsCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, interaction.options.get('input').value);
+		return this._run(interaction, interaction.options.getString('input', true));
 	}
 
 	/**

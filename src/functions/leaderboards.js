@@ -1,7 +1,7 @@
 'use strict';
 
+const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Formatters, Constants } = require('discord.js');
 const { stripIndent, oneLine } = require('common-tags');
-const { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Formatters: { TimestampStyles }, Constants } = require('discord.js');
 const {	DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, RELOAD_EMOJI, Y_EMOJI_ALT } = require('../constants/emojiCharacters');
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_SHORT, XP_OFFSETS_CONVERTER, GUILD_ID_ALL } = require('../constants/database');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../constants/skyblock');
@@ -384,17 +384,17 @@ const self = module.exports = {
 				.setTitle(title)
 				.setDescription(stripIndent`
 					${description}
-					\`\`\`ada${playerList}\`\`\`
+					${Formatters.codeBlock('ada', playerList)}
 				`)
-				.addField(
-					playerRequestingEntry
+				.addFields({
+					name: playerRequestingEntry
 						? 'Your placement'
 						: '\u200b',
-					stripIndent`
+					value: stripIndent`
 						${playerRequestingEntry ?? ''}
 						Page: ${page} / ${PAGES_TOTAL}
 					`,
-				)
+				})
 				.setFooter('Updated at')
 				.setTimestamp(lastUpdatedAt),
 			);
@@ -578,7 +578,7 @@ const self = module.exports = {
 			if (IS_COMPETITION_LB) {
 				description += `Start: ${timestampToDateMarkdown(STARTING_TIME)}\n`;
 				if (COMPETITION_RUNNING) {
-					description += `Ends: ${timestampToDateMarkdown(COMPETITION_END_TIME, TimestampStyles.RelativeTime)}\n`;
+					description += `Ends: ${timestampToDateMarkdown(COMPETITION_END_TIME, Formatters.TimestampStyles.RelativeTime)}\n`;
 				} else { // competition already ended
 					description += `Ended: ${timestampToDateMarkdown(COMPETITION_END_TIME)}\n`;
 				}
@@ -612,31 +612,25 @@ const self = module.exports = {
 		if (playerRequestingIndex !== -1) {
 			const playerRequesting = playerData[playerRequestingIndex];
 
-			playerRequestingEntry = stripIndent`
-					\`\`\`ada
-					#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
-						 > ${getEntry(playerRequesting)}
-					\`\`\`
-				`;
+			playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
+				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
+					 > ${getEntry(playerRequesting)}
+			`);
 		} else if (xpType !== 'purge') {
 			let playerRequesting = user.player;
 
 			// put playerreq into guildplayers and sort then do the above again
 			if (playerRequesting) {
 				playerRequesting = dataConverter(playerRequesting);
-				playerRequestingEntry = stripIndent`
-						\`\`\`ada
-						#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
-							 > ${getEntry(playerRequesting)}
-						\`\`\`
-					`;
+				playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
+					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
+						 > ${getEntry(playerRequesting)}
+				`);
 			} else {
-				playerRequestingEntry = stripIndent`
-						\`\`\`ada
-						#??? : unknown ign
-							 > link your discord tag on hypixel
-						\`\`\`
-					`;
+				playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
+					#??? : unknown ign
+						 > link your discord tag on hypixel
+				`);
 			}
 		}
 
@@ -785,31 +779,25 @@ const self = module.exports = {
 		if (playerRequestingIndex !== -1) {
 			const playerRequesting = playerData[playerRequestingIndex];
 
-			playerRequestingEntry = stripIndent`
-					\`\`\`ada
-					#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
-						 > ${getEntry(playerRequesting)}
-					\`\`\`
-				`;
+			playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
+				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
+					 > ${getEntry(playerRequesting)}
+			`);
 		} else {
 			let playerRequesting = user.player;
 
 			// put playerreq into guildplayers and sort then do the above again
 			if (playerRequesting) {
 				playerRequesting = dataConverter(playerRequesting);
-				playerRequestingEntry = stripIndent`
-						\`\`\`ada
-						#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
-							 > ${getEntry(playerRequesting)}
-						\`\`\`
-					`;
+				playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
+					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
+						 > ${getEntry(playerRequesting)}
+				`);
 			} else {
-				playerRequestingEntry = stripIndent`
-						\`\`\`ada
-						#??? : unknown ign
-							 > link your discord tag on hypixel
-						\`\`\`
-					`;
+				playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
+					#??? : unknown ign
+						 > link your discord tag on hypixel
+				`);
 			}
 		}
 

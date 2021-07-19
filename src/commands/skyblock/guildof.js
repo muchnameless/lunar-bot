@@ -25,7 +25,7 @@ module.exports = class GuildOfCommand extends DualCommand {
 			},
 			{
 				aliases: [ 'guild' ],
-				args: false,
+				args: 1,
 				usage: '[`IGN`]',
 			},
 		);
@@ -58,7 +58,7 @@ module.exports = class GuildOfCommand extends DualCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		return this._run(interaction, interaction.options.get('ign')?.value);
+		return this._run(interaction, interaction.options.getString('ign', true));
 	}
 
 	/**

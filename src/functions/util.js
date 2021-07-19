@@ -1,7 +1,7 @@
 'use strict';
 
-const { setTimeout } = require('timers/promises');
 const { Formatters, Util } = require('discord.js');
+const { setTimeout } = require('timers/promises');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
@@ -232,9 +232,11 @@ const self = module.exports = {
 		let content = text;
 
 		if (isCode) {
-			const codeName = typeof options.code === 'string' ? options.code : '';
+			const codeName = typeof options.code === 'string'
+				? options.code
+				: '';
 
-			content = `\`\`\`${codeName}\n${Util.cleanCodeBlockContent(content)}\n\`\`\``;
+			content = Formatters.codeBlock(codeName, Util.cleanCodeBlockContent(content));
 
 			if (isSplit) {
 				splitOptions.prepend = `${splitOptions.prepend ?? ''}\`\`\`${codeName}\n`;
@@ -253,7 +255,7 @@ const self = module.exports = {
 	 * @param {Function} [formatter=Util.escapeCodeBlock]
 	 */
 	splitForEmbedFields(input, code = '', char = '\n', formatter = Util.escapeCodeBlock) {
-		const TO_SPLIT = `\`\`\`${code}\n${formatter(input)}\`\`\``;
+		const TO_SPLIT = Formatters.codeBlock(code, formatter(input));
 
 		return self.splitMessage(TO_SPLIT, { maxLength: EMBED_FIELD_MAX_CHARS, char: [ char, '' ], prepend: `\`\`\`${code}\n`, append: '```' });
 	},

@@ -1,6 +1,6 @@
 'use strict';
 
-const { Constants } = require('discord.js');
+const { Formatters, Constants } = require('discord.js');
 const { promisify } = require('util');
 const { exec } = require('child_process');
 const SlashCommand = require('../../structures/commands/SlashCommand');
@@ -29,30 +29,41 @@ module.exports = class ExecCommand extends SlashCommand {
 	 */
 	async run(interaction) {
 		try {
-			const { stdout, stderr } = await promisify(exec)(interaction.options.get('input').value);
+			const INPUT = interaction.options.getString('input', true);
+			const { stdout, stderr } = await promisify(exec)(INPUT);
+			const responseEmbed = this.client.defaultEmbed
+				.addFields({
+					name: 'Input',
+					value: Formatters.codeBlock('bash', INPUT),
+				})
+				.setFooter(interaction.guild?.me.displayName ?? this.client.user.username, this.client.user.displayAvatarURL());
 
 			if (stdout) {
 				logger.info(stdout);
-				await interaction.reply({
-					content: stdout,
-					code: 'bash',
-					editPreviousMessage: true,
+
+				responseEmbed.addFields({
+					name: 'Output',
+					value: Formatters.codeBlock('bash', stdout),
 				});
 			}
 
 			if (stderr) {
 				logger.error(stderr);
-				await interaction.reply({
-					content: `${stderr.name}: ${stderr.message}`,
-					code: 'xl',
-					editPreviousMessage: false,
+
+				responseEmbed.addFields({
+					name: stderr.name ?? 'Error',
+					value: Formatters.codeBlock('xl', stderr.message),
 				});
 			}
+
+			return interaction.reply({
+				embeds: [ responseEmbed ],
+			});
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
+
 			return interaction.reply({
-				content: `${error}`,
-				code: 'xl',
+				content: Formatters.codeBlock('xl', `${error}`),
 			});
 		}
 	}

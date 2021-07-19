@@ -95,7 +95,7 @@ module.exports = class PlayerCommand extends DualCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		return this._run(interaction, interaction.options.get('ign')?.value);
+		return this._run(interaction, interaction.options.getString('ign'));
 	}
 
 	/**

@@ -56,16 +56,16 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 					.join('\n'),
 				{ char: '\n', maxLength: 1024 },
 			)) {
-				embed.addField(
-					`**Missing Verified Role:** [display name | tag] (${missingVerifiedRole.length})`,
+				embed.addFields({
+					name: `**Missing Verified Role:** [display name | tag] (${missingVerifiedRole.length})`,
 					value,
-				);
+				});
 			}
 		} else {
-			embed.addField(
-				'**Missing Verified Role:**',
-				'none',
-			);
+			embed.addFields({
+				name: '**Missing Verified Role:**',
+				value: 'none',
+			});
 		}
 
 		if (guildRoleWithoutDbEntry.length) {
@@ -75,16 +75,16 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 					.join('\n'),
 				{ char: '\n', maxLength: 1024 },
 			)) {
-				embed.addField(
-					`**Guild Role and no DB entry:** [display name | tag] (${guildRoleWithoutDbEntry.length})`,
+				embed.addFields({
+					name: `**Guild Role and no DB entry:** [display name | tag] (${guildRoleWithoutDbEntry.length})`,
 					value,
-				);
+				});
 			}
 		} else {
-			embed.addField(
-				'**Guild Role and no DB entry:**',
-				'none',
-			);
+			embed.addFields({
+				name: '**Guild Role and no DB entry:**',
+				value: 'none',
+			});
 		}
 
 		// guild players that are either unlinked or not in the discord server
@@ -128,17 +128,17 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 		}
 
 		for (const { guildName, amount, values } of unlinkedPlayers) for (const value of values) {
-			embed.addField(
-				`**Unlinked Players (${guildName}):**${amount ? ` [ign | tag] (${amount})` : ''}`,
+			embed.addFields({
+				name: `**Unlinked Players (${guildName}):**${amount ? ` [ign | tag] (${amount})` : ''}`,
 				value,
-			);
+			});
 		}
 
 		for (const { guildName, amount, values } of linkedAndNotInDiscord) for (const value of values) {
-			embed.addField(
-				`**Linked and not in Discord (${guildName}):**${amount ? ` (${amount})` : ''}`,
+			embed.addFields({
+				name: `**Linked and not in Discord (${guildName}):**${amount ? ` (${amount})` : ''}`,
 				value,
-			);
+			});
 		}
 
 		embed.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);

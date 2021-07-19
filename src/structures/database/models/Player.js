@@ -923,18 +923,44 @@ module.exports = class Player extends Model {
 
 			// was successful
 			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
-			if (filteredRolesToAdd.size) loggingEmbed.addField('Added', `\`\`\`\n${filteredRolesToAdd.map(({ name }) => name).join('\n')}\`\`\``, true);
-			if (filteredRolesToRemove.size) loggingEmbed.addField('Removed', `\`\`\`\n${filteredRolesToRemove.map(({ name }) => name).join('\n')}\`\`\``, true);
+
+			if (filteredRolesToAdd.size) loggingEmbed.addFields({
+				name: 'Added',
+				value: Formatters.codeBlock(filteredRolesToAdd.map(({ name }) => name).join('\n')),
+				inline: true,
+			});
+
+			if (filteredRolesToRemove.size) loggingEmbed.addFields({
+				name: 'Removed',
+				value: Formatters.codeBlock(filteredRolesToRemove.map(({ name }) => name).join('\n')),
+				inline: true,
+			});
+
 			return true;
-		} catch (error) {
-			// was not successful
+		} catch (error) { // was not successful
 			this.discordMember = null;
+
 			logger.error('[ROLE API CALL]', error);
+
 			loggingEmbed
 				.setColor(config.get('EMBED_RED'))
-				.addField(error.name, error.message);
-			if (filteredRolesToAdd.size) loggingEmbed.addField('Failed to add', `\`\`\`\n${filteredRolesToAdd.map(({ name }) => name).join('\n')}\`\`\``, true);
-			if (filteredRolesToRemove.size) loggingEmbed.addField('Failed to remove', `\`\`\`\n${filteredRolesToRemove.map(({ name }) => name).join('\n')}\`\`\``, true);
+				.addFields({
+					name: error.name,
+					value: error.message,
+				});
+
+			if (filteredRolesToAdd.size) loggingEmbed.addFields({
+				name: 'Failed to add',
+				value: Formatters.codeBlock(filteredRolesToAdd.map(({ name }) => name).join('\n')),
+				inline: true,
+			});
+
+			if (filteredRolesToRemove.size) loggingEmbed.addFields({
+				name: 'Failed to remove',
+				value: Formatters.codeBlock(filteredRolesToRemove.map(({ name }) => name).join('\n')),
+				inline: true,
+			});
+
 			return false;
 		} finally {
 			// logging
@@ -1054,10 +1080,15 @@ module.exports = class Player extends Model {
 					**Nickname Update** for ${member}
 					${this.info}
 				`)
-				.addFields(
-					{ name: 'Old nickname', value: `\`\`\`${PREV_NAME}\`\`\``, inline: true },
-					{ name: 'New nickname', value: `\`\`\`${newNick ?? member.user.username}\`\`\``, inline: true },
-				),
+				.addFields({
+					name: 'Old nickname',
+					value: Formatters.codeBlock(PREV_NAME),
+					inline: true,
+				}, {
+					name: 'New nickname',
+					value: Formatters.codeBlock(newNick ?? member.user.username),
+					inline: true,
+				}),
 			);
 
 			if (shouldSendDm) {

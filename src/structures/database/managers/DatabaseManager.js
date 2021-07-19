@@ -1,8 +1,8 @@
 'use strict';
 
+const { Permissions, Formatters } = require('discord.js');
 const { CronJob: CronJobConstructor } = require('cron');
 const { stripIndents, commaLists } = require('common-tags');
-const { Permissions } = require('discord.js');
 const { isEqual } = require('lodash');
 const { X_EMOJI, Y_EMOJI_ALT } = require('../../../constants/emojiCharacters');
 const { DEFAULT_CONFIG } = require('../../../constants/database');
@@ -218,8 +218,8 @@ module.exports = class DatabaseManager {
 
 				taxPaidLog.push({
 					name: `/ah ${taxCollector.ign}`,
-					value: `\`\`\`\n${paidLog.join('\n')}\`\`\`` },
-				);
+					value: Formatters.codeBlock(paidLog.join('\n')),
+				});
 			} catch (error) {
 				logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}`, error);
 				availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: API Error`);
@@ -256,16 +256,14 @@ module.exports = class DatabaseManager {
 		const TOTAL_COINS = taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0);
 		const taxEmbed = this.client.defaultEmbed
 			.setTitle('Guild Tax')
-			.setDescription(stripIndents(commaLists`
-				\`\`\`cs
+			.setDescription(Formatters.codeBlock('cs', stripIndents(commaLists`
 				Collectors: # /ah ${activeTaxCollectors.map(player => player.ign).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))}
 				Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT'))}
 				Items: ${config.get('TAX_AUCTIONS_ITEMS').map(item => `'${item}'`)}
 				Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round((PAID_COUNT / PLAYER_COUNT) * 100)} % | collected amount: ${this.client.formatNumber(TOTAL_COINS)} coins
 				Available auctions:
 				${availableAuctionsLog?.join('\n') ?? '\u200b -'}
-				\`\`\`
-			`))
+			`)))
 			.setFooter('Last updated at');
 
 		// add guild specific fields
@@ -290,13 +288,13 @@ module.exports = class DatabaseManager {
 					paddedValue += '\n\u200b';
 				}
 
-				taxEmbed.addField(
-					index % 2
+				taxEmbed.addFields({
+					name: index % 2
 						? `${hypixelGuild.name} (${GUILD_PLAYER_COUNT})`
 						: '\u200b',
-					`\`\`\`\n${paddedValue}\`\`\``, // put everything in a code block
-					true,
-				);
+					value: Formatters.codeBlock(paddedValue),
+					inline: true,
+				});
 			}
 		}
 

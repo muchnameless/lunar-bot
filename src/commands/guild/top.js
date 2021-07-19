@@ -30,9 +30,9 @@ module.exports = class TopCommand extends SlashCommand {
 			interaction,
 			{
 				lbType: 'total',
-				xpType: interaction.options.get('type')?.value ?? this.config.get('CURRENT_COMPETITION'),
-				page: interaction.options.get('page')?.value ?? 1,
-				offset: interaction.options.get('offset')?.value ?? '',
+				xpType: interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION'),
+				page: interaction.options.getInteger('page') ?? 1,
+				offset: interaction.options.getString('offset') ?? '',
 				hypixelGuild: this.getHypixelGuild(interaction),
 				user: interaction.user,
 			},

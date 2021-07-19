@@ -77,14 +77,14 @@ module.exports = class EvalCommand extends SlashCommand {
 			.setFooter(ctx.guild?.me.displayName ?? this.client.user.username, this.client.user.displayAvatarURL());
 
 		for (const [ index, inputPart ] of functionsUtil.splitForEmbedFields(input, 'js').entries()) {
-			responseEmbed.addField(
-				index
+			responseEmbed.addFields({
+				name: index
 					? '\u200b'
 					: isAsync
 						? 'Async Input'
 						: 'Input',
-				inputPart,
-			);
+				value: inputPart,
+			});
 		}
 
 		try {
@@ -112,10 +112,13 @@ module.exports = class EvalCommand extends SlashCommand {
 
 				if (responseEmbed.length + INFO.length + 1 + name.length + value.length > EMBED_MAX_CHARS) break;
 
-				responseEmbed.addField(name, value);
+				responseEmbed.addFields({ name, value });
 			}
 
-			responseEmbed.addField('\u200b', INFO);
+			responseEmbed.addFields({
+				name: '\u200b',
+				value: INFO,
+			});
 
 			return [ responseEmbed ];
 		} catch (error) {
@@ -128,10 +131,13 @@ module.exports = class EvalCommand extends SlashCommand {
 
 				if (responseEmbed.length + FOOTER.length + 1 + name.length + value.length > EMBED_MAX_CHARS) break;
 
-				responseEmbed.addField(name, value);
+				responseEmbed.addFields({ name, value });
 			}
 
-			responseEmbed.addField('\u200b', FOOTER);
+			responseEmbed.addFields({
+				name: '\u200b',
+				value: FOOTER,
+			});
 
 			return [ responseEmbed ];
 		}
@@ -186,7 +192,7 @@ module.exports = class EvalCommand extends SlashCommand {
 
 		let indentationCount = 0;
 
-		const INPUT = interaction.options.get('input').value
+		const INPUT = interaction.options.getString('input', true)
 			.replace(/(?<=[^$]{)/g, '\n') // insert new line for new scopes if not in template strings
 			.split(/; *|\n/)
 			.map((line) => { // add indentation
@@ -201,8 +207,8 @@ module.exports = class EvalCommand extends SlashCommand {
 				return `${indentation}${line}`;
 			})
 			.reduce((acc, cur) => `${acc}${acc ? '\n' : ''}${cur}${cur.endsWith('{') ? '' : ';'}`, '');
-		const IS_ASYNC = interaction.options.get('async')?.value;
-		const INSPECT_DEPTH = interaction.options.get('inspect')?.value ?? this.config.get('EVAL_INSPECT_DEPTH');
+		const IS_ASYNC = interaction.options.getBoolean('async');
+		const INSPECT_DEPTH = interaction.options.getInteger('inspect') ?? this.config.get('EVAL_INSPECT_DEPTH');
 		const row = new Discord.MessageActionRow()
 			.addComponents(
 				new Discord.MessageButton()

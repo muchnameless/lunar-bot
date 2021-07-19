@@ -1,6 +1,6 @@
 'use strict';
 
-const { Permissions, Constants } = require('discord.js');
+const { Permissions, Formatters, Constants } = require('discord.js');
 const { Op } = require('sequelize');
 const { validateNumber } = require('../../functions/stringValidators');
 const { escapeIgn, safePromiseAll } = require('../../functions/util');
@@ -95,15 +95,15 @@ module.exports = class TaxCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		switch (interaction.subCommandName) {
+		switch (interaction.options.getSubCommand()) {
 			case 'ah': {
 				const player = this.getPlayer(interaction);
 
 				if (!player) {
-					return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
+					return interaction.reply(`\`${interaction.options.getString('player', true)}\` is not in the player db`);
 				}
 
-				const action = interaction.options.get('action').value;
+				const action = interaction.options.getString('action', true);
 
 				let log;
 
@@ -148,7 +148,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			case 'amount': {
-				const NEW_AMOUNT = interaction.options.get('amount').value;
+				const NEW_AMOUNT = interaction.options.getInteger('amount', true);
 
 				if (NEW_AMOUNT < 0) return interaction.reply({
 					content: 'tax amount must be a non-negative number',
@@ -172,10 +172,15 @@ module.exports = class TaxCommand extends SlashCommand {
 				this.client.log(this.client.defaultEmbed
 					.setTitle('Guild Tax')
 					.setDescription(`${interaction.user.tag} | ${interaction.user} changed the guild tax amount`)
-					.addFields(
-						{ name: 'Old amount', value: `\`\`\`\n${this.client.formatNumber(OLD_AMOUNT)}\`\`\``, inline: true },
-						{ name: 'New amount', value: `\`\`\`\n${this.client.formatNumber(NEW_AMOUNT)}\`\`\``, inline: true },
-					),
+					.addFields({
+						name: 'Old amount',
+						value: Formatters.codeBlock(this.client.formatNumber(OLD_AMOUNT)),
+						inline: true,
+					}, {
+						name: 'New amount',
+						value: Formatters.codeBlock(this.client.formatNumber(NEW_AMOUNT)),
+						inline: true,
+					}),
 				);
 
 				return interaction.reply(`changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``);
@@ -198,7 +203,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const player = this.getPlayer(interaction);
 
 				if (!player) {
-					return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
+					return interaction.reply(`\`${interaction.options.getString('player', true)}\` is not in the player db`);
 				}
 
 				if (player.paid) {
@@ -207,7 +212,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					await player.resetTax();
 				}
 
-				const AMOUNT = interaction.options.get('amount')?.value ?? this.config.get('TAX_AMOUNT');
+				const AMOUNT = interaction.options.getInteger('amount') ?? this.config.get('TAX_AMOUNT');
 
 				await player.setToPaid({
 					amount: AMOUNT,
@@ -216,18 +221,23 @@ module.exports = class TaxCommand extends SlashCommand {
 
 				this.client.log(this.client.defaultEmbed
 					.setTitle('Guild Tax')
-					.addField(`/ah ${collector.ign}`, `\`\`\`\n${player.ign}: ${this.client.formatNumber(AMOUNT)} (manually)\`\`\``),
+					.addFields({
+						name: `/ah ${collector.ign}`,
+						value: Formatters.codeBlock(`${player.ign}: ${this.client.formatNumber(AMOUNT)} (manually)`),
+					}),
 				);
 
 				return interaction.reply(`\`${player.ign}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
 			}
 
 			case 'reminder': {
-				const SHOULD_GHOST_PING = interaction.options.get('ghostping')?.value ?? false;
-				const hypixelGuild = interaction.options.has('guild')
+				const SHOULD_GHOST_PING = interaction.options.getBoolean('ghostping') ?? false;
+				const hypixelGuild = interaction.options.get('guild')
 					? this.getHypixelGuild(interaction)
 					: null;
-				const excluded = interaction.options.get('exclude')?.value.split(/\W/g).flatMap(x => (x ? x.toLowerCase() : [])); // lower case IGN array
+				const excluded = interaction.options.getString('exclude')
+					?.split(/\W/g)
+					.flatMap(x => (x ? x.toLowerCase() : [])); // lower case IGN array
 				const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild)
 					.filter(({ paid, ign }) => !paid && excluded?.includes(ign.toLowerCase()));
 				const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordId }) => inDiscord && validateNumber(discordId));
@@ -267,23 +277,24 @@ module.exports = class TaxCommand extends SlashCommand {
 
 			case 'reset': {
 				const { players, taxCollectors } = this.client;
+				const PLAYER_INPUT = interaction.options.getString('player');
 
 				let currentTaxEmbed;
 				let currentTaxCollectedEmbed;
 				let result;
 
 				// individual player
-				if (interaction.options.has('player')) {
+				if (PLAYER_INPUT) {
 					const player = this.getPlayer(interaction)
 						?? await players.model.findOne({
 							where: {
 								guildId: null,
-								ign: { [Op.iLike]: interaction.options.get('player').value },
+								ign: { [Op.iLike]: PLAYER_INPUT },
 							},
 						});
 
 					if (!player) {
-						return interaction.reply(`\`${interaction.options.get('player').value}\` is not in the player db`);
+						return interaction.reply(`\`${PLAYER_INPUT}\` is not in the player db`);
 					}
 
 					if (!player.paid) return interaction.reply(`\`${player.ign}\` is not set to paid`);
@@ -386,7 +397,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${interaction.subCommandName}'`);
+				throw new Error(`unknown subcommand '${interaction.options.getSubCommand()}'`);
 		}
 	}
 };

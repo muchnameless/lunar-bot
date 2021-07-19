@@ -1,7 +1,7 @@
 'use strict';
 
 const { Model, DataTypes } = require('sequelize');
-const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
+const { MessageEmbed, Formatters, Util: { splitMessage } } = require('discord.js');
 const { cleanFormattedNumber, compareAlphabetically, safePromiseAll } = require('../../../functions/util');
 const { mutedCheck } = require('../../../functions/database');
 const { setRank: { regExp: setRank } } = require('../../chat_bridge/constants/commandResponses');
@@ -566,11 +566,19 @@ module.exports = class HypixelGuild extends Model {
 				for (let i = 1 + MAX_VALUE_LINES - IGNS_JOINED_LOG_LINE_COUNT; --i;) joinedLogElement += '\n\u200b';
 				for (let i = 1 + MAX_VALUE_LINES - PLAYERS_LEFT_LOG_LINE_COUNT; --i;) leftLogElement += '\n\u200b';
 
-				const newFields = [
-					{ name: `${'joined'.padEnd(125, '\xa0')}\u200b`, value: `\`\`\`${IGNS_JOINED_LOG_LINE_COUNT ? `diff\n${joinedLogElement}` : `\n${joinedLogElement}`}\`\`\``, inline: true },
-					{ name: `${'left'.padEnd(125, '\xa0')}\u200b`, value: `\`\`\`${PLAYERS_LEFT_LOG_LINE_COUNT ? `diff\n${leftLogElement}` : `\n${leftLogElement}`}\`\`\``, inline: true },
-					{ name: '\u200b', value: '\u200b', inline: true },
-				];
+				const newFields = [{
+					name: `${'joined'.padEnd(125, '\xa0')}\u200b`,
+					value: Formatters.codeBlock('diff', joinedLogElement),
+					inline: true,
+				}, {
+					name: `${'left'.padEnd(125, '\xa0')}\u200b`,
+					value: Formatters.codeBlock('diff', leftLogElement),
+					inline: true,
+				}, {
+					name: '\u200b',
+					value: '\u200b',
+					inline: true,
+				}];
 				const ADDITIONAL_LENGTH = newFields.reduce((acc, { name, value }) => acc + name.length + value.length, 0);
 
 				if (currentLength + ADDITIONAL_LENGTH <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {

@@ -61,7 +61,7 @@ module.exports = class AhCommand extends SlashCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.get('ign')?.value);
+		const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
 		const auctions = (await hypixel.skyblock.auction.player(uuid))
 			.filter(({ claimed }) => !claimed)
 			.sort((a, b) => a.end - b.end);
@@ -83,8 +83,8 @@ module.exports = class AhCommand extends SlashCommand {
 		for (const { highest_bid_amount: highestBid, starting_bid: startingBid, bids, end, item_name: item, tier, bin, item_lore: lore } of auctions) {
 			const TIME_LEFT = end;
 
-			embed.addField(
-				`${item}${
+			embed.addFields({
+				name: `${item}${
 					item.startsWith('[Lvl ')
 						? ` - ${upperCaseFirstChar(tier)}`
 						: item === 'Enchanted Book'
@@ -95,7 +95,7 @@ module.exports = class AhCommand extends SlashCommand {
 							})()
 							: ''
 				}`,
-				`${
+				value: `${
 					bin
 						? `BIN: ${AhCommand.shortenNumber(startingBid)}`
 						: bids.length
@@ -108,7 +108,7 @@ module.exports = class AhCommand extends SlashCommand {
 							: 'expired'
 						: 'ends'
 				} ${timestampToDateMarkdown(TIME_LEFT, TimestampStyles.RelativeTime)}`,
-			);
+			});
 		}
 
 		totalCoins += totalUnclaimedCoins;

@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, Util: { splitMessage } } = require('discord.js');
+const { MessageEmbed, Formatters, Util: { splitMessage } } = require('discord.js');
 const { Op } = require('sequelize');
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
@@ -310,7 +310,7 @@ module.exports = class PlayerManager extends ModelManager {
 			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
 		) {
 			const logParts = splitMessage(
-				`\`\`\`\n${ignChanges.sort(compareAlphabetically).join('\n')}\`\`\``,
+				Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')),
 				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' },
 			);
 
@@ -322,11 +322,11 @@ module.exports = class PlayerManager extends ModelManager {
 				const value = logParts.shift();
 
 				if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
-					embed.addField(name, value);
+					embed.addFields({ name, value });
 					currentLength += name.length + value.length;
 				} else {
 					embed = createEmbed(guild, ignChanges.length);
-					embed.addField(name, value);
+					embed.addFields({ name, value });
 					currentLength = embed.length;
 				}
 			}
@@ -619,7 +619,7 @@ module.exports = class PlayerManager extends ModelManager {
 			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
 		) {
 			const logParts = splitMessage(
-				`\`\`\`diff\n${mainProfileUpdate.sort(compareAlphabetically).join('\n')}\`\`\``,
+				Formatters.codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')),
 				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' },
 			);
 
@@ -631,11 +631,11 @@ module.exports = class PlayerManager extends ModelManager {
 				const value = logParts.shift();
 
 				if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
-					embed.addField(name, value);
+					embed.addFields({ name, value });
 					currentLength += name.length + value.length;
 				} else {
 					embed = createEmbed(guild, mainProfileUpdate.length);
-					embed.addField(name, value);
+					embed.addFields({ name, value });
 					currentLength = embed.length;
 				}
 			}

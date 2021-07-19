@@ -32,7 +32,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		const IGN = interaction.options.get('ign').value;
+		const IGN = interaction.options.getString('ign', true);
 		/** @type {import('../../structures/database/models/Player')} */
 		const playerLinkedToId = interaction.user.player;
 

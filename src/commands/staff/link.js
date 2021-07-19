@@ -38,8 +38,9 @@ module.exports = class LinkCommand extends SlashCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		const { user, member } = interaction.options.get('user');
-		const IGN_OR_UUID = interaction.options.get('ign').value;
+		const IGN_OR_UUID = interaction.options.getString('ign', true);
+		const user = interaction.options.getUser('user', true);
+		const member = interaction.options.getMember('user', true);
 
 		let uuid;
 		let ign;
