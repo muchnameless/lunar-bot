@@ -1,6 +1,7 @@
 'use strict';
 
 const { Collection } = require('discord.js');
+// const logger = require('../../functions/logger');
 
 /**
  * A Collection which holds a max amount of entries. The first key is deleted if the Collection has
@@ -8,7 +9,6 @@ const { Collection } = require('discord.js');
  * @extends {Collection}
  * @param {number} [maxSize=0] The maximum size of the Collection
  * @param {Iterable} [iterable=null] Optional entries passed to the Map constructor.
- * @private
  */
 module.exports = class MessageCacheCollection extends Collection {
 	constructor(maxSize = 0, iterable = null) {
@@ -22,7 +22,7 @@ module.exports = class MessageCacheCollection extends Collection {
 
 	/**
 	 * @param {import('discord.js').Snowflake} key
-	 * @param {import('./extensions/Message').} value
+	 * @param {import('../extensions/Message')} value
 	 */
 	set(key, value) {
 		if (value.channelId === value.client.config.get('TAX_CHANNEL_ID')) { // only cache own messages in taxChannel (taxMessage)
