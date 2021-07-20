@@ -341,7 +341,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		return this.minecraft.chat({
 			content: isEdit && !content.endsWith('*')
-				? `${content}*` // add a leading * to indicate an edit if not already present
+				? `${content}*` // add a trailing '*' to indicate an edit if not already present
 				: content,
 			prefix: `${this.prefix} ${interaction ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
 			discordMessage: message,
