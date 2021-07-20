@@ -1,7 +1,7 @@
 'use strict';
 
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-const { Client, Intents } = require('discord.js');
+const { Client, Intents, Constants } = require('discord.js');
 const { escapeRegex } = require('./src/functions/util');
 const db = require('./src/structures/database/index');
 const logger = require('./src/functions/logger');
@@ -28,6 +28,7 @@ process
 
 	db.sequelize.close().catch(logger.error);
 
+	const prefixRegExp = new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i');
 	const presence = {
 		activities: [{
 			name: 'nothing due to maintenance',
@@ -57,25 +58,40 @@ process
 		],
 	});
 
-	// ready
-	client.once('ready', () => {
-		setInterval(() => {
-			client.user.setPresence(presence);
-		}, 20 * 60_000).unref(); // 20 min
+	client
+		.once(Constants.Events.CLIENT_READY, () => {
+			setInterval(() => {
+				client.user.setPresence(presence);
+			}, 20 * 60_000).unref(); // 20 min
 
-		// log
-		logger.info(`Startup complete. Logged in as ${client.user.tag}`);
-	});
+			// log
+			logger.info(`Startup complete. Logged in as ${client.user.tag}`);
+		})
+		.on(Constants.Events.MESSAGE_CREATE, async (message) => {
+			if (message.author.bot || message.system || message.webhookId) return; // filter out bot, system & webhook messages
+			if (message.guild && !prefixRegExp.test(message.content)) return; // allow PREFIX and @bot.id
 
-	// message
-	client.on('message', async (message) => {
-		if (message.author.bot || message.system || message.webhookId) return; // filter out bot, system & webhook messages
-		if (message.guild && !new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i').test(message.content)) return; // allow PREFIX and @bot.id
+			logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} during maintenance`);
 
-		message.reply(`${client.user} is currently unavailable due to maintenance`);
-		logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} during maintenance`);
-	});
+			try {
+				await message.reply(`${client.user} is currently unavailable due to maintenance`);
+			} catch (error) {
+				logger.error(error);
+			}
+		})
+		.on(Constants.Events.INTERACTION_CREATE, async (interaction) => {
+			if (!interaction.isCommand() && !interaction.isMessageComponent()) return;
 
-	// connect to Discord
-	client.login();
+			logger.info(`${interaction.user.tag}${interaction.guild ? ` | ${interaction.member.displayName}` : ''} tried to execute ${interaction.commandName ?? interaction.customId} during maintenance`);
+
+			try {
+				await interaction.reply({
+					content: `${client.user} is currently unavailable due to maintenance`,
+					ephemeral: true,
+				});
+			} catch (error) {
+				logger.error(error);
+			}
+		})
+		.login();
 })();
