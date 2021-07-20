@@ -69,13 +69,14 @@ module.exports = class ConfigCommand extends SlashCommand {
 	/**
 	 * @param {import('discord.js').Collection} entries
 	 */
-	listEntries(entries) {
+	_listEntries(entries) {
 		return entries.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
 			.map(({ key, parsedValue }) => {
 				const type = typeof parsedValue;
 				return `${key}: ${type === 'number' ? this.client.formatNumber(parsedValue).replace(/\s/g, '_') : parsedValue} [${Array.isArray(parsedValue) ? 'array' : type}]`;
 			})
-			.join('\n');
+			.join('\n')
+			|| '\u200b';
 	}
 
 	/**
@@ -135,7 +136,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 				const query = interaction.options.getString('query')?.replace(/ +/g, '_');
 
 				if (!query) return interaction.reply({
-					content: this.listEntries(this.config.cache),
+					content: this._listEntries(this.config.cache),
 					code: 'apache',
 					split: { char: '\n' },
 				});
@@ -143,7 +144,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 				const queryRegex = new RegExp(query, 'i');
 
 				return interaction.reply({
-					content: this.listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))),
+					content: this._listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))),
 					code: 'apache',
 					split: { char: '\n' },
 				});
