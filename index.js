@@ -34,7 +34,7 @@ process
 		db,
 		fetchAllMembers: true,
 		failIfNotExists: false,
-		allowedMentions: { parse: [ 'users', 'roles' ], repliedUser: true },
+		allowedMentions: { parse: [ 'users' ], repliedUser: true },
 		intents: [
 			Intents.FLAGS.DIRECT_MESSAGES,
 			// Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
