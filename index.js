@@ -32,10 +32,39 @@ process
 
 	// initiate bot client
 	client = new LunarClient({
+		// custom options
 		db,
 		fetchAllMembers: true,
-		failIfNotExists: false,
+
+		// default options
+		makeCache({ name }) {
+			switch (name) {
+				case 'MessageManager':
+					return new MessageCacheCollection(50);
+
+				case 'ChannelManager':
+					return new ChannelCacheCollection();
+
+				default:
+					return new Collection();
+			}
+		},
 		allowedMentions: { parse: [ 'users' ], repliedUser: true },
+		partials: [
+			Constants.PartialTypes.CHANNEL,
+			// Constants.PartialTypes.GUILD_MEMBER,
+			Constants.PartialTypes.MESSAGE,
+			Constants.PartialTypes.REACTION,
+			// Constants.PartialTypes.USER,
+		],
+		failIfNotExists: false,
+		presence: {
+			activities: [{
+				name: 'slash commands',
+				type: 'LISTENING',
+			}],
+			status: 'online',
+		},
 		intents: [
 			Intents.FLAGS.DIRECT_MESSAGES,
 			// Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
@@ -53,32 +82,6 @@ process
 			// Intents.FLAGS.GUILD_VOICE_STATES,
 			// Intents.FLAGS.GUILD_WEBHOOKS,
 		],
-		makeCache({ name }) {
-			switch (name) {
-				case 'MessageManager':
-					return new MessageCacheCollection(50);
-
-				case 'ChannelManager':
-					return new ChannelCacheCollection();
-
-				default:
-					return new Collection();
-			}
-		},
-		partials: [
-			Constants.PartialTypes.CHANNEL,
-			// Constants.PartialTypes.GUILD_MEMBER,
-			Constants.PartialTypes.MESSAGE,
-			Constants.PartialTypes.REACTION,
-			// Constants.PartialTypes.USER,
-		],
-		presence: {
-			activities: [{
-				name: 'slash commands',
-				type: 'LISTENING',
-			}],
-			status: 'online',
-		},
 	});
 
 	// connect to Discord

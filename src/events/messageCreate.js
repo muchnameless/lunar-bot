@@ -34,7 +34,7 @@ module.exports = class MessageCreateEvent extends Event {
 		}
 
 		// "old" commands
-		if (message.isUserMessage && new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIX')), `<@!?${this.client.user.id}>` ].join('|')})`, 'i').test(message.content)) {
+		if (message.isUserMessage && new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIXES')[0]), `<@!?${this.client.user.id}>` ].join('|')})`, 'i').test(message.content)) {
 			message.reply('all commands have been converted to slash commands, type (not send) `/` to see them');
 		}
 	}

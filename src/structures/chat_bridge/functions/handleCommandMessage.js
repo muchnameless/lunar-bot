@@ -39,7 +39,13 @@ module.exports = async (message) => {
 	// no command, only ping or prefix
 	if (!message.commandData.name) {
 		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
-		if (!client.config.get('INGAME_PREFIX').includes(message.commandData.prefix)) client.chatBridges.commands.help(message, message.commandData.args);
+
+		if (!client.config.get('PREFIXES').slice(1)
+			.includes(message.commandData.prefix)
+		) {
+			client.chatBridges.commands.help(message, message.commandData.args);
+		}
+
 		return;
 	}
 

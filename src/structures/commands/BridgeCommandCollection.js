@@ -37,13 +37,6 @@ module.exports = class BridgeCommandCollection extends BaseCommandCollection {
 	}
 
 	/**
-	 * returns all non-hidden commands
-	 */
-	get visible() {
-		return this.filter(({ category }) => !BridgeCommandCollection.INVISIBLE_CATEGORIES.includes(category));
-	}
-
-	/**
 	 * returns all command categories
 	 * @returns {string[]}
 	 */

@@ -335,7 +335,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 		if (!content) return message.react(X_EMOJI);
 
 		if (interaction) await this.minecraft.chat({
-			content: `${this.client.config.get('PREFIX')}${interaction.logInfo ?? ''}`,
+			content: `${this.client.config.get('PREFIXES')[0]}${interaction.logInfo ?? ''}`,
 			prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? DiscordChatManager.escapeEz(interaction.member?.displayName ?? interaction.user.username))}: `,
 		});
 

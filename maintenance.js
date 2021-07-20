@@ -1,7 +1,7 @@
 'use strict';
 
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-const { Client, Intents, Constants } = require('discord.js');
+const { Client, Collection, LimitedCollection, Intents, Permissions, Constants } = require('discord.js');
 const { escapeRegex } = require('./src/functions/util');
 const db = require('./src/structures/database/index');
 const logger = require('./src/functions/logger');
@@ -18,13 +18,22 @@ process
 	});
 
 
+// Collection which only caches the Client Member
+class ClientCacheCollection extends Collection {
+	set(key, value) {
+		if (value.id === value.client.user.id) return super.set(key, value);
+		return this;
+	}
+}
+
+
 // init
 (async () => {
 	const PREFIX = (await db.Config.findOne({
 		where: {
-			key: 'PREFIX',
+			key: 'PREFIXES',
 		},
-	}))?.value ?? 'lg!';
+	}))?.parsedValue[0] ?? 'lg!';
 
 	db.sequelize.close().catch(logger.error);
 
@@ -36,7 +45,29 @@ process
 		status: 'dnd',
 	};
 	const client = new Client({
-		disableMentions: 'everyone',
+		makeCache({ name }) {
+			switch (name) {
+				case 'MessageManager':
+				case 'ThreadMemberManager':
+					return new LimitedCollection(0);
+
+				case 'UserManager':
+				case 'GuildMemberManager':
+					return new ClientCacheCollection();
+
+				default:
+					return new Collection();
+			}
+		},
+		allowedMentions: { parse: [], repliedUser: true },
+		partials: [
+			Constants.PartialTypes.CHANNEL,
+			// Constants.PartialTypes.GUILD_MEMBER,
+			// Constants.PartialTypes.MESSAGE,
+			// Constants.PartialTypes.REACTION,
+			// Constants.PartialTypes.USER,
+		],
+		failIfNotExists: false,
 		presence,
 		intents: [
 			Intents.FLAGS.DIRECT_MESSAGES,
@@ -61,7 +92,7 @@ process
 
 	client
 		.once(Constants.Events.CLIENT_READY, () => {
-			prefixRegExp = new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i');
+			prefixRegExp = new RegExp(`^(?:${[ escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i');
 
 			setInterval(() => {
 				client.user.setPresence(presence);
@@ -74,18 +105,30 @@ process
 			if (message.author.bot || message.system || message.webhookId) return; // filter out bot, system & webhook messages
 			if (message.guild && !prefixRegExp.test(message.content)) return; // allow PREFIX and @bot.id
 
-			logger.info(`${message.author.tag}${message.guild ? ` | ${message.member.displayName}` : ''} tried to execute ${message.content} during maintenance`);
+			logger.info(`${message.author.tag}${message.member ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' during maintenance`);
+
+			// permissions check
+			if (!(message.guild?.me.permissionsIn(message.channel).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]) ?? true)) return;
 
 			try {
 				await message.reply(`${client.user} is currently unavailable due to maintenance`);
 			} catch (error) {
 				logger.error(error);
+
+				// update roles for the client member if error is related to (outdated) permissions
+				if ([ Constants.APIErrors.MISSING_PERMISSIONS, Constants.APIErrors.MISSING_ACCESS ].includes(error.code)) {
+					try {
+						await message.guild?.me.fetch(true);
+					} catch (err) {
+						logger.error(err);
+					}
+				}
 			}
 		})
 		.on(Constants.Events.INTERACTION_CREATE, async (interaction) => {
 			if (!interaction.isCommand() && !interaction.isMessageComponent()) return;
 
-			logger.info(`${interaction.user.tag}${interaction.guild ? ` | ${interaction.member.displayName}` : ''} tried to execute ${interaction.commandName ?? interaction.customId} during maintenance`);
+			logger.info(`${interaction.user.tag}${interaction.guild ? ` | ${interaction.member.displayName}` : ''} tried to execute '${interaction.commandName ?? interaction.customId}' during maintenance`);
 
 			try {
 				await interaction.reply({

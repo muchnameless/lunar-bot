@@ -82,9 +82,9 @@ module.exports = class HypixelMessage extends ChatMessage {
 			}
 
 			const prefixMatched = new RegExp(
-				`^(?:${[ escapeRegex(this.client.config.get('PREFIX')), ...this.client.config.get('INGAME_PREFIX').map(x => escapeRegex(x)), `@${this.chatBridge.bot.ign}` ].join('|')})`,
+				`^(?:${[ ...this.client.config.get('PREFIXES').map(x => escapeRegex(x)), `@${this.chatBridge.bot.ign}` ].join('|')})`,
 				'i',
-			).exec(this.content)?.[0]; // PREFIX, INGAME_PREFIX, @mention
+			).exec(this.content)?.[0]; // PREFIXES, @mention
 
 			/** @type {string[]} */
 			const args = this.content // command arguments

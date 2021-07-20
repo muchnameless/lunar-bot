@@ -17,23 +17,29 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 	}
 
 	/**
+	 * removes duplicates and lists the commands by name | aliases
+	 * @param {import('discord.js').Collection<string, import('../../../commands/BridgeCommand') | import('../../../commands/DualCommand')>} commands
+	 */
+	static _listCommands(commands) {
+		return [ ...new Set(commands.values()) ].map(({ name, aliases, aliasesInGame }) => [ name, ...(aliases ?? aliasesInGame ?? []) ].join(' | ')).join(', ');
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('../../HypixelMessage')} message message that triggered the command
 	 */
 	async runInGame(message) {
 		// default help
 		if (!message.commandData.args.length) {
-			const reply = [ `gchat prefix: ${[ this.config.get('PREFIX'), this.config.get('INGAME_PREFIX'), `@${message.chatBridge.bot.ign}` ].flat().join(', ')}` ];
-
-			for (const category of this.collection.visibleCategories) {
-				reply.push(`${category}: ${[ ...this.collection.filterByCategory(category).keys() ].join(', ')}`);
-			}
+			const reply = [
+				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${message.chatBridge.bot.ign}` ].join(', ')}`,
+				...this.collection.visibleCategories.map(category => `${category}: ${HelpBridgeCommand._listCommands(this.collection.filterByCategory(category))}`),
+			];
 
 			return message.author.send(reply.join('\n'));
 		}
 
 		const INPUT = message.commandData.args[0].toLowerCase();
-
 
 		// category help
 		const requestedCategory = this.collection.categories.find(categoryName => categoryName === INPUT);
@@ -49,11 +55,10 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 				reply.push(`Required ID: ${this.client.ownerId}`);
 			}
 
-			reply.push(`Commands: ${[ ...categoryCommands.keys() ].join(', ')}`);
+			reply.push(`Commands: ${HelpBridgeCommand._listCommands(categoryCommands)}`);
 
 			return message.author.send(reply.join('\n'));
 		}
-
 
 		// single command help
 		const command = this.collection.getByName(INPUT);
