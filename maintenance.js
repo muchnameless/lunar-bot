@@ -28,7 +28,6 @@ process
 
 	db.sequelize.close().catch(logger.error);
 
-	const prefixRegExp = new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i');
 	const presence = {
 		activities: [{
 			name: 'nothing due to maintenance',
@@ -58,8 +57,12 @@ process
 		],
 	});
 
+	let prefixRegExp;
+
 	client
 		.once(Constants.Events.CLIENT_READY, () => {
+			prefixRegExp = new RegExp(`^(?:${[ PREFIX && escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i');
+
 			setInterval(() => {
 				client.user.setPresence(presence);
 			}, 20 * 60_000).unref(); // 20 min
