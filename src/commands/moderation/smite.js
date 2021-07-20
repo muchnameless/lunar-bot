@@ -15,7 +15,7 @@ module.exports = class SmiteCommand extends DualCommand {
 				options: [{
 					name: 'target',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | uuid | discordID | @mention | \'guild\' | \'everyone\'',
+					description: 'IGN | UUID | discord ID | @mention | \'guild\' | \'everyone\'',
 					required: true,
 				},
 				DualCommand.guildOptionBuilder(data.client, false),

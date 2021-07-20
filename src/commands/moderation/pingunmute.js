@@ -15,7 +15,7 @@ module.exports = class PingUnmuteCommand extends PingMute {
 				options: [{
 					name: 'player',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | uuid | discordID | @mention',
+					description: 'IGN | UUID | discord ID | @mention',
 					required: true,
 				}],
 				defaultPermission: true,

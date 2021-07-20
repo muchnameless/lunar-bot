@@ -27,7 +27,7 @@ const commonOptions = new Map([ [
 	{
 		name: 'player',
 		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'IGN | uuid | discordID | @mention',
+		description: 'IGN | UUID | discord ID | @mention',
 		required: true,
 	},
 ], [
@@ -35,7 +35,7 @@ const commonOptions = new Map([ [
 	{
 		name: 'player',
 		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'IGN | uuid | discordID | @mention',
+		description: 'IGN | UUID | discord ID | @mention',
 		required: false,
 	},
 ], [
@@ -67,7 +67,7 @@ const commonOptions = new Map([ [
 	{
 		name: 'target',
 		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'IGN | uuid | discordID | @mention | \'guild\' | \'everyone\'',
+		description: 'IGN | UUID | discord ID | @mention | \'guild\' | \'everyone\'',
 		required: true,
 	},
 ], [

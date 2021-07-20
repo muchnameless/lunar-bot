@@ -52,7 +52,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 		const { uuid, ign } = await mojang.ign(IGN).catch(error => logger.error('[VERIFY]: ign fetch', error) ?? {});
 
 		// non existing ign
-		if (!uuid) return interaction.reply(`unable to find the minecraft Uuid of \`${ign}\``);
+		if (!uuid) return interaction.reply(`unable to find the minecraft UUID of \`${ign}\``);
 
 		const hypixelGuild = await hypixel.guild.player(uuid).catch(error => logger.error('[VERIFY]: guild fetch', error));
 

@@ -15,7 +15,7 @@ module.exports = class DonateCommand extends SlashCommand {
 			options: [{
 				name: 'player',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | uuid | discordID | @mention',
+				description: 'IGN | UUID | discord ID | @mention',
 				required: true,
 			}, {
 				name: 'value',
