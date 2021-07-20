@@ -124,11 +124,12 @@ class LunarMessage extends Structures.get('Message') {
 
 		try {
 			for (const emoji of emojis) {
-				if (this.reactions.cache.get(this.client.emojis.resolveId(emoji))?.me) {
-					res.push(this.reactions.cache.get(this.client.emojis.resolveId(emoji)));
-				} else {
-					res.push(await super.react(emoji));
-				}
+				const reaction = this.reactions.cache.get(this.client.emojis.resolveId(emoji));
+
+				res.push(reaction?.me
+					? reaction // reaction from bot already exists
+					: await super.react(emoji), // new reaction
+				);
 			}
 		} catch (error) {
 			logger.error('[MESSAGE REACT]', error);

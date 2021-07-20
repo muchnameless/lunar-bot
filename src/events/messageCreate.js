@@ -4,7 +4,7 @@ const { MessageFlags } = require('discord.js');
 const { FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const { escapeRegex } = require('../functions/util');
 const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+// const logger = require('../functions/logger');
 
 
 module.exports = class MessageCreateEvent extends Event {
@@ -20,30 +20,22 @@ module.exports = class MessageCreateEvent extends Event {
 	 * @param {boolean} [isEdit=false]
 	 */
 	async _handleDiscordMessage(message, isEdit = false) {
+		// ignore ephemeral messages
 		if (message.flags.has(MessageFlags.FLAGS.EPHEMERAL)) return;
 
-		if (message.partial) {
-			try {
-				await message.fetch();
-			} catch (error) {
-				return logger.error('[CMD HANDLER]: error while fetching partial message', error);
-			}
+		// channel specific triggers
+		if (message.channel.id === this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) {
+			message.react(FORWARD_TO_GC);
 		}
 
-		/**
-		 * channel specific triggers
-		 */
-		if (message.channel.id === this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) message.react(FORWARD_TO_GC);
+		// chat bridge
+		if (!message.interaction) {
+			this.client.chatBridges.handleDiscordMessage(message, { isEdit, checkIfNotFromBot: !isEdit });
+		}
 
-		/**
-		 * chat bridge
-		 */
-		if (!message.interaction) this.client.chatBridges.handleDiscordMessage(message, { isEdit, checkIfNotFromBot: !isEdit }); // ignore empty messages (attachments, embeds), filter out bot, system & webhook messages
-
-		if (message.content.length && message.isUserMessage) {
-			if (new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIX')), `<@!?${this.client.user.id}>` ].join('|')})`, 'i').test(message.content)) {
-				message.reply('all commands have been converted to slash commands, type (not send) `/` to see them');
-			}
+		// "old" commands
+		if (message.isUserMessage && new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIX')), `<@!?${this.client.user.id}>` ].join('|')})`, 'i').test(message.content)) {
+			message.reply('all commands have been converted to slash commands, type (not send) `/` to see them');
 		}
 	}
 
