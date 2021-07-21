@@ -122,17 +122,20 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 		await ctx.awaitConfirmation(`the command will take approximately ${ms(chatBridge.guild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
 
-		let dates;
+		const joinInfos = [];
 
 		try {
 			JoinDateCommand.running.add(chatBridge.guild.guildId);
-			dates = await Promise.all(chatBridge.guild.players.map(({ ign }) => JoinDateCommand._getJoinDate(chatBridge, ign)));
+
+			for (const { ign } of chatBridge.guild.players.values()) {
+				joinInfos.push(await JoinDateCommand._getJoinDate(chatBridge, ign));
+			}
 		} finally {
 			JoinDateCommand.running.delete(chatBridge.guild.guildId);
 		}
 
 		return ctx.reply({
-			content: `${Formatters.bold(chatBridge.guild.name)} join dates:\n${dates
+			content: `${Formatters.bold(chatBridge.guild.name)} join dates:\n${joinInfos
 				.sort((a, b) => a.timestamp - b.timestamp)
 				.map(JoinDateCommand._formatReply)
 				.join('\n')}`,
