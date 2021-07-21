@@ -1,10 +1,9 @@
 'use strict';
 
-const { Constants } = require('discord.js');
+const { Formatters, Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
 const { getPlayerRank, getNetworkLevel } = require('@zikeji/hypixel');
 const { getUuidAndIgn } = require('../../functions/input');
-const { timestampToDateMarkdown } = require('../../functions/util');
 const hypixel = require('../../api/hypixel');
 const DualCommand = require('../../structures/commands/DualCommand');
 const logger = require('../../functions/logger');
@@ -35,9 +34,10 @@ module.exports = class PlayerCommand extends DualCommand {
 	}
 
 	/**
+	 * extracts the created at date from a database object id
 	 * @param {string} objectId
 	 */
-	static objectIdToDate = objectId => new Date(parseInt(objectId.slice(0, 8), 16) * 1_000);
+	static objectIdToSecondsTimestamp = objectId => parseInt(objectId.slice(0, 8), 16);
 
 	/**
 	 * @param {string} ign
@@ -60,8 +60,8 @@ module.exports = class PlayerCommand extends DualCommand {
 			level: ${level},
 			achievement points: ${this.client.formatNumber(achievementPoints)},
 			karma: ${this.client.formatNumber(karma)},
-			first joined: ${timestampToDateMarkdown(PlayerCommand.objectIdToDate(_id))},
-			last joined: ${timestampToDateMarkdown(lastLogin)}
+			first joined: ${Formatters.time(PlayerCommand.objectIdToSecondsTimestamp(_id))},
+			last joined: ${Formatters.time(new Date(lastLogin))}
 		`;
 	}
 

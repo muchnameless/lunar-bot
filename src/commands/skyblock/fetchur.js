@@ -1,8 +1,7 @@
 'use strict';
 
 const { Formatters } = require('discord.js');
-const tc = require('timezonecomplete');
-const { timestampToDateMarkdown } = require('../../functions/util');
+const { zone, TimeStruct } = require('timezonecomplete');
 const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
@@ -48,7 +47,7 @@ module.exports = class FetchurCommand extends DualCommand {
 	 */
 	async _run(ctx) {
 		const date = new Date();
-		const OFFSET = tc.zone('America/New_York').offsetForUtcDate(date) / 60;
+		const OFFSET = zone('America/New_York').offsetForUtc(TimeStruct.fromDate(date)) / 60;
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
 
 		const tomorrow = new Date();
@@ -65,7 +64,7 @@ module.exports = class FetchurCommand extends DualCommand {
 			].filter(time => time >= Date.now()),
 		);
 
-		return ctx.reply(`item: ${FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]}, changes ${timestampToDateMarkdown(RESET_TIME, Formatters.TimestampStyles.RelativeTime)}`);
+		return ctx.reply(`item: ${FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]}, changes ${Formatters.time(new Date(RESET_TIME), Formatters.TimestampStyles.RelativeTime)}`);
 	}
 
 	/**

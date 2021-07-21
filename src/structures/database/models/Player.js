@@ -912,7 +912,7 @@ module.exports = class Player extends Model {
 			.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
 			.setThumbnail(this.image)
 			.setDescription(stripIndents`
-				**Role Update** for ${member}
+				${Formatters.bold('Role Update')} for ${member}
 				${this.info}
 			`)
 			.setTimestamp();
@@ -1077,7 +1077,7 @@ module.exports = class Player extends Model {
 				.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
 				.setThumbnail(this.image)
 				.setDescription(stripIndents`
-					**Nickname Update** for ${member}
+					${Formatters.bold('Nickname Update')} for ${member}
 					${this.info}
 				`)
 				.addFields({

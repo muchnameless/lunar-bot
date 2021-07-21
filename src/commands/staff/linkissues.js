@@ -1,6 +1,6 @@
 'use strict';
 
-const { Util } = require('discord.js');
+const { Formatters, Util } = require('discord.js');
 const { escapeIgn } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
@@ -57,13 +57,13 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 				{ char: '\n', maxLength: 1024 },
 			)) {
 				embed.addFields({
-					name: `**Missing Verified Role:** [display name | tag] (${missingVerifiedRole.length})`,
+					name: `${Formatters.bold('Missing Verified Role:')} [display name | tag] (${missingVerifiedRole.length})`,
 					value,
 				});
 			}
 		} else {
 			embed.addFields({
-				name: '**Missing Verified Role:**',
+				name: Formatters.bold('Missing Verified Role:'),
 				value: 'none',
 			});
 		}
@@ -76,13 +76,13 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 				{ char: '\n', maxLength: 1024 },
 			)) {
 				embed.addFields({
-					name: `**Guild Role and no DB entry:** [display name | tag] (${guildRoleWithoutDbEntry.length})`,
+					name: `${Formatters.bold('Guild Role and no DB entry:')} [display name | tag] (${guildRoleWithoutDbEntry.length})`,
 					value,
 				});
 			}
 		} else {
 			embed.addFields({
-				name: '**Guild Role and no DB entry:**',
+				name: Formatters.bold('Guild Role and no DB entry:'),
 				value: 'none',
 			});
 		}
@@ -129,14 +129,14 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 
 		for (const { guildName, amount, values } of unlinkedPlayers) for (const value of values) {
 			embed.addFields({
-				name: `**Unlinked Players (${guildName}):**${amount ? ` [ign | tag] (${amount})` : ''}`,
+				name: `${Formatters.bold(`Unlinked Players (${guildName}):`)}${amount ? ` [ign | tag] (${amount})` : ''}`,
 				value,
 			});
 		}
 
 		for (const { guildName, amount, values } of linkedAndNotInDiscord) for (const value of values) {
 			embed.addFields({
-				name: `**Linked and not in Discord (${guildName}):**${amount ? ` (${amount})` : ''}`,
+				name: `${Formatters.bold(`Linked and not in Discord (${guildName}):`)}${amount ? ` (${amount})` : ''}`,
 				value,
 			});
 		}

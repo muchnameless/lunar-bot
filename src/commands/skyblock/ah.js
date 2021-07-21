@@ -1,8 +1,8 @@
 'use strict';
 
-const { Formatters: { TimestampStyles }, Constants } = require('discord.js');
+const { Formatters, Constants } = require('discord.js');
 const { stripIndents } = require('common-tags');
-const { upperCaseFirstChar, timestampToDateMarkdown } = require('../../functions/util');
+const { upperCaseFirstChar } = require('../../functions/util');
 const { getUuidAndIgn } = require('../../functions/input');
 const hypixel = require('../../api/hypixel');
 const SlashCommand = require('../../structures/commands/SlashCommand');
@@ -81,8 +81,6 @@ module.exports = class AhCommand extends SlashCommand {
 		let endedAuctions = 0;
 
 		for (const { highest_bid_amount: highestBid, starting_bid: startingBid, bids, end, item_name: item, tier, bin, item_lore: lore } of auctions) {
-			const TIME_LEFT = end;
-
 			embed.addFields({
 				name: `${item}${
 					item.startsWith('[Lvl ')
@@ -102,12 +100,12 @@ module.exports = class AhCommand extends SlashCommand {
 							? (totalCoins += highestBid, `Highest Bid: ${AhCommand.shortenNumber(highestBid)}`)
 							: `Starting Bid: ${AhCommand.shortenNumber(startingBid)}`
 				} • ${
-					TIME_LEFT < Date.now()
+					end < Date.now()
 						? highestBid
 							? (++endedAuctions, totalUnclaimedCoins += highestBid, 'sold')
 							: 'expired'
 						: 'ends'
-				} ${timestampToDateMarkdown(TIME_LEFT, TimestampStyles.RelativeTime)}`,
+				} ${Formatters.time(new Date(end), Formatters.TimestampStyles.RelativeTime)}`,
 			});
 		}
 

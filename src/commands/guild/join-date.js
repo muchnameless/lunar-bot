@@ -1,12 +1,19 @@
 'use strict';
 
-const { Constants } = require('discord.js');
+const { Formatters, Constants } = require('discord.js');
 const ms = require('ms');
 const { logErrors: { regExp: logErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
-const { escapeIgn, timestampToDateMarkdown } = require('../../functions/util');
+const { escapeIgn } = require('../../functions/util');
 const DualCommand = require('../../structures/commands/DualCommand');
 const logger = require('../../functions/logger');
 
+
+/**
+ * @typedef {object} JoinInfo
+ * @property {string} ign
+ * @property {Date} date
+ * @property {number} timestamp
+ */
 
 module.exports = class JoinDateCommand extends DualCommand {
 	constructor(data) {
@@ -43,6 +50,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	/**
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
 	 * @param {string} ign
+	 * @returns {Promise<JoinInfo>}
 	 */
 	static async _getJoinDate(chatBridge, ign) {
 		// get first page
@@ -62,9 +70,12 @@ module.exports = class JoinDateCommand extends DualCommand {
 			if (!new RegExp(`\\n.+: \\w{1,16} invited ${ign}$`).test(logEntry)) break;
 		}
 
+		const date = new Date(matched?.groups.time);
+
 		return {
 			ign,
-			timestamp: Date.parse(matched?.groups.time),
+			date,
+			timestamp: date.getTime(),
 		};
 	}
 
@@ -82,6 +93,13 @@ module.exports = class JoinDateCommand extends DualCommand {
 	}
 
 	/**
+	 * @param {JoinInfo} joinInfo
+	 */
+	static _formatReply({ ign, date, timestamp }) {
+		return `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`;
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
@@ -90,9 +108,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	async _run(ctx, chatBridge, ignInput) {
 		if (ignInput) { // single player
 			try {
-				const { ign, timestamp } = await JoinDateCommand._getJoinDate(chatBridge, ignInput);
-
-				return ctx.reply(`${ign}: joined at ${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'an unknown date'}`);
+				return ctx.reply(JoinDateCommand._formatReply(await JoinDateCommand._getJoinDate(chatBridge, ignInput)));
 			} catch {
 				return ctx.reply(`${ignInput}: never joined ${chatBridge.guild.name}`);
 			}
@@ -116,10 +132,10 @@ module.exports = class JoinDateCommand extends DualCommand {
 		}
 
 		return ctx.reply({
-			content: dates
+			content: `${Formatters.bold(chatBridge.guild.name)} join dates:\n${dates
 				.sort((a, b) => a.timestamp - b.timestamp)
-				.map(({ timestamp, ign }) => `${!Number.isNaN(timestamp) ? timestampToDateMarkdown(timestamp) : 'unknown date'}: ${escapeIgn(ign)}`)
-				.join('\n'),
+				.map(JoinDateCommand._formatReply)
+				.join('\n')}`,
 			split: true,
 		});
 	}

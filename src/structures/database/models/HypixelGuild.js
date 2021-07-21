@@ -671,7 +671,7 @@ module.exports = class HypixelGuild extends Model {
 
 				setRankLog.push(this.client.defaultEmbed
 					.setThumbnail(player.image)
-					.setDescription(`**Auto Rank Sync** for ${player.info}`)
+					.setDescription(`${Formatters.bold('Auto Rank Sync')} for ${player.info}`)
 					.addFields({
 						name: 'Old',
 						value: oldRank?.name ?? 'unknown',

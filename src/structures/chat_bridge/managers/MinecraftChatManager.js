@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, SnowflakeUtil, Formatters: { TimestampStyles } } = require('discord.js');
+const { MessageEmbed, SnowflakeUtil, Formatters } = require('discord.js');
 const { AsyncQueue } = require('@sapphire/async-queue');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
@@ -236,7 +236,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 								.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
 								.setThumbnail(player.image)
 								.setDescription(stripIndents`
-									**Auto Muted** for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.get('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
+									${Formatters.bold('Auto Muted')} for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.get('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
 									${player.info}
 								`)
 								.setTimestamp(),
@@ -510,25 +510,25 @@ module.exports = class MinecraftChatManager extends ChatManager {
 					if (Number.isNaN(date.getTime())) return match; // invalid date
 
 					switch (p2) { // https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
-						case TimestampStyles.ShortTime:
+						case Formatters.TimestampStyles.ShortTime:
 							return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
 
-						case TimestampStyles.LongTime:
+						case Formatters.TimestampStyles.LongTime:
 							return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
 
-						case TimestampStyles.ShortDate:
+						case Formatters.TimestampStyles.ShortDate:
 							return date.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 
-						case TimestampStyles.LongDate:
+						case Formatters.TimestampStyles.LongDate:
 							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
-						case TimestampStyles.ShortDateTime:
+						case Formatters.TimestampStyles.ShortDateTime:
 							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
 
-						case TimestampStyles.LongDateTime:
+						case Formatters.TimestampStyles.LongDateTime:
 							return date.toLocaleString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
 
-						case TimestampStyles.RelativeTime: {
+						case Formatters.TimestampStyles.RelativeTime: {
 							const TIME = date.getTime() - Date.now();
 							if (TIME > 0) return `in ${ms(Math.abs(TIME), { long: true })}`;
 							return `${ms(Math.abs(TIME), { long: true })} ago`;

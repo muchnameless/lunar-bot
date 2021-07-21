@@ -1,5 +1,6 @@
 'use strict';
 
+const { Formatters } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const { escapeIgn } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
@@ -67,7 +68,7 @@ module.exports = class TaxCollectorManager extends ModelManager {
 		const embed = this.client.defaultEmbed
 			.setTitle('Collected Guild Tax')
 			.setDescription(stripIndents`
-				**combined**
+				${Formatters.bold('combined')}
 				tax: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0), 0)}
 				donations: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0), 0)}
 				total: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax + collector.collectedDonations, 0), 0)}

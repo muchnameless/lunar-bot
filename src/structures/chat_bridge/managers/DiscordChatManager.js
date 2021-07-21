@@ -1,11 +1,10 @@
 'use strict';
 
-const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters: { TimestampStyles } } = require('discord.js');
+const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } = require('discord.js');
 const FormData = require('form-data');
 const fetch = require('node-fetch');
 const { prefixByType } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
-const { timestampToDateMarkdown } = require('../../../functions/util');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
 const cache = require('../../../api/cache');
@@ -174,7 +173,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				this.client.log(new MessageEmbed()
 					.setColor(this.client.config.get('EMBED_GREEN'))
 					.setTitle(`${this.guild.name} Chat Bridge`)
-					.setDescription(`**Webhook**: created in ${channel}`)
+					.setDescription(`${Formatters.bold('Webhook')}: created in ${channel}`)
 					.setTimestamp(),
 				);
 			}
@@ -186,7 +185,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			this.client.log(new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_RED'))
 				.setTitle(error.hypixelGuild ? `${error.hypixelGuild.name} Chat Bridge` : 'Chat Bridge')
-				.setDescription(`**Error**: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
+				.setDescription(`${Formatters.bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
 				.setTimestamp(),
 			);
 
@@ -288,7 +287,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		// check if player is muted
 		if (player?.muted) {
-			DiscordChatManager._dmMuteInfo(message, player, `your mute expires ${timestampToDateMarkdown(player.mutedTill, TimestampStyles.RelativeTime)}`);
+			DiscordChatManager._dmMuteInfo(message, player, `your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 
@@ -300,13 +299,13 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		// check if guild chat is muted
 		if (this.guild.muted && !player?.isStaff) {
-			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat's mute expires ${timestampToDateMarkdown(this.guild.mutedTill, TimestampStyles.RelativeTime)}`);
+			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat's mute expires ${Formatters.time(new Date(this.guild.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.bot.player?.muted) {
-			DiscordChatManager._dmMuteInfo(message, player, `the bot's mute expires ${timestampToDateMarkdown(this.minecraft.bot.player.mutedTill, TimestampStyles.RelativeTime)}`);
+			DiscordChatManager._dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.bot.player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 

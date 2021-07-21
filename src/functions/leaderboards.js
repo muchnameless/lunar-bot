@@ -6,7 +6,7 @@ const {	DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, RELOAD_E
 const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_SHORT, XP_OFFSETS_CONVERTER, GUILD_ID_ALL } = require('../constants/database');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../constants/skyblock');
 const { LB_KEY } = require('../constants/redis');
-const { upperCaseFirstChar, timestampToDateMarkdown } = require('./util');
+const { upperCaseFirstChar } = require('./util');
 const cache = require('../api/cache');
 // const logger = require('./logger');
 
@@ -465,7 +465,7 @@ const self = module.exports = {
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round)}**`;
+				totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round));
 				getEntry = player => client.formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
 				break;
 			}
@@ -488,8 +488,12 @@ const self = module.exports = {
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${(playerData.reduce((acc, player) => acc + player.skillAverageGain, 0) / PLAYER_COUNT).toFixed(2)}** [**${(playerData.reduce((acc, player) => acc + player.trueAverageGain, 0) / PLAYER_COUNT).toFixed(2)}**]`;
-				getEntry = player => `${client.formatDecimalNumber(player.skillAverageGain, Math.floor(playerData[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.trueAverageGain, Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
+				totalStats = oneLine`
+					${Formatters.bold((playerData.reduce((acc, player) => acc + player.skillAverageGain, 0) / PLAYER_COUNT).toFixed(2))}
+					[${Formatters.bold((playerData.reduce((acc, player) => acc + player.trueAverageGain, 0) / PLAYER_COUNT).toFixed(2))}]`;
+				getEntry = player => oneLine`
+					${client.formatDecimalNumber(player.skillAverageGain, Math.floor(playerData[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length)}
+					[${client.formatDecimalNumber(player.trueAverageGain, Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
 				break;
 			}
 
@@ -519,9 +523,18 @@ const self = module.exports = {
 				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...playerData.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
 				getEntry = player => `${client.formatDecimalNumber(player.gainedWeight, PADDING_AMOUNT_GAIN)} [${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)}]`;
 				totalStats = oneLine`
+					${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
 						${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
-						[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT)}]
-					`;
+					${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+						${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+					${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+						${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+					${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+						${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+					${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+						${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+					${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
+					[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT)}]`;
 				break;
 			}
 
@@ -544,10 +557,14 @@ const self = module.exports = {
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = oneLine`**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeightGain, 0) / PLAYER_COUNT)}**
-						[**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weightGain, 0) / PLAYER_COUNT)}** +
-						**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflowGain, 0) / PLAYER_COUNT)}**]`;
-				getEntry = player => `${client.formatDecimalNumber(player.totalWeightGain, Math.floor(playerData[0]?.totalWeightGain).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.weightGain, Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain))).toLocaleString(NUMBER_FORMAT).length)} + ${client.formatDecimalNumber(player.overflowGain, Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
+				totalStats = oneLine`
+					${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeightGain, 0) / PLAYER_COUNT))}
+					[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weightGain, 0) / PLAYER_COUNT))}
+					+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflowGain, 0) / PLAYER_COUNT))}]`;
+				getEntry = player => oneLine`
+					${client.formatDecimalNumber(player.totalWeightGain, Math.floor(playerData[0]?.totalWeightGain).toLocaleString(NUMBER_FORMAT).length)}
+					[${client.formatDecimalNumber(player.weightGain, Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain))).toLocaleString(NUMBER_FORMAT).length)}
+					+ ${client.formatDecimalNumber(player.overflowGain, Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
 				break;
 			}
 
@@ -564,7 +581,7 @@ const self = module.exports = {
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round)}**`;
+				totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round));
 				getEntry = player => client.formatNumber(player.sortingStat, Math.round(playerData[0]?.sortingStat).toLocaleString(NUMBER_FORMAT).length, Math.round);
 			}
 		}
@@ -573,17 +590,13 @@ const self = module.exports = {
 		let description = '';
 
 		if (xpType !== 'purge') {
-			const STARTING_TIME = config.get(XP_OFFSETS_TIME[offset]);
-
 			if (IS_COMPETITION_LB) {
-				description += `Start: ${timestampToDateMarkdown(STARTING_TIME)}\n`;
-				if (COMPETITION_RUNNING) {
-					description += `Ends: ${timestampToDateMarkdown(COMPETITION_END_TIME, Formatters.TimestampStyles.RelativeTime)}\n`;
-				} else { // competition already ended
-					description += `Ended: ${timestampToDateMarkdown(COMPETITION_END_TIME)}\n`;
-				}
+				description += `Start: ${Formatters.time(new Date(config.get(XP_OFFSETS_TIME[offset])))}\n`;
+				description += COMPETITION_RUNNING
+					? `Ends: ${Formatters.time(new Date(COMPETITION_END_TIME), Formatters.TimestampStyles.RelativeTime)}\n`
+					: `Ended: ${Formatters.time(new Date(COMPETITION_END_TIME))}\n`;
 			} else {
-				description += `Tracking xp gained since ${timestampToDateMarkdown(STARTING_TIME)}\n`;
+				description += `Tracking xp gained since ${Formatters.time(new Date(config.get(XP_OFFSETS_TIME[offset])))}\n`;
 			}
 
 			description += `${hypixelGuild?.name ?? 'Guilds'} total (${PLAYER_COUNT} members): ${totalStats}`;
@@ -682,7 +695,7 @@ const self = module.exports = {
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round)}**`;
+				totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round));
 				getEntry = player => client.formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
 				break;
 			}
@@ -702,7 +715,9 @@ const self = module.exports = {
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.skillAverage, 0) / PLAYER_COUNT, 2)}** [**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.trueAverage, 0) / PLAYER_COUNT, 2)}**]`;
+				totalStats = oneLine`
+					${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.skillAverage, 0) / PLAYER_COUNT, 2))}
+					[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.trueAverage, 0) / PLAYER_COUNT, 2))}]`;
 				getEntry = player => `${client.formatDecimalNumber(player.skillAverage, 2)} [${client.formatDecimalNumber(player.trueAverage, 2)}]`;
 				break;
 			}
@@ -722,7 +737,7 @@ const self = module.exports = {
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round)}**`;
+				totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round));
 				getEntry = player => client.formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
 				break;
 			}
@@ -744,11 +759,13 @@ const self = module.exports = {
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
 				totalStats = oneLine`
-						**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT)}**
-						[**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight, 0) / PLAYER_COUNT)}** + 
-						**${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow, 0) / PLAYER_COUNT)}**]
-					`;
-				getEntry = player => `${client.formatDecimalNumber(player.totalWeight, Math.floor(playerData[0]?.totalWeight).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.weight, Math.floor(Math.max(...playerData.map(({ weight }) => weight))).toLocaleString(NUMBER_FORMAT).length)} + ${client.formatDecimalNumber(player.overflow, Math.floor(Math.max(...playerData.map(({ overflow }) => overflow))).toLocaleString(NUMBER_FORMAT).length)}]`;
+					${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT))}
+					[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight, 0) / PLAYER_COUNT))}
+					+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow, 0) / PLAYER_COUNT))}]`;
+				getEntry = player => oneLine`
+					${client.formatDecimalNumber(player.totalWeight, Math.floor(playerData[0]?.totalWeight).toLocaleString(NUMBER_FORMAT).length)}
+					[${client.formatDecimalNumber(player.weight, Math.floor(Math.max(...playerData.map(({ weight }) => weight))).toLocaleString(NUMBER_FORMAT).length)}
+					+ ${client.formatDecimalNumber(player.overflow, Math.floor(Math.max(...playerData.map(({ overflow }) => overflow))).toLocaleString(NUMBER_FORMAT).length)}]`;
 				break;
 			}
 
@@ -765,8 +782,12 @@ const self = module.exports = {
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => b.sortingStat - a.sortingStat);
-				totalStats = `**${(playerData.reduce((acc, player) => acc + player.progressLevel, 0) / PLAYER_COUNT).toFixed(2)}** [**${client.formatNumber(playerData.reduce((acc, player) => acc + player.xp, 0) / PLAYER_COUNT, 0, Math.round)}** XP]`;
-				getEntry = player => `${client.formatDecimalNumber(player.progressLevel, 2)} [${client.formatNumber(player.xp, Math.round(playerData[0]?.xp).toLocaleString(NUMBER_FORMAT).length, Math.round)} XP]`;
+				totalStats = oneLine`
+					${Formatters.bold((playerData.reduce((acc, player) => acc + player.progressLevel, 0) / PLAYER_COUNT).toFixed(2))}
+					[${Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.xp, 0) / PLAYER_COUNT, 0, Math.round))} XP]`;
+				getEntry = player => oneLine`
+					${client.formatDecimalNumber(player.progressLevel, 2)}
+					[${client.formatNumber(player.xp, Math.round(playerData[0]?.xp).toLocaleString(NUMBER_FORMAT).length, Math.round)} XP]`;
 				break;
 			}
 		}

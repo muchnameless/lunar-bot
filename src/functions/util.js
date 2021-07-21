@@ -90,13 +90,6 @@ const self = module.exports = {
 	stringToMS: string => string.split(/(?<=[a-z])(?=\d)/).reduce((acc, cur) => acc + ms(cur), 0),
 
 	/**
-	 * unix timestamp to discord time markdown
-	 * @param {number} number
-	 * @param {string} style https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
-	 */
-	timestampToDateMarkdown: (number, style = Formatters.TimestampStyles.ShortDateTime) => `<t:${Math.round(number / 1_000)}:${style}>`,
-
-	/**
 	 * returns the ISO week number of the given date
 	 * @param {Date} date to analyze
 	 */
