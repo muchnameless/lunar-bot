@@ -1,8 +1,6 @@
 'use strict';
 
 const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } = require('discord.js');
-const FormData = require('form-data');
-const fetch = require('node-fetch');
 const { prefixByType } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
 const WebhookError = require('../../errors/WebhookError');
@@ -67,35 +65,9 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('discord.js').MessageAttachment[]} attachments
 	 * @returns {Promise<string[]>}
 	 */
-	static async _uploadAttachments(attachments) {
-		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? this.urlToImgurLink(attachment.url) : attachment.url))))
+	async _uploadAttachments(attachments) {
+		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? this.client.imgur.upload(attachment.url) : attachment.url))))
 			.map(({ value }, index) => value ?? attachments[index].url);
-	}
-
-	/**
-	 * @param {string} url
-	 * @returns {Promise<string>}
-	 */
-	static async urlToImgurLink(url) {
-		const form = new FormData();
-
-		form.append('image', url);
-		form.append('type', 'url');
-
-		const res = await fetch('https://api.imgur.com/3/upload', {
-			method: 'POST',
-			body: form,
-			headers: {
-				Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
-			},
-		});
-
-		if (res.status !== 200) {
-			logger.error('IMGUR', res);
-			throw new Error('error uploading to imgur');
-		}
-
-		return (await res.json()).data.link;
 	}
 
 	/**
@@ -327,7 +299,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				? message.stickers.map(({ name }) => `:${name}:`).join(' ')
 				: null,
 			message.attachments.size // attachments
-				? (await DiscordChatManager._uploadAttachments([ ...message.attachments.values() ])).join(' ') // links of attachments
+				? (await this._uploadAttachments([ ...message.attachments.values() ])).join(' ') // links of attachments
 				: null,
 		].filter(Boolean).join(' ');
 

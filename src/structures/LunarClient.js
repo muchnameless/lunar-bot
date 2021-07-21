@@ -8,6 +8,7 @@ const CronJobManager = require('./CronJobManager');
 const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const SlashCommandCollection = require('./commands/SlashCommandCollection');
 const EventCollection = require('./events/EventCollection');
+const ImgurClient = require('./ImgurClient');
 const cache = require('../api/cache');
 const logger = require('../functions/logger');
 
@@ -30,6 +31,7 @@ module.exports = class LunarClient extends Client {
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
 		this.events = new EventCollection(this, join(__dirname, '..', 'events'));
+		this.imgur = new ImgurClient({ authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}` });
 	}
 
 	get config() {
