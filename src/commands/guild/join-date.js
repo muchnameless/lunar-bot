@@ -55,14 +55,12 @@ module.exports = class JoinDateCommand extends DualCommand {
 	static async _getJoinDate(chatBridge, ign) {
 		// get first page
 		let logEntry = await this._getLogEntry(chatBridge, ign, 1);
-		let lastPage = logEntry.match(/\(Page 1 of (\d+)\)/)?.[1];
+		let lastPage = Number(logEntry.match(/\(Page 1 of (\d+)\)/)?.[1]);
 
 		// log has more than 1 page -> get latest page
 		if (lastPage !== 1) logEntry = await this._getLogEntry(chatBridge, ign, lastPage);
 
 		let matched = logEntry.match(JoinDateCommand.JOINED_REGEXP);
-
-		logger.debug({ matched })
 
 		// last page didn't contain join, get next-to-last page
 		while (!matched && lastPage >= 1) {
