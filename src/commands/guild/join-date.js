@@ -62,6 +62,8 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 		let matched = logEntry.match(JoinDateCommand.JOINED_REGEXP);
 
+		logger.debug({ matched })
+
 		// last page didn't contain join, get next-to-last page
 		while (!matched && lastPage >= 1) {
 			matched = (await this._getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
