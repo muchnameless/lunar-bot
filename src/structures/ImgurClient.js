@@ -66,17 +66,29 @@ module.exports = class ImgurClient {
 
 		try {
 			if (this.rateLimit.clientremaining === 0) {
-				if (this.rateLimit.clientreset > 60) throw new Error(`imgur client rate limit, reset in ${this.rateLimit.clientreset}`);
+				if (this.rateLimit.clientreset > 60) {
+					setTimeout(() => this.rateLimit.clientremaining = null, this.rateLimit.clientreset * 1_000);
+					throw new Error(`imgur client rate limit, resets in ${this.rateLimit.clientreset}s`);
+				}
+
 				await sleep(this.rateLimit.clientreset * 1_000);
 			}
 
 			if (this.rateLimit.userremaining === 0) {
-				if (this.rateLimit.userreset > 60) throw new Error(`imgur user rate limit, reset in ${this.rateLimit.userreset}`);
+				if (this.rateLimit.userreset > 60) {
+					setTimeout(() => this.rateLimit.userremaining = null, this.rateLimit.userreset * 1_000);
+					throw new Error(`imgur user rate limit, resets in ${this.rateLimit.userreset}s`);
+				}
+
 				await sleep(this.rateLimit.userreset * 1_000);
 			}
 
 			if (this.postRateLimit.remaining === 0) {
-				if (this.postRateLimit.reset > 60) throw new Error(`imgur post rate limit, reset in ${this.postRateLimit.reset}`);
+				if (this.postRateLimit.reset > 60) {
+					setTimeout(() => this.postRateLimit.remaining = null, this.postRateLimit.reset * 1_000);
+					throw new Error(`imgur post rate limit, resets in ${this.postRateLimit.reset}s`);
+				}
+
 				await sleep(this.postRateLimit.reset * 1_000);
 			}
 
