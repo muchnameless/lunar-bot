@@ -29,9 +29,7 @@ module.exports = class MessageCreateEvent extends Event {
 		}
 
 		// chat bridge
-		if (!message.interaction) {
-			this.client.chatBridges.handleDiscordMessage(message, { isEdit, checkIfNotFromBot: !isEdit });
-		}
+		this.client.chatBridges.handleDiscordMessage(message, { isEdit, checkIfNotFromBot: !isEdit || Boolean(message.interaction) });
 
 		// "old" commands
 		if (message.isUserMessage && new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIXES')[0]), `<@!?${this.client.user.id}>` ].join('|')})`, 'i').test(message.content)) {

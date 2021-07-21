@@ -294,7 +294,9 @@ module.exports = class DiscordChatManager extends ChatManager {
 					}
 				})()
 				: null,
-			message.content, // actual content
+			isEdit && !message.interaction && !message.content.endsWith('*') // actual content
+				? `${message.content}*` // add a trailing '*' to indicate an edit if not already present
+				: message.content,
 			message.stickers.size // stickers
 				? message.stickers.map(({ name }) => `:${name}:`).join(' ')
 				: null,
@@ -311,9 +313,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 		});
 
 		return this.minecraft.chat({
-			content: isEdit && !content.endsWith('*')
-				? `${content}*` // add a trailing '*' to indicate an edit if not already present
-				: content,
+			content,
 			prefix: `${this.prefix} ${interaction ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
 			discordMessage: message,
 		});
