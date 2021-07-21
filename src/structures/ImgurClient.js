@@ -15,18 +15,24 @@ module.exports = class ImgurClient {
 		this.authorization = authorization;
 
 		this.rateLimit = {
-			clientlimit: null,
-			clientremaining: null,
-			clientreset: null,
 			userlimit: null,
 			userremaining: null,
 			userreset: null,
+			clientlimit: null,
+			clientremaining: null,
+			clientreset: null,
 		};
 
 		this.postRateLimit = {
 			limit: null,
 			remaining: null,
 			reset: null,
+		};
+
+		this.timeouts = {
+			user: null,
+			client: null,
+			post: null,
 		};
 
 		this.queue = new AsyncQueue();
@@ -65,27 +71,39 @@ module.exports = class ImgurClient {
 		await this.queue.wait();
 
 		try {
-			if (this.rateLimit.clientremaining === 0) {
-				if (this.rateLimit.clientreset > 60) {
-					setTimeout(() => this.rateLimit.clientremaining = null, this.rateLimit.clientreset * 1_000);
-					throw new Error(`imgur client rate limit, resets in ${this.rateLimit.clientreset}s`);
-				}
-
-				await sleep(this.rateLimit.clientreset * 1_000);
-			}
-
 			if (this.rateLimit.userremaining === 0) {
 				if (this.rateLimit.userreset > 60) {
-					setTimeout(() => this.rateLimit.userremaining = null, this.rateLimit.userreset * 1_000);
+					this.timeouts.user ??= setTimeout(() => {
+						this.rateLimit.userremaining = null;
+						this.timeouts.user = null;
+					}, this.rateLimit.userreset * 1_000);
+
 					throw new Error(`imgur user rate limit, resets in ${this.rateLimit.userreset}s`);
 				}
 
 				await sleep(this.rateLimit.userreset * 1_000);
 			}
 
+			if (this.rateLimit.clientremaining === 0) {
+				if (this.rateLimit.clientreset > 60) {
+					this.timeouts.client ??= setTimeout(() => {
+						this.rateLimit.clientremaining = null;
+						this.timeouts.client = null;
+					}, this.rateLimit.clientreset * 1_000);
+
+					throw new Error(`imgur client rate limit, resets in ${this.rateLimit.clientreset}s`);
+				}
+
+				await sleep(this.rateLimit.clientreset * 1_000);
+			}
+
 			if (this.postRateLimit.remaining === 0) {
 				if (this.postRateLimit.reset > 60) {
-					setTimeout(() => this.postRateLimit.remaining = null, this.postRateLimit.reset * 1_000);
+					this.timeouts.post ??= setTimeout(() => {
+						this.postRateLimit.remaining = null;
+						this.timeouts.post = null;
+					}, this.postRateLimit.reset * 1_000);
+
 					throw new Error(`imgur post rate limit, resets in ${this.postRateLimit.reset}s`);
 				}
 
