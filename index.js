@@ -6,8 +6,7 @@ const { Collection, Intents, Constants } = require('discord.js');
 const { requireAll } = require('./src/functions/files');
 const db = require('./src/structures/database/index');
 const LunarClient = require('./src/structures/LunarClient');
-const MessageCacheCollection = require('./src/structures/collections/MessageCacheCollection');
-const ChannelCacheCollection = require('./src/structures/collections/ChannelCacheCollection');
+const MessageCacheCollection = require('./src/structures/MessageCacheCollection');
 const logger = require('./src/functions/logger');
 
 /** @type {LunarClient} */
@@ -41,9 +40,6 @@ process
 			switch (name) {
 				case 'MessageManager':
 					return new MessageCacheCollection(50);
-
-				case 'ChannelManager':
-					return new ChannelCacheCollection();
 
 				default:
 					return new Collection();

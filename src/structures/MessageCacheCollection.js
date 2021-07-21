@@ -22,12 +22,12 @@ module.exports = class MessageCacheCollection extends Collection {
 
 	/**
 	 * @param {import('discord.js').Snowflake} key
-	 * @param {import('../extensions/Message')} value
+	 * @param {import('./extensions/Message')} value
 	 */
 	set(key, value) {
-		if (value.channelId === value.client.config.get('TAX_CHANNEL_ID')) { // only cache own messages in taxChannel (taxMessage)
+		if (value.channel.id === value.client.config.get('TAX_CHANNEL_ID')) { // only cache own messages in taxChannel (taxMessage)
 			if (!value.me) return this;
-		} else if (!value.client.chatBridges.channelIds.has(value.channelId) && value.channelId !== value.client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) { // only cache messages in guild announcements and bridge channels
+		} else if (!value.client.chatBridges.channelIds.has(value.channel.id) && value.channel.id !== value.client.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) { // only cache messages in guild announcements and bridge channels
 			return this;
 		}
 
