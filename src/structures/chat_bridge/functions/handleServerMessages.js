@@ -1,22 +1,11 @@
 'use strict';
 
-const {
-	defaults: { ign: IGN_REGEXP },
-	promote: { string: { success: promote } },
-	demote: { string: { success: demote } },
-	mute: { string: { success: mute } },
-	unmute: { string: { success: unmute } },
-} = require('../constants/commandResponses');
+const { defaults: { ign: IGN_REGEXP }, promoteSuccess, demoteSuccess, muteSuccess, unmuteSuccess } = require('../constants/commandResponses');
 const { STOP } = require('../../../constants/emojiCharacters');
 const { invisibleCharacters } = require('../constants/chatBridge');
 const { stringToMS } = require('../../../functions/util');
 const logger = require('../../../functions/logger');
 
-
-const demoteRegExp = new RegExp(demote(), 'i');
-const promoteRegExp = new RegExp(promote(), 'i');
-const muteRegExp = new RegExp(mute(), 'i');
-const unmuteRegExp = new RegExp(unmute(), 'i');
 
 /**
  * handles a hypixel server message (non user message)
@@ -31,7 +20,7 @@ module.exports = async (message) => {
 		try {
 			await message.client.dmOwner(`${message.chatBridge.logInfo}: anti spam failed: ${message.rawContent}`);
 		} catch (error) {
-			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner anti spam failed`);
+			logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: error DMing owner 'anti spam failed'`);
 		}
 
 		return logger.error(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: anti spam failed: ${message.rawContent}`);
@@ -129,7 +118,7 @@ module.exports = async (message) => {
 	 * [HypixelRank] IGN has muted [HypixelRank] IGN for 10s
 	 * [HypixelRank] IGN has muted the guild chat for 10M
 	 */
-	const muteMatched = message.content.match(muteRegExp);
+	const muteMatched = message.content.match(muteSuccess);
 
 	if (muteMatched) {
 		message.forwardToDiscord();
@@ -143,7 +132,7 @@ module.exports = async (message) => {
 			guild.mutedTill = Number.isNaN(msDuration)
 				? Infinity
 				: Date.now() + msDuration;
-			guild.save();
+			guild.save().catch(logger.error);
 
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 		}
@@ -157,7 +146,7 @@ module.exports = async (message) => {
 		player.mutedTill = Number.isNaN(msDuration)
 			? Infinity
 			: Date.now() + msDuration;
-		player.save();
+		player.save().catch(logger.error);
 
 		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: ${target} was muted for ${duration}`);
 	}
@@ -167,7 +156,7 @@ module.exports = async (message) => {
 	 * [HypixelRank] IGN has unmuted [HypixelRank] IGN
 	 * [HypixelRank] IGN has unmuted the guild chat!
 	 */
-	const unmuteMatched = message.content.match(unmuteRegExp);
+	const unmuteMatched = message.content.match(unmuteSuccess);
 
 	if (unmuteMatched) {
 		message.forwardToDiscord();
@@ -178,7 +167,7 @@ module.exports = async (message) => {
 			const { guild } = message.chatBridge;
 
 			guild.mutedTill = 0;
-			guild.save();
+			guild.save().catch(logger.error);
 
 			return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: guild chat was unmuted`);
 		}
@@ -188,7 +177,7 @@ module.exports = async (message) => {
 		if (!player) return;
 
 		player.mutedTill = 0;
-		player.save();
+		player.save().catch(logger.error);
 
 		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: ${target} was unmuted`);
 	}
@@ -197,11 +186,10 @@ module.exports = async (message) => {
 	 * auto '/gc gg' for promotions
 	 * [HypixelRank] IGN was promoted from PREV to NOW
 	 */
-	const promoteMatched = message.content.match(promoteRegExp);
+	const promoteMatched = message.content.match(promoteSuccess);
 
 	if (promoteMatched) {
 		message.forwardToDiscord();
-		message.chatBridge.broadcast('gg');
 
 		const { groups: { target, newRank } } = promoteMatched;
 		const player = message.client.players.findByIgn(target);
@@ -213,7 +201,7 @@ module.exports = async (message) => {
 		if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to an unknown rank '${newRank}'`);
 
 		player.guildRankPriority = GUILD_RANK_PRIO;
-		player.save();
+		player.save().catch(logger.error);
 
 		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was promoted to '${newRank}'`);
 	}
@@ -222,7 +210,7 @@ module.exports = async (message) => {
 	 * demote
 	 * [HypixelRank] IGN was demoted from PREV to NOW
 	 */
-	const demotedMatched = message.content.match(demoteRegExp);
+	const demotedMatched = message.content.match(demoteSuccess);
 
 	if (demotedMatched) {
 		message.forwardToDiscord();
@@ -237,7 +225,7 @@ module.exports = async (message) => {
 		if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to an unknown rank '${newRank}'`);
 
 		player.guildRankPriority = GUILD_RANK_PRIO;
-		player.save();
+		player.save().catch(logger.error);
 
 		return logger.info(`[CHATBRIDGE]: ${message.chatBridge.logInfo}: '${target}' was demoted to '${newRank}'`);
 	}

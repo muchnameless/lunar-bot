@@ -123,54 +123,23 @@ module.exports = {
 		guildRank: GUILD_RANK_DEFAULT,
 		hypixelRank: HYPIXEL_RANK,
 	},
-	genericErrors: {
-		string: genericErrors,
-		regExp: (ign = IGN_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(genericErrors.map(x => (typeof x === 'function' ? x(ign, undefined, to) : x)).join('|'), 'i'),
-	},
-	paginationErrors: {
-		string: paginationErrors,
-	},
-	demote: {
-		string: demote,
-		regExp: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(demoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
-	},
-	promote: {
-		string: promote,
-		regExp: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
-	},
-	setRank: {
-		regExp: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(
-			setRankResponses
-				.map(x => (typeof x === 'function' ? x(ign, from, to) : x))
-				.join('|')
-				.replace(/\?<.+?>/g, ''), // remove named capture groups as there would be multiple groups with the same name which is not allowed
-			'i',
-		),
-	},
-	mute: {
-		string: mute,
-		regExp: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(muteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
-	},
-	unmute: {
-		string: unmute,
-		regExp: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(unmuteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
-	},
-	invite: {
-		string: invite,
-		regExp: (ign = IGN_DEFAULT) => new RegExp(inviteResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
-	},
-	logErrors: {
-		string: paginationErrors,
-		regExp: (ign = IGN_DEFAULT) => new RegExp(logErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
-	},
-	historyErrors: {
-		string: paginationErrors,
-		regExp: (ign = IGN_DEFAULT) => new RegExp(historyErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
-	},
-	topErrors: {
-		string: topErrorResponses,
-		regExp: (ign = IGN_DEFAULT) => new RegExp(topErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
-	},
+	genericErrors: (ign = IGN_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(genericErrors.map(x => (typeof x === 'function' ? x(ign, undefined, to) : x)).join('|'), 'i'),
+	paginationErrors: (ign = IGN_DEFAULT) => new RegExp(paginationErrors.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
+	demote: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(demoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
+	promote: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
+	setRank: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(
+		setRankResponses
+			.map(x => (typeof x === 'function' ? x(ign, from, to) : x))
+			.join('|')
+			.replace(/\?<.+?>/g, ''), // remove named capture groups as there would be multiple groups with the same name which is not allowed
+		'i',
+	),
+	mute: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(muteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
+	unmute: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(unmuteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
+	invite: (ign = IGN_DEFAULT) => new RegExp(inviteResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
+	logErrors: (ign = IGN_DEFAULT) => new RegExp(logErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
+	historyErrors: (ign = IGN_DEFAULT) => new RegExp(historyErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
+	topErrors: (ign = IGN_DEFAULT) => new RegExp(topErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
 	spamMessages: new RegExp([
 		'You cannot say the same message twice',
 		'You can only send a message once every half second',
@@ -178,4 +147,8 @@ module.exports = {
 		'You are sending commands too fast[.!]? Please slow down',
 		'Please wait before doing that again',
 	].map(x => `^${x}[.!]?$`).join('|'), 'i'),
+	promoteSuccess: new RegExp(promote.success(), 'i'),
+	demoteSuccess: new RegExp(demote.success(), 'i'),
+	muteSuccess: new RegExp(mute.success(), 'i'),
+	unmuteSuccess: new RegExp(unmute.success(), 'i'),
 };
