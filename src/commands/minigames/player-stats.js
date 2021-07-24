@@ -69,7 +69,7 @@ module.exports = class PlayerStatsCommand extends StatsCommand {
 	 */
 	_generateReply({ ign, playerData, guildData, friendsData, statusData }) {
 		try {
-			const { _id, lastLogin, achievementPoints = 0, karma = 0 } = playerData;
+			const { _id, lastLogin, achievementPoints = 0, karma = 0 } = playerData ?? {};
 
 			if (!_id) return `${ign} never logged into hypixel`;
 
