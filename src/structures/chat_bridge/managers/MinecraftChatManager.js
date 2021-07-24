@@ -472,7 +472,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	parseContent(string) {
 		return MinecraftChatManager.escapeEz(
 			cleanFormattedNumber(string)
-				.replace(invisibleCharacterRegExp, '')
+				.replace(/\s{2,}/g, ' ') // mc chat displays multiple whitespace as 1
+				.replace(invisibleCharacterRegExp, '') // remove invisible characters
 				.replace(/<(?:a)?:(\w{2,32}):(?:\d{17,19})>/g, ':$1:') // custom emojis
 				.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
 				.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
