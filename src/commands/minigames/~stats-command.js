@@ -3,7 +3,7 @@
 const { getUuidAndIgn } = require('../../functions/input');
 const hypixel = require('../../api/hypixel');
 const DualCommand = require('../../structures/commands/DualCommand');
-// const logger = require('../../functions/logger');
+const logger = require('../../functions/logger');
 
 /**
  * @typedef {object} FetchedData
@@ -52,11 +52,16 @@ module.exports = class StatsCommand extends DualCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		return interaction.reply(
-			this._generateReply(
-				await this._fetchData(interaction, interaction.options.getString('ign')),
-			),
-		);
+		try {
+			return interaction.reply(
+				this._generateReply(
+					await this._fetchData(interaction, interaction.options.getString('ign')),
+				),
+			);
+		} catch (error) {
+			logger.error(`[${this.name.toUpperCase()} CMD] ${error}`);
+			return interaction.reply(`${error}`);
+		}
 	}
 
 	/**
@@ -64,10 +69,15 @@ module.exports = class StatsCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return message.reply(
-			this._generateReply(
-				await this._fetchData(message, ...message.commandData.args),
-			),
-		);
+		try {
+			return message.reply(
+				this._generateReply(
+					await this._fetchData(message, ...message.commandData.args),
+				),
+			);
+		} catch (error) {
+			logger.error(`[${this.name.toUpperCase()} CMD] ${error}`);
+			return message.reply(`${error}`);
+		}
 	}
 };

@@ -44,7 +44,7 @@ module.exports = class GuildOfCommand extends DualCommand {
 
 			return `${ign}: ${name}${tag ? ` [${tag}]` : ''} ${members.length}/125 members`;
 		} catch (error) {
-			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
+			logger.error('[GUILDOF CMD]', error);
 
 			return `${error}`;
 		}

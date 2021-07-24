@@ -67,7 +67,7 @@ module.exports = class BedWarsStatsCommand extends StatsCommand {
 			`;
 			/* eslint-enable camelcase */
 		} catch (error) {
-			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
+			logger.error('[BEDWARS STATS CMD]', error);
 
 			return `${error}`;
 		}

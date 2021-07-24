@@ -89,7 +89,7 @@ module.exports = class PlayerStatsCommand extends StatsCommand {
 				last joined: ${Formatters.time(new Date(lastLogin))}
 			`;
 		} catch (error) {
-			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
+			logger.error('[PLAYER STATS CMD]', error);
 
 			return `${error}`;
 		}
