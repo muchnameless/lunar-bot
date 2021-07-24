@@ -104,7 +104,7 @@ module.exports = class InteractionCreateEvent extends Event {
 		} catch (error) {
 			logger.error(error);
 
-			if (error.code === Constants.APIErrors.INVALID_WEBHOOK_TOKEN) return; // interaction expired
+			if (error.code === Constants.APIErrors.UNKNOWN_INTERACTION || error.code === Constants.APIErrors.INVALID_WEBHOOK_TOKEN) return; // interaction expired
 
 			try {
 				await interaction.reply({
