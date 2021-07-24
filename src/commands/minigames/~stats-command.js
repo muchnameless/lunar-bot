@@ -59,7 +59,7 @@ module.exports = class StatsCommand extends DualCommand {
 				),
 			);
 		} catch (error) {
-			logger.error(`[${this.name.toUpperCase()} CMD] ${error}`);
+			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
 			return interaction.reply(`${error}`);
 		}
 	}
@@ -76,7 +76,7 @@ module.exports = class StatsCommand extends DualCommand {
 				),
 			);
 		} catch (error) {
-			logger.error(`[${this.name.toUpperCase()} CMD] ${error}`);
+			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
 			return message.reply(`${error}`);
 		}
 	}
