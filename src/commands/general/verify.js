@@ -49,27 +49,25 @@ module.exports = class VerifyCommand extends SlashCommand {
 		// already linked to this discord user
 		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return interaction.reply('you are already linked with this discord account');
 
-		const { uuid, ign } = await mojang.ign(IGN).catch(error => logger.error('[VERIFY]: ign fetch', error) ?? {});
+		let uuid;
+		let ign;
+		let guildId;
+		let hypixelPlayer;
 
-		// non existing ign
-		if (!uuid) return interaction.reply(`unable to find the minecraft UUID of \`${ign}\``);
+		try {
+			({ uuid, ign } = await mojang.ign(IGN));
+			({ _id: guildId } = await hypixel.guild.player(uuid));
 
-		const hypixelGuild = await hypixel.guild.player(uuid).catch(error => logger.error('[VERIFY]: guild fetch', error));
+			// not in one of the guilds that the bot manages
+			if (!this.client.hypixelGuilds.cache.keyArray().includes(guildId)) return interaction.reply(commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
 
-		// not in a guild
-		if (!hypixelGuild) return interaction.reply(`unable to find the hypixel guild of \`${ign}\``);
+			hypixelPlayer = await hypixel.player.uuid(uuid);
+		} catch (error) {
+			logger.error(error);
+			return interaction.reply(`${error}`);
+		}
 
-		const { _id: GUILD_ID } = hypixelGuild;
-
-		// not in one of the guilds that the bot manages
-		if (!this.client.hypixelGuilds.cache.keyArray().includes(GUILD_ID)) return interaction.reply(commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
-
-		const hypixelPlayer = await hypixel.player.uuid(uuid).catch(error => logger.error('[VERIFY]: player fetch', error));
-
-		// hypixel player api error
-		if (!hypixelPlayer) return interaction.reply(`unable to find \`${ign}\` on hypixel`);
-
-		const LINKED_DISCORD_TAG = hypixelPlayer.socialMedia?.links?.DISCORD;
+		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 
 		// no linked discord tag
 		if (!LINKED_DISCORD_TAG) return interaction.reply(`no linked discord tag for \`${ign}\` on hypixel`);
@@ -93,7 +91,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 				where: { minecraftUuid: uuid },
 				defaults: {
 					ign,
-					guildId: GUILD_ID,
+					guildId,
 				},
 			});
 		} catch (error) {
@@ -101,7 +99,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 			return interaction.reply(`an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
 		}
 
-		player.guildId = GUILD_ID;
+		player.guildId = guildId;
 
 		const discordMember = interaction.member
 			?? await this.client.lgGuild?.members.fetch(interaction.user.id).catch(error => logger.error('[VERIFY]: guild member fetch', error))
