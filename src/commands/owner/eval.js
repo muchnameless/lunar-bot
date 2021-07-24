@@ -66,6 +66,8 @@ module.exports = class EvalCommand extends SlashCommand {
 	 * @param {number} [inspectDepth=0]
 	 */
 	async eval(ctx, input, isAsync = /\bawait\b/.test(input), inspectDepth = 0) {
+		if (ctx.user.id !== this.client.ownerId) throw new Error('eval is restricted to the bot owner');
+
 		/* eslint-disable no-unused-vars */
 		const { client, config } = this;
 		const { MessageEmbed } = Discord;
@@ -149,7 +151,7 @@ module.exports = class EvalCommand extends SlashCommand {
 	 */
 	async runButton(interaction) {
 		if (interaction.user.id !== this.client.ownerId) return interaction.reply({
-			content: 'this command is only for the bot owners',
+			content: 'this command is restricted to the bot owner',
 			ephemeral: true,
 		});
 
