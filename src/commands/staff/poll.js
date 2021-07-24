@@ -179,7 +179,7 @@ module.exports = class PollCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
 		const inputMatched = message.content

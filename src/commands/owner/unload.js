@@ -89,7 +89,7 @@ module.exports = class UnloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
 		return this._run(message, ...message.commandData.args.map(arg => arg.toLowerCase()));

@@ -41,7 +41,7 @@ module.exports = class MyCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) { // eslint-disable-line no-unused-vars
 		// do stuff

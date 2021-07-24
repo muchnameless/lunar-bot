@@ -3,17 +3,7 @@
 const { Interaction, SnowflakeUtil, Formatters, Constants } = require('discord.js');
 const { Op } = require('sequelize');
 const ms = require('ms');
-const {
-	demote: { regExp: demote },
-	invite: { regExp: invite },
-	mute: { regExp: mute },
-	promote: { regExp: promote },
-	setRank: { regExp: setRank },
-	unmute: { regExp: unmute },
-	historyErrors: { regExp: historyErrors },
-	logErrors: { regExp: logErrors },
-	topErrors: { regExp: topErrors },
-} = require('../../structures/chat_bridge/constants/commandResponses');
+const { demote, invite, mute, promote, setRank, unmute, historyErrors, logErrors, topErrors } = require('../../structures/chat_bridge/constants/commandResponses');
 const { removeMcFormatting } = require('../../structures/chat_bridge/functions/util');
 const { EMBED_DESCRIPTION_MAX_CHARS } = require('../../constants/discord');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../constants/database');
@@ -97,6 +87,11 @@ module.exports = class GuildCommand extends SlashCommand {
 			name: 'demote',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 			description: 'demote',
+			options: [ 'player' ],
+		}, {
+			name: 'kick',
+			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
+			description: 'kick',
 			options: [ 'player' ],
 		}, {
 			name: 'history',
@@ -346,6 +341,19 @@ module.exports = class GuildCommand extends SlashCommand {
 				return this._run(interaction, {
 					command: `g demote ${IGN}`,
 					responseRegExp: demote(IGN),
+				});
+			}
+
+			case 'kick': {
+				await this.checkPermissions(interaction, {
+					roleIds: [ this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+				});
+
+				const IGN = this.getIgn(interaction);
+
+				return this._run(interaction, {
+					command: `g kick ${IGN}`,
+					abortRegExp: kick(IGN),
 				});
 			}
 

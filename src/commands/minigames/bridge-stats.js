@@ -2,11 +2,11 @@
 
 const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
-const BedWarsStatsCommand = require('./bedwars-stats');
+const StatsCommand = require('./~stats-command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class BridgeStatsCommand extends BedWarsStatsCommand {
+module.exports = class BridgeStatsCommand extends StatsCommand {
 	constructor(data) {
 		super(
 			data,
@@ -16,7 +16,7 @@ module.exports = class BridgeStatsCommand extends BedWarsStatsCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | uuid',
+					description: 'IGN | UUID',
 					required: false,
 				}],
 				defaultPermission: true,
@@ -34,23 +34,27 @@ module.exports = class BridgeStatsCommand extends BedWarsStatsCommand {
 	 * @param {import('@zikeji/hypixel').Components.Schemas.PlayerStats.Duels} duelStats
 	 * @param {string} stat
 	 */
-	static calculateStats(duelStats, stat) {
+	static _calculateStats(duelStats, stat) {
 		return [ 'duel', 'doubles', 'four' ].reduce((acc, cur) => acc + (duelStats[`bridge_${cur}_${stat}`] ?? 0), 0);
 	}
 
 	/**
-	 * @param {string} ign
-	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} data
+	 * @param {StatsCommand.FetchedData} param0
 	 */
-	generateReply(ign, data) {
+	_generateReply({ ign, playerData }) {
+		if (!playerData?.stats?.Duels) return `\`${ign}\` has no Bridge stats`;
+
 		try {
-			const { stats: { Duels: { bridge_deaths: deaths, bridge_kills: kills } } } = data;
+			const {
+				bridge_deaths: deaths,
+				bridge_kills: kills,
+			} = playerData.stats.Duels;
 
 			if (deaths == null || kills == null) return `\`${ign}\` has no Bridge stats`;
 
-			const wins = BridgeStatsCommand.calculateStats(data.stats.Duels, 'wins');
-			const losses = BridgeStatsCommand.calculateStats(data.stats.Duels, 'losses');
-			const gamesPlayed = BridgeStatsCommand.calculateStats(data.stats.Duels, 'rounds_played');
+			const wins = BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'wins');
+			const losses = BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'losses');
+			const gamesPlayed = BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'rounds_played');
 
 			return oneLine`
 				${ign}:
@@ -63,7 +67,7 @@ module.exports = class BridgeStatsCommand extends BedWarsStatsCommand {
 				kills: ${this.client.formatNumber(kills)},
 				deaths: ${this.client.formatNumber(deaths)},
 				kd ratio: ${this.calculateKD(kills, deaths) ?? '-/-'},
-				goals: ${this.client.formatNumber(BridgeStatsCommand.calculateStats(data.stats.Duels, 'goals'))}
+				goals: ${this.client.formatNumber(BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'goals'))}
 			`;
 		} catch {
 			return `\`${ign}\` has no Bridge stats`;

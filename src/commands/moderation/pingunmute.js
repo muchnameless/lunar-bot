@@ -26,13 +26,12 @@ module.exports = class PingUnmuteCommand extends PingMute {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {import('../../structures/database/models/Player')} player
 	 */
-	async _run(ctx, player) {
+	async _run(player) {
 		player.hasDiscordPingPermission = true;
 		await player.save();
 
-		return ctx.reply(`\`${player.ign}\` can now ping members via the chat bridge`);
+		return `\`${player.ign}\` can now ping members via the chat bridge`;
 	}
 };

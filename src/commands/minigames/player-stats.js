@@ -5,11 +5,11 @@ const { oneLine } = require('common-tags');
 const { getPlayerRank, getNetworkLevel } = require('@zikeji/hypixel');
 const { getUuidAndIgn } = require('../../functions/input');
 const hypixel = require('../../api/hypixel');
-const DualCommand = require('../../structures/commands/DualCommand');
+const StatsCommand = require('./~stats-command');
 const logger = require('../../functions/logger');
 
 
-module.exports = class PlayerCommand extends DualCommand {
+module.exports = class PlayerStatsCommand extends StatsCommand {
 	constructor(data) {
 		super(
 			data,
@@ -19,7 +19,7 @@ module.exports = class PlayerCommand extends DualCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | uuid',
+					description: 'IGN | UUID',
 					required: false,
 				}],
 				defaultPermission: true,
@@ -34,75 +34,64 @@ module.exports = class PlayerCommand extends DualCommand {
 	}
 
 	/**
-	 * extracts the created at date from a database object id
-	 * @param {string} objectId
-	 */
-	static objectIdToSecondsTimestamp = objectId => parseInt(objectId.slice(0, 8), 16);
-
-	/**
-	 * @param {string} ign
-	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} player
-	 * @param {import('@zikeji/hypixel').Components.Schemas.Guild} guild
-	 * @param {import('@zikeji/hypixel').Components.Schemas.PlayerFriendsData[]} friends
-	 * @param {import('@zikeji/hypixel').Components.Schemas.Session} status
-	 */
-	generateReply(ign, player, guild, friends, status) {
-		const { cleanName: RANK_NAME } = getPlayerRank(player);
-		const level = Number(getNetworkLevel(player).preciseLevel.toFixed(2));
-		const { _id, lastLogin, achievementPoints = 0, karma = 0 } = player;
-
-		return oneLine`
-			${ign}:
-			rank: ${RANK_NAME},
-			guild: ${guild?.name ?? 'none'},
-			status: ${status.online ? 'online' : 'offline'},
-			friends: ${this.client.formatNumber(friends?.length ?? 0)},
-			level: ${level},
-			achievement points: ${this.client.formatNumber(achievementPoints)},
-			karma: ${this.client.formatNumber(karma)},
-			first joined: ${Formatters.time(PlayerCommand.objectIdToSecondsTimestamp(_id))},
-			last joined: ${Formatters.time(new Date(lastLogin))}
-		`;
-	}
-
-	/**
-	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} [ignOrUuid]
 	 */
-	async _run(ctx, ignOrUuid) {
-		try {
-			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-			const [ player, guild, friends, status ] = await Promise.all([
-				hypixel.player.uuid(uuid),
-				hypixel.guild.player(uuid),
-				hypixel.friends.uuid(uuid),
-				hypixel.status.uuid(uuid),
-			]);
+	async _fetchData(ctx, ignOrUuid) { // eslint-disable-line class-methods-use-this
+		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
+		const [ playerData, guildData, friendsData, statusData ] = await Promise.all([
+			hypixel.player.uuid(uuid),
+			hypixel.guild.player(uuid),
+			hypixel.friends.uuid(uuid),
+			hypixel.status.uuid(uuid),
+		]);
 
-			return ctx.reply(this.generateReply(ign, player, guild, friends, status));
+		return {
+			ign,
+			playerData,
+			guildData,
+			friendsData,
+			statusData,
+		};
+	}
+
+	/**
+	 * @typedef {object} FetchedData
+	 * @property {string} ign
+	 * @property {import('@zikeji/hypixel').Components.Schemas.Player} playerData
+	 * @property {import('@zikeji/hypixel').Components.Schemas.Guild} guildData
+	 * @property {import('@zikeji/hypixel').Components.Schemas.PlayerFriendsData} friendsData
+	 * @property {import('@zikeji/hypixel').Components.Schemas.Session} statusData
+	 */
+
+	/**
+	 * @param {FetchedData} param0
+	 */
+	_generateReply({ ign, playerData, guildData, friendsData, statusData }) {
+		try {
+			const { _id, lastLogin, achievementPoints = 0, karma = 0 } = playerData;
+
+			if (!_id) return `${ign} never logged into hypixel`;
+
+			const { cleanName: RANK_NAME } = getPlayerRank(playerData);
+			const level = Number(getNetworkLevel(playerData).preciseLevel.toFixed(2));
+
+			return oneLine`
+				${ign}:
+				rank: ${RANK_NAME},
+				guild: ${guildData?.name ?? 'none'},
+				status: ${statusData.online ? 'online' : 'offline'},
+				friends: ${this.client.formatNumber(friendsData?.length ?? 0)},
+				level: ${level},
+				achievement points: ${this.client.formatNumber(achievementPoints)},
+				karma: ${this.client.formatNumber(karma)},
+				first joined: ${Formatters.time(parseInt(_id.slice(0, 8), 16))},
+				last joined: ${Formatters.time(new Date(lastLogin))}
+			`;
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
-			return ctx.reply(`${error}`);
+			return `${error}`;
 		}
-	}
-
-	/**
-	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
-	 */
-	async run(interaction) {
-		interaction.defer();
-
-		return this._run(interaction, interaction.options.getString('ign'));
-	}
-
-	/**
-	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 */
-	async runInGame(message) {
-		return this._run(message, ...message.commandData.args);
 	}
 };

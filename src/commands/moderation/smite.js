@@ -44,7 +44,7 @@ module.exports = class SmiteCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
 		return this.client.commands.get('guild').runMute(message, {

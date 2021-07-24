@@ -2,7 +2,7 @@
 
 const { Formatters, Constants } = require('discord.js');
 const ms = require('ms');
-const { logErrors: { regExp: logErrors } } = require('../../structures/chat_bridge/constants/commandResponses');
+const { logErrors } = require('../../structures/chat_bridge/constants/commandResponses');
 const { escapeIgn } = require('../../functions/util');
 const DualCommand = require('../../structures/commands/DualCommand');
 const logger = require('../../functions/logger');
@@ -101,46 +101,15 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
-	 * @param {import('../../structures/database/models/Player')} ignInput
+	 * @param {import('../../structures/database/models/Player')} ign
 	 */
-	async _run(ctx, chatBridge, ignInput) {
-		if (ignInput) { // single player
-			try {
-				return ctx.reply(JoinDateCommand._formatReply(await JoinDateCommand._getJoinDate(chatBridge, ignInput)));
-			} catch {
-				return ctx.reply(`${ignInput}: never joined ${chatBridge.guild.name}`);
-			}
-		}
-
-		// all players
-		if (JoinDateCommand.running.has(chatBridge.guild.guildId)) return ctx.reply({
-			content: 'the command is already running',
-			ephemeral: true,
-		});
-
-		await ctx.awaitConfirmation(`the command will take approximately ${ms(chatBridge.guild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
-
-		const joinInfos = [];
-
+	async _generateReply(chatBridge, ign) {
 		try {
-			JoinDateCommand.running.add(chatBridge.guild.guildId);
-
-			for (const { ign } of chatBridge.guild.players.values()) {
-				joinInfos.push(await JoinDateCommand._getJoinDate(chatBridge, ign));
-			}
-		} finally {
-			JoinDateCommand.running.delete(chatBridge.guild.guildId);
+			return JoinDateCommand._formatReply(await JoinDateCommand._getJoinDate(chatBridge, ign));
+		} catch {
+			return `${ign}: never joined ${chatBridge.guild.name}`;
 		}
-
-		return ctx.reply({
-			content: `${Formatters.bold(chatBridge.guild.name)} join dates:\n${joinInfos
-				.sort((a, b) => a.timestamp - b.timestamp)
-				.map(JoinDateCommand._formatReply)
-				.join('\n')}`,
-			split: true,
-		});
 	}
 
 	/**
@@ -150,22 +119,50 @@ module.exports = class JoinDateCommand extends DualCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		return this._run(
-			interaction,
-			this.getHypixelGuild(interaction).chatBridge,
-			this.getIgn(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID'))),
-		);
+		const { chatBridge } = this.getHypixelGuild(interaction);
+		const IGN = this.getIgn(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')));
+
+		if (!IGN) {
+			// all players
+			if (JoinDateCommand.running.has(chatBridge.guild.guildId)) return interaction.reply({
+				content: 'the command is already running',
+				ephemeral: true,
+			});
+
+			const joinInfos = [];
+
+			try {
+				JoinDateCommand.running.add(chatBridge.guild.guildId);
+
+				await interaction.awaitConfirmation(`the command will take approximately ${ms(chatBridge.guild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
+
+				for (const { ign } of chatBridge.guild.players.values()) {
+					joinInfos.push(await JoinDateCommand._getJoinDate(chatBridge, ign));
+				}
+			} finally {
+				JoinDateCommand.running.delete(chatBridge.guild.guildId);
+			}
+
+			return interaction.reply({
+				content: `${Formatters.bold(chatBridge.guild.name)} join dates:\n${joinInfos
+					.sort((a, b) => a.timestamp - b.timestamp)
+					.map(JoinDateCommand._formatReply)
+					.join('\n')}`,
+				split: true,
+			});
+		}
+
+		return interaction.reply(await this._generateReply(chatBridge, IGN));
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this._run(
-			message,
+		return message.reply(await this._generateReply(
 			message.chatBridge,
 			message.commandData.args[0] ?? message.author.ign,
-		);
+		));
 	}
 };

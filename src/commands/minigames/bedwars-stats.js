@@ -3,29 +3,27 @@
 const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
 const { getBedwarsLevelInfo } = require('@zikeji/hypixel');
-const { getUuidAndIgn } = require('../../functions/input');
-const hypixel = require('../../api/hypixel');
-const DualCommand = require('../../structures/commands/DualCommand');
+const StatsCommand = require('./~stats-command.js');
 const logger = require('../../functions/logger');
 
 
-module.exports = class BedWarsStatsCommand extends DualCommand {
-	constructor(data, param1, param2) {
+module.exports = class BedWarsStatsCommand extends StatsCommand {
+	constructor(data) {
 		super(
 			data,
-			param1 ?? {
+			{
 				aliases: [],
 				description: 'shows a player\'s BedWars stats',
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | uuid',
+					description: 'IGN | UUID',
 					required: false,
 				}],
 				defaultPermission: true,
 				cooldown: 1,
 			},
-			param2 ?? {
+			{
 				aliases: [ 'bwstats' ],
 				args: false,
 				usage: '<`IGN`>',
@@ -34,76 +32,42 @@ module.exports = class BedWarsStatsCommand extends DualCommand {
 	}
 
 	/**
-	 * @param {number} kills
-	 * @param {number} deaths
-	 * @returns {?string}
+	 * @param {StatsCommand.FetchedData} param0
 	 */
-	calculateKD(kills, deaths) {
-		if (kills == null || deaths == null) return null;
-		return this.client.formatDecimalNumber(Math.floor((kills / deaths) * 100) / 100);
-	}
+	_generateReply({ ign, playerData }) {
+		if (!playerData?.stats?.Bedwars) return `\`${ign}\` has no BedWars stats`;
 
-	/**
-	 * @param {string} ign
-	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} data
-	 */
-	generateReply(ign, data) {
 		try {
-			const wins = data.stats.Bedwars.wins_bedwars ?? 0;
-			const losses = data.stats.Bedwars.losses_bedwars ?? 0;
+			/* eslint-disable camelcase */
+			const {
+				wins_bedwars = 0,
+				losses_bedwars = 0,
+				games_played_bedwars = 0,
+				final_kills_bedwars = 0,
+				final_deaths_bedwars = 0,
+				winstreak = 0,
+				beds_broken_bedwars = 0,
+			} = playerData.stats.Bedwars;
 
 			return oneLine`
 				${ign}:
 				BedWars:
-				level: ${this.client.formatNumber(getBedwarsLevelInfo(data).level)},
-				wins: ${this.client.formatNumber(wins)},
-				losses: ${this.client.formatNumber(losses)},
-				win rate: ${this.client.formatDecimalNumber(wins / (wins + losses))},
-				games played: ${this.client.formatNumber(data.stats.Bedwars.games_played_bedwars ?? 0)},
-				final kills: ${this.client.formatNumber(data.stats.Bedwars.final_kills_bedwars ?? 0)},
-				final deaths: ${this.client.formatNumber(data.stats.Bedwars.final_deaths_bedwars ?? 0)},
-				overall fkdr: ${this.calculateKD(data.stats.Bedwars.final_kills_bedwars, data.stats.Bedwars.final_deaths_bedwars) ?? '-/-'},
-				win streak: ${this.client.formatNumber(data.stats.Bedwars.winstreak ?? 0)},
-				beds broken: ${this.client.formatNumber(data.stats.Bedwars.beds_broken_bedwars ?? 0)}
+				level: ${this.client.formatNumber(getBedwarsLevelInfo(playerData).level)},
+				wins: ${this.client.formatNumber(wins_bedwars)},
+				losses: ${this.client.formatNumber(losses_bedwars)},
+				win rate: ${this.client.formatDecimalNumber(wins_bedwars / (wins_bedwars + losses_bedwars))},
+				games played: ${this.client.formatNumber(games_played_bedwars)},
+				final kills: ${this.client.formatNumber(final_kills_bedwars)},
+				final deaths: ${this.client.formatNumber(final_deaths_bedwars)},
+				overall fkdr: ${this.calculateKD(final_kills_bedwars, final_deaths_bedwars) ?? '-/-'},
+				win streak: ${this.client.formatNumber(winstreak)},
+				beds broken: ${this.client.formatNumber(beds_broken_bedwars)}
 			`;
-		} catch {
-			return `\`${ign}\` has no BedWars stats`;
-		}
-	}
-
-	/**
-	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {string} [ignOrUuid]
-	 */
-	async _run(ctx, ignOrUuid) {
-		try {
-			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-			const data = await hypixel.player.uuid(uuid);
-
-			return ctx.reply(this.generateReply(ign, data));
+			/* eslint-enable camelcase */
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
-			return ctx.reply(`${error}`);
+			return `${error}`;
 		}
-	}
-
-	/**
-	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
-	 */
-	async run(interaction) {
-		interaction.defer();
-
-		return this._run(interaction, interaction.options.getString('ign'));
-	}
-
-	/**
-	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
-	 */
-	async runInGame(message) {
-		return this._run(message, ...message.commandData.args);
 	}
 };

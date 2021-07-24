@@ -17,7 +17,7 @@ module.exports = class LinkCommand extends SlashCommand {
 			options: [{
 				name: 'ign',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | uuid',
+				description: 'IGN | UUID',
 				required: true,
 			}, {
 				name: 'user',

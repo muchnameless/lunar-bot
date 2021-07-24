@@ -26,7 +26,7 @@ module.exports = class CoinFlipCommand extends DualCommand {
 	/**
 	 * coinflip result
 	 */
-	static _generateReply() {
+	_generateReply() {
 		const randomNumber = Math.floor(Math.random() * 1001);
 
 		if (randomNumber === 0) return 'edge';
@@ -36,25 +36,17 @@ module.exports = class CoinFlipCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 */
-	async _run(ctx) {
-		return ctx.reply(CoinFlipCommand._generateReply());
-	}
-
-	/**
-	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction);
+		return interaction.reply(this._generateReply());
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this._run(message);
+		return message.reply(this._generateReply());
 	}
 };

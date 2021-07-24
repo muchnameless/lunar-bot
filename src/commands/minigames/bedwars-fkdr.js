@@ -1,11 +1,11 @@
 'use strict';
 
 const { Constants } = require('discord.js');
-const BedWarsStatsCommand = require('./bedwars-stats');
+const StatsCommand = require('./~stats-command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class BedWarsFkdrCommand extends BedWarsStatsCommand {
+module.exports = class BedWarsFkdrCommand extends StatsCommand {
 	constructor(data) {
 		super(
 			data,
@@ -15,7 +15,7 @@ module.exports = class BedWarsFkdrCommand extends BedWarsStatsCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | uuid',
+					description: 'IGN | UUID',
 					required: false,
 				}],
 				defaultPermission: true,
@@ -30,10 +30,11 @@ module.exports = class BedWarsFkdrCommand extends BedWarsStatsCommand {
 	}
 
 	/**
-	 * @param {string} ign
-	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} data
+	 * @param {StatsCommand.FetchedData} param0
 	 */
-	generateReply(ign, data) {
+	_generateReply({ ign, playerData }) {
+		if (!playerData?.stats?.Bedwars) return `\`${ign}\` has no BedWars stats`;
+
 		try {
 			const kds = [
 				{ name: 'Overall', key: '' },
@@ -42,7 +43,7 @@ module.exports = class BedWarsFkdrCommand extends BedWarsStatsCommand {
 				{ name: '3s', key: 'four_three_' },
 				{ name: '4s', key: 'four_four_' },
 			].flatMap(({ name, key }) => {
-				const kd = this.calculateKD(data.stats.Bedwars[`${key}final_kills_bedwars`], data.stats.Bedwars[`${key}final_deaths_bedwars`]);
+				const kd = this.calculateKD(playerData.stats.Bedwars[`${key}final_kills_bedwars`], playerData.stats.Bedwars[`${key}final_deaths_bedwars`]);
 
 				return kd !== null
 					? ({ name, kd })

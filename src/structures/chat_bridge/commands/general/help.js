@@ -26,7 +26,7 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../HypixelMessage')} message message that triggered the command
+	 * @param {import('../../HypixelMessage')} message
 	 */
 	async runInGame(message) {
 		// default help

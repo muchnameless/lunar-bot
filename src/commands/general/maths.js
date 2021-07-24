@@ -396,16 +396,15 @@ module.exports = class MathsCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} rawInput
 	 */
-	async _run(ctx, rawInput) {
+	_generateReply(rawInput) {
 		try {
 			const { input, formattedOutput, warning } = this.calculate(rawInput);
 
-			return ctx.reply(`${input} = ${formattedOutput} ${warning}`);
+			return `${input} = ${formattedOutput} ${warning}`;
 		} catch (error) {
-			return ctx.reply(`${error}`);
+			return `${error}`;
 		}
 	}
 
@@ -414,14 +413,14 @@ module.exports = class MathsCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, interaction.options.getString('input', true));
+		return interaction.reply(this._generateReply(interaction.options.getString('input', true)));
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this._run(message, message.commandData.args.join(''));
+		return message.reply(this._generateReply(message.commandData.args.join('')));
 	}
 };

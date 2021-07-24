@@ -31,14 +31,13 @@ module.exports = class PingMuteCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {import('../../structures/database/models/Player')} player
 	 */
-	async _run(ctx, player) {
+	async _run(player) {
 		player.hasDiscordPingPermission = false;
 		await player.save();
 
-		return ctx.reply(`\`${player.ign}\` can no longer ping members via the chat bridge`);
+		return `\`${player.ign}\` can no longer ping members via the chat bridge`;
 	}
 
 	/**
@@ -46,12 +45,12 @@ module.exports = class PingMuteCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, this.getPlayer(interaction));
+		return interaction.reply(await this._run(this.getPlayer(interaction)));
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
 		const [ INPUT ] = message.commandData.args;
@@ -59,6 +58,6 @@ module.exports = class PingMuteCommand extends DualCommand {
 
 		if (!player) return message.reply(`\`${INPUT}\` not in the player db`);
 
-		return this._run(message, player);
+		return message.reply(await this._run(player));
 	}
 };

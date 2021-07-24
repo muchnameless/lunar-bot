@@ -17,7 +17,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 			options: [{
 				name: 'ign',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | uuid',
+				description: 'IGN | UUID',
 				required: true,
 			}],
 			defaultPermission: true,

@@ -17,7 +17,7 @@ module.exports = class AhCommand extends SlashCommand {
 			options: [{
 				name: 'ign',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | uuid',
+				description: 'IGN | UUID',
 				required: false,
 			}],
 			defaultPermission: true,

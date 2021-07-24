@@ -43,9 +43,8 @@ module.exports = class FetchurCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 */
-	async _run(ctx) {
+	_generateReply() { // eslint-disable-line class-methods-use-this
 		const date = new Date();
 		const OFFSET = zone('America/New_York').offsetForUtc(TimeStruct.fromDate(date)) / 60;
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
@@ -64,7 +63,7 @@ module.exports = class FetchurCommand extends DualCommand {
 			].filter(time => time >= Date.now()),
 		);
 
-		return ctx.reply(`item: ${FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]}, changes ${Formatters.time(new Date(RESET_TIME), Formatters.TimestampStyles.RelativeTime)}`);
+		return `item: ${FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]}, changes ${Formatters.time(new Date(RESET_TIME), Formatters.TimestampStyles.RelativeTime)}`;
 	}
 
 	/**
@@ -72,14 +71,14 @@ module.exports = class FetchurCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction);
+		return interaction.reply(this._generateReply);
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this._run(message);
+		return message.reply(this._generateReply());
 	}
 };

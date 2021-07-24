@@ -17,7 +17,7 @@ module.exports = class GuildOfCommand extends DualCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | uuid',
+					description: 'IGN | UUID',
 					required: true,
 				}],
 				defaultPermission: true,
@@ -33,21 +33,20 @@ module.exports = class GuildOfCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {string} [ignOrUuid]
+	 * @param {string} ignOrUuid
 	 */
-	async _run(ctx, ignOrUuid) {
+	async _generateReply(ignOrUuid) {
 		try {
 			const { uuid, ign } = await mojang.ignOrUuid(ignOrUuid);
 			const { name, tag, members } = await hypixel.guild.player(uuid);
 
-			if (!name) return ctx.reply(`${ign}: no guild`);
+			if (!name) return `${ign}: no guild`;
 
-			return ctx.reply(`${ign}: ${name}${tag ? ` [${tag}]` : ''} ${members.length}/125 members`);
+			return `${ign}: ${name}${tag ? ` [${tag}]` : ''} ${members.length}/125 members`;
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]`, error);
 
-			return ctx.reply(`${error}`);
+			return `${error}`;
 		}
 	}
 
@@ -58,14 +57,14 @@ module.exports = class GuildOfCommand extends DualCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		return this._run(interaction, interaction.options.getString('ign', true));
+		return interaction.reply(await this._generateReply(interaction.options.getString('ign', true)));
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this._run(message, ...message.commandData.args);
+		return message.reply(await this._generateReply(...message.commandData.args));
 	}
 };

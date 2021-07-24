@@ -20,7 +20,7 @@ module.exports = class WeightCommand extends DualCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | uuid',
+					description: 'IGN | UUID',
 					required: false,
 				}, {
 					name: 'profile',
@@ -59,7 +59,7 @@ module.exports = class WeightCommand extends DualCommand {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
 
-			if (!profiles.length) return ctx.reply(`${ign} has no SkyBlock profiles`);
+			if (!profiles.length) return `${ign} has no SkyBlock profiles`;
 
 			let weightData;
 
@@ -71,7 +71,7 @@ module.exports = class WeightCommand extends DualCommand {
 			} else {
 				const { value: profile, similarity } = autocorrect(profileName, profiles, 'cute_name');
 
-				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return ctx.reply(`${ign} has no profile named '${upperCaseFirstChar(profileName)}'`);
+				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return `${ign} has no profile named '${upperCaseFirstChar(profileName)}'`;
 
 				weightData = {
 					name: profile.cute_name,
@@ -79,13 +79,11 @@ module.exports = class WeightCommand extends DualCommand {
 				};
 			}
 
-			return ctx.reply(
-				`${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillApiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`,
-			);
+			return `${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillApiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
 		} catch (error) {
 			logger.error('[WEIGHT]', error);
 
-			return ctx.reply(`${error}`);
+			return `${error}`;
 		}
 	}
 
@@ -96,18 +94,14 @@ module.exports = class WeightCommand extends DualCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		return this._run(
-			interaction,
-			interaction.options.getString('ign'),
-			interaction.options.getString('profile'),
-		);
+		return interaction.reply(await this._run(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message message that triggered the command
+	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this._run(message, ...message.commandData.args);
+		return message.reply(await this._run(message, ...message.commandData.args));
 	}
 };

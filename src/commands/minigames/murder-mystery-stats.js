@@ -16,7 +16,7 @@ module.exports = class MurderMysteryStatsCommand extends BedWarsStatsCommand {
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | uuid',
+					description: 'IGN | UUID',
 					required: false,
 				}],
 				defaultPermission: true,
@@ -34,7 +34,7 @@ module.exports = class MurderMysteryStatsCommand extends BedWarsStatsCommand {
 	 * @param {string} ign
 	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} data
 	 */
-	generateReply(ign, data) {
+	_generateReply(ign, data) {
 		try {
 			const { games, wins = 0, kills, deaths } = data.stats.MurderMystery ?? {};
 

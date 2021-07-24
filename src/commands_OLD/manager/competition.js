@@ -26,7 +26,7 @@ module.exports = class CompetitionCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/Message')} message message that triggered the command
+	 * @param {import('../../structures/extensions/Message')} message
 	 */
 	async run(message) {
 		const collector = message.channel.createMessageCollector({

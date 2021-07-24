@@ -3,11 +3,11 @@
 const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
 const { getSkyWarsLevelInfo } = require('@zikeji/hypixel');
-const BedWarsStatsCommand = require('./bedwars-stats');
+const StatsCommand = require('./~stats-command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class SkyWarsStatsCommand extends BedWarsStatsCommand {
+module.exports = class SkyWarsStatsCommand extends StatsCommand {
 	constructor(data) {
 		super(
 			data,
@@ -32,17 +32,27 @@ module.exports = class SkyWarsStatsCommand extends BedWarsStatsCommand {
 	}
 
 	/**
-	 * @param {string} ign
-	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} data
+	 * @param {StatsCommand.FetchedData} param0
 	 */
-	generateReply(ign, data) {
+	_generateReply({ ign, playerData }) {
+		if (!playerData?.stats?.SkyWars) return `\`${ign}\` has no SkyWars stats`;
+
 		try {
-			const { stats: { SkyWars: { wins = 0, losses = 0, assists, games_played_skywars: games = 0, kills = 0, deaths = 0, win_streak: winStreak = 0 } } } = data;
+			/* eslint-disable camelcase */
+			const {
+				wins = 0,
+				losses = 0,
+				assists = 0,
+				games_played_skywars = 0,
+				kills = 0,
+				deaths = 0,
+				win_streak = 0,
+			} = playerData.stats.SkyWars;
 
 			return oneLine`
 				${ign}:
 				SkyWars:
-				level: ${this.client.formatNumber(getSkyWarsLevelInfo(data).level)},
+				level: ${this.client.formatNumber(getSkyWarsLevelInfo(playerData).level)},
 				wins: ${this.client.formatNumber(wins)},
 				losses: ${this.client.formatNumber(losses)},
 				win rate: ${this.client.formatDecimalNumber(wins / (wins + losses))},
@@ -50,9 +60,10 @@ module.exports = class SkyWarsStatsCommand extends BedWarsStatsCommand {
 				assists: ${this.client.formatNumber(assists)},
 				deaths: ${this.client.formatNumber(deaths)},
 				K/D: ${this.calculateKD(kills, deaths) ?? '-/-'},
-				games played: ${this.client.formatNumber(games)},
-				win streak: ${this.client.formatNumber(winStreak)}
+				games played: ${this.client.formatNumber(games_played_skywars)},
+				win streak: ${this.client.formatNumber(win_streak)}
 			`;
+			/* eslint-enable camelcase */
 		} catch {
 			return `\`${ign}\` has no SkyWars stats`;
 		}
