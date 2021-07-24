@@ -71,7 +71,7 @@ module.exports = class FetchurCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return interaction.reply(this._generateReply);
+		return interaction.reply(this._generateReply());
 	}
 
 	/**
