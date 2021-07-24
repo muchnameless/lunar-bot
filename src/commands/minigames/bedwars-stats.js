@@ -49,6 +49,8 @@ module.exports = class BedWarsStatsCommand extends StatsCommand {
 				beds_broken_bedwars = 0,
 			} = playerData.stats.Bedwars;
 
+			if (wins_bedwars + losses_bedwars === 0) return `\`${ign}\` has no BedWars stats`;
+
 			return oneLine`
 				${ign}:
 				BedWars:

@@ -2,11 +2,11 @@
 
 const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
-const BedWarsStatsCommand = require('./bedwars-stats');
+const StatsCommand = require('./~stats-command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class MurderMysteryStatsCommand extends BedWarsStatsCommand {
+module.exports = class MurderMysteryStatsCommand extends StatsCommand {
 	constructor(data) {
 		super(
 			data,
@@ -31,12 +31,24 @@ module.exports = class MurderMysteryStatsCommand extends BedWarsStatsCommand {
 	}
 
 	/**
-	 * @param {string} ign
-	 * @param {import('@zikeji/hypixel').Components.Schemas.Player} data
+	 * @param {StatsCommand.FetchedData} param0
 	 */
-	_generateReply(ign, data) {
+	_generateReply({ ign, playerData }) {
+		if (!playerData?.stats?.MurderMystery) return `\`${ign}\` has no MurderMystery stats`;
+
 		try {
-			const { games, wins = 0, kills, deaths } = data.stats.MurderMystery ?? {};
+			/* eslint-disable camelcase */
+			const {
+				games = 0,
+				wins = 0,
+				kills = 0,
+				deaths = 0,
+				murderer_wins = 0,
+				detective_wins = 0,
+				coins = 0,
+				quickest_murderer_win_time_seconds = '-/-',
+				quickest_detective_win_time_seconds = '-/-',
+			} = playerData.stats.MurderMystery;
 
 			if (!games) return `\`${ign}\` has no MurderMystery stats`;
 
@@ -47,15 +59,16 @@ module.exports = class MurderMysteryStatsCommand extends BedWarsStatsCommand {
 				losses: ${this.client.formatNumber(games - wins)},
 				winrate: ${this.client.formatDecimalNumber(wins / games)},
 				games played: ${this.client.formatNumber(games)},
-				kills: ${this.client.formatNumber(kills ?? 0)},
-				deaths: ${this.client.formatNumber(deaths ?? 0)},
+				kills: ${this.client.formatNumber(kills)},
+				deaths: ${this.client.formatNumber(deaths)},
 				K/D: ${this.calculateKD(kills, deaths)},
-				murderer wins: ${this.client.formatNumber(data.stats.MurderMystery.murderer_wins ?? 0)},
-				detective wins: ${this.client.formatNumber(data.stats.MurderMystery.detective_wins ?? 0)},
-				coins: ${this.client.formatNumber(data.stats.MurderMystery.coins ?? 0)},
-				fastest murderer win: ${this.client.formatNumber(data.stats.MurderMystery.quickest_murderer_win_time_seconds ?? '-/-')} s,
-				fastest detective win: ${this.client.formatNumber(data.stats.MurderMystery.quickest_detective_win_time_seconds ?? '-/-')} s
+				murderer wins: ${this.client.formatNumber(murderer_wins)},
+				detective wins: ${this.client.formatNumber(detective_wins)},
+				coins: ${this.client.formatNumber(coins)},
+				fastest murderer win: ${this.client.formatNumber(quickest_murderer_win_time_seconds)} s,
+				fastest detective win: ${this.client.formatNumber(quickest_detective_win_time_seconds)} s
 			`;
+			/* eslint-enable camelcase */
 		} catch {
 			return `\`${ign}\` has no MurderMystery stats`;
 		}

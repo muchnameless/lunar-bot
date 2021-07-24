@@ -34,7 +34,7 @@ module.exports = class StatsCommand extends DualCommand {
 	 */
 	calculateKD(kills, deaths) {
 		if (kills == null || deaths == null) return null;
-		return this.client.formatDecimalNumber(Math.floor((kills / deaths) * 100) / 100);
+		return this.client.formatDecimalNumber(Math.floor((kills / Math.max(deaths, 1)) * 100) / 100);
 	}
 
 	/**
