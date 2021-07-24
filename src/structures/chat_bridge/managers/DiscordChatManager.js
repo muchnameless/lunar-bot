@@ -66,6 +66,8 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @returns {Promise<string[]>}
 	 */
 	async _uploadAttachments(attachments) {
+		if (!this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
+
 		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? this.client.imgur.upload(attachment.url) : attachment.url))))
 			.map(({ value }, index) => value ?? attachments[index].url);
 	}
