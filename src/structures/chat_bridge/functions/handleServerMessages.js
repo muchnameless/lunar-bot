@@ -1,6 +1,6 @@
 'use strict';
 
-const { defaults: { ign: IGN_REGEXP }, promoteSuccess, demoteSuccess, muteSuccess, unmuteSuccess } = require('../constants/commandResponses');
+const { defaults: { ign: IGN_REGEXP }, demoteSuccess, kickSuccess, muteSuccess, promoteSuccess, unmuteSuccess } = require('../constants/commandResponses');
 const { STOP } = require('../../../constants/emojiCharacters');
 const { invisibleCharacters } = require('../constants/chatBridge');
 const { stringToMS } = require('../../../functions/util');
@@ -88,7 +88,7 @@ module.exports = async (message) => {
 	/**
 	 * [HypixelRank] IGN was kicked from the guild by [HypixelRank] IGN!
 	 */
-	if (message.content.includes('was kicked from the guild by')) {
+	if (kickSuccess.test(message.content)) {
 		message.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 		return message.forwardToDiscord();
 	}
