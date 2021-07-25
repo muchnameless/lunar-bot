@@ -3,11 +3,11 @@
 const { Interaction, SnowflakeUtil, Formatters, Constants } = require('discord.js');
 const { Op } = require('sequelize');
 const ms = require('ms');
-const { demote, invite, mute, promote, setRank, unmute, historyErrors, logErrors, topErrors } = require('../../structures/chat_bridge/constants/commandResponses');
+const { demote, kick, invite, mute, promote, setRank, unmute, historyErrors, logErrors, topErrors } = require('../../structures/chat_bridge/constants/commandResponses');
 const { removeMcFormatting } = require('../../structures/chat_bridge/functions/util');
 const { EMBED_DESCRIPTION_MAX_CHARS } = require('../../constants/discord');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../constants/database');
-const { stringToMS, trim, getIdFromString } = require('../../functions/util');
+const { stringToMS, trim, getIdFromString, autocorrect } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
 
@@ -76,6 +76,14 @@ const commonOptions = new Map([ [
 		description: 'number of days ago',
 		required: false,
 	},
+], [
+	'reason',
+	{
+		name: 'reason',
+		type: Constants.ApplicationCommandOptionTypes.STRING,
+		description: 'reason',
+		required: true,
+	},
 ] ]);
 
 
@@ -92,7 +100,7 @@ module.exports = class GuildCommand extends SlashCommand {
 			name: 'kick',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 			description: 'kick',
-			options: [ 'player' ],
+			options: [ 'player', 'reason' ],
 		}, {
 			name: 'history',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
@@ -248,6 +256,11 @@ module.exports = class GuildCommand extends SlashCommand {
 		}
 
 		if (target instanceof this.client.players.model) {
+			if (target.guildRankPriority >= (ctx.user.player?.guildRankPriority ?? 0)) return ctx.reply({
+				content: `your guild rank needs to be higher than ${target}'s`,
+				ephemeral: true,
+			});
+
 			target.mutedTill = Date.now() + duration;
 			await target.save();
 
@@ -333,33 +346,73 @@ module.exports = class GuildCommand extends SlashCommand {
 		switch (SUB_COMMAND) {
 			case 'demote': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIgn(interaction);
+				const executor = interaction.user.player;
+
+				if (!executor) return interaction.reply({
+					content: 'unable to find a linked player for your discord account',
+					ephemeral: true,
+				});
+
+				const target = this.getPlayer(interaction);
+
+				if (!target) return interaction.reply({
+					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
+					ephemeral: true,
+				});
+
+				if (target.guildRankPriority >= executor.guildRankPriority) return interaction.reply({
+					content: `your guild rank needs to be higher than ${target}'s`,
+					ephemeral: true,
+				});
 
 				return this._run(interaction, {
-					command: `g demote ${IGN}`,
-					responseRegExp: demote(IGN),
+					command: `g demote ${target}`,
+					responseRegExp: demote(target.ign),
 				});
 			}
 
 			case 'kick': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIgn(interaction);
+				const hypixelGuild = this.getHypixelGuild(interaction);
+				const executor = interaction.user.player;
+
+				if (!executor) return interaction.reply({
+					content: 'unable to find a linked player for your discord account',
+					ephemeral: true,
+				});
+
+				if (executor.guildId !== hypixelGuild.guildId) return interaction.reply({
+					content: `you need to be in ${hypixelGuild.name} to kick a player from there`,
+					ephemeral: true,
+				});
+
+				const target = this.getPlayer(interaction);
+
+				if (!target) return interaction.reply({
+					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
+					ephemeral: true,
+				});
+
+				if (target.guildRankPriority >= executor.guildRankPriority) return interaction.reply({
+					content: `your guild rank needs to be higher than ${target}'s`,
+					ephemeral: true,
+				});
 
 				return this._run(interaction, {
-					command: `g kick ${IGN}`,
-					abortRegExp: kick(IGN),
-				});
+					command: `g kick ${target} ${interaction.options.getString('reason', true)}`,
+					abortRegExp: kick(target.ign),
+				}, hypixelGuild);
 			}
 
 			case 'history': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				return this._run(interaction, {
@@ -372,7 +425,7 @@ module.exports = class GuildCommand extends SlashCommand {
 			case 'motd':
 			case 'quest': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				return this._run(interaction, {
@@ -382,7 +435,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'top': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				return this._run(interaction, {
@@ -393,7 +446,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'invite': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				const IGN = interaction.options.getString('ign', true);
@@ -408,7 +461,7 @@ module.exports = class GuildCommand extends SlashCommand {
 			case 'members':
 			case 'online': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('BRIDGER_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('BRIDGER_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				return this._runList(interaction, {
@@ -418,7 +471,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'log': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				const IGN = this.getIgn(interaction);
@@ -432,7 +485,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'member': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				const IGN = this.getIgn(interaction, true);
@@ -448,7 +501,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'mute': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				const DURATION_INPUT = interaction.options.getString('duration', true);
@@ -467,34 +520,73 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			case 'promote': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIgn(interaction);
+				const executor = interaction.user.player;
+
+				if (!executor) return interaction.reply({
+					content: 'unable to find a linked player for your discord account',
+					ephemeral: true,
+				});
+
+				const target = this.getPlayer(interaction);
+
+				if (!target) return interaction.reply({
+					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
+					ephemeral: true,
+				});
+
+				if (target.guildRankPriority >= executor.guildRankPriority - 1) return interaction.reply({
+					content: 'you can only promote up to your own rank',
+					ephemeral: true,
+				});
 
 				return this._run(interaction, {
-					command: `g promote ${IGN}`,
-					responseRegExp: promote(IGN),
+					command: `g promote ${target}`,
+					responseRegExp: promote(target.ign),
 				});
 			}
 
 			case 'setrank': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIgn(interaction);
-				const RANK = interaction.options.getString('rank', true);
+				const executor = interaction.user.player;
+
+				if (!executor) return interaction.reply({
+					content: 'unable to find a linked player for your discord account',
+					ephemeral: true,
+				});
+
+				const target = this.getPlayer(interaction);
+
+				if (!target) return interaction.reply({
+					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
+					ephemeral: true,
+				});
+
+				const hypixelGuild = this.getHypixelGuild(interaction);
+				const RANK_INPUT = interaction.options.getString('rank', true);
+				const { value: rank, similarity } = autocorrect(RANK_INPUT, hypixelGuild.ranks, 'name');
+
+				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return `unknown guild rank '${RANK_INPUT}'`;
+
+				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) return interaction.reply({
+					content: 'you can only change ranks up to your own rank',
+					ephemeral: true,
+				});
 
 				return this._run(interaction, {
-					command: `g setrank ${IGN} ${RANK}`,
-					responseRegExp: setRank(IGN, undefined, RANK),
+					command: `g setrank ${target} ${rank.name}`,
+					responseRegExp: setRank(target.ign, undefined, rank.name),
 				});
 			}
 
 			case 'unmute': {
 				await this.checkPermissions(interaction, {
-					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
+					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
 				const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
@@ -537,6 +629,11 @@ module.exports = class GuildCommand extends SlashCommand {
 				}
 
 				if (target instanceof this.client.players.model) {
+					if (target.guildRankPriority >= (interaction.user.player?.guildRankPriority ?? 0)) return interaction.reply({
+						content: `your guild rank needs to be higher than ${target}'s`,
+						ephemeral: true,
+					});
+
 					target.mutedTill = 0;
 					await target.save();
 
