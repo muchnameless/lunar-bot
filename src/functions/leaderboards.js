@@ -371,7 +371,7 @@ const self = module.exports = {
 				if (index < PLAYER_COUNT) {
 					const player = playerData[index];
 					playerList += `\n${stripIndent`
-						#${`${index + 1}`.padStart(3, '0')} : ${player}${isCompetition && player.paid ? ` ${Y_EMOJI_ALT}` : ''}
+						#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${Y_EMOJI_ALT}` : ''}
 							 > ${getEntry(player)}
 					`}`;
 				} else {
@@ -616,7 +616,7 @@ const self = module.exports = {
 			const playerRequesting = playerData[playerRequestingIndex];
 
 			playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
-				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
+				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
 					 > ${getEntry(playerRequesting)}
 			`);
 		} else if (xpType !== 'purge') {
@@ -626,7 +626,7 @@ const self = module.exports = {
 			if (playerRequesting) {
 				playerRequesting = dataConverter(playerRequesting);
 				playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
-					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
+					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
 						 > ${getEntry(playerRequesting)}
 				`);
 			} else {
@@ -791,7 +791,7 @@ const self = module.exports = {
 			const playerRequesting = playerData[playerRequestingIndex];
 
 			playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
-				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting}
+				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
 					 > ${getEntry(playerRequesting)}
 			`);
 		} else {
@@ -801,7 +801,7 @@ const self = module.exports = {
 			if (playerRequesting) {
 				playerRequesting = dataConverter(playerRequesting);
 				playerRequestingEntry = Formatters.codeBlock('ada', stripIndent`
-					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting}
+					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequesting.sortingStat) + 1}`.padStart(3, '0')} : ${playerRequesting.ign}
 						 > ${getEntry(playerRequesting)}
 				`);
 			} else {
