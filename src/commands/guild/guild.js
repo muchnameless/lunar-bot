@@ -406,7 +406,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				return this._run(interaction, {
 					command: `g kick ${target} ${interaction.options.getString('reason', true)}`,
-					abortRegExp: kick(target.ign),
+					abortRegExp: kick(target.ign, hypixelGuild.chatBridge.bot.ign),
 				}, hypixelGuild);
 			}
 

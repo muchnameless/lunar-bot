@@ -30,6 +30,7 @@ const invite = {
 	errorInAnotherGuild: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is already in (?:another|your) guild[.!]?$`,
 };
 const kick = {
+	ERROR_SELF: '^You cannot kick yourself from the guild[.!]?$',
 	ERROR_PERMS: '^You do not have permission to kick people from the guild[.!]?$',
 	success: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => `^${HYPIXEL_RANK}${target} was kicked from the guild by ${executor}[.!]?$`,
 };
@@ -146,7 +147,7 @@ module.exports = {
 	paginationErrors: (ign = IGN_DEFAULT) => new RegExp(paginationErrors.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
 	historyErrors: (ign = IGN_DEFAULT) => new RegExp(historyErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
 	invite: (ign = IGN_DEFAULT) => new RegExp(inviteResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
-	kick: (ign = IGN_DEFAULT) => new RegExp(kickResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
+	kick: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(kickResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
 	logErrors: (ign = IGN_DEFAULT) => new RegExp(logErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
 	mute: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(muteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
 	promote: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
