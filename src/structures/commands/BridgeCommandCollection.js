@@ -12,28 +12,11 @@ module.exports = class BridgeCommandCollection extends BaseCommandCollection {
 	static INVISIBLE_CATEGORIES = [ 'hidden', 'owner' ];
 
 	/**
-	 * command flags to change certain behaviours
-	 */
-	static FORCE_FLAGS = [ 'f', 'force' ];
-
-	/**
-	 * checks wether the array includes any of the FORCE_FLAGS
-	 * @param {string[]} array
-	 */
-	static force(array) {
-		return array.some(x => BridgeCommandCollection.FORCE_FLAGS.includes(x));
-	}
-
-	/**
 	 * built-in methods will use this as the constructor
 	 * that way BridgeCommandCollection#filter returns a standard Collection
 	 */
 	static get [Symbol.species]() {
 		return Collection;
-	}
-
-	static get forceFlagsAsFlags() {
-		return this.FORCE_FLAGS.map(flag => `\`-${flag}\``).join('|');
 	}
 
 	/**
