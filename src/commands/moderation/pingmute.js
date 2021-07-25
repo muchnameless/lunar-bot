@@ -24,7 +24,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 			param2 ?? {
 				aliases: [],
 				args: 1,
-				usage: '[`IGN`|`minecraftUuid`|`discordId`|`@mention`]',
+				usage: '[`IGN`|`UUID`|`discord ID`|`@mention`]',
 			},
 		);
 	}
