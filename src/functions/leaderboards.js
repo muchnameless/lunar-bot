@@ -371,7 +371,7 @@ const self = module.exports = {
 				if (index < PLAYER_COUNT) {
 					const player = playerData[index];
 					playerList += `\n${stripIndent`
-						#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${Y_EMOJI_ALT}` : ''}
+						#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${Y_EMOJI_ALT}` : ''}${player.isStaff ? ' [STAFF]' : ''}
 							 > ${getEntry(player)}
 					`}`;
 				} else {
@@ -491,9 +491,7 @@ const self = module.exports = {
 				totalStats = oneLine`
 					${Formatters.bold((playerData.reduce((acc, player) => acc + player.skillAverageGain, 0) / PLAYER_COUNT).toFixed(2))}
 					[${Formatters.bold((playerData.reduce((acc, player) => acc + player.trueAverageGain, 0) / PLAYER_COUNT).toFixed(2))}]`;
-				getEntry = player => oneLine`
-					${client.formatDecimalNumber(player.skillAverageGain, Math.floor(playerData[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length)}
-					[${client.formatDecimalNumber(player.trueAverageGain, Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
+				getEntry = player => `${client.formatDecimalNumber(player.skillAverageGain, Math.floor(playerData[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.trueAverageGain, Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
 				break;
 			}
 
@@ -503,25 +501,30 @@ const self = module.exports = {
 					const { totalWeight } = player.getWeight();
 					const startIndex = player.alchemyXpHistory.length - 1 - config.get('PURGE_LIST_OFFSET');
 					// use weight from the first time they got alch xp, assume player has not been tracked before
-					const { totalWeight: totalWeightOffet } = player.getWeightHistory(player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0));
+					const XP_TRACKING_START = player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0);
+					const { totalWeight: totalWeightOffet } = player.getWeightHistory(XP_TRACKING_START);
 					const gainedWeight = totalWeight - totalWeightOffet;
+					const gainedGuildXp = player.guildXp - player.guildXpHistory[XP_TRACKING_START];
 					return {
 						ign: player.ign,
 						discordId: player.discordId,
-						paid: player.paid,
+						isStaff: player.isStaff,
 						guildId: player.guildId,
 						gainedWeight,
 						totalWeight,
-						sortingStat: gainedWeight,
+						gainedGuildXp,
+						sortingStat: totalWeight * (1 + (gainedWeight >= 0 ? (Math.sqrt(gainedWeight) / 20) : (-0.25))) * (1 + (gainedGuildXp ** (1 / 10))),
 					};
 				};
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => a.totalWeight - b.totalWeight)
 					.sort((a, b) => a.sortingStat - b.sortingStat);
-				const PADDING_AMOUNT_GAIN = Math.floor(playerData[0]?.gainedWeight).toLocaleString(NUMBER_FORMAT).length;
+				const temp1 = Math.floor(playerData[playerData.length - 1].sortingStat).toLocaleString(NUMBER_FORMAT).length;
+				const temp2 = Math.floor(Math.max(...playerData.map(({ gainedGuildXp }) => gainedGuildXp))).toLocaleString(NUMBER_FORMAT).length;
+				const PADDING_AMOUNT_GAIN = Math.floor(Math.max(...playerData.map(({ gainedWeight }) => gainedWeight))).toLocaleString(NUMBER_FORMAT).length;
 				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...playerData.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
-				getEntry = player => `${client.formatDecimalNumber(player.gainedWeight, PADDING_AMOUNT_GAIN)} [${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)}]`;
+				getEntry = player => `${client.formatDecimalNumber(player.sortingStat, temp1)} - ${client.formatDecimalNumber(player.gainedWeight, PADDING_AMOUNT_GAIN)} [${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)}] - ${client.formatDecimalNumber(player.gainedGuildXp, temp2)}`;
 				totalStats = oneLine`
 					${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
 					[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT)}]`;
@@ -551,10 +554,7 @@ const self = module.exports = {
 					${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeightGain, 0) / PLAYER_COUNT))}
 					[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weightGain, 0) / PLAYER_COUNT))}
 					+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflowGain, 0) / PLAYER_COUNT))}]`;
-				getEntry = player => oneLine`
-					${client.formatDecimalNumber(player.totalWeightGain, Math.floor(playerData[0]?.totalWeightGain).toLocaleString(NUMBER_FORMAT).length)}
-					[${client.formatDecimalNumber(player.weightGain, Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain))).toLocaleString(NUMBER_FORMAT).length)}
-					+ ${client.formatDecimalNumber(player.overflowGain, Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
+				getEntry = player => `${client.formatDecimalNumber(player.totalWeightGain, Math.floor(playerData[0]?.totalWeightGain).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.weightGain, Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain))).toLocaleString(NUMBER_FORMAT).length)} + ${client.formatDecimalNumber(player.overflowGain, Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
 				break;
 			}
 
@@ -598,6 +598,8 @@ const self = module.exports = {
 					Current weight requirement: ${client.formatNumber(hypixelGuild.weightReq)}
 					Guild average: ${totalStats}
 					Below reqs: ${playerData.filter(({ totalWeight }) => totalWeight < weightReq).length} / ${hypixelGuild.players.size} members
+
+					"activity weight" - gained [total] weight - guild xp
 				`;
 		} else {
 			description += stripIndent`
@@ -752,10 +754,7 @@ const self = module.exports = {
 					${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT))}
 					[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight, 0) / PLAYER_COUNT))}
 					+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow, 0) / PLAYER_COUNT))}]`;
-				getEntry = player => oneLine`
-					${client.formatDecimalNumber(player.totalWeight, Math.floor(playerData[0]?.totalWeight).toLocaleString(NUMBER_FORMAT).length)}
-					[${client.formatDecimalNumber(player.weight, Math.floor(Math.max(...playerData.map(({ weight }) => weight))).toLocaleString(NUMBER_FORMAT).length)}
-					+ ${client.formatDecimalNumber(player.overflow, Math.floor(Math.max(...playerData.map(({ overflow }) => overflow))).toLocaleString(NUMBER_FORMAT).length)}]`;
+				getEntry = player => `${client.formatDecimalNumber(player.totalWeight, Math.floor(playerData[0]?.totalWeight).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.weight, Math.floor(Math.max(...playerData.map(({ weight }) => weight))).toLocaleString(NUMBER_FORMAT).length)} + ${client.formatDecimalNumber(player.overflow, Math.floor(Math.max(...playerData.map(({ overflow }) => overflow))).toLocaleString(NUMBER_FORMAT).length)}]`;
 				break;
 			}
 
@@ -775,9 +774,7 @@ const self = module.exports = {
 				totalStats = oneLine`
 					${Formatters.bold((playerData.reduce((acc, player) => acc + player.progressLevel, 0) / PLAYER_COUNT).toFixed(2))}
 					[${Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.xp, 0) / PLAYER_COUNT, 0, Math.round))} XP]`;
-				getEntry = player => oneLine`
-					${client.formatDecimalNumber(player.progressLevel, 2)}
-					[${client.formatNumber(player.xp, Math.round(playerData[0]?.xp).toLocaleString(NUMBER_FORMAT).length, Math.round)} XP]`;
+				getEntry = player => `${client.formatDecimalNumber(player.progressLevel, 2)} [${client.formatNumber(player.xp, Math.round(playerData[0]?.xp).toLocaleString(NUMBER_FORMAT).length, Math.round)} XP]`;
 				break;
 			}
 		}
