@@ -1398,7 +1398,7 @@ module.exports = class Player extends Model {
 		this.mutedTill = mutedTill;
 
 		// update guild rank
-		this.guildRankPriority = hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ?? (/^guild ?master$/i.test(rank) ? hypixelGuild.ranks.length : 1);
+		this.guildRankPriority = hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ?? (/^guild ?master$/i.test(rank) ? hypixelGuild.ranks.length + 1 : 1);
 
 		return this.save();
 	}
