@@ -5,7 +5,46 @@ const FormData = require('form-data');
 const fetch = require('node-fetch');
 const ms = require('ms');
 const { sleep } = require('../functions/util');
-const logger = require('../functions/logger');
+// const logger = require('../functions/logger');
+
+/**
+ * @typedef {object} ImageData
+ * @property {string} id
+ * @property {?string} title
+ * @property {?string} description
+ * @property {number} datetime current timestamp in seconds
+ * @property {string} type mediatype
+ * @property {boolean} animated
+ * @property {number} width
+ * @property {number} height
+ * @property {number} size
+ * @property {number} views
+ * @property {number} bandwidth
+ * @property {?*} vote null
+ * @property {boolean} favorite
+ * @property {?boolean} nsfw
+ * @property {?*} section null
+ * @property {?*} account_url null
+ * @property {number} account_id
+ * @property {boolean} is_ad
+ * @property {boolean} in_most_viral
+ * @property {boolean} has_sound
+ * @property {*[]} tags
+ * @property {number} ad_type
+ * @property {string} ad_url
+ * @property {number} edited
+ * @property {boolean} in_gallery
+ * @property {string} deletehash
+ * @property {string} name
+ * @property {string} link
+ */
+
+/**
+ * @typedef {object} UploadResponse
+ * @property {ImageData} data
+ * @property {boolean} success
+ * @property {number} status
+ */
 
 
 module.exports = class ImgurClient {
@@ -32,8 +71,6 @@ module.exports = class ImgurClient {
 		};
 
 		this.queue = new AsyncQueue();
-
-		this.status();
 	}
 
 	static BASE_URL = 'https://api.imgur.com/';
@@ -57,13 +94,11 @@ module.exports = class ImgurClient {
 					: parseInt(data, 10);
 			}
 		}
-
-		logger.error({ ...this.rateLimit, ...this.postRateLimit });
 	}
 
 	/**
 	 * @param {string} url
-	 * @returns {Promise<string>}
+	 * @returns {Promise<UploadResponse>}
 	 */
 	async upload(url) {
 		const form = new FormData();
@@ -71,11 +106,11 @@ module.exports = class ImgurClient {
 		form.append('image', url);
 		form.append('type', 'url');
 
-		return (await this._request({
+		return this._request({
 			endpoint: 'upload',
 			method: 'POST',
 			body: form,
-		})).data.link;
+		});
 	}
 
 	/**
@@ -93,15 +128,13 @@ module.exports = class ImgurClient {
 		if ('ClientLimit' in res.data) this.rateLimit.clientlimit = res.data.ClientLimit;
 		if ('ClientRemaining' in res.data) this.rateLimit.clientremaining = res.data.ClientRemaining;
 
-		logger.error({ ...this.rateLimit, ...this.postRateLimit });
-
 		return res;
 	}
 
 	/**
 	 * @param {{ checkRateLimit: boolean, endpoint: string, method: string, body: FormData }} param0
 	 */
-	async _request({ checkRateLimit = true, endpoint, method, body }) {
+	async _request({ checkRateLimit = true, endpoint, method = 'POST', body }) {
 		await this.queue.wait();
 
 		try {
@@ -139,7 +172,7 @@ module.exports = class ImgurClient {
 			this.getRateLimitHeaders(res.headers);
 
 			if (res.status !== 200) {
-				throw new Error(res);
+				throw res;
 			}
 
 			return await res.json();
