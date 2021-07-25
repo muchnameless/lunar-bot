@@ -97,7 +97,8 @@ module.exports = class TrackCommand extends SlashCommand {
 
 			case 'zombie':
 			case 'spider':
-			case 'wolf': {
+			case 'wolf':
+			case 'guild': {
 				datasets = [{
 					label: `${upperCaseFirstChar(type)} XP`,
 					backgroundColor: 'rgba(0, 0, 255, 0.25)',
