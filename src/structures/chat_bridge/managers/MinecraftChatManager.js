@@ -660,13 +660,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		await this.queue.wait();
 
-		this.retries = 0;
-
 		try {
-			return await this._sendToChat(data);
+			await this._sendToChat(data);
+			return true;
 		} catch (error) {
 			logger.error('[CHATBRIDGE MC CHAT]', error);
+			return false;
 		} finally {
+			this.retries = 0;
 			this.queue.shift();
 		}
 	}
@@ -675,7 +676,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat' or 'command'
 	 * @private
 	 * @param {SendToChatOptions} param0
-	 * @returns {Promise<boolean>}
+	 * @returns {Promise<void>}
 	 */
 	async _sendToChat({ content, prefix = '', shouldUseSpamByPass = false, discordMessage = null } = {}) {
 		// create listener
@@ -692,7 +693,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			discordMessage?.react(X_EMOJI);
 			this._tempIncrementCounter();
 			this._resetFilter();
-			return false;
+			throw error;
 		}
 
 		// listen for responses
@@ -709,10 +710,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 				if (!this.ready) {
 					discordMessage?.react(X_EMOJI);
-					return false;
+					throw response;
 				}
 
-				return true;
+				return;
 			}
 
 			// anti spam failed -> retry
@@ -723,7 +724,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				if (++this.retries === MinecraftChatManager.MAX_RETRIES) {
 					discordMessage?.react(X_EMOJI);
 					await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-					return false;
+					throw `unable to send the message, anti spam failed ${MinecraftChatManager.MAX_RETRIES} times`;
 				}
 
 				await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
@@ -734,7 +735,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			case 'blocked': {
 				this._handleForwardRejection(discordMessage, 'blocked');
 				await sleep(this.delay);
-				return false;
+				throw 'unable to send the message, hypixel\'s filter blocked it';
 			}
 
 			// message sent successfully
@@ -743,7 +744,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 					? this.delay
 					: (this._tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY),
 				);
-				return true;
+				return;
 			}
 		}
 	}
@@ -826,8 +827,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		});
 
 		// send command to chat
-		this.retries = 0;
-
 		(async () => {
 			try {
 				await this._sendToChat({
@@ -835,7 +834,9 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				});
 			} catch (error) {
 				logger.error('[CHATBRIDGE MC CHAT]', error);
+				reject(error);
 			} finally {
+				this.retries = 0;
 				this.queue.shift();
 			}
 		})();

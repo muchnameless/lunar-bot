@@ -3,7 +3,7 @@
 const { Interaction, SnowflakeUtil, Formatters, Constants } = require('discord.js');
 const { Op } = require('sequelize');
 const ms = require('ms');
-const { demote, kick, invite, mute, promote, setRank, unmute, historyErrors, logErrors, topErrors } = require('../../structures/chat_bridge/constants/commandResponses');
+const { demote, kick: { success: kickSuccess, error: kickError }, invite, mute, promote, setRank, unmute, historyErrors, logErrors, topErrors } = require('../../structures/chat_bridge/constants/commandResponses');
 const { removeMcFormatting } = require('../../structures/chat_bridge/functions/util');
 const { EMBED_DESCRIPTION_MAX_CHARS } = require('../../constants/discord');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../constants/database');
@@ -284,6 +284,65 @@ module.exports = class GuildCommand extends SlashCommand {
 	}
 
 	/**
+	 * @param {{ target: import('../../structures/database/models/Player') | string, executor: ?import('../../structures/database/models/Player'), hypixelGuild: import('../../structures/database/models/HypixelGuild'), reason: string }} param0
+	 */
+	async runKick({ target, executor, hypixelGuild, reason }) {
+		if (!executor) return {
+			content: 'unable to find a linked player to your discord account',
+			ephemeral: true,
+		};
+		if (!executor.isStaff) return {
+			content: 'you need to have an in game staff rank for this command',
+			ephemeral: true,
+		};
+		if (executor.guildId !== hypixelGuild.guildId) return {
+			content: `you need to be in ${hypixelGuild.name} to kick a player from there`,
+			ephemeral: true,
+		};
+
+		if (typeof target === 'string') return {
+			content: `no player with the IGN \`${target}\` found`,
+			ephemeral: true,
+		};
+		if (target.guildRankPriority >= executor.guildRankPriority) return {
+			content: `your guild rank needs to be higher than ${target}'s`,
+			ephemeral: true,
+		};
+
+		const LAST_KICK_TIME = this.config.get('LAST_KICK_TIME');
+		const KICK_COOLDOWN = this.config.get('KICK_COOLDOWN');
+		const TIME_LEFT = LAST_KICK_TIME + KICK_COOLDOWN - Date.now();
+
+		if (TIME_LEFT > 0) return {
+			content: `kicking is on cooldown for another ${ms(TIME_LEFT, { long: true })}`,
+			ephemeral: true,
+		};
+
+		try {
+			const res = await hypixelGuild.chatBridge.minecraft.command({
+				command: `g kick ${target} ${reason}`,
+				responseRegExp: kickSuccess(target.ign, hypixelGuild.chatBridge.bot.ign),
+				abortRegExp: kickError(target.ign),
+				rejectOnAbort: true,
+				timeout: 60_000,
+				rejectOnTimeout: true,
+			});
+
+			this.config.set('LAST_KICK_TIME', LAST_KICK_TIME + KICK_COOLDOWN);
+
+			return {
+				content: res,
+				ephemeral: false,
+			};
+		} catch (error) {
+			return {
+				content: `${error}`,
+				ephemeral: true,
+			};
+		}
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
@@ -383,38 +442,23 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const hypixelGuild = this.getHypixelGuild(interaction);
-				const executor = interaction.user.player;
-
-				if (!executor) return interaction.reply({
-					content: 'unable to find a linked player for your discord account',
-					ephemeral: true,
-				});
-				if (!executor.isStaff) return interaction.reply({
-					content: 'you need to have an in game staff rank for this command',
-					ephemeral: true,
-				});
-				if (executor.guildId !== hypixelGuild.guildId) return interaction.reply({
-					content: `you need to be in ${hypixelGuild.name} to kick a player from there`,
-					ephemeral: true,
+				const target = this.getPlayer(interaction) ?? interaction.options.getString('player', true);
+				const reason = interaction.options.getString('reason', true);
+				const { content, ephemeral } = await this.runKick({
+					target,
+					executor: interaction.user.player,
+					reason,
+					hypixelGuild: target?.guild ?? this.getHypixelGuild(interaction),
 				});
 
-				const target = this.getPlayer(interaction);
-
-				if (!target) return interaction.reply({
-					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
-					ephemeral: true,
+				return interaction.reply({
+					embeds: [
+						this.client.defaultEmbed
+							.setTitle(`/g kick ${target} ${reason}`)
+							.setDescription(Formatters.codeBlock(content)),
+					],
+					ephemeral,
 				});
-
-				if (target.guildRankPriority >= executor.guildRankPriority) return interaction.reply({
-					content: `your guild rank needs to be higher than ${target}'s`,
-					ephemeral: true,
-				});
-
-				return this._run(interaction, {
-					command: `g kick ${target} ${interaction.options.getString('reason', true)}`,
-					abortRegExp: kick(target.ign, hypixelGuild.chatBridge.bot.ign),
-				}, hypixelGuild);
 			}
 
 			case 'history': {

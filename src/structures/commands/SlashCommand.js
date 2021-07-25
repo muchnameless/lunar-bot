@@ -169,7 +169,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @returns {?import('../database/models/Player')}
 	 */
 	getPlayer(interaction, fallbackToCurrentUser = false) {
-		if (!interaction.options) {
+		if (!interaction.options._hoistedOptions.length) {
 			if (fallbackToCurrentUser) return interaction.user.player;
 			return null;
 		}

@@ -1,6 +1,5 @@
 'use strict';
 
-const { kick } = require('../../constants/commandResponses');
 const BridgeCommand = require('../../../commands/BridgeCommand');
 // const logger = require('../../../../functions/logger');
 
@@ -22,20 +21,14 @@ module.exports = class KickBridgeCommand extends BridgeCommand {
 	 * @param {import('../../HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		const IGN_INPUT = message.commandData.args.shift();
-		const target = this.client.players.getByIgn(IGN_INPUT);
+		const targetInput = message.commandData.args.shift();
+		const { content } = await this.client.commands.get('guild')?.runKick({
+			target: this.client.players.getByIgn(targetInput) ?? targetInput,
+			executor: message.player,
+			reason: message.commandData.args.join(' '),
+			hypixelGuild: message.guild,
+		});
 
-		if (!target) return message.author.send(`no player with the IGN \`${IGN_INPUT}\` found`);
-
-		const executor = message.player;
-
-		if (!executor) return message.author.send('unable to find a linked player for your account');
-		if (!executor.isStaff) return message.author.send('you need to have an in game staff rank for this command');
-		if (target.guildRankPriority >= executor.guildRankPriority) return message.author.send(`your guild rank needs to be higher than ${target}'s`);
-
-		return message.author.send(await message.guild.chatBridge.minecraft.command({
-			command: `g kick ${target} ${message.commandData.args.join(' ')}`,
-			abortRegExp: kick(target.ign, message.guild.chatBridge.bot.ign),
-		}));
+		return message.author.send(content);
 	}
 };

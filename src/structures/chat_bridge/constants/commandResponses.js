@@ -91,6 +91,13 @@ const kickResponses = [
 	genericErrors.unknownIgn,
 	genericErrors.playerNotInGuild,
 ];
+const kickResponsesError = [
+	...Object.entries(kick).flatMap((key, value) => (key !== 'success' ? value : [])),
+	genericErrors.MUST_BE_GM,
+	genericErrors.MISSING_PERMS,
+	genericErrors.unknownIgn,
+	genericErrors.playerNotInGuild,
+];
 const logErrorResponses = [
 	paginationErrors.RANGE_ERROR,
 	paginationErrors.NO_LOGS,
@@ -147,7 +154,11 @@ module.exports = {
 	paginationErrors: (ign = IGN_DEFAULT) => new RegExp(paginationErrors.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
 	historyErrors: (ign = IGN_DEFAULT) => new RegExp(historyErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
 	invite: (ign = IGN_DEFAULT) => new RegExp(inviteResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
-	kick: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(kickResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
+	kick: {
+		success: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(kick.success(target, executor), 'i'),
+		error: (target = IGN_DEFAULT) => new RegExp(kickResponsesError.map(x => (typeof x === 'function' ? x(target) : x)).join('|'), 'i'),
+		all: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(kickResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
+	},
 	logErrors: (ign = IGN_DEFAULT) => new RegExp(logErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i'),
 	mute: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(muteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
 	promote: (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i'),
