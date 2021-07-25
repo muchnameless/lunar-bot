@@ -491,13 +491,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 					const member = this.client.lgGuild?.members.cache.get(p1);
 					if (member) {
 						const { player } = member;
-						if (player) return `@${player.ign}`;
+						if (player) return `@${player}`;
 					}
 
 					const user = this.client.users.cache.get(p1);
 					if (user) {
 						const { player } = user;
-						if (player) return `@${player.ign}`;
+						if (player) return `@${player}`;
 					}
 
 					const NAME = member?.displayName ?? user?.username;

@@ -199,7 +199,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 				return Promise.all([
 					this.author.send(emoji),
 					(await this.discordMessage.catch(() => null))?.react(emoji)
-							?? this.chatBridge.discord.get(this.type)?.sendViaBot(`${this.member ?? `@${this.author.ign}`} ${emoji}`),
+							?? this.chatBridge.discord.get(this.type)?.sendViaBot(`${this.member ?? `@${this.author}`} ${emoji}`),
 				]);
 			}
 

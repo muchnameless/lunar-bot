@@ -65,4 +65,11 @@ module.exports = class HypixelMessageAuthor {
 			...options,
 		});
 	}
+
+	/**
+	 * player IGN
+	 */
+	toString() {
+		return this.ign;
+	}
 };

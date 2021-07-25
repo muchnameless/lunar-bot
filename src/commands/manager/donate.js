@@ -64,13 +64,13 @@ module.exports = class DonateCommand extends SlashCommand {
 			type: 'donation',
 		}));
 
-		interaction.reply(`registered a donation from \`${player.ign}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
+		interaction.reply(`registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Donations')
 			.addFields({
-				name: `/ah ${collector.ign}`,
-				value: Formatters.codeBlock(`${player.ign}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`),
+				name: `/ah ${collector}`,
+				value: Formatters.codeBlock(`${player}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`),
 			}),
 		);
 	}

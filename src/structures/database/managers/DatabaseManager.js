@@ -191,9 +191,9 @@ module.exports = class DatabaseManager {
 					? auction.bids.length && taxAuctions.push(auction)
 					: auction.end > NOW && ++availableAuctions;
 
-				availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: ${availableAuctions}`);
+				availableAuctionsLog.push(`\u200b > ${taxCollector}: ${availableAuctions}`);
 
-				if (auctions.meta.cached) return logger.info(`[UPDATE TAX DB]: ${taxCollector.ign}: cached data`);
+				if (auctions.meta.cached) return logger.info(`[UPDATE TAX DB]: ${taxCollector}: cached data`);
 
 				auctionsAmount += taxAuctions.length;
 
@@ -203,8 +203,8 @@ module.exports = class DatabaseManager {
 
 					if (!player) return ++unknownPlayers;
 
-					paidLog.push(`${player.ign}: ${this.client.formatNumber(amount)}`);
-					if (config.get('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player.ign} [uuid: ${bidder}] paid ${this.client.formatNumber(amount)} at /ah ${taxCollector.ign} [auctionId: ${auction.uuid}]`);
+					paidLog.push(`${player}: ${this.client.formatNumber(amount)}`);
+					if (config.get('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player} [uuid: ${bidder}] paid ${this.client.formatNumber(amount)} at /ah ${taxCollector} [auctionId: ${auction.uuid}]`);
 
 					return player.setToPaid({
 						amount,
@@ -217,12 +217,12 @@ module.exports = class DatabaseManager {
 				if (!paidLog.length) return;
 
 				taxPaidLog.push({
-					name: `/ah ${taxCollector.ign}`,
+					name: `/ah ${taxCollector}`,
 					value: Formatters.codeBlock(paidLog.join('\n')),
 				});
 			} catch (error) {
-				logger.error(`[UPDATE TAX DB]: ${taxCollector.ign}`, error);
-				availableAuctionsLog.push(`\u200b > ${taxCollector.ign}: API Error`);
+				logger.error(`[UPDATE TAX DB]: ${taxCollector}`, error);
+				availableAuctionsLog.push(`\u200b > ${taxCollector}: API Error`);
 			}
 		}));
 

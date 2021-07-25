@@ -32,6 +32,6 @@ module.exports = class PingUnmuteCommand extends PingMute {
 		player.hasDiscordPingPermission = true;
 		await player.save();
 
-		return `\`${player.ign}\` can now ping members via the chat bridge`;
+		return `\`${player}\` can now ping members via the chat bridge`;
 	}
 };

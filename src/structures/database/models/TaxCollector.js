@@ -83,7 +83,7 @@ module.exports = class TaxCollector extends Model {
 				return this.save();
 
 			default:
-				throw new Error(`[ADD AMOUNT]: ${this.ign ?? this.minecraftUuid}: unknown type '${type}'`);
+				throw new Error(`[ADD AMOUNT]: ${this}: unknown type '${type}'`);
 		}
 	}
 
@@ -104,7 +104,7 @@ module.exports = class TaxCollector extends Model {
 				return this.save();
 
 			default:
-				throw new Error(`[RESET AMOUNT]: ${this.ign ?? this.minecraftUuid}: unknown type '${type}'`);
+				throw new Error(`[RESET AMOUNT]: ${this}: unknown type '${type}'`);
 		}
 	}
 
@@ -113,5 +113,12 @@ module.exports = class TaxCollector extends Model {
 	 */
 	async remove() {
 		return this.client.taxCollectors.remove(this);
+	}
+
+	/**
+	 * player IGN or UUID
+	 */
+	toString() {
+		return this.ign ?? this.minecraftUuid;
 	}
 };

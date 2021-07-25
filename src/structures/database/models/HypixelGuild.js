@@ -428,7 +428,7 @@ module.exports = class HypixelGuild extends Model {
 						player.guildId = this.guildId;
 
 						await player.updateIgn();
-						joinedLog.push(`+\xa0${player.ign}`);
+						joinedLog.push(`+\xa0${player}`);
 
 						// try to link new player to discord
 						await (async () => {
@@ -439,7 +439,7 @@ module.exports = class HypixelGuild extends Model {
 
 								if (!discordTag) {
 									player.inDiscord = false;
-									joinedLog.push(`-\xa0${player.ign}: no linked discord`);
+									joinedLog.push(`-\xa0${player}: no linked discord`);
 									return hasError = true;
 								}
 
@@ -449,8 +449,8 @@ module.exports = class HypixelGuild extends Model {
 									if (/\D/.test(player.discordId)) await player.setValidDiscordId(discordTag).catch(logger.error); // save tag if no id is known
 									player.inDiscord = false;
 									joinedLog.push(player.discordId.includes('#')
-										? `-\xa0${player.ign}: unknown discord tag ${player.discordId}`
-										: `-\xa0${player.ign}: unknown discord ID ${player.discordId}`,
+										? `-\xa0${player}: unknown discord tag ${player.discordId}`
+										: `-\xa0${player}: unknown discord ID ${player.discordId}`,
 									);
 
 									return hasError = true;
@@ -500,11 +500,11 @@ module.exports = class HypixelGuild extends Model {
 
 				// player left the guild
 				...playersLeft.map(async (player) => {
-					leftLog.push(`-\xa0${player.ign}`);
+					leftLog.push(`-\xa0${player}`);
 
 					if (await player.removeFromGuild()) return; // return if successful
 
-					leftLog.push(`-\xa0${player.ign}: error updating roles`);
+					leftLog.push(`-\xa0${player}: error updating roles`);
 					hasError = true;
 				}),
 			]);
@@ -664,7 +664,7 @@ module.exports = class HypixelGuild extends Model {
 
 				// set player to the correct rank
 				await chatBridge.minecraft.command({
-					command: `g setrank ${player.ign} ${newRank.name}`,
+					command: `g setrank ${player} ${newRank.name}`,
 					responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
 					rejectOnTimeout: true,
 				});

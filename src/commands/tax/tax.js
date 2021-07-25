@@ -109,21 +109,21 @@ module.exports = class TaxCommand extends SlashCommand {
 
 				switch (action) {
 					case 'add':
-						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) return interaction.reply(`\`${player.ign}\` is already a tax collector`);
+						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) return interaction.reply(`\`${player}\` is already a tax collector`);
 
 						await this.client.taxCollectors.add(player);
 						if (!player.paid) player.setToPaid(); // let collector collect their own tax if they have not paid already
-						log = `\`${player.ign}\` is now a tax collector`;
+						log = `\`${player}\` is now a tax collector`;
 						break;
 
 					case 'remove': {
 						const taxCollector = this.client.taxCollectors.cache.get(player.minecraftUuid);
 
-						if (!taxCollector?.isCollecting) return interaction.reply(`\`${player.ign}\` is not a tax collector`);
+						if (!taxCollector?.isCollecting) return interaction.reply(`\`${player}\` is not a tax collector`);
 
 						// remove self paid if only the collector paid the default amount at his own ah
 						if (taxCollector.collectedTax === this.config.get('TAX_AMOUNT') && player.collectedBy === player.minecraftUuid) {
-							logger.info(`[TAX AH]: ${player.ign}: removed and reset tax paid`);
+							logger.info(`[TAX AH]: ${player}: removed and reset tax paid`);
 							await player.resetTax();
 							await taxCollector.remove();
 						} else {
@@ -131,7 +131,7 @@ module.exports = class TaxCommand extends SlashCommand {
 							taxCollector.save();
 						}
 
-						log = `\`${taxCollector.ign}\` is no longer a tax collector`;
+						log = `\`${taxCollector}\` is no longer a tax collector`;
 						break;
 					}
 
@@ -207,7 +207,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				}
 
 				if (player.paid) {
-					await interaction.awaitConfirmation(`\`${player.ign}\` is already set to paid with an amount of \`${this.client.formatNumber(await player.taxAmount ?? NaN)}\`. Overwrite this?`);
+					await interaction.awaitConfirmation(`\`${player}\` is already set to paid with an amount of \`${this.client.formatNumber(await player.taxAmount ?? NaN)}\`. Overwrite this?`);
 
 					await player.resetTax();
 				}
@@ -222,12 +222,12 @@ module.exports = class TaxCommand extends SlashCommand {
 				this.client.log(this.client.defaultEmbed
 					.setTitle('Guild Tax')
 					.addFields({
-						name: `/ah ${collector.ign}`,
-						value: Formatters.codeBlock(`${player.ign}: ${this.client.formatNumber(AMOUNT)} (manually)`),
+						name: `/ah ${collector}`,
+						value: Formatters.codeBlock(`${player}: ${this.client.formatNumber(AMOUNT)} (manually)`),
 					}),
 				);
 
-				return interaction.reply(`\`${player.ign}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
+				return interaction.reply(`\`${player}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
 			}
 
 			case 'reminder': {
@@ -297,15 +297,15 @@ module.exports = class TaxCommand extends SlashCommand {
 						return interaction.reply(`\`${PLAYER_INPUT}\` is not in the player db`);
 					}
 
-					if (!player.paid) return interaction.reply(`\`${player.ign}\` is not set to paid`);
+					if (!player.paid) return interaction.reply(`\`${player}\` is not set to paid`);
 
 					const OLD_AMOUNT = await player.taxAmount;
 
-					await interaction.awaitConfirmation(`reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})?`);
+					await interaction.awaitConfirmation(`reset tax paid from \`${player}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})?`);
 
 					await player.resetTax();
 
-					result = `reset tax paid from \`${player.ign}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})`;
+					result = `reset tax paid from \`${player}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})`;
 
 				// all players
 				} else {

@@ -95,7 +95,7 @@ module.exports = class LinkCommand extends SlashCommand {
 
 			if (!linkedUserIsDeleted) {
 				await interaction.awaitConfirmation({
-					question: `${linkedUser ?? `\`${user.id}\``} is already linked to \`${playerLinkedToId.ign}\`. Overwrite this?`,
+					question: `${linkedUser ?? `\`${user.id}\``} is already linked to \`${playerLinkedToId}\`. Overwrite this?`,
 					allowedMentions: { parse: [] },
 				});
 			}
@@ -122,13 +122,13 @@ module.exports = class LinkCommand extends SlashCommand {
 
 			if (!linkedUserIsDeleted) {
 				if (player.discordId === user.id) return interaction.reply({
-					content: `\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}`,
+					content: `\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}`,
 					allowedMentions: { parse: [] },
 				});
 
 				await interaction.awaitConfirmation({
 					question: stripIndents`
-						\`${player.ign}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}. Overwrite this?
+						\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}. Overwrite this?
 						Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 					`,
 					allowedMentions: { parse: [] },
@@ -149,13 +149,13 @@ module.exports = class LinkCommand extends SlashCommand {
 		// no discord member for the user to link found
 		if (!discordMember) {
 			await player.link(user.id);
-			return interaction.reply(`\`${player.ign}\` linked to \`${user.id}\` but could not be found on the Lunar Guard discord server`);
+			return interaction.reply(`\`${player}\` linked to \`${user.id}\` but could not be found on the Lunar Guard discord server`);
 		}
 
 		// user to link is in discord -> update roles
 		await player.link(discordMember, `linked by ${interaction.author.tag}`);
 
-		let reply = `\`${player.ign}\` linked to ${discordMember}`;
+		let reply = `\`${player}\` linked to ${discordMember}`;
 
 		if (!discordMember.roles.cache.has(this.config.get('VERIFIED_ROLE_ID')))	{
 			reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.config.get('VERIFIED_ROLE_ID'))?.name ?? this.config.get('VERIFIED_ROLE_ID')} role)`;

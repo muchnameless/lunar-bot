@@ -571,7 +571,7 @@ module.exports = class PlayerManager extends ModelManager {
 
 				log.push({
 					guildId: player.guildId,
-					mainProfileUpdate: `-\xa0${player.ign}: ${result.oldProfileName} -> ${result.newProfileName}`,
+					mainProfileUpdate: `-\xa0${player}: ${result.oldProfileName} -> ${result.newProfileName}`,
 				});
 			} catch (error) {
 				logger.error('[UPDATE MAIN PROFILE]', error);
@@ -579,7 +579,7 @@ module.exports = class PlayerManager extends ModelManager {
 				if (typeof error === 'string') {
 					log.push({
 						guildId: player.guildId,
-						mainProfileUpdate: `-\xa0${player.ign}: ${error.message}`,
+						mainProfileUpdate: `-\xa0${player}: ${error.message}`,
 					});
 				}
 			}

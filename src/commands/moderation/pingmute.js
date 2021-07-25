@@ -37,7 +37,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 		player.hasDiscordPingPermission = false;
 		await player.save();
 
-		return `\`${player.ign}\` can no longer ping members via the chat bridge`;
+		return `\`${player}\` can no longer ping members via the chat bridge`;
 	}
 
 	/**

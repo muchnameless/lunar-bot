@@ -1585,7 +1585,7 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * player nickname
+	 * player IGN
 	 */
 	toString() {
 		return this.ign;

@@ -64,7 +64,7 @@ module.exports = class XpCommand extends SlashCommand {
 
 		let embed = new MessageEmbed()
 			.setColor(this.config.get('EMBED_BLUE'))
-			.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
+			.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
 			// .setTitle(`${escapeIgn(player.ign)}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`)
 			// .setURL(player.url)
 			// .setThumbnail(player.image)

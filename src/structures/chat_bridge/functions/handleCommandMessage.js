@@ -38,7 +38,7 @@ module.exports = async (message) => {
 
 	// no command, only ping or prefix
 	if (!message.commandData.name) {
-		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
+		logger.info(`${message.author} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
 
 		if (!client.config.get('PREFIXES').slice(1)
 			.includes(message.commandData.prefix)
@@ -52,7 +52,7 @@ module.exports = async (message) => {
 	const { command } = message.commandData;
 
 	// wrong command
-	if (!command) return logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
+	if (!command) return logger.info(`${message.author} tried to execute '${message.content}' in '${message.type}' which is not a valid command`);
 
 	// server only command in DMs
 	if (command.guildOnly && message.type !== GUILD) {
@@ -71,14 +71,14 @@ module.exports = async (message) => {
 			const { lgGuild } = client;
 
 			if (!lgGuild) {
-				logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' with the Lunar Guard Discord server being unreachable`);
+				logger.info(`${message.author} tried to execute '${message.content}' in '${message.type}' with the Lunar Guard Discord server being unreachable`);
 				return message.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles}) from the Lunar Guard Discord server which is unreachable at the moment`);
 			}
 
 			const member = await player?.discordMember;
 
 			if (!member) {
-				logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' and could not be found within the Lunar Guard Discord Server`);
+				logger.info(`${message.author} tried to execute '${message.content}' in '${message.type}' and could not be found within the Lunar Guard Discord Server`);
 				return message.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild.name} Discord server which you can not be found in`);
 			}
 
@@ -90,7 +90,7 @@ module.exports = async (message) => {
 
 		// prevent from executing owner only command
 		} else if (command.category === 'owner') {
-			return logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' which is an owner only command`);
+			return logger.info(`${message.author} tried to execute '${message.content}' in '${message.type}' which is an owner only command`);
 		}
 
 		// command cooldowns
@@ -105,7 +105,7 @@ module.exports = async (message) => {
 				if (NOW < EXPIRATION_TIME) {
 					const TIME_LEFT = ms(EXPIRATION_TIME - NOW, { long: true });
 
-					logger.info(`${message.author.ign}${message.member ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.type}-chat ${TIME_LEFT} before the cooldown expires`);
+					logger.info(`${message.author}${message.member ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' in ${message.type}-chat ${TIME_LEFT} before the cooldown expires`);
 
 					return message.author.send(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\``);
 				}
@@ -126,16 +126,16 @@ module.exports = async (message) => {
 		reply.push(`the '${command.name}' command has${typeof command.args === 'number' ? ` ${command.args}` : ''} mandatory argument${command.args === 1 ? '' : 's'}`);
 		if (command.usage) reply.push(`use: ${command.usageInfo}`);
 
-		logger.info(`${message.author.ign} tried to execute '${message.content}' in '${message.type}' without providing the mandatory arguments`);
+		logger.info(`${message.author} tried to execute '${message.content}' in '${message.type}' without providing the mandatory arguments`);
 		return message.author.send(reply.join('\n'));
 	}
 
 	// execute command
 	try {
-		logger.info(`'${message.content}' was executed by ${message.author.ign} in '${message.type}'`);
+		logger.info(`'${message.content}' was executed by ${message.author} in '${message.type}'`);
 		await command.runInGame(message);
 	} catch (error) {
-		logger.error(`An error occured while ${message.author.ign} tried to execute ${message.content} in '${message.type}'`, error);
+		logger.error(`An error occured while ${message.author} tried to execute ${message.content} in '${message.type}'`, error);
 		message.author.send(`an error occured while executing the '${command.name}' command:\n${error}`);
 	}
 };

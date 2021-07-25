@@ -30,7 +30,7 @@ module.exports = class GuildMemberUpdateEvent extends Event {
 
 			if (!player) return logger.info(`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`);
 
-			logger.info(`[GUILD MEMBER UPDATE]: ${player.ign} | ${newMember.user.tag} received bridger role`);
+			logger.info(`[GUILD MEMBER UPDATE]: ${player} | ${newMember.user.tag} received bridger role`);
 
 			if (player.notInGuild) {
 				player.guildId = GUILD_ID_BRIDGER;

@@ -229,7 +229,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		try {
 			return await this.channel.send({
-				content: this.chatBridge.discord.parseContent(`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author.ign}`}, `}${prefix}${content}`),
+				content: this.chatBridge.discord.parseContent(`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `}${prefix}${content}`),
 				reply: {
 					messageReference: discordMessage,
 				},

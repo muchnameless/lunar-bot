@@ -50,7 +50,7 @@ module.exports = class UnlinkCommand extends SlashCommand {
 
 		return interaction.reply({
 			content: oneLine`
-				\`${player.ign}\` is no longer linked to ${currentLinkedMember ?? `\`${OLD_LINKED_ID}\``}
+				\`${player}\` is no longer linked to ${currentLinkedMember ?? `\`${OLD_LINKED_ID}\``}
 				${WAS_SUCCESSFUL ? '' : ' (unable to update the currently linked member)'}
 			`,
 			allowedMentions: { parse: [] },

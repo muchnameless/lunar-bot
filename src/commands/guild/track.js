@@ -133,7 +133,7 @@ module.exports = class TrackCommand extends SlashCommand {
 		return interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
-					.setAuthor(`${player.ign}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
+					.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
 					.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
 					.setImage('attachment://file.jpg'),
 			],
