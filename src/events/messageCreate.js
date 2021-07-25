@@ -1,6 +1,5 @@
 'use strict';
 
-const { MessageFlags } = require('discord.js');
 const { FORWARD_TO_GC } = require('../constants/emojiCharacters');
 const { escapeRegex } = require('../functions/util');
 const Event = require('../structures/events/Event');
@@ -20,9 +19,6 @@ module.exports = class MessageCreateEvent extends Event {
 	 * @param {boolean} [isEdit=false]
 	 */
 	async _handleDiscordMessage(message, isEdit = false) {
-		// ignore ephemeral messages
-		if (message.flags.has(MessageFlags.FLAGS.EPHEMERAL)) return;
-
 		// channel specific triggers
 		if (message.channel.id === this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) {
 			message.react(FORWARD_TO_GC);
