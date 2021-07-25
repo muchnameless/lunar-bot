@@ -68,24 +68,17 @@ module.exports = async (message) => {
 		const { requiredRoles } = command;
 
 		if (requiredRoles) {
-			const { lgGuild } = client;
-
-			if (!lgGuild) {
-				logger.info(`${message.author} tried to execute '${message.content}' in '${message.type}' with the Lunar Guard Discord server being unreachable`);
-				return message.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles}) from the Lunar Guard Discord server which is unreachable at the moment`);
-			}
-
-			const member = await player?.discordMember;
+			const { member } = message;
 
 			if (!member) {
 				logger.info(`${message.author} tried to execute '${message.content}' in '${message.type}' and could not be found within the Lunar Guard Discord Server`);
-				return message.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild.name} Discord server which you can not be found in`);
+				return message.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => member.guild.roles.cache.get(roleId)?.name ?? roleId)}) from the ${member.guild.name} Discord server which you can not be found in`);
 			}
 
 			// check for req roles
 			if (!member.roles.cache.some((_, roleId) => requiredRoles.includes(roleId))) {
 				logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in '${message.type}' without a required role`);
-				return message.author.send(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the Lunar Guard Discord Server`);
+				return message.author.send(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleId => member.guild.roles.cache.get(roleId)?.name ?? roleId)}) from the Lunar Guard Discord Server`);
 			}
 
 		// prevent from executing owner only command
@@ -96,7 +89,7 @@ module.exports = async (message) => {
 		// command cooldowns
 		if (command.cooldown !== 0) {
 			const NOW = Date.now();
-			const COOLDOWN_TIME = (command.cooldown ?? client.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1000;
+			const COOLDOWN_TIME = (command.cooldown ?? client.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000;
 			const IDENTIFIER = message.member?.id ?? message.author.ign;
 
 			if (command.timestamps.has(IDENTIFIER)) {
