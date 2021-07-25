@@ -285,6 +285,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 	/**
 	 * @param {{ target: import('../../structures/database/models/Player') | string, executor: ?import('../../structures/database/models/Player'), hypixelGuild: import('../../structures/database/models/HypixelGuild'), reason: string }} param0
+	 * @returns {Promise<{ content: string, ephemeral: boolean }>}
 	 */
 	async runKick({ target, executor, hypixelGuild, reason }) {
 		if (!executor) return {
