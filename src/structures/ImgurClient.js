@@ -31,12 +31,6 @@ module.exports = class ImgurClient {
 			reset: null,
 		};
 
-		this.timeouts = {
-			user: null,
-			client: null,
-			post: null,
-		};
-
 		this.queue = new AsyncQueue();
 
 		this.status();
@@ -59,7 +53,7 @@ module.exports = class ImgurClient {
 
 			if (data !== null) {
 				this.postRateLimit[type] = type.endsWith('reset')
-					? Date.now() + (parseInt(data, 10) * 1_000)
+					? Date.now() + (parseInt(data, 10) * 1_000) // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
 					: parseInt(data, 10);
 			}
 		}
@@ -113,48 +107,24 @@ module.exports = class ImgurClient {
 		try {
 			if (checkRateLimit) {
 				if (this.rateLimit.userremaining === 0) {
-					const RESET_TIME = (this.rateLimit.userreset * 1_000) - Date.now();
+					const RESET_TIME = (this.rateLimit.userreset * 1_000) - Date.now(); // x-ratelimit-userreset is a timestamp in seconds for next reset
 
-					if (RESET_TIME > 60) {
-						this.timeouts.user ??= setTimeout(() => {
-							this.rateLimit.userremaining = null;
-							this.timeouts.user = null;
-						}, RESET_TIME);
-
-						throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
-					}
-
-					await sleep(RESET_TIME);
+					if (RESET_TIME > 60_000) throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
 				if (this.rateLimit.clientremaining === 0) {
-					const RESET_TIME = (this.rateLimit.clientreset * 1_000) - Date.now();
+					const RESET_TIME = (this.rateLimit.clientreset * 1_000) - Date.now(); // x-ratelimit-clientreset is a timestamp in seconds for next reset (???) - untested
 
-					if (RESET_TIME > 60) {
-						this.timeouts.client ??= setTimeout(() => {
-							this.rateLimit.clientremaining = null;
-							this.timeouts.client = null;
-						}, RESET_TIME);
-
-						throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
-					}
-
-					await sleep(RESET_TIME);
+					if (RESET_TIME > 60_000) throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
 				if (this.postRateLimit.remaining === 0) {
 					const RESET_TIME = this.postRateLimit.reset;
 
-					if (RESET_TIME > 60) {
-						this.timeouts.post ??= setTimeout(() => {
-							this.postRateLimit.remaining = null;
-							this.timeouts.post = null;
-						}, RESET_TIME);
-
-						throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
-					}
-
-					await sleep(RESET_TIME);
+					if (RESET_TIME > 60_000) throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 			}
 
