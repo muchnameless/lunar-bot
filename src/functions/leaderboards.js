@@ -513,7 +513,7 @@ const self = module.exports = {
 						gainedWeight,
 						totalWeight,
 						gainedGuildXp,
-						sortingStat: totalWeight * (1 + (gainedWeight >= 0 ? (Math.sqrt(gainedWeight) / 20) : (-0.25))) * Math.max(gainedGuildXp ** (1 / 10), 1),
+						sortingStat: totalWeight * (1 + (gainedWeight >= 0 ? (Math.sqrt(gainedWeight) / 20) : (-0.25))) * (gainedGuildXp > 1 ? gainedGuildXp ** (1 / 10) : 1),
 					};
 				};
 				playerData = playerDataRaw
