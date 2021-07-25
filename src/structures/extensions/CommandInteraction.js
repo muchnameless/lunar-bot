@@ -46,7 +46,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	get logInfo() {
 		return [
 			this.fullCommandName,
-			...this.options._options.map(({ name, value }) => `${name}: ${value}`),
+			...this.options._hoistedOptions.map(({ name, value }) => `${name}: ${value}`),
 		].filter(x => x !== null).join(' ');
 	}
 
@@ -71,8 +71,8 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	get fullCommandName() {
 		return [
 			this.commandName,
-			this.options._group,
-			this.options._subCommand,
+			this.options.getSubCommandGroup(false),
+			this.options.getSubCommand(false),
 		].filter(x => x !== null).join(' ');
 	}
 
