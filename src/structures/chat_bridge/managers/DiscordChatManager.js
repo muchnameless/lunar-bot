@@ -68,8 +68,19 @@ module.exports = class DiscordChatManager extends ChatManager {
 	async _uploadAttachments(attachments) {
 		if (!this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
 
-		return (await Promise.allSettled(attachments.map(attachment => (attachment.height !== null ? this.client.imgur.upload(attachment.url) : attachment.url))))
-			.map(({ value }, index) => value ?? attachments[index].url);
+		return Promise.all(attachments.map(async ({ contentType, url }) => {
+			// only images can be uploaded by URL https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
+			if (contentType.startsWith('image')) {
+				try {
+					return (await this.client.imgur.upload(url)).data.link;
+				} catch (error) {
+					logger.error('[UPLOAD ATTACHMENTS]', error);
+					return url;
+				}
+			}
+
+			return url; // no image (e.g. video)
+		}));
 	}
 
 	/**
