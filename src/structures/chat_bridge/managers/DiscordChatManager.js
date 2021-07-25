@@ -70,7 +70,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		return Promise.all(attachments.map(async ({ contentType, url }) => {
 			// only images can be uploaded by URL https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
-			if (contentType.startsWith('image')) {
+			if (this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType.startsWith(type))) {
 				try {
 					return (await this.client.imgur.upload(url)).data.link;
 				} catch (error) {
