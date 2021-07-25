@@ -30,7 +30,7 @@ module.exports = class KickBridgeCommand extends BridgeCommand {
 		const executor = message.player;
 
 		if (!executor) return message.author.send('unable to find a linked player for your account');
-
+		if (!executor.isStaff) return message.author.send('you need to have an in game staff rank for this command');
 		if (target.guildRankPriority >= executor.guildRankPriority) return message.author.send(`your guild rank needs to be higher than ${target}'s`);
 
 		return message.author.send(await message.guild.chatBridge.minecraft.command({

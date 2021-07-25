@@ -355,6 +355,10 @@ module.exports = class GuildCommand extends SlashCommand {
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
+				if (!executor.isStaff) return interaction.reply({
+					content: 'you need to have an in game staff rank for this command',
+					ephemeral: true,
+				});
 
 				const target = this.getPlayer(interaction);
 
@@ -386,7 +390,10 @@ module.exports = class GuildCommand extends SlashCommand {
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-
+				if (!executor.isStaff) return interaction.reply({
+					content: 'you need to have an in game staff rank for this command',
+					ephemeral: true,
+				});
 				if (executor.guildId !== hypixelGuild.guildId) return interaction.reply({
 					content: `you need to be in ${hypixelGuild.name} to kick a player from there`,
 					ephemeral: true,
@@ -529,6 +536,10 @@ module.exports = class GuildCommand extends SlashCommand {
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
+				if (!executor.isStaff) return interaction.reply({
+					content: 'you need to have an in game staff rank for this command',
+					ephemeral: true,
+				});
 
 				const target = this.getPlayer(interaction);
 
@@ -557,6 +568,10 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				if (!executor) return interaction.reply({
 					content: 'unable to find a linked player for your discord account',
+					ephemeral: true,
+				});
+				if (!executor.isStaff) return interaction.reply({
+					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
