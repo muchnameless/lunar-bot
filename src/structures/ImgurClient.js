@@ -3,6 +3,7 @@
 const { AsyncQueue } = require('@sapphire/async-queue');
 const FormData = require('form-data');
 const fetch = require('node-fetch');
+const ms = require('ms');
 const { sleep } = require('../functions/util');
 const logger = require('../functions/logger');
 
@@ -47,8 +48,6 @@ module.exports = class ImgurClient {
 	 * @param {import('node-fetch').Headers} headers
 	 */
 	getRateLimitHeaders(headers) {
-		logger.error({ headers });
-
 		for (const type of Object.keys(this.rateLimit)) {
 			const data = headers.get(`x-ratelimit-${type}`);
 
@@ -58,10 +57,14 @@ module.exports = class ImgurClient {
 		for (const type of Object.keys(this.postRateLimit)) {
 			const data = headers.get(`x-post-rate-limit-${type}`);
 
-			if (data !== null) this.postRateLimit[type] = parseInt(data, 10);
+			if (data !== null) {
+				this.postRateLimit[type] = type.endsWith('reset')
+					? Date.now() + (parseInt(data, 10) * 1_000)
+					: parseInt(data, 10);
+			}
 		}
 
-		logger.error(this.rateLimit, this.postRateLimit);
+		logger.error({ ...this.rateLimit, ...this.postRateLimit });
 	}
 
 	/**
@@ -82,7 +85,7 @@ module.exports = class ImgurClient {
 	}
 
 	/**
-	 * 
+	 * ratelimit status / remaining credits
 	 */
 	async status() {
 		const res = await this._request({
@@ -90,15 +93,13 @@ module.exports = class ImgurClient {
 			endpoint: 'credits',
 		});
 
-		logger.debug({ before: this.rateLimit })
-
 		if ('UserLimit' in res.data) this.rateLimit.userlimit = res.data.UserLimit;
 		if ('UserRemaining' in res.data) this.rateLimit.userremaining = res.data.UserRemaining;
 		if ('UserReset' in res.data) this.rateLimit.userreset = res.data.UserReset;
 		if ('ClientLimit' in res.data) this.rateLimit.clientlimit = res.data.ClientLimit;
 		if ('ClientRemaining' in res.data) this.rateLimit.clientremaining = res.data.ClientRemaining;
 
-		logger.debug({ after: this.rateLimit })
+		logger.error({ ...this.rateLimit, ...this.postRateLimit });
 
 		return res;
 	}
@@ -112,46 +113,50 @@ module.exports = class ImgurClient {
 		try {
 			if (checkRateLimit) {
 				if (this.rateLimit.userremaining === 0) {
-					if (this.rateLimit.userreset > 60) {
+					const RESET_TIME = (this.rateLimit.userreset * 1_000) - Date.now();
+
+					if (RESET_TIME > 60) {
 						this.timeouts.user ??= setTimeout(() => {
 							this.rateLimit.userremaining = null;
 							this.timeouts.user = null;
-						}, this.rateLimit.userreset * 1_000);
+						}, RESET_TIME);
 
-						throw new Error(`imgur user rate limit, resets in ${this.rateLimit.userreset}s`);
+						throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					}
 
-					await sleep(this.rateLimit.userreset * 1_000);
+					await sleep(RESET_TIME);
 				}
 
 				if (this.rateLimit.clientremaining === 0) {
-					if (this.rateLimit.clientreset > 60) {
+					const RESET_TIME = (this.rateLimit.clientreset * 1_000) - Date.now();
+
+					if (RESET_TIME > 60) {
 						this.timeouts.client ??= setTimeout(() => {
 							this.rateLimit.clientremaining = null;
 							this.timeouts.client = null;
-						}, this.rateLimit.clientreset * 1_000);
+						}, RESET_TIME);
 
-						throw new Error(`imgur client rate limit, resets in ${this.rateLimit.clientreset}s`);
+						throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					}
 
-					await sleep(this.rateLimit.clientreset * 1_000);
+					await sleep(RESET_TIME);
 				}
 
 				if (this.postRateLimit.remaining === 0) {
-					if (this.postRateLimit.reset > 60) {
+					const RESET_TIME = this.postRateLimit.reset;
+
+					if (RESET_TIME > 60) {
 						this.timeouts.post ??= setTimeout(() => {
 							this.postRateLimit.remaining = null;
 							this.timeouts.post = null;
-						}, this.postRateLimit.reset * 1_000);
+						}, RESET_TIME);
 
-						throw new Error(`imgur post rate limit, resets in ${this.postRateLimit.reset}s`);
+						throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					}
 
-					await sleep(this.postRateLimit.reset * 1_000);
+					await sleep(RESET_TIME);
 				}
 			}
-
-			logger.debug(`${ImgurClient.BASE_URL}${this.apiVersion}/${endpoint}/`)
 
 			const res = await fetch(`${ImgurClient.BASE_URL}${this.apiVersion}/${endpoint}/`, {
 				method,
