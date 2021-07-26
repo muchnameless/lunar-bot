@@ -22,13 +22,6 @@ class LunarMessage extends Structures.get('Message') {
 	}
 
 	/**
-	 * id of the channel the message was sent in
-	 */
-	get channelId() {
-		return this.channel.id;
-	}
-
-	/**
 	 * wether the command was send by a non-bot user account
 	 */
 	get isUserMessage() {
