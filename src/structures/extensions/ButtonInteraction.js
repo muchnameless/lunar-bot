@@ -87,7 +87,7 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 				}
 
 				// ephemeral defer and non-ephemeral followUp
-				await this.deleteReply();
+				await this.editReply('\u200b'); // ephemeral empty message
 				const message = await this.followUp(data);
 				return this._handleReplyMessage(data, message);
 			}
