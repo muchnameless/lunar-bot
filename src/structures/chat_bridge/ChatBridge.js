@@ -219,8 +219,8 @@ module.exports = class ChatBridge extends EventEmitter {
 		this.guild = null;
 
 		// clear DiscordChatManagers
-		this.discord.channelsByIds.clear();
-		this.discord.channelsByType.clear();
+		// this.discord.channelsByIds.clear();
+		// this.discord.channelsByType.clear();
 
 		return this;
 	}
