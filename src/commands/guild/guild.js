@@ -456,7 +456,9 @@ module.exports = class GuildCommand extends SlashCommand {
 							.setTitle(`/g kick ${target} ${reason}`)
 							.setDescription(Formatters.codeBlock(content)),
 					],
-					ephemeral: interaction.useEphemeral || ephemeral,
+					ephemeral: interaction.options.get('visibility') === null
+						? interaction.useEphemeral || ephemeral
+						: interaction.useEphemeral,
 				});
 			}
 
