@@ -310,9 +310,7 @@ module.exports = class GuildCommand extends SlashCommand {
 			ephemeral: true,
 		};
 
-		const LAST_KICK_TIME = this.config.get('LAST_KICK_TIME');
-		const KICK_COOLDOWN = this.config.get('KICK_COOLDOWN');
-		const TIME_LEFT = LAST_KICK_TIME + KICK_COOLDOWN - Date.now();
+		const TIME_LEFT = this.config.get('LAST_KICK_TIME') + this.config.get('KICK_COOLDOWN') - Date.now();
 
 		if (TIME_LEFT > 0) return {
 			content: `kicking is on cooldown for another ${ms(TIME_LEFT, { long: true })}`,
@@ -329,7 +327,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				rejectOnTimeout: true,
 			});
 
-			this.config.set('LAST_KICK_TIME', LAST_KICK_TIME + KICK_COOLDOWN);
+			this.config.set('LAST_KICK_TIME', Date.now());
 
 			return {
 				content: res,
