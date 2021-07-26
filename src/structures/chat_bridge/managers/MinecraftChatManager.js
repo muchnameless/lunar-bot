@@ -703,13 +703,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		]);
 
 		switch (response) {
-			// collector collected nothing, sleep won the race
+			// collector collected nothing, sleep won the race. this happens for all commands which return a "system reply"
 			case 'timeout': {
 				this._tempIncrementCounter();
 				this._resetFilter();
 
-				if (!this.ready) {
-					discordMessage?.react(X_EMOJI);
+				// only throw for chat messages when the bot was not ready yet
+				if (discordMessage && !this.ready) {
+					discordMessage.react(X_EMOJI);
 					throw response;
 				}
 
@@ -833,7 +834,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 					content: trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1),
 				});
 			} catch (error) {
-				logger.error('[CHATBRIDGE MC CHAT]', error);
+				logger.error('[CHATBRIDGE MC COMMAND]', error);
 				reject(error);
 			} finally {
 				this.retries = 0;
