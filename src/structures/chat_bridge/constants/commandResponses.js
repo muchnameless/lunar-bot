@@ -33,7 +33,7 @@ const invite = {
 const kick = {
 	ERROR_SELF: '^You cannot kick yourself from the guild[.!]?$',
 	ERROR_PERMS: '^You do not have permission to kick people from the guild[.!]?$',
-	success: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => `^${HYPIXEL_RANK}${target} was kicked from the guild by ${executor}[.!]?$`,
+	success: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => `^${HYPIXEL_RANK}${target} was kicked from the guild by ${HYPIXEL_RANK}${executor}[.!]?$`,
 };
 const mute = {
 	ERROR_GM: '^You cannot mute the guild master[.!]?$',
