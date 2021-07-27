@@ -13,7 +13,7 @@ module.exports = class AhCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
-			description: 'SkyBlock acutions',
+			description: 'SkyBlock auctions',
 			options: [{
 				name: 'ign',
 				type: Constants.ApplicationCommandOptionTypes.STRING,
