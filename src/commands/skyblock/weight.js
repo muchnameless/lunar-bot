@@ -52,26 +52,28 @@ module.exports = class WeightCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} ignOrUuid command arguments
-	 * @param {string} [profileName]
+	 * @param {string} [profileNameInput]
 	 */
-	async _run(ctx, ignOrUuid, profileName) {
+	async _run(ctx, ignOrUuid, profileNameInput) {
 		try {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
 
 			if (!profiles.length) return `${ign} has no SkyBlock profiles`;
 
+			const PROFILE_NAME = profileNameInput?.replace(/[^a-z]/gi, '');
+
 			let weightData;
 
-			if (!profileName) {
+			if (!PROFILE_NAME) {
 				weightData = profiles
 					.map(({ cute_name: name, members }) => ({ name, ...getWeight(members[uuid]) }))
 					.sort(({ totalWeight: aTotal }, { totalWeight: bTotal }) => aTotal - bTotal)
 					.pop();
 			} else {
-				const { value: profile, similarity } = autocorrect(profileName, profiles, 'cute_name');
+				const { value: profile, similarity } = autocorrect(PROFILE_NAME, profiles, 'cute_name');
 
-				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return `${ign} has no profile named '${upperCaseFirstChar(profileName)}'`;
+				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return `${ign} has no profile named '${upperCaseFirstChar(PROFILE_NAME)}'`;
 
 				weightData = {
 					name: profile.cute_name,
