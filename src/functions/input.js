@@ -10,8 +10,11 @@ const mojang = require('../api/mojang');
  * @returns {Promise<import('../structures/Mojang').MojangResult>}
  */
 module.exports.getUuidAndIgn = async (ctx, ignOrUuid) => {
+	// remove non-alphanumeric characters
+	const IGN_OR_UUID = ignOrUuid?.replace(/\W/g, '');
+
 	// ign is first arg
-	if (ignOrUuid) return mojang.ignOrUuid(ignOrUuid);
+	if (IGN_OR_UUID) return mojang.ignOrUuid(IGN_OR_UUID);
 
 	// no args -> try to get player object
 	const { player } = ctx.author;
