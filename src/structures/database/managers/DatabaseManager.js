@@ -309,11 +309,11 @@ module.exports = class DatabaseManager {
 		const { config, players } = this.modelManagers;
 
 		// the hypxiel api encountered an error before
-		if (this.client.config.get('HYPIXEL_API_ERROR')) {
+		if (config.get('HYPIXEL_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) return logger.warn('[DB UPDATE]: auto updates disabled');
+			if (new Date().getMinutes() >= config.get('DATABASE_UPDATE_INTERVAL')) return logger.warn('[DB UPDATE]: auto updates disabled');
 
-			this.client.config.set('HYPIXEL_API_ERROR', false);
+			config.set('HYPIXEL_API_ERROR', false);
 		}
 
 		// update player db
