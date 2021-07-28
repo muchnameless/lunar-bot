@@ -1,7 +1,7 @@
 'use strict';
 
 const { Constants } = require('discord.js');
-const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
+const { PROFILE_NAMES, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT, GUILD_ID_ALL } = require('../../constants/database');
 const { validateDiscordId, validateMinecraftUuid } = require('../../functions/stringValidators');
 const BaseCommand = require('./BaseCommand');
@@ -115,6 +115,16 @@ module.exports = class SlashCommand extends BaseCommand {
 			description: 'Δ offset',
 			required: false,
 			choices: Object.keys(XP_OFFSETS_SHORT).map(x => ({ name: x, value: XP_OFFSETS_CONVERTER[x] })),
+		};
+	}
+
+	static get SKYBLOCK_PROFILE_OPTION() {
+		return {
+			name: 'profile',
+			type: Constants.ApplicationCommandOptionTypes.STRING,
+			description: 'SkyBlock profile name',
+			required: false,
+			choices: PROFILE_NAMES.map(name => ({ name, value: name })),
 		};
 	}
 

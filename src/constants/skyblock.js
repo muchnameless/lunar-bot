@@ -140,6 +140,30 @@ module.exports = {
 
 	MAYOR_CHANGE_INTERVAL: 446_400_000,
 
+	PROFILE_NAMES: [
+		'Apple',
+		'Banana',
+		'Blueberry',
+		'Coconut',
+		'Cucumber',
+		'Grapes',
+		'Kiwi',
+		'Lemon',
+		'Lime',
+		'Mango',
+		'Orange',
+		'Papaya',
+		'Peach',
+		'Pear',
+		'Pineapple',
+		'Pomegranate',
+		'Raspberry',
+		'Strawberry',
+		'Tomato',
+		'Watermelon',
+		'Zucchini',
+	],
+
 	/**
 	 * skills
 	 */
