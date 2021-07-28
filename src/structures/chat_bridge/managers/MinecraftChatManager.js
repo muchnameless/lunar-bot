@@ -682,10 +682,11 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		try {
 			// send message to in game chat
-			this.bot.chat(shouldUseSpamByPass
-				? this._hypixelSpamBypass(content, prefix)
-				: `${prefix}${content}`,
-			);
+			this.bot.write('chat', {
+				message: shouldUseSpamByPass
+					? this._hypixelSpamBypass(content, prefix)
+					: `${prefix}${content}`,
+			});
 		} catch (error) {
 			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
 			discordMessage?.react(X_EMOJI);
