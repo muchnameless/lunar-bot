@@ -19,7 +19,7 @@ module.exports = class AhCommand extends SlashCommand {
 				type: Constants.ApplicationCommandOptionTypes.STRING,
 				description: 'IGN | UUID',
 				required: false,
-			}],
+			}, SlashCommand.SKYBLOCK_PROFILE_OPTION ],
 			defaultPermission: true,
 			cooldown: 0,
 		});
@@ -62,11 +62,50 @@ module.exports = class AhCommand extends SlashCommand {
 		interaction.defer();
 
 		const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
-		const auctions = (await hypixel.skyblock.auction.player(uuid))
+		const profiles = await hypixel.skyblock.profiles.uuid(uuid);
+		const embed = this.client.defaultEmbed;
+
+		if (!profiles.length) {
+			return interaction.reply({
+				embeds: [
+					embed
+						.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
+						.setDescription('no SkyBlock profiles'),
+				],
+			});
+		}
+
+		const PROFILE_NAME = interaction.options.getString('profile');
+
+		let profileId;
+		let profileName;
+
+		if (!PROFILE_NAME) {
+			const LAST_PROFILE_SAVE = Math.max(...profiles.map(({ members }) => members[uuid].last_save));
+
+			({ profile_id: profileId, cute_name: profileName } = profiles.find(({ members }) => members[uuid].last_save === LAST_PROFILE_SAVE));
+		} else {
+			profileName = PROFILE_NAME;
+			({ profile_id: profileId } = profiles.find(({ cute_name: name }) => name === PROFILE_NAME));
+
+			if (!profileId) {
+				return interaction.reply({
+					embeds: [
+						embed
+							.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
+							.setDescription(`no SkyBlock profile named \`${profileName}\``),
+					],
+				});
+			}
+		}
+
+		embed
+			.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}/${profileName}`)
+			.setFooter(`Profile: ${profileName}`);
+
+		const auctions = (await hypixel.skyblock.auction.profile(profileId))
 			.filter(({ claimed }) => !claimed)
 			.sort((a, b) => a.end - b.end);
-		const embed = this.client.defaultEmbed
-			.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`);
 
 		if (!auctions.length) {
 			return interaction.reply({
