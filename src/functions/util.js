@@ -59,10 +59,10 @@ const self = module.exports = {
 	getIdFromString: string => string.match(/(?<=^(?:<@!?)?)\d{17,19}(?=>?$)/)?.[0] ?? null,
 
 	/**
-	 * abc -> Abc
+	 * aBc -> Abc
 	 * @param {string} string to convert
 	 */
-	upperCaseFirstChar: string => `${string.charAt(0).toUpperCase()}${string.slice(1).toLowerCase()}`,
+	upperCaseFirstChar: string => `${string[0].toUpperCase()}${string.slice(1).toLowerCase()}`,
 
 	/**
 	 * removes ',', '.' and '_' from the input string
