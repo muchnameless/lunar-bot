@@ -5,15 +5,17 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --trace-warnings .",
+    "start": "node --trace-warnings ./src/index.js",
     "lint": "eslint .",
-    "lintFix": "eslint --fix .",
-    "maintenance": "node maintenance.js",
+    "lint:fix": "eslint --fix .",
+    "maintenance": "node ./src/maintenance.js",
+    "deploy": "node ./src/deploy.js",
     "db": "node ./src/structures/database/dbInit.js -a"
   },
   "author": "muchnameless",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/rest": "^0.1.0-canary.0",
     "@keyv/redis": "^2.1.2",
     "@sapphire/async-queue": "^1.1.4",
     "@zikeji/hypixel": "^3.1.1",
@@ -51,5 +53,9 @@
     "@babel/plugin-syntax-class-properties": "^7.12.13",
     "@babel/preset-env": "^7.14.8",
     "eslint": "^7.31.0"
-  }
+  },
+  "engines": {
+		"node": ">=16.0.0",
+		"npm": ">=7.0.0"
+	}
 }

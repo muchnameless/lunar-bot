@@ -3,11 +3,11 @@
 const { join } = require('path');
 require('dotenv').config({ path: join(__dirname, '.env') });
 const { Collection, Intents, Constants } = require('discord.js');
-const { requireAll } = require('./src/functions/files');
-const db = require('./src/structures/database/index');
-const LunarClient = require('./src/structures/LunarClient');
-const MessageCacheCollection = require('./src/structures/MessageCacheCollection');
-const logger = require('./src/functions/logger');
+const { requireAll } = require('./functions/files');
+const db = require('./structures/database/index');
+const LunarClient = require('./structures/LunarClient');
+const MessageCacheCollection = require('./structures/MessageCacheCollection');
+const logger = require('./functions/logger');
 
 /** @type {LunarClient} */
 let client;
