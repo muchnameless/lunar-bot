@@ -295,7 +295,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 		}
 
 		const content = [
-			message.reference // @referencedMessageAuthor
+			message.reference && message.type !== 'THREAD_CREATED' // @referencedMessageAuthor
 				? await (async () => {
 					try {
 						/** @type {import('../extensions/Message')} */
