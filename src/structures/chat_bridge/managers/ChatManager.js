@@ -52,7 +52,7 @@ module.exports = class ChatManager {
 	/**
 	 * promisified MessageCollector
 	 * @param {AwaitMessagesOptions} options
-	 * @returns {Promise<import('./HypixelMessage')[]>}
+	 * @returns {Promise<import('../HypixelMessage')[]>}
 	 */
 	awaitMessages(options = {}) {
 		return new Promise((resolve, reject) => {
