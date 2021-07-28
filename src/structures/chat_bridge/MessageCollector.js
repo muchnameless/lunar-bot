@@ -91,12 +91,16 @@ module.exports = class MessageCollector extends EventEmitter {
 		this.handleCollect = this.handleCollect.bind(this);
 		this._handleBotDisconnection = this._handleBotDisconnection.bind(this);
 
+		this.chatBridge.incrementMaxListeners();
 		this.chatBridge.on('message', this.handleCollect);
+		this.chatBridge.bot.incrementMaxListeners();
 		this.chatBridge.bot.on('end', this._handleBotDisconnection);
 
 		this.once('end', () => {
 			this.chatBridge.removeListener('message', this.handleCollect);
-			this.chatBridge.bot.removeListener('end', this._handleBotDisconnection);
+			this.chatBridge.decrementMaxListeners();
+			this.chatBridge.bot?.removeListener('end', this._handleBotDisconnection);
+			this.chatBridge.bot?.decrementMaxListeners();
 		});
 
 		if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time);
@@ -126,6 +130,7 @@ module.exports = class MessageCollector extends EventEmitter {
 				this._idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
 			}
 		}
+
 		this.checkEnd();
 	}
 
@@ -178,6 +183,7 @@ module.exports = class MessageCollector extends EventEmitter {
 			clearTimeout(this._idletimeout);
 			this._idletimeout = null;
 		}
+
 		this.ended = true;
 
 		/**

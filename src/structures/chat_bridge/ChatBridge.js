@@ -242,6 +242,24 @@ module.exports = class ChatBridge extends EventEmitter {
 	}
 
 	/**
+	 * Increments max listeners by one, if they are not zero.
+	 */
+	incrementMaxListeners() {
+		const maxListeners = this.getMaxListeners();
+
+		if (maxListeners !== 0) this.setMaxListeners(maxListeners + 1);
+	}
+
+	/**
+	 * Decrements max listeners by one, if they are not zero.
+	 */
+	decrementMaxListeners() {
+		const maxListeners = this.getMaxListeners();
+
+		if (maxListeners !== 0) this.setMaxListeners(maxListeners - 1);
+	}
+
+	/**
 	 * forwards the discord message to minecraft chat if the ChatBridge has a DiscordChatManager for the message's channel, returning true if so, false otherwise
 	 * @param {import('../extensions/Message')} message
 	 * @param {MessageForwardOptions} [options]

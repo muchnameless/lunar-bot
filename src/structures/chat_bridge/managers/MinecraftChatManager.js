@@ -104,9 +104,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	set ready(value) {
-		if (this.bot) {
-			this.bot.ready = value;
-		}
+		if (this.bot) this.bot.ready = value;
 	}
 
 	/**
@@ -118,7 +116,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				const result = await this.command({
 					command: 'locraw',
 					responseRegExp: /^{.+}$/s,
-					force: true,
+					rejectOnTimeout: true,
 					max: 1,
 				});
 
@@ -140,7 +138,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			try {
 				await this.command({
-					command: `w ${this.chatBridge.bot.ign} o/`,
+					command: `w ${this.bot.ign} o/`,
 					responseRegExp: /^You cannot message this player\.$/,
 					timeout: 1_000,
 					rejectOnTimeout: true,

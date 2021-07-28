@@ -43,5 +43,7 @@ declare module 'minecraft-protocol' {
 		readonly ign: string;
 		ready: boolean;
 		ended: boolean;
+		incrementMaxListeners(): void
+		decrementMaxListeners(): void
 	}
 }
