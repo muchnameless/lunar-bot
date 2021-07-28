@@ -2,7 +2,7 @@
 
 lunar guard discord bot
 
-Redis (as a LRU cache)
+Redis (as an LRU cache)
 
     redis-cli
 

@@ -109,7 +109,7 @@ module.exports = class MathsCommand extends DualCommand {
 			},
 			{
 				aliases: [ 'm', 'calc' ],
-				args: false,
+				args: true,
 				usage: '',
 			},
 		);
