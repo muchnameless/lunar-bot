@@ -35,7 +35,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				description: 'set the tax amount',
 				options: [{
 					name: 'amount',
-					type: Constants.ApplicationCommandOptionTypes.NUMBER,
+					type: Constants.ApplicationCommandOptionTypes.INTEGER,
 					description: 'new tax amount',
 					required: true,
 				}],
@@ -55,7 +55,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					required: true,
 				}, {
 					name: 'amount',
-					type: Constants.ApplicationCommandOptionTypes.NUMBER,
+					type: Constants.ApplicationCommandOptionTypes.INTEGER,
 					description: 'amount to overwrite the current tax amount',
 					required: false,
 				}],
@@ -148,7 +148,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			case 'amount': {
-				const NEW_AMOUNT = interaction.options.getNumber('amount', true);
+				const NEW_AMOUNT = interaction.options.getInteger('amount', true);
 
 				if (NEW_AMOUNT < 0) return interaction.reply({
 					content: 'tax amount must be a non-negative number',
@@ -212,7 +212,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					await player.resetTax();
 				}
 
-				const AMOUNT = interaction.options.getNumber('amount') ?? this.config.get('TAX_AMOUNT');
+				const AMOUNT = interaction.options.getInteger('amount') ?? this.config.get('TAX_AMOUNT');
 
 				await player.setToPaid({
 					amount: AMOUNT,
