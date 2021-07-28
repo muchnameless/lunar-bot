@@ -27,7 +27,7 @@ process
 // init
 (async () => {
 	// discord.js structure extensions
-	await requireAll(join(__dirname, 'src', 'structures', 'extensions'));
+	await requireAll(join(__dirname, 'structures', 'extensions'));
 
 	// initiate bot client
 	client = new LunarClient({
