@@ -3,8 +3,7 @@
 const { Constants } = require('discord.js');
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT, GUILD_ID_ALL } = require('../../constants/database');
-const { getIdFromString } = require('../../functions/util');
-const { validateMinecraftUuid } = require('../../functions/stringValidators');
+const { validateDiscordId, validateMinecraftUuid } = require('../../functions/stringValidators');
 const BaseCommand = require('./BaseCommand');
 const missingPermissionsError = require('../errors/MissingPermissionsError');
 const logger = require('../../functions/logger');
@@ -174,23 +173,20 @@ module.exports = class SlashCommand extends BaseCommand {
 			return null;
 		}
 
-		const INPUT = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase();
+		const INPUT = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.replace(/\W/g, '').toLowerCase();
 
 		if (!INPUT) {
 			if (fallbackToCurrentUser) return interaction.user.player;
 			return null;
 		}
 
-		if (validateMinecraftUuid(INPUT)) return this.client.players.get(INPUT.replace(/-/g, ''));
+		if (validateDiscordId(INPUT)) return this.client.players.getById(INPUT);
+		if (validateMinecraftUuid(INPUT)) return this.client.players.get(INPUT);
 
-		const DISCORD_ID = getIdFromString(INPUT);
-
-		return (DISCORD_ID
-			? this.client.players.getById(DISCORD_ID)
-			: interaction.checkForce
-				? this.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
-				: this.client.players.getByIgn(INPUT)
-		) ?? null;
+		return (interaction.checkForce
+			? this.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
+			: this.client.players.getByIgn(INPUT))
+			?? null;
 	}
 
 	/**
