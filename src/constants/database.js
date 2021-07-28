@@ -60,6 +60,7 @@ const DEFAULT_CONFIG = {
 	PLAYER_DB_UPDATE_ENABLED: true,
 	PREFIXES: [ 'lg!', '!', '/' ],
 	PURGE_LIST_OFFSET: 7,
+	REPLY_CONFIRMATION: [ 'y', 'ye', 'yes' ],
 	SENIOR_STAFF_ROLE_ID: null,
 	SHRUG_ROLE_ID: null,
 	SKILL_AVERAGE_STATS_CHANNEL_ID: null,

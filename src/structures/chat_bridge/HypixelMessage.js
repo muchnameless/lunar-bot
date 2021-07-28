@@ -305,4 +305,29 @@ module.exports = class HypixelMessage extends ChatMessage {
 			logger.error('[FORWARD TO DC]', error);
 		}
 	}
+
+	/**
+	 * confirms the action via a button collector
+	 * @param {import('./ChatBridge').BroadcastOptions & import('./ChatBridge').ChatOptions & { question: string, timeoutSeconds: number, errorMessage: string }} [questionOrOptions]
+	 */
+	async awaitConfirmation(questionOrOptions = {}) {
+		const { question = 'confirm this action?', timeoutSeconds = 60, errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
+			? { question: questionOrOptions }
+			: questionOrOptions;
+
+		this.reply({
+			content: question,
+			...options,
+		});
+
+		const result = await this.chatBridge.minecraft.awaitMessages({
+			filter: message => message.author?.ign === this.author.ign,
+			max: 1,
+			time: timeoutSeconds * 1_000,
+		});
+
+		if (this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase())) return;
+
+		throw errorMessage;
+	}
 };
