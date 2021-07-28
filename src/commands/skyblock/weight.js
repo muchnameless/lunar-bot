@@ -5,6 +5,7 @@ const { upperCaseFirstChar, autocorrect } = require('../../functions/util');
 const { getWeight } = require('../../functions/skyblock');
 const { getUuidAndIgn } = require('../../functions/input');
 const { X_EMOJI } = require('../../constants/emojiCharacters');
+const { PROFILE_NAMES } = require('../../constants/skyblock');
 const hypixel = require('../../api/hypixel');
 const DualCommand = require('../../structures/commands/DualCommand');
 const logger = require('../../functions/logger');
@@ -22,12 +23,7 @@ module.exports = class WeightCommand extends DualCommand {
 					type: Constants.ApplicationCommandOptionTypes.STRING,
 					description: 'IGN | UUID',
 					required: false,
-				}, {
-					name: 'profile',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'skyblock profile name',
-					required: false,
-				}],
+				}, DualCommand.SKYBLOCK_PROFILE_OPTION ],
 				defaultPermission: true,
 				cooldown: 1,
 			},
@@ -52,28 +48,26 @@ module.exports = class WeightCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} ignOrUuid command arguments
-	 * @param {string} [profileNameInput]
+	 * @param {string} [profileName]
 	 */
-	async _run(ctx, ignOrUuid, profileNameInput) {
+	async _run(ctx, ignOrUuid, profileName) {
 		try {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
 
 			if (!profiles.length) return `${ign} has no SkyBlock profiles`;
 
-			const PROFILE_NAME = profileNameInput?.replace(/[^a-z]/gi, '');
-
 			let weightData;
 
-			if (!PROFILE_NAME) {
+			if (!profileName) {
 				weightData = profiles
 					.map(({ cute_name: name, members }) => ({ name, ...getWeight(members[uuid]) }))
 					.sort(({ totalWeight: aTotal }, { totalWeight: bTotal }) => aTotal - bTotal)
 					.pop();
 			} else {
-				const { value: profile, similarity } = autocorrect(PROFILE_NAME, profiles, 'cute_name');
+				const profile = profiles.find(({ cute_name: name }) => name === profileName);
 
-				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return `${ign} has no profile named '${upperCaseFirstChar(PROFILE_NAME)}'`;
+				if (!profile) return `${ign} has no profile named '${upperCaseFirstChar(profileName)}'`;
 
 				weightData = {
 					name: profile.cute_name,
@@ -104,6 +98,28 @@ module.exports = class WeightCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return message.reply(await this._run(message, ...message.commandData.args));
+		const [ IGN, PROFILE_NAME_INPUT ] = message.commandData.args;
+
+		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');
+
+		if (profileName) {
+			let similarity;
+
+			({ value: profileName, similarity } = autocorrect(profileName, PROFILE_NAMES));
+
+			if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) {
+				try {
+					await message.awaitConfirmation({
+						question: `'${upperCaseFirstChar(PROFILE_NAME_INPUT)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,
+						timeoutSeconds: 30,
+					});
+				} catch (error) {
+					logger.error(error);
+					return;
+				}
+			}
+		}
+
+		return message.reply(await this._run(message, IGN, profileName));
 	}
 };
