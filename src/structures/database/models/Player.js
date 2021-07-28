@@ -863,7 +863,7 @@ module.exports = class Player extends Model {
 
 			// reset nickname if it is set to the player's ign
 			if (currentlyLinkedMember.nickname === this.ign) {
-				// needs to changed temporarily so that client.on('guildMemberUpdate', ...) doesn't change the nickname back to the ign
+				// needs to be changed temporarily so that client.on('guildMemberUpdate', ...) doesn't change the nickname back to the ign
 				const { guildId } = this; // 1/3
 				this.guildId = GUILD_ID_ERROR; // 2/3
 
@@ -876,6 +876,8 @@ module.exports = class Player extends Model {
 		this.discordId = null;
 
 		await this.save();
+
+		if (!this.guildId) this.uncache(); // uncache if player left the guild and is not a bridger
 
 		return wasSuccessful;
 	}
