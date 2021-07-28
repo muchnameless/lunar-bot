@@ -32,8 +32,8 @@ const logger = require('./functions/logger');
 
 		await rest.put(
 			GUILD_ID
-				? Routes.applicationGuildCommands(process.env.CLIENT_ID, GUILD_ID)
-				: Routes.applicationCommands(process.env.CLIENT_ID),
+				? Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, GUILD_ID)
+				: Routes.applicationCommands(process.env.DISCORD_CLIENT_ID),
 			{
 				body: SHOULD_DELETE
 					? []
