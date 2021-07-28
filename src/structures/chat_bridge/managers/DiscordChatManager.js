@@ -300,6 +300,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 					try {
 						/** @type {import('../extensions/Message')} */
 						const referencedMessage = await message.fetchReference();
+						if (!message.author) return null;
 						return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
 					} catch (error) {
 						logger.error('[FORWARD DC TO MC]: error fetching reference', error);
