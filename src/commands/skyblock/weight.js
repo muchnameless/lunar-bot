@@ -45,12 +45,11 @@ module.exports = class WeightCommand extends DualCommand {
 	}
 
 	/**
-	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} ignOrUuid command arguments
 	 * @param {string} [profileName]
 	 */
-	async _run(ctx, ignOrUuid, profileName) {
+	async _generateReply(ctx, ignOrUuid, profileName) {
 		try {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
@@ -60,10 +59,9 @@ module.exports = class WeightCommand extends DualCommand {
 			let weightData;
 
 			if (!profileName) {
-				weightData = profiles
+				[ weightData ] = profiles
 					.map(({ cute_name: name, members }) => ({ name, ...getWeight(members[uuid]) }))
-					.sort(({ totalWeight: aTotal }, { totalWeight: bTotal }) => aTotal - bTotal)
-					.pop();
+					.sort(({ totalWeight: aTotal }, { totalWeight: bTotal }) => bTotal - aTotal);
 			} else {
 				const profile = profiles.find(({ cute_name: name }) => name === profileName);
 
@@ -90,7 +88,7 @@ module.exports = class WeightCommand extends DualCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		return interaction.reply(await this._run(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
+		return interaction.reply(await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
 	}
 
 	/**
@@ -120,6 +118,6 @@ module.exports = class WeightCommand extends DualCommand {
 			}
 		}
 
-		return message.reply(await this._run(message, IGN, profileName));
+		return message.reply(await this._generateReply(message, IGN, profileName));
 	}
 };
