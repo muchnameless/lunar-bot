@@ -2,7 +2,7 @@
 
 const { Constants } = require('discord.js');
 const DualCommand = require('../../structures/commands/DualCommand');
-// const logger = require('../../functions/logger');
+const logger = require('../../functions/logger');
 
 
 module.exports = class PingMuteCommand extends DualCommand {
@@ -30,14 +30,18 @@ module.exports = class PingMuteCommand extends DualCommand {
 	}
 
 	/**
-	 * execute the command
 	 * @param {import('../../structures/database/models/Player')} player
 	 */
-	async _run(player) {
-		player.hasDiscordPingPermission = false;
-		await player.save();
+	async _generateReply(player) {
+		try {
+			player.hasDiscordPingPermission = false;
+			await player.save();
 
-		return `\`${player}\` can no longer ping members via the chat bridge`;
+			return `\`${player}\` can no longer ping members via the chat bridge`;
+		} catch (error) {
+			logger.error(error);
+			return `an error occurred while trying to remove \`${player}\`'s ping permissions`;
+		}
 	}
 
 	/**
@@ -45,7 +49,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return interaction.reply(await this._run(this.getPlayer(interaction)));
+		return interaction.reply(await this._generateReply(this.getPlayer(interaction)));
 	}
 
 	/**
@@ -58,6 +62,6 @@ module.exports = class PingMuteCommand extends DualCommand {
 
 		if (!player) return message.reply(`\`${INPUT}\` not in the player db`);
 
-		return message.reply(await this._run(player));
+		return message.reply(await this._generateReply(player));
 	}
 };

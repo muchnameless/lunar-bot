@@ -2,7 +2,7 @@
 
 const { Constants } = require('discord.js');
 const PingMute = require('./pingmute');
-// const logger = require('../../functions/logger');
+const logger = require('../../functions/logger');
 
 
 module.exports = class PingUnmuteCommand extends PingMute {
@@ -25,13 +25,17 @@ module.exports = class PingUnmuteCommand extends PingMute {
 	}
 
 	/**
-	 * execute the command
 	 * @param {import('../../structures/database/models/Player')} player
 	 */
-	async _run(player) {
-		player.hasDiscordPingPermission = true;
-		await player.save();
+	async _generateReply(player) {
+		try {
+			player.hasDiscordPingPermission = true;
+			await player.save();
 
-		return `\`${player}\` can now ping members via the chat bridge`;
+			return `\`${player}\` can now ping members via the chat bridge`;
+		} catch (error) {
+			logger.error(error);
+			return `an error occurred while trying to give \`${player}\` ping permissions`;
+		}
 	}
 };
