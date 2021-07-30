@@ -66,13 +66,13 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	}
 
 	/**
-	 * appends the first option name if the command is a subCommandName or subCommandName group
+	 * appends the first option name if the command is a subcommand or subcommand group
 	 */
 	get fullCommandName() {
 		return [
 			this.commandName,
-			this.options.getSubCommandGroup(false),
-			this.options.getSubCommand(false),
+			this.options.getSubcommandGroup(false),
+			this.options.getSubcommand(false),
 		].filter(x => x !== null).join(' ');
 	}
 

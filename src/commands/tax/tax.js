@@ -95,7 +95,7 @@ module.exports = class TaxCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		switch (interaction.options.getSubCommand()) {
+		switch (interaction.options.getSubcommand()) {
 			case 'ah': {
 				const player = this.getPlayer(interaction);
 
@@ -397,7 +397,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${interaction.options.getSubCommand()}'`);
+				throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
 		}
 	}
 };

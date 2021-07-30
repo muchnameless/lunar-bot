@@ -84,7 +84,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		switch (interaction.options.getSubCommand()) {
+		switch (interaction.options.getSubcommand()) {
 			case 'edit': {
 				const KEY = interaction.options.getString('key', true)
 					.toUpperCase()
@@ -151,7 +151,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${interaction.options.getSubCommand()}'`);
+				throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
 		}
 	}
 };

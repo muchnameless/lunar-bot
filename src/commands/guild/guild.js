@@ -399,7 +399,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	async run(interaction) {
 		interaction.defer();
 
-		const SUB_COMMAND = interaction.options.getSubCommand();
+		const SUB_COMMAND = interaction.options.getSubcommand();
 
 		switch (SUB_COMMAND) {
 			case 'demote': {
