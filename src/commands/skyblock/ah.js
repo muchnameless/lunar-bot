@@ -154,10 +154,21 @@ module.exports = class AhCommand extends SlashCommand {
 	async runSelect(interaction) {
 		await interaction.deferUpdate();
 
-		const [ , uuid, ign ] = interaction.customId.split(':');
-		const [ profileId ] = interaction.values;
+		try {
+			const [ , uuid, ign ] = interaction.customId.split(':');
+			const [ profileId ] = interaction.values;
+			const profiles = interaction.message.components[0]?.components[0].options
+				?? (await hypixel.skyblock.profiles.uuid(uuid)).map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id }));
 
-		return interaction.editReply(await this._generateReply({ uuid, ign, profileId, profiles: interaction.message.components[0].components[0].options }));
+			return interaction.editReply(await this._generateReply({ uuid, ign, profileId, profiles }));
+		} catch (error) {
+			logger.error(error);
+
+			return interaction.followUp({
+				content: `${error}`,
+				ephemeral: true,
+			});
+		}
 	}
 
 	/**
