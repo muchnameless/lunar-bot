@@ -3,7 +3,7 @@
 const { Constants } = require('discord.js');
 const ms = require('ms');
 const { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction } = require('../functions/leaderboards');
-const { LB_KEY } = require('../constants/redis');
+const { LB_KEY, AH_KEY } = require('../constants/redis');
 const Event = require('../structures/events/Event');
 const logger = require('../functions/logger');
 
@@ -85,6 +85,9 @@ module.exports = class InteractionCreateEvent extends Event {
 	_handleSelectMenuInteraction(interaction) { // eslint-disable-line class-methods-use-this
 		// leaderboards edit
 		if (interaction.customId.startsWith(LB_KEY)) return handleLeaderboardSelectMenuInteraction(interaction);
+
+		// ah profile change
+		if (interaction.customId.startsWith(AH_KEY)) return this.client.commands.get('ah')?.runSelect(interaction);
 	}
 
 	/**

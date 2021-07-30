@@ -1,12 +1,13 @@
 'use strict';
 
-const { Formatters, Constants } = require('discord.js');
+const { MessageActionRow, MessageSelectMenu, MessageEmbed, Formatters, Constants } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const { upperCaseFirstChar } = require('../../functions/util');
 const { getUuidAndIgn } = require('../../functions/input');
+const { AH_KEY } = require('../../constants/redis');
 const hypixel = require('../../api/hypixel');
 const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+const logger = require('../../functions/logger');
 
 
 module.exports = class AhCommand extends SlashCommand {
@@ -55,108 +56,176 @@ module.exports = class AhCommand extends SlashCommand {
 	}
 
 	/**
+	 * @param {{ ign: string, uuid: string, profileId: string, profiles: { label: string, value: string }[] }} param0
+	 */
+	async _generateReply({ ign, uuid, profileId, profiles }) {
+		try {
+			const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId);
+			const embed = this.client.defaultEmbed
+				.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}/${PROFILE_NAME}`);
+			const auctions = (await hypixel.skyblock.auction.profile(profileId))
+				.filter(({ claimed }) => !claimed)
+				.sort((a, b) => a.end - b.end);
+
+			if (!auctions.length) {
+				return {
+					embeds: [
+						embed.setDescription('no unclaimed auctions'),
+					],
+					components: [
+						new MessageActionRow().addComponents(
+							new MessageSelectMenu()
+								.setCustomId(`${AH_KEY}:${uuid}:${ign}`)
+								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
+								.addOptions(profiles),
+						),
+					],
+				};
+			}
+
+			let totalCoins = 0;
+			let totalUnclaimedCoins = 0;
+			let endedAuctions = 0;
+
+			for (const { highest_bid_amount: highestBid, starting_bid: startingBid, bids, end, item_name: item, tier, bin, item_lore: lore, auctioneer } of auctions) {
+				embed.addFields({
+					name: `${item}${
+						item.startsWith('[Lvl ')
+							? ` - ${upperCaseFirstChar(tier)}`
+							: item === 'Enchanted Book'
+								? (() => {
+									const matched = lore.match(/(?<=^(§[0-9a-gk-or])+)[^§\n]+/)?.[0];
+									if (matched) return ` - ${matched}`;
+									return '';
+								})()
+								: ''
+					}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
+					value: `${
+						bin
+							? `BIN: ${AhCommand.shortenNumber(startingBid)}`
+							: bids.length
+								? (totalCoins += highestBid, `Highest Bid: ${AhCommand.shortenNumber(highestBid)}`)
+								: `Starting Bid: ${AhCommand.shortenNumber(startingBid)}`
+					} • ${
+						end < Date.now()
+							? highestBid
+								? (++endedAuctions, totalUnclaimedCoins += highestBid, 'sold')
+								: 'expired'
+							: 'ends'
+					} ${Formatters.time(new Date(end), Formatters.TimestampStyles.RelativeTime)}`,
+				});
+			}
+
+			totalCoins += totalUnclaimedCoins;
+
+			return {
+				embeds: [
+					embed.setDescription(stripIndents`
+						unclaimed: ${AhCommand.shortenNumber(totalUnclaimedCoins)} coins from ${endedAuctions} auctions
+						total: ${AhCommand.shortenNumber(totalCoins)} coins from ${auctions.length} auctions
+					`),
+				],
+				components: [
+					new MessageActionRow().addComponents(
+						new MessageSelectMenu()
+							.setCustomId(`${AH_KEY}:${uuid}:${ign}`)
+							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
+							.addOptions(profiles),
+					),
+				],
+			};
+		} catch (error) {
+			logger.error(error);
+
+			return {
+				embeds: [
+					new MessageEmbed()
+						.setColor(this.config.get('EMBED_RED'))
+						.setDescription(`${error}`)
+						.setTimestamp(),
+				],
+			};
+		}
+	}
+
+	/**
+	 * @param {import('../../structures/extensions/SelectMenuInteraction')} interaction
+	 */
+	async runSelect(interaction) {
+		await interaction.deferUpdate();
+
+		const [ , uuid, ign ] = interaction.customId.split(':');
+		const [ profileId ] = interaction.values;
+
+		return interaction.editReply(await this._generateReply({ uuid, ign, profileId, profiles: interaction.message.components[0].components[0].options }));
+	}
+
+	/**
 	 * execute the command
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
 		interaction.defer();
 
-		const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
-		const profiles = await hypixel.skyblock.profiles.uuid(uuid);
-		const embed = this.client.defaultEmbed;
+		try {
+			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
+			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
+			const embed = this.client.defaultEmbed;
 
-		if (!profiles.length) {
-			return interaction.reply({
-				embeds: [
-					embed
-						.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
-						.setDescription('no SkyBlock profiles'),
-				],
-			});
-		}
-
-		const PROFILE_NAME = interaction.options.getString('profile');
-
-		let profileId;
-		let profileName;
-
-		if (!PROFILE_NAME) {
-			const LAST_PROFILE_SAVE = Math.max(...profiles.map(({ members }) => members[uuid].last_save));
-
-			({ profile_id: profileId, cute_name: profileName } = profiles.find(({ members }) => members[uuid].last_save === LAST_PROFILE_SAVE));
-		} else {
-			profileName = PROFILE_NAME;
-			({ profile_id: profileId } = profiles.find(({ cute_name: name }) => name === PROFILE_NAME));
-
-			if (!profileId) {
+			if (!profiles.length) {
 				return interaction.reply({
 					embeds: [
 						embed
 							.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
-							.setDescription(`no SkyBlock profile named \`${profileName}\``),
+							.setDescription('no SkyBlock profiles'),
+					],
+					components: [
+						new MessageActionRow().addComponents(
+							new MessageSelectMenu()
+								.setCustomId(`${AH_KEY}:${uuid}:${ign}`)
+								.setDisabled(true)
+								.setPlaceholder('Profile: None'),
+						),
 					],
 				});
 			}
+
+			const PROFILE_NAME_INPUT = interaction.options.getString('profile');
+
+			let profileId;
+			let profileName;
+
+			if (!PROFILE_NAME_INPUT) {
+				const LAST_PROFILE_SAVE = Math.max(...profiles.map(({ members }) => members[uuid].last_save));
+
+				({ profile_id: profileId, cute_name: profileName } = profiles.find(({ members }) => members[uuid].last_save === LAST_PROFILE_SAVE));
+			} else {
+				profileName = PROFILE_NAME_INPUT;
+				profileId = profiles.find(({ cute_name: name }) => name === PROFILE_NAME_INPUT)?.profile_id;
+
+				if (!profileId) {
+					return interaction.reply({
+						embeds: [
+							embed
+								.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
+								.setDescription(`no SkyBlock profile named \`${profileName}\``),
+						],
+						components: [
+							new MessageActionRow().addComponents(
+								new MessageSelectMenu()
+									.setCustomId(`${AH_KEY}:${uuid}:${ign}`)
+									.setPlaceholder(`Profile: ${profileName} (invalid)`)
+									.addOptions(profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id }))),
+							),
+						],
+					});
+				}
+			}
+
+			return interaction.reply(await this._generateReply({ ign, uuid, profileId, profiles: profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id })) }));
+		} catch (error) {
+			logger.error(error);
+			return interaction.reply(`${error}`);
 		}
-
-		embed
-			.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}/${profileName}`)
-			.setFooter(`Profile: ${profileName}`);
-
-		const auctions = (await hypixel.skyblock.auction.profile(profileId))
-			.filter(({ claimed }) => !claimed)
-			.sort((a, b) => a.end - b.end);
-
-		if (!auctions.length) {
-			return interaction.reply({
-				embeds: [
-					embed.setDescription('no unclaimed auctions'),
-				],
-			});
-		}
-
-		let totalCoins = 0;
-		let totalUnclaimedCoins = 0;
-		let endedAuctions = 0;
-
-		for (const { highest_bid_amount: highestBid, starting_bid: startingBid, bids, end, item_name: item, tier, bin, item_lore: lore } of auctions) {
-			embed.addFields({
-				name: `${item}${
-					item.startsWith('[Lvl ')
-						? ` - ${upperCaseFirstChar(tier)}`
-						: item === 'Enchanted Book'
-							? (() => {
-								const matched = lore.match(/(?<=^(§[0-9a-gk-or])+)[^§\n]+/)?.[0];
-								if (matched) return ` - ${matched}`;
-								return '';
-							})()
-							: ''
-				}`,
-				value: `${
-					bin
-						? `BIN: ${AhCommand.shortenNumber(startingBid)}`
-						: bids.length
-							? (totalCoins += highestBid, `Highest Bid: ${AhCommand.shortenNumber(highestBid)}`)
-							: `Starting Bid: ${AhCommand.shortenNumber(startingBid)}`
-				} • ${
-					end < Date.now()
-						? highestBid
-							? (++endedAuctions, totalUnclaimedCoins += highestBid, 'sold')
-							: 'expired'
-						: 'ends'
-				} ${Formatters.time(new Date(end), Formatters.TimestampStyles.RelativeTime)}`,
-			});
-		}
-
-		totalCoins += totalUnclaimedCoins;
-
-		return interaction.reply({
-			embeds: [
-				embed.setDescription(stripIndents`
-					unclaimed: ${AhCommand.shortenNumber(totalUnclaimedCoins)} coins from ${endedAuctions} auctions
-					total: ${AhCommand.shortenNumber(totalCoins)} coins from ${auctions.length} auctions
-				`),
-			],
-		});
 	}
 };
