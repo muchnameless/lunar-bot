@@ -999,17 +999,16 @@ module.exports = class Player extends Model {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 		}
 
-		this.guildId = isBridger
-			? GUILD_ID_BRIDGER
-			: null;
-		this.guildRankPriority = 0;
-		this.save();
-
 		if (isBridger) {
 			this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache (uncache light)
+			this.guildId = GUILD_ID_ERROR;
 		} else {
 			this.uncache(); // uncache everything
+			this.guildId = null;
 		}
+
+		this.guildRankPriority = 0;
+		this.save();
 
 		return true;
 	}
