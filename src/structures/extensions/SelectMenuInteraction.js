@@ -118,9 +118,11 @@ class LunarSelectMenuInteraction extends Structures.get('SelectMenuInteraction')
 	 * @param {import('./Message')} [messageInput]
 	 */
 	async _handleReplyMessage({ ephemeral, content }, messageInput) {
-		if (ephemeral || !content || this.client.chatBridges.channelIds.has(this.channelId)) return;
+		if (ephemeral || !content || !this.client.chatBridges.channelIds.has(this.channelId)) return;
 
 		const message = messageInput ?? await this.fetchReply();
+
+		if (!message.content) return;
 
 		this.client.chatBridges.handleDiscordMessage(
 			message,
