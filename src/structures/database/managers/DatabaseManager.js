@@ -198,7 +198,7 @@ module.exports = class DatabaseManager {
 				auctionsAmount += taxAuctions.length;
 
 				await safePromiseAll(taxAuctions.map(async (auction) => {
-					const { bidder, amount } = auction.bids[auction.bids.length - 1];
+					const { bidder, amount } = auction.bids.at(-1);
 					const player = players.cache.get(bidder);
 
 					if (!player) return ++unknownPlayers;

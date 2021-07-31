@@ -514,13 +514,15 @@ const self = module.exports = {
 						totalWeight,
 						gainedGuildXp,
 						sortingStat: totalWeight * (1 + (gainedWeight >= 0 ? (Math.sqrt(gainedWeight) / 20) : (-0.25))) * (gainedGuildXp > 1 ? gainedGuildXp ** (1 / 10) : 1),
+						// sortingStat: totalWeight * (gainedWeight >= 50 ? ((gainedWeight / 50) ** (1 / 1.5)) : gainedGuildXp > 0 ? 0.9 : 0.75) * (gainedGuildXp > 5_000 ? (gainedGuildXp / 5_000) ** (1 / 10) : 0.9),
+						// sortingStat: totalWeight * (gainedWeight > 0 ? 1 + (gainedWeight / totalWeight) : 0.75) * (gainedGuildXp > 5_000 ? (gainedGuildXp / 5_000) ** (1 / 10) : 0.9),
 					};
 				};
 				playerData = playerDataRaw
 					.map(dataConverter)
 					.sort((a, b) => a.totalWeight - b.totalWeight)
 					.sort((a, b) => a.sortingStat - b.sortingStat);
-				const temp1 = Math.floor(playerData[playerData.length - 1].sortingStat).toLocaleString(NUMBER_FORMAT).length;
+				const temp1 = Math.floor(playerData.at(-1).sortingStat).toLocaleString(NUMBER_FORMAT).length;
 				const temp2 = Math.floor(Math.max(...playerData.map(({ gainedGuildXp }) => gainedGuildXp))).toLocaleString(NUMBER_FORMAT).length;
 				const PADDING_AMOUNT_GAIN = Math.floor(Math.max(...playerData.map(({ gainedWeight }) => gainedWeight))).toLocaleString(NUMBER_FORMAT).length;
 				const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...playerData.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;

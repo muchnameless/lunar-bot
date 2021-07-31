@@ -139,10 +139,10 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		if ([ Constants.ApplicationCommandOptionTypes.SUB_COMMAND, Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP ].includes(firstOption?.type)) {
 			options = options.map((option) => {
-				if (option.options[option.options.length - 1]?.name !== 'visibility') option.options.push(SlashCommand.EPHEMERAL_OPTION);
+				if (option.options.at(-1)?.name !== 'visibility') option.options.push(SlashCommand.EPHEMERAL_OPTION);
 				return option;
 			});
-		} else if (options[options.length - 1]?.name !== 'visibility') {
+		} else if (options.at(-1)?.name !== 'visibility') {
 			options.push(SlashCommand.EPHEMERAL_OPTION);
 		}
 
