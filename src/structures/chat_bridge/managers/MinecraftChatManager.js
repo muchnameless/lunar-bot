@@ -74,6 +74,19 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		 */
 		this.bot = null;
 		/**
+		 * @type {?string}
+		 */
+		this.botUuid = null;
+		/**
+		 * bot player db object
+		 * @type {?import('../../database/models/Player')}
+		 */
+		this._botPlayer = null;
+		/**
+		 * wether the minecraft bot is logged in and ready to receive and send chat messages
+		 */
+		this.botReady = false;
+		/**
 		 * disconnect the bot if it hasn't successfully spawned in 60 seconds
 		 */
 		this.abortLoginTimeout = null;
@@ -99,12 +112,27 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		this._commandCollector = null;
 	}
 
+	/**
+	 * wether the minecraft bot is logged in and ready to receive and send chat messages
+	 */
 	get ready() {
-		return (this.bot?.ready && !this.bot.ended) ?? false;
+		return this.botReady && !(this.bot?.ended ?? true);
 	}
 
 	set ready(value) {
-		if (this.bot) this.bot.ready = value;
+		this.botReady = value;
+	}
+
+	/**
+	 * bot player db object
+	 * @returns {?import('../../database/models/Player')}
+	 */
+	get botPlayer() {
+		return this._botPlayer ??= this.client.players.cache.get(this.botUuid) ?? null;
+	}
+
+	set botPlayer(value) {
+		this._botPlayer = value;
 	}
 
 	/**
@@ -138,7 +166,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			try {
 				await this.command({
-					command: `w ${this.bot.ign} o/`,
+					command: `w ${this.bot.username} o/`,
 					responseRegExp: /^You cannot message this player\.$/,
 					timeout: 1_000,
 					rejectOnTimeout: true,
@@ -318,13 +346,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		if (this.ready) {
 			logger.info(`[CHATBRIDGE]: ${this.logInfo}: already connected`);
-			return this.chatBridge;
+			return this;
 		}
 
 		await this._createBot();
 
 		// reconnect the bot if it hasn't successfully spawned in 60 seconds
-		if (!this.bot?.ready) {
+		if (!this.ready) {
 			this.abortLoginTimeout = setTimeout(() => {
 				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
 				this.reconnect(0);
@@ -333,7 +361,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		this._isReconnecting = false;
 
-		return this.chatBridge;
+		return this;
 	}
 
 	/**
@@ -354,7 +382,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			this._reconnectTimeout = null;
 		}, loginDelay);
 
-		return this.chatBridge;
+		return this;
 	}
 
 	/**
@@ -367,15 +395,17 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		clearTimeout(this.abortLoginTimeout);
 		this.abortLoginTimeout = null;
 
+		this.ready = false;
+
 		try {
-			this.bot?.quit();
+			this.bot?.end('disconnect.quitting');
 		} catch (error) {
 			logger.error('[CHATBRIDGE DISCONNECT]', error);
 		}
 
 		this.bot = null;
 
-		return this.chatBridge;
+		return this;
 	}
 
 	/**
@@ -547,9 +577,9 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	async gchat(contentOrOptions) {
 		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
 
-		if (this.bot.player?.muted) {
+		if (this.botPlayer?.muted) {
 			if (this.client.config.get('CHAT_LOGGING_ENABLED')) {
-				logger.debug(`[GCHAT]: bot muted for ${ms(this.bot.player.mutedTill - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${options.content}`);
+				logger.debug(`[GCHAT]: bot muted for ${ms(this.botPlayer.mutedTill - Date.now(), { long: true })}, unable to send '${prefix}${prefix.length ? ' ' : ''}${options.content}`);
 			}
 
 			return false;

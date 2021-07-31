@@ -19,6 +19,7 @@ module.exports = class HypixelMessageAuthor {
 
 		/**
 		 * player object of the message author
+		 * @type {?import('../database/models/Player')}
 		 */
 		this.player = uuid
 			? this.client.players.cache.get(uuid) ?? logger.error(`[HYPIXEL AUTHOR CTOR]: unknown uuid '${uuid}'`) ?? this.client.players.findByIgn(ign)

@@ -8,14 +8,17 @@ const logger = require('../../functions/logger');
 
 module.exports = class EventCollection extends Collection {
 	/**
-	 * @param {import('../LunarClient')} client
+	 * @param {import('events').EventEmitter} emitter
 	 * @param {string} dirPath the path to the commands folder
 	 * @param {*} [entries]
 	 */
-	constructor(client, dirPath, entries) {
+	constructor(emitter, dirPath, entries) {
 		super(entries);
 
-		this.client = client;
+		/**
+		 * NodeJS EventEmitter
+		 */
+		this.emitter = emitter;
 		/**
 		 * path to the event files
 		 */
@@ -24,7 +27,7 @@ module.exports = class EventCollection extends Collection {
 
 	/**
 	 * built-in methods will use this as the constructor
-	 * that way BaseCommandCollection#filter returns a standard Collection
+	 * that way EventCollection#filter returns a standard Collection
 	 */
 	static get [Symbol.species]() {
 		return Collection;
@@ -38,9 +41,9 @@ module.exports = class EventCollection extends Collection {
 	loadFromFile(file, force = false) {
 		const name = basename(file, '.js');
 		const Event = require(file);
-		/** @type {import('./Event')} */
+		/** @type {import('./BaseEvent')} */
 		const event = new Event({
-			client: this.client,
+			emitter: this.emitter,
 			collection: this,
 			name,
 		});

@@ -67,9 +67,9 @@ module.exports = class HypixelMessage extends ChatMessage {
 							: null,
 					}
 					: {
-						ign: this.chatBridge.bot.ign,
+						ign: this.chatBridge.bot.username,
 						guildRank: null,
-						uuid: this.chatBridge.bot.uuid,
+						uuid: this.chatBridge.minecraft.botUuid,
 					},
 			);
 			this.content = this.cleanedContent.slice(matched[0].length).trimLeft();
@@ -82,7 +82,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 			}
 
 			const prefixMatched = new RegExp(
-				`^(?:${[ ...this.client.config.get('PREFIXES').map(x => escapeRegex(x)), `@${this.chatBridge.bot.ign}` ].join('|')})`,
+				`^(?:${[ ...this.client.config.get('PREFIXES').map(x => escapeRegex(x)), `@${this.chatBridge.bot.username}` ].join('|')})`,
 				'i',
 			).exec(this.content)?.[0]; // PREFIXES, @mention
 
@@ -141,7 +141,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 	 * wether the message was sent by the bot
 	 */
 	get me() {
-		return this.author?.ign === this.chatBridge.bot.ign;
+		return this.author?.ign === this.chatBridge.bot.username;
 	}
 
 	/**

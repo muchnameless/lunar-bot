@@ -76,7 +76,7 @@ module.exports = class ChatTrigger extends Model {
 		if (this._regExp) return this._regExp;
 
 		return new RegExp(
-			this.regExpString.replaceAll('{BOT_IGN}', message.chatBridge.bot.ign.replaceAll('_', '[_ ]?')),
+			this.regExpString.replaceAll('{BOT_IGN}', message.chatBridge.bot.username.replaceAll('_', '[_ ]?')),
 			'i',
 		);
 	}

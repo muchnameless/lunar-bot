@@ -32,7 +32,7 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 		// default help
 		if (!message.commandData.args.length) {
 			const reply = [
-				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${message.chatBridge.bot.ign}` ].join(', ')}`,
+				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${message.chatBridge.bot.username}` ].join(', ')}`,
 				...this.collection.visibleCategories.map(category => `${category}: ${HelpBridgeCommand._listCommands(this.collection.filterByCategory(category))}`),
 			];
 

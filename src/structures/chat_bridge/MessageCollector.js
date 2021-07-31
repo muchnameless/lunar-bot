@@ -93,14 +93,12 @@ module.exports = class MessageCollector extends EventEmitter {
 
 		this.chatBridge.incrementMaxListeners();
 		this.chatBridge.on('message', this.handleCollect);
-		this.chatBridge.bot.incrementMaxListeners();
-		this.chatBridge.bot.on('end', this._handleBotDisconnection);
+		this.chatBridge.once('disconnect', this._handleBotDisconnection);
 
 		this.once('end', () => {
 			this.chatBridge.removeListener('message', this.handleCollect);
+			this.chatBridge.removeListener('disconnect', this._handleBotDisconnection);
 			this.chatBridge.decrementMaxListeners();
-			this.chatBridge.bot?.removeListener('end', this._handleBotDisconnection);
-			this.chatBridge.bot?.decrementMaxListeners();
 		});
 
 		if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time);

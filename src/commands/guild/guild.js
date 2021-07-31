@@ -273,13 +273,13 @@ module.exports = class GuildCommand extends SlashCommand {
 		// interaction
 		if (IS_INTERACTION) return this._run(ctx, {
 			command: `g mute ${target} ${ms(duration)}`,
-			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
 		}, hypixelGuild);
 
 		// hypixel message
 		return ctx.author.send(await hypixelGuild.chatBridge.minecraft.command({
 			command: `g mute ${target} ${ms(duration)}`,
-			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
 		}));
 	}
 
@@ -320,7 +320,7 @@ module.exports = class GuildCommand extends SlashCommand {
 		try {
 			const res = await hypixelGuild.chatBridge.minecraft.command({
 				command: `g kick ${target} ${reason}`,
-				responseRegExp: kickSuccess(target.ign, hypixelGuild.chatBridge.bot.ign),
+				responseRegExp: kickSuccess(target.ign, hypixelGuild.chatBridge.bot.username),
 				abortRegExp: kickError(target.ign),
 				rejectOnAbort: true,
 				timeout: 60_000,
@@ -705,7 +705,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				return this._run(interaction, {
 					command: `g unmute ${target}`,
-					responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.ign),
+					responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
 				}, hypixelGuild);
 			}
 

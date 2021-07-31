@@ -8,10 +8,10 @@ const logger = require('../../../functions/logger');
  * @param {import('../ChatBridge')} chatBridge
  */
 module.exports = async (chatBridge) => {
-	logger.debug(`[CHATBRIDGE]: ${chatBridge.bot.ign}: logged in`);
+	logger.debug(`[CHATBRIDGE]: ${chatBridge.bot.username}: logged in`);
 
 	// remove '-' from uuid
-	chatBridge.bot.uuid = chatBridge.bot.uuid.replace(/-/g, '');
+	chatBridge.minecraft.botUuid = chatBridge.bot.uuid.replaceAll('-', '');
 
 	// send settings to server
 	chatBridge.bot.write('settings', defaultSettings);

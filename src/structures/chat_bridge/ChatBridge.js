@@ -1,13 +1,13 @@
 'use strict';
 
 const { EventEmitter } = require('events');
-const { join, basename } = require('path');
-const { getAllJsFiles } = require('../../functions/files');
+const { join } = require('path');
 const { prefixByType, messageTypes: { GUILD }, chatFunctionByType, randomInvisibleCharacter } = require('./constants/chatBridge');
-const MinecraftChatManager = require('./managers/MinecraftChatManager');
-const logger = require('../../functions/logger');
-const DiscordManager = require('./managers/DiscordManager');
 const { sleep } = require('../../functions/util');
+const MinecraftChatManager = require('./managers/MinecraftChatManager');
+const DiscordManager = require('./managers/DiscordManager');
+const EventCollection = require('../events/EventCollection');
+const logger = require('../../functions/logger');
 
 
 /**
@@ -81,7 +81,9 @@ module.exports = class ChatBridge extends EventEmitter {
 		 */
 		this.discord = new DiscordManager(this);
 
-		this._loadEvents();
+		this.events = new EventCollection(this, join(__dirname, 'events'));
+
+		this.events.loadAll();
 	}
 
 	/**
@@ -124,8 +126,9 @@ module.exports = class ChatBridge extends EventEmitter {
 	 * create and log the bot into hypixel
 	 * @type {Function}
 	 */
-	get connect() {
-		return this.minecraft.connect.bind(this.minecraft);
+	async connect() {
+		await this.minecraft.connect();
+		return this;
 	}
 
 	/**
@@ -142,22 +145,24 @@ module.exports = class ChatBridge extends EventEmitter {
 	 */
 	disconnect() {
 		this.unlink();
-		return this.minecraft.disconnect();
+		this.minecraft.disconnect();
+		return this;
 	}
 
 	/**
 	 * links this chatBridge with the bot's guild
 	 * @param {?string} guildName
+	 * @returns {Promise<this>}
 	 */
 	async link(guildName = null) {
 		try {
 			// link bot to db entry (create if non existant)
-			this.bot.player ??= await (async () => {
+			this.minecraft.botPlayer ??= await (async () => {
 				/** @type {[import('../database/models/Player'), boolean]} */
 				const [ player, created ] = await this.client.players.model.findOrCreate({
-					where: { minecraftUuid: this.bot.uuid },
+					where: { minecraftUuid: this.minecraft.botUuid },
 					defaults: {
-						ign: this.bot.ign,
+						ign: this.bot.username,
 					},
 				});
 
@@ -169,13 +174,13 @@ module.exports = class ChatBridge extends EventEmitter {
 			// guild to link to
 			const guild = guildName
 				? this.client.hypixelGuilds.cache.find(({ name }) => name === guildName)
-				: this.client.hypixelGuilds.cache.find(({ players }) => players.has(this.bot.uuid));
+				: this.client.hypixelGuilds.cache.find(({ players }) => players.has(this.minecraft.botUuid));
 
 			// no guild found
 			if (!guild) {
 				this.unlink();
 
-				logger.error(`[CHATBRIDGE]: ${this.bot.ign}: no matching guild found`);
+				logger.error(`[CHATBRIDGE]: ${this.bot.username}: no matching guild found`);
 				return this;
 			}
 
@@ -188,7 +193,7 @@ module.exports = class ChatBridge extends EventEmitter {
 			guild.chatBridge = this;
 			this.guild = guild;
 
-			logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${this.bot.ign}`);
+			logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${this.bot.username}`);
 
 			// instantiate DiscordChannelManagers
 			await this.discord.init();
@@ -223,22 +228,6 @@ module.exports = class ChatBridge extends EventEmitter {
 		// this.discord.channelsByType.clear();
 
 		return this;
-	}
-
-	/**
-	 * load chatBridge events
-	 */
-	async _loadEvents() {
-		const eventFiles = await getAllJsFiles(join(__dirname, 'events'));
-
-		for (const file of eventFiles) {
-			const event = require(file);
-			const EVENT_NAME = basename(file, '.js');
-
-			this.on(EVENT_NAME, event.bind(null, this));
-		}
-
-		logger.debug(`[CHATBRIDGE EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 	}
 
 	/**

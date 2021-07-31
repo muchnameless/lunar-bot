@@ -36,14 +36,6 @@ export class Message extends (await import('discord.js')).Message {
 
 declare module 'minecraft-protocol' {
 	interface Client {
-		readonly client: import('./structures/LunarClient');
-		chat(message: string): void
-		quit(reason: string): void
-		player: import('./structures/database/models/Player');
-		readonly ign: string;
-		ready: boolean;
 		ended: boolean;
-		incrementMaxListeners(): void
-		decrementMaxListeners(): void
 	}
 }

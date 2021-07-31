@@ -289,8 +289,8 @@ module.exports = class DiscordChatManager extends ChatManager {
 		}
 
 		// check if the chatBridge bot is muted
-		if (this.minecraft.bot.player?.muted) {
-			DiscordChatManager._dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.bot.player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
+		if (this.minecraft.botPlayer?.muted) {
+			DiscordChatManager._dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.botPlayer.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 
