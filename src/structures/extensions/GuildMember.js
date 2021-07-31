@@ -37,12 +37,16 @@ class LunarGuildMember extends Structures.get('GuildMember') {
 		const rolesToRemove = [];
 
 		// guild
-		for (const id of [
-			...hypixelGuilds.cache.array().flatMap(hGuild => hGuild.ranks.map(({ roleId }) => roleId)),
-			...hypixelGuilds.cache.map(({ roleId }) => roleId),
-			config.get('GUILD_ROLE_ID'),
-			config.get('WHALECUM_PASS_ROLE_ID'),
-		]) this.roles.cache.has(id) && rolesToRemove.push(id);
+		for (const { ranks, roleId } of hypixelGuilds.cache.values()) {
+			for (const { roleId: rankRoleId } of ranks) {
+				if (rankRoleId && this.roles.cache.has(rankRoleId)) rolesToRemove.push(rankRoleId);
+			}
+
+			if (this.roles.cache.has(roleId)) rolesToRemove.push(roleId);
+		}
+
+		if (this.roles.cache.has(config.get('GUILD_ROLE_ID'))) rolesToRemove.push(config.get('GUILD_ROLE_ID'));
+		if (this.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
 
 		// delimiter
 		for (const type of delimiterRoles) {

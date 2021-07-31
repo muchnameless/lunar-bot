@@ -113,14 +113,14 @@ const self = module.exports = {
 	/**
 	 * checks the query agains the validInput and returns the most likely match
 	 * @param {string} query
-	 * @param {any[]} validInput
+	 * @param {any[] | Map<any, any>} validInput
 	 * @param {string} attributeToQuery
 	 */
 	autocorrect(query, validInput, attributeToQuery = null) {
 		let currentBestElement;
 		let currentBestSimilarity = 0;
 
-		for (const element of validInput.values()) {
+		for (const element of validInput.values?.() ?? validInput) {
 			const similarity = jaroWinklerSimilarity(query, attributeToQuery ? element[attributeToQuery] : element, { caseSensitive: false });
 
 			if (similarity === 1) return {

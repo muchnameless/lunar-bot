@@ -110,7 +110,7 @@ module.exports = class BaseCommandCollection extends Collection {
 		if (command) return command;
 
 		// autocorrect input
-		const { value, similarity } = autocorrect(name, this.keyArray());
+		const { value, similarity } = autocorrect(name, this.keys());
 		if (similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
 
 		// return command if it is visible

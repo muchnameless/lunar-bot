@@ -59,7 +59,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 			({ _id: guildId } = await hypixel.guild.player(uuid));
 
 			// not in one of the guilds that the bot manages
-			if (!this.client.hypixelGuilds.cache.keyArray().includes(guildId)) return interaction.reply(commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
+			if (!this.client.hypixelGuilds.cache.has(guildId)) return interaction.reply(commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
 
 			hypixelPlayer = await hypixel.player.uuid(uuid);
 		} catch (error) {

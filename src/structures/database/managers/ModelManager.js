@@ -9,11 +9,12 @@ module.exports = class ModelManager {
 	 * @param {object} param0
 	 * @param {import('../../LunarClient')} param0.client
 	 * @param {import('sequelize').Model} param0.model
+	 * @param {Collection} param0.CacheCollection
 	 */
-	constructor({ client, model }) {
+	constructor({ client, model, CacheCollection = Collection }) {
 		this.client = client;
 		this.model = model;
-		this.cache = new Collection();
+		this.cache = new CacheCollection();
 		[ this.primaryKey ] = this.model.primaryKeyAttributes;
 	}
 

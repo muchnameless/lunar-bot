@@ -50,8 +50,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 
 			let index = -1;
 
-			const toPurge = lgGuild.members.cache
-				.array()
+			const toPurge = [ ...lgGuild.members.cache.values() ]
 				.flatMap((member) => {
 					if (member.roles.cache.has(this.config.get('GUILD_ROLE_ID'))) return [];
 

@@ -56,7 +56,7 @@ module.exports = class LinkCommand extends SlashCommand {
 		/** @type {?import('../../structures/database/models/Player')} */
 		let player;
 
-		if (!this.client.hypixelGuilds.cache.keyArray().includes(guildId)) { // IGN_OR_Uuid is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
+		if (!this.client.hypixelGuilds.cache.has(guildId)) { // IGN_OR_Uuid is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
 			player = this.client.players.getByIgn(IGN_OR_UUID);
 
 			if (player) ({ minecraftUuid: uuid, ign } = player);
