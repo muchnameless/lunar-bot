@@ -57,7 +57,7 @@ process
 		presence: {
 			activities: [{
 				name: 'slash commands',
-				type: 'LISTENING',
+				type: Constants.ActivityTypes.LISTENING,
 			}],
 			status: 'online',
 		},
