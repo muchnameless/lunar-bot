@@ -25,13 +25,7 @@ module.exports = class ReadyEvent extends Event {
 		// set presence again every 20 min cause it get's lost sometimes
 		setInterval(async () => {
 			try {
-				const presence = this.client.user.setPresence({
-					activities: [{
-						name: 'slash commands',
-						type: 'LISTENING',
-					}],
-					status: 'online',
-				});
+				const presence = this.client.user.setPresence(this.client.user.presence);
 
 				if (this.config.get('EXTENDED_LOGGING_ENABLED')) logger.info(`[SET PRESENCE]: activity set to ${presence.activities[0].name}`);
 			} catch (error) {
