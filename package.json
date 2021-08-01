@@ -2,15 +2,15 @@
   "name": "lunar-bot-dev",
   "version": "1.0.0",
   "description": "dev version of the lunar guard discord bot",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --trace-warnings ./src/index.js",
+    "start": "node --trace-warnings src/index.js",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "maintenance": "node ./src/maintenance.js",
-    "deploy": "node ./src/deploy.js",
-    "db": "node ./src/structures/database/dbInit.js -a"
+    "maintenance": "node src/maintenance.js",
+    "deploy": "node src/deploy.js",
+    "db": "node src/structures/database/dbInit.js -a"
   },
   "author": "muchnameless",
   "license": "ISC",
