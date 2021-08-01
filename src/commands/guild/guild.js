@@ -196,7 +196,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	/**
 	 * /g mute
 	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {{ targetInput: string, duration: number, hypixelGuildInput: import('../../structures/database/models/HypixelGuild') }} param1
+	 * @param {{ targetInput: string, duration: number, hypixelGuildInput?: import('../../structures/database/models/HypixelGuild') }} param1
 	 */
 	async runMute(ctx, { targetInput, duration, hypixelGuildInput = this.getHypixelGuild(ctx) }) {
 		const IS_INTERACTION = ctx instanceof Interaction;

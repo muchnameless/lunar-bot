@@ -5,8 +5,7 @@ const logger = require('../../../functions/logger');
 
 /**
  * @param {import('../ChatBridge')} chatBridge
- * @param {object} param1
- * @param {string} param1.reason
+ * @param {{ reason?: string }} param1
  */
 module.exports = (chatBridge, { reason }) => {
 	try {

@@ -56,7 +56,7 @@ module.exports = class SenitherAPIFacade extends EventEmitter {
 	/**
 	 * @param {string} key
 	 * @param {object} [options]
-	 * @param {{set:Function, get:Function}} [options.cache] caching method
+	 * @param {{ set: Function, get: Function }} [options.cache] caching method
 	 * @param {number} [options.limitOffset] reduces the api key limit by this amount, to use the same key with different clients
 	 */
 	constructor(key, options = {}) {

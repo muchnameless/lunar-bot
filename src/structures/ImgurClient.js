@@ -49,7 +49,7 @@ const { sleep } = require('../functions/util');
 
 module.exports = class ImgurClient {
 	/**
-	 * @param {{ authorization: string, apiVersion: string | number }} param0
+	 * @param {{ authorization: string, apiVersion?: string | number }} param0
 	 */
 	constructor({ authorization, apiVersion = 3 }) {
 		this.authorization = authorization;
@@ -132,7 +132,7 @@ module.exports = class ImgurClient {
 	}
 
 	/**
-	 * @param {{ checkRateLimit: boolean, endpoint: string, method: string, body: FormData }} param0
+	 * @param {{ checkRateLimit?: boolean, endpoint: string, method?: string, body: FormData }} param0
 	 */
 	async _request({ checkRateLimit = true, endpoint, method = 'POST', body }) {
 		await this.queue.wait();

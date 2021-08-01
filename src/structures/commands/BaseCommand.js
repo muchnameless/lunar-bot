@@ -15,7 +15,7 @@ module.exports = class BaseCommand {
 	/**
 	 * create a new command
 	 * @param {BaseCommandData} param0
-	 * @param {{ cooldown: ?number, requiredRoles: () => import('discord.js').Snowflake[] }} param1
+	 * @param {{ cooldown?: number, requiredRoles: () => import('discord.js').Snowflake[] }} param1
 	 */
 	constructor({ client, collection, name, category }, { cooldown, requiredRoles }) {
 		this.client = client;
