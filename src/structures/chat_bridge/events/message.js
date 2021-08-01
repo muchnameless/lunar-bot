@@ -335,8 +335,9 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 				const { member } = message;
 
 				if (!member) {
+					const { lgGuild } = this.client;
 					logger.info(`${message.author} tried to execute '${message.content}' in '${message.type}' and could not be found within the Lunar Guard Discord Server`);
-					return message.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => member.guild.roles.cache.get(roleId)?.name ?? roleId)}) from the ${member.guild.name} Discord server which you can not be found in`);
+					return message.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild.name} Discord server which you can not be found in`);
 				}
 
 				// check for req roles
