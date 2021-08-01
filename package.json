@@ -24,7 +24,7 @@
     "chartjs-node-canvas": "^3.2.0",
     "common-tags": "^1.8.0",
     "cron": "^1.8.2",
-    "discord.js": "github:muchnameless/discord.js#7eee053ae91dd417b48abe4aa75f0aafa3f6bb5d",
+    "discord.js": "github:muchnameless/discord.js#fdfa1da3fc8e530199b7a5187f2a6d40aedd5007",
     "dotenv": "^10.0.0",
     "emoji-regex": "^9.2.2",
     "form-data": "^4.0.0",
@@ -48,10 +48,10 @@
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.14.7",
+    "@babel/eslint-parser": "^7.14.9",
     "@babel/eslint-plugin": "^7.14.5",
     "@babel/plugin-syntax-class-properties": "^7.12.13",
-    "@babel/preset-env": "^7.14.8",
+    "@babel/preset-env": "^7.14.9",
     "eslint": "^7.32.0"
   },
   "engines": {
