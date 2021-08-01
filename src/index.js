@@ -2,11 +2,10 @@
 
 const { join } = require('path');
 require('dotenv').config({ path: join(__dirname, '.env') });
-const { Collection, Intents, Constants } = require('discord.js');
+const { Intents, LimitedCollection, SnowflakeUtil, Options, Constants } = require('discord.js');
 const { requireAll } = require('./functions/files');
 const db = require('./structures/database/index');
 const LunarClient = require('./structures/LunarClient');
-const MessageCacheCollection = require('./structures/MessageCacheCollection');
 const logger = require('./functions/logger');
 
 /** @type {LunarClient} */
@@ -36,15 +35,33 @@ process
 		fetchAllMembers: true,
 
 		// default options
-		makeCache({ name }) {
-			switch (name) {
-				case 'MessageManager':
-					return new MessageCacheCollection(50);
-
-				default:
-					return new Collection();
-			}
-		},
+		makeCache: Options.cacheWithLimits({
+			MessageManager: {
+				maxSize: 200,
+				sweepInterval: 600,
+				sweepFilter: LimitedCollection.filterByLifetime({
+					lifetime: 3_600,
+					getComparisonTimestamp: e => e.editedTimestamp ?? e.createdTimestamp,
+					excludeFromSweep: e => e.id === client.config.get('TAX_MESSAGE_ID'),
+				}),
+			},
+			ThreadManager: {
+				sweepInterval: 1_800,
+				sweepFilter: LimitedCollection.filterByLifetime({
+					lifetime: 21_600,
+					getComparisonTimestamp: e => e.archiveTimestamp,
+					excludeFromSweep: e => !e.archived,
+				}),
+			},
+			ChannelManager: {
+				sweepInterval: 1_800,
+				sweepFilter: LimitedCollection.filterByLifetime({
+					lifetime: 3_600,
+					getComparisonTimestamp: e => SnowflakeUtil.deconstruct(e.lastMessageId ?? '').timestamp,
+					excludeFromSweep: e => e.type !== 'DM',
+				}),
+			},
+		}),
 		allowedMentions: { parse: [ 'users' ], repliedUser: true },
 		partials: [
 			Constants.PartialTypes.CHANNEL,

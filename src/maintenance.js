@@ -1,7 +1,7 @@
 'use strict';
 
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-const { Client, Collection, LimitedCollection, Intents, Permissions, Constants } = require('discord.js');
+const { Client, Intents, Permissions, LimitedCollection, Options, Constants } = require('discord.js');
 const { escapeRegex } = require('./functions/util');
 const db = require('./structures/database/index');
 const logger = require('./functions/logger');
@@ -18,15 +18,6 @@ process
 	});
 
 
-// Collection which only caches the Client Member
-class ClientCacheCollection extends Collection {
-	set(key, value) {
-		if (value.id === value.client.user.id) return super.set(key, value);
-		return this;
-	}
-}
-
-
 // init
 (async () => {
 	const PREFIX = (await db.Config.findOne({
@@ -40,25 +31,29 @@ class ClientCacheCollection extends Collection {
 	const presence = {
 		activities: [{
 			name: 'nothing due to maintenance',
-			type: 'LISTENING',
+			type: Constants.ActivityTypes.LISTENING,
 		}],
 		status: 'dnd',
 	};
 	const client = new Client({
-		makeCache({ name }) {
-			switch (name) {
-				case 'MessageManager':
-				case 'ThreadMemberManager':
-					return new LimitedCollection(0);
-
-				case 'UserManager':
-				case 'GuildMemberManager':
-					return new ClientCacheCollection();
-
-				default:
-					return new Collection();
-			}
-		},
+		makeCache: Options.cacheWithLimits({
+			MessageManager: 0,
+			ThreadManager: {
+				sweepInterval: 3_600,
+				sweepFilter: LimitedCollection.filterByLifetime({
+					getComparisonTimestamp: e => e.archiveTimestamp,
+					excludeFromSweep: e => !e.archived,
+				}),
+				UserManager: {
+					maxSize: 1,
+					keepOverLimit: v => v.id === client.user.id,
+				},
+				GuildMemberManager: {
+					maxSize: 1,
+					keepOverLimit: v => v.id === client.user.id,
+				},
+			},
+		}),
 		allowedMentions: { parse: [], repliedUser: true },
 		partials: [
 			Constants.PartialTypes.CHANNEL,
