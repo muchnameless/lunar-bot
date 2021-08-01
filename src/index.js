@@ -40,7 +40,7 @@ process
 				maxSize: 200,
 				sweepInterval: 600,
 				sweepFilter: LimitedCollection.filterByLifetime({
-					lifetime: 3_600,
+					lifetime: 1_800,
 					getComparisonTimestamp: e => e.editedTimestamp ?? e.createdTimestamp,
 					excludeFromSweep: e => e.id === client.config.get('TAX_MESSAGE_ID'),
 				}),
@@ -48,7 +48,7 @@ process
 			ThreadManager: {
 				sweepInterval: 1_800,
 				sweepFilter: LimitedCollection.filterByLifetime({
-					lifetime: 21_600,
+					lifetime: 14_400,
 					getComparisonTimestamp: e => e.archiveTimestamp,
 					excludeFromSweep: e => !e.archived,
 				}),
@@ -56,7 +56,7 @@ process
 			ChannelManager: {
 				sweepInterval: 1_800,
 				sweepFilter: LimitedCollection.filterByLifetime({
-					lifetime: 3_600,
+					lifetime: 1_800,
 					getComparisonTimestamp: e => SnowflakeUtil.deconstruct(e.lastMessageId ?? '').timestamp,
 					excludeFromSweep: e => e.type !== 'DM',
 				}),
