@@ -341,7 +341,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 				}
 
 				// check for req roles
-				if (!requiredRoles.some(roleId => member.roles.cache.has(roleId))) {
+				if (!member.roles.cache.hasAny(...requiredRoles)) {
 					logger.info(`${message.author.tag} | ${member.displayName} tried to execute '${message.content}' in '${message.type}' without a required role`);
 					return message.author.send(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleId => member.guild.roles.cache.get(roleId)?.name ?? roleId)}) from the Lunar Guard Discord Server`);
 				}

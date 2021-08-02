@@ -248,7 +248,7 @@ module.exports = class SlashCommand extends BaseCommand {
 			})();
 
 		// check for req roles
-		if (!roleIds.some(roleId => member.roles.cache.has(roleId))) {
+		if (!member.roles.cache.hasAny(...roleIds)) {
 			throw missingPermissionsError('missing required role', interaction, roleIds);
 		}
 	}
