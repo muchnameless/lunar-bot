@@ -103,7 +103,11 @@ module.exports = class InteractionCreateEvent extends Event {
 			// select menus
 			if (interaction.isSelectMenu()) return await this._handleSelectMenuInteraction(interaction);
 		} catch (error) {
-			logger.error(`[INTERACTION CREATE]: ${interaction.member?.displayName ?? interaction.user.username} | ${interaction.user.tag}: ${interaction.logInfo ?? ''}`, error);
+			if (typeof error === 'string') {
+				logger.error(`[INTERACTION CREATE]: ${interaction.member?.displayName ?? interaction.user.username} | ${interaction.user.tag}: ${interaction.logInfo ?? ''}: ${error}`);
+			} else {
+				logger.error(`[INTERACTION CREATE]: ${interaction.member?.displayName ?? interaction.user.username} | ${interaction.user.tag}: ${interaction.logInfo ?? ''}`, error);
+			}
 
 			if (error.code === Constants.APIErrors.UNKNOWN_INTERACTION || error.code === Constants.APIErrors.INVALID_WEBHOOK_TOKEN) return; // interaction expired
 
