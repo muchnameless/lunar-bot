@@ -370,7 +370,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	reconnect(loginDelay = Math.min(Math.exp(this.loginAttempts) * 1_000, 600_000)) {
 		// prevent multiple reconnections
-		if (this._isReconnecting) return this.chatBridge;
+		if (this._isReconnecting) return this;
 		this._isReconnecting = true;
 
 		this.disconnect();
