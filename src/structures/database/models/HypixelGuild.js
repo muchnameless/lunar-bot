@@ -646,7 +646,7 @@ module.exports = class HypixelGuild extends Model {
 						newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
 							? [ newRank.roleId ]
 							: [],
-						[ ...member.roles.cache.keys() ].filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)), // remove all other rank roles
+						member.roles.cache.filter(roleId => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)), // remove all other rank roles
 						'synced with weight lb',
 					);
 
