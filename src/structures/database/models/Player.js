@@ -884,8 +884,8 @@ module.exports = class Player extends Model {
 
 	/**
 	 * adds and/or removes the provided roles and logs it via the log handler, returns true or false depending on the success
-	 * @param {(string | import('discord.js').Role)[]} rolesToAdd roles to add to the member
-	 * @param {(string | import('discord.js').Role)[]} rolesToRemove roles to remove from the member
+	 * @param {(string | import('discord.js').Role)[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesToAdd roles to add to the member
+	 * @param {(string | import('discord.js').Role)[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesToRemove roles to remove from the member
 	 * @param {string} reason reason for discord's audit logs
 	 * @returns {Promise<boolean>} wether the API call was successful
 	 */
@@ -897,7 +897,7 @@ module.exports = class Player extends Model {
 		// check if valid IDs are provided
 		let filteredRolesToAdd = rolesToAdd.filter(x => x != null);
 		let filteredRolesToRemove = rolesToRemove.filter(x => x != null);
-		if (!filteredRolesToAdd.length && !filteredRolesToRemove.length) return true;
+		if (!(filteredRolesToAdd.length ?? filteredRolesToAdd.size) && !(filteredRolesToRemove.length ?? filteredRolesToRemove.size)) return true;
 
 		// permission check
 		if (!member.guild.me.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) return (logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false);

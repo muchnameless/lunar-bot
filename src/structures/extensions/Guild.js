@@ -7,7 +7,7 @@ const logger = require('../../functions/logger');
 class LunarGuild extends Structures.get('Guild') {
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
-	 * @param {(?(import('discord.js').Snowflake | import('discord.js').Role))[]} rolesOrIds roles or role IDs to verify
+	 * @param {(?(import('discord.js').Snowflake | import('discord.js').Role))[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesOrIds roles or role IDs to verify
 	 * @returns {Collection<import('discord.js').Snowflake, import('discord.js').Role>}
 	 */
 	resolveRoles(rolesOrIds) {
