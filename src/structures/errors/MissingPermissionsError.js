@@ -10,10 +10,13 @@ const { commaListsOr } = require('common-tags');
  */
 module.exports = (message, { client, guildId, fullCommandName }, requiredRolesRaw) => commaListsOr`
 	missing permissions for \`${fullCommandName}\` (${
-		requiredRolesRaw.map((roleId) => {
+		requiredRolesRaw.flatMap((roleId) => {
+			if (!roleId) return [];
+
 			const role = client.lgGuild?.roles.cache.get(roleId);
 			if (!role) return roleId;
-			return guildId === client.config.get('MAIN_GUILD_ID')
+
+			return guildId === client.config.get('DISCORD_GUILD_ID')
 				? `${role}`
 				: role.name;
 		})
