@@ -352,7 +352,7 @@ module.exports = class HypixelGuild extends Model {
 			// all old players left (???)
 			if (PLAYERS_LEFT_AMOUNT && PLAYERS_LEFT_AMOUNT === PLAYERS_OLD_AMOUNT) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: aborting guild player update request due to the possibility of an error from the fetched data`);
 
-			const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.inGuild.has(uuid));
+			const membersJoined = currentGuildMembers.filter(({ uuid }) => players.cache.get(uuid)?.notInGuild ?? true);
 
 			let leftLog = [];
 			let joinedLog = [];
