@@ -16,7 +16,8 @@ module.exports = class PlayerManager extends ModelManager {
 		super(options);
 
 		/**
-		 * @type {import('../../ArrayCacheCollection')<string, import('../models/Player')>}
+		 * @type {import('discord.js').Collection<string, import('../models/Player')>}
+		 * @ type {import('../../ArrayCacheCollection')<string, import('../models/Player')>}
 		 */
 		this.cache;
 		/**
