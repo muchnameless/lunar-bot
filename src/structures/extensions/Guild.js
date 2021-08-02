@@ -7,13 +7,16 @@ const logger = require('../../functions/logger');
 class LunarGuild extends Structures.get('Guild') {
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
-	 * @param {(?import('discord.js').Snowflake)[]} roleIds role IDs to verify
+	 * @param {(?(import('discord.js').Snowflake | import('discord.js').Role))[]} rolesOrIds roles or role IDs to verify
 	 * @returns {Collection<import('discord.js').Snowflake, import('discord.js').Role>}
 	 */
-	verifyRoleIds(roleIds) {
+	resolveRoles(rolesOrIds) {
 		return new Collection(
-			roleIds
-				.map(roleId => [ roleId, this.roles.cache.get(roleId) ])
+			rolesOrIds
+				.map((roleOrId) => {
+					const role = this.roles.resolve(roleOrId);
+					return [ role?.id ?? roleOrId, role ];
+				})
 				.filter(([ roleId, role ]) => {
 					if (!role) return logger.warn(`[CHECK ROLE IDS]: '${roleId}' is not a valid role id`);
 					if (!role.editable) return logger.warn(`[CHECK ROLE IDS]: can't edit '${role.name}'`);

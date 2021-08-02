@@ -12,6 +12,7 @@ const { escapeIgn, trim } = require('../../../functions/util');
 const { getSkillLevel, getWeight, getSkillWeight, getSlayerWeight, getDungeonWeight } = require('../../../functions/skyblock');
 const { validateNumber, validateDiscordId } = require('../../../functions/stringValidators');
 const { mutedCheck } = require('../../../functions/database');
+const { PSEUDO_GUILD_IDS } = require('../managers/HypixelGuildManager');
 const LunarGuildMember = require('../../extensions/GuildMember');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
@@ -281,20 +282,19 @@ module.exports = class Player extends Model {
 	 * @returns {?import('./HypixelGuild')}
 	 */
 	get guild() {
-		switch (this.guildId) {
-			case GUILD_ID_BRIDGER:
-				return this.client.hypixelGuilds.mainGuild;
-
-			default:
-				return this.client.hypixelGuilds.cache.get(this.guildId) ?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`);
+		if (this.guildId !== GUILD_ID_BRIDGER) {
+			return this.client.hypixelGuilds.cache.get(this.guildId)
+				?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`);
 		}
+
+		return this.client.hypixelGuilds.mainGuild;
 	}
 
 	/**
 	 * wether the player is a bridger or error case
 	 */
 	get notInGuild() {
-		return this.client.hypixelGuilds.constructor.PSEUDO_GUILD_IDS.includes(this.guildId);
+		return PSEUDO_GUILD_IDS.includes(this.guildId);
 	}
 
 	/**
@@ -884,8 +884,8 @@ module.exports = class Player extends Model {
 
 	/**
 	 * adds and/or removes the provided roles and logs it via the log handler, returns true or false depending on the success
-	 * @param {string[]} rolesToAdd roles to add to the member
-	 * @param {string[]} rolesToRemove roles to remove from the member
+	 * @param {(string | import('discord.js').Role)[]} rolesToAdd roles to add to the member
+	 * @param {(string | import('discord.js').Role)[]} rolesToRemove roles to remove from the member
 	 * @param {string} reason reason for discord's audit logs
 	 * @returns {Promise<boolean>} wether the API call was successful
 	 */
@@ -906,8 +906,8 @@ module.exports = class Player extends Model {
 		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));
 
 		// check if IDs are proper roles and managable by the bot
-		filteredRolesToAdd = member.guild.verifyRoleIds(filteredRolesToAdd);
-		filteredRolesToRemove = member.guild.verifyRoleIds(filteredRolesToRemove);
+		filteredRolesToAdd = member.guild.resolveRoles(filteredRolesToAdd);
+		filteredRolesToRemove = member.guild.resolveRoles(filteredRolesToRemove);
 		if (!filteredRolesToAdd.size && !filteredRolesToRemove.size) return true;
 
 		const loggingEmbed = new MessageEmbed()
