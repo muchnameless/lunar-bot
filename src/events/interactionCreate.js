@@ -110,11 +110,12 @@ module.exports = class InteractionCreateEvent extends Event {
 			if (error.code === Constants.APIErrors.UNKNOWN_INTERACTION || error.code === Constants.APIErrors.INVALID_WEBHOOK_TOKEN) return; // interaction expired
 
 			try {
-				await interaction.reply({
+				await interaction.reply?.({
 					content: typeof error === 'string'
 						? error
 						: `an error occurred while executing the command: ${error}`,
 					ephemeral: true,
+					allowedMentions: { parse: [], repliedUser: true },
 				});
 			} catch (err) {
 				logger.error(err);
