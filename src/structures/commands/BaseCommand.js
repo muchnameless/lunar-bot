@@ -41,6 +41,7 @@ module.exports = class BaseCommand {
 
 	/**
 	 * roles required to run this command
+	 * @returns {import('discord.js').Snowflake[]}
 	 */
 	get requiredRoles() {
 		if (this._requiredRoles) return this._requiredRoles();
