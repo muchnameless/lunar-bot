@@ -286,10 +286,10 @@ module.exports = class GuildCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {{ target: import('../../structures/database/models/Player') | string, executor: ?import('../../structures/database/models/Player'), hypixelGuild: import('../../structures/database/models/HypixelGuild'), reason: string }} param0
+	 * @param {{ interaction: ?import('../../structures/extensions/CommandInteraction'), target: import('../../structures/database/models/Player') | string, executor: ?import('../../structures/database/models/Player'), hypixelGuild: import('../../structures/database/models/HypixelGuild'), reason: string }} param0
 	 * @returns {Promise<{ content: string, ephemeral: boolean }>}
 	 */
-	async runKick({ target, executor, hypixelGuild, reason }) {
+	async runKick({ interaction, target, executor, hypixelGuild, reason }) {
 		if (!executor) return {
 			content: 'unable to find a linked player to your discord account',
 			ephemeral: true,
@@ -320,9 +320,13 @@ module.exports = class GuildCommand extends SlashCommand {
 		};
 
 		try {
-			const res = await hypixelGuild.chatBridge.minecraft.command({
+			const { chatBridge } = hypixelGuild;
+
+			interaction?.defer();
+
+			const res = await chatBridge.minecraft.command({
 				command: `g kick ${target} ${reason}`,
-				responseRegExp: kickSuccess(target.ign, hypixelGuild.chatBridge.bot.username),
+				responseRegExp: kickSuccess(target.ign, chatBridge.bot.username),
 				abortRegExp: kickError(target.ign),
 				rejectOnAbort: true,
 				timeout: 60_000,
@@ -445,11 +449,10 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				interaction.defer();
-
 				const target = this.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
 				const { content, ephemeral } = await this.runKick({
+					interaction,
 					target,
 					executor: interaction.user.player,
 					reason,
