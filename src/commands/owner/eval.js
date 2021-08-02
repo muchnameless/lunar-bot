@@ -172,7 +172,7 @@ module.exports = class EvalCommand extends SlashCommand {
 				errors: [ 'time' ],
 			});
 
-			return interaction.editReply({
+			return interaction.update({
 				embeds: await this.eval(
 					interaction,
 					collected.first().content,

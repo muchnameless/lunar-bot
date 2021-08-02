@@ -152,7 +152,7 @@ module.exports = class AhCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/SelectMenuInteraction')} interaction
 	 */
 	async runSelect(interaction) {
-		await interaction.deferUpdate();
+		const deferring = interaction.deferUpdate();
 
 		try {
 			const [ , uuid, ign ] = interaction.customId.split(':');
@@ -161,9 +161,10 @@ module.exports = class AhCommand extends SlashCommand {
 				?? (await hypixel.skyblock.profiles.uuid(uuid)).map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id }));
 
 			// interaction from original requester -> edit message
-			if (interaction.user.id === interaction.message.interaction.user.id) return interaction.editReply(await this._generateReply({ uuid, ign, profileId, profiles }));
+			if (interaction.user.id === interaction.message.interaction.user.id) return interaction.update(await this._generateReply({ uuid, ign, profileId, profiles }));
 
 			// interaction from new requester -> new message
+			await deferring;
 			return interaction.followUp(await this._generateReply({ uuid, ign, profileId, profiles }));
 		} catch (error) {
 			logger.error(error);

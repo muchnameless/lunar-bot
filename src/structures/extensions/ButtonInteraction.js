@@ -29,6 +29,10 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 			: false; // DM channel
 	}
 
+	get logInfo() {
+		return `${this.componentType} ${this.customId}`;
+	}
+
 	/**
 	 * the user who started the interaction (for compatibility with message methods)
 	 */
@@ -51,8 +55,13 @@ class LunarButtonInteraction extends Structures.get('ButtonInteraction') {
 		return this._deferringUpdate = super.deferUpdate();
 	}
 
+	/**
+	 * @param {import('discord.js').InteractionUpdateOptions} options
+	 */
 	async update(options) {
 		await this._deferringUpdate;
+
+		if (this.deferred || this.replied) return this.editReply(options);
 
 		return super.update(options);
 	}
