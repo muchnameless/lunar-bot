@@ -230,12 +230,14 @@ module.exports = class SlashCommand extends BaseCommand {
 		if (!roleIds?.length) return; // no role requirements
 
 		/** @type {import('../extensions/GuildMember')} */
-		const member = interaction.guildId === this.config.get('MAIN_GUILD_ID')
+		const member = interaction.guildId === this.config.get('DISCORD_GUILD_ID')
 			? interaction.member
 			: await (async () => {
 				const { lgGuild } = this.client;
 
 				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
+
+				interaction.defer();
 
 				try {
 					return await lgGuild.members.fetch(interaction.user.id);

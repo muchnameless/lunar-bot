@@ -31,8 +31,6 @@ module.exports = class InteractionCreateEvent extends Event {
 		});
 
 		if (interaction.user.id !== this.client.ownerId) {
-			interaction.defer();
-
 			// role permissions
 			await command.checkPermissions(interaction);
 

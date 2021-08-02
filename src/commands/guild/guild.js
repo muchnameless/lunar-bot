@@ -201,6 +201,8 @@ module.exports = class GuildCommand extends SlashCommand {
 	async runMute(ctx, { targetInput, duration, hypixelGuildInput = this.getHypixelGuild(ctx) }) {
 		const IS_INTERACTION = ctx instanceof Interaction;
 
+		if (IS_INTERACTION) ctx.defer();
+
 		let hypixelGuild = hypixelGuildInput;
 		let target;
 
@@ -347,12 +349,14 @@ module.exports = class GuildCommand extends SlashCommand {
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 * @param {?import('../../structures/database/models/HypixelGuild')} [hypixelGuild]
 	 */
-	async _run(interaction, commandOptions, hypixelGuild = this.getHypixelGuild(interaction)) {
+	async _run(interaction, commandOptions, { chatBridge } = this.getHypixelGuild(interaction)) {
+		interaction.defer();
+
 		return interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
-					.setDescription(Formatters.codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions))),
+					.setDescription(Formatters.codeBlock(await chatBridge.minecraft.command(commandOptions))),
 			],
 		});
 	}
@@ -363,7 +367,9 @@ module.exports = class GuildCommand extends SlashCommand {
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 */
 	async _runList(interaction, commandOptions) {
-		const hypixelGuild = this.getHypixelGuild(interaction);
+		const { chatBridge } = this.getHypixelGuild(interaction);
+
+		interaction.defer();
 
 		return interaction.reply({
 			embeds: [
@@ -371,7 +377,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					.setTitle(`/${commandOptions.command}`)
 					.setDescription(Formatters.codeBlock(
 						trim(
-							(await hypixelGuild.chatBridge.minecraft.command({
+							(await chatBridge.minecraft.command({
 								raw: true,
 								...commandOptions,
 							}))
@@ -397,8 +403,6 @@ module.exports = class GuildCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer();
-
 		const SUB_COMMAND = interaction.options.getSubcommand();
 
 		switch (SUB_COMMAND) {
@@ -440,6 +444,8 @@ module.exports = class GuildCommand extends SlashCommand {
 				await this.checkPermissions(interaction, {
 					roleIds: [ this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
+
+				interaction.defer();
 
 				const target = this.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
