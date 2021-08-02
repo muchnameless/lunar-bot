@@ -51,7 +51,7 @@ module.exports = class DonationsCommand extends SlashCommand {
 				name: '\u200b',
 				value: Formatters.codeBlock('ada', stripIndent`
 					#${`${index + 1}`.padStart(3, '0')} : ${IGN}
-						> ${this.client.formatNumber(amount)}
+						 > ${this.client.formatNumber(amount)}
 				`),
 				inline: true,
 			});
