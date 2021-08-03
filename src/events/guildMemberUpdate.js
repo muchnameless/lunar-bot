@@ -26,7 +26,7 @@ module.exports = class GuildMemberUpdateEvent extends Event {
 		// received bridger role -> update player db
 		if (newMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID')) && !oldMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID'))) {
 			/** @type {import('../structures/database/models/Player')} */
-			const player = newMember.player ?? await this.client.players.model.findOne({ where: { discordId: newMember.id } });
+			const player = newMember.player ?? await this.client.players.fetch({ discordId: newMember.id });
 
 			if (!player) return logger.info(`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`);
 
@@ -35,8 +35,6 @@ module.exports = class GuildMemberUpdateEvent extends Event {
 			if (player.notInGuild) {
 				player.guildId = GUILD_ID_BRIDGER;
 				player.save();
-
-				this.client.players.set(player.minecraftUuid, player);
 			}
 		}
 

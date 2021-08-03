@@ -14,6 +14,7 @@ module.exports = class ModelManager {
 	constructor({ client, model, CacheCollection = Collection }) {
 		this.client = client;
 		this.model = model;
+		/** @type {Collection<string, import('sequelize').Model>} */
 		this.cache = new CacheCollection();
 		[ this.primaryKey ] = this.model.primaryKeyAttributes;
 	}
@@ -42,6 +43,19 @@ module.exports = class ModelManager {
 	 */
 	sweepCache() {
 		this.cache.clear();
+	}
+
+	/**
+	 * fetches an entry from the database and caches it
+	 * @param {import('sequelize').WhereOptions} where
+	 */
+	async fetch(where) {
+		/** @type {?import('sequelize').Model} */
+		const entry = await this.model.findOne({ where });
+
+		if (entry) this.cache.set(entry[this.primaryKey], entry);
+
+		return entry;
 	}
 
 	/**
