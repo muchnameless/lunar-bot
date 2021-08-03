@@ -1,7 +1,7 @@
 'use strict';
 
 const ms = require('ms');
-const { safePromiseAll } = require('../../functions/util');
+const { sleep } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
 
@@ -45,41 +45,43 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 				ephemeral: true,
 			});
 
-			await lgGuild.members.fetch();
+			const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
+			const toPurge = [];
 
-			let index = -1;
+			for (const member of (await lgGuild.members.fetch()).values()) {
+				if (member.roles.cache.has(GUILD_ROLE_ID)) continue;
 
-			const toPurge = [ ...lgGuild.members.cache.values() ]
-				.flatMap((member) => {
-					if (member.roles.cache.has(this.config.get('GUILD_ROLE_ID'))) return [];
+				/** @type {string[]} */
+				const { rolesToPurge } = member;
 
-					/** @type {string[]} */
-					const { rolesToPurge } = member;
+				if (!rolesToPurge.length) continue;
 
-					if (!rolesToPurge.length) return [];
-
-					return new Promise((resolve) => {
-						setTimeout(async () => {
-							try {
-								if (member.deleted) return;
-								await member.roles.remove(rolesToPurge);
-								logger.info(`[PURGE ROLES]: removed ${rolesToPurge.length} role(s) from ${member.user.tag} | ${member.displayName}`);
-							} catch (error) {
-								logger.error('[PURGE ROLES]', error);
-							} finally {
-								resolve();
-							}
-						}, ++index * PurgeRolesCommand.TIMEOUT);
-					});
+				toPurge.push({
+					id: member.id,
+					rolesToPurge,
 				});
+			}
+
 			const PURGE_AMOUNT = toPurge.length;
 
 			if (!PURGE_AMOUNT) return interaction.reply('no roles need to be purged');
 
-			await safePromiseAll([
-				interaction.reply(`purging roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT, { long: true })}`),
-				...toPurge,
-			]);
+			await interaction.awaitConfirmation(`purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT, { long: true })}?`);
+
+			await Promise.all(toPurge.map(async ({ id, rolesToPurge }, index) => {
+				await sleep(index * PurgeRolesCommand.TIMEOUT);
+
+				try {
+					const member = lgGuild.members.cache.get(id);
+					if (!member || member.deleted) return;
+
+					await member.roles.remove(rolesToPurge);
+
+					logger.info(`[PURGE ROLES]: removed ${rolesToPurge.length} role(s) from ${member.user.tag} | ${member.displayName}`);
+				} catch (error) {
+					logger.error('[PURGE ROLES]', error);
+				}
+			}));
 
 			return interaction.reply(`done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`);
 		} finally {
