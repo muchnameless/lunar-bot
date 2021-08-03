@@ -1,6 +1,6 @@
 'use strict';
 
-const { Collection, Constants } = require('discord.js');
+const { Collection } = require('discord.js');
 const BaseCommandCollection = require('./BaseCommandCollection');
 const logger = require('../../functions/logger');
 
