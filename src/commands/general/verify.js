@@ -37,13 +37,12 @@ module.exports = class VerifyCommand extends SlashCommand {
 		const playerLinkedToId = interaction.user.player;
 
 		let player = this.client.players.getByIgn(IGN)
-			?? await this.client.players.model.findOne({
-				where: {
-					[Op.or]: [{
-						ign: { [Op.iLike]: IGN },
-						minecraftUuid: IGN.toLowerCase(),
-					}],
-				},
+			?? await this.client.players.fetch({
+				[Op.or]: [{
+					ign: { [Op.iLike]: IGN },
+					minecraftUuid: IGN.toLowerCase(),
+				}],
+				cache: false,
 			});
 
 		// already linked to this discord user

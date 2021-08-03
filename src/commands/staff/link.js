@@ -78,8 +78,9 @@ module.exports = class LinkCommand extends SlashCommand {
 
 		// discordId already linked to another player
 		const playerLinkedToId = this.client.players.getById(user.id)
-			?? await this.client.players.model.findOne({
-				where: { discordId: user.id },
+			?? await this.client.players.fetch({
+				discordId: user.id,
+				cache: false,
 			});
 
 		if (playerLinkedToId) {

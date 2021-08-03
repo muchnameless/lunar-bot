@@ -30,14 +30,13 @@ module.exports = class UnlinkCommand extends SlashCommand {
 	async run(interaction) {
 		const PLAYER_INPUT = interaction.options.getString('player', true);
 		const player = this.getPlayer(interaction)
-			?? await this.client.players.model.findOne({
-				where: {
-					[Op.or]: [{
-						ign: { [Op.iLike]: PLAYER_INPUT },
-						minecraftUuid: PLAYER_INPUT.toLowerCase(),
-						discordId: PLAYER_INPUT,
-					}],
-				},
+			?? await this.client.players.fetch({
+				[Op.or]: [{
+					ign: { [Op.iLike]: PLAYER_INPUT },
+					minecraftUuid: PLAYER_INPUT.toLowerCase(),
+					discordId: PLAYER_INPUT,
+				}],
+				cache: false,
 			});
 
 		if (!player?.discordId) return interaction.reply(`\`${PLAYER_INPUT}\` is not linked`);

@@ -47,13 +47,13 @@ module.exports = class ModelManager {
 
 	/**
 	 * fetches an entry from the database and caches it
-	 * @param {import('sequelize').WhereOptions} where
+	 * @param {import('sequelize').WhereOptions & { cache: boolean }} where
 	 */
-	async fetch(where) {
+	async fetch({ cache = true, ...where }) {
 		/** @type {?import('sequelize').Model} */
 		const entry = await this.model.findOne({ where });
 
-		if (entry) this.cache.set(entry[this.primaryKey], entry);
+		if (cache && entry) this.cache.set(entry[this.primaryKey], entry);
 
 		return entry;
 	}

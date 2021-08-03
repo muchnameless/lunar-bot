@@ -213,13 +213,12 @@ module.exports = class GuildCommand extends SlashCommand {
 				? this.getPlayer(ctx)
 					?? (ctx.checkForce
 						? targetInput // use input if force is set
-						: (await this.client.players.model.findOne({ // try to find by ign or uuid
-							where: {
-								[Op.or]: [{
-									ign: { [Op.iLike]: targetInput },
-									minecraftUuid: targetInput,
-								}],
-							},
+						: (await this.client.players.fetch({ // try to find by ign or uuid
+							[Op.or]: [{
+								ign: { [Op.iLike]: targetInput },
+								minecraftUuid: targetInput,
+							}],
+							cache: false,
 						})
 							?? await (async () => { // check if input is a discord id or @mention, find or create player db object if so
 								const ID = getIdFromString(targetInput);
@@ -679,10 +678,9 @@ module.exports = class GuildCommand extends SlashCommand {
 									const ID = getIdFromString(TARGET_INPUT);
 									if (ID) queryParams.push({ discordId: ID });
 
-									return this.client.players.model.findOne({
-										where: {
-											[Op.or]: queryParams,
-										},
+									return this.client.players.fetch({
+										[Op.or]: queryParams,
+										cache: false,
 									});
 								})()
 							);

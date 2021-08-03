@@ -286,11 +286,10 @@ module.exports = class TaxCommand extends SlashCommand {
 				// individual player
 				if (PLAYER_INPUT) {
 					const player = this.getPlayer(interaction)
-						?? await players.model.findOne({
-							where: {
-								guildId: null,
-								ign: { [Op.iLike]: PLAYER_INPUT },
-							},
+						?? await players.fetch({
+							guildId: null,
+							ign: { [Op.iLike]: PLAYER_INPUT },
+							cache: false,
 						});
 
 					if (!player) {
