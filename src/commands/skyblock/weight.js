@@ -24,7 +24,6 @@ module.exports = class WeightCommand extends DualCommand {
 					description: 'IGN | UUID',
 					required: false,
 				}, DualCommand.SKYBLOCK_PROFILE_OPTION ],
-				defaultPermission: true,
 				cooldown: 1,
 			},
 			{

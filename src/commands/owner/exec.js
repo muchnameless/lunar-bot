@@ -18,7 +18,6 @@ module.exports = class ExecCommand extends SlashCommand {
 				description: 'code input',
 				required: true,
 			}],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

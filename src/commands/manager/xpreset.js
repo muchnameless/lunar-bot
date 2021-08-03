@@ -19,7 +19,6 @@ module.exports = class XpResetCommand extends SlashCommand {
 				description: 'IGN | UUID | discord ID | @mention',
 				required: false,
 			}],
-			defaultPermission: true,
 			cooldown: 5,
 		});
 	}

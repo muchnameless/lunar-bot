@@ -18,7 +18,6 @@ module.exports = class UnlinkCommand extends SlashCommand {
 				description: 'IGN | UUID | discord ID | @mention',
 				required: true,
 			}],
-			defaultPermission: true,
 			cooldown: 1,
 		});
 	}

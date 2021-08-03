@@ -16,7 +16,6 @@ module.exports = class TestCommand extends SlashCommand {
 				description: 'input',
 				required: false,
 			}],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

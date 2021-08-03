@@ -104,7 +104,6 @@ module.exports = class MathsCommand extends DualCommand {
 					description: 'mathematical expression to evaluate',
 					required: true,
 				}],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			{

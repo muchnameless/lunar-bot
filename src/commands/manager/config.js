@@ -52,16 +52,6 @@ module.exports = class ConfigCommand extends SlashCommand {
 					required: false,
 				}],
 			}],
-			defaultPermission: true,
-			// permissions: [{
-			// 	id: data.client.config.get('DISCORD_GUILD_ID'),
-			// 	type: Constants.ApplicationCommandPermissionTypes.ROLE,
-			// 	permission: false,
-			// }, {
-			// 	id: data.client.config.get('MANAGER_ROLE_ID'),
-			// 	type: Constants.ApplicationCommandPermissionTypes.ROLE,
-			// 	permission: true,
-			// }],
 			cooldown: 0,
 		});
 	}

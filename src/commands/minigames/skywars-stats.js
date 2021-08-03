@@ -20,7 +20,6 @@ module.exports = class SkyWarsStatsCommand extends StatsCommand {
 					description: 'IGN',
 					required: false,
 				}],
-				defaultPermission: true,
 				cooldown: 1,
 			},
 			{

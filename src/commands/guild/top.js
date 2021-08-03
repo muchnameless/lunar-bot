@@ -16,7 +16,6 @@ module.exports = class TopCommand extends SlashCommand {
 				SlashCommand.OFFSET_OPTION,
 				SlashCommand.guildOptionBuilder(data.client, true),
 			],
-			defaultPermission: true,
 			cooldown: 1,
 		});
 	}

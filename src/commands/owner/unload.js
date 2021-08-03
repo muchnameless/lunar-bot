@@ -33,7 +33,6 @@ module.exports = class UnloadCommand extends DualCommand {
 						required: true,
 					}],
 				}],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			{

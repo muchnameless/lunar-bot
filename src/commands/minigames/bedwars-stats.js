@@ -20,7 +20,6 @@ module.exports = class BedWarsStatsCommand extends StatsCommand {
 					description: 'IGN | UUID',
 					required: false,
 				}],
-				defaultPermission: true,
 				cooldown: 1,
 			},
 			{

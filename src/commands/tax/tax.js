@@ -85,7 +85,6 @@ module.exports = class TaxCommand extends SlashCommand {
 					required: false,
 				}],
 			}],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

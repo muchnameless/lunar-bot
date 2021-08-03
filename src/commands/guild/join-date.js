@@ -32,7 +32,6 @@ module.exports = class JoinDateCommand extends DualCommand {
 					DualCommand.FORCE_OPTION,
 					DualCommand.guildOptionBuilder(data.client),
 				],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			{

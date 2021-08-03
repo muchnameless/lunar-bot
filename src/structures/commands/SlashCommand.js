@@ -22,7 +22,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @param {string} param0.name command name
 	 * @param {CommandData} param1
 	 */
-	constructor(param0, { aliases, description, options, defaultPermission, permissions, cooldown, requiredRoles }) {
+	constructor(param0, { aliases, description, options, defaultPermission, cooldown, requiredRoles }) {
 		super(param0, { cooldown, requiredRoles });
 
 		/** @type {?string[]} */
@@ -32,7 +32,6 @@ module.exports = class SlashCommand extends BaseCommand {
 		this.options = options ?? null;
 		this.defaultPermission = defaultPermission ?? true;
 
-		this.permissions = permissions ?? null;
 		if (this.permissions?.length) this.permissions.push({
 			id: this.client.ownerId,
 			type: Constants.ApplicationCommandPermissionTypes.USER,
@@ -169,6 +168,37 @@ module.exports = class SlashCommand extends BaseCommand {
 		return data.name.length
 			+ data.description.length
 			+ reduceOptions(data.options);
+	}
+
+	/**
+	 * returns discord application command permission data
+	 */
+	get permissions() {
+		const requiredRoles = this.requiredRoles?.filter(r => r !== null);
+
+		if (!requiredRoles?.length && this.category !== 'owner') return null;
+
+		const permissions = [{
+			id: this.client.ownerId, // allow all commands for the bot owner
+			type: Constants.ApplicationCommandPermissionTypes.USER,
+			permission: true,
+		}, {
+			id: this.config.get('DISCORD_GUILD_ID'), // deny for the guild @everyone role
+			type: Constants.ApplicationCommandPermissionTypes.ROLE,
+			permission: false,
+		}];
+
+		if (requiredRoles) {
+			for (const roleId of requiredRoles) {
+				permissions.push({
+					id: roleId,
+					type: Constants.ApplicationCommandPermissionTypes.ROLE,
+					permission: true,
+				});
+			}
+		}
+
+		return permissions;
 	}
 
 	/**

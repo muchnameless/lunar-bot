@@ -61,7 +61,6 @@ module.exports = class ReloadCommand extends DualCommand {
 					description: 'reload the blocked words filter',
 					options: [],
 				}],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			{

@@ -188,7 +188,6 @@ module.exports = class GuildCommand extends SlashCommand {
 			aliases: [ 'g' ],
 			description: 'hypixel',
 			options,
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

@@ -13,7 +13,6 @@ module.exports = class DonationsCommand extends SlashCommand {
 			aliases: [],
 			description: 'donations leaderboard',
 			options: [],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

@@ -20,7 +20,6 @@ module.exports = class GuildOfCommand extends DualCommand {
 					description: 'IGN | UUID',
 					required: true,
 				}],
-				defaultPermission: true,
 				cooldown: 1,
 			},
 			{

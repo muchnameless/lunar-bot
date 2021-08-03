@@ -22,7 +22,6 @@ module.exports = class PlayerStatsCommand extends StatsCommand {
 					description: 'IGN | UUID',
 					required: false,
 				}],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			{

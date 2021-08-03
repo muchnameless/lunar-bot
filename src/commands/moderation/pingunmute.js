@@ -18,7 +18,6 @@ module.exports = class PingUnmuteCommand extends PingMute {
 					description: 'IGN | UUID | discord ID | @mention',
 					required: true,
 				}],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 		);

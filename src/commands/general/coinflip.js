@@ -12,7 +12,6 @@ module.exports = class CoinFlipCommand extends DualCommand {
 				aliases: [],
 				description: 'heads, tails or ???',
 				options: [],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			{

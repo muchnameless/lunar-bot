@@ -28,7 +28,6 @@ module.exports = class DonateCommand extends SlashCommand {
 				description: 'additional notes',
 				required: false,
 			}],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

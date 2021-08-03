@@ -21,7 +21,6 @@ module.exports = class AhCommand extends SlashCommand {
 				description: 'IGN | UUID',
 				required: false,
 			}, SlashCommand.SKYBLOCK_PROFILE_OPTION ],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

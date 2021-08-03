@@ -14,7 +14,6 @@ module.exports = class FetchurCommand extends DualCommand {
 				aliases: [],
 				description: 'shows the current fetchur item',
 				options: [],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			{

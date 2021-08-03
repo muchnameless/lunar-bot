@@ -13,7 +13,6 @@ module.exports = class DebugCommand extends SlashCommand {
 			aliases: [],
 			description: 'shows general information about the bot',
 			options: [],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

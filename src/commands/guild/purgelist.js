@@ -19,7 +19,6 @@ module.exports = class PurgeListCommand extends SlashCommand {
 			},
 			SlashCommand.guildOptionBuilder(data.client, true),
 			],
-			defaultPermission: true,
 			cooldown: 1,
 		});
 	}

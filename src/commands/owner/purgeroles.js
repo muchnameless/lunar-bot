@@ -12,7 +12,6 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 			aliases: [],
 			description: 'removes all roles that the bot manages from non guild members',
 			options: [],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

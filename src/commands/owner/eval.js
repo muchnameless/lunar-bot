@@ -42,7 +42,6 @@ module.exports = class EvalCommand extends SlashCommand {
 				description: 'wrap the code in an async IIFE',
 				required: false,
 			}],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

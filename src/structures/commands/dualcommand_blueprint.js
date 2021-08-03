@@ -12,7 +12,6 @@ module.exports = class MyCommand extends DualCommand {
 				aliases: [],
 				description: '',
 				options: [],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			{

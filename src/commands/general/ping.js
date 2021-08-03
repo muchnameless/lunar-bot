@@ -11,7 +11,6 @@ module.exports = class PingCommand extends SlashCommand {
 			aliases: [],
 			description: 'check API latency and WebSocket ping',
 			options: [],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

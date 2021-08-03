@@ -21,7 +21,6 @@ module.exports = class FriendCheckCommand extends SlashCommand {
 				description: 'IGN | UUID',
 				required: true,
 			}],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

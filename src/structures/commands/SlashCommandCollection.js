@@ -1,8 +1,8 @@
 'use strict';
 
-const { Collection, GuildApplicationCommandManager } = require('discord.js');
+const { Collection, Constants } = require('discord.js');
 const BaseCommandCollection = require('./BaseCommandCollection');
-// const logger = require('../../functions/logger');
+const logger = require('../../functions/logger');
 
 
 module.exports = class SlashCommandCollection extends BaseCommandCollection {
@@ -20,31 +20,44 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 	 */
 	async init(commandManager = this.client.application.commands) {
 		const commands = await commandManager.set(this.map(({ data }, name) => ({ ...data, name })));
-		const fullPermissions = [];
 
-		for (const applicationCommand of commands.values()) {
-			/** @type {import('./DualCommand') | import('./SlashCommand')} */
-			const slashCommand = this.get(applicationCommand.name);
-
-			if (slashCommand.permissions) {
-				fullPermissions.push({
-					id: applicationCommand.id,
-					permissions: slashCommand.permissions,
-				});
-			}
-		}
-
-		if (fullPermissions.length) {
-			if (commandManager instanceof GuildApplicationCommandManager) {
-				await commandManager.permissions.set({ fullPermissions });
-			} else { // permissions for global commands must be set per guild
-				for (const guild of this.client.guilds.cache.values()) {
-					await guild.commands.permissions.set({ fullPermissions });
-				}
-			}
-		}
+		await this.setPermissions(commands);
 
 		return commands;
+	}
+
+	/**
+	 * sets all application command permissions
+	 * @param {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').ApplicationCommand>} applicationCommandsInput
+	 */
+	async setPermissions(applicationCommandsInput) {
+		const applicationCommands = applicationCommandsInput ?? await this.client.application.commands.fetch();
+		const { lgGuild } = this.client;
+		const fullPermissions = [];
+
+		for (const { name, id } of applicationCommands.values()) {
+			/** @type {?import('./SlashCommand')} */
+			const command = this.client.commands.get(name);
+
+			if (!command) {
+				logger.warn(`unknown application command '${name}'`);
+				continue;
+			}
+
+			const { permissions } = command;
+
+			if (!permissions) {
+				logger.info(`no permissions to set for '${name}'`);
+				continue;
+			}
+
+			fullPermissions.push({
+				id,
+				permissions,
+			});
+		}
+
+		return lgGuild.commands.permissions.set({ fullPermissions });
 	}
 
 	/**
@@ -62,6 +75,17 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 		// add aliases if existent
 		command.aliases?.forEach(alias => data.push({ ...data[0], name: alias }));
 
-		return Promise.all(data.map(d => this.client.application.commands.create(d)));
+		const result = await Promise.all(data.map(d => this.client.application.commands.create(d)));
+		const { permissions } = command;
+		const { lgGuild } = this.client;
+
+		for (const { id } of result) {
+			await lgGuild.commands.permissions.set({
+				id,
+				permissions,
+			});
+		}
+
+		return result;
 	}
 };

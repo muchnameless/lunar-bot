@@ -18,7 +18,6 @@ module.exports = class PingMuteCommand extends DualCommand {
 					description: 'IGN | UUID | discord ID | @mention',
 					required: true,
 				}],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			param2 ?? {

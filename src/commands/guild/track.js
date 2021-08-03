@@ -21,7 +21,6 @@ module.exports = class TrackCommand extends SlashCommand {
 			},
 			SlashCommand.XP_TYPE_OPTION,
 			],
-			defaultPermission: true,
 			cooldown: 1,
 		});
 	}

@@ -12,7 +12,6 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 			aliases: [],
 			description: 'list player db and discord role discrepancies',
 			options: [],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

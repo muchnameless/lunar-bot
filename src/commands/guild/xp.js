@@ -32,7 +32,6 @@ module.exports = class XpCommand extends SlashCommand {
 				description: 'update xp before running the command',
 				required: false,
 			}],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

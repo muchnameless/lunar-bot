@@ -20,7 +20,6 @@ module.exports = class SmiteCommand extends DualCommand {
 				},
 				DualCommand.guildOptionBuilder(data.client, false),
 				],
-				defaultPermission: true,
 				cooldown: 0,
 			},
 			{

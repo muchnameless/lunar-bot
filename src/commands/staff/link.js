@@ -25,7 +25,6 @@ module.exports = class LinkCommand extends SlashCommand {
 				description: 'discord user',
 				required: true,
 			}],
-			defaultPermission: true,
 			cooldown: 1,
 		});
 	}

@@ -19,7 +19,6 @@ module.exports = class BridgeStatsCommand extends StatsCommand {
 					description: 'IGN | UUID',
 					required: false,
 				}],
-				defaultPermission: true,
 				cooldown: 1,
 			},
 			{

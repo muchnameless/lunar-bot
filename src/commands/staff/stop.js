@@ -10,7 +10,6 @@ module.exports = class StopCommand extends SlashCommand {
 			aliases: [],
 			description: 'stop the bot. It should restart immediatly',
 			options: [],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

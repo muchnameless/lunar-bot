@@ -10,7 +10,6 @@ module.exports = class MyCommand extends SlashCommand {
 			aliases: [],
 			description: '',
 			options: [],
-			defaultPermission: true,
 			cooldown: 0,
 		});
 	}

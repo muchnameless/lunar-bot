@@ -18,7 +18,6 @@ module.exports = class BedWarsFkdrCommand extends StatsCommand {
 					description: 'IGN | UUID',
 					required: false,
 				}],
-				defaultPermission: true,
 				cooldown: 1,
 			},
 			{

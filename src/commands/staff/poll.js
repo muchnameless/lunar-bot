@@ -45,7 +45,6 @@ module.exports = class PollCommand extends DualCommand {
 				aliases: [],
 				description: 'create a poll for both in game and discord guild chat',
 				options,
-				defaultPermission: true,
 				cooldown: 1,
 			},
 			{
