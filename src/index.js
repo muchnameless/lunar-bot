@@ -57,7 +57,7 @@ process
 				sweepInterval: 1_800,
 				sweepFilter: LimitedCollection.filterByLifetime({
 					lifetime: 1_800,
-					getComparisonTimestamp: e => SnowflakeUtil.deconstruct(e.lastMessageId ?? '').timestamp,
+					getComparisonTimestamp: e => (e.lastMessageId ? SnowflakeUtil.deconstruct(e.lastMessageId).timestamp : 0),
 					excludeFromSweep: e => e.type !== 'DM',
 				}),
 			},
