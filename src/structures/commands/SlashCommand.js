@@ -27,16 +27,9 @@ module.exports = class SlashCommand extends BaseCommand {
 
 		/** @type {?string[]} */
 		this.aliases = aliases?.length ? aliases.filter(Boolean) : null;
-
 		this.description = description?.length ? description : null;
 		this.options = options ?? null;
 		this.defaultPermission = defaultPermission ?? true;
-
-		if (this.permissions?.length) this.permissions.push({
-			id: this.client.ownerId,
-			type: Constants.ApplicationCommandPermissionTypes.USER,
-			permission: true,
-		});
 	}
 
 	static get guildOptionBuilder() {
