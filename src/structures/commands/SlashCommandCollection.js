@@ -21,7 +21,7 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 	async init(commandManager = this.client.application.commands) {
 		const commands = await commandManager.set(this.map(({ data }, name) => ({ ...data, name })));
 
-		await this.setPermissions(commands);
+		await this.setAllPermissions(commands);
 
 		return commands;
 	}
@@ -30,9 +30,8 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 	 * sets all application command permissions
 	 * @param {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').ApplicationCommand>} applicationCommandsInput
 	 */
-	async setPermissions(applicationCommandsInput) {
+	async setAllPermissions(applicationCommandsInput) {
 		const applicationCommands = applicationCommandsInput ?? await this.client.application.commands.fetch();
-		const { lgGuild } = this.client;
 		const fullPermissions = [];
 
 		for (const { name, id } of applicationCommands.values()) {
@@ -57,7 +56,10 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 			});
 		}
 
-		return lgGuild.commands.permissions.set({ fullPermissions });
+		return this.client.application.commands.permissions.set({
+			guild: this.client.config.get('DISCORD_GUILD_ID'),
+			fullPermissions,
+		});
 	}
 
 	/**
@@ -75,17 +77,33 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 		// add aliases if existent
 		command.aliases?.forEach(alias => data.push({ ...data[0], name: alias }));
 
-		const result = await Promise.all(data.map(d => this.client.application.commands.create(d)));
+		const applicationCommands = await Promise.all(data.map(d => this.client.application.commands.create(d)));
+
+		await this.setSinglePermissions({ command, applicationCommands });
+
+		return applicationCommands;
+	}
+
+	/**
+	 * sets a single application command's permissions (including possible aliases)
+	 * @param {{ command: import('./SlashCommand'), applicationCommands: import('discord.js').ApplicationCommand[] }} param0
+	 */
+	// eslint-disable-next-line no-undef
+	async setSinglePermissions({ command = this.getByName(arguments[0]), applicationCommands: applicationCommandsInput }) {
+		const applicationCommands = applicationCommandsInput
+			?? (await this.client.application.commands.fetch()).filter(c => c.name === command.name || command.aliases?.includes(c.name));
 		const { permissions } = command;
-		const { lgGuild } = this.client;
 
-		for (const { id } of result) {
-			await lgGuild.commands.permissions.set({
-				id,
-				permissions,
-			});
+		if (permissions?.length) {
+			const DISCORD_GUILD_ID = this.client.config.get('DISCORD_GUILD_ID');
+
+			for (const applicationCommand of applicationCommands) {
+				await this.client.application.commands.permissions.set({
+					guild: DISCORD_GUILD_ID,
+					command: applicationCommand,
+					permissions,
+				});
+			}
 		}
-
-		return result;
 	}
 };
