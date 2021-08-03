@@ -19,7 +19,7 @@ module.exports = class DisconnectChatBridgeEvent extends ChatBridgeEvent {
 	async run(reason) {
 		this.chatBridge.minecraft.ready = false;
 
-		logger.error(`[CHATBRIDGE END]: Minecraft bot disconnected from server: ${reason ?? 'unknown'}`);
+		logger.error(`[CHATBRIDGE END]: Minecraft bot disconnected from server: ${reason ?? 'unknown reason'}`);
 
 		this.chatBridge.minecraft.reconnect();
 	}

@@ -7,5 +7,5 @@
  * @param {import('../ChatBridge')} chatBridge
  */
 module.exports = (chatBridge) => {
-	chatBridge.emit('disconnect');
+	chatBridge.emit('disconnect', 'bot end');
 };
