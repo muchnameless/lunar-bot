@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * https://github.com/DSharpPlus/DSharpPlus/blob/master/DSharpPlus/Entities/DiscordEmoji.EmojiUtils.cs#L15
+ * https://github.com/DSharpPlus/DSharpPlus/blob/master/DSharpPlus/Entities/Emoji/DiscordEmoji.EmojiUtils.cs
  */
 
 /**
