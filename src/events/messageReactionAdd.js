@@ -20,7 +20,7 @@ module.exports = class MessageReactionAddEvent extends Event {
 	 */
 	async run(reaction, { id: userId }) {
 	// reaction.message is not from the announcement channel or not the broadcast emoji
-		if (reaction.message.channel.id !== this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') || reaction.emoji.name !== FORWARD_TO_GC) return;
+		if (reaction.message.channelId !== this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') || reaction.emoji.name !== FORWARD_TO_GC) return;
 
 		try {
 			if (reaction.partial) await reaction.fetch();

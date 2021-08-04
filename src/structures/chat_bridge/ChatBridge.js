@@ -253,7 +253,7 @@ module.exports = class ChatBridge extends EventEmitter {
 	 * @param {import('../extensions/Message')} message
 	 * @param {MessageForwardOptions} [options]
 	 */
-	handleDiscordMessage(message, { link = this.discord.get(message.channel.id), ...options }) {
+	handleDiscordMessage(message, { link = this.discord.get(message.channelId), ...options }) {
 		return (this.discord.resolve(link)?.forwardToMinecraft(message, options) && true) ?? false;
 	}
 

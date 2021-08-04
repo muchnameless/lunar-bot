@@ -9,16 +9,10 @@ const logger = require('../../functions/logger');
 
 
 class LunarMessage extends Structures.get('Message') {
-	constructor(...args) {
-		super(...args);
-
-		this.sendReplyChannel = true;
-	}
-
 	static DEFAULT_COMMAND_CHANNEL_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
 
 	get logInfo() {
-		return `${this.author?.tag ?? 'unknown author'}${this.guild ? ` | ${this.member?.displayName ?? 'unknown member'}` : ''}`;
+		return `${this.author?.tag ?? 'unknown author'}${this.guildId ? ` | ${this.member?.displayName ?? 'unknown member'}` : ''}`;
 	}
 
 	/**
@@ -80,7 +74,7 @@ class LunarMessage extends Structures.get('Message') {
 	 * part of the caching key unique to the message
 	 */
 	get cachingKey() {
-		return `${this.guild?.id ?? DM_KEY}:${this.channel.id}:${this.id}`;
+		return `${this.guildId ?? DM_KEY}:${this.channelId}:${this.id}`;
 	}
 
 	/**
@@ -89,7 +83,7 @@ class LunarMessage extends Structures.get('Message') {
 	 * @returns {import('./TextChannel')}
 	 */
 	findNearestCommandsChannel(requiredChannelPermissions = LunarMessage.DEFAULT_COMMAND_CHANNEL_PERMISSIONS) {
-		if (!this.guild) return null;
+		if (!this.guildId) return null;
 
 		return this.channel.parent.children.find((/** @type {import('./TextChannel')} */ channel) => channel.name.includes('commands')
 			&& channel.botPermissions.has(requiredChannelPermissions)
@@ -170,8 +164,6 @@ class LunarMessage extends Structures.get('Message') {
 
 			if (!questionMessage) return null;
 
-			this.sendReplyChannel = false; // to not ping the author with #bot-commands a second time
-
 			const collected = await questionMessage.channel.awaitMessages({
 				filter: msg => msg.author.id === this.author.id,
 				max: 1,
@@ -224,19 +216,21 @@ class LunarMessage extends Structures.get('Message') {
 		if (Reflect.has(options, 'embeds')) requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
 		if (Reflect.has(options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
 
+		const { channel } = this;
+
 		// commands channel / reply in same channel option or flag
 		if (this.channel.name.includes('commands') || options.sameChannel || this.shouldReplyInSameChannel) {
 			// permission checks
-			if (!this.channel.botPermissions.has(requiredChannelPermissions)) {
-				const missingChannelPermissions = this.channel.botPermissions
+			if (!channel.botPermissions.has(requiredChannelPermissions)) {
+				const missingChannelPermissions = channel.botPermissions
 					.missing(requiredChannelPermissions)
 					.map(permission => `'${permission}'`);
 				const errorMessage = commaListsAnd`missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
 
-				logger.warn(`${errorMessage} #${this.channel.name}`);
+				logger.warn(`${errorMessage} #${channel.name}`);
 
 				this.author
-					.send(`${errorMessage} ${this.channel}`)
+					.send(`${errorMessage} ${channel}`)
 					.catch(() => logger.error(`[REPLY]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
 
 				return null;
@@ -263,7 +257,7 @@ class LunarMessage extends Structures.get('Message') {
 
 		// no #bot-commands channel found
 		if (!commandsChannel) {
-			if (this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) {
+			if (channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) {
 				setTimeout(() => {
 					if (this.shouldReplyInSameChannel) return;
 					this.delete().catch(logger.error);
@@ -280,7 +274,7 @@ class LunarMessage extends Structures.get('Message') {
 			this.author
 				.send(stripIndents`
 					${errorMessage}.
-					Use \`${this.content} -c\` if you want the reply in ${this.channel} instead
+					Use \`${this.content} -c\` if you want the reply in ${channel} instead
 				`)
 				.catch(() => logger.error(`[REPLY]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
 
@@ -288,26 +282,20 @@ class LunarMessage extends Structures.get('Message') {
 		}
 
 		// clean up channel after 10s
-		if (this.sendReplyChannel) { // notify author and delete messages
-			super
-				.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${this.channel} instead`)
-				.then(async (commandsChannelMessage) => {
-					if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return commandsChannelMessage.delete({ timeout: 10_000 });
+		// notify author and delete messages
+		super
+			.reply(`${commandsChannel}. Use \`${this.content} -c\` if you want the reply in ${channel} instead`)
+			.then(async (commandsChannelMessage) => {
+				if (!channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return commandsChannelMessage.delete({ timeout: 10_000 });
 
-					setTimeout(() => {
-						if (!this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES) || this.shouldReplyInSameChannel) return commandsChannelMessage.delete();
+				setTimeout(() => {
+					if (!channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES) || this.shouldReplyInSameChannel) return commandsChannelMessage.delete();
 
-						this.channel
-							.bulkDelete([ commandsChannelMessage.id, this.id ])
-							.catch(error => logger.error('[REPLY]: unable to bulk delete', error));
-					}, 10_000);
-				});
-		} else if (this.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) { // only delete author's message
-			setTimeout(() => {
-				if (this.shouldReplyInSameChannel) return;
-				this.delete().catch(logger.error);
-			}, 10_000);
-		}
+					channel
+						.bulkDelete([ commandsChannelMessage.id, this.id ])
+						.catch(error => logger.error('[REPLY]: unable to bulk delete', error));
+				}, 10_000);
+			});
 
 		// send reply with an @mention
 		return this._sendReply({
@@ -351,7 +339,7 @@ class LunarMessage extends Structures.get('Message') {
 
 			if (options.saveReplyMessageId) {
 				this.replyData = {
-					channelId: message[0].channel.id,
+					channelId: message[0].channelId,
 					messageId: message.map(({ id }) => id),
 				};
 			}
@@ -369,7 +357,7 @@ class LunarMessage extends Structures.get('Message') {
 
 			if (options.saveReplyMessageId) {
 				this.replyData = {
-					channelId: message.channel.id,
+					channelId: message.channelId,
 					messageId: message.id,
 				};
 			}
@@ -400,16 +388,18 @@ class LunarMessage extends Structures.get('Message') {
 		if (Reflect.has(options, 'embeds')) requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
 		if (Reflect.has(options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
 
-		if (!this.channel.botPermissions.has(requiredChannelPermissions)) {
-			const missingChannelPermissions = this.channel.botPermissions
+		const { channel } = this;
+
+		if (!channel.botPermissions.has(requiredChannelPermissions)) {
+			const missingChannelPermissions = channel.botPermissions
 				.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
 			const errorMessage = commaListsAnd`missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
 
-			logger.warn(`${errorMessage} #${this.channel.name}`);
+			logger.warn(`${errorMessage} #${channel.name}`);
 
 			this.author
-				.send(`${errorMessage} ${this.channel}`)
+				.send(`${errorMessage} ${channel}`)
 				.catch(() => logger.error(`[EDIT]: unable to DM ${this.author.tag} | ${this.member.displayName}`));
 
 			return null;

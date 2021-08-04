@@ -20,7 +20,7 @@ module.exports = class MessageCreateEvent extends Event {
 	 */
 	async _handleDiscordMessage(message, isEdit = false) {
 		// channel specific triggers
-		if (message.channel.id === this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) {
+		if (message.channelId === this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) {
 			message.react(FORWARD_TO_GC);
 		}
 

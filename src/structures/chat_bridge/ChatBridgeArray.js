@@ -180,7 +180,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 * @param {import('./ChatBridge').MessageForwardOptions} [options={}]
 	 */
 	async handleDiscordMessage(message, options = {}) {
-		if (!this.channelIds.has(message.channel.id) || !this.client.config.get('CHATBRIDGE_ENABLED')) return;
+		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return;
 		if (message.flags.any([ MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL ])) return; // ignore defer and ephemeral messages
 
 		try {
@@ -191,7 +191,7 @@ module.exports = class ChatBridgeArray extends Array {
 			if (options.checkIfNotFromBot) {
 				if (message.me) return; // message was sent by the bot
 				if (message.webhookId
-					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channel.id)?.webhook?.id), false)
+					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
 				) return; // message was sent by one of the ChatBridges's webhook
 			}
 
