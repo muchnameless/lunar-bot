@@ -1,7 +1,7 @@
 'use strict';
 
 const HypixelMessage = require('../HypixelMessage');
-// const logger = require('../../../functions/logger');
+const logger = require('../../../functions/logger');
 
 
 /**
@@ -11,13 +11,11 @@ const HypixelMessage = require('../HypixelMessage');
  * @param {HypixelMessage.ChatPosition} position
  */
 module.exports = async (chatBridge, { position, message }) => {
-	let hypixelMessage;
-
 	try {
-		hypixelMessage = new HypixelMessage(chatBridge, position, JSON.parse(message));
-	} catch {
-		hypixelMessage = new HypixelMessage(chatBridge, position, message);
-	}
+		chatBridge.emit('message', await new HypixelMessage(chatBridge, position, JSON.parse(message)).init());
+	} catch (error) {
+		logger.error('[MINECRAFT BOT CHAT]', error);
 
-	chatBridge.emit('message', await hypixelMessage.init());
+		chatBridge.emit('message', await new HypixelMessage(chatBridge, position, message).init());
+	}
 };
