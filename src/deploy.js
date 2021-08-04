@@ -37,7 +37,7 @@ const logger = require('./functions/logger');
 			{
 				body: SHOULD_DELETE
 					? []
-					: client.commands.map(({ data }, name) => ({ ...data, name })),
+					: client.commands.map(({ data }, name) => ({ ...client.application.commands.constructor.transformCommand(data), name })),
 			},
 		);
 
