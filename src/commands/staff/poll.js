@@ -164,7 +164,7 @@ module.exports = class PollCommand extends DualCommand {
 			{
 				chatBridge: this.getHypixelGuild(interaction).chatBridge,
 				question: interaction.options.getString('question', true),
-				pollOptionNames: interaction.options.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value),
+				pollOptionNames: interaction.options._hoistedOptions.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value),
 				duration: interaction.options.getString('duration'),
 				ign: interaction.user.player?.ign ?? interaction.member?.displayName ?? interaction.user.tag,
 			},
