@@ -58,7 +58,7 @@ module.exports = class ChatBridge extends EventEmitter {
 		/**
 		 * @type {import('../database/models/HypixelGuild')}
 		 */
-		this.guild = null;
+		this.hypixelGuild = null;
 		/**
 		 * increases each link cycle
 		 */
@@ -97,14 +97,14 @@ module.exports = class ChatBridge extends EventEmitter {
 	 * bot ign | guild name
 	 */
 	get logInfo() {
-		return `${this.bot?.username ?? 'no bot'} | ${this.guild?.name ?? 'no guild'}`;
+		return `${this.bot?.username ?? 'no bot'} | ${this.hypixelGuild?.name ?? 'no guild'}`;
 	}
 
 	/**
 	 * wether the guild has the chatBridge feature enabled
 	 */
 	get enabled() {
-		return this.guild?.chatBridgeEnabled ?? false;
+		return this.hypixelGuild?.chatBridgeEnabled ?? false;
 	}
 
 	/**
@@ -172,12 +172,12 @@ module.exports = class ChatBridge extends EventEmitter {
 			})();
 
 			// guild to link to
-			const guild = guildName
+			const hypixelGuild = guildName
 				? this.client.hypixelGuilds.cache.find(({ name }) => name === guildName)
 				: this.client.hypixelGuilds.cache.find(({ players }) => players.has(this.minecraft.botUuid));
 
 			// no guild found
-			if (!guild) {
+			if (!hypixelGuild) {
 				this.unlink();
 
 				logger.error(`[CHATBRIDGE]: ${this.bot.username}: no matching guild found`);
@@ -185,15 +185,15 @@ module.exports = class ChatBridge extends EventEmitter {
 			}
 
 			// already linked to this guild
-			if (guild.guildId === this.guild?.guildId) {
+			if (hypixelGuild.guildId === this.hypixelGuild?.guildId) {
 				logger.debug(`[CHATBRIDGE]: ${this.logInfo}: already linked`);
 				return this;
 			}
 
-			guild.chatBridge = this;
-			this.guild = guild;
+			hypixelGuild.chatBridge = this;
+			this.hypixelGuild = hypixelGuild;
 
-			logger.debug(`[CHATBRIDGE]: ${guild.name}: linked to ${this.bot.username}`);
+			logger.debug(`[CHATBRIDGE]: ${hypixelGuild.name}: linked to ${this.bot.username}`);
 
 			// instantiate DiscordChannelManagers
 			await this.discord.init();
@@ -220,8 +220,8 @@ module.exports = class ChatBridge extends EventEmitter {
 	 */
 	unlink() {
 		this.discord.ready = false;
-		if (this.guild) this.guild.chatBridge = null;
-		this.guild = null;
+		if (this.hypixelGuild) this.hypixelGuild.chatBridge = null;
+		this.hypixelGuild = null;
 
 		// clear DiscordChatManagers
 		// this.discord.channelsByIds.clear();

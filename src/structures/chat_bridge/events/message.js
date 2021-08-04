@@ -72,7 +72,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HypixelRank] IGN joined the guild!
 		 */
 		if (message.content.includes('joined the guild')) {
-			this.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 			message.forwardToDiscord();
 			return this.chatBridge.broadcast('welcome');
 		}
@@ -81,7 +81,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HypixelRank] IGN left the guild!
 		 */
 		if (message.content.includes('left the guild!')) {
-			this.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 			return message.forwardToDiscord();
 		}
 
@@ -90,7 +90,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (message.content === 'You left the guild') {
 			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: bot left the guild`);
-			this.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 			message.forwardToDiscord();
 			return this.chatBridge.unlink();
 		}
@@ -99,7 +99,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HypixelRank] IGN was kicked from the guild by [HypixelRank] IGN!
 		 */
 		if (kickSuccess.test(message.content)) {
-			this.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 			return message.forwardToDiscord();
 		}
 
@@ -108,7 +108,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (message.content.startsWith('You were kicked from the guild by')) {
 			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: bot was kicked from the guild`);
-			this.chatBridge.guild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
 			message.forwardToDiscord();
 			return this.chatBridge.unlink();
 		}
@@ -206,7 +206,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!player?.guildId) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was promoted to '${newRank}' but not in the db`);
 
-			const GUILD_RANK_PRIO = (this.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
+			const GUILD_RANK_PRIO = (this.chatBridge.hypixelGuild ?? player.hypixelGuild)?.ranks.find(({ name }) => name === newRank)?.priority;
 
 			if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was promoted to an unknown rank '${newRank}'`);
 
@@ -230,7 +230,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!player?.guildId) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was demoted to '${newRank}' but not in the db`);
 
-			const GUILD_RANK_PRIO = (this.chatBridge.guild ?? player.guild)?.ranks.find(({ name }) => name === newRank)?.priority;
+			const GUILD_RANK_PRIO = (this.chatBridge.hypixelGuild ?? player.hypixelGuild)?.ranks.find(({ name }) => name === newRank)?.priority;
 
 			if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was demoted to an unknown rank '${newRank}'`);
 
@@ -422,7 +422,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 			case PARTY:
 			case WHISPER: {
 				if (!this.chatBridge.enabled || message.me) return;
-				if (message.author.player?.guildId !== this.chatBridge.guild.guildId) return logger.info(`[MESSAGE]: ignored message from '${message.author}': ${message.content}`); // ignore messages from non guild players
+				if (message.author.player?.guildId !== this.chatBridge.hypixelGuild.guildId) return logger.info(`[MESSAGE]: ignored message from '${message.author}': ${message.content}`); // ignore messages from non guild players
 
 				return this._handleCommandMessage(message);
 			}

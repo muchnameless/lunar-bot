@@ -107,7 +107,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 		try {
 			return JoinDateCommand._formatReply(await JoinDateCommand._getJoinDate(chatBridge, ign));
 		} catch {
-			return `${ign}: never joined ${chatBridge.guild.name}`;
+			return `${ign}: never joined ${chatBridge.hypixelGuild.name}`;
 		}
 	}
 
@@ -123,7 +123,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 		if (!IGN) {
 			// all players
-			if (JoinDateCommand.running.has(chatBridge.guild.guildId)) return interaction.reply({
+			if (JoinDateCommand.running.has(chatBridge.hypixelGuild.guildId)) return interaction.reply({
 				content: 'the command is already running',
 				ephemeral: true,
 			});
@@ -131,19 +131,19 @@ module.exports = class JoinDateCommand extends DualCommand {
 			const joinInfos = [];
 
 			try {
-				JoinDateCommand.running.add(chatBridge.guild.guildId);
+				JoinDateCommand.running.add(chatBridge.hypixelGuild.guildId);
 
-				await interaction.awaitConfirmation(`the command will take approximately ${ms(chatBridge.guild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
+				await interaction.awaitConfirmation(`the command will take approximately ${ms(chatBridge.hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
 
-				for (const { ign } of chatBridge.guild.players.values()) {
+				for (const { ign } of chatBridge.hypixelGuild.players.values()) {
 					joinInfos.push(await JoinDateCommand._getJoinDate(chatBridge, ign));
 				}
 			} finally {
-				JoinDateCommand.running.delete(chatBridge.guild.guildId);
+				JoinDateCommand.running.delete(chatBridge.hypixelGuild.guildId);
 			}
 
 			return interaction.reply({
-				content: `${Formatters.bold(chatBridge.guild.name)} join dates:\n${joinInfos
+				content: `${Formatters.bold(chatBridge.hypixelGuild.name)} join dates:\n${joinInfos
 					.sort((a, b) => a.timestamp - b.timestamp)
 					.map(JoinDateCommand._formatReply)
 					.join('\n')}`,

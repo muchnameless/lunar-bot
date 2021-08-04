@@ -104,7 +104,7 @@ module.exports = class DiscordManager {
 	async init() {
 		const promises = [];
 
-		for (const chatBridgeChannel of this.chatBridge.guild.chatBridgeChannels) {
+		for (const chatBridgeChannel of this.chatBridge.hypixelGuild.chatBridgeChannels) {
 			if (this.channelsByType.has(chatBridgeChannel.type)) continue; // prevents multiple instantiations of the same manager
 
 			const channelManager = new DiscordChatManager(this.chatBridge, chatBridgeChannel);

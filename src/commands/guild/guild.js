@@ -454,7 +454,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					target,
 					executor: interaction.user.player,
 					reason,
-					hypixelGuild: target?.guild ?? this.getHypixelGuild(interaction),
+					hypixelGuild: target?.hypixelGuild ?? this.getHypixelGuild(interaction),
 				});
 
 				return interaction.reply({

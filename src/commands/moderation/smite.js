@@ -49,7 +49,7 @@ module.exports = class SmiteCommand extends DualCommand {
 		return this.client.commands.get('guild').runMute(message, {
 			targetInput: message.commandData.args[0],
 			duration: 10 * 60_000,
-			hypixelGuildInput: message.chatBridge.guild,
+			hypixelGuildInput: message.chatBridge.hypixelGuild,
 		});
 	}
 };

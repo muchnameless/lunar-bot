@@ -242,7 +242,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	getHypixelGuild(interaction) {
 		const INPUT = interaction.options.getString('guild');
 		if (INPUT === GUILD_ID_ALL) return INPUT;
-		return this.client.hypixelGuilds.cache.get(INPUT) ?? interaction.user.player?.guild ?? this.client.hypixelGuilds.mainGuild;
+		return this.client.hypixelGuilds.cache.get(INPUT) ?? interaction.user.player?.hypixelGuild ?? this.client.hypixelGuilds.mainGuild;
 	}
 
 	/**

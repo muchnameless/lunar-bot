@@ -26,7 +26,7 @@ module.exports = class KickBridgeCommand extends BridgeCommand {
 			target: this.client.players.getByIgn(targetInput) ?? targetInput,
 			executor: message.player,
 			reason: message.commandData.args.join(' '),
-			hypixelGuild: message.guild,
+			hypixelGuild: message.hypixelGuild,
 		});
 
 		return message.author.send(content);

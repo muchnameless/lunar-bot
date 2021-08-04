@@ -133,19 +133,19 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		this.ready = false;
 
-		if (!this.guild) return logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
+		if (!this.hypixelGuild) return logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
 
 		try {
 			const { channel } = this;
 
 			if (!channel) {
 				this.chatBridge.shouldRetryLinking = false;
-				throw new WebhookError('unknown channel', channel, this.guild);
+				throw new WebhookError('unknown channel', channel, this.hypixelGuild);
 			}
 
 			if (!channel.botPermissions.has(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
 				this.chatBridge.shouldRetryLinking = false;
-				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.guild);
+				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.hypixelGuild);
 			}
 
 			const webhooks = await channel.fetchWebhooks();
@@ -157,7 +157,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 				this.client.log(new MessageEmbed()
 					.setColor(this.client.config.get('EMBED_GREEN'))
-					.setTitle(`${this.guild.name} Chat Bridge`)
+					.setTitle(`${this.hypixelGuild.name} Chat Bridge`)
 					.setDescription(`${Formatters.bold('Webhook')}: created in ${channel}`)
 					.setTimestamp(),
 				);
@@ -165,7 +165,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 			this.ready = true;
 
-			logger.debug(`[CHATBRIDGE]: ${this.guild.name}: #${channel.name} webhook fetched and cached`);
+			logger.debug(`[CHATBRIDGE]: ${this.hypixelGuild.name}: #${channel.name} webhook fetched and cached`);
 		} catch (error) {
 			this.client.log(new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_RED'))
@@ -283,8 +283,8 @@ module.exports = class DiscordChatManager extends ChatManager {
 		}
 
 		// check if guild chat is muted
-		if (this.guild.muted && !player?.isStaff) {
-			DiscordChatManager._dmMuteInfo(message, player, `${this.guild.name}'s guild chat's mute expires ${Formatters.time(new Date(this.guild.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
+		if (this.hypixelGuild.muted && !player?.isStaff) {
+			DiscordChatManager._dmMuteInfo(message, player, `${this.hypixelGuild.name}'s guild chat's mute expires ${Formatters.time(new Date(this.hypixelGuild.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 

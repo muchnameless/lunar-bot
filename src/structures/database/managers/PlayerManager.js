@@ -129,7 +129,7 @@ module.exports = class PlayerManager extends ModelManager {
 			this.sortAlphabetically();
 
 			newPlayer.update({
-				reason: `joined ${newPlayer.guild?.name}`,
+				reason: `joined ${newPlayer.hypixelGuild?.name}`,
 			});
 		}
 

@@ -41,8 +41,8 @@ module.exports = class ChatManager {
 		return this.chatBridge.logInfo;
 	}
 
-	get guild() {
-		return this.chatBridge.guild;
+	get hypixelGuild() {
+		return this.chatBridge.hypixelGuild;
 	}
 
 	get client() {

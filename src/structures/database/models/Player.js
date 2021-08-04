@@ -281,7 +281,7 @@ module.exports = class Player extends Model {
 	 * returns the hypixel guild db object associated with the player
 	 * @returns {?import('./HypixelGuild')}
 	 */
-	get guild() {
+	get hypixelGuild() {
 		if (this.guildId !== GUILD_ID_BRIDGER) {
 			return this.client.hypixelGuilds.cache.get(this.guildId)
 				?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`);
@@ -350,7 +350,7 @@ module.exports = class Player extends Model {
 	 * @returns {?import('./HypixelGuild').GuildRank}
 	 */
 	get guildRank() {
-		return this.guild?.ranks?.find(({ priority }) => priority === this.guildRankPriority) ?? null;
+		return this.hypixelGuild?.ranks?.find(({ priority }) => priority === this.guildRankPriority) ?? null;
 	}
 
 	/**
@@ -365,7 +365,7 @@ module.exports = class Player extends Model {
 				return 'Error';
 
 			default:
-				return this.guild?.name ?? 'unknown guild';
+				return this.hypixelGuild?.name ?? 'unknown guild';
 		}
 	}
 
@@ -402,7 +402,7 @@ module.exports = class Player extends Model {
 	 * assumes the last two guild ranks are staff ranks
 	 */
 	get isStaff() {
-		return this.guildRankPriority >= this.guild?.ranks.length - 1;
+		return this.guildRankPriority >= this.hypixelGuild?.ranks.length - 1;
 	}
 
 	/**
@@ -684,7 +684,7 @@ module.exports = class Player extends Model {
 			}
 
 			if (!this.isStaff) { // non staff rank -> remove other ranks
-				for (const rank of this.guild.ranks.filter(({ roleId, priority }) => roleId && priority !== this.guildRankPriority)) {
+				for (const rank of this.hypixelGuild.ranks.filter(({ roleId, priority }) => roleId && priority !== this.guildRankPriority)) {
 					if (member.roles.cache.has(rank.roleId)) rolesToRemove.push(rank.roleId);
 				}
 			}
@@ -1374,7 +1374,7 @@ module.exports = class Player extends Model {
 	 * @param {import('@zikeji/hypixel').Components.Schemas.GuildMember} data from the hypixel guild API
 	 * @param {import('./HypixelGuild')} hypixelGuilds
 	 */
-	async syncWithGuildData({ expHistory = {}, mutedTill, rank }, hypixelGuild = this.guild) {
+	async syncWithGuildData({ expHistory = {}, mutedTill, rank }, hypixelGuild = this.hypixelGuild) {
 		// update guild xp
 		const [ currentDay ] = Object.keys(expHistory);
 
