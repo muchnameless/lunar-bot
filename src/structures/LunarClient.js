@@ -24,6 +24,7 @@ module.exports = class LunarClient extends Client {
 	constructor(options = {}) {
 		super(options);
 
+		/** @type {import('discord.js').Snowflake} */
 		this.ownerId = process.env.OWNER ?? null;
 		this.db = new DatabaseManager({ client: this, db: options.db });
 		this.logHandler = new LogHandler(this, join(__dirname, '..', '..', 'log_buffer'));

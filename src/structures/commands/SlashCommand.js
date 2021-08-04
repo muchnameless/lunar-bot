@@ -176,6 +176,7 @@ module.exports = class SlashCommand extends BaseCommand {
 			type: Constants.ApplicationCommandPermissionTypes.USER,
 			permission: true,
 		}, {
+			/** @type {import('discord.js').Snowflake} */
 			id: this.config.get('DISCORD_GUILD_ID'), // deny for the guild @everyone role
 			type: Constants.ApplicationCommandPermissionTypes.ROLE,
 			permission: false,
