@@ -32,7 +32,7 @@ class LunarUser extends Structures.get('User') {
 	 * hypixelGuild object associated with the discord user
 	 */
 	get hypixelGuild() {
-		return this.player?.guild ?? null;
+		return this.player?.hypixelGuild ?? null;
 	}
 
 	/**

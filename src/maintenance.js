@@ -98,7 +98,7 @@ process
 		})
 		.on(Constants.Events.MESSAGE_CREATE, async (message) => {
 			if (message.author.bot || message.system || message.webhookId) return; // filter out bot, system & webhook messages
-			if (message.guild && !prefixRegExp.test(message.content)) return; // allow PREFIX and @bot.id
+			if (message.guildId && !prefixRegExp.test(message.content)) return; // allow PREFIX and @bot.id
 
 			logger.info(`${message.author.tag}${message.member ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' during maintenance`);
 
@@ -123,7 +123,7 @@ process
 		.on(Constants.Events.INTERACTION_CREATE, async (interaction) => {
 			if (!interaction.isCommand() && !interaction.isMessageComponent()) return;
 
-			logger.info(`${interaction.user.tag}${interaction.guild ? ` | ${interaction.member.displayName}` : ''} tried to execute '${interaction.commandName ?? interaction.customId}' during maintenance`);
+			logger.info(`${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} tried to execute '${interaction.commandName ?? interaction.customId}' during maintenance`);
 
 			try {
 				await interaction.reply({

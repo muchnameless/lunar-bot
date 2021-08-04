@@ -200,7 +200,7 @@ class LunarMessage extends Structures.get('Message') {
 		};
 
 		// DMs
-		if (!this.guild) {
+		if (!this.guildId) {
 			return this._sendReply({
 				content,
 				reply: {
