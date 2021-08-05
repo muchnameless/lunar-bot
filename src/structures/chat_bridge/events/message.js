@@ -136,13 +136,13 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const { groups: { target, duration } } = muteMatched;
 
 			if (target === 'the guild chat') {
-				const { guild } = this.chatBridge;
+				const { hypixelGuild } = this.chatBridge;
 				const msDuration = stringToMS(duration);
 
-				guild.mutedTill = Number.isNaN(msDuration)
+				hypixelGuild.mutedTill = Number.isNaN(msDuration)
 					? Infinity
 					: Date.now() + msDuration;
-				guild.save().catch(logger.error);
+				hypixelGuild.save().catch(logger.error);
 
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 			}
@@ -174,10 +174,10 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const { groups: { target } } = unmuteMatched;
 
 			if (target === 'the guild chat') {
-				const { guild } = this.chatBridge;
+				const { hypixelGuild } = this.chatBridge;
 
-				guild.mutedTill = 0;
-				guild.save().catch(logger.error);
+				hypixelGuild.mutedTill = 0;
+				hypixelGuild.save().catch(logger.error);
 
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was unmuted`);
 			}
