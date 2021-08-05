@@ -194,7 +194,7 @@ module.exports = class EvalCommand extends SlashCommand {
 		let indentationCount = 0;
 
 		const INPUT = interaction.options.getString('input', true)
-			.replace(/(?<=[^$]{)/g, '\n') // insert new line for new scopes if not in template strings
+			.replace(/(?<=(?<!\$|\\u){)/g, '\n') // insert new line for new scopes if not in template strings
 			.split(/; *|\n/)
 			.map((line) => { // add indentation
 				let indentation = '';
