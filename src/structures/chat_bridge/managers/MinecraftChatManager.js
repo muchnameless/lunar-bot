@@ -564,7 +564,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 						}
 
 						default:
-							return date.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
 					}
 				}),
 		);
