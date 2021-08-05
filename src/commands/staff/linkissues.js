@@ -28,8 +28,6 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 			ephemeral: true,
 		});
 
-		await lgGuild.members.fetch();
-
 		// discord members with wrong roles
 		const embed = this.client.defaultEmbed;
 		const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
@@ -37,7 +35,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 		const guildRoleWithoutDbEntry = [];
 		const missingVerifiedRole = [];
 
-		for (const [ DISCORD_ID, member ] of lgGuild.members.cache) {
+		for (const [ DISCORD_ID, member ] of await lgGuild.members.fetch()) {
 			if (players.cache.some(({ discordId }) => discordId === DISCORD_ID)) {
 				if (!member.roles.cache.has(VERIFIED_ROLE_ID)) missingVerifiedRole.push(member);
 				continue;
