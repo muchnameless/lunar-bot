@@ -36,7 +36,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 		try {
 			PurgeRolesCommand.running = true;
 
-			interaction.defer();
+			interaction.deferReply();
 
 			const { lgGuild } = this.client;
 

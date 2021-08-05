@@ -50,7 +50,7 @@ module.exports = class StatsCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer();
+		interaction.deferReply();
 
 		try {
 			return interaction.reply(

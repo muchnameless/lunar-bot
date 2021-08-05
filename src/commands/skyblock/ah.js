@@ -151,7 +151,7 @@ module.exports = class AhCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/SelectMenuInteraction')} interaction
 	 */
 	async runSelect(interaction) {
-		const deferring = interaction.deferUpdate();
+		interaction.deferUpdate();
 
 		try {
 			const [ , uuid, ign ] = interaction.customId.split(':');
@@ -163,7 +163,7 @@ module.exports = class AhCommand extends SlashCommand {
 			if (interaction.user.id === interaction.message.interaction?.user.id) return interaction.update(await this._generateReply({ uuid, ign, profileId, profiles }));
 
 			// interaction from new requester -> new message
-			await deferring;
+			await interaction.updateDeferring;
 			return interaction.followUp(await this._generateReply({ uuid, ign, profileId, profiles }));
 		} catch (error) {
 			logger.error(error);
@@ -180,7 +180,7 @@ module.exports = class AhCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer();
+		interaction.deferReply();
 
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));

@@ -13,11 +13,11 @@ class LunarSelectMenuInteraction extends Structures.get('SelectMenuInteraction')
 		/**
 		 * deferring promise
 		 */
-		this._deferring = null;
+		this.replyDeferring = null;
 		/**
 		 * deferring update promise
 		 */
-		this._deferringUpdate = null;
+		this.updateDeferring = null;
 
 		const { channel } = this;
 
@@ -43,23 +43,23 @@ class LunarSelectMenuInteraction extends Structures.get('SelectMenuInteraction')
 	/**
 	 * @param {import('discord.js').InteractionDeferOptions} param0
 	 */
-	async defer({ ephemeral = this.useEphemeral, ...options } = {}) {
-		if (this._deferring) return this._deferring;
+	async deferReply({ ephemeral = this.useEphemeral, ...options } = {}) {
+		if (this.replyDeferring) return this.replyDeferring;
 
-		return this._deferring = super.defer({ ephemeral, ...options });
+		return this.replyDeferring = super.deferReply({ ephemeral, ...options });
 	}
 
 	async deferUpdate() {
-		if (this._deferringUpdate) return this._deferringUpdate;
+		if (this.updateDeferring) return this.updateDeferring;
 
-		return this._deferringUpdate = super.deferUpdate();
+		return this.updateDeferring = super.deferUpdate();
 	}
 
 	/**
 	 * @param {import('discord.js').InteractionUpdateOptions} options
 	 */
 	async update(options) {
-		await this._deferringUpdate;
+		await this.updateDeferring;
 
 		if (this.deferred || this.replied) return this.editReply(options);
 
@@ -85,7 +85,7 @@ class LunarSelectMenuInteraction extends Structures.get('SelectMenuInteraction')
 			return;
 		}
 
-		await this._deferring;
+		await this.replyDeferring;
 
 		if (this.deferred && !this.replied) {
 			// ephemeral defer

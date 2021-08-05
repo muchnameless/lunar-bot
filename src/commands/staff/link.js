@@ -35,7 +35,7 @@ module.exports = class LinkCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer();
+		interaction.deferReply();
 
 		const IGN_OR_UUID = interaction.options.getString('ign', true);
 		const user = interaction.options.getUser('user', true);

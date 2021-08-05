@@ -155,7 +155,7 @@ module.exports = class PollCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer({
+		interaction.deferReply({
 			ephemeral: true,
 		});
 

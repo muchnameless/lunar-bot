@@ -110,7 +110,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer();
+		interaction.deferReply();
 
 		const { chatBridge } = this.getHypixelGuild(interaction);
 		const IGN = this.getIgn(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')));

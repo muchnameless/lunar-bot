@@ -40,7 +40,7 @@ module.exports = class UnlinkCommand extends SlashCommand {
 
 		if (!player?.discordId) return interaction.reply(`\`${PLAYER_INPUT}\` is not linked`);
 
-		interaction.defer();
+		interaction.deferReply();
 
 		const { discordId: OLD_LINKED_ID } = player;
 		const currentLinkedMember = await player.discordMember;

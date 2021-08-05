@@ -53,7 +53,7 @@ module.exports = class XpCommand extends SlashCommand {
 
 		// update db?
 		if (interaction.options.getBoolean('update')) {
-			interaction.defer(); // update may take a while
+			interaction.deferReply(); // update may take a while
 			await player.updateXp();
 		}
 

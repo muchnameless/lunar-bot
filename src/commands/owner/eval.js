@@ -189,7 +189,7 @@ module.exports = class EvalCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer();
+		interaction.deferReply();
 
 		let indentationCount = 0;
 

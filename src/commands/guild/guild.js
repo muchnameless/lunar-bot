@@ -200,7 +200,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	async runMute(ctx, { targetInput, duration, hypixelGuildInput = this.getHypixelGuild(ctx) }) {
 		const IS_INTERACTION = ctx instanceof Interaction;
 
-		if (IS_INTERACTION) ctx.defer();
+		if (IS_INTERACTION) ctx.deferReply();
 
 		let hypixelGuild = hypixelGuildInput;
 		let target;
@@ -320,7 +320,7 @@ module.exports = class GuildCommand extends SlashCommand {
 		try {
 			const { chatBridge } = hypixelGuild;
 
-			interaction?.defer();
+			interaction?.deferReply();
 
 			const res = await chatBridge.minecraft.command({
 				command: `g kick ${target} ${reason}`,
@@ -352,7 +352,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	 * @param {?import('../../structures/database/models/HypixelGuild')} [hypixelGuild]
 	 */
 	async _run(interaction, commandOptions, { chatBridge } = this.getHypixelGuild(interaction)) {
-		interaction.defer();
+		interaction.deferReply();
 
 		return interaction.reply({
 			embeds: [
@@ -371,7 +371,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	async _runList(interaction, commandOptions) {
 		const { chatBridge } = this.getHypixelGuild(interaction);
 
-		interaction.defer();
+		interaction.deferReply();
 
 		return interaction.reply({
 			embeds: [

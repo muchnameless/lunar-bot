@@ -85,7 +85,7 @@ module.exports = class WeightCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer();
+		interaction.deferReply();
 
 		return interaction.reply(await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
 	}

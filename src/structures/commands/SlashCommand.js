@@ -261,7 +261,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
 
-				interaction.defer();
+				interaction.deferReply();
 
 				try {
 					return await lgGuild.members.fetch(interaction.user.id);

@@ -54,7 +54,7 @@ module.exports = class GuildOfCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer();
+		interaction.deferReply();
 
 		return interaction.reply(await this._generateReply(interaction.options.getString('ign', true)));
 	}

@@ -13,7 +13,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 		/**
 		 * deferring promise
 		 */
-		this._deferring = null;
+		this.replyDeferring = null;
 
 		const { channel } = this;
 
@@ -79,10 +79,10 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 	/**
 	 * @param {import('discord.js').InteractionDeferOptions} param0
 	 */
-	async defer({ ephemeral = this.useEphemeral, ...options } = {}) {
-		if (this._deferring) return this._deferring;
+	async deferReply({ ephemeral = this.useEphemeral, ...options } = {}) {
+		if (this.replyDeferring) return this.replyDeferring;
 
-		return this._deferring = super.defer({ ephemeral, ...options });
+		return this.replyDeferring = super.deferReply({ ephemeral, ...options });
 	}
 
 	/**
@@ -104,7 +104,7 @@ class LunarCommandInteraction extends Structures.get('CommandInteraction') {
 			return;
 		}
 
-		await this._deferring;
+		await this.replyDeferring;
 
 		if (this.deferred && !this.replied) {
 			// ephemeral defer

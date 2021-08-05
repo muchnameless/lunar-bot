@@ -29,7 +29,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		interaction.defer();
+		interaction.deferReply();
 
 		const IGN = interaction.options.getString('ign', true);
 		/** @type {import('../../structures/database/models/Player')} */
