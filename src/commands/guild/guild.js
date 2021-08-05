@@ -251,7 +251,7 @@ module.exports = class GuildCommand extends SlashCommand {
 			});
 
 			if (target instanceof this.client.players.model) {
-				({ guild: hypixelGuild } = target);
+				({ hypixelGuild } = target);
 			}
 		}
 
@@ -690,7 +690,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					});
 
 					if (target instanceof this.client.players.model) {
-						({ guild: hypixelGuild } = target);
+						({ hypixelGuild } = target);
 					}
 				}
 
