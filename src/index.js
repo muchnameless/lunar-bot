@@ -61,6 +61,14 @@ process
 					excludeFromSweep: e => e.type !== 'DM',
 				}),
 			},
+			UserManager: {
+				sweepInterval: 21_600,
+				sweepFilter: LimitedCollection.filterByLifetime({
+					lifetime: 0,
+					getComparisonTimestamp: () => 0,
+					excludeFromSweep: e => client.guilds.cache.some(guild => guild.members.cache.has(e.id)) || client.channels.cache.some(channel => channel.type === 'DM' && channel.recipient.id === e.id),
+				}),
+			},
 		}),
 		allowedMentions: { parse: [ 'users' ], repliedUser: true },
 		partials: [
