@@ -92,22 +92,16 @@ module.exports = class JoinDateCommand extends DualCommand {
 	}
 
 	/**
-	 * @param {JoinInfo} joinInfo
-	 */
-	static _formatReply({ ign, date, timestamp }) {
-		return `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`;
-	}
-
-	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
-	 * @param {import('../../structures/database/models/Player')} ign
+	 * @param {import('../../structures/database/models/Player')} ignInput
 	 */
-	async _generateReply(chatBridge, ign) {
+	async _generateReply(chatBridge, ignInput) {
 		try {
-			return JoinDateCommand._formatReply(await JoinDateCommand._getJoinDate(chatBridge, ign));
+			const { ign, date, timestamp } = await JoinDateCommand._getJoinDate(chatBridge, ignInput);
+			return `${ign}: joined at ${!Number.isNaN(timestamp) ? Formatters.time(date) : 'an unknown date'}`;
 		} catch {
-			return `${ign}: never joined ${chatBridge.hypixelGuild.name}`;
+			return `${ignInput}: never joined ${chatBridge.hypixelGuild.name}`;
 		}
 	}
 
@@ -145,7 +139,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 			return interaction.reply({
 				content: `${Formatters.bold(chatBridge.hypixelGuild.name)} join dates:\n${joinInfos
 					.sort((a, b) => a.timestamp - b.timestamp)
-					.map(JoinDateCommand._formatReply)
+					.map(({ ign, date, timestamp }) => `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`)
 					.join('\n')}`,
 				split: true,
 			});
