@@ -19,6 +19,11 @@ module.exports = class GuildMemberRemoveEvent extends Event {
 	 * @param {import('../structures/extensions/GuildMember')} member
 	 */
 	async run(member) {
+		// uncache user
+		if (!this.client.guilds.cache.some(guild => guild.members.cache.has(member.id)) && this.client.channels.cache.some(channel => channel.type === 'DM' && channel.recipient.id === member.id)) {
+			this.client.users.cache.delete(member.id);
+		}
+
 		if (member.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
 
 		// check discord members that left for id in player database
