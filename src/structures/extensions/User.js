@@ -16,6 +16,7 @@ class LunarUser extends Structures.get('User') {
 
 	/**
 	 * player object associated with the discord user
+	 * @returns {?import('../database/models/Player')}
 	 */
 	get player() {
 		return this._player ??= this.client.players.getById(this.id);

@@ -9,6 +9,7 @@ const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerR
 class LunarGuildMember extends Structures.get('GuildMember') {
 	/**
 	 * player object associated with the discord member
+	 * @returns {?import('../database/models/Player')}
 	 */
 	get player() {
 		return this.user.player;

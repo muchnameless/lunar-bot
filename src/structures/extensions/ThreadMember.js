@@ -7,6 +7,7 @@ const { Structures } = require('discord.js');
 class LunarThreadMember extends Structures.get('ThreadMember') {
 	/**
 	 * player object associated with the discord member
+	 * @returns {?import('../database/models/Player')}
 	 */
 	get player() {
 		return this.user.player;
