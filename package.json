@@ -15,6 +15,7 @@
   "author": "muchnameless",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/builders": "^0.4.0",
     "@discordjs/rest": "^0.1.0-canary.0",
     "@keyv/redis": "^2.1.2",
     "@sapphire/async-queue": "^1.1.4",
@@ -24,7 +25,7 @@
     "chartjs-node-canvas": "^3.2.0",
     "common-tags": "^1.8.0",
     "cron": "^1.8.2",
-    "discord.js": "github:muchnameless/discord.js#d4fb5ca2c86d724f27a2450f1d1503bfcd3084f9",
+    "discord.js": "github:muchnameless/discord.js#4c872d98b4c919f3d3f7b6810f52aebd36c65ccc",
     "dotenv": "^10.0.0",
     "emoji-regex": "^9.2.2",
     "form-data": "^4.0.0",
@@ -32,7 +33,7 @@
     "keyv": "^4.0.3",
     "lex": "^1.7.9",
     "lodash": "^4.17.21",
-    "minecraft-data": "^2.89.3",
+    "minecraft-data": "^2.89.4",
     "minecraft-protocol": "^1.25.0",
     "ms": "^2.1.3",
     "pg": "^8.7.1",
@@ -44,18 +45,18 @@
     "sinful-math": "^0.0.1",
     "timezonecomplete": "^5.12.4",
     "utf-8-validate": "^5.0.5",
-    "winston": "^3.3.3",
-    "zlib-sync": "^0.1.7"
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.15.0",
     "@babel/eslint-plugin": "^7.14.5",
     "@babel/plugin-syntax-class-properties": "^7.12.13",
     "@babel/preset-env": "^7.15.0",
+    "@types/node": "^16.4.13",
     "eslint": "^7.32.0"
   },
   "engines": {
-		"node": ">=16.6.0",
-		"npm": ">=7.0.0"
-	}
+    "node": ">=16.6.0",
+    "npm": ">=7.0.0"
+  }
 }

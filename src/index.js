@@ -2,7 +2,7 @@
 
 const { join } = require('path');
 require('dotenv').config({ path: join(__dirname, '.env') });
-const { Intents, LimitedCollection, SnowflakeUtil, Options, Constants } = require('discord.js');
+const { Intents, LimitedCollection, SnowflakeUtil, Util, Options, Constants } = require('discord.js');
 const { requireAll } = require('./functions/files');
 const db = require('./structures/database/index');
 const LunarClient = require('./structures/LunarClient');
@@ -45,21 +45,23 @@ process
 					excludeFromSweep: e => e.id === client.config.get('TAX_MESSAGE_ID'),
 				}),
 			},
-			ThreadManager: {
-				sweepInterval: 1_800,
+			ChannelManager: {
+				sweepInterval: 3_600,
 				sweepFilter: LimitedCollection.filterByLifetime({
 					lifetime: 14_400,
-					getComparisonTimestamp: e => e.archiveTimestamp,
-					excludeFromSweep: e => !e.archived,
+					getComparisonTimestamp: e => (e.type === 'DM'
+						? (e.lastMessageId ? SnowflakeUtil.deconstruct(e.lastMessageId).timestamp : 0) // DM -> last message
+						: e.archiveTimestamp), // threads -> archived
+					excludeFromSweep: e => e.type !== 'DM' && !e.archived,
 				}),
 			},
-			ChannelManager: {
-				sweepInterval: 1_800,
-				sweepFilter: LimitedCollection.filterByLifetime({
-					lifetime: 1_800,
-					getComparisonTimestamp: e => (e.lastMessageId ? SnowflakeUtil.deconstruct(e.lastMessageId).timestamp : 0),
-					excludeFromSweep: e => e.type !== 'DM',
-				}),
+			GuildChannelManager: {
+				sweepInterval: 3_600,
+				sweepFilter: Util.archivedThreadSweepFilter(),
+			},
+			ThreadManager: {
+				sweepInterval: 3_600,
+				sweepFilter: Util.archivedThreadSweepFilter(),
 			},
 			UserManager: {
 				sweepInterval: 21_600,

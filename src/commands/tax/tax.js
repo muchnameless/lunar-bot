@@ -1,6 +1,7 @@
 'use strict';
 
 const { Permissions, Formatters, Constants } = require('discord.js');
+const { userMention } = require('@discordjs/builders');
 const { Op } = require('sequelize');
 const { validateNumber } = require('../../functions/stringValidators');
 const { escapeIgn, safePromiseAll } = require('../../functions/util');
@@ -237,6 +238,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const excluded = interaction.options.getString('exclude')
 					?.split(/\W/g)
 					.flatMap(x => (x ? x.toLowerCase() : [])); // lower case IGN array
+				/** @type {import('discord.js').Collection<string, import('../../structures/database/models/Player')>} */
 				const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild)
 					.filter(({ paid, ign }) => !paid && excluded?.includes(ign.toLowerCase()));
 				const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordId }) => inDiscord && validateNumber(discordId));
@@ -251,8 +253,8 @@ module.exports = class TaxCommand extends SlashCommand {
 
 				let pingMessage = '';
 
-				for (const player of playersPingable) pingMessage += ` <@${player.discordId}>`;
-				for (const player of playersOnlyIgn) pingMessage += ` ${escapeIgn(player.ign)}`;
+				for (const player of playersPingable.values()) pingMessage += ` ${userMention(player.discordId)}`;
+				for (const player of playersOnlyIgn.values()) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 				// send ping message and split between pings if too many chars
 				await interaction.reply({

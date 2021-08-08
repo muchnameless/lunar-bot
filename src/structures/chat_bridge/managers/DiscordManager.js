@@ -1,6 +1,7 @@
 'use strict';
 
 const { Collection, Util: { escapeMarkdown } } = require('discord.js');
+const { userMention } = require('@discordjs/builders');
 const { nameToUnicode } = require('../constants/emojiNameUnicodeConverter');
 const { messageTypes: { GUILD } } = require('../constants/chatBridge');
 const { autocorrect } = require('../../../functions/util');
@@ -177,7 +178,7 @@ module.exports = class DiscordManager {
 
 									const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === IGN);
 
-									if (player?.inDiscord) return `<@${player.discordId}>`; // player can be pinged
+									if (player?.inDiscord) return userMention(player.discordId); // player can be pinged
 
 									return match;
 								}

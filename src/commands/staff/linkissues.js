@@ -1,6 +1,7 @@
 'use strict';
 
 const { Formatters, Util } = require('discord.js');
+const { userMention } = require('@discordjs/builders');
 const { escapeIgn } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
@@ -21,22 +22,14 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		const { players, hypixelGuilds, lgGuild } = this.client;
-
-		if (!lgGuild) return interaction.reply({
-			content: 'discord guild is currently unavailable',
-			ephemeral: true,
-		});
-
 		// discord members with wrong roles
-		const embed = this.client.defaultEmbed;
-		const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID');
-		const guildRoleWithoutDbEntry = [];
+		const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 		const missingVerifiedRole = [];
+		const guildRoleWithoutDbEntry = [];
 
-		for (const [ DISCORD_ID, member ] of await lgGuild.members.fetch()) {
-			if (players.cache.some(({ discordId }) => discordId === DISCORD_ID)) {
+		for (const [ DISCORD_ID, member ] of await this.client.fetchAllGuildMembers()) {
+			if (this.client.players.cache.some(({ discordId }) => discordId === DISCORD_ID)) {
 				if (!member.roles.cache.has(VERIFIED_ROLE_ID)) missingVerifiedRole.push(member);
 				continue;
 			}
@@ -45,6 +38,8 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 		}
 
 		let issuesAmount = missingVerifiedRole.length + guildRoleWithoutDbEntry.length;
+
+		const embed = this.client.defaultEmbed;
 
 		if (missingVerifiedRole.length) {
 			for (const value of Util.splitMessage(
@@ -88,7 +83,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 		const unlinkedPlayers = [];
 		const linkedAndNotInDiscord = [];
 
-		for (const { name, players: guildPlayers } of hypixelGuilds.cache.values()) {
+		for (const { name, players: guildPlayers } of this.client.hypixelGuilds.cache.values()) {
 			// db entries with issues
 			const [ unlinkedGuildPlayers, linkedPlayers ] = guildPlayers.partition(({ discordId }) => /\D/.test(discordId));
 			const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(({ inDiscord }) => !inDiscord);
@@ -116,7 +111,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 				values: LINKED_NOT_DISCORD_AMOUNT
 					? Util.splitMessage(
 						linkedAndNotInDiscordCurrentGuild
-							.map(({ discordId, ign }) => `<@${discordId}> | ${escapeIgn(ign)}`)
+							.map(({ discordId, ign }) => `${userMention(discordId)} | ${escapeIgn(ign)}`)
 							.join('\n'),
 						{ char: '\n', maxLength: 1024 },
 					)

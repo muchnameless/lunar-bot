@@ -75,6 +75,18 @@ module.exports = class LunarClient extends Client {
 	}
 
 	/**
+	 * fetches all guild members if the cache size is not equal to the guild's member count
+	 * @returns {Promise<import('discord.js').Collection<import('discord.js').Snowflake, import('./extensions/GuildMember')>>}
+	 */
+	async fetchAllGuildMembers(guild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'))) {
+		if (!guild?.available) throw `the ${guild?.name ?? 'discord'} server is currently unavailable`;
+
+		if (guild.memberCount === guild.members.cache.size) return guild.members.cache;
+
+		return guild.members.fetch();
+	}
+
+	/**
 	 * returns the log channel
 	 */
 	get loggingChannel() {

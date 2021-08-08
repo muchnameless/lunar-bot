@@ -38,20 +38,12 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 
 			interaction.deferReply();
 
-			const { lgGuild } = this.client;
-
-			if (!lgGuild) return interaction.reply({
-				content: 'discord server is currently unavailable',
-				ephemeral: true,
-			});
-
 			const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 			const toPurge = [];
 
-			for (const member of (await lgGuild.members.fetch()).values()) {
+			for (const member of (await this.client.fetchAllGuildMembers()).values()) {
 				if (member.roles.cache.has(GUILD_ROLE_ID)) continue;
 
-				/** @type {string[]} */
 				const { rolesToPurge } = member;
 
 				if (!rolesToPurge.length) continue;
@@ -67,6 +59,8 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 			if (!PURGE_AMOUNT) return interaction.reply('no roles need to be purged');
 
 			await interaction.awaitConfirmation(`purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT, { long: true })}?`);
+
+			const { lgGuild } = this.client;
 
 			await Promise.all(toPurge.map(async ({ id, rolesToPurge }, index) => {
 				await sleep(index * PurgeRolesCommand.TIMEOUT);
