@@ -51,7 +51,7 @@ process
 				sweepFilter: LimitedCollection.filterByLifetime({
 					lifetime: 14_400,
 					getComparisonTimestamp: e => (e.type === 'DM'
-						? (e.lastMessageId ? SnowflakeUtil.deconstruct(e.lastMessageId).timestamp : 0) // DM -> last message
+						? (e.lastMessageId ? SnowflakeUtil.deconstruct(e.lastMessageId).timestamp : -1) // DM -> last message
 						: e.archiveTimestamp), // threads -> archived
 					excludeFromSweep: e => e.type !== 'DM' && !e.archived,
 				}),
@@ -60,7 +60,7 @@ process
 				sweepInterval: 21_600,
 				sweepFilter: LimitedCollection.filterByLifetime({
 					lifetime: 0,
-					getComparisonTimestamp: () => 0,
+					getComparisonTimestamp: () => -1,
 					excludeFromSweep: e => client.guilds.cache.some(guild => guild.members.cache.has(e.id)) || client.channels.cache.some(channel => channel.type === 'DM' && channel.recipient.id === e.id),
 				}),
 			},
