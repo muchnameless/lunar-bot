@@ -17,7 +17,7 @@ module.exports = class GuildUnavailableEvent extends Event {
 	 * @param {import('../structures/extensions/Guild')} guild
 	 */
 	async run(guild) {
-		logger.debug(`[GUILD UNAVAILABLE]: ${guild.name}`);
+		logger.info(`[GUILD UNAVAILABLE]: ${guild.name}`);
 
 		// sweep linked discord members cache
 		if (guild.id === this.config.get('DISCORD_GUILD_ID')) this.client.players.sweepDiscordMemberCache();

@@ -128,6 +128,6 @@ module.exports = class HypixelGuildManager extends ModelManager {
 
 		for (const hypixelGuild of this.cache.values()) hypixelGuild.saveDailyStats();
 
-		logger.debug('[GUILD DAILY STATS]: performed daily stats saves');
+		logger.info('[GUILD DAILY STATS]: performed daily stats saves');
 	}
 };

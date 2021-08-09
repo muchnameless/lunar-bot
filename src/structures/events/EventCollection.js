@@ -68,7 +68,7 @@ module.exports = class EventCollection extends Collection {
 			this.loadFromFile(file);
 		}
 
-		logger.debug(`[EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
+		logger.info(`[EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 
 		return this;
 	}

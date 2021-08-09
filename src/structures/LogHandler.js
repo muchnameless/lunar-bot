@@ -186,7 +186,7 @@ module.exports = class LogHandler {
 	async _createLogBufferFolder() {
 		try {
 			await mkdir(this.logPath);
-			logger.debug('[LOG BUFFER]: created \'log_buffer\' folder');
+			logger.info('[LOG BUFFER]: created \'log_buffer\' folder');
 			return true;
 		} catch { // rejects if folder already exists
 			return false;

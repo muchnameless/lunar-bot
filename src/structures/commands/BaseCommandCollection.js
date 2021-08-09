@@ -85,7 +85,7 @@ module.exports = class BaseCommandCollection extends Collection {
 			this.loadFromFile(file);
 		}
 
-		logger.debug(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
+		logger.info(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
 
 		return this;
 	}
