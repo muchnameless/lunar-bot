@@ -16,9 +16,24 @@ module.exports = class ReadyEvent extends Event {
 	 * event listener callback
 	 */
 	async run() {
-		logger.debug(`[READY]: logged in as ${this.client.user.tag}`);
+		logger.info(`[READY]: logged in as ${this.client.user.tag}`);
 
 		await this.client.logHandler.init();
+
+		if (this.client.options.fetchAllMembers) {
+			try {
+				const { lgGuild } = this.client;
+
+				if (lgGuild) {
+					const members = await lgGuild.members.fetch();
+					logger.info(`[READY]: fetched ${members.size} members`);
+				} else {
+					logger.warn('[READY]: lgGuild unavailable');
+				}
+			} catch (error) {
+				logger.error('[READY]', error);
+			}
+		}
 
 		this.client.db.schedule();
 
@@ -45,6 +60,6 @@ module.exports = class ReadyEvent extends Event {
 		}
 
 		// log ready
-		logger.debug(`[READY]: startup complete. ${this.client.cronJobs.size} CronJobs running. Logging channel available: ${this.client.logHandler.ready}`);
+		logger.info(`[READY]: startup complete. ${this.client.cronJobs.size} CronJobs running. Logging channel available: ${this.client.logHandler.ready}`);
 	}
 };
