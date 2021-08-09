@@ -5,6 +5,7 @@ const Discord = require('discord.js');
 const _ = require('lodash');
 const similarity = require('jaro-winkler');
 const ms = require('ms');
+const fetch = require('node-fetch');
 const util = require('util');
 const { EMBED_MAX_CHARS } = require('../../constants/discord');
 const { CHANNEL_FLAGS } = require('../../constants/bot');
