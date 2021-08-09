@@ -2,7 +2,7 @@
 
 const { join } = require('path');
 require('dotenv').config({ path: join(__dirname, '.env') });
-const { Intents, LimitedCollection, SnowflakeUtil, Util, Options, Constants } = require('discord.js');
+const { Intents, LimitedCollection, SnowflakeUtil, Options, Constants } = require('discord.js');
 const { requireAll } = require('./functions/files');
 const db = require('./structures/database/index');
 const LunarClient = require('./structures/LunarClient');
@@ -36,6 +36,7 @@ process
 
 		// default options
 		makeCache: Options.cacheWithLimits({
+			...Options.defaultMakeCacheSettings(),
 			MessageManager: {
 				maxSize: 200,
 				sweepInterval: 600,
@@ -54,14 +55,6 @@ process
 						: e.archiveTimestamp), // threads -> archived
 					excludeFromSweep: e => e.type !== 'DM' && !e.archived,
 				}),
-			},
-			GuildChannelManager: {
-				sweepInterval: 3_600,
-				sweepFilter: Util.archivedThreadSweepFilter(),
-			},
-			ThreadManager: {
-				sweepInterval: 3_600,
-				sweepFilter: Util.archivedThreadSweepFilter(),
 			},
 			UserManager: {
 				sweepInterval: 21_600,
