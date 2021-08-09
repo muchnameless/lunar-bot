@@ -2,10 +2,11 @@
 
 const { MessageEmbed, SnowflakeUtil, Formatters } = require('discord.js');
 const { AsyncQueue } = require('@sapphire/async-queue');
+const { setTimeout: sleep } = require('timers/promises');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const emojiRegex = require('emoji-regex/es2015')();
-const { sleep, trim, cleanFormattedNumber, splitMessage } = require('../../../functions/util');
+const { trim, cleanFormattedNumber, splitMessage } = require('../../../functions/util');
 const { unicodeToName } = require('../constants/emojiNameUnicodeConverter');
 const { memeRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
 const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');

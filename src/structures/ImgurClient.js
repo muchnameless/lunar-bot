@@ -1,10 +1,10 @@
 'use strict';
 
 const { AsyncQueue } = require('@sapphire/async-queue');
+const { setTimeout: sleep } = require('timers/promises');
 const FormData = require('form-data');
 const fetch = require('node-fetch');
 const ms = require('ms');
-const { sleep } = require('../functions/util');
 // const logger = require('../functions/logger');
 
 /**

@@ -1,9 +1,9 @@
 'use strict';
 
 const { EventEmitter } = require('events');
+const { setTimeout: sleep } = require('timers/promises');
 const { join } = require('path');
 const { prefixByType, messageTypes: { GUILD }, chatFunctionByType, randomInvisibleCharacter } = require('./constants/chatBridge');
-const { sleep } = require('../../functions/util');
 const MinecraftChatManager = require('./managers/MinecraftChatManager');
 const DiscordManager = require('./managers/DiscordManager');
 const EventCollection = require('../events/EventCollection');

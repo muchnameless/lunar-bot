@@ -1,7 +1,6 @@
 'use strict';
 
 const { Formatters, Util } = require('discord.js');
-const { setTimeout } = require('timers/promises');
 const ms = require('ms');
 const jaroWinklerSimilarity = require('jaro-winkler');
 const { EMBED_FIELD_MAX_CHARS } = require('../constants/discord');
@@ -33,12 +32,6 @@ function _concatMessageChunks(splitText, { maxLength, char, append, prepend }) {
 
 
 const self = module.exports = {
-
-	/**
-	 * usage: await sleep(milliseconds)
-	 * @param {number} milliseconds to sleep
-	 */
-	sleep: setTimeout,
 
 	/**
 	 * lets you insert any string as the plain string into a regex

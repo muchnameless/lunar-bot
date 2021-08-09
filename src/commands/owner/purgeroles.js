@@ -1,7 +1,7 @@
 'use strict';
 
+const { setTimeout: sleep } = require('timers/promises');
 const ms = require('ms');
-const { sleep } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
 
