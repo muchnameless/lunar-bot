@@ -36,7 +36,7 @@ process
 
 		// default options
 		makeCache: Options.cacheWithLimits({
-			...Options.defaultMakeCacheSettings(),
+			...Options.defaultMakeCacheSettings,
 			MessageManager: {
 				maxSize: 200,
 				sweepInterval: 600,
