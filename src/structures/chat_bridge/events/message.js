@@ -27,12 +27,6 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * You can only send a message once every half second!
 		 */
 		if (message.spam) {
-			try {
-				await this.client.dmOwner(`${this.chatBridge.logInfo}: anti spam failed: ${message.rawContent}`);
-			} catch (error) {
-				logger.error(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: error DMing owner 'anti spam failed'`);
-			}
-
 			return logger.error(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: anti spam failed: ${message.rawContent}`);
 		}
 
