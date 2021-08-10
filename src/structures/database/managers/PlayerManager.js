@@ -252,7 +252,7 @@ module.exports = class PlayerManager extends ModelManager {
 
 			try {
 				for (const player of this.cache.values()) {
-					if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.9 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
+					if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
 
 					await player.update({ rejectOnAPIError: true, ...options });
 				}
@@ -570,7 +570,7 @@ module.exports = class PlayerManager extends ModelManager {
 			if (player.notInGuild) continue;
 
 			try {
-				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.9 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
+				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
 
 				const result = await player.fetchMainProfile();
 
