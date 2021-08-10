@@ -147,6 +147,8 @@ module.exports = class ImgurClient {
 				}
 
 				if (this.rateLimit.clientremaining === 0) {
+					if (this.rateLimit.clientreset === null) throw new Error('imgur client rate limit, unknown clientreset');
+
 					const RESET_TIME = (this.rateLimit.clientreset * 1_000) - Date.now(); // x-ratelimit-clientreset is a timestamp in seconds for next reset (???) - untested
 
 					if (RESET_TIME > 60_000) throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
