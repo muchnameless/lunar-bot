@@ -9,7 +9,7 @@ const { slayerXp, skills, cosmeticSkills, skillsAchievements, skillXpTotal, slay
 const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
 const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
 const { escapeIgn, trim } = require('../../../functions/util');
-const { getSkillLevel, getWeight, getSkillWeight, getSlayerWeight, getDungeonWeight } = require('../../../functions/skyblock');
+const { getSkillLevel, getSenitherWeight, getSenitherSkillWeight, getSenitherSlayerWeight, getSenitherDungeonWeight } = require('../../../functions/skyblock');
 const { validateNumber, validateDiscordId } = require('../../../functions/stringValidators');
 const { mutedCheck } = require('../../../functions/database');
 const { PSEUDO_GUILD_IDS } = require('../managers/HypixelGuildManager');
@@ -757,7 +757,7 @@ module.exports = class Player extends Model {
 		}
 
 		// weight
-		if (this.getWeight().totalWeight >= config.get('WHALECUM_PASS_WEIGHT')) {
+		if (this.getSenitherWeight().totalWeight >= config.get('WHALECUM_PASS_WEIGHT')) {
 			if (!member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToAdd.push(config.get('WHALECUM_PASS_ROLE_ID'));
 		} else if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) {
 			rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
@@ -1152,7 +1152,7 @@ module.exports = class Player extends Model {
 		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = profiles[
 			profiles.length > 1
 				? profiles
-					.map(({ members }) => getWeight(members[this.minecraftUuid]).totalWeight)
+					.map(({ members }) => getSenitherWeight(members[this.minecraftUuid]).totalWeight)
 					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => (currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar), 0)
 				: 0
 		];
@@ -1466,26 +1466,26 @@ module.exports = class Player extends Model {
 	 * calculates the player's weight using Senither's formula
 	 * @param {string} offset optional offset value to use instead of the current xp value
 	 */
-	getWeight(offset = '') {
+	getSenitherWeight(offset = '') {
 		let weight = 0;
 		let overflow = 0;
 
 		for (const skill of skills) {
-			const { skillWeight, skillOverflow } = getSkillWeight(skill, this[`${skill}Xp${offset}`]);
+			const { skillWeight, skillOverflow } = getSenitherSkillWeight(skill, this[`${skill}Xp${offset}`]);
 
 			weight += skillWeight;
 			overflow += skillOverflow;
 		}
 
 		for (const slayer of slayers) {
-			const { slayerWeight, slayerOverflow } = getSlayerWeight(slayer, this[`${slayer}Xp${offset}`]);
+			const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(slayer, this[`${slayer}Xp${offset}`]);
 
 			weight += slayerWeight;
 			overflow += slayerOverflow;
 		}
 
 		for (const type of dungeonTypesAndClasses) {
-			const { dungeonWeight, dungeonOverflow } = getDungeonWeight(type, this[`${type}Xp${offset}`]);
+			const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(type, this[`${type}Xp${offset}`]);
 
 			weight += dungeonWeight;
 			overflow += dungeonOverflow;
@@ -1543,26 +1543,26 @@ module.exports = class Player extends Model {
 	 * calculates the player's weight using Senither's formula
 	 * @param {number} index xpHistory array index
 	 */
-	getWeightHistory(index) {
+	getSenitherWeightHistory(index) {
 		let weight = 0;
 		let overflow = 0;
 
 		for (const skill of skills) {
-			const { skillWeight, skillOverflow } = getSkillWeight(skill, this[`${skill}XpHistory`][index]);
+			const { skillWeight, skillOverflow } = getSenitherSkillWeight(skill, this[`${skill}XpHistory`][index]);
 
 			weight += skillWeight;
 			overflow += skillOverflow;
 		}
 
 		for (const slayer of slayers) {
-			const { slayerWeight, slayerOverflow } = getSlayerWeight(slayer, this[`${slayer}XpHistory`][index]);
+			const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(slayer, this[`${slayer}XpHistory`][index]);
 
 			weight += slayerWeight;
 			overflow += slayerOverflow;
 		}
 
 		for (const type of dungeonTypesAndClasses) {
-			const { dungeonWeight, dungeonOverflow } = getDungeonWeight(type, this[`${type}XpHistory`][index]);
+			const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(type, this[`${type}XpHistory`][index]);
 
 			weight += dungeonWeight;
 			overflow += dungeonOverflow;

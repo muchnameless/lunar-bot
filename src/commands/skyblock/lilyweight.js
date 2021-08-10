@@ -1,18 +1,18 @@
 'use strict';
 
 const { Constants } = require('discord.js');
-const { getSenitherWeight } = require('../../functions/skyblock');
+const { getLilyWeight } = require('../../functions/skyblock');
 const BaseWeightCommand = require('./~base-weight');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class WeightCommand extends BaseWeightCommand {
+module.exports = class LilyWeightCommand extends BaseWeightCommand {
 	constructor(data) {
 		super(
 			data,
 			{
 				aliases: [],
-				description: 'shows a player\'s senither weight: total, weight and overflow',
+				description: 'shows a player\'s lily weight: total, weight and overflow',
 				options: [{
 					name: 'ign',
 					type: Constants.ApplicationCommandOptionTypes.STRING,
@@ -22,7 +22,7 @@ module.exports = class WeightCommand extends BaseWeightCommand {
 				cooldown: 1,
 			},
 			{
-				aliases: [ 'w' ],
+				aliases: [ 'lily' ],
 				args: false,
 				usage: '<`IGN`> <`profile` name>',
 			},
@@ -33,6 +33,6 @@ module.exports = class WeightCommand extends BaseWeightCommand {
 	 * @param {import('@zikeji/hypixel').Components.Schemas.SkyBlockProfileMember} skyblockMember
 	 */
 	getWeight(skyblockMember) { // eslint-disable-line class-methods-use-this
-		return getSenitherWeight(skyblockMember);
+		return getLilyWeight(skyblockMember);
 	}
 };

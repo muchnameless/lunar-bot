@@ -161,8 +161,8 @@ module.exports = class XpCommand extends SlashCommand {
 			});
 		}
 
-		const { totalWeight, weight, overflow } = player.getWeight();
-		const { totalWeight: totalWeightOffet, weight: weightOffset, overflow: overflowOffset } = player.getWeight(offset);
+		const { totalWeight, weight, overflow } = player.getSenitherWeight();
+		const { totalWeight: totalWeightOffet, weight: weightOffset, overflow: overflowOffset } = player.getSenitherWeight(offset);
 
 		embed
 			.padFields()

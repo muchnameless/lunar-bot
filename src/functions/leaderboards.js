@@ -498,11 +498,11 @@ const self = module.exports = {
 			case 'purge': {
 				title = `${hypixelGuild || ''} Purge List (${config.get('PURGE_LIST_OFFSET')} days interval)`;
 				dataConverter = (player) => {
-					const { totalWeight } = player.getWeight();
+					const { totalWeight } = player.getSenitherWeight();
 					const startIndex = player.alchemyXpHistory.length - 1 - config.get('PURGE_LIST_OFFSET');
 					// use weight from the first time they got alch xp, assume player has not been tracked before
 					const XP_TRACKING_START = player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0);
-					const { totalWeight: totalWeightOffet } = player.getWeightHistory(XP_TRACKING_START);
+					const { totalWeight: totalWeightOffet } = player.getSenitherWeightHistory(XP_TRACKING_START);
 					const gainedWeight = totalWeight - totalWeightOffet;
 					const gainedGuildXp = player.guildXp - player.guildXpHistory[XP_TRACKING_START];
 					return {
@@ -536,8 +536,8 @@ const self = module.exports = {
 			case 'weight': {
 				title = 'Weight Gained Leaderboard';
 				dataConverter = (player) => {
-					const { weight, overflow, totalWeight } = player.getWeight(CURRENT_OFFSET);
-					const { weight: weightOffset, overflow: overflowOffset, totalWeight: totalWeightOffet } = player.getWeight(offset);
+					const { weight, overflow, totalWeight } = player.getSenitherWeight(CURRENT_OFFSET);
+					const { weight: weightOffset, overflow: overflowOffset, totalWeight: totalWeightOffet } = player.getSenitherWeight(offset);
 					const totalWeightGain = totalWeight - totalWeightOffet;
 					return {
 						ign: player.ign,
@@ -739,7 +739,7 @@ const self = module.exports = {
 			case 'weight': {
 				title = 'Weight Leaderboard';
 				dataConverter = (player) => {
-					const { weight, overflow, totalWeight } = player.getWeight(offset);
+					const { weight, overflow, totalWeight } = player.getSenitherWeight(offset);
 					return {
 						ign: player.ign,
 						discordId: player.discordId,

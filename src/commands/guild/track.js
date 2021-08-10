@@ -46,7 +46,7 @@ module.exports = class TrackCommand extends SlashCommand {
 
 		switch (type) {
 			case 'weight': {
-				const weightHistory = [ ...Array(days).keys() ].map(x => player.getWeightHistory(x));
+				const weightHistory = [ ...Array(days).keys() ].map(x => player.getSenitherWeightHistory(x));
 
 				datasets = [{
 					label: 'Weight',

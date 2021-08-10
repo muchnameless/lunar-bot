@@ -208,7 +208,7 @@ module.exports = class HypixelGuild extends Model {
 		const PLAYER_COUNT = players.size;
 
 		return ({
-			weightAverage: players.reduce((acc, player) => acc + player.getWeight().totalWeight, 0) / PLAYER_COUNT,
+			weightAverage: players.reduce((acc, player) => acc + player.getSenitherWeight().totalWeight, 0) / PLAYER_COUNT,
 			skillAverage: players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT,
 			slayerAverage: players.reduce((acc, player) => acc + player.getSlayerTotal(), 0) / PLAYER_COUNT,
 			catacombsAverage: players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT,
@@ -245,7 +245,7 @@ module.exports = class HypixelGuild extends Model {
 
 			if (!rank?.roleId) return []; // unkown or non-requestable rank
 
-			const { totalWeight } = player.getWeight();
+			const { totalWeight } = player.getSenitherWeight();
 
 			if (totalWeight >= rank.weightReq) return [];
 
@@ -611,7 +611,7 @@ module.exports = class HypixelGuild extends Model {
 
 			const playersSortedByWeight = this.players
 				.array()
-				.sort((p1, p2) => p1.getWeight().totalWeight - p2.getWeight().totalWeight) // from lowest to highest weight
+				.sort((p1, p2) => p1.getSenitherWeight().totalWeight - p2.getSenitherWeight().totalWeight) // from lowest to highest weight
 				.map((player, index) => ({
 					player,
 					isStaff: player.isStaff
