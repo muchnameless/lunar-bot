@@ -528,76 +528,74 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {string} string
 	 */
 	parseContent(string) {
-		return MinecraftChatManager.escapeEz(
-			cleanFormattedNumber(string)
-				.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
-				.replace(invisibleCharacterRegExp, '') // remove invisible characters
-				.replace(/<(?:a)?:(\w{2,32}):(?:\d{17,19})>/g, ':$1:') // custom emojis
-				.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
-				.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
-				.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
-					const CHANNEL_NAME = this.client.channels.cache.get(p1)?.name;
-					if (CHANNEL_NAME) return `#${CHANNEL_NAME}`;
-					return match;
-				})
-				.replace(/<@&(\d{17,19})>/g, (match, p1) => { // roles
-					const ROLE_NAME = this.client.lgGuild?.roles.cache.get(p1)?.name;
-					if (ROLE_NAME) return `@${ROLE_NAME}`;
-					return match;
-				})
-				.replace(/<@!?(\d{17,19})>/g, (match, p1) => { // users
-					const member = this.client.lgGuild?.members.cache.get(p1);
-					if (member) {
-						const { player } = member;
-						if (player) return `@${player}`;
+		return cleanFormattedNumber(string)
+			.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
+			.replace(invisibleCharacterRegExp, '') // remove invisible characters
+			.replace(/<(?:a)?:(\w{2,32}):(?:\d{17,19})>/g, ':$1:') // custom emojis
+			.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
+			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
+			.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
+				const CHANNEL_NAME = this.client.channels.cache.get(p1)?.name;
+				if (CHANNEL_NAME) return `#${CHANNEL_NAME}`;
+				return match;
+			})
+			.replace(/<@&(\d{17,19})>/g, (match, p1) => { // roles
+				const ROLE_NAME = this.client.lgGuild?.roles.cache.get(p1)?.name;
+				if (ROLE_NAME) return `@${ROLE_NAME}`;
+				return match;
+			})
+			.replace(/<@!?(\d{17,19})>/g, (match, p1) => { // users
+				const member = this.client.lgGuild?.members.cache.get(p1);
+				if (member) {
+					const { player } = member;
+					if (player) return `@${player}`;
+				}
+
+				const user = this.client.users.cache.get(p1);
+				if (user) {
+					const { player } = user;
+					if (player) return `@${player}`;
+				}
+
+				const NAME = member?.displayName ?? user?.username;
+				if (NAME) return `@${NAME}`;
+
+				return match;
+			})
+			.replace(/<t:(-?\d{1,13})(?::([tTdDfFR]))?>/g, (match, p1, p2) => { // dates
+				const date = new Date(p1 * 1_000);
+
+				if (Number.isNaN(date.getTime())) return match; // invalid date
+
+				switch (p2) { // https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
+					case Formatters.TimestampStyles.ShortTime:
+						return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
+
+					case Formatters.TimestampStyles.LongTime:
+						return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
+
+					case Formatters.TimestampStyles.ShortDate:
+						return date.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+
+					case Formatters.TimestampStyles.LongDate:
+						return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+					case Formatters.TimestampStyles.ShortDateTime:
+						return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
+
+					case Formatters.TimestampStyles.LongDateTime:
+						return date.toLocaleString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
+
+					case Formatters.TimestampStyles.RelativeTime: {
+						const TIME = date.getTime() - Date.now();
+						if (TIME > 0) return `in ${ms(Math.abs(TIME), { long: true })}`;
+						return `${ms(Math.abs(TIME), { long: true })} ago`;
 					}
 
-					const user = this.client.users.cache.get(p1);
-					if (user) {
-						const { player } = user;
-						if (player) return `@${player}`;
-					}
-
-					const NAME = member?.displayName ?? user?.username;
-					if (NAME) return `@${NAME}`;
-
-					return match;
-				})
-				.replace(/<t:(-?\d{1,13})(?::([tTdDfFR]))?>/g, (match, p1, p2) => { // dates
-					const date = new Date(p1 * 1_000);
-
-					if (Number.isNaN(date.getTime())) return match; // invalid date
-
-					switch (p2) { // https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
-						case Formatters.TimestampStyles.ShortTime:
-							return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
-
-						case Formatters.TimestampStyles.LongTime:
-							return date.toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
-
-						case Formatters.TimestampStyles.ShortDate:
-							return date.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
-
-						case Formatters.TimestampStyles.LongDate:
-							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
-
-						case Formatters.TimestampStyles.ShortDateTime:
-							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
-
-						case Formatters.TimestampStyles.LongDateTime:
-							return date.toLocaleString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
-
-						case Formatters.TimestampStyles.RelativeTime: {
-							const TIME = date.getTime() - Date.now();
-							if (TIME > 0) return `in ${ms(Math.abs(TIME), { long: true })}`;
-							return `${ms(Math.abs(TIME), { long: true })} ago`;
-						}
-
-						default:
-							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
-					}
-				}),
-		);
+					default:
+						return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' });
+				}
+			});
 	}
 
 	/**
