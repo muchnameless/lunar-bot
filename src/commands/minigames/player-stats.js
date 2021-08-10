@@ -5,11 +5,11 @@ const { oneLine } = require('common-tags');
 const { getPlayerRank, getNetworkLevel } = require('@zikeji/hypixel');
 const { getUuidAndIgn } = require('../../functions/input');
 const hypixel = require('../../api/hypixel');
-const StatsCommand = require('./~stats-command');
+const BaseStatsCommand = require('./~base-stats-command');
 const logger = require('../../functions/logger');
 
 
-module.exports = class PlayerStatsCommand extends StatsCommand {
+module.exports = class PlayerStatsCommand extends BaseStatsCommand {
 	constructor(data) {
 		super(
 			data,

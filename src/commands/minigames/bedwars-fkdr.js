@@ -1,11 +1,11 @@
 'use strict';
 
 const { Constants } = require('discord.js');
-const StatsCommand = require('./~stats-command');
+const BaseStatsCommand = require('./~base-stats-command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class BedWarsFkdrCommand extends StatsCommand {
+module.exports = class BedWarsFkdrCommand extends BaseStatsCommand {
 	constructor(data) {
 		super(
 			data,

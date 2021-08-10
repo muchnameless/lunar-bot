@@ -2,11 +2,11 @@
 
 const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
-const StatsCommand = require('./~stats-command');
+const BaseStatsCommand = require('./~base-stats-command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class MurderMysteryStatsCommand extends StatsCommand {
+module.exports = class MurderMysteryStatsCommand extends BaseStatsCommand {
 	constructor(data) {
 		super(
 			data,

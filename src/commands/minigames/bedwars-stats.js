@@ -3,11 +3,11 @@
 const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
 const { getBedwarsLevelInfo } = require('@zikeji/hypixel');
-const StatsCommand = require('./~stats-command.js');
+const BaseStatsCommand = require('./~base-stats-command.js');
 const logger = require('../../functions/logger');
 
 
-module.exports = class BedWarsStatsCommand extends StatsCommand {
+module.exports = class BedWarsStatsCommand extends BaseStatsCommand {
 	constructor(data) {
 		super(
 			data,

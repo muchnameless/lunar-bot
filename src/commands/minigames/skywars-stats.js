@@ -3,11 +3,11 @@
 const { Constants } = require('discord.js');
 const { oneLine } = require('common-tags');
 const { getSkyWarsLevelInfo } = require('@zikeji/hypixel');
-const StatsCommand = require('./~stats-command');
+const BaseStatsCommand = require('./~base-stats-command');
 // const logger = require('../../functions/logger');
 
 
-module.exports = class SkyWarsStatsCommand extends StatsCommand {
+module.exports = class SkyWarsStatsCommand extends BaseStatsCommand {
 	constructor(data) {
 		super(
 			data,
