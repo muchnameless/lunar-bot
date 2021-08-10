@@ -1,6 +1,7 @@
 'use strict';
 
 const { MessageEmbed, Formatters, Util: { splitMessage } } = require('discord.js');
+const { setTimeout: sleep } = require('timers/promises');
 const { Op } = require('sequelize');
 const { CronJob } = require('cron');
 const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
@@ -8,6 +9,7 @@ const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, D
 const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
 const { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar, safePromiseAll } = require('../../../functions/util');
 const ModelManager = require('./ModelManager');
+const hypixel = require('../../../api/hypixel');
 const logger = require('../../../functions/logger');
 
 
@@ -250,6 +252,8 @@ module.exports = class PlayerManager extends ModelManager {
 
 			try {
 				for (const player of this.cache.values()) {
+					if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.9 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
+
 					await player.update({ rejectOnAPIError: true, ...options });
 				}
 			} catch (error) {
@@ -566,6 +570,8 @@ module.exports = class PlayerManager extends ModelManager {
 			if (player.notInGuild) continue;
 
 			try {
+				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.9 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
+
 				const result = await player.fetchMainProfile();
 
 				if (!result) continue;
