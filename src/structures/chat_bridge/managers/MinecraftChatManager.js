@@ -303,11 +303,11 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			await discordMessage.author.send(info);
 
-			cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
-
 			logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
 		} catch (error) {
 			logger.error(`[FORWARD REJECTION]: error DMing ${discordMessage.author.tag}`, error);
+		} finally {
+			cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
 		}
 	}
 
