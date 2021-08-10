@@ -15,6 +15,7 @@ const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database')
 const minecraftBot = require('../MinecraftBot');
 const MessageCollector = require('../MessageCollector');
 const ChatManager = require('./ChatManager');
+const cache = require('../../../api/cache');
 const logger = require('../../../functions/logger');
 
 /**
@@ -228,6 +229,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		discordMessage.react(STOP);
 
+		if (await cache.get(`chatbridge:blocked:dm:${discordMessage.author.id}`)) return;
+
 		try {
 			let info;
 
@@ -299,6 +302,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			}
 
 			await discordMessage.author.send(info);
+
+			cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
 
 			logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
 		} catch (error) {

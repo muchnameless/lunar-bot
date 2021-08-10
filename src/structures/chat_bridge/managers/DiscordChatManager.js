@@ -91,7 +91,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 */
 	static async _dmMuteInfo(message, player, content) {
 		if (message.me) return;
-		if (await cache.get(`chatbridge:mute:dm:${message.author.id}`)) return;
+		if (await cache.get(`chatbridge:muted:dm:${message.author.id}`)) return;
 
 		try {
 			await message.author.send(content);
@@ -100,7 +100,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? ''}: error DMing muted user`, error);
 		}
 
-		cache.set(`chatbridge:mute:dm:${message.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
+		cache.set(`chatbridge:muted:dm:${message.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
 	}
 
 	/**
