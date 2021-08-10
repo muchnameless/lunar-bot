@@ -8,7 +8,7 @@ const ms = require('ms');
 const emojiRegex = require('emoji-regex/es2015')();
 const { trim, cleanFormattedNumber, splitMessage } = require('../../../functions/util');
 const { unicodeToName } = require('../constants/emojiNameUnicodeConverter');
-const { memeRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
+const { memeRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, invisibleCharacters, randomPadding, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
 const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
 const { MC_CLIENT_VERSION } = require('../constants/settings');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database');
@@ -112,6 +112,41 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		 * command response collector
 		 */
 		this._commandCollector = null;
+		/**
+		 * anti spam checker
+		 */
+		this._lastMessages = {
+			MAX_INDEX: 8,
+			index: -1,
+			incIndex() {
+				++this.index;
+				if (this.index === this.MAX_INDEX) this.index = 0;
+			},
+			decIndex() {
+				--this.index;
+				if (this.index === -1) this.index = this.MAX_INDEX - 1;
+			},
+			/**
+			 * @type {string[]}
+			 */
+			cache: [],
+			cleanContent(content) {
+				return content
+					.replace(/\d/g, '')
+					.trim()
+					.replace(/ {2,}/g, ' ');
+			},
+			/**
+			 * @param {string} content
+			 */
+			check(content) {
+				return this.cache.includes(this.cleanContent(content));
+			},
+			add(content) {
+				this.incIndex();
+				this.cache[this.index] = this.cleanContent(content);
+			},
+		};
 	}
 
 	/**
@@ -475,28 +510,17 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	_hypixelSpamBypass(string, prefix = '') {
 		// string is already at or above max length
-		if (string.length + prefix.length >= MinecraftChatManager.MAX_MESSAGE_LENGTH) return trim(`${prefix}${string}`, MinecraftChatManager.MAX_MESSAGE_LENGTH);
+		if (string.length + prefix.length >= MinecraftChatManager.MAX_MESSAGE_LENGTH) return trim(string, MinecraftChatManager.MAX_MESSAGE_LENGTH);
 
-		// padding failed at least once -> splice the entire input string with random invisible chars
-		if (this.retries) {
-			const input = string.split('');
+		let padded = string;
+		let index = this.retries;
 
-			// max message length is 256 post 1.11, 100 pre 1.11
-			for (let index = MinecraftChatManager.MAX_MESSAGE_LENGTH - string.length - prefix.length + 1; --index;) {
-				input.splice(Math.floor(Math.random() * input.length), 0, randomInvisibleCharacter());
-			}
-
-			return `${prefix}${input.join('')}`;
+		// 1 for each retry + additional if _lastMessages includes curent padding
+		while ((--index >= 0 || this._lastMessages.check(padded)) && (padded.length + prefix.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH)) {
+			padded += `${invisibleCharacters[0]} ${randomPadding()}`;
 		}
 
-		// default padding (only add the end)
-		let padding = '';
-
-		for (let index = MinecraftChatManager.MAX_MESSAGE_LENGTH - string.length - prefix.length; --index;) {
-			padding += randomInvisibleCharacter();
-		}
-
-		return `${prefix}${string} ${padding}`;
+		return padded;
 	}
 
 	/**
@@ -718,11 +742,19 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		try {
 			// send message to in game chat
-			this.bot.write('chat', {
-				message: shouldUseSpamByPass
-					? this._hypixelSpamBypass(content, prefix)
-					: `${prefix}${content}`,
-			});
+			if (shouldUseSpamByPass) {
+				const PADDED = this._hypixelSpamBypass(content, prefix);
+
+				this.bot.write('chat', {
+					message: `${prefix}${PADDED}`,
+				});
+
+				this._lastMessages.add(PADDED);
+			} else {
+				this.bot.write('chat', {
+					message: `${prefix}${content}`,
+				});
+			}
 		} catch (error) {
 			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
 			discordMessage?.react(X_EMOJI);
@@ -755,6 +787,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			// anti spam failed -> retry
 			case 'spam': {
 				this._tempIncrementCounter();
+
+				this._lastMessages.decIndex();
 
 				// max retries reached
 				if (++this.retries === MinecraftChatManager.MAX_RETRIES) {

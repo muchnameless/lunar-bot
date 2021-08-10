@@ -40,13 +40,13 @@ module.exports = class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * player ign or member displayName or author username, ez escaped and *blocked* if blockedWordsRegExp check doesn't pass
+	 * player ign or member displayName or author username, *blocked* if blockedWordsRegExp check doesn't pass
 	 * @param {import('../../extensions/Message')} message
 	 */
 	static getPlayerName(message) {
 		return this.formatAtMention(message.webhookId
-			? message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.player?.ign ?? DiscordChatManager.escapeEz(message.author.username)
-			: message.author.player?.ign ?? DiscordChatManager.escapeEz(message.member?.displayName ?? message.author.username),
+			? message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.player?.ign ?? message.author.username
+			: message.author.player?.ign ?? message.member?.displayName ?? message.author.username,
 		);
 	}
 
@@ -323,7 +323,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		if (interaction) await this.minecraft.chat({
 			content: `${this.client.config.get('PREFIXES')[0]}${interaction.logInfo ?? ''}`,
-			prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? DiscordChatManager.escapeEz(interaction.member?.displayName ?? interaction.user.username))}: `,
+			prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? interaction.member?.displayName ?? interaction.user.username)}: `,
 		});
 
 		return this.minecraft.chat({

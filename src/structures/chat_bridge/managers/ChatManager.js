@@ -1,7 +1,7 @@
 'use strict';
 
 const { AsyncQueue } = require('@sapphire/async-queue');
-const { blockedWordsRegExp, randomInvisibleCharacter } = require('../constants/chatBridge');
+const { blockedWordsRegExp } = require('../constants/chatBridge');
 
 /**
  * @typedef {import('../MessageCollector').MessageCollectorOptions & { errors: ?string[] }} AwaitMessagesOptions
@@ -24,14 +24,6 @@ module.exports = class ChatManager {
 	 * regexp to check for words that are blocked on hypixel
 	 */
 	static BLOCKED_WORDS_REGEXP = blockedWordsRegExp;
-
-	/**
-	 * escapes all standalone occurrences of 'ez', case-insensitive
-	 * @param {string} string
-	 */
-	static escapeEz(string) {
-		return string.replace(/(?<=\be+)(?=z+\b)/gi, randomInvisibleCharacter());
-	}
 
 	get mcAccount() {
 		return this.chatBridge.mcAccount;
