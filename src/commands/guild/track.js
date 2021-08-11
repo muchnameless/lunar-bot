@@ -34,7 +34,7 @@ module.exports = class TrackCommand extends SlashCommand {
 		const player = this.getPlayer(interaction, true);
 
 		if (!player) {
-			return interaction.reply(oneLine`${interaction.options.get('player')
+			return await interaction.reply(oneLine`${interaction.options.get('player')
 				? `\`${interaction.options.getString('player')}\` is`
 				: 'you are'
 			} not in the player db`);
@@ -130,7 +130,7 @@ module.exports = class TrackCommand extends SlashCommand {
 			},
 		});
 
-		return interaction.reply({
+		return await interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
 					.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)

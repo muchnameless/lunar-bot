@@ -61,7 +61,7 @@ module.exports = class ExecCommand extends SlashCommand {
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
 
-			return interaction.reply({
+			return await interaction.reply({
 				content: Formatters.codeBlock('xl', `${error}`),
 			});
 		}

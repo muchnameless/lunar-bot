@@ -117,7 +117,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 		if (!IGN) {
 			// all players
-			if (JoinDateCommand.running.has(chatBridge.hypixelGuild.guildId)) return interaction.reply({
+			if (JoinDateCommand.running.has(chatBridge.hypixelGuild.guildId)) return await interaction.reply({
 				content: 'the command is already running',
 				ephemeral: true,
 			});
@@ -136,7 +136,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 				JoinDateCommand.running.delete(chatBridge.hypixelGuild.guildId);
 			}
 
-			return interaction.reply({
+			return await interaction.reply({
 				content: `${Formatters.bold(chatBridge.hypixelGuild.name)} join dates:\n${joinInfos
 					.sort((a, b) => a.timestamp - b.timestamp)
 					.map(({ ign, date, timestamp }) => `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`)
@@ -145,7 +145,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 			});
 		}
 
-		return interaction.reply(await this._generateReply(chatBridge, IGN));
+		return await interaction.reply(await this._generateReply(chatBridge, IGN));
 	}
 
 	/**
@@ -153,7 +153,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return message.reply(await this._generateReply(
+		return await message.reply(await this._generateReply(
 			message.chatBridge,
 			message.commandData.args[0] ?? message.author.ign,
 		));

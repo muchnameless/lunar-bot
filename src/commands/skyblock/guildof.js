@@ -56,7 +56,7 @@ module.exports = class GuildOfCommand extends DualCommand {
 	async run(interaction) {
 		interaction.deferReply();
 
-		return interaction.reply(await this._generateReply(interaction.options.getString('ign', true)));
+		return await interaction.reply(await this._generateReply(interaction.options.getString('ign', true)));
 	}
 
 	/**
@@ -64,6 +64,6 @@ module.exports = class GuildOfCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return message.reply(await this._generateReply(...message.commandData.args));
+		return await message.reply(await this._generateReply(...message.commandData.args));
 	}
 };

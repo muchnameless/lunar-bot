@@ -135,7 +135,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 
 		embed.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);
 
-		return interaction.reply({
+		return await interaction.reply({
 			embeds: [
 				embed,
 			],

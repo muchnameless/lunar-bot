@@ -28,7 +28,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		if (PurgeRolesCommand.running) return interaction.reply({
+		if (PurgeRolesCommand.running) return await interaction.reply({
 			content: 'the command is already running',
 			ephemeral: true,
 		});
@@ -56,7 +56,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 
 			const PURGE_AMOUNT = toPurge.length;
 
-			if (!PURGE_AMOUNT) return interaction.reply('no roles need to be purged');
+			if (!PURGE_AMOUNT) return await interaction.reply('no roles need to be purged');
 
 			await interaction.awaitConfirmation(`purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT, { long: true })}?`);
 
@@ -77,7 +77,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 				}
 			}));
 
-			return interaction.reply(`done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`);
+			return await interaction.reply(`done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`);
 		} finally {
 			PurgeRolesCommand.running = false;
 		}

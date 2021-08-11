@@ -241,7 +241,7 @@ const self = module.exports = {
 				components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, Infinity, true),
 			});
 
-			return interaction.reply({
+			return await interaction.reply({
 				content: oneLine`
 					leaderboard timed out, use ${
 						interaction.message

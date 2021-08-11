@@ -35,7 +35,7 @@ module.exports = class FriendCheckCommand extends SlashCommand {
 		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 		const friends = (await hypixel.friends.uuid(uuid)).map(x => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender));
 
-		return interaction.reply({
+		return await interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`${IGN}'s friends in the guild`)

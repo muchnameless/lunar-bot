@@ -48,7 +48,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return interaction.reply(await this._generateReply(this.getPlayer(interaction)));
+		return await interaction.reply(await this._generateReply(this.getPlayer(interaction)));
 	}
 
 	/**
@@ -59,8 +59,8 @@ module.exports = class PingMuteCommand extends DualCommand {
 		const [ INPUT ] = message.commandData.args;
 		const player = this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT);
 
-		if (!player) return message.reply(`\`${INPUT}\` not in the player db`);
+		if (!player) return await message.reply(`\`${INPUT}\` not in the player db`);
 
-		return message.reply(await this._generateReply(player));
+		return await message.reply(await this._generateReply(player));
 	}
 };

@@ -25,7 +25,7 @@ module.exports = class InteractionCreateEvent extends Event {
 		/** @type {import('../structures/commands/SlashCommand')} */
 		const command = this.client.commands.get(interaction.commandName);
 
-		if (!command) return interaction.reply({
+		if (!command) return await interaction.reply({
 			content: `${interaction.commandName} is currently disabled`,
 			ephemeral: true,
 		});
@@ -36,7 +36,7 @@ module.exports = class InteractionCreateEvent extends Event {
 
 			// prevent from executing owner only command
 			if (command.category === 'owner') {
-				return interaction.reply({
+				return await interaction.reply({
 					content: `the \`${command.name}\` command is restricted to the bot owner`,
 					ephemeral: true,
 				});
@@ -52,7 +52,7 @@ module.exports = class InteractionCreateEvent extends Event {
 				const EXPIRATION_TIME = command.timestamps.get(interaction.user.id) + COOLDOWN_TIME;
 
 				if (NOW < EXPIRATION_TIME) {
-					return interaction.reply({
+					return await interaction.reply({
 						content: `\`${command.name}\` is on cooldown for another \`${ms(EXPIRATION_TIME - NOW, { long: true })}\``,
 						ephemeral: true,
 					});

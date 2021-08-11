@@ -46,7 +46,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 				});
 
 
-			if (!player) return interaction.reply(`\`${PLAYER_INPUT}\` is not in the player db`);
+			if (!player) return await interaction.reply(`\`${PLAYER_INPUT}\` is not in the player db`);
 
 			await interaction.awaitConfirmation(`reset xp gained from \`${player}\`?`);
 

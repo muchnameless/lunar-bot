@@ -38,7 +38,7 @@ module.exports = class UnlinkCommand extends SlashCommand {
 				cache: false,
 			});
 
-		if (!player?.discordId) return interaction.reply(`\`${PLAYER_INPUT}\` is not linked`);
+		if (!player?.discordId) return await interaction.reply(`\`${PLAYER_INPUT}\` is not linked`);
 
 		interaction.deferReply();
 
@@ -46,7 +46,7 @@ module.exports = class UnlinkCommand extends SlashCommand {
 		const currentLinkedMember = await player.discordMember;
 		const WAS_SUCCESSFUL = await player.unlink(`unlinked by ${interaction.user.tag}`);
 
-		return interaction.reply({
+		return await interaction.reply({
 			content: oneLine`
 				\`${player}\` is no longer linked to ${currentLinkedMember ?? `\`${OLD_LINKED_ID}\``}
 				${WAS_SUCCESSFUL ? '' : ' (unable to update the currently linked member)'}

@@ -45,7 +45,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 			});
 
 		// already linked to this discord user
-		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return interaction.reply('you are already linked with this discord account');
+		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return await interaction.reply('you are already linked with this discord account');
 
 		let uuid;
 		let ign;
@@ -62,16 +62,16 @@ module.exports = class VerifyCommand extends SlashCommand {
 			hypixelPlayer = await hypixel.player.uuid(uuid);
 		} catch (error) {
 			logger.error(error);
-			return interaction.reply(`${error}`);
+			return await interaction.reply(`${error}`);
 		}
 
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 
 		// no linked discord tag
-		if (!LINKED_DISCORD_TAG) return interaction.reply(`no linked discord tag for \`${ign}\` on hypixel`);
+		if (!LINKED_DISCORD_TAG) return await interaction.reply(`no linked discord tag for \`${ign}\` on hypixel`);
 
 		// linked discord tag doesn't match author's tag
-		if (LINKED_DISCORD_TAG !== interaction.user.tag) return interaction.reply(oneLine`
+		if (LINKED_DISCORD_TAG !== interaction.user.tag) return await interaction.reply(oneLine`
 			the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\`.
 			Keep in mind that discord tags are case sensitive
 		`);
@@ -94,7 +94,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 			});
 		} catch (error) {
 			logger.error('[VERIFY]: database', error);
-			return interaction.reply(`an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
+			return await interaction.reply(`an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
 		}
 
 		player.guildId = guildId;
@@ -105,6 +105,6 @@ module.exports = class VerifyCommand extends SlashCommand {
 
 		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
 
-		return interaction.reply(`successfully linked your discord account to \`${ign}\``);
+		return await interaction.reply(`successfully linked your discord account to \`${ign}\``);
 	}
 };

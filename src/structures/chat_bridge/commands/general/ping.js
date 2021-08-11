@@ -20,6 +20,6 @@ module.exports = class PingBridgeCommand extends BridgeCommand {
 	 * @param {import('../../HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return message.reply('o/');
+		return await message.reply('o/');
 	}
 };

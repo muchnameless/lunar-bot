@@ -68,7 +68,7 @@ module.exports = class BaseWeightCommand extends DualCommand {
 	async run(interaction) {
 		interaction.deferReply();
 
-		return interaction.reply(await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
+		return await interaction.reply(await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
 	}
 
 	/**
@@ -98,6 +98,6 @@ module.exports = class BaseWeightCommand extends DualCommand {
 			}
 		}
 
-		return message.reply(await this._generateReply(message, IGN, profileName));
+		return await message.reply(await this._generateReply(message, IGN, profileName));
 	}
 };

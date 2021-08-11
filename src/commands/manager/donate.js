@@ -39,7 +39,7 @@ module.exports = class DonateCommand extends SlashCommand {
 	async run(interaction) {
 		const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-		if (!collector?.isCollecting) return interaction.reply('this command is restricted to (active) tax collectors');
+		if (!collector?.isCollecting) return await interaction.reply('this command is restricted to (active) tax collectors');
 
 		const player = this.getPlayer(interaction);
 		const AMOUNT_OR_TEXT = interaction.options.getString('value');

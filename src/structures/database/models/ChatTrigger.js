@@ -99,7 +99,7 @@ module.exports = class ChatTrigger extends Model {
 			setTimeout(() => this.timestamps.delete(message.author.ign), this.cooldown);
 		}
 
-		return message.reply(
+		return await message.reply(
 			this.response
 				.replaceAll('{AUTHOR_IGN}', message.author.ign)
 				.replaceAll(/\$(\d+)/g, (m, p0) => matched[p0] ?? m), // replace $number with capture group #number

@@ -149,12 +149,12 @@ module.exports = class EvalCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/ButtonInteraction')} interaction
 	 */
 	async runButton(interaction) {
-		if (interaction.user.id !== this.client.ownerId) return interaction.reply({
+		if (interaction.user.id !== this.client.ownerId) return await interaction.reply({
 			content: 'this command is restricted to the bot owner',
 			ephemeral: true,
 		});
 
-		if (!interaction.channel?.botPermissions.has(Discord.Permissions.FLAGS.VIEW_CHANNEL)) return interaction.reply({
+		if (!interaction.channel?.botPermissions.has(Discord.Permissions.FLAGS.VIEW_CHANNEL)) return await interaction.reply({
 			content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
 			ephemeral: true,
 		});
@@ -218,7 +218,7 @@ module.exports = class EvalCommand extends SlashCommand {
 					.setStyle(Discord.Constants.MessageButtonStyles.SECONDARY),
 			);
 
-		return interaction.reply({
+		return await interaction.reply({
 			embeds: await this.eval(
 				interaction,
 				INPUT,

@@ -104,7 +104,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 
 				const { key, parsedValue } = await this.config.set(KEY, newValue);
 
-				return interaction.reply({
+				return await interaction.reply({
 					content: `${key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${parsedValue}'`,
 					code: 'apache',
 				});
@@ -116,16 +116,16 @@ module.exports = class ConfigCommand extends SlashCommand {
 					.replace(/ +/g, '_');
 				const VALUE = this.config.get(KEY);
 
-				if (VALUE === null) return interaction.reply(`\`${KEY}\` is not in the config`);
+				if (VALUE === null) return await interaction.reply(`\`${KEY}\` is not in the config`);
 
 				await this.config.remove(KEY);
-				return interaction.reply(`removed \`${KEY}\`: \`${VALUE}\``);
+				return await interaction.reply(`removed \`${KEY}\`: \`${VALUE}\``);
 			}
 
 			case 'search': {
 				const query = interaction.options.getString('query')?.replace(/ +/g, '_');
 
-				if (!query) return interaction.reply({
+				if (!query) return await interaction.reply({
 					content: this._listEntries(this.config.cache),
 					code: 'apache',
 					split: { char: '\n' },
@@ -133,7 +133,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 
 				const queryRegex = new RegExp(query, 'i');
 
-				return interaction.reply({
+				return await interaction.reply({
 					content: this._listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))),
 					code: 'apache',
 					split: { char: '\n' },

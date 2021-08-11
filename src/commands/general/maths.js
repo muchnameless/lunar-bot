@@ -412,7 +412,7 @@ module.exports = class MathsCommand extends DualCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return interaction.reply(this._generateReply(interaction.options.getString('input', true)));
+		return await interaction.reply(this._generateReply(interaction.options.getString('input', true)));
 	}
 
 	/**
@@ -420,6 +420,6 @@ module.exports = class MathsCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return message.reply(this._generateReply(message.commandData.args.join('')));
+		return await message.reply(this._generateReply(message.commandData.args.join('')));
 	}
 };

@@ -354,7 +354,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	async _run(interaction, commandOptions, { chatBridge } = this.getHypixelGuild(interaction)) {
 		interaction.deferReply();
 
-		return interaction.reply({
+		return await interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
@@ -373,7 +373,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 		interaction.deferReply();
 
-		return interaction.reply({
+		return await interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
@@ -415,23 +415,23 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				const executor = interaction.user.player;
 
-				if (!executor) return interaction.reply({
+				if (!executor) return await interaction.reply({
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-				if (!executor.isStaff) return interaction.reply({
+				if (!executor.isStaff) return await interaction.reply({
 					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
 				const target = this.getPlayer(interaction);
 
-				if (!target) return interaction.reply({
+				if (!target) return await interaction.reply({
 					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
 					ephemeral: true,
 				});
 
-				if (target.guildRankPriority >= executor.guildRankPriority) return interaction.reply({
+				if (target.guildRankPriority >= executor.guildRankPriority) return await interaction.reply({
 					content: `your guild rank needs to be higher than ${target}'s`,
 					ephemeral: true,
 				});
@@ -457,7 +457,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					hypixelGuild: target?.hypixelGuild ?? this.getHypixelGuild(interaction),
 				});
 
-				return interaction.reply({
+				return await interaction.reply({
 					embeds: [
 						this.client.defaultEmbed
 							.setTitle(`/g kick ${target} ${reason}`)
@@ -548,7 +548,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				const IGN = this.getIgn(interaction, true);
-				if (!IGN) return interaction.reply({
+				if (!IGN) return await interaction.reply({
 					content: 'you are not in the player db',
 					ephemeral: true,
 				});
@@ -566,7 +566,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				const DURATION_INPUT = interaction.options.getString('duration', true);
 				const DURATION = stringToMS(DURATION_INPUT);
 
-				if (Number.isNaN(DURATION)) return interaction.reply({
+				if (Number.isNaN(DURATION)) return await interaction.reply({
 					content: `\`${DURATION_INPUT}\` is not a valid duration`,
 					ephemeral: true,
 				});
@@ -584,23 +584,23 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				const executor = interaction.user.player;
 
-				if (!executor) return interaction.reply({
+				if (!executor) return await interaction.reply({
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-				if (!executor.isStaff) return interaction.reply({
+				if (!executor.isStaff) return await interaction.reply({
 					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
 				const target = this.getPlayer(interaction);
 
-				if (!target) return interaction.reply({
+				if (!target) return await interaction.reply({
 					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
 					ephemeral: true,
 				});
 
-				if (target.guildRankPriority >= executor.guildRankPriority - 1) return interaction.reply({
+				if (target.guildRankPriority >= executor.guildRankPriority - 1) return await interaction.reply({
 					content: 'you can only promote up to your own rank',
 					ephemeral: true,
 				});
@@ -618,18 +618,18 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				const executor = interaction.user.player;
 
-				if (!executor) return interaction.reply({
+				if (!executor) return await interaction.reply({
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-				if (!executor.isStaff) return interaction.reply({
+				if (!executor.isStaff) return await interaction.reply({
 					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
 				const target = this.getPlayer(interaction);
 
-				if (!target) return interaction.reply({
+				if (!target) return await interaction.reply({
 					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
 					ephemeral: true,
 				});
@@ -640,7 +640,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return `unknown guild rank '${RANK_INPUT}'`;
 
-				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) return interaction.reply({
+				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) return await interaction.reply({
 					content: 'you can only change ranks up to your own rank',
 					ephemeral: true,
 				});
@@ -684,7 +684,7 @@ module.exports = class GuildCommand extends SlashCommand {
 								})()
 							);
 
-					if (!target) return interaction.reply({
+					if (!target) return await interaction.reply({
 						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
 						ephemeral: true,
 					});
@@ -695,7 +695,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				}
 
 				if (target instanceof this.client.players.model) {
-					if (target.guildRankPriority >= (interaction.user.player?.guildRankPriority ?? 0)) return interaction.reply({
+					if (target.guildRankPriority >= (interaction.user.player?.guildRankPriority ?? 0)) return await interaction.reply({
 						content: `your guild rank needs to be higher than ${target}'s`,
 						ephemeral: true,
 					});
@@ -703,7 +703,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					target.mutedTill = 0;
 					await target.save();
 
-					if (target.notInGuild) return interaction.reply(`unmuted \`${target}\``);
+					if (target.notInGuild) return await interaction.reply(`unmuted \`${target}\``);
 				} else if (target === 'everyone') {
 					hypixelGuild.mutedTill = 0;
 					await hypixelGuild.save();

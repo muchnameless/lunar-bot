@@ -45,7 +45,7 @@ module.exports = class XpCommand extends SlashCommand {
 		const player = this.getPlayer(interaction, true);
 
 		if (!player) {
-			return interaction.reply(oneLine`${interaction.options.get('player')
+			return await interaction.reply(oneLine`${interaction.options.get('player')
 				? `\`${interaction.options.getString('player')}\` is`
 				: 'you are'
 			} not in the player db`);
@@ -189,6 +189,6 @@ module.exports = class XpCommand extends SlashCommand {
 
 		embeds.push(embed);
 
-		return interaction.reply({ embeds });
+		return await interaction.reply({ embeds });
 	}
 };

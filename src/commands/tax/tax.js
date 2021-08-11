@@ -100,7 +100,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const player = this.getPlayer(interaction);
 
 				if (!player) {
-					return interaction.reply(`\`${interaction.options.getString('player', true)}\` is not in the player db`);
+					return await interaction.reply(`\`${interaction.options.getString('player', true)}\` is not in the player db`);
 				}
 
 				const action = interaction.options.getString('action', true);
@@ -109,7 +109,7 @@ module.exports = class TaxCommand extends SlashCommand {
 
 				switch (action) {
 					case 'add':
-						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) return interaction.reply(`\`${player}\` is already a tax collector`);
+						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) return await interaction.reply(`\`${player}\` is already a tax collector`);
 
 						await this.client.taxCollectors.add(player);
 						if (!player.paid) player.setToPaid(); // let collector collect their own tax if they have not paid already
@@ -119,7 +119,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					case 'remove': {
 						const taxCollector = this.client.taxCollectors.cache.get(player.minecraftUuid);
 
-						if (!taxCollector?.isCollecting) return interaction.reply(`\`${player}\` is not a tax collector`);
+						if (!taxCollector?.isCollecting) return await interaction.reply(`\`${player}\` is not a tax collector`);
 
 						// remove self paid if only the collector paid the default amount at his own ah
 						if (taxCollector.collectedTax === this.config.get('TAX_AMOUNT') && player.collectedBy === player.minecraftUuid) {
@@ -144,13 +144,13 @@ module.exports = class TaxCommand extends SlashCommand {
 					.setDescription(log),
 				);
 
-				return interaction.reply(log);
+				return await interaction.reply(log);
 			}
 
 			case 'amount': {
 				const NEW_AMOUNT = interaction.options.getInteger('amount', true);
 
-				if (NEW_AMOUNT < 0) return interaction.reply({
+				if (NEW_AMOUNT < 0) return await interaction.reply({
 					content: 'tax amount must be a non-negative number',
 					ephemeral: true,
 				});
@@ -183,11 +183,11 @@ module.exports = class TaxCommand extends SlashCommand {
 					}),
 				);
 
-				return interaction.reply(`changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``);
+				return await interaction.reply(`changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``);
 			}
 
 			case 'collected': {
-				return interaction.reply({
+				return await interaction.reply({
 					embeds: [ this.client.taxCollectors.createTaxCollectedEmbed() ],
 				});
 			}
@@ -195,7 +195,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			case 'paid': {
 				const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-				if (!collector?.isCollecting) return interaction.reply({
+				if (!collector?.isCollecting) return await interaction.reply({
 					content: 'this command is restricted to tax collectors',
 					ephemeral: true,
 				});
@@ -203,7 +203,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const player = this.getPlayer(interaction);
 
 				if (!player) {
-					return interaction.reply(`\`${interaction.options.getString('player', true)}\` is not in the player db`);
+					return await interaction.reply(`\`${interaction.options.getString('player', true)}\` is not in the player db`);
 				}
 
 				if (player.paid) {
@@ -227,7 +227,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					}),
 				);
 
-				return interaction.reply(`\`${player}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
+				return await interaction.reply(`\`${player}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
 			}
 
 			case 'reminder': {
@@ -244,7 +244,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordId }) => inDiscord && validateNumber(discordId));
 				const AMOUNT_TO_PING = playersPingable.size;
 
-				if (!AMOUNT_TO_PING) return interaction.reply({
+				if (!AMOUNT_TO_PING) return await interaction.reply({
 					content: `no members to ping from ${hypixelGuild?.name ?? 'all guilds'}`,
 					ephemeral: true,
 				});
@@ -294,10 +294,10 @@ module.exports = class TaxCommand extends SlashCommand {
 						});
 
 					if (!player) {
-						return interaction.reply(`\`${PLAYER_INPUT}\` is not in the player db`);
+						return await interaction.reply(`\`${PLAYER_INPUT}\` is not in the player db`);
 					}
 
-					if (!player.paid) return interaction.reply(`\`${player}\` is not set to paid`);
+					if (!player.paid) return await interaction.reply(`\`${player}\` is not set to paid`);
 
 					const OLD_AMOUNT = await player.taxAmount;
 
@@ -393,7 +393,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					}
 				})();
 
-				return interaction.reply(result);
+				return await interaction.reply(result);
 			}
 
 			default:

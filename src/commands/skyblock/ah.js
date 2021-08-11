@@ -240,7 +240,7 @@ module.exports = class AhCommand extends SlashCommand {
 			return interaction.reply(await this._generateReply({ ign, uuid, profileId, profiles: profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id })) }));
 		} catch (error) {
 			logger.error(error);
-			return interaction.reply(`${error}`);
+			return await interaction.reply(`${error}`);
 		}
 	}
 };

@@ -170,7 +170,7 @@ module.exports = class PollCommand extends DualCommand {
 			},
 		);
 
-		return interaction.reply({
+		return await interaction.reply({
 			content: 'poll complete',
 			ephemeral: true,
 		});
@@ -189,7 +189,7 @@ module.exports = class PollCommand extends DualCommand {
 				return input;
 			});
 
-		if (!inputMatched || inputMatched.length < 2) return message.reply(this.usageInfo);
+		if (!inputMatched || inputMatched.length < 2) return await message.reply(this.usageInfo);
 
 		return this._run(
 			message,

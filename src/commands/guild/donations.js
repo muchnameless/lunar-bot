@@ -71,6 +71,6 @@ module.exports = class DonationsCommand extends SlashCommand {
 		embed.setDescription(`Total: ${this.client.formatNumber(totalAmount)}`);
 
 		// create and send embed
-		return interaction.reply({ embeds: [ embed ] });
+		return await interaction.reply({ embeds: [ embed ] });
 	}
 };
