@@ -3,6 +3,8 @@
 const { Formatters, SnowflakeUtil, version } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
+const { EMBED_FIELD_MAX_CHARS } = require('../../constants/discord');
+const { trim } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
@@ -22,7 +24,7 @@ module.exports = class DebugCommand extends SlashCommand {
 	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
 	 */
 	async run(interaction) {
-		return interaction.reply({
+		return await interaction.reply({
 			embeds: [
 				this.client.defaultEmbed
 					.addFields({
@@ -39,9 +41,15 @@ module.exports = class DebugCommand extends SlashCommand {
 							Channels: ${this.client.formatNumber(this.client.channels.cache.size)}
 							${this.client.channels.cache
 								.filter(c => c.type === 'DM')
-								.map(c => [ c.recipient.tag ?? c.recipient.id, SnowflakeUtil.deconstruct(c.lastMessageId).date ])
+								.map(c => [ c.recipient.tag ?? c.recipient.id, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date ])
 								.sort(([ , a ], [ , b ]) => b - a)
 								.map(([ name, date ]) => Formatters.quote(`${name ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`))
+								.join('\n')}
+							${this.client.channels.cache
+								.filter(c => c.isThread())
+								.map(c => [ c, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date ])
+								.sort(([ , a ], [ , b ]) => b - a)
+								.map(([ c, date ]) => Formatters.quote(`${c ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`))
 								.join('\n')}
 							Members: ${this.client.formatNumber(this.client.guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
 							Users: ${this.client.formatNumber(this.client.users.cache.size)}
@@ -67,6 +75,14 @@ module.exports = class DebugCommand extends SlashCommand {
 								.map(([ key, value ]) => `post${key}: ${value}`)
 								.join('\n')}
 						`,
+					}, {
+						name: 'Chat Bridge Cache',
+						value: trim(this.client.chatBridges.map(cb => stripIndents`
+							bot: ${cb.bot?.username ?? 'offline'}
+							current index: ${cb.minecraft?._lastMessages.index ?? 'offline'}
+							Messages:
+							${cb.minecraft?._lastMessages.cache.map(Formatters.quote).join('\n') ?? 'offline'}
+						`).join('\n\n'), EMBED_FIELD_MAX_CHARS),
 					})
 					.setFooter(interaction.guild?.me.displayName ?? this.client.user.username, this.client.user.displayAvatarURL()),
 			],
