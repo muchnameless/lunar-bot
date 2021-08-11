@@ -1,6 +1,6 @@
 'use strict';
 
-const { Formatters, SnowflakeUtil, version } = require('discord.js');
+const { Formatters, SnowflakeUtil, Util, version } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { EMBED_FIELD_MAX_CHARS } = require('../../constants/discord');
@@ -81,7 +81,7 @@ module.exports = class DebugCommand extends SlashCommand {
 							bot: ${cb.bot?.username ?? 'offline'}
 							current index: ${cb.minecraft?._lastMessages.index ?? 'offline'}
 							Messages:
-							${cb.minecraft?._lastMessages.cache.map(Formatters.quote).join('\n') ?? 'offline'}
+							${cb.minecraft?._lastMessages.cache.map(x => Formatters.quote(Util.escapeMarkdown(x))).join('\n') ?? 'offline'}
 						`).join('\n\n'), EMBED_FIELD_MAX_CHARS),
 					})
 					.setFooter(interaction.guild?.me.displayName ?? this.client.user.username, this.client.user.displayAvatarURL()),
