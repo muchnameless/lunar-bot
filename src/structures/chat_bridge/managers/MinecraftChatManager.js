@@ -741,10 +741,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		try {
 			// send message to in game chat
 			if (shouldUseSpamByPass) {
-				const PADDED = this._hypixelSpamBypass(content, prefix);
+				// '/gc IGN: ' + 'content' -> '/gc' + 'IGN: content'
+				const [ CMD, ...rest ] = prefix.split(' ');
+				const PADDED = this._hypixelSpamBypass(`${rest.join(' ')}${content}`, CMD);
 
 				this.bot.write('chat', {
-					message: `${prefix}${PADDED}`,
+					message: CMD.length
+						? `${CMD} ${PADDED}`
+						: PADDED,
 				});
 
 				this._lastMessages.add(PADDED);
