@@ -1,7 +1,6 @@
 'use strict';
 
 const { Formatters, Util } = require('discord.js');
-const { userMention } = require('@discordjs/builders');
 const { escapeIgn } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
@@ -111,7 +110,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 				values: LINKED_NOT_DISCORD_AMOUNT
 					? Util.splitMessage(
 						linkedAndNotInDiscordCurrentGuild
-							.map(({ discordId, ign }) => `${userMention(discordId)} | ${escapeIgn(ign)}`)
+							.map(({ discordId, ign }) => `${Formatters.userMention(discordId)} | ${escapeIgn(ign)}`)
 							.join('\n'),
 						{ char: '\n', maxLength: 1024 },
 					)

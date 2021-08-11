@@ -1,7 +1,6 @@
 'use strict';
 
 const { Permissions, Formatters, Constants } = require('discord.js');
-const { userMention } = require('@discordjs/builders');
 const { Op } = require('sequelize');
 const { validateNumber } = require('../../functions/stringValidators');
 const { escapeIgn, safePromiseAll } = require('../../functions/util');
@@ -253,7 +252,7 @@ module.exports = class TaxCommand extends SlashCommand {
 
 				let pingMessage = '';
 
-				for (const player of playersPingable.values()) pingMessage += ` ${userMention(player.discordId)}`;
+				for (const player of playersPingable.values()) pingMessage += ` ${Formatters.userMention(player.discordId)}`;
 				for (const player of playersOnlyIgn.values()) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 				// send ping message and split between pings if too many chars
