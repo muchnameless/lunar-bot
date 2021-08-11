@@ -132,9 +132,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			cache: [],
 			cleanContent(content) {
 				return content
-					.replace(/\d/g, '')
-					.trim()
-					.replace(/ {2,}/g, ' ');
+					.replace(/\d/g, '') // remove numbers
+					.replace(invisibleCharacterRegExp, '') // remove invis chars
+					.trim() // remove whitespaces at the beginning and end
+					.replace(/ {2,}/g, ' '); // only single spaces
 			},
 			/**
 			 * @param {string} content
