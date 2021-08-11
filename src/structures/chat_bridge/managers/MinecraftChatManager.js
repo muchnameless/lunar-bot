@@ -509,11 +509,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {string} string
 	 */
 	_hypixelSpamBypass(string) {
-		// string is already at or above max length
-		if (string.length >= MinecraftChatManager.MAX_MESSAGE_LENGTH) return trim(string, MinecraftChatManager.MAX_MESSAGE_LENGTH);
-
-		let padded = string;
 		let index = this.retries;
+		let padded = string;
 
 		// 1 for each retry + additional if _lastMessages includes curent padding
 		while ((--index >= 0 || this._lastMessages.check(padded)) && (padded.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH)) {
@@ -744,13 +741,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				const PADDED = this._hypixelSpamBypass(`${prefix}${content}`);
 
 				this.bot.write('chat', {
-					message: PADDED,
+					message: trim(PADDED, MinecraftChatManager.MAX_MESSAGE_LENGTH),
 				});
 
 				this._lastMessages.add(PADDED);
 			} else {
 				this.bot.write('chat', {
-					message: `${prefix}${content}`,
+					message: trim(`${prefix}${content}`, MinecraftChatManager.MAX_MESSAGE_LENGTH),
 				});
 			}
 		} catch (error) {
