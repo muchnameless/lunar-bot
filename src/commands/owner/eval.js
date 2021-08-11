@@ -15,7 +15,6 @@ const skyblock = require('../../constants/skyblock');
 const functionsUtil = require('../../functions/util');
 const functionsFiles = require('../../functions/files');
 const hypixel = require('../../api/hypixel');
-const senither = require('../../api/senither');
 const mojang = require('../../api/mojang');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
