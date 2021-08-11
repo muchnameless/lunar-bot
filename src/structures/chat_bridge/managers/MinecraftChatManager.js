@@ -8,7 +8,7 @@ const ms = require('ms');
 const emojiRegex = require('emoji-regex/es2015')();
 const { trim, cleanFormattedNumber, splitMessage } = require('../../../functions/util');
 const { unicodeToName } = require('../constants/emojiNameUnicodeConverter');
-const { memeRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, invisibleCharacters, randomPadding, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
+const { memeRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, randomPadding, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
 const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
 const { MC_CLIENT_VERSION } = require('../constants/settings');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database');
@@ -22,7 +22,7 @@ const logger = require('../../../functions/logger');
  * @typedef {object} SendToChatOptions
  * @property {string} content
  * @property {string} [prefix='']
- * @property {boolean} [shouldUseSpamByPass=false]
+ * @property {boolean} [isMessage]
  * @property {?import('../../extensions/Message')} [discordMessage=null]
  */
 
@@ -464,7 +464,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	collect(message) {
 		if (!this._collecting) return;
-		if (message.me && message.content.endsWith(this._contentFilter)) return this._resolveAndReset(message);
+		if (message.me && message.content.includes(this._contentFilter)) return this._resolveAndReset(message);
 		if (message.type) return;
 		if (message.spam) return this._resolveAndReset('spam');
 		if (message.content.startsWith('We blocked your comment')) return this._resolveAndReset('blocked');
@@ -675,7 +675,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		// waits between queueing each part to not clog up the queue if someone spams
 		for (const part of contentParts) {
-			success = await this.sendToChat({ content: part, prefix, discordMessage, shouldUseSpamByPass: true }) && success;
+			success = await this.sendToChat({ content: part, prefix, discordMessage, isMessage: true }) && success;
 		}
 
 		return success;
@@ -715,38 +715,36 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {SendToChatOptions} param0
 	 * @returns {Promise<void>}
 	 */
-	async #sendToChat({ content, prefix = '', shouldUseSpamByPass = false, discordMessage = null } = {}) {
+	async #sendToChat({ content, prefix = '', isMessage, discordMessage = null } = {}) {
+		let message = `${prefix}${content}`;
+
+		const useSpamBypass = isMessage ?? /^\/(?:[acgop]c|msg|w(?:hisper)?|t(?:ell)?) /i.test(message);
+
+		if (useSpamBypass) {
+			let index = this.retries;
+
+			// 1 for each retry + additional if _lastMessages includes curent padding
+			while ((--index >= 0 || this._lastMessages.check(message)) && (message.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH)) {
+				message += randomPadding();
+			}
+		}
+
+		message = trim(message, MinecraftChatManager.MAX_MESSAGE_LENGTH);
+
 		// create listener
 		const listener = this.listenFor(content);
 
 		try {
-			// send message to in game chat
-			if (shouldUseSpamByPass) { // user messages
-				let message = `${prefix}${content}`;
-				let index = this.retries;
+			this.bot.write('chat', { message });
 
-				// 1 for each retry + additional if _lastMessages includes curent padding
-				while ((--index >= 0 || this._lastMessages.check(message)) && (message.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH)) {
-					message += `${invisibleCharacters[0]} ${randomPadding()}`;
-				}
-
-				message = trim(message, MinecraftChatManager.MAX_MESSAGE_LENGTH);
-
-				this.bot.write('chat', {
-					message,
-				});
-
-				this._lastMessages.add(message);
-			} else { // commands
-				this.bot.write('chat', {
-					message: trim(`${prefix}${content}`, MinecraftChatManager.MAX_MESSAGE_LENGTH),
-				});
-			}
+			if (useSpamBypass) this._lastMessages.add(message);
 		} catch (error) {
 			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
 			discordMessage?.react(X_EMOJI);
+
 			this._tempIncrementCounter();
 			this._resetFilter();
+
 			throw error;
 		}
 
@@ -888,7 +886,11 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		(async () => {
 			try {
 				await this.#sendToChat({
-					content: trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1),
+					content: command,
+					prefix: command.startsWith('/')
+						? ''
+						: '/',
+					isMessage: false,
 				});
 			} catch (error) {
 				logger.error('[CHATBRIDGE MC COMMAND]', error);

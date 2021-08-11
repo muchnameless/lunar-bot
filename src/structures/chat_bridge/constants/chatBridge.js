@@ -36,7 +36,7 @@ const paddingChunks = [
 	'----',
 	'____',
 	'////',
-];
+].map(chunk => `${invisibleCharacters[0]} ${chunk}`);
 
 module.exports = {
 	/**
