@@ -505,22 +505,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * pads the input string with random invisible chars to bypass the hypixel spam filter
-	 * @param {string} string
-	 */
-	_hypixelSpamBypass(string) {
-		let index = this.retries;
-		let padded = string;
-
-		// 1 for each retry + additional if _lastMessages includes curent padding
-		while ((--index >= 0 || this._lastMessages.check(padded)) && (padded.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH)) {
-			padded += `${invisibleCharacters[0]} ${randomPadding()}`;
-		}
-
-		return padded;
-	}
-
-	/**
 	 * discord markdown -> readable string
 	 * @param {string} string
 	 */
@@ -737,15 +721,23 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		try {
 			// send message to in game chat
-			if (shouldUseSpamByPass) {
-				const PADDED = this._hypixelSpamBypass(`${prefix}${content}`);
+			if (shouldUseSpamByPass) { // user messages
+				let message = `${prefix}${content}`;
+				let index = this.retries;
+
+				// 1 for each retry + additional if _lastMessages includes curent padding
+				while ((--index >= 0 || this._lastMessages.check(message)) && (message.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH)) {
+					message += `${invisibleCharacters[0]} ${randomPadding()}`;
+				}
+
+				message = trim(message, MinecraftChatManager.MAX_MESSAGE_LENGTH);
 
 				this.bot.write('chat', {
-					message: trim(PADDED, MinecraftChatManager.MAX_MESSAGE_LENGTH),
+					message,
 				});
 
-				this._lastMessages.add(PADDED);
-			} else {
+				this._lastMessages.add(message);
+			} else { // commands
 				this.bot.write('chat', {
 					message: trim(`${prefix}${content}`, MinecraftChatManager.MAX_MESSAGE_LENGTH),
 				});
