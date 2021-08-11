@@ -4,7 +4,7 @@ const { Formatters, SnowflakeUtil, Util, version } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { EMBED_FIELD_MAX_CHARS } = require('../../constants/discord');
-const { trim } = require('../../functions/util');
+const { trim, escapeIgn } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
@@ -78,7 +78,7 @@ module.exports = class DebugCommand extends SlashCommand {
 					}, {
 						name: 'Chat Bridge Cache',
 						value: trim(this.client.chatBridges.map(cb => stripIndents`
-							bot: ${cb.bot?.username ?? 'offline'}
+							bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
 							current index: ${cb.minecraft?._lastMessages.index ?? 'offline'}
 							Messages:
 							${cb.minecraft?._lastMessages.cache.map(x => Formatters.quote(Util.escapeMarkdown(x))).join('\n') ?? 'offline'}
