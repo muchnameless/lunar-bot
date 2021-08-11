@@ -866,13 +866,16 @@ module.exports = class MinecraftChatManager extends ChatManager {
 							: `no in game response after ${ms(timeout, { long: true })}`);
 				}
 
+				case 'error':
+					return;
+
 				case 'abort': {
 					if (rejectOnAbort) reject(raw
 						? collected
 						: MinecraftChatManager._cleanCommandResponse(collected),
 					);
-					// fallthrough
 				}
+				// fallthrough
 
 				default:
 					return resolve(raw
@@ -895,6 +898,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			} catch (error) {
 				logger.error('[CHATBRIDGE MC COMMAND]', error);
 				reject(error);
+				collector.stop('error');
 			} finally {
 				this.retries = 0;
 				this.queue.shift();
