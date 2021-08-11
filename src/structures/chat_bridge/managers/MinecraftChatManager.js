@@ -507,17 +507,16 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	/**
 	 * pads the input string with random invisible chars to bypass the hypixel spam filter
 	 * @param {string} string
-	 * @param {string} [prefix='']
 	 */
-	_hypixelSpamBypass(string, prefix = '') {
+	_hypixelSpamBypass(string) {
 		// string is already at or above max length
-		if (string.length + prefix.length >= MinecraftChatManager.MAX_MESSAGE_LENGTH) return trim(string, MinecraftChatManager.MAX_MESSAGE_LENGTH);
+		if (string.length >= MinecraftChatManager.MAX_MESSAGE_LENGTH) return trim(string, MinecraftChatManager.MAX_MESSAGE_LENGTH);
 
 		let padded = string;
 		let index = this.retries;
 
 		// 1 for each retry + additional if _lastMessages includes curent padding
-		while ((--index >= 0 || this._lastMessages.check(padded)) && (padded.length + prefix.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH)) {
+		while ((--index >= 0 || this._lastMessages.check(padded)) && (padded.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH)) {
 			padded += `${invisibleCharacters[0]} ${randomPadding()}`;
 		}
 
@@ -718,7 +717,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		await this.queue.wait();
 
 		try {
-			await this._sendToChat(data);
+			await this.#sendToChat(data);
 			return true;
 		} catch (error) {
 			logger.error('[CHATBRIDGE MC CHAT]', error);
@@ -735,21 +734,17 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {SendToChatOptions} param0
 	 * @returns {Promise<void>}
 	 */
-	async _sendToChat({ content, prefix = '', shouldUseSpamByPass = false, discordMessage = null } = {}) {
+	async #sendToChat({ content, prefix = '', shouldUseSpamByPass = false, discordMessage = null } = {}) {
 		// create listener
 		const listener = this.listenFor(content);
 
 		try {
 			// send message to in game chat
 			if (shouldUseSpamByPass) {
-				// '/gc IGN: ' + 'content' -> '/gc' + 'IGN: content'
-				const [ CMD, ...rest ] = prefix.split(' ');
-				const PADDED = this._hypixelSpamBypass(`${rest.join(' ')}${content}`, CMD);
+				const PADDED = this._hypixelSpamBypass(`${prefix}${content}`);
 
 				this.bot.write('chat', {
-					message: CMD.length
-						? `${CMD} ${PADDED}`
-						: PADDED,
+					message: PADDED,
 				});
 
 				this._lastMessages.add(PADDED);
@@ -790,7 +785,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			// anti spam failed -> retry
 			case 'spam': {
 				this._tempIncrementCounter();
-
 				this._lastMessages.decIndex();
 
 				// max retries reached
@@ -801,11 +795,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				}
 
 				await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-				return this._sendToChat.apply(this, arguments); // eslint-disable-line prefer-spread
+				return this.#sendToChat(...arguments); // retry sending
 			}
 
 			// hypixel filter blocked message
 			case 'blocked': {
+				this._lastMessages.decIndex();
+
 				this._handleForwardRejection(discordMessage, 'blocked');
 				await sleep(this.delay);
 				throw 'unable to send the message, hypixel\'s filter blocked it';
@@ -902,7 +898,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		// send command to chat
 		(async () => {
 			try {
-				await this._sendToChat({
+				await this.#sendToChat({
 					content: trim(`/${command}`, MinecraftChatManager.MAX_MESSAGE_LENGTH - 1),
 				});
 			} catch (error) {
