@@ -20,19 +20,12 @@ const MojangAPIError = require('./errors/MojangAPIError');
 
 module.exports = class Mojang {
 	/**
-	 * @param {object} options
+	 * @param {{ cache: any, requestTimeout?: number, retries?: number }} options
 	 */
-	constructor(options = {}) {
-		Mojang.#validateOptions(options);
-		this.cache = options.cache;
-	}
-
-	/**
-	 * @private
-	 * @description validates the client options
-	 */
-	static #validateOptions(options) {
-		if (typeof options !== 'object' || options === null) throw new TypeError('[Mojang Client]: options must be an object');
+	constructor({ cache, requestTimeout = 10_000, retries = 1 } = {}) {
+		this.cache = cache;
+		this.requestTimeout = requestTimeout;
+		this.retries = retries;
 	}
 
 	/**
@@ -79,7 +72,13 @@ module.exports = class Mojang {
 	 * @param {MojangFetchOptions} [options]
 	 */
 	async ign(ign, options = {}) {
-		if (validateMinecraftIgn(ign)) return this.#makeRequest('https://api.mojang.com/users/profiles/minecraft/', ign.toLowerCase(), 'ign', options);
+		if (validateMinecraftIgn(ign)) return this.#request({
+			path: 'https://api.mojang.com/users/profiles/minecraft/',
+			query: ign.toLowerCase(),
+			queryType: 'ign',
+			...options,
+		});
+
 		throw new MojangAPIError({ status: '(validation)' }, 'ign', ign);
 	}
 
@@ -89,7 +88,13 @@ module.exports = class Mojang {
 	 * @param {MojangFetchOptions} [options]
 	 */
 	async uuid(uuid, options = {}) {
-		if (validateMinecraftUuid(uuid)) return this.#makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', uuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
+		if (validateMinecraftUuid(uuid)) return this.#request({
+			path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
+			query: uuid.toLowerCase().replace(/-/g, ''),
+			queryType: 'uuid',
+			...options,
+		});
+
 		throw new MojangAPIError({ status: '(validation)' }, 'uuid', uuid);
 	}
 
@@ -99,20 +104,30 @@ module.exports = class Mojang {
 	 * @param {MojangFetchOptions} [options]
 	 */
 	async ignOrUuid(ignOrUuid, options = {}) {
-		if (validateMinecraftIgn(ignOrUuid)) return this.#makeRequest('https://api.mojang.com/users/profiles/minecraft/', ignOrUuid.toLowerCase(), 'ign', options);
-		if (validateMinecraftUuid(ignOrUuid)) return this.#makeRequest('https://sessionserver.mojang.com/session/minecraft/profile/', ignOrUuid.toLowerCase().replace(/-/g, ''), 'uuid', options);
+		if (validateMinecraftIgn(ignOrUuid)) return this.#request({
+			path: 'https://api.mojang.com/users/profiles/minecraft/',
+			query: ignOrUuid.toLowerCase(),
+			queryType: 'ign',
+			...options,
+		});
+
+		if (validateMinecraftUuid(ignOrUuid)) return this.#request({
+			path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
+			query: ignOrUuid.toLowerCase().replace(/-/g, ''),
+			queryType: 'uuid',
+			...options,
+		});
+
 		throw new MojangAPIError({ status: '(validation)' }, 'ignOrUuid', ignOrUuid);
 	}
 
 	/**
 	 * @private
-	 * @param {string} path
-	 * @param {string} query
-	 * @param {string} queryType
-	 * @param {MojangFetchOptions} [options]
+	 * @param {{ path: string, query: string, queryType?: ?string } & MojangFetchOptions} param0
+	 * @param {number} [retries] current retry
 	 * @returns {Promise<MojangResult>}
 	 */
-	async #makeRequest(path, query, queryType = null, { cache = true, force = false } = {}) {
+	async #request({ path, query, queryType = null, cache = true, force = false } = {}, retries = 0) {
 		if (!force) {
 			const cachedResponse = await this.cache?.get(`${queryType}:${query}`);
 
@@ -122,8 +137,26 @@ module.exports = class Mojang {
 			}
 		}
 
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), this.requestTimeout).unref();
+
 		/** @type {import('@types/node-fetch').Response} */
-		const res = await fetch(`${path}${query}`);
+		let res;
+
+		try {
+			res = await fetch(`${path}${query}`, {
+				signal: controller.signal,
+			});
+		} catch (error) {
+			// Retry the specified number of times for possible timed out requests
+			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
+				return this.#request(arguments[0], retries + 1);
+			}
+
+			throw error;
+		} finally {
+			clearTimeout(timeout);
+		}
 
 		switch (res.status) {
 			case 200: {
