@@ -48,7 +48,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 
 			if (!player) return await this.reply(interaction, `\`${PLAYER_INPUT}\` is not in the player db`);
 
-			await interaction.awaitConfirmation(`reset xp gained from \`${player}\`?`);
+			await this.awaitConfirmation(interaction, `reset xp gained from \`${player}\`?`);
 
 			await player.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
 
@@ -58,7 +58,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 		} else {
 			const PLAYER_COUNT = players.size;
 
-			await interaction.awaitConfirmation(`reset competition xp gained from all ${PLAYER_COUNT} guild members?`);
+			await this.awaitConfirmation(interaction, `reset competition xp gained from all ${PLAYER_COUNT} guild members?`);
 
 			// delete players who left the guild
 			await players.sweepDb();

@@ -7,6 +7,7 @@ const { upperCaseFirstChar, stringToMS } = require('../../functions/util');
 const { messageTypes: { GUILD } } = require('../../structures/chat_bridge/constants/chatBridge');
 const ChannelUtil = require('../../util/ChannelUtil');
 const UserUtil = require('../../util/UserUtil');
+const MessageUtil = require('../../util/MessageUtil');
 const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
@@ -86,13 +87,13 @@ module.exports = class PollCommand extends DualCommand {
 			/** @type {{ number: number, option: string, votes: Set<string> }[]} */
 			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set() }));
 			const optionsCount = pollOptions.length;
-			const ingameMessages = chatBridge.minecraft.awaitMessages({
-				filter: msg => msg.isUserMessage && msg.type === GUILD,
+			const hypixelMessages = chatBridge.minecraft.awaitMessages({
+				filter: hypixelMessage => hypixelMessage.isUserMessage && hypixelMessage.type === GUILD,
 				time: DURATION,
 			});
 			const discordChannel = chatBridge.discord.get(GUILD).channel;
 			const discordMessages = discordChannel.awaitMessages({
-				filter: msg => msg.isUserMessage,
+				filter: discordMessage => MessageUtil.isUserMessage(discordMessage),
 				time: DURATION,
 			});
 
@@ -104,7 +105,7 @@ module.exports = class PollCommand extends DualCommand {
 			`);
 
 			// aquire in game votes
-			for (const msg of await ingameMessages) {
+			for (const msg of await hypixelMessages) {
 				const votedFor = parseInt(msg.content, 10);
 
 				// doesn't start with a number or out of range

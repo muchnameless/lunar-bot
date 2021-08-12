@@ -59,7 +59,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 
 			if (!PURGE_AMOUNT) return await this.reply(interaction, 'no roles need to be purged');
 
-			await interaction.awaitConfirmation(`purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT, { long: true })}?`);
+			await this.awaitConfirmation(interaction, `purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT, { long: true })}?`);
 
 			const { lgGuild } = this.client;
 

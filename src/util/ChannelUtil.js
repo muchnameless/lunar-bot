@@ -44,32 +44,36 @@ class ChannelUtil extends null {
 	 * @param {import('discord.js').TextBasedChannels} channel
 	 * @param {string|string[]} IdOrIds
 	 */
-	static deleteMessages(channel, IdOrIds) {
-		switch (channel.type) {
-			case 'DM':
-				if (Array.isArray(IdOrIds)) return Promise.all(IdOrIds.map(async id => channel.messages.delete(id)));
+	static async deleteMessages(channel, IdOrIds) {
+		try {
+			switch (channel.type) {
+				case 'DM':
+					if (Array.isArray(IdOrIds)) return await Promise.all(IdOrIds.map(async id => channel.messages.delete(id)));
 
-				return channel.messages.delete(IdOrIds);
+					return await channel.messages.delete(IdOrIds);
 
-			default: {
-				if (Array.isArray(IdOrIds)) {
-					if (this.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) return channel.bulkDelete(IdOrIds);
+				default: {
+					if (Array.isArray(IdOrIds)) {
+						if (this.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) return await channel.bulkDelete(IdOrIds);
 
-					return Promise.all(IdOrIds.map(async (id) => {
-						const message = channel.messages.cache.get(id);
+						return await Promise.all(IdOrIds.map(async (id) => {
+							const message = channel.messages.cache.get(id);
 
-						if (message?.deleted || !(message?.deletable ?? true)) return;
+							if (message?.deleted || !(message?.deletable ?? true)) return;
 
-						channel.messages.delete(id);
-					}));
+							return await channel.messages.delete(id);
+						}));
+					}
+
+					const message = channel.messages.cache.get(IdOrIds);
+
+					if (message?.deleted || !(message?.deletable ?? true)) return;
+
+					return await channel.messages.delete(IdOrIds);
 				}
-
-				const message = channel.messages.cache.get(IdOrIds);
-
-				if (message?.deleted || !(message?.deletable ?? true)) return;
-
-				return channel.messages.delete(IdOrIds);
 			}
+		} catch (error) {
+			return logger.error(error);
 		}
 	}
 

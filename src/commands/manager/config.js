@@ -99,7 +99,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 				}
 
 				if (typeof newValue !== OLD_TYPE) {
-					await interaction.awaitConfirmation(`type change from ${OLD_VALUE} (${OLD_TYPE}) to ${newValue} (${typeof newValue}). Confirm?`);
+					await this.awaitConfirmation(interaction, `type change from ${OLD_VALUE} (${OLD_TYPE}) to ${newValue} (${typeof newValue}). Confirm?`);
 				}
 
 				const { key, parsedValue } = await this.config.set(KEY, newValue);

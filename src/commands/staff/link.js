@@ -94,7 +94,7 @@ module.exports = class LinkCommand extends SlashCommand {
 			});
 
 			if (!linkedUserIsDeleted) {
-				await interaction.awaitConfirmation({
+				await this.awaitConfirmation(interaction, {
 					question: `${linkedUser ?? `\`${user.id}\``} is already linked to \`${playerLinkedToId}\`. Overwrite this?`,
 					allowedMentions: { parse: [] },
 				});
@@ -126,7 +126,7 @@ module.exports = class LinkCommand extends SlashCommand {
 					allowedMentions: { parse: [] },
 				});
 
-				await interaction.awaitConfirmation({
+				await this.awaitConfirmation(interaction, {
 					question: stripIndents`
 						\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}. Overwrite this?
 						Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})

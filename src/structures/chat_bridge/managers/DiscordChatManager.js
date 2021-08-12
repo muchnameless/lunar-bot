@@ -5,6 +5,7 @@ const { prefixByType } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
 const ChannelUtil = require('../../../util/ChannelUtil');
 const UserUtil = require('../../../util/UserUtil');
+const MessageUtil = require('../../../util/MessageUtil');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
 const cache = require('../../../api/cache');
@@ -92,7 +93,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {string} content
 	 */
 	static async #dmMuteInfo(message, player, content) {
-		if (message.me) return;
+		if (message.editable) return;
 		if (await cache.get(`chatbridge:muted:dm:${message.author.id}`)) return;
 
 		UserUtil.sendDM(message.author, content);
@@ -180,7 +181,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	/**
 	 * uncaches the webhook
 	 */
-	_uncacheWebhook() {
+	#uncacheWebhook() {
 		this.webhook = null;
 		this.ready = false;
 
@@ -212,7 +213,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}`, error);
 
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
-				this._uncacheWebhook();
+				this.#uncacheWebhook();
 				this.#fetchOrCreateWebhook();
 			}
 
@@ -257,10 +258,10 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 */
 	async forwardToMinecraft(message, { player: playerInput, interaction, isEdit = false, checkIfNotFromBot = true } = {}) {
 		if (!this.chatBridge.enabled) return;
-		if (!this.minecraft.ready) return message.react(X_EMOJI);
+		if (!this.minecraft.ready) return MessageUtil.react(message, X_EMOJI);
 
 		if (checkIfNotFromBot) {
-			if (message.me) return; // message was sent by the bot
+			if (message.editable) return; // message was sent by the bot
 			if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		}
 
@@ -272,25 +273,25 @@ module.exports = class DiscordChatManager extends ChatManager {
 		// check if player is muted
 		if (player?.muted) {
 			DiscordChatManager.#dmMuteInfo(message, player, `your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			return message.react(MUTED);
+			return MessageUtil.react(message, MUTED);
 		}
 
 		// check if the player is auto muted
 		if (player?.infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 			DiscordChatManager.#dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
-			return message.react(MUTED);
+			return MessageUtil.react(message, MUTED);
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild.muted && !player?.isStaff) {
 			DiscordChatManager.#dmMuteInfo(message, player, `${this.hypixelGuild.name}'s guild chat's mute expires ${Formatters.time(new Date(this.hypixelGuild.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			return message.react(MUTED);
+			return MessageUtil.react(message, MUTED);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.botPlayer?.muted) {
 			DiscordChatManager.#dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.botPlayer.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			return message.react(MUTED);
+			return MessageUtil.react(message, MUTED);
 		}
 
 		const content = [
@@ -318,7 +319,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				: null,
 		].filter(Boolean).join(' ');
 
-		if (!content) return message.react(X_EMOJI);
+		if (!content) return MessageUtil.react(message, X_EMOJI);
 
 		if (interaction) await this.minecraft.chat({
 			content: `${this.client.config.get('PREFIXES')[0]}${interaction.logInfo ?? ''}`,

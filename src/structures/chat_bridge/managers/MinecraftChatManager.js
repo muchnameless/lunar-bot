@@ -15,6 +15,7 @@ const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database')
 const minecraftBot = require('../MinecraftBot');
 const UserUtil = require('../../../util/UserUtil');
 const GuildMemberUtil = require('../../../util/GuildMemberUtil');
+const MessageUtil = require('../../../util/MessageUtil');
 const MessageCollector = require('../MessageCollector');
 const ChatManager = require('./ChatManager');
 const cache = require('../../../api/cache');
@@ -265,7 +266,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	async #handleForwardRejection(discordMessage, reason, data) {
 		if (!discordMessage) return;
 
-		discordMessage.react(STOP);
+		MessageUtil.react(discordMessage, STOP);
 
 		if (await cache.get(`chatbridge:blocked:dm:${discordMessage.author.id}`)) return;
 
@@ -462,14 +463,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * @param {import('../HypixelMessage')} message
+	 * @param {import('../HypixelMessage')} hypixelMessage
 	 */
-	collect(message) {
+	collect(hypixelMessage) {
 		if (!this._collecting) return;
-		if (message.me && message.content.includes(this._contentFilter)) return this.#resolveAndReset(message);
-		if (message.type) return;
-		if (message.spam) return this.#resolveAndReset('spam');
-		if (message.content.startsWith('We blocked your comment')) return this.#resolveAndReset('blocked');
+		if (hypixelMessage.me && hypixelMessage.content.includes(this._contentFilter)) return this.#resolveAndReset(hypixelMessage);
+		if (hypixelMessage.type) return;
+		if (hypixelMessage.spam) return this.#resolveAndReset('spam');
+		if (hypixelMessage.content.startsWith('We blocked your comment')) return this.#resolveAndReset('blocked');
 	}
 
 	/**
@@ -742,7 +743,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			if (useSpamBypass) this._lastMessages.add(message);
 		} catch (error) {
 			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
-			discordMessage?.react(X_EMOJI);
+			MessageUtil.react(discordMessage, X_EMOJI);
 
 			this.#tempIncrementCounter();
 			this.#resetFilter();
@@ -764,7 +765,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 				// only throw for chat messages when the bot was not ready yet
 				if (discordMessage && !this.ready) {
-					discordMessage.react(X_EMOJI);
+					MessageUtil.react(discordMessage, X_EMOJI);
 					throw response;
 				}
 
@@ -778,7 +779,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 				// max retries reached
 				if (++this.retries === MinecraftChatManager.MAX_RETRIES) {
-					discordMessage?.react(X_EMOJI);
+					MessageUtil.react(discordMessage, X_EMOJI);
 					await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 					throw `unable to send the message, anti spam failed ${MinecraftChatManager.MAX_RETRIES} times`;
 				}

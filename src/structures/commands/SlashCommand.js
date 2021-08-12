@@ -222,6 +222,11 @@ module.exports = class SlashCommand extends BaseCommand {
 		return InteractionUtil.deferUpdate;
 	}
 
+	// eslint-disable-next-line class-methods-use-this
+	get awaitConfirmation() {
+		return InteractionUtil.awaitConfirmation;
+	}
+
 	/**
 	 * returns the player object, optional fallback to the interaction.user's player
 	 * @param {import('discord.js').CommandInteraction} interaction
@@ -244,7 +249,7 @@ module.exports = class SlashCommand extends BaseCommand {
 		if (validateDiscordId(INPUT)) return this.client.players.getById(INPUT);
 		if (validateMinecraftUuid(INPUT)) return this.client.players.get(INPUT);
 
-		return (interaction.checkForce
+		return (InteractionUtil.checkForce(interaction)
 			? this.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
 			: this.client.players.getByIgn(INPUT))
 			?? null;
@@ -257,7 +262,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * @returns {?string}
 	 */
 	getIgn(interaction, fallbackToCurrentUser = false) {
-		if (interaction.checkForce) return (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase();
+		if (InteractionUtil.checkForce(interaction)) return (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase();
 		return this.getPlayer(interaction, fallbackToCurrentUser)?.ign ?? null;
 	}
 

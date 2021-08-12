@@ -342,7 +342,7 @@ module.exports = class DatabaseManager {
 		const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');
 		const taxMessage = TAX_MESSAGE_ID && await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch(error => logger.error('[TAX MESSAGE]', error));
 
-		if (!taxMessage?.me || taxMessage.deleted) { // taxMessage deleted
+		if (!taxMessage?.editable || taxMessage.deleted) { // taxMessage deleted
 			try {
 				const { id } = await taxChannel.send({
 					embeds: [

@@ -7,6 +7,7 @@ const { X_EMOJI } = require('../../constants/emojiCharacters');
 const DiscordChatManager = require('./managers/DiscordChatManager');
 const BridgeCommandCollection = require('../commands/BridgeCommandCollection');
 const ChatBridge = require('./ChatBridge');
+const MessageUtil = require('../../util/MessageUtil');
 const logger = require('../../functions/logger');
 
 
@@ -142,7 +143,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 * @param {import('discord.js').Message} message
 	 */
 	async handleAnnouncementMessage(message) {
-		if (!this.length) return message.react(X_EMOJI);
+		if (!this.length) return MessageUtil.react(message, X_EMOJI);
 
 		try {
 			const result = await this.broadcast({
@@ -166,11 +167,11 @@ module.exports = class ChatBridgeArray extends Array {
 						.catch(error => logger.error('[HANDLE ANNOUNCEMENT MSG]', error));
 				}
 			} else {
-				message.react(X_EMOJI);
+				MessageUtil.react(message, X_EMOJI);
 			}
 		} catch (error) {
 			logger.error('[HANDLE ANNOUNCEMENT MSG]', error);
-			message.react(X_EMOJI);
+			MessageUtil.react(message, X_EMOJI);
 		}
 	}
 
@@ -189,17 +190,17 @@ module.exports = class ChatBridgeArray extends Array {
 
 			// check if the message was sent from the bot, don't react with X_EMOJI in this case
 			if (options.checkIfNotFromBot) {
-				if (message.me) return; // message was sent by the bot
+				if (message.editable) return; // message was sent by the bot
 				if (message.webhookId
 					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
 				) return; // message was sent by one of the ChatBridges's webhook
 			}
 
 			// no ChatBridge for the message's channel found
-			message.react(X_EMOJI);
+			MessageUtil.react(message, X_EMOJI);
 		} catch (error) {
 			logger.error('[CHAT BRIDGES]: handleDiscordMessage', error);
-			message.react(X_EMOJI);
+			MessageUtil.react(message, X_EMOJI);
 		}
 	}
 };

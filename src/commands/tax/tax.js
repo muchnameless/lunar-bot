@@ -207,7 +207,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				}
 
 				if (player.paid) {
-					await interaction.awaitConfirmation(`\`${player}\` is already set to paid with an amount of \`${this.client.formatNumber(await player.taxAmount ?? NaN)}\`. Overwrite this?`);
+					await this.awaitConfirmation(interaction, `\`${player}\` is already set to paid with an amount of \`${this.client.formatNumber(await player.taxAmount ?? NaN)}\`. Overwrite this?`);
 
 					await player.resetTax();
 				}
@@ -249,7 +249,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				await interaction.awaitConfirmation(`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hypixelGuild?.name ?? 'all guilds'}?`);
+				await this.awaitConfirmation(interaction, `${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hypixelGuild?.name ?? 'all guilds'}?`);
 
 				let pingMessage = '';
 
@@ -301,7 +301,7 @@ module.exports = class TaxCommand extends SlashCommand {
 
 					const OLD_AMOUNT = await player.taxAmount;
 
-					await interaction.awaitConfirmation(`reset tax paid from \`${player}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})?`);
+					await this.awaitConfirmation(interaction, `reset tax paid from \`${player}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})?`);
 
 					await player.resetTax();
 
@@ -309,7 +309,7 @@ module.exports = class TaxCommand extends SlashCommand {
 
 				// all players
 				} else {
-					await interaction.awaitConfirmation('reset tax paid from all guild members?');
+					await this.awaitConfirmation(interaction, 'reset tax paid from all guild members?');
 
 					// get current tax embed from #guild-tax channel
 					currentTaxEmbed = await (async () => {
@@ -325,7 +325,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					})();
 
 					if (!currentTaxEmbed) {
-						await interaction.awaitConfirmation(`unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`);
+						await this.awaitConfirmation(interaction, `unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`);
 
 						currentTaxEmbed = this.client.db.createTaxEmbed();
 					}

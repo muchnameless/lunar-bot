@@ -6,6 +6,7 @@ const { defaults: { ign: IGN_REGEXP }, demoteSuccess, kickSuccess, muteSuccess, 
 const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY }, invisibleCharacters } = require('../constants/chatBridge');
 const { STOP } = require('../../../constants/emojiCharacters');
 const { stringToMS } = require('../../../functions/util');
+const MessageUtil = require('../../../util/MessageUtil');
 const ChatBridgeEvent = require('../ChatBridgeEvent');
 const logger = require('../../../functions/logger');
 
@@ -43,11 +44,13 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 				// react to latest message from 'sender' with that content
 				for (const { channel } of this.chatBridge.discord.channels.values()) {
-					channel?.messages.cache
-						.filter(({ content, author: { id } }) => (senderDiscordId ? id === senderDiscordId : true) && this.chatBridge.minecraft.parseContent(content).includes(blockedContent))
-						.sort(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
-						.first()
-						?.react(STOP);
+					MessageUtil.react(
+						channel?.messages.cache
+							.filter(({ content, author: { id } }) => (senderDiscordId ? id === senderDiscordId : true) && this.chatBridge.minecraft.parseContent(content).includes(blockedContent))
+							.sort(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
+							.first(),
+						STOP,
+					);
 				}
 			}
 

@@ -53,7 +53,7 @@ module.exports = class StatsCommand extends DualCommand {
 		this.deferReply(interaction);
 
 		try {
-			return this.reply(interaction, 
+			return this.reply(interaction,
 				this._generateReply(
 					await this._fetchData(interaction, interaction.options.getString('ign')),
 				),

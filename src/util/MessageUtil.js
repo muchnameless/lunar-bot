@@ -28,20 +28,12 @@ module.exports = class MessageUtil extends null {
 	}
 
 	/**
-	 * wether the message was sent by the bot
-	 * @param {import('discord.js').Message} message
-	 */
-	static me(message) {
-		return message.author?.id === message.client.user.id;
-	}
-
-	/**
 	 * react in order if the message is not deleted and the client has 'ADD_REACTIONS', catching promise rejections
-	 * @param {import('discord.js').Message} message
+	 * @param {?import('discord.js').Message} message
 	 * @param {import('discord.js').EmojiIdentifierResolvable[]} emojis
 	 */
 	static async react(message, ...emojis) {
-		if (message.deleted) return null;
+		if (!message || message.deleted) return null;
 		if (!ChannelUtil.botPermissions(message.channel)?.has(Permissions.FLAGS.ADD_REACTIONS)) return null;
 
 		/** @type {(import('discord.js').MessageReaction | Promise<import('discord.js').MessageReaction>)[]} */

@@ -36,7 +36,7 @@ module.exports = class InteractionUtil extends null {
 		const interactionData = {
 			deferReplyPromise: null,
 			deferUpdatePromise: null,
-			useEphemeral: this.checkEphemeralOption(interaction)
+			useEphemeral: this.#checkEphemeralOption(interaction)
 				?? (channel !== null && channel.type !== 'DM'
 					? !(channel.name.includes('command') || ChannelUtil.isTicket(channel)) // guild channel
 					: false), // DM channel
@@ -51,7 +51,7 @@ module.exports = class InteractionUtil extends null {
 	 * checks the command options for the ephemeral option
 	 * @param {GenericInteraction} interaction
 	 */
-	static checkEphemeralOption(interaction) {
+	static #checkEphemeralOption(interaction) {
 		if (!interaction.isCommand()) return null;
 
 		switch (interaction.options.getString('visibility')) {

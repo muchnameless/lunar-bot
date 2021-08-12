@@ -128,7 +128,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 			try {
 				JoinDateCommand.running.add(chatBridge.hypixelGuild.guildId);
 
-				await interaction.awaitConfirmation(`the command will take approximately ${ms(chatBridge.hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
+				await this.awaitConfirmation(interaction, `the command will take approximately ${ms(chatBridge.hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
 
 				for (const { ign } of chatBridge.hypixelGuild.players.values()) {
 					joinInfos.push(await JoinDateCommand.#getJoinDate(chatBridge, ign));

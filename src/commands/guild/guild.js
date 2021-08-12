@@ -8,9 +8,10 @@ const { removeMcFormatting } = require('../../structures/chat_bridge/functions/u
 const { EMBED_DESCRIPTION_MAX_CHARS } = require('../../constants/discord');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../constants/database');
 const { stringToMS, trim, getIdFromString, autocorrect } = require('../../functions/util');
+const UserUtil = require('../../util/UserUtil');
+const InteractionUtil = require('../../util/InteractionUtil');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
-const UserUtil = require('../../util/UserUtil');
 
 
 const commonOptions = new Map([ [
@@ -211,7 +212,7 @@ module.exports = class GuildCommand extends SlashCommand {
 		} else {
 			target = IS_INTERACTION
 				? this.getPlayer(ctx)
-					?? (ctx.checkForce
+					?? (InteractionUtil.checkForce(ctx)
 						? targetInput // use input if force is set
 						: (await this.client.players.fetch({ // try to find by ign or uuid
 							[Op.or]: [{
@@ -666,7 +667,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					target = 'everyone';
 				} else {
 					target = this.getPlayer(interaction)
-							?? (interaction.checkForce
+							?? (InteractionUtil.checkForce(interaction)
 								? TARGET_INPUT // use input if force is set
 								: await (async () => {
 									const queryParams = [{
