@@ -48,12 +48,18 @@ const ms = require('ms');
 
 
 module.exports = class ImgurClient {
+	#authorization;
+	#baseURL;
+	#queue = new AsyncQueue();
+
 	/**
-	 * @param {{ authorization: string, apiVersion?: string | number }} param0
+	 * @param {{ clientId: string, apiVersion?: string | number }} param0
 	 */
-	constructor({ authorization, apiVersion = 3 }) {
-		this.authorization = authorization;
-		this.apiVersion = apiVersion;
+	constructor({ clientId, apiVersion = 3, requestTimeout = 15_000, retries = 1 }) {
+		this.#authorization = `Client-ID ${clientId}`;
+		this.#baseURL = `https://api.imgur.com/${apiVersion}/`;
+		this.requestTimeout = requestTimeout;
+		this.retries = retries;
 
 		this.rateLimit = {
 			userlimit: null,
@@ -69,11 +75,7 @@ module.exports = class ImgurClient {
 			remaining: null,
 			reset: null,
 		};
-
-		this.queue = new AsyncQueue();
 	}
-
-	static BASE_URL = 'https://api.imgur.com/';
 
 	/**
 	 * @param {string} url
@@ -112,9 +114,10 @@ module.exports = class ImgurClient {
 
 	/**
 	 * @param {{ checkRateLimit?: boolean, endpoint: string, method?: string, body: FormData }} param0
+	 * @param {number} [retries] current retry
 	 */
-	async #request({ checkRateLimit = true, endpoint, method = 'POST', body }) {
-		await this.queue.wait();
+	async #request({ checkRateLimit = true, endpoint, method = 'POST', body }, retries = 0) {
+		await this.#queue.wait();
 
 		try {
 			// check rate limit
@@ -144,14 +147,31 @@ module.exports = class ImgurClient {
 			}
 
 			// make request
+			const controller = new AbortController();
+			const timeout = setTimeout(() => controller.abort(), this.requestTimeout).unref();
+
 			/** @type {import('@types/node-fetch').Response} */
-			const res = await fetch(`${ImgurClient.BASE_URL}${this.apiVersion}/${endpoint}/`, {
-				method,
-				body,
-				headers: {
-					Authorization: this.authorization,
-				},
-			});
+			let res;
+
+			try {
+				res = await fetch(`${this.#baseURL}${endpoint}/`, {
+					method,
+					body,
+					headers: {
+						Authorization: this.#authorization,
+					},
+					signal: controller.signal,
+				});
+			} catch (error) {
+				// Retry the specified number of times for possible timed out requests
+				if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
+					return this.#request(arguments[0], retries + 1);
+				}
+
+				throw error;
+			} finally {
+				clearTimeout(timeout);
+			}
 
 			// get ratelimit headers
 			for (const type of Object.keys(this.rateLimit)) {
@@ -177,7 +197,7 @@ module.exports = class ImgurClient {
 
 			return await res.json();
 		} finally {
-			this.queue.shift();
+			this.#queue.shift();
 		}
 	}
 };

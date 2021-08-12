@@ -33,7 +33,7 @@ module.exports = class LunarClient extends Client {
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
 		this.events = new EventCollection(this, join(__dirname, '..', 'events'));
-		this.imgur = new ImgurClient({ authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}` });
+		this.imgur = new ImgurClient({ clientId: process.env.IMGUR_CLIENT_ID });
 
 		this._fetchAllGuildMembersCache = new Map();
 	}
