@@ -1,8 +1,10 @@
 'use strict';
 
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-const { Client, Intents, Permissions, LimitedCollection, Options, Constants } = require('discord.js');
+const { Client, Intents, Permissions, LimitedCollection, SnowflakeUtil, Options, Constants } = require('discord.js');
 const { escapeRegex } = require('./functions/util');
+const ChannelUtil = require('./util/ChannelUtil');
+const MessageUtil = require('./util/MessageUtil');
 const db = require('./structures/database/index');
 const logger = require('./functions/logger');
 
@@ -37,6 +39,17 @@ process
 	};
 	const client = new Client({
 		makeCache: Options.cacheWithLimits({
+			...Options.defaultMakeCacheSettings,
+			ChannelManager: {
+				sweepInterval: 3_600,
+				sweepFilter: LimitedCollection.filterByLifetime({
+					lifetime: 14_400,
+					getComparisonTimestamp: e => (e.type === 'DM'
+						? (e.lastMessageId ? SnowflakeUtil.deconstruct(e.lastMessageId).timestamp : -1) // DM -> last message
+						: e.archiveTimestamp), // threads -> archived
+					excludeFromSweep: e => e.type !== 'DM' && !e.archived,
+				}),
+			},
 			MessageManager: 0,
 			ThreadManager: {
 				sweepInterval: 3_600,
@@ -44,14 +57,14 @@ process
 					getComparisonTimestamp: e => e.archiveTimestamp,
 					excludeFromSweep: e => !e.archived,
 				}),
-				UserManager: {
-					maxSize: 1,
-					keepOverLimit: v => v.id === client.user.id,
-				},
-				GuildMemberManager: {
-					maxSize: 1,
-					keepOverLimit: v => v.id === client.user.id,
-				},
+			},
+			UserManager: {
+				maxSize: 1,
+				keepOverLimit: e => e.id === e.client.user.id,
+			},
+			GuildMemberManager: {
+				maxSize: 1,
+				keepOverLimit: e => e.id === e.client.user.id,
 			},
 		}),
 		allowedMentions: { parse: [], repliedUser: true },
@@ -97,13 +110,13 @@ process
 			logger.info(`Startup complete. Logged in as ${client.user.tag}`);
 		})
 		.on(Constants.Events.MESSAGE_CREATE, async (message) => {
-			if (message.author.bot || message.system || message.webhookId) return; // filter out bot, system & webhook messages
+			if (!MessageUtil.isUserMessage(message)) return;
 			if (message.guildId && !prefixRegExp.test(message.content)) return; // allow PREFIX and @bot.id
 
 			logger.info(`${message.author.tag}${message.member ? ` | ${message.member.displayName}` : ''} tried to execute '${message.content}' during maintenance`);
 
 			// permissions check
-			if (!(message.guild?.me.permissionsIn(message.channel).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ]) ?? true)) return;
+			if (!ChannelUtil.botPermissions(message.channel)?.has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES ])) return;
 
 			try {
 				await message.reply(`${client.user} is currently unavailable due to maintenance`);

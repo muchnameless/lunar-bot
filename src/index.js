@@ -39,7 +39,7 @@ process
 				sweepFilter: LimitedCollection.filterByLifetime({
 					lifetime: 1_800,
 					getComparisonTimestamp: e => e.editedTimestamp ?? e.createdTimestamp,
-					excludeFromSweep: e => e.id === client.config.get('TAX_MESSAGE_ID'),
+					excludeFromSweep: e => e.id === e.client.config.get('TAX_MESSAGE_ID'),
 				}),
 			},
 			ChannelManager: {
@@ -57,7 +57,7 @@ process
 				sweepFilter: LimitedCollection.filterByLifetime({
 					lifetime: 0,
 					getComparisonTimestamp: () => -1,
-					excludeFromSweep: e => client.guilds.cache.some(guild => guild.members.cache.has(e.id)) || client.channels.cache.some(channel => channel.type === 'DM' && channel.recipient.id === e.id),
+					excludeFromSweep: e => e.client.guilds.cache.some(guild => guild.members.cache.has(e.id)) || e.client.channels.cache.some(channel => channel.type === 'DM' && channel.recipient.id === e.id),
 				}),
 			},
 		}),
