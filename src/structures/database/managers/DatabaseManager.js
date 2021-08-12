@@ -19,6 +19,7 @@ const TaxCollector = require('../models/TaxCollector');
 const ModelManager = require('./ModelManager');
 const ChatTrigger = require('../models/ChatTrigger');
 const ArrayCacheCollection = require('../../ArrayCacheCollection');
+const ChannelUtil = require('../../../util/ChannelUtil');
 const logger = require('../../../functions/logger');
 
 
@@ -147,7 +148,7 @@ module.exports = class DatabaseManager {
 	 * false if the auctionId is already in the transactions db, true if not
 	 * @param {string} auctionId
 	 */
-	async _validateAuctionId(auctionId) {
+	async #validateAuctionId(auctionId) {
 		try {
 			await this.models.Transaction.findOne({
 				where: { auctionId },
@@ -164,7 +165,7 @@ module.exports = class DatabaseManager {
 	 * updates the tax database
 	 * @returns {Promise<string[]>}
 	 */
-	async _updateTaxDatabase() {
+	async #updateTaxDatabase() {
 		const { config, players, taxCollectors } = this.modelManagers;
 		const TAX_AUCTIONS_START_TIME = config.get('TAX_AUCTIONS_START_TIME');
 		const TAX_AMOUNT = config.get('TAX_AMOUNT');
@@ -187,7 +188,7 @@ module.exports = class DatabaseManager {
 
 				for (const auction of await asyncFilter(
 					auctions,
-					auc => TAX_AUCTIONS_ITEMS.includes(auc.item_name) && auc.start >= TAX_AUCTIONS_START_TIME && this._validateAuctionId(auc.uuid), // correct item & started after last reset & no outbid from already logged auction
+					auc => TAX_AUCTIONS_ITEMS.includes(auc.item_name) && auc.start >= TAX_AUCTIONS_START_TIME && this.#validateAuctionId(auc.uuid), // correct item & started after last reset & no outbid from already logged auction
 				)) auction.highest_bid_amount >= TAX_AMOUNT
 					? auction.bids.length && taxAuctions.push(auction)
 					: auction.end > NOW && ++availableAuctions;
@@ -322,7 +323,7 @@ module.exports = class DatabaseManager {
 
 		// update tax db
 		const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED')
-			? await this._updateTaxDatabase()
+			? await this.#updateTaxDatabase()
 			: null;
 
 		// update Xp
@@ -331,11 +332,11 @@ module.exports = class DatabaseManager {
 		await players.updateIGN();
 
 		// update taxMessage
-		/** @type {import('../../extensions/TextChannel')} */
+		/** @type {import('discord.js').TextChannel} */
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 		if (!taxChannel?.guild?.available) return logger.warn('[TAX MESSAGE]: channel not found');
-		if (!taxChannel.botPermissions.has(Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS)) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+		if (!ChannelUtil.botPermissions(taxChannel).has(Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS)) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
 		const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');

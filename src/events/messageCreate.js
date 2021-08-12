@@ -15,7 +15,7 @@ module.exports = class MessageCreateEvent extends Event {
 	}
 
 	/**
-	 * @param {import('../structures/extensions/Message')} message
+	 * @param {import('discord.js').Message} message
 	 * @param {boolean} [isEdit=false]
 	 */
 	async _handleDiscordMessage(message, isEdit = false) {
@@ -35,7 +35,7 @@ module.exports = class MessageCreateEvent extends Event {
 
 	/**
 	 * event listener callback
-	 * @param {import('../structures/extensions/Message')} message
+	 * @param {import('discord.js').Message} message
 	 */
 	async run(message) {
 		return this._handleDiscordMessage(message, false);

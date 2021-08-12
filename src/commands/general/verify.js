@@ -3,6 +3,7 @@
 const { Constants } = require('discord.js');
 const { Op } = require('sequelize');
 const { oneLine, commaListsOr } = require('common-tags');
+const UserUtil = require('../../util/UserUtil');
 const hypixel = require('../../api/hypixel');
 const mojang = require('../../api/mojang');
 const SlashCommand = require('../../structures/commands/SlashCommand');
@@ -26,14 +27,14 @@ module.exports = class VerifyCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply();
+		this.deferReply(interaction);
 
 		const IGN = interaction.options.getString('ign', true);
 		/** @type {import('../../structures/database/models/Player')} */
-		const playerLinkedToId = interaction.user.player;
+		const playerLinkedToId = UserUtil.getPlayer(interaction.user);
 
 		let player = this.client.players.getByIgn(IGN)
 			?? await this.client.players.fetch({
@@ -45,7 +46,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 			});
 
 		// already linked to this discord user
-		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return await interaction.reply('you are already linked with this discord account');
+		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return await this.reply(interaction, 'you are already linked with this discord account');
 
 		let uuid;
 		let ign;
@@ -57,21 +58,21 @@ module.exports = class VerifyCommand extends SlashCommand {
 			({ _id: guildId } = await hypixel.guild.player(uuid));
 
 			// not in one of the guilds that the bot manages
-			if (!this.client.hypixelGuilds.cache.has(guildId)) return interaction.reply(commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
+			if (!this.client.hypixelGuilds.cache.has(guildId)) return this.reply(interaction, commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
 
 			hypixelPlayer = await hypixel.player.uuid(uuid);
 		} catch (error) {
 			logger.error(error);
-			return await interaction.reply(`${error}`);
+			return await this.reply(interaction, `${error}`);
 		}
 
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 
 		// no linked discord tag
-		if (!LINKED_DISCORD_TAG) return await interaction.reply(`no linked discord tag for \`${ign}\` on hypixel`);
+		if (!LINKED_DISCORD_TAG) return await this.reply(interaction, `no linked discord tag for \`${ign}\` on hypixel`);
 
 		// linked discord tag doesn't match author's tag
-		if (LINKED_DISCORD_TAG !== interaction.user.tag) return await interaction.reply(oneLine`
+		if (LINKED_DISCORD_TAG !== interaction.user.tag) return await this.reply(interaction, oneLine`
 			the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\`.
 			Keep in mind that discord tags are case sensitive
 		`);
@@ -94,7 +95,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 			});
 		} catch (error) {
 			logger.error('[VERIFY]: database', error);
-			return await interaction.reply(`an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
+			return await this.reply(interaction, `an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
 		}
 
 		player.guildId = guildId;
@@ -105,6 +106,6 @@ module.exports = class VerifyCommand extends SlashCommand {
 
 		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
 
-		return await interaction.reply(`successfully linked your discord account to \`${ign}\``);
+		return await this.reply(interaction, `successfully linked your discord account to \`${ign}\``);
 	}
 };

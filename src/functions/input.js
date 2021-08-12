@@ -1,11 +1,13 @@
 'use strict';
 
+const { Interaction } = require('discord.js');
+const UserUtil = require('../util/UserUtil');
 const mojang = require('../api/mojang');
 
 
 /**
  * message, args -> ign, uuid
- * @param {import('../structures/extensions/CommandInteraction') | import('../structures/chat_bridge/HypixelMessage')} ctx
+ * @param {import('discord.js').CommandInteraction | import('../structures/chat_bridge/HypixelMessage')} ctx
  * @param {string} ignOrUuid
  * @returns {Promise<import('../structures/Mojang').MojangResult>}
  */
@@ -17,7 +19,9 @@ module.exports.getUuidAndIgn = async (ctx, ignOrUuid) => {
 	if (IGN_OR_UUID) return mojang.ignOrUuid(IGN_OR_UUID);
 
 	// no args -> try to get player object
-	const { player } = ctx.author;
+	const player = ctx instanceof Interaction
+		? UserUtil.getPlayer(ctx.user)
+		: ctx.author.player;
 
 	// author is linked to player
 	if (player) return {
@@ -26,7 +30,7 @@ module.exports.getUuidAndIgn = async (ctx, ignOrUuid) => {
 	};
 
 	// no linked player -> try to get ign from author (HypixelMessageAuthor)
-	const { ign } = ctx.author;
+	const { ign } = ctx.author ?? {};
 
 	if (ign) return mojang.ign(ign);
 

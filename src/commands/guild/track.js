@@ -27,14 +27,14 @@ module.exports = class TrackCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		const type = interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION');
 		const player = this.getPlayer(interaction, true);
 
 		if (!player) {
-			return await interaction.reply(oneLine`${interaction.options.get('player')
+			return await this.reply(interaction, oneLine`${interaction.options.get('player')
 				? `\`${interaction.options.getString('player')}\` is`
 				: 'you are'
 			} not in the player db`);
@@ -130,7 +130,7 @@ module.exports = class TrackCommand extends SlashCommand {
 			},
 		});
 
-		return await interaction.reply({
+		return await this.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)

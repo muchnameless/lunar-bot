@@ -7,6 +7,7 @@ const { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_SHORT, XP_OFFSETS_CONVERTER, GU
 const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../constants/skyblock');
 const { LB_KEY } = require('../constants/redis');
 const { upperCaseFirstChar } = require('./util');
+const UserUtil = require('../util/UserUtil');
 const cache = require('../api/cache');
 // const logger = require('./logger');
 
@@ -27,7 +28,7 @@ const cache = require('../api/cache');
  * @property {string} xpType
  * @property {string} offset
  * @property {import('../structures/database/models/HypixelGuild') | GUILD_ID_ALL} hypixelGuild
- * @property {import('../structures/extensions/User')} user
+ * @property {import('discord.js').User} user
  */
 
 
@@ -174,7 +175,7 @@ const self = module.exports = {
 
 	/**
 	 * handles a leaderbaord message
-	 * @param {import('../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {string} leaderboardType
 	 * @param {LeaderboardArgs & { page: number }} leaderboardArgs
 	 */
@@ -207,7 +208,7 @@ const self = module.exports = {
 
 	/**
 	 * handles a leaderbaord message
-	 * @param {import('../structures/extensions/ButtonInteraction')} interaction
+	 * @param {import('discord.js').ButtonInteraction} interaction
 	 */
 	async handleLeaderboardButtonInteraction(interaction) {
 		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, IS_RELOAD ] = interaction.customId.split(':');
@@ -273,7 +274,7 @@ const self = module.exports = {
 
 	/**
 	 * handles a leaderbaord message
-	 * @param {import('../structures/extensions/SelectMenuInteraction')} interaction
+	 * @param {import('discord.js').SelectMenuInteraction} interaction
 	 */
 	async handleLeaderboardSelectMenuInteraction(interaction) {
 		const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE ] = interaction.customId.split(':');
@@ -624,7 +625,7 @@ const self = module.exports = {
 					 > ${getEntry(playerRequesting)}
 			`);
 		} else if (xpType !== 'purge') {
-			let playerRequesting = user.player;
+			let playerRequesting = UserUtil.getPlayer(user);
 
 			// put playerreq into guildplayers and sort then do the above again
 			if (playerRequesting) {
@@ -794,7 +795,7 @@ const self = module.exports = {
 					 > ${getEntry(playerRequesting)}
 			`);
 		} else {
-			let playerRequesting = user.player;
+			let playerRequesting = UserUtil.getPlayer(user);
 
 			// put playerreq into guildplayers and sort then do the above again
 			if (playerRequesting) {

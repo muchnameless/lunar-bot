@@ -32,10 +32,10 @@ module.exports = class LinkCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply();
+		this.deferReply(interaction);
 
 		const IGN_OR_UUID = interaction.options.getString('ign', true);
 		const user = interaction.options.getUser('user', true);
@@ -70,7 +70,7 @@ module.exports = class LinkCommand extends SlashCommand {
 				}))?.[0];
 		}
 
-		if (!player) return await interaction.reply(stripIndents`
+		if (!player) return await this.reply(interaction, stripIndents`
 			\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
 			Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 		`);
@@ -101,7 +101,7 @@ module.exports = class LinkCommand extends SlashCommand {
 			}
 
 			if (!await playerLinkedToId.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
-				await interaction.reply({
+				await this.reply(interaction, {
 					content: `unable to update roles and nickname for the currently linked member ${linkedUser}`,
 					allowedMentions: { parse: [] },
 				});
@@ -121,7 +121,7 @@ module.exports = class LinkCommand extends SlashCommand {
 			});
 
 			if (!linkedUserIsDeleted) {
-				if (player.discordId === user.id) return await interaction.reply({
+				if (player.discordId === user.id) return await this.reply(interaction, {
 					content: `\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}`,
 					allowedMentions: { parse: [] },
 				});
@@ -136,7 +136,7 @@ module.exports = class LinkCommand extends SlashCommand {
 			}
 
 			if (!await player.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
-				await interaction.reply({
+				await this.reply(interaction, {
 					content: `unable to update roles and nickname for the currently linked member ${linkedUser}`,
 					allowedMentions: { parse: [] },
 				});
@@ -149,7 +149,7 @@ module.exports = class LinkCommand extends SlashCommand {
 		// no discord member for the user to link found
 		if (!discordMember) {
 			await player.link(user.id);
-			return await interaction.reply(`\`${player}\` linked to \`${user.id}\` but could not be found on the Lunar Guard discord server`);
+			return await this.reply(interaction, `\`${player}\` linked to \`${user.id}\` but could not be found on the Lunar Guard discord server`);
 		}
 
 		// user to link is in discord -> update roles
@@ -161,7 +161,7 @@ module.exports = class LinkCommand extends SlashCommand {
 			reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.config.get('VERIFIED_ROLE_ID'))?.name ?? this.config.get('VERIFIED_ROLE_ID')} role)`;
 		}
 
-		interaction.reply({
+		this.reply(interaction, {
 			content: reply,
 			allowedMentions: { parse: [] },
 		});

@@ -8,7 +8,6 @@ const ms = require('ms');
 const fetch = require('node-fetch');
 const util = require('util');
 const { EMBED_MAX_CHARS } = require('../../constants/discord');
-const { CHANNEL_FLAGS } = require('../../constants/bot');
 const { EDIT_MESSAGE } = require('../../constants/emojiCharacters');
 const cache = require('../../api/cache');
 const skyblock = require('../../constants/skyblock');
@@ -16,6 +15,8 @@ const functionsUtil = require('../../functions/util');
 const functionsFiles = require('../../functions/files');
 const hypixel = require('../../api/hypixel');
 const mojang = require('../../api/mojang');
+const ChannelUtil = require('../../util/ChannelUtil');
+const InteractionUtil = require('../../util/InteractionUtil');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
 /* eslint-enable no-unused-vars */
@@ -59,7 +60,7 @@ module.exports = class EvalCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/extensions/ButtonInteraction')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('discord.js').ButtonInteraction'} ctx
 	 * @param {string} input
 	 * @param {boolean} [isAsync]
 	 * @param {number} [inspectDepth=0]
@@ -146,20 +147,20 @@ module.exports = class EvalCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/ButtonInteraction')} interaction
+	 * @param {import('discord.js').ButtonInteraction} interaction
 	 */
 	async runButton(interaction) {
-		if (interaction.user.id !== this.client.ownerId) return await interaction.reply({
+		if (interaction.user.id !== this.client.ownerId) return await this.reply(interaction, {
 			content: 'this command is restricted to the bot owner',
 			ephemeral: true,
 		});
 
-		if (!interaction.channel?.botPermissions.has(Discord.Permissions.FLAGS.VIEW_CHANNEL)) return await interaction.reply({
+		if (!ChannelUtil.botPermissions(interaction.channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL)) return await this.reply(interaction, {
 			content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
 			ephemeral: true,
 		});
 
-		interaction.deferUpdate();
+		this.deferUpdate(interaction);
 
 		const { groups: { async, inspectDepth } } = interaction.customId.match(/EVAL:(?<async>.+):(?<inspectDepth>.+)/);
 
@@ -171,7 +172,7 @@ module.exports = class EvalCommand extends SlashCommand {
 				errors: [ 'time' ],
 			});
 
-			return interaction.update({
+			return this.update(interaction, {
 				embeds: await this.eval(
 					interaction,
 					collected.first().content,
@@ -186,10 +187,10 @@ module.exports = class EvalCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply();
+		this.deferReply(interaction);
 
 		let indentationCount = 0;
 
@@ -218,7 +219,7 @@ module.exports = class EvalCommand extends SlashCommand {
 					.setStyle(Discord.Constants.MessageButtonStyles.SECONDARY),
 			);
 
-		return await interaction.reply({
+		return await this.reply(interaction, {
 			embeds: await this.eval(
 				interaction,
 				INPUT,

@@ -27,15 +27,15 @@ module.exports = class FriendCheckCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply();
+		this.deferReply(interaction);
 
 		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 		const friends = (await hypixel.friends.uuid(uuid)).map(x => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender));
 
-		return await interaction.reply({
+		return await this.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`${IGN}'s friends in the guild`)

@@ -13,6 +13,8 @@ const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
 const { MC_CLIENT_VERSION } = require('../constants/settings');
 const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database');
 const minecraftBot = require('../MinecraftBot');
+const UserUtil = require('../../../util/UserUtil');
+const GuildMemberUtil = require('../../../util/GuildMemberUtil');
 const MessageCollector = require('../MessageCollector');
 const ChatManager = require('./ChatManager');
 const cache = require('../../../api/cache');
@@ -23,7 +25,7 @@ const logger = require('../../../functions/logger');
  * @property {string} content
  * @property {string} [prefix='']
  * @property {boolean} [isMessage]
- * @property {?import('../../extensions/Message')} [discordMessage=null]
+ * @property {?import('discord.js').Message} [discordMessage=null]
  */
 
 /**
@@ -256,11 +258,11 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * reacts to the message and DMs the author
-	 * @param {import('../../extensions/Message')} discordMessage
+	 * @param {import('discord.js').Message} discordMessage
 	 * @param {string} reason
 	 * @param {?Record<string, any>}
 	 */
-	async _handleForwardRejection(discordMessage, reason, data) {
+	async #handleForwardRejection(discordMessage, reason, data) {
 		if (!discordMessage) return;
 
 		discordMessage.react(STOP);
@@ -274,7 +276,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				case 'blocked': {
 					try {
 						/** @type {import('../../database/models/Player')} */
-						const player = discordMessage.author.player
+						const player = UserUtil.getPlayer(discordMessage.author)
 							?? (await this.client.players.model.findOrCreate({
 								where: { discordId: discordMessage.author.id },
 								defaults: {
@@ -337,7 +339,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 					throw new Error('invalid rejection case');
 			}
 
-			await discordMessage.author.send(info);
+			await UserUtil.sendDM(discordMessage.author, info);
 
 			logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
 		} catch (error) {
@@ -351,7 +353,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * removes line formatters from the beginning and end
 	 * @param {import('../HypixelMessage')} messages
 	 */
-	static _cleanCommandResponse(messages) {
+	static #cleanCommandResponse(messages) {
 		return messages
 			.map(({ content }) => content.replace(/^-{29,}|-{29,}$/g, '').trim())
 			.join('\n');
@@ -361,13 +363,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * increasing delay
 	 */
 	get delay() {
-		return MinecraftChatManager.delays[this._tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
+		return MinecraftChatManager.delays[this.#tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
 	}
 
 	/**
 	 * create bot instance, loads and binds it's events and logs it into hypixel
 	 */
-	async _createBot() {
+	async #createBot() {
 		++this.loginAttempts;
 
 		return this.bot = await minecraftBot(this.chatBridge, {
@@ -391,7 +393,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			return this;
 		}
 
-		await this._createBot();
+		await this.#createBot();
 
 		// reconnect the bot if it hasn't successfully spawned in 60 seconds
 		if (!this.ready) {
@@ -453,9 +455,9 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	/**
 	 * @param {string|import('../HypixelMessage')} value
 	 */
-	_resolveAndReset(value) {
+	#resolveAndReset(value) {
 		this._resolve(value);
-		this._resetFilter();
+		this.#resetFilter();
 		this._promise = new Promise(res => this._resolve = res);
 	}
 
@@ -464,10 +466,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	collect(message) {
 		if (!this._collecting) return;
-		if (message.me && message.content.includes(this._contentFilter)) return this._resolveAndReset(message);
+		if (message.me && message.content.includes(this._contentFilter)) return this.#resolveAndReset(message);
 		if (message.type) return;
-		if (message.spam) return this._resolveAndReset('spam');
-		if (message.content.startsWith('We blocked your comment')) return this._resolveAndReset('blocked');
+		if (message.spam) return this.#resolveAndReset('spam');
+		if (message.content.startsWith('We blocked your comment')) return this.#resolveAndReset('blocked');
 	}
 
 	/**
@@ -483,7 +485,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	/**
 	 * resets the listener filter
 	 */
-	_resetFilter() {
+	#resetFilter() {
 		this._contentFilter = null;
 		this._collecting = false;
 	}
@@ -491,7 +493,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	/**
 	 * increments messageCounter for 10 seconds
 	 */
-	_tempIncrementCounter() {
+	#tempIncrementCounter() {
 		setTimeout(() => --this.messageCounter, 10_000);
 		return ++this.messageCounter;
 	}
@@ -528,13 +530,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			.replace(/<@!?(\d{17,19})>/g, (match, p1) => { // users
 				const member = this.client.lgGuild?.members.cache.get(p1);
 				if (member) {
-					const { player } = member;
+					const player = GuildMemberUtil.getPlayer(member);
 					if (player) return `@${player}`;
 				}
 
 				const user = this.client.users.cache.get(p1);
 				if (user) {
-					const { player } = user;
+					const player = UserUtil.getPlayer(user);
 					if (player) return `@${player}`;
 				}
 
@@ -662,14 +664,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		);
 
 		if (!success) { // messageParts blocked
-			this._handleForwardRejection(discordMessage, 'filterBlocked');
+			this.#handleForwardRejection(discordMessage, 'filterBlocked');
 			return false;
 		}
 
 		if (!contentParts.size) return false;
 
 		if (contentParts.size > maxParts) {
-			this._handleForwardRejection(discordMessage, 'messageCount', { maxParts });
+			this.#handleForwardRejection(discordMessage, 'messageCount', { maxParts });
 			return false;
 		}
 
@@ -742,8 +744,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
 			discordMessage?.react(X_EMOJI);
 
-			this._tempIncrementCounter();
-			this._resetFilter();
+			this.#tempIncrementCounter();
+			this.#resetFilter();
 
 			throw error;
 		}
@@ -757,8 +759,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		switch (response) {
 			// collector collected nothing, sleep won the race. this happens for all commands which return a "system reply"
 			case 'timeout': {
-				this._tempIncrementCounter();
-				this._resetFilter();
+				this.#tempIncrementCounter();
+				this.#resetFilter();
 
 				// only throw for chat messages when the bot was not ready yet
 				if (discordMessage && !this.ready) {
@@ -771,7 +773,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			// anti spam failed -> retry
 			case 'spam': {
-				this._tempIncrementCounter();
+				this.#tempIncrementCounter();
 				this._lastMessages.decIndex();
 
 				// max retries reached
@@ -789,7 +791,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			case 'blocked': {
 				this._lastMessages.decIndex();
 
-				this._handleForwardRejection(discordMessage, 'blocked');
+				this.#handleForwardRejection(discordMessage, 'blocked');
 				await sleep(this.delay);
 				throw 'unable to send the message, hypixel\'s filter blocked it';
 			}
@@ -798,7 +800,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			default: {
 				await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
 					? this.delay
-					: (this._tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY),
+					: (this.#tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY),
 				);
 				return;
 			}
@@ -862,7 +864,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 					return resolve(raw
 						? collected
 						: collected.length
-							? MinecraftChatManager._cleanCommandResponse(collected)
+							? MinecraftChatManager.#cleanCommandResponse(collected)
 							: `no in game response after ${ms(timeout, { long: true })}`);
 				}
 
@@ -872,7 +874,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				case 'abort': {
 					if (rejectOnAbort) reject(raw
 						? collected
-						: MinecraftChatManager._cleanCommandResponse(collected),
+						: MinecraftChatManager.#cleanCommandResponse(collected),
 					);
 				}
 				// fallthrough
@@ -880,7 +882,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				default:
 					return resolve(raw
 						? collected
-						: MinecraftChatManager._cleanCommandResponse(collected),
+						: MinecraftChatManager.#cleanCommandResponse(collected),
 					);
 			}
 		});

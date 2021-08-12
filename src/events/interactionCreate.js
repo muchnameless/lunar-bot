@@ -4,6 +4,7 @@ const { Constants } = require('discord.js');
 const ms = require('ms');
 const { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction } = require('../functions/leaderboards');
 const { LB_KEY, AH_KEY } = require('../constants/redis');
+const InteractionUtil = require('../util/InteractionUtil');
 const Event = require('../structures/events/Event');
 const logger = require('../functions/logger');
 
@@ -17,15 +18,15 @@ module.exports = class InteractionCreateEvent extends Event {
 	}
 
 	/**
-	 * @param {import('../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async _handleCommandInteraction(interaction) {
-		logger.info(`[CMD HANDLER]: '${interaction.logInfo}' was executed by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel.name} | ${interaction.guild.name}` : 'DMs'}`);
+	async #handleCommandInteraction(interaction) {
+		logger.info(`[CMD HANDLER]: '${InteractionUtil.logInfo(interaction)}' was executed by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`);
 
 		/** @type {import('../structures/commands/SlashCommand')} */
 		const command = this.client.commands.get(interaction.commandName);
 
-		if (!command) return await interaction.reply({
+		if (!command) return await InteractionUtil.reply(interaction, {
 			content: `${interaction.commandName} is currently disabled`,
 			ephemeral: true,
 		});
@@ -36,7 +37,7 @@ module.exports = class InteractionCreateEvent extends Event {
 
 			// prevent from executing owner only command
 			if (command.category === 'owner') {
-				return await interaction.reply({
+				return await InteractionUtil.reply(interaction, {
 					content: `the \`${command.name}\` command is restricted to the bot owner`,
 					ephemeral: true,
 				});
@@ -52,7 +53,7 @@ module.exports = class InteractionCreateEvent extends Event {
 				const EXPIRATION_TIME = command.timestamps.get(interaction.user.id) + COOLDOWN_TIME;
 
 				if (NOW < EXPIRATION_TIME) {
-					return await interaction.reply({
+					return await InteractionUtil.reply(interaction, {
 						content: `\`${command.name}\` is on cooldown for another \`${ms(EXPIRATION_TIME - NOW, { long: true })}\``,
 						ephemeral: true,
 					});
@@ -67,9 +68,9 @@ module.exports = class InteractionCreateEvent extends Event {
 	}
 
 	/**
-	 * @param {import('../structures/extensions/ButtonInteraction')} interaction
+	 * @param {import('discord.js').ButtonInteraction} interaction
 	 */
-	_handleButtonInteraction(interaction) { // eslint-disable-line class-methods-use-this
+	#handleButtonInteraction(interaction) { // eslint-disable-line class-methods-use-this
 		// leaderboards edit
 		if (interaction.customId.startsWith(LB_KEY)) return handleLeaderboardButtonInteraction(interaction);
 
@@ -78,9 +79,9 @@ module.exports = class InteractionCreateEvent extends Event {
 	}
 
 	/**
-	 * @param {import('../structures/extensions/SelectMenuInteraction')} interaction
+	 * @param {import('discord.js').SelectMenuInteraction} interaction
 	 */
-	_handleSelectMenuInteraction(interaction) { // eslint-disable-line class-methods-use-this
+	#handleSelectMenuInteraction(interaction) { // eslint-disable-line class-methods-use-this
 		// leaderboards edit
 		if (interaction.customId.startsWith(LB_KEY)) return handleLeaderboardSelectMenuInteraction(interaction);
 
@@ -93,26 +94,28 @@ module.exports = class InteractionCreateEvent extends Event {
 	 * @param {import('discord.js').Interaction} interaction
 	 */
 	async run(interaction) {
+		InteractionUtil.add(interaction);
+
 		try {
 			// commands
-			if (interaction.isCommand()) return await this._handleCommandInteraction(interaction);
+			if (interaction.isCommand()) return await this.#handleCommandInteraction(interaction);
 
 			// buttons
-			if (interaction.isButton()) return await this._handleButtonInteraction(interaction);
+			if (interaction.isButton()) return await this.#handleButtonInteraction(interaction);
 
 			// select menus
-			if (interaction.isSelectMenu()) return await this._handleSelectMenuInteraction(interaction);
+			if (interaction.isSelectMenu()) return await this.#handleSelectMenuInteraction(interaction);
 		} catch (error) {
 			if (typeof error === 'string') {
-				logger.error(`[INTERACTION CREATE]: ${interaction.member?.displayName ?? interaction.user.username} | ${interaction.user.tag}: ${interaction.logInfo ?? ''}: ${error}`);
+				logger.error(`[INTERACTION CREATE]: ${interaction.member?.displayName ?? interaction.user.username} | ${interaction.user.tag}: ${InteractionUtil.logInfo(interaction)}: ${error}`);
 			} else {
-				logger.error(`[INTERACTION CREATE]: ${interaction.member?.displayName ?? interaction.user.username} | ${interaction.user.tag}: ${interaction.logInfo ?? ''}`, error);
+				logger.error(`[INTERACTION CREATE]: ${interaction.member?.displayName ?? interaction.user.username} | ${interaction.user.tag}: ${InteractionUtil.logInfo(interaction)}`, error);
 			}
 
 			if (error.code === Constants.APIErrors.UNKNOWN_INTERACTION || error.code === Constants.APIErrors.INVALID_WEBHOOK_TOKEN) return; // interaction expired
 
 			try {
-				await interaction.reply?.({
+				await InteractionUtil.reply(interaction, {
 					content: typeof error === 'string'
 						? error
 						: `an error occurred while executing the command: ${error}`,

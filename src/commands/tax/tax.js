@@ -4,6 +4,7 @@ const { Permissions, Formatters, Constants } = require('discord.js');
 const { Op } = require('sequelize');
 const { validateNumber } = require('../../functions/stringValidators');
 const { escapeIgn, safePromiseAll } = require('../../functions/util');
+const ChannelUtil = require('../../util/ChannelUtil');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
 
@@ -91,7 +92,7 @@ module.exports = class TaxCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		switch (interaction.options.getSubcommand()) {
@@ -99,7 +100,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const player = this.getPlayer(interaction);
 
 				if (!player) {
-					return await interaction.reply(`\`${interaction.options.getString('player', true)}\` is not in the player db`);
+					return await this.reply(interaction, `\`${interaction.options.getString('player', true)}\` is not in the player db`);
 				}
 
 				const action = interaction.options.getString('action', true);
@@ -108,7 +109,7 @@ module.exports = class TaxCommand extends SlashCommand {
 
 				switch (action) {
 					case 'add':
-						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) return await interaction.reply(`\`${player}\` is already a tax collector`);
+						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) return await this.reply(interaction, `\`${player}\` is already a tax collector`);
 
 						await this.client.taxCollectors.add(player);
 						if (!player.paid) player.setToPaid(); // let collector collect their own tax if they have not paid already
@@ -118,7 +119,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					case 'remove': {
 						const taxCollector = this.client.taxCollectors.cache.get(player.minecraftUuid);
 
-						if (!taxCollector?.isCollecting) return await interaction.reply(`\`${player}\` is not a tax collector`);
+						if (!taxCollector?.isCollecting) return await this.reply(interaction, `\`${player}\` is not a tax collector`);
 
 						// remove self paid if only the collector paid the default amount at his own ah
 						if (taxCollector.collectedTax === this.config.get('TAX_AMOUNT') && player.collectedBy === player.minecraftUuid) {
@@ -143,13 +144,13 @@ module.exports = class TaxCommand extends SlashCommand {
 					.setDescription(log),
 				);
 
-				return await interaction.reply(log);
+				return await this.reply(interaction, log);
 			}
 
 			case 'amount': {
 				const NEW_AMOUNT = interaction.options.getInteger('amount', true);
 
-				if (NEW_AMOUNT < 0) return await interaction.reply({
+				if (NEW_AMOUNT < 0) return await this.reply(interaction, {
 					content: 'tax amount must be a non-negative number',
 					ephemeral: true,
 				});
@@ -182,11 +183,11 @@ module.exports = class TaxCommand extends SlashCommand {
 					}),
 				);
 
-				return await interaction.reply(`changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``);
+				return await this.reply(interaction, `changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``);
 			}
 
 			case 'collected': {
-				return await interaction.reply({
+				return await this.reply(interaction, {
 					embeds: [ this.client.taxCollectors.createTaxCollectedEmbed() ],
 				});
 			}
@@ -194,7 +195,7 @@ module.exports = class TaxCommand extends SlashCommand {
 			case 'paid': {
 				const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-				if (!collector?.isCollecting) return await interaction.reply({
+				if (!collector?.isCollecting) return await this.reply(interaction, {
 					content: 'this command is restricted to tax collectors',
 					ephemeral: true,
 				});
@@ -202,7 +203,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const player = this.getPlayer(interaction);
 
 				if (!player) {
-					return await interaction.reply(`\`${interaction.options.getString('player', true)}\` is not in the player db`);
+					return await this.reply(interaction, `\`${interaction.options.getString('player', true)}\` is not in the player db`);
 				}
 
 				if (player.paid) {
@@ -226,7 +227,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					}),
 				);
 
-				return await interaction.reply(`\`${player}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
+				return await this.reply(interaction, `\`${player}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
 			}
 
 			case 'reminder': {
@@ -243,7 +244,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordId }) => inDiscord && validateNumber(discordId));
 				const AMOUNT_TO_PING = playersPingable.size;
 
-				if (!AMOUNT_TO_PING) return await interaction.reply({
+				if (!AMOUNT_TO_PING) return await this.reply(interaction, {
 					content: `no members to ping from ${hypixelGuild?.name ?? 'all guilds'}`,
 					ephemeral: true,
 				});
@@ -256,7 +257,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				for (const player of playersOnlyIgn.values()) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 				// send ping message and split between pings if too many chars
-				await interaction.reply({
+				await this.reply(interaction, {
 					content: pingMessage,
 					split: { char: ' ' },
 					ephemeral: false,
@@ -269,7 +270,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const fetched = await interaction.channel?.messages.fetch({ after: replyMessage.id }).catch(error => logger.error('[TAX REMINDER]: ghost ping', error));
 				if (!fetched) return;
 
-				return interaction.channel.deleteMessages([
+				return ChannelUtil.deleteMessages(interaction.channel, [
 					replyMessage.id,
 					...fetched.filter(({ author: { id } }) => [ this.client.user.id, interaction.user.id ].includes(id)).keys(),
 				]);
@@ -293,10 +294,10 @@ module.exports = class TaxCommand extends SlashCommand {
 						});
 
 					if (!player) {
-						return await interaction.reply(`\`${PLAYER_INPUT}\` is not in the player db`);
+						return await this.reply(interaction, `\`${PLAYER_INPUT}\` is not in the player db`);
 					}
 
-					if (!player.paid) return await interaction.reply(`\`${player}\` is not set to paid`);
+					if (!player.paid) return await this.reply(interaction, `\`${player}\` is not set to paid`);
 
 					const OLD_AMOUNT = await player.taxAmount;
 
@@ -368,7 +369,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				// logging
 				(async () => {
 					try {
-						/** @type {import('../../structures/extensions/Message')} */
+						/** @type {import('discord.js').Message} */
 						const logMessage = await this.client.log(
 							currentTaxEmbed,
 							currentTaxCollectedEmbed,
@@ -378,9 +379,12 @@ module.exports = class TaxCommand extends SlashCommand {
 						);
 
 						if (!currentTaxEmbed) return;
-						if (!logMessage.channel.botPermissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return;
 
-						const pinnedMessages = await logMessage.channel.messages.fetchPinned();
+						const { channel } = logMessage;
+
+						if (!ChannelUtil.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) return;
+
+						const pinnedMessages = await channel.messages.fetchPinned();
 
 						if (pinnedMessages.size >= 50) await pinnedMessages.last().unpin({ reason: 'reached max pin amount' });
 
@@ -392,7 +396,7 @@ module.exports = class TaxCommand extends SlashCommand {
 					}
 				})();
 
-				return await interaction.reply(result);
+				return await this.reply(interaction, result);
 			}
 
 			default:

@@ -33,7 +33,7 @@ module.exports = class PlayerStatsCommand extends BaseStatsCommand {
 	}
 
 	/**
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} [ignOrUuid]
 	 */
 	async _fetchData(ctx, ignOrUuid) { // eslint-disable-line class-methods-use-this

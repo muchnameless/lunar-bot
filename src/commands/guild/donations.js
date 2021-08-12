@@ -2,6 +2,7 @@
 
 const { Formatters } = require('discord.js');
 const { stripIndent } = require('common-tags');
+const MessageEmbedUtil = require('../../util/MessageEmbedUtil');
 const mojang = require('../../api/mojang');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
@@ -19,7 +20,7 @@ module.exports = class DonationsCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		// aquire donations from db
@@ -63,7 +64,7 @@ module.exports = class DonationsCommand extends SlashCommand {
 				});
 			}
 
-			embed.padFields();
+			MessageEmbedUtil.padFields(embed);
 
 			totalAmount += amount;
 		}));
@@ -71,6 +72,6 @@ module.exports = class DonationsCommand extends SlashCommand {
 		embed.setDescription(`Total: ${this.client.formatNumber(totalAmount)}`);
 
 		// create and send embed
-		return await interaction.reply({ embeds: [ embed ] });
+		return await this.reply(interaction, { embeds: [ embed ] });
 	}
 };

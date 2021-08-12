@@ -32,7 +32,7 @@ module.exports = class SmiteCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		return this.client.commands.get('guild').runMute(interaction, {

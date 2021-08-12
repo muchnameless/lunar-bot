@@ -30,14 +30,14 @@ module.exports = class DiscordManager {
 	 * @param {string} string
 	 * @param {number} [block=0]
 	 */
-	static _escapeNonURL(string, block = 0) {
+	static #escapeNonURL(string, block = 0) {
 		switch (block) {
 			case 0:
 				return string
 					.split('```')
 					.map((subString, index, array) => {
 						if (index % 2 && index !== array.length - 1) return subString;
-						return this._escapeNonURL(subString, 1);
+						return this.#escapeNonURL(subString, 1);
 					})
 					.join('```');
 
@@ -46,7 +46,7 @@ module.exports = class DiscordManager {
 					.split(/(?<=^|[^`])`(?=[^`]|$)/g)
 					.map((subString, index, array) => {
 						if (index % 2 && index !== array.length - 1) return subString;
-						return this._escapeNonURL(subString, 2);
+						return this.#escapeNonURL(subString, 2);
 					})
 					.join('`');
 
@@ -141,7 +141,7 @@ module.exports = class DiscordManager {
 	 * @param {string} string
 	 */
 	parseContent(string) {
-		return DiscordManager._escapeNonURL(
+		return DiscordManager.#escapeNonURL(
 			escapeMarkdown(
 				string
 					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning

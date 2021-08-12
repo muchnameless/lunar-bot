@@ -15,7 +15,7 @@ const logger = require('../../functions/logger');
  * @property {string} content
  * @property {string} [prefix='']
  * @property {number} [maxParts=10]
- * @property {import('../extensions/Message')} [discordMessage]
+ * @property {import('discord.js').Message} [discordMessage]
  */
 
 /**
@@ -32,8 +32,8 @@ const logger = require('../../functions/logger');
 
 /**
  * @typedef {object} MessageForwardOptions
- * @property {import('../database/models/Player')} [player=message.author.player] player for muted and isStaff check
- * @property {import('../extensions/CommandInteraction')} [interaction]
+ * @property {import('../database/models/Player')} [player] player for muted and isStaff check
+ * @property {import('discord.js').CommandInteraction} [interaction]
  * @property {boolean} [checkIfNotFromBot=true] wether to not forward messages from the client.user
  * @property {boolean} [isEdit=false] wether the message is an edit instead of a new message
  */
@@ -250,7 +250,7 @@ module.exports = class ChatBridge extends EventEmitter {
 
 	/**
 	 * forwards the discord message to minecraft chat if the ChatBridge has a DiscordChatManager for the message's channel, returning true if so, false otherwise
-	 * @param {import('../extensions/Message')} message
+	 * @param {import('discord.js').Message} message
 	 * @param {MessageForwardOptions} [options]
 	 */
 	handleDiscordMessage(message, { link = this.discord.get(message.channelId), ...options }) {
@@ -260,7 +260,7 @@ module.exports = class ChatBridge extends EventEmitter {
 	/**
 	 * send a message both to discord and the in game guild chat, parsing both
 	 * @param {string | BroadcastOptions} contentOrOptions
-	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]]>}
+	 * @returns {Promise<[boolean, ?import('discord.js').Message | import('discord.js').Message[]]>}
 	 */
 	async broadcast(contentOrOptions) {
 		const { content, hypixelMessage, type = hypixelMessage?.type ?? GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = typeof contentOrOptions === 'string'

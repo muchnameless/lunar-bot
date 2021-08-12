@@ -5,7 +5,7 @@ const { commaListsOr } = require('common-tags');
 
 /**
  * @param {string} message
- * @param {import('../extensions/CommandInteraction')} interaction
+ * @param {import('discord.js').CommandInteraction} interaction
  * @param {import('discord.js').Snowflake[]} requiredRolesRaw
  */
 module.exports = (message, { client, guildId, fullCommandName }, requiredRolesRaw) => commaListsOr`

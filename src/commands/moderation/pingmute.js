@@ -45,10 +45,10 @@ module.exports = class PingMuteCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await interaction.reply(await this._generateReply(this.getPlayer(interaction)));
+		return await this.reply(interaction, await this._generateReply(this.getPlayer(interaction)));
 	}
 
 	/**

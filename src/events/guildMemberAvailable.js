@@ -19,7 +19,7 @@ module.exports = class GuildMemberAvailableEvent extends Event {
 
 	/**
 	 * event listener callback
-	 * @param {import('../structures/extensions/GuildMember')} member
+	 * @param {import('discord.js').GuildMember} member
 	 */
 	async run(member) {
 		if (member.guild.id !== this.config.get('DISCORD_GUILD_ID') || !this.client.options.fetchAllMembers) return;

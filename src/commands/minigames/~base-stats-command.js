@@ -14,7 +14,7 @@ const logger = require('../../functions/logger');
 
 module.exports = class StatsCommand extends DualCommand {
 	/**
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} [ignOrUuid]
 	 * @returns {Promise<FetchedData>}
 	 */
@@ -47,20 +47,20 @@ module.exports = class StatsCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply();
+		this.deferReply(interaction);
 
 		try {
-			return interaction.reply(
+			return this.reply(interaction, 
 				this._generateReply(
 					await this._fetchData(interaction, interaction.options.getString('ign')),
 				),
 			);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
-			return await interaction.reply(`${error}`);
+			return await this.reply(interaction, `${error}`);
 		}
 	}
 

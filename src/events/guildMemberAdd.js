@@ -2,6 +2,7 @@
 
 const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
+const GuildMemberUtil = require('../util/GuildMemberUtil');
 const Event = require('../structures/events/Event');
 // const logger = require('../functions/logger');
 
@@ -16,13 +17,13 @@ module.exports = class GuildMemberAddEvent extends Event {
 
 	/**
 	 * event listener callback
- 	 * @param {import('../structures/extensions/GuildMember')} member
+ 	 * @param {import('discord.js').GuildMember} member
 	 */
 	async run(member) {
 		if (member.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
 
 		// check new discord members for tag in player database and link them if found
-		const player = member.player ?? this.client.players.getById(member.user.tag);
+		const player = GuildMemberUtil.getPlayer(member);
 
 		if (!player) return;
 

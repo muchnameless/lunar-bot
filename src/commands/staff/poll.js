@@ -1,11 +1,12 @@
 'use strict';
 
-const { Formatters, Constants } = require('discord.js');
+const { Interaction, Formatters, Constants } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar, stringToMS } = require('../../functions/util');
 const { messageTypes: { GUILD } } = require('../../structures/chat_bridge/constants/chatBridge');
-const LunarCommandInteraction = require('../../structures/extensions/CommandInteraction');
+const ChannelUtil = require('../../util/ChannelUtil');
+const UserUtil = require('../../util/UserUtil');
 const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
@@ -59,7 +60,7 @@ module.exports = class PollCommand extends DualCommand {
 
 	/**
 	 * create a poll for both in game chat and the chatBridge channel
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {object} param1
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} param1.chatBridge
 	 * @param {string} param1.question
@@ -67,7 +68,7 @@ module.exports = class PollCommand extends DualCommand {
 	 * @param {string} param1.duration
 	 * @param {string} param1.ign
 	 */
-	async _run(ctx, { chatBridge, question, pollOptionNames, duration, ign }) {
+	async #run(ctx, { chatBridge, question, pollOptionNames, duration, ign }) {
 		if (chatBridge.pollUntil) return ctx.reply(`poll already in progress, ends ${Formatters.time(new Date(chatBridge.pollUntil), Formatters.TimestampStyles.RelativeTime)}`);
 
 		try {
@@ -77,7 +78,7 @@ module.exports = class PollCommand extends DualCommand {
 
 			chatBridge.pollUntil = Date.now() + Math.min(Math.max(DURATION, 30_000), 10 * 60_000);
 
-			if (ctx instanceof LunarCommandInteraction) ctx.reply({
+			if (ctx instanceof Interaction) ctx.reply({
 				content: 'poll started',
 				ephemeral: true,
 			});
@@ -119,7 +120,7 @@ module.exports = class PollCommand extends DualCommand {
 				// doesn't start with a number or out of range
 				if (Number.isNaN(votedFor) || votedFor < 1 || votedFor > optionsCount) continue;
 
-				pollOptions[votedFor - 1].votes.add(msg.author.player?.minecraftUuid ?? msg.author.id);
+				pollOptions[votedFor - 1].votes.add(UserUtil.getPlayer(msg.author)?.minecraftUuid ?? msg.author.id);
 			}
 
 			// count votes and sort options by them
@@ -130,7 +131,7 @@ module.exports = class PollCommand extends DualCommand {
 			const resultString = result.map(({ number, option, votes }) => `#${number}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
 
 			// reply with result
-			discordChannel.send({
+			ChannelUtil.send(discordChannel, {
 				embeds: [
 					this.client.defaultEmbed
 						.setTitle(question)
@@ -152,25 +153,25 @@ module.exports = class PollCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply({
+		this.deferReply(interaction, {
 			ephemeral: true,
 		});
 
-		await this._run(
+		await this.#run(
 			interaction,
 			{
 				chatBridge: this.getHypixelGuild(interaction).chatBridge,
 				question: interaction.options.getString('question', true),
 				pollOptionNames: interaction.options._hoistedOptions.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value),
 				duration: interaction.options.getString('duration'),
-				ign: interaction.user.player?.ign ?? interaction.member?.displayName ?? interaction.user.tag,
+				ign: UserUtil.getPlayer(interaction.user)?.ign ?? interaction.member?.displayName ?? interaction.user.tag,
 			},
 		);
 
-		return await interaction.reply({
+		return await this.reply(interaction, {
 			content: 'poll complete',
 			ephemeral: true,
 		});
@@ -191,7 +192,7 @@ module.exports = class PollCommand extends DualCommand {
 
 		if (!inputMatched || inputMatched.length < 2) return await message.reply(this.usageInfo);
 
-		return this._run(
+		return this.#run(
 			message,
 			{
 				chatBridge: message.chatBridge,

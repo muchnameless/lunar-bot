@@ -34,7 +34,8 @@ module.exports = class GuildOfCommand extends DualCommand {
 	 * execute the command
 	 * @param {string} ignOrUuid
 	 */
-	async _generateReply(ignOrUuid) {
+	// eslint-disable-next-line class-methods-use-this
+	async #generateReply(ignOrUuid) {
 		try {
 			const { uuid, ign } = await mojang.ignOrUuid(ignOrUuid);
 			const { name, tag, members } = await hypixel.guild.player(uuid);
@@ -51,12 +52,12 @@ module.exports = class GuildOfCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply();
+		this.deferReply(interaction);
 
-		return await interaction.reply(await this._generateReply(interaction.options.getString('ign', true)));
+		return await this.reply(interaction, await this.#generateReply(interaction.options.getString('ign', true)));
 	}
 
 	/**
@@ -64,6 +65,6 @@ module.exports = class GuildOfCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return await message.reply(await this._generateReply(...message.commandData.args));
+		return await message.reply(await this.#generateReply(...message.commandData.args));
 	}
 };

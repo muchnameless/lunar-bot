@@ -7,6 +7,7 @@ const { mutedCheck } = require('../../../functions/database');
 const { setRank } = require('../../chat_bridge/constants/commandResponses');
 const { EMBED_MAX_CHARS, EMBED_MAX_FIELDS, EMBED_FIELD_MAX_CHARS } = require('../../../constants/discord');
 const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, CURRENT, DAY }, UNKNOWN_IGN } = require('../../../constants/database');
+const GuildUtil = require('../../../util/GuildUtil');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
@@ -279,7 +280,7 @@ module.exports = class HypixelGuild extends Model {
 
 		if (data.meta.cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
 
-		this._updateGuildData(data);
+		this.#updateGuildData(data);
 
 		return this.updatePlayers(data, options);
 	}
@@ -288,7 +289,7 @@ module.exports = class HypixelGuild extends Model {
 	 * updates the guild data
 	 * @param {?import('@zikeji/hypixel/src/util/ResultObject').ResultObject<import('@zikeji/hypixel').Components.Schemas.GuildResponse, ['guild']>} data
 	 */
-	async _updateGuildData(data) {
+	async #updateGuildData(data) {
 		const { meta: { cached }, name: guildName, ranks, chatMute } = data ?? await hypixel.guild.id(this.guildId);
 
 		if (cached) return logger.info(`[UPDATE GUILD DATA]: ${this.name}: cached data`);
@@ -396,7 +397,7 @@ module.exports = class HypixelGuild extends Model {
 								return hasError = true;
 							}
 
-							discordMember = await this.client.lgGuild?.fetchMemberByTag(discordTag);
+							discordMember = await GuildUtil.fetchMemberByTag(this.client.lgGuild, discordTag);
 
 							if (discordMember) return;
 
@@ -443,7 +444,7 @@ module.exports = class HypixelGuild extends Model {
 									return hasError = true;
 								}
 
-								discordMember = await this.client.lgGuild?.fetchMemberByTag(discordTag);
+								discordMember = await GuildUtil.fetchMemberByTag(this.client.lgGuild, discordTag);
 
 								if (!discordMember) {
 									if (/\D/.test(player.discordId)) await player.setValidDiscordId(discordTag).catch(logger.error); // save tag if no id is known

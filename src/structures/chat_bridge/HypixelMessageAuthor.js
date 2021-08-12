@@ -25,7 +25,7 @@ module.exports = class HypixelMessageAuthor {
 			? this.client.players.cache.get(uuid) ?? logger.error(`[HYPIXEL AUTHOR CTOR]: unknown uuid '${uuid}'`) ?? this.client.players.findByIgn(ign)
 			: this.client.players.findByIgn(ign);
 		/**
-		 * @type {?import('../extensions/GuildMember')}
+		 * @type {?import('discord.js').Message}
 		 */
 		this.member = null;
 	}

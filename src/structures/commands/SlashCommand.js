@@ -4,8 +4,10 @@ const { Constants } = require('discord.js');
 const { PROFILE_NAMES, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
 const { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT, GUILD_ID_ALL } = require('../../constants/database');
 const { validateDiscordId, validateMinecraftUuid } = require('../../functions/stringValidators');
-const BaseCommand = require('./BaseCommand');
 const missingPermissionsError = require('../errors/MissingPermissionsError');
+const InteractionUtil = require('../../util/InteractionUtil');
+const UserUtil = require('../../util/UserUtil');
+const BaseCommand = require('./BaseCommand');
 const logger = require('../../functions/logger');
 
 
@@ -195,22 +197,47 @@ module.exports = class SlashCommand extends BaseCommand {
 		return permissions;
 	}
 
+	// eslint-disable-next-line class-methods-use-this
+	get reply() {
+		return InteractionUtil.reply;
+	}
+
+	// eslint-disable-next-line class-methods-use-this
+	get deferReply() {
+		return InteractionUtil.deferReply;
+	}
+
+	// eslint-disable-next-line class-methods-use-this
+	get followUp() {
+		return InteractionUtil.followUp;
+	}
+
+	// eslint-disable-next-line class-methods-use-this
+	get update() {
+		return InteractionUtil.update;
+	}
+
+	// eslint-disable-next-line class-methods-use-this
+	get deferUpdate() {
+		return InteractionUtil.deferUpdate;
+	}
+
 	/**
-	 * returns the player object, optional fallback to interaction.user.player
-	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * returns the player object, optional fallback to the interaction.user's player
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {boolean} [fallbackToCurrentUser=false]
 	 * @returns {?import('../database/models/Player')}
 	 */
 	getPlayer(interaction, fallbackToCurrentUser = false) {
 		if (!interaction.options._hoistedOptions.length) {
-			if (fallbackToCurrentUser) return interaction.user.player;
+			if (fallbackToCurrentUser) return UserUtil.getPlayer(interaction.user);
 			return null;
 		}
 
 		const INPUT = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.replace(/\W/g, '').toLowerCase();
 
 		if (!INPUT) {
-			if (fallbackToCurrentUser) return interaction.user.player;
+			if (fallbackToCurrentUser) return UserUtil.getPlayer(interaction.user);
 			return null;
 		}
 
@@ -224,8 +251,8 @@ module.exports = class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * returns the player object's IGN, optional fallback to interaction.user.player
-	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * returns the player object's IGN, optional fallback to interaction.user's player
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {boolean} [fallbackToCurrentUser=false]
 	 * @returns {?string}
 	 */
@@ -236,24 +263,24 @@ module.exports = class SlashCommand extends BaseCommand {
 
 	/**
 	 * returns a HypixelGuild instance
-	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @returns {import('../database/models/HypixelGuild') | GUILD_ID_ALL}
 	 */
 	getHypixelGuild(interaction) {
 		const INPUT = interaction.options.getString('guild');
 		if (INPUT === GUILD_ID_ALL) return INPUT;
-		return this.client.hypixelGuilds.cache.get(INPUT) ?? interaction.user.player?.hypixelGuild ?? this.client.hypixelGuilds.mainGuild;
+		return this.client.hypixelGuilds.cache.get(INPUT) ?? UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? this.client.hypixelGuilds.mainGuild;
 	}
 
 	/**
-	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {{ userIds?: import('discord.js').Snowflake[], roleIds?: import('discord.js').Snowflake[] }} [permissions]
 	 */
 	async checkPermissions(interaction, { userIds = [ this.client.ownerId ], roleIds = this.requiredRoles } = {}) {
 		if (userIds?.includes(interaction.user.id)) return; // user id bypass
 		if (!roleIds?.length) return; // no role requirements
 
-		/** @type {import('../extensions/GuildMember')} */
+		/** @type {import('discord.js').GuildMember} */
 		const member = interaction.guildId === this.config.get('DISCORD_GUILD_ID')
 			? interaction.member
 			: await (async () => {
@@ -261,7 +288,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
 
-				interaction.deferReply();
+				this.deferReply(interaction);
 
 				try {
 					return await lgGuild.members.fetch(interaction.user.id);
@@ -279,7 +306,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');

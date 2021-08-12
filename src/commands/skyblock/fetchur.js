@@ -67,10 +67,10 @@ module.exports = class FetchurCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await interaction.reply(this._generateReply());
+		return await this.reply(interaction, this._generateReply());
 	}
 
 	/**

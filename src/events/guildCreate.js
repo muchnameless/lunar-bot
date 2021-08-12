@@ -14,7 +14,7 @@ module.exports = class GuildCreateEvent extends Event {
 
 	/**
 	 * event listener callback
-	 * @param {import('../structures/extensions/Guild')} guild
+	 * @param {import('discord.js').Guild} guild
 	 */
 	async run(guild) {
 		logger.info(`[GUILD CREATE]: ${guild.name}`);

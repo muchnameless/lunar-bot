@@ -45,11 +45,11 @@ module.exports = class UnloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} subcommand
 	 * @param {string} input
 	 */
-	async _run(ctx, subcommand, input) {
+	async #run(ctx, subcommand, input) {
 		switch (subcommand) {
 			case 'command': {
 				/** @type {import('../../structures/commands/BaseCommand')} */
@@ -80,10 +80,10 @@ module.exports = class UnloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, interaction.options.getSubcommand(), interaction.options.getString('name', true));
+		return this.#run(interaction, interaction.options.getSubcommand(), interaction.options.getString('name', true));
 	}
 
 	/**
@@ -91,6 +91,6 @@ module.exports = class UnloadCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this._run(message, ...message.commandData.args.map(arg => arg.toLowerCase()));
+		return this.#run(message, ...message.commandData.args.map(arg => arg.toLowerCase()));
 	}
 };

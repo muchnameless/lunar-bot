@@ -21,10 +21,10 @@ module.exports = class DebugCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await interaction.reply({
+		return await this.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.addFields({

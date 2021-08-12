@@ -2,6 +2,7 @@
 
 const { setTimeout: sleep } = require('timers/promises');
 const ms = require('ms');
+const GuildMemberUtil = require('../../util/GuildMemberUtil');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
 
@@ -25,10 +26,10 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		if (PurgeRolesCommand.running) return await interaction.reply({
+		if (PurgeRolesCommand.running) return await this.reply(interaction, {
 			content: 'the command is already running',
 			ephemeral: true,
 		});
@@ -36,7 +37,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 		try {
 			PurgeRolesCommand.running = true;
 
-			interaction.deferReply();
+			this.deferReply(interaction);
 
 			const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 			const toPurge = [];
@@ -44,7 +45,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 			for (const member of (await this.client.fetchAllGuildMembers()).values()) {
 				if (member.roles.cache.has(GUILD_ROLE_ID)) continue;
 
-				const { rolesToPurge } = member;
+				const rolesToPurge = GuildMemberUtil.getRolesToPurge(member);
 
 				if (!rolesToPurge.length) continue;
 
@@ -56,7 +57,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 
 			const PURGE_AMOUNT = toPurge.length;
 
-			if (!PURGE_AMOUNT) return await interaction.reply('no roles need to be purged');
+			if (!PURGE_AMOUNT) return await this.reply(interaction, 'no roles need to be purged');
 
 			await interaction.awaitConfirmation(`purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT, { long: true })}?`);
 
@@ -77,7 +78,7 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 				}
 			}));
 
-			return await interaction.reply(`done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`);
+			return await this.reply(interaction, `done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`);
 		} finally {
 			PurgeRolesCommand.running = false;
 		}

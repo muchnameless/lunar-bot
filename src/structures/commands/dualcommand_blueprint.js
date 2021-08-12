@@ -24,7 +24,7 @@ module.exports = class MyCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 */
 	async _run(ctx) { // eslint-disable-line no-unused-vars
 		// do stuff
@@ -32,7 +32,7 @@ module.exports = class MyCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) { // eslint-disable-line no-unused-vars
 		// do stuff

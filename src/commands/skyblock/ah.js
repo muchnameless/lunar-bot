@@ -57,7 +57,7 @@ module.exports = class AhCommand extends SlashCommand {
 	/**
 	 * @param {{ ign: string, uuid: string, profileId: string, profiles: { label: string, value: string }[] }} param0
 	 */
-	async _generateReply({ ign, uuid, profileId, profiles }) {
+	async #generateReply({ ign, uuid, profileId, profiles }) {
 		try {
 			const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId);
 			const embed = this.client.defaultEmbed
@@ -148,10 +148,10 @@ module.exports = class AhCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {import('../../structures/extensions/SelectMenuInteraction')} interaction
+	 * @param {import('discord.js').SelectMenuInteraction} interaction
 	 */
 	async runSelect(interaction) {
-		interaction.deferUpdate();
+		this.deferUpdate(interaction);
 
 		try {
 			const [ , uuid, ign ] = interaction.customId.split(':');
@@ -160,15 +160,14 @@ module.exports = class AhCommand extends SlashCommand {
 				?? (await hypixel.skyblock.profiles.uuid(uuid)).map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id }));
 
 			// interaction from original requester -> edit message
-			if (interaction.user.id === interaction.message.interaction?.user.id) return interaction.update(await this._generateReply({ uuid, ign, profileId, profiles }));
+			if (interaction.user.id === interaction.message.interaction?.user.id) return interaction.update(await this.#generateReply({ uuid, ign, profileId, profiles }));
 
 			// interaction from new requester -> new message
-			await interaction.updateDeferring;
-			return interaction.followUp(await this._generateReply({ uuid, ign, profileId, profiles }));
+			return this.followUp(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));
 		} catch (error) {
 			logger.error(error);
 
-			return interaction.followUp({
+			return this.followUp(interaction, {
 				content: `${error}`,
 				ephemeral: true,
 			});
@@ -177,10 +176,10 @@ module.exports = class AhCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply();
+		this.deferReply(interaction);
 
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
@@ -188,7 +187,7 @@ module.exports = class AhCommand extends SlashCommand {
 			const embed = this.client.defaultEmbed;
 
 			if (!profiles.length) {
-				return interaction.reply({
+				return this.reply(interaction, {
 					embeds: [
 						embed
 							.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
@@ -219,7 +218,7 @@ module.exports = class AhCommand extends SlashCommand {
 				profileId = profiles.find(({ cute_name: name }) => name === PROFILE_NAME_INPUT)?.profile_id;
 
 				if (!profileId) {
-					return interaction.reply({
+					return this.reply(interaction, {
 						embeds: [
 							embed
 								.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
@@ -237,10 +236,10 @@ module.exports = class AhCommand extends SlashCommand {
 				}
 			}
 
-			return interaction.reply(await this._generateReply({ ign, uuid, profileId, profiles: profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id })) }));
+			return this.reply(interaction, await this.#generateReply({ ign, uuid, profileId, profiles: profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id })) }));
 		} catch (error) {
 			logger.error(error);
-			return await interaction.reply(`${error}`);
+			return await this.reply(interaction, `${error}`);
 		}
 	}
 };

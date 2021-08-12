@@ -17,9 +17,9 @@ module.exports = class PingCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await interaction.reply(`Api Latency: ${ms(Date.now() - interaction.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}`);
+		return await this.reply(interaction, `Api Latency: ${ms(Date.now() - interaction.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}`);
 	}
 };

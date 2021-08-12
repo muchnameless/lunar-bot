@@ -3,7 +3,7 @@
 module.exports = class WebhookError extends Error {
 	/**
 	 * @param {string} message
-	 * @param {import('../extensions/TextChannel')} textChannel
+	 * @param {import('discord.js').TextChannel} channel
 	 * @param {import('../database/models/HypixelGuild')} hypixelGuild
 	 */
 	constructor(message, channel, hypixelGuild) {

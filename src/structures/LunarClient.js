@@ -9,6 +9,7 @@ const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
 const SlashCommandCollection = require('./commands/SlashCommandCollection');
 const EventCollection = require('./events/EventCollection');
 const ImgurClient = require('./ImgurClient');
+const UserUtil = require('../util/UserUtil');
 const cache = require('../api/cache');
 const logger = require('../functions/logger');
 
@@ -69,7 +70,7 @@ module.exports = class LunarClient extends Client {
 
 	/**
 	 * returns the lunar guard discord guild
-	 * @returns {?import('./extensions/Guild')} lunar guard discord guild
+	 * @returns {?import('discord.js').Guild} lunar guard discord guild
 	 */
 	get lgGuild() {
 		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'));
@@ -78,7 +79,7 @@ module.exports = class LunarClient extends Client {
 
 	/**
 	 * fetches all guild members if the cache size is not equal to the guild's member count
-	 * @returns {Promise<import('discord.js').Collection<import('discord.js').Snowflake, import('./extensions/GuildMember')>>}
+	 * @returns {Promise<import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').GuildMember>>}
 	 */
 	async fetchAllGuildMembers(guild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'))) {
 		if (!guild?.available) throw `the ${guild?.name ?? 'discord'} server is currently unavailable`;
@@ -156,9 +157,9 @@ module.exports = class LunarClient extends Client {
 	}
 
 	/**
-	 * @returns {Promise<import('./extensions/User')>}
+	 * @returns {Promise<import('discord.js').User>}
 	 */
-	get owner() {
+	fetchOwner() {
 		return this.users.fetch(this.ownerId);
 	}
 
@@ -168,7 +169,7 @@ module.exports = class LunarClient extends Client {
 	get ownerInfo() {
 		return (async () => {
 			try {
-				const owner = await this.owner;
+				const owner = await this.fetchOwner();
 				return `${owner.tag} ${owner}`;
 			} catch (error) {
 				logger.error('[OWNER INFO]', error);
@@ -204,7 +205,7 @@ module.exports = class LunarClient extends Client {
 	 * @param {string} content
 	 */
 	async dmOwner(content) {
-		return (await this.owner).send({
+		return UserUtil.sendDM(await this.fetchOwner(), {
 			content,
 			split: { char: ' ' },
 		});

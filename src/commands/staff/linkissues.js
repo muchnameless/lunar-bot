@@ -18,7 +18,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		// discord members with wrong roles
@@ -134,7 +134,7 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 
 		embed.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);
 
-		return await interaction.reply({
+		return await this.reply(interaction, {
 			embeds: [
 				embed,
 			],

@@ -16,7 +16,7 @@ module.exports = class MyCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) { // eslint-disable-line no-unused-vars
 		// do stuff

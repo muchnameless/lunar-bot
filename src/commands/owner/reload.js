@@ -73,11 +73,11 @@ module.exports = class ReloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} subcommand
 	 * @param {string} input
 	 */
-	async _run(ctx, subcommand, input) {
+	async #run(ctx, subcommand, input) {
 		switch (subcommand) {
 			case 'command': {
 				let commandName = input.toLowerCase();
@@ -190,10 +190,10 @@ module.exports = class ReloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return this._run(interaction, interaction.options.getSubcommand(), interaction.options.getString('name'));
+		return this.#run(interaction, interaction.options.getSubcommand(), interaction.options.getString('name'));
 	}
 
 	/**
@@ -201,6 +201,6 @@ module.exports = class ReloadCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this._run(message, ...message.commandData.args);
+		return this.#run(message, ...message.commandData.args);
 	}
 };

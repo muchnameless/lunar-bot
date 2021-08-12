@@ -30,7 +30,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 		this.chatBridge = chatBridge;
 		/**
 		 * forwarded message
-		 * @type {Promise<?import('../extensions/Message')>}
+		 * @type {Promise<?import('discord.js').Message>}
 		 */
 		this.discordMessage = Promise.resolve(null);
 		/**
@@ -190,7 +190,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 	/**
 	 * alias for reply, to make methods for dc messages compatible with mc messages
 	 * @param {string} emoji
-	 * @returns {Promise<[boolean, ?import('discord.js').MessageReaction|import('../extensions/Message')]>}
+	 * @returns {Promise<[boolean, ?import('discord.js').MessageReaction | import('discord.js').Message]>}
 	 */
 	async react(emoji) {
 		switch (this.type) {

@@ -22,7 +22,7 @@ module.exports = class LeaderboardCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		return handleLeaderboardCommandInteraction(

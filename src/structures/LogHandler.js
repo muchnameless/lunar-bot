@@ -5,6 +5,7 @@ const { commaListsAnd } = require('common-tags');
 const { promises: { mkdir, writeFile, readdir, readFile, unlink } } = require('fs');
 const { join } = require('path');
 const { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } = require('../constants/discord');
+const ChannelUtil = require('../util/ChannelUtil');
 const logger = require('../functions/logger');
 
 
@@ -41,8 +42,10 @@ module.exports = class LogHandler {
 
 		if (!channel?.isText()) return logger.error(`[LOG HANDLER]: ${channel ? `#${channel.name}` : this.client.config.get('LOGGING_CHANNEL_ID')} is not a cached text based channel (id)`);
 
-		if (!channel.botPermissions.has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)) {
-			return logger.error(commaListsAnd`[LOG HANDLER]: missing ${channel.botPermissions.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS).map(permission => `'${permission}'`)}`);
+		if (!ChannelUtil.botPermissions(channel).has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)) {
+			return logger.error(commaListsAnd`[LOG HANDLER]: missing ${ChannelUtil.botPermissions(channel)
+				.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)
+				.map(permission => `'${permission}'`)}`);
 		}
 
 		return channel;
@@ -64,7 +67,7 @@ module.exports = class LogHandler {
 		if (!channel) return;
 
 		try {
-			return await this._postFileLogs(); // repost logs that failed to be posted during the last uptime
+			return await this.#postFileLogs(); // repost logs that failed to be posted during the last uptime
 		} catch (error) {
 			logger.error('[LOG HANDLER]', error);
 		}
@@ -80,7 +83,7 @@ module.exports = class LogHandler {
 		if (!embeds.length) return null; // nothing to log
 
 		// send 1 message
-		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) return this._log(embeds);
+		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) return this.#log(embeds);
 
 		// split into multiple messages
 		const TOTAL_AMOUNT = embeds.length;
@@ -103,7 +106,7 @@ module.exports = class LogHandler {
 				embedChunk.push(embeds[total]);
 			}
 
-			returnValue.push(this._log(embedChunk));
+			returnValue.push(this.#log(embedChunk));
 		}
 
 		return Promise.all(returnValue);
@@ -139,7 +142,7 @@ module.exports = class LogHandler {
 	 * log to console and send in the logging channel
 	 * @param {MessageEmbed[]} embedsInput
 	 */
-	async _log(embeds) {
+	async #log(embeds) {
 		// log to console
 		for (const embed of embeds) {
 			const FIELDS_LOG = embed.fields?.filter(({ name, value }) => name !== '\u200b' || value !== '\u200b');
@@ -164,7 +167,7 @@ module.exports = class LogHandler {
 		const { channel } = this;
 
 		// no logging channel
-		if (!channel) return this._logToFile(embeds);
+		if (!channel) return this.#logToFile(embeds);
 
 		// API call
 		try {
@@ -174,7 +177,7 @@ module.exports = class LogHandler {
 		} catch (error) {
 			logger.error('[CLIENT LOG]', error);
 
-			this._logToFile(embeds);
+			this.#logToFile(embeds);
 
 			return null;
 		}
@@ -183,7 +186,7 @@ module.exports = class LogHandler {
 	/**
 	 * create log_buffer folder if it is non-existent
 	 */
-	async _createLogBufferFolder() {
+	async #createLogBufferFolder() {
 		try {
 			await mkdir(this.logPath);
 			logger.info('[LOG BUFFER]: created \'log_buffer\' folder');
@@ -197,9 +200,9 @@ module.exports = class LogHandler {
 	 * write data in 'cwd/log_buffer'
 	 * @param {MessageEmbed[]} embeds file content
 	 */
-	async _logToFile(embeds) {
+	async #logToFile(embeds) {
 		try {
-			await this._createLogBufferFolder();
+			await this.#createLogBufferFolder();
 			await writeFile(
 				join(this.logPath, `${new Date()
 					.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -216,9 +219,9 @@ module.exports = class LogHandler {
 	/**
 	 * read all files from 'cwd/log_buffer' and log their parsed content in the logging channel
 	 */
-	async _postFileLogs() {
+	async #postFileLogs() {
 		try {
-			await this._createLogBufferFolder();
+			await this.#createLogBufferFolder();
 
 			const logBufferFiles = await readdir(this.logPath);
 

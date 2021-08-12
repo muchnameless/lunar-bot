@@ -46,7 +46,7 @@ module.exports = class ChatBridgeArray extends Array {
 	/**
 	 * @private
 	 */
-	static get _accounts() {
+	static get #accounts() {
 		return process.env.MINECRAFT_ACCOUNT_TYPE.split(' ');
 	}
 
@@ -64,9 +64,9 @@ module.exports = class ChatBridgeArray extends Array {
 	/**
 	 * instantiates all chatBridges
 	 */
-	_init() {
-		for (let index = 0; index < ChatBridgeArray._accounts.length; ++index) {
-			this._initSingle(index);
+	#init() {
+		for (let index = 0; index < ChatBridgeArray.#accounts.length; ++index) {
+			this.#initSingle(index);
 		}
 	}
 
@@ -74,7 +74,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 * instantiates a single chatBridge
 	 * @param {?number} index
 	 */
-	_initSingle(index) {
+	#initSingle(index) {
 		if (this[index] instanceof ChatBridge) return; // already instantiated
 		this[index] = new ChatBridge(this.client, index);
 	}
@@ -93,8 +93,8 @@ module.exports = class ChatBridgeArray extends Array {
 		await this.commands.loadAll();
 
 		// single
-		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray._accounts.length) {
-			if (!(this[index] instanceof ChatBridge)) this._initSingle(index);
+		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray.#accounts.length) {
+			if (!(this[index] instanceof ChatBridge)) this.#initSingle(index);
 
 			(await this[index].connect())
 				.once('ready', () => resolve());
@@ -105,7 +105,7 @@ module.exports = class ChatBridgeArray extends Array {
 		// all
 		let resolved = 0;
 
-		if (this.length !== ChatBridgeArray._accounts.length) this._init();
+		if (this.length !== ChatBridgeArray.#accounts.length) this.#init();
 		(await Promise.all(this.map(async (/** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.connect())))
 			.map(chatBridge => chatBridge.once('ready', () => ++resolved === this.length && resolve()));
 
@@ -119,7 +119,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 */
 	disconnect(index) {
 		// single
-		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray._accounts.length) {
+		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray.#accounts.length) {
 			if (!(this[index] instanceof ChatBridge)) throw new Error(`no chatBridge with index #${index}`);
 			return this[index].disconnect();
 		}
@@ -131,7 +131,7 @@ module.exports = class ChatBridgeArray extends Array {
 	/**
 	 * send a message via all chatBridges both to discord and the in game guild chat, parsing both
 	 * @param {string | ChatBridge.BroadcastOptions} contentOrOptions
-	 * @returns {Promise<[boolean, ?import('../extensions/Message')|import('../extensions/Message')[]][]>}
+	 * @returns {Promise<[boolean, ?import('discord.js').Message | import('discord.js').Message[]][]>}
 	 */
 	async broadcast(contentOrOptions) {
 		return Promise.all(this.map(async (/** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.broadcast(contentOrOptions)));
@@ -139,7 +139,7 @@ module.exports = class ChatBridgeArray extends Array {
 
 	/**
 	 * forwards announcement messages to all chatBridges (via broadcast)
-	 * @param {import('../extensions/Message')} message
+	 * @param {import('discord.js').Message} message
 	 */
 	async handleAnnouncementMessage(message) {
 		if (!this.length) return message.react(X_EMOJI);
@@ -176,7 +176,7 @@ module.exports = class ChatBridgeArray extends Array {
 
 	/**
 	 * forwards the discord message if a chat bridge for that channel is found
-	 * @param {import('../extensions/Message')} message
+	 * @param {import('discord.js').Message} message
 	 * @param {import('./ChatBridge').MessageForwardOptions} [options={}]
 	 */
 	async handleDiscordMessage(message, options = {}) {

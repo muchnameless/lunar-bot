@@ -3,7 +3,6 @@
 const { join } = require('path');
 require('dotenv').config({ path: join(__dirname, '.env') });
 const { Intents, LimitedCollection, SnowflakeUtil, Options, Constants } = require('discord.js');
-const { requireAll } = require('./functions/files');
 const db = require('./structures/database/index');
 const LunarClient = require('./structures/LunarClient');
 const logger = require('./functions/logger');
@@ -25,9 +24,6 @@ process
 
 // init
 (async () => {
-	// discord.js structure extensions
-	await requireAll(join(__dirname, 'structures', 'extensions'));
-
 	// initiate bot client
 	client = new LunarClient({
 		// custom options

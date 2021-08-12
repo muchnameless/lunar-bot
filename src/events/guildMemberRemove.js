@@ -2,6 +2,8 @@
 
 const { MessageEmbed, Formatters } = require('discord.js');
 const { stripIndents } = require('common-tags');
+const GuildMemberUtil = require('../util/GuildMemberUtil');
+const MessageEmbedUtil = require('../util/MessageEmbedUtil');
 const Event = require('../structures/events/Event');
 // const logger = require('../functions/logger');
 
@@ -16,7 +18,7 @@ module.exports = class GuildMemberRemoveEvent extends Event {
 
 	/**
 	 * event listener callback
-	 * @param {import('../structures/extensions/GuildMember')} member
+	 * @param {import('discord.js').GuildMember} member
 	 */
 	async run(member) {
 		// uncache user
@@ -27,34 +29,35 @@ module.exports = class GuildMemberRemoveEvent extends Event {
 		if (member.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
 
 		// check discord members that left for id in player database
-		const { player } = member;
+		const player = GuildMemberUtil.getPlayer(member);
 
 		if (!player) return;
 
 		player.inDiscord = false;
 		player.save();
 
-		this.client.log(new MessageEmbed()
-			.setColor(this.config.get('EMBED_RED'))
-			.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
-			.setThumbnail(player.image)
-			.setDescription(stripIndents`
-				${member} left the discord server
-				${player.info}
-			`)
-			.addFields({
-				name: 'Roles',
-				value: Formatters.codeBlock(
-					member.roles?.cache
-						.filter(({ id }) => id !== member.guild.id)
-						.sort((a, b) => b.comparePositionTo(a))
-						.map(({ name }) => name)
-						.join('\n')
-					?? 'unknown',
-				),
-			})
-			.padFields(2)
-			.setTimestamp(),
-		);
+		this.client.log(MessageEmbedUtil.padFields(
+			new MessageEmbed()
+				.setColor(this.config.get('EMBED_RED'))
+				.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
+				.setThumbnail(player.image)
+				.setDescription(stripIndents`
+					${member} left the discord server
+					${player.info}
+				`)
+				.addFields({
+					name: 'Roles',
+					value: Formatters.codeBlock(
+						member.roles?.cache
+							.filter(({ id }) => id !== member.guild.id)
+							.sort((a, b) => b.comparePositionTo(a))
+							.map(({ name }) => name)
+							.join('\n')
+						?? 'unknown',
+					),
+				})
+				.setTimestamp(),
+			2,
+		));
 	}
 };

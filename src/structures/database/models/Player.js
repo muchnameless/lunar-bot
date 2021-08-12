@@ -1,6 +1,6 @@
 'use strict';
 
-const { MessageEmbed, Permissions, Formatters } = require('discord.js');
+const { GuildMember, MessageEmbed, Permissions, Formatters } = require('discord.js');
 const { Model, DataTypes } = require('sequelize');
 const { stripIndents } = require('common-tags');
 const { RateLimitError } = require('@zikeji/hypixel');
@@ -13,10 +13,13 @@ const { getSkillLevel, getSenitherWeight, getSenitherSkillWeight, getSenitherSla
 const { validateNumber, validateDiscordId } = require('../../../functions/stringValidators');
 const { mutedCheck } = require('../../../functions/database');
 const { PSEUDO_GUILD_IDS } = require('../managers/HypixelGuildManager');
-const LunarGuildMember = require('../../extensions/GuildMember');
+const GuildUtil = require('../../../util/GuildUtil');
+const GuildMemberUtil = require('../../../util/GuildMemberUtil');
+const MessageEmbedUtil = require('../../../util/MessageEmbedUtil');
 const hypixel = require('../../../api/hypixel');
 const mojang = require('../../../api/mojang');
 const logger = require('../../../functions/logger');
+const UserUtil = require('../../../util/UserUtil');
 
 
 module.exports = class Player extends Model {
@@ -24,7 +27,7 @@ module.exports = class Player extends Model {
 		super(...args);
 
 		/**
-		 * @type {?LunarGuildMember}
+		 * @type {?import('discord.js').GuildMember}
 		 */
 		this._discordMember = null;
 		/**
@@ -299,7 +302,7 @@ module.exports = class Player extends Model {
 
 	/**
 	 * fetches the discord member if the discord id is valid and the player is in lg discord
-	 * @type {Promise<?LunarGuildMember>}
+	 * @returns {Promise<?import('discord.js').GuildMember>}
 	 */
 	get discordMember() {
 		return (async () => {
@@ -318,15 +321,13 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * @param {?LunarGuildMember} member
+	 * @param {?import('discord.js').GuildMember} member
 	 */
 	set discordMember(member) {
 		if (member == null) {
 			super.update({ inDiscord: false }).catch(logger.error);
 			return;
 		}
-
-		if (!(member instanceof LunarGuildMember)) throw new TypeError(`[SET DISCORD MEMBER]: ${this.logInfo}: member must be a LunarGuildMember`);
 
 		this._discordMember = member;
 
@@ -337,7 +338,6 @@ module.exports = class Player extends Model {
 
 	/**
 	 * fetches the discord user if the discord id is valid
-	 * @returns {Promise<?import('../../extensions/User')>}
 	 */
 	get discordUser() {
 		return validateNumber(this.discordId)
@@ -769,7 +769,6 @@ module.exports = class Player extends Model {
 
 	/**
 	 * tries to link unlinked players via discord.js-cache (without any discord API calls)
-	 * @returns {Promise<?LunarGuildMember>}
 	 */
 	async linkUsingCache() {
 		const { lgGuild } = this.client;
@@ -824,11 +823,11 @@ module.exports = class Player extends Model {
 
 	/**
 	 * links a player to the provided discord guild member, updating roles and nickname
-	 * @param {LunarGuildMember|string} idOrDiscordMember the member to link the player to
+	 * @param {GuildMember | string} idOrDiscordMember the member to link the player to
 	 * @param {string} reason reason for discord's audit logs
 	 */
 	async link(idOrDiscordMember, reason = null) {
-		if (idOrDiscordMember instanceof LunarGuildMember) {
+		if (idOrDiscordMember instanceof GuildMember) {
 			await this.setValidDiscordId(idOrDiscordMember.id);
 			this.inDiscord = true;
 			this.discordMember = idOrDiscordMember;
@@ -857,7 +856,7 @@ module.exports = class Player extends Model {
 
 		if (currentlyLinkedMember) {
 			// remove roles that the bot manages
-			const { rolesToPurge } = currentlyLinkedMember;
+			const rolesToPurge = GuildMemberUtil.getRolesToPurge(currentlyLinkedMember);
 
 			if (rolesToPurge.length) wasSuccessful = await this.makeRoleApiCall([], rolesToPurge, reason);
 
@@ -906,8 +905,8 @@ module.exports = class Player extends Model {
 		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));
 
 		// check if IDs are proper roles and managable by the bot
-		filteredRolesToAdd = member.guild.resolveRoles(filteredRolesToAdd);
-		filteredRolesToRemove = member.guild.resolveRoles(filteredRolesToRemove);
+		filteredRolesToAdd = GuildUtil.resolveRoles(member.guild, filteredRolesToAdd);
+		filteredRolesToRemove = GuildUtil.resolveRoles(member.guild, filteredRolesToRemove);
 		if (!filteredRolesToAdd.size && !filteredRolesToRemove.size) return true;
 
 		const loggingEmbed = new MessageEmbed()
@@ -966,7 +965,7 @@ module.exports = class Player extends Model {
 			return false;
 		} finally {
 			// logging
-			await member.client.log(loggingEmbed.padFields(2));
+			await member.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2));
 		}
 	}
 
@@ -984,7 +983,7 @@ module.exports = class Player extends Model {
 			const rolesToAdd = (Date.now() - this.createdAt >= 7 * 24 * 60 * 60_000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
 				? [ config.get('EX_GUILD_ROLE_ID') ] // add ex guild role if player stayed for more than 1 week
 				: [];
-			const rolesToRemove = member.rolesToPurge;
+			const rolesToRemove = GuildMemberUtil.getRolesToPurge(member);
 
 			if (!await this.makeRoleApiCall(rolesToAdd, rolesToRemove, `left ${this.guildName}`)) {
 				// error updating roles
@@ -1093,20 +1092,18 @@ module.exports = class Player extends Model {
 			);
 
 			if (shouldSendDm) {
-				await member
-					.send(reason === 1
-						? stripIndents`
-							include your ign \`${this.ign}\` somewhere in your nickname.
-							If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${this.client.user} will automatically change your discord nickname
-						`
-						: stripIndents`
-							the name \`${PREV_NAME}\` is already taken by another guild member.
-							Your name should be unique to allow staff members to easily identify you
-						`,
-					).then(
-						() => logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`),
-						error => logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: unable to DM`, error),
-					);
+				await UserUtil.sendDM(member.user, reason === 1
+					? stripIndents`
+						include your ign \`${this.ign}\` somewhere in your nickname.
+						If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${this.client.user} will automatically change your discord nickname
+					`
+					: stripIndents`
+						the name \`${PREV_NAME}\` is already taken by another guild member.
+						Your name should be unique to allow staff members to easily identify you
+					`,
+				);
+
+				logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`);
 			}
 
 			return true;
@@ -1338,11 +1335,11 @@ module.exports = class Player extends Model {
 
 		// remove from member player cache
 		const member = await this.discordMember;
-		if (member) member.player = null;
+		if (member) GuildMemberUtil.setPlayer(member, null);
 
 		// remove from user player cache
 		const user = this.client.users.cache.get(this.discordId);
-		if (user) user.player = null;
+		if (user) UserUtil.setPlayer(user, null);
 
 		// remove cached member
 		this._discordMember = null;

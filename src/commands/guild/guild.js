@@ -10,6 +10,7 @@ const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../constants/database');
 const { stringToMS, trim, getIdFromString, autocorrect } = require('../../functions/util');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 const logger = require('../../functions/logger');
+const UserUtil = require('../../util/UserUtil');
 
 
 const commonOptions = new Map([ [
@@ -194,7 +195,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 	/**
 	 * /g mute
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {{ targetInput: string, duration: number, hypixelGuildInput?: import('../../structures/database/models/HypixelGuild') }} param1
 	 */
 	async runMute(ctx, { targetInput, duration, hypixelGuildInput = this.getHypixelGuild(ctx) }) {
@@ -256,7 +257,7 @@ module.exports = class GuildCommand extends SlashCommand {
 		}
 
 		if (target instanceof this.client.players.model) {
-			if (target.guildRankPriority >= (ctx.user.player?.guildRankPriority ?? 0)) return ctx.reply({
+			if (target.guildRankPriority >= ((IS_INTERACTION ? UserUtil.getPlayer(ctx.user) : ctx.player)?.guildRankPriority ?? 0)) return ctx.reply({
 				content: `your guild rank needs to be higher than ${target}'s`,
 				ephemeral: true,
 			});
@@ -271,7 +272,7 @@ module.exports = class GuildCommand extends SlashCommand {
 		}
 
 		// interaction
-		if (IS_INTERACTION) return this._run(ctx, {
+		if (IS_INTERACTION) return this.#run(ctx, {
 			command: `g mute ${target} ${ms(duration)}`,
 			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
 		}, hypixelGuild);
@@ -284,7 +285,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {{ interaction: ?import('../../structures/extensions/CommandInteraction'), target: import('../../structures/database/models/Player') | string, executor: ?import('../../structures/database/models/Player'), hypixelGuild: import('../../structures/database/models/HypixelGuild'), reason: string }} param0
+	 * @param {{ interaction: ?import('discord.js').CommandInteraction, target: import('../../structures/database/models/Player') | string, executor: ?import('../../structures/database/models/Player'), hypixelGuild: import('../../structures/database/models/HypixelGuild'), reason: string }} param0
 	 * @returns {Promise<{ content: string, ephemeral: boolean }>}
 	 */
 	async runKick({ interaction, target, executor, hypixelGuild, reason }) {
@@ -347,14 +348,14 @@ module.exports = class GuildCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 * @param {?import('../../structures/database/models/HypixelGuild')} [hypixelGuild]
 	 */
-	async _run(interaction, commandOptions, { chatBridge } = this.getHypixelGuild(interaction)) {
-		interaction.deferReply();
+	async #run(interaction, commandOptions, { chatBridge } = this.getHypixelGuild(interaction)) {
+		this.deferReply(interaction);
 
-		return await interaction.reply({
+		return await this.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
@@ -365,15 +366,15 @@ module.exports = class GuildCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 */
-	async _runList(interaction, commandOptions) {
+	async #runList(interaction, commandOptions) {
 		const { chatBridge } = this.getHypixelGuild(interaction);
 
-		interaction.deferReply();
+		this.deferReply(interaction);
 
-		return await interaction.reply({
+		return await this.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
@@ -402,7 +403,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		const SUB_COMMAND = interaction.options.getSubcommand();
@@ -413,30 +414,30 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const executor = interaction.user.player;
+				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor) return await interaction.reply({
+				if (!executor) return await this.reply(interaction, {
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-				if (!executor.isStaff) return await interaction.reply({
+				if (!executor.isStaff) return await this.reply(interaction, {
 					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
 				const target = this.getPlayer(interaction);
 
-				if (!target) return await interaction.reply({
+				if (!target) return await this.reply(interaction, {
 					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
 					ephemeral: true,
 				});
 
-				if (target.guildRankPriority >= executor.guildRankPriority) return await interaction.reply({
+				if (target.guildRankPriority >= executor.guildRankPriority) return await this.reply(interaction, {
 					content: `your guild rank needs to be higher than ${target}'s`,
 					ephemeral: true,
 				});
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g demote ${target}`,
 					responseRegExp: demote(target.ign),
 				});
@@ -452,12 +453,12 @@ module.exports = class GuildCommand extends SlashCommand {
 				const { content, ephemeral } = await this.runKick({
 					interaction,
 					target,
-					executor: interaction.user.player,
+					executor: UserUtil.getPlayer(interaction.user),
 					reason,
 					hypixelGuild: target?.hypixelGuild ?? this.getHypixelGuild(interaction),
 				});
 
-				return await interaction.reply({
+				return await this.reply(interaction, {
 					embeds: [
 						this.client.defaultEmbed
 							.setTitle(`/g kick ${target} ${reason}`)
@@ -474,7 +475,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g history ${interaction.options.getInteger('page') ?? ''}`,
 					abortRegExp: historyErrors(),
 				});
@@ -487,7 +488,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g ${SUB_COMMAND}`,
 				});
 			}
@@ -497,7 +498,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g top ${interaction.options.getInteger('days_ago') ?? ''}`,
 					abortRegExp: topErrors(),
 				});
@@ -510,7 +511,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				const IGN = interaction.options.getString('ign', true);
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g invite ${IGN}`,
 					responseRegExp: invite(IGN),
 				});
@@ -523,7 +524,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('BRIDGER_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				return this._runList(interaction, {
+				return this.#runList(interaction, {
 					command: `g ${SUB_COMMAND}`,
 				});
 			}
@@ -536,7 +537,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				const IGN = this.getIgn(interaction);
 				const PAGE = interaction.options.getInteger('page');
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g log ${[ IGN, PAGE ].filter(x => x != null).join(' ')}`,
 					abortRegExp: logErrors(),
 				});
@@ -548,12 +549,12 @@ module.exports = class GuildCommand extends SlashCommand {
 				});
 
 				const IGN = this.getIgn(interaction, true);
-				if (!IGN) return await interaction.reply({
+				if (!IGN) return await this.reply(interaction, {
 					content: 'you are not in the player db',
 					ephemeral: true,
 				});
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g member ${IGN}`,
 				});
 			}
@@ -566,7 +567,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				const DURATION_INPUT = interaction.options.getString('duration', true);
 				const DURATION = stringToMS(DURATION_INPUT);
 
-				if (Number.isNaN(DURATION)) return await interaction.reply({
+				if (Number.isNaN(DURATION)) return await this.reply(interaction, {
 					content: `\`${DURATION_INPUT}\` is not a valid duration`,
 					ephemeral: true,
 				});
@@ -582,30 +583,30 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const executor = interaction.user.player;
+				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor) return await interaction.reply({
+				if (!executor) return await this.reply(interaction, {
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-				if (!executor.isStaff) return await interaction.reply({
+				if (!executor.isStaff) return await this.reply(interaction, {
 					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
 				const target = this.getPlayer(interaction);
 
-				if (!target) return await interaction.reply({
+				if (!target) return await this.reply(interaction, {
 					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
 					ephemeral: true,
 				});
 
-				if (target.guildRankPriority >= executor.guildRankPriority - 1) return await interaction.reply({
+				if (target.guildRankPriority >= executor.guildRankPriority - 1) return await this.reply(interaction, {
 					content: 'you can only promote up to your own rank',
 					ephemeral: true,
 				});
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g promote ${target}`,
 					responseRegExp: promote(target.ign),
 				});
@@ -616,20 +617,20 @@ module.exports = class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const executor = interaction.user.player;
+				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor) return await interaction.reply({
+				if (!executor) return await this.reply(interaction, {
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-				if (!executor.isStaff) return await interaction.reply({
+				if (!executor.isStaff) return await this.reply(interaction, {
 					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
 				const target = this.getPlayer(interaction);
 
-				if (!target) return await interaction.reply({
+				if (!target) return await this.reply(interaction, {
 					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
 					ephemeral: true,
 				});
@@ -640,12 +641,12 @@ module.exports = class GuildCommand extends SlashCommand {
 
 				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return `unknown guild rank '${RANK_INPUT}'`;
 
-				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) return await interaction.reply({
+				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) return await this.reply(interaction, {
 					content: 'you can only change ranks up to your own rank',
 					ephemeral: true,
 				});
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g setrank ${target} ${rank.name}`,
 					responseRegExp: setRank(target.ign, undefined, rank.name),
 				});
@@ -684,7 +685,7 @@ module.exports = class GuildCommand extends SlashCommand {
 								})()
 							);
 
-					if (!target) return await interaction.reply({
+					if (!target) return await this.reply(interaction, {
 						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
 						ephemeral: true,
 					});
@@ -695,7 +696,7 @@ module.exports = class GuildCommand extends SlashCommand {
 				}
 
 				if (target instanceof this.client.players.model) {
-					if (target.guildRankPriority >= (interaction.user.player?.guildRankPriority ?? 0)) return await interaction.reply({
+					if (target.guildRankPriority >= (UserUtil.getPlayer(interaction.user)?.guildRankPriority ?? 0)) return await this.reply(interaction, {
 						content: `your guild rank needs to be higher than ${target}'s`,
 						ephemeral: true,
 					});
@@ -703,13 +704,13 @@ module.exports = class GuildCommand extends SlashCommand {
 					target.mutedTill = 0;
 					await target.save();
 
-					if (target.notInGuild) return await interaction.reply(`unmuted \`${target}\``);
+					if (target.notInGuild) return await this.reply(interaction, `unmuted \`${target}\``);
 				} else if (target === 'everyone') {
 					hypixelGuild.mutedTill = 0;
 					await hypixelGuild.save();
 				}
 
-				return this._run(interaction, {
+				return this.#run(interaction, {
 					command: `g unmute ${target}`,
 					responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
 				}, hypixelGuild);

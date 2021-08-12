@@ -1,6 +1,7 @@
 'use strict';
 
 const { MessageFlags, Permissions } = require('discord.js');
+const ChannelUtil = require('../util/ChannelUtil');
 const MessageCreateEvent = require('./messageCreate');
 const logger = require('../functions/logger');
 
@@ -15,8 +16,8 @@ module.exports = class MessageUpdateEvent extends MessageCreateEvent {
 
 	/**
 	 * event listener callback
-	 * @param {import('../structures/extensions/Message')} oldMessage
-	 * @param {import('../structures/extensions/Message')} newMessage
+	 * @param {import('discord.js').Message} oldMessage
+	 * @param {import('discord.js').Message} newMessage
 	 */
 	async run(oldMessage, newMessage) {
 		// ignore ephemeral messages (slash cmd response edits)
@@ -25,7 +26,7 @@ module.exports = class MessageUpdateEvent extends MessageCreateEvent {
 		if (
 			Date.now() - newMessage.createdTimestamp >= 10 * 60_000 // original message is older than 10 min
 			|| oldMessage.content === newMessage.content // pinned or embed added
-			|| !newMessage.channel?.botPermissions.has(Permissions.FLAGS.VIEW_CHANNEL) // slash cmd response edits
+			|| !ChannelUtil.botPermissions(newMessage.channel)?.has(Permissions.FLAGS.VIEW_CHANNEL) // slash cmd response edits
 		) return;
 
 		if (newMessage.partial) {

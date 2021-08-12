@@ -3,6 +3,7 @@
 const { MessageEmbed } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const { GUILD_ID_BRIDGER } = require('../constants/database');
+const GuildMemberUtil = require('../util/GuildMemberUtil');
 const Event = require('../structures/events/Event');
 const logger = require('../functions/logger');
 
@@ -17,8 +18,8 @@ module.exports = class GuildMemberUpdateEvent extends Event {
 
 	/**
 	 * event listener callback
-	 * @param {import('../structures/extensions/GuildMember')} oldMember
- 	 * @param {import('../structures/extensions/GuildMember')} newMember
+	 * @param {import('discord.js').GuildMember} oldMember
+ 	 * @param {import('discord.js').GuildMember} newMember
 	 */
 	async run(oldMember, newMember) {
 		if (newMember.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
@@ -26,7 +27,7 @@ module.exports = class GuildMemberUpdateEvent extends Event {
 		// received bridger role -> update player db
 		if (newMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID')) && !oldMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID'))) {
 			/** @type {import('../structures/database/models/Player')} */
-			const player = newMember.player ?? await this.client.players.fetch({ discordId: newMember.id });
+			const player = GuildMemberUtil.getPlayer(newMember) ?? await this.client.players.fetch({ discordId: newMember.id });
 
 			if (!player) return logger.info(`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`);
 
@@ -38,7 +39,7 @@ module.exports = class GuildMemberUpdateEvent extends Event {
 			}
 		}
 
-		const { player } = newMember;
+		const player = GuildMemberUtil.getPlayer(newMember);
 
 		if (!player) return;
 

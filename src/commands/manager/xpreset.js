@@ -27,7 +27,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		const { players } = this.client;
@@ -46,7 +46,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 				});
 
 
-			if (!player) return await interaction.reply(`\`${PLAYER_INPUT}\` is not in the player db`);
+			if (!player) return await this.reply(interaction, `\`${PLAYER_INPUT}\` is not in the player db`);
 
 			await interaction.awaitConfirmation(`reset xp gained from \`${player}\`?`);
 
@@ -80,6 +80,6 @@ module.exports = class XpResetCommand extends SlashCommand {
 			.setDescription(`${interaction.user.tag} | ${interaction.user} ${result}`),
 		);
 
-		interaction.reply(result);
+		this.reply(interaction, result);
 	}
 };

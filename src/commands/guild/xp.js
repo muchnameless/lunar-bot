@@ -6,6 +6,7 @@ const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = requir
 const { XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
 const { /* escapeIgn, */ upperCaseFirstChar } = require('../../functions/util');
 const { getDefaultOffset } = require('../../functions/leaderboards');
+const MessageEmbedUtil = require('../../util/MessageEmbedUtil');
 const SlashCommand = require('../../structures/commands/SlashCommand');
 // const logger = require('../../functions/logger');
 
@@ -38,14 +39,14 @@ module.exports = class XpCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		const offset = interaction.options.getString('offset') ?? getDefaultOffset(this.config);
 		const player = this.getPlayer(interaction, true);
 
 		if (!player) {
-			return await interaction.reply(oneLine`${interaction.options.get('player')
+			return await this.reply(interaction, oneLine`${interaction.options.get('player')
 				? `\`${interaction.options.getString('player')}\` is`
 				: 'you are'
 			} not in the player db`);
@@ -53,7 +54,7 @@ module.exports = class XpCommand extends SlashCommand {
 
 		// update db?
 		if (interaction.options.getBoolean('update')) {
-			interaction.deferReply(); // update may take a while
+			this.deferReply(interaction); // update may take a while
 			await player.updateXp();
 		}
 
@@ -93,7 +94,7 @@ module.exports = class XpCommand extends SlashCommand {
 			});
 		}
 
-		embed.padFields();
+		MessageEmbedUtil.padFields(embed);
 
 		for (const skill of cosmeticSkills) {
 			const SKILL_ARGUMENT = `${skill}Xp`;
@@ -110,7 +111,7 @@ module.exports = class XpCommand extends SlashCommand {
 			});
 		}
 
-		embed.padFields();
+		MessageEmbedUtil.padFields(embed);
 
 		// slayer
 		const TOTAL_SLAYER_XP = player.getSlayerTotal();
@@ -164,8 +165,7 @@ module.exports = class XpCommand extends SlashCommand {
 		const { totalWeight, weight, overflow } = player.getSenitherWeight();
 		const { totalWeight: totalWeightOffet, weight: weightOffset, overflow: overflowOffset } = player.getSenitherWeight(offset);
 
-		embed
-			.padFields()
+		MessageEmbedUtil.padFields(embed)
 			.addFields({
 				name: '\u200b',
 				value: `${Formatters.codeBlock('Miscellaneous')}\u200b`,
@@ -184,11 +184,10 @@ module.exports = class XpCommand extends SlashCommand {
 					${Formatters.bold('Δ:')} ${this.client.formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${this.client.formatDecimalNumber(weight - weightOffset)} + ${this.client.formatDecimalNumber(overflow - overflowOffset)} ]
 				`,
 				inline: true,
-			})
-			.padFields();
+			});
 
-		embeds.push(embed);
+		embeds.push(MessageEmbedUtil.padFields(embed));
 
-		return await interaction.reply({ embeds });
+		return await this.reply(interaction, { embeds });
 	}
 };

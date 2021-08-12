@@ -409,10 +409,10 @@ module.exports = class MathsCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await interaction.reply(this._generateReply(interaction.options.getString('input', true)));
+		return await this.reply(interaction, this._generateReply(interaction.options.getString('input', true)));
 	}
 
 	/**

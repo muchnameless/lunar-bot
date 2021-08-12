@@ -51,19 +51,19 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * @param {string} ign
 	 * @returns {Promise<JoinInfo>}
 	 */
-	static async _getJoinDate(chatBridge, ign) {
+	static async #getJoinDate(chatBridge, ign) {
 		// get first page
-		let logEntry = await this._getLogEntry(chatBridge, ign, 1);
+		let logEntry = await this.#getLogEntry(chatBridge, ign, 1);
 		let lastPage = Number(logEntry.match(/\(Page 1 of (\d+)\)/)?.[1]);
 
 		// log has more than 1 page -> get latest page
-		if (lastPage !== 1) logEntry = await this._getLogEntry(chatBridge, ign, lastPage);
+		if (lastPage !== 1) logEntry = await this.#getLogEntry(chatBridge, ign, lastPage);
 
 		let matched = logEntry.match(JoinDateCommand.JOINED_REGEXP);
 
 		// last page didn't contain join, get next-to-last page
 		while (!matched && lastPage >= 1) {
-			matched = (await this._getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
+			matched = (await this.#getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
 
 			// entry does not end with invited message -> no joined / created message at all
 			if (!new RegExp(`\\n.+: \\w{1,16} invited ${ign}$`).test(logEntry)) break;
@@ -83,7 +83,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * @param {string} ign
 	 * @param {number} page
 	 */
-	static _getLogEntry(chatBridge, ign, page) {
+	static #getLogEntry(chatBridge, ign, page) {
 		return chatBridge.minecraft.command({
 			command: `g log ${ign} ${page}`,
 			abortRegExp: logErrors(ign),
@@ -96,9 +96,10 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
 	 * @param {import('../../structures/database/models/Player')} ignInput
 	 */
-	async _generateReply(chatBridge, ignInput) {
+	// eslint-disable-next-line class-methods-use-this
+	async #generateReply(chatBridge, ignInput) {
 		try {
-			const { ign, date, timestamp } = await JoinDateCommand._getJoinDate(chatBridge, ignInput);
+			const { ign, date, timestamp } = await JoinDateCommand.#getJoinDate(chatBridge, ignInput);
 			return `${ign}: joined at ${!Number.isNaN(timestamp) ? Formatters.time(date) : 'an unknown date'}`;
 		} catch {
 			return `${ignInput}: never joined ${chatBridge.hypixelGuild.name}`;
@@ -107,17 +108,17 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply();
+		this.deferReply(interaction);
 
 		const { chatBridge } = this.getHypixelGuild(interaction);
 		const IGN = this.getIgn(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')));
 
 		if (!IGN) {
 			// all players
-			if (JoinDateCommand.running.has(chatBridge.hypixelGuild.guildId)) return await interaction.reply({
+			if (JoinDateCommand.running.has(chatBridge.hypixelGuild.guildId)) return await this.reply(interaction, {
 				content: 'the command is already running',
 				ephemeral: true,
 			});
@@ -130,13 +131,13 @@ module.exports = class JoinDateCommand extends DualCommand {
 				await interaction.awaitConfirmation(`the command will take approximately ${ms(chatBridge.hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
 
 				for (const { ign } of chatBridge.hypixelGuild.players.values()) {
-					joinInfos.push(await JoinDateCommand._getJoinDate(chatBridge, ign));
+					joinInfos.push(await JoinDateCommand.#getJoinDate(chatBridge, ign));
 				}
 			} finally {
 				JoinDateCommand.running.delete(chatBridge.hypixelGuild.guildId);
 			}
 
-			return await interaction.reply({
+			return await this.reply(interaction, {
 				content: `${Formatters.bold(chatBridge.hypixelGuild.name)} join dates:\n${joinInfos
 					.sort((a, b) => a.timestamp - b.timestamp)
 					.map(({ ign, date, timestamp }) => `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`)
@@ -145,7 +146,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 			});
 		}
 
-		return await interaction.reply(await this._generateReply(chatBridge, IGN));
+		return await this.reply(interaction, await this.#generateReply(chatBridge, IGN));
 	}
 
 	/**
@@ -153,7 +154,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return await message.reply(await this._generateReply(
+		return await message.reply(await this.#generateReply(
 			message.chatBridge,
 			message.commandData.args[0] ?? message.author.ign,
 		));

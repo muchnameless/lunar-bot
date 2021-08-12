@@ -76,27 +76,6 @@ module.exports = class ImgurClient {
 	static BASE_URL = 'https://api.imgur.com/';
 
 	/**
-	 * @param {import('node-fetch').Headers} headers
-	 */
-	getRateLimitHeaders(headers) {
-		for (const type of Object.keys(this.rateLimit)) {
-			const data = headers.get(`x-ratelimit-${type}`);
-
-			if (data !== null) this.rateLimit[type] = parseInt(data, 10);
-		}
-
-		for (const type of Object.keys(this.postRateLimit)) {
-			const data = headers.get(`x-post-rate-limit-${type}`);
-
-			if (data !== null) {
-				this.postRateLimit[type] = type.endsWith('reset')
-					? Date.now() + (parseInt(data, 10) * 1_000) // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
-					: parseInt(data, 10);
-			}
-		}
-	}
-
-	/**
 	 * @param {string} url
 	 * @returns {Promise<UploadResponse>}
 	 */
@@ -106,7 +85,7 @@ module.exports = class ImgurClient {
 		form.append('image', url);
 		form.append('type', 'url');
 
-		return this._request({
+		return this.#request({
 			endpoint: 'upload',
 			method: 'POST',
 			body: form,
@@ -117,7 +96,7 @@ module.exports = class ImgurClient {
 	 * ratelimit status / remaining credits
 	 */
 	async status() {
-		const res = await this._request({
+		const res = await this.#request({
 			checkRateLimit: false,
 			endpoint: 'credits',
 		});
@@ -134,10 +113,11 @@ module.exports = class ImgurClient {
 	/**
 	 * @param {{ checkRateLimit?: boolean, endpoint: string, method?: string, body: FormData }} param0
 	 */
-	async _request({ checkRateLimit = true, endpoint, method = 'POST', body }) {
+	async #request({ checkRateLimit = true, endpoint, method = 'POST', body }) {
 		await this.queue.wait();
 
 		try {
+			// check rate limit
 			if (checkRateLimit) {
 				if (this.rateLimit.userremaining === 0) {
 					const RESET_TIME = (this.rateLimit.userreset * 1_000) - Date.now(); // x-ratelimit-userreset is a timestamp in seconds for next reset
@@ -163,6 +143,8 @@ module.exports = class ImgurClient {
 				}
 			}
 
+			// make request
+			/** @type {import('@types/node-fetch').Response} */
 			const res = await fetch(`${ImgurClient.BASE_URL}${this.apiVersion}/${endpoint}/`, {
 				method,
 				body,
@@ -171,8 +153,24 @@ module.exports = class ImgurClient {
 				},
 			});
 
-			this.getRateLimitHeaders(res.headers);
+			// get ratelimit headers
+			for (const type of Object.keys(this.rateLimit)) {
+				const data = res.headers.get(`x-ratelimit-${type}`);
 
+				if (data !== null) this.rateLimit[type] = parseInt(data, 10);
+			}
+
+			for (const type of Object.keys(this.postRateLimit)) {
+				const data = res.headers.get(`x-post-rate-limit-${type}`);
+
+				if (data !== null) {
+					this.postRateLimit[type] = type.endsWith('reset')
+						? Date.now() + (parseInt(data, 10) * 1_000) // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
+						: parseInt(data, 10);
+				}
+			}
+
+			// check response
 			if (res.status !== 200) {
 				throw res;
 			}

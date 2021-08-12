@@ -34,12 +34,12 @@ module.exports = class DonateCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-		if (!collector?.isCollecting) return await interaction.reply('this command is restricted to (active) tax collectors');
+		if (!collector?.isCollecting) return await this.reply(interaction, 'this command is restricted to (active) tax collectors');
 
 		const player = this.getPlayer(interaction);
 		const AMOUNT_OR_TEXT = interaction.options.getString('value');
@@ -63,7 +63,7 @@ module.exports = class DonateCommand extends SlashCommand {
 			type: 'donation',
 		}));
 
-		interaction.reply(`registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
+		this.reply(interaction, `registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Donations')

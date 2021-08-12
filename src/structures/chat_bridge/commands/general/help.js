@@ -20,7 +20,7 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 	 * removes duplicates and lists the commands by name | aliases
 	 * @param {import('discord.js').Collection<string, import('../../../commands/BridgeCommand') | import('../../../commands/DualCommand')>} commands
 	 */
-	static _listCommands(commands) {
+	static #listCommands(commands) {
 		return [ ...new Set(commands.values()) ].map(({ name, aliases, aliasesInGame }) => [ name, ...(aliases ?? aliasesInGame ?? []) ].join(' | ')).join(', ');
 	}
 
@@ -33,7 +33,7 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 		if (!message.commandData.args.length) {
 			const reply = [
 				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${message.chatBridge.bot.username}` ].join(', ')}`,
-				...this.collection.visibleCategories.map(category => `${category}: ${HelpBridgeCommand._listCommands(this.collection.filterByCategory(category))}`),
+				...this.collection.visibleCategories.map(category => `${category}: ${HelpBridgeCommand.#listCommands(this.collection.filterByCategory(category))}`),
 			];
 
 			return message.author.send(reply.join('\n'));
@@ -55,7 +55,7 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 				reply.push(`Required ID: ${this.client.ownerId}`);
 			}
 
-			reply.push(`Commands: ${HelpBridgeCommand._listCommands(categoryCommands)}`);
+			reply.push(`Commands: ${HelpBridgeCommand.#listCommands(categoryCommands)}`);
 
 			return message.author.send(reply.join('\n'));
 		}

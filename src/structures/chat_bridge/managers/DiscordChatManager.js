@@ -3,6 +3,8 @@
 const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } = require('discord.js');
 const { prefixByType } = require('../constants/chatBridge');
 const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
+const ChannelUtil = require('../../../util/ChannelUtil');
+const UserUtil = require('../../../util/UserUtil');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
 const cache = require('../../../api/cache');
@@ -41,12 +43,12 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 	/**
 	 * player ign or member displayName or author username, *blocked* if blockedWordsRegExp check doesn't pass
-	 * @param {import('../../extensions/Message')} message
+	 * @param {import('discord.js').Message} message
 	 */
 	static getPlayerName(message) {
 		return this.formatAtMention(message.webhookId
-			? message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.player?.ign ?? message.author.username
-			: message.author.player?.ign ?? message.member?.displayName ?? message.author.username,
+			? UserUtil.getPlayer(message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.user)?.ign ?? message.author.username
+			: UserUtil.getPlayer(message.author)?.ign ?? message.member?.displayName ?? message.author.username,
 		);
 	}
 
@@ -65,7 +67,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {import('discord.js').MessageAttachment[]} attachments
 	 * @returns {Promise<string[]>}
 	 */
-	async _uploadAttachments(attachments) {
+	async #uploadAttachments(attachments) {
 		if (!this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
 
 		return Promise.all(attachments.map(async ({ contentType, url }) => {
@@ -85,27 +87,24 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 	/**
 	 * DMs the message author with the content if they have not been DMed in the last hour
-	 * @param {import('../../extensions/Message')} message
+	 * @param {import('discord.js').Message} message
 	 * @param {import('../../database/models/Player')} player
 	 * @param {string} content
 	 */
-	static async _dmMuteInfo(message, player, content) {
+	static async #dmMuteInfo(message, player, content) {
 		if (message.me) return;
 		if (await cache.get(`chatbridge:muted:dm:${message.author.id}`)) return;
 
-		try {
-			await message.author.send(content);
-			logger.info(`[DM MUTE INFO]: ${player?.logInfo ?? ''}: DMed muted user`);
-		} catch (error) {
-			logger.error(`[FORWARD DC TO MC]: ${player?.logInfo ?? ''}: error DMing muted user`, error);
-		} finally {
-			cache.set(`chatbridge:muted:dm:${message.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
-		}
+		UserUtil.sendDM(message.author, content);
+
+		logger.info(`[DM MUTE INFO]: ${player?.logInfo ?? ''}: DMed muted user`);
+
+		cache.set(`chatbridge:muted:dm:${message.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
 	}
 
 	/**
 	 * chat bridge channel
-	 * @type {import('../../extensions/TextChannel')}
+	 * @type {import('discord.js').TextChannel}
 	 */
 	get channel() {
 		return this.client.channels.cache.get(this.channelId);
@@ -122,13 +121,13 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * initialize the discord chat manager
 	 */
 	async init() {
-		return this._fetchOrCreateWebhook();
+		return this.#fetchOrCreateWebhook();
 	}
 
 	/**
 	 * fetches or creates the webhook for the channel
 	 */
-	async _fetchOrCreateWebhook() {
+	async #fetchOrCreateWebhook() {
 		if (this.webhook) return this.ready = true;
 
 		this.ready = false;
@@ -143,7 +142,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				throw new WebhookError('unknown channel', channel, this.hypixelGuild);
 			}
 
-			if (!channel.botPermissions.has(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
+			if (!ChannelUtil.botPermissions(channel).has(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
 				this.chatBridge.shouldRetryLinking = false;
 				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.hypixelGuild);
 			}
@@ -191,7 +190,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	/**
 	 * sends a message via the chatBridge webhook
 	 * @param {string | import('discord.js').WebhookMessageOptions} contentOrOptions
-	 * @returns {Promise<import('../../extensions/Message')>}
+	 * @returns {Promise<import('discord.js').Message>}
 	 */
 	async sendViaWebhook(contentOrOptions) {
 		if (!this.chatBridge.enabled || !this.ready) return null;
@@ -214,7 +213,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
 				this._uncacheWebhook();
-				this._fetchOrCreateWebhook();
+				this.#fetchOrCreateWebhook();
 			}
 
 			throw error;
@@ -239,7 +238,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 		const discordMessage = await hypixelMessage?.discordMessage.catch(logger.error);
 
 		try {
-			return await this.channel.send({
+			return await ChannelUtil.send(this.channel, {
 				content: this.chatBridge.discord.parseContent(`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `}${prefix}${content}`),
 				reply: {
 					messageReference: discordMessage,
@@ -253,7 +252,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 	/**
 	 * forwards a discord message to in game guild chat, prettifying discord markdown, if neither the player nor the whole guild chat is muted
-	 * @param {import('../../extensions/Message')} message
+	 * @param {import('discord.js').Message} message
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */
 	async forwardToMinecraft(message, { player: playerInput, interaction, isEdit = false, checkIfNotFromBot = true } = {}) {
@@ -267,30 +266,30 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 		/** @type {import('../../database/models/Player')} */
 		const player = playerInput
-			?? message.author.player // cached player
+			?? UserUtil.getPlayer(message.author) // cached player
 			?? await this.client.players.fetch({ discordId: message.author.id }); // uncached player
 
 		// check if player is muted
 		if (player?.muted) {
-			DiscordChatManager._dmMuteInfo(message, player, `your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
+			DiscordChatManager.#dmMuteInfo(message, player, `your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 
 		// check if the player is auto muted
 		if (player?.infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
-			DiscordChatManager._dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
+			DiscordChatManager.#dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
 			return message.react(MUTED);
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild.muted && !player?.isStaff) {
-			DiscordChatManager._dmMuteInfo(message, player, `${this.hypixelGuild.name}'s guild chat's mute expires ${Formatters.time(new Date(this.hypixelGuild.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
+			DiscordChatManager.#dmMuteInfo(message, player, `${this.hypixelGuild.name}'s guild chat's mute expires ${Formatters.time(new Date(this.hypixelGuild.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.botPlayer?.muted) {
-			DiscordChatManager._dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.botPlayer.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
+			DiscordChatManager.#dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.botPlayer.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
 			return message.react(MUTED);
 		}
 
@@ -298,7 +297,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			message.reference && !message.hasThread // @referencedMessageAuthor
 				? await (async () => {
 					try {
-						/** @type {import('../extensions/Message')} */
+						/** @type {import('discord.js').Message} */
 						const referencedMessage = await message.fetchReference();
 						if (!message.author) return null;
 						return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
@@ -315,7 +314,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 				? message.stickers.map(({ name }) => `:${name}:`).join(' ')
 				: null,
 			message.attachments.size // attachments
-				? (await this._uploadAttachments([ ...message.attachments.values() ])).join(' ') // links of attachments
+				? (await this.#uploadAttachments([ ...message.attachments.values() ])).join(' ') // links of attachments
 				: null,
 		].filter(Boolean).join(' ');
 

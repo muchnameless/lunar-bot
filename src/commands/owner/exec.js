@@ -24,7 +24,7 @@ module.exports = class ExecCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		try {
@@ -55,13 +55,13 @@ module.exports = class ExecCommand extends SlashCommand {
 				});
 			}
 
-			return interaction.reply({
+			return this.reply(interaction, {
 				embeds: [ responseEmbed ],
 			});
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
 
-			return await interaction.reply({
+			return await this.reply(interaction, {
 				content: Formatters.codeBlock('xl', `${error}`),
 			});
 		}

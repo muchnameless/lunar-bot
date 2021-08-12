@@ -25,7 +25,7 @@ module.exports = class BaseWeightCommand extends DualCommand {
 	}
 
 	/**
-	 * @param {import('../../structures/extensions/CommandInteraction') | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} ignOrUuid command arguments
 	 * @param {string} [profileName]
 	 */
@@ -63,12 +63,12 @@ module.exports = class BaseWeightCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		interaction.deferReply();
+		this.deferReply(interaction);
 
-		return await interaction.reply(await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
+		return await this.reply(interaction, await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
 	}
 
 	/**

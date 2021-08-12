@@ -16,7 +16,7 @@ module.exports = class MessageReactionAddEvent extends Event {
 	/**
 	 * event listener callback
 	 * @param {import('discord.js').MessageReaction} reaction
-	 * @param {import('../structures/extensions/User')} user
+	 * @param {import('discord.js').User} user
 	 */
 	async run(reaction, { id: userId }) {
 	// reaction.message is not from the announcement channel or not the broadcast emoji

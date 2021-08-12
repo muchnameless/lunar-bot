@@ -16,11 +16,11 @@ module.exports = class StopCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/extensions/CommandInteraction')} interaction
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
 		try {
-			await interaction.reply('stopping the bot');
+			await this.reply(interaction, 'stopping the bot');
 		} catch (error) {
 			logger.error(error);
 		} finally {
