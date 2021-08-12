@@ -6,6 +6,7 @@ const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
 const ChannelUtil = require('../../../util/ChannelUtil');
 const UserUtil = require('../../../util/UserUtil');
 const MessageUtil = require('../../../util/MessageUtil');
+const InteractionUtil = require('../../../util/InteractionUtil');
 const WebhookError = require('../../errors/WebhookError');
 const ChatManager = require('./ChatManager');
 const cache = require('../../../api/cache');
@@ -322,7 +323,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 		if (!content) return MessageUtil.react(message, X_EMOJI);
 
 		if (interaction) await this.minecraft.chat({
-			content: `${this.client.config.get('PREFIXES')[0]}${interaction.logInfo ?? ''}`,
+			content: `${this.client.config.get('PREFIXES')[0]}${InteractionUtil.logInfo(interaction)}`,
 			prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? interaction.member?.displayName ?? interaction.user.username)}: `,
 		});
 
