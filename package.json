@@ -53,7 +53,7 @@
     "@babel/eslint-plugin": "^7.14.5",
     "@babel/plugin-syntax-class-properties": "^7.12.13",
     "@babel/preset-env": "^7.15.0",
-    "@types/node": "^16.4.14",
+    "@types/node": "^16.6.0",
     "@types/node-fetch": "^2.5.12",
     "eslint": "^7.32.0"
   },
