@@ -148,7 +148,7 @@ module.exports = class ImgurClient {
 
 			// make request
 			const controller = new AbortController();
-			const timeout = setTimeout(() => controller.abort(), this.requestTimeout).unref();
+			const timeout = setTimeout(() => controller.abort(), this.requestTimeout);
 
 			/** @type {import('@types/node-fetch').Response} */
 			let res;
