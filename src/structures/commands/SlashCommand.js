@@ -197,34 +197,59 @@ module.exports = class SlashCommand extends BaseCommand {
 		return permissions;
 	}
 
+	/**
+	 * @param {GenericInteraction} interaction
+	 * @param {string | import('discord.js').InteractionReplyOptions} contentOrOptions
+	 */
 	// eslint-disable-next-line class-methods-use-this
-	get reply() {
-		return InteractionUtil.reply;
+	reply(interaction, contentOrOptions) {
+		return InteractionUtil.reply(interaction, contentOrOptions);
 	}
 
+	/**
+	 * @param {GenericInteraction} interaction
+	 * @param {import('discord.js').InteractionDeferOptions} options
+	 */
 	// eslint-disable-next-line class-methods-use-this
-	get deferReply() {
-		return InteractionUtil.deferReply;
+	deferReply(interaction, options) {
+		return InteractionUtil.deferReply(interaction, options);
 	}
 
+	/**
+	 * @param {GenericInteraction} interaction
+	 * @param {string | import('discord.js').InteractionReplyOptions} contentOrOptions
+	 */
 	// eslint-disable-next-line class-methods-use-this
-	get followUp() {
-		return InteractionUtil.followUp;
+	followUp(interaction, contentOrOptions) {
+		return InteractionUtil.followUp(interaction, contentOrOptions);
 	}
 
+	/**
+	 * @param {import('discord.js').MessageComponentInteraction} interaction
+	 * @param {import('discord.js').InteractionUpdateOptions} options
+	 */
 	// eslint-disable-next-line class-methods-use-this
-	get update() {
-		return InteractionUtil.update;
+	update(interaction, options) {
+		return InteractionUtil.update(interaction, options);
 	}
 
+	/**
+	 * @param {import('discord.js').MessageComponentInteraction} interaction
+	 * @param {import('discord.js').InteractionDeferUpdateOptions} options
+	 */
 	// eslint-disable-next-line class-methods-use-this
-	get deferUpdate() {
-		return InteractionUtil.deferUpdate;
+	deferUpdate(interaction, options) {
+		return InteractionUtil.deferUpdate(interaction, options);
 	}
 
+	/**
+	 * confirms the action via a button collector
+	 * @param {GenericInteraction} interaction
+	 * @param {import('discord.js').InteractionReplyOptions & { question: string, timeoutSeconds: number, errorMessage: string }} [questionOrOptions={}]
+	 */
 	// eslint-disable-next-line class-methods-use-this
-	get awaitConfirmation() {
-		return InteractionUtil.awaitConfirmation;
+	awaitConfirmation(interaction, questionOrOptions) {
+		return InteractionUtil.awaitConfirmation(interaction, questionOrOptions);
 	}
 
 	/**
