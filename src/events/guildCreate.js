@@ -22,7 +22,7 @@ module.exports = class GuildCreateEvent extends Event {
 		if (guild.id !== this.config.get('DISCORD_GUILD_ID') || !this.client.options.fetchAllMembers) return;
 
 		try {
-			const members = await guild.members.fetch();
+			const members = await this.client.fetchAllGuildMembers(guild);
 			logger.info(`[GUILD CREATE]: fetched ${members.size} members`);
 		} catch (error) {
 			logger.error('[GUILD CREATE]', error);

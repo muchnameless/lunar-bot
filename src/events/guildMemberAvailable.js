@@ -28,7 +28,7 @@ module.exports = class GuildMemberAvailableEvent extends Event {
 		GuildMemberAvailableEvent.IS_FETCHING = true;
 
 		try {
-			const members = await member.guild.members.fetch();
+			const members = await this.client.fetchAllGuildMembers(member.guild);
 			logger.info(`[GUILD MEMBER AVAILABLE]: fetched ${members.size} members`);
 		} catch (error) {
 			logger.error('[GUILD MEMBER AVAILABLE]', error);

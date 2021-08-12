@@ -22,14 +22,8 @@ module.exports = class ReadyEvent extends Event {
 
 		if (this.client.options.fetchAllMembers) {
 			try {
-				const { lgGuild } = this.client;
-
-				if (lgGuild) {
-					const members = await lgGuild.members.fetch();
-					logger.info(`[READY]: fetched ${members.size} members`);
-				} else {
-					logger.warn('[READY]: lgGuild unavailable');
-				}
+				const members = await this.client.fetchAllGuildMembers();
+				logger.info(`[READY]: fetched ${members.size} members`);
 			} catch (error) {
 				logger.error('[READY]', error);
 			}

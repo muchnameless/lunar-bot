@@ -33,6 +33,8 @@ module.exports = class LunarClient extends Client {
 		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
 		this.events = new EventCollection(this, join(__dirname, '..', 'events'));
 		this.imgur = new ImgurClient({ authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}` });
+
+		this._fetchAllGuildMembersCache = new Map();
 	}
 
 	get config() {
@@ -83,7 +85,12 @@ module.exports = class LunarClient extends Client {
 
 		if (guild.memberCount === guild.members.cache.size) return guild.members.cache;
 
-		return guild.members.fetch();
+		const cached = this._fetchAllGuildMembersCache.get(guild.id);
+		if (cached) return cached;
+
+		const promise = guild.members.fetch();
+		this._fetchAllGuildMembersCache.set(guild.id, promise);
+		return promise.finally(() => this._fetchAllGuildMembersCache.delete(guild.id));
 	}
 
 	/**
