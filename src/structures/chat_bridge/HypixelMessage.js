@@ -163,7 +163,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 	 * the message author's guild object, if the message was sent in guild chat
 	 */
 	get hypixelGuild() {
-		return this.type === GUILD ? this.player?.hypixelGuild : null;
+		return this.chatBridge.hypixelGuild ?? this.player?.hypixelGuild ?? null;
 	}
 
 	/**
