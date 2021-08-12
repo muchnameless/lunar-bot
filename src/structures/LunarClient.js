@@ -90,7 +90,12 @@ module.exports = class LunarClient extends Client {
 
 		const promise = guild.members.fetch();
 		this._fetchAllGuildMembersCache.set(guild.id, promise);
-		return promise.finally(() => this._fetchAllGuildMembersCache.delete(guild.id));
+
+		try {
+			return await promise;
+		} finally {
+			this._fetchAllGuildMembersCache.delete(guild.id);
+		}
 	}
 
 	/**
