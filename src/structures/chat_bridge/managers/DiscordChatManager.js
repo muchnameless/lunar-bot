@@ -93,7 +93,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	 * @param {string} content
 	 */
 	static async #dmMuteInfo(message, player, content) {
-		if (message.editable) return;
+		if (message.editable) return; // message was sent by the bot
 		if (await cache.get(`chatbridge:muted:dm:${message.author.id}`)) return;
 
 		UserUtil.sendDM(message.author, content);
