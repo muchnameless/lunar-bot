@@ -94,6 +94,7 @@ module.exports = class InteractionCreateEvent extends Event {
 	 * @param {import('discord.js').Interaction} interaction
 	 */
 	async run(interaction) {
+		// add interaction to the WeakMap which holds InteractionData
 		InteractionUtil.add(interaction);
 
 		try {
