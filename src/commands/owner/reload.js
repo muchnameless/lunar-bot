@@ -73,11 +73,10 @@ module.exports = class ReloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} subcommand
 	 * @param {string} input
 	 */
-	async #run(ctx, subcommand, input) {
+	async #run(subcommand, input) {
 		switch (subcommand) {
 			case 'command': {
 				let commandName = input.toLowerCase();
@@ -106,7 +105,7 @@ module.exports = class ReloadCommand extends DualCommand {
 						command = this.collection.get(commandName); // try to find already loaded command
 					}
 
-					if (!commandFile) return ctx.reply(`no command with the name or alias \`${input}\` found`);
+					if (!commandFile) return `no command with the name or alias \`${input}\` found`;
 
 					// command already loaded
 					if (command) {
@@ -117,19 +116,19 @@ module.exports = class ReloadCommand extends DualCommand {
 					this.collection.loadFromFile(commandFile);
 
 					logger.info(`command ${commandName} was reloaded successfully`);
-					return ctx.reply(`command \`${commandName}\` was reloaded successfully`);
+					return `command \`${commandName}\` was reloaded successfully`;
 				} catch (error) {
 					logger.error('An error occurred while reloading:\n', error);
-					return ctx.reply(stripIndents`
+					return stripIndents`
 						an error occurred while reloading \`${commandName}\`:
 						${Formatters.codeBlock('xl', `${error}`)}
-					`);
+					`;
 				}
 			}
 
 			case 'commands': {
 				await this.collection.unloadAll().loadAll();
-				return ctx.reply(`${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`);
+				return `${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`;
 			}
 
 			case 'event': {
@@ -139,7 +138,7 @@ module.exports = class ReloadCommand extends DualCommand {
 					const eventFiles = await getAllJsFiles(this.client.events.dirPath);
 					const eventFile = eventFiles.find(file => basename(file, '.js').toLowerCase() === eventName); // try to find file with INPUT name
 
-					if (!eventFile) return ctx.reply(`no event with the name \`${eventName}\` found`); // no file found
+					if (!eventFile) return `no event with the name \`${eventName}\` found`; // no file found
 
 					// file with exact name match found
 					this.client.events.get(basename(eventFile, '.js').toLowerCase())?.unload(); // try to find already loaded event
@@ -147,29 +146,29 @@ module.exports = class ReloadCommand extends DualCommand {
 					({ name: eventName } = this.client.events.loadFromFile(eventFile, true));
 
 					logger.info(`event ${eventName} was reloaded successfully`);
-					return ctx.reply(`event \`${eventName}\` was reloaded successfully`);
+					return `event \`${eventName}\` was reloaded successfully`;
 				} catch (error) {
 					logger.error('An error occurred while reloading:\n', error);
-					return ctx.reply(stripIndents`
+					return stripIndents`
 						an error occurred while reloading \`${eventName}\`:
 						${Formatters.codeBlock('xl', `${error}`)}
-					`);
+					`;
 				}
 			}
 
 			case 'events': {
 				await this.client.events.unloadAll().loadAll();
-				return ctx.reply(`${this.client.events.size} event${this.client.events.size !== 1 ? 's' : ''} were reloaded successfully`);
+				return `${this.client.events.size} event${this.client.events.size !== 1 ? 's' : ''} were reloaded successfully`;
 			}
 
 			case 'database': {
 				await this.client.db.loadCache();
-				return ctx.reply('database cache reloaded successfully');
+				return 'database cache reloaded successfully';
 			}
 
 			case 'cooldowns': {
 				this.collection.clearCooldowns();
-				return ctx.reply('cooldowns reset successfully');
+				return 'cooldowns reset successfully';
 			}
 
 			case 'filter': {
@@ -180,7 +179,7 @@ module.exports = class ReloadCommand extends DualCommand {
 
 				ChatManager.BLOCKED_WORDS_REGEXP = blockedWordsRegExp;
 
-				return ctx.reply('filter reloaded successfully');
+				return 'filter reloaded successfully';
 			}
 
 			default:
@@ -193,7 +192,7 @@ module.exports = class ReloadCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return this.#run(interaction, interaction.options.getSubcommand(), interaction.options.getString('name'));
+		return await this.reply(interaction, await this.#run(interaction.options.getSubcommand(), interaction.options.getString('name')));
 	}
 
 	/**
@@ -201,6 +200,6 @@ module.exports = class ReloadCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this.#run(message, ...message.commandData.args);
+		return await message.reply(await this.#run(...message.commandData.args));
 	}
 };

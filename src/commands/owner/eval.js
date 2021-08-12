@@ -60,7 +60,7 @@ module.exports = class EvalCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {import('discord.js').CommandInteraction | import('discord.js').ButtonInteraction'} ctx
+	 * @param {import('discord.js').CommandInteraction | import('discord.js').ButtonInteraction} ctx
 	 * @param {string} input
 	 * @param {boolean} [isAsync]
 	 * @param {number} [inspectDepth=0]
@@ -71,7 +71,7 @@ module.exports = class EvalCommand extends SlashCommand {
 		/* eslint-disable no-unused-vars */
 		const { client, config } = this;
 		const { MessageEmbed } = Discord;
-		const { channel, channel: ch, guild, guild: g, author, user, member } = ctx;
+		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = ctx;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
 		/* eslint-enable no-unused-vars */
 

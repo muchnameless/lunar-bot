@@ -1,6 +1,6 @@
 'use strict';
 
-const { Interaction, Formatters, Constants } = require('discord.js');
+const { Formatters, Constants } = require('discord.js');
 const { stripIndents } = require('common-tags');
 const ms = require('ms');
 const { upperCaseFirstChar, stringToMS } = require('../../functions/util');
@@ -69,8 +69,8 @@ module.exports = class PollCommand extends DualCommand {
 	 * @param {string} param1.duration
 	 * @param {string} param1.ign
 	 */
-	async #run(ctx, { chatBridge, question, pollOptionNames, duration, ign }) {
-		if (chatBridge.pollUntil) return ctx.reply(`poll already in progress, ends ${Formatters.time(new Date(chatBridge.pollUntil), Formatters.TimestampStyles.RelativeTime)}`);
+	async #run({ chatBridge, question, pollOptionNames, duration, ign }) {
+		if (chatBridge.pollUntil) return `poll already in progress, ends ${Formatters.time(new Date(chatBridge.pollUntil), Formatters.TimestampStyles.RelativeTime)}`;
 
 		try {
 			const DURATION = duration
@@ -78,11 +78,6 @@ module.exports = class PollCommand extends DualCommand {
 				: 60_000;
 
 			chatBridge.pollUntil = Date.now() + Math.min(Math.max(DURATION, 30_000), 10 * 60_000);
-
-			if (ctx instanceof Interaction) ctx.reply({
-				content: 'poll started',
-				ephemeral: true,
-			});
 
 			/** @type {{ number: number, option: string, votes: Set<string> }[]} */
 			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set() }));
@@ -161,19 +156,16 @@ module.exports = class PollCommand extends DualCommand {
 			ephemeral: true,
 		});
 
-		await this.#run(
-			interaction,
-			{
-				chatBridge: this.getHypixelGuild(interaction).chatBridge,
-				question: interaction.options.getString('question', true),
-				pollOptionNames: interaction.options._hoistedOptions.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value),
-				duration: interaction.options.getString('duration'),
-				ign: UserUtil.getPlayer(interaction.user)?.ign ?? interaction.member?.displayName ?? interaction.user.tag,
-			},
-		);
+		const res = await this.#run({
+			chatBridge: this.getHypixelGuild(interaction).chatBridge,
+			question: interaction.options.getString('question', true),
+			pollOptionNames: interaction.options._hoistedOptions.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value),
+			duration: interaction.options.getString('duration'),
+			ign: UserUtil.getPlayer(interaction.user)?.ign ?? interaction.member?.displayName ?? interaction.user.tag,
+		});
 
 		return await this.reply(interaction, {
-			content: 'poll complete',
+			content: res ?? 'poll complete',
 			ephemeral: true,
 		});
 	}
@@ -193,15 +185,14 @@ module.exports = class PollCommand extends DualCommand {
 
 		if (!inputMatched || inputMatched.length < 2) return await message.reply(this.usageInfo);
 
-		return this.#run(
-			message,
-			{
-				chatBridge: message.chatBridge,
-				question: upperCaseFirstChar(inputMatched.shift()),
-				pollOptionNames: inputMatched,
-				duration: message.commandData.args[0],
-				ign: message.author.ign,
-			},
-		);
+		const res = await this.#run({
+			chatBridge: message.chatBridge,
+			question: upperCaseFirstChar(inputMatched.shift()),
+			pollOptionNames: inputMatched,
+			duration: message.commandData.args[0],
+			ign: message.author.ign,
+		});
+
+		if (res) return await message.author.send(res);
 	}
 };

@@ -1,6 +1,7 @@
 'use strict';
 
 const { Constants } = require('discord.js');
+const InteractionUtil = require('../../util/InteractionUtil');
 const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
@@ -35,9 +36,16 @@ module.exports = class SmiteCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return this.client.commands.get('guild').runMute(interaction, {
+		const errorReply = await this.client.commands.get('guild').runMute(interaction, {
 			targetInput: interaction.options.getString('target', true).toLowerCase(),
 			duration: 10 * 60_000,
+		});
+
+		if (Reflect.has(errorReply ?? {}, 'ephemeral')) return await this.reply(interaction, {
+			...errorReply,
+			ephemeral: interaction.options.get('visibility') === null
+				? InteractionUtil.CACHE.get(interaction).useEphemeral || errorReply.ephemeral
+				: InteractionUtil.CACHE.get(interaction).useEphemeral,
 		});
 	}
 
@@ -46,10 +54,10 @@ module.exports = class SmiteCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this.client.commands.get('guild').runMute(message, {
+		return await message.author.send(await this.client.commands.get('guild').runMute(message, {
 			targetInput: message.commandData.args[0],
 			duration: 10 * 60_000,
 			hypixelGuildInput: message.chatBridge.hypixelGuild,
-		});
+		}));
 	}
 };

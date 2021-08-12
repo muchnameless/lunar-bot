@@ -160,7 +160,7 @@ module.exports = class AhCommand extends SlashCommand {
 				?? (await hypixel.skyblock.profiles.uuid(uuid)).map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id }));
 
 			// interaction from original requester -> edit message
-			if (interaction.user.id === interaction.message.interaction?.user.id) return interaction.update(await this.#generateReply({ uuid, ign, profileId, profiles }));
+			if (interaction.user.id === interaction.message.interaction?.user.id) return this.update(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));
 
 			// interaction from new requester -> new message
 			return this.followUp(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));

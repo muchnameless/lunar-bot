@@ -202,7 +202,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	async runMute(ctx, { targetInput, duration, hypixelGuildInput = this.getHypixelGuild(ctx) }) {
 		const IS_INTERACTION = ctx instanceof Interaction;
 
-		if (IS_INTERACTION) ctx.deferReply();
+		if (IS_INTERACTION) this.deferReply(ctx);
 
 		let hypixelGuild = hypixelGuildInput;
 		let target;
@@ -247,10 +247,10 @@ module.exports = class GuildCommand extends SlashCommand {
 					)
 				: this.client.players.getByIgn(targetInput) ?? targetInput;
 
-			if (!target) return ctx.reply({
+			if (!target) return {
 				content: `no player with the IGN \`${targetInput}\` found`,
 				ephemeral: true,
-			});
+			};
 
 			if (target instanceof this.client.players.model) {
 				({ hypixelGuild } = target);
@@ -258,31 +258,34 @@ module.exports = class GuildCommand extends SlashCommand {
 		}
 
 		if (target instanceof this.client.players.model) {
-			if (target.guildRankPriority >= ((IS_INTERACTION ? UserUtil.getPlayer(ctx.user) : ctx.player)?.guildRankPriority ?? 0)) return ctx.reply({
+			if (target.guildRankPriority >= ((IS_INTERACTION ? UserUtil.getPlayer(ctx.user) : ctx.player)?.guildRankPriority ?? 0)) return {
 				content: `your guild rank needs to be higher than ${target}'s`,
 				ephemeral: true,
-			});
+			};
 
 			target.mutedTill = Date.now() + duration;
 			await target.save();
 
-			if (target.notInGuild) return ctx.reply(`muted \`${target}\` for \`${duration}\``);
+			if (target.notInGuild) return {
+				content: `muted \`${target}\` for \`${duration}\``,
+				ephemeral: false,
+			};
 		} else if (target === 'everyone') {
 			hypixelGuild.mutedTill = Date.now() + duration;
 			await hypixelGuild.save();
 		}
 
 		// interaction
-		if (IS_INTERACTION) return this.#run(ctx, {
+		if (IS_INTERACTION) return await this.#run(ctx, {
 			command: `g mute ${target} ${ms(duration)}`,
 			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
 		}, hypixelGuild);
 
 		// hypixel message
-		return ctx.author.send(await hypixelGuild.chatBridge.minecraft.command({
+		return await hypixelGuild.chatBridge.minecraft.command({
 			command: `g mute ${target} ${ms(duration)}`,
 			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
-		}));
+		});
 	}
 
 	/**
@@ -322,7 +325,7 @@ module.exports = class GuildCommand extends SlashCommand {
 		try {
 			const { chatBridge } = hypixelGuild;
 
-			interaction?.deferReply();
+			if (interaction) this.deferReply(interaction);
 
 			const res = await chatBridge.minecraft.command({
 				command: `g kick ${target} ${reason}`,
@@ -466,8 +469,8 @@ module.exports = class GuildCommand extends SlashCommand {
 							.setDescription(Formatters.codeBlock(content)),
 					],
 					ephemeral: interaction.options.get('visibility') === null
-						? interaction.useEphemeral || ephemeral
-						: interaction.useEphemeral,
+						? InteractionUtil.CACHE.get(interaction).useEphemeral || ephemeral
+						: InteractionUtil.CACHE.get(interaction).useEphemeral,
 				});
 			}
 
@@ -573,10 +576,19 @@ module.exports = class GuildCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				return this.runMute(interaction, {
+				const errorReply = await this.runMute(interaction, {
 					targetInput: interaction.options.getString('target', true).toLowerCase(),
 					duration: DURATION,
 				});
+
+				if (Reflect.has(errorReply ?? {}, 'ephemeral')) await this.reply(interaction, {
+					...errorReply,
+					ephemeral: interaction.options.get('visibility') === null
+						? InteractionUtil.CACHE.get(interaction).useEphemeral || errorReply.ephemeral
+						: InteractionUtil.CACHE.get(interaction).useEphemeral,
+				});
+
+				return;
 			}
 
 			case 'promote': {

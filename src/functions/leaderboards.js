@@ -8,6 +8,7 @@ const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = requir
 const { LB_KEY } = require('../constants/redis');
 const { upperCaseFirstChar } = require('./util');
 const UserUtil = require('../util/UserUtil');
+const InteractionUtil = require('../util/InteractionUtil');
 const cache = require('../api/cache');
 // const logger = require('./logger');
 
@@ -194,7 +195,7 @@ const self = module.exports = {
 			leaderboardArgs.page = embeds.length;
 		}
 
-		await interaction.reply({
+		await InteractionUtil.reply(interaction, {
 			embeds: [ embeds[ leaderboardArgs.page - 1 ] ],
 			components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 		});
@@ -238,11 +239,11 @@ const self = module.exports = {
 			: await cache.get(CACHE_KEY);
 
 		if (!embeds) {
-			await interaction.update({
+			await InteractionUtil.update(interaction, {
 				components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, Infinity, true),
 			});
 
-			return await interaction.reply({
+			return await InteractionUtil.reply(interaction, {
 				content: oneLine`
 					leaderboard timed out, use ${
 						interaction.message
@@ -260,7 +261,7 @@ const self = module.exports = {
 			leaderboardArgs.page = embeds.length;
 		}
 
-		await interaction.update({
+		await InteractionUtil.update(interaction, {
 			embeds: [ embeds[ leaderboardArgs.page - 1 ] ],
 			components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 		});
@@ -338,7 +339,7 @@ const self = module.exports = {
 				self.getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 			);
 
-		await interaction.update({
+		await InteractionUtil.update(interaction, {
 			embeds: [ embeds[ leaderboardArgs.page - 1 ] ],
 			components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 		});

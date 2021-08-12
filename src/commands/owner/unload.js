@@ -45,32 +45,31 @@ module.exports = class UnloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
 	 * @param {string} subcommand
 	 * @param {string} input
 	 */
-	async #run(ctx, subcommand, input) {
+	async #run(subcommand, input) {
 		switch (subcommand) {
 			case 'command': {
 				/** @type {import('../../structures/commands/BaseCommand')} */
 				const command = this.collection.getByName(input);
 
-				if (!command) return ctx.reply(`no command with the name or alias \`${input}\` found`);
+				if (!command) return `no command with the name or alias \`${input}\` found`;
 
 				command.unload();
 
-				return ctx.reply(`command \`${command.name}\` was unloaded successfully`);
+				return `command \`${command.name}\` was unloaded successfully`;
 			}
 
 			case 'event': {
 				/** @type {import('../../structures/commands/BaseCommand')} */
 				const event = this.client.events.get(input);
 
-				if (!event) return ctx.reply(`no event with the name \`${input}\` found`);
+				if (!event) return `no event with the name \`${input}\` found`;
 
 				event.unload();
 
-				return ctx.reply(`event \`${event.name}\` was unloaded successfully`);
+				return `event \`${event.name}\` was unloaded successfully`;
 			}
 
 			default:
@@ -83,7 +82,7 @@ module.exports = class UnloadCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return this.#run(interaction, interaction.options.getSubcommand(), interaction.options.getString('name', true));
+		return await this.reply(interaction, await this.#run(interaction, interaction.options.getSubcommand(), interaction.options.getString('name', true)));
 	}
 
 	/**
@@ -91,6 +90,6 @@ module.exports = class UnloadCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return this.#run(message, ...message.commandData.args.map(arg => arg.toLowerCase()));
+		return await message.reply(await this.#run(message, ...message.commandData.args.map(arg => arg.toLowerCase())));
 	}
 };
