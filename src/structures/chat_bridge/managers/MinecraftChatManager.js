@@ -43,6 +43,20 @@ const logger = require('../../../functions/logger');
 
 
 module.exports = class MinecraftChatManager extends ChatManager {
+	/**
+	 * resolves this.#promise
+	 */
+	#resolve;
+	/**
+	 * @type {Promise<'spam'|'blocked'|import('../HypixelMessage')>}
+	 */
+	#promise = new Promise(res => this.#resolve = res);
+	/**
+	 * bot player db object
+	 * @type {?import('../../database/models/Player')}
+	 */
+	#botPlayer = null;
+
 	constructor(...args) {
 		super(...args);
 
@@ -63,14 +77,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		 */
 		this._collecting = false;
 		/**
-		 * resolves this._promise
-		 */
-		this._resolve;
-		/**
-		 * @type {Promise<'spam'|'blocked'|import('../HypixelMessage')>}
-		 */
-		this._promise = new Promise(res => this._resolve = res);
-		/**
 		 * async queue for minecraft commands, prevents multiple response collectors
 		 */
 		this.commandQueue = new AsyncQueue();
@@ -82,11 +88,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		 * @type {?string}
 		 */
 		this.botUuid = null;
-		/**
-		 * bot player db object
-		 * @type {?import('../../database/models/Player')}
-		 */
-		this._botPlayer = null;
 		/**
 		 * wether the minecraft bot is logged in and ready to receive and send chat messages
 		 */
@@ -180,11 +181,11 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @returns {?import('../../database/models/Player')}
 	 */
 	get botPlayer() {
-		return this._botPlayer ??= this.client.players.cache.get(this.botUuid) ?? null;
+		return this.#botPlayer ??= this.client.players.cache.get(this.botUuid) ?? null;
 	}
 
 	set botPlayer(value) {
-		this._botPlayer = value;
+		this.#botPlayer = value;
 	}
 
 	/**
@@ -468,9 +469,9 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {string|import('../HypixelMessage')} value
 	 */
 	#resolveAndReset(value) {
-		this._resolve(value);
+		this.#resolve(value);
 		this.#resetFilter();
-		this._promise = new Promise(res => this._resolve = res);
+		this.#promise = new Promise(res => this.#resolve = res);
 	}
 
 	/**
@@ -488,10 +489,10 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * returns a Promise that resolves with a message that ends with the provided content
 	 * @param {string} content
 	 */
-	listenFor(content) {
+	#listenFor(content) {
 		this._contentFilter = content;
 		this._collecting = true;
-		return this._promise;
+		return this.#promise;
 	}
 
 	/**
@@ -746,7 +747,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		message = trim(message, MinecraftChatManager.MAX_MESSAGE_LENGTH);
 
 		// create listener
-		const listener = this.listenFor(content);
+		const listener = this.#listenFor(content);
 
 		try {
 			this.bot.write('chat', { message });
