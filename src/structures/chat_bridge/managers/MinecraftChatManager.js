@@ -121,15 +121,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		this._lastMessages = {
 			MAX_INDEX: 8,
 			index: -1,
-			incIndex() {
-				++this.index;
-				if (this.index === this.MAX_INDEX) this.index = 0;
-			},
-			decIndex() {
-				--this.index;
-				if (this.index === -1) this.index = this.MAX_INDEX - 1;
-			},
 			/**
+			 * ring buffer
 			 * @type {string[]}
 			 */
 			cache: [],
@@ -148,7 +141,9 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				return this.cache.includes(this.cleanContent(content));
 			},
 			add(content) {
-				this.incIndex();
+				// increment ring buffer index, reset cycle if max index
+				if (++this.index === this.MAX_INDEX) this.index = 0;
+
 				this.cache[this.index] = this.cleanContent(content);
 			},
 		};
@@ -740,8 +735,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 		try {
 			this.bot.write('chat', { message });
-
-			if (useSpamBypass) this._lastMessages.add(message);
 		} catch (error) {
 			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
 			MessageUtil.react(discordMessage, X_EMOJI);
@@ -770,13 +763,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 					throw response;
 				}
 
+				if (useSpamBypass) this._lastMessages.add(message);
+
 				return;
 			}
 
 			// anti spam failed -> retry
 			case 'spam': {
 				this.#tempIncrementCounter();
-				this._lastMessages.decIndex();
 
 				// max retries reached
 				if (++this.retries === MinecraftChatManager.MAX_RETRIES) {
@@ -791,8 +785,6 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			// hypixel filter blocked message
 			case 'blocked': {
-				this._lastMessages.decIndex();
-
 				this.#handleForwardRejection(discordMessage, 'blocked');
 				await sleep(this.delay);
 				throw 'unable to send the message, hypixel\'s filter blocked it';
@@ -800,10 +792,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			// message sent successfully
 			default: {
+				if (useSpamBypass) this._lastMessages.add(message);
+
 				await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
 					? this.delay
-					: (this.#tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY),
+					: (this.#tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY), // use safe delay for commands and whispers
 				);
+
 				return;
 			}
 		}
