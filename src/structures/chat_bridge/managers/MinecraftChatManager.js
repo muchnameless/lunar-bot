@@ -126,25 +126,34 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			 * @type {string[]}
 			 */
 			cache: [],
-			cleanContent(content) {
+			/**
+			 * removes parts of the content which hypixel's spam filter ignores
+			 * @param {string} content
+			 */
+			_cleanContent(content) {
 				return content
 					.replace(/\d/g, '') // remove numbers
 					.replace(/(?<=^\/)o(?=c)/, 'g') // oc and gc share the same anti spam bucket -> /oc -> /gc
 					.replace(invisibleCharacterRegExp, '') // remove invis chars
 					.trim() // remove whitespaces at the beginning and end
-					.replace(/ {2,}/g, ' '); // only single spaces
+					.replace(/ {2,}/g, ' '); // mc messages can only have single spaces
 			},
 			/**
+			 * check wether the content is already in the buffer
 			 * @param {string} content
 			 */
 			check(content) {
-				return this.cache.includes(this.cleanContent(content));
+				return this.cache.includes(this._cleanContent(content));
 			},
+			/**
+			 * add the content to the buffer
+			 * @param {string} content
+			 */
 			add(content) {
 				// increment ring buffer index, reset cycle if max index
 				if (++this.index === this.MAX_INDEX) this.index = 0;
 
-				this.cache[this.index] = this.cleanContent(content);
+				this.cache[this.index] = this._cleanContent(content);
 			},
 		};
 	}
