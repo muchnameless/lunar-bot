@@ -153,7 +153,7 @@ module.exports = class LinkCommand extends SlashCommand {
 		}
 
 		// user to link is in discord -> update roles
-		await player.link(discordMember, `linked by ${interaction.author.tag}`);
+		await player.link(discordMember, `linked by ${interaction.user.tag}`);
 
 		let reply = `\`${player}\` linked to ${discordMember}`;
 
