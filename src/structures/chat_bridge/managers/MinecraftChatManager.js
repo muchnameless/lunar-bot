@@ -119,7 +119,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		 * anti spam checker
 		 */
 		this._lastMessages = {
+			/**
+			 * buffer size
+			 */
 			MAX_INDEX: 8,
+			/**
+			 * current buffer index
+			 */
 			index: -1,
 			/**
 			 * ring buffer
