@@ -148,8 +148,8 @@ module.exports = class Player extends Model {
 				defaultValue: false,
 				allowNull: false,
 				set(value) {
-					if (!value) this.uncacheMember();
 					this.setDataValue('inDiscord', value);
+					if (!value) this.uncacheMember();
 				},
 			},
 			mutedTill: {
