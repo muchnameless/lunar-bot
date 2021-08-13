@@ -136,6 +136,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			cleanContent(content) {
 				return content
 					.replace(/\d/g, '') // remove numbers
+					.replace(/(?<=^\/)o(?=c)/, 'g') // oc and gc share the same anti spam bucket -> /oc -> /gc
 					.replace(invisibleCharacterRegExp, '') // remove invis chars
 					.trim() // remove whitespaces at the beginning and end
 					.replace(/ {2,}/g, ' '); // only single spaces
