@@ -1,6 +1,6 @@
 'use strict';
 
-const { Interaction, SnowflakeUtil, Formatters, Constants } = require('discord.js');
+const { SnowflakeUtil, Formatters, Constants } = require('discord.js');
 const { Op } = require('sequelize');
 const ms = require('ms');
 const { demote, kick: { success: kickSuccess, error: kickError }, invite, mute, promote, setRank, unmute, historyErrors, logErrors, topErrors } = require('../../structures/chat_bridge/constants/commandResponses');
@@ -195,73 +195,69 @@ module.exports = class GuildCommand extends SlashCommand {
 	}
 
 	/**
-	 * /g mute
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
-	 * @param {{ targetInput: string, duration: number, hypixelGuildInput?: import('../../structures/database/models/HypixelGuild') }} param1
+	 * @param {string} targetInput
+	 * @param {?import('discord.js').CommandInteraction} interaction
+	 * @returns {Promise<string | ?import('../../structures/database/models/Player')>}
 	 */
-	async runMute(ctx, { targetInput, duration, hypixelGuildInput = this.getHypixelGuild(ctx) }) {
-		const IS_INTERACTION = ctx instanceof Interaction;
-
-		if (IS_INTERACTION) this.deferReply(ctx);
-
-		let hypixelGuild = hypixelGuildInput;
-		let target;
-
+	async getMuteTarget(targetInput, interaction) {
 		if ([ 'guild', 'everyone' ].includes(targetInput)) {
-			target = 'everyone';
-		} else {
-			target = IS_INTERACTION
-				? this.getPlayer(ctx)
-					?? (InteractionUtil.checkForce(ctx)
-						? targetInput // use input if force is set
-						: (await this.client.players.fetch({ // try to find by ign or uuid
-							[Op.or]: [{
-								ign: { [Op.iLike]: targetInput },
-								minecraftUuid: targetInput,
-							}],
-							cache: false,
-						})
-							?? await (async () => { // check if input is a discord id or @mention, find or create player db object if so
-								const ID = getIdFromString(targetInput);
-
-								if (!ID) return null;
-
-								try {
-									// check if ID is from a member in the guild
-									await this.client.lgGuild?.members.fetch(ID);
-
-									return (await this.client.players.model.findOrCreate({
-										where: { discordId: ID },
-										defaults: {
-											minecraftUuid: SnowflakeUtil.generate(),
-											guildId: GUILD_ID_BRIDGER,
-											ign: UNKNOWN_IGN,
-											inDiscord: true,
-										},
-									}))[0];
-								} catch (error) {
-									return logger.error(error);
-								}
-							})()
-						)
-					)
-				: this.client.players.getByIgn(targetInput) ?? targetInput;
-
-			if (!target) return {
-				content: `no player with the IGN \`${targetInput}\` found`,
-				ephemeral: true,
-			};
-
-			if (target instanceof this.client.players.model) {
-				({ hypixelGuild } = target);
-			}
+			return 'everyone';
 		}
 
+		if (!interaction) return this.client.players.getByIgn(targetInput) ?? targetInput;
+
+		return this.getPlayer(interaction)
+			?? (InteractionUtil.checkForce(interaction)
+				? targetInput // use input if force is set
+				: (await this.client.players.fetch({ // try to find by ign or uuid
+					[Op.or]: [{
+						ign: { [Op.iLike]: targetInput },
+						minecraftUuid: targetInput,
+					}],
+					cache: false,
+				})
+					?? await (async () => { // check if input is a discord id or @mention, find or create player db object if so
+						const ID = getIdFromString(targetInput);
+
+						if (!ID) return null;
+
+						try {
+							// check if ID is from a member in the guild
+							await this.client.lgGuild?.members.fetch(ID);
+
+							return (await this.client.players.model.findOrCreate({
+								where: { discordId: ID },
+								defaults: {
+									minecraftUuid: SnowflakeUtil.generate(),
+									guildId: GUILD_ID_BRIDGER,
+									ign: UNKNOWN_IGN,
+									inDiscord: true,
+								},
+							}))[0];
+						} catch (error) {
+							return logger.error(error);
+						}
+					})()
+				)
+			);
+	}
+
+	/**
+	 * /g mute
+	 * @param {{ interaction: import('discord.js').CommandInteraction, target: string | import('../../structures/database/models/Player'), duration: number, hypixelGuild?: import('../../structures/database/models/HypixelGuild') }} param0
+	 */
+	async runMute({ interaction, target, executor, duration, hypixelGuild: hypixelGuildInput }) {
+		let hypixelGuild = hypixelGuildInput;
+
 		if (target instanceof this.client.players.model) {
-			if (target.guildRankPriority >= ((IS_INTERACTION ? UserUtil.getPlayer(ctx.user) : ctx.player)?.guildRankPriority ?? 0)) return {
+			({ hypixelGuild } = target);
+
+			if (target.guildRankPriority >= (executor?.guildRankPriority ?? -1)) return {
 				content: `your guild rank needs to be higher than ${target}'s`,
 				ephemeral: true,
 			};
+
+			if (interaction) this.deferReply(interaction);
 
 			target.mutedTill = Date.now() + duration;
 			await target.save();
@@ -275,16 +271,58 @@ module.exports = class GuildCommand extends SlashCommand {
 			await hypixelGuild.save();
 		}
 
-		// interaction
-		if (IS_INTERACTION) return await this.#run(ctx, {
-			command: `g mute ${target} ${ms(duration)}`,
-			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
-		}, hypixelGuild);
+		try {
+			const { chatBridge } = hypixelGuild;
 
-		// hypixel message
-		return await hypixelGuild.chatBridge.minecraft.command({
-			command: `g mute ${target} ${ms(duration)}`,
-			responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
+			if (interaction) this.deferReply(interaction);
+
+			const res = await chatBridge.minecraft.command({
+				command: `g mute ${target} ${ms(duration)}`,
+				responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, chatBridge.bot.username),
+			});
+
+			return {
+				content: res,
+				ephemeral: false,
+			};
+		} catch (error) {
+			return {
+				content: `${error}`,
+				ephemeral: true,
+			};
+		}
+	}
+
+	/**
+	 * @param {import('discord.js').CommandInteraction} interaction
+	 * @param {number} duration
+	 */
+	async runMuteInteraction(interaction, duration) {
+		const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
+		const target = await this.getMuteTarget(TARGET_INPUT, interaction);
+
+		if (!target) return await this.reply(interaction, {
+			content: `no player with the IGN \`${TARGET_INPUT}\` found`,
+			ephemeral: true,
+		});
+
+		const { content, ephemeral } = await this.runMute({
+			interaction,
+			target,
+			executor: UserUtil.getPlayer(interaction.user),
+			duration,
+			hypixelGuild: this.getHypixelGuild(interaction),
+		});
+
+		return await this.reply(interaction, {
+			embeds: [
+				this.client.defaultEmbed
+					.setTitle(`/g mute ${target} ${ms(duration)}`)
+					.setDescription(Formatters.codeBlock(content)),
+			],
+			ephemeral: interaction.options.get('visibility') === null
+				? InteractionUtil.CACHE.get(interaction).useEphemeral || ephemeral
+				: InteractionUtil.CACHE.get(interaction).useEphemeral,
 		});
 	}
 
@@ -576,19 +614,7 @@ module.exports = class GuildCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				const errorReply = await this.runMute(interaction, {
-					targetInput: interaction.options.getString('target', true).toLowerCase(),
-					duration: DURATION,
-				});
-
-				if (Reflect.has(errorReply ?? {}, 'ephemeral')) await this.reply(interaction, {
-					...errorReply,
-					ephemeral: interaction.options.get('visibility') === null
-						? InteractionUtil.CACHE.get(interaction).useEphemeral || errorReply.ephemeral
-						: InteractionUtil.CACHE.get(interaction).useEphemeral,
-				});
-
-				return;
+				return await this.runMuteInteraction(interaction, DURATION);
 			}
 
 			case 'promote': {

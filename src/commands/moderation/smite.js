@@ -1,7 +1,6 @@
 'use strict';
 
 const { Constants } = require('discord.js');
-const InteractionUtil = require('../../util/InteractionUtil');
 const DualCommand = require('../../structures/commands/DualCommand');
 // const logger = require('../../functions/logger');
 
@@ -36,17 +35,10 @@ module.exports = class SmiteCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		const errorReply = await this.client.commands.get('guild').runMute(interaction, {
-			targetInput: interaction.options.getString('target', true).toLowerCase(),
-			duration: 10 * 60_000,
-		});
+		/** @type {import('../guild/guild')} */
+		const guildCommand = this.client.commands.get('guild');
 
-		if (Reflect.has(errorReply ?? {}, 'ephemeral')) return await this.reply(interaction, {
-			...errorReply,
-			ephemeral: interaction.options.get('visibility') === null
-				? InteractionUtil.CACHE.get(interaction).useEphemeral || errorReply.ephemeral
-				: InteractionUtil.CACHE.get(interaction).useEphemeral,
-		});
+		return await guildCommand.runMuteInteraction(interaction, 10 * 60_000);
 	}
 
 	/**
@@ -54,10 +46,20 @@ module.exports = class SmiteCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
 	 */
 	async runInGame(message) {
-		return await message.author.send(await this.client.commands.get('guild').runMute(message, {
-			targetInput: message.commandData.args[0],
+		/** @type {import('../guild/guild')} */
+		const guildCommand = this.client.commands.get('guild');
+		const [ TARGET_INPUT ] = message.commandData.args;
+		const target = await guildCommand.getMuteTarget(TARGET_INPUT);
+
+		if (!target) return await message.author.send(`no player with the IGN \`${TARGET_INPUT}\` found`);
+
+		const { content } = await guildCommand.runMute({
+			target,
+			executor: message.player,
 			duration: 10 * 60_000,
-			hypixelGuildInput: message.chatBridge.hypixelGuild,
-		}));
+			hypixelGuild: message.hypixelGuild,
+		});
+
+		return await message.author.send(content);
 	}
 };
