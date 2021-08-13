@@ -807,7 +807,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 			// message sent successfully
 			default: {
-				if (useSpamBypass) this._lastMessages.add(message);
+				this._lastMessages.add(message); // since listener doesn't collect command responses 'if (useSpamBypass)' is not needed in this case
 
 				await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
 					? this.delay
