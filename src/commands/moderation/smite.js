@@ -48,7 +48,7 @@ module.exports = class SmiteCommand extends DualCommand {
 	async runInGame(message) {
 		/** @type {import('../guild/guild')} */
 		const guildCommand = this.client.commands.get('guild');
-		const [ TARGET_INPUT ] = message.commandData.args;
+		const TARGET_INPUT = message.commandData.args[0].toLowerCase();
 		const target = await guildCommand.getMuteTarget(TARGET_INPUT);
 
 		if (!target) return await message.author.send(`no player with the IGN \`${TARGET_INPUT}\` found`);
