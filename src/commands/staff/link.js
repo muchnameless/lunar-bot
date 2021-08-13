@@ -38,8 +38,6 @@ module.exports = class LinkCommand extends SlashCommand {
 		this.deferReply(interaction);
 
 		const IGN_OR_UUID = interaction.options.getString('ign', true);
-		const user = interaction.options.getUser('user', true);
-		const member = interaction.options.getMember('user', true);
 
 		let uuid;
 		let ign;
@@ -75,10 +73,13 @@ module.exports = class LinkCommand extends SlashCommand {
 			Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 		`);
 
+		/** @type {string} */
+		const USER_ID = interaction.options.get('user', true).value;
+
 		// discordId already linked to another player
-		const playerLinkedToId = this.client.players.getById(user.id)
+		const playerLinkedToId = this.client.players.getById(USER_ID)
 			?? await this.client.players.fetch({
-				discordId: user.id,
+				discordId: USER_ID,
 				cache: false,
 			});
 
@@ -95,7 +96,7 @@ module.exports = class LinkCommand extends SlashCommand {
 
 			if (!linkedUserIsDeleted) {
 				await this.awaitConfirmation(interaction, {
-					question: `${linkedUser ?? `\`${user.id}\``} is already linked to \`${playerLinkedToId}\`. Overwrite this?`,
+					question: `${linkedUser ?? `\`${USER_ID}\``} is already linked to \`${playerLinkedToId}\`. Overwrite this?`,
 					allowedMentions: { parse: [] },
 				});
 			}
@@ -121,7 +122,7 @@ module.exports = class LinkCommand extends SlashCommand {
 			});
 
 			if (!linkedUserIsDeleted) {
-				if (player.discordId === user.id) return await this.reply(interaction, {
+				if (player.discordId === USER_ID) return await this.reply(interaction, {
 					content: `\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}`,
 					allowedMentions: { parse: [] },
 				});
@@ -144,12 +145,13 @@ module.exports = class LinkCommand extends SlashCommand {
 		}
 
 		// try to find the linked users member data
-		const discordMember = member ?? await this.client.lgGuild?.members.fetch(user.id).catch(error => logger.error('[LINK]: error fetching member to link', error));
+		const discordMember = interaction.options.getMember('user')
+			?? await this.client.lgGuild?.members.fetch(USER_ID).catch(error => logger.error('[LINK]: error fetching member to link', error));
 
 		// no discord member for the user to link found
 		if (!discordMember) {
-			await player.link(user.id);
-			return await this.reply(interaction, `\`${player}\` linked to \`${user.id}\` but could not be found on the Lunar Guard discord server`);
+			await player.link(USER_ID);
+			return await this.reply(interaction, `\`${player}\` linked to \`${USER_ID}\` but could not be found on the Lunar Guard discord server`);
 		}
 
 		// user to link is in discord -> update roles
