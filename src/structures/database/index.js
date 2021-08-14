@@ -1,5 +1,6 @@
 import { config } from 'dotenv';
-config();
+import { fileURLToPath } from 'url';
+config({ path: fileURLToPath(new URL('../../../.env', import.meta.url)) });
 import { readdir } from 'fs/promises';
 
 // to get bigints as numbers instead of strings

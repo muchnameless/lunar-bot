@@ -57,7 +57,7 @@ export class BaseCommandCollection extends Collection {
 	async loadFromFile(file) {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
-		const Command = (await import(pathToFileURL(file))).default;
+		const Command = (await import(pathToFileURL(file).href)).default;
 		/** @type {import('./DualCommand').DualCommand | import('./SlashCommand').SlashCommand} */
 		const command = new Command({
 			client: this.client,

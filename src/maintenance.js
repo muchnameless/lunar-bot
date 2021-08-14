@@ -1,5 +1,6 @@
 import { config } from 'dotenv';
-config();
+import { fileURLToPath } from 'url';
+config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 import { Client, Intents, Permissions, LimitedCollection, SnowflakeUtil, Options, Constants } from 'discord.js';
 import { escapeRegex } from './functions/util.js';
 import { ChannelUtil } from './util/ChannelUtil.js';

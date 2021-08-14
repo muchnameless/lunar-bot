@@ -39,7 +39,7 @@ export class EventCollection extends Collection {
 	 */
 	async loadFromFile(file, force = false) {
 		const name = basename(file, '.js');
-		const Event = (await import(pathToFileURL(file))).default;
+		const Event = (await import(pathToFileURL(file).href)).default;
 		/** @type {import('./BaseEvent').BaseEvent} */
 		const event = new Event({
 			emitter: this.emitter,
