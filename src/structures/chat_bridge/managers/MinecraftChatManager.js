@@ -1,25 +1,24 @@
-'use strict';
-
-const { MessageEmbed, SnowflakeUtil, Formatters } = require('discord.js');
-const { AsyncQueue } = require('@sapphire/async-queue');
-const { setTimeout: sleep } = require('timers/promises');
-const { stripIndents } = require('common-tags');
-const ms = require('ms');
-const emojiRegex = require('emoji-regex/es2015')();
-const { trim, cleanFormattedNumber, splitMessage } = require('../../../functions/util');
-const { unicodeToName } = require('../constants/emojiNameUnicodeConverter');
-const { memeRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, randomPadding, messageTypes: { GUILD, PARTY, OFFICER } } = require('../constants/chatBridge');
-const { STOP, X_EMOJI } = require('../../../constants/emojiCharacters');
-const { MC_CLIENT_VERSION } = require('../constants/settings');
-const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../../constants/database');
-const minecraftBot = require('../MinecraftBot');
-const UserUtil = require('../../../util/UserUtil');
-const GuildMemberUtil = require('../../../util/GuildMemberUtil');
-const MessageUtil = require('../../../util/MessageUtil');
-const MessageCollector = require('../MessageCollector');
-const ChatManager = require('./ChatManager');
-const cache = require('../../../api/cache');
-const logger = require('../../../functions/logger');
+import { MessageEmbed, SnowflakeUtil, Formatters } from 'discord.js';
+import { AsyncQueue } from '@sapphire/async-queue';
+import { setTimeout as sleep } from 'timers/promises';
+import { stripIndents } from 'common-tags';
+import ms from 'ms';
+import emojiRegex from 'emoji-regex/es2015/index.js';
+import minecraftData from 'minecraft-data';
+import { trim, cleanFormattedNumber, splitMessage } from '../../../functions/util.js';
+import { unicodeToName } from '../constants/emojiNameUnicodeConverter.js';
+import { memeRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, randomPadding, messageTypes } from '../constants/chatBridge.js';
+import { STOP, X_EMOJI } from '../../../constants/emojiCharacters.js';
+import { MC_CLIENT_VERSION } from '../constants/settings.js';
+import { GUILD_ID_BRIDGER, UNKNOWN_IGN } from '../../../constants/database.js';
+import { createBot } from '../MinecraftBot.js';
+import { UserUtil } from '../../../util/UserUtil.js';
+import { GuildMemberUtil } from '../../../util/GuildMemberUtil.js';
+import { MessageUtil } from '../../../util/MessageUtil.js';
+import { MessageCollector } from '../MessageCollector.js';
+import { ChatManager } from './ChatManager.js';
+import { cache } from '../../../api/cache.js';
+import { logger } from '../../../functions/logger.js';
 
 /**
  * @typedef {object} SendToChatOptions
@@ -42,40 +41,48 @@ const logger = require('../../../functions/logger');
  */
 
 
-module.exports = class MinecraftChatManager extends ChatManager {
+export class MinecraftChatManager extends ChatManager {
 	/**
 	 * resolves this.#promise
 	 */
 	#resolve;
 	/**
-	 * @type {Promise<'spam'|'blocked'|import('../HypixelMessage')>}
+	 * @type {Promise<'spam'|'blocked'|import('../HypixelMessage').HypixelMessage>}
 	 */
 	#promise = new Promise(res => this.#resolve = res);
 	/**
 	 * bot player db object
-	 * @type {?import('../../database/models/Player')}
+	 * @type {?import('../../database/models/Player').Player}
 	 */
 	#botPlayer = null;
+	/**
+	 * @type {?string}
+	 */
+	#contentFilter = null;
+	/**
+	 * wether the message sent collector is active
+	 */
+	#collecting = false;
+	/**
+	 * wether the chatBridge mc bot is currently isReconnecting (prevents executing multiple reconnections)
+	 */
+	#isReconnecting = false;
+	/**
+	 * scheduled reconnection
+	 */
+	#reconnectTimeout = null;
+	/**
+	 * current retry when resending messages
+	 */
+	#retries = 0;
 
 	constructor(...args) {
 		super(...args);
 
 		/**
-		 * current retry when resending messages
-		 */
-		this.retries = 0;
-		/**
 		 * how many messages have been sent to in game chat in the last 10 seconds
 		 */
 		this.messageCounter = 0;
-		/**
-		 * @type {?string}
-		 */
-		this._contentFilter = null;
-		/**
-		 * wether the message sent collector is active
-		 */
-		this._collecting = false;
 		/**
 		 * async queue for minecraft commands, prevents multiple response collectors
 		 */
@@ -97,25 +104,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		 */
 		this.abortLoginTimeout = null;
 		/**
-		  * scheduled reconnection
-		  */
-		this._reconnectTimeout = null;
-		/**
 		  * increases each login, reset to 0 on successfull spawn
 		  */
 		this.loginAttempts = 0;
 		/**
-		 * wether the chatBridge mc bot is currently isReconnecting (prevents executing multiple reconnections)
-		 */
-		this._isReconnecting = false;
-		/**
 		  * to prevent chatBridge from reconnecting at <MinecraftBot>.end
 		  */
 		this.shouldReconnect = true;
-		/**
-		 * command response collector
-		 */
-		this._commandCollector = null;
 		/**
 		 * anti spam checker
 		 */
@@ -178,7 +173,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * bot player db object
-	 * @returns {?import('../../database/models/Player')}
+	 * @returns {?import('../../database/models/Player').Player}
 	 */
 	get botPlayer() {
 		return this.#botPlayer ??= this.client.players.cache.get(this.botUuid) ?? null;
@@ -265,7 +260,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * 100 pre 1.10.2, 256 post 1.10.2
 	 * @type {number}
 	 */
-	static MAX_MESSAGE_LENGTH = require('minecraft-data')(MC_CLIENT_VERSION).version.version > require('minecraft-data')('1.10.2').version.version
+	static MAX_MESSAGE_LENGTH = minecraftData(MC_CLIENT_VERSION).version.version > minecraftData('1.10.2').version.version
 		? 256
 		: 100;
 
@@ -288,7 +283,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			switch (reason) {
 				case 'blocked': {
 					try {
-						/** @type {import('../../database/models/Player')} */
+						/** @type {import('../../database/models/Player').Player} */
 						const player = UserUtil.getPlayer(discordMessage.author)
 							?? (await this.client.players.model.findOrCreate({
 								where: { discordId: discordMessage.author.id },
@@ -364,7 +359,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * removes line formatters from the beginning and end
-	 * @param {import('../HypixelMessage')} messages
+	 * @param {import('../HypixelMessage').HypixelMessage} messages
 	 */
 	static #cleanCommandResponse(messages) {
 		return messages
@@ -385,7 +380,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	async #createBot() {
 		++this.loginAttempts;
 
-		return this.bot = await minecraftBot(this.chatBridge, {
+		return this.bot = await createBot(this.chatBridge, {
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
 			username: process.env.MINECRAFT_USERNAME.split(' ')[this.mcAccount],
@@ -416,7 +411,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			}, 60_000);
 		}
 
-		this._isReconnecting = false;
+		this.#isReconnecting = false;
 
 		return this;
 	}
@@ -427,16 +422,16 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 */
 	reconnect(loginDelay = Math.min(Math.exp(this.loginAttempts) * 1_000, 600_000)) {
 		// prevent multiple reconnections
-		if (this._isReconnecting) return this;
-		this._isReconnecting = true;
+		if (this.#isReconnecting) return this;
+		this.#isReconnecting = true;
 
 		this.disconnect();
 
 		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
 
-		this._reconnectTimeout = setTimeout(() => {
+		this.#reconnectTimeout = setTimeout(() => {
 			this.connect();
-			this._reconnectTimeout = null;
+			this.#reconnectTimeout = null;
 		}, loginDelay);
 
 		return this;
@@ -446,8 +441,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * disconnects the bot
 	 */
 	disconnect() {
-		clearTimeout(this._reconnectTimeout);
-		this._reconnectTimeout = null;
+		clearTimeout(this.#reconnectTimeout);
+		this.#reconnectTimeout = null;
 
 		clearTimeout(this.abortLoginTimeout);
 		this.abortLoginTimeout = null;
@@ -466,7 +461,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * @param {string|import('../HypixelMessage')} value
+	 * @param {string|import('../HypixelMessage').HypixelMessage} value
 	 */
 	#resolveAndReset(value) {
 		this.#resolve(value);
@@ -475,11 +470,11 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	}
 
 	/**
-	 * @param {import('../HypixelMessage')} hypixelMessage
+	 * @param {import('../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
 	collect(hypixelMessage) {
-		if (!this._collecting) return;
-		if (hypixelMessage.me && hypixelMessage.content.includes(this._contentFilter)) return this.#resolveAndReset(hypixelMessage);
+		if (!this.#collecting) return;
+		if (hypixelMessage.me && hypixelMessage.content.includes(this.#contentFilter)) return this.#resolveAndReset(hypixelMessage);
 		if (hypixelMessage.type) return;
 		if (hypixelMessage.spam) return this.#resolveAndReset('spam');
 		if (hypixelMessage.content.startsWith('We blocked your comment')) return this.#resolveAndReset('blocked');
@@ -490,8 +485,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * @param {string} content
 	 */
 	#listenFor(content) {
-		this._contentFilter = content;
-		this._collecting = true;
+		this.#contentFilter = content;
+		this.#collecting = true;
 		return this.#promise;
 	}
 
@@ -499,8 +494,8 @@ module.exports = class MinecraftChatManager extends ChatManager {
 	 * resets the listener filter
 	 */
 	#resetFilter() {
-		this._contentFilter = null;
-		this._collecting = false;
+		this.#contentFilter = null;
+		this.#collecting = false;
 	}
 
 	/**
@@ -528,7 +523,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 			.replace(invisibleCharacterRegExp, '') // remove invisible characters
 			.replace(/<(?:a)?:(\w{2,32}):(?:\d{17,19})>/g, ':$1:') // custom emojis
-			.replace(emojiRegex, match => unicodeToName[match] ?? match) // default emojis
+			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
 			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
 			.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
 				const CHANNEL_NAME = this.client.channels.cache.get(p1)?.name;
@@ -719,7 +714,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			logger.error('[CHATBRIDGE MC CHAT]', error);
 			return false;
 		} finally {
-			this.retries = 0;
+			this.#retries = 0;
 			this.queue.shift();
 		}
 	}
@@ -736,7 +731,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		const useSpamBypass = isMessage ?? /^\/(?:[acgop]c|msg|w(?:hisper)?|t(?:ell)?) /i.test(message);
 
 		if (useSpamBypass) {
-			let index = this.retries;
+			let index = this.#retries;
 
 			// 1 for each retry + additional if _lastMessages includes curent padding
 			while ((--index >= 0 || this._lastMessages.check(message)) && (message.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH)) {
@@ -789,13 +784,13 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				this.#tempIncrementCounter();
 
 				// max retries reached
-				if (++this.retries === MinecraftChatManager.MAX_RETRIES) {
+				if (++this.#retries === MinecraftChatManager.MAX_RETRIES) {
 					MessageUtil.react(discordMessage, X_EMOJI);
-					await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
+					await sleep(this.#retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 					throw `unable to send the message, anti spam failed ${MinecraftChatManager.MAX_RETRIES} times`;
 				}
 
-				await sleep(this.retries * MinecraftChatManager.ANTI_SPAM_DELAY);
+				await sleep(this.#retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 				return this.#sendToChat(...arguments); // retry sending
 			}
 
@@ -810,7 +805,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 			default: {
 				this._lastMessages.add(message); // since listener doesn't collect command responses 'if (useSpamBypass)' is not needed in this case
 
-				await sleep([ GUILD, PARTY, OFFICER ].includes(response.type)
+				await sleep([ messageTypes.GUILD, messageTypes.PARTY, messageTypes.OFFICER ].includes(response.type)
 					? this.delay
 					: (this.#tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY), // use safe delay for commands and whispers
 				);
@@ -829,7 +824,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
-		const collector = this._commandCollector = this.createMessageCollector({
+		const collector = this.createMessageCollector({
 			filter: message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{29,}/.test(message.content)),
 			time: timeout,
 		});
@@ -837,14 +832,14 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		let resolve;
 		let reject;
 
-		/** @type {Promise<string|import('../HypixelMessage')[]>} */
+		/** @type {Promise<string|import('../HypixelMessage').HypixelMessage[]>} */
 		const promise = new Promise((res, rej) => {
 			resolve = res;
 			reject = rej;
 		});
 
 		// collect message
-		collector.on('collect', (/** @type {import('../HypixelMessage')} */ message) => {
+		collector.on('collect', (/** @type {import('../HypixelMessage').HypixelMessage} */ message) => {
 			if (/^-{29,}/.test(message.content)) { // is line separator
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
 				if (/[^-]-{29,}$/.test(message.content)) return collector.stop();
@@ -861,7 +856,7 @@ module.exports = class MinecraftChatManager extends ChatManager {
 		});
 
 		// end collection
-		collector.once('end', (/** @type {import('../HypixelMessage')[]} */ collected, /** @type {string} */ reason) => {
+		collector.once('end', (/** @type {import('../HypixelMessage').HypixelMessage[]} */ collected, /** @type {string} */ reason) => {
 			this.commandQueue.shift();
 
 			switch (reason) {
@@ -915,11 +910,11 @@ module.exports = class MinecraftChatManager extends ChatManager {
 				reject(error);
 				collector.stop('error');
 			} finally {
-				this.retries = 0;
+				this.#retries = 0;
 				this.queue.shift();
 			}
 		})();
 
 		return promise;
 	}
-};
+}

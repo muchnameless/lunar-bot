@@ -1,12 +1,11 @@
-'use strict';
+import { Collection } from 'discord.js';
+import { basename } from 'path';
+import { pathToFileURL } from 'url';
+import { getAllJsFiles } from '../../functions/files.js';
+import { logger } from '../../functions/logger.js';
 
-const { Collection } = require('discord.js');
-const { basename } = require('path');
-const { getAllJsFiles } = require('../../functions/files');
-const logger = require('../../functions/logger');
 
-
-module.exports = class EventCollection extends Collection {
+export class EventCollection extends Collection {
 	/**
 	 * @param {import('events').EventEmitter} emitter
 	 * @param {string} dirPath the path to the commands folder
@@ -38,10 +37,10 @@ module.exports = class EventCollection extends Collection {
 	 * @param {string} file command file to load
 	 * @param {boolean} [force=false] wether to also load disabled events
 	 */
-	loadFromFile(file, force = false) {
+	async loadFromFile(file, force = false) {
 		const name = basename(file, '.js');
-		const Event = require(file);
-		/** @type {import('./BaseEvent')} */
+		const Event = (await import(pathToFileURL(file))).default;
+		/** @type {import('./BaseEvent').BaseEvent} */
 		const event = new Event({
 			emitter: this.emitter,
 			collection: this,
@@ -52,9 +51,6 @@ module.exports = class EventCollection extends Collection {
 
 		event.load(force);
 
-		// delete if command won't be loaded again
-		delete require.cache[require.resolve(file)];
-
 		return event;
 	}
 
@@ -64,9 +60,7 @@ module.exports = class EventCollection extends Collection {
 	async loadAll() {
 		const eventFiles = await getAllJsFiles(this.dirPath);
 
-		for (const file of eventFiles) {
-			this.loadFromFile(file);
-		}
+		await Promise.all(eventFiles.map(file => this.loadFromFile(file)));
 
 		logger.info(`[EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 
@@ -79,4 +73,4 @@ module.exports = class EventCollection extends Collection {
 	unloadAll() {
 		return this.each(event => event.unload());
 	}
-};
+}

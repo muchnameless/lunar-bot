@@ -1,15 +1,13 @@
-'use strict';
-
-const { DiscordAPIError, Constants } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const { validateNumber } = require('../../functions/stringValidators');
-const hypixel = require('../../api/hypixel');
-const mojang = require('../../api/mojang');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
+import { DiscordAPIError, Constants } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { validateNumber } from '../../functions/stringValidators.js';
+import { hypixel } from '../../api/hypixel.js';
+import { mojang } from '../../api/mojang.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class LinkCommand extends SlashCommand {
+export default class LinkCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -50,7 +48,7 @@ module.exports = class LinkCommand extends SlashCommand {
 			logger.error('[LINK]', error);
 		}
 
-		/** @type {?import('../../structures/database/models/Player')} */
+		/** @type {?import('../../structures/database/models/Player').Player} */
 		let player;
 
 		if (!this.client.hypixelGuilds.cache.has(guildId)) { // IGN_OR_Uuid is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
@@ -168,4 +166,4 @@ module.exports = class LinkCommand extends SlashCommand {
 			allowedMentions: { parse: [] },
 		});
 	}
-};
+}

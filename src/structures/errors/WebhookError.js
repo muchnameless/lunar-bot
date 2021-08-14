@@ -1,10 +1,8 @@
-'use strict';
-
-module.exports = class WebhookError extends Error {
+export class WebhookError extends Error {
 	/**
 	 * @param {string} message
 	 * @param {import('discord.js').TextChannel} channel
-	 * @param {import('../database/models/HypixelGuild')} hypixelGuild
+	 * @param {import('../database/models/HypixelGuild').HypixelGuild} hypixelGuild
 	 */
 	constructor(message, channel, hypixelGuild) {
 		super(message);
@@ -13,4 +11,4 @@ module.exports = class WebhookError extends Error {
 		this.channel = channel;
 		this.hypixelGuild = hypixelGuild;
 	}
-};
+}

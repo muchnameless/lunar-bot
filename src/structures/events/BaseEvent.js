@@ -1,14 +1,12 @@
-'use strict';
-
 /**
  * @typedef {object} EventData
  * @property {boolean} once
  * @property {boolean} enabled
  */
 
-module.exports = class BaseEvent {
+export class BaseEvent {
 	/**
-	 * @param {{ emitter: import('../LunarClient'), name: string }} param0
+	 * @param {{ emitter: import('../LunarClient').LunarClient, name: string }} param0
 	 * @param {EventData} param1
 	 */
 	constructor({ emitter, name }, { once, enabled }) {
@@ -50,4 +48,4 @@ module.exports = class BaseEvent {
 	async run() {
 		throw new Error('no run function specified');
 	}
-};
+}

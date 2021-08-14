@@ -1,13 +1,11 @@
-'use strict';
-
-const { FORWARD_TO_GC } = require('../constants/emojiCharacters');
-const { escapeRegex } = require('../functions/util');
-const MessageUtil = require('../util/MessageUtil');
-const Event = require('../structures/events/Event');
-// const logger = require('../functions/logger');
+import { FORWARD_TO_GC } from '../constants/emojiCharacters.js';
+import { escapeRegex } from '../functions/util.js';
+import { MessageUtil } from '../util/MessageUtil.js';
+import { Event } from '../structures/events/Event.js';
+// import { logger } from '../functions/logger.js';
 
 
-module.exports = class MessageCreateEvent extends Event {
+export default class MessageCreateEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -41,4 +39,4 @@ module.exports = class MessageCreateEvent extends Event {
 	async run(message) {
 		return this._handleDiscordMessage(message, false);
 	}
-};
+}

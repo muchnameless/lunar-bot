@@ -1,14 +1,12 @@
-'use strict';
-
-const { MessageAttachment, Constants } = require('discord.js');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const { oneLine } = require('common-tags');
-const { upperCaseFirstChar } = require('../../functions/util');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { MessageAttachment, Constants } from 'discord.js';
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import { oneLine } from 'common-tags';
+import { upperCaseFirstChar } from '../../functions/util.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class TrackCommand extends SlashCommand {
+export default class TrackCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -142,4 +140,4 @@ module.exports = class TrackCommand extends SlashCommand {
 			],
 		});
 	}
-};
+}

@@ -1,10 +1,8 @@
-'use strict';
-
-const cache = require('./cache');
-const Mojang = require('../structures/Mojang');
+import { cache } from './cache.js';
+import { Mojang } from '../structures/Mojang.js';
 
 
-const mojang = new Mojang({
+export const mojang = new Mojang({
 	cache: {
 		get(key) {
 			return cache.get(`mojang:${key}`);
@@ -15,5 +13,3 @@ const mojang = new Mojang({
 		},
 	},
 });
-
-module.exports = mojang;

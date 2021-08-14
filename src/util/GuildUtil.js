@@ -1,10 +1,8 @@
-'use strict';
-
-const { Collection } = require('discord.js');
-const logger = require('../functions/logger');
+import { Collection } from 'discord.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class GuildUtil extends null {
+export class GuildUtil extends null {
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
 	 * @param {import('discord.js').Guild} guild
@@ -42,4 +40,4 @@ module.exports = class GuildUtil extends null {
 			return null;
 		}
 	}
-};
+}

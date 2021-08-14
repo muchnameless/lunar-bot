@@ -1,16 +1,15 @@
-'use strict';
-
-const { Model, DataTypes } = require('sequelize');
-const { MessageEmbed, Formatters, Util: { splitMessage } } = require('discord.js');
-const { cleanFormattedNumber, compareAlphabetically, safePromiseAll } = require('../../../functions/util');
-const { mutedCheck } = require('../../../functions/database');
-const { setRank } = require('../../chat_bridge/constants/commandResponses');
-const { EMBED_MAX_CHARS, EMBED_MAX_FIELDS, EMBED_FIELD_MAX_CHARS } = require('../../../constants/discord');
-const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, CURRENT, DAY }, UNKNOWN_IGN } = require('../../../constants/database');
-const GuildUtil = require('../../../util/GuildUtil');
-const hypixel = require('../../../api/hypixel');
-const mojang = require('../../../api/mojang');
-const logger = require('../../../functions/logger');
+import pkg from 'sequelize';
+const { Model, DataTypes } = pkg;
+import { MessageEmbed, Formatters, Util } from 'discord.js';
+import { cleanFormattedNumber, compareAlphabetically, safePromiseAll } from '../../../functions/util.js';
+import { mutedCheck } from '../../../functions/database.js';
+import { setRank } from '../../chat_bridge/constants/commandResponses.js';
+import { EMBED_MAX_CHARS, EMBED_MAX_FIELDS, EMBED_FIELD_MAX_CHARS } from '../../../constants/discord.js';
+import { offsetFlags, UNKNOWN_IGN } from '../../../constants/database.js';
+import { GuildUtil } from '../../../util/GuildUtil.js';
+import { hypixel } from '../../../api/hypixel.js';
+import { mojang } from '../../../api/mojang.js';
+import { logger } from '../../../functions/logger.js';
 
 /**
  * @typedef {object} GuildRank
@@ -32,27 +31,28 @@ const logger = require('../../../functions/logger');
  */
 
 
-module.exports = class HypixelGuild extends Model {
+export class HypixelGuild extends Model {
+	/**
+	 * wether a player db update is currently running
+	 * @type {boolean}
+	 */
+	#isUpdatingPlayers = false;
+	/**
+	 * @type {import('discord.js').Collection<string, import('./Player').Player>}
+	 */
+	#players = null;
+	/**
+	 * @type {import('../../chat_bridge/ChatBridge').ChatBridge}
+	 */
+	#chatBridge = null;
+
 	constructor(...args) {
 		super(...args);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('./Player')>}
-		 */
-		this._players = null;
-		/**
-		 * @type {import('../../chat_bridge/ChatBridge')}
-		 */
-		this._chatBridge = null;
-		/**
-		 * @type {import('../../LunarClient')}
+		 * @type {import('../../LunarClient').LunarClient}
 		 */
 		this.client;
-		/**
-		 * wether a player db update is currently running
-		 * @type {boolean}
-		 */
-		this._isUpdatingPlayers = false;
 
 		/**
 		 * @type {string}
@@ -93,7 +93,7 @@ module.exports = class HypixelGuild extends Model {
 	}
 
 	/**
-	 * @param {import('sequelize')} sequelize
+	 * @param {import('sequelize').Sequelize} sequelize
 	 */
 	static init(sequelize) {
 		return super.init({
@@ -164,25 +164,25 @@ module.exports = class HypixelGuild extends Model {
 	static transformLogArray(logArray) {
 		if (!logArray.length) return logArray;
 
-		return splitMessage(
+		return Util.splitMessage(
 			logArray.sort(compareAlphabetically).join('\n'),
 			{ maxLength: EMBED_FIELD_MAX_CHARS - 11, char: '\n' },
 		);
 	}
 
 	set players(value) {
-		this._players = value;
+		this.#players = value;
 	}
 
 	/**
 	 * returns the filtered <LunarClient>.players containing all players from this guild
 	 */
 	get players() {
-		return this._players ??= this.client.players.cache.filter(({ guildId }) => guildId === this.guildId);
+		return this.#players ??= this.client.players.cache.filter(({ guildId }) => guildId === this.guildId);
 	}
 
 	set chatBridge(value) {
-		this._chatBridge = value;
+		this.#chatBridge = value;
 	}
 
 	/**
@@ -190,8 +190,8 @@ module.exports = class HypixelGuild extends Model {
 	 */
 	get chatBridge() {
 		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
-		if (!this._chatBridge?.minecraft.ready) throw `${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`;
-		return this._chatBridge;
+		if (!this.#chatBridge?.minecraft.ready) throw `${this.name}: chat bridge not ${this.#chatBridge ? 'ready' : 'found'}`;
+		return this.#chatBridge;
 	}
 
 	/**
@@ -332,8 +332,8 @@ module.exports = class HypixelGuild extends Model {
 	 * @param {UpdateOptions} [options]
 	 */
 	async updatePlayers(data, { syncRanks = false } = {}) {
-		if (this._isUpdatingPlayers) return;
-		this._isUpdatingPlayers = true;
+		if (this.#isUpdatingPlayers) return;
+		this.#isUpdatingPlayers = true;
 
 		try {
 			const { meta: { cached }, members: currentGuildMembers } = data ?? await hypixel.guild.id(this.guildId);
@@ -362,7 +362,7 @@ module.exports = class HypixelGuild extends Model {
 			// add / remove player db entries
 			await safePromiseAll([
 				...membersJoined.map(async ({ uuid: minecraftUuid }) => {
-					/** @type {[import('./Player'), boolean]} */
+					/** @type {[import('./Player').Player, boolean]} */
 					const [ player, created ] = await this.client.players.model.findOrCreate({
 						where: { minecraftUuid },
 						defaults: {
@@ -465,7 +465,7 @@ module.exports = class HypixelGuild extends Model {
 						setTimeout(
 							(async () => {
 								// reset current xp to 0
-								await player.resetXp({ offsetToReset: CURRENT }).catch(error => logger.error(error));
+								await player.resetXp({ offsetToReset: offsetFlags.CURRENT }).catch(error => logger.error(error));
 
 								const { xpLastUpdatedAt } = player;
 								// shift the daily array for the amount of daily resets missed
@@ -479,13 +479,13 @@ module.exports = class HypixelGuild extends Model {
 
 								// to trigger the xp gained reset if global reset happened after the player left the guild
 								await safePromiseAll([
-									config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: COMPETITION_START }),
-									config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: COMPETITION_END }),
-									config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: MAYOR }),
-									config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: WEEK }),
-									config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: MONTH }),
+									config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.COMPETITION_START }),
+									config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.COMPETITION_END }),
+									config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.MAYOR }),
+									config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.WEEK }),
+									config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.MONTH }),
 									...new Array(DAYS_PASSED_SINCE_LAST_XP_UPDATE).fill(null)
-										.map(() => player.resetXp({ offsetToReset: DAY })),
+										.map(() => player.resetXp({ offsetToReset: offsetFlags.DAY })),
 								]);
 
 								player.update({
@@ -594,7 +594,7 @@ module.exports = class HypixelGuild extends Model {
 
 			this.client.log(...loggingEmbeds);
 		} finally {
-			this._isUpdatingPlayers = false;
+			this.#isUpdatingPlayers = false;
 		}
 	}
 
@@ -698,4 +698,6 @@ module.exports = class HypixelGuild extends Model {
 	toString() {
 		return this.name;
 	}
-};
+}
+
+export default HypixelGuild;

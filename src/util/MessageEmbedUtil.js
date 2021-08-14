@@ -1,10 +1,8 @@
-'use strict';
-
-const { EMBED_MAX_FIELDS } = require('../constants/discord');
-// const logger = require('../functions/logger');
+import { EMBED_MAX_FIELDS } from '../constants/discord.js';
+// import { logger } from '../functions/logger.js';
 
 
-module.exports = class MessageEmbedUtil extends null {
+export class MessageEmbedUtil extends null {
 	/**
 	 * adds additional blank inline fields such that each line is filled with 'numberOfRows = 3' of them
 	 * @param {import('discord.js').MessageEmbed} embed
@@ -23,4 +21,4 @@ module.exports = class MessageEmbedUtil extends null {
 
 		return embed;
 	}
-};
+}

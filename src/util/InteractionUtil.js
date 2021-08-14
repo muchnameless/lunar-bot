@@ -1,12 +1,10 @@
-'use strict';
-
-const { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } = require('discord.js');
-const { Y_EMOJI, X_EMOJI } = require('../constants/emojiCharacters');
-const { makeContent } = require('../functions/util');
-const ChannelUtil = require('./ChannelUtil');
-const MessageUtil = require('./MessageUtil');
-const UserUtil = require('./UserUtil');
-const logger = require('../functions/logger');
+import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } from 'discord.js';
+import { Y_EMOJI, X_EMOJI } from '../constants/emojiCharacters.js';
+import { makeContent } from '../functions/util.js';
+import { ChannelUtil } from './ChannelUtil.js';
+import { MessageUtil } from './MessageUtil.js';
+import { UserUtil } from './UserUtil.js';
+import { logger } from '../functions/logger.js';
 
 
 /**
@@ -21,7 +19,7 @@ const logger = require('../functions/logger');
  */
 
 
-module.exports = class InteractionUtil extends null {
+export class InteractionUtil extends null {
 	/**
 	 * @type {WeakMap<GenericInteraction, InteractionData>}
 	 */
@@ -342,4 +340,4 @@ module.exports = class InteractionUtil extends null {
 
 		return MessageUtil.react(await interaction.fetchReply(), ...emojis);
 	}
-};
+}

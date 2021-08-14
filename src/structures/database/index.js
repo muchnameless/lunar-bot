@@ -1,19 +1,18 @@
-'use strict';
-
-const { join } = require('path');
-require('dotenv').config({ path: join(__dirname, '..', '..', '..', '.env') });
-const { readdirSync } = require('fs');
+import { config } from 'dotenv';
+config();
+import { readdir } from 'fs/promises';
 
 // to get bigints as numbers instead of strings
-const pg = require('pg');
+import pg from 'pg';
 
 pg.defaults.parseInt8 = true;
 pg.types.setTypeParser(1700, parseFloat);
 
-const Sequelize = require('sequelize');
+import pkg from 'sequelize';
+const { Sequelize, DataTypes, Model } = pkg;
 
 // use floats instead of strings as decimal representation (1/2)
-class CustomDecimal extends Sequelize.DataTypes.DECIMAL {
+class CustomDecimal extends DataTypes.DECIMAL {
 	static parse(value) {
 		return parseFloat(value);
 	}
@@ -36,29 +35,26 @@ const sequelize = new Sequelize(
 	},
 );
 
-const db = {
+export const db = {
 
 	// read models
 	...Object.fromEntries(
-		readdirSync(join(__dirname, 'models'))
+		(await Promise.all((await readdir('./src/structures/database/models'))
 			.filter(file => !file.startsWith('~') && file.endsWith('.js'))
-			.map((file) => {
-				const model = require(join(__dirname, 'models', file));
+			.map(async (file) => {
+				const model = (await import(`./models/${file}`)).default;
 
-				if (Object.getPrototypeOf(model) !== Sequelize.Model) return null;
+				if (Object.getPrototypeOf(model) !== Model) return null;
 
 				return [ model.name, model.init(sequelize) ];
-			})
-			.filter(Boolean),
+			}),
+		)).filter(Boolean),
 	),
 
 	// add sequelize
 	sequelize,
-	Sequelize,
 };
 
-for (const dbEntry of Object.values(db).filter(value => Object.getPrototypeOf(value) === Sequelize.Model)) {
+for (const dbEntry of Object.values(db).filter(value => Object.getPrototypeOf(value) === Model)) {
 	dbEntry.associate?.(db);
 }
-
-module.exports = db;

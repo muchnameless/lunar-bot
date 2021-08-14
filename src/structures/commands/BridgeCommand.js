@@ -1,6 +1,4 @@
-'use strict';
-
-const BaseCommand = require('./BaseCommand');
+import { BaseCommand } from './BaseCommand.js';
 
 /**
  * @typedef {object} CommandInfo additional information about the command
@@ -13,10 +11,10 @@ const BaseCommand = require('./BaseCommand');
  */
 
 
-module.exports = class BridgeCommand extends BaseCommand {
+export class BridgeCommand extends BaseCommand {
 	/**
 	 * create a new command
-	 * @param {BaseCommand.BaseCommandData} param0
+	 * @param {import('./BaseCommand').BaseCommandData} param0
 	 * @param {CommandInfo} param1
 	 */
 	constructor(param0, { aliases, description, guildOnly, args, usage, cooldown, requiredRoles }) {
@@ -80,4 +78,4 @@ module.exports = class BridgeCommand extends BaseCommand {
 	async runInGame(message) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
-};
+}

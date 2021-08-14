@@ -1,11 +1,9 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const DualCommand = require('../../structures/commands/DualCommand');
-const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class PingMuteCommand extends DualCommand {
+export default class PingMuteCommand extends DualCommand {
 	constructor(data, param1, param2) {
 		super(
 			data,
@@ -29,7 +27,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 	}
 
 	/**
-	 * @param {import('../../structures/database/models/Player')} player
+	 * @param {import('../../structures/database/models/Player').Player} player
 	 */
 	async _generateReply(player) {
 		try {
@@ -53,7 +51,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
 	 */
 	async runInGame(message) {
 		const [ INPUT ] = message.commandData.args;
@@ -63,4 +61,4 @@ module.exports = class PingMuteCommand extends DualCommand {
 
 		return await message.reply(await this._generateReply(player));
 	}
-};
+}

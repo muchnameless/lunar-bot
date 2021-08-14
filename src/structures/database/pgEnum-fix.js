@@ -1,17 +1,10 @@
-'use strict';
-
-const PostgresQueryGenerator = require('sequelize/lib/dialects/postgres/query-generator');
+import PostgresQueryGenerator from 'sequelize/lib/dialects/postgres/query-generator';
 
 PostgresQueryGenerator.prototype.pgEnum = function(tableName, attr, dataType, options) {
 	const enumName = this.pgEnumName(tableName, attr, options);
-
-	let values;
-
-	if (dataType.values) {
-		values = `ENUM(${dataType.values.map(value => this.escape(value)).join(', ')})`;
-	} else {
-		[ values ] = `${dataType}`.match(/^ENUM\(.+\)/);
-	}
+	const values = dataType.values
+		? `ENUM(${dataType.values.map(value => this.escape(value)).join(', ')})`
+		: `${dataType}`.match(/^ENUM\(.+\)/)[0];
 
 	let sql = `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_${tableName}_${attr}') THEN CREATE TYPE ${enumName} AS ${values}; END IF; END$$;`;
 

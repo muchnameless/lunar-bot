@@ -1,16 +1,14 @@
-'use strict';
-
-const { AsyncQueue } = require('@sapphire/async-queue');
-const { blockedWordsRegExp } = require('../constants/chatBridge');
+import { AsyncQueue } from '@sapphire/async-queue';
+import { blockedWordsRegExp } from '../constants/chatBridge.js';
 
 /**
  * @typedef {import('../MessageCollector').MessageCollectorOptions & { errors: ?string[] }} AwaitMessagesOptions
  */
 
 
-module.exports = class ChatManager {
+export class ChatManager {
 	/**
-	 * @param {import('../ChatBridge')} chatBridge
+	 * @param {import('../ChatBridge').ChatBridge} chatBridge
 	 */
 	constructor(chatBridge) {
 		this.chatBridge = chatBridge;
@@ -44,7 +42,7 @@ module.exports = class ChatManager {
 	/**
 	 * promisified MessageCollector
 	 * @param {AwaitMessagesOptions} options
-	 * @returns {Promise<import('../HypixelMessage')[]>}
+	 * @returns {Promise<import('../HypixelMessage').HypixelMessage[]>}
 	 */
 	awaitMessages(options = {}) {
 		return new Promise((resolve, reject) => {
@@ -59,4 +57,4 @@ module.exports = class ChatManager {
 			});
 		});
 	}
-};
+}

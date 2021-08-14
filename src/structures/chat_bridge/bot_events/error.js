@@ -1,11 +1,10 @@
-'use strict';
-
-// const logger = require('../../../functions/logger');
+// import { logger } from '../../../functions/logger.js';
 
 
 /**
- * @param {import('../ChatBridge')} chatBridge
+ * @param {import('../ChatBridge').ChatBridge} chatBridge
+ * @param {any} error
  */
-module.exports = (chatBridge, error) => {
+export default function(chatBridge, error) {
 	chatBridge.emit('error', error);
-};
+}

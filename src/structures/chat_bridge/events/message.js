@@ -1,17 +1,15 @@
-'use strict';
-
-const { commaListsOr } = require('common-tags');
-const ms = require('ms');
-const { defaults: { ign: IGN_REGEXP }, demoteSuccess, kickSuccess, muteSuccess, promoteSuccess, unmuteSuccess } = require('../constants/commandResponses');
-const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY }, invisibleCharacters } = require('../constants/chatBridge');
-const { STOP } = require('../../../constants/emojiCharacters');
-const { stringToMS } = require('../../../functions/util');
-const MessageUtil = require('../../../util/MessageUtil');
-const ChatBridgeEvent = require('../ChatBridgeEvent');
-const logger = require('../../../functions/logger');
+import { commaListsOr } from 'common-tags';
+import ms from 'ms';
+import { IGN_DEFAULT, demoteSuccess, kickSuccess, muteSuccess, promoteSuccess, unmuteSuccess } from '../constants/commandResponses.js';
+import { messageTypes, invisibleCharacters } from '../constants/chatBridge.js';
+import { STOP } from '../../../constants/emojiCharacters.js';
+import { stringToMS } from '../../../functions/util.js';
+import { MessageUtil } from '../../../util/MessageUtil.js';
+import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
+import { logger } from '../../../functions/logger.js';
 
 
-module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
+export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -20,7 +18,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 	}
 
 	/**
-	 * @param {import('../HypixelMessage')} hypixelMessage
+	 * @param {import('../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
 	async #handleServerMessage(hypixelMessage) {
 		/**
@@ -36,7 +34,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (hypixelMessage.content.startsWith('We blocked your comment ')) {
 			// react to latest message from 'sender' with that content
-			const blockedMatched = hypixelMessage.rawContent.match(new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_REGEXP}): )?(?<blockedContent>.+) [${invisibleCharacters.join('')}]*" as it is breaking our rules because it`, 'su'));
+			const blockedMatched = hypixelMessage.rawContent.match(new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_DEFAULT}): )?(?<blockedContent>.+) [${invisibleCharacters.join('')}]*" as it is breaking our rules because it`, 'su'));
 
 			if (blockedMatched) {
 				const { groups: { sender, blockedContent } } = blockedMatched;
@@ -271,7 +269,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 	}
 
 	/**
-	 * @param {import('../HypixelMessage')} hypixelMessage
+	 * @param {import('../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
 	async #handleCommandMessage(hypixelMessage) {
 		// must use prefix for commands in guild
@@ -294,7 +292,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 				}
 			}
 
-			if (hypixelMessage.type !== WHISPER) return; // no prefix and no whisper
+			if (hypixelMessage.type !== messageTypes.WHISPER) return; // no prefix and no whisper
 		}
 
 		// no command, only ping or prefix
@@ -316,7 +314,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (!command) return logger.info(`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' which is not a valid command`);
 
 		// server only command in DMs
-		if (command.guildOnly && hypixelMessage.type !== GUILD) {
+		if (command.guildOnly && hypixelMessage.type !== messageTypes.GUILD) {
 			logger.info(`${hypixelMessage.author.tag} tried to execute '${hypixelMessage.content}' in whispers which is a guild-chat-only command`);
 			return hypixelMessage.author.send(`the '${command.name}' command can only be executed in guild chat`);
 		}
@@ -397,7 +395,7 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 	/**
 	 * event listener callback
-	 * @param {import('../HypixelMessage')} hypixelMessage
+	 * @param {import('../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
 	async run(hypixelMessage) {
 		// check if the message is a response for ChatBridge#_chat
@@ -407,8 +405,8 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (!hypixelMessage.rawContent.length) return;
 
 		switch (hypixelMessage.type) {
-			case GUILD:
-			case OFFICER: {
+			case messageTypes.GUILD:
+			case messageTypes.OFFICER: {
 				if (!this.chatBridge.enabled || hypixelMessage.me) return;
 
 				hypixelMessage.forwardToDiscord();
@@ -416,8 +414,8 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 				return this.#handleCommandMessage(hypixelMessage);
 			}
 
-			case PARTY:
-			case WHISPER: {
+			case messageTypes.PARTY:
+			case messageTypes.WHISPER: {
 				if (!this.chatBridge.enabled || hypixelMessage.me) return;
 				if (hypixelMessage.author.player?.guildId !== this.chatBridge.hypixelGuild.guildId) return logger.info(`[MESSAGE]: ignored message from '${hypixelMessage.author}': ${hypixelMessage.content}`); // ignore messages from non guild players
 
@@ -428,4 +426,4 @@ module.exports = class MessageChatBridgeEvent extends ChatBridgeEvent {
 				return this.#handleServerMessage(hypixelMessage);
 		}
 	}
-};
+}

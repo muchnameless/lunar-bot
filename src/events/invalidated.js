@@ -1,10 +1,8 @@
-'use strict';
-
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class InvalidatedEvent extends Event {
+export default class InvalidatedEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -19,4 +17,4 @@ module.exports = class InvalidatedEvent extends Event {
 		logger.warn('[INVALIDATED]: the client became invalidated');
 		this.client.exit(1);
 	}
-};
+}

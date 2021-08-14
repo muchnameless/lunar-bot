@@ -1,10 +1,8 @@
-'use strict';
-
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class StopCommand extends SlashCommand {
+export default class StopCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -27,4 +25,4 @@ module.exports = class StopCommand extends SlashCommand {
 			this.client.exit();
 		}
 	}
-};
+}

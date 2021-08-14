@@ -1,11 +1,9 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class ConfigCommand extends SlashCommand {
+export default class ConfigCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -59,7 +57,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 	/**
 	 * @param {import('discord.js').Collection} entries
 	 */
-	_listEntries(entries) {
+	#listEntries(entries) {
 		return entries.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
 			.map(({ key, parsedValue }) => {
 				const type = typeof parsedValue;
@@ -126,7 +124,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 				const query = interaction.options.getString('query')?.replace(/ +/g, '_');
 
 				if (!query) return await this.reply(interaction, {
-					content: this._listEntries(this.config.cache),
+					content: this.#listEntries(this.config.cache),
 					code: 'apache',
 					split: { char: '\n' },
 				});
@@ -134,7 +132,7 @@ module.exports = class ConfigCommand extends SlashCommand {
 				const queryRegex = new RegExp(query, 'i');
 
 				return await this.reply(interaction, {
-					content: this._listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))),
+					content: this.#listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))),
 					code: 'apache',
 					split: { char: '\n' },
 				});
@@ -144,4 +142,4 @@ module.exports = class ConfigCommand extends SlashCommand {
 				throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
 		}
 	}
-};
+}

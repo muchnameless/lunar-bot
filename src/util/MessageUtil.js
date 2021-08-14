@@ -1,15 +1,13 @@
-'use strict';
-
-const { Permissions } = require('discord.js');
-const { setTimeout: sleep } = require('timers/promises');
-const { commaListsAnd } = require('common-tags');
-const { replyPingRegExp } = require('../constants/bot');
-const ChannelUtil = require('./ChannelUtil');
-const UserUtil = require('./UserUtil');
-const logger = require('../functions/logger');
+import { Permissions } from 'discord.js';
+import { setTimeout as sleep } from 'timers/promises';
+import { commaListsAnd } from 'common-tags';
+import { replyPingRegExp } from '../constants/bot.js';
+import { ChannelUtil } from './ChannelUtil.js';
+import { UserUtil } from './UserUtil.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class MessageUtil extends null {
+export class MessageUtil extends null {
 	static DEFAULT_REPLY_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
 
 	/**
@@ -176,4 +174,4 @@ module.exports = class MessageUtil extends null {
 			...options,
 		});
 	}
-};
+}

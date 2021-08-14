@@ -1,16 +1,14 @@
-'use strict';
-
-const HypixelMessage = require('../HypixelMessage');
-const logger = require('../../../functions/logger');
+import { HypixelMessage } from '../HypixelMessage.js';
+import { logger } from '../../../functions/logger.js';
 
 
 /**
- * @param {import('../ChatBridge')} chatBridge
+ * @param {import('../ChatBridge').ChatBridge} chatBridge
  * @param {object} packet
  * @param {number} packet.position
  * @param {HypixelMessage.ChatPosition} position
  */
-module.exports = async (chatBridge, { position, message }) => {
+export default async function(chatBridge, { position, message }) {
 	try {
 		chatBridge.emit('message', await new HypixelMessage(chatBridge, position, JSON.parse(message)).init());
 	} catch (error) {
@@ -18,4 +16,4 @@ module.exports = async (chatBridge, { position, message }) => {
 
 		chatBridge.emit('message', await new HypixelMessage(chatBridge, position, message).init());
 	}
-};
+}

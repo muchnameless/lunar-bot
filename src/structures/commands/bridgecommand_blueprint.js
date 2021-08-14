@@ -1,10 +1,8 @@
-'use strict';
-
-const BridgeCommand = require('../../../commands/BridgeCommand');
-// const logger = require('../../../../functions/logger');
+import { BridgeCommand } from '../../../commands/BridgeCommand.js';
+// import logger from '../../../../functions/logger.js';
 
 
-module.exports = class MyCommand extends BridgeCommand {
+export default class MyCommand extends BridgeCommand {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [],
@@ -17,9 +15,9 @@ module.exports = class MyCommand extends BridgeCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../HypixelMessage')} message
+	 * @param {import('../../HypixelMessage').HypixelMessage} message
 	 */
 	async runInGame(message) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
-};
+}

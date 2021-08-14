@@ -1,13 +1,11 @@
-'use strict';
-
-const { Formatters, Constants } = require('discord.js');
-const { promisify } = require('util');
-const { exec } = require('child_process');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
+import { Formatters, Constants } from 'discord.js';
+import { promisify } from 'util';
+import { exec } from 'child_process';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class ExecCommand extends SlashCommand {
+export default class ExecCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -66,4 +64,4 @@ module.exports = class ExecCommand extends SlashCommand {
 			});
 		}
 	}
-};
+}

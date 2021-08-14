@@ -1,13 +1,11 @@
-'use strict';
-
-const EventEmitter = require('events');
-// const logger = require('../../functions/logger');
+import EventEmitter from 'events';
+// import { logger } from '../../functions/logger.js';
 
 /**
  * Filter to be applied to the collector.
  * @typedef {Function} CollectorFilter
- * @param {import('./HypixelMessage')} message
- * @param {import('./HypixelMessage')[]} collected The items collected by this collector
+ * @param {import('./HypixelMessage').HypixelMessage} message
+ * @param {import('./HypixelMessage').HypixelMessage[]} collected The items collected by this collector
  * @returns {boolean|Promise<boolean>}
  */
 
@@ -25,9 +23,54 @@ const EventEmitter = require('events');
 /**
  * MessageCollector
  */
-module.exports = class MessageCollector extends EventEmitter {
+export class MessageCollector extends EventEmitter {
 	/**
-	 * @param {import('./ChatBridge')} chatBridge
+	 * Timeout for cleanup
+	 * @type {?Timeout}
+	 * @private
+	 */
+	#timeout = null;
+
+	/**
+	 * Timeout for cleanup due to inactivity
+	 * @type {?Timeout}
+	 * @private
+	 */
+	#idletimeout = null;
+	/**
+	 * handles stopping the collector when the bot got disconnected
+	 */
+	#handleBotDisconnection = () => this.stop('disconnect');
+
+	/**
+	 * Call this to handle an event as a collectable element
+	 * @param {import('./HypixelMessage').HypixelMessage} message
+	 * @emits Collector#collect
+	 */
+	#handleCollect = async (message) => {
+		++this.received;
+
+		if (await this.filter(message, this.collected)) {
+			this.collected.push(message);
+
+			/**
+			 * Emitted whenever an element is collected.
+			 * @event Collector#collect
+			 * @param {import('./HypixelMessage').HypixelMessage} message
+			 */
+			this.emit('collect', message);
+
+			if (this.#idletimeout) {
+				clearTimeout(this.#idletimeout);
+				this.#idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
+			}
+		}
+
+		this.checkEnd();
+	};
+
+	/**
+	 * @param {import('./ChatBridge').ChatBridge} chatBridge
 	 * @param {CollectorFilter} filter
 	 * @param {MessageCollectorOptions} options
 	 */
@@ -46,6 +89,10 @@ module.exports = class MessageCollector extends EventEmitter {
 		 */
 		this.filter = options?.filter ?? (() => true);
 
+		if (typeof this.filter !== 'function') {
+			throw new TypeError('INVALID_TYPE: options.filter is not a function');
+		}
+
 		/**
 		 * The options of this collector
 		 * @type {MessageCollectorOptions}
@@ -54,7 +101,7 @@ module.exports = class MessageCollector extends EventEmitter {
 
 		/**
 		 * The items collected by this collector
-		 * @type {import('./HypixelMessage')[]}
+		 * @type {import('./HypixelMessage').HypixelMessage[]}
 		 */
 		this.collected = [];
 
@@ -65,71 +112,23 @@ module.exports = class MessageCollector extends EventEmitter {
 		this.ended = false;
 
 		/**
-		 * Timeout for cleanup
-		 * @type {?Timeout}
-		 * @private
-		 */
-		this._timeout = null;
-
-		/**
-		 * Timeout for cleanup due to inactivity
-		 * @type {?Timeout}
-		 * @private
-		 */
-		this._idletimeout = null;
-
-		if (typeof this.filter !== 'function') {
-			throw new TypeError('INVALID_TYPE: options.filter is not a function');
-		}
-
-		/**
 		 * Total number of messages that were received from the bot during message collection
 		 * @type {number}
 		 */
 		this.received = 0;
 
-		this.handleCollect = this.handleCollect.bind(this);
-		this._handleBotDisconnection = this._handleBotDisconnection.bind(this);
-
 		this.chatBridge.incrementMaxListeners();
-		this.chatBridge.on('message', this.handleCollect);
-		this.chatBridge.once('disconnect', this._handleBotDisconnection);
+		this.chatBridge.on('message', this.#handleCollect);
+		this.chatBridge.once('disconnect', this.#handleBotDisconnection);
 
 		this.once('end', () => {
-			this.chatBridge.removeListener('message', this.handleCollect);
-			this.chatBridge.removeListener('disconnect', this._handleBotDisconnection);
+			this.chatBridge.removeListener('message', this.#handleCollect);
+			this.chatBridge.removeListener('disconnect', this.#handleBotDisconnection);
 			this.chatBridge.decrementMaxListeners();
 		});
 
-		if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time);
-		if (options.idle) this._idletimeout = setTimeout(() => this.stop('idle'), options.idle);
-	}
-
-	/**
-	 * Call this to handle an event as a collectable element
-	 * @param {import('./HypixelMessage')} message
-	 * @emits Collector#collect
-	 */
-	async handleCollect(message) {
-		++this.received;
-
-		if (await this.filter(message, this.collected)) {
-			this.collected.push(message);
-
-			/**
-			 * Emitted whenever an element is collected.
-			 * @event Collector#collect
-			 * @param {import('./HypixelMessage')} message
-			 */
-			this.emit('collect', message);
-
-			if (this._idletimeout) {
-				clearTimeout(this._idletimeout);
-				this._idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
-			}
-		}
-
-		this.checkEnd();
+		if (options.time) this.#timeout = setTimeout(() => this.stop('time'), options.time);
+		if (options.idle) this.#idletimeout = setTimeout(() => this.stop('idle'), options.idle);
 	}
 
 	/**
@@ -173,13 +172,13 @@ module.exports = class MessageCollector extends EventEmitter {
 	stop(reason = 'user') {
 		if (this.ended) return;
 
-		if (this._timeout) {
-			clearTimeout(this._timeout);
-			this._timeout = null;
+		if (this.#timeout) {
+			clearTimeout(this.#timeout);
+			this.#timeout = null;
 		}
-		if (this._idletimeout) {
-			clearTimeout(this._idletimeout);
-			this._idletimeout = null;
+		if (this.#idletimeout) {
+			clearTimeout(this.#idletimeout);
+			this.#idletimeout = null;
 		}
 
 		this.ended = true;
@@ -187,7 +186,7 @@ module.exports = class MessageCollector extends EventEmitter {
 		/**
 		 * Emitted when the collector is finished collecting.
 		 * @event Collector#end
-		 * @param {import('./HypixelMessage')[]} collected The elements collected by the collector
+		 * @param {import('./HypixelMessage').HypixelMessage[]} collected The elements collected by the collector
 		 * @param {string} reason The reason the collector ended
 		 */
 		this.emit('end', this.collected, reason);
@@ -200,13 +199,13 @@ module.exports = class MessageCollector extends EventEmitter {
 	 * @param {number} [options.idle] How long to stop the collector after inactivity in milliseconds
 	 */
 	resetTimer({ time, idle } = {}) {
-		if (this._timeout) {
-			clearTimeout(this._timeout);
-			this._timeout = setTimeout(() => this.stop('time'), time ?? this.options.time);
+		if (this.#timeout) {
+			clearTimeout(this.#timeout);
+			this.#timeout = setTimeout(() => this.stop('time'), time ?? this.options.time);
 		}
-		if (this._idletimeout) {
-			clearTimeout(this._idletimeout);
-			this._idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle);
+		if (this.#idletimeout) {
+			clearTimeout(this.#idletimeout);
+			this.#idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle);
 		}
 	}
 
@@ -258,11 +257,4 @@ module.exports = class MessageCollector extends EventEmitter {
 		if (this.options.maxProcessed && this.received === this.options.maxProcessed) return 'processedLimit';
 		return null;
 	}
-
-	/**
-	 * handles stopping the collector when the bot got disconnected
-	 */
-	_handleBotDisconnection() {
-		this.stop('disconnect');
-	}
-};
+}

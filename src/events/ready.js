@@ -1,10 +1,8 @@
-'use strict';
-
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class ReadyEvent extends Event {
+export default class ReadyEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: true,
@@ -56,4 +54,4 @@ module.exports = class ReadyEvent extends Event {
 		// log ready
 		logger.info(`[READY]: startup complete. ${this.client.cronJobs.size} CronJobs running. Logging channel available: ${this.client.logHandler.ready}`);
 	}
-};
+}

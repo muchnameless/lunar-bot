@@ -1,10 +1,8 @@
-'use strict';
-
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class ErrorEvent extends Event {
+export default class ErrorEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -19,4 +17,4 @@ module.exports = class ErrorEvent extends Event {
 	run(error) {
 		logger.error('[CLIENT ERROR]', error);
 	}
-};
+}

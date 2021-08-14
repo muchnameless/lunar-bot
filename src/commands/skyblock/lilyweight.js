@@ -1,12 +1,10 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const { getLilyWeight } = require('../../functions/skyblock');
-const BaseWeightCommand = require('./~base-weight');
-// const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { getLilyWeight } from '../../functions/skyblock.js';
+import BaseWeightCommand from './~base-weight.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class LilyWeightCommand extends BaseWeightCommand {
+export default class LilyWeightCommand extends BaseWeightCommand {
 	constructor(data) {
 		super(
 			data,
@@ -35,4 +33,4 @@ module.exports = class LilyWeightCommand extends BaseWeightCommand {
 	getWeight(skyblockMember) { // eslint-disable-line class-methods-use-this
 		return getLilyWeight(skyblockMember);
 	}
-};
+}

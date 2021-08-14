@@ -1,16 +1,14 @@
-'use strict';
-
-const SlashCommand = require('./SlashCommand');
+import { SlashCommand } from './SlashCommand.js';
 
 
-module.exports = class DualCommand extends SlashCommand {
+export class DualCommand extends SlashCommand {
 	/**
 	 * create a new command
 	 * @param {object} param0
-	 * @param {import('../LunarClient')} param0.client discord this.client that instantiated this command
-	 * @param {import('./BridgeCommandCollection')} param0.collection
+	 * @param {import('../LunarClient').LunarClient} param0.client discord this.client that instantiated this command
+	 * @param {import('./BridgeCommandCollection').BridgeCommandCollection} param0.collection
 	 * @param {string} param0.name command name
-	 * @param {SlashCommand.CommandData} param1
+	 * @param {import('./SlashCommand').CommandData} param1
 	 * @param {import('./BridgeCommand').CommandInfo} param2
 	 */
 	constructor(param0, param1, { aliases, guildOnly, args, usage }) {
@@ -77,9 +75,9 @@ module.exports = class DualCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../chat_bridge/HypixelMessage')} message
+	 * @param {import('../chat_bridge/HypixelMessage').HypixelMessage} message
 	 */
 	async runInGame(message) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
-};
+}

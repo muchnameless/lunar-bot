@@ -1,13 +1,11 @@
-'use strict';
-
-const { MessageEmbed } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const GuildMemberUtil = require('../util/GuildMemberUtil');
-const Event = require('../structures/events/Event');
-// const logger = require('../functions/logger');
+import { MessageEmbed } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { GuildMemberUtil } from '../util/GuildMemberUtil.js';
+import { Event } from '../structures/events/Event.js';
+// import { logger } from '../functions/logger.js';
 
 
-module.exports = class GuildMemberAddEvent extends Event {
+export default class GuildMemberAddEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -46,4 +44,4 @@ module.exports = class GuildMemberAddEvent extends Event {
 			.setTimestamp(),
 		);
 	}
-};
+}

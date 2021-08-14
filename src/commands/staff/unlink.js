@@ -1,13 +1,12 @@
-'use strict';
+import { Constants } from 'discord.js';
+import pkg from 'sequelize';
+const { Op } = pkg;
+import { oneLine } from 'common-tags';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
-const { Constants } = require('discord.js');
-const { Op } = require('sequelize');
-const { oneLine } = require('common-tags');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
 
-
-module.exports = class UnlinkCommand extends SlashCommand {
+export default class UnlinkCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -54,4 +53,4 @@ module.exports = class UnlinkCommand extends SlashCommand {
 			allowedMentions: { parse: [] },
 		});
 	}
-};
+}

@@ -1,11 +1,9 @@
-'use strict';
-
-const { Permissions } = require('discord.js');
-const { commaListsAnd } = require('common-tags');
-const logger = require('../functions/logger');
+import { Permissions } from 'discord.js';
+import { commaListsAnd } from 'common-tags';
+import { logger } from '../functions/logger.js';
 
 
-class ChannelUtil extends null {
+export class ChannelUtil extends null {
 	static DM_PERMISSIONS = new Permissions();
 	static DEFAULT_SEND_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
 
@@ -119,5 +117,3 @@ ChannelUtil.DM_PERMISSIONS
 		Permissions.FLAGS.USE_EXTERNAL_EMOJIS,
 	])
 	.freeze();
-
-module.exports = ChannelUtil;

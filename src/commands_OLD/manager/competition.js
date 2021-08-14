@@ -1,20 +1,15 @@
-'use strict';
-
-const { commaListsOr } = require('common-tags');
-const { autocorrect } = require('../../functions/util');
-const { skills, dungeonTypes } = require('../../constants/skyblock');
-const Command = require('../../structures/commands/Command');
-const logger = require('../../functions/logger');
+import { commaListsOr } from 'common-tags';
+import { autocorrect } from '../../functions/util.js';
+import { skills, dungeonTypes } from '../../constants/skyblock.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class CompetitionCommand extends Command {
-	constructor(data, options) {
-		super(data, options ?? {
-			aliases: [ 'comp' ],
+export class CompetitionCommand extends SlashCommand {
+	constructor(data) {
+		super(data, {
+			aliases: [],
 			description: 'WIP',
-			guildOnly: false,
-			args: false,
-			usage: '',
 			cooldown: 1,
 		});
 	}
@@ -26,11 +21,11 @@ module.exports = class CompetitionCommand extends Command {
 
 	/**
 	 * execute the command
-	 * @param {import('discord.js').Message} message
+	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(message) {
-		const collector = message.channel.createMessageCollector({
-			filter: msg => msg.author.id === message.author.id,
+	async run(interaction) {
+		const collector = interaction.channel.createMessageCollector({
+			filter: msg => msg.author.id === interaction.user.id,
 			idle: 30_000,
 		});
 
@@ -40,7 +35,7 @@ module.exports = class CompetitionCommand extends Command {
 		let retries = 0;
 
 		try {
-			await message.reply({
+			await interaction.reply({
 				content: commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`,
 				saveReplyMessageId: false,
 			});
@@ -57,14 +52,14 @@ module.exports = class CompetitionCommand extends Command {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
-					message.reply({
+					await interaction.reply({
 						content: `\`${collected.content}\` is not a valid type`,
 						saveReplyMessageId: false,
 					});
 				}
 			} while (!type);
 
-			await message.reply('starting time?');
+			await interaction.reply('starting time?');
 
 			do {
 				const collected = await collector.next;
@@ -78,14 +73,14 @@ module.exports = class CompetitionCommand extends Command {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
-					message.reply({
+					await interaction.reply({
 						content: `\`${collected.content}\` is not a valid date`,
 						saveReplyMessageId: false,
 					});
 				}
 			} while (!startingTime);
 
-			await message.reply({
+			await interaction.reply({
 				content: 'ending time?',
 				saveReplyMessageId: false,
 			});
@@ -102,24 +97,24 @@ module.exports = class CompetitionCommand extends Command {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
-					message.reply({
+					await interaction.reply({
 						content: `\`${collected.content}\` is not a valid date`,
 						saveReplyMessageId: false,
 					});
 				}
 			} while (!endingTime);
 
-			await message.reply({
+			await interaction.reply({
 				content: `type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
 				saveReplyMessageId: false,
 			});
 		} catch (error) {
 			logger.error(error);
-			message.reply('the command has been cancelled');
+			await interaction.reply('the command has been cancelled');
 		} finally {
 			collector.stop();
 		}
 
 		logger.debug({ type, startingTime, endingTime });
 	}
-};
+}

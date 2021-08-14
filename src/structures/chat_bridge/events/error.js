@@ -1,10 +1,8 @@
-'use strict';
-
-const ChatBridgeEvent = require('../ChatBridgeEvent');
-const logger = require('../../../functions/logger');
+import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
+import { logger } from '../../../functions/logger.js';
 
 
-module.exports = class ErrorChatBridgeEvent extends ChatBridgeEvent {
+export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -28,4 +26,4 @@ module.exports = class ErrorChatBridgeEvent extends ChatBridgeEvent {
 
 		this.chatBridge.minecraft.reconnect();
 	}
-};
+}

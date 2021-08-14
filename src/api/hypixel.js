@@ -1,11 +1,9 @@
-'use strict';
-
-const { Client } = require('@zikeji/hypixel');
-const cache = require('./cache');
-const logger = require('../functions/logger');
+import { Client } from '@zikeji/hypixel';
+import { cache } from './cache.js';
+import { logger } from '../functions/logger.js';
 
 
-const hypixel = new Client(process.env.HYPIXEL_KEY, {
+export const hypixel = new Client(process.env.HYPIXEL_KEY, {
 	cache: {
 		get(key) {
 			return cache.get(`hypixel:${key}`);
@@ -40,5 +38,3 @@ const hypixel = new Client(process.env.HYPIXEL_KEY, {
 hypixel
 	.on('limited', (limit, reset) => logger.warn(`[HYPIXEL API]: ratelimit hit: ${limit} requests. Until: ${reset.toLocaleTimeString('de-DE')}`))
 	.on('reset', () => logger.info('[HYPIXEL API]: ratelimit reset'));
-
-module.exports = hypixel;

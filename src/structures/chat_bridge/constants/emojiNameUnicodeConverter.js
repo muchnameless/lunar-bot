@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * https://github.com/DSharpPlus/DSharpPlus/blob/master/DSharpPlus/Entities/Emoji/DiscordEmoji.EmojiUtils.cs
  */
@@ -7,7 +5,7 @@
 /**
  * discord emoji names to unicode emojis
  */
-const nameToUnicode = {
+export const nameToUnicode = Object.freeze({
 	// ',:(': '\u{0001f613}',
 	// ',:)': '\u{0001f605}',
 	// ',:-(': '\u{0001f613}',
@@ -5855,12 +5853,12 @@ const nameToUnicode = {
 	// 'o=-)': '\u{0001f607}',
 	// 'x-)': '\u{0001f606}',
 	// '♡': '\u{00002764}\u{0000fe0f}',
-};
+});
 
 /**
  * unicode emojis to discord emoji names
  */
-const unicodeToName = {
+export const unicodeToName = Object.freeze({
 	'\u{0001f170}\u{0000fe0f}': ':a:',
 	'\u{0001f18e}': ':ab:',
 	'\u{0001f9ee}': ':abacus:',
@@ -8952,12 +8950,4 @@ const unicodeToName = {
 	'\u{0001f910}': ':zipper_mouth:',
 	'\u{0001f9df}': ':zombie:',
 	'\u{0001f4a4}': ':zzz:',
-};
-
-Object.freeze(nameToUnicode);
-Object.freeze(unicodeToName);
-
-module.exports = {
-	nameToUnicode,
-	unicodeToName,
-};
+});

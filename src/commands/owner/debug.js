@@ -1,15 +1,13 @@
-'use strict';
-
-const { Formatters, SnowflakeUtil, Util, version } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const ms = require('ms');
-const { EMBED_FIELD_MAX_CHARS } = require('../../constants/discord');
-const { trim, escapeIgn } = require('../../functions/util');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { Formatters, SnowflakeUtil, Util, version } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import ms from 'ms';
+import { EMBED_FIELD_MAX_CHARS } from '../../constants/discord.js';
+import { trim, escapeIgn } from '../../functions/util.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class DebugCommand extends SlashCommand {
+export default class DebugCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -88,4 +86,4 @@ module.exports = class DebugCommand extends SlashCommand {
 			],
 		});
 	}
-};
+}

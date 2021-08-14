@@ -1,12 +1,10 @@
-'use strict';
-
-const { Formatters, Util } = require('discord.js');
-const { escapeIgn } = require('../../functions/util');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { Formatters, Util } from 'discord.js';
+import { escapeIgn } from '../../functions/util.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class LinkIssuesCommand extends SlashCommand {
+export default class LinkIssuesCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -140,4 +138,4 @@ module.exports = class LinkIssuesCommand extends SlashCommand {
 			],
 		});
 	}
-};
+}

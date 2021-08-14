@@ -1,10 +1,8 @@
-'use strict';
-
-const DualCommand = require('../../structures/commands/DualCommand');
-// const logger = require('../../functions/logger');
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class CoinFlipCommand extends DualCommand {
+export default class CoinFlipCommand extends DualCommand {
 	constructor(data) {
 		super(
 			data,
@@ -25,7 +23,8 @@ module.exports = class CoinFlipCommand extends DualCommand {
 	/**
 	 * coinflip result
 	 */
-	_generateReply() {
+	// eslint-disable-next-line class-methods-use-this
+	#generateReply() {
 		const randomNumber = Math.floor(Math.random() * 1001);
 
 		if (randomNumber === 0) return 'edge';
@@ -38,14 +37,14 @@ module.exports = class CoinFlipCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await this.reply(interaction, this._generateReply());
+		return await this.reply(interaction, this.#generateReply());
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
 	 */
 	async runInGame(message) {
-		return await message.reply(this._generateReply());
+		return await message.reply(this.#generateReply());
 	}
-};
+}

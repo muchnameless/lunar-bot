@@ -1,11 +1,10 @@
-'use strict';
+import { BaseEvent } from '../events/BaseEvent.js';
 
-const BaseEvent = require('../events/BaseEvent');
 
-module.exports = class ChatBridgeEvent extends BaseEvent {
+export class ChatBridgeEvent extends BaseEvent {
 	/**
 	 * chatBridge
-	 * @returns {import('./ChatBridge')}
+	 * @returns {import('./ChatBridge').ChatBridge}
 	 */
 	get chatBridge() {
 		return this.emitter;
@@ -13,9 +12,9 @@ module.exports = class ChatBridgeEvent extends BaseEvent {
 
 	/**
 	 * client
-	 * @returns {import('../LunarClient')}
+	 * @returns {import('../LunarClient').LunarClient}
 	 */
 	get client() {
 		return this.chatBridge.client;
 	}
-};
+}

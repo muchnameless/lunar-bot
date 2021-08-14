@@ -1,8 +1,7 @@
-'use strict';
+import { Collection } from 'discord.js';
 
-const { Collection } = require('discord.js');
 
-module.exports = class ArrayCacheCollection extends Collection {
+export class ArrayCacheCollection extends Collection {
 	constructor(iterable) {
 		super(iterable);
 
@@ -87,4 +86,4 @@ module.exports = class ArrayCacheCollection extends Collection {
 		this._keyArray = null;
 		return super.sort(compareFunction);
 	}
-};
+}

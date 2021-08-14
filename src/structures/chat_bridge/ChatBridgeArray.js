@@ -1,22 +1,19 @@
-'use strict';
-
-const { MessageFlags } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const { join } = require('path');
-const { X_EMOJI } = require('../../constants/emojiCharacters');
-const DiscordChatManager = require('./managers/DiscordChatManager');
-const BridgeCommandCollection = require('../commands/BridgeCommandCollection');
-const ChatBridge = require('./ChatBridge');
-const MessageUtil = require('../../util/MessageUtil');
-const logger = require('../../functions/logger');
+import { MessageFlags } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { X_EMOJI } from '../../constants/emojiCharacters.js';
+import { DiscordChatManager } from './managers/DiscordChatManager.js';
+import { BridgeCommandCollection } from '../commands/BridgeCommandCollection.js';
+import { ChatBridge } from './ChatBridge.js';
+import { MessageUtil } from '../../util/MessageUtil.js';
+import { logger } from '../../functions/logger.js';
 
 
 /**
  * @type {ChatBridge[]}
  */
-module.exports = class ChatBridgeArray extends Array {
+export class ChatBridgeArray extends Array {
 	/**
-	 * @param {import('../LunarClient')} client
+	 * @param {import('../LunarClient').LunarClient} client
 	 */
 	constructor(client, ...args) {
 		super(...args);
@@ -28,7 +25,7 @@ module.exports = class ChatBridgeArray extends Array {
 		/**
 		 * minecraft command collection
 		 */
-		this.commands = new BridgeCommandCollection(this.client, join(__dirname, 'commands'));
+		this.commands = new BridgeCommandCollection(this.client, new URL('./commands', import.meta.url));
 		/**
 		 * discord channel IDs of all ChatBridge channels
 		 * @type {Set<import('discord.js').Snowflake>}
@@ -83,7 +80,7 @@ module.exports = class ChatBridgeArray extends Array {
 	/**
 	 * connects a single or all bridges, instantiating them first if not already done
 	 * @param {?number} index
-	 * @returns {Promise<import('./ChatBridge')|import('./ChatBridge')[]>}
+	 * @returns {Promise<import('./ChatBridge').ChatBridge|import('./ChatBridge').ChatBridge[]>}
 	 */
 	async connect(index) {
 		let resolve;
@@ -107,7 +104,7 @@ module.exports = class ChatBridgeArray extends Array {
 		let resolved = 0;
 
 		if (this.length !== ChatBridgeArray.#accounts.length) this.#init();
-		(await Promise.all(this.map(async (/** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.connect())))
+		(await Promise.all(this.map(async (/** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => chatBridge.connect())))
 			.map(chatBridge => chatBridge.once('ready', () => ++resolved === this.length && resolve()));
 
 		return promise;
@@ -116,7 +113,7 @@ module.exports = class ChatBridgeArray extends Array {
 	/**
 	 * disconnects a single or all bridges
 	 * @param {?number} index
-	 * @returns {import('./ChatBridge')|import('./ChatBridge')[]}
+	 * @returns {import('./ChatBridge').ChatBridge|import('./ChatBridge').ChatBridge[]}
 	 */
 	disconnect(index) {
 		// single
@@ -126,7 +123,7 @@ module.exports = class ChatBridgeArray extends Array {
 		}
 
 		// all
-		return this.map((/** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.disconnect());
+		return this.map((/** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => chatBridge.disconnect());
 	}
 
 	/**
@@ -135,7 +132,7 @@ module.exports = class ChatBridgeArray extends Array {
 	 * @returns {Promise<[boolean, ?import('discord.js').Message | import('discord.js').Message[]][]>}
 	 */
 	async broadcast(contentOrOptions) {
-		return Promise.all(this.map(async (/** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.broadcast(contentOrOptions)));
+		return Promise.all(this.map(async (/** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => chatBridge.broadcast(contentOrOptions)));
 	}
 
 	/**
@@ -186,13 +183,13 @@ module.exports = class ChatBridgeArray extends Array {
 
 		try {
 			// a ChatBridge for the message's channel was found
-			if (this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
+			if (this.reduce((acc, /** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
 
 			// check if the message was sent from the bot, don't react with X_EMOJI in this case
 			if (options.checkIfNotFromBot) {
 				if (message.editable) return; // message was sent by the bot
 				if (message.webhookId
-					&& this.reduce((acc, /** @type {import('./ChatBridge')} */ chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
+					&& this.reduce((acc, /** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
 				) return; // message was sent by one of the ChatBridges's webhook
 			}
 
@@ -203,4 +200,4 @@ module.exports = class ChatBridgeArray extends Array {
 			MessageUtil.react(message, X_EMOJI);
 		}
 	}
-};
+}

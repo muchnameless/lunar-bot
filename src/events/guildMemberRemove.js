@@ -1,14 +1,12 @@
-'use strict';
-
-const { MessageEmbed, Formatters } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const GuildMemberUtil = require('../util/GuildMemberUtil');
-const MessageEmbedUtil = require('../util/MessageEmbedUtil');
-const Event = require('../structures/events/Event');
-// const logger = require('../functions/logger');
+import { MessageEmbed, Formatters } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { GuildMemberUtil } from '../util/GuildMemberUtil.js';
+import { MessageEmbedUtil } from '../util/MessageEmbedUtil.js';
+import { Event } from '../structures/events/Event.js';
+// import { logger } from '../functions/logger.js';
 
 
-module.exports = class GuildMemberRemoveEvent extends Event {
+export default class GuildMemberRemoveEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -60,4 +58,4 @@ module.exports = class GuildMemberRemoveEvent extends Event {
 			2,
 		));
 	}
-};
+}

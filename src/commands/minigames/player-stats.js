@@ -1,15 +1,13 @@
-'use strict';
-
-const { Formatters, Constants } = require('discord.js');
-const { oneLine } = require('common-tags');
-const { getPlayerRank, getNetworkLevel } = require('@zikeji/hypixel');
-const { getUuidAndIgn } = require('../../functions/input');
-const hypixel = require('../../api/hypixel');
-const BaseStatsCommand = require('./~base-stats-command');
-const logger = require('../../functions/logger');
+import { Formatters, Constants } from 'discord.js';
+import { oneLine } from 'common-tags';
+import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
+import { getUuidAndIgn } from '../../functions/input.js';
+import { hypixel } from '../../api/hypixel.js';
+import BaseStatsCommand from './~base-stats-command.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class PlayerStatsCommand extends BaseStatsCommand {
+export default class PlayerStatsCommand extends BaseStatsCommand {
 	constructor(data) {
 		super(
 			data,
@@ -33,7 +31,7 @@ module.exports = class PlayerStatsCommand extends BaseStatsCommand {
 	}
 
 	/**
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} ctx
 	 * @param {string} [ignOrUuid]
 	 */
 	async _fetchData(ctx, ignOrUuid) { // eslint-disable-line class-methods-use-this
@@ -93,4 +91,4 @@ module.exports = class PlayerStatsCommand extends BaseStatsCommand {
 			return `${error}`;
 		}
 	}
-};
+}

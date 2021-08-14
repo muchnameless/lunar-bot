@@ -1,13 +1,11 @@
-'use strict';
-
-const { Collection } = require('discord.js');
-const logger = require('../../../functions/logger');
+import { Collection } from 'discord.js';
+import { logger } from '../../../functions/logger.js';
 
 
-module.exports = class ModelManager {
+export class ModelManager {
 	/**
 	 * @param {object} param0
-	 * @param {import('../../LunarClient')} param0.client
+	 * @param {import('../../LunarClient').LunarClient} param0.client
 	 * @param {import('sequelize').Model} param0.model
 	 * @param {Collection} param0.CacheCollection
 	 */
@@ -16,7 +14,7 @@ module.exports = class ModelManager {
 		this.model = model;
 		/** @type {Collection<string, import('sequelize').Model>} */
 		this.cache = new CacheCollection();
-		[ this.primaryKey ] = this.model.primaryKeyAttributes;
+		[ this.primaryKey ] = model.primaryKeyAttributes;
 	}
 
 	/**
@@ -108,4 +106,4 @@ module.exports = class ModelManager {
 	valueOf() {
 		return this.cache;
 	}
-};
+}

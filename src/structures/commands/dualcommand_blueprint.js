@@ -1,10 +1,8 @@
-'use strict';
-
-const DualCommand = require('../../structures/commands/DualCommand');
-// const logger = require('../../functions/logger');
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class MyCommand extends DualCommand {
+export default class MyCommand extends DualCommand {
 	constructor(data) {
 		super(
 			data,
@@ -24,7 +22,7 @@ module.exports = class MyCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} ctx
 	 */
 	async _run(ctx) { // eslint-disable-line no-unused-vars
 		// do stuff
@@ -40,9 +38,9 @@ module.exports = class MyCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
 	 */
 	async runInGame(message) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
-};
+}

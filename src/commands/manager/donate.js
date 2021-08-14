@@ -1,13 +1,11 @@
-'use strict';
-
-const { Formatters, Constants } = require('discord.js');
-const { validateNumber } = require('../../functions/stringValidators');
-const { removeNumberFormatting, safePromiseAll } = require('../../functions/util');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { Formatters, Constants } from 'discord.js';
+import { validateNumber } from '../../functions/stringValidators.js';
+import { removeNumberFormatting, safePromiseAll } from '../../functions/util.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class DonateCommand extends SlashCommand {
+export default class DonateCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -73,4 +71,4 @@ module.exports = class DonateCommand extends SlashCommand {
 			}),
 		);
 	}
-};
+}

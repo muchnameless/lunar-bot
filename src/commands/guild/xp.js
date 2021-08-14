@@ -1,17 +1,15 @@
-'use strict';
-
-const { MessageEmbed, Formatters, Constants } = require('discord.js');
-const { oneLine, stripIndents } = require('common-tags');
-const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
-const { XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } = require('../../constants/database');
-const { /* escapeIgn, */ upperCaseFirstChar } = require('../../functions/util');
-const { getDefaultOffset } = require('../../functions/leaderboards');
-const MessageEmbedUtil = require('../../util/MessageEmbedUtil');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { MessageEmbed, Formatters, Constants } from 'discord.js';
+import { oneLine, stripIndents } from 'common-tags';
+import { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } from '../../constants/skyblock.js';
+import { XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } from '../../constants/database.js';
+import { /* escapeIgn, */ upperCaseFirstChar } from '../../functions/util.js';
+import { getDefaultOffset } from '../../functions/leaderboards.js';
+import { MessageEmbedUtil } from '../../util/MessageEmbedUtil.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class XpCommand extends SlashCommand {
+export default class XpCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -190,4 +188,4 @@ module.exports = class XpCommand extends SlashCommand {
 
 		return await this.reply(interaction, { embeds });
 	}
-};
+}

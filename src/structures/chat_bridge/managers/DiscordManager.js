@@ -1,16 +1,14 @@
-'use strict';
-
-const { Collection, Util: { escapeMarkdown }, Formatters } = require('discord.js');
-const { nameToUnicode } = require('../constants/emojiNameUnicodeConverter');
-const { messageTypes: { GUILD } } = require('../constants/chatBridge');
-const { autocorrect } = require('../../../functions/util');
-const DiscordChatManager = require('./DiscordChatManager');
-// const logger = require('../../../functions/logger');
+import { Collection, Util, Formatters } from 'discord.js';
+import { nameToUnicode } from '../constants/emojiNameUnicodeConverter.js';
+import { messageTypes } from '../constants/chatBridge.js';
+import { autocorrect } from '../../../functions/util.js';
+import { DiscordChatManager } from './DiscordChatManager.js';
+// import { logger } from '../../../functions/logger.js';
 
 
-module.exports = class DiscordManager {
+export class DiscordManager {
 	/**
-	 * @param {import('../ChatBridge')} chatBridge
+	 * @param {import('../ChatBridge').ChatBridge} chatBridge
 	 */
 	constructor(chatBridge) {
 		this.chatBridge = chatBridge;
@@ -86,7 +84,7 @@ module.exports = class DiscordManager {
 	 * @param {string} typeOrId
 	 */
 	get(typeOrId) {
-		return this.channelsByType.get(typeOrId ?? GUILD) ?? this.channelsByIds.get(typeOrId);
+		return this.channelsByType.get(typeOrId ?? messageTypes.GUILD) ?? this.channelsByIds.get(typeOrId);
 	}
 
 	/**
@@ -142,7 +140,7 @@ module.exports = class DiscordManager {
 	 */
 	parseContent(string) {
 		return DiscordManager.#escapeNonURL(
-			escapeMarkdown(
+			Util.escapeMarkdown(
 				string
 					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
 					.replace( // emojis (custom and default)
@@ -195,4 +193,4 @@ module.exports = class DiscordManager {
 			),
 		);
 	}
-};
+}

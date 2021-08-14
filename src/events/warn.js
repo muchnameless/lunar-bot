@@ -1,10 +1,8 @@
-'use strict';
-
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class WarnEvent extends Event {
+export default class WarnEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -19,4 +17,4 @@ module.exports = class WarnEvent extends Event {
 	async run(warning) {
 		logger.warn(warning);
 	}
-};
+}

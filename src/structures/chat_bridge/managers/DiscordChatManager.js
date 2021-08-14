@@ -1,21 +1,19 @@
-'use strict';
-
-const { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } = require('discord.js');
-const { prefixByType } = require('../constants/chatBridge');
-const { X_EMOJI, MUTED } = require('../../../constants/emojiCharacters');
-const ChannelUtil = require('../../../util/ChannelUtil');
-const UserUtil = require('../../../util/UserUtil');
-const MessageUtil = require('../../../util/MessageUtil');
-const InteractionUtil = require('../../../util/InteractionUtil');
-const WebhookError = require('../../errors/WebhookError');
-const ChatManager = require('./ChatManager');
-const cache = require('../../../api/cache');
-const logger = require('../../../functions/logger');
+import { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } from 'discord.js';
+import { prefixByType } from '../constants/chatBridge.js';
+import { X_EMOJI, MUTED } from '../../../constants/emojiCharacters.js';
+import { ChannelUtil } from '../../../util/ChannelUtil.js';
+import { UserUtil } from '../../../util/UserUtil.js';
+import { MessageUtil } from '../../../util/MessageUtil.js';
+import { InteractionUtil } from '../../../util/InteractionUtil.js';
+import { WebhookError } from '../../errors/WebhookError.js';
+import { ChatManager } from './ChatManager.js';
+import { cache } from '../../../api/cache.js';
+import { logger } from '../../../functions/logger.js';
 
 
-module.exports = class DiscordChatManager extends ChatManager {
+export class DiscordChatManager extends ChatManager {
 	/**
-	 * @param {import('../ChatBridge')} chatBridge
+	 * @param {import('../ChatBridge').ChatBridge} chatBridge
 	 * @param {import('../../database/models/HypixelGuild').ChatBridgeChannel} param1
 	 */
 	constructor(chatBridge, { type, channelId }) {
@@ -90,7 +88,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 	/**
 	 * DMs the message author with the content if they have not been DMed in the last hour
 	 * @param {import('discord.js').Message} message
-	 * @param {import('../../database/models/Player')} player
+	 * @param {import('../../database/models/Player').Player} player
 	 * @param {string} content
 	 */
 	static async #dmMuteInfo(message, player, content) {
@@ -226,7 +224,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 
 	/**
 	 * sends a message via the bot in the chatBridge channel
-	 * @param {string | { prefix: string, hypixelMessage: import('../HypixelMessage'), options: import('discord.js').MessageOptions }} contentOrOptions
+	 * @param {string | { prefix: string, hypixelMessage: import('../HypixelMessage').HypixelMessage, options: import('discord.js').MessageOptions }} contentOrOptions
 	 */
 	async sendViaBot(contentOrOptions) {
 		if (!this.chatBridge.enabled) return null;
@@ -266,7 +264,7 @@ module.exports = class DiscordChatManager extends ChatManager {
 			if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		}
 
-		/** @type {import('../../database/models/Player')} */
+		/** @type {import('../../database/models/Player').Player} */
 		const player = playerInput
 			?? UserUtil.getPlayer(message.author) // cached player
 			?? await this.client.players.fetch({ discordId: message.author.id }); // uncached player
@@ -341,4 +339,4 @@ module.exports = class DiscordChatManager extends ChatManager {
 	createMessageCollector(options = {}) {
 		return new MessageCollector(this.channel, options);
 	}
-};
+}

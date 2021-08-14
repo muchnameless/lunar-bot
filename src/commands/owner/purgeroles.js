@@ -1,13 +1,11 @@
-'use strict';
-
-const { setTimeout: sleep } = require('timers/promises');
-const ms = require('ms');
-const GuildMemberUtil = require('../../util/GuildMemberUtil');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
+import { setTimeout as sleep } from 'timers/promises';
+import ms from 'ms';
+import { GuildMemberUtil } from '../../util/GuildMemberUtil.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class PurgeRolesCommand extends SlashCommand {
+export default class PurgeRolesCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -83,4 +81,4 @@ module.exports = class PurgeRolesCommand extends SlashCommand {
 			PurgeRolesCommand.running = false;
 		}
 	}
-};
+}

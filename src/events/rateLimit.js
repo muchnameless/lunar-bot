@@ -1,11 +1,9 @@
-'use strict';
-
-const ms = require('ms');
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import ms from 'ms';
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class RateLimitEvent extends Event {
+export default class RateLimitEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -25,4 +23,4 @@ module.exports = class RateLimitEvent extends Event {
 
 		logger.warn('[RATE LIMIT]', { timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData });
 	}
-};
+}

@@ -1,13 +1,11 @@
-'use strict';
+import { BaseEvent } from './BaseEvent.js';
 
-const BaseEvent = require('./BaseEvent');
-
-module.exports = class Event extends BaseEvent {
+export class Event extends BaseEvent {
 	/**
 	 * client
-	 * @returns {import('../LunarClient')}
+	 * @returns {import('../LunarClient').LunarClient}
 	 */
 	get client() {
 		return this.emitter;
 	}
-};
+}

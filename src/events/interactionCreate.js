@@ -1,15 +1,13 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const ms = require('ms');
-const { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction } = require('../functions/leaderboards');
-const { LB_KEY, AH_KEY } = require('../constants/redis');
-const InteractionUtil = require('../util/InteractionUtil');
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import { Constants } from 'discord.js';
+import ms from 'ms';
+import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction } from '../functions/leaderboards.js';
+import { LB_KEY, AH_KEY } from '../constants/redis.js';
+import { InteractionUtil } from '../util/InteractionUtil.js';
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class InteractionCreateEvent extends Event {
+export default class InteractionCreateEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -23,7 +21,7 @@ module.exports = class InteractionCreateEvent extends Event {
 	async #handleCommandInteraction(interaction) {
 		logger.info(`[CMD HANDLER]: '${InteractionUtil.logInfo(interaction)}' was executed by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`);
 
-		/** @type {import('../structures/commands/SlashCommand')} */
+		/** @type {import('../structures/commands/SlashCommand').SlashCommand} */
 		const command = this.client.commands.get(interaction.commandName);
 
 		if (!command) return await InteractionUtil.reply(interaction, {
@@ -128,4 +126,4 @@ module.exports = class InteractionCreateEvent extends Event {
 			}
 		}
 	}
-};
+}

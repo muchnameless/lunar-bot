@@ -1,11 +1,9 @@
-'use strict';
-
-const { FORWARD_TO_GC } = require('../constants/emojiCharacters');
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import { FORWARD_TO_GC } from '../constants/emojiCharacters.js';
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class MessageReactionAddEvent extends Event {
+export default class MessageReactionAddEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -31,4 +29,4 @@ module.exports = class MessageReactionAddEvent extends Event {
 
 		if (userId === reaction.message.author.id) return this.client.chatBridges.handleAnnouncementMessage(reaction.message);
 	}
-};
+}

@@ -1,10 +1,8 @@
-'use strict';
-
-const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses, SKYBLOCK_YEAR_0, MAYOR_CHANGE_INTERVAL } = require('./skyblock');
-const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('./roles');
+import { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses, SKYBLOCK_YEAR_0, MAYOR_CHANGE_INTERVAL } from './skyblock.js';
+import { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } from './roles.js';
 
 // generate default config
-const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG = {
 	AUTO_GUILD_RANKS: true,
 	AUTOCORRECT_THRESHOLD: 0.8,
 	AVERAGE_STATS_CHANNEL_UPDATE_ENABLED: true,
@@ -98,64 +96,56 @@ for (const level of catacombsRoles) DEFAULT_CONFIG[`CATACOMBS_${level}_ROLE_ID`]
 Object.freeze(DEFAULT_CONFIG);
 
 
-module.exports = {
+export const offsetFlags = Object.freeze({
+	COMPETITION_END: 'CompetitionEnd',
+	COMPETITION_START: 'CompetitionStart',
+	MAYOR: 'OffsetMayor',
+	WEEK: 'OffsetWeek',
+	MONTH: 'OffsetMonth',
+	CURRENT: 'current',
+	DAY: 'day',
+});
 
-	offsetFlags: {
-		COMPETITION_END: 'CompetitionEnd',
-		COMPETITION_START: 'CompetitionStart',
-		MAYOR: 'OffsetMayor',
-		WEEK: 'OffsetWeek',
-		MONTH: 'OffsetMonth',
-		CURRENT: 'current',
-		DAY: 'day',
-	},
+export const XP_OFFSETS = Object.freeze([
+	'CompetitionStart',
+	'CompetitionEnd',
+	'OffsetMayor',
+	'OffsetWeek',
+	'OffsetMonth',
+]);
 
-	XP_OFFSETS: [
-		'CompetitionStart',
-		'CompetitionEnd',
-		'OffsetMayor',
-		'OffsetWeek',
-		'OffsetMonth',
-	],
+export const XP_OFFSETS_SHORT = Object.freeze({
+	competition: 'CompetitionStart',
+	mayor: 'OffsetMayor',
+	week: 'OffsetWeek',
+	month: 'OffsetMonth',
+});
 
-	XP_OFFSETS_SHORT: {
-		competition: 'CompetitionStart',
-		mayor: 'OffsetMayor',
-		week: 'OffsetWeek',
-		month: 'OffsetMonth',
-	},
+export const XP_OFFSETS_CONVERTER = Object.freeze({
+	competition: 'CompetitionStart',
+	mayor: 'OffsetMayor',
+	week: 'OffsetWeek',
+	month: 'OffsetMonth',
 
-	XP_OFFSETS_CONVERTER: {
-		competition: 'CompetitionStart',
-		mayor: 'OffsetMayor',
-		week: 'OffsetWeek',
-		month: 'OffsetMonth',
+	CompetitionStart: 'competition',
+	OffsetMayor: 'mayor',
+	OffsetWeek: 'week',
+	OffsetMonth: 'month',
+});
 
-		CompetitionStart: 'competition',
-		OffsetMayor: 'mayor',
-		OffsetWeek: 'week',
-		OffsetMonth: 'month',
-	},
+export const XP_OFFSETS_TIME = Object.freeze({
+	CompetitionStart: 'COMPETITION_START_TIME',
+	CompetitionEnd: 'COMPETITION_END_TIME',
+	OffsetMayor: 'LAST_MAYOR_XP_RESET_TIME',
+	OffsetWeek: 'LAST_WEEKLY_XP_RESET_TIME',
+	OffsetMonth: 'LAST_MONTHLY_XP_RESET_TIME',
+	day: 'LAST_DAILY_XP_RESET_TIME',
+});
 
-	XP_OFFSETS_TIME: {
-		CompetitionStart: 'COMPETITION_START_TIME',
-		CompetitionEnd: 'COMPETITION_END_TIME',
-		OffsetMayor: 'LAST_MAYOR_XP_RESET_TIME',
-		OffsetWeek: 'LAST_WEEKLY_XP_RESET_TIME',
-		OffsetMonth: 'LAST_MONTHLY_XP_RESET_TIME',
-		day: 'LAST_DAILY_XP_RESET_TIME',
-	},
+export const XP_TYPES = Object.freeze([ ...skills, ...cosmeticSkills, ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ]);
 
-	XP_TYPES: [ ...skills, ...cosmeticSkills, ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ],
+export const UNKNOWN_IGN = 'UNKNOWN_IGN';
 
-	UNKNOWN_IGN: 'UNKNOWN_IGN',
-
-	GUILD_ID_ERROR: 'ERROR',
-
-	GUILD_ID_BRIDGER: 'BRIDGER',
-
-	GUILD_ID_ALL: 'ALL',
-
-	DEFAULT_CONFIG,
-
-};
+export const GUILD_ID_ERROR = 'ERROR';
+export const GUILD_ID_BRIDGER = 'BRIDGER';
+export const GUILD_ID_ALL = 'ALL';

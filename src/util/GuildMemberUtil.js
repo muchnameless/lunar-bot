@@ -1,12 +1,10 @@
-'use strict';
-
-const { skills, slayers } = require('../constants/skyblock');
-const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../constants/roles');
-const UserUtil = require('./UserUtil');
-// const logger = require('../functions/logger');
+import { skills, slayers } from '../constants/skyblock.js';
+import { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } from '../constants/roles.js';
+import { UserUtil } from './UserUtil.js';
+// import { logger } from '../functions/logger.js';
 
 
-module.exports = class GuildMemberUtil extends null {
+export class GuildMemberUtil extends null {
 	/**
 	 * @param {import('discord.js').GuildMember} member
 	 */
@@ -16,7 +14,7 @@ module.exports = class GuildMemberUtil extends null {
 
 	/**
 	 * @param {import('discord.js').GuildMember} member
-	 * @param {import('../structures/database/models/Player')} player
+	 * @param {import('../structures/database/models/Player').Player} player
 	 */
 	static setPlayer(member, player) {
 		return UserUtil.setPlayer(member.user, player);
@@ -79,4 +77,4 @@ module.exports = class GuildMemberUtil extends null {
 
 		return rolesToRemove;
 	}
-};
+}

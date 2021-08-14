@@ -1,4 +1,4 @@
-const path = require('path')
+import path from 'path'
 
 module.exports = {
   'models-path': path.resolve('./src/structures/database/models'),

@@ -1,14 +1,12 @@
-'use strict';
-
-const { Formatters } = require('discord.js');
-const { stripIndent } = require('common-tags');
-const MessageEmbedUtil = require('../../util/MessageEmbedUtil');
-const mojang = require('../../api/mojang');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
+import { Formatters } from 'discord.js';
+import { stripIndent } from 'common-tags';
+import { MessageEmbedUtil } from '../../util/MessageEmbedUtil.js';
+import { mojang } from '../../api/mojang.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class DonationsCommand extends SlashCommand {
+export default class DonationsCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -74,4 +72,4 @@ module.exports = class DonationsCommand extends SlashCommand {
 		// create and send embed
 		return await this.reply(interaction, { embeds: [ embed ] });
 	}
-};
+}

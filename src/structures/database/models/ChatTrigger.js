@@ -1,16 +1,15 @@
-'use strict';
+import { Collection } from 'discord.js';
+import pkg from 'sequelize';
+const { Model, DataTypes } = pkg;
+// import { logger } from '../../../functions/logger.js';
 
-const { Collection } = require('discord.js');
-const { Model, DataTypes } = require('sequelize');
-// const logger = require('../../../functions/logger');
 
-
-module.exports = class ChatTrigger extends Model {
+export class ChatTrigger extends Model {
 	constructor(...args) {
 		super(...args);
 
 		/**
-		 * @type {import('../../LunarClient')}
+		 * @type {import('../../LunarClient').LunarClient}
 		 */
 		this.client;
 		/**
@@ -40,7 +39,7 @@ module.exports = class ChatTrigger extends Model {
 	}
 
 	/**
-	 * @param {import('sequelize')} sequelize
+	 * @param {import('sequelize').Sequelize} sequelize
 	 */
 	static init(sequelize) {
 		return super.init({
@@ -82,7 +81,7 @@ module.exports = class ChatTrigger extends Model {
 	}
 
 	/**
-	 * @param {import('../../chat_bridge/HypixelMessage')} message
+	 * @param {import('../../chat_bridge/HypixelMessage').HypixelMessage} message
 	 */
 	async testMessage(message) {
 		if (!this.chatTypes.includes(message.type)) return;
@@ -105,4 +104,6 @@ module.exports = class ChatTrigger extends Model {
 				.replaceAll(/\$(\d+)/g, (m, p0) => matched[p0] ?? m), // replace $number with capture group #number
 		);
 	}
-};
+}
+
+export default ChatTrigger;

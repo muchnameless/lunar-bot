@@ -1,13 +1,11 @@
-'use strict';
-
-const logger = require('./logger');
+import { logger } from './logger.js';
 
 
 /**
  * checks wether the model instance is currently muted
- * @param {import('../structures/database/models/Player')|import('../structures/database/models/HypixelGuild')} model
+ * @param {import('../structures/database/models/Player').Player|import('../structures/database/models/HypixelGuild').HypixelGuild} model
  */
-module.exports.mutedCheck = function(model) {
+export function mutedCheck(model) {
 	if (model.mutedTill) {
 		// mute hasn't expired
 		if (Date.now() < model.mutedTill) return true;
@@ -18,4 +16,4 @@ module.exports.mutedCheck = function(model) {
 	}
 
 	return false;
-};
+}

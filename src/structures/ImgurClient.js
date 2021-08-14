@@ -1,11 +1,9 @@
-'use strict';
-
-const { AsyncQueue } = require('@sapphire/async-queue');
-const { setTimeout: sleep } = require('timers/promises');
-const FormData = require('form-data');
-const fetch = require('node-fetch');
-const ms = require('ms');
-// const logger = require('../functions/logger');
+import { AsyncQueue } from '@sapphire/async-queue';
+import { setTimeout as sleep } from 'timers/promises';
+import FormData from 'form-data';
+import fetch from 'node-fetch';
+import ms from 'ms';
+// import { logger } from '../functions/logger.js';
 
 /**
  * @typedef {object} ImageData
@@ -47,7 +45,7 @@ const ms = require('ms');
  */
 
 
-module.exports = class ImgurClient {
+export class ImgurClient {
 	#authorization;
 	#baseURL;
 	#queue = new AsyncQueue();
@@ -150,7 +148,6 @@ module.exports = class ImgurClient {
 			const controller = new AbortController();
 			const timeout = setTimeout(() => controller.abort(), this.requestTimeout);
 
-			/** @type {import('@types/node-fetch').Response} */
 			let res;
 
 			try {
@@ -200,4 +197,4 @@ module.exports = class ImgurClient {
 			this.#queue.shift();
 		}
 	}
-};
+}

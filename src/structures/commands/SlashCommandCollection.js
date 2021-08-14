@@ -1,11 +1,9 @@
-'use strict';
-
-const { Collection } = require('discord.js');
-const BaseCommandCollection = require('./BaseCommandCollection');
-const logger = require('../../functions/logger');
+import { Collection } from 'discord.js';
+import { BaseCommandCollection } from './BaseCommandCollection.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class SlashCommandCollection extends BaseCommandCollection {
+export class SlashCommandCollection extends BaseCommandCollection {
 	/**
 	 * built-in methods will use this as the constructor
 	 * that way SlashCommandCollection#filter returns a standard Collection
@@ -35,7 +33,7 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 		const fullPermissions = [];
 
 		for (const { name, id } of applicationCommands.values()) {
-			/** @type {?import('./SlashCommand')} */
+			/** @type {?import('./SlashCommand').SlashCommand} */
 			const command = this.client.commands.get(name);
 
 			if (!command) {
@@ -67,7 +65,7 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 	 * @param {string} commandName
 	 */
 	async create(commandName) {
-		/** @type {import('./SlashCommand')} */
+		/** @type {import('./SlashCommand').SlashCommand} */
 		const command = this.get(commandName) ?? await this.loadByName(commandName);
 
 		if (!command) throw new Error(`[COMMANDS CREATE]: unknown command '${commandName}'`);
@@ -86,7 +84,7 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 
 	/**
 	 * sets a single application command's permissions (including possible aliases)
-	 * @param {{ command: import('./SlashCommand'), applicationCommands: import('discord.js').ApplicationCommand[] }} param0
+	 * @param {{ command: import('./SlashCommand').SlashCommand, applicationCommands: import('discord.js').ApplicationCommand[] }} param0
 	 */
 	// eslint-disable-next-line no-undef
 	async setSinglePermissions({ command = this.getByName(arguments[0]), applicationCommands: applicationCommandsInput }) {
@@ -106,4 +104,4 @@ module.exports = class SlashCommandCollection extends BaseCommandCollection {
 			}
 		}
 	}
-};
+}

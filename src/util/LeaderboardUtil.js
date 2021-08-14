@@ -1,8 +1,6 @@
-'use strict';
-
-// const logger = require('../functions/logger');
+// import { logger } from '../functions/logger.js';
 
 
-module.exports = class LeaderboardUtil extends null {
+export class LeaderboardUtil extends null {
 
-};
+}

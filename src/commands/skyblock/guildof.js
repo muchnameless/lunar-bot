@@ -1,13 +1,11 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const mojang = require('../../api/mojang');
-const hypixel = require('../../api/hypixel');
-const DualCommand = require('../../structures/commands/DualCommand');
-const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { mojang } from '../../api/mojang.js';
+import { hypixel } from '../../api/hypixel.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class GuildOfCommand extends DualCommand {
+export default class GuildOfCommand extends DualCommand {
 	constructor(data) {
 		super(
 			data,
@@ -62,9 +60,9 @@ module.exports = class GuildOfCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
 	 */
 	async runInGame(message) {
 		return await message.reply(await this.#generateReply(...message.commandData.args));
 	}
-};
+}

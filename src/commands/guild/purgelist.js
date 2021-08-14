@@ -1,12 +1,10 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const { handleLeaderboardCommandInteraction } = require('../../functions/leaderboards');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { handleLeaderboardCommandInteraction } from '../../functions/leaderboards.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class PurgeListCommand extends SlashCommand {
+export default class PurgeListCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -40,4 +38,4 @@ module.exports = class PurgeListCommand extends SlashCommand {
 			},
 		);
 	}
-};
+}

@@ -1,3 +1,1 @@
-'use strict';
-
-module.exports = require('./disconnect');
+export { default } from './disconnect.js';

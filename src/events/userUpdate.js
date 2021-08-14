@@ -1,11 +1,9 @@
-'use strict';
-
-const UserUtil = require('../util/UserUtil');
-const Event = require('../structures/events/Event');
-// const logger = require('../functions/logger');
+import { UserUtil } from '../util/UserUtil.js';
+import { Event } from '../structures/events/Event.js';
+// import { logger } from '../functions/logger.js';
 
 
-module.exports = class UserUpdateEvent extends Event {
+export default class UserUpdateEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -24,4 +22,4 @@ module.exports = class UserUpdateEvent extends Event {
 			UserUtil.getPlayer(newUser)?.syncIgnWithDisplayName(false);
 		}
 	}
-};
+}

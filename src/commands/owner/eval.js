@@ -1,28 +1,25 @@
-'use strict';
-
 /* eslint-disable no-unused-vars */
-const Discord = require('discord.js');
-const _ = require('lodash');
-const similarity = require('jaro-winkler');
-const ms = require('ms');
-const fetch = require('node-fetch');
-const util = require('util');
-const { EMBED_MAX_CHARS } = require('../../constants/discord');
-const { EDIT_MESSAGE } = require('../../constants/emojiCharacters');
-const cache = require('../../api/cache');
-const skyblock = require('../../constants/skyblock');
-const functionsUtil = require('../../functions/util');
-const functionsFiles = require('../../functions/files');
-const hypixel = require('../../api/hypixel');
-const mojang = require('../../api/mojang');
-const ChannelUtil = require('../../util/ChannelUtil');
-const InteractionUtil = require('../../util/InteractionUtil');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
+import Discord from 'discord.js';
+import _ from 'lodash-es';
+import similarity from 'jaro-winkler';
+import ms from 'ms';
+import fetch from 'node-fetch';
+import util from 'util';
+import { EMBED_MAX_CHARS } from '../../constants/discord.js';
+import { EDIT_MESSAGE } from '../../constants/emojiCharacters.js';
+import { cache } from '../../api/cache.js';
+import * as functionsUtil from '../../functions/util.js';
+import * as functionsFiles from '../../functions/files.js';
+import { hypixel } from '../../api/hypixel.js';
+import { mojang } from '../../api/mojang.js';
+import { ChannelUtil } from '../../util/ChannelUtil.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 /* eslint-enable no-unused-vars */
 
 
-module.exports = class EvalCommand extends SlashCommand {
+export default class EvalCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -52,7 +49,7 @@ module.exports = class EvalCommand extends SlashCommand {
 	 * @param {*} input
 	 * @param {number} [depth=1]
 	 */
-	cleanOutput(input, depth = 1) {
+	#cleanOutput(input, depth = 1) {
 		return (typeof input === 'string' ? input : util.inspect(input, { depth }))
 			.replace(/`/g, '`\u200b')
 			.replace(/@/g, '@\u200b')
@@ -65,7 +62,7 @@ module.exports = class EvalCommand extends SlashCommand {
 	 * @param {boolean} [isAsync]
 	 * @param {number} [inspectDepth=0]
 	 */
-	async eval(ctx, input, isAsync = /\bawait\b/.test(input), inspectDepth = 0) {
+	async #eval(ctx, input, isAsync = /\bawait\b/.test(input), inspectDepth = 0) {
 		if (ctx.user.id !== this.client.ownerId) throw new Error('eval is restricted to the bot owner');
 
 		/* eslint-disable no-unused-vars */
@@ -105,7 +102,7 @@ module.exports = class EvalCommand extends SlashCommand {
 			if ((isPromise = evaled instanceof Promise)) evaled = await evaled;
 
 			const hrStop = process.hrtime(hrStart);
-			const OUTPUT_ARRAY = functionsUtil.splitForEmbedFields(this.cleanOutput(evaled, inspectDepth), 'js');
+			const OUTPUT_ARRAY = functionsUtil.splitForEmbedFields(this.#cleanOutput(evaled, inspectDepth), 'js');
 			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${((hrStop[0] * 1e9) + hrStop[1]) / 1e6} ms\``;
 
 			// add output fields till embed character limit is reached
@@ -128,7 +125,7 @@ module.exports = class EvalCommand extends SlashCommand {
 
 			const FOOTER = `d.js ${Discord.version} • type: \`${typeof error}\``;
 
-			for (const [ index, value ] of functionsUtil.splitForEmbedFields(this.cleanOutput(error), 'xl').entries()) {
+			for (const [ index, value ] of functionsUtil.splitForEmbedFields(this.#cleanOutput(error), 'xl').entries()) {
 				const name = index ? '\u200b' : 'Error';
 
 				if (responseEmbed.length + FOOTER.length + 1 + name.length + value.length > EMBED_MAX_CHARS) break;
@@ -173,7 +170,7 @@ module.exports = class EvalCommand extends SlashCommand {
 			});
 
 			return this.update(interaction, {
-				embeds: await this.eval(
+				embeds: await this.#eval(
 					interaction,
 					collected.first().content,
 					async === 'true' || undefined,
@@ -220,7 +217,7 @@ module.exports = class EvalCommand extends SlashCommand {
 			);
 
 		return await this.reply(interaction, {
-			embeds: await this.eval(
+			embeds: await this.#eval(
 				interaction,
 				INPUT,
 				IS_ASYNC,
@@ -229,4 +226,4 @@ module.exports = class EvalCommand extends SlashCommand {
 			components: [ row ],
 		});
 	}
-};
+}

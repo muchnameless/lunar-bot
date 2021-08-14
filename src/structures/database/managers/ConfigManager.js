@@ -1,19 +1,17 @@
-'use strict';
-
-const ModelManager = require('./ModelManager');
-const logger = require('../../../functions/logger');
+import { ModelManager } from './ModelManager.js';
+import { logger } from '../../../functions/logger.js';
 
 
-module.exports = class ConfigManager extends ModelManager {
+export class ConfigManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('../models/Config')}
+		 * @type {import('discord.js').Collection<string, import('../models/Config').Config}
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/Config')}
+		 * @type {import('../models/Config').Config}
 		 */
 		this.model;
 	}
@@ -22,7 +20,7 @@ module.exports = class ConfigManager extends ModelManager {
 	 * upserts a config entry
 	 * @param {string} key config key
 	 * @param {*} value new value
-	 * @returns {Promise<import('../models/Config')>}
+	 * @returns {Promise<import('../models/Config').Config>}
 	 */
 	async set(key, value) {
 		const UPPERCASED_KEY = key.toUpperCase();
@@ -41,4 +39,4 @@ module.exports = class ConfigManager extends ModelManager {
 	get(key) {
 		return this.cache.get(key?.toUpperCase())?.parsedValue ?? logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`);
 	}
-};
+}

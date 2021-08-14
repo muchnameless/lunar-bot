@@ -1,11 +1,9 @@
-'use strict';
-
-const { Collection } = require('discord.js');
-const BaseCommandCollection = require('./BaseCommandCollection');
-const logger = require('../../functions/logger');
+import { Collection } from 'discord.js';
+import { BaseCommandCollection } from './BaseCommandCollection.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class BridgeCommandCollection extends BaseCommandCollection {
+export class BridgeCommandCollection extends BaseCommandCollection {
 	/**
 	 * categories that are excluded from the help command and autocorrection
 	 */
@@ -52,6 +50,6 @@ module.exports = class BridgeCommandCollection extends BaseCommandCollection {
 	 * @param {string} categoryInput
 	 */
 	filterByCategory(categoryInput) {
-		return this.filter((/** @type {import('./BridgeCommand')} */ { category, aliases }, name) => category === categoryInput && !aliases?.some(alias => alias.toLowerCase() === name));
+		return this.filter((/** @type {import('./BridgeCommand').BridgeCommand} */ { category, aliases }, name) => category === categoryInput && !aliases?.some(alias => alias.toLowerCase() === name));
 	}
-};
+}
