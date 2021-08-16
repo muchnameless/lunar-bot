@@ -18,6 +18,11 @@ export default class PingCommand extends SlashCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await this.reply(interaction, `Api Latency: ${ms(Date.now() - interaction.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}`);
+		const sent = await this.reply(interaction, {
+			content: 'Pinging...',
+			fetchReply: true,
+		});
+
+		return await this.reply(interaction, `Roundtrip latency: ${ms(sent.createdTimestamp - interaction.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}`);
 	}
 }

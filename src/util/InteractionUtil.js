@@ -141,15 +141,13 @@ export class InteractionUtil extends null {
 
 				// ephemeral defer and non-ephemeral followUp
 				await interaction.editReply('\u200b'); // ephemeral empty message
-				const message = await interaction.followUp(data);
-				return this.#handleReplyMessage(interaction, data, message);
+				return await this.followUp(interaction, data);
 			}
 
 			// non-ephemeral defer
 			if (data.ephemeral) {
 				await interaction.deleteReply();
-				const message = await interaction.followUp(data);
-				return this.#handleReplyMessage(interaction, data, message);
+				return await this.followUp(interaction, data);
 			}
 
 			const mesage = await interaction.editReply(data);
@@ -157,8 +155,7 @@ export class InteractionUtil extends null {
 		}
 
 		if (interaction.replied) {
-			const message = await interaction.followUp(data);
-			return this.#handleReplyMessage(interaction, data, message);
+			return await this.followUp(interaction, data);
 		}
 
 		const message = await interaction.reply(data);
@@ -174,7 +171,9 @@ export class InteractionUtil extends null {
 		if (deferReplyPromise) await deferReplyPromise;
 		if (deferUpdatePromise) await deferUpdatePromise;
 
-		return interaction.followUp(contentOrOptions);
+		const message = await interaction.followUp(contentOrOptions);
+
+		return this.#handleReplyMessage(interaction, contentOrOptions, message);
 	}
 
 	/**
@@ -184,11 +183,11 @@ export class InteractionUtil extends null {
 	 * @param {?import('discord.js').Message} [messageInput]
 	 */
 	static async #handleReplyMessage(interaction, { ephemeral, content }, messageInput) {
-		if (ephemeral || !content || !interaction.client.chatBridges.channelIds.has(interaction.channelId)) return;
+		if (ephemeral || !content || !interaction.client.chatBridges.channelIds.has(interaction.channelId)) return messageInput;
 
 		const message = messageInput ?? await interaction.fetchReply();
 
-		if (!message.content) return;
+		if (!message.content) return message;
 
 		interaction.client.chatBridges.handleDiscordMessage(
 			message,
