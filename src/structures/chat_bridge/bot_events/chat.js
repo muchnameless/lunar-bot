@@ -1,19 +1,16 @@
 import { HypixelMessage } from '../HypixelMessage.js';
-import { logger } from '../../../functions/logger.js';
+// import { logger } from '../../../functions/logger.js';
 
+/**
+ * @typedef {object} ChatPacket
+ * @property {string} message
+ * @property {number} position
+ */
 
 /**
  * @param {import('../ChatBridge').ChatBridge} chatBridge
- * @param {object} packet
- * @param {number} packet.position
- * @param {HypixelMessage.ChatPosition} position
+ * @param {ChatPacket} packet
  */
-export default async function(chatBridge, { position, message }) {
-	try {
-		chatBridge.emit('message', await new HypixelMessage(chatBridge, position, JSON.parse(message)).init());
-	} catch (error) {
-		logger.error('[MINECRAFT BOT CHAT]', error);
-
-		chatBridge.emit('message', await new HypixelMessage(chatBridge, position, message).init());
-	}
+export default async function(chatBridge, packet) {
+	chatBridge.emit('message', await new HypixelMessage(chatBridge, packet).init());
 }

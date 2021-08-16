@@ -1,8 +1,8 @@
-import { MC_CLIENT_VERSION } from './constants/settings.js';
 import loader from 'prismarine-chat';
 import { messageTypes, invisibleCharacterRegExp } from './constants/chatBridge.js';
 import { spamMessages } from './constants/commandResponses.js';
 import { NO_BELL } from '../../constants/emojiCharacters.js';
+import { MC_CLIENT_VERSION } from './constants/settings.js';
 import { escapeRegex } from '../../functions/util.js';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
 import { MessageUtil } from '../../util/MessageUtil.js';
@@ -16,31 +16,41 @@ import { logger } from '../../functions/logger.js';
  * * `whisper`
  */
 
+const ChatMessage = loader(MC_CLIENT_VERSION);
 
-export class HypixelMessage extends loader(MC_CLIENT_VERSION) {
+
+export class HypixelMessage {
 	/**
 	 * @param {import('./ChatBridge').ChatBridge} chatBridge
-	 * @param {number} position
-	 * @param {} message
-	 * @param {?boolean} displayWarning
+	 * @param {import('./bot_events/chat').ChatPacket} packet
 	 */
-	constructor(chatBridge, position, message, displayWarning) {
-		super(message, displayWarning);
+	constructor(chatBridge, { message }) {
+		let prismarineMessage;
 
+		try {
+			prismarineMessage = new ChatMessage(JSON.parse(message));
+		} catch (error) {
+			logger.error('[MINECRAFT BOT CHAT]', error);
+			prismarineMessage = new ChatMessage(message);
+		}
+
+		/**
+		 * the chat bridge that instantiated the message
+		 */
 		this.chatBridge = chatBridge;
+		/**
+		 * the prismarine-parsed message
+		 */
+		this.prismarineMessage = prismarineMessage;
 		/**
 		 * forwarded message
 		 * @type {Promise<?import('discord.js').Message>}
 		 */
 		this.discordMessage = Promise.resolve(null);
 		/**
-		 * @type {?HypixelMessageType}
-		 */
-		this.position = { 0: 'chat', 1: 'system', 2: 'gameInfo' }[position] ?? null;
-		/**
 		 * raw content string
 		 */
-		this.rawContent = this.toString();
+		this.rawContent = prismarineMessage.toString();
 		/**
 		 * content with invis chars removed
 		 */
@@ -63,7 +73,7 @@ export class HypixelMessage extends loader(MC_CLIENT_VERSION) {
 						ign: matched.groups.ign,
 						guildRank: matched.groups.guildRank,
 						uuid: matched.groups.type
-							? this.extra?.[0].clickEvent?.value.slice(13).replace(/-/g, '') // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
+							? prismarineMessage.extra?.[0].clickEvent?.value.slice(13).replace(/-/g, '') // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
 							: null,
 					}
 					: {
@@ -169,7 +179,7 @@ export class HypixelMessage extends loader(MC_CLIENT_VERSION) {
 	 * content with minecraft formatting codes
 	 */
 	get formattedContent() {
-		return this.toMotd().trim();
+		return this.prismarineMessage.toMotd().trim();
 	}
 
 	/**
@@ -189,7 +199,7 @@ export class HypixelMessage extends loader(MC_CLIENT_VERSION) {
 
 	/**
 	 * replies in game (and on discord if guild chat) to the message
-	 * @param {string | import('./ChatBridge').BroadcastOptions | import('./ChatBridge').ChatOptions } contentOrOptions
+	 * @param {string | import('./ChatBridge').BroadcastOptions & import('./ChatBridge').ChatOptions } contentOrOptions
 	 */
 	async reply(contentOrOptions) {
 		const { ephemeral, ...options } = typeof contentOrOptions === 'string'
@@ -266,10 +276,10 @@ export class HypixelMessage extends loader(MC_CLIENT_VERSION) {
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 				if (/<@&\d{17,19}>/.test(discordMessage.content)) {
-					this.author.send('you do not have permission to @ roles from in game chat');
+					this.author.send('you do not have permission to ping roles from in game chat');
 					MessageUtil.react(discordMessage, NO_BELL);
 				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content))) {
-					this.author.send('you do not have permission to @ users from in game chat');
+					this.author.send('you do not have permission to ping users from in game chat');
 					MessageUtil.react(discordMessage, NO_BELL);
 				}
 
