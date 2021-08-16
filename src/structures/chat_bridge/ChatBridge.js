@@ -17,7 +17,7 @@ import { logger } from '../../functions/logger.js';
 
 /**
  * @typedef {object} BroadcastOptions
- * @property {string | import('./managers/DiscordChatManager')} type
+ * @property {string | import('./managers/DiscordChatManager').DiscordChatManager} type
  * @property {import('./HypixelMessage').HypixelMessage} hypixelMessage
  * @property {DiscordMessageOptions} discord
  * @property {ChatOptions} minecraft
