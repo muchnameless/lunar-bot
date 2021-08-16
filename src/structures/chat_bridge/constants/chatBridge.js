@@ -85,3 +85,10 @@ export const blockedWordsRegExp = /\b(?:cyber)?s[e3]x\b|seks|\bcum(?:shot)?\b|\b
 export const memeRegExp = /[⠁-⣿]|\be+z+\b/;
 
 export const nonWhiteSpaceRegExp = new RegExp(`[^\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}${invisibleCharacters.join('')}]`, 'u');
+
+/**
+ * https://cdn.discordapp.com/attachments/724130826165420052/876441229905256448/card.png
+ * https://media.discordapp.net/attachments/795861078415638539/876641628083867688/unknown.png
+ */
+// eslint-disable-next-line no-empty-character-class
+export const urlRegExp = /\b(?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/attachments\/\d{17,19}\/\d{17,19}\/[^.]+\.(?:png|jpg|jpeg)(?:\?width=\d+&height=\d+)?\b/gd;
