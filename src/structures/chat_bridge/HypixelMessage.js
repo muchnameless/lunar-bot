@@ -24,7 +24,7 @@ export class HypixelMessage {
 	 * @param {import('./ChatBridge').ChatBridge} chatBridge
 	 * @param {import('./bot_events/chat').ChatPacket} packet
 	 */
-	constructor(chatBridge, { message }) {
+	constructor(chatBridge, { message, position }) {
 		let prismarineMessage;
 
 		try {
@@ -42,6 +42,10 @@ export class HypixelMessage {
 		 * the prismarine-parsed message
 		 */
 		this.prismarineMessage = prismarineMessage;
+		/**
+		 * @type {?HypixelMessageType}
+		 */
+		this.position = { 0: 'chat', 1: 'system', 2: 'gameInfo' }[position] ?? null;
 		/**
 		 * forwarded message
 		 * @type {Promise<?import('discord.js').Message>}
