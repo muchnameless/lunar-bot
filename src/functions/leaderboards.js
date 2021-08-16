@@ -195,7 +195,6 @@ export async function handleLeaderboardCommandInteraction(interaction, leaderboa
 	);
 }
 
-
 /**
  * handles a leaderbaord message
  * @param {import('discord.js').ButtonInteraction} interaction
