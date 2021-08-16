@@ -24,6 +24,6 @@ export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
 			return logger.error('[CHATBRIDGE ERROR]: invalid credentials detected');
 		}
 
-		this.chatBridge.minecraft.reconnect();
+		// this.chatBridge.minecraft.reconnect();
 	}
 }
