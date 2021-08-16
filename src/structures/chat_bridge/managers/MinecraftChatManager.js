@@ -840,19 +840,24 @@ export class MinecraftChatManager extends ChatManager {
 
 		// collect message
 		collector.on('collect', (/** @type {import('../HypixelMessage').HypixelMessage} */ message) => {
-			if (/^-{29,}/.test(message.content)) { // is line separator
+			// message is line separator
+			if (/^-{29,}/.test(message.content)) {
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
 				if (/[^-]-{29,}$/.test(message.content)) return collector.stop();
 
 				collector.collected.pop(); // remove line separator from collected messages
 				if (collector.collected.length) collector.stop(); // stop collector if messages before this line separator were already collected
-			} else if (collector.collected.length === max) { // message is not a line separator
-				collector.stop();
-			} else if (abortRegExp?.test(message.content)) { // abortRegExp triggered
-				collector.stop('abort');
-			} else if (message.spam) { // don't collect anti spam messages
-				collector.collected.pop();
+				return;
 			}
+
+			// message is not a line separator
+			if (collector.collected.length === max) return collector.stop();
+
+			// abortRegExp triggered
+			if (abortRegExp?.test(message.content)) return collector.stop('abort');
+
+			// don't collect anti spam messages
+			if (message.spam) return collector.collected.pop();
 		});
 
 		// end collection
