@@ -239,7 +239,7 @@ export async function handleLeaderboardButtonInteraction(interaction) {
 					`[${RELOAD_EMOJI}](${interaction.message.url ?? `https://discord.com/channels/${interaction.message.guild_id ?? '@me'}/${interaction.message.channel_id}/${interaction.message.id}`})`
 				} to refresh the data
 			`,
-		ephemeral: true,
+			ephemeral: true,
 		});
 	}
 
