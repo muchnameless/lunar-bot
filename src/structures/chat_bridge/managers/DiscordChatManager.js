@@ -304,7 +304,7 @@ export class DiscordChatManager extends ChatManager {
 				? await (async () => {
 					try {
 						const referencedMessage = await message.fetchReference();
-						if (!referencedMessage.author || message.mentions.users.has(referencedMessage.author.id)) return null;
+						if (!referencedMessage.author || message.mentions.users.has(referencedMessage.author.id)) return null; // no author or author is already pinged
 						return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
 					} catch (error) {
 						logger.error('[FORWARD DC TO MC]: error fetching reference', error);
@@ -336,7 +336,7 @@ export class DiscordChatManager extends ChatManager {
 				try {
 					const imgurURL = (await this.client.imgur.upload(URL)).data.link;
 
-					content = `${content.slice(0, START - offset)}${imgurURL}${content.slice(END - offset)}`;
+					content = `${content.slice(0, START - offset)}${imgurURL}${content.slice(END - offset)}`; // replace discord with imgur link
 					offset += URL.length - imgurURL.length; // since indices are relative to the original string
 				} catch (error) {
 					logger.error(error);
@@ -345,11 +345,13 @@ export class DiscordChatManager extends ChatManager {
 			}
 		}
 
+		// send interaction "command"
 		if (interaction) await this.minecraft.chat({
 			content: `${this.client.config.get('PREFIXES')[0]}${InteractionUtil.logInfo(interaction)}`,
 			prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? interaction.member?.displayName ?? interaction.user.username)}: `,
 		});
 
+		// send content
 		return this.minecraft.chat({
 			content,
 			prefix: `${this.prefix} ${interaction ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
