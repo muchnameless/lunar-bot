@@ -297,9 +297,8 @@ export class DiscordChatManager extends ChatManager {
 			message.reference && !message.hasThread // @referencedMessageAuthor
 				? await (async () => {
 					try {
-						/** @type {import('discord.js').Message} */
 						const referencedMessage = await message.fetchReference();
-						if (!message.author) return null;
+						if (!referencedMessage.author || message.mentions.users.has(referencedMessage.author.id)) return null;
 						return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
 					} catch (error) {
 						logger.error('[FORWARD DC TO MC]: error fetching reference', error);
