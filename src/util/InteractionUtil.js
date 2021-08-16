@@ -197,6 +197,8 @@ export class InteractionUtil extends null {
 				checkIfNotFromBot: false,
 			},
 		);
+
+		return message;
 	}
 
 	/**
