@@ -9,17 +9,17 @@ import { logger } from '../../functions/logger.js';
 export class BaseCommandCollection extends Collection {
 	/**
 	 * @param {import('../LunarClient').LunarClient} client
-	 * @param {string} dirPath the path to the commands folder
+	 * @param {URL} dirURL the path to the commands folder
 	 * @param {*} [entries]
 	 */
-	constructor(client, dirPath, entries) {
+	constructor(client, dirURL, entries) {
 		super(entries);
 
 		this.client = client;
 		/**
 		 * path to the command files
 		 */
-		this.dirPath = dirPath;
+		this.dirURL = dirURL;
 	}
 
 	/**
@@ -42,7 +42,7 @@ export class BaseCommandCollection extends Collection {
 	 * @param {string} commandName
 	 */
 	async loadByName(commandName) {
-		const commandFiles = await getAllJsFiles(this.dirPath);
+		const commandFiles = await getAllJsFiles(this.dirURL);
 		const commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
 
 		if (!commandFile) return;
@@ -75,7 +75,7 @@ export class BaseCommandCollection extends Collection {
 	 * loads all commands into the collection
 	 */
 	async loadAll() {
-		const commandFiles = await getAllJsFiles(this.dirPath);
+		const commandFiles = await getAllJsFiles(this.dirURL);
 
 		await Promise.all(commandFiles.map(file => this.loadFromFile(file)));
 

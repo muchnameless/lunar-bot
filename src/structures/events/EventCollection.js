@@ -8,10 +8,10 @@ import { logger } from '../../functions/logger.js';
 export class EventCollection extends Collection {
 	/**
 	 * @param {import('events').EventEmitter} emitter
-	 * @param {string} dirPath the path to the commands folder
+	 * @param {URL} dirURL the path to the commands folder
 	 * @param {*} [entries]
 	 */
-	constructor(emitter, dirPath, entries) {
+	constructor(emitter, dirURL, entries) {
 		super(entries);
 
 		/**
@@ -21,7 +21,7 @@ export class EventCollection extends Collection {
 		/**
 		 * path to the event files
 		 */
-		this.dirPath = dirPath;
+		this.dirURL = dirURL;
 	}
 
 	/**
@@ -58,7 +58,7 @@ export class EventCollection extends Collection {
 	 * loads all commands into the collection
 	 */
 	async loadAll() {
-		const eventFiles = await getAllJsFiles(this.dirPath);
+		const eventFiles = await getAllJsFiles(this.dirURL);
 
 		await Promise.all(eventFiles.map(file => this.loadFromFile(file)));
 
