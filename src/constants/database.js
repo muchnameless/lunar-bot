@@ -2,7 +2,7 @@ import { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses, SKYBLOCK
 import { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } from './roles.js';
 
 // generate default config
-export const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG = Object.freeze({
 	AUTO_GUILD_RANKS: true,
 	AUTOCORRECT_THRESHOLD: 0.8,
 	AVERAGE_STATS_CHANNEL_UPDATE_ENABLED: true,
@@ -46,7 +46,11 @@ export const DEFAULT_CONFIG = {
 	LAST_DAILY_STATS_SAVE_TIME: 0,
 	LAST_DAILY_XP_RESET_TIME: 0,
 	LAST_KICK_TIME: 0,
-	LAST_MAYOR_XP_RESET_TIME: SKYBLOCK_YEAR_0,
+	LAST_MAYOR_XP_RESET_TIME: (() => {
+		let time = SKYBLOCK_YEAR_0;
+		while (time + MAYOR_CHANGE_INTERVAL < Date.now()) time += MAYOR_CHANGE_INTERVAL;
+		return time;
+	})(),
 	LAST_MONTHLY_XP_RESET_TIME: 0,
 	LAST_WEEKLY_XP_RESET_TIME: 0,
 	LOGGING_CHANNEL_ID: null,
@@ -77,24 +81,15 @@ export const DEFAULT_CONFIG = {
 	WHALECUM_PASS_WEIGHT: Infinity,
 	WEIGHT_AVERAGE_STATS_CHANNEL_ID: null,
 	XP_TRACKING_ENABLED: true,
-};
 
-while (DEFAULT_CONFIG.LAST_MAYOR_XP_RESET_TIME + MAYOR_CHANGE_INTERVAL < Date.now()) DEFAULT_CONFIG.LAST_MAYOR_XP_RESET_TIME += MAYOR_CHANGE_INTERVAL;
-
-for (const type of delimiterRoles) DEFAULT_CONFIG[`${type}_DELIMITER_ROLE_ID`] = null; // delimiter
-
-for (const level of skillAverageRoles) DEFAULT_CONFIG[`AVERAGE_LVL_${level}_ROLE_ID`] = null; // skill average
-
-for (const skill of skills) for (const level of skillRoles) DEFAULT_CONFIG[`${skill}_${level}_ROLE_ID`] = null; // individual skills
-
-for (const level of slayerTotalRoles) DEFAULT_CONFIG[`SLAYER_ALL_${level}_ROLE_ID`] = null; // total slayer
-
-for (const slayer of slayers) for (const level of slayerRoles) DEFAULT_CONFIG[`${slayer}_${level}_ROLE_ID`] = null; // individual slayer
-
-for (const level of catacombsRoles) DEFAULT_CONFIG[`CATACOMBS_${level}_ROLE_ID`] = null; // catacombs
-
-Object.freeze(DEFAULT_CONFIG);
-
+	// roles
+	...Object.fromEntries(delimiterRoles.map(type => [ `${type}_DELIMITER_ROLE_ID`, null ])), // delimiter
+	...Object.fromEntries(skillAverageRoles.map(level => [ `AVERAGE_LVL_${level}_ROLE_ID`, null ])), // skill average
+	...Object.fromEntries(skills.flatMap(skill => skillRoles.map(level => [ `${skill}_${level}_ROLE_ID`, null ]))), // individual skills
+	...Object.fromEntries(slayerTotalRoles.map(level => [ `SLAYER_ALL_${level}_ROLE_ID`, null ])), // total slayer
+	...Object.fromEntries(slayers.flatMap(slayer => slayerRoles.map(level => [ `${slayer}_${level}_ROLE_ID`, null ]))), // individual slayer
+	...Object.fromEntries(catacombsRoles.map(level => [ `CATACOMBS_${level}_ROLE_ID`, null ])), // catacombs
+});
 
 export const offsetFlags = Object.freeze({
 	COMPETITION_END: 'CompetitionEnd',
