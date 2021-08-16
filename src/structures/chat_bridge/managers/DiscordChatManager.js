@@ -1,5 +1,5 @@
 import { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } from 'discord.js';
-import { prefixByType } from '../constants/chatBridge.js';
+import { prefixByType, urlRegExp } from '../constants/chatBridge.js';
 import { X_EMOJI, MUTED } from '../../../constants/emojiCharacters.js';
 import { ChannelUtil } from '../../../util/ChannelUtil.js';
 import { UserUtil } from '../../../util/UserUtil.js';
@@ -64,25 +64,31 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * tries to upload all URLs to imgur, replacing all successfully uplaoded URLs with the imgur URLs
-	 * @param {import('discord.js').MessageAttachment[]} attachments
-	 * @returns {Promise<string[]>}
+	 * @param {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').MessageAttachment>} attachments
 	 */
 	async #uploadAttachments(attachments) {
 		if (!this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
 
-		return Promise.all(attachments.map(async ({ contentType, url }) => {
+		const ret = [];
+
+		let hasError = false;
+
+		for (const { contentType, url } of attachments.values()) {
 			// only images can be uploaded by URL https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
-			if (this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType.startsWith(type))) {
+			if (!hasError && this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType.startsWith(type))) {
 				try {
-					return (await this.client.imgur.upload(url)).data.link;
+					ret.push((await this.client.imgur.upload(url)).data.link);
 				} catch (error) {
 					logger.error('[UPLOAD ATTACHMENTS]', error);
-					return url;
+					ret.push(url);
+					hasError = true;
 				}
 			}
 
-			return url; // no image (e.g. video)
-		}));
+			ret.push(url); // no image (e.g. video)
+		}
+
+		return ret;
 	}
 
 	/**
@@ -293,7 +299,7 @@ export class DiscordChatManager extends ChatManager {
 			return MessageUtil.react(message, MUTED);
 		}
 
-		const content = [
+		let content = [
 			message.reference && !message.hasThread // @referencedMessageAuthor
 				? await (async () => {
 					try {
@@ -313,11 +319,31 @@ export class DiscordChatManager extends ChatManager {
 				? message.stickers.map(({ name }) => `:${name}:`).join(' ')
 				: null,
 			message.attachments.size // attachments
-				? (await this.#uploadAttachments([ ...message.attachments.values() ])).join(' ') // links of attachments
+				? (await this.#uploadAttachments(message.attachments)).join(' ') // links of attachments
 				: null,
 		].filter(Boolean).join(' ');
 
 		if (!content) return MessageUtil.react(message, X_EMOJI);
+
+		// parse discord attachment links and replace with imgur uploaded link
+		if (this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) {
+			let offset = 0;
+
+			for (const match of content.matchAll(urlRegExp)) {
+				const [ URL ] = match;
+				const [ [ START, END ] ] = match.indices;
+
+				try {
+					const imgurURL = (await this.client.imgur.upload(URL)).data.link;
+
+					content = `${content.slice(0, START - offset)}${imgurURL}${content.slice(END - offset)}`;
+					offset += URL.length - imgurURL.length; // since indices are relative to the original string
+				} catch (error) {
+					logger.error(error);
+					break;
+				}
+			}
+		}
 
 		if (interaction) await this.minecraft.chat({
 			content: `${this.client.config.get('PREFIXES')[0]}${InteractionUtil.logInfo(interaction)}`,
