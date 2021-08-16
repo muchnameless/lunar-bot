@@ -78,9 +78,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 	if (xpType !== 'purge') {
 		const offsetSelectMenu = new MessageSelectMenu()
 			.setCustomId(`${cacheKey}:offset`)
-			.setPlaceholder(
-				`Offset: ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset] ?? 'None')}`,
-			)
+			.setPlaceholder(`Offset: ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset] ?? 'None')}`)
 			.addOptions(
 				Object.keys(XP_OFFSETS_SHORT).map(x => ({ label: upperCaseFirstChar(x), value: XP_OFFSETS_CONVERTER[x] })),
 			);
@@ -92,9 +90,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 				.addComponents(
 					new MessageSelectMenu()
 						.setCustomId(`${cacheKey}:lbType`)
-						.setPlaceholder(
-							`Lb Type: ${upperCaseFirstChar(lbType)}`,
-						)
+						.setPlaceholder(`Lb Type: ${upperCaseFirstChar(lbType)}`)
 						.addOptions(
 							{ label: 'Total XP', value: 'total' },
 							{ label: 'Gained XP', value: 'gained' },
@@ -116,41 +112,37 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 						),
 				),
 			new MessageActionRow()
-				.addComponents(
-					offsetSelectMenu,
-				),
+				.addComponents(offsetSelectMenu),
 		);
 	}
 
 	row.push(
 		new MessageActionRow()
-			.addComponents(
-				guildSelectMenu,
-			),
+			.addComponents(guildSelectMenu),
 		new MessageActionRow()
 			.addComponents(
 				new MessageButton()
-					.setCustomId(`${cacheKey}:1`)
+					.setCustomId(`${cacheKey}:1:${DOUBLE_LEFT_EMOJI}`)
 					.setEmoji(DOUBLE_LEFT_EMOJI)
 					.setStyle(pageStyle)
 					.setDisabled(decDisabled),
 				new MessageButton()
-					.setCustomId(`${cacheKey}:${page - 1}`)
+					.setCustomId(`${cacheKey}:${page - 1}:${LEFT_EMOJI}`)
 					.setEmoji(LEFT_EMOJI)
 					.setStyle(pageStyle)
 					.setDisabled(decDisabled),
 				new MessageButton()
-					.setCustomId(`${cacheKey}:${page + 1}`)
+					.setCustomId(`${cacheKey}:${page + 1}:${RIGHT_EMOJI}`)
 					.setEmoji(RIGHT_EMOJI)
 					.setStyle(pageStyle)
 					.setDisabled(incDisabled),
 				new MessageButton()
-					.setCustomId(`${cacheKey}:${totalPages}`)
+					.setCustomId(`${cacheKey}:${totalPages}:${DOUBLE_RIGHT_EMOJI}`)
 					.setEmoji(DOUBLE_RIGHT_EMOJI)
 					.setStyle(pageStyle)
 					.setDisabled(incDisabled),
 				new MessageButton()
-					.setCustomId(`${cacheKey}:${page}:reload`)
+					.setCustomId(`${cacheKey}:${page}:${RELOAD_EMOJI}`)
 					.setEmoji(RELOAD_EMOJI)
 					.setStyle(reloadStyle),
 			),
@@ -203,12 +195,13 @@ export async function handleLeaderboardCommandInteraction(interaction, leaderboa
 	);
 }
 
+
 /**
  * handles a leaderbaord message
  * @param {import('discord.js').ButtonInteraction} interaction
  */
 export async function handleLeaderboardButtonInteraction(interaction) {
-	const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, IS_RELOAD ] = interaction.customId.split(':');
+	const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, EMOJI ] = interaction.customId.split(':');
 	/** @type {LeaderboardArgs} */
 	const leaderboardArgs = {
 		lbType: LB_TYPE,
@@ -226,6 +219,7 @@ export async function handleLeaderboardButtonInteraction(interaction) {
 	}
 
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
+	const IS_RELOAD = EMOJI === RELOAD_EMOJI;
 	/** @type {?MessageEmbed[]} */
 	const embeds = IS_RELOAD
 		? createLeaderboardEmbeds(
@@ -242,12 +236,10 @@ export async function handleLeaderboardButtonInteraction(interaction) {
 		return await InteractionUtil.reply(interaction, {
 			content: oneLine`
 				leaderboard timed out, use ${
-					interaction.message
-						? `[${RELOAD_EMOJI}](${interaction.message.url ?? `https://discord.com/channels/${interaction.message.guild_id ?? '@me'}/${interaction.message.channel_id}/${interaction.message.id}`})`
-						: RELOAD_EMOJI
+					`[${RELOAD_EMOJI}](${interaction.message.url ?? `https://discord.com/channels/${interaction.message.guild_id ?? '@me'}/${interaction.message.channel_id}/${interaction.message.id}`})`
 				} to refresh the data
 			`,
-			ephemeral: true,
+		ephemeral: true,
 		});
 	}
 
