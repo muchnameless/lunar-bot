@@ -26,7 +26,7 @@ export default class ReloadCommand extends DualCommand {
 						name: 'reload',
 						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
 						description: 'wether to reimport the file',
-						required: true,
+						required: false,
 					}],
 				}, {
 					name: 'commands',
@@ -36,7 +36,7 @@ export default class ReloadCommand extends DualCommand {
 						name: 'reload',
 						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
 						description: 'wether to reimport the files',
-						required: true,
+						required: false,
 					}],
 				}, {
 					name: 'event',
@@ -51,12 +51,12 @@ export default class ReloadCommand extends DualCommand {
 						name: 'reload',
 						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
 						description: 'wether to reimport the file',
-						required: true,
+						required: false,
 					}, {
 						name: 'force',
 						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
 						description: 'wether to load disabled events',
-						required: true,
+						required: false,
 					}],
 				}, {
 					name: 'events',
@@ -71,7 +71,7 @@ export default class ReloadCommand extends DualCommand {
 						name: 'force',
 						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
 						description: 'wether to load disabled events',
-						required: true,
+						required: false,
 					}],
 				}, {
 					name: 'database',
