@@ -57,23 +57,24 @@ export default class EvalCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {import('discord.js').CommandInteraction | import('discord.js').ButtonInteraction} ctx
+	 * @param {import('discord.js').CommandInteraction | import('discord.js').ButtonInteraction} interaction
 	 * @param {string} input
 	 * @param {boolean} [isAsync]
 	 * @param {number} [inspectDepth=0]
 	 */
-	async #eval(ctx, input, isAsync = /\bawait\b/.test(input), inspectDepth = 0) {
-		if (ctx.user.id !== this.client.ownerId) throw new Error('eval is restricted to the bot owner');
+	async #eval(interaction, input, isAsync = /\bawait\b/.test(input), inspectDepth = 0) {
+		if (interaction.user.id !== this.client.ownerId) throw new Error('eval is restricted to the bot owner');
 
 		/* eslint-disable no-unused-vars */
 		const { client, config } = this;
 		const { MessageEmbed } = Discord;
-		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = ctx;
+		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
+		const reply = InteractionUtil.reply.bind(InteractionUtil, interaction);
 		/* eslint-enable no-unused-vars */
 
 		const responseEmbed = this.client.defaultEmbed
-			.setFooter(ctx.guild?.me.displayName ?? this.client.user.username, this.client.user.displayAvatarURL());
+			.setFooter(interaction.guild?.me.displayName ?? this.client.user.username, this.client.user.displayAvatarURL());
 
 		for (const [ index, inputPart ] of functionsUtil.splitForEmbedFields(input, 'js').entries()) {
 			responseEmbed.addFields({
