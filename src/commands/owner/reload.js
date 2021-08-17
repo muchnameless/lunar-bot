@@ -143,7 +143,7 @@ export default class ReloadCommand extends DualCommand {
 						commandName = command.name;
 					}
 
-					this.collection.loadFromFile(commandFile, { reload, force });
+					await this.collection.loadFromFile(commandFile, { reload, force });
 
 					logger.info(`command ${commandName} was reloaded successfully`);
 					return `command \`${commandName}\` was reloaded successfully`;
@@ -173,7 +173,7 @@ export default class ReloadCommand extends DualCommand {
 					// file with exact name match found
 					this.client.events.get(basename(eventFile, '.js').toLowerCase())?.unload(); // try to find already loaded event
 
-					({ name: eventName } = this.client.events.loadFromFile(eventFile, { force, reload }));
+					({ name: eventName } = await this.client.events.loadFromFile(eventFile, { force, reload }));
 
 					logger.info(`event ${eventName} was reloaded successfully`);
 					return `event \`${eventName}\` was reloaded successfully`;
