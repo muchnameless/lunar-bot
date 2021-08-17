@@ -80,7 +80,7 @@ export default class UnloadCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await this.reply(interaction, await this.#run(interaction, interaction.options.getSubcommand(), interaction.options.getString('name', true)));
+		return await this.reply(interaction, await this.#run(interaction.options.getSubcommand(), interaction.options.getString('name', true)));
 	}
 
 	/**
@@ -88,6 +88,6 @@ export default class UnloadCommand extends DualCommand {
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
 	async runInGame(hypixelMessage) {
-		return await hypixelMessage.reply(await this.#run(hypixelMessage, ...hypixelMessage.commandData.args.map(arg => arg.toLowerCase())));
+		return await hypixelMessage.reply(await this.#run(...hypixelMessage.commandData.args.map(arg => arg.toLowerCase())));
 	}
 }
