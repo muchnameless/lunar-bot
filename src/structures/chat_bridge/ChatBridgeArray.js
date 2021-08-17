@@ -190,8 +190,8 @@ export class ChatBridgeArray extends Array {
 		) return;
 
 		try {
-			// a ChatBridge for the message's channel was found and the message was handled
-			if ((await Promise.all(this.map(async (/** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => chatBridge.handleDiscordMessage(message, options)))).includes(true)) return;
+			// a ChatBridge for the message's channel was found
+			if (this.reduce((acc, /** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
 
 			// check if the message was sent from the bot, don't react with X_EMOJI in this case
 			if (message.webhookId

@@ -250,7 +250,7 @@ export class ChatBridge extends EventEmitter {
 	 * @param {MessageForwardOptions} [options]
 	 */
 	handleDiscordMessage(message, { link = this.discord.get(message.channelId), ...options }) {
-		return this.discord.resolve(link)?.forwardToMinecraft(message, options);
+		return (this.discord.resolve(link)?.forwardToMinecraft(message, options) && true) ?? false;
 	}
 
 	/**

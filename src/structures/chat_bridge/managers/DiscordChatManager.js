@@ -263,12 +263,8 @@ export class DiscordChatManager extends ChatManager {
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */
 	async forwardToMinecraft(message, { player: playerInput, isEdit = false } = {}) {
-		if (!this.chatBridge.enabled) return false;
-		if (!this.minecraft.ready) {
-			MessageUtil.react(message, X_EMOJI);
-			return false;
-		}
-		if (message.webhookId === this.webhook?.id) return true; // message was sent by the ChatBridge's webhook
+		if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
+		if (!this.chatBridge.enabled || !this.minecraft.ready) return MessageUtil.react(message, X_EMOJI);
 
 		/** @type {import('../../database/models/Player').Player} */
 		const player = playerInput
@@ -278,29 +274,25 @@ export class DiscordChatManager extends ChatManager {
 		// check if player is muted
 		if (player?.muted) {
 			DiscordChatManager.#dmMuteInfo(message, player, `your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			MessageUtil.react(message, MUTED);
-			return false;
+			return MessageUtil.react(message, MUTED);
 		}
 
 		// check if the player is auto muted
 		if (player?.infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 			DiscordChatManager.#dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
-			MessageUtil.react(message, MUTED);
-			return false;
+			return MessageUtil.react(message, MUTED);
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild.muted && !player?.isStaff) {
 			DiscordChatManager.#dmMuteInfo(message, player, `${this.hypixelGuild.name}'s guild chat's mute expires ${Formatters.time(new Date(this.hypixelGuild.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			MessageUtil.react(message, MUTED);
-			return false;
+			return MessageUtil.react(message, MUTED);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.botPlayer?.muted) {
 			DiscordChatManager.#dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.botPlayer.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			MessageUtil.react(message, MUTED);
-			return false;
+			return MessageUtil.react(message, MUTED);
 		}
 
 		// build content
@@ -329,10 +321,7 @@ export class DiscordChatManager extends ChatManager {
 		].filter(Boolean).join(' ');
 
 		// empty message (e.g. only embeds)
-		if (!content) {
-			MessageUtil.react(message, X_EMOJI);
-			return false;
-		}
+		if (!content) return MessageUtil.react(message, X_EMOJI);
 
 		// parse discord attachment links and replace with imgur uploaded link
 		if (this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) {
