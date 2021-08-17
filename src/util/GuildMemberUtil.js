@@ -9,7 +9,7 @@ export class GuildMemberUtil extends null {
 	 * @param {import('discord.js').GuildMember} member
 	 */
 	static getPlayer(member) {
-		return UserUtil.getPlayer(member.user);
+		return UserUtil.getPlayer(member?.user);
 	}
 
 	/**

@@ -15,6 +15,8 @@ export class UserUtil extends null {
 		let player = this.PLAYER_CACHE.get(user);
 		if (player) return player;
 
+		if (!user) return null;
+
 		player = user.client.players.getById(user.id) ?? user.client.players.getById(user.tag);
 		if (player) this.setPlayer(user, player);
 		return player;
