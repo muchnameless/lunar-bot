@@ -63,8 +63,9 @@ export class SlashCommandCollection extends BaseCommandCollection {
 	/**
 	 * create a new slash command on discord's side
 	 * @param {string} commandName
+	 * @param {import('discord.js').GuildApplicationCommandManager|import('discord.js').ApplicationCommandManager} [commandManager]
 	 */
-	async create(commandName) {
+	async create(commandName, commandManager = this.client.application.commands) {
 		/** @type {import('./SlashCommand').SlashCommand} */
 		const command = this.get(commandName) ?? await this.loadByName(commandName);
 
@@ -75,7 +76,7 @@ export class SlashCommandCollection extends BaseCommandCollection {
 		// add aliases if existent
 		command.aliases?.forEach(alias => data.push({ ...data[0], name: alias }));
 
-		const applicationCommands = await Promise.all(data.map(d => this.client.application.commands.create(d)));
+		const applicationCommands = await Promise.all(data.map(d => commandManager.create(d)));
 
 		await this.setSinglePermissions({ command, applicationCommands });
 
@@ -103,5 +104,19 @@ export class SlashCommandCollection extends BaseCommandCollection {
 				});
 			}
 		}
+	}
+
+	/**
+	 * deletes an application command
+	 * @param {string} commandName
+	 * @param {import('discord.js').GuildApplicationCommandManager|import('discord.js').ApplicationCommandManager} [commandManager]
+	 */
+	async delete(commandName, commandManager = this.client.application.commands) {
+		const commands = await commandManager.fetch();
+		const command = commands.find(cmd => cmd.name === commandName.toLowerCase());
+
+		if (!command) throw new Error(`unknown command ${commandName}`);
+
+		return await command.delete();
 	}
 }

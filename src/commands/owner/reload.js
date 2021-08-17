@@ -12,7 +12,7 @@ export default class ReloadCommand extends DualCommand {
 			data,
 			{
 				aliases: [],
-				description: 'reload certain parts of the bot',
+				description: 'hot reload certain parts of the bot',
 				options: [{
 					name: 'command',
 					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
@@ -22,12 +22,22 @@ export default class ReloadCommand extends DualCommand {
 						type: Constants.ApplicationCommandOptionTypes.STRING,
 						description: 'command name',
 						required: true,
+					}, {
+						name: 'reload',
+						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+						description: 'wether to reimport the file',
+						required: true,
 					}],
 				}, {
 					name: 'commands',
 					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 					description: 'reload all commands',
-					options: [],
+					options: [{
+						name: 'reload',
+						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+						description: 'wether to reimport the files',
+						required: true,
+					}],
 				}, {
 					name: 'event',
 					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
@@ -37,12 +47,32 @@ export default class ReloadCommand extends DualCommand {
 						type: Constants.ApplicationCommandOptionTypes.STRING,
 						description: 'event name',
 						required: true,
+					}, {
+						name: 'reload',
+						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+						description: 'wether to reimport the file',
+						required: true,
+					}, {
+						name: 'force',
+						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+						description: 'wether to load disabled events',
+						required: true,
 					}],
 				}, {
 					name: 'events',
 					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 					description: 'reload all events',
-					options: [],
+					options: [{
+						name: 'reload',
+						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+						description: 'wether to reimport the files',
+						required: true,
+					}, {
+						name: 'force',
+						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
+						description: 'wether to load disabled events',
+						required: true,
+					}],
 				}, {
 					name: 'database',
 					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
@@ -73,8 +103,10 @@ export default class ReloadCommand extends DualCommand {
 	 * execute the command
 	 * @param {string} subcommand
 	 * @param {string} input
+	 * @param {boolean} [reload=false]
+	 * @param {boolean} [force=false]
 	 */
-	async #run(subcommand, input) {
+	async #run(subcommand, input, reload = false, force = false) {
 		switch (subcommand) {
 			case 'command': {
 				let commandName = input.toLowerCase();
@@ -111,7 +143,7 @@ export default class ReloadCommand extends DualCommand {
 						commandName = command.name;
 					}
 
-					this.collection.loadFromFile(commandFile);
+					this.collection.loadFromFile(commandFile, { reload, force });
 
 					logger.info(`command ${commandName} was reloaded successfully`);
 					return `command \`${commandName}\` was reloaded successfully`;
@@ -125,7 +157,7 @@ export default class ReloadCommand extends DualCommand {
 			}
 
 			case 'commands': {
-				await this.collection.unloadAll().loadAll();
+				await this.collection.unloadAll().loadAll({ reload });
 				return `${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`;
 			}
 
@@ -141,7 +173,7 @@ export default class ReloadCommand extends DualCommand {
 					// file with exact name match found
 					this.client.events.get(basename(eventFile, '.js').toLowerCase())?.unload(); // try to find already loaded event
 
-					({ name: eventName } = this.client.events.loadFromFile(eventFile, true));
+					({ name: eventName } = this.client.events.loadFromFile(eventFile, { force, reload }));
 
 					logger.info(`event ${eventName} was reloaded successfully`);
 					return `event \`${eventName}\` was reloaded successfully`;
@@ -155,7 +187,7 @@ export default class ReloadCommand extends DualCommand {
 			}
 
 			case 'events': {
-				await this.client.events.unloadAll().loadAll();
+				await this.client.events.unloadAll().loadAll({ reload, force });
 				return `${this.client.events.size} event${this.client.events.size !== 1 ? 's' : ''} were reloaded successfully`;
 			}
 
@@ -188,7 +220,11 @@ export default class ReloadCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await this.reply(interaction, await this.#run(interaction.options.getSubcommand(), interaction.options.getString('name')));
+		return await this.reply(interaction, await this.#run(interaction.options.getSubcommand(),
+			interaction.options.getString('name'),
+			interaction.options.getBoolean('reload') ?? false,
+			interaction.options.getBoolean('force') ?? false,
+		));
 	}
 
 	/**

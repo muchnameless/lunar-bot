@@ -6,6 +6,12 @@ import { autocorrect } from '../../functions/util.js';
 import { logger } from '../../functions/logger.js';
 
 
+/**
+ * @typedef {object} CommandLoadOptions
+ * @property {boolean} [reload=false] wether to reload the imported file
+ */
+
+
 export class BaseCommandCollection extends Collection {
 	/**
 	 * @param {import('../LunarClient').LunarClient} client
@@ -34,30 +40,36 @@ export class BaseCommandCollection extends Collection {
 	 * clears the cooldown timestamps collection for all commands
 	 */
 	clearCooldowns() {
-		return this.each(command => command.clearCooldowns());
+		return this.each((/** @type {import('./BaseCommand').BaseCommand} */ command) => command.clearCooldowns());
 	}
 
 	/**
 	 * loads a single command into the collection
 	 * @param {string} commandName
+	 * @param {CommandLoadOptions} [options]
 	 */
-	async loadByName(commandName) {
+	async loadByName(commandName, options = {}) {
 		const commandFiles = await getAllJsFiles(this.dirURL);
 		const commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
 
 		if (!commandFile) return;
 
-		return this.loadFromFile(commandFile);
+		return this.loadFromFile(commandFile, options);
 	}
 
 	/**
 	 * loads a single command into the collection
 	 * @param {string} file command file to load
+	 * @param {CommandLoadOptions} [options]
 	 */
-	async loadFromFile(file) {
+	async loadFromFile(file, { reload = false } = {}) {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
-		const Command = (await import(pathToFileURL(file).href)).default;
+
+		let filePath = pathToFileURL(file).href;
+		if (reload) filePath = `${filePath}?update=${Date.now()}`;
+
+		const Command = (await import(filePath)).default;
 		/** @type {import('./DualCommand').DualCommand | import('./SlashCommand').SlashCommand} */
 		const command = new Command({
 			client: this.client,
@@ -73,11 +85,12 @@ export class BaseCommandCollection extends Collection {
 
 	/**
 	 * loads all commands into the collection
+	 * @param {CommandLoadOptions} [options]
 	 */
-	async loadAll() {
+	async loadAll(options = {}) {
 		const commandFiles = await getAllJsFiles(this.dirURL);
 
-		await Promise.all(commandFiles.map(file => this.loadFromFile(file)));
+		await Promise.all(commandFiles.map(file => this.loadFromFile(file, options)));
 
 		logger.info(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
 

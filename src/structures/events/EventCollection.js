@@ -4,6 +4,12 @@ import { pathToFileURL } from 'url';
 import { getAllJsFiles } from '../../functions/files.js';
 import { logger } from '../../functions/logger.js';
 
+/**
+ * @typedef {object} EventLoadOptions
+ * @property {boolean} [reload=false] wether to reload the imported file
+ * @property {boolean} [force=false] wether to load disabled events
+ */
+
 
 export class EventCollection extends Collection {
 	/**
@@ -35,11 +41,15 @@ export class EventCollection extends Collection {
 	/**
 	 * loads a single command into the collection
 	 * @param {string} file command file to load
-	 * @param {boolean} [force=false] wether to also load disabled events
+	 * @param {EventLoadOptions} [options]
 	 */
-	async loadFromFile(file, force = false) {
+	async loadFromFile(file, { reload = false, force = false } = {}) {
 		const name = basename(file, '.js');
-		const Event = (await import(pathToFileURL(file).href)).default;
+
+		let filePath = pathToFileURL(file).href;
+		if (reload) filePath = `${filePath}?update=${Date.now()}`;
+
+		const Event = (await import(filePath)).default;
 		/** @type {import('./BaseEvent').BaseEvent} */
 		const event = new Event({
 			emitter: this.emitter,
@@ -56,11 +66,12 @@ export class EventCollection extends Collection {
 
 	/**
 	 * loads all commands into the collection
+	 * @param {EventLoadOptions} [options]
 	 */
-	async loadAll() {
+	async loadAll(options = {}) {
 		const eventFiles = await getAllJsFiles(this.dirURL);
 
-		await Promise.all(eventFiles.map(file => this.loadFromFile(file)));
+		await Promise.all(eventFiles.map(file => this.loadFromFile(file, options)));
 
 		logger.info(`[EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);
 

@@ -33,6 +33,7 @@ export class BaseEvent {
 	 */
 	load(force = false) {
 		if (this.enabled || force) this.emitter[this.once ? 'once' : 'on'](this.name, this.callback);
+		return this;
 	}
 
 	/**
@@ -40,6 +41,7 @@ export class BaseEvent {
 	 */
 	unload() {
 		this.emitter.off(this.name, this.callback);
+		return this;
 	}
 
 	/**
