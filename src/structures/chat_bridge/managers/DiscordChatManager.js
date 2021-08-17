@@ -358,7 +358,7 @@ export class DiscordChatManager extends ChatManager {
 		if (message.type === 'APPLICATION_COMMAND' && !message.editedTimestamp) {
 			const interaction = this.client.chatBridges.interactionCache.get(message.interaction.id);
 
-			await this.minecraft.chat({
+			this.minecraft.chat({
 				content: `/${interaction ? InteractionUtil.logInfo(interaction) : message.interaction.commandName}`,
 				prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? message.interaction.user.username)}: `,
 			});
