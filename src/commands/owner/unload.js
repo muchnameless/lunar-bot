@@ -49,7 +49,7 @@ export default class UnloadCommand extends DualCommand {
 	async #run(subcommand, input) {
 		switch (subcommand) {
 			case 'command': {
-				/** @type {import('../../structures/commands/BaseCommand')} */
+				/** @type {import('../../structures/commands/BaseCommand').BaseCommand} */
 				const command = this.collection.getByName(input);
 
 				if (!command) return `no command with the name or alias \`${input}\` found`;
@@ -60,7 +60,7 @@ export default class UnloadCommand extends DualCommand {
 			}
 
 			case 'event': {
-				/** @type {import('../../structures/commands/BaseCommand')} */
+				/** @type {import('../../structures/events/BaseEvent').BaseEvent} */
 				const event = this.client.events.get(input);
 
 				if (!event) return `no event with the name \`${input}\` found`;
