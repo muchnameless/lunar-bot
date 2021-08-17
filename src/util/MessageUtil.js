@@ -33,7 +33,6 @@ export class MessageUtil extends null {
 		if (!message || message.deleted) return null;
 		if (!ChannelUtil.botPermissions(message.channel)?.has(Permissions.FLAGS.ADD_REACTIONS)) return null;
 
-		/** @type {(import('discord.js').MessageReaction | Promise<import('discord.js').MessageReaction>)[]} */
 		const res = [];
 
 		try {
@@ -49,7 +48,7 @@ export class MessageUtil extends null {
 			logger.error('[MESSAGE REACT]', error);
 		}
 
-		return Promise.all(res);
+		return res;
 	}
 
 	/**
