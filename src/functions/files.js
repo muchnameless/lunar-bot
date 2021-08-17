@@ -5,13 +5,13 @@ import { logger } from './logger.js';
 
 
 /**
- * searches the dirPath and subfolders for all .js-files that don't start with '~'
- * @param {string | URL} path path to search in
+ * searches the file url and subfolders for all .js-files that don't start with '~'
+ * @param {string | URL} url file url to search in
  * @param {string[]} arrayOfFiles accumulator
  */
-export async function getAllJsFiles(path, arrayOfFiles = []) {
+export async function getAllJsFiles(url, arrayOfFiles = []) {
 	try {
-		const files = await readdir(path, { withFileTypes: true });
+		const files = await readdir(url, { withFileTypes: true });
 
 		// for (const file of files) {
 		// 	const newPath = join(fileURLToPath(path), file.name);
@@ -22,7 +22,7 @@ export async function getAllJsFiles(path, arrayOfFiles = []) {
 		// }
 
 		await Promise.all(files.map(async (file) => {
-			const newPath = join(typeof path === 'string' ? path : fileURLToPath(path), file.name);
+			const newPath = join(typeof url === 'string' ? url : fileURLToPath(url), file.name);
 
 			if (file.isDirectory()) return getAllJsFiles(newPath, arrayOfFiles);
 

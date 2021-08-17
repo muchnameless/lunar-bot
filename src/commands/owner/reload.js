@@ -112,7 +112,7 @@ export default class ReloadCommand extends DualCommand {
 				let commandName = input.toLowerCase();
 
 				try {
-					const commandFiles = await getAllJsFiles(this.collection.dirPath);
+					const commandFiles = await getAllJsFiles(this.collection.dirURL);
 
 					// try to find file with INPUT name
 					let commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
@@ -165,7 +165,7 @@ export default class ReloadCommand extends DualCommand {
 				let eventName = input.toLowerCase();
 
 				try {
-					const eventFiles = await getAllJsFiles(this.client.events.dirPath);
+					const eventFiles = await getAllJsFiles(this.client.events.dirURL);
 					const eventFile = eventFiles.find(file => basename(file, '.js').toLowerCase() === eventName); // try to find file with INPUT name
 
 					if (!eventFile) return `no event with the name \`${eventName}\` found`; // no file found
