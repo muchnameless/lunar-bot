@@ -1,5 +1,5 @@
 import { AsyncQueue } from '@sapphire/async-queue';
-import { blockedWordsRegExp } from '../constants/chatBridge.js';
+import { blockedWordsRegExp } from '../constants/blockedWords.js';
 
 /**
  * @typedef {import('../MessageCollector').MessageCollectorOptions & { errors: ?string[] }} AwaitMessagesOptions

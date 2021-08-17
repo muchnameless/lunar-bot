@@ -170,9 +170,7 @@ export default class ReloadCommand extends DualCommand {
 			}
 
 			case 'filter': {
-				delete require.cache[require.resolve('../../structures/chat_bridge/constants/ChatBridge').ChatBridge];
-
-				const { blockedWordsRegExp } = await import('../../structures/chat_bridge/constants/chatBridge.js');
+				const { blockedWordsRegExp } = await import(`../../structures/chat_bridge/constants/blockedWords.js?update=${Date.now()}`);
 				const { ChatManager } = await import('../../structures/chat_bridge/managers/ChatManager.js');
 
 				ChatManager.BLOCKED_WORDS_REGEXP = blockedWordsRegExp;
