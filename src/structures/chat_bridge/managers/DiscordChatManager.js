@@ -79,12 +79,13 @@ export class DiscordChatManager extends ChatManager {
 			if (!hasError && this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType.startsWith(type))) {
 				try {
 					ret.push((await this.client.imgur.upload(url)).data.link);
-					continue;
 				} catch (error) {
 					logger.error('[UPLOAD ATTACHMENTS]', error);
 					ret.push(url);
 					hasError = true;
 				}
+
+				continue;
 			}
 
 			ret.push(url); // no image (e.g. video)
