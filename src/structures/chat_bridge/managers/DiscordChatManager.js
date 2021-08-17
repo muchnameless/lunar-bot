@@ -29,6 +29,7 @@ export class DiscordChatManager extends ChatManager {
 		this.channelId = channelId;
 		/**
 		 * hypixel chat prefix
+		 * @type {string}
 		 */
 		this.prefix = prefixByType[type];
 		/**
@@ -261,44 +262,48 @@ export class DiscordChatManager extends ChatManager {
 	 * @param {import('discord.js').Message} message
 	 * @param {import('../ChatBridge').MessageForwardOptions} [options={}]
 	 */
-	async forwardToMinecraft(message, { player: playerInput, interaction, isEdit = false, checkIfNotFromBot = true } = {}) {
-		if (!this.chatBridge.enabled) return;
-		if (!this.minecraft.ready) return MessageUtil.react(message, X_EMOJI);
-
-		if (checkIfNotFromBot) {
-			if (message.editable) return; // message was sent by the bot
-			if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
+	async forwardToMinecraft(message, { player: playerInput, isEdit = false } = {}) {
+		if (!this.chatBridge.enabled) return false;
+		if (!this.minecraft.ready) {
+			MessageUtil.react(message, X_EMOJI);
+			return false;
 		}
+		if (message.webhookId === this.webhook?.id) return true; // message was sent by the ChatBridge's webhook
 
 		/** @type {import('../../database/models/Player').Player} */
 		const player = playerInput
-			?? UserUtil.getPlayer(message.author) // cached player
-			?? await this.client.players.fetch({ discordId: message.author.id }); // uncached player
+			?? UserUtil.getPlayer(message.interaction?.user ?? message.author) // cached player
+			?? await this.client.players.fetch({ discordId: message.interaction?.user.id ?? message.author.id }); // uncached player
 
 		// check if player is muted
 		if (player?.muted) {
 			DiscordChatManager.#dmMuteInfo(message, player, `your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			return MessageUtil.react(message, MUTED);
+			MessageUtil.react(message, MUTED);
+			return false;
 		}
 
 		// check if the player is auto muted
 		if (player?.infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 			DiscordChatManager.#dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
-			return MessageUtil.react(message, MUTED);
+			MessageUtil.react(message, MUTED);
+			return false;
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild.muted && !player?.isStaff) {
 			DiscordChatManager.#dmMuteInfo(message, player, `${this.hypixelGuild.name}'s guild chat's mute expires ${Formatters.time(new Date(this.hypixelGuild.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			return MessageUtil.react(message, MUTED);
+			MessageUtil.react(message, MUTED);
+			return false;
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.botPlayer?.muted) {
 			DiscordChatManager.#dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.botPlayer.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			return MessageUtil.react(message, MUTED);
+			MessageUtil.react(message, MUTED);
+			return false;
 		}
 
+		// build content
 		let content = [
 			message.reference && !message.hasThread // @referencedMessageAuthor
 				? await (async () => {
@@ -323,7 +328,11 @@ export class DiscordChatManager extends ChatManager {
 				: null,
 		].filter(Boolean).join(' ');
 
-		if (!content) return MessageUtil.react(message, X_EMOJI);
+		// empty message (e.g. only embeds)
+		if (!content) {
+			MessageUtil.react(message, X_EMOJI);
+			return false;
+		}
 
 		// parse discord attachment links and replace with imgur uploaded link
 		if (this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) {
@@ -346,15 +355,19 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// send interaction "command"
-		if (interaction) await this.minecraft.chat({
-			content: `${this.client.config.get('PREFIXES')[0]}${InteractionUtil.logInfo(interaction)}`,
-			prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? interaction.member?.displayName ?? interaction.user.username)}: `,
-		});
+		if (message.type === 'APPLICATION_COMMAND' && !message.editedTimestamp) {
+			const interaction = this.client.chatBridges.interactionCache.get(message.interaction.id);
+
+			await this.minecraft.chat({
+				content: `/${interaction ? InteractionUtil.logInfo(interaction) : message.interaction.commandName}`,
+				prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? message.interaction.user.username)}: `,
+			});
+		}
 
 		// send content
 		return this.minecraft.chat({
 			content,
-			prefix: `${this.prefix} ${interaction ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
+			prefix: `${this.prefix} ${message.editable ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
 			discordMessage: message,
 		});
 	}

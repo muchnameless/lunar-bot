@@ -1,4 +1,4 @@
-import { MessageFlags, Permissions } from 'discord.js';
+import { Permissions } from 'discord.js';
 import { ChannelUtil } from '../util/ChannelUtil.js';
 import MessageCreateEvent from './messageCreate.js';
 import { logger } from '../functions/logger.js';
@@ -18,9 +18,6 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 	 * @param {import('discord.js').Message} newMessage
 	 */
 	async run(oldMessage, newMessage) {
-		// ignore ephemeral messages (slash cmd response edits)
-		if (newMessage.flags.has(MessageFlags.FLAGS.EPHEMERAL)) return;
-
 		if (
 			Date.now() - newMessage.createdTimestamp >= 10 * 60_000 // original message is older than 10 min
 			|| oldMessage.content === newMessage.content // pinned or embed added

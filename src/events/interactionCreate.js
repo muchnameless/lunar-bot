@@ -21,6 +21,11 @@ export default class InteractionCreateEvent extends Event {
 	async #handleCommandInteraction(interaction) {
 		logger.info(`[CMD HANDLER]: '${InteractionUtil.logInfo(interaction)}' was executed by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`);
 
+		if (this.client.chatBridges.channelIds.has(interaction.channelId)) {
+			this.client.chatBridges.interactionCache.set(interaction.id, interaction);
+			setTimeout(() => this.client.chatBridges.interactionCache.delete(interaction.id), 60_000);
+		}
+
 		/** @type {import('../structures/commands/SlashCommand').SlashCommand} */
 		const command = this.client.commands.get(interaction.commandName);
 

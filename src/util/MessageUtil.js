@@ -120,20 +120,14 @@ export class MessageUtil extends null {
 		const { content, ...options } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
-		const reply = await ChannelUtil.send(message.channel, {
+
+		return await ChannelUtil.send(message.channel, {
 			content,
 			reply: {
 				messageReference: message,
 			},
 			...options,
 		});
-
-		if (reply?.content) {
-			message.client.chatBridges.handleDiscordMessage(message, { checkIfNotFromBot: false });
-			message.client.chatBridges.handleDiscordMessage(reply, { checkIfNotFromBot: false, player: UserUtil.getPlayer(message.author) });
-		}
-
-		return reply;
 	}
 
 	/**

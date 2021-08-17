@@ -31,6 +31,10 @@ export class ChatBridgeArray extends Array {
 		 * @type {Set<import('discord.js').Snowflake>}
 		 */
 		this.channelIds = new Set();
+		/**
+		 * @type {Map<import('discord.js').Snowflake, import('discord.js').CommandInteraction>}
+		 */
+		this.interactionCache = new Map();
 	}
 
 	/**
@@ -180,18 +184,19 @@ export class ChatBridgeArray extends Array {
 	async handleDiscordMessage(message, options = {}) {
 		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return;
 		if (message.flags.any([ MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL ])) return; // ignore defer and ephemeral messages
+		if (message.editable // message was sent by the bot
+			&& (message.type === 'DEFAULT' // normal message
+				|| (message.type === 'REPLY' && !message.interaction)) // normal reply, not interaction followUp
+		) return;
 
 		try {
-			// a ChatBridge for the message's channel was found
-			if (this.reduce((acc, /** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
+			// a ChatBridge for the message's channel was found and the message was handled
+			if ((await Promise.all(this.map(async (/** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => chatBridge.handleDiscordMessage(message, options)))).includes(true)) return;
 
 			// check if the message was sent from the bot, don't react with X_EMOJI in this case
-			if (options.checkIfNotFromBot) {
-				if (message.editable) return; // message was sent by the bot
-				if (message.webhookId
-					&& this.reduce((acc, /** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
-				) return; // message was sent by one of the ChatBridges's webhook
-			}
+			if (message.webhookId
+				&& this.reduce((acc, /** @type {import('./ChatBridge').ChatBridge} */ chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
+			) return; // message was sent by one of the ChatBridges's webhook
 
 			// no ChatBridge for the message's channel found
 			MessageUtil.react(message, X_EMOJI);

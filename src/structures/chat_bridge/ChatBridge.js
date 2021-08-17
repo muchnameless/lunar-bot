@@ -30,8 +30,6 @@ import { logger } from '../../functions/logger.js';
 /**
  * @typedef {object} MessageForwardOptions
  * @property {import('../database/models/Player').Player} [player] player for muted and isStaff check
- * @property {import('discord.js').CommandInteraction} [interaction]
- * @property {boolean} [checkIfNotFromBot=true] wether to not forward messages from the client.user
  * @property {boolean} [isEdit=false] wether the message is an edit instead of a new message
  */
 
@@ -252,7 +250,7 @@ export class ChatBridge extends EventEmitter {
 	 * @param {MessageForwardOptions} [options]
 	 */
 	handleDiscordMessage(message, { link = this.discord.get(message.channelId), ...options }) {
-		return (this.discord.resolve(link)?.forwardToMinecraft(message, options) && true) ?? false;
+		return this.discord.resolve(link)?.forwardToMinecraft(message, options);
 	}
 
 	/**
