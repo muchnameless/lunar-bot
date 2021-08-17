@@ -298,52 +298,61 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// build content
-		let content = [
-			message.reference && !message.hasThread // @referencedMessageAuthor
-				? await (async () => {
-					try {
-						const referencedMessage = await message.fetchReference();
-						if (!referencedMessage.author || message.mentions.users.has(referencedMessage.author.id)) return null; // no author or author is already pinged
-						return `@${DiscordChatManager.getPlayerName(referencedMessage)}`;
-					} catch (error) {
-						logger.error('[FORWARD DC TO MC]: error fetching reference', error);
-						return null;
-					}
-				})()
-				: null,
-			isEdit && !message.interaction && !message.content.endsWith('*') // actual content
-				? `${message.content}*` // add a trailing '*' to indicate an edit if not already present
-				: message.content,
-			message.stickers.size // stickers
-				? message.stickers.map(({ name }) => `:${name}:`).join(' ')
-				: null,
-			message.attachments.size // attachments
-				? (await this.#uploadAttachments(message.attachments)).join(' ') // links of attachments
-				: null,
-		].filter(Boolean).join(' ');
+		const contentParts = [];
 
-		// empty message (e.g. only embeds)
-		if (!content) return MessageUtil.react(message, X_EMOJI);
+		// @referencedMessageAuthor
+		if (message.reference && !message.hasThread) {
+			try {
+				const referencedMessage = await message.fetchReference();
 
-		// parse discord attachment links and replace with imgur uploaded link
-		if (this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) {
-			let offset = 0;
-
-			for (const match of content.matchAll(urlRegExp)) {
-				const [ URL ] = match;
-				const [ [ START, END ] ] = match.indices;
-
-				try {
-					const imgurURL = (await this.client.imgur.upload(URL)).data.link;
-
-					content = `${content.slice(0, START - offset)}${imgurURL}${content.slice(END - offset)}`; // replace discord with imgur link
-					offset += URL.length - imgurURL.length; // since indices are relative to the original string
-				} catch (error) {
-					logger.error(error);
-					break;
+				// author found and author is not already pinged
+				if (referencedMessage.author && !message.mentions.users.has(referencedMessage.author.id)) {
+					contentParts.push(`@${DiscordChatManager.getPlayerName(referencedMessage)}`);
 				}
+			} catch (error) {
+				logger.error('[FORWARD DC TO MC]: error fetching reference', error);
 			}
 		}
+
+		// actual content
+		let messageContent = isEdit && !message.interaction && message.content && !message.content.endsWith('*')
+			? `${message.content}*` // add a trailing '*' to indicate an edit if not already present
+			: message.content;
+
+		if (messageContent) {
+			// parse discord attachment links and replace with imgur uploaded link
+			if (this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) {
+				let offset = 0;
+
+				for (const match of messageContent.matchAll(urlRegExp)) {
+					const [ URL ] = match;
+					const [ [ START, END ] ] = match.indices;
+
+					try {
+						const imgurURL = (await this.client.imgur.upload(URL)).data.link;
+
+						messageContent = `${messageContent.slice(0, START - offset)}${imgurURL}${messageContent.slice(END - offset)}`; // replace discord with imgur link
+						offset += URL.length - imgurURL.length; // since indices are relative to the original string
+					} catch (error) {
+						logger.error(error);
+						break;
+					}
+				}
+			}
+
+			contentParts.push(messageContent);
+		}
+
+		// stickers
+		if (message.stickers.size) contentParts.push(message.stickers.map(({ name }) => `:${name}:`).join(' '));
+
+		// links of attachments
+		if (message.attachments.size) contentParts.push((await this.#uploadAttachments(message.attachments)).join(' '));
+
+		const CONTENT = contentParts.join(' ');
+
+		// empty message (e.g. only embeds)
+		if (!CONTENT) return MessageUtil.react(message, X_EMOJI);
 
 		// send interaction "command"
 		if (message.type === 'APPLICATION_COMMAND' && !message.editedTimestamp) {
@@ -357,7 +366,7 @@ export class DiscordChatManager extends ChatManager {
 
 		// send content
 		return this.minecraft.chat({
-			content,
+			content: CONTENT,
 			prefix: `${this.prefix} ${message.editable ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
 			discordMessage: message,
 		});
