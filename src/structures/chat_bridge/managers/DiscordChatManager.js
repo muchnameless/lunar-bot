@@ -329,10 +329,10 @@ export class DiscordChatManager extends ChatManager {
 					const [ [ START, END ] ] = match.indices;
 
 					try {
-						const imgurURL = (await this.client.imgur.upload(URL)).data.link;
+						const IMGUR_URL = (await this.client.imgur.upload(URL)).data.link;
 
-						messageContent = `${messageContent.slice(0, START - offset)}${imgurURL}${messageContent.slice(END - offset)}`; // replace discord with imgur link
-						offset += URL.length - imgurURL.length; // since indices are relative to the original string
+						messageContent = `${messageContent.slice(0, START - offset)}${IMGUR_URL}${messageContent.slice(END - offset)}`; // replace discord with imgur link
+						offset += URL.length - IMGUR_URL.length; // since indices are relative to the original string
 					} catch (error) {
 						logger.error(error);
 						break;
