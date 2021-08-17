@@ -186,7 +186,7 @@ export class ChatBridgeArray extends Array {
 		if (message.flags.any([ MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL ])) return; // ignore defer and ephemeral messages
 		if (message.editable // message was sent by the bot
 			&& (message.type === 'DEFAULT' // normal message
-				|| (message.type === 'REPLY' && !message.interaction)) // normal reply, not interaction followUp
+				|| (message.type === 'REPLY' && !message.webhookId)) // normal reply, not interaction followUp
 		) return;
 
 		try {

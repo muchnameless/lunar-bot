@@ -300,8 +300,8 @@ export class DiscordChatManager extends ChatManager {
 		// build content
 		const contentParts = [];
 
-		// @referencedMessageAuthor
-		if (message.reference && !message.hasThread) {
+		// @referencedMessageAuthor if normal reply
+		if (message.type === 'REPLY' && !message.webhookId) {
 			try {
 				const referencedMessage = await message.fetchReference();
 
@@ -352,7 +352,7 @@ export class DiscordChatManager extends ChatManager {
 		// empty message (e.g. only embeds)
 		if (!contentParts.length) return MessageUtil.react(message, X_EMOJI);
 
-		// send interaction "command"
+		// send interaction "command" for initial application command reply
 		if (message.type === 'APPLICATION_COMMAND' && !message.editedTimestamp) {
 			const interaction = this.client.chatBridges.interactionCache.get(message.interaction.id);
 
