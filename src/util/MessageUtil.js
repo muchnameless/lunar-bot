@@ -3,7 +3,6 @@ import { setTimeout as sleep } from 'timers/promises';
 import { commaListsAnd } from 'common-tags';
 import { replyPingRegExp } from '../constants/bot.js';
 import { ChannelUtil } from './ChannelUtil.js';
-import { UserUtil } from './UserUtil.js';
 import { logger } from '../functions/logger.js';
 
 
