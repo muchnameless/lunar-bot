@@ -194,7 +194,7 @@ export class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * @param {GenericInteraction} interaction
+	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
 	 * @param {string | import('discord.js').InteractionReplyOptions} contentOrOptions
 	 */
 	// eslint-disable-next-line class-methods-use-this
@@ -203,7 +203,7 @@ export class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * @param {GenericInteraction} interaction
+	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
 	 * @param {import('discord.js').InteractionDeferOptions} options
 	 */
 	// eslint-disable-next-line class-methods-use-this
@@ -212,7 +212,16 @@ export class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * @param {GenericInteraction} interaction
+	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
+	 * @param {string | import('discord.js').WebhookEditMessageOptions} contentOrOptions
+	 */
+	// eslint-disable-next-line class-methods-use-this
+	editReply(interaction, contentOrOptions) {
+		return InteractionUtil.editReply(interaction, contentOrOptions);
+	}
+
+	/**
+	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
 	 * @param {string | import('discord.js').InteractionReplyOptions} contentOrOptions
 	 */
 	// eslint-disable-next-line class-methods-use-this
@@ -240,7 +249,7 @@ export class SlashCommand extends BaseCommand {
 
 	/**
 	 * confirms the action via a button collector
-	 * @param {GenericInteraction} interaction
+	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
 	 * @param {import('discord.js').InteractionReplyOptions & { question: string, timeoutSeconds: number, errorMessage: string }} [questionOrOptions={}]
 	 */
 	// eslint-disable-next-line class-methods-use-this
