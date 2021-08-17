@@ -148,17 +148,31 @@ export default class ReloadCommand extends DualCommand {
 					logger.info(`command ${commandName} was reloaded successfully`);
 					return `command \`${commandName}\` was reloaded successfully`;
 				} catch (error) {
-					logger.error('An error occurred while reloading:\n', error);
-					return stripIndents`
-						an error occurred while reloading \`${commandName}\`:
-						${Formatters.codeBlock('xl', `${error}`)}
-					`;
+					logger.error('An error occurred while reloading', error);
+					return {
+						content: stripIndents`
+							an error occurred while reloading \`${commandName}\`:
+							${Formatters.codeBlock('xl', `${error}`)}
+						`,
+						ephemeral: true,
+					};
 				}
 			}
 
 			case 'commands': {
-				await this.collection.unloadAll().loadAll({ reload });
-				return `${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`;
+				try {
+					await this.collection.unloadAll().loadAll({ reload });
+					return `${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`;
+				} catch (error) {
+					logger.error('An error occurred while reloading all commands', error);
+					return {
+						content: stripIndents`
+							an error occurred while reloading all commands:
+							${Formatters.codeBlock('xl', `${error}`)}
+						`,
+						ephemeral: true,
+					};
+				}
 			}
 
 			case 'event': {
@@ -178,17 +192,31 @@ export default class ReloadCommand extends DualCommand {
 					logger.info(`event ${eventName} was reloaded successfully`);
 					return `event \`${eventName}\` was reloaded successfully`;
 				} catch (error) {
-					logger.error('An error occurred while reloading:\n', error);
-					return stripIndents`
-						an error occurred while reloading \`${eventName}\`:
-						${Formatters.codeBlock('xl', `${error}`)}
-					`;
+					logger.error('An error occurred while reloading', error);
+					return {
+						content: stripIndents`
+							an error occurred while reloading \`${eventName}\`:
+							${Formatters.codeBlock('xl', `${error}`)}
+						`,
+						ephemeral: true,
+					};
 				}
 			}
 
 			case 'events': {
-				await this.client.events.unloadAll().loadAll({ reload, force });
-				return `${this.client.events.size} event${this.client.events.size !== 1 ? 's' : ''} were reloaded successfully`;
+				try {
+					await this.client.events.unloadAll().loadAll({ reload, force });
+					return `${this.client.events.size} event${this.client.events.size !== 1 ? 's' : ''} were reloaded successfully`;
+				} catch (error) {
+					logger.error('An error occurred while reloading all events', error);
+					return {
+						content: stripIndents`
+							an error occurred while reloading all events:
+							${Formatters.codeBlock('xl', `${error}`)}
+						`,
+						ephemeral: true,
+					};
+				}
 			}
 
 			case 'database': {
@@ -202,12 +230,23 @@ export default class ReloadCommand extends DualCommand {
 			}
 
 			case 'filter': {
-				const { blockedWordsRegExp } = await import(`../../structures/chat_bridge/constants/blockedWords.js?update=${Date.now()}`);
-				const { ChatManager } = await import('../../structures/chat_bridge/managers/ChatManager.js');
+				try {
+					const { blockedWordsRegExp } = await import(`../../structures/chat_bridge/constants/blockedWords.js?update=${Date.now()}`);
+					const { ChatManager } = await import('../../structures/chat_bridge/managers/ChatManager.js');
 
-				ChatManager.BLOCKED_WORDS_REGEXP = blockedWordsRegExp;
+					ChatManager.BLOCKED_WORDS_REGEXP = blockedWordsRegExp;
 
-				return 'filter reloaded successfully';
+					return 'filter reloaded successfully';
+				} catch (error) {
+					logger.error('An error occurred while reloading the filter', error);
+					return {
+						content: stripIndents`
+							an error occurred while reloading the filter:
+							${Formatters.codeBlock('xl', `${error}`)}
+						`,
+						ephemeral: true,
+					};
+				}
 			}
 
 			default:
