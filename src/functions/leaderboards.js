@@ -172,7 +172,7 @@ export async function handleLeaderboardCommandInteraction(interaction, leaderboa
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	/** @type {?MessageEmbed[]} */
 	const embeds = await cache.get(CACHE_KEY)
-		?? createLeaderboardEmbeds(
+		?? await createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		);
@@ -184,7 +184,7 @@ export async function handleLeaderboardCommandInteraction(interaction, leaderboa
 	}
 
 	await InteractionUtil.reply(interaction, {
-		embeds: [ embeds[ leaderboardArgs.page - 1 ] ],
+		embeds: [ embeds[leaderboardArgs.page - 1] ],
 		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 	});
 
@@ -221,7 +221,7 @@ export async function handleLeaderboardButtonInteraction(interaction) {
 	const IS_RELOAD = EMOJI === RELOAD_EMOJI;
 	/** @type {?MessageEmbed[]} */
 	const embeds = IS_RELOAD
-		? createLeaderboardEmbeds(
+		? await createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		)
@@ -249,7 +249,7 @@ export async function handleLeaderboardButtonInteraction(interaction) {
 	}
 
 	await InteractionUtil.update(interaction, {
-		embeds: [ embeds[ leaderboardArgs.page - 1 ] ],
+		embeds: [ embeds[leaderboardArgs.page - 1] ],
 		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 	});
 
@@ -321,13 +321,13 @@ export async function handleLeaderboardSelectMenuInteraction(interaction) {
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	/** @type {?MessageEmbed[]} */
 	const embeds = await cache.get(CACHE_KEY)
-		?? createLeaderboardEmbeds(
+		?? await createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		);
 
 	await InteractionUtil.update(interaction, {
-		embeds: [ embeds[ leaderboardArgs.page - 1 ] ],
+		embeds: [ embeds[leaderboardArgs.page - 1] ],
 		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 	});
 
@@ -343,7 +343,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction) {
  * @param {import('../structures/LunarClient').LunarClient} client
  * @param {LeaderboardData} param1
  */
-export async function createLeaderboardEmbeds(client, { title, description, playerData, playerRequestingEntry, getEntry, isCompetition, lastUpdatedAt }) {
+async function createLeaderboardEmbeds(client, { title, description, playerData, playerRequestingEntry, getEntry, isCompetition, lastUpdatedAt }) {
 	const { config } = client;
 	const ELEMENTS_PER_PAGE = config.get('ELEMENTS_PER_PAGE');
 	const PLAYER_COUNT = playerData.length;
@@ -396,7 +396,7 @@ export async function createLeaderboardEmbeds(client, { title, description, play
  * returns the create[type]LeaderboardData function
  * @param {string} lbType
  */
-export function getLeaderboardDataCreater(lbType) {
+function getLeaderboardDataCreater(lbType) {
 	switch (lbType) {
 		case 'gained':
 			return createGainedLeaderboardData;
@@ -415,7 +415,7 @@ export function getLeaderboardDataCreater(lbType) {
  * @param {LeaderboardArgs} param1
  * @returns {LeaderboardData}
  */
-export function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpType }) {
+function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpType }) {
 	const { config } = client;
 	const COMPETITION_RUNNING = config.get('COMPETITION_RUNNING');
 	const COMPETITION_END_TIME = config.get('COMPETITION_END_TIME');
@@ -647,7 +647,7 @@ export function createGainedLeaderboardData(client, { hypixelGuild, user, offset
  * @param {LeaderboardArgs} param1
  * @returns {LeaderboardData}
  */
-export function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', xpType }) {
+function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', xpType }) {
 	const { config } = client;
 	/** @type {import('../../structures/database/models/Player').Player[]} */
 	const playerDataRaw = hypixelGuild !== GUILD_ID_ALL
