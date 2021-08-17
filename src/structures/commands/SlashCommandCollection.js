@@ -111,7 +111,7 @@ export class SlashCommandCollection extends BaseCommandCollection {
 	 * @param {string} commandName
 	 * @param {import('discord.js').GuildApplicationCommandManager|import('discord.js').ApplicationCommandManager} [commandManager]
 	 */
-	async delete(commandName, commandManager = this.client.application.commands) {
+	async deleteCommand(commandName, commandManager = this.client.application.commands) {
 		const commands = await commandManager.fetch();
 		const command = commands.find(cmd => cmd.name === commandName.toLowerCase());
 
