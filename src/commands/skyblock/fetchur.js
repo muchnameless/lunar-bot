@@ -73,9 +73,9 @@ export default class FetchurCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(this.#generateReply());
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(this.#generateReply());
 	}
 }

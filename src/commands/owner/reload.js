@@ -195,9 +195,9 @@ export default class ReloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(await this.#run(...message.commandData.args));
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(await this.#run(...hypixelMessage.commandData.args));
 	}
 }

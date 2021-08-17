@@ -34,14 +34,14 @@ export class BridgeCommandCollection extends BaseCommandCollection {
 
 	/**
 	 * help command run method
-	 * @type {Function}
+	 * @param {import('../chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async help(message) {
+	async help(hypixelMessage) {
 		try {
-			return await this.get('help').runInGame(message);
+			return await this.get('help').runInGame(hypixelMessage);
 		} catch (error) {
-			logger.error(`[CMD HANDLER]: An error occured while ${message.author} tried to execute '${message.content}' in '${message.type}'`, error);
-			message.reply(`an error occured while executing the \`help\` command:\n${error}`);
+			logger.error(`[CMD HANDLER]: An error occured while ${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}'`, error);
+			hypixelMessage.author.send(`an error occured while executing the \`help\` command:\n${error}`);
 		}
 	}
 

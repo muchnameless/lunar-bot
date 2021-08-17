@@ -71,36 +71,39 @@ export class ChatTrigger extends Model {
 		});
 	}
 
-	getRegExp(message) {
+	/**
+	 * @param {import('../../chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
+	 */
+	getRegExp(hypixelMessage) {
 		if (this._regExp) return this._regExp;
 
 		return new RegExp(
-			this.regExpString.replaceAll('{BOT_IGN}', message.chatBridge.bot.username.replaceAll('_', '[_ ]?')),
+			this.regExpString.replaceAll('{BOT_IGN}', hypixelMessage.chatBridge.bot.username.replaceAll('_', '[_ ]?')),
 			'i',
 		);
 	}
 
 	/**
-	 * @param {import('../../chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async testMessage(message) {
-		if (!this.chatTypes.includes(message.type)) return;
+	async testMessage(hypixelMessage) {
+		if (!this.chatTypes.includes(hypixelMessage.type)) return;
 
-		const matched = this.getRegExp(message).exec(message.content);
+		const matched = this.getRegExp(hypixelMessage).exec(hypixelMessage.content);
 
 		if (!matched) return;
 
 		// cooldowns
 		if (this.cooldown !== 0) {
-			if (this.timestamps.has(message.author.ign) && Date.now() < this.timestamps.get(message.author.ign) + this.cooldown) return;
+			if (this.timestamps.has(hypixelMessage.author.ign) && Date.now() < this.timestamps.get(hypixelMessage.author.ign) + this.cooldown) return;
 
-			this.timestamps.set(message.author.ign, Date.now());
-			setTimeout(() => this.timestamps.delete(message.author.ign), this.cooldown);
+			this.timestamps.set(hypixelMessage.author.ign, Date.now());
+			setTimeout(() => this.timestamps.delete(hypixelMessage.author.ign), this.cooldown);
 		}
 
-		return await message.reply(
+		return await hypixelMessage.reply(
 			this.response
-				.replaceAll('{AUTHOR_IGN}', message.author.ign)
+				.replaceAll('{AUTHOR_IGN}', hypixelMessage.author.ign)
 				.replaceAll(/\$(\d+)/g, (m, p0) => matched[p0] ?? m), // replace $number with capture group #number
 		);
 	}

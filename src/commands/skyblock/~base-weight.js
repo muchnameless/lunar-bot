@@ -71,10 +71,10 @@ export default class BaseWeightCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		const [ IGN, PROFILE_NAME_INPUT ] = message.commandData.args;
+	async runInGame(hypixelMessage) {
+		const [ IGN, PROFILE_NAME_INPUT ] = hypixelMessage.commandData.args;
 
 		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');
 
@@ -85,7 +85,7 @@ export default class BaseWeightCommand extends DualCommand {
 
 			if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) {
 				try {
-					await message.awaitConfirmation({
+					await hypixelMessage.awaitConfirmation({
 						question: `'${upperCaseFirstChar(PROFILE_NAME_INPUT)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,
 						timeoutSeconds: 30,
 					});
@@ -96,6 +96,6 @@ export default class BaseWeightCommand extends DualCommand {
 			}
 		}
 
-		return await message.reply(await this._generateReply(message, IGN, profileName));
+		return await hypixelMessage.reply(await this._generateReply(hypixelMessage, IGN, profileName));
 	}
 }

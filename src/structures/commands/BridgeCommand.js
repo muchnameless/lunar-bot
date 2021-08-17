@@ -73,9 +73,9 @@ export class BridgeCommand extends BaseCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('discord.js').Message} message
+	 * @param {import('../chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) { // eslint-disable-line no-unused-vars
+	async runInGame(hypixelMessage) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
 }

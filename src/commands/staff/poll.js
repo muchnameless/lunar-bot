@@ -170,10 +170,10 @@ export default class PollCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		const inputMatched = message.content
+	async runInGame(hypixelMessage) {
+		const inputMatched = hypixelMessage.content
 			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
 			?.flatMap((x) => {
 				const input = x.trim();
@@ -181,16 +181,16 @@ export default class PollCommand extends DualCommand {
 				return input;
 			});
 
-		if (!inputMatched || inputMatched.length < 2) return await message.reply(this.usageInfo);
+		if (!inputMatched || inputMatched.length < 2) return await hypixelMessage.reply(this.usageInfo);
 
 		const res = await this.#run({
-			chatBridge: message.chatBridge,
+			chatBridge: hypixelMessage.chatBridge,
 			question: upperCaseFirstChar(inputMatched.shift()),
 			pollOptionNames: inputMatched,
-			duration: message.commandData.args[0],
-			ign: message.author.ign,
+			duration: hypixelMessage.commandData.args[0],
+			ign: hypixelMessage.author.ign,
 		});
 
-		if (res) return await message.author.send(res);
+		if (res) return await hypixelMessage.author.send(res);
 	}
 }

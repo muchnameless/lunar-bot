@@ -44,21 +44,21 @@ export class MessageCollector extends EventEmitter {
 
 	/**
 	 * Call this to handle an event as a collectable element
-	 * @param {import('./HypixelMessage').HypixelMessage} message
+	 * @param {import('./HypixelMessage').HypixelMessage} hypixelMessage
 	 * @emits Collector#collect
 	 */
-	#handleCollect = async (message) => {
+	#handleCollect = async (hypixelMessage) => {
 		++this.received;
 
-		if (await this.filter(message, this.collected)) {
-			this.collected.push(message);
+		if (await this.filter(hypixelMessage, this.collected)) {
+			this.collected.push(hypixelMessage);
 
 			/**
 			 * Emitted whenever an element is collected.
 			 * @event Collector#collect
-			 * @param {import('./HypixelMessage').HypixelMessage} message
+			 * @param {import('./HypixelMessage').HypixelMessage} hypixelMessage
 			 */
-			this.emit('collect', message);
+			this.emit('collect', hypixelMessage);
 
 			if (this.#idletimeout) {
 				clearTimeout(this.#idletimeout);

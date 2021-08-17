@@ -60,9 +60,9 @@ export default class GuildOfCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(await this.#generateReply(...message.commandData.args));
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(await this.#generateReply(...hypixelMessage.commandData.args));
 	}
 }

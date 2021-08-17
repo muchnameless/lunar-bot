@@ -149,12 +149,12 @@ export default class JoinDateCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(await this.#generateReply(
-			message.chatBridge,
-			message.commandData.args[0] ?? message.author.ign,
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(await this.#generateReply(
+			hypixelMessage.chatBridge,
+			hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,
 		));
 	}
 }

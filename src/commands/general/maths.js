@@ -416,9 +416,9 @@ export default class MathsCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(this._generateReply(message.commandData.args.join('')));
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(this._generateReply(hypixelMessage.commandData.args.join('')));
 	}
 }

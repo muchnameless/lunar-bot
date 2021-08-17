@@ -22,14 +22,6 @@ export default class MyCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} ctx
-	 */
-	async _run(ctx) { // eslint-disable-line no-unused-vars
-		// do stuff
-	}
-
-	/**
-	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) { // eslint-disable-line no-unused-vars
@@ -38,9 +30,9 @@ export default class MyCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) { // eslint-disable-line no-unused-vars
+	async runInGame(hypixelMessage) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
 }

@@ -85,9 +85,9 @@ export default class UnloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(await this.#run(message, ...message.commandData.args.map(arg => arg.toLowerCase())));
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(await this.#run(hypixelMessage, ...hypixelMessage.commandData.args.map(arg => arg.toLowerCase())));
 	}
 }

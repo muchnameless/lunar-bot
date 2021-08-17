@@ -24,20 +24,20 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../HypixelMessage').HypixelMessage} message
+	 * @param {import('../../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
+	async runInGame(hypixelMessage) {
 		// default help
-		if (!message.commandData.args.length) {
+		if (!hypixelMessage.commandData.args.length) {
 			const reply = [
-				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${message.chatBridge.bot.username}` ].join(', ')}`,
+				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${hypixelMessage.chatBridge.bot.username}` ].join(', ')}`,
 				...this.collection.visibleCategories.map(category => `${category}: ${HelpBridgeCommand.#listCommands(this.collection.filterByCategory(category))}`),
 			];
 
-			return message.author.send(reply.join('\n'));
+			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
-		const INPUT = message.commandData.args[0].toLowerCase();
+		const INPUT = hypixelMessage.commandData.args[0].toLowerCase();
 
 		// category help
 		const requestedCategory = this.collection.categories.find(categoryName => categoryName === INPUT);
@@ -55,13 +55,13 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 			reply.push(`Commands: ${HelpBridgeCommand.#listCommands(categoryCommands)}`);
 
-			return message.author.send(reply.join('\n'));
+			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
 		// single command help
 		const command = this.collection.getByName(INPUT);
 
-		if (!command) return message.author.send(`'${INPUT}' is neither a valid command nor category`);
+		if (!command) return hypixelMessage.author.send(`'${INPUT}' is neither a valid command nor category`);
 
 		const reply = [ `Name: ${command.name}` ];
 
@@ -82,6 +82,6 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
-		return message.author.send(reply.join('\n'));
+		return hypixelMessage.author.send(reply.join('\n'));
 	}
 }

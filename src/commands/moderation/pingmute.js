@@ -51,14 +51,14 @@ export default class PingMuteCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		const [ INPUT ] = message.commandData.args;
+	async runInGame(hypixelMessage) {
+		const [ INPUT ] = hypixelMessage.commandData.args;
 		const player = this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT);
 
-		if (!player) return await message.reply(`\`${INPUT}\` not in the player db`);
+		if (!player) return await hypixelMessage.reply(`\`${INPUT}\` not in the player db`);
 
-		return await message.reply(await this._generateReply(player));
+		return await hypixelMessage.reply(await this._generateReply(player));
 	}
 }

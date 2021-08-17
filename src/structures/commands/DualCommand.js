@@ -75,9 +75,9 @@ export class DualCommand extends SlashCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../chat_bridge/HypixelMessage').HypixelMessage} message
+	 * @param {import('../chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) { // eslint-disable-line no-unused-vars
+	async runInGame(hypixelMessage) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
 }

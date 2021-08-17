@@ -825,25 +825,25 @@ export class MinecraftChatManager extends ChatManager {
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
 		const collector = this.createMessageCollector({
-			filter: message => !message.type && ((responseRegExp?.test(message.content) ?? true) || (abortRegExp?.test(message.content) ?? false) || /^-{29,}/.test(message.content)),
+			filter: hypixelMessage => !hypixelMessage.type && ((responseRegExp?.test(hypixelMessage.content) ?? true) || (abortRegExp?.test(hypixelMessage.content) ?? false) || /^-{29,}/.test(hypixelMessage.content)),
 			time: timeout,
 		});
 
 		let resolve;
 		let reject;
 
-		/** @type {Promise<string|import('../HypixelMessage').HypixelMessage[]>} */
+		/** @type {Promise<string[]|import('../HypixelMessage').HypixelMessage[]>} */
 		const promise = new Promise((res, rej) => {
 			resolve = res;
 			reject = rej;
 		});
 
 		// collect message
-		collector.on('collect', (/** @type {import('../HypixelMessage').HypixelMessage} */ message) => {
+		collector.on('collect', (/** @type {import('../HypixelMessage').HypixelMessage} */ hypixelMessage) => {
 			// message is line separator
-			if (/^-{29,}/.test(message.content)) {
+			if (/^-{29,}/.test(hypixelMessage.content)) {
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
-				if (/[^-]-{29,}$/.test(message.content)) return collector.stop();
+				if (/[^-]-{29,}$/.test(hypixelMessage.content)) return collector.stop();
 
 				collector.collected.pop(); // remove line separator from collected messages
 				if (collector.collected.length) collector.stop(); // stop collector if messages before this line separator were already collected
@@ -854,10 +854,10 @@ export class MinecraftChatManager extends ChatManager {
 			if (collector.collected.length === max) return collector.stop();
 
 			// abortRegExp triggered
-			if (abortRegExp?.test(message.content)) return collector.stop('abort');
+			if (abortRegExp?.test(hypixelMessage.content)) return collector.stop('abort');
 
 			// don't collect anti spam messages
-			if (message.spam) return collector.collected.pop();
+			if (hypixelMessage.spam) return collector.collected.pop();
 		});
 
 		// end collection
