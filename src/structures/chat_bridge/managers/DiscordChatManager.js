@@ -344,15 +344,13 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// stickers
-		if (message.stickers.size) contentParts.push(message.stickers.map(({ name }) => `:${name}:`).join(' '));
+		if (message.stickers.size) contentParts.push(...message.stickers.map(({ name }) => `:${name}:`));
 
 		// links of attachments
-		if (message.attachments.size) contentParts.push((await this.#uploadAttachments(message.attachments)).join(' '));
-
-		const CONTENT = contentParts.join(' ');
+		if (message.attachments.size) contentParts.push(...(await this.#uploadAttachments(message.attachments)));
 
 		// empty message (e.g. only embeds)
-		if (!CONTENT) return MessageUtil.react(message, X_EMOJI);
+		if (!contentParts.length) return MessageUtil.react(message, X_EMOJI);
 
 		// send interaction "command"
 		if (message.type === 'APPLICATION_COMMAND' && !message.editedTimestamp) {
@@ -366,7 +364,7 @@ export class DiscordChatManager extends ChatManager {
 
 		// send content
 		return this.minecraft.chat({
-			content: CONTENT,
+			content: contentParts.join(' '),
 			prefix: `${this.prefix} ${message.editable ? '' : `${DiscordChatManager.getPlayerName(message)}: `}`,
 			discordMessage: message,
 		});
