@@ -3,7 +3,6 @@ import { Y_EMOJI, X_EMOJI } from '../constants/emojiCharacters.js';
 import { makeContent } from '../functions/util.js';
 import { ChannelUtil } from './ChannelUtil.js';
 import { MessageUtil } from './MessageUtil.js';
-import { UserUtil } from './UserUtil.js';
 import { logger } from '../functions/logger.js';
 
 
@@ -134,10 +133,7 @@ export class InteractionUtil extends null {
 		if (interaction.deferred && !interaction.replied) {
 			// ephemeral defer
 			if (interaction.ephemeral) {
-				if (data.ephemeral) {
-					const message = await interaction.editReply(data);
-					return this.#handleReplyMessage(interaction, data, message);
-				}
+				if (data.ephemeral) return await interaction.editReply(data);
 
 				// ephemeral defer and non-ephemeral followUp
 				await interaction.editReply('\u200b'); // ephemeral empty message
@@ -150,16 +146,24 @@ export class InteractionUtil extends null {
 				return await this.followUp(interaction, data);
 			}
 
-			const mesage = await interaction.editReply(data);
-			return this.#handleReplyMessage(interaction, data, mesage);
+			return await interaction.editReply(data);
 		}
 
-		if (interaction.replied) {
-			return await this.followUp(interaction, data);
-		}
+		if (interaction.replied) return await this.followUp(interaction, data);
 
-		const message = await interaction.reply(data);
-		return this.#handleReplyMessage(interaction, data, message);
+		return await interaction.reply(data);
+	}
+
+	/**
+	 * @param {GenericInteraction} interaction
+	 * @param {string | import('discord.js').WebhookEditMessageOptions} contentOrOptions
+	 */
+	static async editReply(interaction, contentOrOptions) {
+		const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction);
+		if (deferReplyPromise) await deferReplyPromise;
+		if (deferUpdatePromise) await deferUpdatePromise;
+
+		return await interaction.editReply(contentOrOptions);
 	}
 
 	/**
@@ -171,34 +175,7 @@ export class InteractionUtil extends null {
 		if (deferReplyPromise) await deferReplyPromise;
 		if (deferUpdatePromise) await deferUpdatePromise;
 
-		const message = await interaction.followUp(contentOrOptions);
-
-		return this.#handleReplyMessage(interaction, contentOrOptions, message);
-	}
-
-	/**
-	 * forwards non-ephemeral replies to the chat bridges
-	 * @param {GenericInteraction} interaction
-	 * @param {import('discord.js').InteractionReplyOptions} param0
-	 * @param {?import('discord.js').Message} [messageInput]
-	 */
-	static async #handleReplyMessage(interaction, { ephemeral, content }, messageInput) {
-		if (ephemeral || !content || !interaction.client.chatBridges.channelIds.has(interaction.channelId)) return messageInput;
-
-		const message = messageInput ?? await interaction.fetchReply();
-
-		if (!message.content) return message;
-
-		interaction.client.chatBridges.handleDiscordMessage(
-			message,
-			{
-				player: UserUtil.getPlayer(interaction.user),
-				interaction,
-				checkIfNotFromBot: false,
-			},
-		);
-
-		return message;
+		return await interaction.followUp(contentOrOptions);
 	}
 
 	/**

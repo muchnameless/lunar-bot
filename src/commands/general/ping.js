@@ -23,6 +23,6 @@ export default class PingCommand extends SlashCommand {
 			fetchReply: true,
 		});
 
-		return await this.reply(interaction, `Roundtrip latency: ${ms(sent.createdTimestamp - interaction.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}`);
+		return await this.editReply(interaction, `Roundtrip latency: ${ms(sent.createdTimestamp - interaction.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}`);
 	}
 }
