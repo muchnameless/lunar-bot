@@ -1,10 +1,8 @@
-'use strict';
-
-const BridgeCommand = require('../../../commands/BridgeCommand');
-// const logger = require('../../../../functions/logger');
+import { BridgeCommand } from '../../../commands/BridgeCommand.js';
+// import { logger } from '../../../../functions/logger.js';
 
 
-module.exports = class PingBridgeCommand extends BridgeCommand {
+export default class PingBridgeCommand extends BridgeCommand {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [ 'o/' ],
@@ -17,9 +15,9 @@ module.exports = class PingBridgeCommand extends BridgeCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../HypixelMessage')} message
+	 * @param {import('../../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply('o/');
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply('o/');
 	}
-};
+}

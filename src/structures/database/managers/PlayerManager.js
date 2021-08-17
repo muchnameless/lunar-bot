@@ -1,36 +1,36 @@
-'use strict';
+import { MessageEmbed, Formatters, Util } from 'discord.js';
+import { setTimeout as sleep } from 'timers/promises';
+import pkg from 'sequelize';
+const { Op } = pkg;
+import { CronJob } from 'cron';
+import { MAYOR_CHANGE_INTERVAL } from '../../../constants/skyblock.js';
+import { offsetFlags } from '../../../constants/database.js';
+import { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } from '../../../constants/discord.js';
+import { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar, safePromiseAll } from '../../../functions/util.js';
+import { ModelManager } from './ModelManager.js';
+import { hypixel } from '../../../api/hypixel.js';
+import { logger } from '../../../functions/logger.js';
 
-const { MessageEmbed, Formatters, Util: { splitMessage } } = require('discord.js');
-const { setTimeout: sleep } = require('timers/promises');
-const { Op } = require('sequelize');
-const { CronJob } = require('cron');
-const { MAYOR_CHANGE_INTERVAL } = require('../../../constants/skyblock');
-const { offsetFlags: { COMPETITION_START, COMPETITION_END, MAYOR, WEEK, MONTH, DAY } } = require('../../../constants/database');
-const { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } = require('../../../constants/discord');
-const { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar, safePromiseAll } = require('../../../functions/util');
-const ModelManager = require('./ModelManager');
-const hypixel = require('../../../api/hypixel');
-const logger = require('../../../functions/logger');
 
+export class PlayerManager extends ModelManager {
+	/**
+	 * wether a player db update is currently running
+	 * @type {boolean}
+	 */
+	#isUpdatingXp = false;
 
-module.exports = class PlayerManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('../models/Player')>}
-		 * @ type {import('../../ArrayCacheCollection')<string, import('../models/Player')>}
+		 * @type {import('discord.js').Collection<string, import('../models/Player').Player>}
+		 * @ type {import('../../ArrayCacheCollection')<string, import('../models/Player').Player>}
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/Player')}
+		 * @type {import('../models/Player').Player}
 		 */
 		this.model;
-		/**
-		 * wether a player db update is currently running
-		 * @type {boolean}
-		 */
-		this._isUpdatingXp = false;
 	}
 
 	/**
@@ -63,7 +63,7 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * add a player to the cache and sweep the player's hypixelGuild's player cache
 	 * @param {string} key
-	 * @param {import('../models/Player')} value
+	 * @param {import('../models/Player').Player} value
 	 */
 	set(key, value) {
 		this.client.hypixelGuilds.sweepPlayerCache(value.guildId);
@@ -74,10 +74,10 @@ module.exports = class PlayerManager extends ModelManager {
 
 	/**
 	 * delete a player from the cache and sweep the player's hypixelGuild's player cache
-	 * @param {string|import('../models/Player')} idOrPlayer
+	 * @param {string|import('../models/Player').Player} idOrPlayer
 	 */
 	delete(idOrPlayer) {
-		/** @type {import('../models/Player')} */
+		/** @type {import('../models/Player').Player} */
 		const player = this.resolve(idOrPlayer);
 
 		if (!player) throw new Error(`[PLAYER HANDLER UNCACHE]: invalid input: ${idOrPlayer}`);
@@ -120,7 +120,7 @@ module.exports = class PlayerManager extends ModelManager {
 	 * add a player to the db and db cache
 	 * @param {object} options options for the new db entry
 	 * @param {boolean} isAddingSingleEntry wether to call sortAlphabetically() and updateXp() after adding the new entry
-	 * @returns {Promise<import('../models/Player')>}
+	 * @returns {Promise<import('../models/Player').Player>}
 	 */
 	async add(options = {}, isAddingSingleEntry = true) {
 		const newPlayer = await super.add(options);
@@ -142,7 +142,7 @@ module.exports = class PlayerManager extends ModelManager {
 	 * deletes all unnecessary db entries
 	 */
 	async sweepDb() {
-		/** @type {import('../models/Player')[]} */
+		/** @type {import('../models/Player').Player[]} */
 		const playersToSweep = await this.model.findAll({
 			where: {
 				guildId: null,
@@ -169,7 +169,7 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * get a player by their IGN, case insensitive and with auto-correction
 	 * @param {string} ign ign of the player
-	 * @returns {?import('../models/Player')}
+	 * @returns {?import('../models/Player').Player}
 	 */
 	getByIgn(ign) {
 		if (!ign) return null;
@@ -192,7 +192,7 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * autocorrects the input to a player ign
 	 * @param {string} input
-	 * @returns {import('../models/Player')}
+	 * @returns {import('../models/Player').Player}
 	 */
 	autocorrectToPlayer(input) {
 		return autocorrect(input, this.cache, 'ign');
@@ -201,7 +201,7 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * get a player by their discord ID
 	 * @param {string} id discord id of the player
-	 * @returns {?import('../models/Player')}
+	 * @returns {?import('../models/Player').Player}
 	 */
 	getById(id) {
 		if (!id) return null;
@@ -235,8 +235,8 @@ module.exports = class PlayerManager extends ModelManager {
 	 * @param {import('../models/Player').PlayerUpdateOptions} options
 	 */
 	async updateXp(options) {
-		if (this._isUpdatingXp) return this;
-		this._isUpdatingXp = true;
+		if (this.#isUpdatingXp) return this;
+		this.#isUpdatingXp = true;
 
 		try {
 			// the hypxiel api encountered an error before
@@ -262,7 +262,7 @@ module.exports = class PlayerManager extends ModelManager {
 
 			return this;
 		} finally {
-			this._isUpdatingXp = false;
+			this.#isUpdatingXp = false;
 		}
 	}
 
@@ -297,7 +297,7 @@ module.exports = class PlayerManager extends ModelManager {
 		 */
 		const embeds = [];
 		/**
-		 * @param {import('../models/HypixelGuild')|string} guild
+		 * @param {import('../models/HypixelGuild').HypixelGuild|string} guild
 		 * @param {number} ignChangesAmount
 		 */
 		const createEmbed = (guild, ignChangesAmount) => {
@@ -314,7 +314,7 @@ module.exports = class PlayerManager extends ModelManager {
 			.map(([ guildId, data ]) => [ this.client.hypixelGuilds.cache.get(guildId) ?? guildId, data ])
 			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
 		) {
-			const logParts = splitMessage(
+			const logParts = Util.splitMessage(
 				Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')),
 				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' },
 			);
@@ -371,11 +371,11 @@ module.exports = class PlayerManager extends ModelManager {
 			if (config.get('COMPETITION_START_TIME') - 10_000 > Date.now()) {
 				this.client.schedule('competitionStart', new CronJob({
 					cronTime: new Date(config.get('COMPETITION_START_TIME')),
-					onTick: () => this.startCompetition(),
+					onTick: () => this.#startCompetition(),
 					start: true,
 				}));
 			} else if (!config.get('COMPETITION_RUNNING')) {
-				this.startCompetition();
+				this.#startCompetition();
 			}
 		}
 
@@ -383,11 +383,11 @@ module.exports = class PlayerManager extends ModelManager {
 		if (config.get('COMPETITION_END_TIME') - 10_000 > Date.now()) {
 			this.client.schedule('competitionEnd', new CronJob({
 				cronTime: new Date(config.get('COMPETITION_END_TIME')),
-				onTick: () => this.endCompetition(),
+				onTick: () => this.#endCompetition(),
 				start: true,
 			}));
 		} else if (config.get('COMPETITION_RUNNING')) {
-			this.endCompetition();
+			this.#endCompetition();
 		}
 
 		// mayor change reset
@@ -396,45 +396,45 @@ module.exports = class PlayerManager extends ModelManager {
 		if (NEXT_MAYOR_TIME - 10_000 > Date.now()) {
 			this.client.schedule('mayorXpReset', new CronJob({
 				cronTime: new Date(NEXT_MAYOR_TIME),
-				onTick: () => this.performMayorXpReset(),
+				onTick: () => this.#performMayorXpReset(),
 				start: true,
 			}));
 		} else {
-			this.performMayorXpReset();
+			this.#performMayorXpReset();
 		}
 
 		const now = new Date();
 
 		// daily reset
-		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.performDailyXpReset();
+		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.#performDailyXpReset();
 
 		// each day at 00:00:00
 		this.client.schedule('dailyXpReset', new CronJob({
 			cronTime: '0 0 0 * * *',
 			timeZone: 'GMT',
-			onTick: () => this.performDailyXpReset(),
+			onTick: () => this.#performDailyXpReset(),
 			start: true,
 		}));
 
 		// weekly reset
-		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.performWeeklyXpReset();
+		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.#performWeeklyXpReset();
 
 		// each monday at 00:00:00
 		this.client.schedule('weeklyXpReset', new CronJob({
 			cronTime: '0 0 0 * * MON',
 			timeZone: 'GMT',
-			onTick: () => this.performWeeklyXpReset(),
+			onTick: () => this.#performWeeklyXpReset(),
 			start: true,
 		}));
 
 		// monthly reset
-		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.performMonthlyXpReset();
+		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.#performMonthlyXpReset();
 
 		// the first of each month at 00:00:00
 		this.client.schedule('monthlyXpReset', new CronJob({
 			cronTime: '0 0 0 1 * *',
 			timeZone: 'GMT',
-			onTick: () => this.performMonthlyXpReset(),
+			onTick: () => this.#performMonthlyXpReset(),
 			start: true,
 		}));
 	}
@@ -442,10 +442,10 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * resets competitionStart xp, updates the config and logs the event
 	 */
-	async startCompetition() {
+	async #startCompetition() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: COMPETITION_START });
+		await this.resetXp({ offsetToReset: offsetFlags.COMPETITION_START });
 
 		config.set('COMPETITION_RUNNING', true);
 		config.set('COMPETITION_SCHEDULED', false);
@@ -459,10 +459,10 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * resets competitionEnd xp, updates the config and logs the event
 	 */
-	async endCompetition() {
+	async #endCompetition() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: COMPETITION_END });
+		await this.resetXp({ offsetToReset: offsetFlags.COMPETITION_END });
 
 		config.set('COMPETITION_RUNNING', false);
 
@@ -475,7 +475,7 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * resets offsetMayor xp, updates the config and logs the event
 	 */
-	async performMayorXpReset() {
+	async #performMayorXpReset() {
 		const { config } = this.client;
 		const LAST_MAYOR_XP_RESET_TIME = config.get('LAST_MAYOR_XP_RESET_TIME');
 
@@ -483,7 +483,7 @@ module.exports = class PlayerManager extends ModelManager {
 		let currentMayorTime = LAST_MAYOR_XP_RESET_TIME + MAYOR_CHANGE_INTERVAL;
 		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
 
-		await this.resetXp({ offsetToReset: MAYOR });
+		await this.resetXp({ offsetToReset: offsetFlags.MAYOR });
 
 		config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime);
 
@@ -494,7 +494,7 @@ module.exports = class PlayerManager extends ModelManager {
 
 		this.client.schedule('mayorXpReset', new CronJob({
 			cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
-			onTick: () => this.performMayorXpReset(),
+			onTick: () => this.#performMayorXpReset(),
 			start: true,
 		}));
 	}
@@ -502,10 +502,10 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * shifts the daily xp array, updates the config and logs the event
 	 */
-	async performDailyXpReset() {
+	async #performDailyXpReset() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: DAY });
+		await this.resetXp({ offsetToReset: offsetFlags.DAY });
 
 		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
 
@@ -514,16 +514,16 @@ module.exports = class PlayerManager extends ModelManager {
 			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 
-		this.updateMainProfiles();
+		this.#updateMainProfiles();
 	}
 
 	/**
 	 * resets offsetWeek xp, updates the config and logs the event
 	 */
-	async performWeeklyXpReset() {
+	async #performWeeklyXpReset() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: WEEK });
+		await this.resetXp({ offsetToReset: offsetFlags.WEEK });
 
 		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
 
@@ -536,10 +536,10 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * resets offsetMonth xp, updates the config and logs the event
 	 */
-	async performMonthlyXpReset() {
+	async #performMonthlyXpReset() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: MONTH });
+		await this.resetXp({ offsetToReset: offsetFlags.MONTH });
 
 		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
 
@@ -552,7 +552,7 @@ module.exports = class PlayerManager extends ModelManager {
 	/**
 	 * checks all players if their current main profile is still valid
 	 */
-	async updateMainProfiles() {
+	async #updateMainProfiles() {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
@@ -606,7 +606,7 @@ module.exports = class PlayerManager extends ModelManager {
 		 */
 		const embeds = [];
 		/**
-		 * @param {import('../models/HypixelGuild')|string} guild
+		 * @param {import('../models/HypixelGuild').HypixelGuild|string} guild
 		 * @param {number} mainProfileChangesAmount
 		 */
 		const createEmbed = (guild, mainProfileChangesAmount) => {
@@ -625,7 +625,7 @@ module.exports = class PlayerManager extends ModelManager {
 			.map(([ guildId, data ]) => [ this.client.hypixelGuilds.cache.get(guildId) ?? guildId, data ])
 			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
 		) {
-			const logParts = splitMessage(
+			const logParts = Util.splitMessage(
 				Formatters.codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')),
 				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' },
 			);
@@ -652,4 +652,4 @@ module.exports = class PlayerManager extends ModelManager {
 
 		return this;
 	}
-};
+}

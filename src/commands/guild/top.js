@@ -1,11 +1,9 @@
-'use strict';
-
-const { handleLeaderboardCommandInteraction } = require('../../functions/leaderboards');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { handleLeaderboardCommandInteraction } from '../../functions/leaderboards.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class TopCommand extends SlashCommand {
+export default class TopCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -37,4 +35,4 @@ module.exports = class TopCommand extends SlashCommand {
 			},
 		);
 	}
-};
+}

@@ -1,14 +1,13 @@
-'use strict';
-
-const ChatMessage = require('prismarine-chat')(require('./constants/settings').MC_CLIENT_VERSION);
-const { messageTypes: { WHISPER, GUILD, OFFICER, PARTY }, invisibleCharacterRegExp } = require('./constants/chatBridge');
-const { spamMessages } = require('./constants/commandResponses');
-const { NO_BELL } = require('../../constants/emojiCharacters');
-const { escapeRegex } = require('../../functions/util');
-const HypixelMessageAuthor = require('./HypixelMessageAuthor');
-const MessageUtil = require('../../util/MessageUtil');
-const mojang = require('../../api/mojang');
-const logger = require('../../functions/logger');
+import loader from 'prismarine-chat';
+import { messageTypes, invisibleCharacterRegExp } from './constants/chatBridge.js';
+import { spamMessages } from './constants/commandResponses.js';
+import { NO_BELL } from '../../constants/emojiCharacters.js';
+import { MC_CLIENT_VERSION } from './constants/settings.js';
+import { escapeRegex } from '../../functions/util.js';
+import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
+import { MessageUtil } from '../../util/MessageUtil.js';
+import { mojang } from '../../api/mojang.js';
+import { logger } from '../../functions/logger.js';
 
 /**
  * @typedef {string} HypixelMessageType
@@ -17,31 +16,45 @@ const logger = require('../../functions/logger');
  * * `whisper`
  */
 
+const ChatMessage = loader(MC_CLIENT_VERSION);
 
-module.exports = class HypixelMessage extends ChatMessage {
+
+export class HypixelMessage {
 	/**
-	 * @param {import('./ChatBridge')} chatBridge
-	 * @param {number} position
-	 * @param {} message
-	 * @param {?boolean} displayWarning
+	 * @param {import('./ChatBridge').ChatBridge} chatBridge
+	 * @param {import('./bot_events/chat').ChatPacket} packet
 	 */
-	constructor(chatBridge, position, message, displayWarning) {
-		super(message, displayWarning);
+	constructor(chatBridge, { message, position }) {
+		let prismarineMessage;
 
+		try {
+			prismarineMessage = new ChatMessage(JSON.parse(message));
+		} catch (error) {
+			logger.error('[MINECRAFT BOT CHAT]', error);
+			prismarineMessage = new ChatMessage(message);
+		}
+
+		/**
+		 * the chat bridge that instantiated the message
+		 */
 		this.chatBridge = chatBridge;
+		/**
+		 * the prismarine-parsed message
+		 */
+		this.prismarineMessage = prismarineMessage;
+		/**
+		 * @type {?HypixelMessageType}
+		 */
+		this.position = { 0: 'chat', 1: 'system', 2: 'gameInfo' }[position] ?? null;
 		/**
 		 * forwarded message
 		 * @type {Promise<?import('discord.js').Message>}
 		 */
 		this.discordMessage = Promise.resolve(null);
 		/**
-		 * @type {?HypixelMessageType}
-		 */
-		this.position = { 0: 'chat', 1: 'system', 2: 'gameInfo' }[position] ?? null;
-		/**
 		 * raw content string
 		 */
-		this.rawContent = this.toString();
+		this.rawContent = prismarineMessage.toString();
 		/**
 		 * content with invis chars removed
 		 */
@@ -56,7 +69,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
-			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? WHISPER : null);
+			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? messageTypes.WHISPER : null);
 			this.author = new HypixelMessageAuthor(
 				this.chatBridge,
 				matched.groups.whisper !== 'To'
@@ -64,7 +77,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 						ign: matched.groups.ign,
 						guildRank: matched.groups.guildRank,
 						uuid: matched.groups.type
-							? this.extra?.[0].clickEvent?.value.slice(13).replace(/-/g, '') // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
+							? prismarineMessage.extra?.[0].clickEvent?.value.slice(13).replace(/-/g, '') // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
 							: null,
 					}
 					: {
@@ -95,7 +108,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 			const COMMAND_NAME = args.shift(); // extract first word
 
 			// no command, only ping or prefix
-			if ((!prefixMatched && this.type !== WHISPER) || !COMMAND_NAME) {
+			if ((!prefixMatched && this.type !== messageTypes.WHISPER) || !COMMAND_NAME) {
 				this.commandData = {
 					name: null,
 					command: null,
@@ -170,7 +183,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 	 * content with minecraft formatting codes
 	 */
 	get formattedContent() {
-		return this.toMotd().trim();
+		return this.prismarineMessage.toMotd().trim();
 	}
 
 	/**
@@ -190,7 +203,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 	/**
 	 * replies in game (and on discord if guild chat) to the message
-	 * @param {string | import('./ChatBridge').BroadcastOptions | import('./ChatBridge').ChatOptions } contentOrOptions
+	 * @param {string | import('./ChatBridge').BroadcastOptions & import('./ChatBridge').ChatOptions } contentOrOptions
 	 */
 	async reply(contentOrOptions) {
 		const { ephemeral, ...options } = typeof contentOrOptions === 'string'
@@ -204,8 +217,8 @@ module.exports = class HypixelMessage extends ChatMessage {
 		});
 
 		switch (this.type) {
-			case GUILD:
-			case OFFICER: {
+			case messageTypes.GUILD:
+			case messageTypes.OFFICER: {
 				const result = await this.chatBridge.broadcast({
 					hypixelMessage: this,
 					discord: {
@@ -220,13 +233,13 @@ module.exports = class HypixelMessage extends ChatMessage {
 				return result;
 			}
 
-			case PARTY:
+			case messageTypes.PARTY:
 				return this.chatBridge.minecraft.pchat({
 					maxParts: Infinity,
 					...options,
 				});
 
-			case WHISPER:
+			case messageTypes.WHISPER:
 				return this.author.send({
 					maxParts: Infinity,
 					...options,
@@ -267,10 +280,10 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 				if (/<@&\d{17,19}>/.test(discordMessage.content)) {
-					this.author.send('you do not have permission to @ roles from in game chat');
+					this.author.send('you do not have permission to ping roles from in game chat');
 					MessageUtil.react(discordMessage, NO_BELL);
 				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content))) {
-					this.author.send('you do not have permission to @ users from in game chat');
+					this.author.send('you do not have permission to ping users from in game chat');
 					MessageUtil.react(discordMessage, NO_BELL);
 				}
 
@@ -301,7 +314,7 @@ module.exports = class HypixelMessage extends ChatMessage {
 		});
 
 		const result = await this.chatBridge.minecraft.awaitMessages({
-			filter: message => message.author?.ign === this.author.ign,
+			filter: hypixelMessage => hypixelMessage.author?.ign === this.author.ign,
 			max: 1,
 			time: timeoutSeconds * 1_000,
 		});
@@ -310,4 +323,4 @@ module.exports = class HypixelMessage extends ChatMessage {
 
 		throw errorMessage;
 	}
-};
+}

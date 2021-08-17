@@ -1,7 +1,5 @@
-'use strict';
-
-const { commaListsOr } = require('common-tags');
-const InteractionUtil = require('../../util/InteractionUtil');
+import { commaListsOr } from 'common-tags';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 
 
 /**
@@ -9,7 +7,7 @@ const InteractionUtil = require('../../util/InteractionUtil');
  * @param {import('discord.js').CommandInteraction} interaction
  * @param {import('discord.js').Snowflake[]} requiredRolesRaw
  */
-module.exports = (message, interaction, requiredRolesRaw) => commaListsOr`
+export const missingPermissionsError = (message, interaction, requiredRolesRaw) => commaListsOr`
 	missing permissions for \`${InteractionUtil.fullCommandName(interaction)}\` (${
 		requiredRolesRaw.flatMap((roleId) => {
 			if (!roleId) return [];

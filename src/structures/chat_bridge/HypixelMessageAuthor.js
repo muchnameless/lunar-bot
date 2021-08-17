@@ -1,12 +1,10 @@
-'use strict';
-
-const mojang = require('../../api/mojang');
-const logger = require('../../functions/logger');
+import { mojang } from '../../api/mojang.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class HypixelMessageAuthor {
+export class HypixelMessageAuthor {
 	/**
-	 * @param {import('./ChatBridge')} chatBridge
+	 * @param {import('./ChatBridge').ChatBridge} chatBridge
 	 * @param {object} param1
 	 * @param {string} [param1.ign]
 	 * @param {string} [param1.guildRank]
@@ -19,13 +17,13 @@ module.exports = class HypixelMessageAuthor {
 
 		/**
 		 * player object of the message author
-		 * @type {?import('../database/models/Player')}
+		 * @type {?import('../database/models/Player').Player}
 		 */
 		this.player = uuid
 			? this.client.players.cache.get(uuid) ?? logger.error(`[HYPIXEL AUTHOR CTOR]: unknown uuid '${uuid}'`) ?? this.client.players.findByIgn(ign)
 			: this.client.players.findByIgn(ign);
 		/**
-		 * @type {?import('discord.js').Message}
+		 * @type {?import('discord.js').GuildMember}
 		 */
 		this.member = null;
 	}
@@ -73,4 +71,4 @@ module.exports = class HypixelMessageAuthor {
 	toString() {
 		return this.ign;
 	}
-};
+}

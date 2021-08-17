@@ -1,11 +1,9 @@
-'use strict';
-
-const { Collection } = require('discord.js');
-const BaseCommandCollection = require('./BaseCommandCollection');
-const logger = require('../../functions/logger');
+import { Collection } from 'discord.js';
+import { BaseCommandCollection } from './BaseCommandCollection.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class BridgeCommandCollection extends BaseCommandCollection {
+export class BridgeCommandCollection extends BaseCommandCollection {
 	/**
 	 * categories that are excluded from the help command and autocorrection
 	 */
@@ -36,14 +34,14 @@ module.exports = class BridgeCommandCollection extends BaseCommandCollection {
 
 	/**
 	 * help command run method
-	 * @type {Function}
+	 * @param {import('../chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async help(message) {
+	async help(hypixelMessage) {
 		try {
-			return await this.get('help').runInGame(message);
+			return await this.get('help').runInGame(hypixelMessage);
 		} catch (error) {
-			logger.error(`[CMD HANDLER]: An error occured while ${message.author} tried to execute '${message.content}' in '${message.type}'`, error);
-			message.reply(`an error occured while executing the \`help\` command:\n${error}`);
+			logger.error(`[CMD HANDLER]: An error occured while ${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}'`, error);
+			hypixelMessage.author.send(`an error occured while executing the \`help\` command:\n${error}`);
 		}
 	}
 
@@ -52,6 +50,6 @@ module.exports = class BridgeCommandCollection extends BaseCommandCollection {
 	 * @param {string} categoryInput
 	 */
 	filterByCategory(categoryInput) {
-		return this.filter((/** @type {import('./BridgeCommand')} */ { category, aliases }, name) => category === categoryInput && !aliases?.some(alias => alias.toLowerCase() === name));
+		return this.filter((/** @type {import('./BridgeCommand').BridgeCommand} */ { category, aliases }, name) => category === categoryInput && !aliases?.some(alias => alias.toLowerCase() === name));
 	}
-};
+}

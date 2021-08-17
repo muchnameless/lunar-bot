@@ -1,17 +1,16 @@
-'use strict';
-
-const { SnowflakeUtil, Formatters, Constants } = require('discord.js');
-const { Op } = require('sequelize');
-const ms = require('ms');
-const { demote, kick: { success: kickSuccess, error: kickError }, invite, mute, promote, setRank, unmute, historyErrors, logErrors, topErrors } = require('../../structures/chat_bridge/constants/commandResponses');
-const { removeMcFormatting } = require('../../structures/chat_bridge/functions/util');
-const { EMBED_DESCRIPTION_MAX_CHARS } = require('../../constants/discord');
-const { GUILD_ID_BRIDGER, UNKNOWN_IGN } = require('../../constants/database');
-const { stringToMS, trim, getIdFromString, autocorrect } = require('../../functions/util');
-const UserUtil = require('../../util/UserUtil');
-const InteractionUtil = require('../../util/InteractionUtil');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
+import { SnowflakeUtil, Formatters, Constants } from 'discord.js';
+import pkg from 'sequelize';
+const { Op } = pkg;
+import ms from 'ms';
+import { demote, kick, invite, mute, promote, setRank, unmute, historyErrors, logErrors, topErrors } from '../../structures/chat_bridge/constants/commandResponses.js';
+import { removeMcFormatting } from '../../structures/chat_bridge/functions/util.js';
+import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants/discord.js';
+import { GUILD_ID_BRIDGER, UNKNOWN_IGN } from '../../constants/database.js';
+import { stringToMS, trim, getIdFromString, autocorrect } from '../../functions/util.js';
+import { UserUtil } from '../../util/UserUtil.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
 const commonOptions = new Map([ [
@@ -89,7 +88,7 @@ const commonOptions = new Map([ [
 ] ]);
 
 
-module.exports = class GuildCommand extends SlashCommand {
+export default class GuildCommand extends SlashCommand {
 	constructor(data) {
 		const guildOption = SlashCommand.guildOptionBuilder(data.client);
 
@@ -197,7 +196,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	/**
 	 * @param {string} targetInput
 	 * @param {?import('discord.js').CommandInteraction} interaction
-	 * @returns {Promise<string | ?import('../../structures/database/models/Player')>}
+	 * @returns {Promise<string | ?import('../../structures/database/models/Player').Player>}
 	 */
 	async getMuteTarget(targetInput, interaction) {
 		if ([ 'guild', 'everyone' ].includes(targetInput)) {
@@ -244,7 +243,7 @@ module.exports = class GuildCommand extends SlashCommand {
 
 	/**
 	 * /g mute
-	 * @param {{ interaction: import('discord.js').CommandInteraction, target: string | import('../../structures/database/models/Player'), duration: number, hypixelGuild?: import('../../structures/database/models/HypixelGuild') }} param0
+	 * @param {{ interaction: import('discord.js').CommandInteraction, target: string | import('../../structures/database/models/Player').Player, duration: number, hypixelGuild?: import('../../structures/database/models/HypixelGuild').HypixelGuild }} param0
 	 */
 	async runMute({ interaction, target, executor, duration, hypixelGuild: hypixelGuildInput }) {
 		let hypixelGuild = hypixelGuildInput;
@@ -327,7 +326,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {{ interaction: ?import('discord.js').CommandInteraction, target: import('../../structures/database/models/Player') | string, executor: ?import('../../structures/database/models/Player'), hypixelGuild: import('../../structures/database/models/HypixelGuild'), reason: string }} param0
+	 * @param {{ interaction: ?import('discord.js').CommandInteraction, target: import('../../structures/database/models/Player').Player | string, executor: ?import('../../structures/database/models/Player').Player, hypixelGuild: import('../../structures/database/models/HypixelGuild').HypixelGuild, reason: string }} param0
 	 * @returns {Promise<{ content: string, ephemeral: boolean }>}
 	 */
 	async runKick({ interaction, target, executor, hypixelGuild, reason }) {
@@ -367,8 +366,8 @@ module.exports = class GuildCommand extends SlashCommand {
 
 			const res = await chatBridge.minecraft.command({
 				command: `g kick ${target} ${reason}`,
-				responseRegExp: kickSuccess(target.ign, chatBridge.bot.username),
-				abortRegExp: kickError(target.ign),
+				responseRegExp: kick.success(target.ign, chatBridge.bot.username),
+				abortRegExp: kick.error(target.ign),
 				rejectOnAbort: true,
 				timeout: 60_000,
 				rejectOnTimeout: true,
@@ -392,7 +391,7 @@ module.exports = class GuildCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
-	 * @param {?import('../../structures/database/models/HypixelGuild')} [hypixelGuild]
+	 * @param {?import('../../structures/database/models/HypixelGuild').HypixelGuild} [hypixelGuild]
 	 */
 	async #run(interaction, commandOptions, { chatBridge } = this.getHypixelGuild(interaction)) {
 		this.deferReply(interaction);
@@ -759,4 +758,4 @@ module.exports = class GuildCommand extends SlashCommand {
 				throw new Error(`unknown subcommand '${SUB_COMMAND}'`);
 		}
 	}
-};
+}

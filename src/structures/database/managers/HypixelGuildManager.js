@@ -1,22 +1,20 @@
-'use strict';
-
-const { CronJob } = require('cron');
-const { GUILD_ID_BRIDGER, GUILD_ID_ERROR } = require('../../../constants/database');
-const { autocorrect } = require('../../../functions/util');
-const ModelManager = require('./ModelManager');
-const logger = require('../../../functions/logger');
+import { CronJob } from 'cron';
+import { GUILD_ID_BRIDGER, GUILD_ID_ERROR } from '../../../constants/database.js';
+import { autocorrect } from '../../../functions/util.js';
+import { ModelManager } from './ModelManager.js';
+import { logger } from '../../../functions/logger.js';
 
 
-module.exports = class HypixelGuildManager extends ModelManager {
+export class HypixelGuildManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('../models/HypixelGuild')}
+		 * @type {import('discord.js').Collection<string, import('../models/HypixelGuild').HypixelGuild}
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/HypixelGuild')}
+		 * @type {import('../models/HypixelGuild').HypixelGuild}
 		 */
 		this.model;
 	}
@@ -73,7 +71,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 
 	/**
 	 * sweeps the player cache
-	 * @param {?string|import('../models/HypixelGuild')} idOrGuild
+	 * @param {?string|import('../models/HypixelGuild').HypixelGuild} idOrGuild
 	 */
 	sweepPlayerCache(idOrGuild) {
 		if (idOrGuild) {
@@ -92,7 +90,7 @@ module.exports = class HypixelGuildManager extends ModelManager {
 	/**
 	 * get a hypixel guild by its name, case insensitive and with auto-correction
 	 * @param {string} name name of the hypixel guild
-	 * @returns {?import('../models/HypixelGuild')}
+	 * @returns {?import('../models/HypixelGuild').HypixelGuild}
 	 */
 	getByName(name) {
 		if (!name) return null;
@@ -130,4 +128,4 @@ module.exports = class HypixelGuildManager extends ModelManager {
 
 		logger.info('[GUILD DAILY STATS]: performed daily stats saves');
 	}
-};
+}

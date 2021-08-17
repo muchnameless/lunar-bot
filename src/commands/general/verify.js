@@ -1,16 +1,15 @@
-'use strict';
+import { Constants } from 'discord.js';
+import pkg from 'sequelize';
+const { Op } = pkg;
+import { oneLine, commaListsOr } from 'common-tags';
+import { UserUtil } from '../../util/UserUtil.js';
+import { hypixel } from '../../api/hypixel.js';
+import { mojang } from '../../api/mojang.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
-const { Constants } = require('discord.js');
-const { Op } = require('sequelize');
-const { oneLine, commaListsOr } = require('common-tags');
-const UserUtil = require('../../util/UserUtil');
-const hypixel = require('../../api/hypixel');
-const mojang = require('../../api/mojang');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
 
-
-module.exports = class VerifyCommand extends SlashCommand {
+export default class VerifyCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -33,7 +32,7 @@ module.exports = class VerifyCommand extends SlashCommand {
 		this.deferReply(interaction);
 
 		const IGN = interaction.options.getString('ign', true);
-		/** @type {import('../../structures/database/models/Player')} */
+		/** @type {import('../../structures/database/models/Player').Player} */
 		const playerLinkedToId = UserUtil.getPlayer(interaction.user);
 
 		let player = this.client.players.getByIgn(IGN)
@@ -108,4 +107,4 @@ module.exports = class VerifyCommand extends SlashCommand {
 
 		return await this.reply(interaction, `successfully linked your discord account to \`${ign}\``);
 	}
-};
+}

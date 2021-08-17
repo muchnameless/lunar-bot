@@ -1,16 +1,14 @@
-'use strict';
-
-const { MessageActionRow, MessageSelectMenu, MessageEmbed, Formatters, Constants } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const { upperCaseFirstChar } = require('../../functions/util');
-const { getUuidAndIgn } = require('../../functions/input');
-const { AH_KEY } = require('../../constants/redis');
-const hypixel = require('../../api/hypixel');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
+import { MessageActionRow, MessageSelectMenu, MessageEmbed, Formatters, Constants } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { upperCaseFirstChar } from '../../functions/util.js';
+import { getUuidAndIgn } from '../../functions/input.js';
+import { AH_KEY } from '../../constants/redis.js';
+import { hypixel } from '../../api/hypixel.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class AhCommand extends SlashCommand {
+export default class AhCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -156,8 +154,7 @@ module.exports = class AhCommand extends SlashCommand {
 		try {
 			const [ , uuid, ign ] = interaction.customId.split(':');
 			const [ profileId ] = interaction.values;
-			const profiles = interaction.message.components[0]?.components[0].options
-				?? (await hypixel.skyblock.profiles.uuid(uuid)).map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id }));
+			const profiles = interaction.message.components[0].components[0].options;
 
 			// interaction from original requester -> edit message
 			if (interaction.user.id === interaction.message.interaction?.user.id) return this.update(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));
@@ -242,4 +239,4 @@ module.exports = class AhCommand extends SlashCommand {
 			return await this.reply(interaction, `${error}`);
 		}
 	}
-};
+}

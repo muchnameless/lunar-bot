@@ -1,10 +1,8 @@
-'use strict';
-
-const BridgeCommand = require('../../../commands/BridgeCommand');
-// const logger = require('../../../../functions/logger');
+import { BridgeCommand } from '../../../commands/BridgeCommand.js';
+// import { logger } from '../../../../functions/logger.js';
 
 
-module.exports = class KickBridgeCommand extends BridgeCommand {
+export default class KickBridgeCommand extends BridgeCommand {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [],
@@ -18,17 +16,17 @@ module.exports = class KickBridgeCommand extends BridgeCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../HypixelMessage')} message
+	 * @param {import('../../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		const targetInput = message.commandData.args.shift();
+	async runInGame(hypixelMessage) {
+		const targetInput = hypixelMessage.commandData.args.shift();
 		const { content } = await this.client.commands.get('guild')?.runKick({
 			target: this.client.players.getByIgn(targetInput) ?? targetInput,
-			executor: message.player,
-			reason: message.commandData.args.join(' '),
-			hypixelGuild: message.hypixelGuild,
+			executor: hypixelMessage.player,
+			reason: hypixelMessage.commandData.args.join(' '),
+			hypixelGuild: hypixelMessage.hypixelGuild,
 		});
 
-		return message.author.send(content);
+		return hypixelMessage.author.send(content);
 	}
-};
+}

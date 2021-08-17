@@ -1,12 +1,10 @@
-'use strict';
-
-const { MessageFlags, Permissions } = require('discord.js');
-const ChannelUtil = require('../util/ChannelUtil');
-const MessageCreateEvent = require('./messageCreate');
-const logger = require('../functions/logger');
+import { MessageFlags, Permissions } from 'discord.js';
+import { ChannelUtil } from '../util/ChannelUtil.js';
+import MessageCreateEvent from './messageCreate.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class MessageUpdateEvent extends MessageCreateEvent {
+export default class MessageUpdateEvent extends MessageCreateEvent {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -39,4 +37,4 @@ module.exports = class MessageUpdateEvent extends MessageCreateEvent {
 
 		this._handleDiscordMessage(newMessage, true);
 	}
-};
+}

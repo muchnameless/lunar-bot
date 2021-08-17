@@ -1,26 +1,25 @@
-'use strict';
+import { Collection } from 'discord.js';
+import { dirname, basename } from 'path';
+import { pathToFileURL } from 'url';
+import { getAllJsFiles } from '../../functions/files.js';
+import { autocorrect } from '../../functions/util.js';
+import { logger } from '../../functions/logger.js';
 
-const { Collection } = require('discord.js');
-const { dirname, basename } = require('path');
-const { getAllJsFiles } = require('../../functions/files');
-const { autocorrect } = require('../../functions/util');
-const logger = require('../../functions/logger');
 
-
-module.exports = class BaseCommandCollection extends Collection {
+export class BaseCommandCollection extends Collection {
 	/**
-	 * @param {import('../LunarClient')} client
-	 * @param {string} dirPath the path to the commands folder
+	 * @param {import('../LunarClient').LunarClient} client
+	 * @param {URL} dirURL the path to the commands folder
 	 * @param {*} [entries]
 	 */
-	constructor(client, dirPath, entries) {
+	constructor(client, dirURL, entries) {
 		super(entries);
 
 		this.client = client;
 		/**
 		 * path to the command files
 		 */
-		this.dirPath = dirPath;
+		this.dirURL = dirURL;
 	}
 
 	/**
@@ -43,7 +42,7 @@ module.exports = class BaseCommandCollection extends Collection {
 	 * @param {string} commandName
 	 */
 	async loadByName(commandName) {
-		const commandFiles = await getAllJsFiles(this.dirPath);
+		const commandFiles = await getAllJsFiles(this.dirURL);
 		const commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
 
 		if (!commandFile) return;
@@ -55,11 +54,11 @@ module.exports = class BaseCommandCollection extends Collection {
 	 * loads a single command into the collection
 	 * @param {string} file command file to load
 	 */
-	loadFromFile(file) {
+	async loadFromFile(file) {
 		const name = basename(file, '.js');
 		const category = basename(dirname(file));
-		const Command = require(file);
-		/** @type {import('./DualCommand') | import('./SlashCommand')} */
+		const Command = (await import(pathToFileURL(file).href)).default;
+		/** @type {import('./DualCommand').DualCommand | import('./SlashCommand').SlashCommand} */
 		const command = new Command({
 			client: this.client,
 			collection: this,
@@ -69,9 +68,6 @@ module.exports = class BaseCommandCollection extends Collection {
 
 		command.load();
 
-		// delete if command won't be loaded again
-		delete require.cache[require.resolve(file)];
-
 		return command;
 	}
 
@@ -79,11 +75,9 @@ module.exports = class BaseCommandCollection extends Collection {
 	 * loads all commands into the collection
 	 */
 	async loadAll() {
-		const commandFiles = await getAllJsFiles(this.dirPath);
+		const commandFiles = await getAllJsFiles(this.dirURL);
 
-		for (const file of commandFiles) {
-			this.loadFromFile(file);
-		}
+		await Promise.all(commandFiles.map(file => this.loadFromFile(file)));
 
 		logger.info(`[COMMANDS]: ${commandFiles.length} command${commandFiles.length !== 1 ? 's' : ''} loaded`);
 
@@ -100,11 +94,11 @@ module.exports = class BaseCommandCollection extends Collection {
 	/**
 	 * get a command by name or by alias
 	 * @param {string} name
-	 * @returns {?import('./BridgeCommand')}
+	 * @returns {?import('./BridgeCommand').BridgeCommand}
 	 */
 	getByName(name) {
 		/**
-		 * @type {?import('./BridgeCommand')}
+		 * @type {?import('./BridgeCommand').BridgeCommand}
 		 */
 		let command = this.get(name);
 		if (command) return command;
@@ -117,4 +111,4 @@ module.exports = class BaseCommandCollection extends Collection {
 		command = this.get(value);
 		return (command.visible ?? true) ? command : null;
 	}
-};
+}

@@ -1,11 +1,9 @@
-'use strict';
-
-const { handleLeaderboardCommandInteraction, getDefaultOffset } = require('../../functions/leaderboards');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { handleLeaderboardCommandInteraction, getDefaultOffset } from '../../functions/leaderboards.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class LeaderboardCommand extends SlashCommand {
+export default class LeaderboardCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [ 'lb' ],
@@ -37,4 +35,4 @@ module.exports = class LeaderboardCommand extends SlashCommand {
 			},
 		);
 	}
-};
+}

@@ -1,17 +1,15 @@
-'use strict';
-
-const { Collection } = require('discord.js');
+import { Collection } from 'discord.js';
 
 /**
  * @typedef {object} BaseCommandData additional information about the command
- * @property {import('../LunarClient')} client discord this.client that instantiated this command
- * @property {import('./BaseCommandCollection')} collection
+ * @property {import('../LunarClient').LunarClient} client discord this.client that instantiated this command
+ * @property {import('./BaseCommandCollection').BaseCommandCollection} collection
  * @property {string} name the name of the command
  * @property {string} category the category of the command
  */
 
 
-module.exports = class BaseCommand {
+export class BaseCommand {
 	/**
 	 * create a new command
 	 * @param {BaseCommandData} param0
@@ -67,7 +65,7 @@ module.exports = class BaseCommand {
 	 * clears the cooldown timestamps collection
 	 */
 	clearCooldowns() {
-		if (this.timestamps) this.timestamps = new Collection();
+		this.timestamps &&= new Collection();
 		return this;
 	}
 
@@ -93,4 +91,4 @@ module.exports = class BaseCommand {
 	async run() {
 		throw new Error('no run function specified');
 	}
-};
+}

@@ -1,15 +1,14 @@
-'use strict';
+import { Permissions, Formatters, Constants } from 'discord.js';
+import pkg from 'sequelize';
+const { Op, Model } = pkg;
+import { validateNumber } from '../../functions/stringValidators.js';
+import { escapeIgn, safePromiseAll } from '../../functions/util.js';
+import { ChannelUtil } from '../../util/ChannelUtil.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { logger } from '../../functions/logger.js';
 
-const { Permissions, Formatters, Constants } = require('discord.js');
-const { Op } = require('sequelize');
-const { validateNumber } = require('../../functions/stringValidators');
-const { escapeIgn, safePromiseAll } = require('../../functions/util');
-const ChannelUtil = require('../../util/ChannelUtil');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-const logger = require('../../functions/logger');
 
-
-module.exports = class TaxCommand extends SlashCommand {
+export default class TaxCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -238,7 +237,7 @@ module.exports = class TaxCommand extends SlashCommand {
 				const excluded = interaction.options.getString('exclude')
 					?.split(/\W/g)
 					.flatMap(x => (x ? x.toLowerCase() : [])); // lower case IGN array
-				/** @type {import('discord.js').Collection<string, import('../../structures/database/models/Player')>} */
+				/** @type {import('discord.js').Collection<string, import('../../structures/database/models/Player').Player>} */
 				const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild)
 					.filter(({ paid, ign }) => !paid && excluded?.includes(ign.toLowerCase()));
 				const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordId }) => inDiscord && validateNumber(discordId));
@@ -342,7 +341,7 @@ module.exports = class TaxCommand extends SlashCommand {
 								taxCollector.resetAmount('donation'),
 							]);
 						}),
-						this.client.db.Sequelize.Model.update.call(players.model, // reset players that left
+						Model.update.call(players.model, // reset players that left
 							{ paid: false },
 							{
 								where: {
@@ -403,4 +402,4 @@ module.exports = class TaxCommand extends SlashCommand {
 				throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
 		}
 	}
-};
+}

@@ -1,14 +1,12 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const { PROFILE_NAMES, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } = require('../../constants/skyblock');
-const { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT, GUILD_ID_ALL } = require('../../constants/database');
-const { validateDiscordId, validateMinecraftUuid } = require('../../functions/stringValidators');
-const missingPermissionsError = require('../errors/MissingPermissionsError');
-const InteractionUtil = require('../../util/InteractionUtil');
-const UserUtil = require('../../util/UserUtil');
-const BaseCommand = require('./BaseCommand');
-const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { PROFILE_NAMES, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } from '../../constants/skyblock.js';
+import { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT, GUILD_ID_ALL } from '../../constants/database.js';
+import { validateDiscordId, validateMinecraftUuid } from '../../functions/stringValidators.js';
+import { missingPermissionsError } from '../errors/MissingPermissionsError.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { UserUtil } from '../../util/UserUtil.js';
+import { BaseCommand } from './BaseCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
 /**
@@ -16,12 +14,10 @@ const logger = require('../../functions/logger');
  */
 
 
-module.exports = class SlashCommand extends BaseCommand {
+export class SlashCommand extends BaseCommand {
 	/**
 	 * create a new command
-	 * @param {BaseCommand.BaseCommandData} param0
-	 * @param {import('../LunarClient')} param0.client discord this.client that instantiated this command
-	 * @param {string} param0.name command name
+	 * @param {import('./BaseCommand').BaseCommandData} param0
 	 * @param {CommandData} param1
 	 */
 	constructor(param0, { aliases, description, options, defaultPermission, cooldown, requiredRoles }) {
@@ -36,7 +32,7 @@ module.exports = class SlashCommand extends BaseCommand {
 
 	static get guildOptionBuilder() {
 		/**
-		 * @param {import('../LunarClient')} client
+		 * @param {import('../LunarClient').LunarClient} client
 		 * @param {boolean} [includeAll=false]
 		 */
 		return (client, includeAll = false) => {
@@ -256,7 +252,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	 * returns the player object, optional fallback to the interaction.user's player
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {boolean} [fallbackToCurrentUser=false]
-	 * @returns {?import('../database/models/Player')}
+	 * @returns {?import('../database/models/Player').Player}
 	 */
 	getPlayer(interaction, fallbackToCurrentUser = false) {
 		if (!interaction.options._hoistedOptions.length) {
@@ -294,7 +290,7 @@ module.exports = class SlashCommand extends BaseCommand {
 	/**
 	 * returns a HypixelGuild instance
 	 * @param {import('discord.js').CommandInteraction} interaction
-	 * @returns {import('../database/models/HypixelGuild') | GUILD_ID_ALL}
+	 * @returns {import('../database/models/HypixelGuild').HypixelGuild | GUILD_ID_ALL}
 	 */
 	getHypixelGuild(interaction) {
 		const INPUT = interaction.options.getString('guild');
@@ -341,4 +337,4 @@ module.exports = class SlashCommand extends BaseCommand {
 	async run(interaction) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
-};
+}

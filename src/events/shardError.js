@@ -1,10 +1,8 @@
-'use strict';
-
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class ShardErrorEvent extends Event {
+export default class ShardErrorEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -20,4 +18,4 @@ module.exports = class ShardErrorEvent extends Event {
 	async run(error, shardId) {
 		logger.error(`[SHARD ERROR]: #${shardId}`, error);
 	}
-};
+}

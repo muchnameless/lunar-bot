@@ -1,9 +1,7 @@
-'use strict';
-
-const { getUuidAndIgn } = require('../../functions/input');
-const hypixel = require('../../api/hypixel');
-const DualCommand = require('../../structures/commands/DualCommand');
-const logger = require('../../functions/logger');
+import { getUuidAndIgn } from '../../functions/input.js';
+import { hypixel } from '../../api/hypixel.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+import { logger } from '../../functions/logger.js';
 
 /**
  * @typedef {object} FetchedData
@@ -12,9 +10,9 @@ const logger = require('../../functions/logger');
  */
 
 
-module.exports = class StatsCommand extends DualCommand {
+export default class StatsCommand extends DualCommand {
 	/**
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} ctx
 	 * @param {string} [ignOrUuid]
 	 * @returns {Promise<FetchedData>}
 	 */
@@ -66,18 +64,18 @@ module.exports = class StatsCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
+	async runInGame(hypixelMessage) {
 		try {
-			return message.reply(
+			return hypixelMessage.reply(
 				this._generateReply(
-					await this._fetchData(message, ...message.commandData.args),
+					await this._fetchData(hypixelMessage, ...hypixelMessage.commandData.args),
 				),
 			);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
-			return await message.reply(`${error}`);
+			return await hypixelMessage.reply(`${error}`);
 		}
 	}
-};
+}

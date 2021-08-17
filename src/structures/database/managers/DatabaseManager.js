@@ -1,33 +1,31 @@
-'use strict';
+import { Permissions, Formatters } from 'discord.js';
+import { CronJob as CronJobConstructor } from 'cron';
+import { stripIndents, commaLists } from 'common-tags';
+import { isEqual } from 'lodash-es';
+import pkg from 'sequelize';
+const { Model } = pkg;
+import { X_EMOJI, Y_EMOJI_ALT } from '../../../constants/emojiCharacters.js';
+import { DEFAULT_CONFIG } from '../../../constants/database.js';
+import { asyncFilter, safePromiseAll } from '../../../functions/util.js';
+import { hypixel } from '../../../api/hypixel.js';
+import { ConfigManager } from './ConfigManager.js';
+import { HypixelGuildManager } from './HypixelGuildManager.js';
+import { PlayerManager } from './PlayerManager.js';
+import { TaxCollectorManager } from './TaxCollectorManager.js';
+import { Config } from '../models/Config.js';
+import { HypixelGuild } from '../models/HypixelGuild.js';
+import { Player } from '../models/Player.js';
+import { TaxCollector } from '../models/TaxCollector.js';
+import { ModelManager } from './ModelManager.js';
+import { ChatTrigger } from '../models/ChatTrigger.js';
+import { ArrayCacheCollection } from '../../ArrayCacheCollection.js';
+import { ChannelUtil } from '../../../util/ChannelUtil.js';
+import { logger } from '../../../functions/logger.js';
 
-const { Permissions, Formatters } = require('discord.js');
-const { CronJob: CronJobConstructor } = require('cron');
-const { stripIndents, commaLists } = require('common-tags');
-const { isEqual } = require('lodash');
-const { X_EMOJI, Y_EMOJI_ALT } = require('../../../constants/emojiCharacters');
-const { DEFAULT_CONFIG } = require('../../../constants/database');
-const { asyncFilter, safePromiseAll } = require('../../../functions/util');
-const hypixel = require('../../../api/hypixel');
-const ConfigManager = require('./ConfigManager');
-const HypixelGuildManager = require('./HypixelGuildManager');
-const PlayerManager = require('./PlayerManager');
-const TaxCollectorManager = require('./TaxCollectorManager');
-const Config = require('../models/Config');
-const HypixelGuild = require('../models/HypixelGuild');
-const Player = require('../models/Player');
-const TaxCollector = require('../models/TaxCollector');
-const ModelManager = require('./ModelManager');
-const ChatTrigger = require('../models/ChatTrigger');
-const ArrayCacheCollection = require('../../ArrayCacheCollection');
-const ChannelUtil = require('../../../util/ChannelUtil');
-const logger = require('../../../functions/logger');
 
-
-module.exports = class DatabaseManager {
+export class DatabaseManager {
 	/**
-	 * @param {object} param0
-	 * @param {import('../../LunarClient')} param0.client
-	 * @param {object} db
+	 * @param {{ client: import('../../LunarClient').LunarClient, db: import('../index') }} param0
 	 */
 	constructor({ client, db }) {
 		this.client = client;
@@ -43,7 +41,7 @@ module.exports = class DatabaseManager {
 		const models = {};
 
 		for (const [ key, value ] of Object.entries(db)) {
-			if (Object.getPrototypeOf(value) === db.Sequelize.Model) {
+			if (Object.getPrototypeOf(value) === Model) {
 				models[key] = value;
 				Object.defineProperty(value.prototype, 'client', { value: client }); // add 'client' to all db models
 			} else {
@@ -305,7 +303,7 @@ module.exports = class DatabaseManager {
 
 	/**
 	 * updates the player database and the corresponding tax message
-	 * @param {import('../../LunarClient')} client
+	 * @param {import('../../LunarClient').LunarClient} client
 	 */
 	async update() {
 		const { config, players } = this.modelManagers;
@@ -370,4 +368,4 @@ module.exports = class DatabaseManager {
 			logger.error('[TAX MESSAGE]', error);
 		}
 	}
-};
+}

@@ -1,11 +1,9 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const DualCommand = require('../../structures/commands/DualCommand');
-// const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class SmiteCommand extends DualCommand {
+export default class SmiteCommand extends DualCommand {
 	constructor(data) {
 		super(
 			data,
@@ -43,23 +41,23 @@ module.exports = class SmiteCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
+	async runInGame(hypixelMessage) {
 		/** @type {import('../guild/guild')} */
 		const guildCommand = this.client.commands.get('guild');
-		const TARGET_INPUT = message.commandData.args[0].toLowerCase();
+		const TARGET_INPUT = hypixelMessage.commandData.args[0].toLowerCase();
 		const target = await guildCommand.getMuteTarget(TARGET_INPUT);
 
-		if (!target) return await message.author.send(`no player with the IGN \`${TARGET_INPUT}\` found`);
+		if (!target) return await hypixelMessage.author.send(`no player with the IGN \`${TARGET_INPUT}\` found`);
 
 		const { content } = await guildCommand.runMute({
 			target,
-			executor: message.player,
+			executor: hypixelMessage.player,
 			duration: 10 * 60_000,
-			hypixelGuild: message.hypixelGuild,
+			hypixelGuild: hypixelMessage.hypixelGuild,
 		});
 
-		return await message.author.send(content);
+		return await hypixelMessage.author.send(content);
 	}
-};
+}

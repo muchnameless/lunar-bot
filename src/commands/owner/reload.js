@@ -1,14 +1,12 @@
-'use strict';
-
-const { Formatters, Constants } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const { basename } = require('path');
-const { getAllJsFiles } = require('../../functions/files');
-const DualCommand = require('../../structures/commands/DualCommand');
-const logger = require('../../functions/logger');
+import { Formatters, Constants } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { basename } from 'path';
+import { getAllJsFiles } from '../../functions/files.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class ReloadCommand extends DualCommand {
+export default class ReloadCommand extends DualCommand {
 	constructor(data) {
 		super(
 			data,
@@ -172,10 +170,10 @@ module.exports = class ReloadCommand extends DualCommand {
 			}
 
 			case 'filter': {
-				delete require.cache[require.resolve('../../structures/chat_bridge/constants/chatBridge')];
+				delete require.cache[require.resolve('../../structures/chat_bridge/constants/ChatBridge').ChatBridge];
 
-				const { blockedWordsRegExp } = require('../../structures/chat_bridge/constants/chatBridge');
-				const ChatManager = require('../../structures/chat_bridge/managers/ChatManager');
+				const { blockedWordsRegExp } = await import('../../structures/chat_bridge/constants/chatBridge.js');
+				const { ChatManager } = await import('../../structures/chat_bridge/managers/ChatManager.js');
 
 				ChatManager.BLOCKED_WORDS_REGEXP = blockedWordsRegExp;
 
@@ -197,9 +195,9 @@ module.exports = class ReloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(await this.#run(...message.commandData.args));
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(await this.#run(...hypixelMessage.commandData.args));
 	}
-};
+}

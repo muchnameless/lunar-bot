@@ -1,21 +1,16 @@
-'use strict';
-
-const HypixelMessage = require('../HypixelMessage');
-const logger = require('../../../functions/logger');
-
+import { HypixelMessage } from '../HypixelMessage.js';
+// import { logger } from '../../../functions/logger.js';
 
 /**
- * @param {import('../ChatBridge')} chatBridge
- * @param {object} packet
- * @param {number} packet.position
- * @param {HypixelMessage.ChatPosition} position
+ * @typedef {object} ChatPacket
+ * @property {string} message
+ * @property {number} position
  */
-module.exports = async (chatBridge, { position, message }) => {
-	try {
-		chatBridge.emit('message', await new HypixelMessage(chatBridge, position, JSON.parse(message)).init());
-	} catch (error) {
-		logger.error('[MINECRAFT BOT CHAT]', error);
 
-		chatBridge.emit('message', await new HypixelMessage(chatBridge, position, message).init());
-	}
-};
+/**
+ * @param {import('../ChatBridge').ChatBridge} chatBridge
+ * @param {ChatPacket} packet
+ */
+export default async function(chatBridge, packet) {
+	chatBridge.emit('message', await new HypixelMessage(chatBridge, packet).init());
+}

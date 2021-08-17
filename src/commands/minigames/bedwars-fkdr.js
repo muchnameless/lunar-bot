@@ -1,11 +1,9 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const BaseStatsCommand = require('./~base-stats-command');
-// const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import BaseStatsCommand from './~base-stats-command.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class BedWarsFkdrCommand extends BaseStatsCommand {
+export default class BedWarsFkdrCommand extends BaseStatsCommand {
 	constructor(data) {
 		super(
 			data,
@@ -56,4 +54,4 @@ module.exports = class BedWarsFkdrCommand extends BaseStatsCommand {
 			return `\`${ign}\` has no BedWars stats`;
 		}
 	}
-};
+}

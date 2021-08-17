@@ -1,11 +1,11 @@
-'use strict';
-
-const { AsyncQueue } = require('@sapphire/async-queue');
-const { setTimeout: sleep } = require('timers/promises');
-const FormData = require('form-data');
-const fetch = require('node-fetch');
-const ms = require('ms');
-// const logger = require('../functions/logger');
+import { AsyncQueue } from '@sapphire/async-queue';
+import { setTimeout as sleep } from 'timers/promises';
+import FormData from 'form-data';
+import fetch from 'node-fetch';
+import ms from 'ms';
+import { IMGUR_KEY } from '../constants/redis.js';
+import { cache } from '../api/cache.js';
+// import { logger } from '../functions/logger.js';
 
 /**
  * @typedef {object} ImageData
@@ -47,19 +47,20 @@ const ms = require('ms');
  */
 
 
-module.exports = class ImgurClient {
+export class ImgurClient {
 	#authorization;
 	#baseURL;
 	#queue = new AsyncQueue();
 
 	/**
-	 * @param {{ clientId: string, apiVersion?: string | number }} param0
+	 * @param {{ clientId: string, apiVersion?: string | number, cacheTTL?: number }} param0
 	 */
-	constructor({ clientId, apiVersion = 3, requestTimeout = 15_000, retries = 1 }) {
+	constructor({ clientId, apiVersion = 3, requestTimeout = 15_000, retries = 1, cacheTTL = 10 * 60 }) {
 		this.#authorization = `Client-ID ${clientId}`;
 		this.#baseURL = `https://api.imgur.com/${apiVersion}/`;
 		this.requestTimeout = requestTimeout;
 		this.retries = retries;
+		this.cacheTTL = cacheTTL * 1_000;
 
 		this.rateLimit = {
 			userlimit: null,
@@ -69,12 +70,15 @@ module.exports = class ImgurClient {
 			clientremaining: null,
 			clientreset: null,
 		};
-
 		this.postRateLimit = {
 			limit: null,
 			remaining: null,
 			reset: null,
 		};
+	}
+
+	get queue() {
+		return this.#queue;
 	}
 
 	/**
@@ -87,36 +91,22 @@ module.exports = class ImgurClient {
 		form.append('image', url);
 		form.append('type', 'url');
 
-		return this.#request({
+		return await this.#request({
 			endpoint: 'upload',
 			method: 'POST',
 			body: form,
+			cacheKey: `${IMGUR_KEY}:${url}`,
 		});
-	}
-
-	/**
-	 * ratelimit status / remaining credits
-	 */
-	async status() {
-		const res = await this.#request({
-			checkRateLimit: false,
-			endpoint: 'credits',
-		});
-
-		if ('UserLimit' in res.data) this.rateLimit.userlimit = res.data.UserLimit;
-		if ('UserRemaining' in res.data) this.rateLimit.userremaining = res.data.UserRemaining;
-		if ('UserReset' in res.data) this.rateLimit.userreset = res.data.UserReset;
-		if ('ClientLimit' in res.data) this.rateLimit.clientlimit = res.data.ClientLimit;
-		if ('ClientRemaining' in res.data) this.rateLimit.clientremaining = res.data.ClientRemaining;
-
-		return res;
 	}
 
 	/**
 	 * @param {{ checkRateLimit?: boolean, endpoint: string, method?: string, body: FormData }} param0
 	 * @param {number} [retries] current retry
 	 */
-	async #request({ checkRateLimit = true, endpoint, method = 'POST', body }, retries = 0) {
+	async #request({ checkRateLimit = true, endpoint, method = 'POST', body, cacheKey }, retries = 0) {
+		const cached = await cache.get(cacheKey);
+		if (cached) return cached;
+
 		await this.#queue.wait();
 
 		try {
@@ -150,7 +140,6 @@ module.exports = class ImgurClient {
 			const controller = new AbortController();
 			const timeout = setTimeout(() => controller.abort(), this.requestTimeout);
 
-			/** @type {import('@types/node-fetch').Response} */
 			let res;
 
 			try {
@@ -195,9 +184,12 @@ module.exports = class ImgurClient {
 				throw res;
 			}
 
-			return await res.json();
+			const parsedRes = await res.json();
+			await cache.set(cacheKey, parsedRes, this.cacheTTL); // cache
+
+			return parsedRes;
 		} finally {
 			this.#queue.shift();
 		}
 	}
-};
+}

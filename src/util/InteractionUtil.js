@@ -1,12 +1,10 @@
-'use strict';
-
-const { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } = require('discord.js');
-const { Y_EMOJI, X_EMOJI } = require('../constants/emojiCharacters');
-const { makeContent } = require('../functions/util');
-const ChannelUtil = require('./ChannelUtil');
-const MessageUtil = require('./MessageUtil');
-const UserUtil = require('./UserUtil');
-const logger = require('../functions/logger');
+import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } from 'discord.js';
+import { Y_EMOJI, X_EMOJI } from '../constants/emojiCharacters.js';
+import { makeContent } from '../functions/util.js';
+import { ChannelUtil } from './ChannelUtil.js';
+import { MessageUtil } from './MessageUtil.js';
+import { UserUtil } from './UserUtil.js';
+import { logger } from '../functions/logger.js';
 
 
 /**
@@ -21,7 +19,7 @@ const logger = require('../functions/logger');
  */
 
 
-module.exports = class InteractionUtil extends null {
+export class InteractionUtil extends null {
 	/**
 	 * @type {WeakMap<GenericInteraction, InteractionData>}
 	 */
@@ -143,15 +141,13 @@ module.exports = class InteractionUtil extends null {
 
 				// ephemeral defer and non-ephemeral followUp
 				await interaction.editReply('\u200b'); // ephemeral empty message
-				const message = await interaction.followUp(data);
-				return this.#handleReplyMessage(interaction, data, message);
+				return await this.followUp(interaction, data);
 			}
 
 			// non-ephemeral defer
 			if (data.ephemeral) {
 				await interaction.deleteReply();
-				const message = await interaction.followUp(data);
-				return this.#handleReplyMessage(interaction, data, message);
+				return await this.followUp(interaction, data);
 			}
 
 			const mesage = await interaction.editReply(data);
@@ -159,8 +155,7 @@ module.exports = class InteractionUtil extends null {
 		}
 
 		if (interaction.replied) {
-			const message = await interaction.followUp(data);
-			return this.#handleReplyMessage(interaction, data, message);
+			return await this.followUp(interaction, data);
 		}
 
 		const message = await interaction.reply(data);
@@ -176,7 +171,9 @@ module.exports = class InteractionUtil extends null {
 		if (deferReplyPromise) await deferReplyPromise;
 		if (deferUpdatePromise) await deferUpdatePromise;
 
-		return interaction.followUp(contentOrOptions);
+		const message = await interaction.followUp(contentOrOptions);
+
+		return this.#handleReplyMessage(interaction, contentOrOptions, message);
 	}
 
 	/**
@@ -186,11 +183,11 @@ module.exports = class InteractionUtil extends null {
 	 * @param {?import('discord.js').Message} [messageInput]
 	 */
 	static async #handleReplyMessage(interaction, { ephemeral, content }, messageInput) {
-		if (ephemeral || !content || !interaction.client.chatBridges.channelIds.has(interaction.channelId)) return;
+		if (ephemeral || !content || !interaction.client.chatBridges.channelIds.has(interaction.channelId)) return messageInput;
 
 		const message = messageInput ?? await interaction.fetchReply();
 
-		if (!message.content) return;
+		if (!message.content) return message;
 
 		interaction.client.chatBridges.handleDiscordMessage(
 			message,
@@ -200,6 +197,8 @@ module.exports = class InteractionUtil extends null {
 				checkIfNotFromBot: false,
 			},
 		);
+
+		return message;
 	}
 
 	/**
@@ -342,4 +341,4 @@ module.exports = class InteractionUtil extends null {
 
 		return MessageUtil.react(await interaction.fetchReply(), ...emojis);
 	}
-};
+}

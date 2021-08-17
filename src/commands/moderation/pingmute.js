@@ -1,11 +1,9 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const DualCommand = require('../../structures/commands/DualCommand');
-const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class PingMuteCommand extends DualCommand {
+export default class PingMuteCommand extends DualCommand {
 	constructor(data, param1, param2) {
 		super(
 			data,
@@ -29,7 +27,7 @@ module.exports = class PingMuteCommand extends DualCommand {
 	}
 
 	/**
-	 * @param {import('../../structures/database/models/Player')} player
+	 * @param {import('../../structures/database/models/Player').Player} player
 	 */
 	async _generateReply(player) {
 		try {
@@ -53,14 +51,14 @@ module.exports = class PingMuteCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		const [ INPUT ] = message.commandData.args;
+	async runInGame(hypixelMessage) {
+		const [ INPUT ] = hypixelMessage.commandData.args;
 		const player = this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT);
 
-		if (!player) return await message.reply(`\`${INPUT}\` not in the player db`);
+		if (!player) return await hypixelMessage.reply(`\`${INPUT}\` not in the player db`);
 
-		return await message.reply(await this._generateReply(player));
+		return await hypixelMessage.reply(await this._generateReply(player));
 	}
-};
+}

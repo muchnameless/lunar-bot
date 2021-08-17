@@ -1,11 +1,9 @@
-'use strict';
-
-// const logger = require('../../../functions/logger');
+// import { logger } from '../../../functions/logger.js';
 
 
 /**
- * @param {import('../ChatBridge')} chatBridge
+ * @param {import('../ChatBridge').ChatBridge} chatBridge
  */
-module.exports = (chatBridge) => {
+export default function(chatBridge) {
 	chatBridge.emit('disconnect', 'bot end');
-};
+}

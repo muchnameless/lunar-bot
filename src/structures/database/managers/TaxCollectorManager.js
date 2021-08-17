@@ -1,22 +1,20 @@
-'use strict';
-
-const { Formatters } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const { escapeIgn } = require('../../../functions/util');
-const ModelManager = require('./ModelManager');
-// const logger = require('../../../functions/logger');
+import { Formatters } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { escapeIgn } from '../../../functions/util.js';
+import { ModelManager } from './ModelManager.js';
+// import { logger } from '../../../functions/logger.js';
 
 
-module.exports = class TaxCollectorManager extends ModelManager {
+export class TaxCollectorManager extends ModelManager {
 	constructor(options) {
 		super(options);
 
 		/**
-		 * @type {import('discord.js').Collection<string, import('../models/TaxCollector')}
+		 * @type {import('discord.js').Collection<string, import('../models/TaxCollector').TaxCollector}
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/TaxCollector')}
+		 * @type {import('../models/TaxCollector').TaxCollector}
 		 */
 		this.model;
 	}
@@ -30,7 +28,7 @@ module.exports = class TaxCollectorManager extends ModelManager {
 
 	/**
 	 * add a player as a taxcollector
-	 * @param {string|import('../models/Player')} uuidOrPlayer
+	 * @param {string|import('../models/Player').Player} uuidOrPlayer
 	 */
 	async add(uuidOrPlayer) {
 		const player = this.client.players.resolve(uuidOrPlayer);
@@ -88,4 +86,4 @@ module.exports = class TaxCollectorManager extends ModelManager {
 
 		return embed;
 	}
-};
+}

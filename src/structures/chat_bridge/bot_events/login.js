@@ -1,13 +1,11 @@
-'use strict';
-
-const { defaultSettings } = require('../constants/settings');
-const logger = require('../../../functions/logger');
+import { defaultSettings } from '../constants/settings.js';
+import { logger } from '../../../functions/logger.js';
 
 
 /**
- * @param {import('../ChatBridge')} chatBridge
+ * @param {import('../ChatBridge').ChatBridge} chatBridge
  */
-module.exports = async (chatBridge) => {
+export default async function(chatBridge) {
 	logger.debug(`[MINECRAFT BOT LOGIN]: ${chatBridge.bot.username}: logged in`);
 
 	// remove '-' from uuid
@@ -17,4 +15,4 @@ module.exports = async (chatBridge) => {
 	chatBridge.bot.write('settings', defaultSettings);
 
 	chatBridge.emit('connect');
-};
+}

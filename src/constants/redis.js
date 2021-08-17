@@ -1,5 +1,3 @@
-'use strict';
-
-module.exports.LB_KEY = 'lb';
-
-module.exports.AH_KEY = 'ah';
+export const LB_KEY = 'lb';
+export const AH_KEY = 'ah';
+export const IMGUR_KEY = 'imgur';

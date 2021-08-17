@@ -1,38 +1,35 @@
-'use strict';
-
-const { Client, MessageEmbed } = require('discord.js');
-const { join } = require('path');
-const DatabaseManager = require('./database/managers/DatabaseManager');
-const LogHandler = require('./LogHandler');
-const CronJobManager = require('./CronJobManager');
-const ChatBridgeArray = require('./chat_bridge/ChatBridgeArray');
-const SlashCommandCollection = require('./commands/SlashCommandCollection');
-const EventCollection = require('./events/EventCollection');
-const ImgurClient = require('./ImgurClient');
-const UserUtil = require('../util/UserUtil');
-const cache = require('../api/cache');
-const logger = require('../functions/logger');
+import { Client, MessageEmbed } from 'discord.js';
+import { DatabaseManager } from './database/managers/DatabaseManager.js';
+import { LogHandler } from './LogHandler.js';
+import { CronJobManager } from './CronJobManager.js';
+import { ChatBridgeArray } from './chat_bridge/ChatBridgeArray.js';
+import { SlashCommandCollection } from './commands/SlashCommandCollection.js';
+import { EventCollection } from './events/EventCollection.js';
+import { ImgurClient } from './ImgurClient.js';
+import { UserUtil } from '../util/UserUtil.js';
+import { cache } from '../api/cache.js';
+import { logger } from '../functions/logger.js';
 
 
 /**
  * @typedef {import('discord.js').ClientOptions & { db: Record<string, any> }} LunarClientOptions
  */
 
-module.exports = class LunarClient extends Client {
+export class LunarClient extends Client {
 	/**
 	 * @param {LunarClientOptions} options
 	 */
 	constructor(options = {}) {
 		super(options);
 
-		/** @type {import('discord.js').Snowflake} */
+		/** @type {?import('discord.js').Snowflake} */
 		this.ownerId = process.env.OWNER ?? null;
 		this.db = new DatabaseManager({ client: this, db: options.db });
-		this.logHandler = new LogHandler(this, join(__dirname, '..', '..', 'log_buffer'));
+		this.logHandler = new LogHandler(this, new URL('../../log_buffer', import.meta.url));
 		this.cronJobs = new CronJobManager(this);
 		this.chatBridges = new ChatBridgeArray(this);
-		this.commands = new SlashCommandCollection(this, join(__dirname, '..', 'commands'));
-		this.events = new EventCollection(this, join(__dirname, '..', 'events'));
+		this.commands = new SlashCommandCollection(this, new URL('../commands', import.meta.url));
+		this.events = new EventCollection(this, new URL('../events', import.meta.url));
 		this.imgur = new ImgurClient({ clientId: process.env.IMGUR_CLIENT_ID });
 
 		this._fetchAllGuildMembersCache = new Map();
@@ -122,7 +119,7 @@ module.exports = class LunarClient extends Client {
 
 	/**
 	 * the main chatBridge
-	 * @returns {import('./chat_bridge/ChatBridge')}
+	 * @returns {import('./chat_bridge/ChatBridge').ChatBridge}
 	 */
 	get chatBridge() {
 		return this.chatBridges[0];
@@ -264,4 +261,4 @@ module.exports = class LunarClient extends Client {
 			process.exit(1);
 		}
 	}
-};
+}

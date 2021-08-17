@@ -1,14 +1,14 @@
-'use strict';
-
-const ChatMessage = require('prismarine-chat')(require('../constants/settings').MC_CLIENT_VERSION);
-const logger = require('../../../functions/logger');
+import loader from 'prismarine-chat';
+import { MC_CLIENT_VERSION } from '../constants/settings.js';
+const ChatMessage = loader(MC_CLIENT_VERSION);
+import { logger } from '../../../functions/logger.js';
 
 
 /**
- * @param {import('../ChatBridge')} chatBridge
+ * @param {import('../ChatBridge').ChatBridge} chatBridge
  * @param {{ reason?: string }} param1
  */
-module.exports = (chatBridge, { reason }) => {
+export default function(chatBridge, { reason }) {
 	try {
 		chatBridge.emit('disconnect', reason && new ChatMessage(JSON.parse(reason)).toString());
 	} catch (error) {
@@ -16,4 +16,4 @@ module.exports = (chatBridge, { reason }) => {
 
 		chatBridge.emit('disconnect', reason);
 	}
-};
+}

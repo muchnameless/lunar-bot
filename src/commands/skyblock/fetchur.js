@@ -1,12 +1,10 @@
-'use strict';
-
-const { Formatters } = require('discord.js');
-const { zone, TimeStruct } = require('timezonecomplete');
-const DualCommand = require('../../structures/commands/DualCommand');
-// const logger = require('../../functions/logger');
+import { Formatters } from 'discord.js';
+import { zone, TimeStruct } from 'timezonecomplete';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class FetchurCommand extends DualCommand {
+export default class FetchurCommand extends DualCommand {
 	constructor(data) {
 		super(
 			data,
@@ -43,7 +41,7 @@ module.exports = class FetchurCommand extends DualCommand {
 	/**
 	 * execute the command
 	 */
-	_generateReply() { // eslint-disable-line class-methods-use-this
+	#generateReply() { // eslint-disable-line class-methods-use-this
 		const date = new Date();
 		const OFFSET = zone('America/New_York').offsetForUtc(TimeStruct.fromDate(date)) / 60;
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
@@ -70,14 +68,14 @@ module.exports = class FetchurCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async run(interaction) {
-		return await this.reply(interaction, this._generateReply());
+		return await this.reply(interaction, this.#generateReply());
 	}
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(this._generateReply());
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(this.#generateReply());
 	}
-};
+}

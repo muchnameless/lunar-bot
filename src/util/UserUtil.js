@@ -1,11 +1,9 @@
-'use strict';
-
-const logger = require('../functions/logger');
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class UserUtil extends null {
+export class UserUtil extends null {
 	/**
-	 * @type {WeakMap<import('discord.js').User, import('../structures/database/models/Player')>}
+	 * @type {WeakMap<import('discord.js').User, import('../structures/database/models/Player').Player>}
 	 */
 	static PLAYER_CACHE = new WeakMap();
 
@@ -13,7 +11,7 @@ module.exports = class UserUtil extends null {
 	 * @param {import('discord.js').User} user
 	 */
 	static getPlayer(user) {
-		/** @type {?import('../structures/database/models/Player')} */
+		/** @type {?import('../structures/database/models/Player').Player} */
 		let player = this.PLAYER_CACHE.get(user);
 		if (player) return player;
 
@@ -24,7 +22,7 @@ module.exports = class UserUtil extends null {
 
 	/**
 	 * @param {import('discord.js').User} user
-	 * @param {import('../structures/database/models/Player')} player
+	 * @param {import('../structures/database/models/Player').Player} player
 	 */
 	static setPlayer(user, player) {
 		if (player == null) return this.PLAYER_CACHE.delete(user);
@@ -45,4 +43,4 @@ module.exports = class UserUtil extends null {
 			return logger.error(error);
 		}
 	}
-};
+}

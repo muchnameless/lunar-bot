@@ -1,9 +1,7 @@
-'use strict';
-
-const fetch = require('node-fetch');
-const { validateMinecraftIgn, validateMinecraftUuid } = require('../functions/stringValidators');
-const MojangAPIError = require('./errors/MojangAPIError');
-// const logger = require('../functions/logger');
+import fetch from 'node-fetch';
+import { validateMinecraftIgn, validateMinecraftUuid } from '../functions/stringValidators.js';
+import { MojangAPIError } from './errors/MojangAPIError.js';
+// import { logger } from '../functions/logger.js';
 
 /**
  * @typedef MojangResult
@@ -18,7 +16,7 @@ const MojangAPIError = require('./errors/MojangAPIError');
  */
 
 
-module.exports = class Mojang {
+export class Mojang {
 	/**
 	 * @param {{ cache: any, requestTimeout?: number, retries?: number }} options
 	 */
@@ -36,7 +34,6 @@ module.exports = class Mojang {
 	async igns(usernames, { cache = true } = {}) {
 		if (!usernames.length || usernames.length > 10) throw new MojangAPIError();
 
-		/** @type {import('@types/node-fetch').Response} */
 		const res = await fetch(
 			'https://api.mojang.com/profiles/minecraft',
 			{
@@ -140,7 +137,6 @@ module.exports = class Mojang {
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), this.requestTimeout);
 
-		/** @type {import('@types/node-fetch').Response} */
 		let res;
 
 		try {
@@ -186,7 +182,6 @@ module.exports = class Mojang {
 
 			// 		// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
 			// 		while (((timestamp -= 2_592_000_000) >= 1_423_008_000_000)) {
-			// 			/** @type {import('@types/node-fetch').Response} */
 			// 			const pastRes = await fetch(`${path}${query}?at=${timestamp}`);
 
 			// 			if (pastRes.status === 200) {
@@ -216,4 +211,4 @@ module.exports = class Mojang {
 				throw new MojangAPIError(res, queryType, query);
 		}
 	}
-};
+}

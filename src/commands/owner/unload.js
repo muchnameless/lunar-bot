@@ -1,11 +1,9 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const DualCommand = require('../../structures/commands/DualCommand');
-// const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class UnloadCommand extends DualCommand {
+export default class UnloadCommand extends DualCommand {
 	constructor(data) {
 		super(
 			data,
@@ -51,7 +49,7 @@ module.exports = class UnloadCommand extends DualCommand {
 	async #run(subcommand, input) {
 		switch (subcommand) {
 			case 'command': {
-				/** @type {import('../../structures/commands/BaseCommand')} */
+				/** @type {import('../../structures/commands/BaseCommand').BaseCommand} */
 				const command = this.collection.getByName(input);
 
 				if (!command) return `no command with the name or alias \`${input}\` found`;
@@ -62,7 +60,7 @@ module.exports = class UnloadCommand extends DualCommand {
 			}
 
 			case 'event': {
-				/** @type {import('../../structures/commands/BaseCommand')} */
+				/** @type {import('../../structures/events/BaseEvent').BaseEvent} */
 				const event = this.client.events.get(input);
 
 				if (!event) return `no event with the name \`${input}\` found`;
@@ -87,9 +85,9 @@ module.exports = class UnloadCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(await this.#run(message, ...message.commandData.args.map(arg => arg.toLowerCase())));
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(await this.#run(hypixelMessage, ...hypixelMessage.commandData.args.map(arg => arg.toLowerCase())));
 	}
-};
+}

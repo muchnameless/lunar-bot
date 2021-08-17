@@ -1,22 +1,21 @@
-'use strict';
+import { Permissions, MessageEmbed, SnowflakeUtil } from 'discord.js';
+import { commaListsAnd } from 'common-tags';
+import { mkdir, writeFile, readdir, readFile, unlink } from 'fs/promises';
+import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants/discord.js';
+import { ChannelUtil } from '../util/ChannelUtil.js';
+import { logger } from '../functions/logger.js';
 
-const { Permissions, MessageEmbed, SnowflakeUtil } = require('discord.js');
-const { commaListsAnd } = require('common-tags');
-const { promises: { mkdir, writeFile, readdir, readFile, unlink } } = require('fs');
-const { join } = require('path');
-const { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } = require('../constants/discord');
-const ChannelUtil = require('../util/ChannelUtil');
-const logger = require('../functions/logger');
 
-
-module.exports = class LogHandler {
+export class LogHandler {
 	/**
-	 * @param {import('./LunarClient')} client
-	 * @param {string} logPath
+	 * @param {import('./LunarClient').LunarClient} client
+	 * @param {URL} logURL
 	 */
-	constructor(client, logPath) {
+	constructor(client, logURL) {
 		this.client = client;
-		this.logPath = logPath;
+		this.logURL = logURL;
 	}
 
 	static REQUIRED_CHANNEL_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS;
@@ -78,7 +77,7 @@ module.exports = class LogHandler {
 	 * @param {...MessageEmbed} embedsInput embeds to log
 	 */
 	async log(...embedsInput) {
-		const embeds = this._transformEmbeds(embedsInput);
+		const embeds = this.#transformEmbeds(embedsInput);
 
 		if (!embeds.length) return null; // nothing to log
 
@@ -116,7 +115,7 @@ module.exports = class LogHandler {
 	 * make sure all elements are instances of MessageEmbed
 	 * @param {MessageEmbed[]|string[]} embedsInput
 	 */
-	_transformEmbeds(embedsInput) {
+	#transformEmbeds(embedsInput) {
 		const embeds = embedsInput.filter(x => x != null); // filter out null & undefined
 
 		// make sure all elements in embeds are instances of MessageEmbed
@@ -188,7 +187,7 @@ module.exports = class LogHandler {
 	 */
 	async #createLogBufferFolder() {
 		try {
-			await mkdir(this.logPath);
+			await mkdir(this.logURL);
 			logger.info('[LOG BUFFER]: created \'log_buffer\' folder');
 			return true;
 		} catch { // rejects if folder already exists
@@ -204,7 +203,7 @@ module.exports = class LogHandler {
 		try {
 			await this.#createLogBufferFolder();
 			await writeFile(
-				join(this.logPath, `${new Date()
+				join(fileURLToPath(this.logURL), `${new Date()
 					.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
 					.replace(', ', '_')
 					.replace(/:/g, '.')
@@ -223,12 +222,12 @@ module.exports = class LogHandler {
 		try {
 			await this.#createLogBufferFolder();
 
-			const logBufferFiles = await readdir(this.logPath);
+			const logBufferFiles = await readdir(this.logURL);
 
 			if (!logBufferFiles) return;
 
 			for (const file of logBufferFiles) {
-				const FILE_PATH = join(this.logPath, file);
+				const FILE_PATH = join(fileURLToPath(this.logURL), file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
 				await this.log(...FILE_CONTENT.split('\n').map(x => new MessageEmbed(JSON.parse(x))));
@@ -238,4 +237,4 @@ module.exports = class LogHandler {
 			logger.error('[POST FILE LOGS]', error);
 		}
 	}
-};
+}

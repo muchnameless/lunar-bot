@@ -1,16 +1,14 @@
-'use strict';
-
-const { Formatters, Constants } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const { EMBED_DESCRIPTION_MAX_CHARS } = require('../../constants/discord');
-const { trim } = require('../../functions/util');
-const hypixel = require('../../api/hypixel');
-const mojang = require('../../api/mojang');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { Formatters, Constants } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants/discord.js';
+import { trim } from '../../functions/util.js';
+import { hypixel } from '../../api/hypixel.js';
+import { mojang } from '../../api/mojang.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class FriendCheckCommand extends SlashCommand {
+export default class FriendCheckCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -51,4 +49,4 @@ module.exports = class FriendCheckCommand extends SlashCommand {
 			],
 		});
 	}
-};
+}

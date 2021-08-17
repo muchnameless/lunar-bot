@@ -1,10 +1,8 @@
-'use strict';
-
-const ChatBridgeEvent = require('../ChatBridgeEvent');
-const logger = require('../../../functions/logger');
+import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
+import { logger } from '../../../functions/logger.js';
 
 
-module.exports = class ReadyChatBridgeEvent extends ChatBridgeEvent {
+export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -28,4 +26,4 @@ module.exports = class ReadyChatBridgeEvent extends ChatBridgeEvent {
 
 		logger.debug(`[CHATBRIDGE READY]: ${this.chatBridge.logInfo}: spawned and ready`);
 	}
-};
+}

@@ -1,8 +1,6 @@
-'use strict';
-
-require('./pgEnum-fix'); // to allow `sync --alter` with pg enums set
-const { sequelize } = require('./index');
-const logger = require('../../functions/logger');
+import './pgEnum-fix.js'; // to allow `sync --alter` with pg enums set
+import { sequelize } from './index.js';
+import { logger } from '../../functions/logger.js';
 
 sequelize.options.logging = x => logger.debug(x);
 

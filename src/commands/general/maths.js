@@ -1,10 +1,9 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const { add, sub, mul, div } = require('sinful-math');
-const Lexer = require('lex');
-const DualCommand = require('../../structures/commands/DualCommand');
-// const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import pkg from 'sinful-math';
+const { add, sub, mul, div } = pkg;
+import Lexer from 'lex';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
 class Parser {
@@ -91,7 +90,7 @@ class Parser {
 }
 
 
-module.exports = class MathsCommand extends DualCommand {
+export default class MathsCommand extends DualCommand {
 	constructor(data) {
 		super(
 			data,
@@ -417,9 +416,9 @@ module.exports = class MathsCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(this._generateReply(message.commandData.args.join('')));
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(this._generateReply(hypixelMessage.commandData.args.join('')));
 	}
-};
+}

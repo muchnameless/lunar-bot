@@ -1,13 +1,11 @@
-'use strict';
-
-const { Collection } = require('discord.js');
-const { CronJob } = require('cron');
-// const logger = require('../functions/logger');
+import { Collection } from 'discord.js';
+import { CronJob } from 'cron';
+// import { logger } from '../functions/logger.js';
 
 
-module.exports = class CronJobManager {
+export class CronJobManager {
 	/**
-	 * @param {import('./LunarClient')} client
+	 * @param {import('./LunarClient').LunarClient} client
 	 */
 	constructor(client) {
 		this.client = client;
@@ -56,4 +54,4 @@ module.exports = class CronJobManager {
 
 		return this.cache.delete(name);
 	}
-};
+}

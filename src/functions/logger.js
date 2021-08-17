@@ -1,8 +1,7 @@
-'use strict';
-
-const { createLogger, transports, format } = require('winston');
-const { inspect } = require('util');
-const chalk = require('chalk');
+import pkg from 'winston';
+const { createLogger, transports, format } = pkg;
+import { inspect } from 'util';
+import chalk from 'chalk';
 
 /**
   * @param {import('logform').TransformableInfo} param0
@@ -112,7 +111,7 @@ const debug = (...input) => {
 	return null;
 };
 
-module.exports = {
+export const logger = {
 	error,
 	warn,
 	info,

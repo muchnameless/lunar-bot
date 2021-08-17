@@ -1,18 +1,16 @@
-'use strict';
-
-const { Formatters, Constants } = require('discord.js');
-const { stripIndents } = require('common-tags');
-const ms = require('ms');
-const { upperCaseFirstChar, stringToMS } = require('../../functions/util');
-const { messageTypes: { GUILD } } = require('../../structures/chat_bridge/constants/chatBridge');
-const ChannelUtil = require('../../util/ChannelUtil');
-const UserUtil = require('../../util/UserUtil');
-const MessageUtil = require('../../util/MessageUtil');
-const DualCommand = require('../../structures/commands/DualCommand');
-// const logger = require('../../functions/logger');
+import { Formatters, Constants } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import ms from 'ms';
+import { upperCaseFirstChar, stringToMS } from '../../functions/util.js';
+import { messageTypes } from '../../structures/chat_bridge/constants/chatBridge.js';
+import { ChannelUtil } from '../../util/ChannelUtil.js';
+import { UserUtil } from '../../util/UserUtil.js';
+import { MessageUtil } from '../../util/MessageUtil.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class PollCommand extends DualCommand {
+export default class PollCommand extends DualCommand {
 	constructor(data) {
 		const options = [{
 			name: 'question',
@@ -61,9 +59,9 @@ module.exports = class PollCommand extends DualCommand {
 
 	/**
 	 * create a poll for both in game chat and the chatBridge channel
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} ctx
 	 * @param {object} param1
-	 * @param {import('../../structures/chat_bridge/ChatBridge')} param1.chatBridge
+	 * @param {import('../../structures/chat_bridge/ChatBridge').ChatBridge} param1.chatBridge
 	 * @param {string} param1.question
 	 * @param {string[]} param1.pollOptionNames
 	 * @param {string} param1.duration
@@ -83,10 +81,10 @@ module.exports = class PollCommand extends DualCommand {
 			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set() }));
 			const optionsCount = pollOptions.length;
 			const hypixelMessages = chatBridge.minecraft.awaitMessages({
-				filter: hypixelMessage => hypixelMessage.isUserMessage && hypixelMessage.type === GUILD,
+				filter: hypixelMessage => hypixelMessage.isUserMessage && hypixelMessage.type === messageTypes.GUILD,
 				time: DURATION,
 			});
-			const discordChannel = chatBridge.discord.get(GUILD).channel;
+			const discordChannel = chatBridge.discord.get(messageTypes.GUILD).channel;
 			const discordMessages = discordChannel.awaitMessages({
 				filter: discordMessage => MessageUtil.isUserMessage(discordMessage),
 				time: DURATION,
@@ -172,10 +170,10 @@ module.exports = class PollCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		const inputMatched = message.content
+	async runInGame(hypixelMessage) {
+		const inputMatched = hypixelMessage.content
 			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
 			?.flatMap((x) => {
 				const input = x.trim();
@@ -183,16 +181,16 @@ module.exports = class PollCommand extends DualCommand {
 				return input;
 			});
 
-		if (!inputMatched || inputMatched.length < 2) return await message.reply(this.usageInfo);
+		if (!inputMatched || inputMatched.length < 2) return await hypixelMessage.reply(this.usageInfo);
 
 		const res = await this.#run({
-			chatBridge: message.chatBridge,
+			chatBridge: hypixelMessage.chatBridge,
 			question: upperCaseFirstChar(inputMatched.shift()),
 			pollOptionNames: inputMatched,
-			duration: message.commandData.args[0],
-			ign: message.author.ign,
+			duration: hypixelMessage.commandData.args[0],
+			ign: hypixelMessage.author.ign,
 		});
 
-		if (res) return await message.author.send(res);
+		if (res) return await hypixelMessage.author.send(res);
 	}
-};
+}

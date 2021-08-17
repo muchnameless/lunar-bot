@@ -1,18 +1,8 @@
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
 
-/**
- * @typedef {object} Transaction
- * @property {string} from
- * @property {string} to
- * @property {number} amount
- * @property {?string} auctionId
- * @property {?string} notes
- * @property {string} type
- */
 
-
-export class Transaction extends Model {
+export class Quest extends Model {
 	constructor(...args) {
 		super(...args);
 
@@ -50,16 +40,16 @@ export class Transaction extends Model {
 				defaultValue: null,
 				allowNull: true,
 			},
-			type: {
+			completed: {
 				type: DataTypes.ENUM([ 'tax', 'donation' ]),
 				defaultValue: 'tax',
 				allowNull: false,
 			},
 		}, {
 			sequelize,
-			modelName: 'Transaction',
+			modelName: 'Quest',
 		});
 	}
 }
 
-export default Transaction;
+export default Quest;

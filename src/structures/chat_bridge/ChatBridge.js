@@ -1,13 +1,10 @@
-'use strict';
-
-const { EventEmitter } = require('events');
-const { setTimeout: sleep } = require('timers/promises');
-const { join } = require('path');
-const { prefixByType, messageTypes: { GUILD }, chatFunctionByType, randomInvisibleCharacter } = require('./constants/chatBridge');
-const MinecraftChatManager = require('./managers/MinecraftChatManager');
-const DiscordManager = require('./managers/DiscordManager');
-const EventCollection = require('../events/EventCollection');
-const logger = require('../../functions/logger');
+import { EventEmitter } from 'events';
+import { setTimeout as sleep } from 'timers/promises';
+import { prefixByType, messageTypes, chatFunctionByType, randomInvisibleCharacter } from './constants/chatBridge.js';
+import { MinecraftChatManager } from './managers/MinecraftChatManager.js';
+import { DiscordManager } from './managers/DiscordManager.js';
+import { EventCollection } from '../events/EventCollection.js';
+import { logger } from '../../functions/logger.js';
 
 
 /**
@@ -20,8 +17,8 @@ const logger = require('../../functions/logger');
 
 /**
  * @typedef {object} BroadcastOptions
- * @property {string | import('./managers/DiscordChatManager')} type
- * @property {import('./HypixelMessage')} hypixelMessage
+ * @property {string | import('./managers/DiscordChatManager').DiscordChatManager} type
+ * @property {import('./HypixelMessage').HypixelMessage} hypixelMessage
  * @property {DiscordMessageOptions} discord
  * @property {ChatOptions} minecraft
  */
@@ -32,16 +29,21 @@ const logger = require('../../functions/logger');
 
 /**
  * @typedef {object} MessageForwardOptions
- * @property {import('../database/models/Player')} [player] player for muted and isStaff check
+ * @property {import('../database/models/Player').Player} [player] player for muted and isStaff check
  * @property {import('discord.js').CommandInteraction} [interaction]
  * @property {boolean} [checkIfNotFromBot=true] wether to not forward messages from the client.user
  * @property {boolean} [isEdit=false] wether the message is an edit instead of a new message
  */
 
 
-module.exports = class ChatBridge extends EventEmitter {
+export class ChatBridge extends EventEmitter {
 	/**
-	 * @param {import('../LunarClient')} client
+	 * increases each link cycle
+	 */
+	#guildLinkAttempts = 0;
+
+	/**
+	 * @param {import('../LunarClient').LunarClient} client
 	 */
 	constructor(client, mcAccount) {
 		super();
@@ -56,13 +58,9 @@ module.exports = class ChatBridge extends EventEmitter {
 		 */
 		this.mcAccount = mcAccount;
 		/**
-		 * @type {import('../database/models/HypixelGuild')}
+		 * @type {import('../database/models/HypixelGuild').HypixelGuild}
 		 */
 		this.hypixelGuild = null;
-		/**
-		 * increases each link cycle
-		 */
-		this._guildLinkAttempts = 0;
 		/**
 		 * wether to retry linking the chat bridge to a guild
 		 */
@@ -81,7 +79,7 @@ module.exports = class ChatBridge extends EventEmitter {
 		 */
 		this.discord = new DiscordManager(this);
 
-		this.events = new EventCollection(this, join(__dirname, 'events'));
+		this.events = new EventCollection(this, new URL('./events', import.meta.url));
 
 		this.events.loadAll();
 	}
@@ -109,7 +107,7 @@ module.exports = class ChatBridge extends EventEmitter {
 
 	/**
 	 * player object associated with the chatBridge's bot
-	 * @type {import('../database/models/Player')}
+	 * @type {import('../database/models/Player').Player}
 	 */
 	get player() {
 		return this.bot?.player ?? null;
@@ -158,7 +156,7 @@ module.exports = class ChatBridge extends EventEmitter {
 		try {
 			// link bot to db entry (create if non existant)
 			this.minecraft.botPlayer ??= await (async () => {
-				/** @type {[import('../database/models/Player'), boolean]} */
+				/** @type {[import('../database/models/Player').Player, boolean]} */
 				const [ player, created ] = await this.client.players.model.findOrCreate({
 					where: { minecraftUuid: this.minecraft.botUuid },
 					defaults: {
@@ -198,7 +196,7 @@ module.exports = class ChatBridge extends EventEmitter {
 			// instantiate DiscordChannelManagers
 			await this.discord.init();
 
-			this._guildLinkAttempts = 0;
+			this.#guildLinkAttempts = 0;
 
 			return this;
 		} catch (error) {
@@ -209,7 +207,7 @@ module.exports = class ChatBridge extends EventEmitter {
 				return this;
 			}
 
-			await sleep(Math.min(++this._guildLinkAttempts * 5_000, 300_000));
+			await sleep(Math.min(++this.#guildLinkAttempts * 5_000, 300_000));
 
 			return this.link(guildName);
 		}
@@ -263,7 +261,7 @@ module.exports = class ChatBridge extends EventEmitter {
 	 * @returns {Promise<[boolean, ?import('discord.js').Message | import('discord.js').Message[]]>}
 	 */
 	async broadcast(contentOrOptions) {
-		const { content, hypixelMessage, type = hypixelMessage?.type ?? GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = typeof contentOrOptions === 'string'
+		const { content, hypixelMessage, type = hypixelMessage?.type ?? messageTypes.GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
 		const discordChatManager = this.discord.resolve(type);
@@ -286,4 +284,4 @@ module.exports = class ChatBridge extends EventEmitter {
 			}),
 		]);
 	}
-};
+}

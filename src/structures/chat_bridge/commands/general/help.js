@@ -1,12 +1,10 @@
-'use strict';
-
-const { commaListsOr } = require('common-tags');
-const ms = require('ms');
-const BridgeCommand = require('../../../commands/BridgeCommand');
-// const logger = require('../../../../functions/logger');
+import { commaListsOr } from 'common-tags';
+import ms from 'ms';
+import { BridgeCommand } from '../../../commands/BridgeCommand.js';
+// import { logger } from '../../../../functions/logger.js';
 
 
-module.exports = class HelpBridgeCommand extends BridgeCommand {
+export default class HelpBridgeCommand extends BridgeCommand {
 	constructor(data, options) {
 		super(data, options ?? {
 			aliases: [ 'h' ],
@@ -18,7 +16,7 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 
 	/**
 	 * removes duplicates and lists the commands by name | aliases
-	 * @param {import('discord.js').Collection<string, import('../../../commands/BridgeCommand') | import('../../../commands/DualCommand')>} commands
+	 * @param {import('discord.js').Collection<string, import('../../../commands/BridgeCommand').BridgeCommand | import('../../../commands/DualCommand').DualCommand>} commands
 	 */
 	static #listCommands(commands) {
 		return [ ...new Set(commands.values()) ].map(({ name, aliases, aliasesInGame }) => [ name, ...(aliases ?? aliasesInGame ?? []) ].join(' | ')).join(', ');
@@ -26,20 +24,20 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../HypixelMessage')} message
+	 * @param {import('../../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
+	async runInGame(hypixelMessage) {
 		// default help
-		if (!message.commandData.args.length) {
+		if (!hypixelMessage.commandData.args.length) {
 			const reply = [
-				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${message.chatBridge.bot.username}` ].join(', ')}`,
+				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${hypixelMessage.chatBridge.bot.username}` ].join(', ')}`,
 				...this.collection.visibleCategories.map(category => `${category}: ${HelpBridgeCommand.#listCommands(this.collection.filterByCategory(category))}`),
 			];
 
-			return message.author.send(reply.join('\n'));
+			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
-		const INPUT = message.commandData.args[0].toLowerCase();
+		const INPUT = hypixelMessage.commandData.args[0].toLowerCase();
 
 		// category help
 		const requestedCategory = this.collection.categories.find(categoryName => categoryName === INPUT);
@@ -57,13 +55,13 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 
 			reply.push(`Commands: ${HelpBridgeCommand.#listCommands(categoryCommands)}`);
 
-			return message.author.send(reply.join('\n'));
+			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
 		// single command help
 		const command = this.collection.getByName(INPUT);
 
-		if (!command) return message.author.send(`'${INPUT}' is neither a valid command nor category`);
+		if (!command) return hypixelMessage.author.send(`'${INPUT}' is neither a valid command nor category`);
 
 		const reply = [ `Name: ${command.name}` ];
 
@@ -84,6 +82,6 @@ module.exports = class HelpBridgeCommand extends BridgeCommand {
 
 		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
-		return message.author.send(reply.join('\n'));
+		return hypixelMessage.author.send(reply.join('\n'));
 	}
-};
+}

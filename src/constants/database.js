@@ -1,10 +1,8 @@
-'use strict';
-
-const { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses, SKYBLOCK_YEAR_0, MAYOR_CHANGE_INTERVAL } = require('./skyblock');
-const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('./roles');
+import { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses, SKYBLOCK_YEAR_0, MAYOR_CHANGE_INTERVAL } from './skyblock.js';
+import { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } from './roles.js';
 
 // generate default config
-const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG = Object.freeze({
 	AUTO_GUILD_RANKS: true,
 	AUTOCORRECT_THRESHOLD: 0.8,
 	AVERAGE_STATS_CHANNEL_UPDATE_ENABLED: true,
@@ -48,7 +46,11 @@ const DEFAULT_CONFIG = {
 	LAST_DAILY_STATS_SAVE_TIME: 0,
 	LAST_DAILY_XP_RESET_TIME: 0,
 	LAST_KICK_TIME: 0,
-	LAST_MAYOR_XP_RESET_TIME: SKYBLOCK_YEAR_0,
+	LAST_MAYOR_XP_RESET_TIME: (() => {
+		let time = SKYBLOCK_YEAR_0;
+		while (time + MAYOR_CHANGE_INTERVAL < Date.now()) time += MAYOR_CHANGE_INTERVAL;
+		return time;
+	})(),
 	LAST_MONTHLY_XP_RESET_TIME: 0,
 	LAST_WEEKLY_XP_RESET_TIME: 0,
 	LOGGING_CHANNEL_ID: null,
@@ -79,83 +81,66 @@ const DEFAULT_CONFIG = {
 	WHALECUM_PASS_WEIGHT: Infinity,
 	WEIGHT_AVERAGE_STATS_CHANNEL_ID: null,
 	XP_TRACKING_ENABLED: true,
-};
 
-while (DEFAULT_CONFIG.LAST_MAYOR_XP_RESET_TIME + MAYOR_CHANGE_INTERVAL < Date.now()) DEFAULT_CONFIG.LAST_MAYOR_XP_RESET_TIME += MAYOR_CHANGE_INTERVAL;
+	// roles
+	...Object.fromEntries(delimiterRoles.map(type => [ `${type}_DELIMITER_ROLE_ID`, null ])), // delimiter
+	...Object.fromEntries(skillAverageRoles.map(level => [ `AVERAGE_LVL_${level}_ROLE_ID`, null ])), // skill average
+	...Object.fromEntries(skills.flatMap(skill => skillRoles.map(level => [ `${skill}_${level}_ROLE_ID`, null ]))), // individual skills
+	...Object.fromEntries(slayerTotalRoles.map(level => [ `SLAYER_ALL_${level}_ROLE_ID`, null ])), // total slayer
+	...Object.fromEntries(slayers.flatMap(slayer => slayerRoles.map(level => [ `${slayer}_${level}_ROLE_ID`, null ]))), // individual slayer
+	...Object.fromEntries(catacombsRoles.map(level => [ `CATACOMBS_${level}_ROLE_ID`, null ])), // catacombs
+});
 
-for (const type of delimiterRoles) DEFAULT_CONFIG[`${type}_DELIMITER_ROLE_ID`] = null; // delimiter
+export const offsetFlags = Object.freeze({
+	COMPETITION_END: 'CompetitionEnd',
+	COMPETITION_START: 'CompetitionStart',
+	MAYOR: 'OffsetMayor',
+	WEEK: 'OffsetWeek',
+	MONTH: 'OffsetMonth',
+	CURRENT: 'current',
+	DAY: 'day',
+});
 
-for (const level of skillAverageRoles) DEFAULT_CONFIG[`AVERAGE_LVL_${level}_ROLE_ID`] = null; // skill average
+export const XP_OFFSETS = Object.freeze([
+	'CompetitionStart',
+	'CompetitionEnd',
+	'OffsetMayor',
+	'OffsetWeek',
+	'OffsetMonth',
+]);
 
-for (const skill of skills) for (const level of skillRoles) DEFAULT_CONFIG[`${skill}_${level}_ROLE_ID`] = null; // individual skills
+export const XP_OFFSETS_SHORT = Object.freeze({
+	competition: 'CompetitionStart',
+	mayor: 'OffsetMayor',
+	week: 'OffsetWeek',
+	month: 'OffsetMonth',
+});
 
-for (const level of slayerTotalRoles) DEFAULT_CONFIG[`SLAYER_ALL_${level}_ROLE_ID`] = null; // total slayer
+export const XP_OFFSETS_CONVERTER = Object.freeze({
+	competition: 'CompetitionStart',
+	mayor: 'OffsetMayor',
+	week: 'OffsetWeek',
+	month: 'OffsetMonth',
 
-for (const slayer of slayers) for (const level of slayerRoles) DEFAULT_CONFIG[`${slayer}_${level}_ROLE_ID`] = null; // individual slayer
+	CompetitionStart: 'competition',
+	OffsetMayor: 'mayor',
+	OffsetWeek: 'week',
+	OffsetMonth: 'month',
+});
 
-for (const level of catacombsRoles) DEFAULT_CONFIG[`CATACOMBS_${level}_ROLE_ID`] = null; // catacombs
+export const XP_OFFSETS_TIME = Object.freeze({
+	CompetitionStart: 'COMPETITION_START_TIME',
+	CompetitionEnd: 'COMPETITION_END_TIME',
+	OffsetMayor: 'LAST_MAYOR_XP_RESET_TIME',
+	OffsetWeek: 'LAST_WEEKLY_XP_RESET_TIME',
+	OffsetMonth: 'LAST_MONTHLY_XP_RESET_TIME',
+	day: 'LAST_DAILY_XP_RESET_TIME',
+});
 
-Object.freeze(DEFAULT_CONFIG);
+export const XP_TYPES = Object.freeze([ ...skills, ...cosmeticSkills, ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ]);
 
+export const UNKNOWN_IGN = 'UNKNOWN_IGN';
 
-module.exports = {
-
-	offsetFlags: {
-		COMPETITION_END: 'CompetitionEnd',
-		COMPETITION_START: 'CompetitionStart',
-		MAYOR: 'OffsetMayor',
-		WEEK: 'OffsetWeek',
-		MONTH: 'OffsetMonth',
-		CURRENT: 'current',
-		DAY: 'day',
-	},
-
-	XP_OFFSETS: [
-		'CompetitionStart',
-		'CompetitionEnd',
-		'OffsetMayor',
-		'OffsetWeek',
-		'OffsetMonth',
-	],
-
-	XP_OFFSETS_SHORT: {
-		competition: 'CompetitionStart',
-		mayor: 'OffsetMayor',
-		week: 'OffsetWeek',
-		month: 'OffsetMonth',
-	},
-
-	XP_OFFSETS_CONVERTER: {
-		competition: 'CompetitionStart',
-		mayor: 'OffsetMayor',
-		week: 'OffsetWeek',
-		month: 'OffsetMonth',
-
-		CompetitionStart: 'competition',
-		OffsetMayor: 'mayor',
-		OffsetWeek: 'week',
-		OffsetMonth: 'month',
-	},
-
-	XP_OFFSETS_TIME: {
-		CompetitionStart: 'COMPETITION_START_TIME',
-		CompetitionEnd: 'COMPETITION_END_TIME',
-		OffsetMayor: 'LAST_MAYOR_XP_RESET_TIME',
-		OffsetWeek: 'LAST_WEEKLY_XP_RESET_TIME',
-		OffsetMonth: 'LAST_MONTHLY_XP_RESET_TIME',
-		day: 'LAST_DAILY_XP_RESET_TIME',
-	},
-
-	XP_TYPES: [ ...skills, ...cosmeticSkills, ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ],
-
-	UNKNOWN_IGN: 'UNKNOWN_IGN',
-
-	GUILD_ID_ERROR: 'ERROR',
-
-	GUILD_ID_BRIDGER: 'BRIDGER',
-
-	GUILD_ID_ALL: 'ALL',
-
-	DEFAULT_CONFIG,
-
-};
+export const GUILD_ID_ERROR = 'ERROR';
+export const GUILD_ID_BRIDGER = 'BRIDGER';
+export const GUILD_ID_ALL = 'ALL';

@@ -1,14 +1,13 @@
-'use strict';
+import { Constants } from 'discord.js';
+import pkg from 'sequelize';
+const { Op } = pkg;
+import { offsetFlags } from '../../constants/database.js';
+import { safePromiseAll } from '../../functions/util.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
-const { Constants } = require('discord.js');
-const { Op } = require('sequelize');
-const { offsetFlags } = require('../../constants/database');
-const { safePromiseAll } = require('../../functions/util');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
 
-
-module.exports = class XpResetCommand extends SlashCommand {
+export default class XpResetCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -37,7 +36,7 @@ module.exports = class XpResetCommand extends SlashCommand {
 
 		// individual player
 		if (PLAYER_INPUT) {
-			/** @type {import('../../structures/database/models/Player')} */
+			/** @type {import('../../structures/database/models/Player').Player} */
 			const player = this.getPlayer(interaction)
 				?? await players.fetch({
 					guildId: null,
@@ -82,4 +81,4 @@ module.exports = class XpResetCommand extends SlashCommand {
 
 		this.reply(interaction, result);
 	}
-};
+}

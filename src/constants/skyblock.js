@@ -1,6 +1,66 @@
-'use strict';
+/**
+ * misc
+ */
 
-const skillXp = {
+export const SKYBLOCK_YEAR_0 = 1_560_275_700_000;
+export const MAYOR_CHANGE_INTERVAL = 446_400_000;
+export const PROFILE_NAMES = Object.freeze([
+	'Apple',
+	'Banana',
+	'Blueberry',
+	'Coconut',
+	'Cucumber',
+	'Grapes',
+	'Kiwi',
+	'Lemon',
+	'Lime',
+	'Mango',
+	'Orange',
+	'Papaya',
+	'Peach',
+	'Pear',
+	'Pineapple',
+	'Pomegranate',
+	'Raspberry',
+	'Strawberry',
+	'Tomato',
+	'Watermelon',
+	'Zucchini',
+]);
+
+
+/**
+ * skills
+ */
+
+export const skills = Object.freeze([
+	'taming',
+	'farming',
+	'mining',
+	'combat',
+	'foraging',
+	'fishing',
+	'enchanting',
+	'alchemy',
+]);
+
+export const cosmeticSkills = Object.freeze([
+	'carpentry',
+	'runecrafting',
+]);
+
+export const skillsAchievements = Object.freeze({
+	farming: 'skyblock_harvester',
+	mining: 'skyblock_excavator',
+	combat: 'skyblock_combat',
+	foraging: 'skyblock_gatherer',
+	fishing: 'skyblock_angler',
+	enchanting: 'skyblock_augmentation',
+	alchemy: 'skyblock_concoctor',
+	taming: 'skyblock_domesticator',
+});
+
+export const skillXp = Object.freeze({
 	1: 50,
 	2: 125,
 	3: 200,
@@ -51,9 +111,9 @@ const skillXp = {
 	48: 3_400_000,
 	49: 3_700_000,
 	50: 4_000_000,
-};
+});
 
-const skillXpPast50 = {
+export const skillXpPast50 = Object.freeze({
 	51: 4_300_000,
 	52: 4_600_000,
 	53: 4_900_000,
@@ -64,9 +124,59 @@ const skillXpPast50 = {
 	58: 6_400_000,
 	59: 6_700_000,
 	60: 7_000_000,
-};
+});
 
-const dungeonXp = {
+export const skillXpTotal = Object.freeze(Object.fromEntries([ ...Object.entries(skillXp), ...Object.entries(skillXpPast50) ]
+	.map(([ level ], index) => [ level, [ ...Object.values(skillXp), ...Object.values(skillXpPast50) ].slice(0, index + 1).reduce((acc, curr) => acc + curr, 0) ])));
+
+export const runecraftingXp = Object.freeze({
+	1: 50,
+	2: 100,
+	3: 125,
+	4: 160,
+	5: 200,
+	6: 250,
+	7: 315,
+	8: 400,
+	9: 500,
+	10: 625,
+	11: 785,
+	12: 1_000,
+	13: 1_250,
+	14: 1_600,
+	15: 2_000,
+	16: 2_465,
+	17: 3_125,
+	18: 4_000,
+	19: 5_000,
+	20: 6_200,
+	21: 7_800,
+	22: 9_800,
+	23: 12_200,
+	24: 15_300,
+	25: 19_050,
+});
+
+export const skillCap = Object.freeze({
+	taming: 50,
+	farming: 60,
+	mining: 60,
+	combat: 60,
+	foraging: 50,
+	fishing: 50,
+	enchanting: 60,
+	alchemy: 50,
+	carpentry: 50,
+	runecrafting: 25,
+	dungeons: 50,
+});
+
+
+/**
+ * dungeons
+ */
+
+export const dungeonXp = Object.freeze({
 	1: 50,
 	2: 75,
 	3: 110,
@@ -117,175 +227,59 @@ const dungeonXp = {
 	48: 75_000_000,
 	49: 93_000_000,
 	50: 116_250_000,
-};
+});
 
-const dungeonTypes = [
+export const dungeonXpTotal = Object.freeze(Object.fromEntries(Object.entries(dungeonXp)
+	.map(([ level ], index) => [
+		level,
+		Object.values(dungeonXp)
+			.slice(0, index + 1)
+			.reduce((acc, curr) => acc + curr, 0),
+	])));
+
+export const dungeonCap = Object.freeze({
+	catacombs: 50,
+	healer: 50,
+	mage: 50,
+	berserk: 50,
+	archer: 50,
+	tank: 50,
+});
+
+export const dungeonTypes = Object.freeze([
 	'catacombs',
-];
+]);
 
-const dungeonClasses = [
+export const dungeonClasses = Object.freeze([
 	'healer',
 	'mage',
 	'berserk',
 	'archer',
 	'tank',
-];
+]);
 
-module.exports = {
-	/**
-	 * misc
-	 */
+export const dungeonTypesAndClasses = Object.freeze([ ...dungeonTypes, ...dungeonClasses ]);
 
-	SKYBLOCK_YEAR_0: 1_560_275_700_000,
 
-	MAYOR_CHANGE_INTERVAL: 446_400_000,
+/**
+ * slayers
+ */
 
-	PROFILE_NAMES: [
-		'Apple',
-		'Banana',
-		'Blueberry',
-		'Coconut',
-		'Cucumber',
-		'Grapes',
-		'Kiwi',
-		'Lemon',
-		'Lime',
-		'Mango',
-		'Orange',
-		'Papaya',
-		'Peach',
-		'Pear',
-		'Pineapple',
-		'Pomegranate',
-		'Raspberry',
-		'Strawberry',
-		'Tomato',
-		'Watermelon',
-		'Zucchini',
-	],
+export const slayers = Object.freeze([
+	'zombie',
+	'spider',
+	'wolf',
+	'enderman',
+]);
 
-	/**
-	 * skills
-	 */
-
-	skills: [
-		'taming',
-		'farming',
-		'mining',
-		'combat',
-		'foraging',
-		'fishing',
-		'enchanting',
-		'alchemy',
-	],
-
-	cosmeticSkills: [
-		'carpentry',
-		'runecrafting',
-	],
-
-	skillsAchievements: {
-		farming: 'skyblock_harvester',
-		mining: 'skyblock_excavator',
-		combat: 'skyblock_combat',
-		foraging: 'skyblock_gatherer',
-		fishing: 'skyblock_angler',
-		enchanting: 'skyblock_augmentation',
-		alchemy: 'skyblock_concoctor',
-		taming: 'skyblock_domesticator',
-	},
-
-	skillXp,
-
-	skillXpPast50,
-
-	skillXpTotal: Object.fromEntries([ ...Object.entries(skillXp), ...Object.entries(skillXpPast50) ].map(([ level ], index) => [ level, [ ...Object.values(skillXp), ...Object.values(skillXpPast50) ].slice(0, index + 1).reduce((acc, curr) => acc + curr, 0) ])),
-
-	runecraftingXp: {
-		1: 50,
-		2: 100,
-		3: 125,
-		4: 160,
-		5: 200,
-		6: 250,
-		7: 315,
-		8: 400,
-		9: 500,
-		10: 625,
-		11: 785,
-		12: 1_000,
-		13: 1_250,
-		14: 1_600,
-		15: 2_000,
-		16: 2_465,
-		17: 3_125,
-		18: 4_000,
-		19: 5_000,
-		20: 6_200,
-		21: 7_800,
-		22: 9_800,
-		23: 12_200,
-		24: 15_300,
-		25: 19_050,
-	},
-
-	skillCap: {
-		taming: 50,
-		farming: 60,
-		mining: 60,
-		combat: 60,
-		foraging: 50,
-		fishing: 50,
-		enchanting: 60,
-		alchemy: 50,
-		carpentry: 50,
-		runecrafting: 25,
-		dungeons: 50,
-	},
-
-	/**
-	 * dungeons
-	 */
-
-	dungeonXp,
-
-	dungeonXpTotal: Object.fromEntries(Object.entries(dungeonXp).map(([ level ], index) => [ level, Object.values(dungeonXp).slice(0, index + 1).reduce((acc, curr) => acc + curr, 0) ])), // eslint-disable-line newline-per-chained-call
-
-	dungeonCap: {
-		catacombs: 50,
-		healer: 50,
-		mage: 50,
-		berserk: 50,
-		archer: 50,
-		tank: 50,
-	},
-
-	dungeonTypes,
-
-	dungeonClasses,
-
-	dungeonTypesAndClasses: [ ...dungeonTypes, ...dungeonClasses ],
-
-	/**
-	 * slayers
-	 */
-
-	slayers: [
-		'zombie',
-		'spider',
-		'wolf',
-		'enderman',
-	],
-
-	slayerXp: {
-		1: 5,
-		2: 15,
-		3: 200,
-		4: 1_000,
-		5: 5_000,
-		6: 20_000,
-		7: 100_000,
-		8: 400_000,
-		9: 1_000_000,
-	},
-};
+export const slayerXp = Object.freeze({
+	1: 5,
+	2: 15,
+	3: 200,
+	4: 1_000,
+	5: 5_000,
+	6: 20_000,
+	7: 100_000,
+	8: 400_000,
+	9: 1_000_000,
+});

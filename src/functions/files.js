@@ -1,40 +1,38 @@
-'use strict';
+import { readdir } from 'fs/promises';
+import { join, basename, extname } from 'path';
+import { fileURLToPath } from 'url';
+import { logger } from './logger.js';
 
-const { promises: fs } = require('fs');
-const { join, basename, extname } = require('path');
 
+/**
+ * searches the dirPath and subfolders for all .js-files that don't start with '~'
+ * @param {string | URL} path path to search in
+ * @param {string[]} arrayOfFiles accumulator
+ */
+export async function getAllJsFiles(path, arrayOfFiles = []) {
+	try {
+		const files = await readdir(path, { withFileTypes: true });
 
-const self = module.exports = {
+		// for (const file of files) {
+		// 	const newPath = join(fileURLToPath(path), file.name);
 
-	/**
-	 * searches the dirPath and subfolders for all .js-files that don't start with '~'
-	 * @param {string} dirPath path to search in
-	 * @param {string[]} arrayOfFiles accumulator
-	 */
-	async getAllJsFiles(dirPath, arrayOfFiles = []) {
-		const files = await fs.readdir(dirPath);
+		// 	if (file.isDirectory()) return getAllJsFiles(newPath, arrayOfFiles);
+
+		// 	arrayOfFiles.push(newPath);
+		// }
 
 		await Promise.all(files.map(async (file) => {
-			if ((await fs.stat(join(dirPath, file))).isDirectory()) return self.getAllJsFiles(join(dirPath, file), arrayOfFiles);
-			arrayOfFiles.push(join(dirPath, file));
+			const newPath = join(typeof path === 'string' ? path : fileURLToPath(path), file.name);
+
+			if (file.isDirectory()) return getAllJsFiles(newPath, arrayOfFiles);
+
+			arrayOfFiles.push(newPath);
 		}));
 
+		// logger.debug({ arrayOfFiles })
+
 		return arrayOfFiles.filter(file => !basename(file).startsWith('~') && extname(file) === '.js');
-	},
-
-	/**
-	 * requires all files in the given directory
-	 * @param {string} dirPath path of the files to require
-	 * @param {any[]} args arguments to call the required files with
-	 */
-	async requireAll(dirPath, ...args) {
-		const files = await self.getAllJsFiles(dirPath);
-
-		if (args.length) {
-			for (const file of files) require(file)(...args);
-		} else {
-			for (const file of files) require(file);
-		}
-	},
-
-};
+	} catch (error) {
+		logger.error(error);
+	}
+}

@@ -1,15 +1,13 @@
-'use strict';
-
-const { upperCaseFirstChar, autocorrect } = require('../../functions/util');
-const { getUuidAndIgn } = require('../../functions/input');
-const { X_EMOJI } = require('../../constants/emojiCharacters');
-const { PROFILE_NAMES } = require('../../constants/skyblock');
-const hypixel = require('../../api/hypixel');
-const DualCommand = require('../../structures/commands/DualCommand');
-const logger = require('../../functions/logger');
+import { upperCaseFirstChar, autocorrect } from '../../functions/util.js';
+import { getUuidAndIgn } from '../../functions/input.js';
+import { X_EMOJI } from '../../constants/emojiCharacters.js';
+import { PROFILE_NAMES } from '../../constants/skyblock.js';
+import { hypixel } from '../../api/hypixel.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class BaseWeightCommand extends DualCommand {
+export default class BaseWeightCommand extends DualCommand {
 	// eslint-disable-next-line class-methods-use-this
 	getWeight() {
 		throw new Error('no weight algorithm implemented');
@@ -25,7 +23,7 @@ module.exports = class BaseWeightCommand extends DualCommand {
 	}
 
 	/**
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage')} ctx
+	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} ctx
 	 * @param {string} ignOrUuid command arguments
 	 * @param {string} [profileName]
 	 */
@@ -73,10 +71,10 @@ module.exports = class BaseWeightCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		const [ IGN, PROFILE_NAME_INPUT ] = message.commandData.args;
+	async runInGame(hypixelMessage) {
+		const [ IGN, PROFILE_NAME_INPUT ] = hypixelMessage.commandData.args;
 
 		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');
 
@@ -87,7 +85,7 @@ module.exports = class BaseWeightCommand extends DualCommand {
 
 			if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) {
 				try {
-					await message.awaitConfirmation({
+					await hypixelMessage.awaitConfirmation({
 						question: `'${upperCaseFirstChar(PROFILE_NAME_INPUT)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,
 						timeoutSeconds: 30,
 					});
@@ -98,6 +96,6 @@ module.exports = class BaseWeightCommand extends DualCommand {
 			}
 		}
 
-		return await message.reply(await this._generateReply(message, IGN, profileName));
+		return await hypixelMessage.reply(await this._generateReply(hypixelMessage, IGN, profileName));
 	}
-};
+}

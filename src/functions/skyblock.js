@@ -1,9 +1,11 @@
-'use strict';
-const { dungeonClasses, dungeonTypes, dungeonXp, dungeonXpTotal, dungeonCap, runecraftingXp, skillXp, skillXpTotal, skillCap, skillXpPast50, skills, slayers } = require('../constants/skyblock');
-const { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } = require('../constants/weight');
-const { getWeightRaw: getLilyWeightRaw } = require('lilyweight')();
-const { skillNames } = require('lilyweight/lib/constants.json');
-// const logger = require('./logger');
+import lilyweight from 'lilyweight';
+import { readFile } from 'fs/promises';
+
+const { skillNames } = JSON.parse(await readFile('node_modules/lilyweight/lib/constants.json'));
+
+import { dungeonClasses, dungeonTypes, dungeonXp, dungeonXpTotal, dungeonCap, runecraftingXp, skillXp, skillXpTotal, skillCap, skillXpPast50, skills, slayers } from '../constants/skyblock.js';
+import { SKILL_EXPONENTS, SKILL_DIVIDER, SLAYER_DIVIDER, SLAYER_MODIFIER, DUNGEON_EXPONENTS } from '../constants/weight.js';
+// import { logger } from './logger.js';
 
 
 /**
@@ -12,7 +14,7 @@ const { skillNames } = require('lilyweight/lib/constants.json');
  * @param {number} xp
  * @param {number} individualCap individual level cap for the player
  */
-function getSkillLevel(type, xp = 0, individualCap = null) {
+export function getSkillLevel(type, xp = 0, individualCap = null) {
 	let xpTable = [ ...dungeonClasses, ...dungeonTypes ].includes(type)
 		? dungeonXp
 		: type === 'runecrafting'
@@ -66,7 +68,7 @@ function getSkillLevel(type, xp = 0, individualCap = null) {
 /**
  * @param {import('@zikeji/hypixel').Components.Schemas.SkyBlockProfileMember} skyblockMember
  */
-function getSenitherWeight(skyblockMember) {
+export function getSenitherWeight(skyblockMember) {
 	let weight = 0;
 	let overflow = 0;
 
@@ -110,7 +112,7 @@ function getSenitherWeight(skyblockMember) {
  * @param {string} skillType
  * @param {number} xp
  */
-function getSenitherSkillWeight(skillType, xp = 0) {
+export function getSenitherSkillWeight(skillType, xp = 0) {
 	const { nonFlooredLevel: LEVEL } = getSkillLevel(skillType, xp);
 	const MAX_XP = skillXpTotal[skillCap[skillType]] ?? Infinity;
 
@@ -126,7 +128,7 @@ function getSenitherSkillWeight(skillType, xp = 0) {
  * @param {string} slayerType
  * @param {number} xp
  */
-function getSenitherSlayerWeight(slayerType, xp = 0) {
+export function getSenitherSlayerWeight(slayerType, xp = 0) {
 	if (xp <= 1_000_000) {
 		return {
 			slayerWeight: xp === 0
@@ -164,7 +166,7 @@ function getSenitherSlayerWeight(slayerType, xp = 0) {
  * @param {string} dungeonType
  * @param {number} xp
  */
-function getSenitherDungeonWeight(dungeonType, xp = 0) {
+export function getSenitherDungeonWeight(dungeonType, xp = 0) {
 	const { nonFlooredLevel: LEVEL } = getSkillLevel(dungeonType, xp);
 	const DUNGEON_WEIGHT = (LEVEL ** 4.5) * (DUNGEON_EXPONENTS[dungeonType] ?? 0);
 	const MAX_XP = dungeonXpTotal[dungeonCap[dungeonType]] ?? Infinity;
@@ -182,10 +184,12 @@ function getSenitherDungeonWeight(dungeonType, xp = 0) {
  * Lily
  */
 
+const { getWeightRaw: getLilyWeightRaw } = lilyweight();
+
 /**
  * @param {import('@zikeji/hypixel').Components.Schemas.SkyBlockProfileMember} skyblockMember
  */
-function getLilyWeight(skyblockMember) {
+export function getLilyWeight(skyblockMember) {
 	const SKILL_XP = Object.keys(skillNames).map(skill => skyblockMember[skill] ?? 0);
 	const { total, skill: { overflow } } = getLilyWeightRaw(
 		[
@@ -217,18 +221,3 @@ function getLilyWeight(skyblockMember) {
 		totalWeight: total,
 	};
 }
-
-
-/**
- * exports
- */
-module.exports = {
-	getSkillLevel,
-
-	getSenitherWeight,
-	getSenitherSkillWeight,
-	getSenitherSlayerWeight,
-	getSenitherDungeonWeight,
-
-	getLilyWeight,
-};

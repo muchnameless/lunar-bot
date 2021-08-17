@@ -1,10 +1,8 @@
-'use strict';
-
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class GuildUnavailableEvent extends Event {
+export default class GuildUnavailableEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -22,4 +20,4 @@ module.exports = class GuildUnavailableEvent extends Event {
 		// sweep linked discord members cache
 		if (guild.id === this.config.get('DISCORD_GUILD_ID')) this.client.players.sweepDiscordMemberCache();
 	}
-};
+}

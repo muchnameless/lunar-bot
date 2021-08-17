@@ -1,10 +1,8 @@
-'use strict';
-
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class MyCommand extends SlashCommand {
+export default class MyCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -21,4 +19,4 @@ module.exports = class MyCommand extends SlashCommand {
 	async run(interaction) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
-};
+}

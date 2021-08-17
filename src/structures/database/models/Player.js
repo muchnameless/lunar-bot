@@ -1,37 +1,37 @@
-'use strict';
+import { GuildMember, MessageEmbed, Permissions, Formatters } from 'discord.js';
+import pkg from 'sequelize';
+const { Model, DataTypes } = pkg;
+import { stripIndents } from 'common-tags';
+import { RateLimitError } from '@zikeji/hypixel';
+import { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags } from '../../../constants/database.js';
+import { slayerXp, skills, cosmeticSkills, skillsAchievements, skillXpTotal, slayers, dungeonTypes, dungeonClasses, dungeonTypesAndClasses } from '../../../constants/skyblock.js';
+import { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } from '../../../constants/roles.js';
+import { NICKNAME_MAX_CHARS } from '../../../constants/discord.js';
+import { escapeIgn, trim } from '../../../functions/util.js';
+import { getSkillLevel, getSenitherWeight, getSenitherSkillWeight, getSenitherSlayerWeight, getSenitherDungeonWeight } from '../../../functions/skyblock.js';
+import { validateNumber, validateDiscordId } from '../../../functions/stringValidators.js';
+import { mutedCheck } from '../../../functions/database.js';
+import { HypixelGuildManager } from '../managers/HypixelGuildManager.js';
+import { GuildUtil } from '../../../util/GuildUtil.js';
+import { GuildMemberUtil } from '../../../util/GuildMemberUtil.js';
+import { MessageEmbedUtil } from '../../../util/MessageEmbedUtil.js';
+import { UserUtil } from '../../../util/UserUtil.js';
+import { hypixel } from '../../../api/hypixel.js';
+import { mojang } from '../../../api/mojang.js';
+import { logger } from '../../../functions/logger.js';
 
-const { GuildMember, MessageEmbed, Permissions, Formatters } = require('discord.js');
-const { Model, DataTypes } = require('sequelize');
-const { stripIndents } = require('common-tags');
-const { RateLimitError } = require('@zikeji/hypixel');
-const { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags: { DAY, CURRENT } } = require('../../../constants/database');
-const { slayerXp, skills, cosmeticSkills, skillsAchievements, skillXpTotal, slayers, dungeonTypes, dungeonClasses, dungeonTypesAndClasses } = require('../../../constants/skyblock');
-const { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } = require('../../../constants/roles');
-const { NICKNAME_MAX_CHARS } = require('../../../constants/discord');
-const { escapeIgn, trim } = require('../../../functions/util');
-const { getSkillLevel, getSenitherWeight, getSenitherSkillWeight, getSenitherSlayerWeight, getSenitherDungeonWeight } = require('../../../functions/skyblock');
-const { validateNumber, validateDiscordId } = require('../../../functions/stringValidators');
-const { mutedCheck } = require('../../../functions/database');
-const { PSEUDO_GUILD_IDS } = require('../managers/HypixelGuildManager');
-const GuildUtil = require('../../../util/GuildUtil');
-const GuildMemberUtil = require('../../../util/GuildMemberUtil');
-const MessageEmbedUtil = require('../../../util/MessageEmbedUtil');
-const hypixel = require('../../../api/hypixel');
-const mojang = require('../../../api/mojang');
-const logger = require('../../../functions/logger');
-const UserUtil = require('../../../util/UserUtil');
 
+export class Player extends Model {
+	/**
+	 * @type {?import('discord.js').GuildMember}
+	 */
+	#discordMember = null;
 
-module.exports = class Player extends Model {
 	constructor(...args) {
 		super(...args);
 
 		/**
-		 * @type {?import('discord.js').GuildMember}
-		 */
-		this._discordMember = null;
-		/**
-		 * @type {import('../../LunarClient')}
+		 * @type {import('../../LunarClient').LunarClient}
 		 */
 		this.client;
 		/**
@@ -110,7 +110,7 @@ module.exports = class Player extends Model {
 	}
 
 	/**
-	 * @param {import('sequelize')} sequelize
+	 * @param {import('sequelize').Sequelize} sequelize
 	 */
 	static init(sequelize) {
 		const dataObject = {
@@ -282,7 +282,7 @@ module.exports = class Player extends Model {
 
 	/**
 	 * returns the hypixel guild db object associated with the player
-	 * @returns {?import('./HypixelGuild')}
+	 * @returns {?import('./HypixelGuild').HypixelGuild}
 	 */
 	get hypixelGuild() {
 		if (this.guildId !== GUILD_ID_BRIDGER) {
@@ -297,7 +297,7 @@ module.exports = class Player extends Model {
 	 * wether the player is a bridger or error case
 	 */
 	get notInGuild() {
-		return PSEUDO_GUILD_IDS.includes(this.guildId);
+		return HypixelGuildManager.PSEUDO_GUILD_IDS.includes(this.guildId);
 	}
 
 	/**
@@ -306,7 +306,7 @@ module.exports = class Player extends Model {
 	 */
 	get discordMember() {
 		return (async () => {
-			if (this._discordMember) return this._discordMember;
+			if (this.#discordMember) return this.#discordMember;
 			if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
 
 			try {
@@ -315,7 +315,7 @@ module.exports = class Player extends Model {
 				this.inDiscord = false; // prevent further fetches and try to link via cache in the next updateDiscordMember calls
 				this.save();
 				logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}`, error);
-				return this._discordMember = null;
+				return this.#discordMember = null;
 			}
 		})();
 	}
@@ -329,7 +329,7 @@ module.exports = class Player extends Model {
 			return;
 		}
 
-		this._discordMember = member;
+		this.#discordMember = member;
 
 		if (this.inDiscord) return;
 
@@ -1228,9 +1228,9 @@ module.exports = class Player extends Model {
 			case null:
 				// no offset type specifies -> resetting everything
 				await Promise.all(XP_OFFSETS.map(async offset => this.resetXp({ offsetToReset: offset, typesToReset })));
-				return this.resetXp({ offsetToReset: DAY, typesToReset });
+				return this.resetXp({ offsetToReset: offsetFlags.DAY, typesToReset });
 
-			case DAY:
+			case offsetFlags.DAY:
 				// append current xp to the beginning of the xpHistory-Array and pop of the last value
 				for (const type of typesToReset) {
 					/**
@@ -1243,7 +1243,7 @@ module.exports = class Player extends Model {
 				}
 				break;
 
-			case CURRENT:
+			case offsetFlags.CURRENT:
 				for (const type of typesToReset) this[`${type}Xp`] = 0;
 				break;
 
@@ -1311,7 +1311,7 @@ module.exports = class Player extends Model {
 	 * @param {setToPaidOptions} options
 	 * @param {?string} [options.type=tax]
 	 * @param {?string} [options.notes]
-	 * @returns {[Promise<import('./TaxCollector')>, Promise<(import('./Transaction'))>]}
+	 * @returns {[Promise<import('./TaxCollector').TaxCollector>, Promise<(import('./Transaction'))>]}
 	 */
 	addTransfer({ amount, collectedBy, auctionId = null, notes = null, type = 'tax' } = {}) {
 		return [
@@ -1342,7 +1342,7 @@ module.exports = class Player extends Model {
 		if (user) UserUtil.setPlayer(user, null);
 
 		// remove cached member
-		this._discordMember = null;
+		this.#discordMember = null;
 	}
 
 	/**
@@ -1369,7 +1369,7 @@ module.exports = class Player extends Model {
 	/**
 	 * updates the guild xp and syncs guild mutes
 	 * @param {import('@zikeji/hypixel').Components.Schemas.GuildMember} data from the hypixel guild API
-	 * @param {import('./HypixelGuild')} hypixelGuilds
+	 * @param {import('./HypixelGuild').HypixelGuild} hypixelGuilds
 	 */
 	async syncWithGuildData({ expHistory = {}, mutedTill, rank }, hypixelGuild = this.hypixelGuild) {
 		// update guild xp
@@ -1588,4 +1588,6 @@ module.exports = class Player extends Model {
 	toString() {
 		return this.ign;
 	}
-};
+}
+
+export default Player;

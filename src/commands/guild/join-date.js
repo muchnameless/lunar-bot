@@ -1,11 +1,9 @@
-'use strict';
-
-const { Formatters, Constants } = require('discord.js');
-const ms = require('ms');
-const { logErrors } = require('../../structures/chat_bridge/constants/commandResponses');
-const { escapeIgn } = require('../../functions/util');
-const DualCommand = require('../../structures/commands/DualCommand');
-const logger = require('../../functions/logger');
+import { Formatters, Constants } from 'discord.js';
+import ms from 'ms';
+import { logErrors } from '../../structures/chat_bridge/constants/commandResponses.js';
+import { escapeIgn } from '../../functions/util.js';
+import { DualCommand } from '../../structures/commands/DualCommand.js';
+import { logger } from '../../functions/logger.js';
 
 
 /**
@@ -15,7 +13,7 @@ const logger = require('../../functions/logger');
  * @property {number} timestamp
  */
 
-module.exports = class JoinDateCommand extends DualCommand {
+export default class JoinDateCommand extends DualCommand {
 	constructor(data) {
 		super(
 			data,
@@ -47,7 +45,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	static JOINED_REGEXP = /(?<time>.+): \w{1,16} (?:joined|created the guild)(?:\n.+: \w{1,16} invited \w{1,16})*$/;
 
 	/**
-	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
+	 * @param {import('../../structures/chat_bridge/ChatBridge').ChatBridge} chatBridge
 	 * @param {string} ign
 	 * @returns {Promise<JoinInfo>}
 	 */
@@ -79,7 +77,7 @@ module.exports = class JoinDateCommand extends DualCommand {
 	}
 
 	/**
-	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
+	 * @param {import('../../structures/chat_bridge/ChatBridge').ChatBridge} chatBridge
 	 * @param {string} ign
 	 * @param {number} page
 	 */
@@ -93,8 +91,8 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/ChatBridge')} chatBridge
-	 * @param {import('../../structures/database/models/Player')} ignInput
+	 * @param {import('../../structures/chat_bridge/ChatBridge').ChatBridge} chatBridge
+	 * @param {import('../../structures/database/models/Player').Player} ignInput
 	 */
 	// eslint-disable-next-line class-methods-use-this
 	async #generateReply(chatBridge, ignInput) {
@@ -151,12 +149,12 @@ module.exports = class JoinDateCommand extends DualCommand {
 
 	/**
 	 * execute the command
-	 * @param {import('../../structures/chat_bridge/HypixelMessage')} message
+	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(message) {
-		return await message.reply(await this.#generateReply(
-			message.chatBridge,
-			message.commandData.args[0] ?? message.author.ign,
+	async runInGame(hypixelMessage) {
+		return await hypixelMessage.reply(await this.#generateReply(
+			hypixelMessage.chatBridge,
+			hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,
 		));
 	}
-};
+}

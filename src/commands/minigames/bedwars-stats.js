@@ -1,13 +1,11 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const { oneLine } = require('common-tags');
-const { getBedwarsLevelInfo } = require('@zikeji/hypixel');
-const BaseStatsCommand = require('./~base-stats-command.js');
-const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { oneLine } from 'common-tags';
+import { getBedwarsLevelInfo } from '@zikeji/hypixel';
+import BaseStatsCommand from './~base-stats-command.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class BedWarsStatsCommand extends BaseStatsCommand {
+export default class BedWarsStatsCommand extends BaseStatsCommand {
 	constructor(data) {
 		super(
 			data,
@@ -71,4 +69,4 @@ module.exports = class BedWarsStatsCommand extends BaseStatsCommand {
 			return `${error}`;
 		}
 	}
-};
+}

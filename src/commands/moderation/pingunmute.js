@@ -1,11 +1,9 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const PingMute = require('./pingmute');
-const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import PingMute from './pingmute.js';
+import { logger } from '../../functions/logger.js';
 
 
-module.exports = class PingUnmuteCommand extends PingMute {
+export default class PingUnmuteCommand extends PingMute {
 	constructor(data) {
 		super(
 			data,
@@ -24,7 +22,7 @@ module.exports = class PingUnmuteCommand extends PingMute {
 	}
 
 	/**
-	 * @param {import('../../structures/database/models/Player')} player
+	 * @param {import('../../structures/database/models/Player').Player} player
 	 */
 	async _generateReply(player) {
 		try {
@@ -37,4 +35,4 @@ module.exports = class PingUnmuteCommand extends PingMute {
 			return `an error occurred while trying to give \`${player}\` ping permissions`;
 		}
 	}
-};
+}

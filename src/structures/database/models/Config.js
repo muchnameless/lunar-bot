@@ -1,14 +1,13 @@
-'use strict';
+import pkg from 'sequelize';
+const { Model, DataTypes } = pkg;
 
-const { Model, DataTypes } = require('sequelize');
 
-
-module.exports = class Config extends Model {
+export class Config extends Model {
 	constructor(...args) {
 		super(...args);
 
 		/**
-		 * @type {import('../../LunarClient')}
+		 * @type {import('../../LunarClient').LunarClient}
 		 */
 		this.client;
 		/**
@@ -26,7 +25,7 @@ module.exports = class Config extends Model {
 	}
 
 	/**
-	 * @param {import('sequelize')} sequelize
+	 * @param {import('sequelize').Sequelize} sequelize
 	 */
 	static init(sequelize) {
 		return super.init({
@@ -49,4 +48,6 @@ module.exports = class Config extends Model {
 			freezeTableName: true,
 		});
 	}
-};
+}
+
+export default Config;

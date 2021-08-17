@@ -1,10 +1,8 @@
-'use strict';
-
-const Event = require('../structures/events/Event');
-const logger = require('../functions/logger');
+import { Event } from '../structures/events/Event.js';
+import { logger } from '../functions/logger.js';
 
 
-module.exports = class GuildMemberAvailableEvent extends Event {
+export default class GuildMemberAvailableEvent extends Event {
 	constructor(data) {
 		super(data, {
 			once: false,
@@ -36,4 +34,4 @@ module.exports = class GuildMemberAvailableEvent extends Event {
 			GuildMemberAvailableEvent.IS_FETCHING = false;
 		}
 	}
-};
+}

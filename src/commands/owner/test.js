@@ -1,11 +1,9 @@
-'use strict';
-
-const { Constants } = require('discord.js');
-const SlashCommand = require('../../structures/commands/SlashCommand');
-// const logger = require('../../functions/logger');
+import { Constants } from 'discord.js';
+import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+// import { logger } from '../../functions/logger.js';
 
 
-module.exports = class TestCommand extends SlashCommand {
+export default class TestCommand extends SlashCommand {
 	constructor(data) {
 		super(data, {
 			aliases: [],
@@ -27,4 +25,4 @@ module.exports = class TestCommand extends SlashCommand {
 	async run(interaction) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
-};
+}
