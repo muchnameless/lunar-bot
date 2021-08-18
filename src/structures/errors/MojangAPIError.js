@@ -6,28 +6,33 @@ export class MojangAPIError extends Error {
 	 * @param {string} queryType
 	 */
 	constructor({ status, statusText }, queryType, input) {
-		super();
-
-		this.name = 'MojangAPIError';
-		this.code = status;
+		let message;
 
 		switch (queryType) {
 			case 'ign':
-				this.message = `invalid IGN \`${input}\``;
+				message = `invalid IGN \`${input}\``;
 				break;
 
 			case 'uuid':
-				this.message = `invalid uuid \`${input}\``;
+				message = `invalid uuid \`${input}\``;
 				break;
 
 			case 'ignOrUuid':
-				this.message = `invalid IGN or uuid \`${input}\``;
+				message = `invalid IGN or uuid \`${input}\``;
 				break;
 
 			default:
-				this.message = `${statusText} \`${input}\``;
+				message = `unknown query \`${input}\``;
 				break;
 		}
+
+		if (statusText && statusText !== 'No Content') message += ` (${statusText})`;
+
+		super(message);
+
+		this.name = 'MojangAPIError';
+		this.code = status;
+		this.statusText = statusText;
 	}
 
 	toString() {

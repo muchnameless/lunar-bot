@@ -1,8 +1,7 @@
 import fetch from 'node-fetch';
 import { validateMinecraftIgn, validateMinecraftUuid } from '../functions/stringValidators.js';
 import { MojangAPIError } from './errors/MojangAPIError.js';
-import { logger } from '../functions/logger.js';
-// import { writeFileSync } from 'node:fs';
+// import { logger } from '../functions/logger.js';
 
 /**
  * @typedef MojangResult
@@ -177,7 +176,7 @@ export class Mojang {
 			/**
 			 * mojang api currently ignores ?at= [https://bugs.mojang.com/browse/WEB-3367]
 			 */
-			// case 204: {
+			// case 204: { // invalid ign
 			// 	if (queryType === 'ign') { // retry a past date if name was queried
 			// 		let timestamp = Date.now();
 
@@ -196,21 +195,19 @@ export class Mojang {
 			// 				};
 
 			// 				if (cache) {
+			// 					// only cache ign -> uuid for outdated igns
 			// 					this.cache?.set('ign', response.ign.toLowerCase(), response);
-			// 					// this.cache?.set('uuid', response.uuid, response);
 			// 				}
 
 			// 				return response;
 			// 			}
 			// 		}
 			// 	}
-			// 	// falls through
 			// }
+			// falls through
 
 			default:
 				if (cache) this.cache?.set(queryType, query, { error: true, res });
-				logger.debug(res)
-				// writeFileSync(`./MojangError-${Date.now()}`, res);
 				throw new MojangAPIError(res, queryType, query);
 		}
 	}
