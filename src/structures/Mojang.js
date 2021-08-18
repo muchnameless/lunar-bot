@@ -1,7 +1,8 @@
 import fetch from 'node-fetch';
 import { validateMinecraftIgn, validateMinecraftUuid } from '../functions/stringValidators.js';
 import { MojangAPIError } from './errors/MojangAPIError.js';
-// import { logger } from '../functions/logger.js';
+import { logger } from '../functions/logger.js';
+// import { writeFileSync } from 'node:fs';
 
 /**
  * @typedef MojangResult
@@ -208,6 +209,8 @@ export class Mojang {
 
 			default:
 				if (cache) this.cache?.set(queryType, query, { error: true, res });
+				logger.debug(res)
+				// writeFileSync(`./MojangError-${Date.now()}`, res);
 				throw new MojangAPIError(res, queryType, query);
 		}
 	}
