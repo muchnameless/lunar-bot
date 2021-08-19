@@ -167,30 +167,6 @@ export default class MathsCommand extends DualCommand {
 		};
 	}
 
-	/**
-	 * parser for reverse polish notation
-	 */
-	static parser = new Parser({
-		m: this.multiplier,
-		k: this.multiplier,
-		'°': this.degree,
-		'^': this.power,
-		'!': this.factorialPost,
-		fac: this.factorialPre,
-		'+': this.term,
-		'-': this.term,
-		'*': this.factor,
-		'/': this.factor,
-		sin: this.func,
-		cos: this.func,
-		tan: this.func,
-		sqrt: this.func,
-		exp: this.func,
-		ln: this.func,
-		log: this.func,
-		percent: this.percent,
-	});
-
 	static percent = {
 		precedence: 8,
 		associativity: 'right',
@@ -287,6 +263,30 @@ export default class MathsCommand extends DualCommand {
 		.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 		.addRule(/e(?:uler)?/i, () => Math.E)
 		.addRule(/m|k/i, lexeme => lexeme.toLowerCase()); // multiplier
+
+	/**
+	 * parser for reverse polish notation
+	 */
+	static parser = new Parser({
+		m: this.multiplier,
+		k: this.multiplier,
+		'°': this.degree,
+		'^': this.power,
+		'!': this.factorialPost,
+		fac: this.factorialPre,
+		'+': this.term,
+		'-': this.term,
+		'*': this.factor,
+		'/': this.factor,
+		sin: this.func,
+		cos: this.func,
+		tan: this.func,
+		sqrt: this.func,
+		exp: this.func,
+		ln: this.func,
+		log: this.func,
+		percent: this.percent,
+	});
 
 	static parse(input) {
 		MathsCommand.lexer.setInput(input);
