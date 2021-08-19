@@ -1,7 +1,8 @@
 import { Constants } from 'discord.js';
 import ms from 'ms';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction } from '../functions/leaderboards.js';
-import { LB_KEY, AH_KEY } from '../constants/redis.js';
+import { LB_KEY } from '../constants/redis.js';
+import { COMMAND_KEY } from '../constants/bot.js';
 import { InteractionUtil } from '../util/InteractionUtil.js';
 import { Event } from '../structures/events/Event.js';
 import { logger } from '../functions/logger.js';
@@ -67,29 +68,97 @@ export default class InteractionCreateEvent extends Event {
 			setTimeout(() => command.timestamps.delete(interaction.user.id), COOLDOWN_TIME);
 		}
 
-		return command.runSlash(interaction);
+		return await command.runSlash(interaction);
 	}
 
 	/**
 	 * @param {import('discord.js').ButtonInteraction} interaction
 	 */
-	#handleButtonInteraction(interaction) { // eslint-disable-line class-methods-use-this
-		// leaderboards edit
-		if (interaction.customId.startsWith(LB_KEY)) return handleLeaderboardButtonInteraction(interaction);
+	async #handleButtonInteraction(interaction) { // eslint-disable-line class-methods-use-this
+		const args = interaction.customId.split(':');
+		const type = args.shift();
 
-		// eval edit
-		if (interaction.customId.startsWith('EVAL')) return this.client.commands.get('eval')?.runButton(interaction);
+		switch (type) {
+			// leaderboards edit
+			case LB_KEY:
+				return handleLeaderboardButtonInteraction(interaction);
+
+			// command message buttons
+			case COMMAND_KEY: {
+				const commandName = args.shift();
+				/** @type {import('../structures/commands/SlashCommand').SlashCommand} */
+				const command = this.client.commands.get(commandName);
+
+				if (!command) {
+					if (commandName) await InteractionUtil.reply(interaction, {
+						content: `${commandName} is currently disabled`,
+						ephemeral: true,
+					});
+
+					return;
+				}
+
+				if (interaction.user.id !== this.client.ownerId) {
+					// role permissions
+					await command.checkPermissions(interaction);
+
+					// prevent from executing owner only command
+					if (command.category === 'owner') {
+						return await InteractionUtil.reply(interaction, {
+							content: `the \`${command.name}\` command is restricted to the bot owner`,
+							ephemeral: true,
+						});
+					}
+				}
+
+				return await command.runButton(interaction);
+			}
+		}
 	}
 
 	/**
 	 * @param {import('discord.js').SelectMenuInteraction} interaction
 	 */
-	#handleSelectMenuInteraction(interaction) { // eslint-disable-line class-methods-use-this
-		// leaderboards edit
-		if (interaction.customId.startsWith(LB_KEY)) return handleLeaderboardSelectMenuInteraction(interaction);
+	async #handleSelectMenuInteraction(interaction) { // eslint-disable-line class-methods-use-this
+		const args = interaction.customId.split(':');
+		const type = args.shift();
 
-		// ah profile change
-		if (interaction.customId.startsWith(AH_KEY)) return this.client.commands.get('ah')?.runSelect(interaction);
+		switch (type) {
+			// leaderboards edit
+			case LB_KEY:
+				return handleLeaderboardSelectMenuInteraction(interaction);
+
+			// command message buttons
+			case 'cmd': {
+				const commandName = args.shift();
+				/** @type {import('../structures/commands/SlashCommand').SlashCommand} */
+				const command = this.client.commands.get(commandName);
+
+				if (!command) {
+					if (commandName) await InteractionUtil.reply(interaction, {
+						content: `${commandName} is currently disabled`,
+						ephemeral: true,
+					});
+
+					return;
+				}
+
+				if (interaction.user.id !== this.client.ownerId) {
+					// role permissions
+					await command.checkPermissions(interaction);
+
+					// prevent from executing owner only command
+					if (command.category === 'owner') {
+						return await InteractionUtil.reply(interaction, {
+							content: `the \`${command.name}\` command is restricted to the bot owner`,
+							ephemeral: true,
+						});
+					}
+				}
+
+				return await command.runSelect(interaction);
+			}
+		}
 	}
 
 	/**

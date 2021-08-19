@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { SlashCommandBuilder } from '@discordjs/builders';
-import Discord from 'discord.js';
+import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Constants } from 'discord.js';
 import _ from 'lodash-es';
 import similarity from 'jaro-winkler';
 import ms from 'ms';
 import fetch from 'node-fetch';
 import util from 'util';
+import { COMMAND_KEY } from '../../constants/bot.js';
 import { EMBED_MAX_CHARS } from '../../constants/discord.js';
 import { EDIT_MESSAGE } from '../../constants/emojiCharacters.js';
 import { cache } from '../../api/cache.js';
@@ -68,7 +69,6 @@ export default class EvalCommand extends SlashCommand {
 
 		/* eslint-disable no-unused-vars */
 		const { client, config } = this;
-		const { MessageEmbed } = Discord;
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
 		const reply = InteractionUtil.reply.bind(InteractionUtil, interaction);
@@ -154,14 +154,14 @@ export default class EvalCommand extends SlashCommand {
 			ephemeral: true,
 		});
 
-		if (!ChannelUtil.botPermissions(interaction.channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL)) return await InteractionUtil.reply(interaction, {
+		if (!ChannelUtil.botPermissions(interaction.channel).has(Permissions.FLAGS.VIEW_CHANNEL)) return await InteractionUtil.reply(interaction, {
 			content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
 			ephemeral: true,
 		});
 
 		InteractionUtil.deferUpdate(interaction);
 
-		const { groups: { async, inspectDepth } } = interaction.customId.match(/EVAL:(?<async>.+):(?<inspectDepth>.+)/);
+		const [ , , async, inspectDepth ] = interaction.customId.split(':');
 
 		try {
 			const collected = await interaction.channel.awaitMessages({
@@ -208,12 +208,12 @@ export default class EvalCommand extends SlashCommand {
 			.reduce((acc, cur) => `${acc}${acc ? '\n' : ''}${cur}${cur.endsWith('{') ? '' : ';'}`, '');
 		const IS_ASYNC = interaction.options.getBoolean('async') ?? /\bawait\b/.test(INPUT);
 		const INSPECT_DEPTH = interaction.options.getInteger('inspect') ?? this.config.get('EVAL_INSPECT_DEPTH');
-		const row = new Discord.MessageActionRow()
+		const row = new MessageActionRow()
 			.addComponents(
-				new Discord.MessageButton()
-					.setCustomId(`EVAL:${IS_ASYNC}:${INSPECT_DEPTH}`)
+				new MessageButton()
+					.setCustomId(`${COMMAND_KEY}:${this.name}:${IS_ASYNC}:${INSPECT_DEPTH}`)
 					.setEmoji(EDIT_MESSAGE)
-					.setStyle(Discord.Constants.MessageButtonStyles.SECONDARY),
+					.setStyle(Constants.MessageButtonStyles.SECONDARY),
 			);
 
 		return await InteractionUtil.reply(interaction, {

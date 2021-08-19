@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageActionRow, MessageSelectMenu, MessageEmbed, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
+import { COMMAND_KEY } from '../../constants/bot.js';
 import { upperCaseFirstChar } from '../../functions/util.js';
 import { getUuidAndIgn } from '../../functions/input.js';
-import { AH_KEY } from '../../constants/redis.js';
 import { hypixel } from '../../api/hypixel.js';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions.js';
 import { InteractionUtil } from '../../util/InteractionUtil.js';
@@ -72,7 +72,7 @@ export default class AhCommand extends SlashCommand {
 					components: [
 						new MessageActionRow().addComponents(
 							new MessageSelectMenu()
-								.setCustomId(`${AH_KEY}:${uuid}:${ign}`)
+								.setCustomId(`${COMMAND_KEY}:${this.name}:${uuid}:${ign}`)
 								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 								.addOptions(profiles),
 						),
@@ -125,7 +125,7 @@ export default class AhCommand extends SlashCommand {
 				components: [
 					new MessageActionRow().addComponents(
 						new MessageSelectMenu()
-							.setCustomId(`${AH_KEY}:${uuid}:${ign}`)
+							.setCustomId(`${COMMAND_KEY}:${this.name}:${uuid}:${ign}`)
 							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 							.addOptions(profiles),
 					),
@@ -152,7 +152,7 @@ export default class AhCommand extends SlashCommand {
 		InteractionUtil.deferUpdate(interaction);
 
 		try {
-			const [ , uuid, ign ] = interaction.customId.split(':');
+			const [ , , uuid, ign ] = interaction.customId.split(':');
 			const [ profileId ] = interaction.values;
 			const profiles = interaction.message.components[0].components[0].options;
 
@@ -195,7 +195,7 @@ export default class AhCommand extends SlashCommand {
 					components: [
 						new MessageActionRow().addComponents(
 							new MessageSelectMenu()
-								.setCustomId(`${AH_KEY}:${uuid}:${ign}`)
+								.setCustomId(`${COMMAND_KEY}:${this.name}:${uuid}:${ign}`)
 								.setDisabled(true)
 								.setPlaceholder('Profile: None'),
 						),
@@ -226,7 +226,7 @@ export default class AhCommand extends SlashCommand {
 						components: [
 							new MessageActionRow().addComponents(
 								new MessageSelectMenu()
-									.setCustomId(`${AH_KEY}:${uuid}:${ign}`)
+									.setCustomId(`${COMMAND_KEY}:${this.name}:${uuid}:${ign}`)
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)
 									.addOptions(profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id }))),
 							),
