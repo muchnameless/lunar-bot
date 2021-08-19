@@ -381,9 +381,9 @@ export default class MathsCommand extends DualCommand {
 	 */
 	#generateReply(rawInput) {
 		try {
-			const { input, formattedOutput, warning } = this.calculate(rawInput);
+			const { input, formattedOutput } = this.calculate(rawInput);
 
-			return `${input} = ${formattedOutput} ${warning}`;
+			return `${input} = ${formattedOutput}`;
 		} catch (error) {
 			return `${error}`;
 		}
