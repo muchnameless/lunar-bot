@@ -132,29 +132,29 @@ export class InteractionUtil extends null {
 				return;
 			}
 
+			// await defers
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
+			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
+			// deferred but not replied
 			if (interaction.deferred && !interaction.replied) {
 				// ephemeral defer
 				if (interaction.ephemeral) {
-					if (data.ephemeral) return await interaction.editReply(data);
+					if (!data.ephemeral) await interaction.editReply('\u200b'); // ephemeral empty message
 
-					// ephemeral defer and non-ephemeral followUp
-					await interaction.editReply('\u200b'); // ephemeral empty message
-					return await this.followUp(interaction, data);
+					return await interaction.followUp(data);
 				}
 
 				// non-ephemeral defer
-				if (data.ephemeral) {
-					await interaction.deleteReply();
-					return await this.followUp(interaction, data);
-				}
+				if (data.ephemeral) await interaction.deleteReply();
 
-				return await interaction.editReply(data);
+				return await interaction.followUp(data);
 			}
 
-			if (interaction.replied) return await this.followUp(interaction, data);
+			// replied
+			if (interaction.replied) return await interaction.followUp(data);
 
+			// initial reply
 			return await interaction.reply(data);
 		} catch (error) {
 			return logger.error(error);
@@ -179,23 +179,6 @@ export class InteractionUtil extends null {
 	}
 
 	/**
-	 * @param {GenericInteraction} interaction
-	 * @param {string | import('discord.js').InteractionReplyOptions} contentOrOptions
-	 */
-	static async followUp(interaction, contentOrOptions) {
-		const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction);
-
-		try {
-			if (deferReplyPromise) await deferReplyPromise;
-			if (deferUpdatePromise) await deferUpdatePromise;
-
-			return await interaction.followUp(contentOrOptions);
-		} catch (error) {
-			return logger.error(error);
-		}
-	}
-
-	/**
 	 * @param {import('discord.js').MessageComponentInteraction} interaction
 	 * @param {import('discord.js').InteractionDeferUpdateOptions} options
 	 */
@@ -214,10 +197,16 @@ export class InteractionUtil extends null {
 		const { deferUpdatePromise } = this.CACHE.get(interaction);
 
 		try {
+			// await defer
 			if (deferUpdatePromise) await deferUpdatePromise;
 
-			if (interaction.deferred || interaction.replied) return await interaction.editReply(options);
+			// deferred but not replied
+			if (interaction.deferred && !interaction.replied) return await interaction.editReply(options);
 
+			// replied
+			if (interaction.replied) return await interaction.message.edit(options);
+
+			// initial reply
 			return await interaction.update(options);
 		} catch (error) {
 			return logger.error(error);
