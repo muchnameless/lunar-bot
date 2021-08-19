@@ -58,7 +58,7 @@ export default class XpCommand extends SlashCommand {
 			.addFields({
 				name: '\u200b',
 				value: stripIndents`
-					${Formatters.codeBlock('SKILLS')}
+					${Formatters.codeBlock('Skills')}
 					Average skill level: ${Formatters.bold(this.client.formatDecimalNumber(skillAverage))} [${Formatters.bold(this.client.formatDecimalNumber(trueAverage))}] - ${Formatters.bold('Δ')}: ${Formatters.bold(this.client.formatDecimalNumber(skillAverage - skillAverageOffset))} [${Formatters.bold(this.client.formatDecimalNumber(trueAverage - trueAverageOffset))}]
 				`,
 			});
