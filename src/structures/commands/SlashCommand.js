@@ -128,7 +128,11 @@ export class SlashCommand extends BaseCommand {
 
 				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
 
-				if (interaction instanceof CommandInteraction) InteractionUtil.deferReply(interaction);
+				if (interaction instanceof CommandInteraction) {
+					InteractionUtil.deferReply(interaction);
+				} else {
+					InteractionUtil.deferUpdate(interaction);
+				}
 
 				try {
 					return await lgGuild.members.fetch(interaction.user);
@@ -142,6 +146,22 @@ export class SlashCommand extends BaseCommand {
 		if (!member.roles.cache.hasAny(...roleIds)) {
 			throw missingPermissionsError('missing required role', interaction, roleIds);
 		}
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('discord.js').SelectMenuInteraction} interaction
+	 */
+	runSelect(interaction) { // eslint-disable-line no-unused-vars
+		throw new Error('no run function specified');
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('discord.js').ButtonInteraction} interaction
+	 */
+	runButton(interaction) { // eslint-disable-line no-unused-vars
+		throw new Error('no run function specified');
 	}
 
 	/**
