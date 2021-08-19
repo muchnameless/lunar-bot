@@ -40,15 +40,11 @@ export class SlashCommand extends BaseCommand {
 		// add ephemeral option to every (sub)command(group)
 		for (const option of this.slash.options) {
 			if (option instanceof SlashCommandSubcommandGroupBuilder) {
-				for (const subcommandGroup of this.slash.options) {
-					for (const subcommand of subcommandGroup.options) {
-						subcommand.addStringOption(ephemeralOption);
-					}
-				}
-			} else if (option instanceof SlashCommandSubcommandBuilder) {
 				for (const subcommand of this.slash.options) {
 					subcommand.addStringOption(ephemeralOption);
 				}
+			} else if (option instanceof SlashCommandSubcommandBuilder) {
+				option.addStringOption(ephemeralOption);
 			} else { // no subcommand(group) -> only add one ephemeralOption
 				this.slash.addStringOption(ephemeralOption);
 				break;
