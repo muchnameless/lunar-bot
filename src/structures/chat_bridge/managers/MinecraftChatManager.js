@@ -13,7 +13,7 @@ import {
 	MESSAGE_TYPES,
 	NON_WHITESPACE_REGEXP,
 	randomPadding,
-	unicodeToName,
+	UNICODE_TO_EMOJI_NAME,
 } from '../constants/index.js';
 import { GUILD_ID_BRIDGER, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants/index.js';
 import { createBot } from '../MinecraftBot.js';
@@ -526,7 +526,7 @@ export class MinecraftChatManager extends ChatManager {
 			.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 			.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invisible characters
 			.replace(/<(?:a)?:(\w{2,32}):(?:\d{17,19})>/g, ':$1:') // custom emojis
-			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
+			.replace(emojiRegex(), match => UNICODE_TO_EMOJI_NAME[match] ?? match) // default emojis
 			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
 			.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
 				const CHANNEL_NAME = this.client.channels.cache.get(p1)?.name;

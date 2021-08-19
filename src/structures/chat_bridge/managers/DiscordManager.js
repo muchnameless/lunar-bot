@@ -1,5 +1,5 @@
 import { Collection, Util, Formatters } from 'discord.js';
-import { MESSAGE_TYPES, nameToUnicode } from '../constants/index.js';
+import { MESSAGE_TYPES, EMOJI_NAME_TO_UNICODE } from '../constants/index.js';
 import { autocorrect } from '../../../functions/index.js';
 import { DiscordChatManager } from './DiscordChatManager.js';
 
@@ -120,12 +120,12 @@ export class DiscordManager {
 	 * @param {string} inColon
 	 * @returns {string}
 	 */
-	findEmojiByName(fullMatch, inColon) {
-		const emoji = nameToUnicode[fullMatch.replace(/_/g, '').toLowerCase()];
+	#findEmojiByName(fullMatch, inColon) {
+		const emoji = EMOJI_NAME_TO_UNICODE[fullMatch.replaceAll('_', '').toLowerCase()];
 
 		if (emoji) return emoji;
 
-		const { value, similarity } = autocorrect(inColon, this.client.emojis.cache, 'name');
+		const { value, similarity } = autocorrect(inColon, this.client.lgGuild?.emojis ?? [], 'name');
 
 		if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return `${value}`;
 
@@ -143,11 +143,11 @@ export class DiscordManager {
 					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
 					.replace( // emojis (custom and default)
 						/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
-						(match, p1) => this.findEmojiByName(match, p1),
+						(match, p1) => this.#findEmojiByName(match, p1),
 					)
 					.replace( // emojis (custom and default)
 						/(?<!<a?):(\S+?):(?!\d{17,19}>)/g,
-						(match, p1) => this.findEmojiByName(match, p1),
+						(match, p1) => this.#findEmojiByName(match, p1),
 					)
 					.replace( // channels
 						/#([a-z-]+)/gi,

@@ -5,7 +5,7 @@
 /**
  * discord emoji names to unicode emojis
  */
-export const nameToUnicode = Object.freeze({
+export const EMOJI_NAME_TO_UNICODE = Object.freeze({
 	// ',:(': '\u{0001f613}',
 	// ',:)': '\u{0001f605}',
 	// ',:-(': '\u{0001f613}',
@@ -5858,7 +5858,7 @@ export const nameToUnicode = Object.freeze({
 /**
  * unicode emojis to discord emoji names
  */
-export const unicodeToName = Object.freeze({
+export const UNICODE_TO_EMOJI_NAME = Object.freeze({
 	'\u{0001f170}\u{0000fe0f}': ':a:',
 	'\u{0001f18e}': ':ab:',
 	'\u{0001f9ee}': ':abacus:',
