@@ -52,7 +52,7 @@ export default class StatsCommand extends DualCommand {
 		InteractionUtil.deferReply(interaction);
 
 		try {
-			return InteractionUtil.reply(interaction,
+			return await InteractionUtil.reply(interaction,
 				this._generateReply(
 					await this._fetchData(interaction, interaction.options.getString('ign')),
 				),

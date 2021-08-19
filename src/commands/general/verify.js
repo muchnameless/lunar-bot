@@ -57,7 +57,7 @@ export default class VerifyCommand extends SlashCommand {
 
 			// not in one of the guilds that the bot manages
 			if (!this.client.hypixelGuilds.cache.has(guildId)) {
-				return InteractionUtil.reply(interaction, commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
+				return await InteractionUtil.reply(interaction, commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
 			}
 
 			hypixelPlayer = await hypixel.player.uuid(uuid);

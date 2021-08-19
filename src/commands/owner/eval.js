@@ -171,7 +171,7 @@ export default class EvalCommand extends SlashCommand {
 				errors: [ 'time' ],
 			});
 
-			return InteractionUtil.update(interaction, {
+			return await InteractionUtil.update(interaction, {
 				embeds: await this.#eval(
 					interaction,
 					collected.first().content,

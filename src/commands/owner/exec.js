@@ -55,7 +55,7 @@ export default class ExecCommand extends SlashCommand {
 				});
 			}
 
-			return InteractionUtil.reply(interaction, {
+			return await InteractionUtil.reply(interaction, {
 				embeds: [ responseEmbed ],
 			});
 		} catch (error) {
