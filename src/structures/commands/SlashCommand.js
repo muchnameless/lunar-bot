@@ -1,3 +1,4 @@
+import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
 import { Constants } from 'discord.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError.js';
 import { ephemeralOption } from './commonOptions.js';
@@ -38,13 +39,13 @@ export class SlashCommand extends BaseCommand {
 
 		// add ephemeral option to every (sub)command(group)
 		for (const option of this.slash.options) {
-			if (option.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP) {
+			if (option instanceof SlashCommandSubcommandGroupBuilder) {
 				for (const subcommandGroup of this.slash.options) {
 					for (const subcommand of subcommandGroup.options) {
 						subcommand.addStringOption(ephemeralOption);
 					}
 				}
-			} else if (option.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND) {
+			} else if (option instanceof SlashCommandSubcommandBuilder) {
 				for (const subcommand of this.slash.options) {
 					subcommand.addStringOption(ephemeralOption);
 				}
