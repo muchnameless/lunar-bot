@@ -8,7 +8,7 @@ import { logger } from '../../functions/logger.js';
 
 
 /**
- * @typedef {object} CommandData
+ * @typedef {object} SlashCommandData
  * @property {?string[]} aliases
  * @property {import('@discordjs/builders').SlashCommandBuilder} slash
  * @property {import('discord.js').ApplicationCommandPermissions} permissions
@@ -21,7 +21,7 @@ export class SlashCommand extends BaseCommand {
 	/**
 	 * create a new command
 	 * @param {import('./BaseCommand').CommandContext} context
-	 * @param {CommandData} param1
+	 * @param {SlashCommandData} param1
 	 */
 	constructor(context, { aliases, slash, cooldown, requiredRoles }) {
 		super(context, { cooldown, requiredRoles });

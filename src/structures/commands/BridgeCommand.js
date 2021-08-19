@@ -1,7 +1,7 @@
 import { BaseCommand } from './BaseCommand.js';
 
 /**
- * @typedef {object} CommandInfo additional information about the command
+ * @typedef {object} BridgeCommandData additional information about the command
  * @property {string[]} [aliases] command aliases
  * @property {string} [description] command description
  * @property {boolean} [guildOnly] wether this command can only be executed on servers
@@ -15,7 +15,7 @@ export class BridgeCommand extends BaseCommand {
 	/**
 	 * create a new command
 	 * @param {import('./BaseCommand').CommandContext} param0
-	 * @param {CommandInfo} param1
+	 * @param {BridgeCommandData} param1
 	 */
 	constructor(param0, { aliases, description, guildOnly, args, usage, cooldown, requiredRoles }) {
 		super(param0, { cooldown, requiredRoles });

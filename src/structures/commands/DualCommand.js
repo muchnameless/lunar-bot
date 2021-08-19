@@ -8,8 +8,8 @@ export class DualCommand extends SlashCommand {
 	 * @param {import('../LunarClient').LunarClient} param0.client discord this.client that instantiated this command
 	 * @param {import('./BridgeCommandCollection').BridgeCommandCollection} param0.collection
 	 * @param {string} param0.name command name
-	 * @param {import('./SlashCommand').CommandData} param1
-	 * @param {import('./BridgeCommand').CommandInfo} param2
+	 * @param {import('./SlashCommand').SlashCommandData} param1
+	 * @param {import('./BridgeCommand').BridgeCommandData} param2
 	 */
 	constructor(context, param1, { aliases, guildOnly, args, usage }) {
 		super(context, param1);
