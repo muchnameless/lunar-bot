@@ -597,7 +597,7 @@ export class Player extends Model {
 				for (const offset of XP_OFFSETS) {
 					if (this[`catacombsXp${offset}`] === 0) {
 						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' dungeon xp`);
-						await this.resetXp({ offsetToReset: offset, typesToReset: [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ] });
+						await this.resetXp({ offsetToReset: offset, typesToReset: DUNGEON_TYPES_AND_CLASSES });
 					}
 				}
 			}
