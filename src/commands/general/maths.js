@@ -108,7 +108,88 @@ export default class MathsCommand extends DualCommand {
 			args: true,
 			usage: '',
 		});
+
+		const self = this;
+
+		this.unaryOperators = {
+			m(x = 1) {
+				return mul(x, 1_000_000);
+			},
+			k(x = 1) {
+				return mul(x, 1_000);
+			},
+			'°'(x) {
+				if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
+				return mul(x, div(Math.PI, 180));
+			},
+			'!'(x) {
+				if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+				if (x < 0) return NaN;
+				return self.factorial(x);
+			},
+			fac(x) {
+				if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+				if (x < 0) return NaN;
+				return self.factorial(x);
+			},
+			sin(x) {
+				if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
+				if (MathsCommand.isMultipleOfPi(x)) return 0;
+				return Math.sin(x);
+			},
+			cos(x) {
+				if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
+				if (MathsCommand.isMultipleOfPiHalf(x)) return 0;
+				return Math.cos(x);
+			},
+			tan(x) {
+				if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
+				if (MathsCommand.isMultipleOfPi(x)) return 0;
+				if (MathsCommand.isMultipleOfPiHalf(x)) return NaN;
+				return Math.tan(x);
+			},
+			sqrt(x) {
+				if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
+				return Math.sqrt(x);
+			},
+			exp(x) {
+				if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
+				return Math.exp(x);
+			},
+			ln(x) {
+				if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
+				return Math.log(x);
+			},
+			percent(x) {
+				if (typeof x === 'undefined') throw new Error('`%` requires one argument');
+				return div(x, 100);
+			},
+		};
 	}
+
+	/**
+	 * parser for reverse polish notation
+	 */
+	static parser = new Parser({
+		m: this.multiplier,
+		k: this.multiplier,
+		'°': this.degree,
+		'^': this.power,
+		'!': this.factorialPost,
+		fac: this.factorialPre,
+		'+': this.term,
+		'-': this.term,
+		'*': this.factor,
+		'/': this.factor,
+		sin: this.func,
+		cos: this.func,
+		tan: this.func,
+		sqrt: this.func,
+		exp: this.func,
+		ln: this.func,
+		log: this.func,
+		percent: this.percent,
+	});
 
 	static percent = {
 		precedence: 8,
@@ -171,71 +252,22 @@ export default class MathsCommand extends DualCommand {
 		},
 	};
 
-	static factorial = (start) => {
+	/**
+	 * @param {number} start
+	 */
+	factorial = (start) => {
 		let temp = 1;
 		let iterations = start;
-		while (iterations > 0) temp *= iterations--;
+		while (iterations > 0) {
+			temp *= iterations--;
+			this.validateNumber(temp);
+		}
 		return temp;
 	};
 
 	static isMultipleOfPi = x => div(x, Math.PI) === Math.floor(div(x, Math.PI));
 
 	static isMultipleOfPiHalf = x => div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI));
-
-	static unaryOperators = {
-		m(x = 1) {
-			return mul(x, 1_000_000);
-		},
-		k(x = 1) {
-			return mul(x, 1_000);
-		},
-		'°'(x) {
-			if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
-			return mul(x, div(Math.PI, 180));
-		},
-		'!'(x) {
-			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
-			if (x < 0) return NaN;
-			return MathsCommand.factorial(x);
-		},
-		fac(x) {
-			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
-			if (x < 0) return NaN;
-			return MathsCommand.factorial(x);
-		},
-		sin(x) {
-			if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
-			if (MathsCommand.isMultipleOfPi(x)) return 0;
-			return Math.sin(x);
-		},
-		cos(x) {
-			if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
-			if (MathsCommand.isMultipleOfPiHalf(x)) return 0;
-			return Math.cos(x);
-		},
-		tan(x) {
-			if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
-			if (MathsCommand.isMultipleOfPi(x)) return 0;
-			if (MathsCommand.isMultipleOfPiHalf(x)) return NaN;
-			return Math.tan(x);
-		},
-		sqrt(x) {
-			if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
-			return Math.sqrt(x);
-		},
-		exp(x) {
-			if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
-			return Math.exp(x);
-		},
-		ln(x) {
-			if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
-			return Math.log(x);
-		},
-		percent(x) {
-			if (typeof x === 'undefined') throw new Error('`%` requires one argument');
-			return div(x, 100);
-		},
-	};
 
 	/**
 	 * lexer for mathematical expressions
@@ -255,30 +287,6 @@ export default class MathsCommand extends DualCommand {
 		.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 		.addRule(/e(?:uler)?/i, () => Math.E)
 		.addRule(/m|k/i, lexeme => lexeme.toLowerCase()); // multiplier
-
-	/**
-	 * parser for reverse polish notation
-	 */
-	static parser = new Parser({
-		m: this.multiplier,
-		k: this.multiplier,
-		'°': this.degree,
-		'^': this.power,
-		'!': this.factorialPost,
-		fac: this.factorialPre,
-		'+': this.term,
-		'-': this.term,
-		'*': this.factor,
-		'/': this.factor,
-		sin: this.func,
-		cos: this.func,
-		tan: this.func,
-		sqrt: this.func,
-		exp: this.func,
-		ln: this.func,
-		log: this.func,
-		percent: this.percent,
-	});
 
 	static parse(input) {
 		MathsCommand.lexer.setInput(input);
@@ -346,10 +354,10 @@ export default class MathsCommand extends DualCommand {
 					continue;
 				}
 
-				if (Reflect.has(MathsCommand.unaryOperators, token)) {
+				if (Reflect.has(this.unaryOperators, token)) {
 					const a = pop();
 
-					stack.push(MathsCommand.unaryOperators[token](a));
+					stack.push(this.unaryOperators[token](a));
 					continue;
 				}
 
