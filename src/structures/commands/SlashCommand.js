@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import { Constants } from 'discord.js';
+import { CommandInteraction, Constants } from 'discord.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError.js';
 import { ephemeralOption } from './commonOptions.js';
 import { InteractionUtil } from '../../util/InteractionUtil.js';
@@ -128,7 +128,7 @@ export class SlashCommand extends BaseCommand {
 
 				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
 
-				InteractionUtil.deferReply(interaction);
+				if (interaction instanceof CommandInteraction) InteractionUtil.deferReply(interaction);
 
 				try {
 					return await lgGuild.members.fetch(interaction.user);
