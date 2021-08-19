@@ -349,7 +349,7 @@ export class InteractionUtil extends null {
 	 * returns the player object, optional fallback to the interaction.user's player
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {boolean} [fallbackToCurrentUser=false]
-	 * @returns {?import('../database/models/Player').Player}
+	 * @returns {?import('../structures/database/models/Player').Player}
 	 */
 	static getPlayer(interaction, fallbackToCurrentUser = false) {
 		if (!interaction.options._hoistedOptions.length) {
@@ -387,7 +387,7 @@ export class InteractionUtil extends null {
 	/**
 	 * returns a HypixelGuild instance
 	 * @param {import('discord.js').CommandInteraction} interaction
-	 * @returns {import('../database/models/HypixelGuild').HypixelGuild | GUILD_ID_ALL}
+	 * @returns {import('../structures/database/models/HypixelGuild').HypixelGuild | GUILD_ID_ALL}
 	 */
 	static getHypixelGuild(interaction) {
 		const INPUT = interaction.options.getString('guild');
