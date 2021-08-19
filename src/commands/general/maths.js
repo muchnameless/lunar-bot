@@ -303,7 +303,7 @@ export default class MathsCommand extends DualCommand {
 	 * @param {any} value
 	 */
 	validateNumber(value) {
-		if (value > Number.MAX_SAFE_INTEGER) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
+		if (Math.abs(value) > Number.MAX_SAFE_INTEGER) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
 
 		return value;
 	}
