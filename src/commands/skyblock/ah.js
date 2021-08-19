@@ -243,7 +243,13 @@ export default class AhCommand extends SlashCommand {
 				}
 			}
 
-			return await InteractionUtil.reply(interaction, await this.#generateReply({ ign, uuid, profileId, profiles: profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id })) }));
+			return await InteractionUtil.reply(interaction, await this.#generateReply({
+				ign,
+				uuid,
+				profileId,
+				profiles: profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id })),
+				userId: interaction.user.id,
+			}));
 		} catch (error) {
 			logger.error(error);
 			return await InteractionUtil.reply(interaction, `${error}`);
