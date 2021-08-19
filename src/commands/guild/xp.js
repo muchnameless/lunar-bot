@@ -1,36 +1,31 @@
-import { MessageEmbed, Formatters, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { MessageEmbed, Formatters } from 'discord.js';
 import { oneLine, stripIndents } from 'common-tags';
 import { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } from '../../constants/skyblock.js';
-import { XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } from '../../constants/database.js';
+import { XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } from '../../constants/database.js';
 import { /* escapeIgn, */ upperCaseFirstChar } from '../../functions/util.js';
 import { getDefaultOffset } from '../../functions/leaderboards.js';
 import { MessageEmbedUtil } from '../../util/MessageEmbedUtil.js';
+import { optionalPlayerOption, pageOption, offsetOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class XpCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'check a player\'s xp gained',
-			options: [{
-				name: 'player',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | UUID | discord ID | @mention',
-				required: false,
-			}, {
-				name: 'offset',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'Δ offset',
-				required: false,
-				choices: Object.keys(XP_OFFSETS_SHORT).map(x => ({ name: x, value: XP_OFFSETS_CONVERTER[x] })),
-			}, {
-				name: 'update',
-				type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-				description: 'update xp before running the command',
-				required: false,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('check a player\'s xp gained')
+				.addStringOption(optionalPlayerOption)
+				.addIntegerOption(pageOption)
+				.addStringOption(offsetOption)
+				.addBooleanOption(option => option
+					.setName('update')
+					.setDescription('update xp before running the command')
+					.setRequired(false),
+				),
 			cooldown: 0,
 		});
 	}
@@ -39,12 +34,12 @@ export default class XpCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		const offset = interaction.options.getString('offset') ?? getDefaultOffset(this.config);
-		const player = this.getPlayer(interaction, true);
+		const player = InteractionUtil.getPlayer(interaction, true);
 
 		if (!player) {
-			return await this.reply(interaction, oneLine`${interaction.options.get('player')
+			return await InteractionUtil.reply(interaction, oneLine`${interaction.options.get('player')
 				? `\`${interaction.options.getString('player')}\` is`
 				: 'you are'
 			} not in the player db`);
@@ -52,7 +47,7 @@ export default class XpCommand extends SlashCommand {
 
 		// update db?
 		if (interaction.options.getBoolean('update')) {
-			this.deferReply(interaction); // update may take a while
+			InteractionUtil.deferReply(interaction); // update may take a while
 			await player.updateXp();
 		}
 
@@ -186,6 +181,6 @@ export default class XpCommand extends SlashCommand {
 
 		embeds.push(MessageEmbedUtil.padFields(embed));
 
-		return await this.reply(interaction, { embeds });
+		return await InteractionUtil.reply(interaction, { embeds });
 	}
 }

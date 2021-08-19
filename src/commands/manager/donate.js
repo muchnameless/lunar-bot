@@ -1,31 +1,30 @@
-import { Formatters, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { Formatters } from 'discord.js';
 import { validateNumber } from '../../functions/stringValidators.js';
 import { removeNumberFormatting, safePromiseAll } from '../../functions/util.js';
+import { requiredPlayerOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class DonateCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'register a donation from a player',
-			options: [{
-				name: 'player',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | UUID | discord ID | @mention',
-				required: true,
-			}, {
-				name: 'value',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'amount / text',
-				required: true,
-			}, {
-				name: 'notes',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'additional notes',
-				required: false,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('register a donation from a player')
+				.addStringOption(requiredPlayerOption)
+				.addStringOption(option => option
+					.setName('value')
+					.setDescription('amount / text')
+					.setRequired(true),
+				)
+				.addStringOption(option => option
+					.setName('notes')
+					.setDescription('additional notes')
+					.setRequired(false),
+				),
 			cooldown: 0,
 		});
 	}
@@ -34,12 +33,12 @@ export default class DonateCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-		if (!collector?.isCollecting) return await this.reply(interaction, 'this command is restricted to (active) tax collectors');
+		if (!collector?.isCollecting) return await InteractionUtil.reply(interaction, 'this command is restricted to (active) tax collectors');
 
-		const player = this.getPlayer(interaction);
+		const player = InteractionUtil.getPlayer(interaction);
 		const AMOUNT_OR_TEXT = interaction.options.getString('value');
 		const TEXT_INPUT = interaction.options.getString('notes');
 
@@ -61,8 +60,6 @@ export default class DonateCommand extends SlashCommand {
 			type: 'donation',
 		}));
 
-		this.reply(interaction, `registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
-
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Donations')
 			.addFields({
@@ -70,5 +67,7 @@ export default class DonateCommand extends SlashCommand {
 				value: Formatters.codeBlock(`${player}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`),
 			}),
 		);
+
+		await InteractionUtil.reply(interaction, `registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
 	}
 }

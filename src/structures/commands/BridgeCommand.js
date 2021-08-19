@@ -14,7 +14,7 @@ import { BaseCommand } from './BaseCommand.js';
 export class BridgeCommand extends BaseCommand {
 	/**
 	 * create a new command
-	 * @param {import('./BaseCommand').BaseCommandData} param0
+	 * @param {import('./BaseCommand').CommandContext} param0
 	 * @param {CommandInfo} param1
 	 */
 	constructor(param0, { aliases, description, guildOnly, args, usage, cooldown, requiredRoles }) {
@@ -75,7 +75,7 @@ export class BridgeCommand extends BaseCommand {
 	 * execute the command
 	 * @param {import('../chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) { // eslint-disable-line no-unused-vars
+	async runMinecraft(hypixelMessage) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
 }

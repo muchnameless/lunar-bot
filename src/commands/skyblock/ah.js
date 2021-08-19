@@ -1,24 +1,24 @@
-import { MessageActionRow, MessageSelectMenu, MessageEmbed, Formatters, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { MessageActionRow, MessageSelectMenu, MessageEmbed, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { upperCaseFirstChar } from '../../functions/util.js';
 import { getUuidAndIgn } from '../../functions/input.js';
 import { AH_KEY } from '../../constants/redis.js';
 import { hypixel } from '../../api/hypixel.js';
+import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class AhCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'SkyBlock auctions',
-			options: [{
-				name: 'ign',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | UUID',
-				required: false,
-			}, SlashCommand.SKYBLOCK_PROFILE_OPTION ],
+			slash: new SlashCommandBuilder()
+				.setDescription('SkyBlock auctions')
+				.addStringOption(optionalIgnOption)
+				.addStringOption(skyblockProfileOption),
 			cooldown: 0,
 		});
 	}
@@ -149,7 +149,7 @@ export default class AhCommand extends SlashCommand {
 	 * @param {import('discord.js').SelectMenuInteraction} interaction
 	 */
 	async runSelect(interaction) {
-		this.deferUpdate(interaction);
+		InteractionUtil.deferUpdate(interaction);
 
 		try {
 			const [ , uuid, ign ] = interaction.customId.split(':');
@@ -157,14 +157,16 @@ export default class AhCommand extends SlashCommand {
 			const profiles = interaction.message.components[0].components[0].options;
 
 			// interaction from original requester -> edit message
-			if (interaction.user.id === interaction.message.interaction?.user.id) return this.update(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));
+			if (interaction.user.id === interaction.message.interaction.user.id) {
+				return await InteractionUtil.update(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));
+			}
 
 			// interaction from new requester -> new message
-			return this.followUp(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));
+			return await InteractionUtil.followUp(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));
 		} catch (error) {
 			logger.error(error);
 
-			return this.followUp(interaction, {
+			return await InteractionUtil.followUp(interaction, {
 				content: `${error}`,
 				ephemeral: true,
 			});
@@ -175,8 +177,8 @@ export default class AhCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		this.deferReply(interaction);
+	async runSlash(interaction) {
+		InteractionUtil.deferReply(interaction);
 
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
@@ -184,7 +186,7 @@ export default class AhCommand extends SlashCommand {
 			const embed = this.client.defaultEmbed;
 
 			if (!profiles.length) {
-				return this.reply(interaction, {
+				return await InteractionUtil.reply(interaction, {
 					embeds: [
 						embed
 							.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
@@ -215,7 +217,7 @@ export default class AhCommand extends SlashCommand {
 				profileId = profiles.find(({ cute_name: name }) => name === PROFILE_NAME_INPUT)?.profile_id;
 
 				if (!profileId) {
-					return this.reply(interaction, {
+					return await InteractionUtil.reply(interaction, {
 						embeds: [
 							embed
 								.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
@@ -233,10 +235,10 @@ export default class AhCommand extends SlashCommand {
 				}
 			}
 
-			return this.reply(interaction, await this.#generateReply({ ign, uuid, profileId, profiles: profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id })) }));
+			return await InteractionUtil.reply(interaction, await this.#generateReply({ ign, uuid, profileId, profiles: profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id })) }));
 		} catch (error) {
 			logger.error(error);
-			return await this.reply(interaction, `${error}`);
+			return await InteractionUtil.reply(interaction, `${error}`);
 		}
 	}
 }

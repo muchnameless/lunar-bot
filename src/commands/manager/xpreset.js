@@ -1,23 +1,21 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import { offsetFlags } from '../../constants/database.js';
 import { safePromiseAll } from '../../functions/util.js';
+import { optionalPlayerOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class XpResetCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'reset the competition xp gained',
-			options: [{
-				name: 'player',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | UUID | discord ID | @mention',
-				required: false,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('reset the competition xp gained')
+				.addStringOption(optionalPlayerOption),
 			cooldown: 5,
 		});
 	}
@@ -28,7 +26,7 @@ export default class XpResetCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		const { players } = this.client;
 		const PLAYER_INPUT = interaction.options.getString('player');
 
@@ -37,7 +35,7 @@ export default class XpResetCommand extends SlashCommand {
 		// individual player
 		if (PLAYER_INPUT) {
 			/** @type {import('../../structures/database/models/Player').Player} */
-			const player = this.getPlayer(interaction)
+			const player = InteractionUtil.getPlayer(interaction)
 				?? await players.fetch({
 					guildId: null,
 					ign: { [Op.iLike]: PLAYER_INPUT },
@@ -45,9 +43,9 @@ export default class XpResetCommand extends SlashCommand {
 				});
 
 
-			if (!player) return await this.reply(interaction, `\`${PLAYER_INPUT}\` is not in the player db`);
+			if (!player) return await InteractionUtil.reply(interaction, `\`${PLAYER_INPUT}\` is not in the player db`);
 
-			await this.awaitConfirmation(interaction, `reset xp gained from \`${player}\`?`);
+			await InteractionUtil.awaitConfirmation(interaction, `reset xp gained from \`${player}\`?`);
 
 			await player.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
 
@@ -57,7 +55,7 @@ export default class XpResetCommand extends SlashCommand {
 		} else {
 			const PLAYER_COUNT = players.size;
 
-			await this.awaitConfirmation(interaction, `reset competition xp gained from all ${PLAYER_COUNT} guild members?`);
+			await InteractionUtil.awaitConfirmation(interaction, `reset competition xp gained from all ${PLAYER_COUNT} guild members?`);
 
 			// delete players who left the guild
 			await players.sweepDb();
@@ -79,6 +77,6 @@ export default class XpResetCommand extends SlashCommand {
 			.setDescription(`${interaction.user.tag} | ${interaction.user} ${result}`),
 		);
 
-		this.reply(interaction, result);
+		return await InteractionUtil.reply(interaction, result);
 	}
 }

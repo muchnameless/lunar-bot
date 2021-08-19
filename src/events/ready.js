@@ -1,3 +1,4 @@
+import { GuildUtil } from '../util/GuildUtil.js';
 import { Event } from '../structures/events/Event.js';
 import { logger } from '../functions/logger.js';
 
@@ -20,7 +21,7 @@ export default class ReadyEvent extends Event {
 
 		if (this.client.options.fetchAllMembers) {
 			try {
-				const members = await this.client.fetchAllGuildMembers();
+				const members = await GuildUtil.fetchAllMembers(this.client.lgGuild);
 				logger.info(`[READY]: fetched ${members.size} members`);
 			} catch (error) {
 				logger.error('[READY]', error);

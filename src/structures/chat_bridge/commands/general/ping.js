@@ -17,7 +17,7 @@ export default class PingBridgeCommand extends BridgeCommand {
 	 * execute the command
 	 * @param {import('../../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		return await hypixelMessage.reply('o/');
 	}
 }

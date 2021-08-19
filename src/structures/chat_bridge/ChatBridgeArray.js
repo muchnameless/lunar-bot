@@ -164,7 +164,7 @@ export class ChatBridgeArray extends Array {
 
 			if (result.every(([ minecraft, discord ]) => minecraft && (Array.isArray(discord) ? discord.length : discord))) {
 				if (message.reactions.cache.get(X_EMOJI)?.me) {
-					message.reactions.cache.get(X_EMOJI).users.remove(this.client.user.id)
+					message.reactions.cache.get(X_EMOJI).users.remove(this.client.user)
 						.catch(error => logger.error('[HANDLE ANNOUNCEMENT MSG]', error));
 				}
 			} else {

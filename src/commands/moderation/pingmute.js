@@ -1,21 +1,18 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { requiredPlayerOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class PingMuteCommand extends DualCommand {
-	constructor(data, param1, param2) {
-		super(
-			data,
+	constructor(context, param1, param2) {
+		super(context,
 			param1 ?? {
 				aliases: [],
-				description: 'prevent a guild member from @mentioning via the chat bridge',
-				options: [{
-					name: 'player',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | UUID | discord ID | @mention',
-					required: true,
-				}],
+				slash: new SlashCommandBuilder()
+					.setDescription('prevent a guild member from @mentioning via the chat bridge')
+					.addStringOption(requiredPlayerOption),
 				cooldown: 0,
 			},
 			param2 ?? {
@@ -27,9 +24,14 @@ export default class PingMuteCommand extends DualCommand {
 	}
 
 	/**
-	 * @param {import('../../structures/database/models/Player').Player} player
+	 * @param {?import('../../structures/database/models/Player').Player} player
+	 * @param {string} playerInput
 	 */
-	async _generateReply(player) {
+	async _generateReply(player, playerInput) {
+		if (!player) return `\`${playerInput}\` is not in the player db`;
+
+		if (!player.hasDiscordPingPermission) return `\`${player}\` is already ping muted`;
+
 		try {
 			player.hasDiscordPingPermission = false;
 			await player.save();
@@ -45,20 +47,23 @@ export default class PingMuteCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		return await this.reply(interaction, await this._generateReply(this.getPlayer(interaction)));
+	async runSlash(interaction) {
+		return await InteractionUtil.reply(interaction, await this._generateReply(
+			InteractionUtil.getPlayer(interaction),
+			interaction.options.getString('player', true),
+		));
 	}
 
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		const [ INPUT ] = hypixelMessage.commandData.args;
-		const player = this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT);
 
-		if (!player) return await hypixelMessage.reply(`\`${INPUT}\` not in the player db`);
-
-		return await hypixelMessage.reply(await this._generateReply(player));
+		return await hypixelMessage.reply(await this._generateReply(
+			this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT),
+			INPUT,
+		));
 	}
 }

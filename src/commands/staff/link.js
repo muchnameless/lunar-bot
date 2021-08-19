@@ -1,39 +1,37 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { DiscordAPIError, Constants } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { validateNumber } from '../../functions/stringValidators.js';
 import { hypixel } from '../../api/hypixel.js';
 import { mojang } from '../../api/mojang.js';
+import { requiredIgnOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class LinkCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'link a discord user to a minecraft ign',
-			options: [{
-				name: 'ign',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | UUID',
-				required: true,
-			}, {
-				name: 'user',
-				type: Constants.ApplicationCommandOptionTypes.USER,
-				description: 'discord user',
-				required: true,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('link a discord user to a minecraft ign')
+				.addStringOption(requiredIgnOption)
+				.addUserOption(option => option
+					.setName('user')
+					.setDescription('discord user')
+					.setRequired(true),
+				),
 			cooldown: 1,
 		});
 	}
-
 
 	/**
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		this.deferReply(interaction);
+	async runSlash(interaction) {
+		InteractionUtil.deferReply(interaction);
 
 		const IGN_OR_UUID = interaction.options.getString('ign', true);
 
@@ -66,7 +64,7 @@ export default class LinkCommand extends SlashCommand {
 				}))?.[0];
 		}
 
-		if (!player) return await this.reply(interaction, stripIndents`
+		if (!player) return await InteractionUtil.reply(interaction, stripIndents`
 			\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
 			Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 		`);
@@ -93,14 +91,14 @@ export default class LinkCommand extends SlashCommand {
 			});
 
 			if (!linkedUserIsDeleted) {
-				await this.awaitConfirmation(interaction, {
+				await InteractionUtil.awaitConfirmation(interaction, {
 					question: `${linkedUser ?? `\`${USER_ID}\``} is already linked to \`${playerLinkedToId}\`. Overwrite this?`,
 					allowedMentions: { parse: [] },
 				});
 			}
 
 			if (!await playerLinkedToId.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
-				await this.reply(interaction, {
+				await InteractionUtil.reply(interaction, {
 					content: `unable to update roles and nickname for the currently linked member ${linkedUser}`,
 					allowedMentions: { parse: [] },
 				});
@@ -120,12 +118,12 @@ export default class LinkCommand extends SlashCommand {
 			});
 
 			if (!linkedUserIsDeleted) {
-				if (player.discordId === USER_ID) return await this.reply(interaction, {
+				if (player.discordId === USER_ID) return await InteractionUtil.reply(interaction, {
 					content: `\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}`,
 					allowedMentions: { parse: [] },
 				});
 
-				await this.awaitConfirmation(interaction, {
+				await InteractionUtil.awaitConfirmation(interaction, {
 					question: stripIndents`
 						\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}. Overwrite this?
 						Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
@@ -135,7 +133,7 @@ export default class LinkCommand extends SlashCommand {
 			}
 
 			if (!await player.unlink(`unlinked by ${interaction.user.tag}`) && linkedUser) {
-				await this.reply(interaction, {
+				await InteractionUtil.reply(interaction, {
 					content: `unable to update roles and nickname for the currently linked member ${linkedUser}`,
 					allowedMentions: { parse: [] },
 				});
@@ -149,7 +147,7 @@ export default class LinkCommand extends SlashCommand {
 		// no discord member for the user to link found
 		if (!discordMember) {
 			await player.link(USER_ID);
-			return await this.reply(interaction, `\`${player}\` linked to \`${USER_ID}\` but could not be found on the Lunar Guard discord server`);
+			return await InteractionUtil.reply(interaction, `\`${player}\` linked to \`${USER_ID}\` but could not be found on the Lunar Guard discord server`);
 		}
 
 		// user to link is in discord -> update roles
@@ -161,7 +159,7 @@ export default class LinkCommand extends SlashCommand {
 			reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.config.get('VERIFIED_ROLE_ID'))?.name ?? this.config.get('VERIFIED_ROLE_ID')} role)`;
 		}
 
-		this.reply(interaction, {
+		return await InteractionUtil.reply(interaction, {
 			content: reply,
 			allowedMentions: { parse: [] },
 		});

@@ -4,6 +4,12 @@ import { logger } from '../functions/logger.js';
 
 export class GuildUtil extends null {
 	/**
+	 * @type {Map<import('discord.js').Snowflake, Promise<import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').GuildMember>>>}
+	 */
+	static #fetchAllMembersCache = new Map();
+
+
+	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
 	 * @param {import('discord.js').Guild} guild
 	 * @param {(?(import('discord.js').Snowflake | import('discord.js').Role))[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesOrIds roles or role IDs to verify
@@ -38,6 +44,28 @@ export class GuildUtil extends null {
 		} catch (error) {
 			logger.error('[FIND MEMBER BY TAG]', error);
 			return null;
+		}
+	}
+
+	/**
+	 * fetches all guild members if the cache size is not equal to the guild's member count
+	 * @param {import('discord.js').Guild} guild
+	 */
+	static async fetchAllMembers(guild) {
+		if (!guild?.available) throw `the ${guild?.name ?? 'discord'} server is currently unavailable`;
+
+		if (guild.memberCount === guild.members.cache.size) return guild.members.cache;
+
+		const cached = this.#fetchAllMembersCache.get(guild.id);
+		if (cached) return await cached;
+
+		const promise = guild.members.fetch();
+		this.#fetchAllMembersCache.set(guild.id, promise);
+
+		try {
+			return await promise;
+		} finally {
+			this.#fetchAllMembersCache.delete(guild.id);
 		}
 	}
 }

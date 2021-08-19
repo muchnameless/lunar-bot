@@ -1,147 +1,65 @@
 import { Constants } from 'discord.js';
-import { PROFILE_NAMES, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } from '../../constants/skyblock.js';
-import { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT, GUILD_ID_ALL } from '../../constants/database.js';
-import { validateDiscordId, validateMinecraftUuid } from '../../functions/stringValidators.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError.js';
+import { ephemeralOption } from './commonOptions.js';
 import { InteractionUtil } from '../../util/InteractionUtil.js';
-import { UserUtil } from '../../util/UserUtil.js';
 import { BaseCommand } from './BaseCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 /**
- * @typedef {import('discord.js').ApplicationCommandData & { aliases: ?string[], permissions: import('discord.js').ApplicationCommandPermissions, cooldown: ?number, requiredRoles: () => import('discord.js').Snowflake[] }} CommandData
+ * @typedef {object} CommandData
+ * @property {?string[]} aliases
+ * @property {import('@discordjs/builders').SlashCommandBuilder} slash
+ * @property {import('discord.js').ApplicationCommandPermissions} permissions
+ * @property {?number} cooldown
+ * @property {() => import('discord.js').Snowflake[]} requiredRoles
  */
 
 
 export class SlashCommand extends BaseCommand {
 	/**
 	 * create a new command
-	 * @param {import('./BaseCommand').BaseCommandData} param0
+	 * @param {import('./BaseCommand').CommandContext} context
 	 * @param {CommandData} param1
 	 */
-	constructor(param0, { aliases, description, options, defaultPermission, cooldown, requiredRoles }) {
-		super(param0, { cooldown, requiredRoles });
+	constructor(context, { aliases, slash, cooldown, requiredRoles }) {
+		super(context, { cooldown, requiredRoles });
 
 		/** @type {?string[]} */
 		this.aliases = aliases?.length ? aliases.filter(Boolean) : null;
-		this.description = description?.length ? description : null;
-		this.options = options ?? null;
-		this.defaultPermission = defaultPermission ?? true;
-	}
+		this.slash = slash;
 
-	static get guildOptionBuilder() {
 		/**
-		 * @param {import('../LunarClient').LunarClient} client
-		 * @param {boolean} [includeAll=false]
+		 * complete slash command data
 		 */
-		return (client, includeAll = false) => {
-			const choices = client.hypixelGuilds.cache.map(({ guildId, name }) => ({ name, value: guildId }));
 
-			if (includeAll) choices.push({
-				name: 'all',
-				value: GUILD_ID_ALL,
-			});
+		// add name (from context (file name))
+		this.slash.setName(this.name);
 
-			return ({
-				name: 'guild',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'hypixel guild',
-				required: false,
-				choices,
-			});
-		};
-	}
-
-	static get FORCE_OPTION() {
-		return {
-			name: 'force',
-			type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-			description: 'disable IGN autocorrection',
-			required: false,
-		};
-	}
-
-	static get EPHEMERAL_OPTION() {
-		return {
-			name: 'visibility',
-			type: Constants.ApplicationCommandOptionTypes.STRING,
-			description: 'visibility of the response message',
-			required: false,
-			choices: [{
-				name: 'everyone',
-				value: 'everyone',
-			}, {
-				name: 'just me',
-				value: 'just me',
-			}],
-		};
-	}
-
-	static get XP_TYPE_OPTION() {
-		return {
-			name: 'type',
-			type: Constants.ApplicationCommandOptionTypes.STRING,
-			description: 'xp type',
-			required: false,
-			choices: [ 'weight', { name: 'skill average', value: 'skill-average' }, ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ]
-				.map(x => (typeof x !== 'object' ? ({ name: x, value: x }) : x)),
-		};
-	}
-
-	static get PAGE_OPTION() {
-		return {
-			name: 'page',
-			type: Constants.ApplicationCommandOptionTypes.INTEGER,
-			description: 'page number',
-			required: false,
-		};
-	}
-
-	static get OFFSET_OPTION() {
-		return {
-			name: 'offset',
-			type: Constants.ApplicationCommandOptionTypes.STRING,
-			description: 'Δ offset',
-			required: false,
-			choices: Object.keys(XP_OFFSETS_SHORT).map(x => ({ name: x, value: XP_OFFSETS_CONVERTER[x] })),
-		};
-	}
-
-	static get SKYBLOCK_PROFILE_OPTION() {
-		return {
-			name: 'profile',
-			type: Constants.ApplicationCommandOptionTypes.STRING,
-			description: 'SkyBlock profile name',
-			required: false,
-			choices: PROFILE_NAMES.map(name => ({ name, value: name })),
-		};
+		// add ephemeral option to every (sub)command(group)
+		for (const option of this.slash.options) {
+			if (option.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP) {
+				for (const subcommandGroup of this.slash.options) {
+					for (const subcommand of subcommandGroup.options) {
+						subcommand.addStringOption(ephemeralOption);
+					}
+				}
+			} else if (option.type === Constants.ApplicationCommandOptionTypes.SUB_COMMAND) {
+				for (const subcommand of this.slash.options) {
+					subcommand.addStringOption(ephemeralOption);
+				}
+			} else { // no subcommand(group) -> only add one ephemeralOption
+				this.slash.addStringOption(ephemeralOption);
+				break;
+			}
+		}
 	}
 
 	/**
-	 * @returns {import('discord.js').ApplicationCommandData}
+	 * data to send to the API
 	 */
 	get data() {
-		/** @type {import('discord.js').ApplicationCommandOptionData[]} */
-		let options = [ ...(this.options ?? []) ];
-
-		const [ firstOption ] = options;
-
-		if ([ Constants.ApplicationCommandOptionTypes.SUB_COMMAND, Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP ].includes(firstOption?.type)) {
-			options = options.map((option) => {
-				if (option.options.at(-1)?.name !== 'visibility') option.options.push(SlashCommand.EPHEMERAL_OPTION);
-				return option;
-			});
-		} else if (options.at(-1)?.name !== 'visibility') {
-			options.push(SlashCommand.EPHEMERAL_OPTION);
-		}
-
-		return {
-			name: this.name,
-			description: this.description,
-			options,
-			defaultPermission: this.defaultPermission,
-		};
+		return this.slash.toJSON();
 	}
 
 	/**
@@ -151,7 +69,7 @@ export class SlashCommand extends BaseCommand {
 		const { data } = this;
 		/**
 		 * recursively reduces options
-		 * @param {import('discord.js').ApplicationCommandData} options
+		 * @param {import('discord.js').ApplicationCommandOption[]} options
 		 * @returns {number}
 		 */
 		const reduceOptions = options => options?.reduce((a1, c1) => a1 + c1.name.length + c1.description.length + (c1.choices?.reduce((a2, c2) => a2 + c2.name.length + `${c2.value}`.length, 0) ?? 0) + reduceOptions(c1.options), 0) ?? 0;
@@ -194,120 +112,6 @@ export class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
-	 * @param {string | import('discord.js').InteractionReplyOptions} contentOrOptions
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	reply(interaction, contentOrOptions) {
-		return InteractionUtil.reply(interaction, contentOrOptions);
-	}
-
-	/**
-	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
-	 * @param {import('discord.js').InteractionDeferOptions} options
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	deferReply(interaction, options) {
-		return InteractionUtil.deferReply(interaction, options);
-	}
-
-	/**
-	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
-	 * @param {string | import('discord.js').WebhookEditMessageOptions} contentOrOptions
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	editReply(interaction, contentOrOptions) {
-		return InteractionUtil.editReply(interaction, contentOrOptions);
-	}
-
-	/**
-	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
-	 * @param {string | import('discord.js').InteractionReplyOptions} contentOrOptions
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	followUp(interaction, contentOrOptions) {
-		return InteractionUtil.followUp(interaction, contentOrOptions);
-	}
-
-	/**
-	 * @param {import('discord.js').MessageComponentInteraction} interaction
-	 * @param {import('discord.js').InteractionUpdateOptions} options
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	update(interaction, options) {
-		return InteractionUtil.update(interaction, options);
-	}
-
-	/**
-	 * @param {import('discord.js').MessageComponentInteraction} interaction
-	 * @param {import('discord.js').InteractionDeferUpdateOptions} options
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	deferUpdate(interaction, options) {
-		return InteractionUtil.deferUpdate(interaction, options);
-	}
-
-	/**
-	 * confirms the action via a button collector
-	 * @param {import('../../util/InteractionUtil').GenericInteraction} interaction
-	 * @param {import('discord.js').InteractionReplyOptions & { question: string, timeoutSeconds: number, errorMessage: string }} [questionOrOptions={}]
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	awaitConfirmation(interaction, questionOrOptions) {
-		return InteractionUtil.awaitConfirmation(interaction, questionOrOptions);
-	}
-
-	/**
-	 * returns the player object, optional fallback to the interaction.user's player
-	 * @param {import('discord.js').CommandInteraction} interaction
-	 * @param {boolean} [fallbackToCurrentUser=false]
-	 * @returns {?import('../database/models/Player').Player}
-	 */
-	getPlayer(interaction, fallbackToCurrentUser = false) {
-		if (!interaction.options._hoistedOptions.length) {
-			if (fallbackToCurrentUser) return UserUtil.getPlayer(interaction.user);
-			return null;
-		}
-
-		const INPUT = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.replace(/\W/g, '').toLowerCase();
-
-		if (!INPUT) {
-			if (fallbackToCurrentUser) return UserUtil.getPlayer(interaction.user);
-			return null;
-		}
-
-		if (validateDiscordId(INPUT)) return this.client.players.getById(INPUT);
-		if (validateMinecraftUuid(INPUT)) return this.client.players.get(INPUT);
-
-		return (InteractionUtil.checkForce(interaction)
-			? this.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
-			: this.client.players.getByIgn(INPUT))
-			?? null;
-	}
-
-	/**
-	 * returns the player object's IGN, optional fallback to interaction.user's player
-	 * @param {import('discord.js').CommandInteraction} interaction
-	 * @param {boolean} [fallbackToCurrentUser=false]
-	 * @returns {?string}
-	 */
-	getIgn(interaction, fallbackToCurrentUser = false) {
-		if (InteractionUtil.checkForce(interaction)) return (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase();
-		return this.getPlayer(interaction, fallbackToCurrentUser)?.ign ?? null;
-	}
-
-	/**
-	 * returns a HypixelGuild instance
-	 * @param {import('discord.js').CommandInteraction} interaction
-	 * @returns {import('../database/models/HypixelGuild').HypixelGuild | GUILD_ID_ALL}
-	 */
-	getHypixelGuild(interaction) {
-		const INPUT = interaction.options.getString('guild');
-		if (INPUT === GUILD_ID_ALL) return INPUT;
-		return this.client.hypixelGuilds.cache.get(INPUT) ?? UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? this.client.hypixelGuilds.mainGuild;
-	}
-
-	/**
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 * @param {{ userIds?: import('discord.js').Snowflake[], roleIds?: import('discord.js').Snowflake[] }} [permissions]
 	 */
@@ -323,10 +127,10 @@ export class SlashCommand extends BaseCommand {
 
 				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
 
-				this.deferReply(interaction);
+				InteractionUtil.deferReply(interaction);
 
 				try {
-					return await lgGuild.members.fetch(interaction.user.id);
+					return await lgGuild.members.fetch(interaction.user);
 				} catch (error) {
 					logger.error('[CHECK PERMISSIONS]: error while fetching member to test for permissions', error);
 					throw missingPermissionsError('unknown discord member', interaction, roleIds);
@@ -343,7 +147,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async runSlash(interaction) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
 }

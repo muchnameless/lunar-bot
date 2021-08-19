@@ -4,15 +4,15 @@ import { SlashCommand } from './SlashCommand.js';
 export class DualCommand extends SlashCommand {
 	/**
 	 * create a new command
-	 * @param {object} param0
+	 * @param {object} context
 	 * @param {import('../LunarClient').LunarClient} param0.client discord this.client that instantiated this command
 	 * @param {import('./BridgeCommandCollection').BridgeCommandCollection} param0.collection
 	 * @param {string} param0.name command name
 	 * @param {import('./SlashCommand').CommandData} param1
 	 * @param {import('./BridgeCommand').CommandInfo} param2
 	 */
-	constructor(param0, param1, { aliases, guildOnly, args, usage }) {
-		super(param0, param1);
+	constructor(context, param1, { aliases, guildOnly, args, usage }) {
+		super(context, param1);
 
 		this._usage = null;
 
@@ -77,7 +77,7 @@ export class DualCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('../chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) { // eslint-disable-line no-unused-vars
+	async runMinecraft(hypixelMessage) { // eslint-disable-line no-unused-vars
 		throw new Error('no run function specified');
 	}
 }

@@ -1,25 +1,23 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { zone, TimeStruct } from 'timezonecomplete';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class FetchurCommand extends DualCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'shows the current fetchur item',
-				options: [],
-				cooldown: 0,
-			},
-			{
-				aliases: [ 'f' ],
-				args: false,
-				usage: '',
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('shows the current fetchur item'),
+			cooldown: 0,
+		}, {
+			aliases: [ 'f' ],
+			args: false,
+			usage: '',
+		});
 	}
 
 	static FETCHUR_ITEMS = [
@@ -67,15 +65,15 @@ export default class FetchurCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		return await this.reply(interaction, this.#generateReply());
+	async runSlash(interaction) {
+		return await InteractionUtil.reply(interaction, this.#generateReply());
 	}
 
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		return await hypixelMessage.reply(this.#generateReply());
 	}
 }

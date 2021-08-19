@@ -25,7 +25,7 @@
 		"arrow-spacing": "error",
 		"brace-style": [ "error", "1tbs", { "allowSingleLine": true }],
 		"camelcase": "error",
-		"class-methods-use-this": [ "error", { "exceptMethods": [ "run", "runInGame", "_run", "_generateReply" ] }],
+		"class-methods-use-this": [ "error", { "exceptMethods": [ "run", "runSlash", "runMinecraft", "_run", "_generateReply" ] }],
 		"comma-dangle": [ "error", "always-multiline" ],
 		"comma-spacing": [ "error", { "before": false, "after": true }],
 		"comma-style": "error",

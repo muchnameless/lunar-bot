@@ -1,5 +1,6 @@
 import { getUuidAndIgn } from '../../functions/input.js';
 import { hypixel } from '../../api/hypixel.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 import { logger } from '../../functions/logger.js';
 
@@ -47,18 +48,18 @@ export default class StatsCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		this.deferReply(interaction);
+	async runSlash(interaction) {
+		InteractionUtil.deferReply(interaction);
 
 		try {
-			return this.reply(interaction,
+			return InteractionUtil.reply(interaction,
 				this._generateReply(
 					await this._fetchData(interaction, interaction.options.getString('ign')),
 				),
 			);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
-			return await this.reply(interaction, `${error}`);
+			return await InteractionUtil.reply(interaction, `${error}`);
 		}
 	}
 
@@ -66,7 +67,7 @@ export default class StatsCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		try {
 			return hypixelMessage.reply(
 				this._generateReply(

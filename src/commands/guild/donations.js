@@ -1,17 +1,19 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import { MessageEmbedUtil } from '../../util/MessageEmbedUtil.js';
 import { mojang } from '../../api/mojang.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class DonationsCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'donations leaderboard',
-			options: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('donations leaderboard'),
 			cooldown: 0,
 		});
 	}
@@ -20,7 +22,7 @@ export default class DonationsCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		// aquire donations from db
 		const donations = await this.client.db.models.Transaction.findAll({
 			where: { type: 'donation' },
@@ -70,6 +72,6 @@ export default class DonationsCommand extends SlashCommand {
 		embed.setDescription(`Total: ${this.client.formatNumber(totalAmount)}`);
 
 		// create and send embed
-		return await this.reply(interaction, { embeds: [ embed ] });
+		return await InteractionUtil.reply(interaction, { embeds: [ embed ] });
 	}
 }

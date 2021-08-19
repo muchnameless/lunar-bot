@@ -1,7 +1,8 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import pkg from 'sinful-math';
 const { add, sub, mul, div } = pkg;
 import Lexer from 'lex';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 // import { logger } from '../../functions/logger.js';
 
@@ -91,26 +92,22 @@ class Parser {
 
 
 export default class MathsCommand extends DualCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'supports: + - * / ^ ! % sin cos tan sqrt exp ln log pi e',
-				options: [{
-					name: 'input',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'mathematical expression to evaluate',
-					required: true,
-				}],
-				cooldown: 0,
-			},
-			{
-				aliases: [ 'm', 'calc' ],
-				args: true,
-				usage: '',
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('supports: + - * / ^ ! % sin cos tan sqrt exp ln log pi e')
+				.addStringOption(option => option
+					.setName('input')
+					.setDescription('mathematical expression to evaluate')
+					.setRequired(true),
+				),
+			cooldown: 0,
+		}, {
+			aliases: [ 'm', 'calc' ],
+			args: true,
+			usage: '',
+		});
 	}
 
 	static percent = {
@@ -298,12 +295,9 @@ export default class MathsCommand extends DualCommand {
 	 * @param {any} value
 	 */
 	validateNumber(value) {
-		if (value > Number.MAX_VALUE) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_VALUE)}`);
+		if (value > Number.MAX_SAFE_INTEGER) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
 
-		return {
-			value,
-			warning: value > Number.MAX_SAFE_INTEGER,
-		};
+		return value;
 	}
 
 	/**
@@ -338,7 +332,6 @@ export default class MathsCommand extends DualCommand {
 		const stack = [];
 
 		let output;
-		let warning = false;
 
 		// calculate
 		try {
@@ -349,18 +342,14 @@ export default class MathsCommand extends DualCommand {
 					const b = pop();
 					const a = pop();
 
-					warning ||= b.warning || a.warning;
-
-					stack.push(MathsCommand.binaryOperators[token](a.value, b.value));
+					stack.push(MathsCommand.binaryOperators[token](a, b));
 					continue;
 				}
 
 				if (Reflect.has(MathsCommand.unaryOperators, token)) {
 					const a = pop();
 
-					warning ||= a.warning;
-
-					stack.push(MathsCommand.unaryOperators[token](a.value));
+					stack.push(MathsCommand.unaryOperators[token](a));
 					continue;
 				}
 
@@ -368,9 +357,6 @@ export default class MathsCommand extends DualCommand {
 			}
 
 			output = pop();
-
-			warning ||= output.warning;
-			output = output.value;
 
 			if (stack.length !== 0) throw new Error('unprocessed parts');
 		} catch (error) {
@@ -386,9 +372,6 @@ export default class MathsCommand extends DualCommand {
 				.replace(/pi/gi, '\u{03C0}'), // prettify 'pi'
 			output: Number(output),
 			formattedOutput: MathsCommand.formatNumberString(output?.toString() ?? ''),
-			warning: warning
-				? `\nwarning: (intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}, calculation may be incorrect`
-				: '',
 		};
 	}
 
@@ -396,7 +379,7 @@ export default class MathsCommand extends DualCommand {
 	 * execute the command
 	 * @param {string} rawInput
 	 */
-	_generateReply(rawInput) {
+	#generateReply(rawInput) {
 		try {
 			const { input, formattedOutput, warning } = this.calculate(rawInput);
 
@@ -410,15 +393,15 @@ export default class MathsCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		return await this.reply(interaction, this._generateReply(interaction.options.getString('input', true)));
+	async runSlash(interaction) {
+		return await InteractionUtil.reply(interaction, this.#generateReply(interaction.options.getString('input', true)));
 	}
 
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
-		return await hypixelMessage.reply(this._generateReply(hypixelMessage.commandData.args.join('')));
+	async runMinecraft(hypixelMessage) {
+		return await hypixelMessage.reply(this.#generateReply(hypixelMessage.commandData.args.join('')));
 	}
 }

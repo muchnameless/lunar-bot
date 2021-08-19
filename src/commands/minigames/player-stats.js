@@ -1,33 +1,28 @@
-import { Formatters, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { Formatters } from 'discord.js';
 import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
 import { getUuidAndIgn } from '../../functions/input.js';
 import { hypixel } from '../../api/hypixel.js';
+import { optionalIgnOption } from '../../structures/commands/commonOptions.js';
+// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import BaseStatsCommand from './~base-stats-command.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class PlayerStatsCommand extends BaseStatsCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'shows a player\'s hypixel stats',
-				options: [{
-					name: 'ign',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | UUID',
-					required: false,
-				}],
-				cooldown: 0,
-			},
-			{
-				aliases: [ 'player' ],
-				args: false,
-				usage: '<`IGN`>',
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('shows a player\'s hypixel stats')
+				.addStringOption(optionalIgnOption),
+			cooldown: 0,
+		}, {
+			aliases: [ 'player' ],
+			args: false,
+			usage: '<`IGN`>',
+		});
 	}
 
 	/**

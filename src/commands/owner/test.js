@@ -1,19 +1,20 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class TestCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'generic test command',
-			options: [{
-				name: 'input',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'input',
-				required: false,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('generic test command')
+				.addStringOption(option => option
+					.setName('input')
+					.setDescription('input')
+					.setRequired(false),
+				),
 			cooldown: 0,
 		});
 	}
@@ -22,7 +23,7 @@ export default class TestCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) { // eslint-disable-line no-unused-vars
+	async runSlash(interaction) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
 }

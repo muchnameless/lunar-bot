@@ -17,7 +17,7 @@ export default class MyCommand extends BridgeCommand {
 	 * execute the command
 	 * @param {import('../../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) { // eslint-disable-line no-unused-vars
+	async runMinecraft(hypixelMessage) { // eslint-disable-line no-unused-vars
 		// do stuff
 	}
 }

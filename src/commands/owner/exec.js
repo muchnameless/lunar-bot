@@ -1,21 +1,23 @@
-import { Formatters, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { Formatters } from 'discord.js';
 import { promisify } from 'util';
 import { exec } from 'child_process';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class ExecCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'executes bash code',
-			options: [{
-				name: 'input',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'code input',
-				required: true,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('executes bash code')
+				.addStringOption(option => option
+					.setName('input')
+					.setDescription('bash code')
+					.setRequired(true),
+				),
 			cooldown: 0,
 		});
 	}
@@ -24,7 +26,7 @@ export default class ExecCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		try {
 			const INPUT = interaction.options.getString('input', true);
 			const { stdout, stderr } = await promisify(exec)(INPUT);
@@ -53,13 +55,13 @@ export default class ExecCommand extends SlashCommand {
 				});
 			}
 
-			return this.reply(interaction, {
+			return InteractionUtil.reply(interaction, {
 				embeds: [ responseEmbed ],
 			});
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
 
-			return await this.reply(interaction, {
+			return await InteractionUtil.reply(interaction, {
 				content: Formatters.codeBlock('xl', `${error}`),
 			});
 		}

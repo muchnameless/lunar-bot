@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { SlashCommandBuilder } from '@discordjs/builders';
 import Discord from 'discord.js';
 import _ from 'lodash-es';
 import similarity from 'jaro-winkler';
@@ -20,26 +21,26 @@ import { logger } from '../../functions/logger.js';
 
 
 export default class EvalCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'executes js code',
-			options: [{
-				name: 'input',
-				type: Discord.Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'code input',
-				required: true,
-			}, {
-				name: 'inspect',
-				type: Discord.Constants.ApplicationCommandOptionTypes.INTEGER,
-				description: 'util.inspect depth on the output',
-				required: false,
-			}, {
-				name: 'async',
-				type: Discord.Constants.ApplicationCommandOptionTypes.BOOLEAN,
-				description: 'wrap the code in an async IIFE',
-				required: false,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('executes js code')
+				.addStringOption(option => option
+					.setName('input')
+					.setDescription('js code to evaluate')
+					.setRequired(true),
+				)
+				.addIntegerOption(option => option
+					.setName('inspect')
+					.setDescription('util.inspect depth on the output')
+					.setRequired(false),
+				)
+				.addBooleanOption(option => option
+					.setName('async')
+					.setDescription('wrap the code in an async IIFE')
+					.setRequired(false),
+				),
 			cooldown: 0,
 		});
 	}
@@ -148,17 +149,17 @@ export default class EvalCommand extends SlashCommand {
 	 * @param {import('discord.js').ButtonInteraction} interaction
 	 */
 	async runButton(interaction) {
-		if (interaction.user.id !== this.client.ownerId) return await this.reply(interaction, {
+		if (interaction.user.id !== this.client.ownerId) return await InteractionUtil.reply(interaction, {
 			content: 'this command is restricted to the bot owner',
 			ephemeral: true,
 		});
 
-		if (!ChannelUtil.botPermissions(interaction.channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL)) return await this.reply(interaction, {
+		if (!ChannelUtil.botPermissions(interaction.channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL)) return await InteractionUtil.reply(interaction, {
 			content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
 			ephemeral: true,
 		});
 
-		this.deferUpdate(interaction);
+		InteractionUtil.deferUpdate(interaction);
 
 		const { groups: { async, inspectDepth } } = interaction.customId.match(/EVAL:(?<async>.+):(?<inspectDepth>.+)/);
 
@@ -170,7 +171,7 @@ export default class EvalCommand extends SlashCommand {
 				errors: [ 'time' ],
 			});
 
-			return this.update(interaction, {
+			return InteractionUtil.update(interaction, {
 				embeds: await this.#eval(
 					interaction,
 					collected.first().content,
@@ -187,8 +188,8 @@ export default class EvalCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		this.deferReply(interaction);
+	async runSlash(interaction) {
+		InteractionUtil.deferReply(interaction);
 
 		let indentationCount = 0;
 
@@ -199,9 +200,7 @@ export default class EvalCommand extends SlashCommand {
 				let indentation = '';
 
 				indentationCount -= line.match(/}/g)?.length ?? 0;
-
 				for (let i = 0; i < indentationCount; ++i) indentation += '  ';
-
 				indentationCount += line.match(/{/g)?.length ?? 0;
 
 				return `${indentation}${line}`;
@@ -217,7 +216,7 @@ export default class EvalCommand extends SlashCommand {
 					.setStyle(Discord.Constants.MessageButtonStyles.SECONDARY),
 			);
 
-		return await this.reply(interaction, {
+		return await InteractionUtil.reply(interaction, {
 			embeds: await this.#eval(
 				interaction,
 				INPUT,

@@ -1,7 +1,7 @@
 import { Collection } from 'discord.js';
 
 /**
- * @typedef {object} BaseCommandData additional information about the command
+ * @typedef {object} CommandContext additional information about the command
  * @property {import('../LunarClient').LunarClient} client discord this.client that instantiated this command
  * @property {import('./BaseCommandCollection').BaseCommandCollection} collection
  * @property {string} name the name of the command
@@ -12,7 +12,7 @@ import { Collection } from 'discord.js';
 export class BaseCommand {
 	/**
 	 * create a new command
-	 * @param {BaseCommandData} param0
+	 * @param {CommandContext} context
 	 * @param {{ cooldown?: number, requiredRoles: () => import('discord.js').Snowflake[] }} param1
 	 */
 	constructor({ client, collection, name, category }, { cooldown, requiredRoles }) {
@@ -83,12 +83,5 @@ export class BaseCommand {
 	unload() {
 		this.collection.delete(this.name.toLowerCase());
 		this.aliases?.forEach(alias => this.collection.delete(alias.toLowerCase()));
-	}
-
-	/**
-	 * execute the command
-	 */
-	async run() {
-		throw new Error('no run function specified');
 	}
 }

@@ -1,7 +1,10 @@
-import { Formatters, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { Formatters } from 'discord.js';
 import ms from 'ms';
 import { logErrors } from '../../structures/chat_bridge/constants/commandResponses.js';
 import { escapeIgn } from '../../functions/util.js';
+import { forceOption, optionalPlayerOption, buildGuildOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 import { logger } from '../../functions/logger.js';
 
@@ -14,30 +17,20 @@ import { logger } from '../../functions/logger.js';
  */
 
 export default class JoinDateCommand extends DualCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'guild member join date, parsed from `/g log ign`',
-				options: [
-					{
-						name: 'player',
-						type: Constants.ApplicationCommandOptionTypes.STRING,
-						description: 'IGN | UUID | discord ID | @mention',
-						required: false,
-					},
-					DualCommand.FORCE_OPTION,
-					DualCommand.guildOptionBuilder(data.client),
-				],
-				cooldown: 0,
-			},
-			{
-				aliases: [ 'joined' ],
-				args: false,
-				usage: '<`IGN`>',
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('guild member join date, parsed from `/g log ign`')
+				.addStringOption(optionalPlayerOption)
+				.addBooleanOption(forceOption)
+				.addStringOption(buildGuildOption(context.client)),
+			cooldown: 0,
+		}, {
+			aliases: [ 'joined' ],
+			args: false,
+			usage: '<`IGN`>',
+		});
 	}
 
 	static running = new Set();
@@ -108,15 +101,15 @@ export default class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		this.deferReply(interaction);
+	async runSlash(interaction) {
+		InteractionUtil.deferReply(interaction);
 
-		const { chatBridge } = this.getHypixelGuild(interaction);
-		const IGN = this.getIgn(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user.id).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')));
+		const { chatBridge } = InteractionUtil.getHypixelGuild(interaction);
+		const IGN = InteractionUtil.getIgn(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')));
 
 		if (!IGN) {
 			// all players
-			if (JoinDateCommand.running.has(chatBridge.hypixelGuild.guildId)) return await this.reply(interaction, {
+			if (JoinDateCommand.running.has(chatBridge.hypixelGuild.guildId)) return await InteractionUtil.reply(interaction, {
 				content: 'the command is already running',
 				ephemeral: true,
 			});
@@ -126,7 +119,7 @@ export default class JoinDateCommand extends DualCommand {
 			try {
 				JoinDateCommand.running.add(chatBridge.hypixelGuild.guildId);
 
-				await this.awaitConfirmation(interaction, `the command will take approximately ${ms(chatBridge.hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
+				await InteractionUtil.awaitConfirmation(interaction, `the command will take approximately ${ms(chatBridge.hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
 
 				for (const { ign } of chatBridge.hypixelGuild.players.values()) {
 					joinInfos.push(await JoinDateCommand.#getJoinDate(chatBridge, ign));
@@ -135,7 +128,7 @@ export default class JoinDateCommand extends DualCommand {
 				JoinDateCommand.running.delete(chatBridge.hypixelGuild.guildId);
 			}
 
-			return await this.reply(interaction, {
+			return await InteractionUtil.reply(interaction, {
 				content: `${Formatters.bold(chatBridge.hypixelGuild.name)} join dates:\n${joinInfos
 					.sort((a, b) => a.timestamp - b.timestamp)
 					.map(({ ign, date, timestamp }) => `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`)
@@ -144,14 +137,14 @@ export default class JoinDateCommand extends DualCommand {
 			});
 		}
 
-		return await this.reply(interaction, await this.#generateReply(chatBridge, IGN));
+		return await InteractionUtil.reply(interaction, await this.#generateReply(chatBridge, IGN));
 	}
 
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		return await hypixelMessage.reply(await this.#generateReply(
 			hypixelMessage.chatBridge,
 			hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,

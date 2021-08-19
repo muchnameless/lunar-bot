@@ -1,4 +1,5 @@
-import { SnowflakeUtil, Formatters, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { SnowflakeUtil, Formatters } from 'discord.js';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import ms from 'ms';
@@ -8,187 +9,125 @@ import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants/discord.js';
 import { GUILD_ID_BRIDGER, UNKNOWN_IGN } from '../../constants/database.js';
 import { stringToMS, trim, getIdFromString, autocorrect } from '../../functions/util.js';
 import { UserUtil } from '../../util/UserUtil.js';
+import { requiredPlayerOption, optionalPlayerOption, pageOption, requiredIgnOption, targetOption, forceOption, buildGuildOption } from '../../structures/commands/commonOptions.js';
 import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
-const commonOptions = new Map([ [
-	'player',
-	{
-		name: 'player',
-		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'IGN | UUID | discord ID | @mention',
-		required: true,
-	},
-], [
-	'player_optional',
-	{
-		name: 'player',
-		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'IGN | UUID | discord ID | @mention',
-		required: false,
-	},
-], [
-	'ign',
-	{
-		name: 'ign',
-		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'IGN',
-		required: true,
-	},
-], [
-	'page',
-	{
-		name: 'page',
-		type: Constants.ApplicationCommandOptionTypes.INTEGER,
-		description: 'page number',
-		required: false,
-	},
-], [
-	'rank',
-	{
-		name: 'rank',
-		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'rank name',
-		required: true,
-	},
-], [
-	'target',
-	{
-		name: 'target',
-		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'IGN | UUID | discord ID | @mention | \'guild\' | \'everyone\'',
-		required: true,
-	},
-], [
-	'duration',
-	{
-		name: 'duration',
-		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 's[econds] | m[inutes] | h[ours] | d[ays]',
-		required: true,
-	},
-], [
-	'days_ago',
-	{
-		name: 'days_ago',
-		type: Constants.ApplicationCommandOptionTypes.INTEGER,
-		description: 'number of days ago',
-		required: false,
-	},
-], [
-	'reason',
-	{
-		name: 'reason',
-		type: Constants.ApplicationCommandOptionTypes.STRING,
-		description: 'reason',
-		required: true,
-	},
-] ]);
-
-
 export default class GuildCommand extends SlashCommand {
-	constructor(data) {
-		const guildOption = SlashCommand.guildOptionBuilder(data.client);
+	constructor(context) {
+		const slash = new SlashCommandBuilder()
+			.setDescription('hypixel')
+			.addSubcommand(subcommand => subcommand
+				.setName('demote')
+				.setDescription('demote')
+				.addStringOption(requiredPlayerOption),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('kick')
+				.setDescription('kick')
+				.addStringOption(requiredPlayerOption)
+				.addStringOption(option => option
+					.setName('reason')
+					.setDescription('reason')
+					.setRequired(true),
+				),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('history')
+				.setDescription('history')
+				.addIntegerOption(pageOption),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('info')
+				.setDescription('info'),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('invite')
+				.setDescription('invite')
+				.addStringOption(requiredIgnOption),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('list')
+				.setDescription('list'),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('log')
+				.setDescription('log')
+				.addStringOption(optionalPlayerOption)
+				.addIntegerOption(pageOption),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('member')
+				.setDescription('member')
+				.addStringOption(optionalPlayerOption),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('members')
+				.setDescription('members'),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('motd')
+				.setDescription('motd'),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('mute')
+				.setDescription('mute')
+				.addStringOption(targetOption)
+				.addStringOption(option => option
+					.setName('duration')
+					.setDescription('s[econds] | m[inutes] | h[ours] | d[ays]')
+					.setRequired(true),
+				),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('online')
+				.setDescription('online'),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('promote')
+				.setDescription('promote')
+				.addStringOption(requiredPlayerOption),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('quest')
+				.setDescription('quest'),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('setrank')
+				.setDescription('setrank')
+				.addStringOption(requiredPlayerOption)
+				.addStringOption(option => option
+					.setName('rank')
+					.setDescription('rank name')
+					.setRequired(true),
+				),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('top')
+				.setDescription('top')
+				.addIntegerOption(option => option
+					.setName('days_ago')
+					.setDescription('number of days ago')
+					.setRequired(false),
+				),
+			)
+			.addSubcommand(subcommand => subcommand
+				.setName('unmute')
+				.setDescription('unmute')
+				.addStringOption(targetOption),
+			);
+		const guildOption = buildGuildOption(context.client);
 
-		const options = [{
-			name: 'demote',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'demote',
-			options: [ 'player' ],
-		}, {
-			name: 'kick',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'kick',
-			options: [ 'player', 'reason' ],
-		}, {
-			name: 'history',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'history',
-			options: [ 'page' ],
-		}, {
-			name: 'info',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'info',
-			options: [],
-		}, {
-			name: 'invite',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'invite',
-			options: [ 'ign' ],
-		}, {
-			name: 'list',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'list',
-			options: [],
-		}, {
-			name: 'log',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'log',
-			options: [ 'player_optional', 'page' ],
-		}, {
-			name: 'member',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'member',
-			options: [ 'player_optional' ],
-		}, {
-			name: 'members',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'members',
-			options: [],
-		}, {
-			name: 'motd',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'motd',
-			options: [],
-		}, {
-			name: 'mute',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'mute',
-			options: [ 'target', 'duration' ],
-		}, {
-			name: 'online',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'online',
-			options: [],
-		}, {
-			name: 'promote',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'promote',
-			options: [ 'player' ],
-		}, {
-			name: 'quest',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'quest',
-			options: [],
-		}, {
-			name: 'setrank',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'setrank',
-			options: [ 'player', 'rank' ],
-		}, {
-			name: 'top',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'top',
-			options: [ 'days_ago' ],
-		}, {
-			name: 'unmute',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: 'unmute',
-			options: [ 'target' ],
-		}].map((option) => {
-			const isPlayerCommand = option.options.includes('player') || option.options.includes('target');
-			option.options = option.options.map(optionName => commonOptions.get(optionName));
-			if (isPlayerCommand) option.options.push(SlashCommand.FORCE_OPTION);
-			option.options.push(guildOption);
-			return option;
-		});
+		for (const subcommand of slash.options) {
+			if (subcommand.options.some(option => option.name === 'player' || option.name === 'target')) subcommand.addBooleanOption(forceOption);
+			subcommand.addStringOption(guildOption);
+		}
 
-		super(data, {
+		super(context, {
 			aliases: [ 'g' ],
-			description: 'hypixel',
-			options,
+			slash,
 			cooldown: 0,
 		});
 	}
@@ -205,7 +144,7 @@ export default class GuildCommand extends SlashCommand {
 
 		if (!interaction) return this.client.players.getByIgn(targetInput) ?? targetInput;
 
-		return this.getPlayer(interaction)
+		return InteractionUtil.getPlayer(interaction)
 			?? (InteractionUtil.checkForce(interaction)
 				? targetInput // use input if force is set
 				: (await this.client.players.fetch({ // try to find by ign or uuid
@@ -256,7 +195,7 @@ export default class GuildCommand extends SlashCommand {
 				ephemeral: true,
 			};
 
-			if (interaction) this.deferReply(interaction);
+			if (interaction) InteractionUtil.deferReply(interaction);
 
 			target.mutedTill = Date.now() + duration;
 			await target.save();
@@ -273,7 +212,7 @@ export default class GuildCommand extends SlashCommand {
 		try {
 			const { chatBridge } = hypixelGuild;
 
-			if (interaction) this.deferReply(interaction);
+			if (interaction) InteractionUtil.deferReply(interaction);
 
 			const res = await chatBridge.minecraft.command({
 				command: `g mute ${target} ${ms(duration)}`,
@@ -300,7 +239,7 @@ export default class GuildCommand extends SlashCommand {
 		const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 		const target = await this.getMuteTarget(TARGET_INPUT, interaction);
 
-		if (!target) return await this.reply(interaction, {
+		if (!target) return await InteractionUtil.reply(interaction, {
 			content: `no player with the IGN \`${TARGET_INPUT}\` found`,
 			ephemeral: true,
 		});
@@ -310,10 +249,10 @@ export default class GuildCommand extends SlashCommand {
 			target,
 			executor: UserUtil.getPlayer(interaction.user),
 			duration,
-			hypixelGuild: this.getHypixelGuild(interaction),
+			hypixelGuild: InteractionUtil.getHypixelGuild(interaction),
 		});
 
-		return await this.reply(interaction, {
+		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/g mute ${target} ${ms(duration)}`)
@@ -362,7 +301,7 @@ export default class GuildCommand extends SlashCommand {
 		try {
 			const { chatBridge } = hypixelGuild;
 
-			if (interaction) this.deferReply(interaction);
+			if (interaction) InteractionUtil.deferReply(interaction);
 
 			const res = await chatBridge.minecraft.command({
 				command: `g kick ${target} ${reason}`,
@@ -393,10 +332,10 @@ export default class GuildCommand extends SlashCommand {
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 * @param {?import('../../structures/database/models/HypixelGuild').HypixelGuild} [hypixelGuild]
 	 */
-	async #run(interaction, commandOptions, { chatBridge } = this.getHypixelGuild(interaction)) {
-		this.deferReply(interaction);
+	async #run(interaction, commandOptions, { chatBridge } = InteractionUtil.getHypixelGuild(interaction)) {
+		InteractionUtil.deferReply(interaction);
 
-		return await this.reply(interaction, {
+		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
@@ -411,11 +350,11 @@ export default class GuildCommand extends SlashCommand {
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 */
 	async #runList(interaction, commandOptions) {
-		const { chatBridge } = this.getHypixelGuild(interaction);
+		const { chatBridge } = InteractionUtil.getHypixelGuild(interaction);
 
-		this.deferReply(interaction);
+		InteractionUtil.deferReply(interaction);
 
-		return await this.reply(interaction, {
+		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
@@ -446,7 +385,7 @@ export default class GuildCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		const SUB_COMMAND = interaction.options.getSubcommand();
 
 		switch (SUB_COMMAND) {
@@ -457,23 +396,23 @@ export default class GuildCommand extends SlashCommand {
 
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor) return await this.reply(interaction, {
+				if (!executor) return await InteractionUtil.reply(interaction, {
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-				if (!executor.isStaff) return await this.reply(interaction, {
+				if (!executor.isStaff) return await InteractionUtil.reply(interaction, {
 					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
-				const target = this.getPlayer(interaction);
+				const target = InteractionUtil.getPlayer(interaction);
 
-				if (!target) return await this.reply(interaction, {
+				if (!target) return await InteractionUtil.reply(interaction, {
 					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
 					ephemeral: true,
 				});
 
-				if (target.guildRankPriority >= executor.guildRankPriority) return await this.reply(interaction, {
+				if (target.guildRankPriority >= executor.guildRankPriority) return await InteractionUtil.reply(interaction, {
 					content: `your guild rank needs to be higher than ${target}'s`,
 					ephemeral: true,
 				});
@@ -489,17 +428,17 @@ export default class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const target = this.getPlayer(interaction) ?? interaction.options.getString('player', true);
+				const target = InteractionUtil.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
 				const { content, ephemeral } = await this.runKick({
 					interaction,
 					target,
 					executor: UserUtil.getPlayer(interaction.user),
 					reason,
-					hypixelGuild: target?.hypixelGuild ?? this.getHypixelGuild(interaction),
+					hypixelGuild: target?.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction),
 				});
 
-				return await this.reply(interaction, {
+				return await InteractionUtil.reply(interaction, {
 					embeds: [
 						this.client.defaultEmbed
 							.setTitle(`/g kick ${target} ${reason}`)
@@ -575,7 +514,7 @@ export default class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIgn(interaction);
+				const IGN = InteractionUtil.getIgn(interaction);
 				const PAGE = interaction.options.getInteger('page');
 
 				return this.#run(interaction, {
@@ -589,8 +528,8 @@ export default class GuildCommand extends SlashCommand {
 					roleIds: [ this.config.get('GUILD_ROLE_ID'), this.config.get('SHRUG_ROLE_ID'), this.config.get('TRIAL_MODERATOR_ROLE_ID'), this.config.get('MODERATOR_ROLE_ID'), this.config.get('DANKER_STAFF_ROLE_ID'), this.config.get('SENIOR_STAFF_ROLE_ID'), this.config.get('MANAGER_ROLE_ID') ],
 				});
 
-				const IGN = this.getIgn(interaction, true);
-				if (!IGN) return await this.reply(interaction, {
+				const IGN = InteractionUtil.getIgn(interaction, true);
+				if (!IGN) return await InteractionUtil.reply(interaction, {
 					content: 'you are not in the player db',
 					ephemeral: true,
 				});
@@ -608,7 +547,7 @@ export default class GuildCommand extends SlashCommand {
 				const DURATION_INPUT = interaction.options.getString('duration', true);
 				const DURATION = stringToMS(DURATION_INPUT);
 
-				if (Number.isNaN(DURATION)) return await this.reply(interaction, {
+				if (Number.isNaN(DURATION)) return await InteractionUtil.reply(interaction, {
 					content: `\`${DURATION_INPUT}\` is not a valid duration`,
 					ephemeral: true,
 				});
@@ -623,23 +562,23 @@ export default class GuildCommand extends SlashCommand {
 
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor) return await this.reply(interaction, {
+				if (!executor) return await InteractionUtil.reply(interaction, {
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-				if (!executor.isStaff) return await this.reply(interaction, {
+				if (!executor.isStaff) return await InteractionUtil.reply(interaction, {
 					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
-				const target = this.getPlayer(interaction);
+				const target = InteractionUtil.getPlayer(interaction);
 
-				if (!target) return await this.reply(interaction, {
+				if (!target) return await InteractionUtil.reply(interaction, {
 					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
 					ephemeral: true,
 				});
 
-				if (target.guildRankPriority >= executor.guildRankPriority - 1) return await this.reply(interaction, {
+				if (target.guildRankPriority >= executor.guildRankPriority - 1) return await InteractionUtil.reply(interaction, {
 					content: 'you can only promote up to your own rank',
 					ephemeral: true,
 				});
@@ -657,29 +596,29 @@ export default class GuildCommand extends SlashCommand {
 
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor) return await this.reply(interaction, {
+				if (!executor) return await InteractionUtil.reply(interaction, {
 					content: 'unable to find a linked player for your discord account',
 					ephemeral: true,
 				});
-				if (!executor.isStaff) return await this.reply(interaction, {
+				if (!executor.isStaff) return await InteractionUtil.reply(interaction, {
 					content: 'you need to have an in game staff rank for this command',
 					ephemeral: true,
 				});
 
-				const target = this.getPlayer(interaction);
+				const target = InteractionUtil.getPlayer(interaction);
 
-				if (!target) return await this.reply(interaction, {
+				if (!target) return await InteractionUtil.reply(interaction, {
 					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
 					ephemeral: true,
 				});
 
-				const hypixelGuild = this.getHypixelGuild(interaction);
+				const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 				const RANK_INPUT = interaction.options.getString('rank', true);
 				const { value: rank, similarity } = autocorrect(RANK_INPUT, hypixelGuild.ranks, 'name');
 
 				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return `unknown guild rank '${RANK_INPUT}'`;
 
-				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) return await this.reply(interaction, {
+				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) return await InteractionUtil.reply(interaction, {
 					content: 'you can only change ranks up to your own rank',
 					ephemeral: true,
 				});
@@ -697,13 +636,13 @@ export default class GuildCommand extends SlashCommand {
 
 				const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 
-				let hypixelGuild = this.getHypixelGuild(interaction);
+				let hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 				let target;
 
 				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT)) {
 					target = 'everyone';
 				} else {
-					target = this.getPlayer(interaction)
+					target = InteractionUtil.getPlayer(interaction)
 							?? (InteractionUtil.checkForce(interaction)
 								? TARGET_INPUT // use input if force is set
 								: await (async () => {
@@ -723,7 +662,7 @@ export default class GuildCommand extends SlashCommand {
 								})()
 							);
 
-					if (!target) return await this.reply(interaction, {
+					if (!target) return await InteractionUtil.reply(interaction, {
 						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
 						ephemeral: true,
 					});
@@ -734,7 +673,7 @@ export default class GuildCommand extends SlashCommand {
 				}
 
 				if (target instanceof this.client.players.model) {
-					if (target.guildRankPriority >= (UserUtil.getPlayer(interaction.user)?.guildRankPriority ?? 0)) return await this.reply(interaction, {
+					if (target.guildRankPriority >= (UserUtil.getPlayer(interaction.user)?.guildRankPriority ?? 0)) return await InteractionUtil.reply(interaction, {
 						content: `your guild rank needs to be higher than ${target}'s`,
 						ephemeral: true,
 					});
@@ -742,7 +681,7 @@ export default class GuildCommand extends SlashCommand {
 					target.mutedTill = 0;
 					await target.save();
 
-					if (target.notInGuild) return await this.reply(interaction, `unmuted \`${target}\``);
+					if (target.notInGuild) return await InteractionUtil.reply(interaction, `unmuted \`${target}\``);
 				} else if (target === 'everyone') {
 					hypixelGuild.mutedTill = 0;
 					await hypixelGuild.save();

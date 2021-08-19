@@ -1,22 +1,20 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import { oneLine } from 'common-tags';
+import { requiredPlayerOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class UnlinkCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'remove a link between a discord user and a minecraft ign',
-			options: [{
-				name: 'player',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | UUID | discord ID | @mention',
-				required: true,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('remove a link between a discord user and a minecraft ign')
+				.addStringOption(requiredPlayerOption),
 			cooldown: 1,
 		});
 	}
@@ -25,9 +23,9 @@ export default class UnlinkCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		const PLAYER_INPUT = interaction.options.getString('player', true);
-		const player = this.getPlayer(interaction)
+		const player = InteractionUtil.getPlayer(interaction)
 			?? await this.client.players.fetch({
 				[Op.or]: [{
 					ign: { [Op.iLike]: PLAYER_INPUT },
@@ -37,15 +35,15 @@ export default class UnlinkCommand extends SlashCommand {
 				cache: false,
 			});
 
-		if (!player?.discordId) return await this.reply(interaction, `\`${PLAYER_INPUT}\` is not linked`);
+		if (!player?.discordId) return await InteractionUtil.reply(interaction, `\`${PLAYER_INPUT}\` is not linked`);
 
-		this.deferReply(interaction);
+		InteractionUtil.deferReply(interaction);
 
 		const { discordId: OLD_LINKED_ID } = player;
 		const currentLinkedMember = await player.discordMember;
 		const WAS_SUCCESSFUL = await player.unlink(`unlinked by ${interaction.user.tag}`);
 
-		return await this.reply(interaction, {
+		return await InteractionUtil.reply(interaction, {
 			content: oneLine`
 				\`${player}\` is no longer linked to ${currentLinkedMember ?? `\`${OLD_LINKED_ID}\``}
 				${WAS_SUCCESSFUL ? '' : ' (unable to update the currently linked member)'}

@@ -1,30 +1,25 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { getLilyWeight } from '../../functions/skyblock.js';
+import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions.js';
+// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import BaseWeightCommand from './~base-weight.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class LilyWeightCommand extends BaseWeightCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'shows a player\'s lily weight: total, weight and overflow',
-				options: [{
-					name: 'ign',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | UUID',
-					required: false,
-				}, BaseWeightCommand.SKYBLOCK_PROFILE_OPTION ],
-				cooldown: 1,
-			},
-			{
-				aliases: [ 'lily' ],
-				args: false,
-				usage: '<`IGN`> <`profile` name>',
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('shows a player\'s lily weight: total, weight and overflow')
+				.addStringOption(optionalIgnOption)
+				.addStringOption(skyblockProfileOption),
+			cooldown: 1,
+		}, {
+			aliases: [ 'lily' ],
+			args: false,
+			usage: '<`IGN`> <`profile` name>',
+		});
 	}
 
 	/**

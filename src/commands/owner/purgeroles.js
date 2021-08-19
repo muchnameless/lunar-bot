@@ -1,16 +1,19 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { setTimeout as sleep } from 'timers/promises';
 import ms from 'ms';
 import { GuildMemberUtil } from '../../util/GuildMemberUtil.js';
+import { GuildUtil } from '../../util/GuildUtil.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class PurgeRolesCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'removes all roles that the bot manages from non guild members',
-			options: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('removes all roles that the bot manages from non guild members'),
 			cooldown: 0,
 		});
 	}
@@ -26,8 +29,8 @@ export default class PurgeRolesCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		if (PurgeRolesCommand.running) return await this.reply(interaction, {
+	async runSlash(interaction) {
+		if (PurgeRolesCommand.running) return await InteractionUtil.reply(interaction, {
 			content: 'the command is already running',
 			ephemeral: true,
 		});
@@ -35,12 +38,13 @@ export default class PurgeRolesCommand extends SlashCommand {
 		try {
 			PurgeRolesCommand.running = true;
 
-			this.deferReply(interaction);
+			InteractionUtil.deferReply(interaction);
 
+			const { lgGuild } = this.client;
 			const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 			const toPurge = [];
 
-			for (const member of (await this.client.fetchAllGuildMembers()).values()) {
+			for (const member of (await GuildUtil.fetchAllMembers(lgGuild)).values()) {
 				if (member.roles.cache.has(GUILD_ROLE_ID)) continue;
 
 				const rolesToPurge = GuildMemberUtil.getRolesToPurge(member);
@@ -55,11 +59,9 @@ export default class PurgeRolesCommand extends SlashCommand {
 
 			const PURGE_AMOUNT = toPurge.length;
 
-			if (!PURGE_AMOUNT) return await this.reply(interaction, 'no roles need to be purged');
+			if (!PURGE_AMOUNT) return await InteractionUtil.reply(interaction, 'no roles need to be purged');
 
-			await this.awaitConfirmation(interaction, `purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT, { long: true })}?`);
-
-			const { lgGuild } = this.client;
+			await InteractionUtil.awaitConfirmation(interaction, `purge roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}, expected duration: ${ms((PURGE_AMOUNT - 1) * PurgeRolesCommand.TIMEOUT, { long: true })}?`);
 
 			await Promise.all(toPurge.map(async ({ id, rolesToPurge }, index) => {
 				await sleep(index * PurgeRolesCommand.TIMEOUT);
@@ -76,7 +78,7 @@ export default class PurgeRolesCommand extends SlashCommand {
 				}
 			}));
 
-			return await this.reply(interaction, `done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`);
+			return await InteractionUtil.reply(interaction, `done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`);
 		} finally {
 			PurgeRolesCommand.running = false;
 		}

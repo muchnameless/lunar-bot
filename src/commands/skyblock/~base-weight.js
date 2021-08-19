@@ -1,8 +1,10 @@
+// import { SlashCommandBuilder } from '@discordjs/builders';
 import { upperCaseFirstChar, autocorrect } from '../../functions/util.js';
 import { getUuidAndIgn } from '../../functions/input.js';
 import { X_EMOJI } from '../../constants/emojiCharacters.js';
 import { PROFILE_NAMES } from '../../constants/skyblock.js';
 import { hypixel } from '../../api/hypixel.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 import { logger } from '../../functions/logger.js';
 
@@ -63,17 +65,17 @@ export default class BaseWeightCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		this.deferReply(interaction);
+	async runSlash(interaction) {
+		InteractionUtil.deferReply(interaction);
 
-		return await this.reply(interaction, await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
+		return await InteractionUtil.reply(interaction, await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
 	}
 
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		const [ IGN, PROFILE_NAME_INPUT ] = hypixelMessage.commandData.args;
 
 		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');

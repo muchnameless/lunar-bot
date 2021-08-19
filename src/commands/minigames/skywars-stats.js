@@ -1,35 +1,29 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { getSkyWarsLevelInfo } from '@zikeji/hypixel';
+import { optionalIgnOption } from '../../structures/commands/commonOptions.js';
+// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import BaseStatsCommand from './~base-stats-command.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class SkyWarsStatsCommand extends BaseStatsCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'shows a player\'s SkyWars stats',
-				options: [{
-					name: 'ign',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN',
-					required: false,
-				}],
-				cooldown: 1,
-			},
-			{
-				aliases: [ 'swstats' ],
-				args: false,
-				usage: '<`IGN`>',
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('shows a player\'s SkyWars stats')
+				.addStringOption(optionalIgnOption),
+			cooldown: 1,
+		}, {
+			aliases: [ 'swstats' ],
+			args: false,
+			usage: '<`IGN`>',
+		});
 	}
 
 	/**
-	 * @param {StatsCommand.FetchedData} param0
+	 * @param {import('./~base-stats-command').FetchedData} param0
 	 */
 	_generateReply({ ign, playerData }) {
 		if (!playerData?.stats?.SkyWars) return `\`${ign}\` has no SkyWars stats`;

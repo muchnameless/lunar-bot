@@ -1,15 +1,18 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { commaListsOr } from 'common-tags';
 import { autocorrect } from '../../functions/util.js';
 import { skills, dungeonTypes } from '../../constants/skyblock.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 export class CompetitionCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'WIP',
+			slash: new SlashCommandBuilder()
+				.setDescription('WIP'),
 			cooldown: 1,
 		});
 	}
@@ -23,7 +26,7 @@ export class CompetitionCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		const collector = interaction.channel.createMessageCollector({
 			filter: msg => msg.author.id === interaction.user.id,
 			idle: 30_000,
@@ -35,10 +38,7 @@ export class CompetitionCommand extends SlashCommand {
 		let retries = 0;
 
 		try {
-			await interaction.reply({
-				content: commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`,
-				saveReplyMessageId: false,
-			});
+			await InteractionUtil.reply(interaction, commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`);
 
 			do {
 				const collected = await collector.next;
@@ -52,14 +52,11 @@ export class CompetitionCommand extends SlashCommand {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
-					await interaction.reply({
-						content: `\`${collected.content}\` is not a valid type`,
-						saveReplyMessageId: false,
-					});
+					await InteractionUtil.reply(interaction, `\`${collected.content}\` is not a valid type`);
 				}
 			} while (!type);
 
-			await interaction.reply('starting time?');
+			await InteractionUtil.reply(interaction, 'starting time?');
 
 			do {
 				const collected = await collector.next;
@@ -73,17 +70,11 @@ export class CompetitionCommand extends SlashCommand {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
-					await interaction.reply({
-						content: `\`${collected.content}\` is not a valid date`,
-						saveReplyMessageId: false,
-					});
+					await InteractionUtil.reply(interaction, `\`${collected.content}\` is not a valid date`);
 				}
 			} while (!startingTime);
 
-			await interaction.reply({
-				content: 'ending time?',
-				saveReplyMessageId: false,
-			});
+			await InteractionUtil.reply(interaction, 'ending time?');
 
 			do {
 				const collected = await collector.next;
@@ -97,20 +88,14 @@ export class CompetitionCommand extends SlashCommand {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
-					await interaction.reply({
-						content: `\`${collected.content}\` is not a valid date`,
-						saveReplyMessageId: false,
-					});
+					await InteractionUtil.reply(interaction, `\`${collected.content}\` is not a valid date`);
 				}
 			} while (!endingTime);
 
-			await interaction.reply({
-				content: `type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
-				saveReplyMessageId: false,
-			});
+			await InteractionUtil.reply(interaction, `type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`);
 		} catch (error) {
 			logger.error(error);
-			await interaction.reply('the command has been cancelled');
+			await InteractionUtil.reply(interaction, 'the command has been cancelled');
 		} finally {
 			collector.stop();
 		}

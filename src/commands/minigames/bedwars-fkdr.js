@@ -1,33 +1,27 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { optionalIgnOption } from '../../structures/commands/commonOptions.js';
+// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import BaseStatsCommand from './~base-stats-command.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class BedWarsFkdrCommand extends BaseStatsCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'shows a player\'s BedWars fkdr',
-				options: [{
-					name: 'ign',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | UUID',
-					required: false,
-				}],
-				cooldown: 1,
-			},
-			{
-				aliases: [ 'fkdr' ],
-				args: false,
-				usage: '<`IGN`>',
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('shows a player\'s BedWars fkdr')
+				.addStringOption(optionalIgnOption),
+			cooldown: 1,
+		}, {
+			aliases: [ 'fkdr' ],
+			args: false,
+			usage: '<`IGN`>',
+		});
 	}
 
 	/**
-	 * @param {StatsCommand.FetchedData} param0
+	 * @param {import('./~base-stats-command').FetchedData} param0
 	 */
 	_generateReply({ ign, playerData }) {
 		if (!playerData?.stats?.Bedwars) return `\`${ign}\` has no BedWars stats`;

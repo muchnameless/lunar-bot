@@ -1,4 +1,5 @@
-import { Formatters, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { upperCaseFirstChar, stringToMS } from '../../functions/util.js';
@@ -6,53 +7,48 @@ import { messageTypes } from '../../structures/chat_bridge/constants/chatBridge.
 import { ChannelUtil } from '../../util/ChannelUtil.js';
 import { UserUtil } from '../../util/UserUtil.js';
 import { MessageUtil } from '../../util/MessageUtil.js';
+import { buildGuildOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class PollCommand extends DualCommand {
-	constructor(data) {
-		const options = [{
-			name: 'question',
-			type: Constants.ApplicationCommandOptionTypes.STRING,
-			description: 'poll question',
-			required: true,
-		}];
+	constructor(context) {
+		const slash = new SlashCommandBuilder()
+			.setDescription('create a poll for both in game and discord guild chat')
+			.addStringOption(option => option
+				.setName('question')
+				.setDescription('poll question')
+				.setRequired(true),
+			);
 
 		// add choices
 		for (let i = 1; i <= 10; ++i) {
-			options.push({
-				name: `choice_${i}`,
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: `choice ${i}`,
-				required: i <= 1,
-			});
+			slash.addStringOption(option => option
+				.setName(`choice_${i}`)
+				.setDescription(`choice ${i}`)
+				.setRequired(i <= 1),
+			);
 		}
 
-		options.push(
-			{
-				name: 'duration',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'number of s[econds] | m[inutes], must be between 30s and 10m',
-				required: false,
-			},
-			DualCommand.guildOptionBuilder(data.client),
-		);
+		slash
+			.addStringOption(option => option
+				.setName('duration')
+				.setDescription('s[econds] | m[inutes], must be between 30s and 10m')
+				.setRequired(false),
+			)
+			.addStringOption(buildGuildOption(context.client));
 
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'create a poll for both in game and discord guild chat',
-				options,
-				cooldown: 1,
-			},
-			{
-				aliases: [],
-				args: 1,
-				usage: '<30s <= `duration` <= 10m> [`"question" "choice_1" "choice_2"` ...]',
-			},
-		);
+		super(context, {
+			aliases: [],
+			slash,
+			cooldown: 1,
+		}, {
+			aliases: [],
+			args: 1,
+			usage: '<30s <= `duration` <= 10m> [`"question" "choice_1" "choice_2"` ...]',
+		});
 
 		this.quoteChars = [ '\u{0022}', '\u{201C}', '\u{201D}' ];
 	}
@@ -149,21 +145,21 @@ export default class PollCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		this.deferReply(interaction, {
+	async runSlash(interaction) {
+		InteractionUtil.deferReply(interaction, {
 			ephemeral: true,
 		});
 
-		const res = await this.#run({
-			chatBridge: this.getHypixelGuild(interaction).chatBridge,
+		const result = await this.#run({
+			chatBridge: InteractionUtil.getHypixelGuild(interaction).chatBridge,
 			question: interaction.options.getString('question', true),
 			pollOptionNames: interaction.options._hoistedOptions.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value),
 			duration: interaction.options.getString('duration'),
 			ign: UserUtil.getPlayer(interaction.user)?.ign ?? interaction.member?.displayName ?? interaction.user.tag,
 		});
 
-		return await this.reply(interaction, {
-			content: res ?? 'poll complete',
+		return await InteractionUtil.reply(interaction, {
+			content: result ?? 'poll complete',
 			ephemeral: true,
 		});
 	}
@@ -172,7 +168,7 @@ export default class PollCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		const inputMatched = hypixelMessage.content
 			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
 			?.flatMap((x) => {
@@ -183,7 +179,7 @@ export default class PollCommand extends DualCommand {
 
 		if (!inputMatched || inputMatched.length < 2) return await hypixelMessage.reply(this.usageInfo);
 
-		const res = await this.#run({
+		const result = await this.#run({
 			chatBridge: hypixelMessage.chatBridge,
 			question: upperCaseFirstChar(inputMatched.shift()),
 			pollOptionNames: inputMatched,
@@ -191,6 +187,6 @@ export default class PollCommand extends DualCommand {
 			ign: hypixelMessage.author.ign,
 		});
 
-		if (res) return await hypixelMessage.author.send(res);
+		if (result) return await hypixelMessage.author.send(result);
 	}
 }

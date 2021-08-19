@@ -1,14 +1,17 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { oneLine } from 'common-tags';
 import ms from 'ms';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class PingCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'check API latency and WebSocket ping',
-			options: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('check API latency and WebSocket ping'),
 			cooldown: 0,
 		});
 	}
@@ -17,12 +20,15 @@ export default class PingCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		const sent = await this.reply(interaction, {
+	async runSlash(interaction) {
+		const sent = await InteractionUtil.reply(interaction, {
 			content: 'Pinging...',
 			fetchReply: true,
 		});
 
-		return await this.editReply(interaction, `Roundtrip latency: ${ms(sent.createdTimestamp - interaction.createdTimestamp, { long: true })} | Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}`);
+		return await InteractionUtil.editReply(interaction, oneLine`
+			Roundtrip latency: ${ms(sent.createdTimestamp - interaction.createdTimestamp, { long: true })} |
+			Average WebSocket Heartbeat: ${ms(Math.round(this.client.ws.ping), { long: true })}
+		`);
 	}
 }

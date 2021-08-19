@@ -1,13 +1,15 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class StopCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'stop the bot. It should restart immediatly',
-			options: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('stop the bot. It should restart immediatly'),
 			cooldown: 0,
 		});
 	}
@@ -16,9 +18,9 @@ export default class StopCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		try {
-			await this.reply(interaction, 'stopping the bot');
+			await InteractionUtil.reply(interaction, 'stopping the bot');
 		} catch (error) {
 			logger.error(error);
 		} finally {

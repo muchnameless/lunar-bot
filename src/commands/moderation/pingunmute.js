@@ -1,30 +1,30 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { requiredPlayerOption } from '../../structures/commands/commonOptions.js';
+// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import PingMute from './pingmute.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class PingUnmuteCommand extends PingMute {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'allow a guild member to @mention via the chat bridge',
-				options: [{
-					name: 'player',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | UUID | discord ID | @mention',
-					required: true,
-				}],
-				cooldown: 0,
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('allow a guild member to @mention via the chat bridge')
+				.addStringOption(requiredPlayerOption),
+			cooldown: 0,
+		});
 	}
 
 	/**
-	 * @param {import('../../structures/database/models/Player').Player} player
+	 * @param {?import('../../structures/database/models/Player').Player} player
+	 * @param {string} playerInput
 	 */
-	async _generateReply(player) {
+	async _generateReply(player, playerInput) {
+		if (!player) return `\`${playerInput}\` is not in the player db`;
+
+		if (player.hasDiscordPingPermission) return `\`${player}\` is not ping muted`;
+
 		try {
 			player.hasDiscordPingPermission = true;
 			await player.save();

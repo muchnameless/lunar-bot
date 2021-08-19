@@ -38,7 +38,7 @@ export class BridgeCommandCollection extends BaseCommandCollection {
 	 */
 	async help(hypixelMessage) {
 		try {
-			return await this.get('help').runInGame(hypixelMessage);
+			return await this.get('help').runMinecraft(hypixelMessage);
 		} catch (error) {
 			logger.error(`[CMD HANDLER]: An error occured while ${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}'`, error);
 			hypixelMessage.author.send(`an error occured while executing the \`help\` command:\n${error}`);

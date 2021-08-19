@@ -1,4 +1,4 @@
-import { Client, MessageEmbed } from 'discord.js';
+import { Client, MessageEmbed, Formatters } from 'discord.js';
 import { DatabaseManager } from './database/managers/DatabaseManager.js';
 import { LogHandler } from './LogHandler.js';
 import { CronJobManager } from './CronJobManager.js';
@@ -31,8 +31,6 @@ export class LunarClient extends Client {
 		this.commands = new SlashCommandCollection(this, new URL('../commands', import.meta.url));
 		this.events = new EventCollection(this, new URL('../events', import.meta.url));
 		this.imgur = new ImgurClient({ clientId: process.env.IMGUR_CLIENT_ID });
-
-		this._fetchAllGuildMembersCache = new Map();
 	}
 
 	get config() {
@@ -72,28 +70,6 @@ export class LunarClient extends Client {
 	get lgGuild() {
 		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'));
 		return lgGuild?.available ? lgGuild : logger.warn('discord guild is currently unavailable');
-	}
-
-	/**
-	 * fetches all guild members if the cache size is not equal to the guild's member count
-	 * @returns {Promise<import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').GuildMember>>}
-	 */
-	async fetchAllGuildMembers(guild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'))) {
-		if (!guild?.available) throw `the ${guild?.name ?? 'discord'} server is currently unavailable`;
-
-		if (guild.memberCount === guild.members.cache.size) return guild.members.cache;
-
-		const cached = this._fetchAllGuildMembersCache.get(guild.id);
-		if (cached) return cached;
-
-		const promise = guild.members.fetch();
-		this._fetchAllGuildMembersCache.set(guild.id, promise);
-
-		try {
-			return await promise;
-		} finally {
-			this._fetchAllGuildMembersCache.delete(guild.id);
-		}
 	}
 
 	/**
@@ -170,7 +146,7 @@ export class LunarClient extends Client {
 				return `${owner.tag} ${owner}`;
 			} catch (error) {
 				logger.error('[OWNER INFO]', error);
-				return `<@${this.ownerId}>`;
+				return Formatters.userMention(this.ownerId);
 			}
 		})();
 	}

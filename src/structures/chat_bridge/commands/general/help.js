@@ -26,7 +26,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 	 * execute the command
 	 * @param {import('../../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		// default help
 		if (!hypixelMessage.commandData.args.length) {
 			const reply = [

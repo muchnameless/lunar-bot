@@ -277,10 +277,10 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			// auto math, ignore 0-0, 4/5 (dungeon parties)
 			if (this.config.get('CHATBRIDGE_AUTO_MATH') && /^[\d.+*x\-/^ ()]+$/.test(hypixelMessage.content) && /[1-9]/.test(hypixelMessage.content) && !/\b[1-5] *\/ *5\b/.test(hypixelMessage.content)) {
 				try {
-					const { input, output, formattedOutput, warning } = this.client.commands.get('maths').calculate(hypixelMessage.content.replaceAll(' ', ''));
+					const { input, output, formattedOutput } = this.client.commands.get('maths').calculate(hypixelMessage.content.replaceAll(' ', ''));
 
 					// filter out stuff like +8 = 8, 1 7 = 17
-					if (output !== Number(hypixelMessage.content.replaceAll(' ', '')) && !warning) hypixelMessage.reply(`${input} = ${formattedOutput}`);
+					if (output !== Number(hypixelMessage.content.replaceAll(' ', ''))) hypixelMessage.reply(`${input} = ${formattedOutput}`);
 				} catch (error) {
 					logger.error(error);
 				}
@@ -386,7 +386,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		// execute command
 		try {
 			logger.info(`'${hypixelMessage.content}' was executed by ${hypixelMessage.author} in '${hypixelMessage.type}'`);
-			await command.runInGame(hypixelMessage);
+			await command.runMinecraft(hypixelMessage);
 		} catch (error) {
 			logger.error(`An error occured while ${hypixelMessage.author} tried to execute ${hypixelMessage.content} in '${hypixelMessage.type}'`, error);
 			hypixelMessage.author.send(`an error occured while executing the '${command.name}' command:\n${error}`);

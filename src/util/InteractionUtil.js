@@ -1,8 +1,11 @@
 import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } from 'discord.js';
 import { Y_EMOJI, X_EMOJI } from '../constants/emojiCharacters.js';
+import { GUILD_ID_ALL } from '../constants/database.js';
+import { validateDiscordId, validateMinecraftUuid } from '../functions/stringValidators.js';
 import { makeContent } from '../functions/util.js';
 import { ChannelUtil } from './ChannelUtil.js';
 import { MessageUtil } from './MessageUtil.js';
+import { UserUtil } from './UserUtil.js';
 import { logger } from '../functions/logger.js';
 
 
@@ -118,40 +121,44 @@ export class InteractionUtil extends null {
 			? { ephemeral: cached.useEphemeral, content: contentOrOptions }
 			: { ephemeral: cached.useEphemeral, ...contentOrOptions };
 
-		/**
-		 * allow split option for CommandInteraction#reply
-		 */
-		if (data.split || data.code) {
-			for (const content of makeContent(data.content ?? '', { split: data.split, code: data.code })) {
-				await this.reply(interaction, { ...data, content, split: false, code: false });
+		try {
+			/**
+			 * allow split option for CommandInteraction#reply
+			 */
+			if (data.split || data.code) {
+				for (const content of makeContent(data.content ?? '', { split: data.split, code: data.code })) {
+					await this.reply(interaction, { ...data, content, split: false, code: false });
+				}
+				return;
 			}
-			return;
+
+			if (cached.deferReplyPromise) await cached.deferReplyPromise;
+
+			if (interaction.deferred && !interaction.replied) {
+				// ephemeral defer
+				if (interaction.ephemeral) {
+					if (data.ephemeral) return await interaction.editReply(data);
+
+					// ephemeral defer and non-ephemeral followUp
+					await interaction.editReply('\u200b'); // ephemeral empty message
+					return await this.followUp(interaction, data);
+				}
+
+				// non-ephemeral defer
+				if (data.ephemeral) {
+					await interaction.deleteReply();
+					return await this.followUp(interaction, data);
+				}
+
+				return await interaction.editReply(data);
+			}
+
+			if (interaction.replied) return await this.followUp(interaction, data);
+
+			return await interaction.reply(data);
+		} catch (error) {
+			return logger.error(error);
 		}
-
-		if (cached.deferReplyPromise) await cached.deferReplyPromise;
-
-		if (interaction.deferred && !interaction.replied) {
-			// ephemeral defer
-			if (interaction.ephemeral) {
-				if (data.ephemeral) return await interaction.editReply(data);
-
-				// ephemeral defer and non-ephemeral followUp
-				await interaction.editReply('\u200b'); // ephemeral empty message
-				return await this.followUp(interaction, data);
-			}
-
-			// non-ephemeral defer
-			if (data.ephemeral) {
-				await interaction.deleteReply();
-				return await this.followUp(interaction, data);
-			}
-
-			return await interaction.editReply(data);
-		}
-
-		if (interaction.replied) return await this.followUp(interaction, data);
-
-		return await interaction.reply(data);
 	}
 
 	/**
@@ -160,10 +167,15 @@ export class InteractionUtil extends null {
 	 */
 	static async editReply(interaction, contentOrOptions) {
 		const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction);
-		if (deferReplyPromise) await deferReplyPromise;
-		if (deferUpdatePromise) await deferUpdatePromise;
 
-		return await interaction.editReply(contentOrOptions);
+		try {
+			if (deferReplyPromise) await deferReplyPromise;
+			if (deferUpdatePromise) await deferUpdatePromise;
+
+			return await interaction.editReply(contentOrOptions);
+		} catch (error) {
+			return logger.error(error);
+		}
 	}
 
 	/**
@@ -172,10 +184,15 @@ export class InteractionUtil extends null {
 	 */
 	static async followUp(interaction, contentOrOptions) {
 		const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction);
-		if (deferReplyPromise) await deferReplyPromise;
-		if (deferUpdatePromise) await deferUpdatePromise;
 
-		return await interaction.followUp(contentOrOptions);
+		try {
+			if (deferReplyPromise) await deferReplyPromise;
+			if (deferUpdatePromise) await deferUpdatePromise;
+
+			return await interaction.followUp(contentOrOptions);
+		} catch (error) {
+			return logger.error(error);
+		}
 	}
 
 	/**
@@ -195,11 +212,16 @@ export class InteractionUtil extends null {
 	 */
 	static async update(interaction, options) {
 		const { deferUpdatePromise } = this.CACHE.get(interaction);
-		if (deferUpdatePromise) await deferUpdatePromise;
 
-		if (interaction.deferred || interaction.replied) return interaction.editReply(options);
+		try {
+			if (deferUpdatePromise) await deferUpdatePromise;
 
-		return interaction.update(options);
+			if (interaction.deferred || interaction.replied) return await interaction.editReply(options);
+
+			return await interaction.update(options);
+		} catch (error) {
+			return logger.error(error);
+		}
 	}
 
 	/**
@@ -316,6 +338,60 @@ export class InteractionUtil extends null {
 	static async react(interaction, ...emojis) {
 		if (interaction.ephemeral) return null;
 
-		return MessageUtil.react(await interaction.fetchReply(), ...emojis);
+		try {
+			return await MessageUtil.react(await interaction.fetchReply(), ...emojis);
+		} catch (error) {
+			return logger.error(error);
+		}
+	}
+
+	/**
+	 * returns the player object, optional fallback to the interaction.user's player
+	 * @param {import('discord.js').CommandInteraction} interaction
+	 * @param {boolean} [fallbackToCurrentUser=false]
+	 * @returns {?import('../database/models/Player').Player}
+	 */
+	static getPlayer(interaction, fallbackToCurrentUser = false) {
+		if (!interaction.options._hoistedOptions.length) {
+			if (fallbackToCurrentUser) return UserUtil.getPlayer(interaction.user);
+			return null;
+		}
+
+		const INPUT = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.replace(/\W/g, '').toLowerCase();
+
+		if (!INPUT) {
+			if (fallbackToCurrentUser) return UserUtil.getPlayer(interaction.user);
+			return null;
+		}
+
+		if (validateDiscordId(INPUT)) return interaction.client.players.getById(INPUT);
+		if (validateMinecraftUuid(INPUT)) return interaction.client.players.get(INPUT);
+
+		return (this.checkForce(interaction)
+			? interaction.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
+			: interaction.client.players.getByIgn(INPUT))
+			?? null;
+	}
+
+	/**
+	 * returns the player object's IGN, optional fallback to interaction.user's player
+	 * @param {import('discord.js').CommandInteraction} interaction
+	 * @param {boolean} [fallbackToCurrentUser=false]
+	 * @returns {?string}
+	 */
+	static getIgn(interaction, fallbackToCurrentUser = false) {
+		if (this.checkForce(interaction)) return (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase();
+		return this.getPlayer(interaction, fallbackToCurrentUser)?.ign ?? null;
+	}
+
+	/**
+	 * returns a HypixelGuild instance
+	 * @param {import('discord.js').CommandInteraction} interaction
+	 * @returns {import('../database/models/HypixelGuild').HypixelGuild | GUILD_ID_ALL}
+	 */
+	static getHypixelGuild(interaction) {
+		const INPUT = interaction.options.getString('guild');
+		if (INPUT === GUILD_ID_ALL) return INPUT;
+		return interaction.client.hypixelGuilds.cache.get(INPUT) ?? UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? interaction.client.hypixelGuilds.mainGuild;
 	}
 }

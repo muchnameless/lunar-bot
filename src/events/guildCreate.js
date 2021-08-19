@@ -1,3 +1,4 @@
+import { GuildUtil } from '../util/GuildUtil.js';
 import { Event } from '../structures/events/Event.js';
 import { logger } from '../functions/logger.js';
 
@@ -20,7 +21,7 @@ export default class GuildCreateEvent extends Event {
 		if (guild.id !== this.config.get('DISCORD_GUILD_ID') || !this.client.options.fetchAllMembers) return;
 
 		try {
-			const members = await this.client.fetchAllGuildMembers(guild);
+			const members = await GuildUtil.fetchAllMembers(guild);
 			logger.info(`[GUILD CREATE]: fetched ${members.size} members`);
 		} catch (error) {
 			logger.error('[GUILD CREATE]', error);

@@ -1,25 +1,23 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import { oneLine, commaListsOr } from 'common-tags';
 import { UserUtil } from '../../util/UserUtil.js';
 import { hypixel } from '../../api/hypixel.js';
 import { mojang } from '../../api/mojang.js';
+import { requiredIgnOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class VerifyCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'link your discord account to your minecraft account (guild members only)',
-			options: [{
-				name: 'ign',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | UUID',
-				required: true,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('link your discord account to your minecraft account (guild members only)')
+				.addStringOption(requiredIgnOption),
 			cooldown: 0,
 		});
 	}
@@ -28,13 +26,14 @@ export default class VerifyCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		this.deferReply(interaction);
+	async runSlash(interaction) {
+		InteractionUtil.deferReply(interaction);
 
 		const IGN = interaction.options.getString('ign', true);
 		/** @type {import('../../structures/database/models/Player').Player} */
 		const playerLinkedToId = UserUtil.getPlayer(interaction.user);
 
+		/** @type {import('../../structures/database/models/Player').Player} */
 		let player = this.client.players.getByIgn(IGN)
 			?? await this.client.players.fetch({
 				[Op.or]: [{
@@ -45,7 +44,7 @@ export default class VerifyCommand extends SlashCommand {
 			});
 
 		// already linked to this discord user
-		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return await this.reply(interaction, 'you are already linked with this discord account');
+		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return await InteractionUtil.reply(interaction, 'you are already linked with this discord account');
 
 		let uuid;
 		let ign;
@@ -57,28 +56,30 @@ export default class VerifyCommand extends SlashCommand {
 			({ _id: guildId } = await hypixel.guild.player(uuid));
 
 			// not in one of the guilds that the bot manages
-			if (!this.client.hypixelGuilds.cache.has(guildId)) return this.reply(interaction, commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
+			if (!this.client.hypixelGuilds.cache.has(guildId)) {
+				return InteractionUtil.reply(interaction, commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
+			}
 
 			hypixelPlayer = await hypixel.player.uuid(uuid);
 		} catch (error) {
 			logger.error(error);
-			return await this.reply(interaction, `${error}`);
+			return await InteractionUtil.reply(interaction, `${error}`);
 		}
 
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 
 		// no linked discord tag
-		if (!LINKED_DISCORD_TAG) return await this.reply(interaction, `no linked discord tag for \`${ign}\` on hypixel`);
+		if (!LINKED_DISCORD_TAG) return await InteractionUtil.reply(interaction, `no linked discord tag for \`${ign}\` on hypixel`);
 
 		// linked discord tag doesn't match author's tag
-		if (LINKED_DISCORD_TAG !== interaction.user.tag) return await this.reply(interaction, oneLine`
+		if (LINKED_DISCORD_TAG !== interaction.user.tag) return await InteractionUtil.reply(interaction, oneLine`
 			the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\`.
 			Keep in mind that discord tags are case sensitive
 		`);
 
 		// already linked to another discord user
 		if (playerLinkedToId) {
-			await this.awaitConfirmation(interaction, `your discord account is already linked to \`${playerLinkedToId}\`. Overwrite this?`);
+			await InteractionUtil.awaitConfirmation(interaction, `your discord account is already linked to \`${playerLinkedToId}\`. Overwrite this?`);
 
 			await playerLinkedToId.unlink(`linked account switched to ${interaction.user.tag}`);
 		}
@@ -94,17 +95,17 @@ export default class VerifyCommand extends SlashCommand {
 			});
 		} catch (error) {
 			logger.error('[VERIFY]: database', error);
-			return await this.reply(interaction, `an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
+			return await InteractionUtil.reply(interaction, `an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
 		}
 
 		player.guildId = guildId;
 
 		const discordMember = interaction.member
-			?? await this.client.lgGuild?.members.fetch(interaction.user.id).catch(error => logger.error('[VERIFY]: guild member fetch', error))
+			?? await this.client.lgGuild?.members.fetch(interaction.user).catch(error => logger.error('[VERIFY]: guild member fetch', error))
 			?? null;
 
 		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
 
-		return await this.reply(interaction, `successfully linked your discord account to \`${ign}\``);
+		return await InteractionUtil.reply(interaction, `successfully linked your discord account to \`${ign}\``);
 	}
 }

@@ -1,24 +1,22 @@
-import { MessageAttachment, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { MessageAttachment } from 'discord.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { oneLine } from 'common-tags';
 import { upperCaseFirstChar } from '../../functions/util.js';
+import { optionalPlayerOption, xpTypeOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class TrackCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'stats graph from the last 30 days',
-			options: [{
-				name: 'player',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | UUID | discord ID | @mention',
-				required: false,
-			},
-			SlashCommand.XP_TYPE_OPTION,
-			],
+			slash: new SlashCommandBuilder()
+				.setDescription('stats graph from the last 30 days')
+				.addStringOption(optionalPlayerOption)
+				.addStringOption(xpTypeOption),
 			cooldown: 1,
 		});
 	}
@@ -27,12 +25,12 @@ export default class TrackCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		const type = interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION');
-		const player = this.getPlayer(interaction, true);
+		const player = InteractionUtil.getPlayer(interaction, true);
 
 		if (!player) {
-			return await this.reply(interaction, oneLine`${interaction.options.get('player')
+			return await InteractionUtil.reply(interaction, oneLine`${interaction.options.get('player')
 				? `\`${interaction.options.getString('player')}\` is`
 				: 'you are'
 			} not in the player db`);
@@ -128,7 +126,7 @@ export default class TrackCommand extends SlashCommand {
 			},
 		});
 
-		return await this.reply(interaction, {
+		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)

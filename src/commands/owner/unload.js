@@ -1,44 +1,39 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class UnloadCommand extends DualCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'unload a command',
-				options: [{
-					name: 'command',
-					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-					description: 'unload a command',
-					options: [{
-						name: 'name',
-						type: Constants.ApplicationCommandOptionTypes.STRING,
-						description: 'command name',
-						required: true,
-					}],
-				}, {
-					name: 'event',
-					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-					description: 'unload an event',
-					options: [{
-						name: 'name',
-						type: Constants.ApplicationCommandOptionTypes.STRING,
-						description: 'event name',
-						required: true,
-					}],
-				}],
-				cooldown: 0,
-			},
-			{
-				aliases: [],
-				args: true,
-				usage: '[`command` [command `name`]|`event` [event `name`]]',
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('unload a command or an event')
+				.addSubcommand(subcommand => subcommand
+					.setName('command')
+					.setDescription('unload a command')
+					.addStringOption(option => option
+						.setName('name')
+						.setDescription('command name')
+						.setRequired(true),
+					),
+				)
+				.addSubcommand(subcommand => subcommand
+					.setName('event')
+					.setDescription('unload an event')
+					.addStringOption(option => option
+						.setName('name')
+						.setDescription('event name')
+						.setRequired(true),
+					),
+				),
+			cooldown: 0,
+		}, {
+			aliases: [],
+			args: true,
+			usage: '[`command` [command `name`]|`event` [event `name`]]',
+		});
 	}
 
 	/**
@@ -79,15 +74,15 @@ export default class UnloadCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		return await this.reply(interaction, await this.#run(interaction.options.getSubcommand(), interaction.options.getString('name', true)));
+	async runSlash(interaction) {
+		return await InteractionUtil.reply(interaction, await this.#run(interaction.options.getSubcommand(), interaction.options.getString('name', true)));
 	}
 
 	/**
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		return await hypixelMessage.reply(await this.#run(...hypixelMessage.commandData.args.map(arg => arg.toLowerCase())));
 	}
 }

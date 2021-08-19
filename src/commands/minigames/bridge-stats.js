@@ -1,30 +1,24 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
+import { optionalIgnOption } from '../../structures/commands/commonOptions.js';
+// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import BaseStatsCommand from './~base-stats-command.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class BridgeStatsCommand extends BaseStatsCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'shows a player\'s Bridge stats',
-				options: [{
-					name: 'ign',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'IGN | UUID',
-					required: false,
-				}],
-				cooldown: 1,
-			},
-			{
-				aliases: [ 'bridge' ],
-				args: false,
-				usage: '<`IGN`>',
-			},
-		);
+	constructor(context) {
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('shows a player\'s Bridge stats')
+				.addStringOption(optionalIgnOption),
+			cooldown: 1,
+		}, {
+			aliases: [ 'bridge' ],
+			args: false,
+			usage: '<`IGN`>',
+		});
 	}
 
 	/**
@@ -36,7 +30,7 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 	}
 
 	/**
-	 * @param {StatsCommand.FetchedData} param0
+	 * @param {import('./~base-stats-command').FetchedData} param0
 	 */
 	_generateReply({ ign, playerData }) {
 		if (!playerData?.stats?.Duels) return `\`${ign}\` has no Bridge stats`;

@@ -1,18 +1,20 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters, SnowflakeUtil, Util, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants/discord.js';
 import { trim, escapeIgn } from '../../functions/util.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class DebugCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'shows general information about the bot',
-			options: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('shows general information about the bot'),
 			cooldown: 0,
 		});
 	}
@@ -21,8 +23,8 @@ export default class DebugCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		return await this.reply(interaction, {
+	async runSlash(interaction) {
+		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.addFields({

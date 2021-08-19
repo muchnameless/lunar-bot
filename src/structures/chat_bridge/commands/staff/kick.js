@@ -18,7 +18,7 @@ export default class KickBridgeCommand extends BridgeCommand {
 	 * execute the command
 	 * @param {import('../../HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		const targetInput = hypixelMessage.commandData.args.shift();
 		const { content } = await this.client.commands.get('guild')?.runKick({
 			target: this.client.players.getByIgn(targetInput) ?? targetInput,

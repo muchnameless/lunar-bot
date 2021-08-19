@@ -67,7 +67,7 @@ export default class InteractionCreateEvent extends Event {
 			setTimeout(() => command.timestamps.delete(interaction.user.id), COOLDOWN_TIME);
 		}
 
-		return command.run(interaction);
+		return command.runSlash(interaction);
 	}
 
 	/**

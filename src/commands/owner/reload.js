@@ -1,102 +1,78 @@
-import { Formatters, Constants } from 'discord.js';
+import { SlashCommandBooleanOption, SlashCommandBuilder } from '@discordjs/builders';
+import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { basename } from 'path';
 import { getAllJsFiles } from '../../functions/files.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 import { logger } from '../../functions/logger.js';
 
 
 export default class ReloadCommand extends DualCommand {
-	constructor(data) {
-		super(
-			data,
-			{
-				aliases: [],
-				description: 'hot reload certain parts of the bot',
-				options: [{
-					name: 'command',
-					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-					description: 'reload a command',
-					options: [{
-						name: 'name',
-						type: Constants.ApplicationCommandOptionTypes.STRING,
-						description: 'command name',
-						required: true,
-					}, {
-						name: 'reload',
-						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-						description: 'wether to reimport the file',
-						required: false,
-					}],
-				}, {
-					name: 'commands',
-					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-					description: 'reload all commands',
-					options: [{
-						name: 'reload',
-						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-						description: 'wether to reimport the files',
-						required: false,
-					}],
-				}, {
-					name: 'event',
-					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-					description: 'reload an event',
-					options: [{
-						name: 'name',
-						type: Constants.ApplicationCommandOptionTypes.STRING,
-						description: 'event name',
-						required: true,
-					}, {
-						name: 'reload',
-						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-						description: 'wether to reimport the file',
-						required: false,
-					}, {
-						name: 'force',
-						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-						description: 'wether to load disabled events',
-						required: false,
-					}],
-				}, {
-					name: 'events',
-					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-					description: 'reload all events',
-					options: [{
-						name: 'reload',
-						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-						description: 'wether to reimport the files',
-						required: true,
-					}, {
-						name: 'force',
-						type: Constants.ApplicationCommandOptionTypes.BOOLEAN,
-						description: 'wether to load disabled events',
-						required: false,
-					}],
-				}, {
-					name: 'database',
-					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-					description: 'reload the database cache',
-					options: [],
-				}, {
-					name: 'cooldowns',
-					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-					description: 'reset all cooldowns',
-					options: [],
-				}, {
-					name: 'filter',
-					type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-					description: 'reload the blocked words filter',
-					options: [],
-				}],
-				cooldown: 0,
-			},
-			{
-				aliases: [],
-				args: true,
-				usage: '[`command` [command `name`]|`commands`|`event` [event `name`]|`events`|`database`|`cooldowns`]',
-			},
-		);
+	constructor(context) {
+		const reloadOption = new SlashCommandBooleanOption()
+			.setName('reload')
+			.setDescription('wether to reimport the file')
+			.setRequired(false);
+		const forceOption = new SlashCommandBooleanOption()
+			.setName('force')
+			.setDescription('wether to load disabled events')
+			.setRequired(false);
+
+		super(context, {
+			aliases: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('hot reload certain parts of the bot')
+				.addSubcommand(subcommand => subcommand
+					.setName('command')
+					.setDescription('reload a command')
+					.addStringOption(option => option
+						.setName('name')
+						.setDescription('command name')
+						.setRequired(true),
+					)
+					.addBooleanOption(reloadOption),
+				)
+				.addSubcommand(subcommand => subcommand
+					.setName('commands')
+					.setDescription('reload all commands')
+					.addBooleanOption(reloadOption),
+				)
+				.addSubcommand(subcommand => subcommand
+					.setName('event')
+					.setDescription('reload an event')
+					.addStringOption(option => option
+						.setName('name')
+						.setDescription('event name')
+						.setRequired(true),
+					)
+					.addBooleanOption(reloadOption)
+					.addBooleanOption(forceOption),
+				)
+				.addSubcommand(subcommand => subcommand
+					.setName('events')
+					.setDescription('reload all events')
+					.addBooleanOption(reloadOption)
+					.addBooleanOption(forceOption),
+				)
+				.addSubcommand(subcommand => subcommand
+					.setName('database')
+					.setDescription('reload the database cache'),
+				)
+				.addSubcommand(subcommand => subcommand
+					.setName('cooldowns')
+					.setDescription('reset all cooldowns'),
+				)
+				.addSubcommand(subcommand => subcommand
+					.setName('filter')
+					.setDescription('reload the blocked words filter'),
+				),
+			cooldown: 0,
+		}, {
+			aliases: [],
+			args: true,
+			usage: '[`command` [command `name`]|`commands`|`event` [event `name`]|`events`|`database`|`cooldowns`]',
+		});
 	}
 
 	/**
@@ -258,8 +234,8 @@ export default class ReloadCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		return await this.reply(interaction, await this.#run(interaction.options.getSubcommand(),
+	async runSlash(interaction) {
+		return await InteractionUtil.reply(interaction, await this.#run(interaction.options.getSubcommand(),
 			interaction.options.getString('name'),
 			interaction.options.getBoolean('reload') ?? false,
 			interaction.options.getBoolean('force') ?? false,
@@ -270,7 +246,7 @@ export default class ReloadCommand extends DualCommand {
 	 * execute the command
 	 * @param {import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} hypixelMessage
 	 */
-	async runInGame(hypixelMessage) {
+	async runMinecraft(hypixelMessage) {
 		return await hypixelMessage.reply(await this.#run(...hypixelMessage.commandData.args));
 	}
 }

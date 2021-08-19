@@ -1,24 +1,23 @@
-import { Formatters, Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants/discord.js';
 import { trim } from '../../functions/util.js';
 import { hypixel } from '../../api/hypixel.js';
 import { mojang } from '../../api/mojang.js';
+import { requiredIgnOption } from '../../structures/commands/commonOptions.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class FriendCheckCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'checks which friends of the player are in the guild',
-			options: [{
-				name: 'ign',
-				type: Constants.ApplicationCommandOptionTypes.STRING,
-				description: 'IGN | UUID',
-				required: true,
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('checks which friends of the player are in the guild')
+				.addStringOption(requiredIgnOption),
 			cooldown: 0,
 		});
 	}
@@ -27,13 +26,13 @@ export default class FriendCheckCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
-		this.deferReply(interaction);
+	async runSlash(interaction) {
+		InteractionUtil.deferReply(interaction);
 
 		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 		const friends = (await hypixel.friends.uuid(uuid)).map(x => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender));
 
-		return await this.reply(interaction, {
+		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`${IGN}'s friends in the guild`)

@@ -1,15 +1,18 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters, Util } from 'discord.js';
 import { escapeIgn } from '../../functions/util.js';
+import { GuildUtil } from '../../util/GuildUtil.js';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class LinkIssuesCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'list player db and discord role discrepancies',
-			options: [],
+			slash: new SlashCommandBuilder()
+				.setDescription('list player db and discord role discrepancies'),
 			cooldown: 0,
 		});
 	}
@@ -18,14 +21,14 @@ export default class LinkIssuesCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		// discord members with wrong roles
 		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID');
 		const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 		const missingVerifiedRole = [];
 		const guildRoleWithoutDbEntry = [];
 
-		for (const [ DISCORD_ID, member ] of await this.client.fetchAllGuildMembers()) {
+		for (const [ DISCORD_ID, member ] of await GuildUtil.fetchAllMembers(this.client.lgGuild)) {
 			if (this.client.players.cache.some(({ discordId }) => discordId === DISCORD_ID)) {
 				if (!member.roles.cache.has(VERIFIED_ROLE_ID)) missingVerifiedRole.push(member);
 				continue;
@@ -132,7 +135,7 @@ export default class LinkIssuesCommand extends SlashCommand {
 
 		embed.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);
 
-		return await this.reply(interaction, {
+		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				embed,
 			],

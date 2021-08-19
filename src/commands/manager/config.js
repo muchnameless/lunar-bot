@@ -1,55 +1,53 @@
-import { Constants } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 // import { logger } from '../../functions/logger.js';
 
 
 export default class ConfigCommand extends SlashCommand {
-	constructor(data) {
-		super(data, {
+	constructor(context) {
+		super(context, {
 			aliases: [],
-			description: 'show and edit the bot\'s config',
-			options: [{
-				name: 'edit',
-				type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-				description: 'edit the config key with the provided value',
-				options: [{
-					name: 'key',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'new / existing config key',
-					required: true,
-				}, {
-					name: 'value',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'new config value',
-					required: true,
-				}, {
-					name: 'type',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'new config value type',
-					required: false,
-					choices: [ 'string', 'number', 'boolean', 'array' ].map(x => ({ name: x, value: x })),
-				}],
-			}, {
-				name: 'delete',
-				type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-				description: 'delete the config key',
-				options: [{
-					name: 'key',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'new / existing config key',
-					required: true,
-				}],
-			}, {
-				name: 'search',
-				type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-				description: 'searches the config keys and values',
-				options: [{
-					name: 'query',
-					type: Constants.ApplicationCommandOptionTypes.STRING,
-					description: 'search query',
-					required: false,
-				}],
-			}],
+			slash: new SlashCommandBuilder()
+				.setDescription('show and edit the bot\'s config')
+				.addSubcommand(subcommand => subcommand
+					.setName('edit')
+					.setDescription('edit the config key with the provided value')
+					.addStringOption(option => option
+						.setName('key')
+						.setDescription('new / existing config key')
+						.setRequired(true),
+					)
+					.addStringOption(option => option
+						.setName('value')
+						.setDescription('new config value')
+						.setRequired(true),
+					)
+					.addStringOption(option => option
+						.setName('type')
+						.setDescription('new config value type')
+						.setRequired(false)
+						.addChoices([ 'string', 'number', 'boolean', 'array' ].map(x => [ x, x ])),
+					),
+				)
+				.addSubcommand(subcommand => subcommand
+					.setName('delete')
+					.setDescription('delete the config key')
+					.addStringOption(option => option
+						.setName('key')
+						.setDescription('existing config key')
+						.setRequired(true),
+					),
+				)
+				.addSubcommand(subcommand => subcommand
+					.setName('search')
+					.setDescription('searches the config keys and values')
+					.addStringOption(option => option
+						.setName('query')
+						.setDescription('search query')
+						.setRequired(false),
+					),
+				),
 			cooldown: 0,
 		});
 	}
@@ -71,7 +69,7 @@ export default class ConfigCommand extends SlashCommand {
 	 * execute the command
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
-	async run(interaction) {
+	async runSlash(interaction) {
 		switch (interaction.options.getSubcommand()) {
 			case 'edit': {
 				const KEY = interaction.options.getString('key', true)
@@ -97,12 +95,12 @@ export default class ConfigCommand extends SlashCommand {
 				}
 
 				if (typeof newValue !== OLD_TYPE) {
-					await this.awaitConfirmation(interaction, `type change from ${OLD_VALUE} (${OLD_TYPE}) to ${newValue} (${typeof newValue}). Confirm?`);
+					await InteractionUtil.awaitConfirmation(interaction, `type change from ${OLD_VALUE} (${OLD_TYPE}) to ${newValue} (${typeof newValue}). Confirm?`);
 				}
 
 				const { key, parsedValue } = await this.config.set(KEY, newValue);
 
-				return await this.reply(interaction, {
+				return await InteractionUtil.reply(interaction, {
 					content: `${key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${parsedValue}'`,
 					code: 'apache',
 				});
@@ -114,16 +112,16 @@ export default class ConfigCommand extends SlashCommand {
 					.replace(/ +/g, '_');
 				const VALUE = this.config.get(KEY);
 
-				if (VALUE === null) return await this.reply(interaction, `\`${KEY}\` is not in the config`);
+				if (VALUE === null) return await InteractionUtil.reply(interaction, `\`${KEY}\` is not in the config`);
 
 				await this.config.remove(KEY);
-				return await this.reply(interaction, `removed \`${KEY}\`: \`${VALUE}\``);
+				return await InteractionUtil.reply(interaction, `removed \`${KEY}\`: \`${VALUE}\``);
 			}
 
 			case 'search': {
 				const query = interaction.options.getString('query')?.replace(/ +/g, '_');
 
-				if (!query) return await this.reply(interaction, {
+				if (!query) return await InteractionUtil.reply(interaction, {
 					content: this.#listEntries(this.config.cache),
 					code: 'apache',
 					split: { char: '\n' },
@@ -131,7 +129,7 @@ export default class ConfigCommand extends SlashCommand {
 
 				const queryRegex = new RegExp(query, 'i');
 
-				return await this.reply(interaction, {
+				return await InteractionUtil.reply(interaction, {
 					content: this.#listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))),
 					code: 'apache',
 					split: { char: '\n' },
