@@ -1,14 +1,13 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants/discord.js';
-import { trim } from '../../functions/util.js';
+import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants/index.js';
 import { hypixel } from '../../api/hypixel.js';
 import { mojang } from '../../api/mojang.js';
 import { requiredIgnOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { trim } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class FriendCheckCommand extends SlashCommand {

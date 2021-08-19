@@ -1,5 +1,6 @@
 import { BaseEvent } from './BaseEvent.js';
 
+
 export class Event extends BaseEvent {
 	/**
 	 * client

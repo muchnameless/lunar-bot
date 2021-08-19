@@ -1,6 +1,6 @@
 import './pgEnum-fix.js'; // to allow `sync --alter` with pg enums set
 import { sequelize } from './index.js';
-import { logger } from '../../functions/logger.js';
+import { logger } from '../../functions/index.js';
 
 sequelize.options.logging = x => logger.debug(x);
 

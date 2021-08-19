@@ -2,11 +2,9 @@ import { config } from 'dotenv';
 import { fileURLToPath } from 'url';
 config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 import { Client, Intents, Permissions, LimitedCollection, SnowflakeUtil, Options, Constants } from 'discord.js';
-import { escapeRegex } from './functions/util.js';
-import { ChannelUtil } from './util/ChannelUtil.js';
-import { MessageUtil } from './util/MessageUtil.js';
+import { ChannelUtil, MessageUtil } from './util/index.js';
 import { db } from './structures/database/index.js';
-import { logger } from './functions/logger.js';
+import { escapeRegex, logger } from './functions/index.js';
 
 
 // catch rejections

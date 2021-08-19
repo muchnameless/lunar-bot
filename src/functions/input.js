@@ -1,5 +1,5 @@
 import { Interaction } from 'discord.js';
-import { UserUtil } from '../util/UserUtil.js';
+import { UserUtil } from '../util/index.js';
 import { mojang } from '../api/mojang.js';
 
 

@@ -1,6 +1,6 @@
 import ms from 'ms';
+import { logger } from '../functions/index.js';
 import { Event } from '../structures/events/Event.js';
-import { logger } from '../functions/logger.js';
 
 
 export default class RateLimitEvent extends Event {

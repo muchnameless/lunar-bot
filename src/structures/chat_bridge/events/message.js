@@ -1,12 +1,19 @@
 import { commaListsOr } from 'common-tags';
 import ms from 'ms';
-import { IGN_DEFAULT, demoteSuccess, kickSuccess, muteSuccess, promoteSuccess, unmuteSuccess } from '../constants/commandResponses.js';
-import { messageTypes, invisibleCharacters } from '../constants/chatBridge.js';
-import { STOP } from '../../../constants/emojiCharacters.js';
-import { stringToMS } from '../../../functions/util.js';
-import { MessageUtil } from '../../../util/MessageUtil.js';
+import {
+	demoteSuccess,
+	IGN_DEFAULT,
+	kickSuccess,
+	INVISIBLE_CHARACTERS,
+	MESSAGE_TYPES,
+	muteSuccess,
+	promoteSuccess,
+	unmuteSuccess,
+} from '../constants/index.js';
+import { STOP_EMOJI } from '../../../constants/index.js';
+import { MessageUtil } from '../../../util/index.js';
+import { logger, stringToMS } from '../../../functions/index.js';
 import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
-import { logger } from '../../../functions/logger.js';
 
 
 export default class MessageChatBridgeEvent extends ChatBridgeEvent {
@@ -34,7 +41,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (hypixelMessage.content.startsWith('We blocked your comment ')) {
 			// react to latest message from 'sender' with that content
-			const blockedMatched = hypixelMessage.rawContent.match(new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_DEFAULT}): )?(?<blockedContent>.+) [${invisibleCharacters.join('')}]*" as it is breaking our rules because it`, 'su'));
+			const blockedMatched = hypixelMessage.rawContent.match(new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_DEFAULT}): )?(?<blockedContent>.+) [${INVISIBLE_CHARACTERS.join('')}]*" as it is breaking our rules because it`, 'su'));
 
 			if (blockedMatched) {
 				const { groups: { sender, blockedContent } } = blockedMatched;
@@ -47,7 +54,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 							.filter(({ content, author: { id } }) => (senderDiscordId ? id === senderDiscordId : true) && this.chatBridge.minecraft.parseContent(content).includes(blockedContent))
 							.sort(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
 							.first(),
-						STOP,
+						STOP_EMOJI,
 					);
 				}
 			}
@@ -292,7 +299,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				}
 			}
 
-			if (hypixelMessage.type !== messageTypes.WHISPER) return; // no prefix and no whisper
+			if (hypixelMessage.type !== MESSAGE_TYPES.WHISPER) return; // no prefix and no whisper
 		}
 
 		// no command, only ping or prefix
@@ -314,7 +321,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (!command) return logger.info(`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' which is not a valid command`);
 
 		// server only command in DMs
-		if (command.guildOnly && hypixelMessage.type !== messageTypes.GUILD) {
+		if (command.guildOnly && hypixelMessage.type !== MESSAGE_TYPES.GUILD) {
 			logger.info(`${hypixelMessage.author.tag} tried to execute '${hypixelMessage.content}' in whispers which is a guild-chat-only command`);
 			return hypixelMessage.author.send(`the '${command.name}' command can only be executed in guild chat`);
 		}
@@ -405,8 +412,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (!hypixelMessage.rawContent.length) return;
 
 		switch (hypixelMessage.type) {
-			case messageTypes.GUILD:
-			case messageTypes.OFFICER: {
+			case MESSAGE_TYPES.GUILD:
+			case MESSAGE_TYPES.OFFICER: {
 				if (!this.chatBridge.enabled || hypixelMessage.me) return;
 
 				hypixelMessage.forwardToDiscord();
@@ -414,8 +421,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				return this.#handleCommandMessage(hypixelMessage);
 			}
 
-			case messageTypes.PARTY:
-			case messageTypes.WHISPER: {
+			case MESSAGE_TYPES.PARTY:
+			case MESSAGE_TYPES.WHISPER: {
 				if (!this.chatBridge.enabled || hypixelMessage.me) return;
 				if (hypixelMessage.author.player?.guildId !== this.chatBridge.hypixelGuild.guildId) return logger.info(`[MESSAGE]: ignored message from '${hypixelMessage.author}': ${hypixelMessage.content}`); // ignore messages from non guild players
 

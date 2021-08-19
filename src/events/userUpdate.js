@@ -1,6 +1,5 @@
-import { UserUtil } from '../util/UserUtil.js';
+import { UserUtil } from '../util/index.js';
 import { Event } from '../structures/events/Event.js';
-// import { logger } from '../functions/logger.js';
 
 
 export default class UserUpdateEvent extends Event {

@@ -1,14 +1,27 @@
 import { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Formatters, Constants } from 'discord.js';
 import { stripIndent, oneLine } from 'common-tags';
-import { DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, RELOAD_EMOJI, Y_EMOJI_ALT } from '../constants/emojiCharacters.js';
-import { offsetFlags, XP_OFFSETS_TIME, XP_OFFSETS_SHORT, XP_OFFSETS_CONVERTER, GUILD_ID_ALL } from '../constants/database.js';
-import { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } from '../constants/skyblock.js';
-import { LB_KEY } from '../constants/redis.js';
-import { upperCaseFirstChar } from './util.js';
-import { UserUtil } from '../util/UserUtil.js';
-import { InteractionUtil } from '../util/InteractionUtil.js';
+import {
+	COSMETIC_SKILLS,
+	DOUBLE_LEFT_EMOJI,
+	DOUBLE_RIGHT_EMOJI,
+	DUNGEON_TYPES_AND_CLASSES,
+	GUILD_ID_ALL,
+	LB_KEY,
+	LEFT_EMOJI,
+	OFFSET_FLAGS,
+	RELOAD_EMOJI,
+	RIGHT_EMOJI,
+	SKILLS,
+	SLAYERS,
+	XP_OFFSETS_CONVERTER,
+	XP_OFFSETS_SHORT,
+	XP_OFFSETS_TIME,
+	Y_EMOJI_ALT,
+} from '../constants/index.js';
+import { upperCaseFirstChar } from './index.js';
+import { InteractionUtil, UserUtil } from '../util/index.js';
 import { cache } from '../api/cache.js';
-// import { logger } from './logger.js';
+
 
 /**
  * @typedef {object} LeaderboardData
@@ -107,7 +120,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 								.join(' ')}`,
 						)
 						.addOptions(
-							[ 'weight', { label: 'Skill Average', value: 'skill-average' }, ...skills, ...cosmeticSkills, 'slayer', ...slayers, ...dungeonTypes, ...dungeonClasses, 'guild' ]
+							[ 'weight', { label: 'Skill Average', value: 'skill-average' }, ...SKILLS, ...COSMETIC_SKILLS, 'slayer', ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES, 'guild' ]
 								.map(x => (typeof x !== 'object' ? ({ label: upperCaseFirstChar(x), value: x }) : x)),
 						),
 				),
@@ -158,7 +171,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
  */
 export function getDefaultOffset(config) {
 	return (config.get('COMPETITION_RUNNING') || (Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1_000)
-		? offsetFlags.COMPETITION_START
+		? OFFSET_FLAGS.COMPETITION_START
 		: config.get('DEFAULT_XP_OFFSET'));
 }
 
@@ -419,10 +432,10 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 	const { config } = client;
 	const COMPETITION_RUNNING = config.get('COMPETITION_RUNNING');
 	const COMPETITION_END_TIME = config.get('COMPETITION_END_TIME');
-	const IS_COMPETITION_LB = offset === offsetFlags.COMPETITION_START;
+	const IS_COMPETITION_LB = offset === OFFSET_FLAGS.COMPETITION_START;
 	const SHOULD_USE_COMPETITION_END = !COMPETITION_RUNNING && IS_COMPETITION_LB;
 	const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END
-		? offsetFlags.COMPETITION_END
+		? OFFSET_FLAGS.COMPETITION_END
 		: '';
 	/** @type {import('../../structures/database/models/Player').Player[]} */
 	const playerDataRaw = hypixelGuild !== GUILD_ID_ALL

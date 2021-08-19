@@ -3,22 +3,47 @@ import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
-import { XP_TYPES, XP_OFFSETS, UNKNOWN_IGN, GUILD_ID_ERROR, GUILD_ID_BRIDGER, offsetFlags } from '../../../constants/database.js';
-import { slayerXp, skills, cosmeticSkills, skillsAchievements, skillXpTotal, slayers, dungeonTypes, dungeonClasses, dungeonTypesAndClasses } from '../../../constants/skyblock.js';
-import { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } from '../../../constants/roles.js';
-import { NICKNAME_MAX_CHARS } from '../../../constants/discord.js';
-import { escapeIgn, trim } from '../../../functions/util.js';
-import { getSkillLevel, getSenitherWeight, getSenitherSkillWeight, getSenitherSlayerWeight, getSenitherDungeonWeight } from '../../../functions/skyblock.js';
-import { validateNumber, validateDiscordId } from '../../../functions/stringValidators.js';
-import { mutedCheck } from '../../../functions/database.js';
+import {
+	CATACOMBS_ROLES,
+	COSMETIC_SKILLS,
+	DELIMITER_ROLES,
+	DUNGEON_CLASSES,
+	DUNGEON_TYPES,
+	DUNGEON_TYPES_AND_CLASSES,
+	GUILD_ID_BRIDGER,
+	GUILD_ID_ERROR,
+	NICKNAME_MAX_CHARS,
+	OFFSET_FLAGS,
+	SKILL_ACHIEVEMENTS,
+	SKILL_AVERAGE_ROLES,
+	SKILL_ROLES,
+	SKILL_XP_TOTAL,
+	SKILLS,
+	SLAYER_ROLES,
+	SLAYER_TOTAL_ROLES,
+	SLAYER_XP,
+	SLAYERS,
+	UNKNOWN_IGN,
+	XP_OFFSETS,
+	XP_TYPES,
+} from '../../../constants/index.js';
 import { HypixelGuildManager } from '../managers/HypixelGuildManager.js';
-import { GuildUtil } from '../../../util/GuildUtil.js';
-import { GuildMemberUtil } from '../../../util/GuildMemberUtil.js';
-import { MessageEmbedUtil } from '../../../util/MessageEmbedUtil.js';
-import { UserUtil } from '../../../util/UserUtil.js';
+import { GuildMemberUtil, GuildUtil, MessageEmbedUtil, UserUtil } from '../../../util/index.js';
 import { hypixel } from '../../../api/hypixel.js';
 import { mojang } from '../../../api/mojang.js';
-import { logger } from '../../../functions/logger.js';
+import {
+	escapeIgn,
+	getSenitherDungeonWeight,
+	getSenitherSkillWeight,
+	getSenitherSlayerWeight,
+	getSenitherWeight,
+	getSkillLevel,
+	logger,
+	mutedCheck,
+	trim,
+	validateDiscordId,
+	validateNumber,
+} from '../../../functions/index.js';
 
 
 export class Player extends Model {
@@ -511,18 +536,18 @@ export class Player extends Model {
 			this.xpLastUpdatedAt = Date.now();
 
 			/**
-			 * skills
+			 * SKILLS
 			 */
 			if (Reflect.has(playerData, 'experience_skill_alchemy')) {
-				for (const skill of skills) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
-				for (const skill of cosmeticSkills) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
+				for (const skill of SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
+				for (const skill of COSMETIC_SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
 
 				// reset skill xp if no taming xp offset
 				if (this.tamingXp !== 0) {
 					for (const offset of XP_OFFSETS) {
 						if (this[`tamingXp${offset}`] === 0) {
 							logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' skill xp`);
-							await this.resetXp({ offsetToReset: offset, typesToReset: [ ...skills, ...cosmeticSkills ] });
+							await this.resetXp({ offsetToReset: offset, typesToReset: [ ...SKILLS, ...COSMETIC_SKILLS ] });
 						}
 					}
 				}
@@ -536,7 +561,7 @@ export class Player extends Model {
 				 */
 				const { achievements } = await hypixel.player.uuid(this.minecraftUuid);
 
-				for (const skill of skills) this[`${skill}Xp`] = skillXpTotal[achievements?.[skillsAchievements[skill]] ?? 0] ?? 0;
+				for (const skill of SKILLS) this[`${skill}Xp`] = SKILL_XP_TOTAL[achievements?.[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
 			}
 
 			this.farmingLvlCap = 50 + (playerData.jacob2?.perks?.farming_level_cap ?? 0);
@@ -544,14 +569,14 @@ export class Player extends Model {
 			/**
 			 * slayer
 			 */
-			for (const slayer of slayers) this[`${slayer}Xp`] = playerData.slayer_bosses?.[slayer]?.xp ?? 0;
+			for (const slayer of SLAYERS) this[`${slayer}Xp`] = playerData.slayer_bosses?.[slayer]?.xp ?? 0;
 
 			// reset slayer xp if no zombie xp offset
 			if (this.zombieXp !== 0) {
 				for (const offset of XP_OFFSETS) {
 					if (this[`zombieXp${offset}`] === 0) {
 						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' slayer xp`);
-						await this.resetXp({ offsetToReset: offset, typesToReset: slayers });
+						await this.resetXp({ offsetToReset: offset, typesToReset: SLAYERS });
 					}
 				}
 			}
@@ -564,15 +589,15 @@ export class Player extends Model {
 			/**
 			 * dungeons
 			 */
-			for (const dungeonType of dungeonTypes) this[`${dungeonType}Xp`] = playerData.dungeons?.dungeon_types?.[dungeonType]?.experience ?? 0;
-			for (const dungeonClass of dungeonClasses) this[`${dungeonClass}Xp`] = playerData.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0;
+			for (const dungeonType of DUNGEON_TYPES) this[`${dungeonType}Xp`] = playerData.dungeons?.dungeon_types?.[dungeonType]?.experience ?? 0;
+			for (const dungeonClass of DUNGEON_CLASSES) this[`${dungeonClass}Xp`] = playerData.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0;
 
 			// reset dungeons xp if no catacombs xp offset
 			if (this.catacombsXp !== 0) {
 				for (const offset of XP_OFFSETS) {
 					if (this[`catacombsXp${offset}`] === 0) {
 						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' dungeon xp`);
-						await this.resetXp({ offsetToReset: offset, typesToReset: [ ...dungeonTypes, ...dungeonClasses ] });
+						await this.resetXp({ offsetToReset: offset, typesToReset: [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ] });
 					}
 				}
 			}
@@ -670,8 +695,8 @@ export class Player extends Model {
 		}
 
 		// other delimiter roles
-		for (let i = 1; i < delimiterRoles.length; ++i) {
-			if (!member.roles.cache.has(config.get(`${delimiterRoles[i]}_DELIMITER_ROLE_ID`))) rolesToAdd.push(config.get(`${delimiterRoles[i]}_DELIMITER_ROLE_ID`));
+		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
+			if (!member.roles.cache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`))) rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`));
 		}
 
 		// hypixel guild ranks
@@ -691,13 +716,13 @@ export class Player extends Model {
 		}
 
 		// skills
-		const skillAverage = skills
+		const skillAverage = SKILLS
 			.map((skill) => { // individual skill lvl 45+ / 50+ / 55+ / 60
 				const { progressLevel } = this.getSkillLevel(skill);
 				const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
 
 				// individual skills
-				for (const level of skillRoles) {
+				for (const level of SKILL_ROLES) {
 					if (level === CURRENT_LEVEL_MILESTONE) {
 						if (!member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
 					} else if (member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
@@ -707,12 +732,12 @@ export class Player extends Model {
 
 				return progressLevel;
 			})
-			.reduce((acc, level) => acc + level, 0) / skills.length;
+			.reduce((acc, level) => acc + level, 0) / SKILLS.length;
 
 		// average skill
 		let currentLvlMilestone = Math.floor(skillAverage / 5) * 5; // round down to nearest divisible by 5
 
-		for (const level of skillAverageRoles) {
+		for (const level of SKILL_AVERAGE_ROLES) {
 			if (level === currentLvlMilestone) {
 				if (!member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 			} else if (member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
@@ -721,11 +746,11 @@ export class Player extends Model {
 		}
 
 		// slayers
-		const LOWEST_SLAYER_LVL = Math.min(...slayers.map((slayer) => {
+		const LOWEST_SLAYER_LVL = Math.min(...SLAYERS.map((slayer) => {
 			const SLAYER_LVL = this.getSlayerLevel(slayer);
 
 			// individual slayer
-			for (const level of slayerRoles) {
+			for (const level of SLAYER_ROLES) {
 				if (level === SLAYER_LVL) {
 					if (!member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
 				} else if (member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
@@ -737,7 +762,7 @@ export class Player extends Model {
 		}));
 
 		// total slayer
-		for (const level of slayerTotalRoles) {
+		for (const level of SLAYER_TOTAL_ROLES) {
 			if (level === LOWEST_SLAYER_LVL) {
 				if (!member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 			} else if (member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
@@ -748,7 +773,7 @@ export class Player extends Model {
 		// dungeons
 		currentLvlMilestone = Math.floor(this.getSkillLevel('catacombs').trueLevel / 5) * 5; // round down to nearest divisible by 5
 
-		for (const level of catacombsRoles) {
+		for (const level of CATACOMBS_ROLES) {
 			if (level === currentLvlMilestone) {
 				if (!member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 			} else if (member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
@@ -1228,9 +1253,9 @@ export class Player extends Model {
 			case null:
 				// no offset type specifies -> resetting everything
 				await Promise.all(XP_OFFSETS.map(async offset => this.resetXp({ offsetToReset: offset, typesToReset })));
-				return this.resetXp({ offsetToReset: offsetFlags.DAY, typesToReset });
+				return this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY, typesToReset });
 
-			case offsetFlags.DAY:
+			case OFFSET_FLAGS.DAY:
 				// append current xp to the beginning of the xpHistory-Array and pop of the last value
 				for (const type of typesToReset) {
 					/**
@@ -1243,7 +1268,7 @@ export class Player extends Model {
 				}
 				break;
 
-			case offsetFlags.CURRENT:
+			case OFFSET_FLAGS.CURRENT:
 				for (const type of typesToReset) this[`${type}Xp`] = 0;
 				break;
 
@@ -1419,14 +1444,14 @@ export class Player extends Model {
 		let skillAverage = 0;
 		let trueAverage = 0;
 
-		for (const skill of skills) {
+		for (const skill of SKILLS) {
 			const { trueLevel, nonFlooredLevel } = this.getSkillLevel(skill, offset);
 
 			skillAverage += nonFlooredLevel;
 			trueAverage += trueLevel;
 		}
 
-		const SKILL_COUNT = skills.length;
+		const SKILL_COUNT = SKILLS.length;
 
 		return {
 			skillAverage: Number((skillAverage / SKILL_COUNT).toFixed(2)),
@@ -1439,12 +1464,12 @@ export class Player extends Model {
 	 * @param {string} type the slayer type
 	 */
 	getSlayerLevel(type) {
-		const xp = this[`${type}Xp`];
-		const maxLevel = Math.max(...Object.keys(slayerXp));
+		const XP = this[`${type}Xp`];
+		const MAX_LEVEL = Math.max(...Object.keys(SLAYER_XP));
 
 		let level = 0;
 
-		for (let x = 1; x <= maxLevel && slayerXp[x] <= xp; ++x) {
+		for (let x = 1; x <= MAX_LEVEL && SLAYER_XP[x] <= XP; ++x) {
 			level = x;
 		}
 
@@ -1456,7 +1481,7 @@ export class Player extends Model {
 	 * @param {string} offset optional offset value to use instead of the current xp value
 	 */
 	getSlayerTotal(offset = '') {
-		return slayers.reduce((acc, slayer) => acc + this[`${slayer}Xp${offset}`], 0);
+		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}Xp${offset}`], 0);
 	}
 
 	/**
@@ -1467,21 +1492,21 @@ export class Player extends Model {
 		let weight = 0;
 		let overflow = 0;
 
-		for (const skill of skills) {
+		for (const skill of SKILLS) {
 			const { skillWeight, skillOverflow } = getSenitherSkillWeight(skill, this[`${skill}Xp${offset}`]);
 
 			weight += skillWeight;
 			overflow += skillOverflow;
 		}
 
-		for (const slayer of slayers) {
+		for (const slayer of SLAYERS) {
 			const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(slayer, this[`${slayer}Xp${offset}`]);
 
 			weight += slayerWeight;
 			overflow += slayerOverflow;
 		}
 
-		for (const type of dungeonTypesAndClasses) {
+		for (const type of DUNGEON_TYPES_AND_CLASSES) {
 			const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(type, this[`${type}Xp${offset}`]);
 
 			weight += dungeonWeight;
@@ -1512,14 +1537,14 @@ export class Player extends Model {
 		let skillAverage = 0;
 		let trueAverage = 0;
 
-		for (const skill of skills) {
+		for (const skill of SKILLS) {
 			const { trueLevel, nonFlooredLevel } = this.getSkillLevelHistory(skill, index);
 
 			skillAverage += nonFlooredLevel;
 			trueAverage += trueLevel;
 		}
 
-		const SKILL_COUNT = skills.length;
+		const SKILL_COUNT = SKILLS.length;
 
 		return {
 			skillAverage: Number((skillAverage / SKILL_COUNT).toFixed(2)),
@@ -1533,7 +1558,7 @@ export class Player extends Model {
 	 * @param {number} index xpHistory array index
 	 */
 	getSlayerTotalHistory(index) {
-		return slayers.reduce((acc, slayer) => acc + this[`${slayer}XpHistory`][index], 0);
+		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}XpHistory`][index], 0);
 	}
 
 	/**
@@ -1544,21 +1569,21 @@ export class Player extends Model {
 		let weight = 0;
 		let overflow = 0;
 
-		for (const skill of skills) {
+		for (const skill of SKILLS) {
 			const { skillWeight, skillOverflow } = getSenitherSkillWeight(skill, this[`${skill}XpHistory`][index]);
 
 			weight += skillWeight;
 			overflow += skillOverflow;
 		}
 
-		for (const slayer of slayers) {
+		for (const slayer of SLAYERS) {
 			const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(slayer, this[`${slayer}XpHistory`][index]);
 
 			weight += slayerWeight;
 			overflow += slayerOverflow;
 		}
 
-		for (const type of dungeonTypesAndClasses) {
+		for (const type of DUNGEON_TYPES_AND_CLASSES) {
 			const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(type, this[`${type}XpHistory`][index]);
 
 			weight += dungeonWeight;

@@ -1,5 +1,5 @@
+import { logger } from '../../../functions/index.js';
 import { ChatBridgeEvent } from '../ChatBridgeEvent.js';
-import { logger } from '../../../functions/logger.js';
 
 
 export default class DisconnectChatBridgeEvent extends ChatBridgeEvent {

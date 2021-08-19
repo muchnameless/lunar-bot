@@ -1,9 +1,8 @@
 import { createClient } from 'minecraft-protocol';
 import { basename } from 'path';
 import { pathToFileURL } from 'url';
-import { spawnEvents } from './constants/chatBridge.js';
-import { getAllJsFiles } from '../../functions/files.js';
-import { logger } from '../../functions/logger.js';
+import { SPAWN_EVENTS } from './constants/index.js';
+import { getAllJsFiles, logger } from '../../functions/index.js';
 
 
 /**
@@ -23,7 +22,7 @@ export async function createBot(chatBridge, options) {
 		const event = (await import(pathToFileURL(file).href)).default;
 		const EVENT_NAME = basename(file, '.js');
 
-		bot[spawnEvents.includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, chatBridge));
+		bot[SPAWN_EVENTS.includes(EVENT_NAME) ? 'once' : 'on'](EVENT_NAME, event.bind(null, chatBridge));
 	}
 
 	logger.debug(`[CHATBRIDGE BOT EVENTS]: ${eventFiles.length} event${eventFiles.length !== 1 ? 's' : ''} loaded`);

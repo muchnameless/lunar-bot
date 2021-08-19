@@ -1,8 +1,7 @@
 import { Collection } from 'discord.js';
 import { basename } from 'path';
 import { pathToFileURL } from 'url';
-import { getAllJsFiles } from '../../functions/files.js';
-import { logger } from '../../functions/logger.js';
+import { getAllJsFiles, logger } from '../../functions/index.js';
 
 /**
  * @typedef {object} EventLoadOptions

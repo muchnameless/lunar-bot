@@ -1,9 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { handleLeaderboardCommandInteraction, getDefaultOffset } from '../../functions/leaderboards.js';
 import { xpTypeOption, pageOption, offsetOption, buildGuildOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { getDefaultOffset, handleLeaderboardCommandInteraction } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class LeaderboardCommand extends SlashCommand {

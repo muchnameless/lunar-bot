@@ -1,8 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { GuildMemberUtil } from '../util/GuildMemberUtil.js';
+import { GuildMemberUtil } from '../util/index.js';
 import { Event } from '../structures/events/Event.js';
-// import { logger } from '../functions/logger.js';
 
 
 export default class GuildMemberAddEvent extends Event {

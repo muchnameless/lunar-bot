@@ -1,7 +1,6 @@
 import { commaListsOr } from 'common-tags';
 import ms from 'ms';
 import { BridgeCommand } from '../../../commands/BridgeCommand.js';
-// import { logger } from '../../../../functions/logger.js';
 
 
 export default class HelpBridgeCommand extends BridgeCommand {

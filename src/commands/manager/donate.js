@@ -1,11 +1,9 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
-import { validateNumber } from '../../functions/stringValidators.js';
-import { removeNumberFormatting, safePromiseAll } from '../../functions/util.js';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { removeNumberFormatting, safePromiseAll, validateNumber } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class DonateCommand extends SlashCommand {

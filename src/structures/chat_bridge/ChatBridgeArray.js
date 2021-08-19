@@ -1,11 +1,11 @@
 import { MessageFlags } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { X_EMOJI } from '../../constants/emojiCharacters.js';
+import { X_EMOJI } from '../../constants/index.js';
 import { DiscordChatManager } from './managers/DiscordChatManager.js';
 import { BridgeCommandCollection } from '../commands/BridgeCommandCollection.js';
 import { ChatBridge } from './ChatBridge.js';
-import { MessageUtil } from '../../util/MessageUtil.js';
-import { logger } from '../../functions/logger.js';
+import { MessageUtil } from '../../util/index.js';
+import { logger } from '../../functions/index.js';
 
 
 /**

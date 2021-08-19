@@ -1,12 +1,8 @@
-// import { SlashCommandBuilder } from '@discordjs/builders';
-import { upperCaseFirstChar, autocorrect } from '../../functions/util.js';
-import { getUuidAndIgn } from '../../functions/input.js';
-import { X_EMOJI } from '../../constants/emojiCharacters.js';
-import { PROFILE_NAMES } from '../../constants/skyblock.js';
+import { PROFILE_NAMES, X_EMOJI } from '../../constants/index.js';
 import { hypixel } from '../../api/hypixel.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { autocorrect, getUuidAndIgn, logger, upperCaseFirstChar } from '../../functions/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class BaseWeightCommand extends DualCommand {

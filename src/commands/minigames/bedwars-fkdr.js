@@ -1,8 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption } from '../../structures/commands/commonOptions.js';
-// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import BaseStatsCommand from './~base-stats-command.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class BedWarsFkdrCommand extends BaseStatsCommand {

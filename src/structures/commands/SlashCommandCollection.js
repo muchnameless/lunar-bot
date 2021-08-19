@@ -1,6 +1,6 @@
 import { Collection } from 'discord.js';
+import { logger } from '../../functions/index.js';
 import { BaseCommandCollection } from './BaseCommandCollection.js';
-import { logger } from '../../functions/logger.js';
 
 
 export class SlashCommandCollection extends BaseCommandCollection {

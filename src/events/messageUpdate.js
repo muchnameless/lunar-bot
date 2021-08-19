@@ -1,7 +1,7 @@
 import { Permissions } from 'discord.js';
-import { ChannelUtil } from '../util/ChannelUtil.js';
+import { ChannelUtil } from '../util/index.js';
+import { logger } from '../functions/index.js';
 import MessageCreateEvent from './messageCreate.js';
-import { logger } from '../functions/logger.js';
 
 
 export default class MessageUpdateEvent extends MessageCreateEvent {

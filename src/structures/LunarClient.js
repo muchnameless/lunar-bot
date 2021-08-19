@@ -6,9 +6,9 @@ import { ChatBridgeArray } from './chat_bridge/ChatBridgeArray.js';
 import { SlashCommandCollection } from './commands/SlashCommandCollection.js';
 import { EventCollection } from './events/EventCollection.js';
 import { ImgurClient } from './ImgurClient.js';
-import { UserUtil } from '../util/UserUtil.js';
+import { UserUtil } from '../util/index.js';
 import { cache } from '../api/cache.js';
-import { logger } from '../functions/logger.js';
+import { logger } from '../functions/index.js';
 
 
 /**

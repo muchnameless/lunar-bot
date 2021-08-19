@@ -1,7 +1,6 @@
 import { Collection } from 'discord.js';
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
-// import { logger } from '../../../functions/logger.js';
 
 
 export class ChatTrigger extends Model {

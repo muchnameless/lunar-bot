@@ -1,8 +1,7 @@
-import { FORWARD_TO_GC } from '../constants/emojiCharacters.js';
-import { escapeRegex } from '../functions/util.js';
-import { MessageUtil } from '../util/MessageUtil.js';
+import { BROADCAST_EMOJI } from '../constants/index.js';
+import { MessageUtil } from '../util/index.js';
+import { escapeRegex } from '../functions/index.js';
 import { Event } from '../structures/events/Event.js';
-// import { logger } from '../functions/logger.js';
 
 
 export default class MessageCreateEvent extends Event {
@@ -20,7 +19,7 @@ export default class MessageCreateEvent extends Event {
 	async _handleDiscordMessage(message, isEdit = false) {
 		// channel specific triggers
 		if (message.channelId === this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) {
-			MessageUtil.react(message, FORWARD_TO_GC);
+			MessageUtil.react(message, BROADCAST_EMOJI);
 		}
 
 		// chat bridge

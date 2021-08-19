@@ -1,13 +1,10 @@
 import loader from 'prismarine-chat';
-import { messageTypes, invisibleCharacterRegExp } from './constants/chatBridge.js';
-import { spamMessages } from './constants/commandResponses.js';
-import { NO_BELL } from '../../constants/emojiCharacters.js';
-import { MC_CLIENT_VERSION } from './constants/settings.js';
-import { escapeRegex } from '../../functions/util.js';
+import { INVISIBLE_CHARACTER_REGEXP, MC_CLIENT_VERSION, MESSAGE_TYPES, spamMessages } from './constants/index.js';
+import { NO_PING_EMOJI } from '../../constants/index.js';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
-import { MessageUtil } from '../../util/MessageUtil.js';
+import { MessageUtil } from '../../util/index.js';
 import { mojang } from '../../api/mojang.js';
-import { logger } from '../../functions/logger.js';
+import { escapeRegex, logger } from '../../functions/index.js';
 
 /**
  * @typedef {string} HypixelMessageType
@@ -16,7 +13,7 @@ import { logger } from '../../functions/logger.js';
  * * `whisper`
  */
 
-const ChatMessage = loader(MC_CLIENT_VERSION);
+export const ChatMessage = loader(MC_CLIENT_VERSION);
 
 
 export class HypixelMessage {
@@ -58,7 +55,7 @@ export class HypixelMessage {
 		/**
 		 * content with invis chars removed
 		 */
-		this.cleanedContent = this.rawContent.replace(invisibleCharacterRegExp, '').trim();
+		this.cleanedContent = this.rawContent.replace(INVISIBLE_CHARACTER_REGEXP, '').trim();
 
 		/**
 		 * Guild > [HypixelRank] ign [GuildRank]: message
@@ -69,7 +66,7 @@ export class HypixelMessage {
 		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
-			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? messageTypes.WHISPER : null);
+			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? MESSAGE_TYPES.WHISPER : null);
 			this.author = new HypixelMessageAuthor(
 				this.chatBridge,
 				matched.groups.whisper !== 'To'
@@ -108,7 +105,7 @@ export class HypixelMessage {
 			const COMMAND_NAME = args.shift(); // extract first word
 
 			// no command, only ping or prefix
-			if ((!prefixMatched && this.type !== messageTypes.WHISPER) || !COMMAND_NAME) {
+			if ((!prefixMatched && this.type !== MESSAGE_TYPES.WHISPER) || !COMMAND_NAME) {
 				this.commandData = {
 					name: null,
 					command: null,
@@ -217,8 +214,8 @@ export class HypixelMessage {
 		});
 
 		switch (this.type) {
-			case messageTypes.GUILD:
-			case messageTypes.OFFICER: {
+			case MESSAGE_TYPES.GUILD:
+			case MESSAGE_TYPES.OFFICER: {
 				const result = await this.chatBridge.broadcast({
 					hypixelMessage: this,
 					discord: {
@@ -233,13 +230,13 @@ export class HypixelMessage {
 				return result;
 			}
 
-			case messageTypes.PARTY:
+			case MESSAGE_TYPES.PARTY:
 				return this.chatBridge.minecraft.pchat({
 					maxParts: Infinity,
 					...options,
 				});
 
-			case messageTypes.WHISPER:
+			case MESSAGE_TYPES.WHISPER:
 				return this.author.send({
 					maxParts: Infinity,
 					...options,
@@ -281,10 +278,10 @@ export class HypixelMessage {
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 				if (/<@&\d{17,19}>/.test(discordMessage.content)) {
 					this.author.send('you do not have permission to ping roles from in game chat');
-					MessageUtil.react(discordMessage, NO_BELL);
+					MessageUtil.react(discordMessage, NO_PING_EMOJI);
 				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content))) {
 					this.author.send('you do not have permission to ping users from in game chat');
-					MessageUtil.react(discordMessage, NO_BELL);
+					MessageUtil.react(discordMessage, NO_PING_EMOJI);
 				}
 
 				return discordMessage;

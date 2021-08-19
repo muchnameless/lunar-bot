@@ -1,5 +1,5 @@
 import { commaListsOr } from 'common-tags';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
 
 
 /**

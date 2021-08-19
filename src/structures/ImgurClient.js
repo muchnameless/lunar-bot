@@ -3,9 +3,8 @@ import { setTimeout as sleep } from 'timers/promises';
 import FormData from 'form-data';
 import fetch from 'node-fetch';
 import ms from 'ms';
-import { IMGUR_KEY } from '../constants/redis.js';
+import { IMGUR_KEY } from '../constants/index.js';
 import { cache } from '../api/cache.js';
-// import { logger } from '../functions/logger.js';
 
 /**
  * @typedef {object} ImageData

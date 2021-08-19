@@ -1,24 +1,23 @@
 /* eslint-disable no-unused-vars */
 import { SlashCommandBuilder } from '@discordjs/builders';
-import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Constants } from 'discord.js';
+import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
 import _ from 'lodash-es';
 import similarity from 'jaro-winkler';
 import ms from 'ms';
 import fetch from 'node-fetch';
 import util from 'util';
-import { COMMAND_KEY } from '../../constants/bot.js';
-import { EMBED_MAX_CHARS } from '../../constants/discord.js';
-import { EDIT_MESSAGE } from '../../constants/emojiCharacters.js';
+import * as constants from '../../constants/index.js';
 import { cache } from '../../api/cache.js';
-import * as functionsUtil from '../../functions/util.js';
-import * as functionsFiles from '../../functions/files.js';
 import { hypixel } from '../../api/hypixel.js';
 import { mojang } from '../../api/mojang.js';
-import { ChannelUtil } from '../../util/ChannelUtil.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import * as botUtil from '../../util/index.js';
+import * as functions from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-import { logger } from '../../functions/logger.js';
 /* eslint-enable no-unused-vars */
+
+const { COMMAND_KEY, EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
+const { ChannelUtil, InteractionUtil } = botUtil;
+const { logger, splitForEmbedFields } = functions;
 
 
 export default class EvalCommand extends SlashCommand {
@@ -77,7 +76,7 @@ export default class EvalCommand extends SlashCommand {
 		const responseEmbed = this.client.defaultEmbed
 			.setFooter(interaction.guild?.me.displayName ?? this.client.user.username, this.client.user.displayAvatarURL());
 
-		for (const [ index, inputPart ] of functionsUtil.splitForEmbedFields(input, 'js').entries()) {
+		for (const [ index, inputPart ] of splitForEmbedFields(input, 'js').entries()) {
 			responseEmbed.addFields({
 				name: index
 					? '\u200b'
@@ -104,7 +103,7 @@ export default class EvalCommand extends SlashCommand {
 			if ((isPromise = evaled instanceof Promise)) evaled = await evaled;
 
 			const hrStop = process.hrtime(hrStart);
-			const OUTPUT_ARRAY = functionsUtil.splitForEmbedFields(this.#cleanOutput(evaled, inspectDepth), 'js');
+			const OUTPUT_ARRAY = splitForEmbedFields(this.#cleanOutput(evaled, inspectDepth), 'js');
 			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${((hrStop[0] * 1e9) + hrStop[1]) / 1e6} ms\``;
 
 			// add output fields till embed character limit is reached
@@ -127,7 +126,7 @@ export default class EvalCommand extends SlashCommand {
 
 			const FOOTER = `d.js ${Discord.version} • type: \`${typeof error}\``;
 
-			for (const [ index, value ] of functionsUtil.splitForEmbedFields(this.#cleanOutput(error), 'xl').entries()) {
+			for (const [ index, value ] of splitForEmbedFields(this.#cleanOutput(error), 'xl').entries()) {
 				const name = index ? '\u200b' : 'Error';
 
 				if (responseEmbed.length + FOOTER.length + 1 + name.length + value.length > EMBED_MAX_CHARS) break;
@@ -212,7 +211,7 @@ export default class EvalCommand extends SlashCommand {
 			.addComponents(
 				new MessageButton()
 					.setCustomId(`${COMMAND_KEY}:${this.name}:${IS_ASYNC}:${INSPECT_DEPTH}`)
-					.setEmoji(EDIT_MESSAGE)
+					.setEmoji(EDIT_MESSAGE_EMOJI)
 					.setStyle(Constants.MessageButtonStyles.SECONDARY),
 			);
 

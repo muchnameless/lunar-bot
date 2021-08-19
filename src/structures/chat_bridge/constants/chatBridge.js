@@ -1,25 +1,25 @@
 /**
  * bot events that should only be listened to once
  */
-export const spawnEvents = Object.freeze([
+export const SPAWN_EVENTS = Object.freeze([
 	'login',
 	'keep_alive',
 ]);
 
-export const messageTypes = Object.freeze({
+export const MESSAGE_TYPES = Object.freeze({
 	WHISPER: 'whisper',
 	GUILD: 'guild',
 	OFFICER: 'officer',
 	PARTY: 'party',
 });
 
-export const prefixByType = Object.freeze({
+export const PREFIX_BY_TYPE = Object.freeze({
 	guild: '/gc',
 	officer: '/oc',
 	party: '/pc',
 });
 
-export const chatFunctionByType = Object.freeze({
+export const CHAT_FUNCTION_BY_TYPE = Object.freeze({
 	guild: 'gchat',
 	officer: 'ochat',
 	party: 'pchat',
@@ -28,9 +28,9 @@ export const chatFunctionByType = Object.freeze({
 /**
  * characters that don't render in mc chat
  */
-export const invisibleCharacters = Object.freeze([
-	'\u{2B4D}', // '⭍'
+export const INVISIBLE_CHARACTERS = Object.freeze([
 	'\u{800}', // 'ࠀ'
+	'\u{2B4D}', // '⭍'
 	'\u{58F}', // '֏'
 	'\u{A8F0}', // '꣰'
 	'\u{26D3}', // '⛓'
@@ -54,9 +54,7 @@ export const invisibleCharacters = Object.freeze([
 	'\u{26CF}', // '⛏'
 ]);
 
-export const randomInvisibleCharacter = () => invisibleCharacters[Math.floor(Math.random() * invisibleCharacters.length)];
-
-export const invisibleCharacterRegExp = new RegExp(invisibleCharacters.join('|'), 'gu');
+export const INVISIBLE_CHARACTER_REGEXP = new RegExp(INVISIBLE_CHARACTERS.join('|'), 'gu');
 
 /**
  * chunks of text which can be used to pad a message to bypass hypixel's spam filter
@@ -65,25 +63,25 @@ const paddingChunks = [
 	'----',
 	'____',
 	'////',
-].map(chunk => `${invisibleCharacters[0]} ${chunk}`);
+].map(chunk => `${INVISIBLE_CHARACTERS[0]} ${chunk}`);
 
 export const randomPadding = () => paddingChunks[Math.floor(Math.random() * paddingChunks.length)];
 
 /**
  * any non-'-' and non-whitespace
  */
-export const defaultResponseRegExp = /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u;
+export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u;
 
 /**
  * spam messages
  */
-export const memeRegExp = /[⠁-⣿]|\be+z+\b/;
+export const MEME_REGEXP = /[⠁-⣿]|\be+z+\b/;
 
-export const nonWhiteSpaceRegExp = new RegExp(`[^\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}${invisibleCharacters.join('')}]`, 'u');
+export const NON_WHITESPACE_REGEXP = new RegExp(`[^\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}${INVISIBLE_CHARACTERS.join('')}]`, 'u');
 
 /**
  * https://cdn.discordapp.com/attachments/724130826165420052/876441229905256448/card.png
  * https://media.discordapp.net/attachments/795861078415638539/876641628083867688/unknown.png
  */
 // eslint-disable-next-line no-empty-character-class
-export const urlRegExp = /\b(?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/attachments\/\d{17,19}\/\d{17,19}\/[^.]+\.(?:png|jpg|jpeg)(?:\?width=\d+&height=\d+)?\b/gd;
+export const DISCORD_CDN_URL_REGEXP = /\b(?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/attachments\/\d{17,19}\/\d{17,19}\/[^.]+\.(?:png|jpg|jpeg)(?:\?width=\d+&height=\d+)?\b/gd;

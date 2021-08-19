@@ -3,13 +3,10 @@ import { setTimeout as sleep } from 'timers/promises';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import { CronJob } from 'cron';
-import { MAYOR_CHANGE_INTERVAL } from '../../../constants/skyblock.js';
-import { offsetFlags } from '../../../constants/database.js';
-import { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS } from '../../../constants/discord.js';
-import { autocorrect, getWeekOfYear, compareAlphabetically, upperCaseFirstChar, safePromiseAll } from '../../../functions/util.js';
-import { ModelManager } from './ModelManager.js';
+import { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS, MAYOR_CHANGE_INTERVAL, OFFSET_FLAGS } from '../../../constants/index.js';
 import { hypixel } from '../../../api/hypixel.js';
-import { logger } from '../../../functions/logger.js';
+import { autocorrect, compareAlphabetically, getWeekOfYear, logger, safePromiseAll, upperCaseFirstChar } from '../../../functions/index.js';
+import { ModelManager } from './ModelManager.js';
 
 
 export class PlayerManager extends ModelManager {
@@ -445,7 +442,7 @@ export class PlayerManager extends ModelManager {
 	async #startCompetition() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: offsetFlags.COMPETITION_START });
+		await this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START });
 
 		config.set('COMPETITION_RUNNING', true);
 		config.set('COMPETITION_SCHEDULED', false);
@@ -462,7 +459,7 @@ export class PlayerManager extends ModelManager {
 	async #endCompetition() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: offsetFlags.COMPETITION_END });
+		await this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END });
 
 		config.set('COMPETITION_RUNNING', false);
 
@@ -483,7 +480,7 @@ export class PlayerManager extends ModelManager {
 		let currentMayorTime = LAST_MAYOR_XP_RESET_TIME + MAYOR_CHANGE_INTERVAL;
 		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
 
-		await this.resetXp({ offsetToReset: offsetFlags.MAYOR });
+		await this.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR });
 
 		config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime);
 
@@ -505,7 +502,7 @@ export class PlayerManager extends ModelManager {
 	async #performDailyXpReset() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: offsetFlags.DAY });
+		await this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY });
 
 		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
 
@@ -523,7 +520,7 @@ export class PlayerManager extends ModelManager {
 	async #performWeeklyXpReset() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: offsetFlags.WEEK });
+		await this.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK });
 
 		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
 
@@ -539,7 +536,7 @@ export class PlayerManager extends ModelManager {
 	async #performMonthlyXpReset() {
 		const { config } = this.client;
 
-		await this.resetXp({ offsetToReset: offsetFlags.MONTH });
+		await this.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH });
 
 		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
 

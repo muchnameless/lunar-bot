@@ -1,7 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class TestCommand extends SlashCommand {

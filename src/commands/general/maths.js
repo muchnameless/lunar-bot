@@ -2,9 +2,8 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import pkg from 'sinful-math';
 const { add, sub, mul, div } = pkg;
 import Lexer from 'lex';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 class Parser {

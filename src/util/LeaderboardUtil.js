@@ -1,6 +1,3 @@
-// import { logger } from '../functions/logger.js';
-
-
-export class LeaderboardUtil extends null {
+export default class LeaderboardUtil extends null {
 
 }

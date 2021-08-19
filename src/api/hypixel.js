@@ -1,6 +1,6 @@
 import { Client } from '@zikeji/hypixel';
 import { cache } from './cache.js';
-import { logger } from '../functions/logger.js';
+import { logger } from '../functions/index.js';
 
 
 export const hypixel = new Client(process.env.HYPIXEL_KEY, {

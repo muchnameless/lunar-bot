@@ -1,8 +1,7 @@
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { escapeIgn } from '../../../functions/util.js';
+import { escapeIgn } from '../../../functions/index.js';
 import { ModelManager } from './ModelManager.js';
-// import { logger } from '../../../functions/logger.js';
 
 
 export class TaxCollectorManager extends ModelManager {

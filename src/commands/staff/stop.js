@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { logger } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class StopCommand extends SlashCommand {

@@ -1,7 +1,5 @@
-import loader from 'prismarine-chat';
-import { MC_CLIENT_VERSION } from '../constants/settings.js';
-const ChatMessage = loader(MC_CLIENT_VERSION);
-import { logger } from '../../../functions/logger.js';
+import { logger } from '../../../functions/index.js';
+import { ChatMessage } from '../HypixelMessage.js';
 
 
 /**

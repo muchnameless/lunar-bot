@@ -1,5 +1,4 @@
 import EventEmitter from 'events';
-// import { logger } from '../../functions/logger.js';
 
 /**
  * Filter to be applied to the collector.

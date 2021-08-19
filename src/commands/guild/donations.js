@@ -1,11 +1,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { stripIndent } from 'common-tags';
-import { MessageEmbedUtil } from '../../util/MessageEmbedUtil.js';
 import { mojang } from '../../api/mojang.js';
+import { InteractionUtil, MessageEmbedUtil } from '../../util/index.js';
+import { logger } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class DonationsCommand extends SlashCommand {

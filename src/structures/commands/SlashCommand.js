@@ -2,9 +2,9 @@ import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } fro
 import { CommandInteraction, Constants } from 'discord.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError.js';
 import { ephemeralOption } from './commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { logger } from '../../functions/index.js';
 import { BaseCommand } from './BaseCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 /**

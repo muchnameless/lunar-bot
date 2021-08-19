@@ -1,5 +1,5 @@
-import { defaultSettings } from '../constants/settings.js';
-import { logger } from '../../../functions/logger.js';
+import { DEFAULT_SETTINGS } from '../constants/index.js';
+import { logger } from '../../../functions/index.js';
 
 
 /**
@@ -12,7 +12,7 @@ export default async function(chatBridge) {
 	chatBridge.minecraft.botUuid = chatBridge.bot.uuid.replaceAll('-', '');
 
 	// send settings to server
-	chatBridge.bot.write('settings', defaultSettings);
+	chatBridge.bot.write('settings', DEFAULT_SETTINGS);
 
 	chatBridge.emit('connect');
 }

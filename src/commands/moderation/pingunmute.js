@@ -1,8 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions.js';
-// import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { logger } from '../../functions/index.js';
 import PingMute from './pingmute.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class PingUnmuteCommand extends PingMute {

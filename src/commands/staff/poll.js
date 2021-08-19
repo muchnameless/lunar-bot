@@ -2,15 +2,11 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
-import { upperCaseFirstChar, stringToMS } from '../../functions/util.js';
-import { messageTypes } from '../../structures/chat_bridge/constants/chatBridge.js';
-import { ChannelUtil } from '../../util/ChannelUtil.js';
-import { UserUtil } from '../../util/UserUtil.js';
-import { MessageUtil } from '../../util/MessageUtil.js';
+import { MESSAGE_TYPES } from '../../structures/chat_bridge/constants/index.js';
 import { buildGuildOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../util/index.js';
+import { stringToMS, upperCaseFirstChar } from '../../functions/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class PollCommand extends DualCommand {
@@ -77,10 +73,10 @@ export default class PollCommand extends DualCommand {
 			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set() }));
 			const optionsCount = pollOptions.length;
 			const hypixelMessages = chatBridge.minecraft.awaitMessages({
-				filter: hypixelMessage => hypixelMessage.isUserMessage && hypixelMessage.type === messageTypes.GUILD,
+				filter: hypixelMessage => hypixelMessage.isUserMessage && hypixelMessage.type === MESSAGE_TYPES.GUILD,
 				time: DURATION,
 			});
-			const discordChannel = chatBridge.discord.get(messageTypes.GUILD).channel;
+			const discordChannel = chatBridge.discord.get(MESSAGE_TYPES.GUILD).channel;
 			const discordMessages = discordChannel.awaitMessages({
 				filter: discordMessage => MessageUtil.isUserMessage(discordMessage),
 				time: DURATION,

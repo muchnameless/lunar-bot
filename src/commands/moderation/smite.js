@@ -1,8 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { targetOption, buildGuildOption } from '../../structures/commands/commonOptions.js';
-// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class SmiteCommand extends DualCommand {

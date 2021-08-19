@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class CoinFlipCommand extends DualCommand {

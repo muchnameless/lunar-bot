@@ -2,11 +2,10 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageAttachment } from 'discord.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { oneLine } from 'common-tags';
-import { upperCaseFirstChar } from '../../functions/util.js';
 import { optionalPlayerOption, xpTypeOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { upperCaseFirstChar } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class TrackCommand extends SlashCommand {

@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
 import { setTimeout as sleep } from 'timers/promises';
-import { prefixByType, messageTypes, chatFunctionByType, randomInvisibleCharacter } from './constants/chatBridge.js';
+import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, MESSAGE_TYPES, PREFIX_BY_TYPE } from './constants/index.js';
 import { MinecraftChatManager } from './managers/MinecraftChatManager.js';
 import { DiscordManager } from './managers/DiscordManager.js';
 import { EventCollection } from '../events/EventCollection.js';
-import { logger } from '../../functions/logger.js';
+import { logger } from '../../functions/index.js';
 
 
 /**
@@ -259,17 +259,17 @@ export class ChatBridge extends EventEmitter {
 	 * @returns {Promise<[boolean, ?import('discord.js').Message | import('discord.js').Message[]]>}
 	 */
 	async broadcast(contentOrOptions) {
-		const { content, hypixelMessage, type = hypixelMessage?.type ?? messageTypes.GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = typeof contentOrOptions === 'string'
+		const { content, hypixelMessage, type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
 		const discordChatManager = this.discord.resolve(type);
 
 		return Promise.all([
 			// minecraft
-			this.minecraft[chatFunctionByType[(discordChatManager?.type ?? type)]]?.({ content, prefix: minecraftPrefix, maxParts, ...options })
+			this.minecraft[CHAT_FUNCTION_BY_TYPE[(discordChatManager?.type ?? type)]]?.({ content, prefix: minecraftPrefix, maxParts, ...options })
 				?? this.minecraft.chat({
 					content,
-					prefix: `${discordChatManager?.prefix ?? prefixByType[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : randomInvisibleCharacter()}`,
+					prefix: `${discordChatManager?.prefix ?? PREFIX_BY_TYPE[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`,
 					maxParts,
 					...options,
 				}),

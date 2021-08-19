@@ -1,8 +1,7 @@
 import { CronJob } from 'cron';
-import { GUILD_ID_BRIDGER, GUILD_ID_ERROR } from '../../../constants/database.js';
-import { autocorrect } from '../../../functions/util.js';
+import { GUILD_ID_BRIDGER, GUILD_ID_ERROR } from '../../../constants/index.js';
+import { autocorrect, logger } from '../../../functions/index.js';
 import { ModelManager } from './ModelManager.js';
-import { logger } from '../../../functions/logger.js';
 
 
 export class HypixelGuildManager extends ModelManager {

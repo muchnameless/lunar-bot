@@ -1,9 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { getLilyWeight } from '../../functions/skyblock.js';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions.js';
-// import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { getLilyWeight } from '../../functions/index.js';
 import BaseWeightCommand from './~base-weight.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class LilyWeightCommand extends BaseWeightCommand {

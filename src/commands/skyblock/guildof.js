@@ -2,9 +2,9 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { mojang } from '../../api/mojang.js';
 import { hypixel } from '../../api/hypixel.js';
 import { requiredIgnOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { logger } from '../../functions/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class GuildOfCommand extends DualCommand {

@@ -1,9 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { optionalIgnOption } from '../../structures/commands/commonOptions.js';
-// import { InteractionUtil } from '../../util/InteractionUtil.js';
 import BaseStatsCommand from './~base-stats-command.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class MurderMysteryStatsCommand extends BaseStatsCommand {

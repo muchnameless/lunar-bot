@@ -1,12 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import pkg from 'sequelize';
 const { Op } = pkg;
-import { offsetFlags } from '../../constants/database.js';
-import { safePromiseAll } from '../../functions/util.js';
+import { OFFSET_FLAGS } from '../../constants/index.js';
 import { optionalPlayerOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { safePromiseAll } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class XpResetCommand extends SlashCommand {
@@ -20,7 +19,7 @@ export default class XpResetCommand extends SlashCommand {
 		});
 	}
 
-	static OFFSET_TO_RESET = offsetFlags.COMPETITION_START;
+	static OFFSET_TO_RESET = OFFSET_FLAGS.COMPETITION_START;
 
 	/**
 	 * execute the command

@@ -5,20 +5,23 @@ import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import emojiRegex from 'emoji-regex/es2015/index.js';
 import minecraftData from 'minecraft-data';
-import { trim, cleanFormattedNumber, splitMessage } from '../../../functions/util.js';
-import { unicodeToName } from '../constants/emojiNameUnicodeConverter.js';
-import { memeRegExp, nonWhiteSpaceRegExp, invisibleCharacterRegExp, randomInvisibleCharacter, randomPadding, messageTypes } from '../constants/chatBridge.js';
-import { STOP, X_EMOJI } from '../../../constants/emojiCharacters.js';
-import { MC_CLIENT_VERSION } from '../constants/settings.js';
-import { GUILD_ID_BRIDGER, UNKNOWN_IGN } from '../../../constants/database.js';
+import {
+	INVISIBLE_CHARACTER_REGEXP,
+	INVISIBLE_CHARACTERS,
+	MC_CLIENT_VERSION,
+	MEME_REGEXP,
+	MESSAGE_TYPES,
+	NON_WHITESPACE_REGEXP,
+	randomPadding,
+	unicodeToName,
+} from '../constants/index.js';
+import { GUILD_ID_BRIDGER, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants/index.js';
 import { createBot } from '../MinecraftBot.js';
-import { UserUtil } from '../../../util/UserUtil.js';
-import { GuildMemberUtil } from '../../../util/GuildMemberUtil.js';
-import { MessageUtil } from '../../../util/MessageUtil.js';
+import { GuildMemberUtil, MessageUtil, UserUtil } from '../../../util/index.js';
 import { MessageCollector } from '../MessageCollector.js';
 import { ChatManager } from './ChatManager.js';
 import { cache } from '../../../api/cache.js';
-import { logger } from '../../../functions/logger.js';
+import { cleanFormattedNumber, logger, splitMessage, trim } from '../../../functions/index.js';
 
 /**
  * @typedef {object} SendToChatOptions
@@ -136,7 +139,7 @@ export class MinecraftChatManager extends ChatManager {
 				return content
 					.replace(/\d/g, '') // remove numbers
 					.replace(/(?<=^\/)o(?=c)/, 'g') // oc and gc share the same anti spam bucket -> /oc -> /gc
-					.replace(invisibleCharacterRegExp, '') // remove invis chars
+					.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invis chars
 					.trim() // remove whitespaces at the beginning and end
 					.replace(/ {2,}/g, ' '); // mc messages can only have single spaces
 			},
@@ -273,7 +276,7 @@ export class MinecraftChatManager extends ChatManager {
 	async #handleForwardRejection(discordMessage, reason, data) {
 		if (!discordMessage) return;
 
-		MessageUtil.react(discordMessage, STOP);
+		MessageUtil.react(discordMessage, STOP_EMOJI);
 
 		if (await cache.get(`chatbridge:blocked:dm:${discordMessage.author.id}`)) return;
 
@@ -521,7 +524,7 @@ export class MinecraftChatManager extends ChatManager {
 	parseContent(string) {
 		return cleanFormattedNumber(string)
 			.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
-			.replace(invisibleCharacterRegExp, '') // remove invisible characters
+			.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invisible characters
 			.replace(/<(?:a)?:(\w{2,32}):(?:\d{17,19})>/g, ':$1:') // custom emojis
 			.replace(emojiRegex(), match => unicodeToName[match] ?? match) // default emojis
 			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
@@ -604,7 +607,7 @@ export class MinecraftChatManager extends ChatManager {
 			return false;
 		}
 
-		return this.chat({ prefix: `/gc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
+		return this.chat({ prefix: `/gc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ...options });
 	}
 
 	/**
@@ -614,7 +617,7 @@ export class MinecraftChatManager extends ChatManager {
 	async ochat(contentOrOptions) {
 		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
 
-		return this.chat({ prefix: `/oc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
+		return this.chat({ prefix: `/oc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ...options });
 	}
 
 	/**
@@ -624,7 +627,7 @@ export class MinecraftChatManager extends ChatManager {
 	async pchat(contentOrOptions) {
 		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
 
-		return this.chat({ prefix: `/pc ${prefix}${prefix.length ? ' ' : randomInvisibleCharacter()}`, ...options });
+		return this.chat({ prefix: `/pc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ...options });
 	}
 
 	/**
@@ -657,8 +660,8 @@ export class MinecraftChatManager extends ChatManager {
 				.split('\n')
 				.flatMap(part => splitMessage(part, { char: [ ' ', '' ], maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length }))
 				.filter((part) => {
-					if (nonWhiteSpaceRegExp.test(part)) { // filter out white space only parts
-						if (ChatManager.BLOCKED_WORDS_REGEXP.test(part) || memeRegExp.test(part)) {
+					if (NON_WHITESPACE_REGEXP.test(part)) { // filter out white space only parts
+						if (ChatManager.BLOCKED_WORDS_REGEXP.test(part) || MEME_REGEXP.test(part)) {
 							if (this.client.config.get('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
 							return success = false;
 						}
@@ -805,7 +808,7 @@ export class MinecraftChatManager extends ChatManager {
 			default: {
 				this._lastMessages.add(message); // since listener doesn't collect command responses 'if (useSpamBypass)' is not needed in this case
 
-				await sleep([ messageTypes.GUILD, messageTypes.PARTY, messageTypes.OFFICER ].includes(response.type)
+				await sleep([ MESSAGE_TYPES.GUILD, MESSAGE_TYPES.PARTY, MESSAGE_TYPES.OFFICER ].includes(response.type)
 					? this.delay
 					: (this.#tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY), // use safe delay for commands and whispers
 				);

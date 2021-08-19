@@ -1,9 +1,7 @@
 import { Collection, Util, Formatters } from 'discord.js';
-import { nameToUnicode } from '../constants/emojiNameUnicodeConverter.js';
-import { messageTypes } from '../constants/chatBridge.js';
-import { autocorrect } from '../../../functions/util.js';
+import { MESSAGE_TYPES, nameToUnicode } from '../constants/index.js';
+import { autocorrect } from '../../../functions/index.js';
 import { DiscordChatManager } from './DiscordChatManager.js';
-// import { logger } from '../../../functions/logger.js';
 
 
 export class DiscordManager {
@@ -84,7 +82,7 @@ export class DiscordManager {
 	 * @param {string} typeOrId
 	 */
 	get(typeOrId) {
-		return this.channelsByType.get(typeOrId ?? messageTypes.GUILD) ?? this.channelsByIds.get(typeOrId);
+		return this.channelsByType.get(typeOrId ?? MESSAGE_TYPES.GUILD) ?? this.channelsByIds.get(typeOrId);
 	}
 
 	/**

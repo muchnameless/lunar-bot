@@ -1,6 +1,5 @@
 import { Collection } from 'discord.js';
 import { CronJob } from 'cron';
-// import { logger } from '../functions/logger.js';
 
 
 export class CronJobManager {

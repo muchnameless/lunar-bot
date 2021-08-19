@@ -2,11 +2,10 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters, SnowflakeUtil, Util, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
-import { EMBED_FIELD_MAX_CHARS } from '../../constants/discord.js';
-import { trim, escapeIgn } from '../../functions/util.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { EMBED_FIELD_MAX_CHARS } from '../../constants/index.js';
+import { InteractionUtil } from '../../util/index.js';
+import { escapeIgn, trim } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class DebugCommand extends SlashCommand {

@@ -1,12 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import ms from 'ms';
-import { logErrors } from '../../structures/chat_bridge/constants/commandResponses.js';
-import { escapeIgn } from '../../functions/util.js';
+import { logErrors } from '../../structures/chat_bridge/constants/index.js';
 import { forceOption, optionalPlayerOption, buildGuildOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { escapeIgn, logger } from '../../functions/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 /**

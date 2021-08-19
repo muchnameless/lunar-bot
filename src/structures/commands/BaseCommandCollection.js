@@ -1,9 +1,7 @@
 import { Collection } from 'discord.js';
 import { dirname, basename } from 'path';
 import { pathToFileURL } from 'url';
-import { getAllJsFiles } from '../../functions/files.js';
-import { autocorrect } from '../../functions/util.js';
-import { logger } from '../../functions/logger.js';
+import { autocorrect, getAllJsFiles, logger } from '../../functions/index.js';
 
 
 /**

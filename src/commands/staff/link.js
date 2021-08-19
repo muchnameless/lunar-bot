@@ -1,13 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { DiscordAPIError, Constants } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { validateNumber } from '../../functions/stringValidators.js';
 import { hypixel } from '../../api/hypixel.js';
 import { mojang } from '../../api/mojang.js';
 import { requiredIgnOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { logger, validateNumber } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class LinkCommand extends SlashCommand {

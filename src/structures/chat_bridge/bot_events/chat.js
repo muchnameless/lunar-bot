@@ -1,5 +1,4 @@
 import { HypixelMessage } from '../HypixelMessage.js';
-// import { logger } from '../../../functions/logger.js';
 
 /**
  * @typedef {object} ChatPacket

@@ -1,11 +1,9 @@
 import { Constants } from 'discord.js';
 import ms from 'ms';
-import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction } from '../functions/leaderboards.js';
-import { LB_KEY } from '../constants/redis.js';
-import { COMMAND_KEY } from '../constants/bot.js';
-import { InteractionUtil } from '../util/InteractionUtil.js';
+import { COMMAND_KEY, LB_KEY } from '../constants/index.js';
+import { InteractionUtil } from '../util/index.js';
+import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, logger } from '../functions/index.js';
 import { Event } from '../structures/events/Event.js';
-import { logger } from '../functions/logger.js';
 
 
 export default class InteractionCreateEvent extends Event {

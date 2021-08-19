@@ -1,6 +1,6 @@
-import { GuildUtil } from '../util/GuildUtil.js';
+import { GuildUtil } from '../util/index.js';
+import { logger } from '../functions/index.js';
 import { Event } from '../structures/events/Event.js';
-import { logger } from '../functions/logger.js';
 
 
 export default class ReadyEvent extends Event {

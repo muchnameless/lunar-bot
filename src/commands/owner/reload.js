@@ -2,10 +2,9 @@ import { SlashCommandBooleanOption, SlashCommandBuilder } from '@discordjs/build
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { basename } from 'path';
-import { getAllJsFiles } from '../../functions/files.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { getAllJsFiles, logger } from '../../functions/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class ReloadCommand extends DualCommand {
@@ -207,10 +206,10 @@ export default class ReloadCommand extends DualCommand {
 
 			case 'filter': {
 				try {
-					const { blockedWordsRegExp } = await import(`../../structures/chat_bridge/constants/blockedWords.js?update=${Date.now()}`);
+					const { BLOCKED_WORDS_REGEXP } = await import(`../../structures/chat_bridge/constants/blockedWords.js?update=${Date.now()}`);
 					const { ChatManager } = await import('../../structures/chat_bridge/managers/ChatManager.js');
 
-					ChatManager.BLOCKED_WORDS_REGEXP = blockedWordsRegExp;
+					ChatManager.BLOCKED_WORDS_REGEXP = BLOCKED_WORDS_REGEXP;
 
 					return 'filter reloaded successfully';
 				} catch (error) {

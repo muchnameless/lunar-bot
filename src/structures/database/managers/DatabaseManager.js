@@ -4,9 +4,7 @@ import { stripIndents, commaLists } from 'common-tags';
 import { isEqual } from 'lodash-es';
 import pkg from 'sequelize';
 const { Model } = pkg;
-import { X_EMOJI, Y_EMOJI_ALT } from '../../../constants/emojiCharacters.js';
-import { DEFAULT_CONFIG } from '../../../constants/database.js';
-import { asyncFilter, safePromiseAll } from '../../../functions/util.js';
+import { DEFAULT_CONFIG, X_EMOJI, Y_EMOJI_ALT } from '../../../constants/index.js';
 import { hypixel } from '../../../api/hypixel.js';
 import { ConfigManager } from './ConfigManager.js';
 import { HypixelGuildManager } from './HypixelGuildManager.js';
@@ -19,8 +17,8 @@ import { TaxCollector } from '../models/TaxCollector.js';
 import { ModelManager } from './ModelManager.js';
 import { ChatTrigger } from '../models/ChatTrigger.js';
 import { ArrayCacheCollection } from '../../ArrayCacheCollection.js';
-import { ChannelUtil } from '../../../util/ChannelUtil.js';
-import { logger } from '../../../functions/logger.js';
+import { ChannelUtil } from '../../../util/index.js';
+import { asyncFilter, logger, safePromiseAll } from '../../../functions/index.js';
 
 
 export class DatabaseManager {

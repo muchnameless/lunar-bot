@@ -1,8 +1,8 @@
 import { Formatters, Util } from 'discord.js';
 import ms from 'ms';
 import jaroWinklerSimilarity from 'jaro-winkler';
-import { EMBED_FIELD_MAX_CHARS } from '../constants/discord.js';
-import { logger } from './logger.js';
+import { EMBED_FIELD_MAX_CHARS } from '../constants/index.js';
+import { logger } from './index.js';
 
 
 /**
@@ -249,3 +249,9 @@ export async function safePromiseAll(arr) {
 		if (x.status === 'rejected') logger.error(x.reason);
 	}
 }
+
+/**
+ * removes minecraft formatting codes
+ * @param {string} string
+ */
+export const removeMcFormatting = string => string.replace(/§[0-9a-gk-or]/g, '');

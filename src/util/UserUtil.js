@@ -1,7 +1,7 @@
-import { logger } from '../functions/logger.js';
+import { logger } from '../functions/index.js';
 
 
-export class UserUtil extends null {
+export default class UserUtil extends null {
 	/**
 	 * @type {WeakMap<import('discord.js').User, import('../structures/database/models/Player').Player>}
 	 */

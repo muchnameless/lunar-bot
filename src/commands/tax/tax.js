@@ -2,13 +2,10 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Permissions, Formatters } from 'discord.js';
 import pkg from 'sequelize';
 const { Op, Model } = pkg;
-import { validateNumber } from '../../functions/stringValidators.js';
-import { escapeIgn, safePromiseAll } from '../../functions/util.js';
-import { ChannelUtil } from '../../util/ChannelUtil.js';
 import { buildGuildOption, requiredPlayerOption, optionalPlayerOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { ChannelUtil, InteractionUtil } from '../../util/index.js';
+import { escapeIgn, logger, safePromiseAll, validateNumber } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class TaxCommand extends SlashCommand {

@@ -5,7 +5,7 @@ import { REST } from '@discordjs/rest';
 import { Routes, APIVersion } from 'discord-api-types/v9';
 import { db } from './structures/database/index.js';
 import { Client } from './structures/LunarClient.js';
-import { logger } from './functions/logger.js';
+import { logger } from './functions/index.js';
 
 
 const rest = new REST({ version: APIVersion }).setToken(process.env.DISCORD_TOKEN);

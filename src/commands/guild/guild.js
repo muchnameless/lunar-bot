@@ -3,16 +3,12 @@ import { SnowflakeUtil, Formatters } from 'discord.js';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import ms from 'ms';
-import { demote, kick, invite, mute, promote, setRank, unmute, historyErrors, logErrors, topErrors } from '../../structures/chat_bridge/constants/commandResponses.js';
-import { removeMcFormatting } from '../../structures/chat_bridge/functions/util.js';
-import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants/discord.js';
-import { GUILD_ID_BRIDGER, UNKNOWN_IGN } from '../../constants/database.js';
-import { stringToMS, trim, getIdFromString, autocorrect } from '../../functions/util.js';
-import { UserUtil } from '../../util/UserUtil.js';
+import { demote, historyErrors, invite, kick, mute, logErrors, promote, setRank, topErrors, unmute } from '../../structures/chat_bridge/constants/index.js';
+import { EMBED_DESCRIPTION_MAX_CHARS, GUILD_ID_BRIDGER, UNKNOWN_IGN } from '../../constants/index.js';
 import { requiredPlayerOption, optionalPlayerOption, pageOption, requiredIgnOption, targetOption, forceOption, buildGuildOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil, UserUtil } from '../../util/index.js';
+import { autocorrect, getIdFromString, logger, removeMcFormatting, stringToMS, trim } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class GuildCommand extends SlashCommand {

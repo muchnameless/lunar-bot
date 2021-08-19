@@ -3,9 +3,8 @@ import pkg from 'sequelize';
 const { Op } = pkg;
 import { oneLine } from 'common-tags';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class UnlinkCommand extends SlashCommand {

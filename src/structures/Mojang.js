@@ -1,7 +1,6 @@
 import fetch from 'node-fetch';
-import { validateMinecraftIgn, validateMinecraftUuid } from '../functions/stringValidators.js';
 import { MojangAPIError } from './errors/MojangAPIError.js';
-// import { logger } from '../functions/logger.js';
+import { validateMinecraftIgn, validateMinecraftUuid } from '../functions/index.js';
 
 /**
  * @typedef MojangResult

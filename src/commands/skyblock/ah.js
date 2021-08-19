@@ -1,14 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageActionRow, MessageSelectMenu, MessageEmbed, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { COMMAND_KEY } from '../../constants/bot.js';
-import { upperCaseFirstChar } from '../../functions/util.js';
-import { getUuidAndIgn } from '../../functions/input.js';
+import { COMMAND_KEY } from '../../constants/index.js';
 import { hypixel } from '../../api/hypixel.js';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { getUuidAndIgn, logger, upperCaseFirstChar } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class AhCommand extends SlashCommand {

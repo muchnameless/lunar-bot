@@ -1,12 +1,7 @@
 import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } from 'discord.js';
-import { Y_EMOJI, X_EMOJI } from '../constants/emojiCharacters.js';
-import { GUILD_ID_ALL } from '../constants/database.js';
-import { validateDiscordId, validateMinecraftUuid } from '../functions/stringValidators.js';
-import { makeContent } from '../functions/util.js';
-import { ChannelUtil } from './ChannelUtil.js';
-import { MessageUtil } from './MessageUtil.js';
-import { UserUtil } from './UserUtil.js';
-import { logger } from '../functions/logger.js';
+import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants/index.js';
+import { MessageUtil, ChannelUtil, UserUtil } from './index.js';
+import { logger, makeContent, validateDiscordId, validateMinecraftUuid } from '../functions/index.js';
 
 
 /**
@@ -21,7 +16,7 @@ import { logger } from '../functions/logger.js';
  */
 
 
-export class InteractionUtil extends null {
+export default class InteractionUtil extends null {
 	/**
 	 * @type {WeakMap<GenericInteraction, InteractionData>}
 	 */

@@ -30,10 +30,10 @@ export const PROFILE_NAMES = Object.freeze([
 
 
 /**
- * skills
+ * SKILLS
  */
 
-export const skills = Object.freeze([
+export const SKILLS = Object.freeze([
 	'taming',
 	'farming',
 	'mining',
@@ -44,12 +44,12 @@ export const skills = Object.freeze([
 	'alchemy',
 ]);
 
-export const cosmeticSkills = Object.freeze([
+export const COSMETIC_SKILLS = Object.freeze([
 	'carpentry',
 	'runecrafting',
 ]);
 
-export const skillsAchievements = Object.freeze({
+export const SKILL_ACHIEVEMENTS = Object.freeze({
 	farming: 'skyblock_harvester',
 	mining: 'skyblock_excavator',
 	combat: 'skyblock_combat',
@@ -60,7 +60,7 @@ export const skillsAchievements = Object.freeze({
 	taming: 'skyblock_domesticator',
 });
 
-export const skillXp = Object.freeze({
+export const SKILL_XP = Object.freeze({
 	1: 50,
 	2: 125,
 	3: 200,
@@ -113,7 +113,7 @@ export const skillXp = Object.freeze({
 	50: 4_000_000,
 });
 
-export const skillXpPast50 = Object.freeze({
+export const SKILL_XP_PAST_50 = Object.freeze({
 	51: 4_300_000,
 	52: 4_600_000,
 	53: 4_900_000,
@@ -126,10 +126,10 @@ export const skillXpPast50 = Object.freeze({
 	60: 7_000_000,
 });
 
-export const skillXpTotal = Object.freeze(Object.fromEntries([ ...Object.entries(skillXp), ...Object.entries(skillXpPast50) ]
-	.map(([ level ], index) => [ level, [ ...Object.values(skillXp), ...Object.values(skillXpPast50) ].slice(0, index + 1).reduce((acc, curr) => acc + curr, 0) ])));
+export const SKILL_XP_TOTAL = Object.freeze(Object.fromEntries([ ...Object.entries(SKILL_XP), ...Object.entries(SKILL_XP_PAST_50) ]
+	.map(([ level ], index) => [ level, [ ...Object.values(SKILL_XP), ...Object.values(SKILL_XP_PAST_50) ].slice(0, index + 1).reduce((acc, curr) => acc + curr, 0) ])));
 
-export const runecraftingXp = Object.freeze({
+export const RUNECRAFTING_XP = Object.freeze({
 	1: 50,
 	2: 100,
 	3: 125,
@@ -157,7 +157,7 @@ export const runecraftingXp = Object.freeze({
 	25: 19_050,
 });
 
-export const skillCap = Object.freeze({
+export const SKILL_CAP = Object.freeze({
 	taming: 50,
 	farming: 60,
 	mining: 60,
@@ -176,7 +176,7 @@ export const skillCap = Object.freeze({
  * dungeons
  */
 
-export const dungeonXp = Object.freeze({
+export const DUNGEON_XP = Object.freeze({
 	1: 50,
 	2: 75,
 	3: 110,
@@ -229,15 +229,15 @@ export const dungeonXp = Object.freeze({
 	50: 116_250_000,
 });
 
-export const dungeonXpTotal = Object.freeze(Object.fromEntries(Object.entries(dungeonXp)
+export const DUNGEON_XP_TOTAL = Object.freeze(Object.fromEntries(Object.entries(DUNGEON_XP)
 	.map(([ level ], index) => [
 		level,
-		Object.values(dungeonXp)
+		Object.values(DUNGEON_XP)
 			.slice(0, index + 1)
 			.reduce((acc, curr) => acc + curr, 0),
 	])));
 
-export const dungeonCap = Object.freeze({
+export const DUNGEON_CAP = Object.freeze({
 	catacombs: 50,
 	healer: 50,
 	mage: 50,
@@ -246,11 +246,11 @@ export const dungeonCap = Object.freeze({
 	tank: 50,
 });
 
-export const dungeonTypes = Object.freeze([
+export const DUNGEON_TYPES = Object.freeze([
 	'catacombs',
 ]);
 
-export const dungeonClasses = Object.freeze([
+export const DUNGEON_CLASSES = Object.freeze([
 	'healer',
 	'mage',
 	'berserk',
@@ -258,21 +258,21 @@ export const dungeonClasses = Object.freeze([
 	'tank',
 ]);
 
-export const dungeonTypesAndClasses = Object.freeze([ ...dungeonTypes, ...dungeonClasses ]);
+export const DUNGEON_TYPES_AND_CLASSES = Object.freeze([ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ]);
 
 
 /**
- * slayers
+ * SLAYERS
  */
 
-export const slayers = Object.freeze([
+export const SLAYERS = Object.freeze([
 	'zombie',
 	'spider',
 	'wolf',
 	'enderman',
 ]);
 
-export const slayerXp = Object.freeze({
+export const SLAYER_XP = Object.freeze({
 	1: 5,
 	2: 15,
 	3: 200,

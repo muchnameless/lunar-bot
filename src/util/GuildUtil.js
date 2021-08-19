@@ -1,8 +1,8 @@
 import { Collection } from 'discord.js';
-import { logger } from '../functions/logger.js';
+import { logger } from '../functions/index.js';
 
 
-export class GuildUtil extends null {
+export default class GuildUtil extends null {
 	/**
 	 * @type {Map<import('discord.js').Snowflake, Promise<import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').GuildMember>>>}
 	 */

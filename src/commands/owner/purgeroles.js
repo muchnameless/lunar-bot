@@ -1,11 +1,9 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { setTimeout as sleep } from 'timers/promises';
 import ms from 'ms';
-import { GuildMemberUtil } from '../../util/GuildMemberUtil.js';
-import { GuildUtil } from '../../util/GuildUtil.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util/index.js';
+import { logger } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export default class PurgeRolesCommand extends SlashCommand {

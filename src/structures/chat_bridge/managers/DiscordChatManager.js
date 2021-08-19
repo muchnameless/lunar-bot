@@ -1,14 +1,11 @@
 import { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } from 'discord.js';
-import { prefixByType, urlRegExp } from '../constants/chatBridge.js';
-import { X_EMOJI, MUTED } from '../../../constants/emojiCharacters.js';
-import { ChannelUtil } from '../../../util/ChannelUtil.js';
-import { UserUtil } from '../../../util/UserUtil.js';
-import { MessageUtil } from '../../../util/MessageUtil.js';
-import { InteractionUtil } from '../../../util/InteractionUtil.js';
+import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants/index.js';
+import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI } from '../../../constants/index.js';
+import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../../util/index.js';
 import { WebhookError } from '../../errors/WebhookError.js';
 import { ChatManager } from './ChatManager.js';
 import { cache } from '../../../api/cache.js';
-import { logger } from '../../../functions/logger.js';
+import { logger } from '../../../functions/index.js';
 
 
 export class DiscordChatManager extends ChatManager {
@@ -31,7 +28,7 @@ export class DiscordChatManager extends ChatManager {
 		 * hypixel chat prefix
 		 * @type {string}
 		 */
-		this.prefix = prefixByType[type];
+		this.prefix = PREFIX_BY_TYPE[type];
 		/**
 		 * channel webhook
 		 */
@@ -43,7 +40,7 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * player ign or member displayName or author username, *blocked* if blockedWordsRegExp check doesn't pass
+	 * player ign or member displayName or author username, *blocked* if BLOCKED_WORDS_REGEXP check doesn't pass
 	 * @param {import('discord.js').Message} message
 	 */
 	static getPlayerName(message) {
@@ -54,7 +51,7 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * returns @name if the name passes the blockedWordsRegExp
+	 * returns @name if the name passes the BLOCKED_WORDS_REGEXP
 	 * @param {string} name
 	 */
 	static formatAtMention(name) {
@@ -276,25 +273,25 @@ export class DiscordChatManager extends ChatManager {
 		// check if player is muted
 		if (player?.muted) {
 			DiscordChatManager.#dmMuteInfo(message, player, `your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			return MessageUtil.react(message, MUTED);
+			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
 		// check if the player is auto muted
 		if (player?.infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 			DiscordChatManager.#dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
-			return MessageUtil.react(message, MUTED);
+			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild.muted && !player?.isStaff) {
 			DiscordChatManager.#dmMuteInfo(message, player, `${this.hypixelGuild.name}'s guild chat's mute expires ${Formatters.time(new Date(this.hypixelGuild.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			return MessageUtil.react(message, MUTED);
+			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.botPlayer?.muted) {
 			DiscordChatManager.#dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.botPlayer.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
-			return MessageUtil.react(message, MUTED);
+			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
 		// build content
@@ -324,7 +321,7 @@ export class DiscordChatManager extends ChatManager {
 			if (this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) {
 				let offset = 0;
 
-				for (const match of messageContent.matchAll(urlRegExp)) {
+				for (const match of messageContent.matchAll(DISCORD_CDN_URL_REGEXP)) {
 					const [ URL ] = match;
 					const [ [ START, END ] ] = match.indices;
 
@@ -350,7 +347,7 @@ export class DiscordChatManager extends ChatManager {
 		if (message.attachments.size) contentParts.push(...(await this.#uploadAttachments(message.attachments)));
 
 		// empty message (e.g. only embeds)
-		if (!contentParts.length) return MessageUtil.react(message, X_EMOJI);
+		if (!contentParts.length) return MessageUtil.react(message, STOP_EMOJI);
 
 		// send interaction "command" for initial application command reply
 		if (message.type === 'APPLICATION_COMMAND' && !message.editedTimestamp) {

@@ -1,5 +1,5 @@
 import { AsyncQueue } from '@sapphire/async-queue';
-import { blockedWordsRegExp } from '../constants/blockedWords.js';
+import { BLOCKED_WORDS_REGEXP } from '../constants/index.js';
 
 /**
  * @typedef {import('../MessageCollector').MessageCollectorOptions & { errors: ?string[] }} AwaitMessagesOptions
@@ -21,7 +21,7 @@ export class ChatManager {
 	/**
 	 * regexp to check for words that are blocked on hypixel
 	 */
-	static BLOCKED_WORDS_REGEXP = blockedWordsRegExp;
+	static BLOCKED_WORDS_REGEXP = BLOCKED_WORDS_REGEXP;
 
 	get mcAccount() {
 		return this.chatBridge.mcAccount;

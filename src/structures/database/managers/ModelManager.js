@@ -1,5 +1,5 @@
 import { Collection } from 'discord.js';
-import { logger } from '../../../functions/logger.js';
+import { logger } from '../../../functions/index.js';
 
 
 export class ModelManager {

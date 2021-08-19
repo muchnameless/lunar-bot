@@ -1,6 +1,14 @@
 import { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandIntegerOption } from '@discordjs/builders';
-import { PROFILE_NAMES, skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } from '../../constants/skyblock.js';
-import { XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT, GUILD_ID_ALL } from '../../constants/database.js';
+import {
+	COSMETIC_SKILLS,
+	DUNGEON_TYPES_AND_CLASSES,
+	GUILD_ID_ALL,
+	PROFILE_NAMES,
+	SKILLS,
+	SLAYERS,
+	XP_OFFSETS_CONVERTER,
+	XP_OFFSETS_SHORT,
+} from '../../constants/index.js';
 
 
 export const optionalIgnOption = new SlashCommandStringOption()
@@ -46,12 +54,11 @@ export const xpTypeOption = new SlashCommandStringOption()
 	.addChoices([
 		'weight',
 		[ 'skill average', 'skill-average' ],
-		...skills,
-		...cosmeticSkills,
+		...SKILLS,
+		...COSMETIC_SKILLS,
 		'slayer',
-		...slayers,
-		...dungeonTypes,
-		...dungeonClasses,
+		...SLAYERS,
+		...DUNGEON_TYPES_AND_CLASSES,
 		'guild',
 	].map(x => (typeof x === 'string' ? [ x, x ] : x)));
 

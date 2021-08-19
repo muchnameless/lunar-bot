@@ -1,15 +1,12 @@
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
 import { MessageEmbed, Formatters, Util } from 'discord.js';
-import { cleanFormattedNumber, compareAlphabetically, safePromiseAll } from '../../../functions/util.js';
-import { mutedCheck } from '../../../functions/database.js';
-import { setRank } from '../../chat_bridge/constants/commandResponses.js';
-import { EMBED_MAX_CHARS, EMBED_MAX_FIELDS, EMBED_FIELD_MAX_CHARS } from '../../../constants/discord.js';
-import { offsetFlags, UNKNOWN_IGN } from '../../../constants/database.js';
-import { GuildUtil } from '../../../util/GuildUtil.js';
+import { setRank } from '../../chat_bridge/constants/index.js';
+import { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS, OFFSET_FLAGS, UNKNOWN_IGN } from '../../../constants/index.js';
+import { GuildUtil } from '../../../util/index.js';
 import { hypixel } from '../../../api/hypixel.js';
 import { mojang } from '../../../api/mojang.js';
-import { logger } from '../../../functions/logger.js';
+import { cleanFormattedNumber, compareAlphabetically, logger, mutedCheck, safePromiseAll } from '../../../functions/index.js';
 
 /**
  * @typedef {object} GuildRank
@@ -465,7 +462,7 @@ export class HypixelGuild extends Model {
 						setTimeout(
 							(async () => {
 								// reset current xp to 0
-								await player.resetXp({ offsetToReset: offsetFlags.CURRENT }).catch(error => logger.error(error));
+								await player.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT }).catch(error => logger.error(error));
 
 								const { xpLastUpdatedAt } = player;
 								// shift the daily array for the amount of daily resets missed
@@ -479,13 +476,13 @@ export class HypixelGuild extends Model {
 
 								// to trigger the xp gained reset if global reset happened after the player left the guild
 								await safePromiseAll([
-									config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.COMPETITION_START }),
-									config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.COMPETITION_END }),
-									config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.MAYOR }),
-									config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.WEEK }),
-									config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: offsetFlags.MONTH }),
+									config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
+									config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
+									config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
+									config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
+									config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
 									...new Array(DAYS_PASSED_SINCE_LAST_XP_UPDATE).fill(null)
-										.map(() => player.resetXp({ offsetToReset: offsetFlags.DAY })),
+										.map(() => player.resetXp({ offsetToReset: OFFSET_FLAGS.DAY })),
 								]);
 
 								player.update({

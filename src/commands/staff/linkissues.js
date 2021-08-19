@@ -1,10 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters, Util } from 'discord.js';
-import { escapeIgn } from '../../functions/util.js';
-import { GuildUtil } from '../../util/GuildUtil.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { GuildUtil, InteractionUtil } from '../../util/index.js';
+import { escapeIgn } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class LinkIssuesCommand extends SlashCommand {

@@ -1,7 +1,7 @@
 import { readdir } from 'fs/promises';
 import { join, basename, extname } from 'path';
 import { fileURLToPath } from 'url';
-import { logger } from './logger.js';
+import { logger } from './index.js';
 
 
 /**

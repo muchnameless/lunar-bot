@@ -1,5 +1,4 @@
 import { BridgeCommand } from '../../../commands/BridgeCommand.js';
-// import logger from '../../../../functions/logger.js';
 
 
 export default class MyCommand extends BridgeCommand {

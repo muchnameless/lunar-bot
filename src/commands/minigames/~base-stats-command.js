@@ -1,8 +1,7 @@
-import { getUuidAndIgn } from '../../functions/input.js';
 import { hypixel } from '../../api/hypixel.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
+import { getUuidAndIgn, logger } from '../../functions/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-import { logger } from '../../functions/logger.js';
 
 /**
  * @typedef {object} FetchedData

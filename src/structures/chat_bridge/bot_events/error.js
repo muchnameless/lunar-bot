@@ -1,6 +1,3 @@
-// import { logger } from '../../../functions/logger.js';
-
-
 /**
  * @param {import('../ChatBridge').ChatBridge} chatBridge
  * @param {any} error

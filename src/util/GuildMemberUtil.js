@@ -1,10 +1,17 @@
-import { skills, slayers } from '../constants/skyblock.js';
-import { delimiterRoles, skillAverageRoles, skillRoles, slayerTotalRoles, slayerRoles, catacombsRoles } from '../constants/roles.js';
-import { UserUtil } from './UserUtil.js';
-// import { logger } from '../functions/logger.js';
+import {
+	CATACOMBS_ROLES,
+	DELIMITER_ROLES,
+	SKILL_AVERAGE_ROLES,
+	SKILL_ROLES,
+	SKILLS,
+	SLAYER_ROLES,
+	SLAYER_TOTAL_ROLES,
+	SLAYERS,
+} from '../constants/index.js';
+import { UserUtil } from './index.js';
 
 
-export class GuildMemberUtil extends null {
+export default class GuildMemberUtil extends null {
 	/**
 	 * @param {import('discord.js').GuildMember} member
 	 */
@@ -42,36 +49,36 @@ export class GuildMemberUtil extends null {
 		if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
 
 		// delimiter
-		for (const type of delimiterRoles) {
+		for (const type of DELIMITER_ROLES) {
 			if (member.roles.cache.has(config.get(`${type}_DELIMITER_ROLE_ID`))) rolesToRemove.push(config.get(`${type}_DELIMITER_ROLE_ID`));
 		}
 
 		// skill average
-		for (const level of skillAverageRoles) {
+		for (const level of SKILL_AVERAGE_ROLES) {
 			if (member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 		}
 
 		// individual skills
-		for (const skill of skills) {
-			for (const level of skillRoles) {
+		for (const skill of SKILLS) {
+			for (const level of SKILL_ROLES) {
 				if (member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
 			}
 		}
 
 		// total slayer
-		for (const level of slayerTotalRoles) {
+		for (const level of SLAYER_TOTAL_ROLES) {
 			if (member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 		}
 
 		// individual slayer
-		for (const slayer of slayers) {
-			for (const level of slayerRoles) {
+		for (const slayer of SLAYERS) {
+			for (const level of SLAYER_ROLES) {
 				if (member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
 			}
 		}
 
 		// catacombs
-		for (const level of catacombsRoles) {
+		for (const level of CATACOMBS_ROLES) {
 			if (member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 		}
 

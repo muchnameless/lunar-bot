@@ -1,9 +1,9 @@
 import { Permissions } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
-import { logger } from '../functions/logger.js';
+import { logger } from '../functions/index.js';
 
 
-export class ChannelUtil extends null {
+export default class ChannelUtil extends null {
 	static DM_PERMISSIONS = new Permissions();
 	static DEFAULT_SEND_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
 

@@ -1,5 +1,5 @@
 import Keyv from 'keyv';
-import { logger } from '../functions/logger.js';
+import { logger } from '../functions/index.js';
 
 
 export const cache = new Keyv(process.env.REDIS_URI, {

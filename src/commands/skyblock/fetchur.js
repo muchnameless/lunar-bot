@@ -1,9 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { zone, TimeStruct } from 'timezonecomplete';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil } from '../../util/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class FetchurCommand extends DualCommand {

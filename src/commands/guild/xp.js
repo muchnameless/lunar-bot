@@ -1,15 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed, Formatters } from 'discord.js';
 import { oneLine, stripIndents } from 'common-tags';
-import { skills, cosmeticSkills, slayers, dungeonTypes, dungeonClasses } from '../../constants/skyblock.js';
-import { XP_OFFSETS_TIME, XP_OFFSETS_CONVERTER } from '../../constants/database.js';
-import { /* escapeIgn, */ upperCaseFirstChar } from '../../functions/util.js';
-import { getDefaultOffset } from '../../functions/leaderboards.js';
-import { MessageEmbedUtil } from '../../util/MessageEmbedUtil.js';
+import { COSMETIC_SKILLS, DUNGEON_TYPES_AND_CLASSES, SKILLS, SLAYERS, XP_OFFSETS_CONVERTER, XP_OFFSETS_TIME } from '../../constants/index.js';
 import { optionalPlayerOption, pageOption, offsetOption } from '../../structures/commands/commonOptions.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { InteractionUtil, MessageEmbedUtil } from '../../util/index.js';
+import { getDefaultOffset, upperCaseFirstChar } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-// import { logger } from '../../functions/logger.js';
 
 
 export default class XpCommand extends SlashCommand {
@@ -35,7 +31,7 @@ export default class XpCommand extends SlashCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		const offset = interaction.options.getString('offset') ?? getDefaultOffset(this.config);
+		const OFFSET = interaction.options.getString('offset') ?? getDefaultOffset(this.config);
 		const player = InteractionUtil.getPlayer(interaction, true);
 
 		if (!player) {
@@ -53,27 +49,24 @@ export default class XpCommand extends SlashCommand {
 
 		const embeds = [];
 		const { skillAverage, trueAverage } = player.getSkillAverage();
-		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(offset);
+		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(OFFSET);
 
 		let embed = new MessageEmbed()
 			.setColor(this.config.get('EMBED_BLUE'))
 			.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
-			// .setTitle(`${escapeIgn(player.ign)}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`)
-			// .setURL(player.url)
-			// .setThumbnail(player.image)
-			.setDescription(`${`Δ: change since ${Formatters.time(new Date(Math.max(this.config.get(XP_OFFSETS_TIME[offset]), player.createdAt)))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`.padEnd(105, '\xa0')}\u200b`)
+			.setDescription(`${`Δ: change since ${Formatters.time(new Date(Math.max(this.config.get(XP_OFFSETS_TIME[OFFSET]), player.createdAt)))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[OFFSET])})`.padEnd(105, '\xa0')}\u200b`)
 			.addFields({
 				name: '\u200b',
 				value: stripIndents`
-					${Formatters.codeBlock('Skills')}
+					${Formatters.codeBlock('SKILLS')}
 					Average skill level: ${Formatters.bold(this.client.formatDecimalNumber(skillAverage))} [${Formatters.bold(this.client.formatDecimalNumber(trueAverage))}] - ${Formatters.bold('Δ')}: ${Formatters.bold(this.client.formatDecimalNumber(skillAverage - skillAverageOffset))} [${Formatters.bold(this.client.formatDecimalNumber(trueAverage - trueAverageOffset))}]
 				`,
 			});
 
 		// skills
-		for (const skill of skills) {
+		for (const skill of SKILLS) {
 			const SKILL_ARGUMENT = `${skill}Xp`;
-			const OFFSET_ARGUMENT = `${skill}Xp${offset}`;
+			const OFFSET_ARGUMENT = `${skill}Xp${OFFSET}`;
 			const { progressLevel } = player.getSkillLevel(skill);
 
 			embed.addFields({
@@ -89,7 +82,7 @@ export default class XpCommand extends SlashCommand {
 
 		MessageEmbedUtil.padFields(embed);
 
-		for (const skill of cosmeticSkills) {
+		for (const skill of COSMETIC_SKILLS) {
 			const SKILL_ARGUMENT = `${skill}Xp`;
 			const { progressLevel } = player.getSkillLevel(skill);
 
@@ -98,7 +91,7 @@ export default class XpCommand extends SlashCommand {
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
 					${Formatters.bold('XP:')} ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${offset}`], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`], 0, Math.round)}
 				`,
 				inline: true,
 			});
@@ -113,12 +106,12 @@ export default class XpCommand extends SlashCommand {
 			name: '\u200b',
 			value: stripIndents`
 				${Formatters.codeBlock('Slayer')}
-				Total slayer xp: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP))} - ${Formatters.bold('Δ')}: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(offset)))}
+				Total slayer xp: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP))} - ${Formatters.bold('Δ')}: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)))}
 			`,
 			inline: false,
 		});
 
-		for (const slayer of slayers) {
+		for (const slayer of SLAYERS) {
 			const SLAYER_ARGUMENT = `${slayer}Xp`;
 
 			embed.addFields({
@@ -126,7 +119,7 @@ export default class XpCommand extends SlashCommand {
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${player.getSlayerLevel(slayer)}
 					${Formatters.bold('XP:')} ${this.client.formatNumber(player[SLAYER_ARGUMENT])}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${offset}`], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`], 0, Math.round)}
 				`,
 				inline: true,
 			});
@@ -140,7 +133,7 @@ export default class XpCommand extends SlashCommand {
 			.setTimestamp(player.xpLastUpdatedAt);
 
 		// dungeons
-		for (const type of [ ...dungeonTypes, ...dungeonClasses ]) {
+		for (const type of DUNGEON_TYPES_AND_CLASSES) {
 			const DUNGEON_ARGUMENT = `${type}Xp`;
 			const { progressLevel } = player.getSkillLevel(type);
 
@@ -149,14 +142,14 @@ export default class XpCommand extends SlashCommand {
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
 					${Formatters.bold('XP:')} ${this.client.formatNumber(player[DUNGEON_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[DUNGEON_ARGUMENT] - player[`${type}Xp${offset}`], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`], 0, Math.round)}
 				`,
 				inline: true,
 			});
 		}
 
 		const { totalWeight, weight, overflow } = player.getSenitherWeight();
-		const { totalWeight: totalWeightOffet, weight: weightOffset, overflow: overflowOffset } = player.getSenitherWeight(offset);
+		const { totalWeight: totalWeightOffet, weight: weightOffset, overflow: overflowOffset } = player.getSenitherWeight(OFFSET);
 
 		MessageEmbedUtil.padFields(embed)
 			.addFields({
@@ -167,7 +160,7 @@ export default class XpCommand extends SlashCommand {
 				name: 'Hypixel Guild XP',
 				value: stripIndents`
 					${Formatters.bold('Total:')} ${this.client.formatNumber(player.guildXp)}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(player.guildXp - player[`guildXp${offset}`])}
+					${Formatters.bold('Δ:')} ${this.client.formatNumber(player.guildXp - player[`guildXp${OFFSET}`])}
 				`,
 				inline: true,
 			}, {

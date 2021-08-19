@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { cache } from '../api/cache.js';
-import { logger } from './logger.js';
+import { logger } from './index.js';
 
 
 export async function uuidToImageBuffer(uuid) {

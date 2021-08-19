@@ -1,10 +1,9 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { commaListsOr } from 'common-tags';
-import { autocorrect } from '../../functions/util.js';
-import { skills, dungeonTypes } from '../../constants/skyblock.js';
-import { InteractionUtil } from '../../util/InteractionUtil.js';
+import { DUNGEON_TYPES, SKILLS } from '../../constants/index.js';
+import { InteractionUtil } from '../../util/index.js';
+import { autocorrect, logger } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
-import { logger } from '../../functions/logger.js';
 
 
 export class CompetitionCommand extends SlashCommand {
@@ -20,7 +19,7 @@ export class CompetitionCommand extends SlashCommand {
 	/**
 	 * possible types for a competition
 	 */
-	static COMPETITION_TYPES = [ ...skills, 'slayer', ...dungeonTypes ];
+	static COMPETITION_TYPES = [ ...SKILLS, 'slayer', ...DUNGEON_TYPES ];
 
 	/**
 	 * execute the command

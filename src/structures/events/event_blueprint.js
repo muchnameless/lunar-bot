@@ -1,5 +1,4 @@
 import { Event } from '../structures/events/Event.js';
-// import { logger } from '../functions/logger.js';
 
 
 export default class MyEvent extends Event {

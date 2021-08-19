@@ -1,8 +1,7 @@
-import { EMBED_MAX_FIELDS } from '../constants/discord.js';
-// import { logger } from '../functions/logger.js';
+import { EMBED_MAX_FIELDS } from '../constants/index.js';
 
 
-export class MessageEmbedUtil extends null {
+export default class MessageEmbedUtil extends null {
 	/**
 	 * adds additional blank inline fields such that each line is filled with 'numberOfRows = 3' of them
 	 * @param {import('discord.js').MessageEmbed} embed

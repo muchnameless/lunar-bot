@@ -1,12 +1,12 @@
-import { Permissions } from 'discord.js';
+import { Permissions, Util } from 'discord.js';
 import { setTimeout as sleep } from 'timers/promises';
 import { commaListsAnd } from 'common-tags';
-import { replyPingRegExp } from '../constants/bot.js';
-import { ChannelUtil } from './ChannelUtil.js';
-import { logger } from '../functions/logger.js';
+import { REPLY_PING_REGEXP } from '../constants/index.js';
+import { ChannelUtil } from './index.js';
+import { logger } from '../functions/index.js';
 
 
-export class MessageUtil extends null {
+export default class MessageUtil extends null {
 	static DEFAULT_REPLY_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
 
 	/**
@@ -36,12 +36,13 @@ export class MessageUtil extends null {
 		const res = [];
 
 		try {
-			for (const emoji of emojis) {
-				const reaction = message.reactions.cache.get(message.client.emojis.resolveId(emoji));
+			for (const emojiIndetifier of emojis) {
+				const emoji = Util.resolvePartialEmoji(emojiIndetifier);
+				const reaction = message.reactions.cache.get(emoji?.id ?? emoji?.name);
 
 				res.push(reaction?.me
 					? reaction // reaction from bot already exists
-					: await message.react(emoji), // new reaction
+					: await message.react(emojiIndetifier), // new reaction
 				);
 			}
 		} catch (error) {
@@ -157,11 +158,11 @@ export class MessageUtil extends null {
 
 		if (!content) return message.edit(options);
 
-		const pingMatched = message.content?.match(replyPingRegExp)?.[0];
+		const PING_MATCHED = message.content?.match(REPLY_PING_REGEXP)?.[0];
 
 		return message.edit({
-			content: pingMatched && !content.startsWith(pingMatched)
-				? `${pingMatched}${content}`
+			content: PING_MATCHED && !content.startsWith(PING_MATCHED)
+				? `${PING_MATCHED}${content}`
 				: content,
 			...options,
 		});

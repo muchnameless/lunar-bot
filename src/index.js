@@ -4,7 +4,7 @@ config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 import { Intents, LimitedCollection, SnowflakeUtil, Options, Constants } from 'discord.js';
 import { db } from './structures/database/index.js';
 import { LunarClient } from './structures/LunarClient.js';
-import { logger } from './functions/logger.js';
+import { logger } from './functions/index.js';
 
 
 const client = new LunarClient({

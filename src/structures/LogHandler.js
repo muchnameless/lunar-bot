@@ -3,9 +3,9 @@ import { commaListsAnd } from 'common-tags';
 import { mkdir, writeFile, readdir, readFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
-import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants/discord.js';
-import { ChannelUtil } from '../util/ChannelUtil.js';
-import { logger } from '../functions/logger.js';
+import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants/index.js';
+import { ChannelUtil } from '../util/index.js';
+import { logger } from '../functions/index.js';
 
 
 export class LogHandler {
