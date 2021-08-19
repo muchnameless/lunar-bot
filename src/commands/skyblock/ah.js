@@ -53,9 +53,16 @@ export default class AhCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {{ ign: string, uuid: string, profileId: string, profiles: { label: string, value: string }[] }} param0
+	 * @param {{ ign: string, uuid: string, userId: import('discord.js').Snowflake }} param0
 	 */
-	async #generateReply({ ign, uuid, profileId, profiles }) {
+	#generateCustomId({ uuid, ign, userId }) {
+		return `${COMMAND_KEY}:${this.name}:${uuid}:${ign}:${userId}`;
+	}
+
+	/**
+	 * @param {{ ign: string, uuid: string, profileId: string, profiles: { label: string, value: string }[], userId: import('discord.js').Snowflake }} param0
+	 */
+	async #generateReply({ ign, uuid, profileId, profiles, userId }) {
 		try {
 			const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId);
 			const embed = this.client.defaultEmbed
@@ -72,7 +79,7 @@ export default class AhCommand extends SlashCommand {
 					components: [
 						new MessageActionRow().addComponents(
 							new MessageSelectMenu()
-								.setCustomId(`${COMMAND_KEY}:${this.name}:${uuid}:${ign}`)
+								.setCustomId(this.#generateCustomId({ uuid, ign, userId }))
 								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 								.addOptions(profiles),
 						),
@@ -125,7 +132,7 @@ export default class AhCommand extends SlashCommand {
 				components: [
 					new MessageActionRow().addComponents(
 						new MessageSelectMenu()
-							.setCustomId(`${COMMAND_KEY}:${this.name}:${uuid}:${ign}`)
+							.setCustomId(this.#generateCustomId({ uuid, ign, userId }))
 							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 							.addOptions(profiles),
 					),
@@ -146,27 +153,28 @@ export default class AhCommand extends SlashCommand {
 	}
 
 	/**
+	 * execute the command
 	 * @param {import('discord.js').SelectMenuInteraction} interaction
 	 */
 	async runSelect(interaction) {
 		InteractionUtil.deferUpdate(interaction);
 
 		try {
-			const [ , , uuid, ign ] = interaction.customId.split(':');
+			const [ , , uuid, ign, userId ] = interaction.customId.split(':');
 			const [ profileId ] = interaction.values;
 			const profiles = interaction.message.components[0].components[0].options;
 
 			// interaction from original requester -> edit message
-			if (interaction.user.id === interaction.message.interaction.user.id) {
-				return await InteractionUtil.update(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));
+			if (interaction.user.id === userId) {
+				return await InteractionUtil.update(interaction, await this.#generateReply({ uuid, ign, profileId, profiles, userId }));
 			}
 
 			// interaction from new requester -> new message
-			return await InteractionUtil.followUp(interaction, await this.#generateReply({ uuid, ign, profileId, profiles }));
+			return await InteractionUtil.reply(interaction, await this.#generateReply({ uuid, ign, profileId, profiles, userId: interaction.user.id }));
 		} catch (error) {
 			logger.error(error);
 
-			return await InteractionUtil.followUp(interaction, {
+			return await InteractionUtil.reply(interaction, {
 				content: `${error}`,
 				ephemeral: true,
 			});
@@ -195,7 +203,7 @@ export default class AhCommand extends SlashCommand {
 					components: [
 						new MessageActionRow().addComponents(
 							new MessageSelectMenu()
-								.setCustomId(`${COMMAND_KEY}:${this.name}:${uuid}:${ign}`)
+								.setCustomId(this.#generateCustomId({ uuid, ign, userId: interaction.user.id }))
 								.setDisabled(true)
 								.setPlaceholder('Profile: None'),
 						),
@@ -226,7 +234,7 @@ export default class AhCommand extends SlashCommand {
 						components: [
 							new MessageActionRow().addComponents(
 								new MessageSelectMenu()
-									.setCustomId(`${COMMAND_KEY}:${this.name}:${uuid}:${ign}`)
+									.setCustomId(this.#generateCustomId({ uuid, ign, userId: interaction.user.id }))
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)
 									.addOptions(profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id }))),
 							),
