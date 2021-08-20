@@ -32,6 +32,7 @@ export default class DebugCommand extends SlashCommand {
 							Ready at: ${Formatters.time(this.client.readyAt, Formatters.TimestampStyles.LongDateTime)}
 							Uptime: ${ms(this.client.uptime)}
 							Discord.js v${version}
+							Node.js ${process.version}
 						`,
 					}, {
 						name: 'Cache',
