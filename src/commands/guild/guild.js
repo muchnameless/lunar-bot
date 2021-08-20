@@ -525,10 +525,15 @@ export default class GuildCommand extends SlashCommand {
 				});
 
 				const IGN = InteractionUtil.getIgn(interaction, true);
-				if (!IGN) return await InteractionUtil.reply(interaction, {
-					content: 'you are not in the player db',
-					ephemeral: true,
-				});
+				if (!IGN) {
+					const IGN_INPUT = interaction.options.getString('player');
+					return await InteractionUtil.reply(interaction, {
+						content: IGN_INPUT
+							? `\`${IGN_INPUT}\` is not in the player db`
+							: 'you are not in the player db',
+						ephemeral: true,
+					});
+				}
 
 				return this.#run(interaction, {
 					command: `g member ${IGN}`,
