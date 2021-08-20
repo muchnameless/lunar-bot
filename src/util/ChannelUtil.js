@@ -9,6 +9,21 @@ export default class ChannelUtil extends null {
 
 	/**
 	 * @param {?import('discord.js').Channel} channel
+	 */
+	static logInfo(channel) {
+		if (!channel) return null;
+
+		switch (channel.type) {
+			case 'DM':
+				return `#${channel.recipient?.tag ?? `DM-${channel.recipient.id}`}`;
+
+			default:
+				return `#${channel.name}`;
+		}
+	}
+
+	/**
+	 * @param {?import('discord.js').Channel} channel
 	 * @returns {?Readonly<Permissions>}
 	 */
 	static botPermissions(channel) {

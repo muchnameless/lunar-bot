@@ -1,4 +1,4 @@
-import { Permissions, Util } from 'discord.js';
+import { Permissions, MessageFlags, Util } from 'discord.js';
 import { setTimeout as sleep } from 'timers/promises';
 import { commaListsAnd } from 'common-tags';
 import { REPLY_PING_REGEXP } from '../constants/index.js';
@@ -17,7 +17,23 @@ export default class MessageUtil extends null {
 	}
 
 	/**
-	 * wether the command was sent by a non-bot user account
+	 * @param {import('discord.js').Message} message
+	 */
+	static channelLogInfo(message) {
+		const { channel } = message;
+		if (!channel) return message.channelId;
+		return ChannelUtil.logInfo(channel);
+	}
+
+	/**
+	 * @param {import('discord.js').Message} message
+	 */
+	static isEphemeral(message) {
+		return message.flags.has(MessageFlags.FLAGS.EPHEMERAL);
+	}
+
+	/**
+	 * wether the message was sent by a non-bot user account
 	 * @param {import('discord.js').Message} message
 	 */
 	static isUserMessage(message) {
@@ -25,7 +41,7 @@ export default class MessageUtil extends null {
 	}
 
 	/**
-	 * wether the command was sent by a non-application-command webhook
+	 * wether the message was sent by a non-application-command webhook
 	 * @param {import('discord.js').Message} message
 	 */
 	static isNormalWebhookMessage(message) {
@@ -33,11 +49,19 @@ export default class MessageUtil extends null {
 	}
 
 	/**
-	 * wether the command was a reply but not to an application command
+	 * wether the message is a reply but not to an application command
 	 * @param {import('discord.js').Message} message
 	 */
 	static isNormalReplyMessage(message) {
 		return message.type === 'REPLY' && !message.webhookId;
+	}
+
+	/**
+	 * wether the message is from the bot user and not related to application commands
+	 * @param {import('discord.js').Message} message
+	 */
+	static isNormalBotMessage(message) {
+		return message.editable && (message.type === 'DEFAULT' || this.isNormalReplyMessage(message));
 	}
 
 	/**
@@ -46,8 +70,8 @@ export default class MessageUtil extends null {
 	 * @param {import('discord.js').EmojiIdentifierResolvable[]} emojis
 	 */
 	static async react(message, ...emojis) {
-		if (!message || message.deleted) return null;
-		if (!ChannelUtil.botPermissions(message.channel)?.has(Permissions.FLAGS.ADD_REACTIONS)) return null;
+		if (!message || message.deleted || this.isEphemeral(message)) return null;
+		if (!ChannelUtil.botPermissions(message.channel)?.has(Permissions.FLAGS.ADD_REACTIONS)) return logger.warn(`[MESSAGE REACT]: missing permissions in ${this.channelLogInfo(message)}`);
 
 		const res = [];
 
@@ -78,7 +102,7 @@ export default class MessageUtil extends null {
 		if (message.deleted) return message; // message already deleted check
 
 		if (!message.deletable) { // permission check
-			logger.warn(`[MESSAGE DELETE]: missing permission to delete message from ${message.author.tag} in #${message.channel?.name ?? message.channelId}`);
+			logger.warn(`[MESSAGE DELETE]: missing permission to delete message from ${message.author.tag} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
@@ -169,7 +193,7 @@ export default class MessageUtil extends null {
 				.map(permission => `'${permission}'`);
 			const errorMessage = commaListsAnd`missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
 
-			return logger.warn(`${errorMessage} #${channel.name}`);
+			return logger.warn(`${errorMessage} ${ChannelUtil.logInfo(channel)}`);
 		}
 
 		if (!content) return message.edit(options);
