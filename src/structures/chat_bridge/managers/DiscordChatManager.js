@@ -44,9 +44,10 @@ export class DiscordChatManager extends ChatManager {
 	 * @param {import('discord.js').Message} message
 	 */
 	static getPlayerName(message) {
-		return this.formatAtMention(message.webhookId
-			? UserUtil.getPlayer(message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.user)?.ign ?? message.author.username
-			: UserUtil.getPlayer(message.author)?.ign ?? message.member?.displayName ?? message.author.username,
+		return this.formatAtMention(
+			MessageUtil.isNormalWebhookMessage(message)
+				? UserUtil.getPlayer(message.guild.members.cache.find(({ displayName }) => displayName === message.author.username)?.user)?.ign ?? message.author.username
+				: UserUtil.getPlayer(message.author)?.ign ?? message.member?.displayName ?? message.author.username,
 		);
 	}
 
@@ -56,7 +57,7 @@ export class DiscordChatManager extends ChatManager {
 	 */
 	static formatAtMention(name) {
 		return this.BLOCKED_WORDS_REGEXP.test(name)
-			? '*blocked*'
+			? '*blocked name*'
 			: name;
 	}
 
@@ -298,7 +299,7 @@ export class DiscordChatManager extends ChatManager {
 		const contentParts = [];
 
 		// @referencedMessageAuthor if normal reply
-		if (message.type === 'REPLY' && !message.webhookId) {
+		if (MessageUtil.isNormalReplyMessage(message)) {
 			try {
 				const referencedMessage = await message.fetchReference();
 

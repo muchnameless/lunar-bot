@@ -17,11 +17,27 @@ export default class MessageUtil extends null {
 	}
 
 	/**
-	 * wether the command was send by a non-bot user account
+	 * wether the command was sent by a non-bot user account
 	 * @param {import('discord.js').Message} message
 	 */
 	static isUserMessage(message) {
 		return !message.author?.bot && !message.webhookId && !message.system;
+	}
+
+	/**
+	 * wether the command was sent by a non-application-command webhook
+	 * @param {import('discord.js').Message} message
+	 */
+	static isNormalWebhookMessage(message) {
+		return message.webhookId && message.webhookId !== message.applicationId;
+	}
+
+	/**
+	 * wether the command was a reply but not to an application command
+	 * @param {import('discord.js').Message} message
+	 */
+	static isNormalReplyMessage(message) {
+		return message.type === 'REPLY' && !message.webhookId;
 	}
 
 	/**
