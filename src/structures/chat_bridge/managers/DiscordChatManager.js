@@ -304,7 +304,7 @@ export class DiscordChatManager extends ChatManager {
 				const referencedMessage = await message.fetchReference();
 
 				// author found and author is not already pinged
-				if (referencedMessage.author && !message.mentions.users.has(referencedMessage.author.id)) {
+				if (referencedMessage.author && !new RegExp(`<@!?${referencedMessage.author.id}>`).test(message.content)) {
 					contentParts.push(`@${DiscordChatManager.getPlayerName(referencedMessage)}`);
 				}
 			} catch (error) {
