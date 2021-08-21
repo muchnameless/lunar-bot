@@ -7,13 +7,12 @@ export class ModelManager {
 	 * @param {object} param0
 	 * @param {import('../../LunarClient').LunarClient} param0.client
 	 * @param {import('sequelize').Model} param0.model
-	 * @param {Collection} param0.CacheCollection
 	 */
-	constructor({ client, model, CacheCollection = Collection }) {
+	constructor({ client, model }) {
 		this.client = client;
 		this.model = model;
 		/** @type {Collection<string, import('sequelize').Model>} */
-		this.cache = new CacheCollection();
+		this.cache = new Collection();
 		[ this.primaryKey ] = model.primaryKeyAttributes;
 	}
 

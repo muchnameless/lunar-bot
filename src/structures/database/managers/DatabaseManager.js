@@ -1,7 +1,6 @@
 import { Permissions, Formatters } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';
-import { isEqual } from 'lodash-es';
 import pkg from 'sequelize';
 const { Model } = pkg;
 import { DEFAULT_CONFIG, X_EMOJI, Y_EMOJI_ALT } from '../../../constants/index.js';
@@ -16,7 +15,6 @@ import { Player } from '../models/Player.js';
 import { TaxCollector } from '../models/TaxCollector.js';
 import { ModelManager } from './ModelManager.js';
 import { ChatTrigger } from '../models/ChatTrigger.js';
-import { ArrayCacheCollection } from '../../ArrayCacheCollection.js';
 import { ChannelUtil } from '../../../util/index.js';
 import { asyncFilter, logger, safePromiseAll } from '../../../functions/index.js';
 
@@ -31,7 +29,7 @@ export class DatabaseManager {
 		this.modelManagers = {
 			config: new ConfigManager({ client, model: Config }),
 			hypixelGuilds: new HypixelGuildManager({ client, model: HypixelGuild }),
-			players: new PlayerManager({ client, model: Player, CacheCollection: ArrayCacheCollection }),
+			players: new PlayerManager({ client, model: Player }),
 			taxCollectors: new TaxCollectorManager({ client, model: TaxCollector }),
 			chatTriggers: new ModelManager({ client, model: ChatTrigger }),
 		};
@@ -272,9 +270,17 @@ export class DatabaseManager {
 
 			// construct player list in three rows: paid emoji + non line-breaking space + player ign, slice to keep everything in one line
 			if (config.get('TAX_TRACKING_ENABLED')) {
-				for (const [ index, player ] of hypixelGuild.players.array().entries()) values[Math.floor(index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\xa0${player.ign.slice(0, 15)}`;
+				let index = -1;
+
+				for (const player of hypixelGuild.players.values()) {
+					values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\xa0${player.ign.slice(0, 15)}`;
+				}
 			} else {
-				for (const [ index, player ] of hypixelGuild.players.array().entries()) values[Math.floor(index / ENTRIES_PER_ROW)] += `\n•\xa0${player.ign.slice(0, 15)}`;
+				let index = -1;
+
+				for (const player of hypixelGuild.players.values()) {
+					values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n•\xa0${player.ign.slice(0, 15)}`;
+				}
 			}
 
 			// add rows to tax embed
@@ -353,7 +359,10 @@ export class DatabaseManager {
 			}
 		}
 
-		if (taxMessage.embeds[0]?.description === taxEmbed.description && isEqual(taxMessage.embeds[0].fields, taxEmbed.fields)) return; // no changes to taxMessage
+		if (taxMessage.embeds[0]?.description === taxEmbed.description
+			&& taxMessage.embeds[0].fields
+				.every(({ name, value }, index) => taxEmbed.fields[index].name === name && taxEmbed.fields[index].value === value)
+		) return; // no changes to taxMessage
 
 		try {
 			await taxMessage.edit({
@@ -361,6 +370,7 @@ export class DatabaseManager {
 					taxEmbed,
 				],
 			});
+
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 		} catch (error) {
 			logger.error('[TAX MESSAGE]', error);

@@ -185,7 +185,7 @@ export async function handleLeaderboardCommandInteraction(interaction, leaderboa
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	/** @type {?MessageEmbed[]} */
 	const embeds = await cache.get(CACHE_KEY)
-		?? await createLeaderboardEmbeds(
+		?? createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		);
@@ -234,7 +234,7 @@ export async function handleLeaderboardButtonInteraction(interaction) {
 	const IS_RELOAD = EMOJI === RELOAD_EMOJI;
 	/** @type {?MessageEmbed[]} */
 	const embeds = IS_RELOAD
-		? await createLeaderboardEmbeds(
+		? createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		)
@@ -334,7 +334,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction) {
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	/** @type {?MessageEmbed[]} */
 	const embeds = await cache.get(CACHE_KEY)
-		?? await createLeaderboardEmbeds(
+		?? createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		);
@@ -356,7 +356,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction) {
  * @param {import('../structures/LunarClient').LunarClient} client
  * @param {LeaderboardData} param1
  */
-async function createLeaderboardEmbeds(client, { title, description, playerData, playerRequestingEntry, getEntry, isCompetition, lastUpdatedAt }) {
+function createLeaderboardEmbeds(client, { title, description, playerData, playerRequestingEntry, getEntry, isCompetition, lastUpdatedAt }) {
 	const { config } = client;
 	const ELEMENTS_PER_PAGE = config.get('ELEMENTS_PER_PAGE');
 	const PLAYER_COUNT = playerData.length;
@@ -423,6 +423,35 @@ function getLeaderboardDataCreater(lbType) {
 }
 
 /**
+ * @typedef {object} PlayerData
+ * @property {string} ign
+ * @property {import('discord.js').Snowflake} discordId
+ * @property {number} xpLastUpdatedAt
+ * @property {boolean} paid
+ * @property {number} sortingStat
+ */
+
+/**
+ * @typedef {Function} dataConverter
+ * @param {import('../../structures/database/models/Player').Player} player
+ * @returns {PlayerData}
+ */
+
+/**
+ * @param {import('../structures/LunarClient').LunarClient} client
+ * @param {import('../structures/database/models/HypixelGuild').HypixelGuild | GUILD_ID_ALL} hypixelGuild
+ * @param {dataConverter} dataConverter
+ * @returns {PlayerData[]}
+ */
+function getPlayerData(client, hypixelGuild, dataConverter) {
+	if (hypixelGuild !== GUILD_ID_ALL) {
+		return hypixelGuild.players.map(dataConverter).sort((a, b) => b.sortingStat - a.sortingStat);
+	}
+
+	return client.players.inGuild.map(dataConverter).sort((a, b) => b.sortingStat - a.sortingStat);
+}
+
+/**
  * create gained leaderboard data
  * @param {import('../structures/LunarClient').LunarClient} client
  * @param {LeaderboardArgs} param1
@@ -437,15 +466,7 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 	const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END
 		? OFFSET_FLAGS.COMPETITION_END
 		: '';
-	/** @type {import('../../structures/database/models/Player').Player[]} */
-	const playerDataRaw = hypixelGuild !== GUILD_ID_ALL
-		? hypixelGuild.players.array()
-		: client.players.inGuild.array();
-	const PLAYER_COUNT = playerDataRaw.length;
 	const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
-	const LAST_UPDATED_AT = SHOULD_USE_COMPETITION_END
-		? COMPETITION_END_TIME
-		: Math.min(...playerDataRaw.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
 
 	/** @type {PlayerData[]} */
 	let playerData;
@@ -464,9 +485,7 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 				paid: player.paid,
 				sortingStat: player.getSlayerTotal(CURRENT_OFFSET) - player.getSlayerTotal(offset),
 			});
-			playerData = playerDataRaw
-				.map(dataConverter)
-				.sort((a, b) => b.sortingStat - a.sortingStat);
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round));
 			getEntry = player => client.formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
 			break;
@@ -481,18 +500,17 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 				return {
 					ign: player.ign,
 					discordId: player.discordId,
+					xpLastUpdatedAt: player.xpLastUpdatedAt,
 					paid: player.paid,
 					skillAverageGain,
 					trueAverageGain: trueAverage - trueAverageOffset,
 					sortingStat: skillAverageGain,
 				};
 			};
-			playerData = playerDataRaw
-				.map(dataConverter)
-				.sort((a, b) => b.sortingStat - a.sortingStat);
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
-				${Formatters.bold((playerData.reduce((acc, player) => acc + player.skillAverageGain, 0) / PLAYER_COUNT).toFixed(2))}
-				[${Formatters.bold((playerData.reduce((acc, player) => acc + player.trueAverageGain, 0) / PLAYER_COUNT).toFixed(2))}]`;
+				${Formatters.bold((playerData.reduce((acc, player) => acc + player.skillAverageGain, 0) / playerData.length).toFixed(2))}
+				[${Formatters.bold((playerData.reduce((acc, player) => acc + player.trueAverageGain, 0) / playerData.length).toFixed(2))}]`;
 			getEntry = player => `${client.formatDecimalNumber(player.skillAverageGain, Math.floor(playerData[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.trueAverageGain, Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
 			break;
 		}
@@ -510,6 +528,7 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 				return {
 					ign: player.ign,
 					discordId: player.discordId,
+					xpLastUpdatedAt: player.xpLastUpdatedAt,
 					isStaff: player.isStaff,
 					guildId: player.guildId,
 					gainedWeight,
@@ -520,8 +539,7 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 					// sortingStat: totalWeight * (gainedWeight > 0 ? 1 + (gainedWeight / totalWeight) : 0.75) * (gainedGuildXp > 5_000 ? (gainedGuildXp / 5_000) ** (1 / 10) : 0.9),
 				};
 			};
-			playerData = playerDataRaw
-				.map(dataConverter)
+			playerData = getPlayerData(client, hypixelGuild, dataConverter)
 				.sort((a, b) => a.totalWeight - b.totalWeight)
 				.sort((a, b) => a.sortingStat - b.sortingStat);
 			const temp1 = Math.floor(playerData.at(-1).sortingStat).toLocaleString(NUMBER_FORMAT).length;
@@ -530,8 +548,8 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 			const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...playerData.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
 			getEntry = player => `${client.formatDecimalNumber(player.sortingStat, temp1)} - ${client.formatDecimalNumber(player.gainedWeight, PADDING_AMOUNT_GAIN)} [${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)}] - ${client.formatNumber(player.gainedGuildXp, temp2)}`;
 			totalStats = oneLine`
-				${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / PLAYER_COUNT)} 
-				[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT)}]`;
+				${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / playerData.length)} 
+				[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / playerData.length)}]`;
 			break;
 		}
 
@@ -544,6 +562,7 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 				return {
 					ign: player.ign,
 					discordId: player.discordId,
+					xpLastUpdatedAt: player.xpLastUpdatedAt,
 					paid: player.paid,
 					weightGain: weight - weightOffset,
 					overflowGain: overflow - overflowOffset,
@@ -551,13 +570,11 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 					sortingStat: totalWeightGain,
 				};
 			};
-			playerData = playerDataRaw
-				.map(dataConverter)
-				.sort((a, b) => b.sortingStat - a.sortingStat);
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
-				${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeightGain, 0) / PLAYER_COUNT))}
-				[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weightGain, 0) / PLAYER_COUNT))}
-				+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflowGain, 0) / PLAYER_COUNT))}]`;
+				${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeightGain, 0) / playerData.length))}
+				[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weightGain, 0) / playerData.length))}
+				+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflowGain, 0) / playerData.length))}]`;
 			getEntry = player => `${client.formatDecimalNumber(player.totalWeightGain, Math.floor(playerData[0]?.totalWeightGain).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.weightGain, Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain))).toLocaleString(NUMBER_FORMAT).length)} + ${client.formatDecimalNumber(player.overflowGain, Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
 			break;
 		}
@@ -569,12 +586,11 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 			dataConverter = player => ({
 				ign: player.ign,
 				discordId: player.discordId,
+				xpLastUpdatedAt: player.xpLastUpdatedAt,
 				paid: player.paid,
 				sortingStat: player[XP_ARGUMENT] - player[OFFSET_ARGUMENT],
 			});
-			playerData = playerDataRaw
-				.map(dataConverter)
-				.sort((a, b) => b.sortingStat - a.sortingStat);
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0), 0, Math.round));
 			getEntry = player => client.formatNumber(player.sortingStat, Math.round(playerData[0]?.sortingStat).toLocaleString(NUMBER_FORMAT).length, Math.round);
 		}
@@ -593,7 +609,7 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 			description += `Tracking xp gained since ${Formatters.time(new Date(config.get(XP_OFFSETS_TIME[offset])))}\n`;
 		}
 
-		description += `${hypixelGuild?.name ?? 'Guilds'} total (${PLAYER_COUNT} members): ${totalStats}`;
+		description += `${hypixelGuild?.name ?? 'Guilds'} total (${playerData.length} members): ${totalStats}`;
 		title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset])})`;
 	} else if (hypixelGuild !== GUILD_ID_ALL) { // purge list
 		const { weightReq } = hypixelGuild;
@@ -650,7 +666,9 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 		playerRequestingEntry,
 		getEntry,
 		isCompetition: IS_COMPETITION_LB,
-		lastUpdatedAt: LAST_UPDATED_AT,
+		lastUpdatedAt: SHOULD_USE_COMPETITION_END
+			? COMPETITION_END_TIME
+			: Math.min(...playerData.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt))),
 	};
 }
 
@@ -662,15 +680,7 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
  */
 function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', xpType }) {
 	const { config } = client;
-	/** @type {import('../../structures/database/models/Player').Player[]} */
-	const playerDataRaw = hypixelGuild !== GUILD_ID_ALL
-		? hypixelGuild.players.array()
-		: client.players.inGuild.array();
-	const PLAYER_COUNT = playerDataRaw.length;
 	const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
-	const LAST_UPDATED_AT = offset
-		? config.get(XP_OFFSETS_TIME[offset])
-		: Math.min(...playerDataRaw.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt)));
 
 	/** @type {PlayerData[]} */
 	let playerData;
@@ -686,12 +696,11 @@ function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', x
 			dataConverter = player => ({
 				ign: player.ign,
 				discordId: player.discordId,
+				xpLastUpdatedAt: player.xpLastUpdatedAt,
 				sortingStat: player.getSlayerTotal(offset),
 			});
-			playerData = playerDataRaw
-				.map(dataConverter)
-				.sort((a, b) => b.sortingStat - a.sortingStat);
-			totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round));
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
+			totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / playerData.length, 0, Math.round));
 			getEntry = player => client.formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
 			break;
 		}
@@ -703,17 +712,16 @@ function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', x
 				return {
 					ign: player.ign,
 					discordId: player.discordId,
+					xpLastUpdatedAt: player.xpLastUpdatedAt,
 					skillAverage,
 					trueAverage,
 					sortingStat: skillAverage,
 				};
 			};
-			playerData = playerDataRaw
-				.map(dataConverter)
-				.sort((a, b) => b.sortingStat - a.sortingStat);
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
-				${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.skillAverage, 0) / PLAYER_COUNT, 2))}
-				[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.trueAverage, 0) / PLAYER_COUNT, 2))}]`;
+				${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.skillAverage, 0) / playerData.length, 2))}
+				[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.trueAverage, 0) / playerData.length, 2))}]`;
 			getEntry = player => `${client.formatDecimalNumber(player.skillAverage, 2)} [${client.formatDecimalNumber(player.trueAverage, 2)}]`;
 			break;
 		}
@@ -728,12 +736,11 @@ function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', x
 			dataConverter = player => ({
 				ign: player.ign,
 				discordId: player.discordId,
+				xpLastUpdatedAt: player.xpLastUpdatedAt,
 				sortingStat: player[XP_ARGUMENT],
 			});
-			playerData = playerDataRaw
-				.map(dataConverter)
-				.sort((a, b) => b.sortingStat - a.sortingStat);
-			totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / PLAYER_COUNT, 0, Math.round));
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
+			totalStats = Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / playerData.length, 0, Math.round));
 			getEntry = player => client.formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
 			break;
 		}
@@ -745,19 +752,18 @@ function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', x
 				return {
 					ign: player.ign,
 					discordId: player.discordId,
+					xpLastUpdatedAt: player.xpLastUpdatedAt,
 					weight,
 					overflow,
 					totalWeight,
 					sortingStat: totalWeight,
 				};
 			};
-			playerData = playerDataRaw
-				.map(dataConverter)
-				.sort((a, b) => b.sortingStat - a.sortingStat);
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
-				${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / PLAYER_COUNT))}
-				[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight, 0) / PLAYER_COUNT))}
-				+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow, 0) / PLAYER_COUNT))}]`;
+				${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / playerData.length))}
+				[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight, 0) / playerData.length))}
+				+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow, 0) / playerData.length))}]`;
 			getEntry = player => `${client.formatDecimalNumber(player.totalWeight, Math.floor(playerData[0]?.totalWeight).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.weight, Math.floor(Math.max(...playerData.map(({ weight }) => weight))).toLocaleString(NUMBER_FORMAT).length)} + ${client.formatDecimalNumber(player.overflow, Math.floor(Math.max(...playerData.map(({ overflow }) => overflow))).toLocaleString(NUMBER_FORMAT).length)}]`;
 			break;
 		}
@@ -768,16 +774,15 @@ function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', x
 			dataConverter = player => ({
 				ign: player.ign,
 				discordId: player.discordId,
+				xpLastUpdatedAt: player.xpLastUpdatedAt,
 				xp: player[XP_ARGUMENT],
 				progressLevel: player.getSkillLevel(xpType, offset).progressLevel,
 				sortingStat: player[XP_ARGUMENT],
 			});
-			playerData = playerDataRaw
-				.map(dataConverter)
-				.sort((a, b) => b.sortingStat - a.sortingStat);
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
-				${Formatters.bold((playerData.reduce((acc, player) => acc + player.progressLevel, 0) / PLAYER_COUNT).toFixed(2))}
-				[${Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.xp, 0) / PLAYER_COUNT, 0, Math.round))} XP]`;
+				${Formatters.bold((playerData.reduce((acc, player) => acc + player.progressLevel, 0) / playerData.length).toFixed(2))}
+				[${Formatters.bold(client.formatNumber(playerData.reduce((acc, player) => acc + player.xp, 0) / playerData.length, 0, Math.round))} XP]`;
 			getEntry = player => `${client.formatDecimalNumber(player.progressLevel, 2)} [${client.formatNumber(player.xp, Math.round(playerData[0]?.xp).toLocaleString(NUMBER_FORMAT).length, Math.round)} XP]`;
 			break;
 		}
@@ -817,10 +822,12 @@ function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', x
 
 	return {
 		title,
-		description: `${`${hypixelGuild?.name ?? 'Guilds'} average (${PLAYER_COUNT} members): ${totalStats}`.padEnd(62, '\xa0')}\u200b`,
+		description: `${`${hypixelGuild?.name ?? 'Guilds'} average (${playerData.length} members): ${totalStats}`.padEnd(62, '\xa0')}\u200b`,
 		playerData,
 		playerRequestingEntry,
 		getEntry,
-		lastUpdatedAt: LAST_UPDATED_AT,
+		lastUpdatedAt: offset
+			? config.get(XP_OFFSETS_TIME[offset])
+			: Math.min(...playerData.map(({ xpLastUpdatedAt }) => Number(xpLastUpdatedAt))),
 	};
 }

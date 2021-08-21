@@ -238,21 +238,25 @@ export class HypixelGuild extends Model {
 	 * guild players that have a requestable rank without meeting the requirements
 	 */
 	get playersBelowRankReqs() {
-		return this.players.array().flatMap((player) => {
+		const ret = [];
+
+		for (const player of this.players.values()) {
 			const rank = player.guildRank;
 
-			if (!rank?.roleId) return []; // unkown or non-requestable rank
+			if (!rank?.roleId) continue; // unkown or non-requestable rank
 
 			const { totalWeight } = player.getSenitherWeight();
 
-			if (totalWeight >= rank.weightReq) return [];
+			if (totalWeight >= rank.weightReq) continue;
 
-			return {
+			ret.push({
 				player,
 				totalWeight,
 				rank,
-			};
-		});
+			});
+		}
+
+		return ret;
 	}
 
 	/**
@@ -607,8 +611,7 @@ export class HypixelGuild extends Model {
 
 			let staffAmount = 0;
 
-			const playersSortedByWeight = this.players
-				.array()
+			const playersSortedByWeight = [ ...this.players.values() ]
 				.sort((p1, p2) => p1.getSenitherWeight().totalWeight - p2.getSenitherWeight().totalWeight) // from lowest to highest weight
 				.map((player, index) => ({
 					player,

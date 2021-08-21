@@ -21,20 +21,12 @@ export class PlayerManager extends ModelManager {
 
 		/**
 		 * @type {import('discord.js').Collection<string, import('../models/Player').Player>}
-		 * @ type {import('../../ArrayCacheCollection')<string, import('../models/Player').Player>}
 		 */
 		this.cache;
 		/**
 		 * @type {import('../models/Player').Player}
 		 */
 		this.model;
-	}
-
-	/**
-	 * @returns {string[]}
-	 */
-	get ignoredAuctions() {
-		return this.cache.array().flatMap(player => player.auctionId ?? []);
 	}
 
 	/**
