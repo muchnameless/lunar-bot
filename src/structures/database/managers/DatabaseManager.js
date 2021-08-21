@@ -56,7 +56,7 @@ export class DatabaseManager {
 
 		this.client.schedule('updatePlayerDatabase', new CronJobConstructor({
 			cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
-			onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.update(),
+			onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.updateData(),
 			start: true,
 		}));
 
@@ -311,7 +311,7 @@ export class DatabaseManager {
 	 * updates the player database and the corresponding tax message
 	 * @param {import('../../LunarClient').LunarClient} client
 	 */
-	async update() {
+	async updateData() {
 		const { config, players } = this.modelManagers;
 
 		// the hypxiel api encountered an error before
@@ -323,7 +323,7 @@ export class DatabaseManager {
 		}
 
 		// update player db
-		await this.modelManagers.hypixelGuilds.update({ syncRanks: true });
+		await this.modelManagers.hypixelGuilds.updateData({ syncRanks: true });
 
 		// update tax db
 		const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED')

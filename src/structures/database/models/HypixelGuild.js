@@ -276,7 +276,7 @@ export class HypixelGuild extends Model {
 	 * updates the player database
 	 * @param {UpdateOptions} [options]
 	 */
-	async update(options = {}) {
+	async updateData(options = {}) {
 		const data = await hypixel.guild.id(this.guildId);
 
 		if (data.meta.cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
@@ -418,7 +418,7 @@ export class HypixelGuild extends Model {
 								player.ign = IGN;
 								player.save();
 
-								player.update({
+								player.updateData({
 									reason: `joined ${this.name}`,
 								});
 							}),
@@ -489,7 +489,7 @@ export class HypixelGuild extends Model {
 										.map(() => player.resetXp({ offsetToReset: OFFSET_FLAGS.DAY })),
 								]);
 
-								player.update({
+								player.updateData({
 									reason: `joined ${this.name}`,
 								});
 							}),

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Permissions, Formatters } from 'discord.js';
 import pkg from 'sequelize';
-const { Op, Model } = pkg;
+const { Op } = pkg;
 import { buildGuildOption, requiredPlayerOption, optionalPlayerOption } from '../../structures/commands/commonOptions.js';
 import { ChannelUtil, InteractionUtil } from '../../util/index.js';
 import { escapeIgn, logger, safePromiseAll, validateNumber } from '../../functions/index.js';
@@ -324,7 +324,7 @@ export default class TaxCommand extends SlashCommand {
 								taxCollector.resetAmount('donation'),
 							]);
 						}),
-						Model.update.call(players.model, // reset players that left
+						players.model.update( // reset players that left
 							{ paid: false },
 							{
 								where: {

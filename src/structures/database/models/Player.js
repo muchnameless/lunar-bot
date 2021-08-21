@@ -350,7 +350,7 @@ export class Player extends Model {
 	 */
 	set discordMember(member) {
 		if (member == null) {
-			super.update({ inDiscord: false }).catch(logger.error);
+			this.update({ inDiscord: false }).catch(logger.error);
 			return;
 		}
 
@@ -358,7 +358,7 @@ export class Player extends Model {
 
 		if (this.inDiscord) return;
 
-		super.update({ inDiscord: true }).catch(logger.error);
+		this.update({ inDiscord: true }).catch(logger.error);
 	}
 
 	/**
@@ -506,7 +506,7 @@ export class Player extends Model {
 	 * updates the player data and discord member
 	 * @param {PlayerUpdateOptions} options
 	 */
-	async update({ reason = 'synced with in game stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false, rejectOnAPIError = false } = {}) {
+	async updateData({ reason = 'synced with in game stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false, rejectOnAPIError = false } = {}) {
 		if (this.guildId === GUILD_ID_BRIDGER) return;
 		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
@@ -846,7 +846,7 @@ export class Player extends Model {
 		const OLD_DISCORD_ID = this.discordId;
 
 		try {
-			await super.update({ discordId: value });
+			await this.update({ discordId: value });
 		} catch (error) {
 			this.discordId = OLD_DISCORD_ID;
 			throw error;
@@ -866,7 +866,7 @@ export class Player extends Model {
 
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
 
-			if (reason) await this.update({ reason });
+			if (reason) await this.updateData({ reason });
 		} else if (typeof idOrDiscordMember === 'string' && validateNumber(idOrDiscordMember)) {
 			await this.setValidDiscordId(idOrDiscordMember);
 			this.inDiscord = false;
@@ -1169,7 +1169,7 @@ export class Player extends Model {
 		try {
 			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
 		} catch (error) {
-			super.update({ xpUpdatesDisabled: true }).catch(logger.error);
+			this.update({ xpUpdatesDisabled: true }).catch(logger.error);
 			logger.error('[MAIN PROFILE]', error);
 		}
 

@@ -119,7 +119,7 @@ export class PlayerManager extends ModelManager {
 		if (isAddingSingleEntry) {
 			this.sortAlphabetically();
 
-			newPlayer.update({
+			newPlayer.updateData({
 				reason: `joined ${newPlayer.hypixelGuild?.name}`,
 			});
 		}
@@ -210,7 +210,7 @@ export class PlayerManager extends ModelManager {
 	 * update db entries and linked discord members of all players
 	 * @param {import('../models/Player').PlayerUpdateOptions} options
 	 */
-	async update(options = {}) {
+	async updateData(options = {}) {
 		await Promise.all([
 			this.updateXp({ shouldOnlyAwaitUpdateXp: true, ...options }),
 			this.updateIgn(),
@@ -243,7 +243,7 @@ export class PlayerManager extends ModelManager {
 				for (const player of this.cache.values()) {
 					if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
 
-					await player.update({ rejectOnAPIError: true, ...options });
+					await player.updateData({ rejectOnAPIError: true, ...options });
 				}
 			} catch (error) {
 				logger.error('[PLAYERS UPDATE XP]', error);
