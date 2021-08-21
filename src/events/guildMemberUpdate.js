@@ -57,15 +57,17 @@ export default class GuildMemberUpdateEvent extends Event {
 		if (oldMember.roles.cache.has(VERIFIED_ROLE_ID)) {
 			// member lost verified role -> log incident
 			if (!newMember.roles.cache.has(VERIFIED_ROLE_ID)) {
-				return this.client.log(new MessageEmbed()
-					.setColor(this.config.get('EMBED_RED'))
-					.setAuthor(newMember.user.tag, newMember.user.displayAvatarURL({ dynamic: true }), player.url)
-					.setThumbnail(player.image)
-					.setDescription(stripIndents`
-						${newMember} lost ${newMember.guild.roles.cache.get(VERIFIED_ROLE_ID)} role
-						${player.info}
-					`)
-					.setTimestamp(),
+				return this.client.log(
+					new MessageEmbed()
+						.setColor(this.config.get('EMBED_RED'))
+						.setAuthor(newMember.user.tag, newMember.user.displayAvatarURL({ dynamic: true }), player.url)
+						.setThumbnail(player.imageURL)
+						.setDescription(stripIndents`
+							${newMember} lost ${newMember.guild.roles.cache.get(VERIFIED_ROLE_ID)} role
+							${player.info}
+						`)
+						.setTimestamp(),
+					player.image,
 				);
 			}
 

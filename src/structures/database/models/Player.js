@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed, Permissions, Formatters } from 'discord.js';
+import { GuildMember, MessageAttachment, MessageEmbed, Permissions, Formatters } from 'discord.js';
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
 import { stripIndents } from 'common-tags';
@@ -409,10 +409,17 @@ export class Player extends Model {
 	}
 
 	/**
-	 * returs a rendered bust image of the player's skin
+	 * returs a rendered bust image of the player's skin, use with player.imageURL
 	 */
 	get image() {
-		return `https://visage.surgeplay.com/bust/${this.minecraftUuid}`;
+		return new MessageAttachment(`https://visage.surgeplay.com/bust/${this.minecraftUuid}`, `${this.minecraftUuid}.png`);
+	}
+
+	/**
+	 * URL to the attachment image from player.image
+	 */
+	get imageURL() {
+		return `attachment://${this.minecraftUuid}.png`;
 	}
 
 	/**
@@ -936,7 +943,7 @@ export class Player extends Model {
 
 		const loggingEmbed = new MessageEmbed()
 			.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
-			.setThumbnail(this.image)
+			.setThumbnail(this.imageURL)
 			.setDescription(stripIndents`
 				${Formatters.bold('Role Update')} for ${member}
 				${this.info}
@@ -990,7 +997,7 @@ export class Player extends Model {
 			return false;
 		} finally {
 			// logging
-			await member.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2));
+			await member.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2), this.image);
 		}
 	}
 
@@ -1098,22 +1105,24 @@ export class Player extends Model {
 							: 'name already taken',
 			);
 
-			await this.client.log(this.client.defaultEmbed
-				.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
-				.setThumbnail(this.image)
-				.setDescription(stripIndents`
-					${Formatters.bold('Nickname Update')} for ${member}
-					${this.info}
-				`)
-				.addFields({
-					name: 'Old nickname',
-					value: Formatters.codeBlock(PREV_NAME),
-					inline: true,
-				}, {
-					name: 'New nickname',
-					value: Formatters.codeBlock(newNick ?? member.user.username),
-					inline: true,
-				}),
+			await this.client.log(
+				this.client.defaultEmbed
+					.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
+					.setThumbnail(this.imageURL)
+					.setDescription(stripIndents`
+						${Formatters.bold('Nickname Update')} for ${member}
+						${this.info}
+					`)
+					.addFields({
+						name: 'Old nickname',
+						value: Formatters.codeBlock(PREV_NAME),
+						inline: true,
+					}, {
+						name: 'New nickname',
+						value: Formatters.codeBlock(newNick ?? member.user.username),
+						inline: true,
+					}),
+				this.image,
 			);
 
 			if (shouldSendDm) {

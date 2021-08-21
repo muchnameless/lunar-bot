@@ -53,7 +53,7 @@ export default class XpCommand extends SlashCommand {
 
 		let embed = new MessageEmbed()
 			.setColor(this.config.get('EMBED_BLUE'))
-			.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.image, player.url)
+			.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.imageURL, player.url)
 			.setDescription(`${`Δ: change since ${Formatters.time(new Date(Math.max(this.config.get(XP_OFFSETS_TIME[OFFSET]), player.createdAt)))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[OFFSET])})`.padEnd(105, '\xa0')}\u200b`)
 			.addFields({
 				name: '\u200b',
@@ -174,6 +174,6 @@ export default class XpCommand extends SlashCommand {
 
 		embeds.push(MessageEmbedUtil.padFields(embed));
 
-		return await InteractionUtil.reply(interaction, { embeds });
+		return await InteractionUtil.reply(interaction, { embeds, files: [ player.image ] });
 	}
 }

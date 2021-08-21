@@ -213,7 +213,7 @@ export class PlayerManager extends ModelManager {
 	async update(options = {}) {
 		await Promise.all([
 			this.updateXp({ shouldOnlyAwaitUpdateXp: true, ...options }),
-			this.updateIGN(),
+			this.updateIgn(),
 		]);
 
 		return this;
@@ -258,7 +258,7 @@ export class PlayerManager extends ModelManager {
 	/**
 	 * updates all IGNs and logs changes via the log handler
 	 */
-	async updateIGN() {
+	async updateIgn() {
 		/** @type {Record<string, string>[]} */
 		const log = [];
 

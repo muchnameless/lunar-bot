@@ -116,7 +116,9 @@ export class DatabaseManager {
 	 * initialises the database and cache
 	 */
 	async init() {
-		await this.loadCache();
+		await this.loadCache(); // load caches
+
+		// set default config
 		await Promise.all(Object.entries(DEFAULT_CONFIG).map(async ([ key, value ]) => (this.modelManagers.config.get(key) !== null ? null : this.modelManagers.config.set(key, value))));
 	}
 
@@ -331,7 +333,7 @@ export class DatabaseManager {
 		// update Xp
 		if (config.get('XP_TRACKING_ENABLED')) players.updateXp();
 
-		await players.updateIGN();
+		await players.updateIgn();
 
 		// update taxMessage
 		/** @type {import('discord.js').TextChannel} */

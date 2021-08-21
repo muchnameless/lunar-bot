@@ -670,19 +670,21 @@ export class HypixelGuild extends Model {
 					rejectOnTimeout: true,
 				});
 
-				setRankLog.push(this.client.defaultEmbed
-					.setThumbnail(player.image)
-					.setDescription(`${Formatters.bold('Auto Rank Sync')} for ${player.info}`)
-					.addFields({
-						name: 'Old',
-						value: oldRank?.name ?? 'unknown',
-						inline: true,
-					}, {
-						name: 'New',
-						value: newRank.name,
-						inline: true,
-					})
-					.setTimestamp(),
+				setRankLog.push(
+					this.client.defaultEmbed
+						.setThumbnail(player.imageURL)
+						.setDescription(`${Formatters.bold('Auto Rank Sync')} for ${player.info}`)
+						.addFields({
+							name: 'Old',
+							value: oldRank?.name ?? 'unknown',
+							inline: true,
+						}, {
+							name: 'New',
+							value: newRank.name,
+							inline: true,
+						})
+						.setTimestamp(),
+					player.image,
 				);
 			}
 

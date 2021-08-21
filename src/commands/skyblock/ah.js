@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageActionRow, MessageSelectMenu, MessageEmbed, Formatters } from 'discord.js';
+import { MessageAttachment, MessageActionRow, MessageSelectMenu, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { COMMAND_KEY } from '../../constants/index.js';
 import { hypixel } from '../../api/hypixel.js';
@@ -61,10 +61,12 @@ export default class AhCommand extends SlashCommand {
 	 * @param {{ ign: string, uuid: string, profileId: string, profiles: { label: string, value: string }[], userId: import('discord.js').Snowflake }} param0
 	 */
 	async #generateReply({ ign, uuid, profileId, profiles, userId }) {
+		const files = [ new MessageAttachment(`https://visage.surgeplay.com/bust/${uuid}`, 'bust.png') ];
+		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId);
+		const embed = this.client.defaultEmbed
+			.setAuthor(ign, 'attachment://bust.png', `https://sky.shiiyu.moe/stats/${ign}/${PROFILE_NAME}`);
+
 		try {
-			const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId);
-			const embed = this.client.defaultEmbed
-				.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}/${PROFILE_NAME}`);
 			const auctions = (await hypixel.skyblock.auction.profile(profileId))
 				.filter(({ claimed }) => !claimed)
 				.sort((a, b) => a.end - b.end);
@@ -82,6 +84,7 @@ export default class AhCommand extends SlashCommand {
 								.addOptions(profiles),
 						),
 					],
+					files,
 				};
 			}
 
@@ -135,17 +138,18 @@ export default class AhCommand extends SlashCommand {
 							.addOptions(profiles),
 					),
 				],
+				files,
 			};
 		} catch (error) {
 			logger.error(error);
 
 			return {
 				embeds: [
-					new MessageEmbed()
+					embed
 						.setColor(this.config.get('EMBED_RED'))
-						.setDescription(`${error}`)
-						.setTimestamp(),
+						.setDescription(`${error}`),
 				],
+				files,
 			};
 		}
 	}

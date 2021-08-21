@@ -1,4 +1,4 @@
-import { Permissions, MessageEmbed, SnowflakeUtil } from 'discord.js';
+import { MessageAttachment, MessageEmbed, Permissions, SnowflakeUtil } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import { mkdir, writeFile, readdir, readFile, unlink } from 'fs/promises';
 import { join } from 'path';
@@ -74,38 +74,37 @@ export class LogHandler {
 
 	/**
 	 * logs embeds to console and to the logging channel
-	 * @param {...MessageEmbed} embedsInput embeds to log
+	 * @param {...(MessageEmbed|MessageAttachment|string)} input embeds to log
 	 */
-	async log(...embedsInput) {
-		const embeds = this.#transformEmbeds(embedsInput);
+	async log(...input) {
+		const { embeds, files } = this.#transformInput(input);
 
 		if (!embeds.length) return null; // nothing to log
 
 		// send 1 message
-		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) return this.#log(embeds);
+		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) return this.#log({ embeds, files });
 
 		// split into multiple messages
-		const TOTAL_AMOUNT = embeds.length;
 		const returnValue = [];
 
-		for (let total = 0; total < TOTAL_AMOUNT; ++total) {
+		for (let total = 0; total < embeds.length; ++total) {
 			const embedChunk = [];
 
 			let embedChunkLength = 0;
 
-			for (let current = 0; current < EMBEDS_MAX_AMOUNT && total < TOTAL_AMOUNT; ++current, ++total) {
+			for (let current = 0; current < EMBEDS_MAX_AMOUNT && total < embeds.length; ++current, ++total) inner: {
 				embedChunkLength += embeds[total].length;
 
 				// adding the new embed would exceed the max char count
 				if (embedChunkLength > EMBED_MAX_CHARS) {
 					--total;
-					break;
+					break inner;
 				}
 
 				embedChunk.push(embeds[total]);
 			}
 
-			returnValue.push(this.#log(embedChunk));
+			returnValue.push(this.#log({ embeds: embedChunk, files }));
 		}
 
 		return Promise.all(returnValue);
@@ -113,35 +112,36 @@ export class LogHandler {
 
 	/**
 	 * make sure all elements are instances of MessageEmbed
-	 * @param {MessageEmbed[]|string[]} embedsInput
+	 * @param {(MessageEmbed|MessageAttachment|string)[]} input
 	 */
-	#transformEmbeds(embedsInput) {
-		const embeds = embedsInput.filter(x => x != null); // filter out null & undefined
+	#transformInput(input) {
+		const embeds = [];
+		const files = [];
 
-		// make sure all elements in embeds are instances of MessageEmbed
-		for (const [ index, embed ] of embeds.entries()) {
-			if (embed instanceof MessageEmbed) continue;
+		for (const i of input) {
+			if (i == null) continue; // filter out null & undefined
 
-			if (typeof embed === 'string' || typeof embed === 'number') {
-				embeds[index] = this.client.defaultEmbed.setDescription(`${embed}`);
-				continue;
+			if (i instanceof MessageEmbed) {
+				embeds.push(i);
+			} else if (i instanceof MessageAttachment) {
+				files.push(i);
+			} else if (typeof i === 'string' || typeof i === 'number') {
+				embeds.push(this.client.defaultEmbed.setDescription(`${i}`));
+			} else if (typeof i !== 'object') {
+				throw new TypeError(`[TRANSFORM INPUT]: provided argument '${i}' is a ${typeof embed} instead of an Object or String`);
+			} else {
+				embeds.push(new MessageEmbed(i));
 			}
-
-			if (typeof embed !== 'object') {
-				throw new TypeError(`[TRANSFORM EMBEDS]: provided argument '${embed}' is a ${typeof embed} instead of an Object or String`);
-			}
-
-			embeds[index] = new MessageEmbed(embed);
 		}
 
-		return embeds;
+		return { embeds, files };
 	}
 
 	/**
 	 * log to console and send in the logging channel
-	 * @param {MessageEmbed[]} embedsInput
+	 * @param {{ embeds: MessageEmbed[], files: MessageAttachment[] }} input
 	 */
-	async #log(embeds) {
+	async #log({ embeds, files }) {
 		// log to console
 		for (const embed of embeds) {
 			const FIELDS_LOG = embed.fields?.filter(({ name, value }) => name !== '\u200b' || value !== '\u200b');
@@ -170,9 +170,7 @@ export class LogHandler {
 
 		// API call
 		try {
-			return await channel.send({
-				embeds,
-			});
+			return await channel.send({ embeds, files });
 		} catch (error) {
 			logger.error('[CLIENT LOG]', error);
 
@@ -230,7 +228,7 @@ export class LogHandler {
 				const FILE_PATH = join(fileURLToPath(this.logURL), file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
-				await this.log(...FILE_CONTENT.split('\n').map(x => new MessageEmbed(JSON.parse(x))));
+				await this.#log({ embeds: FILE_CONTENT.split('\n').map(x => new MessageEmbed(JSON.parse(x))) });
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {

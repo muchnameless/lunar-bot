@@ -35,12 +35,14 @@ export default class GuildMemberAddEvent extends Event {
 			description += `\n\nwaiting for ${member.guild.roles.cache.get(this.config.get('VERIFIED_ROLE_ID')) ?? this.config.get('VERIFIED_ROLE_ID')} role`;
 		}
 
-		this.client.log(new MessageEmbed()
-			.setColor(this.config.get('EMBED_GREEN'))
-			.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
-			.setThumbnail(player.image)
-			.setDescription(description)
-			.setTimestamp(),
+		this.client.log(
+			new MessageEmbed()
+				.setColor(this.config.get('EMBED_GREEN'))
+				.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
+				.setThumbnail(player.imageURL)
+				.setDescription(description)
+				.setTimestamp(),
+			player.image,
 		);
 	}
 }

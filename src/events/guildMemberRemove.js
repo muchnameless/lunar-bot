@@ -32,28 +32,31 @@ export default class GuildMemberRemoveEvent extends Event {
 		player.inDiscord = false;
 		player.save();
 
-		this.client.log(MessageEmbedUtil.padFields(
-			new MessageEmbed()
-				.setColor(this.config.get('EMBED_RED'))
-				.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
-				.setThumbnail(player.image)
-				.setDescription(stripIndents`
-					${member} left the discord server
-					${player.info}
-				`)
-				.addFields({
-					name: 'Roles',
-					value: Formatters.codeBlock(
-						member.roles?.cache
-							.filter(({ id }) => id !== member.guild.id)
-							.sort((a, b) => b.comparePositionTo(a))
-							.map(({ name }) => name)
-							.join('\n')
-						?? 'unknown',
-					),
-				})
-				.setTimestamp(),
-			2,
-		));
+		this.client.log(
+			MessageEmbedUtil.padFields(
+				new MessageEmbed()
+					.setColor(this.config.get('EMBED_RED'))
+					.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
+					.setThumbnail(player.imageURL)
+					.setDescription(stripIndents`
+						${member} left the discord server
+						${player.info}
+					`)
+					.addFields({
+						name: 'Roles',
+						value: Formatters.codeBlock(
+							member.roles?.cache
+								.filter(({ id }) => id !== member.guild.id)
+								.sort((a, b) => b.comparePositionTo(a))
+								.map(({ name }) => name)
+								.join('\n')
+							?? 'unknown',
+						),
+					})
+					.setTimestamp(),
+				2,
+			),
+			player.image,
+		);
 	}
 }

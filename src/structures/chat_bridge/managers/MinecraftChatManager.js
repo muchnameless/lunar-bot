@@ -310,15 +310,17 @@ export class MinecraftChatManager extends ChatManager {
 
 							const MUTE_DURATION_LONG = ms(MUTE_DURATION, { long: true });
 
-							this.client.log(new MessageEmbed()
-								.setColor(this.client.config.get('EMBED_RED'))
-								.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
-								.setThumbnail(player.image)
-								.setDescription(stripIndents`
-									${Formatters.bold('Auto Muted')} for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.get('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
-									${player.info}
-								`)
-								.setTimestamp(),
+							this.client.log(
+								new MessageEmbed()
+									.setColor(this.client.config.get('EMBED_RED'))
+									.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
+									.setThumbnail(player.imageURL)
+									.setDescription(stripIndents`
+										${Formatters.bold('Auto Muted')} for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.get('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
+										${player.info}
+									`)
+									.setTimestamp(),
+								player.image,
 							);
 
 							info = `you were automatically muted for ${MUTE_DURATION_LONG} due to continues infractions`;
