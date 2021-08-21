@@ -409,10 +409,17 @@ export class Player extends Model {
 	}
 
 	/**
+	 * returns a visage.surgeplay link with the 'bust' option
+	 */
+	get bustURL() {
+		return `https://visage.surgeplay.com/bust/${this.minecraftUuid}`;
+	}
+
+	/**
 	 * returs a rendered bust image of the player's skin, use with player.imageURL
 	 */
 	get image() {
-		return new MessageAttachment(`https://visage.surgeplay.com/bust/${this.minecraftUuid}`, `${this.minecraftUuid}.png`);
+		return new MessageAttachment(this.bustURL, `${this.minecraftUuid}.png`);
 	}
 
 	/**

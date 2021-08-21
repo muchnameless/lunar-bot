@@ -1,4 +1,3 @@
-import { MessageAttachment } from 'discord.js';
 import loader from 'prismarine-chat';
 import { INVISIBLE_CHARACTER_REGEXP, MC_CLIENT_VERSION, MESSAGE_TYPES, spamMessages } from './constants/index.js';
 import { NO_PING_EMOJI } from '../../constants/index.js';
@@ -259,32 +258,21 @@ export class HypixelMessage {
 		try {
 			if (this.author) {
 				const { player, member } = this;
-
-				const files = member
-					? null
-					: player
-						? [ player.image ]
-						: await (async () => {
-							try {
-								const { uuid } = await mojang.ign(this.author.ign);
-								return [ new MessageAttachment(`https://visage.surgeplay.com/bust/${uuid}`, 'bust.png') ];
-							} catch (error) {
-								return logger.error('[FORWARD TO DC]', error);
-							}
-						})();
 				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook({
 					content: this.prefixReplacedContent,
 					username: member?.displayName
 						?? player?.ign
 						?? this.author.ign,
 					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
-						?? (files
-							? player?.imageURL ?? 'attachment://bust.png'
-							: this.client.user.displayAvatarURL({ dynamic: true })),
+						?? player?.bustURL
+						?? await mojang.ign(this.author.ign).then(
+							({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`,
+							error => logger.error('[FORWARD TO DC]', error),
+						)
+						?? this.client.user.displayAvatarURL({ dynamic: true }),
 					allowedMentions: {
 						parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
 					},
-					files,
 				}));
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
