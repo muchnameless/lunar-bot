@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
-import _ from 'lodash-es';
 import similarity from 'jaro-winkler';
 import ms from 'ms';
 import fetch from 'node-fetch';
