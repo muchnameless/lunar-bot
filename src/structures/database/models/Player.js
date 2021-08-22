@@ -1396,7 +1396,7 @@ export class Player extends Model {
 	/**
 	 * updates the guild xp and syncs guild mutes
 	 * @param {import('@zikeji/hypixel').Components.Schemas.GuildMember} data from the hypixel guild API
-	 * @param {import('./HypixelGuild').HypixelGuild} hypixelGuilds
+	 * @param {import('./HypixelGuild').HypixelGuild} [hypixelGuild]
 	 */
 	async syncWithGuildData({ expHistory = {}, mutedTill, rank }, hypixelGuild = this.hypixelGuild) {
 		// update guild xp

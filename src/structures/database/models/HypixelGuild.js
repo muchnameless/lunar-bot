@@ -514,7 +514,7 @@ export class HypixelGuild extends Model {
 			// sync guild xp, mutedTill & guild ranks
 			(async () => {
 				await safePromiseAll(currentGuildMembers.map(
-					async hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember)
+					async hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember, this)
 						?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`)),
 				);
 
