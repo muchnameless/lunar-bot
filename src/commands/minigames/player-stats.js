@@ -29,12 +29,19 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 	 */
 	async _fetchData(ctx, ignOrUuid) { // eslint-disable-line class-methods-use-this
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-		const [ playerData, guildData, friendsData, statusData ] = await Promise.all([
+		const [ playerData, guildData, friendsData ] = await Promise.all([
 			hypixel.player.uuid(uuid),
 			hypixel.guild.player(uuid),
 			hypixel.friends.uuid(uuid),
-			hypixel.status.uuid(uuid),
 		]);
+
+		let statusData;
+
+		if (Reflect.has(playerData, 'lastLogin') && Reflect.has(playerData, 'lastLogout')) {
+			statusData = playerData.lastLogin > playerData.lastLogout;
+		} else {
+			statusData = (await hypixel.status.uuid(uuid)).online;
+		}
 
 		return {
 			ign,
@@ -51,7 +58,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 	 * @property {import('@zikeji/hypixel').Components.Schemas.Player} playerData
 	 * @property {import('@zikeji/hypixel').Components.Schemas.Guild} guildData
 	 * @property {import('@zikeji/hypixel').Components.Schemas.PlayerFriendsData} friendsData
-	 * @property {import('@zikeji/hypixel').Components.Schemas.Session} statusData
+	 * @property {boolean} statusData
 	 */
 
 	/**
@@ -70,7 +77,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 				${ign}:
 				rank: ${RANK_NAME},
 				guild: ${guildData?.name ?? 'none'},
-				status: ${statusData.online ? 'online' : 'offline'},
+				status: ${statusData ? 'online' : 'offline'},
 				friends: ${this.client.formatNumber(friendsData?.length ?? 0)},
 				level: ${level},
 				achievement points: ${this.client.formatNumber(achievementPoints)},
