@@ -215,7 +215,8 @@ export default class AhCommand extends SlashCommand {
 			let profileName;
 
 			if (!PROFILE_NAME_INPUT) {
-				({ profile_id: profileId, cute_name: profileName } = profiles.sort((a, b) => b.members[uuid].last_save - a.members[uuid].last_save))[0];
+				// get profile with the latest last_save, profiles without that property are treated as last candidates
+				[{ profile_id: profileId, cute_name: profileName }] = profiles.sort((a, b) => (Reflect.has(b.members[uuid], 'last_save') ? b.members[uuid].last_save - a.members[uuid].last_save : -1));
 			} else {
 				profileName = PROFILE_NAME_INPUT;
 				profileId = profiles.find(({ cute_name: name }) => name === PROFILE_NAME_INPUT)?.profile_id;
