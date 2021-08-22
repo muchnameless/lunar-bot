@@ -4,7 +4,7 @@ import { NO_PING_EMOJI } from '../../constants/index.js';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor.js';
 import { MessageUtil } from '../../util/index.js';
 import { mojang } from '../../api/mojang.js';
-import { escapeRegex, logger } from '../../functions/index.js';
+import { escapeRegex, logger, uuidToImgurBustURL } from '../../functions/index.js';
 
 /**
  * @typedef {string} HypixelMessageType
@@ -264,9 +264,9 @@ export class HypixelMessage {
 						?? player?.ign
 						?? this.author.ign,
 					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
-						?? player?.bustURL
+						?? await player?.imageURL
 						?? await mojang.ign(this.author.ign).then(
-							({ uuid }) => `https://visage.surgeplay.com/bust/${uuid}`,
+							({ uuid }) => uuidToImgurBustURL(this.client, uuid),
 							error => logger.error('[FORWARD TO DC]', error),
 						)
 						?? this.client.user.displayAvatarURL({ dynamic: true }),

@@ -1,4 +1,4 @@
-import { GuildMember, MessageAttachment, MessageEmbed, Permissions, Formatters } from 'discord.js';
+import { GuildMember, MessageEmbed, Permissions, Formatters } from 'discord.js';
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
 import { stripIndents } from 'common-tags';
@@ -41,6 +41,7 @@ import {
 	logger,
 	mutedCheck,
 	trim,
+	uuidToImgurBustURL,
 	validateDiscordId,
 	validateNumber,
 } from '../../../functions/index.js';
@@ -409,24 +410,10 @@ export class Player extends Model {
 	}
 
 	/**
-	 * returns a visage.surgeplay link with the 'bust' option
-	 */
-	get bustURL() {
-		return `https://visage.surgeplay.com/bust/${this.minecraftUuid}`;
-	}
-
-	/**
-	 * returs a rendered bust image of the player's skin, use with player.imageURL
-	 */
-	get image() {
-		return new MessageAttachment(this.bustURL, `${this.minecraftUuid}.png`);
-	}
-
-	/**
-	 * URL to the attachment image from player.image
+	 * imgur link with a bust url of the player's skin
 	 */
 	get imageURL() {
-		return `attachment://${this.minecraftUuid}.png`;
+		return uuidToImgurBustURL(this.client, this.minecraftUuid);
 	}
 
 	/**
@@ -950,7 +937,7 @@ export class Player extends Model {
 
 		const loggingEmbed = new MessageEmbed()
 			.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
-			.setThumbnail(this.imageURL)
+			.setThumbnail(await this.imageURL)
 			.setDescription(stripIndents`
 				${Formatters.bold('Role Update')} for ${member}
 				${this.info}
@@ -1004,7 +991,7 @@ export class Player extends Model {
 			return false;
 		} finally {
 			// logging
-			await member.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2), this.image);
+			await member.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2));
 		}
 	}
 
@@ -1115,7 +1102,7 @@ export class Player extends Model {
 			await this.client.log(
 				this.client.defaultEmbed
 					.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
-					.setThumbnail(this.imageURL)
+					.setThumbnail(await this.imageURL)
 					.setDescription(stripIndents`
 						${Formatters.bold('Nickname Update')} for ${member}
 						${this.info}
@@ -1129,7 +1116,6 @@ export class Player extends Model {
 						value: Formatters.codeBlock(newNick ?? member.user.username),
 						inline: true,
 					}),
-				this.image,
 			);
 
 			if (shouldSendDm) {

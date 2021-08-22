@@ -37,7 +37,7 @@ export default class GuildMemberRemoveEvent extends Event {
 				new MessageEmbed()
 					.setColor(this.config.get('EMBED_RED'))
 					.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
-					.setThumbnail(player.imageURL)
+					.setThumbnail(await player.imageURL)
 					.setDescription(stripIndents`
 						${member} left the discord server
 						${player.info}
@@ -56,7 +56,6 @@ export default class GuildMemberRemoveEvent extends Event {
 					.setTimestamp(),
 				2,
 			),
-			player.image,
 		);
 	}
 }

@@ -1,24 +1,26 @@
-import fetch from 'node-fetch';
+import { BUST_IMAGE_URL } from '../constants/index.js';
 import { cache } from '../api/cache.js';
 import { logger } from './index.js';
 
 
-export async function uuidToImageBuffer(uuid) {
+/**
+ * takes a minecraft uuid and returns the imgur link to an uploaded bust image
+ * @param {import('../structures/LunarClient').LunarClient} client
+ * @param {string} uuid
+ * @returns {Promise<string>}
+ */
+export async function uuidToImgurBustURL(client, uuid) {
 	try {
 		const cacheKey = `image:bust:${uuid}`;
 		const cachedResult = await cache.get(cacheKey);
 
 		if (cachedResult) return cachedResult;
 
-		const result = await fetch(`https://visage.surgeplay.com/bust/${uuid}`);
+		const URL = (await client.imgur.upload(`${BUST_IMAGE_URL}${uuid}`)).data.link;
 
-		if (result.status !== 200) return null;
+		cache.set(cacheKey, URL, 24 * 60 * 60 * 1_000);
 
-		const buffer = await result.buffer();
-
-		cache.set(cacheKey, buffer);
-
-		return buffer;
+		return URL;
 	} catch (error) {
 		return logger.error(error);
 	}

@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageAttachment, MessageActionRow, MessageSelectMenu, Formatters } from 'discord.js';
+import { MessageActionRow, MessageSelectMenu, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { COMMAND_KEY } from '../../constants/index.js';
 import { hypixel } from '../../api/hypixel.js';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions.js';
 import { InteractionUtil } from '../../util/index.js';
-import { getUuidAndIgn, logger, upperCaseFirstChar } from '../../functions/index.js';
+import { getUuidAndIgn, logger, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 
 
@@ -61,10 +61,9 @@ export default class AhCommand extends SlashCommand {
 	 * @param {{ ign: string, uuid: string, profileId: string, profiles: { label: string, value: string }[], userId: import('discord.js').Snowflake }} param0
 	 */
 	async #generateReply({ ign, uuid, profileId, profiles, userId }) {
-		const files = [ new MessageAttachment(`https://visage.surgeplay.com/bust/${uuid}`, 'bust.png') ];
 		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId);
 		const embed = this.client.defaultEmbed
-			.setAuthor(ign, 'attachment://bust.png', `https://sky.shiiyu.moe/stats/${ign}/${PROFILE_NAME}`);
+			.setAuthor(ign, await uuidToImgurBustURL(this.client, uuid), `https://sky.shiiyu.moe/stats/${ign}/${PROFILE_NAME}`);
 
 		try {
 			const auctions = (await hypixel.skyblock.auction.profile(profileId))
@@ -84,7 +83,6 @@ export default class AhCommand extends SlashCommand {
 								.addOptions(profiles),
 						),
 					],
-					files,
 				};
 			}
 
@@ -138,7 +136,6 @@ export default class AhCommand extends SlashCommand {
 							.addOptions(profiles),
 					),
 				],
-				files,
 			};
 		} catch (error) {
 			logger.error(error);
@@ -149,7 +146,6 @@ export default class AhCommand extends SlashCommand {
 						.setColor(this.config.get('EMBED_RED'))
 						.setDescription(`${error}`),
 				],
-				files,
 			};
 		}
 	}
@@ -199,7 +195,7 @@ export default class AhCommand extends SlashCommand {
 				return await InteractionUtil.reply(interaction, {
 					embeds: [
 						embed
-							.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
+							.setAuthor(ign, await uuidToImgurBustURL(this.client, uuid), `https://sky.shiiyu.moe/stats/${ign}`)
 							.setDescription('no SkyBlock profiles'),
 					],
 					components: [
@@ -230,7 +226,7 @@ export default class AhCommand extends SlashCommand {
 					return await InteractionUtil.reply(interaction, {
 						embeds: [
 							embed
-								.setAuthor(ign, `https://visage.surgeplay.com/bust/${uuid}`, `https://sky.shiiyu.moe/stats/${ign}`)
+								.setAuthor(ign, await uuidToImgurBustURL(this.client, uuid), `https://sky.shiiyu.moe/stats/${ign}`)
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [

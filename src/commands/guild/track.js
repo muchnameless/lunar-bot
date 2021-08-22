@@ -128,13 +128,12 @@ export default class TrackCommand extends SlashCommand {
 		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
-					.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, player.imageURL, player.url)
+					.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, await player.imageURL, player.url)
 					.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
 					.setImage('attachment://file.jpg'),
 			],
 			files: [
 				new MessageAttachment(image, 'file.jpg'),
-				player.image,
 			],
 		});
 	}

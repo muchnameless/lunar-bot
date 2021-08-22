@@ -61,13 +61,12 @@ export default class GuildMemberUpdateEvent extends Event {
 					new MessageEmbed()
 						.setColor(this.config.get('EMBED_RED'))
 						.setAuthor(newMember.user.tag, newMember.user.displayAvatarURL({ dynamic: true }), player.url)
-						.setThumbnail(player.imageURL)
+						.setThumbnail(await player.imageURL)
 						.setDescription(stripIndents`
 							${newMember} lost ${newMember.guild.roles.cache.get(VERIFIED_ROLE_ID)} role
 							${player.info}
 						`)
 						.setTimestamp(),
-					player.image,
 				);
 			}
 

@@ -672,7 +672,7 @@ export class HypixelGuild extends Model {
 
 				setRankLog.push(
 					this.client.defaultEmbed
-						.setThumbnail(player.imageURL)
+						.setThumbnail(await player.imageURL)
 						.setDescription(`${Formatters.bold('Auto Rank Sync')} for ${player.info}`)
 						.addFields({
 							name: 'Old',
@@ -682,9 +682,7 @@ export class HypixelGuild extends Model {
 							name: 'New',
 							value: newRank.name,
 							inline: true,
-						})
-						.setTimestamp(),
-					player.image,
+						}),
 				);
 			}
 

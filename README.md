@@ -6,7 +6,7 @@ Redis (as an LRU cache)
 
     redis-cli
 
-    CONFIG SET maxmemory 100mb
+    CONFIG SET maxmemory 200mb
 
     CONFIG SET maxmemory-policy volatile-lru
     
