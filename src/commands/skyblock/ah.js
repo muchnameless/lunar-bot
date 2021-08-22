@@ -215,9 +215,7 @@ export default class AhCommand extends SlashCommand {
 			let profileName;
 
 			if (!PROFILE_NAME_INPUT) {
-				const LAST_PROFILE_SAVE = Math.max(...profiles.map(({ members }) => members[uuid].last_save ?? 0));
-
-				({ profile_id: profileId, cute_name: profileName } = profiles.find(({ members }) => members[uuid].last_save === LAST_PROFILE_SAVE)) ?? profiles.at(-1);
+				({ profile_id: profileId, cute_name: profileName } = profiles.sort((a, b) => b.members[uuid].last_save - a.members[uuid].last_save))[0];
 			} else {
 				profileName = PROFILE_NAME_INPUT;
 				profileId = profiles.find(({ cute_name: name }) => name === PROFILE_NAME_INPUT)?.profile_id;
