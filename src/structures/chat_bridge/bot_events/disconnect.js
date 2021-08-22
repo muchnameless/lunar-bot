@@ -8,7 +8,7 @@ import { ChatMessage } from '../HypixelMessage.js';
  */
 export default function(chatBridge, { reason }) {
 	try {
-		chatBridge.emit('disconnect', reason && new ChatMessage(JSON.parse(reason)).toString());
+		chatBridge.emit('disconnect', reason && ChatMessage.fromNotch(reason).toString());
 	} catch (error) {
 		logger.error(error);
 

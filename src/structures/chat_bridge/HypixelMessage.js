@@ -22,15 +22,6 @@ export class HypixelMessage {
 	 * @param {import('./bot_events/chat').ChatPacket} packet
 	 */
 	constructor(chatBridge, { message, position }) {
-		let prismarineMessage;
-
-		try {
-			prismarineMessage = new ChatMessage(JSON.parse(message));
-		} catch (error) {
-			logger.error('[MINECRAFT BOT CHAT]', error);
-			prismarineMessage = new ChatMessage(message);
-		}
-
 		/**
 		 * the chat bridge that instantiated the message
 		 */
@@ -38,7 +29,7 @@ export class HypixelMessage {
 		/**
 		 * the prismarine-parsed message
 		 */
-		this.prismarineMessage = prismarineMessage;
+		this.prismarineMessage = ChatMessage.fromNotch(message);
 		/**
 		 * @type {?HypixelMessageType}
 		 */
@@ -51,7 +42,7 @@ export class HypixelMessage {
 		/**
 		 * raw content string
 		 */
-		this.rawContent = prismarineMessage.toString();
+		this.rawContent = this.prismarineMessage.toString();
 		/**
 		 * content with invis chars removed
 		 */
@@ -74,7 +65,7 @@ export class HypixelMessage {
 						ign: matched.groups.ign,
 						guildRank: matched.groups.guildRank,
 						uuid: matched.groups.type
-							? prismarineMessage.extra?.[0].clickEvent?.value.slice(13).replace(/-/g, '') // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
+							? this.prismarineMessage.extra?.[0].clickEvent?.value.slice(13).replace(/-/g, '') // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
 							: null,
 					}
 					: {
