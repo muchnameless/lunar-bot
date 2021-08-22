@@ -172,9 +172,17 @@ export class DatabaseManager {
 
 		let auctionsAmount = 0;
 		let unknownPlayers = 0;
+		let apiError = false;
 
 		// update db
-		await Promise.all(taxCollectors.activeCollectors.map(async (taxCollector) => {
+		for (const taxCollector of taxCollectors.cache.values()) {
+			if (!taxCollector.isCollecting) continue;
+
+			if (apiError) {
+				availableAuctionsLog.push(`\u200b > ${taxCollector}: API Error`);
+				continue;
+			}
+
 			try {
 				const auctions = await hypixel.skyblock.auction.player(taxCollector.minecraftUuid);
 				const taxAuctions = [];
@@ -184,7 +192,8 @@ export class DatabaseManager {
 
 				for (const auction of await asyncFilter(
 					auctions,
-					auc => TAX_AUCTIONS_ITEMS.includes(auc.item_name) && auc.start >= TAX_AUCTIONS_START_TIME && this.#validateAuctionId(auc.uuid), // correct item & started after last reset & no outbid from already logged auction
+					// correct item & started after last reset & no outbid from already logged auction
+					auc => TAX_AUCTIONS_ITEMS.includes(auc.item_name) && auc.start >= TAX_AUCTIONS_START_TIME && this.#validateAuctionId(auc.uuid),
 				)) auction.highest_bid_amount >= TAX_AMOUNT
 					? auction.bids.length && taxAuctions.push(auction)
 					: auction.end > NOW && ++availableAuctions;
@@ -202,7 +211,9 @@ export class DatabaseManager {
 					if (!player) return ++unknownPlayers;
 
 					paidLog.push(`${player}: ${this.client.formatNumber(amount)}`);
-					if (config.get('EXTENDED_LOGGING_ENABLED')) logger.info(`[UPDATE TAX DB]: ${player} [uuid: ${bidder}] paid ${this.client.formatNumber(amount)} at /ah ${taxCollector} [auctionId: ${auction.uuid}]`);
+					if (config.get('EXTENDED_LOGGING_ENABLED')) {
+						logger.info(`[UPDATE TAX DB]: ${player} [uuid: ${bidder}] paid ${this.client.formatNumber(amount)} at /ah ${taxCollector} [auctionId: ${auction.uuid}]`);
+					}
 
 					return player.setToPaid({
 						amount,
@@ -220,9 +231,10 @@ export class DatabaseManager {
 				});
 			} catch (error) {
 				logger.error(`[UPDATE TAX DB]: ${taxCollector}`, error);
+				apiError = true;
 				availableAuctionsLog.push(`\u200b > ${taxCollector}: API Error`);
 			}
-		}));
+		}
 
 		// logging
 		if (auctionsAmount && (config.get('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.get('DATABASE_UPDATE_INTERVAL')))) {
@@ -340,7 +352,9 @@ export class DatabaseManager {
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 		if (!taxChannel?.guild?.available) return logger.warn('[TAX MESSAGE]: channel not found');
-		if (!ChannelUtil.botPermissions(taxChannel).has(Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS)) return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+		if (!ChannelUtil.botPermissions(taxChannel).has(Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS)) {
+			return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+		}
 
 		const taxEmbed = this.createTaxEmbed(availableAuctionsLog);
 		const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');
