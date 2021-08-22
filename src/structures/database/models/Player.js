@@ -1415,8 +1415,6 @@ export class Player extends Model {
 				this.guildXpDaily = xp;
 				this.guildXp += xp;
 			}
-		} else if (this.client.config.get('EXTENDED_LOGGING_ENABLED')) {
-			logger.warn(`[UPDATE GUILD XP]: ${this.logInfo}: no guild xp found`);
 		}
 
 		// sync guild mutes

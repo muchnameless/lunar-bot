@@ -30,16 +30,8 @@ export default class ReadyEvent extends Event {
 
 		this.client.db.schedule();
 
-		// set presence again every 20 min cause it get's lost sometimes
-		setInterval(async () => {
-			try {
-				const presence = this.client.user.setPresence(this.client.user.presence);
-
-				if (this.config.get('EXTENDED_LOGGING_ENABLED')) logger.info(`[SET PRESENCE]: activity set to ${presence.activities[0].name}`);
-			} catch (error) {
-				logger.error('[SET PRESENCE]: error while setting presence', error);
-			}
-		}, 20 * 60_000).unref(); // 20 min
+		// set presence again every 1h cause it get's lost sometimes
+		setInterval(() => this.client.user.setPresence(this.client.user.presence), 60 * 60_000).unref();
 
 		// chatBridges
 		if (this.config.get('CHATBRIDGE_ENABLED')) {

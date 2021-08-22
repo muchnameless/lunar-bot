@@ -200,7 +200,10 @@ export class DatabaseManager {
 
 				availableAuctionsLog.push(`\u200b > ${taxCollector}: ${availableAuctions}`);
 
-				if (auctions.meta.cached) return logger.info(`[UPDATE TAX DB]: ${taxCollector}: cached data`);
+				if (auctions.meta.cached) {
+					logger.info(`[UPDATE TAX DB]: ${taxCollector}: cached data`);
+					continue;
+				}
 
 				auctionsAmount += taxAuctions.length;
 
@@ -211,9 +214,6 @@ export class DatabaseManager {
 					if (!player) return ++unknownPlayers;
 
 					paidLog.push(`${player}: ${this.client.formatNumber(amount)}`);
-					if (config.get('EXTENDED_LOGGING_ENABLED')) {
-						logger.info(`[UPDATE TAX DB]: ${player} [uuid: ${bidder}] paid ${this.client.formatNumber(amount)} at /ah ${taxCollector} [auctionId: ${auction.uuid}]`);
-					}
 
 					return player.setToPaid({
 						amount,
@@ -223,7 +223,7 @@ export class DatabaseManager {
 					});
 				}));
 
-				if (!paidLog.length) return;
+				if (!paidLog.length) continue;
 
 				taxPaidLog.push({
 					name: `/ah ${taxCollector}`,
@@ -237,7 +237,7 @@ export class DatabaseManager {
 		}
 
 		// logging
-		if (auctionsAmount && (config.get('EXTENDED_LOGGING_ENABLED') || (unknownPlayers && new Date().getMinutes() < config.get('DATABASE_UPDATE_INTERVAL')))) {
+		if (auctionsAmount && unknownPlayers && new Date().getMinutes() < config.get('DATABASE_UPDATE_INTERVAL')) {
 			logger.info(`[UPDATE TAX DB]: New auctions: ${auctionsAmount}, unknown players: ${unknownPlayers}`);
 		}
 
