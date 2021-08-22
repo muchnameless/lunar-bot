@@ -1,4 +1,5 @@
-import PostgresQueryGenerator from 'sequelize/lib/dialects/postgres/query-generator';
+import PostgresQueryGenerator from 'sequelize/lib/dialects/postgres/query-generator.js';
+
 
 PostgresQueryGenerator.prototype.pgEnum = function(tableName, attr, dataType, options) {
 	const enumName = this.pgEnumName(tableName, attr, options);

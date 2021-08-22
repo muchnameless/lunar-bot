@@ -19,7 +19,7 @@ class CustomDecimal extends DataTypes.DECIMAL {
 	}
 }
 
-const sequelize = new Sequelize(
+export const sequelize = new Sequelize(
 	process.env.DATABASE_URL,
 	{
 		logging: false,
