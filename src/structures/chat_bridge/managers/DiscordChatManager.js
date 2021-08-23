@@ -72,9 +72,9 @@ export class DiscordChatManager extends ChatManager {
 
 		let hasError = false;
 
-		for (const { contentType, url } of attachments.values()) {
+		for (const { contentType, url, size } of attachments.values()) {
 			// only images can be uploaded by URL https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
-			if (!hasError && this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType.startsWith(type))) {
+			if (!hasError && this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType.startsWith(type)) && size <= 1e7) {
 				try {
 					ret.push((await this.client.imgur.upload(url)).data.link);
 				} catch (error) {
