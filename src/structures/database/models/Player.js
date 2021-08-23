@@ -522,10 +522,7 @@ export class Player extends Model {
 			if (!this.mainProfileId) await this.fetchMainProfile(); // detect main profile if it is unknown
 
 			// hypixel API call
-			const { meta: { cached }, members } = await hypixel.skyblock.profile(this.mainProfileId);
-
-			if (cached && Date.now() - this.xpLastUpdatedAt < (this.client.config.get('DATABASE_UPDATE_INTERVAL') - 1) * 60_000) throw 'cached data';
-
+			const { members } = await hypixel.skyblock.profile(this.mainProfileId);
 			const playerData = members?.[this.minecraftUuid];
 
 			if (!playerData) {

@@ -200,11 +200,6 @@ export class DatabaseManager {
 
 				availableAuctionsLog.push(`\u200b > ${taxCollector}: ${availableAuctions}`);
 
-				if (auctions.meta.cached) {
-					logger.info(`[UPDATE TAX DB]: ${taxCollector}: cached data`);
-					continue;
-				}
-
 				auctionsAmount += taxAuctions.length;
 
 				await safePromiseAll(taxAuctions.map(async (auction) => {
