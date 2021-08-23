@@ -1221,7 +1221,11 @@ export class Player extends Model {
 				newIgn: CURRENT_IGN,
 			};
 		} catch (error) {
-			logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
+			if (error instanceof Error && error.name === 'AbortError') {
+				return logger.error(`[UPDATE IGN]: ${this.logInfo}: request timeout`);
+			}
+
+			return logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
 		}
 	}
 

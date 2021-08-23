@@ -264,6 +264,7 @@ export class PlayerManager extends ModelManager {
 
 		await Promise.all(this.cache.map(async (player) => {
 			const result = await player.updateIgn();
+
 			if (result) {
 				log.push({
 					guildId: player.guildId,
