@@ -201,7 +201,6 @@ export class PlayerManager extends ModelManager {
 	 * sort players alphabetically by IGNs
 	 */
 	sortAlphabetically() {
-		this.cache._array = null;
 		this.cache.sort(compareAlphabetically);
 		return this;
 	}
