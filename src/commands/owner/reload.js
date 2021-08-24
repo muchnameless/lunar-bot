@@ -160,7 +160,7 @@ export default class ReloadCommand extends DualCommand {
 					if (!eventFile) return `no event with the name \`${eventName}\` found`; // no file found
 
 					// file with exact name match found
-					this.client.events.get(basename(eventFile, '.js').toLowerCase())?.unload(); // try to find already loaded event
+					this.client.events.get(basename(eventFile, '.js'))?.unload(); // try to find already loaded event
 
 					({ name: eventName } = await this.client.events.loadFromFile(eventFile, { force, reload }));
 
