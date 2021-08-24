@@ -12,9 +12,11 @@ export default class ShardDisconnectEvent extends Event {
 
 	/**
 	 * event listener callback
+	 * @param {CloseEvent} closeEvent
+	 * @param {number} shardId
 	 */
-	async run() {
-		logger.error('[SHARD DISCONNECT]: restarting process');
+	async run(closeEvent, shardId) {
+		logger.error(`[SHARD #${shardId} DISCONNECT] ${closeEvent.code}: ${closeEvent.reason} (cleanly: ${closeEvent.wasClean})`);
 
 		this.client.exit(-1);
 	}
