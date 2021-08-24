@@ -34,12 +34,23 @@ export class TaxCollectorManager extends ModelManager {
 
 		if (!player) throw new Error(`[TAX COLLECTOR ADD]: invalid input: ${uuidOrPlayer}`);
 
-		return super.add({
-			minecraftUuid: player.minecraftUuid,
-			ign: player.ign,
-			isCollecting: true,
-			collectedTax: 0,
+		const [ newEntry, created ] = await this.model.findOrCreate({
+			where: {
+				minecraftUuid: player.minecraftUuid,
+			},
+			defaults: {
+				ign: player.ign,
+				isCollecting: true,
+				collectedTax: 0,
+			},
 		});
+
+		// entry already exists
+		if (!created) await newEntry.update({ isCollecting: true });
+
+		this.cache.set(newEntry[this.primaryKey], newEntry);
+
+		return newEntry;
 	}
 
 	/**
