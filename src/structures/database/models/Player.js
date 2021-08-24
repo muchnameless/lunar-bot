@@ -522,8 +522,7 @@ export class Player extends Model {
 			if (!this.mainProfileId) await this.fetchMainProfile(); // detect main profile if it is unknown
 
 			// hypixel API call
-			const { members } = await hypixel.skyblock.profile(this.mainProfileId);
-			const playerData = members?.[this.minecraftUuid];
+			const playerData = (await hypixel.skyblock.profile(this.mainProfileId))?.members?.[this.minecraftUuid];
 
 			if (!playerData) {
 				this.mainProfileId = null;
