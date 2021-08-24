@@ -31,7 +31,7 @@ export default class ReadyEvent extends Event {
 		this.client.db.schedule();
 
 		// set presence again every 1h cause it get's lost sometimes
-		setInterval(() => this.client.user.setPresence(this.client.user.presence), 60 * 60_000).unref();
+		setInterval(() => this.client.user.setPresence(this.client.user.presence), 60 * 60_000);
 
 		// chatBridges
 		if (this.config.get('CHATBRIDGE_ENABLED')) {

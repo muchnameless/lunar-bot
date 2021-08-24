@@ -99,9 +99,7 @@ client
 	.once(Constants.Events.CLIENT_READY, () => {
 		prefixRegExp = new RegExp(`^(?:${[ escapeRegex(PREFIX), `<@!?${client.user.id}>` ].filter(Boolean).join('|')})`, 'i');
 
-		setInterval(() => {
-			client.user.setPresence(presence);
-		}, 20 * 60_000).unref(); // 20 min
+		setInterval(() => client.user.setPresence(presence), 60 * 60_000); // 1h
 
 		// log
 		logger.info(`Startup complete. Logged in as ${client.user.tag}`);
