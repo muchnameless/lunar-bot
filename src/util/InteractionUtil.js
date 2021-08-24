@@ -97,7 +97,7 @@ export default class InteractionUtil extends null {
 
 	/**
 	 * @param {GenericInteraction} interaction
-	 * @param {import('discord.js').InteractionDeferOptions} options
+	 * @param {import('discord.js').InteractionDeferReplyOptions} options
 	 */
 	static async deferReply(interaction, options = {}) {
 		const cached = this.CACHE.get(interaction);
