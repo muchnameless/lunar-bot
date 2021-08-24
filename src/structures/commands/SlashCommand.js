@@ -41,7 +41,7 @@ export class SlashCommand extends BaseCommand {
 		if (this.slash.options.length) {
 			for (const option of this.slash.options) {
 				if (option instanceof SlashCommandSubcommandGroupBuilder) {
-					for (const subcommand of this.slash.options) {
+					for (const subcommand of option.options) {
 						subcommand.addStringOption(ephemeralOption);
 					}
 				} else if (option instanceof SlashCommandSubcommandBuilder) {
