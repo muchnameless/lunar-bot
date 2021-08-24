@@ -14,6 +14,7 @@ import { cleanFormattedNumber, compareAlphabetically, logger, mutedCheck, safePr
  * @property {?string} roleId discord role ID associated with the guild rank
  * @property {number} priority hypixel guild rank priority
  * @property {?number} positionReq weight lb position requirement for the guild rank
+ * @property {?number} [currentWeightReq] current weight needed for a rank, updates with syncrank
  */
 
 /**
@@ -611,33 +612,53 @@ export class HypixelGuild extends Model {
 
 			let staffAmount = 0;
 
-			const playersSortedByWeight = [ ...this.players.values() ]
-				.sort((p1, p2) => p1.getSenitherWeight().totalWeight - p2.getSenitherWeight().totalWeight) // from lowest to highest weight
-				.map((player, index) => ({
-					player,
-					isStaff: player.isStaff
+			const playersSortedByWeight = this.players.map(player => ({ player, weight: player.getSenitherWeight().totalWeight }))
+				.sort((a, b) => a.weight - b.weight) // from lowest to highest weight
+				.map((value, index) => ({
+					...value,
+					isStaff: value.player.isStaff
 						? (++staffAmount, true)
 						: false,
 					posWithStaff: index,
 					posNonStaff: index - staffAmount,
 				}));
+
+			// abort if a player's weight is 0 -> most likely an API error
+			if (playersSortedByWeight.some(({ weight }) => weight === 0)) {
+				return logger.error(`[SYNC GUILD RANKS]: ${playersSortedByWeight.find(({ weight }) => weight === 0).player.ign}'s weight is 0`);
+			}
+
 			const nonStaffAmount = playersSortedByWeight.length - staffAmount;
 			/** @type {(GuildRank & { positionReqStaff: number, positionReqNonStaff: number })[]} */
 			const automatedRanks = this.ranks
-				.flatMap(rank => (rank.positionReq != null
-					? {
+				.flatMap((rank) => {
+					if (rank.positionReq == null) return [];
+
+					const positionReqNonStaff = Math.round(rank.positionReq * nonStaffAmount);
+
+					// update 'currentWeightReq'
+					this.ranks.find(({ priority }) => priority === rank.priority).currentWeightReq = Math.ceil(playersSortedByWeight.find(({ posNonStaff }) => posNonStaff === positionReqNonStaff).weight);
+
+					return {
 						positionReqStaff: Math.round(rank.positionReq * playersSortedByWeight.length),
-						positionReqNonStaff: Math.round(rank.positionReq * nonStaffAmount),
+						positionReqNonStaff,
 						...rank,
-					}
-					: []
-				));
+					};
+				});
+
+			this.changed('ranks', true);
+			this.save();
+
+			// update player ranks
 			const setRankLog = [];
 
 			for (const { player, isStaff, posWithStaff, posNonStaff } of playersSortedByWeight) {
 				// player is staff -> only roles need to be adapted
 				if (isStaff) {
-					const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReqStaff <= posWithStaff && (acc?.positionReqStaff ?? 0) <= cur.positionReqStaff ? cur : acc), null);
+					const newRank = automatedRanks.reduce(
+						(acc, cur) => (cur.positionReqStaff <= posWithStaff && (acc?.positionReqStaff ?? 0) <= cur.positionReqStaff ? cur : acc),
+						null,
+					);
 					if (!newRank) continue;
 
 					const member = await player.discordMember;
@@ -655,7 +676,10 @@ export class HypixelGuild extends Model {
 				}
 
 				// non staff
-				const newRank = automatedRanks.reduce((acc, cur) => (cur.positionReqNonStaff <= posNonStaff && (acc?.positionReqNonStaff ?? 0) <= cur.positionReqNonStaff ? cur : acc), null);
+				const newRank = automatedRanks.reduce(
+					(acc, cur) => (cur.positionReqNonStaff <= posNonStaff && (acc?.positionReqNonStaff ?? 0) <= cur.positionReqNonStaff ? cur : acc),
+					null,
+				);
 				if (!newRank) continue;
 
 				const { guildRank: oldRank } = player;
