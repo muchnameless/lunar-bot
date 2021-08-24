@@ -575,7 +575,7 @@ export class PlayerManager extends ModelManager {
 				if (typeof error === 'string') {
 					log.push({
 						guildId: player.guildId,
-						mainProfileUpdate: `-\xa0${player}: ${error.message}`,
+						mainProfileUpdate: `-\xa0${player}: ${error}`,
 					});
 				}
 			}
