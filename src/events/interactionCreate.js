@@ -29,7 +29,7 @@ export default class InteractionCreateEvent extends Event {
 		const command = this.client.commands.get(interaction.commandName);
 
 		if (!command) return await InteractionUtil.reply(interaction, {
-			content: `${interaction.commandName} is currently disabled`,
+			content: `the \`${interaction.commandName}\` command is currently disabled`,
 			ephemeral: true,
 		});
 
@@ -89,7 +89,7 @@ export default class InteractionCreateEvent extends Event {
 
 				if (!command) {
 					if (commandName) await InteractionUtil.reply(interaction, {
-						content: `${commandName} is currently disabled`,
+						content: `the \`${commandName}\` command is currently disabled`,
 						ephemeral: true,
 					});
 
@@ -134,7 +134,7 @@ export default class InteractionCreateEvent extends Event {
 
 				if (!command) {
 					if (commandName) await InteractionUtil.reply(interaction, {
-						content: `${commandName} is currently disabled`,
+						content: `the \`${commandName}\` command is currently disabled`,
 						ephemeral: true,
 					});
 
