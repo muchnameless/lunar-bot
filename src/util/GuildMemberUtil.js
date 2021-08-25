@@ -1,3 +1,4 @@
+import { Permissions, Role } from 'discord.js';
 import {
 	CATACOMBS_ROLES,
 	DELIMITER_ROLES,
@@ -9,6 +10,7 @@ import {
 	SLAYERS,
 } from '../constants/index.js';
 import { UserUtil } from './index.js';
+import { logger } from '../functions/index.js';
 
 
 export default class GuildMemberUtil extends null {
@@ -83,5 +85,43 @@ export default class GuildMemberUtil extends null {
 		}
 
 		return rolesToRemove;
+	}
+
+	/**
+	 * sets a GuildMember's roles, performing permission checks beforehand
+	 * @param {import('discord.js').GuildMember} member
+	 * @param {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} roles
+	 */
+	static async setRoles(member, roles) {
+		const { me } = member.guild;
+		if (!me.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) return logger.warn('[SET ROLES]: missing \'MANAGE_ROLES\'');
+
+		const { highest } = me.roles;
+		const difference = roles.difference(member.roles);
+		if (!difference.size) return logger.warn('[SET ROLES]: nothing to change');
+		if (difference.some(role => role.managed || Role.comparePositions(highest, role) <= 0)) {
+			return logger.warn(`[SET ROLES]: unable to add / remove '@${difference.find(role => role.managed || Role.comparePositions(highest, role) <= 0).name}'`);
+		}
+
+		try {
+			return await member.roles.set(roles);
+		} catch (error) {
+			return logger.error(error);
+		}
+	}
+
+	/**
+	 * add / remove roles from a GuildMember
+	 * @param {import('discord.js').GuildMember} member
+	 * @param {object} param1
+	 * @param {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} [param1.add]
+	 * @param {import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} [param1.remove]
+	 */
+	static async editRoles(member, { add, remove }) {
+		let roles = member.roles.cache;
+		if (remove) roles = roles.filter((_, id) => !remove.has(id));
+		if (add) roles = roles.concat(add);
+
+		return this.setRoles(member, roles);
 	}
 }
