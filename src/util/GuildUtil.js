@@ -35,7 +35,7 @@ export default class GuildUtil extends null {
 			roles.set(role.id, role);
 		}
 
-		return roles.sort(([ , a ], [ , b ]) => Role.comparePositions(b, a));
+		return roles.sort((a, b) => Role.comparePositions(b, a));
 	}
 
 	/**
