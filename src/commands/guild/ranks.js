@@ -53,7 +53,7 @@ export default class RanksCommand extends SlashCommand {
 
 			embed.addFields({
 				name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
-				value: `${this.client.formatNumber(Math.floor(weight))} / ${this.client.formatNumber(currentWeightReq)} weight (${this.client.formatNumber(Math.floor(Math.abs(currentWeightReq - weight)))} ${weight <= currentWeightReq ? 'below' : 'above'})`,
+				value: `${this.client.formatNumber(Math.floor(weight))} / ${this.client.formatNumber(currentWeightReq)} weight (${this.client.formatNumber(Math.floor(Math.abs(currentWeightReq - weight)))} ${weight < currentWeightReq ? 'below' : 'above'})`,
 			});
 		}
 
