@@ -145,16 +145,16 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param {import('discord.js').SelectMenuInteraction} interaction
 	 */
-	runSelect(interaction) { // eslint-disable-line no-unused-vars
-		throw new Error('no run function specified');
+	async runSelect(interaction) { // eslint-disable-line no-unused-vars
+		throw new Error('no run function specified for select menus');
 	}
 
 	/**
 	 * execute the command
 	 * @param {import('discord.js').ButtonInteraction} interaction
 	 */
-	runButton(interaction) { // eslint-disable-line no-unused-vars
-		throw new Error('no run function specified');
+	async runButton(interaction) { // eslint-disable-line no-unused-vars
+		throw new Error('no run function specified for buttons');
 	}
 
 	/**
@@ -162,6 +162,6 @@ export class SlashCommand extends BaseCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) { // eslint-disable-line no-unused-vars
-		throw new Error('no run function specified');
+		throw new Error('no run function specified for slash commands');
 	}
 }
