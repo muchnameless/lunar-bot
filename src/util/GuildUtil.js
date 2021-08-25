@@ -1,4 +1,4 @@
-import { Collection } from 'discord.js';
+import { Role, Collection } from 'discord.js';
 import { logger } from '../functions/index.js';
 
 
@@ -12,23 +12,30 @@ export default class GuildUtil extends null {
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
 	 * @param {import('discord.js').Guild} guild
-	 * @param {(?(import('discord.js').Snowflake | import('discord.js').Role))[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesOrIds roles or role IDs to verify
-	 * @returns {Collection<import('discord.js').Snowflake, import('discord.js').Role>}
+	 * @param {(?(import('discord.js').Snowflake | import('discord.js').Role))[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesOrIds roles or role ids to verify
 	 */
 	static resolveRoles(guild, rolesOrIds) {
-		return new Collection(
-			rolesOrIds
-				.map((roleOrId) => {
-					const role = guild.roles.resolve(roleOrId);
-					return [ role?.id ?? roleOrId, role ];
-				})
-				.filter(([ roleId, role ]) => {
-					if (!role) return logger.warn(`[CHECK ROLE IDS]: '${roleId}' is not a valid role id`);
-					if (!role.editable) return logger.warn(`[CHECK ROLE IDS]: can't edit '${role.name}'`);
-					return true;
-				})
-				.sort(([ , a ], [ , b ]) => b.comparePositionTo(a)),
-		);
+		/** @type {Collection<import('discord.js').Snowflake, import('discord.js').Role>} */
+		const roles = new Collection();
+		const { highest } = guild.me.roles;
+
+		for (const roleOrId of rolesOrIds.values()) {
+			const role = guild.roles.resolve(roleOrId);
+
+			if (!role) {
+				logger.warn(`[CHECK ROLE IDS]: '${roleOrId}' is not a valid role id`);
+				continue;
+			}
+
+			if (role.managed || Role.comparePositions(role, highest) >= 0) {
+				logger.warn(`[CHECK ROLE IDS]: can't edit '@${role.name}'`);
+				continue;
+			}
+
+			roles.set(role.id, role);
+		}
+
+		return roles.sort(([ , a ], [ , b ]) => Role.comparePositions(b, a));
 	}
 
 	/**

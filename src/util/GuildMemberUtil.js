@@ -99,7 +99,7 @@ export default class GuildMemberUtil extends null {
 		const { highest } = me.roles;
 		const difference = roles.difference(member.roles);
 		if (!difference.size) return logger.warn('[SET ROLES]: nothing to change');
-		if (difference.some(role => role.managed || Role.comparePositions(highest, role) <= 0)) {
+		if (difference.some(role => role.managed || Role.comparePositions(role, highest) >= 0)) {
 			return logger.warn(`[SET ROLES]: unable to add / remove '@${difference.find(role => role.managed || Role.comparePositions(highest, role) <= 0).name}'`);
 		}
 
