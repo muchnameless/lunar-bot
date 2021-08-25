@@ -18,8 +18,6 @@ export default class InteractionCreateEvent extends Event {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async #handleCommandInteraction(interaction) {
-		logger.info(`[CMD HANDLER]: '${InteractionUtil.logInfo(interaction)}' was executed by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`);
-
 		if (this.client.chatBridges.channelIds.has(interaction.channelId)) {
 			this.client.chatBridges.interactionCache.set(interaction.id, interaction);
 			setTimeout(() => this.client.chatBridges.interactionCache.delete(interaction.id), 60_000);
@@ -166,6 +164,8 @@ export default class InteractionCreateEvent extends Event {
 	async run(interaction) {
 		// add interaction to the WeakMap which holds InteractionData
 		InteractionUtil.add(interaction);
+
+		logger.info(`[INTERACTION CREATE]: '${InteractionUtil.logInfo(interaction)}' by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`);
 
 		try {
 			// commands

@@ -79,7 +79,9 @@ export default class InteractionUtil extends null {
 	static logInfo(interaction) {
 		if (interaction.isCommand()) {
 			return [
-				this.fullCommandName(interaction),
+				interaction.commandName,
+				interaction.options.getSubcommandGroup(false),
+				interaction.options.getSubcommand(false),
 				...interaction.options._hoistedOptions.map(({ name, value }) => `${name}: ${value}`),
 			].filter(x => x !== null).join(' ');
 		}
