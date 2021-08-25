@@ -62,8 +62,6 @@ export default class BaseWeightCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		InteractionUtil.deferReply(interaction);
-
 		return await InteractionUtil.reply(interaction, await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
 	}
 

@@ -47,8 +47,6 @@ export default class GuildOfCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		InteractionUtil.deferReply(interaction);
-
 		return await InteractionUtil.reply(interaction, await this.#generateReply(interaction.options.getString('ign', true)));
 	}
 

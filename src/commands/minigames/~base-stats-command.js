@@ -48,8 +48,6 @@ export default class StatsCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		InteractionUtil.deferReply(interaction);
-
 		try {
 			return await InteractionUtil.reply(interaction,
 				this._generateReply(

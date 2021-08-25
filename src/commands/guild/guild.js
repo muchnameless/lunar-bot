@@ -178,9 +178,9 @@ export default class GuildCommand extends SlashCommand {
 
 	/**
 	 * /g mute
-	 * @param {{ interaction: import('discord.js').CommandInteraction, target: string | import('../../structures/database/models/Player').Player, duration: number, hypixelGuild?: import('../../structures/database/models/HypixelGuild').HypixelGuild }} param0
+	 * @param {{ target: string | import('../../structures/database/models/Player').Player, duration: number, hypixelGuild?: import('../../structures/database/models/HypixelGuild').HypixelGuild }} param0
 	 */
-	async runMute({ interaction, target, executor, duration, hypixelGuild: hypixelGuildInput }) {
+	async runMute({ target, executor, duration, hypixelGuild: hypixelGuildInput }) {
 		let hypixelGuild = hypixelGuildInput;
 
 		if (target instanceof this.client.players.model) {
@@ -190,8 +190,6 @@ export default class GuildCommand extends SlashCommand {
 				content: `your guild rank needs to be higher than ${target}'s`,
 				ephemeral: true,
 			};
-
-			if (interaction) InteractionUtil.deferReply(interaction);
 
 			target.mutedTill = Date.now() + duration;
 			await target.save();
@@ -207,9 +205,6 @@ export default class GuildCommand extends SlashCommand {
 
 		try {
 			const { chatBridge } = hypixelGuild;
-
-			if (interaction) InteractionUtil.deferReply(interaction);
-
 			const res = await chatBridge.minecraft.command({
 				command: `g mute ${target} ${ms(duration)}`,
 				responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, chatBridge.bot.username),
@@ -241,7 +236,6 @@ export default class GuildCommand extends SlashCommand {
 		});
 
 		const { content, ephemeral } = await this.runMute({
-			interaction,
 			target,
 			executor: UserUtil.getPlayer(interaction.user),
 			duration,
@@ -261,10 +255,10 @@ export default class GuildCommand extends SlashCommand {
 	}
 
 	/**
-	 * @param {{ interaction: ?import('discord.js').CommandInteraction, target: import('../../structures/database/models/Player').Player | string, executor: ?import('../../structures/database/models/Player').Player, hypixelGuild: import('../../structures/database/models/HypixelGuild').HypixelGuild, reason: string }} param0
+	 * @param {{ target: import('../../structures/database/models/Player').Player | string, executor: ?import('../../structures/database/models/Player').Player, hypixelGuild: import('../../structures/database/models/HypixelGuild').HypixelGuild, reason: string }} param0
 	 * @returns {Promise<{ content: string, ephemeral: boolean }>}
 	 */
-	async runKick({ interaction, target, executor, hypixelGuild, reason }) {
+	async runKick({ target, executor, hypixelGuild, reason }) {
 		if (!executor) return {
 			content: 'unable to find a linked player to your discord account',
 			ephemeral: true,
@@ -296,9 +290,6 @@ export default class GuildCommand extends SlashCommand {
 
 		try {
 			const { chatBridge } = hypixelGuild;
-
-			if (interaction) InteractionUtil.deferReply(interaction);
-
 			const res = await chatBridge.minecraft.command({
 				command: `g kick ${target} ${reason}`,
 				responseRegExp: kick.success(target.ign, chatBridge.bot.username),
@@ -329,8 +320,6 @@ export default class GuildCommand extends SlashCommand {
 	 * @param {?import('../../structures/database/models/HypixelGuild').HypixelGuild} [hypixelGuild]
 	 */
 	async #run(interaction, commandOptions, { chatBridge } = InteractionUtil.getHypixelGuild(interaction)) {
-		InteractionUtil.deferReply(interaction);
-
 		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
@@ -346,17 +335,13 @@ export default class GuildCommand extends SlashCommand {
 	 * @param {import('../../structures/chat_bridge/managers/MinecraftChatManager').CommandOptions} commandOptions
 	 */
 	async #runList(interaction, commandOptions) {
-		const { chatBridge } = InteractionUtil.getHypixelGuild(interaction);
-
-		InteractionUtil.deferReply(interaction);
-
 		return await InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
 					.setDescription(Formatters.codeBlock(
 						trim(
-							(await chatBridge.minecraft.command({
+							(await InteractionUtil.getHypixelGuild(interaction).chatBridge.minecraft.command({
 								raw: true,
 								...commandOptions,
 							}))
@@ -427,7 +412,6 @@ export default class GuildCommand extends SlashCommand {
 				const target = InteractionUtil.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
 				const { content, ephemeral } = await this.runKick({
-					interaction,
 					target,
 					executor: UserUtil.getPlayer(interaction.user),
 					reason,

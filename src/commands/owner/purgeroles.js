@@ -36,8 +36,6 @@ export default class PurgeRolesCommand extends SlashCommand {
 		try {
 			PurgeRolesCommand.running = true;
 
-			InteractionUtil.deferReply(interaction);
-
 			const { lgGuild } = this.client;
 			const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 			const toPurge = [];

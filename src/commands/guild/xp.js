@@ -42,10 +42,7 @@ export default class XpCommand extends SlashCommand {
 		}
 
 		// update db?
-		if (interaction.options.getBoolean('update')) {
-			InteractionUtil.deferReply(interaction); // update may take a while
-			await player.updateXp();
-		}
+		if (interaction.options.getBoolean('update')) await player.updateXp();
 
 		const embeds = [];
 		const { skillAverage, trueAverage } = player.getSkillAverage();

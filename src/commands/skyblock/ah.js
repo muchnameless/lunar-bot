@@ -155,8 +155,6 @@ export default class AhCommand extends SlashCommand {
 	 * @param {import('discord.js').SelectMenuInteraction} interaction
 	 */
 	async runSelect(interaction) {
-		InteractionUtil.deferUpdate(interaction);
-
 		try {
 			const [ , , uuid, ign, userId ] = interaction.customId.split(':');
 			const [ profileId ] = interaction.values;
@@ -184,8 +182,6 @@ export default class AhCommand extends SlashCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		InteractionUtil.deferReply(interaction);
-
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid);

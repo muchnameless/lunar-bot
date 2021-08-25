@@ -9,6 +9,7 @@ import { logger, makeContent, validateDiscordId, validateMinecraftUuid } from '.
  * @property {?Promise<void>} deferReplyPromise
  * @property {?Promise<void>} deferUpdatePromise
  * @property {boolean} useEphemeral
+ * @property {?NodeJS.Timeout} autoDefer
  */
 
 /**
@@ -35,6 +36,17 @@ export default class InteractionUtil extends null {
 				?? (channel !== null && channel.type !== 'DM'
 					? !(channel.name.includes('command') || ChannelUtil.isTicket(channel)) // guild channel
 					: false), // DM channel
+			autoDefer: setTimeout( // interactions must be acked within 3 seconds
+				() => {
+					if (interaction.isCommand()) {
+						this.deferReply(interaction);
+					} else {
+						this.deferUpdate(interaction);
+					}
+					interactionData.autoDefer = null;
+				},
+				1_000,
+			),
 		};
 
 		this.CACHE.set(interaction, interactionData);
@@ -103,6 +115,7 @@ export default class InteractionUtil extends null {
 		const cached = this.CACHE.get(interaction);
 		if (cached.deferReplyPromise) return cached.deferReplyPromise;
 
+		clearTimeout(cached.autoDefer);
 		return cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options });
 	}
 
@@ -150,6 +163,7 @@ export default class InteractionUtil extends null {
 			if (interaction.replied) return await interaction.followUp(data);
 
 			// initial reply
+			clearTimeout(cached.autoDefer);
 			return await interaction.reply(data);
 		} catch (error) {
 			return logger.error(error);
@@ -181,6 +195,7 @@ export default class InteractionUtil extends null {
 		const cached = this.CACHE.get(interaction);
 		if (cached.deferUpdatePromise) return cached.deferUpdatePromise;
 
+		clearTimeout(cached.autoDefer);
 		return cached.deferUpdatePromise = interaction.deferUpdate(options);
 	}
 
@@ -189,11 +204,11 @@ export default class InteractionUtil extends null {
 	 * @param {import('discord.js').InteractionUpdateOptions} options
 	 */
 	static async update(interaction, options) {
-		const { deferUpdatePromise } = this.CACHE.get(interaction);
+		const cached = this.CACHE.get(interaction);
 
 		try {
 			// await defer
-			if (deferUpdatePromise) await deferUpdatePromise;
+			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
 			// deferred but not replied
 			if (interaction.deferred && !interaction.replied) return await interaction.editReply(options);
@@ -202,6 +217,7 @@ export default class InteractionUtil extends null {
 			if (interaction.replied) return await interaction.message.edit(options);
 
 			// initial reply
+			clearTimeout(cached.autoDefer);
 			return await interaction.update(options);
 		} catch (error) {
 			return logger.error(error);

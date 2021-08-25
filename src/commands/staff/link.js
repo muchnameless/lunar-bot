@@ -30,8 +30,6 @@ export default class LinkCommand extends SlashCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		InteractionUtil.deferReply(interaction);
-
 		const IGN_OR_UUID = interaction.options.getString('ign', true);
 
 		let uuid;

@@ -26,8 +26,6 @@ export default class VerifyCommand extends SlashCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		InteractionUtil.deferReply(interaction);
-
 		const IGN = interaction.options.getString('ign', true);
 		/** @type {import('../../structures/database/models/Player').Player} */
 		const playerLinkedToId = UserUtil.getPlayer(interaction.user);

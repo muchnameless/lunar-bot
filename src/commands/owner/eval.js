@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
+import { setTimeout as sleep } from 'timers/promises';
 import similarity from 'jaro-winkler';
 import ms from 'ms';
 import fetch from 'node-fetch';
@@ -157,8 +158,6 @@ export default class EvalCommand extends SlashCommand {
 			ephemeral: true,
 		});
 
-		InteractionUtil.deferUpdate(interaction);
-
 		const [ , , async, inspectDepth ] = interaction.customId.split(':');
 
 		try {
@@ -187,8 +186,6 @@ export default class EvalCommand extends SlashCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		InteractionUtil.deferReply(interaction);
-
 		let indentationCount = 0;
 
 		const INPUT = interaction.options.getString('input', true)

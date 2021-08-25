@@ -101,34 +101,36 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		InteractionUtil.deferReply(interaction);
+		const player = InteractionUtil.getPlayer(
+			interaction,
+			!(await this.client.lgGuild?.members.fetch(interaction.user).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')),
+		);
+		const hypixelGuild = player?.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction);
 
-		const { chatBridge } = InteractionUtil.getHypixelGuild(interaction);
-		const IGN = InteractionUtil.getIgn(interaction, !(await this.client.lgGuild?.members.fetch(interaction.user).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')));
-
-		if (!IGN) {
+		if (!player) {
 			// all players
-			if (JoinDateCommand.running.has(chatBridge.hypixelGuild.guildId)) return await InteractionUtil.reply(interaction, {
+			if (JoinDateCommand.running.has(hypixelGuild.guildId)) return await InteractionUtil.reply(interaction, {
 				content: 'the command is already running',
 				ephemeral: true,
 			});
 
+			const { chatBridge } = hypixelGuild;
 			const joinInfos = [];
 
 			try {
-				JoinDateCommand.running.add(chatBridge.hypixelGuild.guildId);
+				JoinDateCommand.running.add(hypixelGuild.guildId);
 
-				await InteractionUtil.awaitConfirmation(interaction, `the command will take approximately ${ms(chatBridge.hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
+				await InteractionUtil.awaitConfirmation(interaction, `the command will take approximately ${ms(hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
 
-				for (const { ign } of chatBridge.hypixelGuild.players.values()) {
+				for (const { ign } of hypixelGuild.players.values()) {
 					joinInfos.push(await JoinDateCommand.#getJoinDate(chatBridge, ign));
 				}
 			} finally {
-				JoinDateCommand.running.delete(chatBridge.hypixelGuild.guildId);
+				JoinDateCommand.running.delete(hypixelGuild.guildId);
 			}
 
 			return await InteractionUtil.reply(interaction, {
-				content: `${Formatters.bold(chatBridge.hypixelGuild.name)} join dates:\n${joinInfos
+				content: `${Formatters.bold(hypixelGuild.name)} join dates:\n${joinInfos
 					.sort((a, b) => a.timestamp - b.timestamp)
 					.map(({ ign, date, timestamp }) => `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`)
 					.join('\n')}`,
@@ -136,7 +138,7 @@ export default class JoinDateCommand extends DualCommand {
 			});
 		}
 
-		return await InteractionUtil.reply(interaction, await this.#generateReply(chatBridge, IGN));
+		return await InteractionUtil.reply(interaction, await this.#generateReply(hypixelGuild.chatBridge, player.ign));
 	}
 
 	/**

@@ -36,8 +36,6 @@ export default class UnlinkCommand extends SlashCommand {
 
 		if (!player?.discordId) return await InteractionUtil.reply(interaction, `\`${PLAYER_INPUT}\` is not linked`);
 
-		InteractionUtil.deferReply(interaction);
-
 		const { discordId: OLD_LINKED_ID } = player;
 		const currentLinkedMember = await player.discordMember;
 		const WAS_SUCCESSFUL = await player.unlink(`unlinked by ${interaction.user.tag}`);
