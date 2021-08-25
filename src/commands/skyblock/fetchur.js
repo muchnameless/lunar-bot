@@ -20,9 +20,6 @@ export default class FetchurCommand extends DualCommand {
 	}
 
 	static FETCHUR_ITEMS = [
-		'50 red wool (Wool Weaver near builder merch in hub)',
-		'20 yellow stained glass (Wool Weaver near builder merch in hub)',
-		'1 compass (4 iron + 1 redstone)',
 		'20 mithril',
 		'1 firework (1 gunpowder + 1 paper)',
 		'cheap coffee (bartender in hub)',
@@ -33,6 +30,9 @@ export default class FetchurCommand extends DualCommand {
 		'1 flint and steel',
 		'50 quartz ore (mine with silk touch)',
 		'16 enderpearls',
+		'50 red wool (Wool Weaver near builder merch in hub)',
+		'20 yellow stained glass (Wool Weaver near builder merch in hub)',
+		'1 compass (4 iron + 1 redstone)',
 	];
 
 	/**
