@@ -46,14 +46,14 @@ export default class RanksCommand extends SlashCommand {
 			.setFooter('Updated at')
 			.setTimestamp(player.xpLastUpdatedAt);
 
-		const weight = Math.floor(player?.getSenitherWeight().totalWeight);
+		const weight = player.getSenitherWeight().totalWeight;
 
 		for (const { name, positionReq, currentWeightReq } of hypixelGuild.ranks) {
 			if (positionReq == null || positionReq === 0) continue;
 
 			embed.addFields({
 				name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
-				value: `${this.client.formatNumber(weight)} / ${this.client.formatNumber(currentWeightReq)} weight (${this.client.formatNumber(Math.abs(currentWeightReq - weight))} ${currentWeightReq >= weight ? 'below' : 'above'})`,
+				value: `${this.client.formatNumber(Math.floor(weight))} / ${this.client.formatNumber(currentWeightReq)} weight (${this.client.formatNumber(Math.abs(currentWeightReq - weight))} ${currentWeightReq >= weight ? 'below' : 'above'})`,
 			});
 		}
 
