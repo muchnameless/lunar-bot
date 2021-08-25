@@ -1077,9 +1077,10 @@ export class Player extends Model {
 		const member = await this.discordMember;
 
 		if (!member) return false;
-		if (member.guild.me.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
+		const { me } = member.guild;
+		if (me.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
 		if (member.guild.ownerId === member.id) return false; // can't change nick of owner
-		if (!member.guild.me.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return (logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`), false);
+		if (!me.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return (logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`), false);
 
 		const { displayName: PREV_NAME } = member;
 
