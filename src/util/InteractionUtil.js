@@ -38,6 +38,7 @@ export default class InteractionUtil extends null {
 					: false), // DM channel
 			autoDefer: setTimeout( // interactions must be acked within 3 seconds
 				() => {
+					logger.warn('[INTERACTION UTIL]: auto defer triggered');
 					if (interaction.isCommand()) {
 						this.deferReply(interaction);
 					} else {
