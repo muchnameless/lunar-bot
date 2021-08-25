@@ -49,7 +49,7 @@ export default class RanksCommand extends SlashCommand {
 		const weight = player.getSenitherWeight().totalWeight;
 
 		for (const { name, positionReq, currentWeightReq } of hypixelGuild.ranks) {
-			if (positionReq == null || positionReq === 0) continue;
+			if (positionReq == null || positionReq === 0 || currentWeightReq == null) continue;
 
 			embed.addFields({
 				name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
