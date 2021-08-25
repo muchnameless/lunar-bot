@@ -66,6 +66,6 @@ export default class DonateCommand extends SlashCommand {
 			}),
 		);
 
-		await InteractionUtil.reply(interaction, `registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
+		return await InteractionUtil.reply(interaction, `registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
 	}
 }

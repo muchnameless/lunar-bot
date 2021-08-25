@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { InteractionUtil } from '../../util/index.js';
-import { logger } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
 
 
@@ -19,12 +18,7 @@ export default class StopCommand extends SlashCommand {
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
 	async runSlash(interaction) {
-		try {
-			await InteractionUtil.reply(interaction, 'stopping the bot');
-		} catch (error) {
-			logger.error(error);
-		} finally {
-			this.client.exit();
-		}
+		await InteractionUtil.reply(interaction, 'stopping the bot');
+		this.client.exit();
 	}
 }
