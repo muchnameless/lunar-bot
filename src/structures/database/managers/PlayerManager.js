@@ -11,10 +11,16 @@ import { ModelManager } from './ModelManager.js';
 
 export class PlayerManager extends ModelManager {
 	/**
-	 * wether a player db update is currently running
+	 * wether a player db xp update is currently running
 	 * @type {boolean}
 	 */
 	#isUpdatingXp = false;
+
+	/**
+	 * wether a player db ign update is currently running
+	 * @type {boolean}
+	 */
+	#isUpdatingIgns = false;
 
 	constructor(options) {
 		super(options);
@@ -212,7 +218,7 @@ export class PlayerManager extends ModelManager {
 	async updateData(options = {}) {
 		await Promise.all([
 			this.updateXp({ shouldOnlyAwaitUpdateXp: true, ...options }),
-			this.updateIgn(),
+			this.updateIgns(),
 		]);
 
 		return this;
@@ -231,7 +237,7 @@ export class PlayerManager extends ModelManager {
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 				// reset error every full hour
 				if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
-					logger.warn('[PLAYERS UPDATE]: auto updates disabled');
+					logger.warn('[PLAYERS UPDATE XP]: auto updates disabled');
 					return this;
 				}
 
@@ -257,78 +263,99 @@ export class PlayerManager extends ModelManager {
 	/**
 	 * updates all IGNs and logs changes via the log handler
 	 */
-	async updateIgn() {
-		/** @type {Record<string, string>[]} */
-		const log = [];
+	async updateIgns() {
+		if (this.#isUpdatingIgns) return this;
+		this.#isUpdatingIgns = true;
 
-		await Promise.all(this.cache.map(async (player) => {
-			const result = await player.updateIgn();
+		try {
+			// the hypxiel api encountered an error before
+			if (this.client.config.get('MOJANG_API_ERROR')) {
+				// reset error every full hour
+				if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+					logger.warn('[PLAYERS UPDATE IGNS]: auto updates disabled');
+					return this;
+				}
 
-			if (result) {
-				log.push({
-					guildId: player.guildId,
-					ignChange: `${result.oldIgn} -> ${result.newIgn}`,
-				});
+				this.client.config.set('MOJANG_API_ERROR', false);
 			}
-		}));
 
-		if (!log.length) return this;
 
-		/** @type {[string, string[]][]} */
-		const affectedGuilds = Object.fromEntries([ ...new Set(log.map(({ guildId }) => guildId)) ].map(id => [ id, [] ]));
+			/** @type {Record<string, string>[]} */
+			const log = [];
 
-		for (const { guildId, ignChange } of log) {
-			affectedGuilds[guildId].push(ignChange);
-		}
+			// API calls
+			await Promise.all(this.cache.map(async (player) => {
+				const result = await player.updateIgn();
 
-		/**
-		 * @type {MessageEmbed[]}
-		 */
-		const embeds = [];
-		/**
-		 * @param {import('../models/HypixelGuild').HypixelGuild|string} guild
-		 * @param {number} ignChangesAmount
-		 */
-		const createEmbed = (guild, ignChangesAmount) => {
-			const embed = this.client.defaultEmbed
-				.setTitle(`${typeof guild !== 'string' ? guild : upperCaseFirstChar(guild)} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildId }) => guildId === guild).size}`);
+				if (result) {
+					log.push({
+						guildId: player.guildId,
+						ignChange: `${result.oldIgn} -> ${result.newIgn}`,
+					});
+				}
+			}));
 
-			embeds.push(embed);
+			// logging
+			if (!log.length) return this;
 
-			return embed;
-		};
+			/** @type {[string, string[]][]} */
+			const affectedGuilds = Object.fromEntries([ ...new Set(log.map(({ guildId }) => guildId)) ].map(id => [ id, [] ]));
 
-		for (const [ guild, ignChanges ] of Object.entries(affectedGuilds)
-			.map(([ guildId, data ]) => [ this.client.hypixelGuilds.cache.get(guildId) ?? guildId, data ])
-			.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
-		) {
-			const logParts = Util.splitMessage(
-				Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')),
-				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' },
-			);
+			for (const { guildId, ignChange } of log) {
+				affectedGuilds[guildId].push(ignChange);
+			}
 
-			let embed = createEmbed(guild, ignChanges.length);
-			let currentLength = embed.length;
+			/**
+			 * @type {MessageEmbed[]}
+			 */
+			const embeds = [];
+			/**
+			 * @param {import('../models/HypixelGuild').HypixelGuild|string} guild
+			 * @param {number} ignChangesAmount
+			 */
+			const createEmbed = (guild, ignChangesAmount) => {
+				const embed = this.client.defaultEmbed
+					.setTitle(`${typeof guild !== 'string' ? guild : upperCaseFirstChar(guild)} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
+					.setDescription(`Number of players: ${typeof guild !== 'string' ? guild.playerCount : this.cache.filter(({ guildId }) => guildId === guild).size}`);
 
-			while (logParts.length) {
-				const name = `${'new ign'.padEnd(150, '\xa0')}\u200b`;
-				const value = logParts.shift();
+				embeds.push(embed);
 
-				if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
-					embed.addFields({ name, value });
-					currentLength += name.length + value.length;
-				} else {
-					embed = createEmbed(guild, ignChanges.length);
-					embed.addFields({ name, value });
-					currentLength = embed.length;
+				return embed;
+			};
+
+			for (const [ guild, ignChanges ] of Object.entries(affectedGuilds)
+				.map(([ guildId, data ]) => [ this.client.hypixelGuilds.cache.get(guildId) ?? guildId, data ])
+				.sort(([ guildNameA ], [ guildNameB ]) => compareAlphabetically(guildNameA, guildNameB))
+			) {
+				const logParts = Util.splitMessage(
+					Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')),
+					{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' },
+				);
+
+				let embed = createEmbed(guild, ignChanges.length);
+				let currentLength = embed.length;
+
+				while (logParts.length) {
+					const name = `${'new ign'.padEnd(150, '\xa0')}\u200b`;
+					const value = logParts.shift();
+
+					if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
+						embed.addFields({ name, value });
+						currentLength += name.length + value.length;
+					} else {
+						embed = createEmbed(guild, ignChanges.length);
+						embed.addFields({ name, value });
+						currentLength = embed.length;
+					}
 				}
 			}
+
+			this.client.log(...embeds);
+
+			return this;
+		} finally {
+			this.#isUpdatingIgns = false;
 		}
-
-		this.client.log(...embeds);
-
-		return this;
 	}
 
 	/**

@@ -1221,6 +1221,11 @@ export class Player extends Model {
 				newIgn: CURRENT_IGN,
 			};
 		} catch (error) {
+			if (error.name.startsWith('Sequelize') || error instanceof TypeError || error instanceof RangeError) return logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
+
+			// prevent further auto updates
+			this.client.config.set('MOJANG_API_ERROR', true);
+
 			if (error instanceof Error && error.name === 'AbortError') {
 				return logger.error(`[UPDATE IGN]: ${this.logInfo}: request timeout`);
 			}

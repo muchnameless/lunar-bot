@@ -376,7 +376,7 @@ export class DatabaseManager {
 		if (config.get('HYPIXEL_API_ERROR')) {
 			// reset error every full hour
 			if (new Date().getMinutes() >= config.get('DATABASE_UPDATE_INTERVAL')) {
-				players.updateIgn();
+				players.updateIgns();
 				return logger.warn('[DB UPDATE]: auto updates disabled');
 			}
 
@@ -395,7 +395,7 @@ export class DatabaseManager {
 		if (config.get('XP_TRACKING_ENABLED')) players.updateXp();
 
 		// update IGNs
-		await players.updateIgn();
+		await players.updateIgns();
 
 		// update taxMessage
 		/** @type {import('discord.js').TextChannel} */
