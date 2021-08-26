@@ -31,11 +31,11 @@ export class MojangAPIError extends Error {
 		super(message);
 
 		this.name = 'MojangAPIError';
-		this.code = status;
+		this.status = status;
 		this.statusText = statusText;
 	}
 
 	toString() {
-		return `${this.name}${this.code ? ` ${this.code}` : ''}: ${this.message}`;
+		return `${this.name}${this.status ? ` ${this.status}` : ''}: ${this.message}`;
 	}
 }

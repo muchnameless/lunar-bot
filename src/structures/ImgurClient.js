@@ -3,6 +3,7 @@ import { setTimeout as sleep } from 'timers/promises';
 import FormData from 'form-data';
 import fetch from 'node-fetch';
 import ms from 'ms';
+import { ImgurAPIError } from './errors/ImgurAPIError.js';
 import { IMGUR_KEY } from '../constants/index.js';
 import { cache } from '../api/cache.js';
 
@@ -180,7 +181,7 @@ export class ImgurClient {
 
 			// check response
 			if (res.status !== 200) {
-				throw res;
+				throw new ImgurAPIError(res);
 			}
 
 			const parsedRes = await res.json();
