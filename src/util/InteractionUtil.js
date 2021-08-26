@@ -23,6 +23,8 @@ export default class InteractionUtil extends null {
 	 */
 	static CACHE = new WeakMap();
 
+	static AUTO_DEFER_TIMEOUT = 1_000;
+
 	/**
 	 * @param {GenericInteraction} interaction
 	 */
@@ -38,15 +40,17 @@ export default class InteractionUtil extends null {
 					: false), // DM channel
 			autoDefer: setTimeout( // interactions must be acked within 3 seconds
 				() => {
-					logger.warn('[INTERACTION UTIL]: auto defer triggered');
+					logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: auto defer triggered after ${Date.now() - interaction.createdTimestamp} ms`);
+
 					if (interaction.isCommand()) {
 						this.deferReply(interaction);
 					} else {
 						this.deferUpdate(interaction);
 					}
+
 					interactionData.autoDefer = null;
 				},
-				1_000,
+				this.AUTO_DEFER_TIMEOUT,
 			),
 		};
 
@@ -75,19 +79,27 @@ export default class InteractionUtil extends null {
 	}
 
 	/**
+	 * commandName [subcommandGroup] [subcommand] [option1: value1] [option2: value2]
+	 * @param {import('discord.js').CommandInteraction} interaction
+	 */
+	static getCommand(interaction) {
+		return [
+			interaction.commandName,
+			interaction.options.getSubcommandGroup(false),
+			interaction.options.getSubcommand(false),
+			...interaction.options._hoistedOptions.map(({ name, value }) => `${name}: ${value}`),
+		].filter(x => x !== null).join(' ');
+	}
+
+	/**
 	 * @param {GenericInteraction} interaction
 	 */
 	static logInfo(interaction) {
 		if (interaction.isCommand()) {
-			return [
-				interaction.commandName,
-				interaction.options.getSubcommandGroup(false),
-				interaction.options.getSubcommand(false),
-				...interaction.options._hoistedOptions.map(({ name, value }) => `${name}: ${value}`),
-			].filter(x => x !== null).join(' ');
+			return `${interaction.type} '${this.getCommand(interaction)}' by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`;
 		}
 
-		return `${interaction.componentType} ${interaction.customId}`;
+		return `${interaction.componentType} '${interaction.customId}' by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`;
 	}
 
 	/**

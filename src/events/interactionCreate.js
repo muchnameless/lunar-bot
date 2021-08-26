@@ -165,7 +165,7 @@ export default class InteractionCreateEvent extends Event {
 		// add interaction to the WeakMap which holds InteractionData
 		InteractionUtil.add(interaction);
 
-		logger.info(`[INTERACTION CREATE]: '${InteractionUtil.logInfo(interaction)}' by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`);
+		logger.info(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`);
 
 		try {
 			// commands
@@ -178,9 +178,9 @@ export default class InteractionCreateEvent extends Event {
 			if (interaction.isSelectMenu()) return await this.#handleSelectMenuInteraction(interaction);
 		} catch (error) {
 			if (typeof error === 'string') {
-				logger.error(`[INTERACTION CREATE]: ${interaction.member?.displayName ?? interaction.user.username} | ${interaction.user.tag}: ${InteractionUtil.logInfo(interaction)}: ${error}`);
+				logger.error(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}: ${error}`);
 			} else {
-				logger.error(`[INTERACTION CREATE]: ${interaction.member?.displayName ?? interaction.user.username} | ${interaction.user.tag}: ${InteractionUtil.logInfo(interaction)}`, error);
+				logger.error(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`, error);
 			}
 
 			if (error.code === Constants.APIErrors.UNKNOWN_INTERACTION || error.code === Constants.APIErrors.INVALID_WEBHOOK_TOKEN) return; // interaction expired
