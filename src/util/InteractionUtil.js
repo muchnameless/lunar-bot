@@ -39,13 +39,17 @@ export default class InteractionUtil extends null {
 					? !(channel.name.includes('command') || ChannelUtil.isTicket(channel)) // guild channel
 					: false), // DM channel
 			autoDefer: setTimeout( // interactions must be acked within 3 seconds
-				() => {
+				async () => {
 					logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: auto defer triggered after ${Date.now() - interaction.createdTimestamp} ms`);
 
-					if (interaction.isCommand()) {
-						this.deferReply(interaction);
-					} else {
-						this.deferUpdate(interaction);
+					try {
+						if (interaction.isCommand()) {
+							await this.deferReply(interaction);
+						} else {
+							await this.deferUpdate(interaction);
+						}
+					} catch (error) {
+						logger.error('[INTERACTION UTIL]: auto defer', error);
 					}
 
 					interactionData.autoDefer = null;
