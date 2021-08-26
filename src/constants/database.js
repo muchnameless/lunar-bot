@@ -69,6 +69,7 @@ export const DEFAULT_CONFIG = Object.freeze({
 	MAIN_GUILD_ID: null,
 	MANAGER_ROLE_ID: null,
 	MODERATOR_ROLE_ID: null,
+	MOJANG_API_ERROR: false,
 	MUTED_ROLE_ID: null,
 	NUMBER_FORMAT: 'fr-FR',
 	PLAYER_DB_UPDATE_ENABLED: true,
