@@ -1,12 +1,13 @@
-import { Client } from '@zikeji/hypixel';
 import { cache } from './cache.js';
+import { HYPIXEL_KEY } from '../constants/index.js';
 import { logger } from '../functions/index.js';
+import { Client } from '@zikeji/hypixel';
 
 
 export const hypixel = new Client(process.env.HYPIXEL_KEY, {
 	cache: {
 		get(key) {
-			return cache.get(`hypixel:${key}`);
+			return cache.get(`${HYPIXEL_KEY}:${key}`);
 		},
 		set(key, value) {
 			if (key.startsWith('guild')) return; // don't cache guilds
@@ -30,7 +31,7 @@ export const hypixel = new Client(process.env.HYPIXEL_KEY, {
 				ttl = 5 * 60_000;
 			}
 
-			return cache.set(`hypixel:${key}`, value, ttl);
+			return cache.set(`${HYPIXEL_KEY}:${key}`, value, ttl);
 		},
 	},
 });
