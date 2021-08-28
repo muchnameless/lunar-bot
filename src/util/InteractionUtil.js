@@ -159,27 +159,24 @@ export default class InteractionUtil extends null {
 				return;
 			}
 
+			// replied
+			if (interaction.replied) return await interaction.followUp(data);
+
 			// await defers
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
 			// deferred but not replied
-			if (interaction.deferred && !interaction.replied) {
-				// ephemeral defer
+			if (interaction.deferred) {
+				// "change" ephemeral state
 				if (interaction.ephemeral) {
-					if (!data.ephemeral) await interaction.editReply('\u200b'); // ephemeral empty message
-
-					return await interaction.followUp(data);
+					if (!data.ephemeral) await interaction.editReply('\u200b'); // ephemeral defer -> not ephemeraly reply
+				} else if (data.ephemeral) {
+					await interaction.deleteReply(); // not ephemeral defer -> ephemeral reply
 				}
-
-				// non-ephemeral defer
-				if (data.ephemeral) await interaction.deleteReply();
 
 				return await interaction.followUp(data);
 			}
-
-			// replied
-			if (interaction.replied) return await interaction.followUp(data);
 
 			// initial reply
 			clearTimeout(cached.autoDefer);
@@ -226,14 +223,14 @@ export default class InteractionUtil extends null {
 		const cached = this.CACHE.get(interaction);
 
 		try {
+			// replied
+			if (interaction.replied) return await interaction.message.edit(options);
+
 			// await defer
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
 			// deferred but not replied
-			if (interaction.deferred && !interaction.replied) return await interaction.editReply(options);
-
-			// replied
-			if (interaction.replied) return await interaction.message.edit(options);
+			if (interaction.deferred) return await interaction.editReply(options);
 
 			// initial reply
 			clearTimeout(cached.autoDefer);
