@@ -278,87 +278,73 @@ export class MinecraftChatManager extends ChatManager {
 
 		MessageUtil.react(discordMessage, STOP_EMOJI);
 
-		if (await cache.get(`chatbridge:blocked:dm:${discordMessage.author.id}`)) return;
+		let info;
 
-		try {
-			let info;
+		switch (reason) {
+			case 'hypixelBlocked': {
+				/** @type {import('../../database/models/Player').Player} */
+				const player = UserUtil.getPlayer(discordMessage.author)
+					?? (await this.client.players.model.findOrCreate({
+						where: { discordId: discordMessage.author.id },
+						defaults: {
+							minecraftUuid: SnowflakeUtil.generate(),
+							guildId: GUILD_ID_BRIDGER,
+							ign: UNKNOWN_IGN,
+							inDiscord: true,
+						},
+					}))[0];
 
-			switch (reason) {
-				case 'blocked': {
-					try {
-						/** @type {import('../../database/models/Player').Player} */
-						const player = UserUtil.getPlayer(discordMessage.author)
-							?? (await this.client.players.model.findOrCreate({
-								where: { discordId: discordMessage.author.id },
-								defaults: {
-									minecraftUuid: SnowflakeUtil.generate(),
-									guildId: GUILD_ID_BRIDGER,
-									ign: UNKNOWN_IGN,
-									inDiscord: true,
-								},
-							}))[0];
+				player.addInfraction();
 
-						player.addInfraction();
+				const { infractions } = player;
 
-						const { infractions } = player;
+				if (infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+					const MUTE_DURATION = ms(this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION'), { long: true });
 
-						if (infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS') && !player.muted) {
-							const MUTE_DURATION = this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION');
+					this.client.log(
+						new MessageEmbed()
+							.setColor(this.client.config.get('EMBED_RED'))
+							.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
+							.setThumbnail(await player.imageURL)
+							.setDescription(stripIndents`
+								${Formatters.bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions in the last ${ms(this.client.config.get('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
+								${player.info}
+							`)
+							.setTimestamp(),
+					);
 
-							player.mutedTill = Date.now() + MUTE_DURATION;
-							player.save();
-
-							const MUTE_DURATION_LONG = ms(MUTE_DURATION, { long: true });
-
-							this.client.log(
-								new MessageEmbed()
-									.setColor(this.client.config.get('EMBED_RED'))
-									.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
-									.setThumbnail(await player.imageURL)
-									.setDescription(stripIndents`
-										${Formatters.bold('Auto Muted')} for ${MUTE_DURATION_LONG} due to ${infractions} infractions in the last ${ms(this.client.config.get('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
-										${player.info}
-									`)
-									.setTimestamp(),
-							);
-
-							info = `you were automatically muted for ${MUTE_DURATION_LONG} due to continues infractions`;
-						}
-					} catch (error) {
-						logger.error(`[FORWARD REJECTION]: ${discordMessage.author.tag}`, error);
-					}
-
-					info ??= 'continuing to do so will result in an automatic temporary mute';
+					info = `you were automatically muted for ${MUTE_DURATION} due to continues infractions`;
 				}
-				// fallthrough
-				case 'filterBlocked':
-					info = stripIndents`
-						your message was blocked because you used a blocked word or character
-						(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
 
-						${info ?? ''}
-					`;
-					break;
-
-				case 'messageCount':
-					info = stripIndents`
-						your message was blocked because you are only allowed to send up to ${data?.maxParts ?? this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS')} messages at once
-						(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
-					`;
-					break;
-
-				default:
-					throw new Error('invalid rejection case');
+				info ??= 'continuing to do so will result in an automatic temporary mute';
 			}
+			// fallthrough
 
-			await UserUtil.sendDM(discordMessage.author, info);
+			case 'localBlocked':
+				info = stripIndents`
+					your message was blocked because you used a blocked word or character
+					(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
 
-			logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
-		} catch (error) {
-			logger.error(`[FORWARD REJECTION]: error DMing ${discordMessage.author.tag}`, error);
-		} finally {
-			cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
+					${info ?? ''}
+				`;
+				break;
+
+			case 'messageCount':
+				info = stripIndents`
+					your message was blocked because you are only allowed to send up to ${data?.maxParts ?? this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS')} messages at once
+					(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
+				`;
+				break;
+
+			default:
+				throw new Error(`invalid rejection case '${reason}'`);
 		}
+
+		if (reason !== 'hypixelBlocked' && await cache.get(`chatbridge:blocked:dm:${discordMessage.author.id}`)) return;
+
+		UserUtil.sendDM(discordMessage.author, info);
+		logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
+		cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
 	}
 
 	/**
@@ -676,7 +662,7 @@ export class MinecraftChatManager extends ChatManager {
 		);
 
 		if (!success) { // messageParts blocked
-			this.#handleForwardRejection(discordMessage, 'filterBlocked');
+			this.#handleForwardRejection(discordMessage, 'localBlocked');
 			return false;
 		}
 
@@ -800,7 +786,7 @@ export class MinecraftChatManager extends ChatManager {
 
 			// hypixel filter blocked message
 			case 'blocked': {
-				this.#handleForwardRejection(discordMessage, 'blocked');
+				this.#handleForwardRejection(discordMessage, 'hypixelBlocked');
 				await sleep(this.delay);
 				throw 'unable to send the message, hypixel\'s filter blocked it';
 			}

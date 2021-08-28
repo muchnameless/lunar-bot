@@ -133,6 +133,10 @@ export class Player extends Model {
 		 * @type {number}
 		 */
 		this.guildXpDaily;
+		/**
+		 * @type {number[]}
+		 */
+		this._infractions;
 	}
 
 	/**
