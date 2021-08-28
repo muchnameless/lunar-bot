@@ -78,18 +78,22 @@ export class MinecraftChatManager extends ChatManager {
 	 * current retry when resending messages
 	 */
 	#retries = 0;
+	/**
+	 * how many messages have been sent to in game chat in the last 10 seconds
+	 */
+	#messageCounter = 0;
+	/**
+	 * async queue for minecraft commands, prevents multiple response collectors
+	 */
+	#commandQueue = new AsyncQueue();
+	/**
+	 * wether the minecraft bot is logged in and ready to receive and send chat messages
+	 */
+	#botReady = false;
 
 	constructor(...args) {
 		super(...args);
 
-		/**
-		 * how many messages have been sent to in game chat in the last 10 seconds
-		 */
-		this.messageCounter = 0;
-		/**
-		 * async queue for minecraft commands, prevents multiple response collectors
-		 */
-		this.commandQueue = new AsyncQueue();
 		/**
 		 * @type {import('minecraft-protocol').Client}
 		 */
@@ -98,10 +102,6 @@ export class MinecraftChatManager extends ChatManager {
 		 * @type {?string}
 		 */
 		this.botUuid = null;
-		/**
-		 * wether the minecraft bot is logged in and ready to receive and send chat messages
-		 */
-		this.botReady = false;
 		/**
 		 * disconnect the bot if it hasn't successfully spawned in 60 seconds
 		 */
@@ -167,11 +167,11 @@ export class MinecraftChatManager extends ChatManager {
 	 * wether the minecraft bot is logged in and ready to receive and send chat messages
 	 */
 	get ready() {
-		return this.botReady && !(this.bot?.ended ?? true);
+		return this.#botReady && !(this.bot?.ended ?? true);
 	}
 
 	set ready(value) {
-		this.botReady = value;
+		this.#botReady = value;
 	}
 
 	/**
@@ -506,8 +506,8 @@ export class MinecraftChatManager extends ChatManager {
 	 * increments messageCounter for 10 seconds
 	 */
 	#tempIncrementCounter() {
-		setTimeout(() => --this.messageCounter, 10_000);
-		return ++this.messageCounter;
+		setTimeout(() => --this.#messageCounter, 10_000);
+		return ++this.#messageCounter;
 	}
 
 	/**
@@ -825,7 +825,7 @@ export class MinecraftChatManager extends ChatManager {
 	 */
 	// eslint-disable-next-line no-undef
 	async command({ command = arguments[0], responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.get('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false, rejectOnAbort = false }) {
-		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
+		await this.#commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
 		const collector = this.createMessageCollector({
@@ -866,7 +866,7 @@ export class MinecraftChatManager extends ChatManager {
 
 		// end collection
 		collector.once('end', (/** @type {import('../HypixelMessage').HypixelMessage[]} */ collected, /** @type {string} */ reason) => {
-			this.commandQueue.shift();
+			this.#commandQueue.shift();
 
 			switch (reason) {
 				case 'time':
