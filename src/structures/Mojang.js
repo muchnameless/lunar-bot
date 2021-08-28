@@ -19,7 +19,7 @@ export class Mojang {
 	/**
 	 * @param {{ cache: any, requestTimeout?: number, retries?: number }} options
 	 */
-	constructor({ cache, requestTimeout = 10_000, retries = 1 } = {}) {
+	constructor({ cache, requestTimeout = 20_000, retries = 1 } = {}) {
 		this.cache = cache;
 		this.requestTimeout = requestTimeout;
 		this.retries = retries;
