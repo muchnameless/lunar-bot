@@ -55,7 +55,7 @@ export class ImgurClient {
 	/**
 	 * @param {{ clientId: string, apiVersion?: string | number, cacheTTL?: number }} param0
 	 */
-	constructor({ clientId, apiVersion = 3, requestTimeout = 15_000, retries = 1, cacheTTL = 10 * 60 }) {
+	constructor({ clientId, apiVersion = 3, requestTimeout = 20_000, retries = 1, cacheTTL = 10 * 60 }) {
 		this.#authorization = `Client-ID ${clientId}`;
 		this.#baseURL = `https://api.imgur.com/${apiVersion}/`;
 		this.requestTimeout = requestTimeout;
