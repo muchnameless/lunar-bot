@@ -39,17 +39,13 @@ export default class InteractionUtil extends null {
 					? !(channel.name.includes('command') || ChannelUtil.isTicket(channel)) // guild channel
 					: false), // DM channel
 			autoDefer: setTimeout( // interactions must be acked within 3 seconds
-				async () => {
+				() => {
 					logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: auto defer triggered after ${Date.now() - interaction.createdTimestamp} ms`);
 
-					try {
-						if (interaction.isCommand()) {
-							await this.deferReply(interaction);
-						} else {
-							await this.deferUpdate(interaction);
-						}
-					} catch (error) {
-						logger.error('[INTERACTION UTIL]: auto defer', error);
+					if (interaction.isCommand()) {
+						this.deferReply(interaction);
+					} else {
+						this.deferUpdate(interaction);
 					}
 
 					interactionData.autoDefer = null;
@@ -155,7 +151,12 @@ export default class InteractionUtil extends null {
 		if (interaction.replied) return logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
 
 		clearTimeout(cached.autoDefer);
-		return cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options });
+
+		try {
+			return await (cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options }));
+		} catch (error) {
+			logger.error(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferReply`, error);
+		}
 	}
 
 	/**
@@ -239,7 +240,12 @@ export default class InteractionUtil extends null {
 		if (interaction.replied) return logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
 
 		clearTimeout(cached.autoDefer);
-		return cached.deferUpdatePromise = interaction.deferUpdate(options);
+
+		try {
+			return await (cached.deferUpdatePromise = interaction.deferUpdate(options));
+		} catch (error) {
+			logger.error(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferUpdate`, error);
+		}
 	}
 
 	/**
