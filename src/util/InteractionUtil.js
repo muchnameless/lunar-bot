@@ -83,6 +83,24 @@ export default class InteractionUtil extends null {
 	}
 
 	/**
+	 * wether the error is due to an interaction reply
+	 * @param {Error | DiscordAPIError} error
+	 */
+	static isInteractionError(error) {
+		if (!(error instanceof DiscordAPIError)) return false;
+
+		switch (error.code) {
+			case Constants.APIErrors.UNKNOWN_INTERACTION:
+			case Constants.APIErrors.UNKNOWN_WEBHOOK:
+			case Constants.APIErrors.INVALID_WEBHOOK_TOKEN:
+				return true;
+
+			default:
+				return false;
+		}
+	}
+
+	/**
 	 * commandName [subcommandGroup] [subcommand] [option1: value1] [option2: value2]
 	 * @param {import('discord.js').CommandInteraction} interaction
 	 */
@@ -186,7 +204,7 @@ export default class InteractionUtil extends null {
 		} catch (error) {
 			logger.error(error);
 
-			if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_INTERACTION) {
+			if (this.isInteractionError(error)) {
 				if (options.ephemeral) return UserUtil.sendDM(interaction.user, contentOrOptions);
 				return ChannelUtil.send(interaction.channel, contentOrOptions);
 			}
@@ -247,9 +265,7 @@ export default class InteractionUtil extends null {
 		} catch (error) {
 			logger.error(error);
 
-			if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_INTERACTION) {
-				return MessageUtil.edit(interaction.message, options);
-			}
+			if (this.isInteractionError(error)) return MessageUtil.edit(interaction.message, options);
 		}
 	}
 

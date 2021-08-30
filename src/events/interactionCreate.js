@@ -1,4 +1,3 @@
-import { Constants } from 'discord.js';
 import ms from 'ms';
 import { COMMAND_KEY, LB_KEY } from '../constants/index.js';
 import { InteractionUtil } from '../util/index.js';
@@ -183,7 +182,7 @@ export default class InteractionCreateEvent extends Event {
 				logger.error(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`, error);
 			}
 
-			if (error.code === Constants.APIErrors.UNKNOWN_INTERACTION || error.code === Constants.APIErrors.INVALID_WEBHOOK_TOKEN) return; // interaction expired
+			if (InteractionUtil.isInteractionError(error)) return; // interaction expired
 
 			try {
 				await InteractionUtil.reply(interaction, {
