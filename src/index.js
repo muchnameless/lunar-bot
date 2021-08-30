@@ -17,31 +17,40 @@ const client = new LunarClient({
 		...Options.defaultMakeCacheSettings,
 		MessageManager: {
 			maxSize: 200,
-			sweepInterval: 600,
+			sweepInterval: 600, // 5 min
 			sweepFilter: LimitedCollection.filterByLifetime({
-				lifetime: 1_800,
+				lifetime: 1_800, // 30 min
 				getComparisonTimestamp: e => e.editedTimestamp ?? e.createdTimestamp,
 				excludeFromSweep: e => e.id === e.client.config.get('TAX_MESSAGE_ID'),
 			}),
 		},
 		ChannelManager: {
-			sweepInterval: 3_600,
+			sweepInterval: 3_600, // 1h
 			sweepFilter: LimitedCollection.filterByLifetime({
-				lifetime: 14_400,
+				lifetime: 14_400, // 4h
 				getComparisonTimestamp: e => (e.type === 'DM'
 					? (e.lastMessageId ? SnowflakeUtil.deconstruct(e.lastMessageId).timestamp : -1) // DM -> last message
 					: e.archiveTimestamp), // threads -> archived
 				excludeFromSweep: e => e.type !== 'DM' && !e.archived,
 			}),
 		},
+		PresenceManager: 0,
+		ReactionUserManager: { // cache only the bot user
+			maxSize: 1,
+			keepOverLimit: e => e.id === e.client.user.id,
+		},
+		StageInstanceManager: 0,
 		UserManager: {
-			sweepInterval: 21_600,
+			sweepInterval: 21_600, // 6h
 			sweepFilter: LimitedCollection.filterByLifetime({
-				lifetime: 0,
+				lifetime: 1, // 0 cancles the filter
 				getComparisonTimestamp: () => -1,
-				excludeFromSweep: e => e.client.guilds.cache.some(guild => guild.members.cache.has(e.id)) || e.client.channels.cache.some(channel => channel.type === 'DM' && channel.recipient.id === e.id),
+				excludeFromSweep: e => e.client.guilds.cache.some(guild => guild.members.cache.has(e.id)) // user is part of a member
+					|| e.client.channels.cache.some(channel => channel.type === 'DM' && channel.recipient.id === e.id) // user has a DM channel
+					|| e.discriminator === '0000', // webhook message 'author'
 			}),
 		},
+		VoiceStateManager: 0,
 	}),
 	allowedMentions: { parse: [ 'users' ], repliedUser: true },
 	partials: [

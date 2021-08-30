@@ -47,22 +47,22 @@ const client = new Client({
 				excludeFromSweep: e => e.type !== 'DM' && !e.archived,
 			}),
 		},
-		MessageManager: 0,
-		ThreadManager: {
-			sweepInterval: 3_600,
-			sweepFilter: LimitedCollection.filterByLifetime({
-				getComparisonTimestamp: e => e.archiveTimestamp,
-				excludeFromSweep: e => !e.archived,
-			}),
-		},
-		UserManager: {
-			maxSize: 1,
-			keepOverLimit: e => e.id === e.client.user.id,
-		},
 		GuildMemberManager: {
 			maxSize: 1,
 			keepOverLimit: e => e.id === e.client.user.id,
 		},
+		MessageManager: 0,
+		PresenceManager: 0,
+		ReactionUserManager: {
+			maxSize: 1,
+			keepOverLimit: e => e.id === e.client.user.id,
+		},
+		StageInstanceManager: 0,
+		UserManager: {
+			maxSize: 1,
+			keepOverLimit: e => e.id === e.client.user.id,
+		},
+		VoiceStateManager: 0,
 	}),
 	allowedMentions: { parse: [], repliedUser: true },
 	partials: [
