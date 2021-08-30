@@ -206,7 +206,7 @@ export class Mojang {
 			// falls through
 
 			default:
-				if (cache && !await this.cache?.get(`${queryType}:${query}`)) this.cache?.set(`${queryType}:${query}`, { error: true, res });
+				if (cache && !await this.cache?.get(`${queryType}:${query}`)) this.cache?.set(queryType, query, { error: true, res });
 				throw new MojangAPIError(res, queryType, query);
 		}
 	}
