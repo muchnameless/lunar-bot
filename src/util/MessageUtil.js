@@ -1,7 +1,6 @@
 import { Permissions, MessageFlags, Util } from 'discord.js';
 import { setTimeout as sleep } from 'timers/promises';
 import { commaListsAnd } from 'common-tags';
-import { REPLY_PING_REGEXP } from '../constants/index.js';
 import { ChannelUtil } from './index.js';
 import { logger } from '../functions/index.js';
 
@@ -102,7 +101,7 @@ export default class MessageUtil extends null {
 		if (message.deleted) return message; // message already deleted check
 
 		if (!message.deletable) { // permission check
-			logger.warn(`[MESSAGE DELETE]: missing permission to delete message from ${message.author.tag} in ${this.channelLogInfo(message)}`);
+			logger.warn(`[MESSAGE UTIL]: missing permission to delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
@@ -156,12 +155,11 @@ export default class MessageUtil extends null {
 	 * @param {string | MessageReplyOptions} contentOrOptions
 	 */
 	static async reply(message, contentOrOptions) {
-		const { content, ...options } = typeof contentOrOptions === 'string'
+		const options = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
 
 		return await ChannelUtil.send(message.channel, {
-			content,
 			reply: {
 				messageReference: message,
 			},
@@ -175,12 +173,20 @@ export default class MessageUtil extends null {
 	 * @param {string | import('discord.js').MessageEditOptions} contentOrOptions
 	 */
 	static async edit(message, contentOrOptions) {
-		const { content, ...options } = typeof contentOrOptions === 'string'
+		const options = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
 
 		// permission checks
 		let requiredChannelPermissions = this.DEFAULT_REPLY_PERMISSIONS;
+
+		if (!message.editable) { // message was not sent by the bot user
+			if (Object.keys(options).some(key => key !== 'attachments') || options.attachments?.length !== 0) { // can only remove attachments
+				return logger.warn(`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)} with ${Object.entries(options)}`);
+			}
+
+			requiredChannelPermissions |= Permissions.FLAGS.MANAGE_MESSAGES; // removing attachments requires MANAGE_MESSAGES
+		}
 
 		if (Reflect.has(options, 'embeds')) requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
 		if (Reflect.has(options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
@@ -191,20 +197,10 @@ export default class MessageUtil extends null {
 			const missingChannelPermissions = ChannelUtil.botPermissions(channel)
 				.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
-			const errorMessage = commaListsAnd`missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
 
-			return logger.warn(`${errorMessage} ${ChannelUtil.logInfo(channel)}`);
+			return logger.warn(commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in ${ChannelUtil.logInfo(channel)}`);
 		}
 
-		if (!content) return message.edit(options);
-
-		const PING_MATCHED = message.content?.match(REPLY_PING_REGEXP)?.[0];
-
-		return message.edit({
-			content: PING_MATCHED && !content.startsWith(PING_MATCHED)
-				? `${PING_MATCHED}${content}`
-				: content,
-			...options,
-		});
+		return message.edit(options);
 	}
 }

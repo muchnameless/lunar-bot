@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, Constants } from 'discord.js';
+import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } from 'discord.js';
 import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants/index.js';
 import { MessageUtil, ChannelUtil, UserUtil } from './index.js';
 import { logger, makeContent, validateDiscordId, validateMinecraftUuid } from '../functions/index.js';
@@ -134,6 +134,8 @@ export default class InteractionUtil extends null {
 		const cached = this.CACHE.get(interaction);
 		if (cached.deferReplyPromise) return cached.deferReplyPromise;
 
+		if (interaction.replied) return logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
+
 		clearTimeout(cached.autoDefer);
 		return cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options });
 	}
@@ -182,7 +184,12 @@ export default class InteractionUtil extends null {
 			clearTimeout(cached.autoDefer);
 			return await interaction.reply(data);
 		} catch (error) {
-			return logger.error(error);
+			logger.error(error);
+
+			if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_INTERACTION) {
+				if (data.ephemeral) return UserUtil.sendDM(interaction.user, contentOrOptions);
+				return ChannelUtil.send(interaction.channel, contentOrOptions);
+			}
 		}
 	}
 
@@ -211,6 +218,8 @@ export default class InteractionUtil extends null {
 		const cached = this.CACHE.get(interaction);
 		if (cached.deferUpdatePromise) return cached.deferUpdatePromise;
 
+		if (interaction.replied) return logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
+
 		clearTimeout(cached.autoDefer);
 		return cached.deferUpdatePromise = interaction.deferUpdate(options);
 	}
@@ -224,7 +233,7 @@ export default class InteractionUtil extends null {
 
 		try {
 			// replied
-			if (interaction.replied) return await interaction.message.edit(options);
+			if (interaction.replied) return await MessageUtil.edit(interaction.message, options);
 
 			// await defer
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
@@ -236,7 +245,11 @@ export default class InteractionUtil extends null {
 			clearTimeout(cached.autoDefer);
 			return await interaction.update(options);
 		} catch (error) {
-			return logger.error(error);
+			logger.error(error);
+
+			if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_INTERACTION) {
+				return MessageUtil.edit(interaction.message, options);
+			}
 		}
 	}
 

@@ -108,7 +108,7 @@ export default class ChannelUtil extends null {
 				.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
 
-			return logger.warn(commaListsAnd`missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in #${channel.name}`);
+			return logger.warn(commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in ${this.logInfo(channel)}`);
 		}
 
 		try {
