@@ -107,9 +107,8 @@ export default class ChannelUtil extends null {
 			const missingChannelPermissions = this.botPermissions(channel)
 				.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
-			const errorMessage = commaListsAnd`missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in`;
 
-			return logger.warn(`${errorMessage} #${channel.name}`);
+			return logger.warn(commaListsAnd`missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in #${channel.name}`);
 		}
 
 		try {
