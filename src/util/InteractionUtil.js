@@ -146,7 +146,7 @@ export default class InteractionUtil extends null {
 	 */
 	static async reply(interaction, contentOrOptions) {
 		const cached = this.CACHE.get(interaction);
-		const data = typeof contentOrOptions === 'string'
+		const options = typeof contentOrOptions === 'string'
 			? { ephemeral: cached.useEphemeral, content: contentOrOptions }
 			: { ephemeral: cached.useEphemeral, ...contentOrOptions };
 
@@ -154,15 +154,15 @@ export default class InteractionUtil extends null {
 			/**
 			 * allow split option for CommandInteraction#reply
 			 */
-			if (data.split || data.code) {
-				for (const content of makeContent(data.content ?? '', { split: data.split, code: data.code })) {
-					await this.reply(interaction, { ...data, content, split: false, code: false });
+			if (options.split || options.code) {
+				for (const content of makeContent(options.content ?? '', { split: options.split, code: options.code })) {
+					await this.reply(interaction, { ...options, content, split: false, code: false });
 				}
 				return;
 			}
 
 			// replied
-			if (interaction.replied) return await interaction.followUp(data);
+			if (interaction.replied) return await interaction.followUp(options);
 
 			// await defers
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
@@ -172,22 +172,22 @@ export default class InteractionUtil extends null {
 			if (interaction.deferred) {
 				// "change" ephemeral state
 				if (interaction.ephemeral) {
-					if (!data.ephemeral) await interaction.editReply('\u200b'); // ephemeral defer -> not ephemeraly reply
-				} else if (data.ephemeral) {
+					if (!options.ephemeral) await interaction.editReply('\u200b'); // ephemeral defer -> not ephemeraly reply
+				} else if (options.ephemeral) {
 					await interaction.deleteReply(); // not ephemeral defer -> ephemeral reply
 				}
 
-				return await interaction.followUp(data);
+				return await interaction.followUp(options);
 			}
 
 			// initial reply
 			clearTimeout(cached.autoDefer);
-			return await interaction.reply(data);
+			return await interaction.reply(options);
 		} catch (error) {
 			logger.error(error);
 
 			if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_INTERACTION) {
-				if (data.ephemeral) return UserUtil.sendDM(interaction.user, contentOrOptions);
+				if (options.ephemeral) return UserUtil.sendDM(interaction.user, contentOrOptions);
 				return ChannelUtil.send(interaction.channel, contentOrOptions);
 			}
 		}
