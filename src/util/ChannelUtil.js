@@ -98,6 +98,7 @@ export default class ChannelUtil extends null {
 		// guild -> requires permission
 		let requiredChannelPermissions = this.DEFAULT_SEND_PERMISSIONS;
 
+		if (Reflect.has(contentOrOptions, 'reply')) requiredChannelPermissions |= Permissions.FLAGS.READ_MESSAGE_HISTORY;
 		if (Reflect.has(contentOrOptions, 'embeds')) requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
 		if (Reflect.has(contentOrOptions, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
 
