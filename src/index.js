@@ -17,7 +17,7 @@ const client = new LunarClient({
 		...Options.defaultMakeCacheSettings,
 		MessageManager: {
 			maxSize: 200,
-			sweepInterval: 600, // 5 min
+			sweepInterval: 600, // 10 min
 			sweepFilter: LimitedCollection.filterByLifetime({
 				lifetime: 1_800, // 30 min
 				getComparisonTimestamp: e => e.editedTimestamp ?? e.createdTimestamp,
