@@ -1,4 +1,5 @@
 /**
+ * senither
  * https://github.com/Senither/Hypixel-Skyblock-Assistant/find/master and search for 'weight'
  */
 
@@ -46,3 +47,16 @@ export const DUNGEON_EXPONENTS = Object.freeze({
 	archer: 0.0000045254834,
 	tank: 0.0000045254834,
 });
+
+
+/**
+ * lily
+ * https://github.com/Antonio32A/lilyweight
+ */
+
+import { readFile } from 'fs/promises';
+
+const { skillNames, skillRatioWeight } = JSON.parse(await readFile('node_modules/lilyweight/lib/constants.json'));
+
+export const LILY_SKILL_NAMES_API = Object.keys(skillNames);
+export const LILY_SKILL_NAMES = Object.keys(skillRatioWeight);

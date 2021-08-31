@@ -1,8 +1,4 @@
 import lilyweight from 'lilyweight';
-
-import { readFile } from 'fs/promises';
-const { skillNames } = JSON.parse(await readFile('node_modules/lilyweight/lib/constants.json'));
-
 import {
 	DUNGEON_CAP,
 	DUNGEON_CLASSES,
@@ -11,6 +7,8 @@ import {
 	DUNGEON_TYPES_AND_CLASSES,
 	DUNGEON_XP,
 	DUNGEON_XP_TOTAL,
+	LILY_SKILL_NAMES,
+	LILY_SKILL_NAMES_API,
 	RUNECRAFTING_XP,
 	SKILL_CAP,
 	SKILL_DIVIDER,
@@ -201,34 +199,20 @@ export function getSenitherDungeonWeight(dungeonType, xp = 0) {
  * Lily
  */
 
-const { getWeightRaw: getLilyWeightRaw } = lilyweight();
+export const { getWeightRaw: getLilyWeightRaw } = lilyweight();
 
 /**
  * @param {import('@zikeji/hypixel').Components.Schemas.SkyBlockProfileMember} skyblockMember
  */
 export function getLilyWeight(skyblockMember) {
-	const SKILL_XP_LILY = Object.keys(skillNames).map(skill => skyblockMember[skill] ?? 0);
+	const SKILL_XP_LILY = LILY_SKILL_NAMES_API.map(skill => skyblockMember[skill] ?? 0);
 	const { total, skill: { overflow } } = getLilyWeightRaw(
-		[
-			'enchanting',
-			'taming',
-			'alchemy',
-			'mining',
-			'farming',
-			'foraging',
-			'combat',
-			'fishing',
-		].map((skill, index) => getSkillLevel(skill, SKILL_XP_LILY[index], 60).trueLevel), // skillLevels
-		SKILL_XP_LILY,
+		LILY_SKILL_NAMES.map((skill, index) => getSkillLevel(skill, SKILL_XP_LILY[index], 60).trueLevel), // skill levels
+		SKILL_XP_LILY, // skill xp
 		skyblockMember.dungeons?.dungeon_types?.catacombs?.tier_completions ?? {}, // catacombs completions
 		skyblockMember.dungeons?.dungeon_types?.master_catacombs?.tier_completions ?? {}, // master catacombs completions
 		skyblockMember.dungeons?.dungeon_types?.catacombs?.experience ?? 0, // catacombs xp
-		[ // slayer xp
-			skyblockMember.slayer_bosses?.zombie?.xp ?? 0,
-			skyblockMember.slayer_bosses?.spider?.xp ?? 0,
-			skyblockMember.slayer_bosses?.wolf?.xp ?? 0,
-			skyblockMember.slayer_bosses?.enderman?.xp ?? 0,
-		],
+		SLAYERS.map(slayer => skyblockMember.slayer_bosses?.[slayer]?.xp ?? 0), // slayer xp
 	);
 
 	return {
