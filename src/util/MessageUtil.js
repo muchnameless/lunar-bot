@@ -110,7 +110,13 @@ export default class MessageUtil extends null {
 
 		// timeout
 		await sleep(timeout);
-		return this.delete(message);
+
+		try {
+			return await this.delete(message);
+		} catch (error) {
+			logger.error(`[MESSAGE UTIL]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
+			return message;
+		}
 	}
 
 	/**
@@ -201,6 +207,10 @@ export default class MessageUtil extends null {
 			return logger.warn(commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in ${ChannelUtil.logInfo(channel)}`);
 		}
 
-		return message.edit(options);
+		try {
+			return await message.edit(options);
+		} catch (error) {
+			return logger.error(`[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
+		}
 	}
 }
