@@ -2,7 +2,7 @@ import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
 import { MessageEmbed, Formatters, Util } from 'discord.js';
 import { setRank } from '../../chat_bridge/constants/index.js';
-import { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS, OFFSET_FLAGS, UNKNOWN_IGN } from '../../../constants/index.js';
+import { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS, OFFSET_FLAGS, UNKNOWN_IGN, XP_TYPES } from '../../../constants/index.js';
 import { GuildUtil } from '../../../util/index.js';
 import { hypixel } from '../../../api/hypixel.js';
 import { mojang } from '../../../api/mojang.js';
@@ -467,7 +467,7 @@ export class HypixelGuild extends Model {
 						setTimeout(
 							(async () => {
 								// reset current xp to 0
-								await player.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT }).catch(error => logger.error(error));
+								await player.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT, typesToReset: XP_TYPES }).catch(error => logger.error(error));
 
 								const { xpLastUpdatedAt } = player;
 								// shift the daily array for the amount of daily resets missed
