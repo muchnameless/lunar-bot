@@ -1,8 +1,6 @@
 import {
 	CATACOMBS_ROLES,
-	COSMETIC_SKILLS,
 	DELIMITER_ROLES,
-	DUNGEON_TYPES_AND_CLASSES,
 	MAYOR_CHANGE_INTERVAL,
 	SKILL_AVERAGE_ROLES,
 	SKILL_ROLES,
@@ -12,6 +10,7 @@ import {
 	SLAYERS,
 	SLAYER_TOTAL_ROLES,
 } from './index.js';
+import { transformAPIData } from '../functions/index.js';
 
 
 // generate default config
@@ -150,7 +149,7 @@ export const XP_OFFSETS_TIME = Object.freeze({
 	day: 'LAST_DAILY_XP_RESET_TIME',
 });
 
-export const XP_TYPES = Object.freeze([ ...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES, 'guild' ]);
+export const XP_TYPES = Object.freeze(Object.keys(transformAPIData()).filter(key => key.endsWith('Xp') || key.startsWith('dungeon')));
 
 export const UNKNOWN_IGN = 'UNKNOWN_IGN';
 

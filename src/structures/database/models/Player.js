@@ -5,23 +5,16 @@ import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
 import {
 	CATACOMBS_ROLES,
-	COSMETIC_SKILLS,
 	DELIMITER_ROLES,
-	DUNGEON_CLASSES,
-	DUNGEON_TYPES,
-	DUNGEON_TYPES_AND_CLASSES,
 	GUILD_ID_BRIDGER,
 	GUILD_ID_ERROR,
 	NICKNAME_MAX_CHARS,
 	OFFSET_FLAGS,
-	SKILL_ACHIEVEMENTS,
 	SKILL_AVERAGE_ROLES,
 	SKILL_ROLES,
-	SKILL_XP_TOTAL,
 	SKILLS,
 	SLAYER_ROLES,
 	SLAYER_TOTAL_ROLES,
-	SLAYER_XP,
 	SLAYERS,
 	UNKNOWN_IGN,
 	XP_OFFSETS,
@@ -32,14 +25,16 @@ import { GuildMemberUtil, GuildUtil, MessageEmbedUtil, UserUtil } from '../../..
 import { hypixel } from '../../../api/hypixel.js';
 import { mojang } from '../../../api/mojang.js';
 import {
+	addAchievementsData,
 	escapeIgn,
-	getSenitherDungeonWeight,
-	getSenitherSkillWeight,
-	getSenitherSlayerWeight,
+	getLilyWeight,
 	getSenitherWeight,
 	getSkillLevel,
+	getSlayerLevel,
+	getTotalSlayerXp,
 	logger,
 	mutedCheck,
+	transformAPIData,
 	trim,
 	uuidToImgurBustURL,
 	validateDiscordId,
@@ -121,10 +116,10 @@ export class Player extends Model {
 		 * @type {boolean}
 		 */
 		this.discordMemberUpdatesDisabled;
-		/**
-		 * @type {number}
-		 */
-		this.farmingLvlCap;
+
+		// player is in a guild -> xp tracking enabled
+		if (!this.notInGuild) this.createDefaults();
+
 		/**
 		 * @type {string}
 		 */
@@ -134,7 +129,7 @@ export class Player extends Model {
 		 */
 		this.guildXpDaily;
 		/**
-		 * @type {number[]}
+		 * @type {?number[]}
 		 */
 		this._infractions;
 	}
@@ -167,6 +162,10 @@ export class Player extends Model {
 				type: DataTypes.STRING,
 				defaultValue: null,
 				allowNull: true,
+				set(value) {
+					if (!HypixelGuildManager.PSEUDO_GUILD_IDS.includes(value)) this.createDefaults();
+					this.setDataValue('guildId', value);
+				},
 			},
 			guildRankPriority: {
 				type: DataTypes.INTEGER,
@@ -240,12 +239,25 @@ export class Player extends Model {
 				allowNull: false,
 			},
 
-			// Individual Max Lvl Cap
-			farmingLvlCap: {
-				type: DataTypes.INTEGER,
-				defaultValue: 50,
-				allowNull: false,
+			// API data
+			skyBlockData: {
+				type: DataTypes.JSONB,
+				defaultValue: null,
+				allowNull: true,
 			},
+			skyBlockDataHistory: {
+				type: DataTypes.ARRAY(DataTypes.JSONB),
+				defaultValue: null,
+				allowNull: true,
+			},
+			...Object.fromEntries(XP_OFFSETS.map(offset => [
+				`skyBlockData${offset}`,
+				{
+					type: DataTypes.JSONB,
+					defaultValue: null,
+					allowNull: true,
+				},
+			])),
 
 			// hypixel guild exp
 			guildXpDay: {
@@ -258,30 +270,25 @@ export class Player extends Model {
 				defaultValue: 0,
 				allowNull: false,
 			},
-		};
-
-		// add xp types
-		for (const type of XP_TYPES) {
-			dataObject[`${type}Xp`] = {
+			guildXp: {
 				type: DataTypes.DECIMAL,
-				defaultValue: 0,
-				allowNull: false,
-			};
-
-			dataObject[`${type}XpHistory`] = {
+				defaultValue: null,
+				allowNull: true,
+			},
+			guildXpHistory: {
 				type: DataTypes.ARRAY(DataTypes.DECIMAL),
-				defaultValue: new Array(30).fill(0),
-				allowNull: false,
-			};
-
-			for (const offset of XP_OFFSETS) {
-				dataObject[`${type}Xp${offset}`] = {
+				defaultValue: null,
+				allowNull: true,
+			},
+			...Object.fromEntries(XP_OFFSETS.map(offset => [
+				`guildXp${offset}`,
+				{
 					type: DataTypes.DECIMAL,
-					defaultValue: 0,
-					allowNull: false,
-				};
-			}
-		}
+					defaultValue: null,
+					allowNull: true,
+				},
+			])),
+		};
 
 		return super.init(dataObject, {
 			sequelize,
@@ -537,75 +544,53 @@ export class Player extends Model {
 			this.xpLastUpdatedAt = Date.now();
 
 			/**
+			 * api data
+			 */
+			this.skyBlockData = transformAPIData(playerData);
+
+			/**
 			 * SKILLS
 			 */
-			if (Reflect.has(playerData, 'experience_skill_alchemy')) {
-				for (const skill of SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
-				for (const skill of COSMETIC_SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
+			if (this.skyBlockData.skillApiEnabled) {
+				// reset skill xp if no mining xp offset
+				for (const offset of XP_OFFSETS) {
+					if (this[`skyBlockData${offset}`].skillXp.mining !== 0) continue;
 
-				// reset skill xp if no taming xp offset
-				if (this.tamingXp !== 0) {
-					for (const offset of XP_OFFSETS) {
-						if (this[`tamingXp${offset}`] === 0) {
-							logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' skill xp`);
-							await this.resetXp({ offsetToReset: offset, typesToReset: [ ...SKILLS, ...COSMETIC_SKILLS ] });
-						}
-					}
+					logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' skill xp`);
+					await this.resetXp({ offsetToReset: offset, typesToReset: [ 'skillXp' ] });
 				}
 			} else {
 				// log once every hour (during the first update)
 				if (!(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) logger.warn(`[UPDATE XP]: ${this.logInfo}: skill API disabled`);
 				this.notes = 'skill api disabled';
 
-				/**
-				 * request achievements api
-				 */
-				const { achievements } = await hypixel.player.uuid(this.minecraftUuid);
-
-				for (const skill of SKILLS) this[`${skill}Xp`] = SKILL_XP_TOTAL[achievements?.[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
+				await addAchievementsData(this.skyBlockData, this.minecraftUuid);
 			}
-
-			this.farmingLvlCap = 50 + (playerData.jacob2?.perks?.farming_level_cap ?? 0);
 
 			/**
 			 * slayer
 			 */
-			for (const slayer of SLAYERS) this[`${slayer}Xp`] = playerData.slayer_bosses?.[slayer]?.xp ?? 0;
-
 			// reset slayer xp if no zombie xp offset
-			if (this.zombieXp !== 0) {
+			if (this.skyBlockData.slayerXp.zombie !== 0) {
 				for (const offset of XP_OFFSETS) {
-					if (this[`zombieXp${offset}`] === 0) {
-						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' slayer xp`);
-						await this.resetXp({ offsetToReset: offset, typesToReset: SLAYERS });
-					}
-				}
-			}
+					if (this[`skyBlockData${offset}`].slayerXp.zombie !== 0) continue;
 
-			// no slayer data found logging
-			if (!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
-				logger.warn(`[UPDATE XP]: ${this.logInfo}: no slayer data found`);
+					logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' slayer xp`);
+					await this.resetXp({ offsetToReset: offset, typesToReset: [ 'slayerXp' ] });
+				}
 			}
 
 			/**
 			 * dungeons
 			 */
-			for (const dungeonType of DUNGEON_TYPES) this[`${dungeonType}Xp`] = playerData.dungeons?.dungeon_types?.[dungeonType]?.experience ?? 0;
-			for (const dungeonClass of DUNGEON_CLASSES) this[`${dungeonClass}Xp`] = playerData.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0;
-
 			// reset dungeons xp if no catacombs xp offset
-			if (this.catacombsXp !== 0) {
+			if (this.skyBlockData.dungeonXp.catacombs !== 0) {
 				for (const offset of XP_OFFSETS) {
-					if (this[`catacombsXp${offset}`] === 0) {
-						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' dungeon xp`);
-						await this.resetXp({ offsetToReset: offset, typesToReset: DUNGEON_TYPES_AND_CLASSES });
-					}
-				}
-			}
+					if (this[`skyBlockData${offset}`].dungeonXp.catacombs !== 0) continue;
 
-			// no dungeons data found logging
-			if (!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
-				logger.warn(`[UPDATE XP]: ${this.logInfo}: no dungeons data found`);
+					logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' dungeon xp`);
+					await this.resetXp({ offsetToReset: offset, typesToReset: [ 'dungeonXp' ] });
+				}
 			}
 
 			/**
@@ -1177,7 +1162,7 @@ export class Player extends Model {
 		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = profiles[
 			profiles.length > 1
 				? profiles
-					.map(({ members }) => getSenitherWeight(members[this.minecraftUuid]).totalWeight)
+					.map(({ members }) => getSenitherWeight(transformAPIData(members[this.minecraftUuid])).totalWeight)
 					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => (currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar), 0)
 				: 0
 		];
@@ -1245,51 +1230,147 @@ export class Player extends Model {
 	 * @param {string} options.to
 	 * @param {?string[]} [options.types]
 	 */
-	async transferXp({ from, to, types = XP_TYPES }) {
+	async transferXp({ from = '', to, types = XP_TYPES }) {
 		for (const type of types) {
-			this[`${type}Xp${to}`] = this[`${type}Xp${from}`];
+			if (Reflect.has(this.skyBlockData, type)) {
+				this[`skyBlockData${to}`][type] = { ...this[`skyBlockData${from}`][type] };
+
+				// transfer additional data
+				switch (type) {
+					case 'skillXp':
+						this[`skyBlockData${to}`].farmingLevelCap = this[`skyBlockData${from}`].farmingLevelCap;
+						this[`skyBlockData${to}`].skillApiEnabled = this[`skyBlockData${from}`].skillApiEnabled;
+						break;
+
+					case 'dungeonXp':
+						this[`skyBlockData${to}`].dungeonCompletions.normal = { ...this[`skyBlockData${from}`].dungeonCompletions.normal };
+						this[`skyBlockData${to}`].dungeonCompletions.master = { ...this[`skyBlockData${from}`].dungeonCompletions.master };
+						break;
+				}
+
+				this.changed(`skyBlockData${to}`, true);
+			} else {
+				this[`${type}${to}`] = this[`${type}${from}`];
+			}
 		}
 
 		return this.save();
 	}
 
 	/**
+	 * fills skyBlockData and guildXp with default values if nullish
+	 */
+	createDefaults() {
+		/**
+		 * @type {?import('../../../functions/index').skyBlockData}
+		 */
+		this.skyBlockData ??= transformAPIData();
+		/**
+		 * @type {?import('../../../functions/index').skyBlockData}
+		 */
+		this.skyBlockDataCompetitionStart ??= transformAPIData();
+		/**
+		 * @type {?import('../../../functions/index').skyBlockData}
+		 */
+		this.skyBlockDataCompetitionEnd ??= transformAPIData();
+		/**
+		 * @type {?import('../../../functions/index').skyBlockData}
+		 */
+		this.skyBlockDataOffsetMayor ??= transformAPIData();
+		/**
+		 * @type {?import('../../../functions/index').skyBlockData}
+		 */
+		this.skyBlockDataOffsetWeek ??= transformAPIData();
+		/**
+		 * @type {?import('../../../functions/index').skyBlockData}
+		 */
+		this.skyBlockDataOffsetMonth ??= transformAPIData();
+		/**
+		 * @type {?number}
+		 */
+		this.guildXp ??= 0;
+		/**
+		 * @type {?number}
+		 */
+		this.guildXpCompetitionStart ??= 0;
+		/**
+		 * @type {?number}
+		 */
+		this.guildXpCompetitionEnd ??= 0;
+		/**
+		 * @type {?number}
+		 */
+		this.guildXpOffsetMayor ??= 0;
+		/**
+		 * @type {?number}
+		 */
+		this.guildXpOffsetWeek ??= 0;
+		/**
+		 * @type {?number}
+		 */
+		this.guildXpOffsetMonth ??= 0;
+
+		return this;
+	}
+
+	/**
+	 * shifts the daily history array and pushes a new entry
+	 * @param {string} key
+	 */
+	async #resetHistory(key) {
+		const history = await this.fetchHistory(key);
+
+		if (history.length >= 30) history.shift();
+		history.push(this[key]);
+
+		await this.client.players.model.update({
+			[`${key}History`]: history,
+		}, {
+			where: this.where(),
+		});
+
+		return this;
+	}
+
+	/**
 	 * resets the xp gained to 0
 	 * @param {object} options
 	 * @param {?string} options.offsetToReset
-	 * @param {?string[]} options.typesToReset
+	 * @param {?string[]} options.typesToReset ignored when offsetToReset is 'day'
 	 * @returns {Promise<this>}
 	 */
-	async resetXp({ offsetToReset = null, typesToReset = XP_TYPES } = {}) {
+	async resetXp({ offsetToReset = null, typesToReset = [ ...XP_TYPES, 'guildXp' ] } = {}) {
 		switch (offsetToReset) {
 			case null:
 				// no offset type specifies -> resetting everything
 				await Promise.all(XP_OFFSETS.map(async offset => this.resetXp({ offsetToReset: offset, typesToReset })));
 				return this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY, typesToReset });
 
-			case OFFSET_FLAGS.DAY:
-				// append current xp to the beginning of the xpHistory-Array and pop of the last value
-				for (const type of typesToReset) {
-					/**
-					 * @type {number[]}
-					 */
-					const xpHistory = this[`${type}XpHistory`];
-					xpHistory.shift();
-					xpHistory.push(this[`${type}Xp`]);
-					this.changed(`${type}XpHistory`, true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
-				}
-				break;
+			case OFFSET_FLAGS.DAY: {
+				return await Promise.all([
+					this.#resetHistory('skyBlockData'),
+					this.#resetHistory('guildXp'),
+				]);
+			}
 
 			case OFFSET_FLAGS.CURRENT:
-				for (const type of typesToReset) this[`${type}Xp`] = 0;
-				break;
+				for (const type of typesToReset) {
+					if (Reflect.has(this.skyBlockData, type)) {
+						this.skyBlockData[type] = transformAPIData()[type];
+						this.changed('skyBlockData', true);
+					} else {
+						this[type] = 0;
+					}
+				}
+				return this.save();
 
 			default:
-				for (const type of typesToReset) this[`${type}Xp${offsetToReset}`] = this[`${type}Xp`];
-				break;
+				return this.transferXp({
+					from: '', // current xp
+					to: offsetToReset,
+					types: typesToReset,
+				});
 		}
-
-		return this.save();
 	}
 
 	/**
@@ -1440,10 +1521,9 @@ export class Player extends Model {
 	 * returns the true and progression level for the provided skill type
 	 * @param {string} type the skill or dungeon type
 	 * @param {string} [offset=''] optional offset value to use instead of the current xp value
-	 * @param {boolean} [useIndividualCap=true] wether to use the individual max level cap if existing
 	 */
-	getSkillLevel(type, offset = '', useIndividualCap = true) {
-		return getSkillLevel(type, this[`${type}Xp${offset}`], type === 'farming' && useIndividualCap ? this.farmingLvlCap : null);
+	getSkillLevel(type, offset = '') {
+		return getSkillLevel(type, this[`skyBlockData${offset}`]);
 	}
 
 	/**
@@ -1472,18 +1552,10 @@ export class Player extends Model {
 	/**
 	 * returns the slayer level for the provided slayer type
 	 * @param {string} type the slayer type
+	 * @param {string} [offset=''] optional offset value to use instead of the current xp value
 	 */
-	getSlayerLevel(type) {
-		const XP = this[`${type}Xp`];
-		const MAX_LEVEL = Math.max(...Object.keys(SLAYER_XP));
-
-		let level = 0;
-
-		for (let x = 1; x <= MAX_LEVEL && SLAYER_XP[x] <= XP; ++x) {
-			level = x;
-		}
-
-		return level;
+	getSlayerLevel(type, offset = '') {
+		return getSlayerLevel(type, this[`skyBlockData${offset}`]);
 	}
 
 	/**
@@ -1491,7 +1563,15 @@ export class Player extends Model {
 	 * @param {string} offset optional offset value to use instead of the current xp value
 	 */
 	getSlayerTotal(offset = '') {
-		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}Xp${offset}`], 0);
+		return getTotalSlayerXp(this[`skyBlockData${offset}`]);
+	}
+
+	/**
+	 * calculates the player's weight using lily's formula
+	 * @param {string} offset optional offset value to use instead of the current xp value
+	 */
+	getLilyWeight(offset = '') {
+		return getLilyWeight(this[`skyBlockData${offset}`]);
 	}
 
 	/**
@@ -1499,56 +1579,45 @@ export class Player extends Model {
 	 * @param {string} offset optional offset value to use instead of the current xp value
 	 */
 	getSenitherWeight(offset = '') {
-		let weight = 0;
-		let overflow = 0;
+		return getSenitherWeight(this[`skyBlockData${offset}`]);
+	}
 
-		for (const skill of SKILLS) {
-			const { skillWeight, skillOverflow } = getSenitherSkillWeight(skill, this[`${skill}Xp${offset}`]);
-
-			weight += skillWeight;
-			overflow += skillOverflow;
-		}
-
-		for (const slayer of SLAYERS) {
-			const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(slayer, this[`${slayer}Xp${offset}`]);
-
-			weight += slayerWeight;
-			overflow += slayerOverflow;
-		}
-
-		for (const type of DUNGEON_TYPES_AND_CLASSES) {
-			const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(type, this[`${type}Xp${offset}`]);
-
-			weight += dungeonWeight;
-			overflow += dungeonOverflow;
-		}
-
-		return {
-			weight,
-			overflow,
-			totalWeight: weight + overflow,
-		};
+	/**
+	 * returns the keyHistory array from the db
+	 * @param {string} key
+	 * @returns {Promise<any[]>}
+	 */
+	async fetchHistory(key) {
+		return (await this.client.players.model.findOne({
+			where: this.where(),
+			attributes: [ `${key}History` ],
+			raw: true,
+		}))?.[`${key}History`] ?? [];
 	}
 
 	/**
 	 * returns the true and progression level for the provided skill type
 	 * @param {string} type the skill or dungeon type
 	 * @param {number} index xpHistory array index
+	 * @param {import('../../../functions/index').skyBlockData[]} [historyInput]
 	 */
-	getSkillLevelHistory(type, index) {
-		return getSkillLevel(type, this[`${type}XpHistory`][index], type === 'farming' ? this.farmingLvlCap : null);
+	async getSkillLevelHistory(type, index, historyInput) {
+		return getSkillLevel(type, (historyInput ?? await this.fetchHistory('skyBlockData'))[index]);
 	}
 
 	/**
 	 * returns the true and progression skill average
 	 * @param {number} index xpHistory array index
 	 */
-	getSkillAverageHistory(index) {
+	async getSkillAverageHistory(index) {
+		/** @type {import('../../../functions/index').skyBlockData[]} */
+		const skyBlockDataHistory = await this.fetchHistory('skyBlockData');
+
 		let skillAverage = 0;
 		let trueAverage = 0;
 
 		for (const skill of SKILLS) {
-			const { trueLevel, nonFlooredLevel } = this.getSkillLevelHistory(skill, index);
+			const { trueLevel, nonFlooredLevel } = await this.getSkillLevelHistory(skill, index, skyBlockDataHistory);
 
 			skillAverage += nonFlooredLevel;
 			trueAverage += trueLevel;
@@ -1567,44 +1636,24 @@ export class Player extends Model {
 	 * @param {string} offset optional offset value to use instead of the current xp value
 	 * @param {number} index xpHistory array index
 	 */
-	getSlayerTotalHistory(index) {
-		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}XpHistory`][index], 0);
+	async getSlayerTotalHistory(index) {
+		return getTotalSlayerXp((await this.fetchHistory('skyBlockData'))[index]);
+	}
+
+	/**
+	 * calculates the player's weight using lily's formula
+	 * @param {number} index xpHistory array index
+	 */
+	async getLilyWeightHistory(index) {
+		return getLilyWeight((await this.fetchHistory('skyBlockData'))[index]);
 	}
 
 	/**
 	 * calculates the player's weight using Senither's formula
 	 * @param {number} index xpHistory array index
 	 */
-	getSenitherWeightHistory(index) {
-		let weight = 0;
-		let overflow = 0;
-
-		for (const skill of SKILLS) {
-			const { skillWeight, skillOverflow } = getSenitherSkillWeight(skill, this[`${skill}XpHistory`][index]);
-
-			weight += skillWeight;
-			overflow += skillOverflow;
-		}
-
-		for (const slayer of SLAYERS) {
-			const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(slayer, this[`${slayer}XpHistory`][index]);
-
-			weight += slayerWeight;
-			overflow += slayerOverflow;
-		}
-
-		for (const type of DUNGEON_TYPES_AND_CLASSES) {
-			const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(type, this[`${type}XpHistory`][index]);
-
-			weight += dungeonWeight;
-			overflow += dungeonOverflow;
-		}
-
-		return {
-			weight,
-			overflow,
-			totalWeight: weight + overflow,
-		};
+	async getSenitherWeightHistory(index) {
+		return getSenitherWeight((await this.fetchHistory('skyBlockData'))[index]);
 	}
 
 	/**

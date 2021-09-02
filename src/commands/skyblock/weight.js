@@ -21,9 +21,9 @@ export default class WeightCommand extends BaseWeightCommand {
 	}
 
 	/**
-	 * @param {import('@zikeji/hypixel').Components.Schemas.SkyBlockProfileMember} skyblockMember
+	 * @param {import('../../functions/index').skyBlockData} skyBlockData
 	 */
-	getWeight(skyblockMember) { // eslint-disable-line class-methods-use-this
-		return getSenitherWeight(skyblockMember);
+	getWeight(skyBlockData) { // eslint-disable-line class-methods-use-this
+		return getSenitherWeight(skyBlockData);
 	}
 }

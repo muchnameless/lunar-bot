@@ -43,6 +43,7 @@ export const db = {
 		(await Promise.all((await readdir('./src/structures/database/models'))
 			.filter(file => !file.startsWith('~') && file.endsWith('.js'))
 			.map(async (file) => {
+				/** @type {Model} */
 				const model = (await import(`./models/${file}`)).default;
 
 				if (Object.getPrototypeOf(model) !== Model) return null;

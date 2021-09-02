@@ -1,7 +1,7 @@
 import { PROFILE_NAMES, X_EMOJI } from '../../constants/index.js';
 import { hypixel } from '../../api/hypixel.js';
 import { InteractionUtil } from '../../util/index.js';
-import { autocorrect, getUuidAndIgn, logger, upperCaseFirstChar } from '../../functions/index.js';
+import { addAchievementsData, autocorrect, getUuidAndIgn, logger, transformAPIData, upperCaseFirstChar } from '../../functions/index.js';
 import { DualCommand } from '../../structures/commands/DualCommand.js';
 
 
@@ -35,17 +35,39 @@ export default class BaseWeightCommand extends DualCommand {
 			let weightData;
 
 			if (!profileName) {
-				[ weightData ] = profiles
-					.map(({ cute_name: name, members }) => ({ name, ...this.getWeight(members[uuid]) }))
+				// find profile with max weight
+				const [ maxWeightProfile ] = profiles
+					.map(({ cute_name: name, members }) => {
+						const skyBlockData = transformAPIData(members[uuid]);
+						return {
+							name,
+							...this.getWeight(skyBlockData),
+							skyBlockData,
+						};
+					})
 					.sort(({ totalWeight: aTotal }, { totalWeight: bTotal }) => bTotal - aTotal);
+
+				if (maxWeightProfile.skillApiEnabled) {
+					weightData = maxWeightProfile;
+				} else {
+					// add achievements skill xp and recalculate weight
+					await addAchievementsData(maxWeightProfile.skyBlockData, uuid);
+
+					weightData = {
+						name: maxWeightProfile.name,
+						...this.getWeight(maxWeightProfile.skyBlockData),
+					};
+				}
 			} else {
 				const profile = profiles.find(({ cute_name: name }) => name === profileName);
-
 				if (!profile) return `${ign} has no profile named '${upperCaseFirstChar(profileName)}'`;
+
+				const skyBlockData = transformAPIData(profile.members[uuid]);
+				if (!skyBlockData.skillApiEnabled) await addAchievementsData(skyBlockData, uuid);
 
 				weightData = {
 					name: profile.cute_name,
-					...this.getWeight(profile.members[uuid]),
+					...this.getWeight(skyBlockData),
 				};
 			}
 

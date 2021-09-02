@@ -2,6 +2,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
 import { setTimeout as sleep } from 'timers/promises';
+import Sequelize from 'sequelize';
 import similarity from 'jaro-winkler';
 import ms from 'ms';
 import fetch from 'node-fetch';

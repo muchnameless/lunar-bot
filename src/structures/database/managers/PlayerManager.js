@@ -30,7 +30,7 @@ export class PlayerManager extends ModelManager {
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/Player').Player}
+		 * @type {import('sequelize').ModelStatic<import('../models/Player').Player>}
 		 */
 		this.model;
 	}
@@ -49,6 +49,12 @@ export class PlayerManager extends ModelManager {
 				guildId: {
 					[Op.ne]: null,
 				},
+			},
+			attributes: {
+				exclude: [
+					'dataHistory',
+					'guildXpHistory',
+				],
 			},
 		});
 

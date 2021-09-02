@@ -475,7 +475,7 @@ export class HypixelGuild extends Model {
 									0,
 									Math.min(
 										Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - xpLastUpdatedAt) / (24 * 60 * 60 * 1000)),
-										player.guildXpHistory.length,
+										(await player.fetchHistory('guildXp')).length,
 									),
 								);
 
