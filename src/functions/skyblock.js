@@ -330,7 +330,7 @@ export function getLilyWeight(skyBlockData) {
 			.map(skill => getSkillLevel(skill, skyBlockData, SKILL_CAP[skill]).trueLevel), // skill levels
 		Object.values(skyBlockData.skillXp).slice(0, -2), // skill xp
 		Object.fromEntries(Object.entries(skyBlockData.dungeonCompletions.normal).slice(0, 7)), // catacombs completions
-		Object.fromEntries(Object.entries(skyBlockData.dungeonCompletions.master).slice(0, 5)), // master catacombs completions
+		Object.fromEntries(Object.entries(skyBlockData.dungeonCompletions.master).slice(0, 6)), // master catacombs completions
 		skyBlockData.dungeonXp.catacombs, // catacombs xp
 		Object.values(skyBlockData.slayerXp), // slayer xp
 	);
