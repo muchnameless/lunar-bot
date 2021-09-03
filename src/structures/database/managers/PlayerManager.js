@@ -483,12 +483,15 @@ export class PlayerManager extends ModelManager {
 	 * resets competitionStart xp, updates the config and logs the event
 	 */
 	async #startCompetition() {
-		const { config } = this.client;
-
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START });
-
-		config.set('COMPETITION_RUNNING', true);
-		config.set('COMPETITION_SCHEDULED', false);
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
+			this.client.config.set('COMPETITION_RUNNING', true),
+			this.client.config.set('COMPETITION_SCHEDULED', false),
+			this.updateNonGuildPlayers({
+				[`skyBlockData${OFFSET_FLAGS.COMPETITION_START}`]: null,
+				[`guildXp${OFFSET_FLAGS.COMPETITION_START}`]: null,
+			}),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')
@@ -500,11 +503,14 @@ export class PlayerManager extends ModelManager {
 	 * resets competitionEnd xp, updates the config and logs the event
 	 */
 	async #endCompetition() {
-		const { config } = this.client;
-
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END });
-
-		config.set('COMPETITION_RUNNING', false);
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
+			this.client.config.set('COMPETITION_RUNNING', false),
+			this.updateNonGuildPlayers({
+				[`skyBlockData${OFFSET_FLAGS.COMPETITION_END}`]: null,
+				[`guildXp${OFFSET_FLAGS.COMPETITION_END}`]: null,
+			}),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')
@@ -516,16 +522,18 @@ export class PlayerManager extends ModelManager {
 	 * resets offsetMayor xp, updates the config and logs the event
 	 */
 	async #performMayorXpReset() {
-		const { config } = this.client;
-		const LAST_MAYOR_XP_RESET_TIME = config.get('LAST_MAYOR_XP_RESET_TIME');
-
 		// if the bot skipped a mayor change readd the interval time
-		let currentMayorTime = LAST_MAYOR_XP_RESET_TIME + MAYOR_CHANGE_INTERVAL;
+		let currentMayorTime = this.client.config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
 
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR });
-
-		config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime);
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
+			this.client.config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime),
+			this.updateNonGuildPlayers({
+				[`skyBlockData${OFFSET_FLAGS.MAYOR}`]: null,
+				[`guildXp${OFFSET_FLAGS.MAYOR}`]: null,
+			}),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Current Mayor XP Tracking')
