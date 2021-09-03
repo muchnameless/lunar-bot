@@ -128,15 +128,19 @@ export class DatabaseManager {
 
 		// set default config
 		await Promise.all(Object.entries(DEFAULT_CONFIG).map(async ([ key, value ]) => (this.modelManagers.config.get(key) !== null ? null : this.modelManagers.config.set(key, value))));
+
+		return this;
 	}
 
 	/**
 	 * loads all db caches (performs a sweep first)
 	 */
 	async loadCache() {
-		return Promise.all(
+		await Promise.all(
 			Object.values(this.modelManagers).map(async manager => manager.loadCache()),
 		);
+
+		return this;
 	}
 
 	/**
@@ -146,6 +150,8 @@ export class DatabaseManager {
 		for (const handler of Object.values(this.modelManagers)) {
 			handler.sweepCache();
 		}
+
+		return this;
 	}
 
 	/**
