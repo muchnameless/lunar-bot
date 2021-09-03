@@ -83,7 +83,8 @@ export class HypixelGuildManager extends ModelManager {
 			return hypixelGuild.players = null;
 		}
 
-		return this.cache.each(hypixelGuild => hypixelGuild.players = null);
+		this.cache.each(hypixelGuild => hypixelGuild.players = null);
+		return this;
 	}
 
 	/**

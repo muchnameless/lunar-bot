@@ -71,7 +71,6 @@ export class PlayerManager extends ModelManager {
 	set(key, value) {
 		this.client.hypixelGuilds.sweepPlayerCache(value.guildId);
 		this.cache.set(key, value);
-
 		return this;
 	}
 
@@ -82,11 +81,9 @@ export class PlayerManager extends ModelManager {
 	delete(idOrPlayer) {
 		/** @type {import('../models/Player').Player} */
 		const player = this.resolve(idOrPlayer);
-
 		if (!player) throw new Error(`[PLAYER HANDLER UNCACHE]: invalid input: ${idOrPlayer}`);
 
 		player.uncache();
-
 		return this;
 	}
 
@@ -105,8 +102,8 @@ export class PlayerManager extends ModelManager {
 	 */
 	clear() {
 		this.client.hypixelGuilds.sweepPlayerCache();
-
-		return this.cache.clear();
+		this.cache.clear();
+		return this;
 	}
 
 	/**
@@ -115,17 +112,17 @@ export class PlayerManager extends ModelManager {
 	 */
 	sort(compareFunction) {
 		this.client.hypixelGuilds.sweepPlayerCache();
-
-		return this.cache.sort(compareFunction);
+		this.cache.sort(compareFunction);
+		return this;
 	}
 
 	/**
 	 * add a player to the db and db cache
 	 * @param {object} options options for the new db entry
 	 * @param {boolean} isAddingSingleEntry wether to call sortAlphabetically() and updateXp() after adding the new entry
-	 * @returns {Promise<import('../models/Player').Player>}
 	 */
 	async add(options = {}, isAddingSingleEntry = true) {
+		/** @type {import('../models/Player').Player} */
 		const newPlayer = await super.add(options);
 
 		this.client.hypixelGuilds.sweepPlayerCache(newPlayer.guildId);
@@ -165,21 +162,21 @@ export class PlayerManager extends ModelManager {
 	 * sweeps all cached discord members
 	 */
 	sweepDiscordMemberCache() {
-		return this.cache.each(player => player.discordMember = null);
+		this.cache.each(player => player.discordMember = null);
+		return this;
 	}
 
 	/**
 	 * get a player by their IGN, case insensitive and with auto-correction
 	 * @param {string} ign ign of the player
-	 * @returns {?import('../models/Player').Player}
 	 */
 	getByIgn(ign) {
 		if (!ign) return null;
 
-		const result = this.autocorrectToPlayer(ign);
+		const { similarity, value } = this.#autocorrectToPlayer(ign);
 
-		return (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD'))
-			? result.value
+		return (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD'))
+			? value
 			: null;
 	}
 
@@ -194,16 +191,15 @@ export class PlayerManager extends ModelManager {
 	/**
 	 * autocorrects the input to a player ign
 	 * @param {string} input
-	 * @returns {import('../models/Player').Player}
+	 * @returns {{ similarity: number, value: import('../models/Player').Player}}
 	 */
-	autocorrectToPlayer(input) {
+	#autocorrectToPlayer(input) {
 		return autocorrect(input, this.cache, 'ign');
 	}
 
 	/**
 	 * get a player by their discord ID
 	 * @param {string} id discord id of the player
-	 * @returns {?import('../models/Player').Player}
 	 */
 	getById(id) {
 		if (!id) return null;
@@ -287,7 +283,7 @@ export class PlayerManager extends ModelManager {
 			}
 
 
-			/** @type {Record<string, string>[]} */
+			/** @type{Record<string, string>[]} */
 			const log = [];
 
 			// API calls
@@ -379,7 +375,7 @@ export class PlayerManager extends ModelManager {
 	 * @param {object} options reset options
 	 */
 	async resetXp(options = {}) {
-		await safePromiseAll(this.cache.filter(player => !player.notInGuild).map(async player => player.resetXp(options)));
+		await safePromiseAll(this.cache.map(async player => player.resetXp(options)));
 		return this;
 	}
 
@@ -466,15 +462,16 @@ export class PlayerManager extends ModelManager {
 	 * update non guild players
 	 * @param {Record<string, any>} values
 	 */
-	async updateNonGuildPlayers(values) {
-		await Promise.all([
-			this.model.update(values, {
+	async #updateUncachedPlayers(values) {
+		try {
+			await this.model.update(values, {
 				where: {
 					guildId: null,
 				},
-			}),
-			this.cache.filter(player => player.notInGuild).map(player => player.update(values)),
-		]);
+			});
+		} catch (error) {
+			logger.error('[UPDATE UNCACHED PLAYERS]', error);
+		}
 
 		return this;
 	}
@@ -487,7 +484,7 @@ export class PlayerManager extends ModelManager {
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
 			this.client.config.set('COMPETITION_RUNNING', true),
 			this.client.config.set('COMPETITION_SCHEDULED', false),
-			this.updateNonGuildPlayers({
+			this.#updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.COMPETITION_START}`]: null,
 				[`guildXp${OFFSET_FLAGS.COMPETITION_START}`]: null,
 			}),
@@ -506,7 +503,7 @@ export class PlayerManager extends ModelManager {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
 			this.client.config.set('COMPETITION_RUNNING', false),
-			this.updateNonGuildPlayers({
+			this.#updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.COMPETITION_END}`]: null,
 				[`guildXp${OFFSET_FLAGS.COMPETITION_END}`]: null,
 			}),
@@ -529,7 +526,7 @@ export class PlayerManager extends ModelManager {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
 			this.client.config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime),
-			this.updateNonGuildPlayers({
+			this.#updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.MAYOR}`]: null,
 				[`guildXp${OFFSET_FLAGS.MAYOR}`]: null,
 			}),
@@ -556,19 +553,6 @@ export class PlayerManager extends ModelManager {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY }),
 			this.client.config.set('LAST_DAILY_XP_RESET_TIME', Date.now()),
-			this.cache.filter(player => player.notInGuild).map((player) => {
-				for (const historyKey of HISTORY_KEYS) {
-					if (player[historyKey][0] === null) {
-						player[historyKey] = null;
-					} else {
-						if (player[historyKey].length >= 30) player[historyKey].shift();
-						player[historyKey].push(null);
-						player.changed(historyKey, true);
-					}
-				}
-
-				return player.save();
-			}),
 			(async () => {
 				const notInGuildWithHistory = await this.model.findAll({
 					where: {
@@ -609,7 +593,7 @@ export class PlayerManager extends ModelManager {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
 			this.client.config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now()),
-			this.updateNonGuildPlayers({
+			this.#updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.WEEK}`]: null,
 				[`guildXp${OFFSET_FLAGS.WEEK}`]: null,
 			}),
@@ -630,7 +614,7 @@ export class PlayerManager extends ModelManager {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
 			this.client.config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now()),
-			this.updateNonGuildPlayers({
+			this.#updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.MONTH}`]: null,
 				[`guildXp${OFFSET_FLAGS.MONTH}`]: null,
 			}),
