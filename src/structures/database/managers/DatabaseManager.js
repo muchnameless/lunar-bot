@@ -35,7 +35,9 @@ export class DatabaseManager {
 	 */
 	constructor({ client, db }) {
 		this.client = client;
-
+		/**
+		 * ModelManagers
+		 */
 		this.modelManagers = {
 			chatTriggers: new ModelManager({ client, model: ChatTrigger }),
 			config: new ConfigManager({ client, model: Config }),
@@ -44,6 +46,7 @@ export class DatabaseManager {
 			taxCollectors: new TaxCollectorManager({ client, model: TaxCollector }),
 		};
 		/**
+		 * Models
 		 * @type {Models}
 		 */
 		this.models = Object.fromEntries(
@@ -51,6 +54,7 @@ export class DatabaseManager {
 				.filter(([ , value ]) => Object.getPrototypeOf(value) === Model && Object.defineProperty(value.prototype, 'client', { value: client })),
 		);
 		/**
+		 * Sequelize instance
 		 * @type {import('sequelize').Sequelize}
 		 */
 		this.sequelize = db.sequelize;
