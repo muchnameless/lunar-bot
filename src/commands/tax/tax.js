@@ -130,7 +130,7 @@ export default class TaxCommand extends SlashCommand {
 				return await InteractionUtil.reply(interaction, log);
 			}
 
-			default: {
+			case null: {
 				switch (interaction.options.getSubcommand()) {
 					case 'amount': {
 						const NEW_AMOUNT = interaction.options.getInteger('amount', true);
@@ -377,6 +377,9 @@ export default class TaxCommand extends SlashCommand {
 						throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
 				}
 			}
+
+			default:
+				throw new Error(`unknown subcommand group '${interaction.options.getSubcommandGroup()}'`);
 		}
 	}
 }
