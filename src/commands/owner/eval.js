@@ -2,10 +2,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
 import { setTimeout as sleep } from 'timers/promises';
+import { fetch } from 'undici';
 import Sequelize from 'sequelize';
 import similarity from 'jaro-winkler';
 import ms from 'ms';
-import fetch from 'node-fetch';
 import util from 'util';
 import * as constants from '../../constants/index.js';
 import { cache } from '../../api/cache.js';

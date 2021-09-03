@@ -29,7 +29,6 @@
     "discord.js": "^13.2.0-dev.1630022686.fc51f61",
     "dotenv": "^10.0.0",
     "emoji-regex": "^9.2.2",
-    "form-data": "^4.0.0",
     "jaro-winkler": "^0.2.8",
     "keyv": "^4.0.3",
     "lex": "^1.7.9",
@@ -45,6 +44,7 @@
     "sequelize-cli": "^6.2.0",
     "sinful-math": "^0.0.1",
     "timezonecomplete": "^5.12.4",
+    "undici": "^4.5.1",
     "utf-8-validate": "^5.0.5",
     "winston": "^3.3.3"
   },

@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import { fetch } from 'undici';
 import { MojangAPIError } from './errors/MojangAPIError.js';
 import { validateMinecraftIgn, validateMinecraftUuid } from '../functions/index.js';
 
@@ -46,11 +46,8 @@ export class Mojang {
 			throw new MojangAPIError(res);
 		}
 
-		const parsedRes = await res.json().catch(() => {
-			throw new Error('An error occurred while converting to JSON');
-		});
-
-		const responses = parsedRes.map(({ id, name }) => ({ uuid: id, ign: name }));
+		/** @type {MojangResult[]} */
+		const responses = (await res.body.json()).map(({ id, name }) => ({ uuid: id, ign: name }));
 
 		if (cache) {
 			for (const response of responses) {
@@ -128,7 +125,7 @@ export class Mojang {
 			const cachedResponse = await this.cache?.get(`${queryType}:${query}`);
 
 			if (cachedResponse) {
-				if (cachedResponse.error) throw new MojangAPIError({ status: cachedResponse.status?.length ? `${cachedResponse.status} (cached)` : '(cached)', ...cachedResponse }, queryType, query);
+				if (cachedResponse.error) throw new MojangAPIError({ status: cachedResponse.status ? `${cachedResponse.status} (cached)` : '(cached)', ...cachedResponse }, queryType, query);
 				return cachedResponse;
 			}
 		}
@@ -139,9 +136,12 @@ export class Mojang {
 		let res;
 
 		try {
-			res = await fetch(`${path}${query}`, {
-				signal: controller.signal,
-			});
+			res = await fetch(
+				`${path}${query}`,
+				{
+					signal: controller.signal,
+				},
+			);
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
@@ -155,18 +155,13 @@ export class Mojang {
 
 		switch (res.status) {
 			case 200: {
-				const { id, name } = await res.json().catch(() => {
-					throw new Error('An error occurred while converting to JSON');
-				});
-
-				const response = {
-					uuid: id,
-					ign: name,
-				};
+				/** @type {{ id: string, name: string }} */
+				const { id: uuid, name: ign } = await res.json();
+				const response = { uuid, ign };
 
 				if (cache) {
-					this.cache?.set('ign', response.ign.toLowerCase(), response);
-					this.cache?.set('uuid', response.uuid, response);
+					this.cache?.set('ign', ign.toLowerCase(), response);
+					this.cache?.set('uuid', uuid, response);
 				}
 
 				return response;
@@ -184,14 +179,9 @@ export class Mojang {
 			// 			const pastRes = await fetch(`${path}${query}?at=${timestamp}`);
 
 			// 			if (pastRes.status === 200) {
-			// 				const { id, name } = await res.json().catch(() => {
-			// 					throw new Error('An error occurred while converting to JSON');
-			// 				});
-
-			// 				const response = {
-			// 					uuid: id,
-			// 					ign: name,
-			// 				};
+			// 				/** @type {{ id: string, name: string }} */
+			// 				const { id: uuid, name: ign } = await res.json();
+			// 				const response = { uuid, ign };
 
 			// 				if (cache) {
 			// 					// only cache ign -> uuid for outdated igns
@@ -207,7 +197,10 @@ export class Mojang {
 
 			default:
 				// only check cache if force === true, because otherwise cache is already checked before the request
-				if (cache && (!force || !await this.cache?.get(`${queryType}:${query}`))) this.cache?.set(queryType, query, { error: true, res });
+				if (cache && (!force || !await this.cache?.get(`${queryType}:${query}`))) {
+					this.cache?.set(queryType, query, { error: true, status: res.status, statusText: res.statusText });
+				}
+
 				throw new MojangAPIError(res, queryType, query);
 		}
 	}
