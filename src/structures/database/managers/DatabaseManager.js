@@ -155,7 +155,7 @@ export class DatabaseManager {
 	async #validateAuctionId(auctionId) {
 		return (await this.models.Transaction.findOne({
 			where: { auctionId },
-			attributes: [],
+			attributes: [ 'id' ],
 			raw: true, // to not parse an eventual result
 		})) === null;
 	}
