@@ -557,18 +557,22 @@ export class PlayerManager extends ModelManager {
 				const notInGuildWithHistory = await this.model.findAll({
 					where: {
 						guildId: null,
-						[Op.ne]: { guildXpHistory: null },
+						guildXpHistory: { [Op.ne]: null },
 					},
 					attributes: HISTORY_KEYS,
 				});
+
+				if (!notInGuildWithHistory.length) return;
+
+				const DATA_HISTORY_MAX_LENGTH = this.client.config.get('DATA_HISTORY_MAX_LENGTH');
 
 				return Promise.all(notInGuildWithHistory.map((player) => {
 					for (const historyKey of HISTORY_KEYS) {
 						if (player[historyKey][0] === null) {
 							player[historyKey] = null;
 						} else {
-							if (player[historyKey].length >= 30) player[historyKey].shift();
 							player[historyKey].push(null);
+							player[historyKey] = player[historyKey].slice(player[historyKey].length - DATA_HISTORY_MAX_LENGTH);
 							player.changed(historyKey, true);
 						}
 					}

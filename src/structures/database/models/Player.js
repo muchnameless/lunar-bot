@@ -1332,7 +1332,7 @@ export class Player extends Model {
 		const toUpdate = {};
 
 		for (const [ key, historyKey ] of HISTORY_KEYS) {
-			const history = await this.fetchHistory(key);
+			let history = await this.fetchHistory(key);
 
 			// no history
 			if (history === null) continue;
@@ -1343,9 +1343,7 @@ export class Player extends Model {
 			);
 
 			// save only the last x entries
-			if (history.length > this.client.config.get('DATA_HISTORY_MAX_LENGTH')) {
-				history.shift();
-			}
+			history = history.slice(history.length - this.client.config.get('DATA_HISTORY_MAX_LENGTH'));
 
 			// all elements are null -> no updates for the last 30 days -> clear history
 			if (history.every(item => item === null)) {
