@@ -298,9 +298,9 @@ export default class TaxCommand extends SlashCommand {
 
 							// get current tax embed from #guild-tax channel
 							currentTaxEmbed = await (async () => {
-								const taxChannel = this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
+								const taxChannel = this.client.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
 
-								if (!taxChannel) return logger.warn('[TAX RESET] tax channel error');
+								if (!taxChannel?.guild?.available || !taxChannel?.isText()) return logger.warn('[TAX RESET] tax channel error');
 
 								const taxMessage = await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID')).catch(logger.error);
 
@@ -327,19 +327,8 @@ export default class TaxCommand extends SlashCommand {
 										taxCollector.resetAmount('donation'),
 									]);
 								}),
-								players.model.update( // reset players that left
-									{ paid: false },
-									{
-										where: {
-											guildId: null,
-											paid: true,
-										},
-									},
-								),
-								...players.cache.map(async (player) => { // reset current players
-									player.paid = false;
-									return player.save();
-								}),
+								...players.cache.map(async player => player.update({ paid: false })), // reset current players
+								players.updateUncachedPlayers({ paid: false }), // reset players that left
 								this.config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up until now
 							]);
 

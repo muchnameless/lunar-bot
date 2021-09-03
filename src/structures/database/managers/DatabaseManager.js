@@ -48,8 +48,7 @@ export class DatabaseManager {
 		 */
 		this.models = Object.fromEntries(
 			Object.entries(db)
-				.filter(([ , value ]) => Object.getPrototypeOf(value) === Model)
-				.map(([ key, value ]) => [ key, Object.defineProperty(value.prototype, 'client', { value: client }) ]), // add 'client' to all db models
+				.filter(([ , value ]) => Object.getPrototypeOf(value) === Model && Object.defineProperty(value.prototype, 'client', { value: client })),
 		);
 		/**
 		 * @type {import('sequelize').Sequelize}
@@ -154,16 +153,11 @@ export class DatabaseManager {
 	 * @param {string} auctionId
 	 */
 	async #validateAuctionId(auctionId) {
-		try {
-			await this.models.Transaction.findOne({
-				where: { auctionId },
-				rejectOnEmpty: true, // rejects the promise if nothing was found
-				raw: true, // to not parse an eventual result
-			});
-			return false;
-		} catch {
-			return true;
-		}
+		return (await this.models.Transaction.findOne({
+			where: { auctionId },
+			attributes: [],
+			raw: true, // to not parse an eventual result
+		})) === null;
 	}
 
 	/**
@@ -296,14 +290,13 @@ export class DatabaseManager {
 	 */
 	#createTaxEmbedDescription(availableAuctionsLog = null) {
 		const { config, players, taxCollectors } = this.modelManagers;
-		const activeTaxCollectors = taxCollectors.activeCollectors; // eslint-disable-line no-shadow
 		const playersInGuild = players.inGuild;
 		const PLAYER_COUNT = playersInGuild.size;
 		const PAID_COUNT = playersInGuild.filter(({ paid }) => paid).size;
 		const TOTAL_COINS = this.client.formatNumber(taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0));
 
 		return Formatters.codeBlock('cs', stripIndents(commaLists`
-			Collectors: # /ah ${activeTaxCollectors.map(player => player.ign).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))}
+			Collectors: # /ah ${taxCollectors.activeCollectors.map(player => player.ign).sort(compareAlphabetically)}
 			Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT'))}
 			Items: ${config.get('TAX_AUCTIONS_ITEMS').map(item => `'${item}'`)}
 			Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round((PAID_COUNT / PLAYER_COUNT) * 100)} % | collected amount: ${TOTAL_COINS} coins
@@ -407,11 +400,10 @@ export class DatabaseManager {
 		await players.updateIgns();
 
 		// update taxMessage
-		/** @type {import('discord.js').TextChannel} */
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
-		if (!taxChannel?.guild?.available) return logger.warn('[TAX MESSAGE]: channel not found');
-		if (!ChannelUtil.botPermissions(taxChannel).has(Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS)) {
+		if (!taxChannel?.guild?.available || !taxChannel?.isText()) return logger.warn('[TAX MESSAGE]: tax channel error');
+		if (!ChannelUtil.botPermissions(taxChannel).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) {
 			return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 		}
 
@@ -429,16 +421,16 @@ export class DatabaseManager {
 			}
 		}
 
-		const description = this.#createTaxEmbedDescription(availableAuctionsLog);
+		const DESCRIPTION = this.#createTaxEmbedDescription(availableAuctionsLog);
 		const fields = this.#createTaxEmbedFields();
 
-		if (taxMessage.embeds[0]?.description === description
+		if (taxMessage.embeds[0]?.description === DESCRIPTION
 			&& taxMessage.embeds[0].fields
 				.every(({ name, value }, index) => fields[index].name === name && fields[index].value === value)
 		) return; // no changes to taxMessage
 
 		try {
-			await taxMessage.edit({ embeds: [ this.createTaxEmbed(description, fields) ] });
+			await taxMessage.edit({ embeds: [ this.createTaxEmbed(DESCRIPTION, fields) ] });
 
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 		} catch (error) {

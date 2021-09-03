@@ -33,6 +33,8 @@ export class ModelManager {
 		for (const element of await this.model.findAll(condition)) {
 			this.cache.set(element[this.primaryKey], element);
 		}
+
+		return this;
 	}
 
 	/**
@@ -40,6 +42,7 @@ export class ModelManager {
 	 */
 	sweepCache() {
 		this.cache.clear();
+		return this;
 	}
 
 	/**
@@ -82,7 +85,6 @@ export class ModelManager {
 	/**
 	 * Resolves a data entry to a data Object.
 	 * @param {string|import('sequelize').Model} idOrInstance The id or instance of something in this Manager
-	 * @returns {?import('sequelize').Model} An instance from this Manager
 	 */
 	resolve(idOrInstance) {
 		if (idOrInstance instanceof this.model) return idOrInstance;

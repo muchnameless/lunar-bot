@@ -462,7 +462,7 @@ export class PlayerManager extends ModelManager {
 	 * update non guild players
 	 * @param {Record<string, any>} values
 	 */
-	async #updateUncachedPlayers(values) {
+	async updateUncachedPlayers(values) {
 		try {
 			await this.model.update(values, {
 				where: {
@@ -484,7 +484,7 @@ export class PlayerManager extends ModelManager {
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
 			this.client.config.set('COMPETITION_RUNNING', true),
 			this.client.config.set('COMPETITION_SCHEDULED', false),
-			this.#updateUncachedPlayers({
+			this.updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.COMPETITION_START}`]: null,
 				[`guildXp${OFFSET_FLAGS.COMPETITION_START}`]: null,
 			}),
@@ -503,7 +503,7 @@ export class PlayerManager extends ModelManager {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
 			this.client.config.set('COMPETITION_RUNNING', false),
-			this.#updateUncachedPlayers({
+			this.updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.COMPETITION_END}`]: null,
 				[`guildXp${OFFSET_FLAGS.COMPETITION_END}`]: null,
 			}),
@@ -526,7 +526,7 @@ export class PlayerManager extends ModelManager {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
 			this.client.config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime),
-			this.#updateUncachedPlayers({
+			this.updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.MAYOR}`]: null,
 				[`guildXp${OFFSET_FLAGS.MAYOR}`]: null,
 			}),
@@ -593,7 +593,7 @@ export class PlayerManager extends ModelManager {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
 			this.client.config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now()),
-			this.#updateUncachedPlayers({
+			this.updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.WEEK}`]: null,
 				[`guildXp${OFFSET_FLAGS.WEEK}`]: null,
 			}),
@@ -614,7 +614,7 @@ export class PlayerManager extends ModelManager {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
 			this.client.config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now()),
-			this.#updateUncachedPlayers({
+			this.updateUncachedPlayers({
 				[`skyBlockData${OFFSET_FLAGS.MONTH}`]: null,
 				[`guildXp${OFFSET_FLAGS.MONTH}`]: null,
 			}),
