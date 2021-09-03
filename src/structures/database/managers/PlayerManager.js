@@ -559,7 +559,7 @@ export class PlayerManager extends ModelManager {
 						guildId: null,
 						guildXpHistory: { [Op.ne]: null },
 					},
-					attributes: HISTORY_KEYS,
+					attributes: [ this.primaryKey, ...HISTORY_KEYS ],
 				});
 
 				if (!notInGuildWithHistory.length) return;
@@ -568,12 +568,13 @@ export class PlayerManager extends ModelManager {
 
 				return Promise.all(notInGuildWithHistory.map((player) => {
 					for (const historyKey of HISTORY_KEYS) {
-						if (player[historyKey][0] === null) {
+						if (!player[historyKey]) continue;
+
+						player[historyKey].push(null);
+						player[historyKey] = player[historyKey].slice(player[historyKey].length - DATA_HISTORY_MAX_LENGTH);
+
+						if (player[historyKey].every(key => key === null)) {
 							player[historyKey] = null;
-						} else {
-							player[historyKey].push(null);
-							player[historyKey] = player[historyKey].slice(player[historyKey].length - DATA_HISTORY_MAX_LENGTH);
-							player.changed(historyKey, true);
 						}
 					}
 
