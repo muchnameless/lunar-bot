@@ -46,7 +46,11 @@ export class DatabaseManager {
 		/**
 		 * @type {Models}
 		 */
-		this.models = Object.fromEntries(Object.entries(db).filter(([ , value ]) => Object.getPrototypeOf(value) === Model));
+		this.models = Object.fromEntries(
+			Object.entries(db)
+				.filter(([ , value ]) => Object.getPrototypeOf(value) === Model)
+				.map(([ key, value ]) => [ key, Object.defineProperty(value.prototype, 'client', { value: client }) ]), // add 'client' to all db models
+		);
 		/**
 		 * @type {import('sequelize').Sequelize}
 		 */
