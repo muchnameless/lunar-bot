@@ -282,7 +282,6 @@ export class MinecraftChatManager extends ChatManager {
 
 		switch (reason) {
 			case 'hypixelBlocked': {
-				/** @type {import('../../database/models/Player').Player} */
 				const player = UserUtil.getPlayer(discordMessage.author)
 					?? (await this.client.players.model.findOrCreate({
 						where: { discordId: discordMessage.author.id },

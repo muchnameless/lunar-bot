@@ -131,7 +131,6 @@ export default class GuildCommand extends SlashCommand {
 	/**
 	 * @param {string} targetInput
 	 * @param {?import('discord.js').CommandInteraction} interaction
-	 * @returns {Promise<string | ?import('../../structures/database/models/Player').Player>}
 	 */
 	async getMuteTarget(targetInput, interaction) {
 		if ([ 'guild', 'everyone' ].includes(targetInput)) {

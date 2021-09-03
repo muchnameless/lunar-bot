@@ -13,7 +13,7 @@ export class HypixelGuildManager extends ModelManager {
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/HypixelGuild').HypixelGuild}
+		 * @type {typeof import('../models/HypixelGuild').HypixelGuild}
 		 */
 		this.model;
 	}

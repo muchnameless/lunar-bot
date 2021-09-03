@@ -364,7 +364,6 @@ export class HypixelGuild extends Model {
 			// add / remove player db entries
 			await safePromiseAll([
 				...membersJoined.map(async ({ uuid: minecraftUuid }) => {
-					/** @type {[import('./Player').Player, boolean]} */
 					const [ player, created ] = await this.client.players.model.findOrCreate({
 						where: { minecraftUuid },
 						defaults: {

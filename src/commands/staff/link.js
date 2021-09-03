@@ -43,7 +43,6 @@ export default class LinkCommand extends SlashCommand {
 			logger.error('[LINK]', error);
 		}
 
-		/** @type {?import('../../structures/database/models/Player').Player} */
 		let player;
 
 		if (!this.client.hypixelGuilds.cache.has(guildId)) { // IGN_OR_Uuid is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN

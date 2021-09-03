@@ -11,7 +11,7 @@ export class ConfigManager extends ModelManager {
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/Config').Config}
+		 * @type {typeof import('../models/Config').Config}
 		 */
 		this.model;
 	}

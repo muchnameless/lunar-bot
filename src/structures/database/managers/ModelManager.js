@@ -6,7 +6,7 @@ export class ModelManager {
 	/**
 	 * @param {object} param0
 	 * @param {import('../../LunarClient').LunarClient} param0.client
-	 * @param {import('sequelize').Model} param0.model
+	 * @param {typeof import('sequelize').Model} param0.model
 	 */
 	constructor({ client, model }) {
 		this.client = client;
@@ -47,7 +47,6 @@ export class ModelManager {
 	 * @param {import('sequelize').WhereOptions & { cache: boolean }} where
 	 */
 	async fetch({ cache = true, ...where }) {
-		/** @type {?import('sequelize').Model} */
 		const entry = await this.model.findOne({ where });
 
 		if (cache && entry) this.cache.set(entry[this.primaryKey], entry);

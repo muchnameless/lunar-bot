@@ -154,7 +154,6 @@ export class ChatBridge extends EventEmitter {
 		try {
 			// link bot to db entry (create if non existant)
 			this.minecraft.botPlayer ??= await (async () => {
-				/** @type {[import('../database/models/Player').Player, boolean]} */
 				const [ player, created ] = await this.client.players.model.findOrCreate({
 					where: { minecraftUuid: this.minecraft.botUuid },
 					defaults: {
