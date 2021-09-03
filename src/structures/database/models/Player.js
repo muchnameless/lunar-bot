@@ -8,6 +8,7 @@ import {
 	DELIMITER_ROLES,
 	GUILD_ID_BRIDGER,
 	GUILD_ID_ERROR,
+	HISTORY_KEYS,
 	NICKNAME_MAX_CHARS,
 	OFFSET_FLAGS,
 	SKILL_AVERAGE_ROLES,
@@ -1317,17 +1318,33 @@ export class Player extends Model {
 	 * shifts the daily history array and pushes a new entry
 	 * @param {string} key
 	 */
-	async #resetHistory(key) {
-		const history = await this.fetchHistory(key);
+	async resetHistory() {
+		const toUpdate = {};
 
-		if (history.length >= 30) history.shift();
-		history.push(this[key]);
+		for (const [ key, historyKey ] of HISTORY_KEYS) {
+			const history = await this.fetchHistory(key);
 
-		await this.client.players.model.update({
-			[`${key}History`]: history,
-		}, {
-			where: this.where(),
-		});
+			// no history
+			if (history === null) continue;
+
+			history.push(this.notInGuild
+				? null // player is not being tracked
+				: (this[key] ?? this.createDefaults()), // player is being tracked
+			);
+			if (history.length > 30) history.shift(); // save only the last 30 entries
+
+			// all elements are null -> no updates for the last 30 days -> clear history
+			if (history.every(item => item === null)) {
+				toUpdate[historyKey] = null;
+			}
+		}
+
+		// update uncached histories
+		if (Object.keys(toUpdate).length) {
+			await this.client.players.model.update(toUpdate, {
+				where: this.where(),
+			});
+		}
 
 		return this;
 	}
@@ -1347,10 +1364,7 @@ export class Player extends Model {
 				return this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY, typesToReset });
 
 			case OFFSET_FLAGS.DAY: {
-				return await Promise.all([
-					this.#resetHistory('skyBlockData'),
-					this.#resetHistory('guildXp'),
-				]);
+				return await this.resetHistory();
 			}
 
 			case OFFSET_FLAGS.CURRENT:
@@ -1585,10 +1599,10 @@ export class Player extends Model {
 	/**
 	 * returns the keyHistory array from the db
 	 * @param {string} key
-	 * @returns {Promise<any[]>}
+	 * @returns {Promise<number[] | import('../../../functions/skyblock.js').skyBlockData[]>}
 	 */
 	async fetchHistory(key) {
-		return (await this.client.players.model.findOne({
+		return this[`${key}History`] ?? (await this.client.players.model.findOne({
 			where: this.where(),
 			attributes: [ `${key}History` ],
 			raw: true,

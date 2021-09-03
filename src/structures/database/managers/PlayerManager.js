@@ -30,7 +30,7 @@ export class PlayerManager extends ModelManager {
 		 */
 		this.cache;
 		/**
-		 * @type {import('sequelize').ModelStatic<import('../models/Player').Player>}
+		 * @type {typeof import('../models/Player').Player}
 		 */
 		this.model;
 	}
@@ -42,23 +42,25 @@ export class PlayerManager extends ModelManager {
 		return this.cache.filter(({ notInGuild }) => !notInGuild);
 	}
 
+	/**
+	 * loads the player cache and sorts alphabetically by IGN
+	 */
 	async loadCache() {
 		await super.loadCache({
 			where: {
-				// player is in a guild that the bot tracks (guildId !== null)
-				guildId: {
+				guildId: { // player is in a guild or a bridger / error
 					[Op.ne]: null,
 				},
 			},
 			attributes: {
-				exclude: [
+				exclude: [ // don't load history arrays
 					'dataHistory',
 					'guildXpHistory',
 				],
 			},
 		});
 
-		this.sortAlphabetically();
+		return this.sortAlphabetically();
 	}
 
 	/**
@@ -143,7 +145,6 @@ export class PlayerManager extends ModelManager {
 	 * deletes all unnecessary db entries
 	 */
 	async sweepDb() {
-		/** @type {import('../models/Player').Player[]} */
 		const playersToSweep = await this.model.findAll({
 			where: {
 				guildId: null,
@@ -378,7 +379,7 @@ export class PlayerManager extends ModelManager {
 	 * @param {object} options reset options
 	 */
 	async resetXp(options = {}) {
-		await safePromiseAll(this.cache.map(async player => player.resetXp(options)));
+		await safePromiseAll(this.cache.filter(player => !player.notInGuild).map(async player => player.resetXp(options)));
 		return this;
 	}
 
@@ -462,6 +463,23 @@ export class PlayerManager extends ModelManager {
 	}
 
 	/**
+	 * update non guild players
+	 * @param {Record<string, any>} values
+	 */
+	async updateNonGuildPlayers(values) {
+		await Promise.all([
+			this.model.update(values, {
+				where: {
+					guildId: null,
+				},
+			}),
+			this.cache.filter(player => player.notInGuild).map(player => player.update(values)),
+		]);
+
+		return this;
+	}
+
+	/**
 	 * resets competitionStart xp, updates the config and logs the event
 	 */
 	async #startCompetition() {
@@ -525,11 +543,48 @@ export class PlayerManager extends ModelManager {
 	 * shifts the daily xp array, updates the config and logs the event
 	 */
 	async #performDailyXpReset() {
-		const { config } = this.client;
+		const HISTORY_KEYS = [ 'skyBlockDataHistory', 'guildXpHistory' ];
 
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY });
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY }),
+			this.client.config.set('LAST_DAILY_XP_RESET_TIME', Date.now()),
+			this.cache.filter(player => player.notInGuild).map((player) => {
+				for (const historyKey of HISTORY_KEYS) {
+					if (player[historyKey][0] === null) {
+						player[historyKey] = null;
+					} else {
+						if (player[historyKey].length >= 30) player[historyKey].shift();
+						player[historyKey].push(null);
+						player.changed(historyKey, true);
+					}
+				}
 
-		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
+				return player.save();
+			}),
+			(async () => {
+				const notInGuildWithHistory = await this.model.findAll({
+					where: {
+						guildId: null,
+						[Op.ne]: { guildXpHistory: null },
+					},
+					attributes: HISTORY_KEYS,
+				});
+
+				return Promise.all(notInGuildWithHistory.map((player) => {
+					for (const historyKey of HISTORY_KEYS) {
+						if (player[historyKey][0] === null) {
+							player[historyKey] = null;
+						} else {
+							if (player[historyKey].length >= 30) player[historyKey].shift();
+							player[historyKey].push(null);
+							player.changed(historyKey, true);
+						}
+					}
+
+					return player.save();
+				}));
+			})(),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Daily XP Tracking')
@@ -543,32 +598,42 @@ export class PlayerManager extends ModelManager {
 	 * resets offsetWeek xp, updates the config and logs the event
 	 */
 	async #performWeeklyXpReset() {
-		const { config } = this.client;
-
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK });
-
-		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
+			this.client.config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now()),
+			this.updateNonGuildPlayers({
+				[`skyBlockData${OFFSET_FLAGS.WEEK}`]: null,
+				[`guildXp${OFFSET_FLAGS.WEEK}`]: null,
+			}),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Weekly XP Tracking')
 			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
+
+		return this;
 	}
 
 	/**
 	 * resets offsetMonth xp, updates the config and logs the event
 	 */
 	async #performMonthlyXpReset() {
-		const { config } = this.client;
-
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH });
-
-		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
+			this.client.config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now()),
+			this.updateNonGuildPlayers({
+				[`skyBlockData${OFFSET_FLAGS.MONTH}`]: null,
+				[`guildXp${OFFSET_FLAGS.MONTH}`]: null,
+			}),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Monthly XP Tracking')
 			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
+
+		return this;
 	}
 
 	/**

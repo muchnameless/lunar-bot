@@ -149,7 +149,14 @@ export const XP_OFFSETS_TIME = Object.freeze({
 	day: 'LAST_DAILY_XP_RESET_TIME',
 });
 
+
 export const XP_TYPES = Object.freeze(Object.keys(transformAPIData()).filter(key => key.endsWith('Xp') || key.startsWith('dungeon')));
+
+export const HISTORY_KEYS = Object.freeze([
+	'skyBlockData',
+	'guildXp',
+].map(key => [ key, `${key}History` ]));
+
 
 export const UNKNOWN_IGN = 'UNKNOWN_IGN';
 
