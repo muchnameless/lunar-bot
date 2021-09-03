@@ -18,34 +18,39 @@ import { ChatTrigger } from '../models/ChatTrigger.js';
 import { ChannelUtil } from '../../../util/index.js';
 import { asyncFilter, compareAlphabetically, logger } from '../../../functions/index.js';
 
+/**
+ * @typedef {object} Models
+ * @property {typeof import('../models/ChatTrigger').ChatTrigger} ChatTrigger
+ * @property {typeof import('../models/Config').Config} Config
+ * @property {typeof import('../models/HypixelGuild').HypixelGuild} HypixelGuild
+ * @property {typeof import('../models/Player').Player} Player
+ * @property {typeof import('../models/TaxCollector').TaxCollector} TaxCollector
+ * @property {typeof import('../models/Transaction').Transaction} Transaction
+ */
+
 
 export class DatabaseManager {
 	/**
-	 * @param {{ client: import('../../LunarClient').LunarClient, db: import('../index') }} param0
+	 * @param {{ client: import('../../LunarClient').LunarClient, db: import('../index').db }} param0
 	 */
 	constructor({ client, db }) {
 		this.client = client;
 
 		this.modelManagers = {
+			chatTriggers: new ModelManager({ client, model: ChatTrigger }),
 			config: new ConfigManager({ client, model: Config }),
 			hypixelGuilds: new HypixelGuildManager({ client, model: HypixelGuild }),
 			players: new PlayerManager({ client, model: Player }),
 			taxCollectors: new TaxCollectorManager({ client, model: TaxCollector }),
-			chatTriggers: new ModelManager({ client, model: ChatTrigger }),
 		};
-
-		const models = {};
-
-		for (const [ key, value ] of Object.entries(db)) {
-			if (Object.getPrototypeOf(value) === Model) {
-				models[key] = value;
-				Object.defineProperty(value.prototype, 'client', { value: client }); // add 'client' to all db models
-			} else {
-				this[key] = value;
-			}
-		}
-
-		this.models = models;
+		/**
+		 * @type {Models}
+		 */
+		this.models = Object.fromEntries(Object.entries(db).filter(([ , value ]) => Object.getPrototypeOf(value) === Model));
+		/**
+		 * @type {import('sequelize').Sequelize}
+		 */
+		this.sequelize = db.sequelize;
 	}
 
 	/**
