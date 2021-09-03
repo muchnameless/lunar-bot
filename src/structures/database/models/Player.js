@@ -14,6 +14,7 @@ import {
 	SKILL_AVERAGE_ROLES,
 	SKILL_ROLES,
 	SKILLS,
+	SKYBLOCK_DATA,
 	SLAYER_ROLES,
 	SLAYER_TOTAL_ROLES,
 	SLAYERS,
@@ -1229,11 +1230,17 @@ export class Player extends Model {
 	 * @param {obejct} options
 	 * @param {string} options.from
 	 * @param {string} options.to
-	 * @param {?string[]} [options.types]
+	 * @param {string[]} [options.types]
+	 * @param {boolean} [options.setToNull]
 	 */
-	async transferXp({ from = '', to, types = XP_TYPES }) {
+	async transferXp({ from = '', to, types = XP_TYPES, setToNull = this.notInGuild }) {
 		for (const type of types) {
-			if (Reflect.has(this.skyBlockData, type)) {
+			if (Reflect.has(this.skyBlockData ?? SKYBLOCK_DATA, type)) {
+				if (this.skyBlockData === null) {
+					this[`skyBlockData${to}`] = null;
+					continue;
+				}
+
 				this[`skyBlockData${to}`][type] = { ...this[`skyBlockData${from}`][type] };
 
 				// transfer additional data
@@ -1251,7 +1258,9 @@ export class Player extends Model {
 
 				this.changed(`skyBlockData${to}`, true);
 			} else {
-				this[`${type}${to}`] = this[`${type}${from}`];
+				this[`${type}${to}`] = setToNull
+					? null
+					: this[`${type}${from}`];
 			}
 		}
 
@@ -1353,10 +1362,11 @@ export class Player extends Model {
 	 * resets the xp gained to 0
 	 * @param {object} options
 	 * @param {?string} options.offsetToReset
-	 * @param {?string[]} options.typesToReset ignored when offsetToReset is 'day'
+	 * @param {string[]} [options.typesToReset] ignored when offsetToReset is 'day'
+	 * @param {boolean} [options.setToNull]
 	 * @returns {Promise<this>}
 	 */
-	async resetXp({ offsetToReset = null, typesToReset = [ ...XP_TYPES, 'guildXp' ] } = {}) {
+	async resetXp({ offsetToReset = null, typesToReset = [ 'guildXp', ...XP_TYPES ], setToNull } = {}) {
 		switch (offsetToReset) {
 			case null:
 				// no offset type specifies -> resetting everything
@@ -1383,6 +1393,7 @@ export class Player extends Model {
 					from: '', // current xp
 					to: offsetToReset,
 					types: typesToReset,
+					setToNull,
 				});
 		}
 	}

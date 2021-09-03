@@ -150,7 +150,9 @@ export const XP_OFFSETS_TIME = Object.freeze({
 });
 
 
-export const XP_TYPES = Object.freeze(Object.keys(transformAPIData()).filter(key => key.endsWith('Xp') || key.startsWith('dungeon')));
+export const SKYBLOCK_DATA = Object.freeze(transformAPIData());
+
+export const XP_TYPES = Object.freeze(Object.keys(SKYBLOCK_DATA).filter(key => key.endsWith('Xp') || key.startsWith('dungeon')));
 
 export const HISTORY_KEYS = Object.freeze([
 	'skyBlockData',
