@@ -1341,7 +1341,11 @@ export class Player extends Model {
 				? null // player is not being tracked
 				: (this[key] ?? this.createDefaults()), // player is being tracked
 			);
-			if (history.length > 30) history.shift(); // save only the last 30 entries
+
+			// save only the last x entries
+			if (history.length > this.client.config.get('DATA_HISTORY_MAX_LENGTH')) {
+				history.shift();
+			}
 
 			// all elements are null -> no updates for the last 30 days -> clear history
 			if (history.every(item => item === null)) {
