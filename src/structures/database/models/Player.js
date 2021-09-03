@@ -165,7 +165,11 @@ export class Player extends Model {
 				defaultValue: null,
 				allowNull: true,
 				set(value) {
-					if (!HypixelGuildManager.PSEUDO_GUILD_IDS.includes(value)) this.createDefaults();
+					if (HypixelGuildManager.PSEUDO_GUILD_IDS.includes(value)) {
+						this.skyBlockData = null;
+					} else {
+						this.createDefaults();
+					}
 					this.setDataValue('guildId', value);
 				},
 			},
@@ -899,7 +903,6 @@ export class Player extends Model {
 	 * @param {(string | import('discord.js').Role)[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesToAdd roles to add to the member
 	 * @param {(string | import('discord.js').Role)[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesToRemove roles to remove from the member
 	 * @param {string} reason reason for discord's audit logs
-	 * @returns {Promise<boolean>} wether the API call was successful
 	 */
 	async makeRoleApiCall(rolesToAdd = [], rolesToRemove = [], reason = null) {
 		const member = await this.discordMember;
@@ -984,7 +987,6 @@ export class Player extends Model {
 
 	/**
 	 * removes the discord server in game guild role & all roles handled automatically by the bot
-	 * @returns {Promise<boolean>} wether the discord role removal was successful or not
 	 */
 	async removeFromGuild() {
 		const member = await this.discordMember;
@@ -1062,7 +1064,6 @@ export class Player extends Model {
 	 * @param {?string} newNick new nickname, null to remove the current nickname
 	 * @param {boolean} shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 * @param {?number|string} reason reason for discord's audit logs and the DM
-	 * @returns {Promise<boolean>} wether the API call was successful
 	 */
 	async makeNickApiCall(newNick = null, shouldSendDm = false, reason = null) {
 		const member = await this.discordMember;
