@@ -6,6 +6,9 @@ import { DualCommand } from '../../structures/commands/DualCommand.js';
 
 
 export default class BaseWeightCommand extends DualCommand {
+	/**
+	 * @returns {ReturnType<import('../../functions/index').getSenitherWeight>}
+	 */
 	// eslint-disable-next-line class-methods-use-this
 	getWeight() {
 		throw new Error('no weight algorithm implemented');
