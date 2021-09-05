@@ -112,7 +112,7 @@ export class ImgurClient {
 			// check rate limit
 			if (checkRateLimit) {
 				if (this.rateLimit.userremaining === 0) {
-					const RESET_TIME = (this.rateLimit.userreset * 1_000) - Date.now(); // x-ratelimit-userreset is a timestamp in seconds for next reset
+					const RESET_TIME = this.rateLimit.userreset - Date.now();
 
 					if (RESET_TIME > 60_000) throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
@@ -121,14 +121,14 @@ export class ImgurClient {
 				if (this.rateLimit.clientremaining === 0) {
 					if (this.rateLimit.clientreset === null) throw new Error('imgur client rate limit, unknown clientreset');
 
-					const RESET_TIME = (this.rateLimit.clientreset * 1_000) - Date.now(); // x-ratelimit-clientreset is a timestamp in seconds for next reset
+					const RESET_TIME = this.rateLimit.clientreset - Date.now();
 
 					if (RESET_TIME > 60_000) throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
 				if (this.postRateLimit.remaining === 0) {
-					const RESET_TIME = this.postRateLimit.reset;
+					const RESET_TIME = this.postRateLimit.reset - Date.now();
 
 					if (RESET_TIME > 60_000) throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
@@ -168,7 +168,11 @@ export class ImgurClient {
 			for (const type of Object.keys(this.rateLimit)) {
 				const data = res.headers.get(`x-ratelimit-${type}`);
 
-				if (data !== null) this.rateLimit[type] = parseInt(data, 10);
+				if (data !== null) {
+					this.postRateLimit[type] = type.endsWith('reset')
+						? Date.now() + (parseInt(data, 10) * 1_000) // x-rate-limit-reset is seconds until reset -> convert to timestamp
+						: parseInt(data, 10);
+				}
 			}
 
 			for (const type of Object.keys(this.postRateLimit)) {
