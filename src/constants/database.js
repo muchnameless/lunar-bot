@@ -150,7 +150,8 @@ export const XP_OFFSETS_TIME = Object.freeze({
 	day: 'LAST_DAILY_XP_RESET_TIME',
 });
 
-export const XP_TYPES = Object.freeze([ ...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES, 'guild' ]);
+export const SKYBLOCK_XP_TYPES = Object.freeze([ ...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES ]);
+export const XP_TYPES = Object.freeze([ ...SKYBLOCK_XP_TYPES, 'guild' ]);
 
 export const UNKNOWN_IGN = 'UNKNOWN_IGN';
 

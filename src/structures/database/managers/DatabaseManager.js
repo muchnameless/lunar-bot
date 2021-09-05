@@ -18,35 +18,48 @@ import { ChatTrigger } from '../models/ChatTrigger.js';
 import { ChannelUtil } from '../../../util/index.js';
 import { asyncFilter, compareAlphabetically, logger } from '../../../functions/index.js';
 
+/**
+ * @typedef {object} Models
+ * @property {typeof import('../models/ChatTrigger').ChatTrigger} ChatTrigger
+ * @property {typeof import('../models/Config').Config} Config
+ * @property {typeof import('../models/HypixelGuild').HypixelGuild} HypixelGuild
+ * @property {typeof import('../models/Player').Player} Player
+ * @property {typeof import('../models/TaxCollector').TaxCollector} TaxCollector
+ * @property {typeof import('../models/Transaction').Transaction} Transaction
+ */
+
 
 export class DatabaseManager {
 	/**
-	 * @param {{ client: import('../../LunarClient').LunarClient, db: import('../index') }} param0
+	 * @param {{ client: import('../../LunarClient').LunarClient, db: import('../index').db }} param0
 	 */
 	constructor({ client, db }) {
 		this.client = client;
-
+		/**
+		 * ModelManagers
+		 */
 		this.modelManagers = {
+			chatTriggers: new ModelManager({ client, model: ChatTrigger }),
 			config: new ConfigManager({ client, model: Config }),
 			hypixelGuilds: new HypixelGuildManager({ client, model: HypixelGuild }),
 			players: new PlayerManager({ client, model: Player }),
 			taxCollectors: new TaxCollectorManager({ client, model: TaxCollector }),
-			chatTriggers: new ModelManager({ client, model: ChatTrigger }),
 		};
-
-		const models = {};
-
-		for (const [ key, value ] of Object.entries(db)) {
-			if (Object.getPrototypeOf(value) === Model) {
-				models[key] = value;
-				Object.defineProperty(value.prototype, 'client', { value: client }); // add 'client' to all db models
-			} else {
-				this[key] = value;
-			}
-		}
-
-		this.models = models;
+		/**
+		 * Models
+		 * @type {Models}
+		 */
+		this.models = Object.fromEntries(
+			Object.entries(db)
+				.filter(([ , value ]) => Object.getPrototypeOf(value) === Model && Object.defineProperty(value.prototype, 'client', { value: client })),
+		);
+		/**
+		 * Sequelize instance
+		 * @type {import('sequelize').Sequelize}
+		 */
+		this.sequelize = db.sequelize;
 	}
+
 
 	/**
 	 * update player database and tax message every x min starting at the full hour
@@ -120,15 +133,19 @@ export class DatabaseManager {
 
 		// set default config
 		await Promise.all(Object.entries(DEFAULT_CONFIG).map(async ([ key, value ]) => (this.modelManagers.config.get(key) !== null ? null : this.modelManagers.config.set(key, value))));
+
+		return this;
 	}
 
 	/**
 	 * loads all db caches (performs a sweep first)
 	 */
 	async loadCache() {
-		return Promise.all(
+		await Promise.all(
 			Object.values(this.modelManagers).map(async manager => manager.loadCache()),
 		);
+
+		return this;
 	}
 
 	/**
@@ -138,6 +155,8 @@ export class DatabaseManager {
 		for (const handler of Object.values(this.modelManagers)) {
 			handler.sweepCache();
 		}
+
+		return this;
 	}
 
 	/**
@@ -145,16 +164,11 @@ export class DatabaseManager {
 	 * @param {string} auctionId
 	 */
 	async #validateAuctionId(auctionId) {
-		try {
-			await this.models.Transaction.findOne({
-				where: { auctionId },
-				rejectOnEmpty: true, // rejects the promise if nothing was found
-				raw: true, // to not parse an eventual result
-			});
-			return false;
-		} catch {
-			return true;
-		}
+		return (await this.models.Transaction.findOne({
+			where: { auctionId },
+			attributes: [ 'id' ],
+			raw: true, // to not parse an eventual result
+		})) === null;
 	}
 
 	/**
@@ -287,14 +301,13 @@ export class DatabaseManager {
 	 */
 	#createTaxEmbedDescription(availableAuctionsLog = null) {
 		const { config, players, taxCollectors } = this.modelManagers;
-		const activeTaxCollectors = taxCollectors.activeCollectors; // eslint-disable-line no-shadow
 		const playersInGuild = players.inGuild;
 		const PLAYER_COUNT = playersInGuild.size;
 		const PAID_COUNT = playersInGuild.filter(({ paid }) => paid).size;
 		const TOTAL_COINS = this.client.formatNumber(taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0));
 
 		return Formatters.codeBlock('cs', stripIndents(commaLists`
-			Collectors: # /ah ${activeTaxCollectors.map(player => player.ign).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))}
+			Collectors: # /ah ${taxCollectors.activeCollectors.map(player => player.ign).sort(compareAlphabetically)}
 			Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT'))}
 			Items: ${config.get('TAX_AUCTIONS_ITEMS').map(item => `'${item}'`)}
 			Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round((PAID_COUNT / PLAYER_COUNT) * 100)} % | collected amount: ${TOTAL_COINS} coins
@@ -398,11 +411,10 @@ export class DatabaseManager {
 		await players.updateIgns();
 
 		// update taxMessage
-		/** @type {import('discord.js').TextChannel} */
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
-		if (!taxChannel?.guild?.available) return logger.warn('[TAX MESSAGE]: channel not found');
-		if (!ChannelUtil.botPermissions(taxChannel).has(Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS)) {
+		if (!taxChannel?.isText() || (taxChannel.guildId && !taxChannel.guild?.available)) return logger.warn('[TAX MESSAGE] tax channel error');
+		if (!ChannelUtil.botPermissions(taxChannel).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) {
 			return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 		}
 
@@ -420,16 +432,16 @@ export class DatabaseManager {
 			}
 		}
 
-		const description = this.#createTaxEmbedDescription(availableAuctionsLog);
+		const DESCRIPTION = this.#createTaxEmbedDescription(availableAuctionsLog);
 		const fields = this.#createTaxEmbedFields();
 
-		if (taxMessage.embeds[0]?.description === description
+		if (taxMessage.embeds[0]?.description === DESCRIPTION
 			&& taxMessage.embeds[0].fields
 				.every(({ name, value }, index) => fields[index].name === name && fields[index].value === value)
 		) return; // no changes to taxMessage
 
 		try {
-			await taxMessage.edit({ embeds: [ this.createTaxEmbed(description, fields) ] });
+			await taxMessage.edit({ embeds: [ this.createTaxEmbed(DESCRIPTION, fields) ] });
 
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 		} catch (error) {

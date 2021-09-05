@@ -298,9 +298,9 @@ export default class TaxCommand extends SlashCommand {
 
 							// get current tax embed from #guild-tax channel
 							currentTaxEmbed = await (async () => {
-								const taxChannel = this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
+								const taxChannel = this.client.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
 
-								if (!taxChannel?.isText()) return logger.warn('[TAX RESET] tax channel error');
+								if (!taxChannel?.isText() || (taxChannel.guildId && !taxChannel.guild?.available)) return logger.warn('[TAX RESET] tax channel error');
 
 								const taxMessage = await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID')).catch(logger.error);
 

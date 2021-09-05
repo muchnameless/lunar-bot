@@ -13,7 +13,7 @@ export class TaxCollectorManager extends ModelManager {
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/TaxCollector').TaxCollector}
+		 * @type {typeof import('../models/TaxCollector').TaxCollector}
 		 */
 		this.model;
 	}

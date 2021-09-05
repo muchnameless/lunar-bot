@@ -134,7 +134,7 @@ export class Player extends Model {
 		 */
 		this.guildXpDaily;
 		/**
-		 * @type {number[]}
+		 * @type {?number[]}
 		 */
 		this._infractions;
 	}
@@ -178,8 +178,8 @@ export class Player extends Model {
 				defaultValue: false,
 				allowNull: false,
 				set(value) {
-					this.setDataValue('inDiscord', value);
 					if (!value) this.uncacheMember();
+					this.setDataValue('inDiscord', value);
 				},
 			},
 			mutedTill: {
@@ -912,7 +912,6 @@ export class Player extends Model {
 	 * @param {(string | import('discord.js').Role)[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesToAdd roles to add to the member
 	 * @param {(string | import('discord.js').Role)[] | import('discord.js').Collection<import('discord.js').Snowflake, import('discord.js').Role>} rolesToRemove roles to remove from the member
 	 * @param {string} reason reason for discord's audit logs
-	 * @returns {Promise<boolean>} wether the API call was successful
 	 */
 	async makeRoleApiCall(rolesToAdd = [], rolesToRemove = [], reason = null) {
 		const member = await this.discordMember;
@@ -997,7 +996,6 @@ export class Player extends Model {
 
 	/**
 	 * removes the discord server in game guild role & all roles handled automatically by the bot
-	 * @returns {Promise<boolean>} wether the discord role removal was successful or not
 	 */
 	async removeFromGuild() {
 		const member = await this.discordMember;
@@ -1075,7 +1073,6 @@ export class Player extends Model {
 	 * @param {?string} newNick new nickname, null to remove the current nickname
 	 * @param {boolean} shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 * @param {?number|string} reason reason for discord's audit logs and the DM
-	 * @returns {Promise<boolean>} wether the API call was successful
 	 */
 	async makeNickApiCall(newNick = null, shouldSendDm = false, reason = null) {
 		const member = await this.discordMember;
@@ -1169,7 +1166,7 @@ export class Player extends Model {
 
 		if (!profiles?.length) {
 			this.mainProfileId = null;
-			await this.resetXp({ offsetToReset: 'current' });
+			await this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
 
 			throw `${this.logInfo}: no SkyBlock profiles`;
 		}
@@ -1240,12 +1237,12 @@ export class Player extends Model {
 
 	/**
 	 * transfers xp offsets
-	 * @param {obejct} options
+	 * @param {object} options
 	 * @param {string} options.from
 	 * @param {string} options.to
 	 * @param {?string[]} [options.types]
 	 */
-	async transferXp({ from, to, types = XP_TYPES }) {
+	async transferXp({ from = '', to, types = XP_TYPES }) {
 		for (const type of types) {
 			this[`${type}Xp${to}`] = this[`${type}Xp${from}`];
 		}
@@ -1257,7 +1254,7 @@ export class Player extends Model {
 	 * resets the xp gained to 0
 	 * @param {object} options
 	 * @param {?string} options.offsetToReset
-	 * @param {?string[]} options.typesToReset
+	 * @param {string[]} [options.typesToReset]
 	 * @returns {Promise<this>}
 	 */
 	async resetXp({ offsetToReset = null, typesToReset = XP_TYPES } = {}) {

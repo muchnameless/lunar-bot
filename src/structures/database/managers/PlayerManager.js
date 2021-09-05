@@ -3,9 +3,22 @@ import { setTimeout as sleep } from 'timers/promises';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import { CronJob } from 'cron';
-import { EMBED_FIELD_MAX_CHARS, EMBED_MAX_CHARS, EMBED_MAX_FIELDS, MAYOR_CHANGE_INTERVAL, OFFSET_FLAGS } from '../../../constants/index.js';
+import {
+	EMBED_FIELD_MAX_CHARS,
+	EMBED_MAX_CHARS,
+	EMBED_MAX_FIELDS,
+	MAYOR_CHANGE_INTERVAL,
+	OFFSET_FLAGS,
+} from '../../../constants/index.js';
 import { hypixel } from '../../../api/hypixel.js';
-import { autocorrect, compareAlphabetically, getWeekOfYear, logger, safePromiseAll, upperCaseFirstChar } from '../../../functions/index.js';
+import {
+	autocorrect,
+	compareAlphabetically,
+	getWeekOfYear,
+	logger,
+	safePromiseAll,
+	upperCaseFirstChar,
+} from '../../../functions/index.js';
 import { ModelManager } from './ModelManager.js';
 
 
@@ -30,7 +43,7 @@ export class PlayerManager extends ModelManager {
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/Player').Player}
+		 * @type {typeof import('../models/Player').Player}
 		 */
 		this.model;
 	}
@@ -42,17 +55,19 @@ export class PlayerManager extends ModelManager {
 		return this.cache.filter(({ notInGuild }) => !notInGuild);
 	}
 
+	/**
+	 * loads the player cache and sorts alphabetically by IGN
+	 */
 	async loadCache() {
 		await super.loadCache({
 			where: {
-				// player is in a guild that the bot tracks (guildId !== null)
-				guildId: {
+				guildId: { // player is in a guild or a bridger / error
 					[Op.ne]: null,
 				},
 			},
 		});
 
-		this.sortAlphabetically();
+		return this.sortAlphabetically();
 	}
 
 	/**
@@ -63,7 +78,6 @@ export class PlayerManager extends ModelManager {
 	set(key, value) {
 		this.client.hypixelGuilds.sweepPlayerCache(value.guildId);
 		this.cache.set(key, value);
-
 		return this;
 	}
 
@@ -74,11 +88,9 @@ export class PlayerManager extends ModelManager {
 	delete(idOrPlayer) {
 		/** @type {import('../models/Player').Player} */
 		const player = this.resolve(idOrPlayer);
-
 		if (!player) throw new Error(`[PLAYER HANDLER UNCACHE]: invalid input: ${idOrPlayer}`);
 
 		player.uncache();
-
 		return this;
 	}
 
@@ -97,8 +109,8 @@ export class PlayerManager extends ModelManager {
 	 */
 	clear() {
 		this.client.hypixelGuilds.sweepPlayerCache();
-
-		return this.cache.clear();
+		this.cache.clear();
+		return this;
 	}
 
 	/**
@@ -107,17 +119,17 @@ export class PlayerManager extends ModelManager {
 	 */
 	sort(compareFunction) {
 		this.client.hypixelGuilds.sweepPlayerCache();
-
-		return this.cache.sort(compareFunction);
+		this.cache.sort(compareFunction);
+		return this;
 	}
 
 	/**
 	 * add a player to the db and db cache
-	 * @param {object} options options for the new db entry
-	 * @param {boolean} isAddingSingleEntry wether to call sortAlphabetically() and updateXp() after adding the new entry
-	 * @returns {Promise<import('../models/Player').Player>}
+	 * @param {import('sequelize').CreateOptions} [options={}] options for the new db entry
+	 * @param {boolean} [isAddingSingleEntry=true] wether to call sortAlphabetically() and updateXp() after adding the new entry
 	 */
 	async add(options = {}, isAddingSingleEntry = true) {
+		/** @type {import('../models/Player').Player} */
 		const newPlayer = await super.add(options);
 
 		this.client.hypixelGuilds.sweepPlayerCache(newPlayer.guildId);
@@ -137,12 +149,12 @@ export class PlayerManager extends ModelManager {
 	 * deletes all unnecessary db entries
 	 */
 	async sweepDb() {
-		/** @type {import('../models/Player').Player[]} */
 		const playersToSweep = await this.model.findAll({
 			where: {
 				guildId: null,
 				paid: false,
 			},
+			attributes: [ this.primaryKey, 'ign' ],
 		});
 
 		await safePromiseAll(playersToSweep.map(async player => player.destroy()));
@@ -158,21 +170,21 @@ export class PlayerManager extends ModelManager {
 	 * sweeps all cached discord members
 	 */
 	sweepDiscordMemberCache() {
-		return this.cache.each(player => player.discordMember = null);
+		this.cache.each(player => player.discordMember = null);
+		return this;
 	}
 
 	/**
 	 * get a player by their IGN, case insensitive and with auto-correction
 	 * @param {string} ign ign of the player
-	 * @returns {?import('../models/Player').Player}
 	 */
 	getByIgn(ign) {
 		if (!ign) return null;
 
-		const result = this.autocorrectToPlayer(ign);
+		const { similarity, value } = this.#autocorrectToPlayer(ign);
 
-		return (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD'))
-			? result.value
+		return (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD'))
+			? value
 			: null;
 	}
 
@@ -187,16 +199,15 @@ export class PlayerManager extends ModelManager {
 	/**
 	 * autocorrects the input to a player ign
 	 * @param {string} input
-	 * @returns {import('../models/Player').Player}
+	 * @returns {{ similarity: number, value: import('../models/Player').Player}}
 	 */
-	autocorrectToPlayer(input) {
+	#autocorrectToPlayer(input) {
 		return autocorrect(input, this.cache, 'ign');
 	}
 
 	/**
 	 * get a player by their discord ID
 	 * @param {string} id discord id of the player
-	 * @returns {?import('../models/Player').Player}
 	 */
 	getById(id) {
 		if (!id) return null;
@@ -453,55 +464,57 @@ export class PlayerManager extends ModelManager {
 			onTick: () => this.#performMonthlyXpReset(),
 			start: true,
 		}));
+
+		return this;
 	}
 
 	/**
 	 * resets competitionStart xp, updates the config and logs the event
 	 */
 	async #startCompetition() {
-		const { config } = this.client;
-
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START });
-
-		config.set('COMPETITION_RUNNING', true);
-		config.set('COMPETITION_SCHEDULED', false);
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
+			this.client.config.config.set('COMPETITION_RUNNING', true),
+			this.client.config.config.set('COMPETITION_SCHEDULED', false),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')
 			.setDescription('started'),
 		);
+
+		return this;
 	}
 
 	/**
 	 * resets competitionEnd xp, updates the config and logs the event
 	 */
 	async #endCompetition() {
-		const { config } = this.client;
-
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END });
-
-		config.set('COMPETITION_RUNNING', false);
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
+			this.client.config.set('COMPETITION_RUNNING', false),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Guild Competition')
 			.setDescription('ended'),
 		);
+
+		return this;
 	}
 
 	/**
 	 * resets offsetMayor xp, updates the config and logs the event
 	 */
 	async #performMayorXpReset() {
-		const { config } = this.client;
-		const LAST_MAYOR_XP_RESET_TIME = config.get('LAST_MAYOR_XP_RESET_TIME');
-
 		// if the bot skipped a mayor change readd the interval time
-		let currentMayorTime = LAST_MAYOR_XP_RESET_TIME + MAYOR_CHANGE_INTERVAL;
+		let currentMayorTime = this.client.config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
 
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR });
-
-		config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime);
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
+			this.client.config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Current Mayor XP Tracking')
@@ -513,56 +526,59 @@ export class PlayerManager extends ModelManager {
 			onTick: () => this.#performMayorXpReset(),
 			start: true,
 		}));
+
+		return this;
 	}
 
 	/**
 	 * shifts the daily xp array, updates the config and logs the event
 	 */
 	async #performDailyXpReset() {
-		const { config } = this.client;
-
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY });
-
-		config.set('LAST_DAILY_XP_RESET_TIME', Date.now());
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY }),
+			this.client.config.set('LAST_DAILY_XP_RESET_TIME', Date.now()),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Daily XP Tracking')
 			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
 
-		this.#updateMainProfiles();
+		return this.#updateMainProfiles();
 	}
 
 	/**
 	 * resets offsetWeek xp, updates the config and logs the event
 	 */
 	async #performWeeklyXpReset() {
-		const { config } = this.client;
-
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK });
-
-		config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now());
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
+			this.client.config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now()),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Weekly XP Tracking')
 			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
+
+		return this;
 	}
 
 	/**
 	 * resets offsetMonth xp, updates the config and logs the event
 	 */
 	async #performMonthlyXpReset() {
-		const { config } = this.client;
-
-		await this.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH });
-
-		config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now());
+		await Promise.all([
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
+			this.client.config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now()),
+		]);
 
 		this.client.log(this.client.defaultEmbed
 			.setTitle('Monthly XP Tracking')
 			.setDescription(`reset the xp gained from all ${this.size} guild members`),
 		);
+
+		return this;
 	}
 
 	/**

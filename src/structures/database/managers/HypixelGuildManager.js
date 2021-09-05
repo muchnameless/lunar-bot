@@ -1,6 +1,6 @@
 import { CronJob } from 'cron';
 import { GUILD_ID_BRIDGER, GUILD_ID_ERROR } from '../../../constants/index.js';
-import { autocorrect, logger } from '../../../functions/index.js';
+import { autocorrect, compareAlphabetically, logger } from '../../../functions/index.js';
 import { ModelManager } from './ModelManager.js';
 
 
@@ -13,7 +13,7 @@ export class HypixelGuildManager extends ModelManager {
 		 */
 		this.cache;
 		/**
-		 * @type {import('../models/HypixelGuild').HypixelGuild}
+		 * @type {typeof import('../models/HypixelGuild').HypixelGuild}
 		 */
 		this.model;
 	}
@@ -44,13 +44,13 @@ export class HypixelGuildManager extends ModelManager {
 	async loadCache(condition) {
 		await super.loadCache(condition);
 
-		this.cache.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+		this.cache.sort(compareAlphabetically);
+		return this;
 	}
 
 	/**
 	 * update all guilds
 	 * @param {import('../models/HypixelGuild').UpdateOptions} [options]
-	 * @returns {Promise<boolean>} success
 	 */
 	async updateData(options = {}) {
 		if (this.client.config.get('HYPIXEL_API_ERROR')) return logger.warn('[GUILDS UPDATE]: auto updates disabled');
@@ -83,21 +83,22 @@ export class HypixelGuildManager extends ModelManager {
 			return hypixelGuild.players = null;
 		}
 
-		return this.cache.each(hypixelGuild => hypixelGuild.players = null);
+		this.cache.each(hypixelGuild => hypixelGuild.players = null);
+		return this;
 	}
 
 	/**
 	 * get a hypixel guild by its name, case insensitive and with auto-correction
 	 * @param {string} name name of the hypixel guild
-	 * @returns {?import('../models/HypixelGuild').HypixelGuild}
 	 */
 	getByName(name) {
 		if (!name) return null;
 
-		const result = autocorrect(name, this.cache, 'name');
+		/** @type {{ similarity: number, value: import('../models/HypixelGuild').HypixelGuild }} */
+		const { similarity, value } = autocorrect(name, this.cache, 'name');
 
-		return (result.similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD'))
-			? result.value
+		return (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD'))
+			? value
 			: null;
 	}
 
@@ -115,6 +116,8 @@ export class HypixelGuildManager extends ModelManager {
 			onTick: () => this.performDailyStatsSave(),
 			start: true,
 		}));
+
+		return this;
 	}
 
 	/**
@@ -126,5 +129,7 @@ export class HypixelGuildManager extends ModelManager {
 		for (const hypixelGuild of this.cache.values()) hypixelGuild.saveDailyStats();
 
 		logger.info('[GUILD DAILY STATS]: performed daily stats saves');
+
+		return this;
 	}
 }

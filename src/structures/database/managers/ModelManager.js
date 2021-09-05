@@ -6,7 +6,7 @@ export class ModelManager {
 	/**
 	 * @param {object} param0
 	 * @param {import('../../LunarClient').LunarClient} param0.client
-	 * @param {import('sequelize').Model} param0.model
+	 * @param {typeof import('sequelize').Model} param0.model
 	 */
 	constructor({ client, model }) {
 		this.client = client;
@@ -33,6 +33,8 @@ export class ModelManager {
 		for (const element of await this.model.findAll(condition)) {
 			this.cache.set(element[this.primaryKey], element);
 		}
+
+		return this;
 	}
 
 	/**
@@ -40,6 +42,7 @@ export class ModelManager {
 	 */
 	sweepCache() {
 		this.cache.clear();
+		return this;
 	}
 
 	/**
@@ -47,7 +50,6 @@ export class ModelManager {
 	 * @param {import('sequelize').WhereOptions & { cache: boolean }} where
 	 */
 	async fetch({ cache = true, ...where }) {
-		/** @type {?import('sequelize').Model} */
 		const entry = await this.model.findOne({ where });
 
 		if (cache && entry) this.cache.set(entry[this.primaryKey], entry);
@@ -83,7 +85,6 @@ export class ModelManager {
 	/**
 	 * Resolves a data entry to a data Object.
 	 * @param {string|import('sequelize').Model} idOrInstance The id or instance of something in this Manager
-	 * @returns {?import('sequelize').Model} An instance from this Manager
 	 */
 	resolve(idOrInstance) {
 		if (idOrInstance instanceof this.model) return idOrInstance;
