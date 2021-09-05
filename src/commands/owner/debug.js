@@ -59,6 +59,8 @@ export default class DebugCommand extends SlashCommand {
 								.sort((a, b) => b.messages.cache.size - a.messages.cache.size)
 								.map(c => Formatters.quote(`${c.type !== 'DM' ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${this.client.formatNumber(c.messages.cache.size)}`))
 								.join('\n')}
+							HypixelGuilds: ${this.client.formatNumber(this.client.hypixelGuilds.cache.size)}
+							Players: ${this.client.formatNumber(this.client.players.cache.size)}
 						`.replace(/\n{2,}/g, '\n'),
 					}, {
 						name: 'Memory',
@@ -82,7 +84,7 @@ export default class DebugCommand extends SlashCommand {
 							current index: ${cb.minecraft?._lastMessages.index ?? 'offline'}
 							Messages:
 							${cb.minecraft?._lastMessages.cache.map(x => Formatters.quote(Util.escapeMarkdown(x))).join('\n') ?? 'offline'}
-						`).join('\n\n'), EMBED_FIELD_MAX_CHARS),
+						`).join('\n\n'), EMBED_FIELD_MAX_CHARS) || 'disabled',
 					})
 					.setFooter(interaction.guild?.me.displayName ?? this.client.user.username, this.client.user.displayAvatarURL()),
 			],
