@@ -169,7 +169,7 @@ export class ImgurClient {
 				const data = res.headers.get(`x-ratelimit-${type}`);
 
 				if (data !== null) {
-					this.postRateLimit[type] = type.endsWith('reset')
+					this.rateLimit[type] = type.endsWith('reset')
 						? Date.now() + (parseInt(data, 10) * 1_000) // x-rate-limit-reset is seconds until reset -> convert to timestamp
 						: parseInt(data, 10);
 				}
