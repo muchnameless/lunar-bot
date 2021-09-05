@@ -71,7 +71,7 @@ export default class DebugCommand extends SlashCommand {
 						name: 'Imgur Rate Limits',
 						value: stripIndents`
 							${Object.entries(this.client.imgur.rateLimit)
-								.map(([ key, value ]) => `${key}: ${key.endsWith('reset') && value !== null ? Formatters.time(value, Formatters.TimestampStyles.LongDateTime) : value}`)
+								.map(([ key, value ]) => `${key}: ${key.endsWith('reset') && value !== null ? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime) : value}`)
 								.join('\n')}
 							${Object.entries(this.client.imgur.postRateLimit)
 								.map(([ key, value ]) => `post${key}: ${key.endsWith('reset') && value !== null ? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime) : value}`)
