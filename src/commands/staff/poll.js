@@ -51,13 +51,12 @@ export default class PollCommand extends DualCommand {
 
 	/**
 	 * create a poll for both in game chat and the chatBridge channel
-	 * @param {import('discord.js').CommandInteraction | import('../../structures/chat_bridge/HypixelMessage').HypixelMessage} ctx
-	 * @param {object} param1
-	 * @param {import('../../structures/chat_bridge/ChatBridge').ChatBridge} param1.chatBridge
-	 * @param {string} param1.question
-	 * @param {string[]} param1.pollOptionNames
-	 * @param {string} param1.duration
-	 * @param {string} param1.ign
+	 * @param {object} param0
+	 * @param {import('../../structures/chat_bridge/ChatBridge').ChatBridge} param0.chatBridge
+	 * @param {string} param0.question
+	 * @param {string[]} param0.pollOptionNames
+	 * @param {string} param0.duration
+	 * @param {string} param0.ign
 	 */
 	async #run({ chatBridge, question, pollOptionNames, duration, ign }) {
 		if (chatBridge.pollUntil) return `poll already in progress, ends ${Formatters.time(new Date(chatBridge.pollUntil), Formatters.TimestampStyles.RelativeTime)}`;
