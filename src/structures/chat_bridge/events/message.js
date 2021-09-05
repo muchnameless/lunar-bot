@@ -32,8 +32,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * You cannot say the same message twice!
 		 * You can only send a message once every half second!
 		 */
-		if (hypixelMessage.spam) return;
-
+		if (hypixelMessage.spam) {
+			return logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: anti spam failed: ${hypixelMessage.rawContent}`);
+		}
 		/**
 		 * We blocked your comment "aFate: its because i said the sex word" as it is breaking our rules because it contains inappropriate content with adult themes. http://www.hypixel.net/rules/
 		 */
