@@ -130,7 +130,7 @@ export default class TaxCommand extends SlashCommand {
 				return await InteractionUtil.reply(interaction, log);
 			}
 
-			default: {
+			case null: {
 				switch (interaction.options.getSubcommand()) {
 					case 'amount': {
 						const NEW_AMOUNT = interaction.options.getInteger('amount', true);
@@ -300,7 +300,7 @@ export default class TaxCommand extends SlashCommand {
 							currentTaxEmbed = await (async () => {
 								const taxChannel = this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
 
-								if (!taxChannel) return logger.warn('[TAX RESET] tax channel error');
+								if (!taxChannel?.isText()) return logger.warn('[TAX RESET] tax channel error');
 
 								const taxMessage = await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID')).catch(logger.error);
 
@@ -388,6 +388,9 @@ export default class TaxCommand extends SlashCommand {
 						throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
 				}
 			}
+
+			default:
+				throw new Error(`unknown subcommand '${interaction.options.getSubcommandGroup()}'`);
 		}
 	}
 }
