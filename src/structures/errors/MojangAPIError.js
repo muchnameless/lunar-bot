@@ -1,8 +1,6 @@
 export class MojangAPIError extends Error {
 	/**
-	 * @param {object} param1
-	 * @param {number} [param1.status]
-	 * @param {string} [param1.statusText]
+	 * @param {import('undici').Response} param0
 	 * @param {string} queryType
 	 */
 	constructor({ status, statusText }, queryType, input) {

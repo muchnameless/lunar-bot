@@ -1,6 +1,6 @@
 export class ImgurAPIError extends Error {
 	/**
-	 * @param {import('node-fetch').Response} param0
+	 * @param {import('undici').Response} param0
 	 */
 	constructor({ status, statusText }) {
 		super(statusText);
