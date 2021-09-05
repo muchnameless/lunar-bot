@@ -1065,7 +1065,7 @@ export class Player extends Model {
 			: this.ign;
 
 		// 'nick (ign)' already exists
-		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === newNick.toLowerCase() && id !== member.id)?.player) {
+		if (GuildMemberUtil.getPlayer(member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === newNick.toLowerCase() && id !== member.id))) {
 			newNick = this.ign;
 		}
 
