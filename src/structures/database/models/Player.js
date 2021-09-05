@@ -1044,20 +1044,24 @@ export class Player extends Model {
 		if (this.notInGuild) return;
 
 		const member = await this.discordMember;
-
 		if (!member) return;
 
-		let reason = 0;
+		let reason;
 
-		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 1; // nickname doesn't include ign
-		if (member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id)?.player) reason = 2; // two guild members share the same display name
+		// nickname doesn't include ign
+		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 'NO_IGN';
+
+		// two guild members share the same display name
+		if (GuildMemberUtil.getPlayer(member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id))) {
+			reason = 'NOT_UNIQUE';
+		}
 
 		if (!reason) return;
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
 
 		// check if member already has a nick which is not just the current ign (case insensitive)
 		let newNick = member.nickname && member.nickname.toLowerCase() !== this.ign.toLowerCase()
-			? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - 3).replace(/ \([^)]+?\.\.\.$/, '')} (${this.ign})`
+			? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - ' ()'.length).replace(/ \([^)]+?\.\.\.$/, '')} (${this.ign})`
 			: this.ign;
 
 		// 'nick (ign)' already exists
@@ -1070,14 +1074,15 @@ export class Player extends Model {
 
 	/**
 	 * sets a nickname for the player's discord member
-	 * @param {?string} newNick new nickname, null to remove the current nickname
-	 * @param {boolean} shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
-	 * @param {?number|string} reason reason for discord's audit logs and the DM
+	 * @param {?string} [newNick=null] new nickname, null to remove the current nickname
+	 * @param {boolean} [shouldSendDm=false] wether to dm the user that they should include their ign somewhere in their nickname
+	 * @param {?string} [reason=null] reason for discord's audit logs and the DM
 	 */
 	async makeNickApiCall(newNick = null, shouldSendDm = false, reason = null) {
 		const member = await this.discordMember;
-
 		if (!member) return false;
+
+		// permission checks
 		const { me } = member.guild;
 		if (me.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
 		if (member.guild.ownerId === member.id) return false; // can't change nick of owner
@@ -1086,16 +1091,22 @@ export class Player extends Model {
 		const { displayName: PREV_NAME } = member;
 
 		try {
-			this.discordMember = await member.setNickname(
-				newNick,
-				reason == null
-					? null
-					: typeof reason === 'string'
-						? reason
-						: reason === 1
-							? 'name didn\'t contain ign'
-							: 'name already taken',
-			);
+			let auditLogReason;
+
+			switch (reason) {
+				case 'NO_IGN':
+					auditLogReason = 'name didn\'t contain ign';
+					break;
+
+				case 'NOT_UNIQUE':
+					auditLogReason = 'name already taken';
+					break;
+
+				default:
+					auditLogReason = reason;
+			}
+
+			this.discordMember = await member.setNickname(newNick, auditLogReason);
 
 			await this.client.log(
 				this.client.defaultEmbed
@@ -1117,16 +1128,24 @@ export class Player extends Model {
 			);
 
 			if (shouldSendDm) {
-				await UserUtil.sendDM(member.user, reason === 1
-					? stripIndents`
-						include your ign \`${this.ign}\` somewhere in your nickname.
-						If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${this.client.user} will automatically change your discord nickname
-					`
-					: stripIndents`
-						the name \`${PREV_NAME}\` is already taken by another guild member.
-						Your name should be unique to allow staff members to easily identify you
-					`,
-				);
+				switch (reason) {
+					case 'NO_IGN':
+						GuildMemberUtil.sendDM(member, stripIndents`
+							include your ign \`${this.ign}\` somewhere in your nickname.
+							If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${this.client.user} will automatically change your discord nickname
+						`);
+						break;
+
+					case 'NOT_UNIQUE':
+						GuildMemberUtil.sendDM(member, stripIndents`
+							the name \`${PREV_NAME}\` is already taken by another guild member.
+							Your name should be unique to allow staff members to easily identify you
+						`);
+						break;
+
+					default:
+						logger.error(`[SYNC IGN DISPLAYNAME]: unknown reason: ${reason}`);
+				}
 
 				logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`);
 			}
