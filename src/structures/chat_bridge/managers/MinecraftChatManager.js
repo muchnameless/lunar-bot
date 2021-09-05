@@ -282,7 +282,6 @@ export class MinecraftChatManager extends ChatManager {
 
 		switch (reason) {
 			case 'hypixelBlocked': {
-				/** @type {import('../../database/models/Player').Player} */
 				const player = UserUtil.getPlayer(discordMessage.author)
 					?? (await this.client.players.model.findOrCreate({
 						where: { discordId: discordMessage.author.id },
@@ -344,7 +343,7 @@ export class MinecraftChatManager extends ChatManager {
 
 		UserUtil.sendDM(discordMessage.author, info);
 		logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
-		cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
+		cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, 24 * 60 * 60_000); // prevent DMing again in the next 24 hours
 	}
 
 	/**
