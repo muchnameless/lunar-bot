@@ -75,7 +75,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 		pageStyle = reloadStyle = Constants.MessageButtonStyles.PRIMARY;
 	}
 
-	const row = [];
+	const rows = [];
 	const guildSelectMenu = new MessageSelectMenu()
 		.setCustomId(`${cacheKey}:guild`)
 		.setPlaceholder(
@@ -98,7 +98,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 
 		if (lbType === 'total') offsetSelectMenu.addOptions({ label: 'None', value: 'none' });
 
-		row.push(
+		rows.push(
 			new MessageActionRow()
 				.addComponents(
 					new MessageSelectMenu()
@@ -129,7 +129,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 		);
 	}
 
-	row.push(
+	rows.push(
 		new MessageActionRow()
 			.addComponents(guildSelectMenu),
 		new MessageActionRow()
@@ -161,7 +161,7 @@ function createActionRows(client, cacheKey, { page, lbType, xpType, offset, hypi
 			),
 	);
 
-	return row;
+	return rows;
 }
 
 /**
