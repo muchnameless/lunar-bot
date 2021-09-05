@@ -103,7 +103,7 @@ export default class MathsCommand extends DualCommand {
 				),
 			cooldown: 0,
 		}, {
-			aliases: [ 'm', 'calc' ],
+			aliases: [ 'm' ],
 			args: true,
 			usage: '',
 		});
