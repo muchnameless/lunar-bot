@@ -124,4 +124,12 @@ export default class GuildMemberUtil extends null {
 
 		return this.setRoles(member, roles);
 	}
+
+	/**
+	 * @param {import('discord.js').GuildMember} member
+	 * @param {string | import('discord.js').MessageOptions} contentOrOptions
+	 */
+	static async sendDM(member, contentOrOptions) {
+		return UserUtil.sendDM(member.user, contentOrOptions);
+	}
 }
