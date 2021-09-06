@@ -146,6 +146,33 @@ export default class EvalCommand extends SlashCommand {
 
 	/**
 	 * execute the command
+	 * @param {import('discord.js').ContextMenuInteraction} interaction
+	 */
+	async runMessage(interaction) {
+		const INPUT = interaction.options.getMessage('message').content;
+		const IS_ASYNC = /\bawait\b/.test(INPUT);
+		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH');
+		const row = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+					.setCustomId(`${COMMAND_KEY}:${this.name}:${IS_ASYNC}:${INSPECT_DEPTH}`)
+					.setEmoji(EDIT_MESSAGE_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.SECONDARY),
+			);
+
+		return await InteractionUtil.reply(interaction, {
+			embeds: await this.#eval(
+				interaction,
+				INPUT,
+				IS_ASYNC,
+				INSPECT_DEPTH,
+			),
+			components: [ row ],
+		});
+	}
+
+	/**
+	 * execute the command
 	 * @param {import('discord.js').ButtonInteraction} interaction
 	 */
 	async runButton(interaction) {
