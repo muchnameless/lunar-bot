@@ -150,6 +150,12 @@ export default class EvalCommand extends SlashCommand {
 	 */
 	async runMessage(interaction) {
 		const INPUT = interaction.options.getMessage('message').content;
+
+		if (!INPUT) return await InteractionUtil.reply(interaction, {
+			content: 'no content to evaluate',
+			ephemeral: true,
+		});
+
 		const IS_ASYNC = /\bawait\b/.test(INPUT);
 		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH');
 		const row = new MessageActionRow()
