@@ -181,7 +181,16 @@ export default class InteractionCreateEvent extends Event {
 			}
 		}
 
-		return await command.runMessage(interaction);
+		switch (interaction.targetType) {
+			case 'MESSAGE':
+				return await command.runMessage(interaction);
+
+			case 'USER':
+				return await command.runUser(interaction);
+
+			default:
+				logger.error(`[HANDLE CONTEXT MENU]: unknown target type: ${interaction.targetType}`);
+		}
 	}
 
 	/**
