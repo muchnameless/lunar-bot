@@ -143,6 +143,22 @@ export class SlashCommand extends BaseCommand {
 
 	/**
 	 * execute the command
+	 * @param {import('discord.js').ContextMenuInteraction} interaction
+	 */
+	async runUser(interaction) { // eslint-disable-line no-unused-vars
+		throw new Error('no run function specified for user context menus');
+	}
+
+	/**
+	 * execute the command
+	 * @param {import('discord.js').ContextMenuInteraction} interaction
+	 */
+	async runMessage(interaction) { // eslint-disable-line no-unused-vars
+		throw new Error('no run function specified for message context menus');
+	}
+
+	/**
+	 * execute the command
 	 * @param {import('discord.js').SelectMenuInteraction} interaction
 	 */
 	async runSelect(interaction) { // eslint-disable-line no-unused-vars

@@ -157,6 +157,34 @@ export default class InteractionCreateEvent extends Event {
 	}
 
 	/**
+	 * @param {import('discord.js').ContextMenuInteraction} interaction
+	 */
+	async #handleContextMenuInteraction(interaction) {
+		/** @type {import('../structures/commands/SlashCommand').SlashCommand} */
+		const command = this.client.commands.get(interaction.commandName);
+
+		if (!command) return await InteractionUtil.reply(interaction, {
+			content: `the \`${interaction.commandName}\` command is currently disabled`,
+			ephemeral: true,
+		});
+
+		if (interaction.user.id !== this.client.ownerId) {
+			// role permissions
+			await command.checkPermissions(interaction);
+
+			// prevent from executing owner only command
+			if (command.category === 'owner') {
+				return await InteractionUtil.reply(interaction, {
+					content: `the \`${command.name}\` command is restricted to the bot owner`,
+					ephemeral: true,
+				});
+			}
+		}
+
+		return await command.runMessage(interaction);
+	}
+
+	/**
 	 * event listener callback
 	 * @param {import('discord.js').Interaction} interaction
 	 */
@@ -175,6 +203,9 @@ export default class InteractionCreateEvent extends Event {
 
 			// select menus
 			if (interaction.isSelectMenu()) return await this.#handleSelectMenuInteraction(interaction);
+
+			// context menu
+			if (interaction.isContextMenu()) return await this.#handleContextMenuInteraction(interaction);
 		} catch (error) {
 			if (typeof error === 'string') {
 				logger.error(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}: ${error}`);

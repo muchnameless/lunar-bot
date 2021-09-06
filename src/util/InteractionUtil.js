@@ -42,10 +42,10 @@ export default class InteractionUtil extends null {
 				() => {
 					logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: auto defer triggered after ${Date.now() - interaction.createdTimestamp} ms`);
 
-					if (interaction.isCommand()) {
-						this.deferReply(interaction);
-					} else {
+					if (interaction.isMessageComponent()) {
 						this.deferUpdate(interaction);
+					} else {
+						this.deferReply(interaction);
 					}
 
 					interactionData.autoDefer = null;
@@ -64,7 +64,7 @@ export default class InteractionUtil extends null {
 	 * @param {GenericInteraction} interaction
 	 */
 	static #checkEphemeralOption(interaction) {
-		if (!interaction.isCommand()) return null;
+		if (interaction.isMessageComponent()) return null;
 
 		switch (interaction.options.getString('visibility')) {
 			case 'everyone':
@@ -113,11 +113,11 @@ export default class InteractionUtil extends null {
 	 * @param {GenericInteraction} interaction
 	 */
 	static logInfo(interaction) {
-		if (interaction.isCommand()) {
-			return `${interaction.type} '${this.getCommand(interaction)}' by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`;
+		if (interaction.isMessageComponent()) {
+			return `${interaction.componentType} '${interaction.customId}' by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`;
 		}
 
-		return `${interaction.componentType} '${interaction.customId}' by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`;
+		return `${interaction.type} '${this.getCommand(interaction)}' by ${interaction.user.tag}${interaction.guildId ? ` | ${interaction.member.displayName}` : ''} in ${interaction.guildId ? `#${interaction.channel?.name ?? interaction.channelId} | ${interaction.guild.name}` : 'DMs'}`;
 	}
 
 	/**
