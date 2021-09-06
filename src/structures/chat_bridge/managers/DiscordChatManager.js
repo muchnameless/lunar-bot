@@ -5,6 +5,7 @@ import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../../ut
 import { WebhookError } from '../../errors/WebhookError.js';
 import { ChatManager } from './ChatManager.js';
 import { cache } from '../../../api/cache.js';
+import { imgur } from '../../../api/imgur.js';
 import { logger } from '../../../functions/index.js';
 
 
@@ -76,7 +77,7 @@ export class DiscordChatManager extends ChatManager {
 			// only images can be uploaded by URL https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
 			if (!hasError && this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType.startsWith(type)) && size <= 1e7) {
 				try {
-					ret.push((await this.client.imgur.upload(url)).data.link);
+					ret.push((await imgur.upload(url)).data.link);
 				} catch (error) {
 					logger.error('[UPLOAD ATTACHMENTS]', error);
 					ret.push(url);
@@ -327,7 +328,7 @@ export class DiscordChatManager extends ChatManager {
 					const [ [ START, END ] ] = match.indices;
 
 					try {
-						const IMGUR_URL = (await this.client.imgur.upload(URL)).data.link;
+						const IMGUR_URL = (await imgur.upload(URL)).data.link;
 
 						messageContent = `${messageContent.slice(0, START - offset)}${IMGUR_URL}${messageContent.slice(END - offset)}`; // replace discord with imgur link
 						offset += URL.length - IMGUR_URL.length; // since indices are relative to the original string

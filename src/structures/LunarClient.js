@@ -5,7 +5,6 @@ import { CronJobManager } from './CronJobManager.js';
 import { ChatBridgeArray } from './chat_bridge/ChatBridgeArray.js';
 import { SlashCommandCollection } from './commands/SlashCommandCollection.js';
 import { EventCollection } from './events/EventCollection.js';
-import { ImgurClient } from './ImgurClient.js';
 import { UserUtil } from '../util/index.js';
 import { cache } from '../api/cache.js';
 import { logger } from '../functions/index.js';
@@ -30,7 +29,6 @@ export class LunarClient extends Client {
 		this.chatBridges = new ChatBridgeArray(this);
 		this.commands = new SlashCommandCollection(this, new URL('../commands', import.meta.url));
 		this.events = new EventCollection(this, new URL('../events', import.meta.url));
-		this.imgur = new ImgurClient({ clientId: process.env.IMGUR_CLIENT_ID });
 	}
 
 	get config() {

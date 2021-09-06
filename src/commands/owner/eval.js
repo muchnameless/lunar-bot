@@ -9,6 +9,7 @@ import util from 'util';
 import * as constants from '../../constants/index.js';
 import { cache } from '../../api/cache.js';
 import { hypixel } from '../../api/hypixel.js';
+import { imgur } from '../../api/imgur.js';
 import { mojang } from '../../api/mojang.js';
 import * as botUtil from '../../util/index.js';
 import * as functions from '../../functions/index.js';

@@ -5,6 +5,8 @@ import { Client } from '@zikeji/hypixel';
 
 
 export const hypixel = new Client(process.env.HYPIXEL_KEY, {
+	timeout: 15_000,
+	retries: 1,
 	cache: {
 		get(key) {
 			return cache.get(`${HYPIXEL_KEY}:${key}`);

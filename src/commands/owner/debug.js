@@ -3,6 +3,7 @@ import { Formatters, SnowflakeUtil, Util, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants/index.js';
+import { imgur } from '../../api/imgur.js';
 import { InteractionUtil } from '../../util/index.js';
 import { escapeIgn, trim } from '../../functions/index.js';
 import { SlashCommand } from '../../structures/commands/SlashCommand.js';
@@ -70,10 +71,10 @@ export default class DebugCommand extends SlashCommand {
 					}, {
 						name: 'Imgur Rate Limits',
 						value: stripIndents`
-							${Object.entries(this.client.imgur.rateLimit)
+							${Object.entries(imgur.rateLimit)
 								.map(([ key, value ]) => `${key}: ${key.endsWith('reset') && value !== null ? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime) : value}`)
 								.join('\n')}
-							${Object.entries(this.client.imgur.postRateLimit)
+							${Object.entries(imgur.postRateLimit)
 								.map(([ key, value ]) => `post${key}: ${key.endsWith('reset') && value !== null ? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime) : value}`)
 								.join('\n')}
 						`,

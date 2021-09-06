@@ -257,7 +257,7 @@ export class HypixelMessage {
 					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
 						?? await player?.imageURL
 						?? await mojang.ign(this.author.ign).then(
-							({ uuid }) => uuidToImgurBustURL(this.client, uuid),
+							({ uuid }) => uuidToImgurBustURL(uuid),
 							error => logger.error('[FORWARD TO DC]', error),
 						)
 						?? this.client.user.displayAvatarURL({ dynamic: true }),

@@ -3,8 +3,6 @@ import { setTimeout as sleep } from 'timers/promises';
 import { fetch, FormData } from 'undici';
 import ms from 'ms';
 import { ImgurAPIError } from './errors/ImgurAPIError.js';
-import { IMGUR_KEY } from '../constants/index.js';
-import { cache } from '../api/cache.js';
 
 /**
  * @typedef {object} ImageData
@@ -52,14 +50,17 @@ export class ImgurClient {
 	#queue = new AsyncQueue();
 
 	/**
-	 * @param {{ clientId: string, apiVersion?: string | number, cacheTTL?: number }} param0
+	 * @param {string} clientId
+	 * @param {{ cache?: { get: Function, set: Function }, apiVersion?: number, requestTimeout?: number, rateLimitOffset?: number, rateLimitedWaitTime?: number, retries?: number}} [param1]
 	 */
-	constructor({ clientId, apiVersion = 3, requestTimeout = 20_000, retries = 1, cacheTTL = 10 * 60 }) {
+	constructor(clientId, { cache, apiVersion, requestTimeout, rateLimitOffset, rateLimitedWaitTime, retries } = {}) {
+		this.cache = cache;
 		this.#authorization = `Client-ID ${clientId}`;
-		this.#baseURL = `https://api.imgur.com/${apiVersion}/`;
-		this.requestTimeout = requestTimeout;
-		this.retries = retries;
-		this.cacheTTL = cacheTTL * 1_000;
+		this.#baseURL = `https://api.imgur.com/${apiVersion ?? 3}/`;
+		this.requestTimeout = requestTimeout ?? 10_000;
+		this.rateLimitOffset = rateLimitOffset ?? 1_000;
+		this.rateLimitedWaitTime = rateLimitedWaitTime ?? 60_000;
+		this.retries = retries ?? 1;
 
 		this.rateLimit = {
 			userlimit: null,
@@ -76,11 +77,15 @@ export class ImgurClient {
 		};
 	}
 
+	/**
+	 * request queue
+	 */
 	get queue() {
 		return this.#queue;
 	}
 
 	/**
+	 * uploads an image by URL
 	 * @param {string} url
 	 * @returns {Promise<UploadResponse>}
 	 */
@@ -90,20 +95,25 @@ export class ImgurClient {
 		form.append('image', url);
 		form.append('type', 'url');
 
-		return await this.#request({
-			endpoint: 'upload',
-			method: 'POST',
-			body: form,
-			cacheKey: `${IMGUR_KEY}:${url}`,
-		});
+		return this.request(
+			'upload',
+			{
+				method: 'POST',
+				body: form,
+			}, {
+				checkRateLimit: true,
+				cacheKey: url,
+			},
+		);
 	}
 
 	/**
-	 * @param {{ checkRateLimit?: boolean, endpoint: string, method?: string, body: FormData }} param0
-	 * @param {number} [retries] current retry
+	 * @param {string} endpoint
+	 * @param {import('undici').RequestInit} options
+	 * @param {{ checkRateLimit?: boolean, cacheKey: string }} param2
 	 */
-	async #request({ checkRateLimit = true, endpoint, method = 'POST', body, cacheKey }, retries = 0) {
-		const cached = await cache.get(cacheKey);
+	async request(endpoint, options, { checkRateLimit = true, cacheKey }) {
+		const cached = await this.cache?.get(cacheKey);
 		if (cached) return cached;
 
 		await this.#queue.wait();
@@ -114,7 +124,7 @@ export class ImgurClient {
 				if (this.rateLimit.userremaining === 0) {
 					const RESET_TIME = this.rateLimit.userreset - Date.now();
 
-					if (RESET_TIME > 60_000) throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					if (RESET_TIME > this.rateLimitedWaitTime) throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
@@ -123,46 +133,19 @@ export class ImgurClient {
 
 					const RESET_TIME = this.rateLimit.clientreset - Date.now();
 
-					if (RESET_TIME > 60_000) throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					if (RESET_TIME > this.rateLimitedWaitTime) throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
-				if (this.postRateLimit.remaining === 0) {
+				if ((options.method === 'POST' || !options.method) && this.postRateLimit.remaining === 0) {
 					const RESET_TIME = this.postRateLimit.reset - Date.now();
 
-					if (RESET_TIME > 60_000) throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					if (RESET_TIME > this.rateLimitedWaitTime) throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 			}
 
-			// make request
-			const controller = new AbortController();
-			const timeout = setTimeout(() => controller.abort(), this.requestTimeout);
-
-			let res;
-
-			try {
-				res = await fetch(
-					`${this.#baseURL}${endpoint}`,
-					{
-						method,
-						body,
-						headers: {
-							Authorization: this.#authorization,
-						},
-						signal: controller.signal,
-					},
-				);
-			} catch (error) {
-				// Retry the specified number of times for possible timed out requests
-				if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
-					return this.#request(arguments[0], retries + 1);
-				}
-
-				throw error;
-			} finally {
-				clearTimeout(timeout);
-			}
+			const res = await this.#request(endpoint, options);
 
 			// get ratelimit headers
 			for (const type of Object.keys(this.rateLimit)) {
@@ -170,7 +153,7 @@ export class ImgurClient {
 
 				if (data !== null) {
 					this.rateLimit[type] = type.endsWith('reset')
-						? Date.now() + (parseInt(data, 10) * 1_000) // x-rate-limit-reset is seconds until reset -> convert to timestamp
+						? Date.now() + (parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
 						: parseInt(data, 10);
 				}
 			}
@@ -180,7 +163,7 @@ export class ImgurClient {
 
 				if (data !== null) {
 					this.postRateLimit[type] = type.endsWith('reset')
-						? Date.now() + (parseInt(data, 10) * 1_000) // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
+						? Date.now() + (parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
 						: parseInt(data, 10);
 				}
 			}
@@ -191,11 +174,45 @@ export class ImgurClient {
 			}
 
 			const parsedRes = await res.json();
-			await cache.set(cacheKey, parsedRes, this.cacheTTL); // cache
+			await this.cache?.set(cacheKey, parsedRes); // cache
 
 			return parsedRes;
 		} finally {
 			this.#queue.shift();
+		}
+	}
+
+	/**
+	 * make request
+	 * @param {string} endpoint
+	 * @param {import('undici').RequestInit} options
+	 * @param {number} [retries=0] current retry
+	 * @returns {Promise<import('undici').Response>}
+	 */
+	async #request(endpoint, options, retries = 0) {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), this.requestTimeout);
+
+		try {
+			return await fetch(
+				`${this.#baseURL}${endpoint}`,
+				{
+					headers: {
+						Authorization: this.#authorization,
+					},
+					signal: controller.signal,
+					...options,
+				},
+			);
+		} catch (error) {
+			// Retry the specified number of times for possible timed out requests
+			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
+				return this.#request(endpoint, options, retries + 1);
+			}
+
+			throw error;
+		} finally {
+			clearTimeout(timeout);
 		}
 	}
 }
