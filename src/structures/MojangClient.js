@@ -46,6 +46,11 @@ export class MojangClient {
 		);
 
 		if (res.status !== 200) {
+			// eslint-disable-next-line no-unused-vars
+			for await (const chunk of res.body) {
+				// force consumption of body
+			}
+
 			throw new MojangAPIError(res);
 		}
 
@@ -162,6 +167,11 @@ export class MojangClient {
 			 * mojang api currently ignores ?at= [https://bugs.mojang.com/browse/WEB-3367]
 			 */
 			// case 204: { // invalid ign
+			// 	// eslint-disable-next-line no-unused-vars
+			// 	for await (const chunk of res.body) {
+			// 		// force consumption of body
+			// 	}
+
 			// 	if (queryType === 'ign') { // retry a past date if name was queried
 			// 		let timestamp = Date.now();
 
@@ -181,6 +191,11 @@ export class MojangClient {
 
 			// 				return response;
 			// 			}
+
+			// 			// eslint-disable-next-line no-unused-vars
+			// 			for await (const chunk of res.body) {
+			// 				// force consumption of body
+			// 			}
 			// 		}
 			// 	}
 			// }
@@ -190,6 +205,11 @@ export class MojangClient {
 				// only check cache if force === true, because otherwise cache is already checked before the request
 				if (cache && (!force || !await this.cache?.get(CACHE_KEY))) {
 					this.cache?.set(CACHE_KEY, { error: true, status: res.status, statusText: res.statusText });
+				}
+
+				// eslint-disable-next-line no-unused-vars
+				if (!res.bodyUsed) for await (const chunk of res.body) {
+					// force consumption of body
 				}
 
 				throw new MojangAPIError(res, queryType, query);

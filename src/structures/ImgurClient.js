@@ -170,6 +170,11 @@ export class ImgurClient {
 
 			// check response
 			if (res.status !== 200) {
+				// eslint-disable-next-line no-unused-vars
+				for await (const chunk of res.body) {
+					// force consumption of body
+				}
+
 				throw new ImgurAPIError(res);
 			}
 
