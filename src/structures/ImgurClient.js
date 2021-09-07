@@ -1,6 +1,7 @@
 import { AsyncQueue } from '@sapphire/async-queue';
 import { setTimeout as sleep } from 'timers/promises';
-import { fetch, FormData } from 'undici';
+import { FormData } from 'undici';
+import fetch from 'node-fetch';
 import ms from 'ms';
 import { ImgurAPIError } from './errors/ImgurAPIError.js';
 
@@ -109,7 +110,7 @@ export class ImgurClient {
 
 	/**
 	 * @param {string} endpoint
-	 * @param {import('undici').RequestInit} options
+	 * @param {import('node-fetch').RequestInit} options
 	 * @param {{ checkRateLimit?: boolean, cacheKey: string }} param2
 	 */
 	async request(endpoint, options, { checkRateLimit = true, cacheKey }) {
@@ -170,11 +171,6 @@ export class ImgurClient {
 
 			// check response
 			if (res.status !== 200) {
-				// eslint-disable-next-line no-unused-vars
-				for await (const chunk of res.body) {
-					// force consumption of body
-				}
-
 				throw new ImgurAPIError(res);
 			}
 
@@ -190,9 +186,9 @@ export class ImgurClient {
 	/**
 	 * make request
 	 * @param {string} endpoint
-	 * @param {import('undici').RequestInit} options
+	 * @param {import('node-fetch').RequestInit} options
 	 * @param {number} [retries=0] current retry
-	 * @returns {Promise<import('undici').Response>}
+	 * @returns {Promise<import('node-fetch').Response>}
 	 */
 	async #request(endpoint, options, retries = 0) {
 		const controller = new AbortController();

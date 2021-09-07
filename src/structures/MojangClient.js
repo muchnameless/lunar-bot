@@ -1,4 +1,4 @@
-import { fetch } from 'undici';
+import fetch from 'node-fetch';
 import { MojangAPIError } from './errors/MojangAPIError.js';
 import {
 	validateMinecraftIgn,
@@ -46,11 +46,6 @@ export class MojangClient {
 		);
 
 		if (res.status !== 200) {
-			// eslint-disable-next-line no-unused-vars
-			for await (const chunk of res.body) {
-				// force consumption of body
-			}
-
 			throw new MojangAPIError(res);
 		}
 
@@ -167,11 +162,6 @@ export class MojangClient {
 			 * mojang api currently ignores ?at= [https://bugs.mojang.com/browse/WEB-3367]
 			 */
 			// case 204: { // invalid ign
-			// 	// eslint-disable-next-line no-unused-vars
-			// 	for await (const chunk of res.body) {
-			// 		// force consumption of body
-			// 	}
-
 			// 	if (queryType === 'ign') { // retry a past date if name was queried
 			// 		let timestamp = Date.now();
 
@@ -191,11 +181,6 @@ export class MojangClient {
 
 			// 				return response;
 			// 			}
-
-			// 			// eslint-disable-next-line no-unused-vars
-			// 			for await (const chunk of res.body) {
-			// 				// force consumption of body
-			// 			}
 			// 		}
 			// 	}
 			// }
@@ -207,11 +192,6 @@ export class MojangClient {
 					this.cache?.set(CACHE_KEY, { error: true, status: res.status, statusText: res.statusText });
 				}
 
-				// eslint-disable-next-line no-unused-vars
-				if (!res.bodyUsed) for await (const chunk of res.body) {
-					// force consumption of body
-				}
-
 				throw new MojangAPIError(res, queryType, query);
 		}
 	}
@@ -219,7 +199,7 @@ export class MojangClient {
 	/**
 	 * @param {string} url
 	 * @param {number} [retries=0]
-	 * @returns {Promise<import('undici').Response>}
+	 * @returns {Promise<import('node-fetch').Response>}
 	 */
 	async #request(url, retries = 0) {
 		const controller = new AbortController();
