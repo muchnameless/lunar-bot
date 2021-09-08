@@ -2,6 +2,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
 import { setTimeout as sleep } from 'timers/promises';
+import { Stopwatch } from '@sapphire/stopwatch';
 import fetch from 'node-fetch';
 import similarity from 'jaro-winkler';
 import ms from 'ms';
@@ -91,7 +92,7 @@ export default class EvalCommand extends SlashCommand {
 		try {
 			let isPromise;
 
-			const hrStart = process.hrtime();
+			const stopwatch = new Stopwatch();
 
 			// eval args
 			let evaled = isAsync
@@ -103,9 +104,10 @@ export default class EvalCommand extends SlashCommand {
 
 			if ((isPromise = evaled instanceof Promise)) evaled = await evaled;
 
-			const hrStop = process.hrtime(hrStart);
+			stopwatch.stop();
+
 			const OUTPUT_ARRAY = splitForEmbedFields(this.#cleanOutput(evaled, inspectDepth), 'js');
-			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${((hrStop[0] * 1e9) + hrStop[1]) / 1e6} ms\``;
+			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${stopwatch}\``;
 
 			// add output fields till embed character limit is reached
 			for (const [ index, value ] of OUTPUT_ARRAY.entries()) {
