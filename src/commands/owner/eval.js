@@ -89,10 +89,12 @@ export default class EvalCommand extends SlashCommand {
 			});
 		}
 
+		const stopwatch = new Stopwatch();
+
 		try {
 			let isPromise;
 
-			const stopwatch = new Stopwatch();
+			stopwatch.reset();
 
 			// eval args
 			let evaled = isAsync
@@ -102,9 +104,13 @@ export default class EvalCommand extends SlashCommand {
 					})()`)
 				: eval(input);
 
-			if ((isPromise = evaled instanceof Promise)) evaled = await evaled;
-
 			stopwatch.stop();
+
+			if ((isPromise = evaled instanceof Promise)) {
+				stopwatch.restart();
+				evaled = await evaled;
+				stopwatch.stop();
+			}
 
 			const OUTPUT_ARRAY = splitForEmbedFields(this.#cleanOutput(evaled, inspectDepth), 'js');
 			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${stopwatch}\``;
@@ -125,9 +131,11 @@ export default class EvalCommand extends SlashCommand {
 
 			return [ responseEmbed ];
 		} catch (error) {
+			stopwatch.stop();
+
 			logger.error('[EVAL ERROR]', error);
 
-			const FOOTER = `d.js ${Discord.version} • type: \`${typeof error}\``;
+			const FOOTER = `d.js ${Discord.version} • type: \`${typeof error}\` • time taken: \`${stopwatch}\``;
 
 			for (const [ index, value ] of splitForEmbedFields(this.#cleanOutput(error), 'xl').entries()) {
 				const name = index ? '\u200b' : 'Error';
