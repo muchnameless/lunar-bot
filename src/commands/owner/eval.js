@@ -107,7 +107,7 @@ export default class EvalCommand extends SlashCommand {
 			stopwatch.stop();
 
 			if ((isPromise = evaled instanceof Promise)) {
-				stopwatch.restart();
+				stopwatch.start();
 				evaled = await evaled;
 				stopwatch.stop();
 			}
