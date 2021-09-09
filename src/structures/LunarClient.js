@@ -18,7 +18,7 @@ export class LunarClient extends Client {
 	/**
 	 * @param {LunarClientOptions} options
 	 */
-	constructor(options = {}) {
+	constructor(options) {
 		super(options);
 
 		/** @type {?import('discord.js').Snowflake} */

@@ -259,7 +259,8 @@ export class ChatBridge extends EventEmitter {
 	 * @returns {Promise<[boolean, ?import('discord.js').Message | import('discord.js').Message[]]>}
 	 */
 	async broadcast(contentOrOptions) {
-		const { content, hypixelMessage, type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD, discord = {}, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = typeof contentOrOptions === 'string'
+		/** @type {BroadcastOptions} */
+		const { content, hypixelMessage, type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD, discord, minecraft: { prefix: minecraftPrefix = '', maxParts = Infinity, ...options } = {} } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
 		const discordChatManager = this.discord.resolve(type);

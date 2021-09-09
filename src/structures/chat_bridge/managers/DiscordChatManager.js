@@ -371,9 +371,9 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * collects chat messages from the bot
-	 * @param {import('discord.js').MessageCollectorOptions} options
+	 * @param {import('discord.js').MessageCollectorOptions} [options]
 	 */
-	createMessageCollector(options = {}) {
+	createMessageCollector(options) {
 		return new MessageCollector(this.channel, options);
 	}
 }

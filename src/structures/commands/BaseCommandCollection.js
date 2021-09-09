@@ -46,7 +46,7 @@ export class BaseCommandCollection extends Collection {
 	 * @param {string} commandName
 	 * @param {CommandLoadOptions} [options]
 	 */
-	async loadByName(commandName, options = {}) {
+	async loadByName(commandName, options) {
 		const commandFiles = await getAllJsFiles(this.dirURL);
 		const commandFile = commandFiles.find(file => basename(file, '.js').toLowerCase() === commandName);
 
@@ -85,7 +85,7 @@ export class BaseCommandCollection extends Collection {
 	 * loads all commands into the collection
 	 * @param {CommandLoadOptions} [options]
 	 */
-	async loadAll(options = {}) {
+	async loadAll(options) {
 		const commandFiles = await getAllJsFiles(this.dirURL);
 
 		await Promise.all(commandFiles.map(file => this.loadFromFile(file, options)));

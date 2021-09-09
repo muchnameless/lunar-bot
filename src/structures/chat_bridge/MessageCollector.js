@@ -70,8 +70,7 @@ export class MessageCollector extends EventEmitter {
 
 	/**
 	 * @param {import('./ChatBridge').ChatBridge} chatBridge
-	 * @param {CollectorFilter} filter
-	 * @param {MessageCollectorOptions} options
+	 * @param {MessageCollectorOptions} [options]
 	 */
 	constructor(chatBridge, options = {}) {
 		super();
@@ -86,7 +85,7 @@ export class MessageCollector extends EventEmitter {
 		 * @type {CollectorFilter}
 		 * @returns {boolean | Promise<boolean>}
 		 */
-		this.filter = options?.filter ?? (() => true);
+		this.filter = options.filter ?? (() => true);
 
 		if (typeof this.filter !== 'function') {
 			throw new TypeError('INVALID_TYPE: options.filter is not a function');

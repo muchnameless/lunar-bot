@@ -497,9 +497,9 @@ export class MinecraftChatManager extends ChatManager {
 
 	/**
 	 * collects chat messages from the bot
-	 * @param {import('../MessageCollector').MessageCollectorOptions} options
+	 * @param {import('../MessageCollector').MessageCollectorOptions} [options]
 	 */
-	createMessageCollector(options = {}) {
+	createMessageCollector(options) {
 		return new MessageCollector(this.chatBridge, options);
 	}
 

@@ -67,7 +67,7 @@ export class MojangClient {
 	 * @param {string} ign
 	 * @param {MojangFetchOptions} [options]
 	 */
-	async ign(ign, options = {}) {
+	async ign(ign, options) {
 		if (validateMinecraftIgn(ign)) return this.request({
 			path: 'https://api.mojang.com/users/profiles/minecraft/',
 			query: ign.toLowerCase(),
@@ -83,7 +83,7 @@ export class MojangClient {
 	 * @param {string} uuid
 	 * @param {MojangFetchOptions} [options]
 	 */
-	async uuid(uuid, options = {}) {
+	async uuid(uuid, options) {
 		if (validateMinecraftUuid(uuid)) return this.request({
 			path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
 			query: uuid.toLowerCase().replace(/-/g, ''),
@@ -99,7 +99,7 @@ export class MojangClient {
 	 * @param {string} ignOrUuid
 	 * @param {MojangFetchOptions} [options]
 	 */
-	async ignOrUuid(ignOrUuid, options = {}) {
+	async ignOrUuid(ignOrUuid, options) {
 		if (validateMinecraftIgn(ignOrUuid)) return this.request({
 			path: 'https://api.mojang.com/users/profiles/minecraft/',
 			query: ignOrUuid.toLowerCase(),

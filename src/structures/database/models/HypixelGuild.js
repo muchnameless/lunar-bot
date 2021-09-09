@@ -290,7 +290,7 @@ export class HypixelGuild extends Model {
 	 * updates the player database
 	 * @param {UpdateOptions} [options]
 	 */
-	async updateData(options = {}) {
+	async updateData(options) {
 		const data = await hypixel.guild.id(this.guildId);
 
 		if (data.meta.cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);

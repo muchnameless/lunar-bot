@@ -67,7 +67,7 @@ export class EventCollection extends Collection {
 	 * loads all commands into the collection
 	 * @param {EventLoadOptions} [options]
 	 */
-	async loadAll(options = {}) {
+	async loadAll(options) {
 		const eventFiles = await getAllJsFiles(this.dirURL);
 
 		await Promise.all(eventFiles.map(file => this.loadFromFile(file, options)));

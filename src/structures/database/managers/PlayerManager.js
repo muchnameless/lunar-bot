@@ -224,9 +224,9 @@ export class PlayerManager extends ModelManager {
 
 	/**
 	 * update db entries and linked discord members of all players
-	 * @param {import('../models/Player').PlayerUpdateOptions} options
+	 * @param {import('../models/Player').PlayerUpdateOptions} [options]
 	 */
-	async updateData(options = {}) {
+	async updateData(options) {
 		await Promise.all([
 			this.updateXp({ shouldOnlyAwaitUpdateXp: true, ...options }),
 			this.updateIgns(),
@@ -371,18 +371,18 @@ export class PlayerManager extends ModelManager {
 
 	/**
 	 * transfers xp of all players
-	 * @param {object} options transfer options
+	 * @param {object} [options] transfer options
 	 */
-	async transferXp(options = {}) {
+	async transferXp(options) {
 		await safePromiseAll(this.cache.map(async player => player.transferXp(options)));
 		return this;
 	}
 
 	/**
 	 * reset xp of all players
-	 * @param {object} options reset options
+	 * @param {object} [options] reset options
 	 */
-	async resetXp(options = {}) {
+	async resetXp(options) {
 		await safePromiseAll(this.cache.map(async player => player.resetXp(options)));
 		return this;
 	}

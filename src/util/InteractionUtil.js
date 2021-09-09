@@ -142,9 +142,9 @@ export default class InteractionUtil extends null {
 
 	/**
 	 * @param {GenericInteraction} interaction
-	 * @param {import('discord.js').InteractionDeferReplyOptions} options
+	 * @param {import('discord.js').InteractionDeferReplyOptions} [options]
 	 */
-	static async deferReply(interaction, options = {}) {
+	static async deferReply(interaction, options) {
 		const cached = this.CACHE.get(interaction);
 		if (cached.deferReplyPromise) return cached.deferReplyPromise;
 
@@ -231,7 +231,7 @@ export default class InteractionUtil extends null {
 
 	/**
 	 * @param {import('discord.js').MessageComponentInteraction} interaction
-	 * @param {import('discord.js').InteractionDeferUpdateOptions} options
+	 * @param {import('discord.js').InteractionDeferUpdateOptions} [options]
 	 */
 	static async deferUpdate(interaction, options) {
 		const cached = this.CACHE.get(interaction);

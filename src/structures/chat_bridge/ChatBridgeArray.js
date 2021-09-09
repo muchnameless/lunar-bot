@@ -181,7 +181,7 @@ export class ChatBridgeArray extends Array {
 	 * @param {import('discord.js').Message} message
 	 * @param {import('./ChatBridge').MessageForwardOptions} [options={}]
 	 */
-	async handleDiscordMessage(message, options = {}) {
+	async handleDiscordMessage(message, options) {
 		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return; // not a chat bridge message or bridge disabled
 		if (message.flags.any([ MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL ])) return; // ignore deferReply and ephemeral messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot

@@ -52,7 +52,7 @@ export class HypixelGuildManager extends ModelManager {
 	 * update all guilds
 	 * @param {import('../models/HypixelGuild').UpdateOptions} [options]
 	 */
-	async updateData(options = {}) {
+	async updateData(options) {
 		if (this.client.config.get('HYPIXEL_API_ERROR')) return logger.warn('[GUILDS UPDATE]: auto updates disabled');
 
 		try {
