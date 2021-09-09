@@ -715,6 +715,8 @@ export class MinecraftChatManager extends ChatManager {
 	 * @returns {Promise<void>}
 	 */
 	async #sendToChat({ content, prefix = '', isMessage, discordMessage = null } = {}) {
+		if (!this.bot || this.bot.ended) return MessageUtil.react(discordMessage, X_EMOJI);
+
 		let message = `${prefix}${content}`;
 
 		const useSpamBypass = isMessage ?? /^\/(?:[acgop]c|msg|w(?:hisper)?|t(?:ell)?) /i.test(message);
@@ -739,7 +741,6 @@ export class MinecraftChatManager extends ChatManager {
 			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
 			MessageUtil.react(discordMessage, X_EMOJI);
 
-			this.#tempIncrementCounter();
 			this.#resetFilter();
 
 			throw error;
