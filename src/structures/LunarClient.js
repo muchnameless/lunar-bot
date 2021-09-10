@@ -202,8 +202,7 @@ export class LunarClient extends Client {
 	 * space-padding at the beginning, converterFunction and locale string formatting
 	 * @param {number} number number to format
 	 * @param {number} paddingAmount amount to space-pad at the start (default 0)
-	 * @param {Function} converterFunction function to be called on the number
-	 * @returns {string}
+	 * @param {(input: number) => number} converterFunction function to be called on the number
 	 */
 	formatNumber(number, paddingAmount = 0, converterFunction = x => x) {
 		return converterFunction(number)

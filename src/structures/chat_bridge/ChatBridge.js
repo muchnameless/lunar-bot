@@ -120,7 +120,6 @@ export class ChatBridge extends EventEmitter {
 
 	/**
 	 * create and log the bot into hypixel
-	 * @type {Function}
 	 */
 	async connect() {
 		await this.minecraft.connect();
@@ -129,7 +128,7 @@ export class ChatBridge extends EventEmitter {
 
 	/**
 	 * destroys the connection to the guild and reconnects the bot
-	 * @type {Function}
+	 * @type {import('./managers/MinecraftChatManager').MinecraftChatManager['reconnect']}
 	 */
 	get reconnect() {
 		return this.minecraft.reconnect.bind(this.minecraft);
@@ -137,7 +136,6 @@ export class ChatBridge extends EventEmitter {
 
 	/**
 	 * disconnects the bot and resets the chatBridge
-	 * @type {Function}
 	 */
 	disconnect() {
 		this.unlink();

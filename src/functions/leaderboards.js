@@ -29,9 +29,13 @@ import { cache } from '../api/cache.js';
  * @property {string} description
  * @property {PlayerData[]} playerData
  * @property {string} playerRequestingEntry
- * @property {Function} getEntry
+ * @property {getEntry} getEntry
  * @property {boolean} isCompetition
  * @property {number} lastUpdatedAt
+ */
+
+/**
+ * @typedef {(player: PlayerData) => string} getEntry
  */
 
 /**
@@ -432,9 +436,7 @@ function getLeaderboardDataCreater(lbType) {
  */
 
 /**
- * @typedef {Function} dataConverter
- * @param {import('../../structures/database/models/Player').Player} player
- * @returns {PlayerData}
+ * @typedef {(player: import('../structures/database/models/Player').Player) => PlayerData} dataConverter
  */
 
 /**
@@ -472,6 +474,7 @@ function createGainedLeaderboardData(client, { hypixelGuild, user, offset, xpTyp
 	let playerData;
 	let totalStats;
 	let dataConverter;
+	/** @type {getEntry} */
 	let getEntry;
 	let title;
 
@@ -686,6 +689,7 @@ function createTotalLeaderboardData(client, { hypixelGuild, user, offset = '', x
 	let playerData;
 	let totalStats;
 	let dataConverter;
+	/** @type {getEntry} */
 	let getEntry;
 	let title;
 

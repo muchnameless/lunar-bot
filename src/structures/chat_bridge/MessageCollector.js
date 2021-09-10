@@ -2,10 +2,7 @@ import EventEmitter from 'events';
 
 /**
  * Filter to be applied to the collector.
- * @typedef {Function} CollectorFilter
- * @param {import('./HypixelMessage').HypixelMessage} message
- * @param {import('./HypixelMessage').HypixelMessage[]} collected The items collected by this collector
- * @returns {boolean|Promise<boolean>}
+ * @typedef {(message: import('./HypixelMessage').HypixelMessage, collected: import('./HypixelMessage').HypixelMessage[]) => boolean | Promise<boolean>} CollectorFilter
  */
 
 /**
@@ -83,7 +80,6 @@ export class MessageCollector extends EventEmitter {
 		/**
 		 * The filter applied to this collector
 		 * @type {CollectorFilter}
-		 * @returns {boolean | Promise<boolean>}
 		 */
 		this.filter = options.filter ?? (() => true);
 

@@ -57,6 +57,9 @@ export class HypixelMessage {
 		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /);
 
 		if (matched) {
+			/**
+			 * @type {?'guild' | 'party' | 'whisper'}
+			 */
 			this.type = matched.groups.type?.toLowerCase() ?? (matched.groups.whisper ? MESSAGE_TYPES.WHISPER : null);
 			this.author = new HypixelMessageAuthor(
 				this.chatBridge,

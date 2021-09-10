@@ -109,7 +109,7 @@ export function autocorrect(query, validInput, attributeToQuery = null) {
 
 /**
  * <Array>.filter with an asynchronous callback function
- * @param {Array} arr
+ * @param {any[]} arr
  * @param {Function} callback
  */
 export async function asyncFilter(arr, callback) {
@@ -232,7 +232,7 @@ export function makeContent(text = '', options = {}) {
  * @param {string} input
  * @param {string} [code='']
  * @param {string} [char='\n']
- * @param {Function} [formatter=Util.escapeCodeBlock]
+ * @param {(input: string) => string} [formatter=Util.escapeCodeBlock]
  */
 export function splitForEmbedFields(input, code = '', char = '\n', formatter = Util.escapeCodeBlock) {
 	const TO_SPLIT = Formatters.codeBlock(code, formatter(input));

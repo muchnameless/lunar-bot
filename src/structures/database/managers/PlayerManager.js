@@ -96,7 +96,7 @@ export class PlayerManager extends ModelManager {
 
 	/**
 	 * sweep the cache and the hypixelGuild players cache
-	 * @param {Function} fn
+	 * @param {(value: V, key: K, collection: this) => boolean} fn
 	 */
 	sweep(fn) {
 		this.client.hypixelGuilds.sweepPlayerCache();
@@ -115,7 +115,7 @@ export class PlayerManager extends ModelManager {
 
 	/**
 	 * sort the cache and sweeps the hypixelGuild players cache
-	 * @param {Function} compareFunction
+	 * @param {(firstValue: V, secondValue: V, firstKey: K, secondKey: K) => number} compareFunction
 	 */
 	sort(compareFunction) {
 		this.client.hypixelGuilds.sweepPlayerCache();
