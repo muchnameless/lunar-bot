@@ -188,7 +188,8 @@ export default class MessageUtil extends null {
 
 		if (!message.editable) { // message was not sent by the bot user
 			if (Object.keys(options).some(key => key !== 'attachments') || options.attachments?.length !== 0) { // can only remove attachments
-				return logger.warn(`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)} with ${Object.entries(options)}`);
+				logger.warn(`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)} with ${Object.entries(options)}`);
+				return message;
 			}
 
 			requiredChannelPermissions |= Permissions.FLAGS.MANAGE_MESSAGES; // removing attachments requires MANAGE_MESSAGES
@@ -204,13 +205,33 @@ export default class MessageUtil extends null {
 				.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
 
-			return logger.warn(commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in ${ChannelUtil.logInfo(channel)}`);
+			logger.warn(commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions.length === 1 ? '' : 's'} in ${ChannelUtil.logInfo(channel)}`);
+			return message;
 		}
 
 		try {
 			return await message.edit(options);
 		} catch (error) {
-			return logger.error(`[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
+			logger.error(`[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
+			return message;
+		}
+	}
+
+	/**
+	 * pins a message
+	 * @param {import('discord.js').Message} message
+	 */
+	static async pin(message) {
+		if (!message.pinnable) {
+			logger.warn(`[MESSAGE UTIL]: can't pin message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
+			return message;
+		}
+
+		try {
+			return await message.pin();
+		} catch (error) {
+			logger.error(`[MESSAGE UTIL]: pin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
+			return message;
 		}
 	}
 }
