@@ -655,7 +655,7 @@ export class MinecraftChatManager extends ChatManager {
 					}
 
 					// part consists of only whitespace characters -> ignore
-					if (this.client.config.get('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+					if (this.client.config.get('CHAT_LOGGING_ENABLED') && part) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 					return false;
 				}),
 		);
