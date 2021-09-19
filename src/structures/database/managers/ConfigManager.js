@@ -35,6 +35,7 @@ export class ConfigManager extends ModelManager {
 	/**
 	 * get the value of a config entry or `null` if non-existent
 	 * @param {string} key config key
+	 * @returns {unknown}
 	 */
 	get(key) {
 		return this.cache.get(key?.toUpperCase())?.parsedValue ?? logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`);
