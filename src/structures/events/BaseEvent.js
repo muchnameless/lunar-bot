@@ -21,7 +21,7 @@ export class BaseEvent {
 
 	/**
 	 * client config
-	 * @returns {import('../database/managers/ConfigManager')}
+	 * @returns {import('../database/managers/ConfigManager').ConfigManager}
 	 */
 	get config() {
 		return this.client.config;
