@@ -1061,7 +1061,7 @@ export class Player extends Model {
 
 		// check if member already has a nick which is not just the current ign (case insensitive)
 		let newNick = member.nickname && member.nickname.toLowerCase() !== this.ign.toLowerCase()
-			? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - ' ()'.length).replace(/ +\.\.\.$/, '')} (${this.ign})`
+			? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - ' ()'.length).replace(/ +(?:\([^) ]+?)?\.\.\.$/, '')} (${this.ign})`
 			: this.ign;
 
 		// 'nick (ign)' already exists
