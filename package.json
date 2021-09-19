@@ -27,7 +27,7 @@
     "chartjs-node-canvas": "^3.2.0",
     "common-tags": "^1.8.0",
     "cron": "^1.8.2",
-    "discord.js": "^13.2.0-dev.1631232307.3183b11",
+    "discord.js": "^13.2.0-dev.1632052982.92f6471",
     "dotenv": "^10.0.0",
     "emoji-regex": "^9.2.2",
     "jaro-winkler": "^0.2.8",
@@ -51,11 +51,11 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.15.4",
+    "@babel/eslint-parser": "^7.15.7",
     "@babel/eslint-plugin": "^7.14.5",
     "@babel/plugin-syntax-class-properties": "^7.12.13",
     "@babel/preset-env": "^7.15.6",
-    "@types/node": "^16.9.2",
+    "@types/node": "^16.9.3",
     "@types/validator": "^13.6.3",
     "eslint": "^7.32.0",
     "eslint-plugin-import": "^2.24.2"
