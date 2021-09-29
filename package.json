@@ -32,7 +32,7 @@
     "chartjs-node-canvas": "^3.2.0",
     "common-tags": "^1.8.0",
     "cron": "^1.8.2",
-    "discord.js": "^13.2.0-dev.1632052982.92f6471",
+    "discord.js": "^13.2.0-dev.1632873900.fe95005",
     "dotenv": "^10.0.0",
     "emoji-regex": "^10.0.0",
     "jaro-winkler": "^0.2.8",
