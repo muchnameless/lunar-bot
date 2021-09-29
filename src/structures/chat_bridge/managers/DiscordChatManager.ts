@@ -247,7 +247,7 @@ export class DiscordChatManager extends ChatManager {
 		} catch (error) {
 			logger.error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}`, error);
 
-			if (error instanceof DiscordAPIError && error.method === 'get' && error.code === 0 && error.httpStatus === 404) {
+			if (error instanceof DiscordAPIError && error.httpStatus === 404) {
 				this.#uncacheWebhook();
 				this.#fetchOrCreateWebhook();
 			}
