@@ -1335,7 +1335,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * determines the player's main profile (profile with the most weight)
 	 */
 	async fetchMainProfile() {
-		let profiles!: Components.Schemas.SkyBlockProfileCuteName[];
+		let profiles = null;
 
 		try {
 			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
@@ -1351,20 +1351,35 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			throw `${this.logInfo}: no SkyBlock profiles`;
 		}
 
-		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = profiles[
-			profiles.length > 1
-				? profiles
-					.map(({ members }) => getSenitherWeight(members[this.minecraftUuid]).totalWeight)
-					.reduce((bestIndexSoFar, currentlyTestedValue, currentlyTestedIndex, array) => (currentlyTestedValue > array[bestIndexSoFar] ? currentlyTestedIndex : bestIndexSoFar), 0)
-				: 0
-		];
+		let mainProfile;
+		let maxWeight = -1;
+
+		for (const profile of profiles) {
+			if (profile === null) continue;
+
+			const weight = getSenitherWeight(profile.members[this.minecraftUuid]).totalWeight;
+
+			if (maxWeight > weight) continue;
+
+			mainProfile = profile;
+			maxWeight = weight;
+		}
+
+		if (!mainProfile) {
+			this.mainProfileId = null;
+			await this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
+
+			throw `${this.logInfo}: no SkyBlock profiles`;
+		}
+
+		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = mainProfile;
 
 		if (PROFILE_ID === this.mainProfileId) return null;
 
 		const { mainProfileName } = this;
 
 		this.mainProfileId = PROFILE_ID;
-		this.mainProfileName = PROFILE_NAME;
+		this.mainProfileName = PROFILE_NAME ?? 'unknown profile name';
 		this.xpUpdatesDisabled = false;
 		await this.save();
 
