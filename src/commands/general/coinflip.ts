@@ -25,7 +25,7 @@ export default class CoinFlipCommand extends DualCommand {
 	 */
 	// eslint-disable-next-line class-methods-use-this
 	#generateReply() {
-		const randomNumber = Math.floor(Math.random() * 1001);
+		const randomNumber = Math.floor(Math.random() * 1_001);
 
 		if (randomNumber === 0) return 'edge';
 		if (randomNumber <= 500) return 'heads';
