@@ -1,0 +1,230 @@
+import fetch from 'node-fetch';
+import { MojangAPIError } from './errors/MojangAPIError';
+import {
+	validateMinecraftIgn,
+	validateMinecraftUuid,
+} from '../functions';
+import type { Response } from 'node-fetch';
+
+
+export interface MojangResult {
+	uuid: string,
+	ign: string,
+}
+
+interface MojangFetchOptions {
+	cache?: boolean,
+	force?: boolean,
+}
+
+interface Cache {
+	get(key: string): Promise<MojangResult & { error?: boolean, status?: number, statusText?: string } | undefined>;
+	set(key: string, value: MojangResult | { error: boolean, status: number, statusText: string }): Promise<true>;
+}
+
+
+export class MojangClient {
+	cache?: Cache;
+	timeout: number;
+	retries: number;
+
+	/**
+	 * @param options
+	 */
+	constructor({ cache, timeout, retries }: { cache?: Cache, timeout?: number, retries?: number } = {}) {
+		this.cache = cache;
+		this.timeout = timeout ?? 10_000;
+		this.retries = retries ?? 1;
+	}
+
+	/**
+	 * bulk convertion (1 <= amount  <= 10) for ign -> uuid
+	 * @param usernames
+	 * @param options
+	 */
+	async igns(usernames: string[], options?: MojangFetchOptions): Promise<MojangResult[]> {
+		if (!usernames.length || usernames.length > 10) throw new MojangAPIError({ status: 'wrong input' });
+
+		const res = await fetch(
+			'https://api.mojang.com/profiles/minecraft',
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(usernames),
+			},
+		);
+
+		if (res.status !== 200) {
+			throw new MojangAPIError(res);
+		}
+
+		const responses: MojangResult[] = (await res.json() as { id: string, name: string }[]).map(({ id, name }) => ({ uuid: id, ign: name }));
+
+		if (options?.cache) {
+			for (const response of responses) {
+				this.cache?.set(`ign:${response.ign.toLowerCase()}`, response);
+				this.cache?.set(`uuid:${response.uuid}`, response);
+			}
+		}
+
+		return responses;
+	}
+
+	/**
+	 * query by ign
+	 * @param ign
+	 * @param options
+	 */
+	async ign(ign: string, options?: MojangFetchOptions) {
+		if (validateMinecraftIgn(ign)) return this.request({
+			path: 'https://api.mojang.com/users/profiles/minecraft/',
+			query: ign.toLowerCase(),
+			queryType: 'ign',
+			...options,
+		});
+
+		throw new MojangAPIError({ status: '(validation)' }, 'ign', ign);
+	}
+
+	/**
+	 * query by uuid
+	 * @param uuid
+	 * @param options
+	 */
+	async uuid(uuid: string, options?: MojangFetchOptions) {
+		if (validateMinecraftUuid(uuid)) return this.request({
+			path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
+			query: uuid.toLowerCase().replaceAll('-', ''),
+			queryType: 'uuid',
+			...options,
+		});
+
+		throw new MojangAPIError({ status: '(validation)' }, 'uuid', uuid);
+	}
+
+	/**
+	 * query by ign or uuid
+	 * @param ignOrUuid
+	 * @param options
+	 */
+	async ignOrUuid(ignOrUuid: string, options?: MojangFetchOptions) {
+		if (validateMinecraftIgn(ignOrUuid)) return this.request({
+			path: 'https://api.mojang.com/users/profiles/minecraft/',
+			query: ignOrUuid.toLowerCase(),
+			queryType: 'ign',
+			...options,
+		});
+
+		if (validateMinecraftUuid(ignOrUuid)) return this.request({
+			path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
+			query: ignOrUuid.toLowerCase().replaceAll('-', ''),
+			queryType: 'uuid',
+			...options,
+		});
+
+		throw new MojangAPIError({ status: '(validation)' }, 'ignOrUuid', ignOrUuid);
+	}
+
+	/**
+	 * @private
+	 * @param param0
+	 * @param retries current retry
+	 */
+	async request({ path, query, queryType = null, cache = true, force = false }: { path: string; query: string; queryType?: string | null; } & MojangFetchOptions): Promise<MojangResult> {
+		const CACHE_KEY = `${queryType}:${query}`;
+
+		if (!force) {
+			const cachedResponse = await this.cache?.get(CACHE_KEY);
+
+			if (cachedResponse) {
+				if (cachedResponse.error) {
+					throw new MojangAPIError(
+						{ status: Reflect.has(cachedResponse, 'status') ? `${cachedResponse.status} (cached)` : '(cached)', ...cachedResponse },
+						queryType,
+						query,
+					);
+				}
+
+				return cachedResponse;
+			}
+		}
+
+		const res = await this.#request(`${path}${query}`);
+
+		switch (res.status) {
+			case 200: {
+				const { id: uuid, name: ign } = await res.json() as { id: string, name: string };
+				const response = { uuid, ign };
+
+				if (cache) {
+					this.cache?.set(`ign:${ign.toLowerCase()}`, response);
+					this.cache?.set(`uuid:${uuid}`, response);
+				}
+
+				return response;
+			}
+
+			/**
+			 * mojang api currently ignores ?at= [https://bugs.mojang.com/browse/WEB-3367]
+			 */
+			// case 204: { // invalid ign
+			// 	if (queryType === 'ign') { // retry a past date if name was queried
+			// 		let timestamp = Date.now();
+
+			// 		// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
+			// 		while (((timestamp -= 2_592_000_000) >= 1_423_008_000_000)) {
+			// 			const pastRes = await this.#request(`${path}${query}?at=${timestamp}`);
+
+			// 			if (pastRes.status === 200) {
+			// 				const { id: uuid, name: ign } = await res.json() as { id: string, name: string };
+			// 				const response = { uuid, ign };
+
+			// 				if (cache) {
+			// 					// only cache ign -> uuid for outdated igns
+			// 					this.cache?.set(`ign:${ign.toLowerCase()}`, response);
+			// 				}
+
+			// 				return response;
+			// 			}
+			// 		}
+			// 	}
+			// }
+			// falls through
+
+			default:
+				// only check cache if force === true, because otherwise cache is already checked before the request
+				if (cache && (!force || !await this.cache?.get(CACHE_KEY))) {
+					this.cache?.set(CACHE_KEY, { error: true, status: res.status, statusText: res.statusText });
+				}
+
+				throw new MojangAPIError(res, queryType, query);
+		}
+	}
+
+	/**
+	 * @param url
+	 * @param retries
+	 */
+	async #request(url: string, retries = 0): Promise<Response> {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), this.timeout);
+
+		try {
+			return await fetch(
+				url,
+				{
+					signal: controller.signal,
+				},
+			);
+		} catch (error) {
+			// Retry the specified number of times for possible timed out requests
+			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
+				return this.#request(url, retries + 1);
+			}
+
+			throw error;
+		} finally {
+			clearTimeout(timeout);
+		}
+	}
+}
