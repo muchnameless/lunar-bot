@@ -1,0 +1,39 @@
+import { Permissions } from 'discord.js';
+import { ChannelUtil } from '../util';
+import { logger } from '../functions';
+import MessageCreateEvent from './messageCreate';
+import type { Message } from 'discord.js';
+import type { EventContext } from '../structures/events/BaseEvent';
+
+
+export default class MessageUpdateEvent extends MessageCreateEvent {
+	constructor(context: EventContext) {
+		super(context, {
+			once: false,
+			enabled: true,
+		});
+	}
+
+	/**
+	 * event listener callback
+	 * @param oldMessage
+	 * @param newMessage
+	 */
+	override async run(oldMessage: Message, newMessage: Message) {
+		if (
+			Date.now() - newMessage.createdTimestamp >= 10 * 60_000 // original message is older than 10 min
+			|| (oldMessage.content === newMessage.content && newMessage.content) // pinned or embed added
+			|| !ChannelUtil.botPermissions(newMessage.channel)?.has(Permissions.FLAGS.VIEW_CHANNEL) // slash cmd response edits
+		) return;
+
+		if (newMessage.partial) {
+			try {
+				await newMessage.fetch();
+			} catch (error) {
+				return logger.error('[CMD HANDLER]: error while fetching partial message', error);
+			}
+		}
+
+		this._handleDiscordMessage(newMessage, true);
+	}
+}

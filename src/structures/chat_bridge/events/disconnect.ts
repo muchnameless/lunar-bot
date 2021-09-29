@@ -1,0 +1,25 @@
+import { logger } from '../../../functions';
+import { ChatBridgeEvent } from '../ChatBridgeEvent';
+import type { EventContext } from '../../events/BaseEvent';
+
+
+export default class DisconnectChatBridgeEvent extends ChatBridgeEvent {
+	constructor(context: EventContext) {
+		super(context, {
+			once: false,
+			enabled: true,
+		});
+	}
+
+	/**
+	 * event listener callback
+	 * @param reason
+	 */
+	override async run(reason: string | null) {
+		this.chatBridge.minecraft.ready = false;
+
+		logger.error(`[CHATBRIDGE DISCONNECT]: Minecraft bot disconnected from server: ${reason ?? 'unknown reason'}`);
+
+		this.chatBridge.minecraft.reconnect();
+	}
+}

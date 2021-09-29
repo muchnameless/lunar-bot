@@ -1,7 +1,0 @@
-import path from 'path'
-
-module.exports = {
-  'models-path': path.resolve('./src/structures/database/models'),
-  'seeders-path': path.resolve('./src/structures/database/seeders'),
-  'migrations-path': path.resolve('./src/structures/database/migrations'),
-}

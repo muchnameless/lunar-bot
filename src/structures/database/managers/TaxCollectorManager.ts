@@ -1,0 +1,88 @@
+import { Formatters } from 'discord.js';
+import { stripIndents } from 'common-tags';
+import { escapeIgn } from '../../../functions';
+import { ModelManager } from './ModelManager';
+import type { TaxCollector } from '../models/TaxCollector';
+import type { Player } from '../models/Player';
+
+
+export class TaxCollectorManager extends ModelManager<TaxCollector> {
+	/**
+	 * returns a collection of all currently active collectors
+	 */
+	get activeCollectors() {
+		return this.cache.filter(({ isCollecting }) => isCollecting);
+	}
+
+	/**
+	 * add a player as a taxcollector
+	 * @param uuidOrPlayer
+	 */
+	override async add(uuidOrPlayer: string | Player) {
+		const player = this.client.players.resolve(uuidOrPlayer);
+
+		if (!player) throw new Error(`[TAX COLLECTOR ADD]: invalid input: ${uuidOrPlayer}`);
+
+		const [ newEntry, created ] = await this.model.findCreateFind({
+			where: {
+				minecraftUuid: player.minecraftUuid,
+			},
+			// do I need to specify minecraftUuid here again???
+			defaults: {
+				minecraftUuid: player.minecraftUuid,
+				isCollecting: true,
+			},
+		});
+
+		// entry already exists
+		if (!created) await newEntry.update({ isCollecting: true });
+
+		this.cache.set(newEntry[this.primaryKey], newEntry);
+
+		return newEntry;
+	}
+
+	/**
+	 * get a taxCollector by their discord ID
+	 * @param id
+	 */
+	getById(id: string) {
+		return this.cache.get(this.client.players.getById(id)?.minecraftUuid!) ?? null;
+	}
+
+	/**
+	 * get a taxCollector by their IGN, case insensitive and with auto-correction
+	 * @param ign
+	 */
+	getByIgn(ign: string) {
+		return this.cache.get(this.client.players.getByIgn(ign)?.minecraftUuid!) ?? null;
+	}
+
+	/**
+	 * returns a tax collected embed
+	 */
+	createTaxCollectedEmbed() {
+		const embed = this.client.defaultEmbed
+			.setTitle('Collected Guild Tax')
+			.setDescription(stripIndents`
+				${Formatters.bold('combined')}
+				tax: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0), 0)}
+				donations: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0), 0)}
+				total: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax + collector.collectedDonations, 0), 0)}
+				\u200B
+			`);
+
+		for (const taxCollector of this.cache.values()) {
+			embed.addFields({
+				name: `${escapeIgn(`${taxCollector}`)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
+				value: stripIndents`
+					tax: ${this.client.formatNumber(taxCollector.collectedTax)}
+					donations: ${this.client.formatNumber(taxCollector.collectedDonations)}
+					total: ${this.client.formatNumber(taxCollector.collectedTax + taxCollector.collectedDonations)}
+				`,
+			});
+		}
+
+		return embed;
+	}
+}

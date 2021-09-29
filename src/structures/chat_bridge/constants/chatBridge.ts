@@ -1,0 +1,93 @@
+/**
+ * bot events that should only be listened to once
+ */
+export const SPAWN_EVENTS = [
+	'login',
+	'keep_alive',
+] as const;
+
+export const MESSAGE_POSITIONS = {
+	0: 'CHAT',
+	1: 'SYSTEM',
+	2: 'GAME_INFO',
+} as const;
+
+export const MESSAGE_TYPES = {
+	WHISPER: 'WHISPER',
+	GUILD: 'GUILD',
+	OFFICER: 'OFFICER',
+	PARTY: 'PARTY',
+} as const;
+
+export const PREFIX_BY_TYPE = {
+	GUILD: '/gc',
+	OFFICER: '/oc',
+	PARTY: '/pc',
+} as const;
+
+export const CHAT_FUNCTION_BY_TYPE = {
+	GUILD: 'gchat',
+	OFFICER: 'ochat',
+	PARTY: 'pchat',
+} as const;
+
+/**
+ * characters that don't render in mc chat
+ */
+export const INVISIBLE_CHARACTERS = [
+	'\u{800}', // 'ࠀ'
+	'\u{2B4D}', // '⭍'
+	'\u{58F}', // '֏'
+	'\u{A8F0}', // '꣰'
+	'\u{26D3}', // '⛓'
+	'\u{26EC}', // '⛬'
+	'\u{26EB}', // '⛫'
+	'\u{26ED}', // '⛭'
+	'\u{26EE}', // '⛮'
+	'\u{26F6}', // '⛶'
+	'\u{26D8}', // '⛘'
+	'\u{26D0}', // '⛐'
+	'\u{26E9}', // '⛩'
+	'\u{26E0}', // '⛠'
+	'\u{26CB}', // '⛋'
+	'\u{26DF}', // '⛟'
+	'\u{26C9}', // '⛉'
+	'\u{26CD}', // '⛍'
+	'\u{26D7}', // '⛗'
+	'\u{26DC}', // '⛜'
+	'\u{26E1}', // '⛡'
+	'\u{26CC}', // '⛌'
+	'\u{26CF}', // '⛏'
+] as const;
+
+export const INVISIBLE_CHARACTER_REGEXP = new RegExp(INVISIBLE_CHARACTERS.join('|'), 'gu');
+
+/**
+ * chunks of text which can be used to pad a message to bypass hypixel's spam filter
+ */
+const PADDING_CHUNKS = ([
+	'----',
+	'____',
+	'////',
+] as const).map(chunk => `${INVISIBLE_CHARACTERS[0]} ${chunk}` as const);
+
+export const randomPadding = () => PADDING_CHUNKS[Math.floor(Math.random() * PADDING_CHUNKS.length)];
+
+/**
+ * any non-'-' and non-whitespace
+ */
+export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u;
+
+/**
+ * spam messages
+ */
+export const MEME_REGEXP = /[⠁-⣿]|\be+z+\b/;
+
+export const NON_WHITESPACE_REGEXP = new RegExp(`[^\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}${INVISIBLE_CHARACTERS.join('')}]`, 'u');
+
+/**
+ * https://cdn.discordapp.com/attachments/724130826165420052/876441229905256448/card.png
+ * https://media.discordapp.net/attachments/795861078415638539/876641628083867688/unknown.png
+ */
+// eslint-disable-next-line no-empty-character-class
+export const DISCORD_CDN_URL_REGEXP = /\b(?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/attachments\/\d{17,19}\/\d{17,19}\/.+\.(?:png|jpg|jpeg)(?:\?width=\d+&height=\d+)?\b/gd;

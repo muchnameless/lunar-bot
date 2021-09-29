@@ -1,4 +1,6 @@
-/.env
-/node_modules
-/.VSCodeCounter
-/log_buffer
+.VSCodeCounter
+.vscode
+dist
+log_buffer
+node_modules
+.env
