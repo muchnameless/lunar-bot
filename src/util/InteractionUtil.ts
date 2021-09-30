@@ -283,13 +283,13 @@ export default class InteractionUtil extends null {
 
 		try {
 			// replied
-			if (interaction.replied) return (await MessageUtil.edit(interaction.message as Message, options)) ?? await interaction.editReply(options);
+			if (interaction.replied) return (await MessageUtil.edit(interaction.message as Message, options)) ?? await interaction.editReply(options as WebhookEditMessageOptions);
 
 			// await defer
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
 			// deferred but not replied
-			if (interaction.deferred) return await interaction.editReply(options);
+			if (interaction.deferred) return await interaction.editReply(options as WebhookEditMessageOptions);
 
 			// initial reply
 			clearTimeout(cached.autoDefer!);
