@@ -59,7 +59,7 @@ export default class ChannelUtil extends null {
 	 * @param IdOrIds
 	 */
 	static async deleteMessages(channel: TextBasedChannels | null, IdOrIds: Snowflake | Snowflake[]) {
-		if (!channel?.isText()) return logger.warn(`[DELETE MESSAGES]: ${channel?.name} is not a text based channel`);
+		if (!channel?.isText()) return logger.warn(`[DELETE MESSAGES]: ${this.logInfo(channel)} is not a text based channel`);
 
 		try {
 			switch (channel.type) {

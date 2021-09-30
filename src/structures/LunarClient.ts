@@ -220,7 +220,8 @@ export class LunarClient extends Client {
 	async exit(code = 0): Promise<never> {
 		let hasError = false;
 
-		for (const output of await Promise.allSettled([ this.db.sequelize.close(), cache.opts.store.redis.quit() ])) {
+		// @ts-expect-error
+		for (const output of await Promise.allSettled([ this.db.sequelize.close(), cache.opts.store?.redis.quit() ])) {
 			if (output.status === 'rejected') {
 				logger.error(output.reason);
 				hasError = true;

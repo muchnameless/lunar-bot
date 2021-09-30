@@ -349,7 +349,7 @@ export default class InteractionUtil extends null {
 
 			await this.reply(interaction, {
 				embeds: [
-					interaction.client.defaultEmbed
+					(interaction.client as LunarClient).defaultEmbed
 						.setDescription(question),
 				],
 				components: [

@@ -18,10 +18,11 @@ import type { Merge } from './util';
 
 
 declare module 'discord.js' {
-	// Client = Merge<Client<true>, LunarClient>;
-	// interface Client extends Merge<Client<true>, LunarClient> {};
+	// interface Client<boolean> extends LunarClient {};
+	// interface Base {
+	// 	client: LunarClient;
+	// }
 	// interface Interaction {
 	// 	client: LunarClient;
 	// }
-	class Client<Ready extends boolean = true> extends LunarClient {};
 }

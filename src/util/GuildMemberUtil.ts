@@ -125,7 +125,7 @@ export default class GuildMemberUtil extends null {
 	static async editRoles(member: GuildMember, { add, remove }: { add?: RoleCollection, remove?: RoleCollection}) {
 		let roles = member.roles.cache;
 		if (remove) roles = roles.filter((_, id) => !remove.has(id));
-		if (add) roles = roles.concat(add);
+		if (add) roles = roles.concat(add); // eslint-disable-line unicorn/prefer-spread
 
 		return this.setRoles(member, roles);
 	}
