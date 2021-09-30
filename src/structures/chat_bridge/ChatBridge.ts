@@ -261,7 +261,7 @@ export class ChatBridge<loggedIn extends boolean = true> extends EventEmitter {
 	 * @param contentOrOptions
 	 */
 	async broadcast(contentOrOptions: string | BroadcastOptions) {
-		const { content, hypixelMessage, type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD, discord, minecraft: { prefix: minecraftPrefix = '', maxParts = Number.POSITIVE_INFINITY, ...options } = {} } = typeof contentOrOptions === 'string'
+		const { content, hypixelMessage = null, type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD, discord, minecraft: { prefix: minecraftPrefix = '', maxParts = Number.POSITIVE_INFINITY, ...options } = {} } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
 		const discordChatManager = this.discord.resolve(type);

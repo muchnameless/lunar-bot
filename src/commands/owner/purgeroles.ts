@@ -39,7 +39,7 @@ export default class PurgeRolesCommand extends SlashCommand {
 			PurgeRolesCommand.running = true;
 
 			const { lgGuild } = this.client;
-			const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID') as Snowflake;
+			const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 			const toPurge = [];
 
 			for (const member of (await GuildUtil.fetchAllMembers(lgGuild)).values()) {

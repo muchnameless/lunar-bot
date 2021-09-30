@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed, Formatters } from 'discord.js';
-import { oneLine, stripIndents } from 'common-tags';
+import { stripIndents } from 'common-tags';
 import { COSMETIC_SKILLS, DUNGEON_TYPES_AND_CLASSES, SKILLS, SLAYERS, XP_OFFSETS_CONVERTER, XP_OFFSETS_TIME } from '../../constants';
 import { optionalPlayerOption, pageOption, offsetOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, MessageEmbedUtil } from '../../util';
 import { getDefaultOffset, upperCaseFirstChar } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, HexColorString } from 'discord.js';
+import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
@@ -33,15 +33,8 @@ export default class XpCommand extends SlashCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
+		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 		const OFFSET = interaction.options.getString('offset') ?? getDefaultOffset(this.config);
-		const player = InteractionUtil.getPlayer(interaction, true);
-
-		if (!player) {
-			return await InteractionUtil.reply(interaction, oneLine`${interaction.options.get('player')
-				? `\`${interaction.options.getString('player')}\` is`
-				: 'you are'
-			} not in the player db`);
-		}
 
 		// update db?
 		if (interaction.options.getBoolean('update')) await player.updateXp();
@@ -51,7 +44,7 @@ export default class XpCommand extends SlashCommand {
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(OFFSET);
 
 		let embed = new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE') as HexColorString)
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, (await player.imageURL)!, player.url)
 			.setDescription(`${`Δ: change since ${Formatters.time(new Date(Math.max(this.config.get(XP_OFFSETS_TIME[OFFSET]), player.createdAt)))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[OFFSET])})`.padEnd(105, '\u00A0')}\u200B`)
 			.addFields({

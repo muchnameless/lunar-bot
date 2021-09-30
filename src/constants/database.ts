@@ -1,3 +1,6 @@
+import type { HexColorString, Snowflake } from 'discord.js';
+
+
 import {
 	CATACOMBS_ROLES,
 	COSMETIC_SKILLS,
@@ -103,6 +106,62 @@ export const DEFAULT_CONFIG = {
 	...Object.fromEntries(SLAYERS.flatMap(slayer => SLAYER_ROLES.map(level => [ `${slayer}_${level}_ROLE_ID`, null ]))), // individual slayer
 	...Object.fromEntries(CATACOMBS_ROLES.map(level => [ `CATACOMBS_${level}_ROLE_ID`, null ])), // catacombs
 } as const;
+
+export type ConfigValues = {
+	[key: `${string}_ID`]: Snowflake;
+
+	AUTO_GUILD_RANKS: boolean;
+	AUTOCORRECT_THRESHOLD: number;
+	AVERAGE_STATS_CHANNEL_UPDATE_ENABLED: boolean;
+	CHAT_LOGGING_ENABLED: boolean;
+	CHATBRIDGE_AUTO_MATH: boolean;
+	CHATBRIDGE_AUTOMUTE_DURATION: number;
+	CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS: number;
+	CHATBRIDGE_CHATTRIGGERS_ENABLED: boolean;
+	CHATBRIDGE_DEFAULT_MAX_PARTS: number;
+	CHATBRIDGE_ENABLED: boolean;
+	CHATBRIDGE_IMGUR_UPLOADER_ENABLED: boolean;
+	COMMAND_COOLDOWN_DEFAULT: 1;
+	COMPETITION_END_TIME: number;
+	COMPETITION_RUNNING: boolean;
+	COMPETITION_SCHEDULED: boolean;
+	COMPETITION_START_TIME: number;
+	CURRENT_COMPETITION: 'weight';
+	DATABASE_UPDATE_INTERVAL: number;
+	DEFAULT_MAX_PARTS: number;
+	DEFAULT_XP_OFFSET: 'OffsetWeek';
+	ELEMENTS_PER_PAGE: number;
+	EMBED_BLUE: HexColorString;
+	EMBED_GREEN: HexColorString;
+	EMBED_RED: HexColorString;
+	EVAL_INSPECT_DEPTH: number;
+	HYPIXEL_API_ERROR: boolean;
+	HYPIXEL_SKYBLOCK_API_ERROR: boolean;
+	IMGUR_UPLOADER_CONTENT_TYPE: string[];
+	INFRACTIONS_EXPIRATION_TIME: number;
+	INGAME_RESPONSE_TIMEOUT: number;
+	KICK_COOLDOWN: number;
+	LAST_DAILY_STATS_SAVE_TIME: number;
+	LAST_DAILY_XP_RESET_TIME: number;
+	LAST_KICK_TIME: number;
+	LAST_MAYOR_XP_RESET_TIME: number;
+	LAST_MONTHLY_XP_RESET_TIME: number;
+	LAST_WEEKLY_XP_RESET_TIME: number;
+	MOJANG_API_ERROR: boolean;
+	NUMBER_FORMAT: string;
+	PLAYER_DB_UPDATE_ENABLED: boolean;
+	PREFIXES: string[];
+	PURGE_LIST_OFFSET: number;
+	REPLY_CONFIRMATION: string[];
+	TAX_AMOUNT: number;
+	TAX_AUCTIONS_ITEMS: string[];
+	TAX_AUCTIONS_START_TIME: number;
+	TAX_TRACKING_ENABLED: number;
+	USER_INPUT_MAX_RETRIES: number;
+	WHALECUM_PASS_WEIGHT: number;
+	XP_TRACKING_ENABLED: boolean;
+}
+
 
 export const OFFSET_FLAGS = {
 	COMPETITION_END: 'CompetitionEnd',

@@ -54,41 +54,41 @@ export default class GuildMemberUtil extends null {
 			if (member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
 		}
 
-		if (member.roles.cache.has(config.get('GUILD_ROLE_ID') as Snowflake)) rolesToRemove.push(config.get('GUILD_ROLE_ID') as Snowflake);
-		if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID') as Snowflake)) rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID') as Snowflake);
+		if (member.roles.cache.has(config.get('GUILD_ROLE_ID'))) rolesToRemove.push(config.get('GUILD_ROLE_ID'));
+		if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
 
 		// delimiter
 		for (const type of DELIMITER_ROLES) {
-			if (member.roles.cache.has(config.get(`${type}_DELIMITER_ROLE_ID`) as Snowflake)) rolesToRemove.push(config.get(`${type}_DELIMITER_ROLE_ID`) as Snowflake);
+			if (member.roles.cache.has(config.get(`${type}_DELIMITER_ROLE_ID`))) rolesToRemove.push(config.get(`${type}_DELIMITER_ROLE_ID`));
 		}
 
 		// skill average
 		for (const level of SKILL_AVERAGE_ROLES) {
-			if (member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`) as Snowflake)) rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`) as Snowflake);
+			if (member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 		}
 
 		// individual skills
 		for (const skill of SKILLS) {
 			for (const level of SKILL_ROLES) {
-				if (member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`) as Snowflake)) rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`) as Snowflake);
+				if (member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
 			}
 		}
 
 		// total slayer
 		for (const level of SLAYER_TOTAL_ROLES) {
-			if (member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`) as Snowflake)) rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`) as Snowflake);
+			if (member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 		}
 
 		// individual slayer
 		for (const slayer of SLAYERS) {
 			for (const level of SLAYER_ROLES) {
-				if (member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`) as Snowflake)) rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`) as Snowflake);
+				if (member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
 			}
 		}
 
 		// catacombs
 		for (const level of CATACOMBS_ROLES) {
-			if (member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`) as Snowflake)) rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`) as Snowflake);
+			if (member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 		}
 
 		return rolesToRemove;

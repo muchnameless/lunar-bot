@@ -282,7 +282,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	 */
 	async #handleCommandMessage(hypixelMessage: HypixelMessage) {
 		// must use prefix for commands in guild
-		if (!hypixelMessage.commandData!.prefix) {
+		if (!hypixelMessage.commandData.prefix) {
 			// auto math, ignore 0-0, 4/5 (dungeon parties)
 			if (this.config.get('CHATBRIDGE_AUTO_MATH') && /^[\d ()*+./^x-]+$/.test(hypixelMessage.content) && /[1-9]/.test(hypixelMessage.content) && !/\b[1-5] *\/ *5\b/.test(hypixelMessage.content)) {
 				try {
@@ -305,11 +305,12 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		// no command, only ping or prefix
-		if (!hypixelMessage.commandData!.name) {
+		if (!hypixelMessage.commandData.name) {
 			logger.info(`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' which is not a valid command`);
 
-			if (!(this.config.get('PREFIXES') as string[]).slice(1)
-				.includes(hypixelMessage.commandData!.prefix!)
+			if (!this.config.get('PREFIXES')
+				.slice(1)
+				.includes(hypixelMessage.commandData.prefix!)
 			) {
 				this.client.chatBridges.commands.help(hypixelMessage);
 			}
@@ -346,7 +347,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 				// check for req roles
 				if (!member.roles.cache.hasAny(...requiredRoles)) {
-					logger.info(`${hypixelMessage.author.tag} | ${member.displayName} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' without a required role`);
+					logger.info(`${hypixelMessage.author.ign} | ${member.displayName} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' without a required role`);
 					return hypixelMessage.author!.send(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleId => member.guild.roles.cache.get(roleId)?.name ?? roleId)}) from the Lunar Guard Discord Server`);
 				}
 
@@ -358,7 +359,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			// command cooldowns
 			if (command.timestamps) {
 				const NOW = Date.now();
-				const COOLDOWN_TIME = (command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT') as number) * 1_000;
+				const COOLDOWN_TIME = (command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000;
 				const IDENTIFIER = hypixelMessage.member?.id ?? hypixelMessage.author!.ign;
 
 				if (command.timestamps.has(IDENTIFIER)) {

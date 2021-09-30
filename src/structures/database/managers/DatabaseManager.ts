@@ -101,7 +101,7 @@ export class DatabaseManager {
 
 				try {
 					for (const type of [ 'weight', 'skill', 'slayer', 'catacombs' ] as const) {
-						const channel = this.client.channels.cache.get(config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`) as Snowflake);
+						const channel = this.client.channels.cache.get(config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
 
 						if (!(channel instanceof VoiceChannel)) { // no channel found
 							logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${type}: no channel found`);
@@ -185,9 +185,9 @@ export class DatabaseManager {
 	 */
 	async #updateTaxDatabase() {
 		const { config, players, taxCollectors } = this.modelManagers;
-		const TAX_AUCTIONS_START_TIME = config.get('TAX_AUCTIONS_START_TIME') as number;
-		const TAX_AMOUNT = config.get('TAX_AMOUNT') as number;
-		const TAX_AUCTIONS_ITEMS = config.get('TAX_AUCTIONS_ITEMS') as string[];
+		const TAX_AUCTIONS_START_TIME = config.get('TAX_AUCTIONS_START_TIME');
+		const TAX_AMOUNT = config.get('TAX_AMOUNT');
+		const TAX_AUCTIONS_ITEMS = config.get('TAX_AUCTIONS_ITEMS');
 		const availableAuctionsLog = [];
 		const dbPromises: Promise<EmbedFieldData | undefined>[] = [];
 
@@ -316,8 +316,8 @@ export class DatabaseManager {
 
 		return Formatters.codeBlock('cs', stripIndents(commaLists`
 			Collectors: # /ah ${taxCollectors.activeCollectors.map(collector => collector.ign).sort(compareAlphabetically)}
-			Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT') as number)}
-			Items: ${(config.get('TAX_AUCTIONS_ITEMS') as string[]).map(item => `'${item}'`)}
+			Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT'))}
+			Items: ${config.get('TAX_AUCTIONS_ITEMS').map(item => `'${item}'`)}
 			Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round((PAID_COUNT / PLAYER_COUNT) * 100)} % | collected amount: ${TOTAL_COINS} coins
 			Available auctions:
 			${availableAuctionsLog?.join('\n') ?? '\u200B -'}
@@ -395,7 +395,7 @@ export class DatabaseManager {
 		// the hypxiel api encountered an error before
 		if (config.get('HYPIXEL_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() >= (config.get('DATABASE_UPDATE_INTERVAL') as number)) {
+			if (new Date().getMinutes() >= config.get('DATABASE_UPDATE_INTERVAL')) {
 				players.updateIgns();
 				return logger.warn('[DB UPDATE]: auto updates disabled');
 			}
@@ -418,14 +418,14 @@ export class DatabaseManager {
 		await players.updateIgns();
 
 		// update taxMessage
-		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID') as string);
+		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 		if (!taxChannel?.isText() || (taxChannel.guildId && !taxChannel.guild?.available)) return logger.warn('[TAX MESSAGE] tax channel error');
 		if (!ChannelUtil.botPermissions(taxChannel)?.has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) {
 			return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 		}
 
-		const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID') as string;
+		const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');
 		const taxMessage = TAX_MESSAGE_ID
 			? await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch(error => logger.error('[TAX MESSAGE]', error))
 			: null;

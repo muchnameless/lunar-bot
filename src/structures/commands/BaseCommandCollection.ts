@@ -133,7 +133,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 
 		// autocorrect input
 		const { value, similarity } = autocorrect(name, this.keys());
-		if (similarity < (this.client.config.get('AUTOCORRECT_THRESHOLD') as number)) return null;
+		if (similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
 
 		// return command if it is visible
 		command = this.get(value) as C;

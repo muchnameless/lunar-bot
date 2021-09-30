@@ -27,7 +27,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 * the main guild's hypixelGuild object
 	 */
 	get mainGuild() {
-		return this.cache.get(this.client.config.get('MAIN_GUILD_ID') as string)!;
+		return this.cache.get(this.client.config.get('MAIN_GUILD_ID'))!;
 	}
 
 	override async loadCache(condition?: FindOptions) {
@@ -85,7 +85,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 
 		const { similarity, value } = autocorrect(name, this.cache, 'name');
 
-		return (similarity >= (this.client.config.get('AUTOCORRECT_THRESHOLD') as number))
+		return similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
 			? value
 			: null;
 	}
@@ -95,7 +95,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 */
 	scheduleDailyStatsSave() {
 		// daily reset
-		if (new Date(this.client.config.get('LAST_DAILY_STATS_SAVE_TIME') as number).getUTCDay() !== new Date().getUTCDay()) this.performDailyStatsSave();
+		if (new Date(this.client.config.get('LAST_DAILY_STATS_SAVE_TIME')).getUTCDay() !== new Date().getUTCDay()) this.performDailyStatsSave();
 
 		// each day at 00:00:00
 		this.client.schedule('guildDailyStats', new CronJob({

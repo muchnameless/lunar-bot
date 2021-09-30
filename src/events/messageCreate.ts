@@ -28,7 +28,7 @@ export default class MessageCreateEvent extends Event {
 		this.client.chatBridges.handleDiscordMessage(message, { isEdit });
 
 		// "old" commands
-		if (MessageUtil.isUserMessage(message) && new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIXES') as string[][0]), `<@!?${this.client.user!.id}>` ].join('|')})`, 'i').test(message.content)) {
+		if (MessageUtil.isUserMessage(message) && new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIXES')[0]), `<@!?${this.client.user!.id}>` ].join('|')})`, 'i').test(message.content)) {
 			message.reply('all commands have been converted to slash commands, type (not send) `/` to see them');
 		}
 	}

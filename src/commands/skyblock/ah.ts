@@ -7,7 +7,7 @@ import { optionalIgnOption, skyblockProfileOption } from '../../structures/comma
 import { InteractionUtil } from '../../util';
 import { getUuidAndIgn, logger, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, HexColorString, SelectMenuInteraction, Snowflake } from 'discord.js';
+import type { CommandInteraction, SelectMenuInteraction, Snowflake } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
@@ -144,7 +144,7 @@ export default class AhCommand extends SlashCommand {
 			return {
 				embeds: [
 					embed
-						.setColor(this.config.get('EMBED_RED') as HexColorString)
+						.setColor(this.config.get('EMBED_RED'))
 						.setDescription(`${error}`),
 				],
 			};

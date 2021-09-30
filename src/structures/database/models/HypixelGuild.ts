@@ -21,7 +21,7 @@ import {
 	safePromiseAll,
 } from '../../../functions';
 import type { ModelStatic, Sequelize } from 'sequelize';
-import type { Collection, GuildMember, HexColorString, Snowflake } from 'discord.js';
+import type { Collection, GuildMember, Snowflake } from 'discord.js';
 import type { Components, DefaultMeta } from '@zikeji/hypixel';
 import type { Player } from './Player';
 import type { ChatBridge } from '../../chat_bridge/ChatBridge';
@@ -74,20 +74,20 @@ interface HypixelGuildAttributes {
 
 
 export class HypixelGuild extends Model<HypixelGuildAttributes> implements HypixelGuildAttributes {
-	declare public client: LunarClient;
+	declare client: LunarClient;
 
-	declare public guildId: string;
-	declare public roleId: string | null;
-	declare public name: string;
-	declare public weightReq: number | null;
-	declare public chatBridgeEnabled: boolean;
-	declare public mutedTill: number;
-	declare public chatBridgeChannels: ChatBridgeChannel[];
-	declare public ranks: GuildRank[];
-	declare public statsHistory: StatsHistory[];
+	declare guildId: string;
+	declare roleId: string | null;
+	declare name: string;
+	declare weightReq: number | null;
+	declare chatBridgeEnabled: boolean;
+	declare mutedTill: number;
+	declare chatBridgeChannels: ChatBridgeChannel[];
+	declare ranks: GuildRank[];
+	declare statsHistory: StatsHistory[];
 
-	declare public readonly createdAt: Date;
-	declare public readonly updatedAt: Date;
+	declare readonly createdAt: Date;
+	declare readonly updatedAt: Date;
 
 	/**
 	 * wether a player db update is currently running
@@ -483,18 +483,18 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 								const DAYS_PASSED_SINCE_LAST_XP_UPDATE = Math.max(
 									0,
 									Math.min(
-										Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') as number - xpLastUpdatedAt) / (24 * 60 * 60 * 1_000)),
+										Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - xpLastUpdatedAt) / (24 * 60 * 60 * 1_000)),
 										player.guildXpHistory.length,
 									),
 								);
 
 								// to trigger the xp gained reset if global reset happened after the player left the guild
 								await safePromiseAll([
-									config.get('COMPETITION_START_TIME') as number >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
-									config.get('COMPETITION_END_TIME') as number >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
-									config.get('LAST_MAYOR_XP_RESET_TIME') as number >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
-									config.get('LAST_WEEKLY_XP_RESET_TIME') as number >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
-									config.get('LAST_MONTHLY_XP_RESET_TIME') as number >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
+									config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
+									config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
+									config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
+									config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
+									config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
 									...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE }).fill(null)
 										.map(() => player.resetXp({ offsetToReset: OFFSET_FLAGS.DAY })),
 								]);
@@ -550,7 +550,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			const loggingEmbeds: MessageEmbed[] = [];
 			const createEmbed = () => {
 				const embed = new MessageEmbed()
-					.setColor((hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE')) as HexColorString)
+					.setColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE'))
 					.setTitle(`${this.name} Player Database: ${CHANGES} change${CHANGES !== 1 ? 's' : ''}`)
 					.setDescription(`Number of players: ${PLAYERS_OLD_AMOUNT} -> ${this.playerCount}`)
 					.setTimestamp();

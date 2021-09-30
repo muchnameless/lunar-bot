@@ -15,18 +15,18 @@ export interface TransactionAttributes {
 
 
 export class Transaction extends Model<TransactionAttributes> implements TransactionAttributes {
-	declare public client: LunarClient;;
+	declare client: LunarClient;;
 
-	declare public id: number;
-	declare public from: string;
-	declare public to: string;
-	declare public amount: number;
-	declare public auctionId: string | null;
-	declare public notes: string | null;
-	declare public type: 'tax' | 'donation';
+	declare id: number;
+	declare from: string;
+	declare to: string;
+	declare amount: number;
+	declare auctionId: string | null;
+	declare notes: string | null;
+	declare type: 'tax' | 'donation';
 
-	declare public readonly createdAt: Date;
-	declare public readonly updatedAt: Date;
+	declare readonly createdAt: Date;
+	declare readonly updatedAt: Date;
 
 	static initialize(sequelize: Sequelize) {
 		return this.init({

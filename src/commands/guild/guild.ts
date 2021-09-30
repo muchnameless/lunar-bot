@@ -10,6 +10,7 @@ import { InteractionUtil, UserUtil } from '../../util';
 import { autocorrect, getIdFromString, logger, removeMcFormatting, stringToMS, trim } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction, Snowflake } from 'discord.js';
+import type { WhereOptions } from 'sequelize';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Player } from '../../structures/database/models/Player';
 import type { HypixelGuild } from '../../structures/database/models/HypixelGuild';
@@ -17,7 +18,6 @@ import type { CommandOptions } from '../../structures/chat_bridge/managers/Minec
 
 
 export default class GuildCommand extends SlashCommand {
-	// @ts-expect-error "super call must be first"
 	constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('hypixel')
@@ -285,7 +285,7 @@ export default class GuildCommand extends SlashCommand {
 			ephemeral: true,
 		};
 
-		const TIME_LEFT = this.config.get('LAST_KICK_TIME') as number + (this.config.get('KICK_COOLDOWN') as number) - Date.now();
+		const TIME_LEFT = this.config.get('LAST_KICK_TIME') + (this.config.get('KICK_COOLDOWN')) - Date.now();
 
 		if (TIME_LEFT > 0) return {
 			content: `kicking is on cooldown for another ${ms(TIME_LEFT, { long: true })}`,
@@ -377,12 +377,12 @@ export default class GuildCommand extends SlashCommand {
 			case 'demote': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -397,12 +397,7 @@ export default class GuildCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				const target = InteractionUtil.getPlayer(interaction);
-
-				if (!target) return await InteractionUtil.reply(interaction, {
-					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
-					ephemeral: true,
-				});
+				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
 				if (target.guildRankPriority >= executor.guildRankPriority) return await InteractionUtil.reply(interaction, {
 					content: `your guild rank needs to be higher than ${target}'s`,
@@ -418,10 +413,10 @@ export default class GuildCommand extends SlashCommand {
 			case 'kick': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -451,13 +446,13 @@ export default class GuildCommand extends SlashCommand {
 			case 'history': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('GUILD_ROLE_ID') as Snowflake,
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('GUILD_ROLE_ID'),
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -472,13 +467,13 @@ export default class GuildCommand extends SlashCommand {
 			case 'quest': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('GUILD_ROLE_ID') as Snowflake,
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('GUILD_ROLE_ID'),
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -490,13 +485,13 @@ export default class GuildCommand extends SlashCommand {
 			case 'top': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('GUILD_ROLE_ID') as Snowflake,
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('GUILD_ROLE_ID'),
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -509,12 +504,12 @@ export default class GuildCommand extends SlashCommand {
 			case 'invite': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -531,14 +526,14 @@ export default class GuildCommand extends SlashCommand {
 			case 'online': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('GUILD_ROLE_ID') as Snowflake,
-						this.config.get('BRIDGER_ROLE_ID') as Snowflake,
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('GUILD_ROLE_ID'),
+						this.config.get('BRIDGER_ROLE_ID'),
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -550,12 +545,12 @@ export default class GuildCommand extends SlashCommand {
 			case 'log': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -571,26 +566,17 @@ export default class GuildCommand extends SlashCommand {
 			case 'member': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('GUILD_ROLE_ID') as Snowflake,
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('GUILD_ROLE_ID'),
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
-				const IGN = InteractionUtil.getIgn(interaction, true);
-				if (!IGN) {
-					const IGN_INPUT = interaction.options.getString('player');
-					return await InteractionUtil.reply(interaction, {
-						content: IGN_INPUT
-							? `\`${IGN_INPUT}\` is not in the player db`
-							: 'you are not in the player db',
-						ephemeral: true,
-					});
-				}
+				const IGN = InteractionUtil.getIgn(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 
 				return this.#run(interaction, {
 					command: `g member ${IGN}`,
@@ -600,12 +586,12 @@ export default class GuildCommand extends SlashCommand {
 			case 'mute': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -623,12 +609,12 @@ export default class GuildCommand extends SlashCommand {
 			case 'promote': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -643,12 +629,7 @@ export default class GuildCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				const target = InteractionUtil.getPlayer(interaction);
-
-				if (!target) return await InteractionUtil.reply(interaction, {
-					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
-					ephemeral: true,
-				});
+				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
 				if (target.guildRankPriority >= executor.guildRankPriority - 1) return await InteractionUtil.reply(interaction, {
 					content: 'you can only promote up to your own rank',
@@ -664,12 +645,12 @@ export default class GuildCommand extends SlashCommand {
 			case 'setrank': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -684,18 +665,12 @@ export default class GuildCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				const target = InteractionUtil.getPlayer(interaction);
-
-				if (!target) return await InteractionUtil.reply(interaction, {
-					content: `no player with the IGN \`${interaction.options.getString('player', true)}\` found`,
-					ephemeral: true,
-				});
-
+				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 				const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 				const RANK_INPUT = interaction.options.getString('rank', true);
 				const { value: rank, similarity } = autocorrect(RANK_INPUT, hypixelGuild.ranks, 'name');
 
-				if (similarity < (this.config.get('AUTOCORRECT_THRESHOLD') as number)) return `unknown guild rank '${RANK_INPUT}'`;
+				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return `unknown guild rank '${RANK_INPUT}'`;
 
 				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) return await InteractionUtil.reply(interaction, {
 					content: 'you can only change ranks up to your own rank',
@@ -711,12 +686,12 @@ export default class GuildCommand extends SlashCommand {
 			case 'unmute': {
 				await this.checkPermissions(interaction, {
 					roleIds: [
-						this.config.get('SHRUG_ROLE_ID') as Snowflake,
-						this.config.get('TRIAL_MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('MODERATOR_ROLE_ID') as Snowflake,
-						this.config.get('DANKER_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('SENIOR_STAFF_ROLE_ID') as Snowflake,
-						this.config.get('MANAGER_ROLE_ID') as Snowflake,
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
 					],
 				});
 
@@ -732,7 +707,7 @@ export default class GuildCommand extends SlashCommand {
 							?? (InteractionUtil.checkForce(interaction)
 								? TARGET_INPUT // use input if force is set
 								: await (async () => {
-									const queryParams = [{
+									const queryParams: WhereOptions<Player>[] = [{
 										ign: { [Op.iLike]: TARGET_INPUT },
 										minecraftUuid: TARGET_INPUT,
 									}];

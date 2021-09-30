@@ -155,8 +155,8 @@ export default class LinkCommand extends SlashCommand {
 
 		let reply = `\`${player}\` linked to ${discordMember}`;
 
-		if (!discordMember.roles.cache.has(this.config.get('VERIFIED_ROLE_ID') as Snowflake))	{
-			reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.config.get('VERIFIED_ROLE_ID') as Snowflake)?.name ?? this.config.get('VERIFIED_ROLE_ID') as Snowflake} role)`;
+		if (!discordMember.roles.cache.has(this.config.get('VERIFIED_ROLE_ID')))	{
+			reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.config.get('VERIFIED_ROLE_ID'))?.name ?? this.config.get('VERIFIED_ROLE_ID')} role)`;
 		}
 
 		return await InteractionUtil.reply(interaction, {

@@ -15,17 +15,17 @@ interface ChatTriggerAttributes {
 
 
 export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTriggerAttributes {
-	declare public client: LunarClient;;
+	declare client: LunarClient;;
 
-	declare public regExpString: string;
-	declare public response: string;
-	declare public cooldown: number | null;
-	declare public chatTypes: string[];
+	declare regExpString: string;
+	declare response: string;
+	declare cooldown: number | null;
+	declare chatTypes: string[];
 	private timestamps: Collection<string, number> | null;
 	private _regExp: RegExp | null;
 
-	declare public readonly createdAt: Date;
-	declare public readonly updatedAt: Date;
+	declare readonly createdAt: Date;
+	declare readonly updatedAt: Date;
 
 	constructor(...args: any[]) {
 		super(...args);

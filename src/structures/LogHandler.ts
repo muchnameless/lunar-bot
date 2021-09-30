@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';
-import type { GuildChannel, Snowflake } from 'discord.js';
+import type { GuildChannel } from 'discord.js';
 import type { URL } from 'node:url';
 import type { LunarClient } from './LunarClient';
 
@@ -43,7 +43,7 @@ export class LogHandler {
 	 * logging channel
 	 */
 	get channel() {
-		const channel = this.client.channels.cache.get(this.client.config.get('LOGGING_CHANNEL_ID') as Snowflake);
+		const channel = this.client.channels.cache.get(this.client.config.get('LOGGING_CHANNEL_ID'));
 
 		if (!channel?.isText()) return logger.error(`[LOG HANDLER]: ${channel ? `#${(channel as GuildChannel).name}` : this.client.config.get('LOGGING_CHANNEL_ID')} is not a cached text based channel (id)`);
 

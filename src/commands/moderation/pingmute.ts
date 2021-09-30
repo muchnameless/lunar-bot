@@ -55,7 +55,7 @@ export default class PingMuteCommand extends DualCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		return await InteractionUtil.reply(interaction, await this._generateReply(
-			InteractionUtil.getPlayer(interaction),
+			InteractionUtil.getPlayer(interaction, { throwIfNotFound: true }),
 			interaction.options.getString('player', true),
 		));
 	}

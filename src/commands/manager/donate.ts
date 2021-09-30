@@ -38,7 +38,7 @@ export default class DonateCommand extends SlashCommand {
 
 		if (!collector?.isCollecting) return await InteractionUtil.reply(interaction, 'this command is restricted to (active) tax collectors');
 
-		const player = InteractionUtil.getPlayer(interaction);
+		const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 		const AMOUNT_OR_TEXT = interaction.options.getString('value');
 		const TEXT_INPUT = interaction.options.getString('notes');
 

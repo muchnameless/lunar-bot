@@ -7,7 +7,6 @@ import type {
 	CommandInteraction,
 	EmojiIdentifierResolvable,
 	GuildMember,
-	HexColorString,
 	Interaction,
 	InteractionDeferReplyOptions,
 	InteractionDeferUpdateOptions,
@@ -20,6 +19,7 @@ import type {
 } from 'discord.js';
 import type { LunarClient } from '../structures/LunarClient';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
+import type { Player } from '../structures/database/models/Player';
 
 
 interface InteractionData {
@@ -30,6 +30,13 @@ interface InteractionData {
 }
 
 type ChatInteraction = CommandInteraction | MessageComponentInteraction;
+
+interface GetPlayerOptions {
+	/** wether to use the current user in case that no player / target option is provided */
+	fallbackToCurrentUser?: boolean;
+	/** wether to throw an error if no linked player is found */
+	throwIfNotFound?: boolean;
+}
 
 
 export default class InteractionUtil extends null {
@@ -384,7 +391,7 @@ export default class InteractionUtil extends null {
 			this.update(result, {
 				embeds: [
 					new MessageEmbed()
-						.setColor((interaction.client as LunarClient).config.get(success ? 'EMBED_GREEN' : 'EMBED_RED') as HexColorString)
+						.setColor((interaction.client as LunarClient).config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
 						.setDescription(success ? 'confirmed' : 'cancelled')
 						.setTimestamp(),
 				],
@@ -416,29 +423,50 @@ export default class InteractionUtil extends null {
 	/**
 	 * returns the player object, optional fallback to the interaction.user's player
 	 * @param interaction
-	 * @param fallbackToCurrentUser
+	 * @param options
 	 */
-	static getPlayer(interaction: CommandInteraction, fallbackToCurrentUser = false) {
+	static getPlayer(interaction: CommandInteraction, options: GetPlayerOptions & { throwIfNotFound: true }): Player;
+	static getPlayer(interaction: CommandInteraction, options?: GetPlayerOptions): Player | null;
+	static getPlayer(interaction: CommandInteraction, { fallbackToCurrentUser = false, throwIfNotFound = false } = {}) {
 		// @ts-expect-error Property '_hoistedOptions' is private and only accessible within class 'CommandInteractionOptionResolver'
 		if (!interaction.options._hoistedOptions.length) {
-			if (fallbackToCurrentUser) return UserUtil.getPlayer(interaction.user);
+			if (fallbackToCurrentUser) {
+				const player = UserUtil.getPlayer(interaction.user);
+				if (throwIfNotFound && !player) throw `no player linked to \`${interaction.user.tag}\` found`;
+				return player;
+			}
 			return null;
 		}
 
 		const INPUT = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.replace(/\W/g, '').toLowerCase();
 
 		if (!INPUT) {
-			if (fallbackToCurrentUser) return UserUtil.getPlayer(interaction.user);
+			if (fallbackToCurrentUser) {
+				const player = UserUtil.getPlayer(interaction.user);
+				if (throwIfNotFound && !player) throw `no player linked to \`${interaction.user.tag}\` found`;
+				return player;
+			}
 			return null;
 		}
 
-		if (validateDiscordId(INPUT)) return (interaction.client as LunarClient).players.getById(INPUT);
-		if (validateMinecraftUuid(INPUT)) return (interaction.client as LunarClient).players.cache.get(INPUT) ?? null;
+		if (validateDiscordId(INPUT)) {
+			const player = (interaction.client as LunarClient).players.getById(INPUT);
+			if (throwIfNotFound && !player) throw `no player linked to \`${INPUT}\` found`;
+			return player;
+		}
 
-		return (this.checkForce(interaction)
+		if (validateMinecraftUuid(INPUT)) {
+			const player = (interaction.client as LunarClient).players.cache.get(INPUT) ?? null;
+			if (throwIfNotFound && !player) throw `no player linked to \`${INPUT}\` found`;
+			return player;
+		}
+
+		const player = (this.checkForce(interaction)
 			? (interaction.client as LunarClient).players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
 			: (interaction.client as LunarClient).players.getByIgn(INPUT))
 			?? null;
+		if (throwIfNotFound && !player) throw `no player linked to \`${INPUT}\` found`;
+		return player;
 	}
 
 	/**
@@ -446,9 +474,16 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param fallbackToCurrentUser
 	 */
-	static getIgn(interaction: CommandInteraction, fallbackToCurrentUser = false) {
-		if (this.checkForce(interaction)) return (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase() ?? null;
-		return this.getPlayer(interaction, fallbackToCurrentUser)?.ign ?? null;
+	static getIgn(interaction: CommandInteraction, options: GetPlayerOptions & { throwIfNotFound: true }): string;
+	static getIgn(interaction: CommandInteraction, options?: GetPlayerOptions): string | null;
+	static getIgn(interaction: CommandInteraction, options?: GetPlayerOptions) {
+		if (this.checkForce(interaction)) {
+			const IGN = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase()
+				?? options?.fallbackToCurrentUser ? UserUtil.getPlayer(interaction.user)?.ign ?? null : null;
+			if (options?.throwIfNotFound && !IGN) throw 'no IGN specified';
+			return IGN;
+		}
+		return this.getPlayer(interaction, options)?.ign ?? null;
 	}
 
 	/**

@@ -75,11 +75,12 @@ export default class EvalCommand extends SlashCommand {
 		const { client, config } = this;
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
+		const me = (guild ?? lgGuild)?.me ?? null;
 		const reply = InteractionUtil.reply.bind(InteractionUtil, interaction);
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		const responseEmbed = this.client.defaultEmbed
-			.setFooter(interaction.guild?.me!.displayName ?? this.client.user!.username, this.client.user!.displayAvatarURL());
+			.setFooter(me?.displayName ?? this.client.user!.username, (me ?? this.client.user!).displayAvatarURL());
 
 		for (const [ index, inputPart ] of splitForEmbedFields(input, 'js').entries()) {
 			responseEmbed.addFields({
@@ -171,7 +172,7 @@ export default class EvalCommand extends SlashCommand {
 		});
 
 		const IS_ASYNC = /\bawait\b/.test(INPUT);
-		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH') as number;
+		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH');
 		const row = new MessageActionRow()
 			.addComponents(
 				new MessageButton()
@@ -252,7 +253,7 @@ export default class EvalCommand extends SlashCommand {
 			})
 			.reduce((acc, cur) => `${acc}${acc ? '\n' : ''}${cur}${cur.endsWith('{') ? '' : ';'}`, '');
 		const IS_ASYNC = interaction.options.getBoolean('async') ?? /\bawait\b/.test(INPUT);
-		const INSPECT_DEPTH = interaction.options.getInteger('inspect') ?? this.config.get('EVAL_INSPECT_DEPTH') as number;
+		const INSPECT_DEPTH = interaction.options.getInteger('inspect') ?? this.config.get('EVAL_INSPECT_DEPTH');
 		const row = new MessageActionRow()
 			.addComponents(
 				new MessageButton()

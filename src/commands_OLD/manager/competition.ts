@@ -47,11 +47,11 @@ export class CompetitionCommand extends SlashCommand {
 
 				const result = autocorrect(collected.content, CompetitionCommand.COMPETITION_TYPES);
 
-				if (result.similarity >= (this.config.get('AUTOCORRECT_THRESHOLD') as number)) {
+				if (result.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')) {
 					type = result.value;
 					retries = 0;
 				} else {
-					if (++retries >= (this.config.get('USER_INPUT_MAX_RETRIES') as number)) throw new Error('the command has been cancelled');
+					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
 					await InteractionUtil.reply(interaction, `\`${collected.content}\` is not a valid type`);
 				}
@@ -69,7 +69,7 @@ export class CompetitionCommand extends SlashCommand {
 					startingTime = result;
 					retries = 0;
 				} else {
-					if (++retries >= (this.config.get('USER_INPUT_MAX_RETRIES') as number)) throw new Error('the command has been cancelled');
+					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
 					await InteractionUtil.reply(interaction, `\`${collected.content}\` is not a valid date`);
 				}
@@ -87,7 +87,7 @@ export class CompetitionCommand extends SlashCommand {
 					endingTime = result;
 					retries = 0;
 				} else {
-					if (++retries >= (this.config.get('USER_INPUT_MAX_RETRIES') as number)) throw new Error('the command has been cancelled');
+					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
 					await InteractionUtil.reply(interaction, `\`${collected.content}\` is not a valid date`);
 				}

@@ -111,7 +111,7 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 			}
 
 			const prefixMatched = new RegExp(
-				`^(?:${[ ...(this.client.config.get('PREFIXES') as string[]).map(x => escapeRegex(x)), `@${this.chatBridge.bot!.username}` ].join('|')})`,
+				`^(?:${[ ...this.client.config.get('PREFIXES').map(x => escapeRegex(x)), `@${this.chatBridge.bot!.username}` ].join('|')})`,
 				'i',
 			).exec(this.content)?.[0]; // PREFIXES, @mention
 
@@ -281,13 +281,13 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 					username: member?.displayName
 						?? player?.ign
 						?? this.author.ign,
-					avatarURL: member?.user.displayAvatarURL({ dynamic: true })
+					avatarURL: member?.displayAvatarURL({ dynamic: true })
 						?? await player?.imageURL
 						?? await mojang.ign(this.author.ign).then(
 							({ uuid }) => uuidToImgurBustURL(uuid),
 							error => logger.error('[FORWARD TO DC]', error),
 						)
-						?? this.client.user.displayAvatarURL({ dynamic: true }),
+						?? (member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),
 					allowedMentions: {
 						parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
 					},
@@ -334,7 +334,7 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 			time: timeoutSeconds * 1_000,
 		});
 
-		if ((this.client.config.get('REPLY_CONFIRMATION') as string[]).includes(result[0]?.content.toLowerCase())) return;
+		if (this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase())) return;
 
 		throw errorMessage;
 	}

@@ -63,7 +63,7 @@ export class DualCommand extends SlashCommand {
 	 * prefix name usage
 	 */
 	get usageInfo() {
-		return `\`${this.config.get('PREFIXES') as string[][0]}${this.aliasesInGame?.[0].length ?? Number.POSITIVE_INFINITY < this.name.length ? this.aliasesInGame![0] : this.name}\` ${this.usage}`;
+		return `\`${this.config.get('PREFIXES')[0]}${this.aliasesInGame?.[0].length ?? Number.POSITIVE_INFINITY < this.name.length ? this.aliasesInGame![0] : this.name}\` ${this.usage}`;
 	}
 
 	/**

@@ -20,7 +20,6 @@ import {
 	upperCaseFirstChar,
 } from '../../../functions';
 import { ModelManager } from './ModelManager';
-import type { HexColorString } from 'discord.js';
 import type { CreateOptions } from 'sequelize';
 import type { Player, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
 import type { HypixelGuild } from '../models/HypixelGuild';
@@ -170,7 +169,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		const { similarity, value } = this.#autocorrectToPlayer(ign);
 
-		return (similarity >= (this.client.config.get('AUTOCORRECT_THRESHOLD') as number))
+		return similarity >= (this.client.config.get('AUTOCORRECT_THRESHOLD'))
 			? value
 			: null;
 	}
@@ -233,7 +232,7 @@ export class PlayerManager extends ModelManager<Player> {
 			// the hypxiel api encountered an error before
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 				// reset error every full hour
-				if (new Date().getMinutes() >= (this.client.config.get('DATABASE_UPDATE_INTERVAL') as number)) {
+				if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 					logger.warn('[PLAYERS UPDATE XP]: auto updates disabled');
 					return this;
 				}
@@ -268,7 +267,7 @@ export class PlayerManager extends ModelManager<Player> {
 			// the hypxiel api encountered an error before
 			if (this.client.config.get('MOJANG_API_ERROR')) {
 				// reset error every full hour
-				if (new Date().getMinutes() >= (this.client.config.get('DATABASE_UPDATE_INTERVAL') as number)) {
+				if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 					logger.warn('[PLAYERS UPDATE IGNS]: auto updates disabled');
 					return this;
 				}
@@ -367,9 +366,9 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// auto competition starting
 		if (config.get('COMPETITION_SCHEDULED')) {
-			if (config.get('COMPETITION_START_TIME') as number - 10_000 > Date.now()) {
+			if (config.get('COMPETITION_START_TIME') - 10_000 > Date.now()) {
 				this.client.schedule('competitionStart', new CronJob({
-					cronTime: new Date(config.get('COMPETITION_START_TIME') as number),
+					cronTime: new Date(config.get('COMPETITION_START_TIME')),
 					onTick: () => this.#startCompetition(),
 					start: true,
 				}));
@@ -379,9 +378,9 @@ export class PlayerManager extends ModelManager<Player> {
 		}
 
 		// auto competition ending
-		if (config.get('COMPETITION_END_TIME') as number - 10_000 > Date.now()) {
+		if (config.get('COMPETITION_END_TIME') - 10_000 > Date.now()) {
 			this.client.schedule('competitionEnd', new CronJob({
-				cronTime: new Date(config.get('COMPETITION_END_TIME') as number),
+				cronTime: new Date(config.get('COMPETITION_END_TIME')),
 				onTick: () => this.#endCompetition(),
 				start: true,
 			}));
@@ -390,7 +389,7 @@ export class PlayerManager extends ModelManager<Player> {
 		}
 
 		// mayor change reset
-		const NEXT_MAYOR_TIME = config.get('LAST_MAYOR_XP_RESET_TIME') as number + MAYOR_CHANGE_INTERVAL;
+		const NEXT_MAYOR_TIME = config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
 		if (NEXT_MAYOR_TIME - 10_000 > Date.now()) {
 			this.client.schedule('mayorXpReset', new CronJob({
@@ -405,7 +404,7 @@ export class PlayerManager extends ModelManager<Player> {
 		const now = new Date();
 
 		// daily reset
-		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME') as number).getUTCDay() !== now.getUTCDay()) this.#performDailyXpReset();
+		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.#performDailyXpReset();
 
 		// each day at 00:00:00
 		this.client.schedule('dailyXpReset', new CronJob({
@@ -416,7 +415,7 @@ export class PlayerManager extends ModelManager<Player> {
 		}));
 
 		// weekly reset
-		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME') as number)) !== getWeekOfYear(now)) this.#performWeeklyXpReset();
+		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.#performWeeklyXpReset();
 
 		// each monday at 00:00:00
 		this.client.schedule('weeklyXpReset', new CronJob({
@@ -427,7 +426,7 @@ export class PlayerManager extends ModelManager<Player> {
 		}));
 
 		// monthly reset
-		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME') as number).getUTCMonth() !== now.getUTCMonth()) this.#performMonthlyXpReset();
+		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.#performMonthlyXpReset();
 
 		// the first of each month at 00:00:00
 		this.client.schedule('monthlyXpReset', new CronJob({
@@ -480,7 +479,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	async #performMayorXpReset() {
 		// if the bot skipped a mayor change readd the interval time
-		let currentMayorTime = this.client.config.get('LAST_MAYOR_XP_RESET_TIME') as number + MAYOR_CHANGE_INTERVAL;
+		let currentMayorTime = this.client.config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
 
 		await Promise.all([
@@ -560,7 +559,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
-			if (new Date().getMinutes() >= (this.client.config.get('DATABASE_UPDATE_INTERVAL') as number)) {
+			if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn('[PLAYERS UPDATE MAIN PROFILE]: API error');
 				return this;
 			}
@@ -613,7 +612,7 @@ export class PlayerManager extends ModelManager<Player> {
 		 */
 		const createEmbed = (guild: HypixelGuild | null, mainProfileChangesAmount: number) => {
 			const embed = new MessageEmbed()
-				.setColor(this.client.config.get('EMBED_RED') as HexColorString)
+				.setColor(this.client.config.get('EMBED_RED'))
 				.setTitle(`${guild == null ? 'Bridger' : upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${mainProfileChangesAmount !== 1 ? 's' : ''}`)
 				.setDescription(`Number of players: ${guild == null ? this.cache.filter(({ guildId }) => guildId === guild).size : guild.playerCount}`)
 				.setTimestamp();

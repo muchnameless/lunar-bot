@@ -2,7 +2,7 @@ import { MessageEmbed, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil, MessageEmbedUtil } from '../util';
 import { Event } from '../structures/events/Event';
-import type { DMChannel, GuildMember, HexColorString } from 'discord.js';
+import type { DMChannel, GuildMember } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 
 
@@ -37,8 +37,8 @@ export default class GuildMemberRemoveEvent extends Event {
 		this.client.log(
 			MessageEmbedUtil.padFields(
 				new MessageEmbed()
-					.setColor(this.config.get('EMBED_RED') as HexColorString)
-					.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
+					.setColor(this.config.get('EMBED_RED'))
+					.setAuthor(member.user.tag, member.displayAvatarURL({ dynamic: true }), player.url)
 					.setThumbnail((await player.imageURL)!)
 					.setDescription(stripIndents`
 						${member} left the discord server

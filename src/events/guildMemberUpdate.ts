@@ -4,7 +4,7 @@ import { GUILD_ID_BRIDGER } from '../constants';
 import { GuildMemberUtil } from '../util';
 import { logger } from '../functions';
 import { Event } from '../structures/events/Event';
-import type { GuildMember, HexColorString, Snowflake } from 'discord.js';
+import type { GuildMember } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 
 
@@ -25,7 +25,7 @@ export default class GuildMemberUpdateEvent extends Event {
 		if (newMember.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
 
 		// received bridger role -> update player db
-		if (newMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID') as Snowflake) && !oldMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID') as Snowflake)) {
+		if (newMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID')) && !oldMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID'))) {
 			const player = GuildMemberUtil.getPlayer(newMember) ?? await this.client.players.fetch({ discordId: newMember.id });
 
 			if (!player) return logger.info(`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`);
@@ -52,15 +52,15 @@ export default class GuildMemberUpdateEvent extends Event {
 		}
 
 		// changes in 'verified'-role
-		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID') as Snowflake;
+		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID');
 
 		if (oldMember.roles.cache.has(VERIFIED_ROLE_ID)) {
 			// member lost verified role -> log incident
 			if (!newMember.roles.cache.has(VERIFIED_ROLE_ID)) {
 				return this.client.log(
 					new MessageEmbed()
-						.setColor(this.config.get('EMBED_RED') as HexColorString)
-						.setAuthor(newMember.user.tag, newMember.user.displayAvatarURL({ dynamic: true }), player.url)
+						.setColor(this.config.get('EMBED_RED'))
+						.setAuthor(newMember.user.tag, newMember.displayAvatarURL({ dynamic: true }), player.url)
 						.setThumbnail((await player.imageURL)!)
 						.setDescription(stripIndents`
 							${newMember} lost ${newMember.guild.roles.cache.get(VERIFIED_ROLE_ID)} role

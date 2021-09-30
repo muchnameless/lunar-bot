@@ -107,7 +107,7 @@ export class SlashCommand extends BaseCommand {
 			type: Constants.ApplicationCommandPermissionTypes.USER,
 			permission: true,
 		}, {
-			id: this.config.get('DISCORD_GUILD_ID') as Snowflake, // deny for the guild @everyone role
+			id: this.config.get('DISCORD_GUILD_ID'), // deny for the guild @everyone role
 			type: Constants.ApplicationCommandPermissionTypes.ROLE,
 			permission: false,
 		}];

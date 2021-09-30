@@ -63,7 +63,7 @@ export class BridgeCommand extends BaseCommand {
 	 * prefix name usage
 	 */
 	get usageInfo() {
-		return `\`${(this.config.get('PREFIXES') as string[])[0]}${this.aliases?.[0].length ?? Number.POSITIVE_INFINITY < this.name.length ? this.aliases![0] : this.name}\` ${this.usage}`;
+		return `\`${this.config.get('PREFIXES')[0]}${this.aliases?.[0].length ?? Number.POSITIVE_INFINITY < this.name.length ? this.aliases![0] : this.name}\` ${this.usage}`;
 	}
 
 	/**

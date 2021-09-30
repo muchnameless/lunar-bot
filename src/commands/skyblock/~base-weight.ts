@@ -82,7 +82,7 @@ export default class BaseWeightCommand extends DualCommand {
 
 			({ value: profileName, similarity } = autocorrect(profileName, PROFILE_NAMES));
 
-			if (similarity < (this.config.get('AUTOCORRECT_THRESHOLD') as number)) {
+			if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) {
 				try {
 					await hypixelMessage.awaitConfirmation({
 						question: `'${upperCaseFirstChar(PROFILE_NAME_INPUT)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,

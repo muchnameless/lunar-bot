@@ -22,7 +22,7 @@ import { MessageCollector, MessageCollectorOptions } from '../MessageCollector';
 import { ChatManager } from './ChatManager';
 import { cache } from '../../../api/cache';
 import { cleanFormattedNumber, logger, splitMessage, trim } from '../../../functions';
-import type { HexColorString, Message } from 'discord.js';
+import type { Message } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
 import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
@@ -333,16 +333,16 @@ export class MinecraftChatManager<loggedIn extends boolean> extends ChatManager 
 
 				const { infractions } = player;
 
-				if (infractions >= (this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS') as number)) {
-					const MUTE_DURATION = ms(this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION') as number, { long: true });
+				if (infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+					const MUTE_DURATION = ms(this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION'), { long: true });
 
 					this.client.log(
 						new MessageEmbed()
-							.setColor(this.client.config.get('EMBED_RED') as HexColorString)
-							.setAuthor(discordMessage.author.tag, discordMessage.author.displayAvatarURL({ dynamic: true }), player.url)
+							.setColor(this.client.config.get('EMBED_RED'))
+							.setAuthor(discordMessage.author.tag, (discordMessage.member ?? discordMessage.author).displayAvatarURL({ dynamic: true }), player.url)
 							.setThumbnail((await player.imageURL)!)
 							.setDescription(stripIndents`
-								${Formatters.bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions in the last ${ms(this.client.config.get('INFRACTIONS_EXPIRATION_TIME') as number, { long: true })}
+								${Formatters.bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions in the last ${ms(this.client.config.get('INFRACTIONS_EXPIRATION_TIME'), { long: true })}
 								${player.info}
 							`)
 							.setTimestamp(),
@@ -845,7 +845,7 @@ export class MinecraftChatManager<loggedIn extends boolean> extends ChatManager 
 	async command(options: CommandOptions & { raw: true }): Promise<HypixelMessage[]>;
 	async command(options: CommandOptions): Promise<string>;
 	async command(options: any) {
-		const { command, responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.get('INGAME_RESPONSE_TIMEOUT') as number, rejectOnTimeout = false, rejectOnAbort = false } = typeof options === 'string'
+		const { command, responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.get('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false, rejectOnAbort = false } = typeof options === 'string'
 			? { command: options }
 			: options;
 		await this.#commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)

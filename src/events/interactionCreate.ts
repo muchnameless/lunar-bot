@@ -47,7 +47,7 @@ export default class InteractionCreateEvent extends Event {
 		// command cooldowns
 		if (command.timestamps) {
 			const NOW = Date.now();
-			const COOLDOWN_TIME = (command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT') as number) * 1_000;
+			const COOLDOWN_TIME = (command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000;
 
 			if (command.timestamps.has(interaction.user.id)) {
 				const EXPIRATION_TIME = command.timestamps.get(interaction.user.id)! + COOLDOWN_TIME;

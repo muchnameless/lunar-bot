@@ -31,7 +31,6 @@ import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api/cache';
 import type {
 	ButtonInteraction,
-	HexColorString,
 	Interaction,
 	SelectMenuInteraction,
 	Snowflake,
@@ -204,9 +203,9 @@ function createActionRows(client: LunarClient, cacheKey: string, { page, lbType,
  * @param config
  */
 export function getDefaultOffset(config: ConfigManager) {
-	return (config.get('COMPETITION_RUNNING') || (Date.now() - (config.get('COMPETITION_END_TIME') as number) >= 0 && Date.now() - (config.get('COMPETITION_END_TIME') as number) <= 24 * 60 * 60 * 1_000)
+	return (config.get('COMPETITION_RUNNING') || (Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1_000)
 		? OFFSET_FLAGS.COMPETITION_START
-		: config.get('DEFAULT_XP_OFFSET') as string);
+		: config.get('DEFAULT_XP_OFFSET'));
 }
 
 /**
@@ -236,7 +235,7 @@ export async function handleLeaderboardCommandInteraction(interaction: Interacti
 	await cache.set(
 		CACHE_KEY,
 		embeds.map(embed => embed.toJSON?.() ?? embed),
-		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') as number * 60_000,
+		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
 	);
 }
 
@@ -303,7 +302,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 	if (IS_RELOAD) await cache.set(
 		CACHE_KEY,
 		embeds.map(embed => embed.toJSON?.() ?? embed),
-		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') as number * 60_000,
+		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
 	);
 }
 
@@ -379,7 +378,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 	await cache.set(
 		CACHE_KEY,
 		embeds.map(embed => embed.toJSON?.() ?? embed),
-		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') as number * 60_000,
+		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
 	);
 }
 
@@ -390,7 +389,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
  */
 function createLeaderboardEmbeds(client: LunarClient, { title, description, playerData, playerRequestingEntry, getEntry, isCompetition, lastUpdatedAt }: LeaderboardData) {
 	const { config } = client;
-	const ELEMENTS_PER_PAGE = config.get('ELEMENTS_PER_PAGE') as number;
+	const ELEMENTS_PER_PAGE = config.get('ELEMENTS_PER_PAGE');
 	const PLAYER_COUNT = playerData.length;
 	const PAGES_TOTAL = PLAYER_COUNT
 		? Math.ceil(PLAYER_COUNT / ELEMENTS_PER_PAGE)
@@ -414,7 +413,7 @@ function createLeaderboardEmbeds(client: LunarClient, { title, description, play
 		}
 
 		embeds.push(new MessageEmbed()
-			.setColor(config.get('EMBED_BLUE') as HexColorString)
+			.setColor(config.get('EMBED_BLUE'))
 			.setTitle(title)
 			.setDescription(stripIndent`
 				${description}
@@ -474,14 +473,14 @@ function getPlayerData(client: LunarClient, hypixelGuild: HypixelGuild | typeof 
  */
 function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, offset, xpType }: LeaderboardArgs) {
 	const { config } = client;
-	const COMPETITION_RUNNING = config.get('COMPETITION_RUNNING') as boolean;
-	const COMPETITION_END_TIME = config.get('COMPETITION_END_TIME') as number;
+	const COMPETITION_RUNNING = config.get('COMPETITION_RUNNING');
+	const COMPETITION_END_TIME = config.get('COMPETITION_END_TIME');
 	const IS_COMPETITION_LB = offset === OFFSET_FLAGS.COMPETITION_START;
 	const SHOULD_USE_COMPETITION_END = !COMPETITION_RUNNING && IS_COMPETITION_LB;
 	const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END
 		? OFFSET_FLAGS.COMPETITION_END
 		: '';
-	const NUMBER_FORMAT = config.get('NUMBER_FORMAT') as string;
+	const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
 
 	let playerData: PlayerData[];
 	let totalStats;
@@ -534,7 +533,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			title = `${hypixelGuild || ''} Purge List (${config.get('PURGE_LIST_OFFSET')} days interval)`;
 			dataConverter = (player) => {
 				const { totalWeight } = player.getSenitherWeight();
-				const startIndex = player.alchemyXpHistory.length - 1 - (config.get('PURGE_LIST_OFFSET') as number);
+				const startIndex = player.alchemyXpHistory.length - 1 - config.get('PURGE_LIST_OFFSET');
 				// use weight from the first time they got alch xp, assume player has not been tracked before
 				const XP_TRACKING_START = player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0);
 				const { totalWeight: totalWeightOffet } = player.getSenitherWeightHistory(XP_TRACKING_START);
@@ -616,12 +615,12 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 
 	if (xpType !== 'purge') {
 		if (IS_COMPETITION_LB) {
-			description += `Start: ${Formatters.time(new Date(config.get(XP_OFFSETS_TIME[offset]) as number))}\n`;
+			description += `Start: ${Formatters.time(new Date(config.get(XP_OFFSETS_TIME[offset])))}\n`;
 			description += COMPETITION_RUNNING
 				? `Ends: ${Formatters.time(new Date(COMPETITION_END_TIME), Formatters.TimestampStyles.RelativeTime)}\n`
 				: `Ended: ${Formatters.time(new Date(COMPETITION_END_TIME))}\n`;
 		} else {
-			description += `Tracking xp gained since ${Formatters.time(new Date(config.get(XP_OFFSETS_TIME[offset]) as number))}\n`;
+			description += `Tracking xp gained since ${Formatters.time(new Date(config.get(XP_OFFSETS_TIME[offset])))}\n`;
 		}
 
 		description += `${typeof hypixelGuild === 'string' ? 'Guilds' : hypixelGuild.name} total (${playerData.length} members): ${totalStats}`;
@@ -694,7 +693,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
  */
 function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, offset = '', xpType }: LeaderboardArgs) {
 	const { config } = client;
-	const NUMBER_FORMAT = config.get('NUMBER_FORMAT') as string;
+	const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
 
 	let playerData: PlayerData[];
 	let totalStats;

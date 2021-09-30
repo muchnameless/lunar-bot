@@ -24,7 +24,7 @@ export default class RanksCommand extends SlashCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
-		const player = InteractionUtil.getPlayer(interaction, true);
+		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true });
 		const embed = this.client.defaultEmbed;
 
 		// no player

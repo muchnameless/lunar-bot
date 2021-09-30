@@ -15,15 +15,15 @@ type TaxCollectorCreationAttributes = Optional<TaxCollectorAttributes, 'isCollec
 
 
 export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCreationAttributes> implements TaxCollectorAttributes {
-	declare public client: LunarClient;;
+	declare client: LunarClient;;
 
-	declare public minecraftUuid: string;
-	declare public isCollecting: boolean;
-	declare public collectedTax: number;
-	declare public collectedDonations: number;
+	declare minecraftUuid: string;
+	declare isCollecting: boolean;
+	declare collectedTax: number;
+	declare collectedDonations: number;
 
-	declare public readonly createdAt: Date;
-	declare public readonly updatedAt: Date;
+	declare readonly createdAt: Date;
+	declare readonly updatedAt: Date;
 
 	static initialize(sequelize: Sequelize) {
 		return this.init({

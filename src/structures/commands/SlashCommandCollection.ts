@@ -66,7 +66,7 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 		}
 
 		return this.client.application!.commands.permissions.set({
-			guild: this.client.config.get('DISCORD_GUILD_ID') as Snowflake,
+			guild: this.client.config.get('DISCORD_GUILD_ID'),
 			fullPermissions,
 		});
 	}
@@ -105,7 +105,7 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 		const { permissions } = command;
 
 		if (permissions?.length) {
-			const DISCORD_GUILD_ID = this.client.config.get('DISCORD_GUILD_ID') as Snowflake;
+			const DISCORD_GUILD_ID = this.client.config.get('DISCORD_GUILD_ID');
 
 			for (const applicationCommand of applicationCommands) {
 				await this.client.application!.commands.permissions.set({

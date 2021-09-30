@@ -2,7 +2,7 @@ import { MessageEmbed } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '../util';
 import { Event } from '../structures/events/Event';
-import type { GuildMember, HexColorString, Snowflake } from 'discord.js';
+import type { GuildMember } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 
 
@@ -33,14 +33,14 @@ export default class GuildMemberAddEvent extends Event {
 			${player.info}
 		`;
 
-		if (!member.roles.cache.has(this.config.get('VERIFIED_ROLE_ID') as Snowflake)) {
-			description += `\n\nwaiting for ${member.guild.roles.cache.get(this.config.get('VERIFIED_ROLE_ID') as Snowflake) ?? this.config.get('VERIFIED_ROLE_ID') as Snowflake} role`;
+		if (!member.roles.cache.has(this.config.get('VERIFIED_ROLE_ID'))) {
+			description += `\n\nwaiting for ${member.guild.roles.cache.get(this.config.get('VERIFIED_ROLE_ID')) ?? this.config.get('VERIFIED_ROLE_ID')} role`;
 		}
 
 		this.client.log(
 			new MessageEmbed()
-				.setColor(this.config.get('EMBED_GREEN') as HexColorString)
-				.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), player.url)
+				.setColor(this.config.get('EMBED_GREEN'))
+				.setAuthor(member.user.tag, member.displayAvatarURL({ dynamic: true }), player.url)
 				.setThumbnail((await player.imageURL)!)
 				.setDescription(description)
 				.setTimestamp(),

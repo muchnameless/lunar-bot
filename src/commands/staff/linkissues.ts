@@ -3,7 +3,7 @@ import { Formatters, Util } from 'discord.js';
 import { GuildUtil, InteractionUtil } from '../../util';
 import { escapeIgn } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, GuildMember, Snowflake } from 'discord.js';
+import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
@@ -23,8 +23,8 @@ export default class LinkIssuesCommand extends SlashCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		// discord members with wrong roles
-		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID') as Snowflake;
-		const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID') as Snowflake;
+		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID');
+		const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
 		const missingVerifiedRole: GuildMember[] = [];
 		const guildRoleWithoutDbEntry: GuildMember[] = [];
 

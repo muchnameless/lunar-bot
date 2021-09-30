@@ -11,11 +11,11 @@ interface ConfigAttributes {
 
 
 export class Config extends Model<ConfigAttributes> {
-	declare public client: LunarClient;;
+	declare client: LunarClient;
 
-	declare public key: string;
-	declare public value: string | null;
-	public parsedValue: unknown;
+	declare key: string;
+	declare value: string | null;
+	parsedValue: unknown;
 
 	constructor(...args: any[]) {
 		super(...args);

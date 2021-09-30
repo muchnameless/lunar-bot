@@ -30,6 +30,7 @@ export default class ExecCommand extends SlashCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		try {
+			const me = (interaction.guild ?? this.client.lgGuild)?.me ?? null;
 			const INPUT = interaction.options.getString('input', true);
 			const { stdout, stderr } = await promisify(exec)(INPUT);
 			const responseEmbed = this.client.defaultEmbed
@@ -37,7 +38,7 @@ export default class ExecCommand extends SlashCommand {
 					name: 'Input',
 					value: Formatters.codeBlock('bash', INPUT),
 				})
-				.setFooter(interaction.guild?.me!.displayName ?? this.client.user!.username, this.client.user!.displayAvatarURL());
+				.setFooter(me?.displayName ?? this.client.user!.username, (me ?? this.client.user!).displayAvatarURL());
 
 			if (stdout) {
 				logger.info(stdout);

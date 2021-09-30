@@ -9,7 +9,7 @@ import { EventCollection } from './events/EventCollection';
 import { UserUtil } from '../util';
 import { cache } from '../api/cache';
 import { logger } from '../functions';
-import type { ClientOptions, HexColorString, MessageOptions, Snowflake } from 'discord.js';
+import type { ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 import type { CronJob } from 'cron';
 import type { db } from './database';
 
@@ -69,7 +69,7 @@ export class LunarClient extends Client {
 	 */
 	get defaultEmbed() {
 		return new MessageEmbed({
-			color: this.config.get('EMBED_BLUE') as HexColorString,
+			color: this.config.get('EMBED_BLUE'),
 			timestamp: Date.now(),
 		});
 	}
@@ -79,7 +79,7 @@ export class LunarClient extends Client {
 	 * @returns lunar guard discord guild
 	 */
 	get lgGuild() {
-		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID') as Snowflake);
+		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'));
 		return lgGuild?.available ? lgGuild : logger.warn('discord guild is currently unavailable');
 	}
 
@@ -195,7 +195,7 @@ export class LunarClient extends Client {
 		const [ BEFORE_DOT, AFTER_DOT ] = number.toFixed(2).split('.');
 
 		return `${Number(BEFORE_DOT)
-			.toLocaleString(this.config.get('NUMBER_FORMAT') as string)
+			.toLocaleString(this.config.get('NUMBER_FORMAT'))
 			.padStart(paddingAmount, ' ')
 		}.${AFTER_DOT}`;
 	}
@@ -208,7 +208,7 @@ export class LunarClient extends Client {
 	 */
 	formatNumber(number: number, paddingAmount = 0, converterFunction: (input: number) => number = x => x) {
 		return converterFunction(number)
-			.toLocaleString(this.config.get('NUMBER_FORMAT') as string)
+			.toLocaleString(this.config.get('NUMBER_FORMAT'))
 			.replace(',', '.')
 			.padStart(paddingAmount, ' ');
 	}

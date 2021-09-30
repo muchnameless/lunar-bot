@@ -27,16 +27,8 @@ export default class TrackCommand extends SlashCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		const type = interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION') as string;
-		const player = InteractionUtil.getPlayer(interaction, true);
-
-		if (!player) {
-			return await InteractionUtil.reply(interaction, oneLine`${interaction.options.get('player')
-				? `\`${interaction.options.getString('player')}\` is`
-				: 'you are'
-			} not in the player db`);
-		}
-
+		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
+		const type = interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION');
 		const days = 30;
 
 		let datasets;

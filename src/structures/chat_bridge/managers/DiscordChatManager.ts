@@ -9,7 +9,6 @@ import { imgur } from '../../../api/imgur';
 import { logger } from '../../../functions';
 import type {
 	Collection,
-	HexColorString,
 	Message,
 	MessageAttachment,
 	MessageCollectorOptions,
@@ -96,7 +95,7 @@ export class DiscordChatManager extends ChatManager {
 
 		for (const { contentType, url, size } of attachments.values()) {
 			// only images can be uploaded by URL https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
-			if (!hasError && (this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE') as string[]).some(type => contentType?.startsWith(type)) && size <= 1e7) {
+			if (!hasError && this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType?.startsWith(type)) && size <= 1e7) {
 				try {
 					ret.push((await imgur.upload(url)).data.link);
 				} catch (error) {
@@ -120,7 +119,7 @@ export class DiscordChatManager extends ChatManager {
 	 * @param player
 	 * @param content
 	 */
-	static async #dmMuteInfo(message: Message, player: Player, content: string) {
+	static async #dmMuteInfo(message: Message, player: Player | null, content: string) {
 		if (message.editable) return; // message was sent by the bot
 		if (await cache.get(`chatbridge:muted:dm:${message.author.id}`)) return;
 
@@ -187,10 +186,10 @@ export class DiscordChatManager extends ChatManager {
 			if (webhooks.size) {
 				this.webhook = webhooks.first() ?? null;
 			} else {
-				this.webhook = await channel.createWebhook('chat bridge', { avatar: this.client.user!.displayAvatarURL(), reason: 'no webhooks in chat bridge channel found' });
+				this.webhook = await channel.createWebhook('chat bridge', { avatar: (channel.guild?.me ?? this.client.user!).displayAvatarURL(), reason: 'no webhooks in chat bridge channel found' });
 
 				this.client.log(new MessageEmbed()
-					.setColor(this.client.config.get('EMBED_GREEN') as HexColorString)
+					.setColor(this.client.config.get('EMBED_GREEN'))
 					.setTitle(`${this.hypixelGuild.name} Chat Bridge`)
 					.setDescription(`${Formatters.bold('Webhook')}: created in ${channel}`)
 					.setTimestamp(),
@@ -203,7 +202,7 @@ export class DiscordChatManager extends ChatManager {
 		} catch (error) {
 			if (error instanceof WebhookError) {
 				this.client.log(new MessageEmbed()
-					.setColor(this.client.config.get('EMBED_RED') as HexColorString)
+					.setColor(this.client.config.get('EMBED_RED'))
 					.setTitle(error.hypixelGuild ? `${error.hypixelGuild.name} Chat Bridge` : 'Chat Bridge')
 					.setDescription(`${Formatters.bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
 					.setTimestamp(),
@@ -228,6 +227,9 @@ export class DiscordChatManager extends ChatManager {
 	 * sends a message via the chatBridge webhook
 	 * @param contentOrOptions
 	 */
+	async sendViaWebhook(contentOrOptions: string): Promise<Message>;
+	async sendViaWebhook(contentOrOptions: WebhookMessageOptions & { content: string }): Promise<Message>;
+	async sendViaWebhook(contentOrOptions: WebhookMessageOptions & { content?: undefined }): Promise<null>;
 	async sendViaWebhook(contentOrOptions: string | WebhookMessageOptions) {
 		if (!this.chatBridge.enabled || !this.isReady()) return null;
 
@@ -262,7 +264,7 @@ export class DiscordChatManager extends ChatManager {
 	 * sends a message via the bot in the chatBridge channel
 	 * @param contentOrOptions
 	 */
-	async sendViaBot(contentOrOptions: string | { content: string, prefix: string; hypixelMessage: HypixelMessage; options: MessageOptions; }) {
+	async sendViaBot(contentOrOptions: string | MessageOptions & { content: string, prefix?: string; hypixelMessage?: HypixelMessage; }) {
 		if (!this.chatBridge.enabled) return null;
 
 		const { content, prefix = '', hypixelMessage = null, ...options } = typeof contentOrOptions === 'string'
@@ -271,7 +273,7 @@ export class DiscordChatManager extends ChatManager {
 
 		await this.queue.wait();
 
-		const discordMessage = await hypixelMessage?.discordMessage.catch(logger.error) ?? null;
+		const discordMessage = await hypixelMessage?.discordMessage.catch(logger.error);
 
 		try {
 			return await ChannelUtil.send(this.channel, {
@@ -306,7 +308,7 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// check if the player is auto muted
-		if (player?.infractions >= (this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS') as number)) {
+		if (player?.infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 			DiscordChatManager.#dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}

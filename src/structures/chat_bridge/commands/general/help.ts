@@ -33,7 +33,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 		// default help
 		if (!hypixelMessage.commandData!.args.length) {
 			const reply = [
-				`Guild chat prefix: ${[ ...this.config.get('PREFIXES') as string[], `@${hypixelMessage.chatBridge.bot!.username}` ].join(', ')}`,
+				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${hypixelMessage.chatBridge.bot!.username}` ].join(', ')}`,
 				...this.collection.visibleCategories.map(category => `${category}: ${HelpBridgeCommand.#listCommands(this.collection.filterByCategory(category))}`),
 			];
 
@@ -83,7 +83,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 		if (command.description) reply.push(`Description: ${command.description}`);
 		if (command.usage) reply.push(`Usage: ${command.usageInfo}`);
 
-		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT') as number) * 1_000, { long: true })}`);
+		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
 		return hypixelMessage.author!.send(reply.join('\n'));
 	}

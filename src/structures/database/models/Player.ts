@@ -46,7 +46,7 @@ import {
 	validateNumber,
 } from '../../../functions';
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
-import type { Collection, HexColorString, Role, Snowflake } from 'discord.js';
+import type { Collection, Role, Snowflake } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
 import type { HypixelGuild } from './HypixelGuild';
 import type { TransactionAttributes } from './Transaction';
@@ -118,184 +118,184 @@ type PlayerCreationAttributes = Optional<PlayerAttributes, 'ign' | 'discordId' |
 
 
 export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> implements PlayerAttributes {
-	declare public client: LunarClient;;
+	declare client: LunarClient;;
 
-	declare public minecraftUuid: string;
-	declare public ign: string;
-	declare public discordId: string | null;
-	declare public guildId: string | null;
-	declare public guildRankPriority: number;
-	declare public inDiscord: boolean;
-	declare public mutedTill: number;
+	declare minecraftUuid: string;
+	declare ign: string;
+	declare discordId: string | null;
+	declare guildId: string | null;
+	declare guildRankPriority: number;
+	declare inDiscord: boolean;
+	declare mutedTill: number;
 	declare _infractions: number[] | null;
-	declare public hasDiscordPingPermission: boolean;
-	declare public notes: string | null;
-	declare public paid: boolean;
-	declare public mainProfileId: string | null;
-	declare public mainProfileName: string | null;
-	declare public xpLastUpdatedAt: number | null;
-	declare public xpUpdatesDisabled: boolean;
-	declare public discordMemberUpdatesDisabled: boolean;
-	declare public farmingLvlCap: number;
-	declare public guildXpDay: string | null;
-	declare public guildXpDaily: number;
+	declare hasDiscordPingPermission: boolean;
+	declare notes: string | null;
+	declare paid: boolean;
+	declare mainProfileId: string | null;
+	declare mainProfileName: string | null;
+	declare xpLastUpdatedAt: number | null;
+	declare xpUpdatesDisabled: boolean;
+	declare discordMemberUpdatesDisabled: boolean;
+	declare farmingLvlCap: number;
+	declare guildXpDay: string | null;
+	declare guildXpDaily: number;
 
-	declare public tamingXp: number;
-	declare public farmingXp: number;
-	declare public miningXp: number;
-	declare public combatXp: number;
-	declare public foragingXp: number;
-	declare public fishingXp: number;
-	declare public enchantingXp: number;
-	declare public alchemyXp: number;
-	declare public carpentryXp: number;
-	declare public runecraftingXp: number;
-	declare public zombieXp: number;
-	declare public spiderXp: number;
-	declare public wolfXp: number;
-	declare public endermanXp: number;
-	declare public catacombsXp: number;
-	declare public healerXp: number;
-	declare public mageXp: number;
-	declare public berserkXp: number;
-	declare public archerXp: number;
-	declare public tankXp: number;
-	declare public guildXp: number;
+	declare tamingXp: number;
+	declare farmingXp: number;
+	declare miningXp: number;
+	declare combatXp: number;
+	declare foragingXp: number;
+	declare fishingXp: number;
+	declare enchantingXp: number;
+	declare alchemyXp: number;
+	declare carpentryXp: number;
+	declare runecraftingXp: number;
+	declare zombieXp: number;
+	declare spiderXp: number;
+	declare wolfXp: number;
+	declare endermanXp: number;
+	declare catacombsXp: number;
+	declare healerXp: number;
+	declare mageXp: number;
+	declare berserkXp: number;
+	declare archerXp: number;
+	declare tankXp: number;
+	declare guildXp: number;
 
-	declare public tamingXpHistory: number[];
-	declare public farmingXpHistory: number[];
-	declare public miningXpHistory: number[];
-	declare public combatXpHistory: number[];
-	declare public foragingXpHistory: number[];
-	declare public fishingXpHistory: number[];
-	declare public enchantingXpHistory: number[];
-	declare public alchemyXpHistory: number[];
-	declare public carpentryXpHistory: number[];
-	declare public runecraftingXpHistory: number[];
-	declare public zombieXpHistory: number[];
-	declare public spiderXpHistory: number[];
-	declare public wolfXpHistory: number[];
-	declare public endermanXpHistory: number[];
-	declare public catacombsXpHistory: number[];
-	declare public healerXpHistory: number[];
-	declare public mageXpHistory: number[];
-	declare public berserkXpHistory: number[];
-	declare public archerXpHistory: number[];
-	declare public tankXpHistory: number[];
-	declare public guildXpHistory: number[];
+	declare tamingXpHistory: number[];
+	declare farmingXpHistory: number[];
+	declare miningXpHistory: number[];
+	declare combatXpHistory: number[];
+	declare foragingXpHistory: number[];
+	declare fishingXpHistory: number[];
+	declare enchantingXpHistory: number[];
+	declare alchemyXpHistory: number[];
+	declare carpentryXpHistory: number[];
+	declare runecraftingXpHistory: number[];
+	declare zombieXpHistory: number[];
+	declare spiderXpHistory: number[];
+	declare wolfXpHistory: number[];
+	declare endermanXpHistory: number[];
+	declare catacombsXpHistory: number[];
+	declare healerXpHistory: number[];
+	declare mageXpHistory: number[];
+	declare berserkXpHistory: number[];
+	declare archerXpHistory: number[];
+	declare tankXpHistory: number[];
+	declare guildXpHistory: number[];
 
-	declare public tamingXpCompetitionStart: number;
-	declare public farmingXpCompetitionStart: number;
-	declare public miningXpCompetitionStart: number;
-	declare public combatXpCompetitionStart: number;
-	declare public foragingXpCompetitionStart: number;
-	declare public fishingXpCompetitionStart: number;
-	declare public enchantingXpCompetitionStart: number;
-	declare public alchemyXpCompetitionStart: number;
-	declare public carpentryXpCompetitionStart: number;
-	declare public runecraftingXpCompetitionStart: number;
-	declare public zombieXpCompetitionStart: number;
-	declare public spiderXpCompetitionStart: number;
-	declare public wolfXpCompetitionStart: number;
-	declare public endermanXpCompetitionStart: number;
-	declare public catacombsXpCompetitionStart: number;
-	declare public healerXpCompetitionStart: number;
-	declare public mageXpCompetitionStart: number;
-	declare public berserkXpCompetitionStart: number;
-	declare public archerXpCompetitionStart: number;
-	declare public tankXpCompetitionStart: number;
-	declare public guildXpCompetitionStart: number;
+	declare tamingXpCompetitionStart: number;
+	declare farmingXpCompetitionStart: number;
+	declare miningXpCompetitionStart: number;
+	declare combatXpCompetitionStart: number;
+	declare foragingXpCompetitionStart: number;
+	declare fishingXpCompetitionStart: number;
+	declare enchantingXpCompetitionStart: number;
+	declare alchemyXpCompetitionStart: number;
+	declare carpentryXpCompetitionStart: number;
+	declare runecraftingXpCompetitionStart: number;
+	declare zombieXpCompetitionStart: number;
+	declare spiderXpCompetitionStart: number;
+	declare wolfXpCompetitionStart: number;
+	declare endermanXpCompetitionStart: number;
+	declare catacombsXpCompetitionStart: number;
+	declare healerXpCompetitionStart: number;
+	declare mageXpCompetitionStart: number;
+	declare berserkXpCompetitionStart: number;
+	declare archerXpCompetitionStart: number;
+	declare tankXpCompetitionStart: number;
+	declare guildXpCompetitionStart: number;
 
-	declare public tamingXpCompetitionEnd: number;
-	declare public farmingXpCompetitionEnd: number;
-	declare public miningXpCompetitionEnd: number;
-	declare public combatXpCompetitionEnd: number;
-	declare public foragingXpCompetitionEnd: number;
-	declare public fishingXpCompetitionEnd: number;
-	declare public enchantingXpCompetitionEnd: number;
-	declare public alchemyXpCompetitionEnd: number;
-	declare public carpentryXpCompetitionEnd: number;
-	declare public runecraftingXpCompetitionEnd: number;
-	declare public zombieXpCompetitionEnd: number;
-	declare public spiderXpCompetitionEnd: number;
-	declare public wolfXpCompetitionEnd: number;
-	declare public endermanXpCompetitionEnd: number;
-	declare public catacombsXpCompetitionEnd: number;
-	declare public healerXpCompetitionEnd: number;
-	declare public mageXpCompetitionEnd: number;
-	declare public berserkXpCompetitionEnd: number;
-	declare public archerXpCompetitionEnd: number;
-	declare public tankXpCompetitionEnd: number;
-	declare public guildXpCompetitionEnd: number;
+	declare tamingXpCompetitionEnd: number;
+	declare farmingXpCompetitionEnd: number;
+	declare miningXpCompetitionEnd: number;
+	declare combatXpCompetitionEnd: number;
+	declare foragingXpCompetitionEnd: number;
+	declare fishingXpCompetitionEnd: number;
+	declare enchantingXpCompetitionEnd: number;
+	declare alchemyXpCompetitionEnd: number;
+	declare carpentryXpCompetitionEnd: number;
+	declare runecraftingXpCompetitionEnd: number;
+	declare zombieXpCompetitionEnd: number;
+	declare spiderXpCompetitionEnd: number;
+	declare wolfXpCompetitionEnd: number;
+	declare endermanXpCompetitionEnd: number;
+	declare catacombsXpCompetitionEnd: number;
+	declare healerXpCompetitionEnd: number;
+	declare mageXpCompetitionEnd: number;
+	declare berserkXpCompetitionEnd: number;
+	declare archerXpCompetitionEnd: number;
+	declare tankXpCompetitionEnd: number;
+	declare guildXpCompetitionEnd: number;
 
-	declare public tamingXpOffsetMayor: number;
-	declare public farmingXpOffsetMayor: number;
-	declare public miningXpOffsetMayor: number;
-	declare public combatXpOffsetMayor: number;
-	declare public foragingXpOffsetMayor: number;
-	declare public fishingXpOffsetMayor: number;
-	declare public enchantingXpOffsetMayor: number;
-	declare public alchemyXpOffsetMayor: number;
-	declare public carpentryXpOffsetMayor: number;
-	declare public runecraftingXpOffsetMayor: number;
-	declare public zombieXpOffsetMayor: number;
-	declare public spiderXpOffsetMayor: number;
-	declare public wolfXpOffsetMayor: number;
-	declare public endermanXpOffsetMayor: number;
-	declare public catacombsXpOffsetMayor: number;
-	declare public healerXpOffsetMayor: number;
-	declare public mageXpOffsetMayor: number;
-	declare public berserkXpOffsetMayor: number;
-	declare public archerXpOffsetMayor: number;
-	declare public tankXpOffsetMayor: number;
-	declare public guildXpOffsetMayor: number;
+	declare tamingXpOffsetMayor: number;
+	declare farmingXpOffsetMayor: number;
+	declare miningXpOffsetMayor: number;
+	declare combatXpOffsetMayor: number;
+	declare foragingXpOffsetMayor: number;
+	declare fishingXpOffsetMayor: number;
+	declare enchantingXpOffsetMayor: number;
+	declare alchemyXpOffsetMayor: number;
+	declare carpentryXpOffsetMayor: number;
+	declare runecraftingXpOffsetMayor: number;
+	declare zombieXpOffsetMayor: number;
+	declare spiderXpOffsetMayor: number;
+	declare wolfXpOffsetMayor: number;
+	declare endermanXpOffsetMayor: number;
+	declare catacombsXpOffsetMayor: number;
+	declare healerXpOffsetMayor: number;
+	declare mageXpOffsetMayor: number;
+	declare berserkXpOffsetMayor: number;
+	declare archerXpOffsetMayor: number;
+	declare tankXpOffsetMayor: number;
+	declare guildXpOffsetMayor: number;
 
-	declare public tamingXpOffsetWeek: number;
-	declare public farmingXpOffsetWeek: number;
-	declare public miningXpOffsetWeek: number;
-	declare public combatXpOffsetWeek: number;
-	declare public foragingXpOffsetWeek: number;
-	declare public fishingXpOffsetWeek: number;
-	declare public enchantingXpOffsetWeek: number;
-	declare public alchemyXpOffsetWeek: number;
-	declare public carpentryXpOffsetWeek: number;
-	declare public runecraftingXpOffsetWeek: number;
-	declare public zombieXpOffsetWeek: number;
-	declare public spiderXpOffsetWeek: number;
-	declare public wolfXpOffsetWeek: number;
-	declare public endermanXpOffsetWeek: number;
-	declare public catacombsXpOffsetWeek: number;
-	declare public healerXpOffsetWeek: number;
-	declare public mageXpOffsetWeek: number;
-	declare public berserkXpOffsetWeek: number;
-	declare public archerXpOffsetWeek: number;
-	declare public tankXpOffsetWeek: number;
-	declare public guildXpOffsetWeek: number;
+	declare tamingXpOffsetWeek: number;
+	declare farmingXpOffsetWeek: number;
+	declare miningXpOffsetWeek: number;
+	declare combatXpOffsetWeek: number;
+	declare foragingXpOffsetWeek: number;
+	declare fishingXpOffsetWeek: number;
+	declare enchantingXpOffsetWeek: number;
+	declare alchemyXpOffsetWeek: number;
+	declare carpentryXpOffsetWeek: number;
+	declare runecraftingXpOffsetWeek: number;
+	declare zombieXpOffsetWeek: number;
+	declare spiderXpOffsetWeek: number;
+	declare wolfXpOffsetWeek: number;
+	declare endermanXpOffsetWeek: number;
+	declare catacombsXpOffsetWeek: number;
+	declare healerXpOffsetWeek: number;
+	declare mageXpOffsetWeek: number;
+	declare berserkXpOffsetWeek: number;
+	declare archerXpOffsetWeek: number;
+	declare tankXpOffsetWeek: number;
+	declare guildXpOffsetWeek: number;
 
-	declare public tamingXpOffsetMonth: number;
-	declare public farmingXpOffsetMonth: number;
-	declare public miningXpOffsetMonth: number;
-	declare public combatXpOffsetMonth: number;
-	declare public foragingXpOffsetMonth: number;
-	declare public fishingXpOffsetMonth: number;
-	declare public enchantingXpOffsetMonth: number;
-	declare public alchemyXpOffsetMonth: number;
-	declare public carpentryXpOffsetMonth: number;
-	declare public runecraftingXpOffsetMonth: number;
-	declare public zombieXpOffsetMonth: number;
-	declare public spiderXpOffsetMonth: number;
-	declare public wolfXpOffsetMonth: number;
-	declare public endermanXpOffsetMonth: number;
-	declare public catacombsXpOffsetMonth: number;
-	declare public healerXpOffsetMonth: number;
-	declare public mageXpOffsetMonth: number;
-	declare public berserkXpOffsetMonth: number;
-	declare public archerXpOffsetMonth: number;
-	declare public tankXpOffsetMonth: number;
-	declare public guildXpOffsetMonth: number;
+	declare tamingXpOffsetMonth: number;
+	declare farmingXpOffsetMonth: number;
+	declare miningXpOffsetMonth: number;
+	declare combatXpOffsetMonth: number;
+	declare foragingXpOffsetMonth: number;
+	declare fishingXpOffsetMonth: number;
+	declare enchantingXpOffsetMonth: number;
+	declare alchemyXpOffsetMonth: number;
+	declare carpentryXpOffsetMonth: number;
+	declare runecraftingXpOffsetMonth: number;
+	declare zombieXpOffsetMonth: number;
+	declare spiderXpOffsetMonth: number;
+	declare wolfXpOffsetMonth: number;
+	declare endermanXpOffsetMonth: number;
+	declare catacombsXpOffsetMonth: number;
+	declare healerXpOffsetMonth: number;
+	declare mageXpOffsetMonth: number;
+	declare berserkXpOffsetMonth: number;
+	declare archerXpOffsetMonth: number;
+	declare tankXpOffsetMonth: number;
+	declare guildXpOffsetMonth: number;
 
-	declare public readonly createdAt: Date;
-	declare public readonly updatedAt: Date;
+	declare readonly createdAt: Date;
+	declare readonly updatedAt: Date;
 
 	/**
 	 * linked guild member
@@ -462,7 +462,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (!this._infractions) return 0;
 
 		// last infraction expired -> remove all infractions
-		if (this._infractions.at(-1)! + (this.client.config.get('INFRACTIONS_EXPIRATION_TIME') as number) <= Date.now()) {
+		if (this._infractions.at(-1)! + this.client.config.get('INFRACTIONS_EXPIRATION_TIME') <= Date.now()) {
 			this._infractions = null;
 			this.save();
 			return 0;
@@ -697,7 +697,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				}
 			} else {
 				// log once every hour (during the first update)
-				if (!(new Date().getHours() % 6) && new Date().getMinutes() < (this.client.config.get('DATABASE_UPDATE_INTERVAL') as number)) {
+				if (!(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 					logger.warn(`[UPDATE XP]: ${this.logInfo}: skill API disabled`);
 				}
 
@@ -730,7 +730,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 
 			// no slayer data found logging
-			if (!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') && !(new Date().getHours() % 6) && new Date().getMinutes() < (this.client.config.get('DATABASE_UPDATE_INTERVAL') as number)) {
+			if (!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no slayer data found`);
 			}
 
@@ -751,14 +751,14 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 
 			// no dungeons data found logging
-			if (!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') && !(new Date().getHours() % 6) && new Date().getMinutes() < (this.client.config.get('DATABASE_UPDATE_INTERVAL') as number)) {
+			if (!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no dungeons data found`);
 			}
 
 			/**
 			 * collections
 			 */
-			if (!Reflect.has(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < (this.client.config.get('DATABASE_UPDATE_INTERVAL') as number)) {
+			if (!Reflect.has(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
 			}
 
@@ -792,7 +792,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (this.guildId === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
 
 		if (!member) return; // no linked available discord member to update
-		if (!member.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID') as Snowflake)) {
+		if (!member.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID'))) {
 			return logger.warn(`[UPDATE DISCORD MEMBER]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing verified role`);
 		}
 
@@ -833,24 +833,24 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		// player is not in a guild from <LunarClient>.hypixelGuilds
 		if (!inGuild) {
-			if (member.roles.cache.has(config.get('GUILD_ROLE_ID') as Snowflake)) rolesToRemove.push(config.get('GUILD_ROLE_ID') as Snowflake);
+			if (member.roles.cache.has(config.get('GUILD_ROLE_ID'))) rolesToRemove.push(config.get('GUILD_ROLE_ID'));
 			return this.makeRoleApiCall(rolesToAdd, rolesToRemove, reason);
 		}
 
 		// combined guild roles
-		if (!member.roles.cache.has(config.get('GUILD_ROLE_ID') as Snowflake)) rolesToAdd.push(config.get('GUILD_ROLE_ID') as Snowflake);
-		if (member.roles.cache.has(config.get('EX_GUILD_ROLE_ID') as Snowflake)) rolesToRemove.push(config.get('EX_GUILD_ROLE_ID') as Snowflake);
+		if (!member.roles.cache.has(config.get('GUILD_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_ROLE_ID'));
+		if (member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))) rolesToRemove.push(config.get('EX_GUILD_ROLE_ID'));
 
 		// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
-		if ((member.roles.color?.comparePositionTo(config.get('GUILD_DELIMITER_ROLE_ID') as Snowflake ?? member.guild.roles.highest) ?? -1) > 1) {
-			if (!member.roles.cache.has(config.get('GUILD_DELIMITER_ROLE_ID') as Snowflake)) rolesToAdd.push(config.get('GUILD_DELIMITER_ROLE_ID') as Snowflake);
-		} else if (member.roles.cache.has(config.get('GUILD_DELIMITER_ROLE_ID') as Snowflake)) {
-			rolesToRemove.push(config.get('GUILD_DELIMITER_ROLE_ID') as Snowflake);
+		if ((member.roles.color?.comparePositionTo(config.get('GUILD_DELIMITER_ROLE_ID') ?? member.guild.roles.highest) ?? -1) > 1) {
+			if (!member.roles.cache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_DELIMITER_ROLE_ID'));
+		} else if (member.roles.cache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) {
+			rolesToRemove.push(config.get('GUILD_DELIMITER_ROLE_ID'));
 		}
 
 		// other delimiter roles
 		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
-			if (!member.roles.cache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`) as Snowflake)) rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`) as Snowflake);
+			if (!member.roles.cache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`))) rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`));
 		}
 
 		// hypixel guild ranks
@@ -883,9 +883,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				// individual skills
 				for (const level of SKILL_ROLES) {
 					if (level === CURRENT_LEVEL_MILESTONE) {
-						if (!member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`) as Snowflake)) rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`) as Snowflake);
-					} else if (member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`) as Snowflake)) {
-						rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`) as Snowflake);
+						if (!member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
+					} else if (member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
+						rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
 					}
 				}
 
@@ -898,9 +898,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		for (const level of SKILL_AVERAGE_ROLES) {
 			if (level === currentLvlMilestone) {
-				if (!member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`) as Snowflake)) rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`) as Snowflake);
-			} else if (member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`) as Snowflake)) {
-				rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`) as Snowflake);
+				if (!member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
+			} else if (member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
+				rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 			}
 		}
 
@@ -911,9 +911,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			// individual slayer
 			for (const level of SLAYER_ROLES) {
 				if (level === SLAYER_LVL) {
-					if (!member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`) as Snowflake)) rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`) as Snowflake);
-				} else if (member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`) as Snowflake)) {
-					rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`) as Snowflake);
+					if (!member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
+				} else if (member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
+					rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
 				}
 			}
 
@@ -923,9 +923,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		// total slayer
 		for (const level of SLAYER_TOTAL_ROLES) {
 			if (level === LOWEST_SLAYER_LVL) {
-				if (!member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`) as Snowflake)) rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`) as Snowflake);
-			} else if (member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`) as Snowflake)) {
-				rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`) as Snowflake);
+				if (!member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
+			} else if (member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
+				rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 			}
 		}
 
@@ -934,17 +934,17 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		for (const level of CATACOMBS_ROLES) {
 			if (level === currentLvlMilestone) {
-				if (!member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`) as Snowflake)) rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`) as Snowflake);
-			} else if (member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`) as Snowflake)) {
-				rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`) as Snowflake);
+				if (!member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
+			} else if (member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
+				rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 			}
 		}
 
 		// weight
-		if (this.getSenitherWeight().totalWeight >= (config.get('WHALECUM_PASS_WEIGHT') as number)) {
-			if (!member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID') as Snowflake)) rolesToAdd.push(config.get('WHALECUM_PASS_ROLE_ID') as Snowflake);
-		} else if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID') as Snowflake)) {
-			rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID') as Snowflake);
+		if (this.getSenitherWeight().totalWeight >= config.get('WHALECUM_PASS_WEIGHT')) {
+			if (!member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToAdd.push(config.get('WHALECUM_PASS_ROLE_ID'));
+		} else if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) {
+			rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
 		}
 
 		// api call
@@ -1084,7 +1084,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (!member.guild.me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) return (logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false);
 
 		const { config } = member.client as LunarClient;
-		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID') as Snowflake);
+		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));
 
 		// check if IDs are proper roles and managable by the bot
 		const resolvedRolesToAdd = GuildUtil.resolveRoles(member.guild, filteredRolesToAdd);
@@ -1092,7 +1092,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (!resolvedRolesToAdd.size && !resolvedRolesToRemove.size) return true;
 
 		const loggingEmbed = new MessageEmbed()
-			.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
+			.setAuthor(member.user.tag, member.displayAvatarURL({ dynamic: true }), this.url)
 			.setThumbnail((await this.imageURL)!)
 			.setDescription(stripIndents`
 				${Formatters.bold('Role Update')} for ${member}
@@ -1105,7 +1105,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			this.discordMember = await member.roles.set(member.roles.cache.filter((_, roleId) => !resolvedRolesToRemove.has(roleId)).concat(resolvedRolesToAdd), reason);
 
 			// was successful
-			loggingEmbed.setColor((IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE')) as HexColorString);
+			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
 
 			if (resolvedRolesToAdd.size) loggingEmbed.addFields({
 				name: 'Added',
@@ -1126,7 +1126,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			logger.error('[ROLE API CALL]', error);
 
 			loggingEmbed
-				.setColor(config.get('EMBED_RED') as HexColorString)
+				.setColor(config.get('EMBED_RED'))
 				.addFields(error instanceof Error
 					? {
 						name: error.name,
@@ -1166,8 +1166,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (member) {
 			const { config } = this.client;
-			const rolesToAdd = (Date.now() - this.createdAt.getTime() >= 7 * 24 * 60 * 60_000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID') as Snowflake)
-				? [ config.get('EX_GUILD_ROLE_ID') as Snowflake ] // add ex guild role if player stayed for more than 1 week
+			const rolesToAdd = (Date.now() - this.createdAt.getTime() >= 7 * 24 * 60 * 60_000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
+				? [ config.get('EX_GUILD_ROLE_ID') ] // add ex guild role if player stayed for more than 1 week
 				: [];
 			const rolesToRemove = GuildMemberUtil.getRolesToPurge(member);
 
@@ -1179,7 +1179,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				return false;
 			}
 
-			isBridger = member.roles.cache.has(config.get('BRIDGER_ROLE_ID') as Snowflake);
+			isBridger = member.roles.cache.has(config.get('BRIDGER_ROLE_ID'));
 		} else {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 		}
@@ -1272,7 +1272,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			await this.client.log(
 				this.client.defaultEmbed
-					.setAuthor(member.user.tag, member.user.displayAvatarURL({ dynamic: true }), this.url)
+					.setAuthor(member.user.tag, member.displayAvatarURL({ dynamic: true }), this.url)
 					.setThumbnail((await this.imageURL)!)
 					.setDescription(stripIndents`
 						${Formatters.bold('Nickname Update')} for ${member}
@@ -1508,11 +1508,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * set the player to paid
 	 * @param options
 	 */
-	async setToPaid({ amount = this.client.config.get('TAX_AMOUNT') as number, collectedBy = this.minecraftUuid, auctionId = null }: SetToPaidOptions = {}) {
+	async setToPaid({ amount = this.client.config.get('TAX_AMOUNT'), collectedBy = this.minecraftUuid, auctionId = null }: SetToPaidOptions = {}) {
 		if (this.paid) {
 			await Promise.all(this.addTransfer({ amount, collectedBy, auctionId, type: 'donation' }));
 		} else {
-			const overflow = Math.max(amount - (this.client.config.get('TAX_AMOUNT') as number), 0); // >=
+			const overflow = Math.max(amount - this.client.config.get('TAX_AMOUNT'), 0); // >=
 			const taxAmount = amount - overflow;
 			const promises = this.addTransfer({ amount: taxAmount, collectedBy, auctionId, type: 'tax' });
 

@@ -129,7 +129,7 @@ export class DiscordManager {
 		// switch back to client.emojis if performance problems are fixed (it's a getter currently which copies over all guild emoji caches)
 		const { value, similarity } = autocorrect(inColon, this.client.lgGuild?.emojis.cache ?? [], 'name');
 
-		if (similarity >= (this.client.config.get('AUTOCORRECT_THRESHOLD') as number)) return `${value}`;
+		if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return `${value}`;
 
 		return fullMatch;
 	}

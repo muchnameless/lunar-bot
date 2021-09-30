@@ -6,7 +6,7 @@ import { buildGuildOption, requiredPlayerOption, optionalPlayerOption } from '..
 import { ChannelUtil, InteractionUtil } from '../../util';
 import { escapeIgn, logger, safePromiseAll, validateNumber } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, Snowflake } from 'discord.js';
+import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
@@ -84,11 +84,7 @@ export default class TaxCommand extends SlashCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		switch (interaction.options.getSubcommandGroup(false)) {
 			case 'ah': {
-				const player = InteractionUtil.getPlayer(interaction);
-
-				if (!player) {
-					return await InteractionUtil.reply(interaction, `\`${interaction.options.getString('player', true)}\` is not in the player db`);
-				}
+				const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
 				let log;
 
@@ -142,7 +138,7 @@ export default class TaxCommand extends SlashCommand {
 							ephemeral: true,
 						});
 
-						const OLD_AMOUNT = this.config.get('TAX_AMOUNT') as number;
+						const OLD_AMOUNT = this.config.get('TAX_AMOUNT');
 
 						await safePromiseAll([
 							// update tax amount
@@ -187,11 +183,7 @@ export default class TaxCommand extends SlashCommand {
 							ephemeral: true,
 						});
 
-						const player = InteractionUtil.getPlayer(interaction);
-
-						if (!player) {
-							return await InteractionUtil.reply(interaction, `\`${interaction.options.getString('player', true)}\` is not in the player db`);
-						}
+						const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
 						if (player.paid) {
 							await InteractionUtil.awaitConfirmation(interaction, `\`${player}\` is already set to paid with an amount of \`${this.client.formatNumber(await player.taxAmount ?? Number.NaN)}\`. Overwrite this?`);
@@ -199,7 +191,7 @@ export default class TaxCommand extends SlashCommand {
 							await player.resetTax();
 						}
 
-						const AMOUNT = interaction.options.getInteger('amount') ?? this.config.get('TAX_AMOUNT') as number;
+						const AMOUNT = interaction.options.getInteger('amount') ?? this.config.get('TAX_AMOUNT');
 
 						await player.setToPaid({
 							amount: AMOUNT,
@@ -299,11 +291,11 @@ export default class TaxCommand extends SlashCommand {
 
 							// get current tax embed from #guild-tax channel
 							currentTaxEmbed = await (async () => {
-								const taxChannel = this.client.channels.cache.get(this.config.get('TAX_CHANNEL_ID') as Snowflake);
+								const taxChannel = this.client.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
 
 								if (!taxChannel?.isText() || (taxChannel.guildId && !taxChannel.guild?.available)) return logger.warn('[TAX RESET] tax channel error');
 
-								const taxMessage = await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID') as Snowflake).catch(logger.error);
+								const taxMessage = await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID')).catch(logger.error);
 
 								if (!taxMessage) return logger.warn('[TAX RESET] TAX_MESSAGE fetch error');
 
@@ -311,7 +303,7 @@ export default class TaxCommand extends SlashCommand {
 							})();
 
 							if (!currentTaxEmbed) {
-								await InteractionUtil.awaitConfirmation(interaction, `unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID') as Snowflake) ?? '#guild-tax'} to log it. Create a new one and continue?`);
+								await InteractionUtil.awaitConfirmation(interaction, `unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`);
 
 								currentTaxEmbed = this.client.db.createTaxEmbed();
 							}

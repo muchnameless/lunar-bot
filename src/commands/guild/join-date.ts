@@ -106,7 +106,9 @@ export default class JoinDateCommand extends DualCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		const player = InteractionUtil.getPlayer(
 			interaction,
-			!(await this.client.lgGuild?.members.fetch(interaction.user).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID') as Snowflake),
+			{ fallbackToCurrentUser:
+				!(await this.client.lgGuild?.members.fetch(interaction.user).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')),
+			},
 		);
 		const hypixelGuild = player?.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction);
 
