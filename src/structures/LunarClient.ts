@@ -12,6 +12,8 @@ import { logger } from '../functions';
 import type { ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 import type { CronJob } from 'cron';
 import type { db } from './database';
+import type { MinecraftChatManager } from './chat_bridge/managers/MinecraftChatManager';
+import type { ChatBridge } from './chat_bridge/ChatBridge';
 
 
 interface LunarClientOptions extends ClientOptions {
@@ -108,27 +110,27 @@ export class LunarClient extends Client {
 	 * the minecraft bot for the main guild's chatBridge
 	 */
 	get bot() {
-		return this.chatBridge.bot;
+		return this.chatBridge.minecraft.bot;
 	}
 
 	/**
 	 * send to in game chat via the main guild's chatBridge
 	 */
-	get chat() {
+	get chat(): MinecraftChatManager['sendToChat'] {
 		return arg => this.chatBridge.minecraft.sendToChat(arg);
 	}
 
 	/**
 	 * send to in game guild chat via the main guild's chatBridge
 	 */
-	get gchat() {
+	get gchat(): MinecraftChatManager['gchat'] {
 		return arg => this.chatBridge.minecraft.gchat(arg);
 	}
 
 	/**
 	 * send a message both to discord and the in game guild chat
 	 */
-	get broadcast() {
+	get broadcast(): ChatBridge['broadcast'] {
 		return arg => this.chatBridge.broadcast(arg);
 	}
 
