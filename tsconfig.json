@@ -4,16 +4,12 @@
 		// Type Checking
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
-		// TypeScript 4.4
-		// "exactOptionalPropertyTypes": true,
-		"noFallthroughCasesInSwitch": true,
+		"noFallthroughCasesInSwitch": false,
 		"noImplicitOverride": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"strict": true,
-		// TypeScript 4.4
-		// "useUnknownInCatchVariables": true,
 
 		// Modules
 		"module": "ESNext",
@@ -37,8 +33,8 @@
 		// Language and Environment
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"lib": ["ESNext"],
-		"target": "ES2020",
+		"lib": [ "ESNext" ],
+		"target": "ESNext",
 		"useDefineForClassFields": true,
 
 		// Completeness
