@@ -25,7 +25,7 @@ export class BaseEvent {
 	 * @param context
 	 * @param data
 	 */
-	constructor({ emitter, name }: EventContext, { once, enabled }: EventData) {
+	constructor({ emitter, name }: EventContext, { once, enabled }: EventData = {}) {
 		this.emitter = emitter;
 		this.name = name;
 

@@ -57,7 +57,6 @@ export class EventCollection extends Collection<string, BaseEvent> {
 		const Event = (await import(filePath)).default as typeof BaseEvent;
 		const event = new Event({
 			emitter: this.emitter,
-			collection: this,
 			name,
 		});
 
