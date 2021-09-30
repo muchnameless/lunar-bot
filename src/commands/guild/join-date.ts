@@ -62,7 +62,7 @@ export default class JoinDateCommand extends DualCommand {
 			if (!new RegExp(`\\n.+: \\w{1,16} invited ${ign}$`).test(logEntry)) break;
 		}
 
-		const date = new Date(matched?.groups.time);
+		const date = new Date(matched?.groups!.time!);
 
 		return {
 			ign,
@@ -104,15 +104,15 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		const player = InteractionUtil.getPlayer(
+		const IGN = InteractionUtil.getIgn(
 			interaction,
 			{ fallbackToCurrentUser:
 				!(await this.client.lgGuild?.members.fetch(interaction.user).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')),
 			},
 		);
-		const hypixelGuild = player?.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction);
+		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 
-		if (!player) {
+		if (!IGN) {
 			// all players
 			if (JoinDateCommand.running.has(hypixelGuild.guildId)) return await InteractionUtil.reply(interaction, {
 				content: 'the command is already running',
@@ -143,14 +143,14 @@ export default class JoinDateCommand extends DualCommand {
 			});
 		}
 
-		return await InteractionUtil.reply(interaction, await this.#generateReply(hypixelGuild.chatBridge, player.ign));
+		return await InteractionUtil.reply(interaction, await this.#generateReply(hypixelGuild.chatBridge, IGN));
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+	override async runMinecraft(hypixelMessage: HypixelMessage) {
 		return await hypixelMessage.reply(await this.#generateReply(
 			hypixelMessage.chatBridge,
 			hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,
