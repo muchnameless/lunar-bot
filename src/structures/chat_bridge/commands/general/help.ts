@@ -1,8 +1,8 @@
 import { commaListsOr } from 'common-tags';
 import ms from 'ms';
 import { BridgeCommand } from '../../../commands/BridgeCommand';
-import type { Collection } from 'discord.js';
 import type { CommandContext } from '../../../commands/BaseCommand';
+import type { Collection } from 'discord.js';
 import type { DualCommand } from '../../../commands/DualCommand';
 import type { HypixelMessage } from '../../HypixelMessage';
 

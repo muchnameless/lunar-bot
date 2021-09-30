@@ -1,8 +1,7 @@
 import { Collection } from 'discord.js';
 import { dirname, basename } from 'node:path';
-import { URL, fileURLToPath, pathToFileURL } from 'node:url';
-import readdirp from 'readdirp';
-import { autocorrect, logger } from '../../functions';
+import { URL, pathToFileURL } from 'node:url';
+import { autocorrect, logger, readJSFiles } from '../../functions';
 import type { LunarClient } from '../LunarClient';
 import type { DualCommand } from './DualCommand';
 import type { SlashCommand } from './SlashCommand';
@@ -62,9 +61,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	 * @param options
 	 */
 	async loadByName(commandName: string, options?: CommandLoadOptions) {
-		for await (const dir of readdirp(fileURLToPath(this.dirURL), {
-			fileFilter: [ '*.js', '!~*' ],
-		})) {
+		for await (const dir of readJSFiles(this.dirURL)) {
 			if (dir.basename.slice(0, -'.js'.length).toLowerCase() === commandName) return this.loadFromFile(dir.fullPath, options);
 		}
 
@@ -103,9 +100,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	async loadAll(options?: CommandLoadOptions) {
 		let commandCount = 0;
 
-		for await (const { fullPath } of readdirp(fileURLToPath(this.dirURL), {
-			fileFilter: [ '*.js', '!~*' ],
-		})) {
+		for await (const { fullPath } of readJSFiles(this.dirURL)) {
 			await this.loadFromFile(fullPath, options);
 
 			++commandCount;

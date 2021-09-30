@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
-config({ path: fileURLToPath(new URL('../../../.env', import.meta.url)) });
 import { URL, fileURLToPath, pathToFileURL } from 'node:url';
-import readdirp from 'readdirp';
+config({ path: fileURLToPath(new URL('../../../.env', import.meta.url)) });
+import { readJSFiles } from '../../functions';
 import type { Models } from './managers/DatabaseManager';
 
 
@@ -44,9 +44,7 @@ export const sequelize = new Sequelize(
 
 const models = {};
 
-for await (const { fullPath } of readdirp(fileURLToPath(new URL('./models', import.meta.url)), {
-	fileFilter: [ '*.js', '!~*' ],
-})) {
+for await (const { fullPath } of readJSFiles(new URL('./models', import.meta.url))) {
 	const model = (await import(pathToFileURL(fullPath).href)).default as typeof Model;
 
 	// @ts-expect-error Property 'initialize' does not exist on type 'typeof Model'

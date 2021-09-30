@@ -2,10 +2,8 @@ import { SlashCommandBooleanOption, SlashCommandBuilder } from '@discordjs/build
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { basename } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import readdirp from 'readdirp';
 import { InteractionUtil } from '../../util';
-import { logger } from '../../functions';
+import { logger, readJSFiles } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -13,7 +11,6 @@ import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage
 
 
 export default class ReloadCommand extends DualCommand {
-	// @ts-expect-error super call must be first
 	constructor(context: CommandContext) {
 		const reloadOption = new SlashCommandBooleanOption()
 			.setName('reload')
@@ -96,9 +93,7 @@ export default class ReloadCommand extends DualCommand {
 					// try to find file with INPUT name
 					let commandFile;
 
-					for await (const dir of readdirp(fileURLToPath(this.collection.dirURL), {
-						fileFilter: [ '*.js', '!~*' ],
-					})) {
+					for await (const dir of readJSFiles(this.collection.dirURL)) {
 						if (dir.basename.slice(0, -'.js'.length).toLowerCase() !== commandName) continue;
 
 						commandFile = dir.fullPath;
@@ -115,9 +110,7 @@ export default class ReloadCommand extends DualCommand {
 						if (command) {
 							commandName = command.name;
 
-							for await (const dir of readdirp(fileURLToPath(this.collection.dirURL), {
-								fileFilter: [ '*.js', '!~*' ],
-							})) {
+							for await (const dir of readJSFiles(this.collection.dirURL)) {
 								if (dir.basename.slice(0, -'.js'.length).toLowerCase() !== commandName) continue;
 
 								commandFile = dir.fullPath;
@@ -178,9 +171,7 @@ export default class ReloadCommand extends DualCommand {
 					// try to find file with INPUT name
 					let eventFile;
 
-					for await (const dir of readdirp(fileURLToPath(this.client.events.dirURL), {
-						fileFilter: [ '*.js', '!~*' ],
-					})) {
+					for await (const dir of readJSFiles(this.client.events.dirURL)) {
 						if (dir.basename.slice(0, -'.js'.length).toLowerCase() !== eventName) continue;
 
 						eventFile = dir.fullPath;
@@ -276,6 +267,6 @@ export default class ReloadCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async runMinecraft(hypixelMessage: HypixelMessage) {
-		return await hypixelMessage.reply(await this.#run(...hypixelMessage.commandData!.args));
+		return await hypixelMessage.reply(await this.#run(...hypixelMessage.commandData.args));
 	}
 }

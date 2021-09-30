@@ -1,8 +1,7 @@
 import { Collection } from 'discord.js';
 import { basename } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import readdirp from 'readdirp';
-import { logger } from '../../functions';
+import { pathToFileURL } from 'node:url';
+import { logger, readJSFiles } from '../../functions';
 import type { EventEmitter } from 'node:events';
 import type { URL } from 'node:url';
 import type { BaseEvent } from './BaseEvent';
@@ -76,9 +75,7 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	async loadAll(options?: EventLoadOptions) {
 		let eventCount = 0;
 
-		for await (const { fullPath } of readdirp(fileURLToPath(this.dirURL), {
-			fileFilter: [ '*.js', '!~*' ],
-		})) {
+		for await (const { fullPath } of readJSFiles(this.dirURL)) {
 			await this.loadFromFile(fullPath, options);
 
 			++eventCount;

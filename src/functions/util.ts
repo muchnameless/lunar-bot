@@ -1,9 +1,12 @@
 import { Formatters, Util } from 'discord.js';
+import { fileURLToPath } from 'node:url';
 import ms from 'ms';
 import jaroWinklerSimilarity from 'jaro-winkler';
+import readdirp from 'readdirp';
 import { EMBED_FIELD_MAX_CHARS } from '../constants';
 import { logger } from '.';
 import type { SplitOptions } from 'discord.js';
+import type { URL } from 'node:url';
 
 
 /**
@@ -257,3 +260,10 @@ export async function safePromiseAll(arr: (unknown | Promise<unknown>)[]) {
  * @param string
  */
 export const removeMcFormatting = (string: string) => string.replace(/§[\da-gk-or]/g, '');
+
+
+/**
+ * creates a 'await for..of'-consumable ReaddirpStream from all .js files that don't start with a '~'
+ * @param root
+ */
+export const readJSFiles = (root: string | URL) => readdirp(fileURLToPath(root), { fileFilter: [ '*.js', '!~*' ] });

@@ -1,9 +1,8 @@
 import { basename } from 'node:path';
-import { URL, fileURLToPath, pathToFileURL } from 'node:url';
+import { URL, pathToFileURL } from 'node:url';
 import { createClient } from 'minecraft-protocol';
-import readdirp from 'readdirp';
 import { SPAWN_EVENTS } from './constants';
-import { logger } from '../../functions';
+import { logger, readJSFiles } from '../../functions';
 import type { ClientOptions } from 'minecraft-protocol';
 import type { ChatBridge } from './ChatBridge';
 
@@ -21,9 +20,7 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 	 */
 	let eventCount = 0;
 
-	for await (const { fullPath } of readdirp(fileURLToPath(new URL('./bot_events', import.meta.url)), {
-		fileFilter: [ '*.js', '!~*' ],
-	})) {
+	for await (const { fullPath } of readJSFiles(new URL('./bot_events', import.meta.url))) {
 		const event = (await import(pathToFileURL(fullPath).href)).default;
 		const EVENT_NAME = basename(fullPath, '.js');
 
