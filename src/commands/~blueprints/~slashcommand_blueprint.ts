@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandContext } from './BaseCommand';
+import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { CommandInteraction } from 'discord.js';
 
 

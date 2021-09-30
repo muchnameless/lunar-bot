@@ -13,7 +13,7 @@ export default class MyEvent extends Event {
 	/**
 	 * event listener callback
 	 */
-	async run() {
+	override async run() {
 		// do stuff
 	}
 }

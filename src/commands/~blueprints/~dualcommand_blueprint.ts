@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { DualCommand } from '../../structures/commands/DualCommand';
-import type { CommandContext } from './BaseCommand';
+import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { CommandInteraction } from 'discord.js';
-import type { HypixelMessage } from '../chat_bridge/HypixelMessage';
+import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
 
 
 export default class MyCommand extends DualCommand {

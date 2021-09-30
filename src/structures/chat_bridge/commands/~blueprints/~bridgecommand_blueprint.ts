@@ -1,10 +1,11 @@
 import { BridgeCommand } from '../../../commands/BridgeCommand';
+import type { CommandContext } from '../../../commands/BaseCommand';
 import type { HypixelMessage } from '../../HypixelMessage';
 
 
 export default class MyCommand extends BridgeCommand {
-	constructor(data, options) {
-		super(data, options ?? {
+	constructor(context: CommandContext) {
+		super(context, {
 			aliases: [],
 			description: '',
 			args: false,
@@ -17,7 +18,7 @@ export default class MyCommand extends BridgeCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	async runMinecraft(hypixelMessage: HypixelMessage) { // eslint-disable-line @typescript-eslint/no-unused-vars
+	override async runMinecraft(hypixelMessage: HypixelMessage) { // eslint-disable-line @typescript-eslint/no-unused-vars
 		// do stuff
 	}
 }
