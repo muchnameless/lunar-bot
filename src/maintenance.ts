@@ -43,9 +43,14 @@ const client = new Client({
 			sweepInterval: 3_600, // 1h
 			sweepFilter: LimitedCollection.filterByLifetime({
 				lifetime: 14_400, // 4h
-				getComparisonTimestamp: (e: Channel) => (e.type === 'DM'
-					? ((e as DMChannel).lastMessageId ? SnowflakeUtil.deconstruct((e as DMChannel).lastMessageId!).timestamp : -1) // DM -> last message
-					: (e as ThreadChannel).archiveTimestamp ?? -1), // threads -> archived
+				getComparisonTimestamp(e: Channel) {
+					if (e.type === 'DM') { // DM -> last message
+						return (e as DMChannel).lastMessageId
+							? SnowflakeUtil.deconstruct((e as DMChannel).lastMessageId!).timestamp
+							: -1;
+					}
+					return (e as ThreadChannel).archiveTimestamp ?? -1; // threads -> archived
+				},
 				excludeFromSweep: e => e.type !== 'DM' && !(e as ThreadChannel).archived,
 			}),
 		},

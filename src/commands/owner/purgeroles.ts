@@ -4,7 +4,7 @@ import ms from 'ms';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { logger } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, Snowflake } from 'discord.js';
+import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 

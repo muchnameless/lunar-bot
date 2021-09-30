@@ -15,7 +15,7 @@ interface ChatTriggerAttributes {
 
 
 export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTriggerAttributes {
-	declare client: LunarClient;;
+	declare client: LunarClient;
 
 	declare regExpString: string;
 	declare response: string;

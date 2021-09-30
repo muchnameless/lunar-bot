@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageAttachment } from 'discord.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
-import { oneLine } from 'common-tags';
 import { optionalPlayerOption, xpTypeOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { upperCaseFirstChar } from '../../functions';

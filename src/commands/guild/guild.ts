@@ -9,7 +9,7 @@ import { requiredPlayerOption, optionalPlayerOption, pageOption, requiredIgnOpti
 import { InteractionUtil, UserUtil } from '../../util';
 import { autocorrect, getIdFromString, logger, removeMcFormatting, stringToMS, trim } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, Snowflake } from 'discord.js';
+import type { CommandInteraction } from 'discord.js';
 import type { WhereOptions } from 'sequelize';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Player } from '../../structures/database/models/Player';

@@ -118,7 +118,7 @@ type PlayerCreationAttributes = Optional<PlayerAttributes, 'ign' | 'discordId' |
 
 
 export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> implements PlayerAttributes {
-	declare client: LunarClient;;
+	declare client: LunarClient;
 
 	declare minecraftUuid: string;
 	declare ign: string;
@@ -1071,7 +1071,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param rolesToRemove roles to remove from the member
 	 * @param reason reason for discord's audit logs
 	 */
-	async makeRoleApiCall(rolesToAdd: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], rolesToRemove: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], reason: string | undefined = undefined) {
+	async makeRoleApiCall(rolesToAdd: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], rolesToRemove: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], reason: string | undefined) {
 		const member = await this.discordMember;
 		if (!member) return false;
 

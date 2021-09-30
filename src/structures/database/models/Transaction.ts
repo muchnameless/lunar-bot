@@ -15,7 +15,7 @@ export interface TransactionAttributes {
 
 
 export class Transaction extends Model<TransactionAttributes> implements TransactionAttributes {
-	declare client: LunarClient;;
+	declare client: LunarClient;
 
 	declare id: number;
 	declare from: string;

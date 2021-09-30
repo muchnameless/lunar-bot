@@ -6,7 +6,6 @@ import { forceOption, optionalPlayerOption, buildGuildOption } from '../../struc
 import { InteractionUtil } from '../../util';
 import { escapeIgn, logger } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
-import type { Snowflake } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
 import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';

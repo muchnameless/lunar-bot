@@ -15,7 +15,7 @@ type TaxCollectorCreationAttributes = Optional<TaxCollectorAttributes, 'isCollec
 
 
 export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCreationAttributes> implements TaxCollectorAttributes {
-	declare client: LunarClient;;
+	declare client: LunarClient;
 
 	declare minecraftUuid: string;
 	declare isCollecting: boolean;
