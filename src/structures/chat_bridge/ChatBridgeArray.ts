@@ -1,7 +1,7 @@
 import { MessageFlags } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { URL } from 'node:url';
-import { X_EMOJI } from '../../constants';
+import { STOP_EMOJI, X_EMOJI } from '../../constants';
 import { DiscordChatManager } from './managers/DiscordChatManager';
 import { BridgeCommandCollection } from '../commands/BridgeCommandCollection';
 import { ChatBridge } from './ChatBridge';
@@ -143,6 +143,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 */
 	async handleAnnouncementMessage(message: Message) {
 		if (!this.length) return MessageUtil.react(message, X_EMOJI);
+		if (!message.content) return MessageUtil.react(message, STOP_EMOJI);
 
 		try {
 			const result = await this.broadcast({
