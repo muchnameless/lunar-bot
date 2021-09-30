@@ -46,26 +46,55 @@ export interface UploadResponse {
 	status: number;
 }
 
+interface Cache {
+	get(key: string): Promise<unknown | undefined>;
+	set(key: string, value: unknown): Promise<true>;
+}
+
+interface RateLimitData {
+	userlimit: null | number;
+	userremaining: null | number;
+	userreset: null | number;
+	clientlimit: null | number;
+	clientremaining: null | number;
+	clientreset: null | number;
+}
+
+interface PostRateLimitData {
+	limit: null | number;
+	remaining: null | number;
+	reset: null | number;
+}
+
+interface ImgurClientOptions {
+	cache?: Cache;
+	apiVersion?: number;
+	requestTimeout?: number;
+	rateLimitOffset?: number;
+	rateLimitedWaitTime?: number;
+	retries?: number;
+}
+
 
 export class ImgurClient {
-	#authorization;
+	#authorisation!: string;
 	#baseURL;
 	#queue = new AsyncQueue();
-	cache: any;
+	cache?: Cache;
 	requestTimeout: number;
 	rateLimitOffset: number;
 	rateLimitedWaitTime: number;
 	retries: number;
-	rateLimit: { userlimit: null; userremaining: null; userreset: null; clientlimit: null; clientremaining: null; clientreset: null; };
-	postRateLimit: { limit: null; remaining: null; reset: null; };
+	rateLimit: RateLimitData;
+	postRateLimit: PostRateLimitData;
 
 	/**
 	 * @param clientId
 	 * @param options
 	 */
-	constructor(clientId: string, { cache, apiVersion, requestTimeout, rateLimitOffset, rateLimitedWaitTime, retries }: { cache?: { get: Function; set: Function; }; apiVersion?: number; requestTimeout?: number; rateLimitOffset?: number; rateLimitedWaitTime?: number; retries?: number; } = {}) {
+	constructor(clientId: string, { cache, apiVersion, requestTimeout, rateLimitOffset, rateLimitedWaitTime, retries }: ImgurClientOptions = {}) {
 		this.cache = cache;
-		this.#authorization = `Client-ID ${clientId}`;
+		this.authorisation = clientId;
 		this.#baseURL = `https://api.imgur.com/${apiVersion ?? 3}/`;
 		this.requestTimeout = requestTimeout ?? 10_000;
 		this.rateLimitOffset = rateLimitOffset ?? 1_000;
@@ -94,11 +123,19 @@ export class ImgurClient {
 		return this.#queue;
 	}
 
+	get authorisation() {
+		return this.#authorisation;
+	}
+
+	set authorisation(clientId) {
+		this.#authorisation = `Client-ID ${clientId}`;
+	}
+
 	/**
 	 * uploads an image by URL
 	 * @param url
 	 */
-	async upload(url: string): Promise<UploadResponse> {
+	async upload(url: string) {
 		const form = new FormData();
 
 		form.append('image', url);
@@ -108,12 +145,13 @@ export class ImgurClient {
 			'upload',
 			{
 				method: 'POST',
+				// @ts-expect-error
 				body: form,
 			}, {
 				checkRateLimit: true,
 				cacheKey: url,
 			},
-		);
+		) as Promise<UploadResponse>;
 	}
 
 	/**
@@ -161,7 +199,7 @@ export class ImgurClient {
 				const data = res.headers.get(`x-ratelimit-${type}`);
 
 				if (data !== null) {
-					this.rateLimit[type] = type.endsWith('reset')
+					this.rateLimit[type as keyof RateLimitData] = type.endsWith('reset')
 						? Date.now() + (Number.parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
 						: Number.parseInt(data, 10);
 				}
@@ -171,7 +209,7 @@ export class ImgurClient {
 				const data = res.headers.get(`x-post-rate-limit-${type}`);
 
 				if (data !== null) {
-					this.postRateLimit[type] = type.endsWith('reset')
+					this.postRateLimit[type as keyof PostRateLimitData] = type.endsWith('reset')
 						? Date.now() + (Number.parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
 						: Number.parseInt(data, 10);
 				}
@@ -206,7 +244,7 @@ export class ImgurClient {
 				`${this.#baseURL}${endpoint}`,
 				{
 					headers: {
-						Authorization: this.#authorization,
+						Authorization: this.#authorisation,
 					},
 					signal: controller.signal,
 					...options,
