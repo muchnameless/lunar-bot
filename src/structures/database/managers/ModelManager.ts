@@ -44,6 +44,14 @@ export class ModelManager<M extends Model> {
 	}
 
 	/**
+	 * typeguards the input as instanceof this.model
+	 * @param input
+	 */
+	isModel(input: unknown): input is M {
+		return input instanceof this.model;
+	}
+
+	/**
 	 * fetches an entry from the database and caches it
 	 * @param where
 	 */
@@ -74,10 +82,10 @@ export class ModelManager<M extends Model> {
 	async remove(idOrInstance: string | M) {
 		const element = this.resolve(idOrInstance);
 
-		if (!(element instanceof this.model)) return logger.error(`[MODEL MANAGER REMOVE]: unknown element: ${idOrInstance}`);
+		if (!this.isModel(element)) return logger.error(`[MODEL MANAGER REMOVE]: unknown element: ${idOrInstance}`);
 
-		this.cache.delete(element![this.primaryKey as keyof M] as unknown as string);
-		return element!.destroy();
+		this.cache.delete(element[this.primaryKey as keyof M] as unknown as string);
+		return element.destroy();
 	}
 
 	/**
@@ -85,7 +93,7 @@ export class ModelManager<M extends Model> {
 	 * @param idOrInstance The id or instance of something in this Manager
 	 */
 	resolve(idOrInstance: string | M) {
-		if (idOrInstance instanceof this.model) return idOrInstance as M;
+		if (this.isModel(idOrInstance)) return idOrInstance;
 		if (typeof idOrInstance === 'string') return this.cache.get(idOrInstance) ?? null;
 		return null;
 	}
@@ -95,7 +103,7 @@ export class ModelManager<M extends Model> {
 	 * @param idOrInstance The id or instance of something in this Manager
 	 */
 	resolveId(idOrInstance: string | M) {
-		if (idOrInstance instanceof this.model) return (idOrInstance as M)[this.primaryKey as keyof M] as unknown as string;
+		if (this.isModel(idOrInstance)) return idOrInstance[this.primaryKey as keyof M] as unknown as string;
 		if (typeof idOrInstance === 'string') return idOrInstance;
 		return null;
 	}

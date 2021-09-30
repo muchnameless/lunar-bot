@@ -188,7 +188,7 @@ export default class GuildCommand extends SlashCommand {
 	async runMute({ target, executor, duration, hypixelGuild: hypixelGuildInput }: { target: string | Player, executor: Player | null, duration: number, hypixelGuild: HypixelGuild }) {
 		let hypixelGuild = hypixelGuildInput;
 
-		if (target instanceof (this.client.players.model as typeof Player)) {
+		if (this.client.players.isModel(target)) {
 			({ hypixelGuild } = target);
 
 			if (target.guildRankPriority >= (executor?.guildRankPriority ?? -1)) return {
@@ -728,12 +728,12 @@ export default class GuildCommand extends SlashCommand {
 						ephemeral: true,
 					});
 
-					if (target instanceof this.client.players.model) {
+					if (this.client.players.isModel(target)) {
 						({ hypixelGuild } = target);
 					}
 				}
 
-				if (target instanceof this.client.players.model) {
+				if (this.client.players.isModel(target)) {
 					if (target.guildRankPriority >= (UserUtil.getPlayer(interaction.user)?.guildRankPriority ?? 0)) return await InteractionUtil.reply(interaction, {
 						content: `your guild rank needs to be higher than ${target}'s`,
 						ephemeral: true,
