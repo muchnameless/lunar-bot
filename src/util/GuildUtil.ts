@@ -15,9 +15,10 @@ export default class GuildUtil extends null {
 	 * @param guild
 	 * @param rolesOrIds roles or role ids to verify
 	 */
-	static resolveRoles(guild: Guild, rolesOrIds: ((Snowflake | Role) | null)[] | Collection<Snowflake, Role>) {
-		const roles = new Collection<Snowflake, Role>();
-		const { highest } = guild.me!.roles;
+	static resolveRoles(guild: Guild, rolesOrIds: (Snowflake | Role | null)[] | Collection<Snowflake, Role>) {
+		const resolvedRoles: Role[] = [];
+
+		let highest: Role;
 
 		for (const roleOrId of rolesOrIds.values()) {
 			const role = guild.roles.resolve(roleOrId!);
@@ -27,15 +28,15 @@ export default class GuildUtil extends null {
 				continue;
 			}
 
-			if (role.managed || Role.comparePositions(role, highest) >= 0) {
+			if (role.managed || Role.comparePositions(role, highest ??= guild.me!.roles.highest) >= 0) {
 				logger.warn(`[CHECK ROLE IDS]: can't edit '@${role.name}'`);
 				continue;
 			}
 
-			roles.set(role.id, role);
+			resolvedRoles.push(role);
 		}
 
-		return roles.sort((a, b) => Role.comparePositions(b, a));
+		return resolvedRoles.sort((a, b) => Role.comparePositions(b, a));
 	}
 
 	/**

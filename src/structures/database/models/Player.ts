@@ -1071,26 +1071,20 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param rolesToRemove roles to remove from the member
 	 * @param reason reason for discord's audit logs
 	 */
-	async makeRoleApiCall(rolesToAdd: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], rolesToRemove: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], reason: string | undefined) {
+	async makeRoleApiCall(rolesToAdd: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], rolesToRemove: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], reason: string | undefined = undefined) {
 		const member = await this.discordMember;
 		if (!member) return false;
 
-		// check if valid IDs are provided
-		const filteredRolesToAdd = rolesToAdd.filter(x => x != null);
-		const filteredRolesToRemove = rolesToRemove.filter(x => x != null);
-		if (!(filteredRolesToAdd.length ?? filteredRolesToAdd.size) && !(filteredRolesToRemove.length ?? filteredRolesToRemove.size)) return true;
+		// check if IDs are proper roles and managable by the bot
+		const _rolesToAdd = GuildUtil.resolveRoles(member.guild, rolesToAdd);
+		const _rolesToRemove = GuildUtil.resolveRoles(member.guild, rolesToRemove);
+
+		if (!_rolesToAdd.length && !_rolesToRemove.length) return true;
 
 		// permission check
 		if (!member.guild.me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) return (logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false);
 
-		const { config } = member.client as LunarClient;
-		const IS_ADDING_GUILD_ROLE = filteredRolesToAdd.includes(config.get('GUILD_ROLE_ID'));
-
-		// check if IDs are proper roles and managable by the bot
-		const resolvedRolesToAdd = GuildUtil.resolveRoles(member.guild, filteredRolesToAdd);
-		const resolvedRolesToRemove = GuildUtil.resolveRoles(member.guild, filteredRolesToRemove);
-		if (!resolvedRolesToAdd.size && !resolvedRolesToRemove.size) return true;
-
+		const { config } = this.client;
 		const loggingEmbed = new MessageEmbed()
 			.setAuthor(member.user.tag, member.displayAvatarURL({ dynamic: true }), this.url)
 			.setThumbnail((await this.imageURL)!)
@@ -1099,25 +1093,40 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				${this.info}
 			`)
 			.setTimestamp();
+		const NAMES_TO_ADD = _rolesToAdd.length
+			? Formatters.codeBlock(_rolesToAdd.map(({ name }) => name).join('\n'))
+			: null;
+		const NAMES_TO_REMOVE = _rolesToRemove.length
+			? Formatters.codeBlock(_rolesToRemove.map(({ name }) => name).join('\n'))
+			: null;
+		const IS_ADDING_GUILD_ROLE = _rolesToAdd.some(({ id }) => id === config.get('GUILD_ROLE_ID'));
+
+		for (const role of member.roles.cache.values()) {
+			if (_rolesToRemove.some(({ id }) => role.id === id)) continue;
+			_rolesToAdd.push(role);
+		}
 
 		try {
 			// api call
-			this.discordMember = await member.roles.set(member.roles.cache.filter((_, roleId) => !resolvedRolesToRemove.has(roleId)).concat(resolvedRolesToAdd), reason);
+			this.discordMember = await member.roles.set(
+				_rolesToAdd,
+				reason,
+			);
+
+			if (NAMES_TO_ADD) loggingEmbed.addFields({
+				name: 'Added',
+				value: NAMES_TO_ADD,
+				inline: true,
+			});
+
+			if (NAMES_TO_REMOVE) loggingEmbed.addFields({
+				name: 'Removed',
+				value: NAMES_TO_REMOVE,
+				inline: true,
+			});
 
 			// was successful
 			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
-
-			if (resolvedRolesToAdd.size) loggingEmbed.addFields({
-				name: 'Added',
-				value: Formatters.codeBlock(resolvedRolesToAdd.map(({ name }) => name).join('\n')),
-				inline: true,
-			});
-
-			if (resolvedRolesToRemove.size) loggingEmbed.addFields({
-				name: 'Removed',
-				value: Formatters.codeBlock(resolvedRolesToRemove.map(({ name }) => name).join('\n')),
-				inline: true,
-			});
 
 			return true;
 		} catch (error) { // was not successful
@@ -1137,22 +1146,22 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					},
 				);
 
-			if (resolvedRolesToAdd.size) loggingEmbed.addFields({
+			if (NAMES_TO_ADD) loggingEmbed.addFields({
 				name: 'Failed to add',
-				value: Formatters.codeBlock(resolvedRolesToAdd.map(({ name }) => name).join('\n')),
+				value: NAMES_TO_ADD,
 				inline: true,
 			});
 
-			if (resolvedRolesToRemove.size) loggingEmbed.addFields({
+			if (NAMES_TO_REMOVE) loggingEmbed.addFields({
 				name: 'Failed to remove',
-				value: Formatters.codeBlock(resolvedRolesToRemove.map(({ name }) => name).join('\n')),
+				value: NAMES_TO_REMOVE,
 				inline: true,
 			});
 
 			return false;
 		} finally {
 			// logging
-			await this.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2));
+			this.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2));
 		}
 	}
 
@@ -1657,11 +1666,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	getSlayerLevel(type: ArrayElement<typeof XP_TYPES>) {
 		const XP = this[`${type}Xp`];
-		const MAX_LEVEL = Math.max(...(Object.keys(SLAYER_XP) as unknown as number[]));
+		const MAX_LEVEL = Math.max(...Object.keys(SLAYER_XP) as unknown as number[]);
 
 		let level = 0;
 
-		for (let x = 1; x <= MAX_LEVEL && SLAYER_XP[x] <= XP; ++x) {
+		for (let x = 1; x <= MAX_LEVEL && SLAYER_XP[x as keyof typeof SLAYER_XP] <= XP; ++x) {
 			level = x;
 		}
 
