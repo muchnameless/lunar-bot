@@ -1,0 +1,14 @@
+{
+	"apps" : [{
+		"name": "lunar-bot",
+		"script": "npm",
+		"cwd": "discord_bots/lunar_bot",
+		"args": "start --no-automation --color",
+		"node_args": "--trace-warnings",
+		"autorestart": true,
+		"watch": false,
+		"max_memory_restart": "1024M",
+		"out_file": "../logs/lunar-bot-out.log",
+		"error_file": "../logs/lunar-bot-error.log"
+	}]
+}
