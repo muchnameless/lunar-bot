@@ -76,7 +76,11 @@ export default class EvalCommand extends SlashCommand {
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
 		const me = (guild ?? lgGuild)?.me ?? null;
-		const reply = InteractionUtil.reply.bind(InteractionUtil, interaction);
+		const reply = (options) => InteractionUtil.reply(interaction,
+			typeof options === 'string'
+				? { content: options, ephemeral: false }
+				: { ephemeral: false, ...options },
+		);
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		const responseEmbed = this.client.defaultEmbed
