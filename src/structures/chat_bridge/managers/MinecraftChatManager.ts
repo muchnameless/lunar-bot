@@ -59,7 +59,7 @@ export interface CommandOptions {
 type FilterPromise = 'spam' | 'blocked' | HypixelMessage;
 
 
-export class MinecraftChatManager<loggedIn extends boolean> extends ChatManager {
+export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatManager {
 	/**
 	 * resolves this.#promise
 	 */
@@ -239,8 +239,7 @@ export class MinecraftChatManager<loggedIn extends boolean> extends ChatManager 
 
 				return JSON.parse(result).server as string ?? null;
 			} catch (error) {
-				logger.error('[GET SERVER]', error);
-				return null;
+				return logger.error('[GET SERVER]', error);
 			}
 		})();
 	}
@@ -844,9 +843,9 @@ export class MinecraftChatManager<loggedIn extends boolean> extends ChatManager 
 	async command(options: CommandOptions & { raw?: false }): Promise<string>;
 	async command(options: CommandOptions & { raw: true }): Promise<HypixelMessage[]>;
 	async command(options: CommandOptions): Promise<string>;
-	async command(options: any) {
+	async command(options: string | CommandOptions) {
 		const { command, responseRegExp, abortRegExp, max = -1, raw = false, timeout = this.client.config.get('INGAME_RESPONSE_TIMEOUT'), rejectOnTimeout = false, rejectOnAbort = false } = typeof options === 'string'
-			? { command: options }
+			? { command: options } as CommandOptions
 			: options;
 		await this.#commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait(); // only start the collector if the chat queue is free
@@ -865,7 +864,7 @@ export class MinecraftChatManager<loggedIn extends boolean> extends ChatManager 
 		});
 
 		// collect message
-		collector.on('collect', (hypixelMessage: HypixelMessage) => {
+		collector.on('collect', (hypixelMessage) => {
 			// message is line separator
 			if (/^-{29,}/.test(hypixelMessage.content)) {
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
@@ -883,11 +882,11 @@ export class MinecraftChatManager<loggedIn extends boolean> extends ChatManager 
 			if (abortRegExp?.test(hypixelMessage.content)) return collector.stop('abort');
 
 			// don't collect anti spam messages
-			if (hypixelMessage.spam) return collector.collected.pop();
+			if (hypixelMessage.spam) collector.collected.pop();
 		});
 
 		// end collection
-		collector.once('end', (collected: HypixelMessage[], reason: string) => {
+		collector.once('end', (collected, reason) => {
 			this.#commandQueue.shift();
 
 			switch (reason) {
@@ -904,7 +903,7 @@ export class MinecraftChatManager<loggedIn extends boolean> extends ChatManager 
 				}
 
 				case 'error':
-					return;
+					return; // #sendToChat error, promise gets rejected down below
 
 				case 'abort': {
 					if (rejectOnAbort) {

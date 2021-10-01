@@ -20,14 +20,15 @@ export interface ChatOptions extends SendToChatOptions {
 }
 
 export interface BroadcastOptions {
-	type: DiscordChatManagerResolvable;
-	hypixelMessage: HypixelMessage;
-	discord: DiscordMessageOptions;
-	minecraft: ChatOptions;
+	content: string;
+	type?: DiscordChatManagerResolvable;
+	hypixelMessage?: HypixelMessage | null;
+	discord?: DiscordMessageOptions;
+	minecraft?: Exclude<ChatOptions, 'content'>;
 }
 
 interface DiscordMessageOptions extends MessageOptions {
-	prefix: string;
+	prefix?: string;
 }
 
 export interface MessageForwardOptions {
@@ -261,17 +262,27 @@ export class ChatBridge<loggedIn extends boolean = true> extends EventEmitter {
 	 * @param contentOrOptions
 	 */
 	async broadcast(contentOrOptions: string | BroadcastOptions) {
-		const { content, hypixelMessage = null, type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD, discord, minecraft: { prefix: minecraftPrefix = '', maxParts = Number.POSITIVE_INFINITY, ...options } = {} } = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions }
+		const {
+			content,
+			hypixelMessage,
+			type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD,
+			discord,
+			minecraft: {
+				prefix: minecraftPrefix = '',
+				maxParts = Number.POSITIVE_INFINITY,
+				...options
+			} = {},
+		} = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions } as BroadcastOptions
 			: contentOrOptions;
 		const discordChatManager = this.discord.resolve(type);
 
 		return Promise.all([
 			// minecraft
-			this.minecraft[CHAT_FUNCTION_BY_TYPE[(discordChatManager?.type ?? type)]]?.({ content, prefix: minecraftPrefix, maxParts, ...options })
+			this.minecraft[CHAT_FUNCTION_BY_TYPE[(discordChatManager?.type ?? type as keyof typeof CHAT_FUNCTION_BY_TYPE)]]?.({ content, prefix: minecraftPrefix, maxParts, ...options })
 				?? this.minecraft.chat({
 					content,
-					prefix: `${discordChatManager?.prefix ?? PREFIX_BY_TYPE[(discordChatManager?.type ?? type)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`,
+					prefix: `${discordChatManager?.prefix ?? PREFIX_BY_TYPE[(discordChatManager?.type ?? type as keyof typeof CHAT_FUNCTION_BY_TYPE)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`,
 					maxParts,
 					...options,
 				}),

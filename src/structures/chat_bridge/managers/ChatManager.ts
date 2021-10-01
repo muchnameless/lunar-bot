@@ -1,8 +1,8 @@
 import { AsyncQueue } from '@sapphire/async-queue';
 import { BLOCKED_WORDS_REGEXP } from '../constants';
+import type { MessageCollector as DiscordMessageCollector } from 'discord.js';
 import type { MessageCollector, MessageCollectorOptions } from '../MessageCollector';
 import type { ChatBridge } from '../ChatBridge';
-import type { HypixelMessage } from '../HypixelMessage';
 
 
 interface AwaitMessagesOptions extends MessageCollectorOptions {
@@ -12,14 +12,13 @@ interface AwaitMessagesOptions extends MessageCollectorOptions {
 
 export abstract class ChatManager {
 	chatBridge: ChatBridge;
-	queue: AsyncQueue;
+	/**
+	 * chat queue
+	 */
+	queue: AsyncQueue = new AsyncQueue();
 
 	constructor(chatBridge: ChatBridge) {
 		this.chatBridge = chatBridge;
-		/**
-		 * chat queue
-		 */
-		this.queue = new AsyncQueue();
 	}
 
 	/**
@@ -47,9 +46,9 @@ export abstract class ChatManager {
 	 * promisified MessageCollector
 	 * @param options
 	 */
-	awaitMessages(options?: AwaitMessagesOptions): Promise<HypixelMessage[]> {
+	awaitMessages(options?: AwaitMessagesOptions) {
 		return new Promise((resolve, reject) => {
-			const collector = this.createMessageCollector(options);
+			const collector = this.createMessageCollector(options) as MessageCollector;
 
 			collector.once('end', (collection, reason) => {
 				if (options?.errors?.includes(reason)) {
@@ -60,8 +59,9 @@ export abstract class ChatManager {
 			});
 		});
 	}
-	// eslint-disable-next-line class-methods-use-this
-	createMessageCollector(options: any): MessageCollector {
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
+	createMessageCollector(options: any): unknown {
 		throw new Error('Method not implemented.');
 	}
 }

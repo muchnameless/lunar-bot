@@ -152,7 +152,6 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 					~ ${DiscordChatManager.getPlayerName(message)}
 				`,
 				discord: {
-					split: { char: '\n' },
 					allowedMentions: { parse: [] },
 				},
 				minecraft: {

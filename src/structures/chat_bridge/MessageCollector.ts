@@ -1,4 +1,5 @@
 import EventEmitter from 'node:events';
+import type { Awaited } from 'discord.js';
 import type { HypixelMessage } from './HypixelMessage';
 import type { Timeout } from '../../types/util';
 import type { ChatBridge } from './ChatBridge';
@@ -51,6 +52,7 @@ export class MessageCollector extends EventEmitter {
 	#handleCollect = async (hypixelMessage: HypixelMessage) => {
 		++this.received;
 
+		// eslint-disable-next-line unicorn/no-array-method-this-argument
 		if (await this.filter(hypixelMessage, this.collected)) {
 			this.collected.push(hypixelMessage);
 
@@ -74,6 +76,20 @@ export class MessageCollector extends EventEmitter {
 	filter: CollectorFilter;
 	ended: boolean;
 	received: number;
+
+	override on(eventName: 'collect', listener: (item: HypixelMessage) => Awaited<void>): this;
+	override on(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaited<void>): this;
+	override on(eventName: string, listener: (...args: unknown[]) => void): this;
+	override on(eventName: string, listener: (...args: any[]) => void) {
+		return super.on(eventName, listener);
+	}
+
+	override once(eventName: 'collect', listener: (message: HypixelMessage) => Awaited<void>): this;
+	override once(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaited<void>): this;
+	override once(eventName: string, listener: (...args: unknown[]) => void): this;
+	override once(eventName: string, listener: (...args: any[]) => void) {
+		return super.once(eventName, listener);
+	}
 
 	constructor(chatBridge: ChatBridge, options: MessageCollectorOptions = {}) {
 		super();
@@ -124,6 +140,15 @@ export class MessageCollector extends EventEmitter {
 
 		if (options.time) this.#timeout = setTimeout(() => this.stop('time'), options.time);
 		if (options.idle) this.#idletimeout = setTimeout(() => this.stop('idle'), options.idle);
+	}
+
+	/**
+	 * Checks after un/collection to see if the collector is done.
+	 */
+	get endReason() {
+		if (this.options.max && this.collected.length >= this.options.max) return 'limit';
+		if (this.options.maxProcessed && this.received === this.options.maxProcessed) return 'processedLimit';
+		return null;
 	}
 
 	/**
@@ -204,8 +229,9 @@ export class MessageCollector extends EventEmitter {
 	 * Checks whether the collector should end, and if so, ends it.
 	 */
 	checkEnd() {
-		const reason = this.endReason();
+		const reason = this.endReason;
 		if (reason) this.stop(reason);
+		return Boolean(reason);
 	}
 
 	/**
@@ -214,7 +240,7 @@ export class MessageCollector extends EventEmitter {
 	 */
 	async *[Symbol.asyncIterator]() {
 		const queue: HypixelMessage[] = [];
-		const onCollect = (item: HypixelMessage) => queue.push(item);
+		const onCollect = (item: HypixelMessage) => { queue.push(item); };
 		this.on('collect', onCollect);
 
 		try {
@@ -236,14 +262,5 @@ export class MessageCollector extends EventEmitter {
 		} finally {
 			this.removeListener('collect', onCollect);
 		}
-	}
-
-	/**
-	 * Checks after un/collection to see if the collector is done.
-	 */
-	endReason() {
-		if (this.options.max && this.collected.length >= this.options.max) return 'limit';
-		if (this.options.maxProcessed && this.received === this.options.maxProcessed) return 'processedLimit';
-		return null;
 	}
 }

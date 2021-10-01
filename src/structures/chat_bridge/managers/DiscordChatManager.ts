@@ -24,6 +24,13 @@ import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
 
 
+interface SendViaBotOptions extends MessageOptions {
+	content: string;
+	prefix?: string;
+	hypixelMessage?: HypixelMessage | null;
+}
+
+
 export class DiscordChatManager extends ChatManager {
 	type: keyof typeof PREFIX_BY_TYPE;
 	channelId: Snowflake;
@@ -264,11 +271,11 @@ export class DiscordChatManager extends ChatManager {
 	 * sends a message via the bot in the chatBridge channel
 	 * @param contentOrOptions
 	 */
-	async sendViaBot(contentOrOptions: string | MessageOptions & { content: string, prefix?: string; hypixelMessage?: HypixelMessage; }) {
+	async sendViaBot(contentOrOptions: string | SendViaBotOptions) {
 		if (!this.chatBridge.enabled) return null;
 
-		const { content, prefix = '', hypixelMessage = null, ...options } = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions }
+		const { content, prefix = '', hypixelMessage, ...options } = typeof contentOrOptions === 'string'
+			? { content: contentOrOptions } as SendViaBotOptions
 			: contentOrOptions;
 
 		await this.queue.wait();
@@ -308,7 +315,7 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// check if the player is auto muted
-		if (player?.infractions >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+		if ((player?.infractions ?? -1) >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 			DiscordChatManager.#dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
