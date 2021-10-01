@@ -120,7 +120,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	}
 
 	return {
-		skillApiEnabled: Reflect.has(skyblockMember, 'experience_skill_alchemy'),
+		skillAPIEnabled: Reflect.has(skyblockMember, 'experience_skill_alchemy'),
 		weight,
 		overflow,
 		totalWeight: weight + overflow,
@@ -220,7 +220,7 @@ export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfile
 	);
 
 	return {
-		skillApiEnabled: Reflect.has(skyblockMember, 'experience_skill_alchemy'),
+		skillAPIEnabled: Reflect.has(skyblockMember, 'experience_skill_alchemy'),
 		weight: total - overflow,
 		overflow: overflow as number,
 		totalWeight: total as number,

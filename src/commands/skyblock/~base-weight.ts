@@ -52,7 +52,7 @@ export default class BaseWeightCommand extends DualCommand {
 				};
 			}
 
-			return `${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillApiEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
+			return `${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
 		} catch (error) {
 			logger.error('[WEIGHT]', error);
 

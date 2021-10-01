@@ -669,7 +669,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					const member = await player.discordMember;
 					if (!member) continue;
 
-					await player.makeRoleApiCall(
+					await player.makeRoleAPICall(
 						newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
 							? [ newRank.roleId ]
 							: [],

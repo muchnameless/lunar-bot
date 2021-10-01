@@ -834,7 +834,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		// player is not in a guild from <LunarClient>.hypixelGuilds
 		if (!inGuild) {
 			if (member.roles.cache.has(config.get('GUILD_ROLE_ID'))) rolesToRemove.push(config.get('GUILD_ROLE_ID'));
-			return this.makeRoleApiCall(rolesToAdd, rolesToRemove, reason);
+			return this.makeRoleAPICall(rolesToAdd, rolesToRemove, reason);
 		}
 
 		// combined guild roles
@@ -948,7 +948,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		}
 
 		// api call
-		return this.makeRoleApiCall(rolesToAdd, rolesToRemove, reason);
+		return this.makeRoleAPICall(rolesToAdd, rolesToRemove, reason);
 	}
 
 	/**
@@ -1042,7 +1042,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			// remove roles that the bot manages
 			const rolesToPurge = GuildMemberUtil.getRolesToPurge(currentlyLinkedMember);
 
-			if (rolesToPurge.length) wasSuccessful = await this.makeRoleApiCall([], rolesToPurge, reason);
+			if (rolesToPurge.length) wasSuccessful = await this.makeRoleAPICall([], rolesToPurge, reason);
 
 			// reset nickname if it is set to the player's ign
 			if (currentlyLinkedMember.nickname === this.ign) {
@@ -1050,7 +1050,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				const { guildId } = this; // 1/3
 				this.guildId = GUILD_ID_ERROR; // 2/3
 
-				wasSuccessful = (await this.makeNickApiCall(null, false, reason)) && wasSuccessful;
+				wasSuccessful = (await this.makeNickAPICall(null, false, reason)) && wasSuccessful;
 
 				if (this.guildId === GUILD_ID_ERROR) this.guildId = guildId; // 3/3
 			}
@@ -1071,7 +1071,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param rolesToRemove roles to remove from the member
 	 * @param reason reason for discord's audit logs
 	 */
-	async makeRoleApiCall(rolesToAdd: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], rolesToRemove: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], reason: string | undefined = undefined) {
+	async makeRoleAPICall(rolesToAdd: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], rolesToRemove: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], reason: string | undefined = undefined) {
 		const member = await this.discordMember;
 		if (!member) return false;
 
@@ -1180,7 +1180,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				: [];
 			const rolesToRemove = GuildMemberUtil.getRolesToPurge(member);
 
-			if (!await this.makeRoleApiCall(rolesToAdd, rolesToRemove, `left ${this.guildName}`)) {
+			if (!await this.makeRoleAPICall(rolesToAdd, rolesToRemove, `left ${this.guildName}`)) {
 				// error updating roles
 				logger.warn(`[REMOVE FROM GUILD]: ${this.logInfo}: unable to update roles`);
 				this.guildId = GUILD_ID_ERROR;
@@ -1240,7 +1240,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			newNick = this.ign;
 		}
 
-		return this.makeNickApiCall(newNick, shouldSendDm, reason);
+		return this.makeNickAPICall(newNick, shouldSendDm, reason);
 	}
 
 	/**
@@ -1249,7 +1249,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 * @param reason reason for discord's audit logs and the DM
 	 */
-	async makeNickApiCall(newNick: string | null = null, shouldSendDm = false, reason: string | undefined = undefined) {
+	async makeNickAPICall(newNick: string | null = null, shouldSendDm = false, reason: string | undefined = undefined) {
 		const member = await this.discordMember;
 		if (!member) return false;
 
