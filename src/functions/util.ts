@@ -85,7 +85,7 @@ export function getWeekOfYear(date: Date) {
  * @param validInput
  * @param attributeToQuery
  */
-export function autocorrect<T>(query: string, validInput: T[] | Map<unknown, T> | IterableIterator<T>, attributeToQuery?: keyof T) {
+export function autocorrect<T>(query: string, validInput: readonly T[] | Map<unknown, T> | IterableIterator<T>, attributeToQuery?: keyof T) {
 	let currentBestElement!: T;
 	let currentBestSimilarity = 0;
 
