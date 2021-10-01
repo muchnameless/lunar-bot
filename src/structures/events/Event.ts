@@ -6,7 +6,7 @@ export class Event extends BaseEvent {
 	/**
 	 * client
 	 */
-	override get client() {
+	get client() {
 		return this.emitter as LunarClient;
 	}
 }

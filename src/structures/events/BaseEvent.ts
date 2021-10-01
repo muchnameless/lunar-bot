@@ -19,7 +19,6 @@ export class BaseEvent {
 	once: boolean;
 	enabled: boolean;
 	callback: () => Promise<void> | void;
-	declare client: LunarClient;
 
 	/**
 	 * @param context
@@ -39,7 +38,8 @@ export class BaseEvent {
 	 * client config
 	 */
 	get config() {
-		return this.client.config;
+		// @ts-expect-error
+		return (this.client as LunarClient).config;
 	}
 
 	/**
