@@ -14,9 +14,9 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "start": "node --enable-source-maps --es-module-specifier-resolution=node dist/index.js",
-    "deploy:commands": "env-cmd node --enable-source-maps --es-module-specifier-resolution=node dist/deploy.js",
+    "deploy:commands": "node --enable-source-maps --es-module-specifier-resolution=node dist/deploy.js",
     "maintenance": "node dist/maintenance.js",
-    "db": "node dist/structures/database/dbInit.js -a"
+    "db": "node --enable-source-maps --es-module-specifier-resolution=node dist/structures/database/dbInit.js -a"
   },
   "author": "muchnameless",
   "license": "ISC",
