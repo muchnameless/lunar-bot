@@ -1,4 +1,5 @@
 import { BaseCommand } from './BaseCommand';
+import { BaseCommandCollection } from './BaseCommandCollection';
 import type { CommandContext, RequiredRoles } from './BaseCommand';
 import type { HypixelMessage } from '../chat_bridge/HypixelMessage';
 import type { BridgeCommandCollection } from './BridgeCommandCollection';
@@ -68,7 +69,7 @@ export class BridgeCommand extends BaseCommand {
 	 * wether the command is part of a visible category
 	 */
 	get visible() {
-		return !this.collection.constructor.INVISIBLE_CATEGORIES.includes(this.category);
+		return !BaseCommandCollection.INVISIBLE_CATEGORIES.includes(this.category!);
 	}
 
 	/**

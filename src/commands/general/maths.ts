@@ -313,7 +313,7 @@ export default class MathsCommand extends DualCommand {
 	validateNumber(value?: string | number) {
 		if (Math.abs(Number(value)) > Number.MAX_SAFE_INTEGER) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
 
-		return value;
+		return Number(value);
 	}
 
 	/**
@@ -357,14 +357,14 @@ export default class MathsCommand extends DualCommand {
 					const b = pop();
 					const a = pop();
 
-					stack.push(MathsCommand.binaryOperators[token](a, b));
+					stack.push(MathsCommand.binaryOperators[token as keyof typeof MathsCommand['binaryOperators']](a, b));
 					continue;
 				}
 
 				if (Reflect.has(this.unaryOperators, token)) {
 					const a = pop();
 
-					stack.push(this.unaryOperators[token](a));
+					stack.push(this.unaryOperators[token as keyof MathsCommand['unaryOperators']](a));
 					continue;
 				}
 

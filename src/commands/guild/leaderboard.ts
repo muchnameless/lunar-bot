@@ -5,6 +5,7 @@ import { getDefaultOffset, handleLeaderboardCommandInteraction } from '../../fun
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { XPOffsets } from '../../constants';
 
 
 export default class LeaderboardCommand extends SlashCommand {
@@ -30,7 +31,7 @@ export default class LeaderboardCommand extends SlashCommand {
 			lbType: 'gained',
 			xpType: interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION'),
 			page: interaction.options.getInteger('page') ?? 1,
-			offset: interaction.options.getString('offset') ?? getDefaultOffset(this.config),
+			offset: interaction.options.getString('offset') as XPOffsets ?? getDefaultOffset(this.config),
 			hypixelGuild: InteractionUtil.getHypixelGuild(interaction, true),
 			user: interaction.user,
 		});

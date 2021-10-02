@@ -5,6 +5,7 @@ import { logErrors } from '../../structures/chat_bridge/constants';
 import { forceOption, optionalPlayerOption, buildGuildOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, logger } from '../../functions';
+import { MinecraftChatManager } from '../../structures/chat_bridge/managers/MinecraftChatManager';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
@@ -124,7 +125,10 @@ export default class JoinDateCommand extends DualCommand {
 			try {
 				JoinDateCommand.running.add(hypixelGuild.guildId);
 
-				await InteractionUtil.awaitConfirmation(interaction, `the command will take approximately ${ms(hypixelGuild.playerCount * 2 * chatBridge.minecraft.constructor.SAFE_DELAY, { long: true })}. Confirm?`);
+				await InteractionUtil.awaitConfirmation(
+					interaction,
+					`the command will take approximately ${ms(hypixelGuild.playerCount * 2 * MinecraftChatManager.SAFE_DELAY, { long: true })}. Confirm?`,
+				);
 
 				for (const { ign } of hypixelGuild.players.values()) {
 					joinInfos.push(await JoinDateCommand.#getJoinDate(chatBridge, ign));

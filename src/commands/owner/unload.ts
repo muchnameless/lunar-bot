@@ -80,7 +80,7 @@ export default class UnloadCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override  runMinecraft(hypixelMessage: HypixelMessage<true>) {
-		return hypixelMessage.reply(this.#run(...hypixelMessage.commandData!.args.map(arg => arg.toLowerCase())));
+	override runMinecraft(hypixelMessage: HypixelMessage<true>) {
+		return hypixelMessage.reply(this.#run(...hypixelMessage.commandData.args.map(arg => arg.toLowerCase()) as [ string, string ]));
 	}
 }

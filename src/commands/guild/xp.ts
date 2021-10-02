@@ -7,8 +7,8 @@ import { InteractionUtil, MessageEmbedUtil } from '../../util';
 import { getDefaultOffset, upperCaseFirstChar } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
+import type { XPOffsets } from '../../constants';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { XPOffsets } from '../../structures/database/models/Player';
 
 
 export default class XpCommand extends SlashCommand {

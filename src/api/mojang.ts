@@ -19,7 +19,7 @@ export const mojang = new MojangClient({
 				ttl = 24 * 60 * 60_000;
 			} else if (key.startsWith('uuid')) {
 				ttl = 60 * 60_000;
-			} else if (value.error) { // 1 hour for errors
+			} else if (Reflect.has(value, 'error')) { // 1 hour for errors
 				ttl = 60 * 60_000;
 			}
 

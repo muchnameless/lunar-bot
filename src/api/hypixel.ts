@@ -2,15 +2,15 @@ import { cache } from './cache';
 import { HYPIXEL_KEY } from '../constants';
 import { logger } from '../functions';
 import { Client } from '@zikeji/hypixel';
-import type { Components, DefaultMeta } from '@zikeji/hypixel';
+import type { DefaultMeta } from '@zikeji/hypixel';
 
 
 export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 	timeout: 15_000,
 	retries: 1,
 	cache: {
-		get(key) {
-			return cache.get(`${HYPIXEL_KEY}:${key}`) as Promise<Components.Schemas.ApiSuccess & DefaultMeta>;
+		get<T>(key: string) {
+			return cache.get(`${HYPIXEL_KEY}:${key}`) as Promise<T & DefaultMeta>;
 		},
 		// @ts-expect-error return types
 		set(key, value) {

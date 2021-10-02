@@ -1,4 +1,5 @@
 import { SlashCommand } from './SlashCommand';
+import { BaseCommandCollection } from './BaseCommandCollection';
 import type { CommandContext } from './BaseCommand';
 import type { SlashCommandData } from './SlashCommand';
 import type { BridgeCommandData } from './BridgeCommand';
@@ -32,7 +33,7 @@ export class DualCommand extends SlashCommand {
 	 * wether the command is part of a visible category
 	 */
 	get visible() {
-		return !this.collection.constructor.INVISIBLE_CATEGORIES.includes(this.category);
+		return !BaseCommandCollection.INVISIBLE_CATEGORIES.includes(this.category!);
 	}
 
 	get description() {

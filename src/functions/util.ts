@@ -210,7 +210,7 @@ export function splitMessage(text: string, { maxLength = 2_000, char = '\n', pre
 
 
 export interface MakeContentOptions {
-	split?: SplitOptions | false;
+	split?: SplitOptions | boolean;
 	code?: string | boolean;
 }
 
@@ -221,9 +221,11 @@ export interface MakeContentOptions {
  */
 export function makeContent(text = '', options: MakeContentOptions = {}) {
 	const isCode = typeof options.code !== 'undefined' && options.code !== false;
-	const splitOptions = typeof options.split !== 'undefined' && options.split !== false
-		? { ...options.split }
-		: undefined;
+	const splitOptions = options.split === true
+		? {}
+		: (typeof options.split !== 'undefined' && options.split !== false
+			? { ...options.split }
+			: undefined);
 
 	let content = text;
 

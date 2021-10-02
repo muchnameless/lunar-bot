@@ -33,7 +33,7 @@ interface InteractionData {
 export type ChatInteraction = CommandInteraction | MessageComponentInteraction;
 
 export interface InteractionUtilReplyOptions extends InteractionReplyOptions {
-	split?: SplitOptions | false;
+	split?: SplitOptions | boolean;
 	code?: string | boolean;
 }
 
