@@ -65,7 +65,7 @@ export default class StatsCommand extends DualCommand {
 		try {
 			return hypixelMessage.reply(
 				this._generateReply(
-					await this._fetchData(hypixelMessage, hypixelMessage.commandData!.args![0]),
+					await this._fetchData(hypixelMessage, hypixelMessage.commandData.args[0]),
 				),
 			);
 		} catch (error) {

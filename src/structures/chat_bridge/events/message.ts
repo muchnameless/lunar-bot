@@ -325,8 +325,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		// server only command in DMs
 		if (command.guildOnly && hypixelMessage.type !== MESSAGE_TYPES.GUILD) {
-			logger.info(`${hypixelMessage.author!.ign} tried to execute '${hypixelMessage.content}' in whispers which is a guild-chat-only command`);
-			return hypixelMessage.author!.send(`the '${command.name}' command can only be executed in guild chat`);
+			logger.info(`${hypixelMessage.author.ign} tried to execute '${hypixelMessage.content}' in whispers which is a guild-chat-only command`);
+			return hypixelMessage.author.send(`the '${command.name}' command can only be executed in guild chat`);
 		}
 
 		const { player } = hypixelMessage;
@@ -342,13 +342,13 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				if (!member) {
 					const { lgGuild } = this.client;
 					logger.info(`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' and could not be found within the Lunar Guard Discord Server`);
-					return hypixelMessage.author!.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild?.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in`);
+					return hypixelMessage.author.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild?.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in`);
 				}
 
 				// check for req roles
 				if (!member.roles.cache.hasAny(...requiredRoles)) {
 					logger.info(`${hypixelMessage.author.ign} | ${member.displayName} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' without a required role`);
-					return hypixelMessage.author!.send(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleId => member.guild.roles.cache.get(roleId)?.name ?? roleId)}) from the Lunar Guard Discord Server`);
+					return hypixelMessage.author.send(commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(roleId => member.guild.roles.cache.get(roleId)?.name ?? roleId)}) from the Lunar Guard Discord Server`);
 				}
 
 			// prevent from executing owner only command
@@ -360,7 +360,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			if (command.timestamps) {
 				const NOW = Date.now();
 				const COOLDOWN_TIME = (command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000;
-				const IDENTIFIER = hypixelMessage.member?.id ?? hypixelMessage.author!.ign;
+				const IDENTIFIER = hypixelMessage.member?.id ?? hypixelMessage.author.ign;
 
 				if (command.timestamps.has(IDENTIFIER)) {
 					const EXPIRATION_TIME = command.timestamps.get(IDENTIFIER)! + COOLDOWN_TIME;
@@ -370,7 +370,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 						logger.info(`${hypixelMessage.author}${hypixelMessage.member ? ` | ${hypixelMessage.member.displayName}` : ''} tried to execute '${hypixelMessage.content}' in ${hypixelMessage.type}-chat ${TIME_LEFT} before the cooldown expires`);
 
-						return hypixelMessage.author!.send(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\``);
+						return hypixelMessage.author.send(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\``);
 					}
 				}
 
@@ -391,7 +391,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			if (command.usage) reply.push(`use: ${command.usageInfo}`);
 
 			logger.info(`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' without providing the mandatory arguments`);
-			return hypixelMessage.author!.send(reply.join('\n'));
+			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
 		// execute command
@@ -400,7 +400,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			await command.runMinecraft(hypixelMessage);
 		} catch (error) {
 			logger.error(`An error occured while ${hypixelMessage.author} tried to execute ${hypixelMessage.content} in '${hypixelMessage.type}'`, error);
-			hypixelMessage.author!.send(`an error occured while executing the '${command.name}' command:\n${error}`);
+			hypixelMessage.author.send(`an error occured while executing the '${command.name}' command:\n${error}`);
 		}
 	}
 

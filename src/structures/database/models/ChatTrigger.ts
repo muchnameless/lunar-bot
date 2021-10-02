@@ -83,7 +83,7 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 	/**
 	 * @param hypixelMessage
 	 */
-	async testMessage(hypixelMessage: HypixelMessage) {
+	testMessage(hypixelMessage: HypixelMessage<true>) {
 		if (!this.chatTypes.includes(hypixelMessage.type!)) return;
 
 		const matched = this.getRegExp(hypixelMessage).exec(hypixelMessage.content);
@@ -91,16 +91,16 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 		if (!matched) return;
 
 		// cooldowns
-		if (this.cooldown !== 0) {
-			if (this.timestamps!.has(hypixelMessage.author!.ign) && Date.now() < this.timestamps!.get(hypixelMessage.author!.ign)! + this.cooldown!) return;
+		if (this.timestamps) {
+			if (this.timestamps.has(hypixelMessage.author.ign) && Date.now() < this.timestamps.get(hypixelMessage.author.ign)! + this.cooldown!) return;
 
-			this.timestamps!.set(hypixelMessage.author!.ign, Date.now());
-			setTimeout(() => this.timestamps!.delete(hypixelMessage.author!.ign), this.cooldown!);
+			this.timestamps.set(hypixelMessage.author.ign, Date.now());
+			setTimeout(() => this.timestamps!.delete(hypixelMessage.author.ign), this.cooldown!);
 		}
 
 		return hypixelMessage.reply(
 			this.response
-				.replaceAll('{AUTHOR_IGN}', hypixelMessage.author!.ign)
+				.replaceAll('{AUTHOR_IGN}', hypixelMessage.author.ign)
 				.replaceAll(/\$(\d+)/g, (m, p0) => matched[p0] ?? m), // replace $number with capture group #number
 		);
 	}

@@ -73,7 +73,7 @@ export default class BaseWeightCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
-		const [ IGN, PROFILE_NAME_INPUT ] = hypixelMessage.commandData!.args;
+		const [ IGN, PROFILE_NAME_INPUT ] = hypixelMessage.commandData.args;
 
 		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');
 

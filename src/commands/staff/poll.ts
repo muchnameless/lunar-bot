@@ -182,10 +182,10 @@ export default class PollCommand extends DualCommand {
 			chatBridge: hypixelMessage.chatBridge,
 			question: upperCaseFirstChar(inputMatched.shift()!),
 			pollOptionNames: inputMatched,
-			duration: hypixelMessage.commandData!.args[0],
-			ign: hypixelMessage.author!.ign,
+			duration: hypixelMessage.commandData.args[0],
+			ign: hypixelMessage.author.ign,
 		});
 
-		if (result) return hypixelMessage.author!.send(result);
+		if (result) return hypixelMessage.author.send(result);
 	}
 }

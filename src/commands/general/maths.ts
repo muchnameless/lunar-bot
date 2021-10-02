@@ -417,6 +417,6 @@ export default class MathsCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override runMinecraft(hypixelMessage: HypixelMessage<true>) {
-		return hypixelMessage.reply(this.#generateReply(hypixelMessage.commandData!.args!.join('')));
+		return hypixelMessage.reply(this.#generateReply(hypixelMessage.commandData.args.join('')));
 	}
 }

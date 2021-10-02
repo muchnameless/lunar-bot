@@ -327,7 +327,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 		});
 
 		const result = await this.chatBridge.minecraft.awaitMessages({
-			filter: hypixelMessage => hypixelMessage.author?.ign === this.author!.ign,
+			filter: hypixelMessage => hypixelMessage.author?.ign === this.author.ign,
 			max: 1,
 			time: timeoutSeconds * 1_000,
 		});
