@@ -12,7 +12,7 @@ import { TaxCollectorManager } from './TaxCollectorManager';
 import { ModelManager } from './ModelManager';
 import { ChannelUtil } from '../../../util';
 import { asyncFilter, compareAlphabetically, logger } from '../../../functions';
-import type { EmbedFieldData, Snowflake } from 'discord.js';
+import type { EmbedFieldData, GuildChannel } from 'discord.js';
 import type { ModelCtor, Sequelize } from 'sequelize';
 import type { Components } from '@zikeji/hypixel';
 import type { ChatTrigger } from '../models/ChatTrigger';
@@ -37,6 +37,9 @@ export interface Models {
 
 export class DatabaseManager {
 	client: LunarClient;
+	/**
+	 * ModelManagers
+	 */
 	modelManagers: {
 		chatTriggers: ModelManager<ChatTrigger>;
 		config: ConfigManager;
@@ -44,14 +47,17 @@ export class DatabaseManager {
 		players: PlayerManager;
 		taxCollectors: TaxCollectorManager;
 	};
+	/**
+	 * Models
+	 */
 	models: Models;
+	/**
+	 * Sequelize instance
+	 */
 	sequelize: Sequelize;
 
 	constructor(client: LunarClient, db: typeof DbType) {
 		this.client = client;
-		/**
-		 * ModelManagers
-		 */
 		this.modelManagers = {
 			chatTriggers: new ModelManager(client, db.ChatTrigger),
 			config: new ConfigManager(client, db.Config),
@@ -59,16 +65,15 @@ export class DatabaseManager {
 			players: new PlayerManager(client, db.Player),
 			taxCollectors: new TaxCollectorManager(client, db.TaxCollector),
 		};
-		/**
-		 * Models
-		 */
 		this.models = Object.fromEntries(
 			Object.entries(db)
-				.filter(([ , value ]) => Object.getPrototypeOf(value) === Model && Object.defineProperty(value.prototype, 'client', { value: client })),
+				.filter(([ , value ]) => Object.getPrototypeOf(value) === Model && Reflect.defineProperty(
+					// @ts-expect-error
+					value.prototype,
+					'client',
+					{ value: client },
+				)),
 		) as unknown as Models;
-		/**
-		 * Sequelize instance
-		 */
 		this.sequelize = db.sequelize;
 	}
 
@@ -141,7 +146,9 @@ export class DatabaseManager {
 		await this.loadCache(); // load caches
 
 		// set default config
-		await Promise.all(Object.entries(DEFAULT_CONFIG).map(async ([ key, value ]) => (this.modelManagers.config.get(key) !== null ? null : this.modelManagers.config.set(key, value))));
+		await Promise.all(Object.entries(DEFAULT_CONFIG).map(
+			([ key, value ]) => (this.modelManagers.config.get(key as keyof typeof DEFAULT_CONFIG) !== null ? null : this.modelManagers.config.set(key, value)),
+		));
 
 		return this;
 	}
@@ -151,7 +158,7 @@ export class DatabaseManager {
 	 */
 	async loadCache() {
 		await Promise.all(
-			Object.values(this.modelManagers).map(async manager => manager.loadCache()),
+			Object.values(this.modelManagers).map(manager => manager.loadCache()),
 		);
 
 		return this;
@@ -256,7 +263,6 @@ export class DatabaseManager {
 								amount,
 								collectedBy: taxCollector.minecraftUuid,
 								auctionId: auction.uuid,
-								shouldAdd: true,
 							});
 
 							paidLog.push(`${player}: ${this.client.formatNumber(amount)}`);
@@ -420,7 +426,7 @@ export class DatabaseManager {
 		// update taxMessage
 		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
-		if (!taxChannel?.isText() || (taxChannel.guildId && !taxChannel.guild?.available)) return logger.warn('[TAX MESSAGE] tax channel error');
+		if (!taxChannel?.isText() || ((taxChannel as GuildChannel).guildId && !(taxChannel as GuildChannel).guild?.available)) return logger.warn('[TAX MESSAGE] tax channel error');
 		if (!ChannelUtil.botPermissions(taxChannel)?.has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) {
 			return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 		}

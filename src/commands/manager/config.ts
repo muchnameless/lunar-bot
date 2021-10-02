@@ -102,7 +102,7 @@ export default class ConfigCommand extends SlashCommand {
 
 				const { key, parsedValue } = await this.config.set(KEY, newValue);
 
-				return await InteractionUtil.reply(interaction, {
+				return InteractionUtil.reply(interaction, {
 					content: `${key}: ${OLD_VALUE !== null ? `'${OLD_VALUE}' -> ` : ''}'${parsedValue}'`,
 					code: 'apache',
 				});
@@ -114,16 +114,16 @@ export default class ConfigCommand extends SlashCommand {
 					.replace(/ +/g, '_');
 				const VALUE = this.config.get(KEY);
 
-				if (VALUE === null) return await InteractionUtil.reply(interaction, `\`${KEY}\` is not in the config`);
+				if (VALUE === null) return InteractionUtil.reply(interaction, `\`${KEY}\` is not in the config`);
 
 				await this.config.remove(KEY);
-				return await InteractionUtil.reply(interaction, `removed \`${KEY}\`: \`${VALUE}\``);
+				return InteractionUtil.reply(interaction, `removed \`${KEY}\`: \`${VALUE}\``);
 			}
 
 			case 'search': {
 				const query = interaction.options.getString('query')?.replace(/ +/g, '_');
 
-				if (!query) return await InteractionUtil.reply(interaction, {
+				if (!query) return InteractionUtil.reply(interaction, {
 					content: this.#listEntries(this.config.cache),
 					code: 'apache',
 					split: { char: '\n' },
@@ -131,8 +131,8 @@ export default class ConfigCommand extends SlashCommand {
 
 				const queryRegex = new RegExp(query, 'i');
 
-				return await InteractionUtil.reply(interaction, {
-					content: this.#listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || queryRegex.test(value))),
+				return InteractionUtil.reply(interaction, {
+					content: this.#listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || (value !== null && queryRegex.test(value)))),
 					code: 'apache',
 					split: { char: '\n' },
 				});

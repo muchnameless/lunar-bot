@@ -27,6 +27,7 @@ import type { Player } from './Player';
 import type { ChatBridge } from '../../chat_bridge/ChatBridge';
 import type { LunarClient } from '../../LunarClient';
 import type { PREFIX_BY_TYPE } from '../../chat_bridge/constants';
+import type { ArrayElement } from '../../../types/util';
 
 
 type GuildRank = {
@@ -147,7 +148,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			},
 			statsHistory: {
 				type: DataTypes.ARRAY(DataTypes.JSONB),
-				defaultValue: Array.from({ length: 30 }).fill(null)
+				defaultValue: Array.from({ length: 30 })
 					.map(() => ({
 						playerCount: 0,
 						weightAverage: 0,
@@ -195,9 +196,9 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
-	get chatBridge(): ChatBridge {
+	get chatBridge(): ChatBridge<true> {
 		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
-		if (!this.#chatBridge?.minecraft.ready) throw `${this.name}: chat bridge not ${this.#chatBridge ? 'ready' : 'found'}`;
+		if (!this.#chatBridge?.minecraft.isReady()) throw `${this.name}: chat bridge not ${this.#chatBridge ? 'ready' : 'found'}`;
 		return this.#chatBridge;
 	}
 
@@ -272,7 +273,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * shifts the daily stats history
 	 */
-	async saveDailyStats() {
+	saveDailyStats() {
 		// append current xp to the beginning of the statsHistory-Array and pop of the last value
 		const { statsHistory } = this;
 		statsHistory.shift();
@@ -364,7 +365,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			// all old players left (???)
 			if (PLAYERS_LEFT_AMOUNT && PLAYERS_LEFT_AMOUNT === PLAYERS_OLD_AMOUNT) throw new Error(`[UPDATE GUILD PLAYERS]: ${this.name}: aborting guild player update request due to the possibility of an error from the fetched data`);
 
-			const membersJoined = currentGuildMembers.filter(({ uuid }) => players.cache.get(uuid)?.notInGuild ?? true);
+			const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.cache.get(uuid)?.inGuild());
 
 			let leftLog: string[] = [];
 			let joinedLog: string[] = [];
@@ -478,24 +479,24 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 								// reset current xp to 0
 								await player.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT, typesToReset: SKYBLOCK_XP_TYPES }).catch(error => logger.error(error));
 
-								const { xpLastUpdatedAt } = player;
+								const XP_LAST_UPDATED_AT = Number(player.xpLastUpdatedAt);
 								// shift the daily array for the amount of daily resets missed
 								const DAYS_PASSED_SINCE_LAST_XP_UPDATE = Math.max(
 									0,
 									Math.min(
-										Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - xpLastUpdatedAt) / (24 * 60 * 60 * 1_000)),
+										Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - XP_LAST_UPDATED_AT) / (24 * 60 * 60 * 1_000)),
 										player.guildXpHistory.length,
 									),
 								);
 
 								// to trigger the xp gained reset if global reset happened after the player left the guild
 								await safePromiseAll([
-									config.get('COMPETITION_START_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
-									config.get('COMPETITION_END_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
-									config.get('LAST_MAYOR_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
-									config.get('LAST_WEEKLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
-									config.get('LAST_MONTHLY_XP_RESET_TIME') >= xpLastUpdatedAt && player.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
-									...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE }).fill(null)
+									config.get('COMPETITION_START_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
+									config.get('COMPETITION_END_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
+									config.get('LAST_MAYOR_XP_RESET_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
+									config.get('LAST_WEEKLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
+									config.get('LAST_MONTHLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
+									...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE })
 										.map(() => player.resetXp({ offsetToReset: OFFSET_FLAGS.DAY })),
 								]);
 
@@ -524,7 +525,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			// sync guild xp, mutedTill & guild ranks
 			(async () => {
 				await safePromiseAll(currentGuildMembers.map(
-					async hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember, this)
+					hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember, this)
 						?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`)),
 				);
 
@@ -661,7 +662,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				// player is staff -> only roles need to be adapted
 				if (isStaff) {
 					const newRank = automatedRanks.reduce(
-						(acc, cur) => (cur.positionReqStaff <= posWithStaff && (acc?.positionReqStaff ?? 0) <= cur.positionReqStaff ? cur : acc),
+						(acc: ArrayElement<typeof automatedRanks> | null, cur) => (cur.positionReqStaff <= posWithStaff && (acc?.positionReqStaff ?? 0) <= cur.positionReqStaff ? cur : acc),
 						null,
 					);
 					if (!newRank) continue;
@@ -669,20 +670,20 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					const member = await player.discordMember;
 					if (!member) continue;
 
-					await player.makeRoleAPICall(
-						newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
+					await player.makeRoleAPICall({
+						rolesToAdd: newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
 							? [ newRank.roleId ]
 							: [],
-						member.roles.cache.filter((_, roleId) => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)), // remove all other rank roles
-						'synced with weight lb',
-					);
+						rolesToRemove: member.roles.cache.filter((_, roleId) => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)), // remove all other rank roles
+						reason: 'synced with weight lb',
+					});
 
 					continue;
 				}
 
 				// non staff
 				const newRank = automatedRanks.reduce(
-					(acc, cur) => (cur.positionReqNonStaff <= posNonStaff && (acc?.positionReqNonStaff ?? 0) <= cur.positionReqNonStaff ? cur : acc),
+					(acc: ArrayElement<typeof automatedRanks> | null, cur) => (cur.positionReqNonStaff <= posNonStaff && (acc?.positionReqNonStaff ?? 0) <= cur.positionReqNonStaff ? cur : acc),
 					null,
 				);
 				if (!newRank) continue;

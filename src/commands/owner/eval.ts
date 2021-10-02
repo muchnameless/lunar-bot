@@ -18,6 +18,7 @@ import { SlashCommand } from '../../structures/commands/SlashCommand';
 /* eslint-enable @typescript-eslint/no-unused-vars */
 import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
 
 
 const { COMMAND_KEY, EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
@@ -76,7 +77,7 @@ export default class EvalCommand extends SlashCommand {
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
 		const me = (guild ?? lgGuild)?.me ?? null;
-		const reply = (options) => InteractionUtil.reply(interaction,
+		const reply = (options: string | InteractionUtilReplyOptions) => InteractionUtil.reply(interaction,
 			typeof options === 'string'
 				? { content: options, ephemeral: false }
 				: { ephemeral: false, ...options },
@@ -170,7 +171,7 @@ export default class EvalCommand extends SlashCommand {
 	override async runMessage(interaction: ContextMenuInteraction) {
 		const INPUT = interaction.options.getMessage('message')!.content;
 
-		if (!INPUT) return await InteractionUtil.reply(interaction, {
+		if (!INPUT) return InteractionUtil.reply(interaction, {
 			content: 'no content to evaluate',
 			ephemeral: true,
 		});
@@ -185,7 +186,7 @@ export default class EvalCommand extends SlashCommand {
 					.setStyle(Constants.MessageButtonStyles.SECONDARY),
 			);
 
-		return await InteractionUtil.reply(interaction, {
+		return InteractionUtil.reply(interaction, {
 			embeds: await this.#eval(
 				interaction,
 				INPUT,
@@ -201,14 +202,14 @@ export default class EvalCommand extends SlashCommand {
 	 * @param interaction
 	 */
 	override async runButton(interaction: ButtonInteraction) {
-		if (interaction.user.id !== this.client.ownerId) return await InteractionUtil.reply(interaction, {
+		if (interaction.user.id !== this.client.ownerId) return InteractionUtil.reply(interaction, {
 			content: 'this command is restricted to the bot owner',
 			ephemeral: true,
 		});
 
 		const { channel } = interaction;
 
-		if (!ChannelUtil.botPermissions(channel)?.has(Permissions.FLAGS.VIEW_CHANNEL)) return await InteractionUtil.reply(interaction, {
+		if (!ChannelUtil.botPermissions(channel)?.has(Permissions.FLAGS.VIEW_CHANNEL)) return InteractionUtil.reply(interaction, {
 			content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
 			ephemeral: true,
 		});
@@ -266,7 +267,7 @@ export default class EvalCommand extends SlashCommand {
 					.setStyle(Constants.MessageButtonStyles.SECONDARY),
 			);
 
-		return await InteractionUtil.reply(interaction, {
+		return InteractionUtil.reply(interaction, {
 			embeds: await this.#eval(
 				interaction,
 				INPUT,

@@ -30,7 +30,7 @@ export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommand
 	 */
 	get visibleCategories() {
 		return this.categories
-			.filter(category => !BridgeCommandCollection.INVISIBLE_CATEGORIES.includes(category))
+			.filter(category => !BridgeCommandCollection.INVISIBLE_CATEGORIES.includes(category!))
 			.sort(compareAlphabetically);
 	}
 
@@ -38,7 +38,7 @@ export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommand
 	 * help command run method
 	 * @param hypixelMessage
 	 */
-	async help(hypixelMessage: HypixelMessage) {
+	async help(hypixelMessage: HypixelMessage<true>) {
 		try {
 			return await this.get('help')?.runMinecraft(hypixelMessage);
 		} catch (error) {
@@ -51,7 +51,7 @@ export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommand
 	 * returns the commands from the provided category
 	 * @param categoryInput
 	 */
-	filterByCategory(categoryInput: string) {
+	filterByCategory(categoryInput: string | null) {
 		return this.filter(({ category, aliases }, name) => category === categoryInput && !aliases?.some(alias => alias.toLowerCase() === name));
 	}
 }

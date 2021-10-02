@@ -23,52 +23,54 @@ type CommandData<UserMessage extends boolean> = If<UserMessage, {
 	prefix: string | null,
 }>;
 
-type AwaitConfirmationOptions = BroadcastOptions | ChatOptions | BroadcastOptions & ChatOptions | { question?: string, timeoutSeconds?: number, errorMessage?: string };
+type AwaitConfirmationOptions = Partial<BroadcastOptions> & Partial<ChatOptions> & { question?: string, timeoutSeconds?: number, errorMessage?: string };
 
 
 export const ChatMessage = loader(MC_CLIENT_VERSION);
 
-export class HypixelMessage<UserMessage extends boolean = true> {
+export class HypixelMessage<UserMessage extends boolean = boolean> {
+	/**
+	 * the chat bridge that instantiated the message
+	 */
 	chatBridge: ChatBridge;
+	/**
+	 * the prismarine-parsed message
+	 */
 	prismarineMessage: PrismarineChatMessage;
+	/**
+	 * in game message position
+	 */
 	position: typeof MESSAGE_POSITIONS[keyof typeof MESSAGE_POSITIONS];
-	discordMessage: Promise<Message | null>;
+	/**
+	 * forwarded message
+	 */
+	discordMessage: Promise<Message | null> = Promise.resolve(null);
+	/**
+	 * raw content string
+	 */
 	rawContent: string;
+	/**
+	 * content with invis chars removed
+	 */
 	cleanedContent: string;
-	type!: If<UserMessage, HypixelMessageType>;
-	author!: If<UserMessage, HypixelMessageAuthor>;
+	/**
+	 * message type
+	 */
+	declare type: If<UserMessage, HypixelMessageType>;
+	declare author: If<UserMessage, HypixelMessageAuthor>;
 	content: string;
 	spam: boolean;
-	commandData: CommandData<UserMessage>;
+	declare commandData: CommandData<UserMessage>;
 
 	/**
 	 * @param chatBridge
 	 * @param packet
 	 */
 	constructor(chatBridge: ChatBridge, { message, position }: ChatPacket) {
-		/**
-		 * the chat bridge that instantiated the message
-		 */
 		this.chatBridge = chatBridge;
-		/**
-		 * the prismarine-parsed message
-		 */
 		this.prismarineMessage = ChatMessage.fromNotch(message);
-		/**
-		 * in game message position
-		 */
 		this.position = MESSAGE_POSITIONS[position] ?? null;
-		/**
-		 * forwarded message
-		 */
-		this.discordMessage = Promise.resolve(null);
-		/**
-		 * raw content string
-		 */
 		this.rawContent = this.prismarineMessage.toString();
-		/**
-		 * content with invis chars removed
-		 */
 		this.cleanedContent = this.rawContent.replace(INVISIBLE_CHARACTER_REGEXP, '').trim();
 
 		/**
@@ -80,9 +82,6 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)])?: /);
 
 		if (matched) {
-			/**
-			 * message type
-			 */
 			(this as HypixelMessage<true>).type = (matched.groups!.type?.toUpperCase() as HypixelMessageType ?? (matched.groups!.whisper ? MESSAGE_TYPES.WHISPER : null));
 			(this as HypixelMessage<true>).author = new HypixelMessageAuthor(
 				this.chatBridge,
@@ -92,7 +91,8 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 						guildRank: matched.groups!.guildRank,
 						uuid: matched.groups!.type
 							// clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
-							? this.prismarineMessage.extra?.[0].clickEvent?.value.slice('/viewprofile '.length).replaceAll('-', '')
+							// @ts-expect-error extra typings are missing
+							? this.prismarineMessage.extra?.[0]?.clickEvent?.value.slice('/viewprofile '.length).replaceAll('-', '')
 							: null,
 					}
 					: {
@@ -106,14 +106,14 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 
 			// message was sent from the bot -> don't parse input
 			if (this.me) {
-				this.commandData = null;
+				(this as HypixelMessage<false>).commandData = null;
 				return;
 			}
 
 			const prefixMatched = new RegExp(
 				`^(?:${[ ...this.client.config.get('PREFIXES').map(x => escapeRegex(x)), `@${this.chatBridge.bot!.username}` ].join('|')})`,
 				'i',
-			).exec(this.content)?.[0]; // PREFIXES, @mention
+			).exec(this.content)?.[0] ?? null; // PREFIXES, @mention
 
 			const args: string[] = this.content // command arguments
 				.slice(prefixMatched?.length ?? 0)
@@ -122,24 +122,24 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 			const COMMAND_NAME = args.shift(); // extract first word
 
 			// no command, only ping or prefix
-			this.commandData = (!prefixMatched && this.type !== MESSAGE_TYPES.WHISPER) || !COMMAND_NAME
+			(this as HypixelMessage<true>).commandData = (!prefixMatched && this.type !== MESSAGE_TYPES.WHISPER) || !COMMAND_NAME
 				? {
 					name: null,
 					command: null,
 					args,
 					prefix: null,
-				} as CommandData<UserMessage> : {
+				} : {
 					name: COMMAND_NAME,
 					command: this.client.chatBridges.commands.getByName(COMMAND_NAME.toLowerCase()),
 					args,
 					prefix: prefixMatched,
-				} as CommandData<UserMessage>;
+				};
 		} else {
-			this.type = null as If<UserMessage, HypixelMessageType>;
-			this.author = null as If<UserMessage, HypixelMessageAuthor>;
+			(this as HypixelMessage<false>).type = null;
+			(this as HypixelMessage<false>).author = null;
 			this.content = this.cleanedContent;
 			this.spam = spamMessages.test(this.content);
-			this.commandData = null as CommandData<UserMessage>;
+			(this as HypixelMessage<false>).commandData = null;
 		}
 	}
 
@@ -150,8 +150,8 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 	get prefixReplacedContent() {
 		return this.commandData?.command
 			? this.content
-				.replace(this.commandData.prefix, '/')
-				.replace(this.commandData.name, this.commandData.command.name)
+				.replace(this.commandData.prefix!, '/')
+				.replace(this.commandData.name!, this.commandData.command.name)
 			: this.content;
 	}
 
@@ -166,14 +166,7 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 	 * wether the message was sent by the bot
 	 */
 	get me() {
-		return this.author?.ign === this.chatBridge.bot!.username;
-	}
-
-	/**
-	 * wether the message was sent by a non-bot user
-	 */
-	get isUserMessage() {
-		return Boolean(this.type && !this.me);
+		return this.author?.ign === this.chatBridge.bot?.username ?? '@';
 	}
 
 	/**
@@ -204,8 +197,11 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 		return this.author?.member;
 	}
 
-	isUserMessageTG(): this is HypixelMessage<true> {
-		return this.type !== null && Reflect.has(MESSAGE_TYPES, this.type);
+	/**
+	 * wether the message was sent by a non-bot user
+	 */
+	isUserMessage(): this is HypixelMessage<true> {
+		return this.type !== null && !this.me;
 	}
 
 	/**
@@ -221,12 +217,14 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 	 * @param contentOrOptions
 	 */
 	async reply(contentOrOptions: string | ChatOptions | BroadcastOptions & ChatOptions) {
+		if (!this.isUserMessage()) throw new Error(`cannot reply to a non-user message, received type '${this.type}'`);
+
 		const { ephemeral = false, ...options } = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions }
+			? { content: contentOrOptions } as ChatOptions | BroadcastOptions & ChatOptions
 			: contentOrOptions;
 
 		// to be compatible to Interactions
-		if (ephemeral) return this.author!.send({
+		if (ephemeral) return this.author.send({
 			maxParts: Number.POSITIVE_INFINITY,
 			...options,
 		});
@@ -243,7 +241,7 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 				});
 
 				// DM author the message if sending to gchat failed
-				if (!result[0]) this.author!.send(`an error occurred while replying in ${this.type} chat\n${options.content ?? ''}`);
+				if (!result[0]) this.author.send(`an error occurred while replying in ${this.type} chat\n${options.content ?? ''}`);
 
 				return result;
 			}
@@ -255,7 +253,7 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 				});
 
 			case MESSAGE_TYPES.WHISPER:
-				return this.author!.send({
+				return this.author.send({
 					maxParts: Number.POSITIVE_INFINITY,
 					...options,
 				});
@@ -320,7 +318,7 @@ export class HypixelMessage<UserMessage extends boolean = true> {
 	 */
 	async awaitConfirmation(questionOrOptions: string | AwaitConfirmationOptions = {}) {
 		const { question = 'confirm this action?', timeoutSeconds = 60, errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
-			? { question: questionOrOptions }
+			? { question: questionOrOptions } as AwaitConfirmationOptions
 			: questionOrOptions;
 
 		this.reply({

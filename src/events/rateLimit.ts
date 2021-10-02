@@ -17,7 +17,7 @@ export default class RateLimitEvent extends Event {
 	 * event listener callback
 	 * @param rateLimitData
 	 */
-	override async run(rateLimitData: RateLimitData) {
+	override run(rateLimitData: RateLimitData) {
 		if (rateLimitData.global) return logger.error('[GLOBAL RATELIMIT]', { timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData });
 
 		// adding and removing single reactions are 1/250ms, so get rate limited each time

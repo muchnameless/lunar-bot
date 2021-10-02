@@ -25,15 +25,19 @@ export default class KickBridgeCommand extends BridgeCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
+	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
 		const targetInput = hypixelMessage.commandData.args.shift()!;
+		const hypixelGuild = hypixelMessage.hypixelGuild ?? hypixelMessage.player?.hypixelGuild;
+
+		if (!hypixelGuild) return hypixelMessage.author.send('unable to determine the guild to perform the kick on');
+
 		const { content } = await (this.client.commands.get('guild') as GuildCommand)?.runKick({
 			target: this.client.players.getByIgn(targetInput) ?? targetInput,
 			executor: hypixelMessage.player,
 			reason: hypixelMessage.commandData.args.join(' '),
-			hypixelGuild: hypixelMessage.hypixelGuild,
+			hypixelGuild,
 		});
 
-		return hypixelMessage.author!.send(content);
+		return hypixelMessage.author.send(content);
 	}
 }

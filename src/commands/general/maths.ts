@@ -99,8 +99,6 @@ class Parser {
 
 
 export default class MathsCommand extends DualCommand {
-	unaryOperators: { m(x?: number): number; k(x?: number): number; '°'(x?: number | undefined): number; '!'(x?: number | undefined): number; fac(x?: number | undefined): number; sin(x?: number | undefined): number; cos(x?: number | undefined): number; tan(x?: number | undefined): number; sqrt(x?: number | undefined): number; exp(x?: number | undefined): number; ln(x?: number | undefined): number; percent(x?: number | undefined): number; };
-
 	constructor(context: CommandContext) {
 		super(context, {
 			aliases: [],
@@ -117,63 +115,6 @@ export default class MathsCommand extends DualCommand {
 			args: true,
 			usage: '',
 		});
-
-		const self = this;
-
-		this.unaryOperators = {
-			m(x = 1) {
-				return mul(x, 1_000_000);
-			},
-			k(x = 1) {
-				return mul(x, 1_000);
-			},
-			'°'(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
-				return mul(x, div(Math.PI, 180));
-			},
-			'!'(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
-				if (x < 0) return Number.NaN;
-				return self.factorial(x);
-			},
-			fac(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
-				if (x < 0) return Number.NaN;
-				return self.factorial(x);
-			},
-			sin(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
-				if (MathsCommand.isMultipleOfPi(x)) return 0;
-				return Math.sin(x);
-			},
-			cos(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
-				if (MathsCommand.isMultipleOfPiHalf(x)) return 0;
-				return Math.cos(x);
-			},
-			tan(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
-				if (MathsCommand.isMultipleOfPi(x)) return 0;
-				if (MathsCommand.isMultipleOfPiHalf(x)) return Number.NaN;
-				return Math.tan(x);
-			},
-			sqrt(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
-				return Math.sqrt(x);
-			},
-			exp(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
-				return Math.exp(x);
-			},
-			ln(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
-				return Math.log(x);
-			},
-			percent(x?: number) {
-				if (typeof x === 'undefined') throw new Error('`%` requires one argument');
-				return div(x, 100);
-			},
-		} as const;
 	}
 
 	static percent = {
@@ -211,6 +152,61 @@ export default class MathsCommand extends DualCommand {
 	static term = {
 		precedence: 1,
 		associativity: 'left',
+	} as const;
+
+	unaryOperators = {
+		m(x = 1) {
+			return mul(x, 1_000_000);
+		},
+		k(x = 1) {
+			return mul(x, 1_000);
+		},
+		'°'(x?: number) {
+			if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
+			return mul(x, div(Math.PI, 180));
+		},
+		'!': (x?: number) => {
+			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+			if (x < 0) return Number.NaN;
+			return this.factorial(x);
+		},
+		fac: (x?: number) => {
+			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
+			if (x < 0) return Number.NaN;
+			return this.factorial(x);
+		},
+		sin(x?: number) {
+			if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
+			if (MathsCommand.isMultipleOfPi(x)) return 0;
+			return Math.sin(x);
+		},
+		cos(x?: number) {
+			if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
+			if (MathsCommand.isMultipleOfPiHalf(x)) return 0;
+			return Math.cos(x);
+		},
+		tan(x?: number) {
+			if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
+			if (MathsCommand.isMultipleOfPi(x)) return 0;
+			if (MathsCommand.isMultipleOfPiHalf(x)) return Number.NaN;
+			return Math.tan(x);
+		},
+		sqrt(x?: number) {
+			if (typeof x === 'undefined') throw new Error('`sqrt` requires one argument');
+			return Math.sqrt(x);
+		},
+		exp(x?: number) {
+			if (typeof x === 'undefined') throw new Error('`exp` requires one argument');
+			return Math.exp(x);
+		},
+		ln(x?: number) {
+			if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
+			return Math.log(x);
+		},
+		percent(x?: number) {
+			if (typeof x === 'undefined') throw new Error('`%` requires one argument');
+			return div(x, 100);
+		},
 	} as const;
 
 	static binaryOperators = {
@@ -257,7 +253,10 @@ export default class MathsCommand extends DualCommand {
 	/**
 	 * lexer for mathematical expressions
 	 */
-	static lexer = new Lexer(function(c: number) { throw new Error(`LexerError: unexpected character at index ${this.index}: '${c}'`); }) // eslint-disable-line prefer-arrow-callback
+	static lexer = new Lexer(function(c: string) { // eslint-disable-line prefer-arrow-callback
+		// @ts-expect-error
+		throw new Error(`LexerError: unexpected character at index ${(this as Lexer).index}: '${c}'`);
+	})
 		.addRule(/,/, () => void 0) // ignore ','
 		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[!()*+/^°-]/, (lexeme: string) => lexeme)
 		.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
@@ -409,15 +408,15 @@ export default class MathsCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
-		return await InteractionUtil.reply(interaction, this.#generateReply(interaction.options.getString('input', true)));
+	override runSlash(interaction: CommandInteraction) {
+		return InteractionUtil.reply(interaction, this.#generateReply(interaction.options.getString('input', true)));
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
-		return await hypixelMessage.reply(this.#generateReply(hypixelMessage.commandData!.args!.join('')));
+	override runMinecraft(hypixelMessage: HypixelMessage<true>) {
+		return hypixelMessage.reply(this.#generateReply(hypixelMessage.commandData!.args!.join('')));
 	}
 }

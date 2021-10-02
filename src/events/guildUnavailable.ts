@@ -16,7 +16,7 @@ export default class GuildUnavailableEvent extends Event {
 	 * event listener callback
 	 * @param guild
 	 */
-	override async run(guild: Guild) {
+	override run(guild: Guild) {
 		logger.info(`[GUILD UNAVAILABLE]: ${guild.name}`);
 
 		// sweep linked discord members cache

@@ -23,6 +23,7 @@ import {
 } from '../constants';
 import type { Components } from '@zikeji/hypixel';
 import type { ArrayElement } from '../types/util';
+import type { DungeonTypes, SkillTypes } from '../constants';
 
 
 /**
@@ -31,29 +32,29 @@ import type { ArrayElement } from '../types/util';
  * @param xp
  * @param individualCap individual level cap for the player
  */
-export function getSkillLevel(type: string, xp = 0, individualCap: number | null = null) {
-	let xpTable = DUNGEON_TYPES_AND_CLASSES.includes(type)
+export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individualCap: number | null = null) {
+	let xpTable = DUNGEON_TYPES_AND_CLASSES.includes(type as any)
 		? DUNGEON_XP
-		: type === 'runecrafting'
+		: (type === 'runecrafting'
 			? RUNECRAFTING_XP
-			: SKILL_XP;
-	let maxLevel = Math.max(...Object.keys(xpTable));
+			: SKILL_XP);
+	let maxLevel = Math.max(...Object.keys(xpTable) as unknown as number[]);
 
-	if (SKILL_CAP[type] > maxLevel || individualCap) {
+	if (SKILL_CAP[type as keyof typeof SKILL_CAP] > maxLevel || individualCap) {
 		xpTable = { ...SKILL_XP_PAST_50, ...xpTable };
 		maxLevel = individualCap !== null
 			? individualCap
-			: Math.max(...Object.keys(xpTable));
+			: Math.max(...Object.keys(xpTable) as unknown as number[]);
 	}
 
 	let xpTotal = 0;
 	let trueLevel = 0;
 
 	for (let x = 1; x <= maxLevel; ++x) {
-		xpTotal += xpTable[x];
+		xpTotal += xpTable[x as keyof typeof xpTable];
 
 		if (xpTotal > xp) {
-			xpTotal -= xpTable[x];
+			xpTotal -= xpTable[x as keyof typeof xpTable];
 			break;
 		} else {
 			trueLevel = x;
@@ -61,7 +62,7 @@ export function getSkillLevel(type: string, xp = 0, individualCap: number | null
 	}
 
 	if (trueLevel < maxLevel) {
-		const nonFlooredLevel = trueLevel + (Math.floor(xp - xpTotal) / xpTable[trueLevel + 1]);
+		const nonFlooredLevel = trueLevel + (Math.floor(xp - xpTotal) / xpTable[trueLevel + 1 as keyof typeof xpTable]);
 
 		return {
 			trueLevel,
@@ -185,7 +186,7 @@ export function getSenitherSlayerWeight(slayerType: ArrayElement<typeof SLAYERS>
  * @param dungeonType
  * @param xp
  */
-export function getSenitherDungeonWeight(dungeonType: ArrayElement<typeof DUNGEON_TYPES_AND_CLASSES>, xp = 0) {
+export function getSenitherDungeonWeight(dungeonType: DungeonTypes, xp = 0) {
 	const { nonFlooredLevel: LEVEL } = getSkillLevel(dungeonType, xp);
 	const DUNGEON_WEIGHT = (LEVEL ** 4.5) * (DUNGEON_EXPONENTS[dungeonType] ?? 0);
 	const MAX_XP = DUNGEON_XP_TOTAL[DUNGEON_CAP[dungeonType]] ?? Number.POSITIVE_INFINITY;
@@ -209,9 +210,9 @@ export const { getWeightRaw: getLilyWeightRaw } = lilyweight();
  * @param skyblockMember
  */
 export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfileMember) {
-	const SKILL_XP_LILY = LILY_SKILL_NAMES_API.map(skill => skyblockMember[skill] ?? 0);
+	const SKILL_XP_LILY = LILY_SKILL_NAMES_API.map(skill => skyblockMember[skill as keyof typeof skyblockMember] ?? 0) as number[];
 	const { total, skill: { overflow } } = getLilyWeightRaw(
-		LILY_SKILL_NAMES.map((skill, index) => getSkillLevel(skill, SKILL_XP_LILY[index], 60).trueLevel), // skill levels
+		LILY_SKILL_NAMES.map((skill, index) => getSkillLevel(skill as SkillTypes, SKILL_XP_LILY[index], 60).trueLevel), // skill levels
 		SKILL_XP_LILY, // skill xp
 		skyblockMember.dungeons?.dungeon_types?.catacombs?.tier_completions ?? {}, // catacombs completions
 		skyblockMember.dungeons?.dungeon_types?.master_catacombs?.tier_completions ?? {}, // master catacombs completions

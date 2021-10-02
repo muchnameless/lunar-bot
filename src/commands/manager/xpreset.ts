@@ -42,7 +42,7 @@ export default class XpResetCommand extends SlashCommand {
 					cache: false,
 				});
 
-			if (!player) return await InteractionUtil.reply(interaction, `\`${PLAYER_INPUT}\` is not in the player db`);
+			if (!player) return InteractionUtil.reply(interaction, `\`${PLAYER_INPUT}\` is not in the player db`);
 
 			await InteractionUtil.awaitConfirmation(interaction, `reset xp gained from \`${player}\`?`);
 
@@ -76,6 +76,6 @@ export default class XpResetCommand extends SlashCommand {
 			.setDescription(`${interaction.user.tag} | ${interaction.user} ${result}`),
 		);
 
-		return await InteractionUtil.reply(interaction, result);
+		return InteractionUtil.reply(interaction, result);
 	}
 }

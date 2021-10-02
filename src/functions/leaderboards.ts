@@ -31,15 +31,16 @@ import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api/cache';
 import type {
 	ButtonInteraction,
-	Interaction,
 	SelectMenuInteraction,
 	Snowflake,
 	User,
 } from 'discord.js';
+import type { XPOffsets } from '../constants';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { LunarClient } from '../structures/LunarClient';
 import type { ConfigManager } from '../structures/database/managers/ConfigManager';
+import type { ChatInteraction } from '../util/InteractionUtil';
 
 
 interface LeaderboardData {
@@ -54,21 +55,41 @@ interface LeaderboardData {
 
 type GetEntry = (player: PlayerData) => string;
 
-interface PlayerData {
+interface PlayerDataBase {
 	ign: string;
 	discordId: Snowflake | null;
 	xpLastUpdatedAt: number | null;
-	paid?: boolean;
 	sortingStat: number;
-	isStaff?: boolean;
 }
+
+type PlayerData<xpType extends string = string, lbType extends string = string> = PlayerDataBase
+	& (xpType extends 'purge'
+		? {
+			isStaff: boolean;
+			guildId: boolean;
+			gainedWeight: number;
+			totalWeight: number;
+			gainedGuildXp: number;
+		} : {
+			paid: boolean;
+		})
+	& (xpType extends 'skill-average'
+		? {
+			skillAverageGain: number;
+			trueAverageGain: number;
+		} : xpType extends 'weight'
+			? {
+				weightGain: number;
+				overflowGain: number;
+				totalWeightGain: number;
+			} : PlayerDataBase);
 
 type DataConverter = (player: Player) => PlayerData
 
 interface LeaderboardArgs {
 	lbType: string;
 	xpType: string;
-	offset: string;
+	offset: XPOffsets;
 	hypixelGuild: HypixelGuild | typeof GUILD_ID_ALL;
 	user: User;
 }
@@ -77,12 +98,33 @@ interface LeaderboardArgsWithPage extends LeaderboardArgs {
 	page: number;
 }
 
+type CacheKeyParsed = [
+	typeof LB_KEY,
+	Snowflake, // user id
+	string, // hypixel guild id
+	string, // lbType
+	string, // xpType
+	XPOffsets, // offset
+];
+
+type ButtonCustomIdParsed = [
+	...CacheKeyParsed,
+	number, // new page
+	typeof DOUBLE_LEFT_EMOJI | typeof LEFT_EMOJI | typeof RIGHT_EMOJI | typeof DOUBLE_RIGHT_EMOJI | typeof RELOAD_EMOJI, // emoji
+];
+
+type SelectMenuCustomIdParsed = [
+	...CacheKeyParsed,
+	Omit<keyof LeaderboardArgs, 'hypixelGuild' | 'user'> | 'guild', // selectType
+];
+
+type CacheKey = ReturnType<typeof createCacheKey>;
 
 /**
  * returns the key for the redis cache
  * @param leaderboardArgs
  */
-const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild, lbType, xpType, offset }: LeaderboardArgs) => `${LB_KEY}:${USER_ID}:${typeof hypixelGuild === 'string' ? hypixelGuild : hypixelGuild.guildId}:${lbType}:${xpType}:${offset}`;
+const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild, lbType, xpType, offset }: LeaderboardArgs) => `${LB_KEY}:${USER_ID}:${typeof hypixelGuild === 'string' ? hypixelGuild : hypixelGuild.guildId}:${lbType}:${xpType}:${offset}` as const;
 
 /**
  * returns a message action row with pagination buttons
@@ -92,7 +134,7 @@ const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild, lbType, xpType, o
  * @param totalPages
  * @param isExpired
  */
-function createActionRows(client: LunarClient, cacheKey: string, { page, lbType, xpType, offset, hypixelGuild }: LeaderboardArgsWithPage, totalPages: number, isExpired = false) {
+function createActionRows(client: LunarClient, cacheKey: CacheKey, { page, lbType, xpType, offset, hypixelGuild }: LeaderboardArgsWithPage, totalPages: number, isExpired = false) {
 	let decDisabled;
 	let incDisabled;
 	let pageStyle;
@@ -125,9 +167,9 @@ function createActionRows(client: LunarClient, cacheKey: string, { page, lbType,
 	if (xpType !== 'purge') {
 		const offsetSelectMenu = new MessageSelectMenu()
 			.setCustomId(`${cacheKey}:offset`)
-			.setPlaceholder(`Offset: ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset] ?? 'None')}`)
+			.setPlaceholder(`Offset: ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset as keyof typeof XP_OFFSETS_CONVERTER] ?? 'None')}`)
 			.addOptions(
-				Object.keys(XP_OFFSETS_SHORT).map(x => ({ label: upperCaseFirstChar(x), value: XP_OFFSETS_CONVERTER[x] })),
+				Object.keys(XP_OFFSETS_SHORT).map(x => ({ label: upperCaseFirstChar(x), value: XP_OFFSETS_CONVERTER[x as keyof typeof XP_OFFSETS_CONVERTER] })),
 			);
 
 		if (lbType === 'total') offsetSelectMenu.addOptions({ label: 'None', value: 'none' });
@@ -213,12 +255,12 @@ export function getDefaultOffset(config: ConfigManager) {
  * @param interaction
  * @param leaderboardArgs
  */
-export async function handleLeaderboardCommandInteraction(interaction: Interaction, leaderboardArgs: LeaderboardArgsWithPage) {
+export async function handleLeaderboardCommandInteraction(interaction: ChatInteraction, leaderboardArgs: LeaderboardArgsWithPage) {
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	const embeds = await cache.get(CACHE_KEY) as MessageEmbed[]
 		?? createLeaderboardEmbeds(
-			interaction.client,
-			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
+			interaction.client as LunarClient,
+			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client as LunarClient, leaderboardArgs),
 		);
 
 	if (leaderboardArgs.page < 1) {
@@ -244,7 +286,7 @@ export async function handleLeaderboardCommandInteraction(interaction: Interacti
  * @param interaction
  */
 export async function handleLeaderboardButtonInteraction(interaction: ButtonInteraction) {
-	const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, EMOJI ] = interaction.customId.split(':');
+	const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, EMOJI ] = interaction.customId.split(':') as ButtonCustomIdParsed;
 	const leaderboardArgs: LeaderboardArgsWithPage = {
 		lbType: LB_TYPE,
 		xpType: XP_TYPE,
@@ -264,8 +306,8 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 	const IS_RELOAD = EMOJI === RELOAD_EMOJI;
 	const embeds = IS_RELOAD
 		? createLeaderboardEmbeds(
-			interaction.client,
-			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
+			interaction.client as LunarClient,
+			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client as LunarClient, leaderboardArgs),
 		)
 		: await cache.get(CACHE_KEY) as MessageEmbed[];
 
@@ -278,7 +320,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 			? interaction.message.url
 			: `https://discord.com/channels/${interaction.message.guild_id ?? '@me'}/${interaction.message.channel_id}/${interaction.message.id}`;
 
-		return await InteractionUtil.reply(interaction, {
+		return InteractionUtil.reply(interaction, {
 			content: oneLine`
 				leaderboard timed out, use ${
 					`[${RELOAD_EMOJI}](${URL})`
@@ -311,7 +353,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
  * @param interaction
  */
 export async function handleLeaderboardSelectMenuInteraction(interaction: SelectMenuInteraction) {
-	const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE ] = interaction.customId.split(':');
+	const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE ] = interaction.customId.split(':') as SelectMenuCustomIdParsed;
 	const leaderboardArgs: LeaderboardArgsWithPage = {
 		lbType: LB_TYPE,
 		xpType: XP_TYPE,
@@ -342,7 +384,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 		case 'offset': {
 			const [ OFFSET_SELECT ] = interaction.values;
 			leaderboardArgs.offset = OFFSET_SELECT !== 'none'
-				? OFFSET_SELECT
+				? OFFSET_SELECT as XPOffsets
 				: '';
 			break;
 		}
@@ -355,8 +397,14 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 			break;
 		}
 
-		default:
+		case 'xpType':
 			[ leaderboardArgs[SELECT_TYPE] ] = interaction.values;
+			break;
+
+		default: {
+			const never: never = SELECT_TYPE;
+			throw new Error(`unknown select type ${never}`);
+		}
 	}
 
 	if (USER_ID !== interaction.user.id) {
@@ -366,8 +414,8 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	const embeds = await cache.get(CACHE_KEY) as MessageEmbed[]
 		?? createLeaderboardEmbeds(
-			interaction.client,
-			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
+			interaction.client as LunarClient,
+			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client as LunarClient, leaderboardArgs),
 		);
 
 	await InteractionUtil.update(interaction, {
@@ -482,7 +530,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 		: '';
 	const NUMBER_FORMAT = config.get('NUMBER_FORMAT');
 
-	let playerData: PlayerData[];
+	let playerData: PlayerData<typeof xpType, 'gained'>[];
 	let totalStats;
 	let dataConverter: DataConverter;
 	let getEntry: GetEntry;
@@ -523,9 +571,9 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			};
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
-				${Formatters.bold((playerData.reduce((acc, player) => acc + player.skillAverageGain, 0) / playerData.length).toFixed(2))}
-				[${Formatters.bold((playerData.reduce((acc, player) => acc + player.trueAverageGain, 0) / playerData.length).toFixed(2))}]`;
-			getEntry = player => `${client.formatDecimalNumber(player.skillAverageGain, Math.floor(playerData[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.trueAverageGain, Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
+				${Formatters.bold(((playerData as PlayerData<'skill-average'>[]).reduce((acc, player) => acc + player.skillAverageGain, 0) / playerData.length).toFixed(2))}
+				[${Formatters.bold(((playerData as PlayerData<'skill-average'>[]).reduce((acc, player) => acc + player.trueAverageGain, 0) / playerData.length).toFixed(2))}]`;
+			getEntry = (player: PlayerData<'skill-average'>) => `${client.formatDecimalNumber(player.skillAverageGain, Math.floor((playerData as PlayerData<'skill-average'>[])[0]?.skillAverageGain).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.trueAverageGain, Math.floor(Math.max(...(playerData as PlayerData<'skill-average'>[]).map(({ trueAverageGain }) => trueAverageGain))).toLocaleString(NUMBER_FORMAT).length)}]`;
 			break;
 		}
 
@@ -553,7 +601,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 					// sortingStat: totalWeight * (gainedWeight > 0 ? 1 + (gainedWeight / totalWeight) : 0.75) * (gainedGuildXp > 5_000 ? (gainedGuildXp / 5_000) ** (1 / 10) : 0.9),
 				};
 			};
-			playerData = getPlayerData(client, hypixelGuild, dataConverter)
+			playerData = (getPlayerData(client, hypixelGuild, dataConverter) as PlayerData<'purge'>[])
 				.sort((a, b) => a.totalWeight - b.totalWeight)
 				.sort((a, b) => a.sortingStat - b.sortingStat);
 			const temp1 = Math.floor(playerData.at(-1)!.sortingStat).toLocaleString(NUMBER_FORMAT).length;
@@ -562,8 +610,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			const PADDING_AMOUNT_TOTAL = Math.floor(Math.max(...playerData.map(({ totalWeight }) => totalWeight))).toLocaleString(NUMBER_FORMAT).length;
 			getEntry = player => `${client.formatDecimalNumber(player.sortingStat, temp1)} - ${client.formatDecimalNumber(player.gainedWeight, PADDING_AMOUNT_GAIN)} [${client.formatDecimalNumber(player.totalWeight, PADDING_AMOUNT_TOTAL)}] - ${client.formatNumber(player.gainedGuildXp, temp2)}`;
 			totalStats = oneLine`
-				${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight, 0) / playerData.length)} 
-				[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight, 0) / playerData.length)}]`;
+				${client.formatDecimalNumber((playerData as PlayerData<'purge'>[]).reduce((acc, player) => acc + player.gainedWeight, 0) / playerData.length)} 
+				[${client.formatDecimalNumber((playerData as PlayerData<'purge'>[]).reduce((acc, player) => acc + player.totalWeight, 0) / playerData.length)}]`;
 			break;
 		}
 

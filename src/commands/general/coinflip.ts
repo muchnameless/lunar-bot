@@ -36,15 +36,15 @@ export default class CoinFlipCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
-		return await InteractionUtil.reply(interaction, this.#generateReply());
+	override runSlash(interaction: CommandInteraction) {
+		return InteractionUtil.reply(interaction, this.#generateReply());
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
-		return await hypixelMessage.reply(this.#generateReply());
+	override runMinecraft(hypixelMessage: HypixelMessage<true>) {
+		return hypixelMessage.reply(this.#generateReply());
 	}
 }

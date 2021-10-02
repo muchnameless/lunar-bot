@@ -10,11 +10,11 @@ export class ConfigManager extends ModelManager<Config> {
 	 * @param key config key
 	 * @param value new value
 	 */
-	async set(key: string, value: unknown) {
+	set(key: string, value: unknown) {
 		const UPPERCASED_KEY = key.toUpperCase();
 		const dbEntry = this.cache.get(UPPERCASED_KEY);
 
-		if (!dbEntry) return this.add({ key: UPPERCASED_KEY, value });
+		if (!dbEntry) return this.add({ key: UPPERCASED_KEY, value: JSON.stringify(value) });
 
 		dbEntry.value = value as string;
 		return dbEntry.save();
@@ -24,7 +24,10 @@ export class ConfigManager extends ModelManager<Config> {
 	 * get the value of a config entry or `null` if non-existent
 	 * @param key config key
 	 */
-	get<T extends keyof ConfigValues>(key: T) {
-		return this.cache.get(key?.toUpperCase()!)?.parsedValue as ConfigValues[T] ?? logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`);
+	get<T extends keyof ConfigValues>(key: T): ConfigValues[T];
+	get(key: string): unknown;
+	get(key?: null): null;
+	get(key: any) {
+		return this.cache.get(key?.toUpperCase()!)?.parsedValue ?? logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`);
 	}
 }

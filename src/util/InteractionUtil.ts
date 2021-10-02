@@ -17,6 +17,7 @@ import type {
 	TextBasedChannels,
 	WebhookEditMessageOptions,
 } from 'discord.js';
+import type { SplitOptions } from '../functions';
 import type { LunarClient } from '../structures/LunarClient';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { Player } from '../structures/database/models/Player';
@@ -29,7 +30,12 @@ interface InteractionData {
 	autoDefer: NodeJS.Timeout | null;
 }
 
-type ChatInteraction = CommandInteraction | MessageComponentInteraction;
+export type ChatInteraction = CommandInteraction | MessageComponentInteraction;
+
+export interface InteractionUtilReplyOptions extends InteractionReplyOptions {
+	split?: SplitOptions | false;
+	code?: string | boolean;
+}
 
 interface GetPlayerOptions {
 	/** wether to use the current user in case that no player / target option is provided */
@@ -189,7 +195,7 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param contentOrOptions
 	 */
-	static async reply(interaction: ChatInteraction, contentOrOptions: string | (InteractionReplyOptions & { split?: string | boolean, code?: string | boolean })) {
+	static async reply(interaction: ChatInteraction, contentOrOptions: string | InteractionUtilReplyOptions) {
 		const cached = this.CACHE.get(interaction)!;
 		const options = typeof contentOrOptions === 'string'
 			? { ephemeral: cached.useEphemeral, content: contentOrOptions }

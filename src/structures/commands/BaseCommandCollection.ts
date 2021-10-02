@@ -6,6 +6,7 @@ import type { LunarClient } from '../LunarClient';
 import type { DualCommand } from './DualCommand';
 import type { SlashCommand } from './SlashCommand';
 import type { BridgeCommand } from './BridgeCommand';
+import type { BaseCommand } from './BaseCommand';
 
 
 interface CommandLoadOptions {
@@ -17,20 +18,20 @@ type CommandType = DualCommand | SlashCommand | BridgeCommand;
 
 export class BaseCommandCollection<C extends CommandType = CommandType> extends Collection<string, C> {
 	client: LunarClient;
+	/**
+	 * path to the command files
+	 */
 	dirURL: URL;
 
 	/**
 	 * @param client
-	 * @param dirURL the path to the commands folder
+	 * @param dirURL
 	 * @param entries
 	 */
 	constructor(client: LunarClient, dirURL: URL, entries?: readonly [ string, C ][]) {
 		super(entries);
 
 		this.client = client;
-		/**
-		 * path to the command files
-		 */
 		this.dirURL = dirURL;
 	}
 
@@ -80,8 +81,8 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 		let filePath = pathToFileURL(file).href;
 		if (reload) filePath = `${filePath}?update=${Date.now()}`;
 
-		const Command = (await import(filePath)).default as typeof DualCommand | typeof SlashCommand | typeof BridgeCommand;
-		const command = new Command({
+		const Command = (await import(filePath)).default as typeof BaseCommand;
+		const command: BaseCommand = new Command({
 			client: this.client,
 			collection: this,
 			name,
@@ -131,7 +132,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 		if (similarity < this.client.config.get('AUTOCORRECT_THRESHOLD')) return null;
 
 		// return command if it is visible
-		command = this.get(value) as C;
-		return (command.visible ?? true) ? command : null;
+		command = this.get(value)!;
+		return ((command as DualCommand).visible ?? true) ? command : null;
 	}
 }

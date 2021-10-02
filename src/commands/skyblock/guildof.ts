@@ -50,14 +50,14 @@ export default class GuildOfCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		return await InteractionUtil.reply(interaction, await this.#generateReply(interaction.options.getString('ign', true)));
+		return InteractionUtil.reply(interaction, await this.#generateReply(interaction.options.getString('ign', true)));
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
-		return await hypixelMessage.reply(await this.#generateReply(...hypixelMessage.commandData!.args));
+	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+		return hypixelMessage.reply(await this.#generateReply(...hypixelMessage.commandData!.args));
 	}
 }

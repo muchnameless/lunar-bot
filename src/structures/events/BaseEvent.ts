@@ -18,7 +18,7 @@ export class BaseEvent {
 	name: string;
 	once: boolean;
 	enabled: boolean;
-	callback: () => Promise<void> | void;
+	callback = this.run.bind(this);
 
 	/**
 	 * @param context
@@ -30,8 +30,6 @@ export class BaseEvent {
 
 		this.once = once ?? false;
 		this.enabled = enabled ?? true;
-
-		this.callback = this.run.bind(this);
 	}
 
 	/**
@@ -63,7 +61,7 @@ export class BaseEvent {
 	 * event listener callback
 	 */
 	run(...args: unknown[]): void;
-	async run(...args: unknown[]) { // eslint-disable-line @typescript-eslint/no-unused-vars
+	async run(...args: unknown[]) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
 		throw new Error('no run function specified');
 	}
 }

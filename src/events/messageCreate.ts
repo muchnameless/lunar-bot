@@ -18,7 +18,7 @@ export default class MessageCreateEvent extends Event {
 	 * @param message
 	 * @param isEdit
 	 */
-	async _handleDiscordMessage(message: Message, isEdit = false) {
+	_handleDiscordMessage(message: Message, isEdit = false) {
 		// channel specific triggers
 		if (message.channelId === this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) {
 			MessageUtil.react(message, BROADCAST_EMOJI);
@@ -29,7 +29,7 @@ export default class MessageCreateEvent extends Event {
 
 		// "old" commands
 		if (MessageUtil.isUserMessage(message) && new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIXES')[0]), `<@!?${this.client.user!.id}>` ].join('|')})`, 'i').test(message.content)) {
-			message.reply('all commands have been converted to slash commands, type (not send) `/` to see them');
+			MessageUtil.reply(message, 'all commands have been converted to slash commands, type (not send) `/` to see them');
 		}
 	}
 
@@ -37,7 +37,7 @@ export default class MessageCreateEvent extends Event {
 	 * event listener callback
 	 * @param message
 	 */
-	override async run(message: Message) {
+	override run(message: Message) {
 		return this._handleDiscordMessage(message, false);
 	}
 }

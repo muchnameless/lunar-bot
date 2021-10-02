@@ -13,30 +13,28 @@ import type { LunarClient } from '../LunarClient';
 
 
 export class ChatBridgeArray extends Array<ChatBridge> {
+	/**
+	 * the client that instantiated the ChatBridgeArray
+	 */
 	client: LunarClient;
+	/**
+	 * minecraft command collection
+	 */
 	commands: BridgeCommandCollection;
-	channelIds: Set<Snowflake>;
-	interactionCache: Map<Snowflake, CommandInteraction>;
+	/**
+	 * discord channel IDs of all ChatBridge channels
+	 */
+	channelIds = new Set<Snowflake>();
+	/**
+	 * interaction cache
+	 */
+	interactionCache = new Map<Snowflake, CommandInteraction>();
 
 	constructor(client: LunarClient) {
-		super();
+		super(ChatBridgeArray.#accounts.length);
 
-		/**
-		 * the client that instantiated the ChatBridgeArray
-		 */
 		this.client = client;
-		/**
-		 * minecraft command collection
-		 */
 		this.commands = new BridgeCommandCollection(this.client, new URL('./commands', import.meta.url));
-		/**
-		 * discord channel IDs of all ChatBridge channels
-		 */
-		this.channelIds = new Set();
-		/**
-		 * interaction cache
-		 */
-		this.interactionCache = new Map();
 	}
 
 	/**
@@ -106,7 +104,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 		// all
 		let resolved = 0;
 
-		await Promise.all(this.#init().map(async chatBridge => chatBridge
+		await Promise.all(this.#init().map(chatBridge => chatBridge
 			.once('ready', () => ++resolved === this.length && resolve())
 			.connect(),
 		));
@@ -133,8 +131,8 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 * send a message via all chatBridges both to discord and the in game guild chat, parsing both
 	 * @param contentOrOptions
 	 */
-	async broadcast(contentOrOptions: string | BroadcastOptions) {
-		return Promise.all(this.map(async chatBridge => chatBridge.broadcast(contentOrOptions)));
+	broadcast(contentOrOptions: string | BroadcastOptions) {
+		return Promise.all(this.map(chatBridge => chatBridge.broadcast(contentOrOptions)));
 	}
 
 	/**
@@ -179,7 +177,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 * @param message
 	 * @param options
 	 */
-	async handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
+	handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
 		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return; // not a chat bridge message or bridge disabled
 		if (message.flags.any([ MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL ])) return; // ignore deferReply and ephemeral messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot

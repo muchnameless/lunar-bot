@@ -5,32 +5,37 @@ import type { ChatBridge, ChatOptions } from './ChatBridge';
 import type { Player } from '../database/models/Player';
 
 
+interface AuthorData {
+	ign: string;
+	guildRank?: string | null;
+	uuid?: string | null;
+}
+
+
 export class HypixelMessageAuthor {
 	chatBridge: ChatBridge;
 	ign: string;
 	guildRank: string | null;
+	/**
+	 * player object of the message author
+	 */
 	player: Player | null;
-	member: GuildMember | null;
+	/**
+	 * discord guild member
+	 */
+	member: GuildMember | null = null;
 
 	/**
 	 * @param chatBridge
-	 * @param param1
+	 * @param data
 	 */
-	constructor(chatBridge: ChatBridge, { ign, guildRank, uuid }: { ign: string, guildRank: string | null, uuid?: string | null }) {
+	constructor(chatBridge: ChatBridge, { ign, guildRank, uuid }: AuthorData) {
 		this.chatBridge = chatBridge;
-		this.ign = ign ?? null;
+		this.ign = ign;
 		this.guildRank = guildRank ?? null;
-
-		/**
-		 * player object of the message author
-		 */
 		this.player = uuid
 			? this.client.players.cache.get(uuid) ?? logger.error(`[HYPIXEL AUTHOR CTOR]: unknown uuid '${uuid}'`) ?? this.client.players.findByIgn(ign)
 			: this.client.players.findByIgn(ign);
-		/**
-		 * discord guild member
-		 */
-		this.member = null;
 	}
 
 	get client() {
@@ -58,7 +63,7 @@ export class HypixelMessageAuthor {
 	 * whisper a message to the author
 	 * @param contentOrOptions
 	 */
-	async send(contentOrOptions: string | ChatOptions) {
+	send(contentOrOptions: string | ChatOptions) {
 		const { prefix = '', ...options } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;

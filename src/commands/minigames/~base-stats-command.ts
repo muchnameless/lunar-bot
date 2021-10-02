@@ -46,14 +46,14 @@ export default class StatsCommand extends DualCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		try {
-			return await InteractionUtil.reply(interaction,
+			return InteractionUtil.reply(interaction,
 				this._generateReply(
 					await this._fetchData(interaction, interaction.options.getString('ign')),
 				),
 			);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
-			return await InteractionUtil.reply(interaction, `${error}`);
+			return InteractionUtil.reply(interaction, `${error}`);
 		}
 	}
 
@@ -61,7 +61,7 @@ export default class StatsCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
+	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
 		try {
 			return hypixelMessage.reply(
 				this._generateReply(
@@ -70,7 +70,7 @@ export default class StatsCommand extends DualCommand {
 			);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
-			return await hypixelMessage.reply(`${error}`);
+			return hypixelMessage.reply(`${error}`);
 		}
 	}
 }

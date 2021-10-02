@@ -4,7 +4,15 @@ import { missingPermissionsError } from '../errors/MissingPermissionsError';
 import { ephemeralOption } from './commonOptions';
 import { logger } from '../../functions';
 import { BaseCommand } from './BaseCommand';
-import type { SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, SlashCommandOptionsOnlyBuilder, ToAPIApplicationCommandOptions } from '@discordjs/builders';
+import type {
+	SlashCommandBuilder,
+	SlashCommandSubcommandsOnlyBuilder,
+	SlashCommandOptionsOnlyBuilder,
+	SlashCommandIntegerOption,
+	SlashCommandNumberOption,
+	SlashCommandStringOption,
+	ToAPIApplicationCommandOptions,
+} from '@discordjs/builders';
 import type {
 	ApplicationCommandPermissions,
 	ButtonInteraction,
@@ -18,7 +26,12 @@ import type {
 import type { CommandContext, RequiredRoles } from './BaseCommand';
 
 
-type Slash = SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder & { options: ToAPIApplicationCommandOptions[] } | SlashCommandOptionsOnlyBuilder;
+type Slash = SlashCommandBuilder
+	| SlashCommandSubcommandsOnlyBuilder & { options?: ToAPIApplicationCommandOptions[] }
+	| SlashCommandOptionsOnlyBuilder
+	| Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
+
+type WithChoices = SlashCommandIntegerOption | SlashCommandNumberOption | SlashCommandStringOption;
 
 export interface SlashCommandData {
 	aliases?: string[],
@@ -41,7 +54,9 @@ export class SlashCommand extends BaseCommand {
 	constructor(context: CommandContext, { aliases, slash, cooldown, requiredRoles }: SlashCommandData) {
 		super(context, { cooldown, requiredRoles });
 
-		this.aliases = aliases?.length ? aliases.filter(Boolean) : null;
+		this.aliases = aliases?.filter(Boolean).length
+			? aliases.filter(Boolean)
+			: null;
 		this.slash = slash;
 
 		/**
@@ -52,12 +67,11 @@ export class SlashCommand extends BaseCommand {
 		this.slash.setName(this.name);
 
 		// add ephemeral option to every (sub)command(group)
-		if (this.slash.options.length) {
-			for (const option of this.slash.options) {
+		if (this.slash.options!.length) {
+			for (const option of this.slash.options!) {
 				if (option instanceof SlashCommandSubcommandGroupBuilder) {
 					for (const subcommand of option.options) {
-						// @ts-expect-error Property 'addStringOption' does not exist on type 'ToAPIApplicationCommandOptions'
-						subcommand.addStringOption(ephemeralOption);
+						(subcommand as SlashCommandSubcommandBuilder).addStringOption(ephemeralOption);
 					}
 				} else if (option instanceof SlashCommandSubcommandBuilder) {
 					option.addStringOption(ephemeralOption);
@@ -87,7 +101,15 @@ export class SlashCommand extends BaseCommand {
 		 * recursively reduces options
 		 * @param options
 		 */
-		const reduceOptions = (options?: typeof data.options): number => options?.reduce((a1, c1) => a1 + c1.name.length + c1.description.length + (c1.choices?.reduce((a2, c2) => a2 + c2.name.length + `${c2.value}`.length, 0) ?? 0) + reduceOptions(c1.options), 0) ?? 0;
+		const reduceOptions = (options?: typeof data.options): number => options
+			?.reduce((a1, c1) => a1
+				+ c1.name.length
+				+ c1.description.length
+				+ ((c1 as WithChoices).choices?.reduce((a2, c2) => a2 + c2.name.length + `${c2.value}`.length, 0) ?? 0)
+				// @ts-expect-error
+				+ reduceOptions((c1.options)),
+			0)
+			?? 0;
 
 		return data.name.length
 			+ data.description.length
@@ -158,7 +180,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	async runUser(interaction: ContextMenuInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runUser(interaction: ContextMenuInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for user context menus');
 	}
 
@@ -166,7 +188,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	async runMessage(interaction: ContextMenuInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runMessage(interaction: ContextMenuInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for message context menus');
 	}
 
@@ -174,7 +196,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	async runSelect(interaction: SelectMenuInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runSelect(interaction: SelectMenuInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for select menus');
 	}
 
@@ -182,7 +204,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	async runButton(interaction: ButtonInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runButton(interaction: ButtonInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for buttons');
 	}
 
@@ -190,7 +212,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	async runSlash(interaction: CommandInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runSlash(interaction: CommandInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for slash commands');
 	}
 }

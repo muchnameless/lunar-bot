@@ -46,7 +46,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const blockedMatched = hypixelMessage.rawContent.match(new RegExp(`^We blocked your comment "(?:(?<sender>${IGN_DEFAULT}): )?(?<blockedContent>.+) [${INVISIBLE_CHARACTERS.join('')}]*" as it is breaking our rules because it`, 'su'));
 
 			if (blockedMatched) {
-				const { groups: { sender, blockedContent } } = blockedMatched;
+				const { sender, blockedContent } = blockedMatched.groups as { sender: string; blockedContent: string; };
 				const senderDiscordId = this.client.players.findByIgn(sender)?.discordId;
 
 				// react to latest message from 'sender' with that content
@@ -137,7 +137,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (muteMatched) {
 			hypixelMessage.forwardToDiscord();
 
-			const { groups: { target, duration } } = muteMatched;
+			const { target, duration } = muteMatched.groups as { target: string; duration: string; };
 
 			if (target === 'the guild chat') {
 				const { hypixelGuild } = this.chatBridge;
@@ -175,7 +175,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (unmuteMatched) {
 			hypixelMessage.forwardToDiscord();
 
-			const { groups: { target } } = unmuteMatched;
+			const { target } = unmuteMatched.groups as { target: string; };
 
 			if (target === 'the guild chat') {
 				const { hypixelGuild } = this.chatBridge;
@@ -205,7 +205,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (promoteMatched) {
 			hypixelMessage.forwardToDiscord();
 
-			const { groups: { target, newRank } } = promoteMatched;
+			const { target, newRank } = promoteMatched.groups as { target: string; newRank: string; };
 			const player = this.client.players.findByIgn(target);
 
 			if (!player?.guildId) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was promoted to '${newRank}' but not in the db`);
@@ -229,7 +229,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (demotedMatched) {
 			hypixelMessage.forwardToDiscord();
 
-			const { groups: { target, newRank } } = demotedMatched;
+			const { target, newRank } = demotedMatched.groups as { target: string; newRank: string; };
 			const player = this.client.players.findByIgn(target);
 
 			if (!player?.guildId) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was demoted to '${newRank}' but not in the db`);
@@ -280,7 +280,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	/**
 	 * @param hypixelMessage
 	 */
-	async #handleCommandMessage(hypixelMessage: HypixelMessage) {
+	async #handleCommandMessage(hypixelMessage: HypixelMessage<true>) {
 		// must use prefix for commands in guild
 		if (!hypixelMessage.commandData.prefix) {
 			// auto math, ignore 0-0, 4/5 (dungeon parties)
@@ -342,7 +342,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				if (!member) {
 					const { lgGuild } = this.client;
 					logger.info(`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' and could not be found within the Lunar Guard Discord Server`);
-					return hypixelMessage.author!.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild.name} Discord server which you can not be found in`);
+					return hypixelMessage.author!.send(commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(roleId => lgGuild?.roles.cache.get(roleId)?.name ?? roleId)}) from the ${lgGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in`);
 				}
 
 				// check for req roles
@@ -380,10 +380,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		// argument handling
-		if (typeof command.args === 'boolean'
-			? (command.args && !hypixelMessage.commandData.args.length)
-			: (hypixelMessage.commandData.args.length < command.args)
-		) {
+		if (command.args && (
+			typeof command.args === 'boolean'
+				? !hypixelMessage.commandData.args.length
+				: hypixelMessage.commandData.args.length < command.args
+		)) {
 			const reply = [];
 
 			reply.push(`the '${command.name}' command has${typeof command.args === 'number' ? ` ${command.args}` : ''} mandatory argument${command.args === 1 ? '' : 's'}`);
@@ -407,17 +408,22 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	 * event listener callback
 	 * @param hypixelMessage
 	 */
-	override async run(hypixelMessage: HypixelMessage) {
+	override run(hypixelMessage: HypixelMessage) {
 		// check if the message is a response for ChatBridge#_chat
 		this.chatBridge.minecraft.collect(hypixelMessage);
 
 		if (this.config.get('CHAT_LOGGING_ENABLED')) logger.debug(`[${hypixelMessage.position} #${this.chatBridge.mcAccount}]: ${hypixelMessage.cleanedContent}`);
 		if (!hypixelMessage.rawContent.length) return;
 
+		if (!hypixelMessage.isUserMessage()) {
+			if (hypixelMessage.type === null) return this.#handleServerMessage(hypixelMessage);
+			return;
+		}
+
 		switch (hypixelMessage.type) {
 			case MESSAGE_TYPES.GUILD:
 			case MESSAGE_TYPES.OFFICER: {
-				if (!this.chatBridge.enabled || hypixelMessage.me) return;
+				if (!this.chatBridge.enabled) return;
 
 				hypixelMessage.forwardToDiscord();
 
@@ -426,14 +432,20 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			case MESSAGE_TYPES.PARTY:
 			case MESSAGE_TYPES.WHISPER: {
-				if (!this.chatBridge.enabled || hypixelMessage.me) return;
-				if (hypixelMessage.author!.player?.guildId !== this.chatBridge.hypixelGuild!.guildId) return logger.info(`[MESSAGE]: ignored message from '${hypixelMessage.author}': ${hypixelMessage.content}`); // ignore messages from non guild players
+				if (!this.chatBridge.enabled) return;
+
+				// ignore messages from non guild players
+				if (hypixelMessage.author.player?.guildId !== this.chatBridge.hypixelGuild!.guildId) {
+					return logger.info(`[MESSAGE]: ignored message from '${hypixelMessage.author}': ${hypixelMessage.content}`);
+				}
 
 				return this.#handleCommandMessage(hypixelMessage);
 			}
 
-			default:
-				return this.#handleServerMessage(hypixelMessage);
+			default: {
+				const never: never = hypixelMessage.type;
+				logger.error(`[MESSAGE]: unknown type '${never}'`);
+			}
 		}
 	}
 }

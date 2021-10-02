@@ -22,11 +22,11 @@ import { MessageCollector, MessageCollectorOptions } from '../MessageCollector';
 import { ChatManager } from './ChatManager';
 import { cache } from '../../../api/cache';
 import { cleanFormattedNumber, logger, splitMessage, trim } from '../../../functions';
-import type { Message } from 'discord.js';
+import type { GuildChannel, Message } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
 import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
-import type { Timeout } from '../../../types/util';
+import type { If, Timeout } from '../../../types/util';
 import type { ChatOptions } from '../ChatBridge';
 
 
@@ -34,7 +34,9 @@ export interface SendToChatOptions {
 	content: string;
 	prefix?: string;
 	isMessage?: boolean;
-	discordMessage?: Message | null
+	discordMessage?: Message | null;
+	/** wether to whisper to the author */
+	ephemeral?: boolean;
 }
 
 export interface CommandOptions {
@@ -56,10 +58,22 @@ export interface CommandOptions {
 	rejectOnAbort?: boolean;
 }
 
-type FilterPromise = 'spam' | 'blocked' | HypixelMessage;
+type FilterPromise = ChatResponse | HypixelMessage;
+
+const enum ChatResponse {
+	TIMEOUT,
+	SPAM,
+	BLOCKED,
+}
+
+const enum ForwardRejectionReason {
+	HYPIXEL_BLOCKED,
+	LOCAL_BLOCKED,
+	MESSAGE_COUNT,
+}
 
 
-export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatManager {
+export class MinecraftChatManager<loggedIn extends boolean = boolean> extends ChatManager {
 	/**
 	 * resolves this.#promise
 	 */
@@ -103,114 +117,79 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 	/**
 	 * wether the minecraft bot is logged in and ready to receive and send chat messages
 	 */
-	#botReady = false;
-	bot: MinecraftBot | null = null;
-	botUuid: string | null = null;
-	abortLoginTimeout: Timeout | null;
-	loginAttempts: number;
-	shouldReconnect: boolean;
-	_lastMessages: {
+	botReady = false;
+	/**
+	 * minecraft bot client
+	 */
+	bot: If<loggedIn, MinecraftBot> = null as If<loggedIn, MinecraftBot>;
+	/**
+	 * minecraft uuid of the bot user
+	 */
+	botUuid: If<loggedIn, string> = null as If<loggedIn, string>;
+	/**
+	 * disconnect the bot if it hasn't successfully spawned in 60 seconds
+	 */
+	abortLoginTimeout: Timeout | null = null;
+	/**
+	 * increases each login, reset to 0 on successfull spawn
+	 */
+	loginAttempts = 0;
+	/**
+	* to prevent chatBridge from reconnecting at <MinecraftBot>.end
+	*/
+	shouldReconnect = true;
+	/**
+	 * anti spam checker
+	 */
+	_lastMessages = {
 		/**
 		 * buffer size
 		 */
-		MAX_INDEX: number;
+		MAX_INDEX: 8,
 		/**
 		 * current buffer index
 		 */
-		index: number;
+		index: -1,
 		/**
 		 * ring buffer
 		 */
-		cache: string[];
+		cache: [] as string[],
 		/**
 		 * removes parts of the content which hypixel's spam filter ignores
 		 * @param content
 		 */
-		_cleanContent(content: string): string;
+		_cleanContent(content: string) {
+			return content
+				.replace(/\d/g, '') // remove numbers
+				.replace(/(?<=^\/)o(?=c)/, 'g') // oc and gc share the same anti spam bucket -> /oc -> /gc
+				.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invis chars
+				.trim() // remove whitespaces at the beginning and end
+				.replace(/ {2,}/g, ' '); // mc messages can only have single spaces
+		},
 		/**
 		 * check wether the content is already in the buffer
 		 * @param content
 		 */
-		check(content: string): boolean;
+		check(content: string) {
+			return this.cache.includes(this._cleanContent(content));
+		},
 		/**
 		 * add the content to the buffer
 		 * @param content
 		 */
-		add(content: string): void;
+		add(content: string) {
+			// increment ring buffer index, reset cycle if max index
+			if (++this.index === this.MAX_INDEX) this.index = 0;
+
+			this.cache[this.index] = this._cleanContent(content);
+		},
 	};
-
-	constructor(...args: any[]) {
-		super(...args);
-
-		/**
-		 * disconnect the bot if it hasn't successfully spawned in 60 seconds
-		 */
-		this.abortLoginTimeout = null;
-		/**
-		  * increases each login, reset to 0 on successfull spawn
-		  */
-		this.loginAttempts = 0;
-		/**
-		  * to prevent chatBridge from reconnecting at <MinecraftBot>.end
-		  */
-		this.shouldReconnect = true;
-		/**
-		 * anti spam checker
-		 */
-		this._lastMessages = {
-			/**
-			 * buffer size
-			 */
-			MAX_INDEX: 8,
-			/**
-			 * current buffer index
-			 */
-			index: -1,
-			/**
-			 * ring buffer
-			 */
-			cache: [],
-			/**
-			 * removes parts of the content which hypixel's spam filter ignores
-			 * @param content
-			 */
-			_cleanContent(content: string) {
-				return content
-					.replace(/\d/g, '') // remove numbers
-					.replace(/(?<=^\/)o(?=c)/, 'g') // oc and gc share the same anti spam bucket -> /oc -> /gc
-					.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invis chars
-					.trim() // remove whitespaces at the beginning and end
-					.replace(/ {2,}/g, ' '); // mc messages can only have single spaces
-			},
-			/**
-			 * check wether the content is already in the buffer
-			 * @param content
-			 */
-			check(content: string) {
-				return this.cache.includes(this._cleanContent(content));
-			},
-			/**
-			 * add the content to the buffer
-			 * @param content
-			 */
-			add(content: string) {
-				// increment ring buffer index, reset cycle if max index
-				if (++this.index === this.MAX_INDEX) this.index = 0;
-
-				this.cache[this.index] = this._cleanContent(content);
-			},
-		};
-	}
 
 	/**
 	 * wether the minecraft bot is logged in and ready to receive and send chat messages
 	 */
-	get ready() {
-		return this.#botReady && !(this.bot?.ended ?? true);
-	}
-
-	set ready(value) {
-		this.#botReady = value;
+	isReady(): this is MinecraftChatManager<true> {
+		return this.botReady && !(this.bot?.ended ?? true);
 	}
 
 	/**
@@ -270,7 +249,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 	/**
 	 * maximum attempts to resend to in game chat
 	 */
-	static MAX_RETRIES = 3;
+	static MAX_RETRIES = 3 as const;
 
 	/**
 	 * normal delay to listen for error messages
@@ -283,24 +262,24 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 		120,
 		150,
 		600,
-	];
+	] as const;
 
 	/**
 	 * delay which can be used to send messages to in game chat continously
 	 */
-	static SAFE_DELAY = 600;
+	static SAFE_DELAY = 600 as const;
 
 	/**
 	 * delay which can be used after triggering anti spam
 	 */
-	static ANTI_SPAM_DELAY = 1_000;
+	static ANTI_SPAM_DELAY = 1_000 as const;
 
 	/**
 	 * 100 pre 1.10.2, 256 post 1.10.2
 	 */
 	static MAX_MESSAGE_LENGTH = minecraftData(MC_CLIENT_VERSION).version.version! > minecraftData('1.10.2').version.version!
-		? 256
-		: 100;
+		? 256 as const
+		: 100 as const;
 
 	/**
 	 * reacts to the message and DMs the author
@@ -308,7 +287,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 	 * @param reason
 	 * @param data
 	 */
-	async #handleForwardRejection(discordMessage: Message | null, reason: string, data?: Record<string, unknown>) {
+	async #handleForwardRejection(discordMessage: Message | null, reason: ForwardRejectionReason, data?: Record<string, unknown>) {
 		if (!discordMessage) return;
 
 		MessageUtil.react(discordMessage, STOP_EMOJI);
@@ -316,7 +295,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 		let info;
 
 		switch (reason) {
-			case 'hypixelBlocked': {
+			case ForwardRejectionReason.HYPIXEL_BLOCKED: {
 				const player = UserUtil.getPlayer(discordMessage.author)
 					?? (await this.client.players.model.findCreateFind({
 						where: { discordId: discordMessage.author.id },
@@ -354,7 +333,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 			}
 			// fallthrough
 
-			case 'localBlocked':
+			case ForwardRejectionReason.LOCAL_BLOCKED:
 				info = stripIndents`
 					your message was blocked because you used a blocked word or character
 					(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
@@ -363,18 +342,20 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 				`;
 				break;
 
-			case 'messageCount':
+			case ForwardRejectionReason.MESSAGE_COUNT:
 				info = stripIndents`
 					your message was blocked because you are only allowed to send up to ${data?.maxParts ?? this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS')} messages at once
 					(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
 				`;
 				break;
 
-			default:
-				throw new Error(`invalid rejection case '${reason}'`);
+			default: {
+				const never: never = reason;
+				throw new Error(`invalid rejection case '${never}'`);
+			}
 		}
 
-		if (reason !== 'hypixelBlocked' && await cache.get(`chatbridge:blocked:dm:${discordMessage.author.id}`)) return;
+		if (reason !== ForwardRejectionReason.HYPIXEL_BLOCKED && await cache.get(`chatbridge:blocked:dm:${discordMessage.author.id}`)) return;
 
 		UserUtil.sendDM(discordMessage.author, info);
 		logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
@@ -401,10 +382,10 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 	/**
 	 * create bot instance, loads and binds it's events and logs it into hypixel
 	 */
-	async #createBot() {
+	async #createBot(): Promise<MinecraftBot> {
 		++this.loginAttempts;
 
-		return this.bot = await createBot(this.chatBridge, {
+		return (this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
 			username: process.env.MINECRAFT_USERNAME!.split(' ')[this.mcAccount],
@@ -420,7 +401,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 	async connect() {
 		if (!this.shouldReconnect) throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
 
-		if (this.ready) {
+		if (this.isReady()) {
 			logger.info(`[CHATBRIDGE]: ${this.logInfo}: already connected`);
 			return this;
 		}
@@ -428,7 +409,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 		await this.#createBot();
 
 		// reconnect the bot if it hasn't successfully spawned in 60 seconds
-		if (!this.ready) {
+		if (!this.isReady()) {
 			this.abortLoginTimeout = setTimeout(() => {
 				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
 				this.reconnect(0);
@@ -471,7 +452,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 		clearTimeout(this.abortLoginTimeout!);
 		this.abortLoginTimeout = null;
 
-		this.ready = false;
+		this.botReady = false;
 
 		try {
 			this.bot?.end('disconnect.quitting');
@@ -479,7 +460,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 			logger.error('[CHATBRIDGE DISCONNECT]', error);
 		}
 
-		this.bot = null;
+		(this as MinecraftChatManager<false>).bot = null;
 
 		return this;
 	}
@@ -500,8 +481,8 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 		if (!this.#collecting) return;
 		if (hypixelMessage.me && hypixelMessage.content.includes(this.#contentFilter!)) return this.#resolveAndReset(hypixelMessage);
 		if (hypixelMessage.type) return;
-		if (hypixelMessage.spam) return this.#resolveAndReset('spam');
-		if (hypixelMessage.content.startsWith('We blocked your comment')) return this.#resolveAndReset('blocked');
+		if (hypixelMessage.spam) return this.#resolveAndReset(ChatResponse.SPAM);
+		if (hypixelMessage.content.startsWith('We blocked your comment')) return this.#resolveAndReset(ChatResponse.BLOCKED);
 	}
 
 	/**
@@ -547,10 +528,10 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 			.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 			.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invisible characters
 			.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
-			.replace(emojiRegex(), match => UNICODE_TO_EMOJI_NAME[match] ?? match) // default emojis
+			.replace(emojiRegex(), match => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default emojis
 			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
 			.replace(/<#(\d{17,19})>/g, (match, p1) => { // channels
-				const CHANNEL_NAME = this.client.channels.cache.get(p1)?.name;
+				const CHANNEL_NAME = (this.client.channels.cache.get(p1) as GuildChannel)?.name;
 				if (CHANNEL_NAME) return `#${CHANNEL_NAME}`;
 				return match;
 			})
@@ -617,7 +598,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 	 * send a message to in game guild chat
 	 * @param contentOrOptions
 	 */
-	async gchat(contentOrOptions: string | ChatOptions) {
+	gchat(contentOrOptions: string | ChatOptions) {
 		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
 
 		if (this.botPlayer?.muted) {
@@ -635,7 +616,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 	 * send a message to in game guild chat
 	 * @param contentOrOptions
 	 */
-	async ochat(contentOrOptions: string | ChatOptions) {
+	ochat(contentOrOptions: string | ChatOptions) {
 		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
 
 		return this.chat({ prefix: `/oc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ...options });
@@ -645,7 +626,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 	 * send a message to in game party chat
 	 * @param contentOrOptions
 	 */
-	async pchat(contentOrOptions: string | ChatOptions) {
+	pchat(contentOrOptions: string | ChatOptions) {
 		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
 
 		return this.chat({ prefix: `/pc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ...options });
@@ -693,14 +674,14 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 		);
 
 		if (!success) { // messageParts blocked
-			this.#handleForwardRejection(discordMessage, 'localBlocked');
+			this.#handleForwardRejection(discordMessage, ForwardRejectionReason.LOCAL_BLOCKED);
 			return false;
 		}
 
 		if (!contentParts.size) return false;
 
 		if (contentParts.size > maxParts) {
-			this.#handleForwardRejection(discordMessage, 'messageCount', { maxParts });
+			this.#handleForwardRejection(discordMessage, ForwardRejectionReason.MESSAGE_COUNT, { maxParts });
 			return false;
 		}
 
@@ -779,17 +760,17 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 		// listen for responses
 		const response = await Promise.race([
 			listener,
-			sleep(MinecraftChatManager.SAFE_DELAY, 'timeout'),
+			sleep(MinecraftChatManager.SAFE_DELAY, ChatResponse.TIMEOUT),
 		]);
 
 		switch (response) {
 			// collector collected nothing, sleep won the race. this happens for all commands which return a "system reply"
-			case 'timeout': {
+			case ChatResponse.TIMEOUT: {
 				this.#tempIncrementCounter();
 				this.#resetFilter();
 
 				// only throw for chat messages when the bot was not ready yet
-				if (discordMessage && !this.ready) {
+				if (discordMessage && !this.isReady()) {
 					MessageUtil.react(discordMessage, X_EMOJI);
 					throw response;
 				}
@@ -800,7 +781,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 			}
 
 			// anti spam failed -> retry
-			case 'spam': {
+			case ChatResponse.SPAM: {
 				this.#tempIncrementCounter();
 
 				// max retries reached
@@ -811,12 +792,12 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 				}
 
 				await sleep(this.#retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-				return this.#sendToChat(...arguments); // retry sending
+				return this.#sendToChat({ content, prefix, isMessage, discordMessage }); // retry sending
 			}
 
 			// hypixel filter blocked message
-			case 'blocked': {
-				this.#handleForwardRejection(discordMessage, 'hypixelBlocked');
+			case ChatResponse.BLOCKED: {
+				this.#handleForwardRejection(discordMessage, ForwardRejectionReason.HYPIXEL_BLOCKED);
 				await sleep(this.delay);
 				throw 'unable to send the message, hypixel\'s filter blocked it';
 			}
@@ -825,7 +806,7 @@ export class MinecraftChatManager<loggedIn extends boolean = true> extends ChatM
 			default: {
 				this._lastMessages.add(message); // since listener doesn't collect command responses 'if (useSpamBypass)' is not needed in this case
 
-				await sleep([ MESSAGE_TYPES.GUILD, MESSAGE_TYPES.PARTY, MESSAGE_TYPES.OFFICER ].includes(response.type)
+				await sleep([ MESSAGE_TYPES.GUILD, MESSAGE_TYPES.PARTY, MESSAGE_TYPES.OFFICER ].includes(response.type as any)
 					? this.delay
 					: (this.#tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY), // use safe delay for commands and whispers
 				);

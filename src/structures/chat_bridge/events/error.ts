@@ -15,7 +15,7 @@ export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
 	 * event listener callback
 	 * @param error
 	 */
-	override async run(error: Error) {
+	override run(error: Error) {
 		logger.error('[CHATBRIDGE ERROR]', error);
 
 		if (error.message.includes('Invalid credentials')) {

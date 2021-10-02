@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters, SnowflakeUtil, Util, version } from 'discord.js';
+import { Collection, Formatters, SnowflakeUtil, Util, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
@@ -7,7 +7,7 @@ import { imgur } from '../../api/imgur';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, trim } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { CommandInteraction, DMChannel, Snowflake, TextBasedChannels, ThreadChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
@@ -25,10 +25,10 @@ export default class DebugCommand extends SlashCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: CommandInteraction) {
 		const me = (interaction.guild ?? this.client.lgGuild)?.me ?? null;
 
-		return await InteractionUtil.reply(interaction, {
+		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.addFields({
@@ -44,23 +44,23 @@ export default class DebugCommand extends SlashCommand {
 						value: stripIndents`
 							Guilds: ${this.client.formatNumber(this.client.guilds.cache.size)}
 							Channels: ${this.client.formatNumber(this.client.channels.cache.size)}
-							${this.client.channels.cache
-								.filter(c => c.type === 'DM')
-								.map(c => [ c.recipient.tag ?? c.recipient.id, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date ])
-								.sort(([ , a ], [ , b ]) => b - a)
+							${(this.client.channels.cache
+								.filter(c => c.type === 'DM') as Collection<Snowflake, DMChannel>)
+								.map(c => [ c.recipient.tag ?? c.recipient.id, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date ] as const)
+								.sort(([ , a ], [ , b ]) => b.getTime() - a.getTime())
 								.map(([ name, date ]) => Formatters.quote(`${name ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`))
 								.join('\n')}
-							${this.client.channels.cache
-								.filter(c => c.isThread())
-								.map(c => [ c, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date ])
-								.sort(([ , a ], [ , b ]) => b - a)
+							${(this.client.channels.cache
+								.filter(c => c.isThread()) as Collection<Snowflake, ThreadChannel>)
+								.map(c => [ c, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date ] as const)
+								.sort(([ , a ], [ , b ]) => b.getTime() - a.getTime())
 								.map(([ c, date ]) => Formatters.quote(`${c ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`))
 								.join('\n')}
 							Members: ${this.client.formatNumber(this.client.guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
 							Users: ${this.client.formatNumber(this.client.users.cache.size)}
-							Messages: ${this.client.formatNumber(this.client.channels.cache.reduce((acc, channel) => acc + (channel.messages?.cache.size ?? 0), 0))}
-							${this.client.channels.cache
-								.filter(c => c.messages?.cache.size)
+							Messages: ${this.client.formatNumber(this.client.channels.cache.reduce((acc, channel) => acc + ((channel as TextBasedChannels).messages?.cache.size ?? 0), 0))}
+							${(this.client.channels.cache
+								.filter(c => Boolean((c as TextBasedChannels).messages?.cache.size)) as Collection<Snowflake, TextBasedChannels>)
 								.sort((a, b) => b.messages.cache.size - a.messages.cache.size)
 								.map(c => Formatters.quote(`${c.type !== 'DM' ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${this.client.formatNumber(c.messages.cache.size)}`))
 								.join('\n')}

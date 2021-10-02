@@ -3,8 +3,9 @@ import { COMMAND_KEY, LB_KEY } from '../constants';
 import { InteractionUtil } from '../util';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, logger } from '../functions';
 import { Event } from '../structures/events/Event';
-import type { ButtonInteraction, CommandInteraction, ContextMenuInteraction, Interaction, SelectMenuInteraction } from 'discord.js';
+import type { ButtonInteraction, CommandInteraction, ContextMenuInteraction, SelectMenuInteraction } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
+import type { ChatInteraction } from '../util/InteractionUtil';
 
 
 export default class InteractionCreateEvent extends Event {
@@ -26,7 +27,7 @@ export default class InteractionCreateEvent extends Event {
 
 		const command = this.client.commands.get(interaction.commandName);
 
-		if (!command) return await InteractionUtil.reply(interaction, {
+		if (!command) return InteractionUtil.reply(interaction, {
 			content: `the \`${interaction.commandName}\` command is currently disabled`,
 			ephemeral: true,
 		});
@@ -37,7 +38,7 @@ export default class InteractionCreateEvent extends Event {
 
 			// prevent from executing owner only command
 			if (command.category === 'owner') {
-				return await InteractionUtil.reply(interaction, {
+				return InteractionUtil.reply(interaction, {
 					content: `the \`${command.name}\` command is restricted to the bot owner`,
 					ephemeral: true,
 				});
@@ -53,7 +54,7 @@ export default class InteractionCreateEvent extends Event {
 				const EXPIRATION_TIME = command.timestamps.get(interaction.user.id)! + COOLDOWN_TIME;
 
 				if (NOW < EXPIRATION_TIME) {
-					return await InteractionUtil.reply(interaction, {
+					return InteractionUtil.reply(interaction, {
 						content: `\`${command.name}\` is on cooldown for another \`${ms(EXPIRATION_TIME - NOW, { long: true })}\``,
 						ephemeral: true,
 					});
@@ -64,13 +65,13 @@ export default class InteractionCreateEvent extends Event {
 			setTimeout(() => command.timestamps!.delete(interaction.user.id), COOLDOWN_TIME);
 		}
 
-		return await command.runSlash(interaction);
+		return command.runSlash(interaction);
 	}
 
 	/**
 	 * @param interaction
 	 */
-	async #handleButtonInteraction(interaction: ButtonInteraction) { // eslint-disable-line class-methods-use-this
+	async #handleButtonInteraction(interaction: ButtonInteraction) {
 		const args = interaction.customId.split(':');
 		const type = args.shift();
 
@@ -99,14 +100,14 @@ export default class InteractionCreateEvent extends Event {
 
 					// prevent from executing owner only command
 					if (command.category === 'owner') {
-						return await InteractionUtil.reply(interaction, {
+						return InteractionUtil.reply(interaction, {
 							content: `the \`${command.name}\` command is restricted to the bot owner`,
 							ephemeral: true,
 						});
 					}
 				}
 
-				return await command.runButton(interaction);
+				return command.runButton(interaction);
 			}
 		}
 	}
@@ -114,7 +115,7 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	async #handleSelectMenuInteraction(interaction: SelectMenuInteraction) { // eslint-disable-line class-methods-use-this
+	async #handleSelectMenuInteraction(interaction: SelectMenuInteraction) {
 		const args = interaction.customId.split(':');
 		const type = args.shift();
 
@@ -143,14 +144,14 @@ export default class InteractionCreateEvent extends Event {
 
 					// prevent from executing owner only command
 					if (command.category === 'owner') {
-						return await InteractionUtil.reply(interaction, {
+						return InteractionUtil.reply(interaction, {
 							content: `the \`${command.name}\` command is restricted to the bot owner`,
 							ephemeral: true,
 						});
 					}
 				}
 
-				return await command.runSelect(interaction);
+				return command.runSelect(interaction);
 			}
 		}
 	}
@@ -161,7 +162,7 @@ export default class InteractionCreateEvent extends Event {
 	async #handleContextMenuInteraction(interaction: ContextMenuInteraction) {
 		const command = this.client.commands.get(interaction.commandName);
 
-		if (!command) return await InteractionUtil.reply(interaction, {
+		if (!command) return InteractionUtil.reply(interaction, {
 			content: `the \`${interaction.commandName}\` command is currently disabled`,
 			ephemeral: true,
 		});
@@ -172,7 +173,7 @@ export default class InteractionCreateEvent extends Event {
 
 			// prevent from executing owner only command
 			if (command.category === 'owner') {
-				return await InteractionUtil.reply(interaction, {
+				return InteractionUtil.reply(interaction, {
 					content: `the \`${command.name}\` command is restricted to the bot owner`,
 					ephemeral: true,
 				});
@@ -181,10 +182,10 @@ export default class InteractionCreateEvent extends Event {
 
 		switch (interaction.targetType) {
 			case 'MESSAGE':
-				return await command.runMessage(interaction);
+				return command.runMessage(interaction);
 
 			case 'USER':
-				return await command.runUser(interaction);
+				return command.runUser(interaction);
 
 			default:
 				logger.error(`[HANDLE CONTEXT MENU]: unknown target type: ${interaction.targetType}`);
@@ -195,7 +196,7 @@ export default class InteractionCreateEvent extends Event {
 	 * event listener callback
 	 * @param interaction
 	 */
-	override async run(interaction: Interaction) {
+	override async run(interaction: ChatInteraction) {
 		// add interaction to the WeakMap which holds InteractionData
 		InteractionUtil.add(interaction);
 

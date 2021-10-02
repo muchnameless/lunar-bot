@@ -49,9 +49,11 @@ import type { ModelStatic, Optional, Sequelize } from 'sequelize';
 import type { Collection, Role, Snowflake } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
 import type { HypixelGuild } from './HypixelGuild';
-import type { TransactionAttributes } from './Transaction';
+import type { Transaction, TransactionAttributes } from './Transaction';
 import type { LunarClient } from '../../LunarClient';
-import type { ArrayElement } from '../../../types/util';
+import type { TaxCollector } from './TaxCollector';
+import type { ModelResovable } from '../managers/ModelManager';
+import type { DungeonTypes, SkillTypes, SlayerTypes, XPOffsets, XPTypes } from '../../../constants';
 
 
 interface ParsedTransaction extends TransactionAttributes {
@@ -61,7 +63,7 @@ interface ParsedTransaction extends TransactionAttributes {
 
 export interface PlayerUpdateOptions {
 	/** role update reason for discord's audit logs */
-	reason?: string | null;
+	reason?: string;
 	/** wether to dm the user that they should include their ign somewhere in their nickname */
 	shouldSendDm?: boolean;
 	/** wether to only await the updateXp call and not updateDiscordMember */
@@ -70,26 +72,31 @@ export interface PlayerUpdateOptions {
 	rejectOnAPIError?: boolean;
 }
 
-type XPOffsets = ArrayElement<typeof XP_OFFSETS> | '';
-
 export interface TransferXpOptions {
 	from?: XPOffsets;
 	to?: XPOffsets;
-	types?: readonly ArrayElement<typeof XP_TYPES>[];
+	types?: readonly XPTypes[];
 }
 
 export interface ResetXpOptions {
 	offsetToReset?: XPOffsets | null | typeof OFFSET_FLAGS.DAY | typeof OFFSET_FLAGS.CURRENT;
-	typesToReset?: readonly ArrayElement<typeof XP_TYPES>[];
+	typesToReset?: readonly XPTypes[];
 }
 
 interface SetToPaidOptions {
 	/** paid amount */
 	amount?: number;
 	/** minecraft uuid of the player who collected */
-	collectedBy?: string;
+	collectedBy?: ModelResovable<TaxCollector>;
 	/** hypixel auction uuid */
 	auctionId?: string | null;
+}
+
+interface AddTransferOptions extends SetToPaidOptions {
+	collectedBy: ModelResovable<TaxCollector>;
+	amount: number;
+	notes?: string | null;
+	type?: 'tax' | 'donation';
 }
 
 interface PlayerAttributes {
@@ -114,7 +121,19 @@ interface PlayerAttributes {
 	guildXpDaily: number;
 }
 
+type RoleResolvables = (Snowflake | Role)[] | Collection<Snowflake, Role>;
+
 type PlayerCreationAttributes = Optional<PlayerAttributes, 'ign' | 'discordId' | 'guildId' | 'guildRankPriority' | 'inDiscord' | 'mutedTill' | '_infractions' | 'hasDiscordPingPermission' | 'notes' | 'paid' | 'mainProfileId' | 'mainProfileName' | 'xpLastUpdatedAt' | 'xpUpdatesDisabled' | 'discordMemberUpdatesDisabled' | 'farmingLvlCap' | 'guildXpDay' | 'guildXpDaily'>;
+
+interface PlayerInGuild extends Player {
+	hypixelGuild: HypixelGuild;
+	guildId: string;
+}
+
+const enum NickChangeReason {
+	NO_IGN,
+	NOT_UNIQUE,
+}
 
 
 export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> implements PlayerAttributes {
@@ -484,10 +503,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	}
 
 	/**
-	 * wether the player is a bridger or error case
+	 * wether the player is actually in a guild and not just one of PSEUDO_GUILD_IDS
 	 */
-	get notInGuild() {
-		return HypixelGuildManager.PSEUDO_GUILD_IDS.includes(this.guildId);
+	inGuild(): this is PlayerInGuild {
+		return !HypixelGuildManager.PSEUDO_GUILD_IDS.includes(this.guildId as any);
 	}
 
 	/**
@@ -834,7 +853,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		// player is not in a guild from <LunarClient>.hypixelGuilds
 		if (!inGuild) {
 			if (member.roles.cache.has(config.get('GUILD_ROLE_ID'))) rolesToRemove.push(config.get('GUILD_ROLE_ID'));
-			return this.makeRoleAPICall(rolesToAdd, rolesToRemove, reason);
+			return this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason });
 		}
 
 		// combined guild roles
@@ -948,7 +967,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		}
 
 		// api call
-		return this.makeRoleAPICall(rolesToAdd, rolesToRemove, reason);
+		return this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason });
 	}
 
 	/**
@@ -1040,9 +1059,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (currentlyLinkedMember) {
 			// remove roles that the bot manages
-			const rolesToPurge = GuildMemberUtil.getRolesToPurge(currentlyLinkedMember);
+			const rolesToRemove = GuildMemberUtil.getRolesToPurge(currentlyLinkedMember);
 
-			if (rolesToPurge.length) wasSuccessful = await this.makeRoleAPICall([], rolesToPurge, reason);
+			if (rolesToRemove.length) wasSuccessful = await this.makeRoleAPICall({ rolesToRemove, reason });
 
 			// reset nickname if it is set to the player's ign
 			if (currentlyLinkedMember.nickname === this.ign) {
@@ -1050,7 +1069,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				const { guildId } = this; // 1/3
 				this.guildId = GUILD_ID_ERROR; // 2/3
 
-				wasSuccessful = (await this.makeNickAPICall(null, false, reason)) && wasSuccessful;
+				wasSuccessful = (await this.makeNickAPICall({ reason })) && wasSuccessful;
 
 				if (this.guildId === GUILD_ID_ERROR) this.guildId = guildId; // 3/3
 			}
@@ -1071,7 +1090,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param rolesToRemove roles to remove from the member
 	 * @param reason reason for discord's audit logs
 	 */
-	async makeRoleAPICall(rolesToAdd: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], rolesToRemove: (Snowflake | Role)[] | Collection<Snowflake, Role> = [], reason: string | undefined = undefined) {
+	async makeRoleAPICall({ rolesToAdd = [], rolesToRemove = [], reason }: { rolesToAdd?: RoleResolvables; rolesToRemove?: RoleResolvables; reason?: string; }) {
 		const member = await this.discordMember;
 		if (!member) return false;
 
@@ -1180,7 +1199,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				: [];
 			const rolesToRemove = GuildMemberUtil.getRolesToPurge(member);
 
-			if (!await this.makeRoleAPICall(rolesToAdd, rolesToRemove, `left ${this.guildName}`)) {
+			if (!await this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason: `left ${this.guildName}` })) {
 				// error updating roles
 				logger.warn(`[REMOVE FROM GUILD]: ${this.logInfo}: unable to update roles`);
 				this.guildId = GUILD_ID_ERROR;
@@ -1212,7 +1231,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async syncIgnWithDisplayName(shouldSendDm = false) {
-		if (this.notInGuild) return;
+		if (!this.inGuild()) return;
 
 		const member = await this.discordMember;
 		if (!member) return;
@@ -1220,11 +1239,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		let reason;
 
 		// nickname doesn't include ign
-		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = 'NO_IGN';
+		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = NickChangeReason.NO_IGN;
 
 		// two guild members share the same display name
 		if (GuildMemberUtil.getPlayer(member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id))) {
-			reason = 'NOT_UNIQUE';
+			reason = NickChangeReason.NOT_UNIQUE;
 		}
 
 		if (!reason) return;
@@ -1240,7 +1259,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			newNick = this.ign;
 		}
 
-		return this.makeNickAPICall(newNick, shouldSendDm, reason);
+		return this.makeNickAPICall({ newNick, shouldSendDm, reason });
 	}
 
 	/**
@@ -1249,7 +1268,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 * @param reason reason for discord's audit logs and the DM
 	 */
-	async makeNickAPICall(newNick: string | null = null, shouldSendDm = false, reason: string | undefined = undefined) {
+	async makeNickAPICall({ newNick = null, shouldSendDm = false, reason }: { newNick?: string | null, shouldSendDm?: boolean, reason?: string | NickChangeReason } = {}) {
 		const member = await this.discordMember;
 		if (!member) return false;
 
@@ -1265,11 +1284,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			let auditLogReason;
 
 			switch (reason) {
-				case 'NO_IGN':
+				case NickChangeReason.NO_IGN:
 					auditLogReason = 'name didn\'t contain ign';
 					break;
 
-				case 'NOT_UNIQUE':
+				case NickChangeReason.NOT_UNIQUE:
 					auditLogReason = 'name already taken';
 					break;
 
@@ -1300,14 +1319,14 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			if (shouldSendDm) {
 				switch (reason) {
-					case 'NO_IGN':
+					case NickChangeReason.NO_IGN:
 						GuildMemberUtil.sendDM(member, stripIndents`
 							include your ign \`${this.ign}\` somewhere in your nickname.
 							If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${this.client.user} will automatically change your discord nickname
 						`);
 						break;
 
-					case 'NOT_UNIQUE':
+					case NickChangeReason.NOT_UNIQUE:
 						GuildMemberUtil.sendDM(member, stripIndents`
 							the name \`${PREV_NAME}\` is already taken by another guild member.
 							Your name should be unique to allow staff members to easily identify you
@@ -1448,7 +1467,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options.to
 	 * @param options.types
 	 */
-	async transferXp({ from = '', to = '', types = XP_TYPES }: TransferXpOptions) {
+	transferXp({ from = '', to = '', types = XP_TYPES }: TransferXpOptions) {
 		for (const type of types) {
 			this[`${type}Xp${to}`] = this[`${type}Xp${from}`];
 		}
@@ -1466,7 +1485,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		switch (offsetToReset) {
 			case null:
 				// no offset type specifies -> resetting everything
-				await Promise.all(XP_OFFSETS.map(async offset => this.resetXp({ offsetToReset: offset, typesToReset })));
+				await Promise.all(XP_OFFSETS.map(offset => this.resetXp({ offsetToReset: offset, typesToReset })));
 				return this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY, typesToReset });
 
 			case OFFSET_FLAGS.DAY:
@@ -1541,12 +1560,15 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options.type
 	 * @param options.notes
 	 */
-	addTransfer({ amount, collectedBy, auctionId = null, notes = null, type = 'tax' }: SetToPaidOptions & { collectedBy: string; amount: number; notes?: string | null, type?: 'tax' | 'donation' }) {
+	addTransfer({ amount, collectedBy, auctionId = null, notes = null, type = 'tax' }: AddTransferOptions): [ Promise<TaxCollector>, Promise<Transaction> ] {
+		const taxCollector = this.client.taxCollectors.resolve(collectedBy);
+		if (!taxCollector) throw new Error(`unknown tax collector resolvable ${collectedBy}`);
+
 		return [
-			this.client.taxCollectors.cache.get(collectedBy)!.addAmount(amount, type), // update taxCollector
+			taxCollector.addAmount(amount, type), // update taxCollector
 			this.client.db.models.Transaction.create({
 				from: this.minecraftUuid,
-				to: collectedBy,
+				to: taxCollector.minecraftUuid,
 				amount,
 				auctionId,
 				notes,
@@ -1599,7 +1621,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param data from the hypixel guild API
 	 * @param hypixelGuild
 	 */
-	async syncWithGuildData({ expHistory = {}, mutedTill, rank }: Components.Schemas.GuildMember, hypixelGuild = this.hypixelGuild!) {
+	syncWithGuildData({ expHistory = {}, mutedTill, rank }: Components.Schemas.GuildMember, hypixelGuild = this.hypixelGuild!) {
 		// update guild xp
 		const [ currentDay ] = Object.keys(expHistory);
 
@@ -1633,7 +1655,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param offset optional offset value to use instead of the current xp value
 	 * @param useIndividualCap wether to use the individual max level cap if existing
 	 */
-	getSkillLevel(type: ArrayElement<typeof XP_TYPES>, offset: XPOffsets = '', useIndividualCap = true) {
+	getSkillLevel(type: SkillTypes | DungeonTypes, offset: XPOffsets = '', useIndividualCap = true) {
 		return getSkillLevel(type, this[`${type}Xp${offset}`], type === 'farming' && useIndividualCap ? this.farmingLvlCap : null);
 	}
 
@@ -1664,7 +1686,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * returns the slayer level for the provided slayer type
 	 * @param type the slayer type
 	 */
-	getSlayerLevel(type: ArrayElement<typeof XP_TYPES>) {
+	getSlayerLevel(type: SlayerTypes) {
 		const XP = this[`${type}Xp`];
 		const MAX_LEVEL = Math.max(...Object.keys(SLAYER_XP) as unknown as number[]);
 
@@ -1726,7 +1748,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param type the skill or dungeon type
 	 * @param index xpHistory array index
 	 */
-	getSkillLevelHistory(type: ArrayElement<typeof XP_TYPES>, index: number) {
+	getSkillLevelHistory(type: SkillTypes | DungeonTypes, index: number) {
 		return getSkillLevel(type, this[`${type}XpHistory`][index], type === 'farming' ? this.farmingLvlCap : null);
 	}
 

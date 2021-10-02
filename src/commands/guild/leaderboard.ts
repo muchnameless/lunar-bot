@@ -25,8 +25,8 @@ export default class LeaderboardCommand extends SlashCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
-		return await handleLeaderboardCommandInteraction(interaction, {
+	override runSlash(interaction: CommandInteraction) {
+		return handleLeaderboardCommandInteraction(interaction, {
 			lbType: 'gained',
 			xpType: interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION'),
 			page: interaction.options.getInteger('page') ?? 1,

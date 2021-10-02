@@ -58,13 +58,13 @@ export default class ExecCommand extends SlashCommand {
 				});
 			}
 
-			return await InteractionUtil.reply(interaction, {
+			return InteractionUtil.reply(interaction, {
 				embeds: [ responseEmbed ],
 			});
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
 
-			return await InteractionUtil.reply(interaction, {
+			return InteractionUtil.reply(interaction, {
 				content: Formatters.codeBlock('xl', `${error}`),
 			});
 		}

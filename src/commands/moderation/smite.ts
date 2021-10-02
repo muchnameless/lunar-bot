@@ -27,30 +27,30 @@ export default class SmiteCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: CommandInteraction) {
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
 
-		return await guildCommand.runMuteInteraction(interaction, 10 * 60_000);
+		return guildCommand.runMuteInteraction(interaction, 10 * 60_000);
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
+	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
-		const TARGET_INPUT = hypixelMessage.commandData!.args[0].toLowerCase();
+		const TARGET_INPUT = hypixelMessage.commandData.args[0].toLowerCase();
 		const target = await guildCommand.getMuteTarget(TARGET_INPUT);
 
-		if (!target) return await hypixelMessage.author!.send(`no player with the IGN \`${TARGET_INPUT}\` found`);
+		if (!target) return hypixelMessage.author.send(`no player with the IGN \`${TARGET_INPUT}\` found`);
 
 		const { content } = await guildCommand.runMute({
 			target,
 			executor: hypixelMessage.player,
 			duration: 10 * 60_000,
-			hypixelGuild: hypixelMessage.hypixelGuild,
+			hypixelGuild: hypixelMessage.hypixelGuild ?? hypixelMessage.player!.hypixelGuild!,
 		});
 
-		return await hypixelMessage.author!.send(content);
+		return hypixelMessage.author.send(content);
 	}
 }

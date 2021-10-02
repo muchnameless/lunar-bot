@@ -2,10 +2,10 @@ import { config } from 'dotenv';
 import { URL, fileURLToPath } from 'node:url';
 config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 import { Client, Intents, Permissions, LimitedCollection, SnowflakeUtil, Options, Constants, DiscordAPIError } from 'discord.js';
-import { ChannelUtil, MessageUtil } from './util';
+import { ChannelUtil, InteractionUtil, MessageUtil } from './util';
 import { db } from './structures/database';
 import { escapeRegex, logger } from './functions';
-import type { Channel, DMChannel, GuildMember, ThreadChannel } from 'discord.js';
+import type { Channel, DMChannel, GuildMember, PresenceData, ThreadChannel } from 'discord.js';
 
 
 // catch rejections
@@ -26,13 +26,14 @@ const PREFIX = (await db.Config.findOne({
 	},
 }))?.parsedValue as string[][0] ?? 'lg!';
 
+// eslint-disable-next-line unicorn/prefer-top-level-await
 db.sequelize.close().catch(logger.error);
 
 const presence = {
-	activities: [{
+	activities: [ {
 		name: 'nothing due to maintenance',
 		type: Constants.ActivityTypes.LISTENING,
-	}],
+	} as const ],
 	status: 'dnd' as const,
 };
 const client = new Client({
@@ -106,7 +107,9 @@ client
 	.once(Constants.Events.CLIENT_READY, () => {
 		prefixRegExp = new RegExp(`^(?:${[ escapeRegex(PREFIX), `<@!?${client.user!.id}>` ].filter(Boolean).join('|')})`, 'i');
 
-		setInterval(() => client.user!.setPresence(presence), 60 * 60_000); // 1h
+		// set presence again every 1h cause it get's lost sometimes
+		setInterval(() => client.isReady() && client.user.setPresence(client.user.presence as PresenceData), 60 * 60_000);
+
 
 		// log
 		logger.info(`Startup complete. Logged in as ${client.user!.tag}`);
@@ -140,7 +143,7 @@ client
 	.on(Constants.Events.INTERACTION_CREATE, async (interaction) => {
 		if (!interaction.isCommand() && !interaction.isMessageComponent()) return;
 
-		logger.info(`${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} tried to execute '${interaction.commandName ?? interaction.customId}' during maintenance`);
+		logger.info(`${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} tried to execute '${InteractionUtil.logInfo(interaction)}' during maintenance`);
 
 		try {
 			await interaction.reply({

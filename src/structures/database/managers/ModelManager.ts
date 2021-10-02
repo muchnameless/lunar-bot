@@ -1,14 +1,16 @@
 import { Collection } from 'discord.js';
-import { logger } from '../../../functions';
-import type { CreateOptions, FindOptions, Model, ModelCtor, WhereOptions } from 'sequelize';
+import type { FindOptions, Model, ModelCtor, WhereOptions } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
+
+
+export type ModelResovable<M extends Model> = M | string;
 
 
 export class ModelManager<M extends Model> {
 	client: LunarClient;
 	model: ModelCtor<M>;
-	cache: Collection<string, M>;
 	primaryKey: string;
+	cache = new Collection<string, M>();
 
 	/**
 	 * @param client
@@ -17,7 +19,6 @@ export class ModelManager<M extends Model> {
 	constructor(client: LunarClient, model: ModelCtor<M>) {
 		this.client = client;
 		this.model = model;
-		this.cache = new Collection();
 		[ this.primaryKey ] = model.primaryKeyAttributes;
 	}
 
@@ -55,8 +56,8 @@ export class ModelManager<M extends Model> {
 	 * fetches an entry from the database and caches it
 	 * @param where
 	 */
-	async fetch({ cache = true, ...where }: WhereOptions & { cache?: boolean }) {
-		const entry = await this.model.findOne({ where: where as WhereOptions });
+	async fetch({ cache = true, ...where }: WhereOptions<M['_attributes']> & { cache?: boolean }) {
+		const entry = await this.model.findOne({ where: where as WhereOptions<M['_attributes']> });
 
 		if (cache && entry) this.cache.set(entry[this.primaryKey as keyof M] as unknown as string, entry);
 
@@ -67,7 +68,7 @@ export class ModelManager<M extends Model> {
 	 * create a new database entry and adds it to the cache
 	 * @param options
 	 */
-	async add(options: CreateOptions<M>) {
+	async add(options: M['_creationAttributes']) {
 		const newEntry = await this.model.create(options);
 
 		this.cache.set(newEntry[this.primaryKey as keyof M] as unknown as string, newEntry);
@@ -79,20 +80,20 @@ export class ModelManager<M extends Model> {
 	 * destroys the db entry and removes it from the collection
 	 * @param idOrInstance The id or instance of something in this Manager
 	 */
-	async remove(idOrInstance: string | M) {
+	async remove(idOrInstance: ModelResovable<M>) {
 		const element = this.resolve(idOrInstance);
-
-		if (!this.isModel(element)) return logger.error(`[MODEL MANAGER REMOVE]: unknown element: ${idOrInstance}`);
+		if (!element) throw new Error(`[MODEL MANAGER REMOVE]: unknown element: ${idOrInstance}`);
 
 		this.cache.delete(element[this.primaryKey as keyof M] as unknown as string);
-		return element.destroy();
+		await element.destroy();
+		return element;
 	}
 
 	/**
 	 * Resolves a data entry to a data Object.
 	 * @param idOrInstance The id or instance of something in this Manager
 	 */
-	resolve(idOrInstance: string | M) {
+	resolve(idOrInstance: ModelResovable<M>) {
 		if (this.isModel(idOrInstance)) return idOrInstance;
 		if (typeof idOrInstance === 'string') return this.cache.get(idOrInstance) ?? null;
 		return null;
@@ -102,7 +103,7 @@ export class ModelManager<M extends Model> {
 	 * Resolves a data entry to a instance ID.
 	 * @param idOrInstance The id or instance of something in this Manager
 	 */
-	resolveId(idOrInstance: string | M) {
+	resolveId(idOrInstance: ModelResovable<M>) {
 		if (this.isModel(idOrInstance)) return idOrInstance[this.primaryKey as keyof M] as unknown as string;
 		if (typeof idOrInstance === 'string') return idOrInstance;
 		return null;

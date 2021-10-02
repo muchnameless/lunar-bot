@@ -2,6 +2,7 @@ import './pgEnum-fix.js'; // to allow `sync --alter` with pg enums set
 import { sequelize } from '.';
 import { logger } from '../../functions';
 
+// @ts-expect-error
 sequelize.options.logging = x => logger.debug(x);
 
 const force = process.argv.includes('--force') || process.argv.includes('-f');

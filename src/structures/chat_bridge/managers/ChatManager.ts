@@ -1,8 +1,8 @@
 import { AsyncQueue } from '@sapphire/async-queue';
 import { BLOCKED_WORDS_REGEXP } from '../constants';
-import type { MessageCollector as DiscordMessageCollector } from 'discord.js';
 import type { MessageCollector, MessageCollectorOptions } from '../MessageCollector';
 import type { ChatBridge } from '../ChatBridge';
+import type { HypixelMessage } from '../HypixelMessage';
 
 
 interface AwaitMessagesOptions extends MessageCollectorOptions {
@@ -46,7 +46,7 @@ export abstract class ChatManager {
 	 * promisified MessageCollector
 	 * @param options
 	 */
-	awaitMessages(options?: AwaitMessagesOptions) {
+	awaitMessages(options?: AwaitMessagesOptions): Promise<HypixelMessage[]> {
 		return new Promise((resolve, reject) => {
 			const collector = this.createMessageCollector(options) as MessageCollector;
 

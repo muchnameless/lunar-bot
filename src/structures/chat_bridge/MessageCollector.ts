@@ -31,102 +31,48 @@ export interface MessageCollectorOptions {
  */
 export class MessageCollector extends EventEmitter {
 	/**
+	 * The chatBridge that instantiated this Collector
+	 */
+	chatBridge: ChatBridge;
+	/**
+	 * The options of this collector
+	 */
+	options: MessageCollectorOptions;
+	/**
+	 * The filter applied to this collector
+	 */
+	filter: CollectorFilter;
+	/**
+	 * The items collected by this collector
+	 */
+	collected: HypixelMessage[] = [];
+	/**
+	 * Whether this collector has finished collecting
+	 */
+	ended = false;
+	/**
+	 * Total number of messages that were received from the bot during message collection
+	 */
+	received = 0;
+	/**
 	 * Timeout for cleanup
 	 */
 	#timeout: Timeout | null = null;
-
 	/**
 	 * Timeout for cleanup due to inactivity
 	 */
 	#idletimeout: Timeout | null = null;
 
-	/**
-	 * handles stopping the collector when the bot got disconnected
-	 */
-	#handleBotDisconnection = () => this.stop('disconnect');
-
-	/**
-	 * Call this to handle an event as a collectable element
-	 * @param hypixelMessage
-	 */
-	#handleCollect = async (hypixelMessage: HypixelMessage) => {
-		++this.received;
-
-		// eslint-disable-next-line unicorn/no-array-method-this-argument
-		if (await this.filter(hypixelMessage, this.collected)) {
-			this.collected.push(hypixelMessage);
-
-			/**
-			 * Emitted whenever an element is collected.
-			 */
-			this.emit('collect', hypixelMessage);
-
-			if (this.#idletimeout) {
-				clearTimeout(this.#idletimeout);
-				this.#idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
-			}
-		}
-
-		this.checkEnd();
-	};
-
-	collected: HypixelMessage[];
-	options: MessageCollectorOptions;
-	chatBridge: ChatBridge;
-	filter: CollectorFilter;
-	ended: boolean;
-	received: number;
-
-	override on(eventName: 'collect', listener: (item: HypixelMessage) => Awaited<void>): this;
-	override on(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaited<void>): this;
-	override on(eventName: string, listener: (...args: unknown[]) => void): this;
-	override on(eventName: string, listener: (...args: any[]) => void) {
-		return super.on(eventName, listener);
-	}
-
-	override once(eventName: 'collect', listener: (message: HypixelMessage) => Awaited<void>): this;
-	override once(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaited<void>): this;
-	override once(eventName: string, listener: (...args: unknown[]) => void): this;
-	override once(eventName: string, listener: (...args: any[]) => void) {
-		return super.once(eventName, listener);
-	}
-
 	constructor(chatBridge: ChatBridge, options: MessageCollectorOptions = {}) {
 		super();
 
-		/**
-		 * The chatBridge that instantiated this Collector
-		 */
 		this.chatBridge = chatBridge;
+		this.options = options;
 
-		/**
-		 * The filter applied to this collector
-		 */
 		this.filter = options.filter ?? (() => true);
-
 		if (typeof this.filter !== 'function') {
 			throw new TypeError('INVALID_TYPE: options.filter is not a function');
 		}
-
-		/**
-		 * The options of this collector
-		 */
-		this.options = options;
-
-		/**
-		 * The items collected by this collector
-		 */
-		this.collected = [];
-
-		/**
-		 * Whether this collector has finished collecting
-		 */
-		this.ended = false;
-
-		/**
-		 * Total number of messages that were received from the bot during message collection
-		 */
-		this.received = 0;
 
 		this.chatBridge.incrementMaxListeners();
 		this.chatBridge.on('message', this.#handleCollect);
@@ -140,6 +86,20 @@ export class MessageCollector extends EventEmitter {
 
 		if (options.time) this.#timeout = setTimeout(() => this.stop('time'), options.time);
 		if (options.idle) this.#idletimeout = setTimeout(() => this.stop('idle'), options.idle);
+	}
+
+	override on(eventName: 'collect', listener: (item: HypixelMessage) => Awaited<void>): this;
+	override on(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaited<void>): this;
+	override on(eventName: string, listener: (...args: unknown[]) => void): this;
+	override on(eventName: string, listener: (...args: any[]) => void) {
+		return super.on(eventName, listener);
+	}
+
+	override once(eventName: 'collect', listener: (message: HypixelMessage) => Awaited<void>): this;
+	override once(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaited<void>): this;
+	override once(eventName: string, listener: (...args: unknown[]) => void): this;
+	override once(eventName: string, listener: (...args: any[]) => void) {
+		return super.once(eventName, listener);
 	}
 
 	/**
@@ -181,6 +141,36 @@ export class MessageCollector extends EventEmitter {
 			this.on('end', onEnd);
 		});
 	}
+
+	/**
+	 * handles stopping the collector when the bot got disconnected
+	 */
+	#handleBotDisconnection = () => this.stop('disconnect');
+
+	/**
+	 * Call this to handle an event as a collectable element
+	 * @param hypixelMessage
+	 */
+	#handleCollect = async (hypixelMessage: HypixelMessage) => {
+		++this.received;
+
+		// eslint-disable-next-line unicorn/no-array-method-this-argument
+		if (await this.filter(hypixelMessage, this.collected)) {
+			this.collected.push(hypixelMessage);
+
+			/**
+			 * Emitted whenever an element is collected.
+			 */
+			this.emit('collect', hypixelMessage);
+
+			if (this.#idletimeout) {
+				clearTimeout(this.#idletimeout);
+				this.#idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
+			}
+		}
+
+		this.checkEnd();
+	};
 
 	/**
 	 * Stops this collector and emits the `end` event.

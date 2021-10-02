@@ -65,14 +65,14 @@ export default class BaseWeightCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		return await InteractionUtil.reply(interaction, await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
+		return InteractionUtil.reply(interaction, await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
+	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
 		const [ IGN, PROFILE_NAME_INPUT ] = hypixelMessage.commandData!.args;
 
 		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');
@@ -95,6 +95,6 @@ export default class BaseWeightCommand extends DualCommand {
 			}
 		}
 
-		return await hypixelMessage.reply(await this._generateReply(hypixelMessage, IGN, profileName));
+		return hypixelMessage.reply(await this._generateReply(hypixelMessage, IGN, profileName));
 	}
 }

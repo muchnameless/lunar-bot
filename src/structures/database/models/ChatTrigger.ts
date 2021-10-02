@@ -98,7 +98,7 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 			setTimeout(() => this.timestamps!.delete(hypixelMessage.author!.ign), this.cooldown!);
 		}
 
-		return await hypixelMessage.reply(
+		return hypixelMessage.reply(
 			this.response
 				.replaceAll('{AUTHOR_IGN}', hypixelMessage.author!.ign)
 				.replaceAll(/\$(\d+)/g, (m, p0) => matched[p0] ?? m), // replace $number with capture group #number

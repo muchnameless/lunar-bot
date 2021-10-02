@@ -16,22 +16,19 @@ interface EventLoadOptions {
 
 
 export class EventCollection extends Collection<string, BaseEvent> {
+	/**
+	 * NodeJS EventEmitter
+	 */
 	emitter: EventEmitter;
 	/**
-	 * the path to the commands folder
+	 * path to the event files
 	 */
 	dirURL: URL;
 
 	constructor(emitter: EventEmitter, dirURL: URL, entries?: readonly [ string, BaseEvent ][]) {
 		super(entries);
 
-		/**
-		 * NodeJS EventEmitter
-		 */
 		this.emitter = emitter;
-		/**
-		 * path to the event files
-		 */
 		this.dirURL = dirURL;
 	}
 

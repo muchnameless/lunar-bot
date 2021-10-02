@@ -6,6 +6,21 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
 
+/* eslint-disable camelcase */
+interface MurderMysteryStats {
+	games: number;
+	wins: number;
+	kills: number;
+	deaths: number;
+	murderer_wins: number;
+	detective_wins: number;
+	coins: number;
+	quickest_murderer_win_time_seconds: number | string;
+	quickest_detective_win_time_seconds: number | string;
+}
+/* eslint-enable camelcase */
+
+
 export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -36,7 +51,7 @@ export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 				coins = 0,
 				quickest_murderer_win_time_seconds = '-/-',
 				quickest_detective_win_time_seconds = '-/-',
-			} = playerData.stats.MurderMystery;
+			} = playerData.stats.MurderMystery as unknown as MurderMysteryStats;
 
 			if (!games) return `\`${ign}\` has no MurderMystery stats`;
 
@@ -53,8 +68,8 @@ export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 				murderer wins: ${this.client.formatNumber(murderer_wins)},
 				detective wins: ${this.client.formatNumber(detective_wins)},
 				coins: ${this.client.formatNumber(coins)},
-				fastest murderer win: ${this.client.formatNumber(quickest_murderer_win_time_seconds)} s,
-				fastest detective win: ${this.client.formatNumber(quickest_detective_win_time_seconds)} s
+				fastest murderer win: ${typeof quickest_murderer_win_time_seconds === 'number' ? this.client.formatNumber(quickest_murderer_win_time_seconds) : quickest_murderer_win_time_seconds} s,
+				fastest detective win: ${typeof quickest_detective_win_time_seconds === 'number' ? this.client.formatNumber(quickest_detective_win_time_seconds) : quickest_detective_win_time_seconds} s
 			`;
 			/* eslint-enable camelcase */
 		} catch {

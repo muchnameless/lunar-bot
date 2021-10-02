@@ -24,26 +24,19 @@ interface LunarClientOptions extends ClientOptions {
 export class LunarClient extends Client {
 	ownerId: Snowflake;
 	db: DatabaseManager;
-	logHandler: LogHandler;
-	cronJobs: CronJobManager;
-	chatBridges: ChatBridgeArray;
-	commands: SlashCommandCollection;
-	events: EventCollection;
+	logHandler = new LogHandler(this, new URL('../../log_buffer', import.meta.url));
+	cronJobs = new CronJobManager(this);
+	chatBridges = new ChatBridgeArray(this);
+	commands = new SlashCommandCollection(this, new URL('../commands', import.meta.url));
+	events = new EventCollection(this, new URL('../events', import.meta.url));
 	declare options: LunarClientOptions;
-	log: LogHandler['log'];
+	log = this.logHandler.log.bind(this.logHandler);
 
 	constructor(options: LunarClientOptions) {
 		super(options);
 
 		this.ownerId = process.env.OWNER as Snowflake;
 		this.db = new DatabaseManager(this, options.db);
-		this.logHandler = new LogHandler(this, new URL('../../log_buffer', import.meta.url));
-		this.cronJobs = new CronJobManager(this);
-		this.chatBridges = new ChatBridgeArray(this);
-		this.commands = new SlashCommandCollection(this, new URL('../commands', import.meta.url));
-		this.events = new EventCollection(this, new URL('../events', import.meta.url));
-
-		this.log = this.logHandler.log.bind(this.logHandler);
 	}
 
 	get config() {

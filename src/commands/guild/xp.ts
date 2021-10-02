@@ -8,6 +8,7 @@ import { getDefaultOffset, upperCaseFirstChar } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { XPOffsets } from '../../structures/database/models/Player';
 
 
 export default class XpCommand extends SlashCommand {
@@ -34,7 +35,7 @@ export default class XpCommand extends SlashCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
-		const OFFSET = interaction.options.getString('offset') ?? getDefaultOffset(this.config);
+		const OFFSET = interaction.options.getString('offset') as XPOffsets ?? getDefaultOffset(this.config);
 
 		// update db?
 		if (interaction.options.getBoolean('update')) await player.updateXp();
@@ -46,7 +47,7 @@ export default class XpCommand extends SlashCommand {
 		let embed = new MessageEmbed()
 			.setColor(this.config.get('EMBED_BLUE'))
 			.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, (await player.imageURL)!, player.url)
-			.setDescription(`${`Δ: change since ${Formatters.time(new Date(Math.max(this.config.get(XP_OFFSETS_TIME[OFFSET]), player.createdAt)))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[OFFSET])})`.padEnd(105, '\u00A0')}\u200B`)
+			.setDescription(`${`Δ: change since ${Formatters.time(new Date(Math.max(this.config.get(XP_OFFSETS_TIME[OFFSET as keyof typeof XP_OFFSETS_TIME]), player.createdAt.getTime())))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[OFFSET as keyof typeof XP_OFFSETS_CONVERTER])})`.padEnd(105, '\u00A0')}\u200B`)
 			.addFields({
 				name: '\u200B',
 				value: stripIndents`
@@ -57,8 +58,8 @@ export default class XpCommand extends SlashCommand {
 
 		// skills
 		for (const skill of SKILLS) {
-			const SKILL_ARGUMENT = `${skill}Xp`;
-			const OFFSET_ARGUMENT = `${skill}Xp${OFFSET}`;
+			const SKILL_ARGUMENT = `${skill}Xp` as const;
+			const OFFSET_ARGUMENT = `${skill}Xp${OFFSET}` as const;
 			const { progressLevel } = player.getSkillLevel(skill);
 
 			embed.addFields({
@@ -75,7 +76,7 @@ export default class XpCommand extends SlashCommand {
 		MessageEmbedUtil.padFields(embed);
 
 		for (const skill of COSMETIC_SKILLS) {
-			const SKILL_ARGUMENT = `${skill}Xp`;
+			const SKILL_ARGUMENT = `${skill}Xp` as const;
 			const { progressLevel } = player.getSkillLevel(skill);
 
 			embed.addFields({
@@ -104,7 +105,7 @@ export default class XpCommand extends SlashCommand {
 		});
 
 		for (const slayer of SLAYERS) {
-			const SLAYER_ARGUMENT = `${slayer}Xp`;
+			const SLAYER_ARGUMENT = `${slayer}Xp` as const;
 
 			embed.addFields({
 				name: upperCaseFirstChar(slayer),
@@ -126,7 +127,7 @@ export default class XpCommand extends SlashCommand {
 
 		// dungeons
 		for (const type of DUNGEON_TYPES_AND_CLASSES) {
-			const DUNGEON_ARGUMENT = `${type}Xp`;
+			const DUNGEON_ARGUMENT = `${type}Xp` as const;
 			const { progressLevel } = player.getSkillLevel(type);
 
 			embed.addFields({
@@ -166,6 +167,6 @@ export default class XpCommand extends SlashCommand {
 
 		embeds.push(MessageEmbedUtil.padFields(embed));
 
-		return await InteractionUtil.reply(interaction, { embeds });
+		return InteractionUtil.reply(interaction, { embeds });
 	}
 }

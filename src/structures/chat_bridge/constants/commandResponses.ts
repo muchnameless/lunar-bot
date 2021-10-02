@@ -9,7 +9,7 @@ const _genericErrors = {
 	RANK_MISSING_PERMS: '^Your guild rank does not have permission to use this[.!]?$',
 	unknownIgn: (ign = IGN_DEFAULT) => `^Can't find a player by the name of '${ign}'[.!]?$`,
 	playerNotInGuild: (ign = IGN_DEFAULT) => `^${HYPIXEL_RANK}${ign} is not in your guild[.!]?`,
-	unknownRank: (_0: never, _1: never, to = GUILD_RANK_DEFAULT) => `^I couldn't find a rank by the name of '${to}'[.!]?`,
+	unknownRank: (_0: unknown, _1: unknown, to = GUILD_RANK_DEFAULT) => `^I couldn't find a rank by the name of '${to}'[.!]?`,
 };
 
 
@@ -65,6 +65,7 @@ const _unmute = {
 };
 
 
+const genericErrorResponses = Object.values(_genericErrors);
 const demoteResponses = [
 	...Object.values(_demote),
 	_genericErrors.MUST_BE_GM,
@@ -94,7 +95,7 @@ const kickResponses = [
 	_genericErrors.playerNotInGuild,
 ];
 const kickResponsesError = [
-	...Object.entries(_kick).flatMap((key, value) => (key !== 'success' ? value : [])),
+	...Object.entries(_kick).flatMap(([ key, value ]) => (key !== 'success' ? value : [])),
 	_genericErrors.MUST_BE_GM,
 	_genericErrors.MISSING_PERMS,
 	_genericErrors.RANK_MISSING_PERMS,
@@ -145,22 +146,65 @@ const unmuteResponses = [
 	_genericErrors.unknownIgn,
 	_genericErrors.playerNotInGuild,
 ];
+const paginationErrorResponses = Object.values(_paginationErrors);
 
 
-// Function: RegExp
-export const genericErrors = (ign = IGN_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(_genericErrors.map(x => (typeof x === 'function' ? x(ign, undefined, to) : x)).join('|'), 'i');
-export const demote = (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(demoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i');
-export const paginationErrors = (ign = IGN_DEFAULT) => new RegExp(_paginationErrors.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i');
-export const historyErrors = (ign = IGN_DEFAULT) => new RegExp(historyErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i');
-export const invite = (ign = IGN_DEFAULT) => new RegExp(inviteResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i');
+// dynamic RegExp constructors
+export const genericErrors = (ign = IGN_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(
+	genericErrorResponses.map(x => (typeof x === 'function' ? x(ign, undefined, to) : x)).join('|'),
+	'i',
+);
+
+export const demote = (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(
+	demoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'),
+	'i',
+);
+
+export const paginationErrors = (ign = IGN_DEFAULT) => new RegExp(
+	paginationErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'),
+	'i',
+);
+
+export const historyErrors = (ign = IGN_DEFAULT) => new RegExp(
+	historyErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'),
+	'i',
+);
+
+export const invite = (ign = IGN_DEFAULT) => new RegExp(
+	inviteResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'),
+	'i',
+);
+
 export const kick = {
-	success: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(_kick.success(target, executor), 'i'),
-	error: (target = IGN_DEFAULT) => new RegExp(kickResponsesError.map(x => (typeof x === 'function' ? x(target) : x)).join('|'), 'i'),
-	all: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(kickResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i'),
+	success: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(
+		_kick.success(target, executor),
+		'i',
+	),
+	error: (target = IGN_DEFAULT) => new RegExp(
+		kickResponsesError.map(x => (typeof x === 'function' ? x(target) : x)).join('|'),
+		'i',
+	),
+	all: (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(
+		kickResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'),
+		'i',
+	),
 };
-export const logErrors = (ign = IGN_DEFAULT) => new RegExp(logErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i');
-export const mute = (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(muteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i');
-export const promote = (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'), 'i');
+
+export const logErrors = (ign = IGN_DEFAULT) => new RegExp(
+	logErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'),
+	'i',
+);
+
+export const mute = (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(
+	muteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'),
+	'i',
+);
+
+export const promote = (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(
+	promoteResponses.map(x => (typeof x === 'function' ? x(ign, from, to) : x)).join('|'),
+	'i',
+);
+
 export const setRank = (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(
 	setRankResponses
 		.map(x => (typeof x === 'function' ? x(ign, from, to) : x))
@@ -168,17 +212,26 @@ export const setRank = (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD
 		.replace(/\?<.+?>/g, ''), // remove named capture groups as there would be multiple groups with the same name which is not allowed
 	'i',
 );
-export const topErrors = (ign = IGN_DEFAULT) => new RegExp(topErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'), 'i');
-export const unmute = (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(unmuteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'), 'i');
 
-// RegExp
+export const topErrors = (ign = IGN_DEFAULT) => new RegExp(
+	topErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'),
+	'i',
+);
+
+export const unmute = (target = IGN_DEFAULT, executor = IGN_DEFAULT) => new RegExp(
+	unmuteResponses.map(x => (typeof x === 'function' ? x(target, executor) : x)).join('|'),
+	'i',
+);
+
+// static RegExp
 export const spamMessages = new RegExp([
-	'You cannot say the same message twice',
-	'You can only send a message once every half second',
-	'Blocked excessive spam',
-	'You are sending commands too fast[.!]? Please slow down',
-	'Please wait before doing that again',
-].map(x => `^${x}[.!]?$`).join('|'), 'i');
+	'You cannot say the same message twice!',
+	'You can only send a message once every half second!',
+	'Blocked excessive spam.',
+	'You are sending commands too fast! Please slow down.',
+	'Please wait before doing that again!',
+].map(x => `^${x.replace(/[!.]/g, '[.!]?')}$`).join('|'), 'i');
+
 export const demoteSuccess = new RegExp(_demote.success(), 'i');
 export const kickSuccess = new RegExp(_kick.success(), 'i');
 export const muteSuccess = new RegExp(_mute.success(), 'i');

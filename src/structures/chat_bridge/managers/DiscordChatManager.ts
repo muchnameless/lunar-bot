@@ -32,11 +32,26 @@ interface SendViaBotOptions extends MessageOptions {
 
 
 export class DiscordChatManager extends ChatManager {
+	/**
+	 * hypixel message type
+	 */
 	type: keyof typeof PREFIX_BY_TYPE;
+	/**
+	 * discord channel id
+	 */
 	channelId: Snowflake;
+	/**
+	 * hypixel chat prefix
+	 */
 	prefix: string;
-	webhook: Webhook | null;
-	ready: boolean;
+	/**
+	 * channel webhook
+	 */
+	webhook: Webhook | null = null;
+	/**
+	 * chat bridge status
+	 */
+	ready = false;
 
 	/**
 	 * @param chatBridge
@@ -45,26 +60,9 @@ export class DiscordChatManager extends ChatManager {
 	constructor(chatBridge: ChatBridge, { type, channelId }: ChatBridgeChannel) {
 		super(chatBridge);
 
-		/**
-		 * hypixel message type
-		 */
 		this.type = type;
-		/**
-		 * discord channel id
-		 */
 		this.channelId = channelId;
-		/**
-		 * hypixel chat prefix
-		 */
 		this.prefix = PREFIX_BY_TYPE[type];
-		/**
-		 * channel webhook
-		 */
-		this.webhook = null;
-		/**
-		 * chat bridge status
-		 */
-		this.ready = false;
 	}
 
 	/**
@@ -161,7 +159,7 @@ export class DiscordChatManager extends ChatManager {
 	/**
 	 * initialize the discord chat manager
 	 */
-	async init() {
+	init() {
 		return this.#fetchOrCreateWebhook();
 	}
 
@@ -302,7 +300,7 @@ export class DiscordChatManager extends ChatManager {
 	 */
 	async forwardToMinecraft(message: Message, { player: playerInput, isEdit = false }: MessageForwardOptions = {}) {
 		if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
-		if (!this.chatBridge.enabled || !this.minecraft.ready) return MessageUtil.react(message, X_EMOJI);
+		if (!this.chatBridge.enabled || !this.minecraft.isReady()) return MessageUtil.react(message, X_EMOJI);
 
 		const player = playerInput
 			?? UserUtil.getPlayer(message.interaction?.user ?? message.author) // cached player

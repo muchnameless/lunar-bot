@@ -72,7 +72,7 @@ export const offsetOption = new SlashCommandStringOption()
 	.setName('offset')
 	.setDescription('Δ offset')
 	.setRequired(false)
-	.addChoices(Object.keys(XP_OFFSETS_SHORT).map(x => [ x, XP_OFFSETS_CONVERTER[x] ]));
+	.addChoices(Object.keys(XP_OFFSETS_SHORT).map(x => [ x, XP_OFFSETS_CONVERTER[x as keyof typeof XP_OFFSETS_SHORT] ]));
 
 export const ephemeralOption = new SlashCommandStringOption()
 	.setName('visibility')

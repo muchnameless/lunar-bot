@@ -22,25 +22,27 @@ export default class HelpBridgeCommand extends BridgeCommand {
 	 * @param commands
 	 */
 	static #listCommands(commands: Collection<string, BridgeCommand | DualCommand>) {
-		return [ ...new Set(commands.values()) ].map(({ name, aliases, aliasesInGame }) => [ name, ...(aliases ?? aliasesInGame ?? []) ].join(' | ')).join(', ');
+		return [ ...new Set(commands.values()) ]
+			.map(command => [ command.name, ...((command as DualCommand).aliasesInGame ?? command.aliases ?? []) ].join(' | '))
+			.join(', ');
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
+	override runMinecraft(hypixelMessage: HypixelMessage<true>) {
 		// default help
-		if (!hypixelMessage.commandData!.args.length) {
+		if (!hypixelMessage.commandData.args.length) {
 			const reply = [
 				`Guild chat prefix: ${[ ...this.config.get('PREFIXES'), `@${hypixelMessage.chatBridge.bot!.username}` ].join(', ')}`,
 				...this.collection.visibleCategories.map(category => `${category}: ${HelpBridgeCommand.#listCommands(this.collection.filterByCategory(category))}`),
 			];
 
-			return hypixelMessage.author!.send(reply.join('\n'));
+			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
-		const INPUT = hypixelMessage.commandData!.args[0].toLowerCase();
+		const INPUT = hypixelMessage.commandData.args[0].toLowerCase();
 
 		// category help
 		const requestedCategory = this.collection.categories.find(categoryName => categoryName === INPUT);
@@ -58,13 +60,13 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 			reply.push(`Commands: ${HelpBridgeCommand.#listCommands(categoryCommands)}`);
 
-			return hypixelMessage.author!.send(reply.join('\n'));
+			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
 		// single command help
 		const command = this.collection.getByName(INPUT);
 
-		if (!command) return hypixelMessage.author!.send(`'${INPUT}' is neither a valid command nor category`);
+		if (!command) return hypixelMessage.author.send(`'${INPUT}' is neither a valid command nor category`);
 
 		const reply = [ `Name: ${command.name}` ];
 
@@ -85,6 +87,6 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
 
-		return hypixelMessage.author!.send(reply.join('\n'));
+		return hypixelMessage.author.send(reply.join('\n'));
 	}
 }

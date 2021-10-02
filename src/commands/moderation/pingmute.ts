@@ -54,7 +54,7 @@ export default class PingMuteCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		return await InteractionUtil.reply(interaction, await this._generateReply(
+		return InteractionUtil.reply(interaction, await this._generateReply(
 			InteractionUtil.getPlayer(interaction, { throwIfNotFound: true }),
 			interaction.options.getString('player', true),
 		));
@@ -64,10 +64,10 @@ export default class PingMuteCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
+	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
 		const [ INPUT ] = hypixelMessage.commandData!.args;
 
-		return await hypixelMessage.reply(await this._generateReply(
+		return hypixelMessage.reply(await this._generateReply(
 			this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT),
 			INPUT,
 		));

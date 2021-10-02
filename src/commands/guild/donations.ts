@@ -30,8 +30,9 @@ export default class DonationsCommand extends SlashCommand {
 		});
 
 		// construct { donator: amount } object
-		const reducedAmount = Object.fromEntries([ ...new Set(donations.map(({ from }) => from)) ].map(x => [ x, 0 ]));
-		const reducedNotes = Object.fromEntries([ ...new Set(donations.map(({ from }) => from)) ].map(x => [ x, [] ]));
+		const donators = [ ...new Set(donations.map(({ from }) => from)) ];
+		const reducedAmount = Object.fromEntries(donators.map(x => [ x, 0 ]));
+		const reducedNotes: Record<string, string[]> = Object.fromEntries(donators.map(x => [ x, [] ]));
 
 		// fill said object
 		for (const { from, amount, notes } of donations) {
@@ -73,6 +74,6 @@ export default class DonationsCommand extends SlashCommand {
 		embed.setDescription(`Total: ${this.client.formatNumber(totalAmount)}`);
 
 		// create and send embed
-		return await InteractionUtil.reply(interaction, { embeds: [ embed ] });
+		return InteractionUtil.reply(interaction, { embeds: [ embed ] });
 	}
 }

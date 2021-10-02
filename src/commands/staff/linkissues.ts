@@ -135,7 +135,7 @@ export default class LinkIssuesCommand extends SlashCommand {
 
 		embed.setTitle(`Link Issues${issuesAmount ? ` (${issuesAmount})` : ''}`);
 
-		return await InteractionUtil.reply(interaction, {
+		return InteractionUtil.reply(interaction, {
 			embeds: [
 				embed,
 			],

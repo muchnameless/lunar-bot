@@ -7,6 +7,10 @@ import { upperCaseFirstChar } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { XPTypes } from '../../constants';
+
+
+type TrackingTypes = XPTypes | 'weight' | 'skill-average' | 'slayer';
 
 
 export default class TrackCommand extends SlashCommand {
@@ -27,7 +31,7 @@ export default class TrackCommand extends SlashCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
-		const type = interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION');
+		const type = interaction.options.getString('type') as TrackingTypes ?? this.config.get('CURRENT_COMPETITION');
 		const days = 30;
 
 		let datasets;
@@ -85,6 +89,7 @@ export default class TrackCommand extends SlashCommand {
 			case 'zombie':
 			case 'spider':
 			case 'wolf':
+			case 'enderman':
 			case 'guild': {
 				datasets = [{
 					label: `${upperCaseFirstChar(type)} XP`,
@@ -118,7 +123,7 @@ export default class TrackCommand extends SlashCommand {
 			},
 		});
 
-		return await InteractionUtil.reply(interaction, {
+		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, (await player.imageURL)!, player.url)

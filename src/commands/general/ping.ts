@@ -25,9 +25,7 @@ export default class PingCommand extends SlashCommand {
 			fetchReply: true,
 		});
 
-		if (!sent) return;
-
-		return await InteractionUtil.reply(interaction, oneLine`
+		if (sent) return InteractionUtil.reply(interaction, oneLine`
 			Roundtrip latency: ${sent.createdTimestamp - interaction.createdTimestamp} ms |
 			Average WebSocket Heartbeat: ${this.client.ws.ping} ms
 		`);

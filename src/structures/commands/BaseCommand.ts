@@ -8,7 +8,7 @@ export interface CommandContext {
 	client: LunarClient;
 	collection: BaseCommandCollection;
 	name: string;
-	category: string;
+	category: string | null;
 }
 
 export type RequiredRoles = () => Snowflake[];
@@ -18,7 +18,7 @@ export class BaseCommand {
 	client: LunarClient;
 	collection: BaseCommandCollection;
 	name: string;
-	category: string;
+	category: string | null;
 	cooldown: number | null;
 	_requiredRoles: RequiredRoles | null;
 	timestamps: Collection<Snowflake, number> | null;
@@ -29,7 +29,7 @@ export class BaseCommand {
 	 * @param context
 	 * @param param1
 	 */
-	constructor({ client, collection, name, category }: CommandContext, { cooldown, requiredRoles }: { cooldown?: number | null, requiredRoles?: RequiredRoles }) {
+	constructor({ client, collection, name, category }: CommandContext, { cooldown, requiredRoles }: { cooldown?: number | null, requiredRoles?: RequiredRoles } = {}) {
 		this.client = client;
 		this.collection = collection;
 		this.name = name;
@@ -85,7 +85,8 @@ export class BaseCommand {
 	 */
 	load() {
 		this.collection.set(this.name.toLowerCase(), this);
-		this.aliases?.forEach(alias => this.collection.set(alias.toLowerCase(), this));
+		if (this.aliases) for (const alias of this.aliases) this.collection.set(alias.toLowerCase(), this);
+		return this;
 	}
 
 	/**
@@ -93,6 +94,7 @@ export class BaseCommand {
 	 */
 	unload() {
 		this.collection.delete(this.name.toLowerCase());
-		this.aliases?.forEach(alias => this.collection.delete(alias.toLowerCase()));
+		if (this.aliases) for (const alias of this.aliases) this.collection.delete(alias.toLowerCase());
+		return this;
 	}
 }

@@ -1,3 +1,6 @@
+import type { ArrayElement } from '../types/util';
+
+
 /**
  * misc
  */
@@ -171,6 +174,8 @@ export const SKILL_CAP = {
 	dungeons: 50,
 } as const;
 
+export type SkillTypes = ArrayElement<typeof SKILLS> | ArrayElement<typeof COSMETIC_SKILLS>;
+
 
 /**
  * dungeons
@@ -260,6 +265,7 @@ export const DUNGEON_CLASSES = [
 
 export const DUNGEON_TYPES_AND_CLASSES = [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ] as const;
 
+export type DungeonTypes = ArrayElement<typeof DUNGEON_TYPES_AND_CLASSES>;
 
 /**
  * SLAYERS
@@ -271,6 +277,8 @@ export const SLAYERS = [
 	'wolf',
 	'enderman',
 ] as const;
+
+export type SlayerTypes = ArrayElement<typeof SLAYERS>;
 
 export const SLAYER_XP = {
 	1: 5,

@@ -36,7 +36,7 @@ export default class DonateCommand extends SlashCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-		if (!collector?.isCollecting) return await InteractionUtil.reply(interaction, 'this command is restricted to (active) tax collectors');
+		if (!collector?.isCollecting) return InteractionUtil.reply(interaction, 'this command is restricted to (active) tax collectors');
 
 		const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 		const AMOUNT_OR_TEXT = interaction.options.getString('value');
@@ -68,6 +68,6 @@ export default class DonateCommand extends SlashCommand {
 			}),
 		);
 
-		return await InteractionUtil.reply(interaction, `registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
+		return InteractionUtil.reply(interaction, `registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
 	}
 }

@@ -7,6 +7,19 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
 
+/* eslint-disable camelcase */
+interface SkyWarsStats {
+	wins: number;
+	losses: number;
+	assists: number;
+	games_played_skywars: number;
+	kills: number;
+	deaths: number;
+	win_streak: number;
+}
+/* eslint-enable camelcase */
+
+
 export default class SkyWarsStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -35,7 +48,7 @@ export default class SkyWarsStatsCommand extends BaseStatsCommand {
 				kills = 0,
 				deaths = 0,
 				win_streak = 0,
-			} = playerData.stats.SkyWars;
+			} = playerData.stats.SkyWars as unknown as SkyWarsStats;
 
 			return oneLine`
 				${ign}:

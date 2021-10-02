@@ -20,7 +20,7 @@ import {
 	upperCaseFirstChar,
 } from '../../../functions';
 import { ModelManager } from './ModelManager';
-import type { CreateOptions } from 'sequelize';
+import type { ModelResovable } from './ModelManager';
 import type { Player, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
 import type { HypixelGuild } from '../models/HypixelGuild';
 
@@ -40,7 +40,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * get players from all guilds (no bridgers or errors)
 	 */
 	get inGuild() {
-		return this.cache.filter(({ notInGuild }) => !notInGuild);
+		return this.cache.filter(player => player.inGuild());
 	}
 
 	/**
@@ -73,7 +73,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * delete a player from the cache and sweep the player's hypixelGuild's player cache
 	 * @param idOrPlayer
 	 */
-	delete(idOrPlayer: string | Player) {
+	delete(idOrPlayer: ModelResovable<Player>) {
 		const player = this.resolve(idOrPlayer);
 		if (!player) throw new Error(`[PLAYER HANDLER UNCACHE]: invalid input: ${idOrPlayer}`);
 
@@ -115,7 +115,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @param options options for the new db entry
 	 * @param isAddingSingleEntry wether to call sortAlphabetically() and updateXp() after adding the new entry
 	 */
-	override async add(options: CreateOptions = {}, isAddingSingleEntry = true) {
+	override async add(options: Player['_creationAttributes'], isAddingSingleEntry = true) {
 		const newPlayer = await super.add(options);
 
 		this.client.hypixelGuilds.sweepPlayerCache(newPlayer.guildId);
@@ -242,6 +242,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 			try {
 				for (const player of this.cache.values()) {
+					// @ts-expect-error hypixel.ratelimit is not typed
 					if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
 
 					await player.updateData({ rejectOnAPIError: true, ...options });
@@ -567,12 +568,13 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
 		}
 
-		const log = new Collection<HypixelGuild | null, string[]>();
+		const log = new Collection<HypixelGuild, string[]>();
 
 		for (const player of this.cache.values()) {
-			if (player.notInGuild) continue;
+			if (!player.inGuild()) continue;
 
 			try {
+				// @ts-expect-error hypixel.ratelimit is not typed
 				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
 
 				const result = await player.fetchMainProfile();
@@ -610,11 +612,11 @@ export class PlayerManager extends ModelManager<Player> {
 		 * @param guild
 		 * @param mainProfileChangesAmount
 		 */
-		const createEmbed = (guild: HypixelGuild | null, mainProfileChangesAmount: number) => {
+		const createEmbed = (guild: HypixelGuild, mainProfileChangesAmount: number) => {
 			const embed = new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_RED'))
-				.setTitle(`${guild == null ? 'Bridger' : upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${mainProfileChangesAmount !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${guild == null ? this.cache.filter(({ guildId }) => guildId === guild).size : guild.playerCount}`)
+				.setTitle(`${upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${mainProfileChangesAmount !== 1 ? 's' : ''}`)
+				.setDescription(`Number of players: ${guild.playerCount}`)
 				.setTimestamp();
 
 			embeds.push(embed);

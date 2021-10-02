@@ -85,35 +85,32 @@ export class ImgurClient {
 	rateLimitOffset: number;
 	rateLimitedWaitTime: number;
 	retries: number;
-	rateLimit: RateLimitData;
-	postRateLimit: PostRateLimitData;
+	rateLimit: RateLimitData = {
+		userlimit: null,
+		userremaining: null,
+		userreset: null,
+		clientlimit: null,
+		clientremaining: null,
+		clientreset: null,
+	};
+	postRateLimit: PostRateLimitData = {
+		limit: null,
+		remaining: null,
+		reset: null,
+	};
 
 	/**
 	 * @param clientId
 	 * @param options
 	 */
 	constructor(clientId: string, { cache, apiVersion, requestTimeout, rateLimitOffset, rateLimitedWaitTime, retries }: ImgurClientOptions = {}) {
-		this.cache = cache;
 		this.authorisation = clientId;
+		this.cache = cache;
 		this.#baseURL = `https://api.imgur.com/${apiVersion ?? 3}/`;
 		this.requestTimeout = requestTimeout ?? 10_000;
 		this.rateLimitOffset = rateLimitOffset ?? 1_000;
 		this.rateLimitedWaitTime = rateLimitedWaitTime ?? 60_000;
 		this.retries = retries ?? 1;
-
-		this.rateLimit = {
-			userlimit: null,
-			userremaining: null,
-			userreset: null,
-			clientlimit: null,
-			clientremaining: null,
-			clientreset: null,
-		};
-		this.postRateLimit = {
-			limit: null,
-			remaining: null,
-			reset: null,
-		};
 	}
 
 	/**
@@ -135,7 +132,7 @@ export class ImgurClient {
 	 * uploads an image by URL
 	 * @param url
 	 */
-	async upload(url: string) {
+	upload(url: string) {
 		const form = new FormData();
 
 		form.append('image', url);

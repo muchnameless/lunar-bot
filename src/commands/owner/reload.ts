@@ -255,7 +255,7 @@ export default class ReloadCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		return await InteractionUtil.reply(interaction, await this.#run(interaction.options.getSubcommand(),
+		return InteractionUtil.reply(interaction, await this.#run(interaction.options.getSubcommand(),
 			interaction.options.getString('name'),
 			interaction.options.getBoolean('reload') ?? false,
 			interaction.options.getBoolean('force') ?? false,
@@ -266,7 +266,7 @@ export default class ReloadCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
-		return await hypixelMessage.reply(await this.#run(...hypixelMessage.commandData.args));
+	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+		return hypixelMessage.reply(await this.#run(...hypixelMessage.commandData.args));
 	}
 }

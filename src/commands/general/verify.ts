@@ -41,7 +41,7 @@ export default class VerifyCommand extends SlashCommand {
 			});
 
 		// already linked to this discord user
-		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return await InteractionUtil.reply(interaction, 'you are already linked with this discord account');
+		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return InteractionUtil.reply(interaction, 'you are already linked with this discord account');
 
 		let uuid;
 		let ign;
@@ -54,22 +54,22 @@ export default class VerifyCommand extends SlashCommand {
 
 			// not in one of the guilds that the bot manages
 			if (!this.client.hypixelGuilds.cache.has(guildId)) {
-				return await InteractionUtil.reply(interaction, commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
+				return InteractionUtil.reply(interaction, commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
 			}
 
 			hypixelPlayer = await hypixel.player.uuid(uuid);
 		} catch (error) {
 			logger.error(error);
-			return await InteractionUtil.reply(interaction, `${error}`);
+			return InteractionUtil.reply(interaction, `${error}`);
 		}
 
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 
 		// no linked discord tag
-		if (!LINKED_DISCORD_TAG) return await InteractionUtil.reply(interaction, `no linked discord tag for \`${ign}\` on hypixel`);
+		if (!LINKED_DISCORD_TAG) return InteractionUtil.reply(interaction, `no linked discord tag for \`${ign}\` on hypixel`);
 
 		// linked discord tag doesn't match author's tag
-		if (LINKED_DISCORD_TAG !== interaction.user.tag) return await InteractionUtil.reply(interaction, oneLine`
+		if (LINKED_DISCORD_TAG !== interaction.user.tag) return InteractionUtil.reply(interaction, oneLine`
 			the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\`.
 			Keep in mind that discord tags are case sensitive
 		`);
@@ -93,7 +93,7 @@ export default class VerifyCommand extends SlashCommand {
 			});
 		} catch (error) {
 			logger.error('[VERIFY]: database', error);
-			return await InteractionUtil.reply(interaction, `an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
+			return InteractionUtil.reply(interaction, `an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
 		}
 
 		player.guildId = guildId;
@@ -104,6 +104,6 @@ export default class VerifyCommand extends SlashCommand {
 
 		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
 
-		return await InteractionUtil.reply(interaction, `successfully linked your discord account to \`${ign}\``);
+		return InteractionUtil.reply(interaction, `successfully linked your discord account to \`${ign}\``);
 	}
 }

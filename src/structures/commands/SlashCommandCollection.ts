@@ -85,7 +85,7 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 		const data = [ command.data ];
 
 		// add aliases if existent
-		command.aliases?.forEach(alias => data.push({ ...data[0], name: alias }));
+		if (command.aliases) for (const alias of command.aliases) data.push({ ...data[0], name: alias });
 
 		const applicationCommands = await Promise.all(data.map(d => commandManager.create(d)));
 
@@ -123,7 +123,7 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 	 * @param commandManager
 	 */
 	async deleteCommand(commandName: string, commandManager: GuildApplicationCommandManager | ApplicationCommandManager = this.client.application!.commands) {
-		const commands = await commandManager.fetch();
+		const commands = await (commandManager as ApplicationCommandManager).fetch();
 		const command = commands.find(cmd => cmd.name === commandName.toLowerCase());
 
 		if (!command) throw new Error(`unknown command ${commandName}`);

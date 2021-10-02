@@ -5,6 +5,7 @@ import { handleLeaderboardCommandInteraction } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
+import type { XPOffsets } from '../../constants';
 
 
 export default class TopCommand extends SlashCommand {
@@ -25,12 +26,12 @@ export default class TopCommand extends SlashCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
-		return await handleLeaderboardCommandInteraction(interaction, {
+	override runSlash(interaction: CommandInteraction) {
+		return handleLeaderboardCommandInteraction(interaction, {
 			lbType: 'total',
 			xpType: interaction.options.getString('type') ?? this.config.get('CURRENT_COMPETITION'),
 			page: interaction.options.getInteger('page') ?? 1,
-			offset: interaction.options.getString('offset') ?? '',
+			offset: interaction.options.getString('offset') as XPOffsets ?? '',
 			hypixelGuild: InteractionUtil.getHypixelGuild(interaction, true),
 			user: interaction.user,
 		});

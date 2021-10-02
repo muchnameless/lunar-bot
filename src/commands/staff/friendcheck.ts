@@ -37,7 +37,7 @@ export default class FriendCheckCommand extends SlashCommand {
 			if (friends.has(player.minecraftUuid)) mutualFriends += `${player}\n`;
 		}
 
-		return await InteractionUtil.reply(interaction, {
+		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`${IGN}'s friends in the guild`)

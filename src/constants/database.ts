@@ -1,6 +1,3 @@
-import type { HexColorString, Snowflake } from 'discord.js';
-
-
 import {
 	CATACOMBS_ROLES,
 	COSMETIC_SKILLS,
@@ -15,6 +12,8 @@ import {
 	SLAYERS,
 	SLAYER_TOTAL_ROLES,
 } from '.';
+import type { HexColorString, Snowflake } from 'discord.js';
+import type { ArrayElement } from '../types/util';
 
 
 // generate default config
@@ -209,8 +208,14 @@ export const XP_OFFSETS_TIME = {
 	day: 'LAST_DAILY_XP_RESET_TIME',
 } as const;
 
+export type XPOffsets = ArrayElement<typeof XP_OFFSETS> | '';
+
+
 export const SKYBLOCK_XP_TYPES = [ ...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES ] as const;
 export const XP_TYPES = [ ...SKYBLOCK_XP_TYPES, 'guild' ] as const;
+
+export type XPTypes = ArrayElement<typeof XP_TYPES>;
+
 
 export const UNKNOWN_IGN = 'UNKNOWN_IGN';
 

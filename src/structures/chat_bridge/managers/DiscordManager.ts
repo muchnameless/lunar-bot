@@ -10,14 +10,11 @@ export type DiscordChatManagerResolvable = keyof typeof MESSAGE_TYPES | DiscordC
 
 export class DiscordManager {
 	chatBridge: ChatBridge;
-	channelsByIds: Collection<string, DiscordChatManager>;
-	channelsByType: Collection<string, DiscordChatManager>;
+	channelsByIds = new Collection<string, DiscordChatManager>();
+	channelsByType = new Collection<string, DiscordChatManager>();
 
 	constructor(chatBridge: ChatBridge) {
 		this.chatBridge = chatBridge;
-
-		this.channelsByIds = new Collection();
-		this.channelsByType = new Collection();
 	}
 
 	/**

@@ -6,7 +6,7 @@ import type { HypixelMessage } from '../chat_bridge/HypixelMessage';
 
 
 export class DualCommand extends SlashCommand {
-	_usage: string | (() => string) | null;
+	_usage: string | (() => string) | null = null;
 	aliasesInGame: string[] | null;
 	guildOnly: boolean;
 	args: number | boolean | null;
@@ -20,9 +20,7 @@ export class DualCommand extends SlashCommand {
 	constructor(context: CommandContext, data: SlashCommandData, { aliases, guildOnly, args, usage }: BridgeCommandData = {}) {
 		super(context, data);
 
-		this._usage = null;
-
-		this.aliasesInGame = aliases?.length
+		this.aliasesInGame = aliases?.filter(Boolean).length
 			? aliases.filter(Boolean)
 			: null;
 		this.guildOnly = guildOnly ?? false;
@@ -70,31 +68,33 @@ export class DualCommand extends SlashCommand {
 	 * loads the command and possible aliases into their collections
 	 */
 	override load() {
-		// load into slash commands collection
-		super.load();
-
 		// load into chatbridge command collection
 		this.client.chatBridges.commands.set(this.name.toLowerCase(), this);
-		this.aliasesInGame?.forEach(alias => this.client.chatBridges.commands.set(alias.toLowerCase(), this));
+		if (this.aliasesInGame) for (const alias of this.aliasesInGame) this.client.chatBridges.commands.set(alias.toLowerCase(), this);
+
+		// load into slash commands collection
+		return super.load();
 	}
 
 	/**
 	 * removes all aliases and the command from the commandsCollection
 	 */
 	override unload() {
-		// unload from slash commands collection
-		super.unload();
-
 		// unload from chatbridge command collection
 		this.client.chatBridges.commands.delete(this.name.toLowerCase());
-		this.aliasesInGame?.forEach(alias => this.client.chatBridges.commands.delete(alias.toLowerCase()));
+		if (this.aliasesInGame) for (const alias of this.aliasesInGame) this.client.chatBridges.commands.delete(alias.toLowerCase());
+
+		// unload from slash commands collection
+		return super.unload();
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	async runMinecraft(hypixelMessage: HypixelMessage) { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runMinecraft(hypixelMessage: HypixelMessage<true>): unknown;
+	async runMinecraft(hypixelMessage: HypixelMessage<true>): Promise<unknown>;
+	async runMinecraft(hypixelMessage: HypixelMessage<true>) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
 		throw new Error('no run function specified');
 	}
 }

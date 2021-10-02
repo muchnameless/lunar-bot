@@ -24,7 +24,7 @@ export interface BroadcastOptions {
 	type?: DiscordChatManagerResolvable;
 	hypixelMessage?: HypixelMessage | null;
 	discord?: DiscordMessageOptions;
-	minecraft?: Exclude<ChatOptions, 'content'>;
+	minecraft?: Omit<ChatOptions, 'content'>;
 }
 
 interface DiscordMessageOptions extends MessageOptions {
@@ -40,54 +40,46 @@ export interface MessageForwardOptions {
 }
 
 
-export class ChatBridge<loggedIn extends boolean = true> extends EventEmitter {
+export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter {
 	/**
 	 * increases each link cycle
 	 */
 	#guildLinkAttempts = 0;
+	/**
+	 * client that instantiated the chat bridge
+	 */
 	client: LunarClient;
+	/**
+	 * position in the mcAccount array
+	 */
 	mcAccount: number;
-	hypixelGuild: HypixelGuild | null;
-	shouldRetryLinking: boolean;
-	pollUntil: number | null;
-	minecraft: MinecraftChatManager<loggedIn>;
-	discord: DiscordManager;
-	events: EventCollection;
+	/**
+	 * linked hypixel guild
+	 */
+	hypixelGuild: HypixelGuild | null = null;
+	/**
+	 * wether to retry linking the chat bridge to a guild
+	 */
+	shouldRetryLinking = true;
+	/**
+	 * timestamp of the end of the current poll, if existing
+	 */
+	pollUntil: number | null = null;
+	/**
+	 * minecraft related functions
+	 */
+	minecraft: MinecraftChatManager<loggedIn> = new MinecraftChatManager(this);
+	/**
+	 * discord related functions
+	 */
+	discord: DiscordManager = new DiscordManager(this);
+	events = new EventCollection(this, new URL('./events', import.meta.url));
 
 	constructor(client: LunarClient, mcAccount: number) {
 		super();
 
-		/**
-		 * client that instantiated the chat bridge
-		 */
 		this.client = client;
-		/**
-		 * position in the mcAccount array
-		 */
 		this.mcAccount = mcAccount;
-		/**
-		 * linked hypixel guild
-		 */
-		this.hypixelGuild = null;
-		/**
-		 * wether to retry linking the chat bridge to a guild
-		 */
-		this.shouldRetryLinking = true;
-		/**
-		 * timestamp of the end of the current poll, if existing
-		 */
-		this.pollUntil = null;
-		/**
-		 * minecraft related functions
-		 */
-		this.minecraft = new MinecraftChatManager(this);
-		/**
-		 * discord related functions
-		 */
-		this.discord = new DiscordManager(this);
-
-		this.events = new EventCollection(this, new URL('./events', import.meta.url));
-
 		this.events.loadAll();
 	}
 
@@ -95,7 +87,7 @@ export class ChatBridge<loggedIn extends boolean = true> extends EventEmitter {
 	 * wether the minecraft bot and all discord channel managers (webhooks) are ready
 	 */
 	get ready() {
-		return this.minecraft.ready && this.discord.ready;
+		return this.minecraft.isReady() && this.discord.ready;
 	}
 
 	/**
@@ -253,7 +245,7 @@ export class ChatBridge<loggedIn extends boolean = true> extends EventEmitter {
 	 * @param message
 	 * @param options
 	 */
-	handleDiscordMessage(message: DiscordMessage, { link = this.discord.get(message.channelId)!, ...options }: MessageForwardOptions) {
+	handleDiscordMessage(message: DiscordMessage, { link = this.discord.get(message.channelId)!, ...options }: MessageForwardOptions = {}) {
 		return (this.discord.resolve(link)?.forwardToMinecraft(message, options) && true) ?? false;
 	}
 
@@ -261,7 +253,7 @@ export class ChatBridge<loggedIn extends boolean = true> extends EventEmitter {
 	 * send a message both to discord and the in game guild chat, parsing both
 	 * @param contentOrOptions
 	 */
-	async broadcast(contentOrOptions: string | BroadcastOptions) {
+	broadcast(contentOrOptions: string | BroadcastOptions) {
 		const {
 			content,
 			hypixelMessage,

@@ -113,7 +113,7 @@ export default class JoinDateCommand extends DualCommand {
 
 		if (!IGN) {
 			// all players
-			if (JoinDateCommand.running.has(hypixelGuild.guildId)) return await InteractionUtil.reply(interaction, {
+			if (JoinDateCommand.running.has(hypixelGuild.guildId)) return InteractionUtil.reply(interaction, {
 				content: 'the command is already running',
 				ephemeral: true,
 			});
@@ -133,7 +133,7 @@ export default class JoinDateCommand extends DualCommand {
 				JoinDateCommand.running.delete(hypixelGuild.guildId);
 			}
 
-			return await InteractionUtil.reply(interaction, {
+			return InteractionUtil.reply(interaction, {
 				content: `${Formatters.bold(hypixelGuild.name)} join dates:\n${joinInfos
 					.sort((a, b) => a.timestamp - b.timestamp)
 					.map(({ ign, date, timestamp }) => `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`)
@@ -142,15 +142,15 @@ export default class JoinDateCommand extends DualCommand {
 			});
 		}
 
-		return await InteractionUtil.reply(interaction, await this.#generateReply(hypixelGuild.chatBridge, IGN));
+		return InteractionUtil.reply(interaction, await this.#generateReply(hypixelGuild.chatBridge, IGN));
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
-		return await hypixelMessage.reply(await this.#generateReply(
+	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+		return hypixelMessage.reply(await this.#generateReply(
 			hypixelMessage.chatBridge,
 			hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,
 		));

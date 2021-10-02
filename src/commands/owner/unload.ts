@@ -43,11 +43,10 @@ export default class UnloadCommand extends DualCommand {
 	 * @param subcommand
 	 * @param input
 	 */
-	async #run(subcommand: string, input: string) {
+	#run(subcommand: string, input: string) {
 		switch (subcommand) {
 			case 'command': {
 				const command = this.collection.getByName(input);
-
 				if (!command) return `no command with the name or alias \`${input}\` found`;
 
 				command.unload();
@@ -57,7 +56,6 @@ export default class UnloadCommand extends DualCommand {
 
 			case 'event': {
 				const event = this.client.events.get(input);
-
 				if (!event) return `no event with the name \`${input}\` found`;
 
 				event.unload();
@@ -74,15 +72,15 @@ export default class UnloadCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
-		return await InteractionUtil.reply(interaction, await this.#run(interaction.options.getSubcommand(), interaction.options.getString('name', true)));
+	override runSlash(interaction: CommandInteraction) {
+		return InteractionUtil.reply(interaction, this.#run(interaction.options.getSubcommand(), interaction.options.getString('name', true)));
 	}
 
 	/**
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
-		return await hypixelMessage.reply(await this.#run(...hypixelMessage.commandData!.args.map(arg => arg.toLowerCase())));
+	override  runMinecraft(hypixelMessage: HypixelMessage<true>) {
+		return hypixelMessage.reply(this.#run(...hypixelMessage.commandData!.args.map(arg => arg.toLowerCase())));
 	}
 }

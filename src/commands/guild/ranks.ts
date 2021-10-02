@@ -38,7 +38,7 @@ export default class RanksCommand extends SlashCommand {
 				});
 			}
 
-			return await InteractionUtil.reply(interaction, { embeds: [ embed ] });
+			return InteractionUtil.reply(interaction, { embeds: [ embed ] });
 		}
 
 		// player found
@@ -58,6 +58,6 @@ export default class RanksCommand extends SlashCommand {
 			});
 		}
 
-		return await InteractionUtil.reply(interaction, { embeds: [ embed ] });
+		return InteractionUtil.reply(interaction, { embeds: [ embed ] });
 	}
 }

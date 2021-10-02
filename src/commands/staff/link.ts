@@ -64,7 +64,7 @@ export default class LinkCommand extends SlashCommand {
 				}))?.[0];
 		}
 
-		if (!player) return await InteractionUtil.reply(interaction, stripIndents`
+		if (!player) return InteractionUtil.reply(interaction, stripIndents`
 			\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
 			Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
 		`);
@@ -111,7 +111,7 @@ export default class LinkCommand extends SlashCommand {
 			try {
 				linkedUser = await player.discordUser;
 
-				if (player.discordId === USER_ID) return await InteractionUtil.reply(interaction, {
+				if (player.discordId === USER_ID) return InteractionUtil.reply(interaction, {
 					content: `\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}`,
 					allowedMentions: { parse: [] },
 				});
@@ -147,7 +147,7 @@ export default class LinkCommand extends SlashCommand {
 		// no discord member for the user to link found
 		if (!discordMember) {
 			await player.link(USER_ID);
-			return await InteractionUtil.reply(interaction, `\`${player}\` linked to \`${USER_ID}\` but could not be found on the Lunar Guard discord server`);
+			return InteractionUtil.reply(interaction, `\`${player}\` linked to \`${USER_ID}\` but could not be found on the Lunar Guard discord server`);
 		}
 
 		// user to link is in discord -> update roles
@@ -159,7 +159,7 @@ export default class LinkCommand extends SlashCommand {
 			reply += ` (missing ${this.client.lgGuild?.roles.cache.get(this.config.get('VERIFIED_ROLE_ID'))?.name ?? this.config.get('VERIFIED_ROLE_ID')} role)`;
 		}
 
-		return await InteractionUtil.reply(interaction, {
+		return InteractionUtil.reply(interaction, {
 			content: reply,
 			allowedMentions: { parse: [] },
 		});

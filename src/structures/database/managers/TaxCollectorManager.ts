@@ -3,6 +3,7 @@ import { stripIndents } from 'common-tags';
 import { escapeIgn } from '../../../functions';
 import { ModelManager } from './ModelManager';
 import type { TaxCollector } from '../models/TaxCollector';
+import type { ModelResovable } from './ModelManager';
 import type { Player } from '../models/Player';
 
 
@@ -18,9 +19,9 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	 * add a player as a taxcollector
 	 * @param uuidOrPlayer
 	 */
-	override async add(uuidOrPlayer: string | Player) {
+	// @ts-expect-error
+	override async add(uuidOrPlayer: ModelResovable<Player>) {
 		const player = this.client.players.resolve(uuidOrPlayer);
-
 		if (!player) throw new Error(`[TAX COLLECTOR ADD]: invalid input: ${uuidOrPlayer}`);
 
 		const [ newEntry, created ] = await this.model.findCreateFind({
@@ -37,7 +38,7 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 		// entry already exists
 		if (!created) await newEntry.update({ isCollecting: true });
 
-		this.cache.set(newEntry[this.primaryKey], newEntry);
+		this.cache.set(newEntry[this.primaryKey as keyof TaxCollector] as string, newEntry);
 
 		return newEntry;
 	}

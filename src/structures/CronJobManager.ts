@@ -5,11 +5,10 @@ import type { LunarClient } from './LunarClient';
 
 export class CronJobManager {
 	client: LunarClient;
-	cache: Collection<string, CronJob>;
+	cache = new Collection<string, CronJob>();
 
 	constructor(client: LunarClient) {
 		this.client = client;
-		this.cache = new Collection();
 	}
 
 	/**

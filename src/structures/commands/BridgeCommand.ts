@@ -16,7 +16,7 @@ export interface BridgeCommandData {
 
 
 export class BridgeCommand extends BaseCommand {
-	_usage: string | (() => string) | null;
+	_usage: string | (() => string) | null = null;
 	description: string | null;
 	guildOnly = false;
 	args: number | boolean | null;
@@ -30,12 +30,10 @@ export class BridgeCommand extends BaseCommand {
 	constructor(context: CommandContext, { aliases, description, guildOnly, args, usage, cooldown, requiredRoles }: BridgeCommandData) {
 		super(context, { cooldown, requiredRoles });
 
-		this._usage = null;
-
-		this.aliases = aliases?.length
+		this.aliases = aliases?.filter(Boolean).length
 			? aliases.filter(Boolean)
 			: null;
-		this.description = description?.length ? description : null;
+		this.description = description || null;
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;
 		this.usage = usage ?? null;
@@ -77,7 +75,8 @@ export class BridgeCommand extends BaseCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	async runMinecraft(hypixelMessage: HypixelMessage): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runMinecraft(hypixelMessage: HypixelMessage<true>): unknown;
+	async runMinecraft(hypixelMessage: HypixelMessage<true>) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
 		throw new Error('no run function specified');
 	}
 }

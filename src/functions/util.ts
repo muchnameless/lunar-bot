@@ -5,8 +5,8 @@ import jaroWinklerSimilarity from 'jaro-winkler';
 import readdirp from 'readdirp';
 import { EMBED_FIELD_MAX_CHARS } from '../constants';
 import { logger } from '.';
-import type { SplitOptions } from 'discord.js';
 import type { URL } from 'node:url';
+import type { Merge } from '../types/util';
 
 
 /**
@@ -131,12 +131,13 @@ const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
  */
 export const compareAlphabetically = (a?: string | null, b?: string | null) => collator.compare(a!, b!);
 
+
 /**
  * @param splitText
  * @param options Options controlling the behavior of the split
  */
-function concatMessageChunks(splitText: string[], { maxLength, char, append, prepend }: { maxLength: number, char: string, prepend: string, append: string }) {
-	const messages = [];
+function concatMessageChunks(splitText: string[], { maxLength, char, append, prepend }: Merge<Required<SplitOptions>, { char: string; }>) {
+	const messages: string[] = [];
 
 	let msg = '';
 
@@ -146,10 +147,17 @@ function concatMessageChunks(splitText: string[], { maxLength, char, append, pre
 			msg = prepend;
 		}
 
-		msg += (msg && msg !== prepend ? char : '') + chunk;
+		msg += `${msg && msg !== prepend ? char : ''}${chunk}`;
 	}
 
-	return messages.concat(msg).filter(m => m);
+	return [ ...messages, msg ].filter(Boolean);
+}
+
+export interface SplitOptions {
+	maxLength?: number;
+	char?: string | RegExp | (string | RegExp)[];
+	prepend?: string;
+	append?: string;
 }
 
 /**
@@ -164,10 +172,10 @@ export function splitMessage(text: string, { maxLength = 2_000, char = '\n', pre
 
 	if (Array.isArray(char)) {
 		while (char.length && splitText.some(({ length }) => length > maxLength)) {
-			const currentChar = char.shift();
+			const currentChar = char.shift()!;
 
-			if (currentChar instanceof RegExp) {
-				splitText = splitText.flatMap((chunk) => {
+			splitText = currentChar instanceof RegExp
+				? splitText.flatMap((chunk) => {
 					if (chunk.length <= maxLength) return chunk;
 
 					if (currentChar.global) {
@@ -175,7 +183,7 @@ export function splitMessage(text: string, { maxLength = 2_000, char = '\n', pre
 
 						if (!matched) return chunk;
 
-						return matched.map(match => concatMessageChunks(chunk.split(match), { maxLength, char: match, prepend, append }));
+						return matched.flatMap(match => concatMessageChunks(chunk.split(match), { maxLength, char: match, prepend, append }));
 					}
 
 					// no global flag
@@ -184,10 +192,8 @@ export function splitMessage(text: string, { maxLength = 2_000, char = '\n', pre
 					if (!matched) return chunk;
 
 					return concatMessageChunks(chunk.split(matched), { maxLength, char: matched, prepend, append });
-				});
-			} else {
-				splitText = splitText.flatMap(chunk => (chunk.length > maxLength ? concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append }) : chunk));
-			}
+				})
+				: splitText.flatMap(chunk => (chunk.length > maxLength ? concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append }) : chunk));
 		}
 
 		if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
@@ -199,7 +205,13 @@ export function splitMessage(text: string, { maxLength = 2_000, char = '\n', pre
 
 	if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
 
-	return concatMessageChunks(splitText, { maxLength, char, append, prepend });
+	return concatMessageChunks(splitText, { maxLength, char: typeof char === 'string' ? char : '', append, prepend });
+}
+
+
+export interface MakeContentOptions {
+	split?: SplitOptions | false;
+	code?: string | boolean;
 }
 
 /**
@@ -207,10 +219,10 @@ export function splitMessage(text: string, { maxLength = 2_000, char = '\n', pre
  * @param text
  * @param options
  */
-export function makeContent(text = '', options: { split?: boolean | string, code?: string | boolean } = {}) {
+export function makeContent(text = '', options: MakeContentOptions = {}) {
 	const isCode = typeof options.code !== 'undefined' && options.code !== false;
 	const splitOptions = typeof options.split !== 'undefined' && options.split !== false
-		? { ...options.split as unknown as Record<string, unknown> }
+		? { ...options.split }
 		: undefined;
 
 	let content = text;

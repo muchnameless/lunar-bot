@@ -6,9 +6,12 @@ import { fileURLToPath } from 'node:url';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';
-import type { GuildChannel } from 'discord.js';
+import type { GuildChannel, Message } from 'discord.js';
 import type { URL } from 'node:url';
 import type { LunarClient } from './LunarClient';
+
+
+type LogInput = MessageEmbed | MessageAttachment | string | undefined | null;
 
 
 export class LogHandler {
@@ -82,13 +85,17 @@ export class LogHandler {
 	 * logs embeds to console and to the logging channel
 	 * @param input embeds to log
 	 */
-	async log(...input: (MessageEmbed | MessageAttachment | string)[]) {
+	log(input: LogInput): Promise<void | Message>;
+	log(...input: LogInput[]): Promise<void | Message> | Promise<(void | Message)[]>;
+	log(...input: any) {
 		const { embeds, files } = this.#transformInput(input);
 
 		if (!embeds.length) return null; // nothing to log
 
 		// send 1 message
-		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) return this.#log({ embeds, files });
+		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) {
+			return this.#log({ embeds, files });
+		}
 
 		// split into multiple messages
 		const returnValue = [];
@@ -120,9 +127,9 @@ export class LogHandler {
 	 * make sure all elements are instances of MessageEmbed
 	 * @param input
 	 */
-	#transformInput(input: (MessageEmbed | MessageAttachment | string)[]) {
-		const embeds = [];
-		const files = [];
+	#transformInput(input: LogInput[]) {
+		const embeds: MessageEmbed[] = [];
+		const files: MessageAttachment[] = [];
 
 		for (const i of input) {
 			if (i == null) continue; // filter out null & undefined
@@ -180,9 +187,7 @@ export class LogHandler {
 		} catch (error) {
 			logger.error('[CLIENT LOG]', error);
 
-			this.#logToFile(embeds);
-
-			return null;
+			return this.#logToFile(embeds);
 		}
 	}
 

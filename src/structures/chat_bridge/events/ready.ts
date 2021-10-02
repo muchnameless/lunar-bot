@@ -14,7 +14,7 @@ export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
 	/**
 	 * event listener callback
 	 */
-	override async run() {
+	override run() {
 		// stop abort controller
 		clearTimeout(this.chatBridge.minecraft.abortLoginTimeout!);
 		this.chatBridge.minecraft.abortLoginTimeout = null;
@@ -23,7 +23,7 @@ export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
 		this.chatBridge.minecraft.loginAttempts = 0;
 
 		// set bot to ready
-		this.chatBridge.minecraft.ready = true;
+		this.chatBridge.minecraft.botReady = true;
 
 		logger.debug(`[CHATBRIDGE READY]: ${this.chatBridge.logInfo}: spawned and ready`);
 	}

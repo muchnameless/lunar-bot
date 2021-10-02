@@ -14,9 +14,8 @@ import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
 
 
 export default class PollCommand extends DualCommand {
-	quoteChars: string[];
+	quoteChars = [ '\u{0022}', '\u{201C}', '\u{201D}' ] as const;
 
-	// @ts-expect-error super
 	constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('create a poll for both in game and discord guild chat')
@@ -52,8 +51,6 @@ export default class PollCommand extends DualCommand {
 			args: 1,
 			usage: '<30s <= `duration` <= 10m> [`"question" "choice_1" "choice_2"` ...]',
 		});
-
-		this.quoteChars = [ '\u{0022}', '\u{201C}', '\u{201D}' ];
 	}
 
 	/**
@@ -77,8 +74,8 @@ export default class PollCommand extends DualCommand {
 
 			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set<string>() }));
 			const optionsCount = pollOptions.length;
-			const hypixelMessages = chatBridge.minecraft.awaitMessages({
-				filter: hypixelMessage => hypixelMessage.isUserMessage && hypixelMessage.type === MESSAGE_TYPES.GUILD,
+			const hypixelMessages: Promise<HypixelMessage<true>[]> = chatBridge.minecraft.awaitMessages({
+				filter: hypixelMessage => hypixelMessage.isUserMessage() && hypixelMessage.type === MESSAGE_TYPES.GUILD,
 				time: DURATION,
 			});
 			const discordChannel = chatBridge.discord.get(MESSAGE_TYPES.GUILD)!.channel;
@@ -160,7 +157,7 @@ export default class PollCommand extends DualCommand {
 			ign: UserUtil.getPlayer(interaction.user)?.ign ?? (interaction.member as GuildMember)?.displayName ?? interaction.user.tag,
 		});
 
-		return await InteractionUtil.reply(interaction, {
+		return InteractionUtil.reply(interaction, {
 			content: result ?? 'poll complete',
 			ephemeral: true,
 		});
@@ -170,7 +167,7 @@ export default class PollCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage) {
+	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
 		const inputMatched = hypixelMessage.content
 			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
 			?.flatMap((x) => {
@@ -179,7 +176,7 @@ export default class PollCommand extends DualCommand {
 				return input;
 			});
 
-		if (!inputMatched || inputMatched.length < 2) return await hypixelMessage.reply(this.usageInfo);
+		if (!inputMatched || inputMatched.length < 2) return hypixelMessage.reply(this.usageInfo);
 
 		const result = await this.#run({
 			chatBridge: hypixelMessage.chatBridge,
@@ -189,6 +186,6 @@ export default class PollCommand extends DualCommand {
 			ign: hypixelMessage.author!.ign,
 		});
 
-		if (result) return await hypixelMessage.author!.send(result);
+		if (result) return hypixelMessage.author!.send(result);
 	}
 }

@@ -96,25 +96,25 @@ export default class AhCommand extends SlashCommand {
 					name: `${item}${
 						item.startsWith('[Lvl ')
 							? ` - ${upperCaseFirstChar(tier)}`
-							: item === 'Enchanted Book'
+							: (item === 'Enchanted Book'
 								? (() => {
 									const matched = lore.match(/(?<=^(§[\da-gk-or])+)[^\n§]+/)?.[0];
 									if (matched) return ` - ${matched}`;
 									return '';
 								})()
-								: ''
+								: '')
 					}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
 					value: `${
 						bin
 							? `BIN: ${AhCommand.shortenNumber(startingBid)}`
-							: bids.length
+							: (bids.length
 								? (totalCoins += highestBid, `Highest Bid: ${AhCommand.shortenNumber(highestBid)}`)
-								: `Starting Bid: ${AhCommand.shortenNumber(startingBid)}`
+								: `Starting Bid: ${AhCommand.shortenNumber(startingBid)}`)
 					} • ${
 						end < Date.now()
-							? highestBid
+							? (highestBid
 								? (++endedAuctions, totalUnclaimedCoins += highestBid, 'sold')
-								: 'expired'
+								: 'expired')
 							: 'ends'
 					} ${Formatters.time(new Date(end), Formatters.TimestampStyles.RelativeTime)}`,
 				});
@@ -167,11 +167,11 @@ export default class AhCommand extends SlashCommand {
 			}
 
 			// interaction from new requester -> new message
-			return await InteractionUtil.reply(interaction, await this.#generateReply({ uuid, ign, profileId, profiles, userId: interaction.user.id }));
+			return InteractionUtil.reply(interaction, await this.#generateReply({ uuid, ign, profileId, profiles, userId: interaction.user.id }));
 		} catch (error) {
 			logger.error(error);
 
-			return await InteractionUtil.reply(interaction, {
+			return InteractionUtil.reply(interaction, {
 				content: `${error}`,
 				ephemeral: true,
 			});
@@ -189,7 +189,7 @@ export default class AhCommand extends SlashCommand {
 			const embed = this.client.defaultEmbed;
 
 			if (!profiles.length) {
-				return await InteractionUtil.reply(interaction, {
+				return InteractionUtil.reply(interaction, {
 					embeds: [
 						embed
 							.setAuthor(ign, (await uuidToImgurBustURL(uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
@@ -219,7 +219,7 @@ export default class AhCommand extends SlashCommand {
 				profileId = profiles.find(({ cute_name: name }) => name === PROFILE_NAME_INPUT)?.profile_id;
 
 				if (!profileId) {
-					return await InteractionUtil.reply(interaction, {
+					return InteractionUtil.reply(interaction, {
 						embeds: [
 							embed
 								.setAuthor(ign, (await uuidToImgurBustURL(uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
@@ -237,7 +237,7 @@ export default class AhCommand extends SlashCommand {
 				}
 			}
 
-			return await InteractionUtil.reply(interaction, await this.#generateReply({
+			return InteractionUtil.reply(interaction, await this.#generateReply({
 				ign,
 				uuid,
 				profileId,
@@ -246,7 +246,7 @@ export default class AhCommand extends SlashCommand {
 			}));
 		} catch (error) {
 			logger.error(error);
-			return await InteractionUtil.reply(interaction, `${error}`);
+			return InteractionUtil.reply(interaction, `${error}`);
 		}
 	}
 }

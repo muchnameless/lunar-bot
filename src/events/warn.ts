@@ -15,7 +15,7 @@ export default class WarnEvent extends Event {
 	 * event listener callback
 	 * @param warning
 	 */
-	override async run(warning: string) {
+	override run(warning: string) {
 		logger.warn(warning);
 	}
 }

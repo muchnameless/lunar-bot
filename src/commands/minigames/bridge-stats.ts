@@ -26,8 +26,8 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 	 * @param duelStats
 	 * @param stat
 	 */
-	static _calculateStats(duelStats: Components.Schemas.PlayerStats.Duels, stat: string) {
-		return [ 'duel', 'doubles', 'four' ].reduce((acc, cur) => acc + (duelStats[`bridge_${cur}_${stat}`] ?? 0), 0);
+	static _calculateStats(duelStats: Components.Schemas.PlayerStatsGameMode, stat: string) {
+		return [ 'duel', 'doubles', 'four' ].reduce((acc, cur) => acc + (duelStats[`bridge_${cur}_${stat}`] as number ?? 0), 0);
 	}
 
 	override _generateReply({ ign, playerData }: FetchedData) {
@@ -53,9 +53,9 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 				ties: ${this.client.formatNumber(gamesPlayed - (wins + losses))},
 				win rate: ${this.client.formatDecimalNumber(wins / (wins + losses))},
 				games played: ${this.client.formatNumber(gamesPlayed)},
-				kills: ${this.client.formatNumber(kills)},
-				deaths: ${this.client.formatNumber(deaths)},
-				kd ratio: ${this.calculateKD(kills, deaths) ?? '-/-'},
+				kills: ${this.client.formatNumber(kills as number)},
+				deaths: ${this.client.formatNumber(deaths as number)},
+				kd ratio: ${this.calculateKD(kills as number, deaths as number) ?? '-/-'},
 				goals: ${this.client.formatNumber(BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'goals'))}
 			`;
 		} catch {
