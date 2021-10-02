@@ -416,7 +416,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (!hypixelMessage.rawContent.length) return;
 
 		if (!hypixelMessage.isUserMessage()) {
-			if (hypixelMessage.type === null) return this.#handleServerMessage(hypixelMessage);
+			if (!hypixelMessage.me) return this.#handleServerMessage(hypixelMessage);
 			return;
 		}
 

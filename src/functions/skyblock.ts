@@ -204,7 +204,7 @@ export function getSenitherDungeonWeight(dungeonType: DungeonTypes, xp = 0) {
  * Lily
  */
 
-export const { getWeightRaw: getLilyWeightRaw } = lilyweight();
+const { getWeightRaw: getLilyWeightRaw } = lilyweight();
 
 /**
  * @param skyblockMember

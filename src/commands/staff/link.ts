@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { DiscordAPIError, Constants, GuildMember } from 'discord.js';
+import { DiscordAPIError, Constants } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { hypixel } from '../../api/hypixel';
 import { mojang } from '../../api/mojang';
@@ -7,9 +7,8 @@ import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { logger, validateNumber } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, Snowflake } from 'discord.js';
+import type { CommandInteraction, GuildMember, Snowflake } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { Player } from '../../structures/database/models/Player';
 
 
 export default class LinkCommand extends SlashCommand {
@@ -46,9 +45,9 @@ export default class LinkCommand extends SlashCommand {
 			logger.error('[LINK]', error);
 		}
 
-		let player!: Player | null;
+		let player;
 
-		if (!this.client.hypixelGuilds.cache.has(guildId)) { // IGN_OR_Uuid is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
+		if (!guildId || !this.client.hypixelGuilds.cache.has(guildId)) { // IGN_OR_Uuid is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
 			player = this.client.players.getByIgn(IGN_OR_UUID);
 
 			if (player) ({ minecraftUuid: uuid, ign } = player);

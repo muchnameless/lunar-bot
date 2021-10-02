@@ -32,7 +32,7 @@ const _formatText = ({ timestamp, level, message }: TransformableInfo) => {
 	return `[${timestamp}] [${colour(level.toUpperCase())}]: ${message}`;
 };
 
-const _logger = createLogger({
+export const _logger = createLogger({
 	transports: [
 		new transports.Console({
 			stderrLevels: [ 'error' ],
@@ -48,8 +48,8 @@ const _logger = createLogger({
 	level: 'debug',
 });
 
-_logger.on('error', (error) => {
-	console.error(error);
+_logger.on('error', (error_) => {
+	console.error(error_);
 	process.kill(process.pid, 'SIGINT');
 });
 
@@ -67,7 +67,7 @@ const _formatInput = (input: string | any) => (typeof input === 'string'
 /**
  * extending log method of logger to suppport single argument in log function.
  */
-const log = (...input: any[]) => {
+export function log(...input: any[]) {
 	if (input.length > 1) {
 		const level = input.shift();
 		for (const i of input) _logger.log(level, _formatInput(i));
@@ -75,33 +75,24 @@ const log = (...input: any[]) => {
 		_logger.info(_formatInput(input[0]));
 	}
 	return null;
-};
+}
 
-const error = (...input: any[]) => {
+export function error(...input: any[]) {
 	for (const i of input) _logger.error(_formatInput(i));
 	return null;
-};
+}
 
-const warn = (...input: any[]) => {
+export function warn(...input: any[]) {
 	for (const i of input) _logger.warn(_formatInput(i));
 	return null;
-};
+}
 
-const info = (...input: any[]) => {
+export function info(...input: any[]) {
 	for (const i of input) _logger.info(_formatInput(i));
 	return null;
-};
+}
 
-const debug = (...input: any[]) => {
+export function debug(...input: any[]) {
 	for (const i of input) _logger.debug(_formatInput(i));
 	return null;
-};
-
-export const logger = {
-	error,
-	warn,
-	info,
-	debug,
-	log,
-	_logger,
-};
+}

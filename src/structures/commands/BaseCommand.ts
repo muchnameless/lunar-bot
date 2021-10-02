@@ -1,7 +1,7 @@
 import { Collection } from 'discord.js';
 import type { Snowflake } from 'discord.js';
 import type { LunarClient } from '../LunarClient';
-import type { BaseCommandCollection } from './BaseCommandCollection';
+import type { BaseCommandCollection, CommandType } from './BaseCommandCollection';
 
 
 export interface CommandContext {
@@ -84,8 +84,8 @@ export class BaseCommand {
 	 * loads the command and possible aliases into their collections
 	 */
 	load() {
-		this.collection.set(this.name.toLowerCase(), this);
-		if (this.aliases) for (const alias of this.aliases) this.collection.set(alias.toLowerCase(), this);
+		this.collection.set(this.name.toLowerCase(), this as unknown as CommandType);
+		if (this.aliases) for (const alias of this.aliases) this.collection.set(alias.toLowerCase(), this as unknown as CommandType);
 		return this;
 	}
 

@@ -2,10 +2,11 @@ import { config } from 'dotenv';
 import { URL, fileURLToPath } from 'node:url';
 config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 import { REST } from '@discordjs/rest';
-import { Routes, APIVersion, APIApplicationCommand } from 'discord-api-types/v9';
+import { Routes, APIVersion } from 'discord-api-types/v9';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger } from './functions';
+import type { APIApplicationCommand } from 'discord-api-types/v9';
 
 
 const rest = new REST({ version: APIVersion }).setToken(process.env.DISCORD_TOKEN!);

@@ -17,4 +17,3 @@ declare module 'sinful-math' {
 	function divide(x: number[]): number;
 	function divide(...x: number[]): number;
 }
-

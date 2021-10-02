@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, Formatters } from 'discord.js';
+import { Formatters } from 'discord.js';
 import ms from 'ms';
 import { logErrors } from '../../structures/chat_bridge/constants';
 import { forceOption, optionalPlayerOption, buildGuildOption } from '../../structures/commands/commonOptions';
@@ -7,6 +7,7 @@ import { InteractionUtil } from '../../util';
 import { escapeIgn, logger } from '../../functions';
 import { MinecraftChatManager } from '../../structures/chat_bridge/managers/MinecraftChatManager';
 import { DualCommand } from '../../structures/commands/DualCommand';
+import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
 import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';

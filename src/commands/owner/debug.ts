@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Collection, Formatters, SnowflakeUtil, Util, version } from 'discord.js';
+import { Formatters, SnowflakeUtil, Util, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
@@ -7,7 +7,7 @@ import { imgur } from '../../api/imgur';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, trim } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, DMChannel, Snowflake, TextBasedChannels, ThreadChannel } from 'discord.js';
+import type { Collection, CommandInteraction, DMChannel, Snowflake, TextBasedChannels, ThreadChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 

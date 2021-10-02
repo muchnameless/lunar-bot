@@ -18,12 +18,13 @@ import {
 import { GUILD_ID_BRIDGER, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
 import { createBot } from '../MinecraftBot';
 import { GuildMemberUtil, MessageUtil, UserUtil } from '../../../util';
-import { MessageCollector, MessageCollectorOptions } from '../MessageCollector';
+import { MessageCollector } from '../MessageCollector';
 import { ChatManager } from './ChatManager';
 import { cache } from '../../../api/cache';
 import { cleanFormattedNumber, logger, splitMessage, trim } from '../../../functions';
 import type { GuildChannel, Message } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
+import type { MessageCollectorOptions } from '../MessageCollector';
 import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
 import type { If, Timeout } from '../../../types/util';
