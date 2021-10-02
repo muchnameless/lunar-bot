@@ -46,7 +46,7 @@ import {
 	validateNumber,
 } from '../../../functions';
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
-import type { Collection, Role, Snowflake } from 'discord.js';
+import type { Snowflake } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
 import type { HypixelGuild } from './HypixelGuild';
 import type { Transaction, TransactionAttributes } from './Transaction';
@@ -54,6 +54,7 @@ import type { LunarClient } from '../../LunarClient';
 import type { TaxCollector } from './TaxCollector';
 import type { ModelResovable } from '../managers/ModelManager';
 import type { DungeonTypes, SkillTypes, SlayerTypes, XPOffsets, XPTypes } from '../../../constants';
+import type { RoleResolvables } from '../../../util/GuildUtil';
 
 
 interface ParsedTransaction extends TransactionAttributes {
@@ -120,8 +121,6 @@ interface PlayerAttributes {
 	guildXpDay: string | null;
 	guildXpDaily: number;
 }
-
-type RoleResolvables = (Snowflake | Role)[] | Collection<Snowflake, Role>;
 
 type PlayerCreationAttributes = Optional<PlayerAttributes, 'ign' | 'discordId' | 'guildId' | 'guildRankPriority' | 'inDiscord' | 'mutedTill' | '_infractions' | 'hasDiscordPingPermission' | 'notes' | 'paid' | 'mainProfileId' | 'mainProfileName' | 'xpLastUpdatedAt' | 'xpUpdatesDisabled' | 'discordMemberUpdatesDisabled' | 'farmingLvlCap' | 'guildXpDay' | 'guildXpDaily'>;
 

@@ -1,4 +1,5 @@
 import { Permissions, Role } from 'discord.js';
+import { commaListsAnd } from 'common-tags';
 import {
 	CATACOMBS_ROLES,
 	DELIMITER_ROLES,
@@ -9,14 +10,12 @@ import {
 	SLAYER_TOTAL_ROLES,
 	SLAYERS,
 } from '../constants';
-import { UserUtil } from '.';
+import { GuildUtil, UserUtil } from '.';
 import { logger } from '../functions';
-import type { Collection, GuildMember, MessageOptions, Snowflake } from 'discord.js';
+import type { GuildMember, MessageOptions, Snowflake } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { LunarClient } from '../structures/LunarClient';
-
-
-type RoleCollection = Collection<Snowflake, Role>;
+import type { RoleCollection, RoleResolvables } from './GuildUtil';
 
 
 export default class GuildMemberUtil extends null {
@@ -100,20 +99,31 @@ export default class GuildMemberUtil extends null {
 	 * @param roles
 	 */
 	static async setRoles(member: GuildMember, roles: RoleCollection) {
+		const difference = roles.difference(member.roles.cache);
+		if (!difference.size) {
+			logger.warn('[SET ROLES]: nothing to change');
+			return member;
+		}
+
 		const { me } = member.guild;
-		if (!me?.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) return logger.warn('[SET ROLES]: missing \'MANAGE_ROLES\'');
+		if (!me?.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
+			logger.warn('[SET ROLES]: missing \'MANAGE_ROLES\' permission');
+			return member;
+		}
 
 		const { highest } = me.roles;
-		const difference = roles.difference(member.roles.cache);
-		if (!difference.size) return logger.warn('[SET ROLES]: nothing to change');
 		if (difference.some(role => role.managed || Role.comparePositions(role, highest) >= 0)) {
-			return logger.warn(`[SET ROLES]: unable to add / remove '@${difference.find(role => role.managed || Role.comparePositions(highest, role) <= 0)!.name}'`);
+			logger.warn(commaListsAnd`[SET ROLES]: unable to add / remove '${
+				difference.filter(role => role.managed || Role.comparePositions(role, highest) >= 0).map(({ name }) => `@${name}`)
+			}'`);
+			return member;
 		}
 
 		try {
 			return await member.roles.set(roles);
 		} catch (error) {
-			return logger.error(error);
+			logger.error(error);
+			return member;
 		}
 	}
 
@@ -122,12 +132,23 @@ export default class GuildMemberUtil extends null {
 	 * @param member
 	 * @param options
 	 */
-	static editRoles(member: GuildMember, { add, remove }: { add?: RoleCollection, remove?: RoleCollection}) {
-		let roles = member.roles.cache;
-		if (remove) roles = roles.filter((_, id) => !remove.has(id));
-		if (add) roles = roles.concat(add); // eslint-disable-line unicorn/prefer-spread
+	static async editRoles(member: GuildMember, { add = [], remove = [] }: { add?: RoleResolvables, remove?: RoleResolvables}) {
+		const rolesToAdd = GuildUtil.resolveRoles(member.guild, add);
+		const rolesToRemove = GuildUtil.resolveRoles(member.guild, remove);
 
-		return this.setRoles(member, roles);
+		if (!rolesToAdd.length || !rolesToRemove.length) return member;
+
+		for (const role of member.roles.cache.values()) {
+			if (rolesToRemove.some(({ id }) => id === role.id)) continue;
+			rolesToAdd.push(role);
+		}
+
+		try {
+			return await member.roles.set(rolesToAdd);
+		} catch (error) {
+			logger.error(error);
+			return member;
+		}
 	}
 
 	/**

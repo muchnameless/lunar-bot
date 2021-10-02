@@ -3,6 +3,10 @@ import { logger } from '../functions';
 import type { Guild, GuildMember, Snowflake } from 'discord.js';
 
 
+export type RoleCollection = Collection<Snowflake, Role>;
+export type RoleResolvables = (Snowflake | Role | null)[] | RoleCollection;
+
+
 export default class GuildUtil extends null {
 	/**
 	 * cache
@@ -15,7 +19,7 @@ export default class GuildUtil extends null {
 	 * @param guild
 	 * @param rolesOrIds roles or role ids to verify
 	 */
-	static resolveRoles(guild: Guild, rolesOrIds: (Snowflake | Role | null)[] | Collection<Snowflake, Role>) {
+	static resolveRoles(guild: Guild, rolesOrIds: RoleResolvables) {
 		const resolvedRoles: Role[] = [];
 
 		let highest: Role;
