@@ -60,7 +60,7 @@ export default class XpResetCommand extends SlashCommand {
 			await players.sweepDb();
 
 			await safePromiseAll([
-				...players.cache.map(async (player) => {
+				...players.cache.map((player) => {
 					if (player.notes === 'skill api disabled') player.notes = null;
 					return player.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
 				}),

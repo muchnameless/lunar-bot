@@ -155,12 +155,12 @@ export default class MessageUtil extends null {
 	 * @param message
 	 * @param contentOrOptions
 	 */
-	static async reply(message: Message, contentOrOptions: string | MessageOptions) {
+	static reply(message: Message, contentOrOptions: string | MessageOptions) {
 		const options = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
 
-		return await ChannelUtil.send(message.channel, {
+		return ChannelUtil.send(message.channel, {
 			reply: {
 				messageReference: message,
 			},

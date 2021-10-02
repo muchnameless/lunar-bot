@@ -128,6 +128,6 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 
 		if (!command) throw new Error(`unknown command ${commandName}`);
 
-		return await command.delete();
+		return command.delete();
 	}
 }

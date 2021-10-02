@@ -96,7 +96,7 @@ export class DiscordManager {
 	/**
 	 * instantiates the DiscordChatManagers
 	 */
-	async init() {
+	init() {
 		const promises = [];
 
 		for (const chatBridgeChannel of this.chatBridge.hypixelGuild!.chatBridgeChannels) {

@@ -143,7 +143,7 @@ export class PlayerManager extends ModelManager<Player> {
 			attributes: [ this.primaryKey, 'ign' ],
 		});
 
-		await safePromiseAll(playersToSweep.map(async player => player.destroy()));
+		await safePromiseAll(playersToSweep.map(player => player.destroy()));
 
 		const AMOUNT = playersToSweep.length;
 
@@ -346,7 +346,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @param options transfer options
 	 */
 	async transferXp(options: TransferXpOptions) {
-		await safePromiseAll(this.cache.map(async player => player.transferXp(options)));
+		await safePromiseAll(this.cache.map(player => player.transferXp(options)));
 		return this;
 	}
 
@@ -355,7 +355,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @param options reset options
 	 */
 	async resetXp(options?: ResetXpOptions) {
-		await safePromiseAll(this.cache.map(async player => player.resetXp(options)));
+		await safePromiseAll(this.cache.map(player => player.resetXp(options)));
 		return this;
 	}
 

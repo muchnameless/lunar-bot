@@ -65,7 +65,7 @@ export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCrea
 	 * @param amount
 	 * @param type
 	 */
-	async addAmount(amount: number, type = 'tax') {
+	addAmount(amount: number, type = 'tax') {
 		switch (type) {
 			case 'tax':
 				this.collectedTax += amount;
@@ -84,7 +84,7 @@ export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCrea
 	 * resets the specified amount back to 0
 	 * @param type
 	 */
-	async resetAmount(type = 'tax') {
+	resetAmount(type = 'tax') {
 		switch (type) {
 			case 'tax':
 			case 'taxes':
@@ -104,7 +104,7 @@ export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCrea
 	/**
 	 * removes the collector from the database
 	 */
-	async remove() {
+	remove() {
 		return this.client.taxCollectors.remove(this);
 	}
 

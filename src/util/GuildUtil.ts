@@ -66,7 +66,7 @@ export default class GuildUtil extends null {
 		if (guild.memberCount === guild.members.cache.size) return guild.members.cache;
 
 		const cached = this.#fetchAllMembersCache.get(guild.id);
-		if (cached) return await cached;
+		if (cached) return cached;
 
 		const promise = guild.members.fetch();
 		this.#fetchAllMembersCache.set(guild.id, promise);

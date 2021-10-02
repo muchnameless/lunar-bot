@@ -122,7 +122,7 @@ export default class GuildMemberUtil extends null {
 	 * @param member
 	 * @param options
 	 */
-	static async editRoles(member: GuildMember, { add, remove }: { add?: RoleCollection, remove?: RoleCollection}) {
+	static editRoles(member: GuildMember, { add, remove }: { add?: RoleCollection, remove?: RoleCollection}) {
 		let roles = member.roles.cache;
 		if (remove) roles = roles.filter((_, id) => !remove.has(id));
 		if (add) roles = roles.concat(add); // eslint-disable-line unicorn/prefer-spread
@@ -134,7 +134,7 @@ export default class GuildMemberUtil extends null {
 	 * @param member
 	 * @param contentOrOptions
 	 */
-	static async sendDM(member: GuildMember, contentOrOptions: string | MessageOptions) {
+	static sendDM(member: GuildMember, contentOrOptions: string | MessageOptions) {
 		return UserUtil.sendDM(member.user, contentOrOptions);
 	}
 }

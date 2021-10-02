@@ -64,7 +64,7 @@ export default class ChannelUtil extends null {
 		try {
 			switch (channel.type) {
 				case 'DM':
-					if (Array.isArray(IdOrIds)) return await Promise.all(IdOrIds.map(async id => channel.messages.delete(id)));
+					if (Array.isArray(IdOrIds)) return await Promise.all(IdOrIds.map(id => channel.messages.delete(id)));
 
 					return await channel.messages.delete(IdOrIds);
 
@@ -72,12 +72,12 @@ export default class ChannelUtil extends null {
 					if (Array.isArray(IdOrIds)) {
 						if (this.botPermissions(channel)?.has(Permissions.FLAGS.MANAGE_MESSAGES)) return await channel.bulkDelete(IdOrIds);
 
-						return await Promise.all(IdOrIds.map(async (id) => {
+						return await Promise.all(IdOrIds.map((id) => {
 							const message = channel.messages.cache.get(id);
 
-							if (message?.deleted || !(message?.deletable ?? true)) return;
+							if (message?.deleted || !(message?.deletable ?? true)) return null;
 
-							return await channel.messages.delete(id);
+							return channel.messages.delete(id);
 						}));
 					}
 

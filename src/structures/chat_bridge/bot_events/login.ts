@@ -6,7 +6,7 @@ import type { ChatBridge } from '../ChatBridge';
 /**
  * @param chatBridge
  */
-export default async function(chatBridge: ChatBridge) {
+export default function(chatBridge: ChatBridge) {
 	logger.debug(`[MINECRAFT BOT LOGIN]: ${chatBridge.bot!.username}: logged in`);
 
 	// remove '-' from uuid
