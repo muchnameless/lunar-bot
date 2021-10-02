@@ -10,7 +10,7 @@ import type { MojangResult } from '../structures/MojangClient';
  * @param ctx
  * @param ignOrUuid
  */
-export async function getUuidAndIgn(ctx: Interaction | HypixelMessage, ignOrUuid?: string | null): Promise<MojangResult> {
+export function getUuidAndIgn(ctx: Interaction | HypixelMessage, ignOrUuid?: string | null): Promise<MojangResult> {
 	// remove non-alphanumeric characters
 	const IGN_OR_UUID = ignOrUuid?.replace(/\W/g, '');
 
@@ -23,13 +23,13 @@ export async function getUuidAndIgn(ctx: Interaction | HypixelMessage, ignOrUuid
 		: ctx.author?.player;
 
 	// author is linked to player
-	if (player) return {
+	if (player) return Promise.resolve({
 		uuid: player.minecraftUuid,
 		ign: player.ign,
-	};
+	});
 
 	// no linked player -> try to get ign from author (HypixelMessageAuthor)
 	if (ctx instanceof HypixelMessage && ctx.author?.ign) return mojang.ign(ctx.author.ign);
 
-	throw 'no ign specified and you are not in the player db';
+	return Promise.reject('no ign specified and you are not in the player db');
 }

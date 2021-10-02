@@ -1,4 +1,4 @@
-import { Permissions, Role } from 'discord.js';
+import { Collection, Permissions, Role } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import {
 	CATACOMBS_ROLES,
@@ -98,8 +98,18 @@ export default class GuildMemberUtil extends null {
 	 * @param member
 	 * @param roles
 	 */
-	static async setRoles(member: GuildMember, roles: RoleCollection) {
-		const difference = roles.difference(member.roles.cache);
+	static async setRoles(member: GuildMember, roles: RoleResolvables) {
+		const difference: RoleCollection = (Array.isArray(roles)
+			? (() => {
+				const resolvedRoles = new Collection<Snowflake, Role>();
+				for (const roleOrId of roles) {
+					if (!roleOrId) continue;
+					const role = member.guild.roles.resolve(roleOrId);
+					if (role) resolvedRoles.set(role.id, role);
+				}
+				return resolvedRoles;
+			})()
+			: roles).difference(member.roles.cache);
 		if (!difference.size) {
 			logger.warn('[SET ROLES]: nothing to change');
 			return member;
@@ -120,7 +130,7 @@ export default class GuildMemberUtil extends null {
 		}
 
 		try {
-			return await member.roles.set(roles);
+			return await member.roles.set(Array.isArray(roles) ? roles.filter(Boolean) as (Snowflake | Role)[] : roles);
 		} catch (error) {
 			logger.error(error);
 			return member;

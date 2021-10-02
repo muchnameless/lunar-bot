@@ -75,7 +75,7 @@ export class MojangClient {
 	 * @param ign
 	 * @param options
 	 */
-	async ign(ign: string, options?: MojangFetchOptions) {
+	ign(ign: string, options?: MojangFetchOptions) {
 		if (validateMinecraftIgn(ign)) return this.request({
 			path: 'https://api.mojang.com/users/profiles/minecraft/',
 			query: ign.toLowerCase(),
@@ -83,7 +83,7 @@ export class MojangClient {
 			...options,
 		});
 
-		throw new MojangAPIError({ status: '(validation)' }, 'ign', ign);
+		return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'ign', ign));
 	}
 
 	/**
@@ -91,7 +91,7 @@ export class MojangClient {
 	 * @param uuid
 	 * @param options
 	 */
-	async uuid(uuid: string, options?: MojangFetchOptions) {
+	uuid(uuid: string, options?: MojangFetchOptions) {
 		if (validateMinecraftUuid(uuid)) return this.request({
 			path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
 			query: uuid.toLowerCase().replaceAll('-', ''),
@@ -99,7 +99,7 @@ export class MojangClient {
 			...options,
 		});
 
-		throw new MojangAPIError({ status: '(validation)' }, 'uuid', uuid);
+		return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'uuid', uuid));
 	}
 
 	/**
@@ -107,7 +107,7 @@ export class MojangClient {
 	 * @param ignOrUuid
 	 * @param options
 	 */
-	async ignOrUuid(ignOrUuid: string, options?: MojangFetchOptions) {
+	ignOrUuid(ignOrUuid: string, options?: MojangFetchOptions) {
 		if (validateMinecraftIgn(ignOrUuid)) return this.request({
 			path: 'https://api.mojang.com/users/profiles/minecraft/',
 			query: ignOrUuid.toLowerCase(),
@@ -122,7 +122,7 @@ export class MojangClient {
 			...options,
 		});
 
-		throw new MojangAPIError({ status: '(validation)' }, 'ignOrUuid', ignOrUuid);
+		return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'ignOrUuid', ignOrUuid));
 	}
 
 	/**
