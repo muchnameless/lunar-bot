@@ -96,9 +96,9 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	#collecting = false;
 	/**
-	 * wether the chatBridge mc bot is currently isReconnecting (prevents executing multiple reconnections)
+	 * chatBridge mc bot reconnecting (prevents executing multiple reconnections)
 	 */
-	#isReconnecting = false;
+	#reconnectPromise: Promise<this> | null = null;
 	/**
 	 * scheduled reconnection
 	 */
@@ -146,7 +146,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		/**
 		 * buffer size
 		 */
-		MAX_INDEX: 8,
+		MAX_INDEX: 8 as const,
 		/**
 		 * current buffer index
 		 */
@@ -228,12 +228,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * wether the minecraft bot can send chat messages
 	 */
 	get chatReady() {
-		return (async () => {
-			if (!this.bot) return false;
+		if (!this.bot) return Promise.resolve(false);
 
+		return (async () => {
 			try {
 				await this.command({
-					command: `w ${this.bot.username} o/`,
+					command: `w ${this.bot!.username} o/`,
 					responseRegExp: /^You cannot message this player\.$/,
 					timeout: 1_000,
 					rejectOnTimeout: true,
@@ -417,8 +417,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}, 60_000);
 		}
 
-		this.#isReconnecting = false;
-
 		return this;
 	}
 
@@ -427,20 +425,25 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param loginDelay delay in ms
 	 */
 	reconnect(loginDelay = Math.min(Math.exp(this.loginAttempts) * 1_000, 600_000)) {
-		// prevent multiple reconnections
-		if (this.#isReconnecting) return this;
-		this.#isReconnecting = true;
+		return this.#reconnectPromise ??= this.#reconnect(loginDelay);
+	}
+	/**
+	 * should only ever be called from within reconnect()
+	 * @internal
+	 */
+	async #reconnect(loginDelay = Math.min(Math.exp(this.loginAttempts) * 1_000, 600_000)) {
+		try {
+			this.disconnect();
 
-		this.disconnect();
+			logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
 
-		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
+			await sleep(loginDelay);
+			await this.connect();
 
-		this.#reconnectTimeout = setTimeout(() => {
-			this.connect();
-			this.#reconnectTimeout = null;
-		}, loginDelay);
-
-		return this;
+			return this;
+		} finally {
+			this.#reconnectPromise = null;
+		}
 	}
 
 	/**

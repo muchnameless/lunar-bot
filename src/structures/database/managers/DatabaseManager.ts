@@ -55,6 +55,10 @@ export class DatabaseManager {
 	 * Sequelize instance
 	 */
 	sequelize: Sequelize;
+	/**
+	 * db data update
+	 */
+	#updateDataPromise: Promise<this> | null = null;
 
 	constructor(client: LunarClient, db: typeof DbType) {
 		this.client = client;
@@ -76,7 +80,6 @@ export class DatabaseManager {
 		) as unknown as Models;
 		this.sequelize = db.sequelize;
 	}
-
 
 	/**
 	 * update player database and tax message every x min starting at the full hour
@@ -395,72 +398,84 @@ export class DatabaseManager {
 	/**
 	 * updates the player database and the corresponding tax message
 	 */
-	async updateData() {
-		const { config, players, hypixelGuilds } = this.modelManagers;
+	updateData() {
+		return this.#updateDataPromise ??= this.#updateData();
+	}
+	/**
+	 * should only ever be called from within updateData()
+	 * @internal
+	 */
+	async #updateData() {
+		try {
+			const { config, players, hypixelGuilds } = this.modelManagers;
 
-		// the hypxiel api encountered an error before
-		if (config.get('HYPIXEL_API_ERROR')) {
-			// reset error every full hour
-			if (new Date().getMinutes() >= config.get('DATABASE_UPDATE_INTERVAL')) {
-				players.updateIgns();
-				return logger.warn('[DB UPDATE]: auto updates disabled');
+			// the hypxiel api encountered an error before
+			if (config.get('HYPIXEL_API_ERROR')) {
+				// reset error every full hour
+				if (new Date().getMinutes() >= config.get('DATABASE_UPDATE_INTERVAL')) {
+					await players.updateIgns();
+					logger.warn('[DB UPDATE]: auto updates disabled');
+					return this;
+				}
+
+				config.set('HYPIXEL_API_ERROR', false);
 			}
 
-			config.set('HYPIXEL_API_ERROR', false);
-		}
+			// update player db
+			await hypixelGuilds.updateData({ syncRanks: true });
 
-		// update player db
-		await hypixelGuilds.updateData({ syncRanks: true });
+			// update tax db
+			const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED')
+				? await this.#updateTaxDatabase()
+				: null;
 
-		// update tax db
-		const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED')
-			? await this.#updateTaxDatabase()
-			: null;
+			// update Xp
+			if (config.get('XP_TRACKING_ENABLED')) players.updateXp();
 
-		// update Xp
-		if (config.get('XP_TRACKING_ENABLED')) players.updateXp();
+			// update IGNs
+			await players.updateIgns();
 
-		// update IGNs
-		await players.updateIgns();
+			// update taxMessage
+			const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
-		// update taxMessage
-		const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
+			if (!taxChannel?.isText() || ((taxChannel as GuildChannel).guildId && !(taxChannel as GuildChannel).guild?.available)) {
+				logger.warn('[TAX MESSAGE] tax channel error');
+				return this;
+			}
+			if (!ChannelUtil.botPermissions(taxChannel)?.has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) {
+				logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
+				return this;
+			}
 
-		if (!taxChannel?.isText() || ((taxChannel as GuildChannel).guildId && !(taxChannel as GuildChannel).guild?.available)) return logger.warn('[TAX MESSAGE] tax channel error');
-		if (!ChannelUtil.botPermissions(taxChannel)?.has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) {
-			return logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
-		}
+			const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');
+			const taxMessage = TAX_MESSAGE_ID
+				? await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch(error => logger.error('[TAX MESSAGE]', error))
+				: null;
 
-		const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');
-		const taxMessage = TAX_MESSAGE_ID
-			? await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch(error => logger.error('[TAX MESSAGE]', error))
-			: null;
-
-		if (!taxMessage?.editable || taxMessage.deleted) { // taxMessage deleted -> send a new one
-			try {
+			if (!taxMessage?.editable || taxMessage.deleted) { // taxMessage deleted -> send a new one
 				const { id } = await taxChannel.send({ embeds: [ this.createTaxEmbed(this.#createTaxEmbedDescription(availableAuctionsLog)) ] });
 
 				config.set('TAX_MESSAGE_ID', id);
-				return logger.info('[TAX MESSAGE]: created new taxMessage');
-			} catch (error) {
-				return logger.error('[TAX MESSAGE]', error);
+				logger.info('[TAX MESSAGE]: created new taxMessage');
+				return this;
 			}
-		}
 
-		const DESCRIPTION = this.#createTaxEmbedDescription(availableAuctionsLog);
-		const fields = this.#createTaxEmbedFields();
+			const DESCRIPTION = this.#createTaxEmbedDescription(availableAuctionsLog);
+			const fields = this.#createTaxEmbedFields();
 
-		if (taxMessage.embeds[0]?.description === DESCRIPTION
-			&& taxMessage.embeds[0].fields
-				.every(({ name, value }, index) => fields[index].name === name && fields[index].value === value)
-		) return; // no changes to taxMessage
+			if (taxMessage.embeds[0]?.description === DESCRIPTION
+				&& taxMessage.embeds[0].fields
+					.every(({ name, value }, index) => fields[index].name === name && fields[index].value === value)
+			) return this; // no changes to taxMessage
 
-		try {
 			await taxMessage.edit({ embeds: [ this.createTaxEmbed(DESCRIPTION, fields) ] });
-
 			logger.info('[TAX MESSAGE]: updated taxMessage');
+			return this;
 		} catch (error) {
-			logger.error('[TAX MESSAGE]', error);
+			logger.error('[DATABASE UPDATE ERROR]', error);
+			return this;
+		} finally {
+			this.#updateDataPromise = null;
 		}
 	}
 }

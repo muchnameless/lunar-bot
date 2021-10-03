@@ -91,9 +91,17 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare readonly updatedAt: Date;
 
 	/**
-	 * wether a player db update is currently running
+	 * player db update
 	 */
-	#isUpdatingPlayers = false;
+	#updateGuildPlayersPromise: Promise<this> | null = null;
+	/**
+	 * guild ranks sync
+	 */
+	#syncGuildRanksPromise: Promise<this> | null = null;
+	/**
+	 * guild data update
+	 */
+	#updateDataPromise: Promise<this> | null = null;
 	/**
 	 * guild players
 	 */
@@ -287,14 +295,28 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * updates the player database
 	 * @param options
 	 */
-	async updateData(options?: UpdateOptions) {
-		const data = await hypixel.guild.id(this.guildId);
+	updateData(options?: UpdateOptions) {
+		return this.#updateDataPromise ??= this.#updateData(options);
+	}
+	/**
+	 * should only ever be called from within updateData()
+	 * @internal
+	 */
+	async #updateData(options?: UpdateOptions) {
+		try {
+			const data = await hypixel.guild.id(this.guildId);
 
-		if (data.meta.cached) return logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
+			if (data.meta.cached) {
+				logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
+				return this;
+			}
 
-		this.#updateGuildData(data);
+			await this.#updateGuildData(data);
 
-		return this.updatePlayers(data, options);
+			return this.updatePlayers(data, options);
+		} finally {
+			this.#updateDataPromise = null;
+		}
 	}
 
 	/**
@@ -343,14 +365,21 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * @param data API data
 	 * @param options
 	 */
-	async updatePlayers(data?: Components.Schemas.Guild & { meta: Omit<Components.Schemas.GuildResponse, 'guild'> & DefaultMeta }, { syncRanks = false }: UpdateOptions = {}) {
-		if (this.#isUpdatingPlayers) return;
-		this.#isUpdatingPlayers = true;
-
+	updatePlayers(...args: [ Components.Schemas.Guild & { meta: Omit<Components.Schemas.GuildResponse, 'guild'> & DefaultMeta }, UpdateOptions | undefined ]) {
+		return this.#updateGuildPlayersPromise ??= this.#updatePlayers(...args);
+	}
+	/**
+	 * should only ever be called from within updatePlayers()
+	 * @internal
+	 */
+	async #updatePlayers(data?: Components.Schemas.Guild & { meta: Omit<Components.Schemas.GuildResponse, 'guild'> & DefaultMeta }, { syncRanks = false }: UpdateOptions = {}) {
 		try {
 			const { meta: { cached }, members: currentGuildMembers } = data ?? await hypixel.guild.id(this.guildId);
 
-			if (cached) return logger.info(`[UPDATE PLAYERS]: ${this.name}: cached data`);
+			if (cached) {
+				logger.info(`[UPDATE PLAYERS]: ${this.name}: cached data`);
+				return this;
+			}
 
 			const { players, config, lgGuild } = this.client;
 
@@ -534,7 +563,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 			const CHANGES = PLAYERS_LEFT_AMOUNT + membersJoined.length;
 
-			if (!CHANGES) return;
+			if (!CHANGES) return this;
 
 			players.sortAlphabetically();
 
@@ -602,19 +631,27 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			}
 
 			this.client.log(...loggingEmbeds);
+			return this;
 		} finally {
-			this.#isUpdatingPlayers = false;
+			this.#updateGuildPlayersPromise = null;
 		}
 	}
 
 	/**
 	 * syncs guild ranks with the weight leaderboard
 	 */
-	async syncGuildRanks() {
-		if (!this.client.config.get('AUTO_GUILD_RANKS')) return;
-		if (!this.chatBridgeEnabled) return;
-
+	syncGuildRanks() {
+		return this.#syncGuildRanksPromise ??= this.#syncGuildRanks();
+	}
+	/**
+	 * should only ever be called from within syncGuildRanks()
+	 * @internal
+	 */
+	async #syncGuildRanks() {
 		try {
+			if (!this.client.config.get('AUTO_GUILD_RANKS')) return this;
+			if (!this.chatBridgeEnabled) return this;
+
 			const { chatBridge } = this;
 
 			let staffAmount = 0;
@@ -632,7 +669,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 			// abort if a player's weight is 0 -> most likely an API error
 			if (playersSortedByWeight.some(({ weight }) => weight === 0)) {
-				return logger.error(`[SYNC GUILD RANKS]: ${playersSortedByWeight.find(({ weight }) => weight === 0)!.player.ign}'s weight is 0`);
+				logger.error(`[SYNC GUILD RANKS]: ${playersSortedByWeight.find(({ weight }) => weight === 0)!.player.ign}'s weight is 0`);
+				return this;
 			}
 
 			const nonStaffAmount = playersSortedByWeight.length - staffAmount;
@@ -717,8 +755,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			}
 
 			this.client.log(...setRankLog);
+			return this;
 		} catch (error) {
 			logger.error('[SYNC GUILD RANKS]', error);
+			return this;
+		} finally {
+			this.#syncGuildRanksPromise = null;
 		}
 	}
 

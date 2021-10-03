@@ -7,6 +7,11 @@ import type { HypixelGuild, UpdateOptions } from '../models/HypixelGuild';
 
 
 export class HypixelGuildManager extends ModelManager<HypixelGuild> {
+	/**
+	 * hypixel guild db data update
+	 */
+	#updateDataPromise: Promise<this> | null = null;
+
 	static PSEUDO_GUILD_IDS = [ null, GUILD_ID_BRIDGER, GUILD_ID_ERROR ] as const;
 
 	/**
@@ -41,19 +46,31 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 * update all guilds
 	 * @param options
 	 */
-	async updateData(options?: UpdateOptions) {
-		if (this.client.config.get('HYPIXEL_API_ERROR')) return logger.warn('[GUILDS UPDATE]: auto updates disabled');
-
+	updateData(options?: UpdateOptions) {
+		return this.#updateDataPromise ??= this.#updateData(options);
+	}
+	/**
+	 * should only ever be called from within updateData()
+	 * @internal
+	 */
+	async #updateData(options?: UpdateOptions) {
 		try {
+			if (this.client.config.get('HYPIXEL_API_ERROR')) {
+				logger.warn('[GUILDS UPDATE]: auto updates disabled');
+				return this;
+			}
+
 			for (const hypixelGuild of this.cache.values()) {
 				await hypixelGuild.updateData(options);
 			}
 
-			return true;
+			return this;
 		} catch (error) {
 			if (error instanceof Error && !error.name.startsWith('Sequelize')) this.client.config.set('HYPIXEL_API_ERROR', true);
 			logger.error('[GUILDS UPDATE]', error);
-			return false;
+			return this;
+		} finally {
+			this.#updateDataPromise = null;
 		}
 	}
 

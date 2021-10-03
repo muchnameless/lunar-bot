@@ -27,14 +27,13 @@ import type { HypixelGuild } from '../models/HypixelGuild';
 
 export class PlayerManager extends ModelManager<Player> {
 	/**
-	 * wether a player db xp update is currently running
+	 * player db xp update
 	 */
-	#isUpdatingXp = false;
-
+	#updateXpPromise: Promise<this> | null = null;
 	/**
-	 * wether a player db ign update is currently running
+	 * player db ign update
 	 */
-	#isUpdatingIgns = false;
+	#updateIgnPromise: Promise<this> | null = null;
 
 	/**
 	 * get players from all guilds (no bridgers or errors)
@@ -224,10 +223,14 @@ export class PlayerManager extends ModelManager<Player> {
 	 * update Xp for all players
 	 * @param options
 	 */
-	async updateXp(options?: PlayerUpdateOptions) {
-		if (this.#isUpdatingXp) return this;
-		this.#isUpdatingXp = true;
-
+	updateXp(options?: PlayerUpdateOptions) {
+		return this.#updateXpPromise ??= this.#updateXp(options);
+	}
+	/**
+	 * should only ever be called from within updateXp()
+	 * @internal
+	 */
+	async #updateXp(options?: PlayerUpdateOptions) {
 		try {
 			// the hypxiel api encountered an error before
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
@@ -240,30 +243,33 @@ export class PlayerManager extends ModelManager<Player> {
 				this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
 			}
 
-			try {
-				for (const player of this.cache.values()) {
-					// @ts-expect-error hypixel.ratelimit is not typed
-					if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
+			for (const player of this.cache.values()) {
+				// @ts-expect-error hypixel.ratelimit is not typed
+				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
 
-					await player.updateData({ rejectOnAPIError: true, ...options });
-				}
-			} catch (error) {
-				logger.error('[PLAYERS UPDATE XP]', error);
+				await player.updateData({ rejectOnAPIError: true, ...options });
 			}
 
 			return this;
+		} catch (error) {
+			logger.error('[PLAYERS UPDATE XP]', error);
+			return this;
 		} finally {
-			this.#isUpdatingXp = false;
+			this.#updateXpPromise = null;
 		}
 	}
 
 	/**
 	 * updates all IGNs and logs changes via the log handler
 	 */
-	async updateIgns() {
-		if (this.#isUpdatingIgns) return this;
-		this.#isUpdatingIgns = true;
-
+	updateIgns() {
+		return this.#updateIgnPromise ??= this.#updateIgns();
+	}
+	/**
+	 * should only ever be called from within updateIgns()
+	 * @internal
+	 */
+	async #updateIgns() {
 		try {
 			// the hypxiel api encountered an error before
 			if (this.client.config.get('MOJANG_API_ERROR')) {
@@ -337,7 +343,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 			return this;
 		} finally {
-			this.#isUpdatingIgns = false;
+			this.#updateIgnPromise = null;
 		}
 	}
 
