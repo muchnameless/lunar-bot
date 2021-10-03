@@ -23,8 +23,8 @@ export interface ImageData {
 	vote: unknown | null;
 	favorite: boolean;
 	nsfw: boolean | null;
-	section: unknown;
-	account_url: unknown;
+	section: unknown | null;
+	account_url: unknown | null;
 	account_id: number;
 	is_ad: boolean;
 	in_most_viral: boolean;
@@ -32,7 +32,7 @@ export interface ImageData {
 	tags: string[];
 	ad_type: number;
 	ad_url: string;
-	edited: number;
+	edited?: number;
 	in_gallery: boolean;
 	deletehash: string;
 	name: string;
@@ -129,14 +129,15 @@ export class ImgurClient {
 	}
 
 	/**
-	 * uploads an image by URL
+	 * uploads an image
 	 * @param url
+	 * @param type
 	 */
-	upload(url: string) {
+	upload(url: string, type = 'url') {
 		const form = new FormData();
 
 		form.append('image', url);
-		form.append('type', 'url');
+		form.append('type', type);
 
 		return this.request(
 			'upload',
@@ -144,6 +145,9 @@ export class ImgurClient {
 				method: 'POST',
 				// @ts-expect-error
 				body: form,
+				headers: {
+					Accept: 'application/json',
+				},
 			}, {
 				checkRateLimit: true,
 				cacheKey: url,
@@ -153,10 +157,10 @@ export class ImgurClient {
 
 	/**
 	 * @param endpoint
+	 * @param requestOptions
 	 * @param options
-	 * @param param2
 	 */
-	async request(endpoint: string, options: RequestInit, { checkRateLimit = true, cacheKey }: { checkRateLimit?: boolean; cacheKey: string; }) {
+	async request(endpoint: string, requestOptions: RequestInit, { checkRateLimit = true, cacheKey }: { checkRateLimit?: boolean; cacheKey: string; }) {
 		const cached = await this.cache?.get(cacheKey);
 		if (cached) return cached;
 
@@ -181,7 +185,7 @@ export class ImgurClient {
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
-				if ((options.method === 'POST' || !options.method) && this.postRateLimit.remaining === 0) {
+				if ((requestOptions.method === 'POST' || !requestOptions.method) && this.postRateLimit.remaining === 0) {
 					const RESET_TIME = this.postRateLimit.reset! - Date.now();
 
 					if (RESET_TIME > this.rateLimitedWaitTime) throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
@@ -189,7 +193,13 @@ export class ImgurClient {
 				}
 			}
 
-			const res = await this.#request(endpoint, options);
+			const res = await this.#request(endpoint, requestOptions);
+
+			// get server time
+			const date = res.headers.get('date');
+			const NOW = date
+				? Date.parse(date) || Date.now()
+				: Date.now();
 
 			// get ratelimit headers
 			for (const type of Object.keys(this.rateLimit)) {
@@ -197,7 +207,7 @@ export class ImgurClient {
 
 				if (data !== null) {
 					this.rateLimit[type as keyof RateLimitData] = type.endsWith('reset')
-						? Date.now() + (Number.parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
+						? NOW + (Number.parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
 						: Number.parseInt(data, 10);
 				}
 			}
@@ -207,7 +217,7 @@ export class ImgurClient {
 
 				if (data !== null) {
 					this.postRateLimit[type as keyof PostRateLimitData] = type.endsWith('reset')
-						? Date.now() + (Number.parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
+						? NOW + (Number.parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
 						: Number.parseInt(data, 10);
 				}
 			}
@@ -232,7 +242,7 @@ export class ImgurClient {
 	 * @param options
 	 * @param retries current retry
 	 */
-	async #request(endpoint: string, options: RequestInit, retries = 0): Promise<Response> {
+	async #request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), this.requestTimeout);
 
@@ -242,6 +252,7 @@ export class ImgurClient {
 				{
 					headers: {
 						Authorization: this.#authorisation,
+						...headers,
 					},
 					signal: controller.signal,
 					...options,
@@ -250,7 +261,7 @@ export class ImgurClient {
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
-				return this.#request(endpoint, options, retries + 1);
+				return this.#request(endpoint, { headers, ...options }, retries + 1);
 			}
 
 			throw error;
