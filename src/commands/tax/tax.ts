@@ -90,7 +90,9 @@ export default class TaxCommand extends SlashCommand {
 
 				switch (interaction.options.getSubcommand()) {
 					case 'add':
-						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) return InteractionUtil.reply(interaction, `\`${player}\` is already a tax collector`);
+						if (this.client.taxCollectors.cache.get(player.minecraftUuid)?.isCollecting) {
+							return InteractionUtil.reply(interaction, `\`${player}\` is already a tax collector`);
+						}
 
 						await this.client.taxCollectors.add(player);
 						if (!player.paid) player.setToPaid(); // let collector collect their own tax if they have not paid already
@@ -166,7 +168,10 @@ export default class TaxCommand extends SlashCommand {
 							}),
 						);
 
-						return InteractionUtil.reply(interaction, `changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``);
+						return InteractionUtil.reply(
+							interaction,
+							`changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``,
+						);
 					}
 
 					case 'collected': {
@@ -186,7 +191,10 @@ export default class TaxCommand extends SlashCommand {
 						const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
 						if (player.paid) {
-							await InteractionUtil.awaitConfirmation(interaction, `\`${player}\` is already set to paid with an amount of \`${this.client.formatNumber(await player.taxAmount ?? Number.NaN)}\`. Overwrite this?`);
+							await InteractionUtil.awaitConfirmation(
+								interaction,
+								`\`${player}\` is already set to paid with an amount of \`${this.client.formatNumber(await player.taxAmount ?? Number.NaN)}\`. Overwrite this?`,
+							);
 
 							await player.resetTax();
 						}
@@ -206,7 +214,10 @@ export default class TaxCommand extends SlashCommand {
 							}),
 						);
 
-						return InteractionUtil.reply(interaction, `\`${player}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``);
+						return InteractionUtil.reply(
+							interaction,
+							`\`${player}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``,
+						);
 					}
 
 					case 'reminder': {
@@ -227,7 +238,10 @@ export default class TaxCommand extends SlashCommand {
 							ephemeral: true,
 						});
 
-						await InteractionUtil.awaitConfirmation(interaction, `${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hypixelGuild?.name ?? 'all guilds'}?`);
+						await InteractionUtil.awaitConfirmation(
+							interaction,
+							`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hypixelGuild?.name ?? 'all guilds'}?`,
+						);
 
 						let pingMessage = '';
 
@@ -245,7 +259,9 @@ export default class TaxCommand extends SlashCommand {
 						if (!SHOULD_GHOST_PING) return;
 
 						const replyMessage = await interaction.fetchReply();
-						const fetched = await interaction.channel?.messages.fetch({ after: replyMessage.id }).catch(error => logger.error('[TAX REMINDER]: ghost ping', error));
+						const fetched = await interaction.channel?.messages
+							.fetch({ after: replyMessage.id })
+							.catch(error => logger.error('[TAX REMINDER]: ghost ping', error));
 						if (!fetched) return;
 
 						return ChannelUtil.deleteMessages(interaction.channel, [
@@ -303,7 +319,10 @@ export default class TaxCommand extends SlashCommand {
 							})();
 
 							if (!currentTaxEmbed) {
-								await InteractionUtil.awaitConfirmation(interaction, `unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`);
+								await InteractionUtil.awaitConfirmation(
+									interaction,
+									`unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`,
+								);
 
 								currentTaxEmbed = this.client.db.createTaxEmbed();
 							}
