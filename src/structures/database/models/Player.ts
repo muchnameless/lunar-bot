@@ -595,7 +595,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * imgur link with a bust url of the player's skin
 	 */
 	get imageURL() {
-		return uuidToImgurBustURL(this.minecraftUuid);
+		return uuidToImgurBustURL(this.client, this.minecraftUuid);
 	}
 
 	/**

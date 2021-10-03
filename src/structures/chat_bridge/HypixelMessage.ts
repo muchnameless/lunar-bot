@@ -282,7 +282,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 					avatarURL: member?.displayAvatarURL({ dynamic: true })
 						?? await player?.imageURL
 						?? await mojang.ign(this.author.ign).then(
-							({ uuid }) => uuidToImgurBustURL(uuid),
+							({ uuid }) => uuidToImgurBustURL(this.client, uuid),
 							error => logger.error('[FORWARD TO DC]', error),
 						)
 						?? (member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),

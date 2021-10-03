@@ -66,7 +66,7 @@ export default class AhCommand extends SlashCommand {
 	async #generateReply({ ign, uuid, profileId, profiles, userId }: { ign: string; uuid: string; profileId: string; profiles: { label: string; value: string; }[]; userId: Snowflake; }) {
 		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId)!;
 		const embed = this.client.defaultEmbed
-			.setAuthor(ign, (await uuidToImgurBustURL(uuid))!, `https://sky.shiiyu.moe/stats/${ign}/${PROFILE_NAME}`);
+			.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `https://sky.shiiyu.moe/stats/${ign}/${PROFILE_NAME}`);
 
 		try {
 			const auctions = (await hypixel.skyblock.auction.profile(profileId))
@@ -205,7 +205,7 @@ export default class AhCommand extends SlashCommand {
 				return InteractionUtil.reply(interaction, {
 					embeds: [
 						embed
-							.setAuthor(ign, (await uuidToImgurBustURL(uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
+							.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
 							.setDescription('no SkyBlock profiles'),
 					],
 					components: [
@@ -235,7 +235,7 @@ export default class AhCommand extends SlashCommand {
 					return InteractionUtil.reply(interaction, {
 						embeds: [
 							embed
-								.setAuthor(ign, (await uuidToImgurBustURL(uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
+								.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [
