@@ -58,6 +58,8 @@ interface StatsHistory {
 }
 
 export interface UpdateOptions {
+	/** API data */
+	data?: Components.Schemas.Guild & { meta: Omit<Components.Schemas.GuildResponse, 'guild'> & DefaultMeta };
 	syncRanks?: boolean;
 }
 
@@ -313,7 +315,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 			await this.#updateGuildData(data);
 
-			return this.updatePlayers(data, options);
+			return this.updatePlayers({ data, ...options });
 		} finally {
 			this.#updateDataPromise = null;
 		}
@@ -362,17 +364,16 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 	/**
 	 * updates the guild player database
-	 * @param data API data
 	 * @param options
 	 */
-	updatePlayers(...args: [ Components.Schemas.Guild & { meta: Omit<Components.Schemas.GuildResponse, 'guild'> & DefaultMeta }, UpdateOptions | undefined ]) {
-		return this.#updateGuildPlayersPromise ??= this.#updatePlayers(...args);
+	updatePlayers(options?: UpdateOptions) {
+		return this.#updateGuildPlayersPromise ??= this.#updatePlayers(options);
 	}
 	/**
 	 * should only ever be called from within updatePlayers()
 	 * @internal
 	 */
-	async #updatePlayers(data?: Components.Schemas.Guild & { meta: Omit<Components.Schemas.GuildResponse, 'guild'> & DefaultMeta }, { syncRanks = false }: UpdateOptions = {}) {
+	async #updatePlayers({ data, syncRanks = false }: UpdateOptions = {}) {
 		try {
 			const { meta: { cached }, members: currentGuildMembers } = data ?? await hypixel.guild.id(this.guildId);
 
