@@ -38,7 +38,7 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 			: null;
 	}
 
-	static initialize(sequelize: Sequelize) {
+	static initialise(sequelize: Sequelize) {
 		return this.init({
 			regExpString: {
 				type: DataTypes.STRING,

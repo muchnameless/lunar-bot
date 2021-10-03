@@ -22,7 +22,7 @@ const client = new LunarClient({
 				excludeFromSweep: e => e.id === (e.client as LunarClient).config.get('TAX_MESSAGE_ID'),
 			}),
 		},
-		// @ts-expect-error sweeping ChannelManager is not yet suppported
+		// @ts-expect-error
 		ChannelManager: {
 			sweepInterval: 3_600, // 1h
 			sweepFilter: LimitedCollection.filterByLifetime({

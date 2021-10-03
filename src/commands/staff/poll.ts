@@ -151,8 +151,10 @@ export default class PollCommand extends DualCommand {
 		const result = await this.#run({
 			chatBridge: InteractionUtil.getHypixelGuild(interaction).chatBridge,
 			question: interaction.options.getString('question', true),
-			// @ts-expect-error _hoistedOptions is private
-			pollOptionNames: interaction.options._hoistedOptions.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value),
+			pollOptionNames: interaction.options
+				// @ts-expect-error
+				._hoistedOptions
+				.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value as string),
 			duration: interaction.options.getString('duration'),
 			ign: UserUtil.getPlayer(interaction.user)?.ign ?? (interaction.member as GuildMember)?.displayName ?? interaction.user.tag,
 		});

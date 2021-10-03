@@ -36,8 +36,10 @@ export class BaseEvent {
 	 * client config
 	 */
 	get config() {
-		// @ts-expect-error
-		return (this.client as LunarClient).config;
+		return (this
+			// @ts-expect-error
+			.client as LunarClient
+		).config;
 	}
 
 	/**

@@ -91,8 +91,10 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 						guildRank: matched.groups!.guildRank,
 						uuid: matched.groups!.type
 							// clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
-							// @ts-expect-error extra typings are missing
-							? this.prismarineMessage.extra?.[0]?.clickEvent?.value.slice('/viewprofile '.length).replaceAll('-', '')
+							? (this.prismarineMessage
+								// @ts-expect-error
+								.extra
+								?.[0]?.clickEvent?.value as string).slice('/viewprofile '.length).replaceAll('-', '')
 							: null,
 					}
 					: {

@@ -1,5 +1,5 @@
 import { URL, pathToFileURL } from 'node:url';
-import { readJSFiles } from '../../functions';
+import { logger, readJSFiles } from '../../functions';
 import type { Models } from './managers/DatabaseManager';
 
 
@@ -13,7 +13,7 @@ import pkg from 'sequelize';
 const { Sequelize, DataTypes, Model } = pkg;
 
 // use floats instead of strings as decimal representation (1/2)
-// @ts-expect-error it works
+// @ts-expect-error
 class CustomDecimal extends DataTypes.DECIMAL {
 	static parse(value: string) {
 		return Number.parseFloat(value);
@@ -32,7 +32,7 @@ export const sequelize = new Sequelize(
 				const dTypes = {
 					DECIMAL: CustomDecimal,
 				};
-				// @ts-expect-error it works
+				// @ts-expect-error
 				this.connectionManager.refreshTypeParser(dTypes);
 			},
 		},
@@ -45,8 +45,15 @@ const models = {};
 for await (const { fullPath } of readJSFiles(new URL('./models', import.meta.url))) {
 	const model = (await import(pathToFileURL(fullPath).href)).default as typeof Model;
 
-	// @ts-expect-error Property 'initialize' does not exist on type 'typeof Model'
-	Reflect.set(models, model.name, model.initialize(sequelize));
+	if (!(typeof model
+		// @ts-expect-error
+		.initialise
+		=== 'function')) logger.error(`${model.name} is missing an initialise function`);
+
+	Reflect.set(models, model.name,
+		// @ts-expect-error
+		model['initialise' ?? 'init'](sequelize),
+	);
 }
 
 

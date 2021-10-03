@@ -2,7 +2,6 @@ import { GuildUtil } from '../util';
 import { logger } from '../functions';
 import { Event } from '../structures/events/Event';
 import type { EventContext } from '../structures/events/BaseEvent';
-import type { PresenceData } from 'discord.js';
 
 
 export default class ReadyEvent extends Event {
@@ -31,9 +30,6 @@ export default class ReadyEvent extends Event {
 		}
 
 		this.client.db.schedule();
-
-		// set presence again every 1h cause it get's lost sometimes
-		setInterval(() => this.client.isReady() && this.client.user.setPresence(this.client.user.presence as PresenceData), 60 * 60_000);
 
 		// chatBridges
 		if (this.config.get('CHATBRIDGE_ENABLED')) {

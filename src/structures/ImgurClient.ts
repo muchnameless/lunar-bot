@@ -4,7 +4,7 @@ import { FormData } from 'undici';
 import fetch from 'node-fetch';
 import ms from 'ms';
 import { ImgurAPIError } from './errors/ImgurAPIError';
-import type { RequestInit, Response } from 'node-fetch';
+import type { BodyInit, RequestInit, Response } from 'node-fetch';
 
 
 export interface ImageData {
@@ -143,8 +143,7 @@ export class ImgurClient {
 			'upload',
 			{
 				method: 'POST',
-				// @ts-expect-error
-				body: form,
+				body: form as unknown as BodyInit,
 				headers: {
 					Accept: 'application/json',
 				},

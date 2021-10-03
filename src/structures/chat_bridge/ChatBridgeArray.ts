@@ -34,7 +34,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 		super(ChatBridgeArray.#accounts.length);
 
 		this.client = client;
-		this.commands = new BridgeCommandCollection(this.client, new URL('./commands', import.meta.url));
+		this.commands = new BridgeCommandCollection(client, new URL('./commands', import.meta.url));
 	}
 
 	/**
@@ -56,11 +56,15 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 * loads channelIds from hypixelGuilds
 	 */
 	loadChannelIds() {
+		this.channelIds.clear();
+
 		for (const { chatBridgeChannels } of this.client.hypixelGuilds.cache.values()) {
 			for (const { channelId } of chatBridgeChannels) {
 				this.channelIds.add(channelId);
 			}
 		}
+
+		return this;
 	}
 
 	/**
@@ -85,9 +89,9 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 * @param index
 	 */
 	async connect(index?: number) {
-		let resolve: (value?: unknown) => void;
+		let resolve: (value: this) => void;
 
-		const promise = new Promise(r => resolve = r);
+		const promise: Promise<this> = new Promise(r => resolve = r);
 
 		// load commands if none are present
 		await this.commands.loadAll();
@@ -95,7 +99,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 		// single
 		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray.#accounts.length) {
 			this.#initSingle(index)
-				.once('ready', () => resolve())
+				.once('ready', () => resolve(this))
 				.connect();
 
 			return promise;
@@ -105,7 +109,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 		let resolved = 0;
 
 		await Promise.all(this.#init().map(chatBridge => chatBridge
-			.once('ready', () => ++resolved === this.length && resolve())
+			.once('ready', () => ++resolved === this.length && resolve(this))
 			.connect(),
 		));
 
@@ -116,9 +120,11 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 * disconnects a single or all bridges
 	 * @param index
 	 */
+	disconnect(): ChatBridge[];
+	disconnect(index: number): ChatBridge;
 	disconnect(index?: number) {
 		// single
-		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray.#accounts.length) {
+		if (typeof index === 'number') {
 			if (!(this[index] instanceof ChatBridge)) throw new Error(`no chatBridge with index #${index}`);
 			return this[index].disconnect();
 		}

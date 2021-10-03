@@ -106,8 +106,10 @@ export class SlashCommand extends BaseCommand {
 				+ c1.name.length
 				+ c1.description.length
 				+ ((c1 as WithChoices).choices?.reduce((a2, c2) => a2 + c2.name.length + `${c2.value}`.length, 0) ?? 0)
-				// @ts-expect-error
-				+ reduceOptions((c1.options)),
+				+ reduceOptions(c1
+					// @ts-expect-error
+					.options,
+				),
 			0)
 			?? 0;
 

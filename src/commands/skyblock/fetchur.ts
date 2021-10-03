@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
-import { zone, TimeStruct } from 'timezonecomplete';
+import { zone, TimeStruct, DateFunctions } from 'timezonecomplete';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
@@ -43,8 +43,7 @@ export default class FetchurCommand extends DualCommand {
 	 */
 	#generateReply() { // eslint-disable-line class-methods-use-this
 		const date = new Date();
-		// @ts-expect-error wrong type from TimeStruct
-		const OFFSET = zone('America/New_York').offsetForUtc(TimeStruct.fromDate(date)) / 60;
+		const OFFSET = zone('America/New_York').offsetForUtc(TimeStruct.fromDate(date, DateFunctions.GetUTC)) / 60;
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
 
 		const tomorrow = new Date();

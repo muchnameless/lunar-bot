@@ -25,7 +25,7 @@ export class Config extends Model<ConfigAttributes> {
 			: null;
 	}
 
-	static initialize(sequelize: Sequelize) {
+	static initialise(sequelize: Sequelize) {
 		return this.init({
 			key: {
 				type: DataTypes.STRING,

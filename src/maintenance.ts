@@ -1,8 +1,23 @@
-import { Client, Intents, Permissions, LimitedCollection, SnowflakeUtil, Options, Constants, DiscordAPIError } from 'discord.js';
+import {
+	Client,
+	Intents,
+	Permissions,
+	LimitedCollection,
+	SnowflakeUtil,
+	Options,
+	Constants,
+	DiscordAPIError,
+} from 'discord.js';
 import { ChannelUtil, InteractionUtil, MessageUtil } from './util';
 import { db } from './structures/database';
 import { escapeRegex, logger } from './functions';
-import type { Channel, DMChannel, GuildMember, PresenceData, ThreadChannel } from 'discord.js';
+import type {
+	ActivitiesOptions,
+	Channel,
+	DMChannel,
+	GuildMember,
+	ThreadChannel,
+} from 'discord.js';
 
 
 // catch rejections
@@ -36,7 +51,7 @@ const presence = {
 const client = new Client({
 	makeCache: Options.cacheWithLimits({
 		...Options.defaultMakeCacheSettings,
-		// @ts-expect-error sweeping ChannelManager is not yet suppported
+		// @ts-expect-error
 		ChannelManager: {
 			sweepInterval: 3_600, // 1h
 			sweepFilter: LimitedCollection.filterByLifetime({
@@ -105,8 +120,12 @@ client
 		prefixRegExp = new RegExp(`^(?:${[ escapeRegex(PREFIX), `<@!?${client.user!.id}>` ].filter(Boolean).join('|')})`, 'i');
 
 		// set presence again every 1h cause it get's lost sometimes
-		setInterval(() => client.isReady() && client.user.setPresence(client.user.presence as PresenceData), 60 * 60_000);
-
+		setInterval(() => client.isReady() && client.user.setPresence({
+			status: client.user.presence.status !== 'offline'
+				? client.user.presence.status
+				: undefined,
+			activities: client.user.presence.activities as ActivitiesOptions[],
+		}), 60 * 60_000);
 
 		// log
 		logger.info(`Startup complete. Logged in as ${client.user!.tag}`);

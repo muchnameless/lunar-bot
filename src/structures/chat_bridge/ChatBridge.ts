@@ -281,10 +281,11 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 			// discord
 			discordChatManager?.sendViaBot({
+				// @ts-expect-error idk why content is of type 'string | null' here
 				content,
 				hypixelMessage,
 				...discord,
-			}),
+			}) ?? null,
 		]);
 	}
 }

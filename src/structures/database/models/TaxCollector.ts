@@ -25,7 +25,7 @@ export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCrea
 	declare readonly createdAt: Date;
 	declare readonly updatedAt: Date;
 
-	static initialize(sequelize: Sequelize) {
+	static initialise(sequelize: Sequelize) {
 		return this.init({
 			minecraftUuid: {
 				type: DataTypes.STRING,

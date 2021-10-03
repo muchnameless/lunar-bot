@@ -9,7 +9,7 @@ import { EventCollection } from './events/EventCollection';
 import { UserUtil } from '../util';
 import { cache } from '../api/cache';
 import { logger } from '../functions';
-import type { ClientOptions, MessageOptions, Snowflake } from 'discord.js';
+import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 import type { CronJob } from 'cron';
 import type { db } from './database';
 import type { MinecraftChatManager } from './chat_bridge/managers/MinecraftChatManager';
@@ -154,17 +154,29 @@ export class LunarClient extends Client {
 	 * @param token discord bot token
 	 */
 	override async login(token?: string) {
-		await this.db.init();
-
-		// these need the db cache to be populated
-		await Promise.all([
-			this.commands.loadAll(),
-			this.events.loadAll(),
-			this.chatBridges.loadChannelIds(),
-		]);
-
 		try {
-			return await super.login(token);
+			// load db caches
+			await this.db.init();
+
+			// these need the db cache to be populated
+			await Promise.all([
+				this.commands.loadAll(),
+				this.events.loadAll(),
+				this.chatBridges.loadChannelIds(),
+			]);
+
+			// login
+			const res = await super.login(token);
+
+			// set presence again every 1h cause it get's lost sometimes
+			setInterval(() => this.isReady() && this.user.setPresence({
+				status: this.user.presence.status !== 'offline'
+					? this.user.presence.status
+					: undefined,
+				activities: this.user.presence.activities as ActivitiesOptions[],
+			}), 60 * 60_000);
+
+			return res;
 		} catch (error) {
 			logger.error('[CLIENT LOGIN]', error);
 			return this.exit(1);
@@ -215,8 +227,13 @@ export class LunarClient extends Client {
 	async exit(code = 0): Promise<never> {
 		let hasError = false;
 
-		// @ts-expect-error
-		for (const output of await Promise.allSettled([ this.db.sequelize.close(), cache.opts.store?.redis?.quit() ])) {
+		for (const output of await Promise.allSettled([
+			this.db.sequelize.close(),
+			cache
+				// @ts-expect-error
+				.opts
+				.store?.redis?.quit(),
+		])) {
 			if (output.status === 'rejected') {
 				logger.error(output.reason);
 				hasError = true;

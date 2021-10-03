@@ -157,7 +157,7 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * initialize the discord chat manager
+	 * initialise the discord chat manager
 	 */
 	init() {
 		return this.#fetchOrCreateWebhook();
@@ -359,8 +359,9 @@ export class DiscordChatManager extends ChatManager {
 
 				for (const match of messageContent.matchAll(DISCORD_CDN_URL_REGEXP)) {
 					const [ URL ] = match;
-					// @ts-expect-error indices does not exist
-					const [ [ START, END ] ] = match.indices;
+					const [ [ START, END ] ] = match
+						// @ts-expect-error
+						.indices;
 
 					try {
 						const IMGUR_URL = (await imgur.upload(URL)).data.link;

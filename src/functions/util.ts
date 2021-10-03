@@ -89,8 +89,7 @@ export function autocorrect<T>(query: string, validInput: readonly T[] | Map<unk
 	let currentBestElement!: T;
 	let currentBestSimilarity = 0;
 
-	// @ts-expect-error values does not exist on IterableIterator
-	for (const element of (validInput.values?.() ?? validInput) as T[]) {
+	for (const element of ((validInput as Map<unknown, T>).values?.() ?? validInput)) {
 		const similarity = jaroWinklerSimilarity(query, (attributeToQuery ? element[attributeToQuery] : element) as unknown as string, { caseSensitive: false });
 
 		if (similarity === 1) return {

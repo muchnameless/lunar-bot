@@ -132,8 +132,10 @@ export default class InteractionUtil extends null {
 			interaction.commandName,
 			interaction.options.getSubcommandGroup(false),
 			interaction.options.getSubcommand(false),
-			// @ts-expect-error Property '_hoistedOptions' is private and only accessible within class 'CommandInteractionOptionResolver'
-			...interaction.options._hoistedOptions.map(({ name, value }) => `${name}: ${value}`),
+			...interaction.options
+				// @ts-expect-error
+				._hoistedOptions
+				.map(({ name, value }) => `${name}: ${value}`),
 		].filter(x => x !== null).join(' ');
 	}
 
@@ -434,8 +436,11 @@ export default class InteractionUtil extends null {
 	static getPlayer(interaction: CommandInteraction, options: GetPlayerOptions & { throwIfNotFound: true }): Player;
 	static getPlayer(interaction: CommandInteraction, options?: GetPlayerOptions): Player | null;
 	static getPlayer(interaction: CommandInteraction, { fallbackToCurrentUser = false, throwIfNotFound = false } = {}) {
-		// @ts-expect-error Property '_hoistedOptions' is private and only accessible within class 'CommandInteractionOptionResolver'
-		if (!interaction.options._hoistedOptions.length) {
+		if (!interaction.options
+			// @ts-expect-error
+			._hoistedOptions
+			.length
+		) {
 			if (fallbackToCurrentUser) {
 				const player = UserUtil.getPlayer(interaction.user);
 				if (throwIfNotFound && !player) throw `no player linked to \`${interaction.user.tag}\` found`;

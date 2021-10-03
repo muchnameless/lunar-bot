@@ -113,7 +113,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 */
 	#chatBridge: ChatBridge | null = null;
 
-	static initialize(sequelize: Sequelize) {
+	static initialise(sequelize: Sequelize) {
 		return this.init({
 			guildId: {
 				type: DataTypes.STRING,

@@ -28,7 +28,7 @@ export class Transaction extends Model<TransactionAttributes> implements Transac
 	declare readonly createdAt: Date;
 	declare readonly updatedAt: Date;
 
-	static initialize(sequelize: Sequelize) {
+	static initialise(sequelize: Sequelize) {
 		return this.init({
 			from: {
 				type: DataTypes.STRING,
