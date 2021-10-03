@@ -5,6 +5,7 @@ import { autocorrect, getUuidAndIgn, logger, upperCaseFirstChar } from '../../fu
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
+import type { SkyBlockProfile } from '../../api/hypixel';
 import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { WeightData } from '../../functions';
 
@@ -31,9 +32,9 @@ export default class BaseWeightCommand extends DualCommand {
 	async _generateReply(ctx: CommandInteraction | HypixelMessage, ignOrUuid?: string | null, profileName?: string | null) {
 		try {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
+			const profiles = await hypixel.skyblock.profiles.uuid(uuid) as SkyBlockProfile[];
 
-			if (!profiles.length) return `${ign} has no SkyBlock profiles`;
+			if (!profiles?.length) return `${ign} has no SkyBlock profiles`;
 
 			let weightData;
 

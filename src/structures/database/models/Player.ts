@@ -48,6 +48,7 @@ import {
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
 import type { Snowflake } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
+import type { SkyBlockProfile } from '../../../api/hypixel';
 import type { HypixelGuild } from './HypixelGuild';
 import type { Transaction, TransactionAttributes } from './Transaction';
 import type { LunarClient } from '../../LunarClient';
@@ -1365,7 +1366,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		let profiles = null;
 
 		try {
-			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
+			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid) as SkyBlockProfile[];
 		} catch (error) {
 			this.update({ xpUpdatesDisabled: true }).catch(logger.error);
 			logger.error('[MAIN PROFILE]', error);
@@ -1382,14 +1383,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		let maxWeight = -1;
 
 		for (const profile of profiles) {
-			if (profile === null) continue;
+			const { totalWeight } = getSenitherWeight(profile.members[this.minecraftUuid]);
 
-			const weight = getSenitherWeight(profile.members[this.minecraftUuid]).totalWeight;
-
-			if (maxWeight > weight) continue;
+			if (maxWeight > totalWeight) continue;
 
 			mainProfile = profile;
-			maxWeight = weight;
+			maxWeight = totalWeight;
 		}
 
 		if (!mainProfile) {

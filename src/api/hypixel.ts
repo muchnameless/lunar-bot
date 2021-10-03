@@ -2,7 +2,11 @@ import { cache } from './cache';
 import { HYPIXEL_KEY } from '../constants';
 import { logger } from '../functions';
 import { Client } from '@zikeji/hypixel';
-import type { DefaultMeta } from '@zikeji/hypixel';
+import type { Components, DefaultMeta } from '@zikeji/hypixel';
+
+
+// eslint-disable-next-line camelcase
+export type SkyBlockProfile = Components.Schemas.SkyBlockProfileCuteName & { cute_name: string; };
 
 
 export const hypixel = new Client(process.env.HYPIXEL_KEY!, {

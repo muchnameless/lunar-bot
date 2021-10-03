@@ -1,13 +1,15 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageActionRow, MessageSelectMenu, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { COMMAND_KEY } from '../../constants';
+import { COMMAND_KEY, PROFILE_EMOJIS } from '../../constants';
 import { hypixel } from '../../api/hypixel';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { getUuidAndIgn, logger, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction, SelectMenuInteraction, Snowflake } from 'discord.js';
+import type { APISelectMenuComponent } from 'discord-api-types/v9';
+import type { SkyBlockProfile } from '../../api/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
@@ -62,7 +64,7 @@ export default class AhCommand extends SlashCommand {
 	 * @param param0
 	 */
 	async #generateReply({ ign, uuid, profileId, profiles, userId }: { ign: string; uuid: string; profileId: string; profiles: { label: string; value: string; }[]; userId: Snowflake; }) {
-		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId);
+		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId)!;
 		const embed = this.client.defaultEmbed
 			.setAuthor(ign, (await uuidToImgurBustURL(uuid))!, `https://sky.shiiyu.moe/stats/${ign}/${PROFILE_NAME}`);
 
@@ -151,6 +153,17 @@ export default class AhCommand extends SlashCommand {
 		}
 	}
 
+	// eslint-disable-next-line class-methods-use-this
+	#generateProfileOptions(profiles: SkyBlockProfile[]) {
+		/* eslint-disable camelcase */
+		return profiles.map(({ cute_name, profile_id }) => ({
+			label: cute_name,
+			value: profile_id,
+			emoji: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS],
+		}));
+		/* eslint-enable camelcase */
+	}
+
 	/**
 	 * execute the command
 	 * @param interaction
@@ -159,7 +172,7 @@ export default class AhCommand extends SlashCommand {
 		try {
 			const [ , , uuid, ign, userId ] = interaction.customId.split(':');
 			const [ profileId ] = interaction.values;
-			const profiles = interaction.message.components![0].components[0].options;
+			const profiles = (interaction.message.components![0].components[0] as unknown as APISelectMenuComponent).options;
 
 			// interaction from original requester -> edit message
 			if (interaction.user.id === userId) {
@@ -185,10 +198,10 @@ export default class AhCommand extends SlashCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
-			const profiles = await hypixel.skyblock.profiles.uuid(uuid);
+			const profiles = await hypixel.skyblock.profiles.uuid(uuid) as SkyBlockProfile[];
 			const embed = this.client.defaultEmbed;
 
-			if (!profiles.length) {
+			if (!profiles?.length) {
 				return InteractionUtil.reply(interaction, {
 					embeds: [
 						embed
@@ -230,7 +243,7 @@ export default class AhCommand extends SlashCommand {
 								new MessageSelectMenu()
 									.setCustomId(this.#generateCustomId({ uuid, ign, userId: interaction.user.id }))
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)
-									.addOptions(profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id }))),
+									.addOptions(this.#generateProfileOptions(profiles)),
 							),
 						],
 					});
@@ -241,7 +254,7 @@ export default class AhCommand extends SlashCommand {
 				ign,
 				uuid,
 				profileId,
-				profiles: profiles.map(({ cute_name: name, profile_id: id }) => ({ label: name, value: id })),
+				profiles: this.#generateProfileOptions(profiles),
 				userId: interaction.user.id,
 			}));
 		} catch (error) {
