@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { Type } from '@sapphire/type';
 import { InteractionUtil } from '../../util';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { Collection, CommandInteraction } from 'discord.js';
@@ -59,10 +60,10 @@ export default class ConfigCommand extends SlashCommand {
 	 */
 	#listEntries(entries: Collection<string, Config>) {
 		return entries.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
-			.map(({ key, parsedValue }) => {
-				const type = typeof parsedValue;
-				return `${key}: ${type === 'number' ? this.client.formatNumber(parsedValue as number).replace(/\s/g, '_') : parsedValue} [${Array.isArray(parsedValue) ? 'array' : type}]`;
-			})
+			.map(({ key, parsedValue }) => `${key}: ${typeof parsedValue === 'number'
+					? this.client.formatNumber(parsedValue).replace(/\s/g, '_')
+					: parsedValue
+				} [${new Type(parsedValue)}]`)
 			.join('\n')
 			|| '\u200B';
 	}
@@ -96,8 +97,11 @@ export default class ConfigCommand extends SlashCommand {
 						break;
 				}
 
-				if (typeof newValue !== OLD_TYPE) {
-					await InteractionUtil.awaitConfirmation(interaction, `type change from ${OLD_VALUE} (${OLD_TYPE}) to ${newValue} (${typeof newValue}). Confirm?`);
+				if (OLD_VALUE !== null && typeof newValue !== OLD_TYPE) {
+					await InteractionUtil.awaitConfirmation(
+						interaction,
+						`type change from ${OLD_VALUE} (${new Type(OLD_VALUE)}) to ${newValue} (${new Type(newValue)}). Confirm?`,
+					);
 				}
 
 				const { key, parsedValue } = await this.config.set(KEY, newValue);
