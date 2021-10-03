@@ -835,18 +835,38 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		let inGuild = false;
 		let reason = reasonInput;
 
-		// individual hypixel guild roles
-		for (const [ guildId, { roleId }] of this.client.hypixelGuilds.cache) {
-			if (!roleId) continue;
-
+		// individual hypixel guild roles and guild rank roles
+		for (const [ guildId, { roleId: guildRoleId, ranks }] of this.client.hypixelGuilds.cache) {
 			// player is in the guild
 			if (guildId === this.guildId) {
-				if (!member.roles.cache.has(roleId)) rolesToAdd.push(roleId);
+				// guild role
+				if (guildRoleId && !member.roles.cache.has(guildRoleId)) rolesToAdd.push(guildRoleId);
+
+				// rank roles for non staff
+				if (!this.isStaff) {
+					for (const { roleId, priority } of ranks) {
+						if (!roleId) continue;
+
+						if (priority !== this.guildRankPriority) {
+							if (member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
+						} else if (!member.roles.cache.has(roleId)) {
+							rolesToAdd.push(roleId);
+							reason = 'synced with in game rank';
+						}
+					}
+				}
+
 				inGuild = true;
 
-			// player is not in the guild
-			} else if (member.roles.cache.has(roleId)) {
-				rolesToRemove.push(roleId);
+			// player is not in the guild -> remove all roles
+			} else {
+				// guild role
+				if (guildRoleId && member.roles.cache.has(guildRoleId)) rolesToRemove.push(guildRoleId);
+
+				// rank roles
+				for (const { roleId } of ranks) {
+					if (roleId && member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
+				}
 			}
 		}
 
@@ -870,27 +890,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		// other delimiter roles
 		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
 			if (!member.roles.cache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`))) rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`));
-		}
-
-		// hypixel guild ranks
-		const { guildRank } = this;
-
-		if (guildRank) {
-			if (guildRank.roleId && !member.roles.cache.has(guildRank.roleId)) {
-				reason = 'synced with in game rank';
-				rolesToAdd.push(guildRank.roleId);
-			}
-
-			if (!this.isStaff) { // non staff rank -> remove other ranks
-				const { hypixelGuild } = this;
-
-				if (hypixelGuild) {
-					for (const { roleId, priority } of hypixelGuild.ranks) {
-						if (!roleId || priority !== this.guildRankPriority) continue;
-						if (member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
-					}
-				}
-			}
 		}
 
 		// skills
