@@ -1,6 +1,3 @@
-import { config } from 'dotenv';
-import { URL, fileURLToPath } from 'node:url';
-config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 import { REST } from '@discordjs/rest';
 import { Routes, APIVersion } from 'discord-api-types/v9';
 import { db } from './structures/database';

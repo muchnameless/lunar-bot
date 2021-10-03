@@ -1,6 +1,3 @@
-import { config } from 'dotenv';
-import { URL, fileURLToPath } from 'node:url';
-config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 import { Intents, LimitedCollection, SnowflakeUtil, Options, Constants } from 'discord.js';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';

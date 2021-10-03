@@ -1,6 +1,3 @@
-import { config } from 'dotenv';
-import { URL, fileURLToPath } from 'node:url';
-config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 import { Client, Intents, Permissions, LimitedCollection, SnowflakeUtil, Options, Constants, DiscordAPIError } from 'discord.js';
 import { ChannelUtil, InteractionUtil, MessageUtil } from './util';
 import { db } from './structures/database';

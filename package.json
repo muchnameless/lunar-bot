@@ -13,10 +13,10 @@
     "test:ci": "jest --no-stack-trace --verbose --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "start": "node --enable-source-maps --es-module-specifier-resolution=node dist/index.js",
-    "deploy:commands": "node --enable-source-maps --es-module-specifier-resolution=node dist/deploy.js",
-    "maintenance": "node --enable-source-maps --es-module-specifier-resolution=node dist/maintenance.js",
-    "db": "node --enable-source-maps --es-module-specifier-resolution=node dist/structures/database/dbInit.js --alter"
+    "start": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/index.js",
+    "deploy:commands": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/deploy.js",
+    "maintenance": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/maintenance.js",
+    "db": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/structures/database/dbInit.js --alter"
   },
   "author": "muchnameless",
   "license": "ISC",
@@ -26,6 +26,7 @@
     "@keyv/redis": "^2.1.2",
     "@sapphire/async-queue": "^1.1.4",
     "@sapphire/stopwatch": "^1.1.4",
+    "@sapphire/type": "^2.1.0",
     "@zikeji/hypixel": "^3.1.1",
     "bufferutil": "^4.0.4",
     "chalk": "^4.1.2",

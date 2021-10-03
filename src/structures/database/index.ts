@@ -1,6 +1,4 @@
-import { config } from 'dotenv';
-import { URL, fileURLToPath, pathToFileURL } from 'node:url';
-config({ path: fileURLToPath(new URL('../../../.env', import.meta.url)) });
+import { URL, pathToFileURL } from 'node:url';
 import { readJSFiles } from '../../functions';
 import type { Models } from './managers/DatabaseManager';
 
@@ -24,7 +22,7 @@ class CustomDecimal extends DataTypes.DECIMAL {
 
 
 export const sequelize = new Sequelize(
-	process.env.DATABASE_URL as string,
+	process.env.DATABASE_URL!,
 	{
 		logging: false,
 
