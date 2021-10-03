@@ -320,7 +320,7 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if guild chat is muted
 		if (this.hypixelGuild!.muted && !player?.isStaff) {
-			DiscordChatManager.#dmMuteInfo(message, player, `${this.hypixelGuild!.name}'s guild chat's mute expires ${Formatters.time(new Date(this.hypixelGuild!.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
+			DiscordChatManager.#dmMuteInfo(message, player, `${this.hypixelGuild!.name}'s guild chat mute expires ${Formatters.time(new Date(this.hypixelGuild!.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
