@@ -1,22 +1,29 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { SlashCommandBuilder } from '@discordjs/builders';
 import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
+MessageEmbed; Util; // unused imports are 'used' so that tsc doesn't remove them
 import { setTimeout as sleep } from 'node:timers/promises';
+sleep;
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
 import fetch from 'node-fetch';
+fetch;
 import similarity from 'jaro-winkler';
+similarity;
 import ms from 'ms';
+ms;
 import util from 'node:util';
 import * as constants from '../../constants';
 import { cache } from '../../api/cache';
+cache;
 import { hypixel } from '../../api/hypixel';
+hypixel;
 import { imgur } from '../../api/imgur';
+imgur;
 import { mojang } from '../../api/mojang';
+mojang;
 import * as botUtil from '../../util';
 import * as functions from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-/* eslint-enable @typescript-eslint/no-unused-vars */
 import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
