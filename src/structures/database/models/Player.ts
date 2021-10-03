@@ -514,10 +514,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	// @ts-expect-error The return type of a 'get' accessor must be assignable to its 'set' accessor type
 	get discordMember(): Promise<GuildMember | null> {
-		return (async () => {
-			if (this.#discordMember) return this.#discordMember;
-			if (!this.inDiscord || !validateDiscordId(this.discordId!)) return null;
+		if (this.#discordMember) return Promise.resolve(this.#discordMember);
+		if (!this.inDiscord || !validateDiscordId(this.discordId!)) return Promise.resolve(null);
 
+		return (async () => {
 			try {
 				return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordId!) ?? null;
 			} catch (error) {
