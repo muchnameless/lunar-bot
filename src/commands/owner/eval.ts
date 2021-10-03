@@ -3,6 +3,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Stopwatch } from '@sapphire/stopwatch';
+import { Type } from '@sapphire/type';
 import fetch from 'node-fetch';
 import similarity from 'jaro-winkler';
 import ms from 'ms';
@@ -87,7 +88,7 @@ export default class EvalCommand extends SlashCommand {
 		const responseEmbed = this.client.defaultEmbed
 			.setFooter(me?.displayName ?? this.client.user!.username, (me ?? this.client.user!).displayAvatarURL());
 
-		for (const [ index, inputPart ] of splitForEmbedFields(input, 'js').entries()) {
+		for (const [ index, inputPart ] of splitForEmbedFields(input, 'ts').entries()) {
 			responseEmbed.addFields({
 				name: index
 					? '\u200B'
@@ -99,8 +100,6 @@ export default class EvalCommand extends SlashCommand {
 		}
 
 		const stopwatch = new Stopwatch();
-
-		let isPromise = false;
 
 		try {
 			stopwatch.restart();
@@ -115,15 +114,16 @@ export default class EvalCommand extends SlashCommand {
 
 			stopwatch.stop();
 
+			const type = new Type(evaled);
+
 			if (evaled instanceof Promise) {
-				isPromise = true;
 				stopwatch.start();
 				evaled = await evaled;
 				stopwatch.stop();
 			}
 
-			const OUTPUT_ARRAY = splitForEmbedFields(this.#cleanOutput(evaled, inspectDepth), 'js');
-			const INFO = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof evaled}>` : typeof evaled}\` • time taken: \`${stopwatch}\``;
+			const OUTPUT_ARRAY = splitForEmbedFields(this.#cleanOutput(evaled, inspectDepth), 'ts');
+			const INFO = `d.js ${Discord.version} • type: \`${type}\` • time taken: \`${stopwatch}\``;
 
 			// add output fields till embed character limit is reached
 			for (const [ index, value ] of OUTPUT_ARRAY.entries()) {
@@ -145,7 +145,8 @@ export default class EvalCommand extends SlashCommand {
 
 			logger.error('[EVAL ERROR]', error);
 
-			const FOOTER = `d.js ${Discord.version} • type: \`${isPromise ? `Promise<${typeof error}>` : typeof error}\` • time taken: \`${stopwatch}\``;
+			const type = new Type(error);
+			const FOOTER = `d.js ${Discord.version} • type: \`${type}\` • time taken: \`${stopwatch}\``;
 
 			for (const [ index, value ] of splitForEmbedFields(this.#cleanOutput(error), 'xl').entries()) {
 				const name = index ? '\u200B' : 'Error';
