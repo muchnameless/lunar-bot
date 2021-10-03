@@ -92,7 +92,7 @@ export class DiscordChatManager extends ChatManager {
 	 * @param attachments
 	 */
 	async #uploadAttachments(attachments: Collection<Snowflake, MessageAttachment>) {
-		if (!this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
+		if (!this.client.config.get('IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
 
 		const ret = [];
 
@@ -354,7 +354,7 @@ export class DiscordChatManager extends ChatManager {
 
 		if (messageContent) {
 			// parse discord attachment links and replace with imgur uploaded link
-			if (this.client.config.get('CHATBRIDGE_IMGUR_UPLOADER_ENABLED')) {
+			if (this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
 				let offset = 0;
 
 				for (const match of messageContent.matchAll(DISCORD_CDN_URL_REGEXP)) {
