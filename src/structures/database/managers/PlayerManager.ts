@@ -637,7 +637,7 @@ export class PlayerManager extends ModelManager<Player> {
 			.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
 		);
 
-		return this.#updateMainProfiles();
+		return this.updateMainProfiles();
 	}
 
 	/**
