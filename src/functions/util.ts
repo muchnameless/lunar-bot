@@ -284,8 +284,9 @@ export const readJSFiles = (root: string | URL) => readdirp(fileURLToPath(root),
 /**
  * 99_137 -> 99K, 1_453_329 -> 1.5M
  * @param number
+ * @param digits
  */
-export function shortenNumber(number: number) {
+export function shortenNumber(number: number, digits?: number) {
 	let str;
 	let suffix;
 
@@ -293,17 +294,20 @@ export function shortenNumber(number: number) {
 		str = number;
 		suffix = '';
 	} else if (number < 1e6) {
-		str = Math.round(number / 1e3);
+		str = (number / 1e3).toFixed(digits ?? 0);
 		suffix = 'K';
 	} else if (number < 1e9) {
-		str = Math.round(number / (1e6 / 10)) / 10;
+		str = (number / 1e6).toFixed(digits ?? 1);
 		suffix = 'M';
 	} else if (number < 1e12) {
-		str = Math.round(number / (1e9 / 10)) / 10;
+		str = (number / 1e9).toFixed(digits ?? 2);
 		suffix = 'B';
 	} else if (number < 1e15) {
-		str = Math.round(number / (1e12 / 10)) / 10;
+		str = (number / 1e12).toFixed(digits ?? 2);
 		suffix = 'T';
+	} else { // numbers bigger than 1T shouldn't occur
+		str = number;
+		suffix = '';
 	}
 
 	return `${str}${suffix}`;
