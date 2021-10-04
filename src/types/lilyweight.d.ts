@@ -1,5 +1,5 @@
 declare module 'lilyweight' {
-	interface WeightData {
+	export interface WeightData {
 		total: number;
 		slayer: number;
 		skill: {
@@ -15,7 +15,7 @@ declare module 'lilyweight' {
 		};
 	}
 	
-	interface CataCompletion {
+	export interface CataCompletion {
 		0: number;
 		1: number;
 		2: number;
@@ -26,7 +26,7 @@ declare module 'lilyweight' {
 		7: number;
 	}
 	
-	interface MasterCataCompletion {
+	export interface MasterCataCompletion {
 		1: number;
 		2: number;
 		3: number;

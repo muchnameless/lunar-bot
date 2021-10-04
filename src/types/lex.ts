@@ -1,9 +1,9 @@
 declare module 'lex' {
-	type Action = (...lexeme: string[]) => string | number | undefined;
+	export type Action = (...lexeme: string[]) => string | number | undefined;
 
-	type Defunct = (chr: string) => never;
+	export type Defunct = (chr: string) => never;
 
-	interface Match {
+	export interface Match {
 		result: RegExpExecArray;
 		action: Action;
 		length: number;
