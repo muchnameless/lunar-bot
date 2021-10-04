@@ -1,18 +1,16 @@
 import { BaseCommand } from './BaseCommand';
 import { BaseCommandCollection } from './BaseCommandCollection';
-import type { CommandContext, RequiredRoles } from './BaseCommand';
+import type { CommandContext, CommandData } from './BaseCommand';
 import type { HypixelMessage } from '../chat_bridge/HypixelMessage';
 import type { BridgeCommandCollection } from './BridgeCommandCollection';
 
 
-export interface BridgeCommandData {
-	aliases?: string[],
-	description?: string,
-	guildOnly?: boolean,
-	args?: number | boolean,
-	usage?: string | (() => string),
-	cooldown?: number,
-	requiredRoles?: RequiredRoles,
+export interface BridgeCommandData extends CommandData {
+	aliases?: string[];
+	description?: string;
+	guildOnly?: boolean;
+	args?: number | boolean;
+	usage?: string | (() => string);
 }
 
 
@@ -28,8 +26,8 @@ export class BridgeCommand extends BaseCommand {
 	 * @param context
 	 * @param data
 	 */
-	constructor(context: CommandContext, { aliases, description, guildOnly, args, usage, cooldown, requiredRoles }: BridgeCommandData) {
-		super(context, { cooldown, requiredRoles });
+	constructor(context: CommandContext, { aliases, description, guildOnly, args, usage, ...data }: BridgeCommandData) {
+		super(context, data);
 
 		this.aliases = aliases?.filter(Boolean).length
 			? aliases.filter(Boolean)

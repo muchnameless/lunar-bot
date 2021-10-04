@@ -76,7 +76,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	 * @param options
 	 */
 	async loadFromFile(file: string, { reload = false }: CommandLoadOptions = {}) {
-		const name = basename(file, '.js');
+		const fileName = basename(file, '.js');
 		const category = basename(dirname(file));
 
 		let filePath = pathToFileURL(file).href;
@@ -86,7 +86,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 		const command: BaseCommand = new Command({
 			client: this.client,
 			collection: this,
-			name,
+			fileName,
 			category: category !== 'commands' ? category : null,
 		});
 

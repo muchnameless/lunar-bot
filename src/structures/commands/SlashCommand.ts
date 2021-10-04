@@ -14,7 +14,6 @@ import type {
 	ToAPIApplicationCommandOptions,
 } from '@discordjs/builders';
 import type {
-	ApplicationCommandPermissions,
 	ButtonInteraction,
 	CommandInteraction,
 	ContextMenuInteraction,
@@ -23,7 +22,7 @@ import type {
 	SelectMenuInteraction,
 	Snowflake,
 } from 'discord.js';
-import type { CommandContext, RequiredRoles } from './BaseCommand';
+import type { CommandContext, CommandData } from './BaseCommand';
 
 
 type Slash = SlashCommandBuilder
@@ -33,13 +32,9 @@ type Slash = SlashCommandBuilder
 
 type WithChoices = SlashCommandIntegerOption | SlashCommandNumberOption | SlashCommandStringOption;
 
-export interface SlashCommandData {
-	aliases?: string[],
-	slash: Slash,
-	permissions?: ApplicationCommandPermissions,
-	cooldown?: number,
-	requiredRoles?: RequiredRoles,
-
+export interface SlashCommandData extends CommandData {
+	aliases?: string[];
+	slash: Slash;
 }
 
 
@@ -51,8 +46,8 @@ export class SlashCommand extends BaseCommand {
 	 * @param context
 	 * @param data
 	 */
-	constructor(context: CommandContext, { aliases, slash, cooldown, requiredRoles }: SlashCommandData) {
-		super(context, { cooldown, requiredRoles });
+	constructor(context: CommandContext, { aliases, slash, ...data }: SlashCommandData) {
+		super(context, data);
 
 		this.aliases = aliases?.filter(Boolean).length
 			? aliases.filter(Boolean)
