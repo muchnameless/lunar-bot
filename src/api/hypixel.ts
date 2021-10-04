@@ -1,12 +1,8 @@
+import { Client } from '@zikeji/hypixel';
 import { cache } from './cache';
 import { HYPIXEL_KEY } from '../constants';
 import { logger } from '../functions';
-import { Client } from '@zikeji/hypixel';
-import type { Components, DefaultMeta } from '@zikeji/hypixel';
-
-
-// eslint-disable-next-line camelcase
-export type SkyBlockProfile = Components.Schemas.SkyBlockProfileCuteName & { cute_name: string; };
+import type { DefaultMeta } from '@zikeji/hypixel';
 
 
 export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
@@ -22,12 +18,14 @@ export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 
 			let ttl;
 
-			if (key.startsWith('skyblock:profiles') || key.startsWith('status')) {
-				ttl = 30_000;
+			if (key.startsWith('skyblock:profiles')) {
+				ttl = 60_000;
 			} else if (key.startsWith('skyblock:profile')) {
 				ttl = 2 * 60_000;
 			} else if (key.startsWith('player') || key.startsWith('skyblock:auction')) {
 				ttl = 60_000;
+			} else if (key.startsWith('status')) {
+				ttl = 20_000;
 			// the following endpoints don't require API keys and won't eat into your rate limit
 			} else if (key.startsWith('resources:')) {
 				ttl = 24 * 60 * 60_000; // 24 hours as resources don't update often, if at all
