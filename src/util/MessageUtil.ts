@@ -106,17 +106,19 @@ export default class MessageUtil extends null {
 		}
 
 		// no timeout
-		if (timeout <= 0) return message.delete();
+		if (timeout <= 0) {
+			try {
+				return await message.delete();
+			} catch (error) {
+				logger.error(`[MESSAGE UTIL]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
+				return message;
+			}
+		}
 
 		// timeout
 		await sleep(timeout);
 
-		try {
-			return await this.delete(message);
-		} catch (error) {
-			logger.error(`[MESSAGE UTIL]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
-			return message;
-		}
+		return this.delete(message);
 	}
 
 	/**

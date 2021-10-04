@@ -70,15 +70,15 @@ export class LogHandler {
 	 * posts all remaining file logs from the log_buffer
 	 */
 	async init() {
-		const { channel } = this;
-
-		if (!channel) return;
+		if (!this.channel) return this;
 
 		try {
-			return await this.#postFileLogs(); // repost logs that failed to be posted during the last uptime
+			await this.#postFileLogs(); // repost logs that failed to be posted during the last uptime
 		} catch (error) {
 			logger.error('[LOG HANDLER]', error);
 		}
+
+		return this;
 	}
 
 	/**

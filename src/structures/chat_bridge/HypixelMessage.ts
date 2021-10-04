@@ -305,7 +305,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 				return discordMessage;
 			}
 
-			return await (this.discordMessage = discordChatManager.sendViaBot({
+			return (this.discordMessage = discordChatManager.sendViaBot({
 				content: this.content,
 				allowedMentions: { parse: [] },
 			}));

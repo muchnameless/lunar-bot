@@ -422,7 +422,7 @@ export default class InteractionUtil extends null {
 		if (interaction.ephemeral) return null;
 
 		try {
-			return await MessageUtil.react(await interaction.fetchReply() as Message, ...emojis);
+			return MessageUtil.react(await interaction.fetchReply() as Message, ...emojis);
 		} catch (error) {
 			return logger.error(error);
 		}
