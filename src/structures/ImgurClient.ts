@@ -4,7 +4,7 @@ import FormData from 'form-data';
 import fetch from 'node-fetch';
 import ms from 'ms';
 import { FetchError } from './errors/FetchError';
-import type { BodyInit, RequestInit, Response } from 'node-fetch';
+import type { RequestInit, Response } from 'node-fetch';
 
 
 export interface ImageData {
@@ -141,7 +141,7 @@ export class ImgurClient {
 			'upload',
 			{
 				method: 'POST',
-				body: form as unknown as BodyInit,
+				body: form,
 				headers: form.getHeaders(),
 			}, {
 				checkRateLimit: true,
