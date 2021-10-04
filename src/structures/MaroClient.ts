@@ -32,6 +32,12 @@ export type MaroAPIResponse = {
 }
 
 export interface MaroNetworthResponse {
+	total: number;
+	purse?: number;
+	body?: number;
+}
+
+export interface MaroNetwortCategoryResponse {
 	categories: {
 		storage: number;
 		inventory: number;
@@ -42,30 +48,24 @@ export interface MaroNetworthResponse {
 		pets: number;
 		talismans: number;
 	},
-	bank: number;
-	purse: number;
+	bank?: number;
+	purse?: number;
 	sacks: number;
 	networth: number;
 }
 
+abstract class Method {
+	client: MaroClient;
 
-export class MaroClient {
-	cache?: Cache;
-	timeout: number;
-	retries: number;
-	#baseURL = 'https://nariah-dev.com/api/';
-
-	/**
-	 * @param options
-	 */
-	constructor({ cache, timeout, retries }: MaroClientOptions = {}) {
-		this.cache = cache;
-		this.timeout = timeout ?? 10_000;
-		this.retries = retries ?? 1;
+	constructor(client: MaroClient) {
+		this.client = client;
 	}
+}
 
-	networth(uuid: string, playerData: MaroPlayerData, options?: MaroFetchOptions) {
-		return this.request(
+
+class Networth extends Method {
+	categories(uuid: string, playerData: MaroPlayerData, options?: MaroFetchOptions) {
+		return this.client.request(
 			'networth/categories',
 			{
 				method: 'POST',
@@ -78,7 +78,42 @@ export class MaroClient {
 				cacheKey: `networth:categories:${uuid}`,
 				...options,
 			},
+		) as Promise<MaroNetwortCategoryResponse>;
+	}
+
+	total(uuid: string, playerData: MaroPlayerData, options?: MaroFetchOptions) {
+		return this.client.request(
+			'networth/total',
+			{
+				method: 'POST',
+				body: JSON.stringify({ data: playerData }),
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			},
+			{
+				cacheKey: `networth:categories:${uuid}`,
+				...options,
+			},
 		) as Promise<MaroNetworthResponse>;
+	}
+}
+
+
+export class MaroClient {
+	cache?: Cache;
+	timeout: number;
+	retries: number;
+	#baseURL = 'https://nariah-dev.com/api/';
+	networth = new Networth(this);
+
+	/**
+	 * @param options
+	 */
+	constructor({ cache, timeout, retries }: MaroClientOptions = {}) {
+		this.cache = cache;
+		this.timeout = timeout ?? 10_000;
+		this.retries = retries ?? 1;
 	}
 
 	/**

@@ -52,9 +52,9 @@ export default class NetworthCommand extends BaseWeightCommand {
 			const playerData: MaroPlayerData = profile.members[uuid];
 			playerData.banking = profile.banking;
 
-			const { networth } = await maro.networth(uuid, playerData);
+			const { total } = await maro.networth.total(uuid, playerData);
 
-			return `${ign} (${profile.cute_name}): ${shortenNumber(networth)}`;
+			return `${ign} (${profile.cute_name}): ${shortenNumber(total)}`;
 		} catch (error) {
 			logger.error('[NETWORTH]', error);
 
