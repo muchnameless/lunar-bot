@@ -11,7 +11,6 @@ import type {
 	SlashCommandIntegerOption,
 	SlashCommandNumberOption,
 	SlashCommandStringOption,
-	ToAPIApplicationCommandOptions,
 } from '@discordjs/builders';
 import type {
 	ButtonInteraction,
@@ -26,7 +25,7 @@ import type { CommandContext, CommandData } from './BaseCommand';
 
 
 type Slash = SlashCommandBuilder
-	| SlashCommandSubcommandsOnlyBuilder & { options?: ToAPIApplicationCommandOptions[] }
+	| SlashCommandSubcommandsOnlyBuilder
 	| SlashCommandOptionsOnlyBuilder
 	| Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
 
@@ -62,8 +61,8 @@ export class SlashCommand extends BaseCommand {
 		this.slash.setName(this.name);
 
 		// add ephemeral option to every (sub)command(group)
-		if (this.slash.options!.length) {
-			for (const option of this.slash.options!) {
+		if ((this.slash as SlashCommandBuilder).options.length) {
+			for (const option of (this.slash as SlashCommandBuilder).options) {
 				if (option instanceof SlashCommandSubcommandGroupBuilder) {
 					for (const subcommand of option.options) {
 						(subcommand as SlashCommandSubcommandBuilder).addStringOption(ephemeralOption);
