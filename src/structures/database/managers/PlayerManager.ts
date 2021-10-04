@@ -34,6 +34,10 @@ export class PlayerManager extends ModelManager<Player> {
 	 * player db ign update
 	 */
 	#updateIgnPromise: Promise<this> | null = null;
+	/**
+	 * player db main SkyBlock profile update
+	 */
+	#updateMainProfilesPromise: Promise<this> | null = null;
 
 	/**
 	 * get players from all guilds (no bridgers or errors)
@@ -348,6 +352,117 @@ export class PlayerManager extends ModelManager<Player> {
 	}
 
 	/**
+	 * checks all players if their current main profile is still valid
+	 */
+	updateMainProfiles() {
+		return this.#updateMainProfilesPromise ??= this.#updateMainProfiles();
+	}
+	/**
+	 * should only ever be called from within updateMainProfiles()
+	 * @internal
+	 */
+	async #updateMainProfiles() {
+		try {
+			// the hypxiel api encountered an error before
+			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
+				// reset error every full hour
+				if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+					logger.warn('[PLAYERS UPDATE MAIN PROFILE]: API error');
+					return this;
+				}
+
+				this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
+			}
+
+			const log = new Collection<HypixelGuild, string[]>();
+
+			for (const player of this.cache.values()) {
+				if (!player.inGuild()) continue;
+
+				try {
+					// @ts-expect-error hypixel.ratelimit is not typed
+					if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
+
+					const result = await player.fetchMainProfile();
+					if (!result) continue;
+
+					const { hypixelGuild } = player;
+
+					if (!log.has(hypixelGuild)) {
+						log.set(hypixelGuild, [ `-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}` ]);
+						continue;
+					}
+
+					log.get(hypixelGuild)!.push(`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`);
+				} catch (error) {
+					logger.error('[UPDATE MAIN PROFILE]', error);
+
+					if (typeof error === 'string') {
+						const { hypixelGuild } = player;
+
+						if (!log.has(hypixelGuild)) {
+							log.set(hypixelGuild, [ `-\u00A0${player}: ${error}` ]);
+							continue;
+						}
+
+						log.get(hypixelGuild)!.push(`-\u00A0${player}: ${error}`);
+					}
+				}
+			}
+
+			if (!log.size) return this;
+
+			const embeds: MessageEmbed[] = [];
+
+			/**
+			 * @param guild
+			 * @param mainProfileChangesAmount
+			 */
+			const createEmbed = (guild: HypixelGuild, mainProfileChangesAmount: number) => {
+				const embed = new MessageEmbed()
+					.setColor(this.client.config.get('EMBED_RED'))
+					.setTitle(`${upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${mainProfileChangesAmount !== 1 ? 's' : ''}`)
+					.setDescription(`Number of players: ${guild.playerCount}`)
+					.setTimestamp();
+
+				embeds.push(embed);
+
+				return embed;
+			};
+
+			for (const [ guild, mainProfileUpdate ] of log.sort((_, __, a, b) => compareAlphabetically(a?.name, b?.name))) {
+				const logParts = Util.splitMessage(
+					Formatters.codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')),
+					{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' },
+				);
+
+				let embed = createEmbed(guild, mainProfileUpdate.length);
+				let currentLength = embed.length;
+
+				while (logParts.length) {
+					const name = `${'main profile update'.padEnd(150, '\u00A0')}\u200B`;
+					const value = logParts.shift()!;
+
+					if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
+						embed.addFields({ name, value });
+						currentLength += name.length + value.length;
+					} else {
+						embed = createEmbed(guild, mainProfileUpdate.length);
+						embed.addFields({ name, value });
+						currentLength = embed.length;
+					}
+				}
+			}
+
+			this.client.log(...embeds);
+
+			return this;
+		} finally {
+			this.#updateMainProfilesPromise = null;
+		}
+	}
+
+	/**
 	 * transfers xp of all players
 	 * @param options transfer options
 	 */
@@ -555,106 +670,6 @@ export class PlayerManager extends ModelManager<Player> {
 			.setTitle('Monthly XP Tracking')
 			.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
 		);
-
-		return this;
-	}
-
-	/**
-	 * checks all players if their current main profile is still valid
-	 */
-	async #updateMainProfiles() {
-		// the hypxiel api encountered an error before
-		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
-			// reset error every full hour
-			if (new Date().getMinutes() >= this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
-				logger.warn('[PLAYERS UPDATE MAIN PROFILE]: API error');
-				return this;
-			}
-
-			this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', false);
-		}
-
-		const log = new Collection<HypixelGuild, string[]>();
-
-		for (const player of this.cache.values()) {
-			if (!player.inGuild()) continue;
-
-			try {
-				// @ts-expect-error hypixel.ratelimit is not typed
-				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
-
-				const result = await player.fetchMainProfile();
-				if (!result) continue;
-
-				const { hypixelGuild } = player;
-
-				if (!log.has(hypixelGuild)) {
-					log.set(hypixelGuild, [ `-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}` ]);
-					continue;
-				}
-
-				log.get(hypixelGuild)!.push(`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`);
-			} catch (error) {
-				logger.error('[UPDATE MAIN PROFILE]', error);
-
-				if (typeof error === 'string') {
-					const { hypixelGuild } = player;
-
-					if (!log.has(hypixelGuild)) {
-						log.set(hypixelGuild, [ `-\u00A0${player}: ${error}` ]);
-						continue;
-					}
-
-					log.get(hypixelGuild)!.push(`-\u00A0${player}: ${error}`);
-				}
-			}
-		}
-
-		if (!log.size) return this;
-
-		const embeds: MessageEmbed[] = [];
-
-		/**
-		 * @param guild
-		 * @param mainProfileChangesAmount
-		 */
-		const createEmbed = (guild: HypixelGuild, mainProfileChangesAmount: number) => {
-			const embed = new MessageEmbed()
-				.setColor(this.client.config.get('EMBED_RED'))
-				.setTitle(`${upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${mainProfileChangesAmount !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${guild.playerCount}`)
-				.setTimestamp();
-
-			embeds.push(embed);
-
-			return embed;
-		};
-
-		for (const [ guild, mainProfileUpdate ] of log.sort((_, __, a, b) => compareAlphabetically(a?.name, b?.name))) {
-			const logParts = Util.splitMessage(
-				Formatters.codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')),
-				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' },
-			);
-
-			let embed = createEmbed(guild, mainProfileUpdate.length);
-			let currentLength = embed.length;
-
-			while (logParts.length) {
-				const name = `${'main profile update'.padEnd(150, '\u00A0')}\u200B`;
-				const value = logParts.shift()!;
-
-				if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
-					embed.addFields({ name, value });
-					currentLength += name.length + value.length;
-				} else {
-					embed = createEmbed(guild, mainProfileUpdate.length);
-					embed.addFields({ name, value });
-					currentLength = embed.length;
-				}
-			}
-		}
-
-		this.client.log(...embeds);
 
 		return this;
 	}
