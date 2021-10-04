@@ -144,6 +144,10 @@ export default class InteractionUtil extends null {
 	 */
 	static logInfo(interaction: Interaction) {
 		if (interaction.isMessageComponent()) {
+			if (interaction.isSelectMenu()) {
+				return `${interaction.componentType} '${interaction.customId} [${interaction.values}]' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
+			}
+
 			return `${interaction.componentType} '${interaction.customId}' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
 		}
 
