@@ -4,7 +4,7 @@ import { ImgurClient } from '../structures/ImgurClient';
 
 
 export const imgur = new ImgurClient(process.env.IMGUR_CLIENT_ID!, {
-	requestTimeout: 20_000,
+	timeout: 20_000,
 	retries: 1,
 	rateLimitedWaitTime: 1_000,
 	cache: {

@@ -26,6 +26,12 @@ import type { ArrayElement } from '../types/util';
 import type { DungeonTypes, SkillTypes } from '../constants';
 
 
+// eslint-disable-next-line camelcase
+export type SkyBlockProfile = Components.Schemas.SkyBlockProfileCuteName & { cute_name: string; };
+
+type SkyBlockProfiles = Components.Schemas.SkyBlockProfileCuteName[];
+
+
 /**
  * returns the true and progression level for the provided skill type
  * @param type the skill or dungeon type
@@ -76,6 +82,31 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		progressLevel: trueLevel,
 		nonFlooredLevel: trueLevel,
 	};
+}
+
+/**
+ * returns the main profile, determined by max senither weight
+ * @param profiles SkyBlock profiles
+ * @param uuid minecraft uuid
+ */
+export function getMainProfile(profiles: SkyBlockProfiles | null, uuid: string) {
+	if (!profiles?.length) return null;
+
+	let mainProfile = null;
+	let maxWeight = -1;
+
+	for (const profile of profiles) {
+		if (!profile) continue;
+
+		const { totalWeight } = getSenitherWeight(profile.members[uuid]);
+
+		if (maxWeight > totalWeight) continue;
+
+		mainProfile = profile;
+		maxWeight = totalWeight;
+	}
+
+	return mainProfile;
 }
 
 

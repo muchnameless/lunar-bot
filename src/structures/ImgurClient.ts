@@ -3,7 +3,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { FormData } from 'undici';
 import fetch from 'node-fetch';
 import ms from 'ms';
-import { ImgurAPIError } from './errors/ImgurAPIError';
+import { FetchError } from './errors/FetchError';
 import type { BodyInit, RequestInit, Response } from 'node-fetch';
 
 
@@ -68,20 +68,19 @@ interface PostRateLimitData {
 
 interface ImgurClientOptions {
 	cache?: Cache;
-	apiVersion?: number;
-	requestTimeout?: number;
+	timeout?: number;
+	retries?: number;
 	rateLimitOffset?: number;
 	rateLimitedWaitTime?: number;
-	retries?: number;
 }
 
 
 export class ImgurClient {
 	#authorisation!: string;
-	#baseURL;
+	#baseURL = 'https://api.imgur.com/3/';
 	#queue = new AsyncQueue();
 	cache?: Cache;
-	requestTimeout: number;
+	timeout: number;
 	rateLimitOffset: number;
 	rateLimitedWaitTime: number;
 	retries: number;
@@ -103,14 +102,13 @@ export class ImgurClient {
 	 * @param clientId
 	 * @param options
 	 */
-	constructor(clientId: string, { cache, apiVersion, requestTimeout, rateLimitOffset, rateLimitedWaitTime, retries }: ImgurClientOptions = {}) {
+	constructor(clientId: string, { cache, timeout, retries, rateLimitOffset, rateLimitedWaitTime }: ImgurClientOptions = {}) {
 		this.authorisation = clientId;
 		this.cache = cache;
-		this.#baseURL = `https://api.imgur.com/${apiVersion ?? 3}/`;
-		this.requestTimeout = requestTimeout ?? 10_000;
+		this.timeout = timeout ?? 10_000;
+		this.retries = retries ?? 1;
 		this.rateLimitOffset = rateLimitOffset ?? 1_000;
 		this.rateLimitedWaitTime = rateLimitedWaitTime ?? 60_000;
-		this.retries = retries ?? 1;
 	}
 
 	/**
@@ -223,7 +221,7 @@ export class ImgurClient {
 
 			// check response
 			if (res.status !== 200) {
-				throw new ImgurAPIError(res);
+				throw new FetchError('ImgurAPIError', res);
 			}
 
 			const parsedRes = await res.json();
@@ -243,7 +241,7 @@ export class ImgurClient {
 	 */
 	async #request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
 		const controller = new AbortController();
-		const timeout = setTimeout(() => controller.abort(), this.requestTimeout);
+		const timeout = setTimeout(() => controller.abort(), this.timeout);
 
 		try {
 			return await fetch(

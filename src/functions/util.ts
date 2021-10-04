@@ -280,3 +280,31 @@ export const removeMcFormatting = (string: string) => string.replace(/§[\da-gk-
  * @param root
  */
 export const readJSFiles = (root: string | URL) => readdirp(fileURLToPath(root), { fileFilter: [ '*.js', '!~*' ] });
+
+/**
+ * 99_137 -> 99K, 1_453_329 -> 1.5M
+ * @param number
+ */
+export function shortenNumber(number: number) {
+	let str;
+	let suffix;
+
+	if (number < 1e3) {
+		str = number;
+		suffix = '';
+	} else if (number < 1e6) {
+		str = Math.round(number / 1e3);
+		suffix = 'K';
+	} else if (number < 1e9) {
+		str = Math.round(number / (1e6 / 10)) / 10;
+		suffix = 'M';
+	} else if (number < 1e12) {
+		str = Math.round(number / (1e9 / 10)) / 10;
+		suffix = 'B';
+	} else if (number < 1e15) {
+		str = Math.round(number / (1e12 / 10)) / 10;
+		suffix = 'T';
+	}
+
+	return `${str}${suffix}`;
+}

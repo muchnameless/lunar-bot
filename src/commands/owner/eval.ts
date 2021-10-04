@@ -21,6 +21,8 @@ import { imgur } from '../../api/imgur';
 imgur;
 import { mojang } from '../../api/mojang';
 mojang;
+import { maro } from '../../api/maro';
+maro;
 import * as botUtil from '../../util';
 import * as functions from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
@@ -232,7 +234,7 @@ export default class EvalCommand extends SlashCommand {
 				errors: [ 'time' ],
 			});
 
-			return await InteractionUtil.update(interaction, {
+			return InteractionUtil.update(interaction, {
 				embeds: await this.#eval(
 					interaction,
 					collected.first()!.content,

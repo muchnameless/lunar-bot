@@ -1,13 +1,12 @@
 import { PROFILE_NAMES, X_EMOJI } from '../../constants';
 import { hypixel } from '../../api/hypixel';
 import { InteractionUtil } from '../../util';
-import { autocorrect, getUuidAndIgn, logger, upperCaseFirstChar } from '../../functions';
+import { autocorrect, escapeIgn, getUuidAndIgn, logger, upperCaseFirstChar } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
-import type { SkyBlockProfile } from '../../api/hypixel';
 import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
-import type { WeightData } from '../../functions';
+import type { SkyBlockProfile, WeightData } from '../../functions';
 
 
 export default class BaseWeightCommand extends DualCommand {
@@ -66,7 +65,16 @@ export default class BaseWeightCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		return InteractionUtil.reply(interaction, await this._generateReply(interaction, interaction.options.getString('ign'), interaction.options.getString('profile')));
+		return InteractionUtil.reply(
+			interaction,
+			escapeIgn(
+				await this._generateReply(
+					interaction,
+					interaction.options.getString('ign'),
+					interaction.options.getString('profile'),
+				),
+			),
+		);
 	}
 
 	/**
@@ -96,6 +104,12 @@ export default class BaseWeightCommand extends DualCommand {
 			}
 		}
 
-		return hypixelMessage.reply(await this._generateReply(hypixelMessage, IGN, profileName));
+		return hypixelMessage.reply(
+			await this._generateReply(
+				hypixelMessage,
+				IGN,
+				profileName,
+			),
+		);
 	}
 }

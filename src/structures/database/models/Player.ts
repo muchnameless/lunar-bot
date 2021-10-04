@@ -33,10 +33,10 @@ import { hypixel } from '../../../api/hypixel';
 import { mojang } from '../../../api/mojang';
 import {
 	escapeIgn,
+	getMainProfile,
 	getSenitherDungeonWeight,
 	getSenitherSkillWeight,
 	getSenitherSlayerWeight,
-	getSenitherWeight,
 	getSkillLevel,
 	logger,
 	mutedCheck,
@@ -48,7 +48,6 @@ import {
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
 import type { Snowflake } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
-import type { SkyBlockProfile } from '../../../api/hypixel';
 import type { HypixelGuild } from './HypixelGuild';
 import type { Transaction, TransactionAttributes } from './Transaction';
 import type { LunarClient } from '../../LunarClient';
@@ -1367,30 +1366,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		let profiles = null;
 
 		try {
-			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid) as SkyBlockProfile[];
+			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
 		} catch (error) {
 			this.update({ xpUpdatesDisabled: true }).catch(logger.error);
 			logger.error('[MAIN PROFILE]', error);
 		}
 
-		if (!profiles?.length) {
-			this.mainProfileId = null;
-			await this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
-
-			throw `${this.logInfo}: no SkyBlock profiles`;
-		}
-
-		let mainProfile;
-		let maxWeight = -1;
-
-		for (const profile of profiles) {
-			const { totalWeight } = getSenitherWeight(profile.members[this.minecraftUuid]);
-
-			if (maxWeight > totalWeight) continue;
-
-			mainProfile = profile;
-			maxWeight = totalWeight;
-		}
+		const mainProfile = getMainProfile(profiles, this.minecraftUuid);
 
 		if (!mainProfile) {
 			this.mainProfileId = null;

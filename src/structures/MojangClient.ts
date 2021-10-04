@@ -1,9 +1,6 @@
 import fetch from 'node-fetch';
 import { MojangAPIError } from './errors/MojangAPIError';
-import {
-	validateMinecraftIgn,
-	validateMinecraftUuid,
-} from '../functions';
+import { validateMinecraftIgn, validateMinecraftUuid } from '../functions';
 import type { Response } from 'node-fetch';
 
 
@@ -22,6 +19,12 @@ interface Cache {
 	set(key: string, value: MojangResult | { error: boolean, status: number, statusText: string }): Promise<true>;
 }
 
+interface MojangClientOptions {
+	cache?: Cache;
+	timeout?: number;
+	retries?: number;
+}
+
 
 export class MojangClient {
 	cache?: Cache;
@@ -31,7 +34,7 @@ export class MojangClient {
 	/**
 	 * @param options
 	 */
-	constructor({ cache, timeout, retries }: { cache?: Cache, timeout?: number, retries?: number } = {}) {
+	constructor({ cache, timeout, retries }: MojangClientOptions = {}) {
 		this.cache = cache;
 		this.timeout = timeout ?? 10_000;
 		this.retries = retries ?? 1;
@@ -43,7 +46,7 @@ export class MojangClient {
 	 * @param options
 	 */
 	async igns(usernames: string[], options?: MojangFetchOptions): Promise<MojangResult[]> {
-		if (!usernames.length || usernames.length > 10) throw new MojangAPIError({ status: 'wrong input' });
+		if (!usernames.length || usernames.length > 10) throw new MojangAPIError({ statusText: 'wrong input' });
 
 		const res = await fetch(
 			'https://api.mojang.com/profiles/minecraft',
@@ -83,7 +86,7 @@ export class MojangClient {
 			...options,
 		});
 
-		return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'ign', ign));
+		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'ign', ign));
 	}
 
 	/**
@@ -99,7 +102,7 @@ export class MojangClient {
 			...options,
 		});
 
-		return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'uuid', uuid));
+		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'uuid', uuid));
 	}
 
 	/**
@@ -122,7 +125,7 @@ export class MojangClient {
 			...options,
 		});
 
-		return Promise.reject(new MojangAPIError({ status: '(validation)' }, 'ignOrUuid', ignOrUuid));
+		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'ignOrUuid', ignOrUuid));
 	}
 
 	/**
@@ -139,7 +142,7 @@ export class MojangClient {
 			if (cachedResponse) {
 				if (cachedResponse.error) {
 					throw new MojangAPIError(
-						{ status: Reflect.has(cachedResponse, 'status') ? `${cachedResponse.status} (cached)` : '(cached)', ...cachedResponse },
+						{ statusText: Reflect.has(cachedResponse, 'statusText') ? `${cachedResponse.statusText} (cached)` : '(cached)', ...cachedResponse },
 						queryType,
 						query,
 					);

@@ -5,11 +5,11 @@ import { COMMAND_KEY, PROFILE_EMOJIS } from '../../constants';
 import { hypixel } from '../../api/hypixel';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { getUuidAndIgn, logger, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions';
+import { getMainProfile, getUuidAndIgn, logger, shortenNumber, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, SelectMenuInteraction, Snowflake } from 'discord.js';
+import type { CommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake } from 'discord.js';
 import type { APISelectMenuComponent } from 'discord-api-types/v9';
-import type { SkyBlockProfile } from '../../api/hypixel';
+import type { SkyBlockProfile } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
@@ -23,34 +23,6 @@ export default class AhCommand extends SlashCommand {
 				.addStringOption(skyblockProfileOption),
 			cooldown: 0,
 		});
-	}
-
-	/**
-	 * 99_137 -> 99K, 1_453_329 -> 1.5M
-	 * @param number
-	 */
-	static shortenNumber(number: number) {
-		let str;
-		let suffix;
-
-		if (number < 1e3) {
-			str = number;
-			suffix = '';
-		} else if (number < 1e6) {
-			str = Math.round(number / 1e3);
-			suffix = 'K';
-		} else if (number < 1e9) {
-			str = Math.round(number / (1e6 / 10)) / 10;
-			suffix = 'M';
-		} else if (number < 1e12) {
-			str = Math.round(number / (1e9 / 10)) / 10;
-			suffix = 'B';
-		} else if (number < 1e15) {
-			str = Math.round(number / (1e12 / 10)) / 10;
-			suffix = 'T';
-		}
-
-		return `${str}${suffix}`;
 	}
 
 	/**
@@ -108,10 +80,10 @@ export default class AhCommand extends SlashCommand {
 					}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
 					value: `${
 						bin
-							? `BIN: ${AhCommand.shortenNumber(startingBid)}`
+							? `BIN: ${shortenNumber(startingBid)}`
 							: (bids.length
-								? (totalCoins += highestBid, `Highest Bid: ${AhCommand.shortenNumber(highestBid)}`)
-								: `Starting Bid: ${AhCommand.shortenNumber(startingBid)}`)
+								? (totalCoins += highestBid, `Highest Bid: ${shortenNumber(highestBid)}`)
+								: `Starting Bid: ${shortenNumber(startingBid)}`)
 					} • ${
 						end < Date.now()
 							? (highestBid
@@ -127,8 +99,8 @@ export default class AhCommand extends SlashCommand {
 			return {
 				embeds: [
 					embed.setDescription(stripIndents`
-						unclaimed: ${AhCommand.shortenNumber(totalUnclaimedCoins)} coins from ${endedAuctions} auctions
-						total: ${AhCommand.shortenNumber(totalCoins)} coins from ${auctions.length} auctions
+						unclaimed: ${shortenNumber(totalUnclaimedCoins)} coins from ${endedAuctions} auctions
+						total: ${shortenNumber(totalCoins)} coins from ${auctions.length} auctions
 					`),
 				],
 				components: [
@@ -165,6 +137,31 @@ export default class AhCommand extends SlashCommand {
 	}
 
 	/**
+	 * replies with 'no profiles found embed'
+	 * @param interaction
+	 * @param embed reply embed
+	 * @param ign player ign
+	 * @param uuid player minecraft uuid
+	 */
+	async #handleNoProfiles(interaction: CommandInteraction, embed: MessageEmbed, ign: string, uuid: string) {
+		return InteractionUtil.reply(interaction, {
+			embeds: [
+				embed
+					.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
+					.setDescription('no SkyBlock profiles'),
+			],
+			components: [
+				new MessageActionRow().addComponents(
+					new MessageSelectMenu()
+						.setCustomId(this.#generateCustomId({ uuid, ign, userId: interaction.user.id }))
+						.setDisabled(true)
+						.setPlaceholder('Profile: None'),
+				),
+			],
+		});
+	}
+
+	/**
 	 * execute the command
 	 * @param interaction
 	 */
@@ -176,7 +173,7 @@ export default class AhCommand extends SlashCommand {
 
 			// interaction from original requester -> edit message
 			if (interaction.user.id === userId) {
-				return await InteractionUtil.update(interaction, await this.#generateReply({ uuid, ign, profileId, profiles, userId }));
+				return InteractionUtil.update(interaction, await this.#generateReply({ uuid, ign, profileId, profiles, userId }));
 			}
 
 			// interaction from new requester -> new message
@@ -201,23 +198,7 @@ export default class AhCommand extends SlashCommand {
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid) as SkyBlockProfile[];
 			const embed = this.client.defaultEmbed;
 
-			if (!profiles?.length) {
-				return InteractionUtil.reply(interaction, {
-					embeds: [
-						embed
-							.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
-							.setDescription('no SkyBlock profiles'),
-					],
-					components: [
-						new MessageActionRow().addComponents(
-							new MessageSelectMenu()
-								.setCustomId(this.#generateCustomId({ uuid, ign, userId: interaction.user.id }))
-								.setDisabled(true)
-								.setPlaceholder('Profile: None'),
-						),
-					],
-				});
-			}
+			if (!profiles?.length) return this.#handleNoProfiles(interaction, embed, ign, uuid);
 
 			const PROFILE_NAME_INPUT = interaction.options.getString('profile');
 
@@ -225,8 +206,11 @@ export default class AhCommand extends SlashCommand {
 			let profileName;
 
 			if (!PROFILE_NAME_INPUT) {
-				// get profile with the latest last_save, profiles without that property are treated as last candidates
-				[{ profile_id: profileId, cute_name: profileName }] = profiles.sort((a, b) => (Reflect.has(b.members[uuid], 'last_save') ? b.members[uuid].last_save - a.members[uuid].last_save : -1));
+				const mainProfile = getMainProfile(profiles, uuid);
+
+				if (!mainProfile) return this.#handleNoProfiles(interaction, embed, ign, uuid);
+
+				({ profile_id: profileId, cute_name: profileName } = mainProfile);
 			} else {
 				profileName = PROFILE_NAME_INPUT;
 				profileId = profiles.find(({ cute_name: name }) => name === PROFILE_NAME_INPUT)?.profile_id;
