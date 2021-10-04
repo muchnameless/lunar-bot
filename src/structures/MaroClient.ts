@@ -92,7 +92,7 @@ class Networth extends Method {
 				},
 			},
 			{
-				cacheKey: `networth:categories:${uuid}`,
+				cacheKey: `networth:total:${uuid}`,
 				...options,
 			},
 		) as Promise<MaroNetworthResponse>;
