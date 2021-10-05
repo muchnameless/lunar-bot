@@ -845,39 +845,29 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				if (guildRoleId && !member.roles.cache.has(guildRoleId)) rolesToAdd.push(guildRoleId);
 
 				// rank roles
-				if (this.isStaff) {
-					const newRankPriority = ranks
+				const CURRENT_PRIORITY = this.isStaff
+					? ranks
 						// filter out non-automated ranks
 						.filter(({ currentWeightReq }) => currentWeightReq != null)
 						// sort descendingly by weight req
 						.sort((a, b) => b.currentWeightReq! - a.currentWeightReq!)
 						// find first rank that the player is eligable for
 						.find(({ currentWeightReq }) => weight >= currentWeightReq!)
-						?.priority;
+						?.priority
+					: this.guildRankPriority;
 
-					for (const { roleId, priority } of ranks) {
-						if (!roleId) continue;
+				for (const { roleId, priority } of ranks) {
+					if (!roleId) continue;
 
-						if (priority !== newRankPriority) {
-							if (member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
-						} else if (!member.roles.cache.has(roleId)) {
-							rolesToAdd.push(roleId);
-							reason = 'synced with in game rank';
-						}
-					}
-				} else {
-					for (const { roleId, priority } of ranks) {
-						if (!roleId) continue;
-
-						if (priority !== this.guildRankPriority) {
-							if (member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
-						} else if (!member.roles.cache.has(roleId)) {
-							rolesToAdd.push(roleId);
-							reason = 'synced with in game rank';
-						}
+					if (priority !== CURRENT_PRIORITY) {
+						if (member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
+					} else if (!member.roles.cache.has(roleId)) {
+						rolesToAdd.push(roleId);
+						reason = 'synced with in game rank';
 					}
 				}
 
+				// guild for the player found
 				inGuild = true;
 
 			// player is not in the guild -> remove all roles
