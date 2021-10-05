@@ -214,7 +214,11 @@ export const setRank = (ign = IGN_DEFAULT, from = GUILD_RANK_DEFAULT, to = GUILD
 );
 
 export const topErrors = (ign = IGN_DEFAULT) => new RegExp(
-	topErrorResponses.map(x => (typeof x === 'function' ? x(ign) : x)).join('|'),
+	topErrorResponses.map(x => (typeof x === 'function'
+		// @ts-expect-error future proofing
+		? x(ign)
+		: x),
+	).join('|'),
 	'i',
 );
 

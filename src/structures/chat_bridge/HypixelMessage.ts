@@ -5,7 +5,7 @@ import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { MessageUtil } from '../../util';
 import { mojang } from '../../api/mojang';
 import { escapeRegex, logger, uuidToImgurBustURL } from '../../functions';
-import type { Message } from 'discord.js';
+import type { Message as DiscordMessage } from 'discord.js';
 import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
 import type { BroadcastOptions, ChatBridge, ChatOptions } from './ChatBridge';
 import type { ChatPacket } from './bot_events/chat';
@@ -44,7 +44,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 	/**
 	 * forwarded message
 	 */
-	discordMessage: Promise<Message | null> = Promise.resolve(null);
+	discordMessage: Promise<DiscordMessage | null> = Promise.resolve(null);
 	/**
 	 * raw content string
 	 */
@@ -218,15 +218,13 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 	 * replies in game (and on discord if guild chat) to the message
 	 * @param contentOrOptions
 	 */
-	async reply(contentOrOptions: string | ChatOptions | BroadcastOptions & ChatOptions) {
-		if (!this.isUserMessage()) throw new Error(`cannot reply to a non-user message, received type '${this.type}'`);
-
+	async reply(contentOrOptions: string | ChatOptions | BroadcastOptions & ChatOptions): Promise<boolean | [ boolean, DiscordMessage | null ]> {
 		const { ephemeral = false, ...options } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions } as ChatOptions | BroadcastOptions & ChatOptions
 			: contentOrOptions;
 
 		// to be compatible to Interactions
-		if (ephemeral) return this.author.send({
+		if (ephemeral) return this.author!.send({
 			maxParts: Number.POSITIVE_INFINITY,
 			...options,
 		});
@@ -243,7 +241,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 				});
 
 				// DM author the message if sending to gchat failed
-				if (!result[0]) this.author.send(`an error occurred while replying in ${this.type} chat\n${options.content ?? ''}`);
+				if (!result[0]) this.author!.send(`an error occurred while replying in ${this.type} chat\n${options.content ?? ''}`);
 
 				return result;
 			}
@@ -255,7 +253,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 				});
 
 			case MESSAGE_TYPES.WHISPER:
-				return this.author.send({
+				return this.author!.send({
 					maxParts: Number.POSITIVE_INFINITY,
 					...options,
 				});
@@ -329,7 +327,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 		});
 
 		const result = await this.chatBridge.minecraft.awaitMessages({
-			filter: hypixelMessage => hypixelMessage.author?.ign === this.author.ign,
+			filter: hypixelMessage => hypixelMessage.author?.ign === this.author!.ign,
 			max: 1,
 			time: timeoutSeconds * 1_000,
 		});
