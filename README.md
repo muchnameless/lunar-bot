@@ -1,4 +1,4 @@
-# lunar_bot_dev
+# Lunar Bot
 
 lunar guard discord bot
 
