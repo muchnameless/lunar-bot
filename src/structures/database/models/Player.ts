@@ -832,6 +832,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const { config } = this.client;
 		const rolesToAdd: Snowflake[] = [];
 		const rolesToRemove: Snowflake[] = [];
+		const { totalWeight: weight } = this.getSenitherWeight();
 
 		let inGuild = false;
 		let reason = reasonInput;
@@ -843,8 +844,28 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				// guild role
 				if (guildRoleId && !member.roles.cache.has(guildRoleId)) rolesToAdd.push(guildRoleId);
 
-				// rank roles for non staff
-				if (!this.isStaff) {
+				// rank roles
+				if (this.isStaff) {
+					const newRankPriority = ranks
+						// filter out non-automated ranks
+						.filter(({ currentWeightReq }) => currentWeightReq != null)
+						// sort descendingly by weight req
+						.sort((a, b) => b.currentWeightReq! - a.currentWeightReq!)
+						// find first rank that the player is eligable for
+						.find(({ currentWeightReq }) => weight >= currentWeightReq!)
+						?.priority;
+
+					for (const { roleId, priority } of ranks) {
+						if (!roleId) continue;
+
+						if (priority !== newRankPriority) {
+							if (member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
+						} else if (!member.roles.cache.has(roleId)) {
+							rolesToAdd.push(roleId);
+							reason = 'synced with in game rank';
+						}
+					}
+				} else {
 					for (const { roleId, priority } of ranks) {
 						if (!roleId) continue;
 
@@ -960,7 +981,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		}
 
 		// weight
-		if (this.getSenitherWeight().totalWeight >= config.get('WHALECUM_PASS_WEIGHT')) {
+		if (weight >= config.get('WHALECUM_PASS_WEIGHT')) {
 			if (!member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToAdd.push(config.get('WHALECUM_PASS_ROLE_ID'));
 		} else if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) {
 			rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));

@@ -27,7 +27,6 @@ import type { Player } from './Player';
 import type { ChatBridge } from '../../chat_bridge/ChatBridge';
 import type { LunarClient } from '../../LunarClient';
 import type { PREFIX_BY_TYPE } from '../../chat_bridge/constants';
-import type { ArrayElement } from '../../../types/util';
 
 
 type GuildRank = {
@@ -61,6 +60,11 @@ export interface UpdateOptions {
 	/** API data */
 	data?: Components.Schemas.Guild & { meta: Omit<Components.Schemas.GuildResponse, 'guild'> & DefaultMeta };
 	syncRanks?: boolean;
+}
+
+interface PlayerWithWeight {
+	player: Player;
+	weight: number;
 }
 
 interface HypixelGuildAttributes {
@@ -650,92 +654,72 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 */
 	async #syncGuildRanks() {
 		try {
-			if (!this.client.config.get('AUTO_GUILD_RANKS')) return this;
-			if (!this.chatBridgeEnabled) return this;
+			if (!this.client.config.get('AUTO_GUILD_RANKS') || !this.chatBridgeEnabled) return this;
 
 			const { chatBridge } = this;
+			const nonStaffWithWeight: PlayerWithWeight[] = [];
 
-			let staffAmount = 0;
+			let nonStaffAmount = 0;
 
-			const playersSortedByWeight = this.players.map(player => ({ player, weight: player.getSenitherWeight().totalWeight }))
-				.sort((a, b) => a.weight - b.weight) // from lowest to highest weight
-				.map((value, index) => ({
-					...value,
-					isStaff: value.player.isStaff
-						? (++staffAmount, true)
-						: false,
-					posWithStaff: index,
-					posNonStaff: index - staffAmount,
-				}));
+			// calculate weight for non-staff members and their amount
+			for (const player of this.players.values()) {
+				if (player.isStaff) continue;
+
+				++nonStaffAmount;
+
+				nonStaffWithWeight.push({
+					player,
+					weight: player.getSenitherWeight().totalWeight,
+				});
+			}
+
+			const nonStaffSortedByWeight = nonStaffWithWeight.sort((a, b) => a.weight - b.weight);
 
 			// abort if a player's weight is 0 -> most likely an API error
-			if (playersSortedByWeight.some(({ weight }) => weight === 0)) {
-				logger.error(`[SYNC GUILD RANKS]: ${playersSortedByWeight.find(({ weight }) => weight === 0)!.player.ign}'s weight is 0`);
+			if (nonStaffSortedByWeight.some(({ weight }) => weight === 0)) {
+				logger.error(`[SYNC GUILD RANKS]: ${
+					nonStaffSortedByWeight.find(({ weight }) => weight === 0)!.player.ign
+				}'s weight is 0`);
 				return this;
 			}
 
-			const nonStaffAmount = playersSortedByWeight.length - staffAmount;
+			/** ranks with an absolute instead of a relative positionReq, sorted descendingly by it */
 			const automatedRanks = this.ranks
 				.flatMap((rank) => {
 					if (rank.positionReq == null) return [];
 
-					const positionReqNonStaff = Math.round(rank.positionReq * nonStaffAmount);
+					const positionReq = Math.round(rank.positionReq * nonStaffAmount);
 
-					// update 'currentWeightReq'
-					this.ranks.find(({ priority }) => priority === rank.priority)!.currentWeightReq = Math.ceil(playersSortedByWeight.find(({ posNonStaff }) => posNonStaff === positionReqNonStaff)!.weight);
+					// update 'currentWeightReq' (1/2)
+					rank.currentWeightReq = Math.ceil(nonStaffSortedByWeight[positionReq].weight);
 
 					return {
-						positionReqStaff: Math.round(rank.positionReq * playersSortedByWeight.length),
-						positionReqNonStaff,
 						...rank,
+						positionReq,
 					};
-				});
+				})
+				.sort((a, b) => b.positionReq - a.positionReq);
 
+			// update 'currentWeightReq' (2/2)
 			this.changed('ranks', true);
-			this.save();
+			this.save().catch(logger.error);
 
 			// update player ranks
-			const setRankLog = [];
+			const setRankLog: MessageEmbed[] = [];
 
-			for (const { player, isStaff, posWithStaff, posNonStaff } of playersSortedByWeight) {
-				// player is staff -> only roles need to be adapted
-				if (isStaff) {
-					const newRank = automatedRanks.reduce(
-						(acc: ArrayElement<typeof automatedRanks> | null, cur) => (cur.positionReqStaff <= posWithStaff && (acc?.positionReqStaff ?? 0) <= cur.positionReqStaff ? cur : acc),
-						null,
-					);
-					if (!newRank) continue;
-
-					const member = await player.discordMember;
-					if (!member) continue;
-
-					await player.makeRoleAPICall({
-						rolesToAdd: newRank.roleId && !member.roles.cache.has(newRank.roleId) // new rank has a role id and the member does not have the role
-							? [ newRank.roleId ]
-							: [],
-						rolesToRemove: member.roles.cache.filter((_, roleId) => roleId !== newRank.roleId && automatedRanks.some(rank => rank.roleId === roleId)), // remove all other rank roles
-						reason: 'synced with weight lb',
-					});
-
-					continue;
-				}
-
-				// non staff
-				const newRank = automatedRanks.reduce(
-					(acc: ArrayElement<typeof automatedRanks> | null, cur) => (cur.positionReqNonStaff <= posNonStaff && (acc?.positionReqNonStaff ?? 0) <= cur.positionReqNonStaff ? cur : acc),
-					null,
-				);
-				if (!newRank) continue;
-
-				const { guildRank: oldRank } = player;
+			for (const [ index, { player }] of nonStaffSortedByWeight.entries()) {
+				// automatedRanks is sorted descendingly by positionReq
+				const newRank = automatedRanks.find(({ positionReq }) => index >= positionReq)!;
 
 				// player already has the correct rank
-				if (oldRank?.priority === newRank.priority) continue;
+				if (player.guildRankPriority === newRank.priority) continue;
+
+				const OLD_RANK_NAME = player.guildRank?.name;
 
 				// set player to the correct rank
 				await chatBridge.minecraft.command({
 					command: `g setrank ${player} ${newRank.name}`,
-					responseRegExp: setRank(player.ign, oldRank?.name, newRank.name),
+					responseRegExp: setRank(player.ign, OLD_RANK_NAME, newRank.name),
 					rejectOnTimeout: true,
 				});
 
@@ -745,7 +729,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						.setDescription(`${Formatters.bold('Auto Rank Sync')} for ${player.info}`)
 						.addFields({
 							name: 'Old',
-							value: oldRank?.name ?? 'unknown',
+							value: OLD_RANK_NAME ?? 'unknown',
 							inline: true,
 						}, {
 							name: 'New',
