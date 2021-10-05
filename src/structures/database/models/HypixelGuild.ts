@@ -659,13 +659,9 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			const { chatBridge } = this;
 			const nonStaffWithWeight: PlayerWithWeight[] = [];
 
-			let nonStaffAmount = 0;
-
 			// calculate weight for non-staff members and their amount
 			for (const player of this.players.values()) {
 				if (player.isStaff) continue;
-
-				++nonStaffAmount;
 
 				nonStaffWithWeight.push({
 					player,
@@ -673,13 +669,15 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				});
 			}
 
-			const nonStaffSortedByWeight = nonStaffWithWeight.sort((a, b) => a.weight - b.weight);
+			nonStaffWithWeight.sort((a, b) => a.weight - b.weight);
 
 			// abort if a player's weight is 0 -> most likely an API error
-			if (nonStaffSortedByWeight.some(({ weight }) => weight === 0)) {
-				logger.error(`[SYNC GUILD RANKS]: ${
-					nonStaffSortedByWeight.find(({ weight }) => weight === 0)!.player.ign
-				}'s weight is 0`);
+			if (!nonStaffWithWeight[0]?.weight) {
+				logger.error(`[SYNC GUILD RANKS] ${this.name}: ${
+					nonStaffWithWeight.length
+						? `${nonStaffWithWeight[0].player.ign}'s weight is 0`
+						: 'no non-staff players'
+				}`);
 				return this;
 			}
 
@@ -688,10 +686,10 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				.flatMap((rank) => {
 					if (rank.positionReq == null) return [];
 
-					const positionReq = Math.round(rank.positionReq * nonStaffAmount);
+					const positionReq = Math.round(rank.positionReq * nonStaffWithWeight.length);
 
 					// update 'currentWeightReq' (1/2)
-					rank.currentWeightReq = Math.ceil(nonStaffSortedByWeight[positionReq].weight);
+					rank.currentWeightReq = Math.ceil(nonStaffWithWeight[positionReq].weight);
 
 					return {
 						...rank,
@@ -707,7 +705,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			// update player ranks
 			const setRankLog: MessageEmbed[] = [];
 
-			for (const [ index, { player }] of nonStaffSortedByWeight.entries()) {
+			for (const [ index, { player }] of nonStaffWithWeight.entries()) {
 				// automatedRanks is sorted descendingly by positionReq
 				const newRank = automatedRanks.find(({ positionReq }) => index >= positionReq)!;
 
