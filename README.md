@@ -1,6 +1,6 @@
 # Lunar Bot
 
-lunar guard discord bot
+Lunar Guard Discord Bot
 
 Redis (as an LRU cache)
 
