@@ -29,7 +29,10 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 	 * @param commandManager
 	 */
 	async init(commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands) {
-		const commands = await commandManager.set(this.map(({ data }, name) => ({ ...data, name })));
+		const commands = await commandManager.set(
+			// @ts-expect-error
+			this.map(({ data }, name) => ({ ...data, name })),
+		);
 
 		await this.setAllPermissions(commands);
 
@@ -87,7 +90,10 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 		// add aliases if existent
 		if (command.aliases) for (const alias of command.aliases) data.push({ ...data[0], name: alias });
 
-		const applicationCommands = await Promise.all(data.map(d => commandManager.create(d)));
+		const applicationCommands = await Promise.all(data.map(d => commandManager.create(
+			// @ts-expect-error
+			d,
+		)));
 
 		await this.setSinglePermissions({ command, applicationCommands });
 

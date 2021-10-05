@@ -1,5 +1,5 @@
 import EventEmitter from 'node:events';
-import type { Awaited } from 'discord.js';
+import type { Awaitable } from 'discord.js';
 import type { HypixelMessage } from './HypixelMessage';
 import type { Timeout } from '../../types/util';
 import type { ChatBridge } from './ChatBridge';
@@ -88,15 +88,15 @@ export class MessageCollector extends EventEmitter {
 		if (options.idle) this.#idletimeout = setTimeout(() => this.stop('idle'), options.idle);
 	}
 
-	override on(eventName: 'collect', listener: (item: HypixelMessage) => Awaited<void>): this;
-	override on(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaited<void>): this;
+	override on(eventName: 'collect', listener: (item: HypixelMessage) => Awaitable<void>): this;
+	override on(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
 	override on(eventName: string, listener: (...args: unknown[]) => void): this;
 	override on(eventName: string, listener: (...args: any[]) => void) {
 		return super.on(eventName, listener);
 	}
 
-	override once(eventName: 'collect', listener: (message: HypixelMessage) => Awaited<void>): this;
-	override once(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaited<void>): this;
+	override once(eventName: 'collect', listener: (message: HypixelMessage) => Awaitable<void>): this;
+	override once(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
 	override once(eventName: string, listener: (...args: unknown[]) => void): this;
 	override once(eventName: string, listener: (...args: any[]) => void) {
 		return super.once(eventName, listener);

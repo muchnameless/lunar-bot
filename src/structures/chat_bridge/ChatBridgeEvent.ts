@@ -13,7 +13,7 @@ export class ChatBridgeEvent extends BaseEvent {
 	/**
 	 * client
 	 */
-	override get client() {
+	get client() {
 		return this.chatBridge.client;
 	}
 }

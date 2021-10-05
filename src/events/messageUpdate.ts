@@ -19,6 +19,7 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 	 * @param oldMessage
 	 * @param newMessage
 	 */
+	// @ts-expect-error
 	override async run(oldMessage: Message, newMessage: Message) {
 		if (
 			Date.now() - newMessage.createdTimestamp >= 10 * 60_000 // original message is older than 10 min
