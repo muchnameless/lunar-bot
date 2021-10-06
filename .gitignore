@@ -1,6 +1,7 @@
-.VSCodeCounter
+.env
 .vscode
+.VSCodeCounter
 dist
 log_buffer
+logs
 node_modules
-.env
