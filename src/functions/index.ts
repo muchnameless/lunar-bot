@@ -1,4 +1,5 @@
-export * as logger from './logger';
+// export * as logger from './logger';
+export * from './logger';
 export * from './image';
 export * from './input';
 export * from './leaderboards';
