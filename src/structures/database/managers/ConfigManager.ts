@@ -21,8 +21,8 @@ export class ConfigManager extends ModelManager<Config> {
 				: value,
 		});
 
-		dbEntry.value = value as string;
-		return dbEntry.save();
+		// the value setter makes sure that non strings get JSON.stringified
+		return dbEntry.update({ value: value as string });
 	}
 
 	/**

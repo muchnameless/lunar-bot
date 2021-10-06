@@ -1,5 +1,6 @@
 import { MessageEmbed, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
+import { logger } from '../functions';
 import { GuildMemberUtil, MessageEmbedUtil } from '../util';
 import { Event } from '../structures/events/Event';
 import type { DMChannel, GuildMember } from 'discord.js';
@@ -31,8 +32,7 @@ export default class GuildMemberRemoveEvent extends Event {
 
 		if (!player) return;
 
-		player.inDiscord = false;
-		player.save();
+		player.update({ inDiscord: false }).catch(logger.error);
 
 		this.client.log(
 			MessageEmbedUtil.padFields(

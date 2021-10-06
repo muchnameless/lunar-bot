@@ -68,12 +68,10 @@ export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCrea
 	addAmount(amount: number, type = 'tax') {
 		switch (type) {
 			case 'tax':
-				this.collectedTax += amount;
-				return this.save();
+				return this.update({ collectedTax: this.collectedTax + amount });
 
 			case 'donation':
-				this.collectedDonations += amount;
-				return this.save();
+				return this.update({ collectedDonations: this.collectedDonations + amount });
 
 			default:
 				throw new Error(`[ADD AMOUNT]: ${this}: unknown type '${type}'`);
@@ -88,13 +86,11 @@ export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCrea
 		switch (type) {
 			case 'tax':
 			case 'taxes':
-				this.collectedTax = 0;
-				return this.save();
+				return this.update({ collectedTax: 0 });
 
 			case 'donation':
 			case 'donations':
-				this.collectedDonations = 0;
-				return this.save();
+				return this.update({ collectedDonations: 0 });
 
 			default:
 				throw new Error(`[RESET AMOUNT]: ${this}: unknown type '${type}'`);

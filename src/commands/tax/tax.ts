@@ -110,8 +110,7 @@ export default class TaxCommand extends SlashCommand {
 							await player.resetTax();
 							await taxCollector.remove();
 						} else {
-							taxCollector.isCollecting = false;
-							taxCollector.save();
+							await taxCollector.update({ isCollecting: false });
 						}
 
 						log = `\`${taxCollector}\` is no longer a tax collector`;
@@ -147,10 +146,9 @@ export default class TaxCommand extends SlashCommand {
 							this.config.set('TAX_AMOUNT', NEW_AMOUNT),
 
 							// update tax collectors
-							...this.client.taxCollectors.activeCollectors.map((taxCollector) => {
-								taxCollector.collectedTax += NEW_AMOUNT - OLD_AMOUNT;
-								return taxCollector.save();
-							}),
+							...this.client.taxCollectors.activeCollectors.map(
+								taxCollector => taxCollector.update({ collectedTax: taxCollector.collectedTax + NEW_AMOUNT - OLD_AMOUNT }),
+							),
 						]);
 
 						// logging
@@ -332,14 +330,16 @@ export default class TaxCommand extends SlashCommand {
 
 							// update database
 							await safePromiseAll([
-								...taxCollectors.cache.map((taxCollector) => { // remove retired collectors and reset active ones
+								// remove retired collectors and reset active ones
+								...taxCollectors.cache.map((taxCollector) => {
 									if (!taxCollector.isCollecting) return taxCollector.remove();
 									return safePromiseAll([
 										taxCollector.resetAmount('tax'),
 										taxCollector.resetAmount('donation'),
 									]);
 								}),
-								players.model.update( // reset players that left
+								// reset players that left
+								players.model.update(
 									{ paid: false },
 									{
 										where: {
@@ -348,11 +348,10 @@ export default class TaxCommand extends SlashCommand {
 										},
 									},
 								),
-								...players.cache.map((player) => { // reset current players
-									player.paid = false;
-									return player.save();
-								}),
-								this.config.set('TAX_AUCTIONS_START_TIME', Date.now()), // ignore all auctions up until now
+								// reset current players
+								...players.cache.map(player => player.update({ paid: false })),
+								// ignore all auctions up until now
+								this.config.set('TAX_AUCTIONS_START_TIME', Date.now()),
 							]);
 
 							await safePromiseAll(taxCollectors.cache.map(({ player }) => player?.setToPaid()));

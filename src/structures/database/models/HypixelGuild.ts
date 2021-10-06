@@ -18,7 +18,6 @@ import {
 	compareAlphabetically,
 	days,
 	logger,
-	mutedCheck,
 	safePromiseAll,
 } from '../../../functions';
 import type { ModelStatic, Sequelize } from 'sequelize';
@@ -257,7 +256,15 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * wether the player is muted and that mute is not expired
 	 */
 	get muted() {
-		return mutedCheck(this);
+		if (this.mutedTill) {
+			// mute hasn't expired
+			if (Date.now() < this.mutedTill) return true;
+
+			// mute has expired
+			this.update({ mutedTill: 0 }).catch(logger.error);
+		}
+
+		return false;
 	}
 
 	/**
@@ -461,12 +468,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 									logger.error(error);
 								}
 
-								player.ign = IGN;
-								player.save();
-
-								player.updateData({
-									reason: `joined ${this.name}`,
-								});
+								player.update({ ign: IGN }).catch(logger.error);
+								player.updateData({ reason: `joined ${this.name}` });
 							}),
 							0,
 						);

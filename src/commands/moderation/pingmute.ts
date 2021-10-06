@@ -39,8 +39,7 @@ export default class PingMuteCommand extends DualCommand {
 		if (!player.hasDiscordPingPermission) return `\`${player}\` is already ping muted`;
 
 		try {
-			player.hasDiscordPingPermission = false;
-			await player.save();
+			await player.update({ hasDiscordPingPermission: false });
 
 			return `\`${player}\` can no longer ping members via the chat bridge`;
 		} catch (error) {

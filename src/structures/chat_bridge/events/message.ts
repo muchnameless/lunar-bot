@@ -140,13 +140,13 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const { target, duration } = muteMatched.groups as { target: string; duration: string; };
 
 			if (target === 'the guild chat') {
-				const { hypixelGuild } = this.chatBridge;
 				const msDuration = stringToMS(duration);
 
-				hypixelGuild!.mutedTill = Number.isNaN(msDuration)
-					? Number.POSITIVE_INFINITY
-					: Date.now() + msDuration;
-				hypixelGuild!.save().catch(logger.error);
+				this.chatBridge.hypixelGuild!.update({
+					mutedTill: Number.isNaN(msDuration)
+						? Number.POSITIVE_INFINITY
+						: Date.now() + msDuration,
+				}).catch(logger.error);
 
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 			}
@@ -157,10 +157,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			const msDuration = stringToMS(duration);
 
-			player.mutedTill = Number.isNaN(msDuration)
-				? Number.POSITIVE_INFINITY
-				: Date.now() + msDuration;
-			player.save().catch(logger.error);
+			player.update({
+				mutedTill: Number.isNaN(msDuration)
+					? Number.POSITIVE_INFINITY
+					: Date.now() + msDuration,
+			}).catch(logger.error);
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was muted for ${duration}`);
 		}
@@ -178,10 +179,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const { target } = unmuteMatched.groups as { target: string; };
 
 			if (target === 'the guild chat') {
-				const { hypixelGuild } = this.chatBridge;
-
-				hypixelGuild!.mutedTill = 0;
-				hypixelGuild!.save().catch(logger.error);
+				this.chatBridge.hypixelGuild!.update({ mutedTill: 0 }).catch(logger.error);
 
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was unmuted`);
 			}
@@ -190,8 +188,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!player) return;
 
-			player.mutedTill = 0;
-			player.save().catch(logger.error);
+			player.update({ mutedTill: 0 }).catch(logger.error);
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was unmuted`);
 		}
@@ -214,8 +211,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was promoted to an unknown rank '${newRank}'`);
 
-			player.guildRankPriority = GUILD_RANK_PRIO;
-			player.save().catch(logger.error);
+			player.update({ guildRankPriority: GUILD_RANK_PRIO }).catch(logger.error);
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was promoted to '${newRank}'`);
 		}
@@ -238,8 +234,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was demoted to an unknown rank '${newRank}'`);
 
-			player.guildRankPriority = GUILD_RANK_PRIO;
-			player.save().catch(logger.error);
+			player.update({ guildRankPriority: GUILD_RANK_PRIO }).catch(logger.error);
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was demoted to '${newRank}'`);
 		}
@@ -281,6 +276,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	 * @param hypixelMessage
 	 */
 	async #handleCommandMessage(hypixelMessage: HypixelMessage<true>) {
+		const { player } = hypixelMessage;
+
+		// player activity
+		player?.update({ lastActivityAt: new Date() });
+
 		// must use prefix for commands in guild
 		if (!hypixelMessage.commandData.prefix) {
 			// auto math, ignore 0-0, 4/5 (dungeon parties)
@@ -328,8 +328,6 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			logger.info(`${hypixelMessage.author.ign} tried to execute '${hypixelMessage.content}' in whispers which is a guild-chat-only command`);
 			return hypixelMessage.author.send(`the '${command.name}' command can only be executed in guild chat`);
 		}
-
-		const { player } = hypixelMessage;
 
 		// message author not a bot owner
 		if (player?.discordId !== this.client.ownerId) {

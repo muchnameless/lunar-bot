@@ -28,9 +28,7 @@ export default class MessageCreateEvent extends Event {
 		}
 
 		// player activity
-		UserUtil.getPlayer(message.author)?.update({
-			lastDiscordActivity: new Date(),
-		});
+		UserUtil.getPlayer(message.author)?.update({ lastActivityAt: new Date() });
 
 		// "old" commands
 		if (MessageUtil.isUserMessage(message) && new RegExp(`^(?:${[ regExpEsc(this.config.get('PREFIXES')[0]), `<@!?${this.client.user!.id}>` ].join('|')})`, 'i').test(message.content)) {

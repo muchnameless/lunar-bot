@@ -27,8 +27,7 @@ export default class PingUnmuteCommand extends PingMute {
 		if (player.hasDiscordPingPermission) return `\`${player}\` is not ping muted`;
 
 		try {
-			player.hasDiscordPingPermission = true;
-			await player.save();
+			await player.update({ hasDiscordPingPermission: true });
 
 			return `\`${player}\` can now ping members via the chat bridge`;
 		} catch (error) {

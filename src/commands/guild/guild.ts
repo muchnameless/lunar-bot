@@ -219,8 +219,7 @@ export default class GuildCommand extends SlashCommand {
 				};
 			}
 
-			target.mutedTill = Date.now() + duration;
-			await target.save();
+			await target.update({ mutedTill: Date.now() + duration });
 
 			// don't use chatBridge command if player isn't actually in the guild
 			if (!inGuild) return {
@@ -228,8 +227,7 @@ export default class GuildCommand extends SlashCommand {
 				ephemeral: false,
 			};
 		} else if (target === 'everyone') {
-			hypixelGuild.mutedTill = Date.now() + duration;
-			await hypixelGuild.save();
+			await hypixelGuild.update({ mutedTill: Date.now() + duration });
 		}
 
 		try {
@@ -766,13 +764,11 @@ export default class GuildCommand extends SlashCommand {
 						ephemeral: true,
 					});
 
-					target.mutedTill = 0;
-					await target.save();
+					await target.update({ mutedTill: 0 });
 
 					if (!target.inGuild()) return InteractionUtil.reply(interaction, `unmuted \`${target}\``);
 				} else if (target === 'everyone') {
-					hypixelGuild.mutedTill = 0;
-					await hypixelGuild.save();
+					await hypixelGuild.update({ mutedTill: 0 });
 				}
 
 				return this.#run(interaction, {
