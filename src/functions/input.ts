@@ -1,7 +1,8 @@
-import { Interaction } from 'discord.js';
 import { HypixelMessage } from '../structures/chat_bridge/HypixelMessage';
 import { UserUtil } from '../util';
 import { mojang } from '../api/mojang';
+import type { HypixelUserMessage } from '../structures/chat_bridge/HypixelMessage';
+import type { Interaction } from 'discord.js';
 import type { MojangResult } from '../structures/MojangClient';
 
 
@@ -10,7 +11,7 @@ import type { MojangResult } from '../structures/MojangClient';
  * @param ctx
  * @param ignOrUuid
  */
-export function getUuidAndIgn(ctx: Interaction | HypixelMessage, ignOrUuid?: string | null): Promise<MojangResult> {
+export function getUuidAndIgn(ctx: Interaction | HypixelUserMessage, ignOrUuid?: string | null): Promise<MojangResult> {
 	// remove non-alphanumeric characters
 	const IGN_OR_UUID = ignOrUuid?.replace(/\W/g, '');
 
@@ -18,9 +19,10 @@ export function getUuidAndIgn(ctx: Interaction | HypixelMessage, ignOrUuid?: str
 	if (IGN_OR_UUID) return mojang.ignOrUuid(IGN_OR_UUID);
 
 	// no args -> try to get player object
-	const player = ctx instanceof Interaction
-		? UserUtil.getPlayer(ctx.user)
-		: ctx.author?.player;
+	const IS_HYPIXEL_MESSAGE = ctx instanceof HypixelMessage;
+	const player = IS_HYPIXEL_MESSAGE
+		? ctx.author.player
+		: UserUtil.getPlayer(ctx.user);
 
 	// author is linked to player
 	if (player) return Promise.resolve({
@@ -29,7 +31,9 @@ export function getUuidAndIgn(ctx: Interaction | HypixelMessage, ignOrUuid?: str
 	});
 
 	// no linked player -> try to get ign from author (HypixelMessageAuthor)
-	if (ctx instanceof HypixelMessage && ctx.author?.ign) return mojang.ign(ctx.author.ign);
+	if (IS_HYPIXEL_MESSAGE) return mojang.ign(ctx.author.ign);
 
-	return Promise.reject('no ign specified and you are not in the player db');
+	if (!ignOrUuid) return Promise.reject(`no linked player for \`${ctx.user.tag}\` found`);
+
+	return Promise.reject(`\`${ignOrUuid}\` is not a valid IGN or UUID`);
 }
