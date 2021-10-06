@@ -476,9 +476,13 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 					// player already in the db
 					} else {
-						player.guildId = this.guildId;
+						player.update({
+							guildId: this.guildId,
+							lastActivityAt: new Date(),
+						}).catch(logger.error);
 
 						await player.updateIgn();
+
 						joinedLog.push(`+\u00A0${player}`);
 
 						// try to link new player to discord

@@ -1412,8 +1412,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const mainProfile = getMainProfile(profiles, this.minecraftUuid);
 
 		if (!mainProfile) {
-			this.mainProfileId = null;
-			await this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
+			this.update({ mainProfileId: null }).catch(logger.error);
+			this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
 
 			throw `${this.logInfo}: no SkyBlock profiles`;
 		}
@@ -1424,10 +1424,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		const { mainProfileName } = this;
 
-		this.mainProfileId = PROFILE_ID;
-		this.mainProfileName = PROFILE_NAME ?? 'unknown profile name';
-		this.xpUpdatesDisabled = false;
-		await this.save();
+		await this.update({
+			mainProfileId: PROFILE_ID,
+			mainProfileName: PROFILE_NAME ?? 'unknown profile name',
+			xpUpdatesDisabled: false,
+		});
 
 		logger.info(`[MAIN PROFILE]: ${this.logInfo} -> ${PROFILE_NAME}`);
 
