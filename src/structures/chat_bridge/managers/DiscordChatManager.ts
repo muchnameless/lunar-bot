@@ -236,7 +236,7 @@ export class DiscordChatManager extends ChatManager {
 	async sendViaWebhook(contentOrOptions: WebhookMessageOptions & { content: string }): Promise<Message>;
 	async sendViaWebhook(contentOrOptions: WebhookMessageOptions & { content?: undefined }): Promise<null>;
 	async sendViaWebhook(contentOrOptions: string | WebhookMessageOptions) {
-		if (!this.chatBridge.enabled || !this.isReady()) return null;
+		if (!this.chatBridge.isEnabled() || !this.isReady()) return null;
 
 		const { content, ...options } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
@@ -269,8 +269,8 @@ export class DiscordChatManager extends ChatManager {
 	 * sends a message via the bot in the chatBridge channel
 	 * @param contentOrOptions
 	 */
-	async sendViaBot(contentOrOptions: string | SendViaBotOptions) {
-		if (!this.chatBridge.enabled) return null;
+	async sendViaBot(contentOrOptions: string | SendViaBotOptions): Promise<Message | null> {
+		if (!this.chatBridge.isEnabled()) return null;
 
 		const { content, prefix = '', hypixelMessage, ...options } = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions } as SendViaBotOptions
@@ -300,7 +300,7 @@ export class DiscordChatManager extends ChatManager {
 	 */
 	async forwardToMinecraft(message: Message, { player: playerInput, isEdit = false }: MessageForwardOptions = {}) {
 		if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
-		if (!this.chatBridge.enabled || !this.minecraft.isReady()) return MessageUtil.react(message, X_EMOJI);
+		if (!this.chatBridge.isEnabled() || !this.minecraft.isReady()) return MessageUtil.react(message, X_EMOJI);
 
 		const player = playerInput
 			?? UserUtil.getPlayer(message.interaction?.user ?? message.author) // cached player
