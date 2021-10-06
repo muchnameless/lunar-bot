@@ -28,6 +28,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	}
 
 	/**
+	 * parse server message content
 	 * @param hypixelMessage
 	 */
 	async #handleServerMessage(hypixelMessage: HypixelMessage) {
@@ -273,9 +274,10 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	}
 
 	/**
+	 * update player activity, execute triggers / command
 	 * @param hypixelMessage
 	 */
-	async #handleCommandMessage(hypixelMessage: HypixelMessage<true>) {
+	async #handleUserMessage(hypixelMessage: HypixelMessage<true>) {
 		const { player } = hypixelMessage;
 
 		// player activity
@@ -320,7 +322,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		const { command } = hypixelMessage.commandData;
 
-		// wrong command
+		// no command
 		if (!command) return logger.info(`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' which is not a valid command`);
 
 		// server only command in DMs
@@ -424,23 +426,23 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		switch (hypixelMessage.type) {
 			case MESSAGE_TYPES.GUILD:
 			case MESSAGE_TYPES.OFFICER: {
-				if (!this.chatBridge.enabled) return;
+				if (!this.chatBridge.isEnabled()) return;
 
 				hypixelMessage.forwardToDiscord();
 
-				return this.#handleCommandMessage(hypixelMessage);
+				return this.#handleUserMessage(hypixelMessage);
 			}
 
 			case MESSAGE_TYPES.PARTY:
 			case MESSAGE_TYPES.WHISPER: {
-				if (!this.chatBridge.enabled) return;
+				if (!this.chatBridge.isEnabled()) return;
 
 				// ignore messages from non guild players
-				if (hypixelMessage.author.player?.guildId !== this.chatBridge.hypixelGuild!.guildId) {
+				if (hypixelMessage.author.player?.guildId !== this.chatBridge.hypixelGuild.guildId) {
 					return logger.info(`[MESSAGE]: ignored message from '${hypixelMessage.author}': ${hypixelMessage.content}`);
 				}
 
-				return this.#handleCommandMessage(hypixelMessage);
+				return this.#handleUserMessage(hypixelMessage);
 			}
 
 			default: {

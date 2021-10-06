@@ -98,13 +98,6 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	}
 
 	/**
-	 * wether the guild has the chatBridge feature enabled
-	 */
-	get enabled() {
-		return this.hypixelGuild?.chatBridgeEnabled ?? false;
-	}
-
-	/**
 	 * player object associated with the chatBridge's bot
 	 */
 	get player() {
@@ -116,6 +109,13 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 */
 	get bot() {
 		return this.minecraft.bot;
+	}
+
+	/**
+	 * wether the guild has the chatBridge feature enabled
+	 */
+	isEnabled(): this is ChatBridge & { hypixelGuild: HypixelGuild } {
+		return this.hypixelGuild?.chatBridgeEnabled ?? false;
 	}
 
 	/**
