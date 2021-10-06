@@ -2,7 +2,7 @@ import { Collection } from 'discord.js';
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
 import type { ModelStatic, Sequelize } from 'sequelize';
-import type { HypixelMessage } from '../../chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../chat_bridge/HypixelMessage';
 import type { LunarClient } from '../../LunarClient';
 
 
@@ -71,7 +71,7 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 	/**
 	 * @param hypixelMessage
 	 */
-	getRegExp(hypixelMessage: HypixelMessage) {
+	#getRegExp(hypixelMessage: HypixelUserMessage) {
 		if (this._regExp) return this._regExp;
 
 		return new RegExp(
@@ -83,10 +83,10 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 	/**
 	 * @param hypixelMessage
 	 */
-	testMessage(hypixelMessage: HypixelMessage<true>) {
-		if (!this.chatTypes.includes(hypixelMessage.type!)) return;
+	testMessage(hypixelMessage: HypixelUserMessage) {
+		if (!this.chatTypes.includes(hypixelMessage.type)) return;
 
-		const matched = this.getRegExp(hypixelMessage).exec(hypixelMessage.content);
+		const matched = this.#getRegExp(hypixelMessage).exec(hypixelMessage.content);
 
 		if (!matched) return;
 

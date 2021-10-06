@@ -7,7 +7,7 @@ import { logger, readJSFiles } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
 
 export default class ReloadCommand extends DualCommand {
@@ -266,7 +266,7 @@ export default class ReloadCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(await this.#run(hypixelMessage.commandData.args[0], hypixelMessage.commandData.args[1]));
 	}
 }

@@ -8,7 +8,7 @@ import { getUuidAndIgn, logger, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { Awaited } from '../../types/util';
 
 
@@ -34,7 +34,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 	 * @param ctx
 	 * @param ignOrUuid
 	 */
-	override async _fetchData(ctx: CommandInteraction | HypixelMessage, ignOrUuid: string) { // eslint-disable-line class-methods-use-this
+	override async _fetchData(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid: string) { // eslint-disable-line class-methods-use-this
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 		const [ playerData, guildData, friendsData ] = await Promise.all([
 			hypixel.player.uuid(uuid),

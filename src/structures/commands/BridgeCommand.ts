@@ -1,7 +1,7 @@
 import { BaseCommand } from './BaseCommand';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import type { CommandContext, CommandData } from './BaseCommand';
-import type { HypixelMessage } from '../chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../chat_bridge/HypixelMessage';
 import type { BridgeCommandCollection } from './BridgeCommandCollection';
 
 
@@ -74,8 +74,8 @@ export class BridgeCommand extends BaseCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	runMinecraft(hypixelMessage: HypixelMessage<true>): unknown;
-	async runMinecraft(hypixelMessage: HypixelMessage<true>) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
+	runMinecraft(hypixelMessage: HypixelUserMessage): unknown;
+	async runMinecraft(hypixelMessage: HypixelUserMessage) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
 		throw new Error('no run function specified');
 	}
 }

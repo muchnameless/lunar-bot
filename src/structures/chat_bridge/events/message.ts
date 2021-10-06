@@ -15,7 +15,7 @@ import { MessageUtil } from '../../../util';
 import { logger, stringToMS } from '../../../functions';
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
 import type { EventContext } from '../../events/BaseEvent';
-import type { HypixelMessage } from '../HypixelMessage';
+import type { HypixelMessage, HypixelUserMessage } from '../HypixelMessage';
 import type MathsCommand from '../../../commands/general/maths';
 
 
@@ -277,7 +277,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	 * update player activity, execute triggers / command
 	 * @param hypixelMessage
 	 */
-	async #handleUserMessage(hypixelMessage: HypixelMessage<true>) {
+	async #handleUserMessage(hypixelMessage: HypixelUserMessage) {
 		const { player } = hypixelMessage;
 
 		// player activity
@@ -416,10 +416,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (!hypixelMessage.rawContent.length) return;
 
 		if (!hypixelMessage.isUserMessage()) {
-			if (!hypixelMessage
-				// @ts-expect-error
-				.me
-			) return this.#handleServerMessage(hypixelMessage);
+			if (!hypixelMessage.me) return this.#handleServerMessage(hypixelMessage);
 			return;
 		}
 

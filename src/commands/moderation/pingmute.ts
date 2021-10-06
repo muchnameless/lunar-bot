@@ -6,7 +6,7 @@ import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Player } from '../../structures/database/models/Player';
 import type { CommandInteraction } from 'discord.js';
-import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { SlashCommandData } from '../../structures/commands/SlashCommand';
 import type { BridgeCommandData } from '../../structures/commands/BridgeCommand';
 
@@ -63,7 +63,7 @@ export default class PingMuteCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		const [ INPUT ] = hypixelMessage.commandData.args;
 
 		return hypixelMessage.reply(await this._generateReply(

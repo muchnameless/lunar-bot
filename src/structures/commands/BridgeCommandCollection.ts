@@ -3,7 +3,7 @@ import { compareAlphabetically, logger } from '../../functions';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import type { BridgeCommand } from './BridgeCommand';
 import type { DualCommand } from './DualCommand';
-import type { HypixelMessage } from '../chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../chat_bridge/HypixelMessage';
 
 
 type BridgeCommandType = BridgeCommand | DualCommand;
@@ -38,7 +38,7 @@ export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommand
 	 * help command run method
 	 * @param hypixelMessage
 	 */
-	async help(hypixelMessage: HypixelMessage<true>) {
+	async help(hypixelMessage: HypixelUserMessage) {
 		try {
 			return await this.get('help')?.runMinecraft(hypixelMessage);
 		} catch (error) {

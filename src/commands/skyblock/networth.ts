@@ -6,7 +6,7 @@ import { getMainProfile, getUuidAndIgn, logger, seconds, shortenNumber, upperCas
 import BaseWeightCommand from './~base-weight';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { SkyBlockProfile } from '../../functions';
 import type { MaroPlayerData } from '../../structures/MaroClient';
 
@@ -32,7 +32,7 @@ export default class NetworthCommand extends BaseWeightCommand {
 	 * @param ignOrUuid command arguments
 	 * @param profileName
 	 */
-	override async _generateReply(ctx: CommandInteraction | HypixelMessage, ignOrUuid?: string | null, profileName?: string | null) {
+	override async _generateReply(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid?: string | null, profileName?: string | null) {
 		try {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid) as SkyBlockProfile[];

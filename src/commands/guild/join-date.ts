@@ -10,7 +10,7 @@ import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
-import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
 
 interface JoinInfo {
@@ -154,7 +154,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(await this.#generateReply(
 			hypixelMessage.chatBridge,
 			hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,

@@ -10,19 +10,18 @@ import type { Message as DiscordMessage } from 'discord.js';
 import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
 import type { BroadcastOptions, ChatBridge, ChatOptions } from './ChatBridge';
 import type { ChatPacket } from './bot_events/chat';
-import type { If } from '../../types/util';
 import type { BridgeCommand } from '../commands/BridgeCommand';
 import type { DualCommand } from '../commands/DualCommand';
 
 
 export type HypixelMessageType = keyof typeof MESSAGE_TYPES;
 
-type CommandData<UserMessage extends boolean> = If<UserMessage, {
+type CommandData = {
 	name: string | null,
 	command: BridgeCommand | DualCommand | null,
 	args: string[],
 	prefix: string | null,
-}>;
+};
 
 type AwaitConfirmationOptions = Partial<BroadcastOptions> & Partial<ChatOptions> & {
 	question?: string;
@@ -31,10 +30,17 @@ type AwaitConfirmationOptions = Partial<BroadcastOptions> & Partial<ChatOptions>
 	errorMessage?: string;
 };
 
+export interface HypixelUserMessage extends HypixelMessage {
+	type: NonNullable<HypixelMessage['type']>;
+	author: NonNullable<HypixelMessage['author']>;
+	spam: false;
+	commandData: NonNullable<HypixelMessage['commandData']>;
+}
+
 
 export const ChatMessage = loader(MC_CLIENT_VERSION);
 
-export class HypixelMessage<UserMessage extends boolean = boolean> {
+export class HypixelMessage {
 	/**
 	 * the chat bridge that instantiated the message
 	 */
@@ -62,11 +68,11 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 	/**
 	 * message type
 	 */
-	declare type: If<UserMessage, HypixelMessageType>;
-	declare author: If<UserMessage, HypixelMessageAuthor>;
+	declare type: HypixelMessageType | null;
+	declare author: HypixelMessageAuthor | null;
 	content: string;
 	spam: boolean;
-	declare commandData: CommandData<UserMessage>;
+	declare commandData: CommandData | null;
 
 	/**
 	 * @param chatBridge
@@ -88,8 +94,8 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)])?: /);
 
 		if (matched) {
-			(this as HypixelMessage<true>).type = (matched.groups!.type?.toUpperCase() as HypixelMessageType ?? (matched.groups!.whisper ? MESSAGE_TYPES.WHISPER : null));
-			(this as HypixelMessage<true>).author = new HypixelMessageAuthor(
+			this.type = (matched.groups!.type?.toUpperCase() as HypixelMessageType ?? (matched.groups!.whisper ? MESSAGE_TYPES.WHISPER : null));
+			this.author = new HypixelMessageAuthor(
 				this.chatBridge,
 				matched.groups!.whisper !== 'To'
 					? {
@@ -114,7 +120,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 
 			// message was sent from the bot -> don't parse input
 			if (this.me) {
-				(this as HypixelMessage<false>).commandData = null;
+				this.commandData = null;
 				return;
 			}
 
@@ -130,7 +136,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 			const COMMAND_NAME = args.shift(); // extract first word
 
 			// no command, only ping or prefix
-			(this as HypixelMessage<true>).commandData = (!prefixMatched && this.type !== MESSAGE_TYPES.WHISPER) || !COMMAND_NAME
+			this.commandData = (!prefixMatched && this.type !== MESSAGE_TYPES.WHISPER) || !COMMAND_NAME
 				? {
 					name: null,
 					command: null,
@@ -143,11 +149,11 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 					prefix: prefixMatched,
 				};
 		} else {
-			(this as HypixelMessage<false>).type = null;
-			(this as HypixelMessage<false>).author = null;
+			this.type = null;
+			this.author = null;
 			this.content = this.cleanedContent;
 			this.spam = spamMessages.test(this.content);
-			(this as HypixelMessage<false>).commandData = null;
+			this.commandData = null;
 		}
 	}
 
@@ -208,7 +214,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 	/**
 	 * wether the message was sent by a non-bot user
 	 */
-	isUserMessage(): this is HypixelMessage<true> {
+	isUserMessage(): this is HypixelUserMessage {
 		return this.type !== null && !this.me;
 	}
 

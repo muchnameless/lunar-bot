@@ -5,7 +5,7 @@ import { autocorrect, escapeIgn, getUuidAndIgn, logger, seconds, upperCaseFirstC
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
-import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { SkyBlockProfile, WeightData } from '../../functions';
 
 
@@ -28,7 +28,7 @@ export default class BaseWeightCommand extends DualCommand {
 	 * @param ignOrUuid command arguments
 	 * @param profileName
 	 */
-	async _generateReply(ctx: CommandInteraction | HypixelMessage, ignOrUuid?: string | null, profileName?: string | null) {
+	async _generateReply(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid?: string | null, profileName?: string | null) {
 		try {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const profiles = await hypixel.skyblock.profiles.uuid(uuid) as SkyBlockProfile[];
@@ -81,7 +81,7 @@ export default class BaseWeightCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		const [ IGN, PROFILE_NAME_INPUT ] = hypixelMessage.commandData.args;
 
 		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');

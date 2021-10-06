@@ -5,7 +5,7 @@ import { BridgeCommand } from '../../../commands/BridgeCommand';
 import type { CommandContext } from '../../../commands/BaseCommand';
 import type { Collection } from 'discord.js';
 import type { DualCommand } from '../../../commands/DualCommand';
-import type { HypixelMessage } from '../../HypixelMessage';
+import type { HypixelUserMessage } from '../../HypixelMessage';
 
 
 export default class HelpBridgeCommand extends BridgeCommand {
@@ -32,7 +32,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override runMinecraft(hypixelMessage: HypixelMessage<true>) {
+	override runMinecraft(hypixelMessage: HypixelUserMessage) {
 		// default help
 		if (!hypixelMessage.commandData.args.length) {
 			const reply = [

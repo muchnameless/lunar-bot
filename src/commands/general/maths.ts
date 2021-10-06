@@ -6,7 +6,7 @@ import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
 
 interface Operator {
@@ -418,7 +418,7 @@ export default class MathsCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override runMinecraft(hypixelMessage: HypixelMessage<true>) {
+	override runMinecraft(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(this.#generateReply(hypixelMessage.commandData.args.join('')));
 	}
 }

@@ -4,7 +4,7 @@ import { minutes } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type GuildCommand from '../guild/guild';
 
 
@@ -38,7 +38,7 @@ export default class SmiteCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
 		const TARGET_INPUT = hypixelMessage.commandData.args[0].toLowerCase();
 		const target = await guildCommand.getMuteTarget(TARGET_INPUT);

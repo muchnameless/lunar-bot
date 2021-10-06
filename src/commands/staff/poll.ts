@@ -9,7 +9,7 @@ import { minutes, seconds, stringToMS, upperCaseFirstChar } from '../../function
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
 
 
@@ -74,10 +74,10 @@ export default class PollCommand extends DualCommand {
 
 			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set<string>() }));
 			const optionsCount = pollOptions.length;
-			const hypixelMessages: Promise<HypixelMessage<true>[]> = chatBridge.minecraft.awaitMessages({
+			const hypixelMessages = chatBridge.minecraft.awaitMessages({
 				filter: hypixelMessage => hypixelMessage.isUserMessage() && hypixelMessage.type === MESSAGE_TYPES.GUILD,
 				time: DURATION,
-			});
+			}) as Promise<HypixelUserMessage[]>;
 			const discordChannel = chatBridge.discord.get(MESSAGE_TYPES.GUILD)!.channel;
 			const discordMessages = discordChannel.awaitMessages({
 				filter: discordMessage => MessageUtil.isUserMessage(discordMessage),
@@ -169,7 +169,7 @@ export default class PollCommand extends DualCommand {
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	override async runMinecraft(hypixelMessage: HypixelMessage<true>) {
+	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		const inputMatched = hypixelMessage.content
 			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
 			?.flatMap((x) => {

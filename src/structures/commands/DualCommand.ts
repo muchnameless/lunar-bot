@@ -3,7 +3,7 @@ import { BaseCommandCollection } from './BaseCommandCollection';
 import type { CommandContext } from './BaseCommand';
 import type { SlashCommandData } from './SlashCommand';
 import type { BridgeCommand, BridgeCommandData } from './BridgeCommand';
-import type { HypixelMessage } from '../chat_bridge/HypixelMessage';
+import type { HypixelUserMessage } from '../chat_bridge/HypixelMessage';
 
 
 export class DualCommand extends SlashCommand implements Omit<BridgeCommand, 'collection' | 'load' | 'unload' | 'clearCooldowns'> {
@@ -93,9 +93,9 @@ export class DualCommand extends SlashCommand implements Omit<BridgeCommand, 'co
 	 * execute the command
 	 * @param hypixelMessage
 	 */
-	runMinecraft(hypixelMessage: HypixelMessage<true>): unknown;
-	async runMinecraft(hypixelMessage: HypixelMessage<true>): Promise<unknown>;
-	async runMinecraft(hypixelMessage: HypixelMessage<true>) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
+	runMinecraft(hypixelMessage: HypixelUserMessage): unknown;
+	async runMinecraft(hypixelMessage: HypixelUserMessage): Promise<unknown>;
+	async runMinecraft(hypixelMessage: HypixelUserMessage) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
 		throw new Error('no run function specified');
 	}
 }
