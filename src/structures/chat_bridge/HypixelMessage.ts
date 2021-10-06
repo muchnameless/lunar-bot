@@ -31,6 +31,7 @@ type AwaitConfirmationOptions = Partial<BroadcastOptions> & Partial<ChatOptions>
 };
 
 export interface HypixelUserMessage extends HypixelMessage {
+	position: 'CHAT',
 	type: NonNullable<HypixelMessage['type']>;
 	author: NonNullable<HypixelMessage['author']>;
 	spam: false;
@@ -208,7 +209,7 @@ export class HypixelMessage {
 	 * to make methods for dc messages compatible with mc messages
 	 */
 	get member() {
-		return this.author?.member;
+		return this.author?.member ?? null;
 	}
 
 	/**
