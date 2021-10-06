@@ -1,6 +1,6 @@
 import { GuildMember, MessageEmbed, Permissions, Formatters } from 'discord.js';
 import pkg from 'sequelize';
-const { Model, DataTypes } = pkg;
+const { Model, DataTypes, fn } = pkg;
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
 import {
@@ -32,6 +32,7 @@ import { GuildMemberUtil, GuildUtil, MessageEmbedUtil, UserUtil } from '../../..
 import { hypixel } from '../../../api/hypixel';
 import { mojang } from '../../../api/mojang';
 import {
+	days,
 	escapeIgn,
 	getMainProfile,
 	getSenitherDungeonWeight,
@@ -114,15 +115,20 @@ interface PlayerAttributes {
 	paid: boolean;
 	mainProfileId: string | null;
 	mainProfileName: string | null;
-	xpLastUpdatedAt: number | null;
+	xpLastUpdatedAt: Date | null;
 	xpUpdatesDisabled: boolean;
 	discordMemberUpdatesDisabled: boolean;
 	farmingLvlCap: number;
 	guildXpDay: string | null;
 	guildXpDaily: number;
+	lastDiscordActivity: Date;
 }
 
-type PlayerCreationAttributes = Optional<PlayerAttributes, 'ign' | 'discordId' | 'guildId' | 'guildRankPriority' | 'inDiscord' | 'mutedTill' | '_infractions' | 'hasDiscordPingPermission' | 'notes' | 'paid' | 'mainProfileId' | 'mainProfileName' | 'xpLastUpdatedAt' | 'xpUpdatesDisabled' | 'discordMemberUpdatesDisabled' | 'farmingLvlCap' | 'guildXpDay' | 'guildXpDaily'>;
+type PlayerCreationAttributes = Optional<PlayerAttributes,
+	'ign' | 'discordId' | 'guildId' | 'guildRankPriority' | 'inDiscord' | 'mutedTill' | '_infractions'
+		| 'hasDiscordPingPermission' | 'notes' | 'paid' | 'mainProfileId' | 'mainProfileName' | 'xpLastUpdatedAt' | 'xpUpdatesDisabled'
+		| 'discordMemberUpdatesDisabled' | 'farmingLvlCap' | 'guildXpDay' | 'guildXpDaily' | 'lastDiscordActivity'
+>;
 
 interface PlayerInGuild extends Player {
 	hypixelGuild: HypixelGuild;
@@ -151,12 +157,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare paid: boolean;
 	declare mainProfileId: string | null;
 	declare mainProfileName: string | null;
-	declare xpLastUpdatedAt: number | null;
+	declare xpLastUpdatedAt: Date | null;
 	declare xpUpdatesDisabled: boolean;
 	declare discordMemberUpdatesDisabled: boolean;
 	declare farmingLvlCap: number;
 	declare guildXpDay: string | null;
 	declare guildXpDaily: number;
+	declare lastDiscordActivity: Date;
 
 	declare tamingXp: number;
 	declare farmingXp: number;
@@ -428,7 +435,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				allowNull: true,
 			},
 			xpLastUpdatedAt: {
-				type: DataTypes.BIGINT,
+				type: DataTypes.DATE,
 				defaultValue: null,
 				allowNull: true,
 			},
@@ -459,6 +466,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			guildXpDaily: {
 				type: DataTypes.INTEGER,
 				defaultValue: 0,
+				allowNull: false,
+			},
+
+			lastDiscordActivity: {
+				type: DataTypes.DATE,
+				defaultValue: fn('NOW'),
 				allowNull: false,
 			},
 
@@ -695,7 +708,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				throw `unable to find main profile named '${this.mainProfileName}' -> resetting name`;
 			}
 
-			this.xpLastUpdatedAt = Date.now();
+			this.xpLastUpdatedAt = new Date();
 
 			/**
 			 * SKILLS
@@ -977,6 +990,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
 		}
 
+		// activity
+		if (Date.now() - this.lastDiscordActivity.getTime() > config.get('INACTIVE_ROLE_TIME')) {
+			if (!member.roles.cache.has(config.get('INACTIVE_ROLE_ID'))) rolesToAdd.push(config.get('INACTIVE_ROLE_ID'));
+		} else if (member.roles.cache.has(config.get('INACTIVE_ROLE_ID'))) {
+			rolesToRemove.push(config.get('INACTIVE_ROLE_ID'));
+		}
+
 		// api call
 		return this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason });
 	}
@@ -1205,7 +1225,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (member) {
 			const { config } = this.client;
-			const rolesToAdd = (Date.now() - this.createdAt.getTime() >= 7 * 24 * 60 * 60_000) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
+			const rolesToAdd = (Date.now() - this.createdAt.getTime() >= days(7)) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
 				? [ config.get('EX_GUILD_ROLE_ID') ] // add ex guild role if player stayed for more than 1 week
 				: [];
 			const rolesToRemove = GuildMemberUtil.getRolesToPurge(member);

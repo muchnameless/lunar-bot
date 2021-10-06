@@ -1,6 +1,6 @@
+import { regExpEsc } from '@sapphire/utilities';
 import { BROADCAST_EMOJI } from '../constants';
-import { MessageUtil } from '../util';
-import { escapeRegex } from '../functions';
+import { MessageUtil, UserUtil } from '../util';
 import { Event } from '../structures/events/Event';
 import type { Message } from 'discord.js';
 import type { EventContext, EventData } from '../structures/events/BaseEvent';
@@ -19,16 +19,21 @@ export default class MessageCreateEvent extends Event {
 	 * @param isEdit
 	 */
 	_handleDiscordMessage(message: Message, isEdit = false) {
+		// chat bridge
+		this.client.chatBridges.handleDiscordMessage(message, { isEdit });
+
 		// channel specific triggers
 		if (message.channelId === this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) {
 			MessageUtil.react(message, BROADCAST_EMOJI);
 		}
 
-		// chat bridge
-		this.client.chatBridges.handleDiscordMessage(message, { isEdit });
+		// player activity
+		UserUtil.getPlayer(message.author)?.update({
+			lastDiscordActivity: new Date(),
+		});
 
 		// "old" commands
-		if (MessageUtil.isUserMessage(message) && new RegExp(`^(?:${[ escapeRegex(this.config.get('PREFIXES')[0]), `<@!?${this.client.user!.id}>` ].join('|')})`, 'i').test(message.content)) {
+		if (MessageUtil.isUserMessage(message) && new RegExp(`^(?:${[ regExpEsc(this.config.get('PREFIXES')[0]), `<@!?${this.client.user!.id}>` ].join('|')})`, 'i').test(message.content)) {
 			MessageUtil.reply(message, 'all commands have been converted to slash commands, type (not send) `/` to see them');
 		}
 	}
