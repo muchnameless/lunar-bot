@@ -14,7 +14,12 @@ export class ConfigManager extends ModelManager<Config> {
 		const UPPERCASED_KEY = key.toUpperCase();
 		const dbEntry = this.cache.get(UPPERCASED_KEY);
 
-		if (!dbEntry) return this.add({ key: UPPERCASED_KEY, value: typeof value !== 'string' ? JSON.stringify(value) : value });
+		if (!dbEntry) return this.add({
+			key: UPPERCASED_KEY,
+			value: typeof value !== 'string'
+				? JSON.stringify(value)
+				: value,
+		});
 
 		dbEntry.value = value as string;
 		return dbEntry.save();
