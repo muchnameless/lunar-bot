@@ -26,7 +26,7 @@ import {
 	XP_OFFSETS_TIME,
 	Y_EMOJI_ALT,
 } from '../constants';
-import { upperCaseFirstChar } from '.';
+import { days, minutes, upperCaseFirstChar } from '.';
 import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api/cache';
 import type {
@@ -268,7 +268,7 @@ function createActionRows(client: LunarClient, cacheKey: CacheKey, { page, lbTyp
  * @param config
  */
 export function getDefaultOffset(config: ConfigManager) {
-	return (config.get('COMPETITION_RUNNING') || (Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= 24 * 60 * 60 * 1_000)
+	return (config.get('COMPETITION_RUNNING') || (Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= days(1))
 		? OFFSET_FLAGS.COMPETITION_START
 		: config.get('DEFAULT_XP_OFFSET'));
 }
@@ -300,7 +300,7 @@ export async function handleLeaderboardCommandInteraction(interaction: ChatInter
 	await cache.set(
 		CACHE_KEY,
 		embeds.map(embed => embed.toJSON?.() ?? embed),
-		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
+		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
 	);
 }
 
@@ -367,7 +367,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 	if (IS_RELOAD) await cache.set(
 		CACHE_KEY,
 		embeds.map(embed => embed.toJSON?.() ?? embed),
-		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
+		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
 	);
 }
 
@@ -449,7 +449,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 	await cache.set(
 		CACHE_KEY,
 		embeds.map(embed => embed.toJSON?.() ?? embed),
-		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * 60_000,
+		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
 	);
 }
 

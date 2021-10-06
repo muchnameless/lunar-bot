@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import { FetchError } from './errors/FetchError';
 import type { RequestInit, Response } from 'node-fetch';
 import type { Components } from '@zikeji/hypixel';
-import { logger } from '../functions';
+import { logger, seconds } from '../functions';
 
 
 export type MaroPlayerData = Components.Schemas.SkyBlockProfileMember & { banking?: Components.Schemas.SkyBlockProfileBanking };
@@ -112,7 +112,7 @@ export class MaroClient {
 	 */
 	constructor({ cache, timeout, retries }: MaroClientOptions = {}) {
 		this.cache = cache;
-		this.timeout = timeout ?? 10_000;
+		this.timeout = timeout ?? seconds(10);
 		this.retries = retries ?? 1;
 	}
 

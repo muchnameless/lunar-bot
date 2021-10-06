@@ -3,7 +3,7 @@ import { mojang } from '../../api/mojang';
 import { hypixel } from '../../api/hypixel';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { logger } from '../../functions';
+import { logger, seconds } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -17,7 +17,7 @@ export default class GuildOfCommand extends DualCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s current hypixel guild')
 				.addStringOption(requiredIgnOption),
-			cooldown: 1,
+			cooldown: seconds(1),
 		}, {
 			aliases: [ 'guild' ],
 			args: 1,

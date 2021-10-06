@@ -3,6 +3,7 @@ import pkg from 'sequelize';
 const { Op } = pkg;
 import { oneLine } from 'common-tags';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
+import { seconds } from '../../functions';
 import { InteractionUtil } from '../../util';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
@@ -16,7 +17,7 @@ export default class UnlinkCommand extends SlashCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('remove a link between a discord user and a minecraft ign')
 				.addStringOption(requiredPlayerOption),
-			cooldown: 1,
+			cooldown: seconds(1),
 		});
 	}
 

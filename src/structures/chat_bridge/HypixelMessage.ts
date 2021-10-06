@@ -1,10 +1,11 @@
+import { regExpEsc } from '@sapphire/utilities';
 import loader from 'prismarine-chat';
 import { INVISIBLE_CHARACTER_REGEXP, MC_CLIENT_VERSION, MESSAGE_POSITIONS, MESSAGE_TYPES, spamMessages } from './constants';
 import { NO_PING_EMOJI } from '../../constants';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { MessageUtil } from '../../util';
 import { mojang } from '../../api/mojang';
-import { escapeRegex, logger, uuidToImgurBustURL } from '../../functions';
+import { logger, seconds, uuidToImgurBustURL } from '../../functions';
 import type { Message as DiscordMessage } from 'discord.js';
 import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
 import type { BroadcastOptions, ChatBridge, ChatOptions } from './ChatBridge';
@@ -23,7 +24,12 @@ type CommandData<UserMessage extends boolean> = If<UserMessage, {
 	prefix: string | null,
 }>;
 
-type AwaitConfirmationOptions = Partial<BroadcastOptions> & Partial<ChatOptions> & { question?: string, timeoutSeconds?: number, errorMessage?: string };
+type AwaitConfirmationOptions = Partial<BroadcastOptions> & Partial<ChatOptions> & {
+	question?: string;
+	/** time in milliseconds to wait for a response */
+	time?: number;
+	errorMessage?: string;
+};
 
 
 export const ChatMessage = loader(MC_CLIENT_VERSION);
@@ -113,7 +119,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 			}
 
 			const prefixMatched = new RegExp(
-				`^(?:${[ ...this.client.config.get('PREFIXES').map(x => escapeRegex(x)), `@${this.chatBridge.bot!.username}` ].join('|')})`,
+				`^(?:${[ ...this.client.config.get('PREFIXES').map(x => regExpEsc(x)), `@${this.chatBridge.bot!.username}` ].join('|')})`,
 				'i',
 			).exec(this.content)?.[0] ?? null; // PREFIXES, @mention
 
@@ -317,7 +323,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 	 * @param questionOrOptions
 	 */
 	async awaitConfirmation(questionOrOptions: string | AwaitConfirmationOptions = {}) {
-		const { question = 'confirm this action?', timeoutSeconds = 60, errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
+		const { question = 'confirm this action?', time = seconds(60), errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
 			? { question: questionOrOptions } as AwaitConfirmationOptions
 			: questionOrOptions;
 
@@ -329,7 +335,7 @@ export class HypixelMessage<UserMessage extends boolean = boolean> {
 		const result = await this.chatBridge.minecraft.awaitMessages({
 			filter: hypixelMessage => hypixelMessage.author?.ign === this.author!.ign,
 			max: 1,
-			time: timeoutSeconds * 1_000,
+			time,
 		});
 
 		if (this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase())) return;

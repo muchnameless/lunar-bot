@@ -16,6 +16,7 @@ import { mojang } from '../../../api/mojang';
 import {
 	cleanFormattedNumber,
 	compareAlphabetically,
+	days,
 	logger,
 	mutedCheck,
 	safePromiseAll,
@@ -513,12 +514,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 								// reset current xp to 0
 								await player.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT, typesToReset: SKYBLOCK_XP_TYPES }).catch(error => logger.error(error));
 
-								const XP_LAST_UPDATED_AT = Number(player.xpLastUpdatedAt);
+								const XP_LAST_UPDATED_AT = player.xpLastUpdatedAt?.getTime() ?? Number.NEGATIVE_INFINITY;
 								// shift the daily array for the amount of daily resets missed
 								const DAYS_PASSED_SINCE_LAST_XP_UPDATE = Math.max(
 									0,
 									Math.min(
-										Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - XP_LAST_UPDATED_AT) / (24 * 60 * 60 * 1_000)),
+										Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - XP_LAST_UPDATED_AT) / days(1)),
 										player.guildXpHistory.length,
 									),
 								);

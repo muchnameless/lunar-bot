@@ -5,7 +5,7 @@ import ms from 'ms';
 import { MESSAGE_TYPES } from '../../structures/chat_bridge/constants';
 import { buildGuildOption } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../util';
-import { stringToMS, upperCaseFirstChar } from '../../functions';
+import { minutes, seconds, stringToMS, upperCaseFirstChar } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -45,7 +45,7 @@ export default class PollCommand extends DualCommand {
 		super(context, {
 			aliases: [],
 			slash,
-			cooldown: 1,
+			cooldown: seconds(1),
 		}, {
 			aliases: [],
 			args: 1,
@@ -66,11 +66,11 @@ export default class PollCommand extends DualCommand {
 		if (chatBridge.pollUntil) return `poll already in progress, ends ${Formatters.time(new Date(chatBridge.pollUntil), Formatters.TimestampStyles.RelativeTime)}`;
 
 		try {
-			const DURATION = duration
-				? Math.min(Math.max(stringToMS(duration), 30_000), 10 * 60_000) || 60_000
-				: 60_000;
+			const DURATION = typeof duration === 'string'
+				? Math.min(Math.max(stringToMS(duration), seconds(30)), minutes(10)) || minutes(1)
+				: minutes(1);
 
-			chatBridge.pollUntil = Date.now() + Math.min(Math.max(DURATION, 30_000), 10 * 60_000);
+			chatBridge.pollUntil = Date.now() + DURATION;
 
 			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set<string>() }));
 			const optionsCount = pollOptions.length;

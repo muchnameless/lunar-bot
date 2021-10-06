@@ -49,7 +49,7 @@ export class SlashCommand extends BaseCommand {
 		super(context, data);
 
 		this.aliases = aliases?.filter(Boolean).length
-			? aliases.filter(Boolean)
+			? aliases.flatMap(alias => (!alias ? [] : alias.toLowerCase()))
 			: null;
 		this.slash = slash;
 

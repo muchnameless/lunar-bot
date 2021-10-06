@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { xpTypeOption, pageOption, offsetOption, buildGuildOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { handleLeaderboardCommandInteraction } from '../../functions';
+import { handleLeaderboardCommandInteraction, seconds } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { LeaderboardXPOffsets, LeaderboardXPTypes } from '../../functions';
@@ -18,7 +18,7 @@ export default class TopCommand extends SlashCommand {
 				.addIntegerOption(pageOption)
 				.addStringOption(offsetOption)
 				.addStringOption(buildGuildOption(context.client, true)),
-			cooldown: 1,
+			cooldown: seconds(1),
 		});
 	}
 

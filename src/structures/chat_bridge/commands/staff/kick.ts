@@ -1,3 +1,4 @@
+import { seconds } from '../../../../functions';
 import { BridgeCommand } from '../../../commands/BridgeCommand';
 import type { CommandContext } from '../../../commands/BaseCommand';
 import type { HypixelMessage } from '../../HypixelMessage';
@@ -11,7 +12,7 @@ export default class KickBridgeCommand extends BridgeCommand {
 			description: 'kick a player from the guild',
 			args: 2,
 			usage: '[`IGN`] [`reason`]',
-			cooldown: 60,
+			cooldown: seconds(10),
 			requiredRoles: () => [
 				this.config.get('MODERATOR_ROLE_ID'),
 				this.config.get('DANKER_STAFF_ROLE_ID'),

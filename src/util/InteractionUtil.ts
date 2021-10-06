@@ -1,7 +1,7 @@
 import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } from 'discord.js';
 import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
-import { logger, makeContent, validateDiscordId, validateMinecraftUuid } from '../functions';
+import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
 import type {
 	BaseGuildTextChannel,
 	CommandInteraction,
@@ -44,6 +44,19 @@ interface GetPlayerOptions {
 	throwIfNotFound?: boolean;
 }
 
+interface AwaitReplyOptions extends InteractionReplyOptions {
+	question?: string;
+	/** time in milliseconds to wait for a response */
+	time?: number;
+}
+
+interface AwaitConfirmationOptions extends InteractionReplyOptions {
+	question?: string;
+	/** time in milliseconds to wait for a response */
+	time?: number;
+	errorMessage?: string;
+}
+
 
 export default class InteractionUtil extends null {
 	/**
@@ -51,7 +64,7 @@ export default class InteractionUtil extends null {
 	 */
 	static CACHE = new WeakMap<Interaction, InteractionData>();
 
-	static AUTO_DEFER_TIMEOUT = 1_000;
+	static AUTO_DEFER_TIMEOUT = seconds(1);
 
 	/**
 	 * @param interaction
@@ -318,8 +331,8 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param questionOrOptions
 	 */
-	static async awaitReply(interaction: ChatInteraction, questionOrOptions: InteractionReplyOptions & { question?: string; timeoutSeconds?: number; } = {}) {
-		const { question = 'confirm this action?', timeoutSeconds = 60, ...options } = typeof questionOrOptions === 'string'
+	static async awaitReply(interaction: ChatInteraction, questionOrOptions: string | AwaitReplyOptions = {}) {
+		const { question = 'confirm this action?', time = seconds(60), ...options } = typeof questionOrOptions === 'string'
 			? { question: questionOrOptions }
 			: questionOrOptions;
 
@@ -334,7 +347,7 @@ export default class InteractionUtil extends null {
 			const collected = await channel.awaitMessages({
 				filter: msg => msg.author.id === interaction.user.id,
 				max: 1,
-				time: timeoutSeconds * 1_000,
+				time,
 				errors: [ 'time' ],
 			});
 
@@ -349,8 +362,8 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param questionOrOptions
 	 */
-	static async awaitConfirmation(interaction: ChatInteraction, questionOrOptions: string | InteractionReplyOptions & { question?: string; timeoutSeconds?: number; errorMessage?: string; } = {}) {
-		const { question = 'confirm this action?', timeoutSeconds = 60, errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
+	static async awaitConfirmation(interaction: ChatInteraction, questionOrOptions: string | AwaitConfirmationOptions = {}) {
+		const { question = 'confirm this action?', time = seconds(60), errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
 			? { question: questionOrOptions }
 			: questionOrOptions;
 
@@ -395,7 +408,7 @@ export default class InteractionUtil extends null {
 						}
 						return false;
 					})()),
-				time: timeoutSeconds * 1_000,
+				time,
 			});
 
 			const success = result.customId === SUCCESS_ID;

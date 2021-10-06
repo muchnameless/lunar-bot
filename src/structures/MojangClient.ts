@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { MojangAPIError } from './errors/MojangAPIError';
-import { validateMinecraftIgn, validateMinecraftUuid } from '../functions';
+import { days, seconds, validateMinecraftIgn, validateMinecraftUuid } from '../functions';
 import type { Response } from 'node-fetch';
 
 
@@ -36,7 +36,7 @@ export class MojangClient {
 	 */
 	constructor({ cache, timeout, retries }: MojangClientOptions = {}) {
 		this.cache = cache;
-		this.timeout = timeout ?? 10_000;
+		this.timeout = timeout ?? seconds(10);
 		this.retries = retries ?? 1;
 	}
 
@@ -170,28 +170,28 @@ export class MojangClient {
 			/**
 			 * mojang api currently ignores ?at= [https://bugs.mojang.com/browse/WEB-3367]
 			 */
-			// case 204: { // invalid ign
-			// 	if (queryType === 'ign') { // retry a past date if name was queried
-			// 		let timestamp = Date.now();
+			case 204: { // invalid ign
+				if (queryType === 'ign') { // retry a past date if name was queried
+					let timestamp = Date.now();
 
-			// 		// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
-			// 		while (((timestamp -= 2_592_000_000) >= 1_423_008_000_000)) {
-			// 			const pastRes = await this.#request(`${path}${query}?at=${timestamp}`);
+					// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
+					while (((timestamp -= days(30)) >= Date.parse('2015-02-04T00:00:00.000Z'))) {
+						const pastRes = await this.#request(`${path}${query}?at=${timestamp}`);
 
-			// 			if (pastRes.status === 200) {
-			// 				const { id: uuid, name: ign } = await res.json() as { id: string, name: string };
-			// 				const response = { uuid, ign };
+						if (pastRes.status === 200) {
+							const { id: uuid, name: ign } = await res.json() as { id: string, name: string };
+							const response = { uuid, ign };
 
-			// 				if (cache) {
-			// 					// only cache ign -> uuid for outdated igns
-			// 					this.cache?.set(`ign:${ign.toLowerCase()}`, response);
-			// 				}
+							if (cache) {
+								// only cache ign -> uuid for outdated igns
+								this.cache?.set(`ign:${ign.toLowerCase()}`, response);
+							}
 
-			// 				return response;
-			// 			}
-			// 		}
-			// 	}
-			// }
+							return response;
+						}
+					}
+				}
+			}
 			// falls through
 
 			default:

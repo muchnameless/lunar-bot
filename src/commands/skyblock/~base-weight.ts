@@ -1,7 +1,7 @@
 import { PROFILE_NAMES, X_EMOJI } from '../../constants';
 import { hypixel } from '../../api/hypixel';
 import { InteractionUtil } from '../../util';
-import { autocorrect, escapeIgn, getUuidAndIgn, logger, upperCaseFirstChar } from '../../functions';
+import { autocorrect, escapeIgn, getUuidAndIgn, logger, seconds, upperCaseFirstChar } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
@@ -95,7 +95,7 @@ export default class BaseWeightCommand extends DualCommand {
 				try {
 					await hypixelMessage.awaitConfirmation({
 						question: `'${upperCaseFirstChar(PROFILE_NAME_INPUT)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,
-						timeoutSeconds: 30,
+						time: seconds(30),
 					});
 				} catch (error) {
 					logger.error(error);

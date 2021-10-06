@@ -4,7 +4,7 @@ import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
 import { hypixel } from '../../api/hypixel';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { getUuidAndIgn, logger } from '../../functions';
+import { getUuidAndIgn, logger, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -22,7 +22,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s hypixel stats')
 				.addStringOption(optionalIgnOption),
-			cooldown: 0,
+			cooldown: seconds(1),
 		}, {
 			aliases: [ 'player' ],
 			args: false,

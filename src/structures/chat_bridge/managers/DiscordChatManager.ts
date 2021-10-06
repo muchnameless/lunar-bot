@@ -6,7 +6,7 @@ import { WebhookError } from '../../errors/WebhookError';
 import { ChatManager } from './ChatManager';
 import { cache } from '../../../api/cache';
 import { imgur } from '../../../api/imgur';
-import { logger } from '../../../functions';
+import { hours, logger } from '../../../functions';
 import type {
 	Collection,
 	Message,
@@ -132,7 +132,7 @@ export class DiscordChatManager extends ChatManager {
 
 		logger.info(`[DM MUTE INFO]: ${player?.logInfo ?? ''}: DMed muted user`);
 
-		cache.set(`chatbridge:muted:dm:${message.author.id}`, true, 60 * 60_000); // prevent DMing again in the next hour
+		cache.set(`chatbridge:muted:dm:${message.author.id}`, true, hours(1)); // prevent DMing again in the next hour
 	}
 
 	/**

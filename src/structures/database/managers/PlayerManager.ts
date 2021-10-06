@@ -17,6 +17,7 @@ import {
 	getWeekOfYear,
 	logger,
 	safePromiseAll,
+	seconds,
 	upperCaseFirstChar,
 } from '../../../functions';
 import { ModelManager } from './ModelManager';
@@ -249,7 +250,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 			for (const player of this.cache.values()) {
 				// @ts-expect-error hypixel.ratelimit is not typed
-				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
+				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((seconds(hypixel.rateLimit.reset)) + seconds(1));
 
 				await player.updateData({ rejectOnAPIError: true, ...options });
 			}
@@ -381,7 +382,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 				try {
 					// @ts-expect-error hypixel.ratelimit is not typed
-					if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((hypixel.rateLimit.reset * 1_000) + 1_000);
+					if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep(seconds(hypixel.rateLimit.reset) + seconds(1));
 
 					const result = await player.fetchMainProfile();
 					if (!result) continue;
@@ -488,7 +489,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// auto competition starting
 		if (config.get('COMPETITION_SCHEDULED')) {
-			if (config.get('COMPETITION_START_TIME') - 10_000 > Date.now()) {
+			if (config.get('COMPETITION_START_TIME') - seconds(10) > Date.now()) {
 				this.client.schedule('competitionStart', new CronJob({
 					cronTime: new Date(config.get('COMPETITION_START_TIME')),
 					onTick: () => this.#startCompetition(),
@@ -500,7 +501,7 @@ export class PlayerManager extends ModelManager<Player> {
 		}
 
 		// auto competition ending
-		if (config.get('COMPETITION_END_TIME') - 10_000 > Date.now()) {
+		if (config.get('COMPETITION_END_TIME') - seconds(10) > Date.now()) {
 			this.client.schedule('competitionEnd', new CronJob({
 				cronTime: new Date(config.get('COMPETITION_END_TIME')),
 				onTick: () => this.#endCompetition(),
@@ -513,7 +514,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// mayor change reset
 		const NEXT_MAYOR_TIME = config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
-		if (NEXT_MAYOR_TIME - 10_000 > Date.now()) {
+		if (NEXT_MAYOR_TIME - seconds(10) > Date.now()) {
 			this.client.schedule('mayorXpReset', new CronJob({
 				cronTime: new Date(NEXT_MAYOR_TIME),
 				onTick: () => this.#performMayorXpReset(),

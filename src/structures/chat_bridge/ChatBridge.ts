@@ -5,7 +5,7 @@ import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, MESSAGE_TYPES, PREFIX_BY_T
 import { MinecraftChatManager } from './managers/MinecraftChatManager';
 import { DiscordManager } from './managers/DiscordManager';
 import { EventCollection } from '../events/EventCollection';
-import { logger } from '../../functions';
+import { logger, minutes, seconds } from '../../functions';
 import type { Message as DiscordMessage, MessageOptions } from 'discord.js';
 import type { LunarClient } from '../LunarClient';
 import type { HypixelGuild } from '../database/models/HypixelGuild';
@@ -201,7 +201,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 				return this;
 			}
 
-			await sleep(Math.min(++this.#guildLinkAttempts * 5_000, 300_000));
+			await sleep(Math.min(++this.#guildLinkAttempts * seconds(5), minutes(5)));
 
 			return this.link(guildName);
 		}

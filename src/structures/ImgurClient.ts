@@ -5,6 +5,7 @@ import fetch from 'node-fetch';
 import ms from 'ms';
 import { FetchError } from './errors/FetchError';
 import type { RequestInit, Response } from 'node-fetch';
+import { seconds } from '../functions';
 
 
 export interface ImageData {
@@ -105,10 +106,10 @@ export class ImgurClient {
 	constructor(clientId: string, { cache, timeout, retries, rateLimitOffset, rateLimitedWaitTime }: ImgurClientOptions = {}) {
 		this.authorisation = clientId;
 		this.cache = cache;
-		this.timeout = timeout ?? 10_000;
+		this.timeout = timeout ?? seconds(10);
 		this.retries = retries ?? 1;
-		this.rateLimitOffset = rateLimitOffset ?? 1_000;
-		this.rateLimitedWaitTime = rateLimitedWaitTime ?? 60_000;
+		this.rateLimitOffset = rateLimitOffset ?? seconds(1);
+		this.rateLimitedWaitTime = rateLimitedWaitTime ?? seconds(10);
 	}
 
 	/**
@@ -202,7 +203,7 @@ export class ImgurClient {
 
 				if (data !== null) {
 					this.rateLimit[type as keyof RateLimitData] = type.endsWith('reset')
-						? NOW + (Number.parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
+						? NOW + seconds(Number.parseInt(data, 10)) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
 						: Number.parseInt(data, 10);
 				}
 			}
@@ -212,7 +213,7 @@ export class ImgurClient {
 
 				if (data !== null) {
 					this.postRateLimit[type as keyof PostRateLimitData] = type.endsWith('reset')
-						? NOW + (Number.parseInt(data, 10) * 1_000) + this.rateLimitOffset // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
+						? NOW + seconds(Number.parseInt(data, 10)) + this.rateLimitOffset // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
 						: Number.parseInt(data, 10);
 				}
 			}

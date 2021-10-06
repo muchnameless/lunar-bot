@@ -3,7 +3,7 @@ import { MessageAttachment } from 'discord.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { optionalPlayerOption, xpTypeOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { upperCaseFirstChar } from '../../functions';
+import { seconds, upperCaseFirstChar } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -21,7 +21,7 @@ export default class TrackCommand extends SlashCommand {
 				.setDescription('stats graph from the last 30 days')
 				.addStringOption(optionalPlayerOption)
 				.addStringOption(xpTypeOption),
-			cooldown: 1,
+			cooldown: seconds(1),
 		});
 	}
 

@@ -359,7 +359,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			// command cooldowns
 			if (command.timestamps) {
 				const NOW = Date.now();
-				const COOLDOWN_TIME = (command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000;
+				const COOLDOWN_TIME = command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT');
 				const IDENTIFIER = hypixelMessage.member?.id ?? hypixelMessage.author.ign;
 
 				if (command.timestamps.has(IDENTIFIER)) {

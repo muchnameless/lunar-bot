@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { InteractionUtil } from '../../util';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { seconds } from '../../functions';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -12,7 +13,7 @@ export default class PingCommand extends SlashCommand {
 			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('check API latency and WebSocket ping'),
-			cooldown: 0,
+			cooldown: seconds(1),
 		});
 	}
 

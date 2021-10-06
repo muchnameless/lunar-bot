@@ -1,7 +1,7 @@
 import ms from 'ms';
 import { COMMAND_KEY, LB_KEY } from '../constants';
 import { InteractionUtil } from '../util';
-import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, logger } from '../functions';
+import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, logger, minutes } from '../functions';
 import { Event } from '../structures/events/Event';
 import type { ButtonInteraction, CommandInteraction, ContextMenuInteraction, SelectMenuInteraction } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
@@ -22,7 +22,7 @@ export default class InteractionCreateEvent extends Event {
 	async #handleCommandInteraction(interaction: CommandInteraction) {
 		if (this.client.chatBridges.channelIds.has(interaction.channelId)) {
 			this.client.chatBridges.interactionCache.set(interaction.id, interaction);
-			setTimeout(() => this.client.chatBridges.interactionCache.delete(interaction.id), 60_000);
+			setTimeout(() => this.client.chatBridges.interactionCache.delete(interaction.id), minutes(1));
 		}
 
 		const command = this.client.commands.get(interaction.commandName);
@@ -48,7 +48,7 @@ export default class InteractionCreateEvent extends Event {
 		// command cooldowns
 		if (command.timestamps) {
 			const NOW = Date.now();
-			const COOLDOWN_TIME = (command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000;
+			const COOLDOWN_TIME = command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT');
 
 			if (command.timestamps.has(interaction.user.id)) {
 				const EXPIRATION_TIME = command.timestamps.get(interaction.user.id)! + COOLDOWN_TIME;

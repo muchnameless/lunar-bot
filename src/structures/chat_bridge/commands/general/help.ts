@@ -1,5 +1,6 @@
 import { commaListsOr } from 'common-tags';
 import ms from 'ms';
+import { seconds } from '../../../../functions';
 import { BridgeCommand } from '../../../commands/BridgeCommand';
 import type { CommandContext } from '../../../commands/BaseCommand';
 import type { Collection } from 'discord.js';
@@ -13,7 +14,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 			aliases: [ 'h' ],
 			description: 'list of all commands or info about a specific command',
 			usage: '<`command`|`category` name>',
-			cooldown: 1,
+			cooldown: seconds(1),
 		});
 	}
 
@@ -85,7 +86,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 		if (command.description) reply.push(`Description: ${command.description}`);
 		if (command.usage) reply.push(`Usage: ${command.usageInfo}`);
 
-		reply.push(`Cooldown: ${ms((command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT')) * 1_000, { long: true })}`);
+		reply.push(`Cooldown: ${ms(command.cooldown ?? this.config.get('COMMAND_COOLDOWN_DEFAULT'), { long: true })}`);
 
 		return hypixelMessage.author.send(reply.join('\n'));
 	}

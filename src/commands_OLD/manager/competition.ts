@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { commaListsOr } from 'common-tags';
 import { DUNGEON_TYPES, SKILLS } from '../../constants';
 import { InteractionUtil } from '../../util';
-import { autocorrect, logger } from '../../functions';
+import { autocorrect, logger, seconds } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -14,7 +14,7 @@ export class CompetitionCommand extends SlashCommand {
 			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('WIP'),
-			cooldown: 1,
+			cooldown: seconds(1),
 		});
 	}
 
@@ -30,7 +30,7 @@ export class CompetitionCommand extends SlashCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		const collector = interaction.channel!.createMessageCollector({
 			filter: msg => msg.author.id === interaction.user.id,
-			idle: 30_000,
+			idle: seconds(30),
 		});
 
 		let type;

@@ -4,16 +4,10 @@ import ms from 'ms';
 import jaroWinklerSimilarity from 'jaro-winkler';
 import readdirp from 'readdirp';
 import { EMBED_FIELD_MAX_CHARS } from '../constants';
-import { logger } from '.';
+import { days, logger } from '.';
 import type { URL } from 'node:url';
 import type { Merge } from '../types/util';
 
-
-/**
- * lets you insert any string as the plain string into a regex
- * @param string to escape
- */
-export const escapeRegex = (string: string) => string.replace(/[$()*+.?[\\\]^{|}]/g, '\\$&');
 
 /**
  * escapes discord markdown in igns
@@ -76,7 +70,7 @@ export function getWeekOfYear(date: Date) {
 		target.setUTCMonth(0, 1 + (((4 - target.getUTCDay()) + 7) % 7));
 	}
 
-	return Math.ceil((firstThursday - target.getTime()) / (7 * 24 * 3_600_000)) + 1;
+	return Math.ceil((firstThursday - target.getTime()) / days(7)) + 1;
 }
 
 /**

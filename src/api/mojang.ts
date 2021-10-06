@@ -1,26 +1,25 @@
 import { cache } from './cache';
 import { MOJANG_KEY } from '../constants';
 import { MojangClient } from '../structures/MojangClient';
+import { days, hours, minutes, seconds } from '../functions';
 import type { MojangResult } from '../structures/MojangClient';
 
 
 export const mojang = new MojangClient({
-	timeout: 30_000,
+	timeout: seconds(30),
 	retries: 1,
 	cache: {
 		get(key) {
 			return cache.get(`${MOJANG_KEY}:${key}`) as Promise<MojangResult | undefined>;
 		},
 		set(key, value) {
-			let ttl = 5 * 60_000;
+			let ttl = minutes(5);
 
 			// 24 hours for successful requests (changed IGNs are reserved for 37 days (30 days name change cooldown + 1 week))
 			if (key.startsWith('ign')) {
-				ttl = 24 * 60 * 60_000;
-			} else if (key.startsWith('uuid')) {
-				ttl = 60 * 60_000;
-			} else if (Reflect.has(value, 'error')) { // 1 hour for errors
-				ttl = 60 * 60_000;
+				ttl = days(1);
+			} else if (key.startsWith('uuid') || Reflect.has(value, 'error')) {
+				ttl = hours(1);
 			}
 
 			return cache.set(`${MOJANG_KEY}:${key}`, value, ttl);

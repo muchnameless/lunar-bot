@@ -21,7 +21,7 @@ import { GuildMemberUtil, MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector } from '../MessageCollector';
 import { ChatManager } from './ChatManager';
 import { cache } from '../../../api/cache';
-import { cleanFormattedNumber, logger, splitMessage, trim } from '../../../functions';
+import { cleanFormattedNumber, hours, logger, minutes, seconds, splitMessage, trim } from '../../../functions';
 import type { GuildChannel, Message } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
 import type { MessageCollectorOptions } from '../MessageCollector';
@@ -235,7 +235,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				await this.command({
 					command: `w ${this.bot!.username} o/`,
 					responseRegExp: /^You cannot message this player\.$/,
-					timeout: 1_000,
+					timeout: seconds(1),
 					rejectOnTimeout: true,
 					max: 1,
 				});
@@ -273,7 +273,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * delay which can be used after triggering anti spam
 	 */
-	static ANTI_SPAM_DELAY = 1_000 as const;
+	static ANTI_SPAM_DELAY = seconds(1);
 
 	/**
 	 * 100 pre 1.10.2, 256 post 1.10.2
@@ -360,7 +360,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		UserUtil.sendDM(discordMessage.author, info);
 		logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
-		cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, 24 * 60 * 60_000); // prevent DMing again in the next 24 hours
+		cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, hours(24)); // prevent DMing again in the next 24 hours
 	}
 
 	/**
@@ -414,7 +414,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			this.abortLoginTimeout = setTimeout(() => {
 				logger.warn('[CHATBRIDGE ABORT TIMER]: login abort triggered');
 				this.reconnect(0);
-			}, 60_000);
+			}, seconds(60));
 		}
 
 		return this;
@@ -424,14 +424,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * reconnects the bot, exponential login delay up to 10 min
 	 * @param loginDelay delay in ms
 	 */
-	reconnect(loginDelay = Math.min(Math.exp(this.loginAttempts) * 1_000, 600_000)) {
+	reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
 		return this.#reconnectPromise ??= this.#reconnect(loginDelay);
 	}
 	/**
 	 * should only ever be called from within reconnect()
 	 * @internal
 	 */
-	async #reconnect(loginDelay = Math.min(Math.exp(this.loginAttempts) * 1_000, 600_000)) {
+	async #reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
 		try {
 			this.disconnect();
 
@@ -511,7 +511,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * increments messageCounter for 10 seconds
 	 */
 	#tempIncrementCounter() {
-		setTimeout(() => --this.#messageCounter, 10_000);
+		setTimeout(() => --this.#messageCounter, seconds(10));
 		return ++this.#messageCounter;
 	}
 
@@ -563,7 +563,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				return match;
 			})
 			.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1, p2) => { // dates
-				const date = new Date(p1 * 1_000);
+				const date = new Date(seconds(p1));
 
 				if (Number.isNaN(date.getTime())) return match; // invalid date
 

@@ -1,3 +1,4 @@
+import { days, hours } from '../functions';
 import type { ArrayElement } from '../types/util';
 
 
@@ -6,7 +7,7 @@ import type { ArrayElement } from '../types/util';
  */
 
 export const SKYBLOCK_YEAR_0 = 1_560_275_700_000;
-export const MAYOR_CHANGE_INTERVAL = 446_400_000;
+export const MAYOR_CHANGE_INTERVAL = days(5) + hours(4);
 export const PROFILE_NAMES = [
 	'Apple',
 	'Banana',

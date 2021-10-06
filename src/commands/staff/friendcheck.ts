@@ -6,7 +6,7 @@ import { hypixel } from '../../api/hypixel';
 import { mojang } from '../../api/mojang';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { trim } from '../../functions';
+import { seconds, trim } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -19,7 +19,7 @@ export default class FriendCheckCommand extends SlashCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('checks which friends of the player are in the guild')
 				.addStringOption(requiredIgnOption),
-			cooldown: 0,
+			cooldown: seconds(1),
 		});
 	}
 

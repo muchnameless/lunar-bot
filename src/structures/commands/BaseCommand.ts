@@ -12,7 +12,9 @@ export interface CommandContext {
 }
 
 export interface CommandData {
+	/** command name, defaults to the file name */
 	name?: string;
+	/** command cooldown in milliseconds */
 	cooldown?: number | null;
 	/** function returning a Snowflake array */
 	requiredRoles?: RequiredRoles;
@@ -25,7 +27,7 @@ export class BaseCommand {
 	client: LunarClient;
 	collection: BaseCommandCollection;
 	/**
-	 * command name
+	 * command name (lower case)
 	 */
 	name: string;
 	/**
@@ -38,17 +40,18 @@ export class BaseCommand {
 	cooldown: number | null;
 	#requiredRoles: RequiredRoles | null;
 	timestamps: Collection<Snowflake, number> | null;
+	/** command name aliases (lower case) */
 	aliases: string[] | null = null;
 
 	/**
 	 * create a new command
 	 * @param context
-	 * @param param1
+	 * @param data
 	 */
 	constructor({ client, collection, fileName, category }: CommandContext, { name, cooldown, requiredRoles }: CommandData = {}) {
 		this.client = client;
 		this.collection = collection;
-		this.name = name ?? fileName;
+		this.name = (name ?? fileName).toLowerCase();
 		this.category = category;
 
 		this.cooldown = cooldown ?? null;
@@ -104,8 +107,8 @@ export class BaseCommand {
 	 * loads the command and possible aliases into their collections
 	 */
 	load() {
-		this.collection.set(this.name.toLowerCase(), this as unknown as CommandType);
-		if (this.aliases) for (const alias of this.aliases) this.collection.set(alias.toLowerCase(), this as unknown as CommandType);
+		this.collection.set(this.name, this as unknown as CommandType);
+		if (this.aliases) for (const alias of this.aliases) this.collection.set(alias, this as unknown as CommandType);
 		return this;
 	}
 
@@ -113,8 +116,8 @@ export class BaseCommand {
 	 * removes all aliases and the command from the commandsCollection
 	 */
 	unload() {
-		this.collection.delete(this.name.toLowerCase());
-		if (this.aliases) for (const alias of this.aliases) this.collection.delete(alias.toLowerCase());
+		this.collection.delete(this.name);
+		if (this.aliases) for (const alias of this.aliases) this.collection.delete(alias);
 		return this;
 	}
 }

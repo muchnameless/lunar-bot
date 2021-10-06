@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { setTimeout as sleep } from 'node:timers/promises';
 import ms from 'ms';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
-import { logger } from '../../functions';
+import { logger, seconds } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -23,7 +23,7 @@ export default class PurgeRolesCommand extends SlashCommand {
 	/**
 	 * time to wait between role API requests
 	 */
-	static TIMEOUT = 30_000;
+	static TIMEOUT = seconds(30);
 
 	/**
 	 * execute the command

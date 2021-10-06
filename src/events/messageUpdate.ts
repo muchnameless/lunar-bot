@@ -1,6 +1,6 @@
 import { Permissions } from 'discord.js';
 import { ChannelUtil } from '../util';
-import { logger } from '../functions';
+import { logger, minutes } from '../functions';
 import MessageCreateEvent from './messageCreate';
 import type { Message } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
@@ -22,7 +22,7 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 	// @ts-expect-error
 	override async run(oldMessage: Message, newMessage: Message) {
 		if (
-			Date.now() - newMessage.createdTimestamp >= 10 * 60_000 // original message is older than 10 min
+			Date.now() - newMessage.createdTimestamp >= minutes(10) // original message is older than 10 min
 			|| (oldMessage.content === newMessage.content && newMessage.content) // pinned or embed added
 			|| !ChannelUtil.botPermissions(newMessage.channel)?.has(Permissions.FLAGS.VIEW_CHANNEL) // slash cmd response edits
 		) return;

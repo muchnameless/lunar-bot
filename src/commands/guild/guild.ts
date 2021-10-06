@@ -7,7 +7,7 @@ import { demote, historyErrors, invite, kick, mute, logErrors, promote, setRank,
 import { EMBED_DESCRIPTION_MAX_CHARS, GUILD_ID_BRIDGER, UNKNOWN_IGN } from '../../constants';
 import { requiredPlayerOption, optionalPlayerOption, pageOption, requiredIgnOption, targetOption, forceOption, buildGuildOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, UserUtil } from '../../util';
-import { autocorrect, getIdFromString, logger, removeMcFormatting, stringToMS, trim } from '../../functions';
+import { autocorrect, getIdFromString, logger, removeMcFormatting, seconds, stringToMS, trim } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { SlashCommandStringOption } from '@discordjs/builders';
@@ -323,7 +323,7 @@ export default class GuildCommand extends SlashCommand {
 				responseRegExp: kick.success(target.ign, chatBridge.bot!.username),
 				abortRegExp: kick.error(target.ign),
 				rejectOnAbort: true,
-				timeout: 60_000,
+				timeout: seconds(60),
 				rejectOnTimeout: true,
 			});
 

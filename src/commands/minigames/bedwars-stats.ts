@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { getBedwarsLevelInfo } from '@zikeji/hypixel';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { logger } from '../../functions';
+import { logger, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
@@ -15,7 +15,7 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s BedWars stats')
 				.addStringOption(optionalIgnOption),
-			cooldown: 1,
+			cooldown: seconds(1),
 		}, {
 			aliases: [ 'bwstats' ],
 			args: false,

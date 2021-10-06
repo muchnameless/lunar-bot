@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { targetOption, buildGuildOption } from '../../structures/commands/commonOptions';
+import { minutes } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -30,7 +31,7 @@ export default class SmiteCommand extends DualCommand {
 	override runSlash(interaction: CommandInteraction) {
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
 
-		return guildCommand.runMuteInteraction(interaction, 10 * 60_000);
+		return guildCommand.runMuteInteraction(interaction, minutes(10));
 	}
 
 	/**
@@ -47,7 +48,7 @@ export default class SmiteCommand extends DualCommand {
 		const { content } = await guildCommand.runMute({
 			target,
 			executor: hypixelMessage.player,
-			duration: 10 * 60_000,
+			duration: minutes(10),
 			hypixelGuild: hypixelMessage.hypixelGuild ?? hypixelMessage.player!.hypixelGuild!,
 		});
 

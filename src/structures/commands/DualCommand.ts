@@ -22,7 +22,7 @@ export class DualCommand extends SlashCommand implements Omit<BridgeCommand, 'co
 		super(context, slashData);
 
 		this.aliasesInGame = aliases?.filter(Boolean).length
-			? aliases.filter(Boolean)
+			? aliases.flatMap(alias => (!alias ? [] : alias.toLowerCase()))
 			: null;
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;
@@ -33,7 +33,7 @@ export class DualCommand extends SlashCommand implements Omit<BridgeCommand, 'co
 	 * wether the command is part of a visible category
 	 */
 	get visible() {
-		return !BaseCommandCollection.INVISIBLE_CATEGORIES.includes(this.category!);
+		return !BaseCommandCollection.INVISIBLE_CATEGORIES.has(this.category!);
 	}
 
 	get description() {

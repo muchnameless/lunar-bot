@@ -8,7 +8,7 @@ import { SlashCommandCollection } from './commands/SlashCommandCollection';
 import { EventCollection } from './events/EventCollection';
 import { UserUtil } from '../util';
 import { cache } from '../api/cache';
-import { logger } from '../functions';
+import { hours, logger } from '../functions';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 import type { CronJob } from 'cron';
 import type { db } from './database';
@@ -174,7 +174,7 @@ export class LunarClient extends Client {
 					? this.user.presence.status
 					: undefined,
 				activities: this.user.presence.activities as ActivitiesOptions[],
-			}), 60 * 60_000);
+			}), hours(1));
 
 			return res;
 		} catch (error) {

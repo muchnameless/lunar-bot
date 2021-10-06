@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { pageOption, buildGuildOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { handleLeaderboardCommandInteraction } from '../../functions';
+import { handleLeaderboardCommandInteraction, seconds } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { LeaderboardXPOffsets } from '../../functions';
@@ -16,7 +16,7 @@ export default class PurgeListCommand extends SlashCommand {
 				.setDescription('guild members below requirements, sorted by total and gained weight')
 				.addIntegerOption(pageOption)
 				.addStringOption(buildGuildOption(context.client, true)),
-			cooldown: 1,
+			cooldown: seconds(1),
 		});
 	}
 

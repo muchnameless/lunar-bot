@@ -5,7 +5,7 @@ import { hypixel } from '../../api/hypixel';
 import { mojang } from '../../api/mojang';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { logger, validateNumber } from '../../functions';
+import { logger, seconds, validateNumber } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction, GuildMember, Snowflake } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -23,7 +23,7 @@ export default class LinkCommand extends SlashCommand {
 					.setDescription('discord user')
 					.setRequired(true),
 				),
-			cooldown: 1,
+			cooldown: seconds(1),
 		});
 	}
 

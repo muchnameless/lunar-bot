@@ -30,7 +30,7 @@ export class BridgeCommand extends BaseCommand {
 		super(context, data);
 
 		this.aliases = aliases?.filter(Boolean).length
-			? aliases.filter(Boolean)
+			? aliases?.flatMap(alias => (!alias ? [] : alias.toLowerCase())) || null
 			: null;
 		this.description = description || null;
 		this.guildOnly = guildOnly ?? false;
@@ -67,7 +67,7 @@ export class BridgeCommand extends BaseCommand {
 	 * wether the command is part of a visible category
 	 */
 	get visible() {
-		return !BaseCommandCollection.INVISIBLE_CATEGORIES.includes(this.category!);
+		return !BaseCommandCollection.INVISIBLE_CATEGORIES.has(this.category!);
 	}
 
 	/**

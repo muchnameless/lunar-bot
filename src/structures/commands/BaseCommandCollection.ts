@@ -47,7 +47,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	/**
 	 * categories that are excluded from the help command and autocorrection
 	 */
-	static INVISIBLE_CATEGORIES = [ 'hidden', 'owner' ];
+	static INVISIBLE_CATEGORIES = new Set([ 'hidden', 'owner' ]);
 
 
 	/**

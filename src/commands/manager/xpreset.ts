@@ -4,7 +4,7 @@ const { Op } = pkg;
 import { OFFSET_FLAGS } from '../../constants';
 import { optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { safePromiseAll } from '../../functions';
+import { safePromiseAll, seconds } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -17,7 +17,7 @@ export default class XpResetCommand extends SlashCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('reset the competition xp gained')
 				.addStringOption(optionalPlayerOption),
-			cooldown: 5,
+			cooldown: seconds(5),
 		});
 	}
 

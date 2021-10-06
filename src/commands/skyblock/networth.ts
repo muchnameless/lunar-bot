@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { hypixel } from '../../api/hypixel';
 import { maro } from '../../api/maro';
-import { getMainProfile, getUuidAndIgn, logger, shortenNumber, upperCaseFirstChar } from '../../functions';
+import { getMainProfile, getUuidAndIgn, logger, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
 import BaseWeightCommand from './~base-weight';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -19,7 +19,7 @@ export default class NetworthCommand extends BaseWeightCommand {
 				.setDescription('shows a player\'s networth, provided by maro')
 				.addStringOption(optionalIgnOption)
 				.addStringOption(skyblockProfileOption),
-			cooldown: 1,
+			cooldown: seconds(1),
 		}, {
 			aliases: [ 'nw' ],
 			args: false,

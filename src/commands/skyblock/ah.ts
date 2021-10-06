@@ -5,7 +5,7 @@ import { COMMAND_KEY, PROFILE_EMOJIS } from '../../constants';
 import { hypixel } from '../../api/hypixel';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { getMainProfile, getUuidAndIgn, logger, shortenNumber, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions';
+import { getMainProfile, getUuidAndIgn, logger, seconds, shortenNumber, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake } from 'discord.js';
 import type { APISelectMenuComponent } from 'discord-api-types/v9';
@@ -21,7 +21,7 @@ export default class AhCommand extends SlashCommand {
 				.setDescription('SkyBlock auctions')
 				.addStringOption(optionalIgnOption)
 				.addStringOption(skyblockProfileOption),
-			cooldown: 0,
+			cooldown: seconds(1),
 		});
 	}
 

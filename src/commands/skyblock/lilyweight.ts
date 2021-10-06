@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
-import { getLilyWeight } from '../../functions';
+import { getLilyWeight, seconds } from '../../functions';
 import BaseWeightCommand from './~base-weight';
 import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -14,7 +14,7 @@ export default class LilyWeightCommand extends BaseWeightCommand {
 				.setDescription('shows a player\'s lily weight: total, weight and overflow')
 				.addStringOption(optionalIgnOption)
 				.addStringOption(skyblockProfileOption),
-			cooldown: 1,
+			cooldown: seconds(1),
 		}, {
 			aliases: [ 'lily' ],
 			args: false,

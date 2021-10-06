@@ -8,9 +8,10 @@ import {
 	Constants,
 	DiscordAPIError,
 } from 'discord.js';
+import { regExpEsc } from '@sapphire/utilities';
 import { ChannelUtil, InteractionUtil, MessageUtil } from './util';
 import { db } from './structures/database';
-import { escapeRegex, logger } from './functions';
+import { logger } from './functions';
 import type {
 	ActivitiesOptions,
 	Channel,
@@ -117,7 +118,7 @@ let prefixRegExp: RegExp;
 
 client
 	.once(Constants.Events.CLIENT_READY, () => {
-		prefixRegExp = new RegExp(`^(?:${[ escapeRegex(PREFIX), `<@!?${client.user!.id}>` ].filter(Boolean).join('|')})`, 'i');
+		prefixRegExp = new RegExp(`^(?:${[ regExpEsc(PREFIX), `<@!?${client.user!.id}>` ].filter(Boolean).join('|')})`, 'i');
 
 		// set presence again every 1h cause it get's lost sometimes
 		setInterval(() => client.isReady() && client.user.setPresence({

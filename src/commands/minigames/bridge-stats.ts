@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
+import { seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -14,7 +15,7 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s Bridge stats')
 				.addStringOption(optionalIgnOption),
-			cooldown: 1,
+			cooldown: seconds(1),
 		}, {
 			aliases: [ 'bridge' ],
 			args: false,

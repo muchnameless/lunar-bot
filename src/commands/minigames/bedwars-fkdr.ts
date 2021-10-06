@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
 import BaseStatsCommand from './~base-stats-command';
+import { seconds } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
@@ -12,7 +13,7 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s BedWars fkdr')
 				.addStringOption(optionalIgnOption),
-			cooldown: 1,
+			cooldown: seconds(1),
 		}, {
 			aliases: [ 'fkdr' ],
 			args: false,

@@ -2,8 +2,15 @@ import { Permissions, MessageFlags, Util } from 'discord.js';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { commaListsAnd } from 'common-tags';
 import { ChannelUtil } from '.';
-import { logger } from '../functions';
+import { logger, seconds } from '../functions';
 import type { EmojiIdentifierResolvable, Message, MessageEditOptions, MessageOptions } from 'discord.js';
+
+
+interface AwaitReplyOptions extends MessageOptions {
+	question?: string;
+	/** time in milliseconds to wait for a response */
+	time?: number;
+}
 
 
 export default class MessageUtil extends null {
@@ -126,8 +133,8 @@ export default class MessageUtil extends null {
 	 * @param message
 	 * @param questionOrOptions
 	 */
-	static async awaitReply(message: Message, questionOrOptions: MessageOptions & { question: string; timeoutSeconds: number; }) {
-		const { question = 'confirm this action?', timeoutSeconds = 60, ...options } = typeof questionOrOptions === 'string'
+	static async awaitReply(message: Message, questionOrOptions: string | AwaitReplyOptions = {}) {
+		const { question = 'confirm this action?', time = seconds(60), ...options } = typeof questionOrOptions === 'string'
 			? { question: questionOrOptions }
 			: questionOrOptions;
 
@@ -142,7 +149,7 @@ export default class MessageUtil extends null {
 			const collected = await questionMessage.channel.awaitMessages({
 				filter: msg => msg.author.id === message.author.id,
 				max: 1,
-				time: timeoutSeconds * 1_000,
+				time,
 				errors: [ 'time' ],
 			});
 

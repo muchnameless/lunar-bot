@@ -29,6 +29,7 @@ import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
+import { minutes } from '../../functions';
 
 
 const { COMMAND_KEY, EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
@@ -230,7 +231,7 @@ export default class EvalCommand extends SlashCommand {
 			const collected = await channel!.awaitMessages({
 				filter: msg => msg.author.id === interaction.user.id,
 				max: 1,
-				time: 300 * 1_000,
+				time: minutes(5),
 				errors: [ 'time' ],
 			});
 

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
-import { getSenitherWeight } from '../../functions';
+import { getSenitherWeight, seconds } from '../../functions';
 import BaseWeightCommand from './~base-weight';
 import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -14,7 +14,7 @@ export default class WeightCommand extends BaseWeightCommand {
 				.setDescription('shows a player\'s senither weight: total, weight and overflow')
 				.addStringOption(optionalIgnOption)
 				.addStringOption(skyblockProfileOption),
-			cooldown: 1,
+			cooldown: seconds(1),
 		}, {
 			aliases: [ 'w' ],
 			args: false,
