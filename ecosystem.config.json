@@ -3,13 +3,10 @@
 		"name": "lunar-bot",
 		"script": "npm",
 		"args": "start",
-		"env": {
-			"FORCE_COLOR": true
-		},
 		"autorestart": true,
 		"watch": false,
 		"max_memory_restart": "1024M",
-		"out_file": "logs/lunar-bot.log",
+		"out_file": "logs/lunar-bot-out.log",
 		"error_file": "logs/lunar-bot-error.log"
 	}]
 }
