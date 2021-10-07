@@ -153,7 +153,7 @@ export default class EvalCommand extends SlashCommand {
 		} catch (error) {
 			stopwatch.stop();
 
-			logger.trace(error, 'eval error');
+			logger.trace(error, '[EVAL ERROR]');
 
 			const type = new Type(error);
 			const FOOTER = `d.js ${Discord.version} • type: \`${type}\` • time taken: \`${stopwatch}\``;

@@ -72,7 +72,7 @@ export default class PurgeRolesCommand extends SlashCommand {
 
 					logger.info(`[PURGE ROLES]: removed ${rolesToPurge.length} role(s) from ${member.user.tag} | ${member.displayName}`);
 				} catch (error) {
-					logger.error(error, 'purge roles');
+					logger.error(error, '[PURGE ROLES]');
 				}
 			}));
 

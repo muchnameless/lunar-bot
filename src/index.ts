@@ -95,10 +95,10 @@ const client = new LunarClient({
 // catch rejections
 process
 	.on('unhandledRejection', (error) => {
-		logger.error(error, 'uncaught promise rejection');
+		logger.error(error, '[UNCAUGHT PROMISE REJECTION]');
 	})
 	.on('uncaughtException', (error) => {
-		logger.fatal(error, 'uncaught exception');
+		logger.fatal(error, '[UNCAUGHT EXCEPTION]');
 		client.exit(-1);
 	})
 	.on('SIGINT', () => client.exit(0));

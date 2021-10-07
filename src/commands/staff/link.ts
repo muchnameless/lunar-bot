@@ -42,7 +42,7 @@ export default class LinkCommand extends SlashCommand {
 			({ uuid, ign } = await mojang.ignOrUuid(IGN_OR_UUID));
 			({ _id: guildId } = await hypixel.guild.player(uuid));
 		} catch (error) {
-			logger.error(error, 'link');
+			logger.error(error, '[LINK]');
 		}
 
 		let player;
