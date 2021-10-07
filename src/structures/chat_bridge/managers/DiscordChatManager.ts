@@ -104,7 +104,7 @@ export class DiscordChatManager extends ChatManager {
 				try {
 					ret.push((await imgur.upload(url)).data.link);
 				} catch (error) {
-					logger.error('[UPLOAD ATTACHMENTS]', error);
+					logger.error(error, '[UPLOAD ATTACHMENTS]');
 					ret.push(url);
 					hasError = true;
 				}
@@ -278,7 +278,7 @@ export class DiscordChatManager extends ChatManager {
 
 		await this.queue.wait();
 
-		const discordMessage = await hypixelMessage?.discordMessage.catch(logger.error);
+		const discordMessage = await hypixelMessage?.discordMessage.catch(error => logger.error(error));
 
 		try {
 			return await ChannelUtil.send(this.channel, {
@@ -343,7 +343,7 @@ export class DiscordChatManager extends ChatManager {
 					contentParts.push(`@${DiscordChatManager.getPlayerName(referencedMessage)}`);
 				}
 			} catch (error) {
-				logger.error('[FORWARD DC TO MC]: error fetching reference', error);
+				logger.error(error, '[FORWARD DC TO MC]: error fetching reference');
 			}
 		}
 

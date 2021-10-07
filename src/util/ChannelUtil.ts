@@ -113,13 +113,15 @@ export default class ChannelUtil extends null {
 				?.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
 
-			return logger.warn(commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${this.logInfo(channel)}`);
+			logger.warn(commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${this.logInfo(channel)}`);
+			return null;
 		}
 
 		try {
 			return await channel.send(contentOrOptions);
 		} catch (error) {
-			return logger.error(error);
+			logger.error(error);
+			return null;
 		}
 	}
 }

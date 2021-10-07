@@ -26,7 +26,7 @@ export default class MessageReactionAddEvent extends Event {
 			if (reaction.partial) await reaction.fetch();
 			if (reaction.message.partial) await reaction.message.fetch();
 		} catch (error) {
-			return logger.error('[MESSAGE REACTION ADD]: error while fetching partial', error);
+			return logger.error(error, '[MESSAGE REACTION ADD]: error while fetching partial');
 		}
 
 		if (userId === reaction.message.author?.id) this.client.chatBridges.handleAnnouncementMessage(reaction.message as Message);

@@ -137,7 +137,7 @@ export default class ReloadCommand extends DualCommand {
 					logger.info(`command ${commandName} was reloaded successfully`);
 					return `command \`${commandName}\` was reloaded successfully`;
 				} catch (error) {
-					logger.error('An error occurred while reloading', error);
+					logger.error(error, 'an error occurred while reloading');
 					return {
 						content: stripIndents`
 							an error occurred while reloading \`${commandName}\`:
@@ -153,7 +153,7 @@ export default class ReloadCommand extends DualCommand {
 					await this.collection.unloadAll().loadAll({ reload });
 					return `${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`;
 				} catch (error) {
-					logger.error('An error occurred while reloading all commands', error);
+					logger.error(error, 'an error occurred while reloading all commands');
 					return {
 						content: stripIndents`
 							an error occurred while reloading all commands:
@@ -188,7 +188,7 @@ export default class ReloadCommand extends DualCommand {
 					logger.info(`event ${eventName} was reloaded successfully`);
 					return `event \`${eventName}\` was reloaded successfully`;
 				} catch (error) {
-					logger.error('An error occurred while reloading', error);
+					logger.error(error, 'an error occurred while reloading');
 					return {
 						content: stripIndents`
 							an error occurred while reloading \`${eventName}\`:
@@ -204,7 +204,7 @@ export default class ReloadCommand extends DualCommand {
 					await this.client.events.unloadAll().loadAll({ reload, force });
 					return `${this.client.events.size} event${this.client.events.size !== 1 ? 's' : ''} were reloaded successfully`;
 				} catch (error) {
-					logger.error('An error occurred while reloading all events', error);
+					logger.error(error, 'an error occurred while reloading all events');
 					return {
 						content: stripIndents`
 							an error occurred while reloading all events:
@@ -234,7 +234,7 @@ export default class ReloadCommand extends DualCommand {
 
 					return 'filter reloaded successfully';
 				} catch (error) {
-					logger.error('An error occurred while reloading the filter', error);
+					logger.error(error, 'an error occurred while reloading the filter');
 					return {
 						content: stripIndents`
 							an error occurred while reloading the filter:

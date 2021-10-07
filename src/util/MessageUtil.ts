@@ -93,7 +93,7 @@ export default class MessageUtil extends null {
 				);
 			}
 		} catch (error) {
-			logger.error('[MESSAGE REACT]', error);
+			logger.error(error, '[MESSAGE REACT]');
 		}
 
 		return res;

@@ -67,7 +67,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 			return this;
 		} catch (error) {
 			if (error instanceof Error && !error.name.startsWith('Sequelize')) this.client.config.set('HYPIXEL_API_ERROR', true);
-			logger.error('[GUILDS UPDATE]', error);
+			logger.error(error, '[GUILDS UPDATE]');
 			return this;
 		} finally {
 			this.#updateDataPromise = null;

@@ -32,7 +32,7 @@ export default class GuildMemberRemoveEvent extends Event {
 
 		if (!player) return;
 
-		player.update({ inDiscord: false }).catch(logger.error);
+		player.update({ inDiscord: false }).catch(error => logger.error(error));
 
 		this.client.log(
 			MessageEmbedUtil.padFields(

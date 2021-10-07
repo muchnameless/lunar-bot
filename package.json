@@ -14,8 +14,8 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "start": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/index.js",
-    "start:dev": "npm start | pino-pretty -i pid,hostname -t \"SYS:dd.mm.yyyy HH:MM:ss.l\"",
-    "dev": "npm run build && npm start:dev",
+    "start:dev": "npm start | pino-pretty",
+    "dev": "npm run build && npm run start:dev",
     "deploy:commands": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/deploy.js",
     "maintenance": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/maintenance.js",
     "db": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/structures/database/dbInit.js --alter"
@@ -76,6 +76,7 @@
     "discord-api-types": "^0.23.1",
     "eslint": "^7.32.0",
     "eslint-plugin-unicorn": "^36.0.0",
+    "pino-pretty": "^7.0.1",
     "rimraf": "^3.0.2",
     "typescript": "^4.5.0-dev.20211006"
   },

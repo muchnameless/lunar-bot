@@ -77,7 +77,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HypixelRank] IGN joined the guild!
 		 */
 		if (hypixelMessage.content.includes('joined the guild')) {
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
 			hypixelMessage.forwardToDiscord();
 			return this.chatBridge.broadcast('welcome');
 		}
@@ -86,7 +86,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HypixelRank] IGN left the guild!
 		 */
 		if (hypixelMessage.content.includes('left the guild!')) {
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
 			return hypixelMessage.forwardToDiscord();
 		}
 
@@ -95,7 +95,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (hypixelMessage.content === 'You left the guild') {
 			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: bot left the guild`);
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
 			hypixelMessage.forwardToDiscord();
 			return this.chatBridge.unlink();
 		}
@@ -104,7 +104,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HypixelRank] IGN was kicked from the guild by [HypixelRank] IGN!
 		 */
 		if (kickSuccess.test(hypixelMessage.content)) {
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
 			return hypixelMessage.forwardToDiscord();
 		}
 
@@ -113,7 +113,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (hypixelMessage.content.startsWith('You were kicked from the guild by')) {
 			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: bot was kicked from the guild`);
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
 			hypixelMessage.forwardToDiscord();
 			return this.chatBridge.unlink();
 		}
@@ -147,7 +147,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					mutedTill: Number.isNaN(msDuration)
 						? Number.POSITIVE_INFINITY
 						: Date.now() + msDuration,
-				}).catch(logger.error);
+				}).catch(error => logger.error(error));
 
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was muted for ${duration}`);
 			}
@@ -162,7 +162,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				mutedTill: Number.isNaN(msDuration)
 					? Number.POSITIVE_INFINITY
 					: Date.now() + msDuration,
-			}).catch(logger.error);
+			}).catch(error => logger.error(error));
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was muted for ${duration}`);
 		}
@@ -180,7 +180,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const { target } = unmuteMatched.groups as { target: string; };
 
 			if (target === 'the guild chat') {
-				this.chatBridge.hypixelGuild!.update({ mutedTill: 0 }).catch(logger.error);
+				this.chatBridge.hypixelGuild!.update({ mutedTill: 0 }).catch(error => logger.error(error));
 
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild chat was unmuted`);
 			}
@@ -189,7 +189,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!player) return;
 
-			player.update({ mutedTill: 0 }).catch(logger.error);
+			player.update({ mutedTill: 0 }).catch(error => logger.error(error));
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was unmuted`);
 		}
@@ -212,7 +212,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was promoted to an unknown rank '${newRank}'`);
 
-			player.update({ guildRankPriority: GUILD_RANK_PRIO }).catch(logger.error);
+			player.update({ guildRankPriority: GUILD_RANK_PRIO }).catch(error => logger.error(error));
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was promoted to '${newRank}'`);
 		}
@@ -235,7 +235,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!GUILD_RANK_PRIO) return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was demoted to an unknown rank '${newRank}'`);
 
-			player.update({ guildRankPriority: GUILD_RANK_PRIO }).catch(logger.error);
+			player.update({ guildRankPriority: GUILD_RANK_PRIO }).catch(error => logger.error(error));
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was demoted to '${newRank}'`);
 		}
@@ -251,7 +251,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			this.client.hypixelGuilds
 				.getByName(guildName)
 				?.updatePlayers()
-				.catch(error => logger.error('[CHATBRIDGE]: guild update', error));
+				.catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
 			logger.info(`[CHATBRIDGE]: ${this.chatBridge.bot!.username}: joined ${guildName}`);
 			return this.chatBridge.link(guildName);
 		}

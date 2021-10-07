@@ -75,7 +75,7 @@ export class LogHandler {
 		try {
 			await this.#postFileLogs(); // repost logs that failed to be posted during the last uptime
 		} catch (error) {
-			logger.error('[LOG HANDLER]', error);
+			logger.error(error, '[LOG HANDLER]');
 		}
 
 		return this;
@@ -185,7 +185,7 @@ export class LogHandler {
 		try {
 			return await channel.send({ embeds, files });
 		} catch (error) {
-			logger.error('[CLIENT LOG]', error);
+			logger.error(error, '[CLIENT LOG]');
 
 			return this.#logToFile(embeds);
 		}
@@ -220,7 +220,7 @@ export class LogHandler {
 				embeds.map(embed => JSON.stringify(embed)).join('\n'),
 			);
 		} catch (error) {
-			logger.error('[LOG TO FILE]', error);
+			logger.error(error, '[LOG TO FILE]');
 		}
 	}
 
@@ -243,7 +243,7 @@ export class LogHandler {
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {
-			logger.error('[POST FILE LOGS]', error);
+			logger.error(error, '[POST FILE LOGS]');
 		}
 	}
 }

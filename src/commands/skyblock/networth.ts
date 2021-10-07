@@ -56,7 +56,7 @@ export default class NetworthCommand extends BaseWeightCommand {
 
 			return `${ign} (${profile.cute_name}): ${shortenNumber(total)}`;
 		} catch (error) {
-			logger.error('[NETWORTH]', error);
+			logger.error(error, '[NETWORTH]');
 
 			return `${error}`;
 		}

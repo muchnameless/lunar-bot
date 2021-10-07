@@ -25,7 +25,7 @@ export default class ReadyEvent extends Event {
 				const members = await GuildUtil.fetchAllMembers(this.client.lgGuild);
 				logger.info(`[READY]: fetched ${members.size} members`);
 			} catch (error) {
-				logger.error('[READY]', error);
+				logger.error(error, '[READY]');
 			}
 		}
 

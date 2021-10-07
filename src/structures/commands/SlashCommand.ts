@@ -161,7 +161,7 @@ export class SlashCommand extends BaseCommand {
 				try {
 					return await lgGuild.members.fetch(interaction.user);
 				} catch (error) {
-					logger.error('[CHECK PERMISSIONS]: error while fetching member to test for permissions', error);
+					logger.error(error, '[CHECK PERMISSIONS]: error while fetching member to test for permissions');
 					throw missingPermissionsError('unknown discord member', interaction, roleIds);
 				}
 			})();

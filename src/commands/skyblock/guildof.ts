@@ -39,7 +39,7 @@ export default class GuildOfCommand extends DualCommand {
 
 			return `${ign}: ${name}${tag ? ` [${tag}]` : ''} ${members.length}/125 members`;
 		} catch (error) {
-			logger.error('[GUILDOF CMD]', error);
+			logger.error(error, '[GUILDOF CMD]');
 
 			return `${error}`;
 		}

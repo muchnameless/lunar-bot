@@ -131,7 +131,7 @@ export class DatabaseManager {
 						logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
 					}
 				} catch (error) {
-					logger.error('[GUILD STATS CHANNEL UPDATE]', error);
+					logger.error(error, '[GUILD STATS CHANNEL UPDATE]');
 				}
 			},
 			start: true,
@@ -449,7 +449,7 @@ export class DatabaseManager {
 
 			const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');
 			const taxMessage = TAX_MESSAGE_ID
-				? await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch(error => logger.error('[TAX MESSAGE]', error))
+				? await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch(error => logger.error(error, '[TAX MESSAGE]'))
 				: null;
 
 			if (!taxMessage?.editable || taxMessage.deleted) { // taxMessage deleted -> send a new one
@@ -472,7 +472,7 @@ export class DatabaseManager {
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 			return this;
 		} catch (error) {
-			logger.error('[DATABASE UPDATE ERROR]', error);
+			logger.error(error, '[DATABASE UPDATE ERROR]');
 			return this;
 		} finally {
 			this.#updateDataPromise = null;

@@ -108,7 +108,7 @@ export default class JoinDateCommand extends DualCommand {
 		const IGN = InteractionUtil.getIgn(
 			interaction,
 			{ fallbackToCurrentUser:
-				!(await this.client.lgGuild?.members.fetch(interaction.user).catch(logger.error))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')),
+				!(await this.client.lgGuild?.members.fetch(interaction.user).catch(error => logger.error(error)))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')),
 			},
 		);
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);

@@ -75,7 +75,11 @@ export class LunarClient extends Client {
 	 */
 	get lgGuild() {
 		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'));
-		return lgGuild?.available ? lgGuild : logger.warn('discord guild is currently unavailable');
+
+		if (lgGuild?.available) return lgGuild;
+
+		logger.warn('discord guild is currently unavailable');
+		return null;
 	}
 
 	/**
@@ -143,7 +147,7 @@ export class LunarClient extends Client {
 				const owner = await this.fetchOwner();
 				return `${owner.tag} ${owner}`;
 			} catch (error) {
-				logger.error('[OWNER INFO]', error);
+				logger.error(error, '[OWNER INFO]');
 				return Formatters.userMention(this.ownerId);
 			}
 		})();
@@ -178,7 +182,7 @@ export class LunarClient extends Client {
 
 			return res;
 		} catch (error) {
-			logger.error('[CLIENT LOGIN]', error);
+			logger.error(error, '[CLIENT LOGIN]');
 			return this.exit(1);
 		}
 	}
@@ -235,7 +239,7 @@ export class LunarClient extends Client {
 				.store?.redis?.quit(),
 		])) {
 			if (output.status === 'rejected') {
-				logger.error(output.reason);
+				logger.fatal(output.reason);
 				hasError = true;
 			} else if (typeof output.value !== 'undefined') {
 				logger.info(output.value);

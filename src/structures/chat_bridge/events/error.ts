@@ -16,7 +16,7 @@ export default class ErrorChatBridgeEvent extends ChatBridgeEvent {
 	 * @param error
 	 */
 	override run(error: Error) {
-		logger.error('[CHATBRIDGE ERROR]', error);
+		logger.error(error, '[CHATBRIDGE ERROR]');
 
 		if (error.message.includes('Invalid credentials')) {
 			this.chatBridge.minecraft.shouldReconnect = false;

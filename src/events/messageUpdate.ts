@@ -31,7 +31,7 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 			try {
 				await newMessage.fetch();
 			} catch (error) {
-				return logger.error('[CMD HANDLER]: error while fetching partial message', error);
+				return logger.error(error, '[CMD HANDLER]: error while fetching partial message');
 			}
 		}
 

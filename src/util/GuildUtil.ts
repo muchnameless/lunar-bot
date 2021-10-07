@@ -49,13 +49,16 @@ export default class GuildUtil extends null {
 	 * @param tagInput
 	 */
 	static async fetchMemberByTag(guild: Guild | null, tagInput: string) {
-		if (!guild?.available) return logger.warn(`[FIND MEMBER BY TAG]: guild '${guild?.name}' unavailable`);
+		if (!guild?.available) {
+			logger.warn(`[FIND MEMBER BY TAG]: guild '${guild?.name}' unavailable`);
+			return null;
+		}
 		if (guild.members.cache.size === guild.memberCount) return guild.members.cache.find(({ user: { tag } }) => tag === tagInput) ?? null;
 
 		try {
 			return (await guild.members.fetch({ query: tagInput.replace(/#\d{4}$/, ''), limit: 1_000 })).find(({ user: { tag } }) => tag === tagInput) ?? null;
 		} catch (error) {
-			logger.error('[FIND MEMBER BY TAG]', error);
+			logger.error(error, '[FIND MEMBER BY TAG]');
 			return null;
 		}
 	}

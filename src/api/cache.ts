@@ -7,4 +7,4 @@ export const cache = new Keyv<unknown>(process.env.REDIS_URI, {
 	ttl: minutes(10),
 });
 
-cache.on('error', logger.error);
+cache.on('error', error => logger.error(error));

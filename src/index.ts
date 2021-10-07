@@ -95,14 +95,13 @@ const client = new LunarClient({
 // catch rejections
 process
 	.on('unhandledRejection', (error) => {
-		logger.error('[UNCAUGHT PROMISE REJECTION]', error);
+		logger.error(error, 'uncaught promise rejection');
 	})
 	.on('uncaughtException', (error) => {
-		logger.error('[UNCAUGHT EXCEPTION]', error);
+		logger.fatal(error, 'uncaught exception');
 		client.exit(-1);
 	})
 	.on('SIGINT', () => client.exit(0));
-
 
 // connect to Discord
 await client.login();

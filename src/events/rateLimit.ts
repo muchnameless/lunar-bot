@@ -18,11 +18,11 @@ export default class RateLimitEvent extends Event {
 	 * @param rateLimitData
 	 */
 	override run(rateLimitData: RateLimitData) {
-		if (rateLimitData.global) return logger.error('[GLOBAL RATELIMIT]', { timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData });
+		if (rateLimitData.global) return logger.error({ timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData }, '[GLOBAL RATELIMIT]');
 
 		// adding and removing single reactions are 1/250ms, so get rate limited each time
 		if (rateLimitData.route.endsWith('reactions') && rateLimitData.timeout <= 250 + this.client.options.restTimeOffset!) return;
 
-		logger.warn('[RATE LIMIT]', { timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData });
+		logger.warn({ timeoutHRF: ms(rateLimitData.timeout), ...rateLimitData }, '[RATE LIMIT]');
 	}
 }

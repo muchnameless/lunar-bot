@@ -493,7 +493,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		// last infraction expired -> remove all infractions
 		if (this._infractions.at(-1)! + this.client.config.get('INFRACTIONS_EXPIRATION_TIME') <= Date.now()) {
-			this.update({ _infractions: null }).catch(logger.error);
+			this.update({ _infractions: null }).catch(error => logger.error(error));
 			return 0;
 		}
 
@@ -506,7 +506,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	get hypixelGuild(): HypixelGuild | null {
 		if (this.guildId !== GUILD_ID_BRIDGER) {
 			return this.client.hypixelGuilds.cache.get(this.guildId!)
-				?? logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`);
+				?? (logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`), null);
 		}
 
 		return this.client.hypixelGuilds.mainGuild ?? null;
@@ -532,7 +532,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordId!) ?? null;
 			} catch (error) {
 				// prevent further fetches and try to link via cache in the next updateDiscordMember calls
-				this.update({ inDiscord: false }).catch(logger.error);
+				this.update({ inDiscord: false }).catch(error_ => logger.error(error_));
 				logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}`, error);
 				return this.#discordMember = null;
 			}
@@ -544,7 +544,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	set discordMember(member: GuildMember | null) {
 		if (member == null) {
-			this.update({ inDiscord: false }).catch(logger.error);
+			this.update({ inDiscord: false }).catch(error => logger.error(error));
 			return;
 		}
 
@@ -552,7 +552,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (this.inDiscord) return;
 
-		this.update({ inDiscord: true }).catch(logger.error);
+		this.update({ inDiscord: true }).catch(error => logger.error(error));
 	}
 
 	/**
@@ -660,7 +660,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				.map(async transaction => ({
 					...transaction,
 					fromIGN: this.ign,
-					toIGN: (this.client.players.cache.get(transaction.to) ?? await mojang.uuid(transaction.to).catch(logger.error))?.ign ?? transaction.to,
+					toIGN: (this.client.players.cache.get(transaction.to) ?? await mojang.uuid(transaction.to).catch(error => logger.error(error)))?.ign ?? transaction.to,
 				})),
 		))();
 	}
@@ -674,7 +674,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			if (Date.now() < this.mutedTill) return true;
 
 			// mute has expired
-			this.update({ mutedTill: 0 }).catch(logger.error);
+			this.update({ mutedTill: 0 }).catch(error => logger.error(error));
 		}
 
 		return false;
@@ -709,7 +709,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			const playerData = (await hypixel.skyblock.profile(this.mainProfileId!))?.members?.[this.minecraftUuid];
 
 			if (!playerData) {
-				this.update({ mainProfileId: null }).catch(logger.error);
+				this.update({ mainProfileId: null }).catch(error => logger.error(error));
 				throw `unable to find main profile named '${this.mainProfileName}' -> resetting name`;
 			}
 
@@ -1068,7 +1068,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	async link(idOrDiscordMember: GuildMember | Snowflake, reason?: string) {
 		if (idOrDiscordMember instanceof GuildMember) {
 			await this.setValidDiscordId(idOrDiscordMember.id);
-			this.update({ inDiscord: true }).catch(logger.error);
+			this.update({ inDiscord: true }).catch(error => logger.error(error));
 			this.discordMember = idOrDiscordMember;
 
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
@@ -1189,7 +1189,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		} catch (error) { // was not successful
 			this.discordMember = null;
 
-			logger.error('[ROLE API CALL]', error);
+			logger.error(error, '[ROLE API CALL]');
 
 			loggingEmbed
 				.setColor(config.get('EMBED_RED'))
@@ -1240,7 +1240,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			if (!await this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason: `left ${this.guildName}` })) {
 				// error updating roles
 				logger.warn(`[REMOVE FROM GUILD]: ${this.logInfo}: unable to update roles`);
-				this.update({ guildId: GUILD_ID_ERROR }).catch(logger.error);
+				this.update({ guildId: GUILD_ID_ERROR }).catch(error => logger.error(error));
 				return false;
 			}
 
@@ -1405,14 +1405,14 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		try {
 			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
 		} catch (error) {
-			this.update({ xpUpdatesDisabled: true }).catch(logger.error);
-			logger.error('[MAIN PROFILE]', error);
+			this.update({ xpUpdatesDisabled: true }).catch(error_ => logger.error(error_));
+			logger.error(error, '[MAIN PROFILE]');
 		}
 
 		const mainProfile = getMainProfile(profiles, this.minecraftUuid);
 
 		if (!mainProfile) {
-			this.update({ mainProfileId: null }).catch(logger.error);
+			this.update({ mainProfileId: null }).catch(error => logger.error(error));
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
 
 			throw `${this.logInfo}: no SkyBlock profiles`;

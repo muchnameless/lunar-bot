@@ -54,7 +54,7 @@ export default class BaseWeightCommand extends DualCommand {
 
 			return `${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
 		} catch (error) {
-			logger.error('[WEIGHT]', error);
+			logger.error(error, '[WEIGHT]');
 
 			return `${error}`;
 		}

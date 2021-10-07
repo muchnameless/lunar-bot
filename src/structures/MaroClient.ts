@@ -155,7 +155,7 @@ export class MaroClient {
 				try {
 					({ cause } = await res.json() as { cause: string; });
 				} catch (error) {
-					logger.error('[MARO API]: json', error);
+					logger.error(error, '[MARO API]: json');
 				}
 
 				throw new FetchError('MaroAPIError', res, cause);

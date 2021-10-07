@@ -16,6 +16,6 @@ export default class ErrorEvent extends Event {
 	 * @param error
 	 */
 	override run(error: Error) {
-		logger.error('[CLIENT ERROR]', error);
+		logger.error(error, '[CLIENT ERROR]');
 	}
 }

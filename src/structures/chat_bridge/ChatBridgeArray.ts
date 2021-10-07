@@ -167,13 +167,13 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 			if (result.every(([ minecraft, discord ]) => minecraft && (Array.isArray(discord) ? discord.length : discord))) {
 				if (message.reactions.cache.get(X_EMOJI)?.me) {
 					message.reactions.cache.get(X_EMOJI)!.users.remove(this.client.user!)
-						.catch(error => logger.error('[HANDLE ANNOUNCEMENT MSG]', error));
+						.catch(error => logger.error(error, '[HANDLE ANNOUNCEMENT MSG]'));
 				}
 			} else {
 				MessageUtil.react(message, X_EMOJI);
 			}
 		} catch (error) {
-			logger.error('[HANDLE ANNOUNCEMENT MSG]', error);
+			logger.error(error, '[HANDLE ANNOUNCEMENT MSG]');
 			MessageUtil.react(message, X_EMOJI);
 		}
 	}
@@ -200,7 +200,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 			// no ChatBridge for the message's channel found
 			MessageUtil.react(message, X_EMOJI);
 		} catch (error) {
-			logger.error('[CHAT BRIDGES]: handleDiscordMessage', error);
+			logger.error(error, '[CHAT BRIDGES]: handleDiscordMessage');
 			MessageUtil.react(message, X_EMOJI);
 		}
 	}

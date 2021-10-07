@@ -52,7 +52,7 @@ try {
 
 	logger.info(`[DEPLY]: sucessfully ${SHOULD_DELETE ? 'deleted' : 'reloaded'} slash commands`);
 } catch (error) {
-	logger.error('[DEPLOY]', error);
+	logger.error(error, '[DEPLOY]');
 }
 
 client.destroy();

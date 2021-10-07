@@ -259,7 +259,7 @@ export default class TaxCommand extends SlashCommand {
 						const replyMessage = await interaction.fetchReply();
 						const fetched = await interaction.channel?.messages
 							.fetch({ after: replyMessage.id })
-							.catch(error => logger.error('[TAX REMINDER]: ghost ping', error));
+							.catch(error => logger.error(error, '[TAX REMINDER]: ghost ping'));
 						if (!fetched) return;
 
 						return ChannelUtil.deleteMessages(interaction.channel, [
@@ -309,11 +309,11 @@ export default class TaxCommand extends SlashCommand {
 
 								if (!taxChannel?.isText() || ((taxChannel as TextChannel).guildId && !(taxChannel as TextChannel).guild?.available)) return logger.warn('[TAX RESET] tax channel error');
 
-								const taxMessage = await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID')).catch(logger.error);
-
-								if (!taxMessage) return logger.warn('[TAX RESET] TAX_MESSAGE fetch error');
-
-								return taxMessage.embeds[0];
+								try {
+									return (await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID'))).embeds[0];
+								} catch (error) {
+									logger.error(error, '[TAX RESET] TAX_MESSAGE fetch error');
+								}
 							})();
 
 							if (!currentTaxEmbed) {
@@ -389,7 +389,7 @@ export default class TaxCommand extends SlashCommand {
 
 								await logMessage.pin();
 							} catch (error) {
-								logger.error('[TAX RESET]: logging', error);
+								logger.error(error, '[TAX RESET]: logging');
 							}
 						})();
 

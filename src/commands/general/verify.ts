@@ -92,14 +92,14 @@ export default class VerifyCommand extends SlashCommand {
 				},
 			});
 		} catch (error) {
-			logger.error('[VERIFY]: database', error);
+			logger.error(error, '[VERIFY]: database');
 			return InteractionUtil.reply(interaction, `an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
 		}
 
 		player.guildId = guildId;
 
 		const discordMember = interaction.member as GuildMember
-			?? await this.client.lgGuild?.members.fetch(interaction.user).catch(error => logger.error('[VERIFY]: guild member fetch', error))
+			?? await this.client.lgGuild?.members.fetch(interaction.user).catch(error => logger.error(error, '[VERIFY]: guild member fetch'))
 			?? null;
 
 		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');

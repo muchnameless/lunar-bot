@@ -219,7 +219,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 				return JSON.parse(result).server as string ?? null;
 			} catch (error) {
-				return logger.error('[GET SERVER]', error);
+				return logger.error(error, '[GET SERVER]');
 			}
 		})();
 	}
@@ -461,7 +461,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		try {
 			this.bot?.end('disconnect.quitting');
 		} catch (error) {
-			logger.error('[CHATBRIDGE DISCONNECT]', error);
+			logger.error(error, '[CHATBRIDGE DISCONNECT]');
 		}
 
 		(this as MinecraftChatManager<false>).bot = null;
@@ -717,7 +717,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			await this.#sendToChat(data);
 			return true;
 		} catch (error) {
-			logger.error('[CHATBRIDGE MC CHAT]', error);
+			logger.error(error, '[CHATBRIDGE MC CHAT]');
 			return false;
 		} finally {
 			this.#retries = 0;
@@ -753,7 +753,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		try {
 			this.bot.write('chat', { message });
 		} catch (error) {
-			logger.error('[CHATBRIDGE _SEND TO CHAT]', error);
+			logger.error(error, '[CHATBRIDGE _SEND TO CHAT]');
 			MessageUtil.react(discordMessage, X_EMOJI);
 
 			this.#resetFilter();
@@ -915,7 +915,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					isMessage: false,
 				});
 			} catch (error) {
-				logger.error('[CHATBRIDGE MC COMMAND]', error);
+				logger.error(error, '[CHATBRIDGE MC COMMAND]');
 				reject(error);
 				collector.stop('error');
 			} finally {

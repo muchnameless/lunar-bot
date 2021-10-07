@@ -76,7 +76,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 				last joined: ${Formatters.time(new Date(lastLogin!))}
 			`;
 		} catch (error) {
-			logger.error('[PLAYER STATS CMD]', error);
+			logger.error(error, 'player stats cmd');
 
 			return `${error}`;
 		}

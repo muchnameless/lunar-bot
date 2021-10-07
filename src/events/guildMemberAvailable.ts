@@ -24,7 +24,7 @@ export default class GuildMemberAvailableEvent extends Event {
 			const members = await GuildUtil.fetchAllMembers(member.guild);
 			logger.info(`[GUILD MEMBER AVAILABLE]: fetched ${members.size} members`);
 		} catch (error) {
-			logger.error('[GUILD MEMBER AVAILABLE]', error);
+			logger.error(error, '[GUILD MEMBER AVAILABLE]');
 		}
 	}
 }

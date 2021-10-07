@@ -26,7 +26,7 @@ export default class GuildCreateEvent extends Event {
 			const members = await GuildUtil.fetchAllMembers(guild);
 			logger.info(`[GUILD CREATE]: fetched ${members.size} members`);
 		} catch (error) {
-			logger.error('[GUILD CREATE]', error);
+			logger.error(error, '[GUILD CREATE]');
 		}
 	}
 }

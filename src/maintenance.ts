@@ -24,11 +24,11 @@ import type {
 // catch rejections
 process
 	.on('unhandledRejection', (error) => {
-		logger.error('[UNCAUGHT PROMISE REJECTION]', error);
+		logger.error(error, 'uncaught promise rejection');
 	})
 	.on('uncaughtException', (error) => {
-		logger.error('[UNCAUGHT EXCEPTION]', error);
-		process.exit(1);
+		logger.fatal(error, 'uncaught exception');
+		process.exit(-1);
 	});
 
 
@@ -40,7 +40,7 @@ const PREFIX = (await db.Config.findOne({
 }))?.parsedValue as string[][0] ?? 'lg!';
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
-db.sequelize.close().catch(logger.error);
+db.sequelize.close().catch(error => logger.error(error));
 
 const presence = {
 	activities: [ {

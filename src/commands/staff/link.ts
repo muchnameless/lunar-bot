@@ -42,7 +42,7 @@ export default class LinkCommand extends SlashCommand {
 			({ uuid, ign } = await mojang.ignOrUuid(IGN_OR_UUID));
 			({ _id: guildId } = await hypixel.guild.player(uuid));
 		} catch (error) {
-			logger.error('[LINK]', error);
+			logger.error(error, 'link');
 		}
 
 		let player;
@@ -140,7 +140,7 @@ export default class LinkCommand extends SlashCommand {
 
 		// try to find the linked users member data
 		const discordMember = interaction.options.getMember('user') as GuildMember
-			?? await this.client.lgGuild?.members.fetch(USER_ID).catch(error => logger.error('[LINK]: error fetching member to link', error))
+			?? await this.client.lgGuild?.members.fetch(USER_ID).catch(error => logger.error(error, '[LINK]: error fetching member to link'))
 			?? null;
 
 		// no discord member for the user to link found

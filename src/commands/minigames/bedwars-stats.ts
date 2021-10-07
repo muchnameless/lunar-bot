@@ -56,7 +56,7 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 			`;
 			/* eslint-enable camelcase */
 		} catch (error) {
-			logger.error('[BEDWARS STATS CMD]', error);
+			logger.error(error, 'bedwars stats cmd');
 
 			return `${error}`;
 		}

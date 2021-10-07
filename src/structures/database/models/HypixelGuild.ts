@@ -261,7 +261,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			if (Date.now() < this.mutedTill) return true;
 
 			// mute has expired
-			this.update({ mutedTill: 0 }).catch(logger.error);
+			this.update({ mutedTill: 0 }).catch(error => logger.error(error));
 		}
 
 		return false;
@@ -430,7 +430,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 							try {
 								return (await mojang.uuid(minecraftUuid)).ign;
 							} catch (error) {
-								logger.error('[GET IGN]', error);
+								logger.error(error, '[GET IGN]');
 								return UNKNOWN_IGN;
 							}
 						})();
@@ -468,7 +468,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 									logger.error(error);
 								}
 
-								player.update({ ign: IGN }).catch(logger.error);
+								player.update({ ign: IGN }).catch(error => logger.error(error));
 								player.updateData({ reason: `joined ${this.name}` });
 							}),
 							0,
@@ -479,7 +479,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						player.update({
 							guildId: this.guildId,
 							lastActivityAt: new Date(),
-						}).catch(logger.error);
+						}).catch(error => logger.error(error));
 
 						await player.updateIgn();
 
@@ -501,7 +501,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 								discordMember = await GuildUtil.fetchMemberByTag(lgGuild, discordTag);
 
 								if (!discordMember) {
-									if (/\D/.test(player.discordId!)) await player.setValidDiscordId(discordTag).catch(logger.error); // save tag if no id is known
+									if (/\D/.test(player.discordId!)) await player.setValidDiscordId(discordTag).catch(error => logger.error(error)); // save tag if no id is known
 									player.inDiscord = false;
 									joinedLog.push(player.discordId!.includes('#')
 										? `-\u00A0${player}: unknown discord tag ${player.discordId}`
@@ -708,7 +708,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 			// update 'currentWeightReq' (2/2)
 			this.changed('ranks', true);
-			this.save().catch(logger.error);
+			this.save().catch(error => logger.error(error));
 
 			// update player ranks
 			const setRankLog: MessageEmbed[] = [];
@@ -748,7 +748,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			this.client.log(...setRankLog);
 			return this;
 		} catch (error) {
-			logger.error('[SYNC GUILD RANKS]', error);
+			logger.error(error, '[SYNC GUILD RANKS]');
 			return this;
 		} finally {
 			this.#syncGuildRanksPromise = null;

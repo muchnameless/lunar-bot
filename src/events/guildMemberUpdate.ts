@@ -32,7 +32,7 @@ export default class GuildMemberUpdateEvent extends Event {
 
 			logger.info(`[GUILD MEMBER UPDATE]: ${player} | ${newMember.user.tag} received bridger role`);
 
-			if (!player.inGuild()) player.update({ guildId: GUILD_ID_BRIDGER }).catch(logger.error);
+			if (!player.inGuild()) player.update({ guildId: GUILD_ID_BRIDGER }).catch(error => logger.error(error));
 		}
 
 		const player = GuildMemberUtil.getPlayer(newMember);

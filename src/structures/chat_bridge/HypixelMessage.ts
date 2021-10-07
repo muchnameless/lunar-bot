@@ -296,7 +296,7 @@ export class HypixelMessage {
 						?? await player?.imageURL
 						?? await mojang.ign(this.author.ign).then(
 							({ uuid }) => uuidToImgurBustURL(this.client, uuid),
-							error => logger.error('[FORWARD TO DC]', error),
+							error => logger.error(error, '[FORWARD TO DC]'),
 						)
 						?? (member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),
 					allowedMentions: {
@@ -321,7 +321,7 @@ export class HypixelMessage {
 				allowedMentions: { parse: [] },
 			}));
 		} catch (error) {
-			return logger.error('[FORWARD TO DC]', error);
+			return logger.error(error, '[FORWARD TO DC]');
 		}
 	}
 

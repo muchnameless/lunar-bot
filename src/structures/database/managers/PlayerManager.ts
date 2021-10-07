@@ -257,7 +257,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 			return this;
 		} catch (error) {
-			logger.error('[PLAYERS UPDATE XP]', error);
+			logger.error(error, '[PLAYERS UPDATE XP]');
 			return this;
 		} finally {
 			this.#updateXpPromise = null;
@@ -396,7 +396,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 					log.get(hypixelGuild)!.push(`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`);
 				} catch (error) {
-					logger.error('[UPDATE MAIN PROFILE]', error);
+					logger.error(error, '[UPDATE MAIN PROFILE]');
 
 					if (typeof error === 'string') {
 						const { hypixelGuild } = player;
