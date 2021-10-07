@@ -3,7 +3,7 @@ import { COMMAND_KEY, LB_KEY } from '../constants';
 import { InteractionUtil } from '../util';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, logger, minutes } from '../functions';
 import { Event } from '../structures/events/Event';
-import type { ButtonInteraction, CommandInteraction, ContextMenuInteraction, SelectMenuInteraction } from 'discord.js';
+import type { BaseGuildTextChannel, ButtonInteraction, CommandInteraction, ContextMenuInteraction, GuildMember, SelectMenuInteraction } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 import type { ChatInteraction } from '../util/InteractionUtil';
 
@@ -20,6 +20,13 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	async #handleCommandInteraction(interaction: CommandInteraction) {
+		logger.info({
+			type: interaction.type,
+			command: InteractionUtil.getCommand(interaction),
+			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
+			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
+		}, 'INTERACTION_CREATE');
+
 		if (this.client.chatBridges.channelIds.has(interaction.channelId)) {
 			this.client.chatBridges.interactionCache.set(interaction.id, interaction);
 			setTimeout(() => this.client.chatBridges.interactionCache.delete(interaction.id), minutes(1));
@@ -72,6 +79,13 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	async #handleButtonInteraction(interaction: ButtonInteraction) {
+		logger.info({
+			type: interaction.componentType,
+			customId: interaction.customId,
+			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
+			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
+		}, 'INTERACTION_CREATE');
+
 		const args = interaction.customId.split(':');
 		const type = args.shift();
 
@@ -116,6 +130,13 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	async #handleSelectMenuInteraction(interaction: SelectMenuInteraction) {
+		logger.info({
+			type: interaction.componentType,
+			customId: interaction.customId,
+			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
+			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
+		}, 'INTERACTION_CREATE');
+
 		const args = interaction.customId.split(':');
 		const type = args.shift();
 
@@ -160,6 +181,13 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	async #handleContextMenuInteraction(interaction: ContextMenuInteraction) {
+		logger.info({
+			type: interaction.targetType,
+			command: interaction.commandName,
+			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
+			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
+		}, 'INTERACTION_CREATE');
+
 		const command = this.client.commands.get(interaction.commandName);
 
 		if (!command) return InteractionUtil.reply(interaction, {
@@ -199,8 +227,6 @@ export default class InteractionCreateEvent extends Event {
 	override async run(interaction: ChatInteraction) {
 		// add interaction to the WeakMap which holds InteractionData
 		InteractionUtil.add(interaction);
-
-		logger.info(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`);
 
 		try {
 			// commands
