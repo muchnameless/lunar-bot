@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "dev version of the lunar guard discord bot",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
