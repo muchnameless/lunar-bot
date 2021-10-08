@@ -662,9 +662,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 */
 	async #syncGuildRanks() {
 		try {
-			if (!this.client.config.get('AUTO_GUILD_RANKS') || !this.chatBridgeEnabled) return this;
+			if (!this.client.config.get('AUTO_GUILD_RANKS')) return this;
 
-			const { chatBridge } = this;
 			const nonStaffWithWeight: PlayerWithWeight[] = [];
 
 			// calculate weight for non-staff members and their amount
@@ -711,6 +710,9 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			this.save().catch(error => logger.error(error));
 
 			// update player ranks
+			if (!this.chatBridgeEnabled) return this;
+
+			const { chatBridge } = this;
 			const setRankLog: MessageEmbed[] = [];
 
 			for (const [ index, { player }] of nonStaffWithWeight.entries()) {
