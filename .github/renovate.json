@@ -6,7 +6,7 @@
 		"rangeStrategy": "bump",
 		"packageRules": [
 			{
-				"matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+				"matchUpdateTypes": [ "minor", "patch", "pin", "digest", "dev" ],
 				"matchCurrentVersion": "!/^0/",
 				"automerge": true,
 				"ignoreTests": true
