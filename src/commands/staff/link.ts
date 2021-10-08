@@ -83,9 +83,9 @@ export default class LinkCommand extends SlashCommand {
 			const linkedUser = await playerLinkedToId.discordUser.catch((error) => {
 				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
 					linkedUserIsDeleted = true;
-					return logger.error(`[LINK]: ${playerLinkedToId.logInfo}: deleted discord user: ${playerLinkedToId.discordId}`, error);
+					return logger.error(error, `[LINK]: ${playerLinkedToId.logInfo}: deleted discord user: ${playerLinkedToId.discordId}`);
 				}
-				return logger.error(`[LINK]: ${playerLinkedToId.logInfo}: error fetching already linked user`, error);
+				return logger.error(error, `[LINK]: ${playerLinkedToId.logInfo}: error fetching already linked user`);
 			});
 
 			if (!linkedUserIsDeleted) {
@@ -126,7 +126,7 @@ export default class LinkCommand extends SlashCommand {
 				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
 					logger.error(`[LINK]: ${player.logInfo}: deleted discord user: ${player.discordId}`);
 				} else {
-					logger.error(`[LINK]: ${player.logInfo}: error fetching already linked user`, error);
+					logger.error(error, `[LINK]: ${player.logInfo}: error fetching already linked user`);
 				}
 			}
 

@@ -282,7 +282,7 @@ export class DatabaseManager {
 					};
 				})());
 			} catch (error) {
-				logger.error(`[UPDATE TAX DB]: ${taxCollector}`, error);
+				logger.error(error, `[UPDATE TAX DB]: ${taxCollector}`);
 				apiError = true;
 				availableAuctionsLog.push({
 					ign: taxCollector.ign,

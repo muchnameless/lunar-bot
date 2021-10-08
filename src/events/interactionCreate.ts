@@ -244,7 +244,7 @@ export default class InteractionCreateEvent extends Event {
 			if (typeof error === 'string') {
 				logger.error(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}: ${error}`);
 			} else {
-				logger.error(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`, error);
+				logger.error(error, `[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`);
 			}
 
 			if (InteractionUtil.isInteractionError(error)) return; // interaction expired

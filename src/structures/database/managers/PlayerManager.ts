@@ -151,7 +151,10 @@ export class PlayerManager extends ModelManager<Player> {
 
 		const AMOUNT = playersToSweep.length;
 
-		logger.warn(`[SWEEP DB]: removed ${AMOUNT} entr${AMOUNT === 1 ? 'y' : 'ies'} from the player db: ${playersToSweep.map(({ ign }) => ign).join(', ')}`);
+		logger.warn({
+			sweptPlayers: playersToSweep.map(({ ign }) => ign),
+			amount: playersToSweep.length,
+		}, '[SWEEP DB]');
 
 		return AMOUNT;
 	}

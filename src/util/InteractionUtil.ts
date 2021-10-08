@@ -206,7 +206,7 @@ export default class InteractionUtil extends null {
 		try {
 			return await (cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options }));
 		} catch (error) {
-			logger.error(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferReply`, error);
+			logger.error(error, `[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferReply`);
 		}
 	}
 
@@ -295,7 +295,7 @@ export default class InteractionUtil extends null {
 		try {
 			return await (cached.deferUpdatePromise = interaction.deferUpdate(options));
 		} catch (error) {
-			logger.error(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferUpdate`, error);
+			logger.error(error, `[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferUpdate`);
 		}
 	}
 

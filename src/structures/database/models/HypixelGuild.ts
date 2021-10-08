@@ -358,7 +358,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					currentWeightReq: null,
 				};
 
-				logger.info(`[UPDATE GUILD]: ${this.name}: new rank`, newRank);
+				logger.info(newRank, `[UPDATE GUILD]: ${this.name}: new rank`);
 				this.ranks.push(newRank);
 				this.changed('ranks', true);
 			} else if (dbEntryRank.name !== name) {
@@ -443,7 +443,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						// try to link new player to discord
 						await (async () => {
 							discordTag = (await hypixel.player.uuid(minecraftUuid)
-								.catch(error => logger.error(`[GET DISCORD TAG]: ${IGN} (${this.name})`, error)))
+								.catch(error => logger.error(error, `[GET DISCORD TAG]: ${IGN} (${this.name})`)))
 								?.socialMedia?.links?.DISCORD ?? null;
 
 							if (!discordTag) {

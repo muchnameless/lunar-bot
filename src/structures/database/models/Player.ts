@@ -533,7 +533,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			} catch (error) {
 				// prevent further fetches and try to link via cache in the next updateDiscordMember calls
 				this.update({ inDiscord: false }).catch(error_ => logger.error(error_));
-				logger.error(`[GET DISCORD MEMBER]: ${this.logInfo}`, error);
+				logger.error(error, `[GET DISCORD MEMBER]: ${this.logInfo}`);
 				return this.#discordMember = null;
 			}
 		})();
@@ -804,10 +804,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		} catch (error) {
 			if (typeof error === 'string') return logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
 			if ((error instanceof Error && error.name.startsWith('Sequelize')) || error instanceof TypeError || error instanceof RangeError) {
-				return logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
+				return logger.error(error, `[UPDATE XP]: ${this.logInfo}`);
 			}
 
-			logger.error(`[UPDATE XP]: ${this.logInfo}`, error);
+			logger.error(error, `[UPDATE XP]: ${this.logInfo}`);
 			if (!(error instanceof RateLimitError)) this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', true);
 			if (rejectOnAPIError) throw error;
 		}
@@ -1379,7 +1379,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			return true;
 		} catch (error) {
-			logger.error(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}`, error);
+			logger.error(error, `[SYNC IGN DISPLAYNAME]: ${this.logInfo}`);
 			this.discordMember = null;
 			return false;
 		}
@@ -1392,7 +1392,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		try {
 			return (await hypixel.player.uuid(this.minecraftUuid)).socialMedia?.links?.DISCORD ?? null;
 		} catch (error) {
-			return logger.error(`[FETCH DISCORD TAG]: ${this.logInfo}`, error);
+			return logger.error(error, `[FETCH DISCORD TAG]: ${this.logInfo}`);
 		}
 	}
 
@@ -1453,7 +1453,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				await this.update({ ign: CURRENT_IGN });
 			} catch (error) {
 				this.ign = OLD_IGN;
-				return logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
+				return logger.error(error, `[UPDATE IGN]: ${this.logInfo}`);
 			}
 
 			this.syncIgnWithDisplayName(false);
@@ -1464,7 +1464,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			};
 		} catch (error) {
 			if ((error instanceof Error && error.name.startsWith('Sequelize')) || error instanceof TypeError || error instanceof RangeError) {
-				return logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
+				return logger.error(error, `[UPDATE IGN]: ${this.logInfo}`);
 			}
 
 			// prevent further auto updates
@@ -1474,7 +1474,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				return logger.error(`[UPDATE IGN]: ${this.logInfo}: request timeout`);
 			}
 
-			return logger.error(`[UPDATE IGN]: ${this.logInfo}`, error);
+			return logger.error(error, `[UPDATE IGN]: ${this.logInfo}`);
 		}
 	}
 

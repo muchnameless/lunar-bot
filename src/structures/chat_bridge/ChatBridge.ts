@@ -194,7 +194,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 
 			return this;
 		} catch (error) {
-			logger.error(`[CHATBRIDGE LINK]: #${this.mcAccount}`, error);
+			logger.error(error, `[CHATBRIDGE LINK]: #${this.mcAccount}`);
 
 			if (!this.shouldRetryLinking) {
 				logger.error(`[CHATBRIDGE LINK]: #${this.mcAccount}: aborting retry due to a critical error`);

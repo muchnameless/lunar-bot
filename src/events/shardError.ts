@@ -17,6 +17,6 @@ export default class ShardErrorEvent extends Event {
 	 * @param shardId
 	 */
 	override run(error: Error, shardId: number) {
-		logger.error(`[SHARD ERROR]: #${shardId}`, error);
+		logger.error(error, `[SHARD ERROR]: #${shardId}`);
 	}
 }

@@ -117,7 +117,7 @@ export default class MessageUtil extends null {
 			try {
 				return await message.delete();
 			} catch (error) {
-				logger.error(`[MESSAGE UTIL]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
+				logger.error(error, `[MESSAGE UTIL]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
 				return message;
 			}
 		}
@@ -216,7 +216,7 @@ export default class MessageUtil extends null {
 		try {
 			return await message.edit(options);
 		} catch (error) {
-			logger.error(`[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
+			logger.error(error, `[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 	}
@@ -234,7 +234,7 @@ export default class MessageUtil extends null {
 		try {
 			return await message.pin();
 		} catch (error) {
-			logger.error(`[MESSAGE UTIL]: pin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`, error);
+			logger.error(error, `[MESSAGE UTIL]: pin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 	}
