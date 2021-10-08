@@ -565,14 +565,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			]);
 
 			// sync guild xp, mutedTill & guild ranks
-			(async () => {
-				await safePromiseAll(currentGuildMembers.map(
-					hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember, this)
-						?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`)),
-				);
+			safePromiseAll(currentGuildMembers.map(
+				hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember, this)
+					?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`)),
+			);
 
-				if (syncRanks) this.syncGuildRanks();
-			})();
+			if (syncRanks) this.syncGuildRanks();
 
 			const CHANGES = PLAYERS_LEFT_AMOUNT + membersJoined.length;
 
