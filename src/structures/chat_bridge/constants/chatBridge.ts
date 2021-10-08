@@ -69,7 +69,7 @@ const PADDING_CHUNKS = ([
 	'----',
 	'____',
 	'////',
-] as const).map(chunk => `${INVISIBLE_CHARACTERS[0]} ${chunk}` as const);
+] as const).map(chunk => ` ${INVISIBLE_CHARACTERS[21]}${chunk}` as const);
 
 export const randomPadding = () => PADDING_CHUNKS[Math.floor(Math.random() * PADDING_CHUNKS.length)];
 
