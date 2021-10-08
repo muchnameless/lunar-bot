@@ -685,7 +685,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options
 	 */
 	async updateData({ reason = 'synced with in game stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false, rejectOnAPIError = false }: PlayerUpdateOptions = {}) {
-		if (this.guildId === GUILD_ID_BRIDGER) return;
+		if (this.guildId === GUILD_ID_BRIDGER) return this;
 		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
 		if (shouldOnlyAwaitUpdateXp) {
@@ -693,6 +693,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		} else {
 			await this.updateDiscordMember({ reason, shouldSendDm });
 		}
+
+		return this;
 	}
 
 	/**
@@ -700,7 +702,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param rejectOnAPIError
 	 */
 	async updateXp(rejectOnAPIError = false) {
-		if (this.xpUpdatesDisabled) return;
+		if (this.xpUpdatesDisabled) return this;
 
 		try {
 			if (!this.mainProfileId) await this.fetchMainProfile(); // detect main profile if it is unknown
@@ -800,16 +802,21 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
 			}
 
-			await this.save();
+			return await this.save();
 		} catch (error) {
-			if (typeof error === 'string') return logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
+			if (typeof error === 'string') {
+				logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
+				return this;
+			}
 			if ((error instanceof Error && error.name.startsWith('Sequelize')) || error instanceof TypeError || error instanceof RangeError) {
-				return logger.error(error, `[UPDATE XP]: ${this.logInfo}`);
+				logger.error(error, `[UPDATE XP]: ${this.logInfo}`);
+				return this;
 			}
 
 			logger.error(error, `[UPDATE XP]: ${this.logInfo}`);
 			if (!(error instanceof RateLimitError)) this.client.config.set('HYPIXEL_SKYBLOCK_API_ERROR', true);
 			if (rejectOnAPIError) throw error;
+			return this;
 		}
 	}
 
