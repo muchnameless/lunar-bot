@@ -424,26 +424,28 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * reconnects the bot, exponential login delay up to 10 min
 	 * @param loginDelay delay in ms
 	 */
-	reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
-		return this.#reconnectPromise ??= this.#reconnect(loginDelay);
+	async reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
+		if (this.#reconnectPromise) return this.#reconnectPromise;
+
+		try {
+			return await (this.#reconnectPromise = this.#reconnect(loginDelay));
+		} finally {
+			this.#reconnectPromise = null;
+		}
 	}
 	/**
 	 * should only ever be called from within reconnect()
 	 * @internal
 	 */
 	async #reconnect(loginDelay: number) {
-		try {
-			this.disconnect();
+		this.disconnect();
 
-			logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
+		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
 
-			await sleep(loginDelay);
-			await this.connect();
+		await sleep(loginDelay);
+		await this.connect();
 
-			return this;
-		} finally {
-			this.#reconnectPromise = null;
-		}
+		return this;
 	}
 
 	/**

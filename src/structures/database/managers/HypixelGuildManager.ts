@@ -46,8 +46,14 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 * update all guilds
 	 * @param options
 	 */
-	updateData(options?: UpdateOptions) {
-		return this.#updateDataPromise ??= this.#updateData(options);
+	async updateData(options?: UpdateOptions) {
+		if (this.#updateDataPromise) return this.#updateDataPromise;
+
+		try {
+			return await (this.#updateDataPromise = this.#updateData(options));
+		} finally {
+			this.#updateDataPromise = null;
+		}
 	}
 	/**
 	 * should only ever be called from within updateData()
@@ -69,8 +75,6 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 			if (error instanceof Error && !error.name.startsWith('Sequelize')) this.client.config.set('HYPIXEL_API_ERROR', true);
 			logger.error(error, '[GUILDS UPDATE]');
 			return this;
-		} finally {
-			this.#updateDataPromise = null;
 		}
 	}
 

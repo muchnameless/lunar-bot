@@ -398,8 +398,14 @@ export class DatabaseManager {
 	/**
 	 * updates the player database and the corresponding tax message
 	 */
-	updateData() {
-		return this.#updateDataPromise ??= this.#updateData();
+	async updateData() {
+		if (this.#updateDataPromise) return this.#updateDataPromise;
+
+		try {
+			return await (this.#updateDataPromise = this.#updateData());
+		} finally {
+			this.#updateDataPromise = null;
+		}
 	}
 	/**
 	 * should only ever be called from within updateData()
@@ -414,6 +420,11 @@ export class DatabaseManager {
 				// reset error every full hour
 				if (new Date().getMinutes() >= config.get('DATABASE_UPDATE_INTERVAL')) {
 					await players.updateIgns();
+
+					for (const hypixelGuild of hypixelGuilds.cache.values()) {
+						hypixelGuild.syncGuildRanks();
+					}
+
 					logger.warn('[DB UPDATE]: auto updates disabled');
 					return this;
 				}
@@ -474,8 +485,6 @@ export class DatabaseManager {
 		} catch (error) {
 			logger.error(error, '[DATABASE UPDATE ERROR]');
 			return this;
-		} finally {
-			this.#updateDataPromise = null;
 		}
 	}
 }
