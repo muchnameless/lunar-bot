@@ -431,7 +431,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * should only ever be called from within reconnect()
 	 * @internal
 	 */
-	async #reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
+	async #reconnect(loginDelay: number) {
 		try {
 			this.disconnect();
 

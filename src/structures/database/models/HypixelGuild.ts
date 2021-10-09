@@ -268,31 +268,6 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	}
 
 	/**
-	 * guild players that have a requestable rank without meeting the requirements
-	 */
-	get playersBelowRankReqs() {
-		const ret = [];
-
-		for (const player of this.players.values()) {
-			const rank = player.guildRank;
-
-			if (!rank?.roleId) continue; // unkown or non-requestable rank
-
-			const { totalWeight } = player.getSenitherWeight();
-
-			if (totalWeight >= rank.currentWeightReq) continue;
-
-			ret.push({
-				player,
-				totalWeight,
-				rank,
-			});
-		}
-
-		return ret;
-	}
-
-	/**
 	 * shifts the daily stats history
 	 */
 	saveDailyStats() {
@@ -337,10 +312,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * updates the guild data
 	 * @param data
 	 */
-	async #updateGuildData(data?: Components.Schemas.Guild & { meta: Omit<Components.Schemas.GuildResponse, 'guild'> & DefaultMeta }) {
-		const { meta: { cached }, name: guildName, ranks, chatMute } = data ?? await hypixel.guild.id(this.guildId);
-
-		if (cached) return logger.info(`[UPDATE GUILD DATA]: ${this.name}: cached data`);
+	#updateGuildData(data: Components.Schemas.Guild) {
+		const { name: guildName, ranks, chatMute } = data;
 
 		// update name
 		this.name = guildName;
