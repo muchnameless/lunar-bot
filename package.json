@@ -8,6 +8,7 @@
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "build": "tsc",
+    "watch": "npm run clean && tsc --watch",
     "update": "git pull && npm run build && npm run start",
     "test": "jest --passWithNoTests",
     "test:ci": "jest --no-stack-trace --verbose --passWithNoTests",
