@@ -23,18 +23,20 @@ import { mojang } from '../../api/mojang';
 mojang;
 import { maro } from '../../api/maro';
 maro;
-import * as botUtil from '../../util';
+import { ChannelUtil, GuildMemberUtil, GuildUtil, InteractionUtil, LeaderboardUtil, MessageEmbedUtil, MessageUtil, UserUtil } from '../../util';
+GuildMemberUtil;
+GuildUtil;
+LeaderboardUtil;
+MessageEmbedUtil;
 import * as functions from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction } from 'discord.js';
+import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction, Message } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
-import { minutes } from '../../functions';
 
 
-const { COMMAND_KEY, EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
-const { ChannelUtil, InteractionUtil } = botUtil;
-const { logger, splitForEmbedFields } = functions;
+const { COMMAND_KEY, DELETE_EMOJI, EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
+const { logger, minutes, splitForEmbedFields } = functions;
 
 
 export default class EvalCommand extends SlashCommand {
@@ -74,6 +76,30 @@ export default class EvalCommand extends SlashCommand {
 			.replace(new RegExp(this.client.token!, 'gi'), '****');
 	}
 
+	#getCustomId() {
+		return `${COMMAND_KEY}:${this.name}`;
+	}
+
+	/**
+	 * @param isAsync
+	 * @param inspectDepth
+	 */
+	#getRows(isAsync: boolean, inspectDepth: number) {
+		return [
+			new MessageActionRow()
+				.addComponents(
+					new MessageButton()
+						.setCustomId(`${this.#getCustomId()}:edit:${isAsync}:${inspectDepth}`)
+						.setEmoji(EDIT_MESSAGE_EMOJI)
+						.setStyle(Constants.MessageButtonStyles.SECONDARY),
+					new MessageButton()
+						.setCustomId(`${this.#getCustomId()}:delete`)
+						.setEmoji(DELETE_EMOJI)
+						.setStyle(Constants.MessageButtonStyles.DANGER),
+				),
+		];
+	}
+
 	/**
 	 * @param interaction
 	 * @param input
@@ -88,6 +114,8 @@ export default class EvalCommand extends SlashCommand {
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { lgGuild, chatBridge, hypixelGuilds, players, taxCollectors, db } = client;
 		const me = (guild ?? lgGuild)?.me ?? null;
+		const player = UserUtil.getPlayer(user);
+		const p = player;
 		const reply = (options: string | InteractionUtilReplyOptions) => InteractionUtil.reply(interaction,
 			typeof options === 'string'
 				? { content: options, ephemeral: false }
@@ -189,13 +217,6 @@ export default class EvalCommand extends SlashCommand {
 
 		const IS_ASYNC = /\bawait\b/.test(INPUT);
 		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH');
-		const row = new MessageActionRow()
-			.addComponents(
-				new MessageButton()
-					.setCustomId(`${COMMAND_KEY}:${this.name}:${IS_ASYNC}:${INSPECT_DEPTH}`)
-					.setEmoji(EDIT_MESSAGE_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.SECONDARY),
-			);
 
 		return InteractionUtil.reply(interaction, {
 			embeds: await this.#eval(
@@ -204,7 +225,7 @@ export default class EvalCommand extends SlashCommand {
 				IS_ASYNC,
 				INSPECT_DEPTH,
 			),
-			components: [ row ],
+			components: this.#getRows(IS_ASYNC, INSPECT_DEPTH),
 		});
 	}
 
@@ -225,26 +246,42 @@ export default class EvalCommand extends SlashCommand {
 			ephemeral: true,
 		});
 
-		const [ , , async, inspectDepth ] = interaction.customId.split(':');
+		const [ , , subcommand, async, inspectDepth ] = interaction.customId.split(':');
 
-		try {
-			const collected = await channel!.awaitMessages({
-				filter: msg => msg.author.id === interaction.user.id,
-				max: 1,
-				time: minutes(5),
-				errors: [ 'time' ],
-			});
+		switch (subcommand) {
+			case 'edit': {
+				try {
+					const collected = await channel!.awaitMessages({
+						filter: msg => msg.author.id === interaction.user.id,
+						max: 1,
+						time: minutes(5),
+						errors: [ 'time' ],
+					});
 
-			return InteractionUtil.update(interaction, {
-				embeds: await this.#eval(
-					interaction,
-					collected.first()!.content,
-					async === 'true' || undefined,
-					Number(inspectDepth),
-				),
-			});
-		} catch (error) {
-			return logger.error(error);
+					return InteractionUtil.update(interaction, {
+						embeds: await this.#eval(
+							interaction,
+							collected.first()!.content,
+							async === 'true' || undefined,
+							Number(inspectDepth),
+						),
+					});
+				} catch (error) {
+					return logger.error(error);
+				}
+			}
+
+			case 'delete': {
+				await MessageUtil.delete(interaction.message as Message);
+
+				return InteractionUtil.reply(interaction, {
+					content: 'deleted',
+					ephemeral: true,
+				});
+			}
+
+			default:
+				throw new Error(`unknown subcommand '${subcommand}'`);
 		}
 	}
 
@@ -270,13 +307,6 @@ export default class EvalCommand extends SlashCommand {
 			.reduce((acc, cur) => `${acc}${acc ? '\n' : ''}${cur}${cur.endsWith('{') ? '' : ';'}`, '');
 		const IS_ASYNC = interaction.options.getBoolean('async') ?? /\bawait\b/.test(INPUT);
 		const INSPECT_DEPTH = interaction.options.getInteger('inspect') ?? this.config.get('EVAL_INSPECT_DEPTH');
-		const row = new MessageActionRow()
-			.addComponents(
-				new MessageButton()
-					.setCustomId(`${COMMAND_KEY}:${this.name}:${IS_ASYNC}:${INSPECT_DEPTH}`)
-					.setEmoji(EDIT_MESSAGE_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.SECONDARY),
-			);
 
 		return InteractionUtil.reply(interaction, {
 			embeds: await this.#eval(
@@ -285,7 +315,7 @@ export default class EvalCommand extends SlashCommand {
 				IS_ASYNC,
 				INSPECT_DEPTH,
 			),
-			components: [ row ],
+			components: this.#getRows(IS_ASYNC, INSPECT_DEPTH),
 		});
 	}
 }
