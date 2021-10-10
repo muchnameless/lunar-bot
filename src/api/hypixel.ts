@@ -7,6 +7,7 @@ import type { DefaultMeta, RateLimitData } from '@zikeji/hypixel';
 
 export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 	timeout: seconds(15),
+	rateLimitResetOffset: seconds(1),
 	retries: 1,
 	cache: {
 		get<T>(key: string) {
