@@ -99,11 +99,11 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * player db update
 	 */
-	#updateGuildPlayersPromise: Promise<this> | null = null;
+	#updatePlayersPromise: Promise<this> | null = null;
 	/**
 	 * guild ranks sync
 	 */
-	#syncGuildRanksPromise: Promise<this> | null = null;
+	#syncRanksPromise: Promise<this> | null = null;
 	/**
 	 * guild data update
 	 */
@@ -305,27 +305,15 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			return this;
 		}
 
-		await this.#updateGuildData(data);
-
-		return this.updatePlayers({ data, ...options });
-	}
-
-	/**
-	 * updates the guild data
-	 * @param data
-	 */
-	#updateGuildData(data: Components.Schemas.Guild) {
-		const { name: guildName, ranks, chatMute } = data;
-
 		// update name
-		this.name = guildName;
+		this.name = data.name;
 
 		// update ranks
-		for (const { name, priority } of ranks) {
-			const dbEntryRank = this.ranks?.find(({ priority: rankPriority }) => rankPriority === priority);
+		for (const { name, priority } of data.ranks) {
+			const dbEntryRank = this.ranks.find(({ priority: rankPriority }) => rankPriority === priority);
 
 			if (!dbEntryRank) {
-				const newRank = {
+				const newRank: GuildRank = {
 					name,
 					priority,
 					roleId: null,
@@ -335,6 +323,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 				logger.info(newRank, `[UPDATE GUILD]: ${this.name}: new rank`);
 				this.ranks.push(newRank);
+				this.ranks.sort((a, b) => b.priority - a.priority);
 				this.changed('ranks', true);
 			} else if (dbEntryRank.name !== name) {
 				logger.info(`[UPDATE GUILD]: ${this.name}: rank name changed: '${dbEntryRank.name}' -> '${name}'`);
@@ -344,9 +333,14 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		}
 
 		// sync guild mutes
-		this.mutedTill = chatMute!;
+		this.mutedTill = data.chatMute!;
 
-		return this.save();
+		await Promise.all([
+			this.save(),
+			this.updatePlayers({ data, ...options }),
+		]);
+
+		return this;
 	}
 
 	/**
@@ -354,12 +348,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * @param options
 	 */
 	async updatePlayers(options?: UpdateOptions) {
-		if (this.#updateGuildPlayersPromise) return this.#updateGuildPlayersPromise;
+		if (this.#updatePlayersPromise) return this.#updatePlayersPromise;
 
 		try {
-			return await (this.#updateGuildPlayersPromise = this.#updatePlayers(options));
+			return await (this.#updatePlayersPromise = this.#updatePlayers(options));
 		} finally {
-			this.#updateGuildPlayersPromise = null;
+			this.#updatePlayersPromise = null;
 		}
 	}
 	/**
@@ -550,7 +544,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`)),
 		);
 
-		if (syncRanks) this.syncGuildRanks();
+		if (syncRanks) this.syncRanks();
 
 		const CHANGES = PLAYERS_LEFT_AMOUNT + membersJoined.length;
 
@@ -628,20 +622,20 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * syncs guild ranks with the weight leaderboard
 	 */
-	async syncGuildRanks() {
-		if (this.#syncGuildRanksPromise) return this.#syncGuildRanksPromise;
+	async syncRanks() {
+		if (this.#syncRanksPromise) return this.#syncRanksPromise;
 
 		try {
-			return await (this.#syncGuildRanksPromise = this.#syncGuildRanks());
+			return await (this.#syncRanksPromise = this.#syncRanks());
 		} finally {
-			this.#syncGuildRanksPromise = null;
+			this.#syncRanksPromise = null;
 		}
 	}
 	/**
 	 * should only ever be called from within syncGuildRanks()
 	 * @internal
 	 */
-	async #syncGuildRanks() {
+	async #syncRanks() {
 		try {
 			if (!this.client.config.get('AUTO_GUILD_RANKS')) return this;
 

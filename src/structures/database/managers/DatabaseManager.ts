@@ -422,7 +422,7 @@ export class DatabaseManager {
 					await players.updateIgns();
 
 					for (const hypixelGuild of hypixelGuilds.cache.values()) {
-						hypixelGuild.syncGuildRanks();
+						hypixelGuild.syncRanks();
 					}
 
 					logger.warn('[DB UPDATE]: auto updates disabled');
