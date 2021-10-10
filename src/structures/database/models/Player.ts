@@ -1285,10 +1285,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		let reason: NickChangeReason | null = null;
 
 		// nickname doesn't include ign
-		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = NickChangeReason.NO_IGN;
+		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) {
+			reason = NickChangeReason.NO_IGN;
+		}
 
 		// two guild members share the same display name
-		if (GuildMemberUtil.getPlayer(member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === member.displayName.toLowerCase() && id !== member.id))) {
+		const DISPLAY_NAME = member.displayName.toLowerCase();
+		if (GuildMemberUtil.getPlayer(member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === DISPLAY_NAME && id !== member.id))) {
 			reason = NickChangeReason.NOT_UNIQUE;
 		}
 
