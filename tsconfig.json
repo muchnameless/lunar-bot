@@ -36,6 +36,7 @@
 		"lib": [ "ESNext" ],
 		"target": "ESNext",
 		"useDefineForClassFields": true,
+		"incremental": true,
 
 		// Completeness
 		"skipLibCheck": true
