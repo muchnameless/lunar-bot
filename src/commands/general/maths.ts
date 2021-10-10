@@ -315,7 +315,6 @@ export default class MathsCommand extends DualCommand {
 	validateNumber(value?: string | number) {
 		if (Math.abs(Number(value)) > Number.MAX_SAFE_INTEGER) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
 
-		if (typeof value === 'number') return value;
 		if (typeof value === 'string') return Number(value);
 		return value;
 	}
