@@ -25,6 +25,7 @@ export async function uuidToImgurBustURL({ config }: LunarClient, uuid: string) 
 
 		return URL;
 	} catch (error) {
-		return logger.error(error);
+		logger.error(error);
+		return null;
 	}
 }
