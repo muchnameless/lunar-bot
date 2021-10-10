@@ -1282,7 +1282,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const member = await this.discordMember;
 		if (!member) return;
 
-		let reason;
+		let reason: NickChangeReason | null = null;
 
 		// nickname doesn't include ign
 		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) reason = NickChangeReason.NO_IGN;
@@ -1292,7 +1292,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			reason = NickChangeReason.NOT_UNIQUE;
 		}
 
-		if (!reason) return;
+		if (reason === null) return;
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
 
 		// check if member already has a nick which is not just the current ign (case insensitive)
