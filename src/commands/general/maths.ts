@@ -211,18 +211,18 @@ export default class MathsCommand extends DualCommand {
 
 	static binaryOperators = {
 		'^'(a?: number, b?: number) {
-			if (typeof a === 'undefined') throw new Error('`^` is not an unary operator');
+			if (typeof a === 'undefined') throw new Error('`^` is not a unary operator');
 			if (a == 0 && b == 0) return Number.NaN;
 			return a ** b!;
 		},
 		'+': (a?: number, b?: number) => (typeof a !== 'undefined' ? add(a, b!) : b!),
 		'-': (a?: number, b?: number) => (typeof a !== 'undefined' ? sub(a, b!) : -b!),
 		'*'(a?: number, b?: number) {
-			if (typeof a === 'undefined') throw new Error('`*` is not an unary operator');
+			if (typeof a === 'undefined') throw new Error('`*` is not a unary operator');
 			return mul(a, b!);
 		},
 		'/'(a?: number, b?: number) {
-			if (typeof a === 'undefined') throw new Error('`/` is not an unary operator');
+			if (typeof a === 'undefined') throw new Error('`/` is not a unary operator');
 			if (b == 0) return Number.NaN;
 			return div(a, b!);
 		},
@@ -315,7 +315,9 @@ export default class MathsCommand extends DualCommand {
 	validateNumber(value?: string | number) {
 		if (Math.abs(Number(value)) > Number.MAX_SAFE_INTEGER) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
 
-		return Number(value);
+		if (typeof value === 'number') return value;
+		if (typeof value === 'string') return Number(value);
+		return value;
 	}
 
 	/**
