@@ -291,7 +291,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					const { input, output, formattedOutput } = (this.client.commands.get('maths') as MathsCommand).calculate(hypixelMessage.content.replaceAll(' ', ''));
 
 					// filter out stuff like +8 = 8, 1 7 = 17
-					if (output !== Number(hypixelMessage.content.replaceAll(' ', ''))) hypixelMessage.reply(`${input} = ${formattedOutput}`);
+					if (!Number.isNaN(output) && output !== Number(hypixelMessage.content.replaceAll(' ', ''))) {
+						hypixelMessage.reply(`${input} = ${formattedOutput}`);
+					}
 				} catch (error) {
 					logger.error(error);
 				}
