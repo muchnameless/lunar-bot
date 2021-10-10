@@ -5,7 +5,7 @@ import { logger } from '../../functions';
 sequelize
 	// @ts-expect-error
 	.options
-	.logging = logger.debug;
+	.logging = logger.debug.bind(logger);
 
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 const alter = process.argv.includes('--alter') || process.argv.includes('-a');

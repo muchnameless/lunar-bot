@@ -18,7 +18,7 @@
     "dev": "npm run build && npm run start:dev",
     "deploy:commands": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/deploy.js",
     "maintenance": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/maintenance.js",
-    "db": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/structures/database/dbInit.js --alter"
+    "db": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/structures/database/dbInit.js --alter | pino-pretty"
   },
   "author": "muchnameless",
   "license": "ISC",
