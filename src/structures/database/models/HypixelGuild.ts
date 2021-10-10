@@ -76,6 +76,7 @@ interface HypixelGuildAttributes {
 	mutedTill: number;
 	chatBridgeChannels: ChatBridgeChannel[];
 	ranks: GuildRank[];
+	staffRanksAmount: number;
 	statsHistory: StatsHistory[];
 }
 
@@ -91,6 +92,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare mutedTill: number;
 	declare chatBridgeChannels: ChatBridgeChannel[];
 	declare ranks: GuildRank[];
+	declare staffRanksAmount: number;
 	declare statsHistory: StatsHistory[];
 
 	declare readonly createdAt: Date;
@@ -158,6 +160,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			ranks: {
 				type: DataTypes.ARRAY(DataTypes.JSONB),
 				defaultValue: [],
+				allowNull: false,
+			},
+			staffRanksAmount: {
+				type: DataTypes.SMALLINT,
+				// 2 + GuildMaster but the latter is not in ranks array
+				defaultValue: 2,
 				allowNull: false,
 			},
 			statsHistory: {

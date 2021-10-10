@@ -568,7 +568,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * returns the guild rank of the player
 	 */
 	get guildRank() {
-		return this.hypixelGuild?.ranks?.find(({ priority }) => priority === this.guildRankPriority) ?? null;
+		return this.hypixelGuild?.ranks.find(({ priority }) => priority === this.guildRankPriority) ?? null;
 	}
 
 	/**
@@ -620,7 +620,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * assumes the last two guild ranks are staff ranks
 	 */
 	get isStaff() {
-		return this.guildRankPriority >= this.hypixelGuild?.ranks.length! - 1;
+		const { hypixelGuild } = this;
+		if (!hypixelGuild) return false;
+		return this.guildRankPriority > hypixelGuild.ranks.length - hypixelGuild.staffRanksAmount;
 	}
 
 	/**
