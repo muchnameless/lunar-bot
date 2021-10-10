@@ -2,7 +2,7 @@ import { Client } from '@zikeji/hypixel';
 import { cache } from './cache';
 import { HYPIXEL_KEY } from '../constants';
 import { days, logger, minutes, seconds } from '../functions';
-import type { DefaultMeta } from '@zikeji/hypixel';
+import type { DefaultMeta, RateLimitData } from '@zikeji/hypixel';
 
 
 export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
@@ -38,7 +38,7 @@ export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 			return cache.set(`${HYPIXEL_KEY}:${key}`, value, ttl);
 		},
 	},
-});
+}) as Client & { readonly rateLimit: RateLimitData; };
 
 hypixel
 	.on('limited', (limit, reset) => logger.warn(`[HYPIXEL API]: ratelimit hit: ${limit} requests. Until: ${reset.toLocaleTimeString('de-DE')}`))

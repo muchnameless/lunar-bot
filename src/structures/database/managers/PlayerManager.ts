@@ -258,7 +258,6 @@ export class PlayerManager extends ModelManager<Player> {
 			}
 
 			for (const player of this.cache.values()) {
-				// @ts-expect-error hypixel.ratelimit is not typed
 				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep((seconds(hypixel.rateLimit.reset)) + seconds(1));
 
 				await player.updateData({ rejectOnAPIError: true, ...options });
@@ -395,7 +394,6 @@ export class PlayerManager extends ModelManager<Player> {
 			if (!player.inGuild()) continue;
 
 			try {
-				// @ts-expect-error hypixel.ratelimit is not typed
 				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep(seconds(hypixel.rateLimit.reset) + seconds(1));
 
 				const result = await player.fetchMainProfile();
