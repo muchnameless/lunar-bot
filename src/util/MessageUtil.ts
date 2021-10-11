@@ -78,7 +78,10 @@ export default class MessageUtil extends null {
 	 */
 	static async react(message: Message | null, ...emojis: EmojiIdentifierResolvable[]) {
 		if (!message || message.deleted || this.isEphemeral(message)) return null;
-		if (!ChannelUtil.botPermissions(message.channel)?.has(Permissions.FLAGS.ADD_REACTIONS)) return logger.warn(`[MESSAGE REACT]: missing permissions in ${this.channelLogInfo(message)}`);
+		if (!ChannelUtil.botPermissions(message.channel)?.has(Permissions.FLAGS.ADD_REACTIONS)) {
+			logger.warn(`[MESSAGE REACT]: missing permissions in ${this.channelLogInfo(message)}`);
+			return null;
+		}
 
 		const res = [];
 
@@ -105,10 +108,14 @@ export default class MessageUtil extends null {
 	 * @param options message delete options
 	 */
 	static async delete(message: Message, { timeout = 0 }: { timeout?: number; } = {}): Promise<Message> {
-		if (message.deleted) return message; // message already deleted check
-
 		if (!message.deletable) { // permission check
-			logger.warn(`[MESSAGE UTIL]: missing permission to delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
+			logger.warn(`[MESSAGE UTIL]: message from ${this.logInfo(message)} in ${this.channelLogInfo(message)} is not deletable`);
+			return message;
+		}
+
+		// TODO: remove once discord.js Message#deletable checks for ephemeral state
+		if (this.isEphemeral(message)) {
+			logger.warn(`[MESSAGE UTIL]: unable to delete ephemeral message in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
