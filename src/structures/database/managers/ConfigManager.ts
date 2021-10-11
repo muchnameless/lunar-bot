@@ -33,6 +33,7 @@ export class ConfigManager extends ModelManager<Config> {
 	get(key: string): unknown;
 	get(key?: null): null;
 	get(key: any) {
-		return this.cache.get(key?.toUpperCase()!)?.parsedValue ?? logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`);
+		return this.cache.get(key?.toUpperCase()!)?.parsedValue
+			?? (logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`), null);
 	}
 }

@@ -150,7 +150,11 @@ export class DatabaseManager {
 
 		// set default config
 		await Promise.all(Object.entries(DEFAULT_CONFIG).map(
-			([ key, value ]) => (this.modelManagers.config.get(key as keyof typeof DEFAULT_CONFIG) !== null ? null : this.modelManagers.config.set(key, value)),
+			([ key, value ]) => (
+				this.modelManagers.config.get(key as keyof typeof DEFAULT_CONFIG) !== null
+					? null
+					: this.modelManagers.config.set(key, value)
+			),
 		));
 
 		return this;
