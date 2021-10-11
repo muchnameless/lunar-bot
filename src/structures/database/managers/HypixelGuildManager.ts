@@ -12,7 +12,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 */
 	#updateDataPromise: Promise<this> | null = null;
 
-	static PSEUDO_GUILD_IDS = [ null, GUILD_ID_BRIDGER, GUILD_ID_ERROR ] as const;
+	static PSEUDO_GUILD_IDS = new Set([ null, GUILD_ID_BRIDGER, GUILD_ID_ERROR ] as const);
 
 	/**
 	 * `NameOne`|`NameTwo`|`NameThree`
@@ -84,7 +84,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 */
 	sweepPlayerCache(idOrGuild?: string | HypixelGuild | null) {
 		if (idOrGuild) {
-			if (HypixelGuildManager.PSEUDO_GUILD_IDS.includes(idOrGuild as any)) return;
+			if (HypixelGuildManager.PSEUDO_GUILD_IDS.has(idOrGuild as any)) return;
 
 			const hypixelGuild = this.resolve(idOrGuild);
 

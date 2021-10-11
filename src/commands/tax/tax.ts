@@ -223,11 +223,15 @@ export default class TaxCommand extends SlashCommand {
 						const hypixelGuild = interaction.options.get('guild')
 							? InteractionUtil.getHypixelGuild(interaction)
 							: null;
-						const excluded = interaction.options.getString('exclude')
-							?.split(/\W/g)
-							.flatMap(x => (x ? x.toLowerCase() : [])); // lower case IGN array
+						const EXCLUDED_INPUT = interaction.options.getString('exclude');
+						const excluded = EXCLUDED_INPUT
+							? new Set(EXCLUDED_INPUT
+								.split(/\W/g)
+								.flatMap(x => (x ? x.toLowerCase() : [])), // lower case IGN array
+							)
+							: null;
 						const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild)
-							.filter(({ paid, ign }) => !paid && !excluded?.includes(ign.toLowerCase()));
+							.filter(({ paid, ign }) => !paid && !excluded?.has(ign.toLowerCase()));
 						const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordId }) => inDiscord && validateNumber(discordId));
 						const AMOUNT_TO_PING = playersPingable.size;
 

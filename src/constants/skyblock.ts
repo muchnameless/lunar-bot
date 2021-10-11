@@ -161,7 +161,7 @@ export const RUNECRAFTING_XP = {
 	25: 19_050,
 } as const;
 
-export const SKILL_CAP = {
+const SKILL_CAP = {
 	taming: 50,
 	farming: 60,
 	mining: 60,
@@ -172,7 +172,6 @@ export const SKILL_CAP = {
 	alchemy: 50,
 	carpentry: 50,
 	runecrafting: 25,
-	dungeons: 50,
 } as const;
 
 export type SkillTypes = ArrayElement<typeof SKILLS> | ArrayElement<typeof COSMETIC_SKILLS>;
@@ -243,7 +242,7 @@ export const DUNGEON_XP_TOTAL = Object.fromEntries(Object.entries(DUNGEON_XP)
 			.reduce((acc, curr) => acc + curr, 0),
 	]));
 
-export const DUNGEON_CAP = {
+const DUNGEON_CAP = {
 	catacombs: 50,
 	healer: 50,
 	mage: 50,
@@ -291,4 +290,13 @@ export const SLAYER_XP = {
 	7: 100_000,
 	8: 400_000,
 	9: 1_000_000,
+} as const;
+
+/**
+ * MISC
+ */
+
+export const LEVEL_CAP = {
+	...SKILL_CAP,
+	...DUNGEON_CAP,
 } as const;

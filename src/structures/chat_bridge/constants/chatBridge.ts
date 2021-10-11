@@ -1,10 +1,10 @@
 /**
  * bot events that should only be listened to once
  */
-export const SPAWN_EVENTS = [
+export const SPAWN_EVENTS = new Set([
 	'login',
 	'keep_alive',
-] as const;
+] as const);
 
 export const MESSAGE_POSITIONS = {
 	0: 'CHAT',

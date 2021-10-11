@@ -34,6 +34,8 @@ interface RunKickOptions extends RunModerationOptions {
 
 
 export default class GuildCommand extends SlashCommand {
+	GUILD_IDENTIFIER = new Set([ 'guild', 'everyone' ] as const);
+
 	constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('hypixel')
@@ -158,7 +160,7 @@ export default class GuildCommand extends SlashCommand {
 	 * @param interaction
 	 */
 	async getMuteTarget(targetInput: string, interaction?: CommandInteraction) {
-		if ([ 'guild', 'everyone' ].includes(targetInput)) {
+		if (this.GUILD_IDENTIFIER.has(targetInput as any)) {
 			return 'everyone';
 		}
 
@@ -725,7 +727,7 @@ export default class GuildCommand extends SlashCommand {
 				let hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 				let target;
 
-				if ([ 'guild', 'everyone' ].includes(TARGET_INPUT)) {
+				if (this.GUILD_IDENTIFIER.has(TARGET_INPUT as any)) {
 					target = 'everyone';
 				} else {
 					target = InteractionUtil.getPlayer(interaction)

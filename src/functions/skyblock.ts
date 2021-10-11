@@ -1,16 +1,15 @@
 import lilyweight from 'lilyweight';
 import {
-	DUNGEON_CAP,
 	DUNGEON_CLASSES,
 	DUNGEON_EXPONENTS,
 	DUNGEON_TYPES,
 	DUNGEON_TYPES_AND_CLASSES,
 	DUNGEON_XP,
 	DUNGEON_XP_TOTAL,
+	LEVEL_CAP,
 	LILY_SKILL_NAMES,
 	LILY_SKILL_NAMES_API,
 	RUNECRAFTING_XP,
-	SKILL_CAP,
 	SKILL_DIVIDER,
 	SKILL_EXPONENTS,
 	SKILL_XP,
@@ -32,6 +31,9 @@ export type SkyBlockProfile = Components.Schemas.SkyBlockProfileCuteName & { cut
 type SkyBlockProfiles = Components.Schemas.SkyBlockProfileCuteName[];
 
 
+// used for getSkillLevel to determine the xpTable
+const DUNGEON_TYPES_AND_CLASSES_SET = new Set(DUNGEON_TYPES_AND_CLASSES);
+
 /**
  * returns the true and progression level for the provided skill type
  * @param type the skill or dungeon type
@@ -39,14 +41,14 @@ type SkyBlockProfiles = Components.Schemas.SkyBlockProfileCuteName[];
  * @param individualCap individual level cap for the player
  */
 export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individualCap: number | null = null) {
-	let xpTable = DUNGEON_TYPES_AND_CLASSES.includes(type as any)
+	let xpTable = DUNGEON_TYPES_AND_CLASSES_SET.has(type as any)
 		? DUNGEON_XP
 		: (type === 'runecrafting'
 			? RUNECRAFTING_XP
 			: SKILL_XP);
 	let maxLevel = Math.max(...Object.keys(xpTable) as unknown as number[]);
 
-	if (SKILL_CAP[type as keyof typeof SKILL_CAP] > maxLevel || individualCap) {
+	if (LEVEL_CAP[type] > maxLevel || individualCap) {
 		xpTable = { ...SKILL_XP_PAST_50, ...xpTable };
 		maxLevel = individualCap !== null
 			? individualCap
@@ -165,7 +167,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
  */
 export function getSenitherSkillWeight(skillType: ArrayElement<typeof SKILLS>, xp = 0) {
 	const { nonFlooredLevel: LEVEL } = getSkillLevel(skillType, xp);
-	const MAX_XP = SKILL_XP_TOTAL[SKILL_CAP[skillType]] ?? Number.POSITIVE_INFINITY;
+	const MAX_XP = SKILL_XP_TOTAL[LEVEL_CAP[skillType]] ?? Number.POSITIVE_INFINITY;
 
 	return {
 		skillWeight: ((LEVEL * 10) ** (0.5 + (SKILL_EXPONENTS[skillType] ?? Number.NEGATIVE_INFINITY) + (LEVEL / 100))) / 1_250,
@@ -220,7 +222,7 @@ export function getSenitherSlayerWeight(slayerType: ArrayElement<typeof SLAYERS>
 export function getSenitherDungeonWeight(dungeonType: DungeonTypes, xp = 0) {
 	const { nonFlooredLevel: LEVEL } = getSkillLevel(dungeonType, xp);
 	const DUNGEON_WEIGHT = (LEVEL ** 4.5) * (DUNGEON_EXPONENTS[dungeonType] ?? 0);
-	const MAX_XP = DUNGEON_XP_TOTAL[DUNGEON_CAP[dungeonType]] ?? Number.POSITIVE_INFINITY;
+	const MAX_XP = DUNGEON_XP_TOTAL[LEVEL_CAP[dungeonType]] ?? Number.POSITIVE_INFINITY;
 
 	return {
 		dungeonWeight: DUNGEON_WEIGHT,

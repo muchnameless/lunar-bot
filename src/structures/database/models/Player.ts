@@ -516,7 +516,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * wether the player is actually in a guild and not just one of PSEUDO_GUILD_IDS
 	 */
 	inGuild(): this is PlayerInGuild {
-		return !HypixelGuildManager.PSEUDO_GUILD_IDS.includes(this.guildId as any);
+		return !HypixelGuildManager.PSEUDO_GUILD_IDS.has(this.guildId as any);
 	}
 
 	/**
