@@ -189,9 +189,17 @@ export class DiscordChatManager extends ChatManager {
 			const webhooks = await channel.fetchWebhooks();
 
 			if (webhooks.size) {
-				this.webhook = webhooks.first() ?? null;
-			} else {
-				this.webhook = await channel.createWebhook('chat bridge', { avatar: (channel.guild?.me ?? this.client.user!).displayAvatarURL(), reason: 'no webhooks in chat bridge channel found' });
+				this.webhook = webhooks.find(({ owner }) => owner?.id === this.client.user!.id) ?? null;
+			}
+
+			if (!this.webhook) {
+				this.webhook = await channel.createWebhook(
+					'chat bridge',
+					{
+						avatar: (channel.guild?.me ?? this.client.user!).displayAvatarURL(),
+						reason: 'no webhooks in chat bridge channel found',
+					},
+				);
 
 				this.client.log(new MessageEmbed()
 					.setColor(this.client.config.get('EMBED_GREEN'))
