@@ -45,7 +45,7 @@ export class DiscordManager {
 			case 2:
 				return string
 					.replaceAll('*', '\\*') // escape italic 1/2
-					.replace(/(\S*)_([^\s_]*)/g, (match, p1, p2) => { // escape italic 2/2 & underline
+					.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => { // escape italic 2/2 & underline
 						if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
 						if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
 						return `${p1.replaceAll('_', '\\_')}\\_${p2}`;
