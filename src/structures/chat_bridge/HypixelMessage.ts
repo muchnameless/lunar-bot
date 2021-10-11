@@ -321,7 +321,8 @@ export class HypixelMessage {
 				allowedMentions: { parse: [] },
 			}));
 		} catch (error) {
-			return logger.error(error, '[FORWARD TO DC]');
+			logger.error(error, '[FORWARD TO DC]');
+			return null;
 		}
 	}
 
@@ -345,8 +346,8 @@ export class HypixelMessage {
 			time,
 		});
 
-		if (this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase())) return;
-
-		throw errorMessage;
+		if (!this.client.config.get('REPLY_CONFIRMATION').includes(result[0]?.content.toLowerCase())) {
+			throw errorMessage;
+		}
 	}
 }
