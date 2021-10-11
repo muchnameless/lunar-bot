@@ -37,8 +37,8 @@ export default class KickBridgeCommand extends BridgeCommand {
 			executor: hypixelMessage.player,
 			reason: hypixelMessage.commandData.args.join(' '),
 			hypixelGuild,
-		});
+		}) ?? {};
 
-		return hypixelMessage.author.send(content);
+		return hypixelMessage.author.send(content ?? 'an unknown error occurred');
 	}
 }
