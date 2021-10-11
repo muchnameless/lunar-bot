@@ -751,10 +751,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				for (const skill of SKILLS) this[`${skill}Xp`] = SKILL_XP_TOTAL[achievements?.[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
 			}
 
-			this.farmingLvlCap = 50 + (playerData
-				// @ts-expect-error
-				.jacob2
-				?.perks?.farming_level_cap ?? 0);
+			this.farmingLvlCap = 50 + (playerData.jacob2?.perks?.farming_level_cap ?? 0);
 
 			/**
 			 * slayer
