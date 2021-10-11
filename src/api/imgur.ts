@@ -1,7 +1,7 @@
 import { cache } from './cache';
 import { IMGUR_KEY } from '../constants';
 import { ImgurClient } from '../structures/ImgurClient';
-import { minutes, seconds } from '../functions';
+import { hours, seconds } from '../functions';
 
 
 export const imgur = new ImgurClient(process.env.IMGUR_CLIENT_ID!, {
@@ -13,7 +13,7 @@ export const imgur = new ImgurClient(process.env.IMGUR_CLIENT_ID!, {
 			return cache.get(`${IMGUR_KEY}:${key}`);
 		},
 		set(key, value) {
-			return cache.set(`${IMGUR_KEY}:${key}`, value, minutes(10));
+			return cache.set(`${IMGUR_KEY}:${key}`, value, hours(3));
 		},
 	},
 });
