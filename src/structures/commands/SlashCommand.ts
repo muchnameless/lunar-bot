@@ -176,7 +176,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	runUser(interaction: ContextMenuInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runUser(interaction: ContextMenuInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for user context menus');
 	}
 
@@ -184,7 +184,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	runMessage(interaction: ContextMenuInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runMessage(interaction: ContextMenuInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for message context menus');
 	}
 
@@ -192,7 +192,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	runSelect(interaction: SelectMenuInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runSelect(interaction: SelectMenuInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for select menus');
 	}
 
@@ -200,7 +200,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	runButton(interaction: ButtonInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runButton(interaction: ButtonInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for buttons');
 	}
 
@@ -208,7 +208,7 @@ export class SlashCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	runSlash(interaction: CommandInteraction): Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runSlash(interaction: CommandInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for slash commands');
 	}
 }
