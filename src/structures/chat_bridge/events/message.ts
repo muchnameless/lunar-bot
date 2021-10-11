@@ -123,8 +123,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * The guild has completed Tier 3 of this week's Guild Quest!
 		 * The Guild has reached Level 36!
 		 * The Guild has unlocked Winners III!
+		 * GUILD QUEST TIER 1 COMPLETED!
 		 */
-		if (hypixelMessage.content === 'LEVEL UP!' || /^the guild has (?:completed|reached|unlocked)/i.test(hypixelMessage.content)) {
+		if (hypixelMessage.content === 'LEVEL UP!' || /^the guild has (?:completed|reached|unlocked)|^guild quest tier \d+ completed!?$/i.test(hypixelMessage.content)) {
 			return hypixelMessage.forwardToDiscord();
 		}
 
