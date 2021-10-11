@@ -107,12 +107,18 @@ export function autocorrect<T>(query: string, validInput: readonly T[] | Map<unk
 
 /**
  * <Array>.filter with an asynchronous callback function
- * @param arr
- * @param callback
+ * @param array
+ * @param predicate
  */
-export async function asyncFilter<T>(arr: T[], callback: (x: T) => boolean | Promise<boolean>): Promise<T[]> {
+export async function asyncFilter<T>(array: T[], predicate: (value: T, index: number, array: T[]) => boolean | Promise<boolean>): Promise<T[]> {
 	const fail = Symbol();
-	return (await Promise.all(arr.map(async item => ((await callback(item)) ? item : fail)))).filter(i => i !== fail) as T[];
+
+	return (await Promise.all(array.map(async (item, index) => (
+		(await predicate(item, index, array))
+			? item
+			: fail
+	))))
+		.filter(x => x !== fail) as T[];
 }
 
 const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
