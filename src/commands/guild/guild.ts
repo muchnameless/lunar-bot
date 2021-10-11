@@ -1,21 +1,23 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { SnowflakeUtil, Formatters } from 'discord.js';
+import { SnowflakeUtil, Formatters, Constants, MessageActionRow, MessageButton } from 'discord.js';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import ms from 'ms';
-import { demote, historyErrors, invite, kick, mute, logErrors, promote, setRank, topErrors, unmute } from '../../structures/chat_bridge/constants';
-import { EMBED_DESCRIPTION_MAX_CHARS, GUILD_ID_BRIDGER, UNKNOWN_IGN } from '../../constants';
+import { demote, historyErrors, invite, kick, mute, logErrors, promote, setRank, topErrors, unmute, unknownIgn } from '../../structures/chat_bridge/constants';
+import { COMMAND_KEY, DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, EMBED_DESCRIPTION_MAX_CHARS, GUILD_ID_BRIDGER, LEFT_EMOJI, RELOAD_EMOJI, RIGHT_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { requiredPlayerOption, optionalPlayerOption, pageOption, requiredIgnOption, targetOption, forceOption, buildGuildOption } from '../../structures/commands/commonOptions';
+import { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
 import { InteractionUtil, UserUtil } from '../../util';
 import { autocorrect, getIdFromString, logger, removeMcFormatting, seconds, stringToMS, trim } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ButtonInteraction, CommandInteraction, Interaction } from 'discord.js';
 import type { SlashCommandStringOption } from '@discordjs/builders';
 import type { WhereOptions } from 'sequelize';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Player } from '../../structures/database/models/Player';
 import type { HypixelGuild } from '../../structures/database/models/HypixelGuild';
 import type { CommandOptions } from '../../structures/chat_bridge/managers/MinecraftChatManager';
+import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
 
 interface RunModerationOptions {
@@ -29,6 +31,7 @@ interface RunMuteOptions extends RunModerationOptions {
 }
 
 interface RunKickOptions extends RunModerationOptions {
+	ctx: CommandInteraction | HypixelUserMessage;
 	reason: string;
 }
 
@@ -153,6 +156,80 @@ export default class GuildCommand extends SlashCommand {
 			slash,
 			cooldown: 0,
 		});
+	}
+
+	/**
+	 * throws on unknown subcommand, rejects on missing permissions
+	 * @param interaction
+	 * @param subcommand
+	 */
+	#checkRequiredRoles(interaction: Interaction, subcommand: string) {
+		switch (subcommand) {
+			case 'demote':
+			case 'invite':
+			case 'log':
+			case 'mute':
+			case 'promote':
+			case 'setrank':
+			case 'unmute':
+				return this.checkPermissions(interaction, {
+					roleIds: [
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
+					],
+				});
+
+			case 'kick':
+				return this.checkPermissions(interaction, {
+					roleIds: [
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
+					],
+				});
+
+			case 'history':
+			case 'info':
+			case 'member':
+			case 'motd':
+			case 'quest':
+			case 'top':
+				return this.checkPermissions(interaction, {
+					roleIds: [
+						this.config.get('GUILD_ROLE_ID'),
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
+					],
+				});
+
+			case 'list':
+			case 'members':
+			case 'online':
+				return this.checkPermissions(interaction, {
+					roleIds: [
+						this.config.get('GUILD_ROLE_ID'),
+						this.config.get('BRIDGER_ROLE_ID'),
+						this.config.get('SHRUG_ROLE_ID'),
+						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
+						this.config.get('MODERATOR_ROLE_ID'),
+						this.config.get('DANKER_STAFF_ROLE_ID'),
+						this.config.get('SENIOR_STAFF_ROLE_ID'),
+						this.config.get('MANAGER_ROLE_ID'),
+					],
+				});
+
+			default:
+				throw new Error(`unknown subcommand '${subcommand}'`);
+		}
 	}
 
 	/**
@@ -286,7 +363,7 @@ export default class GuildCommand extends SlashCommand {
 	/**
 	 * @param options
 	 */
-	async runKick({ target, executor, hypixelGuild, reason }: RunKickOptions) {
+	async runKick({ ctx, target, executor, hypixelGuild, reason }: RunKickOptions) {
 		if (!executor) return {
 			content: 'unable to find a linked player to your discord account',
 			ephemeral: true,
@@ -317,6 +394,13 @@ export default class GuildCommand extends SlashCommand {
 		};
 
 		try {
+			// confirm kick
+			const QUESTION = `kick ${target} from ${hypixelGuild}?` as const;
+			await (ctx instanceof HypixelMessage
+				? ctx.awaitConfirmation(QUESTION)
+				: InteractionUtil.awaitConfirmation(ctx, QUESTION)
+			);
+
 			const { chatBridge } = hypixelGuild;
 			const res = await chatBridge.minecraft.command({
 				command: `guild kick ${target} ${reason}`,
@@ -391,25 +475,162 @@ export default class GuildCommand extends SlashCommand {
 	}
 
 	/**
+	 * @param hypixelGuildId
+	 * @param currentPage
+	 * @param totalPages
+	 */
+	#getPaginationButtons(subcommand: string, hypixelGuildId: string, currentPage: number, totalPages: number, parsedPages: boolean) {
+		const CUSTOM_ID = `${COMMAND_KEY}:${this.name}:${subcommand}:${hypixelGuildId}`;
+
+		let currentPage_ = currentPage;
+		let totalPages_ = totalPages;
+		let decDisabled;
+		let incDisabled;
+
+		if (parsedPages) {
+			const INVALID_PAGES = Number.isNaN(currentPage) || Number.isNaN(totalPages);
+
+			decDisabled = currentPage === 1 || INVALID_PAGES;
+			incDisabled = currentPage === totalPages || INVALID_PAGES;
+		} else { // not parsed
+			if (Number.isNaN(currentPage)) currentPage_ = 0;
+			if (Number.isNaN(totalPages)) totalPages_ = currentPage_ + 7;
+
+			decDisabled = currentPage_ === 0;
+			incDisabled = currentPage_ === totalPages_;
+		}
+
+		return [
+			new MessageActionRow()
+				.addComponents(
+					new MessageButton()
+						.setCustomId(`${CUSTOM_ID}:1:${DOUBLE_LEFT_EMOJI}`)
+						.setEmoji(DOUBLE_LEFT_EMOJI)
+						.setStyle(Constants.MessageButtonStyles.PRIMARY)
+						.setDisabled(decDisabled),
+					new MessageButton()
+						.setCustomId(`${CUSTOM_ID}:${currentPage_ - 1}:${LEFT_EMOJI}`)
+						.setEmoji(LEFT_EMOJI)
+						.setStyle(Constants.MessageButtonStyles.PRIMARY)
+						.setDisabled(decDisabled),
+					new MessageButton()
+						.setCustomId(`${CUSTOM_ID}:${currentPage_ + 1}:${RIGHT_EMOJI}`)
+						.setEmoji(RIGHT_EMOJI)
+						.setStyle(Constants.MessageButtonStyles.PRIMARY)
+						.setDisabled(incDisabled),
+					new MessageButton()
+						.setCustomId(`${CUSTOM_ID}:${totalPages_}:${DOUBLE_RIGHT_EMOJI}`)
+						.setEmoji(DOUBLE_RIGHT_EMOJI)
+						.setStyle(Constants.MessageButtonStyles.PRIMARY)
+						.setDisabled(incDisabled),
+					new MessageButton()
+						.setCustomId(`${CUSTOM_ID}:${currentPage_}:${RELOAD_EMOJI}`)
+						.setEmoji(RELOAD_EMOJI)
+						.setStyle(Constants.MessageButtonStyles.PRIMARY),
+				),
+		];
+	}
+
+	/**
+	 * @param interaction
+	 * @param subcommand
+	 * @param baseCommand
+	 * @param hypixelGuild
+	 * @param page
+	 */
+	async #runPaginated(interaction: CommandInteraction | ButtonInteraction, subcommand: string, commandOptions: CommandOptions, hypixelGuild: HypixelGuild, page: number | null) {
+		const command = `${commandOptions.command} ${page ?? ''}`.trimEnd();
+		const response = await hypixelGuild.chatBridge.minecraft.command({
+			...commandOptions,
+			command,
+		});
+		const pageMatched = response.match(/\(Page (?<current>\d+) ?(?:of|\/) ?(?<total>\d+)\)/);
+
+		return InteractionUtil[interaction.isCommand() ? 'reply' : 'update'](interaction as ButtonInteraction, {
+			embeds: [
+				this.client.defaultEmbed
+					.setTitle(`/${command}`)
+					.setDescription(Formatters.codeBlock(response)),
+			],
+			components: this.#getPaginationButtons(
+				subcommand,
+				hypixelGuild.guildId,
+				Number(pageMatched?.groups!.current ?? page),
+				Number(pageMatched?.groups!.total),
+				pageMatched !== null,
+			),
+		});
+	}
+
+	/**
+	 * execute the command
+	 * @param interaction
+	 * @param args parsed customId, split by ':'
+	 */
+	override async runButton(interaction: ButtonInteraction, args: string[]) {
+		const [ SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, PAGE_INPUT ] = args;
+		const [ SUBCOMMAND ] = SUBCOMMAND_WITH_ARGS.split(' ', 1);
+
+		await this.#checkRequiredRoles(interaction, SUBCOMMAND);
+
+		const PAGE = PAGE_INPUT === Number.NaN.toString()
+			? null
+			: Number(PAGE_INPUT);
+
+		// check only the part before the first space
+		switch (SUBCOMMAND) {
+			case 'history':
+				return this.#runPaginated(
+					interaction,
+					SUBCOMMAND,
+					{
+						command: 'guild history',
+						abortRegExp: historyErrors(),
+					},
+					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
+					PAGE,
+				);
+
+			case 'log':
+				return this.#runPaginated(
+					interaction,
+					SUBCOMMAND_WITH_ARGS,
+					{
+						command: `guild ${SUBCOMMAND_WITH_ARGS}`,
+						abortRegExp: logErrors(),
+					},
+					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
+					PAGE,
+				);
+
+			case 'top':
+				return this.#runPaginated(
+					interaction,
+					SUBCOMMAND,
+					{
+						command: 'guild top',
+						abortRegExp: topErrors(),
+					},
+					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
+					PAGE,
+				);
+
+			default:
+				throw new Error(`unknown subcommand '${SUBCOMMAND}'`);
+		}
+	}
+
+	/**
 	 * execute the command
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		const SUB_COMMAND = interaction.options.getSubcommand();
+		const SUBCOMMAND = interaction.options.getSubcommand();
 
-		switch (SUB_COMMAND) {
+		await this.#checkRequiredRoles(interaction, SUBCOMMAND);
+
+		switch (SUBCOMMAND) {
 			case 'demote': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
 				const executor = UserUtil.getPlayer(interaction.user);
 
 				if (!executor) return InteractionUtil.reply(interaction, {
@@ -435,18 +656,10 @@ export default class GuildCommand extends SlashCommand {
 			}
 
 			case 'kick': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
 				const target = InteractionUtil.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
 				const { content, ephemeral } = await this.runKick({
+					ctx: interaction,
 					target,
 					executor: UserUtil.getPlayer(interaction.user),
 					reason,
@@ -467,76 +680,38 @@ export default class GuildCommand extends SlashCommand {
 				});
 			}
 
-			case 'history': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('GUILD_ROLE_ID'),
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
-				return this.#run(interaction, {
-					command: `guild history ${interaction.options.getInteger('page') ?? ''}`,
-					abortRegExp: historyErrors(),
-				});
-			}
+			case 'history':
+				return this.#runPaginated(
+					interaction,
+					SUBCOMMAND,
+					{
+						command: 'guild history',
+						abortRegExp: historyErrors(),
+					},
+					InteractionUtil.getHypixelGuild(interaction),
+					interaction.options.getInteger('page'),
+				);
 
 			case 'info':
 			case 'motd':
-			case 'quest': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('GUILD_ROLE_ID'),
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
+			case 'quest':
 				return this.#run(interaction, {
-					command: `guild ${SUB_COMMAND}`,
-				});
-			}
-
-			case 'top': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('GUILD_ROLE_ID'),
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
+					command: `guild ${SUBCOMMAND}`,
 				});
 
-				return this.#run(interaction, {
-					command: `guild top ${interaction.options.getInteger('days_ago') ?? ''}`,
-					abortRegExp: topErrors(),
-				});
-			}
+			case 'top':
+				return this.#runPaginated(
+					interaction,
+					SUBCOMMAND,
+					{
+						command: 'guild top',
+						abortRegExp: topErrors(),
+					},
+					InteractionUtil.getHypixelGuild(interaction),
+					interaction.options.getInteger('days_ago'),
+				);
 
 			case 'invite': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
 				const IGN = interaction.options.getString('ign', true);
 
 				return this.#run(interaction, {
@@ -547,78 +722,37 @@ export default class GuildCommand extends SlashCommand {
 
 			case 'list':
 			case 'members':
-			case 'online': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('GUILD_ROLE_ID'),
-						this.config.get('BRIDGER_ROLE_ID'),
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
+			case 'online':
 				return this.#runList(interaction, {
-					command: `guild ${SUB_COMMAND}`,
+					command: `guild ${SUBCOMMAND}`,
 				});
-			}
 
 			case 'log': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
+				const COMMAND = `log ${InteractionUtil.getIgn(interaction) ?? ''}`.trimEnd();
 
-				const IGN = InteractionUtil.getIgn(interaction);
-				const PAGE = interaction.options.getInteger('page');
+				return this.#runPaginated(
+					interaction,
+					COMMAND,
+					{
+						command: `guild ${COMMAND}`,
+						abortRegExp: logErrors(),
+					},
+					InteractionUtil.getHypixelGuild(interaction),
+					interaction.options.getInteger('page'),
 
-				return this.#run(interaction, {
-					command: `guild log ${[ IGN, PAGE ].filter(x => x != null).join(' ')}`,
-					abortRegExp: logErrors(),
-				});
+				);
 			}
 
 			case 'member': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('GUILD_ROLE_ID'),
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
 				const IGN = InteractionUtil.getIgn(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 
 				return this.#run(interaction, {
 					command: `guild member ${IGN}`,
+					abortRegExp: unknownIgn(IGN),
 				});
 			}
 
 			case 'mute': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
 				const DURATION_INPUT = interaction.options.getString('duration', true);
 				const DURATION = stringToMS(DURATION_INPUT);
 
@@ -631,17 +765,6 @@ export default class GuildCommand extends SlashCommand {
 			}
 
 			case 'promote': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
 				const executor = UserUtil.getPlayer(interaction.user);
 
 				if (!executor) return InteractionUtil.reply(interaction, {
@@ -667,17 +790,6 @@ export default class GuildCommand extends SlashCommand {
 			}
 
 			case 'setrank': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
 				const executor = UserUtil.getPlayer(interaction.user);
 
 				if (!executor) return InteractionUtil.reply(interaction, {
@@ -711,17 +823,6 @@ export default class GuildCommand extends SlashCommand {
 			}
 
 			case 'unmute': {
-				await this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
-				});
-
 				const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 
 				let hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
@@ -780,7 +881,7 @@ export default class GuildCommand extends SlashCommand {
 			}
 
 			default:
-				throw new Error(`unknown subcommand '${SUB_COMMAND}'`);
+				throw new Error(`unknown subcommand '${SUBCOMMAND}'`);
 		}
 	}
 }

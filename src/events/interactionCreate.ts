@@ -3,7 +3,7 @@ import { COMMAND_KEY, LB_KEY } from '../constants';
 import { InteractionUtil } from '../util';
 import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, logger, minutes } from '../functions';
 import { Event } from '../structures/events/Event';
-import type { BaseGuildTextChannel, ButtonInteraction, CommandInteraction, ContextMenuInteraction, GuildMember, SelectMenuInteraction } from 'discord.js';
+import type { BaseGuildTextChannel, ButtonInteraction, CommandInteraction, ContextMenuInteraction, GuildMember, Message, SelectMenuInteraction } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 import type { ChatInteraction } from '../util/InteractionUtil';
 
@@ -92,7 +92,7 @@ export default class InteractionCreateEvent extends Event {
 		switch (type) {
 			// leaderboards edit
 			case LB_KEY:
-				return handleLeaderboardButtonInteraction(interaction);
+				return handleLeaderboardButtonInteraction(interaction, args);
 
 			// command message buttons
 			case COMMAND_KEY: {
@@ -121,7 +121,7 @@ export default class InteractionCreateEvent extends Event {
 					}
 				}
 
-				return command.runButton(interaction);
+				return command.runButton(interaction, args);
 			}
 		}
 	}
@@ -143,7 +143,7 @@ export default class InteractionCreateEvent extends Event {
 		switch (type) {
 			// leaderboards edit
 			case LB_KEY:
-				return handleLeaderboardSelectMenuInteraction(interaction);
+				return handleLeaderboardSelectMenuInteraction(interaction, args);
 
 			// command message buttons
 			case 'cmd': {
@@ -172,7 +172,7 @@ export default class InteractionCreateEvent extends Event {
 					}
 				}
 
-				return command.runSelect(interaction);
+				return command.runSelect(interaction, args);
 			}
 		}
 	}
@@ -210,10 +210,12 @@ export default class InteractionCreateEvent extends Event {
 
 		switch (interaction.targetType) {
 			case 'MESSAGE':
-				return command.runMessage(interaction);
+				return command.runMessage(interaction, interaction.options.getMessage('message') as Message);
 
-			case 'USER':
-				return command.runUser(interaction);
+			case 'USER': {
+				const { user, member } = interaction.options.get('user')!;
+				return command.runUser(interaction, user!, member as GuildMember ?? null);
+			}
 
 			default:
 				logger.error(`[HANDLE CONTEXT MENU]: unknown target type: ${interaction.targetType}`);

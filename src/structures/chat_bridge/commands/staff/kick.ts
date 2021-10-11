@@ -33,6 +33,7 @@ export default class KickBridgeCommand extends BridgeCommand {
 		if (!hypixelGuild) return hypixelMessage.author.send('unable to determine the guild to perform the kick on');
 
 		const { content } = await (this.client.commands.get('guild') as GuildCommand)?.runKick({
+			ctx: hypixelMessage,
 			target: this.client.players.getByIgn(targetInput) ?? targetInput,
 			executor: hypixelMessage.player,
 			reason: hypixelMessage.commandData.args.join(' '),

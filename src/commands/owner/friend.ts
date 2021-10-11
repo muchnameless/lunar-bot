@@ -73,7 +73,7 @@ export default class MyCommand extends SlashCommand {
 	 * @param hypixelGuild
 	 * @param page
 	 */
-	async #runList(interaction: CommandInteraction | ButtonInteraction, hypixelGuild: HypixelGuild, page: number | null) {
+	async #runPaginated(interaction: CommandInteraction | ButtonInteraction, hypixelGuild: HypixelGuild, page: number | null) {
 		const command = `friend list ${page ?? ''}`;
 		const response = await hypixelGuild.chatBridge.minecraft.command({ command });
 		const pageMatched = response.match(/\(Page (?<current>\d+) of (?<total>\d+)\)/);
@@ -93,14 +93,16 @@ export default class MyCommand extends SlashCommand {
 	}
 
 	/**
+	 * execute the command
 	 * @param interaction
+	 * @param args parsed customId, split by ':'
 	 */
-	override runButton(interaction: ButtonInteraction) {
-		const [ , , SUBCOMMAND, HYPIXEL_GUILD_ID, PAGE ] = interaction.customId.split(':');
+	override runButton(interaction: ButtonInteraction, args: string[]) {
+		const [ SUBCOMMAND, HYPIXEL_GUILD_ID, PAGE ] = args;
 
 		switch (SUBCOMMAND) {
 			case 'list':
-				return this.#runList(
+				return this.#runPaginated(
 					interaction,
 					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
 					Number(PAGE),
@@ -118,7 +120,7 @@ export default class MyCommand extends SlashCommand {
 	override runSlash(interaction: CommandInteraction) {
 		switch (interaction.options.getSubcommand()) {
 			case 'list':
-				return this.#runList(
+				return this.#runPaginated(
 					interaction,
 					InteractionUtil.getHypixelGuild(interaction),
 					interaction.options.getInteger('page'),

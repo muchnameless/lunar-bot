@@ -164,10 +164,11 @@ export default class AhCommand extends SlashCommand {
 	/**
 	 * execute the command
 	 * @param interaction
+	 * @param args parsed customId, split by ':'
 	 */
-	override async runSelect(interaction: SelectMenuInteraction) {
+	override async runSelect(interaction: SelectMenuInteraction, args: string[]) {
 		try {
-			const [ , , uuid, ign, userId ] = interaction.customId.split(':');
+			const [ uuid, ign, userId ] = args;
 			const [ profileId ] = interaction.values;
 			const profiles = (interaction.message.components![0].components[0] as unknown as APISelectMenuComponent).options;
 

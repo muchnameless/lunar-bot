@@ -206,22 +206,21 @@ export default class EvalCommand extends SlashCommand {
 	/**
 	 * execute the command
 	 * @param interaction
+	 * @param message
 	 */
-	override async runMessage(interaction: ContextMenuInteraction) {
-		const INPUT = interaction.options.getMessage('message')!.content;
-
-		if (!INPUT) return InteractionUtil.reply(interaction, {
+	override async runMessage(interaction: ContextMenuInteraction, { content }: Message) {
+		if (!content) return InteractionUtil.reply(interaction, {
 			content: 'no content to evaluate',
 			ephemeral: true,
 		});
 
-		const IS_ASYNC = /\bawait\b/.test(INPUT);
+		const IS_ASYNC = /\bawait\b/.test(content);
 		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH');
 
 		return InteractionUtil.reply(interaction, {
 			embeds: await this.#eval(
 				interaction,
-				INPUT,
+				content,
 				IS_ASYNC,
 				INSPECT_DEPTH,
 			),
@@ -232,8 +231,9 @@ export default class EvalCommand extends SlashCommand {
 	/**
 	 * execute the command
 	 * @param interaction
+	 * @param args parsed customId, split by ':'
 	 */
-	override async runButton(interaction: ButtonInteraction) {
+	override async runButton(interaction: ButtonInteraction, args: string[]) {
 		if (interaction.user.id !== this.client.ownerId) return InteractionUtil.reply(interaction, {
 			content: 'this command is restricted to the bot owner',
 			ephemeral: true,
@@ -246,7 +246,7 @@ export default class EvalCommand extends SlashCommand {
 			ephemeral: true,
 		});
 
-		const [ , , subcommand, async, inspectDepth ] = interaction.customId.split(':');
+		const [ subcommand, async, inspectDepth ] = args;
 
 		switch (subcommand) {
 			case 'edit': {

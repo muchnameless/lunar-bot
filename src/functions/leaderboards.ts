@@ -122,7 +122,6 @@ interface LeaderboardArgsWithPage extends LeaderboardArgs {
 }
 
 type CacheKeyParsed = [
-	typeof LB_KEY,
 	Snowflake, // user id
 	string, // hypixel guild id
 	LeaderboardType, // lbType
@@ -307,9 +306,10 @@ export async function handleLeaderboardCommandInteraction(interaction: ChatInter
 /**
  * handles a leaderbaord message
  * @param interaction
+ * @param args parsed customId, split by ':'
  */
-export async function handleLeaderboardButtonInteraction(interaction: ButtonInteraction) {
-	const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, EMOJI ] = interaction.customId.split(':') as ButtonCustomIdParsed;
+export async function handleLeaderboardButtonInteraction(interaction: ButtonInteraction, args: string[]) {
+	const [ USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, PAGE, EMOJI ] = args as ButtonCustomIdParsed;
 	const leaderboardArgs: LeaderboardArgsWithPage = {
 		lbType: LB_TYPE,
 		xpType: XP_TYPE,
@@ -374,9 +374,10 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 /**
  * handles a leaderbaord message
  * @param interaction
+ * @param args parsed customId, split by ':'
  */
-export async function handleLeaderboardSelectMenuInteraction(interaction: SelectMenuInteraction) {
-	const [ , USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE ] = interaction.customId.split(':') as SelectMenuCustomIdParsed;
+export async function handleLeaderboardSelectMenuInteraction(interaction: SelectMenuInteraction, args: string[]) {
+	const [ USER_ID, HYPIXEL_GUILD_ID, LB_TYPE, XP_TYPE, OFFSET, SELECT_TYPE ] = args as SelectMenuCustomIdParsed;
 	const leaderboardArgs: LeaderboardArgsWithPage = {
 		lbType: LB_TYPE,
 		xpType: XP_TYPE,

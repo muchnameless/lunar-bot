@@ -44,8 +44,8 @@ const _mute = {
 };
 const _paginationErrors = {
 	RANGE_ERROR: '^Page must be between 1 and \\d+[.!]?$',
-	NO_LOGS: 'There are no logs to display[.!]?$',
-	NO_HISTORY: 'There is no recent history to display[.!]?$',
+	NO_LOGS: '^There are no logs to display[.!]?$',
+	NO_HISTORY: '^There is no recent history to display[.!]?$',
 	INVALID_NUMBER: '^Not a valid number[.!]?$',
 	NEGATIVE_NUMBER: '^Must be a positive number[.!]?$',
 	invalidPageNumber: (ign = IGN_DEFAULT) => `'${ign}' is not a valid page number[.!]?$`,
@@ -152,6 +152,11 @@ const paginationErrorResponses = Object.values(_paginationErrors);
 // dynamic RegExp constructors
 export const genericErrors = (ign = IGN_DEFAULT, to = GUILD_RANK_DEFAULT) => new RegExp(
 	genericErrorResponses.map(x => (typeof x === 'function' ? x(ign, undefined, to) : x)).join('|'),
+	'i',
+);
+
+export const unknownIgn = (ign = IGN_DEFAULT) => new RegExp(
+	_genericErrors.unknownIgn(ign),
 	'i',
 );
 

@@ -838,7 +838,9 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
 		const collector = this.createMessageCollector({
-			filter: hypixelMessage => !hypixelMessage.type && ((responseRegExp?.test(hypixelMessage.content) ?? true) || (abortRegExp?.test(hypixelMessage.content) ?? false) || /^-{29,}/.test(hypixelMessage.content)),
+			filter: hypixelMessage => hypixelMessage.type === null && (
+				(responseRegExp?.test(hypixelMessage.content) ?? true) || (abortRegExp?.test(hypixelMessage.content) ?? false) || /^-{29,}/.test(hypixelMessage.content)
+			),
 			time: timeout,
 		});
 

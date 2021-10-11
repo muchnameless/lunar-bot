@@ -18,8 +18,10 @@ import type {
 	ContextMenuInteraction,
 	GuildMember,
 	Interaction,
+	Message,
 	SelectMenuInteraction,
 	Snowflake,
+	User,
 } from 'discord.js';
 import type { CommandContext, CommandData } from './BaseCommand';
 
@@ -175,32 +177,37 @@ export class SlashCommand extends BaseCommand {
 	/**
 	 * execute the command
 	 * @param interaction
+	 * @param user
+	 * @param member
 	 */
-	runUser(interaction: ContextMenuInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runUser(interaction: ContextMenuInteraction, user: User, member: GuildMember | null): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for user context menus');
 	}
 
 	/**
 	 * execute the command
 	 * @param interaction
+	 * @param message
 	 */
-	runMessage(interaction: ContextMenuInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runMessage(interaction: ContextMenuInteraction, message: Message): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for message context menus');
 	}
 
 	/**
 	 * execute the command
 	 * @param interaction
+	 * @param args parsed customId, split by ':'
 	 */
-	runSelect(interaction: SelectMenuInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runSelect(interaction: SelectMenuInteraction, args: string[]): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for select menus');
 	}
 
 	/**
 	 * execute the command
 	 * @param interaction
+	 * @param args parsed customId, split by ':'
 	 */
-	runButton(interaction: ButtonInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	runButton(interaction: ButtonInteraction, args: string[]): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		throw new Error('no run function specified for buttons');
 	}
 
