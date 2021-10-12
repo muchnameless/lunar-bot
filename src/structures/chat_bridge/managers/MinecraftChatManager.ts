@@ -778,6 +778,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				// only throw for chat messages when the bot was not ready yet
 				if (discordMessage && !this.isReady()) {
 					MessageUtil.react(discordMessage, X_EMOJI);
+					logger.error(`timeout while sending '${message}'`);
 					throw response;
 				}
 
