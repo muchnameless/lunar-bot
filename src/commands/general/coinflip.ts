@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { promisify } from 'node:util';
-import { randomBytes as cryptoRandomBytes } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
@@ -12,7 +12,7 @@ export default class CoinFlipCommand extends DualCommand {
 	/**
 	 * async random bytes generator to not block the event loop
 	 */
-	asyncRandomBytes = promisify(cryptoRandomBytes);
+	asyncRandomBytes = promisify(randomBytes);
 
 	constructor(context: CommandContext) {
 		super(context, {
@@ -61,12 +61,12 @@ export default class CoinFlipCommand extends DualCommand {
 	 * @param mask
 	 */
 	async #secureRandomNumber(range: number, minimum: number, bytesNeeded: number, mask: number): Promise<number> {
-		const randomBytes = await this.asyncRandomBytes(bytesNeeded);
+		const randomBytes_ = await this.asyncRandomBytes(bytesNeeded);
 
 		let randomValue = 0;
 
 		for (let i = 0; i < bytesNeeded; i++) {
-			randomValue |= randomBytes[i] << 8 * i;
+			randomValue |= randomBytes_[i] << 8 * i;
 		}
 
 		randomValue = randomValue & mask;
