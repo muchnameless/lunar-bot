@@ -298,18 +298,34 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('MOJANG_API_ERROR', false);
 		}
 
-		const log = new Collection<HypixelGuild | null, string[]>();
+		const log = new Collection<
+			string | null,
+			{
+				guildName: string;
+				playerCount: number;
+				ignChanges: string[];
+			}
+		>();
 
 		// API calls
 		await Promise.all(this.cache.map(async (player) => {
 			const result = await player.updateIgn();
 			if (!result) return;
 
-			const { hypixelGuild } = player;
+			// first change for this guild
+			if (!log.has(player.guildId)) {
+				const { guildName } = player;
 
-			if (!log.has(hypixelGuild)) return log.set(hypixelGuild, [ `${result.oldIgn} -> ${result.newIgn}` ]);
+				return log.set(player.guildId, {
+					guildName,
+					playerCount: this.client.hypixelGuilds.cache.find(({ name }) => name === guildName)?.playerCount
+						?? this.cache.filter(({ guildId: e }) => e === player.guildId).size,
+					ignChanges: [ `${result.oldIgn} -> ${result.newIgn}` ],
+				});
+			}
 
-			return log.get(hypixelGuild)!.push(`${result.oldIgn} -> ${result.newIgn}`);
+			// further change for this guild
+			return log.get(player.guildId)!.ignChanges.push(`${result.oldIgn} -> ${result.newIgn}`);
 		}));
 
 		// logging
@@ -318,26 +334,27 @@ export class PlayerManager extends ModelManager<Player> {
 		const embeds: MessageEmbed[] = [];
 
 		/**
-			 * @param guild
-			 * @param ignChangesAmount
-			 */
-		const createEmbed = (guild: HypixelGuild | null, ignChangesAmount: number) => {
+		 * @param guildName
+		 * @param playerCount
+		 * @param ignChangesAmount
+		 */
+		const createEmbed = (guildName: string | null, playerCount: number, ignChangesAmount: number) => {
 			const embed = this.client.defaultEmbed
-				.setTitle(`${guild == null ? 'Bridger' : upperCaseFirstChar(guild.name)} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
-				.setDescription(`Number of players: ${guild == null ? this.cache.filter(({ guildId }) => guildId === guild).size : guild.playerCount}`);
+				.setTitle(`${guildName} Player Database: ${ignChangesAmount} change${ignChangesAmount !== 1 ? 's' : ''}`)
+				.setDescription(`Number of players: ${playerCount}`);
 
 			embeds.push(embed);
 
 			return embed;
 		};
 
-		for (const [ guild, ignChanges ] of log.sort((_, __, a, b) => compareAlphabetically(a?.name, b?.name))) {
+		for (const { guildName, playerCount, ignChanges } of log.sort((a, b) => compareAlphabetically(a.guildName, b.guildName)).values()) {
 			const logParts = Util.splitMessage(
 				Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')),
 				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' },
 			);
 
-			let embed = createEmbed(guild, ignChanges.length);
+			let embed = createEmbed(guildName, playerCount, ignChanges.length);
 			let currentLength = embed.length;
 
 			while (logParts.length) {
@@ -348,7 +365,7 @@ export class PlayerManager extends ModelManager<Player> {
 					embed.addFields({ name, value });
 					currentLength += name.length + value.length;
 				} else {
-					embed = createEmbed(guild, ignChanges.length);
+					embed = createEmbed(guildName, playerCount, ignChanges.length);
 					embed.addFields({ name, value });
 					currentLength = embed.length;
 				}
