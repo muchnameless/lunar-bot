@@ -1,6 +1,6 @@
 import { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } from 'discord.js';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
-import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI } from '../../../constants';
+import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
 import { ChatManager } from './ChatManager';
@@ -188,16 +188,19 @@ export class DiscordChatManager extends ChatManager {
 
 			const webhooks = await channel.fetchWebhooks();
 
-			if (webhooks.size) {
-				this.webhook = webhooks.find(({ owner }) => owner?.id === this.client.user!.id) ?? null;
-			}
+			this.webhook = webhooks.find(({ type, owner }) => type === 'Incoming' && owner?.id === this.client.user!.id) ?? null;
 
 			if (!this.webhook) {
+				if (webhooks.size >= WEBHOOKS_MAX_PER_CHANNEL) {
+					this.chatBridge.shouldRetryLinking = false;
+					throw new WebhookError('cannot create more webhooks', channel, this.hypixelGuild);
+				}
+
 				this.webhook = await channel.createWebhook(
-					'chat bridge',
+					`${this.hypixelGuild} Chat Bridge`,
 					{
 						avatar: (channel.guild?.me ?? this.client.user!).displayAvatarURL(),
-						reason: 'no webhooks in chat bridge channel found',
+						reason: 'no Webhooks in Chat Bridge Channel found',
 					},
 				);
 
