@@ -12,7 +12,14 @@ export const maro = new MaroClient({
 			return cache.get(`${MARO_KEY}:${key}`);
 		},
 		set(key, value) {
-			return cache.set(`${MARO_KEY}:${key}`, value, minutes(1));
+			let ttl = minutes(1);
+
+			// cached error -> same time as cached profile
+			if (Reflect.has(value as Record<string, string>, 'cause')) {
+				ttl = seconds(30);
+			}
+
+			return cache.set(`${MARO_KEY}:${key}`, value, ttl);
 		},
 	},
 });

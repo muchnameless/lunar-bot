@@ -15,11 +15,13 @@ export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 		},
 		// @ts-expect-error return types
 		set(key, value) {
-			if (key.startsWith('guild')) return; // don't cache guilds
+			let ttl = minutes(5); // default 5 minute ttl
 
-			let ttl;
-
-			if (key.startsWith('skyblock:profiles') || key.startsWith('player') || key.startsWith('skyblock:auction')) {
+			if (key.startsWith('skyblock:profiles')) {
+				ttl = seconds(30);
+			} else if (key.startsWith('guild')) {
+				ttl = seconds(10);
+			} else if (key.startsWith('player') || key.startsWith('skyblock:auction')) {
 				ttl = minutes(1);
 			} else if (key.startsWith('skyblock:profile')) {
 				ttl = minutes(2);
@@ -32,8 +34,6 @@ export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 				ttl = seconds(10); // this endpoint is cached by cloudflare and updates every 10 seconds
 			} else if (key.startsWith('skyblock:auctions:')) {
 				ttl = minutes(1); // this endpoint is cached by cloudflare and updates every 60 seconds
-			} else { // default 5 minute ttl
-				ttl = minutes(5);
 			}
 
 			return cache.set(`${HYPIXEL_KEY}:${key}`, value, ttl);
