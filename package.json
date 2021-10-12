@@ -34,7 +34,7 @@
     "@sapphire/utilities": "^3.0.3",
     "@zikeji/hypixel": "github:muchnameless/node-hypixel",
     "bufferutil": "^4.0.4",
-    "chartjs-node-canvas": "^3.2.0",
+    "chartjs-node-canvas": "^4.0.1",
     "common-tags": "^1.8.0",
     "cron": "^1.8.2",
     "discord.js": "^13.3.0-dev.1633867393.bfb89de",
