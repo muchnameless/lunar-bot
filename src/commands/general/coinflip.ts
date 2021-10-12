@@ -30,8 +30,8 @@ export default class CoinFlipCommand extends DualCommand {
 	/**
 	 * async secure random number generator
 	 * modern js port of https://www.npmjs.com/package/random-number-csprng
-	 * @param minimum
-	 * @param maximum
+	 * @param minimum inclusive lower bound
+	 * @param maximum inclusive upper bound
 	 */
 	randomNumber(minimum: number, maximum: number) {
 		const range = maximum - minimum;
@@ -84,9 +84,9 @@ export default class CoinFlipCommand extends DualCommand {
 	async #generateReply() {
 		const randomNumber = await this.randomNumber(0, 1_000);
 
-		if (randomNumber === 0) return 'edge'; // 0.1 %
-		if (randomNumber <= 500) return 'heads'; // 49.95 %
-		return 'tails'; // 49.95 %
+		if (randomNumber === 0) return 'edge'; // ~ 0.1 %
+		if (randomNumber <= 500) return 'heads'; // ~ 49.95 %
+		return 'tails'; // ~ 49.95 %
 	}
 
 	/**
