@@ -883,7 +883,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					if (!roleId) continue;
 
 					if (priority !== CURRENT_PRIORITY) {
-						if (member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
+						if (member.roles.cache.has(roleId)) {
+							rolesToRemove.push(roleId);
+							reason = 'synced with in game rank';
+						}
 					} else if (!member.roles.cache.has(roleId)) {
 						rolesToAdd.push(roleId);
 						reason = 'synced with in game rank';
