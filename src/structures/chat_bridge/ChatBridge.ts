@@ -94,7 +94,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * bot ign | guild name
 	 */
 	get logInfo() {
-		return `${this.bot?.username ?? 'no bot'} | ${this.hypixelGuild?.name ?? 'no guild'}`;
+		return `${this.bot?.username ?? 'no bot'} | ${this.hypixelGuild ?? 'no guild'}`;
 	}
 
 	/**
@@ -185,7 +185,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 			hypixelGuild.chatBridge = this;
 			this.hypixelGuild = hypixelGuild;
 
-			logger.debug(`[CHATBRIDGE]: ${hypixelGuild.name}: linked to ${this.bot!.username}`);
+			logger.debug(`[CHATBRIDGE]: ${hypixelGuild}: linked to ${this.bot!.username}`);
 
 			// instantiate DiscordChannelManagers
 			await this.discord.init();

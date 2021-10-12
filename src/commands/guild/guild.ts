@@ -373,7 +373,7 @@ export default class GuildCommand extends SlashCommand {
 			ephemeral: true,
 		};
 		if (executor.guildId !== hypixelGuild.guildId) return {
-			content: `you need to be in ${hypixelGuild.name} to kick a player from there`,
+			content: `you need to be in ${hypixelGuild} to kick a player from there`,
 			ephemeral: true,
 		};
 

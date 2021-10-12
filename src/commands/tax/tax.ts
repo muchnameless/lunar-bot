@@ -236,13 +236,13 @@ export default class TaxCommand extends SlashCommand {
 						const AMOUNT_TO_PING = playersPingable.size;
 
 						if (!AMOUNT_TO_PING) return InteractionUtil.reply(interaction, {
-							content: `no members to ping from ${hypixelGuild?.name ?? 'all guilds'}`,
+							content: `no members to ping from ${hypixelGuild ?? 'all guilds'}`,
 							ephemeral: true,
 						});
 
 						await InteractionUtil.awaitConfirmation(
 							interaction,
-							`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hypixelGuild?.name ?? 'all guilds'}?`,
+							`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hypixelGuild ?? 'all guilds'}?`,
 						);
 
 						let pingMessage = '';

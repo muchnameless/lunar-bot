@@ -128,7 +128,7 @@ export class PlayerManager extends ModelManager<Player> {
 			this.sortAlphabetically();
 
 			newPlayer.updateData({
-				reason: `joined ${newPlayer.hypixelGuild?.name}`,
+				reason: `joined ${newPlayer.guildName}`,
 			});
 		}
 

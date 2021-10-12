@@ -375,7 +375,7 @@ export class DatabaseManager {
 
 				fields.push({
 					name: index % 2
-						? `${hypixelGuild.name} (${GUILD_PLAYER_COUNT})`
+						? `${hypixelGuild} (${GUILD_PLAYER_COUNT})`
 						: '\u200B',
 					value: Formatters.codeBlock(paddedValue),
 					inline: true,

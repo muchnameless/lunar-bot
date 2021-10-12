@@ -203,7 +203,7 @@ export class DiscordChatManager extends ChatManager {
 
 				this.client.log(new MessageEmbed()
 					.setColor(this.client.config.get('EMBED_GREEN'))
-					.setTitle(`${this.hypixelGuild.name} Chat Bridge`)
+					.setTitle(`${this.hypixelGuild} Chat Bridge`)
 					.setDescription(`${Formatters.bold('Webhook')}: created in ${channel}`)
 					.setTimestamp(),
 				);
@@ -211,12 +211,12 @@ export class DiscordChatManager extends ChatManager {
 
 			this.ready = true;
 
-			return logger.debug(`[CHATBRIDGE]: ${this.hypixelGuild.name}: #${channel.name} webhook fetched and cached`);
+			return logger.debug(`[CHATBRIDGE]: ${this.hypixelGuild}: #${channel.name} webhook fetched and cached`);
 		} catch (error) {
 			if (error instanceof WebhookError) {
 				this.client.log(new MessageEmbed()
 					.setColor(this.client.config.get('EMBED_RED'))
-					.setTitle(error.hypixelGuild ? `${error.hypixelGuild.name} Chat Bridge` : 'Chat Bridge')
+					.setTitle(`${error.hypixelGuild ?? ''} Chat Bridge`.trimStart())
 					.setDescription(`${Formatters.bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
 					.setTimestamp(),
 				);

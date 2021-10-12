@@ -178,7 +178,7 @@ function createActionRows(client: LunarClient, cacheKey: CacheKey, { page, lbTyp
 		.setCustomId(`${cacheKey}:guild`)
 		.setPlaceholder(
 			hypixelGuild !== GUILD_ID_ALL
-				? `Guild: ${hypixelGuild.name}`
+				? `Guild: ${hypixelGuild}`
 				: 'Guilds: All',
 		)
 		.addOptions(
@@ -695,7 +695,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			description += `Tracking xp gained since ${Formatters.time(new Date(config.get(XP_OFFSETS_TIME[offset as keyof typeof XP_OFFSETS_TIME])))}\n`;
 		}
 
-		description += `${typeof hypixelGuild === 'string' ? 'Guilds' : hypixelGuild.name} total (${playerData.length} members): ${totalStats}`;
+		description += `${typeof hypixelGuild === 'string' ? 'Guilds' : hypixelGuild} total (${playerData.length} members): ${totalStats}`;
 		title += ` (Current ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset as keyof typeof XP_OFFSETS_CONVERTER])})`;
 	} else if (hypixelGuild !== GUILD_ID_ALL) { // purge list
 		const { weightReq } = hypixelGuild;
@@ -906,7 +906,7 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 
 	return {
 		title,
-		description: `${`${typeof hypixelGuild === 'string' ? 'Guilds' : hypixelGuild.name} average (${playerData.length} members): ${totalStats}`.padEnd(62, '\u00A0')}\u200B`,
+		description: `${`${typeof hypixelGuild === 'string' ? 'Guilds' : hypixelGuild} average (${playerData.length} members): ${totalStats}`.padEnd(62, '\u00A0')}\u200B`,
 		playerData,
 		playerRequestingEntry,
 		getEntry,
