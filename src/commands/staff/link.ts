@@ -65,7 +65,7 @@ export default class LinkCommand extends SlashCommand {
 
 		if (!player) return InteractionUtil.reply(interaction, stripIndents`
 			\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
-			Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
+			Make sure to provide the full ign if the player database is not already updated (check ${this.client.logHandler.channel ?? '#lunar-logs'})
 		`);
 
 		const USER_ID = interaction.options.get('user', true).value as Snowflake;
@@ -118,7 +118,7 @@ export default class LinkCommand extends SlashCommand {
 				await InteractionUtil.awaitConfirmation(interaction, {
 					question: stripIndents`
 						\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}. Overwrite this?
-						Make sure to provide the full ign if the player database is not already updated (check ${this.client.loggingChannel ?? '#lunar-logs'})
+						Make sure to provide the full ign if the player database is not already updated (check ${this.client.logHandler.channel ?? '#lunar-logs'})
 					`,
 					allowedMentions: { parse: [] },
 				});

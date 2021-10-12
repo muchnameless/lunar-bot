@@ -87,14 +87,14 @@ export class DatabaseManager {
 	schedule() {
 		const { config } = this.modelManagers;
 
-		this.client.schedule('updatePlayerDatabase', new CronJobConstructor({
+		this.client.cronJobs.schedule('updatePlayerDatabase', new CronJobConstructor({
 			cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
 			onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.updateData(),
 			start: true,
 		}));
 
 		// schedule guild stats channel update
-		this.client.schedule('guildStatsChannelUpdate', new CronJobConstructor({
+		this.client.cronJobs.schedule('guildStatsChannelUpdate', new CronJobConstructor({
 			cronTime: '0 0 * * * *',
 			onTick: async () => {
 				if (!config.get('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;

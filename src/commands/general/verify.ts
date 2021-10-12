@@ -93,7 +93,7 @@ export default class VerifyCommand extends SlashCommand {
 			});
 		} catch (error) {
 			logger.error(error, '[VERIFY]: database');
-			return InteractionUtil.reply(interaction, `an error occurred while updating the guild player database. Contact ${await this.client.ownerInfo}`);
+			return InteractionUtil.reply(interaction, `an error occurred while updating the guild player database. Contact ${await this.client.fetchOwnerInfo()}`);
 		}
 
 		player.guildId = guildId;

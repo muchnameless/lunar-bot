@@ -516,7 +516,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// auto competition starting
 		if (config.get('COMPETITION_SCHEDULED')) {
 			if (config.get('COMPETITION_START_TIME') - seconds(10) > Date.now()) {
-				this.client.schedule('competitionStart', new CronJob({
+				this.client.cronJobs.schedule('competitionStart', new CronJob({
 					cronTime: new Date(config.get('COMPETITION_START_TIME')),
 					onTick: () => this.#startCompetition(),
 					start: true,
@@ -528,7 +528,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// auto competition ending
 		if (config.get('COMPETITION_END_TIME') - seconds(10) > Date.now()) {
-			this.client.schedule('competitionEnd', new CronJob({
+			this.client.cronJobs.schedule('competitionEnd', new CronJob({
 				cronTime: new Date(config.get('COMPETITION_END_TIME')),
 				onTick: () => this.#endCompetition(),
 				start: true,
@@ -541,7 +541,7 @@ export class PlayerManager extends ModelManager<Player> {
 		const NEXT_MAYOR_TIME = config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
 		if (NEXT_MAYOR_TIME - seconds(10) > Date.now()) {
-			this.client.schedule('mayorXpReset', new CronJob({
+			this.client.cronJobs.schedule('mayorXpReset', new CronJob({
 				cronTime: new Date(NEXT_MAYOR_TIME),
 				onTick: () => this.#performMayorXpReset(),
 				start: true,
@@ -556,7 +556,7 @@ export class PlayerManager extends ModelManager<Player> {
 		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.#performDailyXpReset();
 
 		// each day at 00:00:00
-		this.client.schedule('dailyXpReset', new CronJob({
+		this.client.cronJobs.schedule('dailyXpReset', new CronJob({
 			cronTime: '0 0 0 * * *',
 			timeZone: 'GMT',
 			onTick: () => this.#performDailyXpReset(),
@@ -567,7 +567,7 @@ export class PlayerManager extends ModelManager<Player> {
 		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.#performWeeklyXpReset();
 
 		// each monday at 00:00:00
-		this.client.schedule('weeklyXpReset', new CronJob({
+		this.client.cronJobs.schedule('weeklyXpReset', new CronJob({
 			cronTime: '0 0 0 * * MON',
 			timeZone: 'GMT',
 			onTick: () => this.#performWeeklyXpReset(),
@@ -578,7 +578,7 @@ export class PlayerManager extends ModelManager<Player> {
 		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.#performMonthlyXpReset();
 
 		// the first of each month at 00:00:00
-		this.client.schedule('monthlyXpReset', new CronJob({
+		this.client.cronJobs.schedule('monthlyXpReset', new CronJob({
 			cronTime: '0 0 0 1 * *',
 			timeZone: 'GMT',
 			onTick: () => this.#performMonthlyXpReset(),
@@ -641,7 +641,7 @@ export class PlayerManager extends ModelManager<Player> {
 			.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
 		);
 
-		this.client.schedule('mayorXpReset', new CronJob({
+		this.client.cronJobs.schedule('mayorXpReset', new CronJob({
 			cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
 			onTick: () => this.#performMayorXpReset(),
 			start: true,

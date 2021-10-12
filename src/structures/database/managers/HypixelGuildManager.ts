@@ -119,7 +119,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 		if (new Date(this.client.config.get('LAST_DAILY_STATS_SAVE_TIME')).getUTCDay() !== new Date().getUTCDay()) this.performDailyStatsSave();
 
 		// each day at 00:00:00
-		this.client.schedule('guildDailyStats', new CronJob({
+		this.client.cronJobs.schedule('guildDailyStats', new CronJob({
 			cronTime: '0 0 0 * * *',
 			timeZone: 'GMT',
 			onTick: () => this.performDailyStatsSave(),

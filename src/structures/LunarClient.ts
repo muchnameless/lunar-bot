@@ -10,10 +10,7 @@ import { UserUtil } from '../util';
 import { cache } from '../api/cache';
 import { hours, logger } from '../functions';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
-import type { CronJob } from 'cron';
 import type { db } from './database';
-import type { MinecraftChatManager } from './chat_bridge/managers/MinecraftChatManager';
-import type { ChatBridge } from './chat_bridge/ChatBridge';
 
 
 interface LunarClientOptions extends ClientOptions {
@@ -83,55 +80,6 @@ export class LunarClient extends Client {
 	}
 
 	/**
-	 * returns the log channel
-	 */
-	get loggingChannel() {
-		return this.logHandler.channel;
-	}
-
-	/**
-	 * starts and caches a cronJob
-	 */
-	get schedule() {
-		return (name: string, cronJob: CronJob) => this.cronJobs.schedule(name, cronJob);
-	}
-
-	/**
-	 * the main chatBridge
-	 */
-	get chatBridge() {
-		return this.chatBridges[0];
-	}
-
-	/**
-	 * the minecraft bot for the main guild's chatBridge
-	 */
-	get bot() {
-		return this.chatBridge.minecraft.bot;
-	}
-
-	/**
-	 * send to in game chat via the main guild's chatBridge
-	 */
-	get chat(): MinecraftChatManager['sendToChat'] {
-		return arg => this.chatBridge.minecraft.sendToChat(arg);
-	}
-
-	/**
-	 * send to in game guild chat via the main guild's chatBridge
-	 */
-	get gchat(): MinecraftChatManager['gchat'] {
-		return arg => this.chatBridge.minecraft.gchat(arg);
-	}
-
-	/**
-	 * send a message both to discord and the in game guild chat
-	 */
-	get broadcast(): ChatBridge['broadcast'] {
-		return arg => this.chatBridge.broadcast(arg);
-	}
-
-	/**
 	 * fetches the bot application's owner
 	 */
 	fetchOwner() {
@@ -141,16 +89,14 @@ export class LunarClient extends Client {
 	/**
 	 * tag and @mention
 	 */
-	get ownerInfo() {
-		return (async () => {
-			try {
-				const owner = await this.fetchOwner();
-				return `${owner.tag} ${owner}`;
-			} catch (error) {
-				logger.error(error, '[OWNER INFO]');
-				return Formatters.userMention(this.ownerId);
-			}
-		})();
+	async fetchOwnerInfo() {
+		try {
+			const owner = await this.fetchOwner();
+			return `${owner.tag} ${owner}`;
+		} catch (error) {
+			logger.error(error, '[OWNER INFO]');
+			return Formatters.userMention(this.ownerId);
+		}
 	}
 
 	/**
