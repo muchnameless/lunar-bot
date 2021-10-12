@@ -5,6 +5,8 @@ import { days, logger, minutes, seconds } from '../functions';
 import type { DefaultMeta } from '@zikeji/hypixel';
 
 
+export const SKYBLOCK_PROFILE_TTL = seconds(30);
+
 export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 	timeout: seconds(15),
 	rateLimitResetOffset: seconds(1),
@@ -18,7 +20,7 @@ export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 			let ttl = minutes(5); // default 5 minute ttl
 
 			if (key.startsWith('skyblock:profiles')) {
-				ttl = seconds(30);
+				ttl = SKYBLOCK_PROFILE_TTL;
 			} else if (key.startsWith('guild')) {
 				ttl = seconds(10);
 			} else if (key.startsWith('player') || key.startsWith('skyblock:auction')) {

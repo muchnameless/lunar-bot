@@ -1,7 +1,8 @@
 import { cache } from './cache';
 import { MARO_KEY } from '../constants';
 import { MaroClient } from '../structures/MaroClient';
-import { minutes, seconds } from '../functions';
+import { seconds } from '../functions';
+import { SKYBLOCK_PROFILE_TTL } from './hypixel';
 
 
 export const maro = new MaroClient({
@@ -12,14 +13,7 @@ export const maro = new MaroClient({
 			return cache.get(`${MARO_KEY}:${key}`);
 		},
 		set(key, value) {
-			let ttl = minutes(1);
-
-			// cached error -> same time as cached profile
-			if (Reflect.has(value as Record<string, string>, 'cause')) {
-				ttl = seconds(30);
-			}
-
-			return cache.set(`${MARO_KEY}:${key}`, value, ttl);
+			return cache.set(`${MARO_KEY}:${key}`, value, SKYBLOCK_PROFILE_TTL);
 		},
 	},
 });
