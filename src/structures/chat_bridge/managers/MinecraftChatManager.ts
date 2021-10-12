@@ -794,7 +794,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				if (++this.#retries === MinecraftChatManager.MAX_RETRIES) {
 					MessageUtil.react(discordMessage, X_EMOJI);
 					await sleep(this.#retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-					throw `unable to send the message, anti spam failed ${MinecraftChatManager.MAX_RETRIES} times`;
+					throw `unable to send '${message}', anti spam failed ${MinecraftChatManager.MAX_RETRIES} times`;
 				}
 
 				await sleep(this.#retries * MinecraftChatManager.ANTI_SPAM_DELAY);
@@ -805,7 +805,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			case ChatResponse.BLOCKED: {
 				this.#handleForwardRejection(discordMessage, ForwardRejectionReason.HYPIXEL_BLOCKED);
 				await sleep(this.delay);
-				throw 'unable to send the message, hypixel\'s filter blocked it';
+				throw `unable to send '${message}', hypixel's filter blocked it`;
 			}
 
 			// message sent successfully
