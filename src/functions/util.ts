@@ -1,5 +1,7 @@
 import { Formatters, Util } from 'discord.js';
 import { fileURLToPath } from 'node:url';
+import { randomBytes } from 'node:crypto';
+import { promisify } from 'node:util';
 import ms from 'ms';
 import jaroWinklerSimilarity from 'jaro-winkler';
 import readdirp from 'readdirp';
@@ -311,4 +313,62 @@ export function shortenNumber(number: number, digits?: number) {
 	}
 
 	return `${str}${suffix}`;
+}
+
+
+/**
+ * async random bytes generator to not block the event loop
+ */
+const asyncRandomBytes = promisify(randomBytes);
+
+/**
+ * async secure random number generator
+ * modern js port of https://www.npmjs.com/package/random-number-csprng
+ * @param minimum inclusive lower bound
+ * @param maximum inclusive upper bound
+ */
+export function randomNumber(minimum: number, maximum: number) {
+	const range = maximum - minimum;
+
+	let bitsNeeded = 0;
+	let bytesNeeded = 0;
+	let mask = 1;
+	let range_ = range;
+
+	while (range_ > 0) {
+		if (bitsNeeded % 8 === 0) {
+			bytesNeeded += 1;
+		}
+
+		bitsNeeded += 1;
+		mask = (mask << 1) | 1; /* 0x00001111 -> 0x00011111 */
+		range_ = range_ >>> 1; /* 0x01000000 -> 0x00100000 */
+	}
+
+	return _secureRandomNumber(range, minimum, bytesNeeded, mask);
+}
+
+/**
+ * random number loop
+ * @param range
+ * @param minimum
+ * @param bytesNeeded
+ * @param mask
+ */
+async function _secureRandomNumber(range: number, minimum: number, bytesNeeded: number, mask: number): Promise<number> {
+	const randomBytes_ = await asyncRandomBytes(bytesNeeded);
+
+	let randomValue = 0;
+
+	for (let i = 0; i < bytesNeeded; i++) {
+		randomValue |= randomBytes_[i] << 8 * i;
+	}
+
+	randomValue = randomValue & mask;
+
+	if (randomValue <= range) {
+		return minimum + randomValue;
+	}
+
+	return _secureRandomNumber(range, minimum, bytesNeeded, mask);
 }

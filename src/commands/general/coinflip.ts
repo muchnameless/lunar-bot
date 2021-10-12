@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { promisify } from 'node:util';
-import { randomBytes } from 'node:crypto';
+import { randomNumber } from '../../functions';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
@@ -9,11 +8,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
 export default class CoinFlipCommand extends DualCommand {
-	/**
-	 * async random bytes generator to not block the event loop
-	 */
-	asyncRandomBytes = promisify(randomBytes);
-
 	constructor(context: CommandContext) {
 		super(context, {
 			aliases: [],
@@ -28,64 +22,14 @@ export default class CoinFlipCommand extends DualCommand {
 	}
 
 	/**
-	 * async secure random number generator
-	 * modern js port of https://www.npmjs.com/package/random-number-csprng
-	 * @param minimum inclusive lower bound
-	 * @param maximum inclusive upper bound
-	 */
-	randomNumber(minimum: number, maximum: number) {
-		const range = maximum - minimum;
-
-		let bitsNeeded = 0;
-		let bytesNeeded = 0;
-		let mask = 1;
-		let range_ = range;
-
-		while (range_ > 0) {
-			if (bitsNeeded % 8 === 0) {
-				bytesNeeded += 1;
-			}
-
-			bitsNeeded += 1;
-			mask = (mask << 1) | 1; /* 0x00001111 -> 0x00011111 */
-			range_ = range_ >>> 1; /* 0x01000000 -> 0x00100000 */
-		}
-
-		return this.#secureRandomNumber(range, minimum, bytesNeeded, mask);
-	}
-	/**
-	 * random number loop
-	 * @param range
-	 * @param minimum
-	 * @param bytesNeeded
-	 * @param mask
-	 */
-	async #secureRandomNumber(range: number, minimum: number, bytesNeeded: number, mask: number): Promise<number> {
-		const randomBytes_ = await this.asyncRandomBytes(bytesNeeded);
-
-		let randomValue = 0;
-
-		for (let i = 0; i < bytesNeeded; i++) {
-			randomValue |= randomBytes_[i] << 8 * i;
-		}
-
-		randomValue = randomValue & mask;
-
-		if (randomValue <= range) {
-			return minimum + randomValue;
-		}
-
-		return this.#secureRandomNumber(range, minimum, bytesNeeded, mask);
-	}
-
-	/**
 	 * coinflip result
 	 */
+	// eslint-disable-next-line class-methods-use-this
 	async #generateReply() {
-		const randomNumber = await this.randomNumber(0, 1_000);
+		const RANDOM_NUMBER = await randomNumber(0, 1_000);
 
-		if (randomNumber === 0) return 'edge'; // ~ 0.1 %
-		if (randomNumber <= 500) return 'heads'; // ~ 49.95 %
+		if (RANDOM_NUMBER === 0) return 'edge'; // ~ 0.1 %
+		if (RANDOM_NUMBER <= 500) return 'heads'; // ~ 49.95 %
 		return 'tails'; // ~ 49.95 %
 	}
 
