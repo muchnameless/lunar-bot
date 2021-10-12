@@ -177,12 +177,10 @@ export class DiscordChatManager extends ChatManager {
 			const { channel } = this;
 
 			if (!channel) {
-				this.chatBridge.shouldRetryLinking = false;
 				throw new WebhookError('unknown channel', channel, this.hypixelGuild);
 			}
 
 			if (!ChannelUtil.botPermissions(channel)?.has(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
-				this.chatBridge.shouldRetryLinking = false;
 				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.hypixelGuild);
 			}
 
@@ -192,7 +190,6 @@ export class DiscordChatManager extends ChatManager {
 
 			if (!this.webhook) {
 				if (webhooks.size >= WEBHOOKS_MAX_PER_CHANNEL) {
-					this.chatBridge.shouldRetryLinking = false;
 					throw new WebhookError('cannot create more webhooks', channel, this.hypixelGuild);
 				}
 
@@ -217,9 +214,11 @@ export class DiscordChatManager extends ChatManager {
 			return logger.debug(`[CHATBRIDGE]: ${this.hypixelGuild}: #${channel.name} webhook fetched and cached`);
 		} catch (error) {
 			if (error instanceof WebhookError) {
+				this.chatBridge.shouldRetryLinking = false;
+
 				this.client.log(new MessageEmbed()
 					.setColor(this.client.config.get('EMBED_RED'))
-					.setTitle(`${error.hypixelGuild ?? ''} Chat Bridge`.trimStart())
+					.setTitle(`${error.hypixelGuild} Chat Bridge`)
 					.setDescription(`${Formatters.bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
 					.setTimestamp(),
 				);
