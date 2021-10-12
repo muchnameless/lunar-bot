@@ -267,12 +267,10 @@ export default class EvalCommand extends SlashCommand {
 			}
 
 			case 'delete': {
-				const { deleted } = await MessageUtil.delete(interaction.message as Message);
+				await MessageUtil.delete(interaction.message as Message);
 
 				return InteractionUtil.reply(interaction, {
-					content: deleted
-						? 'deleted'
-						: 'error',
+					content: 'done',
 					ephemeral: true,
 				});
 			}
