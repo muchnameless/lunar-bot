@@ -234,11 +234,6 @@ export default class EvalCommand extends SlashCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override async runButton(interaction: ButtonInteraction, args: string[]) {
-		if (interaction.user.id !== this.client.ownerId) return InteractionUtil.reply(interaction, {
-			content: 'this command is restricted to the bot owner',
-			ephemeral: true,
-		});
-
 		const { channel } = interaction;
 
 		if (!ChannelUtil.botPermissions(channel)?.has(Permissions.FLAGS.VIEW_CHANNEL)) return InteractionUtil.reply(interaction, {
@@ -272,10 +267,12 @@ export default class EvalCommand extends SlashCommand {
 			}
 
 			case 'delete': {
-				await MessageUtil.delete(interaction.message as Message);
+				const { deleted } = await MessageUtil.delete(interaction.message as Message);
 
 				return InteractionUtil.reply(interaction, {
-					content: 'deleted',
+					content: deleted
+						? 'deleted'
+						: 'error',
 					ephemeral: true,
 				});
 			}
