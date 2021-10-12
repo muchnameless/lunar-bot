@@ -33,7 +33,9 @@ export class LogHandler {
 	 * cleans a string from an embed for console logging
 	 * @param string the string to clean
 	 */
-	static cleanLoggingEmbedString(string: string | null) {
+	static cleanLoggingEmbedString(string: string): string;
+	static cleanLoggingEmbedString(string: string | null): string | null;
+	static cleanLoggingEmbedString(string: unknown) {
 		if (typeof string === 'string') return string
 			.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
 			.replace(/`|\*|\n?\u200B|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
@@ -157,23 +159,21 @@ export class LogHandler {
 	async #log({ embeds, files }: { embeds: MessageEmbed[], files?: MessageAttachment[] }) {
 		// log to console
 		for (const embed of embeds) {
-			const FIELDS_LOG = embed.fields?.filter(({ name, value }) => name !== '\u200B' || value !== '\u200B');
+			const fields = embed.fields.flatMap(({ name, value }) => {
+				if (name === '\u200B' && value === '\u200B') return [];
+				return {
+					name: name.replaceAll('\u200B', '').trim() || undefined,
+					value: LogHandler.cleanLoggingEmbedString(value).replace(/\n/g, ', '),
+				};
+			});
 
-			logger.info([
-				[
-					embed.title,
-					LogHandler.cleanLoggingEmbedString(embed.description),
-					embed.author?.name,
-				].filter(x => x != null).join(': '),
-				FIELDS_LOG?.length
-					? FIELDS_LOG
-						.map(({ name, value }) => `${name !== '\u200B' ? `${name.replaceAll('\u200B', '').trim()}: ` : ''}${LogHandler.cleanLoggingEmbedString(value)?.replace(/\n/g, ', ')}`)
-						.join('\n')
-					: null,
-			]
-				.filter(x => x != null)
-				.join('\n'),
-			);
+			logger.info({
+				description: LogHandler.cleanLoggingEmbedString(embed.description) || undefined,
+				user: embed.author?.name,
+				fields: fields.length
+					? fields
+					: undefined,
+			}, embed.title || undefined);
 		}
 
 		const { channel } = this;
