@@ -123,8 +123,26 @@ export class MaroClient {
 	 */
 	async request(endpoint: string, requestOptions: RequestInit, { cacheKey, force = false, cache = true }: MaroFetchOptions & { cacheKey: string; }) {
 		if (!force) {
-			const cached = await this.cache?.get(cacheKey);
-			if (cached) return cached;
+			const cached = await this.cache?.get(cacheKey) as Record<string, string>;
+
+			if (cached) {
+				if (Reflect.has(cached, 'cause')) {
+					const { statusText, cause, ...res } = cached;
+
+					throw new FetchError(
+						'MaroAPIError',
+						{
+							statusText: statusText
+								? `${statusText} (cached error)`
+								: 'cached error',
+							...res,
+						},
+						cause,
+					);
+				}
+
+				return cached;
+			}
 		}
 
 		const res = await this.#request(endpoint, requestOptions);
@@ -133,7 +151,7 @@ export class MaroClient {
 			case 200: { // Successfull request
 				const { data } = await res.json() as { data: unknown; };
 
-				// cache
+				// cache successfull response
 				if (cache) this.cache?.set(cacheKey, data);
 
 				return data;
@@ -157,6 +175,9 @@ export class MaroClient {
 				} catch (error) {
 					logger.error(error, '[MARO API]: json');
 				}
+
+				// cache error response
+				if (cache) this.cache?.set(cacheKey, { status: res.status, statusText: res.statusText, cause });
 
 				throw new FetchError('MaroAPIError', res, cause);
 			}

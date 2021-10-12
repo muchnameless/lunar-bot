@@ -142,7 +142,12 @@ export class MojangClient {
 			if (cachedResponse) {
 				if (cachedResponse.error) {
 					throw new MojangAPIError(
-						{ statusText: Reflect.has(cachedResponse, 'statusText') ? `${cachedResponse.statusText} (cached)` : '(cached)', ...cachedResponse },
+						{
+							statusText: cachedResponse.statusText
+								? `${cachedResponse.statusText} (cached error)`
+								: 'cached error',
+							...cachedResponse,
+						},
 						queryType,
 						query,
 					);
