@@ -504,12 +504,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * returns the hypixel guild db object associated with the player
 	 */
 	get hypixelGuild(): HypixelGuild | null {
-		if (this.inGuild()) {
-			return this.client.hypixelGuilds.cache.get(this.guildId)
-				?? (logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`), null);
-		}
-
-		return null;
+		return this.client.hypixelGuilds.cache.get(this.guildId!)
+			?? (this.inGuild()
+				? (logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`), null)
+				: null
+			);
 	}
 
 	/**
