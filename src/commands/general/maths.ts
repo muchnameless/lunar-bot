@@ -330,6 +330,8 @@ export default class MathsCommand extends DualCommand {
 		 * generate input string
 		 */
 		const INPUT = rawInput
+			.replaceAll(' ', '') // remove spaces
+			.replaceAll('_', '') // 1_000 -> 1000
 			.replaceAll('**', '^') // 5**3 -> 5^3
 			.replaceAll(':', '/') // 5:3 -> 5/3
 			.replace(/(?<=[\d)]\s*)(?=[(a-jln-z])/gi, '*') // add implicit '*' between numbers before letters and '('
