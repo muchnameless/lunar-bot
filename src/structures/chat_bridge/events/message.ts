@@ -287,7 +287,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		// must use prefix for commands in guild
 		if (!hypixelMessage.commandData.prefix) {
 			// auto math, ignore 0-0, 4/5 (dungeon parties)
-			if (this.config.get('CHATBRIDGE_AUTO_MATH') && /^[\d ()*+./^x-]+$/.test(hypixelMessage.content) && /[1-9]/.test(hypixelMessage.content) && !/\b[1-5] *\/ *5\b/.test(hypixelMessage.content)) {
+			if (this.config.get('CHATBRIDGE_AUTO_MATH') && /^[\d ()*+./:^x-]+$/.test(hypixelMessage.content) && /[1-9]/.test(hypixelMessage.content) && !/\b[1-5] *\/ *5\b/.test(hypixelMessage.content)) {
 				try {
 					const { input, output, formattedOutput } = (this.client.commands.get('maths') as MathsCommand).calculate(hypixelMessage.content.replaceAll(' ', ''));
 
