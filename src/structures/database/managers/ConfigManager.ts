@@ -16,9 +16,7 @@ export class ConfigManager extends ModelManager<Config> {
 
 		if (!dbEntry) return this.add({
 			key: UPPERCASED_KEY,
-			value: typeof value !== 'string'
-				? JSON.stringify(value)
-				: value,
+			value: value as string,
 		});
 
 		// the value setter makes sure that non strings get JSON.stringified
