@@ -77,7 +77,7 @@ export const DEFAULT_CONFIG = {
 	MUTED_ROLE_ID: null,
 	NUMBER_FORMAT: 'fr-FR',
 	PLAYER_DB_UPDATE_ENABLED: true,
-	PREFIXES: [ 'lg!', '!', '/' ],
+	PREFIXES: [ '!', '/' ],
 	PURGE_LIST_OFFSET: 7,
 	REPLY_CONFIRMATION: [ 'y', 'ye', 'yes' ],
 	SENIOR_STAFF_ROLE_ID: null,

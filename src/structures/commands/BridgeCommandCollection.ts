@@ -1,9 +1,8 @@
 import { Collection } from 'discord.js';
-import { compareAlphabetically, logger } from '../../functions';
+import { compareAlphabetically } from '../../functions';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import type { BridgeCommand } from './BridgeCommand';
 import type { DualCommand } from './DualCommand';
-import type { HypixelUserMessage } from '../chat_bridge/HypixelMessage';
 
 
 type BridgeCommandType = BridgeCommand | DualCommand;
@@ -32,19 +31,6 @@ export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommand
 		return this.categories
 			.filter(category => !BridgeCommandCollection.INVISIBLE_CATEGORIES.has(category!))
 			.sort(compareAlphabetically);
-	}
-
-	/**
-	 * help command run method
-	 * @param hypixelMessage
-	 */
-	async help(hypixelMessage: HypixelUserMessage) {
-		try {
-			return await this.get('help')?.runMinecraft(hypixelMessage);
-		} catch (error) {
-			logger.error(error, `[CMD HANDLER]: An error occured while ${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}'`);
-			return hypixelMessage.author.send(`an error occured while executing the \`help\` command:\n${error}`);
-		}
 	}
 
 	/**
