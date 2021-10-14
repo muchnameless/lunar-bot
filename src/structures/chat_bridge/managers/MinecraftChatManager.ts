@@ -18,7 +18,7 @@ import {
 import { GUILD_ID_BRIDGER, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
 import { createBot } from '../MinecraftBot';
 import { GuildMemberUtil, MessageUtil, UserUtil } from '../../../util';
-import { MessageCollector } from '../MessageCollector';
+import { MessageCollector, MessageCollectorEvents } from '../MessageCollector';
 import { ChatManager } from './ChatManager';
 import { cache } from '../../../api/cache';
 import { cleanFormattedNumber, hours, logger, minutes, seconds, splitMessage, trim } from '../../../functions';
@@ -854,7 +854,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		});
 
 		// collect message
-		collector.on('collect', (hypixelMessage) => {
+		collector.on(MessageCollectorEvents.COLLECT, (hypixelMessage) => {
 			// message is line separator
 			if (/^-{29,}/.test(hypixelMessage.content)) {
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
@@ -876,7 +876,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		});
 
 		// end collection
-		collector.once('end', (collected, reason) => {
+		collector.once(MessageCollectorEvents.END, (collected, reason) => {
 			this.#commandQueue.shift();
 
 			switch (reason) {

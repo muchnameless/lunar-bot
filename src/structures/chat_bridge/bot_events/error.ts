@@ -1,3 +1,4 @@
+import { ChatBridgeEvents } from '../constants';
 import type { ChatBridge } from '../ChatBridge';
 
 /**
@@ -5,5 +6,5 @@ import type { ChatBridge } from '../ChatBridge';
  * @param error
  */
 export default function(chatBridge: ChatBridge, error: unknown) {
-	chatBridge.emit('error', error);
+	chatBridge.emit(ChatBridgeEvents.ERROR, error);
 }

@@ -1,7 +1,9 @@
 import { MessageFlags } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { URL } from 'node:url';
+import { once } from 'node:events';
 import { STOP_EMOJI, X_EMOJI } from '../../constants';
+import { ChatBridgeEvents } from './constants';
 import { DiscordChatManager } from './managers/DiscordChatManager';
 import { BridgeCommandCollection } from '../commands/BridgeCommandCollection';
 import { ChatBridge } from './ChatBridge';
@@ -89,31 +91,26 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 * @param index
 	 */
 	async connect(index?: number) {
-		let resolve: (value: this) => void;
-
-		const promise: Promise<this> = new Promise(r => resolve = r);
-
 		// load commands if none are present
 		await this.commands.loadAll();
 
 		// single
 		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray.#accounts.length) {
-			this.#initSingle(index)
-				.once('ready', () => resolve(this))
-				.connect();
+			const chatBridge = this.#initSingle(index);
 
-			return promise;
+			chatBridge.connect();
+			await once(chatBridge, ChatBridgeEvents.READY);
+
+			return this;
 		}
 
 		// all
-		let resolved = 0;
+		await Promise.all(this.#init().map((chatBridge) => {
+			chatBridge.connect();
+			return once(chatBridge, ChatBridgeEvents.READY);
+		}));
 
-		await Promise.all(this.#init().map(chatBridge => chatBridge
-			.once('ready', () => ++resolved === this.length && resolve(this))
-			.connect(),
-		));
-
-		return promise;
+		return this;
 	}
 
 	/**

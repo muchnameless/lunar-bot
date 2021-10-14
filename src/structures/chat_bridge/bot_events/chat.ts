@@ -1,4 +1,5 @@
 import { HypixelMessage } from '../HypixelMessage';
+import { ChatBridgeEvents } from '../constants';
 import type { ChatBridge } from '../ChatBridge';
 import type { MESSAGE_POSITIONS } from '../constants';
 
@@ -13,5 +14,5 @@ export interface ChatPacket {
  * @param packet
  */
 export default async function(chatBridge: ChatBridge, packet: ChatPacket) {
-	chatBridge.emit('message', await new HypixelMessage(chatBridge, packet).init());
+	chatBridge.emit(ChatBridgeEvents.MESSAGE, await new HypixelMessage(chatBridge, packet).init());
 }

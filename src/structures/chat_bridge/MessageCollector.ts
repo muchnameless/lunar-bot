@@ -25,6 +25,13 @@ export interface MessageCollectorOptions {
 	maxProcessed?: number;
 }
 
+export const enum MessageCollectorEvents {
+	COLLECT = 'collect',
+	DISCONNECT = 'disconnect',
+	END = 'end',
+	MESSAGE = 'message',
+}
+
 
 /**
  * MessageCollector
@@ -75,12 +82,12 @@ export class MessageCollector extends EventEmitter {
 		}
 
 		this.chatBridge.incrementMaxListeners();
-		this.chatBridge.on('message', this.#handleCollect);
-		this.chatBridge.once('disconnect', this.#handleBotDisconnection);
+		this.chatBridge.on(MessageCollectorEvents.MESSAGE, this.#handleCollect);
+		this.chatBridge.once(MessageCollectorEvents.DISCONNECT, this.#handleBotDisconnection);
 
-		this.once('end', () => {
-			this.chatBridge.removeListener('message', this.#handleCollect);
-			this.chatBridge.removeListener('disconnect', this.#handleBotDisconnection);
+		this.once(MessageCollectorEvents.END, () => {
+			this.chatBridge.removeListener(MessageCollectorEvents.MESSAGE, this.#handleCollect);
+			this.chatBridge.removeListener(MessageCollectorEvents.DISCONNECT, this.#handleBotDisconnection);
 			this.chatBridge.decrementMaxListeners();
 		});
 
@@ -88,15 +95,15 @@ export class MessageCollector extends EventEmitter {
 		if (options.idle) this.#idletimeout = setTimeout(() => this.stop('idle'), options.idle);
 	}
 
-	override on(eventName: 'collect', listener: (item: HypixelMessage) => Awaitable<void>): this;
-	override on(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
+	override on(eventName: MessageCollectorEvents.COLLECT, listener: (item: HypixelMessage) => Awaitable<void>): this;
+	override on(eventName: MessageCollectorEvents.END, listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
 	override on(eventName: string, listener: (...args: unknown[]) => void): this;
 	override on(eventName: string, listener: (...args: any[]) => void) {
 		return super.on(eventName, listener);
 	}
 
-	override once(eventName: 'collect', listener: (message: HypixelMessage) => Awaitable<void>): this;
-	override once(eventName: 'end', listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
+	override once(eventName: MessageCollectorEvents.COLLECT, listener: (message: HypixelMessage) => Awaitable<void>): this;
+	override once(eventName: MessageCollectorEvents.END, listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
 	override once(eventName: string, listener: (...args: unknown[]) => void): this;
 	override once(eventName: string, listener: (...args: any[]) => void) {
 		return super.once(eventName, listener);
@@ -123,8 +130,8 @@ export class MessageCollector extends EventEmitter {
 			}
 
 			const cleanup = () => {
-				this.removeListener('collect', onCollect);
-				this.removeListener('end', onEnd);
+				this.removeListener(MessageCollectorEvents.COLLECT, onCollect);
+				this.removeListener(MessageCollectorEvents.END, onEnd);
 			};
 
 			const onCollect = (item: HypixelMessage) => {
@@ -137,8 +144,8 @@ export class MessageCollector extends EventEmitter {
 				reject(this.collected);
 			};
 
-			this.on('collect', onCollect);
-			this.on('end', onEnd);
+			this.on(MessageCollectorEvents.COLLECT, onCollect);
+			this.on(MessageCollectorEvents.END, onEnd);
 		});
 	}
 
@@ -161,7 +168,7 @@ export class MessageCollector extends EventEmitter {
 			/**
 			 * Emitted whenever an element is collected.
 			 */
-			this.emit('collect', hypixelMessage);
+			this.emit(MessageCollectorEvents.COLLECT, hypixelMessage);
 
 			if (this.#idletimeout) {
 				clearTimeout(this.#idletimeout);
@@ -195,7 +202,7 @@ export class MessageCollector extends EventEmitter {
 		 * @param collected The elements collected by the collector
 		 * @param reason The reason the collector ended
 		 */
-		this.emit('end', this.collected, reason);
+		this.emit(MessageCollectorEvents.END, this.collected, reason);
 	}
 
 	/**
@@ -231,7 +238,7 @@ export class MessageCollector extends EventEmitter {
 	async *[Symbol.asyncIterator]() {
 		const queue: HypixelMessage[] = [];
 		const onCollect = (item: HypixelMessage) => { queue.push(item); };
-		this.on('collect', onCollect);
+		this.on(MessageCollectorEvents.COLLECT, onCollect);
 
 		try {
 			while (queue.length || !this.ended) {
@@ -240,17 +247,17 @@ export class MessageCollector extends EventEmitter {
 				} else {
 					await new Promise((resolve) => {
 						const tick = () => {
-							this.removeListener('collect', tick);
-							this.removeListener('end', tick);
+							this.removeListener(MessageCollectorEvents.COLLECT, tick);
+							this.removeListener(MessageCollectorEvents.END, tick);
 							return resolve(null);
 						};
-						this.on('collect', tick);
-						this.on('end', tick);
+						this.on(MessageCollectorEvents.COLLECT, tick);
+						this.on(MessageCollectorEvents.END, tick);
 					});
 				}
 			}
 		} finally {
-			this.removeListener('collect', onCollect);
+			this.removeListener(MessageCollectorEvents.COLLECT, onCollect);
 		}
 	}
 }

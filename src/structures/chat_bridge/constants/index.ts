@@ -3,3 +3,4 @@ export * from './botSettings';
 export * from './chatBridge';
 export * from './commandResponses';
 export * from './emojiNameUnicodeConverter';
+export * from './events';
