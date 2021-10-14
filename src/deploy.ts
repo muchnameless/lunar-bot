@@ -3,7 +3,7 @@ import { Routes, APIVersion } from 'discord-api-types/v9';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger } from './functions';
-import type { APIApplicationCommand } from 'discord-api-types/v9';
+import type { RESTGetAPIApplicationGuildCommandsResult } from 'discord-api-types/v9';
 
 
 const rest = new REST({ version: APIVersion }).setToken(process.env.DISCORD_TOKEN!);
@@ -35,7 +35,7 @@ try {
 				? []
 				: client.commands.map(({ data }, name) => ({ ...data, name })),
 		},
-	) as APIApplicationCommand[];
+	) as RESTGetAPIApplicationGuildCommandsResult;
 
 	if (!SHOULD_DELETE) {
 		logger.info(`[DEPLY]: started setting permissions for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}'s slash commands`);
