@@ -14,6 +14,7 @@ import { GuildUtil } from '../../../util';
 import { hypixel } from '../../../api/hypixel';
 import { mojang } from '../../../api/mojang';
 import {
+	cleanFormattedNumber,
 	compareAlphabetically,
 	days,
 	logger,
@@ -252,12 +253,10 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		const { weightAverage, skillAverage, slayerAverage, catacombsAverage } = this.stats;
 
 		return {
-			weightAverage: weightAverage.toFixed(0),
-			// 'one dot leader' - dot that doesn't get erased in discord channel names
-			skillAverage: skillAverage.toFixed(2).replace('.', '․'),
-			slayerAverage: slayerAverage.toFixed(0),
-			// 'one dot leader' - dot that doesn't get erased in discord channel names
-			catacombsAverage: catacombsAverage.toFixed(2).replace('.', '․'),
+			weightAverage: cleanFormattedNumber(this.client.formatNumber(weightAverage, 0, Math.round)),
+			skillAverage: cleanFormattedNumber(this.client.formatDecimalNumber(skillAverage)),
+			slayerAverage: cleanFormattedNumber(this.client.formatNumber(slayerAverage, 0, Math.round)),
+			catacombsAverage: cleanFormattedNumber(this.client.formatDecimalNumber(catacombsAverage)),
 		};
 	}
 
