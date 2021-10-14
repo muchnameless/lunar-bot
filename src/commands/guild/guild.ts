@@ -546,7 +546,7 @@ export default class GuildCommand extends SlashCommand {
 		});
 		const pageMatched = response.match(/\(Page (?<current>\d+) ?(?:of|\/) ?(?<total>\d+)\)/);
 
-		return InteractionUtil[interaction.isCommand() ? 'reply' : 'update'](interaction as ButtonInteraction, {
+		return InteractionUtil[interaction.isApplicationCommand() ? 'reply' : 'update'](interaction as ButtonInteraction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${command}`)

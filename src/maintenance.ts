@@ -158,7 +158,7 @@ client
 		}
 	})
 	.on(Constants.Events.INTERACTION_CREATE, async (interaction) => {
-		if (!interaction.isCommand() && !interaction.isMessageComponent()) return;
+		if (!interaction.isApplicationCommand() && !interaction.isMessageComponent()) return;
 
 		logger.info(`${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} tried to execute '${InteractionUtil.logInfo(interaction)}' during maintenance`);
 

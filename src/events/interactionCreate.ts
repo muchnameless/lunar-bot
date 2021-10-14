@@ -22,7 +22,7 @@ export default class InteractionCreateEvent extends Event {
 	async #handleCommandInteraction(interaction: CommandInteraction) {
 		logger.info({
 			type: interaction.type,
-			command: InteractionUtil.getCommand(interaction),
+			command: interaction.toString(),
 			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
 			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
 		}, 'INTERACTION_CREATE');

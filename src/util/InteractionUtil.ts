@@ -137,22 +137,6 @@ export default class InteractionUtil extends null {
 	}
 
 	/**
-	 * commandName [subcommandGroup] [subcommand] [option1: value1] [option2: value2]
-	 * @param interaction
-	 */
-	static getCommand(interaction: CommandInteraction) {
-		return [
-			interaction.commandName,
-			interaction.options.getSubcommandGroup(false),
-			interaction.options.getSubcommand(false),
-			...interaction.options
-				// @ts-expect-error
-				._hoistedOptions
-				.map(({ name, value }) => `${name}: ${value}`),
-		].filter(x => x !== null).join(' ');
-	}
-
-	/**
 	 * @param interaction
 	 */
 	static logInfo(interaction: Interaction) {
@@ -164,7 +148,7 @@ export default class InteractionUtil extends null {
 			return `${interaction.componentType} '${interaction.customId}' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
 		}
 
-		return `${interaction.type} '${this.getCommand(interaction as CommandInteraction)}' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
+		return `${interaction.type} '${interaction}' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
 	}
 
 	/**

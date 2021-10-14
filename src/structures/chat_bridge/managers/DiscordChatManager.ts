@@ -402,7 +402,7 @@ export class DiscordChatManager extends ChatManager {
 			const interaction = this.client.chatBridges.interactionCache.get(message.interaction.id);
 
 			this.minecraft.chat({
-				content: `/${interaction ? InteractionUtil.getCommand(interaction) : message.interaction.commandName}`,
+				content: interaction?.toString() ?? `/${message.interaction.commandName}`,
 				prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? message.interaction.user.username)}: `,
 			});
 		}
