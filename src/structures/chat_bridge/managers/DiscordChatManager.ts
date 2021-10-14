@@ -1,7 +1,7 @@
 import { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } from 'discord.js';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
-import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../../util';
+import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
 import { ChatManager } from './ChatManager';
 import { cache } from '../../../api/cache';
@@ -368,16 +368,17 @@ export class DiscordChatManager extends ChatManager {
 				let offset = 0;
 
 				for (const match of messageContent.matchAll(DISCORD_CDN_URL_REGEXP)) {
-					const [ URL ] = match;
+					const [ FULL_URL, URL_WITHOUT_QUERY_PARAMS ] = match;
 					const [ [ START, END ] ] = match
 						// @ts-expect-error
 						.indices;
 
 					try {
-						const IMGUR_URL = (await imgur.upload(URL)).data.link;
+						// try to upload URL without query parameters
+						const IMGUR_URL = (await imgur.upload(URL_WITHOUT_QUERY_PARAMS)).data.link;
 
 						messageContent = `${messageContent.slice(0, START - offset)}${IMGUR_URL}${messageContent.slice(END - offset)}`; // replace discord with imgur link
-						offset += URL.length - IMGUR_URL.length; // since indices are relative to the original string
+						offset += FULL_URL.length - IMGUR_URL.length; // since indices are relative to the original string
 					} catch (error) {
 						logger.error(error);
 						break;

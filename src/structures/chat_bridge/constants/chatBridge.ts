@@ -87,7 +87,8 @@ export const NON_WHITESPACE_REGEXP = new RegExp(`[^\\s\u{2003}\u{2800}\u{0020}\u
 
 /**
  * https://cdn.discordapp.com/attachments/724130826165420052/876441229905256448/card.png
- * https://media.discordapp.net/attachments/795861078415638539/876641628083867688/unknown.png
+ * https://media.discordapp.net/attachments/795861078415638539/876641628083867688/unknown.png?height=50&width=20
+ * https://cdn.discordapp.com/emojis/830971380283605042.png?size=96
  */
 // eslint-disable-next-line no-empty-character-class
-export const DISCORD_CDN_URL_REGEXP = /\b(?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/(?:attachments\/\d{17,19}\/\d{17,19}\/.+|emojis\/\d{17,19})\.(?:png|jpg|jpeg)\b/gd;
+export const DISCORD_CDN_URL_REGEXP = /\b((?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/(?:attachments\/\d{17,19}\/\d{17,19}\/.+|emojis\/\d{17,19})\.(?:png|jpg|jpeg))(?:\?\w+=\w+(?:&\w+=\w+)*)?\b/gd;
