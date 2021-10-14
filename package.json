@@ -74,7 +74,7 @@
     "eslint": "^8.0.1",
     "eslint-plugin-regexp": "^1.4.1",
     "eslint-plugin-unicorn": "^37.0.1",
-    "pino-pretty": "^7.0.1",
+    "pino-pretty": "^7.1.0",
     "rimraf": "^3.0.2",
     "typescript": "^4.5.0-dev.20211014"
   },
