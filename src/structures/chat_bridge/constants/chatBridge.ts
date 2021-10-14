@@ -76,7 +76,7 @@ export const randomPadding = () => PADDING_CHUNKS[Math.floor(Math.random() * PAD
 /**
  * any non-'-' and non-whitespace
  */
-export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}]/u;
+export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2800}\u{180E}\u{200B}]/u;
 
 /**
  * spam messages
@@ -91,4 +91,4 @@ export const NON_WHITESPACE_REGEXP = new RegExp(`[^\\s\u{2003}\u{2800}\u{0020}\u
  * https://cdn.discordapp.com/emojis/830971380283605042.png?size=96
  */
 // eslint-disable-next-line no-empty-character-class
-export const DISCORD_CDN_URL_REGEXP = /\b((?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/(?:attachments\/\d{17,19}\/\d{17,19}\/.+|emojis\/\d{17,19})\.(?:png|jpg|jpeg))(?:\?\w+=\w+(?:&\w+=\w+)*)?\b/gd;
+export const DISCORD_CDN_URL_REGEXP = /\b((?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/(?:attachments\/\d{17,19}\/\d{17,19}\/.+|emojis\/\d{17,19})\.(?:png|jpg|jpeg))(?:\?\w+=\w+(?:&\w+=\w+)*)?\b/dg;

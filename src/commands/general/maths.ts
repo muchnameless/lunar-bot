@@ -323,7 +323,7 @@ export default class MathsCommand extends DualCommand {
 	 * formats a number string
 	 * @param x
 	 */
-	static formatNumberString = (x: string) => x.replace(/(?<!\..*)\B(?=(\d{3})+(?!\d))/gs, '\u{202F}');
+	static formatNumberString = (x: string) => x.replace(/(?<!\..*)\B(?=(?:\d{3})+(?!\d))/gs, '\u{202F}');
 
 	calculate(rawInput: string) {
 		/**

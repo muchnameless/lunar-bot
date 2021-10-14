@@ -3,7 +3,8 @@
 		"eslint:recommended",
 		"plugin:@typescript-eslint/eslint-recommended",
 		"plugin:@typescript-eslint/recommended",
-		"plugin:unicorn/recommended"
+		"plugin:unicorn/recommended",
+		"plugin:regexp/recommended"
 	],
 	"env": {
 		"node": true,
@@ -15,7 +16,8 @@
 	},
 	"plugins": [
 		"@typescript-eslint",
-		"unicorn"
+		"unicorn",
+		"regexp"
 	],
 	"rules": {
 		"@typescript-eslint/ban-ts-comment": "off",

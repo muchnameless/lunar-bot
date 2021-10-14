@@ -46,7 +46,7 @@ export const trim = (string: string, max: number) => (string.length > max ? `${s
  * replaces toLocaleString('fr-FR') separator with a normal space
  * @param string
  */
-export const cleanFormattedNumber = (string: string) => string.replace(/\u{202F}/ug, ' ');
+export const cleanFormattedNumber = (string: string) => string.replace(/\u{202F}/gu, ' ');
 
 /**
  * '30d1193h71585m4295001s' -> 15_476_901_000
