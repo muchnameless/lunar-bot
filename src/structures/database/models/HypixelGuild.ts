@@ -250,13 +250,15 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * returns various average stats, formatted as strings
 	 */
 	get formattedStats() {
+		const formatInteger = (number: number) => cleanFormattedNumber(this.client.formatNumber(number, 0, Math.round));
+		const formatDecimal = (number: number) => cleanFormattedNumber(this.client.formatDecimalNumber(number));
 		const { weightAverage, skillAverage, slayerAverage, catacombsAverage } = this.stats;
 
 		return {
-			weightAverage: cleanFormattedNumber(this.client.formatNumber(weightAverage, 0, Math.round)),
-			skillAverage: cleanFormattedNumber(this.client.formatDecimalNumber(skillAverage)),
-			slayerAverage: cleanFormattedNumber(this.client.formatNumber(slayerAverage, 0, Math.round)),
-			catacombsAverage: cleanFormattedNumber(this.client.formatDecimalNumber(catacombsAverage)),
+			weightAverage: formatInteger(weightAverage),
+			skillAverage: formatDecimal(skillAverage),
+			slayerAverage: formatInteger(slayerAverage),
+			catacombsAverage: formatDecimal(catacombsAverage),
 		};
 	}
 
