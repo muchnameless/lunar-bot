@@ -105,8 +105,6 @@ export class DatabaseManager {
 
 				const { formattedStats } = mainGuild;
 
-				if (!formattedStats) return;
-
 				try {
 					for (const type of [ 'weight', 'skill', 'slayer', 'catacombs' ] as const) {
 						const channel = this.client.channels.cache.get(config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
@@ -116,7 +114,7 @@ export class DatabaseManager {
 							continue;
 						}
 
-						const newName = `${type} avg: ${formattedStats[`${type}Average`]}`;
+						const newName = `${type}︱${formattedStats[`${type}Average`]}`;
 						const { name: oldName } = channel;
 
 						if (newName === oldName) continue; // no update needed

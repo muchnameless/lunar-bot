@@ -14,7 +14,6 @@ import { GuildUtil } from '../../../util';
 import { hypixel } from '../../../api/hypixel';
 import { mojang } from '../../../api/mojang';
 import {
-	cleanFormattedNumber,
 	compareAlphabetically,
 	days,
 	logger,
@@ -238,12 +237,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		const { players } = this;
 		const PLAYER_COUNT = players.size;
 
-		return ({
+		return {
 			weightAverage: players.reduce((acc, player) => acc + player.getSenitherWeight().totalWeight, 0) / PLAYER_COUNT,
 			skillAverage: players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT,
 			slayerAverage: players.reduce((acc, player) => acc + player.getSlayerTotal(), 0) / PLAYER_COUNT,
 			catacombsAverage: players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT,
-		});
+		};
 	}
 
 	/**
@@ -252,12 +251,14 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	get formattedStats() {
 		const { weightAverage, skillAverage, slayerAverage, catacombsAverage } = this.stats;
 
-		return ({
-			weightAverage: cleanFormattedNumber(this.client.formatDecimalNumber(weightAverage)),
-			skillAverage: cleanFormattedNumber(this.client.formatDecimalNumber(skillAverage)),
-			slayerAverage: cleanFormattedNumber(this.client.formatNumber(slayerAverage, 0, Math.round)),
-			catacombsAverage: cleanFormattedNumber(this.client.formatDecimalNumber(catacombsAverage)),
-		});
+		return {
+			weightAverage: weightAverage.toFixed(0),
+			// 'one dot leader' - dot that doesn't get erased in discord channel names
+			skillAverage: skillAverage.toFixed(2).replace('.', '․'),
+			slayerAverage: slayerAverage.toFixed(0),
+			// 'one dot leader' - dot that doesn't get erased in discord channel names
+			catacombsAverage: catacombsAverage.toFixed(2).replace('.', '․'),
+		};
 	}
 
 	/**
