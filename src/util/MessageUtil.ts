@@ -3,7 +3,13 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { commaListsAnd } from 'common-tags';
 import { ChannelUtil } from '.';
 import { logger, seconds } from '../functions';
-import type { EmojiIdentifierResolvable, Message, MessageEditOptions, MessageOptions } from 'discord.js';
+import type {
+	EmojiIdentifierResolvable,
+	Message,
+	MessageEditOptions,
+	MessageOptions,
+	MessageReaction,
+} from 'discord.js';
 
 
 interface AwaitReplyOptions extends MessageOptions {
@@ -83,7 +89,7 @@ export default class MessageUtil extends null {
 			return null;
 		}
 
-		const res = [];
+		const res: MessageReaction[] = [];
 
 		try {
 			for (const emojiIndetifier of emojis) {

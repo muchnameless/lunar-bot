@@ -388,7 +388,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				? !hypixelMessage.commandData.args.length
 				: hypixelMessage.commandData.args.length < command.args
 		)) {
-			const reply = [];
+			const reply: string[] = [];
 
 			reply.push(`the '${command.name}' command has${typeof command.args === 'number' ? ` ${command.args}` : ''} mandatory argument${command.args === 1 ? '' : 's'}`);
 			if (command.usage) reply.push(`use: ${command.usageInfo}`);

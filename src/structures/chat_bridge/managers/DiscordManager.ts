@@ -97,7 +97,7 @@ export class DiscordManager {
 	 * instantiates the DiscordChatManagers
 	 */
 	init() {
-		const promises = [];
+		const promises: Promise<DiscordChatManager>[] = [];
 
 		for (const chatBridgeChannel of this.chatBridge.hypixelGuild!.chatBridgeChannels) {
 			if (this.channelsByType.has(chatBridgeChannel.type)) continue; // prevents multiple instantiations of the same manager

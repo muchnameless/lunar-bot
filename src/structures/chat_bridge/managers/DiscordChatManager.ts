@@ -88,13 +88,13 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * tries to upload all URLs to imgur, replacing all successfully uplaoded URLs with the imgur URLs
+	 * tries to upload all image attachments to imgur, replacing all successfully uploaded URLs with the imgur URLs
 	 * @param attachments
 	 */
 	async #uploadAttachments(attachments: Collection<Snowflake, MessageAttachment>) {
 		if (!this.client.config.get('IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
 
-		const ret = [];
+		const urls: string[] = [];
 
 		let hasError = false;
 
@@ -102,20 +102,20 @@ export class DiscordChatManager extends ChatManager {
 			// only images can be uploaded by URL https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
 			if (!hasError && this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType?.startsWith(type)) && size <= 1e7) {
 				try {
-					ret.push((await imgur.upload(url)).data.link);
+					urls.push((await imgur.upload(url)).data.link);
 				} catch (error) {
 					logger.error(error, '[UPLOAD ATTACHMENTS]');
-					ret.push(url);
+					urls.push(url);
 					hasError = true;
 				}
 
 				continue;
 			}
 
-			ret.push(url); // no image (e.g. video)
+			urls.push(url); // no image (e.g. video)
 		}
 
-		return ret;
+		return urls;
 	}
 
 	/**
@@ -167,11 +167,17 @@ export class DiscordChatManager extends ChatManager {
 	 * fetches or creates the webhook for the channel
 	 */
 	async #fetchOrCreateWebhook() {
-		if (this.webhook) return this.ready = true;
+		if (this.webhook) {
+			this.ready = true;
+			return this;
+		}
 
 		this.ready = false;
 
-		if (!this.hypixelGuild) return logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
+		if (!this.hypixelGuild) {
+			logger.warn(`[CHATBRIDGE]: chatBridge #${this.mcAccount}: no guild to fetch webhook`);
+			return this;
+		}
 
 		try {
 			const { channel } = this;
@@ -211,7 +217,8 @@ export class DiscordChatManager extends ChatManager {
 
 			this.ready = true;
 
-			return logger.debug(`[CHATBRIDGE]: ${this.hypixelGuild}: #${channel.name} webhook fetched and cached`);
+			logger.debug(`[CHATBRIDGE]: ${this.hypixelGuild}: #${channel.name} webhook fetched and cached`);
+			return this;
 		} catch (error) {
 			if (error instanceof WebhookError) {
 				this.chatBridge.shouldRetryLinking = false;
@@ -341,7 +348,7 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// build content
-		const contentParts = [];
+		const contentParts: string[] = [];
 
 		// @referencedMessageAuthor if normal reply
 		if (MessageUtil.isNormalReplyMessage(message)) {

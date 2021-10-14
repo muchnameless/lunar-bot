@@ -40,7 +40,7 @@ export default class XpCommand extends SlashCommand {
 		// update db?
 		if (interaction.options.getBoolean('update')) await player.updateXp();
 
-		const embeds = [];
+		const embeds: MessageEmbed[] = [];
 		const { skillAverage, trueAverage } = player.getSkillAverage();
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(OFFSET);
 

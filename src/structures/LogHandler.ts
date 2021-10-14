@@ -100,10 +100,10 @@ export class LogHandler {
 		}
 
 		// split into multiple messages
-		const returnValue = [];
+		const returnValue: Promise<Message | void>[] = [];
 
 		for (let total = 0; total < embeds.length; ++total) {
-			const embedChunk = [];
+			const embedChunk: MessageEmbed[] = [];
 
 			let embedChunkLength = 0;
 

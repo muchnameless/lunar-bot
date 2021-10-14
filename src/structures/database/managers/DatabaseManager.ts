@@ -202,7 +202,7 @@ export class DatabaseManager {
 		const TAX_AUCTIONS_START_TIME = config.get('TAX_AUCTIONS_START_TIME');
 		const TAX_AMOUNT = config.get('TAX_AMOUNT');
 		const TAX_AUCTIONS_ITEMS = config.get('TAX_AUCTIONS_ITEMS');
-		const availableAuctionsLog = [];
+		const availableAuctionsLog: { ign: string | null, auctions: string | number }[] = [];
 		const dbPromises: Promise<EmbedFieldData | undefined>[] = [];
 
 		let apiError = false;
@@ -342,7 +342,7 @@ export class DatabaseManager {
 	 */
 	#createTaxEmbedFields() {
 		const { config, hypixelGuilds } = this.modelManagers;
-		const fields = [];
+		const fields: EmbedFieldData[] = [];
 
 		for (const hypixelGuild of hypixelGuilds.cache.values()) {
 			const GUILD_PLAYER_COUNT = hypixelGuild.playerCount;

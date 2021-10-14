@@ -7,6 +7,13 @@ import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
+interface IssueInfo {
+	guildName: string;
+	amount: number;
+	values: string[];
+}
+
+
 export default class LinkIssuesCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -80,8 +87,8 @@ export default class LinkIssuesCommand extends SlashCommand {
 		}
 
 		// guild players that are either unlinked or not in the discord server
-		const unlinkedPlayers = [];
-		const linkedAndNotInDiscord = [];
+		const unlinkedPlayers: IssueInfo[] = [];
+		const linkedAndNotInDiscord: IssueInfo[] = [];
 
 		for (const { name, players: guildPlayers } of this.client.hypixelGuilds.cache.values()) {
 			// db entries with issues

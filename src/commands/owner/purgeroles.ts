@@ -4,7 +4,7 @@ import ms from 'ms';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { logger, seconds } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { CommandInteraction, Snowflake } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
@@ -40,7 +40,7 @@ export default class PurgeRolesCommand extends SlashCommand {
 
 			const { lgGuild } = this.client;
 			const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
-			const toPurge = [];
+			const toPurge: { id: Snowflake; rolesToPurge: Snowflake[] }[] = [];
 
 			for (const member of (await GuildUtil.fetchAllMembers(lgGuild)).values()) {
 				if (member.roles.cache.has(GUILD_ROLE_ID)) continue;
