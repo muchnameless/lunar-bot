@@ -1,4 +1,3 @@
-import { regExpEsc } from '@sapphire/utilities';
 import { BROADCAST_EMOJI } from '../constants';
 import { MessageUtil, UserUtil } from '../util';
 import { Event } from '../structures/events/Event';
@@ -29,11 +28,6 @@ export default class MessageCreateEvent extends Event {
 
 		// player activity
 		UserUtil.getPlayer(message.author)?.update({ lastActivityAt: new Date() });
-
-		// "old" commands
-		if (MessageUtil.isUserMessage(message) && new RegExp(`^(?:${[ regExpEsc(this.config.get('PREFIXES')[0]), `<@!?${this.client.user!.id}>` ].join('|')})`, 'i').test(message.content)) {
-			MessageUtil.reply(message, 'all commands have been converted to slash commands, type (not send) `/` to see them');
-		}
 	}
 
 	/**
