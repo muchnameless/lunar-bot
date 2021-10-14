@@ -309,20 +309,6 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			if (hypixelMessage.type !== MESSAGE_TYPES.WHISPER) return; // no prefix and no whisper
 		}
 
-		// no command, only ping or prefix
-		if (!hypixelMessage.commandData.name) {
-			logger.info(`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' which is not a valid command`);
-
-			if (!this.config.get('PREFIXES')
-				.slice(1)
-				.includes(hypixelMessage.commandData.prefix!)
-			) {
-				this.client.chatBridges.commands.help(hypixelMessage);
-			}
-
-			return;
-		}
-
 		const { command } = hypixelMessage.commandData;
 
 		// no command
