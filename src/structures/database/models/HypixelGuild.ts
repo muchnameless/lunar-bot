@@ -688,6 +688,9 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				})
 				.sort((a, b) => b.positionReq - a.positionReq);
 
+			// no ranks with a positionReq
+			if (!automatedRanks.length) return this;
+
 			// update 'currentWeightReq' (2/2)
 			this.changed('ranks', true);
 			this.save().catch(error => logger.error(error));
