@@ -44,6 +44,13 @@ interface GetPlayerOptions {
 	throwIfNotFound?: boolean;
 }
 
+interface GetHypixelGuildOptions {
+	/** wether to use the current user in case that no player / target option is provided */
+	fallbackToCurrentUser?: boolean;
+	/** wether the return value may also be a string with GUILD_ID_ALL */
+	includeAll?: boolean;
+}
+
 interface AwaitReplyOptions extends InteractionReplyOptions {
 	question?: string;
 	/** time in milliseconds to wait for a response */
@@ -510,12 +517,28 @@ export default class InteractionUtil extends null {
 	 * returns a HypixelGuild instance
 	 * @param interaction
 	 */
-	static getHypixelGuild(interaction: CommandInteraction, includeAll: true): HypixelGuild | typeof GUILD_ID_ALL;
-	static getHypixelGuild(interaction: CommandInteraction, includeAll?: false): HypixelGuild;
-	static getHypixelGuild(interaction: CommandInteraction, includeAll = false) {
+	static getHypixelGuild(interaction: CommandInteraction, options: { fallbackToCurrentUser?: true, includeAll: true }): HypixelGuild | typeof GUILD_ID_ALL;
+	static getHypixelGuild(interaction: CommandInteraction, options: { fallbackToCurrentUser: false, includeAll: true }): HypixelGuild | typeof GUILD_ID_ALL | null;
+	static getHypixelGuild(interaction: CommandInteraction, options?: { fallbackToCurrentUser?: true, includeAll?: false }): HypixelGuild;
+	static getHypixelGuild(interaction: CommandInteraction, options: { fallbackToCurrentUser: false, includeAll?: false }): HypixelGuild | null;
+	static getHypixelGuild(interaction: CommandInteraction, { fallbackToCurrentUser = true, includeAll = false }: GetHypixelGuildOptions = {}) {
 		const INPUT = interaction.options.getString('guild');
-		if (!INPUT) return UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? (interaction.client as LunarClient).hypixelGuilds.mainGuild;
+
+		if (!INPUT) {
+			if (fallbackToCurrentUser) {
+				return UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? (interaction.client as LunarClient).hypixelGuilds.mainGuild;
+			}
+			return null;
+		}
+
 		if (includeAll && INPUT === GUILD_ID_ALL) return INPUT;
-		return (interaction.client as LunarClient).hypixelGuilds.cache.get(INPUT) ?? UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? (interaction.client as LunarClient).hypixelGuilds.mainGuild;
+
+		const hypixelGuild = (interaction.client as LunarClient).hypixelGuilds.cache.get(INPUT);
+
+		if (hypixelGuild) return hypixelGuild;
+
+		if (!fallbackToCurrentUser) return null;
+
+		return UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? (interaction.client as LunarClient).hypixelGuilds.mainGuild;
 	}
 }

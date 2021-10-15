@@ -431,12 +431,12 @@ export default class GuildCommand extends SlashCommand {
 	 * @param commandOptions
 	 * @param hypixelGuild
 	 */
-	async #run(interaction: CommandInteraction, commandOptions: CommandOptions, { chatBridge } = InteractionUtil.getHypixelGuild(interaction)) {
+	async #run(interaction: CommandInteraction, commandOptions: CommandOptions, hypixelGuild = InteractionUtil.getHypixelGuild(interaction)) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${commandOptions.command}`)
-					.setDescription(Formatters.codeBlock(await chatBridge.minecraft.command(commandOptions))),
+					.setDescription(Formatters.codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions))),
 			],
 		});
 	}
@@ -655,10 +655,17 @@ export default class GuildCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				return this.#run(interaction, {
-					command: `guild demote ${target}`,
-					responseRegExp: demote(target.ign),
-				});
+				return this.#run(
+					interaction,
+					{
+						command: `guild demote ${target}`,
+						responseRegExp: demote(target.ign),
+					},
+					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false })
+						?? target.hypixelGuild
+						?? executor.hypixelGuild
+						?? this.client.hypixelGuilds.mainGuild,
+				);
 			}
 
 			case 'kick': {
@@ -753,12 +760,18 @@ export default class GuildCommand extends SlashCommand {
 			}
 
 			case 'member': {
-				const IGN = InteractionUtil.getIgn(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
+				const target = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 
-				return this.#run(interaction, {
-					command: `guild member ${IGN}`,
-					abortRegExp: unknownIgn(IGN),
-				});
+				return this.#run(
+					interaction,
+					{
+						command: `guild member ${target}`,
+						abortRegExp: unknownIgn(target.ign),
+					},
+					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false })
+						?? target.hypixelGuild
+						?? this.client.hypixelGuilds.mainGuild,
+				);
 			}
 
 			case 'mute': {
@@ -792,10 +805,17 @@ export default class GuildCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				return this.#run(interaction, {
-					command: `guild promote ${target}`,
-					responseRegExp: promote(target.ign),
-				});
+				return this.#run(
+					interaction,
+					{
+						command: `guild promote ${target}`,
+						responseRegExp: promote(target.ign),
+					},
+					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false })
+						?? target.hypixelGuild
+						?? executor.hypixelGuild
+						?? this.client.hypixelGuilds.mainGuild,
+				);
 			}
 
 			case 'setrank': {
@@ -825,10 +845,17 @@ export default class GuildCommand extends SlashCommand {
 					ephemeral: true,
 				});
 
-				return this.#run(interaction, {
-					command: `guild setrank ${target} ${rank.name}`,
-					responseRegExp: setRank(target.ign, undefined, rank.name),
-				});
+				return this.#run(
+					interaction,
+					{
+						command: `guild setrank ${target} ${rank.name}`,
+						responseRegExp: setRank(target.ign, undefined, rank.name),
+					},
+					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false })
+						?? target.hypixelGuild
+						?? executor.hypixelGuild
+						?? this.client.hypixelGuilds.mainGuild,
+				);
 			}
 
 			case 'unmute': {

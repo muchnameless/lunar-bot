@@ -32,7 +32,7 @@ export default class LeaderboardCommand extends SlashCommand {
 			xpType: interaction.options.getString('type') as LeaderboardXPTypes ?? this.config.get('CURRENT_COMPETITION'),
 			page: interaction.options.getInteger('page') ?? 1,
 			offset: interaction.options.getString('offset') as LeaderboardXPOffsets ?? getDefaultOffset(this.config),
-			hypixelGuild: InteractionUtil.getHypixelGuild(interaction, true),
+			hypixelGuild: InteractionUtil.getHypixelGuild(interaction, { includeAll: true }),
 			user: interaction.user,
 		});
 	}

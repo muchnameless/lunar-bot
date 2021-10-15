@@ -30,7 +30,7 @@ export default class PurgeListCommand extends SlashCommand {
 			xpType: 'purge',
 			page: interaction.options.getInteger('page') ?? 1,
 			offset: interaction.options.getString('offset') as LeaderboardXPOffsets ?? '',
-			hypixelGuild: InteractionUtil.getHypixelGuild(interaction, true),
+			hypixelGuild: InteractionUtil.getHypixelGuild(interaction, { includeAll: true }),
 			user: interaction.user,
 		});
 	}
