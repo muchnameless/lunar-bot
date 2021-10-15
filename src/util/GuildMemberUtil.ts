@@ -43,18 +43,17 @@ export default class GuildMemberUtil extends null {
 		const rolesToRemove: Snowflake[] = [];
 
 		// guild
-		for (const { ranks, roleId } of hypixelGuilds.cache.values()) {
-			if (!roleId) continue;
+		for (const { roleId, ranks } of hypixelGuilds.cache.values()) {
+			if (roleId && member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
 
 			for (const { roleId: rankRoleId } of ranks) {
 				if (rankRoleId && member.roles.cache.has(rankRoleId)) rolesToRemove.push(rankRoleId);
 			}
-
-			if (member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
 		}
 
-		if (member.roles.cache.has(config.get('GUILD_ROLE_ID'))) rolesToRemove.push(config.get('GUILD_ROLE_ID'));
-		if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
+		for (const role of [ 'GUILD_ROLE_ID', 'WHALECUM_PASS_ROLE_ID', 'INACTIVE_ROLE_ID' ] as const) {
+			if (member.roles.cache.has(config.get(role))) rolesToRemove.push(config.get(role));
+		}
 
 		// delimiter
 		for (const type of DELIMITER_ROLES) {
