@@ -6,9 +6,9 @@ import {
 	Options,
 	Constants,
 } from 'discord.js';
-import { InteractionUtil } from './util';
-import { db } from './structures/database';
-import { logger } from './functions';
+import { InteractionUtil } from '../util';
+import { db } from '../structures/database';
+import { logger } from '../functions';
 import type {
 	ActivitiesOptions,
 	Channel,

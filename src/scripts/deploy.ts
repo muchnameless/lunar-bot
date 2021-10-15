@@ -1,8 +1,8 @@
 import { REST } from '@discordjs/rest';
 import { Routes, APIVersion } from 'discord-api-types/v9';
-import { db } from './structures/database';
-import { LunarClient } from './structures/LunarClient';
-import { logger } from './functions';
+import { db } from '../structures/database';
+import { LunarClient } from '../structures/LunarClient';
+import { logger } from '../functions';
 import type { RESTGetAPIApplicationGuildCommandsResult } from 'discord-api-types/v9';
 
 

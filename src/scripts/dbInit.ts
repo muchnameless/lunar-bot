@@ -1,6 +1,6 @@
-import './pgEnum-fix.js'; // to allow `sync --alter` with pg enums set
-import { sequelize } from '.';
-import { logger } from '../../functions';
+import '../structures/database/pgEnum-fix.js'; // to allow `sync --alter` with pg enums set
+import { sequelize } from '../structures/database';
+import { logger } from '../functions';
 
 sequelize
 	// @ts-expect-error
