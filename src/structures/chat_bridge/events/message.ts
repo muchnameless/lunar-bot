@@ -77,7 +77,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HypixelRank] IGN joined the guild!
 		 */
 		if (hypixelMessage.content.includes('joined the guild')) {
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
+			this.chatBridge.hypixelGuild?.updateData();
 			hypixelMessage.forwardToDiscord();
 			return this.chatBridge.broadcast('welcome');
 		}
@@ -86,7 +86,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HypixelRank] IGN left the guild!
 		 */
 		if (hypixelMessage.content.includes('left the guild!')) {
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
+			this.chatBridge.hypixelGuild?.updateData();
 			return hypixelMessage.forwardToDiscord();
 		}
 
@@ -95,7 +95,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (hypixelMessage.content === 'You left the guild') {
 			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: bot left the guild`);
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
+			this.chatBridge.hypixelGuild?.updateData();
 			hypixelMessage.forwardToDiscord();
 			return this.chatBridge.unlink();
 		}
@@ -104,7 +104,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * [HypixelRank] IGN was kicked from the guild by [HypixelRank] IGN!
 		 */
 		if (kickSuccess.test(hypixelMessage.content)) {
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
+			this.chatBridge.hypixelGuild?.updateData();
 			return hypixelMessage.forwardToDiscord();
 		}
 
@@ -113,7 +113,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (hypixelMessage.content.startsWith('You were kicked from the guild by')) {
 			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: bot was kicked from the guild`);
-			this.chatBridge.hypixelGuild?.updatePlayers().catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
+			this.chatBridge.hypixelGuild?.updateData();
 			hypixelMessage.forwardToDiscord();
 			return this.chatBridge.unlink();
 		}
@@ -249,10 +249,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (guildJoinMatched) {
 			const [ guildName ] = guildJoinMatched;
 
-			this.client.hypixelGuilds
-				.getByName(guildName)
-				?.updatePlayers()
-				.catch(error => logger.error(error, '[CHATBRIDGE]: guild update'));
+			this.client.hypixelGuilds.getByName(guildName)?.updateData();
+
 			logger.info(`[CHATBRIDGE]: ${this.chatBridge.bot!.username}: joined ${guildName}`);
 			return this.chatBridge.link(guildName);
 		}

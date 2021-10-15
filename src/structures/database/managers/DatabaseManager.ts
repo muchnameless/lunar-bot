@@ -432,7 +432,7 @@ export class DatabaseManager {
 			}
 
 			// update player db
-			await hypixelGuilds.updateData({ syncRanks: true });
+			await hypixelGuilds.updateData();
 
 			// update tax db
 			const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED')
