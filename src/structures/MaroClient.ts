@@ -21,6 +21,7 @@ interface MaroClientOptions {
 	cache?: Cache;
 	timeout?: number;
 	retries?: number;
+	fetchPlayerData?: FetchPlayerData;
 }
 
 export type MaroAPIResponse = {
@@ -54,6 +55,8 @@ export interface MaroNetwortCategoryResponse {
 	networth: number;
 }
 
+type FetchPlayerData = (uuid: string) => Promise<MaroPlayerData>;
+
 abstract class Method {
 	client: MaroClient;
 
@@ -64,12 +67,14 @@ abstract class Method {
 
 
 class Networth extends Method {
-	categories(uuid: string, playerData: MaroPlayerData, options?: MaroFetchOptions) {
+	async categories(uuid: string, playerData?: MaroPlayerData, options?: MaroFetchOptions) {
 		return this.client.request(
 			'networth/categories',
 			{
 				method: 'POST',
-				body: JSON.stringify({ data: playerData }),
+				body: JSON.stringify({
+					data: playerData ?? await this.client.fetchPlayerData(uuid),
+				}),
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -81,12 +86,14 @@ class Networth extends Method {
 		) as Promise<MaroNetwortCategoryResponse>;
 	}
 
-	total(uuid: string, playerData: MaroPlayerData, options?: MaroFetchOptions) {
+	async total(uuid: string, playerData?: MaroPlayerData, options?: MaroFetchOptions) {
 		return this.client.request(
 			'networth/total',
 			{
 				method: 'POST',
-				body: JSON.stringify({ data: playerData }),
+				body: JSON.stringify({
+					data: playerData ?? await this.client.fetchPlayerData(uuid),
+				}),
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -106,14 +113,16 @@ export class MaroClient {
 	retries: number;
 	#baseURL = 'https://nariah-dev.com/api/';
 	networth = new Networth(this);
+	fetchPlayerData: FetchPlayerData;
 
 	/**
 	 * @param options
 	 */
-	constructor({ cache, timeout, retries }: MaroClientOptions = {}) {
+	constructor({ cache, timeout, retries, fetchPlayerData }: MaroClientOptions = {}) {
 		this.cache = cache;
 		this.timeout = timeout ?? seconds(10);
 		this.retries = retries ?? 1;
+		this.fetchPlayerData = fetchPlayerData ?? (() => { throw new Error('no playerData argument provided and no fetchPlayerData method implemented'); });
 	}
 
 	/**
