@@ -4,7 +4,7 @@ import pkg from 'sequelize';
 const { Op } = pkg;
 import ms from 'ms';
 import { demote, historyErrors, invite, kick, mute, logErrors, promote, setRank, topErrors, unmute, unknownIgn } from '../../structures/chat_bridge/constants';
-import { COMMAND_KEY, DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, EMBED_DESCRIPTION_MAX_CHARS, GUILD_ID_BRIDGER, LEFT_EMOJI, RELOAD_EMOJI, RIGHT_EMOJI, UNKNOWN_IGN } from '../../constants';
+import { DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, EMBED_DESCRIPTION_MAX_CHARS, GUILD_ID_BRIDGER, LEFT_EMOJI, RELOAD_EMOJI, RIGHT_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { requiredPlayerOption, optionalPlayerOption, pageOption, requiredIgnOption, targetOption, forceOption, buildGuildOption } from '../../structures/commands/commonOptions';
 import { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
 import { InteractionUtil, UserUtil } from '../../util';
@@ -480,7 +480,7 @@ export default class GuildCommand extends SlashCommand {
 	 * @param totalPages
 	 */
 	#getPaginationButtons(subcommand: string, hypixelGuildId: string, currentPage: number, totalPages: number, isParsedPages: boolean) {
-		const CUSTOM_ID = `${COMMAND_KEY}:${this.name}:${subcommand}:${hypixelGuildId}`;
+		const CUSTOM_ID = `${this.baseCustomId}:${subcommand}:${hypixelGuildId}` as const;
 
 		let currentPage_ = currentPage;
 		let totalPages_ = totalPages;

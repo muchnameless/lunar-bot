@@ -33,7 +33,7 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
 
 
-const { COMMAND_KEY, DELETE_EMOJI, EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
+const { DELETE_EMOJI, EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
 const { logger, minutes, splitForEmbedFields } = functions;
 
 
@@ -74,10 +74,6 @@ export default class EvalCommand extends SlashCommand {
 			.replace(new RegExp(this.client.token!, 'gi'), '****');
 	}
 
-	#getCustomId() {
-		return `${COMMAND_KEY}:${this.name}`;
-	}
-
 	/**
 	 * @param isAsync
 	 * @param inspectDepth
@@ -87,11 +83,11 @@ export default class EvalCommand extends SlashCommand {
 			new MessageActionRow()
 				.addComponents(
 					new MessageButton()
-						.setCustomId(`${this.#getCustomId()}:edit:${isAsync}:${inspectDepth}`)
+						.setCustomId(`${this.baseCustomId}:edit:${isAsync}:${inspectDepth}`)
 						.setEmoji(EDIT_MESSAGE_EMOJI)
 						.setStyle(Constants.MessageButtonStyles.SECONDARY),
 					new MessageButton()
-						.setCustomId(`${this.#getCustomId()}:delete`)
+						.setCustomId(`${this.baseCustomId}:delete`)
 						.setEmoji(DELETE_EMOJI)
 						.setStyle(Constants.MessageButtonStyles.DANGER),
 				),

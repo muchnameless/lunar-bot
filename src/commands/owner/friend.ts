@@ -1,7 +1,7 @@
 import { Constants, Formatters, MessageActionRow, MessageButton } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { buildGuildOption, pageOption } from '../../structures/commands/commonOptions';
-import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI, COMMAND_KEY } from '../../constants';
+import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI } from '../../constants';
 import { InteractionUtil } from '../../util';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { ButtonInteraction, CommandInteraction } from 'discord.js';
@@ -31,7 +31,7 @@ export default class MyCommand extends SlashCommand {
 	 * @param totalPages
 	 */
 	#getPaginationButtons(hypixelGuildId: string, currentPage: number, totalPages: number) {
-		const CUSTOM_ID = `${COMMAND_KEY}:${this.name}:list:${hypixelGuildId}`;
+		const CUSTOM_ID = `${this.baseCustomId}:list:${hypixelGuildId}`;
 		const INVALID_PAGES = Number.isNaN(currentPage) || Number.isNaN(totalPages);
 		const DEC_DISABLED = currentPage === 1 || INVALID_PAGES;
 		const INC_DISABLED = currentPage === totalPages || INVALID_PAGES;

@@ -2,6 +2,7 @@ import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } fro
 import { Constants } from 'discord.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError';
 import { ephemeralOption } from './commonOptions';
+import { COMMAND_KEY } from '../../constants';
 import { logger } from '../../functions';
 import { BaseCommand } from './BaseCommand';
 import type {
@@ -79,6 +80,13 @@ export class SlashCommand extends BaseCommand {
 		} else {
 			(this.slash as SlashCommandBuilder).addStringOption(ephemeralOption);
 		}
+	}
+
+	/**
+	 * component customId to identify this command in the handler. everything after it gets provided as args split by ':'
+	 */
+	get baseCustomId() {
+		return `${COMMAND_KEY}:${this.name}` as const;
 	}
 
 	/**

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageActionRow, MessageSelectMenu, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { COMMAND_KEY, PROFILE_EMOJIS } from '../../constants';
+import { PROFILE_EMOJIS } from '../../constants';
 import { hypixel } from '../../api/hypixel';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
@@ -29,7 +29,7 @@ export default class AhCommand extends SlashCommand {
 	 * @param param0
 	 */
 	#generateCustomId({ uuid, ign, userId }: { ign: string; uuid: string; userId: Snowflake; }) {
-		return `${COMMAND_KEY}:${this.name}:${uuid}:${ign}:${userId}`;
+		return `${this.baseCustomId}:${uuid}:${ign}:${userId}` as const;
 	}
 
 	/**
