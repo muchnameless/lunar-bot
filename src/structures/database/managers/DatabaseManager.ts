@@ -100,13 +100,10 @@ export class DatabaseManager {
 				if (!config.get('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
 
 				const { mainGuild } = this.modelManagers.hypixelGuilds;
-
 				if (!mainGuild) return;
 
-				const { formattedStats } = mainGuild;
-
 				try {
-					for (const type of [ 'weight', 'skill', 'slayer', 'catacombs' ] as const) {
+					for (const [ type, value ] of Object.entries(mainGuild.formattedStats)) {
 						const channel = this.client.channels.cache.get(config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
 
 						if (!(channel instanceof VoiceChannel)) { // no channel found
@@ -114,7 +111,7 @@ export class DatabaseManager {
 							continue;
 						}
 
-						const newName = `${type}︱${formattedStats[`${type}Average`]}`;
+						const newName = `${type}︱${value}`;
 						const { name: oldName } = channel;
 
 						if (newName === oldName) continue; // no update needed

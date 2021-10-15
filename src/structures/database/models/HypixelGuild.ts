@@ -255,10 +255,10 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		const { weightAverage, skillAverage, slayerAverage, catacombsAverage } = this.stats;
 
 		return {
-			weightAverage: formatInteger(weightAverage),
-			skillAverage: formatDecimal(skillAverage),
-			slayerAverage: formatInteger(slayerAverage),
-			catacombsAverage: formatDecimal(catacombsAverage),
+			weight: formatInteger(weightAverage),
+			skills: formatDecimal(skillAverage),
+			slayer: formatInteger(slayerAverage),
+			catacombs: formatDecimal(catacombsAverage),
 		};
 	}
 
