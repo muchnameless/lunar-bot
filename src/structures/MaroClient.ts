@@ -51,7 +51,7 @@ interface NetworthCategory {
 	top_items: SkyBlockItem[];
 }
 
-export interface MaroNetwortCategoryResponse {
+export interface MaroNetworthCategoryResponse {
 	categories: {
 		storage: NetworthCategory;
 		inventory: NetworthCategory;
@@ -95,7 +95,7 @@ class Networth extends Method {
 				cacheKey: `networth:categories:${uuid}`,
 				...options,
 			},
-		) as Promise<MaroNetwortCategoryResponse>;
+		) as Promise<MaroNetworthCategoryResponse>;
 	}
 
 	async total(uuid: string, playerData?: MaroPlayerData, options?: MaroFetchOptions) {
