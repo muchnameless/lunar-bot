@@ -1,7 +1,7 @@
 import { Intents, LimitedCollection, SnowflakeUtil, Options, Constants } from 'discord.js';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
-import { logger, minutes } from './functions';
+import { logger, seconds } from './functions';
 import type { Channel, DMChannel, ThreadChannel } from 'discord.js';
 
 
@@ -69,7 +69,7 @@ const client = new LunarClient({
 	rejectOnRateLimit: ({ route, method, timeout }) => route.startsWith('/channels')
 		&& !route.includes('/messages')
 		&& method === 'patch'
-		&& timeout > minutes(1),
+		&& timeout > seconds(10),
 	failIfNotExists: false,
 	presence: {
 		activities: [{
