@@ -557,7 +557,7 @@ export default class GuildCommand extends SlashCommand {
 			components: this.#getPaginationButtons(
 				subcommand,
 				hypixelGuild.guildId,
-				userId,
+				interaction.user.id,
 				Number(pageMatched?.groups!.current ?? page),
 				Number(pageMatched?.groups!.total),
 				pageMatched !== null,
