@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { MojangAPIError } from './errors/MojangAPIError';
-import { days, seconds, validateMinecraftIgn, validateMinecraftUuid } from '../functions';
+import { /* days, */ seconds, validateMinecraftIgn, validateMinecraftUuid } from '../functions';
 import type { Response } from 'node-fetch';
 
 
@@ -16,7 +16,7 @@ interface MojangFetchOptions {
 
 interface Cache {
 	get(key: string): Promise<MojangResult & { error?: boolean, status?: number, statusText?: string } | undefined>;
-	set(key: string, value: MojangResult | { error: boolean, status: number, statusText: string }): Promise<true>;
+	set(key: string, value: MojangResult | { error: boolean, status: number, statusText: string }, isError?: boolean): Promise<true>;
 }
 
 interface MojangClientOptions {
@@ -175,34 +175,34 @@ export class MojangClient {
 			/**
 			 * mojang api currently ignores ?at= [https://bugs.mojang.com/browse/WEB-3367]
 			 */
-			case 204: { // invalid ign
-				if (queryType === 'ign') { // retry a past date if name was queried
-					let timestamp = Date.now();
+			// case 204: { // invalid ign
+			// 	if (queryType === 'ign') { // retry a past date if name was queried
+			// 		let timestamp = Date.now();
 
-					// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
-					while (((timestamp -= days(30)) >= Date.parse('2015-02-04T00:00:00.000Z'))) {
-						const pastRes = await this.#request(`${path}${query}?at=${timestamp}`);
+			// 		// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
+			// 		while (((timestamp -= days(30)) >= Date.parse('2015-02-04T00:00:00.000Z'))) {
+			// 			const pastRes = await this.#request(`${path}${query}?at=${timestamp}`);
 
-						if (pastRes.status === 200) {
-							const { id: uuid, name: ign } = await res.json() as { id: string, name: string };
-							const response = { uuid, ign };
+			// 			if (pastRes.status === 200) {
+			// 				const { id: uuid, name: ign } = await res.json() as { id: string, name: string };
+			// 				const response = { uuid, ign };
 
-							if (cache) {
-								// only cache ign -> uuid for outdated igns
-								this.cache?.set(`ign:${ign.toLowerCase()}`, response);
-							}
+			// 				if (cache) {
+			// 					// only cache ign -> uuid for outdated igns
+			// 					this.cache?.set(`ign:${ign.toLowerCase()}`, response);
+			// 				}
 
-							return response;
-						}
-					}
-				}
-			}
+			// 				return response;
+			// 			}
+			// 		}
+			// 	}
+			// }
 			// falls through
 
 			default:
 				// only check cache if force === true, because otherwise cache is already checked before the request
 				if (cache && (!force || !await this.cache?.get(CACHE_KEY))) {
-					this.cache?.set(CACHE_KEY, { error: true, status: res.status, statusText: res.statusText });
+					this.cache?.set(CACHE_KEY, { error: true, status: res.status, statusText: res.statusText }, true);
 				}
 
 				throw new MojangAPIError(res, queryType, query);

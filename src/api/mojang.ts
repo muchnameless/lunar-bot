@@ -12,13 +12,15 @@ export const mojang = new MojangClient({
 		get(key) {
 			return cache.get(`${MOJANG_KEY}:${key}`) as Promise<MojangResult | undefined>;
 		},
-		set(key, value) {
+		set(key, value, isError = false) {
 			let ttl = minutes(5);
 
 			// 24 hours for successful requests (changed IGNs are reserved for 37 days (30 days name change cooldown + 1 week))
-			if (key.startsWith('ign')) {
+			if (isError) {
+				ttl = minutes(1);
+			} else if (key.startsWith('ign')) {
 				ttl = days(1);
-			} else if (key.startsWith('uuid') || Reflect.has(value, 'error')) {
+			} else if (key.startsWith('uuid')) {
 				ttl = hours(1);
 			}
 
