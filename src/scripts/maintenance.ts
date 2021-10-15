@@ -83,6 +83,7 @@ const client = new Client({
 		// Constants.PartialTypes.REACTION,
 		// Constants.PartialTypes.USER,
 	],
+	restGlobalRateLimit: 50,
 	failIfNotExists: false,
 	presence,
 	intents: [
