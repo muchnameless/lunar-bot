@@ -38,16 +38,28 @@ export interface MaroNetworthResponse {
 	body?: number;
 }
 
+interface SkyBlockItem {
+	id: string;
+	name: string;
+	price: number;
+	recomb?: boolean;
+	count: number;
+}
+
+interface NetworthCategory {
+	total: number;
+	top_items: SkyBlockItem[];
+}
+
 export interface MaroNetwortCategoryResponse {
 	categories: {
-		storage: number;
-		inventory: number;
-		enderchest: number;
-		armor: number;
-		// eslint-disable-next-line camelcase
-		wardrobe_inventory: number;
-		pets: number;
-		talismans: number;
+		storage: NetworthCategory;
+		inventory: NetworthCategory;
+		enderchest: NetworthCategory;
+		armor: NetworthCategory;
+		wardrobe_inventory: NetworthCategory;
+		pets: NetworthCategory;
+		talismans: NetworthCategory;
 	},
 	bank?: number;
 	purse?: number;
