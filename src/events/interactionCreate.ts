@@ -133,6 +133,7 @@ export default class InteractionCreateEvent extends Event {
 		logger.info({
 			type: interaction.componentType,
 			customId: interaction.customId,
+			values: interaction.values,
 			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
 			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
 		}, 'INTERACTION_CREATE');
@@ -242,6 +243,11 @@ export default class InteractionCreateEvent extends Event {
 
 			// context menu
 			if (interaction.isContextMenu()) return await this.#handleContextMenuInteraction(interaction);
+
+			return InteractionUtil.reply(interaction, {
+				content: `unknown interaction type '${interaction.type}'`,
+				ephemeral: true,
+			});
 		} catch (error) {
 			if (typeof error === 'string') {
 				logger.error(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}: ${error}`);
@@ -251,17 +257,13 @@ export default class InteractionCreateEvent extends Event {
 
 			if (InteractionUtil.isInteractionError(error)) return; // interaction expired
 
-			try {
-				await InteractionUtil.reply(interaction, {
-					content: typeof error === 'string'
-						? error
-						: `an error occurred while executing the command: ${error}`,
-					ephemeral: true,
-					allowedMentions: { parse: [], repliedUser: true },
-				});
-			} catch (error_) {
-				logger.error(error_);
-			}
+			InteractionUtil.reply(interaction, {
+				content: typeof error === 'string'
+					? error
+					: `an error occurred while executing the command: ${error}`,
+				ephemeral: true,
+				allowedMentions: { parse: [], repliedUser: true },
+			});
 		}
 	}
 }
