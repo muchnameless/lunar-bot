@@ -84,7 +84,7 @@ export default class MessageUtil extends null {
 	 */
 	static async react(message: Message | null, ...emojis: EmojiIdentifierResolvable[]) {
 		if (!message || message.deleted || this.isEphemeral(message)) return null;
-		if (!ChannelUtil.botPermissions(message.channel)?.has(Permissions.FLAGS.ADD_REACTIONS)) {
+		if (!ChannelUtil.botPermissions(message.channel).has(Permissions.FLAGS.ADD_REACTIONS)) {
 			logger.warn(`[MESSAGE REACT]: missing permissions in ${this.channelLogInfo(message)}`);
 			return null;
 		}
@@ -217,9 +217,9 @@ export default class MessageUtil extends null {
 
 		const { channel } = message;
 
-		if (!ChannelUtil.botPermissions(channel)?.has(requiredChannelPermissions)) {
+		if (!ChannelUtil.botPermissions(channel).has(requiredChannelPermissions)) {
 			const missingChannelPermissions = ChannelUtil.botPermissions(channel)
-				?.missing(requiredChannelPermissions)
+				.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
 
 			logger.warn(commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${ChannelUtil.logInfo(channel)}`);

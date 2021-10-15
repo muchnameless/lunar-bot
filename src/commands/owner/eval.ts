@@ -235,7 +235,7 @@ export default class EvalCommand extends SlashCommand {
 	override async runButton(interaction: ButtonInteraction, args: string[]) {
 		const { channel } = interaction;
 
-		if (!ChannelUtil.botPermissions(channel)?.has(Permissions.FLAGS.VIEW_CHANNEL)) return InteractionUtil.reply(interaction, {
+		if (!ChannelUtil.botPermissions(channel!).has(Permissions.FLAGS.VIEW_CHANNEL)) return InteractionUtil.reply(interaction, {
 			content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
 			ephemeral: true,
 		});

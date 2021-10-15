@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';
-import type { GuildChannel, Message } from 'discord.js';
+import type { GuildChannel, Message, TextChannel } from 'discord.js';
 import type { URL } from 'node:url';
 import type { LunarClient } from './LunarClient';
 
@@ -50,15 +50,20 @@ export class LogHandler {
 	get channel() {
 		const channel = this.client.channels.cache.get(this.client.config.get('LOGGING_CHANNEL_ID'));
 
-		if (!channel?.isText()) return logger.error(`[LOG HANDLER]: ${channel ? `#${(channel as GuildChannel).name}` : this.client.config.get('LOGGING_CHANNEL_ID')} is not a cached text based channel (id)`);
-
-		if (!ChannelUtil.botPermissions(channel)?.has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)) {
-			return logger.error(commaListsAnd`[LOG HANDLER]: missing ${ChannelUtil.botPermissions(channel)
-				?.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)
-				.map(permission => `'${permission}'`)}`);
+		if (!channel?.isText()) {
+			logger.error(`[LOG HANDLER]: ${channel ? `#${(channel as GuildChannel).name}` : this.client.config.get('LOGGING_CHANNEL_ID')} is not a cached text based channel (id)`);
+			return null;
 		}
 
-		return channel;
+		if (!ChannelUtil.botPermissions(channel).has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)) {
+			logger.error(commaListsAnd`[LOG HANDLER]: missing ${ChannelUtil.botPermissions(channel)
+				.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)
+				.map(permission => `'${permission}'`)
+			}`);
+			return null;
+		}
+
+		return channel as TextChannel;
 	}
 
 	/**

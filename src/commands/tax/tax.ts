@@ -383,7 +383,7 @@ export default class TaxCommand extends SlashCommand {
 
 								const { channel } = logMessage;
 
-								if (!channel || !ChannelUtil.botPermissions(channel)?.has(Permissions.FLAGS.MANAGE_MESSAGES)) return;
+								if (!ChannelUtil.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) return;
 
 								const pinnedMessages = await channel.messages.fetchPinned();
 

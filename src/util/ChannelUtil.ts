@@ -27,6 +27,9 @@ export default class ChannelUtil extends null {
 	/**
 	 * @param channel
 	 */
+	static botPermissions(channel: Channel | PartialDMChannel): Readonly<Permissions>;
+	static botPermissions(channel: null): null;
+	static botPermissions(channel: Channel | PartialDMChannel | null): Readonly<Permissions> | null;
 	static botPermissions(channel: Channel | PartialDMChannel | null): Readonly<Permissions> | null {
 		if (!channel) return null;
 
@@ -70,7 +73,7 @@ export default class ChannelUtil extends null {
 
 				default: {
 					if (Array.isArray(IdOrIds)) {
-						if (this.botPermissions(channel)?.has(Permissions.FLAGS.MANAGE_MESSAGES)) return await channel.bulkDelete(IdOrIds);
+						if (this.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) return await channel.bulkDelete(IdOrIds);
 
 						return await Promise.all(IdOrIds.map((id) => {
 							const message = channel.messages.cache.get(id);
@@ -108,9 +111,9 @@ export default class ChannelUtil extends null {
 		}
 
 		// permission checks
-		if (!this.botPermissions(channel)?.has(requiredChannelPermissions)) {
+		if (!this.botPermissions(channel).has(requiredChannelPermissions)) {
 			const missingChannelPermissions = this.botPermissions(channel)
-				?.missing(requiredChannelPermissions)
+				.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
 
 			logger.warn(commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${this.logInfo(channel)}`);

@@ -186,7 +186,7 @@ export class DiscordChatManager extends ChatManager {
 				throw new WebhookError('unknown channel', channel, this.hypixelGuild);
 			}
 
-			if (!ChannelUtil.botPermissions(channel)?.has(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
+			if (!ChannelUtil.botPermissions(channel).has(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
 				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.hypixelGuild);
 			}
 

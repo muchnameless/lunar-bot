@@ -116,12 +116,12 @@ export default class GuildMemberUtil extends null {
 		}
 
 		const { me } = member.guild;
-		if (!me?.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
+		if (!me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
 			logger.warn('[SET ROLES]: missing \'MANAGE_ROLES\' permission');
 			return member;
 		}
 
-		const { highest } = me.roles;
+		const { highest } = me!.roles;
 		if (difference.some(role => role.managed || Role.comparePositions(role, highest) >= 0)) {
 			logger.warn(commaListsAnd`[SET ROLES]: unable to add / remove '${
 				difference.filter(role => role.managed || Role.comparePositions(role, highest) >= 0).map(({ name }) => `@${name}`)
