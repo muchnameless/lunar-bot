@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cat logs/lunar-bot-out.log | grep "\"level\":50" | pino-pretty
+
