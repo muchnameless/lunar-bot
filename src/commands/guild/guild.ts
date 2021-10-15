@@ -479,7 +479,7 @@ export default class GuildCommand extends SlashCommand {
 	 * @param currentPage
 	 * @param totalPages
 	 */
-	#getPaginationButtons(subcommand: string, hypixelGuildId: string, currentPage: number, totalPages: number, parsedPages: boolean) {
+	#getPaginationButtons(subcommand: string, hypixelGuildId: string, currentPage: number, totalPages: number, isParsedPages: boolean) {
 		const CUSTOM_ID = `${COMMAND_KEY}:${this.name}:${subcommand}:${hypixelGuildId}`;
 
 		let currentPage_ = currentPage;
@@ -487,7 +487,7 @@ export default class GuildCommand extends SlashCommand {
 		let decDisabled;
 		let incDisabled;
 
-		if (parsedPages) {
+		if (isParsedPages) {
 			const INVALID_PAGES = Number.isNaN(currentPage) || Number.isNaN(totalPages);
 
 			decDisabled = currentPage === 1 || INVALID_PAGES;
@@ -504,7 +504,7 @@ export default class GuildCommand extends SlashCommand {
 			new MessageActionRow()
 				.addComponents(
 					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:1:${DOUBLE_LEFT_EMOJI}`)
+						.setCustomId(`${CUSTOM_ID}:${isParsedPages ? 0 : 1}:${DOUBLE_LEFT_EMOJI}`)
 						.setEmoji(DOUBLE_LEFT_EMOJI)
 						.setStyle(Constants.MessageButtonStyles.PRIMARY)
 						.setDisabled(decDisabled),
