@@ -504,7 +504,7 @@ export default class GuildCommand extends SlashCommand {
 			new MessageActionRow()
 				.addComponents(
 					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${isParsedPages ? 0 : 1}:${DOUBLE_LEFT_EMOJI}`)
+						.setCustomId(`${CUSTOM_ID}:${isParsedPages ? 1 : 0}:${DOUBLE_LEFT_EMOJI}`)
 						.setEmoji(DOUBLE_LEFT_EMOJI)
 						.setStyle(Constants.MessageButtonStyles.PRIMARY)
 						.setDisabled(decDisabled),
