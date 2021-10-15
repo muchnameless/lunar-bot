@@ -10,7 +10,7 @@ import { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
 import { InteractionUtil, UserUtil } from '../../util';
 import { autocorrect, getIdFromString, logger, removeMcFormatting, seconds, stringToMS, trim } from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
-import type { ButtonInteraction, CommandInteraction, Interaction } from 'discord.js';
+import type { ButtonInteraction, CommandInteraction, Interaction, Snowflake } from 'discord.js';
 import type { SlashCommandStringOption } from '@discordjs/builders';
 import type { WhereOptions } from 'sequelize';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -476,11 +476,12 @@ export default class GuildCommand extends SlashCommand {
 
 	/**
 	 * @param hypixelGuildId
+	 * @param userId
 	 * @param currentPage
 	 * @param totalPages
 	 */
-	#getPaginationButtons(subcommand: string, hypixelGuildId: string, currentPage: number, totalPages: number, isParsedPages: boolean) {
-		const CUSTOM_ID = `${this.baseCustomId}:${subcommand}:${hypixelGuildId}` as const;
+	#getPaginationButtons(subcommand: string, hypixelGuildId: string, userId: Snowflake, currentPage: number, totalPages: number, isParsedPages: boolean) {
+		const CUSTOM_ID = `${this.baseCustomId}:${subcommand}:${hypixelGuildId}:${userId}` as const;
 
 		let currentPage_ = currentPage;
 		let totalPages_ = totalPages;
@@ -536,9 +537,10 @@ export default class GuildCommand extends SlashCommand {
 	 * @param subcommand
 	 * @param baseCommand
 	 * @param hypixelGuild
+	 * @param userId
 	 * @param page
 	 */
-	async #runPaginated(interaction: CommandInteraction | ButtonInteraction, subcommand: string, commandOptions: CommandOptions, hypixelGuild: HypixelGuild, page: number | null) {
+	async #runPaginated(interaction: CommandInteraction | ButtonInteraction, subcommand: string, commandOptions: CommandOptions, hypixelGuild: HypixelGuild, userId: Snowflake, page: number | null) {
 		const command = `${commandOptions.command} ${page ?? ''}`.trimEnd();
 		const response = await hypixelGuild.chatBridge.minecraft.command({
 			...commandOptions,
@@ -546,7 +548,7 @@ export default class GuildCommand extends SlashCommand {
 		});
 		const pageMatched = response.match(/\(Page (?<current>\d+) ?(?:of|\/) ?(?<total>\d+)\)/);
 
-		return InteractionUtil[interaction.isApplicationCommand() ? 'reply' : 'update'](interaction as ButtonInteraction, {
+		return InteractionUtil[interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'](interaction as ButtonInteraction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${command}`)
@@ -555,6 +557,7 @@ export default class GuildCommand extends SlashCommand {
 			components: this.#getPaginationButtons(
 				subcommand,
 				hypixelGuild.guildId,
+				userId,
 				Number(pageMatched?.groups!.current ?? page),
 				Number(pageMatched?.groups!.total),
 				pageMatched !== null,
@@ -568,7 +571,7 @@ export default class GuildCommand extends SlashCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override async runButton(interaction: ButtonInteraction, args: string[]) {
-		const [ SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, PAGE_INPUT ] = args;
+		const [ SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, USER_ID, PAGE_INPUT ] = args;
 		const [ SUBCOMMAND ] = SUBCOMMAND_WITH_ARGS.split(' ', 1);
 
 		await this.#checkRequiredRoles(interaction, SUBCOMMAND);
@@ -588,6 +591,7 @@ export default class GuildCommand extends SlashCommand {
 						abortRegExp: historyErrors(),
 					},
 					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
+					USER_ID,
 					PAGE,
 				);
 
@@ -600,6 +604,7 @@ export default class GuildCommand extends SlashCommand {
 						abortRegExp: logErrors(),
 					},
 					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
+					USER_ID,
 					PAGE,
 				);
 
@@ -612,6 +617,7 @@ export default class GuildCommand extends SlashCommand {
 						abortRegExp: topErrors(),
 					},
 					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
+					USER_ID,
 					PAGE,
 				);
 
@@ -689,6 +695,7 @@ export default class GuildCommand extends SlashCommand {
 						abortRegExp: historyErrors(),
 					},
 					InteractionUtil.getHypixelGuild(interaction),
+					interaction.user.id,
 					interaction.options.getInteger('page'),
 				);
 
@@ -708,6 +715,7 @@ export default class GuildCommand extends SlashCommand {
 						abortRegExp: topErrors(),
 					},
 					InteractionUtil.getHypixelGuild(interaction),
+					interaction.user.id,
 					interaction.options.getInteger('days_ago'),
 				);
 
@@ -738,6 +746,7 @@ export default class GuildCommand extends SlashCommand {
 						abortRegExp: logErrors(),
 					},
 					InteractionUtil.getHypixelGuild(interaction),
+					interaction.user.id,
 					interaction.options.getInteger('page'),
 
 				);
