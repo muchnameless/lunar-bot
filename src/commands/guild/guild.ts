@@ -462,7 +462,8 @@ export default class GuildCommand extends SlashCommand {
 										msg.formattedContent
 											.replaceAll('§r§c ●', ' 🔴') // prettify emojis
 											.replaceAll('§r§a ●', ' 🟢')
-											.replace(/\[.+?] /g, ''), // remove hypixel ranks (helps with staying inside the character limit)
+											.replace(/\[.+?] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
+											.trim(),
 									)
 									: msg.content),
 								)
