@@ -349,10 +349,10 @@ export async function randomNumber(minimum: number, maximum: number) {
 	 */
 	while (range_ > 0) {
 		if (bitsNeeded % 8 === 0) {
-			bytesNeeded += 1;
+			++bytesNeeded;
 		}
 
-		bitsNeeded += 1;
+		++bitsNeeded;
 		mask = (mask << 1) | 1; /* 0x00001111 -> 0x00011111 */
 		range_ = range_ >>> 1; /* 0x01000000 -> 0x00100000 */
 	}
