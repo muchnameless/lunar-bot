@@ -13,7 +13,7 @@ export const imgur = new ImgurClient(process.env.IMGUR_CLIENT_ID!, {
 			return cache.get(`${IMGUR_KEY}:${key}`);
 		},
 		set(key, value) {
-			return cache.set(`${IMGUR_KEY}:${key}`, value, hours(3));
+			return cache.set(`${IMGUR_KEY}:${key}`, value, hours(24));
 		},
 	},
 });
