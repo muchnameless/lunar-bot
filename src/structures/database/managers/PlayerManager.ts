@@ -210,7 +210,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * sort players alphabetically by IGNs
 	 */
 	sortAlphabetically() {
-		this.cache.sort((a, b) => compareAlphabetically(a.ign, b.ign));
+		this.cache.sort(({ ign: a }, { ign: b }) => compareAlphabetically(a, b));
 		return this;
 	}
 
@@ -348,7 +348,7 @@ export class PlayerManager extends ModelManager<Player> {
 			return embed;
 		};
 
-		for (const { guildName, playerCount, ignChanges } of log.sort((a, b) => compareAlphabetically(a.guildName, b.guildName)).values()) {
+		for (const { guildName, playerCount, ignChanges } of log.sort(({ guildName: a }, { guildName: b }) => compareAlphabetically(a, b)).values()) {
 			const logParts = Util.splitMessage(
 				Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')),
 				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' },
@@ -445,9 +445,9 @@ export class PlayerManager extends ModelManager<Player> {
 		const embeds: MessageEmbed[] = [];
 
 		/**
-			 * @param guild
-			 * @param mainProfileChangesAmount
-			 */
+		 * @param guild
+		 * @param mainProfileChangesAmount
+		 */
 		const createEmbed = (guild: HypixelGuild, mainProfileChangesAmount: number) => {
 			const embed = new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_RED'))
@@ -460,7 +460,7 @@ export class PlayerManager extends ModelManager<Player> {
 			return embed;
 		};
 
-		for (const [ guild, mainProfileUpdate ] of log.sort((_, __, a, b) => compareAlphabetically(a?.name, b?.name))) {
+		for (const [ guild, mainProfileUpdate ] of log.sort((_, __, { name: a }, { name: b }) => compareAlphabetically(a, b))) {
 			const logParts = Util.splitMessage(
 				Formatters.codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')),
 				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' },

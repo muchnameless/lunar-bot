@@ -306,8 +306,8 @@ export class DatabaseManager {
 		}
 
 		return availableAuctionsLog
-			.sort((a, b) => compareAlphabetically(a.ign, b.ign)) // alphabetically
-			.sort((a, b) => Number(b.auctions) - Number(a.auctions)) // number of auctions
+			.sort(({ ign: a }, { ign: b }) => compareAlphabetically(a, b)) // alphabetically
+			.sort(({ auctions: a }, { auctions: b }) => Number(b) - Number(a)) // number of auctions
 			.map(({ ign, auctions }) => `\u200B > ${ign}: ${auctions}`);
 	}
 

@@ -40,7 +40,7 @@ export default class BaseWeightCommand extends DualCommand {
 			if (!profileName) {
 				[ weightData ] = profiles
 					.map(({ cute_name: name, members }) => ({ name, ...this.getWeight(members[uuid]) }))
-					.sort(({ totalWeight: aTotal }, { totalWeight: bTotal }) => bTotal - aTotal);
+					.sort(({ totalWeight: a }, { totalWeight: b }) => b - a);
 			} else {
 				const profile = profiles.find(({ cute_name: name }) => name === profileName);
 

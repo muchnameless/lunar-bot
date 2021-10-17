@@ -333,7 +333,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 					logger.info(newRank, `[UPDATE GUILD]: ${this.name}: new rank`);
 					this.ranks.push(newRank);
-					this.ranks.sort((a, b) => b.priority - a.priority);
+					this.ranks.sort(({ priority: a }, { priority: b }) => b - a);
 					this.changed('ranks', true);
 				} else if (dbEntryRank.name !== name) {
 					logger.info(`[UPDATE GUILD]: ${this.name}: rank name changed: '${dbEntryRank.name}' -> '${name}'`);
@@ -651,7 +651,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				});
 			}
 
-			nonStaffWithWeight.sort((a, b) => a.weight - b.weight);
+			nonStaffWithWeight.sort(({ weight: a }, { weight: b }) => a - b);
 
 			// abort if a player's weight is 0 -> most likely an API error
 			if (!nonStaffWithWeight[0]?.weight) {
@@ -678,7 +678,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						positionReq,
 					};
 				})
-				.sort((a, b) => b.positionReq - a.positionReq);
+				.sort(({ positionReq: a }, { positionReq: b }) => b - a);
 
 			// no ranks with a positionReq
 			if (!automatedRanks.length) return this;

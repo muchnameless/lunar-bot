@@ -140,7 +140,7 @@ export default class JoinDateCommand extends DualCommand {
 
 			return InteractionUtil.reply(interaction, {
 				content: `${Formatters.bold(hypixelGuild.name)} join dates:\n${joinInfos
-					.sort((a, b) => a.timestamp - b.timestamp)
+					.sort(({ timestamp: a }, { timestamp: b }) => a - b)
 					.map(({ ign, date, timestamp }) => `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`)
 					.join('\n')}`,
 				split: true,

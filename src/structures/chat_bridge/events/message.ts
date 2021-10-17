@@ -55,7 +55,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					MessageUtil.react(
 						channel?.messages.cache
 							.filter(({ content, author: { id } }) => (senderDiscordId ? id === senderDiscordId : true) && this.chatBridge.minecraft.parseContent(content).includes(blockedContent))
-							.sort(({ createdTimestamp: createdTimestampA }, { createdTimestamp: createdTimestampB }) => createdTimestampB - createdTimestampA)
+							.sort(({ createdTimestamp: a }, { createdTimestamp: b }) => b - a)
 							.first() ?? null,
 						STOP_EMOJI,
 					);

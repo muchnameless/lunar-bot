@@ -61,7 +61,7 @@ export default class DebugCommand extends SlashCommand {
 							Messages: ${this.client.formatNumber(this.client.channels.cache.reduce((acc, channel) => acc + ((channel as TextBasedChannels).messages?.cache.size ?? 0), 0))}
 							${(this.client.channels.cache
 								.filter(c => Boolean((c as TextBasedChannels).messages?.cache.size)) as Collection<Snowflake, TextBasedChannels>)
-								.sort((a, b) => b.messages.cache.size - a.messages.cache.size)
+								.sort(({ messages: { cache: { size: a } } }, { messages: { cache: { size: b } } }) => b - a)
 								.map(c => Formatters.quote(`${c.type !== 'DM' ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${this.client.formatNumber(c.messages.cache.size)}`))
 								.join('\n')}
 							HypixelGuilds: ${this.client.formatNumber(this.client.hypixelGuilds.cache.size)}

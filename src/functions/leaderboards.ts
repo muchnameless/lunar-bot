@@ -530,13 +530,11 @@ function getLeaderboardDataCreater(lbType: string) {
  * @param hypixelGuild
  * @param dataConverter
  */
-function getPlayerData(client: LunarClient, hypixelGuild: HypixelGuild | typeof GUILD_ID_ALL, dataConverter: DataConverter) {
-	if (hypixelGuild !== GUILD_ID_ALL) {
-		return hypixelGuild.players.map(dataConverter).sort((a, b) => b.sortingStat - a.sortingStat);
-	}
-
-	return client.players.inGuild.map(dataConverter).sort((a, b) => b.sortingStat - a.sortingStat);
-}
+const getPlayerData = (client: LunarClient, hypixelGuild: HypixelGuild | typeof GUILD_ID_ALL, dataConverter: DataConverter) => (
+	hypixelGuild !== GUILD_ID_ALL
+		? hypixelGuild.players
+		: client.players.inGuild
+).map(dataConverter).sort(({ sortingStat: a }, { sortingStat: b }) => b - a);
 
 /**
  * create gained leaderboard data
@@ -626,8 +624,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				};
 			};
 			playerData = getPlayerData(client, hypixelGuild, dataConverter)
-				.sort((a, b) => a.totalWeight! - b.totalWeight!)
-				.sort((a, b) => a.sortingStat - b.sortingStat);
+				.sort(({ totalWeight: a }, { totalWeight: b }) => a! - b!)
+				.sort(({ sortingStat: a }, { sortingStat: b }) => a - b);
 			const temp1 = Math.floor(playerData.at(-1)!.sortingStat).toLocaleString(NUMBER_FORMAT).length;
 			const temp2 = Math.floor(Math.max(...playerData.map(({ gainedGuildXp }) => gainedGuildXp!))).toLocaleString(NUMBER_FORMAT).length;
 			const PADDING_AMOUNT_GAIN = Math.floor(Math.max(...playerData.map(({ gainedWeight }) => gainedWeight!))).toLocaleString(NUMBER_FORMAT).length;

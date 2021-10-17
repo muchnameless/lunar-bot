@@ -875,7 +875,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 						// filter out non-automated ranks
 						.filter(({ currentWeightReq }) => currentWeightReq != null)
 						// sort descendingly by weight req
-						.sort((a, b) => b.currentWeightReq! - a.currentWeightReq!)
+						.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
 						// find first rank that the player is eligable for
 						.find(({ currentWeightReq }) => weight >= currentWeightReq!)
 						?.priority

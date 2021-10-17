@@ -38,7 +38,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	override async loadCache(condition?: FindOptions) {
 		await super.loadCache(condition);
 
-		this.cache.sort((a, b) => compareAlphabetically(a.name, b.name));
+		this.cache.sort(({ name: a }, { name: b }) => compareAlphabetically(a, b));
 		return this;
 	}
 

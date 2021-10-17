@@ -43,7 +43,7 @@ export default class AhCommand extends SlashCommand {
 		try {
 			const auctions = (await hypixel.skyblock.auction.profile(profileId))
 				.filter(({ claimed }) => !claimed)
-				.sort((a, b) => a.end - b.end);
+				.sort(({ end: a }, { end: b }) => a - b);
 
 			if (!auctions.length) {
 				return {

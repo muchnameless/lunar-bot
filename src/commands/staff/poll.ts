@@ -114,7 +114,7 @@ export default class PollCommand extends DualCommand {
 			// count votes and sort options by them
 			const result = pollOptions
 				.map(({ votes, ...rest }) => ({ votes: votes.size, ...rest }))
-				.sort(({ votes: votesA }, { votes: votesB }) => votesB - votesA);
+				.sort(({ votes: a }, { votes: b }) => b - a);
 			const TOTAL_VOTES = result.reduce((acc, { votes }) => acc + votes, 0);
 			const resultString = result.map(({ number, option, votes }) => `#${number}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
 
