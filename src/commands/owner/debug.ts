@@ -88,7 +88,11 @@ export default class DebugCommand extends SlashCommand {
 							bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
 							current index: ${cb.minecraft?._lastMessages.index ?? 'offline'}
 							Messages:
-							${cb.minecraft?._lastMessages.cache.map(x => Formatters.quote(Util.escapeMarkdown(x))).join('\n') ?? 'offline'}
+							${cb.minecraft?._lastMessages.cache
+								.filter(Boolean)
+								.map(x => Formatters.quote(Util.escapeMarkdown(x)))
+								.join('\n')
+								?? 'offline'}
 						`).join('\n\n'), EMBED_FIELD_MAX_CHARS) || 'disabled',
 					})
 					.setFooter(me?.displayName ?? this.client.user!.username, (me ?? this.client.user!).displayAvatarURL()),

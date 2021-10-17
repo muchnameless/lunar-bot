@@ -28,7 +28,7 @@ import type { MessageCollectorOptions } from '../MessageCollector';
 import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
 import type { If, Timeout } from '../../../types/util';
-import type { ChatOptions } from '../ChatBridge';
+import type { ChatBridge, ChatOptions } from '../ChatBridge';
 
 
 export interface SendToChatOptions {
@@ -185,6 +185,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			this.cache[this.index] = this._cleanContent(content);
 		},
 	};
+
+	constructor(chatBridge: ChatBridge) {
+		super(chatBridge);
+
+		for (let i = 0; i < this._lastMessages.MAX_INDEX; ++i) {
+			this._lastMessages.cache.push('');
+		}
+	}
 
 	/**
 	 * wether the minecraft bot is logged in and ready to receive and send chat messages
