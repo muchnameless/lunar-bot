@@ -84,7 +84,7 @@ export default class DebugCommand extends SlashCommand {
 						`,
 					}, {
 						name: 'Chat Bridge Cache',
-						value: trim(this.client.chatBridges.map(cb => stripIndents`
+						value: trim(this.client.chatBridges.cache.map(cb => stripIndents`
 							bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
 							current index: ${cb.minecraft?._lastMessages.index ?? 'offline'}
 							Messages:

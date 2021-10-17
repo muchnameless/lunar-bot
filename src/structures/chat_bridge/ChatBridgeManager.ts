@@ -14,7 +14,7 @@ import type { BroadcastOptions, MessageForwardOptions } from './ChatBridge';
 import type { LunarClient } from '../LunarClient';
 
 
-export class ChatBridgeArray extends Array<ChatBridge> {
+export class ChatBridgeManager {
 	/**
 	 * the client that instantiated the ChatBridgeArray
 	 */
@@ -31,20 +31,18 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 * interaction cache
 	 */
 	interactionCache = new Map<Snowflake, CommandInteraction>();
+	/**
+	 * individual chat bridges
+	 */
+	cache: ChatBridge[] = [];
 
 	constructor(client: LunarClient) {
-		super(ChatBridgeArray.#accounts.length);
+		for (let i = 0; i < ChatBridgeManager.#accounts.length; ++i) {
+			this.cache.push(new ChatBridge(client, i));
+		}
 
 		this.client = client;
 		this.commands = new BridgeCommandCollection(client, new URL('./commands', import.meta.url));
-	}
-
-	/**
-	 * built-in methods will use this as the constructor
-	 * that way <ChatBridgeArray>.map returns a standard Array
-	 */
-	static override get [Symbol.species]() {
-		return Array;
 	}
 
 	/**
@@ -70,23 +68,6 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	}
 
 	/**
-	 * instantiates all chatBridges
-	 */
-	#init() {
-		return Array.from({ length: ChatBridgeArray.#accounts.length })
-			.map((_, index) => this.#initSingle(index));
-	}
-
-	/**
-	 * instantiates a single chatBridge
-	 * @param index
-	 */
-	#initSingle(index: number) {
-		if (!(this[index] instanceof ChatBridge)) this[index] = new ChatBridge(this.client, index);
-		return this[index];
-	}
-
-	/**
 	 * connects a single or all bridges, instantiating them first if not already done
 	 * @param index
 	 */
@@ -95,8 +76,8 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 		await this.commands.loadAll();
 
 		// single
-		if (typeof index === 'number' && index >= 0 && index < ChatBridgeArray.#accounts.length) {
-			const chatBridge = this.#initSingle(index);
+		if (typeof index === 'number' && index >= 0 && index < ChatBridgeManager.#accounts.length) {
+			const chatBridge = this.cache[index];
 
 			chatBridge.connect();
 			await once(chatBridge, ChatBridgeEvents.READY);
@@ -105,7 +86,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 		}
 
 		// all
-		await Promise.all(this.#init().map((chatBridge) => {
+		await Promise.all(this.cache.map((chatBridge) => {
 			chatBridge.connect();
 			return once(chatBridge, ChatBridgeEvents.READY);
 		}));
@@ -122,12 +103,11 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	disconnect(index?: number) {
 		// single
 		if (typeof index === 'number') {
-			if (!(this[index] instanceof ChatBridge)) throw new Error(`no chatBridge with index #${index}`);
-			return this[index].disconnect();
+			return this.cache[index]?.disconnect() ?? (() => { throw new Error(`no chatBridge with index #${index}`); })();
 		}
 
 		// all
-		return this.map(chatBridge => chatBridge.disconnect());
+		return this.cache.map(chatBridge => chatBridge.disconnect());
 	}
 
 	/**
@@ -135,7 +115,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 * @param contentOrOptions
 	 */
 	broadcast(contentOrOptions: string | BroadcastOptions) {
-		return Promise.all(this.map(chatBridge => chatBridge.broadcast(contentOrOptions)));
+		return Promise.all(this.cache.map(chatBridge => chatBridge.broadcast(contentOrOptions)));
 	}
 
 	/**
@@ -143,7 +123,7 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 	 * @param message
 	 */
 	async handleAnnouncementMessage(message: Message) {
-		if (!this.length) return MessageUtil.react(message, X_EMOJI);
+		if (!this.cache.length) return MessageUtil.react(message, X_EMOJI);
 		if (!message.content) return MessageUtil.react(message, STOP_EMOJI);
 
 		try {
@@ -187,11 +167,11 @@ export class ChatBridgeArray extends Array<ChatBridge> {
 
 		try {
 			// a ChatBridge for the message's channel was found
-			if (this.reduce((acc, chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
+			if (this.cache.reduce((acc, chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
 
 			// check if the message was sent from the bot, don't react with X_EMOJI in this case
 			if (message.webhookId
-				&& this.reduce((acc, chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
+				&& this.cache.reduce((acc, chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
 			) return; // message was sent by one of the ChatBridges's webhook
 
 			// no ChatBridge for the message's channel found

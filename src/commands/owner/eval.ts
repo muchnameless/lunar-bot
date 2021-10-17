@@ -110,7 +110,7 @@ export default class EvalCommand extends SlashCommand {
 		const me = (guild ?? lgGuild)?.me ?? null;
 		const player = UserUtil.getPlayer(user);
 		const p = player;
-		const [ bridge ] = client.chatBridges;
+		const [ bridge ] = client.chatBridges.cache;
 		const reply = (options: string | InteractionUtilReplyOptions) => InteractionUtil.reply(interaction,
 			typeof options === 'string'
 				? { content: options, ephemeral: false }
