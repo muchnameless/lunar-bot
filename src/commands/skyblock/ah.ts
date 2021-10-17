@@ -170,7 +170,15 @@ export default class AhCommand extends SlashCommand {
 		try {
 			const [ uuid, ign, userId ] = args;
 			const [ profileId ] = interaction.values;
-			const profiles = (interaction.message.components![0].components[0] as unknown as APISelectMenuComponent).options;
+			const profiles = (interaction.message.components?.[0].components[0] as unknown as APISelectMenuComponent).options;
+
+			if (!profiles) {
+				await InteractionUtil.update(interaction, { components: [] });
+				return InteractionUtil.reply(interaction, {
+					content: 'an error occurred',
+					ephemeral: true,
+				});
+			}
 
 			// interaction from original requester -> edit message
 			if (interaction.user.id === userId) {
