@@ -12,7 +12,8 @@
 	},
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
-		"ecmaVersion": "latest"
+		"ecmaVersion": "latest",
+		"project": [ "./tsconfig.json" ]
 	},
 	"plugins": [
 		"@typescript-eslint",
@@ -24,6 +25,7 @@
 		"@typescript-eslint/consistent-type-imports": "error",
 		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/no-dupe-class-members": "error",
+		"@typescript-eslint/no-floating-promises": "warn",
 		"@typescript-eslint/no-non-null-asserted-optional-chain": "off",
 		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/no-shadow": "error",
