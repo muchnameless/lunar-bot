@@ -39,54 +39,55 @@ export default class GuildMemberUtil extends null {
 	 * @param member
 	 */
 	static getRolesToPurge(member: GuildMember) {
+		const { cache: roleCache } = member.roles;
 		const { config,	hypixelGuilds } = member.client as LunarClient;
 		const rolesToRemove: Snowflake[] = [];
 
 		// guild
 		for (const { roleId, ranks } of hypixelGuilds.cache.values()) {
-			if (roleId && member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
+			if (roleId && roleCache.has(roleId)) rolesToRemove.push(roleId);
 
 			for (const { roleId: rankRoleId } of ranks) {
-				if (rankRoleId && member.roles.cache.has(rankRoleId)) rolesToRemove.push(rankRoleId);
+				if (rankRoleId && roleCache.has(rankRoleId)) rolesToRemove.push(rankRoleId);
 			}
 		}
 
 		for (const role of [ 'GUILD_ROLE_ID', 'WHALECUM_PASS_ROLE_ID', 'INACTIVE_ROLE_ID' ] as const) {
-			if (member.roles.cache.has(config.get(role))) rolesToRemove.push(config.get(role));
+			if (roleCache.has(config.get(role))) rolesToRemove.push(config.get(role));
 		}
 
 		// delimiter
 		for (const type of DELIMITER_ROLES) {
-			if (member.roles.cache.has(config.get(`${type}_DELIMITER_ROLE_ID`))) rolesToRemove.push(config.get(`${type}_DELIMITER_ROLE_ID`));
+			if (roleCache.has(config.get(`${type}_DELIMITER_ROLE_ID`))) rolesToRemove.push(config.get(`${type}_DELIMITER_ROLE_ID`));
 		}
 
 		// skill average
 		for (const level of SKILL_AVERAGE_ROLES) {
-			if (member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
+			if (roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 		}
 
 		// individual skills
 		for (const skill of SKILLS) {
 			for (const level of SKILL_ROLES) {
-				if (member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
+				if (roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
 			}
 		}
 
 		// total slayer
 		for (const level of SLAYER_TOTAL_ROLES) {
-			if (member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
+			if (roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 		}
 
 		// individual slayer
 		for (const slayer of SLAYERS) {
 			for (const level of SLAYER_ROLES) {
-				if (member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
+				if (roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
 			}
 		}
 
 		// catacombs
 		for (const level of CATACOMBS_ROLES) {
-			if (member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
+			if (roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 		}
 
 		return rolesToRemove;

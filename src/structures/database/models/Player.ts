@@ -852,6 +852,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (!member) return;
 
+		const { roles: roleManager } = member;
+		const { cache: roleCache } = roleManager;
 		const { config } = this.client;
 		const rolesToAdd: Snowflake[] = [];
 		const rolesToRemove: Snowflake[] = [];
@@ -865,7 +867,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			// player is in the guild
 			if (guildId === this.guildId) {
 				// guild role
-				if (guildRoleId && !member.roles.cache.has(guildRoleId)) rolesToAdd.push(guildRoleId);
+				if (guildRoleId && !roleCache.has(guildRoleId)) rolesToAdd.push(guildRoleId);
 
 				// rank roles
 				const CURRENT_PRIORITY = this.isStaff
@@ -883,11 +885,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					if (!roleId) continue;
 
 					if (priority !== CURRENT_PRIORITY) {
-						if (member.roles.cache.has(roleId)) {
+						if (roleCache.has(roleId)) {
 							rolesToRemove.push(roleId);
 							reason = 'synced with in game rank';
 						}
-					} else if (!member.roles.cache.has(roleId)) {
+					} else if (!roleCache.has(roleId)) {
 						rolesToAdd.push(roleId);
 						reason = 'synced with in game rank';
 					}
@@ -899,35 +901,35 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			// player is not in the guild -> remove all roles
 			} else {
 				// guild role
-				if (guildRoleId && member.roles.cache.has(guildRoleId)) rolesToRemove.push(guildRoleId);
+				if (guildRoleId && roleCache.has(guildRoleId)) rolesToRemove.push(guildRoleId);
 
 				// rank roles
 				for (const { roleId } of ranks) {
-					if (roleId && member.roles.cache.has(roleId)) rolesToRemove.push(roleId);
+					if (roleId && roleCache.has(roleId)) rolesToRemove.push(roleId);
 				}
 			}
 		}
 
 		// player is not in a guild from <LunarClient>.hypixelGuilds
 		if (!inGuild) {
-			if (member.roles.cache.has(config.get('GUILD_ROLE_ID'))) rolesToRemove.push(config.get('GUILD_ROLE_ID'));
+			if (roleCache.has(config.get('GUILD_ROLE_ID'))) rolesToRemove.push(config.get('GUILD_ROLE_ID'));
 			return this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason });
 		}
 
 		// combined guild roles
-		if (!member.roles.cache.has(config.get('GUILD_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_ROLE_ID'));
-		if (member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))) rolesToRemove.push(config.get('EX_GUILD_ROLE_ID'));
+		if (!roleCache.has(config.get('GUILD_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_ROLE_ID'));
+		if (roleCache.has(config.get('EX_GUILD_ROLE_ID'))) rolesToRemove.push(config.get('EX_GUILD_ROLE_ID'));
 
 		// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
-		if ((member.roles.color?.comparePositionTo(config.get('GUILD_DELIMITER_ROLE_ID') ?? member.guild.roles.highest) ?? -1) > 1) {
-			if (!member.roles.cache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_DELIMITER_ROLE_ID'));
-		} else if (member.roles.cache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) {
+		if ((roleManager.highest?.comparePositionTo(config.get('GUILD_DELIMITER_ROLE_ID') ?? member.guild.roles.highest) ?? -1) > 1) {
+			if (!roleCache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_DELIMITER_ROLE_ID'));
+		} else if (roleCache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) {
 			rolesToRemove.push(config.get('GUILD_DELIMITER_ROLE_ID'));
 		}
 
 		// other delimiter roles
 		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
-			if (!member.roles.cache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`))) rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`));
+			if (!roleCache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`))) rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`));
 		}
 
 		// skills
@@ -939,8 +941,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				// individual skills
 				for (const level of SKILL_ROLES) {
 					if (level === CURRENT_LEVEL_MILESTONE) {
-						if (!member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
-					} else if (member.roles.cache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
+						if (!roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
+					} else if (roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
 						rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
 					}
 				}
@@ -954,8 +956,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		for (const level of SKILL_AVERAGE_ROLES) {
 			if (level === currentLvlMilestone) {
-				if (!member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
-			} else if (member.roles.cache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
+				if (!roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
+			} else if (roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 			}
 		}
@@ -967,8 +969,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			// individual slayer
 			for (const level of SLAYER_ROLES) {
 				if (level === SLAYER_LVL) {
-					if (!member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
-				} else if (member.roles.cache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
+					if (!roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
+				} else if (roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
 					rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
 				}
 			}
@@ -979,8 +981,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		// total slayer
 		for (const level of SLAYER_TOTAL_ROLES) {
 			if (level === LOWEST_SLAYER_LVL) {
-				if (!member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
-			} else if (member.roles.cache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
+				if (!roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
+			} else if (roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 			}
 		}
@@ -990,23 +992,23 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		for (const level of CATACOMBS_ROLES) {
 			if (level === currentLvlMilestone) {
-				if (!member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
-			} else if (member.roles.cache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
+				if (!roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
+			} else if (roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 			}
 		}
 
 		// weight
 		if (weight >= config.get('WHALECUM_PASS_WEIGHT')) {
-			if (!member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToAdd.push(config.get('WHALECUM_PASS_ROLE_ID'));
-		} else if (member.roles.cache.has(config.get('WHALECUM_PASS_ROLE_ID'))) {
+			if (!roleCache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToAdd.push(config.get('WHALECUM_PASS_ROLE_ID'));
+		} else if (roleCache.has(config.get('WHALECUM_PASS_ROLE_ID'))) {
 			rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
 		}
 
 		// activity
 		if (Date.now() - this.lastActivityAt.getTime() > config.get('INACTIVE_ROLE_TIME')) {
-			if (!member.roles.cache.has(config.get('INACTIVE_ROLE_ID'))) rolesToAdd.push(config.get('INACTIVE_ROLE_ID'));
-		} else if (member.roles.cache.has(config.get('INACTIVE_ROLE_ID'))) {
+			if (!roleCache.has(config.get('INACTIVE_ROLE_ID'))) rolesToAdd.push(config.get('INACTIVE_ROLE_ID'));
+		} else if (roleCache.has(config.get('INACTIVE_ROLE_ID'))) {
 			rolesToRemove.push(config.get('INACTIVE_ROLE_ID'));
 		}
 
