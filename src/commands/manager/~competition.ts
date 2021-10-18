@@ -11,7 +11,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export class CompetitionCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('WIP'),
 			cooldown: seconds(1),

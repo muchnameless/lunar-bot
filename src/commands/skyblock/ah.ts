@@ -16,7 +16,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class AhCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('SkyBlock auctions')
 				.addStringOption(optionalIgnOption)

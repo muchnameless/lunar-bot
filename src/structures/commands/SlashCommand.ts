@@ -1,4 +1,5 @@
 import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
+import { ApplicationCommandType } from 'discord-api-types/v9';
 import { Constants } from 'discord.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError';
 import { ephemeralOption } from './commonOptions';
@@ -6,6 +7,7 @@ import { COMMAND_KEY } from '../../constants';
 import { logger } from '../../functions';
 import { BaseCommand } from './BaseCommand';
 import type {
+	ContextMenuCommandBuilder,
 	SlashCommandBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 	SlashCommandOptionsOnlyBuilder,
@@ -13,6 +15,11 @@ import type {
 	SlashCommandNumberOption,
 	SlashCommandStringOption,
 } from '@discordjs/builders';
+import type {
+	RESTPostAPIApplicationCommandsJSONBody,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	RESTPostAPIContextMenuApplicationCommandsJSONBody,
+} from 'discord-api-types/v9';
 import type {
 	ButtonInteraction,
 	CommandInteraction,
@@ -36,49 +43,99 @@ type WithChoices = SlashCommandIntegerOption | SlashCommandNumberOption | SlashC
 
 export interface SlashCommandData extends CommandData {
 	aliases?: string[];
-	slash: Slash;
+	slash?: Slash;
+	message?: ContextMenuCommandBuilder;
+	user?: ContextMenuCommandBuilder;
 }
 
 
 export class SlashCommand extends BaseCommand {
-	slash: Slash;
+	slash: RESTPostAPIChatInputApplicationCommandsJSONBody | null = null;
+	message: RESTPostAPIContextMenuApplicationCommandsJSONBody | null = null;
+	user: RESTPostAPIContextMenuApplicationCommandsJSONBody | null = null;
+	slashAliases: string[] | null = null;
 
 	/**
 	 * create a new command
 	 * @param context
 	 * @param data
 	 */
-	constructor(context: CommandContext, { aliases, slash, ...data }: SlashCommandData) {
+	constructor(context: CommandContext, { aliases, slash, message, user, ...data }: SlashCommandData) {
 		super(context, data);
 
-		this.aliases = aliases?.filter(Boolean).length
-			? aliases.flatMap(alias => (!alias ? [] : alias.toLowerCase()))
-			: null;
-		this.slash = slash;
-
 		/**
-		 * complete slash command data
+		 * slash commands
 		 */
 
-		// add name (from context (file name))
-		this.slash.setName(this.name);
+		if (slash) {
+			if (aliases) {
+				this.aliases ??= [];
+				this.aliases.push(...aliases);
 
-		// add ephemeral option to every (sub)command(group)
-		if ((this.slash as SlashCommandBuilder).options.length) {
-			for (const option of (this.slash as SlashCommandBuilder).options) {
-				if (option instanceof SlashCommandSubcommandGroupBuilder) {
-					for (const subcommand of option.options) {
-						(subcommand as SlashCommandSubcommandBuilder).addStringOption(ephemeralOption);
-					}
-				} else if (option instanceof SlashCommandSubcommandBuilder) {
-					option.addStringOption(ephemeralOption);
-				} else { // no subcommand(group) -> only add one ephemeralOption
-					(this.slash as SlashCommandBuilder).addStringOption(ephemeralOption);
-					break;
-				}
+				this.slashAliases = aliases.filter(Boolean).length
+					? aliases.flatMap(alias => (!alias ? [] : alias.toLowerCase()))
+					: null;
 			}
-		} else {
-			(this.slash as SlashCommandBuilder).addStringOption(ephemeralOption);
+
+			if (!slash.name) {
+				slash.setName(this.name);
+			} else if (slash.name !== this.name) {
+				this.aliases ??= [];
+				this.aliases.push(slash.name);
+			}
+
+			// add ephemeral option to every (sub)command(group)
+			if ((slash as SlashCommandBuilder).options.length) {
+				for (const option of (slash as SlashCommandBuilder).options) {
+					if (option instanceof SlashCommandSubcommandGroupBuilder) {
+						for (const subcommand of option.options) {
+							(subcommand as SlashCommandSubcommandBuilder).addStringOption(ephemeralOption);
+						}
+					} else if (option instanceof SlashCommandSubcommandBuilder) {
+						option.addStringOption(ephemeralOption);
+					} else { // no subcommand(group) -> only add one ephemeralOption
+						(slash as SlashCommandBuilder).addStringOption(ephemeralOption);
+						break;
+					}
+				}
+			} else {
+				(slash as SlashCommandBuilder).addStringOption(ephemeralOption);
+			}
+
+			// @ts-expect-error
+			this.slash = slash.toJSON();
+		}
+
+		/**
+		 * context menu interactions
+		 */
+
+		if (message) {
+			if (!message.name) {
+				message.setName(this.name);
+			} else if (message.name !== this.name) {
+				this.aliases ??= [];
+				this.aliases.push(message.name);
+			}
+
+			message.setType(ApplicationCommandType.Message);
+
+			// @ts-expect-error
+			this.message = message.toJSON();
+		}
+
+		if (user) {
+			if (!user.name) {
+				user.setName(this.name);
+			} else if (user.name !== this.name) {
+				this.aliases ??= [];
+				this.aliases.push(user.name);
+			}
+
+			user.setType(ApplicationCommandType.User);
+
+			// @ts-expect-error
+			this.user = user.toJSON();
 		}
 	}
 
@@ -90,22 +147,38 @@ export class SlashCommand extends BaseCommand {
 	}
 
 	/**
-	 * data to send to the API
+	 * array of RESTPostAPIApplicationCommandsJSONBody containing all application commands
 	 */
 	get data() {
-		return this.slash.toJSON();
+		const data: RESTPostAPIApplicationCommandsJSONBody[] = [];
+
+		if (this.slash) {
+			data.push(this.slash);
+
+			if (this.slashAliases) {
+				for (const alias of this.slashAliases) {
+					data.push({ ...this.slash, name: alias });
+				}
+			}
+		}
+
+		if (this.message) data.push(this.message);
+		if (this.user) data.push(this.user);
+
+		return data;
 	}
 
 	/**
 	 * must not exceed 4k
 	 */
 	get dataLength() {
-		const { data } = this;
+		if (!this.slash) return null;
+
 		/**
 		 * recursively reduces options
 		 * @param options
 		 */
-		const reduceOptions = (options?: typeof data.options): number => options
+		const reduceOptions = (options?: typeof this.slash.options): number => options
 			?.reduce((a1, c1) => a1
 				+ c1.name.length
 				+ c1.description.length
@@ -117,9 +190,9 @@ export class SlashCommand extends BaseCommand {
 			0)
 			?? 0;
 
-		return data.name.length
-			+ data.description.length
-			+ reduceOptions(data.options);
+		return this.slash.name.length
+			+ this.slash.description.length
+			+ reduceOptions(this.slash.options);
 	}
 
 	/**

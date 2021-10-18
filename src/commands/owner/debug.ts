@@ -14,7 +14,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class DebugCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows general information about the bot'),
 			cooldown: 0,

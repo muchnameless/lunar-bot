@@ -14,7 +14,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class LinkCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('link a discord user to a minecraft ign')
 				.addStringOption(requiredIgnOption)

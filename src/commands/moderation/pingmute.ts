@@ -15,14 +15,12 @@ export default class PingMuteCommand extends DualCommand {
 	constructor(context: CommandContext, param1?: SlashCommandData, param2?: BridgeCommandData) {
 		super(context,
 			param1 ?? {
-				aliases: [],
 				slash: new SlashCommandBuilder()
 					.setDescription('prevent a guild member from @mentioning via the chat bridge')
 					.addStringOption(requiredPlayerOption),
 				cooldown: 0,
 			},
 			param2 ?? {
-				aliases: [],
 				args: 1,
 				usage: '[`IGN`|`UUID`|`discord ID`|`@mention`]',
 			},

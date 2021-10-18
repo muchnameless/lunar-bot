@@ -11,7 +11,6 @@ import type { FetchedData } from './~base-stats-command';
 export default class BridgeStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s Bridge stats')
 				.addStringOption(optionalIgnOption),

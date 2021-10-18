@@ -12,7 +12,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class MyCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('Hypixel friend commands for the Chat Bridge bot')
 				.addSubcommand(subcommand => subcommand

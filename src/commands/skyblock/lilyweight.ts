@@ -9,7 +9,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class LilyWeightCommand extends BaseWeightCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s lily weight: total, weight and overflow')
 				.addStringOption(optionalIgnOption)

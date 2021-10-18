@@ -9,7 +9,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class RanksCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('guild ranks and requirements')
 				.addStringOption(optionalPlayerOption)

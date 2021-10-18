@@ -14,7 +14,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class XpCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('check a player\'s xp gained')
 				.addStringOption(optionalPlayerOption)

@@ -37,7 +37,7 @@ export class DualCommand extends SlashCommand implements Omit<BridgeCommand, 'co
 	}
 
 	get description() {
-		return this.slash.description;
+		return this.slash?.description ?? null;
 	}
 
 	/**

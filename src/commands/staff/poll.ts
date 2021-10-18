@@ -43,11 +43,9 @@ export default class PollCommand extends DualCommand {
 			.addStringOption(buildGuildOption(context.client));
 
 		super(context, {
-			aliases: [],
 			slash,
 			cooldown: seconds(1),
 		}, {
-			aliases: [],
 			args: 1,
 			usage: '<30s <= `duration` <= 10m> [`"question" "choice_1" "choice_2"` ...]',
 		});

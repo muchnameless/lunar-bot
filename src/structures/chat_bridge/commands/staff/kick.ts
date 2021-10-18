@@ -8,7 +8,6 @@ import type GuildCommand from '../../../../commands/guild/guild';
 export default class KickBridgeCommand extends BridgeCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			description: 'kick a player from the guild',
 			args: 2,
 			usage: '[`IGN`] [`reason`]',

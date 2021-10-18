@@ -11,7 +11,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class PurgeListCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('guild members below requirements, sorted by total and gained weight')
 				.addIntegerOption(pageOption)

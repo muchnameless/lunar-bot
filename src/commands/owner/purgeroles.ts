@@ -11,7 +11,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class PurgeRolesCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('removes all roles that the bot manages from non guild members'),
 			cooldown: 0,

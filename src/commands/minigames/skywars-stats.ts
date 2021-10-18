@@ -24,7 +24,6 @@ interface SkyWarsStats {
 export default class SkyWarsStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s SkyWars stats')
 				.addStringOption(optionalIgnOption),

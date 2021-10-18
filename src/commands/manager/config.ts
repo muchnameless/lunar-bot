@@ -10,7 +10,6 @@ import type { Config } from '../../structures/database/models/Config';
 export default class ConfigCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('show and edit the bot\'s config')
 				.addSubcommand(subcommand => subcommand

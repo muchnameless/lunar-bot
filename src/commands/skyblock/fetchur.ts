@@ -11,7 +11,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class FetchurCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows the current fetchur item'),
 			cooldown: 0,

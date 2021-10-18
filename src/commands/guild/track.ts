@@ -16,7 +16,6 @@ type TrackingTypes = XPTypes | 'weight' | 'skill-average' | 'slayer';
 export default class TrackCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('stats graph from the last 30 days')
 				.addStringOption(optionalPlayerOption)

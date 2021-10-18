@@ -15,7 +15,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class VerifyCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('link your discord account to your minecraft account (guild members only)')
 				.addStringOption(requiredIgnOption),

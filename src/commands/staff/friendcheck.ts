@@ -15,7 +15,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class FriendCheckCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('checks which friends of the player are in the guild')
 				.addStringOption(requiredIgnOption),

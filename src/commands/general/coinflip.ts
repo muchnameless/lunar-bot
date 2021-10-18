@@ -10,7 +10,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class CoinFlipCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('heads, tails or ???'),
 			cooldown: 0,

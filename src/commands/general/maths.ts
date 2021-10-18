@@ -101,7 +101,6 @@ class Parser {
 export default class MathsCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('supports: + - * / ^ ! % sin cos tan sqrt exp ln log pi e')
 				.addStringOption(option => option

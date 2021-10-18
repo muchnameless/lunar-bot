@@ -10,7 +10,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class PingCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('check API latency and WebSocket ping'),
 			cooldown: seconds(1),

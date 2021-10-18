@@ -18,7 +18,6 @@ export type FetchedData = Awaited<ReturnType<PlayerStatsCommand['_fetchData']>>;
 export default class PlayerStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s hypixel stats')
 				.addStringOption(optionalIgnOption),

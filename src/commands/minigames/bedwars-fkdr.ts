@@ -9,7 +9,6 @@ import type { FetchedData } from './~base-stats-command';
 export default class BedWarsFkdrCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s BedWars fkdr')
 				.addStringOption(optionalIgnOption),

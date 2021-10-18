@@ -13,7 +13,6 @@ import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMes
 export default class GuildOfCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s current hypixel guild')
 				.addStringOption(requiredIgnOption),

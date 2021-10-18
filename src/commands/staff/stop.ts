@@ -8,7 +8,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class StopCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('stop the bot. It should restart immediatly'),
 			cooldown: 0,

@@ -17,7 +17,6 @@ interface IssueInfo {
 export default class LinkIssuesCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('list player db and discord role discrepancies'),
 			cooldown: 0,

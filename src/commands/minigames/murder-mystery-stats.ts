@@ -25,7 +25,6 @@ interface MurderMysteryStats {
 export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s MurderMystery stats')
 				.addStringOption(optionalIgnOption),

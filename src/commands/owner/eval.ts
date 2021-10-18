@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
 MessageEmbed; Util; // unused imports are 'used' so that tsc doesn't remove them
 import { setTimeout as sleep } from 'node:timers/promises';
@@ -40,7 +40,6 @@ const { logger, minutes, splitForEmbedFields } = functions;
 export default class EvalCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('executes js code')
 				.addStringOption(option => option
@@ -58,6 +57,8 @@ export default class EvalCommand extends SlashCommand {
 					.setDescription('wrap the code in an async IIFE')
 					.setRequired(false),
 				),
+			message: new ContextMenuCommandBuilder()
+				.setName('evaluate content'),
 			cooldown: 0,
 		});
 	}

@@ -14,7 +14,6 @@ import type { MaroPlayerData } from '../../structures/MaroClient';
 export default class NetworthCommand extends BaseWeightCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('shows a player\'s networth, provided by maro')
 				.addStringOption(optionalIgnOption)

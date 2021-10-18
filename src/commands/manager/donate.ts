@@ -11,7 +11,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class DonateCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('register a donation from a player')
 				.addStringOption(requiredPlayerOption)

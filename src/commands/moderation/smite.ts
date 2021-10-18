@@ -11,14 +11,12 @@ import type GuildCommand from '../guild/guild';
 export default class SmiteCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('guild mute for 10 minutes')
 				.addStringOption(targetOption)
 				.addStringOption(buildGuildOption(context.client)),
 			cooldown: 0,
 		}, {
-			aliases: [],
 			args: 1,
 			usage: '[`IGN`]',
 		});

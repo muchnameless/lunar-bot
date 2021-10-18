@@ -9,7 +9,6 @@ import type { Player } from '../../structures/database/models/Player';
 export default class PingUnmuteCommand extends PingMute {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('allow a guild member to @mention via the chat bridge')
 				.addStringOption(requiredPlayerOption),

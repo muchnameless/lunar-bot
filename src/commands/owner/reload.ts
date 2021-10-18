@@ -22,7 +22,6 @@ export default class ReloadCommand extends DualCommand {
 			.setRequired(false);
 
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('hot reload certain parts of the bot')
 				.addSubcommand(subcommand => subcommand
@@ -71,7 +70,6 @@ export default class ReloadCommand extends DualCommand {
 				),
 			cooldown: 0,
 		}, {
-			aliases: [],
 			args: true,
 			usage: '[`command` [command `name`]|`commands`|`event` [event `name`]|`events`|`database`|`cooldowns`]',
 		});

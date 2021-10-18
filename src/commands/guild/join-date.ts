@@ -23,7 +23,6 @@ interface JoinInfo {
 export default class JoinDateCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('guild member join date, parsed from `/g log ign`')
 				.addStringOption(optionalPlayerOption)

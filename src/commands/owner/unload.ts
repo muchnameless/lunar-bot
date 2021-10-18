@@ -9,7 +9,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class UnloadCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('unload a command or an event')
 				.addSubcommand(subcommand => subcommand
@@ -32,7 +31,6 @@ export default class UnloadCommand extends DualCommand {
 				),
 			cooldown: 0,
 		}, {
-			aliases: [],
 			args: true,
 			usage: '[`command` [command `name`]|`event` [event `name`]]',
 		});

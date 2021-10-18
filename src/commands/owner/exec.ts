@@ -12,7 +12,6 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class ExecCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('executes bash code')
 				.addStringOption(option => option

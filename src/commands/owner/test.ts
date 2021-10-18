@@ -7,7 +7,6 @@ import { SlashCommand } from '../../structures/commands/SlashCommand';
 export default class TestCommand extends SlashCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('generic test command')
 				.addStringOption(option => option
