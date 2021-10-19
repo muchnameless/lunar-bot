@@ -14,12 +14,13 @@ export default class UserUtil extends null {
 	 * @param user
 	 */
 	static getPlayer(user?: User) {
-		let player = this.PLAYER_CACHE.get(user!) ?? null;
+		const player = this.PLAYER_CACHE.get(user!) ?? null;
 		if (player || !user) return player;
 
-		player = (user.client as LunarClient).players.getById(user.id) ?? (user.client as LunarClient).players.getById(user.tag);
-		if (player) this.setPlayer(user, player);
-		return player;
+		return this.setPlayer(
+			user,
+			(user.client as LunarClient).players.getById(user.id) ?? (user.client as LunarClient).players.getById(user.tag),
+		);
 	}
 
 	/**
@@ -32,6 +33,8 @@ export default class UserUtil extends null {
 		} else {
 			this.PLAYER_CACHE.delete(user);
 		}
+
+		return player;
 	}
 
 	/**
@@ -39,12 +42,16 @@ export default class UserUtil extends null {
 	 * @param contentOrOptions
 	 */
 	static async sendDM(user: User, contentOrOptions: string | MessageOptions) {
-		if (user.bot) return logger.warn(`${user.tag} is a bot and can't be DMed`);
+		if (user.bot) {
+			logger.warn(`${user.tag} is a bot and can't be DMed`);
+			return null;
+		}
 
 		try {
 			return await user.send(contentOrOptions);
 		} catch (error) {
-			return logger.error(error);
+			logger.error(error);
+			return null;
 		}
 	}
 }
