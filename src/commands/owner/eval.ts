@@ -58,7 +58,7 @@ export default class EvalCommand extends SlashCommand {
 					.setRequired(false),
 				),
 			message: new ContextMenuCommandBuilder()
-				.setName('evaluate content'),
+				.setName('Evaluate content'),
 			cooldown: 0,
 		});
 	}
