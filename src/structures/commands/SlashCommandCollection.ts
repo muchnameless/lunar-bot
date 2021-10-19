@@ -29,12 +29,10 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 	 * @param commandManager
 	 */
 	async init(commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands) {
+		const uniqueCommands = [ ...new Set(this.values()) ];
 		const commands = await commandManager.set(
 			// @ts-expect-error
-			this
-				// eslint-disable-next-line unicorn/prefer-array-flat-map
-				.map(({ data }) => data)
-				.flat(),
+			uniqueCommands.flatMap(({ data }) => data),
 		);
 
 		await this.setAllPermissions(commands);
