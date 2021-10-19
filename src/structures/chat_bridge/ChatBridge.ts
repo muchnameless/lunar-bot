@@ -84,13 +84,6 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	}
 
 	/**
-	 * wether the minecraft bot and all discord channel managers (webhooks) are ready
-	 */
-	get ready() {
-		return this.minecraft.isReady() && this.discord.ready;
-	}
-
-	/**
 	 * bot ign | guild name
 	 */
 	get logInfo() {
@@ -109,6 +102,13 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 */
 	get bot() {
 		return this.minecraft.bot;
+	}
+
+	/**
+	 * wether the minecraft bot and all discord channel managers (webhooks) are ready
+	 */
+	isReady(): this is ChatBridge<true> {
+		return this.minecraft.isReady() && this.discord.ready;
 	}
 
 	/**
@@ -147,6 +147,12 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * @param guildName
 	 */
 	async link(guildName: string | null = null): Promise<this> {
+		if (!this.isReady()) {
+			await sleep(Math.min(++this.#guildLinkAttempts * seconds(5), minutes(5)));
+
+			return this.link(guildName);
+		}
+
 		try {
 			// link bot to db entry (create if non existant)
 			this.minecraft.botPlayer ??= await (async () => {
@@ -172,7 +178,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 			if (!hypixelGuild) {
 				this.unlink();
 
-				logger.error(`[CHATBRIDGE]: ${this.bot!.username}: no matching guild found`);
+				logger.error(`[CHATBRIDGE]: ${this.bot.username}: no matching guild found`);
 				return this;
 			}
 
@@ -185,7 +191,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 			hypixelGuild.chatBridge = this;
 			this.hypixelGuild = hypixelGuild;
 
-			logger.debug(`[CHATBRIDGE]: ${hypixelGuild}: linked to ${this.bot!.username}`);
+			logger.debug(`[CHATBRIDGE]: ${hypixelGuild}: linked to ${this.bot.username}`);
 
 			// instantiate DiscordChannelManagers
 			await this.discord.init();

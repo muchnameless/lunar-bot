@@ -251,7 +251,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			this.client.hypixelGuilds.getByName(guildName)?.updateData();
 
-			logger.info(`[CHATBRIDGE]: ${this.chatBridge.bot!.username}: joined ${guildName}`);
+			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: joined ${guildName}`);
 			return this.chatBridge.link(guildName);
 		}
 

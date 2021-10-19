@@ -1,6 +1,7 @@
 import { Collection } from 'discord.js';
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
+import { NEVER_MATCHING_REGEXP } from '../../../constants';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { HypixelUserMessage } from '../../chat_bridge/HypixelMessage';
 import type { LunarClient } from '../../LunarClient';
@@ -75,7 +76,7 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 		if (this._regExp) return this._regExp;
 
 		return new RegExp(
-			this.regExpString.replaceAll('{BOT_IGN}', hypixelMessage.chatBridge.bot!.username.replaceAll('_', '[_ ]?')),
+			this.regExpString.replaceAll('{BOT_IGN}', hypixelMessage.chatBridge.bot?.username.replaceAll('_', '[_ ]?') ?? NEVER_MATCHING_REGEXP),
 			'i',
 		);
 	}

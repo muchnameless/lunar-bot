@@ -1,7 +1,7 @@
 import { regExpEsc } from '@sapphire/utilities';
 import loader from 'prismarine-chat';
 import { INVISIBLE_CHARACTER_REGEXP, MC_CLIENT_VERSION, MESSAGE_POSITIONS, MESSAGE_TYPES, spamMessages } from './constants';
-import { NO_PING_EMOJI } from '../../constants';
+import { NEVER_MATCHING_REGEXP, NO_PING_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { MessageUtil } from '../../util';
 import { mojang } from '../../api/mojang';
@@ -111,7 +111,7 @@ export class HypixelMessage {
 							: null,
 					}
 					: {
-						ign: this.chatBridge.bot!.username,
+						ign: this.chatBridge.bot?.username ?? UNKNOWN_IGN,
 						guildRank: null,
 						uuid: this.chatBridge.minecraft.botUuid,
 					},
@@ -126,7 +126,10 @@ export class HypixelMessage {
 			}
 
 			const prefixMatched = new RegExp(
-				`^(?:${[ ...this.client.config.get('PREFIXES').map(x => regExpEsc(x)), `@${this.chatBridge.bot!.username}` ].join('|')})`,
+				`^(?:${[
+					...this.client.config.get('PREFIXES').map(x => regExpEsc(x)), // prefixes
+					`@${this.chatBridge.bot?.username ?? NEVER_MATCHING_REGEXP}`, // @Bot-IGN
+				].join('|')})`,
 				'i',
 			).exec(this.content)?.[0] ?? null; // PREFIXES, @mention
 

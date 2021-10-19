@@ -313,7 +313,7 @@ export default class GuildCommand extends SlashCommand {
 			const { chatBridge } = hypixelGuild;
 			const res = await chatBridge.minecraft.command({
 				command: `guild mute ${target} ${ms(duration)}`,
-				responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, chatBridge.bot!.username),
+				responseRegExp: mute(target === 'everyone' ? 'the guild chat' : `${target}`, chatBridge.bot.username),
 			});
 
 			return {
@@ -404,7 +404,7 @@ export default class GuildCommand extends SlashCommand {
 			const { chatBridge } = hypixelGuild;
 			const res = await chatBridge.minecraft.command({
 				command: `guild kick ${target} ${reason}`,
-				responseRegExp: kick.success(target.ign, chatBridge.bot!.username),
+				responseRegExp: kick.success(target.ign, chatBridge.bot.username),
 				abortRegExp: kick.error(target.ign),
 				rejectOnAbort: true,
 				timeout: seconds(60),
@@ -913,7 +913,7 @@ export default class GuildCommand extends SlashCommand {
 
 				return this.#run(interaction, {
 					command: `guild unmute ${target}`,
-					responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot!.username),
+					responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
 				}, hypixelGuild);
 			}
 
