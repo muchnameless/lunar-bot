@@ -6,7 +6,20 @@ import type { LunarClient } from '../structures/LunarClient';
 
 
 export default class ChannelUtil extends null {
-	static DM_PERMISSIONS = new Permissions();
+	static DM_PERMISSIONS = new Permissions()
+		.add([
+			Permissions.FLAGS.ADD_REACTIONS,
+			Permissions.FLAGS.VIEW_CHANNEL,
+			Permissions.FLAGS.SEND_MESSAGES,
+			Permissions.FLAGS.SEND_TTS_MESSAGES,
+			Permissions.FLAGS.EMBED_LINKS,
+			Permissions.FLAGS.ATTACH_FILES,
+			Permissions.FLAGS.READ_MESSAGE_HISTORY,
+			Permissions.FLAGS.MENTION_EVERYONE,
+			Permissions.FLAGS.USE_EXTERNAL_EMOJIS,
+		])
+		.freeze();
+
 	static DEFAULT_SEND_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
 
 	/**
@@ -128,17 +141,3 @@ export default class ChannelUtil extends null {
 		}
 	}
 }
-
-ChannelUtil.DM_PERMISSIONS
-	.add([
-		Permissions.FLAGS.ADD_REACTIONS,
-		Permissions.FLAGS.VIEW_CHANNEL,
-		Permissions.FLAGS.SEND_MESSAGES,
-		Permissions.FLAGS.SEND_TTS_MESSAGES,
-		Permissions.FLAGS.EMBED_LINKS,
-		Permissions.FLAGS.ATTACH_FILES,
-		Permissions.FLAGS.READ_MESSAGE_HISTORY,
-		Permissions.FLAGS.MENTION_EVERYONE,
-		Permissions.FLAGS.USE_EXTERNAL_EMOJIS,
-	])
-	.freeze();
