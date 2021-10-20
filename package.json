@@ -67,7 +67,7 @@
     "@types/ms": "^0.7.31",
     "@types/node": "^16.11.1",
     "@types/pg": "^8.6.1",
-    "@types/validator": "^13.6.3",
+    "@types/validator": "^13.6.4",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
     "discord-api-types": "^0.24.0",
@@ -76,7 +76,7 @@
     "eslint-plugin-unicorn": "^37.0.1",
     "pino-pretty": "^7.1.0",
     "rimraf": "^3.0.2",
-    "typescript": "^4.5.0-dev.20211019"
+    "typescript": "^4.5.0-dev.20211020"
   },
   "engines": {
     "node": ">=16.9.0",
