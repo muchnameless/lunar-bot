@@ -306,6 +306,8 @@ export default class InteractionUtil extends null {
 		const cached = this.CACHE.get(interaction)!;
 
 		try {
+			if (cached.deferReplyPromise) await cached.deferReplyPromise;
+
 			// replied
 			if (interaction.replied) return (await MessageUtil.edit(interaction.message as Message, options)) ?? await interaction.editReply(options as WebhookEditMessageOptions);
 
@@ -322,6 +324,36 @@ export default class InteractionUtil extends null {
 			logger.error(error);
 
 			if (this.isInteractionError(error)) return MessageUtil.edit(interaction.message as Message, options);
+		}
+	}
+
+	/**
+	 * deletes the message which the component is attached to
+	 * @param interaction
+	 */
+	static async deleteMessage(interaction: MessageComponentInteraction) {
+		const cached = this.CACHE.get(interaction)!;
+
+		// replied check
+		try {
+			if (cached.deferReplyPromise) await cached.deferReplyPromise;
+		} catch (error) {
+			logger.error(error);
+		}
+
+		// replied
+		if (interaction.replied) return MessageUtil.delete(interaction.message as Message);
+
+		try {
+			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
+
+			await interaction.update({});
+			await interaction.deleteReply();
+
+			return interaction.message as Message;
+		} catch (error) {
+			logger.error(error);
+			return interaction.message as Message;
 		}
 	}
 

@@ -26,6 +26,7 @@ maro;
 import { ChannelUtil, GuildMemberUtil, GuildUtil, InteractionUtil, LeaderboardUtil, MessageEmbedUtil, MessageUtil, UserUtil } from '../../util';
 GuildMemberUtil; GuildUtil;
 LeaderboardUtil; MessageEmbedUtil;
+MessageUtil;
 import * as functions from '../../functions';
 import { SlashCommand } from '../../structures/commands/SlashCommand';
 import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction, Message } from 'discord.js';
@@ -262,14 +263,8 @@ export default class EvalCommand extends SlashCommand {
 				}
 			}
 
-			case 'delete': {
-				await MessageUtil.delete(interaction.message as Message);
-
-				return InteractionUtil.reply(interaction, {
-					content: 'done',
-					ephemeral: true,
-				});
-			}
+			case 'delete':
+				return InteractionUtil.deleteMessage(interaction);
 
 			default:
 				throw new Error(`unknown subcommand '${subcommand}'`);
