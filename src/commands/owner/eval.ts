@@ -150,7 +150,7 @@ export default class EvalCommand extends SlashCommand {
 
 			stopwatch.stop();
 
-			const type = new Type(evaled);
+			const resultType = new Type(evaled);
 
 			if (evaled instanceof Promise) {
 				stopwatch.start();
@@ -159,7 +159,7 @@ export default class EvalCommand extends SlashCommand {
 			}
 
 			const OUTPUT_ARRAY = splitForEmbedFields(this.#cleanOutput(evaled, inspectDepth), 'ts');
-			const INFO = `d.js ${Discord.version} • type: \`${type}\` • time taken: \`${stopwatch}\``;
+			const INFO = `d.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``;
 
 			// add output fields till embed character limit is reached
 			for (const [ index, value ] of OUTPUT_ARRAY.entries()) {
