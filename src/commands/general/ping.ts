@@ -23,9 +23,10 @@ export default class PingCommand extends SlashCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		const sent = await InteractionUtil.deferReply(interaction, {
 			fetchReply: true,
+			rejectOnError: true,
 		});
 
-		if (sent) return InteractionUtil.reply(interaction, oneLine`
+		return InteractionUtil.reply(interaction, oneLine`
 			Roundtrip latency: ${sent.createdTimestamp - interaction.createdTimestamp} ms |
 			Average WebSocket Heartbeat: ${this.client.ws.ping} ms
 		`);

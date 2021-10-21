@@ -12,7 +12,7 @@ import {
 } from '../constants';
 import { GuildUtil, UserUtil } from '.';
 import { logger } from '../functions';
-import type { GuildMember, MessageOptions, Snowflake } from 'discord.js';
+import type { GuildMember, Message, MessageOptions, Snowflake } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { LunarClient } from '../structures/LunarClient';
 import type { RoleCollection, RoleResolvables } from './GuildUtil';
@@ -165,6 +165,8 @@ export default class GuildMemberUtil extends null {
 	 * @param member
 	 * @param contentOrOptions
 	 */
+	static sendDM(member: GuildMember, contentOrOptions: MessageOptions & { rejectOnError: true }): Promise<Message>;
+	static sendDM(member: GuildMember, contentOrOptions: string | MessageOptions & { rejectOnError?: boolean }): Promise<Message | null>;
 	static sendDM(member: GuildMember, contentOrOptions: string | MessageOptions) {
 		return UserUtil.sendDM(member.user, contentOrOptions);
 	}

@@ -77,7 +77,7 @@ export default class MyCommand extends SlashCommand {
 		const response = await hypixelGuild.chatBridge.minecraft.command({ command });
 		const pageMatched = response.match(/\(Page (?<current>\d+) of (?<total>\d+)\)/);
 
-		return InteractionUtil[interaction.isApplicationCommand() ? 'reply' : 'update'](interaction as ButtonInteraction, {
+		return (InteractionUtil[interaction.isApplicationCommand() ? 'reply' : 'update'] as typeof InteractionUtil['reply'])(interaction as ButtonInteraction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${command}`)

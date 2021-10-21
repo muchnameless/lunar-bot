@@ -32,9 +32,26 @@ interface InteractionData {
 
 export type ChatInteraction = CommandInteraction | MessageComponentInteraction;
 
+interface DeferReplyOptions extends InteractionDeferReplyOptions {
+	rejectOnError?: boolean;
+}
+
 export interface InteractionUtilReplyOptions extends InteractionReplyOptions {
 	split?: SplitOptions | boolean;
 	code?: string | boolean;
+	rejectOnError?: boolean;
+}
+
+interface EditReplyOptions extends WebhookEditMessageOptions {
+	rejectOnError?: boolean;
+}
+
+interface DeferUpdateOptions extends InteractionDeferUpdateOptions {
+	rejectOnError?: boolean;
+}
+
+interface UpdateOptions extends InteractionUpdateOptions {
+	rejectOnError?: boolean;
 }
 
 interface GetPlayerOptions {
@@ -194,17 +211,23 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async deferReply(interaction: ChatInteraction, options?: InteractionDeferReplyOptions) {
+	static async deferReply(interaction: ChatInteraction, options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true }): Promise<Message>;
+	static async deferReply(interaction: ChatInteraction, options?: DeferReplyOptions): Promise<void | Message>;
+	static async deferReply(interaction: ChatInteraction, options?: DeferReplyOptions) {
 		const cached = this.CACHE.get(interaction)!;
 		if (cached.deferReplyPromise) return cached.deferReplyPromise;
 
-		if (interaction.replied) return logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
+		if (interaction.replied) {
+			if (options?.rejectOnError) throw new Error(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
+			return logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
+		}
 
 		clearTimeout(cached.autoDefer!);
 
 		try {
 			return await (cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options }));
 		} catch (error) {
+			if (options?.rejectOnError) throw error;
 			logger.error(error, `[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferReply`);
 		}
 	}
@@ -213,7 +236,10 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param contentOrOptions
 	 */
-	static async reply(interaction: ChatInteraction, contentOrOptions: string | InteractionUtilReplyOptions) {
+	static async reply(interaction: ChatInteraction, contentOrOptions: InteractionUtilReplyOptions & { rejectOnError: true; fetchReply: true }): Promise<Message>
+	static async reply(interaction: ChatInteraction, contentOrOptions: InteractionUtilReplyOptions & { rejectOnError: true }): Promise<void | Message>
+	static async reply(interaction: ChatInteraction, contentOrOptions: string | InteractionUtilReplyOptions): Promise<void | null | Message>;
+	static async reply(interaction: ChatInteraction, contentOrOptions: string | InteractionUtilReplyOptions): Promise<void | null | Message> {
 		const cached = this.CACHE.get(interaction)!;
 		const options = typeof contentOrOptions === 'string'
 			? { ephemeral: cached.useEphemeral, content: contentOrOptions }
@@ -231,7 +257,7 @@ export default class InteractionUtil extends null {
 			}
 
 			// replied
-			if (interaction.replied) return await interaction.followUp(options);
+			if (interaction.replied) return await interaction.followUp(options) as Message;
 
 			// await defers
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
@@ -246,19 +272,21 @@ export default class InteractionUtil extends null {
 					await interaction.deleteReply(); // not ephemeral defer -> ephemeral reply
 				}
 
-				return await interaction.followUp(options);
+				return await interaction.followUp(options) as Message;
 			}
 
 			// initial reply
 			clearTimeout(cached.autoDefer!);
 			return await interaction.reply(options);
 		} catch (error) {
-			logger.error(error);
-
 			if (this.isInteractionError(error)) {
-				if (options.ephemeral) return UserUtil.sendDM(interaction.user, contentOrOptions);
-				return ChannelUtil.send(interaction.channel!, contentOrOptions);
+				logger.error(error);
+				if (options.ephemeral) return UserUtil.sendDM(interaction.user, options);
+				return ChannelUtil.send(interaction.channel!, options);
 			}
+
+			if (options.rejectOnError) throw error;
+			logger.error(error);
 		}
 	}
 
@@ -266,15 +294,18 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param contentOrOptions
 	 */
-	static async editReply(interaction: ChatInteraction, contentOrOptions: string | WebhookEditMessageOptions) {
+	static async editReply(interaction: ChatInteraction, contentOrOptions: EditReplyOptions & { rejectOnError: true }): Promise<Message>
+	static async editReply(interaction: ChatInteraction, contentOrOptions: string | EditReplyOptions): Promise<void | Message>;
+	static async editReply(interaction: ChatInteraction, contentOrOptions: string | EditReplyOptions): Promise<void | Message> {
 		const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
 
 		try {
 			if (deferReplyPromise) await deferReplyPromise;
 			if (deferUpdatePromise) await deferUpdatePromise;
 
-			return await interaction.editReply(contentOrOptions);
+			return await interaction.editReply(contentOrOptions) as Message;
 		} catch (error) {
+			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error;
 			return logger.error(error);
 		}
 	}
@@ -283,7 +314,9 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async deferUpdate(interaction: MessageComponentInteraction, options?: InteractionDeferUpdateOptions) {
+	static async deferUpdate(interaction: ChatInteraction, options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true }): Promise<Message>;
+	static async deferUpdate(interaction: ChatInteraction, options?: DeferReplyOptions): Promise<void | Message>;
+	static async deferUpdate(interaction: MessageComponentInteraction, options?: DeferUpdateOptions): Promise<void | Message> {
 		const cached = this.CACHE.get(interaction)!;
 		if (cached.deferUpdatePromise) return cached.deferUpdatePromise;
 
@@ -294,6 +327,7 @@ export default class InteractionUtil extends null {
 		try {
 			return await (cached.deferUpdatePromise = interaction.deferUpdate(options));
 		} catch (error) {
+			if (options?.rejectOnError) throw error;
 			logger.error(error, `[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferUpdate`);
 		}
 	}
@@ -302,28 +336,34 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async update(interaction: MessageComponentInteraction, options: InteractionUpdateOptions) {
+	static async update(interaction: MessageComponentInteraction, options: UpdateOptions & { rejectOnError: true }): Promise<Message>;
+	static async update(interaction: MessageComponentInteraction, options: UpdateOptions): Promise<void | Message>;
+	static async update(interaction: MessageComponentInteraction, options: UpdateOptions): Promise<void | Message> {
 		const cached = this.CACHE.get(interaction)!;
 
 		try {
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
 
 			// replied
-			if (interaction.replied) return (await MessageUtil.edit(interaction.message as Message, options)) ?? await interaction.editReply(options as WebhookEditMessageOptions);
+			if (interaction.replied) return MessageUtil.edit(interaction.message as Message, options);
 
 			// await defer
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
 			// deferred but not replied
-			if (interaction.deferred) return await interaction.editReply(options as WebhookEditMessageOptions);
+			if (interaction.deferred) return await interaction.editReply(options as WebhookEditMessageOptions) as Message;
 
 			// initial reply
 			clearTimeout(cached.autoDefer!);
 			return await interaction.update(options);
 		} catch (error) {
-			logger.error(error);
+			if (this.isInteractionError(error)) {
+				logger.error(error);
+				return MessageUtil.edit(interaction.message as Message, options);
+			}
 
-			if (this.isInteractionError(error)) return MessageUtil.edit(interaction.message as Message, options);
+			if (options.rejectOnError) throw error;
+			logger.error(error);
 		}
 	}
 
@@ -334,25 +374,18 @@ export default class InteractionUtil extends null {
 	static async deleteMessage(interaction: MessageComponentInteraction) {
 		const cached = this.CACHE.get(interaction)!;
 
-		// replied check
 		try {
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
-		} catch (error) {
-			logger.error(error);
-		}
 
-		// replied
-		if (interaction.replied) return MessageUtil.delete(interaction.message as Message);
+			// replied
+			if (interaction.replied) return MessageUtil.delete(interaction.message as Message);
 
-		try {
-			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
-
-			await interaction.update({});
+			await this.deferUpdate(interaction, { rejectOnError: true });
 			await interaction.deleteReply();
 
 			return interaction.message as Message;
 		} catch (error) {
-			logger.error(error);
+			logger.error(error, `[INTERACTION UTIL]: ${this.logInfo(interaction)}: deleteMessage`);
 			return interaction.message as Message;
 		}
 	}
@@ -372,6 +405,7 @@ export default class InteractionUtil extends null {
 
 			await this.reply(interaction, {
 				content: question,
+				rejectOnError: true,
 				...options,
 			});
 
@@ -379,11 +413,11 @@ export default class InteractionUtil extends null {
 				filter: msg => msg.author.id === interaction.user.id,
 				max: 1,
 				time,
-				errors: [ 'time' ],
 			});
 
-			return collected.first()!.content;
-		} catch {
+			return collected.first()?.content ?? null;
+		} catch (error) {
+			logger.error(error);
 			return null;
 		}
 	}
@@ -421,6 +455,7 @@ export default class InteractionUtil extends null {
 								.setEmoji(X_EMOJI),
 						),
 				],
+				rejectOnError: true,
 				...options,
 			});
 

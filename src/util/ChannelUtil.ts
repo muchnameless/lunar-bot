@@ -1,8 +1,22 @@
 import { Permissions } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import { logger } from '../functions';
-import type { Channel, DMChannel, GuildChannel, MessageOptions, PartialDMChannel, Snowflake, TextBasedChannels } from 'discord.js';
+import type {
+	Channel,
+	DMChannel,
+	GuildChannel,
+	Message,
+	MessageOptions,
+	PartialDMChannel,
+	Snowflake,
+	TextBasedChannels,
+} from 'discord.js';
 import type { LunarClient } from '../structures/LunarClient';
+
+
+export interface SendOptions extends MessageOptions {
+	rejectOnError?: boolean;
+}
 
 
 export default class ChannelUtil extends null {
@@ -113,7 +127,9 @@ export default class ChannelUtil extends null {
 	 * @param channel
 	 * @param contentOrOptions
 	 */
-	static async send(channel: TextBasedChannels, contentOrOptions: string | MessageOptions) {
+	static async send(channel: TextBasedChannels, contentOrOptions: SendOptions & { rejectOnError: true }): Promise<Message>;
+	static async send(channel: TextBasedChannels, contentOrOptions: string | SendOptions): Promise<Message | null>;
+	static async send(channel: TextBasedChannels, contentOrOptions: string | SendOptions) {
 		// guild -> requires permission
 		let requiredChannelPermissions = this.DEFAULT_SEND_PERMISSIONS;
 
@@ -129,6 +145,7 @@ export default class ChannelUtil extends null {
 				.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
 
+			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw new Error(commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${this.logInfo(channel)}`);
 			logger.warn(commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${this.logInfo(channel)}`);
 			return null;
 		}
@@ -136,6 +153,7 @@ export default class ChannelUtil extends null {
 		try {
 			return await channel.send(contentOrOptions);
 		} catch (error) {
+			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error;
 			logger.error(error);
 			return null;
 		}

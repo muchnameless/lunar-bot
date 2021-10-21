@@ -1,4 +1,4 @@
-import { Permissions, MessageFlags, Util } from 'discord.js';
+import { MessageFlags, Permissions, Util } from 'discord.js';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { commaListsAnd } from 'common-tags';
 import { ChannelUtil } from '.';
@@ -10,12 +10,17 @@ import type {
 	MessageOptions,
 	MessageReaction,
 } from 'discord.js';
+import type { SendOptions } from './ChannelUtil';
 
 
 interface AwaitReplyOptions extends MessageOptions {
 	question?: string;
 	/** time in milliseconds to wait for a response */
 	time?: number;
+}
+
+interface EditOptions extends MessageEditOptions {
+	rejectOnError?: boolean;
 }
 
 
@@ -152,22 +157,21 @@ export default class MessageUtil extends null {
 			: questionOrOptions;
 
 		try {
-			const questionMessage = await this.reply(message, {
+			const { channel } = await this.reply(message, {
 				content: question,
+				rejectOnError: true,
 				...options,
 			});
 
-			if (!questionMessage) return null;
-
-			const collected = await questionMessage.channel.awaitMessages({
+			const collected = await channel.awaitMessages({
 				filter: msg => msg.author.id === message.author.id,
 				max: 1,
 				time,
-				errors: [ 'time' ],
 			});
 
-			return collected.first()!.content;
-		} catch {
+			return collected.first()?.content ?? null;
+		} catch (error) {
+			logger.error(error);
 			return null;
 		}
 	}
@@ -177,7 +181,9 @@ export default class MessageUtil extends null {
 	 * @param message
 	 * @param contentOrOptions
 	 */
-	static reply(message: Message, contentOrOptions: string | MessageOptions) {
+	static reply(message: Message, contentOrOptions: SendOptions & { rejectOnError: true }): Promise<Message>;
+	static reply(message: Message, contentOrOptions: string | SendOptions): Promise<Message | null>;
+	static reply(message: Message, contentOrOptions: string | SendOptions) {
 		const options = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
@@ -195,7 +201,7 @@ export default class MessageUtil extends null {
 	 * @param message
 	 * @param contentOrOptions
 	 */
-	static async edit(message: Message, contentOrOptions: string | MessageEditOptions) {
+	static async edit(message: Message, contentOrOptions: string | EditOptions) {
 		const options = typeof contentOrOptions === 'string'
 			? { content: contentOrOptions }
 			: contentOrOptions;
@@ -205,6 +211,7 @@ export default class MessageUtil extends null {
 
 		if (!message.editable) { // message was not sent by the bot user
 			if (Object.keys(options).some(key => key !== 'attachments') || options.attachments?.length !== 0) { // can only remove attachments
+				if (options.rejectOnError) throw new Error(`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)} with ${Object.entries(options)}`);
 				logger.warn(`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)} with ${Object.entries(options)}`);
 				return message;
 			}
@@ -222,6 +229,7 @@ export default class MessageUtil extends null {
 				.missing(requiredChannelPermissions)
 				.map(permission => `'${permission}'`);
 
+			if (options.rejectOnError) throw new Error(commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${ChannelUtil.logInfo(channel)}`);
 			logger.warn(commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${ChannelUtil.logInfo(channel)}`);
 			return message;
 		}
@@ -229,6 +237,7 @@ export default class MessageUtil extends null {
 		try {
 			return await message.edit(options);
 		} catch (error) {
+			if (options.rejectOnError) throw error;
 			logger.error(error, `[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
