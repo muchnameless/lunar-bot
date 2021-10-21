@@ -106,6 +106,12 @@ export default class EvalCommand extends SlashCommand {
 		if (interaction.user.id !== this.client.ownerId) throw new Error('eval is restricted to the bot owner');
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */
+		const reply = (options: string | InteractionUtilReplyOptions) => InteractionUtil.reply(interaction,
+			typeof options === 'string'
+				? { content: options, ephemeral: false }
+				: { ephemeral: false, ...options },
+		);
+		const type = (x: unknown) => new Type(x).toString();
 		const { client, config } = this;
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { lgGuild, hypixelGuilds, players, taxCollectors, db } = client;
@@ -113,11 +119,6 @@ export default class EvalCommand extends SlashCommand {
 		const player = UserUtil.getPlayer(user);
 		const p = player;
 		const [ bridge ] = client.chatBridges.cache;
-		const reply = (options: string | InteractionUtilReplyOptions) => InteractionUtil.reply(interaction,
-			typeof options === 'string'
-				? { content: options, ephemeral: false }
-				: { ephemeral: false, ...options },
-		);
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		const responseEmbed = this.client.defaultEmbed
