@@ -5,7 +5,7 @@ import { autocorrect, logger, readJSFiles } from '../../functions';
 import type { URL } from 'node:url';
 import type { LunarClient } from '../LunarClient';
 import type { DualCommand } from './DualCommand';
-import type { SlashCommand } from './SlashCommand';
+import type { ApplicationCommand } from './ApplicationCommand';
 import type { BridgeCommand } from './BridgeCommand';
 import type { BaseCommand } from './BaseCommand';
 
@@ -14,7 +14,7 @@ interface CommandLoadOptions {
 	reload?: boolean;
 }
 
-export type CommandType = DualCommand | SlashCommand | BridgeCommand;
+export type CommandType = DualCommand | ApplicationCommand | BridgeCommand;
 
 
 export class BaseCommandCollection<C extends CommandType = CommandType> extends Collection<string, C> {

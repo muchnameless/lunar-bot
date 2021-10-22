@@ -4,7 +4,7 @@ import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { optionalPlayerOption, xpTypeOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { seconds, upperCaseFirstChar } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { XPTypes } from '../../constants';
@@ -13,7 +13,7 @@ import type { XPTypes } from '../../constants';
 type TrackingTypes = XPTypes | 'weight' | 'skill-average' | 'slayer';
 
 
-export default class TrackCommand extends SlashCommand {
+export default class TrackCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

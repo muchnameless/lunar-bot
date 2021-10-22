@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { InteractionUtil } from '../../util';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class StopCommand extends SlashCommand {
+export default class StopCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

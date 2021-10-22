@@ -3,13 +3,13 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { buildGuildOption, pageOption } from '../../structures/commands/commonOptions';
 import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI } from '../../constants';
 import { InteractionUtil } from '../../util';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ButtonInteraction, CommandInteraction } from 'discord.js';
 import type { HypixelGuild } from '../../structures/database/models/HypixelGuild';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class MyCommand extends SlashCommand {
+export default class MyCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

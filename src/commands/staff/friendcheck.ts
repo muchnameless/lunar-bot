@@ -7,12 +7,12 @@ import { mojang } from '../../api/mojang';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { seconds, trim } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class FriendCheckCommand extends SlashCommand {
+export default class FriendCheckCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

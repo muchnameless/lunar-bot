@@ -4,12 +4,12 @@ import { stripIndent } from 'common-tags';
 import { mojang } from '../../api/mojang';
 import { InteractionUtil, MessageEmbedUtil } from '../../util';
 import { logger } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class DonationsCommand extends SlashCommand {
+export default class DonationsCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

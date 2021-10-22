@@ -1,9 +1,9 @@
 import { Collection } from 'discord.js';
 import { logger } from '../../functions';
 import { BaseCommandCollection } from './BaseCommandCollection';
-import { SlashCommand } from './SlashCommand';
+import { ApplicationCommand } from './ApplicationCommand';
 import type {
-	ApplicationCommand,
+	ApplicationCommand as DiscordJSApplicationCommand,
 	ApplicationCommandManager,
 	GuildApplicationCommandManager,
 	GuildApplicationCommandPermissionData,
@@ -12,13 +12,13 @@ import type {
 import type { DualCommand } from './DualCommand';
 
 
-type SlashCommandType = DualCommand | SlashCommand;
+type SlashCommandType = DualCommand | ApplicationCommand;
 
 
-export class SlashCommandCollection<C extends SlashCommandType = SlashCommandType> extends BaseCommandCollection<C> {
+export class ApplicationCommandCollection<C extends SlashCommandType = SlashCommandType> extends BaseCommandCollection<C> {
 	/**
 	 * built-in methods will use this as the constructor
-	 * that way SlashCommandCollection#filter returns a standard Collection
+	 * that way ApplicationCommandCollection#filter returns a standard Collection
 	 */
 	static override get [Symbol.species]() {
 		return Collection;
@@ -44,7 +44,7 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 	 * sets all application command permissions
 	 * @param applicationCommandsInput
 	 */
-	async setAllPermissions(applicationCommandsInput: Collection<Snowflake, ApplicationCommand>) {
+	async setAllPermissions(applicationCommandsInput: Collection<Snowflake, DiscordJSApplicationCommand>) {
 		const applicationCommands = applicationCommandsInput ?? await this.client.application!.commands.fetch();
 		const fullPermissions: GuildApplicationCommandPermissionData[] = [];
 
@@ -84,7 +84,7 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 		const command = this.get(commandName) ?? await this.loadByName(commandName);
 
 		if (!command) throw new Error(`[COMMANDS CREATE]: unknown command '${commandName}'`);
-		if (!(command instanceof SlashCommand)) throw new Error(`[COMMANDS CREATE]: ${command.name} is not a SlashCommand`);
+		if (!(command instanceof ApplicationCommand)) throw new Error(`[COMMANDS CREATE]: ${command.name} is not an ApplicationCommand`);
 
 		const applicationCommands = await Promise.all(command.data.map(d => commandManager.create(
 			// @ts-expect-error
@@ -101,7 +101,7 @@ export class SlashCommandCollection<C extends SlashCommandType = SlashCommandTyp
 	 * @param param0
 	 */
 	// eslint-disable-next-line no-undef
-	async setSinglePermissions({ command = this.getByName(arguments[0])!, applicationCommands: applicationCommandsInput }: { command: SlashCommand; applicationCommands: ApplicationCommand[]; }) {
+	async setSinglePermissions({ command = this.getByName(arguments[0])!, applicationCommands: applicationCommandsInput }: { command: ApplicationCommand; applicationCommands: DiscordJSApplicationCommand[]; }) {
 		const applicationCommands = applicationCommandsInput
 			?? (await this.client.application!.commands.fetch()).filter(c => c.name === command.name || (command.aliases?.includes(c.name) ?? false));
 		const { permissions } = command;

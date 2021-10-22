@@ -5,15 +5,15 @@ import type { Merge } from './util';
 // import type { DatabaseManager } from '../structures/database/managers/DatabaseManager';
 
 // declare module "discord.js" {
-//     interface Client {
+// 	interface Client {
 // 		ownerId: Snowflake;
 // 		db: DatabaseManager;
 // 		logHandler: LogHandler;
 // 		cronJobs: CronJobManager;
 // 		chatBridges: ChatBridgeArray;
-// 		commands: SlashCommandCollection;
+// 		commands: ApplicationCommandCollection;
 // 		events: EventCollection;
-//     }
+// 	}
 // }
 
 

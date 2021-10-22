@@ -6,12 +6,12 @@ import { EMBED_FIELD_MAX_CHARS } from '../../constants';
 import { imgur } from '../../api/imgur';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, trim } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { Collection, CommandInteraction, DMChannel, Snowflake, TextBasedChannels, ThreadChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class DebugCommand extends SlashCommand {
+export default class DebugCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

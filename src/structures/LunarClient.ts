@@ -4,7 +4,7 @@ import { DatabaseManager } from './database/managers/DatabaseManager';
 import { LogHandler } from './LogHandler';
 import { CronJobManager } from './CronJobManager';
 import { ChatBridgeManager } from './chat_bridge/ChatBridgeManager';
-import { SlashCommandCollection } from './commands/SlashCommandCollection';
+import { ApplicationCommandCollection } from './commands/ApplicationCommandCollection';
 import { EventCollection } from './events/EventCollection';
 import { UserUtil } from '../util';
 import { cache } from '../api/cache';
@@ -24,7 +24,7 @@ export class LunarClient extends Client {
 	logHandler = new LogHandler(this, new URL('../../log_buffer', import.meta.url));
 	cronJobs = new CronJobManager(this);
 	chatBridges = new ChatBridgeManager(this);
-	commands = new SlashCommandCollection(this, new URL('../commands', import.meta.url));
+	commands = new ApplicationCommandCollection(this, new URL('../commands', import.meta.url));
 	events = new EventCollection(this, new URL('../events', import.meta.url));
 	declare options: LunarClientOptions;
 	log = this.logHandler.log.bind(this.logHandler);

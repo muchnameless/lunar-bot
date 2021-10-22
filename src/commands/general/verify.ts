@@ -7,12 +7,12 @@ import { mojang } from '../../api/mojang';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, UserUtil } from '../../util';
 import { logger } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class VerifyCommand extends SlashCommand {
+export default class VerifyCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

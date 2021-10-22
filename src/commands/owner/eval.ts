@@ -28,7 +28,7 @@ GuildMemberUtil; GuildUtil;
 LeaderboardUtil; MessageEmbedUtil;
 MessageUtil;
 import * as functions from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction, Message } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
@@ -38,7 +38,7 @@ const { DELETE_EMOJI, EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
 const { logger, minutes, splitForEmbedFields } = functions;
 
 
-export default class EvalCommand extends SlashCommand {
+export default class EvalCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

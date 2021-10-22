@@ -5,12 +5,12 @@ const { Op } = pkg;
 import { buildGuildOption, requiredPlayerOption, optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil } from '../../util';
 import { escapeIgn, logger, safePromiseAll, validateNumber } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class TaxCommand extends SlashCommand {
+export default class TaxCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

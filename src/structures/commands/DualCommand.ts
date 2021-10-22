@@ -1,12 +1,12 @@
-import { SlashCommand } from './SlashCommand';
+import { ApplicationCommand } from './ApplicationCommand';
 import { BaseCommandCollection } from './BaseCommandCollection';
 import type { CommandContext } from './BaseCommand';
-import type { SlashCommandData } from './SlashCommand';
+import type { ApplicationCommandData } from './ApplicationCommand';
 import type { BridgeCommand, BridgeCommandData } from './BridgeCommand';
 import type { HypixelUserMessage } from '../chat_bridge/HypixelMessage';
 
 
-export class DualCommand extends SlashCommand implements Omit<BridgeCommand, 'collection' | 'load' | 'unload' | 'clearCooldowns'> {
+export class DualCommand extends ApplicationCommand implements Omit<BridgeCommand, 'collection' | 'load' | 'unload' | 'clearCooldowns'> {
 	_usage: string | (() => string) | null = null;
 	aliasesInGame: string[] | null;
 	guildOnly: boolean;
@@ -18,7 +18,7 @@ export class DualCommand extends SlashCommand implements Omit<BridgeCommand, 'co
 	 * @param slashData
 	 * @param bridgeData
 	 */
-	constructor(context: CommandContext, slashData: SlashCommandData, { aliases, guildOnly, args, usage }: BridgeCommandData = {}) {
+	constructor(context: CommandContext, slashData: ApplicationCommandData, { aliases, guildOnly, args, usage }: BridgeCommandData = {}) {
 		super(context, slashData);
 
 		this.aliasesInGame = aliases?.filter(Boolean).length

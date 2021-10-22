@@ -9,7 +9,7 @@ import { requiredPlayerOption, optionalPlayerOption, pageOption, requiredIgnOpti
 import { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
 import { InteractionUtil, UserUtil } from '../../util';
 import { autocorrect, getIdFromString, logger, removeMcFormatting, seconds, stringToMS, trim } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ButtonInteraction, CommandInteraction, Interaction, Snowflake } from 'discord.js';
 import type { SlashCommandStringOption } from '@discordjs/builders';
 import type { WhereOptions } from 'sequelize';
@@ -36,7 +36,7 @@ interface RunKickOptions extends RunModerationOptions {
 }
 
 
-export default class GuildCommand extends SlashCommand {
+export default class GuildCommand extends ApplicationCommand {
 	GUILD_IDENTIFIER = new Set([ 'guild', 'everyone' ] as const);
 
 	constructor(context: CommandContext) {

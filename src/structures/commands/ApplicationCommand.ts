@@ -41,7 +41,7 @@ type Slash = SlashCommandBuilder
 
 type WithChoices = SlashCommandIntegerOption | SlashCommandNumberOption | SlashCommandStringOption;
 
-export interface SlashCommandData extends CommandData {
+export interface ApplicationCommandData extends CommandData {
 	aliases?: string[];
 	slash?: Slash;
 	message?: ContextMenuCommandBuilder;
@@ -49,7 +49,7 @@ export interface SlashCommandData extends CommandData {
 }
 
 
-export class SlashCommand extends BaseCommand {
+export class ApplicationCommand extends BaseCommand {
 	slash: RESTPostAPIChatInputApplicationCommandsJSONBody | null = null;
 	message: RESTPostAPIContextMenuApplicationCommandsJSONBody | null = null;
 	user: RESTPostAPIContextMenuApplicationCommandsJSONBody | null = null;
@@ -60,7 +60,7 @@ export class SlashCommand extends BaseCommand {
 	 * @param context
 	 * @param data
 	 */
-	constructor(context: CommandContext, { aliases, slash, message, user, ...data }: SlashCommandData) {
+	constructor(context: CommandContext, { aliases, slash, message, user, ...data }: ApplicationCommandData) {
 		super(context, data);
 
 		/**

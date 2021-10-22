@@ -5,12 +5,12 @@ import { oneLine } from 'common-tags';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
 import { seconds } from '../../functions';
 import { InteractionUtil } from '../../util';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class UnlinkCommand extends SlashCommand {
+export default class UnlinkCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

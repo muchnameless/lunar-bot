@@ -2,13 +2,13 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { xpTypeOption, pageOption, offsetOption, buildGuildOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { handleLeaderboardCommandInteraction, seconds } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { LeaderboardXPOffsets, LeaderboardXPTypes } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class TopCommand extends SlashCommand {
+export default class TopCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

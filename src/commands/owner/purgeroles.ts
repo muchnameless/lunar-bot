@@ -3,12 +3,12 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import ms from 'ms';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { logger, seconds } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, Snowflake } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class PurgeRolesCommand extends SlashCommand {
+export default class PurgeRolesCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

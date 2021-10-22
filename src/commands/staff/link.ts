@@ -6,12 +6,12 @@ import { mojang } from '../../api/mojang';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { logger, seconds, validateNumber } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, GuildMember, Snowflake } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class LinkCommand extends SlashCommand {
+export default class LinkCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

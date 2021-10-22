@@ -1,13 +1,13 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Type } from '@sapphire/type';
 import { InteractionUtil } from '../../util';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { Collection, CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Config } from '../../structures/database/models/Config';
 
 
-export default class ConfigCommand extends SlashCommand {
+export default class ConfigCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

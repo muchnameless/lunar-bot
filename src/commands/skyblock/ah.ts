@@ -6,14 +6,14 @@ import { hypixel } from '../../api/hypixel';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { getMainProfile, getUuidAndIgn, logger, seconds, shortenNumber, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake } from 'discord.js';
 import type { APISelectMenuComponent } from 'discord-api-types/v9';
 import type { SkyBlockProfile } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class AhCommand extends SlashCommand {
+export default class AhCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

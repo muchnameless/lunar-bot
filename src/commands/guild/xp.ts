@@ -5,13 +5,13 @@ import { COSMETIC_SKILLS, DUNGEON_TYPES_AND_CLASSES, SKILLS, SLAYERS, XP_OFFSETS
 import { optionalPlayerOption, pageOption, offsetOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, MessageEmbedUtil } from '../../util';
 import { getDefaultOffset, upperCaseFirstChar } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { XPOffsets } from '../../constants';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class XpCommand extends SlashCommand {
+export default class XpCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalPlayerOption, buildGuildOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class RanksCommand extends SlashCommand {
+export default class RanksCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

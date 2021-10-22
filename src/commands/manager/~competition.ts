@@ -3,12 +3,12 @@ import { commaListsOr } from 'common-tags';
 import { DUNGEON_TYPES, SKILLS } from '../../constants';
 import { InteractionUtil } from '../../util';
 import { autocorrect, logger, seconds } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export class CompetitionCommand extends SlashCommand {
+export class CompetitionCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

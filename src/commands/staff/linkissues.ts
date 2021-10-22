@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters, Util } from 'discord.js';
 import { GuildUtil, InteractionUtil } from '../../util';
 import { escapeIgn } from '../../functions';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -14,7 +14,7 @@ interface IssueInfo {
 }
 
 
-export default class LinkIssuesCommand extends SlashCommand {
+export default class LinkIssuesCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

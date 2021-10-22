@@ -1,13 +1,13 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { InteractionUtil } from '../../util';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { seconds } from '../../functions';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class PingCommand extends SlashCommand {
+export default class PingCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

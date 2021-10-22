@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { SlashCommand } from '../../structures/commands/SlashCommand';
+import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { CommandInteraction } from 'discord.js';
 
 
-export default class MyCommand extends SlashCommand {
+export default class MyCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			aliases: [],
