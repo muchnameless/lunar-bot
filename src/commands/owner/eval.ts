@@ -108,8 +108,8 @@ export default class EvalCommand extends ApplicationCommand {
 		/* eslint-disable @typescript-eslint/no-unused-vars */
 		const reply = (options: string | InteractionUtilReplyOptions) => InteractionUtil.reply(interaction,
 			typeof options === 'string'
-				? { content: options, ephemeral: false }
-				: { ephemeral: false, ...options },
+				? { content: options, ephemeral: false, rejectOnError: true }
+				: { ephemeral: false, rejectOnError: true, ...options },
 		);
 		const type = (x: unknown) => new Type(x).toString();
 		const { client, config } = this;
