@@ -4,8 +4,8 @@ import FormData from 'form-data';
 import fetch from 'node-fetch';
 import ms from 'ms';
 import { FetchError } from './errors/FetchError';
+import { logger, seconds } from '../functions';
 import type { RequestInit, Response } from 'node-fetch';
-import { seconds } from '../functions';
 
 
 export interface ImageData {
@@ -110,6 +110,21 @@ export class ImgurClient {
 		this.retries = retries ?? 1;
 		this.rateLimitOffset = rateLimitOffset ?? seconds(1);
 		this.rateLimitedWaitTime = rateLimitedWaitTime ?? seconds(10);
+
+		// restore cached rateLimit data
+		(async () => {
+			try {
+				const data = await cache?.get('ratelimits') as { rateLimit: RateLimitData; postRateLimit: PostRateLimitData; };
+
+				// no cached data or rateLimit data is already present
+				if (!data || this.rateLimit.userlimit !== null) return;
+
+				this.rateLimit = data.rateLimit;
+				this.postRateLimit = data.postRateLimit;
+			} catch (error) {
+				logger.error(error);
+			}
+		})();
 	}
 
 	/**
@@ -217,6 +232,11 @@ export class ImgurClient {
 						: Number.parseInt(data, 10);
 				}
 			}
+
+			this.cache?.set('ratelimits', {
+				rateLimit: this.rateLimit,
+				postRateLimit: this.postRateLimit,
+			});
 
 			// check response
 			if (res.status !== 200) {
