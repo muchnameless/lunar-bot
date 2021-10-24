@@ -5,6 +5,7 @@ import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid 
 import type {
 	BaseGuildTextChannel,
 	CommandInteraction,
+	ContextMenuInteraction,
 	EmojiIdentifierResolvable,
 	GuildMember,
 	Interaction,
@@ -30,7 +31,7 @@ interface InteractionData {
 	autoDefer: NodeJS.Timeout | null;
 }
 
-export type ChatInteraction = CommandInteraction | MessageComponentInteraction;
+export type ChatInteraction = CommandInteraction | MessageComponentInteraction | ContextMenuInteraction;
 
 interface DeferReplyOptions extends InteractionDeferReplyOptions {
 	rejectOnError?: boolean;
