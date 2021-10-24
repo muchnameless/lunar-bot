@@ -147,7 +147,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * @param guildName
 	 */
 	async link(guildName: string | null = null): Promise<this> {
-		if (!this.isReady()) {
+		if (!this.minecraft.isReady()) {
 			await sleep(Math.min(++this.#guildLinkAttempts * seconds(5), minutes(5)));
 
 			return this.link(guildName);
@@ -178,7 +178,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 			if (!hypixelGuild) {
 				this.unlink();
 
-				logger.error(`[CHATBRIDGE]: ${this.bot.username}: no matching guild found`);
+				logger.error(`[CHATBRIDGE]: ${this.bot!.username}: no matching guild found`);
 				return this;
 			}
 
@@ -191,7 +191,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 			hypixelGuild.chatBridge = this;
 			this.hypixelGuild = hypixelGuild;
 
-			logger.debug(`[CHATBRIDGE]: ${hypixelGuild}: linked to ${this.bot.username}`);
+			logger.debug(`[CHATBRIDGE]: ${hypixelGuild}: linked to ${this.bot!.username}`);
 
 			// instantiate DiscordChannelManagers
 			await this.discord.init();
