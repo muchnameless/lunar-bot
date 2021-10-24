@@ -852,8 +852,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (!member) return;
 
-		const { roles: roleManager } = member;
-		const { cache: roleCache } = roleManager;
+		const { cache: roleCache, highest: highestRole } = member.roles;
 		const { config } = this.client;
 		const rolesToAdd: Snowflake[] = [];
 		const rolesToRemove: Snowflake[] = [];
@@ -921,7 +920,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (roleCache.has(config.get('EX_GUILD_ROLE_ID'))) rolesToRemove.push(config.get('EX_GUILD_ROLE_ID'));
 
 		// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
-		if ((roleManager.highest?.comparePositionTo(config.get('GUILD_DELIMITER_ROLE_ID') ?? member.guild.roles.highest) ?? -1) > 1) {
+		if ((member.guild.roles.cache.get(config.get('GUILD_DELIMITER_ROLE_ID'))?.comparePositionTo(highestRole) ?? 0) < 0) { // current highest role is higher
 			if (!roleCache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_DELIMITER_ROLE_ID'));
 		} else if (roleCache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) {
 			rolesToRemove.push(config.get('GUILD_DELIMITER_ROLE_ID'));
