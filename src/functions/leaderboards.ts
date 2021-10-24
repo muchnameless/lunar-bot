@@ -477,7 +477,7 @@ function createLeaderboardEmbeds(client: LunarClient, { title, description, play
 				const player = playerData[index];
 				playerList += `\n${stripIndent`
 					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${Y_EMOJI_ALT}` : ''}${player.isStaff ? ' [STAFF]' : ''}
-							> ${getEntry(player)}
+						 > ${getEntry(player)}
 				`}`;
 			} else {
 				playerList += '\n\u200B\n\u200B';
