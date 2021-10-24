@@ -1,4 +1,5 @@
 import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } from 'discord.js';
+import { stripIndent } from 'common-tags';
 import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
@@ -443,11 +444,24 @@ export default class InteractionUtil extends null {
 		const { question = 'confirm this action?', time = seconds(60), errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
 			? { question: questionOrOptions }
 			: questionOrOptions;
+		const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
+		const CANCLE_ID = `confirm:${SnowflakeUtil.generate()}`;
+		const row = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+					.setCustomId(SUCCESS_ID)
+					.setStyle(Constants.MessageButtonStyles.SUCCESS)
+					.setEmoji(Y_EMOJI),
+				new MessageButton()
+					.setCustomId(CANCLE_ID)
+					.setStyle(Constants.MessageButtonStyles.DANGER)
+					.setEmoji(X_EMOJI),
+			);
+
+		let channel;
 
 		try {
-			const channel = interaction.channel ?? await interaction.client.channels.fetch(interaction.channelId!) as TextBasedChannels;
-			const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
-			const CANCLE_ID = `confirm:${SnowflakeUtil.generate()}`;
+			channel = interaction.channel ?? await interaction.client.channels.fetch(interaction.channelId) as TextBasedChannels;
 
 			await this.reply(interaction, {
 				embeds: [
@@ -455,57 +469,71 @@ export default class InteractionUtil extends null {
 						.setDescription(question),
 				],
 				components: [
-					new MessageActionRow()
-						.addComponents(
-							new MessageButton()
-								.setCustomId(SUCCESS_ID)
-								.setStyle(Constants.MessageButtonStyles.SUCCESS)
-								.setEmoji(Y_EMOJI),
-							new MessageButton()
-								.setCustomId(CANCLE_ID)
-								.setStyle(Constants.MessageButtonStyles.DANGER)
-								.setEmoji(X_EMOJI),
-						),
+					row,
 				],
 				rejectOnError: true,
 				...options,
 			});
+		} catch (error) {
+			logger.error(error);
+			throw errorMessage;
+		}
 
+		let success = false;
+
+		try {
 			const result = await channel.awaitMessageComponent({
 				componentType: Constants.MessageComponentTypes.BUTTON,
-				filter: i => (i.user.id === interaction.user.id && [ SUCCESS_ID, CANCLE_ID ].includes(i.customId)
-					? true
-					: (async () => {
-						try {
-							await this.reply(interaction, {
-								content: 'that is not up to you to decide',
-								ephemeral: true,
-							});
-						} catch (error) {
-							logger.error(error);
-						}
+				filter: (i) => {
+					if (i.user.id !== interaction.user.id) {
+						void this.reply(interaction, {
+							content: 'that is not up to you to decide',
+							ephemeral: true,
+						});
 						return false;
-					})()),
+					}
+
+					return [ SUCCESS_ID, CANCLE_ID ].includes(i.customId);
+				},
 				time,
 			});
 
-			const success = result.customId === SUCCESS_ID;
+			success = result.customId === SUCCESS_ID;
 
 			this.update(result, {
 				embeds: [
 					new MessageEmbed()
 						.setColor((interaction.client as LunarClient).config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
-						.setDescription(success ? 'confirmed' : 'cancelled')
+						.setDescription(stripIndent`
+							${question}
+							\\> ${success ? 'confirmed' : 'cancelled'}
+						`)
 						.setTimestamp(),
 				],
-				components: [],
+				components: [
+					row.setComponents(row.components.map(c => c.setDisabled())),
+				],
+			});
+		} catch (error) {
+			this.editReply(interaction, {
+				embeds: [
+					new MessageEmbed()
+						.setColor('DARKER_GREY')
+						.setDescription(stripIndent`
+							${question}
+							\\> timeout
+						`)
+						.setTimestamp(),
+				],
+				components: [
+					row.setComponents(row.components.map(c => c.setDisabled())),
+				],
 			});
 
-			if (!success) throw errorMessage;
-		} catch (error) {
 			logger.debug(error);
-			throw errorMessage;
 		}
+
+		if (!success) throw errorMessage;
 	}
 
 	/**
