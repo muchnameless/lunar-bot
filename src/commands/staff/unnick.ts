@@ -65,7 +65,7 @@ export default class UnnickCommand extends ApplicationCommand {
 
 		// API call
 		try {
-			await member.setNickname(null, `reset by ${interaction.user.tag}`);
+			await member.setNickname(NEW_NICK, `reset by ${interaction.user.tag}`);
 
 			return InteractionUtil.reply(interaction, {
 				content: `successfully reset ${member}'s nickname`,
