@@ -1,5 +1,6 @@
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import { UNKNOWN_IGN } from '../../constants';
+import { logger } from '../../functions';
 import { GuildMemberUtil, InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, ContextMenuInteraction, GuildMember, User } from 'discord.js';
@@ -31,55 +32,53 @@ export default class UnnickCommand extends ApplicationCommand {
 	 */
 	// eslint-disable-next-line class-methods-use-this
 	async #run(interaction: CommandInteraction | ContextMenuInteraction, member: GuildMember | null) {
+		// input validation
 		if (!member) return InteractionUtil.reply(interaction, {
-			content: `${interaction.options.getUser('user', true)} is not in the guild`,
+			content: `${interaction.options.getUser('user', true)} is not in the discord server`,
 			allowedMentions: { parse: [] },
 		});
 
+		// permission check(s)
+		if (!member.manageable) return InteractionUtil.reply(interaction, {
+			content: `missing permissions to reset ${member}'s nickname`,
+			allowedMentions: { parse: [] },
+		});
+
+		// determine new nickname
 		const player = GuildMemberUtil.getPlayer(member);
+		const NEW_NICK = player && player.ign !== UNKNOWN_IGN
+			? player.ign
+			: null; // remove to username if IGN is unknown
 
-		if (player) { // player found -> discord member linked
-			const NEW_NICK = player.ign !== UNKNOWN_IGN
-				? player.ign
-				: null; // reset to username if IGN is unknown
-
-			if (member.displayName === NEW_NICK) return InteractionUtil.reply(interaction, {
-				content: `${member}'s nickname is already the default`,
-				ephemeral: true,
+		// check if change is neccessary
+		if (NEW_NICK === null) {
+			if (!member.nickname) return InteractionUtil.reply(interaction, {
+				content: `${member} has no nickname`,
+				allowedMentions: { parse: [] },
 			});
-
-			const result = await player.makeNickAPICall({
-				newNick: NEW_NICK,
-				shouldSendDm: false,
-				reason: `reset by ${interaction.user.tag}`,
-			});
-
+		} else if (member.displayName === NEW_NICK) {
 			return InteractionUtil.reply(interaction, {
-				content: result
-					? `successfully reset ${member}'s nickname`
-					: `error resetting ${member}'s nickname`,
+				content: `${member} is already nicked with their IGN`,
 				allowedMentions: { parse: [] },
 			});
 		}
 
-		// no player found -> discord member not linked
+		// API call
+		try {
+			await member.setNickname(null, `reset by ${interaction.user.tag}`);
 
-		if (!member.nickname) return InteractionUtil.reply(interaction, {
-			content: `${member} has no nickname`,
-			ephemeral: true,
-		});
+			return InteractionUtil.reply(interaction, {
+				content: `successfully reset ${member}'s nickname`,
+				allowedMentions: { parse: [] },
+			});
+		} catch (error) {
+			logger.error(error);
 
-		if (!member.manageable) return InteractionUtil.reply(interaction, {
-			content: `missing permissions to reset ${member}'s nickname`,
-			ephemeral: true,
-		});
-
-		await member.setNickname(null, `reset by ${interaction.user.tag}`);
-
-		return InteractionUtil.reply(interaction, {
-			content: `successfully reset ${member}'s nickname`,
-			allowedMentions: { parse: [] },
-		});
+			return InteractionUtil.reply(interaction, {
+				content: `error resetting ${member}'s nickname: ${error}`,
+				allowedMentions: { parse: [] },
+			});
+		}
 	}
 
 	/**
