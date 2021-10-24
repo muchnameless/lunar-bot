@@ -44,7 +44,7 @@ export default class UnnickCommand extends ApplicationCommand {
 				: null; // reset to username if IGN is unknown
 
 			if (member.displayName === NEW_NICK) return InteractionUtil.reply(interaction, {
-				content: `${member}'s nickname is already the default'`,
+				content: `${member}'s nickname is already the default`,
 				ephemeral: true,
 			});
 
@@ -56,8 +56,8 @@ export default class UnnickCommand extends ApplicationCommand {
 
 			return InteractionUtil.reply(interaction, {
 				content: result
-					? `successfully reset ${member}'s nickname'`
-					: `error resetting ${member}'s nickname'`,
+					? `successfully reset ${member}'s nickname`
+					: `error resetting ${member}'s nickname`,
 				allowedMentions: { parse: [] },
 			});
 		}
@@ -70,14 +70,14 @@ export default class UnnickCommand extends ApplicationCommand {
 		});
 
 		if (!member.manageable) return InteractionUtil.reply(interaction, {
-			content: `missing permissions to reset ${member}'s nickname'`,
+			content: `missing permissions to reset ${member}'s nickname`,
 			ephemeral: true,
 		});
 
 		await member.setNickname(null, `reset by ${interaction.user.tag}`);
 
 		return InteractionUtil.reply(interaction, {
-			content: `successfully reset ${member}'s nickname'`,
+			content: `successfully reset ${member}'s nickname`,
 			allowedMentions: { parse: [] },
 		});
 	}
