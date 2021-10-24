@@ -82,7 +82,7 @@ export const DEFAULT_CONFIG = {
 	REPLY_CONFIRMATION: [ 'y', 'ye', 'yes' ],
 	SENIOR_STAFF_ROLE_ID: null,
 	SHRUG_ROLE_ID: null,
-	SKILL_AVERAGE_STATS_CHANNEL_ID: null,
+	SKILLS_AVERAGE_STATS_CHANNEL_ID: null,
 	SLAYER_AVERAGE_STATS_CHANNEL_ID: null,
 	TAX_AMOUNT: 1_000_000,
 	TAX_AUCTIONS_ITEMS: [ 'Stone Bricks', 'Stone Brick Slab', 'Spirit Leap' ],
