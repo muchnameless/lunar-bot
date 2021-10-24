@@ -115,9 +115,10 @@ export default class ConfigCommand extends ApplicationCommand {
 				const KEY = interaction.options.getString('key', true)
 					.toUpperCase()
 					.replace(/ +/g, '_');
-				const VALUE = this.config.get(KEY);
 
-				if (VALUE === null) return InteractionUtil.reply(interaction, `\`${KEY}\` is not in the config`);
+				if (!this.config.cache.has(KEY)) return InteractionUtil.reply(interaction, `\`${KEY}\` is not in the config`);
+
+				const VALUE = this.config.get(KEY);
 
 				await this.config.remove(KEY);
 				return InteractionUtil.reply(interaction, `removed \`${KEY}\`: \`${VALUE}\``);
