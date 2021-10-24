@@ -296,8 +296,8 @@ export default class InteractionUtil extends null {
 	 * @param contentOrOptions
 	 */
 	static async editReply(interaction: ChatInteraction, contentOrOptions: EditReplyOptions & { rejectOnError: true }): Promise<Message>
-	static async editReply(interaction: ChatInteraction, contentOrOptions: string | EditReplyOptions): Promise<void | Message>;
-	static async editReply(interaction: ChatInteraction, contentOrOptions: string | EditReplyOptions): Promise<void | Message> {
+	static async editReply(interaction: ChatInteraction, contentOrOptions: string | EditReplyOptions): Promise<void | null | Message>;
+	static async editReply(interaction: ChatInteraction, contentOrOptions: string | EditReplyOptions): Promise<void | null | Message> {
 		const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
 
 		try {
@@ -306,6 +306,17 @@ export default class InteractionUtil extends null {
 
 			return await interaction.editReply(contentOrOptions) as Message;
 		} catch (error) {
+			if (this.isInteractionError(error)) {
+				logger.error(error);
+
+				try {
+					return MessageUtil.edit(await interaction.fetchReply() as Message, contentOrOptions);
+				} catch (error_) {
+					if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error_;
+					return logger.error(error_);
+				}
+			}
+
 			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error;
 			return logger.error(error);
 		}
