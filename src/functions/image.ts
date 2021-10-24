@@ -11,13 +11,13 @@ import type { LunarClient } from '../structures/LunarClient';
  * @param uuid minecraft UUID
  */
 export async function uuidToImgurBustURL({ config }: LunarClient, uuid: string) {
-	if (!config.get('IMGUR_UPLOADER_ENABLED')) return null;
-
 	try {
 		const cacheKey = `image:bust:${uuid}`;
 		const cachedResult = await cache.get(cacheKey) as string | undefined;
 
 		if (cachedResult) return cachedResult;
+
+		if (!config.get('IMGUR_UPLOADER_ENABLED')) return null;
 
 		const URL = (await imgur.upload(`${BUST_IMAGE_URL}${uuid}`)).data.link;
 
