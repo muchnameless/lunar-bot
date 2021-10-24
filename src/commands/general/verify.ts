@@ -97,7 +97,7 @@ export default class VerifyCommand extends ApplicationCommand {
 
 		player.guildId = guildId;
 
-		const discordMember = interaction.member as GuildMember
+		const discordMember = interaction.member as GuildMember | null
 			?? await this.client.lgGuild?.members.fetch(interaction.user).catch(error => logger.error(error, '[VERIFY]: guild member fetch'))
 			?? null;
 
