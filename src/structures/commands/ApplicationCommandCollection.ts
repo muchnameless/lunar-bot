@@ -31,7 +31,6 @@ export class ApplicationCommandCollection<C extends SlashCommandType = SlashComm
 	async init(commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands) {
 		const uniqueCommands = [ ...new Set(this.values()) ];
 		const commands = await commandManager.set(
-			// @ts-expect-error
 			uniqueCommands.flatMap(({ data }) => data),
 		);
 
@@ -86,10 +85,9 @@ export class ApplicationCommandCollection<C extends SlashCommandType = SlashComm
 		if (!command) throw new Error(`[COMMANDS CREATE]: unknown command '${commandName}'`);
 		if (!(command instanceof ApplicationCommand)) throw new Error(`[COMMANDS CREATE]: ${command.name} is not an ApplicationCommand`);
 
-		const applicationCommands = await Promise.all(command.data.map(d => commandManager.create(
-			// @ts-expect-error
-			d,
-		)));
+		const applicationCommands = await Promise.all(
+			command.data.map(d => commandManager.create(d)),
+		);
 
 		await this.setSinglePermissions({ command, applicationCommands });
 
