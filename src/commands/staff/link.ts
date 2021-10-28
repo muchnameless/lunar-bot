@@ -1,8 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { DiscordAPIError, Constants } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { hypixel } from '../../api/hypixel';
-import { mojang } from '../../api/mojang';
+import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { logger, seconds, validateNumber } from '../../functions';

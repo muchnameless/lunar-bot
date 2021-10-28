@@ -4,7 +4,7 @@ import { INVISIBLE_CHARACTER_REGEXP, MC_CLIENT_VERSION, MESSAGE_POSITIONS, MESSA
 import { NEVER_MATCHING_REGEXP, NO_PING_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { MessageUtil } from '../../util';
-import { mojang } from '../../api/mojang';
+import { mojang } from '../../api';
 import { logger, seconds, uuidToImgurBustURL } from '../../functions';
 import type { Message as DiscordMessage } from 'discord.js';
 import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';

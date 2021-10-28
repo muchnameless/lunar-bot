@@ -4,8 +4,7 @@ import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../.
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
 import { ChatManager } from './ChatManager';
-import { cache } from '../../../api/cache';
-import { imgur } from '../../../api/imgur';
+import { cache, imgur } from '../../../api';
 import { hours, logger } from '../../../functions';
 import type {
 	Collection,

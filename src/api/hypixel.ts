@@ -1,5 +1,5 @@
 import { Client } from '@zikeji/hypixel';
-import { cache } from './cache';
+import { cache } from '.';
 import { HYPIXEL_KEY } from '../constants';
 import { days, logger, minutes, seconds } from '../functions';
 import type { DefaultMeta } from '@zikeji/hypixel';

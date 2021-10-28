@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
-import { hypixel } from '../../api/hypixel';
-import { maro } from '../../api/maro';
+import { hypixel, maro } from '../../api';
 import { getMainProfile, getUuidAndIgn, logger, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
 import BaseWeightCommand from './~base-weight';
 import type { CommandInteraction } from 'discord.js';

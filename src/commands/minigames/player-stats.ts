@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
-import { hypixel } from '../../api/hypixel';
+import { hypixel } from '../../api';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
 import { getUuidAndIgn, logger, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';

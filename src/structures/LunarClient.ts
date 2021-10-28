@@ -7,7 +7,7 @@ import { ChatBridgeManager } from './chat_bridge/ChatBridgeManager';
 import { ApplicationCommandCollection } from './commands/ApplicationCommandCollection';
 import { EventCollection } from './events/EventCollection';
 import { UserUtil } from '../util';
-import { cache } from '../api/cache';
+import { cache, imgur } from '../api';
 import { hours, logger } from '../functions';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 import type { db } from './database';
@@ -176,6 +176,12 @@ export class LunarClient extends Client {
 	 */
 	async exit(code = 0): Promise<never> {
 		let hasError = false;
+
+		try {
+			await imgur.cacheRateLimits();
+		} catch (error) {
+			logger.fatal(error);
+		}
 
 		for (const output of await Promise.allSettled([
 			this.db.sequelize.close(),

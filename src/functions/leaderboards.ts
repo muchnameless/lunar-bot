@@ -28,7 +28,7 @@ import {
 } from '../constants';
 import { days, minutes, upperCaseFirstChar } from '.';
 import { InteractionUtil, UserUtil } from '../util';
-import { cache } from '../api/cache';
+import { cache } from '../api';
 import type {
 	ButtonInteraction,
 	SelectMenuInteraction,

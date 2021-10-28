@@ -1,4 +1,4 @@
-import { mojang } from '../../api/mojang';
+import { mojang } from '../../api';
 import { logger } from '../../functions';
 import type { GuildMember } from 'discord.js';
 import type { ChatBridge, ChatOptions } from './ChatBridge';

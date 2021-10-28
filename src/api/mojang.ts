@@ -1,4 +1,4 @@
-import { cache } from './cache';
+import { cache } from '.';
 import { MOJANG_KEY } from '../constants';
 import { MojangClient } from '../structures/MojangClient';
 import { days, hours, minutes, seconds } from '../functions';

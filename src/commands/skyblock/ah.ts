@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageActionRow, MessageSelectMenu, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { PROFILE_EMOJIS } from '../../constants';
-import { hypixel } from '../../api/hypixel';
+import { hypixel } from '../../api';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { getMainProfile, getUuidAndIgn, logger, seconds, shortenNumber, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions';

@@ -143,6 +143,18 @@ export class ImgurClient {
 	}
 
 	/**
+	 * caches the current ratelimit data
+	 */
+	cacheRateLimits() {
+		if (this.rateLimit.userlimit === null) return;
+
+		return this.cache?.set('ratelimits', {
+			rateLimit: this.rateLimit,
+			postRateLimit: this.postRateLimit,
+		});
+	}
+
+	/**
 	 * uploads an image
 	 * @param url
 	 * @param type
@@ -232,11 +244,6 @@ export class ImgurClient {
 						: Number.parseInt(data, 10);
 				}
 			}
-
-			this.cache?.set('ratelimits', {
-				rateLimit: this.rateLimit,
-				postRateLimit: this.postRateLimit,
-			});
 
 			// check response
 			if (res.status !== 200) {

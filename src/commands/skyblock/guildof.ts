@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { mojang } from '../../api/mojang';
-import { hypixel } from '../../api/hypixel';
+import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { logger, seconds } from '../../functions';

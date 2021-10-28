@@ -10,7 +10,7 @@ import {
 	MAYOR_CHANGE_INTERVAL,
 	OFFSET_FLAGS,
 } from '../../../constants';
-import { hypixel } from '../../../api/hypixel';
+import { hypixel } from '../../../api';
 import {
 	autocorrect,
 	compareAlphabetically,

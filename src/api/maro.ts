@@ -1,4 +1,4 @@
-import { cache } from './cache';
+import { cache } from '.';
 import { MARO_KEY } from '../constants';
 import { MaroClient } from '../structures/MaroClient';
 import { getMainProfile, seconds } from '../functions';

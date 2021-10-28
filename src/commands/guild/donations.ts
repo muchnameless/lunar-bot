@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { stripIndent } from 'common-tags';
-import { mojang } from '../../api/mojang';
+import { mojang } from '../../api';
 import { InteractionUtil, MessageEmbedUtil } from '../../util';
 import { logger } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';

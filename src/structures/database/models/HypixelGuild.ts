@@ -12,8 +12,7 @@ import {
 	UNKNOWN_IGN,
 } from '../../../constants';
 import { GuildUtil } from '../../../util';
-import { hypixel } from '../../../api/hypixel';
-import { mojang } from '../../../api/mojang';
+import { hypixel, mojang } from '../../../api';
 import {
 	cleanFormattedNumber,
 	compareAlphabetically,

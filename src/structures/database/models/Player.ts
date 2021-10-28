@@ -29,8 +29,7 @@ import {
 } from '../../../constants';
 import { HypixelGuildManager } from '../managers/HypixelGuildManager';
 import { GuildMemberUtil, GuildUtil, MessageEmbedUtil, UserUtil } from '../../../util';
-import { hypixel } from '../../../api/hypixel';
-import { mojang } from '../../../api/mojang';
+import { hypixel, mojang } from '../../../api';
 import {
 	days,
 	escapeIgn,

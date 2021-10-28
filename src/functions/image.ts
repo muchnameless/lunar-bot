@@ -1,6 +1,5 @@
 import { BUST_IMAGE_URL } from '../constants';
-import { cache } from '../api/cache';
-import { imgur } from '../api/imgur';
+import { cache, imgur } from '../api';
 import { days, logger } from '.';
 import type { LunarClient } from '../structures/LunarClient';
 
@@ -21,7 +20,7 @@ export async function uuidToImgurBustURL({ config }: LunarClient, uuid: string) 
 
 		const URL = (await imgur.upload(`${BUST_IMAGE_URL}${uuid}`)).data.link;
 
-		cache.set(cacheKey, URL, days(1));
+		cache.set(cacheKey, URL, days(3));
 
 		return URL;
 	} catch (error) {

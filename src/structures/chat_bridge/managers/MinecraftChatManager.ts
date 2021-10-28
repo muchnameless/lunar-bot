@@ -20,7 +20,7 @@ import { createBot } from '../MinecraftBot';
 import { GuildMemberUtil, MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector, MessageCollectorEvents } from '../MessageCollector';
 import { ChatManager } from './ChatManager';
-import { cache } from '../../../api/cache';
+import { cache } from '../../../api';
 import { cleanFormattedNumber, hours, logger, minutes, seconds, splitMessage, trim } from '../../../functions';
 import type { GuildChannel, Message } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';

@@ -1,6 +1,6 @@
 import { HypixelMessage } from '../structures/chat_bridge/HypixelMessage';
 import { UserUtil } from '../util';
-import { mojang } from '../api/mojang';
+import { mojang } from '../api';
 import type { HypixelUserMessage } from '../structures/chat_bridge/HypixelMessage';
 import type { Interaction } from 'discord.js';
 import type { MojangResult } from '../structures/MojangClient';

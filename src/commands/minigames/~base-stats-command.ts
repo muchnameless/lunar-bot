@@ -1,4 +1,4 @@
-import { hypixel } from '../../api/hypixel';
+import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
 import { getUuidAndIgn, logger } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';

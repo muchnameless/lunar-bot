@@ -4,7 +4,7 @@ import { stripIndents, commaLists } from 'common-tags';
 import pkg from 'sequelize';
 const { Model } = pkg;
 import { DEFAULT_CONFIG, X_EMOJI, Y_EMOJI_ALT } from '../../../constants';
-import { hypixel } from '../../../api/hypixel';
+import { hypixel } from '../../../api';
 import { ConfigManager } from './ConfigManager';
 import { HypixelGuildManager } from './HypixelGuildManager';
 import { PlayerManager } from './PlayerManager';

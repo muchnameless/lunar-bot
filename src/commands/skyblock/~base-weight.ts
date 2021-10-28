@@ -1,5 +1,5 @@
 import { PROFILE_NAMES, X_EMOJI } from '../../constants';
-import { hypixel } from '../../api/hypixel';
+import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
 import { autocorrect, escapeIgn, getUuidAndIgn, logger, seconds, upperCaseFirstChar } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';

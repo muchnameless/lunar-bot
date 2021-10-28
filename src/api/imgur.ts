@@ -1,4 +1,4 @@
-import { cache } from './cache';
+import { cache } from '.';
 import { IMGUR_KEY } from '../constants';
 import { ImgurClient } from '../structures/ImgurClient';
 import { hours, seconds } from '../functions';

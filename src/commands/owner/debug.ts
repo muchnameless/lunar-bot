@@ -3,7 +3,7 @@ import { Formatters, SnowflakeUtil, Util, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
-import { imgur } from '../../api/imgur';
+import { imgur } from '../../api';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
