@@ -67,7 +67,7 @@
     "@types/ms": "^0.7.31",
     "@types/node": "^16.11.6",
     "@types/pg": "^8.6.1",
-    "@types/validator": "^13.6.5",
+    "@types/validator": "^13.6.6",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
     "discord-api-types": "^0.24.0",
