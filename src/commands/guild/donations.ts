@@ -4,6 +4,7 @@ import { stripIndent } from 'common-tags';
 import { mojang } from '../../api';
 import { InteractionUtil, MessageEmbedUtil } from '../../util';
 import { logger } from '../../functions';
+import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -25,7 +26,7 @@ export default class DonationsCommand extends ApplicationCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		// aquire donations from db
 		const donations = await this.client.db.models.Transaction.findAll({
-			where: { type: 'donation' },
+			where: { type: TransactionTypes.DONATION },
 		});
 
 		// construct { donator: amount } object

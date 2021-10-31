@@ -3,6 +3,7 @@ import { Formatters } from 'discord.js';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { removeNumberFormatting, safePromiseAll, validateNumber } from '../../functions';
+import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -56,7 +57,7 @@ export default class DonateCommand extends ApplicationCommand {
 			amount,
 			collectedBy: collector.minecraftUuid,
 			notes,
-			type: 'donation',
+			type: TransactionTypes.DONATION,
 		}));
 
 		this.client.log(this.client.defaultEmbed

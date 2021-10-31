@@ -5,6 +5,7 @@ const { Op } = pkg;
 import { buildGuildOption, requiredPlayerOption, optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil } from '../../util';
 import { escapeIgn, logger, safePromiseAll, validateNumber } from '../../functions';
+import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -337,8 +338,8 @@ export default class TaxCommand extends ApplicationCommand {
 								...taxCollectors.cache.map((taxCollector) => {
 									if (!taxCollector.isCollecting) return taxCollector.remove();
 									return safePromiseAll([
-										taxCollector.resetAmount('tax'),
-										taxCollector.resetAmount('donation'),
+										taxCollector.resetAmount(TransactionTypes.TAX),
+										taxCollector.resetAmount(TransactionTypes.DONATION),
 									]);
 								}),
 								// reset players that left

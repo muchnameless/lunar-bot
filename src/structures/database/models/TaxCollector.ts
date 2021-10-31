@@ -1,5 +1,6 @@
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
+import { TransactionTypes } from './Transaction';
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
@@ -65,16 +66,18 @@ export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCrea
 	 * @param amount
 	 * @param type
 	 */
-	addAmount(amount: number, type = 'tax') {
+	addAmount(amount: number, type = TransactionTypes.TAX) {
 		switch (type) {
-			case 'tax':
+			case TransactionTypes.TAX:
 				return this.update({ collectedTax: this.collectedTax + amount });
 
-			case 'donation':
+			case TransactionTypes.DONATION:
 				return this.update({ collectedDonations: this.collectedDonations + amount });
 
-			default:
-				throw new Error(`[ADD AMOUNT]: ${this}: unknown type '${type}'`);
+			default: {
+				const e: never = type;
+				throw new Error(`[ADD AMOUNT]: ${this}: unknown type '${e}'`);
+			}
 		}
 	}
 
@@ -82,18 +85,18 @@ export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCrea
 	 * resets the specified amount back to 0
 	 * @param type
 	 */
-	resetAmount(type = 'tax') {
+	resetAmount(type = TransactionTypes.TAX) {
 		switch (type) {
-			case 'tax':
-			case 'taxes':
+			case TransactionTypes.TAX:
 				return this.update({ collectedTax: 0 });
 
-			case 'donation':
-			case 'donations':
+			case TransactionTypes.DONATION:
 				return this.update({ collectedDonations: 0 });
 
-			default:
-				throw new Error(`[RESET AMOUNT]: ${this}: unknown type '${type}'`);
+			default: {
+				const e: never = type;
+				throw new Error(`[RESET AMOUNT]: ${this}: unknown type '${e}'`);
+			}
 		}
 	}
 

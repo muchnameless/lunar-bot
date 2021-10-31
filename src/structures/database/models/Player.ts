@@ -44,6 +44,7 @@ import {
 	validateDiscordId,
 	validateNumber,
 } from '../../../functions';
+import { TransactionTypes } from './Transaction';
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
 import type { Snowflake } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
@@ -96,7 +97,7 @@ interface AddTransferOptions extends SetToPaidOptions {
 	collectedBy: ModelResovable<TaxCollector>;
 	amount: number;
 	notes?: string | null;
-	type?: 'tax' | 'donation';
+	type?: TransactionTypes;
 }
 
 interface PlayerAttributes {
@@ -632,7 +633,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				limit: 1,
 				where: {
 					from: this.minecraftUuid,
-					type: 'tax',
+					type: TransactionTypes.TAX,
 				},
 				order: [ [ 'createdAt', 'DESC' ] ],
 				attributes: [ 'amount' ],
@@ -1549,13 +1550,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			limit: 1,
 			where: {
 				from: this.minecraftUuid,
-				type: 'tax',
+				type: TransactionTypes.TAX,
 			},
 			order: [ [ 'createdAt', 'DESC' ] ],
 			attributes: [ 'to', 'amount' ],
 			raw: true,
 		});
-		if (result.length) this.client.taxCollectors.cache.get(result[0].to)?.addAmount(-result[0].amount, 'tax');
+		if (result.length) this.client.taxCollectors.cache.get(result[0].to)?.addAmount(-result[0].amount, TransactionTypes.TAX);
 
 		return this.update({ paid: false });
 	}
@@ -1566,15 +1567,15 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	async setToPaid({ amount = this.client.config.get('TAX_AMOUNT'), collectedBy = this.minecraftUuid, auctionId = null }: SetToPaidOptions = {}) {
 		if (this.paid) {
-			await Promise.all(this.addTransfer({ amount, collectedBy, auctionId, type: 'donation' }));
+			await Promise.all(this.addTransfer({ amount, collectedBy, auctionId, type: TransactionTypes.DONATION }));
 			return this;
 		}
 
 		const OVERFLOW = Math.max(amount - this.client.config.get('TAX_AMOUNT'), 0); // >=
 		const TAX_AMOUNT = amount - OVERFLOW;
-		const promises = this.addTransfer({ amount: TAX_AMOUNT, collectedBy, auctionId, type: 'tax' });
+		const promises = this.addTransfer({ amount: TAX_AMOUNT, collectedBy, auctionId, type: TransactionTypes.TAX });
 
-		if (OVERFLOW) promises.push(...this.addTransfer({ amount: OVERFLOW, collectedBy, auctionId, type: 'donation' }));
+		if (OVERFLOW) promises.push(...this.addTransfer({ amount: OVERFLOW, collectedBy, auctionId, type: TransactionTypes.DONATION }));
 
 		await Promise.all(promises);
 
@@ -1587,7 +1588,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options.type
 	 * @param options.notes
 	 */
-	addTransfer({ amount, collectedBy, auctionId = null, notes = null, type = 'tax' }: AddTransferOptions): [ Promise<TaxCollector>, Promise<Transaction> ] {
+	addTransfer({ amount, collectedBy, auctionId = null, notes = null, type = TransactionTypes.TAX }: AddTransferOptions): [ Promise<TaxCollector>, Promise<Transaction> ] {
 		const taxCollector = this.client.taxCollectors.resolve(collectedBy);
 		if (!taxCollector) throw new Error(`unknown tax collector resolvable ${collectedBy}`);
 
