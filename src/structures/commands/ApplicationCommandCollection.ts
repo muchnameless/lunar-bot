@@ -123,7 +123,7 @@ export class ApplicationCommandCollection<C extends SlashCommandType = SlashComm
 	 * @param commandManager
 	 */
 	async deleteCommand(commandName: string, commandManager: GuildApplicationCommandManager | ApplicationCommandManager = this.client.application!.commands) {
-		const commands = await commandManager.fetch();
+		const commands = await (commandManager as ApplicationCommandManager).fetch();
 		const command = commands.find(cmd => cmd.name === commandName.toLowerCase());
 
 		if (!command) throw new Error(`unknown command ${commandName}`);
