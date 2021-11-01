@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
-import { MESSAGE_TYPES } from '../../structures/chat_bridge/constants';
+import { INVISIBLE_CHARACTERS, MESSAGE_TYPES } from '../../structures/chat_bridge/constants';
 import { buildGuildOption } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../util';
 import { minutes, seconds, stringToMS, upperCaseFirstChar } from '../../functions';
@@ -86,7 +86,7 @@ export default class PollCommand extends DualCommand {
 			chatBridge.broadcast(stripIndents`
 				poll by ${ign}: type a number to vote (${ms(DURATION, { long: true })})
 				${question}
-				${pollOptions.map(({ number, option }) => `${number}: ${option}`).join('\n')}
+				${pollOptions.map(({ number, option }) => `${INVISIBLE_CHARACTERS[0]}${number}: ${option}`).join('\n')}
 			`);
 
 			// aquire in game votes

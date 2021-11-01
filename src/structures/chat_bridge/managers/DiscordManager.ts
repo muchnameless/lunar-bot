@@ -1,5 +1,5 @@
 import { Collection, Util, Formatters } from 'discord.js';
-import { MESSAGE_TYPES, EMOJI_NAME_TO_UNICODE } from '../constants';
+import { MESSAGE_TYPES, EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
 import { autocorrect } from '../../../functions';
 import { DiscordChatManager } from './DiscordChatManager';
 import type { ChatBridge } from '../ChatBridge';
@@ -139,6 +139,7 @@ export class DiscordManager {
 		return DiscordManager.#escapeNonURL(
 			Util.escapeMarkdown(
 				string
+					.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invisible mc characters
 					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
 					.replace( // emojis (custom and default)
 						/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
