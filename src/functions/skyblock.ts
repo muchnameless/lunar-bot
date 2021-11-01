@@ -100,7 +100,7 @@ export function getMainProfile(profiles: SkyBlockProfiles | null, uuid: string) 
 	for (const profile of profiles) {
 		if (!profile) continue;
 
-		const { totalWeight } = getSenitherWeight(profile.members[uuid]);
+		const { totalWeight } = getLilyWeight(profile.members[uuid]);
 
 		if (maxWeight > totalWeight) continue;
 
@@ -237,7 +237,7 @@ export function getSenitherDungeonWeight(dungeonType: DungeonTypes, xp = 0) {
  * Lily
  */
 
-const { getWeightRaw: getLilyWeightRaw } = lilyweight();
+export const { getWeightRaw: getLilyWeightRaw } = lilyweight();
 
 /**
  * @param skyblockMember

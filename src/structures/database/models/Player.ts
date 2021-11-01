@@ -24,8 +24,11 @@ import {
 	SLAYER_XP,
 	SLAYERS,
 	UNKNOWN_IGN,
+	XP_AND_DATA_TYPES,
 	XP_OFFSETS,
 	XP_TYPES,
+	isXPType,
+	LILY_SKILL_NAMES,
 } from '../../../constants';
 import { HypixelGuildManager } from '../managers/HypixelGuildManager';
 import { GuildMemberUtil, GuildUtil, MessageEmbedUtil, UserUtil } from '../../../util';
@@ -33,6 +36,7 @@ import { hypixel, mojang } from '../../../api';
 import {
 	days,
 	escapeIgn,
+	getLilyWeightRaw,
 	getMainProfile,
 	getSenitherDungeonWeight,
 	getSenitherSkillWeight,
@@ -53,7 +57,7 @@ import type { Transaction, TransactionAttributes } from './Transaction';
 import type { LunarClient } from '../../LunarClient';
 import type { TaxCollector } from './TaxCollector';
 import type { ModelResovable } from '../managers/ModelManager';
-import type { DungeonTypes, SkillTypes, SlayerTypes, XPOffsets, XPTypes } from '../../../constants';
+import type { DungeonTypes, SkillTypes, SlayerTypes, XPAndDataTypes, XPOffsets } from '../../../constants';
 import type { RoleResolvables } from '../../../util/GuildUtil';
 
 
@@ -76,12 +80,12 @@ export interface PlayerUpdateOptions {
 export interface TransferXpOptions {
 	from?: XPOffsets;
 	to?: XPOffsets;
-	types?: readonly XPTypes[];
+	types?: readonly XPAndDataTypes[];
 }
 
 export interface ResetXpOptions {
 	offsetToReset?: XPOffsets | null | typeof OFFSET_FLAGS.DAY | typeof OFFSET_FLAGS.CURRENT;
-	typesToReset?: readonly XPTypes[];
+	typesToReset?: readonly XPAndDataTypes[];
 }
 
 interface SetToPaidOptions {
@@ -164,6 +168,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare guildXpDaily: number;
 	declare lastActivityAt: Date;
 
+	// current
 	declare tamingXp: number;
 	declare farmingXp: number;
 	declare miningXp: number;
@@ -185,7 +190,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare archerXp: number;
 	declare tankXp: number;
 	declare guildXp: number;
+	declare catacombsCompletions: Record<string, number>;
+	declare catacombsMasterCompletions: Record<string, number>;
 
+	// daily array
 	declare tamingXpHistory: number[];
 	declare farmingXpHistory: number[];
 	declare miningXpHistory: number[];
@@ -207,7 +215,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare archerXpHistory: number[];
 	declare tankXpHistory: number[];
 	declare guildXpHistory: number[];
+	declare catacombsCompletionsHistory: Record<string, number>[];
+	declare catacombsMasterCompletionsHistory: Record<string, number>[];
 
+	// competition start
 	declare tamingXpCompetitionStart: number;
 	declare farmingXpCompetitionStart: number;
 	declare miningXpCompetitionStart: number;
@@ -229,7 +240,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare archerXpCompetitionStart: number;
 	declare tankXpCompetitionStart: number;
 	declare guildXpCompetitionStart: number;
+	declare catacombsCompletionsCompetitionStart: Record<string, number>;
+	declare catacombsMasterCompletionsCompetitionStart: Record<string, number>;
 
+	// competition end
 	declare tamingXpCompetitionEnd: number;
 	declare farmingXpCompetitionEnd: number;
 	declare miningXpCompetitionEnd: number;
@@ -251,7 +265,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare archerXpCompetitionEnd: number;
 	declare tankXpCompetitionEnd: number;
 	declare guildXpCompetitionEnd: number;
+	declare catacombsCompletionsCompetitionEnd: Record<string, number>;
+	declare catacombsMasterCompletionsCompetitionEnd: Record<string, number>;
 
+	// mayor
 	declare tamingXpOffsetMayor: number;
 	declare farmingXpOffsetMayor: number;
 	declare miningXpOffsetMayor: number;
@@ -273,7 +290,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare archerXpOffsetMayor: number;
 	declare tankXpOffsetMayor: number;
 	declare guildXpOffsetMayor: number;
+	declare catacombsCompletionsOffsetMayor: Record<string, number>;
+	declare catacombsMasterCompletionsOffsetMayor: Record<string, number>;
 
+	// week
 	declare tamingXpOffsetWeek: number;
 	declare farmingXpOffsetWeek: number;
 	declare miningXpOffsetWeek: number;
@@ -295,7 +315,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare archerXpOffsetWeek: number;
 	declare tankXpOffsetWeek: number;
 	declare guildXpOffsetWeek: number;
+	declare catacombsCompletionsOffsetWeek: Record<string, number>;
+	declare catacombsMasterCompletionsOffsetWeek: Record<string, number>;
 
+	// month
 	declare tamingXpOffsetMonth: number;
 	declare farmingXpOffsetMonth: number;
 	declare miningXpOffsetMonth: number;
@@ -317,6 +340,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare archerXpOffsetMonth: number;
 	declare tankXpOffsetMonth: number;
 	declare guildXpOffsetMonth: number;
+	declare catacombsCompletionsOffsetMonth: Record<string, number>;
+	declare catacombsMasterCompletionsOffsetMonth: Record<string, number>;
 
 	declare readonly createdAt: Date;
 	declare readonly updatedAt: Date;
@@ -347,6 +372,47 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				Reflect.set(attributes, `${type}Xp${offset}`, {
 					type: DataTypes.DECIMAL,
 					defaultValue: 0,
+					allowNull: false,
+				});
+			}
+		}
+
+		// add dungeon completions
+		for (const type of DUNGEON_TYPES) {
+			Reflect.set(attributes, `${type}Completions`, {
+				type: DataTypes.JSONB,
+				defaultValue: {},
+				allowNull: false,
+			});
+
+			Reflect.set(attributes, `${type}MasterCompletions`, {
+				type: DataTypes.JSONB,
+				defaultValue: {},
+				allowNull: false,
+			});
+
+			Reflect.set(attributes, `${type}CompletionsHistory`, {
+				type: DataTypes.ARRAY(DataTypes.JSONB),
+				defaultValue: Array.from({ length: 30 }).fill({}),
+				allowNull: false,
+			});
+
+			Reflect.set(attributes, `${type}MasterCompletionsHistory`, {
+				type: DataTypes.ARRAY(DataTypes.JSONB),
+				defaultValue: Array.from({ length: 30 }).fill({}),
+				allowNull: false,
+			});
+
+			for (const offset of XP_OFFSETS) {
+				Reflect.set(attributes, `${type}Completions${offset}`, {
+					type: DataTypes.JSONB,
+					defaultValue: {},
+					allowNull: false,
+				});
+
+				Reflect.set(attributes, `${type}MasterCompletions${offset}`, {
+					type: DataTypes.JSONB,
+					defaultValue: {},
 					allowNull: false,
 				});
 			}
@@ -775,15 +841,28 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			/**
 			 * dungeons
 			 */
-			for (const dungeonType of DUNGEON_TYPES) this[`${dungeonType}Xp`] = playerData.dungeons?.dungeon_types?.[dungeonType]?.experience ?? 0;
-			for (const dungeonClass of DUNGEON_CLASSES) this[`${dungeonClass}Xp`] = playerData.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0;
+			for (const dungeonType of DUNGEON_TYPES) {
+				this[`${dungeonType}Xp`] = playerData.dungeons?.dungeon_types?.[dungeonType]?.experience ?? 0;
+				this[`${dungeonType}Completions`] = playerData.dungeons?.dungeon_types?.[dungeonType]?.tier_completions ?? {};
+				this[`${dungeonType}MasterCompletions`] = playerData.dungeons?.dungeon_types?.[`master_${dungeonType}`]?.tier_completions ?? {};
+			}
+
+			for (const dungeonClass of DUNGEON_CLASSES) {
+				this[`${dungeonClass}Xp`] = playerData.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0;
+			}
 
 			// reset dungeons xp if no catacombs xp offset
 			if (this.catacombsXp !== 0) {
 				for (const offset of XP_OFFSETS) {
 					if (this[`catacombsXp${offset}`] === 0) {
 						logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' dungeon xp`);
-						await this.resetXp({ offsetToReset: offset, typesToReset: DUNGEON_TYPES_AND_CLASSES });
+						await this.resetXp({
+							offsetToReset: offset,
+							typesToReset: [
+								...DUNGEON_TYPES_AND_CLASSES,
+								...DUNGEON_TYPES.flatMap(type => [ `${type}Completions`, `${type}MasterCompletions` ] as const),
+							],
+						});
 					}
 				}
 			}
@@ -856,7 +935,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const { config } = this.client;
 		const rolesToAdd: Snowflake[] = [];
 		const rolesToRemove: Snowflake[] = [];
-		const { totalWeight: weight } = this.getSenitherWeight();
+		const { totalWeight: weight } = this.getLilyWeight();
 
 		let inGuild = false;
 		let reason = reasonInput;
@@ -1497,9 +1576,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options.to
 	 * @param options.types
 	 */
-	transferXp({ from = '', to = '', types = XP_TYPES }: TransferXpOptions) {
+	transferXp({ from = '', to = '', types = XP_AND_DATA_TYPES }: TransferXpOptions) {
 		for (const type of types) {
-			this[`${type}Xp${to}`] = this[`${type}Xp${from}`];
+			if (isXPType(type)) {
+				this[`${type}Xp${to}`] = this[`${type}Xp${from}`];
+			} else {
+				this[`${type}${to}`] = this[`${type}${from}`];
+			}
 		}
 
 		return this.save();
@@ -1511,7 +1594,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options.offsetToReset
 	 * @param options.typesToReset
 	 */
-	async resetXp({ offsetToReset = null, typesToReset = XP_TYPES }: ResetXpOptions = {}): Promise<this> {
+	async resetXp({ offsetToReset = null, typesToReset = XP_AND_DATA_TYPES }: ResetXpOptions = {}): Promise<this> {
 		switch (offsetToReset) {
 			case null:
 				// no offset type specifies -> resetting everything
@@ -1521,19 +1604,38 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			case OFFSET_FLAGS.DAY:
 				// append current xp to the beginning of the xpHistory-Array and pop of the last value
 				for (const type of typesToReset) {
-					const xpHistory = this[`${type}XpHistory`];
-					xpHistory.shift();
-					xpHistory.push(this[`${type}Xp`]);
-					this.changed(`${type}XpHistory`, true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+					if (isXPType(type)) {
+						const xpHistory = this[`${type}XpHistory`];
+						xpHistory.shift();
+						xpHistory.push(this[`${type}Xp`]);
+						this.changed(`${type}XpHistory`, true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+					} else {
+						const xpHistory = this[`${type}History`];
+						xpHistory.shift();
+						xpHistory.push(this[type]);
+						this.changed(`${type}History`, true); // neccessary so that sequelize knows an array has changed and the db needs to be updated
+					}
 				}
 				break;
 
 			case OFFSET_FLAGS.CURRENT:
-				for (const type of typesToReset) this[`${type}Xp`] = 0;
+				for (const type of typesToReset) {
+					if (isXPType(type)) {
+						this[`${type}Xp`] = 0;
+					} else {
+						this[type] = {};
+					}
+				}
 				break;
 
 			default:
-				for (const type of typesToReset) this[`${type}Xp${offsetToReset}`] = this[`${type}Xp`];
+				for (const type of typesToReset) {
+					if (isXPType(type)) {
+						this[`${type}Xp${offsetToReset}`] = this[`${type}Xp`];
+					} else {
+						this[`${type}${offsetToReset}`] = this[type];
+					}
+				}
 				break;
 		}
 
@@ -1736,6 +1838,28 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	}
 
 	/**
+	 * calculates the player's weight using Lily's formula
+	 * @param offset optional offset value to use instead of the current xp value
+	 */
+	getLilyWeight(offset: XPOffsets = '') {
+		const SKILL_XP_LILY = LILY_SKILL_NAMES.map(skill => this[`${skill}Xp${offset}`]);
+		const { total, skill: { overflow } } = getLilyWeightRaw(
+			LILY_SKILL_NAMES.map((skill, index) => getSkillLevel(skill, SKILL_XP_LILY[index], 60).trueLevel), // skill levels
+			SKILL_XP_LILY, // skill xp
+			this[`catacombsCompletions${offset}`], // catacombs completions
+			this[`catacombsMasterCompletions${offset}`], // master catacombs completions
+			this[`catacombsXp${offset}`], // catacombs xp
+			SLAYERS.map(slayer => this[`${slayer}Xp${offset}`]), // slayer xp
+		);
+
+		return {
+			weight: total - overflow,
+			overflow,
+			totalWeight: total,
+		};
+	}
+
+	/**
 	 * calculates the player's weight using Senither's formula
 	 * @param offset optional offset value to use instead of the current xp value
 	 */
@@ -1809,6 +1933,28 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	getSlayerTotalHistory(index: number) {
 		return SLAYERS.reduce((acc, slayer) => acc + this[`${slayer}XpHistory`][index], 0);
+	}
+
+	/**
+	 * calculates the player's weight using Lily's formula
+	 * @param index xpHistory array index
+	 */
+	getLilyWeightHistory(index: number) {
+		const SKILL_XP_LILY = LILY_SKILL_NAMES.map(skill => this[`${skill}XpHistory`][index]);
+		const { total, skill: { overflow } } = getLilyWeightRaw(
+			LILY_SKILL_NAMES.map((skill, index_) => getSkillLevel(skill, SKILL_XP_LILY[index_], 60).trueLevel), // skill levels
+			SKILL_XP_LILY, // skill xp
+			this.catacombsCompletionsHistory[index], // catacombs completions
+			this.catacombsMasterCompletionsHistory[index], // master catacombs completions
+			this.catacombsXpHistory[index], // catacombs xp
+			SLAYERS.map(slayer => this[`${slayer}XpHistory`][index]), // slayer xp
+		);
+
+		return {
+			weight: total - overflow,
+			overflow,
+			totalWeight: total,
+		};
 	}
 
 	/**

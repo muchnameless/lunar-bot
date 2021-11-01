@@ -7,10 +7,7 @@ import { seconds, upperCaseFirstChar } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { XPTypes } from '../../constants';
-
-
-type TrackingTypes = XPTypes | 'weight' | 'skill-average' | 'slayer';
+import type { LeaderboardXPTypes } from '../../functions';
 
 
 export default class TrackCommand extends ApplicationCommand {
@@ -30,17 +27,39 @@ export default class TrackCommand extends ApplicationCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
-		const type = interaction.options.getString('type') as TrackingTypes ?? this.config.get('CURRENT_COMPETITION');
+		const type = interaction.options.getString('type') as LeaderboardXPTypes ?? this.config.get('CURRENT_COMPETITION');
 		const days = 30;
 
 		let datasets;
 
 		switch (type) {
-			case 'weight': {
+			case 'lily-weight': {
+				const weightHistory = [ ...Array.from({ length: days }).keys() ].map(x => player.getLilyWeightHistory(x));
+
+				datasets = [{
+					label: 'Lily Weight',
+					backgroundColor: 'rgba(0, 0, 255, 0.25)',
+					borderColor: 'rgb(0, 0, 128)',
+					data: weightHistory.map(({ weight }) => weight),
+				}, {
+					label: 'Overflow',
+					backgroundColor: 'rgba(0, 255, 0, 0.25)',
+					borderColor: 'rgb(0, 128, 0)',
+					data: weightHistory.map(({ overflow }) => overflow),
+				}, {
+					label: 'Total Weight',
+					backgroundColor: 'rgba(255, 0, 0, 0.25)',
+					borderColor: 'rgb(128, 0, 0)',
+					data: weightHistory.map(({ totalWeight }) => totalWeight),
+				}];
+				break;
+			}
+
+			case 'senither-weight': {
 				const weightHistory = [ ...Array.from({ length: days }).keys() ].map(x => player.getSenitherWeightHistory(x));
 
 				datasets = [{
-					label: 'Weight',
+					label: 'Senither Weight',
 					backgroundColor: 'rgba(0, 0, 255, 0.25)',
 					borderColor: 'rgb(0, 0, 128)',
 					data: weightHistory.map(({ weight }) => weight),

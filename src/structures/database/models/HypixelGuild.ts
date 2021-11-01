@@ -233,7 +233,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		const PLAYER_COUNT = players.size;
 
 		return {
-			weightAverage: players.reduce((acc, player) => acc + player.getSenitherWeight().totalWeight, 0) / PLAYER_COUNT,
+			weightAverage: players.reduce((acc, player) => acc + player.getLilyWeight().totalWeight, 0) / PLAYER_COUNT,
 			skillAverage: players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT,
 			slayerAverage: players.reduce((acc, player) => acc + player.getSlayerTotal(), 0) / PLAYER_COUNT,
 			catacombsAverage: players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT,
@@ -646,7 +646,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 				nonStaffWithWeight.push({
 					player,
-					weight: player.getSenitherWeight().totalWeight,
+					weight: player.getLilyWeight().totalWeight,
 				});
 			}
 

@@ -140,8 +140,8 @@ export default class XpCommand extends ApplicationCommand {
 			});
 		}
 
-		const { totalWeight, weight, overflow } = player.getSenitherWeight();
-		const { totalWeight: totalWeightOffet, weight: weightOffset, overflow: overflowOffset } = player.getSenitherWeight(OFFSET);
+		const { totalWeight, weight, overflow } = player.getLilyWeight();
+		const { totalWeight: totalWeightOffet, weight: weightOffset, overflow: overflowOffset } = player.getLilyWeight(OFFSET);
 
 		MessageEmbedUtil.padFields(embed)
 			.addFields({
@@ -156,7 +156,7 @@ export default class XpCommand extends ApplicationCommand {
 				`,
 				inline: true,
 			}, {
-				name: 'Weight',
+				name: 'Lily Weight',
 				value: stripIndents`
 					${Formatters.bold('Total')}: ${this.client.formatDecimalNumber(totalWeight)} [ ${this.client.formatDecimalNumber(weight)} + ${this.client.formatDecimalNumber(overflow)} ]
 					${Formatters.bold('Δ:')} ${this.client.formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${this.client.formatDecimalNumber(weight - weightOffset)} + ${this.client.formatDecimalNumber(overflow - overflowOffset)} ]

@@ -9,18 +9,15 @@ import {
 } from 'discord.js';
 import { stripIndent, oneLine } from 'common-tags';
 import {
-	COSMETIC_SKILLS,
 	DOUBLE_LEFT_EMOJI,
 	DOUBLE_RIGHT_EMOJI,
-	DUNGEON_TYPES_AND_CLASSES,
 	GUILD_ID_ALL,
 	LB_KEY,
+	LEADERBOARD_XP_TYPES,
 	LEFT_EMOJI,
 	OFFSET_FLAGS,
 	RELOAD_EMOJI,
 	RIGHT_EMOJI,
-	SKILLS,
-	SLAYERS,
 	XP_OFFSETS_CONVERTER,
 	XP_OFFSETS_SHORT,
 	XP_OFFSETS_TIME,
@@ -40,12 +37,20 @@ import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { LunarClient } from '../structures/LunarClient';
 import type { ConfigManager } from '../structures/database/managers/ConfigManager';
 import type { ChatInteraction } from '../util/InteractionUtil';
-import type { DungeonTypes, SkillTypes } from '../constants';
+import type {
+	DungeonTypes,
+	SkillTypes,
+	COSMETIC_SKILLS,
+	DUNGEON_TYPES_AND_CLASSES,
+	SKILLS,
+	SLAYERS,
+} from '../constants';
 import type { ArrayElement } from '../types/util';
 
 
 export type LeaderboardXPTypes = ArrayElement<[
-	'weight',
+	'lily-weight',
+	'senither-weight',
 	'skill-average',
 	...typeof SKILLS,
 	...typeof COSMETIC_SKILLS,
@@ -218,8 +223,7 @@ function createActionRows(client: LunarClient, cacheKey: CacheKey, { page, lbTyp
 								.join(' ')}`,
 						)
 						.addOptions(
-							[ 'weight', { label: 'Skill Average', value: 'skill-average' }, ...SKILLS, ...COSMETIC_SKILLS, 'slayer', ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES, 'guild' ]
-								.map(x => (typeof x !== 'object' ? ({ label: upperCaseFirstChar(x), value: x }) : x)),
+							LEADERBOARD_XP_TYPES.map(x => ({ label: upperCaseFirstChar(x.replaceAll('-', ' ')), value: x })),
 						),
 				),
 			new MessageActionRow()
@@ -602,11 +606,11 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 		case 'purge': {
 			title = `${hypixelGuild || ''} Purge List (${config.get('PURGE_LIST_OFFSET')} days interval)`;
 			dataConverter = (player) => {
-				const { totalWeight } = player.getSenitherWeight();
+				const { totalWeight } = player.getLilyWeight();
 				const startIndex = player.alchemyXpHistory.length - 1 - config.get('PURGE_LIST_OFFSET');
 				// use weight from the first time they got alch xp, assume player has not been tracked before
 				const XP_TRACKING_START = player.alchemyXpHistory.findIndex((xp, index) => index >= startIndex && xp !== 0);
-				const { totalWeight: totalWeightOffet } = player.getSenitherWeightHistory(XP_TRACKING_START);
+				const { totalWeight: totalWeightOffet } = player.getLilyWeightHistory(XP_TRACKING_START);
 				const gainedWeight = totalWeight - totalWeightOffet;
 				const gainedGuildXp = player.guildXp - player.guildXpHistory[XP_TRACKING_START];
 				return {
@@ -637,8 +641,34 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			break;
 		}
 
-		case 'weight': {
-			title = 'Weight Gained Leaderboard';
+		case 'lily-weight': {
+			title = 'Lily Weight Gained Leaderboard';
+			dataConverter = (player) => {
+				const { weight, overflow, totalWeight } = player.getLilyWeight(CURRENT_OFFSET);
+				const { weight: weightOffset, overflow: overflowOffset, totalWeight: totalWeightOffet } = player.getLilyWeight(offset);
+				const totalWeightGain = totalWeight - totalWeightOffet;
+				return {
+					ign: player.ign,
+					discordId: player.discordId,
+					xpLastUpdatedAt: player.xpLastUpdatedAt,
+					paid: player.paid,
+					weightGain: weight - weightOffset,
+					overflowGain: overflow - overflowOffset,
+					totalWeightGain,
+					sortingStat: totalWeightGain,
+				};
+			};
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
+			totalStats = oneLine`
+				${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeightGain!, 0) / playerData.length))}
+				[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weightGain!, 0) / playerData.length))}
+				+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflowGain!, 0) / playerData.length))}]`;
+			getEntry = player => `${client.formatDecimalNumber(player.totalWeightGain!, Math.floor(playerData[0]?.totalWeightGain!).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.weightGain!, Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain!))).toLocaleString(NUMBER_FORMAT).length)} + ${client.formatDecimalNumber(player.overflowGain!, Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain!))).toLocaleString(NUMBER_FORMAT).length)}]`;
+			break;
+		}
+
+		case 'senither-weight': {
+			title = 'Senither Weight Gained Leaderboard';
 			dataConverter = (player) => {
 				const { weight, overflow, totalWeight } = player.getSenitherWeight(CURRENT_OFFSET);
 				const { weight: weightOffset, overflow: overflowOffset, totalWeight: totalWeightOffet } = player.getSenitherWeight(offset);
@@ -827,8 +857,31 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			break;
 		}
 
-		case 'weight': {
-			title = 'Weight Leaderboard';
+		case 'lily-weight': {
+			title = 'Lily Weight Leaderboard';
+			dataConverter = (player) => {
+				const { weight, overflow, totalWeight } = player.getLilyWeight(offset);
+				return {
+					ign: player.ign,
+					discordId: player.discordId,
+					xpLastUpdatedAt: player.xpLastUpdatedAt,
+					weight,
+					overflow,
+					totalWeight,
+					sortingStat: totalWeight,
+				};
+			};
+			playerData = getPlayerData(client, hypixelGuild, dataConverter);
+			totalStats = oneLine`
+				${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length))}
+				[${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight!, 0) / playerData.length))}
+				+ ${Formatters.bold(client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow!, 0) / playerData.length))}]`;
+			getEntry = player => `${client.formatDecimalNumber(player.totalWeight!, Math.floor(playerData[0]?.totalWeight!).toLocaleString(NUMBER_FORMAT).length)} [${client.formatDecimalNumber(player.weight!, Math.floor(Math.max(...playerData.map(({ weight }) => weight!))).toLocaleString(NUMBER_FORMAT).length)} + ${client.formatDecimalNumber(player.overflow!, Math.floor(Math.max(...playerData.map(({ overflow }) => overflow!))).toLocaleString(NUMBER_FORMAT).length)}]`;
+			break;
+		}
+
+		case 'senither-weight': {
+			title = 'Senither Weight Leaderboard';
 			dataConverter = (player) => {
 				const { weight, overflow, totalWeight } = player.getSenitherWeight(offset);
 				return {

@@ -1,14 +1,12 @@
 import { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandIntegerOption } from '@discordjs/builders';
 import {
-	COSMETIC_SKILLS,
-	DUNGEON_TYPES_AND_CLASSES,
 	GUILD_ID_ALL,
+	LEADERBOARD_XP_TYPES,
 	PROFILE_NAMES,
-	SKILLS,
-	SLAYERS,
 	XP_OFFSETS_CONVERTER,
 	XP_OFFSETS_SHORT,
 } from '../../constants';
+import { upperCaseFirstChar } from '../../functions';
 import type { LunarClient } from '../LunarClient';
 
 
@@ -52,16 +50,7 @@ export const xpTypeOption = new SlashCommandStringOption()
 	.setName('type')
 	.setDescription('xp type')
 	.setRequired(false)
-	.addChoices([
-		'weight',
-		[ 'skill average', 'skill-average' ],
-		...SKILLS,
-		...COSMETIC_SKILLS,
-		'slayer',
-		...SLAYERS,
-		...DUNGEON_TYPES_AND_CLASSES,
-		'guild',
-	].map(x => (typeof x === 'string' ? [ x, x ] : x)) as [string, string][]);
+	.addChoices(LEADERBOARD_XP_TYPES.map(x => [ upperCaseFirstChar(x.replaceAll('-', ' ')), x ]));
 
 export const pageOption = new SlashCommandIntegerOption()
 	.setName('page')

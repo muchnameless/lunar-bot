@@ -2,6 +2,7 @@ import {
 	CATACOMBS_ROLES,
 	COSMETIC_SKILLS,
 	DELIMITER_ROLES,
+	DUNGEON_TYPES,
 	DUNGEON_TYPES_AND_CLASSES,
 	MAYOR_CHANGE_INTERVAL,
 	SKILL_AVERAGE_ROLES,
@@ -216,12 +217,33 @@ export type XPOffsets = ArrayElement<typeof XP_OFFSETS> | '';
 
 export const SKYBLOCK_XP_TYPES = [ ...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES ] as const;
 export const XP_TYPES = [ ...SKYBLOCK_XP_TYPES, 'guild' ] as const;
+export const XP_AND_DATA_TYPES = [ ...XP_TYPES, ...DUNGEON_TYPES.flatMap(type => [ `${type}Completions`, `${type}MasterCompletions` ] as const) ] as const;
+
+const XP_TYPES_SET = new Set(XP_TYPES);
+export const isXPType = (type: unknown): type is XPTypes => XP_TYPES_SET.has(type as XPTypes);
 
 export type XPTypes = ArrayElement<typeof XP_TYPES>;
+export type XPAndDataTypes = ArrayElement<typeof XP_AND_DATA_TYPES>;
 
 
+export const LEADERBOARD_XP_TYPES = [
+	'lily-weight',
+	'senither-weight',
+	'skill-average',
+	...SKILLS,
+	...COSMETIC_SKILLS,
+	'slayer',
+	...SLAYERS,
+	...DUNGEON_TYPES_AND_CLASSES,
+	'guild',
+] as const;
+
+
+// IGNs
 export const UNKNOWN_IGN = 'UNKNOWN_IGN';
 
+
+// guild Ids
 export const GUILD_ID_ERROR = 'ERROR';
 export const GUILD_ID_BRIDGER = 'BRIDGER';
 export const GUILD_ID_ALL = 'ALL';

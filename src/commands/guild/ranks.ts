@@ -46,7 +46,7 @@ export default class RanksCommand extends ApplicationCommand {
 			.setFooter('Updated at')
 			.setTimestamp(player.xpLastUpdatedAt);
 
-		const weight = player.getSenitherWeight().totalWeight;
+		const weight = player.getLilyWeight().totalWeight;
 
 		for (const { name, positionReq, currentWeightReq } of hypixelGuild.ranks) {
 			if (positionReq == null || positionReq === 0 || currentWeightReq == null) continue;
