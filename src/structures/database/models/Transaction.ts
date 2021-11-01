@@ -59,7 +59,10 @@ export class Transaction extends Model<TransactionAttributes> implements Transac
 				allowNull: true,
 			},
 			type: {
-				type: DataTypes.ENUM(TransactionTypes.TAX, TransactionTypes.DONATION),
+				type: DataTypes.ENUM(
+					TransactionTypes.TAX,
+					TransactionTypes.DONATION,
+				),
 				defaultValue: TransactionTypes.TAX,
 				allowNull: false,
 			},
