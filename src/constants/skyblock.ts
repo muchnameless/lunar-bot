@@ -251,6 +251,8 @@ const DUNGEON_CAP = {
 	tank: 50,
 } as const;
 
+export const DUNGEON_FLOOR_MAX = 10;
+
 export const DUNGEON_TYPES = [
 	'catacombs',
 ] as const;

@@ -114,10 +114,8 @@ interface PlayerAttributes {
 	paid: boolean;
 	mainProfileId: string | null;
 	mainProfileName: string | null;
-	xpLastUpdatedAt: Date | null;
 	xpUpdatesDisabled: boolean;
 	discordMemberUpdatesDisabled: boolean;
-	farmingLvlCap: number;
 	guildXpDay: string | null;
 	guildXpDaily: number;
 	lastActivityAt: Date;
@@ -125,8 +123,8 @@ interface PlayerAttributes {
 
 type PlayerCreationAttributes = Optional<PlayerAttributes,
 	'ign' | 'discordId' | 'guildId' | 'guildRankPriority' | 'inDiscord' | 'mutedTill' | '_infractions'
-		| 'hasDiscordPingPermission' | 'notes' | 'paid' | 'mainProfileId' | 'mainProfileName' | 'xpLastUpdatedAt' | 'xpUpdatesDisabled'
-		| 'discordMemberUpdatesDisabled' | 'farmingLvlCap' | 'guildXpDay' | 'guildXpDaily' | 'lastActivityAt'
+		| 'hasDiscordPingPermission' | 'notes' | 'paid' | 'mainProfileId' | 'mainProfileName' | 'xpUpdatesDisabled'
+		| 'discordMemberUpdatesDisabled' | 'guildXpDay' | 'guildXpDaily' | 'lastActivityAt'
 >;
 
 interface PlayerInGuild extends Player {
@@ -156,166 +154,18 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare paid: boolean;
 	declare mainProfileId: string | null;
 	declare mainProfileName: string | null;
-	declare xpLastUpdatedAt: Date | null;
 	declare xpUpdatesDisabled: boolean;
 	declare discordMemberUpdatesDisabled: boolean;
-	declare farmingLvlCap: number;
 	declare guildXpDay: string | null;
 	declare guildXpDaily: number;
 	declare lastActivityAt: Date;
 
-	declare tamingXp: number;
-	declare farmingXp: number;
-	declare miningXp: number;
-	declare combatXp: number;
-	declare foragingXp: number;
-	declare fishingXp: number;
-	declare enchantingXp: number;
-	declare alchemyXp: number;
-	declare carpentryXp: number;
-	declare runecraftingXp: number;
-	declare zombieXp: number;
-	declare spiderXp: number;
-	declare wolfXp: number;
-	declare endermanXp: number;
-	declare catacombsXp: number;
-	declare healerXp: number;
-	declare mageXp: number;
-	declare berserkXp: number;
-	declare archerXp: number;
-	declare tankXp: number;
 	declare guildXp: number;
-
-	declare tamingXpHistory: number[];
-	declare farmingXpHistory: number[];
-	declare miningXpHistory: number[];
-	declare combatXpHistory: number[];
-	declare foragingXpHistory: number[];
-	declare fishingXpHistory: number[];
-	declare enchantingXpHistory: number[];
-	declare alchemyXpHistory: number[];
-	declare carpentryXpHistory: number[];
-	declare runecraftingXpHistory: number[];
-	declare zombieXpHistory: number[];
-	declare spiderXpHistory: number[];
-	declare wolfXpHistory: number[];
-	declare endermanXpHistory: number[];
-	declare catacombsXpHistory: number[];
-	declare healerXpHistory: number[];
-	declare mageXpHistory: number[];
-	declare berserkXpHistory: number[];
-	declare archerXpHistory: number[];
-	declare tankXpHistory: number[];
 	declare guildXpHistory: number[];
-
-	declare tamingXpCompetitionStart: number;
-	declare farmingXpCompetitionStart: number;
-	declare miningXpCompetitionStart: number;
-	declare combatXpCompetitionStart: number;
-	declare foragingXpCompetitionStart: number;
-	declare fishingXpCompetitionStart: number;
-	declare enchantingXpCompetitionStart: number;
-	declare alchemyXpCompetitionStart: number;
-	declare carpentryXpCompetitionStart: number;
-	declare runecraftingXpCompetitionStart: number;
-	declare zombieXpCompetitionStart: number;
-	declare spiderXpCompetitionStart: number;
-	declare wolfXpCompetitionStart: number;
-	declare endermanXpCompetitionStart: number;
-	declare catacombsXpCompetitionStart: number;
-	declare healerXpCompetitionStart: number;
-	declare mageXpCompetitionStart: number;
-	declare berserkXpCompetitionStart: number;
-	declare archerXpCompetitionStart: number;
-	declare tankXpCompetitionStart: number;
 	declare guildXpCompetitionStart: number;
-
-	declare tamingXpCompetitionEnd: number;
-	declare farmingXpCompetitionEnd: number;
-	declare miningXpCompetitionEnd: number;
-	declare combatXpCompetitionEnd: number;
-	declare foragingXpCompetitionEnd: number;
-	declare fishingXpCompetitionEnd: number;
-	declare enchantingXpCompetitionEnd: number;
-	declare alchemyXpCompetitionEnd: number;
-	declare carpentryXpCompetitionEnd: number;
-	declare runecraftingXpCompetitionEnd: number;
-	declare zombieXpCompetitionEnd: number;
-	declare spiderXpCompetitionEnd: number;
-	declare wolfXpCompetitionEnd: number;
-	declare endermanXpCompetitionEnd: number;
-	declare catacombsXpCompetitionEnd: number;
-	declare healerXpCompetitionEnd: number;
-	declare mageXpCompetitionEnd: number;
-	declare berserkXpCompetitionEnd: number;
-	declare archerXpCompetitionEnd: number;
-	declare tankXpCompetitionEnd: number;
 	declare guildXpCompetitionEnd: number;
-
-	declare tamingXpOffsetMayor: number;
-	declare farmingXpOffsetMayor: number;
-	declare miningXpOffsetMayor: number;
-	declare combatXpOffsetMayor: number;
-	declare foragingXpOffsetMayor: number;
-	declare fishingXpOffsetMayor: number;
-	declare enchantingXpOffsetMayor: number;
-	declare alchemyXpOffsetMayor: number;
-	declare carpentryXpOffsetMayor: number;
-	declare runecraftingXpOffsetMayor: number;
-	declare zombieXpOffsetMayor: number;
-	declare spiderXpOffsetMayor: number;
-	declare wolfXpOffsetMayor: number;
-	declare endermanXpOffsetMayor: number;
-	declare catacombsXpOffsetMayor: number;
-	declare healerXpOffsetMayor: number;
-	declare mageXpOffsetMayor: number;
-	declare berserkXpOffsetMayor: number;
-	declare archerXpOffsetMayor: number;
-	declare tankXpOffsetMayor: number;
 	declare guildXpOffsetMayor: number;
-
-	declare tamingXpOffsetWeek: number;
-	declare farmingXpOffsetWeek: number;
-	declare miningXpOffsetWeek: number;
-	declare combatXpOffsetWeek: number;
-	declare foragingXpOffsetWeek: number;
-	declare fishingXpOffsetWeek: number;
-	declare enchantingXpOffsetWeek: number;
-	declare alchemyXpOffsetWeek: number;
-	declare carpentryXpOffsetWeek: number;
-	declare runecraftingXpOffsetWeek: number;
-	declare zombieXpOffsetWeek: number;
-	declare spiderXpOffsetWeek: number;
-	declare wolfXpOffsetWeek: number;
-	declare endermanXpOffsetWeek: number;
-	declare catacombsXpOffsetWeek: number;
-	declare healerXpOffsetWeek: number;
-	declare mageXpOffsetWeek: number;
-	declare berserkXpOffsetWeek: number;
-	declare archerXpOffsetWeek: number;
-	declare tankXpOffsetWeek: number;
 	declare guildXpOffsetWeek: number;
-
-	declare tamingXpOffsetMonth: number;
-	declare farmingXpOffsetMonth: number;
-	declare miningXpOffsetMonth: number;
-	declare combatXpOffsetMonth: number;
-	declare foragingXpOffsetMonth: number;
-	declare fishingXpOffsetMonth: number;
-	declare enchantingXpOffsetMonth: number;
-	declare alchemyXpOffsetMonth: number;
-	declare carpentryXpOffsetMonth: number;
-	declare runecraftingXpOffsetMonth: number;
-	declare zombieXpOffsetMonth: number;
-	declare spiderXpOffsetMonth: number;
-	declare wolfXpOffsetMonth: number;
-	declare endermanXpOffsetMonth: number;
-	declare catacombsXpOffsetMonth: number;
-	declare healerXpOffsetMonth: number;
-	declare mageXpOffsetMonth: number;
-	declare berserkXpOffsetMonth: number;
-	declare archerXpOffsetMonth: number;
-	declare tankXpOffsetMonth: number;
 	declare guildXpOffsetMonth: number;
 
 	declare readonly createdAt: Date;
@@ -328,29 +178,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 	static initialise(sequelize: Sequelize) {
 		const attributes = {};
-
-		// add xp types
-		for (const type of XP_TYPES) {
-			Reflect.set(attributes, `${type}Xp`, {
-				type: DataTypes.DECIMAL,
-				defaultValue: 0,
-				allowNull: false,
-			});
-
-			Reflect.set(attributes, `${type}XpHistory`, {
-				type: DataTypes.ARRAY(DataTypes.DECIMAL),
-				defaultValue: Array.from({ length: 30 }).fill(0),
-				allowNull: false,
-			});
-
-			for (const offset of XP_OFFSETS) {
-				Reflect.set(attributes, `${type}Xp${offset}`, {
-					type: DataTypes.DECIMAL,
-					defaultValue: 0,
-					allowNull: false,
-				});
-			}
-		}
 
 		return this.init({
 			// general information
@@ -433,11 +260,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				defaultValue: null,
 				allowNull: true,
 			},
-			xpLastUpdatedAt: {
-				type: DataTypes.DATE,
-				defaultValue: null,
-				allowNull: true,
-			},
 			xpUpdatesDisabled: {
 				type: DataTypes.BOOLEAN,
 				defaultValue: false,
@@ -446,13 +268,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			discordMemberUpdatesDisabled: {
 				type: DataTypes.BOOLEAN,
 				defaultValue: false,
-				allowNull: false,
-			},
-
-			// Individual Max Lvl Cap
-			farmingLvlCap: {
-				type: DataTypes.INTEGER,
-				defaultValue: 50,
 				allowNull: false,
 			},
 
