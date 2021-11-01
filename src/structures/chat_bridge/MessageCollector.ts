@@ -97,17 +97,13 @@ export class MessageCollector extends EventEmitter {
 
 	override on(eventName: MessageCollectorEvents.COLLECT, listener: (item: HypixelMessage) => Awaitable<void>): this;
 	override on(eventName: MessageCollectorEvents.END, listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
+	// @ts-expect-error
 	override on(eventName: string, listener: (...args: unknown[]) => void): this;
-	override on(eventName: string, listener: (...args: any[]) => void) {
-		return super.on(eventName, listener);
-	}
 
 	override once(eventName: MessageCollectorEvents.COLLECT, listener: (message: HypixelMessage) => Awaitable<void>): this;
 	override once(eventName: MessageCollectorEvents.END, listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
+	// @ts-expect-error
 	override once(eventName: string, listener: (...args: unknown[]) => void): this;
-	override once(eventName: string, listener: (...args: any[]) => void) {
-		return super.once(eventName, listener);
-	}
 
 	/**
 	 * Checks after un/collection to see if the collector is done.
