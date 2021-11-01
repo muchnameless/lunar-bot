@@ -18,6 +18,7 @@ import type { Components } from '@zikeji/hypixel';
 import type { ChatTrigger } from '../models/ChatTrigger';
 import type { Config } from '../models/Config';
 import type { HypixelGuild } from '../models/HypixelGuild';
+import type { HypixelGuildBan } from '../models/HypixelGuildBan';
 import type { Player } from '../models/Player';
 import type { TaxCollector } from '../models/TaxCollector';
 import type { db as DbType } from '..';
@@ -29,6 +30,7 @@ export interface Models {
 	ChatTrigger: ModelCtor<ChatTrigger>,
 	Config: ModelCtor<Config>,
 	HypixelGuild: ModelCtor<HypixelGuild>,
+	HypixelGuildBan: ModelCtor<HypixelGuildBan>,
 	Player: ModelCtor<Player>,
 	TaxCollector: ModelCtor<TaxCollector>,
 	Transaction: ModelCtor<Transaction>,

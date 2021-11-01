@@ -7,8 +7,9 @@ import { demote, historyErrors, invite, kick, mute, logErrors, promote, setRank,
 import { DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, EMBED_DESCRIPTION_MAX_CHARS, GUILD_ID_BRIDGER, LEFT_EMOJI, RELOAD_EMOJI, RIGHT_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { requiredPlayerOption, optionalPlayerOption, pageOption, requiredIgnOption, targetOption, forceOption, buildGuildOption } from '../../structures/commands/commonOptions';
 import { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
+import { mojang } from '../../api';
 import { InteractionUtil, UserUtil } from '../../util';
-import { autocorrect, getIdFromString, logger, removeMcFormatting, seconds, stringToMS, trim } from '../../functions';
+import { autocorrect, escapeIgn, getIdFromString, logger, removeMcFormatting, seconds, stringToMS, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ButtonInteraction, CommandInteraction, Interaction, Snowflake } from 'discord.js';
 import type { SlashCommandStringOption } from '@discordjs/builders';
@@ -728,11 +729,17 @@ export default class GuildCommand extends ApplicationCommand {
 				);
 
 			case 'invite': {
-				const IGN = interaction.options.getString('ign', true);
+				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
+				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
+
+				if (existingBan) return InteractionUtil.reply(interaction, {
+					content: `${escapeIgn(ign)} is on the ban list for \`${existingBan.reason}\``,
+					ephemeral: true,
+				});
 
 				return this.#run(interaction, {
-					command: `guild invite ${IGN}`,
-					responseRegExp: invite(IGN),
+					command: `guild invite ${ign}`,
+					responseRegExp: invite(ign),
 				});
 			}
 

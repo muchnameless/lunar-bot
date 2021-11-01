@@ -509,6 +509,22 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					}
 
 					players.set(minecraftUuid, player);
+
+					// log if a banned player joins (by accident)
+					(async () => {
+						const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(minecraftUuid);
+						if (!existingBan) return;
+
+						const member = await player.discordMember;
+
+						this.client.log(new MessageEmbed()
+							.setColor(this.client.config.get('EMBED_RED'))
+							.setAuthor(member?.user.tag ?? player.ign, member?.displayAvatarURL({ dynamic: true }), player.url)
+							.setThumbnail((await player.imageURL)!)
+							.setDescription(`${player.info} is on the ban list for \`${existingBan.reason}\``)
+							.setTimestamp(),
+						);
+					});
 				}),
 
 				// player left the guild
