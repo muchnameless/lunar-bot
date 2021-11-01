@@ -9,7 +9,7 @@ import type { HypixelGuild } from '../../structures/database/models/HypixelGuild
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 
-export default class MyCommand extends ApplicationCommand {
+export default class FriendCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
