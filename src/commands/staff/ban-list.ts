@@ -97,7 +97,7 @@ export default class BanListCommand extends ApplicationCommand {
 			offset: (page - 1) * ELEMENTS_PER_PAGE,
 			limit: ELEMENTS_PER_PAGE,
 		});
-		const TOTAL_PAGES = Math.ceil(count / ELEMENTS_PER_PAGE);
+		const TOTAL_PAGES = Math.max(Math.ceil(count / ELEMENTS_PER_PAGE), 1);
 		const withIgn = await Promise.all(bans
 			.map(async ({ minecraftUuid, reason }) => {
 				try {
