@@ -6,6 +6,7 @@ import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid 
 import type {
 	BaseGuildTextChannel,
 	CommandInteraction,
+	CommandInteractionOptionResolver,
 	ContextMenuInteraction,
 	EmojiIdentifierResolvable,
 	GuildMember,
@@ -132,7 +133,7 @@ export default class InteractionUtil extends null {
 	static #checkEphemeralOption(interaction: ChatInteraction) {
 		if (interaction.isMessageComponent()) return null;
 
-		switch (interaction.options.getString('visibility')) {
+		switch ((interaction.options as CommandInteractionOptionResolver).getString('visibility')) {
 			case 'everyone':
 				return false;
 

@@ -7,7 +7,7 @@ import { buildGuildOption } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../util';
 import { minutes, seconds, stringToMS, upperCaseFirstChar } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
-import type { CommandInteraction, GuildMember } from 'discord.js';
+import type { CommandInteraction, CommandInteractionOption, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
@@ -149,9 +149,9 @@ export default class PollCommand extends DualCommand {
 		const result = await this.#run({
 			chatBridge: InteractionUtil.getHypixelGuild(interaction).chatBridge,
 			question: interaction.options.getString('question', true),
-			pollOptionNames: interaction.options
+			pollOptionNames: (interaction.options
 				// @ts-expect-error
-				._hoistedOptions
+				._hoistedOptions as CommandInteractionOption[])
 				.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value as string),
 			duration: interaction.options.getString('duration'),
 			ign: UserUtil.getPlayer(interaction.user)?.ign ?? (interaction.member as GuildMember)?.displayName ?? interaction.user.tag,

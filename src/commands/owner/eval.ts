@@ -96,7 +96,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param isAsync
 	 * @param inspectDepth
 	 */
-	async #eval(interaction: CommandInteraction | ButtonInteraction, input: string, isAsync = /\bawait\b/.test(input), inspectDepth = 0) {
+	async #eval(interaction: CommandInteraction | ContextMenuInteraction | ButtonInteraction, input: string, isAsync = /\bawait\b/.test(input), inspectDepth = 0) {
 		if (interaction.user.id !== this.client.ownerId) throw new Error('eval is restricted to the bot owner');
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */
@@ -175,8 +175,8 @@ export default class EvalCommand extends ApplicationCommand {
 
 			logger.trace(error, '[EVAL ERROR]');
 
-			const type = new Type(error);
-			const FOOTER = `d.js ${Discord.version} • type: \`${type}\` • time taken: \`${stopwatch}\``;
+			const errorType = new Type(error);
+			const FOOTER = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
 
 			for (const [ index, value ] of splitForEmbedFields(this.#cleanOutput(error), 'xl').entries()) {
 				const name = index ? '\u200B' : 'Error';
