@@ -25,7 +25,7 @@
 		"@typescript-eslint/consistent-type-imports": "error",
 		"@typescript-eslint/explicit-module-boundary-types": "off",
 		"@typescript-eslint/no-dupe-class-members": "error",
-		"@typescript-eslint/no-floating-promises": "warn",
+		"@typescript-eslint/no-floating-promises": "off",
 		"@typescript-eslint/no-non-null-asserted-optional-chain": "off",
 		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/no-shadow": "error",
@@ -33,6 +33,7 @@
 		"@typescript-eslint/no-unused-vars": [ "error", { "varsIgnorePattern": "arguments", "argsIgnorePattern": "arguments" }],
 
 		"unicorn/consistent-destructuring": "off",
+		"unicorn/consistent-function-scoping": "warn",
 		"unicorn/custom-error-definition": "warn",
 		"unicorn/explicit-length-check": "off",
 		"unicorn/filename-case": [ "off", { "cases": {
