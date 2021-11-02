@@ -56,6 +56,10 @@ export default class GuildCommand extends ApplicationCommand {
 					.setName('reason')
 					.setDescription('reason')
 					.setRequired(true),
+				)
+				.addBooleanOption(option => option
+					.setName('add-to-ban-list')
+					.setDescription('add the player with the provided reason to the ban list on success (default: false)'),
 				),
 			)
 			.addSubcommand(subcommand => subcommand
@@ -367,31 +371,31 @@ export default class GuildCommand extends ApplicationCommand {
 	async runKick({ ctx, target, executor, hypixelGuild, reason }: RunKickOptions) {
 		if (!executor) return {
 			content: 'unable to find a linked player to your discord account',
-			ephemeral: true,
+			error: true,
 		};
 		if (!executor.isStaff) return {
 			content: 'you need to have an in game staff rank for this command',
-			ephemeral: true,
+			error: true,
 		};
 		if (executor.guildId !== hypixelGuild.guildId) return {
 			content: `you need to be in ${hypixelGuild} to kick a player from there`,
-			ephemeral: true,
+			error: true,
 		};
 
 		if (typeof target === 'string') return {
 			content: `no player with the IGN \`${target}\` found`,
-			ephemeral: true,
+			error: true,
 		};
 		if (target.guildRankPriority >= executor.guildRankPriority) return {
 			content: `your guild rank needs to be higher than ${target}'s`,
-			ephemeral: true,
+			error: true,
 		};
 
 		const TIME_LEFT = this.config.get('LAST_KICK_TIME') + this.config.get('KICK_COOLDOWN') - Date.now();
 
 		if (TIME_LEFT > 0) return {
 			content: `kicking is on cooldown for another ${ms(TIME_LEFT, { long: true })}`,
-			ephemeral: true,
+			error: true,
 		};
 
 		try {
@@ -416,12 +420,12 @@ export default class GuildCommand extends ApplicationCommand {
 
 			return {
 				content: res,
-				ephemeral: false,
+				error: false,
 			};
 		} catch (error) {
 			return {
 				content: `${error}`,
-				ephemeral: true,
+				error: true,
 			};
 		}
 	}
@@ -673,7 +677,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'kick': {
 				const target = InteractionUtil.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
-				const { content, ephemeral } = await this.runKick({
+				const { content, error } = await this.runKick({
 					ctx: interaction,
 					target,
 					executor: UserUtil.getPlayer(interaction.user),
@@ -683,6 +687,14 @@ export default class GuildCommand extends ApplicationCommand {
 						: (target.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction)),
 				});
 
+				// !ephemeral <-> no error, kick successful
+				if (interaction.options.getBoolean('add-to-ban-list') && !error) {
+					this.client.db.models.HypixelGuildBan.upsert({
+						minecraftUuid: (target as Player).minecraftUuid,
+						_reason: reason,
+					});
+				}
+
 				return InteractionUtil.reply(interaction, {
 					embeds: [
 						this.client.defaultEmbed
@@ -690,7 +702,7 @@ export default class GuildCommand extends ApplicationCommand {
 							.setDescription(Formatters.codeBlock(content)),
 					],
 					ephemeral: interaction.options.get('visibility') === null
-						? InteractionUtil.CACHE.get(interaction)!.useEphemeral || ephemeral
+						? InteractionUtil.CACHE.get(interaction)!.useEphemeral || error
 						: InteractionUtil.CACHE.get(interaction)!.useEphemeral,
 				});
 			}
