@@ -17,7 +17,7 @@ export class HypixelGuildBan extends Model<ConfigAttributes> {
 	declare _reason: string | null;
 
 	get reason() {
-		return this._reason ?? 'no reason';
+		return this._reason ?? 'no reason specified';
 	}
 
 	static initialise(sequelize: Sequelize) {
