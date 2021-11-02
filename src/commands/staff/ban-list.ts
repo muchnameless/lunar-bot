@@ -134,7 +134,7 @@ export default class BanListCommand extends ApplicationCommand {
 					`),
 			],
 			components: this.#getPaginationButtons(
-				userId,
+				interaction.user.id,
 				count >= OFFSET
 					? page
 					: TOTAL_PAGES, // reset to total pages in case of page overflow
