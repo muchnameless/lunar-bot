@@ -7,7 +7,7 @@ import { InteractionUtil } from '../../util';
 import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI } from '../../constants';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { ButtonInteraction, CommandInteraction } from 'discord.js';
+import type { ButtonInteraction, CommandInteraction, Snowflake } from 'discord.js';
 
 
 export default class BanListCommand extends ApplicationCommand {
@@ -45,11 +45,12 @@ export default class BanListCommand extends ApplicationCommand {
 	}
 
 	/**
+	 * @param userId
 	 * @param currentPage
 	 * @param totalPages
 	 */
-	#getPaginationButtons(currentPage: number, totalPages: number) {
-		const CUSTOM_ID = `${this.baseCustomId}:view`;
+	#getPaginationButtons(userId: Snowflake, currentPage: number, totalPages: number) {
+		const CUSTOM_ID = `${this.baseCustomId}:view:${userId}`;
 		const INVALID_PAGES = Number.isNaN(currentPage) || Number.isNaN(totalPages);
 		const DEC_DISABLED = currentPage === 1 || INVALID_PAGES;
 		const INC_DISABLED = currentPage === totalPages || INVALID_PAGES;
@@ -88,10 +89,10 @@ export default class BanListCommand extends ApplicationCommand {
 	/**
 	 * /friend list [page]
 	 * @param interaction
-	 * @param hypixelGuild
+	 * @param userId
 	 * @param page
 	 */
-	async #runView(interaction: CommandInteraction | ButtonInteraction, page: number) {
+	async #runView(interaction: CommandInteraction | ButtonInteraction, userId: Snowflake, page: number) {
 		const ELEMENTS_PER_PAGE = this.config.get('ELEMENTS_PER_PAGE');
 		const OFFSET = (page - 1) * ELEMENTS_PER_PAGE;
 		const { rows: bans, count } = await this.client.db.models.HypixelGuildBan.findAndCountAll({
@@ -111,7 +112,7 @@ export default class BanListCommand extends ApplicationCommand {
 			}),
 		);
 
-		return (InteractionUtil[interaction.isApplicationCommand() ? 'reply' : 'update'] as typeof InteractionUtil['reply'])(interaction as ButtonInteraction, {
+		return (InteractionUtil[interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'] as typeof InteractionUtil['reply'])(interaction as ButtonInteraction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`Ban list (${count} players)`)
@@ -119,6 +120,7 @@ export default class BanListCommand extends ApplicationCommand {
 					.setFooter(`Page: ${page} / ${TOTAL_PAGES}`),
 			],
 			components: this.#getPaginationButtons(
+				userId,
 				count >= OFFSET
 					? page
 					: TOTAL_PAGES, // reset to total pages in case of page overflow
@@ -133,12 +135,13 @@ export default class BanListCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override runButton(interaction: ButtonInteraction, args: string[]) {
-		const [ SUBCOMMAND, PAGE ] = args;
+		const [ SUBCOMMAND, USER_ID, PAGE ] = args;
 
 		switch (SUBCOMMAND) {
 			case 'view':
 				return this.#runView(
 					interaction,
+					USER_ID,
 					Number(PAGE),
 				);
 
@@ -209,6 +212,7 @@ export default class BanListCommand extends ApplicationCommand {
 			case 'view':
 				return this.#runView(
 					interaction,
+					interaction.user.id,
 					interaction.options.getInteger('page') ?? 1,
 				);
 
