@@ -371,31 +371,31 @@ export default class GuildCommand extends ApplicationCommand {
 	async runKick({ ctx, target, executor, hypixelGuild, reason }: RunKickOptions) {
 		if (!executor) return {
 			content: 'unable to find a linked player to your discord account',
-			error: true,
+			hasErrored: true,
 		};
 		if (!executor.isStaff) return {
 			content: 'you need to have an in game staff rank for this command',
-			error: true,
+			hasErrored: true,
 		};
 		if (executor.guildId !== hypixelGuild.guildId) return {
 			content: `you need to be in ${hypixelGuild} to kick a player from there`,
-			error: true,
+			hasErrored: true,
 		};
 
 		if (typeof target === 'string') return {
 			content: `no player with the IGN \`${target}\` found`,
-			error: true,
+			hasErrored: true,
 		};
 		if (target.guildRankPriority >= executor.guildRankPriority) return {
 			content: `your guild rank needs to be higher than ${target}'s`,
-			error: true,
+			hasErrored: true,
 		};
 
 		const TIME_LEFT = this.config.get('LAST_KICK_TIME') + this.config.get('KICK_COOLDOWN') - Date.now();
 
 		if (TIME_LEFT > 0) return {
 			content: `kicking is on cooldown for another ${ms(TIME_LEFT, { long: true })}`,
-			error: true,
+			hasErrored: true,
 		};
 
 		try {
@@ -420,12 +420,12 @@ export default class GuildCommand extends ApplicationCommand {
 
 			return {
 				content: res,
-				error: false,
+				hasErrored: false,
 			};
 		} catch (error) {
 			return {
 				content: `${error}`,
-				error: true,
+				hasErrored: true,
 			};
 		}
 	}
@@ -677,7 +677,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'kick': {
 				const target = InteractionUtil.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
-				const { content, error } = await this.runKick({
+				const { content, hasErrored } = await this.runKick({
 					ctx: interaction,
 					target,
 					executor: UserUtil.getPlayer(interaction.user),
@@ -687,13 +687,44 @@ export default class GuildCommand extends ApplicationCommand {
 						: (target.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction)),
 				});
 
-				// !ephemeral <-> no error, kick successful
-				if (interaction.options.getBoolean('add-to-ban-list') && !error) {
-					this.client.db.models.HypixelGuildBan.upsert({
-						minecraftUuid: (target as Player).minecraftUuid,
-						_reason: reason,
-					});
-				}
+				// add to ban list
+				(async () => {
+					if (hasErrored) return;
+
+					switch (interaction.options.getBoolean('add-to-ban-list')) {
+						case false: // option false choosen
+							return;
+
+						case null: // no option chosen
+							try {
+								await InteractionUtil.awaitConfirmation(
+									interaction,
+									`add ${escapeIgn((target as Player).ign)} to the ban list for \`${reason ?? 'no reason'}\`?`,
+								);
+							} catch (error) {
+								return logger.error(error);
+							}
+
+						// fallthrough
+						case true: // option true chosen
+							try {
+								await this.client.db.models.HypixelGuildBan.upsert({
+									minecraftUuid: (target as Player).minecraftUuid,
+									_reason: reason,
+								});
+
+								InteractionUtil.reply(interaction, {
+									content: `${escapeIgn((target as Player).ign)} was added to the ban list for \`${reason ?? 'no reason'}\``,
+								});
+							} catch (error) {
+								logger.error(error);
+
+								InteractionUtil.reply(interaction, {
+									content: `error adding ${escapeIgn((target as Player).ign)} to the ban list: ${error}`,
+								});
+							}
+					}
+				})();
 
 				return InteractionUtil.reply(interaction, {
 					embeds: [
@@ -702,7 +733,7 @@ export default class GuildCommand extends ApplicationCommand {
 							.setDescription(Formatters.codeBlock(content)),
 					],
 					ephemeral: interaction.options.get('visibility') === null
-						? InteractionUtil.CACHE.get(interaction)!.useEphemeral || error
+						? InteractionUtil.CACHE.get(interaction)!.useEphemeral || hasErrored
 						: InteractionUtil.CACHE.get(interaction)!.useEphemeral,
 				});
 			}
