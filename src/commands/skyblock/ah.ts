@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageActionRow, MessageSelectMenu, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { PROFILE_EMOJIS } from '../../constants';
+import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
@@ -37,7 +37,7 @@ export default class AhCommand extends ApplicationCommand {
 	async #generateReply({ ign, uuid, profileId, profiles, userId }: { ign: string; uuid: string; profileId: string; profiles: { label: string; value: string; }[]; userId: Snowflake; }) {
 		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId)!;
 		const embed = this.client.defaultEmbed
-			.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `https://sky.shiiyu.moe/stats/${ign}/${PROFILE_NAME}`);
+			.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `${STATS_URL_BASE}${ign}/${PROFILE_NAME}`);
 
 		try {
 			const auctions = (await hypixel.skyblock.auction.profile(profileId))
@@ -146,7 +146,7 @@ export default class AhCommand extends ApplicationCommand {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				embed
-					.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
+					.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `${STATS_URL_BASE}${ign}`)
 					.setDescription('no SkyBlock profiles'),
 			],
 			components: [
@@ -227,7 +227,7 @@ export default class AhCommand extends ApplicationCommand {
 					return InteractionUtil.reply(interaction, {
 						embeds: [
 							embed
-								.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `https://sky.shiiyu.moe/stats/${ign}`)
+								.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `${STATS_URL_BASE}${ign}`)
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [

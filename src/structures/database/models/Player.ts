@@ -12,6 +12,8 @@ import {
 	DUNGEON_TYPES_AND_CLASSES,
 	GUILD_ID_BRIDGER,
 	GUILD_ID_ERROR,
+	isXPType,
+	LILY_SKILL_NAMES,
 	NICKNAME_MAX_CHARS,
 	OFFSET_FLAGS,
 	SKILL_ACHIEVEMENTS,
@@ -27,8 +29,7 @@ import {
 	XP_AND_DATA_TYPES,
 	XP_OFFSETS,
 	XP_TYPES,
-	isXPType,
-	LILY_SKILL_NAMES,
+	STATS_URL_BASE,
 } from '../../../constants';
 import { HypixelGuildManager } from '../managers/HypixelGuildManager';
 import { GuildMemberUtil, GuildUtil, MessageEmbedUtil, UserUtil } from '../../../util';
@@ -677,7 +678,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * returns a sky.shiiyu.moe link for the player
 	 */
 	get url() {
-		return `https://sky.shiiyu.moe/stats/${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUuid}/${this.mainProfileName ?? ''}`;
+		return `${STATS_URL_BASE}${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUuid}/${this.mainProfileName ?? ''}`;
 	}
 
 	/**

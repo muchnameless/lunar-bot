@@ -32,6 +32,8 @@ export const PROFILE_NAMES = [
 	'Zucchini',
 ] as const;
 
+export const STATS_URL_BASE = 'https://sky.shiiyu.moe/stats/';
+
 
 /**
  * SKILLS
