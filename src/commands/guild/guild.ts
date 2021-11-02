@@ -699,7 +699,7 @@ export default class GuildCommand extends ApplicationCommand {
 							try {
 								await InteractionUtil.awaitConfirmation(
 									interaction,
-									`add ${escapeIgn((target as Player).ign)} to the ban list for \`${reason ?? 'no reason'}\`?`,
+									`add ${escapeIgn((target as Player).ign)} to the ban list for \`${reason}\`?`,
 								);
 							} catch (error) {
 								return logger.error(error);
@@ -714,7 +714,7 @@ export default class GuildCommand extends ApplicationCommand {
 								});
 
 								InteractionUtil.reply(interaction, {
-									content: `${escapeIgn((target as Player).ign)} was added to the ban list for \`${reason ?? 'no reason'}\``,
+									content: `${escapeIgn((target as Player).ign)} was added to the ban list for \`${reason}\``,
 								});
 							} catch (error) {
 								logger.error(error);
