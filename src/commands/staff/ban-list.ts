@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Constants, Formatters, MessageActionRow, MessageButton } from 'discord.js';
+import { Constants, Formatters, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { pageOption, requiredIgnOption } from '../../structures/commands/commonOptions';
 import { mojang } from '../../api';
@@ -215,11 +215,24 @@ export default class BanListCommand extends ApplicationCommand {
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
 
 				if (!existingBan) return InteractionUtil.reply(interaction, {
-					content: `${escapeIgn(ign)} is not on the ban list`,
+					embeds: [
+						new MessageEmbed()
+							.setColor(this.config.get('EMBED_GREEN'))
+							.setDescription(`${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${ign}`))} is not on the ban list`)
+							.setTimestamp(),
+					],
 				});
 
 				return InteractionUtil.reply(interaction, {
-					content: `${escapeIgn(ign)} is on the ban list for \`${existingBan.reason}\``,
+					embeds: [
+						new MessageEmbed()
+							.setColor(this.config.get('EMBED_RED'))
+							.setDescription(stripIndents`
+								${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${ign}`))} is on the ban list for
+								${existingBan.reason}
+							`)
+							.setTimestamp(),
+					],
 				});
 			}
 
