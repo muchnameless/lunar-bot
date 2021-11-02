@@ -1,10 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Constants, Formatters, MessageActionRow, MessageButton } from 'discord.js';
+import { stripIndents } from 'common-tags';
 import { pageOption, requiredIgnOption } from '../../structures/commands/commonOptions';
 import { mojang } from '../../api';
 import { escapeIgn, logger } from '../../functions';
 import { InteractionUtil } from '../../util';
-import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI } from '../../constants';
+import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI, STATS_URL_BASE } from '../../constants';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ButtonInteraction, CommandInteraction, Snowflake } from 'discord.js';
@@ -104,10 +105,18 @@ export default class BanListCommand extends ApplicationCommand {
 			.map(async ({ minecraftUuid, reason }) => {
 				try {
 					const { ign } = await mojang.uuid(minecraftUuid);
-					return `${ign}: ${reason}`;
+
+					return stripIndents`
+						${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${ign}`))}
+						${reason}
+					`;
 				} catch (error) {
 					logger.error(error);
-					return `${minecraftUuid}: ${reason}`;
+
+					return stripIndents`
+						${Formatters.bold(Formatters.hyperlink(minecraftUuid, `${STATS_URL_BASE}${minecraftUuid}`))}
+						${reason}
+					`;
 				}
 			}),
 		);
@@ -115,9 +124,14 @@ export default class BanListCommand extends ApplicationCommand {
 		return (InteractionUtil[interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'] as typeof InteractionUtil['reply'])(interaction as ButtonInteraction, {
 			embeds: [
 				this.client.defaultEmbed
-					.setTitle(`Ban list (${count} players)`)
-					.setDescription(Formatters.codeBlock(withIgn.join('\n\n')))
-					.setFooter(`Page: ${page} / ${TOTAL_PAGES}`),
+					.setTitle(`${'Ban list'.padEnd(166, '\u00A0')}\u200B`)
+					.setDescription(stripIndents`
+						Total: ${count} players
+
+						${withIgn.join('\n\n')}
+
+						Page: ${page} / ${TOTAL_PAGES}
+					`),
 			],
 			components: this.#getPaginationButtons(
 				userId,
