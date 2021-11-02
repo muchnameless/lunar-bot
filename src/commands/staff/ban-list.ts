@@ -93,8 +93,9 @@ export default class BanListCommand extends ApplicationCommand {
 	 */
 	async #runView(interaction: CommandInteraction | ButtonInteraction, page: number) {
 		const ELEMENTS_PER_PAGE = this.config.get('ELEMENTS_PER_PAGE');
+		const OFFSET = (page - 1) * ELEMENTS_PER_PAGE;
 		const { rows: bans, count } = await this.client.db.models.HypixelGuildBan.findAndCountAll({
-			offset: (page - 1) * ELEMENTS_PER_PAGE,
+			offset: OFFSET,
 			limit: ELEMENTS_PER_PAGE,
 		});
 		const TOTAL_PAGES = Math.max(Math.ceil(count / ELEMENTS_PER_PAGE), 1);
@@ -114,11 +115,11 @@ export default class BanListCommand extends ApplicationCommand {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`Ban list (${count} players)`)
-					.setDescription(Formatters.codeBlock(withIgn.join('\n')))
+					.setDescription(Formatters.codeBlock(withIgn.join('\n\n')))
 					.setFooter(`Page: ${page} / ${TOTAL_PAGES}`),
 			],
 			components: this.#getPaginationButtons(
-				bans.length >= page * ELEMENTS_PER_PAGE
+				count >= OFFSET
 					? page
 					: TOTAL_PAGES, // reset to total pages in case of page overflow
 				TOTAL_PAGES,
