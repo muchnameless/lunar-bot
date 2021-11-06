@@ -3,6 +3,8 @@ export * from './logger';
 export * from './image';
 export * from './input';
 export * from './leaderboards';
+export * from './lilyWeight';
+export * from './senitherWeight';
 export * from './skyblock';
 export * from './stringValidators';
 export * from './time';
