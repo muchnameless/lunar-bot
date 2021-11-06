@@ -59,12 +59,12 @@ export const stringToMS = (string: string) => string.split(/(?<=[a-z])(?=\d)/).r
  * @param date date to analyze
  */
 export function getWeekOfYear(date: Date) {
-	const target = new Date(date.valueOf());
+	const target = new Date(date.getTime());
 	const dayNumber = (date.getUTCDay() + 6) % 7;
 
 	target.setUTCDate(target.getUTCDate() - dayNumber + 3);
 
-	const firstThursday = target.valueOf();
+	const firstThursday = target.getTime();
 
 	target.setUTCMonth(0, 1);
 
