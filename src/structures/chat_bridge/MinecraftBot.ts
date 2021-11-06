@@ -25,6 +25,7 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 		const EVENT_NAME = basename(fullPath, '.js');
 
 		bot[SPAWN_EVENTS.has(EVENT_NAME as any) ? 'once' : 'on'](
+			// @ts-expect-error
 			EVENT_NAME,
 			event.bind(null, chatBridge),
 		);
