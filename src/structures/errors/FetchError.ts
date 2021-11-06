@@ -6,7 +6,7 @@ export class FetchError extends Error {
 	url: string | null;
 	status: number | null;
 	statusText: string | null;
-	headers: Headers | null;
+	headers: Record<string, string[]> | null;
 
 	/**
 	 * @param name error name
@@ -21,7 +21,7 @@ export class FetchError extends Error {
 		this.url = url ?? null;
 		this.status = status ?? null;
 		this.statusText = statusText ?? null;
-		this.headers = headers ?? null;
+		this.headers = headers?.raw() ?? null;
 	}
 
 	override toString() {
