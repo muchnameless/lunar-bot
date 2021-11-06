@@ -28,7 +28,7 @@
     "@discordjs/rest": "^0.1.0-canary.0",
     "@keyv/redis": "^2.2.0",
     "@sapphire/async-queue": "^1.1.9",
-    "@sapphire/stopwatch": "^1.2.3",
+    "@sapphire/stopwatch": "^1.2.4",
     "@sapphire/time-utilities": "^1.4.6",
     "@sapphire/type": "^2.1.1",
     "@sapphire/utilities": "^3.0.6",
