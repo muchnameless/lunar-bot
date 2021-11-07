@@ -1484,7 +1484,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		try {
 			return (await hypixel.player.uuid(this.minecraftUuid)).socialMedia?.links?.DISCORD ?? null;
 		} catch (error) {
-			return logger.error(error, `[FETCH DISCORD TAG]: ${this.logInfo}`);
+			logger.error(error, `[FETCH DISCORD TAG]: ${this.logInfo}`);
+			return null;
 		}
 	}
 
