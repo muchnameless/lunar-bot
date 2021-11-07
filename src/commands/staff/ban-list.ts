@@ -107,7 +107,7 @@ export default class BanListCommand extends ApplicationCommand {
 					const { ign } = await mojang.uuid(minecraftUuid);
 
 					return stripIndents`
-						${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${ign}`))}
+						${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${minecraftUuid}`))}
 						${reason}
 					`;
 				} catch (error) {
@@ -218,7 +218,7 @@ export default class BanListCommand extends ApplicationCommand {
 					embeds: [
 						new MessageEmbed()
 							.setColor(this.config.get('EMBED_GREEN'))
-							.setDescription(`${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${ign}`))} is not on the ban list`)
+							.setDescription(`${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`))} is not on the ban list`)
 							.setTimestamp(),
 					],
 				});
@@ -228,7 +228,7 @@ export default class BanListCommand extends ApplicationCommand {
 						new MessageEmbed()
 							.setColor(this.config.get('EMBED_RED'))
 							.setDescription(stripIndents`
-								${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${ign}`))} is on the ban list for
+								${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`))} is on the ban list for
 								${existingBan.reason}
 							`)
 							.setTimestamp(),
