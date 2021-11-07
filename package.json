@@ -45,7 +45,7 @@
     "keyv": "^4.0.4",
     "lex": "^1.7.9",
     "lilyweight": "^2.0.0",
-    "minecraft-data": "^2.95.0",
+    "minecraft-data": "^2.96.0",
     "minecraft-protocol": "github:PrismarineJS/node-minecraft-protocol#pull/918/head",
     "ms": "^2.1.3",
     "node-fetch": "^3.0.0",
