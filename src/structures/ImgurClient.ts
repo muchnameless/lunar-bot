@@ -1,6 +1,6 @@
 import { AsyncQueue } from '@sapphire/async-queue';
 import { setTimeout as sleep } from 'node:timers/promises';
-import FormData from 'form-data';
+import { FormData } from 'formdata-polyfill/esm.min';
 import fetch from 'node-fetch';
 import ms from 'ms';
 import { FetchError } from './errors/FetchError';
@@ -170,7 +170,6 @@ export class ImgurClient {
 			{
 				method: 'POST',
 				body: form,
-				headers: form.getHeaders(),
 			}, {
 				checkRateLimit: true,
 				cacheKey: url,

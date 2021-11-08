@@ -39,7 +39,7 @@
     "discord.js": "github:discordjs/discord.js#49e3ce21339e19912ba853f00bc2d68ab117f29f",
     "dotenv": "^10.0.0",
     "emoji-regex": "^10.0.0",
-    "form-data": "^4.0.0",
+    "formdata-polyfill": "^4.0.10",
     "jaro-winkler": "^0.2.8",
     "keyv": "^4.0.4",
     "lex": "^1.7.9",
