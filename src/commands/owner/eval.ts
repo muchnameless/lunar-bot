@@ -106,6 +106,7 @@ export default class EvalCommand extends ApplicationCommand {
 				: { ephemeral: false, rejectOnError: true, ...options },
 		);
 		const type = (x: unknown) => new Type(x).toString();
+		const i = interaction;
 		const { client, config } = this;
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
 		const { lgGuild, hypixelGuilds, players, taxCollectors, db } = client;
