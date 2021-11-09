@@ -1,5 +1,9 @@
 #!/bin/bash
 
+curdir=`pwd`
+
+cd ~/lunar-bot
+
 echo "pulling from git"
 git pull
 
@@ -13,3 +17,6 @@ npm run build
 
 echo ""
 echo "done"
+
+cd $curdir
+

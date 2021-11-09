@@ -3,5 +3,5 @@
 input=$*
 filter=$(IFS=, ; echo "${input[*]}")
 
-cat logs/lunar-bot-out.log | grep -i "$filter" | pino-pretty
+cat ~/lunar-bot/logs/lunar-bot-out.log | grep -i "$filter" | pino-pretty --config ~/lunar-bot/.pino-prettyrc
 
