@@ -459,12 +459,13 @@ export default class InteractionUtil extends null {
 					.setEmoji(X_EMOJI),
 			);
 
-		let channel;
+		let channel: TextBasedChannels;
+		let message: Message | void;
 
 		try {
 			channel = interaction.channel ?? await interaction.client.channels.fetch(interaction.channelId) as TextBasedChannels;
 
-			await this.reply(interaction, {
+			message = await this.reply(interaction, {
 				embeds: [
 					(interaction.client as LunarClient).defaultEmbed
 						.setDescription(question),
@@ -472,6 +473,7 @@ export default class InteractionUtil extends null {
 				components: [
 					row,
 				],
+				fetchReply: false,
 				rejectOnError: true,
 				...options,
 			});
@@ -487,7 +489,7 @@ export default class InteractionUtil extends null {
 				componentType: Constants.MessageComponentTypes.BUTTON,
 				filter: (i) => {
 					if (i.user.id !== interaction.user.id) {
-						void this.reply(interaction, {
+						this.reply(interaction, {
 							content: 'that is not up to you to decide',
 							ephemeral: true,
 						});
@@ -516,10 +518,10 @@ export default class InteractionUtil extends null {
 				],
 			});
 		} catch (error) {
-			this.editReply(interaction, {
+			const editOptions = {
 				embeds: [
 					new MessageEmbed()
-						.setColor('DARKER_GREY')
+						.setColor('NOT_QUITE_BLACK')
 						.setDescription(stripIndent`
 							${question}
 							\\> timeout
@@ -529,7 +531,21 @@ export default class InteractionUtil extends null {
 				components: [
 					row.setComponents(row.components.map(c => c.setDisabled())),
 				],
-			});
+			};
+
+			if (message) { // question message was a followUp
+				try {
+					await MessageUtil.edit(message, {
+						...editOptions,
+						rejectOnError: true,
+					});
+				} catch (error_) {
+					logger.error(error_);
+					this.reply(interaction, editOptions);
+				}
+			} else { // question message was an initial reply
+				this.editReply(interaction, editOptions);
+			}
 
 			logger.debug(error);
 		}
