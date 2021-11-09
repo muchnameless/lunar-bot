@@ -298,7 +298,7 @@ export default class GuildCommand extends ApplicationCommand {
 				({ hypixelGuild } = target);
 
 				if (target.guildRankPriority >= (executor?.guildRankPriority ?? -1)) return {
-					content: `your guild rank needs to be higher than ${target}'s`,
+					content: `your guild rank needs to be higher than \`${target}\`'s`,
 					ephemeral: true,
 				};
 			}
@@ -387,7 +387,7 @@ export default class GuildCommand extends ApplicationCommand {
 			hasErrored: true,
 		};
 		if (target.guildRankPriority >= executor.guildRankPriority) return {
-			content: `your guild rank needs to be higher than ${target}'s`,
+			content: `your guild rank needs to be higher than \`${target}\`'s`,
 			hasErrored: true,
 		};
 
@@ -400,7 +400,7 @@ export default class GuildCommand extends ApplicationCommand {
 
 		try {
 			// confirm kick
-			const QUESTION = `kick ${target} from ${hypixelGuild}?` as const;
+			const QUESTION = `kick \`${target}\` from ${escapeIgn(hypixelGuild.name)}?` as const;
 			await (ctx instanceof HypixelMessage
 				? ctx.awaitConfirmation(QUESTION)
 				: InteractionUtil.awaitConfirmation(ctx, QUESTION)
@@ -440,7 +440,7 @@ export default class GuildCommand extends ApplicationCommand {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
-					.setTitle(`/${commandOptions.command}`)
+					.setTitle(`/${escapeIgn(commandOptions.command)}`) // command can inclue a player IGN
 					.setDescription(Formatters.codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions))),
 			],
 		});
@@ -657,7 +657,7 @@ export default class GuildCommand extends ApplicationCommand {
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
 				if (target.guildRankPriority >= executor.guildRankPriority) return InteractionUtil.reply(interaction, {
-					content: `your guild rank needs to be higher than ${target}'s`,
+					content: `your guild rank needs to be higher than \`${target}\`'s`,
 					ephemeral: true,
 				});
 
@@ -699,7 +699,7 @@ export default class GuildCommand extends ApplicationCommand {
 							try {
 								await InteractionUtil.awaitConfirmation(
 									interaction,
-									`add ${escapeIgn((target as Player).ign)} to the ban list for \`${reason}\`?`,
+									`add \`${target}\` to the ban list for \`${reason}\`?`,
 								);
 							} catch (error) {
 								return logger.error(error);
@@ -714,13 +714,13 @@ export default class GuildCommand extends ApplicationCommand {
 								});
 
 								InteractionUtil.reply(interaction, {
-									content: `${escapeIgn((target as Player).ign)} was added to the ban list for \`${reason}\``,
+									content: `\`${target}\` was added to the ban list for \`${reason}\``,
 								});
 							} catch (error) {
 								logger.error(error);
 
 								InteractionUtil.reply(interaction, {
-									content: `error adding ${escapeIgn((target as Player).ign)} to the ban list: ${error}`,
+									content: `error adding \`${target}\` to the ban list: ${error}`,
 								});
 							}
 					}
@@ -729,7 +729,7 @@ export default class GuildCommand extends ApplicationCommand {
 				return InteractionUtil.reply(interaction, {
 					embeds: [
 						this.client.defaultEmbed
-							.setTitle(`/guild kick ${target} ${reason}`)
+							.setTitle(`/guild kick ${escapeIgn(typeof target === 'string' ? target : target.ign)} ${reason}`)
 							.setDescription(Formatters.codeBlock(content)),
 					],
 					ephemeral: interaction.options.get('visibility') === null
@@ -950,7 +950,7 @@ export default class GuildCommand extends ApplicationCommand {
 
 				if (this.client.players.isModel(target)) {
 					if (target.guildRankPriority >= (UserUtil.getPlayer(interaction.user)?.guildRankPriority ?? 0)) return InteractionUtil.reply(interaction, {
-						content: `your guild rank needs to be higher than ${target}'s`,
+						content: `your guild rank needs to be higher than \`${target}\`'s`,
 						ephemeral: true,
 					});
 
