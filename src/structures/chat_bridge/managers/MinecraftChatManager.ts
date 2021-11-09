@@ -401,8 +401,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			password: process.env.MINECRAFT_PASSWORD!.split(' ')[this.mcAccount],
 			version: MC_CLIENT_VERSION,
 			auth: process.env.MINECRAFT_ACCOUNT_TYPE!.split(' ')[this.mcAccount] as 'mojang' | 'microsoft',
-			// @ts-expect-error
-			authTitle: false,
 		});
 	}
 
