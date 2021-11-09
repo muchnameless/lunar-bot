@@ -212,7 +212,7 @@ export default class MessageUtil extends null {
 		if (!message.editable) { // message was not sent by the bot user
 			if (Object.keys(options).some(key => key !== 'attachments') || options.attachments?.length !== 0) { // can only remove attachments
 				if (options.rejectOnError) throw new Error(`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)} with ${Object.entries(options)}`);
-				logger.warn(`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)} with ${Object.entries(options)}`);
+				logger.warn(options, `[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
 				return message;
 			}
 
