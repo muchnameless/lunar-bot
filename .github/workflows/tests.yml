@@ -15,15 +15,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v2
+        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2
       - name: Add problem matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
       - name: Use Node.js v17
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2
         with:
           node-version: 17
       - name: Restore CI Cache
-        uses: actions/cache@v2
+        uses: actions/cache@c64c572235d810460d0d6876e9c705ad5002b353 # renovate: tag=v2
         id: cache-restore
         with:
           path: node_modules
@@ -42,15 +42,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v2
+        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2
       - name: Add problem matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
       - name: Use Node.js v17
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c # renovate: tag=v2
         with:
           node-version: 17
       - name: Restore CI Cache
-        uses: actions/cache@v2
+        uses: actions/cache@c64c572235d810460d0d6876e9c705ad5002b353 # renovate: tag=v2
         id: cache-restore
         with:
           path: node_modules
