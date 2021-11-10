@@ -25,7 +25,6 @@ import type { ModelResovable } from './ModelManager';
 import type { Player, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
 import type { HypixelGuild } from '../models/HypixelGuild';
 
-
 export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * player db xp update
@@ -44,7 +43,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * get players from all guilds (no bridgers or errors)
 	 */
 	get inGuild() {
-		return this.cache.filter(player => player.inGuild());
+		return this.cache.filter((player) => player.inGuild());
 	}
 
 	/**
@@ -53,7 +52,8 @@ export class PlayerManager extends ModelManager<Player> {
 	override async loadCache() {
 		await super.loadCache({
 			where: {
-				guildId: { // player is in a guild or a bridger / error
+				guildId: {
+					// player is in a guild or a bridger / error
 					[Op.ne]: null,
 				},
 			},
@@ -144,17 +144,20 @@ export class PlayerManager extends ModelManager<Player> {
 				guildId: null,
 				paid: false,
 			},
-			attributes: [ this.primaryKey, 'ign' ],
+			attributes: [this.primaryKey, 'ign'],
 		});
 
-		await safePromiseAll(playersToSweep.map(player => player.destroy()));
+		await safePromiseAll(playersToSweep.map((player) => player.destroy()));
 
 		const AMOUNT = playersToSweep.length;
 
-		logger.warn({
-			sweptPlayers: playersToSweep.map(({ ign }) => ign),
-			amount: playersToSweep.length,
-		}, '[SWEEP DB]');
+		logger.warn(
+			{
+				sweptPlayers: playersToSweep.map(({ ign }) => ign),
+				amount: playersToSweep.length,
+			},
+			'[SWEEP DB]',
+		);
 
 		return AMOUNT;
 	}
@@ -163,7 +166,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * sweeps all cached discord members
 	 */
 	sweepDiscordMemberCache() {
-		this.cache.each(player => player.discordMember = null);
+		this.cache.each((player) => (player.discordMember = null));
 		return this;
 	}
 
@@ -176,9 +179,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		const { similarity, value } = this.#autocorrectToPlayer(ign);
 
-		return similarity >= (this.client.config.get('AUTOCORRECT_THRESHOLD'))
-			? value
-			: null;
+		return similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD') ? value : null;
 	}
 
 	/**
@@ -219,10 +220,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @param options
 	 */
 	async updateData(options?: PlayerUpdateOptions) {
-		await Promise.all([
-			this.updateXp({ shouldOnlyAwaitUpdateXp: true, ...options }),
-			this.updateIgns(),
-		]);
+		await Promise.all([this.updateXp({ shouldOnlyAwaitUpdateXp: true, ...options }), this.updateIgns()]);
 
 		return this;
 	}
@@ -258,7 +256,8 @@ export class PlayerManager extends ModelManager<Player> {
 			}
 
 			for (const player of this.cache.values()) {
-				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep(hypixel.rateLimit.reset - Date.now() + seconds(1));
+				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1)
+					await sleep(hypixel.rateLimit.reset - Date.now() + seconds(1));
 
 				await player.updateData({ rejectOnAPIError: true, ...options });
 			}
@@ -308,25 +307,28 @@ export class PlayerManager extends ModelManager<Player> {
 		>();
 
 		// API calls
-		await Promise.all(this.cache.map(async (player) => {
-			const result = await player.updateIgn();
-			if (!result) return;
+		await Promise.all(
+			this.cache.map(async (player) => {
+				const result = await player.updateIgn();
+				if (!result) return;
 
-			// first change for this guild
-			if (!log.has(player.guildId)) {
-				const { guildName } = player;
+				// first change for this guild
+				if (!log.has(player.guildId)) {
+					const { guildName } = player;
 
-				return log.set(player.guildId, {
-					guildName,
-					playerCount: this.client.hypixelGuilds.cache.find(({ name }) => name === guildName)?.playerCount
-						?? this.cache.filter(({ guildId: e }) => e === player.guildId).size,
-					ignChanges: [ `${result.oldIgn} -> ${result.newIgn}` ],
-				});
-			}
+					return log.set(player.guildId, {
+						guildName,
+						playerCount:
+							this.client.hypixelGuilds.cache.find(({ name }) => name === guildName)?.playerCount ??
+							this.cache.filter(({ guildId: e }) => e === player.guildId).size,
+						ignChanges: [`${result.oldIgn} -> ${result.newIgn}`],
+					});
+				}
 
-			// further change for this guild
-			return log.get(player.guildId)!.ignChanges.push(`${result.oldIgn} -> ${result.newIgn}`);
-		}));
+				// further change for this guild
+				return log.get(player.guildId)!.ignChanges.push(`${result.oldIgn} -> ${result.newIgn}`);
+			}),
+		);
 
 		// logging
 		if (!log.size) return this;
@@ -348,11 +350,15 @@ export class PlayerManager extends ModelManager<Player> {
 			return embed;
 		};
 
-		for (const { guildName, playerCount, ignChanges } of log.sort(({ guildName: a }, { guildName: b }) => compareAlphabetically(a, b)).values()) {
-			const logParts = Util.splitMessage(
-				Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')),
-				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```\n', append: '```' },
-			);
+		for (const { guildName, playerCount, ignChanges } of log
+			.sort(({ guildName: a }, { guildName: b }) => compareAlphabetically(a, b))
+			.values()) {
+			const logParts = Util.splitMessage(Formatters.codeBlock(ignChanges.sort(compareAlphabetically).join('\n')), {
+				maxLength: EMBED_FIELD_MAX_CHARS,
+				char: '\n',
+				prepend: '```\n',
+				append: '```',
+			});
 
 			let embed = createEmbed(guildName, playerCount, ignChanges.length);
 			let currentLength = embed.length;
@@ -411,7 +417,8 @@ export class PlayerManager extends ModelManager<Player> {
 			if (!player.inGuild()) continue;
 
 			try {
-				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) await sleep(hypixel.rateLimit.reset - Date.now() + seconds(1));
+				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1)
+					await sleep(hypixel.rateLimit.reset - Date.now() + seconds(1));
 
 				const result = await player.fetchMainProfile();
 				if (!result) continue;
@@ -419,11 +426,11 @@ export class PlayerManager extends ModelManager<Player> {
 				const { hypixelGuild } = player;
 
 				if (!log.has(hypixelGuild)) {
-					log.set(hypixelGuild, [ `-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}` ]);
+					log.set(hypixelGuild, [`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`]);
 					continue;
 				}
 
-					log.get(hypixelGuild)!.push(`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`);
+				log.get(hypixelGuild)!.push(`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`);
 			} catch (error) {
 				logger.error(error, '[UPDATE MAIN PROFILE]');
 
@@ -431,11 +438,11 @@ export class PlayerManager extends ModelManager<Player> {
 					const { hypixelGuild } = player;
 
 					if (!log.has(hypixelGuild)) {
-						log.set(hypixelGuild, [ `-\u00A0${player}: ${error}` ]);
+						log.set(hypixelGuild, [`-\u00A0${player}: ${error}`]);
 						continue;
 					}
 
-						log.get(hypixelGuild)!.push(`-\u00A0${player}: ${error}`);
+					log.get(hypixelGuild)!.push(`-\u00A0${player}: ${error}`);
 				}
 			}
 		}
@@ -451,7 +458,11 @@ export class PlayerManager extends ModelManager<Player> {
 		const createEmbed = (guild: HypixelGuild, mainProfileChangesAmount: number) => {
 			const embed = new MessageEmbed()
 				.setColor(this.client.config.get('EMBED_RED'))
-				.setTitle(`${upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${mainProfileChangesAmount !== 1 ? 's' : ''}`)
+				.setTitle(
+					`${upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${
+						mainProfileChangesAmount !== 1 ? 's' : ''
+					}`,
+				)
 				.setDescription(`Number of players: ${guild.playerCount}`)
 				.setTimestamp();
 
@@ -460,7 +471,9 @@ export class PlayerManager extends ModelManager<Player> {
 			return embed;
 		};
 
-		for (const [ guild, mainProfileUpdate ] of log.sort((_, __, { name: a }, { name: b }) => compareAlphabetically(a, b))) {
+		for (const [guild, mainProfileUpdate] of log.sort((_, __, { name: a }, { name: b }) =>
+			compareAlphabetically(a, b),
+		)) {
 			const logParts = Util.splitMessage(
 				Formatters.codeBlock('diff', mainProfileUpdate.sort(compareAlphabetically).join('\n')),
 				{ maxLength: EMBED_FIELD_MAX_CHARS, char: '\n', prepend: '```diff\n', append: '```' },
@@ -494,7 +507,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @param options transfer options
 	 */
 	async transferXp(options: TransferXpOptions) {
-		await safePromiseAll(this.cache.map(player => player.transferXp(options)));
+		await safePromiseAll(this.cache.map((player) => player.transferXp(options)));
 		return this;
 	}
 
@@ -503,7 +516,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @param options reset options
 	 */
 	async resetXp(options?: ResetXpOptions) {
-		await safePromiseAll(this.cache.map(player => player.resetXp(options)));
+		await safePromiseAll(this.cache.map((player) => player.resetXp(options)));
 		return this;
 	}
 
@@ -516,11 +529,14 @@ export class PlayerManager extends ModelManager<Player> {
 		// auto competition starting
 		if (config.get('COMPETITION_SCHEDULED')) {
 			if (config.get('COMPETITION_START_TIME') - seconds(10) > Date.now()) {
-				this.client.cronJobs.schedule('competitionStart', new CronJob({
-					cronTime: new Date(config.get('COMPETITION_START_TIME')),
-					onTick: () => this.#startCompetition(),
-					start: true,
-				}));
+				this.client.cronJobs.schedule(
+					'competitionStart',
+					new CronJob({
+						cronTime: new Date(config.get('COMPETITION_START_TIME')),
+						onTick: () => this.#startCompetition(),
+						start: true,
+					}),
+				);
 			} else if (!config.get('COMPETITION_RUNNING')) {
 				this.#startCompetition();
 			}
@@ -528,11 +544,14 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// auto competition ending
 		if (config.get('COMPETITION_END_TIME') - seconds(10) > Date.now()) {
-			this.client.cronJobs.schedule('competitionEnd', new CronJob({
-				cronTime: new Date(config.get('COMPETITION_END_TIME')),
-				onTick: () => this.#endCompetition(),
-				start: true,
-			}));
+			this.client.cronJobs.schedule(
+				'competitionEnd',
+				new CronJob({
+					cronTime: new Date(config.get('COMPETITION_END_TIME')),
+					onTick: () => this.#endCompetition(),
+					start: true,
+				}),
+			);
 		} else if (config.get('COMPETITION_RUNNING')) {
 			this.#endCompetition();
 		}
@@ -541,11 +560,14 @@ export class PlayerManager extends ModelManager<Player> {
 		const NEXT_MAYOR_TIME = config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 
 		if (NEXT_MAYOR_TIME - seconds(10) > Date.now()) {
-			this.client.cronJobs.schedule('mayorXpReset', new CronJob({
-				cronTime: new Date(NEXT_MAYOR_TIME),
-				onTick: () => this.#performMayorXpReset(),
-				start: true,
-			}));
+			this.client.cronJobs.schedule(
+				'mayorXpReset',
+				new CronJob({
+					cronTime: new Date(NEXT_MAYOR_TIME),
+					onTick: () => this.#performMayorXpReset(),
+					start: true,
+				}),
+			);
 		} else {
 			this.#performMayorXpReset();
 		}
@@ -556,34 +578,45 @@ export class PlayerManager extends ModelManager<Player> {
 		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.#performDailyXpReset();
 
 		// each day at 00:00:00
-		this.client.cronJobs.schedule('dailyXpReset', new CronJob({
-			cronTime: '0 0 0 * * *',
-			timeZone: 'GMT',
-			onTick: () => this.#performDailyXpReset(),
-			start: true,
-		}));
+		this.client.cronJobs.schedule(
+			'dailyXpReset',
+			new CronJob({
+				cronTime: '0 0 0 * * *',
+				timeZone: 'GMT',
+				onTick: () => this.#performDailyXpReset(),
+				start: true,
+			}),
+		);
 
 		// weekly reset
-		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) this.#performWeeklyXpReset();
+		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now))
+			this.#performWeeklyXpReset();
 
 		// each monday at 00:00:00
-		this.client.cronJobs.schedule('weeklyXpReset', new CronJob({
-			cronTime: '0 0 0 * * MON',
-			timeZone: 'GMT',
-			onTick: () => this.#performWeeklyXpReset(),
-			start: true,
-		}));
+		this.client.cronJobs.schedule(
+			'weeklyXpReset',
+			new CronJob({
+				cronTime: '0 0 0 * * MON',
+				timeZone: 'GMT',
+				onTick: () => this.#performWeeklyXpReset(),
+				start: true,
+			}),
+		);
 
 		// monthly reset
-		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) this.#performMonthlyXpReset();
+		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth())
+			this.#performMonthlyXpReset();
 
 		// the first of each month at 00:00:00
-		this.client.cronJobs.schedule('monthlyXpReset', new CronJob({
-			cronTime: '0 0 0 1 * *',
-			timeZone: 'GMT',
-			onTick: () => this.#performMonthlyXpReset(),
-			start: true,
-		}));
+		this.client.cronJobs.schedule(
+			'monthlyXpReset',
+			new CronJob({
+				cronTime: '0 0 0 1 * *',
+				timeZone: 'GMT',
+				onTick: () => this.#performMonthlyXpReset(),
+				start: true,
+			}),
+		);
 
 		return this;
 	}
@@ -598,10 +631,7 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('COMPETITION_SCHEDULED', false),
 		]);
 
-		this.client.log(this.client.defaultEmbed
-			.setTitle('Guild Competition')
-			.setDescription('started'),
-		);
+		this.client.log(this.client.defaultEmbed.setTitle('Guild Competition').setDescription('started'));
 
 		return this;
 	}
@@ -615,10 +645,7 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('COMPETITION_RUNNING', false),
 		]);
 
-		this.client.log(this.client.defaultEmbed
-			.setTitle('Guild Competition')
-			.setDescription('ended'),
-		);
+		this.client.log(this.client.defaultEmbed.setTitle('Guild Competition').setDescription('ended'));
 
 		return this;
 	}
@@ -636,16 +663,20 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime),
 		]);
 
-		this.client.log(this.client.defaultEmbed
-			.setTitle('Current Mayor XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
+		this.client.log(
+			this.client.defaultEmbed
+				.setTitle('Current Mayor XP Tracking')
+				.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
 		);
 
-		this.client.cronJobs.schedule('mayorXpReset', new CronJob({
-			cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
-			onTick: () => this.#performMayorXpReset(),
-			start: true,
-		}));
+		this.client.cronJobs.schedule(
+			'mayorXpReset',
+			new CronJob({
+				cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
+				onTick: () => this.#performMayorXpReset(),
+				start: true,
+			}),
+		);
 
 		return this;
 	}
@@ -659,9 +690,10 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('LAST_DAILY_XP_RESET_TIME', Date.now()),
 		]);
 
-		this.client.log(this.client.defaultEmbed
-			.setTitle('Daily XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
+		this.client.log(
+			this.client.defaultEmbed
+				.setTitle('Daily XP Tracking')
+				.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
 		);
 
 		return this.updateMainProfiles();
@@ -676,9 +708,10 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now()),
 		]);
 
-		this.client.log(this.client.defaultEmbed
-			.setTitle('Weekly XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
+		this.client.log(
+			this.client.defaultEmbed
+				.setTitle('Weekly XP Tracking')
+				.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
 		);
 
 		return this;
@@ -693,9 +726,10 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now()),
 		]);
 
-		this.client.log(this.client.defaultEmbed
-			.setTitle('Monthly XP Tracking')
-			.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
+		this.client.log(
+			this.client.defaultEmbed
+				.setTitle('Monthly XP Tracking')
+				.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
 		);
 
 		return this;

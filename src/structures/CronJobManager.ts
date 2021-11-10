@@ -2,7 +2,6 @@ import { Collection } from 'discord.js';
 import { CronJob } from 'cron';
 import type { LunarClient } from './LunarClient';
 
-
 export class CronJobManager {
 	client: LunarClient;
 	cache = new Collection<string, CronJob>();
@@ -44,7 +43,7 @@ export class CronJobManager {
 
 		cronJob.stop();
 
-		const name = this.cache.findKey(x => x === cronJob)!;
+		const name = this.cache.findKey((x) => x === cronJob)!;
 
 		return this.cache.delete(name);
 	}

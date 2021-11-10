@@ -7,7 +7,6 @@ import type { CommandInteraction } from 'discord.js';
 import type { LeaderboardXPOffsets } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class PurgeListCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -28,7 +27,7 @@ export default class PurgeListCommand extends ApplicationCommand {
 			lbType: 'gained',
 			xpType: 'purge',
 			page: interaction.options.getInteger('page') ?? 1,
-			offset: interaction.options.getString('offset') as LeaderboardXPOffsets ?? '',
+			offset: (interaction.options.getString('offset') as LeaderboardXPOffsets) ?? '',
 			hypixelGuild: InteractionUtil.getHypixelGuild(interaction, { includeAll: true }),
 			user: interaction.user,
 		});

@@ -1,12 +1,24 @@
 import ms from 'ms';
 import { COMMAND_KEY, LB_KEY } from '../constants';
 import { InteractionUtil } from '../util';
-import { handleLeaderboardButtonInteraction, handleLeaderboardSelectMenuInteraction, logger, minutes } from '../functions';
+import {
+	handleLeaderboardButtonInteraction,
+	handleLeaderboardSelectMenuInteraction,
+	logger,
+	minutes,
+} from '../functions';
 import { Event } from '../structures/events/Event';
-import type { BaseGuildTextChannel, ButtonInteraction, CommandInteraction, ContextMenuInteraction, GuildMember, Message, SelectMenuInteraction } from 'discord.js';
+import type {
+	BaseGuildTextChannel,
+	ButtonInteraction,
+	CommandInteraction,
+	ContextMenuInteraction,
+	GuildMember,
+	Message,
+	SelectMenuInteraction,
+} from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 import type { ChatInteraction } from '../util/InteractionUtil';
-
 
 export default class InteractionCreateEvent extends Event {
 	constructor(context: EventContext) {
@@ -20,12 +32,19 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	async #handleCommandInteraction(interaction: CommandInteraction) {
-		logger.info({
-			type: interaction.type,
-			command: interaction.toString(),
-			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
-			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
-		}, 'INTERACTION_CREATE');
+		logger.info(
+			{
+				type: interaction.type,
+				command: interaction.toString(),
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+			},
+			'INTERACTION_CREATE',
+		);
 
 		if (this.client.chatBridges.channelIds.has(interaction.channelId)) {
 			this.client.chatBridges.interactionCache.set(interaction.id, interaction);
@@ -34,10 +53,11 @@ export default class InteractionCreateEvent extends Event {
 
 		const command = this.client.commands.get(interaction.commandName);
 
-		if (!command) return InteractionUtil.reply(interaction, {
-			content: `the \`${interaction.commandName}\` command is currently disabled`,
-			ephemeral: true,
-		});
+		if (!command)
+			return InteractionUtil.reply(interaction, {
+				content: `the \`${interaction.commandName}\` command is currently disabled`,
+				ephemeral: true,
+			});
 
 		if (interaction.user.id !== this.client.ownerId) {
 			// role permissions
@@ -79,12 +99,19 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	async #handleButtonInteraction(interaction: ButtonInteraction) {
-		logger.info({
-			type: interaction.componentType,
-			customId: interaction.customId,
-			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
-			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
-		}, 'INTERACTION_CREATE');
+		logger.info(
+			{
+				type: interaction.componentType,
+				customId: interaction.customId,
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+			},
+			'INTERACTION_CREATE',
+		);
 
 		const args = interaction.customId.split(':');
 		const type = args.shift();
@@ -100,10 +127,11 @@ export default class InteractionCreateEvent extends Event {
 				const command = this.client.commands.get(commandName!);
 
 				if (!command) {
-					if (commandName) await InteractionUtil.reply(interaction, {
-						content: `the \`${commandName}\` command is currently disabled`,
-						ephemeral: true,
-					});
+					if (commandName)
+						await InteractionUtil.reply(interaction, {
+							content: `the \`${commandName}\` command is currently disabled`,
+							ephemeral: true,
+						});
 
 					return;
 				}
@@ -130,13 +158,20 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	async #handleSelectMenuInteraction(interaction: SelectMenuInteraction) {
-		logger.info({
-			type: interaction.componentType,
-			customId: interaction.customId,
-			values: interaction.values,
-			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
-			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
-		}, 'INTERACTION_CREATE');
+		logger.info(
+			{
+				type: interaction.componentType,
+				customId: interaction.customId,
+				values: interaction.values,
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+			},
+			'INTERACTION_CREATE',
+		);
 
 		const args = interaction.customId.split(':');
 		const type = args.shift();
@@ -152,10 +187,11 @@ export default class InteractionCreateEvent extends Event {
 				const command = this.client.commands.get(commandName!);
 
 				if (!command) {
-					if (commandName) await InteractionUtil.reply(interaction, {
-						content: `the \`${commandName}\` command is currently disabled`,
-						ephemeral: true,
-					});
+					if (commandName)
+						await InteractionUtil.reply(interaction, {
+							content: `the \`${commandName}\` command is currently disabled`,
+							ephemeral: true,
+						});
 
 					return;
 				}
@@ -182,19 +218,27 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	async #handleContextMenuInteraction(interaction: ContextMenuInteraction) {
-		logger.info({
-			type: interaction.targetType,
-			command: interaction.commandName,
-			user: interaction.member ? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}` : interaction.user.tag,
-			channel: interaction.guildId ? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId : 'DM',
-		}, 'INTERACTION_CREATE');
+		logger.info(
+			{
+				type: interaction.targetType,
+				command: interaction.commandName,
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+			},
+			'INTERACTION_CREATE',
+		);
 
 		const command = this.client.commands.get(interaction.commandName);
 
-		if (!command) return InteractionUtil.reply(interaction, {
-			content: `the \`${interaction.commandName}\` command is currently disabled`,
-			ephemeral: true,
-		});
+		if (!command)
+			return InteractionUtil.reply(interaction, {
+				content: `the \`${interaction.commandName}\` command is currently disabled`,
+				ephemeral: true,
+			});
 
 		if (interaction.user.id !== this.client.ownerId) {
 			// role permissions
@@ -215,7 +259,7 @@ export default class InteractionCreateEvent extends Event {
 
 			case 'USER': {
 				const { user, member } = interaction.options.get('user')!;
-				return command.runUser(interaction, user!, member as GuildMember ?? null);
+				return command.runUser(interaction, user!, (member as GuildMember) ?? null);
 			}
 
 			default:
@@ -258,9 +302,7 @@ export default class InteractionCreateEvent extends Event {
 			if (InteractionUtil.isInteractionError(error)) return; // interaction expired
 
 			InteractionUtil.reply(interaction, {
-				content: typeof error === 'string'
-					? error
-					: `an error occurred while executing the command: ${error}`,
+				content: typeof error === 'string' ? error : `an error occurred while executing the command: ${error}`,
 				ephemeral: true,
 				allowedMentions: { parse: [], repliedUser: true },
 			});

@@ -13,13 +13,7 @@ import {
 } from '../../../constants';
 import { GuildUtil } from '../../../util';
 import { hypixel, mojang } from '../../../api';
-import {
-	cleanFormattedNumber,
-	compareAlphabetically,
-	days,
-	logger,
-	safePromiseAll,
-} from '../../../functions';
+import { cleanFormattedNumber, compareAlphabetically, days, logger, safePromiseAll } from '../../../functions';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Collection, GuildMember, Snowflake } from 'discord.js';
 import type { Player } from './Player';
@@ -27,20 +21,21 @@ import type { ChatBridge } from '../../chat_bridge/ChatBridge';
 import type { LunarClient } from '../../LunarClient';
 import type { PREFIX_BY_TYPE } from '../../chat_bridge/constants';
 
-
-type GuildRank = {
-	name: string;
-	roleId: null;
-	priority: number;
-	positionReq: null;
-	currentWeightReq: null;
-} | {
-	name: string;
-	roleId: string;
-	priority: number;
-	positionReq: number;
-	currentWeightReq: number;
-};
+type GuildRank =
+	| {
+			name: string;
+			roleId: null;
+			priority: number;
+			positionReq: null;
+			currentWeightReq: null;
+	  }
+	| {
+			name: string;
+			roleId: string;
+			priority: number;
+			positionReq: number;
+			currentWeightReq: number;
+	  };
 
 export interface ChatBridgeChannel {
 	type: keyof typeof PREFIX_BY_TYPE;
@@ -78,7 +73,6 @@ interface HypixelGuildAttributes {
 	statsHistory: StatsHistory[];
 }
 
-
 export class HypixelGuild extends Model<HypixelGuildAttributes> implements HypixelGuildAttributes {
 	declare client: LunarClient;
 
@@ -114,71 +108,73 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	#chatBridge: ChatBridge | null = null;
 
 	static initialise(sequelize: Sequelize) {
-		return this.init({
-			guildId: {
-				type: DataTypes.STRING,
-				primaryKey: true,
-			},
-			roleId: {
-				type: DataTypes.STRING,
-				defaultValue: null,
-				allowNull: true,
-			},
-			name: {
-				type: DataTypes.STRING,
-				allowNull: false,
-			},
-			weightReq: {
-				type: DataTypes.INTEGER,
-				defaultValue: 0,
-				allowNull: true,
-			},
-			chatBridgeEnabled: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: true,
-				allowNull: false,
-			},
-			mutedTill: {
-				type: DataTypes.BIGINT,
-				defaultValue: 0,
-				allowNull: false,
-				set(value: number | undefined) {
-					this.setDataValue('mutedTill', value ?? 0);
+		return this.init(
+			{
+				guildId: {
+					type: DataTypes.STRING,
+					primaryKey: true,
 				},
-			},
-			chatBridgeChannels: {
-				type: DataTypes.ARRAY(DataTypes.JSONB),
-				defaultValue: [],
-				allowNull: false,
-			},
-			ranks: {
-				type: DataTypes.ARRAY(DataTypes.JSONB),
-				defaultValue: [],
-				allowNull: false,
-			},
-			staffRanksAmount: {
-				type: DataTypes.SMALLINT,
-				// 2 + GuildMaster but the latter is not in ranks array
-				defaultValue: 2,
-				allowNull: false,
-			},
-			statsHistory: {
-				type: DataTypes.ARRAY(DataTypes.JSONB),
-				defaultValue: Array.from({ length: 30 })
-					.map(() => ({
+				roleId: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				name: {
+					type: DataTypes.STRING,
+					allowNull: false,
+				},
+				weightReq: {
+					type: DataTypes.INTEGER,
+					defaultValue: 0,
+					allowNull: true,
+				},
+				chatBridgeEnabled: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: true,
+					allowNull: false,
+				},
+				mutedTill: {
+					type: DataTypes.BIGINT,
+					defaultValue: 0,
+					allowNull: false,
+					set(value: number | undefined) {
+						this.setDataValue('mutedTill', value ?? 0);
+					},
+				},
+				chatBridgeChannels: {
+					type: DataTypes.ARRAY(DataTypes.JSONB),
+					defaultValue: [],
+					allowNull: false,
+				},
+				ranks: {
+					type: DataTypes.ARRAY(DataTypes.JSONB),
+					defaultValue: [],
+					allowNull: false,
+				},
+				staffRanksAmount: {
+					type: DataTypes.SMALLINT,
+					// 2 + GuildMaster but the latter is not in ranks array
+					defaultValue: 2,
+					allowNull: false,
+				},
+				statsHistory: {
+					type: DataTypes.ARRAY(DataTypes.JSONB),
+					defaultValue: Array.from({ length: 30 }).map(() => ({
 						playerCount: 0,
 						weightAverage: 0,
 						skillAverage: 0,
 						slayerAverage: 0,
 						catacombsAverage: 0,
 					})),
-				allowNull: false,
+					allowNull: false,
+				},
 			},
-		}, {
-			sequelize,
-			modelName: 'HypixelGuild',
-			timestamps: false,
-		}) as ModelStatic<HypixelGuild>;
+			{
+				sequelize,
+				modelName: 'HypixelGuild',
+				timestamps: false,
+			},
+		) as ModelStatic<HypixelGuild>;
 	}
 
 	/**
@@ -188,10 +184,10 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	static transformLogArray(logArray: string[]) {
 		if (!logArray.length) return logArray;
 
-		return Util.splitMessage(
-			logArray.sort(compareAlphabetically).join('\n'),
-			{ maxLength: EMBED_FIELD_MAX_CHARS - 11, char: '\n' },
-		);
+		return Util.splitMessage(logArray.sort(compareAlphabetically).join('\n'), {
+			maxLength: EMBED_FIELD_MAX_CHARS - 11,
+			char: '\n',
+		});
 	}
 
 	set players(value: Collection<string, Player> | null) {
@@ -202,7 +198,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * returns the filtered <LunarClient>.players containing all players from this guild
 	 */
 	get players(): Collection<string, Player> {
-		return this.#players ??= this.client.players.cache.filter(({ guildId }) => guildId === this.guildId);
+		return (this.#players ??= this.client.players.cache.filter(({ guildId }) => guildId === this.guildId));
 	}
 
 	set chatBridge(value: ChatBridge | null) {
@@ -214,7 +210,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 */
 	get chatBridge(): ChatBridge<true> {
 		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
-		if (!this.#chatBridge?.minecraft.isReady()) throw `${this.name}: chat bridge not ${this.#chatBridge ? 'ready' : 'found'}`;
+		if (!this.#chatBridge?.minecraft.isReady())
+			throw `${this.name}: chat bridge not ${this.#chatBridge ? 'ready' : 'found'}`;
 		return this.#chatBridge;
 	}
 
@@ -236,7 +233,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			weightAverage: players.reduce((acc, player) => acc + player.getLilyWeight().totalWeight, 0) / PLAYER_COUNT,
 			skillAverage: players.reduce((acc, player) => acc + player.getSkillAverage().skillAverage, 0) / PLAYER_COUNT,
 			slayerAverage: players.reduce((acc, player) => acc + player.getSlayerTotal(), 0) / PLAYER_COUNT,
-			catacombsAverage: players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT,
+			catacombsAverage:
+				players.reduce((acc, player) => acc + player.getSkillLevel('catacombs').nonFlooredLevel, 0) / PLAYER_COUNT,
 		};
 	}
 
@@ -265,7 +263,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			if (Date.now() < this.mutedTill) return true;
 
 			// mute has expired
-			this.update({ mutedTill: 0 }).catch(error => logger.error(error));
+			this.update({ mutedTill: 0 }).catch((error) => logger.error(error));
 		}
 
 		return false;
@@ -303,7 +301,13 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 */
 	async #updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
 		try {
-			const { meta: { cached }, name: guildName, ranks, chatMute, members: currentGuildMembers } = await hypixel.guild.id(this.guildId);
+			const {
+				meta: { cached },
+				name: guildName,
+				ranks,
+				chatMute,
+				members: currentGuildMembers,
+			} = await hypixel.guild.id(this.guildId);
 
 			if (cached) {
 				logger.info(`[UPDATE GUILD]: ${this.name}: cached data`);
@@ -355,7 +359,9 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 			const { players, config, lgGuild } = this.client;
 			const guildPlayers = this.players;
-			const playersLeft = guildPlayers.filter((_, minecraftUuid) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUuid));
+			const playersLeft = guildPlayers.filter(
+				(_, minecraftUuid) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUuid),
+			);
 			const PLAYERS_LEFT_AMOUNT = playersLeft.size;
 			const PLAYERS_OLD_AMOUNT = guildPlayers.size;
 
@@ -374,7 +380,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			// add / remove player db entries
 			await safePromiseAll([
 				...membersJoined.map(async ({ uuid: minecraftUuid }) => {
-					const [ player, created ] = await players.model.findCreateFind({
+					const [player, created] = await players.model.findCreateFind({
 						where: { minecraftUuid },
 						defaults: {
 							minecraftUuid,
@@ -400,13 +406,16 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 						// try to link new player to discord
 						await (async () => {
-							discordTag = (await hypixel.player.uuid(minecraftUuid)
-								.catch(error => logger.error(error, `[GET DISCORD TAG]: ${IGN} (${this.name})`)))
-								?.socialMedia?.links?.DISCORD ?? null;
+							discordTag =
+								(
+									await hypixel.player
+										.uuid(minecraftUuid)
+										.catch((error) => logger.error(error, `[GET DISCORD TAG]: ${IGN} (${this.name})`))
+								)?.socialMedia?.links?.DISCORD ?? null;
 
 							if (!discordTag) {
 								joinedLog.push(`-\u00A0${IGN}: no linked discord`);
-								return hasError = true;
+								return (hasError = true);
 							}
 
 							discordMember = await GuildUtil.fetchMemberByTag(lgGuild, discordTag);
@@ -418,26 +427,25 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						})();
 
 						// update player
-						setTimeout(
-							(async () => {
-								try {
-									await player.setValidDiscordId(discordMember?.id ?? discordTag);
-								} catch (error) {
-									logger.error(error);
-								}
+						setTimeout(async () => {
+							try {
+								await player.setValidDiscordId(discordMember?.id ?? discordTag);
+							} catch (error) {
+								logger.error(error);
+							}
 
-								player.update({ ign: IGN }).catch(error => logger.error(error));
-								player.updateData({ reason: `joined ${this.name}` });
-							}),
-							0,
-						);
+							player.update({ ign: IGN }).catch((error) => logger.error(error));
+							player.updateData({ reason: `joined ${this.name}` });
+						}, 0);
 
 						// player already in the db
 					} else {
-						player.update({
-							guildId: this.guildId,
-							lastActivityAt: new Date(),
-						}).catch(error => logger.error(error));
+						player
+							.update({
+								guildId: this.guildId,
+								lastActivityAt: new Date(),
+							})
+							.catch((error) => logger.error(error));
 
 						await player.updateIgn();
 
@@ -453,20 +461,22 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 								if (!discordTag) {
 									player.inDiscord = false;
 									joinedLog.push(`-\u00A0${player}: no linked discord`);
-									return hasError = true;
+									return (hasError = true);
 								}
 
 								discordMember = await GuildUtil.fetchMemberByTag(lgGuild, discordTag);
 
 								if (!discordMember) {
-									if (/\D/.test(player.discordId!)) await player.setValidDiscordId(discordTag).catch(error => logger.error(error)); // save tag if no id is known
+									if (/\D/.test(player.discordId!))
+										await player.setValidDiscordId(discordTag).catch((error) => logger.error(error)); // save tag if no id is known
 									player.inDiscord = false;
-									joinedLog.push(player.discordId!.includes('#')
-										? `-\u00A0${player}: unknown discord tag ${player.discordId}`
-										: `-\u00A0${player}: unknown discord ID ${player.discordId}`,
+									joinedLog.push(
+										player.discordId!.includes('#')
+											? `-\u00A0${player}: unknown discord tag ${player.discordId}`
+											: `-\u00A0${player}: unknown discord ID ${player.discordId}`,
 									);
 
-									return hasError = true;
+									return (hasError = true);
 								}
 							}
 
@@ -474,57 +484,63 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						})();
 
 						// update player
-						setTimeout(
-							(async () => {
-								// reset current xp to 0
-								await player.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT, typesToReset: SKYBLOCK_XP_TYPES }).catch(error => logger.error(error));
+						setTimeout(async () => {
+							// reset current xp to 0
+							await player
+								.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT, typesToReset: SKYBLOCK_XP_TYPES })
+								.catch((error) => logger.error(error));
 
-								const XP_LAST_UPDATED_AT = player.xpLastUpdatedAt?.getTime() ?? Number.NEGATIVE_INFINITY;
-								// shift the daily array for the amount of daily resets missed
-								const DAYS_PASSED_SINCE_LAST_XP_UPDATE = Math.max(
-									0,
-									Math.min(
-										Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - XP_LAST_UPDATED_AT) / days(1)),
-										player.guildXpHistory.length,
-									),
-								);
+							const XP_LAST_UPDATED_AT = player.xpLastUpdatedAt?.getTime() ?? Number.NEGATIVE_INFINITY;
+							// shift the daily array for the amount of daily resets missed
+							const DAYS_PASSED_SINCE_LAST_XP_UPDATE = Math.max(
+								0,
+								Math.min(
+									Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - XP_LAST_UPDATED_AT) / days(1)),
+									player.guildXpHistory.length,
+								),
+							);
 
-								// to trigger the xp gained reset if global reset happened after the player left the guild
-								await safePromiseAll([
-									config.get('COMPETITION_START_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
-									config.get('COMPETITION_END_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
-									config.get('LAST_MAYOR_XP_RESET_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
-									config.get('LAST_WEEKLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
-									config.get('LAST_MONTHLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT && player.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
-									...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE })
-										.map(() => player.resetXp({ offsetToReset: OFFSET_FLAGS.DAY })),
-								]);
+							// to trigger the xp gained reset if global reset happened after the player left the guild
+							await safePromiseAll([
+								config.get('COMPETITION_START_TIME') >= XP_LAST_UPDATED_AT &&
+									player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
+								config.get('COMPETITION_END_TIME') >= XP_LAST_UPDATED_AT &&
+									player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
+								config.get('LAST_MAYOR_XP_RESET_TIME') >= XP_LAST_UPDATED_AT &&
+									player.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
+								config.get('LAST_WEEKLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT &&
+									player.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
+								config.get('LAST_MONTHLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT &&
+									player.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
+								...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE }).map(() =>
+									player.resetXp({ offsetToReset: OFFSET_FLAGS.DAY }),
+								),
+							]);
 
-								player.updateData({
-									reason: `joined ${this.name}`,
-								});
-							}),
-							0,
-						);
+							player.updateData({
+								reason: `joined ${this.name}`,
+							});
+						}, 0);
 					}
 
 					players.set(minecraftUuid, player);
 
 					// log if a banned player joins (by accident)
-					(async () => {
+					async () => {
 						const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(minecraftUuid);
 						if (!existingBan) return;
 
 						const member = await player.discordMember;
 
-						this.client.log(new MessageEmbed()
-							.setColor(this.client.config.get('EMBED_RED'))
-							.setAuthor(member?.user.tag ?? player.ign, member?.displayAvatarURL({ dynamic: true }), player.url)
-							.setThumbnail((await player.imageURL)!)
-							.setDescription(`${player.info} is on the ban list for \`${existingBan.reason}\``)
-							.setTimestamp(),
+						this.client.log(
+							new MessageEmbed()
+								.setColor(this.client.config.get('EMBED_RED'))
+								.setAuthor(member?.user.tag ?? player.ign, member?.displayAvatarURL({ dynamic: true }), player.url)
+								.setThumbnail((await player.imageURL)!)
+								.setDescription(`${player.info} is on the ban list for \`${existingBan.reason}\``)
+								.setTimestamp(),
 						);
-					});
+					};
 				}),
 
 				// player left the guild
@@ -539,9 +555,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			]);
 
 			// sync guild xp, mutedTill & guild ranks
-			safePromiseAll(currentGuildMembers.map(
-				hypixelGuildMember => players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember, this)
-						?? logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`)),
+			safePromiseAll(
+				currentGuildMembers.map(
+					(hypixelGuildMember) =>
+						players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember, this) ??
+						logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`),
+				),
 			);
 
 			if (syncRanks) this.syncRanks();
@@ -557,9 +576,10 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			leftLog = HypixelGuild.transformLogArray(leftLog);
 
 			const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length);
-			const getInlineFieldLineCount = (string: string) => (string.length
-				? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 30), 0) // max shown is 24, number can be tweaked
-				: 0);
+			const getInlineFieldLineCount = (string: string) =>
+				string.length
+					? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 30), 0) // max shown is 24, number can be tweaked
+					: 0;
 
 			// create and send logging embed(s)
 			const loggingEmbeds: MessageEmbed[] = [];
@@ -587,22 +607,26 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				const MAX_VALUE_LINES = Math.max(IGNS_JOINED_LOG_LINE_COUNT, PLAYERS_LEFT_LOG_LINE_COUNT);
 
 				// // empty line padding
-				for (let i = 1 + MAX_VALUE_LINES - IGNS_JOINED_LOG_LINE_COUNT; --i;) joinedLogElement += '\n\u200B';
-				for (let i = 1 + MAX_VALUE_LINES - PLAYERS_LEFT_LOG_LINE_COUNT; --i;) leftLogElement += '\n\u200B';
+				for (let i = 1 + MAX_VALUE_LINES - IGNS_JOINED_LOG_LINE_COUNT; --i; ) joinedLogElement += '\n\u200B';
+				for (let i = 1 + MAX_VALUE_LINES - PLAYERS_LEFT_LOG_LINE_COUNT; --i; ) leftLogElement += '\n\u200B';
 
-				const newFields = [{
-					name: `${'joined'.padEnd(125, '\u00A0')}\u200B`,
-					value: Formatters.codeBlock('diff', joinedLogElement),
-					inline: true,
-				}, {
-					name: `${'left'.padEnd(125, '\u00A0')}\u200B`,
-					value: Formatters.codeBlock('diff', leftLogElement),
-					inline: true,
-				}, {
-					name: '\u200B',
-					value: '\u200B',
-					inline: true,
-				}];
+				const newFields = [
+					{
+						name: `${'joined'.padEnd(125, '\u00A0')}\u200B`,
+						value: Formatters.codeBlock('diff', joinedLogElement),
+						inline: true,
+					},
+					{
+						name: `${'left'.padEnd(125, '\u00A0')}\u200B`,
+						value: Formatters.codeBlock('diff', leftLogElement),
+						inline: true,
+					},
+					{
+						name: '\u200B',
+						value: '\u200B',
+						inline: true,
+					},
+				];
 				const ADDITIONAL_LENGTH = newFields.reduce((acc, { name, value }) => acc + name.length + value.length, 0);
 
 				if (currentLength + ADDITIONAL_LENGTH <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
@@ -622,7 +646,11 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				logger.error(`[UPDATE DATA]: ${this.name}: ${error}`);
 				return this;
 			}
-			if ((error instanceof Error && error.name.startsWith('Sequelize')) || error instanceof TypeError || error instanceof RangeError) {
+			if (
+				(error instanceof Error && error.name.startsWith('Sequelize')) ||
+				error instanceof TypeError ||
+				error instanceof RangeError
+			) {
 				logger.error(error, `[UPDATE DATA]: ${this.name}`);
 				return this;
 			}
@@ -670,11 +698,11 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 			// abort if a player's weight is 0 -> most likely an API error
 			if (!nonStaffWithWeight[0]?.weight) {
-				logger.error(`[SYNC GUILD RANKS] ${this.name}: ${
-					nonStaffWithWeight.length
-						? `${nonStaffWithWeight[0].player.ign}'s weight is 0`
-						: 'no non-staff players'
-				}`);
+				logger.error(
+					`[SYNC GUILD RANKS] ${this.name}: ${
+						nonStaffWithWeight.length ? `${nonStaffWithWeight[0].player.ign}'s weight is 0` : 'no non-staff players'
+					}`,
+				);
 				return this;
 			}
 
@@ -700,7 +728,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 			// update 'currentWeightReq' (2/2)
 			this.changed('ranks', true);
-			this.save().catch(error => logger.error(error));
+			this.save().catch((error) => logger.error(error));
 
 			// update player ranks
 			if (!this.chatBridgeEnabled) return this;
@@ -708,7 +736,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			const { chatBridge } = this;
 			const setRankLog: MessageEmbed[] = [];
 
-			for (const [ index, { player }] of nonStaffWithWeight.entries()) {
+			for (const [index, { player }] of nonStaffWithWeight.entries()) {
 				// automatedRanks is sorted descendingly by positionReq
 				const newRank = automatedRanks.find(({ positionReq }) => index >= positionReq)!;
 
@@ -728,15 +756,18 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					this.client.defaultEmbed
 						.setThumbnail((await player.imageURL)!)
 						.setDescription(`${Formatters.bold('Auto Rank Sync')} for ${player.info}`)
-						.addFields({
-							name: 'Old',
-							value: OLD_RANK_NAME ?? 'unknown',
-							inline: true,
-						}, {
-							name: 'New',
-							value: newRank.name,
-							inline: true,
-						}),
+						.addFields(
+							{
+								name: 'Old',
+								value: OLD_RANK_NAME ?? 'unknown',
+								inline: true,
+							},
+							{
+								name: 'New',
+								value: newRank.name,
+								inline: true,
+							},
+						),
 				);
 			}
 

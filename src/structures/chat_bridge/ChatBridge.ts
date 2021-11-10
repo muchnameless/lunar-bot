@@ -14,7 +14,6 @@ import type { DiscordChatManagerResolvable } from './managers/DiscordManager';
 import type { HypixelMessage } from './HypixelMessage';
 import type { Player } from '../database/models/Player';
 
-
 export interface ChatOptions extends SendToChatOptions {
 	maxParts?: number;
 }
@@ -38,7 +37,6 @@ export interface MessageForwardOptions {
 	/** wether the message is an edit instead of a new message */
 	isEdit?: boolean;
 }
-
 
 export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter {
 	/**
@@ -156,7 +154,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 		try {
 			// link bot to db entry (create if non existant)
 			this.minecraft.botPlayer ??= await (async () => {
-				const [ player, created ] = await this.client.players.model.findCreateFind({
+				const [player, created] = await this.client.players.model.findCreateFind({
 					where: { minecraftUuid: this.minecraft.botUuid },
 					defaults: {
 						minecraftUuid: this.minecraft.botUuid!,
@@ -251,7 +249,10 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 	 * @param message
 	 * @param options
 	 */
-	handleDiscordMessage(message: DiscordMessage, { link = this.discord.get(message.channelId)!, ...options }: MessageForwardOptions = {}) {
+	handleDiscordMessage(
+		message: DiscordMessage,
+		{ link = this.discord.get(message.channelId)!, ...options }: MessageForwardOptions = {},
+	) {
 		return (this.discord.resolve(link)?.forwardToMinecraft(message, options) && true) ?? false;
 	}
 
@@ -265,22 +266,21 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter
 			hypixelMessage,
 			type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD,
 			discord,
-			minecraft: {
-				prefix: minecraftPrefix = '',
-				maxParts = Number.POSITIVE_INFINITY,
-				...options
-			} = {},
-		} = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions } as BroadcastOptions
-			: contentOrOptions;
+			minecraft: { prefix: minecraftPrefix = '', maxParts = Number.POSITIVE_INFINITY, ...options } = {},
+		} = typeof contentOrOptions === 'string' ? ({ content: contentOrOptions } as BroadcastOptions) : contentOrOptions;
 		const discordChatManager = this.discord.resolve(type);
 
 		return Promise.all([
 			// minecraft
-			this.minecraft[CHAT_FUNCTION_BY_TYPE[(discordChatManager?.type ?? type as keyof typeof CHAT_FUNCTION_BY_TYPE)]]?.({ content, prefix: minecraftPrefix, maxParts, ...options })
-				?? this.minecraft.chat({
+			this.minecraft[CHAT_FUNCTION_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof CHAT_FUNCTION_BY_TYPE)]]?.(
+				{ content, prefix: minecraftPrefix, maxParts, ...options },
+			) ??
+				this.minecraft.chat({
 					content,
-					prefix: `${discordChatManager?.prefix ?? PREFIX_BY_TYPE[(discordChatManager?.type ?? type as keyof typeof CHAT_FUNCTION_BY_TYPE)]} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`,
+					prefix: `${
+						discordChatManager?.prefix ??
+						PREFIX_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof CHAT_FUNCTION_BY_TYPE)]
+					} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`,
 					maxParts,
 					...options,
 				}),

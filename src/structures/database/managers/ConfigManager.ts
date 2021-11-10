@@ -3,7 +3,6 @@ import { ModelManager } from './ModelManager';
 import type { Config } from '../models/Config';
 import type { ConfigValues } from '../../../constants';
 
-
 export class ConfigManager extends ModelManager<Config> {
 	/**
 	 * upserts a config entry
@@ -14,10 +13,11 @@ export class ConfigManager extends ModelManager<Config> {
 		const UPPERCASED_KEY = key.toUpperCase();
 		const dbEntry = this.cache.get(UPPERCASED_KEY);
 
-		if (!dbEntry) return this.add({
-			key: UPPERCASED_KEY,
-			value: value as string,
-		});
+		if (!dbEntry)
+			return this.add({
+				key: UPPERCASED_KEY,
+				value: value as string,
+			});
 
 		// the value setter makes sure that non strings get JSON.stringified
 		return dbEntry.update({ value: value as string });
@@ -31,7 +31,9 @@ export class ConfigManager extends ModelManager<Config> {
 	get(key: string): unknown;
 	get(key?: null): null;
 	get(key: any) {
-		return this.cache.get(key?.toUpperCase()!)?.parsedValue
-			?? (logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`), null);
+		return (
+			this.cache.get(key?.toUpperCase()!)?.parsedValue ??
+			(logger.warn(`[CONFIG GET]: '${key}' is not a valid config key`), null)
+		);
 	}
 }

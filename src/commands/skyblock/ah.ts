@@ -5,13 +5,20 @@ import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { getMainProfile, getUuidAndIgn, logger, seconds, shortenNumber, upperCaseFirstChar, uuidToImgurBustURL } from '../../functions';
+import {
+	getMainProfile,
+	getUuidAndIgn,
+	logger,
+	seconds,
+	shortenNumber,
+	upperCaseFirstChar,
+	uuidToImgurBustURL,
+} from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake } from 'discord.js';
 import type { APISelectMenuComponent } from 'discord-api-types/v9';
 import type { SkyBlockProfile } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-
 
 export default class AhCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
@@ -27,17 +34,32 @@ export default class AhCommand extends ApplicationCommand {
 	/**
 	 * @param param0
 	 */
-	#generateCustomId({ uuid, ign, userId }: { ign: string; uuid: string; userId: Snowflake; }) {
+	#generateCustomId({ uuid, ign, userId }: { ign: string; uuid: string; userId: Snowflake }) {
 		return `${this.baseCustomId}:${uuid}:${ign}:${userId}` as const;
 	}
 
 	/**
 	 * @param param0
 	 */
-	async #generateReply({ ign, uuid, profileId, profiles, userId }: { ign: string; uuid: string; profileId: string; profiles: { label: string; value: string; }[]; userId: Snowflake; }) {
+	async #generateReply({
+		ign,
+		uuid,
+		profileId,
+		profiles,
+		userId,
+	}: {
+		ign: string;
+		uuid: string;
+		profileId: string;
+		profiles: { label: string; value: string }[];
+		userId: Snowflake;
+	}) {
 		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId)!;
-		const embed = this.client.defaultEmbed
-			.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `${STATS_URL_BASE}${ign}/${PROFILE_NAME}`);
+		const embed = this.client.defaultEmbed.setAuthor(
+			ign,
+			(await uuidToImgurBustURL(this.client, uuid))!,
+			`${STATS_URL_BASE}${ign}/${PROFILE_NAME}`,
+		);
 
 		try {
 			const auctions = (await hypixel.skyblock.auction.profile(profileId))
@@ -46,9 +68,7 @@ export default class AhCommand extends ApplicationCommand {
 
 			if (!auctions.length) {
 				return {
-					embeds: [
-						embed.setDescription('no unclaimed auctions'),
-					],
+					embeds: [embed.setDescription('no unclaimed auctions')],
 					components: [
 						new MessageActionRow().addComponents(
 							new MessageSelectMenu()
@@ -64,30 +84,40 @@ export default class AhCommand extends ApplicationCommand {
 			let totalUnclaimedCoins = 0;
 			let endedAuctions = 0;
 
-			for (const { highest_bid_amount: highestBid, starting_bid: startingBid, bids, end, item_name: item, tier, bin, item_lore: lore, auctioneer } of auctions) {
+			for (const {
+				highest_bid_amount: highestBid,
+				starting_bid: startingBid,
+				bids,
+				end,
+				item_name: item,
+				tier,
+				bin,
+				item_lore: lore,
+				auctioneer,
+			} of auctions) {
 				embed.addFields({
 					name: `${item}${
 						item.startsWith('[Lvl ')
 							? ` - ${upperCaseFirstChar(tier)}`
-							: (item === 'Enchanted Book'
-								? (() => {
+							: item === 'Enchanted Book'
+							? (() => {
 									const matched = lore.match(/(?<=^(§[\da-gk-or])+)[^\n§]+/)?.[0];
 									if (matched) return ` - ${matched}`;
 									return '';
-								})()
-								: '')
+							  })()
+							: ''
 					}${auctioneer === uuid ? '' : ' [CO-OP]'}`,
 					value: `${
 						bin
 							? `BIN: ${shortenNumber(startingBid)}`
-							: (bids.length
-								? (totalCoins += highestBid, `Highest Bid: ${shortenNumber(highestBid)}`)
-								: `Starting Bid: ${shortenNumber(startingBid)}`)
+							: bids.length
+							? ((totalCoins += highestBid), `Highest Bid: ${shortenNumber(highestBid)}`)
+							: `Starting Bid: ${shortenNumber(startingBid)}`
 					} • ${
 						end < Date.now()
-							? (highestBid
-								? (++endedAuctions, totalUnclaimedCoins += highestBid, 'sold')
-								: 'expired')
+							? highestBid
+								? (++endedAuctions, (totalUnclaimedCoins += highestBid), 'sold')
+								: 'expired'
 							: 'ends'
 					} ${Formatters.time(new Date(end), Formatters.TimestampStyles.RelativeTime)}`,
 				});
@@ -115,11 +145,7 @@ export default class AhCommand extends ApplicationCommand {
 			logger.error(error);
 
 			return {
-				embeds: [
-					embed
-						.setColor(this.config.get('EMBED_RED'))
-						.setDescription(`${error}`),
-				],
+				embeds: [embed.setColor(this.config.get('EMBED_RED')).setDescription(`${error}`)],
 			};
 		}
 	}
@@ -167,8 +193,8 @@ export default class AhCommand extends ApplicationCommand {
 	 */
 	override async runSelect(interaction: SelectMenuInteraction, args: string[]) {
 		try {
-			const [ uuid, ign, userId ] = args;
-			const [ profileId ] = interaction.values;
+			const [uuid, ign, userId] = args;
+			const [profileId] = interaction.values;
 			const profiles = (interaction.message.components?.[0].components[0] as unknown as APISelectMenuComponent).options;
 
 			if (!profiles) {
@@ -181,11 +207,17 @@ export default class AhCommand extends ApplicationCommand {
 
 			// interaction from original requester -> edit message
 			if (interaction.user.id === userId) {
-				return InteractionUtil.update(interaction, await this.#generateReply({ uuid, ign, profileId, profiles, userId }));
+				return InteractionUtil.update(
+					interaction,
+					await this.#generateReply({ uuid, ign, profileId, profiles, userId }),
+				);
 			}
 
 			// interaction from new requester -> new message
-			return InteractionUtil.reply(interaction, await this.#generateReply({ uuid, ign, profileId, profiles, userId: interaction.user.id }));
+			return InteractionUtil.reply(
+				interaction,
+				await this.#generateReply({ uuid, ign, profileId, profiles, userId: interaction.user.id }),
+			);
 		} catch (error) {
 			logger.error(error);
 
@@ -203,7 +235,7 @@ export default class AhCommand extends ApplicationCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
-			const profiles = await hypixel.skyblock.profiles.uuid(uuid) as SkyBlockProfile[];
+			const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
 			const embed = this.client.defaultEmbed;
 
 			if (!profiles?.length) return this.#handleNoProfiles(interaction, embed, ign, uuid);
@@ -242,13 +274,16 @@ export default class AhCommand extends ApplicationCommand {
 				}
 			}
 
-			return InteractionUtil.reply(interaction, await this.#generateReply({
-				ign,
-				uuid,
-				profileId,
-				profiles: this.#generateProfileOptions(profiles),
-				userId: interaction.user.id,
-			}));
+			return InteractionUtil.reply(
+				interaction,
+				await this.#generateReply({
+					ign,
+					uuid,
+					profileId,
+					profiles: this.#generateProfileOptions(profiles),
+					userId: interaction.user.id,
+				}),
+			);
 		} catch (error) {
 			logger.error(error);
 			return InteractionUtil.reply(interaction, `${error}`);

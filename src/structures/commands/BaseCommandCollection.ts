@@ -9,13 +9,11 @@ import type { ApplicationCommand } from './ApplicationCommand';
 import type { BridgeCommand } from './BridgeCommand';
 import type { BaseCommand } from './BaseCommand';
 
-
 interface CommandLoadOptions {
 	reload?: boolean;
 }
 
 export type CommandType = DualCommand | ApplicationCommand | BridgeCommand;
-
 
 export class BaseCommandCollection<C extends CommandType = CommandType> extends Collection<string, C> {
 	client: LunarClient;
@@ -29,7 +27,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	 * @param dirURL
 	 * @param entries
 	 */
-	constructor(client: LunarClient, dirURL: URL, entries?: readonly [ string, C ][]) {
+	constructor(client: LunarClient, dirURL: URL, entries?: readonly [string, C][]) {
 		super(entries);
 
 		this.client = client;
@@ -47,14 +45,13 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	/**
 	 * categories that are excluded from the help command and autocorrection
 	 */
-	static INVISIBLE_CATEGORIES = new Set([ 'hidden', 'owner' ]);
-
+	static INVISIBLE_CATEGORIES = new Set(['hidden', 'owner']);
 
 	/**
 	 * clears the cooldown timestamps collection for all commands
 	 */
 	clearCooldowns() {
-		return this.each(command => command.clearCooldowns());
+		return this.each((command) => command.clearCooldowns());
 	}
 
 	/**
@@ -64,7 +61,8 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	 */
 	async loadByName(commandName: string, options?: CommandLoadOptions) {
 		for await (const dir of readJSFiles(this.dirURL)) {
-			if (dir.basename.slice(0, -'.js'.length).toLowerCase() === commandName) return this.loadFromFile(dir.fullPath, options);
+			if (dir.basename.slice(0, -'.js'.length).toLowerCase() === commandName)
+				return this.loadFromFile(dir.fullPath, options);
 		}
 
 		return null;
@@ -117,7 +115,7 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	 * unload all commands
 	 */
 	unloadAll() {
-		return this.each(command => command.unload());
+		return this.each((command) => command.unload());
 	}
 
 	/**
@@ -134,6 +132,6 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 
 		// return command if it is visible
 		command = this.get(value)!;
-		return ((command as DualCommand).visible ?? true) ? command : null;
+		return (command as DualCommand).visible ?? true ? command : null;
 	}
 }

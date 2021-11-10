@@ -8,17 +8,12 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class ExecCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('executes bash code')
-				.addStringOption(option => option
-					.setName('input')
-					.setDescription('bash code')
-					.setRequired(true),
-				),
+				.addStringOption((option) => option.setName('input').setDescription('bash code').setRequired(true)),
 			cooldown: 0,
 		});
 	}
@@ -58,7 +53,7 @@ export default class ExecCommand extends ApplicationCommand {
 			}
 
 			return InteractionUtil.reply(interaction, {
-				embeds: [ responseEmbed ],
+				embeds: [responseEmbed],
 			});
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)

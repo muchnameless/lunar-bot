@@ -11,38 +11,42 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { Awaited } from '../../types/util';
 
-
 export type FetchedData = Awaited<ReturnType<PlayerStatsCommand['_fetchData']>>;
-
 
 export default class PlayerStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('shows a player\'s hypixel stats')
-				.addStringOption(optionalIgnOption),
-			cooldown: seconds(1),
-		}, {
-			aliases: [ 'player' ],
-			args: false,
-			usage: '<`IGN`>',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription("shows a player's hypixel stats")
+					.addStringOption(optionalIgnOption),
+				cooldown: seconds(1),
+			},
+			{
+				aliases: ['player'],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	/**
 	 * @param ctx
 	 * @param ignOrUuid
 	 */
-	override async _fetchData(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid: string) { // eslint-disable-line class-methods-use-this
+	// eslint-disable-next-line class-methods-use-this
+	override async _fetchData(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid: string) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-		const [ playerData, guildData, friendsData ] = await Promise.all([
+		const [playerData, guildData, friendsData] = await Promise.all([
 			hypixel.player.uuid(uuid),
 			hypixel.guild.player(uuid),
 			hypixel.friends.uuid(uuid),
 		]);
-		const statusData = Reflect.has(playerData, 'lastLogin') && Reflect.has(playerData, 'lastLogout')
-			? playerData.lastLogin! > playerData.lastLogout!
-			: (await hypixel.status.uuid(uuid)).online;
+		const statusData =
+			Reflect.has(playerData, 'lastLogin') && Reflect.has(playerData, 'lastLogout')
+				? playerData.lastLogin! > playerData.lastLogout!
+				: (await hypixel.status.uuid(uuid)).online;
 
 		return {
 			ign,

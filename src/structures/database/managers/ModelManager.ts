@@ -2,9 +2,7 @@ import { Collection } from 'discord.js';
 import type { FindOptions, Model, ModelCtor, WhereOptions } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-
 export type ModelResovable<M extends Model> = M | string;
-
 
 export class ModelManager<M extends Model> {
 	client: LunarClient;
@@ -19,7 +17,7 @@ export class ModelManager<M extends Model> {
 	constructor(client: LunarClient, model: ModelCtor<M>) {
 		this.client = client;
 		this.model = model;
-		[ this.primaryKey ] = model.primaryKeyAttributes;
+		[this.primaryKey] = model.primaryKeyAttributes;
 	}
 
 	/**
@@ -29,7 +27,7 @@ export class ModelManager<M extends Model> {
 	async loadCache(condition?: FindOptions) {
 		this.sweepCache();
 
-		for (const element of await this.model.findAll(condition) as M[]) {
+		for (const element of (await this.model.findAll(condition)) as M[]) {
 			this.cache.set(element[this.primaryKey as keyof M] as unknown as string, element);
 		}
 

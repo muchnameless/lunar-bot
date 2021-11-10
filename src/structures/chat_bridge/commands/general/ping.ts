@@ -2,11 +2,10 @@ import { BridgeCommand } from '../../../commands/BridgeCommand';
 import type { CommandContext } from '../../../commands/BaseCommand';
 import type { HypixelUserMessage } from '../../HypixelMessage';
 
-
 export default class PingBridgeCommand extends BridgeCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			aliases: [ 'o/' ],
+			aliases: ['o/'],
 			description: 'ping the bot',
 			args: false,
 			usage: '',

@@ -4,7 +4,6 @@ import { MojangClient } from '../structures/MojangClient';
 import { days, hours, minutes, seconds } from '../functions';
 import type { MojangResult } from '../structures/MojangClient';
 
-
 export const mojang = new MojangClient({
 	timeout: seconds(30),
 	retries: 1,

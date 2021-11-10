@@ -3,13 +3,51 @@ import { SnowflakeUtil, Formatters, Constants, MessageActionRow, MessageButton }
 import pkg from 'sequelize';
 const { Op } = pkg;
 import ms from 'ms';
-import { demote, historyErrors, invite, kick, mute, logErrors, promote, setRank, topErrors, unmute, unknownIgn } from '../../structures/chat_bridge/constants';
-import { DOUBLE_LEFT_EMOJI, DOUBLE_RIGHT_EMOJI, EMBED_DESCRIPTION_MAX_CHARS, GUILD_ID_BRIDGER, LEFT_EMOJI, RELOAD_EMOJI, RIGHT_EMOJI, UNKNOWN_IGN } from '../../constants';
-import { requiredPlayerOption, optionalPlayerOption, pageOption, requiredIgnOption, targetOption, forceOption, buildGuildOption } from '../../structures/commands/commonOptions';
+import {
+	demote,
+	historyErrors,
+	invite,
+	kick,
+	mute,
+	logErrors,
+	promote,
+	setRank,
+	topErrors,
+	unmute,
+	unknownIgn,
+} from '../../structures/chat_bridge/constants';
+import {
+	DOUBLE_LEFT_EMOJI,
+	DOUBLE_RIGHT_EMOJI,
+	EMBED_DESCRIPTION_MAX_CHARS,
+	GUILD_ID_BRIDGER,
+	LEFT_EMOJI,
+	RELOAD_EMOJI,
+	RIGHT_EMOJI,
+	UNKNOWN_IGN,
+} from '../../constants';
+import {
+	requiredPlayerOption,
+	optionalPlayerOption,
+	pageOption,
+	requiredIgnOption,
+	targetOption,
+	forceOption,
+	buildGuildOption,
+} from '../../structures/commands/commonOptions';
 import { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
 import { mojang } from '../../api';
 import { InteractionUtil, UserUtil } from '../../util';
-import { autocorrect, escapeIgn, getIdFromString, logger, removeMcFormatting, seconds, stringToMS, trim } from '../../functions';
+import {
+	autocorrect,
+	escapeIgn,
+	getIdFromString,
+	logger,
+	removeMcFormatting,
+	seconds,
+	stringToMS,
+	trim,
+} from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ButtonInteraction, CommandInteraction, Interaction, Snowflake } from 'discord.js';
 import type { SlashCommandStringOption } from '@discordjs/builders';
@@ -19,7 +57,6 @@ import type { Player } from '../../structures/database/models/Player';
 import type { HypixelGuild } from '../../structures/database/models/HypixelGuild';
 import type { CommandOptions } from '../../structures/chat_bridge/managers/MinecraftChatManager';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
-
 
 interface RunModerationOptions {
 	target: Player | string;
@@ -36,120 +73,87 @@ interface RunKickOptions extends RunModerationOptions {
 	reason: string;
 }
 
-
 export default class GuildCommand extends ApplicationCommand {
-	GUILD_IDENTIFIER = new Set([ 'guild', 'everyone' ] as const);
+	GUILD_IDENTIFIER = new Set(['guild', 'everyone'] as const);
 
 	constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('hypixel')
-			.addSubcommand(subcommand => subcommand
-				.setName('demote')
-				.setDescription('demote')
-				.addStringOption(requiredPlayerOption),
+			.addSubcommand((subcommand) =>
+				subcommand.setName('demote').setDescription('demote').addStringOption(requiredPlayerOption),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('kick')
-				.setDescription('kick')
-				.addStringOption(requiredPlayerOption)
-				.addStringOption(option => option
-					.setName('reason')
-					.setDescription('reason')
-					.setRequired(true),
-				)
-				.addBooleanOption(option => option
-					.setName('add-to-ban-list')
-					.setDescription('add the player with the provided reason to the ban list on success (default: false)'),
-				),
+			.addSubcommand((subcommand) =>
+				subcommand
+					.setName('kick')
+					.setDescription('kick')
+					.addStringOption(requiredPlayerOption)
+					.addStringOption((option) => option.setName('reason').setDescription('reason').setRequired(true))
+					.addBooleanOption((option) =>
+						option
+							.setName('add-to-ban-list')
+							.setDescription('add the player with the provided reason to the ban list on success (default: false)'),
+					),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('history')
-				.setDescription('history')
-				.addIntegerOption(pageOption),
+			.addSubcommand((subcommand) =>
+				subcommand.setName('history').setDescription('history').addIntegerOption(pageOption),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('info')
-				.setDescription('info'),
+			.addSubcommand((subcommand) => subcommand.setName('info').setDescription('info'))
+			.addSubcommand((subcommand) =>
+				subcommand.setName('invite').setDescription('invite').addStringOption(requiredIgnOption),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('invite')
-				.setDescription('invite')
-				.addStringOption(requiredIgnOption),
+			.addSubcommand((subcommand) => subcommand.setName('list').setDescription('list'))
+			.addSubcommand((subcommand) =>
+				subcommand
+					.setName('log')
+					.setDescription('log')
+					.addStringOption(optionalPlayerOption)
+					.addIntegerOption(pageOption),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('list')
-				.setDescription('list'),
+			.addSubcommand((subcommand) =>
+				subcommand.setName('member').setDescription('member').addStringOption(optionalPlayerOption),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('log')
-				.setDescription('log')
-				.addStringOption(optionalPlayerOption)
-				.addIntegerOption(pageOption),
+			.addSubcommand((subcommand) => subcommand.setName('members').setDescription('members'))
+			.addSubcommand((subcommand) => subcommand.setName('motd').setDescription('motd'))
+			.addSubcommand((subcommand) =>
+				subcommand
+					.setName('mute')
+					.setDescription('mute')
+					.addStringOption(targetOption)
+					.addStringOption((option) =>
+						option.setName('duration').setDescription('s[econds] | m[inutes] | h[ours] | d[ays]').setRequired(true),
+					),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('member')
-				.setDescription('member')
-				.addStringOption(optionalPlayerOption),
+			.addSubcommand((subcommand) => subcommand.setName('online').setDescription('online'))
+			.addSubcommand((subcommand) =>
+				subcommand.setName('promote').setDescription('promote').addStringOption(requiredPlayerOption),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('members')
-				.setDescription('members'),
+			.addSubcommand((subcommand) => subcommand.setName('quest').setDescription('quest'))
+			.addSubcommand((subcommand) =>
+				subcommand
+					.setName('setrank')
+					.setDescription('setrank')
+					.addStringOption(requiredPlayerOption)
+					.addStringOption((option) => option.setName('rank').setDescription('rank name').setRequired(true)),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('motd')
-				.setDescription('motd'),
+			.addSubcommand((subcommand) =>
+				subcommand
+					.setName('top')
+					.setDescription('top')
+					.addIntegerOption((option) =>
+						option.setName('days_ago').setDescription('number of days ago').setRequired(false),
+					),
 			)
-			.addSubcommand(subcommand => subcommand
-				.setName('mute')
-				.setDescription('mute')
-				.addStringOption(targetOption)
-				.addStringOption(option => option
-					.setName('duration')
-					.setDescription('s[econds] | m[inutes] | h[ours] | d[ays]')
-					.setRequired(true),
-				),
-			)
-			.addSubcommand(subcommand => subcommand
-				.setName('online')
-				.setDescription('online'),
-			)
-			.addSubcommand(subcommand => subcommand
-				.setName('promote')
-				.setDescription('promote')
-				.addStringOption(requiredPlayerOption),
-			)
-			.addSubcommand(subcommand => subcommand
-				.setName('quest')
-				.setDescription('quest'),
-			)
-			.addSubcommand(subcommand => subcommand
-				.setName('setrank')
-				.setDescription('setrank')
-				.addStringOption(requiredPlayerOption)
-				.addStringOption(option => option
-					.setName('rank')
-					.setDescription('rank name')
-					.setRequired(true),
-				),
-			)
-			.addSubcommand(subcommand => subcommand
-				.setName('top')
-				.setDescription('top')
-				.addIntegerOption(option => option
-					.setName('days_ago')
-					.setDescription('number of days ago')
-					.setRequired(false),
-				),
-			)
-			.addSubcommand(subcommand => subcommand
-				.setName('unmute')
-				.setDescription('unmute')
-				.addStringOption(targetOption),
+			.addSubcommand((subcommand) =>
+				subcommand.setName('unmute').setDescription('unmute').addStringOption(targetOption),
 			);
 		const guildOption = buildGuildOption(context.client);
 
 		for (const subcommand of (slash as SlashCommandBuilder).options as unknown as SlashCommandBuilder[]) {
-			if ((subcommand.options as SlashCommandStringOption[]).some(option => option.name === 'player' || option.name === 'target')) {
+			if (
+				(subcommand.options as SlashCommandStringOption[]).some(
+					(option) => option.name === 'player' || option.name === 'target',
+				)
+			) {
 				subcommand.addBooleanOption(forceOption);
 			}
 
@@ -157,7 +161,7 @@ export default class GuildCommand extends ApplicationCommand {
 		}
 
 		super(context, {
-			aliases: [ 'g' ],
+			aliases: ['g'],
 			slash,
 			cooldown: 0,
 		});
@@ -248,17 +252,22 @@ export default class GuildCommand extends ApplicationCommand {
 
 		if (!interaction) return this.client.players.getByIgn(targetInput) ?? targetInput;
 
-		return InteractionUtil.getPlayer(interaction)
-			?? (InteractionUtil.checkForce(interaction)
+		return (
+			InteractionUtil.getPlayer(interaction) ??
+			(InteractionUtil.checkForce(interaction)
 				? targetInput // use input if force is set
-				: ((await this.client.players.fetch({ // try to find by ign or uuid
-					[Op.or]: [{
-						ign: { [Op.iLike]: targetInput },
-						minecraftUuid: targetInput,
-					}],
-					cache: false,
-				}))
-					?? (async () => { // check if input is a discord id or @mention, find or create player db object if so
+				: (await this.client.players.fetch({
+						// try to find by ign or uuid
+						[Op.or]: [
+							{
+								ign: { [Op.iLike]: targetInput },
+								minecraftUuid: targetInput,
+							},
+						],
+						cache: false,
+				  })) ??
+				  (async () => {
+						// check if input is a discord id or @mention, find or create player db object if so
 						const ID = getIdFromString(targetInput);
 
 						if (!ID) return null;
@@ -267,21 +276,22 @@ export default class GuildCommand extends ApplicationCommand {
 							// check if ID is from a member in the guild
 							await this.client.lgGuild?.members.fetch(ID);
 
-							return (await this.client.players.model.findCreateFind({
-								where: { discordId: ID },
-								defaults: {
-									minecraftUuid: SnowflakeUtil.generate(),
-									guildId: GUILD_ID_BRIDGER,
-									ign: UNKNOWN_IGN,
-									inDiscord: true,
-								},
-							}))[0];
+							return (
+								await this.client.players.model.findCreateFind({
+									where: { discordId: ID },
+									defaults: {
+										minecraftUuid: SnowflakeUtil.generate(),
+										guildId: GUILD_ID_BRIDGER,
+										ign: UNKNOWN_IGN,
+										inDiscord: true,
+									},
+								})
+							)[0];
 						} catch (error) {
 							return logger.error(error);
 						}
-					})()
-				)
-			);
+				  })())
+		);
 	}
 
 	/**
@@ -297,19 +307,21 @@ export default class GuildCommand extends ApplicationCommand {
 			if (inGuild) {
 				({ hypixelGuild } = target);
 
-				if (target.guildRankPriority >= (executor?.guildRankPriority ?? -1)) return {
-					content: `your guild rank needs to be higher than \`${target}\`'s`,
-					ephemeral: true,
-				};
+				if (target.guildRankPriority >= (executor?.guildRankPriority ?? -1))
+					return {
+						content: `your guild rank needs to be higher than \`${target}\`'s`,
+						ephemeral: true,
+					};
 			}
 
 			await target.update({ mutedTill: Date.now() + duration });
 
 			// don't use chatBridge command if player isn't actually in the guild
-			if (!inGuild) return {
-				content: `muted \`${target}\` for \`${duration}\``,
-				ephemeral: false,
-			};
+			if (!inGuild)
+				return {
+					content: `muted \`${target}\` for \`${duration}\``,
+					ephemeral: false,
+				};
 		} else if (target === 'everyone') {
 			await hypixelGuild.update({ mutedTill: Date.now() + duration });
 		}
@@ -341,10 +353,11 @@ export default class GuildCommand extends ApplicationCommand {
 		const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 		const target = await this.getMuteTarget(TARGET_INPUT, interaction);
 
-		if (!target) return InteractionUtil.reply(interaction, {
-			content: `no player with the IGN \`${TARGET_INPUT}\` found`,
-			ephemeral: true,
-		});
+		if (!target)
+			return InteractionUtil.reply(interaction, {
+				content: `no player with the IGN \`${TARGET_INPUT}\` found`,
+				ephemeral: true,
+			});
 
 		const { content, ephemeral } = await this.runMute({
 			target,
@@ -359,9 +372,10 @@ export default class GuildCommand extends ApplicationCommand {
 					.setTitle(`/guild mute ${target} ${ms(duration)}`)
 					.setDescription(Formatters.codeBlock(content)),
 			],
-			ephemeral: interaction.options.get('visibility') === null
-				? InteractionUtil.CACHE.get(interaction)!.useEphemeral || ephemeral
-				: InteractionUtil.CACHE.get(interaction)!.useEphemeral,
+			ephemeral:
+				interaction.options.get('visibility') === null
+					? InteractionUtil.CACHE.get(interaction)!.useEphemeral || ephemeral
+					: InteractionUtil.CACHE.get(interaction)!.useEphemeral,
 		});
 	}
 
@@ -369,42 +383,47 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param options
 	 */
 	async runKick({ ctx, target, executor, hypixelGuild, reason }: RunKickOptions) {
-		if (!executor) return {
-			content: 'unable to find a linked player to your discord account',
-			hasErrored: true,
-		};
-		if (!executor.isStaff) return {
-			content: 'you need to have an in game staff rank for this command',
-			hasErrored: true,
-		};
-		if (executor.guildId !== hypixelGuild.guildId) return {
-			content: `you need to be in ${hypixelGuild} to kick a player from there`,
-			hasErrored: true,
-		};
+		if (!executor)
+			return {
+				content: 'unable to find a linked player to your discord account',
+				hasErrored: true,
+			};
+		if (!executor.isStaff)
+			return {
+				content: 'you need to have an in game staff rank for this command',
+				hasErrored: true,
+			};
+		if (executor.guildId !== hypixelGuild.guildId)
+			return {
+				content: `you need to be in ${hypixelGuild} to kick a player from there`,
+				hasErrored: true,
+			};
 
-		if (typeof target === 'string') return {
-			content: `no player with the IGN \`${target}\` found`,
-			hasErrored: true,
-		};
-		if (target.guildRankPriority >= executor.guildRankPriority) return {
-			content: `your guild rank needs to be higher than \`${target}\`'s`,
-			hasErrored: true,
-		};
+		if (typeof target === 'string')
+			return {
+				content: `no player with the IGN \`${target}\` found`,
+				hasErrored: true,
+			};
+		if (target.guildRankPriority >= executor.guildRankPriority)
+			return {
+				content: `your guild rank needs to be higher than \`${target}\`'s`,
+				hasErrored: true,
+			};
 
 		const TIME_LEFT = this.config.get('LAST_KICK_TIME') + this.config.get('KICK_COOLDOWN') - Date.now();
 
-		if (TIME_LEFT > 0) return {
-			content: `kicking is on cooldown for another ${ms(TIME_LEFT, { long: true })}`,
-			hasErrored: true,
-		};
+		if (TIME_LEFT > 0)
+			return {
+				content: `kicking is on cooldown for another ${ms(TIME_LEFT, { long: true })}`,
+				hasErrored: true,
+			};
 
 		try {
 			// confirm kick
 			const QUESTION = `kick \`${target}\` from ${escapeIgn(hypixelGuild.name)}?` as const;
 			await (ctx instanceof HypixelMessage
 				? ctx.awaitConfirmation(QUESTION)
-				: InteractionUtil.awaitConfirmation(ctx, QUESTION)
-			);
+				: InteractionUtil.awaitConfirmation(ctx, QUESTION));
 
 			const { chatBridge } = hypixelGuild;
 			const res = await chatBridge.minecraft.command({
@@ -436,7 +455,11 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param commandOptions
 	 * @param hypixelGuild
 	 */
-	async #run(interaction: CommandInteraction, commandOptions: CommandOptions, hypixelGuild = InteractionUtil.getHypixelGuild(interaction)) {
+	async #run(
+		interaction: CommandInteraction,
+		commandOptions: CommandOptions,
+		hypixelGuild = InteractionUtil.getHypixelGuild(interaction),
+	) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
@@ -454,28 +477,31 @@ export default class GuildCommand extends ApplicationCommand {
 	async #runList(interaction: CommandInteraction, commandOptions: CommandOptions) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
-				this.client.defaultEmbed
-					.setTitle(`/${commandOptions.command}`)
-					.setDescription(Formatters.codeBlock(
+				this.client.defaultEmbed.setTitle(`/${commandOptions.command}`).setDescription(
+					Formatters.codeBlock(
 						trim(
-							(await InteractionUtil.getHypixelGuild(interaction).chatBridge.minecraft.command({
-								...commandOptions,
-								raw: true,
-							}))
-								.map(msg => (msg.content.includes('●')
-									? removeMcFormatting(
-										msg.formattedContent
-											.replaceAll('§r§c ●', ' 🔴') // prettify emojis
-											.replaceAll('§r§a ●', ' 🟢')
-											.replace(/\[.+?] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
-											.trim(),
-									)
-									: msg.content),
+							(
+								await InteractionUtil.getHypixelGuild(interaction).chatBridge.minecraft.command({
+									...commandOptions,
+									raw: true,
+								})
+							)
+								.map((msg) =>
+									msg.content.includes('●')
+										? removeMcFormatting(
+												msg.formattedContent
+													.replaceAll('§r§c ●', ' 🔴') // prettify emojis
+													.replaceAll('§r§a ●', ' 🟢')
+													.replace(/\[.+?\] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
+													.trim(),
+										  )
+										: msg.content,
 								)
 								.join('\n'),
 							EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])
 						),
-					)),
+					),
+				),
 			],
 		});
 	}
@@ -486,7 +512,14 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param currentPage
 	 * @param totalPages
 	 */
-	#getPaginationButtons(subcommand: string, hypixelGuildId: string, userId: Snowflake, currentPage: number, totalPages: number, isParsedPages: boolean) {
+	#getPaginationButtons(
+		subcommand: string,
+		hypixelGuildId: string,
+		userId: Snowflake,
+		currentPage: number,
+		totalPages: number,
+		isParsedPages: boolean,
+	) {
 		const CUSTOM_ID = `${this.baseCustomId}:${subcommand}:${hypixelGuildId}:${userId}` as const;
 
 		let currentPage_ = currentPage;
@@ -499,7 +532,8 @@ export default class GuildCommand extends ApplicationCommand {
 
 			decDisabled = currentPage === 1 || INVALID_PAGES;
 			incDisabled = currentPage === totalPages || INVALID_PAGES;
-		} else { // not parsed
+		} else {
+			// not parsed
 			if (Number.isNaN(currentPage)) currentPage_ = 0;
 			if (Number.isNaN(totalPages)) totalPages_ = currentPage_ + 7;
 
@@ -508,33 +542,32 @@ export default class GuildCommand extends ApplicationCommand {
 		}
 
 		return [
-			new MessageActionRow()
-				.addComponents(
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${isParsedPages ? 1 : 0}:${DOUBLE_LEFT_EMOJI}`)
-						.setEmoji(DOUBLE_LEFT_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY)
-						.setDisabled(decDisabled),
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${currentPage_ - 1}:${LEFT_EMOJI}`)
-						.setEmoji(LEFT_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY)
-						.setDisabled(decDisabled),
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${currentPage_ + 1}:${RIGHT_EMOJI}`)
-						.setEmoji(RIGHT_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY)
-						.setDisabled(incDisabled),
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${totalPages_}:${DOUBLE_RIGHT_EMOJI}`)
-						.setEmoji(DOUBLE_RIGHT_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY)
-						.setDisabled(incDisabled),
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${currentPage_}:${RELOAD_EMOJI}`)
-						.setEmoji(RELOAD_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY),
-				),
+			new MessageActionRow().addComponents(
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:${isParsedPages ? 1 : 0}:${DOUBLE_LEFT_EMOJI}`)
+					.setEmoji(DOUBLE_LEFT_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setDisabled(decDisabled),
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:${currentPage_ - 1}:${LEFT_EMOJI}`)
+					.setEmoji(LEFT_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setDisabled(decDisabled),
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:${currentPage_ + 1}:${RIGHT_EMOJI}`)
+					.setEmoji(RIGHT_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setDisabled(incDisabled),
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:${totalPages_}:${DOUBLE_RIGHT_EMOJI}`)
+					.setEmoji(DOUBLE_RIGHT_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setDisabled(incDisabled),
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:${currentPage_}:${RELOAD_EMOJI}`)
+					.setEmoji(RELOAD_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY),
+			),
 		];
 	}
 
@@ -546,7 +579,14 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param userId
 	 * @param page
 	 */
-	async #runPaginated(interaction: CommandInteraction | ButtonInteraction, subcommand: string, commandOptions: CommandOptions, hypixelGuild: HypixelGuild, userId: Snowflake, page: number | null) {
+	async #runPaginated(
+		interaction: CommandInteraction | ButtonInteraction,
+		subcommand: string,
+		commandOptions: CommandOptions,
+		hypixelGuild: HypixelGuild,
+		userId: Snowflake,
+		page: number | null,
+	) {
 		const command = `${commandOptions.command} ${page ?? ''}`.trimEnd();
 		const response = await hypixelGuild.chatBridge.minecraft.command({
 			...commandOptions,
@@ -554,12 +594,12 @@ export default class GuildCommand extends ApplicationCommand {
 		});
 		const pageMatched = response.match(/\(Page (?<current>\d+) ?(?:of|\/) ?(?<total>\d+)\)/);
 
-		return (InteractionUtil[interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'] as typeof InteractionUtil['reply'])(interaction as ButtonInteraction, {
-			embeds: [
-				this.client.defaultEmbed
-					.setTitle(`/${command}`)
-					.setDescription(Formatters.codeBlock(response)),
-			],
+		return (
+			InteractionUtil[
+				interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'
+			] as typeof InteractionUtil['reply']
+		)(interaction as ButtonInteraction, {
+			embeds: [this.client.defaultEmbed.setTitle(`/${command}`).setDescription(Formatters.codeBlock(response))],
 			components: this.#getPaginationButtons(
 				subcommand,
 				hypixelGuild.guildId,
@@ -577,14 +617,12 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override async runButton(interaction: ButtonInteraction, args: string[]) {
-		const [ SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, USER_ID, PAGE_INPUT ] = args;
-		const [ SUBCOMMAND ] = SUBCOMMAND_WITH_ARGS.split(' ', 1);
+		const [SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, USER_ID, PAGE_INPUT] = args;
+		const [SUBCOMMAND] = SUBCOMMAND_WITH_ARGS.split(' ', 1);
 
 		await this.#checkRequiredRoles(interaction, SUBCOMMAND);
 
-		const PAGE = PAGE_INPUT === Number.NaN.toString()
-			? null
-			: Number(PAGE_INPUT);
+		const PAGE = PAGE_INPUT === Number.NaN.toString() ? null : Number(PAGE_INPUT);
 
 		// check only the part before the first space
 		switch (SUBCOMMAND) {
@@ -596,7 +634,10 @@ export default class GuildCommand extends ApplicationCommand {
 						command: 'guild history',
 						abortRegExp: historyErrors(),
 					},
-					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
+					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ??
+						(() => {
+							throw new Error('uncached hypixel guild');
+						})(),
 					USER_ID,
 					PAGE,
 				);
@@ -609,7 +650,10 @@ export default class GuildCommand extends ApplicationCommand {
 						command: `guild ${SUBCOMMAND_WITH_ARGS}`,
 						abortRegExp: logErrors(),
 					},
-					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
+					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ??
+						(() => {
+							throw new Error('uncached hypixel guild');
+						})(),
 					USER_ID,
 					PAGE,
 				);
@@ -622,7 +666,10 @@ export default class GuildCommand extends ApplicationCommand {
 						command: 'guild top',
 						abortRegExp: topErrors(),
 					},
-					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ?? (() => { throw new Error('uncached hypixel guild'); })(),
+					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ??
+						(() => {
+							throw new Error('uncached hypixel guild');
+						})(),
 					USER_ID,
 					PAGE,
 				);
@@ -645,21 +692,24 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'demote': {
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor) return InteractionUtil.reply(interaction, {
-					content: 'unable to find a linked player for your discord account',
-					ephemeral: true,
-				});
-				if (!executor.isStaff) return InteractionUtil.reply(interaction, {
-					content: 'you need to have an in game staff rank for this command',
-					ephemeral: true,
-				});
+				if (!executor)
+					return InteractionUtil.reply(interaction, {
+						content: 'unable to find a linked player for your discord account',
+						ephemeral: true,
+					});
+				if (!executor.isStaff)
+					return InteractionUtil.reply(interaction, {
+						content: 'you need to have an in game staff rank for this command',
+						ephemeral: true,
+					});
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
-				if (target.guildRankPriority >= executor.guildRankPriority) return InteractionUtil.reply(interaction, {
-					content: `your guild rank needs to be higher than \`${target}\`'s`,
-					ephemeral: true,
-				});
+				if (target.guildRankPriority >= executor.guildRankPriority)
+					return InteractionUtil.reply(interaction, {
+						content: `your guild rank needs to be higher than \`${target}\`'s`,
+						ephemeral: true,
+					});
 
 				return this.#run(
 					interaction,
@@ -667,10 +717,10 @@ export default class GuildCommand extends ApplicationCommand {
 						command: `guild demote ${target}`,
 						responseRegExp: demote(target.ign),
 					},
-					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false })
-						?? target.hypixelGuild
-						?? executor.hypixelGuild
-						?? this.client.hypixelGuilds.mainGuild,
+					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false }) ??
+						target.hypixelGuild ??
+						executor.hypixelGuild ??
+						this.client.hypixelGuilds.mainGuild,
 				);
 			}
 
@@ -682,9 +732,10 @@ export default class GuildCommand extends ApplicationCommand {
 					target,
 					executor: UserUtil.getPlayer(interaction.user),
 					reason,
-					hypixelGuild: typeof target === 'string'
-						? InteractionUtil.getHypixelGuild(interaction)
-						: (target.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction)),
+					hypixelGuild:
+						typeof target === 'string'
+							? InteractionUtil.getHypixelGuild(interaction)
+							: target.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction),
 				});
 
 				// add to ban list
@@ -732,9 +783,10 @@ export default class GuildCommand extends ApplicationCommand {
 							.setTitle(`/guild kick ${escapeIgn(typeof target === 'string' ? target : target.ign)} ${reason}`)
 							.setDescription(Formatters.codeBlock(content)),
 					],
-					ephemeral: interaction.options.get('visibility') === null
-						? InteractionUtil.CACHE.get(interaction)!.useEphemeral || hasErrored
-						: InteractionUtil.CACHE.get(interaction)!.useEphemeral,
+					ephemeral:
+						interaction.options.get('visibility') === null
+							? InteractionUtil.CACHE.get(interaction)!.useEphemeral || hasErrored
+							: InteractionUtil.CACHE.get(interaction)!.useEphemeral,
 				});
 			}
 
@@ -775,10 +827,11 @@ export default class GuildCommand extends ApplicationCommand {
 				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
 
-				if (existingBan) return InteractionUtil.reply(interaction, {
-					content: `${escapeIgn(ign)} is on the ban list for \`${existingBan.reason}\``,
-					ephemeral: true,
-				});
+				if (existingBan)
+					return InteractionUtil.reply(interaction, {
+						content: `${escapeIgn(ign)} is on the ban list for \`${existingBan.reason}\``,
+						ephemeral: true,
+					});
 
 				return this.#run(interaction, {
 					command: `guild invite ${ign}`,
@@ -806,7 +859,6 @@ export default class GuildCommand extends ApplicationCommand {
 					InteractionUtil.getHypixelGuild(interaction),
 					interaction.user.id,
 					interaction.options.getInteger('page'),
-
 				);
 			}
 
@@ -819,9 +871,9 @@ export default class GuildCommand extends ApplicationCommand {
 						command: `guild member ${target}`,
 						abortRegExp: unknownIgn(target.ign),
 					},
-					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false })
-						?? target.hypixelGuild
-						?? this.client.hypixelGuilds.mainGuild,
+					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false }) ??
+						target.hypixelGuild ??
+						this.client.hypixelGuilds.mainGuild,
 				);
 			}
 
@@ -829,10 +881,11 @@ export default class GuildCommand extends ApplicationCommand {
 				const DURATION_INPUT = interaction.options.getString('duration', true);
 				const DURATION = stringToMS(DURATION_INPUT);
 
-				if (Number.isNaN(DURATION)) return InteractionUtil.reply(interaction, {
-					content: `\`${DURATION_INPUT}\` is not a valid duration`,
-					ephemeral: true,
-				});
+				if (Number.isNaN(DURATION))
+					return InteractionUtil.reply(interaction, {
+						content: `\`${DURATION_INPUT}\` is not a valid duration`,
+						ephemeral: true,
+					});
 
 				return this.runMuteInteraction(interaction, DURATION);
 			}
@@ -840,21 +893,24 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'promote': {
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor) return InteractionUtil.reply(interaction, {
-					content: 'unable to find a linked player for your discord account',
-					ephemeral: true,
-				});
-				if (!executor.isStaff) return InteractionUtil.reply(interaction, {
-					content: 'you need to have an in game staff rank for this command',
-					ephemeral: true,
-				});
+				if (!executor)
+					return InteractionUtil.reply(interaction, {
+						content: 'unable to find a linked player for your discord account',
+						ephemeral: true,
+					});
+				if (!executor.isStaff)
+					return InteractionUtil.reply(interaction, {
+						content: 'you need to have an in game staff rank for this command',
+						ephemeral: true,
+					});
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
-				if (target.guildRankPriority >= executor.guildRankPriority - 1) return InteractionUtil.reply(interaction, {
-					content: 'you can only promote up to your own rank',
-					ephemeral: true,
-				});
+				if (target.guildRankPriority >= executor.guildRankPriority - 1)
+					return InteractionUtil.reply(interaction, {
+						content: 'you can only promote up to your own rank',
+						ephemeral: true,
+					});
 
 				return this.#run(
 					interaction,
@@ -862,39 +918,43 @@ export default class GuildCommand extends ApplicationCommand {
 						command: `guild promote ${target}`,
 						responseRegExp: promote(target.ign),
 					},
-					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false })
-						?? target.hypixelGuild
-						?? executor.hypixelGuild
-						?? this.client.hypixelGuilds.mainGuild,
+					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false }) ??
+						target.hypixelGuild ??
+						executor.hypixelGuild ??
+						this.client.hypixelGuilds.mainGuild,
 				);
 			}
 
 			case 'setrank': {
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor) return InteractionUtil.reply(interaction, {
-					content: 'unable to find a linked player for your discord account',
-					ephemeral: true,
-				});
-				if (!executor.isStaff) return InteractionUtil.reply(interaction, {
-					content: 'you need to have an in game staff rank for this command',
-					ephemeral: true,
-				});
+				if (!executor)
+					return InteractionUtil.reply(interaction, {
+						content: 'unable to find a linked player for your discord account',
+						ephemeral: true,
+					});
+				if (!executor.isStaff)
+					return InteractionUtil.reply(interaction, {
+						content: 'you need to have an in game staff rank for this command',
+						ephemeral: true,
+					});
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 				const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 				const RANK_INPUT = interaction.options.getString('rank', true);
 				const { value: rank, similarity } = autocorrect(RANK_INPUT, hypixelGuild.ranks, 'name');
 
-				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) return InteractionUtil.reply(interaction, {
-					content: `unknown guild rank '${RANK_INPUT}'`,
-					ephemeral: true,
-				});
+				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD'))
+					return InteractionUtil.reply(interaction, {
+						content: `unknown guild rank '${RANK_INPUT}'`,
+						ephemeral: true,
+					});
 
-				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) return InteractionUtil.reply(interaction, {
-					content: 'you can only change ranks up to your own rank',
-					ephemeral: true,
-				});
+				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority)
+					return InteractionUtil.reply(interaction, {
+						content: 'you can only change ranks up to your own rank',
+						ephemeral: true,
+					});
 
 				return this.#run(
 					interaction,
@@ -902,10 +962,10 @@ export default class GuildCommand extends ApplicationCommand {
 						command: `guild setrank ${target} ${rank.name}`,
 						responseRegExp: setRank(target.ign, undefined, rank.name),
 					},
-					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false })
-						?? target.hypixelGuild
-						?? executor.hypixelGuild
-						?? this.client.hypixelGuilds.mainGuild,
+					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false }) ??
+						target.hypixelGuild ??
+						executor.hypixelGuild ??
+						this.client.hypixelGuilds.mainGuild,
 				);
 			}
 
@@ -918,14 +978,17 @@ export default class GuildCommand extends ApplicationCommand {
 				if (this.GUILD_IDENTIFIER.has(TARGET_INPUT as any)) {
 					target = 'everyone';
 				} else {
-					target = InteractionUtil.getPlayer(interaction)
-							?? (InteractionUtil.checkForce(interaction)
-								? TARGET_INPUT // use input if force is set
-								: await (() => {
-									const queryParams: WhereOptions<Player['_attributes']>[] = [{
-										ign: { [Op.iLike]: TARGET_INPUT },
-										minecraftUuid: TARGET_INPUT,
-									}];
+					target =
+						InteractionUtil.getPlayer(interaction) ??
+						(InteractionUtil.checkForce(interaction)
+							? TARGET_INPUT // use input if force is set
+							: await (() => {
+									const queryParams: WhereOptions<Player['_attributes']>[] = [
+										{
+											ign: { [Op.iLike]: TARGET_INPUT },
+											minecraftUuid: TARGET_INPUT,
+										},
+									];
 
 									// check if input is a discord id or @mention
 									const ID = getIdFromString(TARGET_INPUT);
@@ -935,13 +998,13 @@ export default class GuildCommand extends ApplicationCommand {
 										[Op.or]: queryParams,
 										cache: false,
 									});
-								})()
-							);
+							  })());
 
-					if (!target) return InteractionUtil.reply(interaction, {
-						content: `no player with the IGN \`${TARGET_INPUT}\` found`,
-						ephemeral: true,
-					});
+					if (!target)
+						return InteractionUtil.reply(interaction, {
+							content: `no player with the IGN \`${TARGET_INPUT}\` found`,
+							ephemeral: true,
+						});
 
 					if (this.client.players.isModel(target) && target.inGuild()) {
 						({ hypixelGuild } = target);
@@ -949,10 +1012,11 @@ export default class GuildCommand extends ApplicationCommand {
 				}
 
 				if (this.client.players.isModel(target)) {
-					if (target.guildRankPriority >= (UserUtil.getPlayer(interaction.user)?.guildRankPriority ?? 0)) return InteractionUtil.reply(interaction, {
-						content: `your guild rank needs to be higher than \`${target}\`'s`,
-						ephemeral: true,
-					});
+					if (target.guildRankPriority >= (UserUtil.getPlayer(interaction.user)?.guildRankPriority ?? 0))
+						return InteractionUtil.reply(interaction, {
+							content: `your guild rank needs to be higher than \`${target}\`'s`,
+							ephemeral: true,
+						});
 
 					await target.update({ mutedTill: 0 });
 
@@ -961,10 +1025,17 @@ export default class GuildCommand extends ApplicationCommand {
 					await hypixelGuild.update({ mutedTill: 0 });
 				}
 
-				return this.#run(interaction, {
-					command: `guild unmute ${target}`,
-					responseRegExp: unmute(target === 'everyone' ? 'the guild chat' : `${target}`, hypixelGuild.chatBridge.bot.username),
-				}, hypixelGuild);
+				return this.#run(
+					interaction,
+					{
+						command: `guild unmute ${target}`,
+						responseRegExp: unmute(
+							target === 'everyone' ? 'the guild chat' : `${target}`,
+							hypixelGuild.chatBridge.bot.username,
+						),
+					},
+					hypixelGuild,
+				);
 			}
 
 			default:

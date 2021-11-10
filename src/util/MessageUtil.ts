@@ -12,7 +12,6 @@ import type {
 } from 'discord.js';
 import type { SendOptions } from './ChannelUtil';
 
-
 interface AwaitReplyOptions extends MessageOptions {
 	question?: string;
 	/** time in milliseconds to wait for a response */
@@ -23,7 +22,6 @@ interface EditOptions extends MessageEditOptions {
 	rejectOnError?: boolean;
 }
 
-
 export default class MessageUtil extends null {
 	static DEFAULT_REPLY_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
 
@@ -31,7 +29,9 @@ export default class MessageUtil extends null {
 	 * @param message
 	 */
 	static logInfo(message: Message) {
-		return `${message.author?.tag ?? 'unknown author'}${message.guildId ? ` | ${message.member?.displayName ?? 'unknown member'}` : ''}`;
+		return `${message.author?.tag ?? 'unknown author'}${
+			message.guildId ? ` | ${message.member?.displayName ?? 'unknown member'}` : ''
+		}`;
 	}
 
 	/**
@@ -101,9 +101,10 @@ export default class MessageUtil extends null {
 				const emoji = Util.resolvePartialEmoji(emojiIndetifier);
 				const reaction = message.reactions.cache.get(emoji?.id ?? emoji?.name!);
 
-				res.push(reaction?.me
-					? reaction // reaction from bot already exists
-					: await message.react(emojiIndetifier), // new reaction
+				res.push(
+					reaction?.me
+						? reaction // reaction from bot already exists
+						: await message.react(emojiIndetifier), // new reaction
 				);
 			}
 		} catch (error) {
@@ -118,9 +119,12 @@ export default class MessageUtil extends null {
 	 * @param message
 	 * @param options message delete options
 	 */
-	static async delete(message: Message, { timeout = 0 }: { timeout?: number; } = {}): Promise<Message> {
-		if (!message.deletable) { // permission check
-			logger.warn(`[MESSAGE UTIL]: message from ${this.logInfo(message)} in ${this.channelLogInfo(message)} is not deletable`);
+	static async delete(message: Message, { timeout = 0 }: { timeout?: number } = {}): Promise<Message> {
+		if (!message.deletable) {
+			// permission check
+			logger.warn(
+				`[MESSAGE UTIL]: message from ${this.logInfo(message)} in ${this.channelLogInfo(message)} is not deletable`,
+			);
 			return message;
 		}
 
@@ -135,7 +139,10 @@ export default class MessageUtil extends null {
 			try {
 				return await message.delete();
 			} catch (error) {
-				logger.error(error, `[MESSAGE UTIL]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
+				logger.error(
+					error,
+					`[MESSAGE UTIL]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+				);
 				return message;
 			}
 		}
@@ -152,9 +159,11 @@ export default class MessageUtil extends null {
 	 * @param questionOrOptions
 	 */
 	static async awaitReply(message: Message, questionOrOptions: string | AwaitReplyOptions = {}) {
-		const { question = 'confirm this action?', time = seconds(60), ...options } = typeof questionOrOptions === 'string'
-			? { question: questionOrOptions }
-			: questionOrOptions;
+		const {
+			question = 'confirm this action?',
+			time = seconds(60),
+			...options
+		} = typeof questionOrOptions === 'string' ? { question: questionOrOptions } : questionOrOptions;
 
 		try {
 			const { channel } = await this.reply(message, {
@@ -164,7 +173,7 @@ export default class MessageUtil extends null {
 			});
 
 			const collected = await channel.awaitMessages({
-				filter: msg => msg.author.id === message.author.id,
+				filter: (msg) => msg.author.id === message.author.id,
 				max: 1,
 				time,
 			});
@@ -184,9 +193,7 @@ export default class MessageUtil extends null {
 	static reply(message: Message, contentOrOptions: SendOptions & { rejectOnError: true }): Promise<Message>;
 	static reply(message: Message, contentOrOptions: string | SendOptions): Promise<Message | null>;
 	static reply(message: Message, contentOrOptions: string | SendOptions) {
-		const options = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions }
-			: contentOrOptions;
+		const options = typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
 
 		return ChannelUtil.send(message.channel, {
 			reply: {
@@ -202,17 +209,25 @@ export default class MessageUtil extends null {
 	 * @param contentOrOptions
 	 */
 	static async edit(message: Message, contentOrOptions: string | EditOptions) {
-		const options = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions }
-			: contentOrOptions;
+		const options = typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
 
 		// permission checks
 		let requiredChannelPermissions = this.DEFAULT_REPLY_PERMISSIONS;
 
-		if (!message.editable) { // message was not sent by the bot user
-			if (Object.keys(options).some(key => key !== 'attachments') || options.attachments?.length !== 0) { // can only remove attachments
-				if (options.rejectOnError) throw new Error(`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)} with ${Object.entries(options)}`);
-				logger.warn(options, `[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
+		if (!message.editable) {
+			// message was not sent by the bot user
+			if (Object.keys(options).some((key) => key !== 'attachments') || options.attachments?.length !== 0) {
+				// can only remove attachments
+				if (options.rejectOnError)
+					throw new Error(
+						`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(
+							message,
+						)} with ${Object.entries(options)}`,
+					);
+				logger.warn(
+					options,
+					`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+				);
 				return message;
 			}
 
@@ -227,10 +242,19 @@ export default class MessageUtil extends null {
 		if (!ChannelUtil.botPermissions(channel).has(requiredChannelPermissions)) {
 			const missingChannelPermissions = ChannelUtil.botPermissions(channel)
 				.missing(requiredChannelPermissions)
-				.map(permission => `'${permission}'`);
+				.map((permission) => `'${permission}'`);
 
-			if (options.rejectOnError) throw new Error(commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${ChannelUtil.logInfo(channel)}`);
-			logger.warn(commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${ChannelUtil.logInfo(channel)}`);
+			if (options.rejectOnError)
+				throw new Error(
+					commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${
+						missingChannelPermissions?.length === 1 ? '' : 's'
+					} in ${ChannelUtil.logInfo(channel)}`,
+				);
+			logger.warn(
+				commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${
+					missingChannelPermissions?.length === 1 ? '' : 's'
+				} in ${ChannelUtil.logInfo(channel)}`,
+			);
 			return message;
 		}
 
@@ -238,7 +262,10 @@ export default class MessageUtil extends null {
 			return await message.edit(options);
 		} catch (error) {
 			if (options.rejectOnError) throw error;
-			logger.error(error, `[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
+			logger.error(
+				error,
+				`[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+			);
 			return message;
 		}
 	}
@@ -256,7 +283,10 @@ export default class MessageUtil extends null {
 		try {
 			return await message.pin();
 		} catch (error) {
-			logger.error(error, `[MESSAGE UTIL]: pin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
+			logger.error(
+				error,
+				`[MESSAGE UTIL]: pin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+			);
 			return message;
 		}
 	}

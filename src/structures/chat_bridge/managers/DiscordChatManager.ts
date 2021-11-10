@@ -22,13 +22,11 @@ import type { ChatBridgeChannel } from '../../database/models/HypixelGuild';
 import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
 
-
 interface SendViaBotOptions extends MessageOptions {
 	content: string;
 	prefix?: string;
 	hypixelMessage?: HypixelMessage | null;
 }
-
 
 export class DiscordChatManager extends ChatManager {
 	/**
@@ -71,7 +69,9 @@ export class DiscordChatManager extends ChatManager {
 	static getPlayerName(message: Message) {
 		return this.formatAtMention(
 			MessageUtil.isNormalWebhookMessage(message)
-				? UserUtil.getPlayer(message.guild?.members.cache.find(({ displayName }) => displayName === message.author.username)?.user)?.ign ?? message.author.username
+				? UserUtil.getPlayer(
+						message.guild?.members.cache.find(({ displayName }) => displayName === message.author.username)?.user,
+				  )?.ign ?? message.author.username
 				: UserUtil.getPlayer(message.author)?.ign ?? message.member?.displayName ?? message.author.username,
 		);
 	}
@@ -81,9 +81,7 @@ export class DiscordChatManager extends ChatManager {
 	 * @param name
 	 */
 	static formatAtMention(name: string) {
-		return this.BLOCKED_WORDS_REGEXP.test(name)
-			? '*blocked name*'
-			: name;
+		return this.BLOCKED_WORDS_REGEXP.test(name) ? '*blocked name*' : name;
 	}
 
 	/**
@@ -99,7 +97,11 @@ export class DiscordChatManager extends ChatManager {
 
 		for (const { contentType, url, size } of attachments.values()) {
 			// only images can be uploaded by URL https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
-			if (!hasError && this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some(type => contentType?.startsWith(type)) && size <= 1e7) {
+			if (
+				!hasError &&
+				this.client.config.get('IMGUR_UPLOADER_CONTENT_TYPE').some((type) => contentType?.startsWith(type)) &&
+				size <= 1e7
+			) {
 				try {
 					urls.push((await imgur.upload(url)).data.link);
 				} catch (error) {
@@ -191,26 +193,25 @@ export class DiscordChatManager extends ChatManager {
 
 			const webhooks = await channel.fetchWebhooks();
 
-			this.webhook = webhooks.find(({ type, owner }) => type === 'Incoming' && owner?.id === this.client.user!.id) ?? null;
+			this.webhook =
+				webhooks.find(({ type, owner }) => type === 'Incoming' && owner?.id === this.client.user!.id) ?? null;
 
 			if (!this.webhook) {
 				if (webhooks.size >= WEBHOOKS_MAX_PER_CHANNEL) {
 					throw new WebhookError('cannot create more webhooks', channel, this.hypixelGuild);
 				}
 
-				this.webhook = await channel.createWebhook(
-					`${this.hypixelGuild} Chat Bridge`,
-					{
-						avatar: (channel.guild?.me ?? this.client.user!).displayAvatarURL(),
-						reason: 'no Webhooks in Chat Bridge Channel found',
-					},
-				);
+				this.webhook = await channel.createWebhook(`${this.hypixelGuild} Chat Bridge`, {
+					avatar: (channel.guild?.me ?? this.client.user!).displayAvatarURL(),
+					reason: 'no Webhooks in Chat Bridge Channel found',
+				});
 
-				this.client.log(new MessageEmbed()
-					.setColor(this.client.config.get('EMBED_GREEN'))
-					.setTitle(`${this.hypixelGuild} Chat Bridge`)
-					.setDescription(`${Formatters.bold('Webhook')}: created in ${channel}`)
-					.setTimestamp(),
+				this.client.log(
+					new MessageEmbed()
+						.setColor(this.client.config.get('EMBED_GREEN'))
+						.setTitle(`${this.hypixelGuild} Chat Bridge`)
+						.setDescription(`${Formatters.bold('Webhook')}: created in ${channel}`)
+						.setTimestamp(),
 				);
 			}
 
@@ -222,11 +223,14 @@ export class DiscordChatManager extends ChatManager {
 			if (error instanceof WebhookError) {
 				this.chatBridge.shouldRetryLinking = false;
 
-				this.client.log(new MessageEmbed()
-					.setColor(this.client.config.get('EMBED_RED'))
-					.setTitle(`${error.hypixelGuild} Chat Bridge`)
-					.setDescription(`${Formatters.bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`)
-					.setTimestamp(),
+				this.client.log(
+					new MessageEmbed()
+						.setColor(this.client.config.get('EMBED_RED'))
+						.setTitle(`${error.hypixelGuild} Chat Bridge`)
+						.setDescription(
+							`${Formatters.bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`,
+						)
+						.setTimestamp(),
 				);
 			}
 
@@ -254,19 +258,18 @@ export class DiscordChatManager extends ChatManager {
 	async sendViaWebhook(contentOrOptions: string | WebhookMessageOptions) {
 		if (!this.chatBridge.isEnabled() || !this.isReady()) return null;
 
-		const { content, ...options } = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions }
-			: contentOrOptions;
+		const { content, ...options } =
+			typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
 
 		if (!content) return logger.warn(`[CHATBRIDGE]: ${this.logInfo}: prevented sending empty message`);
 
 		await this.queue.wait();
 
 		try {
-			return await this.webhook.send({
+			return (await this.webhook.send({
 				content: this.chatBridge.discord.parseContent(content),
 				...options,
-			}) as Message;
+			})) as Message;
 		} catch (error) {
 			logger.error(error, `[CHATBRIDGE WEBHOOK]: ${this.logInfo}`);
 
@@ -288,17 +291,24 @@ export class DiscordChatManager extends ChatManager {
 	async sendViaBot(contentOrOptions: string | SendViaBotOptions): Promise<Message | null> {
 		if (!this.chatBridge.isEnabled()) return null;
 
-		const { content, prefix = '', hypixelMessage, ...options } = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions } as SendViaBotOptions
-			: contentOrOptions;
+		const {
+			content,
+			prefix = '',
+			hypixelMessage,
+			...options
+		} = typeof contentOrOptions === 'string' ? ({ content: contentOrOptions } as SendViaBotOptions) : contentOrOptions;
 
 		await this.queue.wait();
 
-		const discordMessage = await hypixelMessage?.discordMessage.catch(error => logger.error(error));
+		const discordMessage = await hypixelMessage?.discordMessage.catch((error) => logger.error(error));
 
 		try {
 			return await ChannelUtil.send(this.channel, {
-				content: this.chatBridge.discord.parseContent(`${discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `}${prefix}${content}`),
+				content: this.chatBridge.discord.parseContent(
+					`${
+						discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
+					}${prefix}${content}`,
+				),
 				reply: {
 					messageReference: discordMessage as Message,
 				},
@@ -318,13 +328,18 @@ export class DiscordChatManager extends ChatManager {
 		if (message.webhookId === this.webhook?.id) return; // message was sent by the ChatBridge's webhook
 		if (!this.chatBridge.isEnabled() || !this.minecraft.isReady()) return MessageUtil.react(message, X_EMOJI);
 
-		const player = playerInput
-			?? UserUtil.getPlayer(message.interaction?.user ?? message.author) // cached player
-			?? await this.client.players.fetch({ discordId: message.interaction?.user.id ?? message.author.id }); // uncached player
+		const player =
+			playerInput ??
+			UserUtil.getPlayer(message.interaction?.user ?? message.author) ?? // cached player
+			(await this.client.players.fetch({ discordId: message.interaction?.user.id ?? message.author.id })); // uncached player
 
 		// check if player is muted
 		if (player?.muted) {
-			DiscordChatManager.#dmMuteInfo(message, player, `your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
+			DiscordChatManager.#dmMuteInfo(
+				message,
+				player,
+				`your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`,
+			);
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
@@ -336,13 +351,27 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if guild chat is muted
 		if (this.hypixelGuild!.muted && !player?.isStaff) {
-			DiscordChatManager.#dmMuteInfo(message, player, `${this.hypixelGuild!.name}'s guild chat mute expires ${Formatters.time(new Date(this.hypixelGuild!.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
+			DiscordChatManager.#dmMuteInfo(
+				message,
+				player,
+				`${this.hypixelGuild!.name}'s guild chat mute expires ${Formatters.time(
+					new Date(this.hypixelGuild!.mutedTill),
+					Formatters.TimestampStyles.RelativeTime,
+				)}`,
+			);
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.botPlayer?.muted) {
-			DiscordChatManager.#dmMuteInfo(message, player, `the bot's mute expires ${Formatters.time(new Date(this.minecraft.botPlayer.mutedTill), Formatters.TimestampStyles.RelativeTime)}`);
+			DiscordChatManager.#dmMuteInfo(
+				message,
+				player,
+				`the bot's mute expires ${Formatters.time(
+					new Date(this.minecraft.botPlayer.mutedTill),
+					Formatters.TimestampStyles.RelativeTime,
+				)}`,
+			);
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
@@ -364,9 +393,10 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// actual content
-		let messageContent = isEdit && !message.interaction && message.content && !message.content.endsWith('*')
-			? `${message.content}*` // add a trailing '*' to indicate an edit if not already present
-			: message.content;
+		let messageContent =
+			isEdit && !message.interaction && message.content && !message.content.endsWith('*')
+				? `${message.content}*` // add a trailing '*' to indicate an edit if not already present
+				: message.content;
 
 		if (messageContent) {
 			// parse discord attachment links and replace with imgur uploaded link
@@ -374,16 +404,18 @@ export class DiscordChatManager extends ChatManager {
 				let offset = 0;
 
 				for (const match of messageContent.matchAll(DISCORD_CDN_URL_REGEXP)) {
-					const [ FULL_URL, URL_WITHOUT_QUERY_PARAMS ] = match;
-					const [ [ START, END ] ] = match
+					const [FULL_URL, URL_WITHOUT_QUERY_PARAMS] = match;
+					const [[START, END]] =
 						// @ts-expect-error
-						.indices;
+						match.indices;
 
 					try {
 						// try to upload URL without query parameters
 						const IMGUR_URL = (await imgur.upload(URL_WITHOUT_QUERY_PARAMS)).data.link;
 
-						messageContent = `${messageContent.slice(0, START - offset)}${IMGUR_URL}${messageContent.slice(END - offset)}`; // replace discord with imgur link
+						messageContent = `${messageContent.slice(0, START - offset)}${IMGUR_URL}${messageContent.slice(
+							END - offset,
+						)}`; // replace discord with imgur link
 						offset += FULL_URL.length - IMGUR_URL.length; // since indices are relative to the original string
 					} catch (error) {
 						logger.error(error);
@@ -410,7 +442,9 @@ export class DiscordChatManager extends ChatManager {
 
 			this.minecraft.chat({
 				content: interaction?.toString() ?? `/${message.interaction.commandName}`,
-				prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(player?.ign ?? message.interaction.user.username)}: `,
+				prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
+					player?.ign ?? message.interaction.user.username,
+				)}: `,
 			});
 		}
 

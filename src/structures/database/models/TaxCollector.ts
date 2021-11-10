@@ -4,7 +4,6 @@ import { TransactionTypes } from './Transaction';
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-
 interface TaxCollectorAttributes {
 	minecraftUuid: string;
 	isCollecting: boolean;
@@ -12,10 +11,15 @@ interface TaxCollectorAttributes {
 	collectedDonations: number;
 }
 
-type TaxCollectorCreationAttributes = Optional<TaxCollectorAttributes, 'isCollecting' | 'collectedTax' | 'collectedDonations'>
+type TaxCollectorCreationAttributes = Optional<
+	TaxCollectorAttributes,
+	'isCollecting' | 'collectedTax' | 'collectedDonations'
+>;
 
-
-export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCreationAttributes> implements TaxCollectorAttributes {
+export class TaxCollector
+	extends Model<TaxCollectorAttributes, TaxCollectorCreationAttributes>
+	implements TaxCollectorAttributes
+{
 	declare client: LunarClient;
 
 	declare minecraftUuid: string;
@@ -27,30 +31,33 @@ export class TaxCollector extends Model<TaxCollectorAttributes, TaxCollectorCrea
 	declare readonly updatedAt: Date;
 
 	static initialise(sequelize: Sequelize) {
-		return this.init({
-			minecraftUuid: {
-				type: DataTypes.STRING,
-				primaryKey: true,
+		return this.init(
+			{
+				minecraftUuid: {
+					type: DataTypes.STRING,
+					primaryKey: true,
+				},
+				isCollecting: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: true,
+					allowNull: false,
+				},
+				collectedTax: {
+					type: DataTypes.BIGINT,
+					defaultValue: 0,
+					allowNull: false,
+				},
+				collectedDonations: {
+					type: DataTypes.BIGINT,
+					defaultValue: 0,
+					allowNull: false,
+				},
 			},
-			isCollecting: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: true,
-				allowNull: false,
+			{
+				sequelize,
+				modelName: 'TaxCollector',
 			},
-			collectedTax: {
-				type: DataTypes.BIGINT,
-				defaultValue: 0,
-				allowNull: false,
-			},
-			collectedDonations: {
-				type: DataTypes.BIGINT,
-				defaultValue: 0,
-				allowNull: false,
-			},
-		}, {
-			sequelize,
-			modelName: 'TaxCollector',
-		}) as ModelStatic<TaxCollector>;
+		) as ModelStatic<TaxCollector>;
 	}
 
 	get player() {

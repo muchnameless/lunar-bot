@@ -7,19 +7,22 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type GuildCommand from '../guild/guild';
 
-
 export default class SmiteCommand extends DualCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('guild mute for 10 minutes')
-				.addStringOption(targetOption)
-				.addStringOption(buildGuildOption(context.client)),
-			cooldown: 0,
-		}, {
-			args: 1,
-			usage: '[`IGN`]',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription('guild mute for 10 minutes')
+					.addStringOption(targetOption)
+					.addStringOption(buildGuildOption(context.client)),
+				cooldown: 0,
+			},
+			{
+				args: 1,
+				usage: '[`IGN`]',
+			},
+		);
 	}
 
 	/**

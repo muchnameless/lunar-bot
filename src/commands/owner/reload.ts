@@ -9,7 +9,6 @@ import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
-
 export default class ReloadCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		const reloadOption = new SlashCommandBooleanOption()
@@ -21,58 +20,48 @@ export default class ReloadCommand extends DualCommand {
 			.setDescription('wether to load disabled events')
 			.setRequired(false);
 
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('hot reload certain parts of the bot')
-				.addSubcommand(subcommand => subcommand
-					.setName('command')
-					.setDescription('reload a command')
-					.addStringOption(option => option
-						.setName('name')
-						.setDescription('command name')
-						.setRequired(true),
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription('hot reload certain parts of the bot')
+					.addSubcommand((subcommand) =>
+						subcommand
+							.setName('command')
+							.setDescription('reload a command')
+							.addStringOption((option) => option.setName('name').setDescription('command name').setRequired(true))
+							.addBooleanOption(reloadOption),
 					)
-					.addBooleanOption(reloadOption),
-				)
-				.addSubcommand(subcommand => subcommand
-					.setName('commands')
-					.setDescription('reload all commands')
-					.addBooleanOption(reloadOption),
-				)
-				.addSubcommand(subcommand => subcommand
-					.setName('event')
-					.setDescription('reload an event')
-					.addStringOption(option => option
-						.setName('name')
-						.setDescription('event name')
-						.setRequired(true),
+					.addSubcommand((subcommand) =>
+						subcommand.setName('commands').setDescription('reload all commands').addBooleanOption(reloadOption),
 					)
-					.addBooleanOption(reloadOption)
-					.addBooleanOption(forceOption),
-				)
-				.addSubcommand(subcommand => subcommand
-					.setName('events')
-					.setDescription('reload all events')
-					.addBooleanOption(reloadOption)
-					.addBooleanOption(forceOption),
-				)
-				.addSubcommand(subcommand => subcommand
-					.setName('database')
-					.setDescription('reload the database cache'),
-				)
-				.addSubcommand(subcommand => subcommand
-					.setName('cooldowns')
-					.setDescription('reset all cooldowns'),
-				)
-				.addSubcommand(subcommand => subcommand
-					.setName('filter')
-					.setDescription('reload the blocked words filter'),
-				),
-			cooldown: 0,
-		}, {
-			args: true,
-			usage: '[`command` [command `name`]|`commands`|`event` [event `name`]|`events`|`database`|`cooldowns`]',
-		});
+					.addSubcommand((subcommand) =>
+						subcommand
+							.setName('event')
+							.setDescription('reload an event')
+							.addStringOption((option) => option.setName('name').setDescription('event name').setRequired(true))
+							.addBooleanOption(reloadOption)
+							.addBooleanOption(forceOption),
+					)
+					.addSubcommand((subcommand) =>
+						subcommand
+							.setName('events')
+							.setDescription('reload all events')
+							.addBooleanOption(reloadOption)
+							.addBooleanOption(forceOption),
+					)
+					.addSubcommand((subcommand) => subcommand.setName('database').setDescription('reload the database cache'))
+					.addSubcommand((subcommand) => subcommand.setName('cooldowns').setDescription('reset all cooldowns'))
+					.addSubcommand((subcommand) =>
+						subcommand.setName('filter').setDescription('reload the blocked words filter'),
+					),
+				cooldown: 0,
+			},
+			{
+				args: true,
+				usage: '[`command` [command `name`]|`commands`|`event` [event `name`]|`events`|`database`|`cooldowns`]',
+			},
+		);
 	}
 
 	/**
@@ -116,7 +105,7 @@ export default class ReloadCommand extends DualCommand {
 							}
 						}
 
-					// file with exact name match found
+						// file with exact name match found
 					} else {
 						commandName = basename(commandFile, '.js').toLowerCase();
 						command = this.collection.get(commandName); // try to find already loaded command
@@ -200,7 +189,9 @@ export default class ReloadCommand extends DualCommand {
 			case 'events': {
 				try {
 					await this.client.events.unloadAll().loadAll({ reload, force });
-					return `${this.client.events.size} event${this.client.events.size !== 1 ? 's' : ''} were reloaded successfully`;
+					return `${this.client.events.size} event${
+						this.client.events.size !== 1 ? 's' : ''
+					} were reloaded successfully`;
 				} catch (error) {
 					logger.error(error, 'an error occurred while reloading all events');
 					return {
@@ -225,7 +216,9 @@ export default class ReloadCommand extends DualCommand {
 
 			case 'filter': {
 				try {
-					const { BLOCKED_WORDS_REGEXP } = await import(`../../structures/chat_bridge/constants/blockedWords.js?update=${Date.now()}`);
+					const { BLOCKED_WORDS_REGEXP } = await import(
+						`../../structures/chat_bridge/constants/blockedWords.js?update=${Date.now()}`
+					);
 					const { ChatManager } = await import('../../structures/chat_bridge/managers/ChatManager.js');
 
 					ChatManager.BLOCKED_WORDS_REGEXP = BLOCKED_WORDS_REGEXP;
@@ -253,11 +246,15 @@ export default class ReloadCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		return InteractionUtil.reply(interaction, await this.#run(interaction.options.getSubcommand(),
-			interaction.options.getString('name'),
-			interaction.options.getBoolean('reload') ?? false,
-			interaction.options.getBoolean('force') ?? false,
-		));
+		return InteractionUtil.reply(
+			interaction,
+			await this.#run(
+				interaction.options.getSubcommand(),
+				interaction.options.getString('name'),
+				interaction.options.getBoolean('reload') ?? false,
+				interaction.options.getBoolean('force') ?? false,
+			),
+		);
 	}
 
 	/**
@@ -265,6 +262,8 @@ export default class ReloadCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(await this.#run(hypixelMessage.commandData.args[0], hypixelMessage.commandData.args[1]));
+		return hypixelMessage.reply(
+			await this.#run(hypixelMessage.commandData.args[0], hypixelMessage.commandData.args[1]),
+		);
 	}
 }

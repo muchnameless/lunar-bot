@@ -12,43 +12,44 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
 
-
 export default class PollCommand extends DualCommand {
-	quoteChars = [ '\u{0022}', '\u{201C}', '\u{201D}' ] as const;
+	quoteChars = ['\u{0022}', '\u{201C}', '\u{201D}'] as const;
 
 	constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('create a poll for both in game and discord guild chat')
-			.addStringOption(option => option
-				.setName('question')
-				.setDescription('poll question')
-				.setRequired(true),
-			);
+			.addStringOption((option) => option.setName('question').setDescription('poll question').setRequired(true));
 
 		// add choices
 		for (let i = 1; i <= 10; ++i) {
-			slash.addStringOption(option => option
-				.setName(`choice_${i}`)
-				.setDescription(`choice ${i}`)
-				.setRequired(i <= 1),
+			slash.addStringOption((option) =>
+				option
+					.setName(`choice_${i}`)
+					.setDescription(`choice ${i}`)
+					.setRequired(i <= 1),
 			);
 		}
 
 		slash
-			.addStringOption(option => option
-				.setName('duration')
-				.setDescription('s[econds] | m[inutes], must be between 30s and 10m')
-				.setRequired(false),
+			.addStringOption((option) =>
+				option
+					.setName('duration')
+					.setDescription('s[econds] | m[inutes], must be between 30s and 10m')
+					.setRequired(false),
 			)
 			.addStringOption(buildGuildOption(context.client));
 
-		super(context, {
-			slash,
-			cooldown: seconds(1),
-		}, {
-			args: 1,
-			usage: '<30s <= `duration` <= 10m> [`"question" "choice_1" "choice_2"` ...]',
-		});
+		super(
+			context,
+			{
+				slash,
+				cooldown: seconds(1),
+			},
+			{
+				args: 1,
+				usage: '<30s <= `duration` <= 10m> [`"question" "choice_1" "choice_2"` ...]',
+			},
+		);
 	}
 
 	/**
@@ -60,25 +61,46 @@ export default class PollCommand extends DualCommand {
 	 * @param param0.duration
 	 * @param param0.ign
 	 */
-	async #run({ chatBridge, question, pollOptionNames, duration, ign }: { chatBridge: ChatBridge, question: string, pollOptionNames: string[], duration: string | null, ign: string }) {
-		if (chatBridge.pollUntil) return `poll already in progress, ends ${Formatters.time(new Date(chatBridge.pollUntil), Formatters.TimestampStyles.RelativeTime)}`;
+	async #run({
+		chatBridge,
+		question,
+		pollOptionNames,
+		duration,
+		ign,
+	}: {
+		chatBridge: ChatBridge;
+		question: string;
+		pollOptionNames: string[];
+		duration: string | null;
+		ign: string;
+	}) {
+		if (chatBridge.pollUntil)
+			return `poll already in progress, ends ${Formatters.time(
+				new Date(chatBridge.pollUntil),
+				Formatters.TimestampStyles.RelativeTime,
+			)}`;
 
 		try {
-			const DURATION = typeof duration === 'string'
-				? Math.min(Math.max(stringToMS(duration), seconds(30)), minutes(10)) || minutes(1)
-				: minutes(1);
+			const DURATION =
+				typeof duration === 'string'
+					? Math.min(Math.max(stringToMS(duration), seconds(30)), minutes(10)) || minutes(1)
+					: minutes(1);
 
 			chatBridge.pollUntil = Date.now() + DURATION;
 
-			const pollOptions = pollOptionNames.map((name, index) => ({ number: index + 1, option: name.trim(), votes: new Set<string>() }));
+			const pollOptions = pollOptionNames.map((name, index) => ({
+				number: index + 1,
+				option: name.trim(),
+				votes: new Set<string>(),
+			}));
 			const optionsCount = pollOptions.length;
 			const hypixelMessages = chatBridge.minecraft.awaitMessages({
-				filter: hypixelMessage => hypixelMessage.isUserMessage() && hypixelMessage.type === MESSAGE_TYPES.GUILD,
+				filter: (hypixelMessage) => hypixelMessage.isUserMessage() && hypixelMessage.type === MESSAGE_TYPES.GUILD,
 				time: DURATION,
 			}) as Promise<HypixelUserMessage[]>;
 			const discordChannel = chatBridge.discord.get(MESSAGE_TYPES.GUILD)!.channel;
 			const discordMessages = discordChannel.awaitMessages({
-				filter: discordMessage => MessageUtil.isUserMessage(discordMessage),
+				filter: (discordMessage) => MessageUtil.isUserMessage(discordMessage),
 				time: DURATION,
 			});
 
@@ -114,7 +136,12 @@ export default class PollCommand extends DualCommand {
 				.map(({ votes, ...rest }) => ({ votes: votes.size, ...rest }))
 				.sort(({ votes: a }, { votes: b }) => b - a);
 			const TOTAL_VOTES = result.reduce((acc, { votes }) => acc + votes, 0);
-			const resultString = result.map(({ number, option, votes }) => `#${number}: ${option} (${Math.round(votes / TOTAL_VOTES * 100) || 0}%, ${votes} vote${votes === 1 ? '' : 's'})`);
+			const resultString = result.map(
+				({ number, option, votes }) =>
+					`#${number}: ${option} (${Math.round((votes / TOTAL_VOTES) * 100) || 0}%, ${votes} vote${
+						votes === 1 ? '' : 's'
+					})`,
+			);
 
 			// reply with result
 			ChannelUtil.send(discordChannel, {
@@ -149,12 +176,15 @@ export default class PollCommand extends DualCommand {
 		const result = await this.#run({
 			chatBridge: InteractionUtil.getHypixelGuild(interaction).chatBridge,
 			question: interaction.options.getString('question', true),
-			pollOptionNames: (interaction.options
-				// @ts-expect-error
-				._hoistedOptions as CommandInteractionOption[])
-				.filter(({ name }) => name.startsWith('choice_')).map(({ value }) => value as string),
+			// @ts-expect-error
+			pollOptionNames: (interaction.options._hoistedOptions as CommandInteractionOption[])
+				.filter(({ name }) => name.startsWith('choice_'))
+				.map(({ value }) => value as string),
 			duration: interaction.options.getString('duration'),
-			ign: UserUtil.getPlayer(interaction.user)?.ign ?? (interaction.member as GuildMember)?.displayName ?? interaction.user.tag,
+			ign:
+				UserUtil.getPlayer(interaction.user)?.ign ??
+				(interaction.member as GuildMember)?.displayName ??
+				interaction.user.tag,
 		});
 
 		return InteractionUtil.reply(interaction, {

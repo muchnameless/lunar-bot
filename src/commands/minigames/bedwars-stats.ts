@@ -7,19 +7,22 @@ import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
-
 export default class BedWarsStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('shows a player\'s BedWars stats')
-				.addStringOption(optionalIgnOption),
-			cooldown: seconds(1),
-		}, {
-			aliases: [ 'bwstats' ],
-			args: false,
-			usage: '<`IGN`>',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription("shows a player's BedWars stats")
+					.addStringOption(optionalIgnOption),
+				cooldown: seconds(1),
+			},
+			{
+				aliases: ['bwstats'],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	override _generateReply({ ign, playerData }: FetchedData) {

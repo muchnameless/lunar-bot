@@ -6,22 +6,15 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction, ContextMenuInteraction, GuildMember, User } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class UnnickCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			aliases: [],
 			slash: new SlashCommandBuilder()
-				.setDescription('resets a user\'s nickname')
-				.addUserOption(option => option
-					.setName('user')
-					.setDescription('the user to unnick')
-					.setRequired(true),
-				)
+				.setDescription("resets a user's nickname")
+				.addUserOption((option) => option.setName('user').setDescription('the user to unnick').setRequired(true))
 				.setDefaultPermission(false),
-			user: new ContextMenuCommandBuilder()
-				.setName('Reset nickname')
-				.setDefaultPermission(false),
+			user: new ContextMenuCommandBuilder().setName('Reset nickname').setDefaultPermission(false),
 			cooldown: 0,
 		});
 	}
@@ -33,29 +26,30 @@ export default class UnnickCommand extends ApplicationCommand {
 	// eslint-disable-next-line class-methods-use-this
 	async #run(interaction: CommandInteraction | ContextMenuInteraction, member: GuildMember | null) {
 		// input validation
-		if (!member) return InteractionUtil.reply(interaction, {
-			content: `${interaction.options.getUser('user', true)} is not in the discord server`,
-			allowedMentions: { parse: [] },
-		});
+		if (!member)
+			return InteractionUtil.reply(interaction, {
+				content: `${interaction.options.getUser('user', true)} is not in the discord server`,
+				allowedMentions: { parse: [] },
+			});
 
 		// permission check(s)
-		if (!member.manageable) return InteractionUtil.reply(interaction, {
-			content: `missing permissions to reset ${member}'s nickname`,
-			allowedMentions: { parse: [] },
-		});
+		if (!member.manageable)
+			return InteractionUtil.reply(interaction, {
+				content: `missing permissions to reset ${member}'s nickname`,
+				allowedMentions: { parse: [] },
+			});
 
 		// determine new nickname
 		const player = GuildMemberUtil.getPlayer(member);
-		const NEW_NICK = player && player.ign !== UNKNOWN_IGN
-			? player.ign
-			: null; // remove to username if IGN is unknown
+		const NEW_NICK = player && player.ign !== UNKNOWN_IGN ? player.ign : null; // remove to username if IGN is unknown
 
 		// check if change is neccessary
 		if (NEW_NICK === null) {
-			if (!member.nickname) return InteractionUtil.reply(interaction, {
-				content: `${member} has no nickname`,
-				allowedMentions: { parse: [] },
-			});
+			if (!member.nickname)
+				return InteractionUtil.reply(interaction, {
+					content: `${member} has no nickname`,
+					allowedMentions: { parse: [] },
+				});
 		} else if (member.displayName === NEW_NICK) {
 			return InteractionUtil.reply(interaction, {
 				content: `${member} is already nicked with their IGN`,
@@ -93,7 +87,8 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: CommandInteraction) { // eslint-disable-line @typescript-eslint/no-unused-vars
+	override runSlash(interaction: CommandInteraction) {
+		// eslint-disable-line @typescript-eslint/no-unused-vars
 		return this.#run(interaction, interaction.options.getMember('user') as GuildMember | null);
 	}
 }

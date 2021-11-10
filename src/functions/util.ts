@@ -10,7 +10,6 @@ import { days, logger } from '.';
 import type { URL } from 'node:url';
 import type { Merge } from '../types/util';
 
-
 /**
  * escapes discord markdown in igns
  * @param string to escape
@@ -69,7 +68,7 @@ export function getWeekOfYear(date: Date) {
 	target.setUTCMonth(0, 1);
 
 	if (target.getUTCDay() !== 4) {
-		target.setUTCMonth(0, 1 + (((4 - target.getUTCDay()) + 7) % 7));
+		target.setUTCMonth(0, 1 + ((4 - target.getUTCDay() + 7) % 7));
 	}
 
 	return Math.ceil((firstThursday - target.getTime()) / days(7)) + 1;
@@ -81,17 +80,26 @@ export function getWeekOfYear(date: Date) {
  * @param validInput
  * @param attributeToQuery
  */
-export function autocorrect<T>(query: string, validInput: readonly T[] | Map<unknown, T> | IterableIterator<T>, attributeToQuery?: keyof T) {
+export function autocorrect<T>(
+	query: string,
+	validInput: readonly T[] | Map<unknown, T> | IterableIterator<T>,
+	attributeToQuery?: keyof T,
+) {
 	let currentBestElement!: T;
 	let currentBestSimilarity = 0;
 
-	for (const element of ((validInput as Map<unknown, T>).values?.() ?? validInput)) {
-		const similarity = jaroWinklerSimilarity(query, (attributeToQuery ? element[attributeToQuery] : element) as unknown as string, { caseSensitive: false });
+	for (const element of (validInput as Map<unknown, T>).values?.() ?? validInput) {
+		const similarity = jaroWinklerSimilarity(
+			query,
+			(attributeToQuery ? element[attributeToQuery] : element) as unknown as string,
+			{ caseSensitive: false },
+		);
 
-		if (similarity === 1) return {
-			value: element,
-			similarity,
-		};
+		if (similarity === 1)
+			return {
+				value: element,
+				similarity,
+			};
 
 		if (similarity < currentBestSimilarity) continue;
 
@@ -99,7 +107,11 @@ export function autocorrect<T>(query: string, validInput: readonly T[] | Map<unk
 		currentBestSimilarity = similarity;
 	}
 
-	logger.info(`[AUTOCORRECT]: autocorrected '${query}' to '${attributeToQuery ? currentBestElement[attributeToQuery] : currentBestElement}' with a certainty of ${currentBestSimilarity}`);
+	logger.info(
+		`[AUTOCORRECT]: autocorrected '${query}' to '${
+			attributeToQuery ? currentBestElement[attributeToQuery] : currentBestElement
+		}' with a certainty of ${currentBestSimilarity}`,
+	);
 
 	return {
 		value: currentBestElement,
@@ -112,15 +124,15 @@ export function autocorrect<T>(query: string, validInput: readonly T[] | Map<unk
  * @param array
  * @param predicate
  */
-export async function asyncFilter<T>(array: T[], predicate: (value: T, index: number, array: T[]) => boolean | Promise<boolean>): Promise<T[]> {
+export async function asyncFilter<T>(
+	array: T[],
+	predicate: (value: T, index: number, array: T[]) => boolean | Promise<boolean>,
+): Promise<T[]> {
 	const fail = Symbol();
 
-	return (await Promise.all(array.map(async (item, index) => (
-		(await predicate(item, index, array))
-			? item
-			: fail
-	))))
-		.filter(x => x !== fail) as T[];
+	return (
+		await Promise.all(array.map(async (item, index) => ((await predicate(item, index, array)) ? item : fail)))
+	).filter((x) => x !== fail) as T[];
 }
 
 const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
@@ -132,12 +144,14 @@ const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
  */
 export const compareAlphabetically = (a?: string | null, b?: string | null) => collator.compare(a!, b!);
 
-
 /**
  * @param splitText
  * @param options Options controlling the behavior of the split
  */
-function concatMessageChunks(splitText: string[], { maxLength, char, append, prepend }: Merge<Required<SplitOptions>, { char: string; }>) {
+function concatMessageChunks(
+	splitText: string[],
+	{ maxLength, char, append, prepend }: Merge<Required<SplitOptions>, { char: string }>,
+) {
 	const messages: string[] = [];
 
 	let msg = '';
@@ -151,7 +165,7 @@ function concatMessageChunks(splitText: string[], { maxLength, char, append, pre
 		msg += `${msg && msg !== prepend ? char : ''}${chunk}`;
 	}
 
-	return [ ...messages, msg ].filter(Boolean);
+	return [...messages, msg].filter(Boolean);
 }
 
 export interface SplitOptions {
@@ -166,35 +180,45 @@ export interface SplitOptions {
  * @param text Content to split
  * @param options Options controlling the behavior of the split
  */
-export function splitMessage(text: string, { maxLength = 2_000, char = '\n', prepend = '', append = '' }: SplitOptions = {}) {
-	if (text.length <= maxLength) return [ text ];
+export function splitMessage(
+	text: string,
+	{ maxLength = 2_000, char = '\n', prepend = '', append = '' }: SplitOptions = {},
+) {
+	if (text.length <= maxLength) return [text];
 
-	let splitText = [ text ];
+	let splitText = [text];
 
 	if (Array.isArray(char)) {
 		while (char.length && splitText.some(({ length }) => length > maxLength)) {
 			const currentChar = char.shift()!;
 
-			splitText = currentChar instanceof RegExp
-				? splitText.flatMap((chunk) => {
-					if (chunk.length <= maxLength) return chunk;
+			splitText =
+				currentChar instanceof RegExp
+					? splitText.flatMap((chunk) => {
+							if (chunk.length <= maxLength) return chunk;
 
-					if (currentChar.global) {
-						const matched = chunk.match(currentChar);
+							if (currentChar.global) {
+								const matched = chunk.match(currentChar);
 
-						if (!matched) return chunk;
+								if (!matched) return chunk;
 
-						return matched.flatMap(match => concatMessageChunks(chunk.split(match), { maxLength, char: match, prepend, append }));
-					}
+								return matched.flatMap((match) =>
+									concatMessageChunks(chunk.split(match), { maxLength, char: match, prepend, append }),
+								);
+							}
 
-					// no global flag
-					const matched = chunk.match(currentChar)?.[0];
+							// no global flag
+							const matched = chunk.match(currentChar)?.[0];
 
-					if (!matched) return chunk;
+							if (!matched) return chunk;
 
-					return concatMessageChunks(chunk.split(matched), { maxLength, char: matched, prepend, append });
-				})
-				: splitText.flatMap(chunk => (chunk.length > maxLength ? concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append }) : chunk));
+							return concatMessageChunks(chunk.split(matched), { maxLength, char: matched, prepend, append });
+					  })
+					: splitText.flatMap((chunk) =>
+							chunk.length > maxLength
+								? concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append })
+								: chunk,
+					  );
 		}
 
 		if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
@@ -209,7 +233,6 @@ export function splitMessage(text: string, { maxLength = 2_000, char = '\n', pre
 	return concatMessageChunks(splitText, { maxLength, char: typeof char === 'string' ? char : '', append, prepend });
 }
 
-
 export interface MakeContentOptions {
 	split?: SplitOptions | boolean;
 	code?: string | boolean;
@@ -222,18 +245,17 @@ export interface MakeContentOptions {
  */
 export function makeContent(text = '', options: MakeContentOptions = {}) {
 	const isCode = typeof options.code !== 'undefined' && options.code !== false;
-	const splitOptions = options.split === true
-		? {}
-		: (typeof options.split !== 'undefined' && options.split !== false
+	const splitOptions =
+		options.split === true
+			? {}
+			: typeof options.split !== 'undefined' && options.split !== false
 			? { ...options.split }
-			: undefined);
+			: undefined;
 
 	let content = text;
 
 	if (isCode) {
-		const codeName = typeof options.code === 'string'
-			? options.code
-			: '';
+		const codeName = typeof options.code === 'string' ? options.code : '';
 
 		content = Formatters.codeBlock(codeName, Util.cleanCodeBlockContent(content));
 
@@ -253,11 +275,18 @@ export function makeContent(text = '', options: MakeContentOptions = {}) {
  * @param char
  * @param formatter
  */
-export function splitForEmbedFields(input: string, code = '', char = '\n', formatter: (text: string) => string = Util.escapeCodeBlock) {
-	return splitMessage(
-		Formatters.codeBlock(code, formatter(input)),
-		{ maxLength: EMBED_FIELD_MAX_CHARS, char: [ char, '' ], prepend: `\`\`\`${code}\n`, append: '```' },
-	);
+export function splitForEmbedFields(
+	input: string,
+	code = '',
+	char = '\n',
+	formatter: (text: string) => string = Util.escapeCodeBlock,
+) {
+	return splitMessage(Formatters.codeBlock(code, formatter(input)), {
+		maxLength: EMBED_FIELD_MAX_CHARS,
+		char: [char, ''],
+		prepend: `\`\`\`${code}\n`,
+		append: '```',
+	});
 }
 
 /**
@@ -276,12 +305,11 @@ export async function safePromiseAll(arr: (unknown | Promise<unknown>)[]) {
  */
 export const removeMcFormatting = (string: string) => string.replace(/§[\da-gk-or]/g, '');
 
-
 /**
  * creates a 'await for..of'-consumable ReaddirpStream from all .js files that don't start with a '~'
  * @param root
  */
-export const readJSFiles = (root: string | URL) => readdirp(fileURLToPath(root), { fileFilter: [ '*.js', '!~*' ] });
+export const readJSFiles = (root: string | URL) => readdirp(fileURLToPath(root), { fileFilter: ['*.js', '!~*'] });
 
 /**
  * 99_137 -> 99K, 1_453_329 -> 1.5M
@@ -307,14 +335,14 @@ export function shortenNumber(number: number, digits?: number) {
 	} else if (number < 1e15) {
 		str = (number / 1e12).toFixed(digits ?? 2);
 		suffix = 'T';
-	} else { // numbers bigger than 1T shouldn't occur
+	} else {
+		// numbers bigger than 1T shouldn't occur
 		str = number;
 		suffix = '';
 	}
 
 	return `${str}${suffix}`;
 }
-
 
 /**
  * async random bytes generator to not block the event loop

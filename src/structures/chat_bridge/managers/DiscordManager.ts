@@ -4,9 +4,7 @@ import { autocorrect } from '../../../functions';
 import { DiscordChatManager } from './DiscordChatManager';
 import type { ChatBridge } from '../ChatBridge';
 
-
 export type DiscordChatManagerResolvable = keyof typeof MESSAGE_TYPES | DiscordChatManager;
-
 
 export class DiscordManager {
 	chatBridge: ChatBridge;
@@ -35,7 +33,7 @@ export class DiscordManager {
 
 			case 1:
 				return string
-					.split(/(?<=^|[^`])`(?=[^`]|$)/g)
+					.split(/(?<=^|[^`])`(?=[^`]|$)/)
 					.map((subString, index, array) => {
 						if (index % 2 && index !== array.length - 1) return subString;
 						return this.#escapeNonURL(subString, 2);
@@ -45,7 +43,8 @@ export class DiscordManager {
 			case 2:
 				return string
 					.replaceAll('*', '\\*') // escape italic 1/2
-					.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => { // escape italic 2/2 & underline
+					.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
+						// escape italic 2/2 & underline
 						if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
 						if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
 						return `${p1.replaceAll('_', '\\_')}\\_${p2}`;
@@ -65,9 +64,7 @@ export class DiscordManager {
 	}
 
 	get ready() {
-		return this.channels.size
-			? this.channels.every(channel => channel.ready)
-			: false;
+		return this.channels.size ? this.channels.every((channel) => channel.ready) : false;
 	}
 
 	set ready(value) {
@@ -119,7 +116,8 @@ export class DiscordManager {
 	 * @param inColon
 	 */
 	#findEmojiByName(fullMatch: string, inColon: string) {
-		const emoji = EMOJI_NAME_TO_UNICODE[fullMatch.replaceAll('_', '').toLowerCase() as keyof typeof EMOJI_NAME_TO_UNICODE];
+		const emoji =
+			EMOJI_NAME_TO_UNICODE[fullMatch.replaceAll('_', '').toLowerCase() as keyof typeof EMOJI_NAME_TO_UNICODE];
 
 		if (emoji) return emoji;
 
@@ -141,32 +139,48 @@ export class DiscordManager {
 				string
 					.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invisible mc characters
 					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
-					.replace( // emojis (custom and default)
+					.replace(
+						// emojis (custom and default)
 						/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
 						(match, p1: string) => this.#findEmojiByName(match, p1),
 					)
-					.replace( // emojis (custom and default)
+					.replace(
+						// emojis (custom and default)
 						/(?<!<a?):(\S+?):(?!\d{17,19}>)/g,
 						(match, p1: string) => this.#findEmojiByName(match, p1),
 					)
-					.replace( // channels
+					.replace(
+						// channels
 						/#([a-z-]+)/gi,
-						(match, p1: string) => this.client.lgGuild?.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match,
+						(match, p1: string) =>
+							this.client.lgGuild?.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match,
 					)
-					.replace( // @mentions
+					.replace(
+						// @mentions
 						/(?<!<)@(!|&)?(\S+)(?!\d{17,19}>)/g,
 						(match, p1: string, p2: string) => {
 							switch (p1) {
 								case '!': // members/users
-									return this.client.lgGuild?.members.cache.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())?.toString() // members
-											?? this.client.users.cache.find(({ username }) => username.toLowerCase() === p2.toLowerCase())?.toString() // users
-											?? match;
+									return (
+										this.client.lgGuild?.members.cache
+											.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())
+											?.toString() ?? // members
+										this.client.users.cache
+											.find(({ username }) => username.toLowerCase() === p2.toLowerCase())
+											?.toString() ?? // users
+										match
+									);
 
 								case '&': // roles
-									return this.client.lgGuild?.roles.cache.find(({ name }) => name.toLowerCase() === p2.toLowerCase())?.toString() // roles
-											?? match;
+									return (
+										this.client.lgGuild?.roles.cache
+											.find(({ name }) => name.toLowerCase() === p2.toLowerCase())
+											?.toString() ?? // roles
+										match
+									);
 
-								default: { // players, members/users, roles
+								default: {
+									// players, members/users, roles
 									const IGN = p2.replace(/\W/g, '').toLowerCase();
 
 									if (!IGN.length) return match;

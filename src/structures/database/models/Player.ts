@@ -61,7 +61,6 @@ import type { ModelResovable } from '../managers/ModelManager';
 import type { DungeonTypes, SkillTypes, SlayerTypes, XPAndDataTypes, XPOffsets } from '../../../constants';
 import type { RoleResolvables } from '../../../util/GuildUtil';
 
-
 interface ParsedTransaction extends TransactionAttributes {
 	fromIGN: string | null;
 	toIGN: string | null;
@@ -128,10 +127,27 @@ interface PlayerAttributes {
 	lastActivityAt: Date;
 }
 
-type PlayerCreationAttributes = Optional<PlayerAttributes,
-	'ign' | 'discordId' | 'guildId' | 'guildRankPriority' | 'inDiscord' | 'mutedTill' | '_infractions'
-		| 'hasDiscordPingPermission' | 'notes' | 'paid' | 'mainProfileId' | 'mainProfileName' | 'xpLastUpdatedAt' | 'xpUpdatesDisabled'
-		| 'discordMemberUpdatesDisabled' | 'farmingLvlCap' | 'guildXpDay' | 'guildXpDaily' | 'lastActivityAt'
+type PlayerCreationAttributes = Optional<
+	PlayerAttributes,
+	| 'ign'
+	| 'discordId'
+	| 'guildId'
+	| 'guildRankPriority'
+	| 'inDiscord'
+	| 'mutedTill'
+	| '_infractions'
+	| 'hasDiscordPingPermission'
+	| 'notes'
+	| 'paid'
+	| 'mainProfileId'
+	| 'mainProfileName'
+	| 'xpLastUpdatedAt'
+	| 'xpUpdatesDisabled'
+	| 'discordMemberUpdatesDisabled'
+	| 'farmingLvlCap'
+	| 'guildXpDay'
+	| 'guildXpDaily'
+	| 'lastActivityAt'
 >;
 
 interface PlayerInGuild extends Player {
@@ -143,7 +159,6 @@ const enum NickChangeReason {
 	NO_IGN,
 	NOT_UNIQUE,
 }
-
 
 export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> implements PlayerAttributes {
 	declare client: LunarClient;
@@ -419,137 +434,143 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 		}
 
-		return this.init({
-			// general information
-			minecraftUuid: {
-				type: DataTypes.STRING,
-				primaryKey: true,
-			},
-			ign: {
-				type: DataTypes.STRING,
-				defaultValue: UNKNOWN_IGN,
-				allowNull: false,
-			},
-			discordId: {
-				type: DataTypes.STRING,
-				defaultValue: null,
-				allowNull: true,
-				set(value: Snowflake | null) {
-					if (!value) (this as Player).inDiscord = false;
-					this.setDataValue('discordId', value);
+		return this.init(
+			{
+				// general information
+				minecraftUuid: {
+					type: DataTypes.STRING,
+					primaryKey: true,
 				},
-			},
-			guildId: {
-				type: DataTypes.STRING,
-				defaultValue: null,
-				allowNull: true,
-			},
-			guildRankPriority: {
-				type: DataTypes.INTEGER,
-				defaultValue: 0,
-				allowNull: false,
-			},
-			inDiscord: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: false,
-				allowNull: false,
-				set(value: boolean) {
-					if (!value) (this as Player).uncacheMember();
-					this.setDataValue('inDiscord', value);
+				ign: {
+					type: DataTypes.STRING,
+					defaultValue: UNKNOWN_IGN,
+					allowNull: false,
 				},
-			},
-			mutedTill: {
-				type: DataTypes.BIGINT,
-				defaultValue: 0,
-				allowNull: false,
-				set(value: number | undefined) {
-					this.setDataValue('mutedTill', value ?? 0);
+				discordId: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+					set(value: Snowflake | null) {
+						if (!value) (this as Player).inDiscord = false;
+						this.setDataValue('discordId', value);
+					},
 				},
-			},
-			_infractions: {
-				type: DataTypes.ARRAY(DataTypes.BIGINT),
-				defaultValue: null,
-				allowNull: true,
-			},
-			hasDiscordPingPermission: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: true,
-				allowNull: false,
-			},
-			notes: {
-				type: DataTypes.TEXT,
-				defaultValue: null,
-				allowNull: true,
-			},
+				guildId: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				guildRankPriority: {
+					type: DataTypes.INTEGER,
+					defaultValue: 0,
+					allowNull: false,
+				},
+				inDiscord: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: false,
+					allowNull: false,
+					set(value: boolean) {
+						if (!value) (this as Player).uncacheMember();
+						this.setDataValue('inDiscord', value);
+					},
+				},
+				mutedTill: {
+					type: DataTypes.BIGINT,
+					defaultValue: 0,
+					allowNull: false,
+					set(value: number | undefined) {
+						this.setDataValue('mutedTill', value ?? 0);
+					},
+				},
+				_infractions: {
+					type: DataTypes.ARRAY(DataTypes.BIGINT),
+					defaultValue: null,
+					allowNull: true,
+				},
+				hasDiscordPingPermission: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: true,
+					allowNull: false,
+				},
+				notes: {
+					type: DataTypes.TEXT,
+					defaultValue: null,
+					allowNull: true,
+				},
 
-			// tax stats
-			paid: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: false,
-				allowNull: false,
-			},
+				// tax stats
+				paid: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: false,
+					allowNull: false,
+				},
 
-			// xp stats reference
-			mainProfileId: {
-				type: DataTypes.STRING,
-				defaultValue: null,
-				allowNull: true,
-			},
-			mainProfileName: {
-				type: DataTypes.STRING,
-				defaultValue: null,
-				allowNull: true,
-			},
-			xpLastUpdatedAt: {
-				type: DataTypes.DATE,
-				defaultValue: null,
-				allowNull: true,
-			},
-			xpUpdatesDisabled: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: false,
-				allowNull: false,
-			},
-			discordMemberUpdatesDisabled: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: false,
-				allowNull: false,
-			},
+				// xp stats reference
+				mainProfileId: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				mainProfileName: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				xpLastUpdatedAt: {
+					type: DataTypes.DATE,
+					defaultValue: null,
+					allowNull: true,
+				},
+				xpUpdatesDisabled: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: false,
+					allowNull: false,
+				},
+				discordMemberUpdatesDisabled: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: false,
+					allowNull: false,
+				},
 
-			// Individual Max Lvl Cap
-			farmingLvlCap: {
-				type: DataTypes.INTEGER,
-				defaultValue: 50,
-				allowNull: false,
-			},
+				// Individual Max Lvl Cap
+				farmingLvlCap: {
+					type: DataTypes.INTEGER,
+					defaultValue: 50,
+					allowNull: false,
+				},
 
-			// hypixel guild exp
-			guildXpDay: {
-				type: DataTypes.STRING,
-				defaultValue: null,
-				allowNull: true,
-			},
-			guildXpDaily: {
-				type: DataTypes.INTEGER,
-				defaultValue: 0,
-				allowNull: false,
-			},
+				// hypixel guild exp
+				guildXpDay: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				guildXpDaily: {
+					type: DataTypes.INTEGER,
+					defaultValue: 0,
+					allowNull: false,
+				},
 
-			lastActivityAt: {
-				type: DataTypes.DATE,
-				defaultValue: fn('NOW'),
-				allowNull: false,
-			},
+				lastActivityAt: {
+					type: DataTypes.DATE,
+					defaultValue: fn('NOW'),
+					allowNull: false,
+				},
 
-			...attributes,
-		}, {
-			sequelize,
-			modelName: 'Player',
-			indexes: [{ // setting unique down here works with `sync --alter`
-				unique: true,
-				fields: [ 'discordId' ],
-			}],
-		}) as ModelStatic<Player>;
+				...attributes,
+			},
+			{
+				sequelize,
+				modelName: 'Player',
+				indexes: [
+					{
+						// setting unique down here works with `sync --alter`
+						unique: true,
+						fields: ['discordId'],
+					},
+				],
+			},
+		) as ModelStatic<Player>;
 	}
 
 	/**
@@ -560,7 +581,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		// last infraction expired -> remove all infractions
 		if (this._infractions.at(-1)! + this.client.config.get('INFRACTIONS_EXPIRATION_TIME') <= Date.now()) {
-			this.update({ _infractions: null }).catch(error => logger.error(error));
+			this.update({ _infractions: null }).catch((error) => logger.error(error));
 			return 0;
 		}
 
@@ -571,11 +592,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * returns the hypixel guild db object associated with the player
 	 */
 	get hypixelGuild(): HypixelGuild | null {
-		return this.client.hypixelGuilds.cache.get(this.guildId!)
-			?? (this.inGuild()
+		return (
+			this.client.hypixelGuilds.cache.get(this.guildId!) ??
+			(this.inGuild()
 				? (logger.warn(`[GET GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`), null)
-				: null
-			);
+				: null)
+		);
 	}
 
 	/**
@@ -595,12 +617,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		return (async () => {
 			try {
-				return this.discordMember = await this.client.lgGuild?.members.fetch(this.discordId!) ?? null;
+				return (this.discordMember = (await this.client.lgGuild?.members.fetch(this.discordId!)) ?? null);
 			} catch (error) {
 				// prevent further fetches and try to link via cache in the next updateDiscordMember calls
-				this.update({ inDiscord: false }).catch(error_ => logger.error(error_));
+				this.update({ inDiscord: false }).catch((error_) => logger.error(error_));
 				logger.error(error, `[GET DISCORD MEMBER]: ${this.logInfo}`);
-				return this.#discordMember = null;
+				return (this.#discordMember = null);
 			}
 		})();
 	}
@@ -610,7 +632,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	set discordMember(member: GuildMember | null) {
 		if (member == null) {
-			this.update({ inDiscord: false }).catch(error => logger.error(error));
+			this.update({ inDiscord: false }).catch((error) => logger.error(error));
 			return;
 		}
 
@@ -618,16 +640,14 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (this.inDiscord) return;
 
-		this.update({ inDiscord: true }).catch(error => logger.error(error));
+		this.update({ inDiscord: true }).catch((error) => logger.error(error));
 	}
 
 	/**
 	 * fetches the discord user if the discord id is valid
 	 */
 	get discordUser() {
-		return validateNumber(this.discordId)
-			? this.client.users.fetch(this.discordId)
-			: Promise.resolve(null);
+		return validateNumber(this.discordId) ? this.client.users.fetch(this.discordId) : Promise.resolve(null);
 	}
 
 	/**
@@ -702,14 +722,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					from: this.minecraftUuid,
 					type: TransactionTypes.TAX,
 				},
-				order: [ [ 'createdAt', 'DESC' ] ],
-				attributes: [ 'amount' ],
+				order: [['createdAt', 'DESC']],
+				attributes: ['amount'],
 				raw: true,
 			});
 
-			return result.length
-				? result[0].amount
-				: null;
+			return result.length ? result[0].amount : null;
 		})();
 	}
 
@@ -717,20 +735,26 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * all transactions from that player
 	 */
 	get transactions(): Promise<ParsedTransaction[]> {
-		return (async () => Promise.all(
-			(await this.client.db.models.Transaction.findAll({
-				where: {
-					from: this.minecraftUuid,
-				},
-				order: [ [ 'createdAt', 'DESC' ] ],
-				raw: true,
-			}))
-				.map(async transaction => ({
+		return (async () =>
+			Promise.all(
+				(
+					await this.client.db.models.Transaction.findAll({
+						where: {
+							from: this.minecraftUuid,
+						},
+						order: [['createdAt', 'DESC']],
+						raw: true,
+					})
+				).map(async (transaction) => ({
 					...transaction,
 					fromIGN: this.ign,
-					toIGN: (this.client.players.cache.get(transaction.to) ?? await mojang.uuid(transaction.to).catch(error => logger.error(error)))?.ign ?? transaction.to,
+					toIGN:
+						(
+							this.client.players.cache.get(transaction.to) ??
+							(await mojang.uuid(transaction.to).catch((error) => logger.error(error)))
+						)?.ign ?? transaction.to,
 				})),
-		))();
+			))();
 	}
 
 	/**
@@ -742,7 +766,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			if (Date.now() < this.mutedTill) return true;
 
 			// mute has expired
-			this.update({ mutedTill: 0 }).catch(error => logger.error(error));
+			this.update({ mutedTill: 0 }).catch((error) => logger.error(error));
 		}
 
 		return false;
@@ -752,7 +776,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * updates the player data and discord member
 	 * @param options
 	 */
-	async updateData({ reason = 'synced with in game stats', shouldSendDm = false, shouldOnlyAwaitUpdateXp = false, rejectOnAPIError = false }: PlayerUpdateOptions = {}) {
+	async updateData({
+		reason = 'synced with in game stats',
+		shouldSendDm = false,
+		shouldOnlyAwaitUpdateXp = false,
+		rejectOnAPIError = false,
+	}: PlayerUpdateOptions = {}) {
 		if (this.guildId === GUILD_ID_BRIDGER) return this;
 		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
@@ -779,7 +808,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			const playerData = (await hypixel.skyblock.profile(this.mainProfileId!))?.members?.[this.minecraftUuid];
 
 			if (!playerData) {
-				this.update({ mainProfileId: null }).catch(error => logger.error(error));
+				this.update({ mainProfileId: null }).catch((error) => logger.error(error));
 				throw `unable to find main profile named '${this.mainProfileName}' -> resetting name`;
 			}
 
@@ -797,13 +826,16 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					for (const offset of XP_OFFSETS) {
 						if (this[`tamingXp${offset}`] === 0) {
 							logger.info(`[UPDATE XP]: ${this.logInfo}: resetting '${offset}' skill xp`);
-							await this.resetXp({ offsetToReset: offset, typesToReset: [ ...SKILLS, ...COSMETIC_SKILLS ] });
+							await this.resetXp({ offsetToReset: offset, typesToReset: [...SKILLS, ...COSMETIC_SKILLS] });
 						}
 					}
 				}
 			} else {
 				// log once every hour (during the first update)
-				if (!(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+				if (
+					!(new Date().getHours() % 6) &&
+					new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
+				) {
 					logger.warn(`[UPDATE XP]: ${this.logInfo}: skill API disabled`);
 				}
 
@@ -814,7 +846,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				 */
 				const { achievements } = await hypixel.player.uuid(this.minecraftUuid);
 
-				for (const skill of SKILLS) this[`${skill}Xp`] = SKILL_XP_TOTAL[achievements?.[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
+				for (const skill of SKILLS)
+					this[`${skill}Xp`] = SKILL_XP_TOTAL[achievements?.[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
 			}
 
 			this.farmingLvlCap = 50 + (playerData.jacob2?.perks?.farming_level_cap ?? 0);
@@ -835,7 +868,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 
 			// no slayer data found logging
-			if (!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (
+				!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') &&
+				!(new Date().getHours() % 6) &&
+				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
+			) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no slayer data found`);
 			}
 
@@ -845,7 +882,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			for (const dungeonType of DUNGEON_TYPES) {
 				this[`${dungeonType}Xp`] = playerData.dungeons?.dungeon_types?.[dungeonType]?.experience ?? 0;
 				this[`${dungeonType}Completions`] = playerData.dungeons?.dungeon_types?.[dungeonType]?.tier_completions ?? {};
-				this[`${dungeonType}MasterCompletions`] = playerData.dungeons?.dungeon_types?.[`master_${dungeonType}`]?.tier_completions ?? {};
+				this[`${dungeonType}MasterCompletions`] =
+					playerData.dungeons?.dungeon_types?.[`master_${dungeonType}`]?.tier_completions ?? {};
 			}
 
 			for (const dungeonClass of DUNGEON_CLASSES) {
@@ -861,7 +899,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 							offsetToReset: offset,
 							typesToReset: [
 								...DUNGEON_TYPES_AND_CLASSES,
-								...DUNGEON_TYPES.flatMap(type => [ `${type}Completions`, `${type}MasterCompletions` ] as const),
+								...DUNGEON_TYPES.flatMap((type) => [`${type}Completions`, `${type}MasterCompletions`] as const),
 							],
 						});
 					}
@@ -869,14 +907,22 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 
 			// no dungeons data found logging
-			if (!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (
+				!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') &&
+				!(new Date().getHours() % 6) &&
+				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
+			) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no dungeons data found`);
 			}
 
 			/**
 			 * collections
 			 */
-			if (!Reflect.has(playerData, 'collection') && !(new Date().getHours() % 6) && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
+			if (
+				!Reflect.has(playerData, 'collection') &&
+				!(new Date().getHours() % 6) &&
+				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
+			) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
 			}
 
@@ -886,7 +932,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				logger.error(`[UPDATE XP]: ${this.logInfo}: ${error}`);
 				return this;
 			}
-			if ((error instanceof Error && error.name.startsWith('Sequelize')) || error instanceof TypeError || error instanceof RangeError) {
+			if (
+				(error instanceof Error && error.name.startsWith('Sequelize')) ||
+				error instanceof TypeError ||
+				error instanceof RangeError
+			) {
 				logger.error(error, `[UPDATE XP]: ${this.logInfo}`);
 				return this;
 			}
@@ -910,13 +960,15 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		let reason = reasonInput;
 
-		const member = await this.discordMember ?? (reason = 'found linked discord tag', await this.linkUsingCache());
+		const member = (await this.discordMember) ?? ((reason = 'found linked discord tag'), await this.linkUsingCache());
 
 		if (this.guildId === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
 
 		if (!member) return; // no linked available discord member to update
 		if (!member.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID'))) {
-			return logger.warn(`[UPDATE DISCORD MEMBER]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing verified role`);
+			return logger.warn(
+				`[UPDATE DISCORD MEMBER]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing verified role`,
+			);
 		}
 
 		await this.updateRoles(reason);
@@ -942,7 +994,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		let reason = reasonInput;
 
 		// individual hypixel guild roles and guild rank roles
-		for (const [ guildId, { roleId: guildRoleId, ranks }] of this.client.hypixelGuilds.cache) {
+		for (const [guildId, { roleId: guildRoleId, ranks }] of this.client.hypixelGuilds.cache) {
 			// player is in the guild
 			if (guildId === this.guildId) {
 				// guild role
@@ -951,13 +1003,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				// rank roles
 				const CURRENT_PRIORITY = this.isStaff
 					? ranks
-						// filter out non-automated ranks
-						.filter(({ currentWeightReq }) => currentWeightReq != null)
-						// sort descendingly by weight req
-						.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
-						// find first rank that the player is eligable for
-						.find(({ currentWeightReq }) => weight >= currentWeightReq!)
-						?.priority
+							// filter out non-automated ranks
+							.filter(({ currentWeightReq }) => currentWeightReq != null)
+							// sort descendingly by weight req
+							.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
+							// find first rank that the player is eligable for
+							.find(({ currentWeightReq }) => weight >= currentWeightReq!)?.priority
 					: this.guildRankPriority;
 
 				for (const { roleId, priority } of ranks) {
@@ -977,7 +1028,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				// guild for the player found
 				inGuild = true;
 
-			// player is not in the guild -> remove all roles
+				// player is not in the guild -> remove all roles
 			} else {
 				// guild role
 				if (guildRoleId && roleCache.has(guildRoleId)) rolesToRemove.push(guildRoleId);
@@ -1000,7 +1051,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (roleCache.has(config.get('EX_GUILD_ROLE_ID'))) rolesToRemove.push(config.get('EX_GUILD_ROLE_ID'));
 
 		// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
-		if ((member.guild.roles.cache.get(config.get('GUILD_DELIMITER_ROLE_ID'))?.comparePositionTo(highestRole) ?? 0) < 0) { // current highest role is higher
+		if (
+			(member.guild.roles.cache.get(config.get('GUILD_DELIMITER_ROLE_ID'))?.comparePositionTo(highestRole) ?? 0) < 0
+		) {
+			// current highest role is higher
 			if (!roleCache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_DELIMITER_ROLE_ID'));
 		} else if (roleCache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) {
 			rolesToRemove.push(config.get('GUILD_DELIMITER_ROLE_ID'));
@@ -1008,59 +1062,66 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		// other delimiter roles
 		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
-			if (!roleCache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`))) rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`));
+			if (!roleCache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`)))
+				rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`));
 		}
 
 		// skills
-		const skillAverage = SKILLS
-			.map((skill) => { // individual skill lvl 45+ / 50+ / 55+ / 60
+		const skillAverage =
+			SKILLS.map((skill) => {
+				// individual skill lvl 45+ / 50+ / 55+ / 60
 				const { progressLevel } = this.getSkillLevel(skill);
 				const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
 
 				// individual skills
 				for (const level of SKILL_ROLES) {
 					if (level === CURRENT_LEVEL_MILESTONE) {
-						if (!roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
+						if (!roleCache.has(config.get(`${skill}_${level}_ROLE_ID`)))
+							rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
 					} else if (roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
 						rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
 					}
 				}
 
 				return progressLevel;
-			})
-			.reduce((acc, level) => acc + level, 0) / SKILLS.length;
+			}).reduce((acc, level) => acc + level, 0) / SKILLS.length;
 
 		// average skill
 		let currentLvlMilestone = Math.floor(skillAverage / 5) * 5; // round down to nearest divisible by 5
 
 		for (const level of SKILL_AVERAGE_ROLES) {
 			if (level === currentLvlMilestone) {
-				if (!roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
+				if (!roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`)))
+					rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 			} else if (roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 			}
 		}
 
 		// slayers
-		const LOWEST_SLAYER_LVL = Math.min(...SLAYERS.map((slayer) => {
-			const SLAYER_LVL = this.getSlayerLevel(slayer);
+		const LOWEST_SLAYER_LVL = Math.min(
+			...SLAYERS.map((slayer) => {
+				const SLAYER_LVL = this.getSlayerLevel(slayer);
 
-			// individual slayer
-			for (const level of SLAYER_ROLES) {
-				if (level === SLAYER_LVL) {
-					if (!roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
-				} else if (roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
-					rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
+				// individual slayer
+				for (const level of SLAYER_ROLES) {
+					if (level === SLAYER_LVL) {
+						if (!roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`)))
+							rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
+					} else if (roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
+						rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
+					}
 				}
-			}
 
-			return SLAYER_LVL;
-		}));
+				return SLAYER_LVL;
+			}),
+		);
 
 		// total slayer
 		for (const level of SLAYER_TOTAL_ROLES) {
 			if (level === LOWEST_SLAYER_LVL) {
-				if (!roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
+				if (!roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`)))
+					rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 			} else if (roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 			}
@@ -1071,7 +1132,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		for (const level of CATACOMBS_ROLES) {
 			if (level === currentLvlMilestone) {
-				if (!roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
+				if (!roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`)))
+					rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 			} else if (roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 			}
@@ -1105,7 +1167,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		let member;
 
-		if (this.discordId) { // tag or ID known
+		if (this.discordId) {
+			// tag or ID known
 			member = /\D/.test(this.discordId)
 				? lgGuild.members.cache.find(({ user: { tag } }) => tag === this.discordId) // tag known
 				: lgGuild.members.cache.get(this.discordId); // id known
@@ -1117,7 +1180,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 				member = lgGuild.members.cache.find(({ user: { tag } }) => tag === DISCORD_TAG);
 			}
-		} else { // unknown tag
+		} else {
+			// unknown tag
 			const DISCORD_TAG = await this.fetchDiscordTag();
 
 			if (!DISCORD_TAG) return null;
@@ -1157,7 +1221,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	async link(idOrDiscordMember: GuildMember | Snowflake, reason?: string) {
 		if (idOrDiscordMember instanceof GuildMember) {
 			await this.setValidDiscordId(idOrDiscordMember.id);
-			this.update({ inDiscord: true }).catch(error => logger.error(error));
+			this.update({ inDiscord: true }).catch((error) => logger.error(error));
 			this.discordMember = idOrDiscordMember;
 
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
@@ -1217,7 +1281,15 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param rolesToRemove roles to remove from the member
 	 * @param reason reason for discord's audit logs
 	 */
-	async makeRoleAPICall({ rolesToAdd = [], rolesToRemove = [], reason }: { rolesToAdd?: RoleResolvables; rolesToRemove?: RoleResolvables; reason?: string; }) {
+	async makeRoleAPICall({
+		rolesToAdd = [],
+		rolesToRemove = [],
+		reason,
+	}: {
+		rolesToAdd?: RoleResolvables;
+		rolesToRemove?: RoleResolvables;
+		reason?: string;
+	}) {
 		const member = await this.discordMember;
 		if (!member) return false;
 
@@ -1228,16 +1300,19 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (!_rolesToAdd.length && !_rolesToRemove.length) return true;
 
 		// permission check
-		if (!member.guild.me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) return (logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false);
+		if (!member.guild.me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES))
+			return logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false;
 
 		const { config } = this.client;
 		const loggingEmbed = new MessageEmbed()
 			.setAuthor(member.user.tag, member.displayAvatarURL({ dynamic: true }), this.url)
 			.setThumbnail((await this.imageURL)!)
-			.setDescription(stripIndents`
+			.setDescription(
+				stripIndents`
 				${Formatters.bold('Role Update')} for ${member}
 				${this.info}
-			`)
+			`,
+			)
 			.setTimestamp();
 		const NAMES_TO_ADD = _rolesToAdd.length
 			? Formatters.codeBlock(_rolesToAdd.map(({ name }) => name).join('\n'))
@@ -1254,55 +1329,57 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		try {
 			// api call
-			this.discordMember = await member.roles.set(
-				_rolesToAdd,
-				reason,
-			);
+			this.discordMember = await member.roles.set(_rolesToAdd, reason);
 
-			if (NAMES_TO_ADD) loggingEmbed.addFields({
-				name: 'Added',
-				value: NAMES_TO_ADD,
-				inline: true,
-			});
+			if (NAMES_TO_ADD)
+				loggingEmbed.addFields({
+					name: 'Added',
+					value: NAMES_TO_ADD,
+					inline: true,
+				});
 
-			if (NAMES_TO_REMOVE) loggingEmbed.addFields({
-				name: 'Removed',
-				value: NAMES_TO_REMOVE,
-				inline: true,
-			});
+			if (NAMES_TO_REMOVE)
+				loggingEmbed.addFields({
+					name: 'Removed',
+					value: NAMES_TO_REMOVE,
+					inline: true,
+				});
 
 			// was successful
 			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
 
 			return true;
-		} catch (error) { // was not successful
+		} catch (error) {
+			// was not successful
 			this.discordMember = null;
 
 			logger.error(error, '[ROLE API CALL]');
 
-			loggingEmbed
-				.setColor(config.get('EMBED_RED'))
-				.addFields(error instanceof Error
+			loggingEmbed.setColor(config.get('EMBED_RED')).addFields(
+				error instanceof Error
 					? {
-						name: error.name,
-						value: error.message,
-					} : {
-						name: 'Error',
-						value: `${error}`,
-					},
-				);
+							name: error.name,
+							value: error.message,
+					  }
+					: {
+							name: 'Error',
+							value: `${error}`,
+					  },
+			);
 
-			if (NAMES_TO_ADD) loggingEmbed.addFields({
-				name: 'Failed to add',
-				value: NAMES_TO_ADD,
-				inline: true,
-			});
+			if (NAMES_TO_ADD)
+				loggingEmbed.addFields({
+					name: 'Failed to add',
+					value: NAMES_TO_ADD,
+					inline: true,
+				});
 
-			if (NAMES_TO_REMOVE) loggingEmbed.addFields({
-				name: 'Failed to remove',
-				value: NAMES_TO_REMOVE,
-				inline: true,
-			});
+			if (NAMES_TO_REMOVE)
+				loggingEmbed.addFields({
+					name: 'Failed to remove',
+					value: NAMES_TO_REMOVE,
+					inline: true,
+				});
 
 			return false;
 		} finally {
@@ -1321,15 +1398,16 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (member) {
 			const { config } = this.client;
-			const rolesToAdd = (Date.now() - this.createdAt.getTime() >= days(7)) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
-				? [ config.get('EX_GUILD_ROLE_ID') ] // add ex guild role if player stayed for more than 1 week
-				: [];
+			const rolesToAdd =
+				Date.now() - this.createdAt.getTime() >= days(7) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
+					? [config.get('EX_GUILD_ROLE_ID')] // add ex guild role if player stayed for more than 1 week
+					: [];
 			const rolesToRemove = GuildMemberUtil.getRolesToPurge(member);
 
-			if (!await this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason: `left ${this.guildName}` })) {
+			if (!(await this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason: `left ${this.guildName}` }))) {
 				// error updating roles
 				logger.warn(`[REMOVE FROM GUILD]: ${this.logInfo}: unable to update roles`);
-				this.update({ guildId: GUILD_ID_ERROR }).catch(error => logger.error(error));
+				this.update({ guildId: GUILD_ID_ERROR }).catch((error) => logger.error(error));
 				return false;
 			}
 
@@ -1371,7 +1449,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		// two guild members share the same display name
 		const DISPLAY_NAME = member.displayName.toLowerCase();
-		if (GuildMemberUtil.getPlayer(member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === DISPLAY_NAME && id !== member.id))) {
+		if (
+			GuildMemberUtil.getPlayer(
+				member.guild.members.cache.find(
+					({ displayName, id }) => displayName.toLowerCase() === DISPLAY_NAME && id !== member.id,
+				),
+			)
+		) {
 			reason = NickChangeReason.NOT_UNIQUE;
 		}
 
@@ -1379,12 +1463,22 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (this.ign === UNKNOWN_IGN) return; // mojang api error
 
 		// check if member already has a nick which is not just the current ign (case insensitive)
-		let newNick = member.nickname && member.nickname.toLowerCase() !== this.ign.toLowerCase()
-			? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - ' ()'.length).replace(/ +(?:\([^ )]*?)?\.{3}$/, '')} (${this.ign})`
-			: this.ign;
+		let newNick =
+			member.nickname && member.nickname.toLowerCase() !== this.ign.toLowerCase()
+				? `${trim(member.nickname, NICKNAME_MAX_CHARS - this.ign.length - ' ()'.length).replace(
+						/ +(?:\([^ )]*?)?\.{3}$/,
+						'',
+				  )} (${this.ign})`
+				: this.ign;
 
 		// 'nick (ign)' already exists
-		if (GuildMemberUtil.getPlayer(member.guild.members.cache.find(({ displayName, id }) => displayName.toLowerCase() === newNick.toLowerCase() && id !== member.id))) {
+		if (
+			GuildMemberUtil.getPlayer(
+				member.guild.members.cache.find(
+					({ displayName, id }) => displayName.toLowerCase() === newNick.toLowerCase() && id !== member.id,
+				),
+			)
+		) {
 			newNick = this.ign;
 		}
 
@@ -1397,7 +1491,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 * @param reason reason for discord's audit logs and the DM
 	 */
-	async makeNickAPICall({ newNick = null, shouldSendDm = false, reason }: { newNick?: string | null, shouldSendDm?: boolean, reason?: string | NickChangeReason } = {}) {
+	async makeNickAPICall({
+		newNick = null,
+		shouldSendDm = false,
+		reason,
+	}: { newNick?: string | null; shouldSendDm?: boolean; reason?: string | NickChangeReason } = {}) {
 		const member = await this.discordMember;
 		if (!member) return false;
 
@@ -1405,7 +1503,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const { me } = member.guild;
 		if (me!.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
 		if (member.guild.ownerId === member.id) return false; // can't change nick of owner
-		if (!me!.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return (logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`), false);
+		if (!me!.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES))
+			return (
+				logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`),
+				false
+			);
 
 		const { displayName: PREV_NAME } = member;
 
@@ -1414,7 +1516,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			switch (reason) {
 				case NickChangeReason.NO_IGN:
-					auditLogReason = 'name didn\'t contain ign';
+					auditLogReason = "name didn't contain ign";
 					break;
 
 				case NickChangeReason.NOT_UNIQUE:
@@ -1431,35 +1533,48 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				this.client.defaultEmbed
 					.setAuthor(member.user.tag, member.displayAvatarURL({ dynamic: true }), this.url)
 					.setThumbnail((await this.imageURL)!)
-					.setDescription(stripIndents`
+					.setDescription(
+						stripIndents`
 						${Formatters.bold('Nickname Update')} for ${member}
 						${this.info}
-					`)
-					.addFields({
-						name: 'Old nickname',
-						value: Formatters.codeBlock(PREV_NAME),
-						inline: true,
-					}, {
-						name: 'New nickname',
-						value: Formatters.codeBlock(newNick ?? member.user.username),
-						inline: true,
-					}),
+					`,
+					)
+					.addFields(
+						{
+							name: 'Old nickname',
+							value: Formatters.codeBlock(PREV_NAME),
+							inline: true,
+						},
+						{
+							name: 'New nickname',
+							value: Formatters.codeBlock(newNick ?? member.user.username),
+							inline: true,
+						},
+					),
 			);
 
 			if (shouldSendDm) {
 				switch (reason) {
 					case NickChangeReason.NO_IGN:
-						GuildMemberUtil.sendDM(member, stripIndents`
+						GuildMemberUtil.sendDM(
+							member,
+							stripIndents`
 							include your ign \`${this.ign}\` somewhere in your nickname.
-							If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${this.client.user} will automatically change your discord nickname
-						`);
+							If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${
+								this.client.user
+							} will automatically change your discord nickname
+						`,
+						);
 						break;
 
 					case NickChangeReason.NOT_UNIQUE:
-						GuildMemberUtil.sendDM(member, stripIndents`
+						GuildMemberUtil.sendDM(
+							member,
+							stripIndents`
 							the name \`${PREV_NAME}\` is already taken by another guild member.
 							Your name should be unique to allow staff members to easily identify you
-						`);
+						`,
+						);
 						break;
 
 					default:
@@ -1498,14 +1613,14 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		try {
 			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
 		} catch (error) {
-			this.update({ xpUpdatesDisabled: true }).catch(error_ => logger.error(error_));
+			this.update({ xpUpdatesDisabled: true }).catch((error_) => logger.error(error_));
 			logger.error(error, '[MAIN PROFILE]');
 		}
 
 		const mainProfile = getMainProfile(profiles, this.minecraftUuid);
 
 		if (!mainProfile) {
-			this.update({ mainProfileId: null }).catch(error => logger.error(error));
+			this.update({ mainProfileId: null }).catch((error) => logger.error(error));
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
 
 			throw `${this.logInfo}: no SkyBlock profiles`;
@@ -1556,7 +1671,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				newIgn: CURRENT_IGN,
 			};
 		} catch (error) {
-			if ((error instanceof Error && error.name.startsWith('Sequelize')) || error instanceof TypeError || error instanceof RangeError) {
+			if (
+				(error instanceof Error && error.name.startsWith('Sequelize')) ||
+				error instanceof TypeError ||
+				error instanceof RangeError
+			) {
 				return logger.error(error, `[UPDATE IGN]: ${this.logInfo}`);
 			}
 
@@ -1600,7 +1719,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		switch (offsetToReset) {
 			case null:
 				// no offset type specifies -> resetting everything
-				await Promise.all(XP_OFFSETS.map(offset => this.resetXp({ offsetToReset: offset, typesToReset })));
+				await Promise.all(XP_OFFSETS.map((offset) => this.resetXp({ offsetToReset: offset, typesToReset })));
 				return this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY, typesToReset });
 
 			case OFFSET_FLAGS.DAY:
@@ -1656,11 +1775,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				from: this.minecraftUuid,
 				type: TransactionTypes.TAX,
 			},
-			order: [ [ 'createdAt', 'DESC' ] ],
-			attributes: [ 'to', 'amount' ],
+			order: [['createdAt', 'DESC']],
+			attributes: ['to', 'amount'],
 			raw: true,
 		});
-		if (result.length) this.client.taxCollectors.cache.get(result[0].to)?.addAmount(-result[0].amount, TransactionTypes.TAX);
+		if (result.length)
+			this.client.taxCollectors.cache.get(result[0].to)?.addAmount(-result[0].amount, TransactionTypes.TAX);
 
 		return this.update({ paid: false });
 	}
@@ -1669,7 +1789,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * set the player to paid
 	 * @param options
 	 */
-	async setToPaid({ amount = this.client.config.get('TAX_AMOUNT'), collectedBy = this.minecraftUuid, auctionId = null }: SetToPaidOptions = {}) {
+	async setToPaid({
+		amount = this.client.config.get('TAX_AMOUNT'),
+		collectedBy = this.minecraftUuid,
+		auctionId = null,
+	}: SetToPaidOptions = {}) {
 		if (this.paid) {
 			await Promise.all(this.addTransfer({ amount, collectedBy, auctionId, type: TransactionTypes.DONATION }));
 			return this;
@@ -1679,7 +1803,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const TAX_AMOUNT = amount - OVERFLOW;
 		const promises = this.addTransfer({ amount: TAX_AMOUNT, collectedBy, auctionId, type: TransactionTypes.TAX });
 
-		if (OVERFLOW) promises.push(...this.addTransfer({ amount: OVERFLOW, collectedBy, auctionId, type: TransactionTypes.DONATION }));
+		if (OVERFLOW)
+			promises.push(...this.addTransfer({ amount: OVERFLOW, collectedBy, auctionId, type: TransactionTypes.DONATION }));
 
 		await Promise.all(promises);
 
@@ -1692,7 +1817,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options.type
 	 * @param options.notes
 	 */
-	addTransfer({ amount, collectedBy, auctionId = null, notes = null, type = TransactionTypes.TAX }: AddTransferOptions): [ Promise<TaxCollector>, Promise<Transaction> ] {
+	addTransfer({
+		amount,
+		collectedBy,
+		auctionId = null,
+		notes = null,
+		type = TransactionTypes.TAX,
+	}: AddTransferOptions): [Promise<TaxCollector>, Promise<Transaction>] {
 		const taxCollector = this.client.taxCollectors.resolve(collectedBy);
 		if (!taxCollector) throw new Error(`unknown tax collector resolvable ${collectedBy}`);
 
@@ -1753,19 +1884,25 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param data from the hypixel guild API
 	 * @param hypixelGuild
 	 */
-	syncWithGuildData({ expHistory = {}, mutedTill, rank }: Components.Schemas.GuildMember, hypixelGuild = this.hypixelGuild!) {
+	syncWithGuildData(
+		{ expHistory = {}, mutedTill, rank }: Components.Schemas.GuildMember,
+		hypixelGuild = this.hypixelGuild!,
+	) {
 		// update guild xp
-		const [ currentDay ] = Object.keys(expHistory);
+		const [currentDay] = Object.keys(expHistory);
 
 		if (currentDay) {
 			const xp = expHistory[currentDay];
 
-			if (this.guildXpDay === currentDay) { // xp gained on the same day
-				if (xp > this.guildXpDaily) { // player gained gxp since last update
+			if (this.guildXpDay === currentDay) {
+				// xp gained on the same day
+				if (xp > this.guildXpDaily) {
+					// player gained gxp since last update
 					this.guildXp += xp - this.guildXpDaily; // add delta
 					this.guildXpDaily = xp;
 				}
-			} else { // new day
+			} else {
+				// new day
 				this.guildXpDay = currentDay;
 				this.guildXpDaily = xp;
 				this.guildXp += xp;
@@ -1776,7 +1913,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		this.mutedTill = mutedTill!;
 
 		// update guild rank
-		this.guildRankPriority = hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ?? (/^guild ?master$/i.test(rank) ? hypixelGuild.ranks.length + 1 : 1);
+		this.guildRankPriority =
+			hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ??
+			(/^guild ?master$/i.test(rank) ? hypixelGuild.ranks.length + 1 : 1);
 
 		return this.save();
 	}
@@ -1788,7 +1927,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param useIndividualCap wether to use the individual max level cap if existing
 	 */
 	getSkillLevel(type: SkillTypes | DungeonTypes, offset: XPOffsets = '', useIndividualCap = true) {
-		return getSkillLevel(type, this[`${type}Xp${offset}`], type === 'farming' && useIndividualCap ? this.farmingLvlCap : null);
+		return getSkillLevel(
+			type,
+			this[`${type}Xp${offset}`],
+			type === 'farming' && useIndividualCap ? this.farmingLvlCap : null,
+		);
 	}
 
 	/**
@@ -1820,7 +1963,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	getSlayerLevel(type: SlayerTypes) {
 		const XP = this[`${type}Xp`];
-		const MAX_LEVEL = Math.max(...Object.keys(SLAYER_XP) as unknown as number[]);
+		const MAX_LEVEL = Math.max(...(Object.keys(SLAYER_XP) as unknown as number[]));
 
 		let level = 0;
 
@@ -1844,14 +1987,17 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param offset optional offset value to use instead of the current xp value
 	 */
 	getLilyWeight(offset: XPOffsets = '') {
-		const SKILL_XP_LILY = LILY_SKILL_NAMES.map(skill => this[`${skill}Xp${offset}`]);
-		const { total, skill: { overflow } } = getLilyWeightRaw(
+		const SKILL_XP_LILY = LILY_SKILL_NAMES.map((skill) => this[`${skill}Xp${offset}`]);
+		const {
+			total,
+			skill: { overflow },
+		} = getLilyWeightRaw(
 			LILY_SKILL_NAMES.map((skill, index) => getSkillLevel(skill, SKILL_XP_LILY[index], 60).trueLevel), // skill levels
 			SKILL_XP_LILY, // skill xp
 			this[`catacombsCompletions${offset}`], // catacombs completions
 			this[`catacombsMasterCompletions${offset}`], // master catacombs completions
 			this[`catacombsXp${offset}`], // catacombs xp
-			SLAYERS.map(slayer => this[`${slayer}Xp${offset}`]), // slayer xp
+			SLAYERS.map((slayer) => this[`${slayer}Xp${offset}`]), // slayer xp
 		);
 
 		return {
@@ -1942,14 +2088,17 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param index xpHistory array index
 	 */
 	getLilyWeightHistory(index: number) {
-		const SKILL_XP_LILY = LILY_SKILL_NAMES.map(skill => this[`${skill}XpHistory`][index]);
-		const { total, skill: { overflow } } = getLilyWeightRaw(
+		const SKILL_XP_LILY = LILY_SKILL_NAMES.map((skill) => this[`${skill}XpHistory`][index]);
+		const {
+			total,
+			skill: { overflow },
+		} = getLilyWeightRaw(
 			LILY_SKILL_NAMES.map((skill, index_) => getSkillLevel(skill, SKILL_XP_LILY[index_], 60).trueLevel), // skill levels
 			SKILL_XP_LILY, // skill xp
 			this.catacombsCompletionsHistory[index], // catacombs completions
 			this.catacombsMasterCompletionsHistory[index], // master catacombs completions
 			this.catacombsXpHistory[index], // catacombs xp
-			SLAYERS.map(slayer => this[`${slayer}XpHistory`][index]), // slayer xp
+			SLAYERS.map((slayer) => this[`${slayer}XpHistory`][index]), // slayer xp
 		);
 
 		return {

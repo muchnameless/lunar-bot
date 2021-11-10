@@ -5,35 +5,32 @@ import type { CommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class UnloadCommand extends DualCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('unload a command or an event')
-				.addSubcommand(subcommand => subcommand
-					.setName('command')
-					.setDescription('unload a command')
-					.addStringOption(option => option
-						.setName('name')
-						.setDescription('command name')
-						.setRequired(true),
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription('unload a command or an event')
+					.addSubcommand((subcommand) =>
+						subcommand
+							.setName('command')
+							.setDescription('unload a command')
+							.addStringOption((option) => option.setName('name').setDescription('command name').setRequired(true)),
+					)
+					.addSubcommand((subcommand) =>
+						subcommand
+							.setName('event')
+							.setDescription('unload an event')
+							.addStringOption((option) => option.setName('name').setDescription('event name').setRequired(true)),
 					),
-				)
-				.addSubcommand(subcommand => subcommand
-					.setName('event')
-					.setDescription('unload an event')
-					.addStringOption(option => option
-						.setName('name')
-						.setDescription('event name')
-						.setRequired(true),
-					),
-				),
-			cooldown: 0,
-		}, {
-			args: true,
-			usage: '[`command` [command `name`]|`event` [event `name`]]',
-		});
+				cooldown: 0,
+			},
+			{
+				args: true,
+				usage: '[`command` [command `name`]|`event` [event `name`]]',
+			},
+		);
 	}
 
 	/**
@@ -71,7 +68,10 @@ export default class UnloadCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override runSlash(interaction: CommandInteraction) {
-		return InteractionUtil.reply(interaction, this.#run(interaction.options.getSubcommand(), interaction.options.getString('name', true)));
+		return InteractionUtil.reply(
+			interaction,
+			this.#run(interaction.options.getSubcommand(), interaction.options.getString('name', true)),
+		);
 	}
 
 	/**
@@ -79,6 +79,8 @@ export default class UnloadCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override runMinecraft(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(this.#run(...hypixelMessage.commandData.args.map(arg => arg.toLowerCase()) as [ string, string ]));
+		return hypixelMessage.reply(
+			this.#run(...(hypixelMessage.commandData.args.map((arg) => arg.toLowerCase()) as [string, string])),
+		);
 	}
 }

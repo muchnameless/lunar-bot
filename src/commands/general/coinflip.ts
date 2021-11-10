@@ -6,18 +6,20 @@ import type { CommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class CoinFlipCommand extends DualCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('heads, tails or ???'),
-			cooldown: 0,
-		}, {
-			aliases: [ 'cf', 'flip' ],
-			args: false,
-			usage: '',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder().setDescription('heads, tails or ???'),
+				cooldown: 0,
+			},
+			{
+				aliases: ['cf', 'flip'],
+				args: false,
+				usage: '',
+			},
+		);
 	}
 
 	/**

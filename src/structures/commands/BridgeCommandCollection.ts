@@ -4,9 +4,7 @@ import { BaseCommandCollection } from './BaseCommandCollection';
 import type { BridgeCommand } from './BridgeCommand';
 import type { DualCommand } from './DualCommand';
 
-
 type BridgeCommandType = BridgeCommand | DualCommand;
-
 
 export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommandType> extends BaseCommandCollection<C> {
 	/**
@@ -21,7 +19,7 @@ export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommand
 	 * returns all command categories
 	 */
 	get categories() {
-		return [ ...new Set(this.map(({ category }) => category)) ];
+		return [...new Set(this.map(({ category }) => category))];
 	}
 
 	/**
@@ -29,7 +27,7 @@ export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommand
 	 */
 	get visibleCategories() {
 		return this.categories
-			.filter(category => !BridgeCommandCollection.INVISIBLE_CATEGORIES.has(category!))
+			.filter((category) => !BridgeCommandCollection.INVISIBLE_CATEGORIES.has(category!))
 			.sort(compareAlphabetically);
 	}
 
@@ -38,6 +36,9 @@ export class BridgeCommandCollection<C extends BridgeCommandType = BridgeCommand
 	 * @param categoryInput
 	 */
 	filterByCategory(categoryInput: string | null) {
-		return this.filter(({ category, aliases }, name) => category === categoryInput && !aliases?.some(alias => alias.toLowerCase() === name));
+		return this.filter(
+			({ category, aliases }, name) =>
+				category === categoryInput && !aliases?.some((alias) => alias.toLowerCase() === name),
+		);
 	}
 }

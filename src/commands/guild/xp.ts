@@ -1,7 +1,14 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { MessageEmbed, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { COSMETIC_SKILLS, DUNGEON_TYPES_AND_CLASSES, SKILLS, SLAYERS, XP_OFFSETS_CONVERTER, XP_OFFSETS_TIME } from '../../constants';
+import {
+	COSMETIC_SKILLS,
+	DUNGEON_TYPES_AND_CLASSES,
+	SKILLS,
+	SLAYERS,
+	XP_OFFSETS_CONVERTER,
+	XP_OFFSETS_TIME,
+} from '../../constants';
 import { optionalPlayerOption, pageOption, offsetOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, MessageEmbedUtil } from '../../util';
 import { getDefaultOffset, upperCaseFirstChar } from '../../functions';
@@ -10,19 +17,16 @@ import type { CommandInteraction } from 'discord.js';
 import type { XPOffsets } from '../../constants';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class XpCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
-				.setDescription('check a player\'s xp gained')
+				.setDescription("check a player's xp gained")
 				.addStringOption(optionalPlayerOption)
 				.addIntegerOption(pageOption)
 				.addStringOption(offsetOption)
-				.addBooleanOption(option => option
-					.setName('update')
-					.setDescription('update xp before running the command')
-					.setRequired(false),
+				.addBooleanOption((option) =>
+					option.setName('update').setDescription('update xp before running the command').setRequired(false),
 				),
 			cooldown: 0,
 		});
@@ -34,7 +38,7 @@ export default class XpCommand extends ApplicationCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
-		const OFFSET = interaction.options.getString('offset') as XPOffsets ?? getDefaultOffset(this.config);
+		const OFFSET = (interaction.options.getString('offset') as XPOffsets) ?? getDefaultOffset(this.config);
 
 		// update db?
 		if (interaction.options.getBoolean('update')) await player.updateXp();
@@ -45,13 +49,33 @@ export default class XpCommand extends ApplicationCommand {
 
 		let embed = new MessageEmbed()
 			.setColor(this.config.get('EMBED_BLUE'))
-			.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, (await player.imageURL)!, player.url)
-			.setDescription(`${`Δ: change since ${Formatters.time(new Date(Math.max(this.config.get(XP_OFFSETS_TIME[OFFSET as keyof typeof XP_OFFSETS_TIME]), player.createdAt.getTime())))} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[OFFSET as keyof typeof XP_OFFSETS_CONVERTER])})`.padEnd(105, '\u00A0')}\u200B`)
+			.setAuthor(
+				`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
+				(await player.imageURL)!,
+				player.url,
+			)
+			.setDescription(
+				`${`Δ: change since ${Formatters.time(
+					new Date(
+						Math.max(
+							this.config.get(XP_OFFSETS_TIME[OFFSET as keyof typeof XP_OFFSETS_TIME]),
+							player.createdAt.getTime(),
+						),
+					),
+				)} (${upperCaseFirstChar(XP_OFFSETS_CONVERTER[OFFSET as keyof typeof XP_OFFSETS_CONVERTER])})`.padEnd(
+					105,
+					'\u00A0',
+				)}\u200B`,
+			)
 			.addFields({
 				name: '\u200B',
 				value: stripIndents`
 					${Formatters.codeBlock('Skills')}
-					Average skill level: ${Formatters.bold(this.client.formatDecimalNumber(skillAverage))} [${Formatters.bold(this.client.formatDecimalNumber(trueAverage))}] - ${Formatters.bold('Δ')}: ${Formatters.bold(this.client.formatDecimalNumber(skillAverage - skillAverageOffset))} [${Formatters.bold(this.client.formatDecimalNumber(trueAverage - trueAverageOffset))}]
+					Average skill level: ${Formatters.bold(this.client.formatDecimalNumber(skillAverage))} [${Formatters.bold(
+					this.client.formatDecimalNumber(trueAverage),
+				)}] - ${Formatters.bold('Δ')}: ${Formatters.bold(
+					this.client.formatDecimalNumber(skillAverage - skillAverageOffset),
+				)} [${Formatters.bold(this.client.formatDecimalNumber(trueAverage - trueAverageOffset))}]
 				`,
 			});
 
@@ -83,7 +107,11 @@ export default class XpCommand extends ApplicationCommand {
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
 					${Formatters.bold('XP:')} ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${this.client.formatNumber(
+					player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`],
+					0,
+					Math.round,
+				)}
 				`,
 				inline: true,
 			});
@@ -98,7 +126,9 @@ export default class XpCommand extends ApplicationCommand {
 			name: '\u200B',
 			value: stripIndents`
 				${Formatters.codeBlock('Slayer')}
-				Total slayer xp: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP))} - ${Formatters.bold('Δ')}: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)))}
+				Total slayer xp: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP))} - ${Formatters.bold(
+				'Δ',
+			)}: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)))}
 			`,
 			inline: false,
 		});
@@ -111,7 +141,11 @@ export default class XpCommand extends ApplicationCommand {
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${player.getSlayerLevel(slayer)}
 					${Formatters.bold('XP:')} ${this.client.formatNumber(player[SLAYER_ARGUMENT])}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${this.client.formatNumber(
+					player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`],
+					0,
+					Math.round,
+				)}
 				`,
 				inline: true,
 			});
@@ -134,35 +168,52 @@ export default class XpCommand extends ApplicationCommand {
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
 					${Formatters.bold('XP:')} ${this.client.formatNumber(player[DUNGEON_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${this.client.formatNumber(
+					player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`],
+					0,
+					Math.round,
+				)}
 				`,
 				inline: true,
 			});
 		}
 
 		const { totalWeight, weight, overflow } = player.getLilyWeight();
-		const { totalWeight: totalWeightOffet, weight: weightOffset, overflow: overflowOffset } = player.getLilyWeight(OFFSET);
+		const {
+			totalWeight: totalWeightOffet,
+			weight: weightOffset,
+			overflow: overflowOffset,
+		} = player.getLilyWeight(OFFSET);
 
-		MessageEmbedUtil.padFields(embed)
-			.addFields({
+		MessageEmbedUtil.padFields(embed).addFields(
+			{
 				name: '\u200B',
 				value: `${Formatters.codeBlock('Miscellaneous')}\u200B`,
 				inline: false,
-			}, {
+			},
+			{
 				name: 'Hypixel Guild XP',
 				value: stripIndents`
 					${Formatters.bold('Total:')} ${this.client.formatNumber(player.guildXp)}
 					${Formatters.bold('Δ:')} ${this.client.formatNumber(player.guildXp - player[`guildXp${OFFSET}`])}
 				`,
 				inline: true,
-			}, {
+			},
+			{
 				name: 'Lily Weight',
 				value: stripIndents`
-					${Formatters.bold('Total')}: ${this.client.formatDecimalNumber(totalWeight)} [ ${this.client.formatDecimalNumber(weight)} + ${this.client.formatDecimalNumber(overflow)} ]
-					${Formatters.bold('Δ:')} ${this.client.formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${this.client.formatDecimalNumber(weight - weightOffset)} + ${this.client.formatDecimalNumber(overflow - overflowOffset)} ]
+					${Formatters.bold('Total')}: ${this.client.formatDecimalNumber(totalWeight)} [ ${this.client.formatDecimalNumber(
+					weight,
+				)} + ${this.client.formatDecimalNumber(overflow)} ]
+					${Formatters.bold('Δ:')} ${this.client.formatDecimalNumber(
+					totalWeight - totalWeightOffet,
+				)} [ ${this.client.formatDecimalNumber(weight - weightOffset)} + ${this.client.formatDecimalNumber(
+					overflow - overflowOffset,
+				)} ]
 				`,
 				inline: true,
-			});
+			},
+		);
 
 		embeds.push(MessageEmbedUtil.padFields(embed));
 

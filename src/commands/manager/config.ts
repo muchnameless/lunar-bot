@@ -6,49 +6,38 @@ import type { Collection, CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Config } from '../../structures/database/models/Config';
 
-
 export default class ConfigCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
-				.setDescription('show and edit the bot\'s config')
-				.addSubcommand(subcommand => subcommand
-					.setName('edit')
-					.setDescription('edit the config key with the provided value')
-					.addStringOption(option => option
-						.setName('key')
-						.setDescription('new / existing config key')
-						.setRequired(true),
-					)
-					.addStringOption(option => option
-						.setName('value')
-						.setDescription('new config value')
-						.setRequired(true),
-					)
-					.addStringOption(option => option
-						.setName('type')
-						.setDescription('new config value type')
-						.setRequired(false)
-						.addChoices([ 'string', 'number', 'boolean', 'array' ].map(x => [ x, x ])),
-					),
+				.setDescription("show and edit the bot's config")
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('edit')
+						.setDescription('edit the config key with the provided value')
+						.addStringOption((option) =>
+							option.setName('key').setDescription('new / existing config key').setRequired(true),
+						)
+						.addStringOption((option) => option.setName('value').setDescription('new config value').setRequired(true))
+						.addStringOption((option) =>
+							option
+								.setName('type')
+								.setDescription('new config value type')
+								.setRequired(false)
+								.addChoices(['string', 'number', 'boolean', 'array'].map((x) => [x, x])),
+						),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('delete')
-					.setDescription('delete the config key')
-					.addStringOption(option => option
-						.setName('key')
-						.setDescription('existing config key')
-						.setRequired(true),
-					),
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('delete')
+						.setDescription('delete the config key')
+						.addStringOption((option) => option.setName('key').setDescription('existing config key').setRequired(true)),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('search')
-					.setDescription('searches the config keys and values')
-					.addStringOption(option => option
-						.setName('query')
-						.setDescription('search query')
-						.setRequired(false),
-					),
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('search')
+						.setDescription('searches the config keys and values')
+						.addStringOption((option) => option.setName('query').setDescription('search query').setRequired(false)),
 				),
 			cooldown: 0,
 		});
@@ -58,13 +47,17 @@ export default class ConfigCommand extends ApplicationCommand {
 	 * @param entries
 	 */
 	#listEntries(entries: Collection<string, Config>) {
-		return entries.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
-			.map(({ key, parsedValue }) => `${key}: ${typeof parsedValue === 'number'
-					? this.client.formatNumber(parsedValue).replace(/\s/g, '_')
-					: parsedValue
-				} [${new Type(parsedValue)}]`)
-			.join('\n')
-			|| '\u200B';
+		return (
+			entries
+				.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
+				.map(
+					({ key, parsedValue }) =>
+						`${key}: ${
+							typeof parsedValue === 'number' ? this.client.formatNumber(parsedValue).replace(/\s/g, '_') : parsedValue
+						} [${new Type(parsedValue)}]`,
+				)
+				.join('\n') || '\u200B'
+		);
 	}
 
 	/**
@@ -74,9 +67,7 @@ export default class ConfigCommand extends ApplicationCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		switch (interaction.options.getSubcommand()) {
 			case 'edit': {
-				const KEY = interaction.options.getString('key', true)
-					.toUpperCase()
-					.replace(/ +/g, '_');
+				const KEY = interaction.options.getString('key', true).toUpperCase().replace(/ +/g, '_');
 				const OLD_VALUE = this.config.get(KEY);
 				const OLD_TYPE = typeof OLD_VALUE;
 
@@ -112,9 +103,7 @@ export default class ConfigCommand extends ApplicationCommand {
 			}
 
 			case 'delete': {
-				const KEY = interaction.options.getString('key', true)
-					.toUpperCase()
-					.replace(/ +/g, '_');
+				const KEY = interaction.options.getString('key', true).toUpperCase().replace(/ +/g, '_');
 
 				if (!this.config.cache.has(KEY)) return InteractionUtil.reply(interaction, `\`${KEY}\` is not in the config`);
 
@@ -127,16 +116,21 @@ export default class ConfigCommand extends ApplicationCommand {
 			case 'search': {
 				const query = interaction.options.getString('query')?.replace(/ +/g, '_');
 
-				if (!query) return InteractionUtil.reply(interaction, {
-					content: this.#listEntries(this.config.cache),
-					code: 'apache',
-					split: { char: '\n' },
-				});
+				if (!query)
+					return InteractionUtil.reply(interaction, {
+						content: this.#listEntries(this.config.cache),
+						code: 'apache',
+						split: { char: '\n' },
+					});
 
 				const queryRegex = new RegExp(query, 'i');
 
 				return InteractionUtil.reply(interaction, {
-					content: this.#listEntries(this.config.cache.filter(({ key, value }) => queryRegex.test(key) || (value !== null && queryRegex.test(value)))),
+					content: this.#listEntries(
+						this.config.cache.filter(
+							({ key, value }) => queryRegex.test(key) || (value !== null && queryRegex.test(value)),
+						),
+					),
 					code: 'apache',
 					split: { char: '\n' },
 				});

@@ -9,7 +9,6 @@ import {
 import { upperCaseFirstChar } from '../../functions';
 import type { LunarClient } from '../LunarClient';
 
-
 export const optionalIgnOption = new SlashCommandStringOption()
 	.setName('ign')
 	.setDescription('IGN | UUID')
@@ -32,7 +31,7 @@ export const requiredPlayerOption = new SlashCommandStringOption()
 
 export const targetOption = new SlashCommandStringOption()
 	.setName('target')
-	.setDescription('IGN | UUID | discord ID | @mention | \'guild\' | \'everyone\'')
+	.setDescription("IGN | UUID | discord ID | @mention | 'guild' | 'everyone'")
 	.setRequired(true);
 
 export const forceOption = new SlashCommandBooleanOption()
@@ -44,13 +43,13 @@ export const skyblockProfileOption = new SlashCommandStringOption()
 	.setName('profile')
 	.setDescription('SkyBlock profile name')
 	.setRequired(false)
-	.addChoices(PROFILE_NAMES.map(x => [ x, x ]));
+	.addChoices(PROFILE_NAMES.map((x) => [x, x]));
 
 export const xpTypeOption = new SlashCommandStringOption()
 	.setName('type')
 	.setDescription('xp type')
 	.setRequired(false)
-	.addChoices(LEADERBOARD_XP_TYPES.map(x => [ upperCaseFirstChar(x.replaceAll('-', ' ')), x ]));
+	.addChoices(LEADERBOARD_XP_TYPES.map((x) => [upperCaseFirstChar(x.replaceAll('-', ' ')), x]));
 
 export const pageOption = new SlashCommandIntegerOption()
 	.setName('page')
@@ -61,13 +60,13 @@ export const offsetOption = new SlashCommandStringOption()
 	.setName('offset')
 	.setDescription('Δ offset')
 	.setRequired(false)
-	.addChoices(Object.keys(XP_OFFSETS_SHORT).map(x => [ x, XP_OFFSETS_CONVERTER[x as keyof typeof XP_OFFSETS_SHORT] ]));
+	.addChoices(Object.keys(XP_OFFSETS_SHORT).map((x) => [x, XP_OFFSETS_CONVERTER[x as keyof typeof XP_OFFSETS_SHORT]]));
 
 export const ephemeralOption = new SlashCommandStringOption()
 	.setName('visibility')
 	.setDescription('visibility of the response message')
 	.setRequired(false)
-	.addChoices([ 'everyone', 'just me' ].map(x => [ x, x ]));
+	.addChoices(['everyone', 'just me'].map((x) => [x, x]));
 
 /**
  * @param client
@@ -78,7 +77,7 @@ export function buildGuildOption(client: LunarClient, includeAll = false) {
 		.setName('guild')
 		.setDescription('hypixel guild')
 		.setRequired(false)
-		.addChoices(client.hypixelGuilds.cache.map(({ name, guildId }) => [ name, guildId ]));
+		.addChoices(client.hypixelGuilds.cache.map(({ name, guildId }) => [name, guildId]));
 
 	if (includeAll) guildOption.addChoice('all', GUILD_ID_ALL);
 

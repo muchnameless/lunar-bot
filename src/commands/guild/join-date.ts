@@ -12,28 +12,30 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
-
 interface JoinInfo {
 	ign: string;
 	date: Date;
 	timestamp: number;
 }
 
-
 export default class JoinDateCommand extends DualCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('guild member join date, parsed from `/g log ign`')
-				.addStringOption(optionalPlayerOption)
-				.addBooleanOption(forceOption)
-				.addStringOption(buildGuildOption(context.client)),
-			cooldown: 0,
-		}, {
-			aliases: [ 'joined' ],
-			args: false,
-			usage: '<`IGN`>',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription('guild member join date, parsed from `/g log ign`')
+					.addStringOption(optionalPlayerOption)
+					.addBooleanOption(forceOption)
+					.addStringOption(buildGuildOption(context.client)),
+				cooldown: 0,
+			},
+			{
+				aliases: ['joined'],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	static running = new Set();
@@ -104,20 +106,20 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		const IGN = InteractionUtil.getIgn(
-			interaction,
-			{ fallbackToCurrentUser:
-				!(await this.client.lgGuild?.members.fetch(interaction.user).catch(error => logger.error(error)))?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')),
-			},
-		);
+		const IGN = InteractionUtil.getIgn(interaction, {
+			fallbackToCurrentUser: !(
+				await this.client.lgGuild?.members.fetch(interaction.user).catch((error) => logger.error(error))
+			)?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')),
+		});
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 
 		if (!IGN) {
 			// all players
-			if (JoinDateCommand.running.has(hypixelGuild.guildId)) return InteractionUtil.reply(interaction, {
-				content: 'the command is already running',
-				ephemeral: true,
-			});
+			if (JoinDateCommand.running.has(hypixelGuild.guildId))
+				return InteractionUtil.reply(interaction, {
+					content: 'the command is already running',
+					ephemeral: true,
+				});
 
 			const { chatBridge } = hypixelGuild;
 			const joinInfos: JoinInfo[] = [];
@@ -127,7 +129,9 @@ export default class JoinDateCommand extends DualCommand {
 
 				await InteractionUtil.awaitConfirmation(
 					interaction,
-					`the command will take approximately ${ms(hypixelGuild.playerCount * 2 * MinecraftChatManager.SAFE_DELAY, { long: true })}. Confirm?`,
+					`the command will take approximately ${ms(hypixelGuild.playerCount * 2 * MinecraftChatManager.SAFE_DELAY, {
+						long: true,
+					})}. Confirm?`,
 				);
 
 				for (const { ign } of hypixelGuild.players.values()) {
@@ -140,7 +144,10 @@ export default class JoinDateCommand extends DualCommand {
 			return InteractionUtil.reply(interaction, {
 				content: `${Formatters.bold(hypixelGuild.name)} join dates:\n${joinInfos
 					.sort(({ timestamp: a }, { timestamp: b }) => a - b)
-					.map(({ ign, date, timestamp }) => `${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`)
+					.map(
+						({ ign, date, timestamp }) =>
+							`${!Number.isNaN(timestamp) ? Formatters.time(date) : 'unknown date'}: ${escapeIgn(ign)}`,
+					)
 					.join('\n')}`,
 				split: true,
 			});
@@ -154,9 +161,11 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(await this.#generateReply(
-			hypixelMessage.chatBridge,
-			hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,
-		));
+		return hypixelMessage.reply(
+			await this.#generateReply(
+				hypixelMessage.chatBridge,
+				hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,
+			),
+		);
 	}
 }

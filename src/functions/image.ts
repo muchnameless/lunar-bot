@@ -3,7 +3,6 @@ import { cache, imgur } from '../api';
 import { days, logger } from '.';
 import type { LunarClient } from '../structures/LunarClient';
 
-
 /**
  * takes a minecraft uuid and returns the imgur link to an uploaded bust image
  * @param client
@@ -12,7 +11,7 @@ import type { LunarClient } from '../structures/LunarClient';
 export async function uuidToImgurBustURL({ config }: LunarClient, uuid: string) {
 	try {
 		const cacheKey = `image:bust:${uuid}`;
-		const cachedResult = await cache.get(cacheKey) as string | undefined;
+		const cachedResult = (await cache.get(cacheKey)) as string | undefined;
 
 		if (cachedResult) return cachedResult;
 

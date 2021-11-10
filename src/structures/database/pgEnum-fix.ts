@@ -1,8 +1,12 @@
 // @ts-expect-error
 import PostgresQueryGenerator from 'sequelize/lib/dialects/postgres/query-generator';
 
-
-PostgresQueryGenerator.prototype.pgEnum = function(tableName: string, attr: string, dataType: Record<string, any>, options?: Record<string, any>) {
+PostgresQueryGenerator.prototype.pgEnum = function (
+	tableName: string,
+	attr: string,
+	dataType: Record<string, any>,
+	options?: Record<string, any>,
+) {
 	const enumName = this.pgEnumName(tableName, attr, options);
 	const values = dataType.values
 		? `ENUM(${dataType.values.map((value: string) => this.escape(value)).join(', ')})`

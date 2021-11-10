@@ -1,7 +1,6 @@
 import type { LunarClient } from '../LunarClient';
 import { BaseEvent } from './BaseEvent';
 
-
 export class Event extends BaseEvent {
 	/**
 	 * client

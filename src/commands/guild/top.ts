@@ -7,7 +7,6 @@ import type { CommandInteraction } from 'discord.js';
 import type { LeaderboardXPOffsets, LeaderboardXPTypes } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class TopCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -28,9 +27,9 @@ export default class TopCommand extends ApplicationCommand {
 	override runSlash(interaction: CommandInteraction) {
 		return handleLeaderboardCommandInteraction(interaction, {
 			lbType: 'total',
-			xpType: interaction.options.getString('type') as LeaderboardXPTypes ?? this.config.get('CURRENT_COMPETITION'),
+			xpType: (interaction.options.getString('type') as LeaderboardXPTypes) ?? this.config.get('CURRENT_COMPETITION'),
 			page: interaction.options.getInteger('page') ?? 1,
-			offset: interaction.options.getString('offset') as LeaderboardXPOffsets ?? '',
+			offset: (interaction.options.getString('offset') as LeaderboardXPOffsets) ?? '',
 			hypixelGuild: InteractionUtil.getHypixelGuild(interaction, { includeAll: true }),
 			user: interaction.user,
 		});

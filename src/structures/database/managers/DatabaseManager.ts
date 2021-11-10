@@ -25,17 +25,15 @@ import type { db as DbType } from '..';
 import type { Transaction } from '../models/Transaction';
 import type { LunarClient } from '../../LunarClient';
 
-
 export interface Models {
-	ChatTrigger: ModelCtor<ChatTrigger>,
-	Config: ModelCtor<Config>,
-	HypixelGuild: ModelCtor<HypixelGuild>,
-	HypixelGuildBan: ModelCtor<HypixelGuildBan>,
-	Player: ModelCtor<Player>,
-	TaxCollector: ModelCtor<TaxCollector>,
-	Transaction: ModelCtor<Transaction>,
+	ChatTrigger: ModelCtor<ChatTrigger>;
+	Config: ModelCtor<Config>;
+	HypixelGuild: ModelCtor<HypixelGuild>;
+	HypixelGuildBan: ModelCtor<HypixelGuildBan>;
+	Player: ModelCtor<Player>;
+	TaxCollector: ModelCtor<TaxCollector>;
+	Transaction: ModelCtor<Transaction>;
 }
-
 
 export class DatabaseManager {
 	client: LunarClient;
@@ -72,13 +70,16 @@ export class DatabaseManager {
 			taxCollectors: new TaxCollectorManager(client, db.TaxCollector),
 		};
 		this.models = Object.fromEntries(
-			Object.entries(db)
-				.filter(([ , value ]) => Object.getPrototypeOf(value) === Model && Reflect.defineProperty(
-					// @ts-expect-error
-					value.prototype,
-					'client',
-					{ value: client },
-				)),
+			Object.entries(db).filter(
+				([, value]) =>
+					Object.getPrototypeOf(value) === Model &&
+					Reflect.defineProperty(
+						// @ts-expect-error
+						value.prototype,
+						'client',
+						{ value: client },
+					),
+			),
 		) as unknown as Models;
 		this.sequelize = db.sequelize;
 	}
@@ -89,50 +90,57 @@ export class DatabaseManager {
 	schedule() {
 		const { config } = this.modelManagers;
 
-		this.client.cronJobs.schedule('updatePlayerDatabase', new CronJobConstructor({
-			cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
-			onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.updateData(),
-			start: true,
-		}));
+		this.client.cronJobs.schedule(
+			'updatePlayerDatabase',
+			new CronJobConstructor({
+				cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
+				onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.updateData(),
+				start: true,
+			}),
+		);
 
 		// schedule guild stats channel update
-		this.client.cronJobs.schedule('guildStatsChannelUpdate', new CronJobConstructor({
-			cronTime: '0 0 * * * *',
-			onTick: async () => {
-				if (!config.get('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
+		this.client.cronJobs.schedule(
+			'guildStatsChannelUpdate',
+			new CronJobConstructor({
+				cronTime: '0 0 * * * *',
+				onTick: async () => {
+					if (!config.get('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
 
-				const { mainGuild } = this.modelManagers.hypixelGuilds;
-				if (!mainGuild) return;
+					const { mainGuild } = this.modelManagers.hypixelGuilds;
+					if (!mainGuild) return;
 
-				try {
-					for (const [ type, value ] of Object.entries(mainGuild.formattedStats)) {
-						const channel = this.client.channels.cache.get(config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
+					try {
+						for (const [type, value] of Object.entries(mainGuild.formattedStats)) {
+							const channel = this.client.channels.cache.get(config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
 
-						if (!(channel instanceof VoiceChannel)) { // no channel found
-							logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${type}: no channel found`);
-							continue;
+							if (!(channel instanceof VoiceChannel)) {
+								// no channel found
+								logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${type}: no channel found`);
+								continue;
+							}
+
+							const newName = `${type}︱${value}`;
+							const { name: oldName } = channel;
+
+							if (newName === oldName) continue; // no update needed
+
+							if (!channel.manageable) {
+								logger.error(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
+								continue;
+							}
+
+							await channel.setName(newName, `synced with ${mainGuild.name}'s average stats`);
+
+							logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
 						}
-
-						const newName = `${type}︱${value}`;
-						const { name: oldName } = channel;
-
-						if (newName === oldName) continue; // no update needed
-
-						if (!channel.manageable) {
-							logger.error(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
-							continue;
-						}
-
-						await channel.setName(newName, `synced with ${mainGuild.name}'s average stats`);
-
-						logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
+					} catch (error) {
+						logger.error(error, '[GUILD STATS CHANNEL UPDATE]');
 					}
-				} catch (error) {
-					logger.error(error, '[GUILD STATS CHANNEL UPDATE]');
-				}
-			},
-			start: true,
-		}));
+				},
+				start: true,
+			}),
+		);
 
 		this.modelManagers.players.scheduleXpResets();
 
@@ -146,13 +154,13 @@ export class DatabaseManager {
 		await this.loadCache(); // load caches
 
 		// set default config
-		await Promise.all(Object.entries(DEFAULT_CONFIG).map(
-			([ key, value ]) => (
+		await Promise.all(
+			Object.entries(DEFAULT_CONFIG).map(([key, value]) =>
 				this.modelManagers.config.get(key as keyof typeof DEFAULT_CONFIG) !== null
 					? null
-					: this.modelManagers.config.set(key, value)
+					: this.modelManagers.config.set(key, value),
 			),
-		));
+		);
 
 		return this;
 	}
@@ -161,9 +169,7 @@ export class DatabaseManager {
 	 * loads all db caches (performs a sweep first)
 	 */
 	async loadCache() {
-		await Promise.all(
-			Object.values(this.modelManagers).map(manager => manager.loadCache()),
-		);
+		await Promise.all(Object.values(this.modelManagers).map((manager) => manager.loadCache()));
 
 		return this;
 	}
@@ -184,11 +190,13 @@ export class DatabaseManager {
 	 * @param auctionId
 	 */
 	async #validateAuctionId(auctionId: string) {
-		return (await this.models.Transaction.findOne({
-			where: { auctionId },
-			attributes: [ 'id' ],
-			raw: true, // to not parse an eventual result
-		})) === null;
+		return (
+			(await this.models.Transaction.findOne({
+				where: { auctionId },
+				attributes: ['id'],
+				raw: true, // to not parse an eventual result
+			})) === null
+		);
 	}
 
 	/**
@@ -199,7 +207,7 @@ export class DatabaseManager {
 		const TAX_AUCTIONS_START_TIME = config.get('TAX_AUCTIONS_START_TIME');
 		const TAX_AMOUNT = config.get('TAX_AMOUNT');
 		const TAX_AUCTIONS_ITEMS = config.get('TAX_AUCTIONS_ITEMS');
-		const availableAuctionsLog: { ign: string | null, auctions: string | number }[] = [];
+		const availableAuctionsLog: { ign: string | null; auctions: string | number }[] = [];
 		const dbPromises: Promise<EmbedFieldData | undefined>[] = [];
 
 		let apiError = false;
@@ -208,7 +216,8 @@ export class DatabaseManager {
 		for (const taxCollector of taxCollectors.cache.values()) {
 			if (!taxCollector.isCollecting) continue; // skip retired collectors
 
-			if (apiError) { // skip the rest if an API error occurred
+			if (apiError) {
+				// skip the rest if an API error occurred
 				availableAuctionsLog.push({
 					ign: taxCollector.ign,
 					auctions: 'API Error',
@@ -235,14 +244,18 @@ export class DatabaseManager {
 				let availableAuctions = 0;
 
 				// filter auctions
-				for (const auction of await asyncFilter(
+				for (const auction of (await asyncFilter(
 					auctions,
 					// correct item & started after last reset & no outbid from already logged auction
-					auc => TAX_AUCTIONS_ITEMS.includes(auc.item_name) && auc.start >= TAX_AUCTIONS_START_TIME && this.#validateAuctionId(auc.uuid),
-				) as Components.Schemas.SkyBlockAuction[]) {
+					(auc) =>
+						TAX_AUCTIONS_ITEMS.includes(auc.item_name) &&
+						auc.start >= TAX_AUCTIONS_START_TIME &&
+						this.#validateAuctionId(auc.uuid),
+				)) as Components.Schemas.SkyBlockAuction[]) {
 					if (auction.highest_bid_amount >= TAX_AMOUNT) {
 						if (auction.bids.length) taxAuctions.push(auction); // player bid on the auction
-					} else if (auction.end > Date.now()) { // auction not expired
+					} else if (auction.end > Date.now()) {
+						// auction not expired
 						++availableAuctions;
 					}
 				}
@@ -252,36 +265,42 @@ export class DatabaseManager {
 					auctions: availableAuctions,
 				});
 
-				if (taxAuctions.length) dbPromises.push((async () => {
-					const paidLog: string[] = [];
+				if (taxAuctions.length)
+					dbPromises.push(
+						(async () => {
+							const paidLog: string[] = [];
 
-					// update database
-					await Promise.all(taxAuctions.map(async (auction) => {
-						const { bidder, amount } = auction.bids.at(-1)!;
-						const player = players.cache.get(bidder);
+							// update database
+							await Promise.all(
+								taxAuctions.map(async (auction) => {
+									const { bidder, amount } = auction.bids.at(-1)!;
+									const player = players.cache.get(bidder);
 
-						if (!player) return;
+									if (!player) return;
 
-						try {
-							await player.setToPaid({
-								amount,
-								collectedBy: taxCollector.minecraftUuid,
-								auctionId: auction.uuid,
-							});
+									try {
+										await player.setToPaid({
+											amount,
+											collectedBy: taxCollector.minecraftUuid,
+											auctionId: auction.uuid,
+										});
 
-							paidLog.push(`${player}: ${this.client.formatNumber(amount)}`);
-						} catch (error) {
-							logger.error(error);
-							paidLog.push(`${player}: ${error}`);
-						}
-					}));
+										paidLog.push(`${player}: ${this.client.formatNumber(amount)}`);
+									} catch (error) {
+										logger.error(error);
+										paidLog.push(`${player}: ${error}`);
+									}
+								}),
+							);
 
-					// logging
-					if (paidLog.length) return {
-						name: `/ah ${taxCollector}`,
-						value: Formatters.codeBlock(paidLog.join('\n')),
-					};
-				})());
+							// logging
+							if (paidLog.length)
+								return {
+									name: `/ah ${taxCollector}`,
+									value: Formatters.codeBlock(paidLog.join('\n')),
+								};
+						})(),
+					);
 			} catch (error) {
 				logger.error(error, `[UPDATE TAX DB]: ${taxCollector}`);
 				apiError = true;
@@ -294,17 +313,17 @@ export class DatabaseManager {
 
 		// update database
 		if (dbPromises.length) {
-			setTimeout((() => async () => {
-				const taxPaidLog = (await Promise.all(dbPromises)).filter(x => x != null) as EmbedFieldData[];
+			setTimeout(
+				(() => async () => {
+					const taxPaidLog = (await Promise.all(dbPromises)).filter((x) => x != null) as EmbedFieldData[];
 
-				// logging
-				if (taxPaidLog.length) {
-					this.client.log(this.client.defaultEmbed
-						.setTitle('Guild Tax')
-						.addFields(...taxPaidLog),
-					);
-				}
-			})(), 0);
+					// logging
+					if (taxPaidLog.length) {
+						this.client.log(this.client.defaultEmbed.setTitle('Guild Tax').addFields(...taxPaidLog));
+					}
+				})(),
+				0,
+			);
 		}
 
 		return availableAuctionsLog
@@ -322,16 +341,23 @@ export class DatabaseManager {
 		const playersInGuild = players.inGuild;
 		const PLAYER_COUNT = playersInGuild.size;
 		const PAID_COUNT = playersInGuild.filter(({ paid }) => paid).size;
-		const TOTAL_COINS = this.client.formatNumber(taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0));
+		const TOTAL_COINS = this.client.formatNumber(
+			taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0),
+		);
 
-		return Formatters.codeBlock('cs', stripIndents(commaLists`
-			Collectors: # /ah ${taxCollectors.activeCollectors.map(collector => collector.ign).sort(compareAlphabetically)}
+		return Formatters.codeBlock(
+			'cs',
+			stripIndents(commaLists`
+			Collectors: # /ah ${taxCollectors.activeCollectors.map((collector) => collector.ign).sort(compareAlphabetically)}
 			Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT'))}
-			Items: ${config.get('TAX_AUCTIONS_ITEMS').map(item => `'${item}'`)}
-			Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round((PAID_COUNT / PLAYER_COUNT) * 100)} % | collected amount: ${TOTAL_COINS} coins
+			Items: ${config.get('TAX_AUCTIONS_ITEMS').map((item) => `'${item}'`)}
+			Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round(
+				(PAID_COUNT / PLAYER_COUNT) * 100,
+			)} % | collected amount: ${TOTAL_COINS} coins
 			Available auctions:
 			${availableAuctionsLog?.join('\n') ?? '\u200B -'}
-		`));
+		`),
+		);
 	}
 
 	/**
@@ -344,14 +370,16 @@ export class DatabaseManager {
 		for (const hypixelGuild of hypixelGuilds.cache.values()) {
 			const GUILD_PLAYER_COUNT = hypixelGuild.playerCount;
 			const ENTRIES_PER_ROW = Math.ceil(GUILD_PLAYER_COUNT / 3);
-			const values = [ '', '', '' ];
+			const values = ['', '', ''];
 
 			// construct player list in three rows: paid emoji + non line-breaking space + player ign, slice to keep everything in one line
 			if (config.get('TAX_TRACKING_ENABLED')) {
 				let index = -1;
 
 				for (const player of hypixelGuild.players.values()) {
-					values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n${player.paid ? Y_EMOJI_ALT : X_EMOJI}\u00A0${player.ign.slice(0, 15)}`;
+					values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n${
+						player.paid ? Y_EMOJI_ALT : X_EMOJI
+					}\u00A0${player.ign.slice(0, 15)}`;
 				}
 			} else {
 				let index = -1;
@@ -362,18 +390,16 @@ export class DatabaseManager {
 			}
 
 			// add rows to tax embed
-			for (const [ index, value ] of values.entries()) {
+			for (const [index, value] of values.entries()) {
 				let paddedValue = value;
 
 				// fill up with empty lines if rows have different size
-				for (let emptyLine = ENTRIES_PER_ROW - (paddedValue.match(/\n/g)?.length ?? 0) + 1; --emptyLine;) {
+				for (let emptyLine = ENTRIES_PER_ROW - (paddedValue.match(/\n/g)?.length ?? 0) + 1; --emptyLine; ) {
 					paddedValue += '\n\u200B';
 				}
 
 				fields.push({
-					name: index % 2
-						? `${hypixelGuild} (${GUILD_PLAYER_COUNT})`
-						: '\u200B',
+					name: index % 2 ? `${hypixelGuild} (${GUILD_PLAYER_COUNT})` : '\u200B',
 					value: Formatters.codeBlock(paddedValue),
 					inline: true,
 				});
@@ -388,7 +414,10 @@ export class DatabaseManager {
 	 * @param description
 	 * @param fields
 	 */
-	createTaxEmbed(description: string = this.#createTaxEmbedDescription(), fields: EmbedFieldData[] = this.#createTaxEmbedFields()) {
+	createTaxEmbed(
+		description: string = this.#createTaxEmbedDescription(),
+		fields: EmbedFieldData[] = this.#createTaxEmbedFields(),
+	) {
 		return this.client.defaultEmbed
 			.setTitle('Guild Tax')
 			.setDescription(description)
@@ -437,9 +466,7 @@ export class DatabaseManager {
 			await hypixelGuilds.updateData();
 
 			// update tax db
-			const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED')
-				? await this.#updateTaxDatabase()
-				: null;
+			const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED') ? await this.#updateTaxDatabase() : null;
 
 			// update Xp
 			if (config.get('XP_TRACKING_ENABLED')) players.updateXp();
@@ -450,22 +477,34 @@ export class DatabaseManager {
 			// update taxMessage
 			const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
-			if (!taxChannel?.isText() || ((taxChannel as GuildChannel).guildId && !(taxChannel as GuildChannel).guild?.available)) {
+			if (
+				!taxChannel?.isText() ||
+				((taxChannel as GuildChannel).guildId && !(taxChannel as GuildChannel).guild?.available)
+			) {
 				logger.warn('[TAX MESSAGE] tax channel error');
 				return this;
 			}
-			if (!ChannelUtil.botPermissions(taxChannel).has([ Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS ])) {
+			if (
+				!ChannelUtil.botPermissions(taxChannel).has([
+					Permissions.FLAGS.VIEW_CHANNEL,
+					Permissions.FLAGS.SEND_MESSAGES,
+					Permissions.FLAGS.EMBED_LINKS,
+				])
+			) {
 				logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 				return this;
 			}
 
 			const TAX_MESSAGE_ID = config.get('TAX_MESSAGE_ID');
 			const taxMessage = TAX_MESSAGE_ID
-				? await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch(error => logger.error(error, '[TAX MESSAGE]'))
+				? await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch((error) => logger.error(error, '[TAX MESSAGE]'))
 				: null;
 
-			if (!taxMessage?.editable || taxMessage.deleted) { // taxMessage deleted -> send a new one
-				const { id } = await taxChannel.send({ embeds: [ this.createTaxEmbed(this.#createTaxEmbedDescription(availableAuctionsLog)) ] });
+			if (!taxMessage?.editable || taxMessage.deleted) {
+				// taxMessage deleted -> send a new one
+				const { id } = await taxChannel.send({
+					embeds: [this.createTaxEmbed(this.#createTaxEmbedDescription(availableAuctionsLog))],
+				});
 
 				config.set('TAX_MESSAGE_ID', id);
 				logger.info('[TAX MESSAGE]: created new taxMessage');
@@ -475,12 +514,15 @@ export class DatabaseManager {
 			const DESCRIPTION = this.#createTaxEmbedDescription(availableAuctionsLog);
 			const fields = this.#createTaxEmbedFields();
 
-			if (taxMessage.embeds[0]?.description === DESCRIPTION
-				&& taxMessage.embeds[0].fields
-					.every(({ name, value }, index) => fields[index].name === name && fields[index].value === value)
-			) return this; // no changes to taxMessage
+			if (
+				taxMessage.embeds[0]?.description === DESCRIPTION &&
+				taxMessage.embeds[0].fields.every(
+					({ name, value }, index) => fields[index].name === name && fields[index].value === value,
+				)
+			)
+				return this; // no changes to taxMessage
 
-			await taxMessage.edit({ embeds: [ this.createTaxEmbed(DESCRIPTION, fields) ] });
+			await taxMessage.edit({ embeds: [this.createTaxEmbed(DESCRIPTION, fields)] });
 			logger.info('[TAX MESSAGE]: updated taxMessage');
 			return this;
 		} catch (error) {

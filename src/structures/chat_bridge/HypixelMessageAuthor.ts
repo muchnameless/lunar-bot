@@ -4,13 +4,11 @@ import type { GuildMember } from 'discord.js';
 import type { ChatBridge, ChatOptions } from './ChatBridge';
 import type { Player } from '../database/models/Player';
 
-
 interface AuthorData {
 	ign: string;
 	guildRank?: string | null;
 	uuid?: string | null;
 }
-
 
 export class HypixelMessageAuthor {
 	chatBridge: ChatBridge;
@@ -34,7 +32,9 @@ export class HypixelMessageAuthor {
 		this.ign = ign;
 		this.guildRank = guildRank ?? null;
 		this.player = uuid
-			? this.client.players.cache.get(uuid) ?? logger.error(`[HYPIXEL AUTHOR CTOR]: unknown uuid '${uuid}'`) ?? this.client.players.findByIgn(ign)
+			? this.client.players.cache.get(uuid) ??
+			  logger.error(`[HYPIXEL AUTHOR CTOR]: unknown uuid '${uuid}'`) ??
+			  this.client.players.findByIgn(ign)
 			: this.client.players.findByIgn(ign);
 	}
 
@@ -50,10 +50,11 @@ export class HypixelMessageAuthor {
 			if (!this.player) {
 				// check mojang API / cache for the uuid associated with that ign
 				const { uuid } = await mojang.ign(this.ign);
-				this.player = this.client.players.cache.get(uuid) ?? (logger.error(`[HYPIXEL AUTHOR INIT]: unknown uuid '${uuid}'`), null);
+				this.player =
+					this.client.players.cache.get(uuid) ?? (logger.error(`[HYPIXEL AUTHOR INIT]: unknown uuid '${uuid}'`), null);
 			}
 
-			this.member = await this.player?.discordMember ?? null;
+			this.member = (await this.player?.discordMember) ?? null;
 		} catch (error) {
 			logger.error(error, '[AUTHOR PLAYER]');
 		}
@@ -64,9 +65,8 @@ export class HypixelMessageAuthor {
 	 * @param contentOrOptions
 	 */
 	send(contentOrOptions: string | ChatOptions) {
-		const { prefix = '', ...options } = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions }
-			: contentOrOptions;
+		const { prefix = '', ...options } =
+			typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
 
 		return this.chatBridge.minecraft.chat({
 			prefix: `/w ${this.ign} ${prefix}${prefix.length ? ' ' : ''}`,

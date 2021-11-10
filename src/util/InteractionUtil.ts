@@ -25,7 +25,6 @@ import type { LunarClient } from '../structures/LunarClient';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { Player } from '../structures/database/models/Player';
 
-
 interface InteractionData {
 	deferReplyPromise: Promise<void | Message> | null;
 	deferUpdatePromise: Promise<void> | null;
@@ -84,7 +83,6 @@ interface AwaitConfirmationOptions extends InteractionReplyOptions {
 	errorMessage?: string;
 }
 
-
 export default class InteractionUtil extends null {
 	/**
 	 * cache
@@ -101,13 +99,19 @@ export default class InteractionUtil extends null {
 		const interactionData: InteractionData = {
 			deferReplyPromise: null,
 			deferUpdatePromise: null,
-			useEphemeral: this.#checkEphemeralOption(interaction)
-				?? (channel !== null && channel.type !== 'DM'
+			useEphemeral:
+				this.#checkEphemeralOption(interaction) ??
+				(channel !== null && channel.type !== 'DM'
 					? !(channel.name.includes('command') || ChannelUtil.isTicket(channel)) // guild channel
 					: false), // DM channel
-			autoDefer: setTimeout( // interactions must be acked within 3 seconds
+			autoDefer: setTimeout(
+				// interactions must be acked within 3 seconds
 				() => {
-					logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: auto defer triggered after ${Date.now() - interaction.createdTimestamp} ms`);
+					logger.warn(
+						`[INTERACTION UTIL]: ${this.logInfo(interaction)}: auto defer triggered after ${
+							Date.now() - interaction.createdTimestamp
+						} ms`,
+					);
 
 					if (interaction.isMessageComponent()) {
 						this.deferUpdate(interaction);
@@ -168,22 +172,62 @@ export default class InteractionUtil extends null {
 	 */
 	static logInfo(interaction: Interaction) {
 		if (interaction.isCommand()) {
-			return `${interaction.type} '${interaction}' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
+			return `${interaction.type} '${interaction}' by ${interaction.user.tag}${
+				interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
+			} in ${
+				interaction.guildId
+					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
+							interaction.guild!.name
+					  }`
+					: 'DMs'
+			}`;
 		}
 
 		if (interaction.isButton()) {
-			return `${interaction.componentType} '${interaction.customId}' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
+			return `${interaction.componentType} '${interaction.customId}' by ${interaction.user.tag}${
+				interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
+			} in ${
+				interaction.guildId
+					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
+							interaction.guild!.name
+					  }`
+					: 'DMs'
+			}`;
 		}
 
 		if (interaction.isSelectMenu()) {
-			return `${interaction.componentType} '${interaction.customId} [${interaction.values}]' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
+			return `${interaction.componentType} '${interaction.customId} [${interaction.values}]' by ${
+				interaction.user.tag
+			}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${
+				interaction.guildId
+					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
+							interaction.guild!.name
+					  }`
+					: 'DMs'
+			}`;
 		}
 
 		if (interaction.isContextMenu()) {
-			return `${interaction.targetType} '${interaction.commandName}' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
+			return `${interaction.targetType} '${interaction.commandName}' by ${interaction.user.tag}${
+				interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
+			} in ${
+				interaction.guildId
+					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
+							interaction.guild!.name
+					  }`
+					: 'DMs'
+			}`;
 		}
 
-		return `unknown type '${interaction.type}' by ${interaction.user.tag}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${interaction.guildId ? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${interaction.guild!.name}` : 'DMs'}`;
+		return `unknown type '${interaction.type}' by ${interaction.user.tag}${
+			interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
+		} in ${
+			interaction.guildId
+				? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
+						interaction.guild!.name
+				  }`
+				: 'DMs'
+		}`;
 	}
 
 	/**
@@ -199,7 +243,9 @@ export default class InteractionUtil extends null {
 			(interaction as CommandInteraction).commandName,
 			(interaction as CommandInteraction).options.getSubcommandGroup(false),
 			(interaction as CommandInteraction).options.getSubcommand(false),
-		].filter(x => x !== null).join(' ');
+		]
+			.filter((x) => x !== null)
+			.join(' ');
 	}
 
 	/**
@@ -214,7 +260,10 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async deferReply(interaction: ChatInteraction, options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true }): Promise<Message>;
+	static async deferReply(
+		interaction: ChatInteraction,
+		options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true },
+	): Promise<Message>;
 	static async deferReply(interaction: ChatInteraction, options?: DeferReplyOptions): Promise<void | Message>;
 	static async deferReply(interaction: ChatInteraction, options?: DeferReplyOptions) {
 		const cached = this.CACHE.get(interaction)!;
@@ -239,14 +288,27 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param contentOrOptions
 	 */
-	static async reply(interaction: ChatInteraction, contentOrOptions: InteractionUtilReplyOptions & { rejectOnError: true; fetchReply: true }): Promise<Message>
-	static async reply(interaction: ChatInteraction, contentOrOptions: InteractionUtilReplyOptions & { rejectOnError: true }): Promise<void | Message>
-	static async reply(interaction: ChatInteraction, contentOrOptions: string | InteractionUtilReplyOptions): Promise<void | null | Message>;
-	static async reply(interaction: ChatInteraction, contentOrOptions: string | InteractionUtilReplyOptions): Promise<void | null | Message> {
+	static async reply(
+		interaction: ChatInteraction,
+		contentOrOptions: InteractionUtilReplyOptions & { rejectOnError: true; fetchReply: true },
+	): Promise<Message>;
+	static async reply(
+		interaction: ChatInteraction,
+		contentOrOptions: InteractionUtilReplyOptions & { rejectOnError: true },
+	): Promise<void | Message>;
+	static async reply(
+		interaction: ChatInteraction,
+		contentOrOptions: string | InteractionUtilReplyOptions,
+	): Promise<void | null | Message>;
+	static async reply(
+		interaction: ChatInteraction,
+		contentOrOptions: string | InteractionUtilReplyOptions,
+	): Promise<void | null | Message> {
 		const cached = this.CACHE.get(interaction)!;
-		const options = typeof contentOrOptions === 'string'
-			? { ephemeral: cached.useEphemeral, content: contentOrOptions }
-			: { ephemeral: cached.useEphemeral, ...contentOrOptions };
+		const options =
+			typeof contentOrOptions === 'string'
+				? { ephemeral: cached.useEphemeral, content: contentOrOptions }
+				: { ephemeral: cached.useEphemeral, ...contentOrOptions };
 
 		try {
 			/**
@@ -260,7 +322,7 @@ export default class InteractionUtil extends null {
 			}
 
 			// replied
-			if (interaction.replied) return await interaction.followUp(options) as Message;
+			if (interaction.replied) return (await interaction.followUp(options)) as Message;
 
 			// await defers
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
@@ -275,7 +337,7 @@ export default class InteractionUtil extends null {
 					await interaction.deleteReply(); // not ephemeral defer -> ephemeral reply
 				}
 
-				return await interaction.followUp(options) as Message;
+				return (await interaction.followUp(options)) as Message;
 			}
 
 			// initial reply
@@ -297,22 +359,31 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param contentOrOptions
 	 */
-	static async editReply(interaction: ChatInteraction, contentOrOptions: EditReplyOptions & { rejectOnError: true }): Promise<Message>
-	static async editReply(interaction: ChatInteraction, contentOrOptions: string | EditReplyOptions): Promise<void | null | Message>;
-	static async editReply(interaction: ChatInteraction, contentOrOptions: string | EditReplyOptions): Promise<void | null | Message> {
+	static async editReply(
+		interaction: ChatInteraction,
+		contentOrOptions: EditReplyOptions & { rejectOnError: true },
+	): Promise<Message>;
+	static async editReply(
+		interaction: ChatInteraction,
+		contentOrOptions: string | EditReplyOptions,
+	): Promise<void | null | Message>;
+	static async editReply(
+		interaction: ChatInteraction,
+		contentOrOptions: string | EditReplyOptions,
+	): Promise<void | null | Message> {
 		const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
 
 		try {
 			if (deferReplyPromise) await deferReplyPromise;
 			if (deferUpdatePromise) await deferUpdatePromise;
 
-			return await interaction.editReply(contentOrOptions) as Message;
+			return (await interaction.editReply(contentOrOptions)) as Message;
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error(error);
 
 				try {
-					return MessageUtil.edit(await interaction.fetchReply() as Message, contentOrOptions);
+					return MessageUtil.edit((await interaction.fetchReply()) as Message, contentOrOptions);
 				} catch (error_) {
 					if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error_;
 					return logger.error(error_);
@@ -328,9 +399,15 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async deferUpdate(interaction: ChatInteraction, options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true }): Promise<Message>;
+	static async deferUpdate(
+		interaction: ChatInteraction,
+		options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true },
+	): Promise<Message>;
 	static async deferUpdate(interaction: ChatInteraction, options?: DeferReplyOptions): Promise<void | Message>;
-	static async deferUpdate(interaction: MessageComponentInteraction, options?: DeferUpdateOptions): Promise<void | Message> {
+	static async deferUpdate(
+		interaction: MessageComponentInteraction,
+		options?: DeferUpdateOptions,
+	): Promise<void | Message> {
 		const cached = this.CACHE.get(interaction)!;
 		if (cached.deferUpdatePromise) return cached.deferUpdatePromise;
 
@@ -350,7 +427,10 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async update(interaction: MessageComponentInteraction, options: UpdateOptions & { rejectOnError: true }): Promise<Message>;
+	static async update(
+		interaction: MessageComponentInteraction,
+		options: UpdateOptions & { rejectOnError: true },
+	): Promise<Message>;
 	static async update(interaction: MessageComponentInteraction, options: UpdateOptions): Promise<void | Message>;
 	static async update(interaction: MessageComponentInteraction, options: UpdateOptions): Promise<void | Message> {
 		const cached = this.CACHE.get(interaction)!;
@@ -365,7 +445,7 @@ export default class InteractionUtil extends null {
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
 			// deferred but not replied
-			if (interaction.deferred) return await interaction.editReply(options as WebhookEditMessageOptions) as Message;
+			if (interaction.deferred) return (await interaction.editReply(options as WebhookEditMessageOptions)) as Message;
 
 			// initial reply
 			clearTimeout(cached.autoDefer!);
@@ -410,12 +490,15 @@ export default class InteractionUtil extends null {
 	 * @param questionOrOptions
 	 */
 	static async awaitReply(interaction: ChatInteraction, questionOrOptions: string | AwaitReplyOptions = {}) {
-		const { question = 'confirm this action?', time = seconds(60), ...options } = typeof questionOrOptions === 'string'
-			? { question: questionOrOptions }
-			: questionOrOptions;
+		const {
+			question = 'confirm this action?',
+			time = seconds(60),
+			...options
+		} = typeof questionOrOptions === 'string' ? { question: questionOrOptions } : questionOrOptions;
 
 		try {
-			const channel = interaction.channel ?? await interaction.client.channels.fetch(interaction.channelId!) as TextBasedChannels;
+			const channel =
+				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId!)) as TextBasedChannels);
 
 			await this.reply(interaction, {
 				content: question,
@@ -424,7 +507,7 @@ export default class InteractionUtil extends null {
 			});
 
 			const collected = await channel.awaitMessages({
-				filter: msg => msg.author.id === interaction.user.id,
+				filter: (msg) => msg.author.id === interaction.user.id,
 				max: 1,
 				time,
 			});
@@ -441,38 +524,33 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param questionOrOptions
 	 */
-	static async awaitConfirmation(interaction: ChatInteraction, questionOrOptions: string | AwaitConfirmationOptions = {}) {
-		const { question = 'confirm this action?', time = seconds(60), errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
-			? { question: questionOrOptions }
-			: questionOrOptions;
+	static async awaitConfirmation(
+		interaction: ChatInteraction,
+		questionOrOptions: string | AwaitConfirmationOptions = {},
+	) {
+		const {
+			question = 'confirm this action?',
+			time = seconds(60),
+			errorMessage = 'the command has been cancelled',
+			...options
+		} = typeof questionOrOptions === 'string' ? { question: questionOrOptions } : questionOrOptions;
 		const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const CANCLE_ID = `confirm:${SnowflakeUtil.generate()}`;
-		const row = new MessageActionRow()
-			.addComponents(
-				new MessageButton()
-					.setCustomId(SUCCESS_ID)
-					.setStyle(Constants.MessageButtonStyles.SUCCESS)
-					.setEmoji(Y_EMOJI),
-				new MessageButton()
-					.setCustomId(CANCLE_ID)
-					.setStyle(Constants.MessageButtonStyles.DANGER)
-					.setEmoji(X_EMOJI),
-			);
+		const row = new MessageActionRow().addComponents(
+			new MessageButton().setCustomId(SUCCESS_ID).setStyle(Constants.MessageButtonStyles.SUCCESS).setEmoji(Y_EMOJI),
+			new MessageButton().setCustomId(CANCLE_ID).setStyle(Constants.MessageButtonStyles.DANGER).setEmoji(X_EMOJI),
+		);
 
 		let channel: TextBasedChannels;
 		let message: Message | void;
 
 		try {
-			channel = interaction.channel ?? await interaction.client.channels.fetch(interaction.channelId) as TextBasedChannels;
+			channel =
+				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannels);
 
 			message = await this.reply(interaction, {
-				embeds: [
-					(interaction.client as LunarClient).defaultEmbed
-						.setDescription(question),
-				],
-				components: [
-					row,
-				],
+				embeds: [(interaction.client as LunarClient).defaultEmbed.setDescription(question)],
+				components: [row],
 				fetchReply: false,
 				rejectOnError: true,
 				...options,
@@ -496,7 +574,7 @@ export default class InteractionUtil extends null {
 						return false;
 					}
 
-					return [ SUCCESS_ID, CANCLE_ID ].includes(i.customId);
+					return [SUCCESS_ID, CANCLE_ID].includes(i.customId);
 				},
 				time,
 			});
@@ -507,33 +585,34 @@ export default class InteractionUtil extends null {
 				embeds: [
 					new MessageEmbed()
 						.setColor((interaction.client as LunarClient).config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
-						.setDescription(stripIndent`
+						.setDescription(
+							stripIndent`
 							${question}
 							\\> ${success ? 'confirmed' : 'cancelled'}
-						`)
+						`,
+						)
 						.setTimestamp(),
 				],
-				components: [
-					row.setComponents(row.components.map(c => c.setDisabled())),
-				],
+				components: [row.setComponents(row.components.map((c) => c.setDisabled()))],
 			});
 		} catch (error) {
 			const editOptions = {
 				embeds: [
 					new MessageEmbed()
 						.setColor('NOT_QUITE_BLACK')
-						.setDescription(stripIndent`
+						.setDescription(
+							stripIndent`
 							${question}
 							\\> timeout
-						`)
+						`,
+						)
 						.setTimestamp(),
 				],
-				components: [
-					row.setComponents(row.components.map(c => c.setDisabled())),
-				],
+				components: [row.setComponents(row.components.map((c) => c.setDisabled()))],
 			};
 
-			if (message) { // question message was a followUp
+			if (message) {
+				// question message was a followUp
 				try {
 					await MessageUtil.edit(message, {
 						...editOptions,
@@ -543,7 +622,8 @@ export default class InteractionUtil extends null {
 					logger.error(error_);
 					this.reply(interaction, editOptions);
 				}
-			} else { // question message was an initial reply
+			} else {
+				// question message was an initial reply
 				this.editReply(interaction, editOptions);
 			}
 
@@ -562,7 +642,7 @@ export default class InteractionUtil extends null {
 		if (interaction.ephemeral) return null;
 
 		try {
-			return MessageUtil.react(await interaction.fetchReply() as Message, ...emojis);
+			return MessageUtil.react((await interaction.fetchReply()) as Message, ...emojis);
 		} catch (error) {
 			return logger.error(error);
 		}
@@ -576,10 +656,11 @@ export default class InteractionUtil extends null {
 	static getPlayer(interaction: CommandInteraction, options: GetPlayerOptions & { throwIfNotFound: true }): Player;
 	static getPlayer(interaction: CommandInteraction, options?: GetPlayerOptions): Player | null;
 	static getPlayer(interaction: CommandInteraction, { fallbackToCurrentUser = false, throwIfNotFound = false } = {}) {
-		if (!interaction.options
-			// @ts-expect-error
-			._hoistedOptions
-			.length
+		if (
+			!(
+				// @ts-expect-error
+				interaction.options._hoistedOptions.length
+			)
 		) {
 			if (fallbackToCurrentUser) {
 				const player = UserUtil.getPlayer(interaction.user);
@@ -589,7 +670,9 @@ export default class InteractionUtil extends null {
 			return null;
 		}
 
-		const INPUT = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.replace(/\W/g, '').toLowerCase();
+		const INPUT = (interaction.options.getString('player') ?? interaction.options.getString('target'))
+			?.replace(/\W/g, '')
+			.toLowerCase();
 
 		if (!INPUT) {
 			if (fallbackToCurrentUser) {
@@ -612,10 +695,10 @@ export default class InteractionUtil extends null {
 			return player;
 		}
 
-		const player = (this.checkForce(interaction)
-			? (interaction.client as LunarClient).players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
-			: (interaction.client as LunarClient).players.getByIgn(INPUT))
-			?? null;
+		const player =
+			(this.checkForce(interaction)
+				? (interaction.client as LunarClient).players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
+				: (interaction.client as LunarClient).players.getByIgn(INPUT)) ?? null;
 		if (throwIfNotFound && !player) throw `no player linked to \`${INPUT}\` found`;
 		return player;
 	}
@@ -629,8 +712,11 @@ export default class InteractionUtil extends null {
 	static getIgn(interaction: CommandInteraction, options?: GetPlayerOptions): string | null;
 	static getIgn(interaction: CommandInteraction, options?: GetPlayerOptions) {
 		if (this.checkForce(interaction)) {
-			const IGN = (interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase()
-				?? options?.fallbackToCurrentUser ? UserUtil.getPlayer(interaction.user)?.ign ?? null : null;
+			const IGN =
+				(interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase() ??
+				options?.fallbackToCurrentUser
+					? UserUtil.getPlayer(interaction.user)?.ign ?? null
+					: null;
 			if (options?.throwIfNotFound && !IGN) throw 'no IGN specified';
 			return IGN;
 		}
@@ -641,16 +727,34 @@ export default class InteractionUtil extends null {
 	 * returns a HypixelGuild instance
 	 * @param interaction
 	 */
-	static getHypixelGuild(interaction: CommandInteraction, options: { fallbackToCurrentUser?: true, includeAll: true }): HypixelGuild | typeof GUILD_ID_ALL;
-	static getHypixelGuild(interaction: CommandInteraction, options: { fallbackToCurrentUser: false, includeAll: true }): HypixelGuild | typeof GUILD_ID_ALL | null;
-	static getHypixelGuild(interaction: CommandInteraction, options?: { fallbackToCurrentUser?: true, includeAll?: false }): HypixelGuild;
-	static getHypixelGuild(interaction: CommandInteraction, options: { fallbackToCurrentUser: false, includeAll?: false }): HypixelGuild | null;
-	static getHypixelGuild(interaction: CommandInteraction, { fallbackToCurrentUser = true, includeAll = false }: GetHypixelGuildOptions = {}) {
+	static getHypixelGuild(
+		interaction: CommandInteraction,
+		options: { fallbackToCurrentUser?: true; includeAll: true },
+	): HypixelGuild | typeof GUILD_ID_ALL;
+	static getHypixelGuild(
+		interaction: CommandInteraction,
+		options: { fallbackToCurrentUser: false; includeAll: true },
+	): HypixelGuild | typeof GUILD_ID_ALL | null;
+	static getHypixelGuild(
+		interaction: CommandInteraction,
+		options?: { fallbackToCurrentUser?: true; includeAll?: false },
+	): HypixelGuild;
+	static getHypixelGuild(
+		interaction: CommandInteraction,
+		options: { fallbackToCurrentUser: false; includeAll?: false },
+	): HypixelGuild | null;
+	static getHypixelGuild(
+		interaction: CommandInteraction,
+		{ fallbackToCurrentUser = true, includeAll = false }: GetHypixelGuildOptions = {},
+	) {
 		const INPUT = interaction.options.getString('guild');
 
 		if (!INPUT) {
 			if (fallbackToCurrentUser) {
-				return UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? (interaction.client as LunarClient).hypixelGuilds.mainGuild;
+				return (
+					UserUtil.getPlayer(interaction.user)?.hypixelGuild ??
+					(interaction.client as LunarClient).hypixelGuilds.mainGuild
+				);
 			}
 			return null;
 		}
@@ -663,6 +767,8 @@ export default class InteractionUtil extends null {
 
 		if (!fallbackToCurrentUser) return null;
 
-		return UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? (interaction.client as LunarClient).hypixelGuilds.mainGuild;
+		return (
+			UserUtil.getPlayer(interaction.user)?.hypixelGuild ?? (interaction.client as LunarClient).hypixelGuilds.mainGuild
+		);
 	}
 }

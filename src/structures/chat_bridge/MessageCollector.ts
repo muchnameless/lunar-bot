@@ -4,7 +4,6 @@ import type { HypixelMessage } from './HypixelMessage';
 import type { Timeout } from '../../types/util';
 import type { ChatBridge } from './ChatBridge';
 
-
 /**
  * Filter to be applied to the collector.
  */
@@ -31,7 +30,6 @@ export const enum MessageCollectorEvents {
 	END = 'end',
 	MESSAGE = 'message',
 }
-
 
 /**
  * MessageCollector
@@ -96,12 +94,21 @@ export class MessageCollector extends EventEmitter {
 	}
 
 	override on(eventName: MessageCollectorEvents.COLLECT, listener: (item: HypixelMessage) => Awaitable<void>): this;
-	override on(eventName: MessageCollectorEvents.END, listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
+	override on(
+		eventName: MessageCollectorEvents.END,
+		listener: (collected: this['collected'], reason: string) => Awaitable<void>,
+	): this;
 	// @ts-expect-error
 	override on(eventName: string, listener: (...args: unknown[]) => void): this;
 
-	override once(eventName: MessageCollectorEvents.COLLECT, listener: (message: HypixelMessage) => Awaitable<void>): this;
-	override once(eventName: MessageCollectorEvents.END, listener: (collected: this['collected'], reason: string) => Awaitable<void>): this;
+	override once(
+		eventName: MessageCollectorEvents.COLLECT,
+		listener: (message: HypixelMessage) => Awaitable<void>,
+	): this;
+	override once(
+		eventName: MessageCollectorEvents.END,
+		listener: (collected: this['collected'], reason: string) => Awaitable<void>,
+	): this;
 	// @ts-expect-error
 	override once(eventName: string, listener: (...args: unknown[]) => void): this;
 
@@ -207,7 +214,7 @@ export class MessageCollector extends EventEmitter {
 	 * @param options.time How long to run the collector for in milliseconds
 	 * @param options.idle How long to stop the collector after inactivity in milliseconds
 	 */
-	resetTimer({ time, idle }: { time?: number, idle?: number } = {}) {
+	resetTimer({ time, idle }: { time?: number; idle?: number } = {}) {
 		if (this.#timeout) {
 			clearTimeout(this.#timeout);
 			this.#timeout = setTimeout(() => this.stop('time'), time ?? this.options.time);
@@ -233,7 +240,9 @@ export class MessageCollector extends EventEmitter {
 	 */
 	async *[Symbol.asyncIterator]() {
 		const queue: HypixelMessage[] = [];
-		const onCollect = (item: HypixelMessage) => { queue.push(item); };
+		const onCollect = (item: HypixelMessage) => {
+			queue.push(item);
+		};
 		this.on(MessageCollectorEvents.COLLECT, onCollect);
 
 		try {

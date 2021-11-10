@@ -5,7 +5,6 @@ import { Event } from '../structures/events/Event';
 import type { GuildMember } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 
-
 export default class GuildMemberAddEvent extends Event {
 	constructor(context: EventContext) {
 		super(context, {
@@ -16,7 +15,7 @@ export default class GuildMemberAddEvent extends Event {
 
 	/**
 	 * event listener callback
- 	 * @param member
+	 * @param member
 	 */
 	override async run(member: GuildMember) {
 		if (member.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
@@ -34,7 +33,9 @@ export default class GuildMemberAddEvent extends Event {
 		`;
 
 		if (!member.roles.cache.has(this.config.get('VERIFIED_ROLE_ID'))) {
-			description += `\n\nwaiting for ${member.guild.roles.cache.get(this.config.get('VERIFIED_ROLE_ID')) ?? this.config.get('VERIFIED_ROLE_ID')} role`;
+			description += `\n\nwaiting for ${
+				member.guild.roles.cache.get(this.config.get('VERIFIED_ROLE_ID')) ?? this.config.get('VERIFIED_ROLE_ID')
+			} role`;
 		}
 
 		this.client.log(

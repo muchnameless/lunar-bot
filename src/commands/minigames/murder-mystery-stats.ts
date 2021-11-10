@@ -6,7 +6,6 @@ import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
-
 /* eslint-disable camelcase */
 interface MurderMysteryStats {
 	games: number;
@@ -21,19 +20,22 @@ interface MurderMysteryStats {
 }
 /* eslint-enable camelcase */
 
-
 export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('shows a player\'s MurderMystery stats')
-				.addStringOption(optionalIgnOption),
-			cooldown: seconds(1),
-		}, {
-			aliases: [ 'mmstats' ],
-			args: false,
-			usage: '<`IGN`>',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription("shows a player's MurderMystery stats")
+					.addStringOption(optionalIgnOption),
+				cooldown: seconds(1),
+			},
+			{
+				aliases: ['mmstats'],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	override _generateReply({ ign, playerData }: FetchedData) {
@@ -68,8 +70,16 @@ export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 				murderer wins: ${this.client.formatNumber(murderer_wins)},
 				detective wins: ${this.client.formatNumber(detective_wins)},
 				coins: ${this.client.formatNumber(coins)},
-				fastest murderer win: ${typeof quickest_murderer_win_time_seconds === 'number' ? this.client.formatNumber(quickest_murderer_win_time_seconds) : quickest_murderer_win_time_seconds} s,
-				fastest detective win: ${typeof quickest_detective_win_time_seconds === 'number' ? this.client.formatNumber(quickest_detective_win_time_seconds) : quickest_detective_win_time_seconds} s
+				fastest murderer win: ${
+					typeof quickest_murderer_win_time_seconds === 'number'
+						? this.client.formatNumber(quickest_murderer_win_time_seconds)
+						: quickest_murderer_win_time_seconds
+				} s,
+				fastest detective win: ${
+					typeof quickest_detective_win_time_seconds === 'number'
+						? this.client.formatNumber(quickest_detective_win_time_seconds)
+						: quickest_detective_win_time_seconds
+				} s
 			`;
 			/* eslint-enable camelcase */
 		} catch {

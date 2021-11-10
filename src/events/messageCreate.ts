@@ -4,13 +4,15 @@ import { Event } from '../structures/events/Event';
 import type { Message } from 'discord.js';
 import type { EventContext, EventData } from '../structures/events/BaseEvent';
 
-
 export default class MessageCreateEvent extends Event {
 	constructor(context: EventContext, data?: EventData) {
-		super(context, data ?? {
-			once: false,
-			enabled: true,
-		});
+		super(
+			context,
+			data ?? {
+				once: false,
+				enabled: true,
+			},
+		);
 	}
 
 	/**

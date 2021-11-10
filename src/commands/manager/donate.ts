@@ -8,23 +8,14 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class DonateCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('register a donation from a player')
 				.addStringOption(requiredPlayerOption)
-				.addStringOption(option => option
-					.setName('value')
-					.setDescription('amount / text')
-					.setRequired(true),
-				)
-				.addStringOption(option => option
-					.setName('notes')
-					.setDescription('additional notes')
-					.setRequired(false),
-				),
+				.addStringOption((option) => option.setName('value').setDescription('amount / text').setRequired(true))
+				.addStringOption((option) => option.setName('notes').setDescription('additional notes').setRequired(false)),
 			cooldown: 0,
 		});
 	}
@@ -36,7 +27,8 @@ export default class DonateCommand extends ApplicationCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-		if (!collector?.isCollecting) return InteractionUtil.reply(interaction, 'this command is restricted to (active) tax collectors');
+		if (!collector?.isCollecting)
+			return InteractionUtil.reply(interaction, 'this command is restricted to (active) tax collectors');
 
 		const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 		const AMOUNT_OR_TEXT = interaction.options.getString('value');
@@ -50,24 +42,32 @@ export default class DonateCommand extends ApplicationCommand {
 			notes = TEXT_INPUT;
 		} else {
 			amount = 0;
-			notes = [ AMOUNT_OR_TEXT, TEXT_INPUT ].filter(x => x !== null).join(' ');
+			notes = [AMOUNT_OR_TEXT, TEXT_INPUT].filter((x) => x !== null).join(' ');
 		}
 
-		await safePromiseAll(player.addTransfer({
-			amount,
-			collectedBy: collector.minecraftUuid,
-			notes,
-			type: TransactionTypes.DONATION,
-		}));
-
-		this.client.log(this.client.defaultEmbed
-			.setTitle('Guild Donations')
-			.addFields({
-				name: `/ah ${collector}`,
-				value: Formatters.codeBlock(`${player}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`),
+		await safePromiseAll(
+			player.addTransfer({
+				amount,
+				collectedBy: collector.minecraftUuid,
+				notes,
+				type: TransactionTypes.DONATION,
 			}),
 		);
 
-		return InteractionUtil.reply(interaction, `registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`);
+		this.client.log(
+			this.client.defaultEmbed.setTitle('Guild Donations').addFields({
+				name: `/ah ${collector}`,
+				value: Formatters.codeBlock(
+					`${player}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`,
+				),
+			}),
+		);
+
+		return InteractionUtil.reply(
+			interaction,
+			`registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${
+				notes?.length ? ` (${notes})` : ''
+			}`,
+		);
 	}
 }

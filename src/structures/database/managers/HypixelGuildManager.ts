@@ -5,14 +5,13 @@ import { ModelManager } from './ModelManager';
 import type { FindOptions } from 'sequelize';
 import type { HypixelGuild, UpdateOptions } from '../models/HypixelGuild';
 
-
 export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	/**
 	 * hypixel guild db data update
 	 */
 	#updateDataPromise: Promise<this> | null = null;
 
-	static PSEUDO_GUILD_IDS = new Set([ null, GUILD_ID_BRIDGER, GUILD_ID_ERROR ] as const);
+	static PSEUDO_GUILD_IDS = new Set([null, GUILD_ID_BRIDGER, GUILD_ID_ERROR] as const);
 
 	/**
 	 * `NameOne`|`NameTwo`|`NameThree`
@@ -72,7 +71,8 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 
 			return this;
 		} catch (error) {
-			if (error instanceof Error && !error.name.startsWith('Sequelize')) this.client.config.set('HYPIXEL_API_ERROR', true);
+			if (error instanceof Error && !error.name.startsWith('Sequelize'))
+				this.client.config.set('HYPIXEL_API_ERROR', true);
 			logger.error(error, '[GUILDS UPDATE]');
 			return this;
 		}
@@ -90,10 +90,10 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 
 			if (!hypixelGuild) throw new Error(`[SWEEP PLAYER CACHE]: invalid input: ${idOrGuild}`);
 
-			return hypixelGuild.players = null;
+			return (hypixelGuild.players = null);
 		}
 
-		this.cache.each(hypixelGuild => hypixelGuild.players = null);
+		this.cache.each((hypixelGuild) => (hypixelGuild.players = null));
 		return this;
 	}
 
@@ -106,9 +106,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 
 		const { similarity, value } = autocorrect(name, this.cache, 'name');
 
-		return similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')
-			? value
-			: null;
+		return similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD') ? value : null;
 	}
 
 	/**
@@ -116,15 +114,19 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 */
 	scheduleDailyStatsSave() {
 		// daily reset
-		if (new Date(this.client.config.get('LAST_DAILY_STATS_SAVE_TIME')).getUTCDay() !== new Date().getUTCDay()) this.performDailyStatsSave();
+		if (new Date(this.client.config.get('LAST_DAILY_STATS_SAVE_TIME')).getUTCDay() !== new Date().getUTCDay())
+			this.performDailyStatsSave();
 
 		// each day at 00:00:00
-		this.client.cronJobs.schedule('guildDailyStats', new CronJob({
-			cronTime: '0 0 0 * * *',
-			timeZone: 'GMT',
-			onTick: () => this.performDailyStatsSave(),
-			start: true,
-		}));
+		this.client.cronJobs.schedule(
+			'guildDailyStats',
+			new CronJob({
+				cronTime: '0 0 0 * * *',
+				timeZone: 'GMT',
+				onTick: () => this.performDailyStatsSave(),
+				start: true,
+			}),
+		);
 
 		return this;
 	}

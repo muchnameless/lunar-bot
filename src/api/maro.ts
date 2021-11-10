@@ -6,7 +6,6 @@ import { hypixel, SKYBLOCK_PROFILE_TTL } from './hypixel';
 import { FetchError } from '../structures/errors/FetchError';
 import type { MaroPlayerData } from '../structures/MaroClient';
 
-
 export const maro = new MaroClient({
 	timeout: seconds(20),
 	retries: 1,
@@ -19,10 +18,7 @@ export const maro = new MaroClient({
 		},
 	},
 	async fetchPlayerData(uuid) {
-		const profile = getMainProfile(
-			await hypixel.skyblock.profiles.uuid(uuid),
-			uuid,
-		);
+		const profile = getMainProfile(await hypixel.skyblock.profiles.uuid(uuid), uuid);
 
 		if (!profile) throw new FetchError('MaroAPIError', { statusText: `${uuid} has no SkyBlock profiles` });
 

@@ -3,7 +3,6 @@ import type { Snowflake } from 'discord.js';
 import type { LunarClient } from '../LunarClient';
 import type { BaseCommandCollection, CommandType } from './BaseCommandCollection';
 
-
 export interface CommandContext {
 	client: LunarClient;
 	collection: BaseCommandCollection;
@@ -21,7 +20,6 @@ export interface CommandData {
 }
 
 type RequiredRoles = () => Snowflake[];
-
 
 export class BaseCommand {
 	client: LunarClient;
@@ -48,7 +46,10 @@ export class BaseCommand {
 	 * @param context
 	 * @param data
 	 */
-	constructor({ client, collection, fileName, category }: CommandContext, { name, cooldown, requiredRoles }: CommandData = {}) {
+	constructor(
+		{ client, collection, fileName, category }: CommandContext,
+		{ name, cooldown, requiredRoles }: CommandData = {},
+	) {
 		this.client = client;
 		this.collection = collection;
 		this.name = (name ?? fileName).toLowerCase();
@@ -56,9 +57,7 @@ export class BaseCommand {
 
 		this.cooldown = cooldown ?? null;
 		this.#requiredRoles = requiredRoles ?? null;
-		this.timestamps = this.cooldown !== 0
-			? new Collection()
-			: null;
+		this.timestamps = this.cooldown !== 0 ? new Collection() : null;
 	}
 
 	/**
@@ -88,7 +87,7 @@ export class BaseCommand {
 
 			case 'tax':
 			case 'manager':
-				return [ this.config.get('MANAGER_ROLE_ID') ];
+				return [this.config.get('MANAGER_ROLE_ID')];
 
 			default:
 				return null;

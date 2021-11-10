@@ -2,17 +2,14 @@ import { Role } from 'discord.js';
 import { logger } from '../functions';
 import type { Collection, Guild, GuildMember, Snowflake } from 'discord.js';
 
-
 export type RoleCollection = Collection<Snowflake, Role>;
 export type RoleResolvables = (Snowflake | Role | null)[] | RoleCollection;
-
 
 export default class GuildUtil extends null {
 	/**
 	 * cache
 	 */
 	static #fetchAllMembersCache = new Map<Snowflake, Promise<Collection<Snowflake, GuildMember>>>();
-
 
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
@@ -32,7 +29,7 @@ export default class GuildUtil extends null {
 				continue;
 			}
 
-			if (role.managed || Role.comparePositions(role, highest ??= guild.me!.roles.highest) >= 0) {
+			if (role.managed || Role.comparePositions(role, (highest ??= guild.me!.roles.highest)) >= 0) {
 				logger.warn(`[CHECK ROLE IDS]: can't edit '@${role.name}'`);
 				continue;
 			}
@@ -53,10 +50,15 @@ export default class GuildUtil extends null {
 			logger.warn(`[FIND MEMBER BY TAG]: guild '${guild?.name}' unavailable`);
 			return null;
 		}
-		if (guild.members.cache.size === guild.memberCount) return guild.members.cache.find(({ user: { tag } }) => tag === tagInput) ?? null;
+		if (guild.members.cache.size === guild.memberCount)
+			return guild.members.cache.find(({ user: { tag } }) => tag === tagInput) ?? null;
 
 		try {
-			return (await guild.members.fetch({ query: tagInput.replace(/#\d{4}$/, ''), limit: 1_000 })).find(({ user: { tag } }) => tag === tagInput) ?? null;
+			return (
+				(await guild.members.fetch({ query: tagInput.replace(/#\d{4}$/, ''), limit: 1_000 })).find(
+					({ user: { tag } }) => tag === tagInput,
+				) ?? null
+			);
 		} catch (error) {
 			logger.error(error, '[FIND MEMBER BY TAG]');
 			return null;

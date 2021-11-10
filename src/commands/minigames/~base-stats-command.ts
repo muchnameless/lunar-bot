@@ -6,16 +6,15 @@ import type { CommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { Awaited } from '../../types/util';
 
-
 export type FetchedData = Awaited<ReturnType<StatsCommand['_fetchData']>>;
-
 
 export default class StatsCommand extends DualCommand {
 	/**
 	 * @param ctx
 	 * @param ignOrUuid
 	 */
-	async _fetchData(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid: string | null) { // eslint-disable-line class-methods-use-this
+	// eslint-disable-next-line class-methods-use-this
+	async _fetchData(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid: string | null) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 
 		return {
@@ -46,10 +45,9 @@ export default class StatsCommand extends DualCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		try {
-			return InteractionUtil.reply(interaction,
-				this._generateReply(
-					await this._fetchData(interaction, interaction.options.getString('ign')),
-				),
+			return InteractionUtil.reply(
+				interaction,
+				this._generateReply(await this._fetchData(interaction, interaction.options.getString('ign'))),
 			);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
@@ -64,9 +62,7 @@ export default class StatsCommand extends DualCommand {
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		try {
 			return hypixelMessage.reply(
-				this._generateReply(
-					await this._fetchData(hypixelMessage, hypixelMessage.commandData.args[0]),
-				),
+				this._generateReply(await this._fetchData(hypixelMessage, hypixelMessage.commandData.args[0])),
 			);
 		} catch (error) {
 			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);

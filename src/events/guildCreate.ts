@@ -4,7 +4,6 @@ import { Event } from '../structures/events/Event';
 import type { Guild } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 
-
 export default class GuildCreateEvent extends Event {
 	constructor(context: EventContext) {
 		super(context, {

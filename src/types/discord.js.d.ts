@@ -16,13 +16,12 @@ import type { Merge } from './util';
 // 	}
 // }
 
-
 // declare module 'discord.js' {
-	// interface Client<boolean> extends LunarClient {};
-	// interface Base {
-	// 	client: LunarClient;
-	// }
-	// interface Interaction {
-	// 	client: LunarClient;
-	// }
+// interface Client<boolean> extends LunarClient {};
+// interface Base {
+// 	client: LunarClient;
+// }
+// interface Interaction {
+// 	client: LunarClient;
+// }
 // }

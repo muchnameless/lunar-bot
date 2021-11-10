@@ -8,7 +8,6 @@ import type { Components } from '@zikeji/hypixel';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { SkyBlockProfile, WeightData } from '../../functions';
 
-
 export default class BaseWeightCommand extends DualCommand {
 	// eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
 	getWeight(skyblockMember: Components.Schemas.SkyBlockProfileMember): WeightData {
@@ -28,17 +27,21 @@ export default class BaseWeightCommand extends DualCommand {
 	 * @param ignOrUuid command arguments
 	 * @param profileName
 	 */
-	async _generateReply(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid?: string | null, profileName?: string | null) {
+	async _generateReply(
+		ctx: CommandInteraction | HypixelUserMessage,
+		ignOrUuid?: string | null,
+		profileName?: string | null,
+	) {
 		try {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-			const profiles = await hypixel.skyblock.profiles.uuid(uuid) as SkyBlockProfile[];
+			const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
 
 			if (!profiles?.length) return `${ign} has no SkyBlock profiles`;
 
 			let weightData;
 
 			if (!profileName) {
-				[ weightData ] = profiles
+				[weightData] = profiles
 					.map(({ cute_name: name, members }) => ({ name, ...this.getWeight(members[uuid]) }))
 					.sort(({ totalWeight: a }, { totalWeight: b }) => b - a);
 			} else {
@@ -52,7 +55,9 @@ export default class BaseWeightCommand extends DualCommand {
 				};
 			}
 
-			return `${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
+			return `${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(
+				weightData.weight,
+			)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
 		} catch (error) {
 			logger.error(error, '[WEIGHT]');
 
@@ -82,7 +87,7 @@ export default class BaseWeightCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
-		const [ IGN, PROFILE_NAME_INPUT ] = hypixelMessage.commandData.args;
+		const [IGN, PROFILE_NAME_INPUT] = hypixelMessage.commandData.args;
 
 		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');
 
@@ -94,7 +99,9 @@ export default class BaseWeightCommand extends DualCommand {
 			if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) {
 				try {
 					await hypixelMessage.awaitConfirmation({
-						question: `'${upperCaseFirstChar(PROFILE_NAME_INPUT)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,
+						question: `'${upperCaseFirstChar(
+							PROFILE_NAME_INPUT,
+						)}' is not a valid SkyBlock profile name, did you mean '${profileName}'?`,
 						time: seconds(30),
 					});
 				} catch (error) {
@@ -104,12 +111,6 @@ export default class BaseWeightCommand extends DualCommand {
 			}
 		}
 
-		return hypixelMessage.reply(
-			await this._generateReply(
-				hypixelMessage,
-				IGN,
-				profileName,
-			),
-		);
+		return hypixelMessage.reply(await this._generateReply(hypixelMessage, IGN, profileName));
 	}
 }

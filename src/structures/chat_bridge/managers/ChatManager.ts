@@ -5,11 +5,9 @@ import type { MessageCollector, MessageCollectorOptions } from '../MessageCollec
 import type { ChatBridge } from '../ChatBridge';
 import type { HypixelMessage } from '../HypixelMessage';
 
-
 interface AwaitMessagesOptions extends MessageCollectorOptions {
 	errors?: string[];
 }
-
 
 export abstract class ChatManager {
 	chatBridge: ChatBridge;

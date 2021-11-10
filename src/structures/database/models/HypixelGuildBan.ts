@@ -3,12 +3,10 @@ const { Model, DataTypes } = pkg;
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-
 interface ConfigAttributes {
 	minecraftUuid: string;
 	_reason: string | null;
 }
-
 
 export class HypixelGuildBan extends Model<ConfigAttributes> {
 	declare client: LunarClient;
@@ -21,19 +19,22 @@ export class HypixelGuildBan extends Model<ConfigAttributes> {
 	}
 
 	static initialise(sequelize: Sequelize) {
-		return this.init({
-			minecraftUuid: {
-				type: DataTypes.STRING,
-				primaryKey: true,
+		return this.init(
+			{
+				minecraftUuid: {
+					type: DataTypes.STRING,
+					primaryKey: true,
+				},
+				_reason: {
+					type: DataTypes.STRING,
+					allowNull: true,
+				},
 			},
-			_reason: {
-				type: DataTypes.STRING,
-				allowNull: true,
+			{
+				sequelize,
+				modelName: 'HypixelGuildBan',
 			},
-		}, {
-			sequelize,
-			modelName: 'HypixelGuildBan',
-		}) as ModelStatic<HypixelGuildBan>;
+		) as ModelStatic<HypixelGuildBan>;
 	}
 }
 

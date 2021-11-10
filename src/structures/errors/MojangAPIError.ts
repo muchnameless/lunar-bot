@@ -1,7 +1,6 @@
 import { FetchError } from './FetchError';
 import type { Response } from 'node-fetch';
 
-
 export class MojangAPIError extends FetchError {
 	/**
 	 * @param response

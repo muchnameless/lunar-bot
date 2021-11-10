@@ -3,20 +3,23 @@ import { MojangAPIError } from './errors/MojangAPIError';
 import { /* days, */ seconds, validateMinecraftIgn, validateMinecraftUuid } from '../functions';
 import type { Response } from 'node-fetch';
 
-
 export interface MojangResult {
-	uuid: string,
-	ign: string,
+	uuid: string;
+	ign: string;
 }
 
 interface MojangFetchOptions {
-	cache?: boolean,
-	force?: boolean,
+	cache?: boolean;
+	force?: boolean;
 }
 
 interface Cache {
-	get(key: string): Promise<MojangResult & { error?: boolean, status?: number, statusText?: string } | undefined>;
-	set(key: string, value: MojangResult | { error: boolean, status: number, statusText: string }, isError?: boolean): Promise<true>;
+	get(key: string): Promise<(MojangResult & { error?: boolean; status?: number; statusText?: string }) | undefined>;
+	set(
+		key: string,
+		value: MojangResult | { error: boolean; status: number; statusText: string },
+		isError?: boolean,
+	): Promise<true>;
 }
 
 interface MojangClientOptions {
@@ -24,7 +27,6 @@ interface MojangClientOptions {
 	timeout?: number;
 	retries?: number;
 }
-
 
 export class MojangClient {
 	cache?: Cache;
@@ -48,20 +50,20 @@ export class MojangClient {
 	async igns(usernames: string[], options?: MojangFetchOptions): Promise<MojangResult[]> {
 		if (!usernames.length || usernames.length > 10) throw new MojangAPIError({ statusText: 'wrong input' });
 
-		const res = await fetch(
-			'https://api.mojang.com/profiles/minecraft',
-			{
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(usernames),
-			},
-		);
+		const res = await fetch('https://api.mojang.com/profiles/minecraft', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(usernames),
+		});
 
 		if (res.status !== 200) {
 			throw new MojangAPIError(res);
 		}
 
-		const responses: MojangResult[] = (await res.json() as { id: string, name: string }[]).map(({ id, name }) => ({ uuid: id, ign: name }));
+		const responses: MojangResult[] = ((await res.json()) as { id: string; name: string }[]).map(({ id, name }) => ({
+			uuid: id,
+			ign: name,
+		}));
 
 		if (options?.cache) {
 			for (const response of responses) {
@@ -79,12 +81,13 @@ export class MojangClient {
 	 * @param options
 	 */
 	ign(ign: string, options?: MojangFetchOptions) {
-		if (validateMinecraftIgn(ign)) return this.request({
-			path: 'https://api.mojang.com/users/profiles/minecraft/',
-			query: ign.toLowerCase(),
-			queryType: 'ign',
-			...options,
-		});
+		if (validateMinecraftIgn(ign))
+			return this.request({
+				path: 'https://api.mojang.com/users/profiles/minecraft/',
+				query: ign.toLowerCase(),
+				queryType: 'ign',
+				...options,
+			});
 
 		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'ign', ign));
 	}
@@ -95,12 +98,13 @@ export class MojangClient {
 	 * @param options
 	 */
 	uuid(uuid: string, options?: MojangFetchOptions) {
-		if (validateMinecraftUuid(uuid)) return this.request({
-			path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
-			query: uuid.toLowerCase().replaceAll('-', ''),
-			queryType: 'uuid',
-			...options,
-		});
+		if (validateMinecraftUuid(uuid))
+			return this.request({
+				path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
+				query: uuid.toLowerCase().replaceAll('-', ''),
+				queryType: 'uuid',
+				...options,
+			});
 
 		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'uuid', uuid));
 	}
@@ -111,19 +115,21 @@ export class MojangClient {
 	 * @param options
 	 */
 	ignOrUuid(ignOrUuid: string, options?: MojangFetchOptions) {
-		if (validateMinecraftIgn(ignOrUuid)) return this.request({
-			path: 'https://api.mojang.com/users/profiles/minecraft/',
-			query: ignOrUuid.toLowerCase(),
-			queryType: 'ign',
-			...options,
-		});
+		if (validateMinecraftIgn(ignOrUuid))
+			return this.request({
+				path: 'https://api.mojang.com/users/profiles/minecraft/',
+				query: ignOrUuid.toLowerCase(),
+				queryType: 'ign',
+				...options,
+			});
 
-		if (validateMinecraftUuid(ignOrUuid)) return this.request({
-			path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
-			query: ignOrUuid.toLowerCase().replaceAll('-', ''),
-			queryType: 'uuid',
-			...options,
-		});
+		if (validateMinecraftUuid(ignOrUuid))
+			return this.request({
+				path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
+				query: ignOrUuid.toLowerCase().replaceAll('-', ''),
+				queryType: 'uuid',
+				...options,
+			});
 
 		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'ignOrUuid', ignOrUuid));
 	}
@@ -133,7 +139,13 @@ export class MojangClient {
 	 * @param param0
 	 * @param retries current retry
 	 */
-	async request({ path, query, queryType = null, cache = true, force = false }: { path: string; query: string; queryType?: string | null; } & MojangFetchOptions): Promise<MojangResult> {
+	async request({
+		path,
+		query,
+		queryType = null,
+		cache = true,
+		force = false,
+	}: { path: string; query: string; queryType?: string | null } & MojangFetchOptions): Promise<MojangResult> {
 		const CACHE_KEY = `${queryType}:${query}`;
 
 		if (!force) {
@@ -143,9 +155,7 @@ export class MojangClient {
 				if (cachedResponse.error) {
 					throw new MojangAPIError(
 						{
-							statusText: cachedResponse.statusText
-								? `${cachedResponse.statusText} (cached error)`
-								: 'cached error',
+							statusText: cachedResponse.statusText ? `${cachedResponse.statusText} (cached error)` : 'cached error',
 							...cachedResponse,
 						},
 						queryType,
@@ -161,7 +171,7 @@ export class MojangClient {
 
 		switch (res.status) {
 			case 200: {
-				const { id: uuid, name: ign } = await res.json() as { id: string, name: string };
+				const { id: uuid, name: ign } = (await res.json()) as { id: string; name: string };
 				const response = { uuid, ign };
 
 				if (cache) {
@@ -201,7 +211,7 @@ export class MojangClient {
 
 			default:
 				// only check cache if force === true, because otherwise cache is already checked before the request
-				if (cache && (!force || !await this.cache?.get(CACHE_KEY))) {
+				if (cache && (!force || !(await this.cache?.get(CACHE_KEY)))) {
 					this.cache?.set(CACHE_KEY, { error: true, status: res.status, statusText: res.statusText }, true);
 				}
 
@@ -218,12 +228,9 @@ export class MojangClient {
 		const timeout = setTimeout(() => controller.abort(), this.timeout);
 
 		try {
-			return await fetch(
-				url,
-				{
-					signal: controller.signal,
-				},
-			);
+			return await fetch(url, {
+				signal: controller.signal,
+			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {

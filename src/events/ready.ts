@@ -3,7 +3,6 @@ import { logger } from '../functions';
 import { Event } from '../structures/events/Event';
 import type { EventContext } from '../structures/events/BaseEvent';
 
-
 export default class ReadyEvent extends Event {
 	constructor(context: EventContext) {
 		super(context, {
@@ -46,6 +45,8 @@ export default class ReadyEvent extends Event {
 		}
 
 		// log ready
-		logger.info(`[READY]: startup complete. ${this.client.cronJobs.cache.size} CronJobs running. Logging channel available: ${this.client.logHandler.ready}`);
+		logger.info(
+			`[READY]: startup complete. ${this.client.cronJobs.cache.size} CronJobs running. Logging channel available: ${this.client.logHandler.ready}`,
+		);
 	}
 }

@@ -7,18 +7,20 @@ import type { CommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class FetchurCommand extends DualCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('shows the current fetchur item'),
-			cooldown: 0,
-		}, {
-			aliases: [ 'f' ],
-			args: false,
-			usage: '',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder().setDescription('shows the current fetchur item'),
+				cooldown: 0,
+			},
+			{
+				aliases: ['f'],
+				args: false,
+				usage: '',
+			},
+		);
 	}
 
 	static FETCHUR_ITEMS = [
@@ -40,7 +42,8 @@ export default class FetchurCommand extends DualCommand {
 	/**
 	 * execute the command
 	 */
-	#generateReply() { // eslint-disable-line class-methods-use-this
+	// eslint-disable-next-line class-methods-use-this
+	#generateReply() {
 		const date = new Date();
 		const OFFSET = zone('America/New_York').offsetForUtc(TimeStruct.fromDate(date, DateFunctions.GetUTC)) / 60;
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
@@ -52,14 +55,11 @@ export default class FetchurCommand extends DualCommand {
 		const today = new Date();
 		today.setUTCHours(Math.abs(OFFSET), 0, 0, 0);
 
-		const RESET_TIME = Math.min(
-			...[
-				tomorrow.getTime(),
-				today.getTime(),
-			].filter(time => time >= Date.now()),
-		);
+		const RESET_TIME = Math.min(...[tomorrow.getTime(), today.getTime()].filter((time) => time >= Date.now()));
 
-		return `item: ${FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]}, changes ${Formatters.time(new Date(RESET_TIME), Formatters.TimestampStyles.RelativeTime)}`;
+		return `item: ${
+			FetchurCommand.FETCHUR_ITEMS[(date.getUTCDate() - 1) % FetchurCommand.FETCHUR_ITEMS.length]
+		}, changes ${Formatters.time(new Date(RESET_TIME), Formatters.TimestampStyles.RelativeTime)}`;
 	}
 
 	/**

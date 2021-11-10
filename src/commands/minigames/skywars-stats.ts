@@ -7,7 +7,6 @@ import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
-
 /* eslint-disable camelcase */
 interface SkyWarsStats {
 	wins: number;
@@ -20,19 +19,22 @@ interface SkyWarsStats {
 }
 /* eslint-enable camelcase */
 
-
 export default class SkyWarsStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('shows a player\'s SkyWars stats')
-				.addStringOption(optionalIgnOption),
-			cooldown: seconds(1),
-		}, {
-			aliases: [ 'swstats' ],
-			args: false,
-			usage: '<`IGN`>',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription("shows a player's SkyWars stats")
+					.addStringOption(optionalIgnOption),
+				cooldown: seconds(1),
+			},
+			{
+				aliases: ['swstats'],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	override _generateReply({ ign, playerData }: FetchedData) {

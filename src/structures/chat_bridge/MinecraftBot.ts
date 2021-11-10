@@ -6,7 +6,6 @@ import { logger, readJSFiles } from '../../functions';
 import type { ClientOptions } from 'minecraft-protocol';
 import type { ChatBridge } from './ChatBridge';
 
-
 /**
  * returns a mc bot client
  * @param chatBridge
@@ -24,10 +23,7 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 		const event = (await import(pathToFileURL(fullPath).href)).default;
 		const EVENT_NAME = basename(fullPath, '.js');
 
-		bot[SPAWN_EVENTS.has(EVENT_NAME as any) ? 'once' : 'on'](
-			EVENT_NAME,
-			event.bind(null, chatBridge),
-		);
+		bot[SPAWN_EVENTS.has(EVENT_NAME as any) ? 'once' : 'on'](EVENT_NAME, event.bind(null, chatBridge));
 
 		++eventCount;
 	}

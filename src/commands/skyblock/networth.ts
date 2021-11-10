@@ -9,20 +9,23 @@ import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMes
 import type { SkyBlockProfile } from '../../functions';
 import type { MaroPlayerData } from '../../structures/MaroClient';
 
-
 export default class NetworthCommand extends BaseWeightCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('shows a player\'s networth, provided by maro')
-				.addStringOption(optionalIgnOption)
-				.addStringOption(skyblockProfileOption),
-			cooldown: seconds(1),
-		}, {
-			aliases: [ 'nw' ],
-			args: false,
-			usage: '<`IGN`> <`profile` name>',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription("shows a player's networth, provided by maro")
+					.addStringOption(optionalIgnOption)
+					.addStringOption(skyblockProfileOption),
+				cooldown: seconds(1),
+			},
+			{
+				aliases: ['nw'],
+				args: false,
+				usage: '<`IGN`> <`profile` name>',
+			},
+		);
 	}
 
 	/**
@@ -30,10 +33,14 @@ export default class NetworthCommand extends BaseWeightCommand {
 	 * @param ignOrUuid command arguments
 	 * @param profileName
 	 */
-	override async _generateReply(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid?: string | null, profileName?: string | null) {
+	override async _generateReply(
+		ctx: CommandInteraction | HypixelUserMessage,
+		ignOrUuid?: string | null,
+		profileName?: string | null,
+	) {
 		try {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
-			const profiles = await hypixel.skyblock.profiles.uuid(uuid) as SkyBlockProfile[];
+			const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
 
 			if (!profiles?.length) return `\`${ign}\` has no SkyBlock profiles`;
 

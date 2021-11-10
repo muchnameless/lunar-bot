@@ -5,7 +5,6 @@ import PingMute from './pingmute';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Player } from '../../structures/database/models/Player';
 
-
 export default class PingUnmuteCommand extends PingMute {
 	constructor(context: CommandContext) {
 		super(context, {

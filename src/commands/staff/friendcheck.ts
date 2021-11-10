@@ -10,7 +10,6 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class FriendCheckCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -27,7 +26,9 @@ export default class FriendCheckCommand extends ApplicationCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
-		const friends = new Set((await hypixel.friends.uuid(uuid)).map(x => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender)));
+		const friends = new Set(
+			(await hypixel.friends.uuid(uuid)).map((x) => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender)),
+		);
 
 		let mutualFriends = '';
 
@@ -37,14 +38,11 @@ export default class FriendCheckCommand extends ApplicationCommand {
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [
-				this.client.defaultEmbed
-					.setTitle(`${IGN}'s friends in the guild`)
-					.setDescription(Formatters.codeBlock(stripIndents`
-						${trim(
-							mutualFriends,
-							EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length,
-						)}
-					`)),
+				this.client.defaultEmbed.setTitle(`${IGN}'s friends in the guild`).setDescription(
+					Formatters.codeBlock(stripIndents`
+						${trim(mutualFriends, EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length)}
+					`),
+				),
 			],
 		});
 	}

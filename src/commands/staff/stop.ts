@@ -4,12 +4,10 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class StopCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('stop the bot. It should restart immediatly'),
+			slash: new SlashCommandBuilder().setDescription('stop the bot. It should restart immediatly'),
 			cooldown: 0,
 		});
 	}

@@ -7,12 +7,10 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export class CompetitionCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('WIP'),
+			slash: new SlashCommandBuilder().setDescription('WIP'),
 			cooldown: seconds(1),
 		});
 	}
@@ -20,7 +18,7 @@ export class CompetitionCommand extends ApplicationCommand {
 	/**
 	 * possible types for a competition
 	 */
-	static COMPETITION_TYPES = [ ...SKILLS, 'slayer', ...DUNGEON_TYPES ];
+	static COMPETITION_TYPES = [...SKILLS, 'slayer', ...DUNGEON_TYPES];
 
 	/**
 	 * execute the command
@@ -28,7 +26,7 @@ export class CompetitionCommand extends ApplicationCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		const collector = interaction.channel!.createMessageCollector({
-			filter: msg => msg.author.id === interaction.user.id,
+			filter: (msg) => msg.author.id === interaction.user.id,
 			idle: seconds(30),
 		});
 
@@ -92,7 +90,10 @@ export class CompetitionCommand extends ApplicationCommand {
 				}
 			} while (!endingTime);
 
-			await InteractionUtil.reply(interaction, `type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`);
+			await InteractionUtil.reply(
+				interaction,
+				`type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
+			);
 		} catch (error) {
 			logger.error(error);
 			await InteractionUtil.reply(interaction, 'the command has been cancelled');

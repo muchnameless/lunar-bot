@@ -1,7 +1,6 @@
 import { days, hours } from '../functions';
 import type { ArrayElement } from '../types/util';
 
-
 /**
  * misc
  */
@@ -34,7 +33,6 @@ export const PROFILE_NAMES = [
 
 export const STATS_URL_BASE = 'https://sky.shiiyu.moe/stats/';
 
-
 /**
  * SKILLS
  */
@@ -50,10 +48,7 @@ export const SKILLS = [
 	'alchemy',
 ] as const;
 
-export const COSMETIC_SKILLS = [
-	'carpentry',
-	'runecrafting',
-] as const;
+export const COSMETIC_SKILLS = ['carpentry', 'runecrafting'] as const;
 
 export const SKILL_ACHIEVEMENTS = {
 	farming: 'skyblock_harvester',
@@ -132,8 +127,14 @@ export const SKILL_XP_PAST_50 = {
 	60: 7_000_000,
 } as const;
 
-export const SKILL_XP_TOTAL = Object.fromEntries([ ...Object.entries(SKILL_XP), ...Object.entries(SKILL_XP_PAST_50) ]
-	.map(([ level ], index) => [ level, [ ...Object.values(SKILL_XP), ...Object.values(SKILL_XP_PAST_50) ].slice(0, index + 1).reduce((acc, curr) => acc + curr, 0) ]));
+export const SKILL_XP_TOTAL = Object.fromEntries(
+	[...Object.entries(SKILL_XP), ...Object.entries(SKILL_XP_PAST_50)].map(([level], index) => [
+		level,
+		[...Object.values(SKILL_XP), ...Object.values(SKILL_XP_PAST_50)]
+			.slice(0, index + 1)
+			.reduce((acc, curr) => acc + curr, 0),
+	]),
+);
 
 export const RUNECRAFTING_XP = {
 	1: 50,
@@ -177,7 +178,6 @@ const SKILL_CAP = {
 } as const;
 
 export type SkillTypes = ArrayElement<typeof SKILLS> | ArrayElement<typeof COSMETIC_SKILLS>;
-
 
 /**
  * dungeons
@@ -236,13 +236,14 @@ export const DUNGEON_XP = {
 	50: 116_250_000,
 } as const;
 
-export const DUNGEON_XP_TOTAL = Object.fromEntries(Object.entries(DUNGEON_XP)
-	.map(([ level ], index) => [
+export const DUNGEON_XP_TOTAL = Object.fromEntries(
+	Object.entries(DUNGEON_XP).map(([level], index) => [
 		level,
 		Object.values(DUNGEON_XP)
 			.slice(0, index + 1)
 			.reduce((acc, curr) => acc + curr, 0),
-	]));
+	]),
+);
 
 const DUNGEON_CAP = {
 	catacombs: 50,
@@ -253,19 +254,11 @@ const DUNGEON_CAP = {
 	tank: 50,
 } as const;
 
-export const DUNGEON_TYPES = [
-	'catacombs',
-] as const;
+export const DUNGEON_TYPES = ['catacombs'] as const;
 
-export const DUNGEON_CLASSES = [
-	'healer',
-	'mage',
-	'berserk',
-	'archer',
-	'tank',
-] as const;
+export const DUNGEON_CLASSES = ['healer', 'mage', 'berserk', 'archer', 'tank'] as const;
 
-export const DUNGEON_TYPES_AND_CLASSES = [ ...DUNGEON_TYPES, ...DUNGEON_CLASSES ] as const;
+export const DUNGEON_TYPES_AND_CLASSES = [...DUNGEON_TYPES, ...DUNGEON_CLASSES] as const;
 
 export type DungeonTypes = ArrayElement<typeof DUNGEON_TYPES_AND_CLASSES>;
 
@@ -273,12 +266,7 @@ export type DungeonTypes = ArrayElement<typeof DUNGEON_TYPES_AND_CLASSES>;
  * SLAYERS
  */
 
-export const SLAYERS = [
-	'zombie',
-	'spider',
-	'wolf',
-	'enderman',
-] as const;
+export const SLAYERS = ['zombie', 'spider', 'wolf', 'enderman'] as const;
 
 export type SlayerTypes = ArrayElement<typeof SLAYERS>;
 

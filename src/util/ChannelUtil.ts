@@ -13,11 +13,9 @@ import type {
 } from 'discord.js';
 import type { LunarClient } from '../structures/LunarClient';
 
-
 export interface SendOptions extends MessageOptions {
 	rejectOnError?: boolean;
 }
-
 
 export default class ChannelUtil extends null {
 	static DM_PERMISSIONS = new Permissions()
@@ -79,7 +77,11 @@ export default class ChannelUtil extends null {
 				return false;
 
 			default:
-				return (channel as GuildChannel).parentId === (channel.client as LunarClient).config.get('TICKET_CHANNELS_CATEGORY_ID') && /-\d+$/.test((channel as GuildChannel).name);
+				return (
+					(channel as GuildChannel).parentId ===
+						(channel.client as LunarClient).config.get('TICKET_CHANNELS_CATEGORY_ID') &&
+					/-\d+$/.test((channel as GuildChannel).name)
+				);
 		}
 	}
 
@@ -89,26 +91,30 @@ export default class ChannelUtil extends null {
 	 * @param IdOrIds
 	 */
 	static async deleteMessages(channel: TextBasedChannels | null, IdOrIds: Snowflake | Snowflake[]) {
-		if (!channel?.isText()) return logger.warn(`[DELETE MESSAGES]: ${this.logInfo(channel)} is not a text based channel`);
+		if (!channel?.isText())
+			return logger.warn(`[DELETE MESSAGES]: ${this.logInfo(channel)} is not a text based channel`);
 
 		try {
 			switch (channel.type) {
 				case 'DM':
-					if (Array.isArray(IdOrIds)) return await Promise.all(IdOrIds.map(id => channel.messages.delete(id)));
+					if (Array.isArray(IdOrIds)) return await Promise.all(IdOrIds.map((id) => channel.messages.delete(id)));
 
 					return await channel.messages.delete(IdOrIds);
 
 				default: {
 					if (Array.isArray(IdOrIds)) {
-						if (this.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) return await channel.bulkDelete(IdOrIds);
+						if (this.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES))
+							return await channel.bulkDelete(IdOrIds);
 
-						return await Promise.all(IdOrIds.map((id) => {
-							const message = channel.messages.cache.get(id);
+						return await Promise.all(
+							IdOrIds.map((id) => {
+								const message = channel.messages.cache.get(id);
 
-							if (message?.deleted || !(message?.deletable ?? true)) return null;
+								if (message?.deleted || !(message?.deletable ?? true)) return null;
 
-							return channel.messages.delete(id);
-						}));
+								return channel.messages.delete(id);
+							}),
+						);
 					}
 
 					const message = channel.messages.cache.get(IdOrIds);
@@ -127,7 +133,10 @@ export default class ChannelUtil extends null {
 	 * @param channel
 	 * @param contentOrOptions
 	 */
-	static async send(channel: TextBasedChannels, contentOrOptions: SendOptions & { rejectOnError: true }): Promise<Message>;
+	static async send(
+		channel: TextBasedChannels,
+		contentOrOptions: SendOptions & { rejectOnError: true },
+	): Promise<Message>;
 	static async send(channel: TextBasedChannels, contentOrOptions: string | SendOptions): Promise<Message | null>;
 	static async send(channel: TextBasedChannels, contentOrOptions: string | SendOptions) {
 		// guild -> requires permission
@@ -143,10 +152,19 @@ export default class ChannelUtil extends null {
 		if (!this.botPermissions(channel).has(requiredChannelPermissions)) {
 			const missingChannelPermissions = this.botPermissions(channel)
 				.missing(requiredChannelPermissions)
-				.map(permission => `'${permission}'`);
+				.map((permission) => `'${permission}'`);
 
-			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw new Error(commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${this.logInfo(channel)}`);
-			logger.warn(commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${missingChannelPermissions?.length === 1 ? '' : 's'} in ${this.logInfo(channel)}`);
+			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError)
+				throw new Error(
+					commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${
+						missingChannelPermissions?.length === 1 ? '' : 's'
+					} in ${this.logInfo(channel)}`,
+				);
+			logger.warn(
+				commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${
+					missingChannelPermissions?.length === 1 ? '' : 's'
+				} in ${this.logInfo(channel)}`,
+			);
 			return null;
 		}
 

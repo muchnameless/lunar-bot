@@ -5,7 +5,6 @@ import MessageCreateEvent from './messageCreate';
 import type { Message } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 
-
 export default class MessageUpdateEvent extends MessageCreateEvent {
 	constructor(context: EventContext) {
 		super(context, {
@@ -22,10 +21,11 @@ export default class MessageUpdateEvent extends MessageCreateEvent {
 	// @ts-expect-error
 	override async run(oldMessage: Message, newMessage: Message) {
 		if (
-			Date.now() - newMessage.createdTimestamp >= minutes(10) // original message is older than 10 min
-			|| (oldMessage.content === newMessage.content && newMessage.content) // pinned or embed added
-			|| !ChannelUtil.botPermissions(newMessage.channel).has(Permissions.FLAGS.VIEW_CHANNEL) // slash cmd response edits
-		) return;
+			Date.now() - newMessage.createdTimestamp >= minutes(10) || // original message is older than 10 min
+			(oldMessage.content === newMessage.content && newMessage.content) || // pinned or embed added
+			!ChannelUtil.botPermissions(newMessage.channel).has(Permissions.FLAGS.VIEW_CHANNEL) // slash cmd response edits
+		)
+			return;
 
 		if (newMessage.partial) {
 			try {

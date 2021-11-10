@@ -7,7 +7,6 @@ import { FetchError } from './errors/FetchError';
 import { logger, seconds } from '../functions';
 import type { RequestInit, Response } from 'node-fetch';
 
-
 export interface ImageData {
 	/* eslint-disable camelcase */
 	id: string;
@@ -75,7 +74,6 @@ interface ImgurClientOptions {
 	rateLimitedWaitTime?: number;
 }
 
-
 export class ImgurClient {
 	#authorisation!: string;
 	#baseURL = 'https://api.imgur.com/3/';
@@ -103,7 +101,10 @@ export class ImgurClient {
 	 * @param clientId
 	 * @param options
 	 */
-	constructor(clientId: string, { cache, timeout, retries, rateLimitOffset, rateLimitedWaitTime }: ImgurClientOptions = {}) {
+	constructor(
+		clientId: string,
+		{ cache, timeout, retries, rateLimitOffset, rateLimitedWaitTime }: ImgurClientOptions = {},
+	) {
 		this.authorisation = clientId;
 		this.cache = cache;
 		this.timeout = timeout ?? seconds(10);
@@ -114,7 +115,7 @@ export class ImgurClient {
 		// restore cached rateLimit data
 		(async () => {
 			try {
-				const data = await cache?.get('ratelimits') as { rateLimit: RateLimitData; postRateLimit: PostRateLimitData; };
+				const data = (await cache?.get('ratelimits')) as { rateLimit: RateLimitData; postRateLimit: PostRateLimitData };
 
 				// no cached data or rateLimit data is already present
 				if (!data || this.rateLimit.userlimit !== null) return;
@@ -170,7 +171,8 @@ export class ImgurClient {
 			{
 				method: 'POST',
 				body: form,
-			}, {
+			},
+			{
 				checkRateLimit: true,
 				cacheKey: url,
 			},
@@ -182,7 +184,11 @@ export class ImgurClient {
 	 * @param requestOptions
 	 * @param options
 	 */
-	async request(endpoint: string, requestOptions: RequestInit, { checkRateLimit = true, cacheKey }: { checkRateLimit?: boolean; cacheKey: string; }) {
+	async request(
+		endpoint: string,
+		requestOptions: RequestInit,
+		{ checkRateLimit = true, cacheKey }: { checkRateLimit?: boolean; cacheKey: string },
+	) {
 		const cached = await this.cache?.get(cacheKey);
 		if (cached) return cached;
 
@@ -194,7 +200,8 @@ export class ImgurClient {
 				if (this.rateLimit.userremaining === 0) {
 					const RESET_TIME = this.rateLimit.userreset! - Date.now();
 
-					if (RESET_TIME > this.rateLimitedWaitTime) throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					if (RESET_TIME > this.rateLimitedWaitTime)
+						throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
@@ -203,14 +210,16 @@ export class ImgurClient {
 
 					const RESET_TIME = this.rateLimit.clientreset - Date.now();
 
-					if (RESET_TIME > this.rateLimitedWaitTime) throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					if (RESET_TIME > this.rateLimitedWaitTime)
+						throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
 				if ((requestOptions.method === 'POST' || !requestOptions.method) && this.postRateLimit.remaining === 0) {
 					const RESET_TIME = this.postRateLimit.reset! - Date.now();
 
-					if (RESET_TIME > this.rateLimitedWaitTime) throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					if (RESET_TIME > this.rateLimitedWaitTime)
+						throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 			}
@@ -219,9 +228,7 @@ export class ImgurClient {
 
 			// get server time
 			const date = res.headers.get('date');
-			const NOW = date
-				? Date.parse(date) || Date.now()
-				: Date.now();
+			const NOW = date ? Date.parse(date) || Date.now() : Date.now();
 
 			// get ratelimit headers
 			for (const type of Object.keys(this.rateLimit)) {
@@ -269,17 +276,14 @@ export class ImgurClient {
 		const timeout = setTimeout(() => controller.abort(), this.timeout);
 
 		try {
-			return await fetch(
-				`${this.#baseURL}${endpoint}`,
-				{
-					headers: {
-						Authorization: this.#authorisation,
-						...headers,
-					},
-					signal: controller.signal,
-					...options,
+			return await fetch(`${this.#baseURL}${endpoint}`, {
+				headers: {
+					Authorization: this.#authorisation,
+					...headers,
 				},
-			);
+				signal: controller.signal,
+				...options,
+			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {

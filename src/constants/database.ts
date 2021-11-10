@@ -17,7 +17,6 @@ import { days, hours, minutes, seconds } from '../functions';
 import type { HexColorString, Snowflake } from 'discord.js';
 import type { ArrayElement } from '../types/util';
 
-
 // generate default config
 export const DEFAULT_CONFIG = {
 	AUTO_GUILD_RANKS: true,
@@ -54,7 +53,7 @@ export const DEFAULT_CONFIG = {
 	GUILD_ROLE_ID: null,
 	HYPIXEL_API_ERROR: false,
 	HYPIXEL_SKYBLOCK_API_ERROR: false,
-	IMGUR_UPLOADER_CONTENT_TYPE: [ 'image' ],
+	IMGUR_UPLOADER_CONTENT_TYPE: ['image'],
 	IMGUR_UPLOADER_ENABLED: true,
 	INACTIVE_ROLE_TIME: days(7),
 	INFRACTIONS_EXPIRATION_TIME: minutes(30),
@@ -78,15 +77,15 @@ export const DEFAULT_CONFIG = {
 	MUTED_ROLE_ID: null,
 	NUMBER_FORMAT: 'fr-FR',
 	PLAYER_DB_UPDATE_ENABLED: true,
-	PREFIXES: [ '!', '/' ],
+	PREFIXES: ['!', '/'],
 	PURGE_LIST_OFFSET: 7,
-	REPLY_CONFIRMATION: [ 'y', 'ye', 'yes' ],
+	REPLY_CONFIRMATION: ['y', 'ye', 'yes'],
 	SENIOR_STAFF_ROLE_ID: null,
 	SHRUG_ROLE_ID: null,
 	SKILLS_AVERAGE_STATS_CHANNEL_ID: null,
 	SLAYER_AVERAGE_STATS_CHANNEL_ID: null,
 	TAX_AMOUNT: 1_000_000,
-	TAX_AUCTIONS_ITEMS: [ 'Stone Bricks', 'Stone Brick Slab', 'Spirit Leap' ],
+	TAX_AUCTIONS_ITEMS: ['Stone Bricks', 'Stone Brick Slab', 'Spirit Leap'],
 	TAX_AUCTIONS_START_TIME: Number.POSITIVE_INFINITY,
 	TAX_CHANNEL_ID: null,
 	TAX_MESSAGE_ID: null,
@@ -101,12 +100,12 @@ export const DEFAULT_CONFIG = {
 	XP_TRACKING_ENABLED: true,
 
 	// roles
-	...Object.fromEntries(DELIMITER_ROLES.map(type => [ `${type}_DELIMITER_ROLE_ID`, null ])), // delimiter
-	...Object.fromEntries(SKILL_AVERAGE_ROLES.map(level => [ `AVERAGE_LVL_${level}_ROLE_ID`, null ])), // skill average
-	...Object.fromEntries(SKILLS.flatMap(skill => SKILL_ROLES.map(level => [ `${skill}_${level}_ROLE_ID`, null ]))), // individual SKILLS
-	...Object.fromEntries(SLAYER_TOTAL_ROLES.map(level => [ `SLAYER_ALL_${level}_ROLE_ID`, null ])), // total slayer
-	...Object.fromEntries(SLAYERS.flatMap(slayer => SLAYER_ROLES.map(level => [ `${slayer}_${level}_ROLE_ID`, null ]))), // individual slayer
-	...Object.fromEntries(CATACOMBS_ROLES.map(level => [ `CATACOMBS_${level}_ROLE_ID`, null ])), // catacombs
+	...Object.fromEntries(DELIMITER_ROLES.map((type) => [`${type}_DELIMITER_ROLE_ID`, null])), // delimiter
+	...Object.fromEntries(SKILL_AVERAGE_ROLES.map((level) => [`AVERAGE_LVL_${level}_ROLE_ID`, null])), // skill average
+	...Object.fromEntries(SKILLS.flatMap((skill) => SKILL_ROLES.map((level) => [`${skill}_${level}_ROLE_ID`, null]))), // individual SKILLS
+	...Object.fromEntries(SLAYER_TOTAL_ROLES.map((level) => [`SLAYER_ALL_${level}_ROLE_ID`, null])), // total slayer
+	...Object.fromEntries(SLAYERS.flatMap((slayer) => SLAYER_ROLES.map((level) => [`${slayer}_${level}_ROLE_ID`, null]))), // individual slayer
+	...Object.fromEntries(CATACOMBS_ROLES.map((level) => [`CATACOMBS_${level}_ROLE_ID`, null])), // catacombs
 } as const;
 
 export type ConfigValues = {
@@ -163,8 +162,7 @@ export type ConfigValues = {
 	USER_INPUT_MAX_RETRIES: number;
 	WHALECUM_PASS_WEIGHT: number;
 	XP_TRACKING_ENABLED: boolean;
-}
-
+};
 
 export const OFFSET_FLAGS = {
 	COMPETITION_END: 'CompetitionEnd',
@@ -176,13 +174,7 @@ export const OFFSET_FLAGS = {
 	DAY: 'day',
 } as const;
 
-export const XP_OFFSETS = [
-	'CompetitionStart',
-	'CompetitionEnd',
-	'OffsetMayor',
-	'OffsetWeek',
-	'OffsetMonth',
-] as const;
+export const XP_OFFSETS = ['CompetitionStart', 'CompetitionEnd', 'OffsetMayor', 'OffsetWeek', 'OffsetMonth'] as const;
 
 export const XP_OFFSETS_SHORT = {
 	competition: 'CompetitionStart',
@@ -214,17 +206,18 @@ export const XP_OFFSETS_TIME = {
 
 export type XPOffsets = ArrayElement<typeof XP_OFFSETS> | '';
 
-
-export const SKYBLOCK_XP_TYPES = [ ...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES ] as const;
-export const XP_TYPES = [ ...SKYBLOCK_XP_TYPES, 'guild' ] as const;
-export const XP_AND_DATA_TYPES = [ ...XP_TYPES, ...DUNGEON_TYPES.flatMap(type => [ `${type}Completions`, `${type}MasterCompletions` ] as const) ] as const;
+export const SKYBLOCK_XP_TYPES = [...SKILLS, ...COSMETIC_SKILLS, ...SLAYERS, ...DUNGEON_TYPES_AND_CLASSES] as const;
+export const XP_TYPES = [...SKYBLOCK_XP_TYPES, 'guild'] as const;
+export const XP_AND_DATA_TYPES = [
+	...XP_TYPES,
+	...DUNGEON_TYPES.flatMap((type) => [`${type}Completions`, `${type}MasterCompletions`] as const),
+] as const;
 
 const XP_TYPES_SET = new Set(XP_TYPES);
 export const isXPType = (type: unknown): type is XPTypes => XP_TYPES_SET.has(type as XPTypes);
 
 export type XPTypes = ArrayElement<typeof XP_TYPES>;
 export type XPAndDataTypes = ArrayElement<typeof XP_AND_DATA_TYPES>;
-
 
 export const LEADERBOARD_XP_TYPES = [
 	'lily-weight',
@@ -238,10 +231,8 @@ export const LEADERBOARD_XP_TYPES = [
 	'guild',
 ] as const;
 
-
 // IGNs
 export const UNKNOWN_IGN = 'UNKNOWN_IGN';
-
 
 // guild Ids
 export const GUILD_ID_ERROR = 'ERROR';

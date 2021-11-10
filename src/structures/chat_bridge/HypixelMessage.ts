@@ -1,6 +1,12 @@
 import { regExpEsc } from '@sapphire/utilities';
 import loader from 'prismarine-chat';
-import { INVISIBLE_CHARACTER_REGEXP, MC_CLIENT_VERSION, MESSAGE_POSITIONS, MESSAGE_TYPES, spamMessages } from './constants';
+import {
+	INVISIBLE_CHARACTER_REGEXP,
+	MC_CLIENT_VERSION,
+	MESSAGE_POSITIONS,
+	MESSAGE_TYPES,
+	spamMessages,
+} from './constants';
 import { NEVER_MATCHING_REGEXP, NO_PING_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { MessageUtil } from '../../util';
@@ -13,31 +19,30 @@ import type { ChatPacket } from './bot_events/chat';
 import type { BridgeCommand } from '../commands/BridgeCommand';
 import type { DualCommand } from '../commands/DualCommand';
 
-
 export type HypixelMessageType = keyof typeof MESSAGE_TYPES;
 
 type CommandData = {
-	name: string | null,
-	command: BridgeCommand | DualCommand | null,
-	args: string[],
-	prefix: string | null,
+	name: string | null;
+	command: BridgeCommand | DualCommand | null;
+	args: string[];
+	prefix: string | null;
 };
 
-type AwaitConfirmationOptions = Partial<BroadcastOptions> & Partial<ChatOptions> & {
-	question?: string;
-	/** time in milliseconds to wait for a response */
-	time?: number;
-	errorMessage?: string;
-};
+type AwaitConfirmationOptions = Partial<BroadcastOptions> &
+	Partial<ChatOptions> & {
+		question?: string;
+		/** time in milliseconds to wait for a response */
+		time?: number;
+		errorMessage?: string;
+	};
 
 export interface HypixelUserMessage extends HypixelMessage {
-	position: 'CHAT',
+	position: 'CHAT';
 	type: NonNullable<HypixelMessage['type']>;
 	author: NonNullable<HypixelMessage['author']>;
 	spam: false;
 	commandData: NonNullable<HypixelMessage['commandData']>;
 }
-
 
 export const ChatMessage = loader(MC_CLIENT_VERSION);
 
@@ -92,29 +97,33 @@ export class HypixelMessage {
 		 * Officer > [HypixelRank] ign [GuildRank]: message
 		 * From [HypixelRank] ign: message
 		 */
-		const matched = this.cleanedContent.match(/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)])?: /);
+		const matched = this.cleanedContent.match(
+			/^(?:(?<type>Guild|Officer|Party) > |(?<whisper>From|To) )(?:\[.+?\] )?(?<ign>\w+)(?: \[(?<guildRank>\w+)\])?: /,
+		);
 
 		if (matched) {
-			this.type = (matched.groups!.type?.toUpperCase() as HypixelMessageType ?? (matched.groups!.whisper ? MESSAGE_TYPES.WHISPER : null));
+			this.type =
+				(matched.groups!.type?.toUpperCase() as HypixelMessageType) ??
+				(matched.groups!.whisper ? MESSAGE_TYPES.WHISPER : null);
 			this.author = new HypixelMessageAuthor(
 				this.chatBridge,
 				matched.groups!.whisper !== 'To'
 					? {
-						ign: matched.groups!.ign,
-						guildRank: matched.groups!.guildRank,
-						uuid: matched.groups!.type
-							// clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
-							? (this.prismarineMessage
-								// @ts-expect-error
-								.extra
-								?.[0]?.clickEvent?.value as string).slice('/viewprofile '.length).replaceAll('-', '')
-							: null,
-					}
+							ign: matched.groups!.ign,
+							guildRank: matched.groups!.guildRank,
+							uuid: matched.groups!.type
+								? // clickEvent: { action: 'run_command', value: '/viewprofile 2144e244-7653-4635-8245-a63d8b276786' }
+								  // @ts-expect-error
+								  (this.prismarineMessage.extra?.[0]?.clickEvent?.value as string)
+										.slice('/viewprofile '.length)
+										.replaceAll('-', '')
+								: null,
+					  }
 					: {
-						ign: this.chatBridge.bot?.username ?? UNKNOWN_IGN,
-						guildRank: null,
-						uuid: this.chatBridge.minecraft.botUuid,
-					},
+							ign: this.chatBridge.bot?.username ?? UNKNOWN_IGN,
+							guildRank: null,
+							uuid: this.chatBridge.minecraft.botUuid,
+					  },
 			);
 			this.content = this.cleanedContent.slice(matched[0].length).trimStart();
 			this.spam = false;
@@ -125,13 +134,14 @@ export class HypixelMessage {
 				return;
 			}
 
-			const prefixMatched = new RegExp(
-				`^(?:${[
-					...this.client.config.get('PREFIXES').map(x => regExpEsc(x)), // prefixes
-					`@${this.chatBridge.bot?.username ?? NEVER_MATCHING_REGEXP}`, // @Bot-IGN
-				].join('|')})`,
-				'i',
-			).exec(this.content)?.[0] ?? null; // PREFIXES, @mention
+			const prefixMatched =
+				new RegExp(
+					`^(?:${[
+						...this.client.config.get('PREFIXES').map((x) => regExpEsc(x)), // prefixes
+						`@${this.chatBridge.bot?.username ?? NEVER_MATCHING_REGEXP}`, // @Bot-IGN
+					].join('|')})`,
+					'i',
+				).exec(this.content)?.[0] ?? null; // PREFIXES, @mention
 
 			const args: string[] = this.content // command arguments
 				.slice(prefixMatched?.length ?? 0)
@@ -140,18 +150,20 @@ export class HypixelMessage {
 			const COMMAND_NAME = args.shift(); // extract first word
 
 			// no command, only ping or prefix
-			this.commandData = (!prefixMatched && this.type !== MESSAGE_TYPES.WHISPER) || !COMMAND_NAME
-				? {
-					name: null,
-					command: null,
-					args,
-					prefix: null,
-				} : {
-					name: COMMAND_NAME,
-					command: this.client.chatBridges.commands.getByName(COMMAND_NAME.toLowerCase()),
-					args,
-					prefix: prefixMatched,
-				};
+			this.commandData =
+				(!prefixMatched && this.type !== MESSAGE_TYPES.WHISPER) || !COMMAND_NAME
+					? {
+							name: null,
+							command: null,
+							args,
+							prefix: null,
+					  }
+					: {
+							name: COMMAND_NAME,
+							command: this.client.chatBridges.commands.getByName(COMMAND_NAME.toLowerCase()),
+							args,
+							prefix: prefixMatched,
+					  };
 		} else {
 			this.type = null;
 			this.author = null;
@@ -168,8 +180,8 @@ export class HypixelMessage {
 	get prefixReplacedContent() {
 		return this.commandData?.command
 			? this.content
-				.replace(this.commandData.prefix!, '/')
-				.replace(this.commandData.name!, this.commandData.command.name)
+					.replace(this.commandData.prefix!, '/')
+					.replace(this.commandData.name!, this.commandData.command.name)
 			: this.content;
 	}
 
@@ -234,16 +246,20 @@ export class HypixelMessage {
 	 * replies in game (and on discord if guild chat) to the message
 	 * @param contentOrOptions
 	 */
-	async reply(contentOrOptions: string | ChatOptions | BroadcastOptions & ChatOptions): Promise<boolean | [ boolean, DiscordMessage | null ]> {
-		const { ephemeral = false, ...options } = typeof contentOrOptions === 'string'
-			? { content: contentOrOptions } as ChatOptions | BroadcastOptions & ChatOptions
-			: contentOrOptions;
+	async reply(
+		contentOrOptions: string | ChatOptions | (BroadcastOptions & ChatOptions),
+	): Promise<boolean | [boolean, DiscordMessage | null]> {
+		const { ephemeral = false, ...options } =
+			typeof contentOrOptions === 'string'
+				? ({ content: contentOrOptions } as ChatOptions | (BroadcastOptions & ChatOptions))
+				: contentOrOptions;
 
 		// to be compatible to Interactions
-		if (ephemeral) return this.author!.send({
-			maxParts: Number.POSITIVE_INFINITY,
-			...options,
-		});
+		if (ephemeral)
+			return this.author!.send({
+				maxParts: Number.POSITIVE_INFINITY,
+				...options,
+			});
 
 		switch (this.type) {
 			case MESSAGE_TYPES.GUILD:
@@ -257,7 +273,8 @@ export class HypixelMessage {
 				});
 
 				// DM author the message if sending to gchat failed
-				if (!result[0]) this.author!.send(`an error occurred while replying in ${this.type} chat\n${options.content ?? ''}`);
+				if (!result[0])
+					this.author!.send(`an error occurred while replying in ${this.type} chat\n${options.content ?? ''}`);
 
 				return result;
 			}
@@ -292,18 +309,17 @@ export class HypixelMessage {
 				const { player, member } = this;
 				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook({
 					content: this.prefixReplacedContent,
-					username: member?.displayName
-						?? player?.ign
-						?? this.author.ign,
-					avatarURL: member?.displayAvatarURL({ dynamic: true })
-						?? await player?.imageURL
-						?? await mojang.ign(this.author.ign).then(
+					username: member?.displayName ?? player?.ign ?? this.author.ign,
+					avatarURL:
+						member?.displayAvatarURL({ dynamic: true }) ??
+						(await player?.imageURL) ??
+						(await mojang.ign(this.author.ign).then(
 							({ uuid }) => uuidToImgurBustURL(this.client, uuid),
-							error => logger.error(error, '[FORWARD TO DC]'),
-						)
-						?? (member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),
+							(error) => logger.error(error, '[FORWARD TO DC]'),
+						)) ??
+						(member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),
 					allowedMentions: {
-						parse: player?.hasDiscordPingPermission ? [ 'users' ] : [],
+						parse: player?.hasDiscordPingPermission ? ['users'] : [],
 					},
 				}));
 
@@ -311,7 +327,7 @@ export class HypixelMessage {
 				if (/<@&\d{17,19}>/.test(discordMessage.content)) {
 					this.author.send('you do not have permission to ping roles from in game chat');
 					MessageUtil.react(discordMessage, NO_PING_EMOJI);
-				} else if ((!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content))) {
+				} else if (!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content)) {
 					this.author.send('you do not have permission to ping users from in game chat');
 					MessageUtil.react(discordMessage, NO_PING_EMOJI);
 				}
@@ -334,8 +350,13 @@ export class HypixelMessage {
 	 * @param questionOrOptions
 	 */
 	async awaitConfirmation(questionOrOptions: string | AwaitConfirmationOptions = {}) {
-		const { question = 'confirm this action?', time = seconds(60), errorMessage = 'the command has been cancelled', ...options } = typeof questionOrOptions === 'string'
-			? { question: questionOrOptions } as AwaitConfirmationOptions
+		const {
+			question = 'confirm this action?',
+			time = seconds(60),
+			errorMessage = 'the command has been cancelled',
+			...options
+		} = typeof questionOrOptions === 'string'
+			? ({ question: questionOrOptions } as AwaitConfirmationOptions)
 			: questionOrOptions;
 
 		this.reply({
@@ -344,7 +365,7 @@ export class HypixelMessage {
 		});
 
 		const result = await this.chatBridge.minecraft.awaitMessages({
-			filter: hypixelMessage => hypixelMessage.author?.ign === this.author!.ign,
+			filter: (hypixelMessage) => hypixelMessage.author?.ign === this.author!.ign,
 			max: 1,
 			time,
 		});

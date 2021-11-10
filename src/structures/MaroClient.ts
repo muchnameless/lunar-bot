@@ -4,12 +4,13 @@ import type { RequestInit, Response } from 'node-fetch';
 import type { Components } from '@zikeji/hypixel';
 import { logger, seconds } from '../functions';
 
-
-export type MaroPlayerData = Components.Schemas.SkyBlockProfileMember & { banking?: Components.Schemas.SkyBlockProfileBanking };
+export type MaroPlayerData = Components.Schemas.SkyBlockProfileMember & {
+	banking?: Components.Schemas.SkyBlockProfileBanking;
+};
 
 interface MaroFetchOptions {
-	cache?: boolean,
-	force?: boolean,
+	cache?: boolean;
+	force?: boolean;
 }
 
 interface Cache {
@@ -24,13 +25,15 @@ interface MaroClientOptions {
 	fetchPlayerData?: FetchPlayerData;
 }
 
-export type MaroAPIResponse = {
-	status: 200;
-	data: unknown;
-} | {
-	status: number;
-	cause: string;
-}
+export type MaroAPIResponse =
+	| {
+			status: 200;
+			data: unknown;
+	  }
+	| {
+			status: number;
+			cause: string;
+	  };
 
 export interface MaroNetworthResponse {
 	total: number;
@@ -60,7 +63,7 @@ export interface MaroNetworthCategoryResponse {
 		wardrobe_inventory: NetworthCategory;
 		pets: NetworthCategory;
 		talismans: NetworthCategory;
-	},
+	};
 	bank?: number;
 	purse?: number;
 	sacks: number;
@@ -77,7 +80,6 @@ abstract class Method {
 	}
 }
 
-
 class Networth extends Method {
 	async categories(uuid: string, playerData?: MaroPlayerData, options?: MaroFetchOptions) {
 		return this.client.request(
@@ -85,7 +87,7 @@ class Networth extends Method {
 			{
 				method: 'POST',
 				body: JSON.stringify({
-					data: playerData ?? await this.client.fetchPlayerData(uuid),
+					data: playerData ?? (await this.client.fetchPlayerData(uuid)),
 				}),
 				headers: {
 					'Content-Type': 'application/json',
@@ -104,7 +106,7 @@ class Networth extends Method {
 			{
 				method: 'POST',
 				body: JSON.stringify({
-					data: playerData ?? await this.client.fetchPlayerData(uuid),
+					data: playerData ?? (await this.client.fetchPlayerData(uuid)),
 				}),
 				headers: {
 					'Content-Type': 'application/json',
@@ -117,7 +119,6 @@ class Networth extends Method {
 		) as Promise<MaroNetworthResponse>;
 	}
 }
-
 
 export class MaroClient {
 	cache?: Cache;
@@ -134,7 +135,11 @@ export class MaroClient {
 		this.cache = cache;
 		this.timeout = timeout ?? seconds(10);
 		this.retries = retries ?? 1;
-		this.fetchPlayerData = fetchPlayerData ?? (() => { throw new Error('no playerData argument provided and no fetchPlayerData method implemented'); });
+		this.fetchPlayerData =
+			fetchPlayerData ??
+			(() => {
+				throw new Error('no playerData argument provided and no fetchPlayerData method implemented');
+			});
 	}
 
 	/**
@@ -142,9 +147,13 @@ export class MaroClient {
 	 * @param requestOptions
 	 * @param options
 	 */
-	async request(endpoint: string, requestOptions: RequestInit, { cacheKey, force = false, cache = true }: MaroFetchOptions & { cacheKey: string; }) {
+	async request(
+		endpoint: string,
+		requestOptions: RequestInit,
+		{ cacheKey, force = false, cache = true }: MaroFetchOptions & { cacheKey: string },
+	) {
 		if (!force) {
-			const cached = await this.cache?.get(cacheKey) as Record<string, string>;
+			const cached = (await this.cache?.get(cacheKey)) as Record<string, string>;
 
 			if (cached) {
 				if (Reflect.has(cached, 'cause')) {
@@ -153,9 +162,7 @@ export class MaroClient {
 					throw new FetchError(
 						'MaroAPIError',
 						{
-							statusText: statusText
-								? `${statusText} (cached error)`
-								: 'cached error',
+							statusText: statusText ? `${statusText} (cached error)` : 'cached error',
 							...res,
 						},
 						cause,
@@ -169,8 +176,9 @@ export class MaroClient {
 		const res = await this.#request(endpoint, requestOptions);
 
 		switch (res.status) {
-			case 200: { // Successfull request
-				const { data } = await res.json() as { data: unknown; };
+			case 200: {
+				// Successfull request
+				const { data } = (await res.json()) as { data: unknown };
 
 				// cache successfull response
 				if (cache) this.cache?.set(cacheKey, data);
@@ -192,7 +200,7 @@ export class MaroClient {
 				let cause;
 
 				try {
-					({ cause } = await res.json() as { cause: string; });
+					({ cause } = (await res.json()) as { cause: string });
 				} catch (error) {
 					logger.error(error, '[MARO API]: json');
 				}
@@ -216,13 +224,10 @@ export class MaroClient {
 		const timeout = setTimeout(() => controller.abort(), this.timeout);
 
 		try {
-			return await fetch(
-					`${this.#baseURL}${endpoint}`,
-					{
-						signal: controller.signal,
-						...options,
-					},
-			);
+			return await fetch(`${this.#baseURL}${endpoint}`, {
+				signal: controller.signal,
+				...options,
+			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {

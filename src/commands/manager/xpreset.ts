@@ -9,7 +9,6 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class XpResetCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -34,12 +33,13 @@ export default class XpResetCommand extends ApplicationCommand {
 
 		// individual player
 		if (PLAYER_INPUT) {
-			const player = InteractionUtil.getPlayer(interaction)
-				?? await players.fetch({
+			const player =
+				InteractionUtil.getPlayer(interaction) ??
+				(await players.fetch({
 					guildId: null,
 					ign: { [Op.iLike]: PLAYER_INPUT },
 					cache: false,
-				});
+				}));
 
 			if (!player) return InteractionUtil.reply(interaction, `\`${PLAYER_INPUT}\` is not in the player db`);
 
@@ -49,11 +49,14 @@ export default class XpResetCommand extends ApplicationCommand {
 
 			result = `reset xp gained from \`${player}\``;
 
-		// all players
+			// all players
 		} else {
 			const PLAYER_COUNT = players.cache.size;
 
-			await InteractionUtil.awaitConfirmation(interaction, `reset competition xp gained from all ${PLAYER_COUNT} guild members?`);
+			await InteractionUtil.awaitConfirmation(
+				interaction,
+				`reset competition xp gained from all ${PLAYER_COUNT} guild members?`,
+			);
 
 			// delete players who left the guild
 			await players.sweepDb();
@@ -70,9 +73,10 @@ export default class XpResetCommand extends ApplicationCommand {
 		}
 
 		// logging
-		this.client.log(this.client.defaultEmbed
-			.setTitle('XP Tracking')
-			.setDescription(`${interaction.user.tag} | ${interaction.user} ${result}`),
+		this.client.log(
+			this.client.defaultEmbed
+				.setTitle('XP Tracking')
+				.setDescription(`${interaction.user.tag} | ${interaction.user} ${result}`),
 		);
 
 		return InteractionUtil.reply(interaction, result);

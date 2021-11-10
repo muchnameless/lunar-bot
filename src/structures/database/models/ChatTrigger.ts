@@ -6,14 +6,12 @@ import type { ModelStatic, Sequelize } from 'sequelize';
 import type { HypixelUserMessage } from '../../chat_bridge/HypixelMessage';
 import type { LunarClient } from '../../LunarClient';
 
-
 interface ChatTriggerAttributes {
 	regExpString: string;
 	response: string;
 	cooldown: number | null;
 	chatTypes: string[];
 }
-
 
 export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTriggerAttributes {
 	declare client: LunarClient;
@@ -31,42 +29,39 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 	constructor(...args: any[]) {
 		super(...args);
 
-		this._regExp = this.regExpString.includes('{')
-			? null
-			: new RegExp(this.regExpString, 'i');
-		this.timestamps = this.cooldown !== 0
-			? new Collection()
-			: null;
+		this._regExp = this.regExpString.includes('{') ? null : new RegExp(this.regExpString, 'i');
+		this.timestamps = this.cooldown !== 0 ? new Collection() : null;
 	}
 
 	static initialise(sequelize: Sequelize) {
-		return this.init({
-			regExpString: {
-				type: DataTypes.STRING,
-				allowNull: false,
-				set(value: string) {
-					(this as ChatTrigger)._regExp = value.includes('{')
-						? null
-						: new RegExp(value, 'i');
-					return this.setDataValue('regExpString', value);
+		return this.init(
+			{
+				regExpString: {
+					type: DataTypes.STRING,
+					allowNull: false,
+					set(value: string) {
+						(this as ChatTrigger)._regExp = value.includes('{') ? null : new RegExp(value, 'i');
+						return this.setDataValue('regExpString', value);
+					},
+				},
+				response: {
+					type: DataTypes.STRING,
+					allowNull: false,
+				},
+				cooldown: {
+					type: DataTypes.INTEGER,
+					allowNull: true,
+				},
+				chatTypes: {
+					type: DataTypes.ARRAY(DataTypes.STRING),
+					allowNull: false,
 				},
 			},
-			response: {
-				type: DataTypes.STRING,
-				allowNull: false,
+			{
+				sequelize,
+				modelName: 'ChatTrigger',
 			},
-			cooldown: {
-				type: DataTypes.INTEGER,
-				allowNull: true,
-			},
-			chatTypes: {
-				type: DataTypes.ARRAY(DataTypes.STRING),
-				allowNull: false,
-			},
-		}, {
-			sequelize,
-			modelName: 'ChatTrigger',
-		}) as ModelStatic<ChatTrigger>;
+		) as ModelStatic<ChatTrigger>;
 	}
 
 	/**
@@ -76,7 +71,10 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 		if (this._regExp) return this._regExp;
 
 		return new RegExp(
-			this.regExpString.replaceAll('{BOT_IGN}', hypixelMessage.chatBridge.bot?.username.replaceAll('_', '[_ ]?') ?? NEVER_MATCHING_REGEXP),
+			this.regExpString.replaceAll(
+				'{BOT_IGN}',
+				hypixelMessage.chatBridge.bot?.username.replaceAll('_', '[_ ]?') ?? NEVER_MATCHING_REGEXP,
+			),
 			'i',
 		);
 	}
@@ -93,7 +91,11 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 
 		// cooldowns
 		if (this.timestamps) {
-			if (this.timestamps.has(hypixelMessage.author.ign) && Date.now() < this.timestamps.get(hypixelMessage.author.ign)! + this.cooldown!) return;
+			if (
+				this.timestamps.has(hypixelMessage.author.ign) &&
+				Date.now() < this.timestamps.get(hypixelMessage.author.ign)! + this.cooldown!
+			)
+				return;
 
 			this.timestamps.set(hypixelMessage.author.ign, Date.now());
 			setTimeout(() => this.timestamps!.delete(hypixelMessage.author.ign), this.cooldown!);

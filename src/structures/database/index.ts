@@ -2,7 +2,6 @@ import { URL, pathToFileURL } from 'node:url';
 import { logger, readJSFiles } from '../../functions';
 import type { Models } from './managers/DatabaseManager';
 
-
 // to get bigints as numbers instead of strings
 import pg from 'pg';
 
@@ -20,45 +19,46 @@ class CustomDecimal extends DataTypes.DECIMAL {
 	}
 }
 
+export const sequelize = new Sequelize(process.env.DATABASE_URL!, {
+	logging: false,
 
-export const sequelize = new Sequelize(
-	process.env.DATABASE_URL!,
-	{
-		logging: false,
-
-		// use floats instead of strings as decimal representation (2/2)
-		hooks: {
-			afterConnect() {
-				const dTypes = {
-					DECIMAL: CustomDecimal,
-				};
-				// @ts-expect-error
-				this.connectionManager.refreshTypeParser(dTypes);
-			},
+	// use floats instead of strings as decimal representation (2/2)
+	hooks: {
+		afterConnect() {
+			const dTypes = {
+				DECIMAL: CustomDecimal,
+			};
+			// @ts-expect-error
+			this.connectionManager.refreshTypeParser(dTypes);
 		},
 	},
-);
-
+});
 
 const models = {};
 
 for await (const { fullPath } of readJSFiles(new URL('./models', import.meta.url))) {
 	const model = (await import(pathToFileURL(fullPath).href)).default as typeof Model;
 
-	if (!(typeof model
-		// @ts-expect-error
-		.initialise
-		=== 'function')) logger.error(`${model.name} is missing an initialise function`);
+	if (
+		!(
+			typeof (
+				// @ts-expect-error
+				model.initialise
+			) === 'function'
+		)
+	)
+		logger.error(`${model.name} is missing an initialise function`);
 
-	Reflect.set(models, model.name,
+	Reflect.set(
+		models,
+		model.name,
 		// @ts-expect-error
 		model['initialise' ?? 'init'](sequelize),
 	);
 }
 
-
 export const db = {
-	...models as Models,
+	...(models as Models),
 
 	// add sequelize
 	sequelize,

@@ -4,7 +4,6 @@ import type { CommandContext, CommandData } from './BaseCommand';
 import type { HypixelUserMessage } from '../chat_bridge/HypixelMessage';
 import type { BridgeCommandCollection } from './BridgeCommandCollection';
 
-
 export interface BridgeCommandData extends CommandData {
 	aliases?: string[];
 	description?: string;
@@ -12,7 +11,6 @@ export interface BridgeCommandData extends CommandData {
 	args?: number | boolean;
 	usage?: string | (() => string);
 }
-
 
 export class BridgeCommand extends BaseCommand {
 	_usage: string | (() => string) | null = null;
@@ -30,7 +28,7 @@ export class BridgeCommand extends BaseCommand {
 		super(context, data);
 
 		this.aliases = aliases?.filter(Boolean).length
-			? aliases?.flatMap(alias => (!alias ? [] : alias.toLowerCase())) || null
+			? aliases?.flatMap((alias) => (!alias ? [] : alias.toLowerCase())) || null
 			: null;
 		this.description = description || null;
 		this.guildOnly = guildOnly ?? false;
@@ -42,25 +40,23 @@ export class BridgeCommand extends BaseCommand {
 	 * @param value
 	 */
 	set usage(value: string | (() => string) | null) {
-		this._usage = typeof value === 'function' || value?.length
-			? value
-			: null;
+		this._usage = typeof value === 'function' || value?.length ? value : null;
 	}
 
 	/**
 	 * @returns command argument usage
 	 */
 	get usage(): string | null {
-		return typeof this._usage === 'function'
-			? this._usage()
-			: this._usage;
+		return typeof this._usage === 'function' ? this._usage() : this._usage;
 	}
 
 	/**
 	 * prefix name usage
 	 */
 	get usageInfo() {
-		return `\`${this.config.get('PREFIXES')[0]}${this.aliases?.[0].length ?? Number.POSITIVE_INFINITY < this.name.length ? this.aliases![0] : this.name}\` ${this.usage}`;
+		return `\`${this.config.get('PREFIXES')[0]}${
+			this.aliases?.[0].length ?? Number.POSITIVE_INFINITY < this.name.length ? this.aliases![0] : this.name
+		}\` ${this.usage}`;
 	}
 
 	/**
@@ -75,7 +71,8 @@ export class BridgeCommand extends BaseCommand {
 	 * @param hypixelMessage
 	 */
 	runMinecraft(hypixelMessage: HypixelUserMessage): unknown;
-	async runMinecraft(hypixelMessage: HypixelUserMessage) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, require-await
+	async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		throw new Error('no run function specified');
 	}
 }

@@ -10,68 +10,63 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class TaxCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('guild tax')
-				.addSubcommandGroup(subcommandGroup => subcommandGroup
-					.setName('ah')
-					.setDescription('add / remove a player as tax collector')
-					.addSubcommand(subcommand => subcommand
-						.setName('add')
-						.setDescription('add a player as tax collector')
-						.addStringOption(requiredPlayerOption),
-					)
-					.addSubcommand(subcommand => subcommand
-						.setName('remove')
-						.setDescription('remove a player from tax collectors')
-						.addStringOption(requiredPlayerOption),
-					),
+				.addSubcommandGroup((subcommandGroup) =>
+					subcommandGroup
+						.setName('ah')
+						.setDescription('add / remove a player as tax collector')
+						.addSubcommand((subcommand) =>
+							subcommand
+								.setName('add')
+								.setDescription('add a player as tax collector')
+								.addStringOption(requiredPlayerOption),
+						)
+						.addSubcommand((subcommand) =>
+							subcommand
+								.setName('remove')
+								.setDescription('remove a player from tax collectors')
+								.addStringOption(requiredPlayerOption),
+						),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('amount')
-					.setDescription('set the tax amount')
-					.addIntegerOption(option => option
+				.addSubcommand((subcommand) =>
+					subcommand
 						.setName('amount')
-						.setDescription('new tax amount')
-						.setRequired(true),
-					),
+						.setDescription('set the tax amount')
+						.addIntegerOption((option) => option.setName('amount').setDescription('new tax amount').setRequired(true)),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('collected')
-					.setDescription('show a list of taxahs and their collected tax amount'),
+				.addSubcommand((subcommand) =>
+					subcommand.setName('collected').setDescription('show a list of taxahs and their collected tax amount'),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('paid')
-					.setDescription('manually set a player to paid')
-					.addStringOption(requiredPlayerOption)
-					.addIntegerOption(option => option
-						.setName('amount')
-						.setDescription('amount to overwrite the current tax amount')
-						.setRequired(false),
-					),
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('paid')
+						.setDescription('manually set a player to paid')
+						.addStringOption(requiredPlayerOption)
+						.addIntegerOption((option) =>
+							option.setName('amount').setDescription('amount to overwrite the current tax amount').setRequired(false),
+						),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('reminder')
-					.setDescription('ping all guild members who have not paid')
-					.addBooleanOption(option => option
-						.setName('ghostping')
-						.setDescription('wether to immediatly delete the pings after sending them')
-						.setRequired(false),
-					)
-					.addStringOption(buildGuildOption(context.client, true))
-					.addStringOption(option => option
-						.setName('exclude')
-						.setDescription('IGNs to exclude from the ping')
-						.setRequired(false),
-					),
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('reminder')
+						.setDescription('ping all guild members who have not paid')
+						.addBooleanOption((option) =>
+							option
+								.setName('ghostping')
+								.setDescription('wether to immediatly delete the pings after sending them')
+								.setRequired(false),
+						)
+						.addStringOption(buildGuildOption(context.client, true))
+						.addStringOption((option) =>
+							option.setName('exclude').setDescription('IGNs to exclude from the ping').setRequired(false),
+						),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('reset')
-					.setDescription('reset the tax database')
-					.addStringOption(optionalPlayerOption),
+				.addSubcommand((subcommand) =>
+					subcommand.setName('reset').setDescription('reset the tax database').addStringOption(optionalPlayerOption),
 				),
 			cooldown: 0,
 		});
@@ -102,10 +97,14 @@ export default class TaxCommand extends ApplicationCommand {
 					case 'remove': {
 						const taxCollector = this.client.taxCollectors.cache.get(player.minecraftUuid);
 
-						if (!taxCollector?.isCollecting) return InteractionUtil.reply(interaction, `\`${player}\` is not a tax collector`);
+						if (!taxCollector?.isCollecting)
+							return InteractionUtil.reply(interaction, `\`${player}\` is not a tax collector`);
 
 						// remove self paid if only the collector paid the default amount at his own ah
-						if (taxCollector.collectedTax === this.config.get('TAX_AMOUNT') && (await player.transactions)[0].to === player.minecraftUuid) {
+						if (
+							taxCollector.collectedTax === this.config.get('TAX_AMOUNT') &&
+							(await player.transactions)[0].to === player.minecraftUuid
+						) {
 							logger.info(`[TAX AH]: ${player}: removed and reset tax paid`);
 							await player.resetTax();
 							await taxCollector.remove();
@@ -121,10 +120,7 @@ export default class TaxCommand extends ApplicationCommand {
 						throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
 				}
 
-				this.client.log(this.client.defaultEmbed
-					.setTitle('Guild Tax')
-					.setDescription(log),
-				);
+				this.client.log(this.client.defaultEmbed.setTitle('Guild Tax').setDescription(log));
 
 				return InteractionUtil.reply(interaction, log);
 			}
@@ -134,10 +130,11 @@ export default class TaxCommand extends ApplicationCommand {
 					case 'amount': {
 						const NEW_AMOUNT = interaction.options.getInteger('amount', true);
 
-						if (NEW_AMOUNT < 0) return InteractionUtil.reply(interaction, {
-							content: 'tax amount must be a non-negative number',
-							ephemeral: true,
-						});
+						if (NEW_AMOUNT < 0)
+							return InteractionUtil.reply(interaction, {
+								content: 'tax amount must be a non-negative number',
+								ephemeral: true,
+							});
 
 						const OLD_AMOUNT = this.config.get('TAX_AMOUNT');
 
@@ -146,52 +143,61 @@ export default class TaxCommand extends ApplicationCommand {
 							this.config.set('TAX_AMOUNT', NEW_AMOUNT),
 
 							// update tax collectors
-							...this.client.taxCollectors.activeCollectors.map(
-								taxCollector => taxCollector.update({ collectedTax: taxCollector.collectedTax + NEW_AMOUNT - OLD_AMOUNT }),
+							...this.client.taxCollectors.activeCollectors.map((taxCollector) =>
+								taxCollector.update({ collectedTax: taxCollector.collectedTax + NEW_AMOUNT - OLD_AMOUNT }),
 							),
 						]);
 
 						// logging
-						this.client.log(this.client.defaultEmbed
-							.setTitle('Guild Tax')
-							.setDescription(`${interaction.user.tag} | ${interaction.user} changed the guild tax amount`)
-							.addFields({
-								name: 'Old amount',
-								value: Formatters.codeBlock(this.client.formatNumber(OLD_AMOUNT)),
-								inline: true,
-							}, {
-								name: 'New amount',
-								value: Formatters.codeBlock(this.client.formatNumber(NEW_AMOUNT)),
-								inline: true,
-							}),
+						this.client.log(
+							this.client.defaultEmbed
+								.setTitle('Guild Tax')
+								.setDescription(`${interaction.user.tag} | ${interaction.user} changed the guild tax amount`)
+								.addFields(
+									{
+										name: 'Old amount',
+										value: Formatters.codeBlock(this.client.formatNumber(OLD_AMOUNT)),
+										inline: true,
+									},
+									{
+										name: 'New amount',
+										value: Formatters.codeBlock(this.client.formatNumber(NEW_AMOUNT)),
+										inline: true,
+									},
+								),
 						);
 
 						return InteractionUtil.reply(
 							interaction,
-							`changed the guild tax amount from \`${this.client.formatNumber(OLD_AMOUNT)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``,
+							`changed the guild tax amount from \`${this.client.formatNumber(
+								OLD_AMOUNT,
+							)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``,
 						);
 					}
 
 					case 'collected': {
 						return InteractionUtil.reply(interaction, {
-							embeds: [ this.client.taxCollectors.createTaxCollectedEmbed() ],
+							embeds: [this.client.taxCollectors.createTaxCollectedEmbed()],
 						});
 					}
 
 					case 'paid': {
 						const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-						if (!collector?.isCollecting) return InteractionUtil.reply(interaction, {
-							content: 'this command is restricted to tax collectors',
-							ephemeral: true,
-						});
+						if (!collector?.isCollecting)
+							return InteractionUtil.reply(interaction, {
+								content: 'this command is restricted to tax collectors',
+								ephemeral: true,
+							});
 
 						const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
 						if (player.paid) {
 							await InteractionUtil.awaitConfirmation(
 								interaction,
-								`\`${player}\` is already set to paid with an amount of \`${this.client.formatNumber(await player.taxAmount ?? Number.NaN)}\`. Overwrite this?`,
+								`\`${player}\` is already set to paid with an amount of \`${this.client.formatNumber(
+									(await player.taxAmount) ?? Number.NaN,
+								)}\`. Overwrite this?`,
 							);
 
 							await player.resetTax();
@@ -204,9 +210,8 @@ export default class TaxCommand extends ApplicationCommand {
 							collectedBy: collector.minecraftUuid,
 						});
 
-						this.client.log(this.client.defaultEmbed
-							.setTitle('Guild Tax')
-							.addFields({
+						this.client.log(
+							this.client.defaultEmbed.setTitle('Guild Tax').addFields({
 								name: `/ah ${collector}`,
 								value: Formatters.codeBlock(`${player}: ${this.client.formatNumber(AMOUNT)} (manually)`),
 							}),
@@ -214,40 +219,46 @@ export default class TaxCommand extends ApplicationCommand {
 
 						return InteractionUtil.reply(
 							interaction,
-							`\`${player}\` manually set to paid with ${AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'} amount of \`${this.client.formatNumber(AMOUNT)}\``,
+							`\`${player}\` manually set to paid with ${
+								AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'
+							} amount of \`${this.client.formatNumber(AMOUNT)}\``,
 						);
 					}
 
 					case 'reminder': {
 						const SHOULD_GHOST_PING = interaction.options.getBoolean('ghostping') ?? false;
-						const hypixelGuild = interaction.options.get('guild')
-							? InteractionUtil.getHypixelGuild(interaction)
-							: null;
+						const hypixelGuild = interaction.options.get('guild') ? InteractionUtil.getHypixelGuild(interaction) : null;
 						const EXCLUDED_INPUT = interaction.options.getString('exclude');
 						const excluded = EXCLUDED_INPUT
-							? new Set(EXCLUDED_INPUT
-								.split(/\W/g)
-								.flatMap(x => (x ? x.toLowerCase() : [])), // lower case IGN array
-							)
+							? new Set(
+									EXCLUDED_INPUT.split(/\W/).flatMap((x) => (x ? x.toLowerCase() : [])), // lower case IGN array
+							  )
 							: null;
-						const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild)
-							.filter(({ paid, ign }) => !paid && !excluded?.has(ign.toLowerCase()));
-						const [ playersPingable, playersOnlyIgn ] = playersToRemind.partition(({ inDiscord, discordId }) => inDiscord && validateNumber(discordId));
+						const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild).filter(
+							({ paid, ign }) => !paid && !excluded?.has(ign.toLowerCase()),
+						);
+						const [playersPingable, playersOnlyIgn] = playersToRemind.partition(
+							({ inDiscord, discordId }) => inDiscord && validateNumber(discordId),
+						);
 						const AMOUNT_TO_PING = playersPingable.size;
 
-						if (!AMOUNT_TO_PING) return InteractionUtil.reply(interaction, {
-							content: `no members to ping from ${hypixelGuild ?? 'all guilds'}`,
-							ephemeral: true,
-						});
+						if (!AMOUNT_TO_PING)
+							return InteractionUtil.reply(interaction, {
+								content: `no members to ping from ${hypixelGuild ?? 'all guilds'}`,
+								ephemeral: true,
+							});
 
 						await InteractionUtil.awaitConfirmation(
 							interaction,
-							`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${AMOUNT_TO_PING !== 1 ? 's' : ''} from ${hypixelGuild ?? 'all guilds'}?`,
+							`${SHOULD_GHOST_PING ? 'ghost' : ''}ping \`${AMOUNT_TO_PING}\` member${
+								AMOUNT_TO_PING !== 1 ? 's' : ''
+							} from ${hypixelGuild ?? 'all guilds'}?`,
 						);
 
 						let pingMessage = '';
 
-						for (const player of playersPingable.values()) pingMessage += ` ${Formatters.userMention(player.discordId!)}`;
+						for (const player of playersPingable.values())
+							pingMessage += ` ${Formatters.userMention(player.discordId!)}`;
 						for (const player of playersOnlyIgn.values()) pingMessage += ` ${escapeIgn(player.ign)}`;
 
 						// send ping message and split between pings if too many chars
@@ -263,12 +274,14 @@ export default class TaxCommand extends ApplicationCommand {
 						const replyMessage = await interaction.fetchReply();
 						const fetched = await interaction.channel?.messages
 							.fetch({ after: replyMessage.id })
-							.catch(error => logger.error(error, '[TAX REMINDER]: ghost ping'));
+							.catch((error) => logger.error(error, '[TAX REMINDER]: ghost ping'));
 						if (!fetched) return;
 
 						return ChannelUtil.deleteMessages(interaction.channel, [
 							replyMessage.id,
-							...fetched.filter(({ author: { id } }) => [ this.client.user!.id, interaction.user.id ].includes(id)).keys(),
+							...fetched
+								.filter(({ author: { id } }) => [this.client.user!.id, interaction.user.id].includes(id))
+								.keys(),
 						]);
 					}
 
@@ -282,12 +295,13 @@ export default class TaxCommand extends ApplicationCommand {
 
 						// individual player
 						if (PLAYER_INPUT) {
-							const player = InteractionUtil.getPlayer(interaction)
-								?? await players.fetch({
+							const player =
+								InteractionUtil.getPlayer(interaction) ??
+								(await players.fetch({
 									guildId: null,
 									ign: { [Op.iLike]: PLAYER_INPUT },
 									cache: false,
-								});
+								}));
 
 							if (!player) {
 								return InteractionUtil.reply(interaction, `\`${PLAYER_INPUT}\` is not in the player db`);
@@ -297,13 +311,20 @@ export default class TaxCommand extends ApplicationCommand {
 
 							const OLD_AMOUNT = await player.taxAmount;
 
-							await InteractionUtil.awaitConfirmation(interaction, `reset tax paid from \`${player}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})?`);
+							await InteractionUtil.awaitConfirmation(
+								interaction,
+								`reset tax paid from \`${player}\` (amount: ${
+									OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'
+								})?`,
+							);
 
 							await player.resetTax();
 
-							result = `reset tax paid from \`${player}\` (amount: ${OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'})`;
+							result = `reset tax paid from \`${player}\` (amount: ${
+								OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'
+							})`;
 
-						// all players
+							// all players
 						} else {
 							await InteractionUtil.awaitConfirmation(interaction, 'reset tax paid from all guild members?');
 
@@ -311,7 +332,11 @@ export default class TaxCommand extends ApplicationCommand {
 							currentTaxEmbed = await (async () => {
 								const taxChannel = this.client.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
 
-								if (!taxChannel?.isText() || ((taxChannel as TextChannel).guildId && !(taxChannel as TextChannel).guild?.available)) return logger.warn('[TAX RESET] tax channel error');
+								if (
+									!taxChannel?.isText() ||
+									((taxChannel as TextChannel).guildId && !(taxChannel as TextChannel).guild?.available)
+								)
+									return logger.warn('[TAX RESET] tax channel error');
 
 								try {
 									return (await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID'))).embeds[0];
@@ -323,14 +348,15 @@ export default class TaxCommand extends ApplicationCommand {
 							if (!currentTaxEmbed) {
 								await InteractionUtil.awaitConfirmation(
 									interaction,
-									`unable to retrieve the current tax embed from ${this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'} to log it. Create a new one and continue?`,
+									`unable to retrieve the current tax embed from ${
+										this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'
+									} to log it. Create a new one and continue?`,
 								);
 
 								currentTaxEmbed = this.client.db.createTaxEmbed();
 							}
 
 							currentTaxCollectedEmbed = taxCollectors.createTaxCollectedEmbed();
-
 
 							// update database
 							await safePromiseAll([
@@ -353,7 +379,7 @@ export default class TaxCommand extends ApplicationCommand {
 									},
 								),
 								// reset current players
-								...players.cache.map(player => player.update({ paid: false })),
+								...players.cache.map((player) => player.update({ paid: false })),
 								// ignore all auctions up until now
 								this.config.set('TAX_AUCTIONS_START_TIME', Date.now()),
 							]);

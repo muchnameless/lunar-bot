@@ -2,14 +2,11 @@ import '../structures/database/pgEnum-fix.js'; // to allow `sync --alter` with p
 import { sequelize } from '../structures/database';
 import { logger } from '../functions';
 
-sequelize
-	// @ts-expect-error
-	.options
-	.logging = logger.debug.bind(logger);
+// @ts-expect-error
+sequelize.options.logging = logger.debug.bind(logger);
 
 const force = process.argv.includes('--force') || process.argv.includes('-f');
 const alter = process.argv.includes('--alter') || process.argv.includes('-a');
-
 
 try {
 	await sequelize.sync({ force, alter });

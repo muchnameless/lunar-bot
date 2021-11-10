@@ -10,9 +10,7 @@ import type { GuildChannel, Message, TextChannel } from 'discord.js';
 import type { URL } from 'node:url';
 import type { LunarClient } from './LunarClient';
 
-
 type LogInput = MessageEmbed | MessageAttachment | string | undefined | null;
-
 
 export class LogHandler {
 	client: LunarClient;
@@ -27,7 +25,8 @@ export class LogHandler {
 		this.logURL = logURL;
 	}
 
-	static REQUIRED_CHANNEL_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS;
+	static REQUIRED_CHANNEL_PERMISSIONS =
+		Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS;
 
 	/**
 	 * cleans a string from an embed for console logging
@@ -36,10 +35,11 @@ export class LogHandler {
 	static cleanLoggingEmbedString(string: string): string;
 	static cleanLoggingEmbedString(string: string | null): string | null;
 	static cleanLoggingEmbedString(string: unknown) {
-		if (typeof string === 'string') return string
-			.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
-			.replace(/`|\*|\n?\u200B|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
-			.replace(/\n{2,}/g, '\n'); // consecutive line-breaks
+		if (typeof string === 'string')
+			return string
+				.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
+				.replace(/`|\*|\n?\u200B|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
+				.replace(/\n{2,}/g, '\n'); // consecutive line-breaks
 
 		return null;
 	}
@@ -51,15 +51,20 @@ export class LogHandler {
 		const channel = this.client.channels.cache.get(this.client.config.get('LOGGING_CHANNEL_ID'));
 
 		if (!channel?.isText()) {
-			logger.error(`[LOG HANDLER]: ${channel ? `#${(channel as GuildChannel).name}` : this.client.config.get('LOGGING_CHANNEL_ID')} is not a cached text based channel (id)`);
+			logger.error(
+				`[LOG HANDLER]: ${
+					channel ? `#${(channel as GuildChannel).name}` : this.client.config.get('LOGGING_CHANNEL_ID')
+				} is not a cached text based channel (id)`,
+			);
 			return null;
 		}
 
 		if (!ChannelUtil.botPermissions(channel).has(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)) {
-			logger.error(commaListsAnd`[LOG HANDLER]: missing ${ChannelUtil.botPermissions(channel)
-				.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)
-				.map(permission => `'${permission}'`)
-			}`);
+			logger.error(
+				commaListsAnd`[LOG HANDLER]: missing ${ChannelUtil.botPermissions(channel)
+					.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)
+					.map((permission) => `'${permission}'`)}`,
+			);
 			return null;
 		}
 
@@ -112,17 +117,18 @@ export class LogHandler {
 
 			let embedChunkLength = 0;
 
-			for (let current = 0; current < EMBEDS_MAX_AMOUNT && total < embeds.length; ++current, ++total) inner: {
-				embedChunkLength += embeds[total].length;
+			for (let current = 0; current < EMBEDS_MAX_AMOUNT && total < embeds.length; ++current, ++total)
+				inner: {
+					embedChunkLength += embeds[total].length;
 
-				// adding the new embed would exceed the max char count
-				if (embedChunkLength > EMBED_MAX_CHARS) {
-					--total;
-					break inner;
+					// adding the new embed would exceed the max char count
+					if (embedChunkLength > EMBED_MAX_CHARS) {
+						--total;
+						break inner;
+					}
+
+					embedChunk.push(embeds[total]);
 				}
-
-				embedChunk.push(embeds[total]);
-			}
 
 			returnValue.push(this.#log({ embeds: embedChunk, files }));
 		}
@@ -148,7 +154,9 @@ export class LogHandler {
 			} else if (typeof i === 'string' || typeof i === 'number') {
 				embeds.push(this.client.defaultEmbed.setDescription(`${i}`));
 			} else if (typeof i !== 'object') {
-				throw new TypeError(`[TRANSFORM INPUT]: provided argument '${i}' is a ${typeof i} instead of an Object or String`);
+				throw new TypeError(
+					`[TRANSFORM INPUT]: provided argument '${i}' is a ${typeof i} instead of an Object or String`,
+				);
 			} else {
 				embeds.push(new MessageEmbed(i));
 			}
@@ -161,7 +169,7 @@ export class LogHandler {
 	 * log to console and send in the logging channel
 	 * @param input
 	 */
-	async #log({ embeds, files }: { embeds: MessageEmbed[], files?: MessageAttachment[] }) {
+	async #log({ embeds, files }: { embeds: MessageEmbed[]; files?: MessageAttachment[] }) {
 		// log to console
 		for (const embed of embeds) {
 			const fields = embed.fields.flatMap(({ name, value }) => {
@@ -172,13 +180,14 @@ export class LogHandler {
 				};
 			});
 
-			logger.info({
-				description: LogHandler.cleanLoggingEmbedString(embed.description) || undefined,
-				user: embed.author?.name,
-				fields: fields.length
-					? fields
-					: undefined,
-			}, embed.title || undefined);
+			logger.info(
+				{
+					description: LogHandler.cleanLoggingEmbedString(embed.description) || undefined,
+					user: embed.author?.name,
+					fields: fields.length ? fields : undefined,
+				},
+				embed.title || undefined,
+			);
 		}
 
 		const { channel } = this;
@@ -202,9 +211,10 @@ export class LogHandler {
 	async #createLogBufferFolder() {
 		try {
 			await mkdir(this.logURL);
-			logger.info('[LOG BUFFER]: created \'log_buffer\' folder');
+			logger.info("[LOG BUFFER]: created 'log_buffer' folder");
 			return true;
-		} catch { // rejects if folder already exists
+		} catch {
+			// rejects if folder already exists
 			return false;
 		}
 	}
@@ -217,12 +227,21 @@ export class LogHandler {
 		try {
 			await this.#createLogBufferFolder();
 			await writeFile(
-				join(fileURLToPath(this.logURL), `${new Date()
-					.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
-					.replace(', ', '_')
-					.replaceAll(':', '.')
-				}_${SnowflakeUtil.generate()}`),
-				embeds.map(embed => JSON.stringify(embed)).join('\n'),
+				join(
+					fileURLToPath(this.logURL),
+					`${new Date()
+						.toLocaleString('de-DE', {
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit',
+							second: '2-digit',
+						})
+						.replace(', ', '_')
+						.replaceAll(':', '.')}_${SnowflakeUtil.generate()}`,
+				),
+				embeds.map((embed) => JSON.stringify(embed)).join('\n'),
 			);
 		} catch (error) {
 			logger.error(error, '[LOG TO FILE]');
@@ -244,7 +263,7 @@ export class LogHandler {
 				const FILE_PATH = join(fileURLToPath(this.logURL), file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
-				await this.#log({ embeds: FILE_CONTENT.split('\n').map(x => new MessageEmbed(JSON.parse(x))) });
+				await this.#log({ embeds: FILE_CONTENT.split('\n').map((x) => new MessageEmbed(JSON.parse(x))) });
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {

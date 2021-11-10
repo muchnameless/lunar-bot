@@ -8,19 +8,22 @@ import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
-
 export default class GuildOfCommand extends DualCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('shows a player\'s current hypixel guild')
-				.addStringOption(requiredIgnOption),
-			cooldown: seconds(1),
-		}, {
-			aliases: [ 'guild' ],
-			args: 1,
-			usage: '[`IGN`]',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription("shows a player's current hypixel guild")
+					.addStringOption(requiredIgnOption),
+				cooldown: seconds(1),
+			},
+			{
+				aliases: ['guild'],
+				args: 1,
+				usage: '[`IGN`]',
+			},
+		);
 	}
 
 	/**

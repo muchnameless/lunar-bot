@@ -5,11 +5,17 @@ import { pageOption, requiredIgnOption } from '../../structures/commands/commonO
 import { mojang } from '../../api';
 import { escapeIgn, logger } from '../../functions';
 import { InteractionUtil } from '../../util';
-import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI, STATS_URL_BASE } from '../../constants';
+import {
+	DOUBLE_LEFT_EMOJI,
+	LEFT_EMOJI,
+	RIGHT_EMOJI,
+	DOUBLE_RIGHT_EMOJI,
+	RELOAD_EMOJI,
+	STATS_URL_BASE,
+} from '../../constants';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ButtonInteraction, CommandInteraction, Snowflake } from 'discord.js';
-
 
 export default class BanListCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
@@ -17,29 +23,27 @@ export default class BanListCommand extends ApplicationCommand {
 			aliases: [],
 			slash: new SlashCommandBuilder()
 				.setDescription('ban list')
-				.addSubcommand(subcommand => subcommand
-					.setName('add')
-					.setDescription('add a player to the ban list')
-					.addStringOption(requiredIgnOption)
-					.addStringOption(option => option
-						.setName('reason')
-						.setDescription('ban reason'),
-					),
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('add')
+						.setDescription('add a player to the ban list')
+						.addStringOption(requiredIgnOption)
+						.addStringOption((option) => option.setName('reason').setDescription('ban reason')),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('remove')
-					.setDescription('remove a player from the ban list')
-					.addStringOption(requiredIgnOption),
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('remove')
+						.setDescription('remove a player from the ban list')
+						.addStringOption(requiredIgnOption),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('check')
-					.setDescription('check if a player is on the ban list')
-					.addStringOption(requiredIgnOption),
+				.addSubcommand((subcommand) =>
+					subcommand
+						.setName('check')
+						.setDescription('check if a player is on the ban list')
+						.addStringOption(requiredIgnOption),
 				)
-				.addSubcommand(subcommand => subcommand
-					.setName('view')
-					.setDescription('shows the ban list')
-					.addIntegerOption(pageOption),
+				.addSubcommand((subcommand) =>
+					subcommand.setName('view').setDescription('shows the ban list').addIntegerOption(pageOption),
 				),
 			cooldown: 0,
 		});
@@ -57,33 +61,32 @@ export default class BanListCommand extends ApplicationCommand {
 		const INC_DISABLED = currentPage === totalPages || INVALID_PAGES;
 
 		return [
-			new MessageActionRow()
-				.addComponents(
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:1:${DOUBLE_LEFT_EMOJI}`)
-						.setEmoji(DOUBLE_LEFT_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY)
-						.setDisabled(DEC_DISABLED),
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${currentPage - 1}:${LEFT_EMOJI}`)
-						.setEmoji(LEFT_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY)
-						.setDisabled(DEC_DISABLED),
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${currentPage + 1}:${RIGHT_EMOJI}`)
-						.setEmoji(RIGHT_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY)
-						.setDisabled(INC_DISABLED),
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${totalPages}:${DOUBLE_RIGHT_EMOJI}`)
-						.setEmoji(DOUBLE_RIGHT_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY)
-						.setDisabled(INC_DISABLED),
-					new MessageButton()
-						.setCustomId(`${CUSTOM_ID}:${currentPage}:${RELOAD_EMOJI}`)
-						.setEmoji(RELOAD_EMOJI)
-						.setStyle(Constants.MessageButtonStyles.PRIMARY),
-				),
+			new MessageActionRow().addComponents(
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:1:${DOUBLE_LEFT_EMOJI}`)
+					.setEmoji(DOUBLE_LEFT_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setDisabled(DEC_DISABLED),
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:${currentPage - 1}:${LEFT_EMOJI}`)
+					.setEmoji(LEFT_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setDisabled(DEC_DISABLED),
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:${currentPage + 1}:${RIGHT_EMOJI}`)
+					.setEmoji(RIGHT_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setDisabled(INC_DISABLED),
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:${totalPages}:${DOUBLE_RIGHT_EMOJI}`)
+					.setEmoji(DOUBLE_RIGHT_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setDisabled(INC_DISABLED),
+				new MessageButton()
+					.setCustomId(`${CUSTOM_ID}:${currentPage}:${RELOAD_EMOJI}`)
+					.setEmoji(RELOAD_EMOJI)
+					.setStyle(Constants.MessageButtonStyles.PRIMARY),
+			),
 		];
 	}
 
@@ -101,8 +104,8 @@ export default class BanListCommand extends ApplicationCommand {
 			limit: ELEMENTS_PER_PAGE,
 		});
 		const TOTAL_PAGES = Math.max(Math.ceil(count / ELEMENTS_PER_PAGE), 1);
-		const withIgn = await Promise.all(bans
-			.map(async ({ minecraftUuid, reason }) => {
+		const withIgn = await Promise.all(
+			bans.map(async ({ minecraftUuid, reason }) => {
 				try {
 					const { ign } = await mojang.uuid(minecraftUuid);
 
@@ -121,11 +124,13 @@ export default class BanListCommand extends ApplicationCommand {
 			}),
 		);
 
-		return (InteractionUtil[interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'] as typeof InteractionUtil['reply'])(interaction as ButtonInteraction, {
+		return (
+			InteractionUtil[
+				interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'
+			] as typeof InteractionUtil['reply']
+		)(interaction as ButtonInteraction, {
 			embeds: [
-				this.client.defaultEmbed
-					.setTitle(`${'Ban list'.padEnd(166, '\u00A0')}\u200B`)
-					.setDescription(stripIndents`
+				this.client.defaultEmbed.setTitle(`${'Ban list'.padEnd(166, '\u00A0')}\u200B`).setDescription(stripIndents`
 						Total: ${count} players
 
 						${withIgn.join('\n\n')}
@@ -135,9 +140,7 @@ export default class BanListCommand extends ApplicationCommand {
 			],
 			components: this.#getPaginationButtons(
 				interaction.user.id,
-				count >= OFFSET
-					? page
-					: TOTAL_PAGES, // reset to total pages in case of page overflow
+				count >= OFFSET ? page : TOTAL_PAGES, // reset to total pages in case of page overflow
 				TOTAL_PAGES,
 			),
 		});
@@ -149,15 +152,11 @@ export default class BanListCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override runButton(interaction: ButtonInteraction, args: string[]) {
-		const [ SUBCOMMAND, USER_ID, PAGE ] = args;
+		const [SUBCOMMAND, USER_ID, PAGE] = args;
 
 		switch (SUBCOMMAND) {
 			case 'view':
-				return this.#runView(
-					interaction,
-					USER_ID,
-					Number(PAGE),
-				);
+				return this.#runView(interaction, USER_ID, Number(PAGE));
 
 			default:
 				throw new Error(`unknown subcommand '${SUBCOMMAND}'`);
@@ -186,9 +185,10 @@ export default class BanListCommand extends ApplicationCommand {
 					_reason: REASON,
 				});
 
-				if (!existingBan) return InteractionUtil.reply(interaction, {
-					content: `${escapeIgn(ign)} was added to the ban list for \`${REASON ?? 'no reason'}\``,
-				});
+				if (!existingBan)
+					return InteractionUtil.reply(interaction, {
+						content: `${escapeIgn(ign)} was added to the ban list for \`${REASON ?? 'no reason'}\``,
+					});
 
 				return InteractionUtil.reply(interaction, {
 					content: `${escapeIgn(ign)}'s ban reason was updated from \`${existingBan.reason}\` to \`${REASON}\``,
@@ -199,9 +199,10 @@ export default class BanListCommand extends ApplicationCommand {
 				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
 
-				if (!existingBan) return InteractionUtil.reply(interaction, {
-					content: `${escapeIgn(ign)} is not on the ban list`,
-				});
+				if (!existingBan)
+					return InteractionUtil.reply(interaction, {
+						content: `${escapeIgn(ign)} is not on the ban list`,
+					});
 
 				await existingBan.destroy();
 
@@ -214,34 +215,37 @@ export default class BanListCommand extends ApplicationCommand {
 				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
 
-				if (!existingBan) return InteractionUtil.reply(interaction, {
-					embeds: [
-						new MessageEmbed()
-							.setColor(this.config.get('EMBED_GREEN'))
-							.setDescription(`${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`))} is not on the ban list`)
-							.setTimestamp(),
-					],
-				});
+				if (!existingBan)
+					return InteractionUtil.reply(interaction, {
+						embeds: [
+							new MessageEmbed()
+								.setColor(this.config.get('EMBED_GREEN'))
+								.setDescription(
+									`${Formatters.bold(
+										Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`),
+									)} is not on the ban list`,
+								)
+								.setTimestamp(),
+						],
+					});
 
 				return InteractionUtil.reply(interaction, {
 					embeds: [
 						new MessageEmbed()
 							.setColor(this.config.get('EMBED_RED'))
-							.setDescription(stripIndents`
+							.setDescription(
+								stripIndents`
 								${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`))} is on the ban list for
 								${existingBan.reason}
-							`)
+							`,
+							)
 							.setTimestamp(),
 					],
 				});
 			}
 
 			case 'view':
-				return this.#runView(
-					interaction,
-					interaction.user.id,
-					interaction.options.getInteger('page') ?? 1,
-				);
+				return this.#runView(interaction, interaction.user.id, interaction.options.getInteger('page') ?? 1);
 
 			default:
 				throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);

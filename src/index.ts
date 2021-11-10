@@ -4,7 +4,6 @@ import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';
 import type { Channel, DMChannel, ThreadChannel } from 'discord.js';
 
-
 const client = new LunarClient({
 	// custom options
 	db,
@@ -18,8 +17,8 @@ const client = new LunarClient({
 			sweepInterval: 600, // 10 min
 			sweepFilter: LimitedCollection.filterByLifetime({
 				lifetime: 1_800, // 30 min
-				getComparisonTimestamp: e => e.editedTimestamp ?? e.createdTimestamp,
-				excludeFromSweep: e => e.id === (e.client as LunarClient).config.get('TAX_MESSAGE_ID'),
+				getComparisonTimestamp: (e) => e.editedTimestamp ?? e.createdTimestamp,
+				excludeFromSweep: (e) => e.id === (e.client as LunarClient).config.get('TAX_MESSAGE_ID'),
 			}),
 		},
 		// @ts-expect-error
@@ -28,20 +27,22 @@ const client = new LunarClient({
 			sweepFilter: LimitedCollection.filterByLifetime({
 				lifetime: 14_400, // 4h
 				getComparisonTimestamp(e: Channel) {
-					if (e.type === 'DM') { // DM -> last message
+					if (e.type === 'DM') {
+						// DM -> last message
 						return (e as DMChannel).lastMessageId
 							? SnowflakeUtil.deconstruct((e as DMChannel).lastMessageId!).timestamp
 							: -1;
 					}
 					return (e as ThreadChannel).archiveTimestamp ?? -1; // threads -> archived
 				},
-				excludeFromSweep: e => e.type !== 'DM' && !(e as ThreadChannel).archived,
+				excludeFromSweep: (e) => e.type !== 'DM' && !(e as ThreadChannel).archived,
 			}),
 		},
 		PresenceManager: 0,
-		ReactionUserManager: { // cache only the bot user
+		ReactionUserManager: {
+			// cache only the bot user
 			maxSize: 1,
-			keepOverLimit: e => e.id === e.client.user!.id,
+			keepOverLimit: (e) => e.id === e.client.user!.id,
 		},
 		StageInstanceManager: 0,
 		UserManager: {
@@ -49,14 +50,17 @@ const client = new LunarClient({
 			sweepFilter: LimitedCollection.filterByLifetime({
 				lifetime: 1, // 0 cancles the filter
 				getComparisonTimestamp: () => -1,
-				excludeFromSweep: e => e.client.guilds.cache.some(guild => guild.members.cache.has(e.id)) // user is part of a member
-					|| e.client.channels.cache.some(channel => channel.type === 'DM' && (channel as DMChannel).recipient.id === e.id) // user has a DM channel
-					|| e.discriminator === '0000', // webhook message 'author'
+				excludeFromSweep: (e) =>
+					e.client.guilds.cache.some((guild) => guild.members.cache.has(e.id)) || // user is part of a member
+					e.client.channels.cache.some(
+						(channel) => channel.type === 'DM' && (channel as DMChannel).recipient.id === e.id,
+					) || // user has a DM channel
+					e.discriminator === '0000', // webhook message 'author'
 			}),
 		},
 		VoiceStateManager: 0,
 	}),
-	allowedMentions: { parse: [ 'users' ], repliedUser: true },
+	allowedMentions: { parse: ['users'], repliedUser: true },
 	partials: [
 		Constants.PartialTypes.CHANNEL, // DM channels
 		Constants.PartialTypes.GUILD_MEMBER,
@@ -66,16 +70,16 @@ const client = new LunarClient({
 	],
 	restGlobalRateLimit: 50,
 	// don't await channel name and topic edits
-	rejectOnRateLimit: ({ route, method, timeout }) => route.startsWith('/channels')
-		&& !route.includes('/messages')
-		&& method === 'patch'
-		&& timeout > seconds(10),
+	rejectOnRateLimit: ({ route, method, timeout }) =>
+		route.startsWith('/channels') && !route.includes('/messages') && method === 'patch' && timeout > seconds(10),
 	failIfNotExists: false,
 	presence: {
-		activities: [{
-			name: 'slash commands',
-			type: Constants.ActivityTypes.LISTENING,
-		}],
+		activities: [
+			{
+				name: 'slash commands',
+				type: Constants.ActivityTypes.LISTENING,
+			},
+		],
 		status: 'online',
 	},
 	intents: [
@@ -96,7 +100,6 @@ const client = new LunarClient({
 		// Intents.FLAGS.GUILD_WEBHOOKS,
 	],
 });
-
 
 // catch rejections
 process

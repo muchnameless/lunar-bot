@@ -1,10 +1,7 @@
 /**
  * bot events that should only be listened to once
  */
-export const SPAWN_EVENTS = new Set([
-	'login',
-	'keep_alive',
-] as const);
+export const SPAWN_EVENTS = new Set(['login', 'keep_alive'] as const);
 
 export const MESSAGE_POSITIONS = {
 	0: 'CHAT',
@@ -65,11 +62,7 @@ export const INVISIBLE_CHARACTER_REGEXP = new RegExp(INVISIBLE_CHARACTERS.join('
 /**
  * chunks of text which can be used to pad a message to bypass hypixel's spam filter
  */
-const PADDING_CHUNKS = ([
-	'----',
-	'____',
-	'////',
-] as const).map(chunk => ` ${chunk}` as const);
+const PADDING_CHUNKS = (['----', '____', '////'] as const).map((chunk) => ` ${chunk}` as const);
 
 export const randomPadding = () => PADDING_CHUNKS[Math.floor(Math.random() * PADDING_CHUNKS.length)];
 
@@ -81,9 +74,13 @@ export const DEFAULT_RESPONSE_REGEXP = /[^-\s\u{2800}\u{180E}\u{200B}]/u;
 /**
  * spam messages
  */
+// eslint-disable-next-line regexp/no-obscure-range
 export const MEME_REGEXP = /[⠁-⣿]|\be+z+\b/;
 
-export const NON_WHITESPACE_REGEXP = new RegExp(`[^\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}${INVISIBLE_CHARACTERS.join('')}]`, 'u');
+export const NON_WHITESPACE_REGEXP = new RegExp(
+	`[^\\s\u{2003}\u{2800}\u{0020}\u{180E}\u{200B}${INVISIBLE_CHARACTERS.join('')}]`,
+	'u',
+);
 
 /**
  * https://cdn.discordapp.com/attachments/724130826165420052/876441229905256448/card.png
@@ -91,4 +88,5 @@ export const NON_WHITESPACE_REGEXP = new RegExp(`[^\\s\u{2003}\u{2800}\u{0020}\u
  * https://cdn.discordapp.com/emojis/830971380283605042.png?size=96
  */
 // eslint-disable-next-line no-empty-character-class
-export const DISCORD_CDN_URL_REGEXP = /\b((?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/(?:attachments\/\d{17,19}\/\d{17,19}\/.+|emojis\/\d{17,19})\.(?:png|jpg|jpeg))(?:\?\w+=\w+(?:&\w+=\w+)*)?\b/dg;
+export const DISCORD_CDN_URL_REGEXP =
+	/\b((?:https:\/\/)?(?:media|cdn)\.discord(?:app)?\.(?:net|com)\/(?:attachments\/\d{17,19}\/\d{17,19}\/.+|emojis\/\d{17,19})\.(?:png|jpg|jpeg))(?:\?\w+=\w+(?:&\w+=\w+)*)?\b/dg;

@@ -10,7 +10,6 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class VerifyCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -29,17 +28,21 @@ export default class VerifyCommand extends ApplicationCommand {
 		const IGN = interaction.options.getString('ign', true);
 		const playerLinkedToId = UserUtil.getPlayer(interaction.user);
 
-		let player = this.client.players.getByIgn(IGN)
-			?? await this.client.players.fetch({
-				[Op.or]: [{
-					ign: { [Op.iLike]: IGN },
-					minecraftUuid: IGN.toLowerCase(),
-				}],
+		let player =
+			this.client.players.getByIgn(IGN) ??
+			(await this.client.players.fetch({
+				[Op.or]: [
+					{
+						ign: { [Op.iLike]: IGN },
+						minecraftUuid: IGN.toLowerCase(),
+					},
+				],
 				cache: false,
-			});
+			}));
 
 		// already linked to this discord user
-		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) return InteractionUtil.reply(interaction, 'you are already linked with this discord account');
+		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid)
+			return InteractionUtil.reply(interaction, 'you are already linked with this discord account');
 
 		let uuid;
 		let ign;
@@ -52,7 +55,12 @@ export default class VerifyCommand extends ApplicationCommand {
 
 			// not in one of the guilds that the bot manages
 			if (!this.client.hypixelGuilds.cache.has(guildId)) {
-				return InteractionUtil.reply(interaction, commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}`);
+				return InteractionUtil.reply(
+					interaction,
+					commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(
+						({ name }) => name,
+					)}`,
+				);
 			}
 
 			hypixelPlayer = await hypixel.player.uuid(uuid);
@@ -64,41 +72,56 @@ export default class VerifyCommand extends ApplicationCommand {
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 
 		// no linked discord tag
-		if (!LINKED_DISCORD_TAG) return InteractionUtil.reply(interaction, `no linked discord tag for \`${ign}\` on hypixel`);
+		if (!LINKED_DISCORD_TAG)
+			return InteractionUtil.reply(interaction, `no linked discord tag for \`${ign}\` on hypixel`);
 
 		// linked discord tag doesn't match author's tag
-		if (LINKED_DISCORD_TAG !== interaction.user.tag) return InteractionUtil.reply(interaction, oneLine`
+		if (LINKED_DISCORD_TAG !== interaction.user.tag)
+			return InteractionUtil.reply(
+				interaction,
+				oneLine`
 			the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\`.
 			Keep in mind that discord tags are case sensitive
-		`);
+		`,
+			);
 
 		// already linked to another discord user
 		if (playerLinkedToId) {
-			await InteractionUtil.awaitConfirmation(interaction, `your discord account is already linked to \`${playerLinkedToId}\`. Overwrite this?`);
+			await InteractionUtil.awaitConfirmation(
+				interaction,
+				`your discord account is already linked to \`${playerLinkedToId}\`. Overwrite this?`,
+			);
 
 			await playerLinkedToId.unlink(`linked account switched to ${interaction.user.tag}`);
 		}
 
 		// create new db entry if non exitent
 		try {
-			if (!player) [ player ] = await this.client.players.model.findCreateFind({
-				where: { minecraftUuid: uuid },
-				defaults: {
-					minecraftUuid: uuid,
-					ign,
-					guildId,
-				},
-			});
+			if (!player)
+				[player] = await this.client.players.model.findCreateFind({
+					where: { minecraftUuid: uuid },
+					defaults: {
+						minecraftUuid: uuid,
+						ign,
+						guildId,
+					},
+				});
 		} catch (error) {
 			logger.error(error, '[VERIFY]: database');
-			return InteractionUtil.reply(interaction, `an error occurred while updating the guild player database. Contact ${await this.client.fetchOwnerInfo()}`);
+			return InteractionUtil.reply(
+				interaction,
+				`an error occurred while updating the guild player database. Contact ${await this.client.fetchOwnerInfo()}`,
+			);
 		}
 
 		player.guildId = guildId;
 
-		const discordMember = interaction.member as GuildMember | null
-			?? await this.client.lgGuild?.members.fetch(interaction.user).catch(error => logger.error(error, '[VERIFY]: guild member fetch'))
-			?? null;
+		const discordMember =
+			(interaction.member as GuildMember | null) ??
+			(await this.client.lgGuild?.members
+				.fetch(interaction.user)
+				.catch((error) => logger.error(error, '[VERIFY]: guild member fetch'))) ??
+			null;
 
 		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
 

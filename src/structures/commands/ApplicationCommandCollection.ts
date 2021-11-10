@@ -11,11 +11,11 @@ import type {
 } from 'discord.js';
 import type { DualCommand } from './DualCommand';
 
-
 type SlashCommandType = DualCommand | ApplicationCommand;
 
-
-export class ApplicationCommandCollection<C extends SlashCommandType = SlashCommandType> extends BaseCommandCollection<C> {
+export class ApplicationCommandCollection<
+	C extends SlashCommandType = SlashCommandType,
+> extends BaseCommandCollection<C> {
 	/**
 	 * built-in methods will use this as the constructor
 	 * that way ApplicationCommandCollection#filter returns a standard Collection
@@ -28,11 +28,11 @@ export class ApplicationCommandCollection<C extends SlashCommandType = SlashComm
 	 * registers all slash commands
 	 * @param commandManager
 	 */
-	async init(commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands) {
-		const uniqueCommands = [ ...new Set(this.values()) ];
-		const commands = await commandManager.set(
-			uniqueCommands.flatMap(({ data }) => data),
-		);
+	async init(
+		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands,
+	) {
+		const uniqueCommands = [...new Set(this.values())];
+		const commands = await commandManager.set(uniqueCommands.flatMap(({ data }) => data));
 
 		await this.setAllPermissions(commands);
 
@@ -44,7 +44,7 @@ export class ApplicationCommandCollection<C extends SlashCommandType = SlashComm
 	 * @param applicationCommandsInput
 	 */
 	async setAllPermissions(applicationCommandsInput: Collection<Snowflake, DiscordJSApplicationCommand>) {
-		const applicationCommands = applicationCommandsInput ?? await this.client.application!.commands.fetch();
+		const applicationCommands = applicationCommandsInput ?? (await this.client.application!.commands.fetch());
 		const fullPermissions: GuildApplicationCommandPermissionData[] = [];
 
 		for (const { name, id } of applicationCommands.values()) {
@@ -79,15 +79,17 @@ export class ApplicationCommandCollection<C extends SlashCommandType = SlashComm
 	 * @param commandName
 	 * @param commandManager
 	 */
-	async create(commandName: string, commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands) {
-		const command = this.get(commandName) ?? await this.loadByName(commandName);
+	async create(
+		commandName: string,
+		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands,
+	) {
+		const command = this.get(commandName) ?? (await this.loadByName(commandName));
 
 		if (!command) throw new Error(`[COMMANDS CREATE]: unknown command '${commandName}'`);
-		if (!(command instanceof ApplicationCommand)) throw new Error(`[COMMANDS CREATE]: ${command.name} is not an ApplicationCommand`);
+		if (!(command instanceof ApplicationCommand))
+			throw new Error(`[COMMANDS CREATE]: ${command.name} is not an ApplicationCommand`);
 
-		const applicationCommands = await Promise.all(
-			command.data.map(d => commandManager.create(d)),
-		);
+		const applicationCommands = await Promise.all(command.data.map((d) => commandManager.create(d)));
 
 		await this.setSinglePermissions({ command, applicationCommands });
 
@@ -99,9 +101,18 @@ export class ApplicationCommandCollection<C extends SlashCommandType = SlashComm
 	 * @param param0
 	 */
 	// eslint-disable-next-line no-undef
-	async setSinglePermissions({ command = this.getByName(arguments[0])!, applicationCommands: applicationCommandsInput }: { command: ApplicationCommand; applicationCommands: DiscordJSApplicationCommand[]; }) {
-		const applicationCommands = applicationCommandsInput
-			?? (await this.client.application!.commands.fetch()).filter(c => c.name === command.name || (command.aliases?.includes(c.name) ?? false));
+	async setSinglePermissions({
+		command = this.getByName(arguments[0])!,
+		applicationCommands: applicationCommandsInput,
+	}: {
+		command: ApplicationCommand;
+		applicationCommands: DiscordJSApplicationCommand[];
+	}) {
+		const applicationCommands =
+			applicationCommandsInput ??
+			(await this.client.application!.commands.fetch()).filter(
+				(c) => c.name === command.name || (command.aliases?.includes(c.name) ?? false),
+			);
 		const { permissions } = command;
 
 		if (permissions?.length) {
@@ -122,9 +133,12 @@ export class ApplicationCommandCollection<C extends SlashCommandType = SlashComm
 	 * @param commandName
 	 * @param commandManager
 	 */
-	async deleteCommand(commandName: string, commandManager: GuildApplicationCommandManager | ApplicationCommandManager = this.client.application!.commands) {
+	async deleteCommand(
+		commandName: string,
+		commandManager: GuildApplicationCommandManager | ApplicationCommandManager = this.client.application!.commands,
+	) {
 		const commands = await (commandManager as ApplicationCommandManager).fetch();
-		const command = commands.find(cmd => cmd.name === commandName.toLowerCase());
+		const command = commands.find((cmd) => cmd.name === commandName.toLowerCase());
 
 		if (!command) throw new Error(`unknown command ${commandName}`);
 

@@ -9,7 +9,6 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class UnlinkCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -26,15 +25,18 @@ export default class UnlinkCommand extends ApplicationCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		const PLAYER_INPUT = interaction.options.getString('player', true);
-		const player = InteractionUtil.getPlayer(interaction)
-			?? await this.client.players.fetch({
-				[Op.or]: [{
-					ign: { [Op.iLike]: PLAYER_INPUT },
-					minecraftUuid: PLAYER_INPUT.toLowerCase(),
-					discordId: PLAYER_INPUT,
-				}],
+		const player =
+			InteractionUtil.getPlayer(interaction) ??
+			(await this.client.players.fetch({
+				[Op.or]: [
+					{
+						ign: { [Op.iLike]: PLAYER_INPUT },
+						minecraftUuid: PLAYER_INPUT.toLowerCase(),
+						discordId: PLAYER_INPUT,
+					},
+				],
 				cache: false,
-			});
+			}));
 
 		if (!player?.discordId) return InteractionUtil.reply(interaction, `\`${PLAYER_INPUT}\` is not linked`);
 

@@ -5,8 +5,10 @@ import type { ApplicationCommandData } from './ApplicationCommand';
 import type { BridgeCommand, BridgeCommandData } from './BridgeCommand';
 import type { HypixelUserMessage } from '../chat_bridge/HypixelMessage';
 
-
-export class DualCommand extends ApplicationCommand implements Omit<BridgeCommand, 'collection' | 'load' | 'unload' | 'clearCooldowns'> {
+export class DualCommand
+	extends ApplicationCommand
+	implements Omit<BridgeCommand, 'collection' | 'load' | 'unload' | 'clearCooldowns'>
+{
 	_usage: string | (() => string) | null = null;
 	aliasesInGame: string[] | null;
 	guildOnly: boolean;
@@ -18,11 +20,15 @@ export class DualCommand extends ApplicationCommand implements Omit<BridgeComman
 	 * @param slashData
 	 * @param bridgeData
 	 */
-	constructor(context: CommandContext, slashData: ApplicationCommandData, { aliases, guildOnly, args, usage }: BridgeCommandData = {}) {
+	constructor(
+		context: CommandContext,
+		slashData: ApplicationCommandData,
+		{ aliases, guildOnly, args, usage }: BridgeCommandData = {},
+	) {
 		super(context, slashData);
 
 		this.aliasesInGame = aliases?.filter(Boolean).length
-			? aliases.flatMap(alias => (!alias ? [] : alias.toLowerCase()))
+			? aliases.flatMap((alias) => (!alias ? [] : alias.toLowerCase()))
 			: null;
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;
@@ -44,25 +50,23 @@ export class DualCommand extends ApplicationCommand implements Omit<BridgeComman
 	 * @param value
 	 */
 	set usage(value: string | (() => string) | null) {
-		this._usage = typeof value === 'function' || value?.length
-			? value
-			: null;
+		this._usage = typeof value === 'function' || value?.length ? value : null;
 	}
 
 	/**
 	 * @returns command argument usage
 	 */
 	get usage(): string | null {
-		return typeof this._usage === 'function'
-			? this._usage()
-			: this._usage;
+		return typeof this._usage === 'function' ? this._usage() : this._usage;
 	}
 
 	/**
 	 * prefix name usage
 	 */
 	get usageInfo() {
-		return `\`${this.config.get('PREFIXES')[0]}${this.aliasesInGame?.[0].length ?? Number.POSITIVE_INFINITY < this.name.length ? this.aliasesInGame![0] : this.name}\` ${this.usage}`;
+		return `\`${this.config.get('PREFIXES')[0]}${
+			this.aliasesInGame?.[0].length ?? Number.POSITIVE_INFINITY < this.name.length ? this.aliasesInGame![0] : this.name
+		}\` ${this.usage}`;
 	}
 
 	/**
@@ -71,7 +75,8 @@ export class DualCommand extends ApplicationCommand implements Omit<BridgeComman
 	override load() {
 		// load into chatbridge command collection
 		this.client.chatBridges.commands.set(this.name.toLowerCase(), this);
-		if (this.aliasesInGame) for (const alias of this.aliasesInGame) this.client.chatBridges.commands.set(alias.toLowerCase(), this);
+		if (this.aliasesInGame)
+			for (const alias of this.aliasesInGame) this.client.chatBridges.commands.set(alias.toLowerCase(), this);
 
 		// load into slash commands collection
 		return super.load();
@@ -83,7 +88,8 @@ export class DualCommand extends ApplicationCommand implements Omit<BridgeComman
 	override unload() {
 		// unload from chatbridge command collection
 		this.client.chatBridges.commands.delete(this.name.toLowerCase());
-		if (this.aliasesInGame) for (const alias of this.aliasesInGame) this.client.chatBridges.commands.delete(alias.toLowerCase());
+		if (this.aliasesInGame)
+			for (const alias of this.aliasesInGame) this.client.chatBridges.commands.delete(alias.toLowerCase());
 
 		// unload from slash commands collection
 		return super.unload();
@@ -95,7 +101,8 @@ export class DualCommand extends ApplicationCommand implements Omit<BridgeComman
 	 */
 	runMinecraft(hypixelMessage: HypixelUserMessage): unknown;
 	async runMinecraft(hypixelMessage: HypixelUserMessage): Promise<unknown>;
-	async runMinecraft(hypixelMessage: HypixelUserMessage) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, require-await
+	async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		throw new Error('no run function specified');
 	}
 }

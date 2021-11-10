@@ -6,14 +6,12 @@ import type { EventEmitter } from 'node:events';
 import type { URL } from 'node:url';
 import type { BaseEvent } from './BaseEvent';
 
-
 interface EventLoadOptions {
 	/** wether to reload the imported file */
 	reload?: boolean;
 	/** wether to load disabled events */
 	force?: boolean;
 }
-
 
 export class EventCollection extends Collection<string, BaseEvent> {
 	/**
@@ -25,7 +23,7 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	 */
 	dirURL: URL;
 
-	constructor(emitter: EventEmitter, dirURL: URL, entries?: readonly [ string, BaseEvent ][]) {
+	constructor(emitter: EventEmitter, dirURL: URL, entries?: readonly [string, BaseEvent][]) {
 		super(entries);
 
 		this.emitter = emitter;
@@ -86,6 +84,6 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	 * unload all commands
 	 */
 	unloadAll() {
-		return this.each(event => event.unload());
+		return this.each((event) => event.unload());
 	}
 }

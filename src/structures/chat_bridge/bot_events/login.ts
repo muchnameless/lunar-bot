@@ -2,11 +2,10 @@ import { ChatBridgeEvents, DEFAULT_SETTINGS } from '../constants';
 import { logger } from '../../../functions';
 import type { ChatBridge } from '../ChatBridge';
 
-
 /**
  * @param chatBridge
  */
-export default function(chatBridge: ChatBridge) {
+export default function (chatBridge: ChatBridge) {
 	if (!chatBridge.bot) return logger.error(`${chatBridge.logInfo}: no bot on login event`);
 
 	logger.debug(`[MINECRAFT BOT LOGIN]: ${chatBridge.bot.username}: logged in`);

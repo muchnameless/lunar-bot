@@ -9,7 +9,7 @@ declare module 'lilyweight' {
 		6: number;
 		7: number;
 	}>;
-	
+
 	export type MasterCataCompletion = Partial<{
 		1: number;
 		2: number;
@@ -65,7 +65,14 @@ declare module 'lilyweight' {
 		 * @param slayerXP Array of slayer experience amounts in the order listed above.
 		 * @returns The weights calculated from the data.
 		 */
-		static getWeightRaw(skillLevels: number[], skillXP: number[], cataCompl: CataCompletion, mCataCompl: MasterCataCompletion, cataXP: number, slayerXP: number[]): WeightData;
+		static getWeightRaw(
+			skillLevels: number[],
+			skillXP: number[],
+			cataCompl: CataCompletion,
+			mCataCompl: MasterCataCompletion,
+			cataXP: number,
+			slayerXP: number[],
+		): WeightData;
 
 		/**
 		 * Gets the player's weight.

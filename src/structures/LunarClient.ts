@@ -12,7 +12,6 @@ import { hours, logger } from '../functions';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 import type { db } from './database';
 
-
 interface LunarClientOptions extends ClientOptions {
 	db: typeof db;
 	fetchAllMembers?: boolean;
@@ -109,22 +108,21 @@ export class LunarClient extends Client {
 			await this.db.init();
 
 			// these need the db cache to be populated
-			await Promise.all([
-				this.commands.loadAll(),
-				this.events.loadAll(),
-				this.chatBridges.loadChannelIds(),
-			]);
+			await Promise.all([this.commands.loadAll(), this.events.loadAll(), this.chatBridges.loadChannelIds()]);
 
 			// login
 			const res = await super.login(token);
 
 			// set presence again every 1h cause it get's lost sometimes
-			setInterval(() => this.isReady() && this.user.setPresence({
-				status: this.user.presence.status !== 'offline'
-					? this.user.presence.status
-					: undefined,
-				activities: this.user.presence.activities as ActivitiesOptions[],
-			}), hours(1));
+			setInterval(
+				() =>
+					this.isReady() &&
+					this.user.setPresence({
+						status: this.user.presence.status !== 'offline' ? this.user.presence.status : undefined,
+						activities: this.user.presence.activities as ActivitiesOptions[],
+					}),
+				hours(1),
+			);
 
 			return res;
 		} catch (error) {
@@ -149,12 +147,11 @@ export class LunarClient extends Client {
 	formatDecimalNumber(number: number, paddingAmount = 0) {
 		if (Number.isNaN(number)) return 'NaN'.padStart(paddingAmount, ' ');
 
-		const [ BEFORE_DOT, AFTER_DOT ] = number.toFixed(2).split('.');
+		const [BEFORE_DOT, AFTER_DOT] = number.toFixed(2).split('.');
 
 		return `${Number(BEFORE_DOT)
 			.toLocaleString(this.config.get('NUMBER_FORMAT'))
-			.padStart(paddingAmount, ' ')
-		}.${AFTER_DOT}`;
+			.padStart(paddingAmount, ' ')}.${AFTER_DOT}`;
 	}
 
 	/**
@@ -163,7 +160,7 @@ export class LunarClient extends Client {
 	 * @param paddingAmount amount to space-pad at the start (default 0)
 	 * @param converterFunction function to be called on the number
 	 */
-	formatNumber(number: number, paddingAmount = 0, converterFunction: (input: number) => number = x => x) {
+	formatNumber(number: number, paddingAmount = 0, converterFunction: (input: number) => number = (x) => x) {
 		return converterFunction(number)
 			.toLocaleString(this.config.get('NUMBER_FORMAT'))
 			.replace(',', '.')
@@ -185,10 +182,8 @@ export class LunarClient extends Client {
 
 		for (const output of await Promise.allSettled([
 			this.db.sequelize.close(),
-			cache
-				// @ts-expect-error
-				.opts
-				.store?.redis?.quit(),
+			cache.opts.store?.redis // @ts-expect-error
+				?.quit(),
 		])) {
 			if (output.status === 'rejected') {
 				logger.fatal(output.reason);

@@ -13,7 +13,6 @@ import type { CommandInteraction, Message, Snowflake } from 'discord.js';
 import type { BroadcastOptions, MessageForwardOptions } from './ChatBridge';
 import type { LunarClient } from '../LunarClient';
 
-
 export class ChatBridgeManager {
 	/**
 	 * the client that instantiated the ChatBridgeArray
@@ -86,10 +85,12 @@ export class ChatBridgeManager {
 		}
 
 		// all
-		await Promise.all(this.cache.map((chatBridge) => {
-			chatBridge.connect();
-			return once(chatBridge, ChatBridgeEvents.READY);
-		}));
+		await Promise.all(
+			this.cache.map((chatBridge) => {
+				chatBridge.connect();
+				return once(chatBridge, ChatBridgeEvents.READY);
+			}),
+		);
 
 		return this;
 	}
@@ -103,11 +104,16 @@ export class ChatBridgeManager {
 	disconnect(index?: number) {
 		// single
 		if (typeof index === 'number') {
-			return this.cache[index]?.disconnect() ?? (() => { throw new Error(`no chatBridge with index #${index}`); })();
+			return (
+				this.cache[index]?.disconnect() ??
+				(() => {
+					throw new Error(`no chatBridge with index #${index}`);
+				})()
+			);
 		}
 
 		// all
-		return this.cache.map(chatBridge => chatBridge.disconnect());
+		return this.cache.map((chatBridge) => chatBridge.disconnect());
 	}
 
 	/**
@@ -115,7 +121,7 @@ export class ChatBridgeManager {
 	 * @param contentOrOptions
 	 */
 	broadcast(contentOrOptions: string | BroadcastOptions) {
-		return Promise.all(this.cache.map(chatBridge => chatBridge.broadcast(contentOrOptions)));
+		return Promise.all(this.cache.map((chatBridge) => chatBridge.broadcast(contentOrOptions)));
 	}
 
 	/**
@@ -141,10 +147,12 @@ export class ChatBridgeManager {
 				},
 			});
 
-			if (result.every(([ minecraft, discord ]) => minecraft && (Array.isArray(discord) ? discord.length : discord))) {
+			if (result.every(([minecraft, discord]) => minecraft && (Array.isArray(discord) ? discord.length : discord))) {
 				if (message.reactions.cache.get(X_EMOJI)?.me) {
-					message.reactions.cache.get(X_EMOJI)!.users.remove(this.client.user!)
-						.catch(error => logger.error(error, '[HANDLE ANNOUNCEMENT MSG]'));
+					message.reactions.cache
+						.get(X_EMOJI)!
+						.users.remove(this.client.user!)
+						.catch((error) => logger.error(error, '[HANDLE ANNOUNCEMENT MSG]'));
 				}
 			} else {
 				MessageUtil.react(message, X_EMOJI);
@@ -162,17 +170,24 @@ export class ChatBridgeManager {
 	 */
 	handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
 		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return; // not a chat bridge message or bridge disabled
-		if (message.flags.any([ MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL ])) return; // ignore deferReply and ephemeral messages
+		if (message.flags.any([MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL])) return; // ignore deferReply and ephemeral messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
 
 		try {
 			// a ChatBridge for the message's channel was found
-			if (this.cache.reduce((acc, chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false)) return;
+			if (this.cache.reduce((acc, chatBridge) => chatBridge.handleDiscordMessage(message, options) || acc, false))
+				return;
 
 			// check if the message was sent from the bot, don't react with X_EMOJI in this case
-			if (message.webhookId
-				&& this.cache.reduce((acc, chatBridge) => acc || (message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id), false)
-			) return; // message was sent by one of the ChatBridges's webhook
+			if (
+				message.webhookId &&
+				this.cache.reduce(
+					(acc, chatBridge) =>
+						acc || message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id,
+					false,
+				)
+			)
+				return; // message was sent by one of the ChatBridges's webhook
 
 			// no ChatBridge for the message's channel found
 			MessageUtil.react(message, X_EMOJI);

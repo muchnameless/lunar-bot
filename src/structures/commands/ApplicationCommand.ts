@@ -33,8 +33,8 @@ import type {
 } from 'discord.js';
 import type { CommandContext, CommandData } from './BaseCommand';
 
-
-type Slash = SlashCommandBuilder
+type Slash =
+	| SlashCommandBuilder
 	| SlashCommandSubcommandsOnlyBuilder
 	| SlashCommandOptionsOnlyBuilder
 	| Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
@@ -47,7 +47,6 @@ export interface ApplicationCommandData extends CommandData {
 	message?: ContextMenuCommandBuilder;
 	user?: ContextMenuCommandBuilder;
 }
-
 
 export class ApplicationCommand extends BaseCommand {
 	slash: RESTPostAPIChatInputApplicationCommandsJSONBody | null = null;
@@ -73,7 +72,7 @@ export class ApplicationCommand extends BaseCommand {
 				this.aliases.push(...aliases);
 
 				this.slashAliases = aliases.filter(Boolean).length
-					? aliases.flatMap(alias => (!alias ? [] : alias.toLowerCase()))
+					? aliases.flatMap((alias) => (!alias ? [] : alias.toLowerCase()))
 					: null;
 			}
 
@@ -93,7 +92,8 @@ export class ApplicationCommand extends BaseCommand {
 						}
 					} else if (option instanceof SlashCommandSubcommandBuilder) {
 						option.addStringOption(ephemeralOption);
-					} else { // no subcommand(group) -> only add one ephemeralOption
+					} else {
+						// no subcommand(group) -> only add one ephemeralOption
 						(slash as SlashCommandBuilder).addStringOption(ephemeralOption);
 						break;
 					}
@@ -178,40 +178,43 @@ export class ApplicationCommand extends BaseCommand {
 		 * recursively reduces options
 		 * @param options
 		 */
-		const reduceOptions = (options?: typeof this.slash.options): number => options
-			?.reduce((a1, c1) => a1
-				+ c1.name.length
-				+ c1.description.length
-				+ ((c1 as WithChoices).choices?.reduce((a2, c2) => a2 + c2.name.length + `${c2.value}`.length, 0) ?? 0)
-				+ reduceOptions(c1
-					// @ts-expect-error
-					.options,
-				),
-			0)
-			?? 0;
+		const reduceOptions = (options?: typeof this.slash.options): number =>
+			options?.reduce(
+				(a1, c1) =>
+					a1 +
+					c1.name.length +
+					c1.description.length +
+					((c1 as WithChoices).choices?.reduce((a2, c2) => a2 + c2.name.length + `${c2.value}`.length, 0) ?? 0) +
+					reduceOptions(
+						// @ts-expect-error
+						c1.options,
+					),
+				0,
+			) ?? 0;
 
-		return this.slash.name.length
-			+ this.slash.description.length
-			+ reduceOptions(this.slash.options);
+		return this.slash.name.length + this.slash.description.length + reduceOptions(this.slash.options);
 	}
 
 	/**
 	 * returns discord application command permission data
 	 */
 	get permissions() {
-		const requiredRoles = this.requiredRoles?.filter(r => r !== null);
+		const requiredRoles = this.requiredRoles?.filter((r) => r !== null);
 
 		if (!requiredRoles?.length && this.category !== 'owner') return null;
 
-		const permissions = [{
-			id: this.client.ownerId, // allow all commands for the bot owner
-			type: Constants.ApplicationCommandPermissionTypes.USER,
-			permission: true,
-		}, {
-			id: this.config.get('DISCORD_GUILD_ID'), // deny for the guild @everyone role
-			type: Constants.ApplicationCommandPermissionTypes.ROLE,
-			permission: false,
-		}];
+		const permissions = [
+			{
+				id: this.client.ownerId, // allow all commands for the bot owner
+				type: Constants.ApplicationCommandPermissionTypes.USER,
+				permission: true,
+			},
+			{
+				id: this.config.get('DISCORD_GUILD_ID'), // deny for the guild @everyone role
+				type: Constants.ApplicationCommandPermissionTypes.ROLE,
+				permission: false,
+			},
+		];
 
 		if (requiredRoles) {
 			for (const roleId of requiredRoles) {
@@ -230,24 +233,31 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param permissions
 	 */
-	async checkPermissions(interaction: Interaction, { userIds = [ this.client.ownerId ], roleIds = this.requiredRoles }: { userIds?: Snowflake[] | null; roleIds?: Snowflake[] | null; } = {}) {
+	async checkPermissions(
+		interaction: Interaction,
+		{
+			userIds = [this.client.ownerId],
+			roleIds = this.requiredRoles,
+		}: { userIds?: Snowflake[] | null; roleIds?: Snowflake[] | null } = {},
+	) {
 		if (userIds?.includes(interaction.user.id)) return; // user id bypass
 		if (!roleIds?.length) return; // no role requirements
 
-		const member = interaction.guildId === this.config.get('DISCORD_GUILD_ID')
-			? interaction.member as GuildMember
-			: await (async () => {
-				const { lgGuild } = this.client;
+		const member =
+			interaction.guildId === this.config.get('DISCORD_GUILD_ID')
+				? (interaction.member as GuildMember)
+				: await (async () => {
+						const { lgGuild } = this.client;
 
-				if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
+						if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
 
-				try {
-					return await lgGuild.members.fetch(interaction.user);
-				} catch (error) {
-					logger.error(error, '[CHECK PERMISSIONS]: error while fetching member to test for permissions');
-					throw missingPermissionsError('unknown discord member', interaction, roleIds);
-				}
-			})();
+						try {
+							return await lgGuild.members.fetch(interaction.user);
+						} catch (error) {
+							logger.error(error, '[CHECK PERMISSIONS]: error while fetching member to test for permissions');
+							throw missingPermissionsError('unknown discord member', interaction, roleIds);
+						}
+				  })();
 
 		// check for req roles
 		if (!member.roles.cache.hasAny(...roleIds)) {
@@ -261,7 +271,8 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param user
 	 * @param member
 	 */
-	runUser(interaction: ContextMenuInteraction, user: User, member: GuildMember | null): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	runUser(interaction: ContextMenuInteraction, user: User, member: GuildMember | null): unknown | Promise<unknown> {
 		throw new Error('no run function specified for user context menus');
 	}
 
@@ -270,7 +281,8 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param message
 	 */
-	runMessage(interaction: ContextMenuInteraction, message: Message): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	runMessage(interaction: ContextMenuInteraction, message: Message): unknown | Promise<unknown> {
 		throw new Error('no run function specified for message context menus');
 	}
 
@@ -279,7 +291,8 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	runSelect(interaction: SelectMenuInteraction, args: string[]): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	runSelect(interaction: SelectMenuInteraction, args: string[]): unknown | Promise<unknown> {
 		throw new Error('no run function specified for select menus');
 	}
 
@@ -288,7 +301,8 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	runButton(interaction: ButtonInteraction, args: string[]): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	runButton(interaction: ButtonInteraction, args: string[]): unknown | Promise<unknown> {
 		throw new Error('no run function specified for buttons');
 	}
 
@@ -296,7 +310,8 @@ export class ApplicationCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	runSlash(interaction: CommandInteraction): unknown | Promise<unknown> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	runSlash(interaction: CommandInteraction): unknown | Promise<unknown> {
 		throw new Error('no run function specified for slash commands');
 	}
 }

@@ -48,7 +48,6 @@ export const DUNGEON_EXPONENTS = {
 	tank: 0.000_004_525_483_4,
 } as const;
 
-
 /**
  * lily
  * https://github.com/Antonio32A/lilyweight

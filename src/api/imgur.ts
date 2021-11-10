@@ -3,7 +3,6 @@ import { IMGUR_KEY } from '../constants';
 import { ImgurClient } from '../structures/ImgurClient';
 import { hours, seconds } from '../functions';
 
-
 export const imgur = new ImgurClient(process.env.IMGUR_CLIENT_ID!, {
 	timeout: seconds(20),
 	retries: 1,

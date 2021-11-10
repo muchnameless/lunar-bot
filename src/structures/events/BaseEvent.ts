@@ -1,7 +1,6 @@
 import type { EventEmitter } from 'node:events';
 import type { LunarClient } from '../LunarClient';
 
-
 export interface EventContext {
 	emitter: EventEmitter;
 	name: string;
@@ -11,7 +10,6 @@ export interface EventData {
 	once?: boolean;
 	enabled?: boolean;
 }
-
 
 export class BaseEvent {
 	emitter: EventEmitter;
@@ -36,10 +34,10 @@ export class BaseEvent {
 	 * client config
 	 */
 	get config() {
-		return (this
+		return (
 			// @ts-expect-error
-			.client as LunarClient
-		).config;
+			(this.client as LunarClient).config
+		);
 	}
 
 	/**
@@ -63,7 +61,8 @@ export class BaseEvent {
 	 * event listener callback
 	 */
 	run(...args: unknown[]): void;
-	async run(...args: unknown[]) { // eslint-disable-line @typescript-eslint/no-unused-vars, require-await
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, require-await
+	async run(...args: unknown[]) {
 		throw new Error('no run function specified');
 	}
 }

@@ -1,7 +1,6 @@
 import { BaseEvent } from '../events/BaseEvent';
 import type { ChatBridge } from './ChatBridge';
 
-
 export class ChatBridgeEvent extends BaseEvent {
 	/**
 	 * chatBridge

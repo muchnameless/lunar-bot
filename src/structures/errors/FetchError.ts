@@ -1,6 +1,5 @@
 import type { Response } from 'node-fetch';
 
-
 export class FetchError extends Error {
 	type: string | null;
 	url: string | null;
@@ -25,6 +24,10 @@ export class FetchError extends Error {
 	}
 
 	override toString() {
-		return `${this.name}${this.status ? ` ${this.status}` : ''}: ${this.message}${this.statusText && this.statusText !== this.message && this.statusText !== 'No Content' ? ` (${this.statusText})` : ''}`;
+		return `${this.name}${this.status ? ` ${this.status}` : ''}: ${this.message}${
+			this.statusText && this.statusText !== this.message && this.statusText !== 'No Content'
+				? ` (${this.statusText})`
+				: ''
+		}`;
 	}
 }

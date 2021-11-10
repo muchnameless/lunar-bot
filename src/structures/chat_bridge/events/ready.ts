@@ -2,7 +2,6 @@ import { logger } from '../../../functions';
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
 import type { EventContext } from '../../events/BaseEvent';
 
-
 export default class ReadyChatBridgeEvent extends ChatBridgeEvent {
 	constructor(context: EventContext) {
 		super(context, {

@@ -8,12 +8,10 @@ import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
-
 interface Operator {
 	precedence: number;
 	associativity: 'left' | 'right';
 }
-
 
 class Parser {
 	table: Record<string, Operator>;
@@ -52,7 +50,7 @@ class Parser {
 						let shouldWriteToStack = true;
 
 						while (stack.length) {
-							const [ punctuator ] = stack;
+							const [punctuator] = stack;
 							const operator = this.table[token];
 
 							if (punctuator === '(') {
@@ -80,7 +78,7 @@ class Parser {
 					output.push(token);
 
 					// check if token is followed by a unary operator
-					const nonBracketIndex = stack.findIndex(x => x !== '(');
+					const nonBracketIndex = stack.findIndex((x) => x !== '(');
 
 					if (nonBracketIndex !== -1 && this.table[stack[nonBracketIndex]]?.associativity === 'right') {
 						output.push(stack.splice(nonBracketIndex, 1)[0]);
@@ -97,23 +95,24 @@ class Parser {
 	}
 }
 
-
 export default class MathsCommand extends DualCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('supports: + - * / ^ ! % sin cos tan sqrt exp ln log pi e')
-				.addStringOption(option => option
-					.setName('input')
-					.setDescription('mathematical expression to evaluate')
-					.setRequired(true),
-				),
-			cooldown: 0,
-		}, {
-			aliases: [ 'm' ],
-			args: true,
-			usage: '',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription('supports: + - * / ^ ! % sin cos tan sqrt exp ln log pi e')
+					.addStringOption((option) =>
+						option.setName('input').setDescription('mathematical expression to evaluate').setRequired(true),
+					),
+				cooldown: 0,
+			},
+			{
+				aliases: ['m'],
+				args: true,
+				usage: '',
+			},
+		);
 	}
 
 	static percent = {
@@ -247,16 +246,20 @@ export default class MathsCommand extends DualCommand {
 
 	static isMultipleOfPi = (x: number) => div(x, Math.PI) === Math.floor(div(x, Math.PI));
 
-	static isMultipleOfPiHalf = (x: number) => div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI));
+	static isMultipleOfPiHalf = (x: number) =>
+		div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI));
 
 	/**
 	 * lexer for mathematical expressions
 	 */
-	static lexer = new Lexer(function(c: string) { // eslint-disable-line prefer-arrow-callback
-		throw new Error(`LexerError: unexpected character at index ${
-			// @ts-expect-error
-			(this as Lexer).index
-		}: '${c}'`);
+	// eslint-disable-next-line prefer-arrow-callback
+	static lexer = new Lexer(function (c: string) {
+		throw new Error(
+			`LexerError: unexpected character at index ${
+				// @ts-expect-error
+				(this as Lexer).index
+			}: '${c}'`,
+		);
 	})
 		.addRule(/,/, () => void 0) // ignore ','
 		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[!()*+/^°-]/, (lexeme: string) => lexeme)
@@ -312,7 +315,8 @@ export default class MathsCommand extends DualCommand {
 	 * @param value
 	 */
 	validateNumber(value?: string | number) {
-		if (Math.abs(Number(value)) > Number.MAX_SAFE_INTEGER) throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
+		if (Math.abs(Number(value)) > Number.MAX_SAFE_INTEGER)
+			throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
 
 		if (typeof value === 'string') return Number(value);
 		return value;

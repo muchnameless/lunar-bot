@@ -10,10 +10,10 @@ import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMes
 import type { ApplicationCommandData } from '../../structures/commands/ApplicationCommand';
 import type { BridgeCommandData } from '../../structures/commands/BridgeCommand';
 
-
 export default class PingMuteCommand extends DualCommand {
 	constructor(context: CommandContext, param1?: ApplicationCommandData, param2?: BridgeCommandData) {
-		super(context,
+		super(
+			context,
 			param1 ?? {
 				slash: new SlashCommandBuilder()
 					.setDescription('prevent a guild member from @mentioning via the chat bridge')
@@ -51,10 +51,13 @@ export default class PingMuteCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		return InteractionUtil.reply(interaction, await this._generateReply(
-			InteractionUtil.getPlayer(interaction, { throwIfNotFound: true }),
-			interaction.options.getString('player', true),
-		));
+		return InteractionUtil.reply(
+			interaction,
+			await this._generateReply(
+				InteractionUtil.getPlayer(interaction, { throwIfNotFound: true }),
+				interaction.options.getString('player', true),
+			),
+		);
 	}
 
 	/**
@@ -62,11 +65,10 @@ export default class PingMuteCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
-		const [ INPUT ] = hypixelMessage.commandData.args;
+		const [INPUT] = hypixelMessage.commandData.args;
 
-		return hypixelMessage.reply(await this._generateReply(
-			this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT),
-			INPUT,
-		));
+		return hypixelMessage.reply(
+			await this._generateReply(this.client.players.getById(INPUT) ?? this.client.players.getByIgn(INPUT), INPUT),
+		);
 	}
 }

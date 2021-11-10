@@ -2,7 +2,6 @@ import { logger } from '../../../functions';
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
 import type { EventContext } from '../../events/BaseEvent';
 
-
 export default class ConnectChatBridgeEvent extends ChatBridgeEvent {
 	constructor(context: EventContext) {
 		super(context, {
@@ -25,7 +24,8 @@ export default class ConnectChatBridgeEvent extends ChatBridgeEvent {
 			try {
 				await this.chatBridge.minecraft.command({
 					command: 'ac §',
-					responseRegExp: /^A kick occurred in your connection, so you have been routed to limbo!$|^Illegal characters in chat$|^You were spawned in Limbo\.$|^\/limbo for more information\.$/,
+					responseRegExp:
+						/^A kick occurred in your connection, so you have been routed to limbo!$|^Illegal characters in chat$|^You were spawned in Limbo\.$|^\/limbo for more information\.$/,
 					rejectOnTimeout: true,
 					max: 1,
 				});

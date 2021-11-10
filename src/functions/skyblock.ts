@@ -10,12 +10,10 @@ import { getLilyWeight } from '.';
 import type { Components } from '@zikeji/hypixel';
 import type { DungeonTypes, SkillTypes } from '../constants';
 
-
 // eslint-disable-next-line camelcase
-export type SkyBlockProfile = Components.Schemas.SkyBlockProfileCuteName & { cute_name: string; };
+export type SkyBlockProfile = Components.Schemas.SkyBlockProfileCuteName & { cute_name: string };
 
 type SkyBlockProfiles = Components.Schemas.SkyBlockProfileCuteName[];
-
 
 // used for getSkillLevel to determine the xpTable
 const DUNGEON_TYPES_AND_CLASSES_SET = new Set(DUNGEON_TYPES_AND_CLASSES);
@@ -29,16 +27,14 @@ const DUNGEON_TYPES_AND_CLASSES_SET = new Set(DUNGEON_TYPES_AND_CLASSES);
 export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individualCap: number | null = null) {
 	let xpTable = DUNGEON_TYPES_AND_CLASSES_SET.has(type as any)
 		? DUNGEON_XP
-		: (type === 'runecrafting'
-			? RUNECRAFTING_XP
-			: SKILL_XP);
-	let maxLevel = Math.max(...Object.keys(xpTable) as unknown as number[]);
+		: type === 'runecrafting'
+		? RUNECRAFTING_XP
+		: SKILL_XP;
+	let maxLevel = Math.max(...(Object.keys(xpTable) as unknown as number[]));
 
 	if (LEVEL_CAP[type] > maxLevel || individualCap) {
 		xpTable = { ...SKILL_XP_PAST_50, ...xpTable };
-		maxLevel = individualCap !== null
-			? individualCap
-			: Math.max(...Object.keys(xpTable) as unknown as number[]);
+		maxLevel = individualCap !== null ? individualCap : Math.max(...(Object.keys(xpTable) as unknown as number[]));
 	}
 
 	let xpTotal = 0;
@@ -56,7 +52,7 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 	}
 
 	if (trueLevel < maxLevel) {
-		const nonFlooredLevel = trueLevel + (Math.floor(xp - xpTotal) / xpTable[trueLevel + 1 as keyof typeof xpTable]);
+		const nonFlooredLevel = trueLevel + Math.floor(xp - xpTotal) / xpTable[(trueLevel + 1) as keyof typeof xpTable];
 
 		return {
 			trueLevel,

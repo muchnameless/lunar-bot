@@ -7,19 +7,22 @@ import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
-
 export default class BridgeStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
-		super(context, {
-			slash: new SlashCommandBuilder()
-				.setDescription('shows a player\'s Bridge stats')
-				.addStringOption(optionalIgnOption),
-			cooldown: seconds(1),
-		}, {
-			aliases: [ 'bridge' ],
-			args: false,
-			usage: '<`IGN`>',
-		});
+		super(
+			context,
+			{
+				slash: new SlashCommandBuilder()
+					.setDescription("shows a player's Bridge stats")
+					.addStringOption(optionalIgnOption),
+				cooldown: seconds(1),
+			},
+			{
+				aliases: ['bridge'],
+				args: false,
+				usage: '<`IGN`>',
+			},
+		);
 	}
 
 	/**
@@ -27,17 +30,17 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 	 * @param stat
 	 */
 	static _calculateStats(duelStats: Components.Schemas.PlayerStatsGameMode, stat: string) {
-		return [ 'duel', 'doubles', 'four' ].reduce((acc, cur) => acc + (duelStats[`bridge_${cur}_${stat}`] as number ?? 0), 0);
+		return ['duel', 'doubles', 'four'].reduce(
+			(acc, cur) => acc + ((duelStats[`bridge_${cur}_${stat}`] as number) ?? 0),
+			0,
+		);
 	}
 
 	override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.Duels) return `\`${ign}\` has no Bridge stats`;
 
 		try {
-			const {
-				bridge_deaths: deaths,
-				bridge_kills: kills,
-			} = playerData.stats.Duels;
+			const { bridge_deaths: deaths, bridge_kills: kills } = playerData.stats.Duels;
 
 			if (deaths == null || kills == null) return `\`${ign}\` has no Bridge stats`;
 

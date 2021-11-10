@@ -6,7 +6,6 @@ import type { TaxCollector } from '../models/TaxCollector';
 import type { ModelResovable } from './ModelManager';
 import type { Player } from '../models/Player';
 
-
 export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	/**
 	 * returns a collection of all currently active collectors
@@ -24,7 +23,7 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 		const player = this.client.players.resolve(uuidOrPlayer);
 		if (!player) throw new Error(`[TAX COLLECTOR ADD]: invalid input: ${uuidOrPlayer}`);
 
-		const [ newEntry, created ] = await this.model.findCreateFind({
+		const [newEntry, created] = await this.model.findCreateFind({
 			where: {
 				minecraftUuid: player.minecraftUuid,
 			},
@@ -63,13 +62,20 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	 * returns a tax collected embed
 	 */
 	createTaxCollectedEmbed() {
-		const embed = this.client.defaultEmbed
-			.setTitle('Collected Guild Tax')
-			.setDescription(stripIndents`
+		const embed = this.client.defaultEmbed.setTitle('Collected Guild Tax').setDescription(stripIndents`
 				${Formatters.bold('combined')}
-				tax: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0), 0)}
-				donations: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0), 0)}
-				total: ${this.client.formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax + collector.collectedDonations, 0), 0)}
+				tax: ${this.client.formatNumber(
+					this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0),
+					0,
+				)}
+				donations: ${this.client.formatNumber(
+					this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0),
+					0,
+				)}
+				total: ${this.client.formatNumber(
+					this.cache.reduce((acc, collector) => acc + collector.collectedTax + collector.collectedDonations, 0),
+					0,
+				)}
 				\u200B
 			`);
 

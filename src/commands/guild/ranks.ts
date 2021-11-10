@@ -5,7 +5,6 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-
 export default class RanksCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -37,12 +36,16 @@ export default class RanksCommand extends ApplicationCommand {
 				});
 			}
 
-			return InteractionUtil.reply(interaction, { embeds: [ embed ] });
+			return InteractionUtil.reply(interaction, { embeds: [embed] });
 		}
 
 		// player found
 		embed
-			.setAuthor(`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`, (await player.imageURL)!, player.url)
+			.setAuthor(
+				`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
+				(await player.imageURL)!,
+				player.url,
+			)
 			.setFooter('Updated at')
 			.setTimestamp(player.xpLastUpdatedAt);
 
@@ -53,10 +56,14 @@ export default class RanksCommand extends ApplicationCommand {
 
 			embed.addFields({
 				name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
-				value: `${this.client.formatNumber(Math.floor(weight))} / ${this.client.formatNumber(currentWeightReq)} weight (${this.client.formatNumber(Math.floor(Math.abs(currentWeightReq - weight)))} ${weight < currentWeightReq ? 'below' : 'above'})`,
+				value: `${this.client.formatNumber(Math.floor(weight))} / ${this.client.formatNumber(
+					currentWeightReq,
+				)} weight (${this.client.formatNumber(Math.floor(Math.abs(currentWeightReq - weight)))} ${
+					weight < currentWeightReq ? 'below' : 'above'
+				})`,
 			});
 		}
 
-		return InteractionUtil.reply(interaction, { embeds: [ embed ] });
+		return InteractionUtil.reply(interaction, { embeds: [embed] });
 	}
 }

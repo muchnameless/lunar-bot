@@ -4,7 +4,6 @@ import { HYPIXEL_KEY } from '../constants';
 import { days, logger, minutes, seconds } from '../functions';
 import type { DefaultMeta } from '@zikeji/hypixel';
 
-
 export const SKYBLOCK_PROFILE_TTL = seconds(30);
 
 export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
@@ -29,7 +28,7 @@ export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 				ttl = minutes(2);
 			} else if (key.startsWith('status')) {
 				ttl = seconds(20);
-			// the following endpoints don't require API keys and won't eat into your rate limit
+				// the following endpoints don't require API keys and won't eat into your rate limit
 			} else if (key.startsWith('resources:')) {
 				ttl = days(1); // 24 hours as resources don't update often, if at all
 			} else if (key === 'skyblock:bazaar') {
@@ -44,5 +43,7 @@ export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
 });
 
 hypixel
-	.on('limited', (limit, reset) => logger.warn(`[HYPIXEL API]: ratelimit hit: ${limit} requests. Until: ${reset.toLocaleTimeString('de-DE')}`))
+	.on('limited', (limit, reset) =>
+		logger.warn(`[HYPIXEL API]: ratelimit hit: ${limit} requests. Until: ${reset.toLocaleTimeString('de-DE')}`),
+	)
 	.on('reset', () => logger.info('[HYPIXEL API]: ratelimit reset'));
