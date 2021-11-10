@@ -1,0 +1,65 @@
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  Linting:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v2
+      - name: Add problem matcher
+        run: echo "::add-matcher::.github/problemMatchers/eslint.json"
+      - name: Use Node.js v17
+        uses: actions/setup-node@v2
+        with:
+          node-version: 17
+      - name: Restore CI Cache
+        uses: actions/cache@v2
+        id: cache-restore
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-17-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies if Cache Miss
+        if: ${{ !steps.cache-restore.outputs.cache-hit }}
+        run: |
+          sudo apt update
+          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
+          npm ci
+      - name: Run ESLint
+        run: npm run lint
+
+  Building:
+    name: Compile source code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v2
+      - name: Add problem matcher
+        run: echo "::add-matcher::.github/problemMatchers/tsc.json"
+      - name: Use Node.js v17
+        uses: actions/setup-node@v2
+        with:
+          node-version: 17
+      - name: Restore CI Cache
+        uses: actions/cache@v2
+        id: cache-restore
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-17-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies if Cache Miss
+        if: ${{ !steps.cache-restore.outputs.cache-hit }}
+        run: |
+          sudo apt update
+          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
+          npm ci
+      - name: Compile Projects
+        run: npm test
