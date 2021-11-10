@@ -10,12 +10,10 @@
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
 		"strict": true,
-
 		// Modules
 		"module": "ESNext",
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
-
 		// Emit
 		"declaration": false,
 		"importHelpers": true,
@@ -29,17 +27,19 @@
 		"sourceMap": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
-
 		// Language and Environment
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"lib": [ "ESNext" ],
+		"lib": [
+			"ESNext"
+		],
 		"target": "ESNext",
 		"useDefineForClassFields": true,
 		"incremental": true,
-
 		// Completeness
 		"skipLibCheck": true
 	},
-	"include": ["src/**/*.ts"]
+	"include": [
+		"src/**/*.ts"
+	]
 }

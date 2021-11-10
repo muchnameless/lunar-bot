@@ -19,4 +19,3 @@ echo ""
 echo "done"
 
 cd $curdir
-
