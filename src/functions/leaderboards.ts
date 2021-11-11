@@ -483,8 +483,7 @@ function createLeaderboardEmbeds(
 					#${`${index + 1}`.padStart(3, '0')} : ${player.ign}${isCompetition && player.paid ? ` ${Y_EMOJI_ALT}` : ''}${
 					player.isStaff ? ' [STAFF]' : ''
 				}
-						 > ${getEntry(player)}
-				`}`;
+						 > ${getEntry(player)}`}`; // needs to be in one line or entries are separated by a newline
 			} else {
 				playerList += '\n\u200B\n\u200B';
 			}
@@ -613,7 +612,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				)}
 				[${Formatters.bold(
 					(playerData.reduce((acc, player) => acc + player.trueAverageGain!, 0) / playerData.length).toFixed(2),
-				)}]`;
+				)}]
+			`;
 			getEntry = (player: PlayerData) =>
 				`${client.formatDecimalNumber(
 					player.skillAverageGain!,
@@ -677,7 +677,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				)}`;
 			totalStats = oneLine`
 				${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight!, 0) / playerData.length)} 
-				[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length)}]`;
+				[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length)}]
+			`;
 			break;
 		}
 
@@ -718,7 +719,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 					client.formatDecimalNumber(
 						playerData.reduce((acc, player) => acc + player.overflowGain!, 0) / playerData.length,
 					),
-				)}]`;
+				)}]
+			`;
 			getEntry = (player) =>
 				`${client.formatDecimalNumber(
 					player.totalWeightGain!,
@@ -771,7 +773,8 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 					client.formatDecimalNumber(
 						playerData.reduce((acc, player) => acc + player.overflowGain!, 0) / playerData.length,
 					),
-				)}]`;
+				)}]
+			`;
 			getEntry = (player) =>
 				`${client.formatDecimalNumber(
 					player.totalWeightGain!,
@@ -839,26 +842,26 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 		const { weightReq } = hypixelGuild;
 
 		description += stripIndent`
-				Current weight requirement: ${client.formatNumber(weightReq!)}
-				Guild average: ${totalStats}
-				Below reqs: ${playerData.filter(({ totalWeight }) => totalWeight! < weightReq!).length} / ${
+			Current weight requirement: ${client.formatNumber(weightReq!)}
+			Guild average: ${totalStats}
+			Below reqs: ${playerData.filter(({ totalWeight }) => totalWeight! < weightReq!).length} / ${
 			hypixelGuild.players.size
 		} members
 
-				"activity weight" - gained [total] weight - guild xp
-			`;
+			"activity weight" - gained [total] weight - guild xp
+		`;
 	} else {
 		description += stripIndent`
-				Current weight requirements: ${client.hypixelGuilds.cache
-					.map(({ name, weightReq }) => `${name} (${client.formatNumber(weightReq!)})`)
-					.join(', ')}
-				Guilds average: ${totalStats}
-				Guilds below reqs: ${
-					playerData.filter(
-						({ totalWeight, guildId }) => totalWeight! < client.hypixelGuilds.cache.get(guildId!)?.weightReq!,
-					).length
-				} / ${client.players.inGuild.size} members
-			`;
+			Current weight requirements: ${client.hypixelGuilds.cache
+				.map(({ name, weightReq }) => `${name} (${client.formatNumber(weightReq!)})`)
+				.join(', ')}
+			Guilds average: ${totalStats}
+			Guilds below reqs: ${
+				playerData.filter(
+					({ totalWeight, guildId }) => totalWeight! < client.hypixelGuilds.cache.get(guildId!)?.weightReq!,
+				).length
+			} / ${client.players.inGuild.size} members
+		`;
 	}
 
 	// player requesting entry
@@ -872,11 +875,11 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 		playerRequestingEntry = Formatters.codeBlock(
 			'ada',
 			stripIndent`
-			#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${
+				#${`${playerRequestingIndex + 1}`.padStart(3, '0')} : ${playerRequesting.ign}${
 				IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''
 			}
-				 > ${getEntry(playerRequesting)}
-		`,
+					 > ${getEntry(playerRequesting)}
+			`,
 		);
 	} else if (xpType !== 'purge') {
 		const playerRequesting = UserUtil.getPlayer(user);
@@ -887,20 +890,20 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			playerRequestingEntry = Formatters.codeBlock(
 				'ada',
 				stripIndent`
-				#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequestingConverted.sortingStat) + 1}`.padStart(
-					3,
-					'0',
-				)} : ${playerRequestingConverted.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
-					 > ${getEntry(playerRequestingConverted)}
-			`,
+					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequestingConverted.sortingStat) + 1}`.padStart(
+						3,
+						'0',
+					)} : ${playerRequestingConverted.ign}${IS_COMPETITION_LB && playerRequesting.paid ? ` ${Y_EMOJI_ALT}` : ''}
+						 > ${getEntry(playerRequestingConverted)}
+				`,
 			);
 		} else {
 			playerRequestingEntry = Formatters.codeBlock(
 				'ada',
 				stripIndent`
-				#??? : unknown ign
-					 > link your discord tag on hypixel
-			`,
+					#??? : unknown ign
+						 > link your discord tag on hypixel
+				`,
 			);
 		}
 	}
@@ -982,7 +985,8 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 						playerData.reduce((acc, player) => acc + player.trueAverage!, 0) / playerData.length,
 						2,
 					),
-				)}]`;
+				)}]
+			`;
 			getEntry = (player) =>
 				`${client.formatDecimalNumber(player.skillAverage!, 2)} [${client.formatDecimalNumber(
 					player.trueAverage!,
@@ -1043,7 +1047,8 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 				)}
 				+ ${Formatters.bold(
 					client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow!, 0) / playerData.length),
-				)}]`;
+				)}]
+			`;
 			getEntry = (player) =>
 				`${client.formatDecimalNumber(
 					player.totalWeight!,
@@ -1084,7 +1089,8 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 				)}
 				+ ${Formatters.bold(
 					client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow!, 0) / playerData.length),
-				)}]`;
+				)}]
+			`;
 			getEntry = (player) =>
 				`${client.formatDecimalNumber(
 					player.totalWeight!,
@@ -1119,7 +1125,8 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 						0,
 						Math.round,
 					),
-				)} XP]`;
+				)} XP]
+			`;
 			getEntry = (player) =>
 				`${client.formatDecimalNumber(player.progressLevel!, 2)} [${client.formatNumber(
 					player.xp!,
@@ -1154,20 +1161,20 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			playerRequestingEntry = Formatters.codeBlock(
 				'ada',
 				stripIndent`
-				#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequestingConverted.sortingStat) + 1}`.padStart(
-					3,
-					'0',
-				)} : ${playerRequestingConverted.ign}
-					 > ${getEntry(playerRequestingConverted)}
-			`,
+					#${`${playerData.findIndex(({ sortingStat }) => sortingStat <= playerRequestingConverted.sortingStat) + 1}`.padStart(
+						3,
+						'0',
+					)} : ${playerRequestingConverted.ign}
+						 > ${getEntry(playerRequestingConverted)}
+				`,
 			);
 		} else {
 			playerRequestingEntry = Formatters.codeBlock(
 				'ada',
 				stripIndent`
-				#??? : unknown ign
-					 > link your discord tag on hypixel
-			`,
+					#??? : unknown ign
+						 > link your discord tag on hypixel
+				`,
 			);
 		}
 	}
