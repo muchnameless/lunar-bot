@@ -1,5 +1,5 @@
 import { ChatMessage } from '../HypixelMessage';
-import { ChatBridgeEvents } from '../constants';
+import { ChatBridgeEvents } from '../ChatBridge';
 import type { ChatBridge } from '../ChatBridge';
 
 /**

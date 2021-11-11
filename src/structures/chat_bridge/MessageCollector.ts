@@ -1,4 +1,5 @@
-import EventEmitter from 'node:events';
+import { TypedEmitter } from 'tiny-typed-emitter';
+import { ChatBridgeEvents } from './ChatBridge';
 import type { Awaitable } from 'discord.js';
 import type { HypixelMessage } from './HypixelMessage';
 import type { Timeout } from '../../types/util';
@@ -26,15 +27,19 @@ export interface MessageCollectorOptions {
 
 export const enum MessageCollectorEvents {
 	COLLECT = 'collect',
-	DISCONNECT = 'disconnect',
 	END = 'end',
-	MESSAGE = 'message',
+}
+
+interface MessageCollectorEventListeners {
+	[MessageCollectorEvents.COLLECT]: (item: HypixelMessage) => Awaitable<void>;
+	[MessageCollectorEvents.END]: (collected: MessageCollector['collected'], reason: string) => Awaitable<void>;
+	string: (...args: unknown[]) => Awaitable<void>;
 }
 
 /**
  * MessageCollector
  */
-export class MessageCollector extends EventEmitter {
+export class MessageCollector extends TypedEmitter<MessageCollectorEventListeners> {
 	/**
 	 * The chatBridge that instantiated this Collector
 	 */
@@ -80,37 +85,18 @@ export class MessageCollector extends EventEmitter {
 		}
 
 		this.chatBridge.incrementMaxListeners();
-		this.chatBridge.on(MessageCollectorEvents.MESSAGE, this.#handleCollect);
-		this.chatBridge.once(MessageCollectorEvents.DISCONNECT, this.#handleBotDisconnection);
+		this.chatBridge.on(ChatBridgeEvents.MESSAGE, this.#handleCollect);
+		this.chatBridge.once(ChatBridgeEvents.DISCONNECT, this.#handleBotDisconnection);
 
 		this.once(MessageCollectorEvents.END, () => {
-			this.chatBridge.removeListener(MessageCollectorEvents.MESSAGE, this.#handleCollect);
-			this.chatBridge.removeListener(MessageCollectorEvents.DISCONNECT, this.#handleBotDisconnection);
+			this.chatBridge.removeListener(ChatBridgeEvents.MESSAGE, this.#handleCollect);
+			this.chatBridge.removeListener(ChatBridgeEvents.DISCONNECT, this.#handleBotDisconnection);
 			this.chatBridge.decrementMaxListeners();
 		});
 
 		if (options.time) this.#timeout = setTimeout(() => this.stop('time'), options.time);
 		if (options.idle) this.#idletimeout = setTimeout(() => this.stop('idle'), options.idle);
 	}
-
-	override on(eventName: MessageCollectorEvents.COLLECT, listener: (item: HypixelMessage) => Awaitable<void>): this;
-	override on(
-		eventName: MessageCollectorEvents.END,
-		listener: (collected: this['collected'], reason: string) => Awaitable<void>,
-	): this;
-	// @ts-expect-error
-	override on(eventName: string, listener: (...args: unknown[]) => void): this;
-
-	override once(
-		eventName: MessageCollectorEvents.COLLECT,
-		listener: (message: HypixelMessage) => Awaitable<void>,
-	): this;
-	override once(
-		eventName: MessageCollectorEvents.END,
-		listener: (collected: this['collected'], reason: string) => Awaitable<void>,
-	): this;
-	// @ts-expect-error
-	override once(eventName: string, listener: (...args: unknown[]) => void): this;
 
 	/**
 	 * Checks after un/collection to see if the collector is done.

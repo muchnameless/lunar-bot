@@ -1,5 +1,6 @@
-import { ChatBridgeEvents, DEFAULT_SETTINGS } from '../constants';
+import { DEFAULT_SETTINGS } from '../constants';
 import { logger } from '../../../functions';
+import { ChatBridgeEvents } from '../ChatBridge';
 import type { ChatBridge } from '../ChatBridge';
 
 /**

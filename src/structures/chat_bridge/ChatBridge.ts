@@ -1,4 +1,4 @@
-import { EventEmitter } from 'node:events';
+import { TypedEmitter } from 'tiny-typed-emitter';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
 import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, MESSAGE_TYPES, PREFIX_BY_TYPE } from './constants';
@@ -6,7 +6,7 @@ import { MinecraftChatManager } from './managers/MinecraftChatManager';
 import { DiscordManager } from './managers/DiscordManager';
 import { EventCollection } from '../events/EventCollection';
 import { logger, minutes, seconds } from '../../functions';
-import type { Message as DiscordMessage, MessageOptions } from 'discord.js';
+import type { Awaitable, Message as DiscordMessage, MessageOptions } from 'discord.js';
 import type { LunarClient } from '../LunarClient';
 import type { HypixelGuild } from '../database/models/HypixelGuild';
 import type { SendToChatOptions } from './managers/MinecraftChatManager';
@@ -38,7 +38,24 @@ export interface MessageForwardOptions {
 	isEdit?: boolean;
 }
 
-export class ChatBridge<loggedIn extends boolean = boolean> extends EventEmitter {
+export const enum ChatBridgeEvents {
+	CONNECT = 'connect',
+	DISCONNECT = 'disconnect',
+	ERROR = 'error',
+	MESSAGE = 'message',
+	READY = 'ready',
+}
+
+interface ChatBridgeEventListeners {
+	[ChatBridgeEvents.CONNECT]: () => Awaitable<void>;
+	[ChatBridgeEvents.DISCONNECT]: (reason?: string) => Awaitable<void>;
+	[ChatBridgeEvents.ERROR]: (error: Error) => Awaitable<void>;
+	[ChatBridgeEvents.MESSAGE]: (hypixelMessage: HypixelMessage) => Awaitable<void>;
+	[ChatBridgeEvents.READY]: () => Awaitable<void>;
+	string: (...args: unknown[]) => Awaitable<void>;
+}
+
+export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter<ChatBridgeEventListeners> {
 	/**
 	 * increases each link cycle
 	 */
