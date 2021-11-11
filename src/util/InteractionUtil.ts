@@ -17,6 +17,7 @@ import type {
 	InteractionUpdateOptions,
 	Message,
 	MessageComponentInteraction,
+	MessageResolvable,
 	TextBasedChannels,
 	WebhookEditMessageOptions,
 } from 'discord.js';
@@ -358,7 +359,13 @@ export default class InteractionUtil extends null {
 	/**
 	 * @param interaction
 	 * @param contentOrOptions
+	 * @param message optional followUp Message to edit
 	 */
+	static async editReply(
+		interaction: ChatInteraction,
+		contentOrOptions: EditReplyOptions,
+		message: MessageResolvable,
+	): Promise<Message>;
 	static async editReply(
 		interaction: ChatInteraction,
 		contentOrOptions: EditReplyOptions & { rejectOnError: true },
@@ -366,14 +373,17 @@ export default class InteractionUtil extends null {
 	static async editReply(
 		interaction: ChatInteraction,
 		contentOrOptions: string | EditReplyOptions,
-	): Promise<void | null | Message>;
+	): Promise<null | Message>;
 	static async editReply(
 		interaction: ChatInteraction,
 		contentOrOptions: string | EditReplyOptions,
-	): Promise<void | null | Message> {
-		const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
-
+		message?: MessageResolvable,
+	) {
 		try {
+			if (message) return (await interaction.webhook.editMessage(message, contentOrOptions)) as Message;
+
+			const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
+
 			if (deferReplyPromise) await deferReplyPromise;
 			if (deferUpdatePromise) await deferUpdatePromise;
 
@@ -386,12 +396,14 @@ export default class InteractionUtil extends null {
 					return MessageUtil.edit((await interaction.fetchReply()) as Message, contentOrOptions);
 				} catch (error_) {
 					if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error_;
-					return logger.error(error_);
+					logger.error(error_);
+					return null;
 				}
 			}
 
 			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error;
-			return logger.error(error);
+			logger.error(error);
+			return null;
 		}
 	}
 
@@ -439,7 +451,12 @@ export default class InteractionUtil extends null {
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
 
 			// replied
-			if (interaction.replied) return MessageUtil.edit(interaction.message as Message, options);
+			if (interaction.replied) {
+				return (await interaction.webhook.editMessage(
+					interaction.message as Message,
+					options as WebhookEditMessageOptions,
+				)) as Message;
+			}
 
 			// await defer
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
@@ -611,20 +628,11 @@ export default class InteractionUtil extends null {
 				components: [row.setComponents(row.components.map((c) => c.setDisabled()))],
 			};
 
-			if (message) {
-				// question message was a followUp
-				try {
-					await MessageUtil.edit(message, {
-						...editOptions,
-						rejectOnError: true,
-					});
-				} catch (error_) {
-					logger.error(error_);
-					this.reply(interaction, editOptions);
-				}
-			} else {
-				// question message was an initial reply
-				this.editReply(interaction, editOptions);
+			try {
+				await this.editReply(interaction, editOptions, message ?? '@original');
+			} catch (error_) {
+				logger.error(error_);
+				this.reply(interaction, editOptions);
 			}
 
 			logger.debug(error);
