@@ -256,8 +256,9 @@ export class PlayerManager extends ModelManager<Player> {
 			}
 
 			for (const player of this.cache.values()) {
-				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1)
+				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) {
 					await sleep(hypixel.rateLimit.reset - Date.now() + seconds(1));
+				}
 
 				await player.updateData({ rejectOnAPIError: true, ...options });
 			}
@@ -417,8 +418,9 @@ export class PlayerManager extends ModelManager<Player> {
 			if (!player.inGuild()) continue;
 
 			try {
-				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1)
+				if (hypixel.rateLimit.remaining < hypixel.rateLimit.limit * 0.1 && hypixel.rateLimit.remaining !== -1) {
 					await sleep(hypixel.rateLimit.reset - Date.now() + seconds(1));
+				}
 
 				const result = await player.fetchMainProfile();
 				if (!result) continue;
@@ -589,8 +591,9 @@ export class PlayerManager extends ModelManager<Player> {
 		);
 
 		// weekly reset
-		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now))
+		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) {
 			this.#performWeeklyXpReset();
+		}
 
 		// each monday at 00:00:00
 		this.client.cronJobs.schedule(
@@ -604,8 +607,9 @@ export class PlayerManager extends ModelManager<Player> {
 		);
 
 		// monthly reset
-		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth())
+		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) {
 			this.#performMonthlyXpReset();
+		}
 
 		// the first of each month at 00:00:00
 		this.client.cronJobs.schedule(

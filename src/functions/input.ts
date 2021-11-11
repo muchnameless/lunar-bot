@@ -22,11 +22,12 @@ export function getUuidAndIgn(ctx: Interaction | HypixelUserMessage, ignOrUuid?:
 	const player = IS_HYPIXEL_MESSAGE ? ctx.author.player : UserUtil.getPlayer(ctx.user);
 
 	// author is linked to player
-	if (player)
+	if (player) {
 		return Promise.resolve({
 			uuid: player.minecraftUuid,
 			ign: player.ign,
 		});
+	}
 
 	// no linked player -> try to get ign from author (HypixelMessageAuthor)
 	if (IS_HYPIXEL_MESSAGE) return mojang.ign(ctx.author.ign);

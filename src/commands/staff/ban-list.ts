@@ -131,12 +131,12 @@ export default class BanListCommand extends ApplicationCommand {
 		)(interaction as ButtonInteraction, {
 			embeds: [
 				this.client.defaultEmbed.setTitle(`${'Ban list'.padEnd(166, '\u00A0')}\u200B`).setDescription(stripIndents`
-						Total: ${count} players
+					Total: ${count} players
 
-						${withIgn.join('\n\n')}
+					${withIgn.join('\n\n')}
 
-						Page: ${page} / ${TOTAL_PAGES}
-					`),
+					Page: ${page} / ${TOTAL_PAGES}
+				`),
 			],
 			components: this.#getPaginationButtons(
 				interaction.user.id,
@@ -185,10 +185,11 @@ export default class BanListCommand extends ApplicationCommand {
 					_reason: REASON,
 				});
 
-				if (!existingBan)
+				if (!existingBan) {
 					return InteractionUtil.reply(interaction, {
 						content: `${escapeIgn(ign)} was added to the ban list for \`${REASON ?? 'no reason'}\``,
 					});
+				}
 
 				return InteractionUtil.reply(interaction, {
 					content: `${escapeIgn(ign)}'s ban reason was updated from \`${existingBan.reason}\` to \`${REASON}\``,
@@ -199,10 +200,11 @@ export default class BanListCommand extends ApplicationCommand {
 				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
 
-				if (!existingBan)
+				if (!existingBan) {
 					return InteractionUtil.reply(interaction, {
 						content: `${escapeIgn(ign)} is not on the ban list`,
 					});
+				}
 
 				await existingBan.destroy();
 
@@ -215,7 +217,7 @@ export default class BanListCommand extends ApplicationCommand {
 				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
 
-				if (!existingBan)
+				if (!existingBan) {
 					return InteractionUtil.reply(interaction, {
 						embeds: [
 							new MessageEmbed()
@@ -228,6 +230,7 @@ export default class BanListCommand extends ApplicationCommand {
 								.setTimestamp(),
 						],
 					});
+				}
 
 				return InteractionUtil.reply(interaction, {
 					embeds: [

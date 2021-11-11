@@ -307,21 +307,23 @@ export default class GuildCommand extends ApplicationCommand {
 			if (inGuild) {
 				({ hypixelGuild } = target);
 
-				if (target.guildRankPriority >= (executor?.guildRankPriority ?? -1))
+				if (target.guildRankPriority >= (executor?.guildRankPriority ?? -1)) {
 					return {
 						content: `your guild rank needs to be higher than \`${target}\`'s`,
 						ephemeral: true,
 					};
+				}
 			}
 
 			await target.update({ mutedTill: Date.now() + duration });
 
 			// don't use chatBridge command if player isn't actually in the guild
-			if (!inGuild)
+			if (!inGuild) {
 				return {
 					content: `muted \`${target}\` for \`${duration}\``,
 					ephemeral: false,
 				};
+			}
 		} else if (target === 'everyone') {
 			await hypixelGuild.update({ mutedTill: Date.now() + duration });
 		}
@@ -353,11 +355,12 @@ export default class GuildCommand extends ApplicationCommand {
 		const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 		const target = await this.getMuteTarget(TARGET_INPUT, interaction);
 
-		if (!target)
+		if (!target) {
 			return InteractionUtil.reply(interaction, {
 				content: `no player with the IGN \`${TARGET_INPUT}\` found`,
 				ephemeral: true,
 			});
+		}
 
 		const { content, ephemeral } = await this.runMute({
 			target,
@@ -383,40 +386,46 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param options
 	 */
 	async runKick({ ctx, target, executor, hypixelGuild, reason }: RunKickOptions) {
-		if (!executor)
+		if (!executor) {
 			return {
 				content: 'unable to find a linked player to your discord account',
 				hasErrored: true,
 			};
-		if (!executor.isStaff)
+		}
+		if (!executor.isStaff) {
 			return {
 				content: 'you need to have an in game staff rank for this command',
 				hasErrored: true,
 			};
-		if (executor.guildId !== hypixelGuild.guildId)
+		}
+		if (executor.guildId !== hypixelGuild.guildId) {
 			return {
 				content: `you need to be in ${hypixelGuild} to kick a player from there`,
 				hasErrored: true,
 			};
+		}
 
-		if (typeof target === 'string')
+		if (typeof target === 'string') {
 			return {
 				content: `no player with the IGN \`${target}\` found`,
 				hasErrored: true,
 			};
-		if (target.guildRankPriority >= executor.guildRankPriority)
+		}
+		if (target.guildRankPriority >= executor.guildRankPriority) {
 			return {
 				content: `your guild rank needs to be higher than \`${target}\`'s`,
 				hasErrored: true,
 			};
+		}
 
 		const TIME_LEFT = this.config.get('LAST_KICK_TIME') + this.config.get('KICK_COOLDOWN') - Date.now();
 
-		if (TIME_LEFT > 0)
+		if (TIME_LEFT > 0) {
 			return {
 				content: `kicking is on cooldown for another ${ms(TIME_LEFT, { long: true })}`,
 				hasErrored: true,
 			};
+		}
 
 		try {
 			// confirm kick
@@ -692,24 +701,27 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'demote': {
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor)
+				if (!executor) {
 					return InteractionUtil.reply(interaction, {
 						content: 'unable to find a linked player for your discord account',
 						ephemeral: true,
 					});
-				if (!executor.isStaff)
+				}
+				if (!executor.isStaff) {
 					return InteractionUtil.reply(interaction, {
 						content: 'you need to have an in game staff rank for this command',
 						ephemeral: true,
 					});
+				}
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
-				if (target.guildRankPriority >= executor.guildRankPriority)
+				if (target.guildRankPriority >= executor.guildRankPriority) {
 					return InteractionUtil.reply(interaction, {
 						content: `your guild rank needs to be higher than \`${target}\`'s`,
 						ephemeral: true,
 					});
+				}
 
 				return this.#run(
 					interaction,
@@ -827,11 +839,12 @@ export default class GuildCommand extends ApplicationCommand {
 				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
 
-				if (existingBan)
+				if (existingBan) {
 					return InteractionUtil.reply(interaction, {
 						content: `${escapeIgn(ign)} is on the ban list for \`${existingBan.reason}\``,
 						ephemeral: true,
 					});
+				}
 
 				return this.#run(interaction, {
 					command: `guild invite ${ign}`,
@@ -881,11 +894,12 @@ export default class GuildCommand extends ApplicationCommand {
 				const DURATION_INPUT = interaction.options.getString('duration', true);
 				const DURATION = stringToMS(DURATION_INPUT);
 
-				if (Number.isNaN(DURATION))
+				if (Number.isNaN(DURATION)) {
 					return InteractionUtil.reply(interaction, {
 						content: `\`${DURATION_INPUT}\` is not a valid duration`,
 						ephemeral: true,
 					});
+				}
 
 				return this.runMuteInteraction(interaction, DURATION);
 			}
@@ -893,24 +907,27 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'promote': {
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor)
+				if (!executor) {
 					return InteractionUtil.reply(interaction, {
 						content: 'unable to find a linked player for your discord account',
 						ephemeral: true,
 					});
-				if (!executor.isStaff)
+				}
+				if (!executor.isStaff) {
 					return InteractionUtil.reply(interaction, {
 						content: 'you need to have an in game staff rank for this command',
 						ephemeral: true,
 					});
+				}
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
-				if (target.guildRankPriority >= executor.guildRankPriority - 1)
+				if (target.guildRankPriority >= executor.guildRankPriority - 1) {
 					return InteractionUtil.reply(interaction, {
 						content: 'you can only promote up to your own rank',
 						ephemeral: true,
 					});
+				}
 
 				return this.#run(
 					interaction,
@@ -928,33 +945,37 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'setrank': {
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				if (!executor)
+				if (!executor) {
 					return InteractionUtil.reply(interaction, {
 						content: 'unable to find a linked player for your discord account',
 						ephemeral: true,
 					});
-				if (!executor.isStaff)
+				}
+				if (!executor.isStaff) {
 					return InteractionUtil.reply(interaction, {
 						content: 'you need to have an in game staff rank for this command',
 						ephemeral: true,
 					});
+				}
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 				const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 				const RANK_INPUT = interaction.options.getString('rank', true);
 				const { value: rank, similarity } = autocorrect(RANK_INPUT, hypixelGuild.ranks, 'name');
 
-				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD'))
+				if (similarity < this.config.get('AUTOCORRECT_THRESHOLD')) {
 					return InteractionUtil.reply(interaction, {
 						content: `unknown guild rank '${RANK_INPUT}'`,
 						ephemeral: true,
 					});
+				}
 
-				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority)
+				if (target.guildRankPriority >= executor.guildRankPriority || rank.priority >= executor.guildRankPriority) {
 					return InteractionUtil.reply(interaction, {
 						content: 'you can only change ranks up to your own rank',
 						ephemeral: true,
 					});
+				}
 
 				return this.#run(
 					interaction,
@@ -1000,11 +1021,12 @@ export default class GuildCommand extends ApplicationCommand {
 									});
 							  })());
 
-					if (!target)
+					if (!target) {
 						return InteractionUtil.reply(interaction, {
 							content: `no player with the IGN \`${TARGET_INPUT}\` found`,
 							ephemeral: true,
 						});
+					}
 
 					if (this.client.players.isModel(target) && target.inGuild()) {
 						({ hypixelGuild } = target);
@@ -1012,11 +1034,12 @@ export default class GuildCommand extends ApplicationCommand {
 				}
 
 				if (this.client.players.isModel(target)) {
-					if (target.guildRankPriority >= (UserUtil.getPlayer(interaction.user)?.guildRankPriority ?? 0))
+					if (target.guildRankPriority >= (UserUtil.getPlayer(interaction.user)?.guildRankPriority ?? 0)) {
 						return InteractionUtil.reply(interaction, {
 							content: `your guild rank needs to be higher than \`${target}\`'s`,
 							ephemeral: true,
 						});
+					}
 
 					await target.update({ mutedTill: 0 });
 

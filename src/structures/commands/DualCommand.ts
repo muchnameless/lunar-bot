@@ -75,8 +75,11 @@ export class DualCommand
 	override load() {
 		// load into chatbridge command collection
 		this.client.chatBridges.commands.set(this.name.toLowerCase(), this);
-		if (this.aliasesInGame)
-			for (const alias of this.aliasesInGame) this.client.chatBridges.commands.set(alias.toLowerCase(), this);
+		if (this.aliasesInGame) {
+			for (const alias of this.aliasesInGame) {
+				this.client.chatBridges.commands.set(alias.toLowerCase(), this);
+			}
+		}
 
 		// load into slash commands collection
 		return super.load();
@@ -88,8 +91,11 @@ export class DualCommand
 	override unload() {
 		// unload from chatbridge command collection
 		this.client.chatBridges.commands.delete(this.name.toLowerCase());
-		if (this.aliasesInGame)
-			for (const alias of this.aliasesInGame) this.client.chatBridges.commands.delete(alias.toLowerCase());
+		if (this.aliasesInGame) {
+			for (const alias of this.aliasesInGame) {
+				this.client.chatBridges.commands.delete(alias.toLowerCase());
+			}
+		}
 
 		// unload from slash commands collection
 		return super.unload();

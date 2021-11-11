@@ -220,19 +220,21 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const { target, newRank } = promoteMatched.groups as { target: string; newRank: string };
 			const player = this.client.players.findByIgn(target);
 
-			if (!player?.guildId)
+			if (!player?.guildId) {
 				return logger.info(
 					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was promoted to '${newRank}' but not in the db`,
 				);
+			}
 
 			const GUILD_RANK_PRIO = (this.chatBridge.hypixelGuild ?? player.hypixelGuild)?.ranks.find(
 				({ name }) => name === newRank,
 			)?.priority;
 
-			if (!GUILD_RANK_PRIO)
+			if (!GUILD_RANK_PRIO) {
 				return logger.info(
 					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was promoted to an unknown rank '${newRank}'`,
 				);
+			}
 
 			player.update({ guildRankPriority: GUILD_RANK_PRIO }).catch((error) => logger.error(error));
 
@@ -251,19 +253,21 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const { target, newRank } = demotedMatched.groups as { target: string; newRank: string };
 			const player = this.client.players.findByIgn(target);
 
-			if (!player?.guildId)
+			if (!player?.guildId) {
 				return logger.info(
 					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was demoted to '${newRank}' but not in the db`,
 				);
+			}
 
 			const GUILD_RANK_PRIO = (this.chatBridge.hypixelGuild ?? player.hypixelGuild)?.ranks.find(
 				({ name }) => name === newRank,
 			)?.priority;
 
-			if (!GUILD_RANK_PRIO)
+			if (!GUILD_RANK_PRIO) {
 				return logger.info(
 					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: '${target}' was demoted to an unknown rank '${newRank}'`,
 				);
+			}
 
 			player.update({ guildRankPriority: GUILD_RANK_PRIO }).catch((error) => logger.error(error));
 
@@ -294,8 +298,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			const [, IGN] = friendReqMatched;
 			const player = this.client.players.findByIgn(IGN);
 
-			if (!player?.guildId)
+			if (!player?.guildId) {
 				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: denying f request from ${IGN}`);
+			}
 
 			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepting f request from ${IGN}`);
 			return this.chatBridge.minecraft.sendToChat(`/f add ${IGN}`);
@@ -347,10 +352,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		const { command } = hypixelMessage.commandData;
 
 		// no command
-		if (!command)
+		if (!command) {
 			return logger.info(
 				`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' which is not a valid command`,
 			);
+		}
 
 		// server only command in DMs
 		if (command.guildOnly && hypixelMessage.type !== MESSAGE_TYPES.GUILD) {
@@ -376,7 +382,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					return hypixelMessage.author.send(
 						commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(
 							(roleId) => lgGuild?.roles.cache.get(roleId)?.name ?? roleId,
-						)}) from the ${lgGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in`,
+						)}) from the ${lgGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in
+						`,
 					);
 				}
 
@@ -388,7 +395,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					return hypixelMessage.author.send(
 						commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(
 							(roleId) => member.guild.roles.cache.get(roleId)?.name ?? roleId,
-						)}) from the Lunar Guard Discord Server`,
+						)}) from the Lunar Guard Discord Server
+						`,
 					);
 				}
 
@@ -471,8 +479,10 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		// check if the message is a response for ChatBridge#_chat
 		this.chatBridge.minecraft.collect(hypixelMessage);
 
-		if (this.config.get('CHAT_LOGGING_ENABLED'))
+		if (this.config.get('CHAT_LOGGING_ENABLED')) {
 			logger.debug(`[${hypixelMessage.position} #${this.chatBridge.mcAccount}]: ${hypixelMessage.cleanedContent}`);
+		}
+
 		if (!hypixelMessage.rawContent.length) return;
 
 		if (!hypixelMessage.isUserMessage()) {

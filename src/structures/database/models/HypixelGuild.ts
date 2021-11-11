@@ -210,8 +210,9 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 */
 	get chatBridge(): ChatBridge<true> {
 		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
-		if (!this.#chatBridge?.minecraft.isReady())
+		if (!this.#chatBridge?.minecraft.isReady()) {
 			throw `${this.name}: chat bridge not ${this.#chatBridge ? 'ready' : 'found'}`;
+		}
 		return this.#chatBridge;
 	}
 
@@ -429,7 +430,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						// update player
 						setTimeout(async () => {
 							try {
-								await player.setValidDiscordId(discordMember?.id ?? discordTag);
+								await player.setUniqueDiscordId(discordMember?.id ?? discordTag);
 							} catch (error) {
 								logger.error(error);
 							}
@@ -467,8 +468,9 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 								discordMember = await GuildUtil.fetchMemberByTag(lgGuild, discordTag);
 
 								if (!discordMember) {
-									if (/\D/.test(player.discordId!))
-										await player.setValidDiscordId(discordTag).catch((error) => logger.error(error)); // save tag if no id is known
+									if (/\D/.test(player.discordId!)) {
+										await player.setUniqueDiscordId(discordTag).catch((error) => logger.error(error)); // save tag if no id is known
+									}
 									player.inDiscord = false;
 									joinedLog.push(
 										player.discordId!.includes('#')

@@ -47,8 +47,10 @@ export default class UserUtil extends null {
 	): Promise<Message | null>;
 	static async sendDM(user: User, contentOrOptions: string | (MessageOptions & { rejectOnError?: boolean })) {
 		if (user.bot) {
-			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError)
+			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) {
 				throw new Error(`${user.tag} is a bot and can't be DMed`);
+			}
+
 			logger.warn(`${user.tag} is a bot and can't be DMed`);
 			return null;
 		}

@@ -61,16 +61,17 @@ export default class LinkCommand extends ApplicationCommand {
 				)?.[0];
 		}
 
-		if (!player)
+		if (!player) {
 			return InteractionUtil.reply(
 				interaction,
 				stripIndents`
-			\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
-			Make sure to provide the full ign if the player database is not already updated (check ${
-				this.client.logHandler.channel ?? '#lunar-logs'
-			})
-		`,
+					\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
+					Make sure to provide the full ign if the player database is not already updated (check ${
+						this.client.logHandler.channel ?? '#lunar-logs'
+					})
+				`,
 			);
+		}
 
 		const USER_ID = interaction.options.get('user', true).value as Snowflake;
 
@@ -118,11 +119,12 @@ export default class LinkCommand extends ApplicationCommand {
 			try {
 				linkedUser = await player.discordUser;
 
-				if (player.discordId === USER_ID)
+				if (player.discordId === USER_ID) {
 					return InteractionUtil.reply(interaction, {
 						content: `\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}`,
 						allowedMentions: { parse: [] },
 					});
+				}
 
 				await InteractionUtil.awaitConfirmation(interaction, {
 					question: stripIndents`

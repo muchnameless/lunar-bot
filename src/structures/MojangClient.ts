@@ -81,13 +81,14 @@ export class MojangClient {
 	 * @param options
 	 */
 	ign(ign: string, options?: MojangFetchOptions) {
-		if (validateMinecraftIgn(ign))
+		if (validateMinecraftIgn(ign)) {
 			return this.request({
 				path: 'https://api.mojang.com/users/profiles/minecraft/',
 				query: ign.toLowerCase(),
 				queryType: 'ign',
 				...options,
 			});
+		}
 
 		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'ign', ign));
 	}
@@ -98,13 +99,14 @@ export class MojangClient {
 	 * @param options
 	 */
 	uuid(uuid: string, options?: MojangFetchOptions) {
-		if (validateMinecraftUuid(uuid))
+		if (validateMinecraftUuid(uuid)) {
 			return this.request({
 				path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
 				query: uuid.toLowerCase().replaceAll('-', ''),
 				queryType: 'uuid',
 				...options,
 			});
+		}
 
 		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'uuid', uuid));
 	}
@@ -115,21 +117,23 @@ export class MojangClient {
 	 * @param options
 	 */
 	ignOrUuid(ignOrUuid: string, options?: MojangFetchOptions) {
-		if (validateMinecraftIgn(ignOrUuid))
+		if (validateMinecraftIgn(ignOrUuid)) {
 			return this.request({
 				path: 'https://api.mojang.com/users/profiles/minecraft/',
 				query: ignOrUuid.toLowerCase(),
 				queryType: 'ign',
 				...options,
 			});
+		}
 
-		if (validateMinecraftUuid(ignOrUuid))
+		if (validateMinecraftUuid(ignOrUuid)) {
 			return this.request({
 				path: 'https://sessionserver.mojang.com/session/minecraft/profile/',
 				query: ignOrUuid.toLowerCase().replaceAll('-', ''),
 				queryType: 'uuid',
 				...options,
 			});
+		}
 
 		return Promise.reject(new MojangAPIError({ statusText: 'validation' }, 'ignOrUuid', ignOrUuid));
 	}

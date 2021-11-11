@@ -31,10 +31,11 @@ export default class GuildMemberUpdateEvent extends Event {
 			const player =
 				GuildMemberUtil.getPlayer(newMember) ?? (await this.client.players.fetch({ discordId: newMember.id }));
 
-			if (!player)
+			if (!player) {
 				return logger.info(
 					`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`,
 				);
+			}
 
 			logger.info(`[GUILD MEMBER UPDATE]: ${player} | ${newMember.user.tag} received bridger role`);
 
@@ -67,9 +68,9 @@ export default class GuildMemberUpdateEvent extends Event {
 						.setThumbnail((await player.imageURL)!)
 						.setDescription(
 							stripIndents`
-							${newMember} lost ${newMember.guild.roles.cache.get(VERIFIED_ROLE_ID)} role
-							${player.info}
-						`,
+								${newMember} lost ${newMember.guild.roles.cache.get(VERIFIED_ROLE_ID)} role
+								${player.info}
+							`,
 						)
 						.setTimestamp(),
 				);

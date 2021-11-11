@@ -74,11 +74,12 @@ export default class PollCommand extends DualCommand {
 		duration: string | null;
 		ign: string;
 	}) {
-		if (chatBridge.pollUntil)
+		if (chatBridge.pollUntil) {
 			return `poll already in progress, ends ${Formatters.time(
 				new Date(chatBridge.pollUntil),
 				Formatters.TimestampStyles.RelativeTime,
 			)}`;
+		}
 
 		try {
 			const DURATION =

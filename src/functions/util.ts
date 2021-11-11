@@ -95,11 +95,12 @@ export function autocorrect<T>(
 			{ caseSensitive: false },
 		);
 
-		if (similarity === 1)
+		if (similarity === 1) {
 			return {
 				value: element,
 				similarity,
 			};
+		}
 
 		if (similarity < currentBestSimilarity) continue;
 

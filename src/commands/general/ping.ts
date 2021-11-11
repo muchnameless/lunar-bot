@@ -27,9 +27,9 @@ export default class PingCommand extends ApplicationCommand {
 		return InteractionUtil.reply(
 			interaction,
 			oneLine`
-			Roundtrip latency: ${sent.createdTimestamp - interaction.createdTimestamp} ms |
-			Average WebSocket Heartbeat: ${this.client.ws.ping} ms
-		`,
+				Roundtrip latency: ${sent.createdTimestamp - interaction.createdTimestamp} ms |
+				Average WebSocket Heartbeat: ${this.client.ws.ping} ms
+			`,
 		);
 	}
 }

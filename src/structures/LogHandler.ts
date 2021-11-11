@@ -35,11 +35,12 @@ export class LogHandler {
 	static cleanLoggingEmbedString(string: string): string;
 	static cleanLoggingEmbedString(string: string | null): string | null;
 	static cleanLoggingEmbedString(string: unknown) {
-		if (typeof string === 'string')
+		if (typeof string === 'string') {
 			return string
 				.replace(/```(?:js|diff|cs|ada|undefined)?\n/g, '') // code blocks
 				.replace(/`|\*|\n?\u200B|\\(?=_)/g, '') // inline code blocks, discord formatting, escaped '_'
 				.replace(/\n{2,}/g, '\n'); // consecutive line-breaks
+		}
 
 		return null;
 	}
@@ -63,7 +64,8 @@ export class LogHandler {
 			logger.error(
 				commaListsAnd`[LOG HANDLER]: missing ${ChannelUtil.botPermissions(channel)
 					.missing(LogHandler.REQUIRED_CHANNEL_PERMISSIONS)
-					.map((permission) => `'${permission}'`)}`,
+					.map((permission) => `'${permission}'`)}
+				`,
 			);
 			return null;
 		}

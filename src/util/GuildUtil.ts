@@ -50,8 +50,9 @@ export default class GuildUtil extends null {
 			logger.warn(`[FIND MEMBER BY TAG]: guild '${guild?.name}' unavailable`);
 			return null;
 		}
-		if (guild.members.cache.size === guild.memberCount)
+		if (guild.members.cache.size === guild.memberCount) {
 			return guild.members.cache.find(({ user: { tag } }) => tag === tagInput) ?? null;
+		}
 
 		try {
 			return (

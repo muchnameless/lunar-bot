@@ -218,12 +218,14 @@ export default class MessageUtil extends null {
 			// message was not sent by the bot user
 			if (Object.keys(options).some((key) => key !== 'attachments') || options.attachments?.length !== 0) {
 				// can only remove attachments
-				if (options.rejectOnError)
+				if (options.rejectOnError) {
 					throw new Error(
 						`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(
 							message,
 						)} with ${Object.entries(options)}`,
 					);
+				}
+
 				logger.warn(
 					options,
 					`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
@@ -244,16 +246,20 @@ export default class MessageUtil extends null {
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
 
-			if (options.rejectOnError)
+			if (options.rejectOnError) {
 				throw new Error(
 					commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${
 						missingChannelPermissions?.length === 1 ? '' : 's'
-					} in ${ChannelUtil.logInfo(channel)}`,
+					} in ${ChannelUtil.logInfo(channel)}
+					`,
 				);
+			}
+
 			logger.warn(
 				commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${
 					missingChannelPermissions?.length === 1 ? '' : 's'
-				} in ${ChannelUtil.logInfo(channel)}`,
+				} in ${ChannelUtil.logInfo(channel)}
+				`,
 			);
 			return message;
 		}

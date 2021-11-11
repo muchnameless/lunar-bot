@@ -39,76 +39,79 @@ export default class DebugCommand extends ApplicationCommand {
 						{
 							name: 'General',
 							value: stripIndents`
-							Ready at: ${Formatters.time(this.client.readyAt!, Formatters.TimestampStyles.LongDateTime)}
-							Uptime: ${ms(this.client.uptime!)}
-							Discord.js v${version}
-							Node.js ${process.version}
-						`,
+								Ready at: ${Formatters.time(this.client.readyAt!, Formatters.TimestampStyles.LongDateTime)}
+								Uptime: ${ms(this.client.uptime!)}
+								Discord.js v${version}
+								Node.js ${process.version}
+							`,
 						},
 						{
 							name: 'Cache',
 							value: stripIndents`
-							Guilds: ${this.client.formatNumber(this.client.guilds.cache.size)}
-							Channels: ${this.client.formatNumber(this.client.channels.cache.size)}
-							${(this.client.channels.cache.filter((c) => c.type === 'DM') as Collection<Snowflake, DMChannel>)
-								.map(
-									(c) =>
-										[c.recipient.tag ?? c.recipient.id, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date] as const,
-								)
-								.sort(([, a], [, b]) => b.getTime() - a.getTime())
-								.map(([name, date]) =>
-									Formatters.quote(
-										`${name ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`,
+								Guilds: ${this.client.formatNumber(this.client.guilds.cache.size)}
+								Channels: ${this.client.formatNumber(this.client.channels.cache.size)}
+								${(this.client.channels.cache.filter((c) => c.type === 'DM') as Collection<Snowflake, DMChannel>)
+									.map(
+										(c) =>
+											[
+												c.recipient.tag ?? c.recipient.id,
+												SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date,
+											] as const,
+									)
+									.sort(([, a], [, b]) => b.getTime() - a.getTime())
+									.map(([name, date]) =>
+										Formatters.quote(
+											`${name ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`,
+										),
+									)
+									.join('\n')}
+								${(this.client.channels.cache.filter((c) => c.isThread()) as Collection<Snowflake, ThreadChannel>)
+									.map((c) => [c, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date] as const)
+									.sort(([, a], [, b]) => b.getTime() - a.getTime())
+									.map(([c, date]) =>
+										Formatters.quote(
+											`${c ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`,
+										),
+									)
+									.join('\n')}
+								Members: ${this.client.formatNumber(this.client.guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
+								Users: ${this.client.formatNumber(this.client.users.cache.size)}
+								Messages: ${this.client.formatNumber(
+									this.client.channels.cache.reduce(
+										(acc, channel) => acc + ((channel as TextBasedChannels).messages?.cache.size ?? 0),
+										0,
 									),
+								)}
+								${(
+									this.client.channels.cache.filter((c) =>
+										Boolean((c as TextBasedChannels).messages?.cache.size),
+									) as Collection<Snowflake, TextBasedChannels>
 								)
-								.join('\n')}
-							${(this.client.channels.cache.filter((c) => c.isThread()) as Collection<Snowflake, ThreadChannel>)
-								.map((c) => [c, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date] as const)
-								.sort(([, a], [, b]) => b.getTime() - a.getTime())
-								.map(([c, date]) =>
-									Formatters.quote(
-										`${c ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`,
-									),
-								)
-								.join('\n')}
-							Members: ${this.client.formatNumber(this.client.guilds.cache.reduce((acc, guild) => acc + guild.members.cache.size, 0))}
-							Users: ${this.client.formatNumber(this.client.users.cache.size)}
-							Messages: ${this.client.formatNumber(
-								this.client.channels.cache.reduce(
-									(acc, channel) => acc + ((channel as TextBasedChannels).messages?.cache.size ?? 0),
-									0,
-								),
-							)}
-							${(
-								this.client.channels.cache.filter((c) =>
-									Boolean((c as TextBasedChannels).messages?.cache.size),
-								) as Collection<Snowflake, TextBasedChannels>
-							)
-								.sort(
-									(
-										{
-											messages: {
-												cache: { size: a },
+									.sort(
+										(
+											{
+												messages: {
+													cache: { size: a },
+												},
 											},
-										},
-										{
-											messages: {
-												cache: { size: b },
+											{
+												messages: {
+													cache: { size: b },
+												},
 											},
-										},
-									) => b - a,
-								)
-								.map((c) =>
-									Formatters.quote(
-										`${c.type !== 'DM' ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${this.client.formatNumber(
-											c.messages.cache.size,
-										)}`,
-									),
-								)
-								.join('\n')}
-							HypixelGuilds: ${this.client.formatNumber(this.client.hypixelGuilds.cache.size)}
-							Players: ${this.client.formatNumber(this.client.players.cache.size)}
-						`.replace(/\n{2,}/g, '\n'),
+										) => b - a,
+									)
+									.map((c) =>
+										Formatters.quote(
+											`${c.type !== 'DM' ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${this.client.formatNumber(
+												c.messages.cache.size,
+											)}`,
+										),
+									)
+									.join('\n')}
+								HypixelGuilds: ${this.client.formatNumber(this.client.hypixelGuilds.cache.size)}
+								Players: ${this.client.formatNumber(this.client.players.cache.size)}
+							`.replace(/\n{2,}/g, '\n'),
 						},
 						{
 							name: 'Memory',
@@ -119,27 +122,27 @@ export default class DebugCommand extends ApplicationCommand {
 						{
 							name: 'Imgur Rate Limits',
 							value: stripIndents`
-							${Object.entries(imgur.rateLimit)
-								.map(
-									([key, value]) =>
-										`${key}: ${
-											key.endsWith('reset') && value !== null
-												? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime)
-												: value
-										}`,
-								)
-								.join('\n')}
-							${Object.entries(imgur.postRateLimit)
-								.map(
-									([key, value]) =>
-										`post${key}: ${
-											key.endsWith('reset') && value !== null
-												? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime)
-												: value
-										}`,
-								)
-								.join('\n')}
-						`,
+								${Object.entries(imgur.rateLimit)
+									.map(
+										([key, value]) =>
+											`${key}: ${
+												key.endsWith('reset') && value !== null
+													? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime)
+													: value
+											}`,
+									)
+									.join('\n')}
+								${Object.entries(imgur.postRateLimit)
+									.map(
+										([key, value]) =>
+											`post${key}: ${
+												key.endsWith('reset') && value !== null
+													? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime)
+													: value
+											}`,
+									)
+									.join('\n')}
+							`,
 						},
 						{
 							name: 'Chat Bridge Cache',
@@ -148,16 +151,16 @@ export default class DebugCommand extends ApplicationCommand {
 									this.client.chatBridges.cache
 										.map(
 											(cb) => stripIndents`
-							bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
-							current index: ${cb.minecraft?._lastMessages.index ?? 'offline'}
-							Messages:
-							${
-								cb.minecraft?._lastMessages.cache
-									.filter(Boolean)
-									.map((x) => Formatters.quote(Util.escapeMarkdown(x)))
-									.join('\n') ?? 'offline'
-							}
-						`,
+												bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
+												current index: ${cb.minecraft?._lastMessages.index ?? 'offline'}
+												Messages:
+												${
+													cb.minecraft?._lastMessages.cache
+														.filter(Boolean)
+														.map((x) => Formatters.quote(Util.escapeMarkdown(x)))
+														.join('\n') ?? 'offline'
+												}
+											`,
 										)
 										.join('\n\n'),
 									EMBED_FIELD_MAX_CHARS,

@@ -62,7 +62,8 @@ export default class HelpBridgeCommand extends BridgeCommand {
 				reply.push(
 					commaListsOr`Required Roles: ${requiredRoles.map(
 						(roleId) => this.client.lgGuild?.roles.cache.get(roleId)?.name ?? roleId,
-					)}`,
+					)}
+					`,
 				);
 			} else if (INPUT === 'owner') {
 				reply.push(`Required ID: ${this.client.ownerId}`);
@@ -90,7 +91,8 @@ export default class HelpBridgeCommand extends BridgeCommand {
 			reply.push(
 				commaListsOr`Required Roles: ${requiredRoles.map(
 					(roleId) => this.client.lgGuild?.roles.cache.get(roleId)?.name ?? roleId,
-				)}`,
+				)}
+				`,
 			);
 		} else if (INPUT === 'owner') {
 			reply.push(`Required ID: ${this.client.ownerId}`);

@@ -255,11 +255,12 @@ export class HypixelMessage {
 				: contentOrOptions;
 
 		// to be compatible to Interactions
-		if (ephemeral)
+		if (ephemeral) {
 			return this.author!.send({
 				maxParts: Number.POSITIVE_INFINITY,
 				...options,
 			});
+		}
 
 		switch (this.type) {
 			case MESSAGE_TYPES.GUILD:
@@ -273,8 +274,9 @@ export class HypixelMessage {
 				});
 
 				// DM author the message if sending to gchat failed
-				if (!result[0])
+				if (!result[0]) {
 					this.author!.send(`an error occurred while replying in ${this.type} chat\n${options.content ?? ''}`);
+				}
 
 				return result;
 			}

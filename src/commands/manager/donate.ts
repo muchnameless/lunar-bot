@@ -27,8 +27,9 @@ export default class DonateCommand extends ApplicationCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-		if (!collector?.isCollecting)
+		if (!collector?.isCollecting) {
 			return InteractionUtil.reply(interaction, 'this command is restricted to (active) tax collectors');
+		}
 
 		const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 		const AMOUNT_OR_TEXT = interaction.options.getString('value');

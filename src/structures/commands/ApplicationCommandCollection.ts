@@ -86,8 +86,9 @@ export class ApplicationCommandCollection<
 		const command = this.get(commandName) ?? (await this.loadByName(commandName));
 
 		if (!command) throw new Error(`[COMMANDS CREATE]: unknown command '${commandName}'`);
-		if (!(command instanceof ApplicationCommand))
-			throw new Error(`[COMMANDS CREATE]: ${command.name} is not an ApplicationCommand`);
+		if (!(command instanceof ApplicationCommand)) {
+			throw new TypeError(`[COMMANDS CREATE]: ${command.name} is not an ApplicationCommand`);
+		}
 
 		const applicationCommands = await Promise.all(command.data.map((d) => commandManager.create(d)));
 

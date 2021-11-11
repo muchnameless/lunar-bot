@@ -332,12 +332,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 							.setThumbnail((await player.imageURL)!)
 							.setDescription(
 								stripIndents`
-								${Formatters.bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions in the last ${ms(
+									${Formatters.bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions in the last ${ms(
 									this.client.config.get('INFRACTIONS_EXPIRATION_TIME'),
 									{ long: true },
 								)}
-								${player.info}
-							`,
+									${player.info}
+								`,
 							)
 							.setTimestamp(),
 					);
@@ -419,8 +419,9 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * create and log the bot into hypixel
 	 */
 	async connect() {
-		if (!this.shouldReconnect)
+		if (!this.shouldReconnect) {
 			throw new Error(`[CHATBRIDGE]: unable to connect #${this.mcAccount} due to a critical error`);
+		}
 
 		if (this.isReady()) {
 			logger.info(`[CHATBRIDGE]: ${this.logInfo}: already connected`);
@@ -505,12 +506,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	collect(hypixelMessage: HypixelMessage) {
 		if (!this.#collecting) return;
-		if (hypixelMessage.me && hypixelMessage.content.includes(this.#contentFilter!))
+		if (hypixelMessage.me && hypixelMessage.content.includes(this.#contentFilter!)) {
 			return this.#resolveAndReset(hypixelMessage);
+		}
 		if (hypixelMessage.type) return;
 		if (hypixelMessage.spam) return this.#resolveAndReset(ChatResponse.SPAM);
-		if (hypixelMessage.content.startsWith('We blocked your comment'))
+		if (hypixelMessage.content.startsWith('We blocked your comment')) {
 			return this.#resolveAndReset(ChatResponse.BLOCKED);
+		}
 	}
 
 	/**
@@ -747,8 +750,9 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					}
 
 					// part consists of only whitespace characters -> ignore
-					if (this.client.config.get('CHAT_LOGGING_ENABLED') && part)
+					if (this.client.config.get('CHAT_LOGGING_ENABLED') && part) {
 						logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+					}
 					return false;
 				}),
 		);
@@ -782,8 +786,9 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const data = typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
 
 		if (data.discordMessage?.deleted) {
-			if (this.client.config.get('CHAT_LOGGING_ENABLED'))
+			if (this.client.config.get('CHAT_LOGGING_ENABLED')) {
 				logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${data.prefix ?? ''}${data.content}'`);
+			}
 			return false;
 		}
 
@@ -969,10 +974,11 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				case 'time':
 				case 'disconnect': {
 					if (rejectOnTimeout && !collected.length) {
-						if (raw)
+						if (raw) {
 							return resolve([
 								{ content: `no in game response after ${ms(timeout, { long: true })}` } as HypixelMessage,
 							]);
+						}
 						return reject(`no in game response after ${ms(timeout, { long: true })}`);
 					}
 

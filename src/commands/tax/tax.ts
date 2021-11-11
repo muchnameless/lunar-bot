@@ -97,8 +97,9 @@ export default class TaxCommand extends ApplicationCommand {
 					case 'remove': {
 						const taxCollector = this.client.taxCollectors.cache.get(player.minecraftUuid);
 
-						if (!taxCollector?.isCollecting)
+						if (!taxCollector?.isCollecting) {
 							return InteractionUtil.reply(interaction, `\`${player}\` is not a tax collector`);
+						}
 
 						// remove self paid if only the collector paid the default amount at his own ah
 						if (
@@ -130,11 +131,12 @@ export default class TaxCommand extends ApplicationCommand {
 					case 'amount': {
 						const NEW_AMOUNT = interaction.options.getInteger('amount', true);
 
-						if (NEW_AMOUNT < 0)
+						if (NEW_AMOUNT < 0) {
 							return InteractionUtil.reply(interaction, {
 								content: 'tax amount must be a non-negative number',
 								ephemeral: true,
 							});
+						}
 
 						const OLD_AMOUNT = this.config.get('TAX_AMOUNT');
 
@@ -184,11 +186,12 @@ export default class TaxCommand extends ApplicationCommand {
 					case 'paid': {
 						const collector = this.client.taxCollectors.getById(interaction.user.id);
 
-						if (!collector?.isCollecting)
+						if (!collector?.isCollecting) {
 							return InteractionUtil.reply(interaction, {
 								content: 'this command is restricted to tax collectors',
 								ephemeral: true,
 							});
+						}
 
 						const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
@@ -242,11 +245,12 @@ export default class TaxCommand extends ApplicationCommand {
 						);
 						const AMOUNT_TO_PING = playersPingable.size;
 
-						if (!AMOUNT_TO_PING)
+						if (!AMOUNT_TO_PING) {
 							return InteractionUtil.reply(interaction, {
 								content: `no members to ping from ${hypixelGuild ?? 'all guilds'}`,
 								ephemeral: true,
 							});
+						}
 
 						await InteractionUtil.awaitConfirmation(
 							interaction,

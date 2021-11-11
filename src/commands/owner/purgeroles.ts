@@ -27,11 +27,12 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		if (PurgeRolesCommand.running)
+		if (PurgeRolesCommand.running) {
 			return InteractionUtil.reply(interaction, {
 				content: 'the command is already running',
 				ephemeral: true,
 			});
+		}
 
 		try {
 			PurgeRolesCommand.running = true;

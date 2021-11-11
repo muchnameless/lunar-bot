@@ -604,9 +604,9 @@ export default class InteractionUtil extends null {
 						.setColor((interaction.client as LunarClient).config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
 						.setDescription(
 							stripIndent`
-							${question}
-							\\> ${success ? 'confirmed' : 'cancelled'}
-						`,
+								${question}
+								\\> ${success ? 'confirmed' : 'cancelled'}
+							`,
 						)
 						.setTimestamp(),
 				],
@@ -619,9 +619,9 @@ export default class InteractionUtil extends null {
 						.setColor('NOT_QUITE_BLACK')
 						.setDescription(
 							stripIndent`
-							${question}
-							\\> timeout
-						`,
+								${question}
+								\\> timeout
+							`,
 						)
 						.setTimestamp(),
 				],

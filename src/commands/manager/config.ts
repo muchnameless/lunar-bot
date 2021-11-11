@@ -116,12 +116,13 @@ export default class ConfigCommand extends ApplicationCommand {
 			case 'search': {
 				const query = interaction.options.getString('query')?.replace(/ +/g, '_');
 
-				if (!query)
+				if (!query) {
 					return InteractionUtil.reply(interaction, {
 						content: this.#listEntries(this.config.cache),
 						code: 'apache',
 						split: { char: '\n' },
 					});
+				}
 
 				const queryRegex = new RegExp(query, 'i');
 

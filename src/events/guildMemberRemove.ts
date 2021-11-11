@@ -46,9 +46,9 @@ export default class GuildMemberRemoveEvent extends Event {
 					.setThumbnail((await player.imageURL)!)
 					.setDescription(
 						stripIndents`
-						${member} left the discord server
-						${player.info}
-					`,
+							${member} left the discord server
+							${player.info}
+						`,
 					)
 					.addFields({
 						name: 'Roles',

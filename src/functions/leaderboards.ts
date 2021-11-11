@@ -364,12 +364,13 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 		components: createActionRows(interaction.client as LunarClient, CACHE_KEY, leaderboardArgs, embeds.length),
 	});
 
-	if (IS_RELOAD)
+	if (IS_RELOAD) {
 		await cache.set(
 			CACHE_KEY,
 			embeds.map((embed) => embed.toJSON?.() ?? embed),
 			(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
 		);
+	}
 }
 
 /**
@@ -495,16 +496,16 @@ function createLeaderboardEmbeds(
 				.setTitle(title)
 				.setDescription(
 					stripIndent`
-				${description}
-				${Formatters.codeBlock('ada', playerList)}
-			`,
+						${description}
+						${Formatters.codeBlock('ada', playerList)}
+					`,
 				)
 				.addFields({
 					name: playerRequestingEntry ? 'Your placement' : '\u200B',
 					value: stripIndent`
-					${playerRequestingEntry ?? ''}
-					Page: ${page} / ${PAGES_TOTAL}
-				`,
+						${playerRequestingEntry ?? ''}
+						Page: ${page} / ${PAGES_TOTAL}
+					`,
 				})
 				.setFooter('Updated at')
 				.setTimestamp(lastUpdatedAt),

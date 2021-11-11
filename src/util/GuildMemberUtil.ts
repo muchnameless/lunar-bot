@@ -57,42 +57,48 @@ export default class GuildMemberUtil extends null {
 
 		// delimiter
 		for (const type of DELIMITER_ROLES) {
-			if (roleCache.has(config.get(`${type}_DELIMITER_ROLE_ID`)))
+			if (roleCache.has(config.get(`${type}_DELIMITER_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`${type}_DELIMITER_ROLE_ID`));
+			}
 		}
 
 		// skill average
 		for (const level of SKILL_AVERAGE_ROLES) {
-			if (roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`)))
+			if (roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
+			}
 		}
 
 		// individual skills
 		for (const skill of SKILLS) {
 			for (const level of SKILL_ROLES) {
-				if (roleCache.has(config.get(`${skill}_${level}_ROLE_ID`)))
+				if (roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
 					rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
+				}
 			}
 		}
 
 		// total slayer
 		for (const level of SLAYER_TOTAL_ROLES) {
-			if (roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`)))
+			if (roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
+			}
 		}
 
 		// individual slayer
 		for (const slayer of SLAYERS) {
 			for (const level of SLAYER_ROLES) {
-				if (roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`)))
+				if (roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
 					rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
+				}
 			}
 		}
 
 		// catacombs
 		for (const level of CATACOMBS_ROLES) {
-			if (roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`)))
+			if (roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
+			}
 		}
 
 		return rolesToRemove;
@@ -133,7 +139,8 @@ export default class GuildMemberUtil extends null {
 			logger.warn(
 				commaListsAnd`[SET ROLES]: unable to add / remove '${difference
 					.filter((role) => role.managed || Role.comparePositions(role, highest) >= 0)
-					.map(({ name }) => `@${name}`)}'`,
+					.map(({ name }) => `@${name}`)}'
+				`,
 			);
 			return member;
 		}

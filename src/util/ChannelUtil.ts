@@ -91,8 +91,9 @@ export default class ChannelUtil extends null {
 	 * @param IdOrIds
 	 */
 	static async deleteMessages(channel: TextBasedChannels | null, IdOrIds: Snowflake | Snowflake[]) {
-		if (!channel?.isText())
+		if (!channel?.isText()) {
 			return logger.warn(`[DELETE MESSAGES]: ${this.logInfo(channel)} is not a text based channel`);
+		}
 
 		try {
 			switch (channel.type) {
@@ -103,8 +104,9 @@ export default class ChannelUtil extends null {
 
 				default: {
 					if (Array.isArray(IdOrIds)) {
-						if (this.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES))
+						if (this.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) {
 							return await channel.bulkDelete(IdOrIds);
+						}
 
 						return await Promise.all(
 							IdOrIds.map((id) => {
@@ -154,16 +156,19 @@ export default class ChannelUtil extends null {
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
 
-			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError)
+			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) {
 				throw new Error(
 					commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${
 						missingChannelPermissions?.length === 1 ? '' : 's'
-					} in ${this.logInfo(channel)}`,
+					} in ${this.logInfo(channel)}
+					`,
 				);
+			}
 			logger.warn(
 				commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${
 					missingChannelPermissions?.length === 1 ? '' : 's'
-				} in ${this.logInfo(channel)}`,
+				} in ${this.logInfo(channel)}
+				`,
 			);
 			return null;
 		}

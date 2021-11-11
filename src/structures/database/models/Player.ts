@@ -1062,8 +1062,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		// other delimiter roles
 		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
-			if (!roleCache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`)))
+			if (!roleCache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`))) {
 				rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`));
+			}
 		}
 
 		// skills
@@ -1076,8 +1077,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				// individual skills
 				for (const level of SKILL_ROLES) {
 					if (level === CURRENT_LEVEL_MILESTONE) {
-						if (!roleCache.has(config.get(`${skill}_${level}_ROLE_ID`)))
+						if (!roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
 							rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
+						}
 					} else if (roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
 						rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
 					}
@@ -1091,8 +1093,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		for (const level of SKILL_AVERAGE_ROLES) {
 			if (level === currentLvlMilestone) {
-				if (!roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`)))
+				if (!roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
 					rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
+				}
 			} else if (roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 			}
@@ -1106,8 +1109,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				// individual slayer
 				for (const level of SLAYER_ROLES) {
 					if (level === SLAYER_LVL) {
-						if (!roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`)))
+						if (!roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
 							rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
+						}
 					} else if (roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
 						rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
 					}
@@ -1120,8 +1124,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		// total slayer
 		for (const level of SLAYER_TOTAL_ROLES) {
 			if (level === LOWEST_SLAYER_LVL) {
-				if (!roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`)))
+				if (!roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
 					rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
+				}
 			} else if (roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 			}
@@ -1132,8 +1137,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		for (const level of CATACOMBS_ROLES) {
 			if (level === currentLvlMilestone) {
-				if (!roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`)))
+				if (!roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
 					rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
+				}
 			} else if (roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
 				rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 			}
@@ -1304,8 +1310,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (!_rolesToAdd.length && !_rolesToRemove.length) return true;
 
 		// permission check
-		if (!member.guild.me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES))
+		if (!member.guild.me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
 			return logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false;
+		}
 
 		const { config } = this.client;
 		const loggingEmbed = new MessageEmbed()
@@ -1313,9 +1320,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			.setThumbnail((await this.imageURL)!)
 			.setDescription(
 				stripIndents`
-				${Formatters.bold('Role Update')} for ${member}
-				${this.info}
-			`,
+					${Formatters.bold('Role Update')} for ${member}
+					${this.info}
+				`,
 			)
 			.setTimestamp();
 		const NAMES_TO_ADD = _rolesToAdd.length
@@ -1335,19 +1342,21 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			// api call
 			this.discordMember = await member.roles.set(_rolesToAdd, reason);
 
-			if (NAMES_TO_ADD)
+			if (NAMES_TO_ADD) {
 				loggingEmbed.addFields({
 					name: 'Added',
 					value: NAMES_TO_ADD,
 					inline: true,
 				});
+			}
 
-			if (NAMES_TO_REMOVE)
+			if (NAMES_TO_REMOVE) {
 				loggingEmbed.addFields({
 					name: 'Removed',
 					value: NAMES_TO_REMOVE,
 					inline: true,
 				});
+			}
 
 			// was successful
 			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
@@ -1371,19 +1380,21 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					  },
 			);
 
-			if (NAMES_TO_ADD)
+			if (NAMES_TO_ADD) {
 				loggingEmbed.addFields({
 					name: 'Failed to add',
 					value: NAMES_TO_ADD,
 					inline: true,
 				});
+			}
 
-			if (NAMES_TO_REMOVE)
+			if (NAMES_TO_REMOVE) {
 				loggingEmbed.addFields({
 					name: 'Failed to remove',
 					value: NAMES_TO_REMOVE,
 					inline: true,
 				});
+			}
 
 			return false;
 		} finally {
@@ -1507,11 +1518,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const { me } = member.guild;
 		if (me!.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
 		if (member.guild.ownerId === member.id) return false; // can't change nick of owner
-		if (!me!.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES))
+		if (!me!.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
 			return (
 				logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`),
 				false
 			);
+		}
 
 		const { displayName: PREV_NAME } = member;
 
@@ -1539,9 +1551,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					.setThumbnail((await this.imageURL)!)
 					.setDescription(
 						stripIndents`
-						${Formatters.bold('Nickname Update')} for ${member}
-						${this.info}
-					`,
+							${Formatters.bold('Nickname Update')} for ${member}
+							${this.info}
+						`,
 					)
 					.addFields(
 						{
@@ -1563,11 +1575,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 						GuildMemberUtil.sendDM(
 							member,
 							stripIndents`
-							include your ign \`${this.ign}\` somewhere in your nickname.
-							If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${
+								include your ign \`${this.ign}\` somewhere in your nickname.
+								If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${
 								this.client.user
 							} will automatically change your discord nickname
-						`,
+							`,
 						);
 						break;
 
@@ -1575,9 +1587,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 						GuildMemberUtil.sendDM(
 							member,
 							stripIndents`
-							the name \`${PREV_NAME}\` is already taken by another guild member.
-							Your name should be unique to allow staff members to easily identify you
-						`,
+								the name \`${PREV_NAME}\` is already taken by another guild member.
+								Your name should be unique to allow staff members to easily identify you
+							`,
 						);
 						break;
 
@@ -1783,8 +1795,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			attributes: ['to', 'amount'],
 			raw: true,
 		});
-		if (result.length)
+		if (result.length) {
 			this.client.taxCollectors.cache.get(result[0].to)?.addAmount(-result[0].amount, TransactionTypes.TAX);
+		}
 
 		return this.update({ paid: false });
 	}
@@ -1807,8 +1820,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const TAX_AMOUNT = amount - OVERFLOW;
 		const promises = this.addTransfer({ amount: TAX_AMOUNT, collectedBy, auctionId, type: TransactionTypes.TAX });
 
-		if (OVERFLOW)
+		if (OVERFLOW) {
 			promises.push(...this.addTransfer({ amount: OVERFLOW, collectedBy, auctionId, type: TransactionTypes.DONATION }));
+		}
 
 		await Promise.all(promises);
 

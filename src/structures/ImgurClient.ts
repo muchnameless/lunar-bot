@@ -200,8 +200,9 @@ export class ImgurClient {
 				if (this.rateLimit.userremaining === 0) {
 					const RESET_TIME = this.rateLimit.userreset! - Date.now();
 
-					if (RESET_TIME > this.rateLimitedWaitTime)
+					if (RESET_TIME > this.rateLimitedWaitTime) {
 						throw new Error(`imgur user rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					}
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
@@ -210,16 +211,18 @@ export class ImgurClient {
 
 					const RESET_TIME = this.rateLimit.clientreset - Date.now();
 
-					if (RESET_TIME > this.rateLimitedWaitTime)
+					if (RESET_TIME > this.rateLimitedWaitTime) {
 						throw new Error(`imgur client rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					}
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 
 				if ((requestOptions.method === 'POST' || !requestOptions.method) && this.postRateLimit.remaining === 0) {
 					const RESET_TIME = this.postRateLimit.reset! - Date.now();
 
-					if (RESET_TIME > this.rateLimitedWaitTime)
+					if (RESET_TIME > this.rateLimitedWaitTime) {
 						throw new Error(`imgur post rate limit, resets in ${ms(RESET_TIME, { long: true })}`);
+					}
 					if (RESET_TIME > 0) await sleep(RESET_TIME);
 				}
 			}

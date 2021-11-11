@@ -265,7 +265,7 @@ export class DatabaseManager {
 					auctions: availableAuctions,
 				});
 
-				if (taxAuctions.length)
+				if (taxAuctions.length) {
 					dbPromises.push(
 						(async () => {
 							const paidLog: string[] = [];
@@ -294,13 +294,15 @@ export class DatabaseManager {
 							);
 
 							// logging
-							if (paidLog.length)
+							if (paidLog.length) {
 								return {
 									name: `/ah ${taxCollector}`,
 									value: Formatters.codeBlock(paidLog.join('\n')),
 								};
+							}
 						})(),
 					);
+				}
 			} catch (error) {
 				logger.error(error, `[UPDATE TAX DB]: ${taxCollector}`);
 				apiError = true;
@@ -348,15 +350,15 @@ export class DatabaseManager {
 		return Formatters.codeBlock(
 			'cs',
 			stripIndents(commaLists`
-			Collectors: # /ah ${taxCollectors.activeCollectors.map((collector) => collector.ign).sort(compareAlphabetically)}
-			Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT'))}
-			Items: ${config.get('TAX_AUCTIONS_ITEMS').map((item) => `'${item}'`)}
-			Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round(
+				Collectors: # /ah ${taxCollectors.activeCollectors.map((collector) => collector.ign).sort(compareAlphabetically)}
+				Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT'))}
+				Items: ${config.get('TAX_AUCTIONS_ITEMS').map((item) => `'${item}'`)}
+				Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round(
 				(PAID_COUNT / PLAYER_COUNT) * 100,
 			)} % | collected amount: ${TOTAL_COINS} coins
-			Available auctions:
-			${availableAuctionsLog?.join('\n') ?? '\u200B -'}
-		`),
+				Available auctions:
+				${availableAuctionsLog?.join('\n') ?? '\u200B -'}
+			`),
 		);
 	}
 

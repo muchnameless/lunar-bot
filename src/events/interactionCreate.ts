@@ -53,11 +53,12 @@ export default class InteractionCreateEvent extends Event {
 
 		const command = this.client.commands.get(interaction.commandName);
 
-		if (!command)
+		if (!command) {
 			return InteractionUtil.reply(interaction, {
 				content: `the \`${interaction.commandName}\` command is currently disabled`,
 				ephemeral: true,
 			});
+		}
 
 		if (interaction.user.id !== this.client.ownerId) {
 			// role permissions
@@ -127,11 +128,12 @@ export default class InteractionCreateEvent extends Event {
 				const command = this.client.commands.get(commandName!);
 
 				if (!command) {
-					if (commandName)
+					if (commandName) {
 						await InteractionUtil.reply(interaction, {
 							content: `the \`${commandName}\` command is currently disabled`,
 							ephemeral: true,
 						});
+					}
 
 					return;
 				}
@@ -187,11 +189,12 @@ export default class InteractionCreateEvent extends Event {
 				const command = this.client.commands.get(commandName!);
 
 				if (!command) {
-					if (commandName)
+					if (commandName) {
 						await InteractionUtil.reply(interaction, {
 							content: `the \`${commandName}\` command is currently disabled`,
 							ephemeral: true,
 						});
+					}
 
 					return;
 				}
@@ -234,11 +237,12 @@ export default class InteractionCreateEvent extends Event {
 
 		const command = this.client.commands.get(interaction.commandName);
 
-		if (!command)
+		if (!command) {
 			return InteractionUtil.reply(interaction, {
 				content: `the \`${interaction.commandName}\` command is currently disabled`,
 				ephemeral: true,
 			});
+		}
 
 		if (interaction.user.id !== this.client.ownerId) {
 			// role permissions

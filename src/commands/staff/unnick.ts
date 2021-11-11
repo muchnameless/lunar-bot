@@ -26,18 +26,20 @@ export default class UnnickCommand extends ApplicationCommand {
 	// eslint-disable-next-line class-methods-use-this
 	async #run(interaction: CommandInteraction | ContextMenuInteraction, member: GuildMember | null) {
 		// input validation
-		if (!member)
+		if (!member) {
 			return InteractionUtil.reply(interaction, {
 				content: `${interaction.options.getUser('user', true)} is not in the discord server`,
 				allowedMentions: { parse: [] },
 			});
+		}
 
 		// permission check(s)
-		if (!member.manageable)
+		if (!member.manageable) {
 			return InteractionUtil.reply(interaction, {
 				content: `missing permissions to reset ${member}'s nickname`,
 				allowedMentions: { parse: [] },
 			});
+		}
 
 		// determine new nickname
 		const player = GuildMemberUtil.getPlayer(member);
@@ -45,11 +47,12 @@ export default class UnnickCommand extends ApplicationCommand {
 
 		// check if change is neccessary
 		if (NEW_NICK === null) {
-			if (!member.nickname)
+			if (!member.nickname) {
 				return InteractionUtil.reply(interaction, {
 					content: `${member} has no nickname`,
 					allowedMentions: { parse: [] },
 				});
+			}
 		} else if (member.displayName === NEW_NICK) {
 			return InteractionUtil.reply(interaction, {
 				content: `${member} is already nicked with their IGN`,

@@ -61,8 +61,9 @@ export class BaseCommandCollection<C extends CommandType = CommandType> extends 
 	 */
 	async loadByName(commandName: string, options?: CommandLoadOptions) {
 		for await (const dir of readJSFiles(this.dirURL)) {
-			if (dir.basename.slice(0, -'.js'.length).toLowerCase() === commandName)
+			if (dir.basename.slice(0, -'.js'.length).toLowerCase() === commandName) {
 				return this.loadFromFile(dir.fullPath, options);
+			}
 		}
 
 		return null;

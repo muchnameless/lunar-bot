@@ -115,11 +115,12 @@ export default class JoinDateCommand extends DualCommand {
 
 		if (!IGN) {
 			// all players
-			if (JoinDateCommand.running.has(hypixelGuild.guildId))
+			if (JoinDateCommand.running.has(hypixelGuild.guildId)) {
 				return InteractionUtil.reply(interaction, {
 					content: 'the command is already running',
 					ephemeral: true,
 				});
+			}
 
 			const { chatBridge } = hypixelGuild;
 			const joinInfos: JoinInfo[] = [];

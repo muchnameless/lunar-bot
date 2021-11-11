@@ -41,8 +41,9 @@ export default class VerifyCommand extends ApplicationCommand {
 			}));
 
 		// already linked to this discord user
-		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid)
+		if (player && player.minecraftUuid === playerLinkedToId?.minecraftUuid) {
 			return InteractionUtil.reply(interaction, 'you are already linked with this discord account');
+		}
 
 		let uuid;
 		let ign;
@@ -57,9 +58,9 @@ export default class VerifyCommand extends ApplicationCommand {
 			if (!this.client.hypixelGuilds.cache.has(guildId)) {
 				return InteractionUtil.reply(
 					interaction,
-					commaListsOr`according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(
-						({ name }) => name,
-					)}`,
+					commaListsOr`
+						according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}
+					`,
 				);
 			}
 
@@ -72,18 +73,20 @@ export default class VerifyCommand extends ApplicationCommand {
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;
 
 		// no linked discord tag
-		if (!LINKED_DISCORD_TAG)
+		if (!LINKED_DISCORD_TAG) {
 			return InteractionUtil.reply(interaction, `no linked discord tag for \`${ign}\` on hypixel`);
+		}
 
 		// linked discord tag doesn't match author's tag
-		if (LINKED_DISCORD_TAG !== interaction.user.tag)
+		if (LINKED_DISCORD_TAG !== interaction.user.tag) {
 			return InteractionUtil.reply(
 				interaction,
 				oneLine`
-			the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\`.
-			Keep in mind that discord tags are case sensitive
-		`,
+					the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\`.
+					Keep in mind that discord tags are case sensitive
+				`,
 			);
+		}
 
 		// already linked to another discord user
 		if (playerLinkedToId) {
@@ -97,7 +100,7 @@ export default class VerifyCommand extends ApplicationCommand {
 
 		// create new db entry if non exitent
 		try {
-			if (!player)
+			if (!player) {
 				[player] = await this.client.players.model.findCreateFind({
 					where: { minecraftUuid: uuid },
 					defaults: {
@@ -106,6 +109,7 @@ export default class VerifyCommand extends ApplicationCommand {
 						guildId,
 					},
 				});
+			}
 		} catch (error) {
 			logger.error(error, '[VERIFY]: database');
 			return InteractionUtil.reply(

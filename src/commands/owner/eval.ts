@@ -13,6 +13,8 @@ similarity;
 import ms from 'ms';
 ms;
 import util from 'node:util';
+import commonTags from 'common-tags';
+commonTags;
 import * as constants from '../../constants';
 import { cache, hypixel, imgur, mojang, maro } from '../../api';
 cache;
@@ -210,11 +212,12 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param message
 	 */
 	override async runMessage(interaction: ContextMenuInteraction, { content }: Message) {
-		if (!content)
+		if (!content) {
 			return InteractionUtil.reply(interaction, {
 				content: 'no content to evaluate',
 				ephemeral: true,
 			});
+		}
 
 		const IS_ASYNC = /\bawait\b/.test(content);
 		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH');
@@ -233,11 +236,12 @@ export default class EvalCommand extends ApplicationCommand {
 	override async runButton(interaction: ButtonInteraction, args: string[]) {
 		const { channel } = interaction;
 
-		if (!ChannelUtil.botPermissions(channel!).has(Permissions.FLAGS.VIEW_CHANNEL))
+		if (!ChannelUtil.botPermissions(channel!).has(Permissions.FLAGS.VIEW_CHANNEL)) {
 			return InteractionUtil.reply(interaction, {
 				content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
 				ephemeral: true,
 			});
+		}
 
 		const [subcommand, async, inspectDepth] = args;
 
