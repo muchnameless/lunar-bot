@@ -1,12 +1,4 @@
-import {
-	Message,
-	MessageEmbed,
-	MessageActionRow,
-	MessageButton,
-	MessageSelectMenu,
-	Formatters,
-	Constants,
-} from 'discord.js';
+import { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Formatters, Constants } from 'discord.js';
 import { stripIndent, oneLine } from 'common-tags';
 import {
 	DOUBLE_LEFT_EMOJI,
@@ -26,7 +18,7 @@ import {
 import { days, minutes, upperCaseFirstChar } from '.';
 import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api';
-import type { ButtonInteraction, SelectMenuInteraction, Snowflake, User } from 'discord.js';
+import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { LunarClient } from '../structures/LunarClient';
@@ -353,17 +345,10 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 			),
 		});
 
-		const URL =
-			interaction.message instanceof Message
-				? interaction.message.url
-				: `https://discord.com/channels/${interaction.message.guild_id ?? '@me'}/${interaction.message.channel_id}/${
-						interaction.message.id
-				  }`;
-
 		return InteractionUtil.reply(interaction, {
-			content: oneLine`
-				leaderboard timed out, use ${`[${RELOAD_EMOJI}](${URL})`} to refresh the data
-			`,
+			content: `leaderboard timed out, use ${`[${RELOAD_EMOJI}](${
+				(interaction.message as Message).url
+			})`} to refresh the data`,
 			ephemeral: true,
 		});
 	}

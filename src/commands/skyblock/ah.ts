@@ -16,7 +16,6 @@ import {
 } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake } from 'discord.js';
-import type { APISelectMenuComponent } from 'discord-api-types/v9';
 import type { SkyBlockProfile } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -195,7 +194,7 @@ export default class AhCommand extends ApplicationCommand {
 		try {
 			const [uuid, ign, userId] = args;
 			const [profileId] = interaction.values;
-			const profiles = (interaction.message.components?.[0].components[0] as unknown as APISelectMenuComponent).options;
+			const profiles = (interaction.component as MessageSelectMenu).options;
 
 			if (!profiles) {
 				await InteractionUtil.update(interaction, { components: [] });
