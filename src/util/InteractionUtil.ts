@@ -714,9 +714,7 @@ export default class InteractionUtil extends null {
 		if (this.checkForce(interaction)) {
 			const IGN =
 				(interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase() ??
-				options?.fallbackToCurrentUser
-					? UserUtil.getPlayer(interaction.user)?.ign ?? null
-					: null;
+				(options?.fallbackToCurrentUser ? UserUtil.getPlayer(interaction.user)?.ign ?? null : null);
 			if (options?.throwIfNotFound && !IGN) throw 'no IGN specified';
 			return IGN;
 		}
