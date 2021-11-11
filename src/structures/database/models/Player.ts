@@ -1202,15 +1202,19 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * validates the discordId and only updates it if the validation passes
 	 * @param value
 	 */
-	async setValidDiscordId(value: string | null) {
-		const OLD_DISCORD_ID = this.discordId;
+	async setUniqueDiscordId(value: string | null) {
+		// use the static method because this.update sets the value temporarily in case of an exception
+		await Player.update(
+			{
+				discordId: value,
+			},
+			{
+				where: { minecraftUuid: this.minecraftUuid },
+			},
+		);
 
-		try {
-			await this.update({ discordId: value });
-		} catch (error) {
-			this.discordId = OLD_DISCORD_ID;
-			throw error;
-		}
+		// update local instance if the update method didn't reject
+		this.discordId = value;
 	}
 
 	/**
@@ -1220,7 +1224,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	async link(idOrDiscordMember: GuildMember | Snowflake, reason?: string) {
 		if (idOrDiscordMember instanceof GuildMember) {
-			await this.setValidDiscordId(idOrDiscordMember.id);
+			await this.setUniqueDiscordId(idOrDiscordMember.id);
 			this.update({ inDiscord: true }).catch((error) => logger.error(error));
 			this.discordMember = idOrDiscordMember;
 
@@ -1232,7 +1236,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		}
 
 		if (typeof idOrDiscordMember === 'string' && validateNumber(idOrDiscordMember)) {
-			await this.setValidDiscordId(idOrDiscordMember);
+			await this.setUniqueDiscordId(idOrDiscordMember);
 			return this.update({ inDiscord: false });
 		}
 
