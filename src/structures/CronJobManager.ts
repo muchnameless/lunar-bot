@@ -1,5 +1,6 @@
 import { Collection } from 'discord.js';
 import { CronJob } from 'cron';
+import { logger } from '../functions';
 import type { LunarClient } from './LunarClient';
 
 export class CronJobManager {
@@ -17,7 +18,10 @@ export class CronJobManager {
 	 */
 	schedule(name: string, cronJob: CronJob) {
 		// prevent multiple cron jobs with the same name
-		this.cache.get('name')?.stop();
+		if (this.cache.has(name)) {
+			this.cache.get(name)!.stop();
+			logger.warn(`[CRONJOB SCHEDULE]: CronJob '${name}' already existed`);
+		}
 
 		cronJob.start();
 
