@@ -714,9 +714,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					if (rank.positionReq == null) return [];
 
 					const positionReq = Math.round(rank.positionReq * nonStaffWithWeight.length);
+					const playerAtReq = nonStaffWithWeight[positionReq];
+
+					if (!playerAtReq) return [];
 
 					// update 'currentWeightReq' (1/2)
-					rank.currentWeightReq = Math.ceil(nonStaffWithWeight[positionReq].weight);
+					rank.currentWeightReq = Math.ceil(playerAtReq.weight);
 
 					return {
 						...rank,
