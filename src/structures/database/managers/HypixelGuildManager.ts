@@ -80,6 +80,21 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	}
 
 	/**
+	 * update discord stat channel names
+	 */
+	async updateStatDiscordChannels() {
+		try {
+			for (const hypixelGuild of this.cache.values()) {
+				await hypixelGuild.updateStatDiscordChannels();
+			}
+		} catch (error) {
+			logger.error(error, '[UPDATE STAT DISCORD CHANNELS]');
+		}
+
+		return this;
+	}
+
+	/**
 	 * sweeps the player cache
 	 * @param idOrGuild
 	 */
@@ -111,14 +126,13 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	}
 
 	/**
-	 * schedules the CronJob for the daily stats save for each guild
+	 * register cron jobs
 	 */
-	scheduleDailyStatsSave() {
-		// daily reset
+	override schedule() {
+		// daily stats save
 		if (new Date(this.client.config.get('LAST_DAILY_STATS_SAVE_TIME')).getUTCDay() !== new Date().getUTCDay()) {
 			this.performDailyStatsSave();
 		}
-
 		// each day at 00:00:00
 		this.client.cronJobs.schedule(
 			'guildDailyStats',
@@ -126,6 +140,17 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
 				onTick: () => this.performDailyStatsSave(),
+				start: true,
+			}),
+		);
+
+		// schedule guild stats channel update
+		this.client.cronJobs.schedule(
+			'statDiscordChannelsUpdate',
+			new CronJob({
+				cronTime: '0 0 * * * *',
+				onTick: () =>
+					this.client.config.get('STAT_DISCORD_CHANNELS_UPDATE_ENABLED') && this.updateStatDiscordChannels(),
 				start: true,
 			}),
 		);

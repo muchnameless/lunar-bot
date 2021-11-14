@@ -1,6 +1,6 @@
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
-import { MessageEmbed, Formatters, Util } from 'discord.js';
+import { MessageEmbed, Formatters, Util, VoiceChannel } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';
 import { setRank } from '../../chat_bridge/constants';
 import {
@@ -69,8 +69,11 @@ interface HypixelGuildAttributes {
 	mutedTill: number;
 	chatBridgeChannels: ChatBridgeChannel[];
 	ranks: GuildRank[];
+	syncRanksEnabled: boolean;
 	staffRanksAmount: number;
 	statsHistory: StatsHistory[];
+	statDiscordChannels: Record<string, string> | null;
+	updateStatDiscordChannelsEnabled: boolean;
 }
 
 export class HypixelGuild extends Model<HypixelGuildAttributes> implements HypixelGuildAttributes {
@@ -84,8 +87,11 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare mutedTill: number;
 	declare chatBridgeChannels: ChatBridgeChannel[];
 	declare ranks: GuildRank[];
+	declare syncRanksEnabled: boolean;
 	declare staffRanksAmount: number;
 	declare statsHistory: StatsHistory[];
+	declare statDiscordChannels: Record<string, string> | null;
+	declare updateStatDiscordChannelsEnabled: boolean;
 
 	declare readonly createdAt: Date;
 	declare readonly updatedAt: Date;
@@ -151,6 +157,11 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					defaultValue: [],
 					allowNull: false,
 				},
+				syncRanksEnabled: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: false,
+					allowNull: false,
+				},
 				staffRanksAmount: {
 					type: DataTypes.SMALLINT,
 					// 2 + GuildMaster but the latter is not in ranks array
@@ -166,6 +177,16 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						slayerAverage: 0,
 						catacombsAverage: 0,
 					})),
+					allowNull: false,
+				},
+				statDiscordChannels: {
+					type: DataTypes.JSONB,
+					defaultValue: null,
+					allowNull: true,
+				},
+				updateStatDiscordChannelsEnabled: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: true,
 					allowNull: false,
 				},
 			},
@@ -781,6 +802,37 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		} catch (error) {
 			logger.error(error, '[SYNC GUILD RANKS]');
 			return this;
+		}
+	}
+
+	/**
+	 * update discord stat channel names
+	 */
+	async updateStatDiscordChannels() {
+		if (!this.updateStatDiscordChannelsEnabled || !this.statDiscordChannels) return;
+
+		for (const [type, value] of Object.entries(this.formattedStats)) {
+			const channel = this.client.channels.cache.get(this.statDiscordChannels[type]);
+
+			if (!(channel instanceof VoiceChannel)) {
+				// no channel found
+				logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${type}: no channel found`);
+				continue;
+			}
+
+			const newName = `${type}︱${value}`;
+			const { name: oldName } = channel;
+
+			if (newName === oldName) continue; // no update needed
+
+			if (!channel.manageable) {
+				logger.error(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
+				continue;
+			}
+
+			await channel.setName(newName, `synced with ${this.name}'s average stats`);
+
+			logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
 		}
 	}
 

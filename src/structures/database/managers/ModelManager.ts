@@ -43,6 +43,13 @@ export class ModelManager<M extends Model> {
 	}
 
 	/**
+	 * register cron jobs
+	 */
+	schedule() {
+		return this;
+	}
+
+	/**
 	 * typeguards the input as instanceof this.model
 	 * @param input
 	 */

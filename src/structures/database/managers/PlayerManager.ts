@@ -523,16 +523,16 @@ export class PlayerManager extends ModelManager<Player> {
 	}
 
 	/**
-	 * creates cronJobs for all xp resets
+	 * register cron jobs for all xp resets
 	 */
-	scheduleXpResets() {
+	override schedule() {
 		const { config } = this.client;
 
 		// auto competition starting
 		if (config.get('COMPETITION_SCHEDULED')) {
 			if (config.get('COMPETITION_START_TIME') - seconds(10) > Date.now()) {
 				this.client.cronJobs.schedule(
-					'competitionStart',
+					`${this.constructor.name}:competitionStart`,
 					new CronJob({
 						cronTime: new Date(config.get('COMPETITION_START_TIME')),
 						onTick: () => this.#startCompetition(),
@@ -547,7 +547,7 @@ export class PlayerManager extends ModelManager<Player> {
 		// auto competition ending
 		if (config.get('COMPETITION_END_TIME') - seconds(10) > Date.now()) {
 			this.client.cronJobs.schedule(
-				'competitionEnd',
+				`${this.constructor.name}:competitionEnd`,
 				new CronJob({
 					cronTime: new Date(config.get('COMPETITION_END_TIME')),
 					onTick: () => this.#endCompetition(),
@@ -563,7 +563,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		if (NEXT_MAYOR_TIME - seconds(10) > Date.now()) {
 			this.client.cronJobs.schedule(
-				'mayorXpReset',
+				`${this.constructor.name}:mayorXpReset`,
 				new CronJob({
 					cronTime: new Date(NEXT_MAYOR_TIME),
 					onTick: () => this.#performMayorXpReset(),
@@ -581,7 +581,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// each day at 00:00:00
 		this.client.cronJobs.schedule(
-			'dailyXpReset',
+			`${this.constructor.name}:dailyXpReset`,
 			new CronJob({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
@@ -597,7 +597,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// each monday at 00:00:00
 		this.client.cronJobs.schedule(
-			'weeklyXpReset',
+			`${this.constructor.name}:weeklyXpReset`,
 			new CronJob({
 				cronTime: '0 0 0 * * MON',
 				timeZone: 'GMT',
@@ -613,7 +613,7 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// the first of each month at 00:00:00
 		this.client.cronJobs.schedule(
-			'monthlyXpReset',
+			`${this.constructor.name}:monthlyXpReset`,
 			new CronJob({
 				cronTime: '0 0 0 1 * *',
 				timeZone: 'GMT',

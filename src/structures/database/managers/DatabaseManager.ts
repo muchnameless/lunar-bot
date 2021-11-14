@@ -1,4 +1,4 @@
-import { Permissions, Formatters, VoiceChannel } from 'discord.js';
+import { Permissions, Formatters } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';
 import pkg from 'sequelize';
@@ -99,52 +99,9 @@ export class DatabaseManager {
 			}),
 		);
 
-		// schedule guild stats channel update
-		this.client.cronJobs.schedule(
-			'guildStatsChannelUpdate',
-			new CronJobConstructor({
-				cronTime: '0 0 * * * *',
-				onTick: async () => {
-					if (!config.get('AVERAGE_STATS_CHANNEL_UPDATE_ENABLED')) return;
-
-					const { mainGuild } = this.modelManagers.hypixelGuilds;
-					if (!mainGuild) return;
-
-					try {
-						for (const [type, value] of Object.entries(mainGuild.formattedStats)) {
-							const channel = this.client.channels.cache.get(config.get(`${type}_AVERAGE_STATS_CHANNEL_ID`));
-
-							if (!(channel instanceof VoiceChannel)) {
-								// no channel found
-								logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${type}: no channel found`);
-								continue;
-							}
-
-							const newName = `${type}︱${value}`;
-							const { name: oldName } = channel;
-
-							if (newName === oldName) continue; // no update needed
-
-							if (!channel.manageable) {
-								logger.error(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
-								continue;
-							}
-
-							await channel.setName(newName, `synced with ${mainGuild.name}'s average stats`);
-
-							logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
-						}
-					} catch (error) {
-						logger.error(error, '[GUILD STATS CHANNEL UPDATE]');
-					}
-				},
-				start: true,
-			}),
-		);
-
-		this.modelManagers.players.scheduleXpResets();
-
-		this.modelManagers.hypixelGuilds.scheduleDailyStatsSave();
+		for (const manager of Object.values(this.modelManagers)) {
+			manager.schedule();
+		}
 	}
 
 	/**
