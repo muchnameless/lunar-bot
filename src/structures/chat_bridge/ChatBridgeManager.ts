@@ -47,7 +47,7 @@ export class ChatBridgeManager {
 	 * mc accounts
 	 */
 	static get #accounts() {
-		return process.env.MINECRAFT_ACCOUNT_TYPE!.split(' ');
+		return process.env.MINECRAFT_ACCOUNT_TYPE!.split(/ +/).filter(Boolean);
 	}
 
 	/**

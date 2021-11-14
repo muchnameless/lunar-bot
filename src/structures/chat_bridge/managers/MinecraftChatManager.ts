@@ -408,10 +408,10 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		return ((this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
-			username: process.env.MINECRAFT_USERNAME!.split(' ')[this.mcAccount],
-			password: process.env.MINECRAFT_PASSWORD!.split(' ')[this.mcAccount],
+			username: process.env.MINECRAFT_USERNAME!.split(/ +/)[this.mcAccount],
+			password: process.env.MINECRAFT_PASSWORD!.split(/ +/)[this.mcAccount],
 			version: MC_CLIENT_VERSION,
-			auth: process.env.MINECRAFT_ACCOUNT_TYPE!.split(' ')[this.mcAccount] as 'mojang' | 'microsoft',
+			auth: process.env.MINECRAFT_ACCOUNT_TYPE!.split(/ +/)[this.mcAccount] as 'mojang' | 'microsoft',
 		}));
 	}
 
