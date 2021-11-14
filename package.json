@@ -47,7 +47,7 @@
     "lex": "^1.7.9",
     "lilyweight": "^2.0.0",
     "minecraft-data": "^2.96.0",
-    "minecraft-protocol": "github:PrismarineJS/node-minecraft-protocol#88003d065e40eb00fc0fbd66ebbd86c83dfe3a34",
+    "minecraft-protocol": "^1.28.0",
     "ms": "^2.1.3",
     "node-fetch": "^3.1.0",
     "pg": "^8.7.1",
