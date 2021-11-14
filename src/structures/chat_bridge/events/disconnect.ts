@@ -19,6 +19,9 @@ export default class DisconnectChatBridgeEvent extends ChatBridgeEvent {
 
 		logger.error(`[CHATBRIDGE DISCONNECT]: Minecraft bot disconnected from server: ${reason ?? 'unknown reason'}`);
 
+		// prevent this event from being emitted multiple times
+		this.chatBridge.minecraft.bot?.removeAllListeners('end');
+
 		this.chatBridge.minecraft.reconnect();
 	}
 }
