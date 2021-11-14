@@ -1,8 +1,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Type } from '@sapphire/type';
+import { sortCache } from '../../functions';
+import { MAX_CHOICES } from '../../constants';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { Collection, CommandInteraction } from 'discord.js';
+import type { AutocompleteInteraction, Collection, CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Config } from '../../structures/database/models/Config';
 
@@ -16,7 +18,7 @@ export default class ConfigCommand extends ApplicationCommand {
 						.setName('edit')
 						.setDescription('edit the config key with the provided value')
 						.addStringOption((option) =>
-							option.setName('key').setDescription('new / existing config key').setRequired(true),
+							option.setName('key').setDescription('new / existing config key').setRequired(true).setAutocomplete(true),
 						)
 						.addStringOption((option) => option.setName('value').setDescription('new config value').setRequired(true))
 						.addStringOption((option) =>
@@ -31,13 +33,17 @@ export default class ConfigCommand extends ApplicationCommand {
 					subcommand
 						.setName('delete')
 						.setDescription('delete the config key')
-						.addStringOption((option) => option.setName('key').setDescription('existing config key').setRequired(true)),
+						.addStringOption((option) =>
+							option.setName('key').setDescription('existing config key').setRequired(true).setAutocomplete(true),
+						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName('search')
 						.setDescription('searches the config keys and values')
-						.addStringOption((option) => option.setName('query').setDescription('search query').setRequired(false)),
+						.addStringOption((option) =>
+							option.setName('query').setDescription('search query').setRequired(false).setAutocomplete(true),
+						),
 				),
 			cooldown: 0,
 		});
@@ -58,6 +64,31 @@ export default class ConfigCommand extends ApplicationCommand {
 				)
 				.join('\n') || '\u200B'
 		);
+	}
+
+	/**
+	 * @param interaction
+	 * @param value input value
+	 */
+	override runAutocomplete(interaction: AutocompleteInteraction, value: string) {
+		if (!value) {
+			return interaction.respond(this.config.cache.map(({ key }) => ({ name: key, value: key })).slice(0, MAX_CHOICES));
+		}
+
+		switch (interaction.options.getSubcommand()) {
+			case 'edit':
+			case 'search':
+				return interaction.respond([
+					{ name: value, value }, // current input
+					...sortCache(this.config.cache, value.toUpperCase().replace(/ +/g, '_'), 'key', 'key', MAX_CHOICES - 1),
+				]);
+
+			case 'delete':
+				return interaction.respond(sortCache(this.config.cache, value.toUpperCase().replace(/ +/g, '_'), 'key', 'key'));
+
+			default:
+				throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
+		}
 	}
 
 	/**

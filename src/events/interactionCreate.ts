@@ -1,12 +1,12 @@
 import ms from 'ms';
-import jaroWinklerSimilarity from 'jaro-winkler';
-import { COMMAND_KEY, GUILD_ID_ALL, LB_KEY } from '../constants';
+import { COMMAND_KEY, GUILD_ID_ALL, LB_KEY, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil } from '../util';
 import {
 	handleLeaderboardButtonInteraction,
 	handleLeaderboardSelectMenuInteraction,
 	logger,
 	minutes,
+	sortCache,
 } from '../functions';
 import { Event } from '../structures/events/Event';
 import type {
@@ -14,7 +14,6 @@ import type {
 	AutocompleteInteraction,
 	BaseGuildTextChannel,
 	ButtonInteraction,
-	Collection,
 	CommandInteraction,
 	ContextMenuInteraction,
 	GuildMember,
@@ -222,37 +221,12 @@ export default class InteractionCreateEvent extends Event {
 	}
 
 	/**
-	 * build autocomplete reponse from cached database entries
-	 * @param cache
-	 * @param value
-	 * @param nameKey
-	 * @param valueKey
-	 */
-	static sortCache<T>(cache: Collection<string, T> | T[], value: string, nameKey: keyof T, valueKey: keyof T) {
-		return (cache as T[])
-			.map((element) => ({
-				similarity: jaroWinklerSimilarity(value, element[nameKey] as unknown as string, {
-					caseSensitive: false,
-				}),
-				element,
-			}))
-			.sort(({ similarity: a }, { similarity: b }) => b - a)
-			.slice(0, 25)
-			.map(({ element }) => ({
-				name: element[nameKey] as unknown as string,
-				value: element[valueKey] as unknown as string,
-			}));
-	}
-
-	/**
 	 * respond to autocomplete interactions
 	 * @param interaction
 	 */
 	async #handleAutocompleteInteraction(interaction: AutocompleteInteraction) {
 		try {
 			const { name, value } = interaction.options.getFocused(true) as { name: string; value: string };
-
-			logger.trace({ name, value });
 
 			switch (name) {
 				case 'player':
@@ -262,7 +236,7 @@ export default class InteractionCreateEvent extends Event {
 						return interaction.respond(
 							this.client.players.cache
 								.map(({ minecraftUuid, ign }) => ({ name: ign, value: minecraftUuid }))
-								.slice(0, 25),
+								.slice(0, MAX_CHOICES),
 						);
 					}
 
@@ -285,21 +259,19 @@ export default class InteractionCreateEvent extends Event {
 
 						// no displayName yet -> don't sort
 						if (value === '@') {
-							return interaction.respond(response.slice(0, 25));
+							return interaction.respond(response.slice(0, MAX_CHOICES));
 						}
 
-						return interaction.respond(InteractionCreateEvent.sortCache(response, value.slice(1), 'name', 'value'));
+						return interaction.respond(sortCache(response, value.slice(1), 'name', 'value'));
 					}
 
 					// target the whole guild, e.g. for mute
-					if (name === 'target' && ['guild', 'everyone'].includes(value)) {
+					if (name === 'target' && ['guild', 'everyone'].includes(value.toLowerCase())) {
 						return interaction.respond([{ name: 'everyone', value: 'everyone' }]);
 					}
 
 					// ign input
-					return interaction.respond(
-						InteractionCreateEvent.sortCache(this.client.players.cache, value, 'ign', 'minecraftUuid'),
-					);
+					return interaction.respond(sortCache(this.client.players.cache, value, 'ign', 'minecraftUuid'));
 				}
 
 				case 'guild': {
@@ -311,7 +283,7 @@ export default class InteractionCreateEvent extends Event {
 									name: guildName,
 									value: guildId,
 								}))
-								.slice(0, 25),
+								.slice(0, MAX_CHOICES),
 						);
 					}
 
@@ -321,9 +293,7 @@ export default class InteractionCreateEvent extends Event {
 					}
 
 					// specific guilds
-					return interaction.respond(
-						InteractionCreateEvent.sortCache(this.client.hypixelGuilds.cache, value, 'name', 'guildId'),
-					);
+					return interaction.respond(sortCache(this.client.hypixelGuilds.cache, value, 'name', 'guildId'));
 				}
 
 				default: {
@@ -333,7 +303,7 @@ export default class InteractionCreateEvent extends Event {
 						return interaction.respond([]);
 					}
 
-					return await command.runAutocomplete(interaction, name, value);
+					return await command.runAutocomplete(interaction, value, name);
 				}
 			}
 		} catch (error) {

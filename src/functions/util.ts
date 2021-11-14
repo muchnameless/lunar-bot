@@ -5,9 +5,10 @@ import { promisify } from 'node:util';
 import ms from 'ms';
 import jaroWinklerSimilarity from 'jaro-winkler';
 import readdirp from 'readdirp';
-import { EMBED_FIELD_MAX_CHARS } from '../constants';
+import { EMBED_FIELD_MAX_CHARS, MAX_CHOICES } from '../constants';
 import { days, logger } from '.';
 import type { URL } from 'node:url';
+import type { Collection } from 'discord.js';
 import type { Merge } from '../types/util';
 
 /**
@@ -429,4 +430,34 @@ export async function randomNumber(minimum: number, maximum: number) {
 		 * We don't try any modulo tricks, as this would introduce bias.
 		 */
 	}
+}
+
+/**
+ * build autocomplete reponse from cached database entries
+ * @param cache
+ * @param value
+ * @param nameKey
+ * @param valueKey
+ * @param max
+ */
+export function sortCache<T>(
+	cache: Collection<string, T> | T[],
+	value: string,
+	nameKey: keyof T,
+	valueKey: keyof T,
+	max = MAX_CHOICES,
+) {
+	return (cache as T[])
+		.map((element) => ({
+			similarity: jaroWinklerSimilarity(value, element[nameKey] as unknown as string, {
+				caseSensitive: false,
+			}),
+			element,
+		}))
+		.sort(({ similarity: a }, { similarity: b }) => b - a)
+		.slice(0, max)
+		.map(({ element }) => ({
+			name: element[nameKey] as unknown as string,
+			value: element[valueKey] as unknown as string,
+		}));
 }

@@ -13,3 +13,6 @@ export const NICKNAME_MAX_CHARS = 32;
 
 // channels
 export const WEBHOOKS_MAX_PER_CHANNEL = 10;
+
+// interactions
+export const MAX_CHOICES = 25;

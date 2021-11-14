@@ -270,13 +270,13 @@ export class ApplicationCommand extends BaseCommand {
 
 	/**
 	 * @param interaction
-	 * @param name
-	 * @param value
+	 * @param value input value
+	 * @param name option name
 	 */
 	runAutocomplete(
 		interaction: AutocompleteInteraction,
-		name: string,
 		value: string | number,
+		name: string,
 	): unknown | Promise<unknown> {
 		throw new Error('no run function specified for autocomplete');
 	}
