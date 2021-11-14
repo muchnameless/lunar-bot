@@ -135,7 +135,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 		}
 		// each day at 00:00:00
 		this.client.cronJobs.schedule(
-			'guildDailyStats',
+			`${this.constructor.name}:saveDailyStats`,
 			new CronJob({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
@@ -146,7 +146,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 
 		// schedule guild stats channel update
 		this.client.cronJobs.schedule(
-			'statDiscordChannelsUpdate',
+			`${this.constructor.name}:updateStatDiscordChannels`,
 			new CronJob({
 				cronTime: '0 0 * * * *',
 				onTick: () =>

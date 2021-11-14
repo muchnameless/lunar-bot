@@ -91,7 +91,7 @@ export class DatabaseManager {
 		const { config } = this.modelManagers;
 
 		this.client.cronJobs.schedule(
-			'updatePlayerDatabase',
+			`${this.constructor.name}:updatePlayerDatabase`,
 			new CronJobConstructor({
 				cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
 				onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.updateData(),

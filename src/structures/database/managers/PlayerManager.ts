@@ -674,7 +674,7 @@ export class PlayerManager extends ModelManager<Player> {
 		);
 
 		this.client.cronJobs.schedule(
-			'mayorXpReset',
+			`${this.constructor.name}:mayorXpReset`,
 			new CronJob({
 				cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
 				onTick: () => this.#performMayorXpReset(),
