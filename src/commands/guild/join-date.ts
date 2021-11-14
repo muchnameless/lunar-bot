@@ -95,9 +95,11 @@ export default class JoinDateCommand extends DualCommand {
 	async #generateReply(chatBridge: ChatBridge, ignInput: string) {
 		try {
 			const { ign, date, timestamp } = await JoinDateCommand.#getJoinDate(chatBridge, ignInput);
-			return `${ign}: joined at ${!Number.isNaN(timestamp) ? Formatters.time(date) : 'an unknown date'}`;
+			return `${ign}: joined ${chatBridge.hypixelGuild} at ${
+				!Number.isNaN(timestamp) ? Formatters.time(date) : 'an unknown date'
+			}`;
 		} catch {
-			return `${ignInput}: never joined ${chatBridge.hypixelGuild!.name}`;
+			return `${ignInput}: never joined ${chatBridge.hypixelGuild}`;
 		}
 	}
 
