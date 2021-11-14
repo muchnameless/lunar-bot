@@ -2,32 +2,21 @@
 
 Lunar Guard Discord Bot
 
-Redis (as an LRU cache)
+## Prerequisites
 
-    redis-cli
+ - Redis
 
-    CONFIG SET maxmemory 1gb
+    ```
+    $ redis-cli
+
+    > CONFIG SET maxmemory 1gb
+    > CONFIG SET activedefrag yes
+    > CONFIG SET maxmemory-policy volatile-lru
+    > CONFIG REWRITE
+    ```
     
-    CONFIG SET activedefrag yes
-
-    CONFIG SET maxmemory-policy volatile-lru
-    
-    CONFIG REWRITE
-
-PostgreSQL ^13 (earlier versions do not accept Date.now() in BigInt arrays)
-
-    # Create the file repository configuration:
-    
-    sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-
-    # Import the repository signing key:
-    
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-
-    # Update the package lists:
-    
-    sudo apt update
-
-    # Install the latest version of PostgreSQL.
-    
-    sudo apt install postgresql
+ - PostgreSQL ^13
+ 
+ - libs to build canvas
+ 
+   `sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev`
