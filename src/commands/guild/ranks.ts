@@ -23,7 +23,7 @@ export default class RanksCommand extends ApplicationCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true });
-		const embed = this.client.defaultEmbed;
+		const embed = this.client.defaultEmbed.setFooter(hypixelGuild.name);
 
 		// no player
 		if (!player) {
