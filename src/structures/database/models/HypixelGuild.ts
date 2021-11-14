@@ -689,6 +689,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * syncs guild ranks with the weight leaderboard
 	 */
 	async syncRanks() {
+		if (!this.client.config.get('AUTO_GUILD_RANKS')) return this;
+
 		if (this.#syncRanksPromise) return this.#syncRanksPromise;
 
 		try {
@@ -703,8 +705,6 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 */
 	async #syncRanks() {
 		try {
-			if (!this.client.config.get('AUTO_GUILD_RANKS')) return this;
-
 			const nonStaffWithWeight: PlayerWithWeight[] = [];
 
 			// calculate weight for non-staff members and their amount
