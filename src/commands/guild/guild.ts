@@ -361,18 +361,20 @@ export default class GuildCommand extends ApplicationCommand {
 			});
 		}
 
+		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const { content, ephemeral } = await this.runMute({
 			target,
 			executor: UserUtil.getPlayer(interaction.user),
 			duration,
-			hypixelGuild: InteractionUtil.getHypixelGuild(interaction),
+			hypixelGuild,
 		});
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/guild mute ${target} ${ms(duration)}`)
-					.setDescription(Formatters.codeBlock(content)),
+					.setDescription(Formatters.codeBlock(content))
+					.setFooter(hypixelGuild.name),
 			],
 			ephemeral:
 				interaction.options.get('visibility') === null
@@ -472,7 +474,8 @@ export default class GuildCommand extends ApplicationCommand {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`/${escapeIgn(commandOptions.command)}`) // command can inclue a player IGN
-					.setDescription(Formatters.codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions))),
+					.setDescription(Formatters.codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions)))
+					.setFooter(hypixelGuild.name),
 			],
 		});
 	}
@@ -483,33 +486,38 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param commandOptions
 	 */
 	async #runList(interaction: CommandInteraction, commandOptions: CommandOptions) {
+		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
+
 		return InteractionUtil.reply(interaction, {
 			embeds: [
-				this.client.defaultEmbed.setTitle(`/${commandOptions.command}`).setDescription(
-					Formatters.codeBlock(
-						trim(
-							(
-								await InteractionUtil.getHypixelGuild(interaction).chatBridge.minecraft.command({
-									...commandOptions,
-									raw: true,
-								})
-							)
-								.map((msg) =>
-									msg.content.includes('●')
-										? removeMcFormatting(
-												msg.formattedContent
-													.replaceAll('§r§c ●', ' 🔴') // prettify emojis
-													.replaceAll('§r§a ●', ' 🟢')
-													.replace(/\[.+?\] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
-													.trim(),
-										  )
-										: msg.content,
+				this.client.defaultEmbed
+					.setTitle(`/${commandOptions.command}`)
+					.setDescription(
+						Formatters.codeBlock(
+							trim(
+								(
+									await hypixelGuild.chatBridge.minecraft.command({
+										...commandOptions,
+										raw: true,
+									})
 								)
-								.join('\n'),
-							EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])
+									.map((msg) =>
+										msg.content.includes('●')
+											? removeMcFormatting(
+													msg.formattedContent
+														.replaceAll('§r§c ●', ' 🔴') // prettify emojis
+														.replaceAll('§r§a ●', ' 🟢')
+														.replace(/\[.+?\] /g, '') // remove hypixel ranks (helps with staying inside the character limit)
+														.trim(),
+											  )
+											: msg.content,
+									)
+									.join('\n'),
+								EMBED_DESCRIPTION_MAX_CHARS - 8, // 2 * (3 [```] + 1 [\n])
+							),
 						),
-					),
-				),
+					)
+					.setFooter(hypixelGuild.name),
 			],
 		});
 	}
@@ -607,7 +615,12 @@ export default class GuildCommand extends ApplicationCommand {
 				interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'
 			] as typeof InteractionUtil['reply']
 		)(interaction as ButtonInteraction, {
-			embeds: [this.client.defaultEmbed.setTitle(`/${command}`).setDescription(Formatters.codeBlock(response))],
+			embeds: [
+				this.client.defaultEmbed
+					.setTitle(`/${command}`)
+					.setDescription(Formatters.codeBlock(response))
+					.setFooter(hypixelGuild.name),
+			],
 			components: this.#getPaginationButtons(
 				subcommand,
 				hypixelGuild.guildId,
@@ -738,15 +751,16 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'kick': {
 				const target = InteractionUtil.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
+				const hypixelGuild =
+					typeof target === 'string'
+						? InteractionUtil.getHypixelGuild(interaction)
+						: target.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction);
 				const { content, hasErrored } = await this.runKick({
 					ctx: interaction,
 					target,
 					executor: UserUtil.getPlayer(interaction.user),
 					reason,
-					hypixelGuild:
-						typeof target === 'string'
-							? InteractionUtil.getHypixelGuild(interaction)
-							: target.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction),
+					hypixelGuild,
 				});
 
 				// add to ban list
@@ -792,7 +806,8 @@ export default class GuildCommand extends ApplicationCommand {
 					embeds: [
 						this.client.defaultEmbed
 							.setTitle(`/guild kick ${escapeIgn(typeof target === 'string' ? target : target.ign)} ${reason}`)
-							.setDescription(Formatters.codeBlock(content)),
+							.setDescription(Formatters.codeBlock(content))
+							.setFooter(hypixelGuild.name),
 					],
 					ephemeral:
 						interaction.options.get('visibility') === null
