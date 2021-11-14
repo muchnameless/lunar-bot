@@ -16,6 +16,9 @@ export class CronJobManager {
 	 * @param cronJob
 	 */
 	schedule(name: string, cronJob: CronJob) {
+		// prevent multiple cron jobs with the same name
+		this.cache.get('name')?.stop();
+
 		cronJob.start();
 
 		this.cache.set(name, cronJob);
