@@ -25,7 +25,7 @@
   "author": "muchnameless",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/builders": "0.7",
+    "@discordjs/builders": "github:muchnameless/builders",
     "@discordjs/rest": "^0.1.0-canary.0",
     "@keyv/redis": "^2.2.0",
     "@sapphire/async-queue": "^1.1.9",

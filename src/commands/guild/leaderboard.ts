@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { xpTypeOption, pageOption, offsetOption, buildGuildOption } from '../../structures/commands/commonOptions';
+import { hypixelGuildOption, offsetOption, pageOption, xpTypeOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { getDefaultOffset, handleLeaderboardCommandInteraction, seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -16,7 +16,7 @@ export default class LeaderboardCommand extends ApplicationCommand {
 				.addStringOption(xpTypeOption)
 				.addIntegerOption(pageOption)
 				.addStringOption(offsetOption)
-				.addStringOption(buildGuildOption(context.client, true)),
+				.addStringOption(hypixelGuildOption),
 			cooldown: seconds(1),
 		});
 	}

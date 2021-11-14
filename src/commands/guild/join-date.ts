@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import ms from 'ms';
 import { logErrors } from '../../structures/chat_bridge/constants';
-import { forceOption, optionalPlayerOption, buildGuildOption } from '../../structures/commands/commonOptions';
+import { forceOption, hypixelGuildOption, optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, logger } from '../../functions';
 import { MinecraftChatManager } from '../../structures/chat_bridge/managers/MinecraftChatManager';
@@ -27,7 +27,7 @@ export default class JoinDateCommand extends DualCommand {
 					.setDescription('guild member join date, parsed from `/g log ign`')
 					.addStringOption(optionalPlayerOption)
 					.addBooleanOption(forceOption)
-					.addStringOption(buildGuildOption(context.client)),
+					.addStringOption(hypixelGuildOption),
 				cooldown: 0,
 			},
 			{

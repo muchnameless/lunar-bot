@@ -1,6 +1,6 @@
 import { Constants, Formatters, MessageActionRow, MessageButton } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { buildGuildOption, pageOption } from '../../structures/commands/commonOptions';
+import { hypixelGuildOption, pageOption } from '../../structures/commands/commonOptions';
 import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI } from '../../constants';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -17,7 +17,7 @@ export default class FriendCommand extends ApplicationCommand {
 					subcommand
 						.setName('list')
 						.setDescription('list friends')
-						.addStringOption(buildGuildOption(context.client))
+						.addStringOption(hypixelGuildOption)
 						.addIntegerOption(pageOption),
 				),
 			cooldown: 0,

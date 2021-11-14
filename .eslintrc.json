@@ -90,12 +90,13 @@
 			{
 				"exceptMethods": [
 					"run",
-					"runSlash",
+					"runAutocomplete",
 					"runButton",
-					"runSelect",
 					"runMessage",
-					"runUser",
 					"runMinecraft",
+					"runSelect",
+					"runSlash",
+					"runUser",
 					"_run",
 					"_generateReply"
 				]
@@ -187,6 +188,7 @@
 			}
 		],
 		"no-var": "error",
+		"no-warning-comments": "warn",
 		"no-whitespace-before-property": "error",
 		"object-curly-spacing": [
 			"error",

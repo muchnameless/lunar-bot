@@ -3,7 +3,7 @@ import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { INVISIBLE_CHARACTERS, MESSAGE_TYPES } from '../../structures/chat_bridge/constants';
-import { buildGuildOption } from '../../structures/commands/commonOptions';
+import { hypixelGuildOption } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../util';
 import { minutes, seconds, stringToMS, upperCaseFirstChar } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
@@ -37,7 +37,7 @@ export default class PollCommand extends DualCommand {
 					.setDescription('s[econds] | m[inutes], must be between 30s and 10m')
 					.setRequired(false),
 			)
-			.addStringOption(buildGuildOption(context.client));
+			.addStringOption(hypixelGuildOption);
 
 		super(
 			context,

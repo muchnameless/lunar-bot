@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { optionalPlayerOption, buildGuildOption } from '../../structures/commands/commonOptions';
+import { hypixelGuildOption, optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
@@ -11,7 +11,7 @@ export default class RanksCommand extends ApplicationCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('guild ranks and requirements')
 				.addStringOption(optionalPlayerOption)
-				.addStringOption(buildGuildOption(context.client)),
+				.addStringOption(hypixelGuildOption),
 			cooldown: 0,
 		});
 	}

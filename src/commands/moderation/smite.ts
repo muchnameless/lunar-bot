@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { targetOption, buildGuildOption } from '../../structures/commands/commonOptions';
+import { hypixelGuildOption, targetOption } from '../../structures/commands/commonOptions';
 import { minutes } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
@@ -15,7 +15,7 @@ export default class SmiteCommand extends DualCommand {
 				slash: new SlashCommandBuilder()
 					.setDescription('guild mute for 10 minutes')
 					.addStringOption(targetOption)
-					.addStringOption(buildGuildOption(context.client)),
+					.addStringOption(hypixelGuildOption),
 				cooldown: 0,
 			},
 			{

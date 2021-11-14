@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { pageOption, buildGuildOption } from '../../structures/commands/commonOptions';
+import { hypixelGuildOption, pageOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { handleLeaderboardCommandInteraction, seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -13,7 +13,7 @@ export default class PurgeListCommand extends ApplicationCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('guild members below requirements, sorted by total and gained weight')
 				.addIntegerOption(pageOption)
-				.addStringOption(buildGuildOption(context.client, true)),
+				.addStringOption(hypixelGuildOption),
 			cooldown: seconds(1),
 		});
 	}

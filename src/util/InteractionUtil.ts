@@ -765,9 +765,11 @@ export default class InteractionUtil extends null {
 			return null;
 		}
 
-		if (includeAll && INPUT === GUILD_ID_ALL) return INPUT;
+		if (includeAll && INPUT.toUpperCase() === GUILD_ID_ALL) return INPUT;
 
-		const hypixelGuild = (interaction.client as LunarClient).hypixelGuilds.cache.get(INPUT);
+		const hypixelGuild =
+			(interaction.client as LunarClient).hypixelGuilds.cache.get(INPUT) ??
+			(interaction.client as LunarClient).hypixelGuilds.getByName(INPUT);
 
 		if (hypixelGuild) return hypixelGuild;
 

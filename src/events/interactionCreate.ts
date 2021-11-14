@@ -1,6 +1,7 @@
 import ms from 'ms';
-import { COMMAND_KEY, LB_KEY } from '../constants';
-import { InteractionUtil } from '../util';
+import jaroWinklerSimilarity from 'jaro-winkler';
+import { COMMAND_KEY, GUILD_ID_ALL, LB_KEY } from '../constants';
+import { GuildMemberUtil, InteractionUtil } from '../util';
 import {
 	handleLeaderboardButtonInteraction,
 	handleLeaderboardSelectMenuInteraction,
@@ -9,8 +10,11 @@ import {
 } from '../functions';
 import { Event } from '../structures/events/Event';
 import type {
+	ApplicationCommandOptionChoice,
+	AutocompleteInteraction,
 	BaseGuildTextChannel,
 	ButtonInteraction,
+	Collection,
 	CommandInteraction,
 	ContextMenuInteraction,
 	GuildMember,
@@ -184,7 +188,7 @@ export default class InteractionCreateEvent extends Event {
 				return handleLeaderboardSelectMenuInteraction(interaction, args);
 
 			// command message buttons
-			case 'cmd': {
+			case COMMAND_KEY: {
 				const commandName = args.shift();
 				const command = this.client.commands.get(commandName!);
 
@@ -213,6 +217,132 @@ export default class InteractionCreateEvent extends Event {
 				}
 
 				return command.runSelect(interaction, args);
+			}
+		}
+	}
+
+	/**
+	 * build autocomplete reponse from cached database entries
+	 * @param cache
+	 * @param value
+	 * @param nameKey
+	 * @param valueKey
+	 */
+	static sortCache<T>(cache: Collection<string, T> | T[], value: string, nameKey: keyof T, valueKey: keyof T) {
+		return (cache as T[])
+			.map((element) => ({
+				similarity: jaroWinklerSimilarity(value, element[nameKey] as unknown as string, {
+					caseSensitive: false,
+				}),
+				element,
+			}))
+			.sort(({ similarity: a }, { similarity: b }) => b - a)
+			.slice(0, 25)
+			.map(({ element }) => ({
+				name: element[nameKey] as unknown as string,
+				value: element[valueKey] as unknown as string,
+			}));
+	}
+
+	/**
+	 * respond to autocomplete interactions
+	 * @param interaction
+	 */
+	async #handleAutocompleteInteraction(interaction: AutocompleteInteraction) {
+		try {
+			const { name, value } = interaction.options.getFocused(true) as { name: string; value: string };
+
+			logger.trace({ name, value });
+
+			switch (name) {
+				case 'player':
+				case 'target': {
+					// no value yet -> don't sort
+					if (!value) {
+						return interaction.respond(
+							this.client.players.cache
+								.map(({ minecraftUuid, ign }) => ({ name: ign, value: minecraftUuid }))
+								.slice(0, 25),
+						);
+					}
+
+					// <@id> input
+					if (value.startsWith('<')) return interaction.respond([{ name: value, value }]);
+
+					// @displayName input
+					if (value.startsWith('@')) {
+						const { lgGuild } = this.client;
+						if (!lgGuild) return interaction.respond([]);
+
+						const response: ApplicationCommandOptionChoice[] = [];
+
+						for (const member of lgGuild.members.cache.values()) {
+							const player = GuildMemberUtil.getPlayer(member);
+							if (!player) continue;
+
+							response.push({ name: member.displayName, value: player.minecraftUuid });
+						}
+
+						// no displayName yet -> don't sort
+						if (value === '@') {
+							return interaction.respond(response.slice(0, 25));
+						}
+
+						return interaction.respond(InteractionCreateEvent.sortCache(response, value.slice(1), 'name', 'value'));
+					}
+
+					// target the whole guild, e.g. for mute
+					if (name === 'target' && ['guild', 'everyone'].includes(value)) {
+						return interaction.respond([{ name: 'everyone', value: 'everyone' }]);
+					}
+
+					// ign input
+					return interaction.respond(
+						InteractionCreateEvent.sortCache(this.client.players.cache, value, 'ign', 'minecraftUuid'),
+					);
+				}
+
+				case 'guild': {
+					// no value yet -> don't sort
+					if (!value) {
+						return interaction.respond(
+							this.client.hypixelGuilds.cache
+								.map(({ guildId, name: guildName }) => ({
+									name: guildName,
+									value: guildId,
+								}))
+								.slice(0, 25),
+						);
+					}
+
+					// all guilds
+					if (value.toUpperCase() === GUILD_ID_ALL) {
+						return interaction.respond([{ name: 'All Guilds', value: GUILD_ID_ALL }]);
+					}
+
+					// specific guilds
+					return interaction.respond(
+						InteractionCreateEvent.sortCache(this.client.hypixelGuilds.cache, value, 'name', 'guildId'),
+					);
+				}
+
+				default: {
+					const command = this.client.commands.get(interaction.commandName);
+
+					if (!command) {
+						return interaction.respond([]);
+					}
+
+					return await command.runAutocomplete(interaction, name, value);
+				}
+			}
+		} catch (error) {
+			logger.error(error);
+
+			try {
+				if (!interaction.responded && !InteractionUtil.isInteractionError(error)) return await interaction.respond([]);
+			} catch (error_) {
+				logger.error(error_);
 			}
 		}
 	}
@@ -276,6 +406,9 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	override async run(interaction: ChatInteraction) {
+		// autocomplete
+		if (interaction.isAutocomplete()) return this.#handleAutocompleteInteraction(interaction);
+
 		// add interaction to the WeakMap which holds InteractionData
 		InteractionUtil.add(interaction);
 

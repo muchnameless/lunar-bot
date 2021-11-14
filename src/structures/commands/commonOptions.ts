@@ -1,13 +1,6 @@
 import { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandIntegerOption } from '@discordjs/builders';
-import {
-	GUILD_ID_ALL,
-	LEADERBOARD_XP_TYPES,
-	PROFILE_NAMES,
-	XP_OFFSETS_CONVERTER,
-	XP_OFFSETS_SHORT,
-} from '../../constants';
+import { LEADERBOARD_XP_TYPES, PROFILE_NAMES, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } from '../../constants';
 import { upperCaseFirstChar } from '../../functions';
-import type { LunarClient } from '../LunarClient';
 
 export const optionalIgnOption = new SlashCommandStringOption()
 	.setName('ign')
@@ -22,17 +15,20 @@ export const requiredIgnOption = new SlashCommandStringOption()
 export const optionalPlayerOption = new SlashCommandStringOption()
 	.setName('player')
 	.setDescription('IGN | UUID | discord ID | @mention')
-	.setRequired(false);
+	.setRequired(false)
+	.setAutocomplete(true);
 
 export const requiredPlayerOption = new SlashCommandStringOption()
 	.setName('player')
 	.setDescription('IGN | UUID | discord ID | @mention')
-	.setRequired(true);
+	.setRequired(true)
+	.setAutocomplete(true);
 
 export const targetOption = new SlashCommandStringOption()
 	.setName('target')
 	.setDescription("IGN | UUID | discord ID | @mention | 'guild' | 'everyone'")
-	.setRequired(true);
+	.setRequired(true)
+	.setAutocomplete(true);
 
 export const forceOption = new SlashCommandBooleanOption()
 	.setName('force')
@@ -68,18 +64,8 @@ export const ephemeralOption = new SlashCommandStringOption()
 	.setRequired(false)
 	.addChoices(['everyone', 'just me'].map((x) => [x, x]));
 
-/**
- * @param client
- * @param includeAll wether to allow GUILD_ID_ALL
- */
-export function buildGuildOption(client: LunarClient, includeAll = false) {
-	const guildOption = new SlashCommandStringOption()
-		.setName('guild')
-		.setDescription('hypixel guild')
-		.setRequired(false)
-		.addChoices(client.hypixelGuilds.cache.map(({ name, guildId }) => [name, guildId]));
-
-	if (includeAll) guildOption.addChoice('all', GUILD_ID_ALL);
-
-	return guildOption;
-}
+export const hypixelGuildOption = new SlashCommandStringOption()
+	.setName('guild')
+	.setDescription('hypixel guild')
+	.setRequired(false)
+	.setAutocomplete(true);

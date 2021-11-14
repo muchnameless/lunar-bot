@@ -21,6 +21,7 @@ import type {
 	RESTPostAPIContextMenuApplicationCommandsJSONBody,
 } from 'discord-api-types/v9';
 import type {
+	AutocompleteInteraction,
 	ButtonInteraction,
 	CommandInteraction,
 	ContextMenuInteraction,
@@ -265,13 +266,27 @@ export class ApplicationCommand extends BaseCommand {
 		}
 	}
 
+	/* eslint-disable @typescript-eslint/no-unused-vars */
+
+	/**
+	 * @param interaction
+	 * @param name
+	 * @param value
+	 */
+	runAutocomplete(
+		interaction: AutocompleteInteraction,
+		name: string,
+		value: string | number,
+	): unknown | Promise<unknown> {
+		throw new Error('no run function specified for autocomplete');
+	}
+
 	/**
 	 * execute the command
 	 * @param interaction
 	 * @param user
 	 * @param member
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	runUser(interaction: ContextMenuInteraction, user: User, member: GuildMember | null): unknown | Promise<unknown> {
 		throw new Error('no run function specified for user context menus');
 	}
@@ -281,7 +296,6 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param message
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	runMessage(interaction: ContextMenuInteraction, message: Message): unknown | Promise<unknown> {
 		throw new Error('no run function specified for message context menus');
 	}
@@ -291,7 +305,6 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	runSelect(interaction: SelectMenuInteraction, args: string[]): unknown | Promise<unknown> {
 		throw new Error('no run function specified for select menus');
 	}
@@ -301,7 +314,6 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	runButton(interaction: ButtonInteraction, args: string[]): unknown | Promise<unknown> {
 		throw new Error('no run function specified for buttons');
 	}
@@ -310,8 +322,9 @@ export class ApplicationCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	runSlash(interaction: CommandInteraction): unknown | Promise<unknown> {
 		throw new Error('no run function specified for slash commands');
 	}
+
+	/* eslint-enable @typescript-eslint/no-unused-vars */
 }

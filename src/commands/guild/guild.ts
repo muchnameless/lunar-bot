@@ -27,13 +27,13 @@ import {
 	UNKNOWN_IGN,
 } from '../../constants';
 import {
-	requiredPlayerOption,
+	forceOption,
+	hypixelGuildOption,
 	optionalPlayerOption,
 	pageOption,
 	requiredIgnOption,
+	requiredPlayerOption,
 	targetOption,
-	forceOption,
-	buildGuildOption,
 } from '../../structures/commands/commonOptions';
 import { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
 import { mojang } from '../../api';
@@ -146,7 +146,6 @@ export default class GuildCommand extends ApplicationCommand {
 			.addSubcommand((subcommand) =>
 				subcommand.setName('unmute').setDescription('unmute').addStringOption(targetOption),
 			);
-		const guildOption = buildGuildOption(context.client);
 
 		for (const subcommand of (slash as SlashCommandBuilder).options as unknown as SlashCommandBuilder[]) {
 			if (
@@ -157,7 +156,7 @@ export default class GuildCommand extends ApplicationCommand {
 				subcommand.addBooleanOption(forceOption);
 			}
 
-			subcommand.addStringOption(guildOption);
+			subcommand.addStringOption(hypixelGuildOption);
 		}
 
 		super(context, {

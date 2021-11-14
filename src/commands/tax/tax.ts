@@ -2,7 +2,11 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Permissions, Formatters } from 'discord.js';
 import pkg from 'sequelize';
 const { Op } = pkg;
-import { buildGuildOption, requiredPlayerOption, optionalPlayerOption } from '../../structures/commands/commonOptions';
+import {
+	hypixelGuildOption,
+	optionalPlayerOption,
+	requiredPlayerOption,
+} from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil } from '../../util';
 import { escapeIgn, logger, safePromiseAll, validateNumber } from '../../functions';
 import { TransactionTypes } from '../../structures/database/models/Transaction';
@@ -60,7 +64,7 @@ export default class TaxCommand extends ApplicationCommand {
 								.setDescription('wether to immediatly delete the pings after sending them')
 								.setRequired(false),
 						)
-						.addStringOption(buildGuildOption(context.client, true))
+						.addStringOption(hypixelGuildOption)
 						.addStringOption((option) =>
 							option.setName('exclude').setDescription('IGNs to exclude from the ping').setRequired(false),
 						),
