@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
-import { MojangAPIError } from './errors/MojangAPIError';
 import { /* days, */ seconds, validateMinecraftIgn, validateMinecraftUuid } from '../functions';
+import { MojangAPIError } from './errors/MojangAPIError';
 import type { Response } from 'node-fetch';
 
 export interface MojangResult {

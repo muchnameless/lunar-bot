@@ -1,8 +1,8 @@
-import { MessageAttachment, MessageEmbed, Permissions, SnowflakeUtil } from 'discord.js';
-import { commaListsAnd } from 'common-tags';
 import { mkdir, writeFile, readdir, readFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { commaListsAnd } from 'common-tags';
+import { MessageAttachment, MessageEmbed, Permissions, SnowflakeUtil } from 'discord.js';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';

@@ -1,10 +1,10 @@
-import { AsyncQueue } from '@sapphire/async-queue';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { AsyncQueue } from '@sapphire/async-queue';
 import { FormData } from 'formdata-polyfill/esm.min';
 import fetch from 'node-fetch';
 import ms from 'ms';
-import { FetchError } from './errors/FetchError';
 import { logger, seconds } from '../functions';
+import { FetchError } from './errors/FetchError';
 import type { RequestInit, Response } from 'node-fetch';
 
 export interface ImageData {

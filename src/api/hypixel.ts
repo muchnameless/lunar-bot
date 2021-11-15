@@ -1,7 +1,7 @@
 import { Client } from '@zikeji/hypixel';
-import { cache } from '.';
 import { HYPIXEL_KEY } from '../constants';
 import { days, logger, minutes, seconds } from '../functions';
+import { cache } from '.';
 import type { DefaultMeta } from '@zikeji/hypixel';
 
 export const SKYBLOCK_PROFILE_TTL = seconds(30);

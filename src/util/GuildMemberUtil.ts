@@ -10,8 +10,8 @@ import {
 	SLAYER_TOTAL_ROLES,
 	SLAYERS,
 } from '../constants';
-import { GuildUtil, UserUtil } from '.';
 import { logger } from '../functions';
+import { GuildUtil, UserUtil } from '.';
 import type { GuildMember, Message, MessageOptions, Snowflake } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { LunarClient } from '../structures/LunarClient';

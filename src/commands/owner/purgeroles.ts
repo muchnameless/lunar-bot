@@ -1,5 +1,5 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import ms from 'ms';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { logger, seconds } from '../../functions';

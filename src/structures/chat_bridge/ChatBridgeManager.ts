@@ -1,13 +1,13 @@
-import { MessageFlags } from 'discord.js';
-import { stripIndents } from 'common-tags';
 import { URL } from 'node:url';
 import { once } from 'node:events';
+import { stripIndents } from 'common-tags';
+import { MessageFlags } from 'discord.js';
 import { STOP_EMOJI, X_EMOJI } from '../../constants';
-import { DiscordChatManager } from './managers/DiscordChatManager';
 import { BridgeCommandCollection } from '../commands/BridgeCommandCollection';
-import { ChatBridge, ChatBridgeEvents } from './ChatBridge';
 import { MessageUtil } from '../../util';
 import { logger } from '../../functions';
+import { ChatBridge, ChatBridgeEvents } from './ChatBridge';
+import { DiscordChatManager } from './managers/DiscordChatManager';
 import type { CommandInteraction, Message, Snowflake } from 'discord.js';
 import type { BroadcastOptions, MessageForwardOptions } from './ChatBridge';
 import type { LunarClient } from '../LunarClient';

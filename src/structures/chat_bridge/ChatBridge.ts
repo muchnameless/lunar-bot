@@ -1,11 +1,11 @@
-import { TypedEmitter } from 'tiny-typed-emitter';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { URL } from 'node:url';
+import { TypedEmitter } from 'tiny-typed-emitter';
+import { EventCollection } from '../events/EventCollection';
+import { logger, minutes, seconds } from '../../functions';
 import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, MESSAGE_TYPES, PREFIX_BY_TYPE } from './constants';
 import { MinecraftChatManager } from './managers/MinecraftChatManager';
 import { DiscordManager } from './managers/DiscordManager';
-import { EventCollection } from '../events/EventCollection';
-import { logger, minutes, seconds } from '../../functions';
 import type { Awaitable, Message as DiscordMessage, MessageOptions } from 'discord.js';
 import type { LunarClient } from '../LunarClient';
 import type { HypixelGuild } from '../database/models/HypixelGuild';

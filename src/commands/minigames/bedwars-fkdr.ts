@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import BaseStatsCommand from './~base-stats-command';
 import { seconds } from '../../functions';
+import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 

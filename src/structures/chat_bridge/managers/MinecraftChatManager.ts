@@ -1,6 +1,6 @@
+import { setTimeout as sleep } from 'node:timers/promises';
 import { MessageEmbed, SnowflakeUtil, Formatters } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
-import { setTimeout as sleep } from 'node:timers/promises';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import emojiRegex from 'emoji-regex';
@@ -19,9 +19,9 @@ import { GUILD_ID_BRIDGER, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../con
 import { createBot } from '../MinecraftBot';
 import { GuildMemberUtil, MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector, MessageCollectorEvents } from '../MessageCollector';
-import { ChatManager } from './ChatManager';
 import { cache } from '../../../api';
 import { cleanFormattedNumber, hours, logger, minutes, seconds, splitMessage, trim } from '../../../functions';
+import { ChatManager } from './ChatManager';
 import type { GuildChannel, Message } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
 import type { MessageCollectorOptions } from '../MessageCollector';

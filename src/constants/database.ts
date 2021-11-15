@@ -1,3 +1,4 @@
+import { days, hours, minutes, seconds } from '../functions';
 import {
 	CATACOMBS_ROLES,
 	COSMETIC_SKILLS,
@@ -13,7 +14,6 @@ import {
 	SLAYERS,
 	SLAYER_TOTAL_ROLES,
 } from '.';
-import { days, hours, minutes, seconds } from '../functions';
 import type { HexColorString, Snowflake } from 'discord.js';
 import type { ArrayElement } from '../types/util';
 

@@ -1,7 +1,7 @@
-import { Formatters, Util } from 'discord.js';
 import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
 import { promisify } from 'node:util';
+import { Formatters, Util } from 'discord.js';
 import ms from 'ms';
 import jaroWinklerSimilarity from 'jaro-winkler';
 import readdirp from 'readdirp';

@@ -1,8 +1,8 @@
-import { MessageFlags, Permissions, Util } from 'discord.js';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { MessageFlags, Permissions, Util } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
-import { ChannelUtil } from '.';
 import { logger, seconds } from '../functions';
+import { ChannelUtil } from '.';
 import type {
 	EmojiIdentifierResolvable,
 	Message,

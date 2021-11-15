@@ -1,15 +1,13 @@
 import { URL, pathToFileURL } from 'node:url';
+import pkg from 'sequelize';
+const { Sequelize, DataTypes, Model } = pkg;
+import pg from 'pg';
 import { logger, readJSFiles } from '../../functions';
 import type { Models } from './managers/DatabaseManager';
 
 // to get bigints as numbers instead of strings
-import pg from 'pg';
-
 pg.defaults.parseInt8 = true;
 pg.types.setTypeParser(1_700, parseFloat);
-
-import pkg from 'sequelize';
-const { Sequelize, DataTypes, Model } = pkg;
 
 // use floats instead of strings as decimal representation (1/2)
 // @ts-expect-error

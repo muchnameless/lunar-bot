@@ -1,6 +1,6 @@
-import { Collection } from 'discord.js';
 import { basename } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { Collection } from 'discord.js';
 import { logger, readJSFiles } from '../../functions';
 import type { EventEmitter } from 'node:events';
 import type { URL } from 'node:url';

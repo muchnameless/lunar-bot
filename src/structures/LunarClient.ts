@@ -1,14 +1,14 @@
-import { Client, MessageEmbed, Formatters } from 'discord.js';
 import { URL } from 'node:url';
+import { Client, MessageEmbed, Formatters } from 'discord.js';
+import { UserUtil } from '../util';
+import { cache, imgur } from '../api';
+import { hours, logger } from '../functions';
 import { DatabaseManager } from './database/managers/DatabaseManager';
 import { LogHandler } from './LogHandler';
 import { CronJobManager } from './CronJobManager';
 import { ChatBridgeManager } from './chat_bridge/ChatBridgeManager';
 import { ApplicationCommandCollection } from './commands/ApplicationCommandCollection';
 import { EventCollection } from './events/EventCollection';
-import { UserUtil } from '../util';
-import { cache, imgur } from '../api';
-import { hours, logger } from '../functions';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 import type { db } from './database';
 

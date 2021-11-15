@@ -1,7 +1,7 @@
+import { basename } from 'node:path';
 import { SlashCommandBooleanOption, SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { basename } from 'node:path';
 import { InteractionUtil } from '../../util';
 import { logger, readJSFiles } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
@@ -219,7 +219,7 @@ export default class ReloadCommand extends DualCommand {
 					const { BLOCKED_WORDS_REGEXP } = await import(
 						`../../structures/chat_bridge/constants/blockedWords.js?update=${Date.now()}`
 					);
-					const { ChatManager } = await import('../../structures/chat_bridge/managers/ChatManager.js');
+					const { ChatManager } = await import('../../structures/chat_bridge/managers/ChatManager');
 
 					ChatManager.BLOCKED_WORDS_REGEXP = BLOCKED_WORDS_REGEXP;
 

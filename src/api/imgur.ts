@@ -1,7 +1,7 @@
-import { cache } from '.';
 import { IMGUR_KEY } from '../constants';
 import { ImgurClient } from '../structures/ImgurClient';
 import { hours, seconds } from '../functions';
+import { cache } from '.';
 
 export const imgur = new ImgurClient(process.env.IMGUR_CLIENT_ID!, {
 	timeout: seconds(20),

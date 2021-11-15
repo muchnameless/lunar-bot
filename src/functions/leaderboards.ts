@@ -15,9 +15,9 @@ import {
 	XP_OFFSETS_TIME,
 	Y_EMOJI_ALT,
 } from '../constants';
-import { days, minutes, upperCaseFirstChar } from '.';
 import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api';
+import { days, minutes, upperCaseFirstChar } from '.';
 import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';

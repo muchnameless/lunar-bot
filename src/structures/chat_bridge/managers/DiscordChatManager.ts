@@ -3,9 +3,9 @@ import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
-import { ChatManager } from './ChatManager';
 import { cache, imgur } from '../../../api';
 import { hours, logger } from '../../../functions';
+import { ChatManager } from './ChatManager';
 import type {
 	Collection,
 	Message,

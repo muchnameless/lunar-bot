@@ -2,9 +2,9 @@ import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } fro
 import { ApplicationCommandType } from 'discord-api-types/v9';
 import { Constants } from 'discord.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError';
-import { ephemeralOption } from './commonOptions';
 import { COMMAND_KEY } from '../../constants';
 import { logger } from '../../functions';
+import { ephemeralOption } from './commonOptions';
 import { BaseCommand } from './BaseCommand';
 import type {
 	ContextMenuCommandBuilder,

@@ -1,8 +1,8 @@
 import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
-import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
+import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
 	BaseGuildTextChannel,
 	CommandInteraction,

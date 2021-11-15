@@ -1,8 +1,8 @@
 import fetch from 'node-fetch';
+import { logger, seconds } from '../functions';
 import { FetchError } from './errors/FetchError';
 import type { RequestInit, Response } from 'node-fetch';
 import type { Components } from '@zikeji/hypixel';
-import { logger, seconds } from '../functions';
 
 export type MaroPlayerData = Components.Schemas.SkyBlockProfileMember & {
 	banking?: Components.Schemas.SkyBlockProfileBanking;

@@ -1,7 +1,7 @@
-import { cache } from '.';
 import { MOJANG_KEY } from '../constants';
 import { MojangClient } from '../structures/MojangClient';
 import { days, hours, minutes, seconds } from '../functions';
+import { cache } from '.';
 import type { MojangResult } from '../structures/MojangClient';
 
 export const mojang = new MojangClient({

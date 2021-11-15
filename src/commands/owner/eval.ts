@@ -1,9 +1,10 @@
+import { setTimeout as sleep } from 'node:timers/promises';
+sleep;
+import util from 'node:util';
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
 MessageEmbed;
 Util; // unused imports are 'used' so that tsc doesn't remove them
-import { setTimeout as sleep } from 'node:timers/promises';
-sleep;
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
 import fetch from 'node-fetch';
@@ -12,7 +13,6 @@ import similarity from 'jaro-winkler';
 similarity;
 import ms from 'ms';
 ms;
-import util from 'node:util';
 import commonTags from 'common-tags';
 commonTags;
 import * as constants from '../../constants';
