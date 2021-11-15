@@ -470,8 +470,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					defaultValue: false,
 					allowNull: false,
 					set(value: boolean) {
-						if (!value) (this as Player).uncacheMember();
 						this.setDataValue('inDiscord', value);
+						if (!value) (this as Player).uncacheMember();
 					},
 				},
 				mutedTill: {
