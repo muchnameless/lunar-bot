@@ -451,8 +451,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					defaultValue: null,
 					allowNull: true,
 					set(value: Snowflake | null) {
-						if (!value) (this as Player).inDiscord = false;
 						this.setDataValue('discordId', value);
+						if (!value) (this as Player).inDiscord = false;
 					},
 				},
 				guildId: {
