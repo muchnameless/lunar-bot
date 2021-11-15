@@ -30,9 +30,9 @@
     "@keyv/redis": "^2.2.0",
     "@sapphire/async-queue": "^1.1.9",
     "@sapphire/stopwatch": "^1.2.4",
-    "@sapphire/time-utilities": "^1.4.7",
+    "@sapphire/time-utilities": "^1.4.8",
     "@sapphire/type": "^2.1.2",
-    "@sapphire/utilities": "^3.0.7",
+    "@sapphire/utilities": "^3.0.8",
     "@zikeji/hypixel": "github:muchnameless/node-hypixel",
     "bufferutil": "^4.0.5",
     "chartjs-node-canvas": "^4.1.4",
@@ -83,7 +83,7 @@
     "pino-pretty": "^7.2.0",
     "prettier": "^2.4.1",
     "rimraf": "^3.0.2",
-    "typescript": "^4.6.0-dev.20211114"
+    "typescript": "^4.6.0-dev.20211115"
   },
   "engines": {
     "node": ">=v17.0.1",
