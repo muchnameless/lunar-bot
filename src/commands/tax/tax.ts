@@ -15,6 +15,8 @@ import type { CommandInteraction, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class TaxCommand extends ApplicationCommand {
+	includeAllHypixelGuilds = true;
+
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

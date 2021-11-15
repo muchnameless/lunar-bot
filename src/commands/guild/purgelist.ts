@@ -8,6 +8,8 @@ import type { LeaderboardXPOffsets } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class PurgeListCommand extends ApplicationCommand {
+	includeAllHypixelGuilds = true;
+
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()

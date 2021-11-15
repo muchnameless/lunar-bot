@@ -22,6 +22,7 @@ import type {
 } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 import type { ChatInteraction } from '../util/InteractionUtil';
+import type LeaderboardCommand from '../commands/guild/leaderboard';
 
 export default class InteractionCreateEvent extends Event {
 	constructor(context: EventContext) {
@@ -277,23 +278,30 @@ export default class InteractionCreateEvent extends Event {
 				case 'guild': {
 					// no value yet -> don't sort
 					if (!value) {
-						return interaction.respond(
-							this.client.hypixelGuilds.cache
-								.map(({ guildId, name: guildName }) => ({
-									name: guildName,
-									value: guildId,
-								}))
-								.slice(0, MAX_CHOICES),
+						const response: ApplicationCommandOptionChoice[] = [];
+
+						if ((this.client.commands.get(interaction.commandName) as LeaderboardCommand)?.includeAllHypixelGuilds) {
+							response.push({ name: 'All Guilds', value: GUILD_ID_ALL });
+						}
+
+						response.push(
+							...this.client.hypixelGuilds.cache.map(({ guildId, name: guildName }) => ({
+								name: guildName,
+								value: guildId,
+							})),
 						);
+
+						return interaction.respond(response.slice(0, MAX_CHOICES));
 					}
 
 					// all guilds
-					if (value.toUpperCase() === GUILD_ID_ALL) {
-						return interaction.respond([{ name: 'All Guilds', value: GUILD_ID_ALL }]);
-					}
+					const guilds = (this.client.commands.get(interaction.commandName) as LeaderboardCommand)
+						?.includeAllHypixelGuilds
+						? [{ name: 'All Guilds', guildId: GUILD_ID_ALL }, ...this.client.hypixelGuilds.cache.values()]
+						: this.client.hypixelGuilds.cache;
 
 					// specific guilds
-					return interaction.respond(sortCache(this.client.hypixelGuilds.cache, value, 'name', 'guildId'));
+					return interaction.respond(sortCache(guilds, value, 'name', 'guildId'));
 				}
 
 				default: {
