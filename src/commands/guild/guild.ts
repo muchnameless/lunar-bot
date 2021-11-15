@@ -830,10 +830,14 @@ export default class GuildCommand extends ApplicationCommand {
 				);
 
 			case 'info':
-			case 'motd':
 			case 'quest':
 				return this.#run(interaction, {
 					command: `guild ${SUBCOMMAND}`,
+				});
+
+			case 'motd':
+				return this.#run(interaction, {
+					command: 'guild motd preview',
 				});
 
 			case 'top':
