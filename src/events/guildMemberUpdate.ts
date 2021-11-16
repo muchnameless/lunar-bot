@@ -64,7 +64,11 @@ export default class GuildMemberUpdateEvent extends Event {
 				return this.client.log(
 					new MessageEmbed()
 						.setColor(this.config.get('EMBED_RED'))
-						.setAuthor(newMember.user.tag, newMember.displayAvatarURL({ dynamic: true }), player.url)
+						.setAuthor({
+							name: newMember.user.tag,
+							iconURL: newMember.displayAvatarURL({ dynamic: true }),
+							url: player.url,
+						})
 						.setThumbnail((await player.imageURL)!)
 						.setDescription(
 							stripIndents`

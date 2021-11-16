@@ -41,7 +41,7 @@ export default class GuildMemberAddEvent extends Event {
 		this.client.log(
 			new MessageEmbed()
 				.setColor(this.config.get('EMBED_GREEN'))
-				.setAuthor(member.user.tag, member.displayAvatarURL({ dynamic: true }), player.url)
+				.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: player.url })
 				.setThumbnail((await player.imageURL)!)
 				.setDescription(description)
 				.setTimestamp(),

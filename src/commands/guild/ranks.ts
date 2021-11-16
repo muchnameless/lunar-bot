@@ -41,11 +41,11 @@ export default class RanksCommand extends ApplicationCommand {
 
 		// player found
 		embed
-			.setAuthor(
-				`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
-				(await player.imageURL)!,
-				player.url,
-			)
+			.setAuthor({
+				name: `${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
+				iconURL: (await player.imageURL)!,
+				url: player.url,
+			})
 			.setFooter('Updated at')
 			.setTimestamp(player.xpLastUpdatedAt);
 

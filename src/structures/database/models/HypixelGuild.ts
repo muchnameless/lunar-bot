@@ -558,7 +558,11 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						this.client.log(
 							new MessageEmbed()
 								.setColor(this.client.config.get('EMBED_RED'))
-								.setAuthor(member?.user.tag ?? player.ign, member?.displayAvatarURL({ dynamic: true }), player.url)
+								.setAuthor({
+									name: member?.user.tag ?? player.ign,
+									iconURL: member?.displayAvatarURL({ dynamic: true }),
+									url: player.url,
+								})
 								.setThumbnail((await player.imageURL)!)
 								.setDescription(`${player.info} is on the ban list for \`${existingBan.reason}\``)
 								.setTimestamp(),

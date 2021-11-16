@@ -171,7 +171,11 @@ export default class AhCommand extends ApplicationCommand {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				embed
-					.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `${STATS_URL_BASE}${ign}`)
+					.setAuthor({
+						name: ign,
+						iconURL: (await uuidToImgurBustURL(this.client, uuid))!,
+						url: `${STATS_URL_BASE}${ign}`,
+					})
 					.setDescription('no SkyBlock profiles'),
 			],
 			components: [
@@ -258,7 +262,11 @@ export default class AhCommand extends ApplicationCommand {
 					return InteractionUtil.reply(interaction, {
 						embeds: [
 							embed
-								.setAuthor(ign, (await uuidToImgurBustURL(this.client, uuid))!, `${STATS_URL_BASE}${ign}`)
+								.setAuthor({
+									name: ign,
+									iconURL: (await uuidToImgurBustURL(this.client, uuid))!,
+									url: `${STATS_URL_BASE}${ign}`,
+								})
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [

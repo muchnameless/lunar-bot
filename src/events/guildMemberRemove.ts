@@ -42,7 +42,7 @@ export default class GuildMemberRemoveEvent extends Event {
 			MessageEmbedUtil.padFields(
 				new MessageEmbed()
 					.setColor(this.config.get('EMBED_RED'))
-					.setAuthor(member.user.tag, member.displayAvatarURL({ dynamic: true }), player.url)
+					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: player.url })
 					.setThumbnail((await player.imageURL)!)
 					.setDescription(
 						stripIndents`
