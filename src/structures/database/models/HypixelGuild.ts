@@ -344,7 +344,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			this.name = guildName;
 
 			// update ranks
-			for (const { name, priority } of ranks) {
+			for (const { name, priority } of ranks ?? []) {
 				const dbEntryRank = this.ranks.find(({ priority: rankPriority }) => rankPriority === priority);
 
 				if (!dbEntryRank) {
