@@ -162,7 +162,7 @@ export default class DebugCommand extends ApplicationCommand {
 												}
 											`,
 										)
-										.join(''),
+										.join('\n'),
 									EMBED_FIELD_MAX_CHARS,
 								) || 'disabled',
 						},
