@@ -99,7 +99,7 @@ export default class PollCommand extends DualCommand {
 				filter: (hypixelMessage) => hypixelMessage.isUserMessage() && hypixelMessage.type === MESSAGE_TYPES.GUILD,
 				time: DURATION,
 			}) as Promise<HypixelUserMessage[]>;
-			const discordChannel = chatBridge.discord.get(MESSAGE_TYPES.GUILD)!.channel;
+			const discordChannel = chatBridge.discord.channelsByType.get(MESSAGE_TYPES.GUILD)!.channel;
 			const discordMessages = discordChannel.awaitMessages({
 				filter: (discordMessage) => MessageUtil.isUserMessage(discordMessage),
 				time: DURATION,
