@@ -302,7 +302,7 @@ export class HypixelMessage {
 	 * forwards the message to discord via the chatBridge's webhook, if the guild has the chatBridge enabled
 	 */
 	async forwardToDiscord() {
-		const discordChatManager = this.chatBridge.discord.get(this.type);
+		const discordChatManager = this.chatBridge.discord.channelsByType.get(this.type ?? MESSAGE_TYPES.GUILD);
 
 		if (!discordChatManager) return null;
 

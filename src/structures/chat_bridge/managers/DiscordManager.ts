@@ -1,10 +1,12 @@
 import { Collection, Util, Formatters } from 'discord.js';
-import { MESSAGE_TYPES, EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
+import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
 import { autocorrect } from '../../../functions';
 import { DiscordChatManager } from './DiscordChatManager';
+import type { Snowflake } from 'discord.js';
+import type { MESSAGE_TYPES } from '../constants';
 import type { ChatBridge } from '../ChatBridge';
 
-export type DiscordChatManagerResolvable = keyof typeof MESSAGE_TYPES | DiscordChatManager;
+export type DiscordChatManagerResolvable = keyof typeof MESSAGE_TYPES | Snowflake | DiscordChatManager;
 
 export class DiscordManager {
 	chatBridge: ChatBridge;
@@ -74,20 +76,12 @@ export class DiscordManager {
 	}
 
 	/**
-	 * gets the discord chat manager for the respective HypixelMessage type
-	 * @param typeOrId
-	 */
-	get(typeOrId: string | null) {
-		return this.channelsByType.get(typeOrId ?? MESSAGE_TYPES.GUILD) ?? this.channelsByIds.get(typeOrId!);
-	}
-
-	/**
 	 * resolves the input to a DiscordChatManager instance
 	 * @param input
 	 */
-	resolve(input: DiscordChatManagerResolvable) {
+	resolve(input?: DiscordChatManagerResolvable) {
 		if (input instanceof DiscordChatManager) return input;
-		return this.get(input);
+		return this.channelsByType.get(input!) ?? this.channelsByIds.get(input!) ?? null;
 	}
 
 	/**
