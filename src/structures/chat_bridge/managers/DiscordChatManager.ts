@@ -378,20 +378,6 @@ export class DiscordChatManager extends ChatManager {
 		// build content
 		const contentParts: string[] = [];
 
-		// @referencedMessageAuthor if normal reply
-		if (MessageUtil.isNormalReplyMessage(message)) {
-			try {
-				const referencedMessage = await message.fetchReference();
-
-				// author found and author is not already pinged
-				if (referencedMessage.author && !new RegExp(`<@!?${referencedMessage.author.id}>`).test(message.content)) {
-					contentParts.push(`@${DiscordChatManager.getPlayerName(referencedMessage)}`);
-				}
-			} catch (error) {
-				logger.error(error, '[FORWARD DC TO MC]: error fetching reference');
-			}
-		}
-
 		// actual content
 		let messageContent =
 			isEdit && !message.interaction && message.content && !message.content.endsWith('*')
@@ -435,6 +421,20 @@ export class DiscordChatManager extends ChatManager {
 
 		// empty message (e.g. only embeds)
 		if (!contentParts.length) return MessageUtil.react(message, STOP_EMOJI);
+
+		// @referencedMessageAuthor if normal reply
+		if (MessageUtil.isNormalReplyMessage(message)) {
+			try {
+				const referencedMessage = await message.fetchReference();
+
+				// author found and author is not already pinged
+				if (referencedMessage.author && !new RegExp(`<@!?${referencedMessage.author.id}>`).test(message.content)) {
+					contentParts.unshift(`@${DiscordChatManager.getPlayerName(referencedMessage)}`);
+				}
+			} catch (error) {
+				logger.error(error, '[FORWARD DC TO MC]: error fetching reference');
+			}
+		}
 
 		// send interaction "command" for initial application command reply
 		if (message.interaction && !message.editedTimestamp) {

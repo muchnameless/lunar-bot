@@ -36,7 +36,7 @@
     "@zikeji/hypixel": "github:muchnameless/node-hypixel",
     "bufferutil": "^4.0.5",
     "chartjs-node-canvas": "^4.1.4",
-    "common-tags": "^1.8.1",
+    "common-tags": "^1.8.2",
     "cron": "^1.8.2",
     "discord.js": "github:discordjs/discord.js#c0ba2d46d0796c95598673f77f04b180280afb57",
     "dotenv": "^10.0.0",

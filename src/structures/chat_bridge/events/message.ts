@@ -95,7 +95,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		/**
 		 * [HypixelRank] IGN left the guild!
 		 */
-		if (hypixelMessage.content.includes('left the guild!')) {
+		if (hypixelMessage.content.includes('left the guild') || hypixelMessage.content.includes('disbanded the guild')) {
 			this.chatBridge.hypixelGuild?.updateData();
 			return hypixelMessage.forwardToDiscord();
 		}
