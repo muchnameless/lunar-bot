@@ -14,6 +14,7 @@ import { STOP_EMOJI } from '../../../constants';
 import { MessageUtil } from '../../../util';
 import { logger, stringToMS } from '../../../functions';
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
+import { mojang } from '../../../api';
 import type { EventContext } from '../../events/BaseEvent';
 import type { HypixelMessage, HypixelUserMessage } from '../HypixelMessage';
 import type MathsCommand from '../../../commands/general/maths';
@@ -297,18 +298,53 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 * accept f reqs from guild members
 		 * Friend request from [HypixelRank] IGN\n
 		 */
-		const friendReqMatched = hypixelMessage.content.match(/Friend request from (?:\[.+?\] )?(\w+)/);
+		const friendReqMatched = hypixelMessage.content.match(/Friend request from (?:\[.+?\] )?(?<ign>\w+)/);
 
 		if (friendReqMatched) {
-			const [, IGN] = friendReqMatched;
-			const player = this.client.players.findByIgn(IGN);
+			const { ign } = friendReqMatched.groups!;
+			const player = this.client.players.findByIgn(ign);
 
 			if (!player?.guildId) {
-				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: denying f request from ${IGN}`);
+				return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: denying f request from ${ign}`);
 			}
 
-			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepting f request from ${IGN}`);
-			return this.chatBridge.minecraft.sendToChat(`/f add ${IGN}`);
+			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepting f request from ${ign}`);
+			return this.chatBridge.minecraft.sendToChat(`/friend add ${ign}`);
+		}
+
+		/**
+		 * accept g join requests if hypixel guild has it enabled and player is not on the ban list
+		 * [HypixelRank] IGN has requested to join the Guild!
+		 */
+		const guildJoinReqMatched = hypixelMessage.content.match(
+			/(?:\[.+?\] )?(?<ign>\w+) has requested to join the Guild!/,
+		);
+
+		if (guildJoinReqMatched) {
+			const { ign } = guildJoinReqMatched.groups!;
+
+			if (!hypixelMessage.hypixelGuild?.acceptJoinRequests) {
+				return logger.info(
+					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ignoring guild join request from ${ign}, hypixel guild has auto accepts disabled`,
+				);
+			}
+
+			try {
+				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk((await mojang.ign(ign)).uuid);
+
+				if (existingBan) {
+					return logger.info(
+						`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${ign} is on the ban list for \`${existingBan.reason}\``,
+					);
+				}
+
+				await hypixelMessage.chatBridge.minecraft.command(`/guild accept ${ign}`);
+				logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepted guild join request from ${ign}`);
+			} catch (error) {
+				logger.error(error, `[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request from ${ign}`);
+			}
+
+			return;
 		}
 	}
 

@@ -74,6 +74,7 @@ interface HypixelGuildAttributes {
 	statsHistory: StatsHistory[];
 	statDiscordChannels: Record<string, string> | null;
 	updateStatDiscordChannelsEnabled: boolean;
+	acceptJoinRequests: boolean;
 }
 
 export class HypixelGuild extends Model<HypixelGuildAttributes> implements HypixelGuildAttributes {
@@ -92,6 +93,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare statsHistory: StatsHistory[];
 	declare statDiscordChannels: Record<string, string> | null;
 	declare updateStatDiscordChannelsEnabled: boolean;
+	declare acceptJoinRequests: boolean;
 
 	declare readonly createdAt: Date;
 	declare readonly updatedAt: Date;
@@ -187,6 +189,11 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				updateStatDiscordChannelsEnabled: {
 					type: DataTypes.BOOLEAN,
 					defaultValue: true,
+					allowNull: false,
+				},
+				acceptJoinRequests: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: false,
 					allowNull: false,
 				},
 			},
