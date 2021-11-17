@@ -252,16 +252,15 @@ export class DiscordChatManager extends ChatManager {
 	 * sends a message via the chatBridge webhook
 	 * @param contentOrOptions
 	 */
-	async sendViaWebhook(contentOrOptions: string): Promise<Message>;
-	async sendViaWebhook(contentOrOptions: WebhookMessageOptions & { content: string }): Promise<Message>;
-	async sendViaWebhook(contentOrOptions: WebhookMessageOptions & { content?: undefined }): Promise<null>;
 	async sendViaWebhook(contentOrOptions: string | WebhookMessageOptions) {
-		if (!this.chatBridge.isEnabled() || !this.isReady()) return null;
+		if (!this.chatBridge.isEnabled() || !this.isReady()) {
+			throw new Error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: not enabled / ready`);
+		}
 
 		const { content, ...options } =
 			typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
 
-		if (!content) return logger.warn(`[CHATBRIDGE]: ${this.logInfo}: prevented sending empty message`);
+		if (!content) throw new Error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: no content`);
 
 		await this.queue.wait();
 
