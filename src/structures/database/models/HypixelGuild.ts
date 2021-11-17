@@ -62,6 +62,7 @@ interface PlayerWithWeight {
 
 interface HypixelGuildAttributes {
 	guildId: string;
+	discordId: Snowflake;
 	roleId: Snowflake | null;
 	name: string;
 	weightReq: number | null;
@@ -81,6 +82,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare client: LunarClient;
 
 	declare guildId: string;
+	declare discordId: Snowflake;
 	declare roleId: string | null;
 	declare name: string;
 	declare weightReq: number | null;
@@ -121,6 +123,11 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				guildId: {
 					type: DataTypes.STRING,
 					primaryKey: true,
+				},
+				discordId: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
 				},
 				roleId: {
 					type: DataTypes.STRING,
