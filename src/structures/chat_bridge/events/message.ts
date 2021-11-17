@@ -94,17 +94,22 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		/**
 		 * [HypixelRank] IGN left the guild!
+		 * [MVP++] vndb transferred Guild Master rank to [MVP+] Underappreciated
 		 */
-		if (hypixelMessage.content.includes('left the guild') || hypixelMessage.content.includes('disbanded the guild')) {
+		if (
+			hypixelMessage.content.includes('left the guild') ||
+			hypixelMessage.content.includes('transferred Guild Master rank to')
+		) {
 			this.chatBridge.hypixelGuild?.updateData();
 			return hypixelMessage.forwardToDiscord();
 		}
 
 		/**
 		 * You left the guild
+		 * [MVP+] Underappreciated disbanded the guild.
 		 */
-		if (hypixelMessage.content === 'You left the guild') {
-			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: bot left the guild`);
+		if (hypixelMessage.content === 'You left the guild' || hypixelMessage.content.includes('disbanded the guild')) {
+			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: no more guild`);
 			this.chatBridge.hypixelGuild?.updateData();
 			hypixelMessage.forwardToDiscord();
 			return this.chatBridge.unlink();
