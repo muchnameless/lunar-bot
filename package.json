@@ -30,7 +30,7 @@
     "@keyv/redis": "^2.2.0",
     "@sapphire/async-queue": "^1.1.9",
     "@sapphire/stopwatch": "^1.2.4",
-    "@sapphire/time-utilities": "^1.4.8",
+    "@sapphire/time-utilities": "^1.4.9",
     "@sapphire/type": "^2.1.2",
     "@sapphire/utilities": "^3.0.8",
     "@zikeji/hypixel": "github:muchnameless/node-hypixel",
