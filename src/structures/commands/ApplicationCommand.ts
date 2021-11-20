@@ -46,7 +46,6 @@ type Slash =
 type WithChoices = SlashCommandIntegerOption | SlashCommandNumberOption | SlashCommandStringOption;
 
 interface CheckPermissionsOptions {
-	userIds?: Snowflake[] | null;
 	roleIds?: Snowflake[] | null;
 	hypixelGuild?: HypixelGuild;
 }
@@ -258,12 +257,18 @@ export class ApplicationCommand extends BaseCommand {
 	async checkPermissions(
 		interaction: Interaction,
 		{
-			userIds = [this.client.ownerId],
 			hypixelGuild = InteractionUtil.getHypixelGuild(interaction),
 			roleIds = this.requiredRoles(hypixelGuild),
 		}: CheckPermissionsOptions = {},
 	) {
-		if (userIds?.includes(interaction.user.id)) return; // user id bypass
+		// owner bypass
+		if (interaction.user.id === this.client.ownerId) return;
+
+		// user is not the owner at this point
+		if (this.category === 'owner') {
+			throw `the \`${this.name}\` command is restricted to the bot owner`;
+		}
+
 		if (roleIds == null) return; // no role requirements
 
 		const member =

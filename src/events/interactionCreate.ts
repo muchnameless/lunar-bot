@@ -64,18 +64,8 @@ export default class InteractionCreateEvent extends Event {
 			});
 		}
 
-		if (interaction.user.id !== this.client.ownerId) {
-			// role permissions
-			await command.checkPermissions(interaction);
-
-			// prevent from executing owner only command
-			if (command.category === 'owner') {
-				return InteractionUtil.reply(interaction, {
-					content: `the \`${command.name}\` command is restricted to the bot owner`,
-					ephemeral: true,
-				});
-			}
-		}
+		// role permissions
+		await command.checkPermissions(interaction);
 
 		// command cooldowns
 		if (command.timestamps) {
@@ -142,18 +132,8 @@ export default class InteractionCreateEvent extends Event {
 					return;
 				}
 
-				if (interaction.user.id !== this.client.ownerId) {
-					// role permissions
-					await command.checkPermissions(interaction);
-
-					// prevent from executing owner only command
-					if (command.category === 'owner') {
-						return InteractionUtil.reply(interaction, {
-							content: `the \`${command.name}\` command is restricted to the bot owner`,
-							ephemeral: true,
-						});
-					}
-				}
+				// role permissions
+				await command.checkPermissions(interaction);
 
 				return command.runButton(interaction, args);
 			}
@@ -203,18 +183,8 @@ export default class InteractionCreateEvent extends Event {
 					return;
 				}
 
-				if (interaction.user.id !== this.client.ownerId) {
-					// role permissions
-					await command.checkPermissions(interaction);
-
-					// prevent from executing owner only command
-					if (command.category === 'owner') {
-						return InteractionUtil.reply(interaction, {
-							content: `the \`${command.name}\` command is restricted to the bot owner`,
-							ephemeral: true,
-						});
-					}
-				}
+				// role permissions
+				await command.checkPermissions(interaction);
 
 				return command.runSelect(interaction, args);
 			}
@@ -352,18 +322,8 @@ export default class InteractionCreateEvent extends Event {
 			});
 		}
 
-		if (interaction.user.id !== this.client.ownerId) {
-			// role permissions
-			await command.checkPermissions(interaction);
-
-			// prevent from executing owner only command
-			if (command.category === 'owner') {
-				return InteractionUtil.reply(interaction, {
-					content: `the \`${command.name}\` command is restricted to the bot owner`,
-					ephemeral: true,
-				});
-			}
-		}
+		// role permissions
+		await command.checkPermissions(interaction);
 
 		switch (interaction.targetType) {
 			case 'MESSAGE':

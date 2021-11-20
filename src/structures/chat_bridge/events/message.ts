@@ -425,12 +425,12 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			return hypixelMessage.author.send(`the '${command.name}' command can only be executed in guild chat`);
 		}
 
-		// message author not a bot owner
+		// message author not the bot owner
 		if (player.discordId !== this.client.ownerId) {
 			// role permissions
 			const requiredRoles = command.requiredRoles(hypixelMessage.hypixelGuild ?? player.hypixelGuild);
 
-			if (requiredRoles) {
+			if (requiredRoles !== null) {
 				const { member } = hypixelMessage;
 
 				if (!member) {
@@ -460,9 +460,10 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 						`,
 					);
 				}
+			}
 
-				// prevent from executing owner only command
-			} else if (command.category === 'owner') {
+			// prevent from executing owner only command
+			if (command.category === 'owner') {
 				return logger.info(
 					`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' which is an owner only command`,
 				);
