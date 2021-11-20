@@ -264,7 +264,7 @@ export class ApplicationCommand extends BaseCommand {
 		}: CheckPermissionsOptions = {},
 	) {
 		if (userIds?.includes(interaction.user.id)) return; // user id bypass
-		if (!roleIds?.length) return; // no role requirements
+		if (roleIds == null) return; // no role requirements
 
 		const member =
 			interaction.guildId === hypixelGuild.discordId
