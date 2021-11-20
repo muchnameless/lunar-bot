@@ -20,6 +20,7 @@ import type {
 	RESTPostAPIApplicationCommandsJSONBody,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	RESTPostAPIContextMenuApplicationCommandsJSONBody,
+	APIApplicationCommandPermission,
 } from 'discord-api-types/v9';
 import type {
 	AutocompleteInteraction,
@@ -208,45 +209,42 @@ export class ApplicationCommand extends BaseCommand {
 	 * returns discord application command permission data
 	 */
 	permissionsFor(guild: HypixelGuild | GuildResolvable) {
-		if (this.category !== 'owner') return null;
-
-		let discordGuild = this.client.guilds.resolve(guild as GuildResolvable);
-		let hypixelGuild;
-
-		if (discordGuild) {
-			hypixelGuild = this.client.hypixelGuilds.findByDiscordGuild(discordGuild);
-		} else {
-			hypixelGuild = this.client.hypixelGuilds.resolve(guild as HypixelGuild);
-			discordGuild = this.client.guilds.cache.get(hypixelGuild?.discordId!) ?? null;
-		}
+		const discordGuild =
+			this.client.guilds.resolve(guild as GuildResolvable) ??
+			this.client.hypixelGuilds.resolve(guild as HypixelGuild)?.discordGuild;
 
 		if (!discordGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name}: no discord guild`);
-		if (!hypixelGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name}: no hypixel guild`);
 
-		const requiredRoles = this.requiredRoles?.(hypixelGuild)?.filter((r) => r !== null);
+		const permissions: APIApplicationCommandPermission[] = [];
 
-		if (!requiredRoles?.length) return null;
+		for (const hypixelGuild of this.client.hypixelGuilds.cache.values()) {
+			if (hypixelGuild.discordId !== discordGuild.id) continue;
 
-		const permissions = [
-			{
-				id: this.client.ownerId, // allow all commands for the bot owner
-				type: ApplicationCommandPermissionType.User,
-				permission: true,
-			},
-			{
-				id: discordGuild.id, // deny for the guild @everyone role
-				type: ApplicationCommandPermissionType.Role,
-				permission: false,
-			},
-		];
+			const requiredRoles = this.requiredRoles?.(hypixelGuild)?.filter((r) => r !== null);
 
-		if (requiredRoles) {
-			for (const roleId of requiredRoles) {
-				permissions.push({
-					id: roleId,
-					type: ApplicationCommandPermissionType.Role,
+			if (!requiredRoles?.length && this.category !== 'owner') continue;
+
+			permissions.push(
+				{
+					id: this.client.ownerId, // allow all commands for the bot owner
+					type: ApplicationCommandPermissionType.User,
 					permission: true,
-				});
+				},
+				{
+					id: discordGuild.id, // deny for the guild @everyone role
+					type: ApplicationCommandPermissionType.Role,
+					permission: false,
+				},
+			);
+
+			if (requiredRoles) {
+				for (const roleId of requiredRoles) {
+					permissions.push({
+						id: roleId,
+						type: ApplicationCommandPermissionType.Role,
+						permission: true,
+					});
+				}
 			}
 		}
 

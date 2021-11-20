@@ -56,7 +56,7 @@ try {
 
 					const permissions = command.permissionsFor(discordId);
 
-					if (!permissions) {
+					if (!permissions?.length) {
 						logger.info(`no permissions to set for '${name}'`);
 						continue;
 					}
