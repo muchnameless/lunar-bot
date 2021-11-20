@@ -220,9 +220,9 @@ export class ApplicationCommand extends BaseCommand {
 		for (const hypixelGuild of this.client.hypixelGuilds.cache.values()) {
 			if (hypixelGuild.discordId !== discordGuild.id) continue;
 
-			const requiredRoles = this.requiredRoles?.(hypixelGuild)?.filter((r) => r !== null);
+			const requiredRoles = this.requiredRoles?.(hypixelGuild);
 
-			if (!requiredRoles?.length && this.category !== 'owner') continue;
+			if (requiredRoles == null && this.category !== 'owner') continue;
 
 			permissions.push(
 				{
