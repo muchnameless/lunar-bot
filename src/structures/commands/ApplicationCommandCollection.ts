@@ -60,7 +60,7 @@ export class ApplicationCommandCollection<
 
 					const permissions = command.permissionsFor(discordId);
 
-					if (!permissions) {
+					if (!permissions.length) {
 						logger.info(`no permissions to set for '${name}'`);
 						continue;
 					}
@@ -124,7 +124,7 @@ export class ApplicationCommandCollection<
 			this.client.hypixelGuilds.uniqueDiscordGuildIds.map(async (discordId) => {
 				const permissions = command.permissionsFor(discordId);
 
-				if (permissions?.length) {
+				if (permissions.length) {
 					for (const applicationCommand of applicationCommands) {
 						// @ts-expect-error
 						await this.client.application!.commands.permissions.set({
