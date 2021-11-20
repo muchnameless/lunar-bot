@@ -45,33 +45,39 @@ export class ApplicationCommandCollection<
 	 */
 	async setAllPermissions(applicationCommandsInput: Collection<Snowflake, DiscordJSApplicationCommand>) {
 		const applicationCommands = applicationCommandsInput ?? (await this.client.application!.commands.fetch());
-		const fullPermissions: GuildApplicationCommandPermissionData[] = [];
 
-		for (const { name, id } of applicationCommands.values()) {
-			const command = this.client.commands.get(name);
+		return Promise.all(
+			this.client.hypixelGuilds.uniqueDiscordGuildIds.map((discordId) => {
+				const fullPermissions: GuildApplicationCommandPermissionData[] = [];
 
-			if (!command) {
-				logger.warn(`unknown application command '${name}'`);
-				continue;
-			}
+				for (const { name, id } of applicationCommands.values()) {
+					const command = this.client.commands.get(name);
 
-			const { permissions } = command;
+					if (!command) {
+						logger.warn(`unknown application command '${name}'`);
+						continue;
+					}
 
-			if (!permissions) {
-				logger.info(`no permissions to set for '${name}'`);
-				continue;
-			}
+					const permissions = command.permissionsFor(discordId);
 
-			fullPermissions.push({
-				id,
-				permissions,
-			});
-		}
+					if (!permissions) {
+						logger.info(`no permissions to set for '${name}'`);
+						continue;
+					}
 
-		return this.client.application!.commands.permissions.set({
-			guild: this.client.config.get('DISCORD_GUILD_ID'),
-			fullPermissions,
-		});
+					fullPermissions.push({
+						id,
+						// @ts-expect-error
+						permissions,
+					});
+				}
+
+				return this.client.application!.commands.permissions.set({
+					guild: discordId,
+					fullPermissions,
+				});
+			}),
+		);
 	}
 
 	/**
@@ -101,7 +107,6 @@ export class ApplicationCommandCollection<
 	 * sets a single application command's permissions (including possible aliases)
 	 * @param param0
 	 */
-	// eslint-disable-next-line no-undef
 	async setSinglePermissions({
 		command = this.getByName(arguments[0])!,
 		applicationCommands: applicationCommandsInput,
@@ -114,19 +119,23 @@ export class ApplicationCommandCollection<
 			(await this.client.application!.commands.fetch()).filter(
 				(c) => c.name === command.name || (command.aliases?.includes(c.name) ?? false),
 			);
-		const { permissions } = command;
 
-		if (permissions?.length) {
-			const DISCORD_GUILD_ID = this.client.config.get('DISCORD_GUILD_ID');
+		return Promise.all(
+			this.client.hypixelGuilds.uniqueDiscordGuildIds.map(async (discordId) => {
+				const permissions = command.permissionsFor(discordId);
 
-			for (const applicationCommand of applicationCommands) {
-				await this.client.application!.commands.permissions.set({
-					guild: DISCORD_GUILD_ID,
-					command: applicationCommand,
-					permissions,
-				});
-			}
-		}
+				if (permissions?.length) {
+					for (const applicationCommand of applicationCommands) {
+						// @ts-expect-error
+						await this.client.application!.commands.permissions.set({
+							guild: discordId,
+							command: applicationCommand,
+							permissions,
+						});
+					}
+				}
+			}),
+		);
 	}
 
 	/**

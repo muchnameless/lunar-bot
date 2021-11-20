@@ -108,12 +108,12 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
+		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const IGN = InteractionUtil.getIgn(interaction, {
 			fallbackToCurrentUser: !(
-				await this.client.lgGuild?.members.fetch(interaction.user).catch((error) => logger.error(error))
-			)?.roles.cache.has(this.config.get('MANAGER_ROLE_ID')),
+				await hypixelGuild.discordGuild?.members.fetch(interaction.user).catch((error) => logger.error(error))
+			)?.roles.cache.hasAny(...hypixelGuild.roleIds.STAFF_IDS),
 		});
-		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 
 		if (!IGN) {
 			// all players

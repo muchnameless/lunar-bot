@@ -359,7 +359,7 @@ export default class TaxCommand extends ApplicationCommand {
 								await InteractionUtil.awaitConfirmation(
 									interaction,
 									`unable to retrieve the current tax embed from ${
-										this.client.lgGuild?.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'
+										this.client.channels.cache.get(this.config.get('TAX_CHANNEL_ID')) ?? '#guild-tax'
 									} to log it. Create a new one and continue?`,
 								);
 

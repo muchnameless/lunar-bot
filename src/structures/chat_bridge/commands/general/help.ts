@@ -56,12 +56,14 @@ export default class HelpBridgeCommand extends BridgeCommand {
 		if (requestedCategory) {
 			const reply = [`Category: ${INPUT}`];
 			const categoryCommands = this.collection.filterByCategory(INPUT);
-			const { requiredRoles } = categoryCommands.first()!;
+			const requiredRoles = categoryCommands
+				.first()
+				?.requiredRoles(hypixelMessage.hypixelGuild ?? hypixelMessage.player?.hypixelGuild);
 
 			if (requiredRoles) {
 				reply.push(
 					commaListsOr`Required Roles: ${requiredRoles.map(
-						(roleId) => this.client.lgGuild?.roles.cache.get(roleId)?.name ?? roleId,
+						(roleId) => hypixelMessage.hypixelGuild?.discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
 					)}
 					`,
 				);
@@ -85,12 +87,12 @@ export default class HelpBridgeCommand extends BridgeCommand {
 
 		reply.push(`Category: ${command.category}`);
 
-		const { requiredRoles } = command;
+		const requiredRoles = command.requiredRoles(hypixelMessage.hypixelGuild ?? hypixelMessage.player?.hypixelGuild);
 
 		if (requiredRoles) {
 			reply.push(
 				commaListsOr`Required Roles: ${requiredRoles.map(
-					(roleId) => this.client.lgGuild?.roles.cache.get(roleId)?.name ?? roleId,
+					(roleId) => hypixelMessage.hypixelGuild?.discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
 				)}
 				`,
 			);

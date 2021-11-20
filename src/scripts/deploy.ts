@@ -3,7 +3,10 @@ import { Routes, APIVersion } from 'discord-api-types/v9';
 import { db } from '../structures/database';
 import { LunarClient } from '../structures/LunarClient';
 import { logger } from '../functions';
-import type { RESTGetAPIApplicationGuildCommandsResult } from 'discord-api-types/v9';
+import type {
+	RESTGetAPIApplicationGuildCommandsResult,
+	RESTPutAPIGuildApplicationCommandsPermissionsJSONBody,
+} from 'discord-api-types/v9';
 
 const rest = new REST({ version: APIVersion }).setToken(process.env.DISCORD_TOKEN!);
 const [, , GUILD_ID] = process.argv;
@@ -39,16 +42,35 @@ try {
 			`[DEPLY]: started setting permissions for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}'s slash commands`,
 		);
 
-		await rest.put(
-			Routes.guildApplicationCommandsPermissions(
-				process.env.DISCORD_CLIENT_ID!,
-				GUILD_ID ?? client.config.get('DISCORD_GUILD_ID'),
-			),
-			{
-				body: client.commands
-					.map(({ name, permissions }) => ({ id: apiCommands.find((c) => c.name === name)!.id, permissions }))
-					.filter(({ permissions }) => permissions?.length),
-			},
+		await Promise.all(
+			client.hypixelGuilds.uniqueDiscordGuildIds.map((discordId) => {
+				const fullPermissions: RESTPutAPIGuildApplicationCommandsPermissionsJSONBody = [];
+
+				for (const { name, id } of apiCommands) {
+					const command = client.commands.get(name);
+
+					if (!command) {
+						logger.warn(`unknown application command '${name}'`);
+						continue;
+					}
+
+					const permissions = command.permissionsFor(discordId);
+
+					if (!permissions) {
+						logger.info(`no permissions to set for '${name}'`);
+						continue;
+					}
+
+					fullPermissions.push({
+						id,
+						permissions,
+					});
+				}
+
+				return rest.put(Routes.guildApplicationCommandsPermissions(process.env.DISCORD_CLIENT_ID!, discordId), {
+					body: fullPermissions,
+				});
+			}),
 		);
 	}
 

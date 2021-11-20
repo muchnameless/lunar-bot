@@ -41,7 +41,7 @@ export default class UnlinkCommand extends ApplicationCommand {
 		if (!player?.discordId) return InteractionUtil.reply(interaction, `\`${PLAYER_INPUT}\` is not linked`);
 
 		const { discordId: OLD_LINKED_ID } = player;
-		const currentLinkedMember = await player.discordMember;
+		const currentLinkedMember = await player.fetchDiscordMember();
 		const WAS_SUCCESSFUL = await player.unlink(`unlinked by ${interaction.user.tag}`);
 
 		return InteractionUtil.reply(interaction, {

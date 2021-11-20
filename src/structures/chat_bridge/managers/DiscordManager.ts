@@ -115,8 +115,7 @@ export class DiscordManager {
 
 		if (emoji) return emoji;
 
-		// switch back to client.emojis if performance problems are fixed (it's a getter currently which copies over all guild emoji caches)
-		const { value, similarity } = autocorrect(inColon, this.client.lgGuild?.emojis.cache ?? [], 'name');
+		const { value, similarity } = autocorrect(inColon, this.client.emojis.cache, 'name');
 
 		if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return `${value}`;
 
@@ -147,7 +146,9 @@ export class DiscordManager {
 						// channels
 						/#([a-z-]+)/gi,
 						(match, p1: string) =>
-							this.client.lgGuild?.channels.cache.find(({ name }) => name === p1.toLowerCase())?.toString() ?? match,
+							this.chatBridge.hypixelGuild?.discordGuild?.channels.cache
+								.find(({ name }) => name === p1.toLowerCase())
+								?.toString() ?? match,
 					)
 					.replace(
 						// @mentions
@@ -156,7 +157,7 @@ export class DiscordManager {
 							switch (p1) {
 								case '!': // members/users
 									return (
-										this.client.lgGuild?.members.cache
+										this.chatBridge.hypixelGuild?.discordGuild?.members.cache
 											.find(({ displayName }) => displayName.toLowerCase() === p2.toLowerCase())
 											?.toString() ?? // members
 										this.client.users.cache
@@ -167,7 +168,7 @@ export class DiscordManager {
 
 								case '&': // roles
 									return (
-										this.client.lgGuild?.roles.cache
+										this.chatBridge.hypixelGuild?.discordGuild?.roles.cache
 											.find(({ name }) => name.toLowerCase() === p2.toLowerCase())
 											?.toString() ?? // roles
 										match

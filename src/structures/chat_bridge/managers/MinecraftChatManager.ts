@@ -568,13 +568,13 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			})
 			.replace(/<@&(\d{17,19})>/g, (match, p1) => {
 				// roles
-				const ROLE_NAME = this.client.lgGuild?.roles.cache.get(p1)?.name;
+				const ROLE_NAME = this.chatBridge.hypixelGuild?.discordGuild?.roles.cache.get(p1)?.name;
 				if (ROLE_NAME) return `@${ROLE_NAME}`;
 				return match;
 			})
 			.replace(/<@!?(\d{17,19})>/g, (match, p1) => {
 				// users
-				const member = this.client.lgGuild?.members.cache.get(p1);
+				const member = this.chatBridge.hypixelGuild?.discordGuild?.members.cache.get(p1);
 				if (member) {
 					const player = GuildMemberUtil.getPlayer(member);
 					if (player) return `@${player}`;

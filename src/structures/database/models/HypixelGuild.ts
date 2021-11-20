@@ -60,10 +60,73 @@ interface PlayerWithWeight {
 	weight: number;
 }
 
+interface DiscordRoleIds {
+	STAFF_IDS: Snowflake[];
+	ADMIN_IDS: Snowflake[];
+
+	ALCHEMY_50: Snowflake;
+	ALCHEMY_55: Snowflake;
+	ALCHEMY_60: Snowflake;
+	AVERAGE_LVL_40: Snowflake;
+	AVERAGE_LVL_45: Snowflake;
+	AVERAGE_LVL_50: Snowflake;
+	AVERAGE_LVL_55: Snowflake;
+	AVERAGE_LVL_60: Snowflake;
+	BRIDGER: Snowflake;
+	CATACOMBS_30: Snowflake;
+	CATACOMBS_35: Snowflake;
+	CATACOMBS_40: Snowflake;
+	CATACOMBS_45: Snowflake;
+	CATACOMBS_50: Snowflake;
+	COMBAT_50: Snowflake;
+	COMBAT_55: Snowflake;
+	COMBAT_60: Snowflake;
+	DUNGEON_DELIMITER: Snowflake;
+	ENCHANTING_50: Snowflake;
+	ENCHANTING_55: Snowflake;
+	ENCHANTING_60: Snowflake;
+	ENDERMAN_8: Snowflake;
+	ENDERMAN_9: Snowflake;
+	EX_GUILD: Snowflake;
+	FARMING_50: Snowflake;
+	FARMING_55: Snowflake;
+	FARMING_60: Snowflake;
+	FISHING_50: Snowflake;
+	FISHING_55: Snowflake;
+	FISHING_60: Snowflake;
+	FORAGING_50: Snowflake;
+	FORAGING_55: Snowflake;
+	FORAGING_60: Snowflake;
+	GUILD_DELIMITER: Snowflake;
+	GUILD: Snowflake;
+	INACTIVE: Snowflake;
+	MINING_50: Snowflake;
+	MINING_55: Snowflake;
+	MINING_60: Snowflake;
+	MISC_DELIMITER: Snowflake;
+	SKILL_DELIMITER: Snowflake;
+	SLAYER_ALL_7: Snowflake;
+	SLAYER_ALL_8: Snowflake;
+	SLAYER_ALL_9: Snowflake;
+	SLAYER_DELIMITER: Snowflake;
+	SPIDER_8: Snowflake;
+	SPIDER_9: Snowflake;
+	TAMING_50: Snowflake;
+	TAMING_55: Snowflake;
+	TAMING_60: Snowflake;
+	/** role a discord member must have for the bot to perform an action of them */
+	MANDATORY: Snowflake;
+	WHALECUM_PASS: Snowflake;
+	WOLF_8: Snowflake;
+	WOLF_9: Snowflake;
+	ZOMBIE_8: Snowflake;
+	ZOMBIE_9: Snowflake;
+}
+
 interface HypixelGuildAttributes {
 	guildId: string;
-	discordId: Snowflake;
-	roleId: Snowflake | null;
+	discordId: Snowflake | null;
+	roleIds: DiscordRoleIds;
 	name: string;
 	weightReq: number | null;
 	chatBridgeEnabled: boolean;
@@ -76,14 +139,19 @@ interface HypixelGuildAttributes {
 	statDiscordChannels: Record<string, string> | null;
 	updateStatDiscordChannelsEnabled: boolean;
 	acceptJoinRequests: boolean;
+	taxChannelId: Snowflake | null;
+	taxMessageId: Snowflake | null;
+	announcementsChannelId: Snowflake | null;
+	loggingChannelId: Snowflake | null;
+	syncIgnThreshold: number;
 }
 
 export class HypixelGuild extends Model<HypixelGuildAttributes> implements HypixelGuildAttributes {
 	declare client: LunarClient;
 
 	declare guildId: string;
-	declare discordId: Snowflake;
-	declare roleId: string | null;
+	declare discordId: Snowflake | null;
+	declare roleIds: DiscordRoleIds;
 	declare name: string;
 	declare weightReq: number | null;
 	declare chatBridgeEnabled: boolean;
@@ -96,6 +164,11 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare statDiscordChannels: Record<string, string> | null;
 	declare updateStatDiscordChannelsEnabled: boolean;
 	declare acceptJoinRequests: boolean;
+	declare taxChannelId: Snowflake | null;
+	declare taxMessageId: Snowflake | null;
+	declare announcementsChannelId: Snowflake | null;
+	declare loggingChannelId: Snowflake | null;
+	declare syncIgnThreshold: number;
 
 	declare readonly createdAt: Date;
 	declare readonly updatedAt: Date;
@@ -129,10 +202,70 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					defaultValue: null,
 					allowNull: true,
 				},
-				roleId: {
-					type: DataTypes.STRING,
-					defaultValue: null,
-					allowNull: true,
+				roleIds: {
+					type: DataTypes.JSONB,
+					defaultValue: {
+						STAFF_IDS: [],
+						ADMIN_IDS: [],
+
+						ALCHEMY_50: null,
+						ALCHEMY_55: null,
+						ALCHEMY_60: null,
+						AVERAGE_LVL_40: null,
+						AVERAGE_LVL_45: null,
+						AVERAGE_LVL_50: null,
+						AVERAGE_LVL_55: null,
+						AVERAGE_LVL_60: null,
+						BRIDGER: null,
+						CATACOMBS_30: null,
+						CATACOMBS_35: null,
+						CATACOMBS_40: null,
+						CATACOMBS_45: null,
+						CATACOMBS_50: null,
+						COMBAT_50: null,
+						COMBAT_55: null,
+						COMBAT_60: null,
+						DUNGEON_DELIMITER: null,
+						ENCHANTING_50: null,
+						ENCHANTING_55: null,
+						ENCHANTING_60: null,
+						ENDERMAN_8: null,
+						ENDERMAN_9: null,
+						EX_GUILD: null,
+						FARMING_50: null,
+						FARMING_55: null,
+						FARMING_60: null,
+						FISHING_50: null,
+						FISHING_55: null,
+						FISHING_60: null,
+						FORAGING_50: null,
+						FORAGING_55: null,
+						FORAGING_60: null,
+						GUILD_DELIMITER: null,
+						GUILD: null,
+						INACTIVE: null,
+						MINING_50: null,
+						MINING_55: null,
+						MINING_60: null,
+						MISC_DELIMITER: null,
+						SKILL_DELIMITER: null,
+						SLAYER_ALL_7: null,
+						SLAYER_ALL_8: null,
+						SLAYER_ALL_9: null,
+						SLAYER_DELIMITER: null,
+						SPIDER_8: null,
+						SPIDER_9: null,
+						TAMING_50: null,
+						TAMING_55: null,
+						TAMING_60: null,
+						MANDATORY: null,
+						WHALECUM_PASS: null,
+						WOLF_8: null,
+						WOLF_9: null,
+						ZOMBIE_8: null,
+						ZOMBIE_9: null,
+					},
+					allowNull: false,
 				},
 				name: {
 					type: DataTypes.STRING,
@@ -201,6 +334,31 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				acceptJoinRequests: {
 					type: DataTypes.BOOLEAN,
 					defaultValue: false,
+					allowNull: false,
+				},
+				taxChannelId: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				taxMessageId: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				announcementsChannelId: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				loggingChannelId: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				syncIgnThreshold: {
+					type: DataTypes.INTEGER,
+					defaultValue: -1,
 					allowNull: false,
 				},
 			},
@@ -306,6 +464,18 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	}
 
 	/**
+	 * linked discord guild (if available)
+	 */
+	get discordGuild() {
+		const discordGuild = this.client.guilds.cache.get(this.discordId!);
+
+		if (discordGuild?.available) return discordGuild;
+
+		logger.warn(`[DISCORD GUILD] ${this.name}: ${discordGuild ? 'unavailable' : 'uncached'}`);
+		return null;
+	}
+
+	/**
 	 * shifts the daily stats history
 	 */
 	saveDailyStats() {
@@ -393,7 +563,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				throw `[UPDATE GUILD PLAYERS]: ${this.name}: guild data did not include any members`; // API error
 			}
 
-			const { players, config, lgGuild } = this.client;
+			const { players, hypixelGuilds, config } = this.client;
 			const guildPlayers = this.players;
 			const playersLeft = guildPlayers.filter(
 				(_, minecraftUuid) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUuid),
@@ -407,7 +577,10 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				throw `[UPDATE GUILD PLAYERS]: ${this.name}: aborting guild player update request due to the possibility of an error from the fetched data`;
 			}
 
-			const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.cache.get(uuid)?.inGuild());
+			// check if the player is either not in the database or the guild is not cached
+			const membersJoined = currentGuildMembers.filter(
+				({ uuid }) => !hypixelGuilds.cache.has(players.cache.get(uuid)?.guildId!),
+			);
 
 			let leftLog: string[] = [];
 			let joinedLog: string[] = [];
@@ -424,43 +597,41 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						},
 					});
 
+					let discordMember: GuildMember | null = null;
+
 					// unknown player
 					if (created) {
-						const IGN = await (async () => {
-							try {
-								return (await mojang.uuid(minecraftUuid)).ign;
-							} catch (error) {
-								logger.error(error, '[GET IGN]');
-								return UNKNOWN_IGN;
-							}
-						})();
+						let ign: string;
 
-						joinedLog.push(`+\u00A0${IGN}`);
+						try {
+							({ ign } = await mojang.uuid(minecraftUuid));
+						} catch (error) {
+							logger.error(error, '[GET IGN]');
+							ign = UNKNOWN_IGN;
+						}
 
-						let discordTag: string | null;
-						let discordMember: GuildMember | null;
+						joinedLog.push(`+\u00A0${ign}`);
 
 						// try to link new player to discord
-						await (async () => {
-							discordTag =
-								(
-									await hypixel.player
-										.uuid(minecraftUuid)
-										.catch((error) => logger.error(error, `[GET DISCORD TAG]: ${IGN} (${this.name})`))
-								)?.socialMedia?.links?.DISCORD ?? null;
+						let discordTag: string | null = null;
 
-							if (!discordTag) {
-								joinedLog.push(`-\u00A0${IGN}: no linked discord`);
-								return (hasError = true);
+						try {
+							discordTag = (await hypixel.player.uuid(minecraftUuid)).socialMedia?.links?.DISCORD ?? null;
+						} catch (error) {
+							logger.error(error, `[GET DISCORD TAG]: ${ign} (${this.name})`);
+						}
+
+						if (discordTag) {
+							discordMember = await GuildUtil.fetchMemberByTag(this.discordGuild, discordTag);
+
+							if (!discordMember) {
+								joinedLog.push(`-\u00A0${ign}: unknown discord tag ${discordTag}`);
+								hasError = true;
 							}
-
-							discordMember = await GuildUtil.fetchMemberByTag(lgGuild, discordTag);
-
-							if (discordMember) return;
-
-							joinedLog.push(`-\u00A0${IGN}: unknown discord tag ${discordTag}`);
+						} else {
+							joinedLog.push(`-\u00A0${ign}: no linked discord`);
 							hasError = true;
-						})();
+						}
 
 						// update player
 						setTimeout(async () => {
@@ -470,7 +641,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 								logger.error(error);
 							}
 
-							player.update({ ign: IGN }).catch((error) => logger.error(error));
+							player.update({ ign }).catch((error) => logger.error(error));
 							player.updateData({ reason: `joined ${this.name}` });
 						}, 0);
 
@@ -488,19 +659,17 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						joinedLog.push(`+\u00A0${player}`);
 
 						// try to link new player to discord
-						await (async () => {
-							let discordMember = await player.discordMember;
+						discordMember = await player.fetchDiscordMember(this.discordId);
 
-							if (!discordMember) {
-								const discordTag = await player.fetchDiscordTag();
+						if (!discordMember) {
+							const discordTag = await player.fetchDiscordTag();
 
-								if (!discordTag) {
-									player.inDiscord = false;
-									joinedLog.push(`-\u00A0${player}: no linked discord`);
-									return (hasError = true);
-								}
-
-								discordMember = await GuildUtil.fetchMemberByTag(lgGuild, discordTag);
+							if (!discordTag) {
+								player.inDiscord = false;
+								joinedLog.push(`-\u00A0${player}: no linked discord`);
+								hasError = true;
+							} else {
+								discordMember = await GuildUtil.fetchMemberByTag(this.discordGuild, discordTag);
 
 								if (!discordMember) {
 									if (/\D/.test(player.discordId!)) {
@@ -513,12 +682,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 											: `-\u00A0${player}: unknown discord ID ${player.discordId}`,
 									);
 
-									return (hasError = true);
+									hasError = true;
 								}
 							}
+						}
 
-							player.link(discordMember);
-						})();
+						if (discordMember) player.link(discordMember);
 
 						// update player
 						setTimeout(async () => {
@@ -567,14 +736,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(minecraftUuid);
 						if (!existingBan) return;
 
-						const member = await player.discordMember;
-
 						this.client.log(
 							new MessageEmbed()
 								.setColor(this.client.config.get('EMBED_RED'))
 								.setAuthor({
-									name: member?.user.tag ?? player.ign,
-									iconURL: member?.displayAvatarURL({ dynamic: true }),
+									name: discordMember?.user.tag ?? player.ign,
+									iconURL: discordMember?.displayAvatarURL({ dynamic: true }),
 									url: player.url,
 								})
 								.setThumbnail((await player.imageURL)!)
@@ -834,7 +1001,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 			if (!(channel instanceof VoiceChannel)) {
 				// no channel found
-				logger.warn(`[GUILD STATS CHANNEL UPDATE]: ${type}: no channel found`);
+				logger.warn(`[GUILD STATS CHANNEL UPDATE] ${this.name}: ${type}: no channel found`);
 				continue;
 			}
 
@@ -844,13 +1011,13 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			if (newName === oldName) continue; // no update needed
 
 			if (!channel.manageable) {
-				logger.error(`[GUILD STATS CHANNEL UPDATE]: ${channel.name}: missing permissions to edit`);
+				logger.error(`[GUILD STATS CHANNEL UPDATE] ${this.name}: ${channel.name}: missing permissions to edit`);
 				continue;
 			}
 
 			await channel.setName(newName, `synced with ${this.name}'s average stats`);
 
-			logger.info(`[GUILD STATS CHANNEL UPDATE]: '${oldName}' -> '${newName}'`);
+			logger.info(`[GUILD STATS CHANNEL UPDATE] ${this.name}: '${oldName}' -> '${newName}'`);
 		}
 	}
 

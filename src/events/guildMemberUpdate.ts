@@ -21,15 +21,17 @@ export default class GuildMemberUpdateEvent extends Event {
 	 * @param newMember
 	 */
 	override async run(oldMember: GuildMember, newMember: GuildMember) {
-		if (newMember.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
+		const hypixelGuild = this.client.hypixelGuilds.findByDiscordGuild(newMember.guild);
+		if (!hypixelGuild?.roleIds) return;
+
+		let player = GuildMemberUtil.getPlayer(newMember);
 
 		// received bridger role -> update player db
 		if (
-			newMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID')) &&
-			!oldMember.roles.cache.has(this.config.get('BRIDGER_ROLE_ID'))
+			newMember.roles.cache.has(hypixelGuild.roleIds.BRIDGER!) &&
+			!oldMember.roles.cache.has(hypixelGuild.roleIds.BRIDGER!)
 		) {
-			const player =
-				GuildMemberUtil.getPlayer(newMember) ?? (await this.client.players.fetch({ discordId: newMember.id }));
+			player ??= await this.client.players.fetch({ discordId: newMember.id });
 
 			if (!player) {
 				return logger.info(
@@ -42,7 +44,6 @@ export default class GuildMemberUpdateEvent extends Event {
 			if (!player.inGuild()) player.update({ guildId: GUILD_ID_BRIDGER }).catch((error) => logger.error(error));
 		}
 
-		const player = GuildMemberUtil.getPlayer(newMember);
 		if (!player) return;
 
 		player.discordMember = newMember;
@@ -56,35 +57,37 @@ export default class GuildMemberUpdateEvent extends Event {
 		}
 
 		// changes in 'verified'-role
-		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID');
+		const { MANDATORY } = hypixelGuild.roleIds;
 
-		if (oldMember.roles.cache.has(VERIFIED_ROLE_ID)) {
-			// member lost verified role -> log incident
-			if (!newMember.roles.cache.has(VERIFIED_ROLE_ID)) {
-				return this.client.log(
-					new MessageEmbed()
-						.setColor(this.config.get('EMBED_RED'))
-						.setAuthor({
-							name: newMember.user.tag,
-							iconURL: newMember.displayAvatarURL({ dynamic: true }),
-							url: player.url,
-						})
-						.setThumbnail((await player.imageURL)!)
-						.setDescription(
-							stripIndents`
-								${newMember} lost ${newMember.guild.roles.cache.get(VERIFIED_ROLE_ID)} role
-								${player.info}
-							`,
-						)
-						.setTimestamp(),
-				);
+		if (MANDATORY) {
+			if (oldMember.roles.cache.has(MANDATORY)) {
+				// member lost verified role -> log incident
+				if (!newMember.roles.cache.has(MANDATORY)) {
+					return this.client.log(
+						new MessageEmbed()
+							.setColor(this.config.get('EMBED_RED'))
+							.setAuthor({
+								name: newMember.user.tag,
+								iconURL: newMember.displayAvatarURL({ dynamic: true }),
+								url: player.url,
+							})
+							.setThumbnail((await player.imageURL)!)
+							.setDescription(
+								stripIndents`
+									${newMember} lost ${newMember.guild.roles.cache.get(MANDATORY)} role
+									${player.info}
+								`,
+							)
+							.setTimestamp(),
+					);
+				}
+
+				// member was given verified role -> update roles
+			} else if (newMember.roles.cache.has(MANDATORY)) {
+				return player.updateDiscordMember({
+					reason: `received ${newMember.guild.roles.cache.get(MANDATORY)!.name} role`,
+				});
 			}
-
-			// member was given verified role -> update roles
-		} else if (newMember.roles.cache.has(VERIFIED_ROLE_ID)) {
-			return player.updateDiscordMember({
-				reason: `received ${newMember.guild.roles.cache.get(VERIFIED_ROLE_ID)!.name} role`,
-			});
 		}
 	}
 }

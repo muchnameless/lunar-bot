@@ -1,26 +1,25 @@
 import { commaListsOr } from 'common-tags';
 import { InteractionUtil } from '../../util';
-import type { Interaction, Snowflake } from 'discord.js';
-import type { LunarClient } from '../LunarClient';
+import type { Guild, Interaction, Snowflake } from 'discord.js';
 
 /**
  * @param message
  * @param interaction
+ * @param discordGuild
  * @param requiredRolesRaw
  */
 export const missingPermissionsError = (
 	message: string,
 	interaction: Interaction,
+	discordGuild: Guild | null,
 	requiredRolesRaw: Snowflake[],
 ) => commaListsOr`
 	missing permissions for \`${InteractionUtil.fullCommandName(interaction)}\` (${requiredRolesRaw.flatMap((roleId) => {
 	if (!roleId) return [];
 
-	const role = (interaction.client as LunarClient).lgGuild?.roles.cache.get(roleId);
+	const role = discordGuild?.roles.cache.get(roleId);
 	if (!role) return roleId;
 
-	return interaction.guildId === (interaction.client as LunarClient).config.get('DISCORD_GUILD_ID')
-		? `${role}`
-		: role.name;
+	return interaction.guildId === discordGuild!.id ? `${role}` : role.name;
 })}): ${message}
 `;

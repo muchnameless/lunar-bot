@@ -12,6 +12,7 @@ import {
 	MESSAGE_TYPES,
 	spamMessages,
 } from './constants';
+import type { PlayerInGuild } from '../database/models/Player';
 import type { Message as DiscordMessage } from 'discord.js';
 import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
 import type { BroadcastOptions, ChatBridge, ChatOptions } from './ChatBridge';
@@ -40,6 +41,7 @@ export interface HypixelUserMessage extends HypixelMessage {
 	position: 'CHAT';
 	type: NonNullable<HypixelMessage['type']>;
 	author: NonNullable<HypixelMessage['author']>;
+	readonly player: PlayerInGuild;
 	spam: false;
 	commandData: NonNullable<HypixelMessage['commandData']>;
 }

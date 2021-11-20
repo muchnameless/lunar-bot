@@ -11,12 +11,7 @@ export default class KickBridgeCommand extends BridgeCommand {
 			args: 2,
 			usage: '[`IGN`] [`reason`]',
 			cooldown: seconds(10),
-			requiredRoles: () => [
-				this.config.get('MODERATOR_ROLE_ID'),
-				this.config.get('DANKER_STAFF_ROLE_ID'),
-				this.config.get('SENIOR_STAFF_ROLE_ID'),
-				this.config.get('MANAGER_ROLE_ID'),
-			],
+			requiredRoles: (hypixelGuild) => hypixelGuild.roleIds.ADMIN_IDS,
 		});
 	}
 

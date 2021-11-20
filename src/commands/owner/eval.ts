@@ -120,8 +120,8 @@ export default class EvalCommand extends ApplicationCommand {
 		const i = interaction;
 		const { client, config } = this;
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
-		const { lgGuild, hypixelGuilds, players, taxCollectors, db } = client;
-		const me = (guild ?? lgGuild)?.me ?? null;
+		const { hypixelGuilds, players, taxCollectors, db } = client;
+		const me = guild?.me ?? null;
 		const player = UserUtil.getPlayer(user);
 		const p = player;
 		const [bridge] = client.chatBridges.cache;

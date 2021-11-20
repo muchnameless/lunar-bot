@@ -66,19 +66,6 @@ export class LunarClient extends Client {
 	}
 
 	/**
-	 * returns the lunar guard discord guild
-	 * @returns lunar guard discord guild
-	 */
-	get lgGuild() {
-		const lgGuild = this.guilds.cache.get(this.config.get('DISCORD_GUILD_ID'));
-
-		if (lgGuild?.available) return lgGuild;
-
-		logger.warn('discord guild is currently unavailable');
-		return null;
-	}
-
-	/**
 	 * fetches the bot application's owner
 	 */
 	fetchOwner() {

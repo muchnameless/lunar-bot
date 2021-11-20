@@ -30,7 +30,7 @@ export default class DebugCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override runSlash(interaction: CommandInteraction) {
-		const me = (interaction.guild ?? this.client.lgGuild)?.me ?? null;
+		const me = interaction.guild?.me ?? null;
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [

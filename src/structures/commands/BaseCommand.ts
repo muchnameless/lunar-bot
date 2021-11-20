@@ -1,4 +1,5 @@
 import { Collection } from 'discord.js';
+import type { HypixelGuild } from '../database/models/HypixelGuild';
 import type { Snowflake } from 'discord.js';
 import type { LunarClient } from '../LunarClient';
 import type { BaseCommandCollection, CommandType } from './BaseCommandCollection';
@@ -19,7 +20,7 @@ export interface CommandData {
 	requiredRoles?: RequiredRoles;
 }
 
-type RequiredRoles = () => Snowflake[];
+type RequiredRoles = (hypixelGuild: HypixelGuild) => Snowflake[];
 
 export class BaseCommand {
 	client: LunarClient;
@@ -70,24 +71,17 @@ export class BaseCommand {
 	/**
 	 * roles required to run this command
 	 */
-	get requiredRoles() {
-		if (this.#requiredRoles) return this.#requiredRoles();
+	requiredRoles(hypixelGuild: HypixelGuild) {
+		if (this.#requiredRoles) return this.#requiredRoles(hypixelGuild);
 
 		switch (this.category) {
 			case 'staff':
 			case 'moderation':
-				return [
-					this.config.get('SHRUG_ROLE_ID'),
-					this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-					this.config.get('MODERATOR_ROLE_ID'),
-					this.config.get('DANKER_STAFF_ROLE_ID'),
-					this.config.get('SENIOR_STAFF_ROLE_ID'),
-					this.config.get('MANAGER_ROLE_ID'),
-				];
+				return hypixelGuild.roleIds.STAFF_IDS;
 
 			case 'tax':
 			case 'manager':
-				return [this.config.get('MANAGER_ROLE_ID')];
+				return hypixelGuild.roleIds.ADMIN_IDS;
 
 			default:
 				return null;

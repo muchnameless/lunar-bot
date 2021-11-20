@@ -122,8 +122,8 @@ export default class VerifyCommand extends ApplicationCommand {
 
 		const discordMember =
 			(interaction.member as GuildMember | null) ??
-			(await this.client.lgGuild?.members
-				.fetch(interaction.user)
+			(await InteractionUtil.getHypixelGuild(interaction)
+				.discordGuild?.members.fetch(interaction.user)
 				.catch((error) => logger.error(error, '[VERIFY]: guild member fetch'))) ??
 			null;
 

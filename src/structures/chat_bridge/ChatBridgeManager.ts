@@ -9,7 +9,7 @@ import { logger } from '../../functions';
 import { ChatBridge, ChatBridgeEvents } from './ChatBridge';
 import { DiscordChatManager } from './managers/DiscordChatManager';
 import type { CommandInteraction, Message, Snowflake } from 'discord.js';
-import type { BroadcastOptions, MessageForwardOptions } from './ChatBridge';
+import type { MessageForwardOptions } from './ChatBridge';
 import type { LunarClient } from '../LunarClient';
 
 export class ChatBridgeManager {
@@ -116,14 +116,6 @@ export class ChatBridgeManager {
 	}
 
 	/**
-	 * send a message via all chatBridges both to discord and the in game guild chat, parsing both
-	 * @param contentOrOptions
-	 */
-	broadcast(contentOrOptions: string | BroadcastOptions) {
-		return Promise.all(this.cache.map((chatBridge) => chatBridge.broadcast(contentOrOptions)));
-	}
-
-	/**
 	 * forwards announcement messages to all chatBridges (via broadcast)
 	 * @param message
 	 */
@@ -131,8 +123,12 @@ export class ChatBridgeManager {
 		if (!this.cache.length) return MessageUtil.react(message, X_EMOJI);
 		if (!message.content) return MessageUtil.react(message, STOP_EMOJI);
 
+		const hypixelGuild = this.client.hypixelGuilds.findByDiscordGuild(message.guild);
+
+		if (!hypixelGuild) return MessageUtil.react(message, X_EMOJI);
+
 		try {
-			const result = await this.broadcast({
+			const [minecraftResult, discordResult] = await hypixelGuild.chatBridge.broadcast({
 				content: stripIndents`
 					${message.content}
 					~ ${DiscordChatManager.getPlayerName(message)}
@@ -146,18 +142,20 @@ export class ChatBridgeManager {
 				},
 			});
 
-			if (result.every(([minecraft, discord]) => minecraft && (Array.isArray(discord) ? discord.length : discord))) {
+			if (minecraftResult && discordResult) {
+				// success
 				if (message.reactions.cache.get(X_EMOJI)?.me) {
 					message.reactions.cache
 						.get(X_EMOJI)!
 						.users.remove(this.client.user!)
-						.catch((error) => logger.error(error, '[HANDLE ANNOUNCEMENT MSG]'));
+						.catch((error) => logger.error(error, `[HANDLE ANNOUNCEMENT MSG]: ${hypixelGuild}`));
 				}
 			} else {
+				// error
 				MessageUtil.react(message, X_EMOJI);
 			}
 		} catch (error) {
-			logger.error(error, '[HANDLE ANNOUNCEMENT MSG]');
+			logger.error(error, `[HANDLE ANNOUNCEMENT MSG]: ${hypixelGuild}`);
 			MessageUtil.react(message, X_EMOJI);
 		}
 	}

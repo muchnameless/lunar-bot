@@ -1,11 +1,12 @@
 import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import { ApplicationCommandType } from 'discord-api-types/v9';
-import { Constants } from 'discord.js';
+import { ApplicationCommandPermissionType, ApplicationCommandType } from 'discord-api-types/v9';
 import { missingPermissionsError } from '../errors/MissingPermissionsError';
 import { COMMAND_KEY } from '../../constants';
 import { logger } from '../../functions';
+import { InteractionUtil } from '../../util';
 import { ephemeralOption } from './commonOptions';
 import { BaseCommand } from './BaseCommand';
+import type { HypixelGuild } from '../database/models/HypixelGuild';
 import type {
 	ContextMenuCommandBuilder,
 	SlashCommandBuilder,
@@ -26,6 +27,7 @@ import type {
 	CommandInteraction,
 	ContextMenuInteraction,
 	GuildMember,
+	GuildResolvable,
 	Interaction,
 	Message,
 	SelectMenuInteraction,
@@ -41,6 +43,12 @@ type Slash =
 	| Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
 
 type WithChoices = SlashCommandIntegerOption | SlashCommandNumberOption | SlashCommandStringOption;
+
+interface CheckPermissionsOptions {
+	userIds?: Snowflake[] | null;
+	roleIds?: Snowflake[] | null;
+	hypixelGuild?: HypixelGuild;
+}
 
 export interface ApplicationCommandData extends CommandData {
 	aliases?: string[];
@@ -199,20 +207,35 @@ export class ApplicationCommand extends BaseCommand {
 	/**
 	 * returns discord application command permission data
 	 */
-	get permissions() {
-		const requiredRoles = this.requiredRoles?.filter((r) => r !== null);
+	permissionsFor(guild: HypixelGuild | GuildResolvable) {
+		if (this.category !== 'owner') return null;
 
-		if (!requiredRoles?.length && this.category !== 'owner') return null;
+		let discordGuild = this.client.guilds.resolve(guild as GuildResolvable);
+		let hypixelGuild;
+
+		if (discordGuild) {
+			hypixelGuild = this.client.hypixelGuilds.findByDiscordGuild(discordGuild);
+		} else {
+			hypixelGuild = this.client.hypixelGuilds.resolve(guild as HypixelGuild);
+			discordGuild = this.client.guilds.cache.get(hypixelGuild?.discordId!) ?? null;
+		}
+
+		if (!discordGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name}: no discord guild`);
+		if (!hypixelGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name}: no hypixel guild`);
+
+		const requiredRoles = this.requiredRoles?.(hypixelGuild)?.filter((r) => r !== null);
+
+		if (!requiredRoles?.length) return null;
 
 		const permissions = [
 			{
 				id: this.client.ownerId, // allow all commands for the bot owner
-				type: Constants.ApplicationCommandPermissionTypes.USER,
+				type: ApplicationCommandPermissionType.User,
 				permission: true,
 			},
 			{
-				id: this.config.get('DISCORD_GUILD_ID'), // deny for the guild @everyone role
-				type: Constants.ApplicationCommandPermissionTypes.ROLE,
+				id: discordGuild.id, // deny for the guild @everyone role
+				type: ApplicationCommandPermissionType.Role,
 				permission: false,
 			},
 		];
@@ -221,7 +244,7 @@ export class ApplicationCommand extends BaseCommand {
 			for (const roleId of requiredRoles) {
 				permissions.push({
 					id: roleId,
-					type: Constants.ApplicationCommandPermissionTypes.ROLE,
+					type: ApplicationCommandPermissionType.Role,
 					permission: true,
 				});
 			}
@@ -232,37 +255,39 @@ export class ApplicationCommand extends BaseCommand {
 
 	/**
 	 * @param interaction
-	 * @param permissions
+	 * @param options
 	 */
 	async checkPermissions(
 		interaction: Interaction,
 		{
 			userIds = [this.client.ownerId],
-			roleIds = this.requiredRoles,
-		}: { userIds?: Snowflake[] | null; roleIds?: Snowflake[] | null } = {},
+			hypixelGuild = InteractionUtil.getHypixelGuild(interaction),
+			roleIds = this.requiredRoles(hypixelGuild),
+		}: CheckPermissionsOptions = {},
 	) {
 		if (userIds?.includes(interaction.user.id)) return; // user id bypass
 		if (!roleIds?.length) return; // no role requirements
 
 		const member =
-			interaction.guildId === this.config.get('DISCORD_GUILD_ID')
+			interaction.guildId === hypixelGuild.discordId
 				? (interaction.member as GuildMember)
 				: await (async () => {
-						const { lgGuild } = this.client;
+						const { discordGuild } = hypixelGuild;
 
-						if (!lgGuild) throw missingPermissionsError('discord server unreachable', interaction, roleIds);
+						if (!discordGuild)
+							throw missingPermissionsError('discord server unreachable', interaction, discordGuild, roleIds);
 
 						try {
-							return await lgGuild.members.fetch(interaction.user);
+							return await discordGuild.members.fetch(interaction.user);
 						} catch (error) {
 							logger.error(error, '[CHECK PERMISSIONS]: error while fetching member to test for permissions');
-							throw missingPermissionsError('unknown discord member', interaction, roleIds);
+							throw missingPermissionsError('unknown discord member', interaction, discordGuild, roleIds);
 						}
 				  })();
 
 		// check for req roles
 		if (!member.roles.cache.hasAny(...roleIds)) {
-			throw missingPermissionsError('missing required role', interaction, roleIds);
+			throw missingPermissionsError('missing required role', interaction, hypixelGuild.discordGuild, roleIds);
 		}
 	}
 

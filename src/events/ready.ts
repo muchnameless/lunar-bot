@@ -21,8 +21,10 @@ export default class ReadyEvent extends Event {
 
 		if (this.client.options.fetchAllMembers) {
 			try {
-				const members = await GuildUtil.fetchAllMembers(this.client.lgGuild);
-				logger.info(`[READY]: fetched ${members.size} members`);
+				for (const guild of this.client.guilds.cache.values()) {
+					const members = await GuildUtil.fetchAllMembers(guild);
+					logger.info(`[READY]: fetched ${members.size} members`);
+				}
 			} catch (error) {
 				logger.error(error, '[READY]');
 			}

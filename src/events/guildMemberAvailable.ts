@@ -17,7 +17,7 @@ export default class GuildMemberAvailableEvent extends Event {
 	 * @param member
 	 */
 	override async run(member: GuildMember) {
-		if (member.guild.id !== this.config.get('DISCORD_GUILD_ID') || !this.client.options.fetchAllMembers) return;
+		if (!this.client.options.fetchAllMembers) return;
 
 		try {
 			const members = await GuildUtil.fetchAllMembers(member.guild);

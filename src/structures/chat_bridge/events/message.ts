@@ -12,9 +12,10 @@ import {
 } from '../constants';
 import { STOP_EMOJI } from '../../../constants';
 import { MessageUtil } from '../../../util';
-import { logger, stringToMS } from '../../../functions';
+import { getLilyWeight, logger, stringToMS } from '../../../functions';
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
-import { mojang } from '../../../api';
+import { hypixel, mojang } from '../../../api';
+import type { SkyBlockProfile } from '../../../functions';
 import type { EventContext } from '../../events/BaseEvent';
 import type { HypixelMessage, HypixelUserMessage } from '../HypixelMessage';
 import type MathsCommand from '../../../commands/general/maths';
@@ -95,7 +96,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		/**
 		 * [HypixelRank] IGN left the guild!
-		 * [MVP++] vndb transferred Guild Master rank to [MVP+] Underappreciated
+		 * [HypixelRank] IGN transferred Guild Master rank to [HypixelRank] IGN
 		 */
 		if (
 			hypixelMessage.content.includes('left the guild') ||
@@ -107,12 +108,17 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		/**
 		 * You left the guild
-		 * [MVP+] Underappreciated disbanded the guild.
+		 * You were kicked from the guild by [HypixelRank] IGN for reason 'REASON'.
+		 * [HypixelRank] IGN disbanded the guild.
 		 */
-		if (hypixelMessage.content === 'You left the guild' || hypixelMessage.content.includes('disbanded the guild')) {
+		if (
+			hypixelMessage.content === 'You left the guild' ||
+			hypixelMessage.content.startsWith('You were kicked from the guild by') ||
+			hypixelMessage.content.includes('disbanded the guild')
+		) {
 			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: no more guild`);
 			this.chatBridge.hypixelGuild?.updateData();
-			hypixelMessage.forwardToDiscord();
+			await hypixelMessage.forwardToDiscord();
 			return this.chatBridge.unlink();
 		}
 
@@ -125,17 +131,6 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		/**
-		 * You were kicked from the guild by [HypixelRank] IGN for reason 'REASON'.
-		 */
-		if (hypixelMessage.content.startsWith('You were kicked from the guild by')) {
-			logger.warn(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: bot was kicked from the guild`);
-			this.chatBridge.hypixelGuild?.updateData();
-			hypixelMessage.forwardToDiscord();
-			return this.chatBridge.unlink();
-		}
-
-		/**
-		 * auto '/gc gg' for quest completions
 		 * The guild has completed Tier 3 of this week's Guild Quest!
 		 * The Guild has reached Level 36!
 		 * The Guild has unlocked Winners III!
@@ -281,6 +276,64 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		/**
+		 * accept g join requests if hypixel guild has it enabled and player is not on the ban list
+		 * [HypixelRank] IGN has requested to join the Guild!
+		 */
+		const guildJoinReqMatched = hypixelMessage.content.match(
+			/(?:\[.+?\] )?(?<ign>\w+) has requested to join the Guild!/,
+		);
+
+		if (guildJoinReqMatched) {
+			const { ign } = guildJoinReqMatched.groups!;
+
+			if (!hypixelMessage.hypixelGuild?.acceptJoinRequests) {
+				return logger.info(
+					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ignoring guild join request from ${ign}, auto accepts disabled`,
+				);
+			}
+
+			try {
+				const { uuid } = await mojang.ign(ign);
+
+				// ban list check
+				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
+
+				if (existingBan) {
+					return logger.info(
+						`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${ign} is on the ban list for \`${existingBan.reason}\``,
+					);
+				}
+
+				// weight req check
+				if (hypixelMessage.hypixelGuild.weightReq !== null) {
+					const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
+
+					if (!profiles?.length) {
+						return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${ign} has no SkyBlock profiles`);
+					}
+
+					const [{ totalWeight }] = profiles
+						.map(({ members }) => getLilyWeight(members[uuid]))
+						.sort(({ totalWeight: a }, { totalWeight: b }) => b - a);
+
+					if (totalWeight < hypixelMessage.hypixelGuild.weightReq) {
+						return logger.info(
+							`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${ign}'s total weight is ${totalWeight}, guild req is ${hypixelMessage.hypixelGuild.weightReq}`,
+						);
+					}
+				}
+
+				// accept invite
+				await hypixelMessage.chatBridge.minecraft.command(`/guild accept ${ign}`);
+				logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepted guild join request from ${ign}`);
+			} catch (error) {
+				logger.error(error, `[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request from ${ign}`);
+			}
+
+			return;
+		}
+
+		/**
 		 * You joined GUILD_NAME!
 		 */
 		const guildJoinMatched = hypixelMessage.content.match(/(?<=^You joined ).+(?=!)/);
@@ -288,7 +341,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (guildJoinMatched) {
 			const [guildName] = guildJoinMatched;
 
-			this.client.hypixelGuilds.getByName(guildName)?.updateData();
+			this.client.hypixelGuilds.findByName(guildName)?.updateData();
 
 			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: joined ${guildName}`);
 			return this.chatBridge.link(guildName);
@@ -311,41 +364,6 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepting f request from ${ign}`);
 			return this.chatBridge.minecraft.sendToChat(`/friend add ${ign}`);
 		}
-
-		/**
-		 * accept g join requests if hypixel guild has it enabled and player is not on the ban list
-		 * [HypixelRank] IGN has requested to join the Guild!
-		 */
-		const guildJoinReqMatched = hypixelMessage.content.match(
-			/(?:\[.+?\] )?(?<ign>\w+) has requested to join the Guild!/,
-		);
-
-		if (guildJoinReqMatched) {
-			const { ign } = guildJoinReqMatched.groups!;
-
-			if (!hypixelMessage.hypixelGuild?.acceptJoinRequests) {
-				return logger.info(
-					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ignoring guild join request from ${ign}, hypixel guild has auto accepts disabled`,
-				);
-			}
-
-			try {
-				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk((await mojang.ign(ign)).uuid);
-
-				if (existingBan) {
-					return logger.info(
-						`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${ign} is on the ban list for \`${existingBan.reason}\``,
-					);
-				}
-
-				await hypixelMessage.chatBridge.minecraft.command(`/guild accept ${ign}`);
-				logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepted guild join request from ${ign}`);
-			} catch (error) {
-				logger.error(error, `[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request from ${ign}`);
-			}
-
-			return;
-		}
 	}
 
 	/**
@@ -356,7 +374,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		const { player } = hypixelMessage;
 
 		// player activity
-		player?.update({ lastActivityAt: new Date() });
+		player.update({ lastActivityAt: new Date() });
 
 		// must use prefix for commands in guild
 		if (!hypixelMessage.commandData.prefix) {
@@ -408,22 +426,24 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		// message author not a bot owner
-		if (player?.discordId !== this.client.ownerId) {
+		if (player.discordId !== this.client.ownerId) {
 			// role permissions
-			const { requiredRoles } = command;
+			const requiredRoles = command.requiredRoles(hypixelMessage.hypixelGuild ?? player.hypixelGuild);
 
 			if (requiredRoles) {
 				const { member } = hypixelMessage;
 
 				if (!member) {
-					const { lgGuild } = this.client;
+					const discordGuild = hypixelMessage.hypixelGuild?.discordGuild;
 					logger.info(
-						`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' and could not be found within the Lunar Guard Discord Server`,
+						`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${
+							hypixelMessage.type
+						}' and could not be found within the ${discordGuild?.name ?? '(currently unavailable)'} discord server`,
 					);
 					return hypixelMessage.author.send(
 						commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(
-							(roleId) => lgGuild?.roles.cache.get(roleId)?.name ?? roleId,
-						)}) from the ${lgGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in
+							(roleId) => discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
+						)}) from the ${discordGuild?.name ?? '(currently unavailable)'} Discord server which you can not be found in
 						`,
 					);
 				}
@@ -436,7 +456,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					return hypixelMessage.author.send(
 						commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(
 							(roleId) => member.guild.roles.cache.get(roleId)?.name ?? roleId,
-						)}) from the Lunar Guard Discord Server
+						)}) from the ${member.guild.name} Discord Server
 						`,
 					);
 				}

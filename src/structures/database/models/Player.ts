@@ -31,7 +31,6 @@ import {
 	XP_TYPES,
 	STATS_URL_BASE,
 } from '../../../constants';
-import { HypixelGuildManager } from '../managers/HypixelGuildManager';
 import { GuildMemberUtil, GuildUtil, MessageEmbedUtil, UserUtil } from '../../../util';
 import { hypixel, mojang } from '../../../api';
 import {
@@ -51,7 +50,7 @@ import {
 } from '../../../functions';
 import { TransactionTypes } from './Transaction';
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
-import type { Snowflake } from 'discord.js';
+import type { Snowflake, GuildResolvable } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
 import type { HypixelGuild } from './HypixelGuild';
 import type { Transaction, TransactionAttributes } from './Transaction';
@@ -108,9 +107,9 @@ interface PlayerAttributes {
 	minecraftUuid: string;
 	ign: string;
 	discordId: Snowflake | null;
+	inDiscord: boolean;
 	guildId: string | null;
 	guildRankPriority: number;
-	inDiscord: boolean;
 	mutedTill: number;
 	_infractions: number[] | null;
 	hasDiscordPingPermission: boolean;
@@ -131,9 +130,9 @@ type PlayerCreationAttributes = Optional<
 	PlayerAttributes,
 	| 'ign'
 	| 'discordId'
+	| 'inDiscord'
 	| 'guildId'
 	| 'guildRankPriority'
-	| 'inDiscord'
 	| 'mutedTill'
 	| '_infractions'
 	| 'hasDiscordPingPermission'
@@ -150,7 +149,7 @@ type PlayerCreationAttributes = Optional<
 	| 'lastActivityAt'
 >;
 
-interface PlayerInGuild extends Player {
+export interface PlayerInGuild extends Player {
 	hypixelGuild: HypixelGuild;
 	guildId: string;
 }
@@ -166,9 +165,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare minecraftUuid: string;
 	declare ign: string;
 	declare discordId: string | null;
+	declare inDiscord: boolean;
 	declare guildId: string | null;
 	declare guildRankPriority: number;
-	declare inDiscord: boolean;
 	declare mutedTill: number;
 	declare _infractions: number[] | null;
 	declare hasDiscordPingPermission: boolean;
@@ -455,6 +454,15 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 						if (!value) (this as Player).inDiscord = false;
 					},
 				},
+				inDiscord: {
+					type: DataTypes.BOOLEAN,
+					defaultValue: false,
+					allowNull: false,
+					set(value: boolean) {
+						this.setDataValue('inDiscord', value);
+						if (!value) (this as Player).uncacheMember();
+					},
+				},
 				guildId: {
 					type: DataTypes.STRING,
 					defaultValue: null,
@@ -464,15 +472,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					type: DataTypes.INTEGER,
 					defaultValue: 0,
 					allowNull: false,
-				},
-				inDiscord: {
-					type: DataTypes.BOOLEAN,
-					defaultValue: false,
-					allowNull: false,
-					set(value: boolean) {
-						this.setDataValue('inDiscord', value);
-						if (!value) (this as Player).uncacheMember();
-					},
 				},
 				mutedTill: {
 					type: DataTypes.BIGINT,
@@ -604,27 +603,34 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * wether the player is actually in a guild and not just one of PSEUDO_GUILD_IDS
 	 */
 	inGuild(): this is PlayerInGuild {
-		return !HypixelGuildManager.PSEUDO_GUILD_IDS.has(this.guildId as any);
+		// return !HypixelGuildManager.PSEUDO_GUILD_IDS.has(this.guildId as any);
+		return !this.client.hypixelGuilds.cache.has(this.guildId!);
 	}
 
 	/**
-	 * fetches the discord member if the discord id is valid and the player is in lg discord
+	 * fetches the discord member if the discord id is valid and the player is in the hypixel guild's discord server
+	 * @param discordGuild
 	 */
-	// @ts-expect-error The return type of a 'get' accessor must be assignable to its 'set' accessor type
-	get discordMember(): Promise<GuildMember | null> {
-		if (this.#discordMember) return Promise.resolve(this.#discordMember);
-		if (!this.inDiscord || !validateDiscordId(this.discordId!)) return Promise.resolve(null);
+	async fetchDiscordMember(discordGuild?: GuildResolvable | null) {
+		if (this.#discordMember) return this.#discordMember;
+		if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
 
-		return (async () => {
-			try {
-				return (this.discordMember = (await this.client.lgGuild?.members.fetch(this.discordId!)) ?? null);
-			} catch (error) {
-				// prevent further fetches and try to link via cache in the next updateDiscordMember calls
-				this.update({ inDiscord: false }).catch((error_) => logger.error(error_));
-				logger.error(error, `[GET DISCORD MEMBER]: ${this.logInfo}`);
-				return (this.#discordMember = null);
-			}
-		})();
+		try {
+			const discordMember =
+				(await (discordGuild
+					? this.client.guilds.resolve(discordGuild)
+					: this.hypixelGuild?.discordGuild
+				)?.members.fetch(this.discordId)) ?? null;
+
+			this.discordMember = discordMember;
+
+			return discordMember;
+		} catch (error) {
+			// prevent further fetches and try to link via cache in the next updateDiscordMember calls
+			logger.error(error, `[GET DISCORD MEMBER]: ${this.logInfo}`);
+			this.discordMember = null;
+			return null;
+		}
 	}
 
 	/**
@@ -960,14 +966,18 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		let reason = reasonInput;
 
-		const member = (await this.discordMember) ?? ((reason = 'found linked discord tag'), await this.linkUsingCache());
+		const member =
+			(await this.fetchDiscordMember()) ?? ((reason = 'found linked discord tag'), await this.linkUsingCache());
 
 		if (this.guildId === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
 
 		if (!member) return; // no linked available discord member to update
-		if (!member.roles.cache.has(this.client.config.get('VERIFIED_ROLE_ID'))) {
+
+		const MANDATORY = this.hypixelGuild?.roleIds.MANDATORY;
+
+		if (MANDATORY && !member.roles.cache.has(MANDATORY)) {
 			return logger.warn(
-				`[UPDATE DISCORD MEMBER]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing verified role`,
+				`[UPDATE DISCORD MEMBER]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing mandatory role`,
 			);
 		}
 
@@ -980,183 +990,174 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param reasonInput reason for discord's audit logs
 	 */
 	async updateRoles(reasonInput?: string) {
-		const member = await this.discordMember;
-
+		const member = await this.fetchDiscordMember();
 		if (!member) return;
 
 		const { cache: roleCache, highest: highestRole } = member.roles;
-		const { config } = this.client;
 		const rolesToAdd: Snowflake[] = [];
 		const rolesToRemove: Snowflake[] = [];
 		const { totalWeight: weight } = this.getLilyWeight();
 
-		let inGuild = false;
 		let reason = reasonInput;
 
 		// individual hypixel guild roles and guild rank roles
-		for (const [guildId, { roleId: guildRoleId, ranks }] of this.client.hypixelGuilds.cache) {
-			// player is in the guild
-			if (guildId === this.guildId) {
+		for (const [guildId, { roleIds, ranks }] of this.client.hypixelGuilds.cache) {
+			// player is not in the guild -> remove all roles
+			if (guildId !== this.guildId) {
 				// guild role
-				if (guildRoleId && !roleCache.has(guildRoleId)) rolesToAdd.push(guildRoleId);
-
-				// rank roles
-				const CURRENT_PRIORITY = this.isStaff
-					? ranks
-							// filter out non-automated ranks
-							.filter(({ currentWeightReq }) => currentWeightReq != null)
-							// sort descendingly by weight req
-							.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
-							// find first rank that the player is eligable for
-							.find(({ currentWeightReq }) => weight >= currentWeightReq!)?.priority
-					: this.guildRankPriority;
-
-				for (const { roleId, priority } of ranks) {
-					if (!roleId) continue;
-
-					if (priority !== CURRENT_PRIORITY) {
-						if (roleCache.has(roleId)) {
-							rolesToRemove.push(roleId);
-							reason = 'synced with in game rank';
-						}
-					} else if (!roleCache.has(roleId)) {
-						rolesToAdd.push(roleId);
-						reason = 'synced with in game rank';
-					}
-				}
-
-				// guild for the player found
-				inGuild = true;
-
-				// player is not in the guild -> remove all roles
-			} else {
-				// guild role
-				if (guildRoleId && roleCache.has(guildRoleId)) rolesToRemove.push(guildRoleId);
+				if (roleCache.has(roleIds.GUILD)) rolesToRemove.push(roleIds.GUILD);
 
 				// rank roles
 				for (const { roleId } of ranks) {
 					if (roleId && roleCache.has(roleId)) rolesToRemove.push(roleId);
 				}
+
+				// only remove roles
+				continue;
 			}
-		}
 
-		// player is not in a guild from <LunarClient>.hypixelGuilds
-		if (!inGuild) {
-			if (roleCache.has(config.get('GUILD_ROLE_ID'))) rolesToRemove.push(config.get('GUILD_ROLE_ID'));
-			return this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason });
-		}
+			// player is in the guild
 
-		// combined guild roles
-		if (!roleCache.has(config.get('GUILD_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_ROLE_ID'));
-		if (roleCache.has(config.get('EX_GUILD_ROLE_ID'))) rolesToRemove.push(config.get('EX_GUILD_ROLE_ID'));
+			// guild role
+			if (roleIds.GUILD && !roleCache.has(roleIds.GUILD)) rolesToAdd.push(roleIds.GUILD);
 
-		// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
-		if (
-			(member.guild.roles.cache.get(config.get('GUILD_DELIMITER_ROLE_ID'))?.comparePositionTo(highestRole) ?? 0) < 0
-		) {
-			// current highest role is higher
-			if (!roleCache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) rolesToAdd.push(config.get('GUILD_DELIMITER_ROLE_ID'));
-		} else if (roleCache.has(config.get('GUILD_DELIMITER_ROLE_ID'))) {
-			rolesToRemove.push(config.get('GUILD_DELIMITER_ROLE_ID'));
-		}
+			// rank roles
+			const CURRENT_PRIORITY = this.isStaff
+				? ranks
+						// filter out non-automated ranks
+						.filter(({ currentWeightReq }) => currentWeightReq != null)
+						// sort descendingly by weight req
+						.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
+						// find first rank that the player is eligable for
+						.find(({ currentWeightReq }) => weight >= currentWeightReq!)?.priority
+				: this.guildRankPriority;
 
-		// other delimiter roles
-		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
-			if (!roleCache.has(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`))) {
-				rolesToAdd.push(config.get(`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`));
-			}
-		}
+			for (const { roleId, priority } of ranks) {
+				if (!roleId) continue;
 
-		// skills
-		const skillAverage =
-			SKILLS.map((skill) => {
-				// individual skill lvl 45+ / 50+ / 55+ / 60
-				const { progressLevel } = this.getSkillLevel(skill);
-				const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
-
-				// individual skills
-				for (const level of SKILL_ROLES) {
-					if (level === CURRENT_LEVEL_MILESTONE) {
-						if (!roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
-							rolesToAdd.push(config.get(`${skill}_${level}_ROLE_ID`));
-						}
-					} else if (roleCache.has(config.get(`${skill}_${level}_ROLE_ID`))) {
-						rolesToRemove.push(config.get(`${skill}_${level}_ROLE_ID`));
+				if (priority !== CURRENT_PRIORITY) {
+					if (roleCache.has(roleId)) {
+						rolesToRemove.push(roleId);
+						reason = 'synced with in game rank';
 					}
+				} else if (!roleCache.has(roleId)) {
+					rolesToAdd.push(roleId);
+					reason = 'synced with in game rank';
 				}
-
-				return progressLevel;
-			}).reduce((acc, level) => acc + level, 0) / SKILLS.length;
-
-		// average skill
-		let currentLvlMilestone = Math.floor(skillAverage / 5) * 5; // round down to nearest divisible by 5
-
-		for (const level of SKILL_AVERAGE_ROLES) {
-			if (level === currentLvlMilestone) {
-				if (!roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
-					rolesToAdd.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
-				}
-			} else if (roleCache.has(config.get(`AVERAGE_LVL_${level}_ROLE_ID`))) {
-				rolesToRemove.push(config.get(`AVERAGE_LVL_${level}_ROLE_ID`));
 			}
-		}
 
-		// slayers
-		const LOWEST_SLAYER_LVL = Math.min(
-			...SLAYERS.map((slayer) => {
-				const SLAYER_LVL = this.getSlayerLevel(slayer);
+			// combined guild roles
+			if (!roleCache.has(roleIds.GUILD)) rolesToAdd.push(roleIds.GUILD);
+			if (roleCache.has(roleIds.EX_GUILD)) rolesToRemove.push(roleIds.EX_GUILD);
 
-				// individual slayer
-				for (const level of SLAYER_ROLES) {
-					if (level === SLAYER_LVL) {
-						if (!roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
-							rolesToAdd.push(config.get(`${slayer}_${level}_ROLE_ID`));
+			// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
+			if ((member.guild.roles.cache.get(roleIds.GUILD_DELIMITER)?.comparePositionTo(highestRole) ?? 0) < 0) {
+				// current highest role is higher
+				if (!roleCache.has(roleIds.GUILD_DELIMITER)) rolesToAdd.push(roleIds.GUILD_DELIMITER);
+			} else if (roleCache.has(roleIds.GUILD_DELIMITER)) {
+				rolesToRemove.push(roleIds.GUILD_DELIMITER);
+			}
+
+			// other delimiter roles
+			for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
+				if (!roleCache.has(roleIds[`${DELIMITER_ROLES[i]}_DELIMITER`])) {
+					rolesToAdd.push(roleIds[`${DELIMITER_ROLES[i]}_DELIMITER`]);
+				}
+			}
+
+			// skills
+			const skillAverage =
+				SKILLS.map((skill) => {
+					// individual skill lvl 45+ / 50+ / 55+ / 60
+					const { progressLevel } = this.getSkillLevel(skill);
+					const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
+					const SKILL = skill.toUpperCase() as Uppercase<typeof skill>;
+
+					// individual skills
+					for (const level of SKILL_ROLES) {
+						if (level === CURRENT_LEVEL_MILESTONE) {
+							if (!roleCache.has(roleIds[`${SKILL}_${level}`])) {
+								rolesToAdd.push(roleIds[`${SKILL}_${level}`]);
+							}
+						} else if (roleCache.has(roleIds[`${SKILL}_${level}`])) {
+							rolesToRemove.push(roleIds[`${SKILL}_${level}`]);
 						}
-					} else if (roleCache.has(config.get(`${slayer}_${level}_ROLE_ID`))) {
-						rolesToRemove.push(config.get(`${slayer}_${level}_ROLE_ID`));
 					}
-				}
 
-				return SLAYER_LVL;
-			}),
-		);
+					return progressLevel;
+				}).reduce((acc, level) => acc + level, 0) / SKILLS.length;
 
-		// total slayer
-		for (const level of SLAYER_TOTAL_ROLES) {
-			if (level === LOWEST_SLAYER_LVL) {
-				if (!roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
-					rolesToAdd.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
+			// average skill
+			let currentLvlMilestone = Math.floor(skillAverage / 5) * 5; // round down to nearest divisible by 5
+
+			for (const level of SKILL_AVERAGE_ROLES) {
+				if (level === currentLvlMilestone) {
+					if (!roleCache.has(roleIds[`AVERAGE_LVL_${level}`])) {
+						rolesToAdd.push(roleIds[`AVERAGE_LVL_${level}`]);
+					}
+				} else if (roleCache.has(roleIds[`AVERAGE_LVL_${level}`])) {
+					rolesToRemove.push(roleIds[`AVERAGE_LVL_${level}`]);
 				}
-			} else if (roleCache.has(config.get(`SLAYER_ALL_${level}_ROLE_ID`))) {
-				rolesToRemove.push(config.get(`SLAYER_ALL_${level}_ROLE_ID`));
 			}
-		}
 
-		// dungeons
-		currentLvlMilestone = Math.floor(this.getSkillLevel('catacombs').trueLevel / 5) * 5; // round down to nearest divisible by 5
+			// slayers
+			const LOWEST_SLAYER_LVL = Math.min(
+				...SLAYERS.map((slayer) => {
+					const SLAYER_LVL = this.getSlayerLevel(slayer);
+					const SLAYER = slayer.toUpperCase() as Uppercase<typeof slayer>;
 
-		for (const level of CATACOMBS_ROLES) {
-			if (level === currentLvlMilestone) {
-				if (!roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
-					rolesToAdd.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
+					// individual slayer
+					for (const level of SLAYER_ROLES) {
+						if (level === SLAYER_LVL) {
+							if (!roleCache.has(roleIds[`${SLAYER}_${level}`])) {
+								rolesToAdd.push(roleIds[`${SLAYER}_${level}`]);
+							}
+						} else if (roleCache.has(roleIds[`${SLAYER}_${level}`])) {
+							rolesToRemove.push(roleIds[`${SLAYER}_${level}`]);
+						}
+					}
+
+					return SLAYER_LVL;
+				}),
+			);
+
+			// total slayer
+			for (const level of SLAYER_TOTAL_ROLES) {
+				if (level === LOWEST_SLAYER_LVL) {
+					if (!roleCache.has(roleIds[`SLAYER_ALL_${level}`])) {
+						rolesToAdd.push(roleIds[`SLAYER_ALL_${level}`]);
+					}
+				} else if (roleCache.has(roleIds[`SLAYER_ALL_${level}`])) {
+					rolesToRemove.push(roleIds[`SLAYER_ALL_${level}`]);
 				}
-			} else if (roleCache.has(config.get(`CATACOMBS_${level}_ROLE_ID`))) {
-				rolesToRemove.push(config.get(`CATACOMBS_${level}_ROLE_ID`));
 			}
-		}
 
-		// weight
-		if (weight >= config.get('WHALECUM_PASS_WEIGHT')) {
-			if (!roleCache.has(config.get('WHALECUM_PASS_ROLE_ID'))) rolesToAdd.push(config.get('WHALECUM_PASS_ROLE_ID'));
-		} else if (roleCache.has(config.get('WHALECUM_PASS_ROLE_ID'))) {
-			rolesToRemove.push(config.get('WHALECUM_PASS_ROLE_ID'));
-		}
+			// dungeons
+			currentLvlMilestone = Math.floor(this.getSkillLevel('catacombs').trueLevel / 5) * 5; // round down to nearest divisible by 5
 
-		// activity
-		if (Date.now() - this.lastActivityAt.getTime() > config.get('INACTIVE_ROLE_TIME')) {
-			if (!roleCache.has(config.get('INACTIVE_ROLE_ID'))) rolesToAdd.push(config.get('INACTIVE_ROLE_ID'));
-		} else if (roleCache.has(config.get('INACTIVE_ROLE_ID'))) {
-			rolesToRemove.push(config.get('INACTIVE_ROLE_ID'));
+			for (const level of CATACOMBS_ROLES) {
+				if (level === currentLvlMilestone) {
+					if (!roleCache.has(roleIds[`CATACOMBS_${level}`])) {
+						rolesToAdd.push(roleIds[`CATACOMBS_${level}`]);
+					}
+				} else if (roleCache.has(roleIds[`CATACOMBS_${level}`])) {
+					rolesToRemove.push(roleIds[`CATACOMBS_${level}`]);
+				}
+			}
+
+			// weight
+			if (weight >= this.client.config.get('WHALECUM_PASS_WEIGHT')) {
+				if (!roleCache.has(roleIds.WHALECUM_PASS)) rolesToAdd.push(roleIds.WHALECUM_PASS);
+			} else if (roleCache.has(roleIds.WHALECUM_PASS)) {
+				rolesToRemove.push(roleIds.WHALECUM_PASS);
+			}
+
+			// activity
+			if (Date.now() - this.lastActivityAt.getTime() > this.client.config.get('INACTIVE_ROLE_TIME')) {
+				if (!roleCache.has(roleIds.INACTIVE)) rolesToAdd.push(roleIds.INACTIVE);
+			} else if (roleCache.has(roleIds.INACTIVE)) {
+				rolesToRemove.push(roleIds.INACTIVE);
+			}
 		}
 
 		// api call
@@ -1167,24 +1168,23 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * tries to link unlinked players via discord.js-cache (without any discord API calls)
 	 */
 	async linkUsingCache() {
-		const { lgGuild } = this.client;
-
-		if (!lgGuild) return null;
+		const discordGuild = this.hypixelGuild?.discordGuild;
+		if (!discordGuild) return null;
 
 		let member;
 
 		if (this.discordId) {
 			// tag or ID known
 			member = /\D/.test(this.discordId)
-				? lgGuild.members.cache.find(({ user: { tag } }) => tag === this.discordId) // tag known
-				: lgGuild.members.cache.get(this.discordId); // id known
+				? discordGuild.members.cache.find(({ user: { tag } }) => tag === this.discordId) // tag known
+				: discordGuild.members.cache.get(this.discordId); // id known
 
 			if (!member) {
 				const DISCORD_TAG = await this.fetchDiscordTag();
 
 				if (!DISCORD_TAG) return null;
 
-				member = lgGuild.members.cache.find(({ user: { tag } }) => tag === DISCORD_TAG);
+				member = discordGuild.members.cache.find(({ user: { tag } }) => tag === DISCORD_TAG);
 			}
 		} else {
 			// unknown tag
@@ -1192,7 +1192,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			if (!DISCORD_TAG) return null;
 
-			member = lgGuild.members.cache.find(({ user: { tag } }) => tag === DISCORD_TAG);
+			member = discordGuild.members.cache.find(({ user: { tag } }) => tag === DISCORD_TAG);
 		}
 
 		if (!member) return null;
@@ -1254,7 +1254,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param reason reason for discord's audit logs
 	 */
 	async unlink(reason?: string) {
-		const currentlyLinkedMember = await this.discordMember;
+		const currentlyLinkedMember = await this.fetchDiscordMember();
 
 		let wasSuccessful = true;
 
@@ -1300,7 +1300,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		rolesToRemove?: RoleResolvables;
 		reason?: string;
 	}) {
-		const member = await this.discordMember;
+		const member = await this.fetchDiscordMember();
 		if (!member) return false;
 
 		// check if IDs are proper roles and managable by the bot
@@ -1331,7 +1331,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const NAMES_TO_REMOVE = _rolesToRemove.length
 			? Formatters.codeBlock(_rolesToRemove.map(({ name }) => name).join('\n'))
 			: null;
-		const IS_ADDING_GUILD_ROLE = _rolesToAdd.some(({ id }) => id === config.get('GUILD_ROLE_ID'));
+		const GUILD = this.hypixelGuild?.roleIds.GUILD;
+		const IS_ADDING_GUILD_ROLE = _rolesToAdd.some(({ id }) => id === GUILD);
 
 		for (const role of member.roles.cache.values()) {
 			if (_rolesToRemove.some(({ id }) => role.id === id)) continue;
@@ -1407,15 +1408,15 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * removes the discord server in game guild role & all roles handled automatically by the bot
 	 */
 	async removeFromGuild() {
-		const member = await this.discordMember;
+		const { hypixelGuild } = this;
+		const member = await this.fetchDiscordMember();
 
 		let isBridger = false;
 
 		if (member) {
-			const { config } = this.client;
 			const rolesToAdd =
-				Date.now() - this.createdAt.getTime() >= days(7) && !member.roles.cache.has(config.get('EX_GUILD_ROLE_ID'))
-					? [config.get('EX_GUILD_ROLE_ID')] // add ex guild role if player stayed for more than 1 week
+				Date.now() - this.createdAt.getTime() >= days(7) && !member.roles.cache.has(hypixelGuild?.roleIds.EX_GUILD!)
+					? [hypixelGuild?.roleIds.EX_GUILD!] // add ex guild role if player stayed for more than 1 week
 					: [];
 			const rolesToRemove = GuildMemberUtil.getRolesToPurge(member);
 
@@ -1426,7 +1427,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				return false;
 			}
 
-			isBridger = member.roles.cache.has(config.get('BRIDGER_ROLE_ID'));
+			isBridger = member.roles.cache.has(hypixelGuild?.roleIds.BRIDGER!);
 		} else {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 		}
@@ -1450,9 +1451,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async syncIgnWithDisplayName(shouldSendDm = false) {
-		if (!this.inGuild()) return;
+		if (!this.inGuild() || this.guildRankPriority > this.hypixelGuild.syncIgnThreshold) return;
 
-		const member = await this.discordMember;
+		const member = await this.fetchDiscordMember();
 		if (!member) return;
 
 		let reason: NickChangeReason | null = null;
@@ -1511,7 +1512,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		shouldSendDm = false,
 		reason,
 	}: { newNick?: string | null; shouldSendDm?: boolean; reason?: string | NickChangeReason } = {}) {
-		const member = await this.discordMember;
+		const member = await this.fetchDiscordMember();
 		if (!member) return false;
 
 		// permission checks
@@ -1861,16 +1862,18 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * removes the dual link between a discord member / user and the player
 	 */
-	async uncacheMember() {
+	async uncacheMember(removeFromUser = true) {
 		if (!this.discordId) return;
 
-		// remove from member player cache
-		const member = await this.discordMember;
-		if (member) GuildMemberUtil.setPlayer(member, null);
+		if (removeFromUser) {
+			// remove from member player cache
+			const member = await this.fetchDiscordMember();
+			if (member) GuildMemberUtil.setPlayer(member, null);
 
-		// remove from user player cache
-		const user = this.client.users.cache.get(this.discordId);
-		if (user) UserUtil.setPlayer(user, null);
+			// remove from user player cache
+			const user = this.client.users.cache.get(this.discordId);
+			if (user) UserUtil.setPlayer(user, null);
+		}
 
 		// remove cached member
 		this.#discordMember = null;

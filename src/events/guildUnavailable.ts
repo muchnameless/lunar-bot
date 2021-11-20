@@ -19,6 +19,12 @@ export default class GuildUnavailableEvent extends Event {
 		logger.info(`[GUILD UNAVAILABLE]: ${guild.name}`);
 
 		// sweep linked discord members cache
-		if (guild.id === this.config.get('DISCORD_GUILD_ID')) this.client.players.sweepDiscordMemberCache();
+		for (const hypixelGuild of this.client.hypixelGuilds.cache.values()) {
+			if (hypixelGuild.discordId !== guild.id) continue;
+
+			for (const player of hypixelGuild.players.values()) {
+				player.uncacheMember(false);
+			}
+		}
 	}
 }

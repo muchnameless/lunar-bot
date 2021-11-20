@@ -11,7 +11,6 @@ import type {
 	Snowflake,
 	TextBasedChannels,
 } from 'discord.js';
-import type { LunarClient } from '../structures/LunarClient';
 
 export interface SendOptions extends MessageOptions {
 	rejectOnError?: boolean;
@@ -64,24 +63,6 @@ export default class ChannelUtil extends null {
 
 			default:
 				return (channel as GuildChannel).permissionsFor(channel.client.user!);
-		}
-	}
-
-	/**
-	 * wether the channel is a ticket channel
-	 * @param channel
-	 */
-	static isTicket(channel: Channel) {
-		switch (channel.type) {
-			case 'DM':
-				return false;
-
-			default:
-				return (
-					(channel as GuildChannel).parentId ===
-						(channel.client as LunarClient).config.get('TICKET_CHANNELS_CATEGORY_ID') &&
-					/-\d+$/.test((channel as GuildChannel).name)
-				);
 		}
 	}
 

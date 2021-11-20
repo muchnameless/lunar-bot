@@ -19,7 +19,7 @@ export default class GuildCreateEvent extends Event {
 	override async run(guild: Guild) {
 		logger.info(`[GUILD CREATE]: ${guild.name}`);
 
-		if (guild.id !== this.config.get('DISCORD_GUILD_ID') || !this.client.options.fetchAllMembers) return;
+		if (!this.client.options.fetchAllMembers) return;
 
 		try {
 			const members = await GuildUtil.fetchAllMembers(guild);

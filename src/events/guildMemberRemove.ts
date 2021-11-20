@@ -29,8 +29,6 @@ export default class GuildMemberRemoveEvent extends Event {
 			this.client.users.cache.delete(member.id);
 		}
 
-		if (member.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
-
 		// check discord members that left for id in player database
 		const player = GuildMemberUtil.getPlayer(member);
 

@@ -2,6 +2,7 @@ import { CronJob } from 'cron';
 import { GUILD_ID_BRIDGER, GUILD_ID_ERROR } from '../../../constants';
 import { autocorrect, compareAlphabetically, logger } from '../../../functions';
 import { ModelManager } from './ModelManager';
+import type { GuildResolvable, Snowflake } from 'discord.js';
 import type { FindOptions } from 'sequelize';
 import type { HypixelGuild, UpdateOptions } from '../models/HypixelGuild';
 
@@ -32,6 +33,15 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 */
 	get mainGuild() {
 		return this.cache.get(this.client.config.get('MAIN_GUILD_ID'))!;
+	}
+
+	/**
+	 * linked discord guilds
+	 */
+	get uniqueDiscordGuildIds() {
+		return [
+			...new Set(this.client.hypixelGuilds.cache.map(({ discordId }) => discordId).filter(Boolean) as Snowflake[]),
+		];
 	}
 
 	override async loadCache(condition?: FindOptions) {
@@ -100,29 +110,40 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 */
 	sweepPlayerCache(idOrGuild?: string | HypixelGuild | null) {
 		if (idOrGuild) {
-			if (HypixelGuildManager.PSEUDO_GUILD_IDS.has(idOrGuild as any)) return;
-
 			const hypixelGuild = this.resolve(idOrGuild);
 
-			if (!hypixelGuild) throw new Error(`[SWEEP PLAYER CACHE]: invalid input: ${idOrGuild}`);
-
-			return (hypixelGuild.players = null);
+			if (hypixelGuild) {
+				hypixelGuild.players = null;
+			}
+		} else {
+			this.cache.each((hypixelGuild) => (hypixelGuild.players = null));
 		}
 
-		this.cache.each((hypixelGuild) => (hypixelGuild.players = null));
 		return this;
 	}
 
 	/**
-	 * get a hypixel guild by its name, case insensitive and with auto-correction
+	 * find a hypixel guild by its name, case insensitive and with auto-correction
 	 * @param name name of the hypixel guild
 	 */
-	getByName(name: string) {
+	findByName(name: string) {
 		if (!name) return null;
 
 		const { similarity, value } = autocorrect(name, this.cache, 'name');
 
 		return similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD') ? value : null;
+	}
+
+	/**
+	 * find a hypixel guild by its linked discord guild
+	 * @param discordGuildResolvable
+	 */
+	findByDiscordGuild(discordGuildResolvable: GuildResolvable | null) {
+		const discordGuildId = this.client.guilds.resolveId(discordGuildResolvable!);
+
+		if (!discordGuildId) return null;
+
+		return this.cache.find(({ discordId }) => discordId === discordGuildId) ?? null;
 	}
 
 	/**

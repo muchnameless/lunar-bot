@@ -169,9 +169,10 @@ export default class GuildCommand extends ApplicationCommand {
 	/**
 	 * throws on unknown subcommand, rejects on missing permissions
 	 * @param interaction
+	 * @param hypixelGuild
 	 * @param subcommand
 	 */
-	#checkRequiredRoles(interaction: Interaction, subcommand: string) {
+	#checkRequiredRoles(interaction: Interaction, hypixelGuild: HypixelGuild, subcommand: string) {
 		switch (subcommand) {
 			case 'demote':
 			case 'invite':
@@ -181,24 +182,14 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'setrank':
 			case 'unmute':
 				return this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
+					roleIds: hypixelGuild.roleIds.STAFF_IDS,
+					hypixelGuild,
 				});
 
 			case 'kick':
 				return this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
+					roleIds: hypixelGuild.roleIds.ADMIN_IDS,
+					hypixelGuild,
 				});
 
 			case 'history':
@@ -208,31 +199,16 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'quest':
 			case 'top':
 				return this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('GUILD_ROLE_ID'),
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
+					roleIds: [hypixelGuild.roleIds.GUILD, ...hypixelGuild.roleIds.STAFF_IDS],
+					hypixelGuild,
 				});
 
 			case 'list':
 			case 'members':
 			case 'online':
 				return this.checkPermissions(interaction, {
-					roleIds: [
-						this.config.get('GUILD_ROLE_ID'),
-						this.config.get('BRIDGER_ROLE_ID'),
-						this.config.get('SHRUG_ROLE_ID'),
-						this.config.get('TRIAL_MODERATOR_ROLE_ID'),
-						this.config.get('MODERATOR_ROLE_ID'),
-						this.config.get('DANKER_STAFF_ROLE_ID'),
-						this.config.get('SENIOR_STAFF_ROLE_ID'),
-						this.config.get('MANAGER_ROLE_ID'),
-					],
+					roleIds: [hypixelGuild.roleIds.GUILD, hypixelGuild.roleIds.BRIDGER, ...hypixelGuild.roleIds.STAFF_IDS],
+					hypixelGuild,
 				});
 
 			default:
@@ -273,7 +249,7 @@ export default class GuildCommand extends ApplicationCommand {
 
 						try {
 							// check if ID is from a member in the guild
-							await this.client.lgGuild?.members.fetch(ID);
+							await interaction.guild?.members.fetch(ID);
 
 							return (
 								await this.client.players.model.findCreateFind({
@@ -297,21 +273,15 @@ export default class GuildCommand extends ApplicationCommand {
 	 * /g mute
 	 * @param options
 	 */
-	async runMute({ target, executor, duration, hypixelGuild: hypixelGuildInput }: RunMuteOptions) {
-		let hypixelGuild = hypixelGuildInput;
-
+	async runMute({ target, executor, duration, hypixelGuild }: RunMuteOptions) {
 		if (this.client.players.isModel(target)) {
 			const inGuild = target.inGuild();
 
-			if (inGuild) {
-				({ hypixelGuild } = target);
-
-				if (target.guildRankPriority >= (executor?.guildRankPriority ?? -1)) {
-					return {
-						content: `your guild rank needs to be higher than \`${target}\`'s`,
-						ephemeral: true,
-					};
-				}
+			if (inGuild && target.guildRankPriority >= (executor?.guildRankPriority ?? -1)) {
+				return {
+					content: `your guild rank needs to be higher than \`${target}\`'s`,
+					ephemeral: true,
+				};
 			}
 
 			await target.update({ mutedTill: Date.now() + duration });
@@ -348,9 +318,10 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * @param interaction
+	 * @param hypixelGuild
 	 * @param duration
 	 */
-	async runMuteInteraction(interaction: CommandInteraction, duration: number) {
+	async runMuteInteraction(interaction: CommandInteraction, hypixelGuild: HypixelGuild, duration: number) {
 		const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 		const target = await this.getMuteTarget(TARGET_INPUT, interaction);
 
@@ -361,7 +332,6 @@ export default class GuildCommand extends ApplicationCommand {
 			});
 		}
 
-		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const { content, ephemeral } = await this.runMute({
 			target,
 			executor: UserUtil.getPlayer(interaction.user),
@@ -465,11 +435,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param commandOptions
 	 * @param hypixelGuild
 	 */
-	async #run(
-		interaction: CommandInteraction,
-		commandOptions: CommandOptions,
-		hypixelGuild = InteractionUtil.getHypixelGuild(interaction),
-	) {
+	async #run(interaction: CommandInteraction, hypixelGuild: HypixelGuild, commandOptions: CommandOptions) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
@@ -485,9 +451,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param commandOptions
 	 */
-	async #runList(interaction: CommandInteraction, commandOptions: CommandOptions) {
-		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
-
+	async #runList(interaction: CommandInteraction, hypixelGuild: HypixelGuild, commandOptions: CommandOptions) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
@@ -589,17 +553,17 @@ export default class GuildCommand extends ApplicationCommand {
 
 	/**
 	 * @param interaction
+	 * @param hypixelGuild
 	 * @param subcommand
 	 * @param baseCommand
-	 * @param hypixelGuild
 	 * @param userId
 	 * @param page
 	 */
 	async #runPaginated(
 		interaction: CommandInteraction | ButtonInteraction,
+		hypixelGuild: HypixelGuild,
 		subcommand: string,
 		commandOptions: CommandOptions,
-		hypixelGuild: HypixelGuild,
 		userId: Snowflake,
 		page: number | null,
 	) {
@@ -640,8 +604,13 @@ export default class GuildCommand extends ApplicationCommand {
 	override async runButton(interaction: ButtonInteraction, args: string[]) {
 		const [SUBCOMMAND_WITH_ARGS, HYPIXEL_GUILD_ID, USER_ID, PAGE_INPUT] = args;
 		const [SUBCOMMAND] = SUBCOMMAND_WITH_ARGS.split(' ', 1);
+		const hypixelGuild = this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID);
 
-		await this.#checkRequiredRoles(interaction, SUBCOMMAND);
+		if (!hypixelGuild) {
+			throw new Error('uncached hypixel guild');
+		}
+
+		await this.#checkRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
 
 		const PAGE = PAGE_INPUT === Number.NaN.toString() ? null : Number(PAGE_INPUT);
 
@@ -650,15 +619,12 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'history':
 				return this.#runPaginated(
 					interaction,
+					hypixelGuild,
 					SUBCOMMAND,
 					{
 						command: 'guild history',
 						abortRegExp: historyErrors(),
 					},
-					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ??
-						(() => {
-							throw new Error('uncached hypixel guild');
-						})(),
 					USER_ID,
 					PAGE,
 				);
@@ -666,15 +632,12 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'log':
 				return this.#runPaginated(
 					interaction,
+					hypixelGuild,
 					SUBCOMMAND_WITH_ARGS,
 					{
 						command: `guild ${SUBCOMMAND_WITH_ARGS}`,
 						abortRegExp: logErrors(),
 					},
-					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ??
-						(() => {
-							throw new Error('uncached hypixel guild');
-						})(),
 					USER_ID,
 					PAGE,
 				);
@@ -682,15 +645,12 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'top':
 				return this.#runPaginated(
 					interaction,
+					hypixelGuild,
 					SUBCOMMAND,
 					{
 						command: 'guild top',
 						abortRegExp: topErrors(),
 					},
-					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ??
-						(() => {
-							throw new Error('uncached hypixel guild');
-						})(),
 					USER_ID,
 					PAGE,
 				);
@@ -705,9 +665,10 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
+		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const SUBCOMMAND = interaction.options.getSubcommand();
 
-		await this.#checkRequiredRoles(interaction, SUBCOMMAND);
+		await this.#checkRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
 
 		switch (SUBCOMMAND) {
 			case 'demote': {
@@ -735,26 +696,15 @@ export default class GuildCommand extends ApplicationCommand {
 					});
 				}
 
-				return this.#run(
-					interaction,
-					{
-						command: `guild demote ${target}`,
-						responseRegExp: demote(target.ign),
-					},
-					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false }) ??
-						target.hypixelGuild ??
-						executor.hypixelGuild ??
-						this.client.hypixelGuilds.mainGuild,
-				);
+				return this.#run(interaction, hypixelGuild, {
+					command: `guild demote ${target}`,
+					responseRegExp: demote(target.ign),
+				});
 			}
 
 			case 'kick': {
 				const target = InteractionUtil.getPlayer(interaction) ?? interaction.options.getString('player', true);
 				const reason = interaction.options.getString('reason', true);
-				const hypixelGuild =
-					typeof target === 'string'
-						? InteractionUtil.getHypixelGuild(interaction)
-						: target.hypixelGuild ?? InteractionUtil.getHypixelGuild(interaction);
 				const { content, hasErrored } = await this.runKick({
 					ctx: interaction,
 					target,
@@ -819,36 +769,36 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'history':
 				return this.#runPaginated(
 					interaction,
+					hypixelGuild,
 					SUBCOMMAND,
 					{
 						command: 'guild history',
 						abortRegExp: historyErrors(),
 					},
-					InteractionUtil.getHypixelGuild(interaction),
 					interaction.user.id,
 					interaction.options.getInteger('page'),
 				);
 
 			case 'info':
 			case 'quest':
-				return this.#run(interaction, {
+				return this.#run(interaction, hypixelGuild, {
 					command: `guild ${SUBCOMMAND}`,
 				});
 
 			case 'motd':
-				return this.#run(interaction, {
+				return this.#run(interaction, hypixelGuild, {
 					command: 'guild motd preview',
 				});
 
 			case 'top':
 				return this.#runPaginated(
 					interaction,
+					hypixelGuild,
 					SUBCOMMAND,
 					{
 						command: 'guild top',
 						abortRegExp: topErrors(),
 					},
-					InteractionUtil.getHypixelGuild(interaction),
 					interaction.user.id,
 					interaction.options.getInteger('days_ago'),
 				);
@@ -864,7 +814,7 @@ export default class GuildCommand extends ApplicationCommand {
 					});
 				}
 
-				return this.#run(interaction, {
+				return this.#run(interaction, hypixelGuild, {
 					command: `guild invite ${ign}`,
 					responseRegExp: invite(ign),
 				});
@@ -873,7 +823,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'list':
 			case 'members':
 			case 'online':
-				return this.#runList(interaction, {
+				return this.#runList(interaction, hypixelGuild, {
 					command: `guild ${SUBCOMMAND}`,
 				});
 
@@ -882,12 +832,12 @@ export default class GuildCommand extends ApplicationCommand {
 
 				return this.#runPaginated(
 					interaction,
+					hypixelGuild,
 					COMMAND,
 					{
 						command: `guild ${COMMAND}`,
 						abortRegExp: logErrors(),
 					},
-					InteractionUtil.getHypixelGuild(interaction),
 					interaction.user.id,
 					interaction.options.getInteger('page'),
 				);
@@ -896,16 +846,10 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'member': {
 				const target = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 
-				return this.#run(
-					interaction,
-					{
-						command: `guild member ${target}`,
-						abortRegExp: unknownIgn(target.ign),
-					},
-					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false }) ??
-						target.hypixelGuild ??
-						this.client.hypixelGuilds.mainGuild,
-				);
+				return this.#run(interaction, hypixelGuild, {
+					command: `guild member ${target}`,
+					abortRegExp: unknownIgn(target.ign),
+				});
 			}
 
 			case 'mute': {
@@ -919,7 +863,7 @@ export default class GuildCommand extends ApplicationCommand {
 					});
 				}
 
-				return this.runMuteInteraction(interaction, DURATION);
+				return this.runMuteInteraction(interaction, hypixelGuild, DURATION);
 			}
 
 			case 'promote': {
@@ -947,17 +891,10 @@ export default class GuildCommand extends ApplicationCommand {
 					});
 				}
 
-				return this.#run(
-					interaction,
-					{
-						command: `guild promote ${target}`,
-						responseRegExp: promote(target.ign),
-					},
-					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false }) ??
-						target.hypixelGuild ??
-						executor.hypixelGuild ??
-						this.client.hypixelGuilds.mainGuild,
-				);
+				return this.#run(interaction, hypixelGuild, {
+					command: `guild promote ${target}`,
+					responseRegExp: promote(target.ign),
+				});
 			}
 
 			case 'setrank': {
@@ -977,7 +914,6 @@ export default class GuildCommand extends ApplicationCommand {
 				}
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
-				const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 				const RANK_INPUT = interaction.options.getString('rank', true);
 				const { value: rank, similarity } = autocorrect(RANK_INPUT, hypixelGuild.ranks, 'name');
 
@@ -995,23 +931,15 @@ export default class GuildCommand extends ApplicationCommand {
 					});
 				}
 
-				return this.#run(
-					interaction,
-					{
-						command: `guild setrank ${target} ${rank.name}`,
-						responseRegExp: setRank(target.ign, undefined, rank.name),
-					},
-					InteractionUtil.getHypixelGuild(interaction, { fallbackToCurrentUser: false }) ??
-						target.hypixelGuild ??
-						executor.hypixelGuild ??
-						this.client.hypixelGuilds.mainGuild,
-				);
+				return this.#run(interaction, hypixelGuild, {
+					command: `guild setrank ${target} ${rank.name}`,
+					responseRegExp: setRank(target.ign, undefined, rank.name),
+				});
 			}
 
 			case 'unmute': {
 				const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 
-				let hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 				let target;
 
 				if (this.GUILD_IDENTIFIER.has(TARGET_INPUT as any)) {
@@ -1045,10 +973,6 @@ export default class GuildCommand extends ApplicationCommand {
 							ephemeral: true,
 						});
 					}
-
-					if (this.client.players.isModel(target) && target.inGuild()) {
-						({ hypixelGuild } = target);
-					}
 				}
 
 				if (this.client.players.isModel(target)) {
@@ -1066,17 +990,13 @@ export default class GuildCommand extends ApplicationCommand {
 					await hypixelGuild.update({ mutedTill: 0 });
 				}
 
-				return this.#run(
-					interaction,
-					{
-						command: `guild unmute ${target}`,
-						responseRegExp: unmute(
-							target === 'everyone' ? 'the guild chat' : `${target}`,
-							hypixelGuild.chatBridge.bot.username,
-						),
-					},
-					hypixelGuild,
-				);
+				return this.#run(interaction, hypixelGuild, {
+					command: `guild unmute ${target}`,
+					responseRegExp: unmute(
+						target === 'everyone' ? 'the guild chat' : `${target}`,
+						hypixelGuild.chatBridge.bot.username,
+					),
+				});
 			}
 
 			default:

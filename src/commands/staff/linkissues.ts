@@ -26,39 +26,43 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		// discord members with wrong roles
-		const VERIFIED_ROLE_ID = this.config.get('VERIFIED_ROLE_ID');
-		const GUILD_ROLE_ID = this.config.get('GUILD_ROLE_ID');
-		const missingVerifiedRole: GuildMember[] = [];
+		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
+		const { discordGuild } = hypixelGuild;
+		const mandatoryRole = discordGuild?.roles.cache.get(hypixelGuild.roleIds.MANDATORY!);
+		const { GUILD } = hypixelGuild.roleIds;
+		const missingMandatoryRole: GuildMember[] = [];
 		const guildRoleWithoutDbEntry: GuildMember[] = [];
 
-		for (const [DISCORD_ID, member] of await GuildUtil.fetchAllMembers(this.client.lgGuild)) {
+		for (const [DISCORD_ID, member] of await GuildUtil.fetchAllMembers(discordGuild)) {
 			if (this.client.players.cache.some(({ discordId }) => discordId === DISCORD_ID)) {
-				if (!member.roles.cache.has(VERIFIED_ROLE_ID)) missingVerifiedRole.push(member);
+				if (mandatoryRole && !member.roles.cache.has(mandatoryRole.id)) missingMandatoryRole.push(member);
 				continue;
 			}
 
-			if (member.roles.cache.has(GUILD_ROLE_ID)) guildRoleWithoutDbEntry.push(member);
+			if (member.roles.cache.has(GUILD!)) guildRoleWithoutDbEntry.push(member);
 		}
 
-		let issuesAmount = missingVerifiedRole.length + guildRoleWithoutDbEntry.length;
+		let issuesAmount = missingMandatoryRole.length + guildRoleWithoutDbEntry.length;
 
 		const embed = this.client.defaultEmbed;
 
-		if (missingVerifiedRole.length) {
+		if (missingMandatoryRole.length) {
 			for (const value of Util.splitMessage(
-				missingVerifiedRole
+				missingMandatoryRole
 					.map((member) => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`)
 					.join('\n'),
 				{ char: '\n', maxLength: 1_024 },
 			)) {
 				embed.addFields({
-					name: `${Formatters.bold('Missing Verified Role:')} [display name | tag] (${missingVerifiedRole.length})`,
+					name: `${Formatters.bold(`Missing ${mandatoryRole!.name} Role:`)} [display name | tag] (${
+						missingMandatoryRole.length
+					})`,
 					value,
 				});
 			}
-		} else {
+		} else if (mandatoryRole) {
 			embed.addFields({
-				name: Formatters.bold('Missing Verified Role:'),
+				name: Formatters.bold(`Missing ${mandatoryRole.name} Role:`),
 				value: 'none',
 			});
 		}

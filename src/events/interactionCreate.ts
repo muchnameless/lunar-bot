@@ -246,12 +246,12 @@ export default class InteractionCreateEvent extends Event {
 
 					// @displayName input
 					if (value.startsWith('@')) {
-						const { lgGuild } = this.client;
-						if (!lgGuild) return interaction.respond([]);
+						const { discordGuild } = InteractionUtil.getHypixelGuild(interaction);
+						if (!discordGuild) return interaction.respond([]);
 
 						const response: ApplicationCommandOptionChoice[] = [];
 
-						for (const member of lgGuild.members.cache.values()) {
+						for (const member of discordGuild.members.cache.values()) {
 							const player = GuildMemberUtil.getPlayer(member);
 							if (!player) continue;
 

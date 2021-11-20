@@ -20,8 +20,10 @@ export default class MessageReactionAddEvent extends Event {
 	override async run(reaction: MessageReaction, { id: userId }: User) {
 		// reaction.message is not from the announcement channel or not the broadcast emoji
 		if (
-			reaction.message.channelId !== this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID') ||
-			reaction.emoji.name !== BROADCAST_EMOJI
+			reaction.emoji.name !== BROADCAST_EMOJI ||
+			!this.client.hypixelGuilds.cache.some(
+				({ announcementsChannelId }) => announcementsChannelId === reaction.message.channelId,
+			)
 		)
 			return;
 

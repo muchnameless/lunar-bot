@@ -267,7 +267,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 	 * @param options
 	 */
 	handleDiscordMessage(message: DiscordMessage, options: MessageForwardOptions = {}) {
-		return (this.discord.channelsByIds.get(message.channelId)?.forwardToMinecraft(message, options) && true) ?? false;
+		return Boolean(this.discord.channelsByIds.get(message.channelId)?.forwardToMinecraft(message, options));
 	}
 
 	/**

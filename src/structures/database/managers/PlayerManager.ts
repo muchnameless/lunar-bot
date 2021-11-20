@@ -163,14 +163,6 @@ export class PlayerManager extends ModelManager<Player> {
 	}
 
 	/**
-	 * sweeps all cached discord members
-	 */
-	sweepDiscordMemberCache() {
-		this.cache.each((player) => (player.discordMember = null));
-		return this;
-	}
-
-	/**
 	 * get a player by their IGN, case insensitive and with auto-correction
 	 * @param ign ign of the player
 	 */

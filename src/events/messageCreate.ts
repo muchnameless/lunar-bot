@@ -24,7 +24,9 @@ export default class MessageCreateEvent extends Event {
 		this.client.chatBridges.handleDiscordMessage(message, { isEdit });
 
 		// channel specific triggers
-		if (message.channelId === this.config.get('GUILD_ANNOUNCEMENTS_CHANNEL_ID')) {
+		if (
+			this.client.hypixelGuilds.cache.some(({ announcementsChannelId }) => announcementsChannelId === message.channelId)
+		) {
 			MessageUtil.react(message, BROADCAST_EMOJI);
 		}
 

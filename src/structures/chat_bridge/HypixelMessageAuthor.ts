@@ -54,7 +54,7 @@ export class HypixelMessageAuthor {
 					this.client.players.cache.get(uuid) ?? (logger.error(`[HYPIXEL AUTHOR INIT]: unknown uuid '${uuid}'`), null);
 			}
 
-			this.member = (await this.player?.discordMember) ?? null;
+			this.member = (await this.player?.fetchDiscordMember()) ?? null;
 		} catch (error) {
 			logger.error(error, '[AUTHOR PLAYER]');
 		}

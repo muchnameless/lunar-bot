@@ -152,9 +152,11 @@ export default class LinkCommand extends ApplicationCommand {
 		}
 
 		// try to find the linked users member data
+		const { hypixelGuild } = player;
+		const discordGuild = hypixelGuild?.discordGuild;
 		const discordMember =
 			(interaction.options.getMember('user') as GuildMember) ??
-			(await this.client.lgGuild?.members
+			(await discordGuild?.members
 				.fetch(USER_ID)
 				.catch((error) => logger.error(error, '[LINK]: error fetching member to link'))) ??
 			null;
@@ -164,7 +166,9 @@ export default class LinkCommand extends ApplicationCommand {
 			await player.link(USER_ID);
 			return InteractionUtil.reply(
 				interaction,
-				`\`${player}\` linked to \`${USER_ID}\` but could not be found on the Lunar Guard discord server`,
+				`\`${player}\` linked to \`${USER_ID}\` but could not be found on the ${
+					discordGuild?.name ?? '(currently unavailable)'
+				} discord server`,
 			);
 		}
 
@@ -173,11 +177,10 @@ export default class LinkCommand extends ApplicationCommand {
 
 		let reply = `\`${player}\` linked to ${discordMember}`;
 
-		if (!discordMember.roles.cache.has(this.config.get('VERIFIED_ROLE_ID'))) {
-			reply += ` (missing ${
-				this.client.lgGuild?.roles.cache.get(this.config.get('VERIFIED_ROLE_ID'))?.name ??
-				this.config.get('VERIFIED_ROLE_ID')
-			} role)`;
+		const { MANDATORY } = hypixelGuild!.roleIds;
+
+		if (MANDATORY && !discordMember.roles.cache.has(MANDATORY)) {
+			reply += ` (missing ${hypixelGuild!.discordGuild?.roles.cache.get(MANDATORY)?.name ?? MANDATORY} role)`;
 		}
 
 		return InteractionUtil.reply(interaction, {

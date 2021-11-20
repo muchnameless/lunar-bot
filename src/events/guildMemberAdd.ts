@@ -18,8 +18,6 @@ export default class GuildMemberAddEvent extends Event {
 	 * @param member
 	 */
 	override async run(member: GuildMember) {
-		if (member.guild.id !== this.config.get('DISCORD_GUILD_ID')) return;
-
 		// check new discord members for tag in player database and link them if found
 		const player = GuildMemberUtil.getPlayer(member);
 
@@ -32,10 +30,10 @@ export default class GuildMemberAddEvent extends Event {
 			${player.info}
 		`;
 
-		if (!member.roles.cache.has(this.config.get('VERIFIED_ROLE_ID'))) {
-			description += `\n\nwaiting for ${
-				member.guild.roles.cache.get(this.config.get('VERIFIED_ROLE_ID')) ?? this.config.get('VERIFIED_ROLE_ID')
-			} role`;
+		const MANDATORY = this.client.hypixelGuilds.findByDiscordGuild(member.guild)?.roleIds.MANDATORY;
+
+		if (MANDATORY && !member.roles.cache.has(MANDATORY)) {
+			description += `\n\nwaiting for ${member.guild.roles.cache.get(MANDATORY) ?? MANDATORY} role`;
 		}
 
 		this.client.log(
