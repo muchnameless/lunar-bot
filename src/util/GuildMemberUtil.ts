@@ -46,7 +46,8 @@ export default class GuildMemberUtil extends null {
 			if (discordId !== member.guild.id) continue;
 
 			// guild
-			if (roleIds.GUILD && roleCache.has(roleIds.GUILD)) rolesToRemove.push(roleIds.GUILD);
+			if (roleCache.has(roleIds.GUILD)) rolesToRemove.push(roleIds.GUILD);
+			if (roleCache.has(roleIds.GUILD_2)) rolesToRemove.push(roleIds.GUILD_2);
 
 			for (const { roleId: rankRoleId } of ranks) {
 				if (rankRoleId && roleCache.has(rankRoleId)) rolesToRemove.push(rankRoleId);
