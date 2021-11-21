@@ -75,7 +75,7 @@ const client = new Client({
 	failIfNotExists: false,
 	presence,
 	intents: [
-		Intents.FLAGS.DIRECT_MESSAGES,
+		// Intents.FLAGS.DIRECT_MESSAGES,
 		// Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
 		// Intents.FLAGS.DIRECT_MESSAGE_TYPING,
 		Intents.FLAGS.GUILDS,
@@ -84,7 +84,7 @@ const client = new Client({
 		// Intents.FLAGS.GUILD_INTEGRATIONS,
 		// Intents.FLAGS.GUILD_INVITES,
 		// Intents.FLAGS.GUILD_MEMBERS,
-		Intents.FLAGS.GUILD_MESSAGES,
+		// Intents.FLAGS.GUILD_MESSAGES,
 		// Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
 		// Intents.FLAGS.GUILD_MESSAGE_TYPING,
 		// Intents.FLAGS.GUILD_PRESENCES,
@@ -110,7 +110,17 @@ client
 		logger.info(`Startup complete. Logged in as ${client.user!.tag}`);
 	})
 	.on(Constants.Events.INTERACTION_CREATE, async (interaction) => {
-		if (!interaction.isApplicationCommand() && !interaction.isMessageComponent()) return;
+		if (interaction.isAutocomplete()) {
+			try {
+				return await interaction.respond([]);
+			} catch (error) {
+				logger.error(error);
+			}
+		}
+
+		if (!interaction.isApplicationCommand() && !interaction.isMessageComponent() && !interaction.isContextMenu()) {
+			return;
+		}
 
 		logger.info(
 			`${interaction.user.tag}${
