@@ -273,6 +273,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				},
 				name: {
 					type: DataTypes.STRING,
+					defaultValue: 'UNKNOWN_GUILD_NAME',
 					allowNull: false,
 				},
 				weightReq: {
