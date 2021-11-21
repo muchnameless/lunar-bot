@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed, Permissions, Formatters } from 'discord.js';
+import { DiscordAPIError, GuildMember, MessageEmbed, Permissions, Formatters } from 'discord.js';
 import pkg from 'sequelize';
 const { Model, DataTypes, fn } = pkg;
 import { stripIndents } from 'common-tags';
@@ -611,24 +611,37 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * fetches the discord member if the discord id is valid and the player is in the hypixel guild's discord server
 	 * @param discordGuild
 	 */
-	async fetchDiscordMember(discordGuild?: GuildResolvable | null) {
+	async fetchDiscordMember(discordGuildResolvable?: GuildResolvable | null) {
 		if (this.#discordMember) return this.#discordMember;
 		if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
 
 		try {
-			const discordMember =
-				(await (discordGuild
-					? this.client.guilds.resolve(discordGuild)
-					: this.hypixelGuild?.discordGuild
-				)?.members.fetch(this.discordId)) ?? null;
+			let discordGuild;
+
+			if (discordGuildResolvable) {
+				discordGuild = this.client.guilds.resolve(discordGuildResolvable);
+
+				if (!discordGuild?.available) {
+					logger.warn(
+						`[FETCH DISCORD MEMBER] ${this.logInfo}: discord guild ${discordGuild ? 'unavailable' : 'uncached'}`,
+					);
+					return null;
+				}
+			} else {
+				discordGuild = this.hypixelGuild?.discordGuild;
+
+				if (!discordGuild) return null;
+			}
+
+			const discordMember = (await discordGuild.members.fetch(this.discordId)) ?? null;
 
 			this.setDiscordMember(discordMember, true);
 
 			return discordMember;
 		} catch (error) {
 			// prevent further fetches and try to link via cache in the next updateDiscordMember calls
-			logger.error(error, `[GET DISCORD MEMBER]: ${this.logInfo}`);
-			this.setDiscordMember(null);
+			logger.error(error, `[FETCH DISCORD MEMBER]: ${this.logInfo}`);
+			this.setDiscordMember(null, error instanceof DiscordAPIError);
 			return null;
 		}
 	}
@@ -641,10 +654,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (member == null) {
 			this.#discordMember = null;
 
-			try {
-				await this.update({ inDiscord: false });
-			} catch (error) {
-				logger.error(error);
+			if (force) {
+				try {
+					await this.update({ inDiscord: false });
+				} catch (error) {
+					logger.error(error);
+				}
 			}
 
 			return this;
@@ -985,7 +1000,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	async updateDiscordMember({ reason: reasonInput = 'synced with in game stats', shouldSendDm = false } = {}) {
 		if (this.discordMemberUpdatesDisabled) return;
-		if (this.guildId === GUILD_ID_BRIDGER) return;
+		if (this.guildId === GUILD_ID_BRIDGER || this.guildId === null) return;
 
 		let reason = reasonInput;
 
@@ -1389,7 +1404,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			return true;
 		} catch (error) {
 			// was not successful
-			this.setDiscordMember(null);
+			this.setDiscordMember(null, error instanceof DiscordAPIError);
 
 			logger.error(error, '[ROLE API CALL]');
 
@@ -1628,7 +1643,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			return true;
 		} catch (error) {
 			logger.error(error, `[SYNC IGN DISPLAYNAME]: ${this.logInfo}`);
-			this.setDiscordMember(null);
+			this.setDiscordMember(null, error instanceof DiscordAPIError);
 			return false;
 		}
 	}
@@ -1900,7 +1915,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		}
 
 		// remove cached member
-		this.#discordMember = null;
+		this.setDiscordMember(null, false);
 	}
 
 	/**
