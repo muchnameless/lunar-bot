@@ -1669,14 +1669,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		try {
 			profiles = await hypixel.skyblock.profiles.uuid(this.minecraftUuid);
 		} catch (error) {
-			this.update({ xpUpdatesDisabled: true }).catch((error_) => logger.error(error_));
 			logger.error(error, '[MAIN PROFILE]');
 		}
 
 		const mainProfile = getMainProfile(profiles, this.minecraftUuid);
 
 		if (!mainProfile) {
-			this.update({ mainProfileId: null }).catch((error) => logger.error(error));
+			this.update({ mainProfileId: null, xpUpdatesDisabled: true }).catch((error) => logger.error(error));
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
 
 			throw `${this.logInfo}: no SkyBlock profiles`;
