@@ -604,7 +604,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	inGuild(): this is PlayerInGuild {
 		// return !HypixelGuildManager.PSEUDO_GUILD_IDS.has(this.guildId as any);
-		return !this.client.hypixelGuilds.cache.has(this.guildId!);
+		return this.client.hypixelGuilds.cache.has(this.guildId!);
 	}
 
 	/**
