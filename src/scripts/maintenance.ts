@@ -118,7 +118,7 @@ client
 			}
 		}
 
-		if (!interaction.isApplicationCommand() && !interaction.isMessageComponent() && !interaction.isContextMenu()) {
+		if (!interaction.isApplicationCommand() && !interaction.isMessageComponent()) {
 			return;
 		}
 
