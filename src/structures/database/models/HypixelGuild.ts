@@ -475,7 +475,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 		if (discordGuild?.available) return discordGuild;
 
-		logger.warn(`[DISCORD GUILD] ${this.name}: ${discordGuild ? 'unavailable' : 'uncached'}`);
+		if (discordGuild) logger.warn(`[DISCORD GUILD] ${this.name}: unavailable`);
 		return null;
 	}
 
