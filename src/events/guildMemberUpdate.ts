@@ -46,7 +46,7 @@ export default class GuildMemberUpdateEvent extends Event {
 
 		if (!player) return;
 
-		player.discordMember = newMember;
+		player.setDiscordMember(newMember);
 
 		// changed nickname -> check if new name includes ign
 		if (oldMember.nickname !== newMember.nickname) {

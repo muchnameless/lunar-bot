@@ -622,31 +622,54 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					: this.hypixelGuild?.discordGuild
 				)?.members.fetch(this.discordId)) ?? null;
 
-			this.discordMember = discordMember;
+			this.setDiscordMember(discordMember, true);
 
 			return discordMember;
 		} catch (error) {
 			// prevent further fetches and try to link via cache in the next updateDiscordMember calls
 			logger.error(error, `[GET DISCORD MEMBER]: ${this.logInfo}`);
-			this.discordMember = null;
+			this.setDiscordMember(null);
 			return null;
 		}
 	}
 
 	/**
 	 * @param member discord guild member linked to the player
+	 * @param force
 	 */
-	set discordMember(member: GuildMember | null) {
+	async setDiscordMember(member: GuildMember | null, force = false) {
 		if (member == null) {
-			this.update({ inDiscord: false }).catch((error) => logger.error(error));
-			return;
+			this.#discordMember = null;
+
+			try {
+				await this.update({ inDiscord: false });
+			} catch (error) {
+				logger.error(error);
+			}
+
+			return this;
+		}
+
+		if (
+			!force &&
+			(this.inGuild()
+				? this.hypixelGuild.discordId !== member.guild.id
+				: this.#discordMember && this.#discordMember.guild.id !== member.guild.id)
+		) {
+			return this;
 		}
 
 		this.#discordMember = member;
 
-		if (this.inDiscord) return;
+		if (!this.inDiscord) {
+			try {
+				await this.update({ inDiscord: true });
+			} catch (error) {
+				logger.error(error);
+			}
+		}
 
-		this.update({ inDiscord: true }).catch((error) => logger.error(error));
+		return this;
 	}
 
 	/**
@@ -1233,7 +1256,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (idOrDiscordMember instanceof GuildMember) {
 			await this.setUniqueDiscordId(idOrDiscordMember.id);
 			this.update({ inDiscord: true }).catch((error) => logger.error(error));
-			this.discordMember = idOrDiscordMember;
+			this.setDiscordMember(idOrDiscordMember, true);
 
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
 
@@ -1342,7 +1365,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		try {
 			// api call
-			this.discordMember = await member.roles.set(_rolesToAdd, reason);
+			this.setDiscordMember(await member.roles.set(_rolesToAdd, reason), true);
 
 			if (NAMES_TO_ADD) {
 				loggingEmbed.addFields({
@@ -1366,7 +1389,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			return true;
 		} catch (error) {
 			// was not successful
-			this.discordMember = null;
+			this.setDiscordMember(null);
 
 			logger.error(error, '[ROLE API CALL]');
 
@@ -1545,7 +1568,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					auditLogReason = reason;
 			}
 
-			this.discordMember = await member.setNickname(newNick, auditLogReason);
+			this.setDiscordMember(await member.setNickname(newNick, auditLogReason), true);
 
 			await this.client.log(
 				this.client.defaultEmbed
@@ -1605,7 +1628,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			return true;
 		} catch (error) {
 			logger.error(error, `[SYNC IGN DISPLAYNAME]: ${this.logInfo}`);
-			this.discordMember = null;
+			this.setDiscordMember(null);
 			return false;
 		}
 	}
