@@ -22,7 +22,10 @@ export default class GuildUtil extends null {
 		let highest: Role;
 
 		for (const roleOrId of rolesOrIds.values()) {
-			const role = guild.roles.resolve(roleOrId!);
+			// skip invalid input
+			if (!roleOrId) continue;
+
+			const role = guild.roles.resolve(roleOrId);
 
 			if (!role) {
 				logger.warn(`[CHECK ROLE IDS]: '${roleOrId}' is not a valid role id`);
