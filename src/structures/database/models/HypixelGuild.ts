@@ -98,7 +98,10 @@ interface DiscordRoleIds {
 	FORAGING_55: Snowflake;
 	FORAGING_60: Snowflake;
 	GUILD_DELIMITER: Snowflake;
+	/** Guardians */
 	GUILD: Snowflake;
+	/** Lunar */
+	GUILD_2: Snowflake;
 	INACTIVE: Snowflake;
 	MINING_50: Snowflake;
 	MINING_55: Snowflake;
@@ -243,6 +246,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						FORAGING_60: null,
 						GUILD_DELIMITER: null,
 						GUILD: null,
+						GUILD_2: null,
 						INACTIVE: null,
 						MINING_50: null,
 						MINING_55: null,

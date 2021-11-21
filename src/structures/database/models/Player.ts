@@ -1001,7 +1001,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		let reason = reasonInput;
 
 		// individual hypixel guild roles and guild rank roles
-		for (const [guildId, { roleIds, ranks }] of this.client.hypixelGuilds.cache) {
+		for (const [guildId, { discordId, roleIds, ranks }] of this.client.hypixelGuilds.cache) {
+			// hypixel guild is not linked to member's discord guild
+			if (discordId !== member.guild.id) continue;
+
 			// player is not in the guild -> remove all roles
 			if (guildId !== this.guildId) {
 				// guild role
@@ -1012,14 +1015,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					if (roleId && roleCache.has(roleId)) rolesToRemove.push(roleId);
 				}
 
-				// only remove roles
+				// skip adding roles
 				continue;
 			}
 
 			// player is in the guild
-
-			// guild role
-			if (roleIds.GUILD && !roleCache.has(roleIds.GUILD)) rolesToAdd.push(roleIds.GUILD);
 
 			// rank roles
 			const CURRENT_PRIORITY = this.isStaff
@@ -1046,8 +1046,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				}
 			}
 
-			// combined guild roles
+			// guild roles
 			if (!roleCache.has(roleIds.GUILD)) rolesToAdd.push(roleIds.GUILD);
+			if (!roleCache.has(roleIds.GUILD_2)) rolesToAdd.push(roleIds.GUILD_2);
 			if (roleCache.has(roleIds.EX_GUILD)) rolesToRemove.push(roleIds.EX_GUILD);
 
 			// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
