@@ -1,9 +1,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { DiscordAPIError, Constants } from 'discord.js';
+import { DiscordAPIError } from 'discord.js';
+import { RESTJSONErrorCodes } from 'discord-api-types/v9';
 import { stripIndents } from 'common-tags';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
+import { InteractionUtil, UserUtil } from '../../util';
 import { logger, seconds, validateNumber } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, GuildMember, Snowflake } from 'discord.js';
@@ -27,9 +28,9 @@ export default class LinkCommand extends ApplicationCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		const IGN_OR_UUID = interaction.options.getString('ign', true);
 
-		let uuid;
-		let ign;
-		let guildId;
+		let uuid: string | undefined;
+		let ign: string | undefined;
+		let guildId: string | null = null;
 
 		try {
 			({ uuid, ign } = await mojang.ignOrUuid(IGN_OR_UUID));
@@ -44,7 +45,7 @@ export default class LinkCommand extends ApplicationCommand {
 			// IGN_OR_Uuid is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
 			player = this.client.players.getByIgn(IGN_OR_UUID);
 
-			if (player) ({ minecraftUuid: uuid, ign } = player);
+			if (player) ({ minecraftUuid: uuid, ign, guildId } = player);
 		} else if (uuid) {
 			// IGN_OR_Uuid could be resolved to a valid uuid in guild
 			player =
@@ -62,15 +63,35 @@ export default class LinkCommand extends ApplicationCommand {
 		}
 
 		if (!player) {
-			return InteractionUtil.reply(
-				interaction,
-				stripIndents`
+			return InteractionUtil.reply(interaction, {
+				content: stripIndents`
 					\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
 					Make sure to provide the full ign if the player database is not already updated (check ${
 						this.client.logHandler.channel ?? '#lunar-logs'
 					})
 				`,
-			);
+				ephemeral: true,
+			});
+		}
+
+		const { hypixelGuild } = player;
+		const discordGuild = hypixelGuild?.discordGuild;
+
+		if (interaction.user.id !== this.client.ownerId) {
+			if (!hypixelGuild) {
+				return InteractionUtil.reply(interaction, {
+					content: `\`${player}\` is not in a cached hypixel guild`,
+					ephemeral: true,
+				});
+			}
+
+			// check if executor is staff in the player's hypixel guild's discord guild
+			if (UserUtil.getPlayer(interaction.user)?.hypixelGuild?.discordId !== discordGuild?.id) {
+				return InteractionUtil.reply(interaction, {
+					content: `you need to be staff in ${discordGuild}'s discord server`,
+					ephemeral: true,
+				});
+			}
 		}
 
 		const USER_ID = interaction.options.get('user', true).value as Snowflake;
@@ -87,7 +108,7 @@ export default class LinkCommand extends ApplicationCommand {
 			let linkedUserIsDeleted = false;
 
 			const linkedUser = await playerLinkedToId.discordUser.catch((error) => {
-				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
+				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownUser) {
 					linkedUserIsDeleted = true;
 					return logger.error(
 						error,
@@ -136,7 +157,7 @@ export default class LinkCommand extends ApplicationCommand {
 					allowedMentions: { parse: [] },
 				});
 			} catch (error) {
-				if (error instanceof DiscordAPIError && error.code === Constants.APIErrors.UNKNOWN_USER) {
+				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownUser) {
 					logger.error(`[LINK]: ${player.logInfo}: deleted discord user: ${player.discordId}`);
 				} else {
 					logger.error(error, `[LINK]: ${player.logInfo}: error fetching already linked user`);
@@ -152,8 +173,6 @@ export default class LinkCommand extends ApplicationCommand {
 		}
 
 		// try to find the linked users member data
-		const { hypixelGuild } = player;
-		const discordGuild = hypixelGuild?.discordGuild;
 		const discordMember =
 			(interaction.options.getMember('user') as GuildMember) ??
 			(await discordGuild?.members
