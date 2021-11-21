@@ -1,4 +1,5 @@
 import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } from 'discord.js';
+import { RESTJSONErrorCodes } from 'discord-api-types/v9';
 import { stripIndent } from 'common-tags';
 import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
 import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
@@ -103,7 +104,7 @@ export default class InteractionUtil extends null {
 			useEphemeral:
 				this.#checkEphemeralOption(interaction) ??
 				(channel !== null && channel.type !== 'DM'
-					? !channel.name.includes('command') // guild channel
+					? !channel.name.includes('command') && !channel.name.includes('ᴄᴏᴍᴍᴀɴᴅ') // guild channel
 					: false), // DM channel
 			autoDefer: setTimeout(
 				// interactions must be acked within 3 seconds
@@ -158,9 +159,9 @@ export default class InteractionUtil extends null {
 		if (!(error instanceof DiscordAPIError)) return false;
 
 		switch (error.code) {
-			case Constants.APIErrors.UNKNOWN_INTERACTION:
-			case Constants.APIErrors.UNKNOWN_WEBHOOK:
-			case Constants.APIErrors.INVALID_WEBHOOK_TOKEN:
+			case RESTJSONErrorCodes.UnknownInteraction:
+			case RESTJSONErrorCodes.UnknownWebhook:
+			case RESTJSONErrorCodes.InvalidWebhookToken:
 				return true;
 
 			default:
