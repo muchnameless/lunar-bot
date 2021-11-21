@@ -1458,7 +1458,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (isBridger) {
 			this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache (uncache light)
-			this.guildId = GUILD_ID_ERROR;
+			this.guildId = GUILD_ID_BRIDGER;
 		} else {
 			this.uncache(); // uncache everything
 			this.guildId = null;
