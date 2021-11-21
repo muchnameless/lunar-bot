@@ -17,7 +17,7 @@ export default class GuildUtil extends null {
 	 * @param rolesOrIds roles or role ids to verify
 	 */
 	static resolveRoles(guild: Guild, rolesOrIds: RoleResolvables) {
-		const resolvedRoles: Role[] = [];
+		const resolvedRoles = new Set<Role>();
 
 		let highest: Role;
 
@@ -34,10 +34,10 @@ export default class GuildUtil extends null {
 				continue;
 			}
 
-			resolvedRoles.push(role);
+			resolvedRoles.add(role);
 		}
 
-		return resolvedRoles.sort((a, b) => Role.comparePositions(b, a));
+		return [...resolvedRoles].sort((a, b) => Role.comparePositions(b, a));
 	}
 
 	/**
