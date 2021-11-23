@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Type } from '@sapphire/type';
+import RE2 from 're2';
 import { sortCache } from '../../functions';
 import { MAX_CHOICES } from '../../constants';
 import { InteractionUtil } from '../../util';
@@ -155,7 +156,7 @@ export default class ConfigCommand extends ApplicationCommand {
 					});
 				}
 
-				const queryRegex = new RegExp(query, 'i');
+				const queryRegex = new RE2(query, 'i');
 
 				return InteractionUtil.reply(interaction, {
 					content: this.#listEntries(
