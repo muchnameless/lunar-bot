@@ -75,7 +75,7 @@ export default class LinkCommand extends ApplicationCommand {
 		}
 
 		const { hypixelGuild } = player;
-		const discordGuild = hypixelGuild?.discordGuild;
+		const guild = hypixelGuild?.discordGuild;
 
 		if (interaction.user.id !== this.client.ownerId) {
 			if (!hypixelGuild) {
@@ -86,9 +86,9 @@ export default class LinkCommand extends ApplicationCommand {
 			}
 
 			// check if executor is staff in the player's hypixel guild's discord guild
-			if (UserUtil.getPlayer(interaction.user)?.hypixelGuild?.discordId !== discordGuild?.id) {
+			if (UserUtil.getPlayer(interaction.user)?.hypixelGuild?.discordId !== guild?.id) {
 				return InteractionUtil.reply(interaction, {
-					content: `you need to be staff in ${discordGuild}'s discord server`,
+					content: `you need to be staff in ${hypixelGuild}'s discord server`,
 					ephemeral: true,
 				});
 			}
@@ -175,7 +175,7 @@ export default class LinkCommand extends ApplicationCommand {
 		// try to find the linked users member data
 		const discordMember =
 			(interaction.options.getMember('user') as GuildMember) ??
-			(await discordGuild?.members
+			(await guild?.members
 				.fetch(USER_ID)
 				.catch((error) => logger.error(error, '[LINK]: error fetching member to link'))) ??
 			null;
@@ -186,7 +186,7 @@ export default class LinkCommand extends ApplicationCommand {
 			return InteractionUtil.reply(
 				interaction,
 				`\`${player}\` linked to \`${USER_ID}\` but could not be found on the ${
-					discordGuild?.name ?? '(currently unavailable)'
+					guild?.name ?? '(currently unavailable)'
 				} discord server`,
 			);
 		}
@@ -196,10 +196,10 @@ export default class LinkCommand extends ApplicationCommand {
 
 		let reply = `\`${player}\` linked to ${discordMember}`;
 
-		const { MANDATORY } = hypixelGuild!.roleIds;
+		const MANDATORY_ROLE_ID = this.client.discordGuilds.cache.get(hypixelGuild?.discordId!)?.MANDATORY_ROLE_ID;
 
-		if (MANDATORY && !discordMember.roles.cache.has(MANDATORY)) {
-			reply += ` (missing ${hypixelGuild!.discordGuild?.roles.cache.get(MANDATORY)?.name ?? MANDATORY} role)`;
+		if (MANDATORY_ROLE_ID && !discordMember.roles.cache.has(MANDATORY_ROLE_ID)) {
+			reply += ` (missing ${guild?.roles.cache.get(MANDATORY_ROLE_ID)?.name ?? MANDATORY_ROLE_ID} role)`;
 		}
 
 		return InteractionUtil.reply(interaction, {

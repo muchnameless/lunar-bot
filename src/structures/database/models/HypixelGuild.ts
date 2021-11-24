@@ -60,76 +60,15 @@ interface PlayerWithWeight {
 	weight: number;
 }
 
-interface DiscordRoleIds {
-	STAFF_IDS: Snowflake[];
-	ADMIN_IDS: Snowflake[];
-
-	ALCHEMY_50: Snowflake;
-	ALCHEMY_55: Snowflake;
-	ALCHEMY_60: Snowflake;
-	AVERAGE_LVL_40: Snowflake;
-	AVERAGE_LVL_45: Snowflake;
-	AVERAGE_LVL_50: Snowflake;
-	AVERAGE_LVL_55: Snowflake;
-	AVERAGE_LVL_60: Snowflake;
-	BRIDGER: Snowflake;
-	CATACOMBS_30: Snowflake;
-	CATACOMBS_35: Snowflake;
-	CATACOMBS_40: Snowflake;
-	CATACOMBS_45: Snowflake;
-	CATACOMBS_50: Snowflake;
-	COMBAT_50: Snowflake;
-	COMBAT_55: Snowflake;
-	COMBAT_60: Snowflake;
-	DUNGEON_DELIMITER: Snowflake;
-	ENCHANTING_50: Snowflake;
-	ENCHANTING_55: Snowflake;
-	ENCHANTING_60: Snowflake;
-	ENDERMAN_8: Snowflake;
-	ENDERMAN_9: Snowflake;
-	EX_GUILD: Snowflake;
-	FARMING_50: Snowflake;
-	FARMING_55: Snowflake;
-	FARMING_60: Snowflake;
-	FISHING_50: Snowflake;
-	FISHING_55: Snowflake;
-	FISHING_60: Snowflake;
-	FORAGING_50: Snowflake;
-	FORAGING_55: Snowflake;
-	FORAGING_60: Snowflake;
-	GUILD_DELIMITER: Snowflake;
-	/** Guardians */
-	GUILD: Snowflake;
-	/** Lunar */
-	GUILD_2: Snowflake;
-	INACTIVE: Snowflake;
-	MINING_50: Snowflake;
-	MINING_55: Snowflake;
-	MINING_60: Snowflake;
-	MISC_DELIMITER: Snowflake;
-	SKILL_DELIMITER: Snowflake;
-	SLAYER_ALL_7: Snowflake;
-	SLAYER_ALL_8: Snowflake;
-	SLAYER_ALL_9: Snowflake;
-	SLAYER_DELIMITER: Snowflake;
-	SPIDER_8: Snowflake;
-	SPIDER_9: Snowflake;
-	TAMING_50: Snowflake;
-	TAMING_55: Snowflake;
-	TAMING_60: Snowflake;
-	/** role a discord member must have for the bot to perform an action of them */
-	MANDATORY: Snowflake;
-	WHALECUM_PASS: Snowflake;
-	WOLF_8: Snowflake;
-	WOLF_9: Snowflake;
-	ZOMBIE_8: Snowflake;
-	ZOMBIE_9: Snowflake;
-}
-
 interface HypixelGuildAttributes {
 	guildId: string;
 	discordId: Snowflake | null;
-	roleIds: DiscordRoleIds;
+	/** Lunar */
+	GUILD_ROLE_ID: Snowflake | null;
+	EX_GUILD_ROLE_ID: Snowflake | null;
+	BRIDGER_ROLE_ID: Snowflake | null;
+	staffRoleIds: Snowflake[];
+	adminRoleIds: Snowflake[];
 	name: string;
 	weightReq: number | null;
 	chatBridgeEnabled: boolean;
@@ -137,6 +76,7 @@ interface HypixelGuildAttributes {
 	chatBridgeChannels: ChatBridgeChannel[];
 	ranks: GuildRank[];
 	syncRanksEnabled: boolean;
+	/** amount of non GM ranks with staff perms */
 	staffRanksAmount: number;
 	statsHistory: StatsHistory[];
 	statDiscordChannels: Record<string, string> | null;
@@ -154,7 +94,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 	declare guildId: string;
 	declare discordId: Snowflake | null;
-	declare roleIds: DiscordRoleIds;
+	/** Lunar */
+	declare GUILD_ROLE_ID: Snowflake | null;
+	declare EX_GUILD_ROLE_ID: Snowflake | null;
+	declare BRIDGER_ROLE_ID: Snowflake | null;
+	declare staffRoleIds: Snowflake[];
+	declare adminRoleIds: Snowflake[];
 	declare name: string;
 	declare weightReq: number | null;
 	declare chatBridgeEnabled: boolean;
@@ -162,6 +107,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare chatBridgeChannels: ChatBridgeChannel[];
 	declare ranks: GuildRank[];
 	declare syncRanksEnabled: boolean;
+	/** amount of non GM ranks with staff perms */
 	declare staffRanksAmount: number;
 	declare statsHistory: StatsHistory[];
 	declare statDiscordChannels: Record<string, string> | null;
@@ -172,9 +118,6 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare announcementsChannelId: Snowflake | null;
 	declare loggingChannelId: Snowflake | null;
 	declare syncIgnThreshold: number;
-
-	declare readonly createdAt: Date;
-	declare readonly updatedAt: Date;
 
 	/**
 	 * guild ranks sync
@@ -205,70 +148,29 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					defaultValue: null,
 					allowNull: true,
 				},
-				roleIds: {
-					type: DataTypes.JSONB,
-					defaultValue: {
-						STAFF_IDS: [],
-						ADMIN_IDS: [],
-
-						ALCHEMY_50: null,
-						ALCHEMY_55: null,
-						ALCHEMY_60: null,
-						AVERAGE_LVL_40: null,
-						AVERAGE_LVL_45: null,
-						AVERAGE_LVL_50: null,
-						AVERAGE_LVL_55: null,
-						AVERAGE_LVL_60: null,
-						BRIDGER: null,
-						CATACOMBS_30: null,
-						CATACOMBS_35: null,
-						CATACOMBS_40: null,
-						CATACOMBS_45: null,
-						CATACOMBS_50: null,
-						COMBAT_50: null,
-						COMBAT_55: null,
-						COMBAT_60: null,
-						DUNGEON_DELIMITER: null,
-						ENCHANTING_50: null,
-						ENCHANTING_55: null,
-						ENCHANTING_60: null,
-						ENDERMAN_8: null,
-						ENDERMAN_9: null,
-						EX_GUILD: null,
-						FARMING_50: null,
-						FARMING_55: null,
-						FARMING_60: null,
-						FISHING_50: null,
-						FISHING_55: null,
-						FISHING_60: null,
-						FORAGING_50: null,
-						FORAGING_55: null,
-						FORAGING_60: null,
-						GUILD_DELIMITER: null,
-						GUILD: null,
-						GUILD_2: null,
-						INACTIVE: null,
-						MINING_50: null,
-						MINING_55: null,
-						MINING_60: null,
-						MISC_DELIMITER: null,
-						SKILL_DELIMITER: null,
-						SLAYER_ALL_7: null,
-						SLAYER_ALL_8: null,
-						SLAYER_ALL_9: null,
-						SLAYER_DELIMITER: null,
-						SPIDER_8: null,
-						SPIDER_9: null,
-						TAMING_50: null,
-						TAMING_55: null,
-						TAMING_60: null,
-						MANDATORY: null,
-						WHALECUM_PASS: null,
-						WOLF_8: null,
-						WOLF_9: null,
-						ZOMBIE_8: null,
-						ZOMBIE_9: null,
-					},
+				GUILD_ROLE_ID: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				EX_GUILD_ROLE_ID: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				BRIDGER_ROLE_ID: {
+					type: DataTypes.STRING,
+					defaultValue: null,
+					allowNull: true,
+				},
+				staffRoleIds: {
+					type: DataTypes.ARRAY(DataTypes.STRING),
+					defaultValue: [],
+					allowNull: false,
+				},
+				adminRoleIds: {
+					type: DataTypes.ARRAY(DataTypes.STRING),
+					defaultValue: [],
 					allowNull: false,
 				},
 				name: {
@@ -311,8 +213,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				},
 				staffRanksAmount: {
 					type: DataTypes.SMALLINT,
-					// 2 + GuildMaster but the latter is not in ranks array
-					defaultValue: 2,
+					defaultValue: -1, // no staff ranks by default
 					allowNull: false,
 				},
 				statsHistory: {

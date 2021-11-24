@@ -77,11 +77,11 @@ export class BaseCommand {
 		switch (this.category) {
 			case 'staff':
 			case 'moderation':
-				return hypixelGuild.roleIds.STAFF_IDS;
+				return hypixelGuild.staffRoleIds;
 
 			case 'tax':
 			case 'manager':
-				return hypixelGuild.roleIds.ADMIN_IDS;
+				return hypixelGuild.adminRoleIds;
 
 			default:
 				return null;

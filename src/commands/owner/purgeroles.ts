@@ -30,17 +30,16 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
-		const { discordGuild } = hypixelGuild;
+		const { discordGuild: guild } = InteractionUtil.getHypixelGuild(interaction);
 
-		if (!discordGuild) {
+		if (!guild) {
 			return InteractionUtil.reply(interaction, {
 				content: 'unable to determine the guild',
 				ephemeral: true,
 			});
 		}
 
-		if (PurgeRolesCommand.running.has(discordGuild.id)) {
+		if (PurgeRolesCommand.running.has(guild.id)) {
 			return InteractionUtil.reply(interaction, {
 				content: 'the command is already running',
 				ephemeral: true,
@@ -48,13 +47,13 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 		}
 
 		try {
-			PurgeRolesCommand.running.add(discordGuild.id);
+			PurgeRolesCommand.running.add(guild.id);
 
-			const { GUILD } = hypixelGuild.roleIds;
+			const GUILD_ROLE_ID = this.client.discordGuilds.cache.get(guild.id)?.GUILD_ROLE_ID;
 			const toPurge: { id: Snowflake; rolesToPurge: Snowflake[] }[] = [];
 
-			for (const member of (await GuildUtil.fetchAllMembers(discordGuild)).values()) {
-				if (member.roles.cache.has(GUILD)) continue;
+			for (const member of (await GuildUtil.fetchAllMembers(guild)).values()) {
+				if (member.roles.cache.has(GUILD_ROLE_ID!)) continue;
 
 				const rolesToPurge = GuildMemberUtil.getRolesToPurge(member);
 
@@ -83,7 +82,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 					await sleep(index * PurgeRolesCommand.TIMEOUT);
 
 					try {
-						const member = discordGuild.members.cache.get(id);
+						const member = guild.members.cache.get(id);
 						if (!member || member.deleted) return;
 
 						await member.roles.remove(rolesToPurge);
@@ -102,7 +101,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 				`done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`,
 			);
 		} finally {
-			PurgeRolesCommand.running.delete(discordGuild.id);
+			PurgeRolesCommand.running.delete(guild.id);
 		}
 	}
 }

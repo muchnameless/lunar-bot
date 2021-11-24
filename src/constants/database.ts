@@ -70,7 +70,6 @@ export const DEFAULT_CONFIG = {
 	TAX_MESSAGE_ID: null,
 	TAX_TRACKING_ENABLED: true,
 	USER_INPUT_MAX_RETRIES: 3,
-	WHALECUM_PASS_WEIGHT: Number.POSITIVE_INFINITY,
 	XP_TRACKING_ENABLED: true,
 } as const;
 
@@ -128,7 +127,6 @@ export type ConfigValues = {
 	TAX_MESSAGE_ID: Snowflake;
 	TAX_TRACKING_ENABLED: number;
 	USER_INPUT_MAX_RETRIES: number;
-	WHALECUM_PASS_WEIGHT: number;
 	XP_TRACKING_ENABLED: boolean;
 };
 

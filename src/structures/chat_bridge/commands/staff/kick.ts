@@ -11,7 +11,7 @@ export default class KickBridgeCommand extends BridgeCommand {
 			args: 2,
 			usage: '[`IGN`] [`reason`]',
 			cooldown: seconds(10),
-			requiredRoles: (hypixelGuild) => hypixelGuild.roleIds.ADMIN_IDS,
+			requiredRoles: (hypixelGuild) => hypixelGuild.adminRoleIds,
 		});
 	}
 

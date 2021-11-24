@@ -182,13 +182,13 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'setrank':
 			case 'unmute':
 				return this.checkPermissions(interaction, {
-					roleIds: hypixelGuild.roleIds.STAFF_IDS,
+					roleIds: hypixelGuild.staffRoleIds,
 					hypixelGuild,
 				});
 
 			case 'kick':
 				return this.checkPermissions(interaction, {
-					roleIds: hypixelGuild.roleIds.ADMIN_IDS,
+					roleIds: hypixelGuild.adminRoleIds,
 					hypixelGuild,
 				});
 
@@ -199,7 +199,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'quest':
 			case 'top':
 				return this.checkPermissions(interaction, {
-					roleIds: [hypixelGuild.roleIds.GUILD, ...hypixelGuild.roleIds.STAFF_IDS],
+					roleIds: [hypixelGuild.GUILD_ROLE_ID!, ...hypixelGuild.staffRoleIds],
 					hypixelGuild,
 				});
 
@@ -207,7 +207,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'members':
 			case 'online':
 				return this.checkPermissions(interaction, {
-					roleIds: [hypixelGuild.roleIds.GUILD, hypixelGuild.roleIds.BRIDGER, ...hypixelGuild.roleIds.STAFF_IDS],
+					roleIds: [hypixelGuild.GUILD_ROLE_ID!, hypixelGuild.BRIDGER_ROLE_ID!, ...hypixelGuild.staffRoleIds],
 					hypixelGuild,
 				});
 

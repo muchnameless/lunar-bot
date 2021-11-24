@@ -64,14 +64,13 @@ export default class EvalCommand extends ApplicationCommand {
 	}
 
 	/**
-	 * replaces the client's token in 'text' and escapes ` and @mentions
+	 * replaces the client's token in 'text' and escapes `
 	 * @param input
 	 * @param depth
 	 */
 	#cleanOutput(input: unknown, depth = 1) {
 		return (typeof input === 'string' ? input : util.inspect(input, { depth }))
 			.replaceAll('`', '`\u200B')
-			.replaceAll('@', '@\u200B')
 			.replace(new RegExp(this.client.token!, 'gi'), '****');
 	}
 

@@ -120,42 +120,46 @@ export class ChatBridgeManager {
 	 * @param message
 	 */
 	async handleAnnouncementMessage(message: Message) {
-		if (!this.cache.length) return MessageUtil.react(message, X_EMOJI);
 		if (!message.content) return MessageUtil.react(message, STOP_EMOJI);
 
-		const hypixelGuild = this.client.hypixelGuilds.findByDiscordGuild(message.guild);
+		const res: boolean[] = [];
 
-		if (!hypixelGuild) return MessageUtil.react(message, X_EMOJI);
+		// broadcast messages
+		for (const hypixelGuild of this.client.hypixelGuilds.cache.values()) {
+			if (hypixelGuild.announcementsChannelId !== message.channelId) continue;
 
-		try {
-			const [minecraftResult, discordResult] = await hypixelGuild.chatBridge.broadcast({
-				content: stripIndents`
-					${message.content}
-					~ ${DiscordChatManager.getPlayerName(message)}
-				`,
-				discord: {
-					allowedMentions: { parse: [] },
-				},
-				minecraft: {
-					prefix: 'Guild_Announcement:',
-					maxParts: Number.POSITIVE_INFINITY,
-				},
-			});
+			try {
+				const [minecraftResult, discordResult] = await hypixelGuild.chatBridge.broadcast({
+					content: stripIndents`
+						${message.content}
+						~ ${DiscordChatManager.getPlayerName(message)}
+					`,
+					discord: {
+						allowedMentions: { parse: [] },
+					},
+					minecraft: {
+						prefix: 'Guild_Announcement:',
+						maxParts: Number.POSITIVE_INFINITY,
+					},
+				});
 
-			if (minecraftResult && discordResult) {
-				// success
-				if (message.reactions.cache.get(X_EMOJI)?.me) {
-					message.reactions.cache
-						.get(X_EMOJI)!
-						.users.remove(this.client.user!)
-						.catch((error) => logger.error(error, `[HANDLE ANNOUNCEMENT MSG]: ${hypixelGuild}`));
-				}
-			} else {
-				// error
-				MessageUtil.react(message, X_EMOJI);
+				res.push(minecraftResult && Boolean(discordResult));
+			} catch (error) {
+				logger.error(error, `[HANDLE ANNOUNCEMENT MSG]: ${hypixelGuild}`);
+				res.push(false);
 			}
-		} catch (error) {
-			logger.error(error, `[HANDLE ANNOUNCEMENT MSG]: ${hypixelGuild}`);
+		}
+
+		// handle results
+		if (res.length && !res.includes(false)) {
+			// remove :x: reaction from bot if existant
+			if (message.reactions.cache.get(X_EMOJI)?.me) {
+				message.reactions.cache
+					.get(X_EMOJI)!
+					.users.remove(this.client.user!)
+					.catch((error) => logger.error(error, '[HANDLE ANNOUNCEMENT MSG]'));
+			}
+		} else {
 			MessageUtil.react(message, X_EMOJI);
 		}
 	}
@@ -184,8 +188,9 @@ export class ChatBridgeManager {
 						acc || message.webhookId === chatBridge.discord.channelsByIds.get(message.channelId)?.webhook?.id,
 					false,
 				)
-			)
-				return; // message was sent by one of the ChatBridges's webhook
+			) {
+				return; // message was sent by one of the ChatBridges's webhooks
+			}
 
 			// no ChatBridge for the message's channel found
 			MessageUtil.react(message, X_EMOJI);

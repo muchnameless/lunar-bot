@@ -5,21 +5,25 @@ import type { Guild, Interaction, Snowflake } from 'discord.js';
 /**
  * @param message
  * @param interaction
- * @param discordGuild
+ * @param guild
  * @param requiredRolesRaw
  */
 export const missingPermissionsError = (
 	message: string,
 	interaction: Interaction,
-	discordGuild: Guild | null,
+	guild: Guild | null,
 	requiredRolesRaw: Snowflake[],
-) => commaListsOr`
-	missing permissions for \`${InteractionUtil.fullCommandName(interaction)}\` (${requiredRolesRaw.flatMap((roleId) => {
-	if (!roleId) return [];
+) => {
+	const requiredRoles = requiredRolesRaw.flatMap((roleId) => {
+		if (!roleId) return [];
 
-	const role = discordGuild?.roles.cache.get(roleId);
-	if (!role) return roleId;
+		const role = guild?.roles.cache.get(roleId);
+		if (!role) return roleId;
 
-	return interaction.guildId === discordGuild!.id ? `${role}` : role.name;
-})}): ${message}
-`;
+		return interaction.guildId === guild!.id ? `${role}` : role.name;
+	});
+
+	return commaListsOr`missing permissions for \`${InteractionUtil.fullCommandName(interaction)}\` (${
+		requiredRoles.length ? requiredRoles : `no roles set up for ${guild?.name ?? 'uncached discord server'}`
+	}): ${message}`;
+};

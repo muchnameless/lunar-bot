@@ -17,6 +17,7 @@ import type { ModelCtor, Sequelize } from 'sequelize';
 import type { Components } from '@zikeji/hypixel';
 import type { ChatTrigger } from '../models/ChatTrigger';
 import type { Config } from '../models/Config';
+import type { DiscordGuild } from '../models/DiscordGuild';
 import type { HypixelGuild } from '../models/HypixelGuild';
 import type { HypixelGuildBan } from '../models/HypixelGuildBan';
 import type { Player } from '../models/Player';
@@ -28,6 +29,7 @@ import type { LunarClient } from '../../LunarClient';
 export interface Models {
 	ChatTrigger: ModelCtor<ChatTrigger>;
 	Config: ModelCtor<Config>;
+	DiscordGuild: ModelCtor<DiscordGuild>;
 	HypixelGuild: ModelCtor<HypixelGuild>;
 	HypixelGuildBan: ModelCtor<HypixelGuildBan>;
 	Player: ModelCtor<Player>;
@@ -43,6 +45,7 @@ export class DatabaseManager {
 	modelManagers: {
 		chatTriggers: ModelManager<ChatTrigger>;
 		config: ConfigManager;
+		discordGuilds: ModelManager<DiscordGuild>;
 		hypixelGuilds: HypixelGuildManager;
 		players: PlayerManager;
 		taxCollectors: TaxCollectorManager;
@@ -65,6 +68,7 @@ export class DatabaseManager {
 		this.modelManagers = {
 			chatTriggers: new ModelManager(client, db.ChatTrigger),
 			config: new ConfigManager(client, db.Config),
+			discordGuilds: new ModelManager(client, db.DiscordGuild),
 			hypixelGuilds: new HypixelGuildManager(client, db.HypixelGuild),
 			players: new PlayerManager(client, db.Player),
 			taxCollectors: new TaxCollectorManager(client, db.TaxCollector),

@@ -39,68 +39,75 @@ export default class GuildMemberUtil extends null {
 	 */
 	static getRolesToPurge(member: GuildMember) {
 		const { cache: roleCache } = member.roles;
-		const { hypixelGuilds } = member.client as LunarClient;
 		const rolesToRemove: Snowflake[] = [];
+		const discordGuild = (member.client as LunarClient).discordGuilds.cache.get(member.guild.id);
 
-		for (const { discordId, roleIds, ranks } of hypixelGuilds.cache.values()) {
-			if (discordId !== member.guild.id) continue;
+		if (discordGuild) {
+			for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
+				const hypixelGuild = (member.client as LunarClient).hypixelGuilds.cache.get(hypixelGuildId);
+				if (!hypixelGuild) continue;
 
-			// guild
-			if (roleCache.has(roleIds.GUILD)) rolesToRemove.push(roleIds.GUILD);
-			if (roleCache.has(roleIds.GUILD_2)) rolesToRemove.push(roleIds.GUILD_2);
+				// guild
+				if (roleCache.has(hypixelGuild.GUILD_ROLE_ID!)) rolesToRemove.push(hypixelGuild.GUILD_ROLE_ID!);
 
-			for (const { roleId: rankRoleId } of ranks) {
-				if (rankRoleId && roleCache.has(rankRoleId)) rolesToRemove.push(rankRoleId);
+				for (const { roleId: rankRoleId } of hypixelGuild.ranks) {
+					if (roleCache.has(rankRoleId!)) rolesToRemove.push(rankRoleId!);
+				}
 			}
 
-			for (const role of ['GUILD', 'WHALECUM_PASS', 'INACTIVE'] as const) {
-				if (roleCache.has(roleIds[role])) rolesToRemove.push(roleIds[role]);
+			for (const role of ['GUILD', 'INACTIVE'] as const) {
+				if (roleCache.has(discordGuild[`${role}_ROLE_ID`]!)) rolesToRemove.push(discordGuild[`${role}_ROLE_ID`]!);
 			}
 
 			// delimiter
 			for (const type of DELIMITER_ROLES) {
-				if (roleCache.has(roleIds[`${type}_DELIMITER`])) {
-					rolesToRemove.push(roleIds[`${type}_DELIMITER`]);
+				if (roleCache.has(discordGuild[`${type}_DELIMITER_ROLE_ID`]!)) {
+					rolesToRemove.push(discordGuild[`${type}_DELIMITER_ROLE_ID`]!);
 				}
 			}
 
 			// skill average
 			for (const level of SKILL_AVERAGE_ROLES) {
-				if (roleCache.has(roleIds[`AVERAGE_LVL_${level}`])) {
-					rolesToRemove.push(roleIds[`AVERAGE_LVL_${level}`]);
+				if (roleCache.has(discordGuild[`AVERAGE_LVL_${level}_ROLE_ID`]!)) {
+					rolesToRemove.push(discordGuild[`AVERAGE_LVL_${level}_ROLE_ID`]!);
 				}
 			}
 
 			// individual skills
 			for (const skill of SKILLS.map((s) => s.toUpperCase() as Uppercase<typeof s>)) {
 				for (const level of SKILL_ROLES) {
-					if (roleCache.has(roleIds[`${skill}_${level}`])) {
-						rolesToRemove.push(roleIds[`${skill}_${level}`]);
+					if (roleCache.has(discordGuild[`${skill}_${level}_ROLE_ID`]!)) {
+						rolesToRemove.push(discordGuild[`${skill}_${level}_ROLE_ID`]!);
 					}
 				}
 			}
 
 			// total slayer
 			for (const level of SLAYER_TOTAL_ROLES) {
-				if (roleCache.has(roleIds[`SLAYER_ALL_${level}`])) {
-					rolesToRemove.push(roleIds[`SLAYER_ALL_${level}`]);
+				if (roleCache.has(discordGuild[`SLAYER_ALL_${level}_ROLE_ID`]!)) {
+					rolesToRemove.push(discordGuild[`SLAYER_ALL_${level}_ROLE_ID`]!);
 				}
 			}
 
 			// individual slayer
 			for (const slayer of SLAYERS.map((s) => s.toUpperCase() as Uppercase<typeof s>)) {
 				for (const level of SLAYER_ROLES) {
-					if (roleCache.has(roleIds[`${slayer}_${level}`])) {
-						rolesToRemove.push(roleIds[`${slayer}_${level}`]);
+					if (roleCache.has(discordGuild[`${slayer}_${level}_ROLE_ID`]!)) {
+						rolesToRemove.push(discordGuild[`${slayer}_${level}_ROLE_ID`]!);
 					}
 				}
 			}
 
 			// catacombs
 			for (const level of CATACOMBS_ROLES) {
-				if (roleCache.has(roleIds[`CATACOMBS_${level}`])) {
-					rolesToRemove.push(roleIds[`CATACOMBS_${level}`]);
+				if (roleCache.has(discordGuild[`CATACOMBS_${level}_ROLE_ID`]!)) {
+					rolesToRemove.push(discordGuild[`CATACOMBS_${level}_ROLE_ID`]!);
 				}
+			}
+
+			// weight
+			for (const { roleId } of discordGuild.weightRoleIds) {
+				if (roleCache.has(roleId)) rolesToRemove.push(roleId);
 			}
 		}
 

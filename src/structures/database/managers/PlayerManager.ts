@@ -7,6 +7,7 @@ import {
 	EMBED_FIELD_MAX_CHARS,
 	EMBED_MAX_CHARS,
 	EMBED_MAX_FIELDS,
+	GUILD_ID_BRIDGER,
 	MAYOR_CHANGE_INTERVAL,
 	OFFSET_FLAGS,
 } from '../../../constants';
@@ -53,8 +54,9 @@ export class PlayerManager extends ModelManager<Player> {
 		await super.loadCache({
 			where: {
 				guildId: {
-					// player is in a guild or a bridger / error
+					// player is in a guild or error
 					[Op.ne]: null,
+					[Op.ne]: GUILD_ID_BRIDGER,
 				},
 			},
 		});

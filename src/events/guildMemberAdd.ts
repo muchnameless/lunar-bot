@@ -30,10 +30,10 @@ export default class GuildMemberAddEvent extends Event {
 			${player.info}
 		`;
 
-		const MANDATORY = this.client.hypixelGuilds.findByDiscordGuild(member.guild)?.roleIds.MANDATORY;
+		const MANDATORY_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.MANDATORY_ROLE_ID;
 
-		if (MANDATORY && !member.roles.cache.has(MANDATORY)) {
-			description += `\n\nwaiting for ${member.guild.roles.cache.get(MANDATORY) ?? MANDATORY} role`;
+		if (MANDATORY_ROLE_ID && !member.roles.cache.has(MANDATORY_ROLE_ID)) {
+			description += `\n\nwaiting for ${member.guild.roles.cache.get(MANDATORY_ROLE_ID) ?? MANDATORY_ROLE_ID} role`;
 		}
 
 		this.client.log(

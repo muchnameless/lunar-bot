@@ -112,7 +112,7 @@ export default class JoinDateCommand extends DualCommand {
 		const IGN = InteractionUtil.getIgn(interaction, {
 			fallbackToCurrentUser: !(
 				await hypixelGuild.discordGuild?.members.fetch(interaction.user).catch((error) => logger.error(error))
-			)?.roles.cache.hasAny(...hypixelGuild.roleIds.STAFF_IDS),
+			)?.roles.cache.hasAny(...hypixelGuild.staffRoleIds),
 		});
 
 		if (!IGN) {

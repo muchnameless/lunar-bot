@@ -21,27 +21,34 @@ export default class GuildMemberUpdateEvent extends Event {
 	 * @param newMember
 	 */
 	override async run(oldMember: GuildMember, newMember: GuildMember) {
-		const hypixelGuild = this.client.hypixelGuilds.findByDiscordGuild(newMember.guild);
-		if (!hypixelGuild?.roleIds) return;
+		const discordGuild = this.client.discordGuilds.cache.get(newMember.guild.id);
+		if (!discordGuild) return;
 
 		let player = GuildMemberUtil.getPlayer(newMember);
 
-		// received bridger role -> update player db
-		if (
-			newMember.roles.cache.has(hypixelGuild.roleIds.BRIDGER!) &&
-			!oldMember.roles.cache.has(hypixelGuild.roleIds.BRIDGER!)
-		) {
-			player ??= await this.client.players.fetch({ discordId: newMember.id });
+		for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
+			const hypixelGuild = this.client.hypixelGuilds.cache.get(hypixelGuildId);
+			if (!hypixelGuild) continue;
 
-			if (!player) {
-				return logger.info(
-					`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`,
-				);
+			// received bridger role -> update player db
+			if (
+				newMember.roles.cache.has(hypixelGuild.BRIDGER_ROLE_ID!) &&
+				!oldMember.roles.cache.has(hypixelGuild.BRIDGER_ROLE_ID!)
+			) {
+				player ??= await this.client.players.fetch({ discordId: newMember.id });
+
+				if (!player) {
+					return logger.info(
+						`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`,
+					);
+				}
+
+				logger.info(`[GUILD MEMBER UPDATE]: ${player} | ${newMember.user.tag} received bridger role`);
+
+				if (!player.inGuild()) player.update({ guildId: GUILD_ID_BRIDGER }).catch((error) => logger.error(error));
+
+				break;
 			}
-
-			logger.info(`[GUILD MEMBER UPDATE]: ${player} | ${newMember.user.tag} received bridger role`);
-
-			if (!player.inGuild()) player.update({ guildId: GUILD_ID_BRIDGER }).catch((error) => logger.error(error));
 		}
 
 		if (!player) return;
@@ -56,13 +63,11 @@ export default class GuildMemberUpdateEvent extends Event {
 			);
 		}
 
-		// changes in 'verified'-role
-		const { MANDATORY } = hypixelGuild.roleIds;
-
-		if (MANDATORY) {
-			if (oldMember.roles.cache.has(MANDATORY)) {
-				// member lost verified role -> log incident
-				if (!newMember.roles.cache.has(MANDATORY)) {
+		// changes in 'mandatory'-role
+		if (discordGuild.MANDATORY_ROLE_ID) {
+			if (oldMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
+				// member lost mandatory role -> log incident
+				if (!newMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
 					return this.client.log(
 						new MessageEmbed()
 							.setColor(this.config.get('EMBED_RED'))
@@ -74,7 +79,7 @@ export default class GuildMemberUpdateEvent extends Event {
 							.setThumbnail((await player.imageURL)!)
 							.setDescription(
 								stripIndents`
-									${newMember} lost ${newMember.guild.roles.cache.get(MANDATORY)} role
+									${newMember} lost ${newMember.guild.roles.cache.get(discordGuild.MANDATORY_ROLE_ID)} role
 									${player.info}
 								`,
 							)
@@ -82,10 +87,10 @@ export default class GuildMemberUpdateEvent extends Event {
 					);
 				}
 
-				// member was given verified role -> update roles
-			} else if (newMember.roles.cache.has(MANDATORY)) {
+				// member was given mandatory role -> update roles
+			} else if (newMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
 				return player.updateDiscordMember({
-					reason: `received ${newMember.guild.roles.cache.get(MANDATORY)!.name} role`,
+					reason: `received ${newMember.guild.roles.cache.get(discordGuild.MANDATORY_ROLE_ID)!.name} role`,
 				});
 			}
 		}

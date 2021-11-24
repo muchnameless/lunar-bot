@@ -611,29 +611,27 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * fetches the discord member if the discord id is valid and the player is in the hypixel guild's discord server
 	 * @param discordGuild
 	 */
-	async fetchDiscordMember(discordGuildResolvable?: GuildResolvable | null) {
+	async fetchDiscordMember(guildResolvable?: GuildResolvable | null) {
 		if (this.#discordMember) return this.#discordMember;
 		if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
 
 		try {
-			let discordGuild;
+			let guild;
 
-			if (discordGuildResolvable) {
-				discordGuild = this.client.guilds.resolve(discordGuildResolvable);
+			if (guildResolvable) {
+				guild = this.client.guilds.resolve(guildResolvable);
 
-				if (!discordGuild?.available) {
-					logger.warn(
-						`[FETCH DISCORD MEMBER] ${this.logInfo}: discord guild ${discordGuild ? 'unavailable' : 'uncached'}`,
-					);
+				if (!guild?.available) {
+					logger.warn(`[FETCH DISCORD MEMBER] ${this.logInfo}: discord guild ${guild ? 'unavailable' : 'uncached'}`);
 					return null;
 				}
 			} else {
-				discordGuild = this.hypixelGuild?.discordGuild;
+				guild = this.hypixelGuild?.discordGuild;
 
-				if (!discordGuild) return null;
+				if (!guild) return null;
 			}
 
-			const discordMember = (await discordGuild.members.fetch(this.discordId)) ?? null;
+			const discordMember = (await guild.members.fetch(this.discordId)) ?? null;
 
 			this.setDiscordMember(discordMember, true);
 
@@ -1011,9 +1009,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (!member) return; // no linked available discord member to update
 
-		const MANDATORY = this.hypixelGuild?.roleIds.MANDATORY;
+		const MANDATORY_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.MANDATORY_ROLE_ID;
 
-		if (MANDATORY && !member.roles.cache.has(MANDATORY)) {
+		if (MANDATORY_ROLE_ID && !member.roles.cache.has(MANDATORY_ROLE_ID)) {
 			return logger.warn(
 				`[UPDATE DISCORD MEMBER]: ${this.logInfo} | ${member.user.tag} | ${member.displayName}: missing mandatory role`,
 			);
@@ -1031,6 +1029,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const member = await this.fetchDiscordMember();
 		if (!member) return;
 
+		const discordGuild = this.client.discordGuilds.cache.get(member.guild.id);
+		if (!discordGuild) return;
+
 		const { cache: roleCache, highest: highestRole } = member.roles;
 		const rolesToAdd: Snowflake[] = [];
 		const rolesToRemove: Snowflake[] = [];
@@ -1038,165 +1039,179 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		let reason = reasonInput;
 
-		// individual hypixel guild roles and guild rank roles
-		for (const [guildId, { discordId, roleIds, ranks }] of this.client.hypixelGuilds.cache) {
-			// hypixel guild is not linked to member's discord guild
-			if (discordId !== member.guild.id) continue;
-
-			// player is not in the guild -> remove all roles
-			if (guildId !== this.guildId) {
-				// guild role
-				if (roleCache.has(roleIds.GUILD)) rolesToRemove.push(roleIds.GUILD);
-
-				// rank roles
-				for (const { roleId } of ranks) {
-					if (roleId && roleCache.has(roleId)) rolesToRemove.push(roleId);
-				}
-
-				// skip adding roles
-				continue;
-			}
+		for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
+			const hypixelGuild = this.client.hypixelGuilds.cache.get(hypixelGuildId);
+			if (!hypixelGuild) continue;
 
 			// player is in the guild
+			if (hypixelGuild.guildId === this.guildId) {
+				if (hypixelGuild.GUILD_ROLE_ID && !roleCache.has(hypixelGuild.GUILD_ROLE_ID)) {
+					rolesToAdd.push(hypixelGuild.GUILD_ROLE_ID);
+				}
 
-			// rank roles
-			const CURRENT_PRIORITY = this.isStaff
-				? ranks
-						// filter out non-automated ranks
-						.filter(({ currentWeightReq }) => currentWeightReq != null)
-						// sort descendingly by weight req
-						.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
-						// find first rank that the player is eligable for
-						.find(({ currentWeightReq }) => weight >= currentWeightReq!)?.priority
-				: this.guildRankPriority;
+				if (roleCache.has(hypixelGuild.EX_GUILD_ROLE_ID!)) rolesToRemove.push(hypixelGuild.EX_GUILD_ROLE_ID!);
 
-			for (const { roleId, priority } of ranks) {
-				if (!roleId) continue;
+				// rank roles
+				const CURRENT_PRIORITY =
+					this.isStaff && hypixelGuild.syncRanksEnabled
+						? hypixelGuild.ranks
+								// filter out non-automated ranks
+								.filter(({ currentWeightReq }) => currentWeightReq != null)
+								// sort descendingly by weight req
+								.sort(({ currentWeightReq: a }, { currentWeightReq: b }) => b! - a!)
+								// find first rank that the player is eligable for
+								.find(({ currentWeightReq }) => weight >= currentWeightReq!)?.priority
+						: this.guildRankPriority;
 
-				if (priority !== CURRENT_PRIORITY) {
-					if (roleCache.has(roleId)) {
-						rolesToRemove.push(roleId);
+				for (const { roleId, priority } of hypixelGuild.ranks) {
+					if (!roleId) continue;
+
+					if (priority !== this.guildRankPriority && priority !== CURRENT_PRIORITY) {
+						if (roleCache.has(roleId)) {
+							rolesToRemove.push(roleId);
+							reason = 'synced with in game rank';
+						}
+					} else if (!roleCache.has(roleId)) {
+						rolesToAdd.push(roleId);
 						reason = 'synced with in game rank';
 					}
-				} else if (!roleCache.has(roleId)) {
-					rolesToAdd.push(roleId);
-					reason = 'synced with in game rank';
+				}
+			} else {
+				// player is not in the guild -> remove all roles
+				// guild role
+				if (roleCache.has(hypixelGuild.GUILD_ROLE_ID!)) rolesToRemove.push(hypixelGuild.GUILD_ROLE_ID!);
+
+				// rank roles
+				for (const { roleId } of hypixelGuild.ranks) {
+					if (roleId && roleCache.has(roleId)) rolesToRemove.push(roleId);
 				}
 			}
+		}
 
-			// guild roles
-			if (!roleCache.has(roleIds.GUILD)) rolesToAdd.push(roleIds.GUILD);
-			if (!roleCache.has(roleIds.GUILD_2)) rolesToAdd.push(roleIds.GUILD_2);
-			if (roleCache.has(roleIds.EX_GUILD)) rolesToRemove.push(roleIds.EX_GUILD);
+		// guild roles
+		if (discordGuild.GUILD_ROLE_ID && !roleCache.has(discordGuild.GUILD_ROLE_ID)) {
+			rolesToAdd.push(discordGuild.GUILD_ROLE_ID);
+		}
 
-			// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
-			if ((member.guild.roles.cache.get(roleIds.GUILD_DELIMITER)?.comparePositionTo(highestRole) ?? 0) < 0) {
-				// current highest role is higher
-				if (!roleCache.has(roleIds.GUILD_DELIMITER)) rolesToAdd.push(roleIds.GUILD_DELIMITER);
-			} else if (roleCache.has(roleIds.GUILD_DELIMITER)) {
-				rolesToRemove.push(roleIds.GUILD_DELIMITER);
+		// guild delimiter role (only if it doesn't overwrite current colour role, delimiters have invis colour)
+		if (
+			(member.guild.roles.cache.get(discordGuild.GUILD_DELIMITER_ROLE_ID!)?.comparePositionTo(highestRole) ?? 0) < 0
+		) {
+			// current highest role is higher
+			if (!roleCache.has(discordGuild.GUILD_DELIMITER_ROLE_ID!)) rolesToAdd.push(discordGuild.GUILD_DELIMITER_ROLE_ID!);
+		} else if (roleCache.has(discordGuild.GUILD_DELIMITER_ROLE_ID!)) {
+			rolesToRemove.push(discordGuild.GUILD_DELIMITER_ROLE_ID!);
+		}
+
+		// other delimiter roles
+		for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
+			if (
+				discordGuild[`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`] &&
+				!roleCache.has(discordGuild[`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`]!)
+			) {
+				rolesToAdd.push(discordGuild[`${DELIMITER_ROLES[i]}_DELIMITER_ROLE_ID`]!);
 			}
+		}
 
-			// other delimiter roles
-			for (let i = 1; i < DELIMITER_ROLES.length; ++i) {
-				if (!roleCache.has(roleIds[`${DELIMITER_ROLES[i]}_DELIMITER`])) {
-					rolesToAdd.push(roleIds[`${DELIMITER_ROLES[i]}_DELIMITER`]);
-				}
-			}
+		// skills
+		const skillAverage =
+			SKILLS.map((skill) => {
+				// individual skill lvl 45+ / 50+ / 55+ / 60
+				const { progressLevel } = this.getSkillLevel(skill);
+				const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
+				const SKILL = skill.toUpperCase() as Uppercase<typeof skill>;
 
-			// skills
-			const skillAverage =
-				SKILLS.map((skill) => {
-					// individual skill lvl 45+ / 50+ / 55+ / 60
-					const { progressLevel } = this.getSkillLevel(skill);
-					const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
-					const SKILL = skill.toUpperCase() as Uppercase<typeof skill>;
-
-					// individual skills
-					for (const level of SKILL_ROLES) {
-						if (level === CURRENT_LEVEL_MILESTONE) {
-							if (!roleCache.has(roleIds[`${SKILL}_${level}`])) {
-								rolesToAdd.push(roleIds[`${SKILL}_${level}`]);
-							}
-						} else if (roleCache.has(roleIds[`${SKILL}_${level}`])) {
-							rolesToRemove.push(roleIds[`${SKILL}_${level}`]);
+				// individual skills
+				for (const level of SKILL_ROLES) {
+					if (level === CURRENT_LEVEL_MILESTONE) {
+						if (
+							discordGuild[`${SKILL}_${level}_ROLE_ID`] &&
+							!roleCache.has(discordGuild[`${SKILL}_${level}_ROLE_ID`]!)
+						) {
+							rolesToAdd.push(discordGuild[`${SKILL}_${level}_ROLE_ID`]!);
 						}
+					} else if (roleCache.has(discordGuild[`${SKILL}_${level}_ROLE_ID`]!)) {
+						rolesToRemove.push(discordGuild[`${SKILL}_${level}_ROLE_ID`]!);
 					}
-
-					return progressLevel;
-				}).reduce((acc, level) => acc + level, 0) / SKILLS.length;
-
-			// average skill
-			let currentLvlMilestone = Math.floor(skillAverage / 5) * 5; // round down to nearest divisible by 5
-
-			for (const level of SKILL_AVERAGE_ROLES) {
-				if (level === currentLvlMilestone) {
-					if (!roleCache.has(roleIds[`AVERAGE_LVL_${level}`])) {
-						rolesToAdd.push(roleIds[`AVERAGE_LVL_${level}`]);
-					}
-				} else if (roleCache.has(roleIds[`AVERAGE_LVL_${level}`])) {
-					rolesToRemove.push(roleIds[`AVERAGE_LVL_${level}`]);
 				}
+
+				return progressLevel;
+			}).reduce((acc, level) => acc + level, 0) / SKILLS.length;
+
+		// average skill
+		let currentLvlMilestone = Math.floor(skillAverage / 5) * 5; // round down to nearest divisible by 5
+
+		for (const level of SKILL_AVERAGE_ROLES) {
+			if (level === currentLvlMilestone) {
+				if (!roleCache.has(discordGuild[`AVERAGE_LVL_${level}_ROLE_ID`]!)) {
+					rolesToAdd.push(discordGuild[`AVERAGE_LVL_${level}_ROLE_ID`]!);
+				}
+			} else if (roleCache.has(discordGuild[`AVERAGE_LVL_${level}_ROLE_ID`]!)) {
+				rolesToRemove.push(discordGuild[`AVERAGE_LVL_${level}_ROLE_ID`]!);
 			}
+		}
 
-			// slayers
-			const LOWEST_SLAYER_LVL = Math.min(
-				...SLAYERS.map((slayer) => {
-					const SLAYER_LVL = this.getSlayerLevel(slayer);
-					const SLAYER = slayer.toUpperCase() as Uppercase<typeof slayer>;
+		// slayers
+		const LOWEST_SLAYER_LVL = Math.min(
+			...SLAYERS.map((slayer) => {
+				const SLAYER_LVL = this.getSlayerLevel(slayer);
+				const SLAYER = slayer.toUpperCase() as Uppercase<typeof slayer>;
 
-					// individual slayer
-					for (const level of SLAYER_ROLES) {
-						if (level === SLAYER_LVL) {
-							if (!roleCache.has(roleIds[`${SLAYER}_${level}`])) {
-								rolesToAdd.push(roleIds[`${SLAYER}_${level}`]);
-							}
-						} else if (roleCache.has(roleIds[`${SLAYER}_${level}`])) {
-							rolesToRemove.push(roleIds[`${SLAYER}_${level}`]);
+				// individual slayer
+				for (const level of SLAYER_ROLES) {
+					if (level === SLAYER_LVL) {
+						if (!roleCache.has(discordGuild[`${SLAYER}_${level}_ROLE_ID`]!)) {
+							rolesToAdd.push(discordGuild[`${SLAYER}_${level}_ROLE_ID`]!);
 						}
+					} else if (roleCache.has(discordGuild[`${SLAYER}_${level}_ROLE_ID`]!)) {
+						rolesToRemove.push(discordGuild[`${SLAYER}_${level}_ROLE_ID`]!);
 					}
+				}
 
-					return SLAYER_LVL;
-				}),
-			);
+				return SLAYER_LVL;
+			}),
+		);
 
-			// total slayer
-			for (const level of SLAYER_TOTAL_ROLES) {
-				if (level === LOWEST_SLAYER_LVL) {
-					if (!roleCache.has(roleIds[`SLAYER_ALL_${level}`])) {
-						rolesToAdd.push(roleIds[`SLAYER_ALL_${level}`]);
-					}
-				} else if (roleCache.has(roleIds[`SLAYER_ALL_${level}`])) {
-					rolesToRemove.push(roleIds[`SLAYER_ALL_${level}`]);
+		// total slayer
+		for (const level of SLAYER_TOTAL_ROLES) {
+			if (level === LOWEST_SLAYER_LVL) {
+				if (!roleCache.has(discordGuild[`SLAYER_ALL_${level}_ROLE_ID`]!)) {
+					rolesToAdd.push(discordGuild[`SLAYER_ALL_${level}_ROLE_ID`]!);
+				}
+			} else if (roleCache.has(discordGuild[`SLAYER_ALL_${level}_ROLE_ID`]!)) {
+				rolesToRemove.push(discordGuild[`SLAYER_ALL_${level}_ROLE_ID`]!);
+			}
+		}
+
+		// dungeons
+		currentLvlMilestone = Math.floor(this.getSkillLevel('catacombs').trueLevel / 5) * 5; // round down to nearest divisible by 5
+
+		for (const level of CATACOMBS_ROLES) {
+			if (level === currentLvlMilestone) {
+				if (!roleCache.has(discordGuild[`CATACOMBS_${level}_ROLE_ID`]!)) {
+					rolesToAdd.push(discordGuild[`CATACOMBS_${level}_ROLE_ID`]!);
+				}
+			} else if (roleCache.has(discordGuild[`CATACOMBS_${level}_ROLE_ID`]!)) {
+				rolesToRemove.push(discordGuild[`CATACOMBS_${level}_ROLE_ID`]!);
+			}
+		}
+
+		// weight
+		if (discordGuild.weightRoleIds) {
+			for (const { weightReq, roleId } of discordGuild.weightRoleIds) {
+				if (weight >= weightReq) {
+					if (!roleCache.has(roleId)) rolesToAdd.push(roleId);
+				} else if (roleCache.has(roleId)) {
+					rolesToRemove.push(roleId);
 				}
 			}
+		}
 
-			// dungeons
-			currentLvlMilestone = Math.floor(this.getSkillLevel('catacombs').trueLevel / 5) * 5; // round down to nearest divisible by 5
-
-			for (const level of CATACOMBS_ROLES) {
-				if (level === currentLvlMilestone) {
-					if (!roleCache.has(roleIds[`CATACOMBS_${level}`])) {
-						rolesToAdd.push(roleIds[`CATACOMBS_${level}`]);
-					}
-				} else if (roleCache.has(roleIds[`CATACOMBS_${level}`])) {
-					rolesToRemove.push(roleIds[`CATACOMBS_${level}`]);
-				}
-			}
-
-			// weight
-			if (weight >= this.client.config.get('WHALECUM_PASS_WEIGHT')) {
-				if (!roleCache.has(roleIds.WHALECUM_PASS)) rolesToAdd.push(roleIds.WHALECUM_PASS);
-			} else if (roleCache.has(roleIds.WHALECUM_PASS)) {
-				rolesToRemove.push(roleIds.WHALECUM_PASS);
-			}
-
-			// activity
-			if (Date.now() - this.lastActivityAt.getTime() > this.client.config.get('INACTIVE_ROLE_TIME')) {
-				if (!roleCache.has(roleIds.INACTIVE)) rolesToAdd.push(roleIds.INACTIVE);
-			} else if (roleCache.has(roleIds.INACTIVE)) {
-				rolesToRemove.push(roleIds.INACTIVE);
-			}
+		// activity
+		if (Date.now() - this.lastActivityAt.getTime() > this.client.config.get('INACTIVE_ROLE_TIME')) {
+			if (!roleCache.has(discordGuild.INACTIVE_ROLE_ID!)) rolesToAdd.push(discordGuild.INACTIVE_ROLE_ID!);
+		} else if (roleCache.has(discordGuild.INACTIVE_ROLE_ID!)) {
+			rolesToRemove.push(discordGuild.INACTIVE_ROLE_ID!);
 		}
 
 		// api call
@@ -1370,8 +1385,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const NAMES_TO_REMOVE = _rolesToRemove.length
 			? Formatters.codeBlock(_rolesToRemove.map(({ name }) => name).join('\n'))
 			: null;
-		const GUILD = this.hypixelGuild?.roleIds.GUILD;
-		const IS_ADDING_GUILD_ROLE = _rolesToAdd.some(({ id }) => id === GUILD);
+		const GUILD_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.GUILD_ROLE_ID;
+		const IS_ADDING_GUILD_ROLE = _rolesToAdd.some(({ id }) => id === GUILD_ROLE_ID);
 
 		for (const role of member.roles.cache.values()) {
 			if (_rolesToRemove.some(({ id }) => role.id === id)) continue;
@@ -1447,15 +1462,17 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * removes the discord server in game guild role & all roles handled automatically by the bot
 	 */
 	async removeFromGuild() {
-		const { hypixelGuild } = this;
 		const member = await this.fetchDiscordMember();
 
 		let isBridger = false;
 
 		if (member) {
+			const EX_GUILD_ROLE_ID = this.hypixelGuild?.EX_GUILD_ROLE_ID;
 			const rolesToAdd =
-				Date.now() - this.createdAt.getTime() >= days(7) && !member.roles.cache.has(hypixelGuild?.roleIds.EX_GUILD!)
-					? [hypixelGuild?.roleIds.EX_GUILD!] // add ex guild role if player stayed for more than 1 week
+				Date.now() - this.createdAt.getTime() >= days(7) &&
+				EX_GUILD_ROLE_ID &&
+				!member.roles.cache.has(EX_GUILD_ROLE_ID)
+					? [EX_GUILD_ROLE_ID] // add ex guild role if player stayed for more than 1 week
 					: [];
 			const rolesToRemove = GuildMemberUtil.getRolesToPurge(member);
 
@@ -1466,7 +1483,18 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				return false;
 			}
 
-			isBridger = member.roles.cache.has(hypixelGuild?.roleIds.BRIDGER!);
+			const discordGuild = this.client.discordGuilds.cache.get(member.guild.id);
+			if (discordGuild) {
+				const roleCache = member.roles.cache;
+				for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
+					const hypixelGuild = this.client.hypixelGuilds.cache.get(hypixelGuildId);
+					if (!hypixelGuild) continue;
+					if (!roleCache.has(hypixelGuild.BRIDGER_ROLE_ID!)) continue;
+
+					isBridger = true;
+					break;
+				}
+			}
 		} else {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 		}

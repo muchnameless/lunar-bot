@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters, Util } from 'discord.js';
-import { GuildUtil, InteractionUtil } from '../../util';
+import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { escapeIgn } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, GuildMember } from 'discord.js';
@@ -27,19 +27,21 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		// discord members with wrong roles
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
-		const { discordGuild } = hypixelGuild;
-		const mandatoryRole = discordGuild?.roles.cache.get(hypixelGuild.roleIds.MANDATORY!);
-		const { GUILD } = hypixelGuild.roleIds;
+		const guild = hypixelGuild.discordGuild;
+		const discordGuild = this.client.discordGuilds.cache.get(hypixelGuild.discordId!);
+		const mandatoryRole = guild?.roles.cache.get(discordGuild?.MANDATORY_ROLE_ID!);
 		const missingMandatoryRole: GuildMember[] = [];
 		const guildRoleWithoutDbEntry: GuildMember[] = [];
 
-		for (const [DISCORD_ID, member] of await GuildUtil.fetchAllMembers(discordGuild)) {
-			if (this.client.players.cache.some(({ discordId }) => discordId === DISCORD_ID)) {
-				if (mandatoryRole && !member.roles.cache.has(mandatoryRole.id)) missingMandatoryRole.push(member);
+		for (const member of (await GuildUtil.fetchAllMembers(guild)).values()) {
+			if (GuildMemberUtil.getPlayer(member)) {
+				if (mandatoryRole && !member.roles.cache.has(mandatoryRole.id)) {
+					missingMandatoryRole.push(member);
+				}
 				continue;
 			}
 
-			if (member.roles.cache.has(GUILD!)) guildRoleWithoutDbEntry.push(member);
+			if (member.roles.cache.has(discordGuild?.GUILD_ROLE_ID!)) guildRoleWithoutDbEntry.push(member);
 		}
 
 		let issuesAmount = missingMandatoryRole.length + guildRoleWithoutDbEntry.length;

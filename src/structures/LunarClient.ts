@@ -43,6 +43,10 @@ export class LunarClient extends Client {
 		return this.db.modelManagers.hypixelGuilds;
 	}
 
+	get discordGuilds() {
+		return this.db.modelManagers.discordGuilds;
+	}
+
 	get players() {
 		return this.db.modelManagers.players;
 	}

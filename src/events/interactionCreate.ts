@@ -202,13 +202,11 @@ export default class InteractionCreateEvent extends Event {
 			switch (name) {
 				case 'player':
 				case 'target': {
-					const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
-
 					// no value yet -> don't sort
 					if (!value) {
 						return interaction.respond(
-							hypixelGuild.players
-								.map(({ minecraftUuid, ign }) => ({ name: ign, value: minecraftUuid }))
+							InteractionUtil.getHypixelGuild(interaction)
+								.players.map(({ minecraftUuid, ign }) => ({ name: ign, value: minecraftUuid }))
 								.slice(0, MAX_CHOICES),
 						);
 					}
@@ -218,12 +216,12 @@ export default class InteractionCreateEvent extends Event {
 
 					// @displayName input
 					if (value.startsWith('@')) {
-						const { discordGuild } = hypixelGuild;
-						if (!discordGuild) return interaction.respond([]);
+						const { discordGuild: guild } = InteractionUtil.getHypixelGuild(interaction);
+						if (!guild) return interaction.respond([]);
 
 						const response: ApplicationCommandOptionChoice[] = [];
 
-						for (const member of discordGuild.members.cache.values()) {
+						for (const member of guild.members.cache.values()) {
 							const player = GuildMemberUtil.getPlayer(member);
 							if (!player) continue;
 
@@ -244,7 +242,9 @@ export default class InteractionCreateEvent extends Event {
 					}
 
 					// ign input
-					return interaction.respond(sortCache(hypixelGuild.players, value, 'ign', 'minecraftUuid'));
+					return interaction.respond(
+						sortCache(InteractionUtil.getHypixelGuild(interaction).players, value, 'ign', 'minecraftUuid'),
+					);
 				}
 
 				case 'guild': {

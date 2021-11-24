@@ -28,7 +28,6 @@ import type {
 	CommandInteraction,
 	ContextMenuInteraction,
 	GuildMember,
-	GuildResolvable,
 	Interaction,
 	Message,
 	SelectMenuInteraction,
@@ -207,22 +206,35 @@ export class ApplicationCommand extends BaseCommand {
 	/**
 	 * returns discord application command permission data
 	 */
-	permissionsFor(guild: HypixelGuild | GuildResolvable) {
-		const discordGuild =
-			this.client.guilds.resolve(guild as GuildResolvable) ??
-			this.client.hypixelGuilds.resolve(guild as HypixelGuild)?.discordGuild;
-
+	permissionsFor(guildId: Snowflake) {
+		const discordGuild = this.client.discordGuilds.cache.get(guildId);
 		if (!discordGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name}: no discord guild`);
 
 		const permissions: APIApplicationCommandPermission[] = [];
 
-		for (const hypixelGuild of this.client.hypixelGuilds.cache.values()) {
-			if (hypixelGuild.discordId !== discordGuild.id) continue;
+		for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
+			const hypixelGuild = this.client.hypixelGuilds.cache.get(hypixelGuildId);
+			if (!hypixelGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name} no hypixel guild`);
 
 			const requiredRoles = this.requiredRoles(hypixelGuild);
 
-			if (requiredRoles == null && this.category !== 'owner') continue;
+			// no roles to add
+			if (requiredRoles == null) continue;
 
+			for (const roleId of requiredRoles) {
+				// role already added (by another hypixel guild)
+				if (permissions.some(({ id }) => id === roleId)) continue;
+
+				permissions.push({
+					id: roleId,
+					type: ApplicationCommandPermissionType.Role,
+					permission: true,
+				});
+			}
+		}
+
+		// disallow for everyone but the owner by default
+		if (permissions.length || this.category === 'owner') {
 			permissions.push(
 				{
 					id: this.client.ownerId, // allow all commands for the bot owner
@@ -230,21 +242,11 @@ export class ApplicationCommand extends BaseCommand {
 					permission: true,
 				},
 				{
-					id: discordGuild.id, // deny for the guild @everyone role
+					id: discordGuild.discordId, // deny for the guild @everyone role
 					type: ApplicationCommandPermissionType.Role,
 					permission: false,
 				},
 			);
-
-			if (requiredRoles) {
-				for (const roleId of requiredRoles) {
-					permissions.push({
-						id: roleId,
-						type: ApplicationCommandPermissionType.Role,
-						permission: true,
-					});
-				}
-			}
 		}
 
 		return permissions;
