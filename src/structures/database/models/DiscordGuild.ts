@@ -22,7 +22,7 @@ interface WeightRole {
 interface DiscordGuildAttributes {
 	discordId: Snowflake;
 	hypixelGuildIds: string[];
-	weightRoleIds: WeightRole[];
+	weightRoleIds: WeightRole[] | null;
 	GUILD_ROLE_ID: Snowflake | null;
 }
 
@@ -41,7 +41,7 @@ export class DiscordGuild
 	declare hypixelGuildIds: string[];
 
 	// roles
-	declare weightRoleIds: WeightRole[];
+	declare weightRoleIds: WeightRole[] | null;
 
 	declare ALCHEMY_50_ROLE_ID: Snowflake | null;
 	declare ALCHEMY_55_ROLE_ID: Snowflake | null;

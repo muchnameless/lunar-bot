@@ -106,8 +106,10 @@ export default class GuildMemberUtil extends null {
 			}
 
 			// weight
-			for (const { roleId } of discordGuild.weightRoleIds) {
-				if (roleCache.has(roleId)) rolesToRemove.push(roleId);
+			if (discordGuild.weightRoleIds) {
+				for (const { roleId } of discordGuild.weightRoleIds) {
+					if (roleCache.has(roleId)) rolesToRemove.push(roleId);
+				}
 			}
 		}
 
