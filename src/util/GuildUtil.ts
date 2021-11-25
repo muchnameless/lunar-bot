@@ -50,7 +50,7 @@ export default class GuildUtil extends null {
 	 */
 	static async fetchMemberByTag(guild: Guild | null, tagInput: string) {
 		if (!guild?.available) {
-			logger.warn(`[FIND MEMBER BY TAG]: guild '${guild?.name}' unavailable`);
+			logger.warn(`[FIND MEMBER BY TAG]: guild ${guild ? `'${guild?.name}' unavailable` : 'uncached'}`);
 			return null;
 		}
 		if (guild.members.cache.size === guild.memberCount) {
