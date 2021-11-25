@@ -96,10 +96,10 @@ export class LunarClient extends Client {
 	override async login(token?: string) {
 		try {
 			// load db caches
-			await this.db.init();
+			await Promise.all([this.db.init(), this.commands.loadAll(), this.events.loadAll()]);
 
-			// these need the db cache to be populated
-			await Promise.all([this.commands.loadAll(), this.events.loadAll(), this.chatBridges.loadChannelIds()]);
+			// needs the db cache to be populated
+			this.chatBridges.loadChannelIds();
 
 			// login
 			const res = await super.login(token);

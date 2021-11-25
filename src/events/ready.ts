@@ -1,5 +1,5 @@
 import { GuildUtil } from '../util';
-import { logger } from '../functions';
+import { logger, safePromiseAll } from '../functions';
 import { Event } from '../structures/events/Event';
 import type { EventContext } from '../structures/events/BaseEvent';
 
@@ -20,14 +20,7 @@ export default class ReadyEvent extends Event {
 		await this.client.logHandler.init();
 
 		if (this.client.options.fetchAllMembers) {
-			try {
-				for (const guild of this.client.guilds.cache.values()) {
-					const members = await GuildUtil.fetchAllMembers(guild);
-					logger.info(`[READY]: fetched ${members.size} members`);
-				}
-			} catch (error) {
-				logger.error(error, '[READY]');
-			}
+			await safePromiseAll(this.client.guilds.cache.map((guild) => GuildUtil.fetchAllMembers(guild)));
 		}
 
 		this.client.db.schedule();
