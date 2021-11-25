@@ -17,7 +17,11 @@ export default class DisconnectChatBridgeEvent extends ChatBridgeEvent {
 	override run(reason: string | null) {
 		this.chatBridge.minecraft.botReady = false;
 
-		logger.error(`[CHATBRIDGE DISCONNECT]: Minecraft bot disconnected from server: ${reason ?? 'unknown reason'}`);
+		logger.error(
+			`[CHATBRIDGE DISCONNECT]: ${this.chatBridge.logInfo}: minecraft bot disconnected from server for ${
+				reason ?? 'unknown reason'
+			}`,
+		);
 
 		// prevent this event from being emitted multiple times
 		this.chatBridge.minecraft.bot?.removeAllListeners('end');
