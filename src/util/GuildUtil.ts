@@ -50,7 +50,7 @@ export default class GuildUtil extends null {
 	 */
 	static async fetchMemberByTag(guild: Guild | null, tagInput: string) {
 		if (!guild?.available) {
-			logger.warn(`[FIND MEMBER BY TAG]: guild ${guild ? `'${guild?.name}' unavailable` : 'uncached'}`);
+			logger.warn(`[FIND MEMBER BY TAG]: ${tagInput}: guild ${guild ? `'${guild?.name}' unavailable` : 'uncached'}`);
 			return null;
 		}
 		if (guild.members.cache.size === guild.memberCount) {
@@ -64,7 +64,7 @@ export default class GuildUtil extends null {
 				) ?? null
 			);
 		} catch (error) {
-			logger.error(error, '[FIND MEMBER BY TAG]');
+			logger.error(error, `[FIND MEMBER BY TAG]: ${tagInput}`);
 			return null;
 		}
 	}
