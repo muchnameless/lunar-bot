@@ -81,7 +81,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 				{ char: '\n', maxLength: 1_024 },
 			)) {
 				embed.addFields({
-					name: `${Formatters.bold('Guild Role and no DB entry:')} [display name | tag] (${
+					name: `${Formatters.bold('Guild Role and no linked Player:')} [display name | tag] (${
 						guildRoleAndNotInGuild.length
 					})`,
 					value,
@@ -89,7 +89,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 			}
 		} else {
 			embed.addFields({
-				name: Formatters.bold('Guild Role and no DB entry:'),
+				name: Formatters.bold('Guild Role and no linked Player:'),
 				value: 'none',
 			});
 		}
