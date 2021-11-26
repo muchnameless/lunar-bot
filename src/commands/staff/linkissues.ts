@@ -45,7 +45,9 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 				continue;
 			}
 
-			if (member.roles.cache.has(discordGuild?.GUILD_ROLE_ID!)) guildRoleAndNotInGuild.push(member);
+			if (member.roles.cache.hasAny(discordGuild?.GUILD_ROLE_ID!, hypixelGuild.GUILD_ROLE_ID!)) {
+				guildRoleAndNotInGuild.push(member);
+			}
 		}
 
 		let issuesAmount = missingMandatoryRole.length + guildRoleAndNotInGuild.length;
