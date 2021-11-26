@@ -34,20 +34,21 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		const discordGuild = this.client.discordGuilds.cache.get(hypixelGuild.discordId!);
 		const mandatoryRole = guild?.roles.cache.get(discordGuild?.MANDATORY_ROLE_ID!);
 		const missingMandatoryRole: GuildMember[] = [];
-		const guildRoleWithoutDbEntry: GuildMember[] = [];
+		const guildRoleAndNotInGuild: GuildMember[] = [];
 
 		for (const member of (await GuildUtil.fetchAllMembers(guild)).values()) {
-			if (GuildMemberUtil.getPlayer(member)) {
+			// member is linked to a player in the hypixel guild
+			if (GuildMemberUtil.getPlayer(member)?.guildId === hypixelGuild.guildId) {
 				if (mandatoryRole && !member.roles.cache.has(mandatoryRole.id)) {
 					missingMandatoryRole.push(member);
 				}
 				continue;
 			}
 
-			if (member.roles.cache.has(discordGuild?.GUILD_ROLE_ID!)) guildRoleWithoutDbEntry.push(member);
+			if (member.roles.cache.has(discordGuild?.GUILD_ROLE_ID!)) guildRoleAndNotInGuild.push(member);
 		}
 
-		let issuesAmount = missingMandatoryRole.length + guildRoleWithoutDbEntry.length;
+		let issuesAmount = missingMandatoryRole.length + guildRoleAndNotInGuild.length;
 
 		const embed = this.client.defaultEmbed.setFooter(hypixelGuild.name);
 
@@ -72,16 +73,16 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 			});
 		}
 
-		if (guildRoleWithoutDbEntry.length) {
+		if (guildRoleAndNotInGuild.length) {
 			for (const value of Util.splitMessage(
-				guildRoleWithoutDbEntry
+				guildRoleAndNotInGuild
 					.map((member) => `${member} | ${Util.escapeMarkdown(`${member.displayName} | ${member.user.tag}`)}`)
 					.join('\n'),
 				{ char: '\n', maxLength: 1_024 },
 			)) {
 				embed.addFields({
 					name: `${Formatters.bold('Guild Role and no DB entry:')} [display name | tag] (${
-						guildRoleWithoutDbEntry.length
+						guildRoleAndNotInGuild.length
 					})`,
 					value,
 				});
