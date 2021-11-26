@@ -173,47 +173,43 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param subcommand
 	 */
 	#checkRequiredRoles(interaction: Interaction, hypixelGuild: HypixelGuild, subcommand: string) {
+		const roleIds: Snowflake[] = [];
+
 		switch (subcommand) {
-			case 'demote':
+			case 'kick': // admin commands
+				roleIds.push(...hypixelGuild.adminRoleIds);
+				break;
+
+			case 'list': // bridger commands
+			case 'members':
+			case 'online':
+				roleIds.push(hypixelGuild.BRIDGER_ROLE_ID!);
+			// fallthrough
+
+			case 'history': // g member commands
+			case 'info':
+			case 'member':
+			case 'motd':
+			case 'quest':
+			case 'top':
+				roleIds.push(hypixelGuild.GUILD_ROLE_ID!);
+			// fallthrough
+
+			case 'demote': // staff commands
 			case 'invite':
 			case 'log':
 			case 'mute':
 			case 'promote':
 			case 'setrank':
 			case 'unmute':
-				return this.checkPermissions(interaction, {
-					roleIds: hypixelGuild.staffRoleIds,
-					hypixelGuild,
-				});
-
-			case 'kick':
-				return this.checkPermissions(interaction, {
-					roleIds: hypixelGuild.adminRoleIds,
-					hypixelGuild,
-				});
-
-			case 'history':
-			case 'info':
-			case 'member':
-			case 'motd':
-			case 'quest':
-			case 'top':
-				return this.checkPermissions(interaction, {
-					roleIds: [hypixelGuild.GUILD_ROLE_ID!, ...hypixelGuild.staffRoleIds],
-					hypixelGuild,
-				});
-
-			case 'list':
-			case 'members':
-			case 'online':
-				return this.checkPermissions(interaction, {
-					roleIds: [hypixelGuild.GUILD_ROLE_ID!, hypixelGuild.BRIDGER_ROLE_ID!, ...hypixelGuild.staffRoleIds],
-					hypixelGuild,
-				});
+				roleIds.push(...hypixelGuild.staffRoleIds);
+				break;
 
 			default:
 				throw new Error(`unknown subcommand '${subcommand}'`);
 		}
+
+		return this.checkPermissions(interaction, { roleIds, hypixelGuild });
 	}
 
 	/**
