@@ -633,7 +633,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			const discordMember = (await guild.members.fetch(this.discordId)) ?? null;
 
-			this.setDiscordMember(discordMember, true);
+			this.setDiscordMember(discordMember);
 
 			return discordMember;
 		} catch (error) {
@@ -663,14 +663,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			return this;
 		}
 
-		if (
-			!force &&
-			(this.inGuild()
-				? this.hypixelGuild.discordId !== member.guild.id
-				: this.#discordMember && this.#discordMember.guild.id !== member.guild.id)
-		) {
-			return this;
-		}
+		if (this.hypixelGuild?.discordId !== member.guild.id) return;
 
 		this.#discordMember = member;
 
@@ -1286,7 +1279,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (idOrDiscordMember instanceof GuildMember) {
 			await this.setUniqueDiscordId(idOrDiscordMember.id);
 			this.update({ inDiscord: true }).catch((error) => logger.error(error));
-			this.setDiscordMember(idOrDiscordMember, true);
+			this.setDiscordMember(idOrDiscordMember);
 
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
 
@@ -1395,7 +1388,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		try {
 			// api call
-			this.setDiscordMember(await member.roles.set(_rolesToAdd, reason), true);
+			this.setDiscordMember(await member.roles.set(_rolesToAdd, reason));
 
 			if (NAMES_TO_ADD) {
 				loggingEmbed.addFields({
@@ -1611,7 +1604,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					auditLogReason = reason;
 			}
 
-			this.setDiscordMember(await member.setNickname(newNick, auditLogReason), true);
+			this.setDiscordMember(await member.setNickname(newNick, auditLogReason));
 
 			await this.client.log(
 				this.client.defaultEmbed
