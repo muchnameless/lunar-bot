@@ -8,6 +8,7 @@ import type {
 	GuildApplicationCommandManager,
 	GuildApplicationCommandPermissionData,
 	Snowflake,
+	GuildResolvable,
 } from 'discord.js';
 import type { DualCommand } from './DualCommand';
 
@@ -42,12 +43,19 @@ export class ApplicationCommandCollection<
 	/**
 	 * sets all application command permissions
 	 * @param applicationCommandsInput
+	 * @param guild
 	 */
-	async setAllPermissions(applicationCommandsInput: Collection<Snowflake, DiscordJSApplicationCommand>) {
+	async setAllPermissions(
+		applicationCommandsInput: Collection<Snowflake, DiscordJSApplicationCommand>,
+		guild?: GuildResolvable,
+	) {
 		const applicationCommands = applicationCommandsInput ?? (await this.client.application!.commands.fetch());
+		const guildIds: Snowflake[] = guild
+			? ([this.client.guilds.resolveId(guild)].filter(Boolean) as Snowflake[])
+			: this.client.hypixelGuilds.uniqueDiscordGuildIds;
 
 		return Promise.all(
-			this.client.hypixelGuilds.uniqueDiscordGuildIds.map((discordId) => {
+			guildIds.map((discordId) => {
 				const fullPermissions: GuildApplicationCommandPermissionData[] = [];
 
 				for (const { name, id } of applicationCommands.values()) {
