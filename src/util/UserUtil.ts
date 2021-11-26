@@ -48,10 +48,10 @@ export default class UserUtil extends null {
 	static async sendDM(user: User, contentOrOptions: string | (MessageOptions & { rejectOnError?: boolean })) {
 		if (user.bot) {
 			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) {
-				throw new Error(`${user.tag} is a bot and can't be DMed`);
+				throw new Error(`${user.tag} | ${user.id} is a bot and can't be DMed`);
 			}
 
-			logger.warn(`${user.tag} is a bot and can't be DMed`);
+			logger.warn(`${user.tag} | ${user.id} is a bot and can't be DMed`);
 			return null;
 		}
 
@@ -59,7 +59,7 @@ export default class UserUtil extends null {
 			return await user.send(contentOrOptions);
 		} catch (error) {
 			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error;
-			logger.error(error);
+			logger.error(error, `[SEND DM]: ${user.tag} | ${user.id}`);
 			return null;
 		}
 	}
