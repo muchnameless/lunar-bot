@@ -1379,7 +1379,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			? Formatters.codeBlock(_rolesToRemove.map(({ name }) => name).join('\n'))
 			: null;
 		const GUILD_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.GUILD_ROLE_ID;
-		const IS_ADDING_GUILD_ROLE = _rolesToAdd.some(({ id }) => id === GUILD_ROLE_ID);
+		const GUILD_2_ROLE_ID = this.hypixelGuild?.GUILD_ROLE_ID;
+		const IS_ADDING_GUILD_ROLE = _rolesToAdd.some(({ id }) => id === GUILD_ROLE_ID || id === GUILD_2_ROLE_ID);
 
 		for (const role of member.roles.cache.values()) {
 			if (_rolesToRemove.some(({ id }) => role.id === id)) continue;
@@ -1494,6 +1495,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (isBridger) {
 			this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache (uncache light)
+			this.setDiscordMember(null, false);
 			this.guildId = GUILD_ID_BRIDGER;
 		} else {
 			this.uncache(); // uncache everything
