@@ -668,66 +668,66 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 	/**
 	 * send a message to in game guild chat
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	gchat(contentOrOptions: string | ChatOptions) {
-		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
+	gchat(options: string | ChatOptions) {
+		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
 
 		if (this.botPlayer?.muted) {
 			if (this.client.config.get('CHAT_LOGGING_ENABLED')) {
 				logger.debug(
 					`[GCHAT]: bot muted for ${ms(this.botPlayer.mutedTill - Date.now(), {
 						long: true,
-					})}, unable to send '${prefix}${prefix.length ? ' ' : ''}${options.content}`,
+					})}, unable to send '${prefix}${prefix.length ? ' ' : ''}${_options.content}`,
 				);
 			}
 
 			return false;
 		}
 
-		return this.chat({ prefix: `/gc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ...options });
+		return this.chat({ prefix: `/gc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
 	}
 
 	/**
 	 * send a message to in game guild chat
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	ochat(contentOrOptions: string | ChatOptions) {
-		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
+	ochat(options: string | ChatOptions) {
+		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
 
-		return this.chat({ prefix: `/oc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ...options });
+		return this.chat({ prefix: `/oc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
 	}
 
 	/**
 	 * send a message to in game party chat
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	pchat(contentOrOptions: string | ChatOptions) {
-		const { prefix = '', ...options } = MinecraftChatManager.resolveInput(contentOrOptions);
+	pchat(options: string | ChatOptions) {
+		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
 
-		return this.chat({ prefix: `/pc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ...options });
+		return this.chat({ prefix: `/pc ${prefix}${prefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`, ..._options });
 	}
 
 	/**
 	 * resolves content or options to an options object
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	static resolveInput(contentOrOptions: string | ChatOptions) {
-		return typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
+	static resolveInput(options: string | ChatOptions) {
+		return typeof options === 'string' ? { content: options } : options;
 	}
 
 	/**
 	 * splits the message into the max in game chat length, prefixes all parts and sends them
-	 * @param contentOrOptions
+	 * @param options
 	 * @returns success - wether all message parts were send
 	 */
-	async chat(contentOrOptions: string | ChatOptions) {
+	async chat(options: string | ChatOptions) {
 		const {
 			content,
 			prefix = '',
 			maxParts = this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS'),
 			discordMessage = null,
-		} = MinecraftChatManager.resolveInput(contentOrOptions);
+		} = MinecraftChatManager.resolveInput(options);
 
 		if (!content) return false;
 
@@ -780,14 +780,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 	/**
 	 * queue a message for the in game chat
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	async sendToChat(contentOrOptions: string | ChatOptions) {
-		const data = typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
+	async sendToChat(options: string | ChatOptions) {
+		const _options = typeof options === 'string' ? { content: options } : options;
 
-		if (data.discordMessage?.deleted) {
+		if (_options.discordMessage?.deleted) {
 			if (this.client.config.get('CHAT_LOGGING_ENABLED')) {
-				logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${data.prefix ?? ''}${data.content}'`);
+				logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${_options.prefix ?? ''}${_options.content}'`);
 			}
 			return false;
 		}
@@ -795,7 +795,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		await this.queue.wait();
 
 		try {
-			await this.#sendToChat(data);
+			await this.#sendToChat(_options);
 			return true;
 		} catch (error) {
 			logger.error(error, '[CHATBRIDGE MC CHAT]');

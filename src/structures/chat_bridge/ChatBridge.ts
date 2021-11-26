@@ -272,22 +272,22 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 
 	/**
 	 * send a message both to discord and the in game guild chat, parsing both
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	broadcast(contentOrOptions: string | BroadcastOptions) {
+	broadcast(options: string | BroadcastOptions) {
 		const {
 			content,
 			hypixelMessage,
 			type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD,
 			discord,
-			minecraft: { prefix: minecraftPrefix = '', maxParts = Number.POSITIVE_INFINITY, ...options } = {},
-		} = typeof contentOrOptions === 'string' ? ({ content: contentOrOptions } as BroadcastOptions) : contentOrOptions;
+			minecraft: { prefix: minecraftPrefix = '', maxParts = Number.POSITIVE_INFINITY, ..._options } = {},
+		} = typeof options === 'string' ? ({ content: options } as BroadcastOptions) : options;
 		const discordChatManager = this.discord.resolve(type);
 
 		return Promise.all([
 			// minecraft
 			this.minecraft[CHAT_FUNCTION_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof CHAT_FUNCTION_BY_TYPE)]]?.(
-				{ content, prefix: minecraftPrefix, maxParts, ...options },
+				{ content, prefix: minecraftPrefix, maxParts, ..._options },
 			) ??
 				this.minecraft.chat({
 					content,
@@ -296,7 +296,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 						PREFIX_BY_TYPE[discordChatManager?.type ?? (type as keyof typeof CHAT_FUNCTION_BY_TYPE)]
 					} ${minecraftPrefix}${minecraftPrefix.length ? ' ' : INVISIBLE_CHARACTERS[0]}`,
 					maxParts,
-					...options,
+					..._options,
 				}),
 
 			// discord

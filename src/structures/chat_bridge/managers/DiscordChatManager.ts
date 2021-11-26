@@ -250,15 +250,14 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * sends a message via the chatBridge webhook
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	async sendViaWebhook(contentOrOptions: string | WebhookMessageOptions) {
+	async sendViaWebhook(options: string | WebhookMessageOptions) {
 		if (!this.chatBridge.isEnabled() || !this.isReady()) {
 			throw new Error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: not enabled / ready`);
 		}
 
-		const { content, ...options } =
-			typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
+		const { content, ..._options } = typeof options === 'string' ? { content: options } : options;
 
 		if (!content) throw new Error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: no content`);
 
@@ -267,7 +266,7 @@ export class DiscordChatManager extends ChatManager {
 		try {
 			return (await this.webhook.send({
 				content: this.chatBridge.discord.parseContent(content),
-				...options,
+				..._options,
 			})) as Message;
 		} catch (error) {
 			logger.error(error, `[CHATBRIDGE WEBHOOK]: ${this.logInfo}`);
@@ -285,17 +284,17 @@ export class DiscordChatManager extends ChatManager {
 
 	/**
 	 * sends a message via the bot in the chatBridge channel
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	async sendViaBot(contentOrOptions: string | SendViaBotOptions): Promise<Message | null> {
+	async sendViaBot(options: string | SendViaBotOptions): Promise<Message | null> {
 		if (!this.chatBridge.isEnabled()) return null;
 
 		const {
 			content,
 			prefix = '',
 			hypixelMessage,
-			...options
-		} = typeof contentOrOptions === 'string' ? ({ content: contentOrOptions } as SendViaBotOptions) : contentOrOptions;
+			..._options
+		} = typeof options === 'string' ? ({ content: options } as SendViaBotOptions) : options;
 
 		await this.queue.wait();
 
@@ -311,7 +310,7 @@ export class DiscordChatManager extends ChatManager {
 				reply: {
 					messageReference: discordMessage as Message,
 				},
-				...options,
+				..._options,
 			});
 		} finally {
 			this.queue.shift();

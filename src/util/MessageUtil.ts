@@ -2,11 +2,13 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { MessageFlags, Permissions, Util } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import { logger, seconds } from '../functions';
+import { MESSAGE_MAX_CHARS, EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS } from '../constants';
 import { ChannelUtil } from '.';
 import type {
 	EmojiIdentifierResolvable,
 	Message,
 	MessageEditOptions,
+	MessageEmbed,
 	MessageOptions,
 	MessageReaction,
 } from 'discord.js';
@@ -156,20 +158,20 @@ export default class MessageUtil extends null {
 	/**
 	 * posts question in same channel and returns content of first reply or null if timeout
 	 * @param message
-	 * @param questionOrOptions
+	 * @param options
 	 */
-	static async awaitReply(message: Message, questionOrOptions: string | AwaitReplyOptions = {}) {
+	static async awaitReply(message: Message, options: string | AwaitReplyOptions = {}) {
 		const {
 			question = 'confirm this action?',
 			time = seconds(60),
-			...options
-		} = typeof questionOrOptions === 'string' ? { question: questionOrOptions } : questionOrOptions;
+			..._options
+		} = typeof options === 'string' ? { question: options } : options;
 
 		try {
 			const { channel } = await this.reply(message, {
 				content: question,
 				rejectOnError: true,
-				...options,
+				..._options,
 			});
 
 			const collected = await channel.awaitMessages({
@@ -188,56 +190,81 @@ export default class MessageUtil extends null {
 	/**
 	 * replies in nearest #bot-commands or in message's channel if DMs or '-c' flag set
 	 * @param message
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	static reply(message: Message, contentOrOptions: SendOptions & { rejectOnError: true }): Promise<Message>;
-	static reply(message: Message, contentOrOptions: string | SendOptions): Promise<Message | null>;
-	static reply(message: Message, contentOrOptions: string | SendOptions) {
-		const options = typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
+	static reply(message: Message, options: SendOptions & { rejectOnError: true }): Promise<Message>;
+	static reply(message: Message, options: string | SendOptions): Promise<Message | null>;
+	static reply(message: Message, options: string | SendOptions) {
+		const _options = typeof options === 'string' ? { content: options } : options;
 
 		return ChannelUtil.send(message.channel, {
 			reply: {
 				messageReference: message,
 			},
-			...options,
+			..._options,
 		});
 	}
 
 	/**
 	 * edits a message, preserving @mention pings at the beginning
 	 * @param message
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	static async edit(message: Message, contentOrOptions: string | EditOptions) {
-		const options = typeof contentOrOptions === 'string' ? { content: contentOrOptions } : contentOrOptions;
+	static async edit(message: Message, options: string | EditOptions) {
+		const _options = typeof options === 'string' ? { content: options } : options;
 
 		// permission checks
 		let requiredChannelPermissions = this.DEFAULT_REPLY_PERMISSIONS;
 
 		if (!message.editable) {
-			// message was not sent by the bot user
-			if (Object.keys(options).some((key) => key !== 'attachments') || options.attachments?.length !== 0) {
-				// can only remove attachments
-				if (options.rejectOnError) {
-					throw new Error(
-						`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(
-							message,
-						)} with ${Object.entries(options)}`,
-					);
-				}
+			// message was not sent by the bot user -> can only remove attachments
+			if (Object.keys(_options).some((key) => key !== 'attachments') || _options.attachments?.length !== 0) {
+				const MESSAGE = `[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(
+					message,
+				)} with ${Object.entries(_options)}`;
 
-				logger.warn(
-					options,
-					`[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
-				);
+				if (_options.rejectOnError) throw new Error(MESSAGE);
+				logger.warn(_options, MESSAGE);
 				return message;
 			}
 
 			requiredChannelPermissions |= Permissions.FLAGS.MANAGE_MESSAGES; // removing attachments requires MANAGE_MESSAGES
 		}
 
-		if (Reflect.has(options, 'embeds')) requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
-		if (Reflect.has(options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
+		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
+			const MESSAGE = `[MESSAGE UTIL]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn(options, MESSAGE);
+			return message;
+		}
+
+		if (Reflect.has(_options, 'embeds')) {
+			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
+				const MESSAGE = `[MESSAGE UTIL]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+
+				if (_options.rejectOnError) throw new Error(MESSAGE);
+				logger.warn(options, MESSAGE);
+				return message;
+			}
+
+			const TOTAL_LENGTH = _options.embeds!.reduce(
+				(acc, cur) => acc + (cur as MessageEmbed).length ?? Number.POSITIVE_INFINITY,
+				0,
+			);
+
+			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
+				const MESSAGE = `[MESSAGE UTIL]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+
+				if (_options.rejectOnError) throw new Error(MESSAGE);
+				logger.warn(_options, MESSAGE);
+				return message;
+			}
+
+			requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
+		}
+
+		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
 
 		const { channel } = message;
 
@@ -246,7 +273,7 @@ export default class MessageUtil extends null {
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
 
-			if (options.rejectOnError) {
+			if (_options.rejectOnError) {
 				throw new Error(
 					commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${
 						missingChannelPermissions?.length === 1 ? '' : 's'
@@ -265,9 +292,9 @@ export default class MessageUtil extends null {
 		}
 
 		try {
-			return await message.edit(options);
+			return await message.edit(_options);
 		} catch (error) {
-			if (options.rejectOnError) throw error;
+			if (_options.rejectOnError) throw error;
 			logger.error(
 				error,
 				`[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,

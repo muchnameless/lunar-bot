@@ -288,43 +288,43 @@ export default class InteractionUtil extends null {
 
 	/**
 	 * @param interaction
-	 * @param contentOrOptions
+	 * @param options
 	 */
 	static async reply(
 		interaction: ChatInteraction,
-		contentOrOptions: InteractionUtilReplyOptions & { rejectOnError: true; fetchReply: true },
+		options: InteractionUtilReplyOptions & { rejectOnError: true; fetchReply: true },
 	): Promise<Message>;
 	static async reply(
 		interaction: ChatInteraction,
-		contentOrOptions: InteractionUtilReplyOptions & { rejectOnError: true },
+		options: InteractionUtilReplyOptions & { rejectOnError: true },
 	): Promise<void | Message>;
 	static async reply(
 		interaction: ChatInteraction,
-		contentOrOptions: string | InteractionUtilReplyOptions,
+		options: string | InteractionUtilReplyOptions,
 	): Promise<void | null | Message>;
 	static async reply(
 		interaction: ChatInteraction,
-		contentOrOptions: string | InteractionUtilReplyOptions,
+		options: string | InteractionUtilReplyOptions,
 	): Promise<void | null | Message> {
 		const cached = this.CACHE.get(interaction)!;
-		const options =
-			typeof contentOrOptions === 'string'
-				? { ephemeral: cached.useEphemeral, content: contentOrOptions }
-				: { ephemeral: cached.useEphemeral, ...contentOrOptions };
+		const _options =
+			typeof options === 'string'
+				? { ephemeral: cached.useEphemeral, content: options }
+				: { ephemeral: cached.useEphemeral, ...options };
 
 		try {
 			/**
 			 * allow split option for CommandInteraction#reply
 			 */
-			if (options.split || options.code) {
-				for (const content of makeContent(options.content ?? '', { split: options.split, code: options.code })) {
-					await this.reply(interaction, { ...options, content, split: false, code: false });
+			if (_options.split || _options.code) {
+				for (const content of makeContent(_options.content ?? '', { split: _options.split, code: _options.code })) {
+					await this.reply(interaction, { ..._options, content, split: false, code: false });
 				}
 				return;
 			}
 
 			// replied
-			if (interaction.replied) return (await interaction.followUp(options)) as Message;
+			if (interaction.replied) return (await interaction.followUp(_options)) as Message;
 
 			// await defers
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
@@ -334,75 +334,72 @@ export default class InteractionUtil extends null {
 			if (interaction.deferred) {
 				// "change" ephemeral state
 				if (interaction.ephemeral) {
-					if (!options.ephemeral) await interaction.editReply('\u200B'); // ephemeral defer -> not ephemeraly reply
-				} else if (options.ephemeral) {
+					if (!_options.ephemeral) await interaction.editReply('\u200B'); // ephemeral defer -> not ephemeraly reply
+				} else if (_options.ephemeral) {
 					await interaction.deleteReply(); // not ephemeral defer -> ephemeral reply
 				}
 
-				return (await interaction.followUp(options)) as Message;
+				return (await interaction.followUp(_options)) as Message;
 			}
 
 			// initial reply
 			clearTimeout(cached.autoDefer!);
-			return await interaction.reply(options);
+			return await interaction.reply(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error(error);
-				if (options.ephemeral) return UserUtil.sendDM(interaction.user, options);
-				return ChannelUtil.send(interaction.channel!, options);
+				if (_options.ephemeral) return UserUtil.sendDM(interaction.user, _options);
+				return ChannelUtil.send(interaction.channel!, _options);
 			}
 
-			if (options.rejectOnError) throw error;
+			if (_options.rejectOnError) throw error;
 			logger.error(error);
 		}
 	}
 
 	/**
 	 * @param interaction
-	 * @param contentOrOptions
+	 * @param options
 	 * @param message optional followUp Message to edit
 	 */
 	static async editReply(
 		interaction: ChatInteraction,
-		contentOrOptions: EditReplyOptions,
+		options: EditReplyOptions,
 		message: MessageResolvable,
 	): Promise<Message>;
 	static async editReply(
 		interaction: ChatInteraction,
-		contentOrOptions: EditReplyOptions & { rejectOnError: true },
+		options: EditReplyOptions & { rejectOnError: true },
 	): Promise<Message>;
+	static async editReply(interaction: ChatInteraction, options: string | EditReplyOptions): Promise<null | Message>;
 	static async editReply(
 		interaction: ChatInteraction,
-		contentOrOptions: string | EditReplyOptions,
-	): Promise<null | Message>;
-	static async editReply(
-		interaction: ChatInteraction,
-		contentOrOptions: string | EditReplyOptions,
+		options: string | EditReplyOptions,
 		message?: MessageResolvable,
 	) {
 		try {
-			if (message) return (await interaction.webhook.editMessage(message, contentOrOptions)) as Message;
+			if (message) return (await interaction.webhook.editMessage(message, options)) as Message;
 
 			const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
 
 			if (deferReplyPromise) await deferReplyPromise;
 			if (deferUpdatePromise) await deferUpdatePromise;
 
-			return (await interaction.editReply(contentOrOptions)) as Message;
+			return (await interaction.editReply(options)) as Message;
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error(error);
 
 				try {
-					return MessageUtil.edit((await interaction.fetchReply()) as Message, contentOrOptions);
+					return MessageUtil.edit((await interaction.fetchReply()) as Message, options);
 				} catch (error_) {
-					if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error_;
+					if (typeof options !== 'string' && options.rejectOnError) throw error_;
 					logger.error(error_);
 					return null;
 				}
 			}
 
-			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error;
+			if (typeof options !== 'string' && options.rejectOnError) throw error;
 			logger.error(error);
 			return null;
 		}
@@ -505,14 +502,14 @@ export default class InteractionUtil extends null {
 	/**
 	 * posts question in same channel and returns content of first reply or null if timeout
 	 * @param interaction
-	 * @param questionOrOptions
+	 * @param options
 	 */
-	static async awaitReply(interaction: ChatInteraction, questionOrOptions: string | AwaitReplyOptions = {}) {
+	static async awaitReply(interaction: ChatInteraction, options: string | AwaitReplyOptions = {}) {
 		const {
 			question = 'confirm this action?',
 			time = seconds(60),
-			...options
-		} = typeof questionOrOptions === 'string' ? { question: questionOrOptions } : questionOrOptions;
+			..._options
+		} = typeof options === 'string' ? { question: options } : options;
 
 		try {
 			const channel =
@@ -521,7 +518,7 @@ export default class InteractionUtil extends null {
 			await this.reply(interaction, {
 				content: question,
 				rejectOnError: true,
-				...options,
+				..._options,
 			});
 
 			const collected = await channel.awaitMessages({
@@ -540,18 +537,15 @@ export default class InteractionUtil extends null {
 	/**
 	 * confirms the action via a button collector
 	 * @param interaction
-	 * @param questionOrOptions
+	 * @param options
 	 */
-	static async awaitConfirmation(
-		interaction: ChatInteraction,
-		questionOrOptions: string | AwaitConfirmationOptions = {},
-	) {
+	static async awaitConfirmation(interaction: ChatInteraction, options: string | AwaitConfirmationOptions = {}) {
 		const {
 			question = 'confirm this action?',
 			time = seconds(60),
 			errorMessage = 'the command has been cancelled',
-			...options
-		} = typeof questionOrOptions === 'string' ? { question: questionOrOptions } : questionOrOptions;
+			..._options
+		} = typeof options === 'string' ? { question: options } : options;
 		const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const CANCLE_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const row = new MessageActionRow().addComponents(
@@ -571,7 +565,7 @@ export default class InteractionUtil extends null {
 				components: [row],
 				fetchReply: false,
 				rejectOnError: true,
-				...options,
+				..._options,
 			});
 		} catch (error) {
 			logger.error(error);

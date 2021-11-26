@@ -194,14 +194,14 @@ export default class GuildMemberUtil extends null {
 
 	/**
 	 * @param member
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	static sendDM(member: GuildMember, contentOrOptions: MessageOptions & { rejectOnError: true }): Promise<Message>;
+	static sendDM(member: GuildMember, options: MessageOptions & { rejectOnError: true }): Promise<Message>;
 	static sendDM(
 		member: GuildMember,
-		contentOrOptions: string | (MessageOptions & { rejectOnError?: boolean }),
+		options: string | (MessageOptions & { rejectOnError?: boolean }),
 	): Promise<Message | null>;
-	static sendDM(member: GuildMember, contentOrOptions: string | MessageOptions) {
-		return UserUtil.sendDM(member.user, contentOrOptions);
+	static sendDM(member: GuildMember, options: string | MessageOptions) {
+		return UserUtil.sendDM(member.user, options);
 	}
 }

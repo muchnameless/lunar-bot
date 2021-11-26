@@ -1,5 +1,6 @@
 import { logger } from '../functions';
-import type { Message, MessageOptions, User } from 'discord.js';
+import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
+import type { Message, MessageEmbed, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { LunarClient } from '../structures/LunarClient';
 
@@ -38,28 +39,60 @@ export default class UserUtil extends null {
 
 	/**
 	 * @param user
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	static async sendDM(user: User, contentOrOptions: MessageOptions & { rejectOnError: true }): Promise<Message>;
+	static async sendDM(user: User, options: MessageOptions & { rejectOnError: true }): Promise<Message>;
 	static async sendDM(
 		user: User,
-		contentOrOptions: string | (MessageOptions & { rejectOnError?: boolean }),
+		options: string | (MessageOptions & { rejectOnError?: boolean }),
 	): Promise<Message | null>;
-	static async sendDM(user: User, contentOrOptions: string | (MessageOptions & { rejectOnError?: boolean })) {
+	static async sendDM(user: User, options: string | (MessageOptions & { rejectOnError?: boolean })) {
+		const _options = typeof options === 'string' ? { content: options } : options;
+
 		if (user.bot) {
-			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) {
-				throw new Error(`${user.tag} | ${user.id} is a bot and can't be DMed`);
+			const MESSAGE = `[USER UTIL]: ${user.tag} | ${user.id} is a bot and can't be DMed`;
+
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn(_options, MESSAGE);
+			return null;
+		}
+
+		if (Reflect.has(_options, 'embeds')) {
+			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
+				const MESSAGE = `[USER UTIL]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+
+				if (_options.rejectOnError) throw new Error(MESSAGE);
+				logger.warn(_options, MESSAGE);
+				return null;
 			}
 
-			logger.warn(`${user.tag} | ${user.id} is a bot and can't be DMed`);
+			const TOTAL_LENGTH = _options.embeds!.reduce(
+				(acc, cur) => acc + (cur as MessageEmbed).length ?? Number.POSITIVE_INFINITY,
+				0,
+			);
+
+			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
+				const MESSAGE = `[USER UTIL]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+
+				if (_options.rejectOnError) throw new Error(MESSAGE);
+				logger.warn(_options, MESSAGE);
+				return null;
+			}
+		}
+
+		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
+			const MESSAGE = `[USER UTIL]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn(_options, MESSAGE);
 			return null;
 		}
 
 		try {
-			return await user.send(contentOrOptions);
+			return await user.send(_options);
 		} catch (error) {
-			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error;
-			logger.error(error, `[SEND DM]: ${user.tag} | ${user.id}`);
+			if (_options.rejectOnError) throw error;
+			logger.error(error, `[USER UTIL]: ${user.tag} | ${user.id}`);
 			return null;
 		}
 	}

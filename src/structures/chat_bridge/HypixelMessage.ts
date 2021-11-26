@@ -246,21 +246,19 @@ export class HypixelMessage {
 
 	/**
 	 * replies in game (and on discord if guild chat) to the message
-	 * @param contentOrOptions
+	 * @param options
 	 */
 	async reply(
-		contentOrOptions: string | ChatOptions | (BroadcastOptions & ChatOptions),
+		options: string | ChatOptions | (BroadcastOptions & ChatOptions),
 	): Promise<boolean | [boolean, DiscordMessage | null]> {
-		const { ephemeral = false, ...options } =
-			typeof contentOrOptions === 'string'
-				? ({ content: contentOrOptions } as ChatOptions | (BroadcastOptions & ChatOptions))
-				: contentOrOptions;
+		const { ephemeral = false, ..._options } =
+			typeof options === 'string' ? ({ content: options } as ChatOptions | (BroadcastOptions & ChatOptions)) : options;
 
 		// to be compatible to Interactions
 		if (ephemeral) {
 			return this.author!.send({
 				maxParts: Number.POSITIVE_INFINITY,
-				...options,
+				..._options,
 			});
 		}
 
@@ -272,12 +270,12 @@ export class HypixelMessage {
 					discord: {
 						allowedMentions: { parse: [] },
 					},
-					...options,
+					..._options,
 				});
 
 				// DM author the message if sending to gchat failed
 				if (!result[0]) {
-					this.author!.send(`an error occurred while replying in ${this.type} chat\n${options.content ?? ''}`);
+					this.author!.send(`an error occurred while replying in ${this.type} chat\n${_options.content ?? ''}`);
 				}
 
 				return result;
@@ -286,13 +284,13 @@ export class HypixelMessage {
 			case MESSAGE_TYPES.PARTY:
 				return this.chatBridge.minecraft.pchat({
 					maxParts: Number.POSITIVE_INFINITY,
-					...options,
+					..._options,
 				});
 
 			case MESSAGE_TYPES.WHISPER:
 				return this.author!.send({
 					maxParts: Number.POSITIVE_INFINITY,
-					...options,
+					..._options,
 				});
 
 			default:
@@ -351,21 +349,19 @@ export class HypixelMessage {
 
 	/**
 	 * confirms the action via a button collector
-	 * @param questionOrOptions
+	 * @param options
 	 */
-	async awaitConfirmation(questionOrOptions: string | AwaitConfirmationOptions = {}) {
+	async awaitConfirmation(options: string | AwaitConfirmationOptions = {}) {
 		const {
 			question = 'confirm this action?',
 			time = seconds(60),
 			errorMessage = 'the command has been cancelled',
-			...options
-		} = typeof questionOrOptions === 'string'
-			? ({ question: questionOrOptions } as AwaitConfirmationOptions)
-			: questionOrOptions;
+			..._options
+		} = typeof options === 'string' ? ({ question: options } as AwaitConfirmationOptions) : options;
 
 		this.reply({
 			content: question,
-			...options,
+			..._options,
 		});
 
 		const result = await this.chatBridge.minecraft.awaitMessages({

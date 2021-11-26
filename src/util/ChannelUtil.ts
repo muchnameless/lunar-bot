@@ -1,11 +1,13 @@
 import { Permissions } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import { logger } from '../functions';
+import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
 import type {
 	Channel,
 	DMChannel,
 	GuildChannel,
 	Message,
+	MessageEmbed,
 	MessageOptions,
 	PartialDMChannel,
 	Snowflake,
@@ -114,50 +116,71 @@ export default class ChannelUtil extends null {
 
 	/**
 	 * @param channel
-	 * @param contentOrOptions
+	 * @param options
 	 */
-	static async send(
-		channel: TextBasedChannels,
-		contentOrOptions: SendOptions & { rejectOnError: true },
-	): Promise<Message>;
-	static async send(channel: TextBasedChannels, contentOrOptions: string | SendOptions): Promise<Message | null>;
-	static async send(channel: TextBasedChannels, contentOrOptions: string | SendOptions) {
+	static async send(channel: TextBasedChannels, options: SendOptions & { rejectOnError: true }): Promise<Message>;
+	static async send(channel: TextBasedChannels, options: string | SendOptions): Promise<Message | null>;
+	static async send(channel: TextBasedChannels, options: string | SendOptions) {
+		const _options = typeof options === 'string' ? { content: options } : options;
+
 		// guild -> requires permission
 		let requiredChannelPermissions = this.DEFAULT_SEND_PERMISSIONS;
 
-		if (typeof contentOrOptions !== 'string') {
-			if (Reflect.has(contentOrOptions, 'reply')) requiredChannelPermissions |= Permissions.FLAGS.READ_MESSAGE_HISTORY;
-			if (Reflect.has(contentOrOptions, 'embeds')) requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
-			if (Reflect.has(contentOrOptions, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
+		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
+			const MESSAGE = `[CHANNEL UTIL]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn(_options, MESSAGE);
+			return null;
 		}
+
+		if (Reflect.has(_options, 'reply')) requiredChannelPermissions |= Permissions.FLAGS.READ_MESSAGE_HISTORY;
+
+		if (Reflect.has(_options, 'embeds')) {
+			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
+				const MESSAGE = `[CHANNEL UTIL]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+
+				if (_options.rejectOnError) throw new Error(MESSAGE);
+				logger.warn(_options, MESSAGE);
+				return null;
+			}
+
+			const TOTAL_LENGTH = _options.embeds!.reduce(
+				(acc, cur) => acc + (cur as MessageEmbed).length ?? Number.POSITIVE_INFINITY,
+				0,
+			);
+
+			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
+				const MESSAGE = `[CHANNEL UTIL]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+
+				if (_options.rejectOnError) throw new Error(MESSAGE);
+				logger.warn(_options, MESSAGE);
+				return null;
+			}
+
+			requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
+		}
+
+		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
 
 		// permission checks
 		if (!this.botPermissions(channel).has(requiredChannelPermissions)) {
 			const missingChannelPermissions = this.botPermissions(channel)
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
+			const MESSAGE = commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${
+				missingChannelPermissions?.length === 1 ? '' : 's'
+			} in ${this.logInfo(channel)}
+			`;
 
-			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) {
-				throw new Error(
-					commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${
-						missingChannelPermissions?.length === 1 ? '' : 's'
-					} in ${this.logInfo(channel)}
-					`,
-				);
-			}
-			logger.warn(
-				commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${
-					missingChannelPermissions?.length === 1 ? '' : 's'
-				} in ${this.logInfo(channel)}
-				`,
-			);
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn(_options, MESSAGE);
 			return null;
 		}
 
 		try {
-			return await channel.send(contentOrOptions);
+			return await channel.send(_options);
 		} catch (error) {
-			if (typeof contentOrOptions !== 'string' && contentOrOptions.rejectOnError) throw error;
+			if (_options.rejectOnError) throw error;
 			logger.error(error);
 			return null;
 		}
