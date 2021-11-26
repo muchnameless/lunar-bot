@@ -3,8 +3,8 @@ import { DiscordAPIError } from 'discord.js';
 import { RESTJSONErrorCodes } from 'discord-api-types/v9';
 import { stripIndents } from 'common-tags';
 import { hypixel, mojang } from '../../api';
-import { requiredIgnOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil, UserUtil } from '../../util';
+import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands/commonOptions';
+import { InteractionUtil } from '../../util';
 import { logger, seconds, validateNumber } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, GuildMember, Snowflake } from 'discord.js';
@@ -16,7 +16,8 @@ export default class LinkCommand extends ApplicationCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('link a discord user to a minecraft ign')
 				.addStringOption(requiredIgnOption)
-				.addUserOption((option) => option.setName('user').setDescription('discord user').setRequired(true)),
+				.addUserOption((option) => option.setName('user').setDescription('discord user').setRequired(true))
+				.addStringOption(hypixelGuildOption),
 			cooldown: seconds(1),
 		});
 	}
@@ -75,7 +76,6 @@ export default class LinkCommand extends ApplicationCommand {
 		}
 
 		const { hypixelGuild } = player;
-		const guild = hypixelGuild?.discordGuild;
 
 		if (interaction.user.id !== this.client.ownerId) {
 			if (!hypixelGuild) {
@@ -86,9 +86,9 @@ export default class LinkCommand extends ApplicationCommand {
 			}
 
 			// check if executor is staff in the player's hypixel guild's discord guild
-			if (UserUtil.getPlayer(interaction.user)?.hypixelGuild?.discordId !== guild?.id) {
+			if (hypixelGuild.guildId !== InteractionUtil.getHypixelGuild(interaction).guildId) {
 				return InteractionUtil.reply(interaction, {
-					content: `you need to be staff in ${hypixelGuild}'s discord server`,
+					content: `you can only link players in ${hypixelGuild}'s discord server`,
 					ephemeral: true,
 				});
 			}
@@ -173,6 +173,7 @@ export default class LinkCommand extends ApplicationCommand {
 		}
 
 		// try to find the linked users member data
+		const guild = hypixelGuild?.discordGuild;
 		const discordMember =
 			(interaction.options.getMember('user') as GuildMember) ??
 			(await guild?.members
