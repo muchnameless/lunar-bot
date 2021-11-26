@@ -3,6 +3,7 @@ import { Formatters, Util } from 'discord.js';
 import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { escapeIgn } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { hypixelGuildOption } from '../../structures/commands/commonOptions';
 import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -15,7 +16,9 @@ interface IssueInfo {
 export default class LinkIssuesCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			slash: new SlashCommandBuilder().setDescription('list player db and discord role discrepancies'),
+			slash: new SlashCommandBuilder()
+				.setDescription('list player db and discord role discrepancies')
+				.addStringOption(hypixelGuildOption),
 			cooldown: 0,
 		});
 	}
@@ -46,7 +49,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 
 		let issuesAmount = missingMandatoryRole.length + guildRoleWithoutDbEntry.length;
 
-		const embed = this.client.defaultEmbed;
+		const embed = this.client.defaultEmbed.setFooter(hypixelGuild.name);
 
 		if (missingMandatoryRole.length) {
 			for (const value of Util.splitMessage(
@@ -94,44 +97,44 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		const unlinkedPlayers: IssueInfo[] = [];
 		const linkedAndNotInDiscord: IssueInfo[] = [];
 
-		for (const { name, players: guildPlayers } of this.client.hypixelGuilds.cache.values()) {
-			// db entries with issues
-			const [unlinkedGuildPlayers, linkedPlayers] = guildPlayers.partition(({ discordId }) => /\D/.test(discordId!));
-			const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(({ inDiscord }) => !inDiscord);
-			const UNLINKED_AMOUNT = unlinkedGuildPlayers.size;
-			const LINKED_NOT_DISCORD_AMOUNT = linkedAndNotInDiscordCurrentGuild.size;
+		// db entries with issues
+		const [unlinkedGuildPlayers, linkedPlayers] = hypixelGuild.players.partition(({ discordId }) =>
+			/\D/.test(discordId!),
+		);
+		const linkedAndNotInDiscordCurrentGuild = linkedPlayers.filter(({ inDiscord }) => !inDiscord);
+		const UNLINKED_AMOUNT = unlinkedGuildPlayers.size;
+		const LINKED_NOT_DISCORD_AMOUNT = linkedAndNotInDiscordCurrentGuild.size;
 
-			issuesAmount += UNLINKED_AMOUNT + LINKED_NOT_DISCORD_AMOUNT;
+		issuesAmount += UNLINKED_AMOUNT + LINKED_NOT_DISCORD_AMOUNT;
 
-			unlinkedPlayers.push({
-				guildName: name,
-				amount: UNLINKED_AMOUNT,
-				values: UNLINKED_AMOUNT
-					? Util.splitMessage(
-							unlinkedGuildPlayers
-								.map(
-									({ ign, discordId }) =>
-										`${escapeIgn(ign)} | ${discordId ? Util.escapeMarkdown(discordId) : 'unknown tag'}`,
-								)
-								.join('\n'),
-							{ char: '\n', maxLength: 1_024 },
-					  )
-					: ['none'],
-			});
+		unlinkedPlayers.push({
+			guildName: hypixelGuild.name,
+			amount: UNLINKED_AMOUNT,
+			values: UNLINKED_AMOUNT
+				? Util.splitMessage(
+						unlinkedGuildPlayers
+							.map(
+								({ ign, discordId }) =>
+									`${escapeIgn(ign)} | ${discordId ? Util.escapeMarkdown(discordId) : 'unknown tag'}`,
+							)
+							.join('\n'),
+						{ char: '\n', maxLength: 1_024 },
+				  )
+				: ['none'],
+		});
 
-			linkedAndNotInDiscord.push({
-				guildName: name,
-				amount: LINKED_NOT_DISCORD_AMOUNT,
-				values: LINKED_NOT_DISCORD_AMOUNT
-					? Util.splitMessage(
-							linkedAndNotInDiscordCurrentGuild
-								.map(({ discordId, ign }) => `${Formatters.userMention(discordId!)} | ${escapeIgn(ign)}`)
-								.join('\n'),
-							{ char: '\n', maxLength: 1_024 },
-					  )
-					: ['none'],
-			});
-		}
+		linkedAndNotInDiscord.push({
+			guildName: hypixelGuild.name,
+			amount: LINKED_NOT_DISCORD_AMOUNT,
+			values: LINKED_NOT_DISCORD_AMOUNT
+				? Util.splitMessage(
+						linkedAndNotInDiscordCurrentGuild
+							.map(({ discordId, ign }) => `${Formatters.userMention(discordId!)} | ${escapeIgn(ign)}`)
+							.join('\n'),
+						{ char: '\n', maxLength: 1_024 },
+				  )
+				: ['none'],
+		});
 
 		for (const { guildName, amount, values } of unlinkedPlayers)
 			for (const value of values) {
