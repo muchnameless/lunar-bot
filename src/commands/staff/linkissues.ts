@@ -8,7 +8,6 @@ import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 interface IssueInfo {
-	guildName: string;
 	amount: number;
 	values: string[];
 }
@@ -111,7 +110,6 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		issuesAmount += UNLINKED_AMOUNT + LINKED_NOT_DISCORD_AMOUNT;
 
 		unlinkedPlayers.push({
-			guildName: hypixelGuild.name,
 			amount: UNLINKED_AMOUNT,
 			values: UNLINKED_AMOUNT
 				? Util.splitMessage(
@@ -127,7 +125,6 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 		});
 
 		linkedAndNotInDiscord.push({
-			guildName: hypixelGuild.name,
 			amount: LINKED_NOT_DISCORD_AMOUNT,
 			values: LINKED_NOT_DISCORD_AMOUNT
 				? Util.splitMessage(
@@ -139,18 +136,18 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 				: ['none'],
 		});
 
-		for (const { guildName, amount, values } of unlinkedPlayers)
+		for (const { amount, values } of unlinkedPlayers)
 			for (const value of values) {
 				embed.addFields({
-					name: `${Formatters.bold(`Unlinked Players (${guildName}):`)}${amount ? ` [ign | tag] (${amount})` : ''}`,
+					name: `${Formatters.bold('Unlinked Players:')}${amount ? ` [ign | tag] (${amount})` : ''}`,
 					value,
 				});
 			}
 
-		for (const { guildName, amount, values } of linkedAndNotInDiscord)
+		for (const { amount, values } of linkedAndNotInDiscord)
 			for (const value of values) {
 				embed.addFields({
-					name: `${Formatters.bold(`Linked and not in Discord (${guildName}):`)}${amount ? ` (${amount})` : ''}`,
+					name: `${Formatters.bold('Linked and not in Discord:')}${amount ? ` (${amount})` : ''}`,
 					value,
 				});
 			}
