@@ -279,9 +279,10 @@ export default class InteractionCreateEvent extends Event {
 				default: {
 					const command = this.client.commands.get(interaction.commandName);
 
-					if (!command) {
-						return interaction.respond([]);
-					}
+					if (!command) return interaction.respond([]);
+
+					// role permissions
+					await command.checkPermissions(interaction);
 
 					return await command.runAutocomplete(interaction, value, name);
 				}
