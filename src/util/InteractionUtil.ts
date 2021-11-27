@@ -221,6 +221,18 @@ export default class InteractionUtil extends null {
 			}`;
 		}
 
+		if (interaction.isAutocomplete()) {
+			return `'${interaction.type}' by ${interaction.user.tag}${
+				interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
+			} in ${
+				interaction.guildId
+					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
+							interaction.guild!.name
+					  }`
+					: 'DMs'
+			}`;
+		}
+
 		return `unknown type '${interaction.type}' by ${interaction.user.tag}${
 			interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
 		} in ${
