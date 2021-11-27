@@ -196,104 +196,94 @@ export default class InteractionCreateEvent extends Event {
 	 * @param interaction
 	 */
 	async #handleAutocompleteInteraction(interaction: AutocompleteInteraction) {
-		try {
-			const { name, value } = interaction.options.getFocused(true) as { name: string; value: string };
+		const { name, value } = interaction.options.getFocused(true) as { name: string; value: string };
 
-			switch (name) {
-				case 'player':
-				case 'target': {
-					// no value yet -> don't sort
-					if (!value) {
-						return interaction.respond(
-							InteractionUtil.getHypixelGuild(interaction)
-								.players.map(({ minecraftUuid, ign }) => ({ name: ign, value: minecraftUuid }))
-								.slice(0, MAX_CHOICES),
-						);
-					}
-
-					// <@id> input
-					if (value.startsWith('<')) return interaction.respond([{ name: value, value }]);
-
-					// @displayName input
-					if (value.startsWith('@')) {
-						const { discordGuild: guild } = InteractionUtil.getHypixelGuild(interaction);
-						if (!guild) return interaction.respond([]);
-
-						const response: ApplicationCommandOptionChoice[] = [];
-
-						for (const member of guild.members.cache.values()) {
-							const player = GuildMemberUtil.getPlayer(member);
-							if (!player) continue;
-
-							response.push({ name: member.displayName, value: player.minecraftUuid });
-						}
-
-						// no displayName yet -> don't sort
-						if (value === '@') {
-							return interaction.respond(response.slice(0, MAX_CHOICES));
-						}
-
-						return interaction.respond(sortCache(response, value.slice(1), 'name', 'value'));
-					}
-
-					// target the whole guild, e.g. for mute
-					if (name === 'target' && ['guild', 'everyone'].includes(value.toLowerCase())) {
-						return interaction.respond([{ name: 'everyone', value: 'everyone' }]);
-					}
-
-					// ign input
+		switch (name) {
+			case 'player':
+			case 'target': {
+				// no value yet -> don't sort
+				if (!value) {
 					return interaction.respond(
-						sortCache(InteractionUtil.getHypixelGuild(interaction).players, value, 'ign', 'minecraftUuid'),
+						InteractionUtil.getHypixelGuild(interaction)
+							.players.map(({ minecraftUuid, ign }) => ({ name: ign, value: minecraftUuid }))
+							.slice(0, MAX_CHOICES),
 					);
 				}
 
-				case 'guild': {
-					// no value yet -> don't sort
-					if (!value) {
-						const response: ApplicationCommandOptionChoice[] = [];
+				// <@id> input
+				if (value.startsWith('<')) return interaction.respond([{ name: value, value }]);
 
-						if ((this.client.commands.get(interaction.commandName) as LeaderboardCommand)?.includeAllHypixelGuilds) {
-							response.push({ name: 'All Guilds', value: GUILD_ID_ALL });
-						}
+				// @displayName input
+				if (value.startsWith('@')) {
+					const { discordGuild: guild } = InteractionUtil.getHypixelGuild(interaction);
+					if (!guild) return interaction.respond([]);
 
-						response.push(
-							...this.client.hypixelGuilds.cache.map(({ guildId, name: guildName }) => ({
-								name: guildName,
-								value: guildId,
-							})),
-						);
+					const response: ApplicationCommandOptionChoice[] = [];
 
+					for (const member of guild.members.cache.values()) {
+						const player = GuildMemberUtil.getPlayer(member);
+						if (!player) continue;
+
+						response.push({ name: member.displayName, value: player.minecraftUuid });
+					}
+
+					// no displayName yet -> don't sort
+					if (value === '@') {
 						return interaction.respond(response.slice(0, MAX_CHOICES));
 					}
 
-					// all guilds
-					const guilds = (this.client.commands.get(interaction.commandName) as LeaderboardCommand)
-						?.includeAllHypixelGuilds
-						? [{ name: 'All Guilds', guildId: GUILD_ID_ALL }, ...this.client.hypixelGuilds.cache.values()]
-						: this.client.hypixelGuilds.cache;
-
-					// specific guilds
-					return interaction.respond(sortCache(guilds, value, 'name', 'guildId'));
+					return interaction.respond(sortCache(response, value.slice(1), 'name', 'value'));
 				}
 
-				default: {
-					const command = this.client.commands.get(interaction.commandName);
-
-					if (!command) return interaction.respond([]);
-
-					// role permissions
-					await command.checkPermissions(interaction);
-
-					return await command.runAutocomplete(interaction, value, name);
+				// target the whole guild, e.g. for mute
+				if (name === 'target' && ['guild', 'everyone'].includes(value.toLowerCase())) {
+					return interaction.respond([{ name: 'everyone', value: 'everyone' }]);
 				}
+
+				// ign input
+				return interaction.respond(
+					sortCache(InteractionUtil.getHypixelGuild(interaction).players, value, 'ign', 'minecraftUuid'),
+				);
 			}
-		} catch (error) {
-			logger.error(error, `[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`);
 
-			try {
-				if (!interaction.responded && !InteractionUtil.isInteractionError(error)) return await interaction.respond([]);
-			} catch (error_) {
-				logger.error(error_);
+			case 'guild': {
+				// no value yet -> don't sort
+				if (!value) {
+					const response: ApplicationCommandOptionChoice[] = [];
+
+					if ((this.client.commands.get(interaction.commandName) as LeaderboardCommand)?.includeAllHypixelGuilds) {
+						response.push({ name: 'All Guilds', value: GUILD_ID_ALL });
+					}
+
+					response.push(
+						...this.client.hypixelGuilds.cache.map(({ guildId, name: guildName }) => ({
+							name: guildName,
+							value: guildId,
+						})),
+					);
+
+					return interaction.respond(response.slice(0, MAX_CHOICES));
+				}
+
+				// all guilds
+				const guilds = (this.client.commands.get(interaction.commandName) as LeaderboardCommand)
+					?.includeAllHypixelGuilds
+					? [{ name: 'All Guilds', guildId: GUILD_ID_ALL }, ...this.client.hypixelGuilds.cache.values()]
+					: this.client.hypixelGuilds.cache;
+
+				// specific guilds
+				return interaction.respond(sortCache(guilds, value, 'name', 'guildId'));
+			}
+
+			default: {
+				const command = this.client.commands.get(interaction.commandName);
+
+				if (!command) return interaction.respond([]);
+
+				// role permissions
+				await command.checkPermissions(interaction);
+
+				return command.runAutocomplete(interaction, value, name);
 			}
 		}
 	}
@@ -346,14 +336,14 @@ export default class InteractionCreateEvent extends Event {
 	 * event listener callback
 	 * @param interaction
 	 */
-	override async run(interaction: ChatInteraction) {
-		// autocomplete
-		if (interaction.isAutocomplete()) return this.#handleAutocompleteInteraction(interaction);
-
-		// add interaction to the WeakMap which holds InteractionData
-		InteractionUtil.add(interaction);
-
+	override async run(interaction: ChatInteraction | AutocompleteInteraction) {
 		try {
+			// autocomplete
+			if (interaction.isAutocomplete()) return await this.#handleAutocompleteInteraction(interaction);
+
+			// add interaction to the WeakMap which holds InteractionData
+			InteractionUtil.add(interaction);
+
 			// commands
 			if (interaction.isCommand()) return await this.#handleCommandInteraction(interaction);
 
@@ -379,6 +369,21 @@ export default class InteractionCreateEvent extends Event {
 
 			if (InteractionUtil.isInteractionError(error)) return; // interaction expired
 
+			// autocomplete
+			if (interaction.isAutocomplete()) {
+				// send empty choices
+				if (!interaction.responded) {
+					try {
+						await interaction.respond([]);
+					} catch (error_) {
+						logger.error(error_, `[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`);
+					}
+				}
+
+				return;
+			}
+
+			// other interactions
 			InteractionUtil.reply(interaction, {
 				content: typeof error === 'string' ? error : `an error occurred while executing the command: ${error}`,
 				ephemeral: true,
