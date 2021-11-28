@@ -123,7 +123,7 @@ export default class EvalCommand extends ApplicationCommand {
 		const me = guild?.me ?? null;
 		const player = UserUtil.getPlayer(user);
 		const p = player;
-		const [bridge] = client.chatBridges.cache;
+		const bridges = client.chatBridges.cache;
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		const responseEmbed = this.client.defaultEmbed.setFooter(
