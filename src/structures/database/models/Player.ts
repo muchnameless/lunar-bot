@@ -695,7 +695,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * returns the player's guild name
 	 */
 	get guildName() {
-		return this.hypixelGuild?.name ?? (this.guildId === GUILD_ID_ERROR ? 'Error' : 'Unknown guild');
+		return this.hypixelGuild?.name ?? (this.guildId === GUILD_ID_ERROR ? 'Error' : 'Unknown Guild');
 	}
 
 	/**
@@ -982,7 +982,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	async updateDiscordMember({ reason: reasonInput = 'synced with in game stats', shouldSendDm = false } = {}) {
 		if (this.discordMemberUpdatesDisabled) return;
 		if (!this.guildId) {
-			if (this.lastActivityAt.getTime() < Date.now() - hours(1)) this.uncache();
+			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) this.uncache();
 			return;
 		}
 
@@ -1454,8 +1454,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (member) {
 			const EX_GUILD_ROLE_ID = this.hypixelGuild?.EX_GUILD_ROLE_ID;
 			const rolesToAdd =
-				Date.now() - this.createdAt.getTime() >= days(7) &&
 				EX_GUILD_ROLE_ID &&
+				Date.now() - this.createdAt.getTime() >= days(7) &&
 				!member.roles.cache.has(EX_GUILD_ROLE_ID)
 					? [EX_GUILD_ROLE_ID] // add ex guild role if player stayed for more than 1 week
 					: [];
