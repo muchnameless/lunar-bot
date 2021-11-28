@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters, SnowflakeUtil, Util, version } from 'discord.js';
+import { Formatters, SnowflakeUtil, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
@@ -29,7 +29,7 @@ export default class DebugCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: CommandInteraction) {
 		const me = interaction.guild?.me ?? null;
 
 		return InteractionUtil.reply(interaction, {
@@ -109,8 +109,11 @@ export default class DebugCommand extends ApplicationCommand {
 										),
 									)
 									.join('\n')}
+								DiscordGuilds: ${this.client.formatNumber(this.client.discordGuilds.cache.size)}
 								HypixelGuilds: ${this.client.formatNumber(this.client.hypixelGuilds.cache.size)}
-								Players: ${this.client.formatNumber(this.client.players.cache.size)}
+								Players: ${this.client.formatNumber(this.client.players.cache.size)} (${this.client.formatNumber(
+								this.client.players.cache.filter((p) => !p.inGuild()).size,
+							)} not inGuild)
 							`.replace(/\n{2,}/g, '\n'),
 						},
 						{
@@ -148,21 +151,17 @@ export default class DebugCommand extends ApplicationCommand {
 							name: 'Chat Bridge Cache',
 							value:
 								trim(
-									this.client.chatBridges.cache
-										.map(
-											(cb) => stripIndents`
+									(
+										await Promise.all(
+											this.client.chatBridges.cache.map(
+												async (cb) => stripIndents`
 												bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
-												current index: ${cb.minecraft?._lastMessages.index ?? 'offline'}
-												Messages:
-												${
-													cb.minecraft?._lastMessages.cache
-														.filter(Boolean)
-														.map((x) => Formatters.quote(Util.escapeMarkdown(x)))
-														.join('\n') ?? 'offline'
-												}
+												last messages: ${cb.minecraft._lastMessages.cache.length}
+												server: ${await cb.minecraft.server}
 											`,
+											),
 										)
-										.join('\n\n'),
+									).join('\n\n'),
 									EMBED_FIELD_MAX_CHARS,
 								) || 'disabled',
 						},
