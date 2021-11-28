@@ -469,7 +469,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				throw `[UPDATE GUILD PLAYERS]: ${this.name}: guild data did not include any members`; // API error
 			}
 
-			const { players, hypixelGuilds, config } = this.client;
+			const { players, config } = this.client;
 			const guildPlayers = this.players;
 			const playersLeft = guildPlayers.filter(
 				(_, minecraftUuid) => !currentGuildMembers.some(({ uuid }) => uuid === minecraftUuid),
@@ -484,9 +484,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			}
 
 			// check if the player is either not in the database or the guild is not cached
-			const membersJoined = currentGuildMembers.filter(
-				({ uuid }) => !hypixelGuilds.cache.has(players.cache.get(uuid)?.guildId!),
-			);
+			const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.cache.get(uuid)?.inGuild());
 
 			let leftLog: string[] = [];
 			let joinedLog: string[] = [];
