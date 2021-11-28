@@ -982,7 +982,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	async updateDiscordMember({ reason: reasonInput = 'synced with in game stats', shouldSendDm = false } = {}) {
 		if (this.discordMemberUpdatesDisabled) return;
 		if (!this.guildId) {
-			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) this.uncache();
+			// uncache non guild members if no activity in the last hour
+			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) this.uncacheEntry();
 			return;
 		}
 
@@ -1316,11 +1317,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 		}
 
+		// uncaches the discord member
 		this.discordId = null;
 
 		await this.save();
-
-		if (!this.guildId) this.uncache(); // uncache if player left the guild and is not a bridger
 
 		return wasSuccessful;
 	}
@@ -1467,13 +1467,16 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				this.update({ guildId: GUILD_ID_ERROR }).catch((error) => logger.error(error));
 				return false;
 			}
+
+			// keep entry in cache but uncache discord member
+			this.client.hypixelGuilds.sweepPlayerCache(this.guildId);
+			this.uncacheMember();
 		} else {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
-		}
 
-		// sweep hypixel guild player cache (uncache light)
-		this.client.hypixelGuilds.sweepPlayerCache(this.guildId);
-		this.setDiscordMember(null, false);
+			// no linked member -> uncache entry
+			this.uncacheEntry();
+		}
 
 		this.update({
 			guildId: null,
@@ -1898,21 +1901,28 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * removes the dual link between a discord member / user and the player
 	 */
-	async uncacheMember(removeFromUser = true) {
+	async uncacheMember() {
 		if (!this.discordId) return;
 
-		if (removeFromUser) {
-			// remove from member player cache
-			const member = await this.fetchDiscordMember();
-			if (member) GuildMemberUtil.setPlayer(member, null);
+		// remove from member player cache
+		const member = await this.fetchDiscordMember();
+		if (member) GuildMemberUtil.setPlayer(member, null);
 
-			// remove from user player cache
-			const user = this.client.users.cache.get(this.discordId);
-			if (user) UserUtil.setPlayer(user, null);
-		}
+		// remove from user player cache
+		const user = this.client.users.cache.get(this.discordId);
+		if (user) UserUtil.setPlayer(user, null);
 
 		// remove cached member
-		this.setDiscordMember(null, false);
+		return this.setDiscordMember(null, false);
+	}
+
+	/**
+	 * remove from guild / client player cache
+	 */
+	uncacheEntry() {
+		if (this.guildId) this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache
+		this.client.players.cache.delete(this.minecraftUuid);
+		return this;
 	}
 
 	/**
@@ -1920,10 +1930,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	async uncache() {
 		await this.uncacheMember();
-
-		// remove from guild / client player cache
-		this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache
-		this.client.players.cache.delete(this.minecraftUuid);
+		this.uncacheEntry();
 
 		return this;
 	}

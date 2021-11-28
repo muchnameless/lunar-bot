@@ -79,7 +79,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	delete(idOrPlayer: ModelResovable<Player>) {
 		const player = this.resolve(idOrPlayer);
-		if (!player) throw new Error(`[PLAYER HANDLER UNCACHE]: invalid input: ${idOrPlayer}`);
+		if (!player) throw new Error(`[PLAYERS DELETE]: invalid input: ${idOrPlayer}`);
 
 		player.uncache();
 		return this;

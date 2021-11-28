@@ -22,8 +22,9 @@ export default class GuildUnavailableEvent extends Event {
 		for (const hypixelGuild of this.client.hypixelGuilds.cache.values()) {
 			if (hypixelGuild.discordId !== guild.id) continue;
 
+			// sweep discord member cache
 			for (const player of hypixelGuild.players.values()) {
-				player.uncacheMember(false);
+				player.setDiscordMember(null, false);
 			}
 		}
 	}
