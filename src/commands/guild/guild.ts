@@ -197,11 +197,10 @@ export default class GuildCommand extends ApplicationCommand {
 				roleIds.push(...hypixelGuild.adminRoleIds);
 				break;
 
-			case 'list': // bridger commands
+			case 'list': // bridger commands (all roles pass, no need to check again)
 			case 'members':
 			case 'online':
-				roleIds.push(hypixelGuild.BRIDGER_ROLE_ID!);
-			// fallthrough
+				return;
 
 			case 'history': // g member commands
 			case 'info':
