@@ -182,7 +182,9 @@ export class DiscordManager {
 
 									const player = this.client.players.cache.find(({ ign }) => ign.toLowerCase() === IGN);
 
-									if (player?.inDiscord) return Formatters.userMention(player.discordId!); // player can be pinged
+									if (player?.inDiscord || (player?.discordId && !player.discordId.includes('#'))) {
+										return Formatters.userMention(player.discordId!); // player can be pinged
+									}
 
 									return match;
 								}
