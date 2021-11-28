@@ -194,7 +194,9 @@ export class DiscordManager {
 					inlineCode: false,
 					codeBlockContent: false,
 					inlineCodeContent: false,
+					// escapeNonURL already escapes '*'
 					italic: false,
+					bold: false,
 					underline: false,
 				},
 			),
