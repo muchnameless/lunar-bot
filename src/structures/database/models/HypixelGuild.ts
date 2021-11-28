@@ -483,8 +483,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				throw `[UPDATE GUILD PLAYERS]: ${this.name}: aborting guild player update request due to the possibility of an error from the fetched data`;
 			}
 
-			// check if the player is either not in the database or the guild is not cached
-			const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.cache.get(uuid)?.inGuild());
+			// check if the player is either not in the cache or not in a guild
+			const membersJoined = currentGuildMembers.filter(({ uuid }) => !players.cache.get(uuid)?.guildId);
 
 			let leftLog: string[] = [];
 			let joinedLog: string[] = [];
