@@ -1,5 +1,4 @@
 import { CronJob } from 'cron';
-import { GUILD_ID_BRIDGER, GUILD_ID_ERROR } from '../../../constants';
 import { autocorrect, compareAlphabetically, logger } from '../../../functions';
 import { ModelManager } from './ModelManager';
 import type { GuildResolvable, Snowflake } from 'discord.js';
@@ -11,8 +10,6 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 * hypixel guild db data update
 	 */
 	#updateDataPromise: Promise<this> | null = null;
-
-	static PSEUDO_GUILD_IDS = new Set([null, GUILD_ID_BRIDGER, GUILD_ID_ERROR] as const);
 
 	/**
 	 * `NameOne`|`NameTwo`|`NameThree`

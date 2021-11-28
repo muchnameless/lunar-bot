@@ -202,5 +202,4 @@ export const UNKNOWN_IGN = 'UNKNOWN_IGN';
 
 // guild Ids
 export const GUILD_ID_ERROR = 'ERROR';
-export const GUILD_ID_BRIDGER = 'BRIDGER';
 export const GUILD_ID_ALL = 'ALL';

@@ -10,7 +10,6 @@ import {
 	DUNGEON_CLASSES,
 	DUNGEON_TYPES,
 	DUNGEON_TYPES_AND_CLASSES,
-	GUILD_ID_BRIDGER,
 	GUILD_ID_ERROR,
 	isXPType,
 	LILY_SKILL_NAMES,
@@ -42,6 +41,7 @@ import {
 	getSenitherSkillWeight,
 	getSenitherSlayerWeight,
 	getSkillLevel,
+	hours,
 	logger,
 	trim,
 	uuidToImgurBustURL,
@@ -600,10 +600,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	}
 
 	/**
-	 * wether the player is actually in a guild and not just one of PSEUDO_GUILD_IDS
+	 * wether the player is in a cached hypixel guild
 	 */
 	inGuild(): this is PlayerInGuild {
-		// return !HypixelGuildManager.PSEUDO_GUILD_IDS.has(this.guildId as any);
 		return this.client.hypixelGuilds.cache.has(this.guildId!);
 	}
 
@@ -696,16 +695,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * returns the player's guild name
 	 */
 	get guildName() {
-		switch (this.guildId) {
-			case GUILD_ID_BRIDGER:
-				return 'Bridger';
-
-			case GUILD_ID_ERROR:
-				return 'Error';
-
-			default:
-				return this.hypixelGuild?.name ?? 'unknown guild';
-		}
+		return this.hypixelGuild?.name ?? (this.guildId === GUILD_ID_ERROR ? 'Error' : 'Unknown guild');
 	}
 
 	/**
@@ -817,7 +807,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		shouldOnlyAwaitUpdateXp = false,
 		rejectOnAPIError = false,
 	}: PlayerUpdateOptions = {}) {
-		if (this.guildId === GUILD_ID_BRIDGER) return this;
+		if (!this.guildId) return this;
 		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
 		if (shouldOnlyAwaitUpdateXp) {
@@ -991,7 +981,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	async updateDiscordMember({ reason: reasonInput = 'synced with in game stats', shouldSendDm = false } = {}) {
 		if (this.discordMemberUpdatesDisabled) return;
-		if (this.guildId === GUILD_ID_BRIDGER || this.guildId === null) return;
+		if (!this.guildId) {
+			if (this.lastActivityAt.getTime() < Date.now() - hours(1)) this.uncache();
+			return;
+		}
 
 		let reason = reasonInput;
 
@@ -1458,8 +1451,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	async removeFromGuild() {
 		const member = await this.fetchDiscordMember();
 
-		let isBridger = false;
-
 		if (member) {
 			const EX_GUILD_ROLE_ID = this.hypixelGuild?.EX_GUILD_ROLE_ID;
 			const rolesToAdd =
@@ -1476,34 +1467,18 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				this.update({ guildId: GUILD_ID_ERROR }).catch((error) => logger.error(error));
 				return false;
 			}
-
-			const discordGuild = this.client.discordGuilds.cache.get(member.guild.id);
-			if (discordGuild) {
-				const roleCache = member.roles.cache;
-				for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
-					const hypixelGuild = this.client.hypixelGuilds.cache.get(hypixelGuildId);
-					if (!hypixelGuild) continue;
-					if (!roleCache.has(hypixelGuild.BRIDGER_ROLE_ID!)) continue;
-
-					isBridger = true;
-					break;
-				}
-			}
 		} else {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 		}
 
-		if (isBridger) {
-			this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache (uncache light)
-			this.setDiscordMember(null, false);
-			this.guildId = GUILD_ID_BRIDGER;
-		} else {
-			this.uncache(); // uncache everything
-			this.guildId = null;
-		}
+		// sweep hypixel guild player cache (uncache light)
+		this.client.hypixelGuilds.sweepPlayerCache(this.guildId);
+		this.setDiscordMember(null, false);
 
-		this.guildRankPriority = 0;
-		this.save();
+		this.update({
+			guildId: null,
+			guildRankPriority: 0,
+		});
 
 		return true;
 	}

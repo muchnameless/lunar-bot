@@ -15,7 +15,7 @@ import {
 	randomPadding,
 	UNICODE_TO_EMOJI_NAME,
 } from '../constants';
-import { GUILD_ID_BRIDGER, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
+import { STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
 import { createBot } from '../MinecraftBot';
 import { GuildMemberUtil, MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector, MessageCollectorEvents } from '../MessageCollector';
@@ -307,7 +307,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 							where: { discordId: discordMessage.author.id },
 							defaults: {
 								minecraftUuid: SnowflakeUtil.generate(),
-								guildId: GUILD_ID_BRIDGER,
 								ign: UNKNOWN_IGN,
 								inDiscord: true,
 							},

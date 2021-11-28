@@ -20,7 +20,6 @@ import {
 	DOUBLE_LEFT_EMOJI,
 	DOUBLE_RIGHT_EMOJI,
 	EMBED_DESCRIPTION_MAX_CHARS,
-	GUILD_ID_BRIDGER,
 	LEFT_EMOJI,
 	RELOAD_EMOJI,
 	RIGHT_EMOJI,
@@ -252,7 +251,6 @@ export default class GuildCommand extends ApplicationCommand {
 									where: { discordId: ID },
 									defaults: {
 										minecraftUuid: SnowflakeUtil.generate(),
-										guildId: GUILD_ID_BRIDGER,
 										ign: UNKNOWN_IGN,
 										inDiscord: true,
 									},

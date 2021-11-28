@@ -1,8 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { GUILD_ID_BRIDGER } from '../constants';
 import { GuildMemberUtil } from '../util';
-import { logger } from '../functions';
 import { Event } from '../structures/events/Event';
 import type { GuildMember } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
@@ -24,32 +22,7 @@ export default class GuildMemberUpdateEvent extends Event {
 		const discordGuild = this.client.discordGuilds.cache.get(newMember.guild.id);
 		if (!discordGuild) return;
 
-		let player = GuildMemberUtil.getPlayer(newMember);
-
-		for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
-			const hypixelGuild = this.client.hypixelGuilds.cache.get(hypixelGuildId);
-			if (!hypixelGuild) continue;
-
-			// received bridger role -> update player db
-			if (
-				newMember.roles.cache.has(hypixelGuild.BRIDGER_ROLE_ID!) &&
-				!oldMember.roles.cache.has(hypixelGuild.BRIDGER_ROLE_ID!)
-			) {
-				player ??= await this.client.players.fetch({ discordId: newMember.id });
-
-				if (!player) {
-					return logger.info(
-						`[GUILD MEMBER UPDATE]: ${newMember.user.tag} received bridger role but was not in the player db`,
-					);
-				}
-
-				logger.info(`[GUILD MEMBER UPDATE]: ${player} | ${newMember.user.tag} received bridger role`);
-
-				if (!player.inGuild()) player.update({ guildId: GUILD_ID_BRIDGER }).catch((error) => logger.error(error));
-
-				break;
-			}
-		}
+		const player = GuildMemberUtil.getPlayer(newMember);
 
 		if (!player) return;
 
