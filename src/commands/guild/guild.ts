@@ -48,7 +48,13 @@ import {
 	trim,
 } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { ButtonInteraction, CommandInteraction, Interaction, Snowflake } from 'discord.js';
+import type {
+	ButtonInteraction,
+	CommandInteraction,
+	Interaction,
+	Snowflake,
+	AutocompleteInteraction,
+} from 'discord.js';
 import type { SlashCommandStringOption } from '@discordjs/builders';
 import type { WhereOptions } from 'sequelize';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -132,7 +138,9 @@ export default class GuildCommand extends ApplicationCommand {
 					.setName('setrank')
 					.setDescription('setrank')
 					.addStringOption(requiredPlayerOption)
-					.addStringOption((option) => option.setName('rank').setDescription('rank name').setRequired(true)),
+					.addStringOption((option) =>
+						option.setName('rank').setDescription('rank name').setRequired(true).setAutocomplete(true),
+					),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand
@@ -478,6 +486,26 @@ export default class GuildCommand extends ApplicationCommand {
 					.setFooter(hypixelGuild.name),
 			],
 		});
+	}
+
+	/**
+	 * @param interaction
+	 * @param value input value
+	 * @param name option name
+	 */
+	override runAutocomplete(interaction: AutocompleteInteraction, value: string, name: string) {
+		switch (name) {
+			case 'rank':
+				return interaction.respond(
+					InteractionUtil.getHypixelGuild(interaction).ranks.map(({ name: rankName }) => ({
+						name: rankName,
+						value: rankName,
+					})),
+				);
+
+			default:
+				return interaction.respond([]);
+		}
 	}
 
 	/**
