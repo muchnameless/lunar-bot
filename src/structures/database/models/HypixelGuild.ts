@@ -495,13 +495,18 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			// add / remove player db entries
 			await safePromiseAll([
 				...membersJoined.map(async ({ uuid: minecraftUuid }) => {
-					const [player, created] = await players.model.findCreateFind({
-						where: { minecraftUuid },
-						defaults: {
-							minecraftUuid,
-							guildId: this.guildId,
-						},
-					});
+					let player = this.client.players.cache.get(minecraftUuid)!;
+					let created = false;
+
+					if (!player) {
+						[player, created] = await players.model.findCreateFind({
+							where: { minecraftUuid },
+							defaults: {
+								minecraftUuid,
+								guildId: this.guildId,
+							},
+						});
+					}
 
 					let discordMember: GuildMember | null = null;
 
