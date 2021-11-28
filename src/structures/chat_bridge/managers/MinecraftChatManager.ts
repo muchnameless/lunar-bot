@@ -225,7 +225,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 				return (JSON.parse(result).server as string) ?? null;
 			} catch (error) {
-				return logger.error(error, '[GET SERVER]');
+				logger.error(error, '[GET SERVER]');
+				return null;
 			}
 		})();
 	}
