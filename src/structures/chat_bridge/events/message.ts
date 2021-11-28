@@ -525,11 +525,18 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			logger.info(`'${hypixelMessage.content}' was executed by ${hypixelMessage.author} in '${hypixelMessage.type}'`);
 			await command.runMinecraft(hypixelMessage);
 		} catch (error) {
-			logger.error(
-				error,
-				`An error occured while ${hypixelMessage.author} tried to execute ${hypixelMessage.content} in '${hypixelMessage.type}'`,
-			);
-			hypixelMessage.author.send(`an error occured while executing the '${command.name}' command:\n${error}`);
+			if (typeof error === 'string') {
+				logger.error(
+					`an error occured while ${hypixelMessage.author} tried to execute ${hypixelMessage.content} in '${hypixelMessage.type}': ${error}`,
+				);
+				hypixelMessage.author.send(error);
+			} else {
+				logger.error(
+					error,
+					`an error occured while ${hypixelMessage.author} tried to execute ${hypixelMessage.content} in '${hypixelMessage.type}'`,
+				);
+				hypixelMessage.author.send(`an error occured while executing the '${command.name}' command:\n${error}`);
+			}
 		}
 	}
 
