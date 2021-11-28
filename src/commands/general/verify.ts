@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import pkg from 'sequelize';
 const { Op } = pkg;
-import { oneLine, commaListsOr } from 'common-tags';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, UserUtil } from '../../util';
 import { logger } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import type { Components } from '@zikeji/hypixel';
 import type { CommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -14,7 +14,7 @@ export default class VerifyCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
-				.setDescription('link your discord account to your minecraft account (guild members only)')
+				.setDescription('link your discord account to your minecraft account')
 				.addStringOption(requiredIgnOption),
 			cooldown: 0,
 		});
@@ -26,7 +26,9 @@ export default class VerifyCommand extends ApplicationCommand {
 	 */
 	override async runSlash(interaction: CommandInteraction) {
 		const IGN = interaction.options.getString('ign', true);
-		const playerLinkedToId = UserUtil.getPlayer(interaction.user);
+		const playerLinkedToId =
+			UserUtil.getPlayer(interaction.user) ??
+			(await this.client.players.fetch({ discordId: interaction.user.id, cache: false }));
 
 		let player =
 			this.client.players.getByIgn(IGN) ??
@@ -45,24 +47,13 @@ export default class VerifyCommand extends ApplicationCommand {
 			return InteractionUtil.reply(interaction, 'you are already linked with this discord account');
 		}
 
-		let uuid;
-		let ign;
-		let guildId;
-		let hypixelPlayer;
+		let uuid: string;
+		let ign: string;
+		let hypixelPlayer: Components.Schemas.Player;
 
+		// API requests
 		try {
-			({ uuid, ign } = await mojang.ign(IGN));
-			({ _id: guildId } = await hypixel.guild.player(uuid));
-
-			// not in one of the guilds that the bot manages
-			if (!this.client.hypixelGuilds.cache.has(guildId)) {
-				return InteractionUtil.reply(
-					interaction,
-					commaListsOr`
-						according to the hypixel API, \`${ign}\` is not in ${this.client.hypixelGuilds.cache.map(({ name }) => name)}
-					`,
-				);
-			}
+			({ uuid, ign } = await mojang.ignOrUuid(IGN));
 
 			hypixelPlayer = await hypixel.player.uuid(uuid);
 		} catch (error) {
@@ -77,14 +68,11 @@ export default class VerifyCommand extends ApplicationCommand {
 			return InteractionUtil.reply(interaction, `no linked discord tag for \`${ign}\` on hypixel`);
 		}
 
-		// linked discord tag doesn't match author's tag
+		// linked discord tag doesn't match user's tag
 		if (LINKED_DISCORD_TAG !== interaction.user.tag) {
 			return InteractionUtil.reply(
 				interaction,
-				oneLine`
-					the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\`.
-					Keep in mind that discord tags are case sensitive
-				`,
+				`the linked discord tag \`${LINKED_DISCORD_TAG}\` for \`${ign}\` does not match yours: \`${interaction.user.tag}\``,
 			);
 		}
 
@@ -98,36 +86,36 @@ export default class VerifyCommand extends ApplicationCommand {
 			await playerLinkedToId.unlink(`linked account switched to ${interaction.user.tag}`);
 		}
 
-		// create new db entry if non exitent
-		try {
-			if (!player) {
+		// player db entry not cached -> find or create
+		if (!player) {
+			try {
 				[player] = await this.client.players.model.findCreateFind({
 					where: { minecraftUuid: uuid },
 					defaults: {
 						minecraftUuid: uuid,
 						ign,
-						guildId,
 					},
 				});
+			} catch (error) {
+				logger.error(error, '[VERIFY]: database');
+				return InteractionUtil.reply(
+					interaction,
+					`an error occurred while updating the guild player database. Contact ${await this.client.fetchOwnerInfo()}`,
+				);
 			}
-		} catch (error) {
-			logger.error(error, '[VERIFY]: database');
-			return InteractionUtil.reply(
-				interaction,
-				`an error occurred while updating the guild player database. Contact ${await this.client.fetchOwnerInfo()}`,
-			);
 		}
 
-		player.guildId = guildId;
+		// link player if they are in a cached hypixel guild
+		if (player.inGuild()) {
+			const discordMember =
+				(interaction.member as GuildMember | null) ??
+				(await InteractionUtil.getHypixelGuild(interaction)
+					.discordGuild?.members.fetch(interaction.user)
+					.catch((error) => logger.error(error, '[VERIFY]: guild member fetch'))) ??
+				null;
 
-		const discordMember =
-			(interaction.member as GuildMember | null) ??
-			(await InteractionUtil.getHypixelGuild(interaction)
-				.discordGuild?.members.fetch(interaction.user)
-				.catch((error) => logger.error(error, '[VERIFY]: guild member fetch'))) ??
-			null;
-
-		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
+			await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
+		}
 
 		return InteractionUtil.reply(interaction, `successfully linked your discord account to \`${ign}\``);
 	}
