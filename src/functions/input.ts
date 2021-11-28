@@ -1,16 +1,16 @@
 import { HypixelMessage } from '../structures/chat_bridge/HypixelMessage';
 import { UserUtil } from '../util';
 import { mojang } from '../api';
+import type { LunarClient } from '../structures/LunarClient';
 import type { HypixelUserMessage } from '../structures/chat_bridge/HypixelMessage';
 import type { Interaction } from 'discord.js';
-import type { MojangResult } from '../structures/MojangClient';
 
 /**
  * message, args -> ign, uuid
  * @param ctx
  * @param ignOrUuid
  */
-export function getUuidAndIgn(ctx: Interaction | HypixelUserMessage, ignOrUuid?: string | null): Promise<MojangResult> {
+export async function getUuidAndIgn(ctx: Interaction | HypixelUserMessage, ignOrUuid?: string | null) {
 	// remove non-alphanumeric characters
 	const IGN_OR_UUID = ignOrUuid?.replace(/\W/g, '');
 
@@ -19,20 +19,28 @@ export function getUuidAndIgn(ctx: Interaction | HypixelUserMessage, ignOrUuid?:
 
 	// no args -> try to get player object
 	const IS_HYPIXEL_MESSAGE = ctx instanceof HypixelMessage;
-	const player = IS_HYPIXEL_MESSAGE ? ctx.author.player : UserUtil.getPlayer(ctx.user);
 
 	// author is linked to player
+	const player = IS_HYPIXEL_MESSAGE ? ctx.author.player : UserUtil.getPlayer(ctx.user);
 	if (player) {
-		return Promise.resolve({
+		return {
 			uuid: player.minecraftUuid,
 			ign: player.ign,
-		});
+		};
 	}
 
 	// no linked player -> try to get ign from author (HypixelMessageAuthor)
 	if (IS_HYPIXEL_MESSAGE) return mojang.ign(ctx.author.ign);
 
-	if (!ignOrUuid) return Promise.reject(`no linked player for \`${ctx.user.tag}\` found`);
+	// user linked to uncached player
+	const fetchedPlayer = await (ctx.client as LunarClient).players.model.findOne({
+		where: { discordId: ctx.user.id },
+		attributes: ['minecraftUuid'],
+	});
+	if (fetchedPlayer) return mojang.uuid(fetchedPlayer.minecraftUuid);
 
-	return Promise.reject(`\`${ignOrUuid}\` is not a valid IGN or UUID`);
+	// errors
+	if (!ignOrUuid) throw `no linked player for \`${ctx.user.tag}\` found`;
+
+	throw `\`${ignOrUuid}\` is not a valid IGN or UUID`;
 }
