@@ -156,7 +156,6 @@ export default class DebugCommand extends ApplicationCommand {
 											this.client.chatBridges.cache.map(
 												async (cb) => stripIndents`
 												bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
-												last messages: ${cb.minecraft._lastMessages.cache.length}
 												server: ${await cb.minecraft.server}
 											`,
 											),
