@@ -169,6 +169,16 @@ export default class GuildCommand extends ApplicationCommand {
 		super(context, {
 			aliases: ['g'],
 			slash,
+			requiredRoles: (hypixelGuild) => [
+				...new Set(
+					[
+						hypixelGuild.GUILD_ROLE_ID!,
+						hypixelGuild.BRIDGER_ROLE_ID!,
+						...hypixelGuild.staffRoleIds,
+						...hypixelGuild.adminRoleIds,
+					].filter(Boolean),
+				),
+			],
 			cooldown: 0,
 		});
 	}
