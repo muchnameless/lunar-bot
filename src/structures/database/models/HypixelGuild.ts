@@ -783,7 +783,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * syncs guild ranks with the weight leaderboard
 	 */
 	async syncRanks() {
-		if (!this.client.config.get('AUTO_GUILD_RANKS')) return this;
+		if (!this.client.config.get('AUTO_GUILD_RANKS') || !this.syncRanksEnabled) return this;
 
 		if (this.#syncRanksPromise) return this.#syncRanksPromise;
 
