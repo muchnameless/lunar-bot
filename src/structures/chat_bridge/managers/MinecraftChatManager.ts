@@ -907,8 +907,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * sends a message to in game chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
 	 * @param commandOptions
 	 */
-	async command(options: string): Promise<string>;
-	async command(options: CommandOptions & { raw?: false }): Promise<string>;
+	async command(options: string | (CommandOptions & { raw?: false })): Promise<string>;
 	async command(options: CommandOptions & { raw: true }): Promise<HypixelMessage[]>;
 	async command(options: CommandOptions): Promise<string>;
 	async command(options: string | CommandOptions) {
