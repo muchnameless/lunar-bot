@@ -165,11 +165,11 @@ export default class TrackCommand extends ApplicationCommand {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
-					.setAuthor(
-						`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
-						(await player.imageURL)!,
-						player.url,
-					)
+					.setAuthor({
+						name: `${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
+						iconURL: (await player.imageURL)!,
+						url: player.url,
+					})
 					.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
 					.setImage('attachment://file.jpg'),
 			],

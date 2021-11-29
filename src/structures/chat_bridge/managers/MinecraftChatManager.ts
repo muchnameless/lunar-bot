@@ -324,11 +324,11 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					this.client.log(
 						new MessageEmbed()
 							.setColor(this.client.config.get('EMBED_RED'))
-							.setAuthor(
-								discordMessage.author.tag,
-								(discordMessage.member ?? discordMessage.author).displayAvatarURL({ dynamic: true }),
-								player.url,
-							)
+							.setAuthor({
+								name: discordMessage.author.tag,
+								iconURL: (discordMessage.member ?? discordMessage.author).displayAvatarURL({ dynamic: true }),
+								url: player.url,
+							})
 							.setThumbnail((await player.imageURL)!)
 							.setDescription(
 								stripIndents`

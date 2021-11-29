@@ -49,11 +49,11 @@ export default class XpCommand extends ApplicationCommand {
 
 		let embed = new MessageEmbed()
 			.setColor(this.config.get('EMBED_BLUE'))
-			.setAuthor(
-				`${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
-				(await player.imageURL)!,
-				player.url,
-			)
+			.setAuthor({
+				name: `${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
+				iconURL: (await player.imageURL)!,
+				url: player.url,
+			})
 			.setDescription(
 				`${`Δ: change since ${Formatters.time(
 					new Date(
