@@ -807,7 +807,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		shouldOnlyAwaitUpdateXp = false,
 		rejectOnAPIError = false,
 	}: PlayerUpdateOptions = {}) {
-		if (!this.guildId) return this;
+		if (!this.guildId) {
+			// uncache non guild members if no activity in the last hour
+			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) this.uncacheEntry();
+			return;
+		}
 		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
 
 		if (shouldOnlyAwaitUpdateXp) {
@@ -980,12 +984,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options.shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async updateDiscordMember({ reason: reasonInput = 'synced with in game stats', shouldSendDm = false } = {}) {
-		if (this.discordMemberUpdatesDisabled) return;
-		if (!this.guildId) {
-			// uncache non guild members if no activity in the last hour
-			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) this.uncacheEntry();
-			return;
-		}
+		if (this.discordMemberUpdatesDisabled || !this.guildId) return;
 
 		let reason = reasonInput;
 
