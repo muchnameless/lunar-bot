@@ -108,7 +108,14 @@ const kickResponsesError = [
 	_genericErrors.unknownIgn,
 	_genericErrors.playerNotInGuild,
 ];
-const logErrorResponses = [_paginationErrors.RANGE_ERROR, _paginationErrors.NO_LOGS, _genericErrors.unknownIgn];
+const logErrorResponses = [
+	_paginationErrors.RANGE_ERROR,
+	_paginationErrors.NO_LOGS,
+	_genericErrors.MUST_BE_GM,
+	_genericErrors.MISSING_PERMS,
+	_genericErrors.RANK_MISSING_PERMS,
+	_genericErrors.unknownIgn,
+];
 const muteResponses = [
 	...Object.values(_mute),
 	_genericErrors.MUST_BE_GM,
