@@ -155,7 +155,7 @@ export default class InteractionUtil extends null {
 	 * wether the error is due to an interaction reply
 	 * @param error
 	 */
-	static isInteractionError(error: unknown) {
+	static isInteractionError(error: unknown): error is DiscordAPIError {
 		if (!(error instanceof DiscordAPIError)) return false;
 
 		switch (error.code) {
