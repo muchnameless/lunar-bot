@@ -202,10 +202,8 @@ export default class AhCommand extends ApplicationCommand {
 
 			if (!profiles) {
 				await InteractionUtil.update(interaction, { components: [] });
-				return InteractionUtil.reply(interaction, {
-					content: 'an error occurred',
-					ephemeral: true,
-				});
+
+				throw 'an error occurred';
 			}
 
 			// interaction from original requester -> edit message
@@ -224,10 +222,7 @@ export default class AhCommand extends ApplicationCommand {
 		} catch (error) {
 			logger.error(error);
 
-			return InteractionUtil.reply(interaction, {
-				content: `${error}`,
-				ephemeral: true,
-			});
+			throw `${error}`;
 		}
 	}
 

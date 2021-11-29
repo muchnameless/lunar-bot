@@ -5,10 +5,10 @@ import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
 import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
+	BaseCommandInteraction,
 	BaseGuildTextChannel,
 	CommandInteraction,
 	CommandInteractionOptionResolver,
-	ContextMenuInteraction,
 	EmojiIdentifierResolvable,
 	GuildMember,
 	Interaction,
@@ -34,7 +34,7 @@ interface InteractionData {
 	autoDefer: NodeJS.Timeout | null;
 }
 
-export type ChatInteraction = CommandInteraction | MessageComponentInteraction | ContextMenuInteraction;
+export type ChatInteraction = BaseCommandInteraction | MessageComponentInteraction;
 
 interface DeferReplyOptions extends InteractionDeferReplyOptions {
 	rejectOnError?: boolean;

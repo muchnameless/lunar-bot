@@ -58,10 +58,7 @@ export default class InteractionCreateEvent extends Event {
 		const command = this.client.commands.get(interaction.commandName);
 
 		if (!command) {
-			return InteractionUtil.reply(interaction, {
-				content: `the \`${interaction.commandName}\` command is currently disabled`,
-				ephemeral: true,
-			});
+			throw `the \`${interaction.commandName}\` command is currently disabled`;
 		}
 
 		// role permissions
@@ -76,10 +73,7 @@ export default class InteractionCreateEvent extends Event {
 				const EXPIRATION_TIME = command.timestamps.get(interaction.user.id)! + COOLDOWN_TIME;
 
 				if (NOW < EXPIRATION_TIME) {
-					return InteractionUtil.reply(interaction, {
-						content: `\`${command.name}\` is on cooldown for another \`${ms(EXPIRATION_TIME - NOW, { long: true })}\``,
-						ephemeral: true,
-					});
+					throw `\`${command.name}\` is on cooldown for another \`${ms(EXPIRATION_TIME - NOW, { long: true })}\``;
 				}
 			}
 
@@ -123,13 +117,10 @@ export default class InteractionCreateEvent extends Event {
 
 				if (!command) {
 					if (commandName) {
-						await InteractionUtil.reply(interaction, {
-							content: `the \`${commandName}\` command is currently disabled`,
-							ephemeral: true,
-						});
+						throw `the \`${commandName}\` command is currently disabled`;
 					}
 
-					return;
+					throw 'unknown button command';
 				}
 
 				// role permissions
@@ -174,10 +165,7 @@ export default class InteractionCreateEvent extends Event {
 
 				if (!command) {
 					if (commandName) {
-						await InteractionUtil.reply(interaction, {
-							content: `the \`${commandName}\` command is currently disabled`,
-							ephemeral: true,
-						});
+						throw `the \`${commandName}\` command is currently disabled`;
 					}
 
 					return;
@@ -309,10 +297,7 @@ export default class InteractionCreateEvent extends Event {
 		const command = this.client.commands.get(interaction.commandName);
 
 		if (!command) {
-			return InteractionUtil.reply(interaction, {
-				content: `the \`${interaction.commandName}\` command is currently disabled`,
-				ephemeral: true,
-			});
+			throw `the \`${interaction.commandName}\` command is currently disabled`;
 		}
 
 		// role permissions
@@ -356,10 +341,7 @@ export default class InteractionCreateEvent extends Event {
 			// context menu
 			if (interaction.isContextMenu()) return await this.#handleContextMenuInteraction(interaction);
 
-			return InteractionUtil.reply(interaction, {
-				content: `unknown interaction type '${interaction.type}'`,
-				ephemeral: true,
-			});
+			throw `unknown interaction type '${interaction.type}'`;
 		} catch (error) {
 			if (typeof error === 'string') {
 				logger.error(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}: ${error}`);

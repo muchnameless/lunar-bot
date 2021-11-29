@@ -33,17 +33,11 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 		const { discordGuild: guild } = InteractionUtil.getHypixelGuild(interaction);
 
 		if (!guild) {
-			return InteractionUtil.reply(interaction, {
-				content: 'unable to determine the guild',
-				ephemeral: true,
-			});
+			throw 'unable to determine the guild';
 		}
 
 		if (PurgeRolesCommand.running.has(guild.id)) {
-			return InteractionUtil.reply(interaction, {
-				content: 'the command is already running',
-				ephemeral: true,
-			});
+			throw 'the command is already running';
 		}
 
 		try {

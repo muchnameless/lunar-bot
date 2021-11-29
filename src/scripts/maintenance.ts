@@ -128,13 +128,6 @@ client
 			} tried to execute '${InteractionUtil.logInfo(interaction)}' during maintenance`,
 		);
 
-		try {
-			await interaction.reply({
-				content: `${client.user} is currently unavailable due to maintenance`,
-				ephemeral: true,
-			});
-		} catch (error) {
-			logger.error(error);
-		}
+		InteractionUtil.reply(interaction, `${client.user} is currently unavailable due to maintenance`);
 	})
 	.login();

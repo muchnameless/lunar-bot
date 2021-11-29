@@ -7,7 +7,8 @@ import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands
 import { InteractionUtil } from '../../util';
 import { logger, seconds, validateNumber } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction, GuildMember, Snowflake } from 'discord.js';
+import type { CommandInteraction, GuildMember, Snowflake, User } from 'discord.js';
+import type { Player } from '../../structures/database/models/Player';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class LinkCommand extends ApplicationCommand {
@@ -40,7 +41,7 @@ export default class LinkCommand extends ApplicationCommand {
 			logger.error(error, '[LINK]');
 		}
 
-		let player;
+		let player: Player | null = null;
 
 		if (!guildId || !this.client.hypixelGuilds.cache.has(guildId)) {
 			// IGN_OR_Uuid is neither a valid ign nor uuid from a player in the guild -> autocomplete to IGN
@@ -64,33 +65,28 @@ export default class LinkCommand extends ApplicationCommand {
 		}
 
 		if (!player) {
-			return InteractionUtil.reply(interaction, {
-				content: stripIndents`
-					\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
-					Make sure to provide the full ign if the player database is not already updated (check ${
-						this.client.logHandler.channel ?? '#lunar-logs'
-					})
-				`,
-				ephemeral: true,
-			});
+			throw stripIndents`
+				\`${IGN_OR_UUID}\` is neither a valid IGN nor minecraft uuid.
+				Make sure to provide the full ign if the player database is not already updated (check ${
+					this.client.logHandler.channel ?? '#lunar-logs'
+				})
+			`;
 		}
 
 		const { hypixelGuild } = player;
 
 		if (interaction.user.id !== this.client.ownerId) {
 			if (!hypixelGuild) {
-				return InteractionUtil.reply(interaction, {
-					content: `\`${player}\` is not in a cached hypixel guild`,
-					ephemeral: true,
-				});
+				throw `\`${player}\` is not in a cached hypixel guild`;
 			}
 
 			// check if executor is staff in the player's hypixel guild's discord guild
 			if (hypixelGuild.guildId !== InteractionUtil.getHypixelGuild(interaction).guildId) {
-				return InteractionUtil.reply(interaction, {
-					content: `you can only link players in ${hypixelGuild}'s discord server`,
-					ephemeral: true,
-				});
+				throw `you can only link players in ${hypixelGuild}'s discord server`;
+			}
+
+			if (player.isStaff) {
+				throw `\`${player}\` is a staff member and cannot be manually linked`;
 			}
 		}
 
@@ -106,17 +102,21 @@ export default class LinkCommand extends ApplicationCommand {
 
 		if (playerLinkedToId) {
 			let linkedUserIsDeleted = false;
+			let linkedUser: User | null = null;
 
-			const linkedUser = await playerLinkedToId.discordUser.catch((error) => {
+			try {
+				linkedUser = await playerLinkedToId.discordUser;
+			} catch (error) {
 				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownUser) {
 					linkedUserIsDeleted = true;
-					return logger.error(
+					logger.error(
 						error,
 						`[LINK]: ${playerLinkedToId.logInfo}: deleted discord user: ${playerLinkedToId.discordId}`,
 					);
+				} else {
+					logger.error(error, `[LINK]: ${playerLinkedToId.logInfo}: error fetching already linked user`);
 				}
-				return logger.error(error, `[LINK]: ${playerLinkedToId.logInfo}: error fetching already linked user`);
-			});
+			}
 
 			if (!linkedUserIsDeleted) {
 				await InteractionUtil.awaitConfirmation(interaction, {

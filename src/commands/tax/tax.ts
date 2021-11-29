@@ -138,10 +138,7 @@ export default class TaxCommand extends ApplicationCommand {
 						const NEW_AMOUNT = interaction.options.getInteger('amount', true);
 
 						if (NEW_AMOUNT < 0) {
-							return InteractionUtil.reply(interaction, {
-								content: 'tax amount must be a non-negative number',
-								ephemeral: true,
-							});
+							throw 'tax amount must be a non-negative number';
 						}
 
 						const OLD_AMOUNT = this.config.get('TAX_AMOUNT');
@@ -193,10 +190,7 @@ export default class TaxCommand extends ApplicationCommand {
 						const collector = this.client.taxCollectors.getById(interaction.user.id);
 
 						if (!collector?.isCollecting) {
-							return InteractionUtil.reply(interaction, {
-								content: 'this command is restricted to tax collectors',
-								ephemeral: true,
-							});
+							throw 'this command is restricted to tax collectors';
 						}
 
 						const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
@@ -252,10 +246,7 @@ export default class TaxCommand extends ApplicationCommand {
 						const AMOUNT_TO_PING = playersPingable.size;
 
 						if (!AMOUNT_TO_PING) {
-							return InteractionUtil.reply(interaction, {
-								content: `no members to ping from ${hypixelGuild ?? 'all guilds'}`,
-								ephemeral: true,
-							});
+							throw `no members to ping from ${hypixelGuild ?? 'all guilds'}`;
 						}
 
 						await InteractionUtil.awaitConfirmation(

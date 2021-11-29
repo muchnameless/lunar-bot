@@ -122,32 +122,30 @@ export default class ReloadCommand extends DualCommand {
 					await this.collection.loadFromFile(commandFile, { reload });
 
 					logger.info(`command ${commandName} was reloaded successfully`);
+
 					return `command \`${commandName}\` was reloaded successfully`;
 				} catch (error) {
 					logger.error(error, 'an error occurred while reloading');
-					return {
-						content: stripIndents`
-							an error occurred while reloading \`${commandName}\`:
-							${Formatters.codeBlock('xl', `${error}`)}
-						`,
-						ephemeral: true,
-					};
+
+					throw stripIndents`
+						an error occurred while reloading \`${commandName}\`:
+						${Formatters.codeBlock('xl', `${error}`)}
+					`;
 				}
 			}
 
 			case 'commands': {
 				try {
 					await this.collection.unloadAll().loadAll({ reload });
+
 					return `${this.collection.size} command${this.collection.size !== 1 ? 's' : ''} were reloaded successfully`;
 				} catch (error) {
 					logger.error(error, 'an error occurred while reloading all commands');
-					return {
-						content: stripIndents`
-							an error occurred while reloading all commands:
-							${Formatters.codeBlock('xl', `${error}`)}
-						`,
-						ephemeral: true,
-					};
+
+					throw stripIndents`
+						an error occurred while reloading all commands:
+						${Formatters.codeBlock('xl', `${error}`)}
+					`;
 				}
 			}
 
@@ -173,44 +171,44 @@ export default class ReloadCommand extends DualCommand {
 					({ name: eventName } = await this.client.events.loadFromFile(eventFile, { force, reload }));
 
 					logger.info(`event ${eventName} was reloaded successfully`);
+
 					return `event \`${eventName}\` was reloaded successfully`;
 				} catch (error) {
 					logger.error(error, 'an error occurred while reloading');
-					return {
-						content: stripIndents`
-							an error occurred while reloading \`${eventName}\`:
-							${Formatters.codeBlock('xl', `${error}`)}
-						`,
-						ephemeral: true,
-					};
+
+					throw stripIndents`
+						an error occurred while reloading \`${eventName}\`:
+						${Formatters.codeBlock('xl', `${error}`)}
+					`;
 				}
 			}
 
 			case 'events': {
 				try {
 					await this.client.events.unloadAll().loadAll({ reload, force });
+
 					return `${this.client.events.size} event${
 						this.client.events.size !== 1 ? 's' : ''
 					} were reloaded successfully`;
 				} catch (error) {
 					logger.error(error, 'an error occurred while reloading all events');
-					return {
-						content: stripIndents`
-							an error occurred while reloading all events:
-							${Formatters.codeBlock('xl', `${error}`)}
-						`,
-						ephemeral: true,
-					};
+
+					throw stripIndents`
+						an error occurred while reloading all events:
+						${Formatters.codeBlock('xl', `${error}`)}
+					`;
 				}
 			}
 
 			case 'database': {
 				await this.client.db.loadCache();
+
 				return 'database cache reloaded successfully';
 			}
 
 			case 'cooldowns': {
 				this.collection.clearCooldowns();
+
 				return 'cooldowns reset successfully';
 			}
 
@@ -226,13 +224,11 @@ export default class ReloadCommand extends DualCommand {
 					return 'filter reloaded successfully';
 				} catch (error) {
 					logger.error(error, 'an error occurred while reloading the filter');
-					return {
-						content: stripIndents`
-							an error occurred while reloading the filter:
-							${Formatters.codeBlock('xl', `${error}`)}
-						`,
-						ephemeral: true,
-					};
+
+					throw stripIndents`
+						an error occurred while reloading the filter:
+						${Formatters.codeBlock('xl', `${error}`)}
+					`;
 				}
 			}
 

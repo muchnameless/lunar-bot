@@ -105,7 +105,9 @@ export default class EvalCommand extends ApplicationCommand {
 		isAsync = /\bawait\b/.test(input),
 		inspectDepth = 0,
 	) {
-		if (interaction.user.id !== this.client.ownerId) throw new Error('eval is restricted to the bot owner');
+		if (interaction.user.id !== this.client.ownerId) {
+			throw 'eval is restricted to the bot owner';
+		}
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */
 		const reply = (options: string | InteractionUtilReplyOptions) =>
@@ -212,10 +214,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 */
 	override async runMessage(interaction: ContextMenuInteraction, { content }: Message) {
 		if (!content) {
-			return InteractionUtil.reply(interaction, {
-				content: 'no content to evaluate',
-				ephemeral: true,
-			});
+			throw 'no content to evaluate';
 		}
 
 		const IS_ASYNC = /\bawait\b/.test(content);
@@ -236,10 +235,7 @@ export default class EvalCommand extends ApplicationCommand {
 		const { channel } = interaction;
 
 		if (!ChannelUtil.botPermissions(channel!).has(Permissions.FLAGS.VIEW_CHANNEL)) {
-			return InteractionUtil.reply(interaction, {
-				content: `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`,
-				ephemeral: true,
-			});
+			throw `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`;
 		}
 
 		const [subcommand, async, inspectDepth] = args;
