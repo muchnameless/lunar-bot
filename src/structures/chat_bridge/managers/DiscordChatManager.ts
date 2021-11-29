@@ -348,7 +348,7 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// check if guild chat is muted
-		if (this.hypixelGuild!.muted && !player?.isStaff) {
+		if (this.hypixelGuild!.muted && (!player?.isStaff || player?.guildId === this.hypixelGuild!.guildId)) {
 			DiscordChatManager.#dmMuteInfo(
 				message,
 				player,

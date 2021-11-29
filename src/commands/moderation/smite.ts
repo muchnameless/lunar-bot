@@ -48,7 +48,7 @@ export default class SmiteCommand extends DualCommand {
 
 		if (!target) return hypixelMessage.author.send(`no player with the IGN \`${TARGET_INPUT}\` found`);
 
-		const { content } = await guildCommand.runMute({
+		const content = await guildCommand.runMute({
 			target,
 			executor: hypixelMessage.player,
 			duration: minutes(10),
