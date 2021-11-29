@@ -794,7 +794,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		}
 	}
 	/**
-	 * should only ever be called from within syncGuildRanks()
+	 * should only ever be called from within syncRanks()
 	 * @internal
 	 */
 	async #syncRanks() {
