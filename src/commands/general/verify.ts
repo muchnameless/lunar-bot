@@ -105,17 +105,15 @@ export default class VerifyCommand extends ApplicationCommand {
 			}
 		}
 
-		// link player if they are in a cached hypixel guild
-		if (player.inGuild()) {
-			const discordMember =
-				(interaction.member as GuildMember | null) ??
-				(await InteractionUtil.getHypixelGuild(interaction)
-					.discordGuild?.members.fetch(interaction.user)
-					.catch((error) => logger.error(error, '[VERIFY]: guild member fetch'))) ??
-				null;
+		// link player
+		const discordMember =
+			(interaction.member as GuildMember | null) ??
+			(await InteractionUtil.getHypixelGuild(interaction)
+				.discordGuild?.members.fetch(interaction.user)
+				.catch((error) => logger.error(error, '[VERIFY]: guild member fetch'))) ??
+			null;
 
-			await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
-		}
+		await player.link(discordMember ?? interaction.user.id, 'verified with the bot');
 
 		return InteractionUtil.reply(interaction, `successfully linked your discord account to \`${ign}\``);
 	}

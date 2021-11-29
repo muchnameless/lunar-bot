@@ -4,10 +4,10 @@ import { RESTJSONErrorCodes } from 'discord-api-types/v9';
 import { stripIndents } from 'common-tags';
 import { hypixel, mojang } from '../../api';
 import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil } from '../../util';
+import { InteractionUtil, UserUtil } from '../../util';
 import { logger, seconds, validateNumber } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction, GuildMember, Snowflake, User } from 'discord.js';
+import type { CommandInteraction, GuildMember, User } from 'discord.js';
 import type { Player } from '../../structures/database/models/Player';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -90,17 +90,24 @@ export default class LinkCommand extends ApplicationCommand {
 			}
 		}
 
-		const USER_ID = interaction.options.get('user', true).value as Snowflake;
+		const user = interaction.options.getUser('user', true);
 
 		// discordId already linked to another player
 		const playerLinkedToId =
-			this.client.players.getById(USER_ID) ??
+			UserUtil.getPlayer(user) ??
 			(await this.client.players.fetch({
-				discordId: USER_ID,
+				discordId: user.id,
 				cache: false,
 			}));
 
 		if (playerLinkedToId) {
+			if (playerLinkedToId.minecraftUuid === player.minecraftUuid) {
+				return InteractionUtil.reply(interaction, {
+					content: `\`${player}\` is already linked to ${user}`,
+					allowedMentions: { parse: [] },
+				});
+			}
+
 			let linkedUserIsDeleted = false;
 			let linkedUser: User | null = null;
 
@@ -120,7 +127,7 @@ export default class LinkCommand extends ApplicationCommand {
 
 			if (!linkedUserIsDeleted) {
 				await InteractionUtil.awaitConfirmation(interaction, {
-					question: `${linkedUser ?? `\`${USER_ID}\``} is already linked to \`${playerLinkedToId}\`. Overwrite this?`,
+					question: `${linkedUser ?? `\`${user}\``} is already linked to \`${playerLinkedToId}\`. Overwrite this?`,
 					allowedMentions: { parse: [] },
 				});
 			}
@@ -139,13 +146,6 @@ export default class LinkCommand extends ApplicationCommand {
 
 			try {
 				linkedUser = await player.discordUser;
-
-				if (player.discordId === USER_ID) {
-					return InteractionUtil.reply(interaction, {
-						content: `\`${player}\` is already linked to ${linkedUser ?? `\`${player.discordId}\``}`,
-						allowedMentions: { parse: [] },
-					});
-				}
 
 				await InteractionUtil.awaitConfirmation(interaction, {
 					question: stripIndents`
@@ -177,16 +177,16 @@ export default class LinkCommand extends ApplicationCommand {
 		const discordMember =
 			(interaction.options.getMember('user') as GuildMember) ??
 			(await guild?.members
-				.fetch(USER_ID)
+				.fetch(user)
 				.catch((error) => logger.error(error, '[LINK]: error fetching member to link'))) ??
 			null;
 
 		// no discord member for the user to link found
 		if (!discordMember) {
-			await player.link(USER_ID);
+			await player.link(user.id);
 			return InteractionUtil.reply(
 				interaction,
-				`\`${player}\` linked to \`${USER_ID}\` but could not be found on the ${
+				`\`${player}\` linked to \`${user}\` but could not be found on the ${
 					guild?.name ?? '(currently unavailable)'
 				} discord server`,
 			);
