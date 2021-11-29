@@ -44,7 +44,7 @@ type Slash =
 
 type WithChoices = SlashCommandIntegerOption | SlashCommandNumberOption | SlashCommandStringOption;
 
-interface CheckPermissionsOptions {
+interface AssertPermissionsOptions {
 	roleIds?: Snowflake[] | null;
 	hypixelGuild?: HypixelGuild;
 }
@@ -253,15 +253,16 @@ export class ApplicationCommand extends BaseCommand {
 	}
 
 	/**
+	 * rejects on missing permissions
 	 * @param interaction
 	 * @param options
 	 */
-	async checkPermissions(
+	async assertPermissions(
 		interaction: Interaction,
 		{
 			hypixelGuild = InteractionUtil.getHypixelGuild(interaction),
 			roleIds = this.requiredRoles(hypixelGuild),
-		}: CheckPermissionsOptions = {},
+		}: AssertPermissionsOptions = {},
 	) {
 		// owner bypass
 		if (interaction.user.id === this.client.ownerId) return;

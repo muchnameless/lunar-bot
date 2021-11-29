@@ -189,7 +189,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param subcommand
 	 */
-	#checkRequiredRoles(interaction: Interaction, hypixelGuild: HypixelGuild, subcommand: string) {
+	#assertRequiredRoles(interaction: Interaction, hypixelGuild: HypixelGuild, subcommand: string) {
 		const roleIds: Snowflake[] = [];
 
 		switch (subcommand) {
@@ -225,7 +225,7 @@ export default class GuildCommand extends ApplicationCommand {
 				throw new Error(`unknown subcommand '${subcommand}'`);
 		}
 
-		return this.checkPermissions(interaction, { roleIds, hypixelGuild });
+		return this.assertPermissions(interaction, { roleIds, hypixelGuild });
 	}
 
 	/**
@@ -641,7 +641,7 @@ export default class GuildCommand extends ApplicationCommand {
 			throw new Error('uncached hypixel guild');
 		}
 
-		await this.#checkRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
+		await this.#assertRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
 
 		const PAGE = PAGE_INPUT === Number.NaN.toString() ? null : Number(PAGE_INPUT);
 
@@ -699,7 +699,7 @@ export default class GuildCommand extends ApplicationCommand {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const SUBCOMMAND = interaction.options.getSubcommand();
 
-		await this.#checkRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
+		await this.#assertRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
 
 		switch (SUBCOMMAND) {
 			case 'demote': {

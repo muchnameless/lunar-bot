@@ -65,7 +65,7 @@ export default class InteractionCreateEvent extends Event {
 		}
 
 		// role permissions
-		await command.checkPermissions(interaction);
+		await command.assertPermissions(interaction);
 
 		// command cooldowns
 		if (command.timestamps) {
@@ -133,7 +133,7 @@ export default class InteractionCreateEvent extends Event {
 				}
 
 				// role permissions
-				await command.checkPermissions(interaction);
+				await command.assertPermissions(interaction);
 
 				return command.runButton(interaction, args);
 			}
@@ -184,7 +184,7 @@ export default class InteractionCreateEvent extends Event {
 				}
 
 				// role permissions
-				await command.checkPermissions(interaction);
+				await command.assertPermissions(interaction);
 
 				return command.runSelect(interaction, args);
 			}
@@ -281,7 +281,7 @@ export default class InteractionCreateEvent extends Event {
 				if (!command) return interaction.respond([]);
 
 				// role permissions
-				await command.checkPermissions(interaction);
+				await command.assertPermissions(interaction);
 
 				return command.runAutocomplete(interaction, value, name);
 			}
@@ -316,7 +316,7 @@ export default class InteractionCreateEvent extends Event {
 		}
 
 		// role permissions
-		await command.checkPermissions(interaction);
+		await command.assertPermissions(interaction);
 
 		switch (interaction.targetType) {
 			case 'MESSAGE':
