@@ -1273,7 +1273,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (idOrDiscordMember instanceof GuildMember) {
 			await this.setUniqueDiscordId(idOrDiscordMember.id);
 			this.update({ inDiscord: true }).catch((error) => logger.error(error));
-			if (this.inGuild()) this.setDiscordMember(idOrDiscordMember);
+			this.setDiscordMember(idOrDiscordMember);
 
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
 
