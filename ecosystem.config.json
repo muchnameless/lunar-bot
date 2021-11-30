@@ -6,7 +6,7 @@
 			"args": "start",
 			"autorestart": true,
 			"watch": false,
-			"max_memory_restart": "1024M",
+			"max_memory_restart": "2G",
 			"out_file": "logs/lunar-bot-out.log",
 			"error_file": "logs/lunar-bot-error.log"
 		}
