@@ -36,7 +36,7 @@ export default class BaseWeightCommand extends DualCommand {
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
 
-			if (!profiles?.length) return `${ign} has no SkyBlock profiles`;
+			if (!profiles?.length) return `\`${ign}\` has no SkyBlock profiles`;
 
 			let weightData;
 
@@ -47,7 +47,7 @@ export default class BaseWeightCommand extends DualCommand {
 			} else {
 				const profile = profiles.find(({ cute_name: name }) => name === profileName);
 
-				if (!profile) return `${ign} has no profile named '${upperCaseFirstChar(profileName)}'`;
+				if (!profile) return `\`${ign}\` has no profile named \`${upperCaseFirstChar(profileName)}\``;
 
 				weightData = {
 					name: profile.cute_name,
@@ -55,7 +55,7 @@ export default class BaseWeightCommand extends DualCommand {
 				};
 			}
 
-			return `${ign} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(
+			return `${escapeIgn(ign)} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(
 				weightData.weight,
 			)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
 		} catch (error) {
@@ -72,12 +72,10 @@ export default class BaseWeightCommand extends DualCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		return InteractionUtil.reply(
 			interaction,
-			escapeIgn(
-				await this._generateReply(
-					interaction,
-					interaction.options.getString('ign'),
-					interaction.options.getString('profile'),
-				),
+			await this._generateReply(
+				interaction,
+				interaction.options.getString('ign'),
+				interaction.options.getString('profile'),
 			),
 		);
 	}
