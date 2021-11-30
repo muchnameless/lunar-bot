@@ -1,11 +1,12 @@
+import { Interaction } from 'discord.js';
 import { PROFILE_NAMES, X_EMOJI } from '../../constants';
 import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
 import { autocorrect, escapeIgn, getUuidAndIgn, logger, seconds, upperCaseFirstChar } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
-import type { Components } from '@zikeji/hypixel';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
+import type { Components } from '@zikeji/hypixel';
 import type { SkyBlockProfile, WeightData } from '../../functions';
 
 export default class BaseWeightCommand extends DualCommand {
@@ -55,9 +56,11 @@ export default class BaseWeightCommand extends DualCommand {
 				};
 			}
 
-			return `${escapeIgn(ign)} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(
-				weightData.weight,
-			)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
+			return `${ctx instanceof Interaction ? escapeIgn(ign) : ign} (${weightData.name}): ${this.formatNumber(
+				weightData.totalWeight,
+			)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${
+				weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`
+			}`;
 		} catch (error) {
 			logger.error(error, '[WEIGHT]');
 
