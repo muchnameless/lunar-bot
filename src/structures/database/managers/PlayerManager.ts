@@ -22,7 +22,7 @@ import {
 } from '../../../functions';
 import { ModelManager } from './ModelManager';
 import type { ModelResovable } from './ModelManager';
-import type { Player, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
+import type { Player, PlayerInGuild, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
 import type { HypixelGuild } from '../models/HypixelGuild';
 
 export class PlayerManager extends ModelManager<Player> {
@@ -42,8 +42,8 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * get players from all guilds (no bridgers or errors)
 	 */
-	get inGuild() {
-		return this.cache.filter((player) => player.inGuild());
+	get inGuild(): Collection<string, PlayerInGuild> {
+		return this.cache.filter((player) => player.inGuild()) as Collection<string, PlayerInGuild>;
 	}
 
 	/**
@@ -662,7 +662,7 @@ export class PlayerManager extends ModelManager<Player> {
 		this.client.log(
 			this.client.defaultEmbed
 				.setTitle('Current Mayor XP Tracking')
-				.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
+				.setDescription(`reset the xp gained from ${this.inGuild.size} guild members`),
 		);
 
 		this.client.cronJobs.schedule(
@@ -689,7 +689,7 @@ export class PlayerManager extends ModelManager<Player> {
 		this.client.log(
 			this.client.defaultEmbed
 				.setTitle('Daily XP Tracking')
-				.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
+				.setDescription(`reset the xp gained from ${this.inGuild.size} guild members`),
 		);
 
 		return this.updateMainProfiles();
@@ -707,7 +707,7 @@ export class PlayerManager extends ModelManager<Player> {
 		this.client.log(
 			this.client.defaultEmbed
 				.setTitle('Weekly XP Tracking')
-				.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
+				.setDescription(`reset the xp gained from ${this.inGuild.size} guild members`),
 		);
 
 		return this;
@@ -725,7 +725,7 @@ export class PlayerManager extends ModelManager<Player> {
 		this.client.log(
 			this.client.defaultEmbed
 				.setTitle('Monthly XP Tracking')
-				.setDescription(`reset the xp gained from all ${this.cache.size} guild members`),
+				.setDescription(`reset the xp gained from ${this.inGuild.size} guild members`),
 		);
 
 		return this;

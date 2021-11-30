@@ -55,7 +55,7 @@ export default class XpResetCommand extends ApplicationCommand {
 
 			await InteractionUtil.awaitConfirmation(
 				interaction,
-				`reset competition xp gained from all ${PLAYER_COUNT} guild members?`,
+				`reset competition xp gained from ${PLAYER_COUNT} guild members?`,
 			);
 
 			// delete players who left the guild
@@ -69,7 +69,7 @@ export default class XpResetCommand extends ApplicationCommand {
 				this.config.set('COMPETITION_START_TIME', Date.now()),
 			]);
 
-			result = `reset the competition xp gained from all ${PLAYER_COUNT} guild members`;
+			result = `reset the competition xp gained from ${PLAYER_COUNT} guild members`;
 		}
 
 		// logging
