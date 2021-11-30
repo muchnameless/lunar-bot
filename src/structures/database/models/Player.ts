@@ -809,7 +809,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	}: PlayerUpdateOptions = {}) {
 		if (!this.guildId) {
 			// uncache non guild members if no activity in the last hour
-			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) this.uncacheEntry();
+			if (Date.now() - this.lastActivityAt.getTime() >= hours(1)) this.uncache();
 			return;
 		}
 		if (this.guildId !== GUILD_ID_ERROR) await this.updateXp(rejectOnAPIError); // only query hypixel skyblock api for guild players without errors
