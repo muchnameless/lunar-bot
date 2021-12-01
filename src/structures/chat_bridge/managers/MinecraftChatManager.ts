@@ -559,7 +559,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 			.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
 			.replace(emojiRegex(), (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default emojis
-			.replace(/\u{2022}/gu, '\u{25CF}') // better bullet points
+			.replace(/(?<!\\)\\(?=[^a-z\d\\ \n])/gi, '') // replace escaping \ which are invisible on discord
+			.replaceAll('\u{2022}', '\u{25CF}') // better bullet points: "• -> ●"
 			.replaceAll('`', "'") // better single quotes
 			.replace(/<#(\d{17,19})>/g, (match, p1) => {
 				// channels
