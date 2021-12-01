@@ -1,4 +1,5 @@
 import { Collection } from 'discord.js';
+import { logger } from '../../../functions';
 import type { FindOptions, Model, ModelCtor, WhereOptions } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
@@ -62,11 +63,16 @@ export class ModelManager<M extends Model> {
 	 * @param where
 	 */
 	async fetch({ cache = true, ...where }: WhereOptions<M['_attributes']> & { cache?: boolean }) {
-		const entry = await this.model.findOne({ where: where as WhereOptions<M['_attributes']> });
+		try {
+			const entry = await this.model.findOne({ where: where as WhereOptions<M['_attributes']> });
 
-		if (cache && entry) this.cache.set(entry[this.primaryKey as keyof M] as unknown as string, entry);
+			if (cache && entry) this.cache.set(entry[this.primaryKey as keyof M] as unknown as string, entry);
 
-		return entry;
+			return entry;
+		} catch (error) {
+			logger.error(error, `[${this.constructor.name} FETCH]`);
+			return null;
+		}
 	}
 
 	/**
@@ -87,7 +93,7 @@ export class ModelManager<M extends Model> {
 	 */
 	async remove(idOrInstance: ModelResovable<M>) {
 		const element = this.resolve(idOrInstance);
-		if (!element) throw new Error(`[MODEL MANAGER REMOVE]: unknown element: ${idOrInstance}`);
+		if (!element) throw new Error(`[${this.constructor.name} REMOVE]: unknown element: ${idOrInstance}`);
 
 		this.cache.delete(element[this.primaryKey as keyof M] as unknown as string);
 		await element.destroy();
