@@ -502,12 +502,22 @@ export default class InteractionUtil extends null {
 			if (interaction.replied) return MessageUtil.delete(interaction.message as Message);
 
 			await this.deferUpdate(interaction, { rejectOnError: true });
+
+			if (MessageUtil.isEphemeral(interaction.message as Message)) {
+				logger.warn(
+					`[INTERACTION UTIL]: unable to delete ephemeral message in ${MessageUtil.channelLogInfo(
+						interaction.message as Message,
+					)}`,
+				);
+				return null;
+			}
+
 			await interaction.deleteReply();
 
 			return interaction.message as Message;
 		} catch (error) {
 			logger.error(error, `[INTERACTION UTIL]: ${this.logInfo(interaction)}: deleteMessage`);
-			return interaction.message as Message;
+			return MessageUtil.delete(interaction.message as Message);
 		}
 	}
 
