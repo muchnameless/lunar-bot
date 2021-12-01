@@ -46,12 +46,12 @@ export class DiscordManager {
 
 			case 2:
 				return string
-					.replaceAll('*', '\\*') // escape italic 1/2
+					.replace(/(?<!\\)(?=\*)/g, '\\') // escape italic 1/2
 					.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
 						// escape italic 2/2 & underline
 						if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
 						if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
-						return `${p1.replaceAll('_', '\\_')}\\_${p2}`;
+						return `${p1.replace(/(?<!\\)(?=_)/g, '\\')}${p1.endsWith('\\') ? '' : '\\'}_${p2}`; // escape not already escaped '_'
 					});
 
 			default:
@@ -211,7 +211,7 @@ export class DiscordManager {
 					inlineCode: false,
 					codeBlockContent: false,
 					inlineCodeContent: false,
-					// escapeNonURL already escapes '*'
+					// escapeNonURL already escapes '*' and '_'
 					italic: false,
 					bold: false,
 					underline: false,
