@@ -560,6 +560,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
 			.replace(emojiRegex(), (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default emojis
 			.replace(/(?<!\\)\\(?=[^a-z\d\\ \n])/gi, '') // replace escaping \ which are invisible on discord
+			.replace(/\\+/g, (match) => {
+				// replace \\ with \
+				let ret = '';
+				for (let i = Math.ceil(match.length / 2); i !== 0; --i) ret += '\\';
+				return ret;
+			})
 			.replaceAll('\u{2022}', '\u{25CF}') // better bullet points: "• -> ●"
 			.replaceAll('`', "'") // better single quotes
 			.replace(/<#(\d{17,19})>/g, (match, p1) => {
