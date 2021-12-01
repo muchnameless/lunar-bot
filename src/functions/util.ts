@@ -5,7 +5,7 @@ import { Formatters, Util } from 'discord.js';
 import ms from 'ms';
 import jaroWinklerSimilarity from 'jaro-winkler';
 import readdirp from 'readdirp';
-import { EMBED_FIELD_MAX_CHARS, MAX_CHOICES } from '../constants';
+import { EMBED_FIELD_MAX_CHARS, MAX_CHOICES, SMALL_LATIN_CAPITAL_LETTERS } from '../constants';
 import { days, logger } from '.';
 import type { URL } from 'node:url';
 import type { Collection } from 'discord.js';
@@ -47,6 +47,13 @@ export const trim = (string: string, max: number) => (string.length > max ? `${s
  * @param string
  */
 export const cleanFormattedNumber = (string: string) => string.replace(/\u{202F}/gu, ' ');
+
+/**
+ * replaces all small latin capital letters with normal lowercase letters
+ * @param string
+ */
+export const replaceSmallLatinCapitalLetters = (string: string) =>
+	Object.entries(SMALL_LATIN_CAPITAL_LETTERS).reduce((s, [normal, small]) => s.replaceAll(small, normal), string);
 
 /**
  * '30d1193h71585m4295001s' -> 15_476_901_000

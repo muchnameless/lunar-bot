@@ -265,7 +265,7 @@ export class DiscordChatManager extends ChatManager {
 
 		try {
 			return (await this.webhook.send({
-				content: this.chatBridge.discord.parseContent(content),
+				content: await this.chatBridge.discord.parseContent(content),
 				..._options,
 			})) as Message;
 		} catch (error) {
@@ -302,7 +302,7 @@ export class DiscordChatManager extends ChatManager {
 
 		try {
 			return await ChannelUtil.send(this.channel, {
-				content: this.chatBridge.discord.parseContent(
+				content: await this.chatBridge.discord.parseContent(
 					`${
 						discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
 					}${prefix}${content}`,
