@@ -1474,7 +1474,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 
 			// no linked member -> uncache entry
-			this.uncacheEntry();
+			this.uncache();
 		}
 
 		this.update({
@@ -1916,20 +1916,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	}
 
 	/**
-	 * remove from guild / client player cache
-	 */
-	uncacheEntry() {
-		if (this.guildId) this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache
-		this.client.players.cache.delete(this.minecraftUuid);
-		return this;
-	}
-
-	/**
 	 * removes the element from member, user, guild, client cache
 	 */
 	async uncache() {
 		await this.uncacheMember();
-		this.uncacheEntry();
+
+		if (this.guildId) this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache
+		this.client.players.cache.delete(this.minecraftUuid);
 
 		return this;
 	}
