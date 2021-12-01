@@ -345,8 +345,8 @@ export default class GuildCommand extends ApplicationCommand {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
-					.setTitle(`/guild mute ${target} ${ms(duration)}`)
-					.setDescription(Formatters.codeBlock(result))
+					.setTitle(`/guild mute ${escapeIgn(`${target}`)} ${ms(duration)}`)
+					.setDescription(Formatters.codeBlock(result.replaceAll('`', '')))
 					.setFooter(hypixelGuild.name),
 			],
 		});
@@ -398,7 +398,7 @@ export default class GuildCommand extends ApplicationCommand {
 
 		try {
 			// confirm kick
-			const QUESTION = `kick \`${target}\` from ${escapeIgn(hypixelGuild.name)}?` as const;
+			const QUESTION = `kick \`${target}\` from ${hypixelGuild.name}?` as const;
 			await (ctx instanceof HypixelMessage
 				? ctx.awaitConfirmation(QUESTION)
 				: InteractionUtil.awaitConfirmation(ctx, QUESTION));
@@ -757,7 +757,7 @@ export default class GuildCommand extends ApplicationCommand {
 					embeds: [
 						this.client.defaultEmbed
 							.setTitle(`/guild kick ${escapeIgn(typeof target === 'string' ? target : target.ign)} ${reason}`)
-							.setDescription(Formatters.codeBlock(result))
+							.setDescription(Formatters.codeBlock(result.replaceAll('`', '')))
 							.setFooter(hypixelGuild.name),
 					],
 				});
@@ -805,7 +805,7 @@ export default class GuildCommand extends ApplicationCommand {
 				const existingBan = await this.client.db.models.HypixelGuildBan.findByPk(uuid);
 
 				if (existingBan) {
-					throw `${escapeIgn(ign)} is on the ban list for \`${existingBan.reason}\``;
+					throw `\`${ign}\` is on the ban list for \`${existingBan.reason}\``;
 				}
 
 				return this.#run(interaction, hypixelGuild, {

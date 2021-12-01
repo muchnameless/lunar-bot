@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { getSkyWarsLevelInfo } from '@zikeji/hypixel';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { seconds } from '../../functions';
+import { escapeIgn, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
@@ -53,7 +53,7 @@ export default class SkyWarsStatsCommand extends BaseStatsCommand {
 			} = playerData.stats.SkyWars as unknown as SkyWarsStats;
 
 			return oneLine`
-				${ign}:
+				${escapeIgn(ign)}:
 				SkyWars:
 				level: ${this.client.formatNumber(getSkyWarsLevelInfo(playerData).level)},
 				wins: ${this.client.formatNumber(wins)},

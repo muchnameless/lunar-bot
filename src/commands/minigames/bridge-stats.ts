@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { seconds } from '../../functions';
+import { escapeIgn, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -49,7 +49,7 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 			const gamesPlayed = BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'rounds_played');
 
 			return oneLine`
-				${ign}:
+				${escapeIgn(ign)}:
 				Bridge:
 				wins: ${this.client.formatNumber(wins)},
 				losses: ${this.client.formatNumber(losses)},

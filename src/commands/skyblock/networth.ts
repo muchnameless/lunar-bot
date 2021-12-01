@@ -1,7 +1,15 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { hypixel, maro } from '../../api';
-import { getMainProfile, getUuidAndIgn, logger, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
+import {
+	escapeIgn,
+	getMainProfile,
+	getUuidAndIgn,
+	logger,
+	seconds,
+	shortenNumber,
+	upperCaseFirstChar,
+} from '../../functions';
 import BaseWeightCommand from './~base-weight';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -59,7 +67,7 @@ export default class NetworthCommand extends BaseWeightCommand {
 
 			const { total } = await maro.networth.total(uuid, playerData);
 
-			return `${ign} (${profile.cute_name}): ${shortenNumber(total)}`;
+			return `${escapeIgn(ign)} (${profile.cute_name}): ${shortenNumber(total)}`;
 		} catch (error) {
 			logger.error(error, '[NETWORTH]');
 

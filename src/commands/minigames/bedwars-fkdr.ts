@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { seconds } from '../../functions';
+import { escapeIgn, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
@@ -46,7 +46,7 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 
 			if (!kds.length) return `\`${ign}\` has no BedWars stats`;
 
-			return `${ign}: BedWars: ${kds.map(({ name, kd }) => `${name}: ${kd}`).join(', ')}`;
+			return `${escapeIgn(ign)}: BedWars: ${kds.map(({ name, kd }) => `${name}: ${kd}`).join(', ')}`;
 		} catch {
 			return `\`${ign}\` has no BedWars stats`;
 		}

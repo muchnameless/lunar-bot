@@ -4,7 +4,7 @@ import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
 import { hypixel } from '../../api';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { getUuidAndIgn, logger, seconds } from '../../functions';
+import { escapeIgn, getUuidAndIgn, logger, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -67,7 +67,7 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 			const level = Number(getNetworkLevel(playerData).preciseLevel.toFixed(2));
 
 			return oneLine`
-				${ign}:
+				${escapeIgn(ign)}:
 				rank: ${RANK_NAME},
 				guild: ${guildData?.name ?? 'none'},
 				status: ${statusData ? 'online' : 'offline'},

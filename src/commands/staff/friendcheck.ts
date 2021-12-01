@@ -5,7 +5,7 @@ import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { seconds, trim } from '../../functions';
+import { escapeIgn, seconds, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -33,12 +33,12 @@ export default class FriendCheckCommand extends ApplicationCommand {
 		let mutualFriends = '';
 
 		for (const player of this.client.players.cache.values()) {
-			if (friends.has(player.minecraftUuid)) mutualFriends += `${player}\n`;
+			if (friends.has(player.minecraftUuid)) mutualFriends += `${escapeIgn(`${player}`)}\n`;
 		}
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [
-				this.client.defaultEmbed.setTitle(`${IGN}'s friends in the guild`).setDescription(
+				this.client.defaultEmbed.setTitle(`${escapeIgn(IGN)}'s friends in the guild`).setDescription(
 					Formatters.codeBlock(stripIndents`
 						${trim(mutualFriends, EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length)}
 					`),

@@ -24,7 +24,7 @@ export default class JoinDateCommand extends DualCommand {
 			context,
 			{
 				slash: new SlashCommandBuilder()
-					.setDescription('guild member join date, parsed from `/g log ign`')
+					.setDescription('guild member join date, parsed from `/guild log IGN`')
 					.addStringOption(optionalPlayerOption)
 					.addBooleanOption(forceOption)
 					.addStringOption(hypixelGuildOption),
@@ -95,11 +95,11 @@ export default class JoinDateCommand extends DualCommand {
 	async #generateReply(chatBridge: ChatBridge, ignInput: string) {
 		try {
 			const { ign, date, timestamp } = await JoinDateCommand.#getJoinDate(chatBridge, ignInput);
-			return `${ign}: joined ${chatBridge.hypixelGuild} at ${
+			return `${escapeIgn(ign)}: joined ${chatBridge.hypixelGuild} at ${
 				!Number.isNaN(timestamp) ? Formatters.time(date) : 'an unknown date'
 			}`;
 		} catch {
-			return `${ignInput}: never joined ${chatBridge.hypixelGuild}`;
+			return `${escapeIgn(ignInput)}: never joined ${chatBridge.hypixelGuild}`;
 		}
 	}
 

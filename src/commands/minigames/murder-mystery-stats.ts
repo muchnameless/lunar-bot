@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { seconds } from '../../functions';
+import { escapeIgn, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
@@ -58,7 +58,7 @@ export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 			if (!games) return `\`${ign}\` has no MurderMystery stats`;
 
 			return oneLine`
-				${ign}:
+				${escapeIgn(ign)}:
 				MurderMystery:
 				wins: ${this.client.formatNumber(wins)},
 				losses: ${this.client.formatNumber(games - wins)},

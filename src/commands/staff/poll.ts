@@ -5,7 +5,7 @@ import ms from 'ms';
 import { INVISIBLE_CHARACTERS, MESSAGE_TYPES } from '../../structures/chat_bridge/constants';
 import { hypixelGuildOption } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../util';
-import { minutes, seconds, stringToMS, upperCaseFirstChar } from '../../functions';
+import { escapeIgn, minutes, seconds, stringToMS, upperCaseFirstChar } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction, CommandInteractionOption, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -107,7 +107,7 @@ export default class PollCommand extends DualCommand {
 
 			// post message to both chats
 			chatBridge.broadcast(stripIndents`
-				poll by ${ign}: type a number to vote (${ms(DURATION, { long: true })})
+				poll by ${escapeIgn(ign)}: type a number to vote (${ms(DURATION, { long: true })})
 				${question}
 				${pollOptions.map(({ number, option }) => `${INVISIBLE_CHARACTERS[0]}${number}: ${option}`).join('\n')}
 			`);
@@ -150,7 +150,7 @@ export default class PollCommand extends DualCommand {
 					this.client.defaultEmbed
 						.setTitle(question)
 						.setDescription(resultString.join('\n\n'))
-						.setFooter(`Poll by ${ign}`),
+						.setFooter(`Poll by ${ign}`), // no markdown in footer -> no need to escape IGN
 				],
 			});
 

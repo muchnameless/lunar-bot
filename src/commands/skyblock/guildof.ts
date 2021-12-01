@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { logger, seconds } from '../../functions';
+import { escapeIgn, logger, seconds } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -38,7 +38,7 @@ export default class GuildOfCommand extends DualCommand {
 
 			if (!name) return `${ign}: no guild`;
 
-			return `${ign}: ${name}${tag ? ` [${tag}]` : ''} ${members.length}/125 members`;
+			return `${escapeIgn(ign)}: ${name}${tag ? ` [${tag}]` : ''} ${members.length}/125 members`;
 		} catch (error) {
 			logger.error(error, '[GUILDOF CMD]');
 

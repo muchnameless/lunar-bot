@@ -1,4 +1,3 @@
-import { Interaction } from 'discord.js';
 import { PROFILE_NAMES, X_EMOJI } from '../../constants';
 import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
@@ -56,11 +55,9 @@ export default class BaseWeightCommand extends DualCommand {
 				};
 			}
 
-			return `${ctx instanceof Interaction ? escapeIgn(ign) : ign} (${weightData.name}): ${this.formatNumber(
-				weightData.totalWeight,
-			)} [${this.formatNumber(weightData.weight)} + ${this.formatNumber(weightData.overflow)}]${
-				weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`
-			}`;
+			return `${escapeIgn(ign)} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(
+				weightData.weight,
+			)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
 		} catch (error) {
 			logger.error(error, '[WEIGHT]');
 

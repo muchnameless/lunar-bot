@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { getBedwarsLevelInfo } from '@zikeji/hypixel';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { logger, seconds } from '../../functions';
+import { escapeIgn, logger, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
@@ -43,7 +43,7 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 			if (wins_bedwars + losses_bedwars === 0) return `\`${ign}\` has no BedWars stats`;
 
 			return oneLine`
-				${ign}:
+				${escapeIgn(ign)}:
 				BedWars:
 				level: ${this.client.formatNumber(getBedwarsLevelInfo(playerData).level)},
 				wins: ${this.client.formatNumber(wins_bedwars)},

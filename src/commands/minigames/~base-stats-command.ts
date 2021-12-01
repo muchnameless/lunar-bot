@@ -1,6 +1,6 @@
 import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
-import { getUuidAndIgn, logger } from '../../functions';
+import { escapeIgn, getUuidAndIgn, logger } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
@@ -36,7 +36,7 @@ export default class StatsCommand extends DualCommand {
 	 * data -> reply
 	 */
 	_generateReply({ ign }: FetchedData) {
-		return ign;
+		return escapeIgn(ign);
 	}
 
 	/**
