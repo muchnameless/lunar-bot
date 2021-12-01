@@ -17,7 +17,7 @@ import {
 } from '../constants';
 import { STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
 import { createBot } from '../MinecraftBot';
-import { GuildMemberUtil, MessageUtil, UserUtil } from '../../../util';
+import { MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector, MessageCollectorEvents } from '../MessageCollector';
 import { cache } from '../../../api';
 import { cleanFormattedNumber, hours, logger, minutes, seconds, splitMessage, trim } from '../../../functions';
@@ -553,9 +553,32 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * discord markdown -> readable string
 	 * @param string
+	 * @param discordMessage
 	 */
-	parseContent(string: string) {
-		return cleanFormattedNumber(string)
+	async parseContent(string: string, discordMessage: Message | null) {
+		let _string = string;
+
+		// @mentions
+		for (const match of string.matchAll(/<@!?(?<discordId>\d{17,19})>/g)) {
+			const [FULL_MATCH] = match;
+
+			const user = this.client.users.cache.get(match.groups!.discordId);
+			if (user) {
+				const player = UserUtil.getPlayer(user) ?? (await this.client.players.fetch({ discordId: user.id }));
+				if (player) {
+					_string = _string.replaceAll(FULL_MATCH, `@${player}`);
+					continue;
+				}
+			}
+
+			const NAME = discordMessage?.guild?.members.cache.get(match.groups!.discordId)?.displayName ?? user?.username;
+			if (NAME) {
+				_string = _string.replaceAll(FULL_MATCH, `@${NAME}`);
+				continue;
+			}
+		}
+
+		return cleanFormattedNumber(_string)
 			.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 			.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
 			.replace(emojiRegex(), (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default emojis
@@ -576,27 +599,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			})
 			.replace(/<@&(\d{17,19})>/g, (match, p1) => {
 				// roles
-				const ROLE_NAME = this.chatBridge.hypixelGuild?.discordGuild?.roles.cache.get(p1)?.name;
+				const ROLE_NAME = discordMessage?.guild?.roles.cache.get(p1)?.name;
 				if (ROLE_NAME) return `@${ROLE_NAME}`;
-				return match;
-			})
-			.replace(/<@!?(\d{17,19})>/g, (match, p1) => {
-				// users
-				const member = this.chatBridge.hypixelGuild?.discordGuild?.members.cache.get(p1);
-				if (member) {
-					const player = GuildMemberUtil.getPlayer(member);
-					if (player) return `@${player}`;
-				}
-
-				const user = this.client.users.cache.get(p1);
-				if (user) {
-					const player = UserUtil.getPlayer(user);
-					if (player) return `@${player}`;
-				}
-
-				const NAME = member?.displayName ?? user?.username;
-				if (NAME) return `@${NAME}`;
-
 				return match;
 			})
 			.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1, p2) => {
@@ -742,7 +746,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		let success = true;
 
 		const contentParts = new Set(
-			this.parseContent(content)
+			(await this.parseContent(content, discordMessage))
 				.split('\n')
 				.flatMap((part) =>
 					splitMessage(part, { char: [' ', ''], maxLength: MinecraftChatManager.MAX_MESSAGE_LENGTH - prefix.length }),

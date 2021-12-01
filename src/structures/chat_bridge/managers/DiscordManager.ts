@@ -132,6 +132,7 @@ export class DiscordManager {
 	async parseContent(string: string) {
 		let _string = string;
 
+		// @mentions
 		for (const match of string.matchAll(/(?<!<)@(?<type>!|&)?(?<name>\S+)(?!\d{17,19}>)/g)) {
 			const [FULL_MATCH] = match;
 

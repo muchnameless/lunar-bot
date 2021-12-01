@@ -12,7 +12,7 @@ import {
 } from '../constants';
 import { STOP_EMOJI } from '../../../constants';
 import { MessageUtil } from '../../../util';
-import { getLilyWeight, logger, stringToMS } from '../../../functions';
+import { asyncFilter, getLilyWeight, logger, stringToMS } from '../../../functions';
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
 import { hypixel, mojang } from '../../../api';
 import type { SkyBlockProfile } from '../../../functions';
@@ -61,14 +61,17 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				// react to latest message from 'sender' with that content
 				for (const { channel } of this.chatBridge.discord.channels.values()) {
 					MessageUtil.react(
-						channel?.messages.cache
-							.filter(
-								({ content, author: { id } }) =>
-									(senderDiscordId ? id === senderDiscordId : true) &&
-									this.chatBridge.minecraft.parseContent(content).includes(blockedContent),
+						(
+							await asyncFilter(
+								[...(channel?.messages.cache.values() ?? [])],
+								senderDiscordId
+									? async (message) =>
+											message.author.id === senderDiscordId &&
+											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent)
+									: async (message) =>
+											(await this.chatBridge.minecraft.parseContent(message.content, message)).includes(blockedContent),
 							)
-							.sort(({ createdTimestamp: a }, { createdTimestamp: b }) => b - a)
-							.first() ?? null,
+						).sort(({ createdTimestamp: a }, { createdTimestamp: b }) => b - a)[0] ?? null,
 						STOP_EMOJI,
 					);
 				}
