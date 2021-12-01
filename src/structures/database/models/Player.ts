@@ -1460,6 +1460,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					: [];
 			const rolesToRemove = GuildMemberUtil.getRolesToPurge(member);
 
+			this.client.hypixelGuilds.sweepPlayerCache(this.guildId);
+
 			if (!(await this.makeRoleAPICall({ rolesToAdd, rolesToRemove, reason: `left ${this.guildName}` }))) {
 				// error updating roles
 				logger.warn(`[REMOVE FROM GUILD]: ${this.logInfo}: unable to update roles`);
@@ -1468,16 +1470,15 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 
 			// keep entry in cache but uncache discord member
-			this.client.hypixelGuilds.sweepPlayerCache(this.guildId);
 			this.uncacheMember();
 		} else {
 			logger.info(`[REMOVE FROM GUILD]: ${this.logInfo}: left without being in the discord`);
 
 			// no linked member -> uncache entry
-			this.uncache();
+			await this.uncache();
 		}
 
-		this.update({
+		await this.update({
 			guildId: null,
 			guildRankPriority: 0,
 		});
