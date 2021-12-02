@@ -2,7 +2,7 @@ import { Collection, Util, Formatters } from 'discord.js';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
-import { autocorrect, replaceSmallLatinCapitalLetters } from '../../../functions';
+import { asyncReplace, autocorrect, replaceSmallLatinCapitalLetters } from '../../../functions';
 import { DiscordChatManager } from './DiscordChatManager';
 import type { Snowflake } from 'discord.js';
 import type { MESSAGE_TYPES } from '../constants';
@@ -130,57 +130,55 @@ export class DiscordManager {
 	 * @param string
 	 */
 	async parseContent(string: string) {
-		let _string = string;
-
-		// @mentions
-		for (const match of string.matchAll(/(?<!<)@(?<type>!|&)?(?<name>\S+)(?!\d{17,19}>)/g)) {
-			const [FULL_MATCH] = match;
-
-			switch (match.groups!.type) {
-				// members/users
-				case '!': {
-					const TO_SEARCH = match.groups!.name.toLowerCase();
-					const MENTION =
-						this.chatBridge.hypixelGuild?.discordGuild?.members.cache
-							.find(({ displayName }) => displayName.toLowerCase() === TO_SEARCH)
-							?.toString() ?? // members
-						this.client.users.cache.find(({ username }) => username.toLowerCase() === TO_SEARCH)?.toString(); // users
-
-					if (MENTION) _string = _string.replaceAll(FULL_MATCH, MENTION);
-					continue;
-				}
-
-				// roles
-				case '&': {
-					const TO_SEARCH = match.groups!.name.toLowerCase();
-					const MENTION = this.chatBridge.hypixelGuild?.discordGuild?.roles.cache
-						.find(({ name }) => name.toLowerCase() === TO_SEARCH)
-						?.toString(); // roles
-
-					if (MENTION) _string = _string.replaceAll(FULL_MATCH, MENTION);
-					continue;
-				}
-
-				// players, members/users, roles
-				default: {
-					const TO_SEARCH = match.groups!.name.replace(/\W/g, '').toLowerCase();
-					if (!TO_SEARCH) continue;
-
-					const player =
-						this.client.players.cache.find(({ ign }) => ign.toLowerCase() === TO_SEARCH) ??
-						(await this.client.players.fetch({ ign: { [Op.iLike]: TO_SEARCH } }));
-
-					// player can be pinged
-					if (player?.inDiscord || (player?.discordId && !player.discordId.includes('#'))) {
-						_string = _string.replaceAll(FULL_MATCH, Formatters.userMention(player.discordId!));
-					}
-				}
-			}
-		}
-
 		return DiscordManager.#escapeNonURL(
 			Util.escapeMarkdown(
-				_string
+				// @mentions
+				(
+					await asyncReplace(string, /(?<!<)@(?<type>!|&)?(?<name>\w+)(?!\d{17,19}>)/g, async (match) => {
+						switch (match.groups!.type) {
+							// members/users
+							case '!': {
+								const TO_SEARCH = match.groups!.name.toLowerCase();
+								const MENTION =
+									this.chatBridge.hypixelGuild?.discordGuild?.members.cache
+										.find(({ displayName }) => displayName.toLowerCase() === TO_SEARCH)
+										?.toString() ?? // members
+									this.client.users.cache.find(({ username }) => username.toLowerCase() === TO_SEARCH)?.toString(); // users
+
+								if (MENTION) return MENTION;
+								break;
+							}
+
+							// roles
+							case '&': {
+								const TO_SEARCH = match.groups!.name.toLowerCase();
+								const MENTION = this.chatBridge.hypixelGuild?.discordGuild?.roles.cache
+									.find(({ name }) => name.toLowerCase() === TO_SEARCH)
+									?.toString(); // roles
+
+								if (MENTION) return MENTION;
+								break;
+							}
+
+							// players, members/users, roles
+							default: {
+								const TO_SEARCH = match.groups!.name.toLowerCase();
+								if (!TO_SEARCH) break;
+
+								const player =
+									this.client.players.cache.find(({ ign }) => ign.toLowerCase() === TO_SEARCH) ??
+									(await this.client.players.fetch({ ign: { [Op.iLike]: TO_SEARCH } }));
+
+								// player can be pinged
+								if (player?.inDiscord || (player?.discordId && !player.discordId.includes('#'))) {
+									return Formatters.userMention(player.discordId!);
+								}
+							}
+						}
+
+						return match[0];
+					})
+				)
 					.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invisible mc characters
 					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
 					.replace(

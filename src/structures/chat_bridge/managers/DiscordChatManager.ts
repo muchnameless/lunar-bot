@@ -4,7 +4,7 @@ import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../.
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
 import { cache, imgur } from '../../../api';
-import { hours, logger } from '../../../functions';
+import { asyncReplace, hours, logger } from '../../../functions';
 import { ChatManager } from './ChatManager';
 import type {
 	Collection,
@@ -385,27 +385,15 @@ export class DiscordChatManager extends ChatManager {
 		if (messageContent) {
 			// parse discord attachment links and replace with imgur uploaded link
 			if (this.client.config.get('IMGUR_UPLOADER_ENABLED')) {
-				let offset = 0;
-
-				for (const match of messageContent.matchAll(DISCORD_CDN_URL_REGEXP)) {
-					const [FULL_URL, URL_WITHOUT_QUERY_PARAMS] = match;
-					const [[START, END]] =
-						// @ts-expect-error
-						match.indices;
-
+				messageContent = await asyncReplace(messageContent, DISCORD_CDN_URL_REGEXP, async (match) => {
 					try {
 						// try to upload URL without query parameters
-						const IMGUR_URL = (await imgur.upload(URL_WITHOUT_QUERY_PARAMS)).data.link;
-
-						messageContent = `${messageContent.slice(0, START - offset)}${IMGUR_URL}${messageContent.slice(
-							END - offset,
-						)}`; // replace discord with imgur link
-						offset += FULL_URL.length - IMGUR_URL.length; // since indices are relative to the original string
+						return (await imgur.upload(match[1])).data.link;
 					} catch (error) {
-						logger.error(error);
-						break;
+						logger.error(error, '[FORWARD DC TO MC]');
+						return match[0];
 					}
-				}
+				});
 			}
 
 			contentParts.push(messageContent);

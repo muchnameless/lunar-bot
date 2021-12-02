@@ -20,7 +20,16 @@ import { createBot } from '../MinecraftBot';
 import { MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector, MessageCollectorEvents } from '../MessageCollector';
 import { cache } from '../../../api';
-import { cleanFormattedNumber, hours, logger, minutes, seconds, splitMessage, trim } from '../../../functions';
+import {
+	asyncReplace,
+	cleanFormattedNumber,
+	hours,
+	logger,
+	minutes,
+	seconds,
+	splitMessage,
+	trim,
+} from '../../../functions';
 import { ChatManager } from './ChatManager';
 import type { GuildChannel, Message } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
@@ -556,29 +565,23 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param discordMessage
 	 */
 	async parseContent(string: string, discordMessage: Message | null) {
-		let _string = string;
-
-		// @mentions
-		for (const match of string.matchAll(/<@!?(?<discordId>\d{17,19})>/g)) {
-			const [FULL_MATCH] = match;
-
-			const user = this.client.users.cache.get(match.groups!.discordId);
-			if (user) {
-				const player = UserUtil.getPlayer(user) ?? (await this.client.players.fetch({ discordId: user.id }));
-				if (player) {
-					_string = _string.replaceAll(FULL_MATCH, `@${player}`);
-					continue;
+		return cleanFormattedNumber(
+			// @mentions
+			await asyncReplace(string, /<@!?(\d{17,19})>/g, async (match) => {
+				const user = this.client.users.cache.get(match[1]);
+				if (user) {
+					const player = UserUtil.getPlayer(user) ?? (await this.client.players.fetch({ discordId: user.id }));
+					if (player) return `@${player}`;
 				}
-			}
 
-			const NAME = discordMessage?.guild?.members.cache.get(match.groups!.discordId)?.displayName ?? user?.username;
-			if (NAME) {
-				_string = _string.replaceAll(FULL_MATCH, `@${NAME}`);
-				continue;
-			}
-		}
+				const NAME =
+					(discordMessage?.guild ?? this.chatBridge.hypixelGuild?.discordGuild)?.members.cache.get(match[1])
+						?.displayName ?? user?.username;
+				if (NAME) return `@${NAME}`;
 
-		return cleanFormattedNumber(_string)
+				return match[0];
+			}),
+		)
 			.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 			.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
 			.replace(emojiRegex(), (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default emojis

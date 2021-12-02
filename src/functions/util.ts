@@ -129,7 +129,41 @@ export function autocorrect<T>(
 }
 
 /**
- * <Array>.filter with an asynchronous callback function
+ * String.prototype.replace with an asynchronous callback function
+ * @param string
+ * @param regex
+ * @param callback
+ */
+export async function asyncReplace(
+	string: string,
+	regex: RegExp,
+	callback: (match: RegExpMatchArray) => string | Promise<string>,
+) {
+	const promises: Promise<{ start: number; length: number; value: string }>[] = [];
+
+	for (const match of string.matchAll(regex)) {
+		promises.push(
+			(async () => ({
+				start: match.index!,
+				length: match[0].length,
+				value: await callback(match),
+			}))(),
+		);
+	}
+
+	if (!promises.length) return string;
+
+	let offset = 0;
+
+	return (await Promise.all(promises)).reduce((acc, { start, length, value }) => {
+		const REPLACED = `${acc.slice(0, start - offset)}${value}${acc.slice(start - offset + length)}`;
+		offset += length - value.length;
+		return REPLACED;
+	}, string);
+}
+
+/**
+ * Array.prototype.filter with an asynchronous callback function
  * @param array
  * @param predicate
  */
