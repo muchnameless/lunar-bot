@@ -1,5 +1,5 @@
 import { URL } from 'node:url';
-import { Client, MessageEmbed, Formatters } from 'discord.js';
+import { Client, MessageEmbed } from 'discord.js';
 import { UserUtil } from '../util';
 import { cache, imgur } from '../api';
 import { hours, logger } from '../functions';
@@ -70,26 +70,6 @@ export class LunarClient extends Client {
 	}
 
 	/**
-	 * fetches the bot application's owner
-	 */
-	fetchOwner() {
-		return this.users.fetch(this.ownerId);
-	}
-
-	/**
-	 * tag and @mention
-	 */
-	async fetchOwnerInfo() {
-		try {
-			const owner = await this.fetchOwner();
-			return `${owner.tag} ${owner}`;
-		} catch (error) {
-			logger.error(error, '[OWNER INFO]');
-			return Formatters.userMention(this.ownerId);
-		}
-	}
-
-	/**
 	 * loads all commands, events, db caches and logs the client in
 	 * @param token discord bot token
 	 */
@@ -127,7 +107,11 @@ export class LunarClient extends Client {
 	 * @param options
 	 */
 	async dmOwner(options: string | MessageOptions) {
-		return UserUtil.sendDM(await this.fetchOwner(), options);
+		try {
+			return UserUtil.sendDM(await this.users.fetch(this.ownerId), options);
+		} catch (error) {
+			logger.error(error, '[DM OWNER]');
+		}
 	}
 
 	/**

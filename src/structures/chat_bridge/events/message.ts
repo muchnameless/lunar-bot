@@ -78,11 +78,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			}
 
 			// DM owner to add the blocked content to the filter
-			try {
-				await this.client.dmOwner(`${this.chatBridge.logInfo}: blocked message: ${hypixelMessage.rawContent}`);
-			} catch (error) {
-				logger.error(error, `[CHATBRIDGE]: ${this.chatBridge.logInfo}: error DMing owner blocked message`);
-			}
+			this.client.dmOwner(`${this.chatBridge.logInfo}: blocked message: ${hypixelMessage.rawContent}`);
 
 			return logger.error(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: blocked message: ${hypixelMessage.rawContent}`);
 		}

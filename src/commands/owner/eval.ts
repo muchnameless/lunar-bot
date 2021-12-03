@@ -2,7 +2,15 @@ import { setTimeout as sleep } from 'node:timers/promises';
 sleep;
 import util from 'node:util';
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
-import Discord, { MessageEmbed, MessageActionRow, MessageButton, Permissions, Util, Constants } from 'discord.js';
+import Discord, {
+	Formatters,
+	MessageEmbed,
+	MessageActionRow,
+	MessageButton,
+	Permissions,
+	Util,
+	Constants,
+} from 'discord.js';
 MessageEmbed;
 Util; // unused imports are 'used' so that tsc doesn't remove them
 import { Stopwatch } from '@sapphire/stopwatch';
@@ -106,7 +114,7 @@ export default class EvalCommand extends ApplicationCommand {
 		inspectDepth = 0,
 	) {
 		if (interaction.user.id !== this.client.ownerId) {
-			throw 'eval is restricted to the bot owner';
+			throw `eval is restricted to ${Formatters.userMention(this.client.ownerId)}`;
 		}
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */

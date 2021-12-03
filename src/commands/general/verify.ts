@@ -1,13 +1,14 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import pkg from 'sequelize';
 const { Op } = pkg;
+import { Formatters } from 'discord.js';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, UserUtil } from '../../util';
 import { logger } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { Components } from '@zikeji/hypixel';
 import type { CommandInteraction, GuildMember } from 'discord.js';
+import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class VerifyCommand extends ApplicationCommand {
@@ -100,7 +101,9 @@ export default class VerifyCommand extends ApplicationCommand {
 				logger.error(error, '[VERIFY]: database');
 				return InteractionUtil.reply(
 					interaction,
-					`an error occurred while updating the guild player database. Contact ${await this.client.fetchOwnerInfo()}`,
+					`an error occurred while updating the guild player database. Contact ${Formatters.userMention(
+						this.client.ownerId,
+					)}`,
 				);
 			}
 		}
