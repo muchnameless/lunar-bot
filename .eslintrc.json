@@ -37,13 +37,7 @@
 		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/no-shadow": "error",
 		"@typescript-eslint/no-this-alias": "off",
-		"@typescript-eslint/no-unused-vars": [
-			"error",
-			{
-				"varsIgnorePattern": "arguments",
-				"argsIgnorePattern": "arguments"
-			}
-		],
+		"@typescript-eslint/no-unused-vars": "error",
 		"unicorn/better-regex": "off",
 		"unicorn/consistent-destructuring": "off",
 		"unicorn/consistent-function-scoping": "off",

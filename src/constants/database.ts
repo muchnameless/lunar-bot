@@ -1,4 +1,4 @@
-import { days, hours, minutes, seconds } from '../functions';
+import { days, minutes, seconds } from '../functions';
 import {
 	COSMETIC_SKILLS,
 	DUNGEON_TYPES,
@@ -43,10 +43,8 @@ export const DEFAULT_CONFIG = {
 	INACTIVE_ROLE_TIME: days(7),
 	INFRACTIONS_EXPIRATION_TIME: minutes(30),
 	INGAME_RESPONSE_TIMEOUT: seconds(5),
-	KICK_COOLDOWN: hours(1),
 	LAST_DAILY_STATS_SAVE_TIME: 0,
 	LAST_DAILY_XP_RESET_TIME: 0,
-	LAST_KICK_TIME: 0,
 	LAST_MAYOR_XP_RESET_TIME: (() => {
 		let time = SKYBLOCK_YEAR_0;
 		while (time + MAYOR_CHANGE_INTERVAL < Date.now()) time += MAYOR_CHANGE_INTERVAL;
@@ -104,10 +102,8 @@ export type ConfigValues = {
 	INACTIVE_ROLE_TIME: number;
 	INFRACTIONS_EXPIRATION_TIME: number;
 	INGAME_RESPONSE_TIMEOUT: number;
-	KICK_COOLDOWN: number;
 	LAST_DAILY_STATS_SAVE_TIME: number;
 	LAST_DAILY_XP_RESET_TIME: number;
-	LAST_KICK_TIME: number;
 	LAST_MAYOR_XP_RESET_TIME: number;
 	LAST_MONTHLY_XP_RESET_TIME: number;
 	LAST_WEEKLY_XP_RESET_TIME: number;

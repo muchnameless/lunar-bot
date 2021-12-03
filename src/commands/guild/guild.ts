@@ -390,7 +390,7 @@ export default class GuildCommand extends ApplicationCommand {
 			throw `your guild rank needs to be higher than \`${target}\`'s`;
 		}
 
-		const TIME_LEFT = this.config.get('LAST_KICK_TIME') + this.config.get('KICK_COOLDOWN') - Date.now();
+		const TIME_LEFT = hypixelGuild.lastKickAt.getTime() + hypixelGuild.kickCooldown - Date.now();
 
 		if (TIME_LEFT > 0) {
 			throw `kicking is on cooldown for another ${ms(TIME_LEFT, { long: true })}`;
@@ -413,7 +413,7 @@ export default class GuildCommand extends ApplicationCommand {
 				rejectOnTimeout: true,
 			});
 
-			this.config.set('LAST_KICK_TIME', Date.now());
+			hypixelGuild.update({ lastKickAt: new Date() }).catch((error) => logger.error(error));
 
 			return result;
 		} catch (error) {

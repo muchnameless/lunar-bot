@@ -13,7 +13,7 @@ import {
 } from '../../../constants';
 import { GuildUtil } from '../../../util';
 import { hypixel, mojang } from '../../../api';
-import { cleanFormattedNumber, compareAlphabetically, days, logger, safePromiseAll } from '../../../functions';
+import { cleanFormattedNumber, compareAlphabetically, days, hours, logger, safePromiseAll } from '../../../functions';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Collection, GuildMember, Snowflake } from 'discord.js';
 import type { Player } from './Player';
@@ -87,6 +87,8 @@ interface HypixelGuildAttributes {
 	announcementsChannelId: Snowflake | null;
 	loggingChannelId: Snowflake | null;
 	syncIgnThreshold: number;
+	kickCooldown: number;
+	lastKickAt: Date;
 }
 
 export class HypixelGuild extends Model<HypixelGuildAttributes> implements HypixelGuildAttributes {
@@ -118,6 +120,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare announcementsChannelId: Snowflake | null;
 	declare loggingChannelId: Snowflake | null;
 	declare syncIgnThreshold: number;
+	declare kickCooldown: number;
+	declare lastKickAt: Date;
 
 	/**
 	 * guild ranks sync
@@ -265,6 +269,16 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				syncIgnThreshold: {
 					type: DataTypes.INTEGER,
 					defaultValue: -1,
+					allowNull: false,
+				},
+				kickCooldown: {
+					type: DataTypes.INTEGER,
+					defaultValue: hours(1),
+					allowNull: false,
+				},
+				lastKickAt: {
+					type: DataTypes.DATE,
+					defaultValue: new Date(0),
 					allowNull: false,
 				},
 			},
