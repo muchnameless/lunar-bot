@@ -149,8 +149,8 @@ export default class EvalCommand extends ApplicationCommand {
 			let evaled = isAsync
 				? eval(
 						`(async () => {
-						${input}
-					})()`,
+							${input}
+						})()`,
 				  )
 				: eval(input);
 
