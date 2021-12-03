@@ -649,6 +649,10 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	async setDiscordMember(member: GuildMember | null, force = false) {
 		if (member == null) {
+			if (this.#discordMember) {
+				GuildMemberUtil.setPlayer(this.#discordMember, null);
+			}
+
 			this.#discordMember = null;
 
 			if (force) {
@@ -664,7 +668,13 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (this.hypixelGuild?.discordId !== member.guild.id) return;
 
+		if (this.#discordMember) {
+			GuildMemberUtil.setPlayer(this.#discordMember, null);
+		}
+
 		this.#discordMember = member;
+
+		GuildMemberUtil.setPlayer(member, this);
 
 		if (!this.inDiscord) {
 			try {
@@ -1902,15 +1912,15 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * removes the dual link between a discord member / user and the player
 	 */
 	async uncacheMember() {
-		if (!this.discordId) return;
-
 		// remove from member player cache
 		const member = await this.fetchDiscordMember();
 		if (member) GuildMemberUtil.setPlayer(member, null);
 
 		// remove from user player cache
-		const user = this.client.users.cache.get(this.discordId);
-		if (user) UserUtil.setPlayer(user, null);
+		if (this.discordId) {
+			const user = this.client.users.cache.get(this.discordId);
+			if (user) UserUtil.setPlayer(user, null);
+		}
 
 		// remove cached member
 		return this.setDiscordMember(null, false);
