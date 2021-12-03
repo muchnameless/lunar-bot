@@ -1911,11 +1911,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * removes the dual link between a discord member / user and the player
 	 */
-	async uncacheMember() {
-		// remove from member player cache
-		const member = await this.fetchDiscordMember();
-		if (member) GuildMemberUtil.setPlayer(member, null);
-
+	uncacheMember() {
 		// remove from user player cache
 		if (this.discordId) {
 			const user = this.client.users.cache.get(this.discordId);
