@@ -167,6 +167,7 @@ export default class DebugCommand extends ApplicationCommand {
 											this.client.chatBridges.cache.map(
 												async (cb) => stripIndents`
 													Bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
+													HypixelGuild: ${cb.hypixelGuild?.name ?? 'not linked'}
 													Server: ${await cb.minecraft.server}
 													Queues:
 													${Formatters.quote(`MC: ${cb.minecraft.queue.remaining}`)}
