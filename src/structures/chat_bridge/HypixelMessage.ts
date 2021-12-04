@@ -308,12 +308,12 @@ export class HypixelMessage {
 		try {
 			// user message
 			if (this.author) {
-				const { player, member } = this;
+				const { player } = this;
 				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook({
 					content: this.prefixReplacedContent,
 					author: this.author,
+					member: this.member,
 					player,
-					member,
 				}));
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
