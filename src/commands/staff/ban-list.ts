@@ -100,6 +100,7 @@ export default class BanListCommand extends ApplicationCommand {
 		const ELEMENTS_PER_PAGE = this.config.get('ELEMENTS_PER_PAGE');
 		const OFFSET = (page - 1) * ELEMENTS_PER_PAGE;
 		const { rows: bans, count } = await this.client.db.models.HypixelGuildBan.findAndCountAll({
+			order: [['updatedAt', 'DESC']], // newest entries first
 			offset: OFFSET,
 			limit: ELEMENTS_PER_PAGE,
 		});
