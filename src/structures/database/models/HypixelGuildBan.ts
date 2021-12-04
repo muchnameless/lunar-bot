@@ -1,18 +1,23 @@
 import pkg from 'sequelize';
 const { Model, DataTypes } = pkg;
-import type { ModelStatic, Sequelize } from 'sequelize';
+import type { ModelStatic, Sequelize, Optional } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-interface ConfigAttributes {
+interface HypixelGuildBanAttributes {
 	minecraftUuid: string;
 	_reason: string | null;
 }
 
-export class HypixelGuildBan extends Model<ConfigAttributes> {
+type HypixelGuildBanCreationAttributes = Optional<HypixelGuildBanAttributes, '_reason'>;
+
+export class HypixelGuildBan extends Model<HypixelGuildBanAttributes, HypixelGuildBanCreationAttributes> {
 	declare client: LunarClient;
 
 	declare minecraftUuid: string;
 	declare _reason: string | null;
+
+	declare readonly createdAt: Date;
+	declare readonly updatedAt: Date;
 
 	get reason() {
 		return this._reason ?? 'no reason specified';
@@ -27,6 +32,7 @@ export class HypixelGuildBan extends Model<ConfigAttributes> {
 				},
 				_reason: {
 					type: DataTypes.STRING,
+					defaultValue: null,
 					allowNull: true,
 				},
 			},
