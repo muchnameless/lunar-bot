@@ -170,8 +170,8 @@ export default class DebugCommand extends ApplicationCommand {
 													HypixelGuild: ${cb.hypixelGuild?.name ?? 'not linked'}
 													Server: ${await cb.minecraft.server}
 													Queues:
-													${Formatters.quote(`MC: ${cb.minecraft.queue.remaining}`)}
-													${cb.discord.channelsByType.map((c) => Formatters.quote(`${c.type}: ${c.queue.remaining}`)).join('\n')}
+													${Formatters.quote(`Minecraft: ${cb.minecraft.queue.remaining}`)}
+													${cb.discord.channelsByType.map((c) => Formatters.quote(`${c.channel}: ${c.queue.remaining}`)).join('\n')}
 												`,
 											),
 										)
