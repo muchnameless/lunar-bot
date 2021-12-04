@@ -159,7 +159,7 @@ export default class DebugCommand extends ApplicationCommand {
 							`,
 						},
 						{
-							name: 'Chat Bridge Cache',
+							name: 'Chat Bridges',
 							value:
 								trim(
 									(
