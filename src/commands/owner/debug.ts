@@ -3,7 +3,7 @@ import { Formatters, SnowflakeUtil, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
-import { imgur } from '../../api';
+import { hypixel, imgur } from '../../api';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -49,7 +49,9 @@ export default class DebugCommand extends ApplicationCommand {
 							name: 'Cache',
 							value: stripIndents`
 								Guilds: ${this.client.formatNumber(this.client.guilds.cache.size)}
-								Channels: ${this.client.formatNumber(this.client.channels.cache.size)}
+								Channels: ${this.client.formatNumber(this.client.channels.cache.size)} (${this.client.formatNumber(
+								this.client.channels.cache.filter((c) => c.isThread() || c.type === 'DM').size,
+							)} temporary)
 								${(this.client.channels.cache.filter((c) => c.type === 'DM') as Collection<Snowflake, DMChannel>)
 									.map(
 										(c) =>
@@ -123,28 +125,37 @@ export default class DebugCommand extends ApplicationCommand {
 								.join('\n'),
 						},
 						{
-							name: 'Imgur Rate Limits',
+							name: 'Hypixel',
+							// @ts-expect-error
+							value: `Queue: ${hypixel.queue.promises.length}`,
+						},
+						{
+							name: 'Imgur',
 							value: stripIndents`
+								Rate Limits
 								${Object.entries(imgur.rateLimit)
-									.map(
-										([key, value]) =>
+									.map(([key, value]) =>
+										Formatters.quote(
 											`${key}: ${
 												key.endsWith('reset') && value !== null
 													? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime)
 													: value
 											}`,
+										),
 									)
 									.join('\n')}
 								${Object.entries(imgur.postRateLimit)
-									.map(
-										([key, value]) =>
+									.map(([key, value]) =>
+										Formatters.quote(
 											`post${key}: ${
 												key.endsWith('reset') && value !== null
 													? Formatters.time(new Date(value), Formatters.TimestampStyles.LongDateTime)
 													: value
 											}`,
+										),
 									)
 									.join('\n')}
+								Queue: ${imgur.queue.remaining}
 							`,
 						},
 						{
@@ -155,9 +166,12 @@ export default class DebugCommand extends ApplicationCommand {
 										await Promise.all(
 											this.client.chatBridges.cache.map(
 												async (cb) => stripIndents`
-												bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
-												server: ${await cb.minecraft.server}
-											`,
+													Bot: ${escapeIgn(cb.bot?.username ?? 'offline')}
+													Server: ${await cb.minecraft.server}
+													Queues:
+													${Formatters.quote(`MC: ${cb.minecraft.queue.remaining}`)}
+													${cb.discord.channelsByType.map((c) => Formatters.quote(`${c.type}: ${c.queue.remaining}`)).join('\n')}
+												`,
 											),
 										)
 									).join('\n\n'),
