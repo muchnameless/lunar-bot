@@ -1,10 +1,11 @@
+import { setTimeout as sleep } from 'node:timers/promises';
 import { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } from 'discord.js';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
-import { cache, imgur } from '../../../api';
-import { asyncReplace, hours, logger } from '../../../functions';
+import { cache, imgur, mojang } from '../../../api';
+import { asyncReplace, hours, logger, uuidToImgurBustURL } from '../../../functions';
 import { ChatManager } from './ChatManager';
 import type {
 	Collection,
@@ -12,12 +13,14 @@ import type {
 	MessageAttachment,
 	MessageCollectorOptions,
 	MessageOptions,
+	GuildMember,
 	Snowflake,
 	TextChannel,
 	Webhook,
 	WebhookMessageOptions,
 } from 'discord.js';
 import type { ChatBridge, MessageForwardOptions } from '../ChatBridge';
+import type { HypixelMessageAuthor } from '../HypixelMessageAuthor';
 import type { ChatBridgeChannel } from '../../database/models/HypixelGuild';
 import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
@@ -26,6 +29,13 @@ interface SendViaBotOptions extends MessageOptions {
 	content: string;
 	prefix?: string;
 	hypixelMessage?: HypixelMessage | null;
+}
+
+interface SendViaWebhookOptions extends WebhookMessageOptions {
+	content: string;
+	author: HypixelMessageAuthor;
+	player: Player | null;
+	member: GuildMember | null;
 }
 
 export class DiscordChatManager extends ChatManager {
@@ -252,25 +262,22 @@ export class DiscordChatManager extends ChatManager {
 	 * sends a message via the chatBridge webhook
 	 * @param options
 	 */
-	async sendViaWebhook(options: string | WebhookMessageOptions) {
+	async sendViaWebhook(options: SendViaWebhookOptions) {
 		if (!this.chatBridge.isEnabled() || !this.isReady()) {
-			throw new Error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: not enabled / ready`);
+			throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: not enabled / ready`);
 		}
 
-		const { content, ..._options } = typeof options === 'string' ? { content: options } : options;
-
-		if (!content) throw new Error(`[CHATBRIDGE WEBHOOK]: ${this.logInfo}: no content`);
+		if (!options.content) throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: no content`);
 
 		await this.queue.wait();
 
 		try {
-			return (await this.webhook.send({
-				content: await this.chatBridge.discord.parseContent(content),
-				..._options,
-			})) as Message;
-		} catch (error) {
-			logger.error(error, `[CHATBRIDGE WEBHOOK]: ${this.logInfo}`);
+			const result = await Promise.race([this.#sendViaWebhook(options), sleep(60_000)]);
 
+			if (!result) throw options;
+
+			return result;
+		} catch (error) {
 			if (error instanceof DiscordAPIError && error.httpStatus === 404) {
 				this.#uncacheWebhook();
 				this.#fetchOrCreateWebhook();
@@ -281,40 +288,74 @@ export class DiscordChatManager extends ChatManager {
 			this.queue.shift();
 		}
 	}
+	/**
+	 * should only ever be called from within sendViaWebhook()
+	 * @internal
+	 */
+	async #sendViaWebhook({ content, author, player, member, ...options }: SendViaWebhookOptions) {
+		return this.webhook!.send({
+			content: await this.chatBridge.discord.parseContent(content),
+			username: member?.displayName ?? player?.ign ?? author.ign,
+			avatarURL:
+				member?.displayAvatarURL({ dynamic: true }) ??
+				(await player?.imageURL) ??
+				(await mojang.ign(author.ign).then(
+					({ uuid }) => uuidToImgurBustURL(this.client, uuid),
+					(error) => logger.error(error, `[SEND VIA WEBHOOK]: ${this.logInfo}`),
+				)) ??
+				(member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),
+			allowedMentions: {
+				parse: player?.hasDiscordPingPermission ? ['users'] : [],
+			},
+			...options,
+		}) as Promise<Message>;
+	}
 
 	/**
 	 * sends a message via the bot in the chatBridge channel
 	 * @param options
 	 */
-	async sendViaBot(options: string | SendViaBotOptions): Promise<Message | null> {
+	async sendViaBot(options: SendViaBotOptions) {
 		if (!this.chatBridge.isEnabled()) return null;
-
-		const {
-			content,
-			prefix = '',
-			hypixelMessage,
-			..._options
-		} = typeof options === 'string' ? ({ content: options } as SendViaBotOptions) : options;
 
 		await this.queue.wait();
 
-		const discordMessage = await hypixelMessage?.discordMessage.catch((error) => logger.error(error));
-
 		try {
-			return await ChannelUtil.send(this.channel, {
-				content: await this.chatBridge.discord.parseContent(
-					`${
-						discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
-					}${prefix}${content}`,
-				),
-				reply: {
-					messageReference: discordMessage as Message,
-				},
-				..._options,
-			});
+			const result = await Promise.race([this.#sendViaBot(options), sleep(60_000)]);
+
+			if (!result) {
+				logger.error(options, `[SEND VIA BOT]: ${this.logInfo}: timeout`);
+				return null;
+			}
+
+			return result;
 		} finally {
 			this.queue.shift();
 		}
+	}
+	/**
+	 * should only ever be called from within sendViaBot()
+	 * @internal
+	 */
+	async #sendViaBot({ hypixelMessage, content, prefix = '', ...options }: SendViaBotOptions) {
+		let discordMessage: Message | null | undefined;
+		try {
+			discordMessage = await hypixelMessage?.discordMessage;
+		} catch (error) {
+			logger.error(error);
+		}
+
+		return ChannelUtil.send(this.channel, {
+			content: await this.chatBridge.discord.parseContent(
+				`${
+					discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
+				}${prefix}${content}`,
+			),
+			reply: {
+				messageReference: discordMessage as Message,
+			},
+			...options,
+		});
 	}
 
 	/**

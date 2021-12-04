@@ -2,8 +2,7 @@ import { regExpEsc } from '@sapphire/utilities';
 import loader from 'prismarine-chat';
 import { NEVER_MATCHING_REGEXP, NO_PING_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { MessageUtil } from '../../util';
-import { mojang } from '../../api';
-import { logger, seconds, uuidToImgurBustURL } from '../../functions';
+import { logger, seconds } from '../../functions';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import {
 	INVISIBLE_CHARACTER_REGEXP,
@@ -307,22 +306,14 @@ export class HypixelMessage {
 		if (!discordChatManager) return null;
 
 		try {
+			// user message
 			if (this.author) {
 				const { player, member } = this;
 				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook({
 					content: this.prefixReplacedContent,
-					username: member?.displayName ?? player?.ign ?? this.author.ign,
-					avatarURL:
-						member?.displayAvatarURL({ dynamic: true }) ??
-						(await player?.imageURL) ??
-						(await mojang.ign(this.author.ign).then(
-							({ uuid }) => uuidToImgurBustURL(this.client, uuid),
-							(error) => logger.error(error, '[FORWARD TO DC]'),
-						)) ??
-						(member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),
-					allowedMentions: {
-						parse: player?.hasDiscordPingPermission ? ['users'] : [],
-					},
+					author: this.author,
+					player,
+					member,
 				}));
 
 				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
@@ -337,6 +328,7 @@ export class HypixelMessage {
 				return discordMessage;
 			}
 
+			// server message
 			return (this.discordMessage = discordChatManager.sendViaBot({
 				content: this.content,
 				allowedMentions: { parse: [] },
