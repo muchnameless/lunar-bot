@@ -824,6 +824,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * internal chat method with error listener and retries, should only ever be called from inside 'sendToChat' or 'command'
 	 * @param options
+	 * @internal
 	 */
 	async #sendToChat({ content, prefix = '', isMessage, discordMessage = null }: SendToChatOptions): Promise<unknown> {
 		if (!this.bot || this.bot.ended) return MessageUtil.react(discordMessage, X_EMOJI);
