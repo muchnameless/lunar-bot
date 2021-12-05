@@ -102,7 +102,7 @@ export default class InteractionUtil extends null {
 			deferReplyPromise: null,
 			deferUpdatePromise: null,
 			useEphemeral:
-				this.#checkEphemeralOption(interaction) ??
+				this.checkEphemeralOption(interaction) ??
 				(channel !== null && channel.type !== 'DM'
 					? !channel.name.includes('command') && !channel.name.includes('ᴄᴏᴍᴍᴀɴᴅ') // guild channel
 					: false), // DM channel
@@ -136,7 +136,7 @@ export default class InteractionUtil extends null {
 	 * checks the command options for the ephemeral option
 	 * @param interaction
 	 */
-	static #checkEphemeralOption(interaction: ChatInteraction) {
+	static checkEphemeralOption(interaction: ChatInteraction) {
 		if (interaction.isMessageComponent()) return null;
 
 		switch ((interaction.options as CommandInteractionOptionResolver).getString('visibility')) {

@@ -21,7 +21,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 	 * removes duplicates and lists the commands by name | aliases
 	 * @param commands
 	 */
-	static #listCommands(commands: Collection<string, BridgeCommand | DualCommand>) {
+	static listCommands(commands: Collection<string, BridgeCommand | DualCommand>) {
 		return [...new Set(commands.values())]
 			.map((command) =>
 				[command.name, ...((command as DualCommand).aliasesInGame ?? command.aliases ?? [])].join(' | '),
@@ -41,7 +41,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 					', ',
 				)}`,
 				...this.collection.visibleCategories.map(
-					(category) => `${category}: ${HelpBridgeCommand.#listCommands(this.collection.filterByCategory(category))}`,
+					(category) => `${category}: ${HelpBridgeCommand.listCommands(this.collection.filterByCategory(category))}`,
 				),
 			];
 
@@ -71,7 +71,7 @@ export default class HelpBridgeCommand extends BridgeCommand {
 				reply.push(`Required ID: ${this.client.ownerId}`);
 			}
 
-			reply.push(`Commands: ${HelpBridgeCommand.#listCommands(categoryCommands)}`);
+			reply.push(`Commands: ${HelpBridgeCommand.listCommands(categoryCommands)}`);
 
 			return hypixelMessage.author.send(reply.join('\n'));
 		}

@@ -517,3 +517,35 @@ export function sortCache<T>(
 			value: element[valueKey] as unknown as string,
 		}));
 }
+
+/**
+ * escapes '*' and '_' if those are neither within an URL nor a code block or inline code
+ * @param string
+ */
+export const escapeMarkdown = (string: string) =>
+	string
+		.split('```')
+		.map((subString, index, array) => {
+			if (index % 2 && index !== array.length - 1) return subString;
+			return escapeIfNoCodeBlock(subString);
+		})
+		.join('```');
+
+const escapeIfNoCodeBlock = (string: string) =>
+	string
+		.split(/(?<=^|[^`])`(?=[^`]|$)/)
+		.map((subString, index, array) => {
+			if (index % 2 && index !== array.length - 1) return subString;
+			return escapeIfNoURL(subString);
+		})
+		.join('`');
+
+const escapeIfNoURL = (string: string) =>
+	string
+		.replace(/(?<!\\)(?=\*)/g, '\\') // escape italic 1/2
+		.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
+			// escape italic 2/2 & underline
+			if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
+			if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
+			return `${p1.replace(/(?<!\\)(?=_)/g, '\\')}${p1.endsWith('\\') ? '' : '\\'}_${p2}`; // escape not already escaped '_'
+		});

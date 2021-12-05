@@ -48,17 +48,17 @@ export default class JoinDateCommand extends DualCommand {
 	 */
 	static async #getJoinDate(chatBridge: ChatBridge, ign: string) {
 		// get first page
-		let logEntry = await this.#getLogEntry(chatBridge, ign, 1);
+		let logEntry = await this.getLogEntry(chatBridge, ign, 1);
 		let lastPage = Number(logEntry.match(/\(Page 1 of (\d+)\)/)?.[1]);
 
 		// log has more than 1 page -> get latest page
-		if (lastPage !== 1) logEntry = await this.#getLogEntry(chatBridge, ign, lastPage);
+		if (lastPage !== 1) logEntry = await this.getLogEntry(chatBridge, ign, lastPage);
 
 		let matched = logEntry.match(JoinDateCommand.JOINED_REGEXP);
 
 		// last page didn't contain join, get next-to-last page
 		while (!matched && lastPage >= 1) {
-			matched = (await this.#getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
+			matched = (await this.getLogEntry(chatBridge, ign, --lastPage)).match(JoinDateCommand.JOINED_REGEXP);
 
 			// entry does not end with invited message -> no joined / created message at all
 			if (!new RegExp(`\\n.+: \\w{1,16} invited ${ign}$`).test(logEntry)) break;
@@ -78,7 +78,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param ign
 	 * @param page
 	 */
-	static #getLogEntry(chatBridge: ChatBridge, ign: string, page: number) {
+	static getLogEntry(chatBridge: ChatBridge, ign: string, page: number) {
 		return chatBridge.minecraft.command({
 			command: `g log ${ign} ${page}`,
 			abortRegExp: logErrors(ign),

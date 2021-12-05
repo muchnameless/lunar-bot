@@ -2,7 +2,7 @@ import { Collection, Util, Formatters } from 'discord.js';
 import pkg from 'sequelize';
 const { Op } = pkg;
 import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
-import { asyncReplace, autocorrect, replaceSmallLatinCapitalLetters } from '../../../functions';
+import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '../../../functions';
 import { DiscordChatManager } from './DiscordChatManager';
 import type { Snowflake } from 'discord.js';
 import type { MESSAGE_TYPES } from '../constants';
@@ -17,46 +17,6 @@ export class DiscordManager {
 
 	constructor(chatBridge: ChatBridge) {
 		this.chatBridge = chatBridge;
-	}
-
-	/**
-	 * escapes '*' and '_' if those are neither within an URL nor a code block or inline code
-	 * @param string
-	 * @param block
-	 */
-	static #escapeNonURL(string: string, block = 0): string {
-		switch (block) {
-			case 0:
-				return string
-					.split('```')
-					.map((subString, index, array) => {
-						if (index % 2 && index !== array.length - 1) return subString;
-						return this.#escapeNonURL(subString, 1);
-					})
-					.join('```');
-
-			case 1:
-				return string
-					.split(/(?<=^|[^`])`(?=[^`]|$)/)
-					.map((subString, index, array) => {
-						if (index % 2 && index !== array.length - 1) return subString;
-						return this.#escapeNonURL(subString, 2);
-					})
-					.join('`');
-
-			case 2:
-				return string
-					.replace(/(?<!\\)(?=\*)/g, '\\') // escape italic 1/2
-					.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
-						// escape italic 2/2 & underline
-						if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
-						if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
-						return `${p1.replace(/(?<!\\)(?=_)/g, '\\')}${p1.endsWith('\\') ? '' : '\\'}_${p2}`; // escape not already escaped '_'
-					});
-
-			default:
-				return string;
-		}
 	}
 
 	get client() {
@@ -130,7 +90,7 @@ export class DiscordManager {
 	 * @param string
 	 */
 	async parseContent(string: string) {
-		return DiscordManager.#escapeNonURL(
+		return escapeMarkdown(
 			Util.escapeMarkdown(
 				// @mentions
 				(

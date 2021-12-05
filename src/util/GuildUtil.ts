@@ -9,7 +9,7 @@ export default class GuildUtil extends null {
 	/**
 	 * cache
 	 */
-	static #fetchAllMembersCache = new Map<Snowflake, Promise<Collection<Snowflake, GuildMember>>>();
+	static fetchAllMembersCache = new Map<Snowflake, Promise<Collection<Snowflake, GuildMember>>>();
 
 	/**
 	 * verifies the roles via guild.roles.cache and sorts them by position, array -> collection
@@ -78,16 +78,16 @@ export default class GuildUtil extends null {
 
 		if (guild.memberCount === guild.members.cache.size) return guild.members.cache;
 
-		const cached = this.#fetchAllMembersCache.get(guild.id);
+		const cached = this.fetchAllMembersCache.get(guild.id);
 		if (cached) return cached;
 
 		const promise = guild.members.fetch();
-		this.#fetchAllMembersCache.set(guild.id, promise);
+		this.fetchAllMembersCache.set(guild.id, promise);
 
 		try {
 			return await promise;
 		} finally {
-			this.#fetchAllMembersCache.delete(guild.id);
+			this.fetchAllMembersCache.delete(guild.id);
 		}
 	}
 }

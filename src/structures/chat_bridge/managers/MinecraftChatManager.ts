@@ -397,7 +397,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * removes line formatters from the beginning and end
 	 * @param messages
 	 */
-	static #cleanCommandResponse(messages: HypixelMessage[]) {
+	static cleanCommandResponse(messages: HypixelMessage[]) {
 		return messages.map(({ content }) => content.replace(/^-{29,}|-{29,}$/g, '').trim()).join('\n');
 	}
 
@@ -998,7 +998,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					}
 
 					if (raw) return resolve(collected);
-					if (collected.length) return resolve(MinecraftChatManager.#cleanCommandResponse(collected));
+					if (collected.length) return resolve(MinecraftChatManager.cleanCommandResponse(collected));
 					return resolve(`no in game response after ${ms(timeout, { long: true })}`);
 				}
 
@@ -1008,14 +1008,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				case 'abort': {
 					if (rejectOnAbort) {
 						if (raw) return reject(collected);
-						return reject(MinecraftChatManager.#cleanCommandResponse(collected));
+						return reject(MinecraftChatManager.cleanCommandResponse(collected));
 					}
 				}
 				// fallthrough
 
 				default:
 					if (raw) return resolve(collected);
-					return resolve(MinecraftChatManager.#cleanCommandResponse(collected));
+					return resolve(MinecraftChatManager.cleanCommandResponse(collected));
 			}
 		});
 
