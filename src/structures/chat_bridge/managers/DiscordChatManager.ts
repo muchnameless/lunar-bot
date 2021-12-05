@@ -1,4 +1,3 @@
-import { setTimeout as sleep } from 'node:timers/promises';
 import { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } from 'discord.js';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
@@ -276,11 +275,7 @@ export class DiscordChatManager extends ChatManager {
 		await (options.queuePromise ?? this.queue.wait());
 
 		try {
-			const result = await Promise.race([this.webhook.send(options) as Promise<Message>, sleep(60_000)]);
-
-			if (!result) throw options;
-
-			return result;
+			return (await this.webhook.send(options)) as Message;
 		} catch (error) {
 			if (error instanceof DiscordAPIError && error.httpStatus === 404) {
 				this.#uncacheWebhook();
@@ -324,14 +319,7 @@ export class DiscordChatManager extends ChatManager {
 		await queuePromise;
 
 		try {
-			const result = await Promise.race([ChannelUtil.send(this.channel, _options), sleep(60_000)]);
-
-			if (!result) {
-				logger.error(options, `[SEND VIA BOT]: ${this.logInfo}: timeout`);
-				return null;
-			}
-
-			return result;
+			return await ChannelUtil.send(this.channel, _options);
 		} finally {
 			this.queue.shift();
 		}
