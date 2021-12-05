@@ -5,6 +5,7 @@ import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
 import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
+	AutocompleteInteraction,
 	BaseCommandInteraction,
 	BaseGuildTextChannel,
 	CommandInteraction,
@@ -266,7 +267,7 @@ export default class InteractionUtil extends null {
 	 * wether the force option was set to true
 	 * @param interaction
 	 */
-	static checkForce(interaction: CommandInteraction) {
+	static checkForce(interaction: CommandInteraction | AutocompleteInteraction) {
 		return interaction.options.getBoolean('force') ?? false;
 	}
 

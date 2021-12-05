@@ -228,6 +228,20 @@ export default class InteractionCreateEvent extends Event {
 					return interaction.respond([{ name: 'everyone', value: 'everyone' }]);
 				}
 
+				// return input if 'force' option is set
+				if (InteractionUtil.checkForce(interaction)) {
+					return interaction.respond([
+						{ name: value, value },
+						...sortCache(
+							InteractionUtil.getHypixelGuild(interaction).players,
+							value,
+							'ign',
+							'minecraftUuid',
+							MAX_CHOICES - 1,
+						),
+					]);
+				}
+
 				// ign input
 				return interaction.respond(
 					sortCache(InteractionUtil.getHypixelGuild(interaction).players, value, 'ign', 'minecraftUuid'),
