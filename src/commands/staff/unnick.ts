@@ -23,8 +23,7 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param member
 	 */
-	// eslint-disable-next-line class-methods-use-this
-	async #run(interaction: CommandInteraction | ContextMenuInteraction, member: GuildMember | null) {
+	private async _run(interaction: CommandInteraction | ContextMenuInteraction, member: GuildMember | null) {
 		// input validation
 		if (!member) {
 			return InteractionUtil.reply(interaction, {
@@ -83,7 +82,7 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override runUser(interaction: ContextMenuInteraction, _: User, member: GuildMember | null) {
-		return this.#run(interaction, member);
+		return this._run(interaction, member);
 	}
 
 	/**
@@ -92,6 +91,6 @@ export default class UnnickCommand extends ApplicationCommand {
 	 */
 	override runSlash(interaction: CommandInteraction) {
 		// eslint-disable-line @typescript-eslint/no-unused-vars
-		return this.#run(interaction, interaction.options.getMember('user') as GuildMember | null);
+		return this._run(interaction, interaction.options.getMember('user') as GuildMember | null);
 	}
 }

@@ -76,7 +76,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param input
 	 * @param depth
 	 */
-	#cleanOutput(input: unknown, depth = 1) {
+	private _cleanOutput(input: unknown, depth = 1) {
 		return (typeof input === 'string' ? input : util.inspect(input, { depth }))
 			.replaceAll('`', '`\u200B')
 			.replace(new RegExp(this.client.token!, 'gi'), '****');
@@ -86,7 +86,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param isAsync
 	 * @param inspectDepth
 	 */
-	#getRows(isAsync: boolean, inspectDepth: number) {
+	private _getRows(isAsync: boolean, inspectDepth: number) {
 		return [
 			new MessageActionRow().addComponents(
 				new MessageButton()
@@ -107,7 +107,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param isAsync
 	 * @param inspectDepth
 	 */
-	async #eval(
+	private async _eval(
 		interaction: CommandInteraction | ContextMenuInteraction | ButtonInteraction,
 		input: string,
 		isAsync = /\bawait\b/.test(input),
@@ -172,7 +172,7 @@ export default class EvalCommand extends ApplicationCommand {
 				stopwatch.stop();
 			}
 
-			const OUTPUT_ARRAY = splitForEmbedFields(this.#cleanOutput(evaled, inspectDepth), 'ts');
+			const OUTPUT_ARRAY = splitForEmbedFields(this._cleanOutput(evaled, inspectDepth), 'ts');
 			const INFO = `d.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``;
 
 			// add output fields till embed character limit is reached
@@ -198,7 +198,7 @@ export default class EvalCommand extends ApplicationCommand {
 			const errorType = new Type(error);
 			const FOOTER = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
 
-			for (const [index, value] of splitForEmbedFields(this.#cleanOutput(error), 'xl').entries()) {
+			for (const [index, value] of splitForEmbedFields(this._cleanOutput(error), 'xl').entries()) {
 				const name = index ? '\u200B' : 'Error';
 
 				if (responseEmbed.length + FOOTER.length + 1 + name.length + value.length > EMBED_MAX_CHARS) break;
@@ -229,8 +229,8 @@ export default class EvalCommand extends ApplicationCommand {
 		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH');
 
 		return InteractionUtil.reply(interaction, {
-			embeds: await this.#eval(interaction, content, IS_ASYNC, INSPECT_DEPTH),
-			components: this.#getRows(IS_ASYNC, INSPECT_DEPTH),
+			embeds: await this._eval(interaction, content, IS_ASYNC, INSPECT_DEPTH),
+			components: this._getRows(IS_ASYNC, INSPECT_DEPTH),
 		});
 	}
 
@@ -259,7 +259,7 @@ export default class EvalCommand extends ApplicationCommand {
 					});
 
 					return InteractionUtil.update(interaction, {
-						embeds: await this.#eval(
+						embeds: await this._eval(
 							interaction,
 							collected.first()!.content,
 							async === 'true' || undefined,
@@ -305,8 +305,8 @@ export default class EvalCommand extends ApplicationCommand {
 		const INSPECT_DEPTH = interaction.options.getInteger('inspect') ?? this.config.get('EVAL_INSPECT_DEPTH');
 
 		return InteractionUtil.reply(interaction, {
-			embeds: await this.#eval(interaction, INPUT, IS_ASYNC, INSPECT_DEPTH),
-			components: this.#getRows(IS_ASYNC, INSPECT_DEPTH),
+			embeds: await this._eval(interaction, INPUT, IS_ASYNC, INSPECT_DEPTH),
+			components: this._getRows(IS_ASYNC, INSPECT_DEPTH),
 		});
 	}
 }

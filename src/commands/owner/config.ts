@@ -53,7 +53,7 @@ export default class ConfigCommand extends ApplicationCommand {
 	/**
 	 * @param entries
 	 */
-	#listEntries(entries: Collection<string, Config>) {
+	private _listEntries(entries: Collection<string, Config>) {
 		return (
 			entries
 				.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
@@ -150,7 +150,7 @@ export default class ConfigCommand extends ApplicationCommand {
 
 				if (!query) {
 					return InteractionUtil.reply(interaction, {
-						content: this.#listEntries(this.config.cache),
+						content: this._listEntries(this.config.cache),
 						code: 'apache',
 						split: { char: '\n' },
 					});
@@ -159,7 +159,7 @@ export default class ConfigCommand extends ApplicationCommand {
 				const queryRegex = new RE2(query, 'i');
 
 				return InteractionUtil.reply(interaction, {
-					content: this.#listEntries(
+					content: this._listEntries(
 						this.config.cache.filter(
 							({ key, value }) => queryRegex.test(key) || (value !== null && queryRegex.test(value)),
 						),

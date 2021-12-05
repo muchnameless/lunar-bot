@@ -364,7 +364,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * linked guild member
 	 */
-	#discordMember: GuildMember | null = null;
+	private _discordMember: GuildMember | null = null;
 
 	static initialise(sequelize: Sequelize) {
 		const attributes = {};
@@ -611,7 +611,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param discordGuild
 	 */
 	async fetchDiscordMember(guildResolvable?: GuildResolvable | null) {
-		if (this.#discordMember) return this.#discordMember;
+		if (this._discordMember) return this._discordMember;
 		if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
 
 		try {
@@ -649,11 +649,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 */
 	async setDiscordMember(member: GuildMember | null, force = false) {
 		if (member == null) {
-			if (this.#discordMember) {
-				GuildMemberUtil.setPlayer(this.#discordMember, null);
+			if (this._discordMember) {
+				GuildMemberUtil.setPlayer(this._discordMember, null);
 			}
 
-			this.#discordMember = null;
+			this._discordMember = null;
 
 			if (force) {
 				try {
@@ -668,11 +668,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (this.hypixelGuild?.discordId !== member.guild.id) return;
 
-		if (this.#discordMember) {
-			GuildMemberUtil.setPlayer(this.#discordMember, null);
+		if (this._discordMember) {
+			GuildMemberUtil.setPlayer(this._discordMember, null);
 		}
 
-		this.#discordMember = member;
+		this._discordMember = member;
 
 		GuildMemberUtil.setPlayer(member, this);
 

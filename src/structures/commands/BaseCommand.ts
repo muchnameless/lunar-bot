@@ -37,7 +37,7 @@ export class BaseCommand {
 	 * null for a default, 0 for none
 	 */
 	cooldown: number | null;
-	#requiredRoles: RequiredRoles | null;
+	private _requiredRoles: RequiredRoles | null;
 	timestamps: Collection<Snowflake, number> | null;
 	/** command name aliases (lower case) */
 	aliases: string[] | null = null;
@@ -57,7 +57,7 @@ export class BaseCommand {
 		this.category = category;
 
 		this.cooldown = cooldown ?? null;
-		this.#requiredRoles = requiredRoles ?? null;
+		this._requiredRoles = requiredRoles ?? null;
 		this.timestamps = this.cooldown !== 0 ? new Collection() : null;
 	}
 
@@ -72,7 +72,7 @@ export class BaseCommand {
 	 * roles required to run this command
 	 */
 	requiredRoles(hypixelGuild: HypixelGuild) {
-		if (this.#requiredRoles) return this.#requiredRoles(hypixelGuild);
+		if (this._requiredRoles) return this._requiredRoles(hypixelGuild);
 
 		switch (this.category) {
 			case 'staff':

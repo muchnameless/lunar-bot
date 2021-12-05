@@ -12,6 +12,14 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
 
+interface RunOptions {
+	chatBridge: ChatBridge;
+	question: string;
+	pollOptionNames: string[];
+	duration: string | null;
+	ign: string;
+}
+
 export default class PollCommand extends DualCommand {
 	quoteChars = ['\u{0022}', '\u{201C}', '\u{201D}'] as const;
 
@@ -61,19 +69,7 @@ export default class PollCommand extends DualCommand {
 	 * @param param0.duration
 	 * @param param0.ign
 	 */
-	async #run({
-		chatBridge,
-		question,
-		pollOptionNames,
-		duration,
-		ign,
-	}: {
-		chatBridge: ChatBridge;
-		question: string;
-		pollOptionNames: string[];
-		duration: string | null;
-		ign: string;
-	}) {
+	private async _run({ chatBridge, question, pollOptionNames, duration, ign }: RunOptions) {
 		if (chatBridge.pollUntil) {
 			return `poll already in progress, ends ${Formatters.time(
 				new Date(chatBridge.pollUntil),
@@ -174,7 +170,7 @@ export default class PollCommand extends DualCommand {
 			ephemeral: true,
 		});
 
-		const result = await this.#run({
+		const result = await this._run({
 			chatBridge: InteractionUtil.getHypixelGuild(interaction).chatBridge,
 			question: interaction.options.getString('question', true),
 			// @ts-expect-error
@@ -209,7 +205,7 @@ export default class PollCommand extends DualCommand {
 
 		if (!inputMatched || inputMatched.length < 2) return hypixelMessage.reply(this.usageInfo);
 
-		const result = await this.#run({
+		const result = await this._run({
 			chatBridge: hypixelMessage.chatBridge,
 			question: upperCaseFirstChar(inputMatched.shift()!),
 			pollOptionNames: inputMatched,

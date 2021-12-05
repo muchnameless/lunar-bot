@@ -46,7 +46,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param chatBridge
 	 * @param ign
 	 */
-	static async #getJoinDate(chatBridge: ChatBridge, ign: string) {
+	static async getJoinDate(chatBridge: ChatBridge, ign: string) {
 		// get first page
 		let logEntry = await this.getLogEntry(chatBridge, ign, 1);
 		let lastPage = Number(logEntry.match(/\(Page 1 of (\d+)\)/)?.[1]);
@@ -91,10 +91,9 @@ export default class JoinDateCommand extends DualCommand {
 	 * @param chatBridge
 	 * @param ignInput
 	 */
-	// eslint-disable-next-line class-methods-use-this
-	async #generateReply(chatBridge: ChatBridge, ignInput: string) {
+	private async _generateReply(chatBridge: ChatBridge, ignInput: string) {
 		try {
-			const { ign, date, timestamp } = await JoinDateCommand.#getJoinDate(chatBridge, ignInput);
+			const { ign, date, timestamp } = await JoinDateCommand.getJoinDate(chatBridge, ignInput);
 			return `${escapeIgn(ign)}: joined ${chatBridge.hypixelGuild} at ${
 				!Number.isNaN(timestamp) ? Formatters.time(date) : 'an unknown date'
 			}`;
@@ -135,7 +134,7 @@ export default class JoinDateCommand extends DualCommand {
 				);
 
 				for (const { ign } of hypixelGuild.players.values()) {
-					joinInfos.push(await JoinDateCommand.#getJoinDate(chatBridge, ign));
+					joinInfos.push(await JoinDateCommand.getJoinDate(chatBridge, ign));
 				}
 			} finally {
 				JoinDateCommand.running.delete(hypixelGuild.guildId);
@@ -153,7 +152,7 @@ export default class JoinDateCommand extends DualCommand {
 			});
 		}
 
-		return InteractionUtil.reply(interaction, await this.#generateReply(hypixelGuild.chatBridge, IGN));
+		return InteractionUtil.reply(interaction, await this._generateReply(hypixelGuild.chatBridge, IGN));
 	}
 
 	/**
@@ -162,7 +161,7 @@ export default class JoinDateCommand extends DualCommand {
 	 */
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(
-			await this.#generateReply(
+			await this._generateReply(
 				hypixelMessage.chatBridge,
 				hypixelMessage.commandData.args[0] ?? hypixelMessage.author.ign,
 			),

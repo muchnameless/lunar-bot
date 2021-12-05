@@ -30,8 +30,7 @@ export default class GuildOfCommand extends DualCommand {
 	 * execute the command
 	 * @param ignOrUuid
 	 */
-	// eslint-disable-next-line class-methods-use-this
-	async #generateReply(ignOrUuid: string) {
+	private async _generateReply(ignOrUuid: string) {
 		try {
 			const { uuid, ign } = await mojang.ignOrUuid(ignOrUuid);
 			const { name, tag, members } = await hypixel.guild.player(uuid);
@@ -51,7 +50,7 @@ export default class GuildOfCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		return InteractionUtil.reply(interaction, await this.#generateReply(interaction.options.getString('ign', true)));
+		return InteractionUtil.reply(interaction, await this._generateReply(interaction.options.getString('ign', true)));
 	}
 
 	/**
@@ -59,6 +58,6 @@ export default class GuildOfCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(await this.#generateReply(hypixelMessage.commandData.args[0]));
+		return hypixelMessage.reply(await this._generateReply(hypixelMessage.commandData.args[0]));
 	}
 }

@@ -55,7 +55,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 	/**
 	 * increases each link cycle
 	 */
-	#guildLinkAttempts = 0;
+	guildLinkAttempts = 0;
 	/**
 	 * client that instantiated the chat bridge
 	 */
@@ -159,7 +159,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 	 */
 	async link(guildName: string | null = null): Promise<this> {
 		if (!this.minecraft.isReady()) {
-			await sleep(Math.min(++this.#guildLinkAttempts * seconds(5), minutes(5)));
+			await sleep(Math.min(++this.guildLinkAttempts * seconds(5), minutes(5)));
 
 			return this.link(guildName);
 		}
@@ -207,7 +207,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 			// instantiate DiscordChannelManagers
 			await this.discord.init();
 
-			this.#guildLinkAttempts = 0;
+			this.guildLinkAttempts = 0;
 
 			return this;
 		} catch (error) {
@@ -218,7 +218,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 				return this;
 			}
 
-			await sleep(Math.min(++this.#guildLinkAttempts * seconds(5), minutes(5)));
+			await sleep(Math.min(++this.guildLinkAttempts * seconds(5), minutes(5)));
 
 			return this.link(guildName);
 		}

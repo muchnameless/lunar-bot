@@ -97,7 +97,7 @@ export class DiscordChatManager extends ChatManager {
 	 * tries to upload all image attachments to imgur, replacing all successfully uploaded URLs with the imgur URLs
 	 * @param attachments
 	 */
-	async #uploadAttachments(attachments: Collection<Snowflake, MessageAttachment>) {
+	private async _uploadAttachments(attachments: Collection<Snowflake, MessageAttachment>) {
 		if (!this.client.config.get('IMGUR_UPLOADER_ENABLED')) return attachments.map(({ url }) => url);
 
 		const urls: string[] = [];
@@ -134,7 +134,7 @@ export class DiscordChatManager extends ChatManager {
 	 * @param player
 	 * @param content
 	 */
-	static async #dmMuteInfo(message: Message, player: Player | null, content: string) {
+	static async _dmMuteInfo(message: Message, player: Player | null, content: string) {
 		if (message.editable) return; // message was sent by the bot
 		if (await cache.get(`chatbridge:muted:dm:${message.author.id}`)) return;
 
@@ -170,13 +170,13 @@ export class DiscordChatManager extends ChatManager {
 	 * initialise the discord chat manager
 	 */
 	init() {
-		return this.#fetchOrCreateWebhook();
+		return this._fetchOrCreateWebhook();
 	}
 
 	/**
 	 * fetches or creates the webhook for the channel
 	 */
-	async #fetchOrCreateWebhook() {
+	private async _fetchOrCreateWebhook() {
 		if (this.webhook) {
 			this.ready = true;
 			return this;
@@ -250,7 +250,7 @@ export class DiscordChatManager extends ChatManager {
 	/**
 	 * uncaches the webhook
 	 */
-	#uncacheWebhook() {
+	private _uncacheWebhook() {
 		this.webhook = null;
 		this.ready = false;
 
@@ -284,8 +284,8 @@ export class DiscordChatManager extends ChatManager {
 			return (await this.webhook.send(options)) as Message;
 		} catch (error) {
 			if (error instanceof DiscordAPIError && error.httpStatus === 404) {
-				this.#uncacheWebhook();
-				this.#fetchOrCreateWebhook();
+				this._uncacheWebhook();
+				this._fetchOrCreateWebhook();
 			}
 
 			throw error;
@@ -347,7 +347,7 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if player is muted
 		if (player?.muted) {
-			DiscordChatManager.#dmMuteInfo(
+			DiscordChatManager._dmMuteInfo(
 				message,
 				player,
 				`your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`,
@@ -357,13 +357,13 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if the player is auto muted
 		if ((player?.infractions ?? -1) >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
-			DiscordChatManager.#dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
+			DiscordChatManager._dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild!.muted && (!player?.isStaff || player?.guildId === this.hypixelGuild!.guildId)) {
-			DiscordChatManager.#dmMuteInfo(
+			DiscordChatManager._dmMuteInfo(
 				message,
 				player,
 				`${this.hypixelGuild!.name}'s guild chat mute expires ${Formatters.time(
@@ -376,7 +376,7 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if the chatBridge bot is muted
 		if (this.minecraft.botPlayer?.muted) {
-			DiscordChatManager.#dmMuteInfo(
+			DiscordChatManager._dmMuteInfo(
 				message,
 				player,
 				`the bot's mute expires ${Formatters.time(
@@ -417,7 +417,7 @@ export class DiscordChatManager extends ChatManager {
 		if (message.stickers.size) contentParts.push(...message.stickers.map(({ name }) => `:${name}:`));
 
 		// links of attachments
-		if (message.attachments.size) contentParts.push(...(await this.#uploadAttachments(message.attachments)));
+		if (message.attachments.size) contentParts.push(...(await this._uploadAttachments(message.attachments)));
 
 		// empty message (e.g. only embeds)
 		if (!contentParts.length) return MessageUtil.react(message, STOP_EMOJI);

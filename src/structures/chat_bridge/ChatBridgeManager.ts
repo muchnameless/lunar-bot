@@ -35,7 +35,7 @@ export class ChatBridgeManager {
 	cache: ChatBridge[] = [];
 
 	constructor(client: LunarClient) {
-		for (let i = 0; i < ChatBridgeManager.#accounts.length; ++i) {
+		for (let i = 0; i < ChatBridgeManager._accounts.length; ++i) {
 			this.cache.push(new ChatBridge(client, i));
 		}
 
@@ -46,7 +46,7 @@ export class ChatBridgeManager {
 	/**
 	 * mc accounts
 	 */
-	static get #accounts() {
+	static get _accounts() {
 		return process.env.MINECRAFT_ACCOUNT_TYPE!.split(/ +/).filter(Boolean);
 	}
 
@@ -74,7 +74,7 @@ export class ChatBridgeManager {
 		await this.commands.loadAll();
 
 		// single
-		if (typeof index === 'number' && index >= 0 && index < ChatBridgeManager.#accounts.length) {
+		if (typeof index === 'number' && index >= 0 && index < ChatBridgeManager._accounts.length) {
 			const chatBridge = this.cache[index];
 
 			chatBridge.connect();

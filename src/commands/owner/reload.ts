@@ -71,7 +71,7 @@ export default class ReloadCommand extends DualCommand {
 	 * @param reload
 	 * @param force
 	 */
-	async #run(subcommand: string, input: string | null, reload = false, force = false) {
+	private async _run(subcommand: string, input: string | null, reload = false, force = false) {
 		switch (subcommand) {
 			case 'command': {
 				let commandName = input!.toLowerCase();
@@ -244,7 +244,7 @@ export default class ReloadCommand extends DualCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		return InteractionUtil.reply(
 			interaction,
-			await this.#run(
+			await this._run(
 				interaction.options.getSubcommand(),
 				interaction.options.getString('name'),
 				interaction.options.getBoolean('reload') ?? false,
@@ -259,7 +259,7 @@ export default class ReloadCommand extends DualCommand {
 	 */
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(
-			await this.#run(hypixelMessage.commandData.args[0], hypixelMessage.commandData.args[1]),
+			await this._run(hypixelMessage.commandData.args[0], hypixelMessage.commandData.args[1]),
 		);
 	}
 }

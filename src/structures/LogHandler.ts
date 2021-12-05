@@ -12,6 +12,11 @@ import type { LunarClient } from './LunarClient';
 
 type LogInput = MessageEmbed | MessageAttachment | string | undefined | null;
 
+interface LogOptions {
+	embeds: MessageEmbed[];
+	files?: MessageAttachment[];
+}
+
 export class LogHandler {
 	client: LunarClient;
 	logURL: URL;
@@ -87,7 +92,7 @@ export class LogHandler {
 		if (!this.channel) return this;
 
 		try {
-			await this.#postFileLogs(); // repost logs that failed to be posted during the last uptime
+			await this._postFileLogs(); // repost logs that failed to be posted during the last uptime
 		} catch (error) {
 			logger.error(error, '[LOG HANDLER]');
 		}
@@ -102,13 +107,13 @@ export class LogHandler {
 	log(input: LogInput): Promise<void | Message>;
 	log(...input: LogInput[]): Promise<void | Message> | Promise<(void | Message)[]>;
 	log(...input: any) {
-		const { embeds, files } = this.#transformInput(input);
+		const { embeds, files } = this._transformInput(input);
 
 		if (!embeds.length) return null; // nothing to log
 
 		// send 1 message
 		if (embeds.length <= EMBEDS_MAX_AMOUNT && embeds.reduce((acc, cur) => acc + cur.length, 0) <= EMBED_MAX_CHARS) {
-			return this.#log({ embeds, files });
+			return this._log({ embeds, files });
 		}
 
 		// split into multiple messages
@@ -132,7 +137,7 @@ export class LogHandler {
 					embedChunk.push(embeds[total]);
 				}
 
-			returnValue.push(this.#log({ embeds: embedChunk, files }));
+			returnValue.push(this._log({ embeds: embedChunk, files }));
 		}
 
 		return Promise.all(returnValue);
@@ -142,7 +147,7 @@ export class LogHandler {
 	 * make sure all elements are instances of MessageEmbed
 	 * @param input
 	 */
-	#transformInput(input: LogInput[]) {
+	private _transformInput(input: LogInput[]) {
 		const embeds: MessageEmbed[] = [];
 		const files: MessageAttachment[] = [];
 
@@ -169,9 +174,9 @@ export class LogHandler {
 
 	/**
 	 * log to console and send in the logging channel
-	 * @param input
+	 * @param options
 	 */
-	async #log({ embeds, files }: { embeds: MessageEmbed[]; files?: MessageAttachment[] }) {
+	private async _log({ embeds, files }: LogOptions) {
 		// log to console
 		for (const embed of embeds) {
 			const fields = embed.fields.flatMap(({ name, value }) => {
@@ -195,7 +200,7 @@ export class LogHandler {
 		const { channel } = this;
 
 		// no logging channel
-		if (!channel) return this.#logToFile(embeds);
+		if (!channel) return this._logToFile(embeds);
 
 		// API call
 		try {
@@ -203,14 +208,14 @@ export class LogHandler {
 		} catch (error) {
 			logger.error(error, '[CLIENT LOG]');
 
-			return this.#logToFile(embeds);
+			return this._logToFile(embeds);
 		}
 	}
 
 	/**
 	 * create log_buffer folder if it is non-existent
 	 */
-	async #createLogBufferFolder() {
+	private async _createLogBufferFolder() {
 		try {
 			await mkdir(this.logURL);
 			logger.info("[LOG BUFFER]: created 'log_buffer' folder");
@@ -225,9 +230,9 @@ export class LogHandler {
 	 * write data in 'cwd/log_buffer'
 	 * @param embeds file content
 	 */
-	async #logToFile(embeds: MessageEmbed[]) {
+	private async _logToFile(embeds: MessageEmbed[]) {
 		try {
-			await this.#createLogBufferFolder();
+			await this._createLogBufferFolder();
 			await writeFile(
 				join(
 					fileURLToPath(this.logURL),
@@ -253,9 +258,9 @@ export class LogHandler {
 	/**
 	 * read all files from 'cwd/log_buffer' and log their parsed content in the logging channel
 	 */
-	async #postFileLogs() {
+	private async _postFileLogs() {
 		try {
-			await this.#createLogBufferFolder();
+			await this._createLogBufferFolder();
 
 			const logBufferFiles = await readdir(this.logURL);
 
@@ -265,7 +270,7 @@ export class LogHandler {
 				const FILE_PATH = join(fileURLToPath(this.logURL), file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
-				await this.#log({ embeds: FILE_CONTENT.split('\n').map((x) => new MessageEmbed(JSON.parse(x))) });
+				await this._log({ embeds: FILE_CONTENT.split('\n').map((x) => new MessageEmbed(JSON.parse(x))) });
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {

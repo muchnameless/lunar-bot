@@ -35,7 +35,7 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	async #handleCommandInteraction(interaction: CommandInteraction) {
+	private async _handleCommandInteraction(interaction: CommandInteraction) {
 		logger.info(
 			{
 				type: interaction.type,
@@ -87,7 +87,7 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	async #handleButtonInteraction(interaction: ButtonInteraction) {
+	private async _handleButtonInteraction(interaction: ButtonInteraction) {
 		logger.info(
 			{
 				type: interaction.componentType,
@@ -134,7 +134,7 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	async #handleSelectMenuInteraction(interaction: SelectMenuInteraction) {
+	private async _handleSelectMenuInteraction(interaction: SelectMenuInteraction) {
 		logger.info(
 			{
 				type: interaction.componentType,
@@ -183,7 +183,7 @@ export default class InteractionCreateEvent extends Event {
 	 * respond to autocomplete interactions
 	 * @param interaction
 	 */
-	async #handleAutocompleteInteraction(interaction: AutocompleteInteraction) {
+	private async _handleAutocompleteInteraction(interaction: AutocompleteInteraction) {
 		const { name, value } = interaction.options.getFocused(true) as { name: string; value: string };
 
 		switch (name) {
@@ -279,7 +279,7 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	async #handleContextMenuInteraction(interaction: ContextMenuInteraction) {
+	private async _handleContextMenuInteraction(interaction: ContextMenuInteraction) {
 		logger.info(
 			{
 				type: interaction.targetType,
@@ -324,22 +324,22 @@ export default class InteractionCreateEvent extends Event {
 	override async run(interaction: ChatInteraction | AutocompleteInteraction) {
 		try {
 			// autocomplete
-			if (interaction.isAutocomplete()) return await this.#handleAutocompleteInteraction(interaction);
+			if (interaction.isAutocomplete()) return await this._handleAutocompleteInteraction(interaction);
 
 			// add interaction to the WeakMap which holds InteractionData
 			InteractionUtil.add(interaction);
 
 			// commands
-			if (interaction.isCommand()) return await this.#handleCommandInteraction(interaction);
+			if (interaction.isCommand()) return await this._handleCommandInteraction(interaction);
 
 			// buttons
-			if (interaction.isButton()) return await this.#handleButtonInteraction(interaction);
+			if (interaction.isButton()) return await this._handleButtonInteraction(interaction);
 
 			// select menus
-			if (interaction.isSelectMenu()) return await this.#handleSelectMenuInteraction(interaction);
+			if (interaction.isSelectMenu()) return await this._handleSelectMenuInteraction(interaction);
 
 			// context menu
-			if (interaction.isContextMenu()) return await this.#handleContextMenuInteraction(interaction);
+			if (interaction.isContextMenu()) return await this._handleContextMenuInteraction(interaction);
 
 			throw `unknown interaction type '${interaction.type}'`;
 		} catch (error) {

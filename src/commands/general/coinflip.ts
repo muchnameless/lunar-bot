@@ -25,8 +25,7 @@ export default class CoinFlipCommand extends DualCommand {
 	/**
 	 * coinflip result
 	 */
-	// eslint-disable-next-line class-methods-use-this
-	async #generateReply() {
+	private async _generateReply() {
 		const RANDOM_NUMBER = await randomNumber(0, 1_000);
 
 		if (RANDOM_NUMBER === 0) return 'edge'; // ~ 0.1 %
@@ -39,7 +38,7 @@ export default class CoinFlipCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: CommandInteraction) {
-		return InteractionUtil.reply(interaction, await this.#generateReply());
+		return InteractionUtil.reply(interaction, await this._generateReply());
 	}
 
 	/**
@@ -47,6 +46,6 @@ export default class CoinFlipCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(await this.#generateReply());
+		return hypixelMessage.reply(await this._generateReply());
 	}
 }

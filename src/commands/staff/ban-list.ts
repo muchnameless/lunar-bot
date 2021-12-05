@@ -54,7 +54,7 @@ export default class BanListCommand extends ApplicationCommand {
 	 * @param currentPage
 	 * @param totalPages
 	 */
-	#getPaginationButtons(userId: Snowflake, currentPage: number, totalPages: number) {
+	private _getPaginationButtons(userId: Snowflake, currentPage: number, totalPages: number) {
 		const CUSTOM_ID = `${this.baseCustomId}:view:${userId}`;
 		const INVALID_PAGES = Number.isNaN(currentPage) || Number.isNaN(totalPages);
 		const DEC_DISABLED = currentPage === 1 || INVALID_PAGES;
@@ -96,7 +96,7 @@ export default class BanListCommand extends ApplicationCommand {
 	 * @param userId
 	 * @param page
 	 */
-	async #runView(interaction: CommandInteraction | ButtonInteraction, userId: Snowflake, page: number) {
+	private async _runView(interaction: CommandInteraction | ButtonInteraction, userId: Snowflake, page: number) {
 		const ELEMENTS_PER_PAGE = this.config.get('ELEMENTS_PER_PAGE');
 		const OFFSET = (page - 1) * ELEMENTS_PER_PAGE;
 		const { rows: bans, count } = await this.client.db.models.HypixelGuildBan.findAndCountAll({
@@ -139,7 +139,7 @@ export default class BanListCommand extends ApplicationCommand {
 					Page: ${page} / ${TOTAL_PAGES}
 				`),
 			],
-			components: this.#getPaginationButtons(
+			components: this._getPaginationButtons(
 				interaction.user.id,
 				count >= OFFSET ? page : TOTAL_PAGES, // reset to total pages in case of page overflow
 				TOTAL_PAGES,
@@ -157,7 +157,7 @@ export default class BanListCommand extends ApplicationCommand {
 
 		switch (SUBCOMMAND) {
 			case 'view':
-				return this.#runView(interaction, USER_ID, Number(PAGE));
+				return this._runView(interaction, USER_ID, Number(PAGE));
 
 			default:
 				throw new Error(`unknown subcommand '${SUBCOMMAND}'`);
@@ -249,7 +249,7 @@ export default class BanListCommand extends ApplicationCommand {
 			}
 
 			case 'view':
-				return this.#runView(interaction, interaction.user.id, interaction.options.getInteger('page') ?? 1);
+				return this._runView(interaction, interaction.user.id, interaction.options.getInteger('page') ?? 1);
 
 			default:
 				throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);

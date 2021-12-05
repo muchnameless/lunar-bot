@@ -126,19 +126,19 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * guild ranks sync
 	 */
-	#syncRanksPromise: Promise<this> | null = null;
+	private _syncRanksPromise: Promise<this> | null = null;
 	/**
 	 * guild data update
 	 */
-	#updateDataPromise: Promise<this> | null = null;
+	private _updateDataPromise: Promise<this> | null = null;
 	/**
 	 * guild players
 	 */
-	#players: Collection<string, Player> | null = null;
+	private _players: Collection<string, Player> | null = null;
 	/**
 	 * linked chat bridge
 	 */
-	#chatBridge: ChatBridge | null = null;
+	private _chatBridge: ChatBridge | null = null;
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(
@@ -304,18 +304,18 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	}
 
 	set players(value: Collection<string, Player> | null) {
-		this.#players = value;
+		this._players = value;
 	}
 
 	/**
 	 * returns the filtered <LunarClient>.players containing all players from this guild
 	 */
 	get players(): Collection<string, Player> {
-		return (this.#players ??= this.client.players.cache.filter(({ guildId }) => guildId === this.guildId));
+		return (this._players ??= this.client.players.cache.filter(({ guildId }) => guildId === this.guildId));
 	}
 
 	set chatBridge(value: ChatBridge | null) {
-		this.#chatBridge = value;
+		this._chatBridge = value;
 	}
 
 	/**
@@ -323,10 +323,10 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 */
 	get chatBridge(): ChatBridge<true> {
 		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
-		if (!this.#chatBridge?.minecraft.isReady()) {
-			throw `${this.name}: chat bridge not ${this.#chatBridge ? 'ready' : 'found'}`;
+		if (!this._chatBridge?.minecraft.isReady()) {
+			throw `${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`;
 		}
-		return this.#chatBridge;
+		return this._chatBridge;
 	}
 
 	/**
@@ -413,19 +413,19 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * @param options
 	 */
 	async updateData(options?: UpdateOptions) {
-		if (this.#updateDataPromise) return this.#updateDataPromise;
+		if (this._updateDataPromise) return this._updateDataPromise;
 
 		try {
-			return await (this.#updateDataPromise = this.#updateData(options));
+			return await (this._updateDataPromise = this._updateData(options));
 		} finally {
-			this.#updateDataPromise = null;
+			this._updateDataPromise = null;
 		}
 	}
 	/**
 	 * should only ever be called from within updateData()
 	 * @internal
 	 */
-	async #updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
+	private async _updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
 		try {
 			const {
 				meta: { cached },
@@ -799,19 +799,19 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	async syncRanks() {
 		if (!this.client.config.get('AUTO_GUILD_RANKS') || !this.syncRanksEnabled) return this;
 
-		if (this.#syncRanksPromise) return this.#syncRanksPromise;
+		if (this._syncRanksPromise) return this._syncRanksPromise;
 
 		try {
-			return await (this.#syncRanksPromise = this.#syncRanks());
+			return await (this._syncRanksPromise = this._syncRanks());
 		} finally {
-			this.#syncRanksPromise = null;
+			this._syncRanksPromise = null;
 		}
 	}
 	/**
 	 * should only ever be called from within syncRanks()
 	 * @internal
 	 */
-	async #syncRanks() {
+	private async _syncRanks() {
 		try {
 			const nonStaffWithWeight: PlayerWithWeight[] = [];
 

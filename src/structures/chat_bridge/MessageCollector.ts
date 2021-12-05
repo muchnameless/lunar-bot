@@ -267,11 +267,11 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 	/**
 	 * Timeout for cleanup
 	 */
-	#timeout: Timeout | null = null;
+	private _timeout: Timeout | null = null;
 	/**
 	 * Timeout for cleanup due to inactivity
 	 */
-	#idletimeout: Timeout | null = null;
+	private _idletimeout: Timeout | null = null;
 
 	constructor(chatBridge: ChatBridge, options: MessageCollectorOptions = {}) {
 		super();
@@ -285,17 +285,17 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 		}
 
 		this.chatBridge.incrementMaxListeners();
-		this.chatBridge.on(ChatBridgeEvents.MESSAGE, this.#handleCollect);
-		this.chatBridge.once(ChatBridgeEvents.DISCONNECT, this.#handleBotDisconnection);
+		this.chatBridge.on(ChatBridgeEvents.MESSAGE, this._handleCollect);
+		this.chatBridge.once(ChatBridgeEvents.DISCONNECT, this._handleBotDisconnection);
 
 		this.once(MessageCollectorEvents.END, () => {
-			this.chatBridge.removeListener(ChatBridgeEvents.MESSAGE, this.#handleCollect);
-			this.chatBridge.removeListener(ChatBridgeEvents.DISCONNECT, this.#handleBotDisconnection);
+			this.chatBridge.removeListener(ChatBridgeEvents.MESSAGE, this._handleCollect);
+			this.chatBridge.removeListener(ChatBridgeEvents.DISCONNECT, this._handleBotDisconnection);
 			this.chatBridge.decrementMaxListeners();
 		});
 
-		if (options.time) this.#timeout = setTimeout(() => this.stop('time'), options.time);
-		if (options.idle) this.#idletimeout = setTimeout(() => this.stop('idle'), options.idle);
+		if (options.time) this._timeout = setTimeout(() => this.stop('time'), options.time);
+		if (options.idle) this._idletimeout = setTimeout(() => this.stop('idle'), options.idle);
 	}
 
 	/**
@@ -341,13 +341,13 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 	/**
 	 * handles stopping the collector when the bot got disconnected
 	 */
-	#handleBotDisconnection = () => this.stop('disconnect');
+	private _handleBotDisconnection = () => this.stop('disconnect');
 
 	/**
 	 * Call this to handle an event as a collectable element
 	 * @param hypixelMessage
 	 */
-	#handleCollect = async (hypixelMessage: HypixelMessage) => {
+	private _handleCollect = async (hypixelMessage: HypixelMessage) => {
 		++this.received;
 
 		// eslint-disable-next-line unicorn/no-array-method-this-argument
@@ -359,9 +359,9 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 			 */
 			this.emit(MessageCollectorEvents.COLLECT, hypixelMessage);
 
-			if (this.#idletimeout) {
-				clearTimeout(this.#idletimeout);
-				this.#idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
+			if (this._idletimeout) {
+				clearTimeout(this._idletimeout);
+				this._idletimeout = setTimeout(() => this.stop('idle'), this.options.idle);
 			}
 		}
 
@@ -375,13 +375,13 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 	stop(reason = 'user') {
 		if (this.ended) return;
 
-		if (this.#timeout) {
-			clearTimeout(this.#timeout);
-			this.#timeout = null;
+		if (this._timeout) {
+			clearTimeout(this._timeout);
+			this._timeout = null;
 		}
-		if (this.#idletimeout) {
-			clearTimeout(this.#idletimeout);
-			this.#idletimeout = null;
+		if (this._idletimeout) {
+			clearTimeout(this._idletimeout);
+			this._idletimeout = null;
 		}
 
 		this.ended = true;
@@ -401,13 +401,13 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 	 * @param options.idle How long to stop the collector after inactivity in milliseconds
 	 */
 	resetTimer({ time, idle }: { time?: number; idle?: number } = {}) {
-		if (this.#timeout) {
-			clearTimeout(this.#timeout);
-			this.#timeout = setTimeout(() => this.stop('time'), time ?? this.options.time);
+		if (this._timeout) {
+			clearTimeout(this._timeout);
+			this._timeout = setTimeout(() => this.stop('time'), time ?? this.options.time);
 		}
-		if (this.#idletimeout) {
-			clearTimeout(this.#idletimeout);
-			this.#idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle);
+		if (this._idletimeout) {
+			clearTimeout(this._idletimeout);
+			this._idletimeout = setTimeout(() => this.stop('idle'), idle ?? this.options.idle);
 		}
 	}
 

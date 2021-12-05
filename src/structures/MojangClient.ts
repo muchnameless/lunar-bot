@@ -171,9 +171,10 @@ export class MojangClient {
 			}
 		}
 
-		const res = await this.#request(`${path}${query}`);
+		const res = await this._request(`${path}${query}`);
 
 		switch (res.status) {
+			// success
 			case 200: {
 				const { id: uuid, name: ign } = (await res.json()) as { id: string; name: string };
 				const response = { uuid, ign };
@@ -189,16 +190,18 @@ export class MojangClient {
 			/**
 			 * mojang api currently ignores ?at= [https://bugs.mojang.com/browse/WEB-3367]
 			 */
-			// case 204: { // invalid ign
-			// 	if (queryType === 'ign') { // retry a past date if name was queried
+			// invalid ign
+			// case 204: {
+			// 	if (queryType === 'ign') {
+			// 		// retry a past date if name was queried
 			// 		let timestamp = Date.now();
 
 			// 		// igns can be changed every 30 days since 2015-02-04T00:00:00.000Z
-			// 		while (((timestamp -= days(30)) >= Date.parse('2015-02-04T00:00:00.000Z'))) {
-			// 			const pastRes = await this.#request(`${path}${query}?at=${timestamp}`);
+			// 		while ((timestamp -= days(30)) >= Date.parse('2015-02-04T00:00:00.000Z')) {
+			// 			const pastRes = await this._request(`${path}${query}?at=${timestamp}`);
 
 			// 			if (pastRes.status === 200) {
-			// 				const { id: uuid, name: ign } = await res.json() as { id: string, name: string };
+			// 				const { id: uuid, name: ign } = (await res.json()) as { id: string; name: string };
 			// 				const response = { uuid, ign };
 
 			// 				if (cache) {
@@ -227,7 +230,7 @@ export class MojangClient {
 	 * @param url
 	 * @param retries
 	 */
-	async #request(url: string, retries = 0): Promise<Response> {
+	private async _request(url: string, retries = 0): Promise<Response> {
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), this.timeout);
 
@@ -238,7 +241,7 @@ export class MojangClient {
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
-				return this.#request(url, retries + 1);
+				return this._request(url, retries + 1);
 			}
 
 			throw error;

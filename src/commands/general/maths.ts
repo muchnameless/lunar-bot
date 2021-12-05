@@ -403,7 +403,7 @@ export default class MathsCommand extends DualCommand {
 	 * execute the command
 	 * @param rawInput
 	 */
-	#generateReply(rawInput: string) {
+	private _generateReply(rawInput: string) {
 		try {
 			const { input, formattedOutput } = this.calculate(rawInput);
 
@@ -418,7 +418,7 @@ export default class MathsCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override runSlash(interaction: CommandInteraction) {
-		return InteractionUtil.reply(interaction, this.#generateReply(interaction.options.getString('input', true)));
+		return InteractionUtil.reply(interaction, this._generateReply(interaction.options.getString('input', true)));
 	}
 
 	/**
@@ -426,6 +426,6 @@ export default class MathsCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override runMinecraft(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(this.#generateReply(hypixelMessage.commandData.args.join('')));
+		return hypixelMessage.reply(this._generateReply(hypixelMessage.commandData.args.join('')));
 	}
 }

@@ -9,7 +9,7 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	/**
 	 * hypixel guild db data update
 	 */
-	#updateDataPromise: Promise<this> | null = null;
+	private _updateDataPromise: Promise<this> | null = null;
 
 	/**
 	 * `NameOne`|`NameTwo`|`NameThree`
@@ -53,19 +53,19 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 * @param options
 	 */
 	async updateData({ syncRanks = true, rejectOnAPIError = true }: UpdateOptions = {}) {
-		if (this.#updateDataPromise) return this.#updateDataPromise;
+		if (this._updateDataPromise) return this._updateDataPromise;
 
 		try {
-			return await (this.#updateDataPromise = this.#updateData({ syncRanks, rejectOnAPIError }));
+			return await (this._updateDataPromise = this._updateData({ syncRanks, rejectOnAPIError }));
 		} finally {
-			this.#updateDataPromise = null;
+			this._updateDataPromise = null;
 		}
 	}
 	/**
 	 * should only ever be called from within updateData()
 	 * @internal
 	 */
-	async #updateData(options: UpdateOptions) {
+	private async _updateData(options: UpdateOptions) {
 		try {
 			if (this.client.config.get('HYPIXEL_API_ERROR')) {
 				logger.warn('[GUILDS UPDATE]: auto updates disabled');

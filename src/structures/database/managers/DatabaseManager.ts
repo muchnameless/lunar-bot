@@ -61,7 +61,7 @@ export class DatabaseManager {
 	/**
 	 * db data update
 	 */
-	#updateDataPromise: Promise<this> | null = null;
+	private _updateDataPromise: Promise<this> | null = null;
 
 	constructor(client: LunarClient, db: typeof DbType) {
 		this.client = client;
@@ -150,7 +150,7 @@ export class DatabaseManager {
 	 * false if the auctionId is already in the transactions db, true if not
 	 * @param auctionId
 	 */
-	async #validateAuctionId(auctionId: string) {
+	private async _validateAuctionId(auctionId: string) {
 		return (
 			(await this.models.Transaction.findOne({
 				where: { auctionId },
@@ -163,7 +163,7 @@ export class DatabaseManager {
 	/**
 	 * updates the tax database, returns availableAuctions per taxCollector
 	 */
-	async #updateTaxDatabase() {
+	private async _updateTaxDatabase() {
 		const { config, players, taxCollectors } = this.modelManagers;
 		const TAX_AUCTIONS_START_TIME = config.get('TAX_AUCTIONS_START_TIME');
 		const TAX_AMOUNT = config.get('TAX_AMOUNT');
@@ -211,7 +211,7 @@ export class DatabaseManager {
 					(auc) =>
 						TAX_AUCTIONS_ITEMS.includes(auc.item_name) &&
 						auc.start >= TAX_AUCTIONS_START_TIME &&
-						this.#validateAuctionId(auc.uuid),
+						this._validateAuctionId(auc.uuid),
 				)) as Components.Schemas.SkyBlockAuction[]) {
 					if (auction.highest_bid_amount >= TAX_AMOUNT) {
 						if (auction.bids.length) taxAuctions.push(auction); // player bid on the auction
@@ -299,7 +299,7 @@ export class DatabaseManager {
 	 * tax embed description
 	 * @param availableAuctionsLog
 	 */
-	#createTaxEmbedDescription(availableAuctionsLog: string[] | null = null) {
+	private _createTaxEmbedDescription(availableAuctionsLog: string[] | null = null) {
 		const { config, players, taxCollectors } = this.modelManagers;
 		const playersInGuild = players.inGuild;
 		const PLAYER_COUNT = playersInGuild.size;
@@ -326,7 +326,7 @@ export class DatabaseManager {
 	/**
 	 * tax embed fields
 	 */
-	#createTaxEmbedFields() {
+	private _createTaxEmbedFields() {
 		const { config, hypixelGuilds } = this.modelManagers;
 		const fields: EmbedFieldData[] = [];
 
@@ -378,8 +378,8 @@ export class DatabaseManager {
 	 * @param fields
 	 */
 	createTaxEmbed(
-		description: string = this.#createTaxEmbedDescription(),
-		fields: EmbedFieldData[] = this.#createTaxEmbedFields(),
+		description: string = this._createTaxEmbedDescription(),
+		fields: EmbedFieldData[] = this._createTaxEmbedFields(),
 	) {
 		return this.client.defaultEmbed
 			.setTitle('Guild Tax')
@@ -392,19 +392,19 @@ export class DatabaseManager {
 	 * updates the player database and the corresponding tax message
 	 */
 	async updateData() {
-		if (this.#updateDataPromise) return this.#updateDataPromise;
+		if (this._updateDataPromise) return this._updateDataPromise;
 
 		try {
-			return await (this.#updateDataPromise = this.#updateData());
+			return await (this._updateDataPromise = this._updateData());
 		} finally {
-			this.#updateDataPromise = null;
+			this._updateDataPromise = null;
 		}
 	}
 	/**
 	 * should only ever be called from within updateData()
 	 * @internal
 	 */
-	async #updateData() {
+	private async _updateData() {
 		try {
 			const { config, players, hypixelGuilds } = this.modelManagers;
 
@@ -429,7 +429,7 @@ export class DatabaseManager {
 			await hypixelGuilds.updateData();
 
 			// update tax db
-			const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED') ? await this.#updateTaxDatabase() : null;
+			const availableAuctionsLog = config.get('TAX_TRACKING_ENABLED') ? await this._updateTaxDatabase() : null;
 
 			// update Xp
 			if (config.get('XP_TRACKING_ENABLED')) players.updateXp();
@@ -466,7 +466,7 @@ export class DatabaseManager {
 			if (!taxMessage?.editable || taxMessage.deleted) {
 				// taxMessage deleted -> send a new one
 				const { id } = await taxChannel.send({
-					embeds: [this.createTaxEmbed(this.#createTaxEmbedDescription(availableAuctionsLog))],
+					embeds: [this.createTaxEmbed(this._createTaxEmbedDescription(availableAuctionsLog))],
 				});
 
 				config.set('TAX_MESSAGE_ID', id);
@@ -474,8 +474,8 @@ export class DatabaseManager {
 				return this;
 			}
 
-			const DESCRIPTION = this.#createTaxEmbedDescription(availableAuctionsLog);
-			const fields = this.#createTaxEmbedFields();
+			const DESCRIPTION = this._createTaxEmbedDescription(availableAuctionsLog);
+			const fields = this._createTaxEmbedFields();
 
 			if (
 				taxMessage.embeds[0]?.description === DESCRIPTION &&

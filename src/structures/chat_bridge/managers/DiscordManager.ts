@@ -71,7 +71,7 @@ export class DiscordManager {
 	 * @param fullMatch
 	 * @param inColon
 	 */
-	#findEmojiByName(fullMatch: string, inColon: string) {
+	private _findEmojiByName(fullMatch: string, inColon: string) {
 		const emoji =
 			EMOJI_NAME_TO_UNICODE[fullMatch.replaceAll('_', '').toLowerCase() as keyof typeof EMOJI_NAME_TO_UNICODE];
 
@@ -144,12 +144,12 @@ export class DiscordManager {
 					.replace(
 						// emojis (custom and default)
 						/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
-						(match, p1: string) => this.#findEmojiByName(match, p1),
+						(match, p1: string) => this._findEmojiByName(match, p1),
 					)
 					.replace(
 						// emojis (custom and default)
 						/(?<!<a?):(\S+?):(?!\d{17,19}>)/g,
-						(match, p1: string) => this.#findEmojiByName(match, p1),
+						(match, p1: string) => this._findEmojiByName(match, p1),
 					)
 					.replace(
 						// channels

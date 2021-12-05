@@ -29,15 +29,15 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * player db xp update
 	 */
-	#updateXpPromise: Promise<this> | null = null;
+	private _updateXpPromise: Promise<this> | null = null;
 	/**
 	 * player db ign update
 	 */
-	#updateIgnPromise: Promise<this> | null = null;
+	private _updateIgnPromise: Promise<this> | null = null;
 	/**
 	 * player db main SkyBlock profile update
 	 */
-	#updateMainProfilesPromise: Promise<this> | null = null;
+	private _updateMainProfilesPromise: Promise<this> | null = null;
 
 	/**
 	 * get players from all guilds (no bridgers or errors)
@@ -169,7 +169,7 @@ export class PlayerManager extends ModelManager<Player> {
 	getByIgn(ign: string) {
 		if (!ign) return null;
 
-		const { similarity, value } = this.#autocorrectToPlayer(ign);
+		const { similarity, value } = autocorrect(ign, this.cache, 'ign');
 
 		return similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD') ? value : null;
 	}
@@ -180,14 +180,6 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	findByIgn(ignInput: string) {
 		return this.cache.find(({ ign }) => ign === ignInput) ?? null;
-	}
-
-	/**
-	 * autocorrects the input to a player ign
-	 * @param input
-	 */
-	#autocorrectToPlayer(input: string) {
-		return autocorrect(input, this.cache, 'ign');
 	}
 
 	/**
@@ -222,19 +214,19 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @param options
 	 */
 	async updateXp(options?: PlayerUpdateOptions) {
-		if (this.#updateXpPromise) return this.#updateXpPromise;
+		if (this._updateXpPromise) return this._updateXpPromise;
 
 		try {
-			return await (this.#updateXpPromise = this.#updateXp(options));
+			return await (this._updateXpPromise = this._updateXp(options));
 		} finally {
-			this.#updateXpPromise = null;
+			this._updateXpPromise = null;
 		}
 	}
 	/**
 	 * should only ever be called from within updateXp()
 	 * @internal
 	 */
-	async #updateXp(options?: PlayerUpdateOptions) {
+	private async _updateXp(options?: PlayerUpdateOptions) {
 		try {
 			// the hypxiel api encountered an error before
 			if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
@@ -266,19 +258,19 @@ export class PlayerManager extends ModelManager<Player> {
 	 * updates all IGNs and logs changes via the log handler
 	 */
 	async updateIgns() {
-		if (this.#updateIgnPromise) return this.#updateIgnPromise;
+		if (this._updateIgnPromise) return this._updateIgnPromise;
 
 		try {
-			return await (this.#updateIgnPromise = this.#updateIgns());
+			return await (this._updateIgnPromise = this._updateIgns());
 		} finally {
-			this.#updateIgnPromise = null;
+			this._updateIgnPromise = null;
 		}
 	}
 	/**
 	 * should only ever be called from within updateIgns()
 	 * @internal
 	 */
-	async #updateIgns() {
+	private async _updateIgns() {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('MOJANG_API_ERROR')) {
 			// reset error every full hour
@@ -380,19 +372,19 @@ export class PlayerManager extends ModelManager<Player> {
 	 * checks all players if their current main profile is still valid
 	 */
 	async updateMainProfiles() {
-		if (this.#updateMainProfilesPromise) return this.#updateMainProfilesPromise;
+		if (this._updateMainProfilesPromise) return this._updateMainProfilesPromise;
 
 		try {
-			return await (this.#updateMainProfilesPromise = this.#updateMainProfiles());
+			return await (this._updateMainProfilesPromise = this._updateMainProfiles());
 		} finally {
-			this.#updateMainProfilesPromise = null;
+			this._updateMainProfilesPromise = null;
 		}
 	}
 	/**
 	 * should only ever be called from within updateMainProfiles()
 	 * @internal
 	 */
-	async #updateMainProfiles() {
+	private async _updateMainProfiles() {
 		// the hypxiel api encountered an error before
 		if (this.client.config.get('HYPIXEL_SKYBLOCK_API_ERROR')) {
 			// reset error every full hour
@@ -527,12 +519,12 @@ export class PlayerManager extends ModelManager<Player> {
 					`${this.constructor.name}:competitionStart`,
 					new CronJob({
 						cronTime: new Date(config.get('COMPETITION_START_TIME')),
-						onTick: () => this.#startCompetition(),
+						onTick: () => this._startCompetition(),
 						start: true,
 					}),
 				);
 			} else if (!config.get('COMPETITION_RUNNING')) {
-				this.#startCompetition();
+				this._startCompetition();
 			}
 		}
 
@@ -542,12 +534,12 @@ export class PlayerManager extends ModelManager<Player> {
 				`${this.constructor.name}:competitionEnd`,
 				new CronJob({
 					cronTime: new Date(config.get('COMPETITION_END_TIME')),
-					onTick: () => this.#endCompetition(),
+					onTick: () => this._endCompetition(),
 					start: true,
 				}),
 			);
 		} else if (config.get('COMPETITION_RUNNING')) {
-			this.#endCompetition();
+			this._endCompetition();
 		}
 
 		// mayor change reset
@@ -558,18 +550,18 @@ export class PlayerManager extends ModelManager<Player> {
 				`${this.constructor.name}:mayorXpReset`,
 				new CronJob({
 					cronTime: new Date(NEXT_MAYOR_TIME),
-					onTick: () => this.#performMayorXpReset(),
+					onTick: () => this._performMayorXpReset(),
 					start: true,
 				}),
 			);
 		} else {
-			this.#performMayorXpReset();
+			this._performMayorXpReset();
 		}
 
 		const now = new Date();
 
 		// daily reset
-		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this.#performDailyXpReset();
+		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this._performDailyXpReset();
 
 		// each day at 00:00:00
 		this.client.cronJobs.schedule(
@@ -577,14 +569,14 @@ export class PlayerManager extends ModelManager<Player> {
 			new CronJob({
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
-				onTick: () => this.#performDailyXpReset(),
+				onTick: () => this._performDailyXpReset(),
 				start: true,
 			}),
 		);
 
 		// weekly reset
 		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) {
-			this.#performWeeklyXpReset();
+			this._performWeeklyXpReset();
 		}
 
 		// each monday at 00:00:00
@@ -593,14 +585,14 @@ export class PlayerManager extends ModelManager<Player> {
 			new CronJob({
 				cronTime: '0 0 0 * * MON',
 				timeZone: 'GMT',
-				onTick: () => this.#performWeeklyXpReset(),
+				onTick: () => this._performWeeklyXpReset(),
 				start: true,
 			}),
 		);
 
 		// monthly reset
 		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) {
-			this.#performMonthlyXpReset();
+			this._performMonthlyXpReset();
 		}
 
 		// the first of each month at 00:00:00
@@ -609,7 +601,7 @@ export class PlayerManager extends ModelManager<Player> {
 			new CronJob({
 				cronTime: '0 0 0 1 * *',
 				timeZone: 'GMT',
-				onTick: () => this.#performMonthlyXpReset(),
+				onTick: () => this._performMonthlyXpReset(),
 				start: true,
 			}),
 		);
@@ -620,7 +612,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * resets competitionStart xp, updates the config and logs the event
 	 */
-	async #startCompetition() {
+	private async _startCompetition() {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
 			this.client.config.set('COMPETITION_RUNNING', true),
@@ -635,7 +627,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * resets competitionEnd xp, updates the config and logs the event
 	 */
-	async #endCompetition() {
+	private async _endCompetition() {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
 			this.client.config.set('COMPETITION_RUNNING', false),
@@ -649,7 +641,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * resets offsetMayor xp, updates the config and logs the event
 	 */
-	async #performMayorXpReset() {
+	private async _performMayorXpReset() {
 		// if the bot skipped a mayor change readd the interval time
 		let currentMayorTime = this.client.config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
 		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
@@ -669,7 +661,7 @@ export class PlayerManager extends ModelManager<Player> {
 			`${this.constructor.name}:mayorXpReset`,
 			new CronJob({
 				cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
-				onTick: () => this.#performMayorXpReset(),
+				onTick: () => this._performMayorXpReset(),
 				start: true,
 			}),
 		);
@@ -680,7 +672,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * shifts the daily xp array, updates the config and logs the event
 	 */
-	async #performDailyXpReset() {
+	private async _performDailyXpReset() {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY }),
 			this.client.config.set('LAST_DAILY_XP_RESET_TIME', Date.now()),
@@ -698,7 +690,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * resets offsetWeek xp, updates the config and logs the event
 	 */
-	async #performWeeklyXpReset() {
+	private async _performWeeklyXpReset() {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
 			this.client.config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now()),
@@ -716,7 +708,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * resets offsetMonth xp, updates the config and logs the event
 	 */
-	async #performMonthlyXpReset() {
+	private async _performMonthlyXpReset() {
 		await Promise.all([
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
 			this.client.config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now()),

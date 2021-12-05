@@ -32,7 +32,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	 * parse server message content
 	 * @param hypixelMessage
 	 */
-	async #handleServerMessage(hypixelMessage: HypixelMessage) {
+	private async _handleServerMessage(hypixelMessage: HypixelMessage) {
 		/**
 		 * You cannot say the same message twice!
 		 * You can only send a message once every half second!
@@ -369,7 +369,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 	 * update player activity, execute triggers / command
 	 * @param hypixelMessage
 	 */
-	async #handleUserMessage(hypixelMessage: HypixelUserMessage) {
+	private async _handleUserMessage(hypixelMessage: HypixelUserMessage) {
 		const { player } = hypixelMessage;
 
 		// player activity
@@ -554,7 +554,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (!hypixelMessage.rawContent.length) return;
 
 		if (!hypixelMessage.isUserMessage()) {
-			if (!hypixelMessage.me) return this.#handleServerMessage(hypixelMessage);
+			if (!hypixelMessage.me) return this._handleServerMessage(hypixelMessage);
 			return;
 		}
 
@@ -565,7 +565,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 				hypixelMessage.forwardToDiscord();
 
-				return this.#handleUserMessage(hypixelMessage);
+				return this._handleUserMessage(hypixelMessage);
 			}
 
 			case MESSAGE_TYPES.PARTY:
@@ -577,7 +577,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					return logger.info(`[MESSAGE]: ignored message from '${hypixelMessage.author}': ${hypixelMessage.content}`);
 				}
 
-				return this.#handleUserMessage(hypixelMessage);
+				return this._handleUserMessage(hypixelMessage);
 			}
 
 			default: {

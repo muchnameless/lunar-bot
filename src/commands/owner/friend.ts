@@ -29,7 +29,7 @@ export default class FriendCommand extends ApplicationCommand {
 	 * @param currentPage
 	 * @param totalPages
 	 */
-	#getPaginationButtons(hypixelGuildId: string, currentPage: number, totalPages: number) {
+	private _getPaginationButtons(hypixelGuildId: string, currentPage: number, totalPages: number) {
 		const CUSTOM_ID = `${this.baseCustomId}:list:${hypixelGuildId}`;
 		const INVALID_PAGES = Number.isNaN(currentPage) || Number.isNaN(totalPages);
 		const DEC_DISABLED = currentPage === 1 || INVALID_PAGES;
@@ -71,7 +71,7 @@ export default class FriendCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param page
 	 */
-	async #runPaginated(
+	private async _runPaginated(
 		interaction: CommandInteraction | ButtonInteraction,
 		hypixelGuild: HypixelGuild,
 		page: number | null,
@@ -84,7 +84,7 @@ export default class FriendCommand extends ApplicationCommand {
 			InteractionUtil[interaction.isApplicationCommand() ? 'reply' : 'update'] as typeof InteractionUtil['reply']
 		)(interaction as ButtonInteraction, {
 			embeds: [this.client.defaultEmbed.setTitle(`/${command}`).setDescription(Formatters.codeBlock(response))],
-			components: this.#getPaginationButtons(
+			components: this._getPaginationButtons(
 				hypixelGuild.guildId,
 				Number(pageMatched?.groups!.current),
 				Number(pageMatched?.groups!.total),
@@ -102,7 +102,7 @@ export default class FriendCommand extends ApplicationCommand {
 
 		switch (SUBCOMMAND) {
 			case 'list':
-				return this.#runPaginated(
+				return this._runPaginated(
 					interaction,
 					this.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID) ??
 						(() => {
@@ -123,7 +123,7 @@ export default class FriendCommand extends ApplicationCommand {
 	override runSlash(interaction: CommandInteraction) {
 		switch (interaction.options.getSubcommand()) {
 			case 'list':
-				return this.#runPaginated(
+				return this._runPaginated(
 					interaction,
 					InteractionUtil.getHypixelGuild(interaction),
 					interaction.options.getInteger('page'),

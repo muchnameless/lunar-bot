@@ -38,7 +38,7 @@ export default class UnloadCommand extends DualCommand {
 	 * @param subcommand
 	 * @param input
 	 */
-	#run(subcommand: string, input: string) {
+	private _run(subcommand: string, input: string) {
 		switch (subcommand) {
 			case 'command': {
 				const command = this.collection.getByName(input);
@@ -70,7 +70,7 @@ export default class UnloadCommand extends DualCommand {
 	override runSlash(interaction: CommandInteraction) {
 		return InteractionUtil.reply(
 			interaction,
-			this.#run(interaction.options.getSubcommand(), interaction.options.getString('name', true)),
+			this._run(interaction.options.getSubcommand(), interaction.options.getString('name', true)),
 		);
 	}
 
@@ -80,7 +80,7 @@ export default class UnloadCommand extends DualCommand {
 	 */
 	override runMinecraft(hypixelMessage: HypixelUserMessage) {
 		return hypixelMessage.reply(
-			this.#run(...(hypixelMessage.commandData.args.map((arg) => arg.toLowerCase()) as [string, string])),
+			this._run(...(hypixelMessage.commandData.args.map((arg) => arg.toLowerCase()) as [string, string])),
 		);
 	}
 }

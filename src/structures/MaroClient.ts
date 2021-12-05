@@ -124,7 +124,7 @@ export class MaroClient {
 	cache?: Cache;
 	timeout: number;
 	retries: number;
-	#baseURL = 'https://nariah-dev.com/api/';
+	baseURL = 'https://nariah-dev.com/api/';
 	networth = new Networth(this);
 	fetchPlayerData: FetchPlayerData;
 
@@ -173,7 +173,7 @@ export class MaroClient {
 			}
 		}
 
-		const res = await this.#request(endpoint, requestOptions);
+		const res = await this._request(endpoint, requestOptions);
 
 		switch (res.status) {
 			case 200: {
@@ -219,19 +219,19 @@ export class MaroClient {
 	 * @param options
 	 * @param retries current retry
 	 */
-	async #request(endpoint: string, options: RequestInit, retries = 0): Promise<Response> {
+	private async _request(endpoint: string, options: RequestInit, retries = 0): Promise<Response> {
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), this.timeout);
 
 		try {
-			return await fetch(`${this.#baseURL}${endpoint}`, {
+			return await fetch(`${this.baseURL}${endpoint}`, {
 				signal: controller.signal,
 				...options,
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
-				return this.#request(endpoint, options, retries + 1);
+				return this._request(endpoint, options, retries + 1);
 			}
 
 			throw error;

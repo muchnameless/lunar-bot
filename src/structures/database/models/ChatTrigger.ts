@@ -67,7 +67,7 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 	/**
 	 * @param hypixelMessage
 	 */
-	#getRegExp(hypixelMessage: HypixelUserMessage) {
+	private _getRegExp(hypixelMessage: HypixelUserMessage) {
 		if (this._regExp) return this._regExp;
 
 		return new RegExp(
@@ -85,7 +85,7 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 	testMessage(hypixelMessage: HypixelUserMessage) {
 		if (!this.chatTypes.includes(hypixelMessage.type)) return;
 
-		const matched = this.#getRegExp(hypixelMessage).exec(hypixelMessage.content);
+		const matched = this._getRegExp(hypixelMessage).exec(hypixelMessage.content);
 
 		if (!matched) return;
 

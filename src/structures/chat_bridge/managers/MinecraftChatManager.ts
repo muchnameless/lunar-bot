@@ -83,45 +83,45 @@ const enum ForwardRejectionReason {
 
 export class MinecraftChatManager<loggedIn extends boolean = boolean> extends ChatManager {
 	/**
-	 * resolves this.#promise
+	 * resolves this._promise
 	 */
-	#resolve!: (value: FilterPromise) => void;
+	private _resolve!: (value: FilterPromise) => void;
 	/**
 	 * filter promise
 	 */
-	#promise: Promise<FilterPromise> = new Promise((res) => (this.#resolve = res));
+	private _promise: Promise<FilterPromise> = new Promise((res) => (this._resolve = res));
 	/**
 	 * bot player db object
 	 */
-	#botPlayer: Player | null = null;
+	private _botPlayer: Player | null = null;
 	/**
 	 * filter for the message listener
 	 */
-	#contentFilter: string | null = null;
+	private _contentFilter: string | null = null;
 	/**
 	 * wether the message sent collector is active
 	 */
-	#collecting = false;
+	private _collecting = false;
 	/**
 	 * chatBridge mc bot reconnecting (prevents executing multiple reconnections)
 	 */
-	#reconnectPromise: Promise<this> | null = null;
+	private _reconnectPromise: Promise<this> | null = null;
 	/**
 	 * scheduled reconnection
 	 */
-	#reconnectTimeout: Timeout | null = null;
+	private _reconnectTimeout: Timeout | null = null;
 	/**
 	 * current retry when resending messages
 	 */
-	#retries = 0;
+	private _retries = 0;
 	/**
 	 * how many messages have been sent to in game chat in the last 10 seconds
 	 */
-	#messageCounter = 0;
+	private _messageCounter = 0;
 	/**
 	 * async queue for minecraft commands, prevents multiple response collectors
 	 */
-	#commandQueue = new AsyncQueue();
+	private commandQueue = new AsyncQueue();
 	/**
 	 * wether the minecraft bot is logged in and ready to receive and send chat messages
 	 */
@@ -212,11 +212,11 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * bot player db object
 	 */
 	get botPlayer() {
-		return (this.#botPlayer ??= this.client.players.cache.get(this.botUuid!) ?? null);
+		return (this._botPlayer ??= this.client.players.cache.get(this.botUuid!) ?? null);
 	}
 
 	set botPlayer(value) {
-		this.#botPlayer = value;
+		this._botPlayer = value;
 	}
 
 	/**
@@ -297,7 +297,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param reason
 	 * @param data
 	 */
-	async #handleForwardRejection(
+	private async _handleForwardRejection(
 		discordMessage: Message | null,
 		reason: ForwardRejectionReason,
 		data?: Record<string, unknown>,
@@ -405,13 +405,13 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * increasing delay
 	 */
 	get delay() {
-		return MinecraftChatManager.delays[this.#tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
+		return MinecraftChatManager.delays[this._tempIncrementCounter()] ?? MinecraftChatManager.SAFE_DELAY;
 	}
 
 	/**
 	 * create bot instance, loads and binds it's events and logs it into hypixel
 	 */
-	async #createBot(): Promise<MinecraftBot> {
+	private async _createBot(): Promise<MinecraftBot> {
 		++this.loginAttempts;
 
 		return ((this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
@@ -437,7 +437,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			return this;
 		}
 
-		await this.#createBot();
+		await this._createBot();
 
 		// reconnect the bot if it hasn't successfully spawned in 60 seconds
 		if (!this.isReady()) {
@@ -455,19 +455,19 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param loginDelay delay in ms
 	 */
 	async reconnect(loginDelay = Math.min(seconds(Math.exp(this.loginAttempts)), minutes(10))) {
-		if (this.#reconnectPromise) return this.#reconnectPromise;
+		if (this._reconnectPromise) return this._reconnectPromise;
 
 		try {
-			return await (this.#reconnectPromise = this.#reconnect(loginDelay));
+			return await (this._reconnectPromise = this._reconnect(loginDelay));
 		} finally {
-			this.#reconnectPromise = null;
+			this._reconnectPromise = null;
 		}
 	}
 	/**
 	 * should only ever be called from within reconnect()
 	 * @internal
 	 */
-	async #reconnect(loginDelay: number) {
+	private async _reconnect(loginDelay: number) {
 		this.disconnect();
 
 		logger.warn(`[CHATBRIDGE RECONNECT]: attempting reconnect in ${ms(loginDelay, { long: true })}`);
@@ -482,8 +482,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * disconnects the bot
 	 */
 	disconnect() {
-		clearTimeout(this.#reconnectTimeout!);
-		this.#reconnectTimeout = null;
+		clearTimeout(this._reconnectTimeout!);
+		this._reconnectTimeout = null;
 
 		clearTimeout(this.abortLoginTimeout!);
 		this.abortLoginTimeout = null;
@@ -504,24 +504,24 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * @param value
 	 */
-	#resolveAndReset(value: FilterPromise) {
-		this.#resolve(value);
-		this.#resetFilter();
-		this.#promise = new Promise((res) => (this.#resolve = res));
+	private _resolveAndReset(value: FilterPromise) {
+		this._resolve(value);
+		this._resetFilter();
+		this._promise = new Promise((res) => (this._resolve = res));
 	}
 
 	/**
 	 * @param hypixelMessage
 	 */
 	collect(hypixelMessage: HypixelMessage) {
-		if (!this.#collecting) return;
-		if (hypixelMessage.me && hypixelMessage.content.includes(this.#contentFilter!)) {
-			return this.#resolveAndReset(hypixelMessage);
+		if (!this._collecting) return;
+		if (hypixelMessage.me && hypixelMessage.content.includes(this._contentFilter!)) {
+			return this._resolveAndReset(hypixelMessage);
 		}
 		if (hypixelMessage.type) return;
-		if (hypixelMessage.spam) return this.#resolveAndReset(ChatResponse.SPAM);
+		if (hypixelMessage.spam) return this._resolveAndReset(ChatResponse.SPAM);
 		if (hypixelMessage.content.startsWith('We blocked your comment')) {
-			return this.#resolveAndReset(ChatResponse.BLOCKED);
+			return this._resolveAndReset(ChatResponse.BLOCKED);
 		}
 	}
 
@@ -529,26 +529,26 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * returns a Promise that resolves with a message that ends with the provided content
 	 * @param content
 	 */
-	#listenFor(content: string) {
-		this.#contentFilter = content;
-		this.#collecting = true;
-		return this.#promise;
+	private _listenFor(content: string) {
+		this._contentFilter = content;
+		this._collecting = true;
+		return this._promise;
 	}
 
 	/**
 	 * resets the listener filter
 	 */
-	#resetFilter() {
-		this.#contentFilter = null;
-		this.#collecting = false;
+	private _resetFilter() {
+		this._contentFilter = null;
+		this._collecting = false;
 	}
 
 	/**
 	 * increments messageCounter for 10 seconds
 	 */
-	#tempIncrementCounter() {
-		setTimeout(() => --this.#messageCounter, seconds(10));
-		return ++this.#messageCounter;
+	private _tempIncrementCounter() {
+		setTimeout(() => --this._messageCounter, seconds(10));
+		return ++this._messageCounter;
 	}
 
 	/**
@@ -774,14 +774,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		if (!success) {
 			// messageParts blocked
-			this.#handleForwardRejection(discordMessage, ForwardRejectionReason.LOCAL_BLOCKED);
+			this._handleForwardRejection(discordMessage, ForwardRejectionReason.LOCAL_BLOCKED);
 			return false;
 		}
 
 		if (!contentParts.size) return false;
 
 		if (contentParts.size > maxParts) {
-			this.#handleForwardRejection(discordMessage, ForwardRejectionReason.MESSAGE_COUNT, { maxParts });
+			this._handleForwardRejection(discordMessage, ForwardRejectionReason.MESSAGE_COUNT, { maxParts });
 			return false;
 		}
 
@@ -810,13 +810,13 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		await this.queue.wait();
 
 		try {
-			await this.#sendToChat(_options);
+			await this._sendToChat(_options);
 			return true;
 		} catch (error) {
 			logger.error(error, '[CHATBRIDGE MC CHAT]');
 			return false;
 		} finally {
-			this.#retries = 0;
+			this._retries = 0;
 			this.queue.shift();
 		}
 	}
@@ -826,7 +826,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param options
 	 * @internal
 	 */
-	async #sendToChat({ content, prefix = '', isMessage, discordMessage = null }: SendToChatOptions): Promise<unknown> {
+	private async _sendToChat({
+		content,
+		prefix = '',
+		isMessage,
+		discordMessage = null,
+	}: SendToChatOptions): Promise<unknown> {
 		if (!this.bot || this.bot.ended) return MessageUtil.react(discordMessage, X_EMOJI);
 
 		let message = `${prefix}${content}`;
@@ -834,7 +839,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const useSpamBypass = isMessage ?? /^\/(?:[acgop]c|msg|w(?:hisper)?|t(?:ell)?) /i.test(message);
 
 		if (useSpamBypass) {
-			let index = this.#retries;
+			let index = this._retries;
 
 			// 1 for each retry + additional if _lastMessages includes curent padding
 			while (
@@ -848,7 +853,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		message = trim(message, MinecraftChatManager.MAX_MESSAGE_LENGTH);
 
 		// create listener
-		const listener = this.#listenFor(content);
+		const listener = this._listenFor(content);
 
 		try {
 			this.bot.write('chat', { message });
@@ -856,7 +861,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			logger.error(error, '[CHATBRIDGE _SEND TO CHAT]');
 			MessageUtil.react(discordMessage, X_EMOJI);
 
-			this.#resetFilter();
+			this._resetFilter();
 
 			throw error;
 		}
@@ -867,8 +872,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		switch (response) {
 			// collector collected nothing, sleep won the race. this happens for all commands which return a "system reply"
 			case ChatResponse.TIMEOUT: {
-				this.#tempIncrementCounter();
-				this.#resetFilter();
+				this._tempIncrementCounter();
+				this._resetFilter();
 
 				// only throw for chat messages when the bot was not ready yet
 				if (discordMessage && !this.isReady()) {
@@ -884,22 +889,22 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 			// anti spam failed -> retry
 			case ChatResponse.SPAM: {
-				this.#tempIncrementCounter();
+				this._tempIncrementCounter();
 
 				// max retries reached
-				if (++this.#retries === MinecraftChatManager.MAX_RETRIES) {
+				if (++this._retries === MinecraftChatManager.MAX_RETRIES) {
 					MessageUtil.react(discordMessage, X_EMOJI);
-					await sleep(this.#retries * MinecraftChatManager.ANTI_SPAM_DELAY);
+					await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
 					throw `unable to send '${message}', anti spam failed ${MinecraftChatManager.MAX_RETRIES} times`;
 				}
 
-				await sleep(this.#retries * MinecraftChatManager.ANTI_SPAM_DELAY);
-				return this.#sendToChat({ content, prefix, isMessage, discordMessage }); // retry sending
+				await sleep(this._retries * MinecraftChatManager.ANTI_SPAM_DELAY);
+				return this._sendToChat({ content, prefix, isMessage, discordMessage }); // retry sending
 			}
 
 			// hypixel filter blocked message
 			case ChatResponse.BLOCKED: {
-				this.#handleForwardRejection(discordMessage, ForwardRejectionReason.HYPIXEL_BLOCKED);
+				this._handleForwardRejection(discordMessage, ForwardRejectionReason.HYPIXEL_BLOCKED);
 				await sleep(this.delay);
 				throw `unable to send '${message}', hypixel's filter blocked it`;
 			}
@@ -911,7 +916,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				await sleep(
 					[MESSAGE_TYPES.GUILD, MESSAGE_TYPES.PARTY, MESSAGE_TYPES.OFFICER].includes(response.type as any)
 						? this.delay
-						: (this.#tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY), // use safe delay for commands and whispers
+						: (this._tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY), // use safe delay for commands and whispers
 				);
 
 				return;
@@ -937,7 +942,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			rejectOnTimeout = false,
 			rejectOnAbort = false,
 		} = typeof options === 'string' ? ({ command: options } as CommandOptions) : options;
-		await this.#commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
+		await this.commandQueue.wait(); // only have one collector active at a time (prevent collecting messages from other command calls)
 		await this.queue.wait(); // only start the collector if the chat queue is free
 
 		const collector = this.createMessageCollector({
@@ -983,7 +988,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		// end collection
 		collector.once(MessageCollectorEvents.END, (collected, reason) => {
-			this.#commandQueue.shift();
+			this.commandQueue.shift();
 
 			switch (reason) {
 				case 'time':
@@ -1003,7 +1008,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				}
 
 				case 'error':
-					return; // #sendToChat error, promise gets rejected down below
+					return; // _sendToChat error, promise gets rejected down below
 
 				case 'abort': {
 					if (rejectOnAbort) {
@@ -1022,7 +1027,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		// send command to chat
 		(async () => {
 			try {
-				await this.#sendToChat({
+				await this._sendToChat({
 					content: command,
 					prefix: command.startsWith('/') ? '' : '/',
 					isMessage: false,
@@ -1032,7 +1037,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				reject(error);
 				collector.stop('error');
 			} finally {
-				this.#retries = 0;
+				this._retries = 0;
 				this.queue.shift();
 			}
 		})();

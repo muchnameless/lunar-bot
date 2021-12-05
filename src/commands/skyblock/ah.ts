@@ -19,6 +19,20 @@ import type { CommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake
 import type { SkyBlockProfile } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
+interface GenerateCustomIdOptions {
+	ign: string;
+	uuid: string;
+	userId: Snowflake;
+}
+
+interface GenerateReplyOptions {
+	ign: string;
+	uuid: string;
+	profileId: string;
+	profiles: { label: string; value: string }[];
+	userId: Snowflake;
+}
+
 export default class AhCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -31,28 +45,16 @@ export default class AhCommand extends ApplicationCommand {
 	}
 
 	/**
-	 * @param param0
+	 * @param options
 	 */
-	#generateCustomId({ uuid, ign, userId }: { ign: string; uuid: string; userId: Snowflake }) {
+	private _generateCustomId({ uuid, ign, userId }: GenerateCustomIdOptions) {
 		return `${this.baseCustomId}:${uuid}:${ign}:${userId}` as const;
 	}
 
 	/**
-	 * @param param0
+	 * @param options
 	 */
-	async #generateReply({
-		ign,
-		uuid,
-		profileId,
-		profiles,
-		userId,
-	}: {
-		ign: string;
-		uuid: string;
-		profileId: string;
-		profiles: { label: string; value: string }[];
-		userId: Snowflake;
-	}) {
+	private async _generateReply({ ign, uuid, profileId, profiles, userId }: GenerateReplyOptions) {
 		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId)!;
 		const embed = this.client.defaultEmbed.setAuthor(
 			ign,
@@ -71,7 +73,7 @@ export default class AhCommand extends ApplicationCommand {
 					components: [
 						new MessageActionRow().addComponents(
 							new MessageSelectMenu()
-								.setCustomId(this.#generateCustomId({ uuid, ign, userId }))
+								.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 								.addOptions(profiles),
 						),
@@ -134,7 +136,7 @@ export default class AhCommand extends ApplicationCommand {
 				components: [
 					new MessageActionRow().addComponents(
 						new MessageSelectMenu()
-							.setCustomId(this.#generateCustomId({ uuid, ign, userId }))
+							.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
 							.addOptions(profiles),
 					),
@@ -150,7 +152,7 @@ export default class AhCommand extends ApplicationCommand {
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	#generateProfileOptions(profiles: SkyBlockProfile[]) {
+	private _generateProfileOptions(profiles: SkyBlockProfile[]) {
 		/* eslint-disable camelcase */
 		return profiles.map(({ cute_name, profile_id }) => ({
 			label: cute_name,
@@ -167,7 +169,7 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param ign player ign
 	 * @param uuid player minecraft uuid
 	 */
-	async #handleNoProfiles(interaction: CommandInteraction, embed: MessageEmbed, ign: string, uuid: string) {
+	private async _handleNoProfiles(interaction: CommandInteraction, embed: MessageEmbed, ign: string, uuid: string) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				embed
@@ -181,7 +183,7 @@ export default class AhCommand extends ApplicationCommand {
 			components: [
 				new MessageActionRow().addComponents(
 					new MessageSelectMenu()
-						.setCustomId(this.#generateCustomId({ uuid, ign, userId: interaction.user.id }))
+						.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 						.setDisabled(true)
 						.setPlaceholder('Profile: None'),
 				),
@@ -210,14 +212,14 @@ export default class AhCommand extends ApplicationCommand {
 			if (interaction.user.id === userId) {
 				return InteractionUtil.update(
 					interaction,
-					await this.#generateReply({ uuid, ign, profileId, profiles, userId }),
+					await this._generateReply({ uuid, ign, profileId, profiles, userId }),
 				);
 			}
 
 			// interaction from new requester -> new message
 			return InteractionUtil.reply(
 				interaction,
-				await this.#generateReply({ uuid, ign, profileId, profiles, userId: interaction.user.id }),
+				await this._generateReply({ uuid, ign, profileId, profiles, userId: interaction.user.id }),
 			);
 		} catch (error) {
 			logger.error(error);
@@ -236,7 +238,7 @@ export default class AhCommand extends ApplicationCommand {
 			const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
 			const embed = this.client.defaultEmbed;
 
-			if (!profiles?.length) return this.#handleNoProfiles(interaction, embed, ign, uuid);
+			if (!profiles?.length) return this._handleNoProfiles(interaction, embed, ign, uuid);
 
 			const PROFILE_NAME_INPUT = interaction.options.getString('profile');
 
@@ -246,7 +248,7 @@ export default class AhCommand extends ApplicationCommand {
 			if (!PROFILE_NAME_INPUT) {
 				const mainProfile = getMainProfile(profiles, uuid);
 
-				if (!mainProfile) return this.#handleNoProfiles(interaction, embed, ign, uuid);
+				if (!mainProfile) return this._handleNoProfiles(interaction, embed, ign, uuid);
 
 				({ profile_id: profileId, cute_name: profileName } = mainProfile);
 			} else {
@@ -267,9 +269,9 @@ export default class AhCommand extends ApplicationCommand {
 						components: [
 							new MessageActionRow().addComponents(
 								new MessageSelectMenu()
-									.setCustomId(this.#generateCustomId({ uuid, ign, userId: interaction.user.id }))
+									.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)
-									.addOptions(this.#generateProfileOptions(profiles)),
+									.addOptions(this._generateProfileOptions(profiles)),
 							),
 						],
 					});
@@ -278,11 +280,11 @@ export default class AhCommand extends ApplicationCommand {
 
 			return InteractionUtil.reply(
 				interaction,
-				await this.#generateReply({
+				await this._generateReply({
 					ign,
 					uuid,
 					profileId,
-					profiles: this.#generateProfileOptions(profiles),
+					profiles: this._generateProfileOptions(profiles),
 					userId: interaction.user.id,
 				}),
 			);

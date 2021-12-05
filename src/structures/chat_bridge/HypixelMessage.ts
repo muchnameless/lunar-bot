@@ -323,7 +323,7 @@ export class HypixelMessage {
 		// user message
 		try {
 			const { player } = this;
-			const discordMessage = await (this.discordMessage = this.#forwardToDiscord({
+			const discordMessage = await (this.discordMessage = this._forwardToDiscord({
 				discordChatManager,
 				member: this.member,
 				player,
@@ -348,7 +348,7 @@ export class HypixelMessage {
 	 * @param options
 	 * @internal
 	 */
-	async #forwardToDiscord({ discordChatManager, player, member }: ForwardToDiscordOptions) {
+	private async _forwardToDiscord({ discordChatManager, player, member }: ForwardToDiscordOptions) {
 		return discordChatManager.sendViaWebhook({
 			queuePromise: discordChatManager.queue.wait(),
 			content: await this.chatBridge.discord.parseContent(this.prefixReplacedContent),

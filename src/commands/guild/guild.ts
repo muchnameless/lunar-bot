@@ -192,7 +192,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param subcommand
 	 */
-	#assertRequiredRoles(interaction: Interaction, hypixelGuild: HypixelGuild, subcommand: string) {
+	private _assertRequiredRoles(interaction: Interaction, hypixelGuild: HypixelGuild, subcommand: string) {
 		const roleIds: Snowflake[] = [];
 
 		switch (subcommand) {
@@ -292,7 +292,7 @@ export default class GuildCommand extends ApplicationCommand {
 			const IN_GUILD = target.inGuild();
 
 			if (IN_GUILD) {
-				this.#assertExecutorIsStaff(hypixelGuild, executor);
+				this._assertExecutorIsStaff(hypixelGuild, executor);
 
 				if (target.guildRankPriority >= executor.guildRankPriority) {
 					throw `your guild rank needs to be higher than \`${target}\`'s`;
@@ -306,7 +306,7 @@ export default class GuildCommand extends ApplicationCommand {
 				return `muted \`${target}\` for \`${duration}\``;
 			}
 		} else if (target === 'everyone') {
-			this.#assertExecutorIsStaff(hypixelGuild, executor);
+			this._assertExecutorIsStaff(hypixelGuild, executor);
 
 			await hypixelGuild.update({ mutedTill: Date.now() + duration });
 		}
@@ -358,7 +358,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param executor
 	 */
 	// eslint-disable-next-line class-methods-use-this
-	#assertExecutorIsStaff(hypixelGuild: HypixelGuild, executor: Player | null): asserts executor is Player {
+	private _assertExecutorIsStaff(hypixelGuild: HypixelGuild, executor: Player | null): asserts executor is Player {
 		if (!executor) {
 			throw 'unable to find a linked player for your discord account';
 		}
@@ -380,7 +380,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param options
 	 */
 	async runKick({ ctx, target, executor, hypixelGuild, reason }: RunKickOptions) {
-		this.#assertExecutorIsStaff(hypixelGuild, executor);
+		this._assertExecutorIsStaff(hypixelGuild, executor);
 
 		if (typeof target === 'string') {
 			throw `no player with the IGN \`${target}\` found`;
@@ -427,7 +427,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param commandOptions
 	 * @param hypixelGuild
 	 */
-	async #run(interaction: CommandInteraction, hypixelGuild: HypixelGuild, commandOptions: CommandOptions) {
+	private async _run(interaction: CommandInteraction, hypixelGuild: HypixelGuild, commandOptions: CommandOptions) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
@@ -443,7 +443,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param commandOptions
 	 */
-	async #runList(interaction: CommandInteraction, hypixelGuild: HypixelGuild, commandOptions: CommandOptions) {
+	private async _runList(interaction: CommandInteraction, hypixelGuild: HypixelGuild, commandOptions: CommandOptions) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
@@ -509,7 +509,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param currentPage
 	 * @param totalPages
 	 */
-	#getPaginationButtons(
+	private _getPaginationButtons(
 		subcommand: string,
 		hypixelGuildId: string,
 		userId: Snowflake,
@@ -576,7 +576,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param userId
 	 * @param page
 	 */
-	async #runPaginated(
+	private async _runPaginated(
 		interaction: CommandInteraction | ButtonInteraction,
 		hypixelGuild: HypixelGuild,
 		subcommand: string,
@@ -602,7 +602,7 @@ export default class GuildCommand extends ApplicationCommand {
 					.setDescription(Formatters.codeBlock(response))
 					.setFooter(hypixelGuild.name),
 			],
-			components: this.#getPaginationButtons(
+			components: this._getPaginationButtons(
 				subcommand,
 				hypixelGuild.guildId,
 				interaction.user.id,
@@ -627,14 +627,14 @@ export default class GuildCommand extends ApplicationCommand {
 			throw new Error('uncached hypixel guild');
 		}
 
-		await this.#assertRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
+		await this._assertRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
 
 		const PAGE = PAGE_INPUT === Number.NaN.toString() ? null : Number(PAGE_INPUT);
 
 		// check only the part before the first space
 		switch (SUBCOMMAND) {
 			case 'history':
-				return this.#runPaginated(
+				return this._runPaginated(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND,
@@ -647,7 +647,7 @@ export default class GuildCommand extends ApplicationCommand {
 				);
 
 			case 'log':
-				return this.#runPaginated(
+				return this._runPaginated(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND_WITH_ARGS,
@@ -660,7 +660,7 @@ export default class GuildCommand extends ApplicationCommand {
 				);
 
 			case 'top':
-				return this.#runPaginated(
+				return this._runPaginated(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND,
@@ -685,13 +685,13 @@ export default class GuildCommand extends ApplicationCommand {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const SUBCOMMAND = interaction.options.getSubcommand();
 
-		await this.#assertRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
+		await this._assertRequiredRoles(interaction, hypixelGuild, SUBCOMMAND);
 
 		switch (SUBCOMMAND) {
 			case 'demote': {
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				this.#assertExecutorIsStaff(hypixelGuild, executor);
+				this._assertExecutorIsStaff(hypixelGuild, executor);
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
@@ -699,7 +699,7 @@ export default class GuildCommand extends ApplicationCommand {
 					throw `your guild rank needs to be higher than \`${target}\`'s`;
 				}
 
-				return this.#run(interaction, hypixelGuild, {
+				return this._run(interaction, hypixelGuild, {
 					command: `guild demote ${target}`,
 					responseRegExp: demote(target.ign),
 				});
@@ -764,7 +764,7 @@ export default class GuildCommand extends ApplicationCommand {
 			}
 
 			case 'history':
-				return this.#runPaginated(
+				return this._runPaginated(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND,
@@ -778,17 +778,17 @@ export default class GuildCommand extends ApplicationCommand {
 
 			case 'info':
 			case 'quest':
-				return this.#run(interaction, hypixelGuild, {
+				return this._run(interaction, hypixelGuild, {
 					command: `guild ${SUBCOMMAND}`,
 				});
 
 			case 'motd':
-				return this.#run(interaction, hypixelGuild, {
+				return this._run(interaction, hypixelGuild, {
 					command: 'guild motd preview',
 				});
 
 			case 'top':
-				return this.#runPaginated(
+				return this._runPaginated(
 					interaction,
 					hypixelGuild,
 					SUBCOMMAND,
@@ -808,7 +808,7 @@ export default class GuildCommand extends ApplicationCommand {
 					throw `\`${ign}\` is on the ban list for \`${existingBan.reason}\``;
 				}
 
-				return this.#run(interaction, hypixelGuild, {
+				return this._run(interaction, hypixelGuild, {
 					command: `guild invite ${ign}`,
 					responseRegExp: invite(ign),
 				});
@@ -817,14 +817,14 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'list':
 			case 'members':
 			case 'online':
-				return this.#runList(interaction, hypixelGuild, {
+				return this._runList(interaction, hypixelGuild, {
 					command: `guild ${SUBCOMMAND}`,
 				});
 
 			case 'log': {
 				const COMMAND = `log ${InteractionUtil.getIgn(interaction) ?? ''}`.trimEnd();
 
-				return this.#runPaginated(
+				return this._runPaginated(
 					interaction,
 					hypixelGuild,
 					COMMAND,
@@ -840,7 +840,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'member': {
 				const target = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 
-				return this.#run(interaction, hypixelGuild, {
+				return this._run(interaction, hypixelGuild, {
 					command: `guild member ${target}`,
 					abortRegExp: unknownIgn(target.ign),
 				});
@@ -860,7 +860,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'promote': {
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				this.#assertExecutorIsStaff(hypixelGuild, executor);
+				this._assertExecutorIsStaff(hypixelGuild, executor);
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
@@ -868,7 +868,7 @@ export default class GuildCommand extends ApplicationCommand {
 					throw 'you can only promote up to your own rank';
 				}
 
-				return this.#run(interaction, hypixelGuild, {
+				return this._run(interaction, hypixelGuild, {
 					command: `guild promote ${target}`,
 					responseRegExp: promote(target.ign),
 				});
@@ -877,7 +877,7 @@ export default class GuildCommand extends ApplicationCommand {
 			case 'setrank': {
 				const executor = UserUtil.getPlayer(interaction.user);
 
-				this.#assertExecutorIsStaff(hypixelGuild, executor);
+				this._assertExecutorIsStaff(hypixelGuild, executor);
 
 				const target = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 				const RANK_INPUT = interaction.options.getString('rank', true);
@@ -891,7 +891,7 @@ export default class GuildCommand extends ApplicationCommand {
 					throw 'you can only change ranks up to your own rank';
 				}
 
-				return this.#run(interaction, hypixelGuild, {
+				return this._run(interaction, hypixelGuild, {
 					command: `guild setrank ${target} ${rank.name}`,
 					responseRegExp: setRank(target.ign, undefined, rank.name),
 				});
@@ -941,7 +941,7 @@ export default class GuildCommand extends ApplicationCommand {
 					if (IN_GUILD) {
 						const executor = UserUtil.getPlayer(interaction.user);
 
-						this.#assertExecutorIsStaff(hypixelGuild, executor);
+						this._assertExecutorIsStaff(hypixelGuild, executor);
 
 						if (target.guildRankPriority >= executor.guildRankPriority) {
 							throw `your guild rank needs to be higher than \`${target}\`'s`;
@@ -952,12 +952,12 @@ export default class GuildCommand extends ApplicationCommand {
 
 					if (!IN_GUILD) return InteractionUtil.reply(interaction, `unmuted \`${target}\``);
 				} else if (target === 'everyone') {
-					this.#assertExecutorIsStaff(hypixelGuild, UserUtil.getPlayer(interaction.user));
+					this._assertExecutorIsStaff(hypixelGuild, UserUtil.getPlayer(interaction.user));
 
 					await hypixelGuild.update({ mutedTill: 0 });
 				}
 
-				return this.#run(interaction, hypixelGuild, {
+				return this._run(interaction, hypixelGuild, {
 					command: `guild unmute ${target}`,
 					responseRegExp: unmute(
 						target === 'everyone' ? 'the guild chat' : `${target}`,

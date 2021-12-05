@@ -76,8 +76,8 @@ interface ImgurClientOptions {
 
 export class ImgurClient {
 	#authorisation!: string;
-	#baseURL = 'https://api.imgur.com/3/';
-	#queue = new AsyncQueue();
+	baseURL = 'https://api.imgur.com/3/';
+	queue = new AsyncQueue();
 	cache?: Cache;
 	timeout: number;
 	rateLimitOffset: number;
@@ -126,13 +126,6 @@ export class ImgurClient {
 				logger.error(error);
 			}
 		})();
-	}
-
-	/**
-	 * request queue
-	 */
-	get queue() {
-		return this.#queue;
 	}
 
 	get authorisation() {
@@ -192,7 +185,7 @@ export class ImgurClient {
 		const cached = await this.cache?.get(cacheKey);
 		if (cached) return cached;
 
-		await this.#queue.wait();
+		await this.queue.wait();
 
 		try {
 			// check rate limit
@@ -227,7 +220,7 @@ export class ImgurClient {
 				}
 			}
 
-			const res = await this.#request(endpoint, requestOptions);
+			const res = await this._request(endpoint, requestOptions);
 
 			// get server time
 			const date = res.headers.get('date');
@@ -264,7 +257,7 @@ export class ImgurClient {
 
 			return parsedRes;
 		} finally {
-			this.#queue.shift();
+			this.queue.shift();
 		}
 	}
 
@@ -274,12 +267,12 @@ export class ImgurClient {
 	 * @param options
 	 * @param retries current retry
 	 */
-	async #request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
+	private async _request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), this.timeout);
 
 		try {
-			return await fetch(`${this.#baseURL}${endpoint}`, {
+			return await fetch(`${this.baseURL}${endpoint}`, {
 				headers: {
 					Authorization: this.#authorisation,
 					...headers,
@@ -290,7 +283,7 @@ export class ImgurClient {
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
 			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
-				return this.#request(endpoint, { headers, ...options }, retries + 1);
+				return this._request(endpoint, { headers, ...options }, retries + 1);
 			}
 
 			throw error;

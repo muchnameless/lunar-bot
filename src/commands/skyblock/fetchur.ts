@@ -41,8 +41,7 @@ export default class FetchurCommand extends DualCommand {
 	/**
 	 * execute the command
 	 */
-	// eslint-disable-next-line class-methods-use-this
-	#generateReply() {
+	private _generateReply() {
 		const date = new Date();
 		const OFFSET = zone('America/New_York').offsetForUtc(TimeStruct.fromDate(date, DateFunctions.GetUTC)) / 60;
 		date.setUTCHours(date.getUTCHours() + OFFSET); // EST
@@ -66,7 +65,7 @@ export default class FetchurCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override runSlash(interaction: CommandInteraction) {
-		return InteractionUtil.reply(interaction, this.#generateReply());
+		return InteractionUtil.reply(interaction, this._generateReply());
 	}
 
 	/**
@@ -74,6 +73,6 @@ export default class FetchurCommand extends DualCommand {
 	 * @param hypixelMessage
 	 */
 	override runMinecraft(hypixelMessage: HypixelUserMessage) {
-		return hypixelMessage.reply(this.#generateReply());
+		return hypixelMessage.reply(this._generateReply());
 	}
 }
