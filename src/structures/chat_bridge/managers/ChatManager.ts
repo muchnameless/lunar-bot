@@ -1,4 +1,4 @@
-import { TimeoutAsyncQueue } from '../../TimeoutAsyncQueue';
+import { AsyncQueue } from '@sapphire/async-queue';
 import { BLOCKED_WORDS_REGEXP } from '../constants';
 import { MessageCollectorEvents } from '../MessageCollector';
 import type { MessageCollector, MessageCollectorOptions } from '../MessageCollector';
@@ -14,7 +14,7 @@ export abstract class ChatManager {
 	/**
 	 * chat queue
 	 */
-	queue = new TimeoutAsyncQueue();
+	queue = new AsyncQueue();
 
 	constructor(chatBridge: ChatBridge) {
 		this.chatBridge = chatBridge;

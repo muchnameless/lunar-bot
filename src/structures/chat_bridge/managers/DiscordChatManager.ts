@@ -5,6 +5,7 @@ import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
 import { cache, imgur } from '../../../api';
 import { asyncReplace, hours, logger } from '../../../functions';
+import { TimeoutAsyncQueue } from '../../TimeoutAsyncQueue';
 import { ChatManager } from './ChatManager';
 import type {
 	Collection,
@@ -32,6 +33,11 @@ interface SendViaWebhookOptions extends WebhookMessageOptions {
 }
 
 export class DiscordChatManager extends ChatManager {
+	/**
+	 * chat queue
+	 */
+	// @ts-expect-error
+	override queue = new TimeoutAsyncQueue();
 	/**
 	 * hypixel message type
 	 */

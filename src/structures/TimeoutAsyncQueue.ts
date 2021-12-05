@@ -44,7 +44,7 @@ export class TimeoutAsyncQueue {
 	/**
 	 * The promises array
 	 */
-	promises: TimeoutAsyncQueueDeferredPromise[] = [];
+	private promises: TimeoutAsyncQueueDeferredPromise[] = [];
 
 	/**
 	 * Waits for last promise and queues a new one
@@ -55,22 +55,15 @@ export class TimeoutAsyncQueue {
 		const promise = new Promise<void>((res) => {
 			resolve = res;
 		});
-		const item = {
+
+		this.promises.push({
 			resolve: resolve!,
 			promise,
-		};
-
-		this.promises.push(item);
-
-		setTimeout(async () => {
-			if (!item.resolve) return;
-			logger.error(new Error(`[TimeoutAsyncQueue]: timeout after ${this.timeout} ms`));
-
-			const prev = this.promises[this.promises.indexOf(item) - 1];
-			if (prev) await prev.promise;
-
-			this.shift();
-		}, this.timeout);
+			timeout: setTimeout(() => {
+				logger.error(new Error(`[TimeoutAsyncQueue]: timeout after ${this.timeout} ms`));
+				this.shift();
+			}, this.timeout),
+		});
 
 		return next;
 	}
@@ -80,14 +73,15 @@ export class TimeoutAsyncQueue {
 	 */
 	shift() {
 		const deferred = this.promises.shift();
-		if (!deferred?.resolve) return;
+		if (!deferred) return;
 
+		clearTimeout(deferred.timeout);
 		deferred.resolve();
-		deferred.resolve = null;
 	}
 }
 
 interface TimeoutAsyncQueueDeferredPromise {
-	resolve: (() => void) | null;
+	resolve: () => void;
 	promise: Promise<void>;
+	timeout: NodeJS.Timeout;
 }
