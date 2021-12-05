@@ -22,12 +22,8 @@ export interface BroadcastOptions {
 	content: string;
 	type?: DiscordChatManagerResolvable;
 	hypixelMessage?: HypixelMessage | null;
-	discord?: DiscordMessageOptions;
+	discord?: MessageOptions;
 	minecraft?: Omit<ChatOptions, 'content'>;
-}
-
-interface DiscordMessageOptions extends MessageOptions {
-	prefix?: string;
 }
 
 export interface MessageForwardOptions {

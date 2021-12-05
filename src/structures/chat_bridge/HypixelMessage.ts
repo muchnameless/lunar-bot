@@ -2,7 +2,8 @@ import { regExpEsc } from '@sapphire/utilities';
 import loader from 'prismarine-chat';
 import { NEVER_MATCHING_REGEXP, NO_PING_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { MessageUtil } from '../../util';
-import { logger, seconds } from '../../functions';
+import { logger, seconds, uuidToImgurBustURL } from '../../functions';
+import { mojang } from '../../api';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import {
 	INVISIBLE_CHARACTER_REGEXP,
@@ -11,8 +12,9 @@ import {
 	MESSAGE_TYPES,
 	spamMessages,
 } from './constants';
-import type { PlayerInGuild } from '../database/models/Player';
-import type { Message as DiscordMessage } from 'discord.js';
+import type { DiscordChatManager } from './managers/DiscordChatManager';
+import type { Player, PlayerInGuild } from '../database/models/Player';
+import type { GuildMember, Message as DiscordMessage } from 'discord.js';
 import type { ChatMessage as PrismarineChatMessage } from 'prismarine-chat';
 import type { BroadcastOptions, ChatBridge, ChatOptions } from './ChatBridge';
 import type { ChatPacket } from './bot_events/chat';
@@ -35,6 +37,12 @@ type AwaitConfirmationOptions = Partial<BroadcastOptions> &
 		time?: number;
 		errorMessage?: string;
 	};
+
+interface ForwardToDiscordOptions {
+	discordChatManager: DiscordChatManager;
+	player: Player | null;
+	member: GuildMember | null;
+}
 
 export interface HypixelUserMessage extends HypixelMessage {
 	position: 'CHAT';
@@ -300,43 +308,63 @@ export class HypixelMessage {
 	/**
 	 * forwards the message to discord via the chatBridge's webhook, if the guild has the chatBridge enabled
 	 */
-	async forwardToDiscord() {
+	async forwardToDiscord(): Promise<DiscordMessage | null> {
 		const discordChatManager = this.chatBridge.discord.channelsByType.get(this.type ?? MESSAGE_TYPES.GUILD);
-
 		if (!discordChatManager) return null;
 
-		try {
-			// user message
-			if (this.author) {
-				const { player } = this;
-				const discordMessage = await (this.discordMessage = discordChatManager.sendViaWebhook({
-					content: this.prefixReplacedContent,
-					author: this.author,
-					member: this.member,
-					player,
-				}));
-
-				// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
-				if (/<@&\d{17,19}>/.test(discordMessage.content)) {
-					this.author.send('you do not have permission to ping roles from in game chat');
-					MessageUtil.react(discordMessage, NO_PING_EMOJI);
-				} else if (!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content)) {
-					this.author.send('you do not have permission to ping users from in game chat');
-					MessageUtil.react(discordMessage, NO_PING_EMOJI);
-				}
-
-				return discordMessage;
-			}
-
-			// server message
+		// server message
+		if (!this.author) {
 			return (this.discordMessage = discordChatManager.sendViaBot({
 				content: this.content,
 				allowedMentions: { parse: [] },
 			}));
+		}
+
+		// user message
+		try {
+			const { player } = this;
+			const discordMessage = await (this.discordMessage = this.#forwardToDiscord({
+				discordChatManager,
+				member: this.member,
+				player,
+			}));
+
+			// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
+			if (/<@&\d{17,19}>/.test(discordMessage.content)) {
+				this.author.send('you do not have permission to ping roles from in game chat');
+				MessageUtil.react(discordMessage, NO_PING_EMOJI);
+			} else if (!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content)) {
+				this.author.send('you do not have permission to ping users from in game chat');
+				MessageUtil.react(discordMessage, NO_PING_EMOJI);
+			}
+
+			return discordMessage;
 		} catch (error) {
 			logger.error(error, '[FORWARD TO DC]');
 			return null;
 		}
+	}
+	/**
+	 * @param options
+	 * @internal
+	 */
+	async #forwardToDiscord({ discordChatManager, player, member }: ForwardToDiscordOptions) {
+		return discordChatManager.sendViaWebhook({
+			queuePromise: discordChatManager.queue.wait(),
+			content: await this.chatBridge.discord.parseContent(this.prefixReplacedContent),
+			username: member?.displayName ?? player?.ign ?? this.author!.ign,
+			avatarURL:
+				member?.displayAvatarURL({ dynamic: true }) ??
+				(await player?.imageURL) ??
+				(await mojang.ign(this.author!.ign).then(
+					({ uuid }) => uuidToImgurBustURL(this.client, uuid),
+					(error) => logger.error(error, '[FORWARD TO DC]'),
+				)) ??
+				(member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),
+			allowedMentions: {
+				parse: player?.hasDiscordPingPermission ? ['users'] : [],
+			},
+		});
 	}
 
 	/**
