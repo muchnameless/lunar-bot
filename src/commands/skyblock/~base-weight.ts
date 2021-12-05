@@ -1,7 +1,15 @@
 import { PROFILE_NAMES, X_EMOJI } from '../../constants';
 import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
-import { autocorrect, escapeIgn, getUuidAndIgn, logger, seconds, upperCaseFirstChar } from '../../functions';
+import {
+	autocorrect,
+	escapeIgn,
+	formatDecimalNumber,
+	getUuidAndIgn,
+	logger,
+	seconds,
+	upperCaseFirstChar,
+} from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
@@ -18,8 +26,9 @@ export default class BaseWeightCommand extends DualCommand {
 	 * rounds and toLocaleStrings a number
 	 * @param number
 	 */
+	// eslint-disable-next-line class-methods-use-this
 	formatNumber(number: number) {
-		return this.client.formatDecimalNumber(Math.floor(number * 100) / 100);
+		return formatDecimalNumber(Math.floor(number * 100) / 100);
 	}
 
 	/**

@@ -11,7 +11,7 @@ import {
 } from '../../constants';
 import { optionalPlayerOption, pageOption, offsetOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, MessageEmbedUtil } from '../../util';
-import { getDefaultOffset, upperCaseFirstChar } from '../../functions';
+import { formatDecimalNumber, formatNumber, getDefaultOffset, upperCaseFirstChar } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { XPOffsets } from '../../constants';
@@ -71,11 +71,11 @@ export default class XpCommand extends ApplicationCommand {
 				name: '\u200B',
 				value: stripIndents`
 					${Formatters.codeBlock('Skills')}
-					Average skill level: ${Formatters.bold(this.client.formatDecimalNumber(skillAverage))} [${Formatters.bold(
-					this.client.formatDecimalNumber(trueAverage),
+					Average skill level: ${Formatters.bold(formatDecimalNumber(skillAverage))} [${Formatters.bold(
+					formatDecimalNumber(trueAverage),
 				)}] - ${Formatters.bold('Δ')}: ${Formatters.bold(
-					this.client.formatDecimalNumber(skillAverage - skillAverageOffset),
-				)} [${Formatters.bold(this.client.formatDecimalNumber(trueAverage - trueAverageOffset))}]
+					formatDecimalNumber(skillAverage - skillAverageOffset),
+				)} [${Formatters.bold(formatDecimalNumber(trueAverage - trueAverageOffset))}]
 				`,
 			});
 
@@ -89,8 +89,8 @@ export default class XpCommand extends ApplicationCommand {
 				name: upperCaseFirstChar(skill),
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
-					${Formatters.bold('XP:')} ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT], 0, Math.round)}
+					${Formatters.bold('XP:')} ${formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${formatNumber(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT], 0, Math.round)}
 				`,
 				inline: true,
 			});
@@ -106,12 +106,8 @@ export default class XpCommand extends ApplicationCommand {
 				name: upperCaseFirstChar(skill),
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
-					${Formatters.bold('XP:')} ${this.client.formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(
-					player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`],
-					0,
-					Math.round,
-				)}
+					${Formatters.bold('XP:')} ${formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`], 0, Math.round)}
 				`,
 				inline: true,
 			});
@@ -126,9 +122,9 @@ export default class XpCommand extends ApplicationCommand {
 			name: '\u200B',
 			value: stripIndents`
 				${Formatters.codeBlock('Slayer')}
-				Total slayer xp: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP))} - ${Formatters.bold(
-				'Δ',
-			)}: ${Formatters.bold(this.client.formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)))}
+				Total slayer xp: ${Formatters.bold(formatNumber(TOTAL_SLAYER_XP))} - ${Formatters.bold('Δ')}: ${Formatters.bold(
+				formatNumber(TOTAL_SLAYER_XP - player.getSlayerTotal(OFFSET)),
+			)}
 			`,
 			inline: false,
 		});
@@ -140,12 +136,8 @@ export default class XpCommand extends ApplicationCommand {
 				name: upperCaseFirstChar(slayer),
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${player.getSlayerLevel(slayer)}
-					${Formatters.bold('XP:')} ${this.client.formatNumber(player[SLAYER_ARGUMENT])}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(
-					player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`],
-					0,
-					Math.round,
-				)}
+					${Formatters.bold('XP:')} ${formatNumber(player[SLAYER_ARGUMENT])}
+					${Formatters.bold('Δ:')} ${formatNumber(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`], 0, Math.round)}
 				`,
 				inline: true,
 			});
@@ -167,12 +159,8 @@ export default class XpCommand extends ApplicationCommand {
 				name: upperCaseFirstChar(type),
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
-					${Formatters.bold('XP:')} ${this.client.formatNumber(player[DUNGEON_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(
-					player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`],
-					0,
-					Math.round,
-				)}
+					${Formatters.bold('XP:')} ${formatNumber(player[DUNGEON_ARGUMENT], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${formatNumber(player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`], 0, Math.round)}
 				`,
 				inline: true,
 			});
@@ -194,22 +182,20 @@ export default class XpCommand extends ApplicationCommand {
 			{
 				name: 'Hypixel Guild XP',
 				value: stripIndents`
-					${Formatters.bold('Total:')} ${this.client.formatNumber(player.guildXp)}
-					${Formatters.bold('Δ:')} ${this.client.formatNumber(player.guildXp - player[`guildXp${OFFSET}`])}
+					${Formatters.bold('Total:')} ${formatNumber(player.guildXp)}
+					${Formatters.bold('Δ:')} ${formatNumber(player.guildXp - player[`guildXp${OFFSET}`])}
 				`,
 				inline: true,
 			},
 			{
 				name: 'Lily Weight',
 				value: stripIndents`
-					${Formatters.bold('Total')}: ${this.client.formatDecimalNumber(totalWeight)} [ ${this.client.formatDecimalNumber(
+					${Formatters.bold('Total')}: ${formatDecimalNumber(totalWeight)} [ ${formatDecimalNumber(
 					weight,
-				)} + ${this.client.formatDecimalNumber(overflow)} ]
-					${Formatters.bold('Δ:')} ${this.client.formatDecimalNumber(
-					totalWeight - totalWeightOffet,
-				)} [ ${this.client.formatDecimalNumber(weight - weightOffset)} + ${this.client.formatDecimalNumber(
-					overflow - overflowOffset,
-				)} ]
+				)} + ${formatDecimalNumber(overflow)} ]
+					${Formatters.bold('Δ:')} ${formatDecimalNumber(totalWeight - totalWeightOffet)} [ ${formatDecimalNumber(
+					weight - weightOffset,
+				)} + ${formatDecimalNumber(overflow - overflowOffset)} ]
 				`,
 				inline: true,
 			},

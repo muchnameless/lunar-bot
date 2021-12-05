@@ -4,7 +4,7 @@ import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
 import { hypixel } from '../../api';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { escapeIgn, getUuidAndIgn, logger, seconds } from '../../functions';
+import { escapeIgn, formatNumber, getUuidAndIgn, logger, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -71,10 +71,10 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 				rank: ${RANK_NAME},
 				guild: ${guildData?.name ?? 'none'},
 				status: ${statusData ? 'online' : 'offline'},
-				friends: ${this.client.formatNumber(friendsData?.length ?? 0)},
+				friends: ${formatNumber(friendsData?.length ?? 0)},
 				level: ${level},
-				achievement points: ${this.client.formatNumber(achievementPoints)},
-				karma: ${this.client.formatNumber(karma)},
+				achievement points: ${formatNumber(achievementPoints)},
+				karma: ${formatNumber(karma)},
 				first joined: ${Formatters.time(Number.parseInt(_id.slice(0, 8), 16))},
 				last joined: ${Formatters.time(new Date(lastLogin!))}
 			`;

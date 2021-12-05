@@ -3,7 +3,7 @@ import { Formatters } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import { mojang } from '../../api';
 import { InteractionUtil, MessageEmbedUtil } from '../../util';
-import { logger } from '../../functions';
+import { formatNumber, logger } from '../../functions';
 import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
@@ -59,7 +59,7 @@ export default class DonationsCommand extends ApplicationCommand {
 							'ada',
 							stripIndent`
 								#${`${index + 1}`.padStart(3, '0')} : ${IGN}
-									 > ${this.client.formatNumber(amount)}
+									 > ${formatNumber(amount)}
 							`,
 						),
 						inline: true,
@@ -79,7 +79,7 @@ export default class DonationsCommand extends ApplicationCommand {
 				}),
 		);
 
-		embed.setDescription(`Total: ${this.client.formatNumber(totalAmount)}`);
+		embed.setDescription(`Total: ${formatNumber(totalAmount)}`);
 
 		// create and send embed
 		return InteractionUtil.reply(interaction, { embeds: [embed] });

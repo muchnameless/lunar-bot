@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { escapeIgn, seconds } from '../../functions';
+import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -51,15 +51,15 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 			return oneLine`
 				${escapeIgn(ign)}:
 				Bridge:
-				wins: ${this.client.formatNumber(wins)},
-				losses: ${this.client.formatNumber(losses)},
-				ties: ${this.client.formatNumber(gamesPlayed - (wins + losses))},
-				win rate: ${this.client.formatDecimalNumber(wins / (wins + losses))},
-				games played: ${this.client.formatNumber(gamesPlayed)},
-				kills: ${this.client.formatNumber(kills as number)},
-				deaths: ${this.client.formatNumber(deaths as number)},
+				wins: ${formatNumber(wins)},
+				losses: ${formatNumber(losses)},
+				ties: ${formatNumber(gamesPlayed - (wins + losses))},
+				win rate: ${formatDecimalNumber(wins / (wins + losses))},
+				games played: ${formatNumber(gamesPlayed)},
+				kills: ${formatNumber(kills as number)},
+				deaths: ${formatNumber(deaths as number)},
 				kd ratio: ${this.calculateKD(kills as number, deaths as number) ?? '-/-'},
-				goals: ${this.client.formatNumber(BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'goals'))}
+				goals: ${formatNumber(BridgeStatsCommand._calculateStats(playerData.stats.Duels, 'goals'))}
 			`;
 		} catch {
 			return `\`${ign}\` has no Bridge stats`;

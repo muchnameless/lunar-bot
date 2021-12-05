@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { getBedwarsLevelInfo } from '@zikeji/hypixel';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { escapeIgn, logger, seconds } from '../../functions';
+import { escapeIgn, formatDecimalNumber, formatNumber, logger, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
@@ -45,16 +45,16 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 			return oneLine`
 				${escapeIgn(ign)}:
 				BedWars:
-				level: ${this.client.formatNumber(getBedwarsLevelInfo(playerData).level)},
-				wins: ${this.client.formatNumber(wins_bedwars)},
-				losses: ${this.client.formatNumber(losses_bedwars)},
-				win rate: ${this.client.formatDecimalNumber(wins_bedwars / (wins_bedwars + losses_bedwars))},
-				games played: ${this.client.formatNumber(games_played_bedwars)},
-				final kills: ${this.client.formatNumber(final_kills_bedwars)},
-				final deaths: ${this.client.formatNumber(final_deaths_bedwars)},
+				level: ${formatNumber(getBedwarsLevelInfo(playerData).level)},
+				wins: ${formatNumber(wins_bedwars)},
+				losses: ${formatNumber(losses_bedwars)},
+				win rate: ${formatDecimalNumber(wins_bedwars / (wins_bedwars + losses_bedwars))},
+				games played: ${formatNumber(games_played_bedwars)},
+				final kills: ${formatNumber(final_kills_bedwars)},
+				final deaths: ${formatNumber(final_deaths_bedwars)},
 				overall fkdr: ${this.calculateKD(final_kills_bedwars, final_deaths_bedwars) ?? '-/-'},
-				win streak: ${this.client.formatNumber(winstreak)},
-				beds broken: ${this.client.formatNumber(beds_broken_bedwars)}
+				win streak: ${formatNumber(winstreak)},
+				beds broken: ${formatNumber(beds_broken_bedwars)}
 			`;
 			/* eslint-enable camelcase */
 		} catch (error) {

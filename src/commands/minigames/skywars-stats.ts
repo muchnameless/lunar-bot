@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { getSkyWarsLevelInfo } from '@zikeji/hypixel';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { escapeIgn, seconds } from '../../functions';
+import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
@@ -55,16 +55,16 @@ export default class SkyWarsStatsCommand extends BaseStatsCommand {
 			return oneLine`
 				${escapeIgn(ign)}:
 				SkyWars:
-				level: ${this.client.formatNumber(getSkyWarsLevelInfo(playerData).level)},
-				wins: ${this.client.formatNumber(wins)},
-				losses: ${this.client.formatNumber(losses)},
-				win rate: ${this.client.formatDecimalNumber(wins / (wins + losses))},
-				kills: ${this.client.formatNumber(kills)},
-				assists: ${this.client.formatNumber(assists)},
-				deaths: ${this.client.formatNumber(deaths)},
+				level: ${formatNumber(getSkyWarsLevelInfo(playerData).level)},
+				wins: ${formatNumber(wins)},
+				losses: ${formatNumber(losses)},
+				win rate: ${formatDecimalNumber(wins / (wins + losses))},
+				kills: ${formatNumber(kills)},
+				assists: ${formatNumber(assists)},
+				deaths: ${formatNumber(deaths)},
 				K/D: ${this.calculateKD(kills, deaths) ?? '-/-'},
-				games played: ${this.client.formatNumber(games_played_skywars)},
-				win streak: ${this.client.formatNumber(win_streak)}
+				games played: ${formatNumber(games_played_skywars)},
+				win streak: ${formatNumber(win_streak)}
 			`;
 			/* eslint-enable camelcase */
 		} catch {

@@ -549,3 +549,28 @@ const escapeIfNoURL = (string: string) =>
 			if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
 			return `${p1.replace(/(?<!\\)(?=_)/g, '\\')}${p1.endsWith('\\') ? '' : '\\'}_${p2}`; // escape not already escaped '_'
 		});
+
+/**
+ * space-padding at the beginning and '0'-padding at the end
+ * @param number number to format
+ * @param paddingAmount amount to space-pad at the start
+ */
+export function formatDecimalNumber(number: number, paddingAmount = 0) {
+	if (Number.isNaN(number)) return 'NaN'.padStart(paddingAmount, ' ');
+
+	const [BEFORE_DOT, AFTER_DOT] = number.toFixed(2).split('.');
+
+	return `${Number(BEFORE_DOT).toLocaleString('fr-FR').padStart(paddingAmount, ' ')}.${AFTER_DOT}`;
+}
+
+/**
+ * space-padding at the beginning, converterFunction and locale string formatting
+ * @param number number to format
+ * @param paddingAmount amount to space-pad at the start (default 0)
+ * @param converterFunction function to be called on the number
+ */
+export const formatNumber = (
+	number: number,
+	paddingAmount = 0,
+	converterFunction: (input: number) => number = (x) => x,
+) => converterFunction(number).toLocaleString('fr-FR').replace(',', '.').padStart(paddingAmount, ' ');

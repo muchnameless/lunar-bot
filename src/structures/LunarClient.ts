@@ -115,34 +115,6 @@ export class LunarClient extends Client {
 	}
 
 	/**
-	 * space-padding at the beginning and '0'-padding at the end
-	 * @param number number to format
-	 * @param paddingAmount amount to space-pad at the start
-	 */
-	formatDecimalNumber(number: number, paddingAmount = 0) {
-		if (Number.isNaN(number)) return 'NaN'.padStart(paddingAmount, ' ');
-
-		const [BEFORE_DOT, AFTER_DOT] = number.toFixed(2).split('.');
-
-		return `${Number(BEFORE_DOT)
-			.toLocaleString(this.config.get('NUMBER_FORMAT'))
-			.padStart(paddingAmount, ' ')}.${AFTER_DOT}`;
-	}
-
-	/**
-	 * space-padding at the beginning, converterFunction and locale string formatting
-	 * @param number number to format
-	 * @param paddingAmount amount to space-pad at the start (default 0)
-	 * @param converterFunction function to be called on the number
-	 */
-	formatNumber(number: number, paddingAmount = 0, converterFunction: (input: number) => number = (x) => x) {
-		return converterFunction(number)
-			.toLocaleString(this.config.get('NUMBER_FORMAT'))
-			.replace(',', '.')
-			.padStart(paddingAmount, ' ');
-	}
-
-	/**
 	 * closes all db connections and exits the process
 	 * @param code exit code
 	 */

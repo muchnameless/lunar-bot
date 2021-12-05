@@ -6,7 +6,7 @@ const { Model } = pkg;
 import { DEFAULT_CONFIG, X_EMOJI, Y_EMOJI_ALT } from '../../../constants';
 import { hypixel } from '../../../api';
 import { ChannelUtil } from '../../../util';
-import { asyncFilter, compareAlphabetically, logger } from '../../../functions';
+import { asyncFilter, compareAlphabetically, formatNumber, logger } from '../../../functions';
 import { ConfigManager } from './ConfigManager';
 import { HypixelGuildManager } from './HypixelGuildManager';
 import { PlayerManager } from './PlayerManager';
@@ -246,7 +246,7 @@ export class DatabaseManager {
 											auctionId: auction.uuid,
 										});
 
-										paidLog.push(`${player}: ${this.client.formatNumber(amount)}`);
+										paidLog.push(`${player}: ${formatNumber(amount)}`);
 									} catch (error) {
 										logger.error(error);
 										paidLog.push(`${player}: ${error}`);
@@ -304,15 +304,13 @@ export class DatabaseManager {
 		const playersInGuild = players.inGuild;
 		const PLAYER_COUNT = playersInGuild.size;
 		const PAID_COUNT = playersInGuild.filter(({ paid }) => paid).size;
-		const TOTAL_COINS = this.client.formatNumber(
-			taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0),
-		);
+		const TOTAL_COINS = formatNumber(taxCollectors.cache.reduce((acc, { collectedTax }) => acc + collectedTax, 0));
 
 		return Formatters.codeBlock(
 			'cs',
 			stripIndents(commaLists`
 				Collectors: # /ah ${taxCollectors.activeCollectors.map((collector) => collector.ign).sort(compareAlphabetically)}
-				Amount: ${this.client.formatNumber(config.get('TAX_AMOUNT'))}
+				Amount: ${formatNumber(config.get('TAX_AMOUNT'))}
 				Items: ${config.get('TAX_AUCTIONS_ITEMS').map((item) => `'${item}'`)}
 				Paid: ${PAID_COUNT} / ${PLAYER_COUNT} | ${Math.round(
 				(PAID_COUNT / PLAYER_COUNT) * 100,

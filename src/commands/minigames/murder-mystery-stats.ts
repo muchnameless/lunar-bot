@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { oneLine } from 'common-tags';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { escapeIgn, seconds } from '../../functions';
+import { escapeIgn, formatDecimalNumber, formatNumber, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
@@ -60,24 +60,24 @@ export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 			return oneLine`
 				${escapeIgn(ign)}:
 				MurderMystery:
-				wins: ${this.client.formatNumber(wins)},
-				losses: ${this.client.formatNumber(games - wins)},
-				winrate: ${this.client.formatDecimalNumber(wins / games)},
-				games played: ${this.client.formatNumber(games)},
-				kills: ${this.client.formatNumber(kills)},
-				deaths: ${this.client.formatNumber(deaths)},
+				wins: ${formatNumber(wins)},
+				losses: ${formatNumber(games - wins)},
+				winrate: ${formatDecimalNumber(wins / games)},
+				games played: ${formatNumber(games)},
+				kills: ${formatNumber(kills)},
+				deaths: ${formatNumber(deaths)},
 				K/D: ${this.calculateKD(kills, deaths)},
-				murderer wins: ${this.client.formatNumber(murderer_wins)},
-				detective wins: ${this.client.formatNumber(detective_wins)},
-				coins: ${this.client.formatNumber(coins)},
+				murderer wins: ${formatNumber(murderer_wins)},
+				detective wins: ${formatNumber(detective_wins)},
+				coins: ${formatNumber(coins)},
 				fastest murderer win: ${
 					typeof quickest_murderer_win_time_seconds === 'number'
-						? this.client.formatNumber(quickest_murderer_win_time_seconds)
+						? formatNumber(quickest_murderer_win_time_seconds)
 						: quickest_murderer_win_time_seconds
 				} s,
 				fastest detective win: ${
 					typeof quickest_detective_win_time_seconds === 'number'
-						? this.client.formatNumber(quickest_detective_win_time_seconds)
+						? formatNumber(quickest_detective_win_time_seconds)
 						: quickest_detective_win_time_seconds
 				} s
 			`;

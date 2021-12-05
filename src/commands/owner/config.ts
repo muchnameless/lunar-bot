@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Type } from '@sapphire/type';
 import RE2 from 're2';
-import { sortCache } from '../../functions';
+import { formatNumber, sortCache } from '../../functions';
 import { MAX_CHOICES } from '../../constants';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -53,14 +53,14 @@ export default class ConfigCommand extends ApplicationCommand {
 	/**
 	 * @param entries
 	 */
-	private _listEntries(entries: Collection<string, Config>) {
+	private static _listEntries(entries: Collection<string, Config>) {
 		return (
 			entries
 				.sorted(({ key: keyA }, { key: keyB }) => keyA.localeCompare(keyB))
 				.map(
 					({ key, parsedValue }) =>
 						`${key}: ${
-							typeof parsedValue === 'number' ? this.client.formatNumber(parsedValue).replace(/\s/g, '_') : parsedValue
+							typeof parsedValue === 'number' ? formatNumber(parsedValue).replace(/\s/g, '_') : parsedValue
 						} [${new Type(parsedValue)}]`,
 				)
 				.join('\n') || '\u200B'
@@ -150,7 +150,7 @@ export default class ConfigCommand extends ApplicationCommand {
 
 				if (!query) {
 					return InteractionUtil.reply(interaction, {
-						content: this._listEntries(this.config.cache),
+						content: ConfigCommand._listEntries(this.config.cache),
 						code: 'apache',
 						split: { char: '\n' },
 					});
@@ -159,7 +159,7 @@ export default class ConfigCommand extends ApplicationCommand {
 				const queryRegex = new RE2(query, 'i');
 
 				return InteractionUtil.reply(interaction, {
-					content: this._listEntries(
+					content: ConfigCommand._listEntries(
 						this.config.cache.filter(
 							({ key, value }) => queryRegex.test(key) || (value !== null && queryRegex.test(value)),
 						),

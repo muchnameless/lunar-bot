@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { hypixelGuildOption, optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { formatNumber } from '../../functions';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -32,7 +33,7 @@ export default class RanksCommand extends ApplicationCommand {
 
 				embed.addFields({
 					name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
-					value: `${this.client.formatNumber(currentWeightReq!)} weight`,
+					value: `${formatNumber(currentWeightReq!)} weight`,
 				});
 			}
 
@@ -56,11 +57,9 @@ export default class RanksCommand extends ApplicationCommand {
 
 			embed.addFields({
 				name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
-				value: `${this.client.formatNumber(Math.floor(weight))} / ${this.client.formatNumber(
-					currentWeightReq,
-				)} weight (${this.client.formatNumber(Math.floor(Math.abs(currentWeightReq - weight)))} ${
-					weight < currentWeightReq ? 'below' : 'above'
-				})`,
+				value: `${formatNumber(Math.floor(weight))} / ${formatNumber(currentWeightReq)} weight (${formatNumber(
+					Math.floor(Math.abs(currentWeightReq - weight)),
+				)} ${weight < currentWeightReq ? 'below' : 'above'})`,
 			});
 		}
 

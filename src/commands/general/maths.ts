@@ -4,6 +4,7 @@ const { add, sub, mul, div } = pkg;
 import Lexer from 'lex';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
+import { formatNumber } from '../../functions';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
@@ -163,15 +164,15 @@ export default class MathsCommand extends DualCommand {
 			if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
 			return mul(x, div(Math.PI, 180));
 		},
-		'!': (x?: number) => {
+		'!'(x?: number) {
 			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
 			if (x < 0) return Number.NaN;
-			return this.factorial(x);
+			return MathsCommand.factorial(x);
 		},
-		fac: (x?: number) => {
+		fac(x?: number) {
 			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
 			if (x < 0) return Number.NaN;
-			return this.factorial(x);
+			return MathsCommand.factorial(x);
 		},
 		sin(x?: number) {
 			if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
@@ -234,7 +235,7 @@ export default class MathsCommand extends DualCommand {
 	/**
 	 * @param start
 	 */
-	factorial = (start: number) => {
+	static factorial = (start: number) => {
 		let temp = 1;
 		let iterations = start;
 		while (iterations > 0) {
@@ -314,9 +315,9 @@ export default class MathsCommand extends DualCommand {
 	 * throws if the input is larger than Number.MAX_SAFE_INTEGER, returns the value otherwise
 	 * @param value
 	 */
-	validateNumber(value?: string | number) {
+	static validateNumber(value?: string | number) {
 		if (Math.abs(Number(value)) > Number.MAX_SAFE_INTEGER) {
-			throw new Error(`(intermediate) result larger than ${this.client.formatNumber(Number.MAX_SAFE_INTEGER)}`);
+			throw new Error(`(intermediate) result larger than ${formatNumber(Number.MAX_SAFE_INTEGER)}`);
 		}
 
 		if (typeof value === 'string') return Number(value);
@@ -359,7 +360,7 @@ export default class MathsCommand extends DualCommand {
 
 		// calculate
 		try {
-			const pop = () => this.validateNumber(stack.pop());
+			const pop = () => MathsCommand.validateNumber(stack.pop());
 
 			for (const token of parsed) {
 				if (Reflect.has(MathsCommand.binaryOperators, token)) {

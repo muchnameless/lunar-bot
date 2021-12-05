@@ -8,7 +8,7 @@ import {
 	requiredPlayerOption,
 } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil } from '../../util';
-import { escapeIgn, logger, safePromiseAll, validateNumber } from '../../functions';
+import { escapeIgn, formatNumber, logger, safePromiseAll, validateNumber } from '../../functions';
 import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction, TextChannel } from 'discord.js';
@@ -161,12 +161,12 @@ export default class TaxCommand extends ApplicationCommand {
 								.addFields(
 									{
 										name: 'Old amount',
-										value: Formatters.codeBlock(this.client.formatNumber(OLD_AMOUNT)),
+										value: Formatters.codeBlock(formatNumber(OLD_AMOUNT)),
 										inline: true,
 									},
 									{
 										name: 'New amount',
-										value: Formatters.codeBlock(this.client.formatNumber(NEW_AMOUNT)),
+										value: Formatters.codeBlock(formatNumber(NEW_AMOUNT)),
 										inline: true,
 									},
 								),
@@ -174,9 +174,7 @@ export default class TaxCommand extends ApplicationCommand {
 
 						return InteractionUtil.reply(
 							interaction,
-							`changed the guild tax amount from \`${this.client.formatNumber(
-								OLD_AMOUNT,
-							)}\` to \`${this.client.formatNumber(NEW_AMOUNT)}\``,
+							`changed the guild tax amount from \`${formatNumber(OLD_AMOUNT)}\` to \`${formatNumber(NEW_AMOUNT)}\``,
 						);
 					}
 
@@ -198,7 +196,7 @@ export default class TaxCommand extends ApplicationCommand {
 						if (player.paid) {
 							await InteractionUtil.awaitConfirmation(
 								interaction,
-								`\`${player}\` is already set to paid with an amount of \`${this.client.formatNumber(
+								`\`${player}\` is already set to paid with an amount of \`${formatNumber(
 									(await player.taxAmount) ?? Number.NaN,
 								)}\`. Overwrite this?`,
 							);
@@ -216,7 +214,7 @@ export default class TaxCommand extends ApplicationCommand {
 						this.client.log(
 							this.client.defaultEmbed.setTitle('Guild Tax').addFields({
 								name: `/ah ${collector}`,
-								value: Formatters.codeBlock(`${player}: ${this.client.formatNumber(AMOUNT)} (manually)`),
+								value: Formatters.codeBlock(`${player}: ${formatNumber(AMOUNT)} (manually)`),
 							}),
 						);
 
@@ -224,7 +222,7 @@ export default class TaxCommand extends ApplicationCommand {
 							interaction,
 							`\`${player}\` manually set to paid with ${
 								AMOUNT === this.config.get('TAX_AMOUNT') ? 'the default' : 'a custom'
-							} amount of \`${this.client.formatNumber(AMOUNT)}\``,
+							} amount of \`${formatNumber(AMOUNT)}\``,
 						);
 					}
 
@@ -314,15 +312,13 @@ export default class TaxCommand extends ApplicationCommand {
 
 							await InteractionUtil.awaitConfirmation(
 								interaction,
-								`reset tax paid from \`${player}\` (amount: ${
-									OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'
-								})?`,
+								`reset tax paid from \`${player}\` (amount: ${OLD_AMOUNT ? formatNumber(OLD_AMOUNT) : 'unknown'})?`,
 							);
 
 							await player.resetTax();
 
 							result = `reset tax paid from \`${player}\` (amount: ${
-								OLD_AMOUNT ? this.client.formatNumber(OLD_AMOUNT) : 'unknown'
+								OLD_AMOUNT ? formatNumber(OLD_AMOUNT) : 'unknown'
 							})`;
 
 							// all players

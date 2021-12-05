@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { removeNumberFormatting, safePromiseAll, validateNumber } from '../../functions';
+import { formatNumber, removeNumberFormatting, safePromiseAll, validateNumber } from '../../functions';
 import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
@@ -59,16 +59,14 @@ export default class DonateCommand extends ApplicationCommand {
 			this.client.defaultEmbed.setTitle('Guild Donations').addFields({
 				name: `/ah ${collector}`,
 				value: Formatters.codeBlock(
-					`${player}: ${this.client.formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`,
+					`${player}: ${formatNumber(amount)} (manually)${notes?.length ? `\n(${notes})` : ''}`,
 				),
 			}),
 		);
 
 		return InteractionUtil.reply(
 			interaction,
-			`registered a donation from \`${player}\` of \`${this.client.formatNumber(amount)}\`${
-				notes?.length ? ` (${notes})` : ''
-			}`,
+			`registered a donation from \`${player}\` of \`${formatNumber(amount)}\`${notes?.length ? ` (${notes})` : ''}`,
 		);
 	}
 }

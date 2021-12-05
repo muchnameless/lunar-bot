@@ -17,7 +17,7 @@ import {
 } from '../constants';
 import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api';
-import { days, minutes, upperCaseFirstChar } from '.';
+import { days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
 import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
@@ -578,14 +578,14 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			});
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(
-				client.formatNumber(
+				formatNumber(
 					playerData.reduce((acc, player) => acc + player.sortingStat, 0),
 					0,
 					Math.round,
 				),
 			);
 			getEntry = (player) =>
-				client.formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
+				formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
 			break;
 		}
 
@@ -615,10 +615,10 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				)}]
 			`;
 			getEntry = (player: PlayerData) =>
-				`${client.formatDecimalNumber(
+				`${formatDecimalNumber(
 					player.skillAverageGain!,
 					Math.floor(playerData[0]?.skillAverageGain!).toLocaleString(NUMBER_FORMAT).length,
-				)} [${client.formatDecimalNumber(
+				)} [${formatDecimalNumber(
 					player.trueAverageGain!,
 					Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain!))).toLocaleString(
 						NUMBER_FORMAT,
@@ -668,16 +668,16 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				Math.max(...playerData.map(({ totalWeight }) => totalWeight!)),
 			).toLocaleString(NUMBER_FORMAT).length;
 			getEntry = (player) =>
-				`${client.formatDecimalNumber(player.sortingStat, temp1)} - ${client.formatDecimalNumber(
+				`${formatDecimalNumber(player.sortingStat, temp1)} - ${formatDecimalNumber(
 					player.gainedWeight!,
 					PADDING_AMOUNT_GAIN,
-				)} [${client.formatDecimalNumber(player.totalWeight!, PADDING_AMOUNT_TOTAL)}] - ${client.formatNumber(
+				)} [${formatDecimalNumber(player.totalWeight!, PADDING_AMOUNT_TOTAL)}] - ${formatNumber(
 					player.gainedGuildXp!,
 					temp2,
 				)}`;
 			totalStats = oneLine`
-				${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight!, 0) / playerData.length)} 
-				[${client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length)}]
+				${formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight!, 0) / playerData.length)} 
+				[${formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length)}]
 			`;
 			break;
 		}
@@ -706,29 +706,23 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
 				${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.totalWeightGain!, 0) / playerData.length,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeightGain!, 0) / playerData.length),
 				)}
 				[${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.weightGain!, 0) / playerData.length,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weightGain!, 0) / playerData.length),
 				)}
 				+ ${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.overflowGain!, 0) / playerData.length,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflowGain!, 0) / playerData.length),
 				)}]
 			`;
 			getEntry = (player) =>
-				`${client.formatDecimalNumber(
+				`${formatDecimalNumber(
 					player.totalWeightGain!,
 					Math.floor(playerData[0]?.totalWeightGain!).toLocaleString(NUMBER_FORMAT).length,
-				)} [${client.formatDecimalNumber(
+				)} [${formatDecimalNumber(
 					player.weightGain!,
 					Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain!))).toLocaleString(NUMBER_FORMAT).length,
-				)} + ${client.formatDecimalNumber(
+				)} + ${formatDecimalNumber(
 					player.overflowGain!,
 					Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain!))).toLocaleString(NUMBER_FORMAT)
 						.length,
@@ -760,29 +754,23 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
 				${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.totalWeightGain!, 0) / playerData.length,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeightGain!, 0) / playerData.length),
 				)}
 				[${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.weightGain!, 0) / playerData.length,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weightGain!, 0) / playerData.length),
 				)}
 				+ ${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.overflowGain!, 0) / playerData.length,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflowGain!, 0) / playerData.length),
 				)}]
 			`;
 			getEntry = (player) =>
-				`${client.formatDecimalNumber(
+				`${formatDecimalNumber(
 					player.totalWeightGain!,
 					Math.floor(playerData[0]?.totalWeightGain!).toLocaleString(NUMBER_FORMAT).length,
-				)} [${client.formatDecimalNumber(
+				)} [${formatDecimalNumber(
 					player.weightGain!,
 					Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain!))).toLocaleString(NUMBER_FORMAT).length,
-				)} + ${client.formatDecimalNumber(
+				)} + ${formatDecimalNumber(
 					player.overflowGain!,
 					Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain!))).toLocaleString(NUMBER_FORMAT)
 						.length,
@@ -803,14 +791,14 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			});
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(
-				client.formatNumber(
+				formatNumber(
 					playerData.reduce((acc, player) => acc + player.sortingStat, 0),
 					0,
 					Math.round,
 				),
 			);
 			getEntry = (player) =>
-				client.formatNumber(
+				formatNumber(
 					player.sortingStat,
 					Math.round(playerData[0]?.sortingStat).toLocaleString(NUMBER_FORMAT).length,
 					Math.round,
@@ -842,7 +830,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 		const { weightReq } = hypixelGuild;
 
 		description += stripIndent`
-			Current weight requirement: ${client.formatNumber(weightReq!)}
+			Current weight requirement: ${formatNumber(weightReq!)}
 			Guild average: ${totalStats}
 			Below reqs: ${playerData.filter(({ totalWeight }) => totalWeight! < weightReq!).length} / ${
 			hypixelGuild.players.size
@@ -853,7 +841,7 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 	} else {
 		description += stripIndent`
 			Current weight requirements: ${client.hypixelGuilds.cache
-				.map(({ name, weightReq }) => `${name} (${client.formatNumber(weightReq!)})`)
+				.map(({ name, weightReq }) => `${name} (${formatNumber(weightReq!)})`)
 				.join(', ')}
 			Guilds average: ${totalStats}
 			Guilds below reqs: ${
@@ -948,14 +936,14 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			});
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(
-				client.formatNumber(
+				formatNumber(
 					playerData.reduce((acc, player) => acc + player.sortingStat, 0) / playerData.length,
 					0,
 					Math.round,
 				),
 			);
 			getEntry = (player) =>
-				client.formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
+				formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
 			break;
 		}
 
@@ -975,23 +963,14 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
 				${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.skillAverage!, 0) / playerData.length,
-						2,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.skillAverage!, 0) / playerData.length, 2),
 				)}
 				[${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.trueAverage!, 0) / playerData.length,
-						2,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.trueAverage!, 0) / playerData.length, 2),
 				)}]
 			`;
 			getEntry = (player) =>
-				`${client.formatDecimalNumber(player.skillAverage!, 2)} [${client.formatDecimalNumber(
-					player.trueAverage!,
-					2,
-				)}]`;
+				`${formatDecimalNumber(player.skillAverage!, 2)} [${formatDecimalNumber(player.trueAverage!, 2)}]`;
 			break;
 		}
 
@@ -1010,14 +989,14 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			});
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(
-				client.formatNumber(
+				formatNumber(
 					playerData.reduce((acc, player) => acc + player.sortingStat, 0) / playerData.length,
 					0,
 					Math.round,
 				),
 			);
 			getEntry = (player) =>
-				client.formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
+				formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString(NUMBER_FORMAT).length);
 			break;
 		}
 
@@ -1038,25 +1017,23 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
 				${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length),
 				)}
 				[${Formatters.bold(
-					client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight!, 0) / playerData.length),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight!, 0) / playerData.length),
 				)}
 				+ ${Formatters.bold(
-					client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow!, 0) / playerData.length),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow!, 0) / playerData.length),
 				)}]
 			`;
 			getEntry = (player) =>
-				`${client.formatDecimalNumber(
+				`${formatDecimalNumber(
 					player.totalWeight!,
 					Math.floor(playerData[0]?.totalWeight!).toLocaleString(NUMBER_FORMAT).length,
-				)} [${client.formatDecimalNumber(
+				)} [${formatDecimalNumber(
 					player.weight!,
 					Math.floor(Math.max(...playerData.map(({ weight }) => weight!))).toLocaleString(NUMBER_FORMAT).length,
-				)} + ${client.formatDecimalNumber(
+				)} + ${formatDecimalNumber(
 					player.overflow!,
 					Math.floor(Math.max(...playerData.map(({ overflow }) => overflow!))).toLocaleString(NUMBER_FORMAT).length,
 				)}]`;
@@ -1080,25 +1057,23 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
 				${Formatters.bold(
-					client.formatDecimalNumber(
-						playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length,
-					),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.totalWeight!, 0) / playerData.length),
 				)}
 				[${Formatters.bold(
-					client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight!, 0) / playerData.length),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.weight!, 0) / playerData.length),
 				)}
 				+ ${Formatters.bold(
-					client.formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow!, 0) / playerData.length),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.overflow!, 0) / playerData.length),
 				)}]
 			`;
 			getEntry = (player) =>
-				`${client.formatDecimalNumber(
+				`${formatDecimalNumber(
 					player.totalWeight!,
 					Math.floor(playerData[0]?.totalWeight!).toLocaleString(NUMBER_FORMAT).length,
-				)} [${client.formatDecimalNumber(
+				)} [${formatDecimalNumber(
 					player.weight!,
 					Math.floor(Math.max(...playerData.map(({ weight }) => weight!))).toLocaleString(NUMBER_FORMAT).length,
-				)} + ${client.formatDecimalNumber(
+				)} + ${formatDecimalNumber(
 					player.overflow!,
 					Math.floor(Math.max(...playerData.map(({ overflow }) => overflow!))).toLocaleString(NUMBER_FORMAT).length,
 				)}]`;
@@ -1120,15 +1095,11 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			totalStats = oneLine`
 				${Formatters.bold((playerData.reduce((acc, player) => acc + player.progressLevel!, 0) / playerData.length).toFixed(2))}
 				[${Formatters.bold(
-					client.formatNumber(
-						playerData.reduce((acc, player) => acc + player.xp!, 0) / playerData.length,
-						0,
-						Math.round,
-					),
+					formatNumber(playerData.reduce((acc, player) => acc + player.xp!, 0) / playerData.length, 0, Math.round),
 				)} XP]
 			`;
 			getEntry = (player) =>
-				`${client.formatDecimalNumber(player.progressLevel!, 2)} [${client.formatNumber(
+				`${formatDecimalNumber(player.progressLevel!, 2)} [${formatNumber(
 					player.xp!,
 					Math.round(playerData[0]?.xp!).toLocaleString(NUMBER_FORMAT).length,
 					Math.round,

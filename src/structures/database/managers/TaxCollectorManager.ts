@@ -1,6 +1,6 @@
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
-import { escapeIgn } from '../../../functions';
+import { escapeIgn, formatNumber } from '../../../functions';
 import { ModelManager } from './ModelManager';
 import type { TaxCollector } from '../models/TaxCollector';
 import type { ModelResovable } from './ModelManager';
@@ -64,15 +64,15 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	createTaxCollectedEmbed() {
 		const embed = this.client.defaultEmbed.setTitle('Collected Guild Tax').setDescription(stripIndents`
 			${Formatters.bold('combined')}
-			tax: ${this.client.formatNumber(
+			tax: ${formatNumber(
 				this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0),
 				0,
 			)}
-			donations: ${this.client.formatNumber(
+			donations: ${formatNumber(
 				this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0),
 				0,
 			)}
-			total: ${this.client.formatNumber(
+			total: ${formatNumber(
 				this.cache.reduce((acc, collector) => acc + collector.collectedTax + collector.collectedDonations, 0),
 				0,
 			)}
@@ -83,9 +83,9 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 			embed.addFields({
 				name: `${escapeIgn(`${taxCollector}`)}${taxCollector.isCollecting ? '' : ' (inactive)'}`,
 				value: stripIndents`
-					tax: ${this.client.formatNumber(taxCollector.collectedTax)}
-					donations: ${this.client.formatNumber(taxCollector.collectedDonations)}
-					total: ${this.client.formatNumber(taxCollector.collectedTax + taxCollector.collectedDonations)}
+					tax: ${formatNumber(taxCollector.collectedTax)}
+					donations: ${formatNumber(taxCollector.collectedDonations)}
+					total: ${formatNumber(taxCollector.collectedTax + taxCollector.collectedDonations)}
 				`,
 			});
 		}

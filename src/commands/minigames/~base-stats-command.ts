@@ -1,6 +1,6 @@
 import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
-import { escapeIgn, getUuidAndIgn, logger } from '../../functions';
+import { escapeIgn, formatDecimalNumber, getUuidAndIgn, logger } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
@@ -27,9 +27,10 @@ export default class StatsCommand extends DualCommand {
 	 * @param kills
 	 * @param deaths
 	 */
+	// eslint-disable-next-line class-methods-use-this
 	calculateKD(kills?: number | string | null, deaths?: number | string | null) {
 		if (kills == null || deaths == null) return null;
-		return this.client.formatDecimalNumber(Math.floor((Number(kills) / Math.max(Number(deaths), 1)) * 100) / 100);
+		return formatDecimalNumber(Math.floor((Number(kills) / Math.max(Number(deaths), 1)) * 100) / 100);
 	}
 
 	/**

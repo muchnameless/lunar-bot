@@ -13,7 +13,16 @@ import {
 } from '../../../constants';
 import { GuildUtil } from '../../../util';
 import { hypixel, mojang } from '../../../api';
-import { cleanFormattedNumber, compareAlphabetically, days, hours, logger, safePromiseAll } from '../../../functions';
+import {
+	cleanFormattedNumber,
+	compareAlphabetically,
+	days,
+	formatDecimalNumber,
+	formatNumber,
+	hours,
+	logger,
+	safePromiseAll,
+} from '../../../functions';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Collection, GuildMember, Snowflake } from 'discord.js';
 import type { Player } from './Player';
@@ -356,8 +365,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * returns various average stats, formatted as strings
 	 */
 	get formattedStats() {
-		const formatInteger = (number: number) => cleanFormattedNumber(this.client.formatNumber(number, 0, Math.round));
-		const formatDecimal = (number: number) => cleanFormattedNumber(this.client.formatDecimalNumber(number));
+		const formatInteger = (number: number) => cleanFormattedNumber(formatNumber(number, 0, Math.round));
+		const formatDecimal = (number: number) => cleanFormattedNumber(formatDecimalNumber(number));
 		const { weightAverage, skillAverage, slayerAverage, catacombsAverage } = this.stats;
 
 		return {
