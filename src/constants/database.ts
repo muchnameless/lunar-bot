@@ -55,7 +55,6 @@ export const DEFAULT_CONFIG = {
 	LOGGING_CHANNEL_ID: null,
 	MAIN_GUILD_ID: null,
 	MOJANG_API_ERROR: false,
-	NUMBER_FORMAT: 'fr-FR',
 	PLAYER_DB_UPDATE_ENABLED: true,
 	PREFIXES: ['!', '/'],
 	PURGE_LIST_OFFSET: 7,
@@ -110,7 +109,6 @@ export type ConfigValues = {
 	LOGGING_CHANNEL_ID: Snowflake;
 	MAIN_GUILD_ID: string;
 	MOJANG_API_ERROR: boolean;
-	NUMBER_FORMAT: string;
 	PLAYER_DB_UPDATE_ENABLED: boolean;
 	PREFIXES: string[];
 	PURGE_LIST_OFFSET: number;
