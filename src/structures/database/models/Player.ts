@@ -593,7 +593,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	get hypixelGuild(): HypixelGuild | null {
 		return (
 			this.client.hypixelGuilds.cache.get(this.guildId!) ??
-			(this.inGuild()
+			(this.guildId
 				? (logger.warn(`[GET HYPIXEL GUILD]: ${this.ign}: no guild with the id '${this.guildId}' found`), null)
 				: null)
 		);
