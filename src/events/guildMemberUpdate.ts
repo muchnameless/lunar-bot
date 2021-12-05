@@ -26,6 +26,9 @@ export default class GuildMemberUpdateEvent extends Event {
 
 		if (!player) return;
 
+		// member is not from the hypixel guild's discord guild
+		if (player?.hypixelGuild?.discordId !== newMember.guild.id) return;
+
 		player.setDiscordMember(newMember);
 
 		// changed nickname -> check if new name includes ign

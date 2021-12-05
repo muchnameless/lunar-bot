@@ -32,8 +32,10 @@ export default class GuildMemberRemoveEvent extends Event {
 		// check discord members that left for id in player database
 		const player = GuildMemberUtil.getPlayer(member);
 
-		if (!player) return;
+		// member is not from the hypixel guild's discord guild
+		if (player?.hypixelGuild?.discordId !== member.guild.id) return;
 
+		// uncaches the member as well
 		player.update({ inDiscord: false }).catch((error) => logger.error(error));
 
 		this.client.log(

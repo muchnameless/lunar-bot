@@ -1281,8 +1281,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	async link(idOrDiscordMember: GuildMember | Snowflake, reason?: string) {
 		if (idOrDiscordMember instanceof GuildMember) {
 			await this.setUniqueDiscordId(idOrDiscordMember.id);
-			this.update({ inDiscord: true }).catch((error) => logger.error(error));
-			this.setDiscordMember(idOrDiscordMember);
+
+			if (this.hypixelGuild?.discordId === idOrDiscordMember.guild.id) {
+				this.update({ inDiscord: true }).catch((error) => logger.error(error, `[LINK]: ${this.logInfo}`));
+				this.setDiscordMember(idOrDiscordMember);
+			}
 
 			logger.info(`[LINK]: ${this.logInfo}: linked to '${idOrDiscordMember.user.tag}'`);
 
@@ -1296,7 +1299,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			return this.update({ inDiscord: false });
 		}
 
-		throw new Error('[LINK]: input must be either a discord GuildMember or a discord ID');
+		throw new Error(`[LINK]: ${this.logInfo}: input must be either a discord GuildMember or a discord ID`);
 	}
 
 	/**

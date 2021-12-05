@@ -25,6 +25,9 @@ export default class GuildMemberAddEvent extends Event {
 
 		player.link(member, 'linked player joined discord server');
 
+		// member is not from the hypixel guild's discord guild
+		if (player?.hypixelGuild?.discordId !== member.guild.id) return;
+
 		let description = stripIndents`
 			${member} joined the discord server
 			${player.info}
