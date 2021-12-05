@@ -24,8 +24,6 @@ export default class GuildMemberUpdateEvent extends Event {
 
 		const player = GuildMemberUtil.getPlayer(newMember);
 
-		if (!player) return;
-
 		// member is not from the hypixel guild's discord guild
 		if (player?.hypixelGuild?.discordId !== newMember.guild.id) return;
 
