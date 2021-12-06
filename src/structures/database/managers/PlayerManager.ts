@@ -418,9 +418,9 @@ export class PlayerManager extends ModelManager<Player> {
 
 				log.get(hypixelGuild)!.push(`-\u00A0${player}: ${result.oldProfileName} -> ${result.newProfileName}`);
 			} catch (error) {
-				logger.error(error, '[UPDATE MAIN PROFILE]');
-
 				if (typeof error === 'string') {
+					logger.error(`[UPDATE MAIN PROFILE]: ${player.logInfo}: ${error}`);
+
 					const { hypixelGuild } = player;
 
 					if (!log.has(hypixelGuild)) {
@@ -429,6 +429,8 @@ export class PlayerManager extends ModelManager<Player> {
 					}
 
 					log.get(hypixelGuild)!.push(`-\u00A0${player}: ${error}`);
+				} else {
+					logger.error(error, `[UPDATE MAIN PROFILE]: ${player.logInfo}`);
 				}
 			}
 		}

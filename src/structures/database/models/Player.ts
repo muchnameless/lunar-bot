@@ -1692,7 +1692,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			this.update({ mainProfileId: null, xpUpdatesDisabled: true }).catch((error) => logger.error(error));
 			this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
 
-			throw `${this.logInfo}: no SkyBlock profiles`;
+			throw 'no SkyBlock profiles';
 		}
 
 		const { profile_id: PROFILE_ID, cute_name: PROFILE_NAME } = mainProfile;
