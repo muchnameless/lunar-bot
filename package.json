@@ -85,7 +85,7 @@
     "pino-pretty": "^7.2.0",
     "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
-    "typescript": "^4.6.0-dev.20211205"
+    "typescript": "^4.6.0-dev.20211206"
   },
   "engines": {
     "node": ">=v17.0.1",
