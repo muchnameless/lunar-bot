@@ -37,9 +37,7 @@ const client = new Client({
 				getComparisonTimestamp(e: Channel) {
 					if (e.type === 'DM') {
 						// DM -> last message
-						return (e as DMChannel).lastMessageId
-							? SnowflakeUtil.deconstruct((e as DMChannel).lastMessageId!).timestamp
-							: -1;
+						return (e as DMChannel).lastMessageId ? SnowflakeUtil.timestampFrom((e as DMChannel).lastMessageId!) : -1;
 					}
 					return (e as ThreadChannel).archiveTimestamp ?? -1; // threads -> archived
 				},
