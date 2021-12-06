@@ -287,7 +287,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!hypixelMessage.hypixelGuild?.acceptJoinRequests) {
 				return logger.info(
-					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ignoring guild join request from ${ign}, auto accepts disabled`,
+					{ ign, status: 'ignored', reason: 'auto accepts disabled' },
+					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request`,
 				);
 			}
 
@@ -299,7 +300,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 				if (existingBan) {
 					return logger.info(
-						`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${ign} is on the ban list for \`${existingBan.reason}\``,
+						{ ign, status: 'banned', reason: existingBan.reason },
+						`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request`,
 					);
 				}
 
@@ -308,7 +310,10 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
 
 					if (!profiles?.length) {
-						return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${ign} has no SkyBlock profiles`);
+						return logger.info(
+							{ ign, status: 'ignored', reason: 'no SkyBlock profiles' },
+							`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request`,
+						);
 					}
 
 					const [{ totalWeight }] = profiles
@@ -317,16 +322,29 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 					if (totalWeight < hypixelMessage.hypixelGuild.weightReq) {
 						return logger.info(
-							`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${ign}'s total weight is ${totalWeight}, guild req is ${hypixelMessage.hypixelGuild.weightReq}`,
+							{
+								ign,
+								status: 'ignored',
+								reason: "doesn't meet requirements",
+								totalWeight,
+								requiredWeight: hypixelMessage.hypixelGuild.weightReq,
+							},
+							`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request`,
 						);
 					}
 				}
 
 				// accept invite
 				await hypixelMessage.chatBridge.minecraft.command(`/guild accept ${ign}`);
-				logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: accepted guild join request from ${ign}`);
+				logger.info(
+					{ ign, status: 'accepted', reason: 'meets requirements' },
+					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request`,
+				);
 			} catch (error) {
-				logger.error(error, `[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request from ${ign}`);
+				logger.info(
+					{ err: error, ign, status: 'errored' },
+					`[CHATBRIDGE]: ${this.chatBridge.logInfo}: guild join request`,
+				);
 			}
 
 			return;
