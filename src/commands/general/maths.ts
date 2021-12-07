@@ -263,7 +263,7 @@ export default class MathsCommand extends DualCommand {
 		);
 	})
 		.addRule(/,/, () => void 0) // ignore ','
-		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[!()*+/^°-]/, (lexeme: string) => lexeme)
+		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[!()*/^°]|[+-](?=[^)])(?!$)/, (lexeme: string) => lexeme)
 		.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
 		.addRule(/cos(?:ine|inus)?/i, () => 'cos')
 		.addRule(/tan(?:gen[st])?/i, () => 'tan')
