@@ -285,11 +285,10 @@ export default class MathsCommand extends DualCommand {
 		);
 	})
 		.addRule(/,/, () => void 0) // ignore ','
-		.addRule(
-			// numbers | binary ops | unary postfix | unary prefix
-			/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[()*/^]|(?<!^)(?<=[^(^/])[°!]|[+-](?=[^)!°^/])(?!$)/,
-			(lexeme: string) => lexeme,
-		)
+		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)/, (lexeme: string) => lexeme) // numbers
+		.addRule(/[()*/^]/, (lexeme: string) => lexeme)
+		.addRule(/[+-](?=[^)^/])(?!$)/, (lexeme: string) => lexeme) // unary prefix
+		.addRule(/(?<!^)(?<=[^(^/+-])[°!]/, (lexeme: string) => lexeme) // unary postfix (include prev rules matches in lookbehind)
 		.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
 		.addRule(/cos(?:ine|inus)?/i, () => 'cos')
 		.addRule(/tan(?:gen[st])?/i, () => 'tan')
