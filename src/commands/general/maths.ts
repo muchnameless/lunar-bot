@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import BigDecimal from 'js-big-decimal';
 import Lexer from 'lex';
+import { Util } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { formatNumber } from '../../functions';
@@ -254,23 +255,29 @@ export default class MathsCommand extends DualCommand {
 	 * helper method to ensure that sin(pi) = 0
 	 * @param x
 	 */
-	isMultipleOfPi = (x: number) =>
-		Number(BigDecimal.divide(x, Math.PI, this.precision)) ===
-		Number(BigDecimal.floor(BigDecimal.divide(x, Math.PI, this.precision)));
+	isMultipleOfPi(x: number) {
+		return (
+			Number(BigDecimal.divide(x, Math.PI, this.precision)) ===
+			Number(BigDecimal.floor(BigDecimal.divide(x, Math.PI, this.precision)))
+		);
+	}
 
 	/**
 	 * helper method to ensure that cos(pi/2) = 0
 	 * @param x
 	 */
-	isMultipleOfPiHalf = (x: number) =>
-		Number(
-			BigDecimal.divide(BigDecimal.add(x, BigDecimal.divide(Math.PI, 2, this.precision)), Math.PI, this.precision),
-		) ===
-		Number(
-			BigDecimal.floor(
+	isMultipleOfPiHalf(x: number) {
+		return (
+			Number(
 				BigDecimal.divide(BigDecimal.add(x, BigDecimal.divide(Math.PI, 2, this.precision)), Math.PI, this.precision),
-			),
+			) ===
+			Number(
+				BigDecimal.floor(
+					BigDecimal.divide(BigDecimal.add(x, BigDecimal.divide(Math.PI, 2, this.precision)), Math.PI, this.precision),
+				),
+			)
 		);
+	}
 
 	/**
 	 * lexer for mathematical expressions
@@ -286,9 +293,10 @@ export default class MathsCommand extends DualCommand {
 	})
 		.addRule(/,/, () => void 0) // ignore ','
 		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)/, (lexeme: string) => lexeme) // numbers
-		.addRule(/[()*/^]/, (lexeme: string) => lexeme)
-		.addRule(/[+-](?=[^)^/])(?!$)/, (lexeme: string) => lexeme) // unary prefix
-		.addRule(/(?<!^)(?<=[^(^/+-])[°!]/, (lexeme: string) => lexeme) // unary postfix (include prev rules matches in lookbehind)
+		.addRule(/(?<=[^+-])[)/^*]/, (lexeme: string) => lexeme) // operators which should not follow after unary prefix operators
+		.addRule(/\(/, (lexeme: string) => lexeme) // operators which can be anywhere
+		.addRule(/[+-](?!$)/, (lexeme: string) => lexeme) // unary prefix
+		.addRule(/(?<!^)(?<=[^(/^*+-])[°!]/, (lexeme: string) => lexeme) // unary postfix (include prev rules matches in lookbehind)
 		.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
 		.addRule(/cos(?:ine|inus)?/i, () => 'cos')
 		.addRule(/tan(?:gen[st])?/i, () => 'tan')
@@ -444,7 +452,10 @@ export default class MathsCommand extends DualCommand {
 	 * @param interaction
 	 */
 	override runSlash(interaction: CommandInteraction) {
-		return InteractionUtil.reply(interaction, this._generateReply(interaction.options.getString('input', true)));
+		return InteractionUtil.reply(
+			interaction,
+			Util.escapeMarkdown(this._generateReply(interaction.options.getString('input', true))),
+		);
 	}
 
 	/**
