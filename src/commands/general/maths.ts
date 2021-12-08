@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import pkg from 'sinful-math';
-const { add, sub, mul, div } = pkg;
+import BigDecimal from 'js-big-decimal';
 import Lexer from 'lex';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
@@ -97,6 +96,12 @@ class Parser {
 }
 
 export default class MathsCommand extends DualCommand {
+	/**
+	 * >= 10 -> sin(90°) = 0
+	 * >= 18 -> cos(90°) = 1
+	 */
+	precision = 18;
+
 	constructor(context: CommandContext) {
 		super(
 			context,
@@ -155,14 +160,14 @@ export default class MathsCommand extends DualCommand {
 
 	unaryOperators = {
 		m(x = 1) {
-			return mul(x, 1_000_000);
+			return BigDecimal.multiply(x, 1_000_000);
 		},
 		k(x = 1) {
-			return mul(x, 1_000);
+			return BigDecimal.multiply(x, 1_000);
 		},
-		'°'(x?: number) {
+		'°': (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`degree` requires one argument');
-			return mul(x, div(Math.PI, 180));
+			return BigDecimal.multiply(x, BigDecimal.divide(Math.PI, 180, this.precision));
 		},
 		'!'(x?: number) {
 			if (typeof x === 'undefined') throw new Error('`fac` requires one argument');
@@ -174,20 +179,20 @@ export default class MathsCommand extends DualCommand {
 			if (x < 0) return Number.NaN;
 			return MathsCommand.factorial(x);
 		},
-		sin(x?: number) {
+		sin: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`sin` requires one argument');
-			if (MathsCommand.isMultipleOfPi(x)) return 0;
+			if (this.isMultipleOfPi(x)) return 0;
 			return Math.sin(x);
 		},
-		cos(x?: number) {
+		cos: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`cos` requires one argument');
-			if (MathsCommand.isMultipleOfPiHalf(x)) return 0;
+			if (this.isMultipleOfPiHalf(x)) return 0;
 			return Math.cos(x);
 		},
-		tan(x?: number) {
+		tan: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`tan` requires one argument');
-			if (MathsCommand.isMultipleOfPi(x)) return 0;
-			if (MathsCommand.isMultipleOfPiHalf(x)) return Number.NaN;
+			if (this.isMultipleOfPi(x)) return 0;
+			if (this.isMultipleOfPiHalf(x)) return Number.NaN;
 			return Math.tan(x);
 		},
 		sqrt(x?: number) {
@@ -202,33 +207,33 @@ export default class MathsCommand extends DualCommand {
 			if (typeof x === 'undefined') throw new Error('`ln` requires one argument');
 			return Math.log(x);
 		},
-		percent(x?: number) {
+		percent: (x?: number) => {
 			if (typeof x === 'undefined') throw new Error('`%` requires one argument');
-			return div(x, 100);
+			return BigDecimal.divide(x, 100, this.precision);
 		},
 	} as const;
 
-	static binaryOperators = {
+	binaryOperators = {
 		'^'(a?: number, b?: number) {
 			if (typeof a === 'undefined') throw new Error('`^` is not a unary operator');
 			if (a == 0 && b == 0) return Number.NaN;
 			return a ** b!;
 		},
-		'+': (a?: number, b?: number) => (typeof a !== 'undefined' ? add(a, b!) : b!),
-		'-': (a?: number, b?: number) => (typeof a !== 'undefined' ? sub(a, b!) : -b!),
+		'+': (a?: number, b?: number) => (typeof a !== 'undefined' ? BigDecimal.add(a, b) : b!),
+		'-': (a?: number, b?: number) => (typeof a !== 'undefined' ? BigDecimal.subtract(a, b) : BigDecimal.negate(b)),
 		'*'(a?: number, b?: number) {
 			if (typeof a === 'undefined') throw new Error('`*` is not a unary operator');
-			return mul(a, b!);
+			return BigDecimal.multiply(a, b!);
 		},
-		'/'(a?: number, b?: number) {
+		'/': (a?: number, b?: number) => {
 			if (typeof a === 'undefined') throw new Error('`/` is not a unary operator');
 			if (b == 0) return Number.NaN;
-			return div(a, b!);
+			return BigDecimal.divide(a, b!, this.precision);
 		},
-		log(a?: number, b?: number) {
+		log: (a?: number, b?: number) => {
 			if (typeof a === 'undefined') throw new Error('`log` requires two arguments (use `ln` for base e)');
 			if (a <= 0 || b! <= 0) return Number.NaN;
-			return div(Math.log(a), Math.log(b!));
+			return BigDecimal.divide(Math.log(a), Math.log(b!), this.precision);
 		},
 	} as const;
 
@@ -245,10 +250,27 @@ export default class MathsCommand extends DualCommand {
 		return temp;
 	};
 
-	static isMultipleOfPi = (x: number) => div(x, Math.PI) === Math.floor(div(x, Math.PI));
+	/**
+	 * helper method to ensure that sin(pi) = 0
+	 * @param x
+	 */
+	isMultipleOfPi = (x: number) =>
+		Number(BigDecimal.divide(x, Math.PI, this.precision)) ===
+		Number(BigDecimal.floor(BigDecimal.divide(x, Math.PI, this.precision)));
 
-	static isMultipleOfPiHalf = (x: number) =>
-		div(add(x, div(Math.PI, 2)), Math.PI) === Math.floor(div(add(x, div(Math.PI, 2)), Math.PI));
+	/**
+	 * helper method to ensure that cos(pi/2) = 0
+	 * @param x
+	 */
+	isMultipleOfPiHalf = (x: number) =>
+		Number(
+			BigDecimal.divide(BigDecimal.add(x, BigDecimal.divide(Math.PI, 2, this.precision)), Math.PI, this.precision),
+		) ===
+		Number(
+			BigDecimal.floor(
+				BigDecimal.divide(BigDecimal.add(x, BigDecimal.divide(Math.PI, 2, this.precision)), Math.PI, this.precision),
+			),
+		);
 
 	/**
 	 * lexer for mathematical expressions
@@ -367,11 +389,11 @@ export default class MathsCommand extends DualCommand {
 			const pop = () => MathsCommand.validateNumber(stack.pop());
 
 			for (const token of parsed) {
-				if (Reflect.has(MathsCommand.binaryOperators, token)) {
+				if (Reflect.has(this.binaryOperators, token)) {
 					const b = pop();
 					const a = pop();
 
-					stack.push(MathsCommand.binaryOperators[token as keyof typeof MathsCommand['binaryOperators']](a, b));
+					stack.push(this.binaryOperators[token as keyof MathsCommand['binaryOperators']](a, b));
 					continue;
 				}
 
