@@ -263,7 +263,11 @@ export default class MathsCommand extends DualCommand {
 		);
 	})
 		.addRule(/,/, () => void 0) // ignore ','
-		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[!()*/^°]|[+-](?=[^)])(?!$)/, (lexeme: string) => lexeme)
+		.addRule(
+			// numbers | binary ops | unary postfix | unary prefix
+			/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)|[()*/^]|(?<!^)(?<=[^(^/])[°!]|[+-](?=[^)!°^/])(?!$)/,
+			(lexeme: string) => lexeme,
+		)
 		.addRule(/sin(?:e|us)?/i, () => 'sin') // functions
 		.addRule(/cos(?:ine|inus)?/i, () => 'cos')
 		.addRule(/tan(?:gen[st])?/i, () => 'tan')
@@ -275,7 +279,7 @@ export default class MathsCommand extends DualCommand {
 		.addRule(/%/, () => 'percent')
 		.addRule(/pi|\u03C0/iu, () => Math.PI) // constants
 		.addRule(/e(?:uler)?/i, () => Math.E)
-		.addRule(/m|k/i, (lexeme: string) => lexeme.toLowerCase()); // multiplier
+		.addRule(/(?<=\d)[mk]/i, (lexeme: string) => lexeme.toLowerCase()); // multiplier
 
 	/**
 	 * parser for reverse polish notation
