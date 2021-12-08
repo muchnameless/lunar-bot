@@ -142,7 +142,7 @@ export default class LinkCommand extends ApplicationCommand {
 
 		// player already linked
 		if (validateNumber(player.discordId)) {
-			let linkedUser;
+			let linkedUser: User | null = null;
 
 			try {
 				linkedUser = await player.discordUser;

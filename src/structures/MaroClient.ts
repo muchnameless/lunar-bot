@@ -197,7 +197,7 @@ export class MaroClient {
 			// // fallthrough
 
 			default: {
-				let cause;
+				let cause: string | undefined;
 
 				try {
 					({ cause } = (await res.json()) as { cause: string });

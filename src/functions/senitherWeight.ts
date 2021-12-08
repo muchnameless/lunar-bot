@@ -106,7 +106,7 @@ export function getSenitherSlayerWeight(slayerType: ArrayElement<typeof SLAYERS>
 
 	// calculate overflow
 	let remaining = xp - 1_000_000;
-	let modifier;
+	let modifier: number;
 
 	const BASE_MODIFIER = (modifier = SLAYER_MODIFIER[slayerType] ?? 0);
 

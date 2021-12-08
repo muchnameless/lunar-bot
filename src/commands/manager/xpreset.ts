@@ -29,7 +29,7 @@ export default class XpResetCommand extends ApplicationCommand {
 		const { players } = this.client;
 		const PLAYER_INPUT = interaction.options.getString('player');
 
-		let result;
+		let result: string;
 
 		// individual player
 		if (PLAYER_INPUT) {

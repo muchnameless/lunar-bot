@@ -36,7 +36,7 @@ export default class DonateCommand extends ApplicationCommand {
 		const TEXT_INPUT = interaction.options.getString('notes');
 
 		let amount: string | number | undefined = removeNumberFormatting(AMOUNT_OR_TEXT);
-		let notes;
+		let notes: string | null;
 
 		if (validateNumber(amount!)) {
 			amount = Number(amount);

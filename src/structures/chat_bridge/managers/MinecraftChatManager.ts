@@ -306,7 +306,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		MessageUtil.react(discordMessage, STOP_EMOJI);
 
-		let info;
+		let info: string | undefined;
 
 		switch (reason) {
 			case ForwardRejectionReason.HYPIXEL_BLOCKED: {

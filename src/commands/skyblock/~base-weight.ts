@@ -47,7 +47,7 @@ export default class BaseWeightCommand extends DualCommand {
 
 			if (!profiles?.length) return `\`${ign}\` has no SkyBlock profiles`;
 
-			let weightData;
+			let weightData: WeightData & { name: string };
 
 			if (!profileName) {
 				[weightData] = profiles
@@ -99,7 +99,7 @@ export default class BaseWeightCommand extends DualCommand {
 		let profileName = PROFILE_NAME_INPUT?.replace(/\W/g, '');
 
 		if (profileName) {
-			let similarity;
+			let similarity: number;
 
 			({ value: profileName, similarity } = autocorrect(profileName, PROFILE_NAMES));
 

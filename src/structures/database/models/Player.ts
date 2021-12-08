@@ -50,7 +50,7 @@ import {
 } from '../../../functions';
 import { TransactionTypes } from './Transaction';
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
-import type { Snowflake, GuildResolvable } from 'discord.js';
+import type { Snowflake, GuildResolvable, Guild } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
 import type { HypixelGuild } from './HypixelGuild';
 import type { Transaction, TransactionAttributes } from './Transaction';
@@ -615,7 +615,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (!this.inDiscord || !validateDiscordId(this.discordId)) return null;
 
 		try {
-			let guild;
+			let guild: Guild | null | undefined;
 
 			if (guildResolvable) {
 				guild = this.client.guilds.resolve(guildResolvable);
@@ -1221,7 +1221,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const discordGuild = this.hypixelGuild?.discordGuild;
 		if (!discordGuild) return null;
 
-		let member;
+		let member: GuildMember | undefined;
 
 		if (this.discordId) {
 			// tag or ID known
@@ -1582,7 +1582,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const { displayName: PREV_NAME } = member;
 
 		try {
-			let auditLogReason;
+			let auditLogReason: string | undefined;
 
 			switch (reason) {
 				case NickChangeReason.NO_IGN:

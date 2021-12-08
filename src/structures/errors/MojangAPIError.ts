@@ -8,7 +8,7 @@ export class MojangAPIError extends FetchError {
 	 * @param input
 	 */
 	constructor(response: Partial<Response>, queryType?: string | null, input?: string) {
-		let message;
+		let message: string;
 
 		switch (queryType) {
 			case 'ign':

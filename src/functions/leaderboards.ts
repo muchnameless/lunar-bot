@@ -18,6 +18,7 @@ import {
 import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api';
 import { days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
+import type { MessageButtonStyles } from 'discord.js/typings/enums';
 import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
@@ -159,10 +160,10 @@ function createActionRows(
 	totalPages: number,
 	isExpired = false,
 ) {
-	let decDisabled;
-	let incDisabled;
-	let pageStyle;
-	let reloadStyle;
+	let decDisabled: boolean;
+	let incDisabled: boolean;
+	let pageStyle: MessageButtonStyles;
+	let reloadStyle: MessageButtonStyles;
 
 	if (isExpired) {
 		decDisabled = true;
@@ -559,10 +560,10 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 	const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END ? OFFSET_FLAGS.COMPETITION_END : '';
 
 	let playerData: PlayerData[];
-	let totalStats;
+	let totalStats: string;
 	let dataConverter: DataConverter;
 	let getEntry: GetEntry;
-	let title;
+	let title: string;
 
 	// type specific stuff
 	switch (xpType) {
@@ -914,10 +915,10 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 	const { config } = client;
 
 	let playerData: PlayerData[];
-	let totalStats;
+	let totalStats: string;
 	let dataConverter: DataConverter;
 	let getEntry: GetEntry;
-	let title;
+	let title: string;
 
 	// type specific stuff
 	switch (xpType) {

@@ -6,6 +6,7 @@ import { InteractionUtil } from '../../util';
 import { logger, readJSFiles } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
+import type { CommandType } from '../../structures/commands/BaseCommandCollection';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
@@ -78,7 +79,7 @@ export default class ReloadCommand extends DualCommand {
 
 				try {
 					// try to find file with INPUT name
-					let commandFile;
+					let commandFile: string | undefined;
 
 					for await (const dir of readJSFiles(this.collection.dirURL)) {
 						if (dir.basename.slice(0, -'.js'.length).toLowerCase() !== commandName) continue;
@@ -87,7 +88,7 @@ export default class ReloadCommand extends DualCommand {
 						break;
 					}
 
-					let command;
+					let command: CommandType | null | undefined;
 
 					// no file found
 					if (!commandFile) {
@@ -154,7 +155,7 @@ export default class ReloadCommand extends DualCommand {
 
 				try {
 					// try to find file with INPUT name
-					let eventFile;
+					let eventFile: string | undefined;
 
 					for await (const dir of readJSFiles(this.client.events.dirURL)) {
 						if (dir.basename.slice(0, -'.js'.length).toLowerCase() !== eventName) continue;

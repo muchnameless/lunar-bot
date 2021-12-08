@@ -360,8 +360,8 @@ export const readJSFiles = (root: string | URL) => readdirp(fileURLToPath(root),
  * @param digits
  */
 export function shortenNumber(number: number, digits?: number) {
-	let str;
-	let suffix;
+	let str: string | number;
+	let suffix: string;
 
 	if (number < 1e3) {
 		str = number;

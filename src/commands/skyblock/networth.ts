@@ -52,7 +52,7 @@ export default class NetworthCommand extends BaseWeightCommand {
 
 			if (!profiles?.length) return `\`${ign}\` has no SkyBlock profiles`;
 
-			let profile;
+			let profile: SkyBlockProfile | null | undefined;
 
 			if (!profileName) {
 				profile = getMainProfile(profiles, uuid);

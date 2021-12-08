@@ -9,6 +9,13 @@ import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { LeaderboardXPTypes } from '../../functions';
 
+interface DataSets {
+	label: string;
+	backgroundColor: string;
+	borderColor: string;
+	data: number[];
+}
+
 export default class TrackCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
@@ -30,7 +37,7 @@ export default class TrackCommand extends ApplicationCommand {
 			(interaction.options.getString('type') as LeaderboardXPTypes) ?? this.config.get('CURRENT_COMPETITION');
 		const days = 30;
 
-		let datasets;
+		let datasets: DataSets[];
 
 		switch (type) {
 			case 'lily-weight': {

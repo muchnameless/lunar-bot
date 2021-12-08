@@ -521,8 +521,8 @@ export default class GuildCommand extends ApplicationCommand {
 
 		let currentPage_ = currentPage;
 		let totalPages_ = totalPages;
-		let decDisabled;
-		let incDisabled;
+		let decDisabled: boolean;
+		let incDisabled: boolean;
 
 		if (isParsedPages) {
 			const INVALID_PAGES = Number.isNaN(currentPage) || Number.isNaN(totalPages);

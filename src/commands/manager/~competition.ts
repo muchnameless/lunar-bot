@@ -30,9 +30,9 @@ export class CompetitionCommand extends ApplicationCommand {
 			idle: seconds(30),
 		});
 
-		let type;
-		let startingTime;
-		let endingTime;
+		let type: string | undefined;
+		let startingTime: Date | undefined;
+		let endingTime: Date | undefined;
 		let retries = 0;
 
 		try {

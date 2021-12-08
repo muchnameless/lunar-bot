@@ -242,8 +242,8 @@ export default class AhCommand extends ApplicationCommand {
 
 			const PROFILE_NAME_INPUT = interaction.options.getString('profile');
 
-			let profileId;
-			let profileName;
+			let profileId: string | undefined;
+			let profileName: string;
 
 			if (!PROFILE_NAME_INPUT) {
 				const mainProfile = getMainProfile(profiles, uuid);

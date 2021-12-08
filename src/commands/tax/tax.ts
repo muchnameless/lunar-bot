@@ -11,7 +11,7 @@ import { ChannelUtil, InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, logger, safePromiseAll, validateNumber } from '../../functions';
 import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction, TextChannel } from 'discord.js';
+import type { CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class TaxCommand extends ApplicationCommand {
@@ -87,7 +87,7 @@ export default class TaxCommand extends ApplicationCommand {
 			case 'ah': {
 				const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
-				let log;
+				let log: string;
 
 				switch (interaction.options.getSubcommand()) {
 					case 'add':
@@ -288,9 +288,9 @@ export default class TaxCommand extends ApplicationCommand {
 						const { players, taxCollectors } = this.client;
 						const PLAYER_INPUT = interaction.options.getString('player');
 
-						let currentTaxEmbed;
-						let currentTaxCollectedEmbed;
-						let result;
+						let currentTaxEmbed: MessageEmbed | null = null;
+						let currentTaxCollectedEmbed!: MessageEmbed;
+						let result: string;
 
 						// individual player
 						if (PLAYER_INPUT) {
@@ -332,13 +332,16 @@ export default class TaxCommand extends ApplicationCommand {
 								if (
 									!taxChannel?.isText() ||
 									((taxChannel as TextChannel).guildId && !(taxChannel as TextChannel).guild?.available)
-								)
-									return logger.warn('[TAX RESET] tax channel error');
+								) {
+									logger.warn('[TAX RESET] tax channel error');
+									return null;
+								}
 
 								try {
 									return (await taxChannel.messages.fetch(this.config.get('TAX_MESSAGE_ID'))).embeds[0];
 								} catch (error) {
 									logger.error(error, '[TAX RESET] TAX_MESSAGE fetch error');
+									return null;
 								}
 							})();
 
