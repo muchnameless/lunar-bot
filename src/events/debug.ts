@@ -6,7 +6,7 @@ export default class DebugEvent extends Event {
 	constructor(context: EventContext) {
 		super(context, {
 			once: false,
-			enabled: false,
+			enabled: process.env.NODE_ENV === 'development',
 		});
 	}
 
