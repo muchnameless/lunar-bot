@@ -6,6 +6,7 @@ import { MessageAttachment, MessageEmbed, Permissions, SnowflakeUtil } from 'dis
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';
+import type { APIEmbed } from 'discord-api-types/v9';
 import type { GuildChannel, Message, TextChannel } from 'discord.js';
 import type { URL } from 'node:url';
 import type { LunarClient } from './LunarClient';
@@ -106,7 +107,7 @@ export class LogHandler {
 	 */
 	log(input: LogInput): Promise<void | Message>;
 	log(...input: LogInput[]): Promise<void | Message> | Promise<(void | Message)[]>;
-	log(...input: any) {
+	log(...input: LogInput[]) {
 		const { embeds, files } = this._transformInput(input);
 
 		if (!embeds.length) return null; // nothing to log
@@ -270,7 +271,7 @@ export class LogHandler {
 				const FILE_PATH = join(fileURLToPath(this.logURL), file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
-				await this._log({ embeds: FILE_CONTENT.split('\n').map((x) => new MessageEmbed(JSON.parse(x))) });
+				await this._log({ embeds: FILE_CONTENT.split('\n').map((x) => new MessageEmbed(JSON.parse(x) as APIEmbed)) });
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {

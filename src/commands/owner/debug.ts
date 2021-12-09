@@ -134,7 +134,7 @@ export default class DebugCommand extends ApplicationCommand {
 							value: stripIndents`
 								Rate Limits
 								${Object.entries(imgur.rateLimit)
-									.map(([key, value]) =>
+									.map(([key, value]: [string, number | null]) =>
 										Formatters.quote(
 											`${key}: ${
 												key.endsWith('reset') && value !== null
@@ -145,7 +145,7 @@ export default class DebugCommand extends ApplicationCommand {
 									)
 									.join('\n')}
 								${Object.entries(imgur.postRateLimit)
-									.map(([key, value]) =>
+									.map(([key, value]: [string, number | null]) =>
 										Formatters.quote(
 											`post${key}: ${
 												key.endsWith('reset') && value !== null
