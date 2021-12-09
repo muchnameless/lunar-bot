@@ -1394,7 +1394,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		try {
 			// api call
-			this.setDiscordMember(await member.roles.set(_rolesToAdd, reason));
+			await member.roles.set(_rolesToAdd, reason);
 
 			if (NAMES_TO_ADD) {
 				loggingEmbed.addFields({
@@ -1418,9 +1418,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			return true;
 		} catch (error) {
 			// was not successful
-			this.setDiscordMember(null, error instanceof DiscordAPIError);
-
 			logger.error(error, '[ROLE API CALL]');
+
+			this.setDiscordMember(null, error instanceof DiscordAPIError);
 
 			loggingEmbed.setColor(config.get('EMBED_RED')).addFields(
 				error instanceof Error
@@ -1597,9 +1597,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					auditLogReason = reason;
 			}
 
-			this.setDiscordMember(await member.setNickname(newNick, auditLogReason));
+			await member.setNickname(newNick, auditLogReason);
 
-			await this.client.log(
+			this.client.log(
 				this.client.defaultEmbed
 					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: this.url })
 					.setThumbnail((await this.imageURL)!)
