@@ -2,7 +2,7 @@ import { logger } from '../functions';
 import { Event } from '../structures/events/Event';
 import type { EventContext } from '../structures/events/BaseEvent';
 
-export default class ShardErrorEvent extends Event {
+export default class ShardReadyEvent extends Event {
 	constructor(context: EventContext) {
 		super(context, {
 			once: false,
@@ -13,9 +13,11 @@ export default class ShardErrorEvent extends Event {
 	/**
 	 * event listener callback
 	 * @param error
-	 * @param id
+	 * @param replayedEvents
 	 */
-	override run(error: Error, id: number) {
-		logger.error(error, `[SHARD #${id} ERROR]`);
+	override run(id: number, replayedEvents: number) {
+		logger.info(`[SHARD #${id} READY]: ${replayedEvents} replayed Events`);
+
+		this.client.fetchAllMembers();
 	}
 }

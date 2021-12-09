@@ -1,5 +1,4 @@
-import { GuildUtil } from '../util';
-import { logger, safePromiseAll } from '../functions';
+import { logger } from '../functions';
 import { Event } from '../structures/events/Event';
 import type { EventContext } from '../structures/events/BaseEvent';
 
@@ -18,10 +17,6 @@ export default class ReadyEvent extends Event {
 		logger.info(`[READY]: logged in as ${this.client.user!.tag}`);
 
 		await this.client.logHandler.init();
-
-		if (this.client.options.fetchAllMembers) {
-			await safePromiseAll(this.client.guilds.cache.map((guild) => GuildUtil.fetchAllMembers(guild)));
-		}
 
 		this.client.db.schedule();
 

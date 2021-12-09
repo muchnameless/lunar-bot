@@ -1,8 +1,8 @@
 import { URL } from 'node:url';
 import { Client, MessageEmbed } from 'discord.js';
-import { UserUtil } from '../util';
+import { GuildUtil, UserUtil } from '../util';
 import { cache, imgur } from '../api';
-import { hours, logger } from '../functions';
+import { hours, logger, safePromiseAll } from '../functions';
 import { DatabaseManager } from './database/managers/DatabaseManager';
 import { LogHandler } from './LogHandler';
 import { CronJobManager } from './CronJobManager';
@@ -112,6 +112,20 @@ export class LunarClient extends Client {
 		} catch (error) {
 			logger.error(error, '[DM OWNER]');
 		}
+	}
+
+	/**
+	 * fetches and caches all members if the fetchAllMembers client option is set to true
+	 */
+	fetchAllMembers() {
+		if (!this.options.fetchAllMembers) return;
+
+		return safePromiseAll(
+			this.guilds.cache.map(async (guild) => {
+				const { size } = await GuildUtil.fetchAllMembers(guild);
+				logger.info(`[FETCH ALL MEMBERS]: ${guild.name}: fetched ${size} members`);
+			}),
+		);
 	}
 
 	/**
