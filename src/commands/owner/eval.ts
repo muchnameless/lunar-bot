@@ -1,6 +1,8 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 sleep;
 import util from 'node:util';
+import fs from 'node:fs/promises';
+import v8 from 'node:v8';
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import Discord, {
 	Formatters,
@@ -126,6 +128,7 @@ export default class EvalCommand extends ApplicationCommand {
 					: { ephemeral: false, rejectOnError: true, ...options },
 			);
 		const type = (x: unknown) => new Type(x).toString();
+		const saveHeapdump = () => fs.writeFile(`${Date.now()}.heapsnapshot`, v8.getHeapSnapshot());
 		const i = interaction;
 		const { client, config } = this;
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
