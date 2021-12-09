@@ -1,5 +1,6 @@
-import { logger } from '../functions';
+import { logger, minutes } from '../functions';
 import { Event } from '../structures/events/Event';
+import { GuildUtil } from '../util';
 import type { Guild } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 
@@ -27,5 +28,15 @@ export default class GuildUnavailableEvent extends Event {
 				player.setDiscordMember(null, false);
 			}
 		}
+
+		// refetch members
+		const interval = setInterval(async () => {
+			try {
+				await GuildUtil.fetchAllMembers(guild);
+				clearInterval(interval);
+			} catch (error) {
+				logger.error(error, `[GUILD UNAVAILABLE]: ${guild.name}`);
+			}
+		}, minutes(5));
 	}
 }
