@@ -16,7 +16,7 @@ export default class ShardResumeEvent extends Event {
 	 * @param replayedEvents
 	 */
 	override run(id: number, replayedEvents: number) {
-		logger.info(`[SHARD #${id} READY]: ${replayedEvents} replayed Events`);
+		logger.info(`[SHARD #${id} RESUMED]: ${replayedEvents} replayed Events`);
 
 		this.client.fetchAllMembers();
 	}
