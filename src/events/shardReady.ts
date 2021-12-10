@@ -13,8 +13,8 @@ export default class ShardReadyEvent extends Event {
 
 	/**
 	 * event listener callback
-	 * @param error
-	 * @param shardId
+	 * @param id
+	 * @param unavailableGuilds
 	 */
 	override run(id: number, unavailableGuilds?: Set<Snowflake>) {
 		if (unavailableGuilds) {
@@ -23,6 +23,7 @@ export default class ShardReadyEvent extends Event {
 			logger.info(`[SHARD #${id} READY]`);
 		}
 
+		this.client.players.uncacheDiscordMembers();
 		this.client.fetchAllMembers();
 	}
 }

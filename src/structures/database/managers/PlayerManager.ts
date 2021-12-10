@@ -200,6 +200,15 @@ export class PlayerManager extends ModelManager<Player> {
 	}
 
 	/**
+	 * uncaches all discord members
+	 */
+	uncacheDiscordMembers() {
+		for (const player of this.cache.values()) {
+			player.setDiscordMember(null, false);
+		}
+	}
+
+	/**
 	 * update db entries and linked discord members of all players
 	 * @param options
 	 */

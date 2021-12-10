@@ -12,12 +12,13 @@ export default class ShardReadyEvent extends Event {
 
 	/**
 	 * event listener callback
-	 * @param error
+	 * @param id
 	 * @param replayedEvents
 	 */
 	override run(id: number, replayedEvents: number) {
 		logger.info(`[SHARD #${id} READY]: ${replayedEvents} replayed Events`);
 
+		this.client.players.uncacheDiscordMembers();
 		this.client.fetchAllMembers();
 	}
 }
