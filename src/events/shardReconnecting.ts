@@ -2,7 +2,7 @@ import { logger } from '../functions';
 import { Event } from '../structures/events/Event';
 import type { EventContext } from '../structures/events/BaseEvent';
 
-export default class ShardResumeEvent extends Event {
+export default class ShardReconnectingEvent extends Event {
 	constructor(context: EventContext) {
 		super(context, {
 			once: false,
@@ -13,11 +13,10 @@ export default class ShardResumeEvent extends Event {
 	/**
 	 * event listener callback
 	 * @param id
-	 * @param replayedEvents
 	 */
-	override run(id: number, replayedEvents: number) {
-		logger.info(`[SHARD #${id} READY]: ${replayedEvents} replayed Events`);
+	override run(id: number) {
+		logger.info(`[SHARD #${id} RECONNECTING]`);
 
-		this.client.fetchAllMembers();
+		this.client.players.uncacheDiscordMembers();
 	}
 }

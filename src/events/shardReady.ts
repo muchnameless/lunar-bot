@@ -23,7 +23,6 @@ export default class ShardReadyEvent extends Event {
 			logger.info(`[SHARD #${id} READY]`);
 		}
 
-		this.client.players.uncacheDiscordMembers();
 		this.client.fetchAllMembers();
 	}
 }
