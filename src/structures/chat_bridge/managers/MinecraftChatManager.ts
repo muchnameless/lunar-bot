@@ -689,13 +689,11 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
 
 		if (this.botPlayer?.muted) {
-			if (this.client.config.get('CHAT_LOGGING_ENABLED')) {
-				logger.debug(
-					`[GCHAT]: bot muted for ${ms(this.botPlayer.mutedTill - Date.now(), {
-						long: true,
-					})}, unable to send '${prefix}${prefix.length ? ' ' : ''}${_options.content}`,
-				);
-			}
+			logger.debug(
+				`[GCHAT]: bot muted for ${ms(this.botPlayer.mutedTill - Date.now(), {
+					long: true,
+				})}, unable to send '${prefix}${prefix.length ? ' ' : ''}${_options.content}`,
+			);
 
 			return false;
 		}
@@ -758,16 +756,15 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					if (NON_WHITESPACE_REGEXP.test(part)) {
 						// filter out white space only parts
 						if (ChatManager.BLOCKED_WORDS_REGEXP.test(part) || MEME_REGEXP.test(part)) {
-							if (this.client.config.get('CHAT_LOGGING_ENABLED')) logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
+							logger.warn(`[CHATBRIDGE CHAT]: blocked '${part}'`);
 							return (success = false);
 						}
 						return true;
 					}
 
 					// part consists of only whitespace characters -> ignore
-					if (this.client.config.get('CHAT_LOGGING_ENABLED') && part) {
-						logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
-					}
+					if (part) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+
 					return false;
 				}),
 		);
@@ -801,9 +798,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		if (_options.discordMessage?.deleted) {
-			if (this.client.config.get('CHAT_LOGGING_ENABLED')) {
-				logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${_options.prefix ?? ''}${_options.content}'`);
-			}
+			logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${_options.prefix ?? ''}${_options.content}'`);
 			return false;
 		}
 
