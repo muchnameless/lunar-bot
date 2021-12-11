@@ -70,17 +70,23 @@ export class BaseCommand {
 
 	/**
 	 * roles required to run this command
+	 * @param hypixelGuild
 	 */
-	requiredRoles(hypixelGuild: HypixelGuild) {
-		if (this._requiredRoles) return this._requiredRoles(hypixelGuild);
+	requiredRoles(hypixelGuild?: HypixelGuild | null) {
+		if (this._requiredRoles) {
+			if (!hypixelGuild) throw 'unable to find a hypixel guild for role permissions';
+			return this._requiredRoles(hypixelGuild);
+		}
 
 		switch (this.category) {
 			case 'staff':
 			case 'moderation':
+				if (!hypixelGuild) throw 'unable to find a hypixel guild for role permissions';
 				return hypixelGuild.staffRoleIds;
 
 			case 'tax':
 			case 'manager':
+				if (!hypixelGuild) throw 'unable to find a hypixel guild for role permissions';
 				return hypixelGuild.adminRoleIds;
 
 			default:

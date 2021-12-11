@@ -391,7 +391,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		const { player } = hypixelMessage;
 
 		// player activity
-		player.update({ lastActivityAt: new Date() });
+		player?.update({ lastActivityAt: new Date() });
 
 		// must use prefix for commands in guild
 		if (!hypixelMessage.commandData.prefix) {
@@ -443,9 +443,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		// message author not the bot owner
-		if (player.discordId !== this.client.ownerId) {
+		if (player?.discordId !== this.client.ownerId) {
 			// role permissions
-			const requiredRoles = command.requiredRoles(hypixelMessage.hypixelGuild ?? player.hypixelGuild);
+			const requiredRoles = command.requiredRoles(hypixelMessage.hypixelGuild ?? player?.hypixelGuild);
 
 			if (requiredRoles !== null) {
 				const { member } = hypixelMessage;

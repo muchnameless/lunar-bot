@@ -48,11 +48,15 @@ export default class SmiteCommand extends DualCommand {
 
 		if (!target) return hypixelMessage.author.send(`no player with the IGN \`${TARGET_INPUT}\` found`);
 
+		const hypixelGuild = hypixelMessage.hypixelGuild ?? hypixelMessage.player?.hypixelGuild;
+
+		if (!hypixelGuild) return hypixelMessage.author.send('unable to find your hypixel guild');
+
 		const content = await guildCommand.runMute({
 			target,
 			executor: hypixelMessage.player,
 			duration: minutes(10),
-			hypixelGuild: hypixelMessage.hypixelGuild ?? hypixelMessage.player.hypixelGuild!,
+			hypixelGuild,
 		});
 
 		return hypixelMessage.author.send(content);
