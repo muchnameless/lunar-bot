@@ -51,7 +51,9 @@ export class HypixelMessageAuthor {
 				// check mojang API / cache for the uuid associated with that ign
 				const { uuid } = await mojang.ign(this.ign);
 				this.player =
-					this.client.players.cache.get(uuid) ?? (logger.error(`[HYPIXEL AUTHOR INIT]: unknown uuid '${uuid}'`), null);
+					this.client.players.cache.get(uuid) ??
+					logger.error(`[HYPIXEL AUTHOR INIT]: unknown uuid '${uuid}'`) ??
+					(await this.client.players.fetch({ minecraftUuid: uuid }));
 			}
 
 			this.member = (await this.player?.fetchDiscordMember()) ?? null;
