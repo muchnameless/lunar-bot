@@ -76,7 +76,10 @@ export default class GuildUtil extends null {
 	static async fetchAllMembers(guild: Guild | null) {
 		if (!guild?.available) throw `the ${guild?.name ?? 'discord'} server is currently unavailable`;
 
-		if (guild.memberCount === guild.members.cache.size) return guild.members.cache;
+		if (guild.memberCount === guild.members.cache.size) {
+			logger.trace(`[FETCH ALL MEMBERS]: ${guild.name}: already cached`);
+			return guild.members.cache;
+		}
 
 		const cached = this.fetchAllMembersCache.get(guild.id);
 		if (cached) return cached;
