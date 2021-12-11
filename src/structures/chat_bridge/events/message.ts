@@ -429,16 +429,22 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		// no command
 		if (!command) {
-			return logger.info(
-				`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' which is not a valid command`,
-			);
+			return logger.info({
+				author: hypixelMessage.author.ign,
+				content: hypixelMessage.content,
+				channel: hypixelMessage.type,
+				status: 'invalid command',
+			});
 		}
 
 		// server only command in DMs
 		if (command.guildOnly && hypixelMessage.type !== MESSAGE_TYPES.GUILD) {
-			logger.info(
-				`${hypixelMessage.author.ign} tried to execute '${hypixelMessage.content}' in whispers which is a guild-chat-only command`,
-			);
+			logger.info({
+				author: hypixelMessage.author.ign,
+				content: hypixelMessage.content,
+				channel: hypixelMessage.type,
+				status: 'guild-chat-only command in whispers',
+			});
 			return hypixelMessage.author.send(`the '${command.name}' command can only be executed in guild chat`);
 		}
 
@@ -452,11 +458,12 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 				if (!member) {
 					const discordGuild = hypixelMessage.hypixelGuild?.discordGuild;
-					logger.info(
-						`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${
-							hypixelMessage.type
-						}' and could not be found within the ${discordGuild?.name ?? '(currently unavailable)'} discord server`,
-					);
+					logger.info({
+						author: hypixelMessage.author.ign,
+						content: hypixelMessage.content,
+						channel: hypixelMessage.type,
+						status: `unable to find linked discord member in ${discordGuild?.name ?? 'currently unavailable'}`,
+					});
 					return hypixelMessage.author.send(
 						commaListsOr`the '${command.name}' command requires a role (${requiredRoles.map(
 							(roleId) => discordGuild?.roles.cache.get(roleId)?.name ?? roleId,
@@ -467,9 +474,14 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 				// check for req roles
 				if (!member.roles.cache.hasAny(...requiredRoles)) {
-					logger.info(
-						`${hypixelMessage.author.ign} | ${member.displayName} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' without a required role`,
-					);
+					logger.info({
+						author: hypixelMessage.author.ign,
+						member: member.user.tag,
+						content: hypixelMessage.content,
+						channel: hypixelMessage.type,
+						requiredRoles,
+						status: 'missing required role',
+					});
 					return hypixelMessage.author.send(
 						commaListsOr`the '${command.name}' command requires you to have a role (${requiredRoles.map(
 							(roleId) => member.guild.roles.cache.get(roleId)?.name ?? roleId,
@@ -481,9 +493,12 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			// prevent from executing owner only command
 			if (command.category === 'owner') {
-				return logger.info(
-					`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' which is an owner only command`,
-				);
+				return logger.info({
+					author: hypixelMessage.author.ign,
+					content: hypixelMessage.content,
+					channel: hypixelMessage.type,
+					status: 'owner only command',
+				});
 			}
 
 			// command cooldowns
@@ -542,18 +557,16 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			logger.info(`'${hypixelMessage.content}' was executed by ${hypixelMessage.author} in '${hypixelMessage.type}'`);
 			await command.runMinecraft(hypixelMessage);
 		} catch (error) {
-			if (typeof error === 'string') {
-				logger.error(
-					`an error occured while ${hypixelMessage.author} tried to execute ${hypixelMessage.content} in '${hypixelMessage.type}': ${error}`,
-				);
-				hypixelMessage.author.send(error);
-			} else {
-				logger.error(
-					error,
-					`an error occured while ${hypixelMessage.author} tried to execute ${hypixelMessage.content} in '${hypixelMessage.type}'`,
-				);
-				hypixelMessage.author.send(`an error occured while executing the '${command.name}' command:\n${error}`);
-			}
+			logger.error({
+				err: error,
+				author: hypixelMessage.author.ign,
+				content: hypixelMessage.content,
+				channel: hypixelMessage.type,
+			});
+
+			hypixelMessage.author.send(
+				typeof error === 'string' ? error : `an error occured while executing the '${command.name}' command:\n${error}`,
+			);
 		}
 	}
 
