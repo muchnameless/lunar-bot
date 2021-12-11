@@ -308,13 +308,11 @@ export class PlayerManager extends ModelManager<Player> {
 
 				// first change for this guild
 				if (!log.has(player.guildId)) {
-					const { guildName } = player;
+					const { hypixelGuild } = player;
 
 					return log.set(player.guildId, {
-						guildName,
-						playerCount:
-							this.client.hypixelGuilds.cache.find(({ name }) => name === guildName)?.playerCount ??
-							this.cache.filter(({ guildId: e }) => e === player.guildId).size,
+						guildName: hypixelGuild?.name ?? player.guildName,
+						playerCount: hypixelGuild?.playerCount ?? this.cache.filter(({ guildId: e }) => e === player.guildId).size,
 						ignChanges: [`${result.oldIgn} -> ${result.newIgn}`],
 					});
 				}
@@ -324,9 +322,14 @@ export class PlayerManager extends ModelManager<Player> {
 			}),
 		);
 
-		// logging
+		// no changes
 		if (!log.size) return this;
 
+		// sort cache
+		this.client.hypixelGuilds.sweepPlayerCache();
+		this.sortAlphabetically();
+
+		// logging
 		const embeds: MessageEmbed[] = [];
 
 		/**
