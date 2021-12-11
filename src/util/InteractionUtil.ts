@@ -175,74 +175,81 @@ export default class InteractionUtil extends null {
 	 */
 	static logInfo(interaction: Interaction) {
 		if (interaction.isCommand()) {
-			return `${interaction.type} '${interaction}' by ${interaction.user.tag}${
-				interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
-			} in ${
-				interaction.guildId
-					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
-							interaction.guild!.name
-					  }`
-					: 'DMs'
-			}`;
+			return {
+				type: interaction.type,
+				command: interaction.toString(),
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+			};
 		}
 
 		if (interaction.isButton()) {
-			return `${interaction.componentType} '${interaction.customId}' by ${interaction.user.tag}${
-				interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
-			} in ${
-				interaction.guildId
-					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
-							interaction.guild!.name
-					  }`
-					: 'DMs'
-			}`;
+			return {
+				type: interaction.componentType,
+				customId: interaction.customId,
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+			};
 		}
 
 		if (interaction.isSelectMenu()) {
-			return `${interaction.componentType} '${interaction.customId} [${interaction.values}]' by ${
-				interaction.user.tag
-			}${interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''} in ${
-				interaction.guildId
-					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
-							interaction.guild!.name
-					  }`
-					: 'DMs'
-			}`;
+			return {
+				type: interaction.componentType,
+				customId: interaction.customId,
+				values: interaction.values,
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+			};
 		}
 
 		if (interaction.isContextMenu()) {
-			return `${interaction.targetType} '${interaction.commandName}' by ${interaction.user.tag}${
-				interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
-			} in ${
-				interaction.guildId
-					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
-							interaction.guild!.name
-					  }`
-					: 'DMs'
-			}`;
+			return {
+				type: interaction.targetType,
+				command: interaction.commandName,
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+			};
 		}
 
 		if (interaction.isAutocomplete()) {
-			return `'${interaction.type}' by ${interaction.user.tag}${
-				interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
-			} in ${
-				interaction.guildId
-					? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
-							interaction.guild!.name
-					  }`
-					: 'DMs'
-			}`;
+			return {
+				type: interaction.type,
+				command: interaction.commandName,
+				focused: interaction.options.getFocused(true),
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+			};
 		}
 
-		return `unknown type '${interaction.type}' by ${interaction.user.tag}${
-			interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
-		} in ${
-			interaction.guildId
-				? `#${(interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId} | ${
-						interaction.guild!.name
-				  }`
-				: 'DMs'
-		}`;
+		return {
+			type: interaction.type,
+			user: interaction.member
+				? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+				: interaction.user.tag,
+			channel: interaction.guildId
+				? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+				: 'DM',
+		};
 	}
 
 	/**

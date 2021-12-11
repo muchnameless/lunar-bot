@@ -357,13 +357,9 @@ export default class InteractionCreateEvent extends Event {
 
 			throw `unknown interaction type '${interaction.type}'`;
 		} catch (error) {
-			if (typeof error === 'string') {
-				logger.error(`[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}: ${error}`);
-			} else {
-				logger.error(error, `[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`);
+			logger.error({ err: error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
 
-				if (InteractionUtil.isInteractionError(error)) return; // interaction expired
-			}
+			if (InteractionUtil.isInteractionError(error)) return; // interaction expired
 
 			// autocomplete
 			if (interaction.isAutocomplete()) {
@@ -372,7 +368,7 @@ export default class InteractionCreateEvent extends Event {
 					try {
 						await interaction.respond([]);
 					} catch (error_) {
-						logger.error(error_, `[INTERACTION CREATE]: ${InteractionUtil.logInfo(interaction)}`);
+						logger.error({ err: error_, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
 					}
 				}
 

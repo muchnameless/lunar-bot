@@ -1,8 +1,8 @@
 import { Client, Intents, LimitedCollection, SnowflakeUtil, Options, Constants } from 'discord.js';
 import { InteractionUtil } from '../util';
 import { db } from '../structures/database';
-import { logger } from '../functions';
-import type { ActivitiesOptions, Channel, DMChannel, GuildMember, ThreadChannel } from 'discord.js';
+import { hours, logger } from '../functions';
+import type { ActivitiesOptions, Channel, DMChannel, ThreadChannel } from 'discord.js';
 
 // catch rejections
 process
@@ -101,7 +101,7 @@ client
 					status: client.user.presence.status !== 'offline' ? client.user.presence.status : undefined,
 					activities: client.user.presence.activities as ActivitiesOptions[],
 				}),
-			60 * 60_000,
+			hours(1),
 		);
 
 		// log
@@ -120,11 +120,7 @@ client
 			return;
 		}
 
-		logger.info(
-			`${interaction.user.tag}${
-				interaction.guildId ? ` | ${(interaction.member as GuildMember).displayName}` : ''
-			} tried to execute '${InteractionUtil.logInfo(interaction)}' during maintenance`,
-		);
+		logger.info(InteractionUtil.logInfo(interaction), '[INTERACTION CREATE]: maintenance');
 
 		InteractionUtil.reply(interaction, `${client.user} is currently unavailable due to maintenance`);
 	})
