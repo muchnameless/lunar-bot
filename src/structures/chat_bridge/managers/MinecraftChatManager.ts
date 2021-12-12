@@ -565,120 +565,127 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 * @param discordMessage
 	 */
 	async parseContent(string: string, discordMessage: Message | null) {
-		return cleanFormattedNumber(
-			// @mentions
-			await asyncReplace(string, /<@!?(\d{17,19})>/g, async (match) => {
-				const user = this.client.users.cache.get(match[1]);
-				if (user) {
-					const player = UserUtil.getPlayer(user) ?? (await this.client.players.fetch({ discordId: user.id }));
-					if (player) return `@${player}`;
-				}
-
-				const NAME =
-					(discordMessage?.guild ?? this.chatBridge.hypixelGuild?.discordGuild)?.members.cache.get(match[1])
-						?.displayName ?? user?.username;
-				if (NAME) return `@${NAME}`;
-
-				return match[0];
-			}),
-		)
-			.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
-			.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
-			.replace(emojiRegex(), (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default emojis
-			.replace(/(?<!\\)\\(?=[^a-z\d\\ \n])/gi, '') // replace escaping \ which are invisible on discord
-			.replace(/\\{2,}/g, (match) => {
-				// replace \\ with \
-				let ret = '';
-				for (let i = Math.ceil(match.length / 2); i !== 0; --i) ret += '\\';
-				return ret;
-			})
-			.replaceAll('\u{2022}', '\u{25CF}') // better bullet points: "• -> ●"
-			.replaceAll('`', "'") // better single quotes
-			.replace(/<#(\d{17,19})>/g, (match, p1) => {
-				// channels
-				const CHANNEL_NAME = (this.client.channels.cache.get(p1) as GuildChannel)?.name;
-				if (CHANNEL_NAME) return `#${CHANNEL_NAME}`;
-				return match;
-			})
-			.replace(/<@&(\d{17,19})>/g, (match, p1) => {
-				// roles
-				const ROLE_NAME = discordMessage?.guild?.roles.cache.get(p1)?.name;
-				if (ROLE_NAME) return `@${ROLE_NAME}`;
-				return match;
-			})
-			.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1, p2) => {
-				// dates
-				const date = new Date(seconds(p1));
-
-				if (Number.isNaN(date.getTime())) return match; // invalid date
-
-				switch (
-					p2 // https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
-				) {
-					case Formatters.TimestampStyles.ShortTime:
-						return date.toLocaleString('en-GB', {
-							hour: '2-digit',
-							minute: '2-digit',
-							timeZoneName: 'short',
-							timeZone: 'UTC',
-						});
-
-					case Formatters.TimestampStyles.LongTime:
-						return date.toLocaleString('en-GB', {
-							hour: '2-digit',
-							minute: '2-digit',
-							second: '2-digit',
-							timeZoneName: 'short',
-							timeZone: 'UTC',
-						});
-
-					case Formatters.TimestampStyles.ShortDate:
-						return date.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
-
-					case Formatters.TimestampStyles.LongDate:
-						return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
-
-					case Formatters.TimestampStyles.ShortDateTime:
-						return date.toLocaleString('en-GB', {
-							day: '2-digit',
-							month: 'long',
-							year: 'numeric',
-							hour: '2-digit',
-							minute: '2-digit',
-							timeZoneName: 'short',
-							timeZone: 'UTC',
-						});
-
-					case Formatters.TimestampStyles.LongDateTime:
-						return date.toLocaleString('en-GB', {
-							weekday: 'long',
-							day: '2-digit',
-							month: 'long',
-							year: 'numeric',
-							hour: '2-digit',
-							minute: '2-digit',
-							timeZoneName: 'short',
-							timeZone: 'UTC',
-						});
-
-					case Formatters.TimestampStyles.RelativeTime: {
-						const TIME = date.getTime() - Date.now();
-						if (TIME > 0) return `in ${ms(Math.abs(TIME), { long: true })}`;
-						return `${ms(Math.abs(TIME), { long: true })} ago`;
+		return (
+			cleanFormattedNumber(
+				// @mentions
+				await asyncReplace(string, /<@!?(\d{17,19})>/g, async (match) => {
+					const user = this.client.users.cache.get(match[1]);
+					if (user) {
+						const player = UserUtil.getPlayer(user) ?? (await this.client.players.fetch({ discordId: user.id }));
+						if (player) return `@${player}`;
 					}
 
-					default:
-						return date.toLocaleString('en-GB', {
-							day: '2-digit',
-							month: 'long',
-							year: 'numeric',
-							hour: '2-digit',
-							minute: '2-digit',
-							timeZoneName: 'short',
-							timeZone: 'UTC',
-						});
-				}
-			});
+					const NAME =
+						(discordMessage?.guild ?? this.chatBridge.hypixelGuild?.discordGuild)?.members.cache.get(match[1])
+							?.displayName ?? user?.username;
+					if (NAME) return `@${NAME}`;
+
+					return match[0];
+				}),
+			)
+				.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
+				.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
+				.replace(emojiRegex(), (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default emojis
+				// replace escaping \ which are invisible on discord, '¯\_' is ignored since it's part of '¯\_(ツ)_/¯' which doesn't need to be escaped
+				.replace(/(?<![¯\\])\\(?=[^a-z\d\\ \n])/gi, '')
+				.replace(/\\{2,}/g, (match) => {
+					// replace \\ with \
+					let ret = '';
+					for (let i = Math.ceil(match.length / 2); i !== 0; --i) ret += '\\';
+					return ret;
+				})
+				.replaceAll('\u{2022}', '\u{25CF}') // better bullet points: "• -> ●"
+				.replaceAll('`', "'") // better single quotes
+				.replace(/<#(\d{17,19})>/g, (match, p1) => {
+					// channels
+					const CHANNEL_NAME = (this.client.channels.cache.get(p1) as GuildChannel)?.name;
+					if (CHANNEL_NAME) return `#${CHANNEL_NAME}`;
+					return match;
+				})
+				.replace(/<@&(\d{17,19})>/g, (match, p1) => {
+					// roles
+					const ROLE_NAME = discordMessage?.guild?.roles.cache.get(p1)?.name;
+					if (ROLE_NAME) return `@${ROLE_NAME}`;
+					return match;
+				})
+				.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1, p2) => {
+					// dates
+					const date = new Date(seconds(p1));
+
+					if (Number.isNaN(date.getTime())) return match; // invalid date
+
+					// https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
+					switch (p2) {
+						case Formatters.TimestampStyles.ShortTime:
+							return date.toLocaleString('en-GB', {
+								hour: '2-digit',
+								minute: '2-digit',
+								timeZoneName: 'short',
+								timeZone: 'UTC',
+							});
+
+						case Formatters.TimestampStyles.LongTime:
+							return date.toLocaleString('en-GB', {
+								hour: '2-digit',
+								minute: '2-digit',
+								second: '2-digit',
+								timeZoneName: 'short',
+								timeZone: 'UTC',
+							});
+
+						case Formatters.TimestampStyles.ShortDate:
+							return date.toLocaleString('en-GB', {
+								day: '2-digit',
+								month: '2-digit',
+								year: 'numeric',
+								timeZone: 'UTC',
+							});
+
+						case Formatters.TimestampStyles.LongDate:
+							return date.toLocaleString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+						case Formatters.TimestampStyles.ShortDateTime:
+							return date.toLocaleString('en-GB', {
+								day: '2-digit',
+								month: 'long',
+								year: 'numeric',
+								hour: '2-digit',
+								minute: '2-digit',
+								timeZoneName: 'short',
+								timeZone: 'UTC',
+							});
+
+						case Formatters.TimestampStyles.LongDateTime:
+							return date.toLocaleString('en-GB', {
+								weekday: 'long',
+								day: '2-digit',
+								month: 'long',
+								year: 'numeric',
+								hour: '2-digit',
+								minute: '2-digit',
+								timeZoneName: 'short',
+								timeZone: 'UTC',
+							});
+
+						case Formatters.TimestampStyles.RelativeTime: {
+							const TIME = date.getTime() - Date.now();
+							if (TIME > 0) return `in ${ms(Math.abs(TIME), { long: true })}`;
+							return `${ms(Math.abs(TIME), { long: true })} ago`;
+						}
+
+						default:
+							return date.toLocaleString('en-GB', {
+								day: '2-digit',
+								month: 'long',
+								year: 'numeric',
+								hour: '2-digit',
+								minute: '2-digit',
+								timeZoneName: 'short',
+								timeZone: 'UTC',
+							});
+					}
+				})
+		);
 	}
 
 	/**

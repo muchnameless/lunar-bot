@@ -521,34 +521,44 @@ export function sortCache<T>(
 /**
  * escapes '*' and '_' if those are neither within an URL nor a code block or inline code
  * @param string
+ * @param escapeEverything wether to also escape '\' before '*' and '_'
  */
-export const escapeMarkdown = (string: string) =>
+export const escapeMarkdown = (string: string, escapeEverything = false) =>
 	string
 		.split('```')
 		.map((subString, index, array) => {
 			if (index % 2 && index !== array.length - 1) return subString;
-			return escapeIfNoCodeBlock(subString);
+			return escapeIfNoCodeBlock(subString, escapeEverything);
 		})
 		.join('```');
 
-const escapeIfNoCodeBlock = (string: string) =>
+const escapeIfNoCodeBlock = (string: string, escapeEverything: boolean) =>
 	string
 		.split(/(?<=^|[^`])`(?=[^`]|$)/)
 		.map((subString, index, array) => {
 			if (index % 2 && index !== array.length - 1) return subString;
-			return escapeIfNoURL(subString);
+			return escapeIfNoURL(subString, escapeEverything);
 		})
 		.join('`');
 
-const escapeIfNoURL = (string: string) =>
-	string
-		.replace(/(?<!\\)(?=\*)/g, '\\') // escape italic 1/2
-		.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
-			// escape italic 2/2 & underline
-			if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
-			if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
-			return `${p1.replace(/(?<!\\)(?=_)/g, '\\')}${p1.endsWith('\\') ? '' : '\\'}_${p2}`; // escape not already escaped '_'
-		});
+const escapeIfNoURL = (string: string, escapeEverything: boolean) =>
+	escapeEverything
+		? string
+				.replace(/(?=\*)/g, '\\') // escape italic 1/2
+				.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
+					// escape italic 2/2 & underline
+					if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
+					if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
+					return `${p1.replace(/(?=_)/g, '\\')}\\_${p2}`; // escape not already escaped '_'
+				})
+		: string
+				.replace(/(?<!\\)(?=\*)/g, '\\') // escape italic 1/2
+				.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
+					// escape italic 2/2 & underline
+					if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
+					if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
+					return `${p1.replace(/(?<!\\)(?=_)/g, '\\')}${p1.endsWith('\\') ? '' : '\\'}_${p2}`; // escape not already escaped '_'
+				});
 
 /**
  * space-padding at the beginning and '0'-padding at the end

@@ -26,6 +26,7 @@ import type { HypixelMessage } from '../HypixelMessage';
 interface SendViaBotOptions extends MessageOptions {
 	content: string;
 	hypixelMessage?: HypixelMessage | null;
+	fromMinecraft?: boolean;
 }
 
 interface SendViaWebhookOptions extends WebhookMessageOptions {
@@ -298,7 +299,7 @@ export class DiscordChatManager extends ChatManager {
 	 * sends a message via the bot in the chatBridge channel
 	 * @param options
 	 */
-	async sendViaBot({ hypixelMessage, content, ...options }: SendViaBotOptions) {
+	async sendViaBot({ hypixelMessage, content, fromMinecraft, ...options }: SendViaBotOptions) {
 		if (!this.chatBridge.isEnabled()) return null;
 
 		const queuePromise = this.queue.wait();
@@ -315,6 +316,7 @@ export class DiscordChatManager extends ChatManager {
 				`${
 					discordMessage || !hypixelMessage ? '' : `${hypixelMessage.member ?? `@${hypixelMessage.author}`}, `
 				}${content}`,
+				fromMinecraft,
 			),
 			reply: {
 				messageReference: discordMessage as Message,

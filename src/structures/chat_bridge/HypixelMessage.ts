@@ -316,6 +316,7 @@ export class HypixelMessage {
 			return (this.discordMessage = discordChatManager.sendViaBot({
 				content: this.content,
 				allowedMentions: { parse: [] },
+				fromMinecraft: true,
 			}));
 		}
 
@@ -350,7 +351,7 @@ export class HypixelMessage {
 	private async _forwardToDiscord({ discordChatManager, player, member }: ForwardToDiscordOptions) {
 		return discordChatManager.sendViaWebhook({
 			queuePromise: discordChatManager.queue.wait(),
-			content: await this.chatBridge.discord.parseContent(this.prefixReplacedContent),
+			content: await this.chatBridge.discord.parseContent(this.prefixReplacedContent, true),
 			username: member?.displayName ?? player?.ign ?? this.author!.ign,
 			avatarURL:
 				member?.displayAvatarURL({ dynamic: true }) ??
