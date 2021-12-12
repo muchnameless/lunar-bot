@@ -513,13 +513,12 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 					if (NOW < EXPIRATION_TIME) {
 						const TIME_LEFT = ms(EXPIRATION_TIME - NOW, { long: true });
 
-						logger.info(
-							`${hypixelMessage.author}${
-								hypixelMessage.member ? ` | ${hypixelMessage.member.displayName}` : ''
-							} tried to execute '${hypixelMessage.content}' in ${
-								hypixelMessage.type
-							}-chat ${TIME_LEFT} before the cooldown expires`,
-						);
+						logger.info({
+							author: hypixelMessage.author.ign,
+							content: hypixelMessage.content,
+							channel: hypixelMessage.type,
+							status: `on cooldown for ${TIME_LEFT}`,
+						});
 
 						return hypixelMessage.author.send(`\`${command.name}\` is on cooldown for another \`${TIME_LEFT}\``);
 					}
@@ -546,15 +545,25 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			);
 			if (command.usage) reply.push(`use: ${command.usageInfo}`);
 
-			logger.info(
-				`${hypixelMessage.author} tried to execute '${hypixelMessage.content}' in '${hypixelMessage.type}' without providing the mandatory arguments`,
-			);
+			logger.info({
+				author: hypixelMessage.author.ign,
+				content: hypixelMessage.content,
+				channel: hypixelMessage.type,
+				status: 'missing mandatory arguments',
+			});
+
 			return hypixelMessage.author.send(reply.join('\n'));
 		}
 
 		// execute command
 		try {
-			logger.info(`'${hypixelMessage.content}' was executed by ${hypixelMessage.author} in '${hypixelMessage.type}'`);
+			logger.info({
+				author: hypixelMessage.author.ign,
+				content: hypixelMessage.content,
+				channel: hypixelMessage.type,
+				command: command.name,
+			});
+
 			await command.runMinecraft(hypixelMessage);
 		} catch (error) {
 			logger.error({
