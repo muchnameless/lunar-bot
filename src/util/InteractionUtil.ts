@@ -111,9 +111,8 @@ export default class InteractionUtil extends null {
 				// interactions must be acked within 3 seconds
 				() => {
 					logger.warn(
-						`[INTERACTION UTIL]: ${this.logInfo(interaction)}: auto defer triggered after ${
-							Date.now() - interaction.createdTimestamp
-						} ms`,
+						this.logInfo(interaction),
+						`[INTERACTION UTIL]: auto defer triggered after ${Date.now() - interaction.createdTimestamp} ms`,
 					);
 
 					if (interaction.isMessageComponent()) {
@@ -292,8 +291,10 @@ export default class InteractionUtil extends null {
 		if (cached.deferReplyPromise) return cached.deferReplyPromise;
 
 		if (interaction.replied) {
-			if (options?.rejectOnError) throw new Error(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
-			return logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
+			if (options?.rejectOnError) {
+				throw new Error(`[INTERACTION UTIL]: ${Object.entries(this.logInfo(interaction))}: already replied`);
+			}
+			return logger.warn(this.logInfo(interaction), '[INTERACTION UTIL]: already replied');
 		}
 
 		clearTimeout(cached.autoDefer!);
@@ -302,7 +303,7 @@ export default class InteractionUtil extends null {
 			return await (cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options }));
 		} catch (error) {
 			if (options?.rejectOnError) throw error;
-			logger.error(error, `[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferReply`);
+			logger.error({ err: error, ...this.logInfo(interaction) }, '[INTERACTION UTIL]: deferReply');
 		}
 	}
 
@@ -441,7 +442,7 @@ export default class InteractionUtil extends null {
 		const cached = this.CACHE.get(interaction)!;
 		if (cached.deferUpdatePromise) return cached.deferUpdatePromise;
 
-		if (interaction.replied) return logger.warn(`[INTERACTION UTIL]: ${this.logInfo(interaction)}: already replied`);
+		if (interaction.replied) return logger.warn(this.logInfo(interaction), '[INTERACTION UTIL]: already replied');
 
 		clearTimeout(cached.autoDefer!);
 
@@ -449,7 +450,7 @@ export default class InteractionUtil extends null {
 			return await (cached.deferUpdatePromise = interaction.deferUpdate(options));
 		} catch (error) {
 			if (options?.rejectOnError) throw error;
-			logger.error(error, `[INTERACTION UTIL]: ${this.logInfo(interaction)}: deferUpdate`);
+			logger.error({ err: error, ...this.logInfo(interaction) }, '[INTERACTION UTIL]: deferUpdate');
 		}
 	}
 
@@ -524,7 +525,7 @@ export default class InteractionUtil extends null {
 
 			return interaction.message as Message;
 		} catch (error) {
-			logger.error(error, `[INTERACTION UTIL]: ${this.logInfo(interaction)}: deleteMessage`);
+			logger.error({ err: error, ...this.logInfo(interaction) }, '[INTERACTION UTIL]: deleteMessage');
 			return MessageUtil.delete(interaction.message as Message);
 		}
 	}
