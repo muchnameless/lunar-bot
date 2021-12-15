@@ -84,8 +84,9 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		/**
-		 * auto '/gc welcome'
-		 * [HypixelRank] IGN joined the guild!
+		 * update HypixelGuild data, forward message to discord and broadcast '/gc welcome'
+		 *
+		 * [HYPIXEL_RANK] IGN joined the guild!
 		 */
 		if (hypixelMessage.content.includes('joined the guild')) {
 			this.chatBridge.hypixelGuild?.updateData();
@@ -94,21 +95,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		/**
-		 * [HypixelRank] IGN left the guild!
-		 * [HypixelRank] IGN transferred Guild Master rank to [HypixelRank] IGN
-		 */
-		if (
-			hypixelMessage.content.includes('left the guild') ||
-			hypixelMessage.content.includes('transferred Guild Master rank to')
-		) {
-			this.chatBridge.hypixelGuild?.updateData();
-			return hypixelMessage.forwardToDiscord();
-		}
-
-		/**
+		 * update HypixelGuild data, forward message to discord and unlink the bridge
+		 *
 		 * You left the guild
-		 * You were kicked from the guild by [HypixelRank] IGN for reason 'REASON'.
-		 * [HypixelRank] IGN disbanded the guild.
+		 * You were kicked from the guild by [HYPIXEL_RANK] IGN for reason 'REASON'.
+		 * [HYPIXEL_RANK] IGN disbanded the guild.
 		 */
 		if (
 			hypixelMessage.content === 'You left the guild' ||
@@ -122,14 +113,27 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		/**
-		 * [HypixelRank] IGN was kicked from the guild by [HypixelRank] IGN!
+		 * update HypixelGuild data and forward message to discord
+		 *
+		 * [HYPIXEL_RANK] IGN left the guild!
+		 * [HYPIXEL_RANK] IGN transferred Guild Master rank to [HYPIXEL_RANK] IGN
+		 * [HYPIXEL_RANK] IGN renamed the guild to NEW_NAME!
+		 * [HYPIXEL_RANK] IGN was kicked from the guild by [HYPIXEL_RANK] IGN!
 		 */
-		if (kickSuccess.test(hypixelMessage.content)) {
+		if (
+			hypixelMessage.content.includes('left the guild') ||
+			hypixelMessage.content.includes('transferred Guild Master rank to') ||
+			hypixelMessage.content.includes('renamed the guild to') ||
+			kickSuccess.test(hypixelMessage.content)
+		) {
 			this.chatBridge.hypixelGuild?.updateData();
 			return hypixelMessage.forwardToDiscord();
 		}
 
 		/**
+		 * forward message to discord
+		 *
+		 * [HYPIXEL_RANK] IGN set the guild tag to [TAG]! You may have to change lobbies for it to update.
 		 * The guild has completed Tier 3 of this week's Guild Quest!
 		 * The Guild has reached Level 36!
 		 * The Guild has unlocked Winners III!
@@ -137,6 +141,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		 */
 		if (
 			hypixelMessage.content === 'LEVEL UP!' ||
+			(hypixelMessage.content.includes('set the guild tag to') &&
+				hypixelMessage.content.endsWith('You may have to change lobbies for it to update.')) ||
 			/^the guild has (?:completed|reached|unlocked)|^guild quest tier \d+ completed!?$/i.test(hypixelMessage.content)
 		) {
 			return hypixelMessage.forwardToDiscord();
@@ -144,8 +150,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		/**
 		 * mute
-		 * [HypixelRank] IGN has muted [HypixelRank] IGN for 10s
-		 * [HypixelRank] IGN has muted the guild chat for 10M
+		 * [HYPIXEL_RANK] IGN has muted [HYPIXEL_RANK] IGN for 10s
+		 * [HYPIXEL_RANK] IGN has muted the guild chat for 10M
 		 */
 		const muteMatched = hypixelMessage.content.match(muteSuccess);
 
@@ -183,8 +189,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		/**
 		 * unmute
-		 * [HypixelRank] IGN has unmuted [HypixelRank] IGN
-		 * [HypixelRank] IGN has unmuted the guild chat!
+		 * [HYPIXEL_RANK] IGN has unmuted [HYPIXEL_RANK] IGN
+		 * [HYPIXEL_RANK] IGN has unmuted the guild chat!
 		 */
 		const unmuteMatched = hypixelMessage.content.match(unmuteSuccess);
 
@@ -210,7 +216,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		/**
 		 * auto '/gc gg' for promotions
-		 * [HypixelRank] IGN was promoted from PREV to NOW
+		 * [HYPIXEL_RANK] IGN was promoted from PREV to NOW
 		 */
 		const promoteMatched = hypixelMessage.content.match(promoteSuccess);
 
@@ -243,7 +249,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		/**
 		 * demote
-		 * [HypixelRank] IGN was demoted from PREV to NOW
+		 * [HYPIXEL_RANK] IGN was demoted from PREV to NOW
 		 */
 		const demotedMatched = hypixelMessage.content.match(demoteSuccess);
 
@@ -276,7 +282,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		/**
 		 * accept g join requests if hypixel guild has it enabled and player is not on the ban list
-		 * [HypixelRank] IGN has requested to join the Guild!
+		 * [HYPIXEL_RANK] IGN has requested to join the Guild!
 		 */
 		const guildJoinReqMatched = hypixelMessage.content.match(
 			/(?:\[.+?\] )?(?<ign>\w+) has requested to join the Guild!/,
@@ -366,7 +372,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 		/**
 		 * accept f reqs from guild members
-		 * Friend request from [HypixelRank] IGN\n
+		 * Friend request from [HYPIXEL_RANK] IGN
 		 */
 		const friendReqMatched = hypixelMessage.content.match(/Friend request from (?:\[.+?\] )?(?<ign>\w+)/);
 
