@@ -1,0 +1,279 @@
+import { Formatters, Util } from 'discord.js';
+import ms from 'ms';
+import { EMBED_FIELD_MAX_CHARS, SMALL_LATIN_CAPITAL_LETTERS } from '../constants';
+import type { Merge } from '../types/util';
+
+/**
+ * escapes discord markdown in igns
+ * @param string to escape
+ */
+export const escapeIgn = (string: string | null) => string?.replace(/_/g, '\\_') ?? '';
+
+/**
+ * extracts user IDs from @mentions
+ * @param string to analyze
+ */
+export const getIdFromString = (string: string) => string.match(/(?<=^(?:<@!?)?)\d{17,19}(?=>?$)/)?.[0] ?? null;
+
+/**
+ * aBc -> Abc
+ * @param string to convert
+ */
+export const upperCaseFirstChar = (string: string) => `${string[0].toUpperCase()}${string.slice(1).toLowerCase()}`;
+
+/**
+ * removes ',', '.' and '_' from the input string
+ * @param string input
+ */
+export const removeNumberFormatting = (string: string | null) => string?.replace(/[,._]/g, '');
+
+/**
+ * trims a string to a certain length
+ * @param string to trim
+ * @param max maximum length
+ */
+export const trim = (string: string, max: number) => (string.length > max ? `${string.slice(0, max - 3)}...` : string);
+
+/**
+ * replaces toLocaleString('fr-FR') separator with a normal space
+ * @param string
+ */
+export const cleanFormattedNumber = (string: string) => string.replace(/\u{202F}/gu, ' ');
+
+/**
+ * replaces all small latin capital letters with normal lowercase letters
+ * @param string
+ */
+export const replaceSmallLatinCapitalLetters = (string: string) =>
+	Object.entries(SMALL_LATIN_CAPITAL_LETTERS).reduce((s, [normal, small]) => s.replaceAll(small, normal), string);
+
+/**
+ * '30d1193h71585m4295001s' -> 15_476_901_000
+ * @param string
+ */
+export const stringToMS = (string: string) => string.split(/(?<=[a-z])(?=\d)/).reduce((acc, cur) => acc + ms(cur), 0);
+
+/**
+ * removes minecraft formatting codes
+ * @param string
+ */
+export const removeMcFormatting = (string: string) => string.replace(/§[\da-gk-or]/g, '');
+
+/**
+ * escapes '*' and '_' if those are neither within an URL nor a code block or inline code
+ * @param string
+ * @param escapeEverything wether to also escape '\' before '*' and '_'
+ */
+export const escapeMarkdown = (string: string, escapeEverything = false) =>
+	string
+		.split('```')
+		.map((subString, index, array) => {
+			if (index % 2 && index !== array.length - 1) return subString;
+
+			return string
+				.split(/(?<=^|[^`])`(?=[^`]|$)/)
+				.map((subString_, index_, array_) => {
+					if (index_ % 2 && index_ !== array_.length - 1) return subString_;
+
+					if (escapeEverything) {
+						return subString_
+							.replace(/(?=\*)/g, '\\') // escape italic 1/2
+							.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
+								// escape italic 2/2 & underline
+								if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
+								if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
+								return `${p1.replace(/(?=_)/g, '\\')}\\_${p2}`; // escape not already escaped '_'
+							});
+					}
+
+					return subString_
+						.replace(/(?<!\\)(?=\*)/g, '\\') // escape italic 1/2
+						.replace(/(\S*)_([^\s_]*)/g, (match, p1: string, p2: string) => {
+							// escape italic 2/2 & underline
+							if (/^https?:\/\/|^www\./i.test(match)) return match; // don't escape URLs
+							if (p1.includes('<') || p2.includes('>')) return match; // don't escape emojis
+							return `${p1.replace(/(?<!\\)(?=_)/g, '\\')}${p1.endsWith('\\') ? '' : '\\'}_${p2}`; // escape not already escaped '_'
+						});
+				})
+				.join('`');
+		})
+		.join('```');
+
+const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
+
+/**
+ * compares to strings alphabetically, case insensitive
+ * @param a
+ * @param b
+ */
+export const compareAlphabetically = (a?: string | null, b?: string | null) => collator.compare(a!, b!);
+
+/**
+ * @param splitText
+ * @param options Options controlling the behavior of the split
+ */
+function concatMessageChunks(
+	splitText: string[],
+	{ maxLength, char, append, prepend }: Merge<Required<SplitOptions>, { char: string }>,
+) {
+	const messages: string[] = [];
+
+	let msg = '';
+
+	for (const chunk of splitText) {
+		if (msg && `${msg}${char}${chunk}${append}`.length > maxLength) {
+			messages.push(`${msg}${append}`);
+			msg = prepend;
+		}
+
+		msg += `${msg && msg !== prepend ? char : ''}${chunk}`;
+	}
+
+	return [...messages, msg].filter(Boolean);
+}
+
+export interface SplitOptions {
+	maxLength?: number;
+	char?: string | RegExp | (string | RegExp)[];
+	prepend?: string;
+	append?: string;
+}
+
+/**
+ * Splits a string into multiple chunks at a designated character that do not exceed a specific length.
+ * @param text Content to split
+ * @param options Options controlling the behavior of the split
+ */
+export function splitMessage(
+	text: string,
+	{ maxLength = 2_000, char = '\n', prepend = '', append = '' }: SplitOptions = {},
+) {
+	if (text.length <= maxLength) return [text];
+
+	let splitText = [text];
+
+	if (Array.isArray(char)) {
+		while (char.length && splitText.some(({ length }) => length > maxLength)) {
+			const currentChar = char.shift()!;
+
+			splitText =
+				currentChar instanceof RegExp
+					? splitText.flatMap((chunk) => {
+							if (chunk.length <= maxLength) return chunk;
+
+							if (currentChar.global) {
+								const matched = chunk.match(currentChar);
+
+								if (!matched) return chunk;
+
+								return matched.flatMap((match) =>
+									concatMessageChunks(chunk.split(match), { maxLength, char: match, prepend, append }),
+								);
+							}
+
+							// no global flag
+							const matched = chunk.match(currentChar)?.[0];
+
+							if (!matched) return chunk;
+
+							return concatMessageChunks(chunk.split(matched), { maxLength, char: matched, prepend, append });
+					  })
+					: splitText.flatMap((chunk) =>
+							chunk.length > maxLength
+								? concatMessageChunks(chunk.split(currentChar), { maxLength, char: currentChar, prepend, append })
+								: chunk,
+					  );
+		}
+
+		if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
+
+		return splitText;
+	}
+
+	splitText = text.split(char);
+
+	if (splitText.some(({ length }) => length > maxLength)) throw new RangeError('SPLIT_MAX_LEN');
+
+	return concatMessageChunks(splitText, { maxLength, char: typeof char === 'string' ? char : '', append, prepend });
+}
+
+export interface MakeContentOptions {
+	split?: SplitOptions | boolean;
+	code?: string | boolean;
+}
+
+/**
+ * TEMPORARY replacement until discordjs/builders includes a message builder
+ * @param text
+ * @param options
+ */
+export function makeContent(text = '', options: MakeContentOptions = {}) {
+	const isCode = typeof options.code !== 'undefined' && options.code !== false;
+	const splitOptions =
+		options.split === true
+			? {}
+			: typeof options.split !== 'undefined' && options.split !== false
+			? { ...options.split }
+			: undefined;
+
+	let content = text;
+
+	if (isCode) {
+		const codeName = typeof options.code === 'string' ? options.code : '';
+
+		content = Formatters.codeBlock(codeName, Util.cleanCodeBlockContent(content));
+
+		if (splitOptions) {
+			splitOptions.prepend = `${splitOptions.prepend ?? ''}\`\`\`${codeName}\n`;
+			splitOptions.append = `\n\`\`\`${splitOptions.append ?? ''}`;
+		}
+	}
+
+	return splitMessage(content, splitOptions);
+}
+
+/**
+ * generates an array of code blocks
+ * @param input
+ * @param code
+ * @param char
+ * @param formatter
+ */
+export function splitForEmbedFields(
+	input: string,
+	code = '',
+	char = '\n',
+	formatter: (text: string) => string = Util.escapeCodeBlock,
+) {
+	return splitMessage(Formatters.codeBlock(code, formatter(input)), {
+		maxLength: EMBED_FIELD_MAX_CHARS,
+		char: [char, ''],
+		prepend: `\`\`\`${code}\n`,
+		append: '```',
+	});
+}
+
+/**
+ * calculate how many lines the single-line string takes up inside the embed field
+ * @param string
+ */
+function getDisplayedLines(string: string) {
+	let currentLine = '';
+	let totalLines = 1;
+	for (const word of string.split(' ')) {
+		// word still fits within the same line
+		if (currentLine.length + 1 + word.length <= 24) {
+			currentLine += ` ${word}`;
+		} else {
+			++totalLines;
+			currentLine = word;
+		}
+	}
+	return totalLines;
+}
+/**
+ * calculates how many lines the multi-line string takes up inside the embed field
+ * @param string
+ */
+export const getInlineFieldLineCount = (string: string) =>
+	string.length ? string.split('\n').reduce((acc, line) => acc + getDisplayedLines(line), 0) : 0;
