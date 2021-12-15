@@ -19,6 +19,7 @@ import {
 	days,
 	formatDecimalNumber,
 	formatNumber,
+	getInlineFieldLineCount,
 	hours,
 	logger,
 	safePromiseAll,
@@ -716,12 +717,6 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			leftLog = HypixelGuild.transformLogArray(leftLog);
 
 			const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length);
-			const getInlineFieldLineCount = (string: string) =>
-				string.length
-					? string.split('\n').reduce((acc, line) => acc + Math.ceil(line.length / 30), 0) // max shown is 24, number can be tweaked
-					: 0;
-
-			// create and send logging embed(s)
 			const loggingEmbeds: MessageEmbed[] = [];
 			const createEmbed = () => {
 				const embed = new MessageEmbed()
