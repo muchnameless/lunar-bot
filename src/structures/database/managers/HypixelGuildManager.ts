@@ -1,9 +1,12 @@
 import { CronJob } from 'cron';
 import { autocorrect, compareAlphabetically, logger } from '../../../functions';
 import { ModelManager } from './ModelManager';
+import type { ModelResovable } from './ModelManager';
 import type { GuildResolvable, Snowflake } from 'discord.js';
 import type { FindOptions } from 'sequelize';
 import type { HypixelGuild, UpdateOptions } from '../models/HypixelGuild';
+
+export type HypixelGuildResolvable = ModelResovable<HypixelGuild>;
 
 export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	/**
@@ -105,14 +108,14 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	 * sweeps the player cache
 	 * @param idOrGuild
 	 */
-	sweepPlayerCache(idOrGuild?: string | HypixelGuild | null) {
+	sweepPlayerCache(idOrGuild?: HypixelGuildResolvable | null) {
 		if (idOrGuild) {
 			const hypixelGuild = this.resolve(idOrGuild);
 
 			if (hypixelGuild) {
 				hypixelGuild.players = null;
 			}
-		} else {
+		} else if (idOrGuild !== null) {
 			this.cache.each((hypixelGuild) => (hypixelGuild.players = null));
 		}
 

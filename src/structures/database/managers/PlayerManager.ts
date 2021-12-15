@@ -326,7 +326,9 @@ export class PlayerManager extends ModelManager<Player> {
 		if (!log.size) return this;
 
 		// sort cache
-		this.client.hypixelGuilds.sweepPlayerCache();
+		for (const guildId of new Set(log.keys())) {
+			this.client.hypixelGuilds.sweepPlayerCache(guildId);
+		}
 		this.sortAlphabetically();
 
 		// logging

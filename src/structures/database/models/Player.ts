@@ -1931,7 +1931,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	async uncache() {
 		await this.uncacheMember();
 
-		if (this.guildId) this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache
+		this.client.hypixelGuilds.sweepPlayerCache(this.guildId); // sweep hypixel guild player cache
 		this.client.players.cache.delete(this.minecraftUuid);
 
 		return this;
