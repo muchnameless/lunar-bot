@@ -1,4 +1,4 @@
-import { Intents, LimitedCollection, SnowflakeUtil, Options, Constants } from 'discord.js';
+import { Intents, SnowflakeUtil, Options, Sweepers, Constants } from 'discord.js';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';
@@ -11,20 +11,12 @@ const client = new LunarClient({
 
 	// default options
 	makeCache: Options.cacheWithLimits({
-		...Options.defaultMakeCacheSettings,
-		MessageManager: {
-			maxSize: 200,
-			sweepInterval: 600, // 10 min
-			sweepFilter: LimitedCollection.filterByLifetime({
-				lifetime: 1_800, // 30 min
-				getComparisonTimestamp: (e) => e.editedTimestamp ?? e.createdTimestamp,
-				excludeFromSweep: (e) => e.id === (e.client as LunarClient).config.get('TAX_MESSAGE_ID'),
-			}),
-		},
+		ApplicationCommandManager: 0,
+		MessageManager: 200,
 		// @ts-expect-error
 		ChannelManager: {
 			sweepInterval: 3_600, // 1h
-			sweepFilter: LimitedCollection.filterByLifetime({
+			sweepFilter: Sweepers.filterByLifetime({
 				lifetime: 14_400, // 4h
 				getComparisonTimestamp(e: Channel) {
 					if (e.type === 'DM') {
@@ -36,6 +28,8 @@ const client = new LunarClient({
 				excludeFromSweep: (e) => e.type !== 'DM' && !(e as ThreadChannel).archived,
 			}),
 		},
+		GuildBanManager: 0,
+		GuildInviteManager: 0,
 		PresenceManager: 0,
 		ReactionUserManager: {
 			// cache only the bot user
@@ -43,9 +37,21 @@ const client = new LunarClient({
 			keepOverLimit: (e) => e.id === e.client.user!.id,
 		},
 		StageInstanceManager: 0,
-		UserManager: {
-			sweepInterval: 21_600, // 6h
-			sweepFilter: LimitedCollection.filterByLifetime({
+		VoiceStateManager: 0,
+	}),
+	sweepers: {
+		...Options.defaultSweeperSettings,
+		messages: {
+			interval: 600,
+			filter: Sweepers.filterByLifetime({
+				lifetime: 1_800, // 30 min
+				getComparisonTimestamp: (e) => e.editedTimestamp ?? e.createdTimestamp,
+				excludeFromSweep: (e) => e.id === (e.client as LunarClient).config.get('TAX_MESSAGE_ID'),
+			}),
+		},
+		users: {
+			interval: 21_600, // 6h
+			filter: Sweepers.filterByLifetime({
 				lifetime: 1, // 0 cancles the filter
 				getComparisonTimestamp: () => -1,
 				excludeFromSweep: (e) =>
@@ -56,8 +62,7 @@ const client = new LunarClient({
 					e.discriminator === '0000', // webhook message 'author'
 			}),
 		},
-		VoiceStateManager: 0,
-	}),
+	},
 	allowedMentions: { parse: ['users'], repliedUser: true },
 	partials: [
 		Constants.PartialTypes.CHANNEL, // DM channels
