@@ -1,4 +1,3 @@
-import { setTimeout as sleep } from 'node:timers/promises';
 import { MessageFlags, Permissions, Util } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import { logger, seconds } from '../functions';
@@ -11,6 +10,7 @@ import type {
 	MessageEmbed,
 	MessageOptions,
 	MessageReaction,
+	Snowflake,
 } from 'discord.js';
 import type { SendOptions } from './ChannelUtil';
 
@@ -24,8 +24,18 @@ interface EditOptions extends MessageEditOptions {
 	rejectOnError?: boolean;
 }
 
+interface QueuedDeletionTimeout {
+	timeout: NodeJS.Timeout;
+	promise: Promise<Message>;
+	executionTime: number;
+}
+
 export default class MessageUtil extends null {
 	static DEFAULT_REPLY_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
+
+	static DELETE_TIMEOUT_CACHE = new Map<Snowflake, QueuedDeletionTimeout>();
+
+	static DELETED_MESSAGES = new WeakSet<Message>();
 
 	/**
 	 * @param message
@@ -90,8 +100,10 @@ export default class MessageUtil extends null {
 	 * @param emojis
 	 */
 	static async react(message: Message | null, ...emojis: EmojiIdentifierResolvable[]) {
-		if (!message || message.deleted || this.isEphemeral(message)) return null;
-		if (!ChannelUtil.botPermissions(message.channel).has(Permissions.FLAGS.ADD_REACTIONS)) {
+		if (!message || this.DELETED_MESSAGES.has(message) || this.isEphemeral(message)) return null;
+		if (
+			!ChannelUtil.botPermissions(message.channel).has(Permissions.FLAGS.ADD_REACTIONS | Permissions.FLAGS.VIEW_CHANNEL)
+		) {
 			logger.warn(`[MESSAGE REACT]: missing permissions in ${this.channelLogInfo(message)}`);
 			return null;
 		}
@@ -138,6 +150,8 @@ export default class MessageUtil extends null {
 
 		// no timeout
 		if (timeout <= 0) {
+			this.DELETE_TIMEOUT_CACHE.delete(message.id);
+
 			try {
 				return await message.delete();
 			} catch (error) {
@@ -149,10 +163,30 @@ export default class MessageUtil extends null {
 			}
 		}
 
-		// timeout
-		await sleep(timeout);
+		// check if timeout is already queued
+		const existing = this.DELETE_TIMEOUT_CACHE.get(message.id);
+		if (existing) {
+			// queued timeout resolves earlier than new one
+			if (existing.executionTime - Date.now() <= timeout) return existing.promise;
 
-		return this.delete(message);
+			// delete queued timeout and requeue newer one
+			clearTimeout(existing.timeout);
+		}
+
+		// timeout
+		let res: (value: Promise<Message>) => void;
+		const promise = new Promise<Message>((r) => (res = r));
+
+		this.DELETE_TIMEOUT_CACHE.set(message.id, {
+			timeout: setTimeout(() => {
+				this.DELETE_TIMEOUT_CACHE.delete(message.id);
+				res(this.delete(message));
+			}, timeout),
+			promise,
+			executionTime: Date.now() + timeout,
+		});
+
+		return promise;
 	}
 
 	/**

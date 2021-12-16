@@ -95,7 +95,7 @@ export default class ChannelUtil extends null {
 							IdOrIds.map((id) => {
 								const message = channel.messages.cache.get(id);
 
-								if (message?.deleted || !(message?.deletable ?? true)) return null;
+								if (!message?.deletable) return null;
 
 								return channel.messages.delete(id);
 							}),
@@ -104,7 +104,7 @@ export default class ChannelUtil extends null {
 
 					const message = channel.messages.cache.get(IdOrIds);
 
-					if (message?.deleted || !(message?.deletable ?? true)) return;
+					if (!message?.deletable) return;
 
 					return await channel.messages.delete(IdOrIds);
 				}

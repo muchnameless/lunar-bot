@@ -804,7 +804,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	async sendToChat(options: string | ChatOptions) {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
-		if (_options.discordMessage?.deleted) {
+		if (_options.discordMessage && MessageUtil.DELETED_MESSAGES.has(_options.discordMessage)) {
 			logger.warn(`[CHATBRIDGE CHAT]: deleted on discord: '${_options.prefix ?? ''}${_options.content}'`);
 			return false;
 		}

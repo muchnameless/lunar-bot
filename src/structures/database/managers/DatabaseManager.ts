@@ -461,7 +461,7 @@ export class DatabaseManager {
 				? await taxChannel.messages.fetch(TAX_MESSAGE_ID).catch((error) => logger.error(error, '[TAX MESSAGE]'))
 				: null;
 
-			if (!taxMessage?.editable || taxMessage.deleted) {
+			if (!taxMessage?.editable) {
 				// taxMessage deleted -> send a new one
 				const { id } = await taxChannel.send({
 					embeds: [this.createTaxEmbed(this._createTaxEmbedDescription(availableAuctionsLog))],

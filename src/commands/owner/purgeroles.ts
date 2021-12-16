@@ -77,7 +77,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 
 					try {
 						const member = guild.members.cache.get(id);
-						if (!member || member.deleted) return;
+						if (!member) return;
 
 						await member.roles.remove(rolesToPurge);
 
