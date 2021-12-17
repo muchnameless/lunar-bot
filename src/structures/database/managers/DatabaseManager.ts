@@ -445,13 +445,7 @@ export class DatabaseManager {
 				logger.warn('[TAX MESSAGE] tax channel error');
 				return this;
 			}
-			if (
-				!ChannelUtil.botPermissions(taxChannel).has([
-					Permissions.FLAGS.VIEW_CHANNEL,
-					Permissions.FLAGS.SEND_MESSAGES,
-					Permissions.FLAGS.EMBED_LINKS,
-				])
-			) {
+			if (!ChannelUtil.botPermissions(taxChannel).has(Permissions.FLAGS.VIEW_CHANNEL)) {
 				logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 				return this;
 			}
