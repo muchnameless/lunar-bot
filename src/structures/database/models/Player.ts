@@ -1229,14 +1229,14 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				? discordGuild.members.cache.find(({ user: { tag } }) => tag === this.discordId) // tag known
 				: discordGuild.members.cache.get(this.discordId); // id known
 
-			if (!member) {
+			if (!member && !this.client.config.get('HYPIXEL_API_ERROR')) {
 				const DISCORD_TAG = await this.fetchDiscordTag();
 
 				if (!DISCORD_TAG) return null;
 
 				member = discordGuild.members.cache.find(({ user: { tag } }) => tag === DISCORD_TAG);
 			}
-		} else {
+		} else if (!this.client.config.get('HYPIXEL_API_ERROR')) {
 			// unknown tag
 			const DISCORD_TAG = await this.fetchDiscordTag();
 
