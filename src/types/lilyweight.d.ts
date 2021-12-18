@@ -80,7 +80,7 @@ declare module 'lilyweight' {
 		 * @param returnUsername Should the function return the player's username.
 		 * @returns The weights calculated for the player.
 		 */
-		async getWeightFromUUID(uuid: string, returnUsername: boolean = false): Promise<PlayerWeightData>;
+		getWeightFromUUID(uuid: string, returnUsername?: boolean): Promise<PlayerWeightData>;
 
 		/**
 		 * Gets the player's weight.
@@ -88,7 +88,7 @@ declare module 'lilyweight' {
 		 * @param returnUsername Should the function return the player's username.
 		 * @returns The weights calculated for the player.
 		 */
-		async getWeightFromUsername(username: string, returnUsername: boolean = false): Promise<PlayerWeightData>;
+		getWeightFromUsername(username: string, returnUsername?: boolean): Promise<PlayerWeightData>;
 
 		/**
 		 * Gets the player's weight.
@@ -96,6 +96,6 @@ declare module 'lilyweight' {
 		 * @param returnUsername Should the function return the player's username.
 		 * @returns The weights calculated for the player.
 		 */
-		async getWeight(player: string, returnUsername: boolean = false): Promise<PlayerWeightData>;
+		getWeight(player: string, returnUsername?: boolean): Promise<PlayerWeightData>;
 	}
 }
