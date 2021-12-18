@@ -262,7 +262,7 @@ function getDisplayedLines(string: string) {
 	let totalLines = 1;
 	for (const word of string.split(' ')) {
 		// word still fits within the same line
-		if (currentLine.length + 1 + word.length <= 24) {
+		if (currentLine.length + 1 + word.length <= 27) {
 			currentLine += ` ${word}`;
 		} else {
 			++totalLines;
