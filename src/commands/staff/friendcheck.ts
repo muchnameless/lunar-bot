@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
-import { stripIndents } from 'common-tags';
 import { EMBED_DESCRIPTION_MAX_CHARS } from '../../constants';
 import { hypixel, mojang } from '../../api';
 import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands/commonOptions';
@@ -32,21 +31,17 @@ export default class FriendCheckCommand extends ApplicationCommand {
 		);
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 
-		let mutualFriends = '';
+		let friendsInGuild = '';
 
 		for (const player of hypixelGuild.players.values()) {
-			if (friends.has(player.minecraftUuid)) mutualFriends += `${player}\n`;
+			if (friends.has(player.minecraftUuid)) friendsInGuild += `${player}\n`;
 		}
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
-					.setTitle(`${escapeIgn(IGN)}'s friends in the guild`)
-					.setDescription(
-						Formatters.codeBlock(stripIndents`
-						${trim(mutualFriends, EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length)}
-					`),
-					)
+					.setTitle(`${escapeIgn(IGN)}'s friends in ${hypixelGuild}`)
+					.setDescription(Formatters.codeBlock(trim(friendsInGuild, EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length)))
 					.setFooter(hypixelGuild.name),
 			],
 		});
