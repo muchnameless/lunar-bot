@@ -256,13 +256,14 @@ export function splitForEmbedFields(
 /**
  * calculate how many lines the single-line string takes up inside the embed field
  * @param string
+ * @param lineLength
  */
-function getDisplayedLines(string: string) {
+function getDisplayedLines(string: string, lineLength: number) {
 	let currentLine = '';
 	let totalLines = 1;
 	for (const word of string.split(' ')) {
 		// word still fits within the same line
-		if (currentLine.length + 1 + word.length <= 27) {
+		if (currentLine.length + 1 + word.length <= lineLength) {
 			currentLine += ` ${word}`;
 		} else {
 			++totalLines;
@@ -274,6 +275,7 @@ function getDisplayedLines(string: string) {
 /**
  * calculates how many lines the multi-line string takes up inside the embed field
  * @param string
+ * @param lineLength
  */
-export const getInlineFieldLineCount = (string: string) =>
-	string.length ? string.split('\n').reduce((acc, line) => acc + getDisplayedLines(line), 0) : 0;
+export const getInlineFieldLineCount = (string: string, lineLength: number) =>
+	string.length ? string.split('\n').reduce((acc, line) => acc + getDisplayedLines(line, lineLength), 0) : 0;

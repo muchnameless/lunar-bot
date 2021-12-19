@@ -737,8 +737,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				let joinedLogElement = joinedLog[index] ?? '';
 				let leftLogElement = leftLog[index] ?? '';
 
-				const IGNS_JOINED_LOG_LINE_COUNT = getInlineFieldLineCount(joinedLogElement);
-				const PLAYERS_LEFT_LOG_LINE_COUNT = getInlineFieldLineCount(leftLogElement);
+				const IGNS_JOINED_LOG_LINE_COUNT = getInlineFieldLineCount(joinedLogElement, 27);
+				const PLAYERS_LEFT_LOG_LINE_COUNT = getInlineFieldLineCount(leftLogElement, 27);
 				const MAX_VALUE_LINES = Math.max(IGNS_JOINED_LOG_LINE_COUNT, PLAYERS_LEFT_LOG_LINE_COUNT);
 
 				// // empty line padding

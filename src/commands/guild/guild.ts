@@ -43,6 +43,7 @@ import {
 	autocorrect,
 	escapeIgn,
 	getIdFromString,
+	getInlineFieldLineCount,
 	logger,
 	removeMcFormatting,
 	seconds,
@@ -591,17 +592,55 @@ export default class GuildCommand extends ApplicationCommand {
 		});
 		const pageMatched = response.match(/\(Page (?<current>\d+) ?(?:of|\/) ?(?<total>\d+)\)/);
 
+		// split input and parse dates
+		const description: string[] = [];
+		const dates: string[] = [];
+		const events: string[] = [];
+
+		for (const line of response.split('\n')) {
+			const matched = line.match(/^(?<date>[a-z]+ \d+ \d{4} \d{2}:\d{2} [a-z]+): (?<event>.+)$/i);
+
+			if (!matched) {
+				description.push(line);
+				continue;
+			}
+
+			const { date, event } = matched.groups!;
+
+			let padding = '\n';
+
+			for (let i = getInlineFieldLineCount(event, 37); i--; ) {
+				padding += '\n';
+			}
+
+			dates.push(`${Formatters.time(new Date(date))}${padding}`);
+			events.push(event);
+		}
+
+		// build embed
+		const embed = this.client.defaultEmbed
+			.setTitle(`/${command}`)
+			.setDescription(Formatters.codeBlock(description.join('\n')))
+			.setFooter(hypixelGuild.name);
+
+		if (dates.length) {
+			embed.addFields(
+				{
+					name: `${'\u200B'.padEnd(105, '\u00A0')}\u200B`,
+					value: `\u200B\n${dates.join('')}`,
+					inline: true,
+				},
+				{ name: '\u200B', value: Formatters.codeBlock(events.join('\n\n')), inline: true },
+			);
+		}
+
+		// send reply
 		return (
 			InteractionUtil[
 				interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'
 			] as typeof InteractionUtil['reply']
 		)(interaction as ButtonInteraction, {
-			embeds: [
-				this.client.defaultEmbed
-					.setTitle(`/${command}`)
-					.setDescription(Formatters.codeBlock(response))
-					.setFooter(hypixelGuild.name),
-			],
+			embeds: [embed],
 			components: this._getPaginationButtons(
 				subcommand,
 				hypixelGuild.guildId,
