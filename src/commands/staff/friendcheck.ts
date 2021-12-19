@@ -41,7 +41,9 @@ export default class FriendCheckCommand extends ApplicationCommand {
 			embeds: [
 				this.client.defaultEmbed
 					.setTitle(`${escapeIgn(IGN)}'s friends in ${hypixelGuild}`)
-					.setDescription(Formatters.codeBlock(trim(friendsInGuild, EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length)))
+					.setDescription(
+						Formatters.codeBlock(trim(friendsInGuild || '-- none --', EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length)),
+					)
 					.setFooter(hypixelGuild.name),
 			],
 		});
