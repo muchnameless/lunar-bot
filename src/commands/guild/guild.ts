@@ -626,6 +626,7 @@ export default class GuildCommand extends ApplicationCommand {
 		if (dates.length) {
 			embed.addFields(
 				{
+					// padding since dates are sometimes not as long (may <> november), with this 37 works everytime for getInlineFieldLineCount
 					name: `${'\u200B'.padEnd(105, '\u00A0')}\u200B`,
 					value: `\u200B\n${dates.join('')}`,
 					inline: true,
