@@ -204,7 +204,7 @@ export class DiscordChatManager extends ChatManager {
 			const webhooks = await channel.fetchWebhooks();
 
 			this.webhook =
-				webhooks.find(({ type, owner }) => type === 'Incoming' && owner?.id === this.client.user!.id) ?? null;
+				webhooks.find((webhook) => webhook.isIncoming() && webhook.owner?.id === this.client.user!.id) ?? null;
 
 			if (!this.webhook) {
 				if (webhooks.size >= WEBHOOKS_MAX_PER_CHANNEL) {
