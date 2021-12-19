@@ -90,13 +90,13 @@ export class CompetitionCommand extends ApplicationCommand {
 				}
 			} while (!endingTime);
 
-			await InteractionUtil.reply(
+			InteractionUtil.reply(
 				interaction,
 				`type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
 			);
 		} catch (error) {
 			logger.error(error);
-			await InteractionUtil.reply(interaction, 'the command has been cancelled');
+			InteractionUtil.reply(interaction, 'the command has been cancelled');
 		} finally {
 			collector.stop();
 		}
