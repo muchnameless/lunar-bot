@@ -124,8 +124,8 @@ export default class EvalCommand extends ApplicationCommand {
 			InteractionUtil.reply(
 				interaction,
 				typeof options === 'string'
-					? { content: options, ephemeral: false, rejectOnError: true }
-					: { ephemeral: false, rejectOnError: true, ...options },
+					? { content: options, ephemeral: false, rejectOnError: true, fetchReply: true }
+					: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
 			);
 		const type = (x: unknown) => new Type(x).toString();
 		const saveHeapdump = () => fs.writeFile(`${Date.now()}.heapsnapshot`, v8.getHeapSnapshot());
