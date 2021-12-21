@@ -1,6 +1,7 @@
 .env
 .vscode
 .VSCodeCounter
+*.heapsnapshot
 dist
 launcher_accounts.json
 log_buffer
