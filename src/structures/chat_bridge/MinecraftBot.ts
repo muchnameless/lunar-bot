@@ -20,7 +20,7 @@ export async function createBot(chatBridge: ChatBridge, options: ClientOptions) 
 	let eventCount = 0;
 
 	for await (const { fullPath } of readJSFiles(new URL('./bot_events', import.meta.url))) {
-		const event = (await import(pathToFileURL(fullPath).href)).default;
+		const event = (await import(pathToFileURL(fullPath).href)).default as (chatBridge: ChatBridge) => void;
 		const EVENT_NAME = basename(fullPath, '.js');
 
 		bot[SPAWN_EVENTS.has(EVENT_NAME as any) ? 'once' : 'on'](EVENT_NAME, event.bind(null, chatBridge));
