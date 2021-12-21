@@ -4,7 +4,7 @@ import { db } from '../structures/database';
 import { LunarClient } from '../structures/LunarClient';
 import { logger } from '../functions';
 import type {
-	RESTGetAPIApplicationGuildCommandsResult,
+	RESTPutAPIApplicationCommandsResult,
 	RESTPutAPIGuildApplicationCommandsPermissionsJSONBody,
 } from 'discord-api-types/v9';
 
@@ -35,7 +35,7 @@ try {
 		{
 			body: SHOULD_DELETE ? [] : client.commands.map(({ data }, name) => ({ ...data, name })),
 		},
-	)) as RESTGetAPIApplicationGuildCommandsResult;
+	)) as RESTPutAPIApplicationCommandsResult;
 
 	if (!SHOULD_DELETE) {
 		logger.info(
