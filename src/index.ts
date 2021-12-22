@@ -2,7 +2,7 @@ import { Intents, SnowflakeUtil, Options, Sweepers, Constants } from 'discord.js
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';
-import type { AnyChannel, DMChannel, ThreadChannel } from 'discord.js';
+import type { AnyChannel, ThreadChannel } from 'discord.js';
 
 const client = new LunarClient({
 	// custom options
@@ -56,9 +56,7 @@ const client = new LunarClient({
 				getComparisonTimestamp: () => -1,
 				excludeFromSweep: (e) =>
 					e.client.guilds.cache.some((guild) => guild.members.cache.has(e.id)) || // user is part of a member
-					e.client.channels.cache.some(
-						(channel) => channel.type === 'DM' && (channel as DMChannel).recipient.id === e.id,
-					) || // user has a DM channel
+					e.client.channels.cache.some((channel) => channel.type === 'DM' && channel.recipient.id === e.id) || // user has a DM channel
 					e.discriminator === '0000', // webhook message 'author'
 			}),
 		},

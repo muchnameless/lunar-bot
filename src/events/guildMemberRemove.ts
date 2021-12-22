@@ -3,7 +3,7 @@ import { stripIndents } from 'common-tags';
 import { logger } from '../functions';
 import { GuildMemberUtil, MessageEmbedUtil } from '../util';
 import { Event } from '../structures/events/Event';
-import type { DMChannel, GuildMember } from 'discord.js';
+import type { GuildMember } from 'discord.js';
 import type { EventContext } from '../structures/events/BaseEvent';
 
 export default class GuildMemberRemoveEvent extends Event {
@@ -22,9 +22,7 @@ export default class GuildMemberRemoveEvent extends Event {
 		// uncache user
 		if (
 			!this.client.guilds.cache.some((guild) => guild.members.cache.has(member.id)) &&
-			this.client.channels.cache.some(
-				(channel) => channel.type === 'DM' && (channel as DMChannel).recipient.id === member.id,
-			)
+			this.client.channels.cache.some((channel) => channel.type === 'DM' && channel.recipient.id === member.id)
 		) {
 			this.client.users.cache.delete(member.id);
 		}

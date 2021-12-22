@@ -7,7 +7,7 @@ import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';
 import type { APIEmbed } from 'discord-api-types/v9';
-import type { GuildChannel, Message, TextChannel } from 'discord.js';
+import type { GuildChannel, Message } from 'discord.js';
 import type { URL } from 'node:url';
 import type { LunarClient } from './LunarClient';
 
@@ -60,7 +60,7 @@ export class LogHandler {
 		if (!channel?.isText()) {
 			logger.error(
 				`[LOG HANDLER]: ${
-					channel ? `#${(channel as GuildChannel).name}` : this.client.config.get('LOGGING_CHANNEL_ID')
+					channel ? `#${(channel as GuildChannel).name ?? channel.id}` : this.client.config.get('LOGGING_CHANNEL_ID')
 				} is not a cached text based channel (id)`,
 			);
 			return null;
@@ -76,7 +76,7 @@ export class LogHandler {
 			return null;
 		}
 
-		return channel as TextChannel;
+		return channel;
 	}
 
 	/**
