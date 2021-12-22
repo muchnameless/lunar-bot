@@ -1,7 +1,6 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Collection, MessageEmbed, Formatters, Util } from 'discord.js';
-import pkg from 'sequelize';
-const { Op } = pkg;
+import { Op } from 'sequelize';
 import { CronJob } from 'cron';
 import {
 	EMBED_FIELD_MAX_CHARS,

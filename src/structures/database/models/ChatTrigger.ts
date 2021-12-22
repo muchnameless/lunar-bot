@@ -1,6 +1,5 @@
 import { Collection } from 'discord.js';
-import pkg from 'sequelize';
-const { Model, DataTypes } = pkg;
+import { Model, DataTypes } from 'sequelize';
 import { NEVER_MATCHING_REGEXP } from '../../../constants';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { HypixelUserMessage } from '../../chat_bridge/HypixelMessage';

@@ -1,8 +1,8 @@
 import { URL, pathToFileURL } from 'node:url';
-import pkg from 'sequelize';
-const { Sequelize, DataTypes, Model } = pkg;
+import { Sequelize, DataTypes } from 'sequelize';
 import pg from 'pg';
 import { logger, readJSFiles } from '../../functions';
+import type { Model } from 'sequelize';
 import type { Models } from './managers/DatabaseManager';
 
 // to get bigints as numbers instead of strings

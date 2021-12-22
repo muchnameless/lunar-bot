@@ -1,5 +1,4 @@
-import pkg from 'sequelize';
-const { Model, DataTypes } = pkg;
+import { Model, DataTypes } from 'sequelize';
 import { MessageEmbed, Formatters, Util, VoiceChannel } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';
 import { setRank } from '../../chat_bridge/constants';

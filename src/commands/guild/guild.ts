@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { SnowflakeUtil, Formatters, Constants, MessageActionRow, MessageButton } from 'discord.js';
-import pkg from 'sequelize';
-const { Op } = pkg;
+import { Op } from 'sequelize';
 import ms from 'ms';
 import { commaListsOr } from 'common-tags';
 import {

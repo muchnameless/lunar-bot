@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import pkg from 'sequelize';
-const { Op } = pkg;
+import { Op } from 'sequelize';
 import { oneLine } from 'common-tags';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
 import { seconds } from '../../functions';

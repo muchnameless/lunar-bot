@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import pkg from 'sequelize';
-const { Op } = pkg;
+import { Op } from 'sequelize';
 import { OFFSET_FLAGS } from '../../constants';
 import { optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';

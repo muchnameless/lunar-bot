@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import pkg from 'sequelize';
-const { Op } = pkg;
+import { Op } from 'sequelize';
 import { Formatters } from 'discord.js';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';

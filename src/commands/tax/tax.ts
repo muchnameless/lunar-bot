@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Permissions, Formatters } from 'discord.js';
-import pkg from 'sequelize';
-const { Op } = pkg;
+import { Op } from 'sequelize';
 import {
 	hypixelGuildOption,
 	optionalPlayerOption,

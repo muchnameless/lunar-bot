@@ -1,6 +1,5 @@
 import { DiscordAPIError, GuildMember, MessageEmbed, Permissions, Formatters } from 'discord.js';
-import pkg from 'sequelize';
-const { Model, DataTypes, fn } = pkg;
+import { Model, DataTypes, fn } from 'sequelize';
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
 import {

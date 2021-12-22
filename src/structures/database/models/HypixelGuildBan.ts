@@ -1,5 +1,4 @@
-import pkg from 'sequelize';
-const { Model, DataTypes } = pkg;
+import { Model, DataTypes } from 'sequelize';
 import type { ModelStatic, Sequelize, Optional } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 

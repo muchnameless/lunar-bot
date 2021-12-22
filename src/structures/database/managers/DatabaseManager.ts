@@ -1,8 +1,7 @@
 import { Permissions, Formatters } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';
-import pkg from 'sequelize';
-const { Model } = pkg;
+import { Model } from 'sequelize';
 import { DEFAULT_CONFIG, X_EMOJI, Y_EMOJI_ALT } from '../../../constants';
 import { hypixel } from '../../../api';
 import { ChannelUtil } from '../../../util';

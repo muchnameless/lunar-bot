@@ -1,5 +1,4 @@
-import pkg from 'sequelize';
-const { Model, DataTypes } = pkg;
+import { Model, DataTypes } from 'sequelize';
 import {
 	CATACOMBS_ROLES,
 	DELIMITER_ROLES,
