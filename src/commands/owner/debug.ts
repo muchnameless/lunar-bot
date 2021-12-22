@@ -7,14 +7,7 @@ import { hypixel, imgur } from '../../api';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type {
-	Collection,
-	CommandInteraction,
-	DMChannel,
-	Snowflake,
-	TextBasedChannels,
-	ThreadChannel,
-} from 'discord.js';
+import type { Collection, CommandInteraction, DMChannel, Snowflake, TextBasedChannel, ThreadChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class DebugCommand extends ApplicationCommand {
@@ -81,14 +74,14 @@ export default class DebugCommand extends ApplicationCommand {
 								Users: ${formatNumber(this.client.users.cache.size)}
 								Messages: ${formatNumber(
 									channels.cache.reduce(
-										(acc, channel) => acc + ((channel as TextBasedChannels).messages?.cache.size ?? 0),
+										(acc, channel) => acc + ((channel as TextBasedChannel).messages?.cache.size ?? 0),
 										0,
 									),
 								)}
 								${(
-									channels.cache.filter((c) => Boolean((c as TextBasedChannels).messages?.cache.size)) as Collection<
+									channels.cache.filter((c) => Boolean((c as TextBasedChannel).messages?.cache.size)) as Collection<
 										Snowflake,
-										TextBasedChannels
+										TextBasedChannel
 									>
 								)
 									.sort(

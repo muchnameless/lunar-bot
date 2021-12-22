@@ -11,7 +11,7 @@ import type {
 	MessageOptions,
 	PartialDMChannel,
 	Snowflake,
-	TextBasedChannels,
+	TextBasedChannel,
 } from 'discord.js';
 
 export interface SendOptions extends MessageOptions {
@@ -73,7 +73,7 @@ export default class ChannelUtil extends null {
 	 * @param channel
 	 * @param IdOrIds
 	 */
-	static async deleteMessages(channel: TextBasedChannels | null, IdOrIds: Snowflake | Snowflake[]) {
+	static async deleteMessages(channel: TextBasedChannel | null, IdOrIds: Snowflake | Snowflake[]) {
 		if (!channel?.isText()) {
 			return logger.warn(`[DELETE MESSAGES]: ${this.logInfo(channel)} is not a text based channel`);
 		}
@@ -118,9 +118,9 @@ export default class ChannelUtil extends null {
 	 * @param channel
 	 * @param options
 	 */
-	static async send(channel: TextBasedChannels, options: SendOptions & { rejectOnError: true }): Promise<Message>;
-	static async send(channel: TextBasedChannels, options: string | SendOptions): Promise<Message | null>;
-	static async send(channel: TextBasedChannels, options: string | SendOptions) {
+	static async send(channel: TextBasedChannel, options: SendOptions & { rejectOnError: true }): Promise<Message>;
+	static async send(channel: TextBasedChannel, options: string | SendOptions): Promise<Message | null>;
+	static async send(channel: TextBasedChannel, options: string | SendOptions) {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		// guild -> requires permission

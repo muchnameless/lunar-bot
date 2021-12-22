@@ -20,7 +20,7 @@ import type {
 	Message,
 	MessageComponentInteraction,
 	MessageResolvable,
-	TextBasedChannels,
+	TextBasedChannel,
 	WebhookEditMessageOptions,
 } from 'discord.js';
 import type { SplitOptions } from '../functions';
@@ -544,7 +544,7 @@ export default class InteractionUtil extends null {
 
 		try {
 			const channel =
-				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId!)) as TextBasedChannels);
+				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId!)) as TextBasedChannel);
 
 			await this.reply(interaction, {
 				content: question,
@@ -584,12 +584,12 @@ export default class InteractionUtil extends null {
 			new MessageButton().setCustomId(CANCLE_ID).setStyle(Constants.MessageButtonStyles.DANGER).setEmoji(X_EMOJI),
 		);
 
-		let channel: TextBasedChannels;
+		let channel: TextBasedChannel;
 		let message: Message | void;
 
 		try {
 			channel =
-				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannels);
+				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel);
 
 			message = await this.reply(interaction, {
 				embeds: [(interaction.client as LunarClient).defaultEmbed.setDescription(question)],
