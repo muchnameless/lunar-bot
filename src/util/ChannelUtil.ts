@@ -2,15 +2,7 @@ import { Permissions } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
-import type {
-	AnyChannel,
-	GuildChannel,
-	Message,
-	MessageEmbed,
-	MessageOptions,
-	Snowflake,
-	TextBasedChannel,
-} from 'discord.js';
+import type { AnyChannel, Message, MessageEmbed, MessageOptions, Snowflake, TextBasedChannel } from 'discord.js';
 
 export interface SendOptions extends MessageOptions {
 	rejectOnError?: boolean;
@@ -62,7 +54,7 @@ export default class ChannelUtil extends null {
 				return this.DM_PERMISSIONS;
 
 			default:
-				return (channel as GuildChannel).permissionsFor(channel.client.user!);
+				return channel.permissionsFor(channel.client.user!);
 		}
 	}
 
