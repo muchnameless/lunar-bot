@@ -1,8 +1,8 @@
-import { Client, Intents, LimitedCollection, SnowflakeUtil, Options, Constants } from 'discord.js';
+import { Client, Intents, SnowflakeUtil, Options, Constants, Sweepers } from 'discord.js';
 import { InteractionUtil } from '../util';
 import { db } from '../structures/database';
 import { hours, logger } from '../functions';
-import type { ActivitiesOptions, Channel, DMChannel, ThreadChannel } from 'discord.js';
+import type { ActivitiesOptions, AnyChannel, ThreadChannel } from 'discord.js';
 
 // catch rejections
 process
@@ -32,12 +32,12 @@ const client = new Client({
 		// @ts-expect-error
 		ChannelManager: {
 			sweepInterval: 3_600, // 1h
-			sweepFilter: LimitedCollection.filterByLifetime({
+			sweepFilter: Sweepers.filterByLifetime({
 				lifetime: 14_400, // 4h
-				getComparisonTimestamp(e: Channel) {
+				getComparisonTimestamp(e: AnyChannel) {
 					if (e.type === 'DM') {
 						// DM -> last message
-						return (e as DMChannel).lastMessageId ? SnowflakeUtil.timestampFrom((e as DMChannel).lastMessageId!) : -1;
+						return e.lastMessageId ? SnowflakeUtil.timestampFrom(e.lastMessageId!) : -1;
 					}
 					return (e as ThreadChannel).archiveTimestamp ?? -1; // threads -> archived
 				},

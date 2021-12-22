@@ -2,7 +2,7 @@ import { Intents, SnowflakeUtil, Options, Sweepers, Constants } from 'discord.js
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';
-import type { Channel, DMChannel, ThreadChannel } from 'discord.js';
+import type { AnyChannel, DMChannel, ThreadChannel } from 'discord.js';
 
 const client = new LunarClient({
 	// custom options
@@ -18,10 +18,10 @@ const client = new LunarClient({
 			sweepInterval: 3_600, // 1h
 			sweepFilter: Sweepers.filterByLifetime({
 				lifetime: 14_400, // 4h
-				getComparisonTimestamp(e: Channel) {
+				getComparisonTimestamp(e: AnyChannel) {
 					if (e.type === 'DM') {
 						// DM -> last message
-						return (e as DMChannel).lastMessageId ? SnowflakeUtil.timestampFrom((e as DMChannel).lastMessageId!) : -1;
+						return e.lastMessageId ? SnowflakeUtil.timestampFrom(e.lastMessageId!) : -1;
 					}
 					return (e as ThreadChannel).archiveTimestamp ?? -1; // threads -> archived
 				},

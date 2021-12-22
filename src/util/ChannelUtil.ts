@@ -3,13 +3,11 @@ import { commaListsAnd } from 'common-tags';
 import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
 import type {
-	Channel,
-	DMChannel,
+	AnyChannel,
 	GuildChannel,
 	Message,
 	MessageEmbed,
 	MessageOptions,
-	PartialDMChannel,
 	Snowflake,
 	TextBasedChannel,
 } from 'discord.js';
@@ -38,25 +36,25 @@ export default class ChannelUtil extends null {
 	/**
 	 * @param channel
 	 */
-	static logInfo(channel: Channel | PartialDMChannel | null) {
+	static logInfo(channel: AnyChannel | null) {
 		if (!channel) return null;
 
 		switch (channel.type) {
 			case 'DM':
-				return `#${(channel as DMChannel).recipient?.tag ?? `DM-${(channel as DMChannel).recipient.id}`}`;
+				return `#${channel.recipient?.tag ?? `DM-${channel.recipient.id}`}`;
 
 			default:
-				return `#${(channel as GuildChannel).name}`;
+				return `#${channel.name}`;
 		}
 	}
 
 	/**
 	 * @param channel
 	 */
-	static botPermissions(channel: Channel | PartialDMChannel): Readonly<Permissions>;
+	static botPermissions(channel: AnyChannel): Readonly<Permissions>;
 	static botPermissions(channel: null): null;
-	static botPermissions(channel: Channel | PartialDMChannel | null): Readonly<Permissions> | null;
-	static botPermissions(channel: Channel | PartialDMChannel | null): Readonly<Permissions> | null {
+	static botPermissions(channel: AnyChannel | null): Readonly<Permissions> | null;
+	static botPermissions(channel: AnyChannel | null): Readonly<Permissions> | null {
 		if (!channel) return null;
 
 		switch (channel.type) {
