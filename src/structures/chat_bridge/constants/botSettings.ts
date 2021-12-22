@@ -1,7 +1,7 @@
 /**
  * mc client version
  */
-export const MC_CLIENT_VERSION = '1.16.5';
+export const MC_CLIENT_VERSION = '1.18';
 
 export const DEFAULT_SETTINGS = {
 	locale: 'en_US',
