@@ -35,6 +35,10 @@ interface SendViaWebhookOptions extends WebhookMessageOptions {
 
 export class DiscordChatManager extends ChatManager {
 	/**
+	 * webhook fetching/creating & caching
+	 */
+	private _fetchOrCreateWebhookPromise: Promise<this> | null = null;
+	/**
 	 * chat queue
 	 */
 	// @ts-expect-error
@@ -183,6 +187,19 @@ export class DiscordChatManager extends ChatManager {
 			return this;
 		}
 
+		if (this._fetchOrCreateWebhookPromise) return this._fetchOrCreateWebhookPromise;
+
+		try {
+			return await (this._fetchOrCreateWebhookPromise = this.__fetchOrCreateWebhook());
+		} finally {
+			this._fetchOrCreateWebhookPromise = null;
+		}
+	}
+	/**
+	 * should only ever be called from within _fetchOrCreateWebhook
+	 * @internal
+	 */
+	private async __fetchOrCreateWebhook() {
 		this.ready = false;
 
 		if (!this.hypixelGuild) {
@@ -262,36 +279,64 @@ export class DiscordChatManager extends ChatManager {
 	 * sends a message via the chatBridge webhook
 	 * @param options
 	 */
-	async sendViaWebhook(options: SendViaWebhookOptions) {
-		if (!this.chatBridge.isEnabled() || !this.isReady()) {
-			if (options.queuePromise) {
-				await options.queuePromise;
+	async sendViaWebhook({ queuePromise, ...options }: SendViaWebhookOptions) {
+		// chat bridge disabled
+		if (!this.chatBridge.isEnabled()) {
+			if (queuePromise) {
+				await queuePromise;
 				this.queue.shift();
 			}
-			throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: not enabled / ready`);
+			throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: not enabled`);
 		}
 
+		// no content
 		if (!options.content) {
-			if (options.queuePromise) {
-				await options.queuePromise;
+			if (queuePromise) {
+				await queuePromise;
 				this.queue.shift();
 			}
 			throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: no content`);
 		}
 
-		await (options.queuePromise ?? this.queue.wait());
+		// async queue
+		await (queuePromise ?? this.queue.wait());
 
 		try {
+			return await this._sendViaWebhook(options);
+		} finally {
+			this.queue.shift();
+		}
+	}
+	/**
+	 * should only ever be called from within sendViaWebhook
+	 * @param options
+	 * @internal
+	 */
+	async _sendViaWebhook(options: WebhookMessageOptions): Promise<Message> {
+		try {
+			// fetch / create webhook if non existent
+			if (!this.isReady()) {
+				await this._fetchOrCreateWebhook();
+
+				if (!this.isReady()) throw new Error(`[SEND VIA WEBHOOK]: ${this.logInfo}: not ready`);
+			}
+
+			// API request
 			return (await this.webhook.send(options)) as Message;
 		} catch (error) {
+			// webhook deleted
 			if (error instanceof DiscordAPIError && error.httpStatus === 404) {
+				logger.error(error, `[SEND VIA WEBHOOK]: ${this.logInfo}: webhook deleted -> recreating & resending`);
+
+				// try to obtain another webhook
 				this._uncacheWebhook();
-				this._fetchOrCreateWebhook();
+				await this._fetchOrCreateWebhook();
+
+				// resend
+				return this._sendViaWebhook(options);
 			}
 
 			throw error;
-		} finally {
-			this.queue.shift();
 		}
 	}
 
