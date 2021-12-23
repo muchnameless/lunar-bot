@@ -125,6 +125,8 @@ export default class EvalCommand extends ApplicationCommand {
 				interaction,
 				typeof options === 'string'
 					? { content: options, ephemeral: false, rejectOnError: true, fetchReply: true }
+					: options instanceof MessageEmbed
+					? { embeds: [options], ephemeral: false, rejectOnError: true, fetchReply: true }
 					: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
 			);
 		const type = (x: unknown) => new Type(x).toString();
