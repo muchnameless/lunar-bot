@@ -464,7 +464,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		}
 	}
 	/**
-	 * should only ever be called from within reconnect()
+	 * should only ever be called from within reconnect
 	 * @internal
 	 */
 	private async _reconnect(loginDelay: number) {

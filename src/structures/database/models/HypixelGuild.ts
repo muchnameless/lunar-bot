@@ -431,7 +431,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		}
 	}
 	/**
-	 * should only ever be called from within updateData()
+	 * should only ever be called from within updateData
 	 * @internal
 	 */
 	private async _updateData({ syncRanks = false, rejectOnAPIError = false }: UpdateOptions = {}) {
@@ -811,7 +811,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		}
 	}
 	/**
-	 * should only ever be called from within syncRanks()
+	 * should only ever be called from within syncRanks
 	 * @internal
 	 */
 	private async _syncRanks() {

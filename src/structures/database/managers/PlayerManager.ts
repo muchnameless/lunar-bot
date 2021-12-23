@@ -231,7 +231,7 @@ export class PlayerManager extends ModelManager<Player> {
 		}
 	}
 	/**
-	 * should only ever be called from within updateXp()
+	 * should only ever be called from within updateXp
 	 * @internal
 	 */
 	private async _updateXp(options?: PlayerUpdateOptions) {
@@ -275,7 +275,7 @@ export class PlayerManager extends ModelManager<Player> {
 		}
 	}
 	/**
-	 * should only ever be called from within updateIgns()
+	 * should only ever be called from within updateIgns
 	 * @internal
 	 */
 	private async _updateIgns() {
@@ -394,7 +394,7 @@ export class PlayerManager extends ModelManager<Player> {
 		}
 	}
 	/**
-	 * should only ever be called from within updateMainProfiles()
+	 * should only ever be called from within updateMainProfiles
 	 * @internal
 	 */
 	private async _updateMainProfiles() {

@@ -398,7 +398,7 @@ export class DatabaseManager {
 		}
 	}
 	/**
-	 * should only ever be called from within updateData()
+	 * should only ever be called from within updateData
 	 * @internal
 	 */
 	private async _updateData() {
