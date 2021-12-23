@@ -3,7 +3,7 @@ import { MessageEmbed, SnowflakeUtil, Formatters } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
-import emojiRegex from 'emoji-regex';
+import emojiRegex from 'emoji-regex/es2015';
 import minecraftData from 'minecraft-data';
 import {
 	INVISIBLE_CHARACTER_REGEXP,
