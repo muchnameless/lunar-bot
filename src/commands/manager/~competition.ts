@@ -7,6 +7,12 @@ import { ApplicationCommand } from '../../structures/commands/ApplicationCommand
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
+/**
+ * Roadmap: (project discontinued)
+ *  - input via modals (date option)
+ *  - use guild scheduled events to register event for players to participate
+ */
+
 export class CompetitionCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
