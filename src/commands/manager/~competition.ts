@@ -35,6 +35,11 @@ export class CompetitionCommand extends ApplicationCommand {
 			filter: (msg) => msg.author.id === interaction.user.id,
 			idle: seconds(30),
 		});
+		const next = async () => {
+			const { content } = await collector.next;
+			if (content === 'cancel') throw new Error('command cancelled');
+			return content;
+		};
 
 		let type: string | undefined;
 		let startingTime: Date | undefined;
@@ -42,13 +47,11 @@ export class CompetitionCommand extends ApplicationCommand {
 		let retries = 0;
 
 		try {
-			await InteractionUtil.reply(interaction, commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`);
+			InteractionUtil.reply(interaction, commaListsOr`competition type? ${CompetitionCommand.COMPETITION_TYPES}`);
 
 			do {
-				const collected = await collector.next;
-				if (collected.content === 'cancel') throw new Error('command cancelled');
-
-				const result = autocorrect(collected.content, CompetitionCommand.COMPETITION_TYPES);
+				const collected = await next();
+				const result = autocorrect(collected, CompetitionCommand.COMPETITION_TYPES);
 
 				if (result.similarity >= this.config.get('AUTOCORRECT_THRESHOLD')) {
 					type = result.value;
@@ -56,17 +59,15 @@ export class CompetitionCommand extends ApplicationCommand {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
-					await InteractionUtil.reply(interaction, `\`${collected.content}\` is not a valid type`);
+					InteractionUtil.reply(interaction, `\`${collected}\` is not a valid type`);
 				}
 			} while (!type);
 
-			await InteractionUtil.reply(interaction, 'starting time?');
+			InteractionUtil.reply(interaction, 'starting time?');
 
 			do {
-				const collected = await collector.next;
-				if (collected.content === 'cancel') throw new Error('command cancelled');
-
-				const result = new Date(collected.content);
+				const collected = await next();
+				const result = new Date(collected);
 
 				if (!Number.isNaN(result.getTime())) {
 					startingTime = result;
@@ -74,17 +75,16 @@ export class CompetitionCommand extends ApplicationCommand {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
-					await InteractionUtil.reply(interaction, `\`${collected.content}\` is not a valid date`);
+					InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
 				}
 			} while (!startingTime);
 
-			await InteractionUtil.reply(interaction, 'ending time?');
+			InteractionUtil.reply(interaction, 'ending time?');
 
 			do {
-				const collected = await collector.next;
-				if (collected.content === 'cancel') throw new Error('command cancelled');
+				const collected = await next();
 
-				const result = new Date(collected.content);
+				const result = new Date(collected);
 
 				if (!Number.isNaN(result.getTime())) {
 					endingTime = result;
@@ -92,7 +92,7 @@ export class CompetitionCommand extends ApplicationCommand {
 				} else {
 					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
 
-					await InteractionUtil.reply(interaction, `\`${collected.content}\` is not a valid date`);
+					InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
 				}
 			} while (!endingTime);
 
