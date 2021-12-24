@@ -585,7 +585,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			)
 				.replace(/ {2,}/g, ' ') // mc chat displays multiple whitespace as 1
 				.replace(/<a?:(\w{2,32}):\d{17,19}>/g, ':$1:') // custom emojis
-				.replace(emojiRegex(), (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default emojis
+				.replace(emojiRegex(), (match) => UNICODE_TO_EMOJI_NAME[match as keyof typeof UNICODE_TO_EMOJI_NAME] ?? match) // default (unicode) emojis
 				// replace escaping \ which are invisible on discord, '¯\_' is ignored since it's part of '¯\_(ツ)_/¯' which doesn't need to be escaped
 				.replace(/(?<![¯\\])\\(?=[^a-z\d\\ \n])/gi, '')
 				.replace(/\\{2,}/g, (match) => {
