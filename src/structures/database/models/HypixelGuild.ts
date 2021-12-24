@@ -405,6 +405,14 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	}
 
 	/**
+	 * wether the player has an in-game staff rank in this hypixel guild
+	 * @param player
+	 */
+	checkStaff(player: Player) {
+		return player.guildId === this.guildId && player.guildRankPriority > this.ranks.length - this.staffRanksAmount;
+	}
+
+	/**
 	 * shifts the daily stats history
 	 */
 	saveDailyStats() {
@@ -820,7 +828,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 			// calculate weight for non-staff members and their amount
 			for (const player of this.players.values()) {
-				if (player.isStaff) continue;
+				if (this.checkStaff(player)) continue;
 
 				nonStaffWithWeight.push({
 					player,

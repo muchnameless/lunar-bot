@@ -115,7 +115,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	private _retries = 0;
 	/**
-	 * how many messages have been sent to in game chat in the last 10 seconds
+	 * how many messages have been sent to in-game chat in the last 10 seconds
 	 */
 	private _messageCounter = 0;
 	/**
@@ -264,7 +264,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
-	 * maximum attempts to resend to in game chat
+	 * maximum attempts to resend to in-game chat
 	 */
 	static MAX_RETRIES = 3 as const;
 
@@ -274,7 +274,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	static delays = [null, 100, 100, 100, 120, 150, 600] as const;
 
 	/**
-	 * delay which can be used to send messages to in game chat continously
+	 * delay which can be used to send messages to in-game chat continously
 	 */
 	static SAFE_DELAY = 600 as const;
 
@@ -372,7 +372,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					your message was blocked because you are only allowed to send up to ${
 						data?.maxParts ?? this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS')
 					} messages at once
-					(in game chat messages can only be up to 256 characters long and new lines are treated as new messages)
+					(in-game chat messages can only be up to 256 characters long and new lines are treated as new messages)
 				`;
 				break;
 
@@ -689,7 +689,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
-	 * send a message to in game guild chat
+	 * send a message to in-game guild chat
 	 * @param options
 	 */
 	gchat(options: string | ChatOptions) {
@@ -709,7 +709,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
-	 * send a message to in game guild chat
+	 * send a message to in-game guild chat
 	 * @param options
 	 */
 	ochat(options: string | ChatOptions) {
@@ -719,7 +719,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
-	 * send a message to in game party chat
+	 * send a message to in-game party chat
 	 * @param options
 	 */
 	pchat(options: string | ChatOptions) {
@@ -737,7 +737,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
-	 * splits the message into the max in game chat length, prefixes all parts and sends them
+	 * splits the message into the max in-game chat length, prefixes all parts and sends them
 	 * @param options
 	 * @returns success - wether all message parts were send
 	 */
@@ -798,7 +798,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
-	 * queue a message for the in game chat
+	 * queue a message for the in-game chat
 	 * @param options
 	 */
 	async sendToChat(options: string | ChatOptions) {
@@ -927,7 +927,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
-	 * sends a message to in game chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
+	 * sends a message to in-game chat and resolves with the first message.content within 'INGAME_RESPONSE_TIMEOUT' ms that passes the regex filter, also supports a single string as input
 	 * @param commandOptions
 	 */
 	async command(options: string | (CommandOptions & { raw?: false })): Promise<string>;
@@ -998,15 +998,15 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					if (rejectOnTimeout && !collected.length) {
 						if (raw) {
 							return resolve([
-								{ content: `no in game response after ${ms(timeout, { long: true })}` } as HypixelMessage,
+								{ content: `no in-game response after ${ms(timeout, { long: true })}` } as HypixelMessage,
 							]);
 						}
-						return reject(`no in game response after ${ms(timeout, { long: true })}`);
+						return reject(`no in-game response after ${ms(timeout, { long: true })}`);
 					}
 
 					if (raw) return resolve(collected);
 					if (collected.length) return resolve(MinecraftChatManager.cleanCommandResponse(collected));
-					return resolve(`no in game response after ${ms(timeout, { long: true })}`);
+					return resolve(`no in-game response after ${ms(timeout, { long: true })}`);
 				}
 
 				case 'error':

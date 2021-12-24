@@ -736,8 +736,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	}
 
 	/**
-	 * wether the player has an in game staff rank,
-	 * assumes the last two guild ranks are staff ranks
+	 * wether the player has an in-game staff rank in their current hypixel guild
 	 */
 	get isStaff() {
 		const { hypixelGuild } = this;
@@ -811,7 +810,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options
 	 */
 	async updateData({
-		reason = 'synced with in game stats',
+		reason = 'synced with in-game stats',
 		shouldSendDm = false,
 		shouldOnlyAwaitUpdateXp = false,
 		rejectOnAPIError = false,
@@ -992,7 +991,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param options.reason role update reason for discord's audit logs
 	 * @param options.shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
 	 */
-	async updateDiscordMember({ reason: reasonInput = 'synced with in game stats', shouldSendDm = false } = {}) {
+	async updateDiscordMember({ reason: reasonInput = 'synced with in-game stats', shouldSendDm = false } = {}) {
 		if (this.discordMemberUpdatesDisabled || !this.guildId) return;
 
 		let reason = reasonInput;
@@ -1048,7 +1047,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 				// rank roles
 				const CURRENT_PRIORITY =
-					this.isStaff && hypixelGuild.syncRanksEnabled
+					hypixelGuild.checkStaff(this) && hypixelGuild.syncRanksEnabled
 						? hypixelGuild.ranks
 								// filter out non-automated ranks
 								.filter(({ currentWeightReq }) => currentWeightReq != null)
@@ -1064,11 +1063,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					if (priority !== this.guildRankPriority && priority !== CURRENT_PRIORITY) {
 						if (roleCache.has(roleId)) {
 							rolesToRemove.push(roleId);
-							reason = 'synced with in game rank';
+							reason = 'synced with in-game rank';
 						}
 					} else if (!roleCache.has(roleId)) {
 						rolesToAdd.push(roleId);
-						reason = 'synced with in game rank';
+						reason = 'synced with in-game rank';
 					}
 				}
 			} else {
@@ -1457,7 +1456,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	}
 
 	/**
-	 * removes the discord server in game guild role & all roles handled automatically by the bot
+	 * removes the discord server in-game guild role & all roles handled automatically by the bot
 	 */
 	async removeFromGuild() {
 		const member = await this.fetchDiscordMember();

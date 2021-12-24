@@ -379,7 +379,7 @@ export class DiscordChatManager extends ChatManager {
 	}
 
 	/**
-	 * forwards a discord message to in game guild chat, prettifying discord markdown, if neither the player nor the whole guild chat is muted
+	 * forwards a discord message to in-game guild chat, prettifying discord markdown, if neither the player nor the whole guild chat is muted
 	 * @param message
 	 * @param options
 	 */
@@ -409,7 +409,7 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// check if guild chat is muted
-		if (this.hypixelGuild!.muted && (!player?.isStaff || player?.guildId === this.hypixelGuild!.guildId)) {
+		if (this.hypixelGuild!.muted && (!player || !this.hypixelGuild!.checkStaff(player))) {
 			DiscordChatManager._dmMuteInfo(
 				message,
 				player,

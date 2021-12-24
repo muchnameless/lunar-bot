@@ -353,7 +353,7 @@ export default class GuildCommand extends ApplicationCommand {
 	}
 
 	/**
-	 * asserts the executor has an in game staff rank in the hypixelGuild
+	 * asserts the executor has an in-game staff rank in the hypixelGuild
 	 * @param hypixelGuild
 	 * @param executor
 	 */
@@ -363,16 +363,12 @@ export default class GuildCommand extends ApplicationCommand {
 			throw 'unable to find a linked player for your discord account';
 		}
 
-		if (executor.guildId !== hypixelGuild.guildId) {
-			throw `you need to be in \`${hypixelGuild}\``;
-		}
-
-		if (!executor.isStaff) {
-			throw commaListsOr`you need to have an in game staff rank (${
+		if (!hypixelGuild.checkStaff(executor)) {
+			throw commaListsOr`you need to have an in-game staff rank (${
 				hypixelGuild.ranks
 					.filter(({ priority }) => priority > hypixelGuild.ranks.length - hypixelGuild.staffRanksAmount)
 					.map(({ name }) => name) || 'none set'
-			})`;
+			}) in \`${hypixelGuild}\``;
 		}
 	}
 

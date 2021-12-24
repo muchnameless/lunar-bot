@@ -267,7 +267,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 	}
 
 	/**
-	 * send a message both to discord and the in game guild chat, parsing both
+	 * send a message both to discord and the in-game guild chat, parsing both
 	 * @param options
 	 */
 	broadcast(options: string | BroadcastOptions) {

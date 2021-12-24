@@ -25,7 +25,7 @@ export default class PollCommand extends DualCommand {
 
 	constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
-			.setDescription('create a poll for both in game and discord guild chat')
+			.setDescription('create a poll for both in-game and discord guild chat')
 			.addStringOption((option) => option.setName('question').setDescription('poll question').setRequired(true));
 
 		// add choices
@@ -61,7 +61,7 @@ export default class PollCommand extends DualCommand {
 	}
 
 	/**
-	 * create a poll for both in game chat and the chatBridge channel
+	 * create a poll for both in-game chat and the chatBridge channel
 	 * @param param0
 	 * @param param0.chatBridge
 	 * @param param0.question
@@ -108,7 +108,7 @@ export default class PollCommand extends DualCommand {
 				${pollOptions.map(({ number, option }) => `${INVISIBLE_CHARACTERS[0]}${number}: ${option}`).join('\n')}
 			`);
 
-			// aquire in game votes
+			// aquire in-game votes
 			for (const msg of await hypixelMessages) {
 				const votedFor = Number.parseInt(msg.content, 10);
 

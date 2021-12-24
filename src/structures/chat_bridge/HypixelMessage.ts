@@ -64,7 +64,7 @@ export class HypixelMessage {
 	 */
 	prismarineMessage: PrismarineChatMessage;
 	/**
-	 * in game message position
+	 * in-game message position
 	 */
 	position: typeof MESSAGE_POSITIONS[keyof typeof MESSAGE_POSITIONS];
 	/**
@@ -251,7 +251,7 @@ export class HypixelMessage {
 	}
 
 	/**
-	 * replies in game (and on discord if guild chat) to the message
+	 * replies in-game (and on discord if guild chat) to the message
 	 * @param options
 	 */
 	async reply(
@@ -331,10 +331,10 @@ export class HypixelMessage {
 
 			// inform user if user and role pings don't actually ping (can't use message.mentions to detect cause that is empty)
 			if (/<@&\d{17,19}>/.test(discordMessage.content)) {
-				this.author.send('you do not have permission to ping roles from in game chat');
+				this.author.send('you do not have permission to ping roles from in-game chat');
 				MessageUtil.react(discordMessage, NO_PING_EMOJI);
 			} else if (!player?.hasDiscordPingPermission && /<@!?\d{17,19}>/.test(discordMessage.content)) {
-				this.author.send('you do not have permission to ping users from in game chat');
+				this.author.send('you do not have permission to ping users from in-game chat');
 				MessageUtil.react(discordMessage, NO_PING_EMOJI);
 			}
 
