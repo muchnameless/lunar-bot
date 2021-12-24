@@ -9,7 +9,7 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 /**
  * Roadmap: (project discontinued)
- *  - input via modals (date option)
+ *  - input via modals (date option, autocomplete)
  *  - use guild scheduled events to register event for players to participate
  */
 
@@ -37,7 +37,7 @@ export class CompetitionCommand extends ApplicationCommand {
 		});
 		const next = async () => {
 			const { content } = await collector.next;
-			if (content === 'cancel') throw new Error('command cancelled');
+			if (/^(?:cancel|stop|abort|end)$/i.test(content)) throw 'command cancelled';
 			return content;
 		};
 
@@ -57,7 +57,7 @@ export class CompetitionCommand extends ApplicationCommand {
 					type = result.value;
 					retries = 0;
 				} else {
-					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
+					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw 'the command has been cancelled';
 
 					InteractionUtil.reply(interaction, `\`${collected}\` is not a valid type`);
 				}
@@ -73,7 +73,7 @@ export class CompetitionCommand extends ApplicationCommand {
 					startingTime = result;
 					retries = 0;
 				} else {
-					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
+					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw 'the command has been cancelled';
 
 					InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
 				}
@@ -90,7 +90,7 @@ export class CompetitionCommand extends ApplicationCommand {
 					endingTime = result;
 					retries = 0;
 				} else {
-					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw new Error('the command has been cancelled');
+					if (++retries >= this.config.get('USER_INPUT_MAX_RETRIES')) throw 'the command has been cancelled';
 
 					InteractionUtil.reply(interaction, `\`${collected}\` is not a valid date`);
 				}
@@ -100,9 +100,6 @@ export class CompetitionCommand extends ApplicationCommand {
 				interaction,
 				`type: ${type}, starting time: ${startingTime.toUTCString()}, ending time: ${endingTime.toUTCString()}`,
 			);
-		} catch (error) {
-			logger.error(error);
-			InteractionUtil.reply(interaction, 'the command has been cancelled');
 		} finally {
 			collector.stop();
 		}
