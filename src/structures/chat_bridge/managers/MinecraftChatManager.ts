@@ -696,9 +696,9 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	gchat(options: string | ChatOptions) {
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
 
-		if (this.botPlayer?.muted) {
+		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
 			logger.debug(
-				`[GCHAT]: bot muted for ${ms(this.botPlayer.mutedTill - Date.now(), {
+				`[GCHAT]: bot muted for ${ms(this.hypixelGuild.mutedPlayers.get(this.botUuid!)! - Date.now(), {
 					long: true,
 				})}, unable to send '${prefix}${prefix.length ? ' ' : ''}${_options.content}`,
 			);

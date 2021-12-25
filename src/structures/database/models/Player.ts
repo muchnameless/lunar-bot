@@ -109,7 +109,6 @@ interface PlayerAttributes {
 	inDiscord: boolean;
 	guildId: string | null;
 	guildRankPriority: number;
-	mutedTill: number;
 	_infractions: number[] | null;
 	hasDiscordPingPermission: boolean;
 	notes: string | null;
@@ -132,7 +131,6 @@ type PlayerCreationAttributes = Optional<
 	| 'inDiscord'
 	| 'guildId'
 	| 'guildRankPriority'
-	| 'mutedTill'
 	| '_infractions'
 	| 'hasDiscordPingPermission'
 	| 'notes'
@@ -167,7 +165,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	declare inDiscord: boolean;
 	declare guildId: string | null;
 	declare guildRankPriority: number;
-	declare mutedTill: number;
 	declare _infractions: number[] | null;
 	declare hasDiscordPingPermission: boolean;
 	declare notes: string | null;
@@ -471,14 +468,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					type: DataTypes.INTEGER,
 					defaultValue: 0,
 					allowNull: false,
-				},
-				mutedTill: {
-					type: DataTypes.BIGINT,
-					defaultValue: 0,
-					allowNull: false,
-					set(value: number | undefined) {
-						this.setDataValue('mutedTill', value ?? 0);
-					},
 				},
 				_infractions: {
 					type: DataTypes.ARRAY(DataTypes.BIGINT),
@@ -788,21 +777,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 						)?.ign ?? transaction.to,
 				})),
 			))();
-	}
-
-	/**
-	 * wether the player is muted and that mute is not expired
-	 */
-	get muted() {
-		if (this.mutedTill) {
-			// mute hasn't expired
-			if (Date.now() < this.mutedTill) return true;
-
-			// mute has expired
-			this.update({ mutedTill: 0 }).catch((error) => logger.error(error));
-		}
-
-		return false;
 	}
 
 	/**
@@ -1948,8 +1922,8 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param data from the hypixel guild API
 	 * @param hypixelGuild
 	 */
-	syncWithGuildData(
-		{ expHistory = {}, mutedTill, rank }: Components.Schemas.GuildMember,
+	async syncWithGuildData(
+		{ expHistory = {}, rank }: Components.Schemas.GuildMember,
 		hypixelGuild = this.hypixelGuild!,
 	) {
 		// update guild xp
@@ -1973,15 +1947,16 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 		}
 
-		// sync guild mutes
-		this.mutedTill = mutedTill!;
-
 		// update guild rank
 		this.guildRankPriority =
 			hypixelGuild.ranks.find(({ name }) => name === rank)?.priority ??
 			(/^guild ?master$/i.test(rank) ? hypixelGuild.ranks.length + 1 : 1);
 
-		return this.save();
+		try {
+			return await this.save();
+		} catch (error) {
+			return logger.error({ err: error, data: { expHistory, rank } }, `[SYNC WITH GUILD DATA]: ${this.logInfo}`);
+		}
 	}
 
 	/**

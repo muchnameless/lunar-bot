@@ -1,7 +1,8 @@
 import { Model, DataTypes } from 'sequelize';
 import { MessageEmbed, Formatters, Util, VoiceChannel } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';
-import { setRank } from '../../chat_bridge/constants';
+import ms from 'ms';
+import { mute, setRank, unmute } from '../../chat_bridge/constants';
 import {
 	EMBED_FIELD_MAX_CHARS,
 	EMBED_MAX_CHARS,
@@ -69,6 +70,11 @@ interface PlayerWithWeight {
 	weight: number;
 }
 
+interface MutedGuildMember {
+	minecraftUuid: string;
+	mutedTill: number;
+}
+
 interface HypixelGuildAttributes {
 	guildId: string;
 	discordId: Snowflake | null;
@@ -82,6 +88,7 @@ interface HypixelGuildAttributes {
 	weightReq: number | null;
 	chatBridgeEnabled: boolean;
 	mutedTill: number;
+	_mutedPlayers: MutedGuildMember[];
 	chatBridgeChannels: ChatBridgeChannel[];
 	ranks: GuildRank[];
 	syncRanksEnabled: boolean;
@@ -115,6 +122,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	declare weightReq: number | null;
 	declare chatBridgeEnabled: boolean;
 	declare mutedTill: number;
+	declare _mutedPlayers: MutedGuildMember[];
 	declare chatBridgeChannels: ChatBridgeChannel[];
 	declare ranks: GuildRank[];
 	declare syncRanksEnabled: boolean;
@@ -148,6 +156,14 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * linked chat bridge
 	 */
 	private _chatBridge: ChatBridge | null = null;
+
+	mutedPlayers: Map<string, number>;
+
+	constructor(...args: any[]) {
+		super(...args);
+
+		this.mutedPlayers = new Map(this._mutedPlayers.map(({ minecraftUuid, mutedTill }) => [minecraftUuid, mutedTill]));
+	}
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(
@@ -207,6 +223,18 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					allowNull: false,
 					set(value: number | undefined) {
 						this.setDataValue('mutedTill', value ?? 0);
+					},
+				},
+				_mutedPlayers: {
+					type: DataTypes.ARRAY(DataTypes.JSONB),
+					defaultValue: [],
+					allowNull: false,
+					set(value: MutedGuildMember[]) {
+						logger.trace('SETTER');
+						this.setDataValue('_mutedPlayers', value);
+						(this as HypixelGuild).mutedPlayers = new Map(
+							value.map(({ minecraftUuid, mutedTill }) => [minecraftUuid, mutedTill]),
+						);
 					},
 				},
 				chatBridgeChannels: {
@@ -402,6 +430,116 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 		if (discordGuild) logger.warn(`[DISCORD GUILD] ${this.name}: unavailable`);
 		return null;
+	}
+
+	/**
+	 * /guild mute ${target} ms(duration)
+	 * @param target
+	 * @param duration
+	 */
+	async mute(target: Player | 'everyone', duration: number) {
+		try {
+			const { chatBridge } = this;
+			return await chatBridge.minecraft.command({
+				command: `guild mute ${target} ${ms(duration)}`,
+				responseRegExp: mute(`${target}`, chatBridge.bot.username),
+			});
+		} catch (error) {
+			logger.error({ err: error, data: { target: `${target}`, duration } }, `[MUTE]: ${this.name}`);
+		}
+	}
+
+	/**
+	 * /guild unmute ${target}
+	 * @param target
+	 */
+	async unMute(target: Player | 'everyone') {
+		try {
+			const { chatBridge } = this;
+			return await chatBridge.minecraft.command({
+				command: `guild unmute ${target}`,
+				responseRegExp: unmute(`${target}`, chatBridge.bot.username),
+			});
+		} catch (error) {
+			logger.error({ err: error, data: { target: `${target}` } }, `[UNMUTE]: ${this.name}`);
+		}
+	}
+
+	/**
+	 * sync in-game guild mutes for the player
+	 * @param player
+	 * @param mutedTill
+	 */
+	syncMute(player: Player, mutedTill: number | null) {
+		if (mutedTill == null) {
+			// delete returns false if the element has not been deleted, true if it has been deleted
+			if (!this.mutedPlayers.delete(player.minecraftUuid)) return;
+
+			this._mutedPlayers.splice(
+				this._mutedPlayers.findIndex(({ minecraftUuid }) => minecraftUuid === player.minecraftUuid),
+				1,
+			);
+
+			this.changed('_mutedPlayers', true);
+
+			return this.save().catch((error) =>
+				logger.error({ err: error, data: { player: player.ign, mutedTill } }, `[SYNC MUTE]: ${this.name}`),
+			);
+		}
+
+		this.mutedPlayers.set(player.minecraftUuid, mutedTill);
+
+		const existing = this._mutedPlayers.find(({ minecraftUuid }) => minecraftUuid === player.minecraftUuid);
+		if (existing) {
+			existing.mutedTill = mutedTill;
+		} else {
+			this._mutedPlayers.push({ minecraftUuid: player.minecraftUuid, mutedTill });
+		}
+
+		this.changed('_mutedPlayers', true);
+
+		return this.save().catch((error) =>
+			logger.error({ err: error, data: { player: player.ign, mutedTill } }, `[SYNC MUTE]: ${this.name}`),
+		);
+	}
+
+	/**
+	 * wether the player is muted in-game in this hypixel guild
+	 * @param player
+	 */
+	checkMute(player: Player | null) {
+		if (this.mutedPlayers.has(player?.minecraftUuid!)) {
+			// mute hasn't expired
+			if (Date.now() < this.mutedPlayers.get(player!.minecraftUuid)!) return true;
+
+			// mute has expired
+			this.syncMute(player!, null);
+		}
+
+		return false;
+	}
+
+	/**
+	 * removes mutes from players that have expired. useful since the map can still hold mutes of players who left the guild
+	 */
+	removeExpiredMutes() {
+		let changed = false;
+
+		for (const [minecraftUuid, mutedTill] of this.mutedPlayers) {
+			if (mutedTill > Date.now()) continue; // not expired yet
+
+			this.mutedPlayers.delete(minecraftUuid);
+			this._mutedPlayers.splice(
+				this._mutedPlayers.findIndex(({ minecraftUuid: uuid }) => uuid === minecraftUuid),
+				1,
+			);
+			changed = true;
+		}
+
+		if (!changed) return;
+
+		this.changed('_mutedPlayers', true);
+		return this.save();
 	}
 
 	/**
@@ -703,13 +841,18 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			]);
 
 			// sync guild xp, mutedTill & guild ranks
-			safePromiseAll(
-				currentGuildMembers.map(
-					(hypixelGuildMember) =>
-						players.cache.get(hypixelGuildMember.uuid)?.syncWithGuildData(hypixelGuildMember, this) ??
-						logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`),
-				),
-			);
+			const NOW = Date.now();
+
+			for (const hypixelGuildMember of currentGuildMembers) {
+				const player = players.cache.get(hypixelGuildMember.uuid);
+				if (!player) {
+					logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
+					continue;
+				}
+
+				this.syncMute(player, NOW < (hypixelGuildMember.mutedTill ?? 0) ? hypixelGuildMember.mutedTill! : null);
+				player.syncWithGuildData(hypixelGuildMember, this);
+			}
 
 			if (syncRanks) this.syncRanks();
 

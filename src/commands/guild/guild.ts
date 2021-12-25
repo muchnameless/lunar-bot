@@ -299,7 +299,7 @@ export default class GuildCommand extends ApplicationCommand {
 				}
 			}
 
-			await target.update({ mutedTill: Date.now() + duration });
+			await hypixelGuild.syncMute(target, Date.now() + duration);
 
 			// don't use chatBridge command if player isn't actually in the guild
 			if (!IN_GUILD) {
@@ -983,7 +983,7 @@ export default class GuildCommand extends ApplicationCommand {
 						}
 					}
 
-					await target.update({ mutedTill: 0 });
+					await hypixelGuild.syncMute(target, null);
 
 					if (!IN_GUILD) return InteractionUtil.reply(interaction, `unmuted \`${target}\``);
 				} else if (target === 'everyone') {

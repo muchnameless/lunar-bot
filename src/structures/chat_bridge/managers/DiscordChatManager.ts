@@ -393,11 +393,14 @@ export class DiscordChatManager extends ChatManager {
 			(await this.client.players.fetch({ discordId: message.interaction?.user.id ?? message.author.id })); // uncached player
 
 		// check if player is muted
-		if (player?.muted) {
+		if (this.hypixelGuild!.checkMute(player)) {
 			DiscordChatManager._dmMuteInfo(
 				message,
 				player,
-				`your mute expires ${Formatters.time(new Date(player.mutedTill), Formatters.TimestampStyles.RelativeTime)}`,
+				`your mute expires ${Formatters.time(
+					new Date(this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!),
+					Formatters.TimestampStyles.RelativeTime,
+				)}`,
 			);
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
@@ -422,12 +425,12 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// check if the chatBridge bot is muted
-		if (this.minecraft.botPlayer?.muted) {
+		if (this.hypixelGuild!.checkMute(this.minecraft.botPlayer)) {
 			DiscordChatManager._dmMuteInfo(
 				message,
 				player,
 				`the bot's mute expires ${Formatters.time(
-					new Date(this.minecraft.botPlayer.mutedTill),
+					new Date(this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid)!),
 					Formatters.TimestampStyles.RelativeTime,
 				)}`,
 			);

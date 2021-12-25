@@ -177,11 +177,10 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			const msDuration = stringToMS(duration);
 
-			player
-				.update({
-					mutedTill: Number.isNaN(msDuration) ? Number.POSITIVE_INFINITY : Date.now() + msDuration,
-				})
-				.catch((error) => logger.error(error));
+			this.chatBridge.hypixelGuild!.syncMute(
+				player,
+				Number.isNaN(msDuration) ? Number.POSITIVE_INFINITY : Date.now() + msDuration,
+			);
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was muted for ${duration}`);
 		}
@@ -208,7 +207,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!player) return;
 
-			player.update({ mutedTill: 0 }).catch((error) => logger.error(error));
+			this.chatBridge.hypixelGuild!.syncMute(player, null);
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was unmuted`);
 		}

@@ -90,21 +90,6 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 	}
 
 	/**
-	 * update discord stat channel names
-	 */
-	async updateStatDiscordChannels() {
-		try {
-			for (const hypixelGuild of this.cache.values()) {
-				await hypixelGuild.updateStatDiscordChannels();
-			}
-		} catch (error) {
-			logger.error(error, '[UPDATE STAT DISCORD CHANNELS]');
-		}
-
-		return this;
-	}
-
-	/**
 	 * sweeps the player cache
 	 * @param idOrGuild
 	 */
@@ -165,6 +150,17 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 			}),
 		);
 
+		// remove expired mutes
+		this.client.cronJobs.schedule(
+			`${this.constructor.name}:removeExpiredMutes`,
+			new CronJob({
+				cronTime: '0 0 0 * * *',
+				timeZone: 'GMT',
+				onTick: () => this.removeExpiredMutes(),
+				start: true,
+			}),
+		);
+
 		// schedule guild stats channel update
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:updateStatDiscordChannels`,
@@ -188,6 +184,30 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 		for (const hypixelGuild of this.cache.values()) hypixelGuild.saveDailyStats();
 
 		logger.info('[GUILD DAILY STATS]: performed daily stats saves');
+
+		return this;
+	}
+
+	/**
+	 * removes mutes from players that have expired. useful since the map can still hold mutes of players who left the guild
+	 */
+	removeExpiredMutes() {
+		for (const hypixelGuild of this.cache.values()) {
+			hypixelGuild.removeExpiredMutes();
+		}
+	}
+
+	/**
+	 * update discord stat channel names
+	 */
+	async updateStatDiscordChannels() {
+		try {
+			for (const hypixelGuild of this.cache.values()) {
+				await hypixelGuild.updateStatDiscordChannels();
+			}
+		} catch (error) {
+			logger.error(error, '[UPDATE STAT DISCORD CHANNELS]');
+		}
 
 		return this;
 	}
