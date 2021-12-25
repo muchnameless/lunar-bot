@@ -305,7 +305,11 @@ export default class GuildCommand extends ApplicationCommand {
 				(async () => {
 					const discordMember = await target.fetchDiscordMember();
 					if (!discordMember) return;
-					return GuildMemberUtil.timeout(discordMember, duration);
+					return GuildMemberUtil.timeout(
+						discordMember,
+						duration,
+						`${executor}: \`/guild mute ${target} ${ms(duration)}\``,
+					);
 				})(),
 			]);
 
@@ -980,10 +984,9 @@ export default class GuildCommand extends ApplicationCommand {
 
 				if (this.client.players.isModel(target)) {
 					const IN_GUILD = target.inGuild();
+					const executor = UserUtil.getPlayer(interaction.user);
 
 					if (IN_GUILD) {
-						const executor = UserUtil.getPlayer(interaction.user);
-
 						this._assertExecutorIsStaff(hypixelGuild, executor);
 
 						if (target.guildRankPriority >= executor.guildRankPriority) {
@@ -997,7 +1000,7 @@ export default class GuildCommand extends ApplicationCommand {
 						(async () => {
 							const discordMember = await target.fetchDiscordMember();
 							if (!discordMember) return;
-							return GuildMemberUtil.timeout(discordMember, null);
+							return GuildMemberUtil.timeout(discordMember, null, `${executor}: \`/guild unmute ${target}\``);
 						})(),
 					]);
 

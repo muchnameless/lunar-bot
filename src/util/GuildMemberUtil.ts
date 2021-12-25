@@ -216,15 +216,16 @@ export default class GuildMemberUtil extends null {
 	/**
 	 * @param member
 	 * @param duration
+	 * @param reason
 	 */
-	static async timeout(member: GuildMember, duration: number | null) {
+	static async timeout(member: GuildMember, duration: number | null, reason?: string) {
 		if (!member.moderatable) {
 			logger.warn(`[TIMEOUT] ${this.logInfo(member)}: missing permissions`);
 			return member;
 		}
 
 		try {
-			return await member.timeout(duration);
+			return await member.timeout(duration, reason);
 		} catch (error) {
 			logger.error(error, `[TIMEOUT] ${this.logInfo(member)}`);
 			return member;

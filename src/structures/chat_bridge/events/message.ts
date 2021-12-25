@@ -55,7 +55,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			);
 
 			if (blockedMatched) {
-				const { sender, blockedContent } = blockedMatched.groups as { sender: string; blockedContent: string };
+				const { sender, blockedContent } = blockedMatched.groups!;
 				const senderDiscordId = this.client.players.findByIgn(sender)?.discordId;
 
 				// react to latest message from 'sender' with that content
@@ -157,7 +157,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (muteMatched) {
 			hypixelMessage.forwardToDiscord();
 
-			const { target, duration } = muteMatched.groups as { target: string; duration: string };
+			const { target, duration, executor } = muteMatched.groups!;
 
 			if (target === 'the guild chat') {
 				const msDuration = stringToMS(duration);
@@ -186,7 +186,11 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				if (Number.isNaN(MS_DURATION)) return;
 				const discordMember = await player.fetchDiscordMember();
 				if (!discordMember) return;
-				return GuildMemberUtil.timeout(discordMember, MS_DURATION);
+				return GuildMemberUtil.timeout(
+					discordMember,
+					MS_DURATION,
+					`${executor}: \`/guild mute ${target} ${duration}\``,
+				);
 			})();
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was muted for ${duration}`);
@@ -202,7 +206,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (unmuteMatched) {
 			hypixelMessage.forwardToDiscord();
 
-			const { target } = unmuteMatched.groups as { target: string };
+			const { target, executor } = unmuteMatched.groups!;
 
 			if (target === 'the guild chat') {
 				this.chatBridge.hypixelGuild!.update({ mutedTill: 0 }).catch((error) => logger.error(error));
@@ -219,7 +223,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 			(async () => {
 				const discordMember = await player.fetchDiscordMember();
 				if (!discordMember) return;
-				return GuildMemberUtil.timeout(discordMember, null);
+				return GuildMemberUtil.timeout(discordMember, null, `${executor}: \`/guild unmute ${target}\``);
 			})();
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was unmuted`);
@@ -234,7 +238,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (promoteMatched) {
 			hypixelMessage.forwardToDiscord();
 
-			const { target, newRank } = promoteMatched.groups as { target: string; newRank: string };
+			const { target, newRank } = promoteMatched.groups!;
 			const player = this.client.players.findByIgn(target);
 
 			if (!player?.guildId) {
@@ -267,7 +271,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		if (demotedMatched) {
 			hypixelMessage.forwardToDiscord();
 
-			const { target, newRank } = demotedMatched.groups as { target: string; newRank: string };
+			const { target, newRank } = demotedMatched.groups!;
 			const player = this.client.players.findByIgn(target);
 
 			if (!player?.guildId) {
