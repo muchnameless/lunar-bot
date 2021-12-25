@@ -10,7 +10,7 @@ import {
 	SLAYER_TOTAL_ROLES,
 	SLAYERS,
 } from '../constants';
-import { logger } from '../functions';
+import { logger, seconds } from '../functions';
 import { GuildUtil, UserUtil } from '.';
 import type { GuildMember, Message, MessageOptions, Snowflake, Role } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
@@ -221,6 +221,11 @@ export default class GuildMemberUtil extends null {
 	static async timeout(member: GuildMember, duration: number | null, reason?: string) {
 		if (!member.moderatable) {
 			logger.warn(`[TIMEOUT] ${this.logInfo(member)}: missing permissions`);
+			return member;
+		}
+
+		if (Math.abs(member.communicationDisabledUntilTimestamp! - Date.now() - duration!) < seconds(1)) {
+			logger.trace(`[TIMEOUT] ${this.logInfo(member)}: is already in (similar) timeout`);
 			return member;
 		}
 
