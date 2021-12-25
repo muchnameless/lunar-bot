@@ -37,7 +37,7 @@ import {
 } from '../../structures/commands/commonOptions';
 import { HypixelMessage } from '../../structures/chat_bridge/HypixelMessage';
 import { mojang } from '../../api';
-import { InteractionUtil, UserUtil } from '../../util';
+import { GuildMemberUtil, InteractionUtil, UserUtil } from '../../util';
 import {
 	autocorrect,
 	escapeIgn,
@@ -299,7 +299,15 @@ export default class GuildCommand extends ApplicationCommand {
 				}
 			}
 
-			await hypixelGuild.syncMute(target, Date.now() + duration);
+			// update db and timeout discord member
+			await Promise.all([
+				hypixelGuild.syncMute(target, Date.now() + duration),
+				(async () => {
+					const discordMember = await target.fetchDiscordMember();
+					if (!discordMember) return;
+					return GuildMemberUtil.timeout(discordMember, duration);
+				})(),
+			]);
 
 			// don't use chatBridge command if player isn't actually in the guild
 			if (!IN_GUILD) {
@@ -983,7 +991,15 @@ export default class GuildCommand extends ApplicationCommand {
 						}
 					}
 
-					await hypixelGuild.syncMute(target, null);
+					// update db and remove timeout from discord member
+					await Promise.all([
+						hypixelGuild.syncMute(target, null),
+						(async () => {
+							const discordMember = await target.fetchDiscordMember();
+							if (!discordMember) return;
+							return GuildMemberUtil.timeout(discordMember, null);
+						})(),
+					]);
 
 					if (!IN_GUILD) return InteractionUtil.reply(interaction, `unmuted \`${target}\``);
 				} else if (target === 'everyone') {

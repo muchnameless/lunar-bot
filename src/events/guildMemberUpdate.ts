@@ -22,10 +22,11 @@ export default class GuildMemberUpdateEvent extends Event {
 		const discordGuild = this.client.discordGuilds.cache.get(newMember.guild.id);
 		if (!discordGuild) return;
 
-		const player = GuildMemberUtil.getPlayer(newMember);
+		const player = GuildMemberUtil.getPlayer(newMember)!;
+		const hypixelGuild = player?.hypixelGuild;
 
 		// member is not from the hypixel guild's discord guild
-		if (player?.hypixelGuild?.discordId !== newMember.guild.id) return;
+		if (hypixelGuild?.discordId !== newMember.guild.id) return;
 
 		player.setDiscordMember(newMember);
 
@@ -35,6 +36,22 @@ export default class GuildMemberUpdateEvent extends Event {
 				newMember.nickname !== null || // added or updated nickname
 					(oldMember.nickname !== null && newMember.nickname === null), // removed nickname
 			);
+		}
+
+		// guild member timeout change
+		if (
+			Date.now() < (newMember.communicationDisabledUntilTimestamp ?? 0) &&
+			(oldMember.communicationDisabledUntilTimestamp === null ||
+				oldMember.communicationDisabledUntilTimestamp !== newMember.communicationDisabledUntilTimestamp)
+		) {
+			// muted
+			hypixelGuild.mute(player, newMember.communicationDisabledUntilTimestamp! - Date.now());
+		} else if (
+			newMember.communicationDisabledUntilTimestamp === null &&
+			oldMember.communicationDisabledUntilTimestamp !== null
+		) {
+			// manually unmuted
+			hypixelGuild.unMute(player, 0);
 		}
 
 		// changes in 'mandatory'-role

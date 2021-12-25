@@ -22,7 +22,9 @@ import {
 	getInlineFieldLineCount,
 	hours,
 	logger,
+	minutes,
 	safePromiseAll,
+	seconds,
 } from '../../../functions';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Collection, GuildMember, Snowflake } from 'discord.js';
@@ -158,6 +160,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	private _chatBridge: ChatBridge | null = null;
 
 	mutedPlayers: Map<string, number>;
+	unMuteTimeouts = new Map<string, NodeJS.Timeout>();
 
 	constructor(...args: any[]) {
 		super(...args);
@@ -438,6 +441,9 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * @param duration
 	 */
 	async mute(target: Player | 'everyone', duration: number) {
+		// prevent circular calls when syncing
+		if (Math.abs(this.mutedPlayers.get((target as Player).minecraftUuid)! - Date.now() - duration) < seconds(1)) return;
+
 		try {
 			const { chatBridge } = this;
 			return await chatBridge.minecraft.command({
@@ -452,16 +458,47 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * /guild unmute ${target}
 	 * @param target
+	 * @param timeout
 	 */
-	async unMute(target: Player | 'everyone') {
+	unMute(target: Player | 'everyone', timeout: number) {
+		// prevent circular calls when syncing
+		if (!this.mutedPlayers.has((target as Player).minecraftUuid)) return;
+
+		// overwrite existing scheduled unmute
+		const existing = this.unMuteTimeouts.get((target as Player).minecraftUuid);
+		if (existing) {
+			this.unMuteTimeouts.delete((target as Player).minecraftUuid);
+			clearTimeout(existing);
+		}
+
+		// immediate unmute
+		if (!timeout) return this._unmute(target);
+
+		// schedule unmute
+		return new Promise((resolve) => {
+			this.unMuteTimeouts.set(
+				(target as Player).minecraftUuid,
+				setTimeout(() => {
+					resolve(this._unmute(target));
+				}, timeout),
+			);
+		});
+	}
+	/**
+	 * @param target
+	 * @internal
+	 */
+	private async _unmute(target: Player | 'everyone') {
 		try {
 			const { chatBridge } = this;
-			return await chatBridge.minecraft.command({
+			await chatBridge.minecraft.command({
 				command: `guild unmute ${target}`,
 				responseRegExp: unmute(`${target}`, chatBridge.bot.username),
 			});
+			this.unMuteTimeouts.delete((target as Player).minecraftUuid);
 		} catch (error) {
 			logger.error({ err: error, data: { target: `${target}` } }, `[UNMUTE]: ${this.name}`);
+			this.unMute(target, minutes(1));
 		}
 	}
 

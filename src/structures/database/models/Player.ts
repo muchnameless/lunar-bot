@@ -42,6 +42,7 @@ import {
 	getSkillLevel,
 	hours,
 	logger,
+	minutes,
 	trim,
 	uuidToImgurBustURL,
 	validateDiscordId,
@@ -976,6 +977,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (this.guildId === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
 
 		if (!member) return; // no linked available discord member to update
+
+		// timeout expires before the next update
+		const TIMEOUT_LEFT = (member.communicationDisabledUntilTimestamp ?? 0) - Date.now();
+		if (TIMEOUT_LEFT >= 0 && TIMEOUT_LEFT <= this.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1)) {
+			this.hypixelGuild?.unMute(this, member.communicationDisabledUntilTimestamp! - Date.now());
+		}
 
 		const MANDATORY_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.MANDATORY_ROLE_ID;
 

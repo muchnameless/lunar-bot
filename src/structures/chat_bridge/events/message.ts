@@ -11,7 +11,7 @@ import {
 	unmuteSuccess,
 } from '../constants';
 import { STOP_EMOJI } from '../../../constants';
-import { MessageUtil } from '../../../util';
+import { GuildMemberUtil, MessageUtil } from '../../../util';
 import { asyncFilter, getLilyWeight, logger, stringToMS } from '../../../functions';
 import { ChatBridgeEvent } from '../ChatBridgeEvent';
 import { hypixel, mojang } from '../../../api';
@@ -175,12 +175,19 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!player) return;
 
-			const msDuration = stringToMS(duration);
+			const MS_DURATION = stringToMS(duration);
 
+			// update db and timeout discord member
 			this.chatBridge.hypixelGuild!.syncMute(
 				player,
-				Number.isNaN(msDuration) ? Number.POSITIVE_INFINITY : Date.now() + msDuration,
+				Number.isNaN(MS_DURATION) ? Number.POSITIVE_INFINITY : Date.now() + MS_DURATION,
 			);
+			(async () => {
+				if (Number.isNaN(MS_DURATION)) return;
+				const discordMember = await player.fetchDiscordMember();
+				if (!discordMember) return;
+				return GuildMemberUtil.timeout(discordMember, MS_DURATION);
+			})();
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was muted for ${duration}`);
 		}
@@ -207,7 +214,13 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 
 			if (!player) return;
 
+			// update db and remove timeout from discord member
 			this.chatBridge.hypixelGuild!.syncMute(player, null);
+			(async () => {
+				const discordMember = await player.fetchDiscordMember();
+				if (!discordMember) return;
+				return GuildMemberUtil.timeout(discordMember, null);
+			})();
 
 			return logger.info(`[CHATBRIDGE]: ${this.chatBridge.logInfo}: ${target} was unmuted`);
 		}
