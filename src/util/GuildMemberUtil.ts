@@ -21,6 +21,14 @@ export default class GuildMemberUtil extends null {
 	/**
 	 * @param member
 	 */
+	static logInfo(member: GuildMember) {
+		if (member.nickname) return `${member.nickname} | ${member.user.tag}`;
+		return member.user.tag;
+	}
+
+	/**
+	 * @param member
+	 */
 	static getPlayer(member: GuildMember | null | undefined) {
 		return UserUtil.getPlayer(member?.user);
 	}
@@ -136,20 +144,20 @@ export default class GuildMemberUtil extends null {
 				: roles
 		).difference(member.roles.cache);
 		if (!difference.size) {
-			logger.warn('[SET ROLES]: nothing to change');
+			logger.warn(`[SET ROLES] ${this.logInfo(member)}: nothing to change`);
 			return member;
 		}
 
 		const { me } = member.guild;
 		if (!me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
-			logger.warn("[SET ROLES]: missing 'MANAGE_ROLES' permission");
+			logger.warn(`[SET ROLES] ${this.logInfo(member)}: missing 'MANAGE_ROLES' permission`);
 			return member;
 		}
 
 		const { highest } = me!.roles;
 		if (difference.some((role) => role.managed || Role.comparePositions(role, highest) >= 0)) {
 			logger.warn(
-				commaListsAnd`[SET ROLES]: unable to add / remove '${difference
+				commaListsAnd`[SET ROLES] ${this.logInfo(member)}: unable to add / remove '${difference
 					.filter((role) => role.managed || Role.comparePositions(role, highest) >= 0)
 					.map(({ name }) => `@${name}`)}'
 				`,
@@ -203,5 +211,23 @@ export default class GuildMemberUtil extends null {
 	): Promise<Message | null>;
 	static sendDM(member: GuildMember, options: string | MessageOptions) {
 		return UserUtil.sendDM(member.user, options);
+	}
+
+	/**
+	 * @param member
+	 * @param duration
+	 */
+	static async timeout(member: GuildMember, duration: number | null) {
+		if (!member.moderatable) {
+			logger.warn(`[TIMEOUT] ${this.logInfo(member)}: missing permissions`);
+			return member;
+		}
+
+		try {
+			return await member.timeout(duration);
+		} catch (error) {
+			logger.error(error, `[TIMEOUT] ${this.logInfo(member)}`);
+			return member;
+		}
 	}
 }
