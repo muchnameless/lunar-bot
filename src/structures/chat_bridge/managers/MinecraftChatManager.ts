@@ -26,6 +26,7 @@ import {
 	hours,
 	logger,
 	minutes,
+	replaceSmallLatinCapitalLetters,
 	seconds,
 	splitMessage,
 	trim,
@@ -599,7 +600,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				.replace(/<#(\d{17,19})>/g, (match, p1) => {
 					// channels
 					const CHANNEL_NAME = (this.client.channels.cache.get(p1) as GuildChannel)?.name;
-					if (CHANNEL_NAME) return `#${CHANNEL_NAME}`;
+					if (CHANNEL_NAME) return `#${replaceSmallLatinCapitalLetters(CHANNEL_NAME)}`;
 					return match;
 				})
 				.replace(/<@&(\d{17,19})>/g, (match, p1) => {
