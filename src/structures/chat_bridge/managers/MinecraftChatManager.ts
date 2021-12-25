@@ -957,16 +957,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			time: timeout,
 		});
 
-		let resolve: (
-			value: HypixelMessage | string | HypixelMessage[] | string[] | PromiseLike<HypixelMessage[] | string[]>,
-		) => void;
-		let reject!: (reason?: unknown) => void;
-
-		const promise = new Promise((res, rej) => {
-			resolve = res;
-			reject = rej;
-		});
-
 		// collect message
 		collector.on(MessageCollectorEvents.COLLECT, (hypixelMessage) => {
 			// message is line separator
@@ -989,46 +979,47 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			if (hypixelMessage.spam) collector.collected.pop();
 		});
 
-		// end collection
-		collector.once(MessageCollectorEvents.END, (collected, reason) => {
-			this.commandQueue.shift();
+		// eslint-disable-next-line no-async-promise-executor
+		return new Promise(async (resolve, reject) => {
+			// end collection
+			collector.once(MessageCollectorEvents.END, (collected, reason) => {
+				this.commandQueue.shift();
 
-			switch (reason) {
-				case 'time':
-				case 'disconnect': {
-					if (rejectOnTimeout && !collected.length) {
-						if (raw) {
-							return resolve([
-								{ content: `no in-game response after ${ms(timeout, { long: true })}` } as HypixelMessage,
-							]);
+				switch (reason) {
+					case 'time':
+					case 'disconnect': {
+						if (rejectOnTimeout && !collected.length) {
+							if (raw) {
+								return resolve([
+									{ content: `no in-game response after ${ms(timeout, { long: true })}` } as HypixelMessage,
+								]);
+							}
+							return reject(`no in-game response after ${ms(timeout, { long: true })}`);
 						}
-						return reject(`no in-game response after ${ms(timeout, { long: true })}`);
+
+						if (raw) return resolve(collected);
+						if (collected.length) return resolve(MinecraftChatManager.cleanCommandResponse(collected));
+						return resolve(`no in-game response after ${ms(timeout, { long: true })}`);
 					}
 
-					if (raw) return resolve(collected);
-					if (collected.length) return resolve(MinecraftChatManager.cleanCommandResponse(collected));
-					return resolve(`no in-game response after ${ms(timeout, { long: true })}`);
-				}
+					case 'error':
+						return; // _sendToChat error, promise gets rejected down below
 
-				case 'error':
-					return; // _sendToChat error, promise gets rejected down below
-
-				case 'abort': {
-					if (rejectOnAbort) {
-						if (raw) return reject(collected);
-						return reject(MinecraftChatManager.cleanCommandResponse(collected));
+					case 'abort': {
+						if (rejectOnAbort) {
+							if (raw) return reject(collected);
+							return reject(MinecraftChatManager.cleanCommandResponse(collected));
+						}
 					}
+					// fallthrough
+
+					default:
+						if (raw) return resolve(collected);
+						return resolve(MinecraftChatManager.cleanCommandResponse(collected));
 				}
-				// fallthrough
+			});
 
-				default:
-					if (raw) return resolve(collected);
-					return resolve(MinecraftChatManager.cleanCommandResponse(collected));
-			}
-		});
-
-		// send command to chat
-		(async () => {
+			// send command to chat
 			try {
 				await this._sendToChat({
 					content: command,
@@ -1043,8 +1034,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				this._retries = 0;
 				this.queue.shift();
 			}
-		})();
-
-		return promise;
+		});
 	}
 }
