@@ -1,6 +1,5 @@
-import { Role } from 'discord.js';
 import { logger } from '../functions';
-import type { Collection, Guild, GuildMember, Snowflake } from 'discord.js';
+import type { Role, Collection, Guild, GuildMember, Snowflake } from 'discord.js';
 
 export type RoleCollection = Collection<Snowflake, Role>;
 export type RoleResolvables = (Snowflake | Role | null)[] | RoleCollection;
@@ -32,7 +31,7 @@ export default class GuildUtil extends null {
 				continue;
 			}
 
-			if (role.managed || Role.comparePositions(role, (highest ??= guild.me!.roles.highest)) >= 0) {
+			if (role.managed || guild.roles.comparePositions(role, (highest ??= guild.me!.roles.highest)) >= 0) {
 				logger.warn(`[CHECK ROLE IDS]: can't edit '@${role.name}'`);
 				continue;
 			}
@@ -40,7 +39,7 @@ export default class GuildUtil extends null {
 			resolvedRoles.add(role);
 		}
 
-		return [...resolvedRoles].sort((a, b) => Role.comparePositions(b, a));
+		return [...resolvedRoles].sort((a, b) => guild.roles.comparePositions(b, a));
 	}
 
 	/**

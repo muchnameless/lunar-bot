@@ -1,4 +1,4 @@
-import { Collection, Permissions, Role } from 'discord.js';
+import { Collection, Permissions } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import {
 	CATACOMBS_ROLES,
@@ -12,7 +12,7 @@ import {
 } from '../constants';
 import { logger } from '../functions';
 import { GuildUtil, UserUtil } from '.';
-import type { GuildMember, Message, MessageOptions, Snowflake } from 'discord.js';
+import type { GuildMember, Message, MessageOptions, Snowflake, Role } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { LunarClient } from '../structures/LunarClient';
 import type { RoleCollection, RoleResolvables } from './GuildUtil';
@@ -155,10 +155,10 @@ export default class GuildMemberUtil extends null {
 		}
 
 		const { highest } = me!.roles;
-		if (difference.some((role) => role.managed || Role.comparePositions(role, highest) >= 0)) {
+		if (difference.some((role) => role.managed || member.guild.roles.comparePositions(role, highest) >= 0)) {
 			logger.warn(
 				commaListsAnd`[SET ROLES] ${this.logInfo(member)}: unable to add / remove '${difference
-					.filter((role) => role.managed || Role.comparePositions(role, highest) >= 0)
+					.filter((role) => role.managed || member.guild.roles.comparePositions(role, highest) >= 0)
 					.map(({ name }) => `@${name}`)}'
 				`,
 			);
