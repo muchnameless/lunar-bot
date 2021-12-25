@@ -24,7 +24,7 @@ try {
 
 	await client.commands.loadAll();
 
-	logger.info(`[DEPLY]: started refreshing slash commands for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}`);
+	logger.info(`[DEPLOY]: started refreshing slash commands for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}`);
 
 	const SHOULD_DELETE = process.argv.includes('delete') || process.argv.includes('d');
 
@@ -39,7 +39,9 @@ try {
 
 	if (!SHOULD_DELETE) {
 		logger.info(
-			`[DEPLY]: started setting permissions for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}'s slash commands`,
+			`[DEPLOY]: started setting permissions for ${
+				GUILD_ID ? `guild ${GUILD_ID}` : 'the application'
+			}'s slash commands`,
 		);
 
 		await Promise.all(
@@ -50,14 +52,14 @@ try {
 					const command = client.commands.get(name);
 
 					if (!command) {
-						logger.warn(`unknown application command '${name}'`);
+						logger.warn(`[DEPLOY]: unknown application command '${name}'`);
 						continue;
 					}
 
 					const permissions = command.permissionsFor(discordId);
 
 					if (!permissions.length) {
-						logger.info(`no permissions to set for '${name}'`);
+						logger.info(`[DEPLOY]: no permissions to set for '${name}'`);
 						continue;
 					}
 
@@ -74,7 +76,7 @@ try {
 		);
 	}
 
-	logger.info(`[DEPLY]: sucessfully ${SHOULD_DELETE ? 'deleted' : 'reloaded'} slash commands`);
+	logger.info(`[DEPLOY]: sucessfully ${SHOULD_DELETE ? 'deleted' : 'reloaded'} slash commands`);
 } catch (error) {
 	logger.error(error, '[DEPLOY]');
 }
