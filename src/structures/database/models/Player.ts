@@ -972,7 +972,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		let reason = reasonInput;
 
 		const member =
-			(await this.fetchDiscordMember()) ?? ((reason = 'found linked discord tag'), await this.linkUsingCache());
+			(await this.fetchDiscordMember()) ?? ((reason = 'found linked discord tag'), await this._linkUsingCache());
 
 		if (this.guildId === GUILD_ID_ERROR) return this.removeFromGuild(); // player left the guild but discord member couldn't be updated for some reason
 
@@ -1196,7 +1196,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * tries to link unlinked players via discord.js-cache (without any discord API calls)
 	 */
-	async linkUsingCache() {
+	private async _linkUsingCache() {
 		const discordGuild = this.hypixelGuild?.discordGuild;
 		if (!discordGuild) return null;
 
@@ -1226,9 +1226,14 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		if (!member) return null;
 
-		logger.info(`[UPDATE ROLES]: ${this.logInfo}: discord data found: ${member.user.tag}`);
+		logger.info(`[LINK USING CACHE] ${this.logInfo}: discord data found: ${member.user.tag}`);
 
-		await this.link(member);
+		// catch potential sequelize errors propagated from setUniqueDiscordId
+		try {
+			await this.link(member);
+		} catch (error) {
+			logger.error(error, `[LINK USING CACHE] ${this.logInfo}`);
+		}
 
 		return member;
 	}
