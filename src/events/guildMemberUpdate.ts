@@ -51,7 +51,7 @@ export default class GuildMemberUpdateEvent extends Event {
 			oldMember.communicationDisabledUntilTimestamp !== null
 		) {
 			// manually unmuted
-			hypixelGuild.unMute(player, 0);
+			hypixelGuild.unmute(player, 0);
 		}
 
 		// changes in 'mandatory'-role

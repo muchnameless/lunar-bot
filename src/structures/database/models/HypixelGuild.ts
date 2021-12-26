@@ -158,9 +158,14 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * linked chat bridge
 	 */
 	private _chatBridge: ChatBridge | null = null;
-
+	/**
+	 * players who are muted in guild chat, <minecraftUuid, mutedTill>
+	 */
 	mutedPlayers: Map<string, number>;
-	unMuteTimeouts = new Map<string, NodeJS.Timeout>();
+	/**
+	 * scheduled unmutes
+	 */
+	private _unmuteTimeouts = new Map<string, NodeJS.Timeout>();
 
 	constructor(...args: any[]) {
 		super(...args);
@@ -460,15 +465,15 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * @param target
 	 * @param timeout
 	 */
-	unMute(target: Player | 'everyone', timeout: number) {
+	unmute(target: Player, timeout: number) {
 		// prevent circular calls when syncing
-		if (!this.mutedPlayers.has((target as Player).minecraftUuid)) return;
+		if (!this.checkMute(target)) return;
 
 		// overwrite existing scheduled unmute
-		const existing = this.unMuteTimeouts.get((target as Player).minecraftUuid);
+		const existing = this._unmuteTimeouts.get(target.minecraftUuid);
 		if (existing) {
-			this.unMuteTimeouts.delete((target as Player).minecraftUuid);
 			clearTimeout(existing);
+			this._unmuteTimeouts.delete(target.minecraftUuid);
 		}
 
 		// immediate unmute
@@ -476,8 +481,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 		// schedule unmute
 		return new Promise((resolve) => {
-			this.unMuteTimeouts.set(
-				(target as Player).minecraftUuid,
+			this._unmuteTimeouts.set(
+				target.minecraftUuid,
 				setTimeout(() => {
 					resolve(this._unmute(target));
 				}, timeout),
@@ -488,17 +493,20 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	 * @param target
 	 * @internal
 	 */
-	private async _unmute(target: Player | 'everyone') {
+	private async _unmute(target: Player) {
+		// prevent circular calls when syncing
+		if (!this.checkMute(target)) return;
+
 		try {
 			const { chatBridge } = this;
 			await chatBridge.minecraft.command({
 				command: `guild unmute ${target}`,
 				responseRegExp: unmute(`${target}`, chatBridge.bot.username),
 			});
-			this.unMuteTimeouts.delete((target as Player).minecraftUuid);
+			this._unmuteTimeouts.delete(target.minecraftUuid);
 		} catch (error) {
 			logger.error({ err: error, data: { target: `${target}` } }, `[UNMUTE]: ${this.name}`);
-			this.unMute(target, minutes(1));
+			this.unmute(target, minutes(1));
 		}
 	}
 
@@ -511,6 +519,12 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		if (mutedTill == null) {
 			// delete returns false if the element has not been deleted, true if it has been deleted
 			if (!this.mutedPlayers.delete(player.minecraftUuid)) return;
+
+			const existing = this._unmuteTimeouts.get(player.minecraftUuid);
+			if (existing) {
+				clearTimeout(existing);
+				this._unmuteTimeouts.delete(player.minecraftUuid);
+			}
 
 			this._mutedPlayers.splice(
 				this._mutedPlayers.findIndex(({ minecraftUuid }) => minecraftUuid === player.minecraftUuid),

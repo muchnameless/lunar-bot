@@ -43,6 +43,7 @@ import {
 	hours,
 	logger,
 	minutes,
+	seconds,
 	trim,
 	uuidToImgurBustURL,
 	validateDiscordId,
@@ -980,10 +981,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		// timeout expires before the next update
 		const TIMEOUT_LEFT = (member.communicationDisabledUntilTimestamp ?? 0) - Date.now();
-		if (TIMEOUT_LEFT >= 0 && TIMEOUT_LEFT <= this.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1)) {
-			this.hypixelGuild?.unMute(this, member.communicationDisabledUntilTimestamp! - Date.now());
+
+		if (TIMEOUT_LEFT >= 0 && TIMEOUT_LEFT <= 2 * this.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1)) {
+			this.hypixelGuild?.unmute(this, member.communicationDisabledUntilTimestamp! - Date.now() + seconds(1));
 		}
 
+		// abort if the member is missing the mandatory role (if existant)
 		const MANDATORY_ROLE_ID = this.client.discordGuilds.cache.get(member.guild.id)?.MANDATORY_ROLE_ID;
 
 		if (MANDATORY_ROLE_ID && !member.roles.cache.has(MANDATORY_ROLE_ID)) {
@@ -992,6 +995,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			);
 		}
 
+		// actual update(s)
 		await this.updateRoles(reason);
 		await this.syncIgnWithDisplayName(shouldSendDm);
 	}
