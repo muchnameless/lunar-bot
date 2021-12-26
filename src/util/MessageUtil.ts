@@ -265,6 +265,12 @@ export default class MessageUtil extends null {
 			requiredChannelPermissions |= Permissions.FLAGS.MANAGE_MESSAGES; // removing attachments requires MANAGE_MESSAGES
 		}
 
+		// TODO: remove once discord.js Message#editable checks for ephemeral state
+		if (this.isEphemeral(message)) {
+			logger.warn(`[MESSAGE UTIL]: unable to edit ephemeral message in ${this.channelLogInfo(message)}`);
+			return message;
+		}
+
 		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
 			const MESSAGE = `[MESSAGE UTIL]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
 
