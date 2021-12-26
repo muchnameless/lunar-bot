@@ -753,7 +753,10 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 							try {
 								await player.setUniqueDiscordId(discordMember?.id ?? discordTag);
 							} catch (error) {
-								logger.error(error);
+								logger.error(
+									{ err: error, toSet: discordMember?.id ?? discordTag, existing: player.discordId },
+									`[UPDATE GUILD PLAYERS] ${this.name}`,
+								);
 							}
 
 							player.update({ ign }).catch((error) => logger.error(error));
@@ -788,8 +791,16 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 								if (!discordMember) {
 									if (/\D/.test(player.discordId!)) {
-										await player.setUniqueDiscordId(discordTag).catch((error) => logger.error(error)); // save tag if no id is known
+										try {
+											await player.setUniqueDiscordId(discordTag); // save tag if no id is known
+										} catch (error) {
+											logger.error(
+												{ err: error, toSet: discordTag, existing: player.discordId },
+												`[UPDATE GUILD PLAYERS] ${this.name}`,
+											);
+										}
 									}
+
 									player.inDiscord = false;
 									joinedLog.push(
 										player.discordId!.includes('#')
@@ -883,7 +894,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			for (const hypixelGuildMember of currentGuildMembers) {
 				const player = players.cache.get(hypixelGuildMember.uuid);
 				if (!player) {
-					logger.warn(`[UPDATE GUILD PLAYERS]: ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
+					logger.warn(`[UPDATE GUILD PLAYERS] ${this.name}: missing db entry for uuid: ${hypixelGuildMember.uuid}`);
 					continue;
 				}
 
