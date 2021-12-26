@@ -3,6 +3,7 @@ import { commaListsAnd } from 'common-tags';
 import {
 	CATACOMBS_ROLES,
 	DELIMITER_ROLES,
+	MAX_TIMEOUT_DURATION,
 	SKILL_AVERAGE_ROLES,
 	SKILL_ROLES,
 	SKILLS,
@@ -224,13 +225,15 @@ export default class GuildMemberUtil extends null {
 			return member;
 		}
 
-		if (Math.abs(member.communicationDisabledUntilTimestamp! - Date.now() - duration!) < seconds(1)) {
+		const DURATION = duration !== null ? Math.max(duration, MAX_TIMEOUT_DURATION) : null;
+
+		if (Math.abs(member.communicationDisabledUntilTimestamp! - Date.now() - DURATION!) < seconds(1)) {
 			logger.trace(`[TIMEOUT] ${this.logInfo(member)}: is already in (similar) timeout`);
 			return member;
 		}
 
 		try {
-			return await member.timeout(duration, reason);
+			return await member.timeout(DURATION, reason);
 		} catch (error) {
 			logger.error(error, `[TIMEOUT] ${this.logInfo(member)}`);
 			return member;
