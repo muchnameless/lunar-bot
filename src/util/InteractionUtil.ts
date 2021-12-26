@@ -183,6 +183,7 @@ export default class InteractionUtil extends null {
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
+				guild: interaction.guild?.name ?? null,
 			};
 		}
 
@@ -196,6 +197,7 @@ export default class InteractionUtil extends null {
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
+				guild: interaction.guild?.name ?? null,
 			};
 		}
 
@@ -210,6 +212,7 @@ export default class InteractionUtil extends null {
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
+				guild: interaction.guild?.name ?? null,
 			};
 		}
 
@@ -223,6 +226,7 @@ export default class InteractionUtil extends null {
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
+				guild: interaction.guild?.name ?? null,
 			};
 		}
 
@@ -237,6 +241,7 @@ export default class InteractionUtil extends null {
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
+				guild: interaction.guild?.name ?? null,
 			};
 		}
 
@@ -248,6 +253,7 @@ export default class InteractionUtil extends null {
 			channel: interaction.guildId
 				? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 				: 'DM',
+			guild: interaction.guild?.name ?? null,
 		};
 	}
 

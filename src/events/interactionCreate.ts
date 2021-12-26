@@ -46,6 +46,7 @@ export default class InteractionCreateEvent extends Event {
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
+				guild: interaction.guild?.name ?? null,
 			},
 			'INTERACTION_CREATE',
 		);
@@ -98,6 +99,7 @@ export default class InteractionCreateEvent extends Event {
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
+				guild: interaction.guild?.name ?? null,
 			},
 			'INTERACTION_CREATE',
 		);
@@ -146,6 +148,7 @@ export default class InteractionCreateEvent extends Event {
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
+				guild: interaction.guild?.name ?? null,
 			},
 			'INTERACTION_CREATE',
 		);
@@ -304,6 +307,7 @@ export default class InteractionCreateEvent extends Event {
 				channel: interaction.guildId
 					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
 					: 'DM',
+				guild: interaction.guild?.name ?? null,
 			},
 			'INTERACTION_CREATE',
 		);
