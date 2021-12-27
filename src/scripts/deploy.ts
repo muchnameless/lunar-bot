@@ -51,14 +51,14 @@ try {
 					const command = client.commands.get(name);
 
 					if (!command) {
-						logger.warn(`[DEPLOY]: unknown application command '${name}'`);
+						logger.error(`[DEPLOY]: unknown application command '${name}'`);
 						continue;
 					}
 
 					const permissions = command.permissionsFor(guildId);
 
 					if (!permissions.length) {
-						logger.info(`[DEPLOY]: no permissions to set for '${name}'`);
+						logger.trace(`[DEPLOY]: no permissions to set for '${name}'`);
 						continue;
 					}
 
