@@ -214,7 +214,7 @@ export class ApplicationCommand extends BaseCommand {
 
 		for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
 			const hypixelGuild = this.client.hypixelGuilds.cache.get(hypixelGuildId);
-			if (!hypixelGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name} no hypixel guild`);
+			if (!hypixelGuild) throw new Error(`[PERMISSIONS FOR]: ${this.name}: no hypixel guild`);
 
 			const requiredRoles = this.requiredRoles(hypixelGuild);
 
