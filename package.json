@@ -55,7 +55,7 @@
     "pg-hstore": "^2.3.4",
     "pino": "^7.6.1",
     "prismarine-chat": "^1.4.1",
-    "re2": "^1.17.1",
+    "re2": "^1.17.2",
     "readdirp": "^3.6.0",
     "sequelize": "^6.12.2",
     "timezonecomplete": "^5.12.4",
