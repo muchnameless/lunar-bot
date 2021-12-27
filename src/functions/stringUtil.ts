@@ -38,7 +38,7 @@ export const trim = (string: string, max: number) => (string.length > max ? `${s
  * replaces toLocaleString('fr-FR') separator with a normal space
  * @param string
  */
-export const cleanFormattedNumber = (string: string) => string.replace(/\u{202F}/gu, ' ');
+export const cleanFormattedNumber = (string: string) => string.replaceAll('\u{202F}', ' ');
 
 /**
  * replaces all small latin capital letters with normal lowercase letters
