@@ -89,8 +89,8 @@ export default class XpCommand extends ApplicationCommand {
 				name: upperCaseFirstChar(skill),
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
-					${Formatters.bold('XP:')} ${formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${formatNumber(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT], 0, Math.round)}
+					${Formatters.bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
+					${Formatters.bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[OFFSET_ARGUMENT]))}
 				`,
 				inline: true,
 			});
@@ -106,8 +106,8 @@ export default class XpCommand extends ApplicationCommand {
 				name: upperCaseFirstChar(skill),
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
-					${Formatters.bold('XP:')} ${formatNumber(player[SKILL_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${formatNumber(player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`], 0, Math.round)}
+					${Formatters.bold('XP:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT]))}
+					${Formatters.bold('Δ:')} ${formatNumber(Math.round(player[SKILL_ARGUMENT] - player[`${skill}Xp${OFFSET}`]))}
 				`,
 				inline: true,
 			});
@@ -137,7 +137,7 @@ export default class XpCommand extends ApplicationCommand {
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${player.getSlayerLevel(slayer)}
 					${Formatters.bold('XP:')} ${formatNumber(player[SLAYER_ARGUMENT])}
-					${Formatters.bold('Δ:')} ${formatNumber(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`], 0, Math.round)}
+					${Formatters.bold('Δ:')} ${formatNumber(Math.round(player[SLAYER_ARGUMENT] - player[`${slayer}Xp${OFFSET}`]))}
 				`,
 				inline: true,
 			});
@@ -159,8 +159,8 @@ export default class XpCommand extends ApplicationCommand {
 				name: upperCaseFirstChar(type),
 				value: stripIndents`
 					${Formatters.bold('Lvl:')} ${progressLevel}
-					${Formatters.bold('XP:')} ${formatNumber(player[DUNGEON_ARGUMENT], 0, Math.round)}
-					${Formatters.bold('Δ:')} ${formatNumber(player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`], 0, Math.round)}
+					${Formatters.bold('XP:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT]))}
+					${Formatters.bold('Δ:')} ${formatNumber(Math.round(player[DUNGEON_ARGUMENT] - player[`${type}Xp${OFFSET}`]))}
 				`,
 				inline: true,
 			});

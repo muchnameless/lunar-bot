@@ -64,17 +64,10 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 	createTaxCollectedEmbed() {
 		const embed = this.client.defaultEmbed.setTitle('Collected Guild Tax').setDescription(stripIndents`
 			${Formatters.bold('combined')}
-			tax: ${formatNumber(
-				this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0),
-				0,
-			)}
-			donations: ${formatNumber(
-				this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0),
-				0,
-			)}
+			tax: ${formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedTax, 0))}
+			donations: ${formatNumber(this.cache.reduce((acc, collector) => acc + collector.collectedDonations, 0))}
 			total: ${formatNumber(
 				this.cache.reduce((acc, collector) => acc + collector.collectedTax + collector.collectedDonations, 0),
-				0,
 			)}
 			\u200B
 		`);

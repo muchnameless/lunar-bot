@@ -2,10 +2,12 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { getSenitherWeight, seconds } from '../../functions';
 import BaseWeightCommand from './~base-weight';
-import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class WeightCommand extends BaseWeightCommand {
+	override weightType = 'Senither';
+	override getWeight = getSenitherWeight;
+
 	constructor(context: CommandContext) {
 		super(
 			context,
@@ -22,13 +24,5 @@ export default class WeightCommand extends BaseWeightCommand {
 				usage: '<`IGN`> <`profile` name>',
 			},
 		);
-	}
-
-	/**
-	 * @param skyblockMember
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	override getWeight(skyblockMember: Components.Schemas.SkyBlockProfileMember) {
-		return getSenitherWeight(skyblockMember);
 	}
 }

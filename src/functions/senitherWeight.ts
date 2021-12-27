@@ -26,15 +26,20 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 	let weight = 0;
 	let overflow = 0;
 
+	let totalSkillWeight = 0;
+
 	for (const skill of SKILLS) {
 		const { skillWeight, skillOverflow } = getSenitherSkillWeight(
 			skill,
 			skyblockMember[`experience_skill_${skill}`] ?? 0,
 		);
 
+		totalSkillWeight += skillWeight + skillOverflow;
 		weight += skillWeight;
 		overflow += skillOverflow;
 	}
+
+	let totalSlayerWeight = 0;
 
 	for (const slayer of SLAYERS) {
 		const { slayerWeight, slayerOverflow } = getSenitherSlayerWeight(
@@ -42,9 +47,12 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 			skyblockMember.slayer_bosses?.[slayer]?.xp ?? 0,
 		);
 
+		totalSlayerWeight += slayerWeight + slayerOverflow;
 		weight += slayerWeight;
 		overflow += slayerOverflow;
 	}
+
+	let totalDungeonWeight = 0;
 
 	for (const type of DUNGEON_TYPES) {
 		const { dungeonWeight, dungeonOverflow } = getSenitherDungeonWeight(
@@ -52,6 +60,7 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 			skyblockMember.dungeons?.dungeon_types?.[type]?.experience ?? 0,
 		);
 
+		totalDungeonWeight += dungeonWeight + dungeonOverflow;
 		weight += dungeonWeight;
 		overflow += dungeonOverflow;
 	}
@@ -62,12 +71,16 @@ export function getSenitherWeight(skyblockMember: Components.Schemas.SkyBlockPro
 			skyblockMember.dungeons?.player_classes?.[dungeonClass]?.experience ?? 0,
 		);
 
+		totalDungeonWeight += dungeonWeight + dungeonOverflow;
 		weight += dungeonWeight;
 		overflow += dungeonOverflow;
 	}
 
 	return {
 		skillAPIEnabled: Reflect.has(skyblockMember, 'experience_skill_alchemy'),
+		skill: totalSkillWeight,
+		slayer: totalSlayerWeight,
+		dungeons: totalDungeonWeight,
 		weight,
 		overflow,
 		totalWeight: weight + overflow,

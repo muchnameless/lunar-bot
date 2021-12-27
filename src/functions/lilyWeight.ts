@@ -14,18 +14,23 @@ export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfile
 	);
 	const {
 		total,
-		skill: { overflow },
+		skill: { base: skill, overflow },
+		slayer,
+		catacombs,
 	} = getLilyWeightRaw(
-		LILY_SKILL_NAMES.map((skill, index) => getSkillLevel(skill, SKILL_XP_LILY[index], 60).trueLevel), // skill levels
+		LILY_SKILL_NAMES.map((_skill, index) => getSkillLevel(_skill, SKILL_XP_LILY[index], 60).trueLevel), // skill levels
 		SKILL_XP_LILY, // skill xp
 		skyblockMember.dungeons?.dungeon_types?.catacombs?.tier_completions ?? {}, // catacombs completions
 		skyblockMember.dungeons?.dungeon_types?.master_catacombs?.tier_completions ?? {}, // master catacombs completions
 		skyblockMember.dungeons?.dungeon_types?.catacombs?.experience ?? 0, // catacombs xp
-		SLAYERS.map((slayer) => skyblockMember.slayer_bosses?.[slayer]?.xp ?? 0), // slayer xp
+		SLAYERS.map((_slayer) => skyblockMember.slayer_bosses?.[_slayer]?.xp ?? 0), // slayer xp
 	);
 
 	return {
 		skillAPIEnabled: Reflect.has(skyblockMember, 'experience_skill_alchemy'),
+		skill,
+		slayer,
+		dungeons: catacombs.experience + catacombs.completion.base + catacombs.completion.master,
 		weight: total - overflow,
 		overflow,
 		totalWeight: total,

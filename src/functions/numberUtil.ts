@@ -135,27 +135,38 @@ export async function randomNumber(minimum: number, maximum: number) {
 	}
 }
 
+interface DecimalNumberFormattingOptions {
+	/** amount to space-pad at the start */
+	padding?: number;
+	/** amount of decimals to round to */
+	decimals?: number;
+}
+
 /**
  * space-padding at the beginning and '0'-padding at the end
  * @param number number to format
- * @param paddingAmount amount to space-pad at the start
+ * @param options
  */
-export function formatDecimalNumber(number: number, paddingAmount = 0) {
-	if (Number.isNaN(number)) return 'NaN'.padStart(paddingAmount, ' ');
+export function formatDecimalNumber(
+	number: number,
+	{ padding = 0, decimals = 2 }: DecimalNumberFormattingOptions = {},
+) {
+	if (Number.isNaN(number)) return 'NaN'.padStart(padding, ' ');
 
-	const [BEFORE_DOT, AFTER_DOT] = number.toFixed(2).split('.');
+	const [BEFORE_DOT, AFTER_DOT] = number.toFixed(decimals).split('.');
 
-	return `${Number(BEFORE_DOT).toLocaleString('fr-FR').padStart(paddingAmount, ' ')}.${AFTER_DOT}`;
+	return `${Number(BEFORE_DOT).toLocaleString('fr-FR').padStart(padding, ' ')}.${AFTER_DOT}`;
+}
+
+interface NumberFormattingOptions {
+	/** amount to space-pad at the start */
+	padding?: number;
 }
 
 /**
  * space-padding at the beginning, converterFunction and locale string formatting
  * @param number number to format
- * @param paddingAmount amount to space-pad at the start (default 0)
- * @param converterFunction function to be called on the number
+ * @param options
  */
-export const formatNumber = (
-	number: number,
-	paddingAmount = 0,
-	converterFunction: (input: number) => number = (x) => x,
-) => converterFunction(number).toLocaleString('fr-FR').replace(',', '.').padStart(paddingAmount, ' ');
+export const formatNumber = (number: number, { padding = 0 }: NumberFormattingOptions = {}) =>
+	number.toLocaleString('fr-FR').replace(',', '.').padStart(padding, ' ');

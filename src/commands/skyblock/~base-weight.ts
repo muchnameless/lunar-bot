@@ -17,18 +17,33 @@ import type { Components } from '@zikeji/hypixel';
 import type { SkyBlockProfile, WeightData } from '../../functions';
 
 export default class BaseWeightCommand extends DualCommand {
-	// eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
-	getWeight(skyblockMember: Components.Schemas.SkyBlockProfileMember): WeightData {
-		throw new Error('no weight algorithm implemented');
-	}
+	/**
+	 * name of the weight algorithm
+	 */
+	weightType = 'unknown';
+	/**
+	 * weight algorithm
+	 */
+	getWeight: (skyblockMember: Components.Schemas.SkyBlockProfileMember) => WeightData = () => {
+		throw new Error(`no '${this.weightType}' weight algorithm implemented`);
+	};
 
 	/**
 	 * rounds and toLocaleStrings a number
 	 * @param number
 	 */
 	// eslint-disable-next-line class-methods-use-this
-	formatNumber(number: number) {
-		return formatDecimalNumber(Math.floor(number * 100) / 100);
+	formatNumber(number: number, decimals = 1) {
+		return formatDecimalNumber(Math.floor(number * 100) / 100, { decimals });
+	}
+
+	/**
+	 *
+	 * @param number
+	 */
+	// eslint-disable-next-line class-methods-use-this
+	formatPercent(number: number) {
+		return `${(100 * number).toFixed(1)}%`;
 	}
 
 	/**
@@ -42,11 +57,13 @@ export default class BaseWeightCommand extends DualCommand {
 		profileName?: string | null,
 	) {
 		try {
+			// API requests
 			const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 			const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];
 
 			if (!profiles?.length) return `\`${ign}\` has no SkyBlock profiles`;
 
+			// select profile
 			let weightData: WeightData & { name: string };
 
 			if (!profileName) {
@@ -64,9 +81,19 @@ export default class BaseWeightCommand extends DualCommand {
 				};
 			}
 
-			return `${escapeIgn(ign)} (${weightData.name}): ${this.formatNumber(weightData.totalWeight)} [${this.formatNumber(
-				weightData.weight,
-			)} + ${this.formatNumber(weightData.overflow)}]${weightData.skillAPIEnabled ? '' : ` (${X_EMOJI} API disabled)`}`;
+			// generate reply
+			const { name, totalWeight, overflow, skill, dungeons, slayer, skillAPIEnabled } = weightData;
+
+			return `${escapeIgn(ign)} (${name}): ${this.formatNumber(
+				totalWeight,
+				totalWeight > 1_000 ? 2 : 1,
+			)} (${this.formatNumber(overflow, totalWeight > 1_000 ? 2 : 1)} Overflow) | Skill: ${this.formatNumber(
+				skill,
+			)} (${this.formatPercent(skill / totalWeight)})${
+				skillAPIEnabled ? '' : ` ${X_EMOJI} API disabled`
+			} | Dungeons: ${this.formatNumber(dungeons)} (${this.formatPercent(
+				dungeons / totalWeight,
+			)}) | Slayer: ${this.formatNumber(slayer)} (${this.formatPercent(slayer / totalWeight)}) | ${this.weightType}`;
 		} catch (error) {
 			logger.error(error, '[WEIGHT]');
 

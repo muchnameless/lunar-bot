@@ -578,14 +578,10 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			});
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(
-				formatNumber(
-					playerData.reduce((acc, player) => acc + player.sortingStat, 0),
-					0,
-					Math.round,
-				),
+				formatNumber(Math.round(playerData.reduce((acc, player) => acc + player.sortingStat, 0))),
 			);
 			getEntry = (player) =>
-				formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString('fr-FR').length);
+				formatNumber(player.sortingStat, { padding: playerData[0]?.sortingStat.toLocaleString('fr-FR').length });
 			break;
 		}
 
@@ -615,14 +611,13 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				)}]
 			`;
 			getEntry = (player: PlayerData) =>
-				`${formatDecimalNumber(
-					player.skillAverageGain!,
-					Math.floor(playerData[0]?.skillAverageGain!).toLocaleString('fr-FR').length,
-				)} [${formatDecimalNumber(
-					player.trueAverageGain!,
-					Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain!))).toLocaleString('fr-FR')
-						.length,
-				)}]`;
+				`${formatDecimalNumber(player.skillAverageGain!, {
+					padding: Math.floor(playerData[0]?.skillAverageGain!).toLocaleString('fr-FR').length,
+				})} [${formatDecimalNumber(player.trueAverageGain!, {
+					padding: Math.floor(Math.max(...playerData.map(({ trueAverageGain }) => trueAverageGain!))).toLocaleString(
+						'fr-FR',
+					).length,
+				})}]`;
 			break;
 		}
 
@@ -667,12 +662,11 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				Math.max(...playerData.map(({ totalWeight }) => totalWeight!)),
 			).toLocaleString('fr-FR').length;
 			getEntry = (player) =>
-				`${formatDecimalNumber(player.sortingStat, temp1)} - ${formatDecimalNumber(
-					player.gainedWeight!,
-					PADDING_AMOUNT_GAIN,
-				)} [${formatDecimalNumber(player.totalWeight!, PADDING_AMOUNT_TOTAL)}] - ${formatNumber(
+				`${formatDecimalNumber(player.sortingStat, { padding: temp1 })} - ${formatDecimalNumber(player.gainedWeight!, {
+					padding: PADDING_AMOUNT_GAIN,
+				})} [${formatDecimalNumber(player.totalWeight!, { padding: PADDING_AMOUNT_TOTAL })}] - ${formatNumber(
 					player.gainedGuildXp!,
-					temp2,
+					{ padding: temp2 },
 				)}`;
 			totalStats = oneLine`
 				${formatDecimalNumber(playerData.reduce((acc, player) => acc + player.gainedWeight!, 0) / playerData.length)} 
@@ -715,16 +709,15 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				)}]
 			`;
 			getEntry = (player) =>
-				`${formatDecimalNumber(
-					player.totalWeightGain!,
-					Math.floor(playerData[0]?.totalWeightGain!).toLocaleString('fr-FR').length,
-				)} [${formatDecimalNumber(
-					player.weightGain!,
-					Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain!))).toLocaleString('fr-FR').length,
-				)} + ${formatDecimalNumber(
-					player.overflowGain!,
-					Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain!))).toLocaleString('fr-FR').length,
-				)}]`;
+				`${formatDecimalNumber(player.totalWeightGain!, {
+					padding: Math.floor(playerData[0]?.totalWeightGain!).toLocaleString('fr-FR').length,
+				})} [${formatDecimalNumber(player.weightGain!, {
+					padding: Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain!))).toLocaleString('fr-FR')
+						.length,
+				})} + ${formatDecimalNumber(player.overflowGain!, {
+					padding: Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain!))).toLocaleString('fr-FR')
+						.length,
+				})}]`;
 			break;
 		}
 
@@ -762,16 +755,15 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 				)}]
 			`;
 			getEntry = (player) =>
-				`${formatDecimalNumber(
-					player.totalWeightGain!,
-					Math.floor(playerData[0]?.totalWeightGain!).toLocaleString('fr-FR').length,
-				)} [${formatDecimalNumber(
-					player.weightGain!,
-					Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain!))).toLocaleString('fr-FR').length,
-				)} + ${formatDecimalNumber(
-					player.overflowGain!,
-					Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain!))).toLocaleString('fr-FR').length,
-				)}]`;
+				`${formatDecimalNumber(player.totalWeightGain!, {
+					padding: Math.floor(playerData[0]?.totalWeightGain!).toLocaleString('fr-FR').length,
+				})} [${formatDecimalNumber(player.weightGain!, {
+					padding: Math.floor(Math.max(...playerData.map(({ weightGain }) => weightGain!))).toLocaleString('fr-FR')
+						.length,
+				})} + ${formatDecimalNumber(player.overflowGain!, {
+					padding: Math.floor(Math.max(...playerData.map(({ overflowGain }) => overflowGain!))).toLocaleString('fr-FR')
+						.length,
+				})}]`;
 			break;
 		}
 
@@ -788,18 +780,12 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 			});
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(
-				formatNumber(
-					playerData.reduce((acc, player) => acc + player.sortingStat, 0),
-					0,
-					Math.round,
-				),
+				formatNumber(Math.round(playerData.reduce((acc, player) => acc + player.sortingStat, 0))),
 			);
 			getEntry = (player) =>
-				formatNumber(
-					player.sortingStat,
-					Math.round(playerData[0]?.sortingStat).toLocaleString('fr-FR').length,
-					Math.round,
-				);
+				formatNumber(Math.round(player.sortingStat), {
+					padding: Math.round(playerData[0]?.sortingStat).toLocaleString('fr-FR').length,
+				});
 		}
 	}
 
@@ -932,14 +918,10 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			});
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(
-				formatNumber(
-					playerData.reduce((acc, player) => acc + player.sortingStat, 0) / playerData.length,
-					0,
-					Math.round,
-				),
+				formatNumber(Math.round(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / playerData.length)),
 			);
 			getEntry = (player) =>
-				formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString('fr-FR').length);
+				formatNumber(player.sortingStat, { padding: playerData[0]?.sortingStat.toLocaleString('fr-FR').length });
 			break;
 		}
 
@@ -959,14 +941,20 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = oneLine`
 				${Formatters.bold(
-					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.skillAverage!, 0) / playerData.length, 2),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.skillAverage!, 0) / playerData.length, {
+						padding: 2,
+					}),
 				)}
 				[${Formatters.bold(
-					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.trueAverage!, 0) / playerData.length, 2),
+					formatDecimalNumber(playerData.reduce((acc, player) => acc + player.trueAverage!, 0) / playerData.length, {
+						padding: 2,
+					}),
 				)}]
 			`;
 			getEntry = (player) =>
-				`${formatDecimalNumber(player.skillAverage!, 2)} [${formatDecimalNumber(player.trueAverage!, 2)}]`;
+				`${formatDecimalNumber(player.skillAverage!, { padding: 2 })} [${formatDecimalNumber(player.trueAverage!, {
+					padding: 2,
+				})}]`;
 			break;
 		}
 
@@ -985,14 +973,10 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			});
 			playerData = getPlayerData(client, hypixelGuild, dataConverter);
 			totalStats = Formatters.bold(
-				formatNumber(
-					playerData.reduce((acc, player) => acc + player.sortingStat, 0) / playerData.length,
-					0,
-					Math.round,
-				),
+				formatNumber(Math.round(playerData.reduce((acc, player) => acc + player.sortingStat, 0) / playerData.length)),
 			);
 			getEntry = (player) =>
-				formatNumber(player.sortingStat, playerData[0]?.sortingStat.toLocaleString('fr-FR').length);
+				formatNumber(player.sortingStat, { padding: playerData[0]?.sortingStat.toLocaleString('fr-FR').length });
 			break;
 		}
 
@@ -1023,16 +1007,13 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 				)}]
 			`;
 			getEntry = (player) =>
-				`${formatDecimalNumber(
-					player.totalWeight!,
-					Math.floor(playerData[0]?.totalWeight!).toLocaleString('fr-FR').length,
-				)} [${formatDecimalNumber(
-					player.weight!,
-					Math.floor(Math.max(...playerData.map(({ weight }) => weight!))).toLocaleString('fr-FR').length,
-				)} + ${formatDecimalNumber(
-					player.overflow!,
-					Math.floor(Math.max(...playerData.map(({ overflow }) => overflow!))).toLocaleString('fr-FR').length,
-				)}]`;
+				`${formatDecimalNumber(player.totalWeight!, {
+					padding: Math.floor(playerData[0]?.totalWeight!).toLocaleString('fr-FR').length,
+				})} [${formatDecimalNumber(player.weight!, {
+					padding: Math.floor(Math.max(...playerData.map(({ weight }) => weight!))).toLocaleString('fr-FR').length,
+				})} + ${formatDecimalNumber(player.overflow!, {
+					padding: Math.floor(Math.max(...playerData.map(({ overflow }) => overflow!))).toLocaleString('fr-FR').length,
+				})}]`;
 			break;
 		}
 
@@ -1063,16 +1044,13 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 				)}]
 			`;
 			getEntry = (player) =>
-				`${formatDecimalNumber(
-					player.totalWeight!,
-					Math.floor(playerData[0]?.totalWeight!).toLocaleString('fr-FR').length,
-				)} [${formatDecimalNumber(
-					player.weight!,
-					Math.floor(Math.max(...playerData.map(({ weight }) => weight!))).toLocaleString('fr-FR').length,
-				)} + ${formatDecimalNumber(
-					player.overflow!,
-					Math.floor(Math.max(...playerData.map(({ overflow }) => overflow!))).toLocaleString('fr-FR').length,
-				)}]`;
+				`${formatDecimalNumber(player.totalWeight!, {
+					padding: Math.floor(playerData[0]?.totalWeight!).toLocaleString('fr-FR').length,
+				})} [${formatDecimalNumber(player.weight!, {
+					padding: Math.floor(Math.max(...playerData.map(({ weight }) => weight!))).toLocaleString('fr-FR').length,
+				})} + ${formatDecimalNumber(player.overflow!, {
+					padding: Math.floor(Math.max(...playerData.map(({ overflow }) => overflow!))).toLocaleString('fr-FR').length,
+				})}]`;
 			break;
 		}
 
@@ -1091,15 +1069,13 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 			totalStats = oneLine`
 				${Formatters.bold((playerData.reduce((acc, player) => acc + player.progressLevel!, 0) / playerData.length).toFixed(2))}
 				[${Formatters.bold(
-					formatNumber(playerData.reduce((acc, player) => acc + player.xp!, 0) / playerData.length, 0, Math.round),
+					formatNumber(Math.round(playerData.reduce((acc, player) => acc + player.xp!, 0) / playerData.length)),
 				)} XP]
 			`;
 			getEntry = (player) =>
-				`${formatDecimalNumber(player.progressLevel!, 2)} [${formatNumber(
-					player.xp!,
-					Math.round(playerData[0]?.xp!).toLocaleString('fr-FR').length,
-					Math.round,
-				)} XP]`;
+				`${formatDecimalNumber(player.progressLevel!, { padding: 2 })} [${formatNumber(Math.round(player.xp!), {
+					padding: Math.round(playerData[0]?.xp!).toLocaleString('fr-FR').length,
+				})} XP]`;
 			break;
 		}
 	}
