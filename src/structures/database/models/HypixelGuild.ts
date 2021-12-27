@@ -131,7 +131,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/** amount of non GM ranks with staff perms */
 	declare staffRanksAmount: number;
 	declare statsHistory: StatsHistory[];
-	declare statDiscordChannels: Record<string, string> | null;
+	declare statDiscordChannels: Record<'weight' | 'skills' | 'slayer' | 'catacombs', string> | null;
 	declare updateStatDiscordChannelsEnabled: boolean;
 	declare acceptJoinRequests: boolean;
 	declare taxChannelId: Snowflake | null;
@@ -1136,7 +1136,9 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		if (!this.updateStatDiscordChannelsEnabled || !this.statDiscordChannels) return;
 
 		for (const [type, value] of Object.entries(this.formattedStats)) {
-			const channel = this.client.channels.cache.get(this.statDiscordChannels[type]);
+			const channel = this.client.channels.cache.get(
+				this.statDiscordChannels[type as keyof HypixelGuild['formattedStats']],
+			);
 
 			if (!(channel instanceof VoiceChannel)) {
 				// no channel found
