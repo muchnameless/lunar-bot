@@ -2,13 +2,14 @@ import LilyWeight from 'lilyweight';
 import { LILY_SKILL_NAMES, LILY_SKILL_NAMES_API, SLAYERS } from '../constants';
 import { getSkillLevel } from '.';
 import type { Components } from '@zikeji/hypixel';
+import type { WeightData } from '.';
 
 export const { getWeightRaw: getLilyWeightRaw } = LilyWeight;
 
 /**
  * @param skyblockMember
  */
-export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfileMember) {
+export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfileMember): WeightData {
 	const SKILL_XP_LILY = LILY_SKILL_NAMES_API.map(
 		(skill) => (skyblockMember[skill as keyof typeof skyblockMember] as number) ?? 0,
 	);
