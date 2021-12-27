@@ -225,9 +225,13 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param message
 	 */
-	override async runMessage(interaction: ContextMenuInteraction, { content }: Message) {
+	override async runMessage(interaction: ContextMenuInteraction, { content, author }: Message) {
 		if (!content) {
 			throw 'no content to evaluate';
+		}
+
+		if (author.id !== this.client.ownerId) {
+			throw `cannot evaluate a message from ${author}`;
 		}
 
 		const IS_ASYNC = /\bawait\b/.test(content);
