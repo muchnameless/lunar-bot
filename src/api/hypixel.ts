@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { Client } from '@zikeji/hypixel';
 import { HYPIXEL_KEY } from '../constants';
 import { days, logger, minutes, seconds } from '../functions';

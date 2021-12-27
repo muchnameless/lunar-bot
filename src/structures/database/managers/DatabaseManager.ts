@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers';
 import { Permissions, Formatters } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';

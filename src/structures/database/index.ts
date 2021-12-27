@@ -1,4 +1,5 @@
 import { URL, pathToFileURL } from 'node:url';
+import process from 'node:process';
 import { Sequelize, DataTypes } from 'sequelize';
 import pg from 'pg';
 import { logger, readJSFiles } from '../../functions';

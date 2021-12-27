@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers';
 import { Model, DataTypes } from 'sequelize';
 import { MessageEmbed, Formatters, Util } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';

@@ -23,6 +23,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
+import { setTimeout } from 'node:timers';
 import { logger, minutes } from '../functions';
 
 /**

@@ -1,4 +1,6 @@
+import { setInterval } from 'node:timers';
 import { URL } from 'node:url';
+import process from 'node:process';
 import { Client, MessageEmbed } from 'discord.js';
 import { GuildUtil, UserUtil } from '../util';
 import { cache, imgur } from '../api';

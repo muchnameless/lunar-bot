@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers';
 import ms from 'ms';
 import { COMMAND_KEY, GUILD_ID_ALL, LB_KEY, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil } from '../util';

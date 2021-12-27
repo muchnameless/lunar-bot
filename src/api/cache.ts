@@ -1,3 +1,4 @@
+import process from 'node:process';
 import Keyv from 'keyv';
 import { logger, minutes } from '../functions';
 

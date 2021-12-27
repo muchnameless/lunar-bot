@@ -1,3 +1,4 @@
+import { setInterval } from 'node:timers';
 import { logger, minutes } from '../functions';
 import { Event } from '../structures/events/Event';
 import { GuildUtil } from '../util';

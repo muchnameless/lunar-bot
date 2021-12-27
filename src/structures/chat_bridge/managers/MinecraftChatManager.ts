@@ -1,4 +1,6 @@
 import { setTimeout as sleep } from 'node:timers/promises';
+import { setTimeout } from 'node:timers';
+import process from 'node:process';
 import { MessageEmbed, SnowflakeUtil, Formatters } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
@@ -37,7 +39,7 @@ import type { Client as MinecraftBot } from 'minecraft-protocol';
 import type { MessageCollectorOptions } from '../MessageCollector';
 import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
-import type { If, Timeout } from '../../../types/util';
+import type { If } from '../../../types/util';
 import type { ChatBridge, ChatOptions } from '../ChatBridge';
 
 export interface SendToChatOptions {
@@ -110,7 +112,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * scheduled reconnection
 	 */
-	private _reconnectTimeout: Timeout | null = null;
+	private _reconnectTimeout: NodeJS.Timeout | null = null;
 	/**
 	 * current retry when resending messages
 	 */
@@ -138,7 +140,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * disconnect the bot if it hasn't successfully spawned in 60 seconds
 	 */
-	abortLoginTimeout: Timeout | null = null;
+	abortLoginTimeout: NodeJS.Timeout | null = null;
 	/**
 	 * increases each login, reset to 0 on successfull spawn
 	 */

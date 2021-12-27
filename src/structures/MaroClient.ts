@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers';
 import fetch from 'node-fetch';
 import { logger, seconds } from '../functions';
 import { FetchError } from './errors/FetchError';

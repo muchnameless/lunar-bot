@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers';
 import fetch from 'node-fetch';
 import { /* days, */ seconds, validateMinecraftIgn, validateMinecraftUuid } from '../functions';
 import { MojangAPIError } from './errors/MojangAPIError';

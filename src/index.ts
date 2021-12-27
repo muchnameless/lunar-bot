@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { Intents, SnowflakeUtil, Options, Sweepers, Constants } from 'discord.js';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';

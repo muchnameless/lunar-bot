@@ -1,3 +1,5 @@
+import { setInterval } from 'node:timers';
+import process from 'node:process';
 import { Client, Intents, SnowflakeUtil, Options, Constants, Sweepers } from 'discord.js';
 import { InteractionUtil } from '../util';
 import { db } from '../structures/database';

@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters, SnowflakeUtil, version } from 'discord.js';
 import { stripIndents } from 'common-tags';

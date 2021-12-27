@@ -1,5 +1,6 @@
 import { URL } from 'node:url';
 import { once } from 'node:events';
+import process from 'node:process';
 import { stripIndents } from 'common-tags';
 import { MessageFlags } from 'discord.js';
 import { STOP_EMOJI, X_EMOJI } from '../../constants';

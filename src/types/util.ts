@@ -13,11 +13,6 @@ export type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType exten
 	: never;
 
 /**
- * NodeJS Timeout
- */
-export type Timeout = ReturnType<typeof setTimeout>;
-
-/**
  * Type helper for making certain fields of an object optional. This is helpful
  * for creating the `CreationAttributes` from your `Attributes` for a Model.
  */

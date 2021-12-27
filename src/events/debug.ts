@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { logger } from '../functions';
 import { Event } from '../structures/events/Event';
 import type { EventContext } from '../structures/events/BaseEvent';

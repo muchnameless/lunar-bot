@@ -198,11 +198,11 @@
  *
  */
 
+import { setTimeout } from 'node:timers';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { ChatBridgeEvents } from './ChatBridge';
 import type { Awaitable } from 'discord.js';
 import type { HypixelMessage } from './HypixelMessage';
-import type { Timeout } from '../../types/util';
 import type { ChatBridge } from './ChatBridge';
 
 /**
@@ -267,11 +267,11 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 	/**
 	 * Timeout for cleanup
 	 */
-	private _timeout: Timeout | null = null;
+	private _timeout: NodeJS.Timeout | null = null;
 	/**
 	 * Timeout for cleanup due to inactivity
 	 */
-	private _idletimeout: Timeout | null = null;
+	private _idletimeout: NodeJS.Timeout | null = null;
 
 	constructor(chatBridge: ChatBridge, options: MessageCollectorOptions = {}) {
 		super();

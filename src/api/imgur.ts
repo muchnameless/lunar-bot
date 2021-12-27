@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { IMGUR_KEY } from '../constants';
 import { ImgurClient } from '../structures/ImgurClient';
 import { hours, seconds } from '../functions';

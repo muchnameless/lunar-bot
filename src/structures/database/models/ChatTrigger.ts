@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers';
 import { Collection } from 'discord.js';
 import { Model, DataTypes } from 'sequelize';
 import { NEVER_MATCHING_REGEXP } from '../../../constants';
