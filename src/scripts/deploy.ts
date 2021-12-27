@@ -39,14 +39,12 @@ try {
 	)) as RESTPutAPIApplicationCommandsResult;
 
 	if (!SHOULD_DELETE) {
-		logger.info(
-			`[DEPLOY]: started setting permissions for ${
-				GUILD_ID ? `guild ${GUILD_ID}` : 'the application'
-			}'s slash commands`,
-		);
+		const guildIds = GUILD_ID ? [GUILD_ID] : client.hypixelGuilds.uniqueDiscordGuildIds;
+
+		logger.info("[DEPLOY]: started setting permissions for the application's slash commands");
 
 		await Promise.all(
-			client.hypixelGuilds.uniqueDiscordGuildIds.map((discordId) => {
+			guildIds.map(async (guildId) => {
 				const fullPermissions: RESTPutAPIGuildApplicationCommandsPermissionsJSONBody = [];
 
 				for (const { name, id } of apiCommands) {
@@ -57,7 +55,7 @@ try {
 						continue;
 					}
 
-					const permissions = command.permissionsFor(discordId);
+					const permissions = command.permissionsFor(guildId);
 
 					if (!permissions.length) {
 						logger.info(`[DEPLOY]: no permissions to set for '${name}'`);
@@ -70,9 +68,13 @@ try {
 					});
 				}
 
-				return rest.put(Routes.guildApplicationCommandsPermissions(process.env.DISCORD_CLIENT_ID!, discordId), {
+				logger.info(`[DEPLOY]: setting permissions for '${guildId}'`);
+
+				await rest.put(Routes.guildApplicationCommandsPermissions(process.env.DISCORD_CLIENT_ID!, guildId), {
 					body: fullPermissions,
 				});
+
+				logger.info(`[DEPLOY]: successfully set permissions for '${guildId}'`);
 			}),
 		);
 	}
