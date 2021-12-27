@@ -43,6 +43,7 @@ export default class BaseWeightCommand extends DualCommand {
 	 */
 	// eslint-disable-next-line class-methods-use-this
 	formatPercent(number: number) {
+		if (Number.isNaN(number)) return '0%';
 		return `${(100 * number).toFixed(1)}%`;
 	}
 
