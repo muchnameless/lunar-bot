@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { MessageEmbed, Formatters, Util, VoiceChannel } from 'discord.js';
+import { MessageEmbed, Formatters, Util } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';
 import ms from 'ms';
 import { mute, setRank, unmute } from '../../chat_bridge/constants';
@@ -1140,7 +1140,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				this.statDiscordChannels[type as keyof HypixelGuild['formattedStats']],
 			);
 
-			if (!(channel instanceof VoiceChannel)) {
+			if (!channel?.isVoice()) {
 				// no channel found
 				logger.warn(`[GUILD STATS CHANNEL UPDATE] ${this.name}: ${type}: no channel found`);
 				continue;
