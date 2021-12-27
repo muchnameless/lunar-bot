@@ -24,16 +24,17 @@ try {
 
 	await client.commands.loadAll();
 
-	logger.info(`[DEPLOY]: started refreshing slash commands for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}`);
-
 	const SHOULD_DELETE = process.argv.includes('delete') || process.argv.includes('d');
+	const commands = SHOULD_DELETE ? [] : [...new Set(client.commands.values())].flatMap(({ data }) => data);
+
+	logger.info(`[DEPLOY]: started refreshing slash commands for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}`);
 
 	const apiCommands = (await rest.put(
 		GUILD_ID
 			? Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID!, GUILD_ID)
 			: Routes.applicationCommands(process.env.DISCORD_CLIENT_ID!),
 		{
-			body: SHOULD_DELETE ? [] : client.commands.map(({ data }, name) => ({ ...data, name })),
+			body: commands,
 		},
 	)) as RESTPutAPIApplicationCommandsResult;
 
