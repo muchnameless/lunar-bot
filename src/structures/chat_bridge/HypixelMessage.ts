@@ -254,11 +254,8 @@ export class HypixelMessage {
 	 * replies in-game (and on discord if guild chat) to the message
 	 * @param options
 	 */
-	async reply(
-		options: string | ChatOptions | (BroadcastOptions & ChatOptions),
-	): Promise<boolean | [boolean, DiscordMessage | null]> {
-		const { ephemeral = false, ..._options } =
-			typeof options === 'string' ? ({ content: options } as ChatOptions | (BroadcastOptions & ChatOptions)) : options;
+	async reply(options: string | ChatOptions | (BroadcastOptions & ChatOptions)) {
+		const { ephemeral = false, ..._options } = typeof options === 'string' ? { content: options } : options;
 
 		// to be compatible to Interactions
 		if (ephemeral) {
