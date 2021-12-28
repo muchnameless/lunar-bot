@@ -699,7 +699,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		const { prefix = '', ..._options } = MinecraftChatManager.resolveInput(options);
 
 		if (this.hypixelGuild?.checkMute(this.botPlayer)) {
-			logger.debug(
+			logger.trace(
 				`[GCHAT]: bot muted for ${ms(this.hypixelGuild.mutedPlayers.get(this.botUuid!)! - Date.now(), {
 					long: true,
 				})}, unable to send '${prefix}${prefix.length ? ' ' : ''}${_options.content}`,
@@ -773,7 +773,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					}
 
 					// part consists of only whitespace characters -> ignore
-					if (part) logger.warn(`[CHATBRIDGE CHAT]: ignored '${part}'`);
+					if (part) logger.trace(`[CHATBRIDGE CHAT]: ignored '${part}'`);
 
 					return false;
 				}),

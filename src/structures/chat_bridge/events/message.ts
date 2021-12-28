@@ -609,7 +609,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		// check if the message is a response for ChatBridge#_chat
 		this.chatBridge.minecraft.collect(hypixelMessage);
 
-		logger.debug(`[${hypixelMessage.position} #${this.chatBridge.mcAccount}]: ${hypixelMessage.cleanedContent}`);
+		logger.trace(`[${hypixelMessage.position} #${this.chatBridge.mcAccount}]: ${hypixelMessage.cleanedContent}`);
 
 		if (!hypixelMessage.rawContent.length) return;
 

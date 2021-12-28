@@ -239,7 +239,6 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 					defaultValue: [],
 					allowNull: false,
 					set(value: MutedGuildMember[]) {
-						logger.trace('SETTER');
 						this.setDataValue('_mutedPlayers', value);
 						(this as HypixelGuild).mutedPlayers = new Map(
 							value.map(({ minecraftUuid, mutedTill }) => [minecraftUuid, mutedTill]),

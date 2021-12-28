@@ -228,7 +228,7 @@ export default class GuildMemberUtil extends null {
 		const DURATION = duration !== null ? Math.min(duration, MAX_TIMEOUT_DURATION) : null;
 
 		if (Math.abs(member.communicationDisabledUntilTimestamp! - Date.now() - DURATION!) < seconds(1)) {
-			logger.trace(`[TIMEOUT] ${this.logInfo(member)}: is already in (similar) timeout`);
+			logger.debug(`[TIMEOUT] ${this.logInfo(member)}: is already in (similar) timeout`);
 			return member;
 		}
 

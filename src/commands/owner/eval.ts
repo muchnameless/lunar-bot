@@ -198,7 +198,7 @@ export default class EvalCommand extends ApplicationCommand {
 		} catch (error) {
 			stopwatch.stop();
 
-			logger.trace(error, '[EVAL ERROR]');
+			logger.debug(error, '[EVAL ERROR]');
 
 			const errorType = new Type(error);
 			const FOOTER = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;

@@ -16,6 +16,6 @@ export default class CacheSweepEvent extends Event {
 	 * @param message
 	 */
 	override run(message: string) {
-		logger.trace(`[SWEEPERS]: ${message}`);
+		logger.debug(`[SWEEPERS]: ${message}`);
 	}
 }

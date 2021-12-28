@@ -59,7 +59,7 @@ try {
 					const permissions = command.permissionsFor(guildId);
 
 					if (!permissions.length) {
-						logger.trace(`[DEPLOY]: no permissions to set for '${name}'`);
+						logger.debug(`[DEPLOY]: no permissions to set for '${name}'`);
 						continue;
 					}
 

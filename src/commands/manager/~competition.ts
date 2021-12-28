@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { commaListsOr } from 'common-tags';
 import { DUNGEON_TYPES, SKILLS } from '../../constants';
 import { InteractionUtil } from '../../util';
-import { autocorrect, logger, seconds } from '../../functions';
+import { autocorrect, seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -103,7 +103,5 @@ export class CompetitionCommand extends ApplicationCommand {
 		} finally {
 			collector.stop();
 		}
-
-		logger.debug({ type, startingTime, endingTime });
 	}
 }

@@ -339,7 +339,7 @@ export default class MathsCommand extends DualCommand {
 		const tokens: string[] = [];
 		let token: string | undefined;
 		while ((token = MathsCommand.lexer.lex())) tokens.push(token);
-		// logger.trace({ tokens });
+		// logger.debug({ tokens });
 		if (!tokens.length) throw new Error('LexerError: token list empty');
 		return MathsCommand.parser.parse(tokens);
 	}
@@ -385,7 +385,7 @@ export default class MathsCommand extends DualCommand {
 			throw `${error instanceof Error ? error.message : error}, input: '${INPUT}'`;
 		}
 
-		// logger.trace({ rawInput, INPUT, parsed });
+		// logger.debug({ rawInput, INPUT, parsed });
 
 		const stack: (number | string)[] = [];
 
@@ -421,7 +421,7 @@ export default class MathsCommand extends DualCommand {
 			throw `CalculationError: ${error instanceof Error ? error.message : error}, input: '${INPUT}'`;
 		}
 
-		// logger.trace({ input: PRETTIFIED_INPUT, output })
+		// logger.debug({ input: PRETTIFIED_INPUT, output })
 
 		return {
 			input: MathsCommand.formatNumberString(INPUT)

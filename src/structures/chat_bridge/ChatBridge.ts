@@ -202,7 +202,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 			hypixelGuild.chatBridge = this;
 			this.hypixelGuild = hypixelGuild;
 
-			logger.debug(`[CHATBRIDGE]: ${hypixelGuild}: linked to ${this.bot!.username}`);
+			logger.info(`[CHATBRIDGE]: ${hypixelGuild}: linked to ${this.bot!.username}`);
 
 			// instantiate DiscordChannelManagers
 			await this.discord.init();
