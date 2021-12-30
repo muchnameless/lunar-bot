@@ -46,4 +46,4 @@ edit the `.env`-file
 [`discord.js`]: https://discord.js.org/
 [`dsharpplus`]: https://github.com/DSharpPlus/DSharpPlus
 [`random-number-csprng`]: https://github.com/joepie91/node-random-number-csprng
-[`maro-api`]: https://github.com/muchnameless/maro-api
+[`maro-api`]: https://github.com/zt3h/MaroAPI
