@@ -40,12 +40,12 @@ export default class GuildMemberUpdateEvent extends Event {
 
 		// guild member timeout change
 		if (
-			Date.now() < (newMember.communicationDisabledUntilTimestamp ?? 0) &&
+			newMember.isCommunicationDisabled() &&
 			(oldMember.communicationDisabledUntilTimestamp === null ||
 				oldMember.communicationDisabledUntilTimestamp !== newMember.communicationDisabledUntilTimestamp)
 		) {
 			// muted
-			hypixelGuild.mute(player, newMember.communicationDisabledUntilTimestamp! - Date.now());
+			hypixelGuild.mute(player, newMember.communicationDisabledUntilTimestamp - Date.now());
 		} else if (
 			newMember.communicationDisabledUntilTimestamp === null &&
 			oldMember.communicationDisabledUntilTimestamp !== null
