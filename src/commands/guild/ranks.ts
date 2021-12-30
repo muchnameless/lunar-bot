@@ -24,7 +24,7 @@ export default class RanksCommand extends ApplicationCommand {
 	override async runSlash(interaction: CommandInteraction) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true });
-		const embed = this.client.defaultEmbed.setFooter(hypixelGuild.name);
+		const embed = this.client.defaultEmbed.setFooter({ text: hypixelGuild.name });
 
 		// no player
 		if (!player) {
@@ -47,7 +47,7 @@ export default class RanksCommand extends ApplicationCommand {
 				iconURL: (await player.imageURL)!,
 				url: player.url,
 			})
-			.setFooter('Updated at')
+			.setFooter({ text: 'Updated at' })
 			.setTimestamp(player.xpLastUpdatedAt);
 
 		const weight = player.getLilyWeight().totalWeight;

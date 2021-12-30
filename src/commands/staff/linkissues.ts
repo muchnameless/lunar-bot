@@ -51,7 +51,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 
 		let issuesAmount = missingMandatoryRole.length + guildRoleAndNotInGuild.length;
 
-		const embed = this.client.defaultEmbed.setFooter(hypixelGuild.name);
+		const embed = this.client.defaultEmbed.setFooter({ text: hypixelGuild.name });
 
 		if (missingMandatoryRole.length) {
 			for (const value of Util.splitMessage(

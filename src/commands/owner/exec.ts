@@ -32,7 +32,10 @@ export default class ExecCommand extends ApplicationCommand {
 					name: 'Input',
 					value: Formatters.codeBlock('bash', INPUT),
 				})
-				.setFooter(me?.displayName ?? this.client.user!.username, (me ?? this.client.user!).displayAvatarURL());
+				.setFooter({
+					text: me?.displayName ?? this.client.user!.username,
+					iconURL: (me ?? this.client.user!).displayAvatarURL(),
+				});
 
 			if (stdout) {
 				logger.info(stdout);

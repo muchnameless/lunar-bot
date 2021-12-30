@@ -141,10 +141,10 @@ export default class EvalCommand extends ApplicationCommand {
 		const bridges = client.chatBridges.cache;
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
-		const responseEmbed = this.client.defaultEmbed.setFooter(
-			me?.displayName ?? this.client.user!.username,
-			(me ?? this.client.user!).displayAvatarURL(),
-		);
+		const responseEmbed = this.client.defaultEmbed.setFooter({
+			text: me?.displayName ?? this.client.user!.username,
+			iconURL: (me ?? this.client.user!).displayAvatarURL(),
+		});
 
 		for (const [index, inputPart] of splitForEmbedFields(input, 'ts').entries()) {
 			responseEmbed.addFields({

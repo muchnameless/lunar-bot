@@ -507,7 +507,7 @@ function createLeaderboardEmbeds(
 						Page: ${page} / ${PAGES_TOTAL}
 					`,
 				})
-				.setFooter('Updated at')
+				.setFooter({ text: 'Updated at' })
 				.setTimestamp(lastUpdatedAt),
 		);
 	}

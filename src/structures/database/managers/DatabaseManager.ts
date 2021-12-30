@@ -383,7 +383,7 @@ export class DatabaseManager {
 			.setTitle('Guild Tax')
 			.setDescription(description)
 			.addFields(...fields)
-			.setFooter('Last updated at');
+			.setFooter({ text: 'Last updated at' });
 	}
 
 	/**

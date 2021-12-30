@@ -12,8 +12,6 @@ import type {
 	SlashCommandBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 	SlashCommandOptionsOnlyBuilder,
-	SlashCommandIntegerOption,
-	SlashCommandNumberOption,
 	SlashCommandStringOption,
 } from '@discordjs/builders';
 import type {
@@ -41,8 +39,6 @@ type Slash =
 	| SlashCommandSubcommandsOnlyBuilder
 	| SlashCommandOptionsOnlyBuilder
 	| Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
-
-type WithChoices = SlashCommandIntegerOption | SlashCommandNumberOption | SlashCommandStringOption;
 
 interface AssertPermissionsOptions {
 	roleIds?: Snowflake[] | null;
@@ -192,7 +188,10 @@ export class ApplicationCommand extends BaseCommand {
 					a1 +
 					c1.name.length +
 					c1.description.length +
-					((c1 as WithChoices).choices?.reduce((a2, c2) => a2 + c2.name.length + `${c2.value}`.length, 0) ?? 0) +
+					((c1 as SlashCommandStringOption).choices?.reduce(
+						(a2, c2) => a2 + c2.name.length + `${c2.value}`.length,
+						0,
+					) ?? 0) +
 					reduceOptions(
 						// @ts-expect-error
 						c1.options,

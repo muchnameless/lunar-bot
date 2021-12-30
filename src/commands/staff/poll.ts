@@ -146,7 +146,7 @@ export default class PollCommand extends DualCommand {
 					this.client.defaultEmbed
 						.setTitle(question)
 						.setDescription(resultString.join('\n\n'))
-						.setFooter(`Poll by ${ign}`), // no markdown in footer -> no need to escape IGN
+						.setFooter({ text: `Poll by ${ign}` }), // no markdown in footer -> no need to escape IGN
 				],
 			});
 

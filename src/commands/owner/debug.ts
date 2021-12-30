@@ -192,7 +192,10 @@ export default class DebugCommand extends ApplicationCommand {
 								) || 'disabled',
 						},
 					)
-					.setFooter(me?.displayName ?? this.client.user!.username, (me ?? this.client.user!).displayAvatarURL()),
+					.setFooter({
+						text: me?.displayName ?? this.client.user!.username,
+						iconURL: (me ?? this.client.user!).displayAvatarURL(),
+					}),
 			],
 		});
 	}
