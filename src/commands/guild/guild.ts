@@ -359,7 +359,7 @@ export default class GuildCommand extends ApplicationCommand {
 				this.client.defaultEmbed
 					.setTitle(`/guild mute ${escapeIgn(`${target}`)} ${ms(duration)}`)
 					.setDescription(Formatters.codeBlock(result.replaceAll('`', '')))
-					.setFooter(hypixelGuild.name),
+					.setFooter({ text: hypixelGuild.name }),
 			],
 		});
 	}
@@ -441,7 +441,7 @@ export default class GuildCommand extends ApplicationCommand {
 				this.client.defaultEmbed
 					.setTitle(`/${escapeIgn(commandOptions.command)}`) // command can inclue a player IGN
 					.setDescription(Formatters.codeBlock(await hypixelGuild.chatBridge.minecraft.command(commandOptions)))
-					.setFooter(hypixelGuild.name),
+					.setFooter({ text: hypixelGuild.name }),
 			],
 		});
 	}
@@ -481,7 +481,7 @@ export default class GuildCommand extends ApplicationCommand {
 							),
 						),
 					)
-					.setFooter(hypixelGuild.name),
+					.setFooter({ text: hypixelGuild.name }),
 			],
 		});
 	}
@@ -628,7 +628,7 @@ export default class GuildCommand extends ApplicationCommand {
 		const embed = this.client.defaultEmbed
 			.setTitle(`/${command}`)
 			.setDescription(Formatters.codeBlock(description.join('\n')))
-			.setFooter(hypixelGuild.name);
+			.setFooter({ text: hypixelGuild.name });
 
 		if (dates.length) {
 			embed.addFields(
@@ -805,7 +805,7 @@ export default class GuildCommand extends ApplicationCommand {
 						this.client.defaultEmbed
 							.setTitle(`/guild kick ${escapeIgn(typeof target === 'string' ? target : target.ign)} ${reason}`)
 							.setDescription(Formatters.codeBlock(result.replaceAll('`', '')))
-							.setFooter(hypixelGuild.name),
+							.setFooter({ text: hypixelGuild.name }),
 					],
 				});
 			}

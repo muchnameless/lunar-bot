@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
-import { hypixel, maro } from '../../api';
+import { hypixel } from '../../api';
 import {
 	escapeIgn,
 	getMainProfile,
@@ -10,12 +10,13 @@ import {
 	shortenNumber,
 	upperCaseFirstChar,
 } from '../../functions';
+import { getNetworth } from '../../structures/networth/networth';
+import { X_EMOJI } from '../../constants';
 import BaseWeightCommand from './~base-weight';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { SkyBlockProfile } from '../../functions';
-import type { MaroPlayerData } from '../../structures/MaroClient';
 
 export default class NetworthCommand extends BaseWeightCommand {
 	constructor(context: CommandContext) {
@@ -62,12 +63,13 @@ export default class NetworthCommand extends BaseWeightCommand {
 				if (!profile) return `\`${ign}\` has no profile named '${upperCaseFirstChar(profileName)}'`;
 			}
 
-			const playerData: MaroPlayerData = profile.members[uuid];
-			playerData.banking = profile.banking;
+			const { networth, bankingAPIEnabled, inventoryAPIEnabled } = await getNetworth(profile, uuid);
 
-			const { total } = await maro.networth.total(uuid, playerData);
+			const reply = [`${escapeIgn(ign)} (${profile.cute_name}): ${shortenNumber(networth)}`];
+			if (!bankingAPIEnabled) reply.push(`${X_EMOJI} Banking API disabled`);
+			if (!inventoryAPIEnabled) reply.push(`${X_EMOJI} Inventory API disabled`);
 
-			return `${escapeIgn(ign)} (${profile.cute_name}): ${shortenNumber(total)}`;
+			return reply.join(' | ');
 		} catch (error) {
 			logger.error(error, '[NETWORTH]');
 

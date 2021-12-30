@@ -550,7 +550,6 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			},
 			{
 				sequelize,
-				modelName: 'Player',
 				indexes: [
 					{
 						// setting unique down here works with `sync --alter`

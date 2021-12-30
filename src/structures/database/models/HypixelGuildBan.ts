@@ -9,7 +9,10 @@ interface HypixelGuildBanAttributes {
 
 type HypixelGuildBanCreationAttributes = Optional<HypixelGuildBanAttributes, '_reason'>;
 
-export class HypixelGuildBan extends Model<HypixelGuildBanAttributes, HypixelGuildBanCreationAttributes> {
+export class HypixelGuildBan
+	extends Model<HypixelGuildBanAttributes, HypixelGuildBanCreationAttributes>
+	implements HypixelGuildBanAttributes
+{
 	declare client: LunarClient;
 
 	declare minecraftUuid: string;
@@ -37,7 +40,6 @@ export class HypixelGuildBan extends Model<HypixelGuildBanAttributes, HypixelGui
 			},
 			{
 				sequelize,
-				modelName: 'HypixelGuildBan',
 			},
 		) as ModelStatic<HypixelGuildBan>;
 	}

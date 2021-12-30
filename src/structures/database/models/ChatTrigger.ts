@@ -59,7 +59,6 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 			},
 			{
 				sequelize,
-				modelName: 'ChatTrigger',
 			},
 		) as ModelStatic<ChatTrigger>;
 	}

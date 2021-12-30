@@ -17,6 +17,8 @@ MessageEmbed;
 Util; // unused imports are 'used' so that tsc doesn't remove them
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
+import { transformItemData } from '@zikeji/hypixel';
+transformItemData;
 import fetch from 'node-fetch';
 fetch;
 import similarity from 'jaro-winkler';
@@ -26,12 +28,11 @@ ms;
 import commonTags from 'common-tags';
 commonTags;
 import * as constants from '../../constants';
-import { cache, hypixel, imgur, mojang, maro } from '../../api';
+import { cache, hypixel, imgur, mojang } from '../../api';
 cache;
 hypixel;
 imgur;
 mojang;
-maro;
 import {
 	ChannelUtil,
 	GuildMemberUtil,
@@ -49,6 +50,8 @@ MessageEmbedUtil;
 MessageUtil;
 import * as functions from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { prices } from '../../structures/networth/prices';
+prices;
 import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction, Message } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
@@ -141,10 +144,10 @@ export default class EvalCommand extends ApplicationCommand {
 		const bridges = client.chatBridges.cache;
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
-		const responseEmbed = this.client.defaultEmbed.setFooter(
-			me?.displayName ?? this.client.user!.username,
-			(me ?? this.client.user!).displayAvatarURL(),
-		);
+		const responseEmbed = this.client.defaultEmbed.setFooter({
+			text: me?.displayName ?? this.client.user!.username,
+			iconURL: (me ?? this.client.user!).displayAvatarURL(),
+		});
 
 		for (const [index, inputPart] of splitForEmbedFields(input, 'ts').entries()) {
 			responseEmbed.addFields({

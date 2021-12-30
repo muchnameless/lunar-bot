@@ -147,7 +147,7 @@ export default class XpCommand extends ApplicationCommand {
 
 		embed = this.client.defaultEmbed
 			.setDescription(`\u200B${''.padEnd(171, '\u00A0')}\u200B\n${Formatters.codeBlock('Dungeons')}`)
-			.setFooter('\u200B\nUpdated at')
+			.setFooter({ text: '\u200B\nUpdated at' })
 			.setTimestamp(player.xpLastUpdatedAt);
 
 		// dungeons

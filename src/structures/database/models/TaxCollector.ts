@@ -54,7 +54,6 @@ export class TaxCollector
 			},
 			{
 				sequelize,
-				modelName: 'TaxCollector',
 			},
 		) as ModelStatic<TaxCollector>;
 	}

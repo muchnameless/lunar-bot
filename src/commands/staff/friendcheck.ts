@@ -44,7 +44,7 @@ export default class FriendCheckCommand extends ApplicationCommand {
 					.setDescription(
 						Formatters.codeBlock(trim(friendsInGuild || '-- none --', EMBED_DESCRIPTION_MAX_CHARS - '```\n```'.length)),
 					)
-					.setFooter(hypixelGuild.name),
+					.setFooter({ text: hypixelGuild.name }),
 			],
 		});
 	}
