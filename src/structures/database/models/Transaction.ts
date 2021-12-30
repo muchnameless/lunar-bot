@@ -65,7 +65,6 @@ export class Transaction extends Model<TransactionAttributes> implements Transac
 			},
 			{
 				sequelize,
-				modelName: 'Transaction',
 			},
 		) as ModelStatic<Transaction>;
 	}

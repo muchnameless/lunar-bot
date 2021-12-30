@@ -7,7 +7,7 @@ interface ConfigAttributes {
 	value: string | null;
 }
 
-export class Config extends Model<ConfigAttributes> {
+export class Config extends Model<ConfigAttributes> implements ConfigAttributes {
 	declare client: LunarClient;
 
 	declare key: string;
@@ -38,7 +38,6 @@ export class Config extends Model<ConfigAttributes> {
 			},
 			{
 				sequelize,
-				modelName: 'Config',
 				timestamps: false,
 				freezeTableName: true,
 			},

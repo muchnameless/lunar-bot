@@ -329,7 +329,6 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			},
 			{
 				sequelize,
-				modelName: 'HypixelGuild',
 				timestamps: false,
 			},
 		) as ModelStatic<HypixelGuild>;

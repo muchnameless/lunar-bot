@@ -179,7 +179,6 @@ export class DiscordGuild
 			},
 			{
 				sequelize,
-				modelName: 'DiscordGuild',
 				timestamps: false,
 			},
 		) as ModelStatic<DiscordGuild>;

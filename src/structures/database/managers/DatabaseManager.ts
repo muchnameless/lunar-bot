@@ -15,6 +15,8 @@ import { ModelManager } from './ModelManager';
 import type { EmbedFieldData, GuildChannel } from 'discord.js';
 import type { ModelCtor, Sequelize } from 'sequelize';
 import type { Components } from '@zikeji/hypixel';
+import type { SkyBlockAuction } from '../models/SkyBlockAuction';
+import type { SkyBlockBazaar } from '../models/SkyBlockBazaar';
 import type { ChatTrigger } from '../models/ChatTrigger';
 import type { Config } from '../models/Config';
 import type { DiscordGuild } from '../models/DiscordGuild';
@@ -33,6 +35,8 @@ export interface Models {
 	HypixelGuild: ModelCtor<HypixelGuild>;
 	HypixelGuildBan: ModelCtor<HypixelGuildBan>;
 	Player: ModelCtor<Player>;
+	SkyBlockAuction: ModelCtor<SkyBlockAuction>;
+	SkyBlockBazaar: ModelCtor<SkyBlockBazaar>;
 	TaxCollector: ModelCtor<TaxCollector>;
 	Transaction: ModelCtor<Transaction>;
 }
