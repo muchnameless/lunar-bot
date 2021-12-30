@@ -9,30 +9,32 @@ import type { Components, NBTExtraAttributes } from '@zikeji/hypixel';
 export const prices = new Map<string, number>();
 
 /**
+ * returns the item's id, with a custom implementation for enchanted books and pets
  * @param item
  */
-const getAttributes = function (item: NBTExtraAttributes) {
-	if (item.id == 'ENCHANTED_BOOK' && item.enchantments) {
+function getItemId(item: NBTExtraAttributes) {
+	if (item.id === 'ENCHANTED_BOOK' && item.enchantments) {
 		const enchants = Object.keys(item.enchantments);
 
-		if (enchants.length == 1) {
+		if (enchants.length === 1) {
 			const value = item.enchantments[enchants[0]];
 
 			return `${enchants[0]}_${value}`;
 		}
-	} else if (item.id == 'PET') {
+	} else if (item.id === 'PET') {
 		const pet = JSON.parse(item.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
 		const data = calculatePetSkillLevel(pet);
 
-		if (data.level == 1 || data.level == 100 || data.level == 200) {
+		if (data.level === 1 || data.level === 100 || data.level === 200) {
 			return `lvl_${data.level}_${pet.tier}_${pet.type}`;
 		}
 	}
 
 	return item.id;
-};
+}
 
 /**
+ * fetches a single auction page
  * @param page
  */
 async function fetchAuctionPage(page = 0) {
@@ -44,7 +46,7 @@ async function fetchAuctionPage(page = 0) {
 }
 
 /**
- *
+ * fetches all auction pages
  */
 async function fetchAuctions() {
 	try {
@@ -62,7 +64,7 @@ async function fetchAuctions() {
 
 					if (!item) return;
 
-					const itemId = getAttributes(item.tag!.ExtraAttributes!);
+					const itemId = getItemId(item.tag!.ExtraAttributes!);
 
 					if (formattedAuctions.has(itemId)) {
 						formattedAuctions.get(itemId)!.push(auction.starting_bid);
@@ -92,7 +94,7 @@ async function fetchAuctions() {
 }
 
 /**
- *
+ * fetches bazaar products
  */
 async function fetchProducts() {
 	try {
@@ -124,7 +126,6 @@ for (const product of await db.SkyBlockBazaar.findAll()) {
 }
 
 setInterval(() => {
-	logger.debug('UPDATING PRICES');
 	fetchProducts();
 	fetchAuctions();
 }, minutes(5));

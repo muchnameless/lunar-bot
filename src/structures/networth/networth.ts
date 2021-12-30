@@ -64,10 +64,10 @@ function calculateItemPrice(item: NBTInventoryItem) {
 		price = ExtraAttributes.winning_bid as number;
 	}
 
-	if (itemId == 'enchanted_book' && ExtraAttributes.enchantments) {
+	if (itemId === 'enchanted_book' && ExtraAttributes.enchantments) {
 		const enchants = Object.keys(ExtraAttributes.enchantments);
 
-		if (enchants.length == 1) {
+		if (enchants.length === 1) {
 			const value = ExtraAttributes.enchantments[enchants[0]];
 
 			price = prices.get(`${enchants[0]}_${value}`) ?? 0;
@@ -152,7 +152,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
  * @param pet
  */
 export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePet) {
-	const maxLevel = pet.type == 'GOLDEN_DRAGON' ? 200 : 100;
+	const maxLevel = pet.type === 'GOLDEN_DRAGON' ? 200 : 100;
 	const rarityOffset = PET_RARITY_OFFSET[pet.tier as keyof typeof PET_RARITY_OFFSET];
 	const levels = PET_LEVELS_XP.slice(rarityOffset, rarityOffset + maxLevel - 1);
 
