@@ -4,14 +4,14 @@ import type { LunarClient } from '../../LunarClient';
 
 interface SkyBlockAuctionAttributes {
 	id: string;
-	lowestBin: number;
+	lowestBIN: number;
 }
 
 export class SkyBlockAuction extends Model<SkyBlockAuctionAttributes> implements SkyBlockAuctionAttributes {
 	declare client: LunarClient;
 
 	declare id: string;
-	declare lowestBin: number;
+	declare lowestBIN: number;
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(
@@ -20,7 +20,7 @@ export class SkyBlockAuction extends Model<SkyBlockAuctionAttributes> implements
 					type: DataTypes.STRING,
 					primaryKey: true,
 				},
-				lowestBin: {
+				lowestBIN: {
 					type: DataTypes.DECIMAL,
 					allowNull: false,
 				},

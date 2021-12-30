@@ -83,10 +83,10 @@ async function fetchAuctions() {
 		await Promise.all(promises);
 
 		for (const [item, auctions] of formattedAuctions) {
-			const lowestBin = Math.min(...auctions);
+			const lowestBIN = Math.min(...auctions);
 
-			prices.set(item.toLowerCase(), lowestBin);
-			db.SkyBlockAuction.upsert({ id: item.toLowerCase(), lowestBin });
+			prices.set(item.toLowerCase(), lowestBIN);
+			db.SkyBlockAuction.upsert({ id: item.toLowerCase(), lowestBIN });
 		}
 	} catch (error) {
 		logger.error(error);
@@ -117,8 +117,11 @@ async function fetchProducts() {
 }
 
 // INIT
-for (const { id, lowestBin } of await db.SkyBlockAuction.findAll({ attributes: ['id', 'lowestBin'], raw: true })) {
-	prices.set(id, lowestBin);
+for (const { id, lowestBIN } of await db.SkyBlockAuction.findAll({
+	attributes: ['id', 'lowestBIN'],
+	raw: true,
+})) {
+	prices.set(id, lowestBIN);
 }
 
 for (const product of await db.SkyBlockBazaar.findAll()) {
