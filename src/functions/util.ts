@@ -26,37 +26,67 @@ export function getWeekOfYear(date: Date) {
 	return Math.ceil((firstThursday - target.getTime()) / days(7)) + 1;
 }
 
+interface AutocompleteResult<T> {
+	value: T;
+	/** 0 (no match) to 1 (exact match) */
+	similarity: number;
+}
+
 /**
  * checks the query agains the validInput and returns the most likely match
  * @param query
  * @param validInput
  * @param attributeToQuery
  */
+export function autocorrect(
+	query: string,
+	validInput: readonly string[] | Map<unknown, string> | IterableIterator<string>,
+): AutocompleteResult<string>;
 export function autocorrect<T>(
 	query: string,
 	validInput: readonly T[] | Map<unknown, T> | IterableIterator<T>,
-	attributeToQuery?: keyof T,
+	attributeToQuery: keyof T,
+): AutocompleteResult<T>;
+export function autocorrect<T>(
+	query: string,
+	validInput: readonly T[] | Map<unknown, T> | IterableIterator<T>,
+	attributeToQuery?: T[keyof T] extends string ? keyof T : never,
 ) {
 	let currentBestElement!: T;
 	let currentBestSimilarity = 0;
 
-	for (const element of (validInput as Map<unknown, T>).values?.() ?? validInput) {
-		const similarity = jaroWinklerSimilarity(
-			query,
-			(attributeToQuery ? element[attributeToQuery] : element) as unknown as string,
-		);
+	if (attributeToQuery) {
+		for (const element of (validInput as Map<unknown, T>).values?.() ?? validInput) {
+			const similarity = jaroWinklerSimilarity(query, element[attributeToQuery] as unknown as string);
 
-		if (similarity === 1) {
-			return {
-				value: element,
-				similarity,
-			};
+			if (similarity === 1) {
+				return {
+					value: element,
+					similarity: 1,
+				};
+			}
+
+			if (similarity < currentBestSimilarity) continue;
+
+			currentBestElement = element;
+			currentBestSimilarity = similarity;
 		}
+	} else {
+		for (const element of (validInput as Map<unknown, T>).values?.() ?? validInput) {
+			const similarity = jaroWinklerSimilarity(query, element as unknown as string);
 
-		if (similarity < currentBestSimilarity) continue;
+			if (similarity === 1) {
+				return {
+					value: element,
+					similarity: 1,
+				};
+			}
 
-		currentBestElement = element;
-		currentBestSimilarity = similarity;
+			if (similarity < currentBestSimilarity) continue;
+
+			currentBestElement = element;
+			currentBestSimilarity = similarity;
+		}
 	}
 
 	logger.info(
