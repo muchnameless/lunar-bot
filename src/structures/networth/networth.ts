@@ -15,7 +15,7 @@ import {
 	SPECIAL_GEMSTONES,
 	TALISMANS,
 } from './constants';
-import { getPrice } from './prices';
+import { getPrice, prices } from './prices';
 import type { SkyBlockProfile } from '../../functions';
 import type { Buffer } from 'node:buffer';
 import type { NBTInventory, NBTInventoryItem, Components } from '@zikeji/hypixel';
@@ -256,9 +256,9 @@ export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePe
  * @param pet
  */
 function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
-	const lvl1 = getPrice(`lvl_1_${pet.tier}_${pet.type}`.toLowerCase());
-	const lvl100 = getPrice(`lvl_100_${pet.tier}_${pet.type}`.toLowerCase());
-	const lvl200 = getPrice(`lvl_200_${pet.tier}_${pet.type}`.toLowerCase());
+	const lvl1 = prices.get(`lvl_1_${pet.tier}_${pet.type}`.toLowerCase());
+	const lvl100 = prices.get(`lvl_100_${pet.tier}_${pet.type}`.toLowerCase());
+	const lvl200 = prices.get(`lvl_200_${pet.tier}_${pet.type}`.toLowerCase());
 	const { level, maxXP } = calculatePetSkillLevel(pet);
 
 	let price = lvl200 ?? lvl100;
