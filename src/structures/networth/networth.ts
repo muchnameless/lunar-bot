@@ -75,7 +75,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
 		const material = MATERIALS_TO_ID[hoe.at(-2) as keyof typeof MATERIALS_TO_ID];
 		const tickets = level === 2 ? (getPrice('jacobs_ticket') ?? 0) * 64 : getPrice('jacobs_ticket') * 256;
 
-		price = 1_000_000 + 256 * (getPrice(material) * 144 ** (level - 1)) + tickets;
+		price = 1_000_000 + 256 * getPrice(material) * 144 ** (level - 1) + tickets;
 	}
 
 	// enchantments
@@ -169,10 +169,9 @@ function calculateItemPrice(item: NBTInventoryItem) {
 			const [slotType] = key.split('_', 2);
 
 			if (SPECIAL_GEMSTONES.has(slotType)) {
-				price +=
-					getPrice(
-						`${value}_${(ExtraAttributes.gems as unknown as Record<string, string>)[`${key}_gem`]}_gem`.toLowerCase(),
-					) ?? 0;
+				price += getPrice(
+					`${value}_${(ExtraAttributes.gems as unknown as Record<string, string>)[`${key}_gem`]}_gem`.toLowerCase(),
+				);
 			} else if (GEMSTONES.has(slotType)) {
 				price += getPrice(`${value}_${key.split('_', 2)[0]}_gem`.toLowerCase());
 			}
