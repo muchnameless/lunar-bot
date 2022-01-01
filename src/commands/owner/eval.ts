@@ -21,8 +21,6 @@ import { transformItemData } from '@zikeji/hypixel';
 transformItemData;
 import fetch from 'node-fetch';
 fetch;
-import similarity from 'jaro-winkler';
-similarity;
 import ms from 'ms';
 ms;
 import commonTags from 'common-tags';

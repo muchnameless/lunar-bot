@@ -1,8 +1,7 @@
 import { fileURLToPath } from 'node:url';
-import jaroWinklerSimilarity from 'jaro-winkler';
 import readdirp from 'readdirp';
 import { MAX_CHOICES } from '../constants';
-import { days, logger } from '.';
+import { days, jaroWinklerSimilarity, logger } from '.';
 import type { URL } from 'node:url';
 import type { Collection } from 'discord.js';
 
@@ -45,7 +44,6 @@ export function autocorrect<T>(
 		const similarity = jaroWinklerSimilarity(
 			query,
 			(attributeToQuery ? element[attributeToQuery] : element) as unknown as string,
-			{ caseSensitive: false },
 		);
 
 		if (similarity === 1) {
@@ -156,9 +154,7 @@ export function sortCache<T>(
 ) {
 	return (cache as T[])
 		.map((element) => ({
-			similarity: jaroWinklerSimilarity(value, element[nameKey] as unknown as string, {
-				caseSensitive: false,
-			}),
+			similarity: jaroWinklerSimilarity(value, element[nameKey] as unknown as string),
 			element,
 		}))
 		.sort(({ similarity: a }, { similarity: b }) => b - a)

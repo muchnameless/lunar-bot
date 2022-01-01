@@ -1,3 +1,4 @@
+import { jaroWinkler } from '@skyra/jaro-winkler';
 import { Formatters, Util } from 'discord.js';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS, SMALL_LATIN_CAPITAL_LETTERS } from '../constants';
@@ -279,3 +280,18 @@ function getDisplayedLines(string: string, lineLength: number) {
  */
 export const getInlineFieldLineCount = (string: string, lineLength: number) =>
 	string.length ? string.split('\n').reduce((acc, line) => acc + getDisplayedLines(line, lineLength), 0) : 0;
+
+/**
+ * jaro winkler similarity, 0 (no match) to 1 (exact match)
+ * @param string1
+ * @param string2
+ * @returns
+ */
+export function jaroWinklerSimilarity(string1: string, string2: string) {
+	const _string1 = string1.toLowerCase();
+	const _string2 = string2.toLowerCase();
+
+	if (_string1 === _string2) return 1;
+
+	return jaroWinkler(_string1, _string2);
+}
