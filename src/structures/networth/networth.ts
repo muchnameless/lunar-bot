@@ -276,12 +276,12 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 	if (typeof price === 'undefined') return 0;
 
 	// held item
-	if (pet.heldItem && level != 200) {
+	if (pet.heldItem && level !== 200) {
 		price += getPrice(pet.heldItem.toLowerCase());
 	}
 
 	// candy
-	if (pet.candyUsed! > 0 && pet.type != 'ENDER_DRAGON') {
+	if (pet.candyUsed! > 0 && pet.type !== 'ENDER_DRAGON') {
 		price = price / 1.538_232;
 	}
 
@@ -301,7 +301,7 @@ export async function getNetworth({ banking, members }: SkyBlockProfile, uuid: s
 	const member = members[uuid];
 
 	let bankingAPIEnabled = true;
-	let networth = banking?.balance ?? ((bankingAPIEnabled = false), 0) + member.coin_purse ?? 0;
+	let networth = (banking?.balance ?? ((bankingAPIEnabled = false), 0)) + (member.coin_purse ?? 0);
 
 	const promises: Promise<number>[] = [];
 
