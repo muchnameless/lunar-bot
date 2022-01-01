@@ -7,6 +7,7 @@ import { calculatePetSkillLevel } from './networth';
 import type { Components, NBTExtraAttributes } from '@zikeji/hypixel';
 
 export const prices = new Map<string, number>();
+export const getPrice = (item: string) => prices.get(item) ?? 0;
 
 /**
  * returns the item's id, with a custom implementation for enchanted books and pets

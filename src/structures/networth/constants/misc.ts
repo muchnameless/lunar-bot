@@ -32,8 +32,6 @@ export const BLOCKED_ENCHANTS = {
 	death_bow: new Set(['overload', 'power', 'ultimate_soul_eater']),
 };
 
-export const MASTER_STARS = ['first_master_star', 'second_master_star', 'third_master_star', 'fourth_master_star'];
-
 export const SKYBLOCK_INVENTORIES = [
 	'inv_contents',
 	'ender_chest_contents',

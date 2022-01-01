@@ -36,7 +36,7 @@ edit the `.env`-file
 - MessageCollector.ts adapted from [`discord.js`]
 - Emoji name <> unicode converter ported from [`DSharpPlus`]
 - randomNumber ported from [`random-number-csprng`]
-- networth calculations from [`maro-api`]
+- networth calculations from [`maro-api`] and [`SkyHelper-api`]
 
 <!----------------- LINKS --------------->
 
@@ -47,3 +47,4 @@ edit the `.env`-file
 [`dsharpplus`]: https://github.com/DSharpPlus/DSharpPlus
 [`random-number-csprng`]: https://github.com/joepie91/node-random-number-csprng
 [`maro-api`]: https://github.com/zt3h/MaroAPI
+[`skyhelper-api`]: https://github.com/Altpapier/SkyHelperAPI
