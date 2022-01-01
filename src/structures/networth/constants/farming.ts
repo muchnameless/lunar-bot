@@ -1,7 +1,7 @@
 export const MATERIALS_TO_ID = {
-	WHEAT: 'wheat',
-	CANE: 'sugar_cane',
-	CARROT: 'carrot_item',
-	WARTS: 'nether_stalk',
-	POTATO: 'potato_item',
+	wheat: 'wheat',
+	cane: 'sugar_cane',
+	carrot: 'carrot_item',
+	warts: 'nether_stalk',
+	potato: 'potato_item',
 } as const;

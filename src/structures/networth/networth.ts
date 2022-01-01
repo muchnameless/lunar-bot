@@ -70,12 +70,29 @@ function calculateItemPrice(item: NBTInventoryItem) {
 
 	// farming tools
 	if (itemId.startsWith('theoretical_hoe')) {
-		const hoe = ExtraAttributes.id.split('_');
-		const level = Number(hoe.at(-1));
-		const material = MATERIALS_TO_ID[hoe.at(-2) as keyof typeof MATERIALS_TO_ID];
-		const tickets = level === 2 ? (getPrice('jacobs_ticket') ?? 0) * 64 : getPrice('jacobs_ticket') * 256;
+		const hoe = itemId.split('_');
+		const level = Number(hoe.pop());
 
-		price = 1_000_000 + 256 * getPrice(material) * 144 ** (level - 1) + tickets;
+		// base price
+		let tickets = 32;
+
+		price = 1_000_000;
+
+		// upgrades
+		if (!Number.isNaN(level)) {
+			// 256 + 256 * 144 ~= 256 * 144 -> only take materials for last upgrade stage into consideration
+			price += 256 * getPrice(MATERIALS_TO_ID[hoe.pop() as keyof typeof MATERIALS_TO_ID]) * 144 ** (level - 1);
+
+			switch (level) {
+				case 3:
+					tickets += 256;
+				// fallthrough
+				case 2:
+					tickets += 64;
+			}
+		}
+
+		price += getPrice('jacobs_ticket') * tickets;
 	}
 
 	// enchantments
