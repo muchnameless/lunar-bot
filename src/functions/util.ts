@@ -71,6 +71,15 @@ export function autocorrect<T>(
 			currentBestElement = element;
 			currentBestSimilarity = similarity;
 		}
+
+		logger.debug(
+			{
+				query,
+				value: currentBestElement[attributeToQuery],
+				similarity: currentBestSimilarity,
+			},
+			'[AUTOCORRECT]',
+		);
 	} else {
 		for (const element of (validInput as Map<unknown, T>).values?.() ?? validInput) {
 			const similarity = jaroWinklerSimilarity(query, element as unknown as string);
@@ -87,13 +96,16 @@ export function autocorrect<T>(
 			currentBestElement = element;
 			currentBestSimilarity = similarity;
 		}
-	}
 
-	logger.info(
-		`[AUTOCORRECT]: autocorrected '${query}' to '${
-			attributeToQuery ? currentBestElement[attributeToQuery] : currentBestElement
-		}' with a certainty of ${currentBestSimilarity}`,
-	);
+		logger.debug(
+			{
+				query,
+				value: currentBestElement,
+				similarity: currentBestSimilarity,
+			},
+			'[AUTOCORRECT]',
+		);
+	}
 
 	return {
 		value: currentBestElement,
