@@ -192,6 +192,8 @@ function calculateItemPrice(item: NBTInventoryItem) {
 			const [slotType] = key.split('_', 1);
 
 			if (SPECIAL_GEMSTONES.has(slotType)) {
+				if (key.endsWith('_gem')) continue;
+
 				price += getPrice(`${value}_${(ExtraAttributes.gems as unknown as Record<string, string>)[`${key}_gem`]}_GEM`);
 			} else if (GEMSTONES.has(slotType)) {
 				price += getPrice(`${value}_${slotType}_GEM`);
