@@ -159,7 +159,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
 			price += essenceAmount * ESSENCE_PRICES[essenceItem.type];
 
 			// master stars (4 -> 0 cause array index)
-			for (let star = ExtraAttributes.dungeon_item_level - 5; star--; ) {
+			for (let star = ExtraAttributes.dungeon_item_level - 5; star-- >= 0; ) {
 				price += getPrice(MASTER_STARS[star]);
 			}
 		}
