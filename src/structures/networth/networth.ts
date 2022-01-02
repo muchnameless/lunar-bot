@@ -61,7 +61,9 @@ function calculateItemPrice(item: NBTInventoryItem) {
 	const { ExtraAttributes } = item.tag;
 
 	// pet item
-	if (ExtraAttributes.petInfo) return getPetPrice(JSON.parse(ExtraAttributes.petInfo as string));
+	if (ExtraAttributes.petInfo) {
+		return getPetPrice(JSON.parse(ExtraAttributes.petInfo as string) as Components.Schemas.SkyBlockProfilePet);
+	}
 
 	const itemId = ExtraAttributes.id.toLowerCase();
 

@@ -10,7 +10,7 @@ export const prices = new Map<string, number>();
 export const getPrice = (item: string) => prices.get(item) ?? 0;
 
 /**
- * returns the item's id, with a custom implementation for enchanted books and pets
+ * returns the lowercased item's id, with a custom implementation for enchanted books and pets
  * @param item
  */
 function getItemId(item: NBTExtraAttributes) {
@@ -20,18 +20,18 @@ function getItemId(item: NBTExtraAttributes) {
 		if (enchants.length === 1) {
 			const value = item.enchantments[enchants[0]];
 
-			return `${enchants[0]}_${value}`;
+			return `${enchants[0]}_${value}`.toLowerCase();
 		}
 	} else if (item.id === 'PET') {
 		const pet = JSON.parse(item.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
 		const data = calculatePetSkillLevel(pet);
 
 		if (data.level === 1 || data.level === 100 || data.level === 200) {
-			return `lvl_${data.level}_${pet.tier}_${pet.type}`;
+			return `lvl_${data.level}_${pet.tier}_${pet.type}`.toLowerCase();
 		}
 	}
 
-	return item.id;
+	return item.id.toLowerCase();
 }
 
 /**
@@ -49,13 +49,19 @@ async function fetchAuctionPage(page = 0) {
 /**
  * fetches all auction pages
  */
-async function fetchAuctions() {
+async function updatePrices() {
 	try {
+		// fetch first auction page
 		const firstPage = await fetchAuctionPage();
 
+		// abort on error
 		if (!firstPage.success) return;
 
-		const formattedAuctions = new Map<string, number[]>();
+		// update bazaar prices if the first auction page request was successful
+		updateBazaarProducts();
+
+		// fetch remaining auction pages
+		const BINAuctions = new Map<string, number[]>();
 		const processAuctions = (auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
 			Promise.all(
 				auctions.map(async (auction) => {
@@ -67,10 +73,10 @@ async function fetchAuctions() {
 
 					const itemId = getItemId(item.tag!.ExtraAttributes!);
 
-					if (formattedAuctions.has(itemId)) {
-						formattedAuctions.get(itemId)!.push(auction.starting_bid);
+					if (BINAuctions.has(itemId)) {
+						BINAuctions.get(itemId)!.push(auction.starting_bid);
 					} else {
-						formattedAuctions.set(itemId, [auction.starting_bid]);
+						BINAuctions.set(itemId, [auction.starting_bid]);
 					}
 				}),
 			);
@@ -83,11 +89,11 @@ async function fetchAuctions() {
 
 		await Promise.all(promises);
 
-		for (const [item, auctions] of formattedAuctions) {
+		for (const [itemId, auctions] of BINAuctions) {
 			const lowestBIN = Math.min(...auctions);
 
-			prices.set(item.toLowerCase(), lowestBIN);
-			db.SkyBlockAuction.upsert({ id: item.toLowerCase(), lowestBIN });
+			prices.set(itemId, lowestBIN);
+			db.SkyBlockAuction.upsert({ id: itemId, lowestBIN });
 		}
 	} catch (error) {
 		logger.error(error);
@@ -97,7 +103,7 @@ async function fetchAuctions() {
 /**
  * fetches bazaar products
  */
-async function fetchProducts() {
+async function updateBazaarProducts() {
 	try {
 		const res = await fetch('https://api.hypixel.net/skyblock/bazaar');
 
@@ -126,10 +132,7 @@ for (const { id, lowestBIN } of await db.SkyBlockAuction.findAll({
 }
 
 for (const product of await db.SkyBlockBazaar.findAll()) {
-	prices.set(product.id.toLowerCase(), product.buyPrice);
+	prices.set(product.id, product.buyPrice);
 }
 
-setInterval(() => {
-	fetchProducts();
-	fetchAuctions();
-}, minutes(5));
+setInterval(updatePrices, minutes(5));
