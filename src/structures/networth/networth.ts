@@ -27,18 +27,18 @@ async function parseItems(base64: string | number[] | Buffer) {
 	let networth = 0;
 
 	for (const item of await transformItemData(base64)) {
-		if (!item) continue;
+		if (!item?.tag?.ExtraAttributes?.id) continue;
 
 		// backpacks -> iterate over contained items
-		if (item.tag?.display?.Name?.includes('Backpack')) {
-			const _items = item.tag.ExtraAttributes![
-				Object.keys(item.tag.ExtraAttributes!).find((key) => key.endsWith('_data'))!
+		if (item.tag.ExtraAttributes.id.endsWith('BACKPACK')) {
+			const _items = item.tag.ExtraAttributes[
+				Object.keys(item.tag.ExtraAttributes).find((key) => key.endsWith('_data'))!
 			] as NBTInventory;
 
 			if (!Array.isArray(_items)) continue;
 
 			for (const _item of _items) {
-				if (!_item) continue;
+				if (!_item?.tag?.ExtraAttributes?.id) continue;
 
 				networth += calculateItemPrice(_item);
 			}
@@ -46,6 +46,7 @@ async function parseItems(base64: string | number[] | Buffer) {
 			continue;
 		}
 
+		// normal items
 		networth += calculateItemPrice(item);
 	}
 
@@ -56,9 +57,7 @@ async function parseItems(base64: string | number[] | Buffer) {
  * @param item
  */
 function calculateItemPrice(item: NBTInventoryItem) {
-	if (typeof item.tag?.ExtraAttributes?.id === 'undefined') return 0;
-
-	const { ExtraAttributes } = item.tag;
+	const ExtraAttributes = item.tag!.ExtraAttributes!;
 
 	// pet item
 	if (ExtraAttributes.petInfo) {
@@ -171,7 +170,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
 	}
 
 	// enrichments
-	if (item.tag.ExtraAttributes.talisman_enrichment) {
+	if (ExtraAttributes.talisman_enrichment) {
 		price += getPrice((ExtraAttributes.talisman_enrichment as string).toLowerCase());
 	}
 
