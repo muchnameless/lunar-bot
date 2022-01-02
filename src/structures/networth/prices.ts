@@ -118,15 +118,12 @@ async function updateBazaarPrices() {
 }
 
 // INIT
-for (const { id, lowestBIN } of await db.SkyBlockAuction.findAll({
-	attributes: ['id', 'lowestBIN'],
-	raw: true,
-})) {
+for (const { id, lowestBIN } of await db.SkyBlockAuction.findAll({ attributes: ['id', 'lowestBIN'], raw: true })) {
 	prices.set(id, lowestBIN);
 }
 
-for (const product of await db.SkyBlockBazaar.findAll()) {
-	prices.set(product.id, product.buyPrice);
+for (const { id, buyPrice } of await db.SkyBlockBazaar.findAll({ attributes: ['id', 'buyPrice'], raw: true })) {
+	prices.set(id, buyPrice);
 }
 
 setInterval(updatePrices, minutes(5));
