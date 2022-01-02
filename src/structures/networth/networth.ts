@@ -150,14 +150,14 @@ function calculateItemPrice(item: NBTInventoryItem) {
 
 		let essenceAmount = essenceItem.dungeonize;
 
-		// normal stars
+		// normal stars (5 -> 1)
 		for (let star = Math.min(ExtraAttributes.dungeon_item_level, 5); star > 0; --star) {
 			essenceAmount += essenceItem[star as 1 | 2 | 3 | 4 | 5] ?? 0;
 		}
 
 		price += essenceAmount * ESSENCE_PRICES[essenceItem.type];
 
-		// master stars
+		// master stars (4 -> 0 cause array index)
 		for (let star = ExtraAttributes.dungeon_item_level - 5; star--; ) {
 			price += getPrice(MASTER_STARS[star]);
 		}
