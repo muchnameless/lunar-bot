@@ -167,7 +167,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
 
 	// skin
 	if (ExtraAttributes.skin) {
-		price += getPrice(ExtraAttributes.skin as string);
+		price += getPrice(ExtraAttributes.skin as string) * 0.7;
 	}
 
 	// enrichments
@@ -310,7 +310,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 
 	// skin
 	if (pet.skin) {
-		price += getPrice(`pet_skin_${pet.skin.toLowerCase()}`);
+		price += getPrice(`pet_skin_${pet.skin.toLowerCase()}`) * 0.7;
 	}
 
 	return price;
