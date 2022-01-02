@@ -58,8 +58,12 @@ async function parseItems(base64: string | number[] | Buffer) {
 function calculateItemPrice(item: NBTInventoryItem) {
 	if (typeof item.tag?.ExtraAttributes?.id === 'undefined') return 0;
 
-	const itemId = item.tag.ExtraAttributes.id.toLowerCase();
 	const { ExtraAttributes } = item.tag;
+
+	// pet item
+	if (ExtraAttributes.petInfo) return getPetPrice(JSON.parse(ExtraAttributes.petInfo as string));
+
+	const itemId = ExtraAttributes.id.toLowerCase();
 
 	let price = getPrice(itemId) * item.Count;
 
