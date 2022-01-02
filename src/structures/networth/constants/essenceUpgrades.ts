@@ -1,6 +1,9 @@
 /* eslint-disable camelcase */
 export const ESSENCE_UPGRADES = {
-	soul_whip: {
+	/**
+	 * wither essence
+	 */
+	SOUL_WHIP: {
 		type: 'wither',
 		dungeonize: 300,
 		1: 200,
@@ -9,7 +12,7 @@ export const ESSENCE_UPGRADES = {
 		4: 550,
 		5: 750,
 	},
-	jerry_staff: {
+	JERRY_STAFF: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 5,
@@ -18,7 +21,7 @@ export const ESSENCE_UPGRADES = {
 		4: 50,
 		5: 100,
 	},
-	crypt_witherlord_sword: {
+	CRYPT_WITHERLORD_SWORD: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 15,
@@ -27,7 +30,7 @@ export const ESSENCE_UPGRADES = {
 		4: 60,
 		5: 100,
 	},
-	bonzo_staff: {
+	BONZO_STAFF: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 5,
@@ -36,7 +39,7 @@ export const ESSENCE_UPGRADES = {
 		4: 50,
 		5: 100,
 	},
-	bonzo_mask: {
+	BONZO_MASK: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 5,
@@ -45,7 +48,7 @@ export const ESSENCE_UPGRADES = {
 		4: 50,
 		5: 100,
 	},
-	stone_blade: {
+	STONE_BLADE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 15,
@@ -54,7 +57,7 @@ export const ESSENCE_UPGRADES = {
 		4: 60,
 		5: 100,
 	},
-	adaptive_helmet: {
+	ADAPTIVE_HELMET: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 10,
@@ -63,7 +66,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	adaptive_chestplate: {
+	ADAPTIVE_CHESTPLATE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 20,
@@ -72,7 +75,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	adaptive_leggings: {
+	ADAPTIVE_LEGGINGS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 10,
@@ -81,7 +84,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 200,
 	},
-	adaptive_boots: {
+	ADAPTIVE_BOOTS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 10,
@@ -90,7 +93,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	silent_death: {
+	SILENT_DEATH: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 5,
@@ -99,7 +102,7 @@ export const ESSENCE_UPGRADES = {
 		4: 50,
 		5: 100,
 	},
-	conjuring_sword: {
+	CONJURING_SWORD: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 5,
@@ -108,7 +111,7 @@ export const ESSENCE_UPGRADES = {
 		4: 50,
 		5: 100,
 	},
-	spirit_sword: {
+	SPIRIT_SWORD: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 20,
@@ -117,7 +120,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	item_spirit_bow: {
+	ITEM_SPIRIT_BOW: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 20,
@@ -126,7 +129,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	thorns_boots: {
+	THORNS_BOOTS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 20,
@@ -135,7 +138,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	spirit_mask: {
+	SPIRIT_MASK: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 20,
@@ -144,7 +147,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	bone_boomerang: {
+	BONE_BOOMERANG: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 20,
@@ -153,7 +156,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	bat_wand: {
+	BAT_WAND: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 20,
@@ -162,7 +165,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	last_breath: {
+	LAST_BREATH: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 20,
@@ -171,7 +174,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	shadow_assassin_helmet: {
+	SHADOW_ASSASSIN_HELMET: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 25,
@@ -180,7 +183,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	shadow_assassin_chestplate: {
+	SHADOW_ASSASSIN_CHESTPLATE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 35,
@@ -189,7 +192,7 @@ export const ESSENCE_UPGRADES = {
 		4: 300,
 		5: 500,
 	},
-	shadow_assassin_leggings: {
+	SHADOW_ASSASSIN_LEGGINGS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 30,
@@ -198,7 +201,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 400,
 	},
-	shadow_assassin_boots: {
+	SHADOW_ASSASSIN_BOOTS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 20,
@@ -207,7 +210,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	shadow_fury: {
+	SHADOW_FURY: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -216,7 +219,7 @@ export const ESSENCE_UPGRADES = {
 		4: 400,
 		5: 800,
 	},
-	livid_dagger: {
+	LIVID_DAGGER: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 30,
@@ -225,7 +228,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 400,
 	},
-	flower_of_truth: {
+	FLOWER_OF_TRUTH: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -234,7 +237,7 @@ export const ESSENCE_UPGRADES = {
 		4: 400,
 		5: 800,
 	},
-	fel_sword: {
+	FEL_SWORD: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 15,
@@ -243,7 +246,7 @@ export const ESSENCE_UPGRADES = {
 		4: 60,
 		5: 100,
 	},
-	wither_cloak: {
+	WITHER_CLOAK: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 75,
@@ -252,7 +255,7 @@ export const ESSENCE_UPGRADES = {
 		4: 600,
 		5: 1_200,
 	},
-	precursor_eye: {
+	PRECURSOR_EYE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 75,
@@ -261,7 +264,7 @@ export const ESSENCE_UPGRADES = {
 		4: 600,
 		5: 1_200,
 	},
-	giants_sword: {
+	GIANTS_SWORD: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 75,
@@ -270,7 +273,7 @@ export const ESSENCE_UPGRADES = {
 		4: 600,
 		5: 1_200,
 	},
-	necromancer_lord_helmet: {
+	NECROMANCER_LORD_HELMET: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 30,
@@ -279,7 +282,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 400,
 	},
-	necromancer_lord_chestplate: {
+	NECROMANCER_LORD_CHESTPLATE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 70,
@@ -288,7 +291,7 @@ export const ESSENCE_UPGRADES = {
 		4: 450,
 		5: 750,
 	},
-	necromancer_lord_leggings: {
+	NECROMANCER_LORD_LEGGINGS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 35,
@@ -297,7 +300,7 @@ export const ESSENCE_UPGRADES = {
 		4: 300,
 		5: 500,
 	},
-	necromancer_lord_boots: {
+	NECROMANCER_LORD_BOOTS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 30,
@@ -306,7 +309,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 400,
 	},
-	necromancer_sword: {
+	NECROMANCER_SWORD: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 70,
@@ -315,7 +318,7 @@ export const ESSENCE_UPGRADES = {
 		4: 450,
 		5: 750,
 	},
-	necron_blade: {
+	NECRON_BLADE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 150,
@@ -324,7 +327,7 @@ export const ESSENCE_UPGRADES = {
 		4: 900,
 		5: 1_500,
 	},
-	hyperion: {
+	HYPERION: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 150,
@@ -333,7 +336,7 @@ export const ESSENCE_UPGRADES = {
 		4: 900,
 		5: 1_500,
 	},
-	valkyrie: {
+	VALKYRIE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 150,
@@ -342,7 +345,7 @@ export const ESSENCE_UPGRADES = {
 		4: 900,
 		5: 1_500,
 	},
-	scylla: {
+	SCYLLA: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 150,
@@ -351,7 +354,7 @@ export const ESSENCE_UPGRADES = {
 		4: 900,
 		5: 1_500,
 	},
-	astraea: {
+	ASTRAEA: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 150,
@@ -360,7 +363,7 @@ export const ESSENCE_UPGRADES = {
 		4: 900,
 		5: 1_500,
 	},
-	wither_helmet: {
+	WITHER_HELMET: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -369,7 +372,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	wither_chestplate: {
+	WITHER_CHESTPLATE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 100,
@@ -378,7 +381,7 @@ export const ESSENCE_UPGRADES = {
 		4: 600,
 		5: 1_000,
 	},
-	wither_leggings: {
+	WITHER_LEGGINGS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 75,
@@ -387,7 +390,7 @@ export const ESSENCE_UPGRADES = {
 		4: 400,
 		5: 700,
 	},
-	wither_boots: {
+	WITHER_BOOTS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -396,7 +399,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	tank_wither_helmet: {
+	TANK_WITHER_HELMET: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -405,7 +408,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	tank_wither_chestplate: {
+	TANK_WITHER_CHESTPLATE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 100,
@@ -414,7 +417,7 @@ export const ESSENCE_UPGRADES = {
 		4: 600,
 		5: 1_000,
 	},
-	tank_wither_leggings: {
+	TANK_WITHER_LEGGINGS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 75,
@@ -423,7 +426,7 @@ export const ESSENCE_UPGRADES = {
 		4: 400,
 		5: 700,
 	},
-	tank_wither_boots: {
+	TANK_WITHER_BOOTS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -432,7 +435,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	speed_wither_helmet: {
+	SPEED_WITHER_HELMET: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -441,7 +444,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	speed_wither_chestplate: {
+	SPEED_WITHER_CHESTPLATE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 100,
@@ -450,7 +453,7 @@ export const ESSENCE_UPGRADES = {
 		4: 600,
 		5: 1_000,
 	},
-	speed_wither_leggings: {
+	SPEED_WITHER_LEGGINGS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 75,
@@ -459,7 +462,7 @@ export const ESSENCE_UPGRADES = {
 		4: 400,
 		5: 700,
 	},
-	speed_wither_boots: {
+	SPEED_WITHER_BOOTS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -468,7 +471,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	wise_wither_helmet: {
+	WISE_WITHER_HELMET: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -477,7 +480,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	wise_wither_chestplate: {
+	WISE_WITHER_CHESTPLATE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 100,
@@ -486,7 +489,7 @@ export const ESSENCE_UPGRADES = {
 		4: 600,
 		5: 1_000,
 	},
-	wise_wither_leggings: {
+	WISE_WITHER_LEGGINGS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 75,
@@ -495,7 +498,7 @@ export const ESSENCE_UPGRADES = {
 		4: 400,
 		5: 700,
 	},
-	wise_wither_boots: {
+	WISE_WITHER_BOOTS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -504,7 +507,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	power_wither_helmet: {
+	POWER_WITHER_HELMET: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -513,7 +516,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	power_wither_chestplate: {
+	POWER_WITHER_CHESTPLATE: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 100,
@@ -522,7 +525,7 @@ export const ESSENCE_UPGRADES = {
 		4: 600,
 		5: 1_000,
 	},
-	power_wither_leggings: {
+	POWER_WITHER_LEGGINGS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 75,
@@ -531,7 +534,7 @@ export const ESSENCE_UPGRADES = {
 		4: 400,
 		5: 700,
 	},
-	power_wither_boots: {
+	POWER_WITHER_BOOTS: {
 		type: 'wither',
 		dungeonize: 0,
 		1: 50,
@@ -540,7 +543,11 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 500,
 	},
-	runaans_bow: {
+
+	/**
+	 * spider essence
+	 */
+	RUNAANS_BOW: {
 		type: 'spider',
 		dungeonize: 500,
 		1: 50,
@@ -549,7 +556,7 @@ export const ESSENCE_UPGRADES = {
 		4: 125,
 		5: 150,
 	},
-	leaping_sword: {
+	LEAPING_SWORD: {
 		type: 'spider',
 		dungeonize: 20,
 		1: 5,
@@ -558,7 +565,7 @@ export const ESSENCE_UPGRADES = {
 		4: 20,
 		5: 25,
 	},
-	silk_edge_sword: {
+	SILK_EDGE_SWORD: {
 		type: 'spider',
 		dungeonize: 20,
 		1: 5,
@@ -567,7 +574,7 @@ export const ESSENCE_UPGRADES = {
 		4: 20,
 		5: 25,
 	},
-	spider_hat: {
+	SPIDER_HAT: {
 		type: 'spider',
 		dungeonize: 20,
 		1: 5,
@@ -576,7 +583,7 @@ export const ESSENCE_UPGRADES = {
 		4: 20,
 		5: 25,
 	},
-	spider_boots: {
+	SPIDER_BOOTS: {
 		type: 'spider',
 		dungeonize: 20,
 		1: 10,
@@ -585,7 +592,7 @@ export const ESSENCE_UPGRADES = {
 		4: 25,
 		5: 30,
 	},
-	mosquito_bow: {
+	MOSQUITO_BOW: {
 		type: 'spider',
 		dungeonize: 30,
 		1: 15,
@@ -594,7 +601,7 @@ export const ESSENCE_UPGRADES = {
 		4: 45,
 		5: 65,
 	},
-	tarantula_helmet: {
+	TARANTULA_HELMET: {
 		type: 'spider',
 		dungeonize: 30,
 		1: 12,
@@ -603,7 +610,7 @@ export const ESSENCE_UPGRADES = {
 		4: 45,
 		5: 65,
 	},
-	tarantula_chestplate: {
+	TARANTULA_CHESTPLATE: {
 		type: 'spider',
 		dungeonize: 30,
 		1: 12,
@@ -612,7 +619,7 @@ export const ESSENCE_UPGRADES = {
 		4: 45,
 		5: 65,
 	},
-	tarantula_leggings: {
+	TARANTULA_LEGGINGS: {
 		type: 'spider',
 		dungeonize: 20,
 		1: 10,
@@ -621,7 +628,7 @@ export const ESSENCE_UPGRADES = {
 		4: 25,
 		5: 30,
 	},
-	tarantula_boots: {
+	TARANTULA_BOOTS: {
 		type: 'spider',
 		dungeonize: 20,
 		1: 10,
@@ -630,7 +637,7 @@ export const ESSENCE_UPGRADES = {
 		4: 25,
 		5: 30,
 	},
-	scorpion_bow: {
+	SCORPION_BOW: {
 		type: 'spider',
 		dungeonize: 20,
 		1: 10,
@@ -639,7 +646,11 @@ export const ESSENCE_UPGRADES = {
 		4: 25,
 		5: 30,
 	},
-	phantom_rod: {
+
+	/**
+	 * undead essence
+	 */
+	PHANTOM_ROD: {
 		type: 'undead',
 		dungeonize: 500,
 		1: 200,
@@ -648,7 +659,7 @@ export const ESSENCE_UPGRADES = {
 		4: 500,
 		5: 600,
 	},
-	werewolf_helmet: {
+	WEREWOLF_HELMET: {
 		type: 'undead',
 		dungeonize: 500,
 		1: 200,
@@ -657,7 +668,7 @@ export const ESSENCE_UPGRADES = {
 		4: 500,
 		5: 600,
 	},
-	werewolf_chestplate: {
+	WEREWOLF_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 1_000,
 		1: 400,
@@ -666,7 +677,7 @@ export const ESSENCE_UPGRADES = {
 		4: 1_000,
 		5: 1_200,
 	},
-	werewolf_leggings: {
+	WEREWOLF_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 750,
 		1: 300,
@@ -675,7 +686,7 @@ export const ESSENCE_UPGRADES = {
 		4: 750,
 		5: 900,
 	},
-	werewolf_boots: {
+	WEREWOLF_BOOTS: {
 		type: 'undead',
 		dungeonize: 500,
 		1: 200,
@@ -684,7 +695,7 @@ export const ESSENCE_UPGRADES = {
 		4: 500,
 		5: 600,
 	},
-	pigman_sword: {
+	PIGMAN_SWORD: {
 		type: 'undead',
 		dungeonize: 200,
 		1: 100,
@@ -693,7 +704,7 @@ export const ESSENCE_UPGRADES = {
 		4: 400,
 		5: 500,
 	},
-	undead_sword: {
+	UNDEAD_SWORD: {
 		type: 'undead',
 		dungeonize: 10,
 		1: 20,
@@ -702,7 +713,7 @@ export const ESSENCE_UPGRADES = {
 		4: 50,
 		5: 60,
 	},
-	zombie_sword: {
+	ZOMBIE_SWORD: {
 		type: 'undead',
 		dungeonize: 100,
 		1: 30,
@@ -711,7 +722,7 @@ export const ESSENCE_UPGRADES = {
 		4: 75,
 		5: 90,
 	},
-	ornate_zombie_sword: {
+	ORNATE_ZOMBIE_SWORD: {
 		type: 'undead',
 		dungeonize: 100,
 		1: 30,
@@ -720,7 +731,7 @@ export const ESSENCE_UPGRADES = {
 		4: 75,
 		5: 90,
 	},
-	florid_zombie_sword: {
+	FLORID_ZOMBIE_SWORD: {
 		type: 'undead',
 		dungeonize: 100,
 		1: 30,
@@ -729,7 +740,7 @@ export const ESSENCE_UPGRADES = {
 		4: 75,
 		5: 90,
 	},
-	skeleton_hat: {
+	SKELETON_HAT: {
 		type: 'undead',
 		dungeonize: 40,
 		1: 20,
@@ -738,7 +749,7 @@ export const ESSENCE_UPGRADES = {
 		4: 50,
 		5: 60,
 	},
-	zombie_hat: {
+	ZOMBIE_HAT: {
 		type: 'undead',
 		dungeonize: 40,
 		1: 20,
@@ -747,7 +758,7 @@ export const ESSENCE_UPGRADES = {
 		4: 50,
 		5: 60,
 	},
-	zombie_heart: {
+	ZOMBIE_HEART: {
 		type: 'undead',
 		dungeonize: 100,
 		1: 30,
@@ -756,7 +767,7 @@ export const ESSENCE_UPGRADES = {
 		4: 75,
 		5: 90,
 	},
-	zombie_chestplate: {
+	ZOMBIE_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 200,
 		1: 40,
@@ -765,7 +776,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 120,
 	},
-	zombie_leggings: {
+	ZOMBIE_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 150,
 		1: 40,
@@ -774,7 +785,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 120,
 	},
-	zombie_boots: {
+	ZOMBIE_BOOTS: {
 		type: 'undead',
 		dungeonize: 120,
 		1: 35,
@@ -783,7 +794,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 100,
 	},
-	skeleton_helmet: {
+	SKELETON_HELMET: {
 		type: 'undead',
 		dungeonize: 100,
 		1: 30,
@@ -792,7 +803,7 @@ export const ESSENCE_UPGRADES = {
 		4: 75,
 		5: 90,
 	},
-	machine_gun_bow: {
+	MACHINE_GUN_BOW: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -801,7 +812,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	crypt_bow: {
+	CRYPT_BOW: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -810,7 +821,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	crypt_dreadlord_sword: {
+	CRYPT_DREADLORD_SWORD: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -819,7 +830,7 @@ export const ESSENCE_UPGRADES = {
 		4: 25,
 		5: 30,
 	},
-	crypt_witherlord_helmet: {
+	CRYPT_WITHERLORD_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -828,7 +839,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	crypt_witherlord_chestplate: {
+	CRYPT_WITHERLORD_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -837,7 +848,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	crypt_witherlord_leggings: {
+	CRYPT_WITHERLORD_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -846,7 +857,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	crypt_witherlord_boots: {
+	CRYPT_WITHERLORD_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -855,7 +866,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	skeleton_grunt_helmet: {
+	SKELETON_GRUNT_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -864,7 +875,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	skeleton_grunt_chestplate: {
+	SKELETON_GRUNT_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -873,7 +884,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	skeleton_grunt_leggings: {
+	SKELETON_GRUNT_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -882,7 +893,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	skeleton_grunt_boots: {
+	SKELETON_GRUNT_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -891,7 +902,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	sniper_bow: {
+	SNIPER_BOW: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -900,7 +911,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	sniper_helmet: {
+	SNIPER_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -909,7 +920,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	rotten_helmet: {
+	ROTTEN_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -918,7 +929,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	rotten_chestplate: {
+	ROTTEN_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -927,7 +938,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	rotten_leggings: {
+	ROTTEN_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -936,7 +947,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	rotten_boots: {
+	ROTTEN_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -945,7 +956,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	undead_bow: {
+	UNDEAD_BOW: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -954,7 +965,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	stone_chestplate: {
+	STONE_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -963,7 +974,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	mender_helmet: {
+	MENDER_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -972,7 +983,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	dark_goggles: {
+	DARK_GOGGLES: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -981,7 +992,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	heavy_helmet: {
+	HEAVY_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -990,7 +1001,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	heavy_chestplate: {
+	HEAVY_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -999,7 +1010,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	heavy_leggings: {
+	HEAVY_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -1008,7 +1019,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	heavy_boots: {
+	HEAVY_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -1017,7 +1028,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	super_heavy_helmet: {
+	SUPER_HEAVY_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1026,7 +1037,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	super_heavy_chestplate: {
+	SUPER_HEAVY_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1035,7 +1046,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	super_heavy_leggings: {
+	SUPER_HEAVY_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1044,7 +1055,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	super_heavy_boots: {
+	SUPER_HEAVY_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1053,7 +1064,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	stinger_bow: {
+	STINGER_BOW: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -1062,7 +1073,7 @@ export const ESSENCE_UPGRADES = {
 		4: 25,
 		5: 30,
 	},
-	bouncy_helmet: {
+	BOUNCY_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -1071,7 +1082,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	bouncy_chestplate: {
+	BOUNCY_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -1080,7 +1091,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	bouncy_leggings: {
+	BOUNCY_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -1089,7 +1100,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	bouncy_boots: {
+	BOUNCY_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 10,
@@ -1098,7 +1109,7 @@ export const ESSENCE_UPGRADES = {
 		4: 80,
 		5: 160,
 	},
-	skeleton_master_helmet: {
+	SKELETON_MASTER_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1107,7 +1118,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeleton_master_chestplate: {
+	SKELETON_MASTER_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1116,7 +1127,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeleton_master_leggings: {
+	SKELETON_MASTER_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1125,7 +1136,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeleton_master_boots: {
+	SKELETON_MASTER_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1134,7 +1145,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeleton_soldier_helmet: {
+	SKELETON_SOLDIER_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1143,7 +1154,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeleton_soldier_chestplate: {
+	SKELETON_SOLDIER_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1152,7 +1163,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeleton_soldier_leggings: {
+	SKELETON_SOLDIER_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1161,7 +1172,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeleton_soldier_boots: {
+	SKELETON_SOLDIER_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1170,7 +1181,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	zombie_soldier_helmet: {
+	ZOMBIE_SOLDIER_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1179,7 +1190,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	zombie_soldier_chestplate: {
+	ZOMBIE_SOLDIER_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1188,7 +1199,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	zombie_soldier_leggings: {
+	ZOMBIE_SOLDIER_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1197,7 +1208,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	zombie_soldier_boots: {
+	ZOMBIE_SOLDIER_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1206,7 +1217,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	zombie_knight_helmet: {
+	ZOMBIE_KNIGHT_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 20,
@@ -1215,7 +1226,7 @@ export const ESSENCE_UPGRADES = {
 		4: 160,
 		5: 320,
 	},
-	zombie_knight_chestplate: {
+	ZOMBIE_KNIGHT_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 20,
@@ -1224,7 +1235,7 @@ export const ESSENCE_UPGRADES = {
 		4: 160,
 		5: 320,
 	},
-	zombie_knight_leggings: {
+	ZOMBIE_KNIGHT_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 20,
@@ -1233,7 +1244,7 @@ export const ESSENCE_UPGRADES = {
 		4: 160,
 		5: 320,
 	},
-	zombie_knight_boots: {
+	ZOMBIE_KNIGHT_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 20,
@@ -1242,7 +1253,7 @@ export const ESSENCE_UPGRADES = {
 		4: 160,
 		5: 320,
 	},
-	zombie_knight_sword: {
+	ZOMBIE_KNIGHT_SWORD: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 20,
@@ -1251,7 +1262,7 @@ export const ESSENCE_UPGRADES = {
 		4: 160,
 		5: 320,
 	},
-	zombie_commander_helmet: {
+	ZOMBIE_COMMANDER_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1260,7 +1271,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	zombie_commander_chestplate: {
+	ZOMBIE_COMMANDER_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1269,7 +1280,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	zombie_commander_leggings: {
+	ZOMBIE_COMMANDER_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1278,7 +1289,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	zombie_commander_boots: {
+	ZOMBIE_COMMANDER_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1287,7 +1298,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	zombie_commander_whip: {
+	ZOMBIE_COMMANDER_WHIP: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1296,7 +1307,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	zombie_lord_helmet: {
+	ZOMBIE_LORD_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1305,7 +1316,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	zombie_lord_chestplate: {
+	ZOMBIE_LORD_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1314,7 +1325,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	zombie_lord_leggings: {
+	ZOMBIE_LORD_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1323,7 +1334,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	zombie_lord_boots: {
+	ZOMBIE_LORD_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1332,7 +1343,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	skeleton_lord_helmet: {
+	SKELETON_LORD_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1341,7 +1352,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	skeleton_lord_chestplate: {
+	SKELETON_LORD_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1350,7 +1361,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	skeleton_lord_leggings: {
+	SKELETON_LORD_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1359,7 +1370,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	skeleton_lord_boots: {
+	SKELETON_LORD_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 25,
@@ -1368,7 +1379,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 400,
 	},
-	skeletor_helmet: {
+	SKELETOR_HELMET: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1377,7 +1388,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeletor_chestplate: {
+	SKELETOR_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1386,7 +1397,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeletor_leggings: {
+	SKELETOR_LEGGINGS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1395,7 +1406,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	skeletor_boots: {
+	SKELETOR_BOOTS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1404,7 +1415,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	zombie_soldier_cutlass: {
+	ZOMBIE_SOLDIER_CUTLASS: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 15,
@@ -1413,7 +1424,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 240,
 	},
-	metal_chestplate: {
+	METAL_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 20,
@@ -1422,7 +1433,7 @@ export const ESSENCE_UPGRADES = {
 		4: 150,
 		5: 300,
 	},
-	mender_fedora: {
+	MENDER_FEDORA: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 20,
@@ -1431,7 +1442,7 @@ export const ESSENCE_UPGRADES = {
 		4: 150,
 		5: 300,
 	},
-	shadow_goggles: {
+	SHADOW_GOGGLES: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 20,
@@ -1440,7 +1451,7 @@ export const ESSENCE_UPGRADES = {
 		4: 150,
 		5: 300,
 	},
-	super_undead_bow: {
+	SUPER_UNDEAD_BOW: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 20,
@@ -1449,7 +1460,7 @@ export const ESSENCE_UPGRADES = {
 		4: 150,
 		5: 300,
 	},
-	earth_shard: {
+	EARTH_SHARD: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 50,
@@ -1458,7 +1469,7 @@ export const ESSENCE_UPGRADES = {
 		4: 400,
 		5: 600,
 	},
-	steel_chestplate: {
+	STEEL_CHESTPLATE: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 40,
@@ -1467,7 +1478,7 @@ export const ESSENCE_UPGRADES = {
 		4: 300,
 		5: 600,
 	},
-	mender_crown: {
+	MENDER_CROWN: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 40,
@@ -1476,7 +1487,7 @@ export const ESSENCE_UPGRADES = {
 		4: 300,
 		5: 600,
 	},
-	wither_goggles: {
+	WITHER_GOGGLES: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 40,
@@ -1485,7 +1496,7 @@ export const ESSENCE_UPGRADES = {
 		4: 300,
 		5: 600,
 	},
-	death_bow: {
+	DEATH_BOW: {
 		type: 'undead',
 		dungeonize: 0,
 		1: 40,
@@ -1494,7 +1505,7 @@ export const ESSENCE_UPGRADES = {
 		4: 300,
 		5: 600,
 	},
-	crystallized_heart: {
+	CRYSTALLIZED_HEART: {
 		type: 'undead',
 		dungeonize: 100,
 		1: 30,
@@ -1503,7 +1514,7 @@ export const ESSENCE_UPGRADES = {
 		4: 75,
 		5: 90,
 	},
-	revived_heart: {
+	REVIVED_HEART: {
 		type: 'undead',
 		dungeonize: 100,
 		1: 30,
@@ -1512,7 +1523,7 @@ export const ESSENCE_UPGRADES = {
 		4: 75,
 		5: 90,
 	},
-	reaper_mask: {
+	REAPER_MASK: {
 		type: 'undead',
 		dungeonize: 500,
 		1: 200,
@@ -1521,7 +1532,7 @@ export const ESSENCE_UPGRADES = {
 		4: 850,
 		5: 1_200,
 	},
-	reaper_scythe: {
+	REAPER_SCYTHE: {
 		type: 'undead',
 		dungeonize: 200,
 		1: 300,
@@ -1530,7 +1541,7 @@ export const ESSENCE_UPGRADES = {
 		4: 700,
 		5: 900,
 	},
-	revenant_sword: {
+	REVENANT_SWORD: {
 		type: 'undead',
 		dungeonize: 500,
 		1: 200,
@@ -1539,7 +1550,7 @@ export const ESSENCE_UPGRADES = {
 		4: 800,
 		5: 1_000,
 	},
-	reaper_sword: {
+	REAPER_SWORD: {
 		type: 'undead',
 		dungeonize: 500,
 		1: 200,
@@ -1548,7 +1559,7 @@ export const ESSENCE_UPGRADES = {
 		4: 800,
 		5: 1_000,
 	},
-	axe_of_the_shredded: {
+	AXE_OF_THE_SHREDDED: {
 		type: 'undead',
 		dungeonize: 500,
 		1: 200,
@@ -1557,7 +1568,11 @@ export const ESSENCE_UPGRADES = {
 		4: 800,
 		5: 1_000,
 	},
-	aspect_of_the_dragon: {
+
+	/**
+	 * dragon essence
+	 */
+	ASPECT_OF_THE_DRAGON: {
 		type: 'dragon',
 		dungeonize: 150,
 		1: 150,
@@ -1566,7 +1581,7 @@ export const ESSENCE_UPGRADES = {
 		4: 600,
 		5: 750,
 	},
-	young_dragon_helmet: {
+	YOUNG_DRAGON_HELMET: {
 		type: 'dragon',
 		dungeonize: 40,
 		1: 20,
@@ -1575,7 +1590,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	young_dragon_chestplate: {
+	YOUNG_DRAGON_CHESTPLATE: {
 		type: 'dragon',
 		dungeonize: 70,
 		1: 30,
@@ -1584,7 +1599,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 180,
 	},
-	young_dragon_leggings: {
+	YOUNG_DRAGON_LEGGINGS: {
 		type: 'dragon',
 		dungeonize: 60,
 		1: 25,
@@ -1593,7 +1608,7 @@ export const ESSENCE_UPGRADES = {
 		4: 110,
 		5: 160,
 	},
-	young_dragon_boots: {
+	YOUNG_DRAGON_BOOTS: {
 		type: 'dragon',
 		dungeonize: 35,
 		1: 20,
@@ -1602,7 +1617,7 @@ export const ESSENCE_UPGRADES = {
 		4: 90,
 		5: 140,
 	},
-	old_dragon_helmet: {
+	OLD_DRAGON_HELMET: {
 		type: 'dragon',
 		dungeonize: 40,
 		1: 20,
@@ -1611,7 +1626,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	old_dragon_chestplate: {
+	OLD_DRAGON_CHESTPLATE: {
 		type: 'dragon',
 		dungeonize: 70,
 		1: 30,
@@ -1620,7 +1635,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 180,
 	},
-	old_dragon_leggings: {
+	OLD_DRAGON_LEGGINGS: {
 		type: 'dragon',
 		dungeonize: 60,
 		1: 25,
@@ -1629,7 +1644,7 @@ export const ESSENCE_UPGRADES = {
 		4: 110,
 		5: 160,
 	},
-	old_dragon_boots: {
+	OLD_DRAGON_BOOTS: {
 		type: 'dragon',
 		dungeonize: 35,
 		1: 20,
@@ -1638,7 +1653,7 @@ export const ESSENCE_UPGRADES = {
 		4: 90,
 		5: 140,
 	},
-	strong_dragon_helmet: {
+	STRONG_DRAGON_HELMET: {
 		type: 'dragon',
 		dungeonize: 40,
 		1: 20,
@@ -1647,7 +1662,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	strong_dragon_chestplate: {
+	STRONG_DRAGON_CHESTPLATE: {
 		type: 'dragon',
 		dungeonize: 70,
 		1: 30,
@@ -1656,7 +1671,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 180,
 	},
-	strong_dragon_leggings: {
+	STRONG_DRAGON_LEGGINGS: {
 		type: 'dragon',
 		dungeonize: 60,
 		1: 25,
@@ -1665,7 +1680,7 @@ export const ESSENCE_UPGRADES = {
 		4: 110,
 		5: 160,
 	},
-	strong_dragon_boots: {
+	STRONG_DRAGON_BOOTS: {
 		type: 'dragon',
 		dungeonize: 35,
 		1: 20,
@@ -1674,7 +1689,7 @@ export const ESSENCE_UPGRADES = {
 		4: 90,
 		5: 140,
 	},
-	protector_dragon_helmet: {
+	PROTECTOR_DRAGON_HELMET: {
 		type: 'dragon',
 		dungeonize: 40,
 		1: 20,
@@ -1683,7 +1698,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	protector_dragon_chestplate: {
+	PROTECTOR_DRAGON_CHESTPLATE: {
 		type: 'dragon',
 		dungeonize: 70,
 		1: 30,
@@ -1692,7 +1707,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 180,
 	},
-	protector_dragon_leggings: {
+	PROTECTOR_DRAGON_LEGGINGS: {
 		type: 'dragon',
 		dungeonize: 60,
 		1: 25,
@@ -1701,7 +1716,7 @@ export const ESSENCE_UPGRADES = {
 		4: 110,
 		5: 160,
 	},
-	protector_dragon_boots: {
+	PROTECTOR_DRAGON_BOOTS: {
 		type: 'dragon',
 		dungeonize: 35,
 		1: 20,
@@ -1710,7 +1725,7 @@ export const ESSENCE_UPGRADES = {
 		4: 90,
 		5: 140,
 	},
-	wise_dragon_helmet: {
+	WISE_DRAGON_HELMET: {
 		type: 'dragon',
 		dungeonize: 40,
 		1: 20,
@@ -1719,7 +1734,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	wise_dragon_chestplate: {
+	WISE_DRAGON_CHESTPLATE: {
 		type: 'dragon',
 		dungeonize: 70,
 		1: 30,
@@ -1728,7 +1743,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 180,
 	},
-	wise_dragon_leggings: {
+	WISE_DRAGON_LEGGINGS: {
 		type: 'dragon',
 		dungeonize: 60,
 		1: 25,
@@ -1737,7 +1752,7 @@ export const ESSENCE_UPGRADES = {
 		4: 110,
 		5: 160,
 	},
-	wise_dragon_boots: {
+	WISE_DRAGON_BOOTS: {
 		type: 'dragon',
 		dungeonize: 35,
 		1: 20,
@@ -1746,7 +1761,7 @@ export const ESSENCE_UPGRADES = {
 		4: 90,
 		5: 140,
 	},
-	unstable_dragon_helmet: {
+	UNSTABLE_DRAGON_HELMET: {
 		type: 'dragon',
 		dungeonize: 40,
 		1: 20,
@@ -1755,7 +1770,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	unstable_dragon_chestplate: {
+	UNSTABLE_DRAGON_CHESTPLATE: {
 		type: 'dragon',
 		dungeonize: 70,
 		1: 30,
@@ -1764,7 +1779,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 180,
 	},
-	unstable_dragon_leggings: {
+	UNSTABLE_DRAGON_LEGGINGS: {
 		type: 'dragon',
 		dungeonize: 60,
 		1: 25,
@@ -1773,7 +1788,7 @@ export const ESSENCE_UPGRADES = {
 		4: 110,
 		5: 160,
 	},
-	unstable_dragon_boots: {
+	UNSTABLE_DRAGON_BOOTS: {
 		type: 'dragon',
 		dungeonize: 35,
 		1: 20,
@@ -1782,7 +1797,7 @@ export const ESSENCE_UPGRADES = {
 		4: 90,
 		5: 140,
 	},
-	superior_dragon_helmet: {
+	SUPERIOR_DRAGON_HELMET: {
 		type: 'dragon',
 		dungeonize: 70,
 		1: 40,
@@ -1791,7 +1806,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	superior_dragon_chestplate: {
+	SUPERIOR_DRAGON_CHESTPLATE: {
 		type: 'dragon',
 		dungeonize: 100,
 		1: 60,
@@ -1800,7 +1815,7 @@ export const ESSENCE_UPGRADES = {
 		4: 240,
 		5: 360,
 	},
-	superior_dragon_leggings: {
+	SUPERIOR_DRAGON_LEGGINGS: {
 		type: 'dragon',
 		dungeonize: 85,
 		1: 50,
@@ -1809,7 +1824,7 @@ export const ESSENCE_UPGRADES = {
 		4: 220,
 		5: 320,
 	},
-	superior_dragon_boots: {
+	SUPERIOR_DRAGON_BOOTS: {
 		type: 'dragon',
 		dungeonize: 60,
 		1: 40,
@@ -1818,7 +1833,7 @@ export const ESSENCE_UPGRADES = {
 		4: 180,
 		5: 280,
 	},
-	holy_dragon_helmet: {
+	HOLY_DRAGON_HELMET: {
 		type: 'dragon',
 		dungeonize: 40,
 		1: 20,
@@ -1827,7 +1842,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	holy_dragon_chestplate: {
+	HOLY_DRAGON_CHESTPLATE: {
 		type: 'dragon',
 		dungeonize: 70,
 		1: 30,
@@ -1836,7 +1851,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 180,
 	},
-	holy_dragon_leggings: {
+	HOLY_DRAGON_LEGGINGS: {
 		type: 'dragon',
 		dungeonize: 60,
 		1: 25,
@@ -1845,7 +1860,7 @@ export const ESSENCE_UPGRADES = {
 		4: 110,
 		5: 160,
 	},
-	holy_dragon_boots: {
+	HOLY_DRAGON_BOOTS: {
 		type: 'dragon',
 		dungeonize: 35,
 		1: 20,
@@ -1854,7 +1869,7 @@ export const ESSENCE_UPGRADES = {
 		4: 90,
 		5: 140,
 	},
-	terminator: {
+	TERMINATOR: {
 		type: 'dragon',
 		dungeonize: 300,
 		1: 100,
@@ -1863,7 +1878,7 @@ export const ESSENCE_UPGRADES = {
 		4: 500,
 		5: 750,
 	},
-	sinseeker_scythe: {
+	SINSEEKER_SCYTHE: {
 		type: 'dragon',
 		dungeonize: 250,
 		1: 70,
@@ -1872,7 +1887,7 @@ export const ESSENCE_UPGRADES = {
 		4: 350,
 		5: 600,
 	},
-	juju_shortbow: {
+	JUJU_SHORTBOW: {
 		type: 'dragon',
 		dungeonize: 150,
 		1: 30,
@@ -1881,7 +1896,11 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 300,
 	},
-	midas_staff: {
+
+	/**
+	 * gold essence
+	 */
+	MIDAS_STAFF: {
 		type: 'gold',
 		dungeonize: 100,
 		1: 50,
@@ -1890,7 +1909,7 @@ export const ESSENCE_UPGRADES = {
 		4: 200,
 		5: 250,
 	},
-	rogue_sword: {
+	ROGUE_SWORD: {
 		type: 'gold',
 		dungeonize: 5,
 		1: 5,
@@ -1899,7 +1918,7 @@ export const ESSENCE_UPGRADES = {
 		4: 20,
 		5: 25,
 	},
-	midas_sword: {
+	MIDAS_SWORD: {
 		type: 'gold',
 		dungeonize: 100,
 		1: 25,
@@ -1908,7 +1927,7 @@ export const ESSENCE_UPGRADES = {
 		4: 125,
 		5: 200,
 	},
-	super_cleaver: {
+	SUPER_CLEAVER: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 1,
@@ -1917,7 +1936,7 @@ export const ESSENCE_UPGRADES = {
 		4: 2,
 		5: 3,
 	},
-	hyper_cleaver: {
+	HYPER_CLEAVER: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 5,
@@ -1926,7 +1945,7 @@ export const ESSENCE_UPGRADES = {
 		4: 20,
 		5: 25,
 	},
-	giant_cleaver: {
+	GIANT_CLEAVER: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 10,
@@ -1935,7 +1954,7 @@ export const ESSENCE_UPGRADES = {
 		4: 40,
 		5: 50,
 	},
-	gold_bonzo_head: {
+	GOLD_BONZO_HEAD: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 50,
@@ -1944,7 +1963,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	gold_scarf_head: {
+	GOLD_SCARF_HEAD: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 50,
@@ -1953,7 +1972,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	gold_professor_head: {
+	GOLD_PROFESSOR_HEAD: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 50,
@@ -1962,7 +1981,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	gold_thorn_head: {
+	GOLD_THORN_HEAD: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 50,
@@ -1971,7 +1990,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	gold_livid_head: {
+	GOLD_LIVID_HEAD: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 50,
@@ -1980,7 +1999,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	gold_sadan_head: {
+	GOLD_SADAN_HEAD: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 50,
@@ -1989,7 +2008,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	gold_necron_head: {
+	GOLD_NECRON_HEAD: {
 		type: 'gold',
 		dungeonize: 0,
 		1: 50,
@@ -1998,7 +2017,11 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	hardened_diamond_helmet: {
+
+	/**
+	 * diamond essence
+	 */
+	HARDENED_DIAMOND_HELMET: {
 		type: 'diamond',
 		dungeonize: 10,
 		1: 5,
@@ -2007,7 +2030,7 @@ export const ESSENCE_UPGRADES = {
 		4: 20,
 		5: 25,
 	},
-	hardened_diamond_chestplate: {
+	HARDENED_DIAMOND_CHESTPLATE: {
 		type: 'diamond',
 		dungeonize: 10,
 		1: 5,
@@ -2016,7 +2039,7 @@ export const ESSENCE_UPGRADES = {
 		4: 20,
 		5: 25,
 	},
-	hardened_diamond_leggings: {
+	HARDENED_DIAMOND_LEGGINGS: {
 		type: 'diamond',
 		dungeonize: 10,
 		1: 5,
@@ -2025,7 +2048,7 @@ export const ESSENCE_UPGRADES = {
 		4: 20,
 		5: 25,
 	},
-	hardened_diamond_boots: {
+	HARDENED_DIAMOND_BOOTS: {
 		type: 'diamond',
 		dungeonize: 10,
 		1: 5,
@@ -2034,7 +2057,7 @@ export const ESSENCE_UPGRADES = {
 		4: 20,
 		5: 25,
 	},
-	perfect_helmet_1: {
+	PERFECT_HELMET_1: {
 		type: 'diamond',
 		dungeonize: 40,
 		1: 20,
@@ -2043,7 +2066,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	perfect_chestplate_1: {
+	PERFECT_CHESTPLATE_1: {
 		type: 'diamond',
 		dungeonize: 70,
 		1: 30,
@@ -2052,7 +2075,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 180,
 	},
-	perfect_leggings_1: {
+	PERFECT_LEGGINGS_1: {
 		type: 'diamond',
 		dungeonize: 60,
 		1: 25,
@@ -2061,7 +2084,7 @@ export const ESSENCE_UPGRADES = {
 		4: 110,
 		5: 160,
 	},
-	perfect_boots_1: {
+	PERFECT_BOOTS_1: {
 		type: 'diamond',
 		dungeonize: 35,
 		1: 20,
@@ -2070,7 +2093,7 @@ export const ESSENCE_UPGRADES = {
 		4: 90,
 		5: 140,
 	},
-	diamond_bonzo_head: {
+	DIAMOND_BONZO_HEAD: {
 		type: 'diamond',
 		dungeonize: 0,
 		1: 50,
@@ -2079,7 +2102,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	diamond_scarf_head: {
+	DIAMOND_SCARF_HEAD: {
 		type: 'diamond',
 		dungeonize: 0,
 		1: 50,
@@ -2088,7 +2111,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	diamond_professor_head: {
+	DIAMOND_PROFESSOR_HEAD: {
 		type: 'diamond',
 		dungeonize: 0,
 		1: 50,
@@ -2097,7 +2120,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	diamond_thorn_head: {
+	DIAMOND_THORN_HEAD: {
 		type: 'diamond',
 		dungeonize: 0,
 		1: 50,
@@ -2106,7 +2129,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	diamond_livid_head: {
+	DIAMOND_LIVID_HEAD: {
 		type: 'diamond',
 		dungeonize: 0,
 		1: 50,
@@ -2115,7 +2138,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	diamond_sadan_head: {
+	DIAMOND_SADAN_HEAD: {
 		type: 'diamond',
 		dungeonize: 0,
 		1: 50,
@@ -2124,7 +2147,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	diamond_necron_head: {
+	DIAMOND_NECRON_HEAD: {
 		type: 'diamond',
 		dungeonize: 0,
 		1: 50,
@@ -2133,7 +2156,11 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 500,
 	},
-	yeti_sword: {
+
+	/**
+	 * ice essence
+	 */
+	YETI_SWORD: {
 		type: 'ice',
 		dungeonize: 100,
 		1: 100,
@@ -2142,7 +2169,7 @@ export const ESSENCE_UPGRADES = {
 		4: 250,
 		5: 300,
 	},
-	frozen_blaze_helmet: {
+	FROZEN_BLAZE_HELMET: {
 		type: 'ice',
 		dungeonize: 400,
 		1: 100,
@@ -2151,7 +2178,7 @@ export const ESSENCE_UPGRADES = {
 		4: 175,
 		5: 200,
 	},
-	frozen_blaze_chestplate: {
+	FROZEN_BLAZE_CHESTPLATE: {
 		type: 'ice',
 		dungeonize: 40,
 		1: 10,
@@ -2160,7 +2187,7 @@ export const ESSENCE_UPGRADES = {
 		4: 35,
 		5: 60,
 	},
-	frozen_blaze_leggings: {
+	FROZEN_BLAZE_LEGGINGS: {
 		type: 'ice',
 		dungeonize: 60,
 		1: 15,
@@ -2169,7 +2196,7 @@ export const ESSENCE_UPGRADES = {
 		4: 40,
 		5: 65,
 	},
-	frozen_blaze_boots: {
+	FROZEN_BLAZE_BOOTS: {
 		type: 'ice',
 		dungeonize: 30,
 		1: 5,
@@ -2178,7 +2205,7 @@ export const ESSENCE_UPGRADES = {
 		4: 30,
 		5: 55,
 	},
-	frozen_scythe: {
+	FROZEN_SCYTHE: {
 		type: 'ice',
 		dungeonize: 50,
 		1: 10,
@@ -2187,7 +2214,7 @@ export const ESSENCE_UPGRADES = {
 		4: 25,
 		5: 30,
 	},
-	ice_spray_wand: {
+	ICE_SPRAY_WAND: {
 		type: 'ice',
 		dungeonize: 0,
 		1: 20,

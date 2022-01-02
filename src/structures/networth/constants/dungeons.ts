@@ -1,8 +1,8 @@
 export const MASTER_STARS = [
-	'first_master_star',
-	'second_master_star',
-	'third_master_star',
-	'fourth_master_star',
+	'FIRST_MASTER_STAR',
+	'SECOND_MASTER_STAR',
+	'THIRD_MASTER_STAR',
+	'FOURTH_MASTER_STAR',
 ] as const;
 
 export const ESSENCE_PRICES = {

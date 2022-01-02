@@ -28,8 +28,8 @@ export const ALLOWED_ENCHANTS = new Set([
 ]);
 
 export const BLOCKED_ENCHANTS = {
-	bone_boomerang: new Set(['overload', 'power']),
-	death_bow: new Set(['overload', 'power', 'ultimate_soul_eater']),
+	BONE_BOOMERANG: new Set(['overload', 'power']),
+	DEATH_BOW: new Set(['overload', 'power', 'ultimate_soul_eater']),
 };
 
 export const SKYBLOCK_INVENTORIES = [

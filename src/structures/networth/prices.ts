@@ -46,23 +46,32 @@ async function updatePrices() {
 
 					if (!item) return;
 
-					let itemId = item.tag!.ExtraAttributes!.id.toLowerCase();
+					let itemId = item.tag?.ExtraAttributes?.id;
 
-					if (itemId === 'enchanted_book') {
-						const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
+					switch (itemId) {
+						case 'ENCHANTED_BOOK': {
+							const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
 
-						if (enchants.length !== 1) return;
+							if (enchants.length !== 1) return;
 
-						itemId = `${enchants[0]}_${item.tag!.ExtraAttributes!.enchantments[enchants[0]]}`.toLowerCase();
-					} else if (itemId === 'pet') {
-						const pet = JSON.parse(
-							item.tag!.ExtraAttributes!.petInfo as string,
-						) as Components.Schemas.SkyBlockProfilePet;
-						const { level } = calculatePetSkillLevel(pet);
+							itemId = `${enchants[0]}_${item.tag!.ExtraAttributes!.enchantments[enchants[0]]}`;
+							break;
+						}
 
-						if (level !== 1 && level !== 100 && level !== 200) return;
+						case 'PET': {
+							const pet = JSON.parse(
+								item.tag!.ExtraAttributes!.petInfo as string,
+							) as Components.Schemas.SkyBlockProfilePet;
+							const { level } = calculatePetSkillLevel(pet);
 
-						itemId = `lvl_${level}_${pet.tier}_${pet.type}`.toLowerCase();
+							if (level !== 1 && level !== 100 && level !== 200) return;
+
+							itemId = `LVL_${level}_${pet.tier}_${pet.type}`;
+							break;
+						}
+
+						case undefined:
+							return;
 					}
 
 					if (BINAuctions.has(itemId)) {
@@ -106,9 +115,9 @@ async function updateBazaarPrices() {
 		const { products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
 
 		for (const [item, data] of Object.entries(products)) {
-			prices.set(item.toLowerCase(), data.quick_status.buyPrice);
+			prices.set(item, data.quick_status.buyPrice);
 			db.SkyBlockBazaar.upsert({
-				id: item.toLowerCase(),
+				id: item,
 				buyPrice: data.quick_status.buyPrice,
 			});
 		}

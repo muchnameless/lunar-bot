@@ -64,17 +64,17 @@ function calculateItemPrice(item: NBTInventoryItem) {
 		return getPetPrice(JSON.parse(ExtraAttributes.petInfo as string) as Components.Schemas.SkyBlockProfilePet);
 	}
 
-	const itemId = ExtraAttributes.id.toLowerCase();
+	const itemId = ExtraAttributes.id;
 
 	let price = getPrice(itemId) * item.Count;
 
 	// dark auctions
-	if (ExtraAttributes.winning_bid && !itemId.includes('hegemony')) {
+	if (ExtraAttributes.winning_bid && itemId !== 'HEGEMONY_ARTIFACT') {
 		price = ExtraAttributes.winning_bid as number;
 	}
 
 	// farming tools
-	if (itemId.startsWith('theoretical_hoe')) {
+	if (itemId.startsWith('THEORETICAL_HOE')) {
 		const hoe = itemId.split('_');
 		const level = Number(hoe.pop());
 
@@ -97,12 +97,12 @@ function calculateItemPrice(item: NBTInventoryItem) {
 			}
 		}
 
-		price += getPrice('jacobs_ticket') * tickets;
+		price += getPrice('JACOBS_TICKET') * tickets;
 	}
 
 	// enchantments
 	if (ExtraAttributes.enchantments) {
-		if (itemId === 'enchanted_book') {
+		if (itemId === 'ENCHANTED_BOOK') {
 			const enchants = Object.keys(ExtraAttributes.enchantments);
 
 			if (enchants.length === 1) {
@@ -115,8 +115,8 @@ function calculateItemPrice(item: NBTInventoryItem) {
 					continue;
 				}
 
-				if (itemId !== 'stonk_pickaxe' && enchant === 'efficiency' && level > 5) {
-					price += getPrice('silex');
+				if (itemId !== 'STONK_PICKAXE' && enchant === 'efficiency' && level > 5) {
+					price += getPrice('SILEX');
 				}
 
 				price += getPrice(`${enchant}_${level}`);
@@ -127,59 +127,61 @@ function calculateItemPrice(item: NBTInventoryItem) {
 	// hot potato books + fuming potato books
 	if (ExtraAttributes.hot_potato_count) {
 		if (ExtraAttributes.hot_potato_count > 10) {
-			price += getPrice('hot_potato_book') * 10;
-			price += getPrice('fuming_potato_book') * (ExtraAttributes.hot_potato_count - 10);
+			price += getPrice('HOT_POTATO_BOOK') * 10;
+			price += getPrice('FUMING_POTATO_BOOK') * (ExtraAttributes.hot_potato_count - 10);
 		} else {
-			price += getPrice('hot_potato_book') * ExtraAttributes.hot_potato_count;
+			price += getPrice('HOT_POTATO_BOOK') * ExtraAttributes.hot_potato_count;
 		}
 	}
 
 	// art of war
 	if (ExtraAttributes.art_of_war_count) {
-		price += getPrice('the_art_of_war') * (ExtraAttributes.art_of_war_count as number);
+		price += getPrice('THE_ART_OF_WAR') * (ExtraAttributes.art_of_war_count as number);
 	}
 
 	// farming for dummies
 	if (ExtraAttributes.farming_for_dummies_count) {
-		price += getPrice('farming_for_dummies') * (ExtraAttributes.farming_for_dummies_count as number);
+		price += getPrice('FARMING_FOR_DUMMIES') * (ExtraAttributes.farming_for_dummies_count as number);
 	}
 
 	// dungeon stars
-	if (ExtraAttributes.dungeon_item_level && ESSENCE_UPGRADES[itemId as keyof typeof ESSENCE_UPGRADES]) {
+	if (ExtraAttributes.dungeon_item_level) {
 		const essenceItem = ESSENCE_UPGRADES[itemId as keyof typeof ESSENCE_UPGRADES];
 
-		let essenceAmount = essenceItem.dungeonize;
+		if (essenceItem) {
+			let essenceAmount = essenceItem.dungeonize;
 
-		// normal stars (5 -> 1)
-		for (let star = Math.min(ExtraAttributes.dungeon_item_level, 5); star > 0; --star) {
-			essenceAmount += essenceItem[star as 1 | 2 | 3 | 4 | 5] ?? 0;
-		}
+			// normal stars (5 -> 1)
+			for (let star = Math.min(ExtraAttributes.dungeon_item_level, 5); star > 0; --star) {
+				essenceAmount += essenceItem[star as 1 | 2 | 3 | 4 | 5] ?? 0;
+			}
 
-		price += essenceAmount * ESSENCE_PRICES[essenceItem.type];
+			price += essenceAmount * ESSENCE_PRICES[essenceItem.type];
 
-		// master stars (4 -> 0 cause array index)
-		for (let star = ExtraAttributes.dungeon_item_level - 5; star--; ) {
-			price += getPrice(MASTER_STARS[star]);
+			// master stars (4 -> 0 cause array index)
+			for (let star = ExtraAttributes.dungeon_item_level - 5; star--; ) {
+				price += getPrice(MASTER_STARS[star]);
+			}
 		}
 	}
 
 	// skin
 	if (ExtraAttributes.skin) {
-		price += getPrice(ExtraAttributes.skin as string) * 0.7;
+		price += getPrice(ExtraAttributes.skin as string) * 0.9;
 	}
 
 	// enrichments
 	if (ExtraAttributes.talisman_enrichment) {
-		price += getPrice((ExtraAttributes.talisman_enrichment as string).toLowerCase());
+		price += getPrice(`TALISMAN_ENRICHMENT_${ExtraAttributes.talisman_enrichment}`);
 	}
 
 	// recombed
 	if (
-		(ExtraAttributes.rarity_upgrades ?? 0) > 0 &&
+		ExtraAttributes.rarity_upgrades! > 0 &&
 		ExtraAttributes.originTag &&
 		(ExtraAttributes.enchantments || TALISMANS.has(itemId))
 	) {
-		price += getPrice('recombobulator_3000') / 2;
+		price += getPrice('RECOMBOBULATOR_3000') / 2;
 	}
 
 	// gemstones
@@ -187,26 +189,24 @@ function calculateItemPrice(item: NBTInventoryItem) {
 		for (const [key, value] of Object.entries(ExtraAttributes.gems as unknown as Record<string, string>)) {
 			if (IGNORED_GEMSTONES.has(key)) continue;
 
-			const [slotType] = key.split('_', 2);
+			const [slotType] = key.split('_', 1);
 
 			if (SPECIAL_GEMSTONES.has(slotType)) {
-				price += getPrice(
-					`${value}_${(ExtraAttributes.gems as unknown as Record<string, string>)[`${key}_gem`]}_gem`.toLowerCase(),
-				);
+				price += getPrice(`${value}_${(ExtraAttributes.gems as unknown as Record<string, string>)[`${key}_gem`]}_GEM`);
 			} else if (GEMSTONES.has(slotType)) {
-				price += getPrice(`${value}_${key.split('_', 2)[0]}_gem`.toLowerCase());
+				price += getPrice(`${value}_${slotType}_GEM`);
 			}
 		}
 	}
 
 	// wooden singularity
 	if (ExtraAttributes.wood_singularity_count) {
-		price += getPrice('wood_singularity');
+		price += getPrice('WOOD_SINGULARITY');
 	}
 
 	// transmission tuners
 	if (ExtraAttributes.tuned_transmission) {
-		price += getPrice('transmission_tuner') * (ExtraAttributes.tuned_transmission as number);
+		price += getPrice('TRANSMISSION_TUNER') * (ExtraAttributes.tuned_transmission as number);
 	}
 
 	// reforge
@@ -217,29 +217,29 @@ function calculateItemPrice(item: NBTInventoryItem) {
 	// scrolls (Necron's Blade)
 	if (ExtraAttributes.ability_scroll) {
 		for (const _item of Object.values(ExtraAttributes.ability_scroll as unknown as string[])) {
-			price += getPrice(_item.toLowerCase());
+			price += getPrice(_item);
 		}
 	}
 
 	// divan armor
 	if (ExtraAttributes.gemstone_slots) {
-		price += (ExtraAttributes.gemstone_slots as number) * getPrice('gemstone_chamber');
+		price += (ExtraAttributes.gemstone_slots as number) * getPrice('GEMSTONE_CHAMBER');
 	}
 
 	// drills
 	if (ExtraAttributes.drill_part_upgrade_module) {
-		price += getPrice(ExtraAttributes.drill_part_upgrade_module as string);
+		price += getPrice((ExtraAttributes.drill_part_upgrade_module as string).toUpperCase());
 	}
 	if (ExtraAttributes.drill_part_fuel_tank) {
-		price += getPrice(ExtraAttributes.drill_part_fuel_tank as string);
+		price += getPrice((ExtraAttributes.drill_part_fuel_tank as string).toUpperCase());
 	}
 	if (ExtraAttributes.drill_part_engine) {
-		price += getPrice(ExtraAttributes.drill_part_engine as string);
+		price += getPrice((ExtraAttributes.drill_part_engine as string).toUpperCase());
 	}
 
 	// ethermerge (Aspect of the Void)
 	if (ExtraAttributes.ethermerge) {
-		price += getPrice('etherwarp_conduit') + getPrice('etherwarp_merger');
+		price += getPrice('ETHERWARP_CONDUIT') + getPrice('ETHERWARP_MERGER');
 	}
 
 	return price;
@@ -277,9 +277,9 @@ export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePe
  * @param pet
  */
 function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
-	const lvl1 = prices.get(`lvl_1_${pet.tier}_${pet.type}`.toLowerCase());
-	const lvl100 = prices.get(`lvl_100_${pet.tier}_${pet.type}`.toLowerCase());
-	const lvl200 = prices.get(`lvl_200_${pet.tier}_${pet.type}`.toLowerCase());
+	const lvl1 = prices.get(`LVL_1_${pet.tier}_${pet.type}`);
+	const lvl100 = prices.get(`LVL_100_${pet.tier}_${pet.type}`);
+	const lvl200 = prices.get(`LVL_200_${pet.tier}_${pet.type}`);
 	const { level, maxXP } = calculatePetSkillLevel(pet);
 
 	let price = lvl200 ?? lvl100;
@@ -298,17 +298,23 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 
 	// held item
 	if (pet.heldItem && level !== 200) {
-		price += getPrice(pet.heldItem.toLowerCase());
+		price += getPrice(pet.heldItem);
 	}
 
-	// candy
-	if (pet.candyUsed! > 0 && pet.type !== 'ENDER_DRAGON') {
-		price = price / 1.538_232;
-	}
-
-	// skin
-	if (pet.skin) {
-		price += getPrice(`pet_skin_${pet.skin.toLowerCase()}`) * 0.7;
+	// candy + skins
+	if (!pet.candyUsed) {
+		if (pet.skin) {
+			// no candy and skin
+			price += getPrice(`PET_SKIN_${pet.skin}`) * 0.9;
+		}
+	} else {
+		if (pet.type !== 'ENDER_DRAGON') {
+			price = price / 1.538_232;
+		}
+		if (pet.skin) {
+			// candy and skin
+			price += getPrice(`PET_SKIN_${pet.skin}`) * 0.5;
+		}
 	}
 
 	return price;
@@ -351,7 +357,7 @@ export async function getNetworth({ banking, members }: SkyBlockProfile, uuid: s
 
 	if (member.sacks_counts) {
 		for (const [index, count] of Object.entries(member.sacks_counts)) {
-			networth += getPrice(index.toLowerCase()) * (count ?? 0);
+			networth += getPrice(index) * (count ?? 0);
 		}
 	}
 
