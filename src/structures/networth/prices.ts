@@ -55,10 +55,10 @@ async function updatePrices() {
 		const firstPage = await fetchAuctionPage();
 
 		// abort on error
-		if (!firstPage.success) return;
+		if (!firstPage.success) return logger.error('[UPDATE PRICES]: firstPage not successful');
 
 		// update bazaar prices if the first auction page request was successful
-		updateBazaarProducts();
+		updateBazaarPrices();
 
 		// fetch remaining auction pages
 		const BINAuctions = new Map<string, number[]>();
@@ -95,15 +95,17 @@ async function updatePrices() {
 			prices.set(itemId, lowestBIN);
 			db.SkyBlockAuction.upsert({ id: itemId, lowestBIN });
 		}
+
+		logger.debug(`[UPDATE PRICES]: fetched and processed ${firstPage.totalPages} auction pages`);
 	} catch (error) {
-		logger.error(error);
+		logger.error(error, '[UPDATE PRICES]');
 	}
 }
 
 /**
  * fetches bazaar products
  */
-async function updateBazaarProducts() {
+async function updateBazaarPrices() {
 	try {
 		const res = await fetch('https://api.hypixel.net/skyblock/bazaar');
 
@@ -119,7 +121,7 @@ async function updateBazaarProducts() {
 			});
 		}
 	} catch (error) {
-		logger.error(error);
+		logger.error(error, '[UPDATE BAZAAR PRICES]');
 	}
 }
 
