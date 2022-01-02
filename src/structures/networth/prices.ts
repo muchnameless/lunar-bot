@@ -4,35 +4,10 @@ import { transformItemData } from '@zikeji/hypixel';
 import { db } from '../database';
 import { minutes, logger } from '../../functions';
 import { calculatePetSkillLevel } from './networth';
-import type { Components, NBTExtraAttributes } from '@zikeji/hypixel';
+import type { Components } from '@zikeji/hypixel';
 
 export const prices = new Map<string, number>();
 export const getPrice = (item: string) => prices.get(item) ?? 0;
-
-/**
- * returns the lowercased item's id, with a custom implementation for enchanted books and pets
- * @param item
- */
-function getItemId(item: NBTExtraAttributes) {
-	if (item.id === 'ENCHANTED_BOOK' && item.enchantments) {
-		const enchants = Object.keys(item.enchantments);
-
-		if (enchants.length === 1) {
-			const value = item.enchantments[enchants[0]];
-
-			return `${enchants[0]}_${value}`.toLowerCase();
-		}
-	} else if (item.id === 'PET') {
-		const pet = JSON.parse(item.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
-		const data = calculatePetSkillLevel(pet);
-
-		if (data.level === 1 || data.level === 100 || data.level === 200) {
-			return `lvl_${data.level}_${pet.tier}_${pet.type}`.toLowerCase();
-		}
-	}
-
-	return item.id.toLowerCase();
-}
 
 /**
  * fetches a single auction page
@@ -71,7 +46,24 @@ async function updatePrices() {
 
 					if (!item) return;
 
-					const itemId = getItemId(item.tag!.ExtraAttributes!);
+					let itemId = item.tag!.ExtraAttributes!.id.toLowerCase();
+
+					if (itemId === 'enchanted_book') {
+						const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
+
+						if (enchants.length !== 1) return;
+
+						itemId = `${enchants[0]}_${item.tag!.ExtraAttributes!.enchantments[enchants[0]]}`.toLowerCase();
+					} else if (itemId === 'pet') {
+						const pet = JSON.parse(
+							item.tag!.ExtraAttributes!.petInfo as string,
+						) as Components.Schemas.SkyBlockProfilePet;
+						const { level } = calculatePetSkillLevel(pet);
+
+						if (level !== 1 && level !== 100 && level !== 200) return;
+
+						itemId = `lvl_${level}_${pet.tier}_${pet.type}`.toLowerCase();
+					}
 
 					if (BINAuctions.has(itemId)) {
 						BINAuctions.get(itemId)!.push(auction.starting_bid);
