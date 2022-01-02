@@ -1,4 +1,9 @@
-export const MASTER_STARS = ['first_master_star', 'second_master_star', 'third_master_star', 'fourth_master_star'];
+export const MASTER_STARS = [
+	'first_master_star',
+	'second_master_star',
+	'third_master_star',
+	'fourth_master_star',
+] as const;
 
 export const ESSENCE_PRICES = {
 	wither: 3_500,
@@ -8,4 +13,4 @@ export const ESSENCE_PRICES = {
 	ice: 4_000,
 	spider: 3_000,
 	dragon: 750,
-};
+} as const;

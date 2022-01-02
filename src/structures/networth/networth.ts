@@ -148,8 +148,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
 	if (ExtraAttributes.dungeon_item_level && ESSENCE_UPGRADES[itemId as keyof typeof ESSENCE_UPGRADES]) {
 		const essenceItem = ESSENCE_UPGRADES[itemId as keyof typeof ESSENCE_UPGRADES];
 
-		// @ts-expect-error
-		let essenceAmount = essenceItem.dungeonize ?? 0;
+		let essenceAmount = essenceItem.dungeonize;
 
 		// normal stars
 		for (let star = Math.min(ExtraAttributes.dungeon_item_level, 5); star > 0; --star) {
@@ -159,7 +158,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
 		price += essenceAmount * ESSENCE_PRICES[essenceItem.type];
 
 		// master stars
-		for (let star = ExtraAttributes.dungeon_item_level - 5; star > 0; --star) {
+		for (let star = ExtraAttributes.dungeon_item_level - 5; star--; ) {
 			price += getPrice(MASTER_STARS[star]);
 		}
 	}
