@@ -1,6 +1,6 @@
 import process from 'node:process';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters, SnowflakeUtil, version } from 'discord.js';
+import { Formatters, MessageActionRow, SnowflakeUtil, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
@@ -197,6 +197,7 @@ export default class DebugCommand extends ApplicationCommand {
 						iconURL: (me ?? this.client.user!).displayAvatarURL(),
 					}),
 			],
+			components: [new MessageActionRow().addComponents(InteractionUtil.getDeleteButton(interaction))],
 		});
 	}
 }

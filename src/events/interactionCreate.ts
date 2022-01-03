@@ -1,6 +1,7 @@
 import { setTimeout } from 'node:timers';
 import ms from 'ms';
-import { COMMAND_KEY, GUILD_ID_ALL, LB_KEY, MAX_CHOICES } from '../constants';
+import { Formatters } from 'discord.js';
+import { COMMAND_KEY, DELETE_KEY, GUILD_ID_ALL, LB_KEY, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil } from '../util';
 import {
 	handleLeaderboardButtonInteraction,
@@ -106,12 +107,24 @@ export default class InteractionCreateEvent extends Event {
 		);
 
 		const args = interaction.customId.split(':');
-		const type = args.shift();
+		const TYPE = args.shift();
 
-		switch (type) {
+		switch (TYPE) {
 			// leaderboards edit
 			case LB_KEY:
 				return handleLeaderboardButtonInteraction(interaction, args);
+
+			// message delete
+			case DELETE_KEY:
+				// check if button press is from the user that invoked the original interaction
+				if (interaction.user.id !== args[0]) {
+					return InteractionUtil.reply(interaction, {
+						content: `you cannot delete messages from ${Formatters.userMention(args[0])}`,
+						ephemeral: true,
+					});
+				}
+
+				return InteractionUtil.deleteMessage(interaction);
 
 			// command message buttons
 			case COMMAND_KEY: {

@@ -50,11 +50,11 @@ import * as functions from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { prices } from '../../structures/networth/prices';
 prices;
-import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction, Message } from 'discord.js';
+import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction, Message, Interaction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
 
-const { DELETE_EMOJI, EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
+const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
 const { logger, minutes, splitForEmbedFields } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
@@ -86,20 +86,18 @@ export default class EvalCommand extends ApplicationCommand {
 	}
 
 	/**
+	 * @param interaction
 	 * @param isAsync
 	 * @param inspectDepth
 	 */
-	private _getRows(isAsync: boolean, inspectDepth: number) {
+	private _getRows(interaction: Interaction, isAsync: boolean, inspectDepth: number) {
 		return [
 			new MessageActionRow().addComponents(
 				new MessageButton()
 					.setCustomId(`${this.baseCustomId}:edit:${isAsync}:${inspectDepth}`)
 					.setEmoji(EDIT_MESSAGE_EMOJI)
 					.setStyle(Constants.MessageButtonStyles.SECONDARY),
-				new MessageButton()
-					.setCustomId(`${this.baseCustomId}:delete`)
-					.setEmoji(DELETE_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.DANGER),
+				InteractionUtil.getDeleteButton(interaction),
 			),
 		];
 	}
@@ -240,7 +238,7 @@ export default class EvalCommand extends ApplicationCommand {
 
 		return InteractionUtil.reply(interaction, {
 			embeds: await this._eval(interaction, content, IS_ASYNC, INSPECT_DEPTH),
-			components: this._getRows(IS_ASYNC, INSPECT_DEPTH),
+			components: this._getRows(interaction, IS_ASYNC, INSPECT_DEPTH),
 		});
 	}
 
@@ -251,16 +249,15 @@ export default class EvalCommand extends ApplicationCommand {
 	 */
 	override async runButton(interaction: ButtonInteraction, args: string[]) {
 		const { channel } = interaction;
-
-		if (!ChannelUtil.botPermissions(channel!).has(Permissions.FLAGS.VIEW_CHANNEL)) {
-			throw `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`;
-		}
-
 		const [subcommand, async, inspectDepth] = args;
 
 		switch (subcommand) {
 			case 'edit': {
 				try {
+					if (!ChannelUtil.botPermissions(channel!).has(Permissions.FLAGS.VIEW_CHANNEL)) {
+						throw `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`;
+					}
+
 					const collected = await channel!.awaitMessages({
 						filter: (msg) => msg.author.id === interaction.user.id,
 						max: 1,
@@ -280,9 +277,6 @@ export default class EvalCommand extends ApplicationCommand {
 					return logger.error(error);
 				}
 			}
-
-			case 'delete':
-				return InteractionUtil.deleteMessage(interaction);
 
 			default:
 				throw new Error(`unknown subcommand '${subcommand}'`);
@@ -316,7 +310,7 @@ export default class EvalCommand extends ApplicationCommand {
 
 		return InteractionUtil.reply(interaction, {
 			embeds: await this._eval(interaction, INPUT, IS_ASYNC, INSPECT_DEPTH),
-			components: this._getRows(IS_ASYNC, INSPECT_DEPTH),
+			components: this._getRows(interaction, IS_ASYNC, INSPECT_DEPTH),
 		});
 	}
 }
