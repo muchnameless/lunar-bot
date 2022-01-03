@@ -270,7 +270,7 @@ export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePe
 	}
 
 	return {
-		maxXP: levels.reduce((a, b) => a + b),
+		maxXP: levels.reduce((a, b) => a + b, 0),
 		level,
 	};
 }
@@ -289,7 +289,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 
 		if (LVL_1 === undefined) {
 			price = 0;
-		} else if (LVL_100 === undefined) {
+		} else if (LVL_100 === undefined || !maxXP) {
 			price = LVL_1;
 		} else {
 			price = ((LVL_100 - LVL_1) / maxXP) * pet.exp + LVL_1;
