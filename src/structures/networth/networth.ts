@@ -300,7 +300,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 			price = ((LVL_100 - LVL_1) / maxXP) * pet.exp + LVL_1;
 		}
 	} else if (level === 100) {
-		price = getPrice(`LVL_100_${pet.tier}_${pet.type}`);
+		price = prices.get(`LVL_100_${pet.tier}_${pet.type}`) ?? getPrice(`LVL_1_${pet.tier}_${pet.type}`);
 	} else if (level < 200) {
 		const LVL_100 = prices.get(`LVL_100_${pet.tier}_${pet.type}`);
 		const LVL_200 = prices.get(`LVL_200_${pet.tier}_${pet.type}`);
@@ -313,7 +313,10 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 			price = ((LVL_200 - LVL_100) / 100) * Number(level.toString().slice(1)) + LVL_100;
 		}
 	} else {
-		price = getPrice(`LVL_200_${pet.tier}_${pet.type}`);
+		price =
+			prices.get(`LVL_200_${pet.tier}_${pet.type}`) ??
+			prices.get(`LVL_100_${pet.tier}_${pet.type}`) ??
+			getPrice(`LVL_1_${pet.tier}_${pet.type}`);
 	}
 
 	// held item
