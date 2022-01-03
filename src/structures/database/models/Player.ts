@@ -844,10 +844,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				}
 			} else {
 				// log once every hour (during the first update)
-				if (
-					!(new Date().getHours() % 6) &&
-					new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
-				) {
+				if (!new Date().getHours() && new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')) {
 					logger.warn(`[UPDATE XP]: ${this.logInfo}: skill API disabled`);
 				}
 
@@ -882,7 +879,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			// no slayer data found logging
 			if (
 				!Reflect.has(playerData.slayer_bosses?.zombie ?? {}, 'xp') &&
-				!(new Date().getHours() % 6) &&
+				!new Date().getHours() &&
 				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
 			) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no slayer data found`);
@@ -921,7 +918,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			// no dungeons data found logging
 			if (
 				!Reflect.has(playerData.dungeons?.dungeon_types?.catacombs ?? {}, 'experience') &&
-				!(new Date().getHours() % 6) &&
+				!new Date().getHours() &&
 				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
 			) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: no dungeons data found`);
@@ -932,7 +929,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			 */
 			if (
 				!Reflect.has(playerData, 'collection') &&
-				!(new Date().getHours() % 6) &&
+				!new Date().getHours() &&
 				new Date().getMinutes() < this.client.config.get('DATABASE_UPDATE_INTERVAL')
 			) {
 				logger.warn(`[UPDATE XP]: ${this.logInfo}: collections API disabled`);
