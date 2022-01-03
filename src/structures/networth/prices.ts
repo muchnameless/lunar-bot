@@ -72,14 +72,11 @@ async function updatePrices() {
 						}
 
 						case undefined:
+							logger.warn(item?.tag?.ExtraAttributes ?? item, '[UPDATE PRICES]: malformed item data');
 							return;
 					}
 
-					if (BINAuctions.has(itemId)) {
-						BINAuctions.get(itemId)!.push(auction.starting_bid);
-					} else {
-						BINAuctions.set(itemId, [auction.starting_bid]);
-					}
+					BINAuctions.get(itemId)?.push(auction.starting_bid) ?? BINAuctions.set(itemId, [auction.starting_bid]);
 				}),
 			);
 
