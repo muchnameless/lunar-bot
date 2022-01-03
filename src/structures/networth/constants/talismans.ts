@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 export const TALISMANS = new Set([
-	'wedDING_RING_0',
+	'WEDDING_RING_0',
 	'WEDDING_RING_2',
 	'WEDDING_RING_4',
 	'WEDDING_RING_7',
@@ -158,5 +158,5 @@ export const TALISMANS = new Set([
 	'POWER_ARTIFACT',
 	'NETHER_ARTIFACT',
 	'BINGO_TALISMAN',
-	'BINGO_Ring',
+	'BINGO_RING',
 ]);
