@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import { transformItemData } from '@zikeji/hypixel';
 import { db } from '../database';
 import { minutes, logger } from '../../functions';
+import { FetchError } from '../errors/FetchError';
 import { calculatePetSkillLevel } from './networth';
 import type { Components } from '@zikeji/hypixel';
 
@@ -16,7 +17,7 @@ export const getPrice = (item: string) => prices.get(item) ?? 0;
 async function fetchAuctionPage(page = 0) {
 	const res = await fetch(`https://api.hypixel.net/skyblock/auctions?page=${page}`);
 
-	if (res.status !== 200) throw new Error(res.statusText);
+	if (res.status !== 200) throw new FetchError('FetchAuctionError', res);
 
 	return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
 }
@@ -110,7 +111,7 @@ async function updateBazaarPrices() {
 	try {
 		const res = await fetch('https://api.hypixel.net/skyblock/bazaar');
 
-		if (res.status !== 200) throw new Error(res.statusText);
+		if (res.status !== 200) throw new FetchError('FetchBazaarError', res);
 
 		const { products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
 
