@@ -262,22 +262,15 @@ export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePe
 	const rarityOffset = PET_RARITY_OFFSET[pet.tier as keyof typeof PET_RARITY_OFFSET];
 	const levels = PET_LEVELS_XP.slice(rarityOffset, rarityOffset + maxLevel - 1);
 
-	let level = 1;
+	let level = 0;
 	let totalExperience = 0;
 
-	for (let i = 0; i < maxLevel; ++i) {
-		totalExperience += levels[i];
-
-		if (totalExperience > pet.exp) {
-			totalExperience -= levels[i];
-			break;
-		}
-
-		++level;
+	for (; level < maxLevel && totalExperience <= pet.exp; ++level) {
+		totalExperience += levels[level];
 	}
 
 	return {
-		maxXP: levels.reduce((a, b) => a + b, 0),
+		maxXP: levels.reduce((a, b) => a + b),
 		level: level > maxLevel ? maxLevel : level,
 	};
 }
