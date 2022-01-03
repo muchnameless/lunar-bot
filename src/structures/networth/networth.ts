@@ -271,7 +271,7 @@ export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePe
 
 	return {
 		maxXP: levels.reduce((a, b) => a + b),
-		level: level > maxLevel ? maxLevel : level,
+		level,
 	};
 }
 
