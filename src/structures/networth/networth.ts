@@ -148,9 +148,9 @@ function calculateItemPrice(item: NBTInventoryItem) {
 	// dungeon stars
 	if (ExtraAttributes.dungeon_item_level) {
 		const essenceItem =
-			ESSENCE_UPGRADES[
-				(itemId.startsWith('STARRED_') ? itemId.slice('STARRED_'.length) : itemId) as keyof typeof ESSENCE_UPGRADES
-			];
+			ESSENCE_UPGRADES[itemId as keyof typeof ESSENCE_UPGRADES] ??
+			(itemId.startsWith('STARRED_') &&
+				ESSENCE_UPGRADES[itemId.slice('STARRED_'.length) as keyof typeof ESSENCE_UPGRADES]);
 
 		if (essenceItem) {
 			let essenceAmount = essenceItem.dungeonize;
