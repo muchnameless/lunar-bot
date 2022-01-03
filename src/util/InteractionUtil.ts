@@ -2,7 +2,7 @@ import { setTimeout } from 'node:timers';
 import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } from 'discord.js';
 import { RESTJSONErrorCodes } from 'discord-api-types/v9';
 import { stripIndent } from 'common-tags';
-import { GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
+import { DELETE_EMOJI, DELETE_KEY, GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
 import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
@@ -282,6 +282,17 @@ export default class InteractionUtil extends null {
 	 */
 	static checkForce(interaction: CommandInteraction | AutocompleteInteraction) {
 		return interaction.options.getBoolean('force') ?? false;
+	}
+
+	/**
+	 * returns a MessageButton which triggers deleting the Message it is attached to
+	 * @param interaction
+	 */
+	static getDeleteButton(interaction: Interaction) {
+		return new MessageButton()
+			.setCustomId(`${DELETE_KEY}:${interaction.user.id}`)
+			.setEmoji(DELETE_EMOJI)
+			.setStyle(Constants.MessageButtonStyles.DANGER);
 	}
 
 	/**
