@@ -63,7 +63,17 @@ async function updatePrices() {
 							const pet = JSON.parse(
 								item.tag!.ExtraAttributes!.petInfo as string,
 							) as Components.Schemas.SkyBlockProfilePet;
-							const { level } = calculatePetSkillLevel(pet);
+
+							// ignore candied pets
+							if (pet.candyUsed) return;
+
+							let { level } = calculatePetSkillLevel(pet);
+
+							if (level < 50) {
+								level = 1;
+							} else if (level > 100 && level < 150) {
+								level = 100;
+							}
 
 							if (level !== 1 && level !== 100 && level !== 200) return;
 
