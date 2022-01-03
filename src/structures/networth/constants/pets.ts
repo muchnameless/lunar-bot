@@ -4,6 +4,7 @@ export const PET_RARITY_OFFSET = {
 	RARE: 11,
 	EPIC: 16,
 	LEGENDARY: 20,
+	MYTHIC: 20,
 };
 
 export const PET_LEVELS_XP = [
