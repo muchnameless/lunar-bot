@@ -568,7 +568,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (!this._infractions) return 0;
 
 		// last infraction expired -> remove all infractions
-		if (this._infractions.at(-1)! + this.client.config.get('INFRACTIONS_EXPIRATION_TIME') <= Date.now()) {
+		if (this._infractions.at(-1)! + this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION') <= Date.now()) {
 			this.update({ _infractions: null }).catch((error) => logger.error(error));
 			return 0;
 		}

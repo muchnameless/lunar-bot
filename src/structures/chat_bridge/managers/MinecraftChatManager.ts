@@ -344,10 +344,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 							.setThumbnail((await player.imageURL)!)
 							.setDescription(
 								stripIndents`
-									${Formatters.bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions in the last ${ms(
-									this.client.config.get('INFRACTIONS_EXPIRATION_TIME'),
-									{ long: true },
-								)}
+									${Formatters.bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions
 									${player.info}
 								`,
 							)

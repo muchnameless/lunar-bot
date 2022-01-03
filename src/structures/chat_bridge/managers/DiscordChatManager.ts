@@ -406,7 +406,7 @@ export class DiscordChatManager extends ChatManager {
 		}
 
 		// check if the player is auto muted
-		if ((player?.infractions ?? -1) >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
+		if (player?.infractions! >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
 			DiscordChatManager._dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
