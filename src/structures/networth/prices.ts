@@ -95,7 +95,7 @@ async function updatePrices() {
 			db.SkyBlockAuction.upsert({ id: itemId, lowestBIN });
 		}
 
-		logger.debug(`[UPDATE PRICES]: fetched and processed ${firstPage.totalPages} auction pages`);
+		logger.debug(`[UPDATE PRICES]: updated ${BINAuctions.size} items from ${firstPage.totalPages} auction pages`);
 	} catch (error) {
 		logger.error(error, '[UPDATE PRICES]');
 	}
