@@ -1,4 +1,5 @@
 import { transformItemData } from '@zikeji/hypixel';
+import { logger } from '../../functions';
 import {
 	ALLOWED_ENCHANTS,
 	BLOCKED_ENCHANTS,
@@ -162,6 +163,8 @@ function calculateItemPrice(item: NBTInventoryItem) {
 			for (let star = ExtraAttributes.dungeon_item_level - 5; star-- >= 0; ) {
 				price += getPrice(MASTER_STARS[star]);
 			}
+		} else {
+			logger.warn(`[NETWORTH]: unknown dungeon item '${itemId}'`);
 		}
 	}
 
@@ -197,6 +200,8 @@ function calculateItemPrice(item: NBTInventoryItem) {
 				price += getPrice(`${value}_${(ExtraAttributes.gems as unknown as Record<string, string>)[`${key}_gem`]}_GEM`);
 			} else if (GEMSTONES.has(slotType)) {
 				price += getPrice(`${value}_${slotType}_GEM`);
+			} else {
+				logger.warn(`[NETWORTH]: unknown gemstone '${key}: ${value}'`);
 			}
 		}
 	}
