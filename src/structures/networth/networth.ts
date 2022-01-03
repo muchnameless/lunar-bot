@@ -260,7 +260,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
 export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePet) {
 	const maxLevel = pet.type === 'GOLDEN_DRAGON' ? 200 : 100;
 	const rarityOffset = PET_RARITY_OFFSET[pet.tier as keyof typeof PET_RARITY_OFFSET];
-	const levels = PET_LEVELS_XP.slice(rarityOffset, rarityOffset + maxLevel - 1);
+	const levels = PET_LEVELS_XP.slice(rarityOffset, rarityOffset + maxLevel);
 
 	let level = 0;
 	let totalExperience = 0;
