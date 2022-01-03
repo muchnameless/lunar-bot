@@ -284,24 +284,37 @@ export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePe
  * @param pet
  */
 function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
-	const lvl1 = prices.get(`LVL_1_${pet.tier}_${pet.type}`);
-	const lvl100 = prices.get(`LVL_100_${pet.tier}_${pet.type}`);
-	const lvl200 = prices.get(`LVL_200_${pet.tier}_${pet.type}`);
 	const { level, maxXP } = calculatePetSkillLevel(pet);
 
-	let price = lvl200 ?? lvl100;
+	let price: number;
 
-	if (level < 100 && maxXP) {
-		if (typeof lvl1 === 'undefined' || typeof lvl100 === 'undefined') return 0;
-		price = ((lvl100 - lvl1) / maxXP) * pet.exp + lvl1;
+	if (level < 100) {
+		const LVL_1 = prices.get(`LVL_1_${pet.tier}_${pet.type}`);
+		const LVL_100 = prices.get(`LVL_100_${pet.tier}_${pet.type}`);
+
+		if (LVL_1 === undefined) {
+			price = 0;
+		} else if (LVL_100 === undefined) {
+			price = LVL_1;
+		} else {
+			price = ((LVL_100 - LVL_1) / maxXP) * pet.exp + LVL_1;
+		}
+	} else if (level === 100) {
+		price = getPrice(`LVL_100_${pet.tier}_${pet.type}`);
+	} else if (level < 200) {
+		const LVL_100 = prices.get(`LVL_100_${pet.tier}_${pet.type}`);
+		const LVL_200 = prices.get(`LVL_200_${pet.tier}_${pet.type}`);
+
+		if (LVL_100 === undefined) {
+			price = 0;
+		} else if (LVL_200 === undefined) {
+			price = LVL_100;
+		} else {
+			price = ((LVL_200 - LVL_100) / 100) * Number(level.toString().slice(1)) + LVL_100;
+		}
+	} else {
+		price = getPrice(`LVL_200_${pet.tier}_${pet.type}`);
 	}
-
-	if (level > 100 && level < 200) {
-		if (typeof lvl100 === 'undefined' || typeof lvl200 === 'undefined') return 0;
-		price = ((lvl200 - lvl100) / 100) * Number(level.toString().slice(1)) + lvl100;
-	}
-
-	if (typeof price === 'undefined') return 0;
 
 	// held item
 	if (pet.heldItem && level !== 200) {
