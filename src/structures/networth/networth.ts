@@ -166,7 +166,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
 				price += getPrice(MASTER_STARS[star]);
 			}
 		} else {
-			logger.warn(`[NETWORTH]: unknown dungeon item '${itemId}'`);
+			logger.warn(`[NETWORTH]: unknown dungeon item '${itemId}', originTag: '${ExtraAttributes.originTag}'`);
 		}
 	}
 
