@@ -40,3 +40,8 @@ export const SKYBLOCK_INVENTORIES = [
 	'talisman_bag',
 	'personal_vault_contents',
 ] as const;
+
+/**
+ * 12 per hour (every 5 mins), 6 hours
+ */
+export const MAX_HISTORY_LENGTH = 72;
