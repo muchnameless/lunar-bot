@@ -1,13 +1,13 @@
 import { Collection } from 'discord.js';
 import { logger } from '../../../functions';
-import type { FindOptions, Model, ModelCtor, WhereOptions } from 'sequelize';
+import type { FindOptions, Model, ModelStatic, WhereOptions } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
 export type ModelResovable<M extends Model> = M | string;
 
 export class ModelManager<M extends Model> {
 	client: LunarClient;
-	model: ModelCtor<M>;
+	model: ModelStatic<M>;
 	primaryKey: string;
 	cache = new Collection<string, M>();
 
@@ -15,7 +15,7 @@ export class ModelManager<M extends Model> {
 	 * @param client
 	 * @param model
 	 */
-	constructor(client: LunarClient, model: ModelCtor<M>) {
+	constructor(client: LunarClient, model: ModelStatic<M>) {
 		this.client = client;
 		this.model = model;
 		[this.primaryKey] = model.primaryKeyAttributes;

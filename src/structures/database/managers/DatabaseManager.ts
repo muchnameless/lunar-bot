@@ -13,7 +13,7 @@ import { PlayerManager } from './PlayerManager';
 import { TaxCollectorManager } from './TaxCollectorManager';
 import { ModelManager } from './ModelManager';
 import type { EmbedFieldData, GuildChannel } from 'discord.js';
-import type { ModelCtor, Sequelize } from 'sequelize';
+import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Components } from '@zikeji/hypixel';
 import type { SkyBlockAuction } from '../models/SkyBlockAuction';
 import type { SkyBlockBazaar } from '../models/SkyBlockBazaar';
@@ -29,16 +29,16 @@ import type { Transaction } from '../models/Transaction';
 import type { LunarClient } from '../../LunarClient';
 
 export interface Models {
-	ChatTrigger: ModelCtor<ChatTrigger>;
-	Config: ModelCtor<Config>;
-	DiscordGuild: ModelCtor<DiscordGuild>;
-	HypixelGuild: ModelCtor<HypixelGuild>;
-	HypixelGuildBan: ModelCtor<HypixelGuildBan>;
-	Player: ModelCtor<Player>;
-	SkyBlockAuction: ModelCtor<SkyBlockAuction>;
-	SkyBlockBazaar: ModelCtor<SkyBlockBazaar>;
-	TaxCollector: ModelCtor<TaxCollector>;
-	Transaction: ModelCtor<Transaction>;
+	ChatTrigger: ModelStatic<ChatTrigger>;
+	Config: ModelStatic<Config>;
+	DiscordGuild: ModelStatic<DiscordGuild>;
+	HypixelGuild: ModelStatic<HypixelGuild>;
+	HypixelGuildBan: ModelStatic<HypixelGuildBan>;
+	Player: ModelStatic<Player>;
+	SkyBlockAuction: ModelStatic<SkyBlockAuction>;
+	SkyBlockBazaar: ModelStatic<SkyBlockBazaar>;
+	TaxCollector: ModelStatic<TaxCollector>;
+	Transaction: ModelStatic<Transaction>;
 }
 
 export class DatabaseManager {
