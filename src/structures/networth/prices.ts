@@ -124,7 +124,7 @@ async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 					{
 						lowestBINHistory: fn(
 							'array_trim',
-							col('highestBINHistory'),
+							col('lowestBINHistory'),
 							existing.lowestBINHistory.length - MAX_HISTORY_LENGTH,
 						),
 					},
