@@ -149,7 +149,10 @@ function calculateItemPrice(item: NBTInventoryItem) {
 	if (ExtraAttributes.dungeon_item_level) {
 		const essenceItem =
 			ESSENCE_UPGRADES[itemId as keyof typeof ESSENCE_UPGRADES] ??
-			ESSENCE_UPGRADES[ExtraAttributes.originTag as keyof typeof ESSENCE_UPGRADES];
+			// upgraded item fix p1: originTag (most of the time) shows the base version of upgraded items
+			ESSENCE_UPGRADES[ExtraAttributes.originTag as keyof typeof ESSENCE_UPGRADES] ??
+			// upgraded item fix p2: STARRED_BONZO_STAFF -> BONZO_STAFF
+			ESSENCE_UPGRADES[itemId.slice(itemId.indexOf('_') + 1) as keyof typeof ESSENCE_UPGRADES];
 
 		if (essenceItem) {
 			let essenceAmount = essenceItem.dungeonize;
