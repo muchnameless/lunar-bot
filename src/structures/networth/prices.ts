@@ -1,10 +1,12 @@
 import { setInterval } from 'node:timers';
 import fetch from 'node-fetch';
 import { transformItemData } from '@zikeji/hypixel';
+import { col, fn } from 'sequelize';
 import { db } from '../database';
 import { minutes, logger } from '../../functions';
 import { FetchError } from '../errors/FetchError';
 import { calculatePetSkillLevel } from './networth';
+import { MAX_HISTORY_LENGTH } from './constants';
 import type { Components } from '@zikeji/hypixel';
 
 export const prices = new Map<string, number>();
@@ -20,6 +22,135 @@ async function fetchAuctionPage(page = 0) {
 	if (res.status !== 200) throw new FetchError('FetchAuctionError', res);
 
 	return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
+}
+
+/**
+ * updates the database and the prices map with the median of the buy price
+ * @param itemId
+ * @param currentBuyPrice
+ */
+async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
+	try {
+		const existing = await db.SkyBlockBazaar.findByPk(itemId, { attributes: ['buyPriceHistory'], raw: true });
+
+		if (existing) {
+			// calculate median value
+			existing.buyPriceHistory.push(currentBuyPrice);
+			const buyPrice = existing.buyPriceHistory.sort((a, b) => a - b).at(existing.buyPriceHistory.length / 2)!;
+
+			prices.set(itemId, buyPrice);
+
+			await db.SkyBlockBazaar.update(
+				{ buyPrice, buyPriceHistory: fn('array_prepend', currentBuyPrice, col('buyPriceHistory')) },
+				{ where: { id: itemId } },
+			);
+
+			if (existing.buyPriceHistory.length > MAX_HISTORY_LENGTH) {
+				await db.SkyBlockBazaar.update(
+					{
+						buyPriceHistory: fn(
+							'array_trim',
+							col('buyPriceHistory'),
+							existing.buyPriceHistory.length - MAX_HISTORY_LENGTH,
+						),
+					},
+					{ where: { id: itemId } },
+				);
+			}
+		} else {
+			prices.set(itemId, currentBuyPrice);
+
+			await db.SkyBlockBazaar.create({
+				id: itemId,
+				buyPrice: currentBuyPrice,
+				buyPriceHistory: [currentBuyPrice],
+			});
+
+			logger.debug(
+				{
+					itemId,
+					currentBuyPrice,
+				},
+				'[UPDATE BAZAAR ITEM]: new database entry',
+			);
+		}
+	} catch (error) {
+		logger.error({ err: error, data: { itemId, currentBuyPrice } }, '[UPDATE BAZAAR ITEM]');
+	}
+}
+
+/**
+ * fetches bazaar products
+ */
+async function updateBazaarPrices() {
+	try {
+		const res = await fetch('https://api.hypixel.net/skyblock/bazaar');
+
+		if (res.status !== 200) throw new FetchError('FetchBazaarError', res);
+
+		const { products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
+
+		for (const [item, data] of Object.entries(products)) {
+			updateBazaarItem(item, data.quick_status.buyPrice);
+		}
+	} catch (error) {
+		logger.error(error, '[UPDATE BAZAAR PRICES]');
+	}
+}
+
+/**
+ * updates the database and the prices map with the median of the lowest BIN
+ * @param itemId
+ * @param currentLowestBIN
+ */
+async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
+	try {
+		const existing = await db.SkyBlockAuction.findByPk(itemId, { attributes: ['lowestBINHistory'], raw: true });
+
+		if (existing) {
+			// calculate median value
+			existing.lowestBINHistory.push(currentLowestBIN);
+			const lowestBIN = existing.lowestBINHistory.sort((a, b) => a - b).at(existing.lowestBINHistory.length / 2)!;
+
+			prices.set(itemId, lowestBIN);
+
+			await db.SkyBlockAuction.update(
+				{ lowestBIN, lowestBINHistory: fn('array_prepend', currentLowestBIN, col('lowestBINHistory')) },
+				{ where: { id: itemId } },
+			);
+
+			if (existing.lowestBINHistory.length > MAX_HISTORY_LENGTH) {
+				await db.SkyBlockAuction.update(
+					{
+						lowestBINHistory: fn(
+							'array_trim',
+							col('highestBINHistory'),
+							existing.lowestBINHistory.length - MAX_HISTORY_LENGTH,
+						),
+					},
+					{ where: { id: itemId } },
+				);
+			}
+		} else {
+			prices.set(itemId, currentLowestBIN);
+
+			await db.SkyBlockAuction.create({
+				id: itemId,
+				lowestBIN: currentLowestBIN,
+				lowestBINHistory: [currentLowestBIN],
+			});
+
+			logger.debug(
+				{
+					itemId,
+					currentLowestBIN,
+				},
+				'[UPDATE AUCTION ITEM]: new database entry',
+			);
+		}
+	} catch (error) {
+		logger.error({ err: error, data: { itemId, currentLowestBIN } }, '[UPDATE AUCTION ITEM]');
+	}
 }
 
 /**
@@ -99,38 +230,12 @@ async function updatePrices() {
 		await Promise.all(promises);
 
 		for (const [itemId, auctions] of BINAuctions) {
-			const lowestBIN = Math.min(...auctions);
-
-			prices.set(itemId, lowestBIN);
-			db.SkyBlockAuction.upsert({ id: itemId, lowestBIN });
+			updateAuctionItem(itemId, Math.min(...auctions));
 		}
 
 		logger.debug(`[UPDATE PRICES]: updated ${BINAuctions.size} items from ${firstPage.totalPages} auction pages`);
 	} catch (error) {
 		logger.error(error, '[UPDATE PRICES]');
-	}
-}
-
-/**
- * fetches bazaar products
- */
-async function updateBazaarPrices() {
-	try {
-		const res = await fetch('https://api.hypixel.net/skyblock/bazaar');
-
-		if (res.status !== 200) throw new FetchError('FetchBazaarError', res);
-
-		const { products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
-
-		for (const [item, data] of Object.entries(products)) {
-			prices.set(item, data.quick_status.buyPrice);
-			db.SkyBlockBazaar.upsert({
-				id: item,
-				buyPrice: data.quick_status.buyPrice,
-			});
-		}
-	} catch (error) {
-		logger.error(error, '[UPDATE BAZAAR PRICES]');
 	}
 }
 
