@@ -49,7 +49,7 @@ async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
 				await db.SkyBlockBazaar.update(
 					{
 						buyPriceHistory: fn(
-							'array_trim',
+							'trim_array',
 							col('buyPriceHistory'),
 							existing.buyPriceHistory.length - MAX_HISTORY_LENGTH,
 						),
@@ -123,7 +123,7 @@ async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 				await db.SkyBlockAuction.update(
 					{
 						lowestBINHistory: fn(
-							'array_trim',
+							'trim_array',
 							col('lowestBINHistory'),
 							existing.lowestBINHistory.length - MAX_HISTORY_LENGTH,
 						),
