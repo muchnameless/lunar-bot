@@ -3,8 +3,7 @@ import { optionalIgnOption, skyblockProfileOption } from '../../structures/comma
 import { formatDecimalNumber, formatNumber, getSkillLevel, seconds, shortenNumber } from '../../functions';
 import { DUNGEON_CLASSES, DUNGEON_XP, LEVEL_CAP } from '../../constants';
 import { hypixel } from '../../api';
-import BaseSkyBlockCommand from './~base-skyblock-command';
-import type { FetchedData } from './~base-skyblock-command';
+import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class DungeonsCommand extends BaseSkyBlockCommand {
