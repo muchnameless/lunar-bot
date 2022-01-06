@@ -3,8 +3,7 @@ import { optionalIgnOption, skyblockProfileOption } from '../../structures/comma
 import { seconds, shortenNumber } from '../../functions';
 import { getNetworth } from '../../structures/networth/networth';
 import { X_EMOJI } from '../../constants';
-import BaseSkyBlockCommand from './~base-skyblock-command';
-import type { FetchedData } from './~base-skyblock-command';
+import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class NetworthCommand extends BaseSkyBlockCommand {
