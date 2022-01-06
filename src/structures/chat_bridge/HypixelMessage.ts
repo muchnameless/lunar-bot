@@ -278,7 +278,7 @@ export class HypixelMessage {
 
 				// DM author the message if sending to gchat failed
 				if (!result[0]) {
-					this.author!.send(`an error occurred while replying in ${this.type} chat\n${_options.content ?? ''}`);
+					this.author!.send(_options.content);
 				}
 
 				return result;
