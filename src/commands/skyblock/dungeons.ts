@@ -34,14 +34,12 @@ export default class DungeonsCommand extends BaseSkyBlockCommand {
 		const player = await hypixel.player.uuid(uuid);
 		const SECRETS_FOUND = player.achievements?.skyblock_treasure_hunter ?? 0;
 		const member = profile.members[uuid];
-		const { progressLevel: catacombsLvl, trueLevel } = getSkillLevel(
-			'catacombs',
-			member.dungeons?.dungeon_types?.catacombs?.experience,
-		);
+		const XP = member.dungeons?.dungeon_types?.catacombs?.experience ?? 0;
+		const { progressLevel: catacombsLvl, trueLevel } = getSkillLevel('catacombs', XP);
 		const XP_TILL_NEXT = Math.abs(
 			Object.values(DUNGEON_XP)
 				.slice(0, trueLevel + 1)
-				.reduce((acc, cur) => acc + cur, 0) - (member.dungeons?.dungeon_types?.catacombs?.experience ?? 0),
+				.reduce((acc, cur) => acc + cur, 0) - XP,
 		);
 		const CLASS_AVERAGE =
 			DUNGEON_CLASSES.reduce(
