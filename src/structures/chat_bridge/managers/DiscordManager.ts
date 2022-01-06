@@ -143,12 +143,12 @@ export class DiscordManager {
 					.replace(/(?<=^\s*)(?=>)/, '\\') // escape '>' at the beginning
 					.replace(
 						// emojis (custom and default)
-						/(?<!<a?):(\S+):(?!\d{17,19}>)/g,
+						/(?<!<[at]?):(\S+):(?!\d{17,19}>)/g,
 						(match, p1: string) => this._findEmojiByName(match, p1),
 					)
 					.replace(
 						// emojis (custom and default)
-						/(?<!<a?):(\S+?):(?!\d{17,19}>)/g,
+						/(?<!<[at]?):(\S+?):(?!\d{17,19}>)/g,
 						(match, p1: string) => this._findEmojiByName(match, p1),
 					)
 					.replace(
