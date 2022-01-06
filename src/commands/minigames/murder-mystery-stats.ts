@@ -38,6 +38,10 @@ export default class MurderMysteryStatsCommand extends BaseStatsCommand {
 		);
 	}
 
+	/**
+	 * data -> reply
+	 * @param data
+	 */
 	override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.MurderMystery) return `\`${ign}\` has no MurderMystery stats`;
 

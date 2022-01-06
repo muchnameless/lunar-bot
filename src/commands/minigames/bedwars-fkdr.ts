@@ -23,6 +23,10 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 		);
 	}
 
+	/**
+	 * data -> reply
+	 * @param data
+	 */
 	override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.Bedwars) return `\`${ign}\` has no BedWars stats`;
 

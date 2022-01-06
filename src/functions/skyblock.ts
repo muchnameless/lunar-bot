@@ -5,6 +5,7 @@ import {
 	RUNECRAFTING_XP,
 	SKILL_XP,
 	SKILL_XP_PAST_50,
+	SLAYER_XP,
 } from '../constants';
 import { getLilyWeight } from '.';
 import type { Components } from '@zikeji/hypixel';
@@ -66,6 +67,22 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		progressLevel: trueLevel,
 		nonFlooredLevel: trueLevel,
 	};
+}
+
+/**
+ * returns the slayer level for the provided slayer xp
+ * @param xp
+ */
+export function getSlayerLevel(xp = 0) {
+	const MAX_LEVEL = Math.max(...(Object.keys(SLAYER_XP) as unknown as number[]));
+
+	let level = 0;
+
+	for (let x = 1; x <= MAX_LEVEL && SLAYER_XP[x as keyof typeof SLAYER_XP] <= xp; ++x) {
+		level = x;
+	}
+
+	return level;
 }
 
 /**

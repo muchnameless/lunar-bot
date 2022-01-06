@@ -37,6 +37,10 @@ export default class SkyWarsStatsCommand extends BaseStatsCommand {
 		);
 	}
 
+	/**
+	 * data -> reply
+	 * @param data
+	 */
 	override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.SkyWars) return `\`${ign}\` has no SkyWars stats`;
 
