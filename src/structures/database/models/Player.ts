@@ -21,7 +21,6 @@ import {
 	SKILLS,
 	SLAYER_ROLES,
 	SLAYER_TOTAL_ROLES,
-	SLAYER_XP,
 	SLAYERS,
 	UNKNOWN_IGN,
 	XP_AND_DATA_TYPES,
@@ -40,6 +39,7 @@ import {
 	getSenitherSkillWeight,
 	getSenitherSlayerWeight,
 	getSkillLevel,
+	getSlayerLevel,
 	hours,
 	logger,
 	minutes,
@@ -2013,16 +2013,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * @param type the slayer type
 	 */
 	getSlayerLevel(type: SlayerTypes) {
-		const XP = this[`${type}Xp`];
-		const MAX_LEVEL = Math.max(...(Object.keys(SLAYER_XP) as unknown as number[]));
-
-		let level = 0;
-
-		for (let x = 1; x <= MAX_LEVEL && SLAYER_XP[x as keyof typeof SLAYER_XP] <= XP; ++x) {
-			level = x;
-		}
-
-		return level;
+		return getSlayerLevel(this[`${type}Xp`]);
 	}
 
 	/**

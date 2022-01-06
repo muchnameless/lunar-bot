@@ -36,6 +36,10 @@ export default class BridgeStatsCommand extends BaseStatsCommand {
 		);
 	}
 
+	/**
+	 * data -> reply
+	 * @param data
+	 */
 	override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.Duels) return `\`${ign}\` has no Bridge stats`;
 

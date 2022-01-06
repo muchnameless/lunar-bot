@@ -1,14 +1,14 @@
 import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
-import { escapeIgn, formatDecimalNumber, getUuidAndIgn, logger } from '../../functions';
+import { formatDecimalNumber, getUuidAndIgn, logger } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { CommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { Awaited } from '../../types/util';
 
-export type FetchedData = Awaited<ReturnType<StatsCommand['_fetchData']>>;
+export type FetchedData = Awaited<ReturnType<BaseStatsCommand['_fetchData']>>;
 
-export default class StatsCommand extends DualCommand {
+export default class BaseStatsCommand extends DualCommand {
 	/**
 	 * @param ctx
 	 * @param ignOrUuid
@@ -35,9 +35,11 @@ export default class StatsCommand extends DualCommand {
 
 	/**
 	 * data -> reply
+	 * @param data
 	 */
-	_generateReply({ ign }: FetchedData) {
-		return escapeIgn(ign);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	_generateReply(data: FetchedData): string {
+		throw new Error('not implemented');
 	}
 
 	/**
@@ -51,7 +53,7 @@ export default class StatsCommand extends DualCommand {
 				this._generateReply(await this._fetchData(interaction, interaction.options.getString('ign'))),
 			);
 		} catch (error) {
-			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
+			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
 			return InteractionUtil.reply(interaction, `${error}`);
 		}
 	}
@@ -66,7 +68,7 @@ export default class StatsCommand extends DualCommand {
 				this._generateReply(await this._fetchData(hypixelMessage, hypixelMessage.commandData.args[0])),
 			);
 		} catch (error) {
-			logger.error(`[${this.name.toUpperCase()} CMD]: ${error}`);
+			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
 			return hypixelMessage.reply(`${error}`);
 		}
 	}

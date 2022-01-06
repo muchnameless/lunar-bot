@@ -4,7 +4,7 @@ import { oneLine } from 'common-tags';
 import { getPlayerRank, getNetworkLevel } from '@zikeji/hypixel';
 import { hypixel } from '../../api';
 import { optionalIgnOption } from '../../structures/commands/commonOptions';
-import { escapeIgn, formatNumber, getUuidAndIgn, logger, seconds } from '../../functions';
+import { escapeIgn, formatNumber, getUuidAndIgn, seconds } from '../../functions';
 import BaseStatsCommand from './~base-stats-command';
 import type { CommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -57,31 +57,29 @@ export default class PlayerStatsCommand extends BaseStatsCommand {
 		};
 	}
 
+	/**
+	 * data -> reply
+	 * @param data
+	 */
 	override _generateReply({ ign, playerData, guildData, friendsData, statusData }: FetchedData) {
-		try {
-			const { _id, lastLogin, achievementPoints = 0, karma = 0 } = playerData ?? {};
+		const { _id, lastLogin, achievementPoints = 0, karma = 0 } = playerData ?? {};
 
-			if (!_id) return `${ign} never logged into hypixel`;
+		if (!_id) return `\`${ign}\` never logged into hypixel`;
 
-			const { cleanName: RANK_NAME } = getPlayerRank(playerData);
-			const level = Number(getNetworkLevel(playerData).preciseLevel.toFixed(2));
+		const { cleanName: RANK_NAME } = getPlayerRank(playerData);
+		const level = Number(getNetworkLevel(playerData).preciseLevel.toFixed(2));
 
-			return oneLine`
-				${escapeIgn(ign)}:
-				rank: ${RANK_NAME},
-				guild: ${guildData?.name ?? 'none'},
-				status: ${statusData ? 'online' : 'offline'},
-				friends: ${formatNumber(friendsData?.length ?? 0)},
-				level: ${level},
-				achievement points: ${formatNumber(achievementPoints)},
-				karma: ${formatNumber(karma)},
-				first joined: ${Formatters.time(Number.parseInt(_id.slice(0, 8), 16))},
-				last joined: ${lastLogin ? Formatters.time(new Date(lastLogin)) : 'unknown'}
-			`;
-		} catch (error) {
-			logger.error(error, '[PLAYER STATS CMD]');
-
-			return `${error}`;
-		}
+		return oneLine`
+			${escapeIgn(ign)}:
+			rank: ${RANK_NAME},
+			guild: ${guildData?.name ?? 'none'},
+			status: ${statusData ? 'online' : 'offline'},
+			friends: ${formatNumber(friendsData?.length ?? 0)},
+			level: ${level},
+			achievement points: ${formatNumber(achievementPoints)},
+			karma: ${formatNumber(karma)},
+			first joined: ${Formatters.time(Number.parseInt(_id.slice(0, 8), 16))},
+			last joined: ${lastLogin ? Formatters.time(new Date(lastLogin)) : 'unknown'}
+		`;
 	}
 }

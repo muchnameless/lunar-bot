@@ -1,25 +1,24 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
-import { seconds, shortenNumber } from '../../functions';
-import { getNetworth } from '../../structures/networth/networth';
-import { X_EMOJI } from '../../constants';
+import { getSlayerLevel, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
+import { SLAYERS } from '../../constants';
 import BaseSkyBlockCommand from './~base-skyblock-command';
 import type { FetchedData } from './~base-skyblock-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
-export default class NetworthCommand extends BaseSkyBlockCommand {
+export default class SlayersCommand extends BaseSkyBlockCommand {
 	constructor(context: CommandContext) {
 		super(
 			context,
 			{
 				slash: new SlashCommandBuilder()
-					.setDescription("shows a player's networth, algorithm by Maro and SkyHelper")
+					.setDescription("shows a player's slayer stats")
 					.addStringOption(optionalIgnOption)
 					.addStringOption(skyblockProfileOption),
 				cooldown: seconds(1),
 			},
 			{
-				aliases: ['nw'],
+				aliases: [],
 				args: false,
 				usage: '<`IGN`> <`profile` name>',
 			},
@@ -30,12 +29,21 @@ export default class NetworthCommand extends BaseSkyBlockCommand {
 	 * data -> reply
 	 * @param data
 	 */
-	override async _generateReply({ ign, uuid, profile }: FetchedData) {
-		const { networth, bankingAPIEnabled, inventoryAPIEnabled } = await getNetworth(profile, uuid);
+	override _generateReply({ ign, uuid, profile }: FetchedData) {
+		const member = profile.members[uuid];
+		const reply = [`${ign} (${profile.cute_name}): `];
 
-		const reply = [`${ign} (${profile.cute_name}): ${shortenNumber(networth)}`];
-		if (!bankingAPIEnabled) reply.push(`${X_EMOJI} Banking API disabled`);
-		if (!inventoryAPIEnabled) reply.push(`${X_EMOJI} Inventory API disabled`);
+		let totalXp = 0;
+
+		for (const slayer of SLAYERS) {
+			const XP = member.slayer_bosses?.[slayer]?.xp ?? 0;
+
+			totalXp += XP;
+
+			reply.push(`${upperCaseFirstChar(slayer)} ${getSlayerLevel(XP)} (${shortenNumber(XP)} XP)`);
+		}
+
+		reply[0] += `${shortenNumber(totalXp)} Slayer XP`;
 
 		return reply.join(' | ');
 	}
