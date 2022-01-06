@@ -195,8 +195,8 @@ async function updatePrices() {
 								item.tag!.ExtraAttributes!.petInfo as string,
 							) as Components.Schemas.SkyBlockProfilePet;
 
-							// ignore candied pets
-							if (pet.candyUsed) return;
+							// ignore candied and skinned pets
+							if (pet.candyUsed || pet.skin) return;
 
 							let { level } = calculatePetSkillLevel(pet);
 
