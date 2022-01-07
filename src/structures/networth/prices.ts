@@ -30,6 +30,9 @@ async function fetchAuctionPage(page = 0) {
  * @param currentBuyPrice
  */
 async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
+	// API error
+	if (currentBuyPrice > 2_147_483_647) return;
+
 	try {
 		const existing = await db.SkyBlockBazaar.findByPk(itemId, { attributes: ['buyPriceHistory'], raw: true });
 
