@@ -25,14 +25,43 @@ async function fetchAuctionPage(page = 0) {
 }
 
 /**
+ * https://github.com/SkyCryptWebsite/SkyCrypt/blob/481de4411c4093576c728f04540f497ef55ceadf/src/helper.js#L494
+ * calculates the product's buyPrice based on the buy_summary
+ * @param orderSummary
+ */
+function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy_summary']) {
+	const _orderSummary = orderSummary.slice(0, Math.ceil(orderSummary.length / 2));
+
+	const orders = [];
+
+	const totalVolume = _orderSummary.map((a) => a.amount).reduce((a, b) => a + b, 0);
+	const volumeTop2 = Math.ceil(totalVolume * 0.02);
+
+	let volume = 0;
+
+	for (const order of _orderSummary) {
+		const cappedAmount = Math.min(order.amount, volumeTop2 - volume);
+
+		orders.push([order.pricePerUnit, cappedAmount]);
+
+		volume += cappedAmount;
+
+		if (volume >= volumeTop2) {
+			break;
+		}
+	}
+
+	const totalWeight = orders.reduce((sum, value) => sum + value[1], 0);
+
+	return orders.reduce((mean, value) => mean + (value[0] * value[1]) / totalWeight, 0);
+}
+
+/**
  * updates the database and the prices map with the median of the buy price
  * @param itemId
  * @param currentBuyPrice
  */
 async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
-	// API error
-	if (currentBuyPrice > 2_147_483_647) return;
-
 	try {
 		const existing = await db.SkyBlockBazaar.findByPk(itemId, { attributes: ['buyPriceHistory'], raw: true });
 
@@ -94,7 +123,12 @@ async function updateBazaarPrices() {
 		const { products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
 
 		for (const [item, data] of Object.entries(products)) {
-			updateBazaarItem(item, data.quick_status.buyPrice);
+			updateBazaarItem(
+				item,
+				data.quick_status.buyPrice < 2_147_483_647 && data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
+					? data.quick_status.buyPrice
+					: getBuyPrice(data.buy_summary),
+			);
 		}
 	} catch (error) {
 		logger.error(error, '[UPDATE BAZAAR PRICES]');
