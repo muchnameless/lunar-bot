@@ -27,7 +27,7 @@
   "dependencies": {
     "@discordjs/builders": "^0.11.0",
     "@discordjs/rest": "^0.2.0-canary.0",
-    "@keyv/redis": "^2.2.1",
+    "@keyv/redis": "^2.2.2",
     "@sapphire/async-queue": "^1.1.9",
     "@sapphire/stopwatch": "^1.2.4",
     "@sapphire/time-utilities": "^1.5.0",
