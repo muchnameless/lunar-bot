@@ -16,6 +16,7 @@ export const REFORGES = {
 	gilded: 'MIDAS_JEWEL',
 	jaded: 'JADERALD',
 	headstrong: 'SALMON_OPAL',
+	heated: 'HOT_STUFF',
 	loving: 'RED_SCARF',
 	magnetic: 'LAPIS_CRYSTAL',
 	mithraic: 'PURE_MITHRIL',
