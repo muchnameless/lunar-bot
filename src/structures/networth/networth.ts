@@ -1,8 +1,6 @@
 import { transformItemData } from '@zikeji/hypixel';
 import { logger } from '../../functions';
 import {
-	ALLOWED_ENCHANTS,
-	BLOCKED_ENCHANTS,
 	ESSENCE_PRICES,
 	ESSENCE_UPGRADES,
 	GEMSTONES,
@@ -103,25 +101,14 @@ function calculateItemPrice(item: NBTInventoryItem) {
 
 	// enchantments
 	if (ExtraAttributes.enchantments) {
-		if (itemId === 'ENCHANTED_BOOK') {
-			const enchants = Object.keys(ExtraAttributes.enchantments);
-
-			if (enchants.length === 1) {
-				price = getPrice(`${enchants[0]}_${ExtraAttributes.enchantments[enchants[0]]}`);
+		for (const [enchant, level] of Object.entries(ExtraAttributes.enchantments)) {
+			if (enchant === 'efficiency' && level > 5 && itemId !== 'STONK_PICKAXE') {
+				price += getPrice('SILEX');
 			}
-		} else {
-			// non books
-			for (const [enchant, level] of Object.entries(ExtraAttributes.enchantments)) {
-				if (BLOCKED_ENCHANTS[itemId as keyof typeof BLOCKED_ENCHANTS]?.has(enchant) || !ALLOWED_ENCHANTS.has(enchant)) {
-					continue;
-				}
 
-				if (itemId !== 'STONK_PICKAXE' && enchant === 'efficiency' && level > 5) {
-					price += getPrice('SILEX');
-				}
-
-				price += getPrice(`${enchant}_${level}`);
-			}
+			price += enchant.startsWith('_ultimate')
+				? getPrice(`${enchant}_1`) * 2 ** (level - 1)
+				: getPrice(`${enchant}_${level}`);
 		}
 	}
 
