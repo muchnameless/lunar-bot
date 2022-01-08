@@ -13,18 +13,6 @@ export const prices = new Map<string, number>();
 export const getPrice = (item: string) => prices.get(item) ?? 0;
 
 /**
- * fetches a single auction page
- * @param page
- */
-async function fetchAuctionPage(page = 0) {
-	const res = await fetch(`https://api.hypixel.net/skyblock/auctions?page=${page}`);
-
-	if (res.status !== 200) throw new FetchError('FetchAuctionError', res);
-
-	return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
-}
-
-/**
  * https://github.com/SkyCryptWebsite/SkyCrypt/blob/481de4411c4093576c728f04540f497ef55ceadf/src/helper.js#L494
  * calculates the product's buyPrice based on the buy_summary
  * @param orderSummary
@@ -191,6 +179,18 @@ async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 }
 
 /**
+ * fetches a single auction page
+ * @param page
+ */
+async function fetchAuctionPage(page = 0) {
+	const res = await fetch(`https://api.hypixel.net/skyblock/auctions?page=${page}`);
+
+	if (res.status !== 200) throw new FetchError('FetchAuctionError', res);
+
+	return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
+}
+
+/**
  * fetches all auction pages
  */
 async function updatePrices() {
@@ -250,11 +250,18 @@ async function updatePrices() {
 						}
 
 						case undefined:
+							// no itemId
 							logger.warn(item?.tag?.ExtraAttributes ?? item, '[UPDATE PRICES]: malformed item data');
 							return;
+
+						default:
+							// ignore vanilla mc items
+							if (itemId.includes(':')) return;
 					}
 
-					BINAuctions.get(itemId)?.push(auction.starting_bid) ?? BINAuctions.set(itemId, [auction.starting_bid]);
+					const price = auction.starting_bid / item.Count;
+
+					BINAuctions.get(itemId)?.push(price) ?? BINAuctions.set(itemId, [price]);
 				}),
 			);
 
