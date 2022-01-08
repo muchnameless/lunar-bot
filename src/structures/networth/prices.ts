@@ -5,7 +5,7 @@ import { col, fn } from 'sequelize';
 import { db } from '../database';
 import { minutes, logger } from '../../functions';
 import { FetchError } from '../errors/FetchError';
-import { VANILLA_ITEMS_AND_BLOCKS } from '../../constants';
+import { VANILLA_ITEM_NAMES } from '../../constants';
 import { calculatePetSkillLevel } from './networth';
 import { MAX_HISTORY_LENGTH } from './constants';
 import type { Components } from '@zikeji/hypixel';
@@ -257,10 +257,7 @@ async function updatePrices() {
 
 						default:
 							// ignore vanilla mc items
-							if (
-								auction.tier === 'COMMON' &&
-								(itemId.includes(':') || VANILLA_ITEMS_AND_BLOCKS.has(auction.item_name))
-							) {
+							if (auction.tier === 'COMMON' && (itemId.includes(':') || VANILLA_ITEM_NAMES.has(auction.item_name))) {
 								return;
 							}
 					}

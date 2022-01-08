@@ -5,14 +5,16 @@ import minecraftDataLoader from 'minecraft-data';
  */
 export const MC_CLIENT_VERSION = '1.18';
 
+/**
+ * minecraft data from the version the bridge bot uses
+ */
 export const MINECRAFT_DATA = minecraftDataLoader(MC_CLIENT_VERSION);
 
-export const VANILLA_ITEMS_AND_BLOCKS = new Set<string>(['null']);
-
-for (const { displayName } of MINECRAFT_DATA.blocksArray) {
-	VANILLA_ITEMS_AND_BLOCKS.add(displayName);
-}
+/**
+ * display names of vanilla mc items and blocks, including "null"
+ */
+export const VANILLA_ITEM_NAMES = new Set<string>(['null']);
 
 for (const { displayName } of MINECRAFT_DATA.itemsArray) {
-	VANILLA_ITEMS_AND_BLOCKS.add(displayName);
+	VANILLA_ITEM_NAMES.add(displayName);
 }
