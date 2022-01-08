@@ -217,6 +217,7 @@ async function updatePrices() {
 					if (!item) return;
 
 					let itemId = item.tag?.ExtraAttributes?.id;
+					let count = item.Count;
 
 					switch (itemId) {
 						case 'ENCHANTED_BOOK': {
@@ -224,7 +225,17 @@ async function updatePrices() {
 
 							if (enchants.length !== 1) return;
 
-							itemId = `${enchants[0]}_${item.tag!.ExtraAttributes!.enchantments[enchants[0]]}`;
+							const [ENCHANTMENT] = enchants;
+
+							let level = item.tag!.ExtraAttributes!.enchantments[enchants[0]];
+
+							// ultimate enchants
+							if (ENCHANTMENT.startsWith('ultimate_')) {
+								count = 2 ** (level - 1);
+								level = 1;
+							}
+
+							itemId = `${ENCHANTMENT}_${level}`;
 							break;
 						}
 
@@ -262,7 +273,7 @@ async function updatePrices() {
 							}
 					}
 
-					const price = auction.starting_bid / item.Count;
+					const price = auction.starting_bid / count;
 
 					BINAuctions.get(itemId)?.push(price) ?? BINAuctions.set(itemId, [price]);
 				}),
