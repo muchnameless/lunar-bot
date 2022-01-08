@@ -1,17 +1,11 @@
 import { regExpEsc } from '@sapphire/utilities';
 import loader from 'prismarine-chat';
-import { NEVER_MATCHING_REGEXP, NO_PING_EMOJI, UNKNOWN_IGN } from '../../constants';
+import { MC_CLIENT_VERSION, NEVER_MATCHING_REGEXP, NO_PING_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { MessageUtil } from '../../util';
 import { logger, seconds, uuidToImgurBustURL } from '../../functions';
 import { mojang } from '../../api';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
-import {
-	INVISIBLE_CHARACTER_REGEXP,
-	MC_CLIENT_VERSION,
-	MESSAGE_POSITIONS,
-	MESSAGE_TYPES,
-	spamMessages,
-} from './constants';
+import { INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, MESSAGE_TYPES, spamMessages } from './constants';
 import type { DiscordChatManager } from './managers/DiscordChatManager';
 import type { Player } from '../database/models/Player';
 import type { GuildMember, Message as DiscordMessage } from 'discord.js';

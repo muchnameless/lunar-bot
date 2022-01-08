@@ -6,18 +6,16 @@ import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import emojiRegex from 'emoji-regex/es2015';
-import minecraftData from 'minecraft-data';
 import {
 	INVISIBLE_CHARACTER_REGEXP,
 	INVISIBLE_CHARACTERS,
-	MC_CLIENT_VERSION,
 	MEME_REGEXP,
 	MESSAGE_TYPES,
 	NON_WHITESPACE_REGEXP,
 	randomPadding,
 	UNICODE_TO_EMOJI_NAME,
 } from '../constants';
-import { STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
+import { MC_CLIENT_VERSION, MINECRAFT_DATA, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
 import { createBot } from '../MinecraftBot';
 import { MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector, MessageCollectorEvents } from '../MessageCollector';
@@ -289,10 +287,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * 100 pre 1.10.2, 256 post 1.10.2
 	 */
-	static MAX_MESSAGE_LENGTH =
-		minecraftData(MC_CLIENT_VERSION).version.version! > minecraftData('1.10.2').version.version!
-			? (256 as const)
-			: (100 as const);
+	static MAX_MESSAGE_LENGTH = MINECRAFT_DATA.isNewerOrEqualTo('1.10.2') ? (256 as const) : (100 as const);
 
 	/**
 	 * reacts to the message and DMs the author

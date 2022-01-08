@@ -1,6 +1,7 @@
 export * from './bot';
 export * from './discord';
 export * from './emojiCharacters';
+export * from './minecraft';
 export * from './redis';
 export * from './roles';
 export * from './skyblock';
