@@ -287,7 +287,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * 100 pre 1.10.2, 256 post 1.10.2
 	 */
-	static MAX_MESSAGE_LENGTH = MINECRAFT_DATA.isNewerOrEqualTo('1.10.2') ? (256 as const) : (100 as const);
+	static MAX_MESSAGE_LENGTH = MINECRAFT_DATA.isNewerOrEqualTo('1.11') ? (256 as const) : (100 as const);
 
 	/**
 	 * reacts to the message and DMs the author
