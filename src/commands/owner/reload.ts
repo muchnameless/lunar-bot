@@ -5,7 +5,7 @@ import { stripIndents } from 'common-tags';
 import { InteractionUtil } from '../../util';
 import { logger, readJSFiles } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandType } from '../../structures/commands/BaseCommandCollection';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
@@ -242,7 +242,7 @@ export default class ReloadCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		return InteractionUtil.reply(
 			interaction,
 			await this._run(

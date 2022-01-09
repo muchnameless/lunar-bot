@@ -314,7 +314,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 						await this.client.players.model.findCreateFind({
 							where: { discordId: discordMessage.author.id },
 							defaults: {
-								minecraftUuid: SnowflakeUtil.generate(),
+								minecraftUuid: SnowflakeUtil.generate().toString(),
 								ign: UNKNOWN_IGN,
 								inDiscord: true,
 							},

@@ -3,7 +3,7 @@ import { hypixelGuildOption, offsetOption, pageOption, xpTypeOption } from '../.
 import { InteractionUtil } from '../../util';
 import { handleLeaderboardCommandInteraction, seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { LeaderboardXPOffsets, LeaderboardXPTypes } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -26,7 +26,7 @@ export default class TopCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: ChatInputCommandInteraction) {
 		return handleLeaderboardCommandInteraction(interaction, {
 			lbType: 'total',
 			xpType: (interaction.options.getString('type') as LeaderboardXPTypes) ?? this.config.get('CURRENT_COMPETITION'),

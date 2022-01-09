@@ -7,7 +7,7 @@ import { InteractionUtil } from '../../util';
 import { escapeIgn, logger } from '../../functions';
 import { MinecraftChatManager } from '../../structures/chat_bridge/managers/MinecraftChatManager';
 import { DualCommand } from '../../structures/commands/DualCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { ChatBridge } from '../../structures/chat_bridge/ChatBridge';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
@@ -106,7 +106,7 @@ export default class JoinDateCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const IGN = InteractionUtil.getIgn(interaction, {
 			fallbackToCurrentUser: !(

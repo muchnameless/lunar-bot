@@ -7,7 +7,7 @@ import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands
 import { InteractionUtil, UserUtil } from '../../util';
 import { logger, seconds, validateNumber } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction, GuildMember, User } from 'discord.js';
+import type { ChatInputCommandInteraction, GuildMember, User } from 'discord.js';
 import type { Player } from '../../structures/database/models/Player';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -27,7 +27,7 @@ export default class LinkCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const IGN_OR_UUID = interaction.options.getString('ign', true);
 
 		let uuid: string | undefined;

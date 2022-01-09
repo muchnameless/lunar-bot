@@ -3,7 +3,7 @@ import { hypixelGuildOption, optionalPlayerOption } from '../../structures/comma
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { formatNumber } from '../../functions';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class RanksCommand extends ApplicationCommand {
@@ -21,7 +21,7 @@ export default class RanksCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true });
 		const embed = this.client.defaultEmbed.setFooter({ text: hypixelGuild.name });

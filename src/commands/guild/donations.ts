@@ -6,7 +6,7 @@ import { InteractionUtil, MessageEmbedUtil } from '../../util';
 import { formatNumber, logger } from '../../functions';
 import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class DonationsCommand extends ApplicationCommand {
@@ -21,7 +21,7 @@ export default class DonationsCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		// aquire donations from db
 		const donations = await this.client.db.models.Transaction.findAll({
 			where: { type: TransactionTypes.DONATION },

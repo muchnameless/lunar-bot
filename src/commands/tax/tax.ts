@@ -10,7 +10,7 @@ import { ChannelUtil, InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, logger, safePromiseAll, validateNumber } from '../../functions';
 import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
+import type { ChatInputCommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class TaxCommand extends ApplicationCommand {
@@ -81,7 +81,7 @@ export default class TaxCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		switch (interaction.options.getSubcommandGroup(false)) {
 			case 'ah': {
 				const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });

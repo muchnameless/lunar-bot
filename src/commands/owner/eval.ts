@@ -50,7 +50,13 @@ import * as functions from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { prices } from '../../structures/networth/prices';
 prices;
-import type { CommandInteraction, ContextMenuInteraction, ButtonInteraction, Message, Interaction } from 'discord.js';
+import type {
+	ChatInputCommandInteraction,
+	ContextMenuCommandInteraction,
+	ButtonInteraction,
+	Message,
+	Interaction,
+} from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
 
@@ -109,7 +115,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param inspectDepth
 	 */
 	private async _eval(
-		interaction: CommandInteraction | ContextMenuInteraction | ButtonInteraction,
+		interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction,
 		input: string,
 		isAsync = /\bawait\b/.test(input),
 		inspectDepth = 0,
@@ -224,7 +230,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param message
 	 */
-	override async runMessage(interaction: ContextMenuInteraction, { content, author }: Message) {
+	override async runMessage(interaction: ContextMenuCommandInteraction, { content, author }: Message) {
 		if (!content) {
 			throw 'no content to evaluate';
 		}
@@ -287,7 +293,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		let indentationCount = 0;
 
 		const INPUT = interaction.options
