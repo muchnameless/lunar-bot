@@ -112,6 +112,13 @@ function calculateItemPrice(item: NBTInventoryItem) {
 		}
 	}
 
+	// runes
+	if (ExtraAttributes.runes) {
+		for (const [rune, level] of Object.entries(ExtraAttributes.runes)) {
+			price += getPrice(`RUNE_${rune}_${level}`);
+		}
+	}
+
 	// hot potato books + fuming potato books
 	if (ExtraAttributes.hot_potato_count) {
 		if (ExtraAttributes.hot_potato_count > 10) {
