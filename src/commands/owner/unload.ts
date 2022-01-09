@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -67,7 +67,7 @@ export default class UnloadCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: ChatInputCommandInteraction) {
 		return InteractionUtil.reply(
 			interaction,
 			this._run(interaction.options.getSubcommand(), interaction.options.getString('name', true)),

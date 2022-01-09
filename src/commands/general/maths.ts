@@ -5,7 +5,7 @@ import { Util } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { formatNumber } from '../../functions';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
@@ -451,7 +451,7 @@ export default class MathsCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: ChatInputCommandInteraction) {
 		return InteractionUtil.reply(
 			interaction,
 			Util.escapeMarkdown(this._generateReply(interaction.options.getString('input', true))),

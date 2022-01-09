@@ -5,7 +5,7 @@ import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { logger, seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { hypixelGuildOption } from '../../structures/commands/commonOptions';
-import type { CommandInteraction, Snowflake } from 'discord.js';
+import type { ChatInputCommandInteraction, Snowflake } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class PurgeRolesCommand extends ApplicationCommand {
@@ -29,7 +29,7 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const { discordGuild: guild } = InteractionUtil.getHypixelGuild(interaction);
 
 		if (!guild) {

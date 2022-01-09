@@ -4,7 +4,7 @@ import { hypixelGuildOption, pageOption } from '../../structures/commands/common
 import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI } from '../../constants';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { ButtonInteraction, CommandInteraction } from 'discord.js';
+import type { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelGuild } from '../../structures/database/models/HypixelGuild';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -72,7 +72,7 @@ export default class FriendCommand extends ApplicationCommand {
 	 * @param page
 	 */
 	private async _runPaginated(
-		interaction: CommandInteraction | ButtonInteraction,
+		interaction: ChatInputCommandInteraction | ButtonInteraction,
 		hypixelGuild: HypixelGuild,
 		page: number | null,
 	) {
@@ -80,16 +80,17 @@ export default class FriendCommand extends ApplicationCommand {
 		const response = await hypixelGuild.chatBridge.minecraft.command({ command });
 		const pageMatched = response.match(/\(Page (?<current>\d+) of (?<total>\d+)\)/);
 
-		return (
-			InteractionUtil[interaction.isApplicationCommand() ? 'reply' : 'update'] as typeof InteractionUtil['reply']
-		)(interaction as ButtonInteraction, {
-			embeds: [this.client.defaultEmbed.setTitle(`/${command}`).setDescription(Formatters.codeBlock(response))],
-			components: this._getPaginationButtons(
-				hypixelGuild.guildId,
-				Number(pageMatched?.groups!.current),
-				Number(pageMatched?.groups!.total),
-			),
-		});
+		return (InteractionUtil[interaction.isCommand() ? 'reply' : 'update'] as typeof InteractionUtil['reply'])(
+			interaction as ButtonInteraction,
+			{
+				embeds: [this.client.defaultEmbed.setTitle(`/${command}`).setDescription(Formatters.codeBlock(response))],
+				components: this._getPaginationButtons(
+					hypixelGuild.guildId,
+					Number(pageMatched?.groups!.current),
+					Number(pageMatched?.groups!.total),
+				),
+			},
+		);
 	}
 
 	/**
@@ -120,7 +121,7 @@ export default class FriendCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: ChatInputCommandInteraction) {
 		switch (interaction.options.getSubcommand()) {
 			case 'list':
 				return this._runPaginated(

@@ -15,7 +15,7 @@ import {
 } from '../../constants';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { ButtonInteraction, CommandInteraction, Snowflake } from 'discord.js';
+import type { ButtonInteraction, ChatInputCommandInteraction, Snowflake } from 'discord.js';
 
 export default class BanListCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
@@ -96,7 +96,11 @@ export default class BanListCommand extends ApplicationCommand {
 	 * @param userId
 	 * @param page
 	 */
-	private async _runView(interaction: CommandInteraction | ButtonInteraction, userId: Snowflake, page: number) {
+	private async _runView(
+		interaction: ChatInputCommandInteraction | ButtonInteraction,
+		userId: Snowflake,
+		page: number,
+	) {
 		const ELEMENTS_PER_PAGE = this.config.get('ELEMENTS_PER_PAGE');
 		const OFFSET = (page - 1) * ELEMENTS_PER_PAGE;
 		const { rows: bans, count } = await this.client.db.models.HypixelGuildBan.findAndCountAll({
@@ -127,7 +131,7 @@ export default class BanListCommand extends ApplicationCommand {
 
 		return (
 			InteractionUtil[
-				interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'
+				interaction.isCommand() || interaction.user.id !== userId ? 'reply' : 'update'
 			] as typeof InteractionUtil['reply']
 		)(interaction as ButtonInteraction, {
 			embeds: [
@@ -168,7 +172,7 @@ export default class BanListCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		switch (interaction.options.getSubcommand()) {
 			case 'add': {
 				const { ign, uuid } = await mojang.ignOrUuid(interaction.options.getString('ign', true));

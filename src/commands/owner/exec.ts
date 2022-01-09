@@ -5,7 +5,7 @@ import { Formatters, MessageActionRow } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { logger } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class ExecCommand extends ApplicationCommand {
@@ -22,7 +22,7 @@ export default class ExecCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		try {
 			const me = interaction.guild?.me ?? null;
 			const INPUT = interaction.options.getString('input', true);

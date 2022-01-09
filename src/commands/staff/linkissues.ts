@@ -4,7 +4,7 @@ import { GuildMemberUtil, GuildUtil, InteractionUtil } from '../../util';
 import { escapeIgn } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { hypixelGuildOption } from '../../structures/commands/commonOptions';
-import type { CommandInteraction, GuildMember } from 'discord.js';
+import type { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 interface IssueInfo {
@@ -26,7 +26,7 @@ export default class LinkIssuesCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		// discord members with wrong roles
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const guild = hypixelGuild.discordGuild;

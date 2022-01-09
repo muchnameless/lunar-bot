@@ -3,7 +3,7 @@ import { hypixelGuildOption, targetOption } from '../../structures/commands/comm
 import { minutes } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { InteractionUtil } from '../../util';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type GuildCommand from '../guild/guild';
@@ -30,7 +30,7 @@ export default class SmiteCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: ChatInputCommandInteraction) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const guildCommand = this.client.commands.get('guild') as GuildCommand;
 

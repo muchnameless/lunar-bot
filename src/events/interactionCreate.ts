@@ -16,8 +16,8 @@ import type {
 	AutocompleteInteraction,
 	BaseGuildTextChannel,
 	ButtonInteraction,
-	CommandInteraction,
-	ContextMenuInteraction,
+	ChatInputCommandInteraction,
+	ContextMenuCommandInteraction,
 	GuildMember,
 	Message,
 	SelectMenuInteraction,
@@ -37,7 +37,7 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	private async _handleCommandInteraction(interaction: CommandInteraction) {
+	private async _handleCommandInteraction(interaction: ChatInputCommandInteraction) {
 		logger.info(
 			{
 				type: interaction.type,
@@ -310,7 +310,7 @@ export default class InteractionCreateEvent extends Event {
 	/**
 	 * @param interaction
 	 */
-	private async _handleContextMenuInteraction(interaction: ContextMenuInteraction) {
+	private async _handleContextMenuInteraction(interaction: ContextMenuCommandInteraction) {
 		logger.info(
 			{
 				type: interaction.targetType,
@@ -362,7 +362,7 @@ export default class InteractionCreateEvent extends Event {
 			InteractionUtil.add(interaction);
 
 			// commands
-			if (interaction.isCommand()) return await this._handleCommandInteraction(interaction);
+			if (interaction.isChatInputCommand()) return await this._handleCommandInteraction(interaction);
 
 			// buttons
 			if (interaction.isButton()) return await this._handleButtonInteraction(interaction);
@@ -371,7 +371,7 @@ export default class InteractionCreateEvent extends Event {
 			if (interaction.isSelectMenu()) return await this._handleSelectMenuInteraction(interaction);
 
 			// context menu
-			if (interaction.isContextMenu()) return await this._handleContextMenuInteraction(interaction);
+			if (interaction.isContextMenuCommand()) return await this._handleContextMenuInteraction(interaction);
 
 			throw `unknown interaction type '${interaction.type}'`;
 		} catch (error) {

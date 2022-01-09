@@ -8,7 +8,14 @@ import { hypixel, imgur } from '../../api';
 import { InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { Collection, CommandInteraction, DMChannel, Snowflake, TextBasedChannel, ThreadChannel } from 'discord.js';
+import type {
+	Collection,
+	ChatInputCommandInteraction,
+	DMChannel,
+	Snowflake,
+	TextBasedChannel,
+	ThreadChannel,
+} from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class DebugCommand extends ApplicationCommand {
@@ -23,7 +30,7 @@ export default class DebugCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const { guilds, channels, players } = this.client;
 		const me = interaction.guild?.me ?? null;
 
@@ -50,24 +57,27 @@ export default class DebugCommand extends ApplicationCommand {
 								${(channels.cache.filter((c) => c.type === 'DM') as Collection<Snowflake, DMChannel>)
 									.map(
 										(c) =>
-											[
-												c.recipient.tag ?? c.recipient.id,
-												SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date,
-											] as const,
+											[c.recipient.tag ?? c.recipient.id, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const,
 									)
-									.sort(([, a], [, b]) => b.getTime() - a.getTime())
+									.sort(([, a], [, b]) => b - a)
 									.map(([name, date]) =>
 										Formatters.quote(
-											`${name ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`,
+											`${name ?? 'unknown channel'}: ${Formatters.time(
+												new Date(date),
+												Formatters.TimestampStyles.LongDateTime,
+											)}`,
 										),
 									)
 									.join('\n')}
 								${(channels.cache.filter((c) => c.isThread()) as Collection<Snowflake, ThreadChannel>)
-									.map((c) => [c, SnowflakeUtil.deconstruct(c.lastMessageId ?? '').date] as const)
-									.sort(([, a], [, b]) => b.getTime() - a.getTime())
+									.map((c) => [c, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const)
+									.sort(([, a], [, b]) => b - a)
 									.map(([c, date]) =>
 										Formatters.quote(
-											`${c ?? 'unknown channel'}: ${Formatters.time(date, Formatters.TimestampStyles.LongDateTime)}`,
+											`${c ?? 'unknown channel'}: ${Formatters.time(
+												new Date(date),
+												Formatters.TimestampStyles.LongDateTime,
+											)}`,
 										),
 									)
 									.join('\n')}

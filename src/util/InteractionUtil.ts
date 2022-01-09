@@ -7,8 +7,8 @@ import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid 
 import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
 	AutocompleteInteraction,
-	BaseCommandInteraction,
 	BaseGuildTextChannel,
+	ChatInputCommandInteraction,
 	CommandInteraction,
 	CommandInteractionOptionResolver,
 	EmojiIdentifierResolvable,
@@ -36,7 +36,7 @@ interface InteractionData {
 	autoDefer: NodeJS.Timeout | null;
 }
 
-export type ChatInteraction = BaseCommandInteraction | MessageComponentInteraction;
+export type ChatInteraction = CommandInteraction | MessageComponentInteraction;
 
 interface DeferReplyOptions extends InteractionDeferReplyOptions {
 	rejectOnError?: boolean;
@@ -217,7 +217,7 @@ export default class InteractionUtil extends null {
 			};
 		}
 
-		if (interaction.isContextMenu()) {
+		if (interaction.isContextMenuCommand()) {
 			return {
 				type: interaction.targetType,
 				command: interaction.commandName,
@@ -268,9 +268,9 @@ export default class InteractionUtil extends null {
 		}
 
 		return [
-			(interaction as CommandInteraction).commandName,
-			(interaction as CommandInteraction).options.getSubcommandGroup(false),
-			(interaction as CommandInteraction).options.getSubcommand(false),
+			(interaction as ChatInputCommandInteraction).commandName,
+			(interaction as ChatInputCommandInteraction).options.getSubcommandGroup(false),
+			(interaction as ChatInputCommandInteraction).options.getSubcommand(false),
 		]
 			.filter((x) => x !== null)
 			.join(' ');
@@ -280,7 +280,7 @@ export default class InteractionUtil extends null {
 	 * wether the force option was set to true
 	 * @param interaction
 	 */
-	static checkForce(interaction: CommandInteraction | AutocompleteInteraction) {
+	static checkForce(interaction: ChatInputCommandInteraction | AutocompleteInteraction) {
 		return interaction.options.getBoolean('force') ?? false;
 	}
 
@@ -353,7 +353,7 @@ export default class InteractionUtil extends null {
 
 		try {
 			/**
-			 * allow split option for CommandInteraction#reply
+			 * allow split option for ChatInputCommandInteraction#reply
 			 */
 			if (_options.split || _options.code) {
 				for (const content of makeContent(_options.content ?? '', { split: _options.split, code: _options.code })) {
@@ -690,7 +690,7 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param emojis
 	 */
-	static async react(interaction: CommandInteraction, ...emojis: EmojiIdentifierResolvable[]) {
+	static async react(interaction: ChatInputCommandInteraction, ...emojis: EmojiIdentifierResolvable[]) {
 		if (interaction.ephemeral) return null;
 
 		try {
@@ -705,9 +705,15 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static getPlayer(interaction: CommandInteraction, options: GetPlayerOptions & { throwIfNotFound: true }): Player;
-	static getPlayer(interaction: CommandInteraction, options?: GetPlayerOptions): Player | null;
-	static getPlayer(interaction: CommandInteraction, { fallbackToCurrentUser = false, throwIfNotFound = false } = {}) {
+	static getPlayer(
+		interaction: ChatInputCommandInteraction,
+		options: GetPlayerOptions & { throwIfNotFound: true },
+	): Player;
+	static getPlayer(interaction: ChatInputCommandInteraction, options?: GetPlayerOptions): Player | null;
+	static getPlayer(
+		interaction: ChatInputCommandInteraction,
+		{ fallbackToCurrentUser = false, throwIfNotFound = false } = {},
+	) {
 		if (
 			!(
 				// @ts-expect-error
@@ -760,9 +766,12 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 * @param fallbackToCurrentUser
 	 */
-	static getIgn(interaction: CommandInteraction, options: GetPlayerOptions & { throwIfNotFound: true }): string;
-	static getIgn(interaction: CommandInteraction, options?: GetPlayerOptions): string | null;
-	static getIgn(interaction: CommandInteraction, options?: GetPlayerOptions) {
+	static getIgn(
+		interaction: ChatInputCommandInteraction,
+		options: GetPlayerOptions & { throwIfNotFound: true },
+	): string;
+	static getIgn(interaction: ChatInputCommandInteraction, options?: GetPlayerOptions): string | null;
+	static getIgn(interaction: ChatInputCommandInteraction, options?: GetPlayerOptions) {
 		if (this.checkForce(interaction)) {
 			const IGN =
 				(interaction.options.getString('player') ?? interaction.options.getString('target'))?.toLowerCase() ??
@@ -797,7 +806,7 @@ export default class InteractionUtil extends null {
 		interaction: Interaction,
 		{ fallbackIfNoInput = true, includeAll = false }: GetHypixelGuildOptions = {},
 	) {
-		const INPUT = (interaction as CommandInteraction).options?.getString('guild');
+		const INPUT = (interaction as ChatInputCommandInteraction).options?.getString('guild');
 
 		if (INPUT) {
 			if (includeAll && INPUT.toUpperCase() === GUILD_ID_ALL) return GUILD_ID_ALL;

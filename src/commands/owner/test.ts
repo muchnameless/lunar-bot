@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class TestCommand extends ApplicationCommand {
@@ -18,7 +18,7 @@ export default class TestCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: ChatInputCommandInteraction) {
 		// do stuff
 	}
 }

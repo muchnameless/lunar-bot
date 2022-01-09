@@ -3,7 +3,7 @@ import { UNKNOWN_IGN } from '../../constants';
 import { logger } from '../../functions';
 import { GuildMemberUtil, InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction, ContextMenuInteraction, GuildMember, User } from 'discord.js';
+import type { ChatInputCommandInteraction, ContextMenuCommandInteraction, GuildMember, User } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class UnnickCommand extends ApplicationCommand {
@@ -23,7 +23,10 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param member
 	 */
-	private async _run(interaction: CommandInteraction | ContextMenuInteraction, member: GuildMember | null) {
+	private async _run(
+		interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction,
+		member: GuildMember | null,
+	) {
 		// input validation
 		if (!member) {
 			return InteractionUtil.reply(interaction, {
@@ -81,7 +84,7 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runUser(interaction: ContextMenuInteraction, _: User, member: GuildMember | null) {
+	override runUser(interaction: ContextMenuCommandInteraction, _: User, member: GuildMember | null) {
 		return this._run(interaction, member);
 	}
 
@@ -89,7 +92,7 @@ export default class UnnickCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: ChatInputCommandInteraction) {
 		// eslint-disable-line @typescript-eslint/no-unused-vars
 		return this._run(interaction, interaction.options.getMember('user') as GuildMember | null);
 	}

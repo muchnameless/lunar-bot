@@ -5,7 +5,7 @@ import { InteractionUtil } from '../../util';
 import { formatNumber, removeNumberFormatting, safePromiseAll, validateNumber } from '../../functions';
 import { TransactionTypes } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class DonateCommand extends ApplicationCommand {
@@ -24,7 +24,7 @@ export default class DonateCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const collector = this.client.taxCollectors.getById(interaction.user.id);
 
 		if (!collector?.isCollecting) {

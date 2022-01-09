@@ -9,7 +9,7 @@ import { MessageUtil } from '../../util';
 import { logger } from '../../functions';
 import { ChatBridge, ChatBridgeEvents } from './ChatBridge';
 import { DiscordChatManager } from './managers/DiscordChatManager';
-import type { CommandInteraction, Message, Snowflake } from 'discord.js';
+import type { ChatInputCommandInteraction, Message, Snowflake } from 'discord.js';
 import type { MessageForwardOptions } from './ChatBridge';
 import type { LunarClient } from '../LunarClient';
 
@@ -29,7 +29,7 @@ export class ChatBridgeManager {
 	/**
 	 * interaction cache
 	 */
-	interactionCache = new Map<Snowflake, CommandInteraction>();
+	interactionCache = new Map<Snowflake, ChatInputCommandInteraction>();
 	/**
 	 * individual chat bridges
 	 */

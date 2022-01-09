@@ -6,7 +6,7 @@ import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, UserUtil } from '../../util';
 import { logger } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction, GuildMember } from 'discord.js';
+import type { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -24,7 +24,7 @@ export default class VerifyCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const IGN = interaction.options.getString('ign', true);
 		const playerLinkedToId =
 			UserUtil.getPlayer(interaction.user) ??
