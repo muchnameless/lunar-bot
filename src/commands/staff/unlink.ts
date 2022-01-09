@@ -5,7 +5,7 @@ import { requiredPlayerOption } from '../../structures/commands/commonOptions';
 import { seconds } from '../../functions';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class UnlinkCommand extends ApplicationCommand {
@@ -22,7 +22,7 @@ export default class UnlinkCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const PLAYER_INPUT = interaction.options.getString('player', true);
 		const player =
 			InteractionUtil.getPlayer(interaction) ??

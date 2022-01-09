@@ -5,7 +5,7 @@ import { formatNumber, sortCache } from '../../functions';
 import { MAX_CHOICES } from '../../constants';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { AutocompleteInteraction, Collection, CommandInteraction } from 'discord.js';
+import type { AutocompleteInteraction, Collection, ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Config } from '../../structures/database/models/Config';
 
@@ -96,7 +96,7 @@ export default class ConfigCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		switch (interaction.options.getSubcommand()) {
 			case 'edit': {
 				const KEY = interaction.options.getString('key', true).toUpperCase().replace(/ +/g, '_');

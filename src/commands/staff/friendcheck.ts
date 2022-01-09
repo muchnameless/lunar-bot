@@ -6,7 +6,7 @@ import { hypixelGuildOption, requiredIgnOption } from '../../structures/commands
 import { InteractionUtil } from '../../util';
 import { escapeIgn, seconds, trim } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class FriendCheckCommand extends ApplicationCommand {
@@ -24,7 +24,7 @@ export default class FriendCheckCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const { uuid, ign: IGN } = await mojang.ignOrUuid(interaction.options.getString('ign', true));
 		const friends = new Set(
 			(await hypixel.friends.uuid(uuid)).map((x) => (x.uuidSender === uuid ? x.uuidReceiver : x.uuidSender)),

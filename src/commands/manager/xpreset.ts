@@ -5,7 +5,7 @@ import { optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { safePromiseAll, seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class XpResetCommand extends ApplicationCommand {
@@ -24,7 +24,7 @@ export default class XpResetCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const { players } = this.client;
 		const PLAYER_INPUT = interaction.options.getString('player');
 

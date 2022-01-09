@@ -5,7 +5,7 @@ import { optionalPlayerOption, xpTypeOption } from '../../structures/commands/co
 import { InteractionUtil } from '../../util';
 import { seconds, upperCaseFirstChar } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { LeaderboardXPTypes } from '../../functions';
 
@@ -31,7 +31,7 @@ export default class TrackCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 		const type =
 			(interaction.options.getString('type') as LeaderboardXPTypes) ?? this.config.get('CURRENT_COMPETITION');

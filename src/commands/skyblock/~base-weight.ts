@@ -2,7 +2,7 @@ import { X_EMOJI } from '../../constants';
 import { hypixel } from '../../api';
 import { escapeIgn, formatDecimalNumber, getUuidAndIgn, upperCaseFirstChar } from '../../functions';
 import BaseSkyBlockCommand from './~base-skyblock-command';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { Components } from '@zikeji/hypixel';
 import type { SkyBlockProfile, WeightData } from '../../functions';
@@ -15,7 +15,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	/**
 	 * weight algorithm
 	 */
-	getWeight: (skyblockMember: Components.Schemas.SkyBlockProfileMember) => WeightData = () => {
+	protected getWeight: (skyblockMember: Components.Schemas.SkyBlockProfileMember) => WeightData = () => {
 		throw new Error(`no '${this.weightType}' weight algorithm implemented`);
 	};
 
@@ -24,7 +24,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	 * @param number
 	 */
 	// eslint-disable-next-line class-methods-use-this
-	formatNumber(number: number, decimals = 1) {
+	private formatNumber(number: number, decimals = 1) {
 		return formatDecimalNumber(Math.floor(number * 100) / 100, { decimals });
 	}
 
@@ -33,7 +33,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	 * @param number
 	 */
 	// eslint-disable-next-line class-methods-use-this
-	formatPercent(number: number) {
+	private formatPercent(number: number) {
 		if (Number.isNaN(number)) return '0%';
 		return `${(100 * number).toFixed(1)}%`;
 	}
@@ -44,8 +44,8 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	 * @param profileName
 	 */
 	// @ts-expect-error
-	override async _fetchData(
-		ctx: CommandInteraction | HypixelUserMessage,
+	protected override async _fetchData(
+		ctx: ChatInputCommandInteraction | HypixelUserMessage,
 		ignOrUuid?: string | null,
 		profileName?: string | null,
 	) {
@@ -81,7 +81,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	 * @param data
 	 */
 	// @ts-expect-error
-	override _generateReply({ ign, weightData }: Awaited<ReturnType<this['_fetchData']>>) {
+	protected override _generateReply({ ign, weightData }: Awaited<ReturnType<this['_fetchData']>>) {
 		const { name, totalWeight, overflow, skill, dungeons, slayer, skillAPIEnabled } = weightData;
 
 		return `${escapeIgn(ign)} (${name}): ${this.formatNumber(

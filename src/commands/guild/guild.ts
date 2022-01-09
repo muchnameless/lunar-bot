@@ -53,7 +53,7 @@ import {
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type {
 	ButtonInteraction,
-	CommandInteraction,
+	ChatInputCommandInteraction,
 	Interaction,
 	Snowflake,
 	AutocompleteInteraction,
@@ -77,7 +77,7 @@ interface RunMuteOptions extends RunModerationOptions {
 }
 
 interface RunKickOptions extends RunModerationOptions {
-	ctx: CommandInteraction | HypixelUserMessage;
+	ctx: ChatInputCommandInteraction | HypixelUserMessage;
 	reason: string;
 }
 
@@ -235,7 +235,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param targetInput
 	 * @param interaction
 	 */
-	async getMuteTarget(targetInput: string, interaction?: CommandInteraction) {
+	async getMuteTarget(targetInput: string, interaction?: ChatInputCommandInteraction) {
 		if (this.GUILD_IDENTIFIER.has(targetInput as any)) {
 			return 'everyone';
 		}
@@ -270,7 +270,7 @@ export default class GuildCommand extends ApplicationCommand {
 								await this.client.players.model.findCreateFind({
 									where: { discordId: ID },
 									defaults: {
-										minecraftUuid: SnowflakeUtil.generate(),
+										minecraftUuid: SnowflakeUtil.generate().toString(),
 										ign: UNKNOWN_IGN,
 										inDiscord: true,
 									},
@@ -339,7 +339,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param hypixelGuild
 	 * @param duration
 	 */
-	async runMuteInteraction(interaction: CommandInteraction, hypixelGuild: HypixelGuild, duration: number) {
+	async runMuteInteraction(interaction: ChatInputCommandInteraction, hypixelGuild: HypixelGuild, duration: number) {
 		const TARGET_INPUT = interaction.options.getString('target', true).toLowerCase();
 		const target = await this.getMuteTarget(TARGET_INPUT, interaction);
 
@@ -435,7 +435,11 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param commandOptions
 	 * @param hypixelGuild
 	 */
-	private async _run(interaction: CommandInteraction, hypixelGuild: HypixelGuild, commandOptions: CommandOptions) {
+	private async _run(
+		interaction: ChatInputCommandInteraction,
+		hypixelGuild: HypixelGuild,
+		commandOptions: CommandOptions,
+	) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
@@ -451,7 +455,11 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param commandOptions
 	 */
-	private async _runList(interaction: CommandInteraction, hypixelGuild: HypixelGuild, commandOptions: CommandOptions) {
+	private async _runList(
+		interaction: ChatInputCommandInteraction,
+		hypixelGuild: HypixelGuild,
+		commandOptions: CommandOptions,
+	) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				this.client.defaultEmbed
@@ -585,7 +593,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param page
 	 */
 	private async _runPaginated(
-		interaction: CommandInteraction | ButtonInteraction,
+		interaction: ChatInputCommandInteraction | ButtonInteraction,
 		hypixelGuild: HypixelGuild,
 		subcommand: string,
 		commandOptions: CommandOptions,
@@ -645,7 +653,7 @@ export default class GuildCommand extends ApplicationCommand {
 		// send reply
 		return (
 			InteractionUtil[
-				interaction.isApplicationCommand() || interaction.user.id !== userId ? 'reply' : 'update'
+				interaction.isCommand() || interaction.user.id !== userId ? 'reply' : 'update'
 			] as typeof InteractionUtil['reply']
 		)(interaction as ButtonInteraction, {
 			embeds: [embed],
@@ -728,7 +736,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const SUBCOMMAND = interaction.options.getSubcommand();
 

@@ -15,7 +15,7 @@ import {
 	uuidToImgurBustURL,
 } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake } from 'discord.js';
+import type { ChatInputCommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake } from 'discord.js';
 import type { SkyBlockProfile } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -169,7 +169,12 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param ign player ign
 	 * @param uuid player minecraft uuid
 	 */
-	private async _handleNoProfiles(interaction: CommandInteraction, embed: MessageEmbed, ign: string, uuid: string) {
+	private async _handleNoProfiles(
+		interaction: ChatInputCommandInteraction,
+		embed: MessageEmbed,
+		ign: string,
+		uuid: string,
+	) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				embed
@@ -232,7 +237,7 @@ export default class AhCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		try {
 			const { ign, uuid } = await getUuidAndIgn(interaction, interaction.options.getString('ign'));
 			const profiles = (await hypixel.skyblock.profiles.uuid(uuid)) as SkyBlockProfile[];

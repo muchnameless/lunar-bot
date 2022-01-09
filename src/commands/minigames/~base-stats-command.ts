@@ -2,7 +2,7 @@ import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
 import { formatDecimalNumber, getUuidAndIgn, logger } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 import type { Awaited } from '../../types/util';
 
@@ -14,7 +14,7 @@ export default class BaseStatsCommand extends DualCommand {
 	 * @param ignOrUuid
 	 */
 	// eslint-disable-next-line class-methods-use-this
-	async _fetchData(ctx: CommandInteraction | HypixelUserMessage, ignOrUuid: string | null) {
+	async _fetchData(ctx: ChatInputCommandInteraction | HypixelUserMessage, ignOrUuid: string | null) {
 		const { uuid, ign } = await getUuidAndIgn(ctx, ignOrUuid);
 
 		return {
@@ -46,7 +46,7 @@ export default class BaseStatsCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		try {
 			return InteractionUtil.reply(
 				interaction,

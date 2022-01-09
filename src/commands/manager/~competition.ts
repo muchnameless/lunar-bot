@@ -4,7 +4,7 @@ import { DUNGEON_TYPES, SKILLS } from '../../constants';
 import { InteractionUtil } from '../../util';
 import { autocorrect, seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 /**
@@ -30,7 +30,7 @@ export class CompetitionCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const collector = interaction.channel!.createMessageCollector({
 			filter: (msg) => msg.author.id === interaction.user.id,
 			idle: seconds(30),

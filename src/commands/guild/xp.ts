@@ -13,7 +13,7 @@ import { optionalPlayerOption, pageOption, offsetOption } from '../../structures
 import { InteractionUtil, MessageEmbedUtil } from '../../util';
 import { formatDecimalNumber, formatNumber, getDefaultOffset, upperCaseFirstChar } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { XPOffsets } from '../../constants';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -36,7 +36,7 @@ export default class XpCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true, throwIfNotFound: true });
 		const OFFSET = (interaction.options.getString('offset') as XPOffsets) ?? getDefaultOffset(this.config);
 

@@ -23,8 +23,8 @@ import type {
 import type {
 	AutocompleteInteraction,
 	ButtonInteraction,
-	CommandInteraction,
-	ContextMenuInteraction,
+	ChatInputCommandInteraction,
+	ContextMenuCommandInteraction,
 	GuildMember,
 	Interaction,
 	Message,
@@ -317,7 +317,11 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param user
 	 * @param member
 	 */
-	runUser(interaction: ContextMenuInteraction, user: User, member: GuildMember | null): unknown | Promise<unknown> {
+	runUser(
+		interaction: ContextMenuCommandInteraction,
+		user: User,
+		member: GuildMember | null,
+	): unknown | Promise<unknown> {
 		throw new Error('no run function specified for user context menus');
 	}
 
@@ -326,7 +330,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param interaction
 	 * @param message
 	 */
-	runMessage(interaction: ContextMenuInteraction, message: Message): unknown | Promise<unknown> {
+	runMessage(interaction: ContextMenuCommandInteraction, message: Message): unknown | Promise<unknown> {
 		throw new Error('no run function specified for message context menus');
 	}
 
@@ -352,7 +356,7 @@ export class ApplicationCommand extends BaseCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	runSlash(interaction: CommandInteraction): unknown | Promise<unknown> {
+	runSlash(interaction: ChatInputCommandInteraction): unknown | Promise<unknown> {
 		throw new Error('no run function specified for slash commands');
 	}
 

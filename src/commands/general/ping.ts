@@ -3,7 +3,7 @@ import { oneLine } from 'common-tags';
 import { InteractionUtil } from '../../util';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { seconds } from '../../functions';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class PingCommand extends ApplicationCommand {
@@ -18,7 +18,7 @@ export default class PingCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		const sent = await InteractionUtil.deferReply(interaction, {
 			fetchReply: true,
 			rejectOnError: true,

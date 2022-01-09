@@ -4,7 +4,7 @@ import { autocorrect, getMainProfile, getUuidAndIgn, logger, seconds, upperCaseF
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { hypixel } from '../../api';
 import type { SkyBlockProfile } from '../../functions';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
 export type FetchedData = Awaited<ReturnType<BaseSkyBlockCommand['_fetchData']>>;
@@ -15,8 +15,8 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 * @param ignOrUuid
 	 */
 	// eslint-disable-next-line class-methods-use-this
-	async _fetchData(
-		ctx: CommandInteraction | HypixelUserMessage,
+	protected async _fetchData(
+		ctx: ChatInputCommandInteraction | HypixelUserMessage,
 		ignOrUuid: string | null,
 		profileName?: string | null,
 	) {
@@ -47,7 +47,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 * @param data
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	_generateReply(data: FetchedData): string | Promise<string> {
+	protected _generateReply(data: FetchedData): string | Promise<string> {
 		throw new Error('not implemented');
 	}
 
@@ -55,7 +55,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: CommandInteraction) {
+	override async runSlash(interaction: ChatInputCommandInteraction) {
 		try {
 			return InteractionUtil.reply(
 				interaction,

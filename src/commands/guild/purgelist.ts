@@ -3,7 +3,7 @@ import { hypixelGuildOption, pageOption } from '../../structures/commands/common
 import { InteractionUtil } from '../../util';
 import { handleLeaderboardCommandInteraction, seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { CommandInteraction } from 'discord.js';
+import type { ChatInputCommandInteraction } from 'discord.js';
 import type { LeaderboardXPOffsets } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -24,7 +24,7 @@ export default class PurgeListCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override runSlash(interaction: CommandInteraction) {
+	override runSlash(interaction: ChatInputCommandInteraction) {
 		return handleLeaderboardCommandInteraction(interaction, {
 			lbType: 'gained',
 			xpType: 'purge',
