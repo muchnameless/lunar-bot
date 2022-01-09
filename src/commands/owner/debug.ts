@@ -60,10 +60,10 @@ export default class DebugCommand extends ApplicationCommand {
 											[c.recipient.tag ?? c.recipient.id, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const,
 									)
 									.sort(([, a], [, b]) => b - a)
-									.map(([name, date]) =>
+									.map(([name, timestamp]) =>
 										Formatters.quote(
 											`${name ?? 'unknown channel'}: ${Formatters.time(
-												new Date(date),
+												new Date(timestamp),
 												Formatters.TimestampStyles.LongDateTime,
 											)}`,
 										),
@@ -72,10 +72,10 @@ export default class DebugCommand extends ApplicationCommand {
 								${(channels.cache.filter((c) => c.isThread()) as Collection<Snowflake, ThreadChannel>)
 									.map((c) => [c, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const)
 									.sort(([, a], [, b]) => b - a)
-									.map(([c, date]) =>
+									.map(([c, timestamp]) =>
 										Formatters.quote(
 											`${c ?? 'unknown channel'}: ${Formatters.time(
-												new Date(date),
+												new Date(timestamp),
 												Formatters.TimestampStyles.LongDateTime,
 											)}`,
 										),
