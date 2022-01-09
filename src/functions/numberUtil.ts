@@ -170,3 +170,12 @@ interface NumberFormattingOptions {
  */
 export const formatNumber = (number: number, { padding = 0 }: NumberFormattingOptions = {}) =>
 	number.toLocaleString('fr-FR').replace(',', '.').padStart(padding, ' ');
+
+/**
+ * formats a number as percentage
+ * @param number
+ */
+export function formatPercent(number: number) {
+	if (Number.isNaN(number)) return '0%';
+	return `${(100 * number).toFixed(1)}%`;
+}

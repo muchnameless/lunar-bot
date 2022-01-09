@@ -1,6 +1,6 @@
 import { X_EMOJI } from '../../constants';
 import { hypixel } from '../../api';
-import { escapeIgn, formatDecimalNumber, getUuidAndIgn, upperCaseFirstChar } from '../../functions';
+import { escapeIgn, formatDecimalNumber, formatPercent, getUuidAndIgn, upperCaseFirstChar } from '../../functions';
 import BaseSkyBlockCommand from './~base-skyblock-command';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
@@ -26,16 +26,6 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	// eslint-disable-next-line class-methods-use-this
 	private formatNumber(number: number, decimals = 1) {
 		return formatDecimalNumber(Math.floor(number * 100) / 100, { decimals });
-	}
-
-	/**
-	 *
-	 * @param number
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	private formatPercent(number: number) {
-		if (Number.isNaN(number)) return '0%';
-		return `${(100 * number).toFixed(1)}%`;
 	}
 
 	/**
@@ -89,10 +79,10 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 			totalWeight > 1_000 ? 2 : 1,
 		)} (${this.formatNumber(overflow, totalWeight > 1_000 ? 2 : 1)} Overflow) | Skill: ${this.formatNumber(
 			skill,
-		)} (${this.formatPercent(skill / totalWeight)})${
+		)} (${formatPercent(skill / totalWeight)})${
 			skillAPIEnabled ? '' : ` ${X_EMOJI} API disabled`
-		} | Dungeons: ${this.formatNumber(dungeons)} (${this.formatPercent(
+		} | Dungeons: ${this.formatNumber(dungeons)} (${formatPercent(
 			dungeons / totalWeight,
-		)}) | Slayer: ${this.formatNumber(slayer)} (${this.formatPercent(slayer / totalWeight)}) | ${this.weightType}`;
+		)}) | Slayer: ${this.formatNumber(slayer)} (${formatPercent(slayer / totalWeight)}) | ${this.weightType}`;
 	}
 }
