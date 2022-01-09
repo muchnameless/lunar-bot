@@ -261,6 +261,13 @@ async function updatePrices() {
 							break;
 						}
 
+						case 'RUNE': {
+							const [[RUNE, LEVEL]] = Object.entries(item.tag!.ExtraAttributes!.runes!);
+
+							itemId = `RUNE_${RUNE}_${LEVEL}`;
+							break;
+						}
+
 						case undefined:
 							// no itemId
 							logger.warn(item?.tag?.ExtraAttributes ?? item, '[UPDATE PRICES]: malformed item data');
