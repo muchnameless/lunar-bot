@@ -11,7 +11,7 @@ export function shortenNumber(number: number, digits?: number) {
 	let suffix: string;
 
 	if (number < 1e3) {
-		str = number;
+		str = number.toFixed(digits ?? 0);
 		suffix = '';
 	} else if (number < 1e6) {
 		str = (number / 1e3).toFixed(digits ?? 0);
@@ -27,7 +27,7 @@ export function shortenNumber(number: number, digits?: number) {
 		suffix = 'T';
 	} else {
 		// numbers bigger than 1T shouldn't occur
-		str = number;
+		str = number.toFixed(digits ?? 0);
 		suffix = '';
 	}
 
