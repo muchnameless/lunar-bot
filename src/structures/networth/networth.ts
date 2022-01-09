@@ -101,14 +101,14 @@ function calculateItemPrice(item: NBTInventoryItem) {
 
 	// enchantments
 	if (ExtraAttributes.enchantments) {
-		for (const [enchant, level] of Object.entries(ExtraAttributes.enchantments)) {
-			if (enchant === 'efficiency' && level > 5 && itemId !== 'STONK_PICKAXE') {
+		for (const [enchantment, level] of Object.entries(ExtraAttributes.enchantments)) {
+			if (enchantment === 'efficiency' && level > 5 && itemId !== 'STONK_PICKAXE') {
 				price += getPrice('SILEX');
 			}
 
-			price += enchant.startsWith('_ultimate')
-				? getPrice(`${enchant}_1`) * 2 ** (level - 1)
-				: getPrice(`${enchant}_${level}`);
+			price += enchantment.startsWith('ultimate_')
+				? getPrice(`${enchantment}_1`) * 2 ** (level - 1)
+				: getPrice(`${enchantment}_${level}`);
 		}
 	}
 
