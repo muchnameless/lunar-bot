@@ -336,7 +336,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 								iconURL: (discordMessage.member ?? discordMessage.author).displayAvatarURL({ dynamic: true }),
 								url: player.url,
 							})
-							.setThumbnail((await player.imageURL)!)
+							.setThumbnail(player.imageURL)
 							.setDescription(
 								stripIndents`
 									${Formatters.bold('Auto Muted')} for ${MUTE_DURATION} due to ${infractions} infractions

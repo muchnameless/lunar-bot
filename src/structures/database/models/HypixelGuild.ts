@@ -883,7 +883,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 									iconURL: discordMember?.displayAvatarURL({ dynamic: true }),
 									url: player.url,
 								})
-								.setThumbnail((await player.imageURL)!)
+								.setThumbnail(player.imageURL)
 								.setDescription(`${player.info} is on the ban list for \`${existingBan.reason}\``)
 								.setTimestamp(),
 						);
@@ -1103,7 +1103,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 				setRankLog.push(
 					this.client.defaultEmbed
-						.setThumbnail((await player.imageURL)!)
+						.setThumbnail(player.imageURL)
 						.setDescription(`${Formatters.bold('Auto Rank Sync')} for ${player.info}`)
 						.addFields(
 							{

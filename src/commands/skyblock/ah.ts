@@ -12,7 +12,7 @@ import {
 	seconds,
 	shortenNumber,
 	upperCaseFirstChar,
-	uuidToImgurBustURL,
+	uuidToBustURL,
 } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ChatInputCommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake } from 'discord.js';
@@ -56,11 +56,11 @@ export default class AhCommand extends ApplicationCommand {
 	 */
 	private async _generateReply({ ign, uuid, profileId, profiles, userId }: GenerateReplyOptions) {
 		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId)!;
-		const embed = this.client.defaultEmbed.setAuthor(
-			ign,
-			(await uuidToImgurBustURL(this.client, uuid))!,
-			`${STATS_URL_BASE}${ign}/${PROFILE_NAME}`,
-		);
+		const embed = this.client.defaultEmbed.setAuthor({
+			name: ign,
+			iconURL: uuidToBustURL(uuid),
+			url: `${STATS_URL_BASE}${ign}/${PROFILE_NAME}`,
+		});
 
 		try {
 			const auctions = (await hypixel.skyblock.auction.profile(profileId))
@@ -169,18 +169,13 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param ign player ign
 	 * @param uuid player minecraft uuid
 	 */
-	private async _handleNoProfiles(
-		interaction: ChatInputCommandInteraction,
-		embed: MessageEmbed,
-		ign: string,
-		uuid: string,
-	) {
+	private _handleNoProfiles(interaction: ChatInputCommandInteraction, embed: MessageEmbed, ign: string, uuid: string) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				embed
 					.setAuthor({
 						name: ign,
-						iconURL: (await uuidToImgurBustURL(this.client, uuid))!,
+						iconURL: uuidToBustURL(uuid),
 						url: `${STATS_URL_BASE}${ign}`,
 					})
 					.setDescription('no SkyBlock profiles'),
@@ -266,7 +261,7 @@ export default class AhCommand extends ApplicationCommand {
 							embed
 								.setAuthor({
 									name: ign,
-									iconURL: (await uuidToImgurBustURL(this.client, uuid))!,
+									iconURL: uuidToBustURL(uuid),
 									url: `${STATS_URL_BASE}${ign}`,
 								})
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),

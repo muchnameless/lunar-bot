@@ -17,7 +17,7 @@ export default class GuildMemberAddEvent extends Event {
 	 * event listener callback
 	 * @param member
 	 */
-	override async run(member: GuildMember) {
+	override run(member: GuildMember) {
 		// check new discord members for tag in player database and link them if found
 		const player = GuildMemberUtil.getPlayer(member);
 
@@ -43,7 +43,7 @@ export default class GuildMemberAddEvent extends Event {
 			new MessageEmbed()
 				.setColor(this.config.get('EMBED_GREEN'))
 				.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: player.url })
-				.setThumbnail((await player.imageURL)!)
+				.setThumbnail(player.imageURL)
 				.setDescription(description)
 				.setTimestamp(),
 		);

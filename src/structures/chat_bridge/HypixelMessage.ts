@@ -2,7 +2,7 @@ import { regExpEsc } from '@sapphire/utilities';
 import loader from 'prismarine-chat';
 import { MC_CLIENT_VERSION, NEVER_MATCHING_REGEXP, NO_PING_EMOJI, UNKNOWN_IGN } from '../../constants';
 import { MessageUtil } from '../../util';
-import { logger, seconds, uuidToImgurBustURL } from '../../functions';
+import { logger, seconds, uuidToBustURL } from '../../functions';
 import { mojang } from '../../api';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
 import { INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, MESSAGE_TYPES, spamMessages } from './constants';
@@ -346,9 +346,9 @@ export class HypixelMessage {
 			username: member?.displayName ?? player?.ign ?? this.author!.ign,
 			avatarURL:
 				member?.displayAvatarURL({ dynamic: true }) ??
-				(await player?.imageURL) ??
+				player?.imageURL ??
 				(await mojang.ign(this.author!.ign).then(
-					({ uuid }) => uuidToImgurBustURL(this.client, uuid),
+					({ uuid }) => uuidToBustURL(uuid),
 					(error) => logger.error(error, '[FORWARD TO DC]'),
 				)) ??
 				(member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),

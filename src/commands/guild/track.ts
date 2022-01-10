@@ -174,7 +174,7 @@ export default class TrackCommand extends ApplicationCommand {
 				this.client.defaultEmbed
 					.setAuthor({
 						name: `${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
-						iconURL: (await player.imageURL)!,
+						iconURL: player.imageURL,
 						url: player.url,
 					})
 					.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
