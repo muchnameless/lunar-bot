@@ -192,6 +192,13 @@ async function fetchAuctionPage(page = 0) {
 }
 
 /**
+ * wether the enchantment is upgradable via an anvil
+ * @param enchantment
+ */
+export const isUpgradableTieredEnchantment = (enchantment: string) =>
+	enchantment.startsWith('ultimate_') || enchantment.startsWith('turbo_');
+
+/**
  * fetches all auction pages
  */
 async function updatePrices() {
@@ -230,7 +237,7 @@ async function updatePrices() {
 							let level = item.tag!.ExtraAttributes!.enchantments[enchants[0]];
 
 							// ultimate enchants
-							if (ENCHANTMENT.startsWith('ultimate_')) {
+							if (isUpgradableTieredEnchantment(ENCHANTMENT)) {
 								count = 2 ** (level - 1);
 								level = 1;
 							}

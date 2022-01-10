@@ -14,7 +14,7 @@ import {
 	SPECIAL_GEMSTONES,
 	TALISMANS,
 } from './constants';
-import { getPrice, prices } from './prices';
+import { getPrice, isUpgradableTieredEnchantment, prices } from './prices';
 import type { SkyBlockProfile } from '../../functions';
 import type { Buffer } from 'node:buffer';
 import type { NBTInventory, NBTInventoryItem, Components } from '@zikeji/hypixel';
@@ -106,7 +106,7 @@ function calculateItemPrice(item: NBTInventoryItem) {
 				price += getPrice('SILEX');
 			}
 
-			price += enchantment.startsWith('ultimate_')
+			price += isUpgradableTieredEnchantment(enchantment)
 				? getPrice(`${enchantment}_1`) * 2 ** (level - 1)
 				: getPrice(`${enchantment}_${level}`);
 		}
