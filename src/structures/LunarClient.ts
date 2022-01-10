@@ -14,57 +14,59 @@ import { EventCollection } from './events/EventCollection';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 import type { db } from './database';
 
-interface LunarClientOptions extends ClientOptions {
+export interface LunarClientOptions {
 	db: typeof db;
 	fetchAllMembers?: boolean;
 }
 
-export class LunarClient extends Client {
-	ownerId: Snowflake;
-	db: DatabaseManager;
-	logHandler = new LogHandler(this, new URL('../../log_buffer', import.meta.url));
-	cronJobs = new CronJobManager(this);
-	chatBridges = new ChatBridgeManager(this);
-	commands = new ApplicationCommandCollection(this, new URL('../commands', import.meta.url));
-	events = new EventCollection(this, new URL('../events', import.meta.url));
-	declare options: LunarClientOptions;
-	log = this.logHandler.log.bind(this.logHandler);
+export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> {
+	override ownerId: Snowflake;
+	override db: DatabaseManager;
+	override logHandler: LogHandler = new LogHandler(this, new URL('../../log_buffer', import.meta.url));
+	override cronJobs: CronJobManager = new CronJobManager(this);
+	override chatBridges: ChatBridgeManager = new ChatBridgeManager(this);
+	override commands: ApplicationCommandCollection = new ApplicationCommandCollection(
+		this,
+		new URL('../commands', import.meta.url),
+	);
+	override events = new EventCollection(this, new URL('../events', import.meta.url));
+	override log = this.logHandler.log.bind(this.logHandler);
 
-	constructor(options: LunarClientOptions) {
+	constructor(options: ClientOptions) {
 		super(options);
 
 		this.ownerId = process.env.OWNER as Snowflake;
 		this.db = new DatabaseManager(this, options.db);
 	}
 
-	get config() {
+	override get config() {
 		return this.db.modelManagers.config;
 	}
 
-	get hypixelGuilds() {
+	override get hypixelGuilds() {
 		return this.db.modelManagers.hypixelGuilds;
 	}
 
-	get discordGuilds() {
+	override get discordGuilds() {
 		return this.db.modelManagers.discordGuilds;
 	}
 
-	get players() {
+	override get players() {
 		return this.db.modelManagers.players;
 	}
 
-	get taxCollectors() {
+	override get taxCollectors() {
 		return this.db.modelManagers.taxCollectors;
 	}
 
-	get chatTriggers() {
+	override get chatTriggers() {
 		return this.db.modelManagers.chatTriggers;
 	}
 
 	/**
 	 * default embed, blue border and current timestamp
 	 */
-	get defaultEmbed() {
+	override get defaultEmbed() {
 		return new MessageEmbed({
 			color: this.config.get('EMBED_BLUE'),
 			timestamp: Date.now(),
@@ -108,18 +110,19 @@ export class LunarClient extends Client {
 	 * sends a DM to the bot owner
 	 * @param options
 	 */
-	async dmOwner(options: string | MessageOptions) {
+	override async dmOwner(options: string | MessageOptions) {
 		try {
 			return UserUtil.sendDM(await this.users.fetch(this.ownerId), options);
 		} catch (error) {
 			logger.error(error, '[DM OWNER]');
+			return null;
 		}
 	}
 
 	/**
 	 * fetches and caches all members if the fetchAllMembers client option is set to true
 	 */
-	fetchAllMembers() {
+	override fetchAllMembers() {
 		if (!this.options.fetchAllMembers) return;
 
 		return safePromiseAll(
@@ -134,7 +137,7 @@ export class LunarClient extends Client {
 	 * closes all db connections and exits the process
 	 * @param code exit code
 	 */
-	async exit(code = 0): Promise<never> {
+	override async exit(code = 0): Promise<never> {
 		let hasError = false;
 
 		try {

@@ -1,7 +1,6 @@
 import { HypixelMessage } from '../structures/chat_bridge/HypixelMessage';
 import { UserUtil } from '../util';
 import { mojang } from '../api';
-import type { LunarClient } from '../structures/LunarClient';
 import type { HypixelUserMessage } from '../structures/chat_bridge/HypixelMessage';
 import type { Interaction } from 'discord.js';
 
@@ -33,7 +32,7 @@ export async function getUuidAndIgn(ctx: Interaction | HypixelUserMessage, ignOr
 	if (IS_HYPIXEL_MESSAGE) return mojang.ign(ctx.author.ign);
 
 	// user linked to uncached player
-	const fetchedPlayer = await (ctx.client as LunarClient).players.model.findOne({
+	const fetchedPlayer = await ctx.client.players.model.findOne({
 		where: { discordId: ctx.user.id },
 		attributes: ['minecraftUuid'],
 	});

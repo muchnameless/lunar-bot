@@ -25,7 +25,6 @@ import type {
 	WebhookEditMessageOptions,
 } from 'discord.js';
 import type { SplitOptions } from '../functions';
-import type { LunarClient } from '../structures/LunarClient';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { Player } from '../structures/database/models/Player';
 
@@ -610,7 +609,7 @@ export default class InteractionUtil extends null {
 				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel);
 
 			message = await this.reply(interaction, {
-				embeds: [(interaction.client as LunarClient).defaultEmbed.setDescription(question)],
+				embeds: [interaction.client.defaultEmbed.setDescription(question)],
 				components: [row],
 				fetchReply: false,
 				rejectOnError: true,
@@ -645,7 +644,7 @@ export default class InteractionUtil extends null {
 			this.update(result, {
 				embeds: [
 					new MessageEmbed()
-						.setColor((interaction.client as LunarClient).config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
+						.setColor(interaction.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
 						.setDescription(
 							stripIndent`
 								${question}
@@ -742,21 +741,21 @@ export default class InteractionUtil extends null {
 		}
 
 		if (validateDiscordId(INPUT)) {
-			const player = (interaction.client as LunarClient).players.getById(INPUT);
+			const player = interaction.client.players.getById(INPUT);
 			if (throwIfNotFound && !player) throw `no player linked to \`${INPUT}\` found`;
 			return player;
 		}
 
 		if (validateMinecraftUuid(INPUT)) {
-			const player = (interaction.client as LunarClient).players.cache.get(INPUT) ?? null;
+			const player = interaction.client.players.cache.get(INPUT) ?? null;
 			if (throwIfNotFound && !player) throw `no player linked to \`${INPUT}\` found`;
 			return player;
 		}
 
 		const player =
 			(this.checkForce(interaction)
-				? (interaction.client as LunarClient).players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
-				: (interaction.client as LunarClient).players.getByIgn(INPUT)) ?? null;
+				? interaction.client.players.cache.find(({ ign }) => ign.toLowerCase() === INPUT)
+				: interaction.client.players.getByIgn(INPUT)) ?? null;
 		if (throwIfNotFound && !player) throw `no player linked to \`${INPUT}\` found`;
 		return player;
 	}
@@ -812,8 +811,7 @@ export default class InteractionUtil extends null {
 			if (includeAll && INPUT.toUpperCase() === GUILD_ID_ALL) return GUILD_ID_ALL;
 
 			const hypixelGuild =
-				(interaction.client as LunarClient).hypixelGuilds.cache.get(INPUT) ??
-				(interaction.client as LunarClient).hypixelGuilds.findByName(INPUT);
+				interaction.client.hypixelGuilds.cache.get(INPUT) ?? interaction.client.hypixelGuilds.findByName(INPUT);
 
 			if (hypixelGuild) return hypixelGuild;
 		}
@@ -821,9 +819,8 @@ export default class InteractionUtil extends null {
 		if (fallbackIfNoInput) {
 			return (
 				(interaction.guildId
-					? (interaction.client as LunarClient).hypixelGuilds.findByDiscordGuild(interaction.guild)
-					: UserUtil.getPlayer(interaction.user)?.hypixelGuild) ??
-				(interaction.client as LunarClient).hypixelGuilds.mainGuild
+					? interaction.client.hypixelGuilds.findByDiscordGuild(interaction.guild)
+					: UserUtil.getPlayer(interaction.user)?.hypixelGuild) ?? interaction.client.hypixelGuilds.mainGuild
 			);
 		}
 

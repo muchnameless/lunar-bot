@@ -281,8 +281,8 @@ export async function handleLeaderboardCommandInteraction(
 	const embeds =
 		((await cache.get(CACHE_KEY)) as MessageEmbed[]) ??
 		createLeaderboardEmbeds(
-			interaction.client as LunarClient,
-			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client as LunarClient, leaderboardArgs),
+			interaction.client,
+			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		);
 
 	if (leaderboardArgs.page < 1) {
@@ -293,13 +293,13 @@ export async function handleLeaderboardCommandInteraction(
 
 	await InteractionUtil.reply(interaction, {
 		embeds: [embeds[leaderboardArgs.page - 1]],
-		components: createActionRows(interaction.client as LunarClient, CACHE_KEY, leaderboardArgs, embeds.length),
+		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 	});
 
 	await cache.set(
 		CACHE_KEY,
 		embeds.map((embed) => embed.toJSON?.() ?? embed),
-		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
+		interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
 	);
 }
 
@@ -316,7 +316,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 		offset: OFFSET,
 		hypixelGuild:
 			HYPIXEL_GUILD_ID !== GUILD_ID_ALL
-				? (interaction.client as LunarClient).hypixelGuilds.cache.get(HYPIXEL_GUILD_ID)!
+				? interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID)!
 				: HYPIXEL_GUILD_ID,
 		user: interaction.user,
 		page: Number(PAGE),
@@ -330,20 +330,14 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 	const IS_RELOAD = EMOJI === RELOAD_EMOJI;
 	const embeds = IS_RELOAD
 		? createLeaderboardEmbeds(
-				interaction.client as LunarClient,
-				getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client as LunarClient, leaderboardArgs),
+				interaction.client,
+				getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		  )
 		: ((await cache.get(CACHE_KEY)) as MessageEmbed[]);
 
 	if (!embeds) {
 		await InteractionUtil.update(interaction, {
-			components: createActionRows(
-				interaction.client as LunarClient,
-				CACHE_KEY,
-				leaderboardArgs,
-				Number.POSITIVE_INFINITY,
-				true,
-			),
+			components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, Number.POSITIVE_INFINITY, true),
 		});
 
 		return InteractionUtil.reply(interaction, {
@@ -362,14 +356,14 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 
 	await InteractionUtil.update(interaction, {
 		embeds: [embeds[leaderboardArgs.page - 1]],
-		components: createActionRows(interaction.client as LunarClient, CACHE_KEY, leaderboardArgs, embeds.length),
+		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 	});
 
 	if (IS_RELOAD) {
 		await cache.set(
 			CACHE_KEY,
 			embeds.map((embed) => embed.toJSON?.() ?? embed),
-			(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
+			interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
 		);
 	}
 }
@@ -387,7 +381,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 		offset: OFFSET,
 		hypixelGuild:
 			HYPIXEL_GUILD_ID !== GUILD_ID_ALL
-				? (interaction.client as LunarClient).hypixelGuilds.cache.get(HYPIXEL_GUILD_ID)!
+				? interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID)!
 				: HYPIXEL_GUILD_ID,
 		user: interaction.user,
 		page: 1,
@@ -400,7 +394,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 			// reset offsets to defaults
 			switch (leaderboardArgs.lbType) {
 				case 'gained':
-					leaderboardArgs.offset = getDefaultOffset((interaction.client as LunarClient).config);
+					leaderboardArgs.offset = getDefaultOffset(interaction.client.config);
 					break;
 
 				case 'total':
@@ -419,7 +413,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 			const [HYPIXEL_GUILD_ID_SELECT] = interaction.values;
 			leaderboardArgs.hypixelGuild =
 				HYPIXEL_GUILD_ID_SELECT !== GUILD_ID_ALL
-					? (interaction.client as LunarClient).hypixelGuilds.cache.get(HYPIXEL_GUILD_ID_SELECT)!
+					? interaction.client.hypixelGuilds.cache.get(HYPIXEL_GUILD_ID_SELECT)!
 					: GUILD_ID_ALL;
 			break;
 		}
@@ -442,19 +436,19 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 	const embeds =
 		((await cache.get(CACHE_KEY)) as MessageEmbed[]) ??
 		createLeaderboardEmbeds(
-			interaction.client as LunarClient,
-			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client as LunarClient, leaderboardArgs),
+			interaction.client,
+			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		);
 
 	await InteractionUtil.update(interaction, {
 		embeds: [embeds[leaderboardArgs.page - 1]],
-		components: createActionRows(interaction.client as LunarClient, CACHE_KEY, leaderboardArgs, embeds.length),
+		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 	});
 
 	await cache.set(
 		CACHE_KEY,
 		embeds.map((embed) => embed.toJSON?.() ?? embed),
-		(interaction.client as LunarClient).config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
+		interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
 	);
 }
 

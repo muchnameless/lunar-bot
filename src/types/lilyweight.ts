@@ -1,5 +1,5 @@
 declare module 'lilyweight' {
-	export type CataCompletion = Partial<{
+	type CataCompletion = Partial<{
 		0: number;
 		1: number;
 		2: number;
@@ -10,7 +10,7 @@ declare module 'lilyweight' {
 		7: number;
 	}>;
 
-	export type MasterCataCompletion = Partial<{
+	type MasterCataCompletion = Partial<{
 		1: number;
 		2: number;
 		3: number;
@@ -22,7 +22,7 @@ declare module 'lilyweight' {
 	/**
 	 * An object containing weights.
 	 */
-	export interface WeightData {
+	interface WeightData {
 		total: number;
 		slayer: number;
 		skill: {
@@ -41,7 +41,7 @@ declare module 'lilyweight' {
 	/**
 	 * An object containing weights, the UUID and maybe username.
 	 */
-	export interface PlayerWeightData extends WeightData {
+	interface PlayerWeightData extends WeightData {
 		uuid: string;
 		username?: string;
 	}

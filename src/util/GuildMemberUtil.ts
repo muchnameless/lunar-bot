@@ -15,7 +15,6 @@ import { logger, seconds } from '../functions';
 import { GuildUtil, UserUtil } from '.';
 import type { GuildMember, Message, MessageOptions, Snowflake, Role } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
-import type { LunarClient } from '../structures/LunarClient';
 import type { RoleCollection, RoleResolvables } from './GuildUtil';
 
 export default class GuildMemberUtil extends null {
@@ -49,11 +48,11 @@ export default class GuildMemberUtil extends null {
 	static getRolesToPurge(member: GuildMember) {
 		const { cache: roleCache } = member.roles;
 		const rolesToRemove: Snowflake[] = [];
-		const discordGuild = (member.client as LunarClient).discordGuilds.cache.get(member.guild.id);
+		const discordGuild = member.client.discordGuilds.cache.get(member.guild.id);
 
 		if (discordGuild) {
 			for (const hypixelGuildId of discordGuild.hypixelGuildIds) {
-				const hypixelGuild = (member.client as LunarClient).hypixelGuilds.cache.get(hypixelGuildId);
+				const hypixelGuild = member.client.hypixelGuilds.cache.get(hypixelGuildId);
 				if (!hypixelGuild) continue;
 
 				// guild
