@@ -52,7 +52,7 @@
     "node-fetch": "^3.1.0",
     "pg": "^8.7.1",
     "pg-hstore": "^2.3.4",
-    "pino": "^7.6.2",
+    "pino": "^7.6.3",
     "prismarine-chat": "^1.5.0",
     "prismarine-nbt": "^2.0.0",
     "re2": "^1.17.2",
