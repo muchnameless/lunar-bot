@@ -47,7 +47,7 @@ const client = new LunarClient({
 			filter: Sweepers.filterByLifetime({
 				lifetime: 1_800, // 30 min
 				getComparisonTimestamp: (e) => e.editedTimestamp ?? e.createdTimestamp,
-				excludeFromSweep: (e) => e.id === (e.client as LunarClient).config.get('TAX_MESSAGE_ID'),
+				excludeFromSweep: (e) => e.id === e.client.config.get('TAX_MESSAGE_ID'),
 			}),
 		},
 		users: {

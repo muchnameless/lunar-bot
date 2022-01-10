@@ -2,7 +2,6 @@ import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
 import type { Message, MessageEmbed, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
-import type { LunarClient } from '../structures/LunarClient';
 
 export default class UserUtil extends null {
 	/**
@@ -17,10 +16,7 @@ export default class UserUtil extends null {
 		const player = this.PLAYER_CACHE.get(user!) ?? null;
 		if (player || !user) return player;
 
-		return this.setPlayer(
-			user,
-			(user.client as LunarClient).players.getById(user.id) ?? (user.client as LunarClient).players.getById(user.tag),
-		);
+		return this.setPlayer(user, user.client.players.getById(user.id) ?? user.client.players.getById(user.tag));
 	}
 
 	/**
