@@ -2,8 +2,8 @@ import { Permissions } from 'discord.js';
 import { ChannelUtil } from '../util';
 import { logger, minutes } from '../functions';
 import MessageCreateEvent from './messageCreate';
+import type { EventContext } from '../structures/events/Event';
 import type { Message } from 'discord.js';
-import type { EventContext } from '../structures/events/BaseEvent';
 
 export default class MessageUpdateEvent extends MessageCreateEvent {
 	constructor(context: EventContext) {

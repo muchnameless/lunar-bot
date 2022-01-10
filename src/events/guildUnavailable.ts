@@ -1,9 +1,8 @@
 import { setInterval } from 'node:timers';
 import { logger, minutes } from '../functions';
-import { Event } from '../structures/events/Event';
+import { Event, type EventContext } from '../structures/events/Event';
 import { GuildUtil } from '../util';
 import type { Guild } from 'discord.js';
-import type { EventContext } from '../structures/events/BaseEvent';
 
 export default class GuildUnavailableEvent extends Event {
 	constructor(context: EventContext) {

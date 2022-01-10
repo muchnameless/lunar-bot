@@ -1,5 +1,4 @@
-import { Event } from '../structures/events/Event';
-import type { EventContext } from '../structures/events/BaseEvent';
+import { Event, type EventContext } from '../structures/events/Event';
 
 export default class MyEvent extends Event {
 	constructor(context: EventContext) {

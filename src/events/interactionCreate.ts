@@ -10,7 +10,7 @@ import {
 	minutes,
 	sortCache,
 } from '../functions';
-import { Event } from '../structures/events/Event';
+import { Event, type EventContext } from '../structures/events/Event';
 import type {
 	ApplicationCommandOptionChoice,
 	AutocompleteInteraction,
@@ -22,7 +22,6 @@ import type {
 	Message,
 	SelectMenuInteraction,
 } from 'discord.js';
-import type { EventContext } from '../structures/events/BaseEvent';
 import type { ChatInteraction } from '../util/InteractionUtil';
 import type LeaderboardCommand from '../commands/guild/leaderboard';
 

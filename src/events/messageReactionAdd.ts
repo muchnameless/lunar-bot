@@ -1,8 +1,7 @@
 import { BROADCAST_EMOJI } from '../constants';
 import { logger } from '../functions';
-import { Event } from '../structures/events/Event';
+import { Event, type EventContext } from '../structures/events/Event';
 import type { Message, MessageReaction, User } from 'discord.js';
-import type { EventContext } from '../structures/events/BaseEvent';
 
 export default class MessageReactionAddEvent extends Event {
 	constructor(context: EventContext) {

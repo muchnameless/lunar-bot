@@ -1,18 +1,24 @@
 import { BaseEvent } from '../events/BaseEvent';
+import type { EventData, BaseEventContext } from '../events/BaseEvent';
 import type { ChatBridge } from './ChatBridge';
 
+export interface ChatBridgeEventContext extends BaseEventContext {
+	emitter: ChatBridge;
+}
 export class ChatBridgeEvent extends BaseEvent {
-	/**
-	 * chatBridge
-	 */
-	get chatBridge() {
-		return this.emitter as ChatBridge;
+	chatBridge: ChatBridge;
+
+	constructor(context: ChatBridgeEventContext, data: EventData) {
+		super(context, data);
+
+		this.chatBridge = context.emitter;
 	}
 
-	/**
-	 * client
-	 */
 	get client() {
 		return this.chatBridge.client;
+	}
+
+	get config() {
+		return this.client.config;
 	}
 }
