@@ -45,7 +45,7 @@ import {
 	minutes,
 	seconds,
 	trim,
-	uuidToImgurBustURL,
+	uuidToBustURL,
 	validateDiscordId,
 	validateNumber,
 } from '../../../functions';
@@ -715,7 +715,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * imgur link with a bust url of the player's skin
 	 */
 	get imageURL() {
-		return uuidToImgurBustURL(this.client, this.minecraftUuid);
+		return uuidToBustURL(this.minecraftUuid);
 	}
 
 	/**
@@ -1353,7 +1353,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const { config } = this.client;
 		const loggingEmbed = new MessageEmbed()
 			.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: this.url })
-			.setThumbnail((await this.imageURL)!)
+			.setThumbnail(this.imageURL)
 			.setDescription(
 				stripIndents`
 					${Formatters.bold('Role Update')} for ${member}
@@ -1586,7 +1586,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			this.client.log(
 				this.client.defaultEmbed
 					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: this.url })
-					.setThumbnail((await this.imageURL)!)
+					.setThumbnail(this.imageURL)
 					.setDescription(
 						stripIndents`
 							${Formatters.bold('Nickname Update')} for ${member}

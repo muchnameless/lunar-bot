@@ -18,7 +18,7 @@ export default class GuildMemberUpdateEvent extends Event {
 	 * @param oldMember
 	 * @param newMember
 	 */
-	override async run(oldMember: GuildMember, newMember: GuildMember) {
+	override run(oldMember: GuildMember, newMember: GuildMember) {
 		const discordGuild = this.client.discordGuilds.cache.get(newMember.guild.id);
 		if (!discordGuild) return;
 
@@ -67,7 +67,7 @@ export default class GuildMemberUpdateEvent extends Event {
 								iconURL: newMember.displayAvatarURL({ dynamic: true }),
 								url: player.url,
 							})
-							.setThumbnail((await player.imageURL)!)
+							.setThumbnail(player.imageURL)
 							.setDescription(
 								stripIndents`
 									${newMember} lost ${newMember.guild.roles.cache.get(discordGuild.MANDATORY_ROLE_ID)} role

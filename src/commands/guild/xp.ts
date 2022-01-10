@@ -51,7 +51,7 @@ export default class XpCommand extends ApplicationCommand {
 			.setColor(this.config.get('EMBED_BLUE'))
 			.setAuthor({
 				name: `${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
-				iconURL: (await player.imageURL)!,
+				iconURL: player.imageURL,
 				url: player.url,
 			})
 			.setDescription(

@@ -18,7 +18,7 @@ export default class GuildMemberRemoveEvent extends Event {
 	 * event listener callback
 	 * @param member
 	 */
-	override async run(member: GuildMember) {
+	override run(member: GuildMember) {
 		// uncache user
 		if (
 			!this.client.guilds.cache.some((guild) => guild.members.cache.has(member.id)) &&
@@ -41,7 +41,7 @@ export default class GuildMemberRemoveEvent extends Event {
 				new MessageEmbed()
 					.setColor(this.config.get('EMBED_RED'))
 					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: player.url })
-					.setThumbnail((await player.imageURL)!)
+					.setThumbnail(player.imageURL)
 					.setDescription(
 						stripIndents`
 							${member} left the discord server

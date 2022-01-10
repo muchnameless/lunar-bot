@@ -21,7 +21,7 @@ export default class RanksCommand extends ApplicationCommand {
 	 * execute the command
 	 * @param interaction
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
+	override runSlash(interaction: ChatInputCommandInteraction) {
 		const hypixelGuild = InteractionUtil.getHypixelGuild(interaction);
 		const player = InteractionUtil.getPlayer(interaction, { fallbackToCurrentUser: true });
 		const embed = this.client.defaultEmbed.setFooter({ text: hypixelGuild.name });
@@ -44,7 +44,7 @@ export default class RanksCommand extends ApplicationCommand {
 		embed
 			.setAuthor({
 				name: `${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
-				iconURL: (await player.imageURL)!,
+				iconURL: player.imageURL,
 				url: player.url,
 			})
 			.setFooter({ text: 'Updated at' })
