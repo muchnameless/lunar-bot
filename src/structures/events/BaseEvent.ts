@@ -1,7 +1,6 @@
 import type { EventEmitter } from 'node:events';
-import type { LunarClient } from '../LunarClient';
 
-export interface EventContext {
+export interface BaseEventContext {
 	emitter: EventEmitter;
 	name: string;
 }
@@ -22,22 +21,12 @@ export class BaseEvent {
 	 * @param context
 	 * @param data
 	 */
-	constructor({ emitter, name }: EventContext, { once, enabled }: EventData = {}) {
+	constructor({ emitter, name }: BaseEventContext, { once, enabled }: EventData = {}) {
 		this.emitter = emitter;
 		this.name = name;
 
 		this.once = once ?? false;
 		this.enabled = enabled ?? true;
-	}
-
-	/**
-	 * client config
-	 */
-	get config() {
-		return (
-			// @ts-expect-error
-			(this.client as LunarClient).config
-		);
 	}
 
 	/**

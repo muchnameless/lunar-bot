@@ -1,7 +1,6 @@
 import process from 'node:process';
-import { Event } from '../structures/events/Event';
 import { logger } from '../functions';
-import type { EventContext } from '../structures/events/BaseEvent';
+import { Event, type EventContext } from '../structures/events/Event';
 
 export default class CacheSweepEvent extends Event {
 	constructor(context: EventContext) {

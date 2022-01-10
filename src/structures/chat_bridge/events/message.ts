@@ -14,15 +14,14 @@ import {
 import { STOP_EMOJI } from '../../../constants';
 import { GuildMemberUtil, MessageUtil } from '../../../util';
 import { asyncFilter, getLilyWeight, logger, stringToMS } from '../../../functions';
-import { ChatBridgeEvent } from '../ChatBridgeEvent';
+import { ChatBridgeEvent, type ChatBridgeEventContext } from '../ChatBridgeEvent';
 import { hypixel, mojang } from '../../../api';
 import type { SkyBlockProfile } from '../../../functions';
-import type { EventContext } from '../../events/BaseEvent';
 import type { HypixelMessage, HypixelUserMessage } from '../HypixelMessage';
 import type MathsCommand from '../../../commands/general/maths';
 
 export default class MessageChatBridgeEvent extends ChatBridgeEvent {
-	constructor(context: EventContext) {
+	constructor(context: ChatBridgeEventContext) {
 		super(context, {
 			once: false,
 			enabled: true,

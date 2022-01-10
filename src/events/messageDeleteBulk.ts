@@ -1,6 +1,6 @@
 import MessageDeleteEvent from './messageDelete';
+import type { EventContext } from '../structures/events/Event';
 import type { Collection, Message, Snowflake } from 'discord.js';
-import type { EventContext } from '../structures/events/BaseEvent';
 
 export default class MessageDeleteBulkEvent extends MessageDeleteEvent {
 	constructor(context: EventContext) {

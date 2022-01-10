@@ -1,9 +1,8 @@
 import { MessageEmbed } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '../util';
-import { Event } from '../structures/events/Event';
+import { Event, type EventContext } from '../structures/events/Event';
 import type { GuildMember } from 'discord.js';
-import type { EventContext } from '../structures/events/BaseEvent';
 
 export default class GuildMemberAddEvent extends Event {
 	constructor(context: EventContext) {
