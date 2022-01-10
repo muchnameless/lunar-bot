@@ -31,10 +31,7 @@ jobs:
 
       - name: Install dependencies if cache miss
         if: ${{ !steps.cache-restore.outputs.cache-hit }}
-        run: |
-          sudo apt update
-          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
-          npm ci
+        run: npm ci
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
@@ -63,10 +60,7 @@ jobs:
 
       - name: Install dependencies if cache miss
         if: ${{ !steps.cache-restore.outputs.cache-hit }}
-        run: |
-          sudo apt update
-          sudo apt install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
-          npm ci
+        run: npm ci
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
