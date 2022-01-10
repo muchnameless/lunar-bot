@@ -701,7 +701,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * returns a string with the ign and guild name
 	 */
 	get info() {
-		return `${Formatters.hyperlink(escapeIgn(this.ign), this.url)} | ${this.guildName}`; // •
+		return `${Formatters.hyperlink(escapeIgn(this.ign), this.url)} | ${this.guildName}` as const; // •
 	}
 
 	/**
@@ -712,7 +712,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	}
 
 	/**
-	 * imgur link with a bust url of the player's skin
+	 * link with a bust url of the player's skin
 	 */
 	get imageURL() {
 		return uuidToBustURL(this.minecraftUuid);
@@ -722,7 +722,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	 * returns a sky.shiiyu.moe link for the player
 	 */
 	get url() {
-		return `${STATS_URL_BASE}${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUuid}/${this.mainProfileName ?? ''}`;
+		return `${STATS_URL_BASE}${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUuid}/${
+			this.mainProfileName ?? ''
+		}` as const;
 	}
 
 	/**
