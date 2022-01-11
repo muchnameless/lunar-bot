@@ -491,7 +491,9 @@ export class DiscordChatManager extends ChatManager {
 			const interaction = this.client.chatBridges.interactionCache.get(message.interaction.id);
 
 			this.minecraft.chat({
-				content: interaction?.toString() ?? `/${message.interaction.commandName}`,
+				content: `${this.client.config.get('PREFIXES')[0]}${
+					interaction?.toString().slice(1) ?? message.interaction.commandName
+				}`,
 				prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
 					player?.ign ?? message.interaction.user.username,
 				)}: `,
