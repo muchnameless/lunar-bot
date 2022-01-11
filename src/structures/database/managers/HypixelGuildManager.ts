@@ -146,7 +146,6 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
 				onTick: () => this.performDailyStatsSave(),
-				start: true,
 			}),
 		);
 
@@ -157,7 +156,6 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
 				onTick: () => this.removeExpiredMutes(),
-				start: true,
 			}),
 		);
 
@@ -168,7 +166,6 @@ export class HypixelGuildManager extends ModelManager<HypixelGuild> {
 				cronTime: '0 0 * * * *',
 				onTick: () =>
 					this.client.config.get('STAT_DISCORD_CHANNELS_UPDATE_ENABLED') && this.updateStatDiscordChannels(),
-				start: true,
 			}),
 		);
 

@@ -535,7 +535,6 @@ export class PlayerManager extends ModelManager<Player> {
 					new CronJob({
 						cronTime: new Date(config.get('COMPETITION_START_TIME')),
 						onTick: () => this._startCompetition(),
-						start: true,
 					}),
 				);
 			} else if (!config.get('COMPETITION_RUNNING')) {
@@ -550,7 +549,6 @@ export class PlayerManager extends ModelManager<Player> {
 				new CronJob({
 					cronTime: new Date(config.get('COMPETITION_END_TIME')),
 					onTick: () => this._endCompetition(),
-					start: true,
 				}),
 			);
 		} else if (config.get('COMPETITION_RUNNING')) {
@@ -566,7 +564,6 @@ export class PlayerManager extends ModelManager<Player> {
 				new CronJob({
 					cronTime: new Date(NEXT_MAYOR_TIME),
 					onTick: () => this._performMayorXpReset(),
-					start: true,
 				}),
 			);
 		} else {
@@ -585,7 +582,6 @@ export class PlayerManager extends ModelManager<Player> {
 				cronTime: '0 0 0 * * *',
 				timeZone: 'GMT',
 				onTick: () => this._performDailyXpReset(),
-				start: true,
 			}),
 		);
 
@@ -601,7 +597,6 @@ export class PlayerManager extends ModelManager<Player> {
 				cronTime: '0 0 0 * * MON',
 				timeZone: 'GMT',
 				onTick: () => this._performWeeklyXpReset(),
-				start: true,
 			}),
 		);
 
@@ -617,7 +612,6 @@ export class PlayerManager extends ModelManager<Player> {
 				cronTime: '0 0 0 1 * *',
 				timeZone: 'GMT',
 				onTick: () => this._performMonthlyXpReset(),
-				start: true,
 			}),
 		);
 
@@ -677,7 +671,6 @@ export class PlayerManager extends ModelManager<Player> {
 			new CronJob({
 				cronTime: new Date(currentMayorTime + MAYOR_CHANGE_INTERVAL),
 				onTick: () => this._performMayorXpReset(),
-				start: true,
 			}),
 		);
 

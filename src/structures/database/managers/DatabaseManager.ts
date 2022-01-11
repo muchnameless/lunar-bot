@@ -12,6 +12,7 @@ import { HypixelGuildManager } from './HypixelGuildManager';
 import { PlayerManager } from './PlayerManager';
 import { TaxCollectorManager } from './TaxCollectorManager';
 import { ModelManager } from './ModelManager';
+import { SkyBlockPatchNoteManager } from './SkyBlockPatchNoteManager';
 import type { EmbedFieldData, GuildChannel } from 'discord.js';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Components } from '@zikeji/hypixel';
@@ -22,6 +23,7 @@ import type { Config } from '../models/Config';
 import type { DiscordGuild } from '../models/DiscordGuild';
 import type { HypixelGuild } from '../models/HypixelGuild';
 import type { HypixelGuildBan } from '../models/HypixelGuildBan';
+import type { SkyBlockPatchNote } from '../models/SkyBlockPatchNote';
 import type { Player } from '../models/Player';
 import type { TaxCollector } from '../models/TaxCollector';
 import type { db as DbType } from '..';
@@ -37,6 +39,7 @@ export interface Models {
 	Player: ModelStatic<Player>;
 	SkyBlockAuction: ModelStatic<SkyBlockAuction>;
 	SkyBlockBazaar: ModelStatic<SkyBlockBazaar>;
+	SkyBlockPatchNote: ModelStatic<SkyBlockPatchNote>;
 	TaxCollector: ModelStatic<TaxCollector>;
 	Transaction: ModelStatic<Transaction>;
 }
@@ -52,6 +55,7 @@ export class DatabaseManager {
 		discordGuilds: ModelManager<DiscordGuild>;
 		hypixelGuilds: HypixelGuildManager;
 		players: PlayerManager;
+		skyBlockPatchNotes: SkyBlockPatchNoteManager;
 		taxCollectors: TaxCollectorManager;
 	};
 	/**
@@ -75,6 +79,7 @@ export class DatabaseManager {
 			discordGuilds: new ModelManager(client, db.DiscordGuild),
 			hypixelGuilds: new HypixelGuildManager(client, db.HypixelGuild),
 			players: new PlayerManager(client, db.Player),
+			skyBlockPatchNotes: new SkyBlockPatchNoteManager(client, db.SkyBlockPatchNote),
 			taxCollectors: new TaxCollectorManager(client, db.TaxCollector),
 		};
 		this.models = Object.fromEntries(
@@ -103,7 +108,6 @@ export class DatabaseManager {
 			new CronJobConstructor({
 				cronTime: `0 0/${config.get('DATABASE_UPDATE_INTERVAL')} * * * *`,
 				onTick: () => config.get('PLAYER_DB_UPDATE_ENABLED') && this.updateData(),
-				start: true,
 			}),
 		);
 
