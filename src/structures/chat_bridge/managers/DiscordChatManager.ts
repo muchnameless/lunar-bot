@@ -492,7 +492,10 @@ export class DiscordChatManager extends ChatManager {
 
 			this.minecraft.chat({
 				content: `${this.client.config.get('PREFIXES')[0]}${
-					interaction?.toString().slice(1) ?? message.interaction.commandName
+					interaction
+						?.toString()
+						.slice(1)
+						.replace(/ visibility:[a-z]+/, '') ?? message.interaction.commandName
 				}`,
 				prefix: `${this.prefix} ${DiscordChatManager.formatAtMention(
 					player?.ign ?? message.interaction.user.username,
