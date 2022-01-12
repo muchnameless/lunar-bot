@@ -173,7 +173,7 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 */
 	static logInfo(interaction: Interaction) {
-		if (interaction.isCommand()) {
+		if (interaction.isChatInputCommand()) {
 			return {
 				type: interaction.type,
 				command: interaction.toString(),
