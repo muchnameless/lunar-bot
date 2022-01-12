@@ -1,4 +1,46 @@
 /* eslint-disable camelcase */
+
+// defined here since mineral armor has the same data
+const HARDENED_DIAMOND_HELMET = {
+	type: 'diamond',
+	dungeonize: 10,
+	1: 5,
+	2: 10,
+	3: 15,
+	4: 20,
+	5: 25,
+} as const;
+const HARDENED_DIAMOND_CHESTPLATE = {
+	type: 'diamond',
+	dungeonize: 10,
+	1: 5,
+	2: 10,
+	3: 15,
+	4: 20,
+	5: 25,
+} as const;
+const HARDENED_DIAMOND_LEGGINGS = {
+	type: 'diamond',
+	dungeonize: 10,
+	1: 5,
+	2: 10,
+	3: 15,
+	4: 20,
+	5: 25,
+} as const;
+const HARDENED_DIAMOND_BOOTS = {
+	type: 'diamond',
+	dungeonize: 10,
+	1: 5,
+	2: 10,
+	3: 15,
+	4: 20,
+	5: 25,
+} as const;
+
+/**
+ * dungeonizing and starring essence costs
+ */
 export const ESSENCE_UPGRADES = {
 	/**
 	 * wither essence
@@ -2021,43 +2063,15 @@ export const ESSENCE_UPGRADES = {
 	/**
 	 * diamond essence
 	 */
-	HARDENED_DIAMOND_HELMET: {
-		type: 'diamond',
-		dungeonize: 10,
-		1: 5,
-		2: 10,
-		3: 15,
-		4: 20,
-		5: 25,
-	},
-	HARDENED_DIAMOND_CHESTPLATE: {
-		type: 'diamond',
-		dungeonize: 10,
-		1: 5,
-		2: 10,
-		3: 15,
-		4: 20,
-		5: 25,
-	},
-	HARDENED_DIAMOND_LEGGINGS: {
-		type: 'diamond',
-		dungeonize: 10,
-		1: 5,
-		2: 10,
-		3: 15,
-		4: 20,
-		5: 25,
-	},
-	HARDENED_DIAMOND_BOOTS: {
-		type: 'diamond',
-		dungeonize: 10,
-		1: 5,
-		2: 10,
-		3: 15,
-		4: 20,
-		5: 25,
-	},
-	PERFECT_HELMET_1: {
+	HARDENED_DIAMOND_HELMET,
+	HARDENED_DIAMOND_CHESTPLATE,
+	HARDENED_DIAMOND_LEGGINGS,
+	HARDENED_DIAMOND_BOOTS,
+	MINERAL_HELMET: HARDENED_DIAMOND_HELMET,
+	MINERAL_CHESTPLATE: HARDENED_DIAMOND_CHESTPLATE,
+	MINERAL_LEGGINGS: HARDENED_DIAMOND_LEGGINGS,
+	MINERAL_BOOTS: HARDENED_DIAMOND_BOOTS,
+	PERFECT_HELMET: {
 		type: 'diamond',
 		dungeonize: 40,
 		1: 20,
@@ -2066,7 +2080,7 @@ export const ESSENCE_UPGRADES = {
 		4: 100,
 		5: 150,
 	},
-	PERFECT_CHESTPLATE_1: {
+	PERFECT_CHESTPLATE: {
 		type: 'diamond',
 		dungeonize: 70,
 		1: 30,
@@ -2075,7 +2089,7 @@ export const ESSENCE_UPGRADES = {
 		4: 120,
 		5: 180,
 	},
-	PERFECT_LEGGINGS_1: {
+	PERFECT_LEGGINGS: {
 		type: 'diamond',
 		dungeonize: 60,
 		1: 25,
@@ -2084,7 +2098,7 @@ export const ESSENCE_UPGRADES = {
 		4: 110,
 		5: 160,
 	},
-	PERFECT_BOOTS_1: {
+	PERFECT_BOOTS: {
 		type: 'diamond',
 		dungeonize: 35,
 		1: 20,
