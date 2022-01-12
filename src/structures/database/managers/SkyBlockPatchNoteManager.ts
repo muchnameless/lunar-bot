@@ -38,7 +38,7 @@ export class SkyBlockPatchNoteManager extends ModelManager<SkyBlockPatchNote> {
 	/**
 	 * fetch forum posts from hypixel's rss feed
 	 */
-	async fetchRSSFeeds() {
+	private async _fetchRSSFeeds() {
 		try {
 			// fetch RSS feeds
 			const [{ items: skyblockPatchnotes }, { items: newsAndAnnouncements }] = await Promise.all([
@@ -81,7 +81,7 @@ export class SkyBlockPatchNoteManager extends ModelManager<SkyBlockPatchNote> {
 	override schedule() {
 		this.client.cronJobs.schedule(
 			`${this.constructor.name}:fetchRSSFeeds`,
-			new CronJob({ cronTime: '0 0/10 * * * *', timeZone: 'GMT', onTick: () => this.fetchRSSFeeds() }),
+			new CronJob({ cronTime: '0 0/10 * * * *', timeZone: 'GMT', onTick: () => this._fetchRSSFeeds() }),
 		);
 
 		return this;
