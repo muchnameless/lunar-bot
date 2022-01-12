@@ -32,9 +32,9 @@ interface HypixelForumResponse {
 	lastBuildDate: string;
 }
 
-const parser = new Parser<HypixelForumResponse>();
-
 export class SkyBlockPatchNoteManager extends ModelManager<SkyBlockPatchNote> {
+	private parser = new Parser<HypixelForumResponse>();
+
 	/**
 	 * fetch forum posts from hypixel's rss feed
 	 */
@@ -42,8 +42,8 @@ export class SkyBlockPatchNoteManager extends ModelManager<SkyBlockPatchNote> {
 		try {
 			// fetch RSS feeds
 			const [{ items: skyblockPatchnotes }, { items: newsAndAnnouncements }] = await Promise.all([
-				parser.parseURL('https://hypixel.net/forums/skyblock-patch-notes.158/index.rss'),
-				parser.parseURL('https://hypixel.net/forums/news-and-announcements.4/index.rss'),
+				this.parser.parseURL('https://hypixel.net/forums/skyblock-patch-notes.158/index.rss'),
+				this.parser.parseURL('https://hypixel.net/forums/news-and-announcements.4/index.rss'),
 			]);
 
 			// add skyblock related posts from news and announcements
