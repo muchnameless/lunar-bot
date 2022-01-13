@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers';
-import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } from 'discord.js';
-import { RESTJSONErrorCodes } from 'discord-api-types/v9';
+import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, DiscordAPIError } from 'discord.js';
+import { ButtonStyle, ComponentType, RESTJSONErrorCodes } from 'discord-api-types/v9';
 import { stripIndent } from 'common-tags';
 import { DELETE_EMOJI, DELETE_KEY, GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
 import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';
@@ -291,7 +291,7 @@ export default class InteractionUtil extends null {
 		return new MessageButton()
 			.setCustomId(`${DELETE_KEY}:${interaction.user.id}`)
 			.setEmoji(DELETE_EMOJI)
-			.setStyle(Constants.MessageButtonStyles.DANGER);
+			.setStyle(ButtonStyle.Danger);
 	}
 
 	/**
@@ -597,8 +597,8 @@ export default class InteractionUtil extends null {
 		const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const CANCLE_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const row = new MessageActionRow().addComponents(
-			new MessageButton().setCustomId(SUCCESS_ID).setStyle(Constants.MessageButtonStyles.SUCCESS).setEmoji(Y_EMOJI),
-			new MessageButton().setCustomId(CANCLE_ID).setStyle(Constants.MessageButtonStyles.DANGER).setEmoji(X_EMOJI),
+			new MessageButton().setCustomId(SUCCESS_ID).setStyle(ButtonStyle.Success).setEmoji(Y_EMOJI),
+			new MessageButton().setCustomId(CANCLE_ID).setStyle(ButtonStyle.Danger).setEmoji(X_EMOJI),
 		);
 
 		let channel: TextBasedChannel;
@@ -624,7 +624,7 @@ export default class InteractionUtil extends null {
 
 		try {
 			const result = await channel.awaitMessageComponent({
-				componentType: Constants.MessageComponentTypes.BUTTON,
+				componentType: ComponentType.Button,
 				filter: (i) => {
 					if (i.user.id !== interaction.user.id) {
 						this.reply(interaction, {

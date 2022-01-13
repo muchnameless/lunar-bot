@@ -1,4 +1,4 @@
-import { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Formatters, Constants } from 'discord.js';
+import { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Formatters, ButtonStyle } from 'discord.js';
 import { stripIndent, oneLine } from 'common-tags';
 import {
 	DOUBLE_LEFT_EMOJI,
@@ -18,7 +18,6 @@ import {
 import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api';
 import { days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
-import type { MessageButtonStyles } from 'discord.js/typings/enums';
 import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
@@ -162,18 +161,18 @@ function createActionRows(
 ) {
 	let decDisabled: boolean;
 	let incDisabled: boolean;
-	let pageStyle: MessageButtonStyles;
-	let reloadStyle: MessageButtonStyles;
+	let pageStyle: ButtonStyle;
+	let reloadStyle: ButtonStyle;
 
 	if (isExpired) {
 		decDisabled = true;
 		incDisabled = true;
-		pageStyle = Constants.MessageButtonStyles.SECONDARY;
-		reloadStyle = Constants.MessageButtonStyles.DANGER;
+		pageStyle = ButtonStyle.Secondary;
+		reloadStyle = ButtonStyle.Danger;
 	} else {
 		decDisabled = page === 1;
 		incDisabled = page === totalPages;
-		pageStyle = reloadStyle = Constants.MessageButtonStyles.PRIMARY;
+		pageStyle = reloadStyle = ButtonStyle.Primary;
 	}
 
 	const rows: MessageActionRow[] = [];
