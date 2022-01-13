@@ -1,4 +1,4 @@
-import { Constants, Formatters, MessageActionRow, MessageButton } from 'discord.js';
+import { ButtonStyle, Formatters, MessageActionRow, MessageButton } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { hypixelGuildOption, pageOption } from '../../structures/commands/commonOptions';
 import { DOUBLE_LEFT_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, DOUBLE_RIGHT_EMOJI, RELOAD_EMOJI } from '../../constants';
@@ -40,27 +40,27 @@ export default class FriendCommand extends ApplicationCommand {
 				new MessageButton()
 					.setCustomId(`${CUSTOM_ID}:1:${DOUBLE_LEFT_EMOJI}`)
 					.setEmoji(DOUBLE_LEFT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setStyle(ButtonStyle.Primary)
 					.setDisabled(DEC_DISABLED),
 				new MessageButton()
 					.setCustomId(`${CUSTOM_ID}:${currentPage - 1}:${LEFT_EMOJI}`)
 					.setEmoji(LEFT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setStyle(ButtonStyle.Primary)
 					.setDisabled(DEC_DISABLED),
 				new MessageButton()
 					.setCustomId(`${CUSTOM_ID}:${currentPage + 1}:${RIGHT_EMOJI}`)
 					.setEmoji(RIGHT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setStyle(ButtonStyle.Primary)
 					.setDisabled(INC_DISABLED),
 				new MessageButton()
 					.setCustomId(`${CUSTOM_ID}:${totalPages}:${DOUBLE_RIGHT_EMOJI}`)
 					.setEmoji(DOUBLE_RIGHT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setStyle(ButtonStyle.Primary)
 					.setDisabled(INC_DISABLED),
 				new MessageButton()
 					.setCustomId(`${CUSTOM_ID}:${currentPage}:${RELOAD_EMOJI}`)
 					.setEmoji(RELOAD_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY),
+					.setStyle(ButtonStyle.Primary),
 			),
 		];
 	}

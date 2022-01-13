@@ -11,7 +11,7 @@ import Discord, {
 	MessageButton,
 	Permissions,
 	Util,
-	Constants,
+	ButtonStyle,
 } from 'discord.js';
 MessageEmbed;
 Util; // unused imports are 'used' so that tsc doesn't remove them
@@ -102,7 +102,7 @@ export default class EvalCommand extends ApplicationCommand {
 				new MessageButton()
 					.setCustomId(`${this.baseCustomId}:edit:${isAsync}:${inspectDepth}`)
 					.setEmoji(EDIT_MESSAGE_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.SECONDARY),
+					.setStyle(ButtonStyle.Secondary),
 				InteractionUtil.getDeleteButton(interaction),
 			),
 		];

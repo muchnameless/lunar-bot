@@ -1,5 +1,5 @@
 import process from 'node:process';
-import { Intents, SnowflakeUtil, Options, Sweepers, Constants } from 'discord.js';
+import { Intents, SnowflakeUtil, Options, Sweepers, Constants, ActivityType } from 'discord.js';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';
@@ -79,7 +79,7 @@ const client = new LunarClient({
 		activities: [
 			{
 				name: 'slash commands',
-				type: Constants.ActivityTypes.LISTENING,
+				type: ActivityType.Listening,
 			},
 		],
 		status: 'online',

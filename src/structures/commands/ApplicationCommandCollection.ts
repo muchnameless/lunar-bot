@@ -75,7 +75,6 @@ export class ApplicationCommandCollection<
 
 					fullPermissions.push({
 						id,
-						// @ts-expect-error
 						permissions,
 					});
 				}
@@ -134,7 +133,6 @@ export class ApplicationCommandCollection<
 
 				if (permissions.length) {
 					for (const applicationCommand of applicationCommands) {
-						// @ts-expect-error
 						await this.client.application!.commands.permissions.set({
 							guild: discordId,
 							command: applicationCommand,
