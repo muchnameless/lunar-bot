@@ -1,6 +1,7 @@
 import { transformItemData } from '@zikeji/hypixel';
 import { logger } from '../../functions';
 import {
+	CRAFTING_RECIPES,
 	ESSENCE_PRICES,
 	ESSENCE_UPGRADES,
 	GEMSTONES,
@@ -65,7 +66,12 @@ function calculateItemPrice(item: NBTInventoryItem) {
 
 	const itemId = ExtraAttributes.id;
 
-	let price = getPrice(itemId) * item.Count;
+	let price =
+		(prices.get(itemId) ??
+			// non auctionable craftable items
+			CRAFTING_RECIPES[itemId]?.reduce((acc, { id, count }) => acc + getPrice(id) * count, 0) ??
+			// unknown item
+			0) * item.Count;
 
 	// dark auctions
 	if (ExtraAttributes.winning_bid && itemId !== 'HEGEMONY_ARTIFACT') {

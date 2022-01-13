@@ -1,3 +1,4 @@
+export * from './craftingRecipes';
 export * from './dungeons';
 export * from './essenceUpgrades';
 export * from './farming';
