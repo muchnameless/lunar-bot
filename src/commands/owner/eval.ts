@@ -48,6 +48,8 @@ MessageEmbedUtil;
 MessageUtil;
 import * as functions from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import { calculateItemPrice } from '../../structures/networth/networth';
+calculateItemPrice;
 import { prices } from '../../structures/networth/prices';
 prices;
 import type {

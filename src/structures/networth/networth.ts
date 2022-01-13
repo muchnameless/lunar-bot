@@ -56,7 +56,7 @@ async function parseItems(base64: string | number[] | Buffer) {
 /**
  * @param item
  */
-function calculateItemPrice(item: NBTInventoryItem) {
+export function calculateItemPrice(item: NBTInventoryItem) {
 	const ExtraAttributes = item.tag!.ExtraAttributes!;
 
 	// pet item
