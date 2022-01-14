@@ -13,7 +13,7 @@ export default class CoopNetworthCommand extends NetworthCommand {
 			context,
 			{
 				slash: new SlashCommandBuilder()
-					.setDescription("shows a player's coop-networth, algorithm by Maro and SkyHelper")
+					.setDescription("shows a player's Co-op's networth, algorithm by Maro and SkyHelper")
 					.addStringOption(optionalIgnOption)
 					.addStringOption(skyblockProfileOption),
 				cooldown: seconds(1),
@@ -38,18 +38,20 @@ export default class CoopNetworthCommand extends NetworthCommand {
 
 		let bankingAPIEnabled = true;
 		let totalNetworth = profile.banking?.balance ?? ((bankingAPIEnabled = false), 0);
-		let everyInventoryAPIEnabled = true;
+		let inventoryAPIDisabled = 0;
 
 		for (const { networth, inventoryAPIEnabled } of await Promise.all(
 			memberUuids.map((_uuid) => getNetworth(profile, _uuid, false)),
 		)) {
 			totalNetworth += networth;
-			everyInventoryAPIEnabled &&= inventoryAPIEnabled;
+			if (!inventoryAPIEnabled) ++inventoryAPIDisabled;
 		}
 
-		const reply = [`${ign}'s coop (${profile.cute_name}): ${shortenNumber(totalNetworth)}`];
+		const reply = [`${ign}'s Co-op (${profile.cute_name}): ${shortenNumber(totalNetworth)}`];
 		if (!bankingAPIEnabled) reply.push(`${X_EMOJI} Banking API disabled`);
-		if (!everyInventoryAPIEnabled) reply.push(`${X_EMOJI} Inventory API disabled`);
+		if (inventoryAPIDisabled) {
+			reply.push(`${X_EMOJI} ${inventoryAPIDisabled}/${memberUuids.length} Inventory API disabled`);
+		}
 
 		return reply.join(' | ');
 	}
