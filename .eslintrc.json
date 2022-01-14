@@ -202,6 +202,10 @@
 			{
 			  "name": "clearInterval",
 			  "message": "Import clearInterval from `node:timers` instead"
+			},
+			{
+				"name": "URL",
+				"message": "Import URL from `node:url` instead"
 			}
 		],
 		"no-return-await": "error",
