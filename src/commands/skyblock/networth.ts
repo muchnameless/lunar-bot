@@ -4,20 +4,22 @@ import { seconds, shortenNumber } from '../../functions';
 import { getNetworth } from '../../structures/networth/networth';
 import { X_EMOJI } from '../../constants';
 import BaseSkyBlockCommand, { type FetchedData } from './~base-skyblock-command';
+import type { BridgeCommandData } from '../../structures/commands/BridgeCommand';
+import type { ApplicationCommandData } from '../../structures/commands/ApplicationCommand';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class NetworthCommand extends BaseSkyBlockCommand {
-	constructor(context: CommandContext) {
+	constructor(context: CommandContext, slashData?: ApplicationCommandData, bridgeData?: BridgeCommandData) {
 		super(
 			context,
-			{
+			slashData ?? {
 				slash: new SlashCommandBuilder()
 					.setDescription("shows a player's networth, algorithm by Maro and SkyHelper")
 					.addStringOption(optionalIgnOption)
 					.addStringOption(skyblockProfileOption),
 				cooldown: seconds(1),
 			},
-			{
+			bridgeData ?? {
 				aliases: ['nw'],
 				args: false,
 				usage: '<`IGN`> <`profile` name>',

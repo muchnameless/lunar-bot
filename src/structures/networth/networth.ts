@@ -346,12 +346,13 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 /**
  * @param profile
  * @param uuid
+ * @param addBanking
  */
-export async function getNetworth({ banking, members }: SkyBlockProfile, uuid: string) {
+export async function getNetworth({ banking, members }: SkyBlockProfile, uuid: string, addBanking = true) {
 	const member = members[uuid];
 
 	let bankingAPIEnabled = true;
-	let networth = (banking?.balance ?? ((bankingAPIEnabled = false), 0)) + (member.coin_purse ?? 0);
+	let networth = (addBanking ? banking?.balance ?? ((bankingAPIEnabled = false), 0) : 0) + (member.coin_purse ?? 0);
 
 	const promises: Promise<number>[] = [];
 
