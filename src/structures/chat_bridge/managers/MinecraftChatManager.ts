@@ -1,5 +1,6 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { setTimeout, clearTimeout } from 'node:timers';
+import { URL } from 'node:url';
 import process from 'node:process';
 import { MessageEmbed, SnowflakeUtil, Formatters } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
@@ -32,7 +33,7 @@ import {
 	trim,
 } from '../../../functions';
 import { ChatManager } from './ChatManager';
-import type { GuildChannel, Message } from 'discord.js';
+import type { GuildChannel, Message, Snowflake } from 'discord.js';
 import type { Client as MinecraftBot } from 'minecraft-protocol';
 import type { MessageCollectorOptions } from '../MessageCollector';
 import type { Player } from '../../database/models/Player';
@@ -591,21 +592,21 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				})
 				.replaceAll('\u{2022}', '\u{25CF}') // better bullet points: "• -> ●"
 				.replaceAll('`', "'") // better single quotes
-				.replace(/<#(\d{17,19})>/g, (match, p1) => {
+				.replace(/<#(\d{17,19})>/g, (match, p1: Snowflake) => {
 					// channels
 					const CHANNEL_NAME = (this.client.channels.cache.get(p1) as GuildChannel)?.name;
 					if (CHANNEL_NAME) return `#${replaceSmallLatinCapitalLetters(CHANNEL_NAME)}`;
 					return match;
 				})
-				.replace(/<@&(\d{17,19})>/g, (match, p1) => {
+				.replace(/<@&(\d{17,19})>/g, (match, p1: Snowflake) => {
 					// roles
 					const ROLE_NAME = discordMessage?.guild?.roles.cache.get(p1)?.name;
 					if (ROLE_NAME) return `@${ROLE_NAME}`;
 					return match;
 				})
-				.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1, p2) => {
+				.replace(/<t:(-?\d{1,13})(?::([DFRTdft]))?>/g, (match, p1: string, p2: string) => {
 					// dates
-					const date = new Date(seconds(p1));
+					const date = new Date(seconds(Number(p1)));
 
 					if (Number.isNaN(date.getTime())) return match; // invalid date
 
@@ -680,6 +681,19 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 							});
 					}
 				})
+				.replace(
+					// hideEmbedLink markdown
+					/<(https?:\/\/(?:www\.)?[-\w@:%.+~#=]{2,256}\.[a-z]{2,6}\b[-\w@:%+.~#?&/=]*)>/gi,
+					(match, p1: string) => {
+						// return p1 if it is a valid URL
+						try {
+							new URL(p1);
+							return p1;
+						} catch {
+							return match;
+						}
+					},
+				)
 		);
 	}
 
