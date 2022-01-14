@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
-import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { logger, seconds } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
@@ -13,9 +12,7 @@ export default class PatchnotesCommand extends DualCommand {
 		super(
 			context,
 			{
-				slash: new SlashCommandBuilder()
-					.setDescription('shows latest SkyBlock patchnotes')
-					.addStringOption(requiredIgnOption),
+				slash: new SlashCommandBuilder().setDescription('shows latest SkyBlock patchnotes'),
 				cooldown: seconds(1),
 			},
 			{
