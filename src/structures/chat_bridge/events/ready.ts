@@ -1,3 +1,4 @@
+import { clearTimeout } from 'node:timers';
 import { logger } from '../../../functions';
 import { ChatBridgeEvent, type ChatBridgeEventContext } from '../ChatBridgeEvent';
 

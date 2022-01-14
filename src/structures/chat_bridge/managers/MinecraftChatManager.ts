@@ -1,5 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { setTimeout } from 'node:timers';
+import { setTimeout, clearTimeout } from 'node:timers';
 import process from 'node:process';
 import { MessageEmbed, SnowflakeUtil, Formatters } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';

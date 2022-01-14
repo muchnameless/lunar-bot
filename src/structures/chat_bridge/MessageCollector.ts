@@ -198,7 +198,7 @@
  *
  */
 
-import { setTimeout } from 'node:timers';
+import { setTimeout, clearTimeout } from 'node:timers';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { ChatBridgeEvents } from './ChatBridge';
 import type { Awaitable } from 'discord.js';

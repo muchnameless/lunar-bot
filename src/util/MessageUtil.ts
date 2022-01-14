@@ -1,4 +1,4 @@
-import { setTimeout } from 'node:timers';
+import { setTimeout, clearTimeout } from 'node:timers';
 import { MessageFlags, Permissions, Util } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import { logger, seconds } from '../functions';

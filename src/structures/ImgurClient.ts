@@ -1,5 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { setTimeout } from 'node:timers';
+import { setTimeout, clearTimeout } from 'node:timers';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { FormData } from 'formdata-polyfill/esm.min';
 import fetch from 'node-fetch';
