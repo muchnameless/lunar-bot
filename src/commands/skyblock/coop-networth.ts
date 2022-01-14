@@ -50,7 +50,7 @@ export default class CoopNetworthCommand extends NetworthCommand {
 		const reply = [`${ign}'s Co-op (${profile.cute_name}): ${shortenNumber(totalNetworth)}`];
 		if (!bankingAPIEnabled) reply.push(`${X_EMOJI} Banking API disabled`);
 		if (inventoryAPIDisabled) {
-			reply.push(`${X_EMOJI} ${inventoryAPIDisabled}/${memberUuids.length} Inventory API disabled`);
+			reply.push(`${X_EMOJI} ${inventoryAPIDisabled}/${memberUuids.length} Inventory APIs disabled`);
 		}
 
 		return reply.join(' | ');
