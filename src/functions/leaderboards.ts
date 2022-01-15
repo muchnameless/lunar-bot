@@ -537,7 +537,7 @@ const getPlayerData = (
 	dataConverter: DataConverter,
 ) =>
 	(hypixelGuild !== GUILD_ID_ALL ? hypixelGuild.players : client.players.inGuild)
-		.map(dataConverter)
+		.map((player) => dataConverter(player))
 		.sort(({ sortingStat: a }, { sortingStat: b }) => b - a);
 
 /**
