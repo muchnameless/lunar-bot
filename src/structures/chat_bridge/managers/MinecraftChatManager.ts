@@ -156,7 +156,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		/**
 		 * buffer size
 		 */
-		MAX_INDEX: 8 as const,
+		MAX_INDEX: 4 as const,
 		/**
 		 * current buffer index
 		 */
@@ -164,7 +164,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		/**
 		 * ring buffer
 		 */
-		cache: ['', '', '', '', '', '', '', ''] as string[],
+		cache: ['', '', '', ''] as string[],
 		/**
 		 * removes parts of the content which hypixel's spam filter ignores
 		 * @param content
