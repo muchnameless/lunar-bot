@@ -164,7 +164,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		/**
 		 * ring buffer
 		 */
-		cache: ['', '', '', ''] as string[],
+		cache: ['', '', '', ''],
 		/**
 		 * removes parts of the content which hypixel's spam filter ignores
 		 * @param content
