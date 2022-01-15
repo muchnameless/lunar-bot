@@ -7,6 +7,7 @@ import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import emojiRegex from 'emoji-regex/es2015';
+import { jaroWinkler } from '@skyra/jaro-winkler';
 import {
 	INVISIBLE_CHARACTER_REGEXP,
 	INVISIBLE_CHARACTERS,
@@ -163,7 +164,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		/**
 		 * ring buffer
 		 */
-		cache: [] as string[],
+		cache: ['', '', '', '', '', '', '', ''] as string[],
 		/**
 		 * removes parts of the content which hypixel's spam filter ignores
 		 * @param content
@@ -181,7 +182,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		 * @param content
 		 */
 		check(content: string) {
-			return this.cache.includes(this._cleanContent(content));
+			const cleanedContent = this._cleanContent(content);
+
+			return this.cache.some((cached) => {
+				if (cached === cleanedContent) return true;
+				return jaroWinkler(cleanedContent, cached) >= MinecraftChatManager.JARO_WINKLER_THRESHOLD;
+			});
 		},
 		/**
 		 * add the content to the buffer
@@ -264,6 +270,11 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}
 		})();
 	}
+
+	/**
+	 * treshold above which the message to send gets additional random padding
+	 */
+	static JARO_WINKLER_THRESHOLD = 0.975 as const;
 
 	/**
 	 * maximum attempts to resend to in-game chat
