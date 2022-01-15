@@ -108,8 +108,10 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	// enchantments
 	if (ExtraAttributes.enchantments) {
 		for (const [enchantment, level] of Object.entries(ExtraAttributes.enchantments)) {
-			if (enchantment === 'efficiency' && level > 5 && itemId !== 'STONK_PICKAXE') {
-				price += getPrice('SILEX');
+			if (enchantment === 'efficiency' && level > 5) {
+				if (itemId === 'STONK_PICKAXE') continue;
+				price += getPrice('SIL_EX') * (level - 5);
+				continue;
 			}
 
 			price += isUpgradableTieredEnchantment(enchantment)
