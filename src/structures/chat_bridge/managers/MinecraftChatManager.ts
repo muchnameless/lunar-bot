@@ -40,7 +40,7 @@ import type { MessageCollectorOptions } from '../MessageCollector';
 import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
 import type { If } from '../../../types/util';
-import type { ChatBridge, ChatOptions } from '../ChatBridge';
+import type { ChatOptions } from '../ChatBridge';
 
 export interface SendToChatOptions {
 	content: string;
@@ -82,6 +82,73 @@ const enum ForwardRejectionReason {
 	HYPIXEL_BLOCKED,
 	LOCAL_BLOCKED,
 	MESSAGE_COUNT,
+}
+
+class LastMessages {
+	/**
+	 * buffer size
+	 */
+	private static MAX_INDEX = 4 as const;
+	/**
+	 * treshold above which the message to send gets additional random padding
+	 */
+	private static JARO_WINKLER_THRESHOLD = 0.975 as const;
+
+	/**
+	 * current buffer index
+	 */
+	private index = -1;
+	/**
+	 * ring buffer
+	 */
+	private cache = [] as string[];
+
+	constructor() {
+		for (let i = 0; i < LastMessages.MAX_INDEX; ++i) {
+			this.cache.push('');
+		}
+	}
+
+	/**
+	 * removes parts of the content which hypixel's spam filter ignores
+	 * @param content
+	 */
+	private static _cleanContent(content: string) {
+		return content
+			.replace(/\d/g, '') // remove numbers
+			.replace(/(?<=^\/)o(?=c)/, 'g') // oc and gc share the same anti spam bucket -> /oc -> /gc
+			.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invis chars
+			.trim() // remove whitespaces at the beginning and end
+			.replace(/ {2,}/g, ' '); // mc messages can only have single spaces
+	}
+
+	/**
+	 * check wether the content is already in the buffer
+	 * @param content
+	 * @param retry
+	 */
+	check(content: string, retry: number) {
+		const CLEANED_CONTENT = LastMessages._cleanContent(content);
+		const THRESHOLD = LastMessages.JARO_WINKLER_THRESHOLD - 0.005 * retry;
+
+		return this.cache.some((cached) => {
+			// exact match
+			if (cached === CLEANED_CONTENT) return true;
+			// fuzzy match
+			return jaroWinkler(CLEANED_CONTENT, cached) >= THRESHOLD;
+		});
+	}
+
+	/**
+	 * add the content to the buffer
+	 * @param content
+	 */
+	add(content: string) {
+		// increment ring buffer index, reset cycle if max index
+		if (++this.index === LastMessages.MAX_INDEX) this.index = 0;
+
+		this.cache[this.index] = LastMessages._cleanContent(content);
+	}
 }
 
 export class MinecraftChatManager<loggedIn extends boolean = boolean> extends ChatManager {
@@ -152,62 +219,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * anti spam checker
 	 */
-	_lastMessages = {
-		/**
-		 * buffer size
-		 */
-		MAX_INDEX: 4 as const,
-		/**
-		 * current buffer index
-		 */
-		index: -1,
-		/**
-		 * ring buffer
-		 */
-		cache: ['', '', '', ''],
-		/**
-		 * removes parts of the content which hypixel's spam filter ignores
-		 * @param content
-		 */
-		_cleanContent(content: string) {
-			return content
-				.replace(/\d/g, '') // remove numbers
-				.replace(/(?<=^\/)o(?=c)/, 'g') // oc and gc share the same anti spam bucket -> /oc -> /gc
-				.replace(INVISIBLE_CHARACTER_REGEXP, '') // remove invis chars
-				.trim() // remove whitespaces at the beginning and end
-				.replace(/ {2,}/g, ' '); // mc messages can only have single spaces
-		},
-		/**
-		 * check wether the content is already in the buffer
-		 * @param content
-		 */
-		check(content: string) {
-			const cleanedContent = this._cleanContent(content);
-
-			return this.cache.some((cached) => {
-				if (cached === cleanedContent) return true;
-				return jaroWinkler(cleanedContent, cached) >= MinecraftChatManager.JARO_WINKLER_THRESHOLD;
-			});
-		},
-		/**
-		 * add the content to the buffer
-		 * @param content
-		 */
-		add(content: string) {
-			// increment ring buffer index, reset cycle if max index
-			if (++this.index === this.MAX_INDEX) this.index = 0;
-
-			this.cache[this.index] = this._cleanContent(content);
-		},
-	};
-
-	constructor(chatBridge: ChatBridge) {
-		super(chatBridge);
-
-		for (let i = 0; i < this._lastMessages.MAX_INDEX; ++i) {
-			this._lastMessages.cache.push('');
-		}
-	}
+	private _lastMessages = new LastMessages();
 
 	/**
 	 * wether the minecraft bot is logged in and ready to receive and send chat messages
@@ -270,11 +282,6 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}
 		})();
 	}
-
-	/**
-	 * treshold above which the message to send gets additional random padding
-	 */
-	static JARO_WINKLER_THRESHOLD = 0.975 as const;
 
 	/**
 	 * maximum attempts to resend to in-game chat
@@ -424,10 +431,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		return ((this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
 			host: process.env.MINECRAFT_SERVER_HOST,
 			port: Number(process.env.MINECRAFT_SERVER_PORT),
-			username: process.env.MINECRAFT_USERNAME!.split(/ +/)[this.mcAccount],
-			password: process.env.MINECRAFT_PASSWORD!.split(/ +/)[this.mcAccount],
+			username: process.env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
+			password: process.env.MINECRAFT_PASSWORD!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
 			version: MC_CLIENT_VERSION,
-			auth: process.env.MINECRAFT_ACCOUNT_TYPE!.split(/ +/)[this.mcAccount] as 'mojang' | 'microsoft',
+			auth: process.env.MINECRAFT_ACCOUNT_TYPE!.split(/\s+/, this.mcAccount + 1)[this.mcAccount] as
+				| 'mojang'
+				| 'microsoft',
 		}));
 	}
 
@@ -865,7 +874,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 			// 1 for each retry + additional if _lastMessages includes curent padding
 			while (
-				(--index >= 0 || this._lastMessages.check(message)) &&
+				(--index >= 0 || this._lastMessages.check(message, this._retries)) &&
 				message.length + 6 <= MinecraftChatManager.MAX_MESSAGE_LENGTH
 			) {
 				message += randomPadding();
