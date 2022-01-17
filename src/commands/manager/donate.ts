@@ -3,7 +3,7 @@ import { Formatters } from 'discord.js';
 import { requiredPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { formatNumber, removeNumberFormatting, safePromiseAll, validateNumber } from '../../functions';
-import { TransactionTypes } from '../../structures/database/models/Transaction';
+import { TransactionType } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -51,7 +51,7 @@ export default class DonateCommand extends ApplicationCommand {
 				amount,
 				collectedBy: collector.minecraftUuid,
 				notes,
-				type: TransactionTypes.DONATION,
+				type: TransactionType.Donation,
 			}),
 		);
 

@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
-import { INVISIBLE_CHARACTERS, MESSAGE_TYPES } from '../../structures/chat_bridge/constants';
+import { INVISIBLE_CHARACTERS, HypixelMessageType } from '../../structures/chat_bridge/constants';
 import { hypixelGuildOption } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil, MessageUtil, UserUtil } from '../../util';
 import { escapeIgn, minutes, seconds, stringToMS, upperCaseFirstChar } from '../../functions';
@@ -92,10 +92,10 @@ export default class PollCommand extends DualCommand {
 			}));
 			const optionsCount = pollOptions.length;
 			const hypixelMessages = chatBridge.minecraft.awaitMessages({
-				filter: (hypixelMessage) => hypixelMessage.isUserMessage() && hypixelMessage.type === MESSAGE_TYPES.GUILD,
+				filter: (hypixelMessage) => hypixelMessage.isUserMessage() && hypixelMessage.type === HypixelMessageType.Guild,
 				time: DURATION,
 			}) as Promise<HypixelUserMessage[]>;
-			const discordChannel = chatBridge.discord.channelsByType.get(MESSAGE_TYPES.GUILD)!.channel;
+			const discordChannel = chatBridge.discord.channelsByType.get(HypixelMessageType.Guild)!.channel;
 			const discordMessages = discordChannel.awaitMessages({
 				filter: (discordMessage) => MessageUtil.isUserMessage(discordMessage),
 				time: DURATION,

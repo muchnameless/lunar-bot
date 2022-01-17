@@ -5,7 +5,7 @@ import { MessageUtil } from '../../util';
 import { logger, seconds, uuidToBustURL } from '../../functions';
 import { mojang } from '../../api';
 import { HypixelMessageAuthor } from './HypixelMessageAuthor';
-import { INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, MESSAGE_TYPES, spamMessages } from './constants';
+import { INVISIBLE_CHARACTER_REGEXP, MESSAGE_POSITIONS, HypixelMessageType, spamMessages } from './constants';
 import type { DiscordChatManager } from './managers/DiscordChatManager';
 import type { Player } from '../database/models/Player';
 import type { GuildMember, Message as DiscordMessage } from 'discord.js';
@@ -14,8 +14,6 @@ import type { BroadcastOptions, ChatBridge, ChatOptions } from './ChatBridge';
 import type { ChatPacket } from './bot_events/chat';
 import type { BridgeCommand } from '../commands/BridgeCommand';
 import type { DualCommand } from '../commands/DualCommand';
-
-export type HypixelMessageType = keyof typeof MESSAGE_TYPES;
 
 type CommandData = {
 	name: string | null;
@@ -106,7 +104,7 @@ export class HypixelMessage {
 		if (matched) {
 			this.type =
 				(matched.groups!.type?.toUpperCase() as HypixelMessageType) ??
-				(matched.groups!.whisper ? MESSAGE_TYPES.WHISPER : null);
+				(matched.groups!.whisper ? HypixelMessageType.Whisper : null);
 			this.author = new HypixelMessageAuthor(
 				this.chatBridge,
 				matched.groups!.whisper !== 'To'
@@ -153,7 +151,7 @@ export class HypixelMessage {
 
 			// no command, only ping or prefix
 			this.commandData =
-				(!prefixMatched && this.type !== MESSAGE_TYPES.WHISPER) || !COMMAND_NAME
+				(!prefixMatched && this.type !== HypixelMessageType.Whisper) || !COMMAND_NAME
 					? {
 							name: null,
 							command: null,
@@ -260,8 +258,8 @@ export class HypixelMessage {
 		}
 
 		switch (this.type) {
-			case MESSAGE_TYPES.GUILD:
-			case MESSAGE_TYPES.OFFICER: {
+			case HypixelMessageType.Guild:
+			case HypixelMessageType.Officer: {
 				const result = await this.chatBridge.broadcast({
 					hypixelMessage: this,
 					discord: {
@@ -278,13 +276,13 @@ export class HypixelMessage {
 				return result;
 			}
 
-			case MESSAGE_TYPES.PARTY:
+			case HypixelMessageType.Party:
 				return this.chatBridge.minecraft.pchat({
 					maxParts: Number.POSITIVE_INFINITY,
 					..._options,
 				});
 
-			case MESSAGE_TYPES.WHISPER:
+			case HypixelMessageType.Whisper:
 				return this.author!.send({
 					maxParts: Number.POSITIVE_INFINITY,
 					..._options,
@@ -299,7 +297,7 @@ export class HypixelMessage {
 	 * forwards the message to discord via the chatBridge's webhook, if the guild has the chatBridge enabled
 	 */
 	async forwardToDiscord(): Promise<DiscordMessage | null> {
-		const discordChatManager = this.chatBridge.discord.channelsByType.get(this.type ?? MESSAGE_TYPES.GUILD);
+		const discordChatManager = this.chatBridge.discord.channelsByType.get(this.type ?? HypixelMessageType.Guild);
 		if (!discordChatManager) return null;
 
 		// server message

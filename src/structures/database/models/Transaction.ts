@@ -2,9 +2,9 @@ import { Model, DataTypes } from 'sequelize';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-export const enum TransactionTypes {
-	TAX = 'tax',
-	DONATION = 'donation',
+export const enum TransactionType {
+	Tax = 'tax',
+	Donation = 'donation',
 }
 
 export interface TransactionAttributes {
@@ -13,7 +13,7 @@ export interface TransactionAttributes {
 	amount: number;
 	auctionId: string | null;
 	notes: string | null;
-	type: TransactionTypes;
+	type: TransactionType;
 }
 
 export class Transaction extends Model<TransactionAttributes> implements TransactionAttributes {
@@ -25,7 +25,7 @@ export class Transaction extends Model<TransactionAttributes> implements Transac
 	declare amount: number;
 	declare auctionId: string | null;
 	declare notes: string | null;
-	declare type: TransactionTypes;
+	declare type: TransactionType;
 
 	declare readonly createdAt: Date;
 	declare readonly updatedAt: Date;
@@ -58,8 +58,8 @@ export class Transaction extends Model<TransactionAttributes> implements Transac
 					allowNull: true,
 				},
 				type: {
-					type: DataTypes.ENUM(TransactionTypes.TAX, TransactionTypes.DONATION),
-					defaultValue: TransactionTypes.TAX,
+					type: DataTypes.ENUM(TransactionType.Tax, TransactionType.Donation),
+					defaultValue: TransactionType.Tax,
 					allowNull: false,
 				},
 			},

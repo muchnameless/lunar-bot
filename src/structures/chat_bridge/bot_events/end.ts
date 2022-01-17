@@ -1,9 +1,9 @@
-import { ChatBridgeEvents } from '../ChatBridge';
+import { ChatBridgeEvent } from '../ChatBridge';
 import type { ChatBridge } from '../ChatBridge';
 
 /**
  * @param chatBridge
  */
 export default function (chatBridge: ChatBridge, reason?: string) {
-	chatBridge.emit(ChatBridgeEvents.DISCONNECT, reason ?? 'bot end');
+	chatBridge.emit(ChatBridgeEvent.Disconnect, reason ?? 'bot end');
 }

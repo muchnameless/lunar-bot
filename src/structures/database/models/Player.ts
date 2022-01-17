@@ -49,7 +49,7 @@ import {
 	validateDiscordId,
 	validateNumber,
 } from '../../../functions';
-import { TransactionTypes } from './Transaction';
+import { TransactionType } from './Transaction';
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
 import type { Snowflake, GuildResolvable, Guild } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
@@ -101,7 +101,7 @@ interface AddTransferOptions extends SetToPaidOptions {
 	collectedBy: ModelResovable<TaxCollector>;
 	amount: number;
 	notes?: string | null;
-	type?: TransactionTypes;
+	type?: TransactionType;
 }
 
 interface PlayerAttributes {
@@ -154,8 +154,8 @@ export interface PlayerInGuild extends Player {
 }
 
 const enum NickChangeReason {
-	NO_IGN,
-	NOT_UNIQUE,
+	NoIGN,
+	NotUnique,
 }
 
 export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> implements PlayerAttributes {
@@ -745,7 +745,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				limit: 1,
 				where: {
 					from: this.minecraftUuid,
-					type: TransactionTypes.TAX,
+					type: TransactionType.Tax,
 				},
 				order: [['createdAt', 'DESC']],
 				attributes: ['amount'],
@@ -1499,7 +1499,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		// nickname doesn't include ign
 		if (!member.displayName.toLowerCase().includes(this.ign.toLowerCase())) {
-			reason = NickChangeReason.NO_IGN;
+			reason = NickChangeReason.NoIGN;
 		}
 
 		// two guild members share the same display name
@@ -1511,7 +1511,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				),
 			)
 		) {
-			reason = NickChangeReason.NOT_UNIQUE;
+			reason = NickChangeReason.NotUnique;
 		}
 
 		if (reason === null) return;
@@ -1571,11 +1571,11 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			let auditLogReason: string | undefined;
 
 			switch (reason) {
-				case NickChangeReason.NO_IGN:
+				case NickChangeReason.NoIGN:
 					auditLogReason = "name didn't contain ign";
 					break;
 
-				case NickChangeReason.NOT_UNIQUE:
+				case NickChangeReason.NotUnique:
 					auditLogReason = 'name already taken';
 					break;
 
@@ -1611,7 +1611,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			if (shouldSendDm) {
 				switch (reason) {
-					case NickChangeReason.NO_IGN:
+					case NickChangeReason.NoIGN:
 						GuildMemberUtil.sendDM(
 							member,
 							stripIndents`
@@ -1623,7 +1623,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 						);
 						break;
 
-					case NickChangeReason.NOT_UNIQUE:
+					case NickChangeReason.NotUnique:
 						GuildMemberUtil.sendDM(
 							member,
 							stripIndents`
@@ -1828,14 +1828,14 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			limit: 1,
 			where: {
 				from: this.minecraftUuid,
-				type: TransactionTypes.TAX,
+				type: TransactionType.Tax,
 			},
 			order: [['createdAt', 'DESC']],
 			attributes: ['to', 'amount'],
 			raw: true,
 		});
 		if (result.length) {
-			this.client.taxCollectors.cache.get(result[0].to)?.addAmount(-result[0].amount, TransactionTypes.TAX);
+			this.client.taxCollectors.cache.get(result[0].to)?.addAmount(-result[0].amount, TransactionType.Tax);
 		}
 
 		return this.update({ paid: false });
@@ -1851,16 +1851,16 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		auctionId = null,
 	}: SetToPaidOptions = {}) {
 		if (this.paid) {
-			await Promise.all(this.addTransfer({ amount, collectedBy, auctionId, type: TransactionTypes.DONATION }));
+			await Promise.all(this.addTransfer({ amount, collectedBy, auctionId, type: TransactionType.Donation }));
 			return this;
 		}
 
 		const OVERFLOW = Math.max(amount - this.client.config.get('TAX_AMOUNT'), 0); // >=
 		const TAX_AMOUNT = amount - OVERFLOW;
-		const promises = this.addTransfer({ amount: TAX_AMOUNT, collectedBy, auctionId, type: TransactionTypes.TAX });
+		const promises = this.addTransfer({ amount: TAX_AMOUNT, collectedBy, auctionId, type: TransactionType.Tax });
 
 		if (OVERFLOW) {
-			promises.push(...this.addTransfer({ amount: OVERFLOW, collectedBy, auctionId, type: TransactionTypes.DONATION }));
+			promises.push(...this.addTransfer({ amount: OVERFLOW, collectedBy, auctionId, type: TransactionType.Donation }));
 		}
 
 		await Promise.all(promises);
@@ -1879,7 +1879,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		collectedBy,
 		auctionId = null,
 		notes = null,
-		type = TransactionTypes.TAX,
+		type = TransactionType.Tax,
 	}: AddTransferOptions): [Promise<TaxCollector>, Promise<Transaction>] {
 		const taxCollector = this.client.taxCollectors.resolve(collectedBy);
 		if (!taxCollector) throw new Error(`unknown tax collector resolvable ${collectedBy}`);

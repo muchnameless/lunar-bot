@@ -9,12 +9,12 @@ export const MESSAGE_POSITIONS = {
 	2: 'GAME_INFO',
 } as const;
 
-export const MESSAGE_TYPES = {
-	WHISPER: 'WHISPER',
-	GUILD: 'GUILD',
-	OFFICER: 'OFFICER',
-	PARTY: 'PARTY',
-} as const;
+export const enum HypixelMessageType {
+	Whisper = 'WHISPER',
+	Guild = 'GUILD',
+	Officer = 'OFFICER',
+	Party = 'PARTY',
+}
 
 export const PREFIX_BY_TYPE = {
 	GUILD: '/gc',

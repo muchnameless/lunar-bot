@@ -3,7 +3,7 @@ import { URL } from 'node:url';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { EventCollection } from '../events/EventCollection';
 import { logger, minutes, seconds } from '../../functions';
-import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, MESSAGE_TYPES, PREFIX_BY_TYPE } from './constants';
+import { CHAT_FUNCTION_BY_TYPE, INVISIBLE_CHARACTERS, HypixelMessageType, PREFIX_BY_TYPE } from './constants';
 import { MinecraftChatManager } from './managers/MinecraftChatManager';
 import { DiscordManager } from './managers/DiscordManager';
 import type { Awaitable, Message as DiscordMessage, MessageOptions } from 'discord.js';
@@ -34,20 +34,20 @@ export interface MessageForwardOptions {
 	isEdit?: boolean;
 }
 
-export const enum ChatBridgeEvents {
-	CONNECT = 'connect',
-	DISCONNECT = 'disconnect',
-	ERROR = 'error',
-	MESSAGE = 'message',
-	READY = 'ready',
+export const enum ChatBridgeEvent {
+	Connect = 'connect',
+	Disconnect = 'disconnect',
+	Error = 'error',
+	Message = 'message',
+	Ready = 'ready',
 }
 
 interface ChatBridgeEventListeners {
-	[ChatBridgeEvents.CONNECT]: () => Awaitable<void>;
-	[ChatBridgeEvents.DISCONNECT]: (reason?: string) => Awaitable<void>;
-	[ChatBridgeEvents.ERROR]: (error: Error) => Awaitable<void>;
-	[ChatBridgeEvents.MESSAGE]: (hypixelMessage: HypixelMessage) => Awaitable<void>;
-	[ChatBridgeEvents.READY]: () => Awaitable<void>;
+	[ChatBridgeEvent.Connect]: () => Awaitable<void>;
+	[ChatBridgeEvent.Disconnect]: (reason?: string) => Awaitable<void>;
+	[ChatBridgeEvent.Error]: (error: Error) => Awaitable<void>;
+	[ChatBridgeEvent.Message]: (hypixelMessage: HypixelMessage) => Awaitable<void>;
+	[ChatBridgeEvent.Ready]: () => Awaitable<void>;
 	string: (...args: unknown[]) => Awaitable<void>;
 }
 
@@ -274,7 +274,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 		const {
 			content,
 			hypixelMessage,
-			type = hypixelMessage?.type ?? MESSAGE_TYPES.GUILD,
+			type = hypixelMessage?.type ?? HypixelMessageType.Guild,
 			discord,
 			minecraft: { prefix: minecraftPrefix = '', maxParts = Number.POSITIVE_INFINITY, ..._options } = {},
 		} = typeof options === 'string' ? ({ content: options } as BroadcastOptions) : options;

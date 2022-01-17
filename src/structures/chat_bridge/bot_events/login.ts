@@ -1,6 +1,6 @@
 import { DEFAULT_SETTINGS } from '../constants';
 import { logger } from '../../../functions';
-import { ChatBridgeEvents } from '../ChatBridge';
+import { ChatBridgeEvent } from '../ChatBridge';
 import type { ChatBridge } from '../ChatBridge';
 
 /**
@@ -17,5 +17,5 @@ export default function (chatBridge: ChatBridge) {
 	// send settings to server
 	chatBridge.bot.write('settings', DEFAULT_SETTINGS);
 
-	chatBridge.emit(ChatBridgeEvents.CONNECT);
+	chatBridge.emit(ChatBridgeEvent.Connect);
 }

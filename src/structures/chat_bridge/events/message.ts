@@ -6,7 +6,7 @@ import {
 	IGN_DEFAULT,
 	kickSuccess,
 	INVISIBLE_CHARACTERS,
-	MESSAGE_TYPES,
+	HypixelMessageType,
 	muteSuccess,
 	promoteSuccess,
 	unmuteSuccess,
@@ -443,7 +443,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				}
 			}
 
-			if (hypixelMessage.type !== MESSAGE_TYPES.WHISPER) return; // no prefix and no whisper
+			if (hypixelMessage.type !== HypixelMessageType.Whisper) return; // no prefix and no whisper
 		}
 
 		const { command } = hypixelMessage.commandData;
@@ -459,7 +459,7 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		// server only command in DMs
-		if (command.guildOnly && hypixelMessage.type !== MESSAGE_TYPES.GUILD) {
+		if (command.guildOnly && hypixelMessage.type !== HypixelMessageType.Guild) {
 			logger.info({
 				author: hypixelMessage.author.ign,
 				content: hypixelMessage.content,
@@ -618,8 +618,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 		}
 
 		switch (hypixelMessage.type) {
-			case MESSAGE_TYPES.GUILD:
-			case MESSAGE_TYPES.OFFICER: {
+			case HypixelMessageType.Guild:
+			case HypixelMessageType.Officer: {
 				if (!this.chatBridge.isEnabled()) return;
 
 				hypixelMessage.forwardToDiscord();
@@ -627,8 +627,8 @@ export default class MessageChatBridgeEvent extends ChatBridgeEvent {
 				return this._handleUserMessage(hypixelMessage);
 			}
 
-			case MESSAGE_TYPES.PARTY:
-			case MESSAGE_TYPES.WHISPER: {
+			case HypixelMessageType.Party:
+			case HypixelMessageType.Whisper: {
 				if (!this.chatBridge.isEnabled()) return;
 
 				// ignore messages from non guild players

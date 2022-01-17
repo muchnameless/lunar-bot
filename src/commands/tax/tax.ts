@@ -8,7 +8,7 @@ import {
 } from '../../structures/commands/commonOptions';
 import { ChannelUtil, InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, logger, safePromiseAll, validateNumber } from '../../functions';
-import { TransactionTypes } from '../../structures/database/models/Transaction';
+import { TransactionType } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ChatInputCommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -363,8 +363,8 @@ export default class TaxCommand extends ApplicationCommand {
 								...taxCollectors.cache.map((taxCollector) => {
 									if (!taxCollector.isCollecting) return taxCollector.remove();
 									return safePromiseAll([
-										taxCollector.resetAmount(TransactionTypes.TAX),
-										taxCollector.resetAmount(TransactionTypes.DONATION),
+										taxCollector.resetAmount(TransactionType.Tax),
+										taxCollector.resetAmount(TransactionType.Donation),
 									]);
 								}),
 								// reset players that left

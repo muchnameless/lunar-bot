@@ -12,7 +12,7 @@ import {
 	INVISIBLE_CHARACTER_REGEXP,
 	INVISIBLE_CHARACTERS,
 	MEME_REGEXP,
-	MESSAGE_TYPES,
+	HypixelMessageType,
 	NON_WHITESPACE_REGEXP,
 	randomPadding,
 	UNICODE_TO_EMOJI_NAME,
@@ -20,7 +20,7 @@ import {
 import { MC_CLIENT_VERSION, MINECRAFT_DATA, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
 import { createBot } from '../MinecraftBot';
 import { MessageUtil, UserUtil } from '../../../util';
-import { MessageCollector, MessageCollectorEvents } from '../MessageCollector';
+import { MessageCollector, MessageCollectorEvent } from '../MessageCollector';
 import { cache } from '../../../api';
 import {
 	asyncReplace,
@@ -73,12 +73,15 @@ export interface CommandOptions {
 type FilterPromise = ChatResponse | HypixelMessage;
 
 const enum ChatResponse {
-	TIMEOUT,
-	SPAM,
-	BLOCKED,
+	Timeout,
+	Spam,
+	Blocked,
 }
 
 const enum ForwardRejectionReason {
+	HypixelBlocked,
+	LocalBlocked,
+	MessageCount,
 	HYPIXEL_BLOCKED,
 	LOCAL_BLOCKED,
 	MESSAGE_COUNT,
@@ -326,7 +329,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		let info: string | undefined;
 
 		switch (reason) {
-			case ForwardRejectionReason.HYPIXEL_BLOCKED: {
+			case ForwardRejectionReason.HypixelBlocked: {
 				const player =
 					UserUtil.getPlayer(discordMessage.author) ??
 					(
@@ -372,7 +375,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}
 			// fallthrough
 
-			case ForwardRejectionReason.LOCAL_BLOCKED:
+			case ForwardRejectionReason.LocalBlocked:
 				info = stripIndents`
 					your message was blocked because you used a blocked word or character
 					(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
@@ -381,7 +384,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				`;
 				break;
 
-			case ForwardRejectionReason.MESSAGE_COUNT:
+			case ForwardRejectionReason.MessageCount:
 				info = stripIndents`
 					your message was blocked because you are only allowed to send up to ${
 						data?.maxParts ?? this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS')
@@ -397,10 +400,11 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		}
 
 		if (
-			reason !== ForwardRejectionReason.HYPIXEL_BLOCKED &&
+			reason !== ForwardRejectionReason.HypixelBlocked &&
 			(await cache.get(`chatbridge:blocked:dm:${discordMessage.author.id}`))
-		)
+		) {
 			return;
+		}
 
 		UserUtil.sendDM(discordMessage.author, info);
 		logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
@@ -535,9 +539,9 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			return this._resolveAndReset(hypixelMessage);
 		}
 		if (hypixelMessage.type) return;
-		if (hypixelMessage.spam) return this._resolveAndReset(ChatResponse.SPAM);
+		if (hypixelMessage.spam) return this._resolveAndReset(ChatResponse.Spam);
 		if (hypixelMessage.content.startsWith('We blocked your comment')) {
-			return this._resolveAndReset(ChatResponse.BLOCKED);
+			return this._resolveAndReset(ChatResponse.Blocked);
 		}
 	}
 
@@ -807,14 +811,14 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		if (!success) {
 			// messageParts blocked
-			this._handleForwardRejection(discordMessage, ForwardRejectionReason.LOCAL_BLOCKED);
+			this._handleForwardRejection(discordMessage, ForwardRejectionReason.LocalBlocked);
 			return false;
 		}
 
 		if (!contentParts.size) return false;
 
 		if (contentParts.size > maxParts) {
-			this._handleForwardRejection(discordMessage, ForwardRejectionReason.MESSAGE_COUNT, { maxParts });
+			this._handleForwardRejection(discordMessage, ForwardRejectionReason.MessageCount, { maxParts });
 			return false;
 		}
 
@@ -898,11 +902,11 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		}
 
 		// listen for responses
-		const response = await Promise.race([listener, sleep(MinecraftChatManager.SAFE_DELAY, ChatResponse.TIMEOUT)]);
+		const response = await Promise.race([listener, sleep(MinecraftChatManager.SAFE_DELAY, ChatResponse.Timeout)]);
 
 		switch (response) {
 			// collector collected nothing, sleep won the race. this happens for all commands which return a "system reply"
-			case ChatResponse.TIMEOUT: {
+			case ChatResponse.Timeout: {
 				this._tempIncrementCounter();
 				this._resetFilter();
 
@@ -919,7 +923,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}
 
 			// anti spam failed -> retry
-			case ChatResponse.SPAM: {
+			case ChatResponse.Spam: {
 				this._tempIncrementCounter();
 
 				// max retries reached
@@ -934,8 +938,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}
 
 			// hypixel filter blocked message
-			case ChatResponse.BLOCKED: {
-				this._handleForwardRejection(discordMessage, ForwardRejectionReason.HYPIXEL_BLOCKED);
+			case ChatResponse.Blocked: {
+				this._handleForwardRejection(discordMessage, ForwardRejectionReason.HypixelBlocked);
 				await sleep(this.delay);
 				throw `unable to send '${message}', hypixel's filter blocked it`;
 			}
@@ -945,7 +949,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 				this._lastMessages.add(message); // since listener doesn't collect command responses 'if (useSpamBypass)' is not needed in this case
 
 				await sleep(
-					[MESSAGE_TYPES.GUILD, MESSAGE_TYPES.PARTY, MESSAGE_TYPES.OFFICER].includes(response.type as any)
+					[HypixelMessageType.Guild, HypixelMessageType.Party, HypixelMessageType.Officer].includes(response.type!)
 						? this.delay
 						: (this._tempIncrementCounter(), MinecraftChatManager.SAFE_DELAY), // use safe delay for commands and whispers
 				);
@@ -986,7 +990,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		});
 
 		// collect message
-		collector.on(MessageCollectorEvents.COLLECT, (hypixelMessage) => {
+		collector.on(MessageCollectorEvent.Collect, (hypixelMessage) => {
 			// message is line separator
 			if (/^-{29,}/.test(hypixelMessage.content)) {
 				// message starts and ends with a line separator (50+ * '-') but includes non '-' in the middle -> single message response detected
@@ -1010,7 +1014,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		// eslint-disable-next-line no-async-promise-executor
 		return new Promise(async (resolve, reject) => {
 			// end collection
-			collector.once(MessageCollectorEvents.END, (collected, reason) => {
+			collector.once(MessageCollectorEvent.End, (collected, reason) => {
 				this.commandQueue.shift();
 
 				switch (reason) {

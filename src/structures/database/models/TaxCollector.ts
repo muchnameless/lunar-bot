@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import { TransactionTypes } from './Transaction';
+import { TransactionType } from './Transaction';
 import type { ModelStatic, Optional, Sequelize } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
@@ -71,12 +71,12 @@ export class TaxCollector
 	 * @param amount
 	 * @param type
 	 */
-	addAmount(amount: number, type = TransactionTypes.TAX) {
+	addAmount(amount: number, type = TransactionType.Tax) {
 		switch (type) {
-			case TransactionTypes.TAX:
+			case TransactionType.Tax:
 				return this.update({ collectedTax: this.collectedTax + amount });
 
-			case TransactionTypes.DONATION:
+			case TransactionType.Donation:
 				return this.update({ collectedDonations: this.collectedDonations + amount });
 
 			default: {
@@ -90,12 +90,12 @@ export class TaxCollector
 	 * resets the specified amount back to 0
 	 * @param type
 	 */
-	resetAmount(type = TransactionTypes.TAX) {
+	resetAmount(type = TransactionType.Tax) {
 		switch (type) {
-			case TransactionTypes.TAX:
+			case TransactionType.Tax:
 				return this.update({ collectedTax: 0 });
 
-			case TransactionTypes.DONATION:
+			case TransactionType.Donation:
 				return this.update({ collectedDonations: 0 });
 
 			default: {

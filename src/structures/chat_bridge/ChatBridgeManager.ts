@@ -7,7 +7,7 @@ import { STOP_EMOJI, X_EMOJI } from '../../constants';
 import { BridgeCommandCollection } from '../commands/BridgeCommandCollection';
 import { MessageUtil } from '../../util';
 import { logger } from '../../functions';
-import { ChatBridge, ChatBridgeEvents } from './ChatBridge';
+import { ChatBridge, ChatBridgeEvent } from './ChatBridge';
 import { DiscordChatManager } from './managers/DiscordChatManager';
 import type { ChatInputCommandInteraction, Message, Snowflake } from 'discord.js';
 import type { MessageForwardOptions } from './ChatBridge';
@@ -79,7 +79,7 @@ export class ChatBridgeManager {
 			const chatBridge = this.cache[index];
 
 			chatBridge.connect();
-			await once(chatBridge, ChatBridgeEvents.READY);
+			await once(chatBridge, ChatBridgeEvent.Ready);
 
 			return this;
 		}
@@ -88,7 +88,7 @@ export class ChatBridgeManager {
 		await Promise.all(
 			this.cache.map((chatBridge) => {
 				chatBridge.connect();
-				return once(chatBridge, ChatBridgeEvents.READY);
+				return once(chatBridge, ChatBridgeEvent.Ready);
 			}),
 		);
 

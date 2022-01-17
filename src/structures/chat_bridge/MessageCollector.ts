@@ -200,7 +200,7 @@
 
 import { setTimeout, clearTimeout } from 'node:timers';
 import { TypedEmitter } from 'tiny-typed-emitter';
-import { ChatBridgeEvents } from './ChatBridge';
+import { ChatBridgeEvent } from './ChatBridge';
 import type { Awaitable } from 'discord.js';
 import type { HypixelMessage } from './HypixelMessage';
 import type { ChatBridge } from './ChatBridge';
@@ -225,14 +225,14 @@ export interface MessageCollectorOptions {
 	maxProcessed?: number;
 }
 
-export const enum MessageCollectorEvents {
-	COLLECT = 'collect',
-	END = 'end',
+export const enum MessageCollectorEvent {
+	Collect = 'collect',
+	End = 'end',
 }
 
 interface MessageCollectorEventListeners {
-	[MessageCollectorEvents.COLLECT]: (item: HypixelMessage) => Awaitable<void>;
-	[MessageCollectorEvents.END]: (collected: MessageCollector['collected'], reason: string) => Awaitable<void>;
+	[MessageCollectorEvent.Collect]: (item: HypixelMessage) => Awaitable<void>;
+	[MessageCollectorEvent.End]: (collected: MessageCollector['collected'], reason: string) => Awaitable<void>;
 	string: (...args: unknown[]) => Awaitable<void>;
 }
 
@@ -285,12 +285,12 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 		}
 
 		this.chatBridge.incrementMaxListeners();
-		this.chatBridge.on(ChatBridgeEvents.MESSAGE, this._handleCollect);
-		this.chatBridge.once(ChatBridgeEvents.DISCONNECT, this._handleBotDisconnection);
+		this.chatBridge.on(ChatBridgeEvent.Message, this._handleCollect);
+		this.chatBridge.once(ChatBridgeEvent.Disconnect, this._handleBotDisconnection);
 
-		this.once(MessageCollectorEvents.END, () => {
-			this.chatBridge.removeListener(ChatBridgeEvents.MESSAGE, this._handleCollect);
-			this.chatBridge.removeListener(ChatBridgeEvents.DISCONNECT, this._handleBotDisconnection);
+		this.once(MessageCollectorEvent.End, () => {
+			this.chatBridge.removeListener(ChatBridgeEvent.Message, this._handleCollect);
+			this.chatBridge.removeListener(ChatBridgeEvent.Disconnect, this._handleBotDisconnection);
 			this.chatBridge.decrementMaxListeners();
 		});
 
@@ -319,8 +319,8 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 			}
 
 			const cleanup = () => {
-				this.removeListener(MessageCollectorEvents.COLLECT, onCollect);
-				this.removeListener(MessageCollectorEvents.END, onEnd);
+				this.removeListener(MessageCollectorEvent.Collect, onCollect);
+				this.removeListener(MessageCollectorEvent.End, onEnd);
 			};
 
 			const onCollect = (item: HypixelMessage) => {
@@ -333,8 +333,8 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 				reject(this.collected);
 			};
 
-			this.on(MessageCollectorEvents.COLLECT, onCollect);
-			this.on(MessageCollectorEvents.END, onEnd);
+			this.on(MessageCollectorEvent.Collect, onCollect);
+			this.on(MessageCollectorEvent.End, onEnd);
 		});
 	}
 
@@ -357,7 +357,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 			/**
 			 * Emitted whenever an element is collected.
 			 */
-			this.emit(MessageCollectorEvents.COLLECT, hypixelMessage);
+			this.emit(MessageCollectorEvent.Collect, hypixelMessage);
 
 			if (this._idletimeout) {
 				clearTimeout(this._idletimeout);
@@ -391,7 +391,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 		 * @param collected The elements collected by the collector
 		 * @param reason The reason the collector ended
 		 */
-		this.emit(MessageCollectorEvents.END, this.collected, reason);
+		this.emit(MessageCollectorEvent.End, this.collected, reason);
 	}
 
 	/**
@@ -429,7 +429,7 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 		const onCollect = (item: HypixelMessage) => {
 			queue.push(item);
 		};
-		this.on(MessageCollectorEvents.COLLECT, onCollect);
+		this.on(MessageCollectorEvent.Collect, onCollect);
 
 		try {
 			while (queue.length || !this.ended) {
@@ -438,17 +438,17 @@ export class MessageCollector extends TypedEmitter<MessageCollectorEventListener
 				} else {
 					await new Promise((resolve) => {
 						const tick = () => {
-							this.removeListener(MessageCollectorEvents.COLLECT, tick);
-							this.removeListener(MessageCollectorEvents.END, tick);
+							this.removeListener(MessageCollectorEvent.Collect, tick);
+							this.removeListener(MessageCollectorEvent.End, tick);
 							return resolve(null);
 						};
-						this.on(MessageCollectorEvents.COLLECT, tick);
-						this.on(MessageCollectorEvents.END, tick);
+						this.on(MessageCollectorEvent.Collect, tick);
+						this.on(MessageCollectorEvent.End, tick);
 					});
 				}
 			}
 		} finally {
-			this.removeListener(MessageCollectorEvents.COLLECT, onCollect);
+			this.removeListener(MessageCollectorEvent.Collect, onCollect);
 		}
 	}
 }

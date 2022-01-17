@@ -4,10 +4,10 @@ import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants'
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '../../../functions';
 import { DiscordChatManager } from './DiscordChatManager';
 import type { Snowflake } from 'discord.js';
-import type { MESSAGE_TYPES } from '../constants';
+import type { HypixelMessageType } from '../constants';
 import type { ChatBridge } from '../ChatBridge';
 
-export type DiscordChatManagerResolvable = keyof typeof MESSAGE_TYPES | Snowflake | DiscordChatManager;
+export type DiscordChatManagerResolvable = HypixelMessageType | Snowflake | DiscordChatManager;
 
 export class DiscordManager {
 	chatBridge: ChatBridge;
