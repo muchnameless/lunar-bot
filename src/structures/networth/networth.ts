@@ -193,7 +193,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 		ExtraAttributes.originTag &&
 		(ExtraAttributes.enchantments || TALISMANS.has(itemId))
 	) {
-		price += getPrice('RECOMBOBULATOR_3000') / 2;
+		price += getPrice('RECOMBOBULATOR_3000') * 0.5;
 	}
 
 	// gemstones
