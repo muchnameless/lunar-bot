@@ -79,7 +79,7 @@ interface AwaitReplyOptions extends InteractionReplyOptions {
 	time?: number;
 }
 
-interface AwaitConfirmationOptions extends InteractionReplyOptions {
+interface AwaitConfirmationOptions extends Omit<InteractionReplyOptions, 'fetchReply' | 'rejectOnError'> {
 	question?: string;
 	/** time in milliseconds to wait for a response */
 	time?: number;
@@ -595,10 +595,10 @@ export default class InteractionUtil extends null {
 			..._options
 		} = typeof options === 'string' ? { question: options } : options;
 		const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
-		const CANCLE_ID = `confirm:${SnowflakeUtil.generate()}`;
+		const CANCEL_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const row = new MessageActionRow().addComponents(
 			new MessageButton().setCustomId(SUCCESS_ID).setStyle(Constants.MessageButtonStyles.SUCCESS).setEmoji(Y_EMOJI),
-			new MessageButton().setCustomId(CANCLE_ID).setStyle(Constants.MessageButtonStyles.DANGER).setEmoji(X_EMOJI),
+			new MessageButton().setCustomId(CANCEL_ID).setStyle(Constants.MessageButtonStyles.DANGER).setEmoji(X_EMOJI),
 		);
 
 		let channel: TextBasedChannel;
@@ -620,68 +620,83 @@ export default class InteractionUtil extends null {
 			throw errorMessage;
 		}
 
-		let success = false;
+		const collector = channel.createMessageComponentCollector({
+			componentType: Constants.MessageComponentTypes.BUTTON,
+			message: message!,
+			filter: (i) => {
+				// wrong button
+				if (![SUCCESS_ID, CANCEL_ID].includes(i.customId)) return false;
 
-		try {
-			const result = await channel.awaitMessageComponent({
-				componentType: Constants.MessageComponentTypes.BUTTON,
-				filter: (i) => {
-					if (i.user.id !== interaction.user.id) {
-						this.reply(interaction, {
-							content: 'that is not up to you to decide',
-							ephemeral: true,
+				// wrong user
+				if (i.user.id !== interaction.user.id) {
+					this.reply(interaction, {
+						content: 'that is not up to you to decide',
+						ephemeral: true,
+					});
+					return false;
+				}
+
+				return true;
+			},
+			max: 1,
+			time,
+		});
+
+		return new Promise<void>((resolve, reject) => {
+			collector.once('end', async (collected, reason) => {
+				switch (reason) {
+					case 'limit': {
+						const buttonInteraction = collected.first()!;
+						const success = buttonInteraction.customId === SUCCESS_ID;
+
+						this.update(buttonInteraction, {
+							embeds: [
+								new MessageEmbed()
+									.setColor(interaction.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
+									.setDescription(
+										stripIndent`
+											${question}
+											\\> ${success ? 'confirmed' : 'cancelled'}
+										`,
+									)
+									.setTimestamp(),
+							],
+							components: [row.setComponents(row.components.map((c) => c.setDisabled()))],
 						});
-						return false;
+
+						if (success) return resolve();
+						break;
 					}
 
-					return [SUCCESS_ID, CANCLE_ID].includes(i.customId);
-				},
-				time,
+					case 'time': {
+						const editOptions = {
+							embeds: [
+								new MessageEmbed()
+									.setColor('NOT_QUITE_BLACK')
+									.setDescription(
+										stripIndent`
+											${question}
+											\\> timeout
+										`,
+									)
+									.setTimestamp(),
+							],
+							components: [row.setComponents(row.components.map((c) => c.setDisabled()))],
+						};
+
+						try {
+							await this.editReply(interaction, editOptions, message ?? '@original');
+						} catch (error) {
+							logger.error(error);
+							this.reply(interaction, editOptions);
+						}
+						break;
+					}
+				}
+
+				reject(errorMessage);
 			});
-
-			success = result.customId === SUCCESS_ID;
-
-			this.update(result, {
-				embeds: [
-					new MessageEmbed()
-						.setColor(interaction.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
-						.setDescription(
-							stripIndent`
-								${question}
-								\\> ${success ? 'confirmed' : 'cancelled'}
-							`,
-						)
-						.setTimestamp(),
-				],
-				components: [row.setComponents(row.components.map((c) => c.setDisabled()))],
-			});
-		} catch (error) {
-			const editOptions = {
-				embeds: [
-					new MessageEmbed()
-						.setColor('NOT_QUITE_BLACK')
-						.setDescription(
-							stripIndent`
-								${question}
-								\\> timeout
-							`,
-						)
-						.setTimestamp(),
-				],
-				components: [row.setComponents(row.components.map((c) => c.setDisabled()))],
-			};
-
-			try {
-				await this.editReply(interaction, editOptions, message ?? '@original');
-			} catch (error_) {
-				logger.error(error_);
-				this.reply(interaction, editOptions);
-			}
-
-			logger.debug(error);
-		}
-
-		if (!success) throw errorMessage;
+		});
 	}
 
 	/**
