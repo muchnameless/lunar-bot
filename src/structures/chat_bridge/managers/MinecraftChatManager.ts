@@ -101,7 +101,7 @@ class LastMessages {
 	/**
 	 * ring buffer
 	 */
-	private cache = [] as string[];
+	private cache: string[] = [];
 
 	constructor() {
 		for (let i = 0; i < LastMessages.MAX_INDEX; ++i) {
