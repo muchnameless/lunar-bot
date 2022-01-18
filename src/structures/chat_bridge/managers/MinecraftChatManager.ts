@@ -82,9 +82,6 @@ const enum ForwardRejectionReason {
 	HypixelBlocked,
 	LocalBlocked,
 	MessageCount,
-	HYPIXEL_BLOCKED,
-	LOCAL_BLOCKED,
-	MESSAGE_COUNT,
 }
 
 class LastMessages {
