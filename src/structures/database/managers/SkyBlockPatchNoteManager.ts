@@ -2,7 +2,7 @@ import Parser from 'rss-parser';
 import { CronJob } from 'cron';
 import { logger } from '../../../functions';
 import { ModelManager } from './ModelManager';
-import type { SkyBlockPatchNote } from '../models/SkyBlockPatchNote';
+import type { HypixelForumPostAttributes, SkyBlockPatchNote } from '../models/SkyBlockPatchNote';
 
 interface HypixelForumResponseItem {
 	creator: string;
@@ -69,7 +69,9 @@ export class SkyBlockPatchNoteManager extends ModelManager<SkyBlockPatchNote> {
 				this.client.config.set('HYPIXEL_FORUM_LAST_GUID', Math.max(...newPosts.map(({ guid }) => guid)));
 			}
 
-			await this.model.bulkCreate(parsedItems, { updateOnDuplicate: ['title', 'creator', 'link'] });
+			await this.model.bulkCreate(parsedItems, {
+				updateOnDuplicate: ['title', 'creator', 'link', 'updatedAt' as keyof HypixelForumPostAttributes],
+			});
 		} catch (error) {
 			logger.error(error, '[RSS]');
 		}

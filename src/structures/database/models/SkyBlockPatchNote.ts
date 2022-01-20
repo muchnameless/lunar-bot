@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-interface HypixelForumPostAttributes {
+export interface HypixelForumPostAttributes {
 	guid: number;
 	title: string;
 	creator: string;
@@ -21,6 +21,9 @@ export class SkyBlockPatchNote
 	declare title: string;
 	declare creator: string;
 	declare link: string;
+
+	declare readonly createdAt: Date;
+	declare readonly updatedAt: Date;
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(
