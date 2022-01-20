@@ -160,7 +160,6 @@ export default class TrackCommand extends ApplicationCommand {
 			width: 800,
 			height: 400,
 		});
-
 		const image = await canvas.renderToBuffer({
 			type: 'line',
 			data: {
@@ -168,6 +167,7 @@ export default class TrackCommand extends ApplicationCommand {
 				datasets,
 			},
 		});
+		const attachment = new MessageAttachment(image, 'file.jpg');
 
 		return InteractionUtil.reply(interaction, {
 			embeds: [
@@ -178,9 +178,9 @@ export default class TrackCommand extends ApplicationCommand {
 						url: player.url,
 					})
 					.setTitle(`${upperCaseFirstChar(datasets[0].label)} history (${days} days)`)
-					.setImage('attachment://file.jpg'),
+					.setImage(`attachment://${attachment.name}`),
 			],
-			files: [new MessageAttachment(image, 'file.jpg')],
+			files: [attachment],
 		});
 	}
 }

@@ -163,7 +163,7 @@ export class LogHandler {
 				embeds.push(this.client.defaultEmbed.setDescription(`${i}`));
 			} else if (typeof i !== 'object') {
 				throw new TypeError(
-					`[TRANSFORM INPUT]: provided argument '${i}' is a ${typeof i} instead of an Object or String`,
+					`[TRANSFORM INPUT]: provided argument '${i}' is a '${typeof i}' instead of an Object or String`,
 				);
 			} else {
 				embeds.push(new MessageEmbed(i));
