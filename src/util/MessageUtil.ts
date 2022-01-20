@@ -43,7 +43,7 @@ export default class MessageUtil extends null {
 	 */
 	static logInfo(message: Message) {
 		return `${message.author?.tag ?? 'unknown author'}${
-			message.guildId ? ` | ${message.member?.displayName ?? 'unknown member'}` : ''
+			message.inGuild() ? ` | ${message.member?.displayName ?? 'unknown member'}` : ''
 		}`;
 	}
 
