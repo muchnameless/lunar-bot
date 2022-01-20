@@ -79,8 +79,6 @@ export class DiscordManager {
 		const { value, similarity } = autocorrect(inColon, this.client.emojis.cache, 'name');
 
 		if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return `${value}`;
-
-		return fullMatch;
 	}
 
 	/**
@@ -144,12 +142,11 @@ export class DiscordManager {
 					.replace(
 						// emojis (custom and default)
 						/(?<!<[at]?):(\S+):(?!\d{17,19}>)/g,
-						(match, p1: string) => this._findEmojiByName(match, p1),
-					)
-					.replace(
-						// emojis (custom and default)
-						/(?<!<[at]?):(\S+?):(?!\d{17,19}>)/g,
-						(match, p1: string) => this._findEmojiByName(match, p1),
+						(match, p1: string) =>
+							this._findEmojiByName(match, p1) ??
+							match.replace(/:(\S+?):/g, (_match, _p1: string) =>
+								p1.length !== _p1.length ? this._findEmojiByName(_match, _p1) ?? _match : _match,
+							),
 					)
 					.replace(
 						// channels
