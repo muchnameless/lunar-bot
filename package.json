@@ -29,7 +29,7 @@
     "@keyv/redis": "^2.2.2",
     "@sapphire/async-queue": "^1.1.9",
     "@sapphire/stopwatch": "^1.2.5",
-    "@sapphire/time-utilities": "^1.5.1",
+    "@sapphire/time-utilities": "^1.5.2",
     "@sapphire/type": "^2.1.2",
     "@sapphire/utilities": "^3.2.0",
     "@skyra/jaro-winkler": "^1.0.0",
