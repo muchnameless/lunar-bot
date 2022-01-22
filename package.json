@@ -58,7 +58,7 @@
     "re2": "^1.17.3",
     "readdirp": "^3.6.0",
     "rss-parser": "^3.12.0",
-    "sequelize": "^6.13.0",
+    "sequelize": "^6.14.0",
     "timezonecomplete": "^5.12.4",
     "tiny-typed-emitter": "^2.1.0",
     "tslib": "^2.3.1",
