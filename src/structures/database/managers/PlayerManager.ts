@@ -20,6 +20,7 @@ import {
 	upperCaseFirstChar,
 } from '../../../functions';
 import { ModelManager } from './ModelManager';
+import type { CreationAttributes } from 'sequelize';
 import type { ModelResovable } from './ModelManager';
 import type { Player, PlayerInGuild, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
 import type { HypixelGuild } from '../models/HypixelGuild';
@@ -118,7 +119,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * @param options options for the new db entry
 	 * @param isAddingSingleEntry wether to call sortAlphabetically() and updateXp() after adding the new entry
 	 */
-	override async add(options: Player['_creationAttributes'], isAddingSingleEntry = true) {
+	override async add(options: CreationAttributes<Player>, isAddingSingleEntry = true) {
 		const newPlayer = await super.add(options);
 
 		this.client.hypixelGuilds.sweepPlayerCache(newPlayer.guildId);

@@ -1,6 +1,6 @@
 import { Collection } from 'discord.js';
 import { logger } from '../../../functions';
-import type { Attributes, FindOptions, Model, ModelStatic, WhereOptions } from 'sequelize';
+import type { Attributes, CreationAttributes, FindOptions, Model, ModelStatic, WhereOptions } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
 export type ModelResovable<M extends Model> = M | string;
@@ -79,7 +79,7 @@ export class ModelManager<M extends Model> {
 	 * create a new database entry and adds it to the cache
 	 * @param options
 	 */
-	async add(options: M['_creationAttributes']) {
+	async add(options: CreationAttributes<M>) {
 		const newEntry = await this.model.create(options);
 
 		this.cache.set(newEntry[this.primaryKey as keyof M] as unknown as string, newEntry);
