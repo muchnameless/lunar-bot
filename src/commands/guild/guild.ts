@@ -59,7 +59,7 @@ import type {
 	AutocompleteInteraction,
 } from 'discord.js';
 import type { SlashCommandStringOption } from '@discordjs/builders';
-import type { WhereOptions } from 'sequelize';
+import type { Attributes, WhereOptions } from 'sequelize';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { Player } from '../../structures/database/models/Player';
 import type { HypixelGuild } from '../../structures/database/models/HypixelGuild';
@@ -967,7 +967,7 @@ export default class GuildCommand extends ApplicationCommand {
 							target = TARGET_INPUT;
 						} else {
 							// fetch uncached player
-							const queryParams: WhereOptions<Player['_attributes']>[] = [
+							const queryParams: WhereOptions<Attributes<Player>>[] = [
 								{
 									ign: { [Op.iLike]: TARGET_INPUT },
 									minecraftUuid: TARGET_INPUT,

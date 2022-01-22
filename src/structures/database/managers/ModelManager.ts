@@ -1,6 +1,6 @@
 import { Collection } from 'discord.js';
 import { logger } from '../../../functions';
-import type { FindOptions, Model, ModelStatic, WhereOptions } from 'sequelize';
+import type { Attributes, FindOptions, Model, ModelStatic, WhereOptions } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
 export type ModelResovable<M extends Model> = M | string;
@@ -62,9 +62,9 @@ export class ModelManager<M extends Model> {
 	 * fetches an entry from the database and caches it
 	 * @param where
 	 */
-	async fetch({ cache = true, ...where }: WhereOptions<M['_attributes']> & { cache?: boolean }) {
+	async fetch({ cache = true, ...where }: WhereOptions<Attributes<M>> & { cache?: boolean }) {
 		try {
-			const entry = await this.model.findOne({ where: where as WhereOptions<M['_attributes']> });
+			const entry = await this.model.findOne({ where: where as WhereOptions<Attributes<M>> });
 
 			if (cache && entry) this.cache.set(entry[this.primaryKey as keyof M] as unknown as string, entry);
 
