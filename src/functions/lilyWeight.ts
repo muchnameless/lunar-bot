@@ -28,7 +28,7 @@ export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfile
 	);
 
 	return {
-		skillAPIEnabled: Reflect.has(skyblockMember, 'experience_skill_alchemy'),
+		skillAPIEnabled: Reflect.has(skyblockMember, 'experience_skill_mining'),
 		skill,
 		slayer,
 		dungeons: catacombs.experience + catacombs.completion.base + catacombs.completion.master,

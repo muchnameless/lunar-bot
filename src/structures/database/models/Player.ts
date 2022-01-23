@@ -831,7 +831,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			/**
 			 * SKILLS
 			 */
-			if (Reflect.has(playerData, 'experience_skill_alchemy')) {
+			if (Reflect.has(playerData, 'experience_skill_mining')) {
 				for (const skill of SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
 				for (const skill of COSMETIC_SKILLS) this[`${skill}Xp`] = playerData[`experience_skill_${skill}`] ?? 0;
 
@@ -857,8 +857,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 				 */
 				const { achievements } = await hypixel.player.uuid(this.minecraftUuid);
 
-				for (const skill of SKILLS)
+				for (const skill of SKILLS) {
 					this[`${skill}Xp`] = SKILL_XP_TOTAL[achievements?.[SKILL_ACHIEVEMENTS[skill]] ?? 0] ?? 0;
+				}
 			}
 
 			this.farmingLvlCap = 50 + (playerData.jacob2?.perks?.farming_level_cap ?? 0);

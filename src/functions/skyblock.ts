@@ -52,20 +52,20 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		}
 	}
 
-	if (trueLevel < maxLevel) {
-		const nonFlooredLevel = trueLevel + Math.floor(xp - xpTotal) / xpTable[(trueLevel + 1) as keyof typeof xpTable];
-
+	if (trueLevel >= maxLevel) {
 		return {
 			trueLevel,
-			progressLevel: Math.floor(nonFlooredLevel * 100) / 100,
-			nonFlooredLevel,
+			progressLevel: trueLevel,
+			nonFlooredLevel: trueLevel,
 		};
 	}
 
+	const nonFlooredLevel = trueLevel + Math.floor(xp - xpTotal) / xpTable[(trueLevel + 1) as keyof typeof xpTable];
+
 	return {
 		trueLevel,
-		progressLevel: trueLevel,
-		nonFlooredLevel: trueLevel,
+		progressLevel: Math.floor(nonFlooredLevel * 100) / 100,
+		nonFlooredLevel,
 	};
 }
 
