@@ -196,7 +196,7 @@ async function fetchAuctionPage(page = 0) {
  * @param enchantment
  */
 export const isUpgradableTieredEnchantment = (enchantment: string) =>
-	enchantment.startsWith('ultimate_') || enchantment.startsWith('turbo_');
+	enchantment.startsWith('ultimate_') || enchantment.startsWith('turbo_') || enchantment.startsWith('dragon_hunter_');
 
 /**
  * fetches all auction pages
