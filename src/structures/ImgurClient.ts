@@ -161,7 +161,7 @@ export class ImgurClient {
 		form.append('type', type);
 
 		return this.request(
-			'upload',
+			'image',
 			{
 				method: 'POST',
 				body: form,
