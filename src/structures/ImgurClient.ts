@@ -229,23 +229,21 @@ export class ImgurClient {
 
 			// get ratelimit headers
 			for (const type of Object.keys(this.rateLimit)) {
-				const data = res.headers.get(`x-ratelimit-${type}`);
+				const data = Number.parseInt(res.headers.get(`x-ratelimit-${type}`)!, 10);
+				if (Number.isNaN(data)) continue;
 
-				if (data !== null) {
-					this.rateLimit[type as keyof RateLimitData] = type.endsWith('reset')
-						? NOW + seconds(Number.parseInt(data, 10)) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
-						: Number.parseInt(data, 10);
-				}
+				this.rateLimit[type as keyof RateLimitData] = type.endsWith('reset')
+					? (data < 1e9 ? NOW : 0) + seconds(data) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
+					: data;
 			}
 
 			for (const type of Object.keys(this.postRateLimit)) {
-				const data = res.headers.get(`x-post-rate-limit-${type}`);
+				const data = Number.parseInt(res.headers.get(`x-post-rate-limit-${type}`)!, 10);
+				if (Number.isNaN(data)) continue;
 
-				if (data !== null) {
-					this.postRateLimit[type as keyof PostRateLimitData] = type.endsWith('reset')
-						? NOW + seconds(Number.parseInt(data, 10)) + this.rateLimitOffset // x-post-rate-limit-reset is seconds until reset -> convert to timestamp
-						: Number.parseInt(data, 10);
-				}
+				this.postRateLimit[type as keyof PostRateLimitData] = type.endsWith('reset')
+					? (data < 1e9 ? NOW : 0) + seconds(data) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
+					: data;
 			}
 
 			// check response
