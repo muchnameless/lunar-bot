@@ -2,29 +2,26 @@ import { setTimeout } from 'node:timers';
 import { Collection } from 'discord.js';
 import { Model, DataTypes } from 'sequelize';
 import { NEVER_MATCHING_REGEXP } from '../../../constants';
-import type { ModelStatic, Sequelize } from 'sequelize';
+import type { ModelStatic, Sequelize, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import type { HypixelUserMessage } from '../../chat_bridge/HypixelMessage';
 import type { LunarClient } from '../../LunarClient';
 
-interface ChatTriggerAttributes {
-	regExpString: string;
-	response: string;
-	cooldown: number | null;
-	chatTypes: string[];
-}
-
-export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTriggerAttributes {
+export class ChatTrigger extends Model<
+	InferAttributes<ChatTrigger, { omit: 'client' }>,
+	InferCreationAttributes<ChatTrigger, { omit: 'client' }>
+> {
 	declare client: LunarClient;
 
 	declare regExpString: string;
 	declare response: string;
 	declare cooldown: number | null;
 	declare chatTypes: string[];
+
+	declare createdAt: CreationOptional<Date>;
+	declare updatedAt: CreationOptional<Date>;
+
 	private timestamps: Collection<string, number> | null;
 	private _regExp: RegExp | null;
-
-	declare readonly createdAt: Date;
-	declare readonly updatedAt: Date;
 
 	constructor(...args: any[]) {
 		super(...args);
@@ -56,6 +53,8 @@ export class ChatTrigger extends Model<ChatTriggerAttributes> implements ChatTri
 					type: DataTypes.ARRAY(DataTypes.STRING),
 					allowNull: false,
 				},
+				createdAt: DataTypes.DATE,
+				updatedAt: DataTypes.DATE,
 			},
 			{
 				sequelize,

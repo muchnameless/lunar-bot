@@ -1,17 +1,16 @@
 import { Model, DataTypes } from 'sequelize';
-import type { ModelStatic, Sequelize } from 'sequelize';
+import type { Sequelize, InferAttributes, InferCreationAttributes, ModelStatic } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-interface ConfigAttributes {
-	key: string;
-	value: string | null;
-}
-
-export class Config extends Model<ConfigAttributes> implements ConfigAttributes {
+export class Config extends Model<
+	InferAttributes<Config, { omit: 'client' }>,
+	InferCreationAttributes<Config, { omit: 'client' }>
+> {
 	declare client: LunarClient;
 
 	declare key: string;
 	declare value: string | null;
+
 	parsedValue: unknown;
 
 	constructor(...args: any[]) {
