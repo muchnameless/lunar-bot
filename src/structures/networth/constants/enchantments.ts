@@ -14,10 +14,6 @@ export const enum EnchantmentType {
  * @param level
  */
 export const getEnchantmentType = (enchantment: string, level: number) => {
-	if (enchantment.startsWith('ultimate_') || enchantment.startsWith('turbo_')) {
-		return EnchantmentType.AnvilUpgradableFrom1;
-	}
-
 	switch (enchantment) {
 		case 'aqua_affinity':
 		case 'counter_strike':
@@ -117,6 +113,10 @@ export const getEnchantmentType = (enchantment: string, level: number) => {
 			return EnchantmentType.AnvilUpgradableFrom3;
 
 		default:
+			if (enchantment.startsWith('ultimate_') || enchantment.startsWith('turbo_')) {
+				return EnchantmentType.AnvilUpgradableFrom1;
+			}
+
 			logger.warn(`[GET ENCHANTMENT TYPE]: unknown enchantment '${enchantment}', level: '${level}'`);
 			return EnchantmentType.NotUpgradable;
 	}
