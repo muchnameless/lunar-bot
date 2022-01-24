@@ -1,8 +1,17 @@
 import { ChannelType, Permissions } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
+import ms from 'ms';
 import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
-import type { AnyChannel, Message, MessageEmbed, MessageOptions, Snowflake, TextBasedChannel } from 'discord.js';
+import type {
+	AnyChannel,
+	Message,
+	MessageEmbed,
+	MessageOptions,
+	Snowflake,
+	TextBasedChannel,
+	TextChannel,
+} from 'discord.js';
 
 export interface SendOptions extends MessageOptions {
 	rejectOnError?: boolean;
@@ -117,7 +126,7 @@ export default class ChannelUtil extends null {
 		let requiredChannelPermissions = this.DEFAULT_SEND_PERMISSIONS;
 
 		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
-			const MESSAGE = `[CHANNEL UTIL]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+			const MESSAGE = `[CHANNEL SEND]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn(_options, MESSAGE);
 			return null;
@@ -127,7 +136,7 @@ export default class ChannelUtil extends null {
 
 		if (Reflect.has(_options, 'embeds')) {
 			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
-				const MESSAGE = `[CHANNEL UTIL]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+				const MESSAGE = `[CHANNEL SEND]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn(_options, MESSAGE);
@@ -140,7 +149,7 @@ export default class ChannelUtil extends null {
 			);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
-				const MESSAGE = `[CHANNEL UTIL]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+				const MESSAGE = `[CHANNEL SEND]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn(_options, MESSAGE);
@@ -157,10 +166,21 @@ export default class ChannelUtil extends null {
 			const missingChannelPermissions = this.botPermissions(channel)
 				.missing(requiredChannelPermissions)
 				.map((permission) => `'${permission}'`);
-			const MESSAGE = commaListsAnd`[CHANNEL UTIL]: missing ${missingChannelPermissions} permission${
+			const MESSAGE = commaListsAnd`[CHANNEL SEND]: missing ${missingChannelPermissions} permission${
 				missingChannelPermissions?.length === 1 ? '' : 's'
 			} in ${this.logInfo(channel)}
 			`;
+
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn(_options, MESSAGE);
+			return null;
+		}
+
+		if ((channel as TextChannel).guild?.me!.isCommunicationDisabled()) {
+			const MESSAGE = `[CHANNEL SEND]: bot timed out in '${(channel as TextChannel).guild.name}' for ${ms(
+				(channel as TextChannel).guild.me!.communicationDisabledUntilTimestamp! - Date.now(),
+				{ long: true },
+			)}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn(_options, MESSAGE);

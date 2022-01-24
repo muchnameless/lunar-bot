@@ -1,6 +1,7 @@
 import { setTimeout, clearTimeout } from 'node:timers';
 import { MessageFlags, MessageType, Permissions, Util } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
+import ms from 'ms';
 import { logger, seconds } from '../functions';
 import { MESSAGE_MAX_CHARS, EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS } from '../constants';
 import { ChannelUtil } from '.';
@@ -12,6 +13,7 @@ import type {
 	MessageOptions,
 	MessageReaction,
 	Snowflake,
+	TextChannel,
 } from 'discord.js';
 import type { SendOptions } from './ChannelUtil';
 
@@ -102,10 +104,21 @@ export default class MessageUtil extends null {
 	 */
 	static async react(message: Message | null, ...emojis: EmojiIdentifierResolvable[]) {
 		if (!message || this.DELETED_MESSAGES.has(message) || this.isEphemeral(message)) return null;
-		if (
-			!ChannelUtil.botPermissions(message.channel).has(Permissions.FLAGS.ADD_REACTIONS | Permissions.FLAGS.VIEW_CHANNEL)
-		) {
+
+		const { channel } = message;
+
+		if (!ChannelUtil.botPermissions(channel).has(Permissions.FLAGS.ADD_REACTIONS | Permissions.FLAGS.VIEW_CHANNEL)) {
 			logger.warn(`[MESSAGE REACT]: missing permissions in ${this.channelLogInfo(message)}`);
+			return null;
+		}
+
+		if ((channel as TextChannel).guild?.me!.isCommunicationDisabled()) {
+			logger.warn(
+				`[MESSAGE REACT]: bot timed out in '${(channel as TextChannel).guild.name}' for ${ms(
+					(channel as TextChannel).guild.me!.communicationDisabledUntilTimestamp! - Date.now(),
+					{ long: true },
+				)}`,
+			);
 			return null;
 		}
 
