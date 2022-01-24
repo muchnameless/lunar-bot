@@ -11,6 +11,7 @@ export const enum EnchantmentType {
 /**
  * wether the enchantment is upgradable via an anvil
  * @param enchantment
+ * @param level
  */
 export const getEnchantmentType = (enchantment: string, level: number) => {
 	if (enchantment.startsWith('ultimate_') || enchantment.startsWith('turbo_')) {
