@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageActionRow, MessageSelectMenu, Formatters } from 'discord.js';
+import { ActionRow, Formatters, SelectMenuComponent, SelectMenuOption } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';
@@ -29,7 +29,7 @@ interface GenerateReplyOptions {
 	ign: string;
 	uuid: string;
 	profileId: string;
-	profiles: { label: string; value: string }[];
+	profiles: SelectMenuOption[];
 	userId: Snowflake;
 }
 
@@ -71,11 +71,11 @@ export default class AhCommand extends ApplicationCommand {
 				return {
 					embeds: [embed.setDescription('no unclaimed auctions')],
 					components: [
-						new MessageActionRow().addComponents(
-							new MessageSelectMenu()
+						new ActionRow().addComponents(
+							new SelectMenuComponent()
 								.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 								.setPlaceholder(`Profile: ${PROFILE_NAME}`)
-								.addOptions(profiles),
+								.addOptions(...profiles),
 						),
 					],
 				};
@@ -134,11 +134,11 @@ export default class AhCommand extends ApplicationCommand {
 					`),
 				],
 				components: [
-					new MessageActionRow().addComponents(
-						new MessageSelectMenu()
+					new ActionRow().addComponents(
+						new SelectMenuComponent()
 							.setCustomId(this._generateCustomId({ uuid, ign, userId }))
 							.setPlaceholder(`Profile: ${PROFILE_NAME}`)
-							.addOptions(profiles),
+							.addOptions(...profiles),
 					),
 				],
 			};
@@ -154,11 +154,12 @@ export default class AhCommand extends ApplicationCommand {
 	// eslint-disable-next-line class-methods-use-this
 	private _generateProfileOptions(profiles: SkyBlockProfile[]) {
 		/* eslint-disable camelcase */
-		return profiles.map(({ cute_name, profile_id }) => ({
-			label: cute_name,
-			value: profile_id,
-			emoji: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS],
-		}));
+		return profiles.map(({ cute_name, profile_id }) =>
+			new SelectMenuOption()
+				.setLabel(cute_name)
+				.setValue(profile_id)
+				.setEmoji({ name: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS] }),
+		);
 		/* eslint-enable camelcase */
 	}
 
@@ -181,8 +182,8 @@ export default class AhCommand extends ApplicationCommand {
 					.setDescription('no SkyBlock profiles'),
 			],
 			components: [
-				new MessageActionRow().addComponents(
-					new MessageSelectMenu()
+				new ActionRow().addComponents(
+					new SelectMenuComponent()
 						.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 						.setDisabled(true)
 						.setPlaceholder('Profile: None'),
@@ -200,7 +201,7 @@ export default class AhCommand extends ApplicationCommand {
 		try {
 			const [uuid, ign, userId] = args;
 			const [profileId] = interaction.values;
-			const profiles = (interaction.component as MessageSelectMenu).options;
+			const profiles = (interaction.component as SelectMenuComponent).options;
 
 			if (!profiles) {
 				await InteractionUtil.update(interaction, { components: [] });
@@ -267,11 +268,11 @@ export default class AhCommand extends ApplicationCommand {
 								.setDescription(`no SkyBlock profile named \`${profileName}\``),
 						],
 						components: [
-							new MessageActionRow().addComponents(
-								new MessageSelectMenu()
+							new ActionRow().addComponents(
+								new SelectMenuComponent()
 									.setCustomId(this._generateCustomId({ uuid, ign, userId: interaction.user.id }))
 									.setPlaceholder(`Profile: ${profileName} (invalid)`)
-									.addOptions(this._generateProfileOptions(profiles)),
+									.addOptions(...this._generateProfileOptions(profiles)),
 							),
 						],
 					});

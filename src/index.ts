@@ -1,5 +1,5 @@
 import process from 'node:process';
-import { Intents, SnowflakeUtil, Options, Sweepers, Constants } from 'discord.js';
+import { ActivityType, Constants, Intents, Options, SnowflakeUtil, Sweepers } from 'discord.js';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';
@@ -20,13 +20,13 @@ const client = new LunarClient({
 			sweepFilter: Sweepers.filterByLifetime({
 				lifetime: 14_400, // 4h
 				getComparisonTimestamp(e: AnyChannel) {
-					if (e.type === 'DM') {
+					if (e.isDM()) {
 						// DM -> last message
 						return e.lastMessageId ? SnowflakeUtil.timestampFrom(e.lastMessageId!) : -1;
 					}
 					return (e as ThreadChannel).archiveTimestamp ?? -1; // threads -> archived
 				},
-				excludeFromSweep: (e) => e.type !== 'DM' && !(e as ThreadChannel).archived,
+				excludeFromSweep: (e) => !e.isDM() && !(e as ThreadChannel).archived,
 			}),
 		},
 		GuildBanManager: 0,
@@ -57,7 +57,7 @@ const client = new LunarClient({
 				getComparisonTimestamp: () => -1,
 				excludeFromSweep: (e) =>
 					e.client.guilds.cache.some((guild) => guild.members.cache.has(e.id)) || // user is part of a member
-					e.client.channels.cache.some((channel) => channel.type === 'DM' && channel.recipient.id === e.id) || // user has a DM channel
+					e.client.channels.cache.some((channel) => channel.isDM() && channel.recipient.id === e.id) || // user has a DM channel
 					e.discriminator === '0000', // webhook message 'author'
 			}),
 		},
@@ -79,7 +79,7 @@ const client = new LunarClient({
 		activities: [
 			{
 				name: 'slash commands',
-				type: Constants.ActivityTypes.LISTENING,
+				type: ActivityType.Listening,
 			},
 		],
 		status: 'online',

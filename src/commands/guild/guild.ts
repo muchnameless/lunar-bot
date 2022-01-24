@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { SnowflakeUtil, Formatters, Constants, MessageActionRow, MessageButton } from 'discord.js';
+import { ActionRow, ButtonComponent, ButtonStyle, Formatters, SnowflakeUtil } from 'discord.js';
 import { Op } from 'sequelize';
 import ms from 'ms';
 import { commaListsOr } from 'common-tags';
@@ -555,31 +555,31 @@ export default class GuildCommand extends ApplicationCommand {
 		}
 
 		return [
-			new MessageActionRow().addComponents(
-				new MessageButton()
+			new ActionRow().addComponents(
+				new ButtonComponent()
 					.setCustomId(`${CUSTOM_ID}:${isParsedPages ? 1 : 0}:${DOUBLE_LEFT_EMOJI}`)
-					.setEmoji(DOUBLE_LEFT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setEmoji({ name: DOUBLE_LEFT_EMOJI })
+					.setStyle(ButtonStyle.Primary)
 					.setDisabled(decDisabled),
-				new MessageButton()
+				new ButtonComponent()
 					.setCustomId(`${CUSTOM_ID}:${currentPage_ - 1}:${LEFT_EMOJI}`)
-					.setEmoji(LEFT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setEmoji({ name: LEFT_EMOJI })
+					.setStyle(ButtonStyle.Primary)
 					.setDisabled(decDisabled),
-				new MessageButton()
+				new ButtonComponent()
 					.setCustomId(`${CUSTOM_ID}:${currentPage_ + 1}:${RIGHT_EMOJI}`)
-					.setEmoji(RIGHT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setEmoji({ name: RIGHT_EMOJI })
+					.setStyle(ButtonStyle.Primary)
 					.setDisabled(incDisabled),
-				new MessageButton()
+				new ButtonComponent()
 					.setCustomId(`${CUSTOM_ID}:${totalPages_}:${DOUBLE_RIGHT_EMOJI}`)
-					.setEmoji(DOUBLE_RIGHT_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY)
+					.setEmoji({ name: DOUBLE_RIGHT_EMOJI })
+					.setStyle(ButtonStyle.Primary)
 					.setDisabled(incDisabled),
-				new MessageButton()
+				new ButtonComponent()
 					.setCustomId(`${CUSTOM_ID}:${currentPage_}:${RELOAD_EMOJI}`)
-					.setEmoji(RELOAD_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.PRIMARY),
+					.setEmoji({ name: RELOAD_EMOJI })
+					.setStyle(ButtonStyle.Primary),
 			),
 		];
 	}

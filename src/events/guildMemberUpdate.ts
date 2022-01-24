@@ -63,7 +63,7 @@ export default class GuildMemberUpdateEvent extends Event {
 							.setColor(this.config.get('EMBED_RED'))
 							.setAuthor({
 								name: newMember.user.tag,
-								iconURL: newMember.displayAvatarURL({ dynamic: true }),
+								iconURL: newMember.displayAvatarURL(),
 								url: player.url,
 							})
 							.setThumbnail(player.imageURL)

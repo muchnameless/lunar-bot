@@ -1,5 +1,14 @@
 import { setTimeout, clearTimeout } from 'node:timers';
-import { MessageActionRow, MessageButton, MessageEmbed, SnowflakeUtil, DiscordAPIError, Constants } from 'discord.js';
+import {
+	ActionRow,
+	ButtonComponent,
+	ButtonStyle,
+	ChannelType,
+	ComponentType,
+	DiscordAPIError,
+	MessageEmbed,
+	SnowflakeUtil,
+} from 'discord.js';
 import { RESTJSONErrorCodes } from 'discord-api-types/v9';
 import { stripIndent } from 'common-tags';
 import { DELETE_EMOJI, DELETE_KEY, GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
@@ -104,7 +113,7 @@ export default class InteractionUtil extends null {
 			deferUpdatePromise: null,
 			useEphemeral:
 				this.checkEphemeralOption(interaction) ??
-				(channel !== null && channel.type !== 'DM'
+				(channel !== null && channel.type !== ChannelType.DM
 					? !channel.name.includes('command') && !channel.name.includes('ᴄᴏᴍᴍᴀɴᴅ') // guild channel
 					: false), // DM channel
 			autoDefer: setTimeout(
@@ -288,10 +297,10 @@ export default class InteractionUtil extends null {
 	 * @param interaction
 	 */
 	static getDeleteButton(interaction: Interaction) {
-		return new MessageButton()
+		return new ButtonComponent()
 			.setCustomId(`${DELETE_KEY}:${interaction.user.id}`)
-			.setEmoji(DELETE_EMOJI)
-			.setStyle(Constants.MessageButtonStyles.DANGER);
+			.setEmoji({ name: DELETE_EMOJI })
+			.setStyle(ButtonStyle.Danger);
 	}
 
 	/**
@@ -596,9 +605,9 @@ export default class InteractionUtil extends null {
 		} = typeof options === 'string' ? { question: options } : options;
 		const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const CANCEL_ID = `confirm:${SnowflakeUtil.generate()}`;
-		const row = new MessageActionRow().addComponents(
-			new MessageButton().setCustomId(SUCCESS_ID).setStyle(Constants.MessageButtonStyles.SUCCESS).setEmoji(Y_EMOJI),
-			new MessageButton().setCustomId(CANCEL_ID).setStyle(Constants.MessageButtonStyles.DANGER).setEmoji(X_EMOJI),
+		const row = new ActionRow().addComponents(
+			new ButtonComponent().setCustomId(SUCCESS_ID).setStyle(ButtonStyle.Success).setEmoji({ name: Y_EMOJI }),
+			new ButtonComponent().setCustomId(CANCEL_ID).setStyle(ButtonStyle.Danger).setEmoji({ name: X_EMOJI }),
 		);
 
 		let channel: TextBasedChannel;
@@ -621,7 +630,7 @@ export default class InteractionUtil extends null {
 		}
 
 		const collector = channel.createMessageComponentCollector({
-			componentType: Constants.MessageComponentTypes.BUTTON,
+			componentType: ComponentType.Button,
 			message: message!,
 			filter: (i) => {
 				// wrong button
@@ -661,7 +670,7 @@ export default class InteractionUtil extends null {
 									)
 									.setTimestamp(),
 							],
-							components: [row.setComponents(row.components.map((c) => c.setDisabled()))],
+							components: [row.setComponents(row.components.map((c) => c.setDisabled(true)))],
 						});
 
 						if (success) return resolve();
@@ -681,7 +690,7 @@ export default class InteractionUtil extends null {
 									)
 									.setTimestamp(),
 							],
-							components: [row.setComponents(row.components.map((c) => c.setDisabled()))],
+							components: [row.setComponents(row.components.map((c) => c.setDisabled(true)))],
 						};
 
 						try {

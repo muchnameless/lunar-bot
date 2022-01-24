@@ -21,7 +21,7 @@ export default class GuildMemberRemoveEvent extends Event {
 		// uncache user
 		if (
 			!this.client.guilds.cache.some((guild) => guild.members.cache.has(member.id)) &&
-			this.client.channels.cache.some((channel) => channel.type === 'DM' && channel.recipient.id === member.id)
+			this.client.channels.cache.some((channel) => channel.isDM() && channel.recipient.id === member.id)
 		) {
 			this.client.users.cache.delete(member.id);
 		}
@@ -39,7 +39,7 @@ export default class GuildMemberRemoveEvent extends Event {
 			MessageEmbedUtil.padFields(
 				new MessageEmbed()
 					.setColor(this.config.get('EMBED_RED'))
-					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: player.url })
+					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL(), url: player.url })
 					.setThumbnail(player.imageURL)
 					.setDescription(
 						stripIndents`

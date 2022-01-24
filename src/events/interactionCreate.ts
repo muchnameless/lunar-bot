@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers';
 import ms from 'ms';
-import { Formatters } from 'discord.js';
+import { ApplicationCommandType, Formatters } from 'discord.js';
 import { COMMAND_KEY, DELETE_KEY, GUILD_ID_ALL, LB_KEY, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil } from '../util';
 import {
@@ -335,10 +335,10 @@ export default class InteractionCreateEvent extends Event {
 		await command.assertPermissions(interaction);
 
 		switch (interaction.targetType) {
-			case 'MESSAGE':
+			case ApplicationCommandType.Message:
 				return command.runMessage(interaction, interaction.options.getMessage('message') as Message);
 
-			case 'USER': {
+			case ApplicationCommandType.User: {
 				const { user, member } = interaction.options.get('user')!;
 				return command.runUser(interaction, user!, (member as GuildMember) ?? null);
 			}

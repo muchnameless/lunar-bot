@@ -5,13 +5,13 @@ import fs from 'node:fs/promises';
 import v8 from 'node:v8';
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
 import Discord, {
+	ActionRow,
+	ButtonComponent,
+	ButtonStyle,
 	Formatters,
 	MessageEmbed,
-	MessageActionRow,
-	MessageButton,
 	Permissions,
 	Util,
-	Constants,
 } from 'discord.js';
 MessageEmbed;
 Util; // unused imports are 'used' so that tsc doesn't remove them
@@ -100,11 +100,11 @@ export default class EvalCommand extends ApplicationCommand {
 	 */
 	private _getRows(interaction: Interaction, isAsync: boolean, inspectDepth: number) {
 		return [
-			new MessageActionRow().addComponents(
-				new MessageButton()
+			new ActionRow().addComponents(
+				new ButtonComponent()
 					.setCustomId(`${this.baseCustomId}:edit:${isAsync}:${inspectDepth}`)
-					.setEmoji(EDIT_MESSAGE_EMOJI)
-					.setStyle(Constants.MessageButtonStyles.SECONDARY),
+					.setEmoji({ name: EDIT_MESSAGE_EMOJI })
+					.setStyle(ButtonStyle.Secondary),
 				InteractionUtil.getDeleteButton(interaction),
 			),
 		];

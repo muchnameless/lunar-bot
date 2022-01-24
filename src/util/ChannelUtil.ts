@@ -1,4 +1,4 @@
-import { Permissions } from 'discord.js';
+import { ChannelType, Permissions } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
@@ -32,7 +32,7 @@ export default class ChannelUtil extends null {
 		if (!channel) return null;
 
 		switch (channel.type) {
-			case 'DM':
+			case ChannelType.DM:
 				return `#${channel.recipient?.tag ?? `DM-${channel.recipient.id}`}`;
 
 			default:
@@ -50,7 +50,7 @@ export default class ChannelUtil extends null {
 		if (!channel) return null;
 
 		switch (channel.type) {
-			case 'DM':
+			case ChannelType.DM:
 				return this.DM_PERMISSIONS;
 
 			default:
@@ -64,13 +64,13 @@ export default class ChannelUtil extends null {
 	 * @param IdOrIds
 	 */
 	static async deleteMessages(channel: TextBasedChannel | null, IdOrIds: Snowflake | Snowflake[]) {
-		if (!channel?.isText()) {
+		if (!channel?.isTextBased()) {
 			return logger.warn(`[DELETE MESSAGES]: ${this.logInfo(channel)} is not a text based channel`);
 		}
 
 		try {
 			switch (channel.type) {
-				case 'DM':
+				case ChannelType.DM:
 					if (Array.isArray(IdOrIds)) return await Promise.all(IdOrIds.map((id) => channel.messages.delete(id)));
 
 					return await channel.messages.delete(IdOrIds);

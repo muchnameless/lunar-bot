@@ -1,4 +1,12 @@
-import { MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Formatters, Constants } from 'discord.js';
+import {
+	ActionRow,
+	ButtonComponent,
+	ButtonStyle,
+	Formatters,
+	MessageEmbed,
+	SelectMenuComponent,
+	SelectMenuOption,
+} from 'discord.js';
 import { stripIndent, oneLine } from 'common-tags';
 import {
 	DOUBLE_LEFT_EMOJI,
@@ -18,8 +26,14 @@ import {
 import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api';
 import { days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
-import type { MessageButtonStyles } from 'discord.js/typings/enums';
-import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
+import type {
+	ButtonInteraction,
+	Message,
+	SelectMenuInteraction,
+	Snowflake,
+	User,
+	ActionRowComponent,
+} from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { LunarClient } from '../structures/LunarClient';
@@ -162,53 +176,57 @@ function createActionRows(
 ) {
 	let decDisabled: boolean;
 	let incDisabled: boolean;
-	let pageStyle: MessageButtonStyles;
-	let reloadStyle: MessageButtonStyles;
+	let pageStyle: ButtonStyle;
+	let reloadStyle: ButtonStyle;
 
 	if (isExpired) {
 		decDisabled = true;
 		incDisabled = true;
-		pageStyle = Constants.MessageButtonStyles.SECONDARY;
-		reloadStyle = Constants.MessageButtonStyles.DANGER;
+		pageStyle = ButtonStyle.Secondary;
+		reloadStyle = ButtonStyle.Danger;
 	} else {
 		decDisabled = page === 1;
 		incDisabled = page === totalPages;
-		pageStyle = reloadStyle = Constants.MessageButtonStyles.PRIMARY;
+		pageStyle = reloadStyle = ButtonStyle.Primary;
 	}
 
-	const rows: MessageActionRow[] = [];
-	const guildSelectMenu = new MessageSelectMenu()
+	const rows: ActionRow<ActionRowComponent>[] = [];
+	const guildSelectMenu = new SelectMenuComponent()
 		.setCustomId(`${cacheKey}:guild`)
 		.setPlaceholder(hypixelGuild !== GUILD_ID_ALL ? `Guild: ${hypixelGuild}` : 'Guilds: All')
 		.addOptions(
-			client.hypixelGuilds.cache.map(({ guildId, name }) => ({ label: name, value: guildId })),
-			[{ label: 'All', value: GUILD_ID_ALL }],
+			...client.hypixelGuilds.cache.map(({ guildId, name }) => new SelectMenuOption().setLabel(name).setValue(guildId)),
+			new SelectMenuOption().setLabel('ALL').setValue(GUILD_ID_ALL),
 		);
 
 	if (xpType !== 'purge') {
-		const offsetSelectMenu = new MessageSelectMenu()
+		const offsetSelectMenu = new SelectMenuComponent()
 			.setCustomId(`${cacheKey}:offset`)
 			.setPlaceholder(
 				`Offset: ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset as keyof typeof XP_OFFSETS_CONVERTER] ?? 'None')}`,
 			)
 			.addOptions(
-				Object.keys(XP_OFFSETS_SHORT).map((x) => ({
-					label: upperCaseFirstChar(x),
-					value: XP_OFFSETS_CONVERTER[x as keyof typeof XP_OFFSETS_CONVERTER],
-				})),
+				...Object.keys(XP_OFFSETS_SHORT).map((_offset) =>
+					new SelectMenuOption()
+						.setLabel(upperCaseFirstChar(_offset))
+						.setValue(XP_OFFSETS_CONVERTER[_offset as keyof typeof XP_OFFSETS_CONVERTER]),
+				),
 			);
 
-		if (lbType === 'total') offsetSelectMenu.addOptions({ label: 'None', value: 'none' });
+		if (lbType === 'total') offsetSelectMenu.addOptions(new SelectMenuOption().setLabel('None').setValue('none'));
 
 		rows.push(
-			new MessageActionRow().addComponents(
-				new MessageSelectMenu()
+			new ActionRow().addComponents(
+				new SelectMenuComponent()
 					.setCustomId(`${cacheKey}:lbType`)
 					.setPlaceholder(`Lb Type: ${upperCaseFirstChar(lbType)}`)
-					.addOptions({ label: 'Total XP', value: 'total' }, { label: 'Gained XP', value: 'gained' }),
+					.addOptions(
+						new SelectMenuOption().setLabel('Total XP').setValue('total'),
+						new SelectMenuOption().setLabel('Gained XP').setValue('gained'),
+					),
 			),
-			new MessageActionRow().addComponents(
-				new MessageSelectMenu()
+			new ActionRow().addComponents(
+				new SelectMenuComponent()
 					.setCustomId(`${cacheKey}:xpType`)
 					.setPlaceholder(
 						`XP Type: ${xpType
@@ -217,39 +235,41 @@ function createActionRows(
 							.join(' ')}`,
 					)
 					.addOptions(
-						LEADERBOARD_XP_TYPES.map((x) => ({ label: upperCaseFirstChar(x.replaceAll('-', ' ')), value: x })),
+						...LEADERBOARD_XP_TYPES.map((type) =>
+							new SelectMenuOption().setLabel(upperCaseFirstChar(type.replaceAll('-', ' '))).setValue(type),
+						),
 					),
 			),
-			new MessageActionRow().addComponents(offsetSelectMenu),
+			new ActionRow().addComponents(offsetSelectMenu),
 		);
 	}
 
 	rows.push(
-		new MessageActionRow().addComponents(guildSelectMenu),
-		new MessageActionRow().addComponents(
-			new MessageButton()
+		new ActionRow().addComponents(guildSelectMenu),
+		new ActionRow().addComponents(
+			new ButtonComponent()
 				.setCustomId(`${cacheKey}:1:${DOUBLE_LEFT_EMOJI}`)
-				.setEmoji(DOUBLE_LEFT_EMOJI)
+				.setEmoji({ name: DOUBLE_LEFT_EMOJI })
 				.setStyle(pageStyle)
 				.setDisabled(decDisabled),
-			new MessageButton()
+			new ButtonComponent()
 				.setCustomId(`${cacheKey}:${page - 1}:${LEFT_EMOJI}`)
-				.setEmoji(LEFT_EMOJI)
+				.setEmoji({ name: LEFT_EMOJI })
 				.setStyle(pageStyle)
 				.setDisabled(decDisabled),
-			new MessageButton()
+			new ButtonComponent()
 				.setCustomId(`${cacheKey}:${page + 1}:${RIGHT_EMOJI}`)
-				.setEmoji(RIGHT_EMOJI)
+				.setEmoji({ name: RIGHT_EMOJI })
 				.setStyle(pageStyle)
 				.setDisabled(incDisabled),
-			new MessageButton()
+			new ButtonComponent()
 				.setCustomId(`${cacheKey}:${totalPages}:${DOUBLE_RIGHT_EMOJI}`)
-				.setEmoji(DOUBLE_RIGHT_EMOJI)
+				.setEmoji({ name: DOUBLE_RIGHT_EMOJI })
 				.setStyle(pageStyle)
 				.setDisabled(incDisabled),
-			new MessageButton()
+			new ButtonComponent()
 				.setCustomId(`${cacheKey}:${page}:${RELOAD_EMOJI}`)
-				.setEmoji(RELOAD_EMOJI)
+				.setEmoji({ name: RELOAD_EMOJI })
 				.setStyle(reloadStyle),
 		),
 	);

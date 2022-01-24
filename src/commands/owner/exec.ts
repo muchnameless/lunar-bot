@@ -1,7 +1,7 @@
 import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters, MessageActionRow } from 'discord.js';
+import { ActionRow, Formatters } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { logger } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -57,14 +57,14 @@ export default class ExecCommand extends ApplicationCommand {
 
 			return InteractionUtil.reply(interaction, {
 				embeds: [responseEmbed],
-				components: [new MessageActionRow().addComponents(InteractionUtil.getDeleteButton(interaction))],
+				components: [new ActionRow().addComponents(InteractionUtil.getDeleteButton(interaction))],
 			});
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
 
 			return InteractionUtil.reply(interaction, {
 				content: Formatters.codeBlock('xl', `${error}`),
-				components: [new MessageActionRow().addComponents(InteractionUtil.getDeleteButton(interaction))],
+				components: [new ActionRow().addComponents(InteractionUtil.getDeleteButton(interaction))],
 			});
 		}
 	}

@@ -1,5 +1,5 @@
 import { setTimeout, clearTimeout } from 'node:timers';
-import { MessageFlags, Permissions, Util } from 'discord.js';
+import { MessageFlags, MessageType, Permissions, Util } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import { logger, seconds } from '../functions';
 import { MESSAGE_MAX_CHARS, EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS } from '../constants';
@@ -84,7 +84,7 @@ export default class MessageUtil extends null {
 	 * @param message
 	 */
 	static isNormalReplyMessage(message: Message) {
-		return message.type === 'REPLY' && !message.webhookId;
+		return message.type === MessageType.Reply && !message.webhookId;
 	}
 
 	/**
@@ -92,7 +92,7 @@ export default class MessageUtil extends null {
 	 * @param message
 	 */
 	static isNormalBotMessage(message: Message) {
-		return message.editable && (message.type === 'DEFAULT' || this.isNormalReplyMessage(message));
+		return message.editable && (message.type === MessageType.Default || this.isNormalReplyMessage(message));
 	}
 
 	/**

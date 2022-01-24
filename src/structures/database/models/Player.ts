@@ -1355,7 +1355,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 		const { config } = this.client;
 		const loggingEmbed = new MessageEmbed()
-			.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: this.url })
+			.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL(), url: this.url })
 			.setThumbnail(this.imageURL)
 			.setDescription(
 				stripIndents`
@@ -1588,7 +1588,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			this.client.log(
 				this.client.defaultEmbed
-					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL({ dynamic: true }), url: this.url })
+					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL(), url: this.url })
 					.setThumbnail(this.imageURL)
 					.setDescription(
 						stripIndents`

@@ -343,13 +343,13 @@ export class HypixelMessage {
 			content: await this.chatBridge.discord.parseContent(this.prefixReplacedContent, true),
 			username: member?.displayName ?? player?.ign ?? this.author!.ign,
 			avatarURL:
-				member?.displayAvatarURL({ dynamic: true }) ??
+				member?.displayAvatarURL() ??
 				player?.imageURL ??
 				(await mojang.ign(this.author!.ign).then(
 					({ uuid }) => uuidToBustURL(uuid),
 					(error) => logger.error(error, '[FORWARD TO DC]'),
 				)) ??
-				(member?.guild.me ?? this.client.user)?.displayAvatarURL({ dynamic: true }),
+				(member?.guild.me ?? this.client.user)?.displayAvatarURL(),
 			allowedMentions: {
 				parse: player?.hasDiscordPingPermission ? ['users'] : [],
 			},

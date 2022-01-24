@@ -1,6 +1,6 @@
 import process from 'node:process';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters, MessageActionRow, SnowflakeUtil, version } from 'discord.js';
+import { ActionRow, Formatters, SnowflakeUtil, version } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
@@ -52,9 +52,9 @@ export default class DebugCommand extends ApplicationCommand {
 							value: stripIndents`
 								Guilds: ${formatNumber(guilds.cache.size)}
 								Channels: ${formatNumber(channels.cache.size)} (${formatNumber(
-								channels.cache.filter((c) => c.isThread() || c.type === 'DM').size,
+								channels.cache.filter((c) => c.isThread() || c.isDM()).size,
 							)} temporary)
-								${(channels.cache.filter((c) => c.type === 'DM') as Collection<Snowflake, DMChannel>)
+								${(channels.cache.filter((c) => c.isDM()) as Collection<Snowflake, DMChannel>)
 									.map(
 										(c) =>
 											[c.recipient.tag ?? c.recipient.id, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const,
@@ -111,7 +111,7 @@ export default class DebugCommand extends ApplicationCommand {
 									)
 									.map((c) =>
 										Formatters.quote(
-											`${c.type !== 'DM' ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${formatNumber(
+											`${!c.isDM() ? `${c}` : c.recipient?.tag ?? 'unknown channel'}: ${formatNumber(
 												c.messages.cache.size,
 											)}`,
 										),
@@ -207,7 +207,7 @@ export default class DebugCommand extends ApplicationCommand {
 						iconURL: (me ?? this.client.user!).displayAvatarURL(),
 					}),
 			],
-			components: [new MessageActionRow().addComponents(InteractionUtil.getDeleteButton(interaction))],
+			components: [new ActionRow().addComponents(InteractionUtil.getDeleteButton(interaction))],
 		});
 	}
 }

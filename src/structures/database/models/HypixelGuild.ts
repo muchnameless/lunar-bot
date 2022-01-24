@@ -880,7 +880,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 								.setColor(this.client.config.get('EMBED_RED'))
 								.setAuthor({
 									name: discordMember?.user.tag ?? player.ign,
-									iconURL: discordMember?.displayAvatarURL({ dynamic: true }),
+									iconURL: discordMember?.displayAvatarURL(),
 									url: player.url,
 								})
 								.setThumbnail(player.imageURL)

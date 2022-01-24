@@ -352,7 +352,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 							.setColor(this.client.config.get('EMBED_RED'))
 							.setAuthor({
 								name: discordMessage.author.tag,
-								iconURL: (discordMessage.member ?? discordMessage.author).displayAvatarURL({ dynamic: true }),
+								iconURL: (discordMessage.member ?? discordMessage.author).displayAvatarURL(),
 								url: player.url,
 							})
 							.setThumbnail(player.imageURL)
