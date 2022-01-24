@@ -447,7 +447,7 @@ export class DatabaseManager {
 			const taxChannel = this.client.channels.cache.get(config.get('TAX_CHANNEL_ID'));
 
 			if (
-				!taxChannel?.isText() ||
+				!taxChannel?.isTextBased() ||
 				((taxChannel as GuildChannel).guildId && !(taxChannel as GuildChannel).guild?.available)
 			) {
 				logger.warn('[TAX MESSAGE] tax channel error');

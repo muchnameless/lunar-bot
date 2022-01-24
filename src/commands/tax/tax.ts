@@ -82,7 +82,7 @@ export default class TaxCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override async runSlash(interaction: ChatInputCommandInteraction) {
-		switch (interaction.options.getSubcommandGroup(false)) {
+		switch (interaction.options.getSubcommandGroup()) {
 			case 'ah': {
 				const player = InteractionUtil.getPlayer(interaction, { throwIfNotFound: true });
 
@@ -329,7 +329,7 @@ export default class TaxCommand extends ApplicationCommand {
 								const taxChannel = this.client.channels.cache.get(this.config.get('TAX_CHANNEL_ID'));
 
 								if (
-									!taxChannel?.isText() ||
+									!taxChannel?.isTextBased() ||
 									((taxChannel as TextChannel).guildId && !(taxChannel as TextChannel).guild?.available)
 								) {
 									logger.warn('[TAX RESET] tax channel error');

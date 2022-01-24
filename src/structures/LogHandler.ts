@@ -57,7 +57,7 @@ export class LogHandler {
 	get channel() {
 		const channel = this.client.channels.cache.get(this.client.config.get('LOGGING_CHANNEL_ID'));
 
-		if (!channel?.isText()) {
+		if (!channel?.isTextBased()) {
 			logger.error(
 				`[LOG HANDLER]: ${
 					channel ? `#${(channel as GuildChannel).name ?? channel.id}` : this.client.config.get('LOGGING_CHANNEL_ID')
@@ -75,6 +75,8 @@ export class LogHandler {
 			);
 			return null;
 		}
+
+		// TODO: timeout check guild.me.isCommDis
 
 		return channel;
 	}

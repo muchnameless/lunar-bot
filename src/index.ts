@@ -72,8 +72,8 @@ const client = new LunarClient({
 	],
 	restGlobalRateLimit: 50,
 	// don't await channel name and topic edits
-	rejectOnRateLimit: ({ route, method, timeout }) =>
-		route.startsWith('/channels') && !route.includes('/messages') && method === 'patch' && timeout > seconds(10),
+	rejectOnRateLimit: ({ path, method, timeout }) =>
+		method === 'patch' && /^\/channels\/\d{17,19}$/.test(path) && timeout > seconds(30),
 	failIfNotExists: false,
 	presence: {
 		activities: [

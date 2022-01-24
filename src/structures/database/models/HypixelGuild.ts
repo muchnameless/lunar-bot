@@ -1139,7 +1139,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 				this.statDiscordChannels[type as keyof HypixelGuild['formattedStats']],
 			);
 
-			if (!channel?.isVoice()) {
+			if (!channel?.isVoiceBased()) {
 				// no channel found
 				logger.warn(`[GUILD STATS CHANNEL UPDATE] ${this.name}: ${type}: no channel found`);
 				continue;

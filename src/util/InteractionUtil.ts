@@ -277,7 +277,7 @@ export default class InteractionUtil extends null {
 
 		return [
 			(interaction as ChatInputCommandInteraction).commandName,
-			(interaction as ChatInputCommandInteraction).options.getSubcommandGroup(false),
+			(interaction as ChatInputCommandInteraction).options.getSubcommandGroup(),
 			(interaction as ChatInputCommandInteraction).options.getSubcommand(false),
 		]
 			.filter((x) => x !== null)
