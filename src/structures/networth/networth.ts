@@ -156,6 +156,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 				case EnchantmentType.NotUpgradable:
 					price += getPrice(`${enchantment}_${level}`) * PriceModifier.Enchantment;
+					break;
 			}
 		}
 	}
