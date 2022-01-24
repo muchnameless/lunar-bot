@@ -117,7 +117,7 @@ export const getEnchantmentType = (enchantment: string, level: number) => {
 			return EnchantmentType.AnvilUpgradableFrom3;
 
 		default:
-			logger.warn(`[ENCHANTMENT]: unknown enchantment '${enchantment}', level: '${level}'`);
+			logger.warn(`[GET ENCHANTMENT TYPE]: unknown enchantment '${enchantment}', level: '${level}'`);
 			return EnchantmentType.NotUpgradable;
 	}
 };
