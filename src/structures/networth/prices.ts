@@ -7,7 +7,7 @@ import { minutes, logger } from '../../functions';
 import { FetchError } from '../errors/FetchError';
 import { VANILLA_ITEM_NAMES } from '../../constants';
 import { calculatePetSkillLevel } from './networth';
-import { MAX_HISTORY_LENGTH } from './constants';
+import { EnchantmentType, getEnchantmentType, MAX_HISTORY_LENGTH } from './constants';
 import type { Components } from '@zikeji/hypixel';
 
 export const prices = new Map<string, number>();
@@ -192,13 +192,6 @@ async function fetchAuctionPage(page = 0) {
 }
 
 /**
- * wether the enchantment is upgradable via an anvil
- * @param enchantment
- */
-export const isUpgradableTieredEnchantment = (enchantment: string) =>
-	enchantment.startsWith('ultimate_') || enchantment.startsWith('turbo_') || enchantment.startsWith('dragon_hunter_');
-
-/**
  * fetches all auction pages
  */
 async function updatePrices() {
@@ -236,10 +229,25 @@ async function updatePrices() {
 
 							let level = item.tag!.ExtraAttributes!.enchantments[enchants[0]];
 
-							// ultimate enchants
-							if (isUpgradableTieredEnchantment(ENCHANTMENT)) {
-								count = 2 ** (level - 1);
-								level = 1;
+							switch (getEnchantmentType(ENCHANTMENT, level)) {
+								case EnchantmentType.AnvilUpgradableFrom1:
+									count = 2 ** (level - 1);
+									level = 1;
+									break;
+
+								case EnchantmentType.AnvilUpgradableFrom3:
+									count = 2 ** (level - 3);
+									level = 3;
+									break;
+
+								case EnchantmentType.AnvilUpgradableFrom6:
+									count = 2 ** (level - 6);
+									level = 6;
+									break;
+
+								case EnchantmentType.UsageUpgradable:
+									level = 1;
+									break;
 							}
 
 							itemId = `${ENCHANTMENT}_${level}`;

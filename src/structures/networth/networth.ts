@@ -6,6 +6,7 @@ import {
 	ESSENCE_UPGRADES,
 	GEMSTONES,
 	IGNORED_GEMSTONES,
+	getEnchantmentType,
 	MASTER_STARS,
 	MATERIALS_TO_ID,
 	PET_LEVELS_XP,
@@ -15,8 +16,9 @@ import {
 	SKYBLOCK_INVENTORIES,
 	SPECIAL_GEMSTONES,
 	TALISMANS,
+	EnchantmentType,
 } from './constants';
-import { getPrice, isUpgradableTieredEnchantment, prices } from './prices';
+import { getPrice, prices } from './prices';
 import type { SkyBlockProfile } from '../../functions';
 import type { Buffer } from 'node:buffer';
 import type { Components, NBTInventory, NBTInventoryItem, NBTExtraAttributes } from '@zikeji/hypixel';
@@ -127,18 +129,34 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// enchantments
 	if (ExtraAttributes.enchantments) {
-		for (const [enchantment, level] of Object.entries(ExtraAttributes.enchantments)) {
+		// eslint-disable-next-line prefer-const
+		for (let [enchantment, level] of Object.entries(ExtraAttributes.enchantments)) {
 			if (enchantment === 'efficiency' && level > 5) {
 				if (itemId === 'STONK_PICKAXE') continue;
-				price +=
-					getPrice('efficiency_5') * PriceModifier.Enchantment + getPrice('SIL_EX') * PriceModifier.Silex * (level - 5);
-				continue;
+				price += getPrice('SIL_EX') * PriceModifier.Silex * (level - 5);
+				level = 5;
 			}
 
-			price +=
-				(isUpgradableTieredEnchantment(enchantment)
-					? getPrice(`${enchantment}_1`) * 2 ** (level - 1)
-					: getPrice(`${enchantment}_${level}`)) * PriceModifier.Enchantment;
+			switch (getEnchantmentType(enchantment, level)) {
+				case EnchantmentType.AnvilUpgradableFrom1:
+					price += getPrice(`${enchantment}_1`) * PriceModifier.Enchantment * 2 ** (level - 1);
+					break;
+
+				case EnchantmentType.AnvilUpgradableFrom3:
+					price += getPrice(`${enchantment}_3`) * PriceModifier.Enchantment * 2 ** (level - 3);
+					break;
+
+				case EnchantmentType.AnvilUpgradableFrom6:
+					price += getPrice(`${enchantment}_6`) * PriceModifier.Enchantment * 2 ** (level - 6);
+					break;
+
+				case EnchantmentType.UsageUpgradable:
+					price += getPrice(`${enchantment}_1`) * PriceModifier.Enchantment;
+					break;
+
+				case EnchantmentType.NotUpgradable:
+					price += getPrice(`${enchantment}_${level}`) * PriceModifier.Enchantment;
+			}
 		}
 	}
 
