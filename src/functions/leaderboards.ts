@@ -2,10 +2,11 @@ import {
 	ActionRow,
 	ButtonComponent,
 	ButtonStyle,
+	Embed,
 	Formatters,
-	MessageEmbed,
 	SelectMenuComponent,
 	SelectMenuOption,
+	Util,
 } from 'discord.js';
 import { stripIndent, oneLine } from 'common-tags';
 import {
@@ -299,7 +300,7 @@ export async function handleLeaderboardCommandInteraction(
 ) {
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	const embeds =
-		((await cache.get(CACHE_KEY)) as MessageEmbed[]) ??
+		((await cache.get(CACHE_KEY)) as Embed[]) ??
 		createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
@@ -353,7 +354,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 				interaction.client,
 				getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		  )
-		: ((await cache.get(CACHE_KEY)) as MessageEmbed[]);
+		: ((await cache.get(CACHE_KEY)) as Embed[]);
 
 	if (!embeds) {
 		await InteractionUtil.update(interaction, {
@@ -454,7 +455,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	const embeds =
-		((await cache.get(CACHE_KEY)) as MessageEmbed[]) ??
+		((await cache.get(CACHE_KEY)) as Embed[]) ??
 		createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
@@ -485,7 +486,7 @@ function createLeaderboardEmbeds(
 	const ELEMENTS_PER_PAGE = config.get('ELEMENTS_PER_PAGE');
 	const PLAYER_COUNT = playerData.length;
 	const PAGES_TOTAL = PLAYER_COUNT ? Math.ceil(PLAYER_COUNT / ELEMENTS_PER_PAGE) : 1; // to create at least one page if player list is empty
-	const embeds: MessageEmbed[] = [];
+	const embeds: Embed[] = [];
 
 	for (let page = 1; page <= PAGES_TOTAL; ++page) {
 		let playerList = '';
@@ -505,8 +506,8 @@ function createLeaderboardEmbeds(
 		}
 
 		embeds.push(
-			new MessageEmbed()
-				.setColor(config.get('EMBED_BLUE'))
+			new Embed()
+				.setColor(Util.resolveColor(config.get('EMBED_BLUE')))
 				.setTitle(title)
 				.setDescription(
 					stripIndent`

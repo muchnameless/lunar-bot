@@ -1,5 +1,6 @@
 import process from 'node:process';
-import { ActivityType, Constants, Intents, Options, SnowflakeUtil, Sweepers } from 'discord.js';
+import { ActivityType, Constants, Options, SnowflakeUtil, Sweepers } from 'discord.js';
+import { GatewayIntentBits } from 'discord-api-types/v9';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';
@@ -85,21 +86,12 @@ const client = new LunarClient({
 		status: 'online',
 	},
 	intents: [
-		Intents.FLAGS.DIRECT_MESSAGES, // eval edit button
-		// Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
-		// Intents.FLAGS.DIRECT_MESSAGE_TYPING,
-		Intents.FLAGS.GUILDS, // to populate guild and channel caches
-		// Intents.FLAGS.GUILD_BANS,
-		Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS, // to keep the cache updated for the chat bridge
-		// Intents.FLAGS.GUILD_INTEGRATIONS,
-		// Intents.FLAGS.GUILD_INVITES,
-		Intents.FLAGS.GUILD_MEMBERS, // guildMemberAdd, remove
-		Intents.FLAGS.GUILD_MESSAGES, // chat bridge
-		Intents.FLAGS.GUILD_MESSAGE_REACTIONS, // forward announcements to guild chat
-		// Intents.FLAGS.GUILD_MESSAGE_TYPING,
-		// Intents.FLAGS.GUILD_PRESENCES,
-		// Intents.FLAGS.GUILD_VOICE_STATES,
-		// Intents.FLAGS.GUILD_WEBHOOKS,
+		GatewayIntentBits.DirectMessages, // eval edit button
+		GatewayIntentBits.Guilds, // to populate guild and channel caches
+		GatewayIntentBits.GuildEmojisAndStickers, // to keep the cache updated for the chat bridge
+		GatewayIntentBits.GuildMembers, // guildMemberAdd, remove
+		GatewayIntentBits.GuildMessages, // chat bridge
+		GatewayIntentBits.GuildMessageReactions, // forward announcements to guild chat
 	],
 });
 

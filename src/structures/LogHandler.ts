@@ -2,7 +2,8 @@ import { mkdir, writeFile, readdir, readFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { commaListsAnd } from 'common-tags';
-import { MessageAttachment, MessageEmbed, Permissions, SnowflakeUtil } from 'discord.js';
+import { Embed, MessageAttachment, SnowflakeUtil } from 'discord.js';
+import { PermissionFlagsBits } from 'discord-api-types/v9';
 import ms from 'ms';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
@@ -12,10 +13,10 @@ import type { GuildChannel, Message, TextChannel } from 'discord.js';
 import type { URL } from 'node:url';
 import type { LunarClient } from './LunarClient';
 
-type LogInput = MessageEmbed | MessageAttachment | string | undefined | null;
+type LogInput = Embed | MessageAttachment | string | undefined | null;
 
 interface LogOptions {
-	embeds: MessageEmbed[];
+	embeds: Embed[];
 	files?: MessageAttachment[];
 }
 
@@ -33,14 +34,14 @@ export class LogHandler {
 	}
 
 	static REQUIRED_CHANNEL_PERMISSIONS =
-		Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES | Permissions.FLAGS.EMBED_LINKS;
+		PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages | PermissionFlagsBits.EmbedLinks;
 
 	/**
 	 * cleans a string from an embed for console logging
 	 * @param string the string to clean
 	 */
 	static cleanLoggingEmbedString(string: string): string;
-	static cleanLoggingEmbedString(string: string | null): string | null;
+	static cleanLoggingEmbedString(string: string | undefined): string | null;
 	static cleanLoggingEmbedString(string: unknown) {
 		if (typeof string === 'string') {
 			return string
@@ -132,7 +133,7 @@ export class LogHandler {
 		const returnValue: Promise<Message | void>[] = [];
 
 		for (let total = 0; total < embeds.length; ++total) {
-			const embedChunk: MessageEmbed[] = [];
+			const embedChunk: Embed[] = [];
 
 			let embedChunkLength = 0;
 
@@ -160,13 +161,13 @@ export class LogHandler {
 	 * @param input
 	 */
 	private _transformInput(input: LogInput[]) {
-		const embeds: MessageEmbed[] = [];
+		const embeds: Embed[] = [];
 		const files: MessageAttachment[] = [];
 
 		for (const i of input) {
 			if (i == null) continue; // filter out null & undefined
 
-			if (i instanceof MessageEmbed) {
+			if (i instanceof Embed) {
 				embeds.push(i);
 			} else if (i instanceof MessageAttachment) {
 				files.push(i);
@@ -177,7 +178,7 @@ export class LogHandler {
 					`[TRANSFORM INPUT]: provided argument '${i}' is a '${typeof i}' instead of an Object or String`,
 				);
 			} else {
-				embeds.push(new MessageEmbed(i));
+				embeds.push(new Embed(i));
 			}
 		}
 
@@ -242,7 +243,7 @@ export class LogHandler {
 	 * write data in 'cwd/log_buffer'
 	 * @param embeds file content
 	 */
-	private async _logToFile(embeds: MessageEmbed[]) {
+	private async _logToFile(embeds: Embed[]) {
 		try {
 			await this._createLogBufferFolder();
 			await writeFile(
@@ -282,7 +283,7 @@ export class LogHandler {
 				const FILE_PATH = join(fileURLToPath(this.logURL), file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
-				await this._log({ embeds: FILE_CONTENT.split('\n').map((x) => new MessageEmbed(JSON.parse(x) as APIEmbed)) });
+				await this._log({ embeds: FILE_CONTENT.split('\n').map((x) => new Embed(JSON.parse(x) as APIEmbed)) });
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {

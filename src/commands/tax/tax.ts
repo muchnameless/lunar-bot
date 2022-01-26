@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Permissions, Formatters } from 'discord.js';
+import { Formatters } from 'discord.js';
 import { Op } from 'sequelize';
+import { PermissionFlagsBits } from 'discord-api-types/v9';
 import {
 	hypixelGuildOption,
 	optionalPlayerOption,
@@ -10,7 +11,7 @@ import { ChannelUtil, InteractionUtil } from '../../util';
 import { escapeIgn, formatNumber, logger, safePromiseAll, validateNumber } from '../../functions';
 import { TransactionType } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { ChatInputCommandInteraction, MessageEmbed, TextChannel } from 'discord.js';
+import type { ChatInputCommandInteraction, Embed, TextChannel } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class TaxCommand extends ApplicationCommand {
@@ -287,8 +288,8 @@ export default class TaxCommand extends ApplicationCommand {
 						const { players, taxCollectors } = this.client;
 						const PLAYER_INPUT = interaction.options.getString('player');
 
-						let currentTaxEmbed: MessageEmbed | null = null;
-						let currentTaxCollectedEmbed!: MessageEmbed;
+						let currentTaxEmbed: Embed | null = null;
+						let currentTaxCollectedEmbed!: Embed;
 						let result: string;
 
 						// individual player
@@ -408,7 +409,7 @@ export default class TaxCommand extends ApplicationCommand {
 
 								const { channel } = logMessage;
 
-								if (!ChannelUtil.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) return;
+								if (!ChannelUtil.botPermissions(channel).has(PermissionFlagsBits.ManageMessages)) return;
 
 								const pinnedMessages = await channel.messages.fetchPinned();
 

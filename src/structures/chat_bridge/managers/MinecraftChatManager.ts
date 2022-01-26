@@ -2,7 +2,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { setTimeout, clearTimeout } from 'node:timers';
 import { URL } from 'node:url';
 import process from 'node:process';
-import { MessageEmbed, SnowflakeUtil, Formatters } from 'discord.js';
+import { Embed, Formatters, SnowflakeUtil, Util } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
@@ -348,8 +348,8 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 					const MUTE_DURATION = ms(this.client.config.get('CHATBRIDGE_AUTOMUTE_DURATION'), { long: true });
 
 					this.client.log(
-						new MessageEmbed()
-							.setColor(this.client.config.get('EMBED_RED'))
+						new Embed()
+							.setColor(Util.resolveColor(this.client.config.get('EMBED_RED')))
 							.setAuthor({
 								name: discordMessage.author.tag,
 								iconURL: (discordMessage.member ?? discordMessage.author).displayAvatarURL(),

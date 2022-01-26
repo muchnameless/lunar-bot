@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { Embed, Util } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '../util';
 import { Event, type EventContext } from '../structures/events/Event';
@@ -59,8 +59,8 @@ export default class GuildMemberUpdateEvent extends Event {
 				// member lost mandatory role -> log incident
 				if (!newMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
 					return this.client.log(
-						new MessageEmbed()
-							.setColor(this.config.get('EMBED_RED'))
+						new Embed()
+							.setColor(Util.resolveColor(this.config.get('EMBED_RED')))
 							.setAuthor({
 								name: newMember.user.tag,
 								iconURL: newMember.displayAvatarURL(),

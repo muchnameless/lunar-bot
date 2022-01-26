@@ -1,17 +1,10 @@
 import { ChannelType, Permissions } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
+import { PermissionFlagsBits } from 'discord-api-types/v9';
 import ms from 'ms';
 import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
-import type {
-	AnyChannel,
-	Message,
-	MessageEmbed,
-	MessageOptions,
-	Snowflake,
-	TextBasedChannel,
-	TextChannel,
-} from 'discord.js';
+import type { AnyChannel, Embed, Message, MessageOptions, Snowflake, TextBasedChannel, TextChannel } from 'discord.js';
 
 export interface SendOptions extends MessageOptions {
 	rejectOnError?: boolean;
@@ -20,19 +13,19 @@ export interface SendOptions extends MessageOptions {
 export default class ChannelUtil extends null {
 	static DM_PERMISSIONS = new Permissions()
 		.add([
-			Permissions.FLAGS.ADD_REACTIONS,
-			Permissions.FLAGS.VIEW_CHANNEL,
-			Permissions.FLAGS.SEND_MESSAGES,
-			Permissions.FLAGS.SEND_TTS_MESSAGES,
-			Permissions.FLAGS.EMBED_LINKS,
-			Permissions.FLAGS.ATTACH_FILES,
-			Permissions.FLAGS.READ_MESSAGE_HISTORY,
-			Permissions.FLAGS.MENTION_EVERYONE,
-			Permissions.FLAGS.USE_EXTERNAL_EMOJIS,
+			PermissionFlagsBits.AddReactions,
+			PermissionFlagsBits.ViewChannel,
+			PermissionFlagsBits.SendMessages,
+			PermissionFlagsBits.SendTTSMessages,
+			PermissionFlagsBits.EmbedLinks,
+			PermissionFlagsBits.AttachFiles,
+			PermissionFlagsBits.ReadMessageHistory,
+			PermissionFlagsBits.MentionEveryone,
+			PermissionFlagsBits.UseExternalEmojis,
 		])
 		.freeze();
 
-	static DEFAULT_SEND_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
+	static DEFAULT_SEND_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
 
 	/**
 	 * @param channel
@@ -86,7 +79,7 @@ export default class ChannelUtil extends null {
 
 				default: {
 					if (Array.isArray(IdOrIds)) {
-						if (this.botPermissions(channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) {
+						if (this.botPermissions(channel).has(PermissionFlagsBits.ManageMessages)) {
 							return await channel.bulkDelete(IdOrIds);
 						}
 
@@ -132,7 +125,7 @@ export default class ChannelUtil extends null {
 			return null;
 		}
 
-		if (Reflect.has(_options, 'reply')) requiredChannelPermissions |= Permissions.FLAGS.READ_MESSAGE_HISTORY;
+		if (Reflect.has(_options, 'reply')) requiredChannelPermissions |= PermissionFlagsBits.ReadMessageHistory;
 
 		if (Reflect.has(_options, 'embeds')) {
 			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
@@ -144,7 +137,7 @@ export default class ChannelUtil extends null {
 			}
 
 			const TOTAL_LENGTH = _options.embeds!.reduce(
-				(acc, cur) => acc + (cur as MessageEmbed).length ?? Number.POSITIVE_INFINITY,
+				(acc, cur) => acc + (cur as Embed).length ?? Number.POSITIVE_INFINITY,
 				0,
 			);
 
@@ -156,10 +149,10 @@ export default class ChannelUtil extends null {
 				return null;
 			}
 
-			requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
+			requiredChannelPermissions |= PermissionFlagsBits.EmbedLinks;
 		}
 
-		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
+		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
 
 		// permission checks
 		if (!this.botPermissions(channel).has(requiredChannelPermissions)) {

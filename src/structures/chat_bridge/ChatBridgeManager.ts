@@ -2,7 +2,7 @@ import { URL } from 'node:url';
 import { once } from 'node:events';
 import process from 'node:process';
 import { stripIndents } from 'common-tags';
-import { MessageFlags } from 'discord.js';
+import { MessageFlags } from 'discord-api-types/v9';
 import { STOP_EMOJI, X_EMOJI } from '../../constants';
 import { BridgeCommandCollection } from '../commands/BridgeCommandCollection';
 import { MessageUtil } from '../../util';
@@ -172,7 +172,7 @@ export class ChatBridgeManager {
 	 */
 	handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
 		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return; // not a chat bridge message or bridge disabled
-		if (message.flags.any([MessageFlags.FLAGS.LOADING, MessageFlags.FLAGS.EPHEMERAL])) return; // ignore deferReply and ephemeral messages
+		if (message.flags.any([MessageFlags.Loading, MessageFlags.Ephemeral])) return; // ignore deferReply and ephemeral messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
 
 		try {

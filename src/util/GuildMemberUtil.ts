@@ -1,4 +1,5 @@
-import { Collection, Permissions } from 'discord.js';
+import { Collection } from 'discord.js';
+import { PermissionFlagsBits } from 'discord-api-types/v9';
 import { commaListsAnd } from 'common-tags';
 import {
 	CATACOMBS_ROLES,
@@ -149,7 +150,7 @@ export default class GuildMemberUtil extends null {
 		}
 
 		const { me } = member.guild;
-		if (!me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
+		if (!me!.permissions.has(PermissionFlagsBits.ManageRoles)) {
 			logger.warn(`[SET ROLES] ${this.logInfo(member)}: missing 'MANAGE_ROLES' permission`);
 			return member;
 		}

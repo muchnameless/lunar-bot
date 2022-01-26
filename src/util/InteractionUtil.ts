@@ -6,8 +6,9 @@ import {
 	ChannelType,
 	ComponentType,
 	DiscordAPIError,
-	MessageEmbed,
+	Embed,
 	SnowflakeUtil,
+	Util,
 } from 'discord.js';
 import { RESTJSONErrorCodes } from 'discord-api-types/v9';
 import { stripIndent } from 'common-tags';
@@ -29,6 +30,7 @@ import type {
 	InteractionUpdateOptions,
 	Message,
 	MessageComponentInteraction,
+	MessageOptions,
 	MessageResolvable,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
@@ -395,8 +397,8 @@ export default class InteractionUtil extends null {
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error(error);
-				if (_options.ephemeral) return UserUtil.sendDM(interaction.user, _options);
-				return ChannelUtil.send(interaction.channel!, _options);
+				if (_options.ephemeral) return UserUtil.sendDM(interaction.user, _options as MessageOptions);
+				return ChannelUtil.send(interaction.channel!, _options as MessageOptions);
 			}
 
 			if (_options.rejectOnError) throw error;
@@ -660,8 +662,8 @@ export default class InteractionUtil extends null {
 
 						this.update(buttonInteraction, {
 							embeds: [
-								new MessageEmbed()
-									.setColor(interaction.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
+								new Embed()
+									.setColor(Util.resolveColor(interaction.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED')))
 									.setDescription(
 										stripIndent`
 											${question}
@@ -680,8 +682,8 @@ export default class InteractionUtil extends null {
 					case 'time': {
 						const editOptions = {
 							embeds: [
-								new MessageEmbed()
-									.setColor('NOT_QUITE_BLACK')
+								new Embed()
+									.setColor(Util.resolveColor('NOT_QUITE_BLACK'))
 									.setDescription(
 										stripIndent`
 											${question}

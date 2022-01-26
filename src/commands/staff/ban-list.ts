@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRow, ButtonComponent, ButtonStyle, Formatters, MessageEmbed } from 'discord.js';
+import { ActionRow, ButtonComponent, ButtonStyle, Embed, Formatters, Util } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { pageOption, requiredIgnOption } from '../../structures/commands/commonOptions';
 import { mojang } from '../../api';
@@ -225,8 +225,8 @@ export default class BanListCommand extends ApplicationCommand {
 				if (!existingBan) {
 					return InteractionUtil.reply(interaction, {
 						embeds: [
-							new MessageEmbed()
-								.setColor(this.config.get('EMBED_GREEN'))
+							new Embed()
+								.setColor(Util.resolveColor(this.config.get('EMBED_GREEN')))
 								.setDescription(
 									`${Formatters.bold(
 										Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`),
@@ -239,8 +239,8 @@ export default class BanListCommand extends ApplicationCommand {
 
 				return InteractionUtil.reply(interaction, {
 					embeds: [
-						new MessageEmbed()
-							.setColor(this.config.get('EMBED_RED'))
+						new Embed()
+							.setColor(Util.resolveColor(this.config.get('EMBED_RED')))
 							.setDescription(
 								stripIndents`
 								${Formatters.bold(Formatters.hyperlink(escapeIgn(ign), `${STATS_URL_BASE}${uuid}`))} is on the ban list for

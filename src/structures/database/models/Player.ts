@@ -1,7 +1,8 @@
-import { DiscordAPIError, GuildMember, MessageEmbed, Permissions, Formatters } from 'discord.js';
+import { DiscordAPIError, Embed, Formatters, GuildMember, Util } from 'discord.js';
 import { Model, DataTypes, fn } from 'sequelize';
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
+import { PermissionFlagsBits } from 'discord-api-types/v9';
 import {
 	CATACOMBS_ROLES,
 	COSMETIC_SKILLS,
@@ -1349,12 +1350,12 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		if (!_rolesToAdd.length && !_rolesToRemove.length) return true;
 
 		// permission check
-		if (!member.guild.me!.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
+		if (!member.guild.me!.permissions.has(PermissionFlagsBits.ManageRoles)) {
 			return logger.warn(`[ROLE API CALL]: missing 'MANAGE_ROLES' in '${member.guild.name}'`), false;
 		}
 
 		const { config } = this.client;
-		const loggingEmbed = new MessageEmbed()
+		const loggingEmbed = new Embed()
 			.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL(), url: this.url })
 			.setThumbnail(this.imageURL)
 			.setDescription(
@@ -1400,7 +1401,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 
 			// was successful
-			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
+			loggingEmbed.setColor(
+				Util.resolveColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE')),
+			);
 
 			return true;
 		} catch (error) {
@@ -1409,7 +1412,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			this.setDiscordMember(null, error instanceof DiscordAPIError);
 
-			loggingEmbed.setColor(config.get('EMBED_RED')).addFields(
+			loggingEmbed.setColor(Util.resolveColor(config.get('EMBED_RED'))).addFields(
 				error instanceof Error
 					? {
 							name: error.name,
@@ -1559,7 +1562,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 		const { me } = member.guild;
 		if (me!.roles.highest.comparePositionTo(member.roles.highest) < 1) return false; // member's highest role is above bot's highest role
 		if (member.guild.ownerId === member.id) return false; // can't change nick of owner
-		if (!me!.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+		if (!me!.permissions.has(PermissionFlagsBits.ManageNicknames)) {
 			return (
 				logger.warn(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: missing 'MANAGE_NICKNAMES' in ${member.guild.name}`),
 				false

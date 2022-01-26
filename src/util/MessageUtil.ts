@@ -1,15 +1,16 @@
 import { setTimeout, clearTimeout } from 'node:timers';
-import { MessageFlags, MessageType, Permissions, Util } from 'discord.js';
+import { MessageType, Util } from 'discord.js';
+import { MessageFlags, PermissionFlagsBits } from 'discord-api-types/v9';
 import { commaListsAnd } from 'common-tags';
 import ms from 'ms';
 import { logger, seconds } from '../functions';
 import { MESSAGE_MAX_CHARS, EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS } from '../constants';
 import { ChannelUtil } from '.';
 import type {
+	Embed,
 	EmojiIdentifierResolvable,
 	Message,
 	MessageEditOptions,
-	MessageEmbed,
 	MessageOptions,
 	MessageReaction,
 	Snowflake,
@@ -34,7 +35,7 @@ interface QueuedDeletionTimeout {
 }
 
 export default class MessageUtil extends null {
-	static DEFAULT_REPLY_PERMISSIONS = Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.SEND_MESSAGES;
+	static DEFAULT_REPLY_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
 
 	static DELETE_TIMEOUT_CACHE = new Map<Snowflake, QueuedDeletionTimeout>();
 
@@ -62,7 +63,7 @@ export default class MessageUtil extends null {
 	 * @param message
 	 */
 	static isEphemeral(message: Message) {
-		return message.flags.has(MessageFlags.FLAGS.EPHEMERAL);
+		return message.flags.has(MessageFlags.Ephemeral);
 	}
 
 	/**
@@ -107,7 +108,11 @@ export default class MessageUtil extends null {
 
 		const { channel } = message;
 
-		if (!ChannelUtil.botPermissions(channel).has(Permissions.FLAGS.ADD_REACTIONS | Permissions.FLAGS.VIEW_CHANNEL)) {
+		if (
+			!ChannelUtil.botPermissions(channel).has(
+				PermissionFlagsBits.AddReactions | PermissionFlagsBits.ViewChannel | PermissionFlagsBits.ReadMessageHistory,
+			)
+		) {
 			logger.warn(`[MESSAGE REACT]: missing permissions in ${this.channelLogInfo(message)}`);
 			return null;
 		}
@@ -276,7 +281,7 @@ export default class MessageUtil extends null {
 				return message;
 			}
 
-			requiredChannelPermissions |= Permissions.FLAGS.MANAGE_MESSAGES; // removing attachments requires MANAGE_MESSAGES
+			requiredChannelPermissions |= PermissionFlagsBits.ManageMessages; // removing attachments requires MANAGE_MESSAGES
 		}
 
 		// TODO: remove once discord.js Message#editable checks for ephemeral state
@@ -303,7 +308,7 @@ export default class MessageUtil extends null {
 			}
 
 			const TOTAL_LENGTH = _options.embeds!.reduce(
-				(acc, cur) => acc + (cur as MessageEmbed).length ?? Number.POSITIVE_INFINITY,
+				(acc, cur) => acc + (cur as Embed).length ?? Number.POSITIVE_INFINITY,
 				0,
 			);
 
@@ -315,10 +320,10 @@ export default class MessageUtil extends null {
 				return message;
 			}
 
-			requiredChannelPermissions |= Permissions.FLAGS.EMBED_LINKS;
+			requiredChannelPermissions |= PermissionFlagsBits.EmbedLinks;
 		}
 
-		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= Permissions.FLAGS.ATTACH_FILES;
+		if (Reflect.has(_options, 'files')) requiredChannelPermissions |= PermissionFlagsBits.AttachFiles;
 
 		const { channel } = message;
 

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageEmbed, Formatters } from 'discord.js';
+import { Embed, Formatters, Util } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import {
 	COSMETIC_SKILLS,
@@ -43,12 +43,12 @@ export default class XpCommand extends ApplicationCommand {
 		// update db?
 		if (interaction.options.getBoolean('update')) await player.updateXp();
 
-		const embeds: MessageEmbed[] = [];
+		const embeds: Embed[] = [];
 		const { skillAverage, trueAverage } = player.getSkillAverage();
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(OFFSET);
 
-		let embed = new MessageEmbed()
-			.setColor(this.config.get('EMBED_BLUE'))
+		let embed = new Embed()
+			.setColor(Util.resolveColor(this.config.get('EMBED_BLUE')))
 			.setAuthor({
 				name: `${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
 				iconURL: player.imageURL,

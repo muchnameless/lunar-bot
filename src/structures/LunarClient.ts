@@ -1,7 +1,7 @@
 import { setInterval } from 'node:timers';
 import { URL } from 'node:url';
 import process from 'node:process';
-import { Client, MessageEmbed } from 'discord.js';
+import { Client, Embed, Util } from 'discord.js';
 import { GuildUtil, UserUtil } from '../util';
 import { cache, imgur } from '../api';
 import { hours, logger, safePromiseAll } from '../functions';
@@ -67,9 +67,9 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	 * default embed, blue border and current timestamp
 	 */
 	override get defaultEmbed() {
-		return new MessageEmbed({
-			color: this.config.get('EMBED_BLUE'),
-			timestamp: Date.now(),
+		return new Embed({
+			color: Util.resolveColor(this.config.get('EMBED_BLUE')),
+			timestamp: new Date().toISOString(),
 		});
 	}
 

@@ -1,4 +1,5 @@
-import { MessageEmbed, DiscordAPIError, MessageCollector, Permissions, Formatters } from 'discord.js';
+import { DiscordAPIError, Embed, Formatters, MessageCollector, Util } from 'discord.js';
+import { PermissionFlagsBits } from 'discord-api-types/v9';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
@@ -214,7 +215,7 @@ export class DiscordChatManager extends ChatManager {
 				throw new WebhookError('unknown channel', channel, this.hypixelGuild);
 			}
 
-			if (!ChannelUtil.botPermissions(channel).has(Permissions.FLAGS.MANAGE_WEBHOOKS)) {
+			if (!ChannelUtil.botPermissions(channel).has(PermissionFlagsBits.ManageWebhooks)) {
 				throw new WebhookError('missing `MANAGE_WEBHOOKS`', channel, this.hypixelGuild);
 			}
 
@@ -234,8 +235,8 @@ export class DiscordChatManager extends ChatManager {
 				});
 
 				this.client.log(
-					new MessageEmbed()
-						.setColor(this.client.config.get('EMBED_GREEN'))
+					new Embed()
+						.setColor(Util.resolveColor(this.client.config.get('EMBED_GREEN')))
 						.setTitle(`${this.hypixelGuild} Chat Bridge`)
 						.setDescription(`${Formatters.bold('Webhook')}: created in ${channel}`)
 						.setTimestamp(),
@@ -251,8 +252,8 @@ export class DiscordChatManager extends ChatManager {
 				this.chatBridge.shouldRetryLinking = false;
 
 				this.client.log(
-					new MessageEmbed()
-						.setColor(this.client.config.get('EMBED_RED'))
+					new Embed()
+						.setColor(Util.resolveColor(this.client.config.get('EMBED_RED')))
 						.setTitle(`${error.hypixelGuild} Chat Bridge`)
 						.setDescription(
 							`${Formatters.bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`,

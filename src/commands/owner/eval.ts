@@ -4,17 +4,10 @@ import util from 'node:util';
 import fs from 'node:fs/promises';
 import v8 from 'node:v8';
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
-import Discord, {
-	ActionRow,
-	ButtonComponent,
-	ButtonStyle,
-	Formatters,
-	MessageEmbed,
-	Permissions,
-	Util,
-} from 'discord.js';
-MessageEmbed;
+import Discord, { ActionRow, ButtonComponent, ButtonStyle, Embed, Formatters, Util } from 'discord.js';
+Embed;
 Util; // unused imports are 'used' so that tsc doesn't remove them
+import { PermissionFlagsBits } from 'discord-api-types/v9';
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
 import { transformItemData } from '@zikeji/hypixel';
@@ -132,7 +125,7 @@ export default class EvalCommand extends ApplicationCommand {
 				interaction,
 				typeof options === 'string'
 					? { content: options, ephemeral: false, rejectOnError: true, fetchReply: true }
-					: options instanceof MessageEmbed
+					: options instanceof Embed
 					? { embeds: [options], ephemeral: false, rejectOnError: true, fetchReply: true }
 					: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
 			);
@@ -262,7 +255,7 @@ export default class EvalCommand extends ApplicationCommand {
 		switch (subcommand) {
 			case 'edit': {
 				try {
-					if (!ChannelUtil.botPermissions(channel!).has(Permissions.FLAGS.VIEW_CHANNEL)) {
+					if (!ChannelUtil.botPermissions(channel!).has(PermissionFlagsBits.ViewChannel)) {
 						throw `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`;
 					}
 

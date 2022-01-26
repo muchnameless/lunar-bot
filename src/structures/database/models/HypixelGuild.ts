@@ -1,6 +1,6 @@
 import { setTimeout, clearTimeout } from 'node:timers';
 import { Model, DataTypes } from 'sequelize';
-import { MessageEmbed, Formatters, Util } from 'discord.js';
+import { Embed, Formatters, Util } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';
 import ms from 'ms';
 import { mute, setRank, unmute } from '../../chat_bridge/constants';
@@ -876,8 +876,8 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 						if (!existingBan) return;
 
 						this.client.log(
-							new MessageEmbed()
-								.setColor(this.client.config.get('EMBED_RED'))
+							new Embed()
+								.setColor(Util.resolveColor(this.client.config.get('EMBED_RED')))
 								.setAuthor({
 									name: discordMember?.user.tag ?? player.ign,
 									iconURL: discordMember?.displayAvatarURL(),
@@ -928,10 +928,10 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			leftLog = HypixelGuild.transformLogArray(leftLog);
 
 			const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length);
-			const loggingEmbeds: MessageEmbed[] = [];
+			const loggingEmbeds: Embed[] = [];
 			const createEmbed = () => {
-				const embed = new MessageEmbed()
-					.setColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE'))
+				const embed = new Embed()
+					.setColor(Util.resolveColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE')))
 					.setTitle(`${this.name} Player Database: ${CHANGES} change${CHANGES !== 1 ? 's' : ''}`)
 					.setDescription(`Number of players: ${PLAYERS_OLD_AMOUNT} -> ${this.playerCount}`)
 					.setTimestamp();
@@ -1083,7 +1083,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			if (!this.chatBridgeEnabled) return this;
 
 			const { chatBridge } = this;
-			const setRankLog: MessageEmbed[] = [];
+			const setRankLog: Embed[] = [];
 
 			for (const [index, { player }] of nonStaffWithWeight.entries()) {
 				// automatedRanks is sorted descendingly by positionReq

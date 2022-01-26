@@ -1,5 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { Collection, MessageEmbed, Formatters, Util } from 'discord.js';
+import { Collection, Embed, Formatters, Util } from 'discord.js';
 import { Op } from 'sequelize';
 import { CronJob } from 'cron';
 import {
@@ -332,7 +332,7 @@ export class PlayerManager extends ModelManager<Player> {
 		this.sortAlphabetically();
 
 		// logging
-		const embeds: MessageEmbed[] = [];
+		const embeds: Embed[] = [];
 
 		/**
 		 * @param guildName
@@ -451,15 +451,15 @@ export class PlayerManager extends ModelManager<Player> {
 
 		if (!log.size) return this;
 
-		const embeds: MessageEmbed[] = [];
+		const embeds: Embed[] = [];
 
 		/**
 		 * @param guild
 		 * @param mainProfileChangesAmount
 		 */
 		const createEmbed = (guild: HypixelGuild, mainProfileChangesAmount: number) => {
-			const embed = new MessageEmbed()
-				.setColor(this.client.config.get('EMBED_RED'))
+			const embed = new Embed()
+				.setColor(Util.resolveColor(this.client.config.get('EMBED_RED')))
 				.setTitle(
 					`${upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${
 						mainProfileChangesAmount !== 1 ? 's' : ''

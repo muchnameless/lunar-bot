@@ -1,8 +1,9 @@
 import { setTimeout } from 'node:timers';
-import { Permissions, Formatters } from 'discord.js';
+import { Formatters } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';
 import { Model } from 'sequelize';
+import { PermissionFlagsBits } from 'discord-api-types/v9';
 import { DEFAULT_CONFIG, X_EMOJI, Y_EMOJI_ALT } from '../../../constants';
 import { hypixel } from '../../../api';
 import { ChannelUtil } from '../../../util';
@@ -453,7 +454,7 @@ export class DatabaseManager {
 				logger.warn('[TAX MESSAGE] tax channel error');
 				return this;
 			}
-			if (!ChannelUtil.botPermissions(taxChannel).has(Permissions.FLAGS.VIEW_CHANNEL)) {
+			if (!ChannelUtil.botPermissions(taxChannel).has(PermissionFlagsBits.ViewChannel)) {
 				logger.warn('[TAX MESSAGE]: missing permission to edit taxMessage');
 				return this;
 			}

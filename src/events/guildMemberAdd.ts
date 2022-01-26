@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { Embed, Util } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '../util';
 import { Event, type EventContext } from '../structures/events/Event';
@@ -39,8 +39,8 @@ export default class GuildMemberAddEvent extends Event {
 		}
 
 		this.client.log(
-			new MessageEmbed()
-				.setColor(this.config.get('EMBED_GREEN'))
+			new Embed()
+				.setColor(Util.resolveColor(this.config.get('EMBED_GREEN')))
 				.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL(), url: player.url })
 				.setThumbnail(player.imageURL)
 				.setDescription(description)

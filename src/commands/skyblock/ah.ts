@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRow, Formatters, SelectMenuComponent, SelectMenuOption } from 'discord.js';
+import { ActionRow, Formatters, SelectMenuComponent, SelectMenuOption, Util } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';
@@ -15,7 +15,7 @@ import {
 	uuidToBustURL,
 } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { ChatInputCommandInteraction, MessageEmbed, SelectMenuInteraction, Snowflake } from 'discord.js';
+import type { ChatInputCommandInteraction, Embed, SelectMenuInteraction, Snowflake } from 'discord.js';
 import type { SkyBlockProfile } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
@@ -146,7 +146,7 @@ export default class AhCommand extends ApplicationCommand {
 			logger.error(error);
 
 			return {
-				embeds: [embed.setColor(this.config.get('EMBED_RED')).setDescription(`${error}`)],
+				embeds: [embed.setColor(Util.resolveColor(this.config.get('EMBED_RED'))).setDescription(`${error}`)],
 			};
 		}
 	}
@@ -170,7 +170,7 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param ign player ign
 	 * @param uuid player minecraft uuid
 	 */
-	private _handleNoProfiles(interaction: ChatInputCommandInteraction, embed: MessageEmbed, ign: string, uuid: string) {
+	private _handleNoProfiles(interaction: ChatInputCommandInteraction, embed: Embed, ign: string, uuid: string) {
 		return InteractionUtil.reply(interaction, {
 			embeds: [
 				embed

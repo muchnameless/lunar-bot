@@ -1,6 +1,6 @@
 import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
-import type { Message, MessageEmbed, MessageOptions, User } from 'discord.js';
+import type { Embed, Message, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 
 export default class UserUtil extends null {
@@ -63,7 +63,7 @@ export default class UserUtil extends null {
 			}
 
 			const TOTAL_LENGTH = _options.embeds!.reduce(
-				(acc, cur) => acc + (cur as MessageEmbed).length ?? Number.POSITIVE_INFINITY,
+				(acc, cur) => acc + (cur as Embed).length ?? Number.POSITIVE_INFINITY,
 				0,
 			);
 
