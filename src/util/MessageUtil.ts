@@ -106,6 +106,7 @@ export default class MessageUtil extends null {
 	static async react(message: Message | null, ...emojis: EmojiIdentifierResolvable[]) {
 		if (!message || this.DELETED_MESSAGES.has(message) || this.isEphemeral(message)) return null;
 
+		// permission checks
 		const { channel } = message;
 
 		if (
@@ -127,6 +128,12 @@ export default class MessageUtil extends null {
 			return null;
 		}
 
+		if (this.isEphemeral(message)) {
+			logger.warn(`[MESSAGE REACT]: unable to react to ephemeral message in ${this.channelLogInfo(message)}`);
+			return message;
+		}
+
+		// api call(s)
 		const res: MessageReaction[] = [];
 
 		try {
@@ -156,14 +163,14 @@ export default class MessageUtil extends null {
 		if (!message.deletable) {
 			// permission check
 			logger.warn(
-				`[MESSAGE UTIL]: message from ${this.logInfo(message)} in ${this.channelLogInfo(message)} is not deletable`,
+				`[MESSAGE DELETE]: message from ${this.logInfo(message)} in ${this.channelLogInfo(message)} is not deletable`,
 			);
 			return message;
 		}
 
 		// TODO: remove once discord.js Message#deletable checks for ephemeral state
 		if (this.isEphemeral(message)) {
-			logger.warn(`[MESSAGE UTIL]: unable to delete ephemeral message in ${this.channelLogInfo(message)}`);
+			logger.warn(`[MESSAGE DELETE]: unable to delete ephemeral message in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
@@ -176,7 +183,7 @@ export default class MessageUtil extends null {
 			} catch (error) {
 				logger.error(
 					error,
-					`[MESSAGE UTIL]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+					`[MESSAGE DELETE]: delete message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
 				);
 				return message;
 			}
@@ -272,7 +279,7 @@ export default class MessageUtil extends null {
 		if (!message.editable) {
 			// message was not sent by the bot user -> can only remove attachments
 			if (Object.keys(_options).some((key) => key !== 'attachments') || _options.attachments?.length !== 0) {
-				const MESSAGE = `[MESSAGE UTIL]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(
+				const MESSAGE = `[MESSAGE EDIT]: can't edit message by ${this.logInfo(message)} in ${this.channelLogInfo(
 					message,
 				)} with ${Object.entries(_options)}`;
 
@@ -286,12 +293,12 @@ export default class MessageUtil extends null {
 
 		// TODO: remove once discord.js Message#editable checks for ephemeral state
 		if (this.isEphemeral(message)) {
-			logger.warn(`[MESSAGE UTIL]: unable to edit ephemeral message in ${this.channelLogInfo(message)}`);
+			logger.warn(`[MESSAGE EDIT]: unable to edit ephemeral message in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
 		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
-			const MESSAGE = `[MESSAGE UTIL]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+			const MESSAGE = `[MESSAGE EDIT]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn(options, MESSAGE);
@@ -300,7 +307,7 @@ export default class MessageUtil extends null {
 
 		if (Reflect.has(_options, 'embeds')) {
 			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
-				const MESSAGE = `[MESSAGE UTIL]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+				const MESSAGE = `[MESSAGE EDIT]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn(options, MESSAGE);
@@ -313,7 +320,7 @@ export default class MessageUtil extends null {
 			);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
-				const MESSAGE = `[MESSAGE UTIL]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+				const MESSAGE = `[MESSAGE EDIT]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn(_options, MESSAGE);
@@ -334,7 +341,7 @@ export default class MessageUtil extends null {
 
 			if (_options.rejectOnError) {
 				throw new Error(
-					commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${
+					commaListsAnd`[MESSAGE EDIT]: missing ${missingChannelPermissions} permission${
 						missingChannelPermissions?.length === 1 ? '' : 's'
 					} in ${ChannelUtil.logInfo(channel)}
 					`,
@@ -342,7 +349,7 @@ export default class MessageUtil extends null {
 			}
 
 			logger.warn(
-				commaListsAnd`[MESSAGE UTIL]: missing ${missingChannelPermissions} permission${
+				commaListsAnd`[MESSAGE EDIT]: missing ${missingChannelPermissions} permission${
 					missingChannelPermissions?.length === 1 ? '' : 's'
 				} in ${ChannelUtil.logInfo(channel)}
 				`,
@@ -356,7 +363,7 @@ export default class MessageUtil extends null {
 			if (_options.rejectOnError) throw error;
 			logger.error(
 				error,
-				`[MESSAGE UTIL]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+				`[MESSAGE EDIT]: edit message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
 			);
 			return message;
 		}
@@ -368,13 +375,13 @@ export default class MessageUtil extends null {
 	 */
 	static async pin(message: Message) {
 		if (!message.pinnable) {
-			logger.warn(`[MESSAGE UTIL]: can't pin message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
+			logger.warn(`[MESSAGE PIN]: can't pin message by ${this.logInfo(message)} in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
 		// TODO: remove once discord.js Message#pinnable checks for ephemeral state
 		if (this.isEphemeral(message)) {
-			logger.warn(`[MESSAGE UTIL]: unable to pin ephemeral message in ${this.channelLogInfo(message)}`);
+			logger.warn(`[MESSAGE PIN]: unable to pin ephemeral message in ${this.channelLogInfo(message)}`);
 			return message;
 		}
 
@@ -383,7 +390,7 @@ export default class MessageUtil extends null {
 		} catch (error) {
 			logger.error(
 				error,
-				`[MESSAGE UTIL]: pin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
+				`[MESSAGE PIN]: pin message from ${this.logInfo(message)} in ${this.channelLogInfo(message)}`,
 			);
 			return message;
 		}
