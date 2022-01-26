@@ -27,12 +27,12 @@ export default class GuildUtil extends null {
 			const role = guild.roles.resolve(roleOrId);
 
 			if (!role) {
-				logger.warn(`[CHECK ROLE IDS]: '${roleOrId}' is not a valid role id`);
+				logger.warn(`[GUILD RESOLVE ROLES]: '${roleOrId}' is not a valid role id`);
 				continue;
 			}
 
 			if (role.managed || guild.roles.comparePositions(role, (highest ??= guild.me!.roles.highest)) >= 0) {
-				logger.warn(`[CHECK ROLE IDS]: can't edit '@${role.name}'`);
+				logger.warn(`[GUILD RESOLVE ROLES]: can't edit '@${role.name}'`);
 				continue;
 			}
 
@@ -49,7 +49,9 @@ export default class GuildUtil extends null {
 	 */
 	static async fetchMemberByTag(guild: Guild | null, tagInput: string) {
 		if (!guild?.available) {
-			logger.warn(`[FIND MEMBER BY TAG]: ${tagInput}: guild ${guild ? `'${guild?.name}' unavailable` : 'uncached'}`);
+			logger.warn(
+				`[GUILD FETCH MEMBER BY TAG]: ${tagInput}: guild ${guild ? `'${guild?.name}' unavailable` : 'uncached'}`,
+			);
 			return null;
 		}
 		if (guild.members.cache.size === guild.memberCount) {
@@ -58,12 +60,12 @@ export default class GuildUtil extends null {
 
 		try {
 			return (
-				(await guild.members.fetch({ query: tagInput.replace(/#\d{4}$/, ''), limit: 1_000 })).find(
+				(await guild.members.fetch({ query: tagInput.replace(/#\d{4}$/, ''), limit: 100 })).find(
 					({ user: { tag } }) => tag === tagInput,
 				) ?? null
 			);
 		} catch (error) {
-			logger.error(error, `[FIND MEMBER BY TAG]: ${tagInput}`);
+			logger.error(error, `[GUILD FETCH MEMBER BY TAG]: ${tagInput}`);
 			return null;
 		}
 	}
@@ -76,7 +78,7 @@ export default class GuildUtil extends null {
 		if (!guild?.available) throw `the ${guild?.name ?? 'discord'} server is currently unavailable`;
 
 		if (guild.memberCount === guild.members.cache.size) {
-			logger.debug(`[FETCH ALL MEMBERS]: ${guild.name}: already cached`);
+			logger.debug(`[GUILD FETCH ALL MEMBERS]: ${guild.name}: already cached`);
 			return guild.members.cache;
 		}
 

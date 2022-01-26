@@ -46,7 +46,7 @@ export default class UserUtil extends null {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		if (user.bot) {
-			const MESSAGE = `[USER UTIL]: ${user.tag} | ${user.id} is a bot and can't be DMed`;
+			const MESSAGE = `[USER SEND DM]: ${user.tag} | ${user.id} is a bot and can't be DMed`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn(_options, MESSAGE);
@@ -55,7 +55,7 @@ export default class UserUtil extends null {
 
 		if (Reflect.has(_options, 'embeds')) {
 			if (_options.embeds!.length > EMBEDS_MAX_AMOUNT) {
-				const MESSAGE = `[USER UTIL]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
+				const MESSAGE = `[USER SEND DM]: embeds length ${_options.embeds!.length} > ${EMBEDS_MAX_AMOUNT}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn(_options, MESSAGE);
@@ -68,7 +68,7 @@ export default class UserUtil extends null {
 			);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
-				const MESSAGE = `[USER UTIL]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
+				const MESSAGE = `[USER SEND DM]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
 
 				if (_options.rejectOnError) throw new Error(MESSAGE);
 				logger.warn(_options, MESSAGE);
@@ -77,7 +77,7 @@ export default class UserUtil extends null {
 		}
 
 		if ((_options.content?.length ?? 0) > MESSAGE_MAX_CHARS) {
-			const MESSAGE = `[USER UTIL]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
+			const MESSAGE = `[USER SEND DM]: content length ${_options.content!.length} > ${MESSAGE_MAX_CHARS}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn(_options, MESSAGE);
@@ -88,7 +88,7 @@ export default class UserUtil extends null {
 			return await user.send(_options);
 		} catch (error) {
 			if (_options.rejectOnError) throw error;
-			logger.error(error, `[USER UTIL]: ${user.tag} | ${user.id}`);
+			logger.error(error, `[USER SEND DM]: ${user.tag} | ${user.id}`);
 			return null;
 		}
 	}

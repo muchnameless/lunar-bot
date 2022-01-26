@@ -67,7 +67,7 @@ export default class ChannelUtil extends null {
 	 */
 	static async deleteMessages(channel: TextBasedChannel | null, IdOrIds: Snowflake | Snowflake[]) {
 		if (!channel?.isTextBased()) {
-			return logger.warn(`[DELETE MESSAGES]: ${this.logInfo(channel)} is not a text based channel`);
+			return logger.warn(`[CHANNEL DELETE MESSAGES]: ${this.logInfo(channel)} is not a text based channel`);
 		}
 
 		try {
@@ -102,7 +102,7 @@ export default class ChannelUtil extends null {
 				}
 			}
 		} catch (error) {
-			return logger.error(error);
+			return logger.error(error, '[CHANNEL DELETE MESSAGES]');
 		}
 	}
 
