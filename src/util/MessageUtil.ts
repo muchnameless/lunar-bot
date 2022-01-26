@@ -130,7 +130,7 @@ export default class MessageUtil extends null {
 
 		if (this.isEphemeral(message)) {
 			logger.warn(`[MESSAGE REACT]: unable to react to ephemeral message in ${this.channelLogInfo(message)}`);
-			return message;
+			return null;
 		}
 
 		// api call(s)
