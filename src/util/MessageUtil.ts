@@ -372,6 +372,12 @@ export default class MessageUtil extends null {
 			return message;
 		}
 
+		// TODO: remove once discord.js Message#pinnable checks for ephemeral state
+		if (this.isEphemeral(message)) {
+			logger.warn(`[MESSAGE UTIL]: unable to pin ephemeral message in ${this.channelLogInfo(message)}`);
+			return message;
+		}
+
 		try {
 			return await message.pin();
 		} catch (error) {
