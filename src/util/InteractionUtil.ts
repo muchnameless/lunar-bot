@@ -574,7 +574,7 @@ export default class InteractionUtil extends null {
 
 		try {
 			const channel =
-				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId!)) as TextBasedChannel);
+				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel);
 
 			await this.reply(interaction, {
 				content: question,
