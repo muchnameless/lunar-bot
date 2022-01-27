@@ -71,10 +71,6 @@ const client = new LunarClient({
 		Constants.PartialTypes.REACTION, // reactions on uncached messages
 		Constants.PartialTypes.USER,
 	],
-	restGlobalRateLimit: 50,
-	// don't await channel name and topic edits
-	rejectOnRateLimit: ({ path, method, timeout }) =>
-		method === 'patch' && /^\/channels\/\d{17,19}$/.test(path) && timeout > seconds(30),
 	failIfNotExists: false,
 	presence: {
 		activities: [
@@ -93,6 +89,11 @@ const client = new LunarClient({
 		GatewayIntentBits.GuildMessages, // chat bridge
 		GatewayIntentBits.GuildMessageReactions, // forward announcements to guild chat
 	],
+	rest: {
+		// don't await channel name and topic edits
+		rejectOnRateLimit: ({ method, route, timeToReset }) =>
+			method === 'patch' && route === '/channels/:id' && timeToReset > seconds(30),
+	},
 });
 
 // catch rejections

@@ -326,7 +326,7 @@ export class DiscordChatManager extends ChatManager {
 			return (await this.webhook.send(options)) as Message;
 		} catch (error) {
 			// webhook deleted
-			if (error instanceof DiscordAPIError && error.httpStatus === 404) {
+			if (error instanceof DiscordAPIError && error.status === 404) {
 				logger.error(error, `[SEND VIA WEBHOOK]: ${this.logInfo}: webhook deleted -> recreating & resending`);
 
 				// try to obtain another webhook

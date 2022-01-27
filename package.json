@@ -17,7 +17,7 @@
     "prepare": "husky install",
     "start": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/index.js",
     "start:dev": "cross-env NODE_ENV=development npm start | pino-pretty",
-    "dev": "npm run build && npm run start:dev",
+    "dev": "npm run build; npm run start:dev",
     "deploy:commands": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/scripts/deploy.js | pino-pretty",
     "db": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/scripts/dbInit.js --alter | pino-pretty"
   },
@@ -38,7 +38,7 @@
     "chartjs-node-canvas": "^4.1.6",
     "common-tags": "^1.8.2",
     "cron": "^1.8.2",
-    "discord.js": "14.0.0-dev.1643155629.b640272",
+    "discord.js": "14.0.0-dev.1643241965.355f579",
     "dotenv": "^14.3.2",
     "emoji-regex": "9.2.2",
     "formdata-polyfill": "^4.0.10",
