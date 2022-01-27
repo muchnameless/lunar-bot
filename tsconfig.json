@@ -17,7 +17,7 @@
 		// Emit
 		"declaration": false,
 		"importHelpers": true,
-		"importsNotUsedAsValues": "remove",
+		"importsNotUsedAsValues": "error",
 		"inlineSources": true,
 		"newLine": "lf",
 		"noEmitHelpers": true,
