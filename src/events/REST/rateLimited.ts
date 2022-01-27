@@ -1,7 +1,7 @@
 import ms from 'ms';
 import { logger } from '../../functions';
-import { type EventContext } from '../../structures/events/Event';
 import { RESTEvent } from '../../structures/events/RESTEvent';
+import type { EventContext } from '../../structures/events/Event';
 import type { RateLimitData } from '@discordjs/rest';
 
 export default class RateLimitedEvent extends RESTEvent {
