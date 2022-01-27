@@ -4,7 +4,7 @@ import { Formatters } from 'discord.js';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil, UserUtil } from '../../util';
-import { logger } from '../../functions';
+import { formatError, logger } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
@@ -58,7 +58,7 @@ export default class VerifyCommand extends ApplicationCommand {
 			hypixelPlayer = await hypixel.player.uuid(uuid);
 		} catch (error) {
 			logger.error(error);
-			return InteractionUtil.reply(interaction, `${error}`);
+			return InteractionUtil.reply(interaction, formatError(error));
 		}
 
 		const LINKED_DISCORD_TAG = hypixelPlayer?.socialMedia?.links?.DISCORD;

@@ -1,6 +1,6 @@
 import { hypixel } from '../../api';
 import { InteractionUtil } from '../../util';
-import { formatDecimalNumber, getUuidAndIgn, logger } from '../../functions';
+import { formatDecimalNumber, formatError, getUuidAndIgn, logger } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
@@ -54,7 +54,7 @@ export default class BaseStatsCommand extends DualCommand {
 			);
 		} catch (error) {
 			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
-			return InteractionUtil.reply(interaction, `${error}`);
+			return InteractionUtil.reply(interaction, formatError(error));
 		}
 	}
 
@@ -69,7 +69,7 @@ export default class BaseStatsCommand extends DualCommand {
 			);
 		} catch (error) {
 			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
-			return hypixelMessage.reply(`${error}`);
+			return hypixelMessage.reply(formatError(error));
 		}
 	}
 }

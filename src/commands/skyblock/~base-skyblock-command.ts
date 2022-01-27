@@ -1,6 +1,14 @@
 import { PROFILE_NAMES } from '../../constants';
 import { InteractionUtil } from '../../util';
-import { autocorrect, getMainProfile, getUuidAndIgn, logger, seconds, upperCaseFirstChar } from '../../functions';
+import {
+	autocorrect,
+	formatError,
+	getMainProfile,
+	getUuidAndIgn,
+	logger,
+	seconds,
+	upperCaseFirstChar,
+} from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import { hypixel } from '../../api';
 import type { SkyBlockProfile } from '../../functions';
@@ -69,7 +77,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 			);
 		} catch (error) {
 			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
-			return InteractionUtil.reply(interaction, `${error}`);
+			return InteractionUtil.reply(interaction, formatError(error));
 		}
 	}
 
@@ -105,7 +113,7 @@ export default class BaseSkyBlockCommand extends DualCommand {
 			return hypixelMessage.reply(await this._generateReply(await this._fetchData(hypixelMessage, IGN, profileName)));
 		} catch (error) {
 			logger.error({ err: error, msg: `[${this.name.toUpperCase()} CMD]` });
-			return hypixelMessage.reply(`${error}`);
+			return hypixelMessage.reply(formatError(error));
 		}
 	}
 }

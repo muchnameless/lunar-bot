@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { hypixel, mojang } from '../../api';
 import { requiredIgnOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { escapeIgn, logger, seconds } from '../../functions';
+import { escapeIgn, formatError, logger, seconds } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -41,7 +41,7 @@ export default class GuildOfCommand extends DualCommand {
 		} catch (error) {
 			logger.error(error, '[GUILDOF CMD]');
 
-			return `${error}`;
+			return formatError(error);
 		}
 	}
 

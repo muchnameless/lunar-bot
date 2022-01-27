@@ -6,6 +6,7 @@ import { hypixel } from '../../api';
 import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import {
+	formatError,
 	getMainProfile,
 	getUuidAndIgn,
 	logger,
@@ -146,7 +147,7 @@ export default class AhCommand extends ApplicationCommand {
 			logger.error(error);
 
 			return {
-				embeds: [embed.setColor(Util.resolveColor(this.config.get('EMBED_RED'))).setDescription(`${error}`)],
+				embeds: [embed.setColor(Util.resolveColor(this.config.get('EMBED_RED'))).setDescription(formatError(error))],
 			};
 		}
 	}
@@ -198,35 +199,26 @@ export default class AhCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override async runSelect(interaction: SelectMenuInteraction, args: string[]) {
-		try {
-			const [uuid, ign, userId] = args;
-			const [profileId] = interaction.values;
-			const profiles = (interaction.component as SelectMenuComponent).options;
+		const [uuid, ign, userId] = args;
+		const [profileId] = interaction.values;
+		const profiles = (interaction.component as SelectMenuComponent).options;
 
-			if (!profiles) {
-				await InteractionUtil.update(interaction, { components: [] });
+		if (!profiles) {
+			await InteractionUtil.update(interaction, { components: [] });
 
-				throw 'an error occurred';
-			}
-
-			// interaction from original requester -> edit message
-			if (interaction.user.id === userId) {
-				return InteractionUtil.update(
-					interaction,
-					await this._generateReply({ uuid, ign, profileId, profiles, userId }),
-				);
-			}
-
-			// interaction from new requester -> new message
-			return InteractionUtil.reply(
-				interaction,
-				await this._generateReply({ uuid, ign, profileId, profiles, userId: interaction.user.id }),
-			);
-		} catch (error) {
-			logger.error(error);
-
-			throw `${error}`;
+			throw 'an error occurred';
 		}
+
+		// interaction from original requester -> edit message
+		if (interaction.user.id === userId) {
+			return InteractionUtil.update(interaction, await this._generateReply({ uuid, ign, profileId, profiles, userId }));
+		}
+
+		// interaction from new requester -> new message
+		return InteractionUtil.reply(
+			interaction,
+			await this._generateReply({ uuid, ign, profileId, profiles, userId: interaction.user.id }),
+		);
 	}
 
 	/**
@@ -291,7 +283,7 @@ export default class AhCommand extends ApplicationCommand {
 			);
 		} catch (error) {
 			logger.error(error);
-			return InteractionUtil.reply(interaction, `${error}`);
+			return InteractionUtil.reply(interaction, formatError(error));
 		}
 	}
 }

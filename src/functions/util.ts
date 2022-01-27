@@ -206,3 +206,9 @@ export function sortCache<T>(
 			value: element[valueKey] as unknown as string,
 		}));
 }
+
+/**
+ * stringifies the error and removes html code from it
+ * @param error
+ */
+export const formatError = (error: unknown) => `${error}`.replace(/(?:\.? Response: )?<html>.+<\/html>/, '');
