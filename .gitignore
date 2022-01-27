@@ -7,3 +7,4 @@ launcher_accounts.json
 log_buffer
 logs
 node_modules
+src/tests
