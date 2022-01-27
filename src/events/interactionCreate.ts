@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers';
 import ms from 'ms';
-import { ApplicationCommandType, ComponentType, Formatters, InteractionType } from 'discord.js';
+import { ApplicationCommandType, Formatters } from 'discord.js';
 import { COMMAND_KEY, DELETE_KEY, GUILD_ID_ALL, LB_KEY, MAX_CHOICES } from '../constants';
 import { GuildMemberUtil, InteractionUtil } from '../util';
 import {
@@ -39,8 +39,7 @@ export default class InteractionCreateEvent extends Event {
 	private async _handleCommandInteraction(interaction: ChatInputCommandInteraction) {
 		logger.info(
 			{
-				// @ts-expect-error
-				type: InteractionType[interaction.type],
+				type: interaction.type,
 				command: interaction.toString(),
 				user: interaction.member
 					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
@@ -93,8 +92,7 @@ export default class InteractionCreateEvent extends Event {
 	private async _handleButtonInteraction(interaction: ButtonInteraction) {
 		logger.info(
 			{
-				// @ts-expect-error
-				type: ComponentType[interaction.componentType],
+				type: interaction.componentType,
 				customId: interaction.customId,
 				user: interaction.member
 					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
@@ -154,8 +152,7 @@ export default class InteractionCreateEvent extends Event {
 	private async _handleSelectMenuInteraction(interaction: SelectMenuInteraction) {
 		logger.info(
 			{
-				// @ts-expect-error
-				type: ComponentType[interaction.componentType],
+				type: interaction.componentType,
 				customId: interaction.customId,
 				values: interaction.values,
 				user: interaction.member
@@ -315,8 +312,7 @@ export default class InteractionCreateEvent extends Event {
 	private async _handleContextMenuInteraction(interaction: ContextMenuCommandInteraction) {
 		logger.info(
 			{
-				// @ts-expect-error
-				type: ApplicationCommandType[interaction.targetType],
+				type: interaction.targetType,
 				command: interaction.commandName,
 				user: interaction.member
 					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
@@ -347,10 +343,8 @@ export default class InteractionCreateEvent extends Event {
 				return command.runUser(interaction, user!, (member as GuildMember) ?? null);
 			}
 
-			default: {
-				const e: never = interaction.targetType;
-				logger.error(`[HANDLE CONTEXT MENU]: unknown target type: ${e}`);
-			}
+			default:
+				logger.error(`[HANDLE CONTEXT MENU]: unknown target type: ${interaction.targetType}`);
 		}
 	}
 
