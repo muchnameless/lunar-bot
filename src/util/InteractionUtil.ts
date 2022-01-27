@@ -188,7 +188,6 @@ export default class InteractionUtil extends null {
 	static logInfo(interaction: Interaction) {
 		if (interaction.isChatInputCommand()) {
 			return {
-				// @ts-expect-error
 				type: InteractionType[interaction.type],
 				command: interaction.toString(),
 				user: interaction.member
@@ -203,7 +202,6 @@ export default class InteractionUtil extends null {
 
 		if (interaction.isButton()) {
 			return {
-				// @ts-expect-error
 				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
 				user: interaction.member
@@ -218,7 +216,6 @@ export default class InteractionUtil extends null {
 
 		if (interaction.isSelectMenu()) {
 			return {
-				// @ts-expect-error
 				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
 				values: interaction.values,
@@ -234,7 +231,6 @@ export default class InteractionUtil extends null {
 
 		if (interaction.isContextMenuCommand()) {
 			return {
-				// @ts-expect-error
 				type: ApplicationCommandType[interaction.targetType],
 				command: interaction.commandName,
 				user: interaction.member
@@ -249,7 +245,6 @@ export default class InteractionUtil extends null {
 
 		if (interaction.isAutocomplete()) {
 			return {
-				// @ts-expect-error
 				type: InteractionType[interaction.type],
 				command: interaction.commandName,
 				focused: interaction.options.getFocused(true),
@@ -264,7 +259,6 @@ export default class InteractionUtil extends null {
 		}
 
 		return {
-			// @ts-expect-error
 			type: InteractionType[interaction.type],
 			user: interaction.member
 				? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`

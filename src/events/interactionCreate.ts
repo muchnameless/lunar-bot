@@ -39,7 +39,6 @@ export default class InteractionCreateEvent extends Event {
 	private async _handleCommandInteraction(interaction: ChatInputCommandInteraction) {
 		logger.info(
 			{
-				// @ts-expect-error
 				type: InteractionType[interaction.type],
 				command: interaction.toString(),
 				user: interaction.member
@@ -93,7 +92,6 @@ export default class InteractionCreateEvent extends Event {
 	private async _handleButtonInteraction(interaction: ButtonInteraction) {
 		logger.info(
 			{
-				// @ts-expect-error
 				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
 				user: interaction.member
@@ -154,7 +152,6 @@ export default class InteractionCreateEvent extends Event {
 	private async _handleSelectMenuInteraction(interaction: SelectMenuInteraction) {
 		logger.info(
 			{
-				// @ts-expect-error
 				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
 				values: interaction.values,
@@ -315,7 +312,6 @@ export default class InteractionCreateEvent extends Event {
 	private async _handleContextMenuInteraction(interaction: ContextMenuCommandInteraction) {
 		logger.info(
 			{
-				// @ts-expect-error
 				type: ApplicationCommandType[interaction.targetType],
 				command: interaction.commandName,
 				user: interaction.member
