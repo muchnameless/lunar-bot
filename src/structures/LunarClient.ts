@@ -1,6 +1,6 @@
 import { setInterval } from 'node:timers';
 import { URL } from 'node:url';
-import process from 'node:process';
+import { env, exit } from 'node:process';
 import { Client, Embed, Util } from 'discord.js';
 import { GuildUtil, UserUtil } from '../util';
 import { cache, imgur } from '../api';
@@ -35,7 +35,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	constructor(options: ClientOptions) {
 		super(options);
 
-		this.ownerId = process.env.OWNER as Snowflake;
+		this.ownerId = env.OWNER as Snowflake;
 		this.db = new DatabaseManager(this, options.db);
 	}
 
@@ -159,6 +159,6 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 			}
 		}
 
-		process.exit(hasError ? 1 : code);
+		exit(hasError ? 1 : code);
 	}
 }

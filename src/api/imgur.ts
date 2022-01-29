@@ -1,10 +1,10 @@
-import process from 'node:process';
+import { env } from 'node:process';
 import { IMGUR_KEY } from '../constants';
 import { ImgurClient } from '../structures/ImgurClient';
 import { hours, seconds } from '../functions';
 import { cache } from '.';
 
-export const imgur = new ImgurClient(process.env.IMGUR_CLIENT_ID!, {
+export const imgur = new ImgurClient(env.IMGUR_CLIENT_ID!, {
 	timeout: seconds(20),
 	retries: 1,
 	rateLimitedWaitTime: seconds(1),

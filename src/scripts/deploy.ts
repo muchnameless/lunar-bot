@@ -1,4 +1,4 @@
-import process from 'node:process';
+import { argv, env, exit } from 'node:process';
 import { Routes } from 'discord-api-types/v9';
 import { db } from '../structures/database';
 import { LunarClient } from '../structures/LunarClient';
@@ -8,13 +8,13 @@ import type {
 	RESTPutAPIGuildApplicationCommandsPermissionsJSONBody,
 } from 'discord-api-types/v9';
 
-const [, , GUILD_ID] = process.argv;
+const [, , GUILD_ID] = argv;
 const client = new LunarClient({
 	db,
 	intents: 0,
 });
 
-client.rest.setToken(process.env.DISCORD_TOKEN!);
+client.rest.setToken(env.DISCORD_TOKEN!);
 
 try {
 	logger.info('[DEPLOY]: initialising database');
@@ -25,15 +25,15 @@ try {
 
 	await client.commands.loadAll();
 
-	const SHOULD_DELETE = process.argv.includes('delete') || process.argv.includes('d');
+	const SHOULD_DELETE = argv.includes('delete') || argv.includes('d');
 	const commands = SHOULD_DELETE ? [] : [...new Set(client.commands.values())].flatMap(({ data }) => data);
 
 	logger.info(`[DEPLOY]: started refreshing slash commands for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}`);
 
 	const apiCommands = (await client.rest.put(
 		GUILD_ID
-			? Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID!, GUILD_ID)
-			: Routes.applicationCommands(process.env.DISCORD_CLIENT_ID!),
+			? Routes.applicationGuildCommands(env.DISCORD_CLIENT_ID!, GUILD_ID)
+			: Routes.applicationCommands(env.DISCORD_CLIENT_ID!),
 		{
 			body: commands,
 		},
@@ -71,7 +71,7 @@ try {
 
 				logger.info(`[DEPLOY]: setting permissions for '${guildId}'`);
 
-				await client.rest.put(Routes.guildApplicationCommandsPermissions(process.env.DISCORD_CLIENT_ID!, guildId), {
+				await client.rest.put(Routes.guildApplicationCommandsPermissions(env.DISCORD_CLIENT_ID!, guildId), {
 					body: fullPermissions,
 				});
 
@@ -86,4 +86,4 @@ try {
 }
 
 client.destroy();
-process.exit(0);
+exit(0);

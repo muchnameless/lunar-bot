@@ -1,5 +1,5 @@
 import { URL, pathToFileURL } from 'node:url';
-import process from 'node:process';
+import { env } from 'node:process';
 import { Sequelize, DataTypes } from 'sequelize';
 import pg from 'pg';
 import { logger, readJSFiles } from '../../functions';
@@ -18,7 +18,7 @@ class CustomDecimal extends DataTypes.DECIMAL {
 	}
 }
 
-export const sequelize = new Sequelize(process.env.DATABASE_URL!, {
+export const sequelize = new Sequelize(env.DATABASE_URL!, {
 	logging: false,
 
 	// use floats instead of strings as decimal representation (2/2)

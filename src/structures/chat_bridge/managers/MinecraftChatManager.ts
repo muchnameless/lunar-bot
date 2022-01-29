@@ -1,7 +1,7 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { setTimeout, clearTimeout } from 'node:timers';
 import { URL } from 'node:url';
-import process from 'node:process';
+import { env } from 'node:process';
 import { Embed, Formatters, SnowflakeUtil, Util } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
@@ -430,14 +430,12 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 		++this.loginAttempts;
 
 		return ((this as MinecraftChatManager<true>).bot = await createBot(this.chatBridge, {
-			host: process.env.MINECRAFT_SERVER_HOST,
-			port: Number(process.env.MINECRAFT_SERVER_PORT),
-			username: process.env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
-			password: process.env.MINECRAFT_PASSWORD!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
+			host: env.MINECRAFT_SERVER_HOST,
+			port: Number(env.MINECRAFT_SERVER_PORT),
+			username: env.MINECRAFT_USERNAME!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
+			password: env.MINECRAFT_PASSWORD!.split(/\s+/, this.mcAccount + 1)[this.mcAccount],
 			version: MC_CLIENT_VERSION,
-			auth: process.env.MINECRAFT_ACCOUNT_TYPE!.split(/\s+/, this.mcAccount + 1)[this.mcAccount] as
-				| 'mojang'
-				| 'microsoft',
+			auth: env.MINECRAFT_ACCOUNT_TYPE!.split(/\s+/, this.mcAccount + 1)[this.mcAccount] as 'mojang' | 'microsoft',
 		}));
 	}
 

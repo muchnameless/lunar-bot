@@ -1,9 +1,9 @@
-import process from 'node:process';
+import { env } from 'node:process';
 import Keyv from 'keyv';
 import { logger, minutes } from '../functions';
 
-export const cache = new Keyv<unknown>(process.env.REDIS_URI, {
-	namespace: process.env.NAMESPACE,
+export const cache = new Keyv<unknown>(env.REDIS_URI, {
+	namespace: env.NAMESPACE,
 	ttl: minutes(10),
 });
 
