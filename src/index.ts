@@ -1,5 +1,5 @@
 import process from 'node:process';
-import { ActivityType, Constants, Options, SnowflakeUtil, Sweepers } from 'discord.js';
+import { ActivityType, Options, Partials, SnowflakeUtil, Sweepers } from 'discord.js';
 import { GatewayIntentBits } from 'discord-api-types/v9';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
@@ -65,11 +65,11 @@ const client = new LunarClient({
 	},
 	allowedMentions: { parse: ['users'], repliedUser: true },
 	partials: [
-		Constants.PartialTypes.CHANNEL, // DM channels
-		Constants.PartialTypes.GUILD_MEMBER,
-		Constants.PartialTypes.MESSAGE,
-		Constants.PartialTypes.REACTION, // reactions on uncached messages
-		Constants.PartialTypes.USER,
+		Partials.Channel, // DM channels
+		Partials.GuildMember,
+		Partials.Message,
+		Partials.Reaction, // reactions on uncached messages
+		Partials.User,
 	],
 	failIfNotExists: false,
 	presence: {
