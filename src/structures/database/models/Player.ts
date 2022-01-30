@@ -1,8 +1,7 @@
-import { DiscordAPIError, Embed, Formatters, GuildMember, Util } from 'discord.js';
+import { DiscordAPIError, Embed, Formatters, GuildMember, PermissionFlagsBits, Util } from 'discord.js';
 import { Model, DataTypes, fn } from 'sequelize';
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
-import { PermissionFlagsBits } from 'discord-api-types/v9';
 import {
 	CATACOMBS_ROLES,
 	COSMETIC_SKILLS,

@@ -2,7 +2,7 @@ import { URL } from 'node:url';
 import { once } from 'node:events';
 import { env } from 'node:process';
 import { stripIndents } from 'common-tags';
-import { MessageFlags } from 'discord-api-types/v9';
+import { MessageFlags } from 'discord.js';
 import { STOP_EMOJI, X_EMOJI } from '../../constants';
 import { BridgeCommandCollection } from '../commands/BridgeCommandCollection';
 import { MessageUtil } from '../../util';

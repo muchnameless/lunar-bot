@@ -1,6 +1,5 @@
-import { ChannelType, PermissionsBitField } from 'discord.js';
+import { ChannelType, PermissionFlagsBits, PermissionsBitField } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
-import { PermissionFlagsBits } from 'discord-api-types/v9';
 import ms from 'ms';
 import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';

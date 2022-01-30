@@ -1,6 +1,5 @@
 import { setTimeout, clearTimeout } from 'node:timers';
-import { MessageType, Util } from 'discord.js';
-import { MessageFlags, PermissionFlagsBits } from 'discord-api-types/v9';
+import { MessageFlags, MessageType, PermissionFlagsBits, Util } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import ms from 'ms';
 import { logger, seconds } from '../functions';

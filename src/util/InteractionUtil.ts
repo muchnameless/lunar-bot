@@ -7,10 +7,10 @@ import {
 	ComponentType,
 	DiscordAPIError,
 	Embed,
+	RESTJSONErrorCodes,
 	SnowflakeUtil,
 	Util,
 } from 'discord.js';
-import { RESTJSONErrorCodes } from 'discord-api-types/v9';
 import { stripIndent } from 'common-tags';
 import { DELETE_EMOJI, DELETE_KEY, GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
 import { logger, makeContent, seconds, validateDiscordId, validateMinecraftUuid } from '../functions';

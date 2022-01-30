@@ -1,6 +1,5 @@
 import process from 'node:process';
-import { ActivityType, Options, Partials, SnowflakeUtil, Sweepers } from 'discord.js';
-import { GatewayIntentBits } from 'discord-api-types/v9';
+import { ActivityType, GatewayIntentBits, Options, Partials, SnowflakeUtil, Sweepers } from 'discord.js';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';

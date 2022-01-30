@@ -1,5 +1,4 @@
-import { DiscordAPIError, Embed, Formatters, MessageCollector, Util } from 'discord.js';
-import { PermissionFlagsBits } from 'discord-api-types/v9';
+import { DiscordAPIError, Embed, Formatters, MessageCollector, PermissionFlagsBits, Util } from 'discord.js';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
