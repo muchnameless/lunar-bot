@@ -229,7 +229,7 @@ export default class InteractionUtil extends null {
 
 		if (interaction.isContextMenuCommand()) {
 			return {
-				type: interaction.targetType,
+				type: interaction.commandType,
 				command: interaction.commandName,
 				user: interaction.member
 					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`

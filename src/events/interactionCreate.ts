@@ -312,7 +312,7 @@ export default class InteractionCreateEvent extends Event {
 	private async _handleContextMenuInteraction(interaction: ContextMenuCommandInteraction) {
 		logger.info(
 			{
-				type: interaction.targetType,
+				type: interaction.commandType,
 				command: interaction.commandName,
 				user: interaction.member
 					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
@@ -334,7 +334,7 @@ export default class InteractionCreateEvent extends Event {
 		// role permissions
 		await command.assertPermissions(interaction);
 
-		switch (interaction.targetType) {
+		switch (interaction.commandType) {
 			case ApplicationCommandType.Message:
 				return command.runMessage(interaction, interaction.options.getMessage('message') as Message);
 
@@ -344,7 +344,7 @@ export default class InteractionCreateEvent extends Event {
 			}
 
 			default:
-				logger.error(`[HANDLE CONTEXT MENU]: unknown target type: ${interaction.targetType}`);
+				logger.error(`[HANDLE CONTEXT MENU]: unknown target type: ${interaction.commandType}`);
 		}
 	}
 
