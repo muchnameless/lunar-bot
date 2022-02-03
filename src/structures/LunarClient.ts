@@ -1,7 +1,7 @@
 import { setInterval } from 'node:timers';
 import { URL } from 'node:url';
 import { env, exit } from 'node:process';
-import { Client, Embed, Util } from 'discord.js';
+import { Client, Embed } from 'discord.js';
 import { GuildUtil, UserUtil } from '../util';
 import { cache, imgur } from '../api';
 import { hours, logger, safePromiseAll } from '../functions';
@@ -68,7 +68,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	 */
 	override get defaultEmbed() {
 		return new Embed({
-			color: Util.resolveColor(this.config.get('EMBED_BLUE')),
+			color: this.config.get('EMBED_BLUE'),
 			timestamp: new Date().toISOString(),
 		});
 	}

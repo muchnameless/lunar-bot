@@ -6,7 +6,6 @@ import {
 	Formatters,
 	SelectMenuComponent,
 	SelectMenuOption,
-	Util,
 } from 'discord.js';
 import { stripIndent, oneLine } from 'common-tags';
 import {
@@ -507,7 +506,7 @@ function createLeaderboardEmbeds(
 
 		embeds.push(
 			new Embed()
-				.setColor(Util.resolveColor(config.get('EMBED_BLUE')))
+				.setColor(config.get('EMBED_BLUE'))
 				.setTitle(title)
 				.setDescription(
 					stripIndent`

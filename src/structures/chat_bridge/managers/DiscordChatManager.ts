@@ -1,4 +1,4 @@
-import { DiscordAPIError, Embed, Formatters, MessageCollector, PermissionFlagsBits, Util } from 'discord.js';
+import { DiscordAPIError, Embed, Formatters, MessageCollector, PermissionFlagsBits } from 'discord.js';
 import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
@@ -235,7 +235,7 @@ export class DiscordChatManager extends ChatManager {
 
 				this.client.log(
 					new Embed()
-						.setColor(Util.resolveColor(this.client.config.get('EMBED_GREEN')))
+						.setColor(this.client.config.get('EMBED_GREEN'))
 						.setTitle(`${this.hypixelGuild} Chat Bridge`)
 						.setDescription(`${Formatters.bold('Webhook')}: created in ${channel}`)
 						.setTimestamp(),
@@ -252,7 +252,7 @@ export class DiscordChatManager extends ChatManager {
 
 				this.client.log(
 					new Embed()
-						.setColor(Util.resolveColor(this.client.config.get('EMBED_RED')))
+						.setColor(this.client.config.get('EMBED_RED'))
 						.setTitle(`${error.hypixelGuild} Chat Bridge`)
 						.setDescription(
 							`${Formatters.bold('Error')}: ${error.message}${error.channel ? ` in ${error.channel}` : ''}`,

@@ -5,11 +5,11 @@ import {
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
+	Constants,
 	DiscordAPIError,
 	Embed,
 	RESTJSONErrorCodes,
 	SnowflakeUtil,
-	Util,
 } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import { DELETE_EMOJI, DELETE_KEY, GUILD_ID_ALL, X_EMOJI, Y_EMOJI } from '../constants';
@@ -665,7 +665,7 @@ export default class InteractionUtil extends null {
 						this.update(buttonInteraction, {
 							embeds: [
 								new Embed()
-									.setColor(Util.resolveColor(interaction.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED')))
+									.setColor(interaction.client.config.get(success ? 'EMBED_GREEN' : 'EMBED_RED'))
 									.setDescription(
 										stripIndent`
 											${question}
@@ -685,7 +685,7 @@ export default class InteractionUtil extends null {
 						const editOptions = {
 							embeds: [
 								new Embed()
-									.setColor(Util.resolveColor('NOT_QUITE_BLACK'))
+									.setColor(Constants.Colors.NOT_QUITE_BLACK)
 									.setDescription(
 										stripIndent`
 											${question}

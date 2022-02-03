@@ -1,4 +1,4 @@
-import { Embed, Util } from 'discord.js';
+import { Embed } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '../util';
 import { Event, type EventContext } from '../structures/events/Event';
@@ -60,7 +60,7 @@ export default class GuildMemberUpdateEvent extends Event {
 				if (!newMember.roles.cache.has(discordGuild.MANDATORY_ROLE_ID)) {
 					return this.client.log(
 						new Embed()
-							.setColor(Util.resolveColor(this.config.get('EMBED_RED')))
+							.setColor(this.config.get('EMBED_RED'))
 							.setAuthor({
 								name: newMember.user.tag,
 								iconURL: newMember.displayAvatarURL(),

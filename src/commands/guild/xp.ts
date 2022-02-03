@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Embed, Formatters, Util } from 'discord.js';
+import { Embed, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import {
 	COSMETIC_SKILLS,
@@ -48,7 +48,7 @@ export default class XpCommand extends ApplicationCommand {
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(OFFSET);
 
 		let embed = new Embed()
-			.setColor(Util.resolveColor(this.config.get('EMBED_BLUE')))
+			.setColor(this.config.get('EMBED_BLUE'))
 			.setAuthor({
 				name: `${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
 				iconURL: player.imageURL,

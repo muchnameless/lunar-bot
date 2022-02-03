@@ -2,7 +2,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { setTimeout, clearTimeout } from 'node:timers';
 import { URL } from 'node:url';
 import { env } from 'node:process';
-import { Embed, Formatters, SnowflakeUtil, Util } from 'discord.js';
+import { Embed, Formatters, SnowflakeUtil } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
@@ -349,7 +349,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 					this.client.log(
 						new Embed()
-							.setColor(Util.resolveColor(this.client.config.get('EMBED_RED')))
+							.setColor(this.client.config.get('EMBED_RED'))
 							.setAuthor({
 								name: discordMessage.author.tag,
 								iconURL: (discordMessage.member ?? discordMessage.author).displayAvatarURL(),

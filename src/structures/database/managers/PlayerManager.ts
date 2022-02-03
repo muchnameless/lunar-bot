@@ -459,7 +459,7 @@ export class PlayerManager extends ModelManager<Player> {
 		 */
 		const createEmbed = (guild: HypixelGuild, mainProfileChangesAmount: number) => {
 			const embed = new Embed()
-				.setColor(Util.resolveColor(this.client.config.get('EMBED_RED')))
+				.setColor(this.client.config.get('EMBED_RED'))
 				.setTitle(
 					`${upperCaseFirstChar(guild.name)} Player Database: ${mainProfileChangesAmount} change${
 						mainProfileChangesAmount !== 1 ? 's' : ''
