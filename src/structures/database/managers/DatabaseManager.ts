@@ -1,9 +1,8 @@
 import { setTimeout } from 'node:timers';
-import { Formatters } from 'discord.js';
+import { Formatters, PermissionFlagsBits } from 'discord.js';
 import { CronJob as CronJobConstructor } from 'cron';
 import { stripIndents, commaLists } from 'common-tags';
 import { Model } from 'sequelize';
-import { PermissionFlagsBits } from 'discord-api-types/v9';
 import { DEFAULT_CONFIG, X_EMOJI, Y_EMOJI_ALT } from '../../../constants';
 import { hypixel } from '../../../api';
 import { ChannelUtil } from '../../../util';

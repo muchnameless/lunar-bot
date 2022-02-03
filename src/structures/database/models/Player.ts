@@ -1,8 +1,7 @@
-import { DiscordAPIError, Embed, Formatters, GuildMember, Util } from 'discord.js';
+import { DiscordAPIError, Embed, Formatters, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { Model, DataTypes, fn } from 'sequelize';
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
-import { PermissionFlagsBits } from 'discord-api-types/v9';
 import {
 	CATACOMBS_ROLES,
 	COSMETIC_SKILLS,
@@ -1401,9 +1400,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 			}
 
 			// was successful
-			loggingEmbed.setColor(
-				Util.resolveColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE')),
-			);
+			loggingEmbed.setColor(IS_ADDING_GUILD_ROLE ? config.get('EMBED_GREEN') : config.get('EMBED_BLUE'));
 
 			return true;
 		} catch (error) {
@@ -1412,7 +1409,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 
 			this.setDiscordMember(null, error instanceof DiscordAPIError);
 
-			loggingEmbed.setColor(Util.resolveColor(config.get('EMBED_RED'))).addFields(
+			loggingEmbed.setColor(config.get('EMBED_RED')).addFields(
 				error instanceof Error
 					? {
 							name: error.name,

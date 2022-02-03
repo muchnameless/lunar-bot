@@ -877,7 +877,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 
 						this.client.log(
 							new Embed()
-								.setColor(Util.resolveColor(this.client.config.get('EMBED_RED')))
+								.setColor(this.client.config.get('EMBED_RED'))
 								.setAuthor({
 									name: discordMember?.user.tag ?? player.ign,
 									iconURL: discordMember?.displayAvatarURL(),
@@ -931,7 +931,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 			const loggingEmbeds: Embed[] = [];
 			const createEmbed = () => {
 				const embed = new Embed()
-					.setColor(Util.resolveColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE')))
+					.setColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE'))
 					.setTitle(`${this.name} Player Database: ${CHANGES} change${CHANGES !== 1 ? 's' : ''}`)
 					.setDescription(`Number of players: ${PLAYERS_OLD_AMOUNT} -> ${this.playerCount}`)
 					.setTimestamp();

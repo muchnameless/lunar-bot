@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Formatters } from 'discord.js';
+import { Formatters, PermissionFlagsBits } from 'discord.js';
 import { Op } from 'sequelize';
-import { PermissionFlagsBits } from 'discord-api-types/v9';
 import {
 	hypixelGuildOption,
 	optionalPlayerOption,

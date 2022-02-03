@@ -1,5 +1,4 @@
-import { Collection } from 'discord.js';
-import { PermissionFlagsBits } from 'discord-api-types/v9';
+import { Collection, PermissionFlagsBits } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import {
 	CATACOMBS_ROLES,
@@ -220,7 +219,8 @@ export default class GuildMemberUtil extends null {
 	 * @param reason
 	 */
 	static async timeout(member: GuildMember, duration: number | null, reason?: string) {
-		if (!member.moderatable) {
+		// TODO: remove second condition once discord.js GuildMember#moderatable checks for admin
+		if (!member.moderatable || member.permissions.has(PermissionFlagsBits.Administrator)) {
 			logger.warn(`[GUILDMEMBER TIMEOUT] ${this.logInfo(member)}: missing permissions`);
 			return member;
 		}

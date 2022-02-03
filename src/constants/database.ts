@@ -8,7 +8,7 @@ import {
 	SKYBLOCK_YEAR_0,
 	SLAYERS,
 } from '.';
-import type { HexColorString, Snowflake } from 'discord.js';
+import type { Snowflake } from 'discord.js';
 import type { ArrayElement } from '../types/util';
 
 // generate default config
@@ -31,9 +31,9 @@ export const DEFAULT_CONFIG = {
 	DEFAULT_MAX_PARTS: 5,
 	DEFAULT_XP_OFFSET: 'OffsetWeek',
 	ELEMENTS_PER_PAGE: 10,
-	EMBED_BLUE: '#3498DB',
-	EMBED_GREEN: '#2EDD30',
-	EMBED_RED: '#E8410E',
+	EMBED_BLUE: 0x34_98_db,
+	EMBED_GREEN: 0x2e_dd_30,
+	EMBED_RED: 0xe8_41_0e,
 	EVAL_INSPECT_DEPTH: 1,
 	HYPIXEL_API_ERROR: false,
 	HYPIXEL_FORUM_LAST_GUID: 0,
@@ -88,9 +88,9 @@ export type ConfigValues = {
 	DEFAULT_MAX_PARTS: number;
 	DEFAULT_XP_OFFSET: 'OffsetWeek';
 	ELEMENTS_PER_PAGE: number;
-	EMBED_BLUE: HexColorString;
-	EMBED_GREEN: HexColorString;
-	EMBED_RED: HexColorString;
+	EMBED_BLUE: number;
+	EMBED_GREEN: number;
+	EMBED_RED: number;
 	EVAL_INSPECT_DEPTH: number;
 	HYPIXEL_API_ERROR: boolean;
 	HYPIXEL_FORUM_LAST_GUID: number;

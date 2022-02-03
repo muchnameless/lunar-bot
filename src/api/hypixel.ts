@@ -1,4 +1,4 @@
-import process from 'node:process';
+import { env } from 'node:process';
 import { Client } from '@zikeji/hypixel';
 import { HYPIXEL_KEY } from '../constants';
 import { days, logger, minutes, seconds } from '../functions';
@@ -7,7 +7,7 @@ import type { DefaultMeta } from '@zikeji/hypixel';
 
 export const SKYBLOCK_PROFILE_TTL = seconds(30);
 
-export const hypixel = new Client(process.env.HYPIXEL_KEY!, {
+export const hypixel = new Client(env.HYPIXEL_KEY!, {
 	timeout: seconds(15),
 	rateLimitResetOffset: seconds(1),
 	retries: 1,

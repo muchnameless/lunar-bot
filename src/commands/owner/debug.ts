@@ -1,6 +1,6 @@
-import process from 'node:process';
+import { memoryUsage, version as processVersion } from 'node:process';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRow, Formatters, SnowflakeUtil, version } from 'discord.js';
+import { ActionRow, Formatters, SnowflakeUtil, version as djsVersion } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import ms from 'ms';
 import { EMBED_FIELD_MAX_CHARS } from '../../constants';
@@ -43,8 +43,8 @@ export default class DebugCommand extends ApplicationCommand {
 							value: stripIndents`
 								Ready at: ${Formatters.time(this.client.readyAt!, Formatters.TimestampStyles.LongDateTime)}
 								Uptime: ${ms(this.client.uptime!)}
-								Discord.js v${version}
-								Node.js ${process.version}
+								Discord.js v${djsVersion}
+								Node.js ${processVersion}
 							`,
 						},
 						{
@@ -142,7 +142,7 @@ export default class DebugCommand extends ApplicationCommand {
 						},
 						{
 							name: 'Memory',
-							value: Object.entries(process.memoryUsage())
+							value: Object.entries(memoryUsage())
 								.map(([key, value]) => `${key}: ${Math.round((value / 1_024 / 1_024) * 100) / 100} MB`)
 								.join('\n'),
 						},

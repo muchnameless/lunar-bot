@@ -4,10 +4,17 @@ import util from 'node:util';
 import fs from 'node:fs/promises';
 import v8 from 'node:v8';
 import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
-import Discord, { ActionRow, ButtonComponent, ButtonStyle, Embed, Formatters, Util } from 'discord.js';
+import Discord, {
+	ActionRow,
+	ButtonComponent,
+	ButtonStyle,
+	Embed,
+	Formatters,
+	PermissionFlagsBits,
+	Util,
+} from 'discord.js';
 Embed;
 Util; // unused imports are 'used' so that tsc doesn't remove them
-import { PermissionFlagsBits } from 'discord-api-types/v9';
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
 import { transformItemData } from '@zikeji/hypixel';

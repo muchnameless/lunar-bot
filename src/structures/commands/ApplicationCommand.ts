@@ -1,5 +1,5 @@
 import { SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
-import { ApplicationCommandPermissionType, ApplicationCommandType } from 'discord-api-types/v9';
+import { ApplicationCommandPermissionType, ApplicationCommandType } from 'discord.js';
 import { missingPermissionsError } from '../errors/MissingPermissionsError';
 import { COMMAND_KEY } from '../../constants';
 import { logger } from '../../functions';

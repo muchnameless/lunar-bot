@@ -211,4 +211,4 @@ export function sortCache<T>(
  * stringifies the error and removes html code from it
  * @param error
  */
-export const formatError = (error: unknown) => `${error}`.replace(/(?:\.? Response: )?<html>.+<\/html>/, '');
+export const formatError = (error: unknown) => `${error}`.replace(/(?:\.? Response: )?<html>.+<\/html>/s, '');

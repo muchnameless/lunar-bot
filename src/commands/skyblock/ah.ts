@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRow, Formatters, SelectMenuComponent, SelectMenuOption, Util } from 'discord.js';
+import { ActionRow, Formatters, SelectMenuComponent, SelectMenuOption } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';
@@ -147,7 +147,7 @@ export default class AhCommand extends ApplicationCommand {
 			logger.error(error);
 
 			return {
-				embeds: [embed.setColor(Util.resolveColor(this.config.get('EMBED_RED'))).setDescription(formatError(error))],
+				embeds: [embed.setColor(this.config.get('EMBED_RED')).setDescription(formatError(error))],
 			};
 		}
 	}

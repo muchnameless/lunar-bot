@@ -1,6 +1,5 @@
-import { ChannelType, Permissions } from 'discord.js';
+import { ChannelType, PermissionFlagsBits, PermissionsBitField } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
-import { PermissionFlagsBits } from 'discord-api-types/v9';
 import ms from 'ms';
 import { logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
@@ -11,7 +10,7 @@ export interface SendOptions extends MessageOptions {
 }
 
 export default class ChannelUtil extends null {
-	static DM_PERMISSIONS = new Permissions()
+	static DM_PERMISSIONS = new PermissionsBitField()
 		.add([
 			PermissionFlagsBits.AddReactions,
 			PermissionFlagsBits.ViewChannel,
@@ -45,10 +44,10 @@ export default class ChannelUtil extends null {
 	/**
 	 * @param channel
 	 */
-	static botPermissions(channel: AnyChannel): Readonly<Permissions>;
+	static botPermissions(channel: AnyChannel): Readonly<PermissionsBitField>;
 	static botPermissions(channel: null): null;
-	static botPermissions(channel: AnyChannel | null): Readonly<Permissions> | null;
-	static botPermissions(channel: AnyChannel | null): Readonly<Permissions> | null {
+	static botPermissions(channel: AnyChannel | null): Readonly<PermissionsBitField> | null;
+	static botPermissions(channel: AnyChannel | null) {
 		if (!channel) return null;
 
 		switch (channel.type) {

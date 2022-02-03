@@ -246,7 +246,12 @@ export function splitForEmbedFields(
 	char = '\n',
 	formatter: (text: string) => string = Util.escapeCodeBlock,
 ) {
-	return splitMessage(Formatters.codeBlock(code, formatter(input)), {
+	const formattedInput = formatter(input);
+
+	// empty code blocks would display the language
+	if (!formattedInput) return [Formatters.codeBlock('\u200B')];
+
+	return splitMessage(Formatters.codeBlock(code, formattedInput), {
 		maxLength: EMBED_FIELD_MAX_CHARS,
 		char: [char, ''],
 		prepend: `\`\`\`${code}\n`,
