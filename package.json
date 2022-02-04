@@ -52,7 +52,7 @@
     "pg-hstore": "^2.3.4",
     "pino": "^7.6.5",
     "prismarine-chat": "^1.5.0",
-    "prismarine-nbt": "^2.1.0",
+    "prismarine-nbt": "^2.2.0",
     "re2": "^1.17.3",
     "readdirp": "^3.6.0",
     "rss-parser": "^3.12.0",
