@@ -1,5 +1,5 @@
 import { FetchError } from './FetchError';
-import type { Response } from 'node-fetch';
+import type { Response } from 'undici';
 
 export class MojangAPIError extends FetchError {
 	/**

@@ -1,8 +1,8 @@
 import { setTimeout, clearTimeout } from 'node:timers';
-import fetch from 'node-fetch';
-import { /* days, */ seconds, validateMinecraftIgn, validateMinecraftUuid } from '../functions';
+import { fetch } from 'undici';
+import { /* days, */ consumeBody, seconds, validateMinecraftIgn, validateMinecraftUuid } from '../functions';
 import { MojangAPIError } from './errors/MojangAPIError';
-import type { Response } from 'node-fetch';
+import type { Response } from 'undici';
 
 export interface MojangResult {
 	uuid: string;
@@ -194,6 +194,8 @@ export class MojangClient {
 			// invalid ign
 			// case 204: {
 			// 	if (queryType === 'ign') {
+			// 		consumeBody(res);
+
 			// 		// retry a past date if name was queried
 			// 		let timestamp = Date.now();
 
@@ -212,12 +214,16 @@ export class MojangClient {
 
 			// 				return response;
 			// 			}
+
+			// 			consumeBody(res);
 			// 		}
 			// 	}
 			// }
 			// falls through
 
 			default:
+				consumeBody(res);
+
 				// only check cache if force === true, because otherwise cache is already checked before the request
 				if (cache && (!force || !(await this.cache?.get(CACHE_KEY)))) {
 					this.cache?.set(CACHE_KEY, { error: true, status: res.status, statusText: res.statusText }, true);

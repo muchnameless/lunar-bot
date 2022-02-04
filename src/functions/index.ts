@@ -1,5 +1,6 @@
 // export * as logger from './logger';
 export * from './logger';
+export * from './fetch';
 export * from './image';
 export * from './input';
 export * from './leaderboards';
