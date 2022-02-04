@@ -19,7 +19,7 @@ import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
 import { transformItemData } from '@zikeji/hypixel';
 transformItemData;
-import fetch from 'node-fetch';
+import { fetch } from 'undici';
 fetch;
 import ms from 'ms';
 ms;

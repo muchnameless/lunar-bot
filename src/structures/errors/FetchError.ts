@@ -1,11 +1,11 @@
-import type { Response } from 'node-fetch';
+import type { Response } from 'undici';
 
 export class FetchError extends Error {
 	type: string | null;
 	url: string | null;
 	status: number | null;
 	statusText: string | null;
-	headers: Record<string, string[]> | null;
+	headers: [string, string][];
 
 	/**
 	 * @param name error name
@@ -20,7 +20,7 @@ export class FetchError extends Error {
 		this.url = url ?? null;
 		this.status = status ?? null;
 		this.statusText = statusText ?? null;
-		this.headers = headers?.raw() ?? null;
+		this.headers = [...(headers?.entries() ?? [])];
 	}
 
 	override toString() {

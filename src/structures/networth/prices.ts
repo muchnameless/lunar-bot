@@ -1,9 +1,9 @@
 import { setInterval } from 'node:timers';
-import fetch from 'node-fetch';
+import { fetch } from 'undici';
 import { transformItemData } from '@zikeji/hypixel';
 import { col, fn } from 'sequelize';
 import { db } from '../database';
-import { minutes, logger } from '../../functions';
+import { consumeBody, logger, minutes } from '../../functions';
 import { FetchError } from '../errors/FetchError';
 import { VANILLA_ITEM_NAMES } from '../../constants';
 import { calculatePetSkillLevel } from './networth';
@@ -107,7 +107,10 @@ async function updateBazaarPrices() {
 	try {
 		const res = await fetch('https://api.hypixel.net/skyblock/bazaar');
 
-		if (res.status !== 200) throw new FetchError('FetchBazaarError', res);
+		if (res.status !== 200) {
+			consumeBody(res);
+			throw new FetchError('FetchBazaarError', res);
+		}
 
 		const { products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
 
@@ -186,7 +189,10 @@ async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 async function fetchAuctionPage(page = 0) {
 	const res = await fetch(`https://api.hypixel.net/skyblock/auctions?page=${page}`);
 
-	if (res.status !== 200) throw new FetchError('FetchAuctionError', res);
+	if (res.status !== 200) {
+		consumeBody(res);
+		throw new FetchError('FetchAuctionError', res);
+	}
 
 	return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
 }

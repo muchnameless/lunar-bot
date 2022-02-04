@@ -1,12 +1,11 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { setTimeout, clearTimeout } from 'node:timers';
 import { AsyncQueue } from '@sapphire/async-queue';
-import { FormData } from 'formdata-polyfill/esm.min';
-import fetch from 'node-fetch';
+import { fetch, FormData } from 'undici';
 import ms from 'ms';
-import { logger, seconds } from '../functions';
+import { consumeBody, logger, seconds } from '../functions';
 import { FetchError } from './errors/FetchError';
-import type { RequestInit, Response } from 'node-fetch';
+import type { RequestInit, Response } from 'undici';
 
 export interface ImageData {
 	/* eslint-disable camelcase */
@@ -248,6 +247,7 @@ export class ImgurClient {
 
 			// check response
 			if (res.status !== 200) {
+				consumeBody(res);
 				throw new FetchError('ImgurAPIError', res);
 			}
 
