@@ -26,14 +26,7 @@ import {
 import { InteractionUtil, UserUtil } from '../util';
 import { cache } from '../api';
 import { days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
-import type {
-	ButtonInteraction,
-	Message,
-	SelectMenuInteraction,
-	Snowflake,
-	User,
-	ActionRowComponent,
-} from 'discord.js';
+import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { LunarClient } from '../structures/LunarClient';
@@ -190,7 +183,7 @@ function createActionRows(
 		pageStyle = reloadStyle = ButtonStyle.Primary;
 	}
 
-	const rows: ActionRow<ActionRowComponent>[] = [];
+	const rows: ActionRow[] = [];
 	const guildSelectMenu = new SelectMenuComponent()
 		.setCustomId(`${cacheKey}:guild`)
 		.setPlaceholder(hypixelGuild !== GUILD_ID_ALL ? `Guild: ${hypixelGuild}` : 'Guilds: All')
