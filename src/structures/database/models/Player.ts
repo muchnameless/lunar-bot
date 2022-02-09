@@ -218,8 +218,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare archerXpCompetitionStart: CreationOptional<number>;
 	declare tankXpCompetitionStart: CreationOptional<number>;
 	declare guildXpCompetitionStart: CreationOptional<number>;
-	declare catacombsCompletionsCompetitionStart: CreationOptional<Record<string, number>>;
-	declare catacombsMasterCompletionsCompetitionStart: CreationOptional<Record<string, number>>;
+	declare catacombsCompletionsCompetitionStart: CreationOptional<Record<`${bigint}`, number>>;
+	declare catacombsMasterCompletionsCompetitionStart: CreationOptional<Record<`${bigint}`, number>>;
 
 	// competition end
 	declare tamingXpCompetitionEnd: CreationOptional<number>;
@@ -243,8 +243,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare archerXpCompetitionEnd: CreationOptional<number>;
 	declare tankXpCompetitionEnd: CreationOptional<number>;
 	declare guildXpCompetitionEnd: CreationOptional<number>;
-	declare catacombsCompletionsCompetitionEnd: CreationOptional<Record<string, number>>;
-	declare catacombsMasterCompletionsCompetitionEnd: CreationOptional<Record<string, number>>;
+	declare catacombsCompletionsCompetitionEnd: CreationOptional<Record<`${bigint}`, number>>;
+	declare catacombsMasterCompletionsCompetitionEnd: CreationOptional<Record<`${bigint}`, number>>;
 
 	// mayor
 	declare tamingXpOffsetMayor: CreationOptional<number>;
@@ -268,8 +268,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare archerXpOffsetMayor: CreationOptional<number>;
 	declare tankXpOffsetMayor: CreationOptional<number>;
 	declare guildXpOffsetMayor: CreationOptional<number>;
-	declare catacombsCompletionsOffsetMayor: CreationOptional<Record<string, number>>;
-	declare catacombsMasterCompletionsOffsetMayor: CreationOptional<Record<string, number>>;
+	declare catacombsCompletionsOffsetMayor: CreationOptional<Record<`${bigint}`, number>>;
+	declare catacombsMasterCompletionsOffsetMayor: CreationOptional<Record<`${bigint}`, number>>;
 
 	// week
 	declare tamingXpOffsetWeek: CreationOptional<number>;
@@ -293,8 +293,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare archerXpOffsetWeek: CreationOptional<number>;
 	declare tankXpOffsetWeek: CreationOptional<number>;
 	declare guildXpOffsetWeek: CreationOptional<number>;
-	declare catacombsCompletionsOffsetWeek: CreationOptional<Record<string, number>>;
-	declare catacombsMasterCompletionsOffsetWeek: CreationOptional<Record<string, number>>;
+	declare catacombsCompletionsOffsetWeek: CreationOptional<Record<`${bigint}`, number>>;
+	declare catacombsMasterCompletionsOffsetWeek: CreationOptional<Record<`${bigint}`, number>>;
 
 	// month
 	declare tamingXpOffsetMonth: CreationOptional<number>;
@@ -318,8 +318,8 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	declare archerXpOffsetMonth: CreationOptional<number>;
 	declare tankXpOffsetMonth: CreationOptional<number>;
 	declare guildXpOffsetMonth: CreationOptional<number>;
-	declare catacombsCompletionsOffsetMonth: CreationOptional<Record<string, number>>;
-	declare catacombsMasterCompletionsOffsetMonth: CreationOptional<Record<string, number>>;
+	declare catacombsCompletionsOffsetMonth: CreationOptional<Record<`${bigint}`, number>>;
+	declare catacombsMasterCompletionsOffsetMonth: CreationOptional<Record<`${bigint}`, number>>;
 
 	declare readonly createdAt: CreationOptional<Date>;
 	declare readonly updatedAt: CreationOptional<Date>;
@@ -1240,7 +1240,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			this.discordId = value;
 		} catch (error) {
 			if (error instanceof UniqueConstraintError) {
-				throw `${this.logInfo}: error changing discordId from '${this.discordId}' to '${value}'`;
+				throw `${this.logInfo}: error updating discordId from '${this.discordId}' to '${value}'`;
 			}
 			throw error;
 		}

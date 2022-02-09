@@ -1,7 +1,7 @@
 declare module 'lilyweight' {
-	type CataCompletion = Record<string, number>;
+	type CataCompletion = Record<`${bigint}`, number>;
 
-	type MasterCataCompletion = Record<string, number>;
+	type MasterCataCompletion = Record<`${bigint}`, number>;
 
 	/**
 	 * An object containing weights.
