@@ -4,8 +4,8 @@ import {
 	ButtonComponent,
 	ButtonStyle,
 	ChannelType,
+	Colors,
 	ComponentType,
-	Constants,
 	DiscordAPIError,
 	Embed,
 	RESTJSONErrorCodes,
@@ -685,7 +685,7 @@ export default class InteractionUtil extends null {
 						const editOptions = {
 							embeds: [
 								new Embed()
-									.setColor(Constants.Colors.NOT_QUITE_BLACK)
+									.setColor(Colors.NotQuiteBlack)
 									.setDescription(
 										stripIndent`
 											${question}
