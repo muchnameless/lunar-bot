@@ -1,33 +1,26 @@
 import { Model, DataTypes } from 'sequelize';
 import { TransactionType } from './Transaction';
-import type { ModelStatic, Optional, Sequelize } from 'sequelize';
+import type {
+	CreationOptional,
+	InferAttributes,
+	InferCreationAttributes,
+	ModelStatic,
+	NonAttribute,
+	Sequelize,
+} from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
+import type { Player } from './Player';
 
-interface TaxCollectorAttributes {
-	minecraftUuid: string;
-	isCollecting: boolean;
-	collectedTax: number;
-	collectedDonations: number;
-}
-
-type TaxCollectorCreationAttributes = Optional<
-	TaxCollectorAttributes,
-	'isCollecting' | 'collectedTax' | 'collectedDonations'
->;
-
-export class TaxCollector
-	extends Model<TaxCollectorAttributes, TaxCollectorCreationAttributes>
-	implements TaxCollectorAttributes
-{
-	declare client: LunarClient;
+export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCreationAttributes<TaxCollector>> {
+	declare client: NonAttribute<LunarClient>;
 
 	declare minecraftUuid: string;
-	declare isCollecting: boolean;
-	declare collectedTax: number;
-	declare collectedDonations: number;
+	declare isCollecting: CreationOptional<boolean>;
+	declare collectedTax: CreationOptional<number>;
+	declare collectedDonations: CreationOptional<number>;
 
-	declare readonly createdAt: Date;
-	declare readonly updatedAt: Date;
+	declare readonly createdAt: CreationOptional<Date>;
+	declare readonly updatedAt: CreationOptional<Date>;
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(
@@ -51,6 +44,8 @@ export class TaxCollector
 					defaultValue: 0,
 					allowNull: false,
 				},
+				createdAt: DataTypes.DATE,
+				updatedAt: DataTypes.DATE,
 			},
 			{
 				sequelize,
@@ -58,11 +53,11 @@ export class TaxCollector
 		) as ModelStatic<TaxCollector>;
 	}
 
-	get player() {
+	get player(): NonAttribute<Player | null> {
 		return this.client.players.cache.get(this.minecraftUuid) ?? null;
 	}
 
-	get ign() {
+	get ign(): NonAttribute<string | null> {
 		return this.player?.ign ?? null;
 	}
 

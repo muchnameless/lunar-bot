@@ -1,29 +1,27 @@
 import { Model, DataTypes } from 'sequelize';
-import type { ModelStatic, Sequelize } from 'sequelize';
+import type {
+	CreationOptional,
+	InferAttributes,
+	InferCreationAttributes,
+	ModelStatic,
+	NonAttribute,
+	Sequelize,
+} from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-export interface HypixelForumPostAttributes {
-	guid: number;
-	title: string;
-	creator: string;
-	link: string;
-}
-
-type HypixelForumPostCreationAttributes = HypixelForumPostAttributes;
-
-export class SkyBlockPatchNote
-	extends Model<HypixelForumPostAttributes, HypixelForumPostCreationAttributes>
-	implements HypixelForumPostAttributes
-{
-	declare client: LunarClient;
+export class SkyBlockPatchNote extends Model<
+	InferAttributes<SkyBlockPatchNote>,
+	InferCreationAttributes<SkyBlockPatchNote>
+> {
+	declare client: NonAttribute<LunarClient>;
 
 	declare guid: number;
 	declare title: string;
 	declare creator: string;
 	declare link: string;
 
-	declare readonly createdAt: Date;
-	declare readonly updatedAt: Date;
+	declare readonly createdAt: CreationOptional<Date>;
+	declare readonly updatedAt: CreationOptional<Date>;
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(
@@ -44,6 +42,8 @@ export class SkyBlockPatchNote
 					type: DataTypes.STRING,
 					allowNull: false,
 				},
+				createdAt: DataTypes.DATE,
+				updatedAt: DataTypes.DATE,
 			},
 			{
 				sequelize,

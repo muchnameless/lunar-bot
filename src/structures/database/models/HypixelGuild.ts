@@ -27,8 +27,15 @@ import {
 	safePromiseAll,
 	seconds,
 } from '../../../functions';
-import type { ModelStatic, Sequelize } from 'sequelize';
-import type { Collection, GuildMember, Snowflake } from 'discord.js';
+import type {
+	CreationOptional,
+	InferAttributes,
+	InferCreationAttributes,
+	ModelStatic,
+	NonAttribute,
+	Sequelize,
+} from 'sequelize';
+import type { Collection, GuildMember, Snowflake, Guild } from 'discord.js';
 import type { Player } from './Player';
 import type { ChatBridge } from '../../chat_bridge/ChatBridge';
 import type { LunarClient } from '../../LunarClient';
@@ -78,95 +85,68 @@ interface MutedGuildMember {
 	mutedTill: number;
 }
 
-interface HypixelGuildAttributes {
-	guildId: string;
-	discordId: Snowflake | null;
-	/** Lunar */
-	GUILD_ROLE_ID: Snowflake | null;
-	EX_GUILD_ROLE_ID: Snowflake | null;
-	BRIDGER_ROLE_ID: Snowflake | null;
-	staffRoleIds: Snowflake[];
-	adminRoleIds: Snowflake[];
-	name: string;
-	weightReq: number | null;
-	chatBridgeEnabled: boolean;
-	mutedTill: number;
-	_mutedPlayers: MutedGuildMember[];
-	chatBridgeChannels: ChatBridgeChannel[];
-	ranks: GuildRank[];
-	syncRanksEnabled: boolean;
-	/** amount of non GM ranks with staff perms */
-	staffRanksAmount: number;
-	statsHistory: StatsHistory[];
-	statDiscordChannels: Record<string, string> | null;
-	updateStatDiscordChannelsEnabled: boolean;
-	acceptJoinRequests: boolean;
-	taxChannelId: Snowflake | null;
-	taxMessageId: Snowflake | null;
-	announcementsChannelId: Snowflake | null;
-	loggingChannelId: Snowflake | null;
-	syncIgnThreshold: number;
-	kickCooldown: number;
-	lastKickAt: Date;
-}
+type HypixelGuildStats = Record<'weight' | 'skills' | 'slayer' | 'catacombs', string>;
 
-export class HypixelGuild extends Model<HypixelGuildAttributes> implements HypixelGuildAttributes {
-	declare client: LunarClient;
+export class HypixelGuild extends Model<
+	InferAttributes<HypixelGuild, { omit: 'players' }>,
+	InferCreationAttributes<HypixelGuild, { omit: 'players' }>
+> {
+	declare client: NonAttribute<LunarClient>;
 
 	declare guildId: string;
-	declare discordId: Snowflake | null;
+	declare discordId: CreationOptional<Snowflake | null>;
 	/** Lunar */
-	declare GUILD_ROLE_ID: Snowflake | null;
-	declare EX_GUILD_ROLE_ID: Snowflake | null;
-	declare BRIDGER_ROLE_ID: Snowflake | null;
-	declare staffRoleIds: Snowflake[];
-	declare adminRoleIds: Snowflake[];
-	declare name: string;
-	declare weightReq: number | null;
-	declare chatBridgeEnabled: boolean;
-	declare mutedTill: number;
-	declare _mutedPlayers: MutedGuildMember[];
-	declare chatBridgeChannels: ChatBridgeChannel[];
-	declare ranks: GuildRank[];
-	declare syncRanksEnabled: boolean;
+	declare GUILD_ROLE_ID: CreationOptional<Snowflake | null>;
+	declare EX_GUILD_ROLE_ID: CreationOptional<Snowflake | null>;
+	declare BRIDGER_ROLE_ID: CreationOptional<Snowflake | null>;
+	declare staffRoleIds: CreationOptional<Snowflake[]>;
+	declare adminRoleIds: CreationOptional<Snowflake[]>;
+	declare name: CreationOptional<string>;
+	declare weightReq: CreationOptional<number | null>;
+	declare chatBridgeEnabled: CreationOptional<boolean>;
+	declare mutedTill: CreationOptional<number>;
+	declare _mutedPlayers: CreationOptional<MutedGuildMember[]>;
+	declare chatBridgeChannels: CreationOptional<ChatBridgeChannel[]>;
+	declare ranks: CreationOptional<GuildRank[]>;
+	declare syncRanksEnabled: CreationOptional<boolean>;
 	/** amount of non GM ranks with staff perms */
-	declare staffRanksAmount: number;
-	declare statsHistory: StatsHistory[];
-	declare statDiscordChannels: Record<'weight' | 'skills' | 'slayer' | 'catacombs', string> | null;
-	declare updateStatDiscordChannelsEnabled: boolean;
-	declare acceptJoinRequests: boolean;
-	declare taxChannelId: Snowflake | null;
-	declare taxMessageId: Snowflake | null;
-	declare announcementsChannelId: Snowflake | null;
-	declare loggingChannelId: Snowflake | null;
-	declare syncIgnThreshold: number;
-	declare kickCooldown: number;
-	declare lastKickAt: Date;
+	declare staffRanksAmount: CreationOptional<number>;
+	declare statsHistory: CreationOptional<StatsHistory[]>;
+	declare statDiscordChannels: CreationOptional<HypixelGuildStats | null>;
+	declare updateStatDiscordChannelsEnabled: CreationOptional<boolean>;
+	declare acceptJoinRequests: CreationOptional<boolean>;
+	declare taxChannelId: CreationOptional<Snowflake | null>;
+	declare taxMessageId: CreationOptional<Snowflake | null>;
+	declare announcementsChannelId: CreationOptional<Snowflake | null>;
+	declare loggingChannelId: CreationOptional<Snowflake | null>;
+	declare syncIgnThreshold: CreationOptional<number>;
+	declare kickCooldown: CreationOptional<number>;
+	declare lastKickAt: CreationOptional<Date>;
 
 	/**
 	 * guild ranks sync
 	 */
-	private _syncRanksPromise: Promise<this> | null = null;
+	private _syncRanksPromise: NonAttribute<Promise<this> | null> = null;
 	/**
 	 * guild data update
 	 */
-	private _updateDataPromise: Promise<this> | null = null;
+	private _updateDataPromise: NonAttribute<Promise<this> | null> = null;
 	/**
 	 * guild players
 	 */
-	private _players: Collection<string, Player> | null = null;
+	private _players: NonAttribute<Collection<string, Player> | null> = null;
 	/**
 	 * linked chat bridge
 	 */
-	private _chatBridge: ChatBridge | null = null;
+	private _chatBridge: NonAttribute<ChatBridge<true> | null> = null;
 	/**
 	 * players who are muted in guild chat, <minecraftUuid, mutedTill>
 	 */
-	mutedPlayers: Map<string, number>;
+	mutedPlayers: NonAttribute<Map<string, number>>;
 	/**
 	 * scheduled unmutes
 	 */
-	private _unmuteTimeouts = new Map<string, NodeJS.Timeout>();
+	private _unmuteTimeouts: NonAttribute<Map<string, NodeJS.Timeout>> = new Map();
 
 	constructor(...args: any[]) {
 		super(...args);
@@ -365,7 +345,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * returns either the chatBridge if it is linked and ready or throws an exception
 	 */
-	get chatBridge(): ChatBridge<true> {
+	get chatBridge(): NonAttribute<ChatBridge<true>> {
 		if (!this.chatBridgeEnabled) throw `${this.name}: chat bridge disabled`;
 		if (!this._chatBridge?.minecraft.isReady()) {
 			throw `${this.name}: chat bridge not ${this._chatBridge ? 'ready' : 'found'}`;
@@ -376,14 +356,14 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * returns the amount of players in the guild
 	 */
-	get playerCount() {
+	get playerCount(): NonAttribute<number> {
 		return this.players.size;
 	}
 
 	/**
 	 * returns various average stats
 	 */
-	get stats() {
+	get stats(): NonAttribute<Record<'weightAverage' | 'skillAverage' | 'slayerAverage' | 'catacombsAverage', number>> {
 		const { players } = this;
 		const PLAYER_COUNT = players.size;
 
@@ -399,7 +379,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * returns various average stats, formatted as strings
 	 */
-	get formattedStats() {
+	get formattedStats(): NonAttribute<HypixelGuildStats> {
 		const formatInteger = (number: number) => cleanFormattedNumber(formatNumber(Math.round(number)));
 		const formatDecimal = (number: number) => cleanFormattedNumber(formatDecimalNumber(number));
 		const { weightAverage, skillAverage, slayerAverage, catacombsAverage } = this.stats;
@@ -415,7 +395,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * wether the player is muted and that mute is not expired
 	 */
-	get muted() {
+	get muted(): NonAttribute<boolean> {
 		if (this.mutedTill) {
 			// mute hasn't expired
 			if (Date.now() < this.mutedTill) return true;
@@ -430,7 +410,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 	/**
 	 * linked discord guild (if available)
 	 */
-	get discordGuild() {
+	get discordGuild(): NonAttribute<Guild | null> {
 		const discordGuild = this.client.guilds.cache.get(this.discordId!);
 
 		if (discordGuild?.available) return discordGuild;
@@ -1135,9 +1115,7 @@ export class HypixelGuild extends Model<HypixelGuildAttributes> implements Hypix
 		if (!this.updateStatDiscordChannelsEnabled || !this.statDiscordChannels) return;
 
 		for (const [type, value] of Object.entries(this.formattedStats)) {
-			const channel = this.client.channels.cache.get(
-				this.statDiscordChannels[type as keyof HypixelGuild['formattedStats']],
-			);
+			const channel = this.client.channels.cache.get(this.statDiscordChannels[type as keyof HypixelGuildStats]);
 
 			if (!channel?.isVoiceBased()) {
 				// no channel found

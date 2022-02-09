@@ -1,23 +1,7 @@
 declare module 'lilyweight' {
-	type CataCompletion = Partial<{
-		0: number;
-		1: number;
-		2: number;
-		3: number;
-		4: number;
-		5: number;
-		6: number;
-		7: number;
-	}>;
+	type CataCompletion = Record<string, number>;
 
-	type MasterCataCompletion = Partial<{
-		1: number;
-		2: number;
-		3: number;
-		4: number;
-		5: number;
-		6: number;
-	}>;
+	type MasterCataCompletion = Record<string, number>;
 
 	/**
 	 * An object containing weights.

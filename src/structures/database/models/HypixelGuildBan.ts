@@ -1,27 +1,24 @@
 import { Model, DataTypes } from 'sequelize';
-import type { ModelStatic, Sequelize, Optional } from 'sequelize';
+import type {
+	CreationOptional,
+	InferAttributes,
+	InferCreationAttributes,
+	ModelStatic,
+	NonAttribute,
+	Sequelize,
+} from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-interface HypixelGuildBanAttributes {
-	minecraftUuid: string;
-	_reason: string | null;
-}
-
-type HypixelGuildBanCreationAttributes = Optional<HypixelGuildBanAttributes, '_reason'>;
-
-export class HypixelGuildBan
-	extends Model<HypixelGuildBanAttributes, HypixelGuildBanCreationAttributes>
-	implements HypixelGuildBanAttributes
-{
-	declare client: LunarClient;
+export class HypixelGuildBan extends Model<InferAttributes<HypixelGuildBan>, InferCreationAttributes<HypixelGuildBan>> {
+	declare client: NonAttribute<LunarClient>;
 
 	declare minecraftUuid: string;
-	declare _reason: string | null;
+	declare _reason: CreationOptional<string | null>;
 
-	declare readonly createdAt: Date;
-	declare readonly updatedAt: Date;
+	declare readonly createdAt: CreationOptional<Date>;
+	declare readonly updatedAt: CreationOptional<Date>;
 
-	get reason() {
+	get reason(): NonAttribute<string> {
 		return this._reason ?? 'no reason specified';
 	}
 
@@ -37,6 +34,8 @@ export class HypixelGuildBan
 					defaultValue: null,
 					allowNull: true,
 				},
+				createdAt: DataTypes.DATE,
+				updatedAt: DataTypes.DATE,
 			},
 			{
 				sequelize,

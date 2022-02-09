@@ -1,5 +1,12 @@
 import { Model, DataTypes } from 'sequelize';
-import type { ModelStatic, Sequelize } from 'sequelize';
+import type {
+	ModelStatic,
+	Sequelize,
+	CreationOptional,
+	InferAttributes,
+	InferCreationAttributes,
+	NonAttribute,
+} from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
 export const enum TransactionType {
@@ -7,19 +14,9 @@ export const enum TransactionType {
 	Donation = 'donation',
 }
 
-export interface TransactionAttributes {
-	from: string;
-	to: string;
-	amount: number;
-	auctionId: string | null;
-	notes: string | null;
-	type: TransactionType;
-}
+export class Transaction extends Model<InferAttributes<Transaction>, InferCreationAttributes<Transaction>> {
+	declare client: NonAttribute<LunarClient>;
 
-export class Transaction extends Model<TransactionAttributes> implements TransactionAttributes {
-	declare client: LunarClient;
-
-	declare id: number;
 	declare from: string;
 	declare to: string;
 	declare amount: number;
@@ -27,8 +24,8 @@ export class Transaction extends Model<TransactionAttributes> implements Transac
 	declare notes: string | null;
 	declare type: TransactionType;
 
-	declare readonly createdAt: Date;
-	declare readonly updatedAt: Date;
+	declare readonly createdAt: CreationOptional<Date>;
+	declare readonly updatedAt: CreationOptional<Date>;
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(
@@ -62,6 +59,8 @@ export class Transaction extends Model<TransactionAttributes> implements Transac
 					defaultValue: TransactionType.Tax,
 					allowNull: false,
 				},
+				createdAt: DataTypes.DATE,
+				updatedAt: DataTypes.DATE,
 			},
 			{
 				sequelize,

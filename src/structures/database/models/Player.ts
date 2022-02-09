@@ -50,18 +50,27 @@ import {
 	validateNumber,
 } from '../../../functions';
 import { TransactionType } from './Transaction';
-import type { ModelStatic, Optional, Sequelize } from 'sequelize';
-import type { Snowflake, GuildResolvable, Guild } from 'discord.js';
+import type {
+	CreationOptional,
+	InferAttributes,
+	InferCreationAttributes,
+	ModelStatic,
+	NonAttribute,
+	Sequelize,
+	ModelAttributeColumnOptions,
+} from 'sequelize';
+import type { Snowflake, GuildResolvable, Guild, User } from 'discord.js';
 import type { Components } from '@zikeji/hypixel';
-import type { HypixelGuild } from './HypixelGuild';
-import type { Transaction, TransactionAttributes } from './Transaction';
+import type { GuildRank, HypixelGuild } from './HypixelGuild';
+import type { Transaction } from './Transaction';
 import type { LunarClient } from '../../LunarClient';
 import type { TaxCollector } from './TaxCollector';
 import type { ModelResovable } from '../managers/ModelManager';
 import type { DungeonTypes, SkillTypes, SlayerTypes, XPAndDataTypes, XPOffsets } from '../../../constants';
 import type { RoleResolvables } from '../../../util/GuildUtil';
+import type { ArrayElement } from '../../../types/util';
 
-interface ParsedTransaction extends TransactionAttributes {
+interface ParsedTransaction extends InferAttributes<Transaction> {
 	fromIGN: string | null;
 	toIGN: string | null;
 }
@@ -104,260 +113,216 @@ interface AddTransferOptions extends SetToPaidOptions {
 	type?: TransactionType;
 }
 
-interface PlayerAttributes {
-	minecraftUuid: string;
-	ign: string;
-	discordId: Snowflake | null;
-	inDiscord: boolean;
-	guildId: string | null;
-	guildRankPriority: number;
-	_infractions: number[] | null;
-	hasDiscordPingPermission: boolean;
-	notes: string | null;
-	paid: boolean;
-	mainProfileId: string | null;
-	mainProfileName: string | null;
-	xpLastUpdatedAt: Date | null;
-	xpUpdatesDisabled: boolean;
-	discordMemberUpdatesDisabled: boolean;
-	farmingLvlCap: number;
-	guildXpDay: string | null;
-	guildXpDaily: number;
-	lastActivityAt: Date;
-}
-
-type PlayerCreationAttributes = Optional<
-	PlayerAttributes,
-	| 'ign'
-	| 'discordId'
-	| 'inDiscord'
-	| 'guildId'
-	| 'guildRankPriority'
-	| '_infractions'
-	| 'hasDiscordPingPermission'
-	| 'notes'
-	| 'paid'
-	| 'mainProfileId'
-	| 'mainProfileName'
-	| 'xpLastUpdatedAt'
-	| 'xpUpdatesDisabled'
-	| 'discordMemberUpdatesDisabled'
-	| 'farmingLvlCap'
-	| 'guildXpDay'
-	| 'guildXpDaily'
-	| 'lastActivityAt'
->;
-
-export interface PlayerInGuild extends Player {
+export type PlayerInGuild = Player & {
 	hypixelGuild: HypixelGuild;
 	guildId: string;
-}
+};
 
 const enum NickChangeReason {
 	NoIGN,
 	NotUnique,
 }
 
-export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> implements PlayerAttributes {
-	declare client: LunarClient;
+export class Player extends Model<InferAttributes<Player>, InferCreationAttributes<Player>> {
+	declare client: NonAttribute<LunarClient>;
 
 	declare minecraftUuid: string;
-	declare ign: string;
-	declare discordId: string | null;
-	declare inDiscord: boolean;
-	declare guildId: string | null;
-	declare guildRankPriority: number;
-	declare _infractions: number[] | null;
-	declare hasDiscordPingPermission: boolean;
-	declare notes: string | null;
-	declare paid: boolean;
-	declare mainProfileId: string | null;
-	declare mainProfileName: string | null;
-	declare xpLastUpdatedAt: Date | null;
-	declare xpUpdatesDisabled: boolean;
-	declare discordMemberUpdatesDisabled: boolean;
-	declare farmingLvlCap: number;
-	declare guildXpDay: string | null;
-	declare guildXpDaily: number;
-	declare lastActivityAt: Date;
+	declare ign: CreationOptional<string>;
+	declare discordId: CreationOptional<string | null>;
+	declare inDiscord: CreationOptional<boolean>;
+	declare guildId: CreationOptional<string | null>;
+	declare guildRankPriority: CreationOptional<number>;
+	declare _infractions: CreationOptional<number[] | null>;
+	declare hasDiscordPingPermission: CreationOptional<boolean>;
+	declare notes: CreationOptional<string | null>;
+	declare paid: CreationOptional<boolean>;
+	declare mainProfileId: CreationOptional<string | null>;
+	declare mainProfileName: CreationOptional<string | null>;
+	declare xpLastUpdatedAt: CreationOptional<Date | null>;
+	declare xpUpdatesDisabled: CreationOptional<boolean>;
+	declare discordMemberUpdatesDisabled: CreationOptional<boolean>;
+	declare farmingLvlCap: CreationOptional<number>;
+	declare guildXpDay: CreationOptional<string | null>;
+	declare guildXpDaily: CreationOptional<number>;
+	declare lastActivityAt: CreationOptional<Date>;
 
 	// current
-	declare tamingXp: number;
-	declare farmingXp: number;
-	declare miningXp: number;
-	declare combatXp: number;
-	declare foragingXp: number;
-	declare fishingXp: number;
-	declare enchantingXp: number;
-	declare alchemyXp: number;
-	declare carpentryXp: number;
-	declare runecraftingXp: number;
-	declare zombieXp: number;
-	declare spiderXp: number;
-	declare wolfXp: number;
-	declare endermanXp: number;
-	declare catacombsXp: number;
-	declare healerXp: number;
-	declare mageXp: number;
-	declare berserkXp: number;
-	declare archerXp: number;
-	declare tankXp: number;
-	declare guildXp: number;
-	declare catacombsCompletions: Record<string, number>;
-	declare catacombsMasterCompletions: Record<string, number>;
+	declare tamingXp: CreationOptional<number>;
+	declare farmingXp: CreationOptional<number>;
+	declare miningXp: CreationOptional<number>;
+	declare combatXp: CreationOptional<number>;
+	declare foragingXp: CreationOptional<number>;
+	declare fishingXp: CreationOptional<number>;
+	declare enchantingXp: CreationOptional<number>;
+	declare alchemyXp: CreationOptional<number>;
+	declare carpentryXp: CreationOptional<number>;
+	declare runecraftingXp: CreationOptional<number>;
+	declare zombieXp: CreationOptional<number>;
+	declare spiderXp: CreationOptional<number>;
+	declare wolfXp: CreationOptional<number>;
+	declare endermanXp: CreationOptional<number>;
+	declare catacombsXp: CreationOptional<number>;
+	declare healerXp: CreationOptional<number>;
+	declare mageXp: CreationOptional<number>;
+	declare berserkXp: CreationOptional<number>;
+	declare archerXp: CreationOptional<number>;
+	declare tankXp: CreationOptional<number>;
+	declare guildXp: CreationOptional<number>;
+	declare catacombsCompletions: CreationOptional<Record<string, number>>;
+	declare catacombsMasterCompletions: CreationOptional<Record<string, number>>;
 
 	// daily array
-	declare tamingXpHistory: number[];
-	declare farmingXpHistory: number[];
-	declare miningXpHistory: number[];
-	declare combatXpHistory: number[];
-	declare foragingXpHistory: number[];
-	declare fishingXpHistory: number[];
-	declare enchantingXpHistory: number[];
-	declare alchemyXpHistory: number[];
-	declare carpentryXpHistory: number[];
-	declare runecraftingXpHistory: number[];
-	declare zombieXpHistory: number[];
-	declare spiderXpHistory: number[];
-	declare wolfXpHistory: number[];
-	declare endermanXpHistory: number[];
-	declare catacombsXpHistory: number[];
-	declare healerXpHistory: number[];
-	declare mageXpHistory: number[];
-	declare berserkXpHistory: number[];
-	declare archerXpHistory: number[];
-	declare tankXpHistory: number[];
-	declare guildXpHistory: number[];
-	declare catacombsCompletionsHistory: Record<string, number>[];
-	declare catacombsMasterCompletionsHistory: Record<string, number>[];
+	declare tamingXpHistory: CreationOptional<number[]>;
+	declare farmingXpHistory: CreationOptional<number[]>;
+	declare miningXpHistory: CreationOptional<number[]>;
+	declare combatXpHistory: CreationOptional<number[]>;
+	declare foragingXpHistory: CreationOptional<number[]>;
+	declare fishingXpHistory: CreationOptional<number[]>;
+	declare enchantingXpHistory: CreationOptional<number[]>;
+	declare alchemyXpHistory: CreationOptional<number[]>;
+	declare carpentryXpHistory: CreationOptional<number[]>;
+	declare runecraftingXpHistory: CreationOptional<number[]>;
+	declare zombieXpHistory: CreationOptional<number[]>;
+	declare spiderXpHistory: CreationOptional<number[]>;
+	declare wolfXpHistory: CreationOptional<number[]>;
+	declare endermanXpHistory: CreationOptional<number[]>;
+	declare catacombsXpHistory: CreationOptional<number[]>;
+	declare healerXpHistory: CreationOptional<number[]>;
+	declare mageXpHistory: CreationOptional<number[]>;
+	declare berserkXpHistory: CreationOptional<number[]>;
+	declare archerXpHistory: CreationOptional<number[]>;
+	declare tankXpHistory: CreationOptional<number[]>;
+	declare guildXpHistory: CreationOptional<number[]>;
+	declare catacombsCompletionsHistory: CreationOptional<Record<string, number>[]>;
+	declare catacombsMasterCompletionsHistory: CreationOptional<Record<string, number>[]>;
 
 	// competition start
-	declare tamingXpCompetitionStart: number;
-	declare farmingXpCompetitionStart: number;
-	declare miningXpCompetitionStart: number;
-	declare combatXpCompetitionStart: number;
-	declare foragingXpCompetitionStart: number;
-	declare fishingXpCompetitionStart: number;
-	declare enchantingXpCompetitionStart: number;
-	declare alchemyXpCompetitionStart: number;
-	declare carpentryXpCompetitionStart: number;
-	declare runecraftingXpCompetitionStart: number;
-	declare zombieXpCompetitionStart: number;
-	declare spiderXpCompetitionStart: number;
-	declare wolfXpCompetitionStart: number;
-	declare endermanXpCompetitionStart: number;
-	declare catacombsXpCompetitionStart: number;
-	declare healerXpCompetitionStart: number;
-	declare mageXpCompetitionStart: number;
-	declare berserkXpCompetitionStart: number;
-	declare archerXpCompetitionStart: number;
-	declare tankXpCompetitionStart: number;
-	declare guildXpCompetitionStart: number;
-	declare catacombsCompletionsCompetitionStart: Record<string, number>;
-	declare catacombsMasterCompletionsCompetitionStart: Record<string, number>;
+	declare tamingXpCompetitionStart: CreationOptional<number>;
+	declare farmingXpCompetitionStart: CreationOptional<number>;
+	declare miningXpCompetitionStart: CreationOptional<number>;
+	declare combatXpCompetitionStart: CreationOptional<number>;
+	declare foragingXpCompetitionStart: CreationOptional<number>;
+	declare fishingXpCompetitionStart: CreationOptional<number>;
+	declare enchantingXpCompetitionStart: CreationOptional<number>;
+	declare alchemyXpCompetitionStart: CreationOptional<number>;
+	declare carpentryXpCompetitionStart: CreationOptional<number>;
+	declare runecraftingXpCompetitionStart: CreationOptional<number>;
+	declare zombieXpCompetitionStart: CreationOptional<number>;
+	declare spiderXpCompetitionStart: CreationOptional<number>;
+	declare wolfXpCompetitionStart: CreationOptional<number>;
+	declare endermanXpCompetitionStart: CreationOptional<number>;
+	declare catacombsXpCompetitionStart: CreationOptional<number>;
+	declare healerXpCompetitionStart: CreationOptional<number>;
+	declare mageXpCompetitionStart: CreationOptional<number>;
+	declare berserkXpCompetitionStart: CreationOptional<number>;
+	declare archerXpCompetitionStart: CreationOptional<number>;
+	declare tankXpCompetitionStart: CreationOptional<number>;
+	declare guildXpCompetitionStart: CreationOptional<number>;
+	declare catacombsCompletionsCompetitionStart: CreationOptional<Record<string, number>>;
+	declare catacombsMasterCompletionsCompetitionStart: CreationOptional<Record<string, number>>;
 
 	// competition end
-	declare tamingXpCompetitionEnd: number;
-	declare farmingXpCompetitionEnd: number;
-	declare miningXpCompetitionEnd: number;
-	declare combatXpCompetitionEnd: number;
-	declare foragingXpCompetitionEnd: number;
-	declare fishingXpCompetitionEnd: number;
-	declare enchantingXpCompetitionEnd: number;
-	declare alchemyXpCompetitionEnd: number;
-	declare carpentryXpCompetitionEnd: number;
-	declare runecraftingXpCompetitionEnd: number;
-	declare zombieXpCompetitionEnd: number;
-	declare spiderXpCompetitionEnd: number;
-	declare wolfXpCompetitionEnd: number;
-	declare endermanXpCompetitionEnd: number;
-	declare catacombsXpCompetitionEnd: number;
-	declare healerXpCompetitionEnd: number;
-	declare mageXpCompetitionEnd: number;
-	declare berserkXpCompetitionEnd: number;
-	declare archerXpCompetitionEnd: number;
-	declare tankXpCompetitionEnd: number;
-	declare guildXpCompetitionEnd: number;
-	declare catacombsCompletionsCompetitionEnd: Record<string, number>;
-	declare catacombsMasterCompletionsCompetitionEnd: Record<string, number>;
+	declare tamingXpCompetitionEnd: CreationOptional<number>;
+	declare farmingXpCompetitionEnd: CreationOptional<number>;
+	declare miningXpCompetitionEnd: CreationOptional<number>;
+	declare combatXpCompetitionEnd: CreationOptional<number>;
+	declare foragingXpCompetitionEnd: CreationOptional<number>;
+	declare fishingXpCompetitionEnd: CreationOptional<number>;
+	declare enchantingXpCompetitionEnd: CreationOptional<number>;
+	declare alchemyXpCompetitionEnd: CreationOptional<number>;
+	declare carpentryXpCompetitionEnd: CreationOptional<number>;
+	declare runecraftingXpCompetitionEnd: CreationOptional<number>;
+	declare zombieXpCompetitionEnd: CreationOptional<number>;
+	declare spiderXpCompetitionEnd: CreationOptional<number>;
+	declare wolfXpCompetitionEnd: CreationOptional<number>;
+	declare endermanXpCompetitionEnd: CreationOptional<number>;
+	declare catacombsXpCompetitionEnd: CreationOptional<number>;
+	declare healerXpCompetitionEnd: CreationOptional<number>;
+	declare mageXpCompetitionEnd: CreationOptional<number>;
+	declare berserkXpCompetitionEnd: CreationOptional<number>;
+	declare archerXpCompetitionEnd: CreationOptional<number>;
+	declare tankXpCompetitionEnd: CreationOptional<number>;
+	declare guildXpCompetitionEnd: CreationOptional<number>;
+	declare catacombsCompletionsCompetitionEnd: CreationOptional<Record<string, number>>;
+	declare catacombsMasterCompletionsCompetitionEnd: CreationOptional<Record<string, number>>;
 
 	// mayor
-	declare tamingXpOffsetMayor: number;
-	declare farmingXpOffsetMayor: number;
-	declare miningXpOffsetMayor: number;
-	declare combatXpOffsetMayor: number;
-	declare foragingXpOffsetMayor: number;
-	declare fishingXpOffsetMayor: number;
-	declare enchantingXpOffsetMayor: number;
-	declare alchemyXpOffsetMayor: number;
-	declare carpentryXpOffsetMayor: number;
-	declare runecraftingXpOffsetMayor: number;
-	declare zombieXpOffsetMayor: number;
-	declare spiderXpOffsetMayor: number;
-	declare wolfXpOffsetMayor: number;
-	declare endermanXpOffsetMayor: number;
-	declare catacombsXpOffsetMayor: number;
-	declare healerXpOffsetMayor: number;
-	declare mageXpOffsetMayor: number;
-	declare berserkXpOffsetMayor: number;
-	declare archerXpOffsetMayor: number;
-	declare tankXpOffsetMayor: number;
-	declare guildXpOffsetMayor: number;
-	declare catacombsCompletionsOffsetMayor: Record<string, number>;
-	declare catacombsMasterCompletionsOffsetMayor: Record<string, number>;
+	declare tamingXpOffsetMayor: CreationOptional<number>;
+	declare farmingXpOffsetMayor: CreationOptional<number>;
+	declare miningXpOffsetMayor: CreationOptional<number>;
+	declare combatXpOffsetMayor: CreationOptional<number>;
+	declare foragingXpOffsetMayor: CreationOptional<number>;
+	declare fishingXpOffsetMayor: CreationOptional<number>;
+	declare enchantingXpOffsetMayor: CreationOptional<number>;
+	declare alchemyXpOffsetMayor: CreationOptional<number>;
+	declare carpentryXpOffsetMayor: CreationOptional<number>;
+	declare runecraftingXpOffsetMayor: CreationOptional<number>;
+	declare zombieXpOffsetMayor: CreationOptional<number>;
+	declare spiderXpOffsetMayor: CreationOptional<number>;
+	declare wolfXpOffsetMayor: CreationOptional<number>;
+	declare endermanXpOffsetMayor: CreationOptional<number>;
+	declare catacombsXpOffsetMayor: CreationOptional<number>;
+	declare healerXpOffsetMayor: CreationOptional<number>;
+	declare mageXpOffsetMayor: CreationOptional<number>;
+	declare berserkXpOffsetMayor: CreationOptional<number>;
+	declare archerXpOffsetMayor: CreationOptional<number>;
+	declare tankXpOffsetMayor: CreationOptional<number>;
+	declare guildXpOffsetMayor: CreationOptional<number>;
+	declare catacombsCompletionsOffsetMayor: CreationOptional<Record<string, number>>;
+	declare catacombsMasterCompletionsOffsetMayor: CreationOptional<Record<string, number>>;
 
 	// week
-	declare tamingXpOffsetWeek: number;
-	declare farmingXpOffsetWeek: number;
-	declare miningXpOffsetWeek: number;
-	declare combatXpOffsetWeek: number;
-	declare foragingXpOffsetWeek: number;
-	declare fishingXpOffsetWeek: number;
-	declare enchantingXpOffsetWeek: number;
-	declare alchemyXpOffsetWeek: number;
-	declare carpentryXpOffsetWeek: number;
-	declare runecraftingXpOffsetWeek: number;
-	declare zombieXpOffsetWeek: number;
-	declare spiderXpOffsetWeek: number;
-	declare wolfXpOffsetWeek: number;
-	declare endermanXpOffsetWeek: number;
-	declare catacombsXpOffsetWeek: number;
-	declare healerXpOffsetWeek: number;
-	declare mageXpOffsetWeek: number;
-	declare berserkXpOffsetWeek: number;
-	declare archerXpOffsetWeek: number;
-	declare tankXpOffsetWeek: number;
-	declare guildXpOffsetWeek: number;
-	declare catacombsCompletionsOffsetWeek: Record<string, number>;
-	declare catacombsMasterCompletionsOffsetWeek: Record<string, number>;
+	declare tamingXpOffsetWeek: CreationOptional<number>;
+	declare farmingXpOffsetWeek: CreationOptional<number>;
+	declare miningXpOffsetWeek: CreationOptional<number>;
+	declare combatXpOffsetWeek: CreationOptional<number>;
+	declare foragingXpOffsetWeek: CreationOptional<number>;
+	declare fishingXpOffsetWeek: CreationOptional<number>;
+	declare enchantingXpOffsetWeek: CreationOptional<number>;
+	declare alchemyXpOffsetWeek: CreationOptional<number>;
+	declare carpentryXpOffsetWeek: CreationOptional<number>;
+	declare runecraftingXpOffsetWeek: CreationOptional<number>;
+	declare zombieXpOffsetWeek: CreationOptional<number>;
+	declare spiderXpOffsetWeek: CreationOptional<number>;
+	declare wolfXpOffsetWeek: CreationOptional<number>;
+	declare endermanXpOffsetWeek: CreationOptional<number>;
+	declare catacombsXpOffsetWeek: CreationOptional<number>;
+	declare healerXpOffsetWeek: CreationOptional<number>;
+	declare mageXpOffsetWeek: CreationOptional<number>;
+	declare berserkXpOffsetWeek: CreationOptional<number>;
+	declare archerXpOffsetWeek: CreationOptional<number>;
+	declare tankXpOffsetWeek: CreationOptional<number>;
+	declare guildXpOffsetWeek: CreationOptional<number>;
+	declare catacombsCompletionsOffsetWeek: CreationOptional<Record<string, number>>;
+	declare catacombsMasterCompletionsOffsetWeek: CreationOptional<Record<string, number>>;
 
 	// month
-	declare tamingXpOffsetMonth: number;
-	declare farmingXpOffsetMonth: number;
-	declare miningXpOffsetMonth: number;
-	declare combatXpOffsetMonth: number;
-	declare foragingXpOffsetMonth: number;
-	declare fishingXpOffsetMonth: number;
-	declare enchantingXpOffsetMonth: number;
-	declare alchemyXpOffsetMonth: number;
-	declare carpentryXpOffsetMonth: number;
-	declare runecraftingXpOffsetMonth: number;
-	declare zombieXpOffsetMonth: number;
-	declare spiderXpOffsetMonth: number;
-	declare wolfXpOffsetMonth: number;
-	declare endermanXpOffsetMonth: number;
-	declare catacombsXpOffsetMonth: number;
-	declare healerXpOffsetMonth: number;
-	declare mageXpOffsetMonth: number;
-	declare berserkXpOffsetMonth: number;
-	declare archerXpOffsetMonth: number;
-	declare tankXpOffsetMonth: number;
-	declare guildXpOffsetMonth: number;
-	declare catacombsCompletionsOffsetMonth: Record<string, number>;
-	declare catacombsMasterCompletionsOffsetMonth: Record<string, number>;
+	declare tamingXpOffsetMonth: CreationOptional<number>;
+	declare farmingXpOffsetMonth: CreationOptional<number>;
+	declare miningXpOffsetMonth: CreationOptional<number>;
+	declare combatXpOffsetMonth: CreationOptional<number>;
+	declare foragingXpOffsetMonth: CreationOptional<number>;
+	declare fishingXpOffsetMonth: CreationOptional<number>;
+	declare enchantingXpOffsetMonth: CreationOptional<number>;
+	declare alchemyXpOffsetMonth: CreationOptional<number>;
+	declare carpentryXpOffsetMonth: CreationOptional<number>;
+	declare runecraftingXpOffsetMonth: CreationOptional<number>;
+	declare zombieXpOffsetMonth: CreationOptional<number>;
+	declare spiderXpOffsetMonth: CreationOptional<number>;
+	declare wolfXpOffsetMonth: CreationOptional<number>;
+	declare endermanXpOffsetMonth: CreationOptional<number>;
+	declare catacombsXpOffsetMonth: CreationOptional<number>;
+	declare healerXpOffsetMonth: CreationOptional<number>;
+	declare mageXpOffsetMonth: CreationOptional<number>;
+	declare berserkXpOffsetMonth: CreationOptional<number>;
+	declare archerXpOffsetMonth: CreationOptional<number>;
+	declare tankXpOffsetMonth: CreationOptional<number>;
+	declare guildXpOffsetMonth: CreationOptional<number>;
+	declare catacombsCompletionsOffsetMonth: CreationOptional<Record<string, number>>;
+	declare catacombsMasterCompletionsOffsetMonth: CreationOptional<Record<string, number>>;
 
-	declare readonly createdAt: Date;
-	declare readonly updatedAt: Date;
+	declare readonly createdAt: CreationOptional<Date>;
+	declare readonly updatedAt: CreationOptional<Date>;
 
 	/**
 	 * linked guild member
@@ -365,69 +330,80 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	private _discordMember: GuildMember | null = null;
 
 	static initialise(sequelize: Sequelize) {
-		const attributes = {};
+		const attributes = {} as Record<
+			| `${ArrayElement<typeof XP_TYPES>}Xp`
+			| `${ArrayElement<typeof XP_TYPES>}XpHistory`
+			| `${ArrayElement<typeof XP_TYPES>}Xp${ArrayElement<typeof XP_OFFSETS>}`
+			| `${ArrayElement<typeof DUNGEON_TYPES>}Completions`
+			| `${ArrayElement<typeof DUNGEON_TYPES>}MasterCompletions`
+			| `${ArrayElement<typeof DUNGEON_TYPES>}CompletionsHistory`
+			| `${ArrayElement<typeof DUNGEON_TYPES>}MasterCompletionsHistory`
+			| `${ArrayElement<typeof DUNGEON_TYPES>}Completions${ArrayElement<typeof XP_OFFSETS>}`
+			| `${ArrayElement<typeof DUNGEON_TYPES>}MasterCompletions${ArrayElement<typeof XP_OFFSETS>}`,
+			ModelAttributeColumnOptions<Player>
+		>;
 
 		// add xp types
 		for (const type of XP_TYPES) {
-			Reflect.set(attributes, `${type}Xp`, {
+			attributes[`${type}Xp`] = {
 				type: DataTypes.DECIMAL,
 				defaultValue: 0,
 				allowNull: false,
-			});
+			};
 
-			Reflect.set(attributes, `${type}XpHistory`, {
+			attributes[`${type}XpHistory`] = {
 				type: DataTypes.ARRAY(DataTypes.DECIMAL),
 				defaultValue: Array.from({ length: 30 }).fill(0),
 				allowNull: false,
-			});
+			};
 
 			for (const offset of XP_OFFSETS) {
-				Reflect.set(attributes, `${type}Xp${offset}`, {
+				attributes[`${type}Xp${offset}`] = {
 					type: DataTypes.DECIMAL,
 					defaultValue: 0,
 					allowNull: false,
-				});
+				};
 			}
 		}
 
 		// add dungeon completions
 		for (const type of DUNGEON_TYPES) {
-			Reflect.set(attributes, `${type}Completions`, {
+			attributes[`${type}Completions`] = {
 				type: DataTypes.JSONB,
 				defaultValue: {},
 				allowNull: false,
-			});
+			};
 
-			Reflect.set(attributes, `${type}MasterCompletions`, {
+			attributes[`${type}MasterCompletions`] = {
 				type: DataTypes.JSONB,
 				defaultValue: {},
 				allowNull: false,
-			});
+			};
 
-			Reflect.set(attributes, `${type}CompletionsHistory`, {
+			attributes[`${type}CompletionsHistory`] = {
 				type: DataTypes.ARRAY(DataTypes.JSONB),
 				defaultValue: Array.from({ length: 30 }).fill({}),
 				allowNull: false,
-			});
+			};
 
-			Reflect.set(attributes, `${type}MasterCompletionsHistory`, {
+			attributes[`${type}MasterCompletionsHistory`] = {
 				type: DataTypes.ARRAY(DataTypes.JSONB),
 				defaultValue: Array.from({ length: 30 }).fill({}),
 				allowNull: false,
-			});
+			};
 
 			for (const offset of XP_OFFSETS) {
-				Reflect.set(attributes, `${type}Completions${offset}`, {
+				attributes[`${type}Completions${offset}`] = {
 					type: DataTypes.JSONB,
 					defaultValue: {},
 					allowNull: false,
-				});
+				};
 
-				Reflect.set(attributes, `${type}MasterCompletions${offset}`, {
+				attributes[`${type}MasterCompletions${offset}`] = {
 					type: DataTypes.JSONB,
 					defaultValue: {},
 					allowNull: false,
-				});
+				};
 			}
 		}
 
@@ -546,6 +522,9 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 					allowNull: false,
 				},
 
+				createdAt: DataTypes.DATE,
+				updatedAt: DataTypes.DATE,
+
 				...attributes,
 			},
 			{
@@ -564,7 +543,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * returns the number of infractions that have not already expired
 	 */
-	get infractions() {
+	get infractions(): NonAttribute<number> {
 		if (!this._infractions) return 0;
 
 		// last infraction expired -> remove all infractions
@@ -579,7 +558,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * returns the hypixel guild db object associated with the player
 	 */
-	get hypixelGuild(): HypixelGuild | null {
+	get hypixelGuild(): NonAttribute<HypixelGuild | null> {
 		return (
 			this.client.hypixelGuilds.cache.get(this.guildId!) ??
 			(this.guildId
@@ -679,49 +658,49 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * fetches the discord user if the discord id is valid
 	 */
-	get discordUser() {
+	get discordUser(): NonAttribute<Promise<User | null>> {
 		return validateNumber(this.discordId) ? this.client.users.fetch(this.discordId) : Promise.resolve(null);
 	}
 
 	/**
 	 * returns the guild rank of the player
 	 */
-	get guildRank() {
+	get guildRank(): NonAttribute<GuildRank | null> {
 		return this.hypixelGuild?.ranks.find(({ priority }) => priority === this.guildRankPriority) ?? null;
 	}
 
 	/**
 	 * returns the player's guild name
 	 */
-	get guildName() {
+	get guildName(): NonAttribute<string> {
 		return this.hypixelGuild?.name ?? (this.guildId === GUILD_ID_ERROR ? 'Error' : 'Unknown Guild');
 	}
 
 	/**
 	 * returns a string with the ign and guild name
 	 */
-	get info() {
+	get info(): NonAttribute<string> {
 		return `${Formatters.hyperlink(escapeIgn(this.ign), this.url)} | ${this.guildName}` as const; // •
 	}
 
 	/**
 	 * returns a string with the ign and guild name
 	 */
-	get logInfo() {
+	get logInfo(): NonAttribute<string> {
 		return `${this.ign} (${this.guildName})`;
 	}
 
 	/**
 	 * link with a bust url of the player's skin
 	 */
-	get imageURL() {
+	get imageURL(): NonAttribute<ReturnType<typeof uuidToBustURL>> {
 		return uuidToBustURL(this.minecraftUuid);
 	}
 
 	/**
 	 * returns a sky.shiiyu.moe link for the player
 	 */
-	get url() {
+	get url(): NonAttribute<string> {
 		return `${STATS_URL_BASE}${this.ign !== UNKNOWN_IGN ? this.ign : this.minecraftUuid}/${
 			this.mainProfileName ?? ''
 		}` as const;
@@ -730,7 +709,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * wether the player has an in-game staff rank in their current hypixel guild
 	 */
-	get isStaff() {
+	get isStaff(): NonAttribute<boolean> {
 		const { hypixelGuild } = this;
 		if (!hypixelGuild) return false;
 		return this.guildRankPriority > hypixelGuild.ranks.length - hypixelGuild.staffRanksAmount;
@@ -739,7 +718,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * amount of the last tax transaction from that player
 	 */
-	get taxAmount() {
+	get taxAmount(): NonAttribute<Promise<number | null>> {
 		return (async () => {
 			const result = await this.client.db.models.Transaction.findAll({
 				limit: 1,
@@ -759,7 +738,7 @@ export class Player extends Model<PlayerAttributes, PlayerCreationAttributes> im
 	/**
 	 * all transactions from that player
 	 */
-	get transactions(): Promise<ParsedTransaction[]> {
+	get transactions(): NonAttribute<Promise<ParsedTransaction[]>> {
 		return (async () =>
 			Promise.all(
 				(

@@ -1,24 +1,20 @@
 import { Model, DataTypes } from 'sequelize';
-import type { ModelStatic, Sequelize, Optional } from 'sequelize';
+import type {
+	CreationOptional,
+	InferAttributes,
+	InferCreationAttributes,
+	ModelStatic,
+	NonAttribute,
+	Sequelize,
+} from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-interface SkyBlockAuctionAttributes {
-	id: string;
-	lowestBIN: number;
-	lowestBINHistory: number[];
-}
-
-type SkyBlockAuctionCreationAttributes = Optional<SkyBlockAuctionAttributes, 'lowestBIN' | 'lowestBINHistory'>;
-
-export class SkyBlockAuction
-	extends Model<SkyBlockAuctionAttributes, SkyBlockAuctionCreationAttributes>
-	implements SkyBlockAuctionAttributes
-{
-	declare client: LunarClient;
+export class SkyBlockAuction extends Model<InferAttributes<SkyBlockAuction>, InferCreationAttributes<SkyBlockAuction>> {
+	declare client: NonAttribute<LunarClient>;
 
 	declare id: string;
-	declare lowestBIN: number;
-	declare lowestBINHistory: number[];
+	declare lowestBIN: CreationOptional<number>;
+	declare lowestBINHistory: CreationOptional<number[]>;
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(

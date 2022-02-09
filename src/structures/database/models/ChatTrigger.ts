@@ -2,15 +2,19 @@ import { setTimeout } from 'node:timers';
 import { Collection } from 'discord.js';
 import { Model, DataTypes } from 'sequelize';
 import { NEVER_MATCHING_REGEXP } from '../../../constants';
-import type { ModelStatic, Sequelize, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import type {
+	CreationOptional,
+	InferAttributes,
+	InferCreationAttributes,
+	ModelStatic,
+	NonAttribute,
+	Sequelize,
+} from 'sequelize';
 import type { HypixelUserMessage } from '../../chat_bridge/HypixelMessage';
 import type { LunarClient } from '../../LunarClient';
 
-export class ChatTrigger extends Model<
-	InferAttributes<ChatTrigger, { omit: 'client' }>,
-	InferCreationAttributes<ChatTrigger, { omit: 'client' }>
-> {
-	declare client: LunarClient;
+export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreationAttributes<ChatTrigger>> {
+	declare client: NonAttribute<LunarClient>;
 
 	declare regExpString: string;
 	declare response: string;

@@ -1,24 +1,20 @@
 import { Model, DataTypes } from 'sequelize';
-import type { ModelStatic, Sequelize, Optional } from 'sequelize';
+import type {
+	CreationOptional,
+	InferAttributes,
+	InferCreationAttributes,
+	ModelStatic,
+	NonAttribute,
+	Sequelize,
+} from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-interface SkyBlockBazaarAttributes {
-	id: string;
-	buyPrice: number;
-	buyPriceHistory: number[];
-}
-
-type SkyBlockBazaarCreationAttributes = Optional<SkyBlockBazaarAttributes, 'buyPrice' | 'buyPriceHistory'>;
-
-export class SkyBlockBazaar
-	extends Model<SkyBlockBazaarAttributes, SkyBlockBazaarCreationAttributes>
-	implements SkyBlockBazaarAttributes
-{
-	declare client: LunarClient;
+export class SkyBlockBazaar extends Model<InferAttributes<SkyBlockBazaar>, InferCreationAttributes<SkyBlockBazaar>> {
+	declare client: NonAttribute<LunarClient>;
 
 	declare id: string;
-	declare buyPrice: number;
-	declare buyPriceHistory: number[];
+	declare buyPrice: CreationOptional<number>;
+	declare buyPriceHistory: CreationOptional<number[]>;
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(

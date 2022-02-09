@@ -1,12 +1,12 @@
 import { Model, DataTypes } from 'sequelize';
-import type { Sequelize, InferAttributes, InferCreationAttributes, ModelStatic } from 'sequelize';
+import type { InferAttributes, InferCreationAttributes, ModelStatic, NonAttribute, Sequelize } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
 export class Config extends Model<
-	InferAttributes<Config, { omit: 'client' | 'parsedValue' }>,
-	InferCreationAttributes<Config, { omit: 'client' | 'parsedValue' }>
+	InferAttributes<Config, { omit: 'parsedValue' }>,
+	InferCreationAttributes<Config, { omit: 'parsedValue' }>
 > {
-	declare client: LunarClient;
+	declare client: NonAttribute<LunarClient>;
 
 	declare key: string;
 	declare value: string | null;
