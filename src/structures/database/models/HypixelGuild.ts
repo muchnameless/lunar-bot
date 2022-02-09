@@ -41,7 +41,7 @@ import type { ChatBridge } from '../../chat_bridge/ChatBridge';
 import type { LunarClient } from '../../LunarClient';
 import type { PREFIX_BY_TYPE } from '../../chat_bridge/constants';
 
-type GuildRank =
+export type GuildRank =
 	| {
 			name: string;
 			roleId: null;
