@@ -2,6 +2,7 @@ import { Embed } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { GuildMemberUtil } from '../util';
 import { Event, type EventContext } from '../structures/events/Event';
+import { logger } from '../functions';
 import type { GuildMember } from 'discord.js';
 
 export default class GuildMemberAddEvent extends Event {
@@ -22,7 +23,7 @@ export default class GuildMemberAddEvent extends Event {
 
 		if (!player) return;
 
-		player.link(member, 'linked player joined discord server');
+		player.link(member, 'linked player joined discord server').catch((error) => logger.error(error));
 
 		// member is not from the hypixel guild's discord guild
 		if (player?.hypixelGuild?.discordId !== member.guild.id) return;
