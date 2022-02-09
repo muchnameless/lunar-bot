@@ -3,8 +3,8 @@ import type { Sequelize, InferAttributes, InferCreationAttributes, ModelStatic }
 import type { LunarClient } from '../../LunarClient';
 
 export class Config extends Model<
-	InferAttributes<Config, { omit: 'client' }>,
-	InferCreationAttributes<Config, { omit: 'client' }>
+	InferAttributes<Config, { omit: 'client' | 'parsedValue' }>,
+	InferCreationAttributes<Config, { omit: 'client' | 'parsedValue' }>
 > {
 	declare client: LunarClient;
 
