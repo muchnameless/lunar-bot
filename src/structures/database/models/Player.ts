@@ -1,5 +1,5 @@
 import { DiscordAPIError, Embed, Formatters, GuildMember, PermissionFlagsBits } from 'discord.js';
-import { Model, DataTypes, fn } from 'sequelize';
+import { DataTypes, fn, Model, UniqueConstraintError } from 'sequelize';
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
 import {
@@ -1225,18 +1225,25 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * @param value
 	 */
 	async setUniqueDiscordId(value: string | null) {
-		// use the static method because this.update sets the value temporarily in case of an exception
-		await Player.update(
-			{
-				discordId: value,
-			},
-			{
-				where: { minecraftUuid: this.minecraftUuid },
-			},
-		);
+		try {
+			// use the static method because this.update sets the value temporarily in case of an exception
+			await Player.update(
+				{
+					discordId: value,
+				},
+				{
+					where: { minecraftUuid: this.minecraftUuid },
+				},
+			);
 
-		// update local instance if the update method didn't reject
-		this.discordId = value;
+			// update local instance if the update method didn't reject
+			this.discordId = value;
+		} catch (error) {
+			if (error instanceof UniqueConstraintError) {
+				throw `${this.logInfo}: error changing discordId from '${this.discordId}' to '${value}'`;
+			}
+			throw error;
+		}
 	}
 
 	/**
