@@ -1240,7 +1240,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			this.discordId = value;
 		} catch (error) {
 			if (error instanceof UniqueConstraintError) {
-				throw `${this.logInfo}: error updating discordId from '${this.discordId}' to '${value}'`;
+				throw `[SET UNIQUE DISCORD ID] ${this.logInfo}: error updating discordId from '${this.discordId}' to '${value}'`;
 			}
 			throw error;
 		}
