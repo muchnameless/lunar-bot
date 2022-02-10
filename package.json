@@ -37,7 +37,7 @@
 		"chartjs-node-canvas": "^4.1.6",
 		"common-tags": "^1.8.2",
 		"cron": "^1.8.2",
-		"discord-api-types": "0.26.1",
+		"discord-api-types": "0.27.0",
 		"discord.js": "14.0.0-dev.1644408625.fe11ff5",
 		"dotenv": "^16.0.0",
 		"emoji-regex": "9.2.2",
@@ -64,7 +64,7 @@
 		"utf-8-validate": "^5.0.8"
 	},
 	"devDependencies": {
-		"@discordjs/rest": "0.3.0-dev.1644408653.fe11ff5",
+		"@discordjs/rest": "0.3.0",
 		"@types/common-tags": "^1.8.1",
 		"@types/cron": "^1.7.3",
 		"@types/keyv": "^3.1.3",
