@@ -25,7 +25,7 @@ Lunar Guard Discord Bot
 
 ```sh-session
 $ git clone <repo>
-$ npm install
+$ yarn install
 $ cp .env_example .env && chmod 600 .env
 ```
 
