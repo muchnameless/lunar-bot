@@ -1,6 +1,3 @@
-# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
 name: Tests
 
 on:
@@ -17,27 +14,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2
 
-      - name: Install Node v17
+      - name: Install Node.js v17
         uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2
         with:
           node-version: 17
+          cache: yarn
+          registry-url: https://registry.npmjs.org/
 
-      - name: Restore CI cache
-        uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # renovate: tag=v2
-        id: cache-restore
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-17-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Install dependencies if cache miss
-        if: ${{ !steps.cache-restore.outputs.cache-hit }}
-        run: npm ci
+      - name: Install dependencies
+        run: yarn --immutable
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
 
       - name: Run ESLint
-        run: npm run lint
+        run: yarn run lint
 
   Building:
     name: TypeScript
@@ -46,24 +37,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # renovate: tag=v2
 
-      - name: Install Node v17
+      - name: Install Node.js v17
         uses: actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561 # renovate: tag=v2
         with:
           node-version: 17
+          cache: yarn
+          registry-url: https://registry.npmjs.org/
 
-      - name: Restore CI cache
-        uses: actions/cache@937d24475381cd9c75ae6db12cb4e79714b926ed # renovate: tag=v2
-        id: cache-restore
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-17-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Install dependencies if cache miss
-        if: ${{ !steps.cache-restore.outputs.cache-hit }}
-        run: npm ci
+      - name: Install dependencies
+        run: yarn --immutable
 
       - name: Register Problem Matcher
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
 
       - name: Run TypeScript compiler
-        run: npm test
+        run: yarn test
