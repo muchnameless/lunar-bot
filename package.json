@@ -92,7 +92,7 @@
 	},
 	"engines": {
 		"node": ">=v17.5.0",
-		"npm": ">=8.4.1"
+		"npm": ">=8.5.0"
 	},
 	"packageManager": "yarn@3.1.1"
 }
