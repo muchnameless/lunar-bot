@@ -9,11 +9,11 @@ git pull
 
 echo ""
 echo "updating local dependencies"
-npm install
+yarn install
 
 echo ""
 echo "compiling to js"
-npm run build
+yarn run build
 
 echo ""
 echo "done"
