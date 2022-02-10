@@ -21,6 +21,7 @@ export default class ConnectChatBridgeEvent extends ChatBridgeEvent {
 
 		do {
 			try {
+				// TODO: fix, hypixel broke it
 				await this.chatBridge.minecraft.command({
 					command: 'ac §',
 					responseRegExp:
