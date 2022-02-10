@@ -3,7 +3,8 @@
 	"extends": [
 		"config:base",
 		"helpers:pinGitHubActionDigests",
-		":semanticCommitTypeAll(chore)"
+		":semanticCommitTypeAll(chore)",
+		"group:allNonMajor"
 	],
 	"labels": [
 		"Meta: Dependencies"
