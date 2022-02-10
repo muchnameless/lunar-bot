@@ -8,3 +8,10 @@ log_buffer
 logs
 node_modules
 src/tests
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

@@ -6,18 +6,18 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "prebuild": "npm run clean",
+    "prebuild": "yarn run clean",
     "build": "tsc",
-    "watch": "npm run clean && tsc --watch",
-    "update": "git pull && npm run build && npm run start",
+    "watch": "yarn run clean && tsc --watch",
+    "update": "git pull && yarn run build && yarn run start",
     "test": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write src/*",
     "prepare": "husky install",
     "start": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/index.js",
-    "start:dev": "cross-env NODE_ENV=development npm start | pino-pretty",
-    "dev": "npm run build; npm run start:dev",
+    "start:dev": "cross-env NODE_ENV=development yarn start | pino-pretty",
+    "dev": "yarn run build; yarn run start:dev",
     "deploy:commands": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/scripts/deploy.js | pino-pretty",
     "db": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/scripts/dbInit.js --alter | pino-pretty"
   },
@@ -37,7 +37,7 @@
     "chartjs-node-canvas": "^4.1.6",
     "common-tags": "^1.8.2",
     "cron": "^1.8.2",
-    "discord-api-types": "*",
+    "discord-api-types": "0.26.1",
     "discord.js": "14.0.0-dev.1644408625.fe11ff5",
     "dotenv": "^16.0.0",
     "emoji-regex": "9.2.2",
@@ -92,5 +92,6 @@
   "engines": {
     "node": ">=v17.0.1",
     "npm": ">=8.4.1"
-  }
+  },
+  "packageManager": "yarn@3.1.1"
 }
