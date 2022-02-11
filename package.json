@@ -6,10 +6,8 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"clean": "rimraf dist",
-		"prebuild": "yarn run clean",
-		"build": "tsc",
-		"watch": "yarn run clean && tsc --watch",
-		"update": "git pull && yarn run build && yarn run start",
+		"build": "yarn clean && tsc",
+		"update": "git pull && yarn build && yarn start",
 		"test": "tsc --noEmit",
 		"lint": "eslint src --ext .ts",
 		"lint:fix": "eslint src --ext .ts --fix",
@@ -17,7 +15,7 @@
 		"prepare": "husky install",
 		"start": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/index.js",
 		"start:dev": "cross-env NODE_ENV=development yarn start | pino-pretty",
-		"dev": "yarn run build; yarn run start:dev",
+		"dev": "yarn build; yarn start:dev",
 		"deploy:commands": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/scripts/deploy.js | pino-pretty",
 		"db": "node --require dotenv/config --enable-source-maps --es-module-specifier-resolution=node dist/scripts/dbInit.js --alter | pino-pretty"
 	},
