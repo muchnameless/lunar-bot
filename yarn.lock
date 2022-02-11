@@ -2966,8 +2966,8 @@ __metadata:
     timezonecomplete: ^5.12.4
     tiny-typed-emitter: ^2.1.0
     tslib: ^2.3.1
-    typescript: ^4.6.0-dev.20220210
-    undici: ^4.13.0
+    typescript: ^4.6.0-dev.20220211
+    undici: ^4.14.0
     utf-8-validate: ^5.0.8
   languageName: unknown
   linkType: soft
@@ -4909,23 +4909,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.6.0-dev.20220210":
-  version: 4.6.0-dev.20220210
-  resolution: "typescript@npm:4.6.0-dev.20220210"
+"typescript@npm:^4.6.0-dev.20220211":
+  version: 4.6.0-dev.20220211
+  resolution: "typescript@npm:4.6.0-dev.20220211"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 84a4428034858e27ecef18b71395d31ec7cccda314cf4d8ae6cfbdcfeace3e008511d6105587ae9d8ae1f994934b094f4f658fb5452dfd3639c6d1ee62a05ab8
+  checksum: 74254f58fcd4c5fcadaef76f92a58c40beabc26fc1e5d7623795e221c8ac5eee437a2487a0306a7b0f895d346735d47c59e3b0c198801a3ed1cdfa309ac4f5cc
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.6.0-dev.20220210#~builtin<compat/typescript>":
-  version: 4.6.0-dev.20220210
-  resolution: "typescript@patch:typescript@npm%3A4.6.0-dev.20220210#~builtin<compat/typescript>::version=4.6.0-dev.20220210&hash=493e53"
+"typescript@patch:typescript@^4.6.0-dev.20220211#~builtin<compat/typescript>":
+  version: 4.6.0-dev.20220211
+  resolution: "typescript@patch:typescript@npm%3A4.6.0-dev.20220211#~builtin<compat/typescript>::version=4.6.0-dev.20220211&hash=493e53"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 6f4e3a1bc2197d7bfece046ecdbaaa2e6116af19c79782cc381d355b37a4f21a77ab863b73943ef01307122097b7ec4adaa2807508f7eb082a0fa1a7c9fb8f36
+  checksum: 6985a7144bca8181f08a2c9b3ff5c86f42732817c9bb4df9d7d0e11ca6ddac8d406aacca205f8e5772063113563d2e12658a36a184eeaf7d3c9e2f98f056532a
   languageName: node
   linkType: hard
 
@@ -4955,10 +4955,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^4.13.0":
-  version: 4.13.0
-  resolution: "undici@npm:4.13.0"
-  checksum: 7bb4b432e1f94473eb6aec3c72cda774f29c4e02a534d199bdecab12c3a17f1ad829d2b187eddfeb2320d5c6690a5bc483b0e3a02f52febe623712298f900b7e
+"undici@npm:^4.14.0":
+  version: 4.14.0
+  resolution: "undici@npm:4.14.0"
+  checksum: 7a34bbac4c5dbecbaeae2d3af6273aa90d72608948fea0ffdf48b3a8cb19bc330e9f78534a9f2cad038c1133e3bbf0c2c2acf6544ffd011388383988b6f0d942
   languageName: node
   linkType: hard
 
