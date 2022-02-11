@@ -18,7 +18,7 @@ export class ModelManager<M extends Model> {
 	constructor(client: LunarClient, model: ModelStatic<M>) {
 		this.client = client;
 		this.model = model;
-		[this.primaryKey] = model.primaryKeyAttributes;
+		this.primaryKey = model.primaryKeyAttribute;
 	}
 
 	/**
