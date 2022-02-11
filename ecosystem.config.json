@@ -2,7 +2,7 @@
 	"apps": [
 		{
 			"name": "lunar-bot",
-			"script": "npm",
+			"script": "yarn",
 			"args": "start",
 			"autorestart": true,
 			"watch": false,
