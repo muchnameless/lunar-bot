@@ -1151,7 +1151,7 @@ export class HypixelGuild extends Model<
 		// clean up players
 		await Promise.all(this.players.map((player) => player.removeFromGuild()));
 
-		// destroy guild entry
+		this.client.hypixelGuilds.cache.delete(this.guildId);
 		return super.destroy();
 	}
 
