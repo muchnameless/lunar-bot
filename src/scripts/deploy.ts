@@ -26,7 +26,7 @@ try {
 	await client.commands.loadAll();
 
 	const SHOULD_DELETE = argv.includes('delete') || argv.includes('d');
-	const commands = SHOULD_DELETE ? [] : [...new Set(client.commands.values())].flatMap(({ data }) => data);
+	const commands = SHOULD_DELETE ? [] : client.commands.apiData;
 
 	logger.info(`[DEPLOY]: started refreshing slash commands for ${GUILD_ID ? `guild ${GUILD_ID}` : 'the application'}`);
 

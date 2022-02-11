@@ -26,14 +26,20 @@ export class ApplicationCommandCollection<
 	}
 
 	/**
+	 * command data ready to be deployed to the API
+	 */
+	get apiData() {
+		return [...new Set(this.values())].flatMap(({ data }) => data);
+	}
+
+	/**
 	 * registers all slash commands
 	 * @param commandManager
 	 */
 	async init(
 		commandManager: ApplicationCommandManager | GuildApplicationCommandManager = this.client.application!.commands,
 	) {
-		const uniqueCommands = [...new Set(this.values())];
-		const commands = await commandManager.set(uniqueCommands.flatMap(({ data }) => data));
+		const commands = await commandManager.set(this.apiData);
 
 		await this.setAllPermissions(commands);
 
