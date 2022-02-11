@@ -37,7 +37,7 @@ export class TaxCollectorManager extends ModelManager<TaxCollector> {
 		// entry already exists
 		if (!created) await newEntry.update({ isCollecting: true });
 
-		this.cache.set(newEntry[this.primaryKey as keyof TaxCollector] as string, newEntry);
+		this.cache.set(newEntry[this.primaryKey] as string, newEntry);
 
 		return newEntry;
 	}

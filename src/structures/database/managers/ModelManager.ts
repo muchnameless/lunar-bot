@@ -8,7 +8,7 @@ export type ModelResovable<M extends Model> = M | string;
 export class ModelManager<M extends Model> {
 	client: LunarClient;
 	model: ModelStatic<M>;
-	primaryKey: string;
+	primaryKey: keyof M; // Attributes<M> doesn't work with InterAttributes (sequelize 6.16.1)
 	cache = new Collection<string, M>();
 
 	/**
@@ -18,7 +18,7 @@ export class ModelManager<M extends Model> {
 	constructor(client: LunarClient, model: ModelStatic<M>) {
 		this.client = client;
 		this.model = model;
-		this.primaryKey = model.primaryKeyAttribute;
+		this.primaryKey = model.primaryKeyAttribute as keyof M; // TODO: remove cast once above typings issue is fixed
 	}
 
 	/**
@@ -29,7 +29,7 @@ export class ModelManager<M extends Model> {
 		this.sweepCache();
 
 		for (const element of (await this.model.findAll(condition)) as M[]) {
-			this.cache.set(element[this.primaryKey as keyof M] as unknown as string, element);
+			this.cache.set(element[this.primaryKey] as unknown as string, element);
 		}
 
 		return this;
@@ -66,7 +66,7 @@ export class ModelManager<M extends Model> {
 		try {
 			const entry = await this.model.findOne({ where: where as WhereOptions<Attributes<M>> });
 
-			if (cache && entry) this.cache.set(entry[this.primaryKey as keyof M] as unknown as string, entry);
+			if (cache && entry) this.cache.set(entry[this.primaryKey] as unknown as string, entry);
 
 			return entry;
 		} catch (error) {
@@ -82,7 +82,7 @@ export class ModelManager<M extends Model> {
 	async add(options: CreationAttributes<M>) {
 		const newEntry = await this.model.create(options);
 
-		this.cache.set(newEntry[this.primaryKey as keyof M] as unknown as string, newEntry);
+		this.cache.set(newEntry[this.primaryKey] as unknown as string, newEntry);
 
 		return newEntry;
 	}
@@ -95,7 +95,7 @@ export class ModelManager<M extends Model> {
 		const element = this.resolve(idOrInstance);
 		if (!element) throw new Error(`[${this.constructor.name} REMOVE]: unknown element: ${idOrInstance}`);
 
-		this.cache.delete(element[this.primaryKey as keyof M] as unknown as string);
+		this.cache.delete(element[this.primaryKey] as unknown as string);
 		await element.destroy();
 		return element;
 	}
@@ -115,7 +115,7 @@ export class ModelManager<M extends Model> {
 	 * @param idOrInstance The id or instance of something in this Manager
 	 */
 	resolveId(idOrInstance: ModelResovable<M>) {
-		if (this.isModel(idOrInstance)) return idOrInstance[this.primaryKey as keyof M] as unknown as string;
+		if (this.isModel(idOrInstance)) return idOrInstance[this.primaryKey] as unknown as string;
 		if (typeof idOrInstance === 'string') return idOrInstance;
 		return null;
 	}
