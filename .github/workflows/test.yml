@@ -28,7 +28,7 @@ jobs:
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
 
       - name: Run ESLint
-        run: yarn run lint
+        run: yarn lint
 
   Building:
     name: TypeScript
