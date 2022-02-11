@@ -172,7 +172,7 @@ export class ChatBridgeManager {
 	 */
 	handleDiscordMessage(message: Message, options?: MessageForwardOptions) {
 		if (!this.channelIds.has(message.channelId) || !this.client.config.get('CHATBRIDGE_ENABLED')) return; // not a chat bridge message or bridge disabled
-		if (message.flags.any([MessageFlags.Loading, MessageFlags.Ephemeral])) return; // ignore deferReply and ephemeral messages
+		if (message.flags.any(MessageFlags.Loading | MessageFlags.Ephemeral)) return; // ignore deferReply and ephemeral messages
 		if (MessageUtil.isNormalBotMessage(message)) return; // ignore non application command messages from the bot
 
 		try {
