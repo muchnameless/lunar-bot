@@ -16,7 +16,8 @@
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
 		"ecmaVersion": "latest",
-		"project": ["./tsconfig.json"]
+		"project": ["./tsconfig.json"],
+		"extraFileExtensions": [".mjs"]
 	},
 	"plugins": ["@typescript-eslint", "unicorn", "regexp", "import"],
 	"rules": {
@@ -196,12 +197,12 @@
 				"message": "Import setImmediate from `node:timers` instead"
 			},
 			{
-			  "name": "clearTimeout",
-			  "message": "Import clearTimeout from `node:timers` instead"
+				"name": "clearTimeout",
+				"message": "Import clearTimeout from `node:timers` instead"
 			},
 			{
-			  "name": "clearInterval",
-			  "message": "Import clearInterval from `node:timers` instead"
+				"name": "clearInterval",
+				"message": "Import clearInterval from `node:timers` instead"
 			},
 			{
 				"name": "URL",
