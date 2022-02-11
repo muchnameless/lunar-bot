@@ -625,6 +625,11 @@ export class HypixelGuild extends Model<
 				return this;
 			}
 
+			if (!guildName) {
+				logger.error(`[UPDATE GUILD]: ${this.name}: no data`);
+				return this;
+			}
+
 			/**
 			 * update guild data
 			 */
