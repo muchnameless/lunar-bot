@@ -1145,6 +1145,17 @@ export class HypixelGuild extends Model<
 	}
 
 	/**
+	 * destroys the db entry and removes it from cache
+	 */
+	override async destroy() {
+		// clean up players
+		await Promise.all(this.players.map((player) => player.removeFromGuild()));
+
+		// destroy guild entry
+		return super.destroy();
+	}
+
+	/**
 	 * the name of the guild
 	 */
 	override toString() {
