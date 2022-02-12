@@ -62,7 +62,7 @@
 		"utf-8-validate": "^5.0.8"
 	},
 	"devDependencies": {
-		"@discordjs/rest": "0.4.0-dev.1644537992.298b226",
+		"@discordjs/rest": "0.4.0-dev.1644667396.861f0e2",
 		"@types/common-tags": "^1.8.1",
 		"@types/cron": "^1.7.3",
 		"@types/keyv": "^3.1.3",
