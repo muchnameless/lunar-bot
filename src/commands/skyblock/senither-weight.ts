@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { getSenitherWeight, seconds } from '../../functions';
 import BaseWeightCommand from './~base-weight';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -12,16 +11,11 @@ export default class WeightCommand extends BaseWeightCommand {
 		super(
 			context,
 			{
-				slash: new SlashCommandBuilder()
-					.setDescription("shows a player's senither weight: total, weight and overflow")
-					.addStringOption(optionalIgnOption)
-					.addStringOption(skyblockProfileOption),
+				slash: new SlashCommandBuilder().setDescription("shows a player's senither weight: total, weight and overflow"),
 				cooldown: seconds(1),
 			},
 			{
 				aliases: ['senither'],
-				args: false,
-				usage: '<`IGN`> <`profile` name>',
 			},
 		);
 	}

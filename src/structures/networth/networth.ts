@@ -1,5 +1,6 @@
 import { transformItemData } from '@zikeji/hypixel';
 import { logger } from '../../functions';
+import { hypixel } from '../../api';
 import {
 	CRAFTING_RECIPES,
 	ESSENCE_PRICES,
@@ -391,17 +392,45 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 }
 
 /**
+ * @param profileId
+ * @param uuid
+ */
+export async function getAuctionNetworth(profileId: string, uuid?: string) {
+	const auctions = await hypixel.skyblock.auction.profile(profileId);
+
+	if (!auctions.length) return 0;
+
+	return (
+		await Promise.all(
+			auctions.map(
+				uuid
+					? (auction) => (auction.auctioneer === uuid ? parseItems(auction.item_bytes.data) : 0)
+					: (auction) => parseItems(auction.item_bytes.data),
+			),
+		)
+	).reduce((a, b) => a + b);
+}
+
+/**
  * @param profile
  * @param uuid
- * @param addBanking
+ * @param options
  */
-export async function getNetworth({ banking, members }: SkyBlockProfile, uuid: string, addBanking = true) {
+export async function getNetworth(
+	{ banking, members, profile_id: profileId }: SkyBlockProfile,
+	uuid: string,
+	{ addBanking = true, addAuctions = false } = {},
+) {
 	const member = members[uuid];
 
 	let bankingAPIEnabled = true;
 	let networth = (addBanking ? banking?.balance ?? ((bankingAPIEnabled = false), 0) : 0) + (member.coin_purse ?? 0);
 
 	const promises: Promise<number>[] = [];
+
+	if (addAuctions) {
+		promises.push(getAuctionNetworth(profileId, uuid));
+	}
 
 	let inventoryAPIEnabled = true;
 

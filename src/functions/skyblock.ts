@@ -1,6 +1,7 @@
 import {
 	DUNGEON_TYPES_AND_CLASSES,
 	DUNGEON_XP,
+	FindProfileStrategy,
 	LEVEL_CAP,
 	RUNECRAFTING_XP,
 	SKILL_XP,
@@ -89,23 +90,51 @@ export function getSlayerLevel(xp = 0) {
  * returns the main profile, determined by max senither weight
  * @param profiles SkyBlock profiles
  * @param uuid minecraft uuid
+ * @param findProfileStrategy
  */
-export function getMainProfile(profiles: SkyBlockProfiles | null, uuid: string) {
+export function findSkyblockProfile(
+	profiles: SkyBlockProfiles | null,
+	uuid: string,
+	findProfileStrategy?: FindProfileStrategy | null,
+) {
 	if (!profiles?.length) return null;
+	if (profiles.length === 1) return profiles[0];
 
-	let mainProfile = null;
-	let maxWeight = -1;
+	switch (findProfileStrategy ?? FindProfileStrategy.MaxWeight) {
+		case FindProfileStrategy.MaxWeight: {
+			let mainProfile = null;
+			let maxWeight = -1;
 
-	for (const profile of profiles) {
-		if (!profile) continue;
+			for (const profile of profiles) {
+				if (!profile) continue;
 
-		const { totalWeight } = getLilyWeight(profile.members[uuid]);
+				const { totalWeight } = getLilyWeight(profile.members[uuid]);
 
-		if (maxWeight > totalWeight) continue;
+				if (maxWeight > totalWeight) continue;
 
-		mainProfile = profile;
-		maxWeight = totalWeight;
+				mainProfile = profile;
+				maxWeight = totalWeight;
+			}
+
+			return mainProfile;
+		}
+
+		case FindProfileStrategy.LastActive: {
+			let mainProfile = null;
+			let lastActive = -1;
+
+			for (const profile of profiles) {
+				if (!profile) continue;
+
+				profile.members[uuid].last_save;
+
+				if (lastActive > profile.members[uuid].last_save) continue;
+
+				mainProfile = profile;
+				lastActive = profile.members[uuid].last_save;
+			}
+
+			return mainProfile;
+		}
 	}
-
-	return mainProfile;
 }

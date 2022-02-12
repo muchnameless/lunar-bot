@@ -5,6 +5,11 @@ import type { ArrayElement } from '../types/util';
  * misc
  */
 
+export const enum FindProfileStrategy {
+	MaxWeight = 'max weight',
+	LastActive = 'last active',
+}
+
 export const SKYBLOCK_YEAR_0 = 1_560_275_700_000;
 export const MAYOR_CHANGE_INTERVAL = days(5) + hours(4);
 export const PROFILE_NAMES = [

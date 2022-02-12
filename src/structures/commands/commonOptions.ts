@@ -1,5 +1,11 @@
 import { SlashCommandStringOption, SlashCommandBooleanOption, SlashCommandIntegerOption } from '@discordjs/builders';
-import { LEADERBOARD_XP_TYPES, PROFILE_NAMES, XP_OFFSETS_CONVERTER, XP_OFFSETS_SHORT } from '../../constants';
+import {
+	FindProfileStrategy,
+	LEADERBOARD_XP_TYPES,
+	PROFILE_NAMES,
+	XP_OFFSETS_CONVERTER,
+	XP_OFFSETS_SHORT,
+} from '../../constants';
 import { upperCaseFirstChar } from '../../functions';
 
 export const optionalIgnOption = new SlashCommandStringOption()
@@ -40,6 +46,22 @@ export const skyblockProfileOption = new SlashCommandStringOption()
 	.setDescription('SkyBlock profile name')
 	.setRequired(false)
 	.addChoices(PROFILE_NAMES.map((x) => [x, x]));
+
+export const skyblockFindProfileOptionName = 'find-profile';
+export const skyblockFindProfileOption = new SlashCommandStringOption()
+	.setName(skyblockFindProfileOptionName)
+	.setDescription('strategy used to find a profile if none was selected')
+	.setRequired(false)
+	.addChoices([
+		['max weight (default)', FindProfileStrategy.MaxWeight],
+		['last active', FindProfileStrategy.LastActive],
+	]);
+
+export const includeAuctionsOptionName = 'include-auctions';
+export const includeAuctionsOption = new SlashCommandBooleanOption()
+	.setName(includeAuctionsOptionName)
+	.setDescription('include current auctions (default: false)')
+	.setRequired(false);
 
 export const xpTypeOption = new SlashCommandStringOption()
 	.setName('type')

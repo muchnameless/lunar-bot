@@ -9,10 +9,17 @@ import { BaseCommand } from './BaseCommand';
 import type { HypixelGuild } from '../database/models/HypixelGuild';
 import type {
 	ContextMenuCommandBuilder,
+	SlashCommandBooleanOption,
 	SlashCommandBuilder,
-	SlashCommandSubcommandsOnlyBuilder,
+	SlashCommandChannelOption,
+	SlashCommandIntegerOption,
+	SlashCommandMentionableOption,
+	SlashCommandNumberOption,
 	SlashCommandOptionsOnlyBuilder,
+	SlashCommandRoleOption,
 	SlashCommandStringOption,
+	SlashCommandSubcommandsOnlyBuilder,
+	SlashCommandUserOption,
 } from '@discordjs/builders';
 import type {
 	RESTPostAPIApplicationCommandsJSONBody,
@@ -44,6 +51,17 @@ interface AssertPermissionsOptions {
 	roleIds?: Snowflake[] | null;
 	hypixelGuild?: HypixelGuild;
 }
+
+export type SlashCommandOption =
+	| SlashCommandRoleOption
+	| SlashCommandUserOption
+	| SlashCommandStringOption
+	| SlashCommandNumberOption
+	| SlashCommandBooleanOption
+	| SlashCommandChannelOption
+	| SlashCommandChannelOption
+	| SlashCommandIntegerOption
+	| SlashCommandMentionableOption;
 
 export interface ApplicationCommandData extends CommandData {
 	aliases?: string[];

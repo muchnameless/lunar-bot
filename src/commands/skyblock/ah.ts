@@ -3,11 +3,16 @@ import { ActionRow, Formatters, SelectMenuComponent, SelectMenuOption } from 'di
 import { stripIndents } from 'common-tags';
 import { PROFILE_EMOJIS, STATS_URL_BASE } from '../../constants';
 import { hypixel } from '../../api';
-import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
+import {
+	optionalIgnOption,
+	skyblockFindProfileOption,
+	skyblockFindProfileOptionName,
+	skyblockProfileOption,
+} from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import {
 	formatError,
-	getMainProfile,
+	findSkyblockProfile,
 	getUuidAndIgn,
 	logger,
 	seconds,
@@ -16,6 +21,7 @@ import {
 	uuidToBustURL,
 } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import type { FindProfileStrategy } from '../../constants';
 import type { ChatInputCommandInteraction, Embed, SelectMenuInteraction, Snowflake } from 'discord.js';
 import type { SkyBlockProfile } from '../../functions';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -40,7 +46,8 @@ export default class AhCommand extends ApplicationCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('SkyBlock auctions')
 				.addStringOption(optionalIgnOption)
-				.addStringOption(skyblockProfileOption),
+				.addStringOption(skyblockProfileOption)
+				.addStringOption(skyblockFindProfileOption),
 			cooldown: seconds(1),
 		});
 	}
@@ -239,7 +246,11 @@ export default class AhCommand extends ApplicationCommand {
 			let profileName: string;
 
 			if (!PROFILE_NAME_INPUT) {
-				const mainProfile = getMainProfile(profiles, uuid);
+				const mainProfile = findSkyblockProfile(
+					profiles,
+					uuid,
+					interaction.options.getString(skyblockFindProfileOptionName) as FindProfileStrategy | null,
+				);
 
 				if (!mainProfile) return this._handleNoProfiles(interaction, embed, ign, uuid);
 

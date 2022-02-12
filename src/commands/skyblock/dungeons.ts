@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { formatDecimalNumber, formatNumber, getSkillLevel, seconds, shortenNumber } from '../../functions';
 import { DUNGEON_CLASSES, DUNGEON_XP, LEVEL_CAP } from '../../constants';
 import { hypixel } from '../../api';
@@ -11,16 +10,11 @@ export default class DungeonsCommand extends BaseSkyBlockCommand {
 		super(
 			context,
 			{
-				slash: new SlashCommandBuilder()
-					.setDescription("shows a player's dungeon stats")
-					.addStringOption(optionalIgnOption)
-					.addStringOption(skyblockProfileOption),
+				slash: new SlashCommandBuilder().setDescription("shows a player's dungeon stats"),
 				cooldown: seconds(1),
 			},
 			{
 				aliases: ['cata'],
-				args: false,
-				usage: '<`IGN`> <`profile` name>',
 			},
 		);
 	}

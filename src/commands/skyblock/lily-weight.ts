@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { getLilyWeight, seconds } from '../../functions';
 import BaseWeightCommand from './~base-weight';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -13,16 +12,11 @@ export default class LilyWeightCommand extends BaseWeightCommand {
 			context,
 			{
 				aliases: ['weight'],
-				slash: new SlashCommandBuilder()
-					.setDescription("shows a player's lily weight: total, weight and overflow")
-					.addStringOption(optionalIgnOption)
-					.addStringOption(skyblockProfileOption),
+				slash: new SlashCommandBuilder().setDescription("shows a player's lily weight: total, weight and overflow"),
 				cooldown: seconds(1),
 			},
 			{
 				aliases: ['w', 'weight', 'lily'],
-				args: false,
-				usage: '<`IGN`> <`profile` name>',
 			},
 		);
 	}

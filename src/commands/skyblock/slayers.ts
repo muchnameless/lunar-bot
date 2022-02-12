@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { getSlayerLevel, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
 import { SLAYERS } from '../../constants';
 import BaseSkyBlockCommand from './~base-skyblock-command';
@@ -11,16 +10,11 @@ export default class SlayersCommand extends BaseSkyBlockCommand {
 		super(
 			context,
 			{
-				slash: new SlashCommandBuilder()
-					.setDescription("shows a player's slayer stats")
-					.addStringOption(optionalIgnOption)
-					.addStringOption(skyblockProfileOption),
+				slash: new SlashCommandBuilder().setDescription("shows a player's slayer stats"),
 				cooldown: seconds(1),
 			},
 			{
 				aliases: [],
-				args: false,
-				usage: '<`IGN`> <`profile` name>',
 			},
 		);
 	}

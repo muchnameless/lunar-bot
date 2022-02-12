@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { formatDecimalNumber, getSkillLevel, seconds, shortenNumber, upperCaseFirstChar } from '../../functions';
 import { SKILLS, SKILL_ACHIEVEMENTS, SKILL_XP_TOTAL, X_EMOJI } from '../../constants';
 import { hypixel } from '../../api';
@@ -12,16 +11,11 @@ export default class SkillsCommand extends BaseSkyBlockCommand {
 		super(
 			context,
 			{
-				slash: new SlashCommandBuilder()
-					.setDescription("shows a player's skills")
-					.addStringOption(optionalIgnOption)
-					.addStringOption(skyblockProfileOption),
+				slash: new SlashCommandBuilder().setDescription("shows a player's skills"),
 				cooldown: seconds(1),
 			},
 			{
 				aliases: [],
-				args: false,
-				usage: '<`IGN`> <`profile` name>',
 			},
 		);
 	}

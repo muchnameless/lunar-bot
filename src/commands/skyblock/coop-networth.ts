@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { optionalIgnOption, skyblockProfileOption } from '../../structures/commands/commonOptions';
 import { seconds, shortenNumber } from '../../functions';
-import { getNetworth } from '../../structures/networth/networth';
+import { getAuctionNetworth, getNetworth } from '../../structures/networth/networth';
 import { X_EMOJI } from '../../constants';
+import { includeAuctionsOption } from '../../structures/commands/commonOptions';
 import NetworthCommand from './networth';
 import type { FetchedData } from './~base-skyblock-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -12,16 +12,14 @@ export default class CoopNetworthCommand extends NetworthCommand {
 		super(
 			context,
 			{
-				slash: new SlashCommandBuilder()
-					.setDescription("shows a player's Co-op's networth, algorithm by Maro and SkyHelper")
-					.addStringOption(optionalIgnOption)
-					.addStringOption(skyblockProfileOption),
+				slash: new SlashCommandBuilder().setDescription(
+					"shows a player's Co-op's networth, algorithm by Maro and SkyHelper",
+				),
+				additionalOptions: [includeAuctionsOption],
 				cooldown: seconds(1),
 			},
 			{
 				aliases: ['coopnw'],
-				args: false,
-				usage: '<`IGN`> <`profile` name>',
 			},
 		);
 	}
@@ -30,18 +28,22 @@ export default class CoopNetworthCommand extends NetworthCommand {
 	 * data -> reply
 	 * @param data
 	 */
-	override async _generateReply({ ign, uuid, profile }: FetchedData) {
+	override async _generateReply({ ign, uuid, profile }: FetchedData, includeAuctions: boolean) {
 		const memberUuids = Object.keys(profile.members);
 
 		// use NetworthCommand#_generateReply if no coop
-		if (memberUuids.length === 1) return super._generateReply({ ign, uuid, profile });
+		if (memberUuids.length === 1) return super._generateReply({ ign, uuid, profile }, includeAuctions);
 
 		let bankingAPIEnabled = true;
 		let totalNetworth = profile.banking?.balance ?? ((bankingAPIEnabled = false), 0);
 		let inventoryAPIDisabled = 0;
 
+		if (includeAuctions) {
+			totalNetworth += await getAuctionNetworth(profile.profile_id);
+		}
+
 		for (const { networth, inventoryAPIEnabled } of await Promise.all(
-			memberUuids.map((_uuid) => getNetworth(profile, _uuid, false)),
+			memberUuids.map((_uuid) => getNetworth(profile, _uuid, { addBanking: false })),
 		)) {
 			totalNetworth += networth;
 			if (!inventoryAPIEnabled) ++inventoryAPIDisabled;

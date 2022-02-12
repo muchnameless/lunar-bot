@@ -9,6 +9,7 @@ import {
 	DUNGEON_CLASSES,
 	DUNGEON_TYPES,
 	DUNGEON_TYPES_AND_CLASSES,
+	FindProfileStrategy,
 	GUILD_ID_ERROR,
 	isXPType,
 	LILY_SKILL_NAMES,
@@ -34,7 +35,7 @@ import {
 	days,
 	escapeIgn,
 	getLilyWeightRaw,
-	getMainProfile,
+	findSkyblockProfile,
 	getSenitherDungeonWeight,
 	getSenitherSkillWeight,
 	getSenitherSlayerWeight,
@@ -1660,7 +1661,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			logger.error(error, '[MAIN PROFILE]');
 		}
 
-		const mainProfile = getMainProfile(profiles, this.minecraftUuid);
+		const mainProfile = findSkyblockProfile(profiles, this.minecraftUuid, FindProfileStrategy.MaxWeight);
 
 		if (!mainProfile) {
 			this.update({ mainProfileId: null, xpUpdatesDisabled: true }).catch((error) => logger.error(error));
