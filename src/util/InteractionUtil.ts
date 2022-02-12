@@ -170,8 +170,10 @@ export default class InteractionUtil extends null {
 		if (!(error instanceof DiscordAPIError)) return false;
 
 		switch (error.code) {
-			case RESTJSONErrorCodes.UnknownInteraction:
+			// TODO: use RESTJSONErrorCodes.InteractionHasAlreadyBeenAcknowledged
 			case RESTJSONErrorCodes.UnknownWebhook:
+			case RESTJSONErrorCodes.UnknownInteraction:
+			case 40_060:
 			case RESTJSONErrorCodes.InvalidWebhookToken:
 				return true;
 
