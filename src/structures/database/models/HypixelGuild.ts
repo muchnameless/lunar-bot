@@ -31,6 +31,7 @@ import type {
 	CreationOptional,
 	InferAttributes,
 	InferCreationAttributes,
+	InstanceDestroyOptions,
 	ModelStatic,
 	NonAttribute,
 	Sequelize,
@@ -1147,12 +1148,12 @@ export class HypixelGuild extends Model<
 	/**
 	 * destroys the db entry and removes it from cache
 	 */
-	override async destroy() {
+	override async destroy(options?: InstanceDestroyOptions) {
 		// clean up players
 		await Promise.all(this.players.map((player) => player.removeFromGuild()));
 
 		this.client.hypixelGuilds.cache.delete(this.guildId);
-		return super.destroy();
+		return super.destroy(options);
 	}
 
 	/**

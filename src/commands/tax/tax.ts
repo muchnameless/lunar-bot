@@ -113,7 +113,7 @@ export default class TaxCommand extends ApplicationCommand {
 						) {
 							logger.info(`[TAX AH]: ${player}: removed and reset tax paid`);
 							await player.resetTax();
-							await taxCollector.remove();
+							await taxCollector.destroy();
 						} else {
 							await taxCollector.update({ isCollecting: false });
 						}
@@ -361,7 +361,7 @@ export default class TaxCommand extends ApplicationCommand {
 							await safePromiseAll([
 								// remove retired collectors and reset active ones
 								...taxCollectors.cache.map((taxCollector) => {
-									if (!taxCollector.isCollecting) return taxCollector.remove();
+									if (!taxCollector.isCollecting) return taxCollector.destroy();
 									return safePromiseAll([
 										taxCollector.resetAmount(TransactionType.Tax),
 										taxCollector.resetAmount(TransactionType.Donation),

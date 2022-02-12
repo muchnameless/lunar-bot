@@ -13,6 +13,7 @@ import type {
 	CreationOptional,
 	InferAttributes,
 	InferCreationAttributes,
+	InstanceDestroyOptions,
 	ModelAttributeColumnOptions,
 	ModelStatic,
 	NonAttribute,
@@ -194,6 +195,14 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 				timestamps: false,
 			},
 		) as ModelStatic<DiscordGuild>;
+	}
+
+	/**
+	 * destroys the db entry and removes it from cache
+	 */
+	override destroy(options?: InstanceDestroyOptions) {
+		this.client.discordGuilds.cache.delete(this.discordId);
+		return super.destroy(options);
 	}
 }
 

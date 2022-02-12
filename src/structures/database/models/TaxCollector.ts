@@ -4,6 +4,7 @@ import type {
 	CreationOptional,
 	InferAttributes,
 	InferCreationAttributes,
+	InstanceDestroyOptions,
 	ModelStatic,
 	NonAttribute,
 	Sequelize,
@@ -101,10 +102,11 @@ export class TaxCollector extends Model<InferAttributes<TaxCollector>, InferCrea
 	}
 
 	/**
-	 * removes the collector from the database
+	 * destroys the db entry and removes it from cache
 	 */
-	remove() {
-		return this.client.taxCollectors.remove(this);
+	override destroy(options?: InstanceDestroyOptions) {
+		this.client.taxCollectors.cache.delete(this.minecraftUuid);
+		return super.destroy(options);
 	}
 
 	/**

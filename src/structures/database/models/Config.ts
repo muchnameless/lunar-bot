@@ -1,5 +1,12 @@
 import { Model, DataTypes } from 'sequelize';
-import type { InferAttributes, InferCreationAttributes, ModelStatic, NonAttribute, Sequelize } from 'sequelize';
+import type {
+	InferAttributes,
+	InferCreationAttributes,
+	InstanceDestroyOptions,
+	ModelStatic,
+	NonAttribute,
+	Sequelize,
+} from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
 export class Config extends Model<
@@ -41,6 +48,14 @@ export class Config extends Model<
 				freezeTableName: true,
 			},
 		) as ModelStatic<Config>;
+	}
+
+	/**
+	 * destroys the db entry and removes it from cache
+	 */
+	override destroy(options?: InstanceDestroyOptions) {
+		this.client.config.cache.delete(this.key);
+		return super.destroy(options);
 	}
 }
 

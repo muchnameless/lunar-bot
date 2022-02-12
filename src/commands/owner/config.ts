@@ -141,7 +141,7 @@ export default class ConfigCommand extends ApplicationCommand {
 
 				const VALUE = this.config.get(KEY);
 
-				await this.config.remove(KEY);
+				await this.config.destroy(KEY);
 				return InteractionUtil.reply(interaction, `removed \`${KEY}\`: \`${VALUE}\``);
 			}
 

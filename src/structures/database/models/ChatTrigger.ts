@@ -6,6 +6,7 @@ import type {
 	CreationOptional,
 	InferAttributes,
 	InferCreationAttributes,
+	InstanceDestroyOptions,
 	ModelStatic,
 	NonAttribute,
 	Sequelize,
@@ -108,6 +109,14 @@ export class ChatTrigger extends Model<InferAttributes<ChatTrigger>, InferCreati
 				.replaceAll('{AUTHOR_IGN}', hypixelMessage.author.ign)
 				.replaceAll(/\$(\d+)/g, (m, p0) => matched[p0] ?? m), // replace $number with capture group #number
 		);
+	}
+
+	/**
+	 * destroys the db entry and removes it from cache
+	 */
+	override destroy(options?: InstanceDestroyOptions) {
+		this.client.chatTriggers.cache.delete(this[this.client.chatTriggers.primaryKey] as string);
+		return super.destroy(options);
 	}
 }
 

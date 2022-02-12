@@ -54,6 +54,7 @@ import type {
 	CreationOptional,
 	InferAttributes,
 	InferCreationAttributes,
+	InstanceDestroyOptions,
 	ModelStatic,
 	NonAttribute,
 	Sequelize,
@@ -1913,9 +1914,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * destroys the db entry and removes it from cache
 	 */
-	override async destroy() {
+	override async destroy(options?: InstanceDestroyOptions) {
 		await this.uncache();
-		return super.destroy();
+		return super.destroy(options);
 	}
 
 	/**

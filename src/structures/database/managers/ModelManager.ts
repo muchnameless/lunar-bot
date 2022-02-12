@@ -1,6 +1,14 @@
 import { Collection } from 'discord.js';
 import { logger } from '../../../functions';
-import type { Attributes, CreationAttributes, FindOptions, Model, ModelStatic, WhereOptions } from 'sequelize';
+import type {
+	Attributes,
+	CreationAttributes,
+	FindOptions,
+	InstanceDestroyOptions,
+	Model,
+	ModelStatic,
+	WhereOptions,
+} from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
 export type ModelResovable<M extends Model> = M | string;
@@ -91,12 +99,12 @@ export class ModelManager<M extends Model> {
 	 * destroys the db entry and removes it from the collection
 	 * @param idOrInstance The id or instance of something in this Manager
 	 */
-	async remove(idOrInstance: ModelResovable<M>) {
+	async destroy(idOrInstance: ModelResovable<M>, options?: InstanceDestroyOptions) {
 		const element = this.resolve(idOrInstance);
 		if (!element) throw new Error(`[${this.constructor.name} REMOVE]: unknown element: ${idOrInstance}`);
 
 		this.cache.delete(element[this.primaryKey] as unknown as string);
-		await element.destroy();
+		await element.destroy(options);
 		return element;
 	}
 
