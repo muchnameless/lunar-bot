@@ -676,7 +676,7 @@ export default class InteractionUtil extends null {
 									)
 									.setTimestamp(),
 							],
-							components: [row.setComponents(row.components.map((c) => c.setDisabled(true)))],
+							components: [row.setComponents(...row.components.map((c) => c.setDisabled(true)))],
 						});
 
 						if (success) return resolve();
@@ -696,7 +696,7 @@ export default class InteractionUtil extends null {
 									)
 									.setTimestamp(),
 							],
-							components: [row.setComponents(row.components.map((c) => c.setDisabled(true)))],
+							components: [row.setComponents(...row.components.map((c) => c.setDisabled(true)))],
 						};
 
 						try {
