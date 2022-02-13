@@ -67,19 +67,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/builders@npm:^0.13.0-dev":
-  version: 0.13.0-dev.1644408664.fe11ff5
-  resolution: "@discordjs/builders@npm:0.13.0-dev.1644408664.fe11ff5"
-  dependencies:
-    "@sindresorhus/is": ^4.4.0
-    discord-api-types: ^0.26.1
-    ts-mixer: ^6.0.0
-    tslib: ^2.3.1
-    zod: ^3.11.6
-  checksum: ac70f545ffd87e3bc4f794e4bd759ec9dfdffd02bc46f8d06257166345c5cd18f28dd67c98e225c8882a9417f2b8c1abea1f44aeadb4432281eb733ac1e009e4
-  languageName: node
-  linkType: hard
-
 "@discordjs/collection@npm:^0.6.0-dev":
   version: 0.6.0-dev.1644408625.fe11ff5
   resolution: "@discordjs/collection@npm:0.6.0-dev.1644408625.fe11ff5"
@@ -119,22 +106,6 @@ __metadata:
     node-fetch: ^2.6.7
     tslib: ^2.3.1
   checksum: 6871129ea94619e2f97282cad23fc3dd70580869cdbc4e76d773fc2d9e06944dc31580dc6f46bfccf4bb0b9bde844a68900c82222526b088181900eeffcf22fa
-  languageName: node
-  linkType: hard
-
-"@discordjs/rest@npm:^0.4.0-dev":
-  version: 0.4.0-dev.1644537992.298b226
-  resolution: "@discordjs/rest@npm:0.4.0-dev.1644537992.298b226"
-  dependencies:
-    "@discordjs/collection": ^0.6.0-dev
-    "@sapphire/async-queue": ^1.2.0
-    "@sapphire/snowflake": ^3.1.0
-    "@types/node-fetch": ^2.5.12
-    discord-api-types: ^0.26.1
-    form-data: ^4.0.0
-    node-fetch: ^2.6.7
-    tslib: ^2.3.1
-  checksum: 778282bbc51f9581b53a7f54afb51cbd2c39054443af14cf8a5388f45c9cc40a08cf45c0463c416c64e9290f437e01d1c40fdee96859ec0c74662ef8ce17911f
   languageName: node
   linkType: hard
 
