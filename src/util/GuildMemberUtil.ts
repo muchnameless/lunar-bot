@@ -219,8 +219,7 @@ export default class GuildMemberUtil extends null {
 	 * @param reason
 	 */
 	static async timeout(member: GuildMember, duration: number | null, reason?: string) {
-		// TODO: remove second condition once discord.js GuildMember#moderatable checks for admin
-		if (!member.moderatable || member.permissions.has(PermissionFlagsBits.Administrator)) {
+		if (!member.moderatable) {
 			logger.warn(`[GUILDMEMBER TIMEOUT] ${this.logInfo(member)}: missing permissions`);
 			return member;
 		}
