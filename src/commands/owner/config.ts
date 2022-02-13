@@ -27,7 +27,7 @@ export default class ConfigCommand extends ApplicationCommand {
 								.setName('type')
 								.setDescription('new config value type')
 								.setRequired(false)
-								.addChoices(['string', 'number', 'boolean', 'array'].map((x) => [x, x])),
+								.addChoices(...['string', 'number', 'boolean', 'array'].map((x) => ({ name: x, value: x }))),
 						),
 				)
 				.addSubcommand((subcommand) =>

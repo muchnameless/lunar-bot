@@ -45,17 +45,23 @@ export const skyblockProfileOption = new SlashCommandStringOption()
 	.setName('profile')
 	.setDescription('SkyBlock profile name')
 	.setRequired(false)
-	.addChoices(PROFILE_NAMES.map((x) => [x, x]));
+	.addChoices(...PROFILE_NAMES.map((x) => ({ name: x, value: x })));
 
 export const skyblockFindProfileOptionName = 'find-profile';
 export const skyblockFindProfileOption = new SlashCommandStringOption()
 	.setName(skyblockFindProfileOptionName)
 	.setDescription('strategy used to find a profile if none was selected')
 	.setRequired(false)
-	.addChoices([
-		['max weight (default)', FindProfileStrategy.MaxWeight],
-		['last active', FindProfileStrategy.LastActive],
-	]);
+	.addChoices(
+		{
+			name: 'max weight (default)',
+			value: FindProfileStrategy.MaxWeight,
+		},
+		{
+			name: 'last active',
+			value: FindProfileStrategy.LastActive,
+		},
+	);
 
 export const includeAuctionsOptionName = 'include-auctions';
 export const includeAuctionsOption = new SlashCommandBooleanOption()
@@ -67,7 +73,7 @@ export const xpTypeOption = new SlashCommandStringOption()
 	.setName('type')
 	.setDescription('xp type')
 	.setRequired(false)
-	.addChoices(LEADERBOARD_XP_TYPES.map((x) => [upperCaseFirstChar(x.replaceAll('-', ' ')), x]));
+	.addChoices(...LEADERBOARD_XP_TYPES.map((x) => ({ name: upperCaseFirstChar(x.replaceAll('-', ' ')), value: x })));
 
 export const pageOption = new SlashCommandIntegerOption()
 	.setName('page')
@@ -78,13 +84,18 @@ export const offsetOption = new SlashCommandStringOption()
 	.setName('offset')
 	.setDescription('Δ offset')
 	.setRequired(false)
-	.addChoices(Object.keys(XP_OFFSETS_SHORT).map((x) => [x, XP_OFFSETS_CONVERTER[x as keyof typeof XP_OFFSETS_SHORT]]));
+	.addChoices(
+		...Object.keys(XP_OFFSETS_SHORT).map((x) => ({
+			name: x,
+			value: XP_OFFSETS_CONVERTER[x as keyof typeof XP_OFFSETS_SHORT],
+		})),
+	);
 
 export const ephemeralOption = new SlashCommandStringOption()
 	.setName('visibility')
 	.setDescription('visibility of the response message')
 	.setRequired(false)
-	.addChoices(['everyone', 'just me'].map((x) => [x, x]));
+	.addChoices(...['everyone', 'just me'].map((x) => ({ name: x, value: x })));
 
 export const hypixelGuildOption = new SlashCommandStringOption()
 	.setName('guild')
