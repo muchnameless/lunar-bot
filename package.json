@@ -7,7 +7,7 @@
 	"scripts": {
 		"clean": "rimraf dist",
 		"build": "yarn clean && tsc",
-		"update": "git pull && yarn build && yarn start",
+		"update": "yarn upgrade-interactive",
 		"test": "tsc --noEmit",
 		"lint": "eslint src --ext .ts",
 		"lint:fix": "eslint src --ext .ts --fix",
