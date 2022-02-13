@@ -106,9 +106,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/rest@npm:0.4.0-dev.1644710838.f495364":
-  version: 0.4.0-dev.1644710838.f495364
-  resolution: "@discordjs/rest@npm:0.4.0-dev.1644710838.f495364"
+"@discordjs/rest@npm:0.4.0-dev.1644753853.3ae6f3c":
+  version: 0.4.0-dev.1644753853.3ae6f3c
+  resolution: "@discordjs/rest@npm:0.4.0-dev.1644753853.3ae6f3c"
   dependencies:
     "@discordjs/collection": ^0.6.0-dev
     "@sapphire/async-queue": ^1.2.0
@@ -118,7 +118,7 @@ __metadata:
     form-data: ^4.0.0
     node-fetch: ^2.6.7
     tslib: ^2.3.1
-  checksum: 0b73277387411c04190b307aef785eed98d446c6bb58ba1b40cb51af4fe26b86613b0dc8191aebd19b41f85d8cab87f7907ced38473b01fbe14ab640b957d450
+  checksum: 6871129ea94619e2f97282cad23fc3dd70580869cdbc4e76d773fc2d9e06944dc31580dc6f46bfccf4bb0b9bde844a68900c82222526b088181900eeffcf22fa
   languageName: node
   linkType: hard
 
@@ -2930,7 +2930,7 @@ __metadata:
   resolution: "lunar-bot@workspace:."
   dependencies:
     "@discordjs/builders": 0.13.0-dev.1644667400.861f0e2
-    "@discordjs/rest": 0.4.0-dev.1644710838.f495364
+    "@discordjs/rest": 0.4.0-dev.1644753853.3ae6f3c
     "@keyv/redis": ^2.2.3
     "@sapphire/async-queue": ^1.2.0
     "@sapphire/stopwatch": ^1.3.0
