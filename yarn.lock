@@ -2958,7 +2958,7 @@ __metadata:
     pino-pretty: ^7.5.1
     prettier: ^2.5.1
     pretty-quick: ^3.1.3
-    prismarine-chat: ^1.5.0
+    prismarine-chat: ^1.6.0
     prismarine-nbt: ^2.2.0
     re2: ^1.17.3
     readdirp: ^3.6.0
@@ -3905,16 +3905,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-chat@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "prismarine-chat@npm:1.5.0"
+"prismarine-chat@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "prismarine-chat@npm:1.6.0"
   dependencies:
     minecraft-data: ^2.62.1
     mojangson: ^2.0.1
     prismarine-item: ^1.10.0
     prismarine-nbt: ^2.0.0
     sprintf-js: ^1.1.2
-  checksum: 6ad8f80331660ff7edcef8fa37871eb8a21b4761d1d2758ae270e1f4f8578bff91ad8bafadbb992e80a5affbf0abc09ddc5d2aff185e66b6959698d3d946f5db
+  checksum: 6cbfd321eb509acfd3e78fb9efdf1f3f064d4d90ffb93715d8ebd8a8fc1f7884b80b38256395b79493e01702a7f2f292dfa8369c797c147742de38faed463d7d
   languageName: node
   linkType: hard
 
