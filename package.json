@@ -23,6 +23,7 @@
 	"license": "GPL-3.0",
 	"dependencies": {
 		"@discordjs/builders": "0.13.0-dev.1644753796.3ae6f3c",
+		"@discordjs/rest": "0.4.0-dev.1644753853.3ae6f3c",
 		"@keyv/redis": "^2.2.3",
 		"@sapphire/async-queue": "^1.2.0",
 		"@sapphire/stopwatch": "^1.3.0",
@@ -63,7 +64,6 @@
 		"utf-8-validate": "^5.0.8"
 	},
 	"devDependencies": {
-		"@discordjs/rest": "0.4.0-dev.1644753853.3ae6f3c",
 		"@types/common-tags": "^1.8.1",
 		"@types/cron": "^1.7.3",
 		"@types/keyv": "^3.1.3",
