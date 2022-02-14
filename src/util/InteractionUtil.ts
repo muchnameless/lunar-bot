@@ -664,6 +664,8 @@ export default class InteractionUtil extends null {
 						const buttonInteraction = collected.first()!;
 						const success = buttonInteraction.customId === SUCCESS_ID;
 
+						for (const component of row.components) component.setDisabled(true);
+
 						this.update(buttonInteraction, {
 							embeds: [
 								new Embed()
@@ -676,7 +678,7 @@ export default class InteractionUtil extends null {
 									)
 									.setTimestamp(),
 							],
-							components: [row.setComponents(...row.components.map((c) => c.setDisabled(true)))],
+							components: [row],
 						});
 
 						if (success) return resolve();
@@ -684,6 +686,8 @@ export default class InteractionUtil extends null {
 					}
 
 					case 'time': {
+						for (const component of row.components) component.setDisabled(true);
+
 						const editOptions = {
 							embeds: [
 								new Embed()
@@ -696,7 +700,7 @@ export default class InteractionUtil extends null {
 									)
 									.setTimestamp(),
 							],
-							components: [row.setComponents(...row.components.map((c) => c.setDisabled(true)))],
+							components: [row],
 						};
 
 						try {
