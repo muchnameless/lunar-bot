@@ -400,15 +400,23 @@ export async function getAuctionNetworth(profileId: string, uuid?: string) {
 
 	if (!auctions.length) return 0;
 
-	return (
-		await Promise.all(
-			auctions.map(
-				uuid
-					? (auction) => (auction.auctioneer === uuid ? parseItems(auction.item_bytes.data) : 0)
-					: (auction) => parseItems(auction.item_bytes.data),
-			),
-		)
-	).reduce((a, b) => a + b);
+	const promises: Promise<number>[] = [];
+
+	let collectableBids = 0;
+
+	for (const auction of auctions) {
+		if (auction.claimed || auction.auctioneer !== uuid) continue;
+
+		if (auction.end > Date.now()) {
+			collectableBids += auction.highest_bid_amount;
+		} else {
+			promises.push(parseItems(auction.item_bytes.data));
+		}
+	}
+
+	if (!promises.length) return collectableBids;
+
+	return collectableBids + (await Promise.all(promises)).reduce((a, b) => a + b);
 }
 
 /**
