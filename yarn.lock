@@ -2954,7 +2954,7 @@ __metadata:
     ms: ^2.1.3
     pg: ^8.7.3
     pg-hstore: ^2.3.4
-    pino: ^7.7.0
+    pino: ^7.8.0
     pino-pretty: ^7.5.1
     prettier: ^2.5.1
     pretty-quick: ^3.1.3
@@ -3790,9 +3790,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:^7.7.0":
-  version: 7.7.0
-  resolution: "pino@npm:7.7.0"
+"pino@npm:^7.8.0":
+  version: 7.8.0
+  resolution: "pino@npm:7.8.0"
   dependencies:
     fast-redact: ^3.0.0
     on-exit-leak-free: ^0.2.0
@@ -3806,7 +3806,7 @@ __metadata:
     thread-stream: ^0.13.0
   bin:
     pino: bin.js
-  checksum: b5c43d1d26ad22f3ed2d50728ce443520f284227df427b11cede83971ae257b35ce72bda05a318856f26c15c7f2b4c62465ede646e75aa757c14ad563bf9a1ab
+  checksum: 0be8a440f81e7e2f4a22156e5886d550c618d6609572f0f262ccbc15077b702ee56c17d8bff7779361a74e64e4257f533b6038f46845e583315895ac6babc753
   languageName: node
   linkType: hard
 
