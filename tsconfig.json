@@ -36,5 +36,5 @@
 		"skipDefaultLibCheck": true,
 		"skipLibCheck": false
 	},
-	"include": ["src/**/*.ts"]
+	"include": ["src", "scripts"]
 }
