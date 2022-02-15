@@ -16,13 +16,23 @@ export default class UnloadCommand extends DualCommand {
 						subcommand
 							.setName('command')
 							.setDescription('unload a command')
-							.addStringOption((option) => option.setName('name').setDescription('command name').setRequired(true)),
+							.addStringOption((option) =>
+								option //
+									.setName('name')
+									.setDescription('command name')
+									.setRequired(true),
+							),
 					)
 					.addSubcommand((subcommand) =>
 						subcommand
 							.setName('event')
 							.setDescription('unload an event')
-							.addStringOption((option) => option.setName('name').setDescription('event name').setRequired(true)),
+							.addStringOption((option) =>
+								option //
+									.setName('name')
+									.setDescription('event name')
+									.setRequired(true),
+							),
 					),
 				cooldown: 0,
 			},

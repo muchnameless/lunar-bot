@@ -14,8 +14,18 @@ export default class DonateCommand extends ApplicationCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('register a donation from a player')
 				.addStringOption(requiredPlayerOption)
-				.addStringOption((option) => option.setName('value').setDescription('amount / text').setRequired(true))
-				.addStringOption((option) => option.setName('notes').setDescription('additional notes').setRequired(false)),
+				.addStringOption((option) =>
+					option //
+						.setName('value')
+						.setDescription('amount / text')
+						.setRequired(true),
+				)
+				.addStringOption((option) =>
+					option //
+						.setName('notes')
+						.setDescription('additional notes')
+						.setRequired(false),
+				),
 			cooldown: 0,
 		});
 	}

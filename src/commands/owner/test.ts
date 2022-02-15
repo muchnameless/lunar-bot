@@ -6,9 +6,14 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class TestCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			slash: new SlashCommandBuilder()
+			slash: new SlashCommandBuilder() //
 				.setDescription('generic test command')
-				.addStringOption((option) => option.setName('input').setDescription('input').setRequired(false)),
+				.addStringOption((option) =>
+					option //
+						.setName('input')
+						.setDescription('input')
+						.setRequired(false),
+				),
 			cooldown: 0,
 		});
 	}

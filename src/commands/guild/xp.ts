@@ -26,7 +26,10 @@ export default class XpCommand extends ApplicationCommand {
 				.addIntegerOption(pageOption)
 				.addStringOption(offsetOption)
 				.addBooleanOption((option) =>
-					option.setName('update').setDescription('update xp before running the command').setRequired(false),
+					option //
+						.setName('update')
+						.setDescription('update xp before running the command')
+						.setRequired(false),
 				),
 			cooldown: 0,
 		});

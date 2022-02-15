@@ -19,9 +19,18 @@ export default class ConfigCommand extends ApplicationCommand {
 						.setName('edit')
 						.setDescription('edit the config key with the provided value')
 						.addStringOption((option) =>
-							option.setName('key').setDescription('new / existing config key').setRequired(true).setAutocomplete(true),
+							option //
+								.setName('key')
+								.setDescription('new / existing config key')
+								.setRequired(true)
+								.setAutocomplete(true),
 						)
-						.addStringOption((option) => option.setName('value').setDescription('new config value').setRequired(true))
+						.addStringOption((option) =>
+							option //
+								.setName('value')
+								.setDescription('new config value')
+								.setRequired(true),
+						)
 						.addStringOption((option) =>
 							option
 								.setName('type')
@@ -35,7 +44,11 @@ export default class ConfigCommand extends ApplicationCommand {
 						.setName('delete')
 						.setDescription('delete the config key')
 						.addStringOption((option) =>
-							option.setName('key').setDescription('existing config key').setRequired(true).setAutocomplete(true),
+							option //
+								.setName('key')
+								.setDescription('existing config key')
+								.setRequired(true)
+								.setAutocomplete(true),
 						),
 				)
 				.addSubcommand((subcommand) =>
@@ -43,7 +56,11 @@ export default class ConfigCommand extends ApplicationCommand {
 						.setName('search')
 						.setDescription('searches the config keys and values')
 						.addStringOption((option) =>
-							option.setName('query').setDescription('search query').setRequired(false).setAutocomplete(true),
+							option //
+								.setName('query')
+								.setDescription('search query')
+								.setRequired(false)
+								.setAutocomplete(true),
 						),
 				),
 			cooldown: 0,

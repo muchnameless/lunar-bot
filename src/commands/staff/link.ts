@@ -16,7 +16,12 @@ export default class LinkCommand extends ApplicationCommand {
 			slash: new SlashCommandBuilder()
 				.setDescription('link a discord user to a minecraft ign')
 				.addStringOption(requiredIgnOption)
-				.addUserOption((option) => option.setName('user').setDescription('discord user').setRequired(true))
+				.addUserOption((option) =>
+					option //
+						.setName('user')
+						.setDescription('discord user')
+						.setRequired(true),
+				)
 				.addStringOption(hypixelGuildOption),
 			cooldown: seconds(1),
 		});

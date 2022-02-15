@@ -70,12 +70,23 @@ export default class EvalCommand extends ApplicationCommand {
 		super(context, {
 			slash: new SlashCommandBuilder()
 				.setDescription('executes js code')
-				.addStringOption((option) => option.setName('input').setDescription('js code to evaluate').setRequired(true))
+				.addStringOption((option) =>
+					option //
+						.setName('input')
+						.setDescription('js code to evaluate')
+						.setRequired(true),
+				)
 				.addIntegerOption((option) =>
-					option.setName('inspect').setDescription('util.inspect depth on the output').setRequired(false),
+					option //
+						.setName('inspect')
+						.setDescription('util.inspect depth on the output')
+						.setRequired(false),
 				)
 				.addBooleanOption((option) =>
-					option.setName('async').setDescription('wrap the code in an async IIFE').setRequired(false),
+					option //
+						.setName('async')
+						.setDescription('wrap the code in an async IIFE')
+						.setRequired(false),
 				),
 			message: new ContextMenuCommandBuilder().setName('Evaluate content'),
 			cooldown: 0,

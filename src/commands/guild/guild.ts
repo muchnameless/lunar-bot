@@ -88,14 +88,22 @@ export default class GuildCommand extends ApplicationCommand {
 		const slash = new SlashCommandBuilder()
 			.setDescription('hypixel')
 			.addSubcommand((subcommand) =>
-				subcommand.setName('demote').setDescription('demote').addStringOption(requiredPlayerOption),
+				subcommand //
+					.setName('demote')
+					.setDescription('demote')
+					.addStringOption(requiredPlayerOption),
 			)
 			.addSubcommand((subcommand) =>
 				subcommand
 					.setName('kick')
 					.setDescription('kick')
 					.addStringOption(requiredPlayerOption)
-					.addStringOption((option) => option.setName('reason').setDescription('reason').setRequired(true))
+					.addStringOption((option) =>
+						option //
+							.setName('reason')
+							.setDescription('reason')
+							.setRequired(true),
+					)
 					.addBooleanOption((option) =>
 						option
 							.setName('add-to-ban-list')
@@ -103,13 +111,27 @@ export default class GuildCommand extends ApplicationCommand {
 					),
 			)
 			.addSubcommand((subcommand) =>
-				subcommand.setName('history').setDescription('history').addIntegerOption(pageOption),
+				subcommand //
+					.setName('history')
+					.setDescription('history')
+					.addIntegerOption(pageOption),
 			)
-			.addSubcommand((subcommand) => subcommand.setName('info').setDescription('info'))
 			.addSubcommand((subcommand) =>
-				subcommand.setName('invite').setDescription('invite').addStringOption(requiredIgnOption),
+				subcommand //
+					.setName('info')
+					.setDescription('info'),
 			)
-			.addSubcommand((subcommand) => subcommand.setName('list').setDescription('list'))
+			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('invite')
+					.setDescription('invite')
+					.addStringOption(requiredIgnOption),
+			)
+			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('list')
+					.setDescription('list'),
+			)
 			.addSubcommand((subcommand) =>
 				subcommand
 					.setName('log')
@@ -118,31 +140,60 @@ export default class GuildCommand extends ApplicationCommand {
 					.addIntegerOption(pageOption),
 			)
 			.addSubcommand((subcommand) =>
-				subcommand.setName('member').setDescription('member').addStringOption(optionalPlayerOption),
+				subcommand //
+					.setName('member')
+					.setDescription('member')
+					.addStringOption(optionalPlayerOption),
 			)
-			.addSubcommand((subcommand) => subcommand.setName('members').setDescription('members'))
-			.addSubcommand((subcommand) => subcommand.setName('motd').setDescription('motd'))
+			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('members')
+					.setDescription('members'),
+			)
+			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('motd')
+					.setDescription('motd'),
+			)
 			.addSubcommand((subcommand) =>
 				subcommand
 					.setName('mute')
 					.setDescription('mute')
 					.addStringOption(targetOption)
 					.addStringOption((option) =>
-						option.setName('duration').setDescription('s[econds] | m[inutes] | h[ours] | d[ays]').setRequired(true),
+						option //
+							.setName('duration')
+							.setDescription('s[econds] | m[inutes] | h[ours] | d[ays]')
+							.setRequired(true),
 					),
 			)
-			.addSubcommand((subcommand) => subcommand.setName('online').setDescription('online'))
 			.addSubcommand((subcommand) =>
-				subcommand.setName('promote').setDescription('promote').addStringOption(requiredPlayerOption),
+				subcommand //
+					.setName('online')
+					.setDescription('online'),
 			)
-			.addSubcommand((subcommand) => subcommand.setName('quest').setDescription('quest'))
+			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('promote')
+					.setDescription('promote')
+					.addStringOption(requiredPlayerOption),
+			)
+			.addSubcommand((subcommand) =>
+				subcommand //
+					.setName('quest')
+					.setDescription('quest'),
+			)
 			.addSubcommand((subcommand) =>
 				subcommand
 					.setName('setrank')
 					.setDescription('setrank')
 					.addStringOption(requiredPlayerOption)
 					.addStringOption((option) =>
-						option.setName('rank').setDescription('rank name').setRequired(true).setAutocomplete(true),
+						option //
+							.setName('rank')
+							.setDescription('rank name')
+							.setRequired(true)
+							.setAutocomplete(true),
 					),
 			)
 			.addSubcommand((subcommand) =>
@@ -150,11 +201,17 @@ export default class GuildCommand extends ApplicationCommand {
 					.setName('top')
 					.setDescription('top')
 					.addIntegerOption((option) =>
-						option.setName('days_ago').setDescription('number of days ago').setRequired(false),
+						option //
+							.setName('days_ago')
+							.setDescription('number of days ago')
+							.setRequired(false),
 					),
 			)
 			.addSubcommand((subcommand) =>
-				subcommand.setName('unmute').setDescription('unmute').addStringOption(targetOption),
+				subcommand //
+					.setName('unmute')
+					.setDescription('unmute')
+					.addStringOption(targetOption),
 			);
 
 		for (const subcommand of (slash as SlashCommandBuilder).options as unknown as SlashCommandBuilder[]) {

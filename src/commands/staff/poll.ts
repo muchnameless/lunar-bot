@@ -26,7 +26,12 @@ export default class PollCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		const slash = new SlashCommandBuilder()
 			.setDescription('create a poll for both in-game and discord guild chat')
-			.addStringOption((option) => option.setName('question').setDescription('poll question').setRequired(true));
+			.addStringOption((option) =>
+				option //
+					.setName('question')
+					.setDescription('poll question')
+					.setRequired(true),
+			);
 
 		// add choices
 		for (let i = 1; i <= 10; ++i) {

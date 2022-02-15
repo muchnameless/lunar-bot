@@ -28,7 +28,11 @@ export default class BanListCommand extends ApplicationCommand {
 						.setName('add')
 						.setDescription('add a player to the ban list')
 						.addStringOption(requiredIgnOption)
-						.addStringOption((option) => option.setName('reason').setDescription('ban reason')),
+						.addStringOption((option) =>
+							option //
+								.setName('reason')
+								.setDescription('ban reason'),
+						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
@@ -43,7 +47,10 @@ export default class BanListCommand extends ApplicationCommand {
 						.addStringOption(requiredIgnOption),
 				)
 				.addSubcommand((subcommand) =>
-					subcommand.setName('view').setDescription('shows the ban list').addIntegerOption(pageOption),
+					subcommand //
+						.setName('view')
+						.setDescription('shows the ban list')
+						.addIntegerOption(pageOption),
 				),
 			cooldown: 0,
 		});

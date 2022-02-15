@@ -30,17 +30,30 @@ export default class ReloadCommand extends DualCommand {
 						subcommand
 							.setName('command')
 							.setDescription('reload a command')
-							.addStringOption((option) => option.setName('name').setDescription('command name').setRequired(true))
+							.addStringOption((option) =>
+								option //
+									.setName('name')
+									.setDescription('command name')
+									.setRequired(true),
+							)
 							.addBooleanOption(reloadOption),
 					)
 					.addSubcommand((subcommand) =>
-						subcommand.setName('commands').setDescription('reload all commands').addBooleanOption(reloadOption),
+						subcommand //
+							.setName('commands')
+							.setDescription('reload all commands')
+							.addBooleanOption(reloadOption),
 					)
 					.addSubcommand((subcommand) =>
 						subcommand
 							.setName('event')
 							.setDescription('reload an event')
-							.addStringOption((option) => option.setName('name').setDescription('event name').setRequired(true))
+							.addStringOption((option) =>
+								option //
+									.setName('name')
+									.setDescription('event name')
+									.setRequired(true),
+							)
 							.addBooleanOption(reloadOption)
 							.addBooleanOption(forceOption),
 					)
@@ -51,10 +64,20 @@ export default class ReloadCommand extends DualCommand {
 							.addBooleanOption(reloadOption)
 							.addBooleanOption(forceOption),
 					)
-					.addSubcommand((subcommand) => subcommand.setName('database').setDescription('reload the database cache'))
-					.addSubcommand((subcommand) => subcommand.setName('cooldowns').setDescription('reset all cooldowns'))
 					.addSubcommand((subcommand) =>
-						subcommand.setName('filter').setDescription('reload the blocked words filter'),
+						subcommand //
+							.setName('database')
+							.setDescription('reload the database cache'),
+					)
+					.addSubcommand((subcommand) =>
+						subcommand //
+							.setName('cooldowns')
+							.setDescription('reset all cooldowns'),
+					)
+					.addSubcommand((subcommand) =>
+						subcommand //
+							.setName('filter')
+							.setDescription('reload the blocked words filter'),
 					),
 				cooldown: 0,
 			},

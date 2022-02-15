@@ -11,9 +11,14 @@ import type { CommandContext } from '../../structures/commands/BaseCommand';
 export default class ExecCommand extends ApplicationCommand {
 	constructor(context: CommandContext) {
 		super(context, {
-			slash: new SlashCommandBuilder()
+			slash: new SlashCommandBuilder() //
 				.setDescription('executes bash code')
-				.addStringOption((option) => option.setName('input').setDescription('bash code').setRequired(true)),
+				.addStringOption((option) =>
+					option //
+						.setName('input')
+						.setDescription('bash code')
+						.setRequired(true),
+				),
 			cooldown: 0,
 		});
 	}

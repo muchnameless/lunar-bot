@@ -110,7 +110,10 @@ export default class MathsCommand extends DualCommand {
 				slash: new SlashCommandBuilder()
 					.setDescription('supports: + - * / ^ ! % sin cos tan sqrt exp ln log pi e')
 					.addStringOption((option) =>
-						option.setName('input').setDescription('mathematical expression to evaluate').setRequired(true),
+						option //
+							.setName('input')
+							.setDescription('mathematical expression to evaluate')
+							.setRequired(true),
 					),
 				cooldown: 0,
 			},

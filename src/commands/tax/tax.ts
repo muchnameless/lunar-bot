@@ -41,10 +41,17 @@ export default class TaxCommand extends ApplicationCommand {
 					subcommand
 						.setName('amount')
 						.setDescription('set the tax amount')
-						.addIntegerOption((option) => option.setName('amount').setDescription('new tax amount').setRequired(true)),
+						.addIntegerOption((option) =>
+							option //
+								.setName('amount')
+								.setDescription('new tax amount')
+								.setRequired(true),
+						),
 				)
 				.addSubcommand((subcommand) =>
-					subcommand.setName('collected').setDescription('show a list of taxahs and their collected tax amount'),
+					subcommand //
+						.setName('collected')
+						.setDescription('show a list of taxahs and their collected tax amount'),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
@@ -52,7 +59,10 @@ export default class TaxCommand extends ApplicationCommand {
 						.setDescription('manually set a player to paid')
 						.addStringOption(requiredPlayerOption)
 						.addIntegerOption((option) =>
-							option.setName('amount').setDescription('amount to overwrite the current tax amount').setRequired(false),
+							option //
+								.setName('amount')
+								.setDescription('amount to overwrite the current tax amount')
+								.setRequired(false),
 						),
 				)
 				.addSubcommand((subcommand) =>
@@ -67,11 +77,17 @@ export default class TaxCommand extends ApplicationCommand {
 						)
 						.addStringOption(hypixelGuildOption)
 						.addStringOption((option) =>
-							option.setName('exclude').setDescription('IGNs to exclude from the ping').setRequired(false),
+							option //
+								.setName('exclude')
+								.setDescription('IGNs to exclude from the ping')
+								.setRequired(false),
 						),
 				)
 				.addSubcommand((subcommand) =>
-					subcommand.setName('reset').setDescription('reset the tax database').addStringOption(optionalPlayerOption),
+					subcommand //
+						.setName('reset')
+						.setDescription('reset the tax database')
+						.addStringOption(optionalPlayerOption),
 				),
 			cooldown: 0,
 		});
