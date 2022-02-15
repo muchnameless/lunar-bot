@@ -16,7 +16,7 @@ export type ModelResovable<M extends Model> = M | string;
 export class ModelManager<M extends Model> {
 	client: LunarClient;
 	model: ModelStatic<M>;
-	primaryKey: keyof M; // Attributes<M> doesn't work with InterAttributes (sequelize 6.16.1)
+	primaryKey: keyof M; // Attributes<M> doesn't work with InferAttributes (sequelize 6.16.1)
 	cache = new Collection<string, M>();
 
 	/**
