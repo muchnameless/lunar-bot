@@ -342,11 +342,6 @@ export default class InteractionCreateEvent extends Event {
 				const { user, member } = interaction.options.get('user')!;
 				return command.runUser(interaction, user!, (member as GuildMember) ?? null);
 			}
-
-			default: {
-				const e: never = interaction.targetType;
-				logger.error(`[HANDLE CONTEXT MENU]: unknown target type: ${e}`);
-			}
 		}
 	}
 
