@@ -407,7 +407,7 @@ export async function getAuctionNetworth(profileId: string, uuid?: string) {
 	for (const auction of auctions) {
 		if (auction.claimed || auction.auctioneer !== uuid) continue;
 
-		if (auction.end > Date.now()) {
+		if (auction.end < Date.now()) {
 			collectableBids += auction.highest_bid_amount;
 		} else {
 			promises.push(parseItems(auction.item_bytes.data));
