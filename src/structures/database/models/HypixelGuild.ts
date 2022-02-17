@@ -961,7 +961,7 @@ export class HypixelGuild extends Model<
 				];
 				const ADDITIONAL_LENGTH = newFields.reduce((acc, { name, value }) => acc + name.length + value.length, 0);
 
-				if (currentLength + ADDITIONAL_LENGTH <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
+				if (currentLength + ADDITIONAL_LENGTH <= EMBED_MAX_CHARS && (embed.fields?.length ?? 0) < EMBED_MAX_FIELDS) {
 					embed.addFields(...newFields);
 					currentLength += ADDITIONAL_LENGTH;
 				} else {

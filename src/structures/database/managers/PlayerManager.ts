@@ -366,7 +366,10 @@ export class PlayerManager extends ModelManager<Player> {
 				const name = `${'new ign'.padEnd(150, '\u00A0')}\u200B`;
 				const value = logParts.shift()!;
 
-				if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
+				if (
+					currentLength + name.length + value.length <= EMBED_MAX_CHARS &&
+					(embed.fields?.length ?? 0) < EMBED_MAX_FIELDS
+				) {
 					embed.addFields({ name, value });
 					currentLength += name.length + value.length;
 				} else {
@@ -488,7 +491,10 @@ export class PlayerManager extends ModelManager<Player> {
 				const name = `${'main profile update'.padEnd(150, '\u00A0')}\u200B`;
 				const value = logParts.shift()!;
 
-				if (currentLength + name.length + value.length <= EMBED_MAX_CHARS && embed.fields.length < EMBED_MAX_FIELDS) {
+				if (
+					currentLength + name.length + value.length <= EMBED_MAX_CHARS &&
+					(embed.fields?.length ?? 0) < EMBED_MAX_FIELDS
+				) {
 					embed.addFields({ name, value });
 					currentLength += name.length + value.length;
 				} else {

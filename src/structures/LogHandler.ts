@@ -191,21 +191,19 @@ export class LogHandler {
 	private async _log({ embeds, files }: LogOptions) {
 		// log to console
 		for (const embed of embeds) {
-			const fields = embed.fields.flatMap(({ name, value }) => {
-				if (name === '\u200B' && value === '\u200B') return [];
-				return {
-					name: name.replaceAll('\u200B', '').trim() || undefined,
-					value: LogHandler.cleanLoggingEmbedString(value).replace(/\n/g, ', '),
-				};
-			});
-
 			logger.info(
 				{
 					description: LogHandler.cleanLoggingEmbedString(embed.description) || undefined,
 					user: embed.author?.name,
-					fields: fields.length ? fields : undefined,
+					fields: embed.fields?.flatMap(({ name, value }) => {
+						if (name === '\u200B' && value === '\u200B') return [];
+						return {
+							name: name.replaceAll('\u200B', '').trim() || undefined,
+							value: LogHandler.cleanLoggingEmbedString(value).replace(/\n/g, ', '),
+						};
+					}),
 				},
-				embed.title || undefined,
+				embed.title,
 			);
 		}
 

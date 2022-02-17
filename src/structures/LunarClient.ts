@@ -69,7 +69,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	override get defaultEmbed() {
 		return new Embed({
 			color: this.config.get('EMBED_BLUE'),
-			timestamp: new Date().toISOString(),
+			timestamp: Date.now(),
 		});
 	}
 

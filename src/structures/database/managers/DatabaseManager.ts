@@ -479,11 +479,12 @@ export class DatabaseManager {
 
 			if (
 				taxMessage.embeds[0]?.description === DESCRIPTION &&
-				taxMessage.embeds[0].fields.every(
+				taxMessage.embeds[0].fields?.every(
 					({ name, value }, index) => fields[index].name === name && fields[index].value === value,
 				)
-			)
+			) {
 				return this; // no changes to taxMessage
+			}
 
 			await taxMessage.edit({ embeds: [this.createTaxEmbed(DESCRIPTION, fields)] });
 			logger.info('[TAX MESSAGE]: updated taxMessage');

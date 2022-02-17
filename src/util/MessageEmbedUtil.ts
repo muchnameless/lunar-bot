@@ -8,7 +8,7 @@ export default class MessageEmbedUtil extends null {
 	 * @param numberOfRows
 	 */
 	static padFields(embed: Embed, numberOfRows = 3) {
-		if (embed.fields.length >= EMBED_MAX_FIELDS) return embed; // max number of embed fields already reached
+		if (!embed.fields || embed.fields.length >= EMBED_MAX_FIELDS) return embed; // max number of embed fields already reached
 
 		for (
 			let index = (numberOfRows - (embed.fields.filter(({ inline }) => inline).length % numberOfRows)) % numberOfRows;
