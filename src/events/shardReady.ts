@@ -1,6 +1,6 @@
 import { logger } from '../functions';
 import { Event, type EventContext } from '../structures/events/Event';
-import type { Snowflake } from 'discord-api-types';
+import type { Snowflake } from 'discord.js';
 
 export default class ShardReadyEvent extends Event {
 	constructor(context: EventContext) {
