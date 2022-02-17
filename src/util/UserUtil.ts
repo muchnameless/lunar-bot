@@ -5,13 +5,14 @@ import { cache } from '../api';
 import type { Embed, Message, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 
-interface _SendDMOptions extends MessageOptions {
+export interface SendDMOptions extends MessageOptions {
 	rejectOnError?: boolean;
 	embeds?: Embed[];
+	/** identifier used to prevent multiple DMs of the same type within `cooldown` ms */
+	redisKey?: string;
+	/** defaults to 1 hour */
+	cooldown?: number;
 }
-
-export type SendDMOptions = _SendDMOptions &
-	({ redisKey: string; cooldown: number } | { redisKey?: null; cooldown?: null });
 
 export class UserUtil extends null {
 	/**
@@ -50,11 +51,8 @@ export class UserUtil extends null {
 	static async sendDM(user: User, options: SendDMOptions & { rejectOnError: true }): Promise<Message>;
 	static async sendDM(user: User, options: string | SendDMOptions): Promise<Message | null>;
 	static async sendDM(user: User, options: string | SendDMOptions) {
-		const {
-			cooldown = null,
-			redisKey = null,
-			..._options
-		} = typeof options === 'string' ? ({ content: options } as SendDMOptions) : options;
+		const { cooldown, redisKey, ..._options } =
+			typeof options === 'string' ? ({ content: options } as SendDMOptions) : options;
 
 		// can't DM bots
 		if (user.bot) {
@@ -122,7 +120,7 @@ export class UserUtil extends null {
 			logger.error(error, `[USER SEND DM]: ${user.tag} | ${user.id}`);
 			return null;
 		} finally {
-			if (redisKey && cooldown) cache.set(redisKey, true, cooldown);
+			if (redisKey) cache.set(redisKey, true, cooldown ?? hours(1));
 		}
 	}
 }

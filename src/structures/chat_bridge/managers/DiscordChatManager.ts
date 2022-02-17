@@ -4,7 +4,7 @@ import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../.
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
 import { imgur } from '../../../api';
-import { asyncReplace, hours, logger } from '../../../functions';
+import { asyncReplace, logger } from '../../../functions';
 import { TimeoutAsyncQueue } from '../../TimeoutAsyncQueue';
 import { ChatManager } from './ChatManager';
 import type {
@@ -144,7 +144,6 @@ export class DiscordChatManager extends ChatManager {
 		UserUtil.sendDM(user, {
 			content,
 			redisKey: `dm:${user.id}:chatbridge:muted`,
-			cooldown: hours(1),
 		});
 	}
 

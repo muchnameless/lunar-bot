@@ -1609,7 +1609,6 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 							} will automatically change your discord nickname
 						`,
 							redisKey: `dm:${member.id}:nickname:ign`,
-							cooldown: hours(1),
 						});
 						break;
 
@@ -1620,7 +1619,6 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 								Your name should be unique to allow staff members to easily identify you
 							`,
 							redisKey: `dm:${member.id}:nickname:unique`,
-							cooldown: hours(1),
 						});
 						break;
 
