@@ -4,7 +4,7 @@ import type { Role, Collection, Guild, GuildMember, Snowflake } from 'discord.js
 export type RoleCollection = Collection<Snowflake, Role>;
 export type RoleResolvables = (Snowflake | Role | null)[] | RoleCollection;
 
-export default class GuildUtil extends null {
+export class GuildUtil extends null {
 	/**
 	 * cache
 	 */

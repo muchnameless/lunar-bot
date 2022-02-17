@@ -13,11 +13,11 @@ import {
 } from '../constants';
 import { logger, seconds } from '../functions';
 import { GuildUtil, UserUtil } from '.';
-import type { GuildMember, Message, MessageOptions, Snowflake, Role } from 'discord.js';
+import type { GuildMember, Message, Snowflake, Role } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
-import type { RoleCollection, RoleResolvables } from './GuildUtil';
+import type { RoleCollection, RoleResolvables, SendDMOptions } from '.';
 
-export default class GuildMemberUtil extends null {
+export class GuildMemberUtil extends null {
 	/**
 	 * @param member
 	 */
@@ -204,12 +204,9 @@ export default class GuildMemberUtil extends null {
 	 * @param member
 	 * @param options
 	 */
-	static sendDM(member: GuildMember, options: MessageOptions & { rejectOnError: true }): Promise<Message>;
-	static sendDM(
-		member: GuildMember,
-		options: string | (MessageOptions & { rejectOnError?: boolean }),
-	): Promise<Message | null>;
-	static sendDM(member: GuildMember, options: string | MessageOptions) {
+	static sendDM(member: GuildMember, options: SendDMOptions & { rejectOnError: true }): Promise<Message>;
+	static sendDM(member: GuildMember, options: string | SendDMOptions): Promise<Message | null>;
+	static sendDM(member: GuildMember, options: string | SendDMOptions) {
 		return UserUtil.sendDM(member.user, options);
 	}
 

@@ -15,7 +15,7 @@ import type {
 	Snowflake,
 	TextChannel,
 } from 'discord.js';
-import type { SendOptions } from './ChannelUtil';
+import type { SendOptions } from '.';
 
 interface AwaitReplyOptions extends MessageOptions {
 	question?: string;
@@ -35,7 +35,7 @@ interface QueuedDeletionTimeout {
 	executionTime: number;
 }
 
-export default class MessageUtil extends null {
+export class MessageUtil extends null {
 	static DEFAULT_REPLY_PERMISSIONS = PermissionFlagsBits.ViewChannel | PermissionFlagsBits.SendMessages;
 
 	static DELETE_TIMEOUT_CACHE = new Map<Snowflake, QueuedDeletionTimeout>();

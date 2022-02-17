@@ -10,7 +10,7 @@ export interface SendOptions extends MessageOptions {
 	embeds?: Embed[];
 }
 
-export default class ChannelUtil extends null {
+export class ChannelUtil extends null {
 	static DM_PERMISSIONS = new PermissionsBitField()
 		.add([
 			PermissionFlagsBits.AddReactions,

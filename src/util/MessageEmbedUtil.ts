@@ -1,7 +1,7 @@
 import { EMBED_MAX_FIELDS } from '../constants';
 import type { Embed } from 'discord.js';
 
-export default class MessageEmbedUtil extends null {
+export class MessageEmbedUtil extends null {
 	/**
 	 * adds additional blank inline fields such that each line is filled with 'numberOfRows = 3' of them
 	 * @param embed

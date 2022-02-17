@@ -69,7 +69,7 @@ import type { LunarClient } from '../../LunarClient';
 import type { TaxCollector } from './TaxCollector';
 import type { ModelResovable } from '../managers/ModelManager';
 import type { DungeonTypes, SkillTypes, SlayerTypes, XPAndDataTypes, XPOffsets } from '../../../constants';
-import type { RoleResolvables } from '../../../util/GuildUtil';
+import type { RoleResolvables } from '../../../util';
 import type { ArrayElement } from '../../../types/util';
 
 interface ParsedTransaction extends InferAttributes<Transaction> {

@@ -31,7 +31,7 @@ import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { LunarClient } from '../structures/LunarClient';
 import type { ConfigManager } from '../structures/database/managers/ConfigManager';
-import type { ChatInteraction } from '../util/InteractionUtil';
+import type { ChatInteraction } from '../util';
 import type {
 	DungeonTypes,
 	SkillTypes,

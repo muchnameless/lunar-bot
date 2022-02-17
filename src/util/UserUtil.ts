@@ -3,12 +3,12 @@ import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../consta
 import type { Embed, Message, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 
-interface SendDMOptions extends MessageOptions {
+export interface SendDMOptions extends MessageOptions {
 	rejectOnError?: boolean;
 	embeds?: Embed[];
 }
 
-export default class UserUtil extends null {
+export class UserUtil extends null {
 	/**
 	 * cache
 	 */

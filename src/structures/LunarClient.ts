@@ -110,7 +110,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	 * sends a DM to the bot owner
 	 * @param options
 	 */
-	override async dmOwner(options: string | MessageOptions) {
+	override async dmOwner(options: string | (MessageOptions & { embeds?: Embed[] })) {
 		try {
 			return UserUtil.sendDM(await this.users.fetch(this.ownerId), options);
 		} catch (error) {

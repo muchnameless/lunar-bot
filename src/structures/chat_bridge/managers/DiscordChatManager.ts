@@ -27,6 +27,7 @@ interface SendViaBotOptions extends MessageOptions {
 	content: string;
 	hypixelMessage?: HypixelMessage | null;
 	fromMinecraft?: boolean;
+	embeds?: Embed[];
 }
 
 interface SendViaWebhookOptions extends WebhookMessageOptions {

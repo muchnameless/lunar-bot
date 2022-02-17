@@ -1,1 +1,1 @@
-export default class LeaderboardUtil extends null {}
+export class LeaderboardUtil extends null {}

@@ -60,7 +60,7 @@ import type {
 	Interaction,
 } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { InteractionUtilReplyOptions } from '../../util/InteractionUtil';
+import type { InteractionUtilReplyOptions } from '../../util';
 
 const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
 const { logger, minutes, splitForEmbedFields } = functions;

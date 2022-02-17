@@ -33,7 +33,6 @@ import type {
 	InteractionUpdateOptions,
 	Message,
 	MessageComponentInteraction,
-	MessageOptions,
 	MessageResolvable,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
@@ -41,6 +40,7 @@ import type {
 import type { SplitOptions } from '../functions';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { Player } from '../structures/database/models/Player';
+import type { SendDMOptions } from '.';
 
 interface InteractionData {
 	deferReplyPromise: Promise<void | Message> | null;
@@ -59,10 +59,12 @@ export interface InteractionUtilReplyOptions extends InteractionReplyOptions {
 	split?: SplitOptions | boolean;
 	code?: string | boolean;
 	rejectOnError?: boolean;
+	embeds?: Embed[];
 }
 
 interface EditReplyOptions extends WebhookEditMessageOptions {
 	rejectOnError?: boolean;
+	embeds?: Embed[];
 }
 
 interface DeferUpdateOptions extends InteractionDeferUpdateOptions {
@@ -71,6 +73,7 @@ interface DeferUpdateOptions extends InteractionDeferUpdateOptions {
 
 interface UpdateOptions extends InteractionUpdateOptions {
 	rejectOnError?: boolean;
+	embeds?: Embed[];
 }
 
 interface GetPlayerOptions {
@@ -91,6 +94,7 @@ interface AwaitReplyOptions extends InteractionReplyOptions {
 	question?: string;
 	/** time in milliseconds to wait for a response */
 	time?: number;
+	embeds?: Embed[];
 }
 
 interface AwaitConfirmationOptions extends Omit<InteractionReplyOptions, 'fetchReply' | 'rejectOnError'> {
@@ -98,9 +102,10 @@ interface AwaitConfirmationOptions extends Omit<InteractionReplyOptions, 'fetchR
 	/** time in milliseconds to wait for a response */
 	time?: number;
 	errorMessage?: string;
+	embeds?: Embed[];
 }
 
-export default class InteractionUtil extends null {
+export class InteractionUtil extends null {
 	/**
 	 * cache
 	 */
@@ -401,8 +406,8 @@ export default class InteractionUtil extends null {
 		} catch (error) {
 			if (this.isInteractionError(error)) {
 				logger.error({ err: error, options: _options }, '[INTERACTION REPLY]');
-				if (_options.ephemeral) return UserUtil.sendDM(interaction.user, _options as MessageOptions);
-				return ChannelUtil.send(interaction.channel!, _options as MessageOptions);
+				if (_options.ephemeral) return UserUtil.sendDM(interaction.user, _options as SendDMOptions);
+				return ChannelUtil.send(interaction.channel!, _options as SendDMOptions);
 			}
 
 			if (_options.rejectOnError) throw error;
