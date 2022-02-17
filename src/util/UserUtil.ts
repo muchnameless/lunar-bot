@@ -1,12 +1,17 @@
-import { logger } from '../functions';
+import { DiscordAPIError, RESTJSONErrorCodes } from 'discord.js';
+import { hours, logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
+import { cache } from '../api';
 import type { Embed, Message, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 
-export interface SendDMOptions extends MessageOptions {
+interface _SendDMOptions extends MessageOptions {
 	rejectOnError?: boolean;
 	embeds?: Embed[];
 }
+
+export type SendDMOptions = _SendDMOptions &
+	({ redisKey: string; cooldown: number } | { redisKey?: null; cooldown?: null });
 
 export class UserUtil extends null {
 	/**
@@ -45,10 +50,33 @@ export class UserUtil extends null {
 	static async sendDM(user: User, options: SendDMOptions & { rejectOnError: true }): Promise<Message>;
 	static async sendDM(user: User, options: string | SendDMOptions): Promise<Message | null>;
 	static async sendDM(user: User, options: string | SendDMOptions) {
-		const _options = typeof options === 'string' ? { content: options } : options;
+		const {
+			cooldown = null,
+			redisKey = null,
+			..._options
+		} = typeof options === 'string' ? ({ content: options } as SendDMOptions) : options;
 
+		// can't DM bots
 		if (user.bot) {
 			const MESSAGE = `[USER SEND DM]: ${user.tag} | ${user.id} is a bot and can't be DMed`;
+
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn(_options, MESSAGE);
+			return null;
+		}
+
+		// user had DMs closed
+		if (await cache.get(`dm:${user.id}:closed`)) {
+			const MESSAGE = `[USER SEND DM]: DMing ${user.tag} is currently on cooldown`;
+
+			if (_options.rejectOnError) throw new Error(MESSAGE);
+			logger.warn(_options, MESSAGE);
+			return null;
+		}
+
+		// user has already been DMed recently
+		if (redisKey && (await cache.get(redisKey))) {
+			const MESSAGE = `[USER SEND DM]: DMing ${user.tag} is currently on cooldown`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn(_options, MESSAGE);
@@ -86,9 +114,15 @@ export class UserUtil extends null {
 		try {
 			return await user.send(_options);
 		} catch (error) {
+			if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.CannotSendMessagesToThisUser) {
+				cache.set(`dm:${user.id}:closed`, true, hours(1));
+			}
+
 			if (_options.rejectOnError) throw error;
 			logger.error(error, `[USER SEND DM]: ${user.tag} | ${user.id}`);
 			return null;
+		} finally {
+			if (redisKey && cooldown) cache.set(redisKey, true, cooldown);
 		}
 	}
 }

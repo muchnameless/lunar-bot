@@ -1599,34 +1599,38 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			);
 
 			if (shouldSendDm) {
+				let content: string | undefined;
+
 				switch (reason) {
 					case NickChangeReason.NoIGN:
-						GuildMemberUtil.sendDM(
-							member,
-							stripIndents`
-								include your ign \`${this.ign}\` somewhere in your nickname.
-								If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${
-								this.client.user
-							} will automatically change your discord nickname
-							`,
-						);
+						content = stripIndents`
+							include your ign \`${this.ign}\` somewhere in your nickname.
+							If you just changed your ign, wait up to ${this.client.config.get('DATABASE_UPDATE_INTERVAL')} minutes and ${
+							this.client.user
+						} will automatically change your discord nickname
+						`;
 						break;
 
 					case NickChangeReason.NotUnique:
-						GuildMemberUtil.sendDM(
-							member,
-							stripIndents`
-								the name \`${PREV_NAME}\` is already taken by another guild member.
-								Your name should be unique to allow staff members to easily identify you
-							`,
-						);
+						content = stripIndents`
+							the name \`${PREV_NAME}\` is already taken by another guild member.
+							Your name should be unique to allow staff members to easily identify you
+						`;
 						break;
 
 					default:
 						logger.error(`[SYNC IGN DISPLAYNAME]: unknown reason: ${reason}`);
 				}
 
-				logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`);
+				if (content) {
+					GuildMemberUtil.sendDM(member, {
+						content,
+						redisKey: `dm:${member.id}:nickname`,
+						cooldown: hours(1),
+					});
+
+					logger.info(`[SYNC IGN DISPLAYNAME]: ${this.logInfo}: sent nickname info DM`);
+				}
 			}
 
 			return true;

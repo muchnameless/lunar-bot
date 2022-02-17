@@ -21,7 +21,6 @@ import { MC_CLIENT_VERSION, MINECRAFT_DATA, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } f
 import { createBot } from '../MinecraftBot';
 import { MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector, MessageCollectorEvent } from '../MessageCollector';
-import { cache } from '../../../api';
 import {
 	asyncReplace,
 	cleanFormattedNumber,
@@ -323,7 +322,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 
 		MessageUtil.react(discordMessage, STOP_EMOJI);
 
-		let info: string | undefined;
+		let content: string | undefined;
 
 		switch (reason) {
 			case ForwardRejectionReason.HypixelBlocked: {
@@ -365,24 +364,24 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 							.setTimestamp(),
 					);
 
-					info = `you were automatically muted for ${MUTE_DURATION} due to continues infractions`;
+					content = `you were automatically muted for ${MUTE_DURATION} due to continues infractions`;
 				}
 
-				info ??= 'continuing to do so will result in an automatic temporary mute';
+				content ??= 'continuing to do so will result in an automatic temporary mute';
 			}
 			// fallthrough
 
 			case ForwardRejectionReason.LocalBlocked:
-				info = stripIndents`
+				content = stripIndents`
 					your message was blocked because you used a blocked word or character
 					(the blocked words filter is to comply with hypixel's chat rules, removing it would simply result in a "We blocked your comment as it breaks our rules"-message)
 
-					${info ?? ''}
+					${content ?? ''}
 				`;
 				break;
 
 			case ForwardRejectionReason.MessageCount:
-				info = stripIndents`
+				content = stripIndents`
 					your message was blocked because you are only allowed to send up to ${
 						data?.maxParts ?? this.client.config.get('CHATBRIDGE_DEFAULT_MAX_PARTS')
 					} messages at once
@@ -396,16 +395,16 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 			}
 		}
 
-		if (
-			reason !== ForwardRejectionReason.HypixelBlocked &&
-			(await cache.get(`chatbridge:blocked:dm:${discordMessage.author.id}`))
-		) {
-			return;
-		}
-
-		UserUtil.sendDM(discordMessage.author, info);
-		logger.info(`[FORWARD REJECTION]: DMed ${discordMessage.author.tag}`);
-		cache.set(`chatbridge:blocked:dm:${discordMessage.author.id}`, true, hours(24)); // prevent DMing again in the next 24 hours
+		UserUtil.sendDM(
+			discordMessage.author,
+			reason === ForwardRejectionReason.HypixelBlocked
+				? content
+				: {
+						content,
+						redisKey: `dm:${discordMessage.author.id}:chatbridge:blocked`,
+						cooldown: hours(24),
+				  },
+		);
 	}
 
 	/**

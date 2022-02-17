@@ -3,7 +3,7 @@ import { PREFIX_BY_TYPE, DISCORD_CDN_URL_REGEXP } from '../constants';
 import { X_EMOJI, MUTED_EMOJI, STOP_EMOJI, WEBHOOKS_MAX_PER_CHANNEL } from '../../../constants';
 import { ChannelUtil, MessageUtil, UserUtil } from '../../../util';
 import { WebhookError } from '../../errors/WebhookError';
-import { cache, imgur } from '../../../api';
+import { imgur } from '../../../api';
 import { asyncReplace, hours, logger } from '../../../functions';
 import { TimeoutAsyncQueue } from '../../TimeoutAsyncQueue';
 import { ChatManager } from './ChatManager';
@@ -15,12 +15,12 @@ import type {
 	MessageOptions,
 	Snowflake,
 	TextChannel,
+	User,
 	Webhook,
 	WebhookMessageOptions,
 } from 'discord.js';
 import type { ChatBridge, MessageForwardOptions } from '../ChatBridge';
 import type { ChatBridgeChannel } from '../../database/models/HypixelGuild';
-import type { Player } from '../../database/models/Player';
 import type { HypixelMessage } from '../HypixelMessage';
 
 interface SendViaBotOptions extends MessageOptions {
@@ -140,15 +140,12 @@ export class DiscordChatManager extends ChatManager {
 	 * @param player
 	 * @param content
 	 */
-	static async _dmMuteInfo(message: Message, player: Player | null, content: string) {
-		if (message.editable) return; // message was sent by the bot
-		if (await cache.get(`chatbridge:muted:dm:${message.author.id}`)) return;
-
-		UserUtil.sendDM(message.author, content);
-
-		logger.info(`[DM MUTE INFO]: ${player?.logInfo ?? ''}: DMed muted user`);
-
-		cache.set(`chatbridge:muted:dm:${message.author.id}`, true, hours(1)); // prevent DMing again in the next hour
+	static _dmMuteInfo(user: User, content: string) {
+		UserUtil.sendDM(user, {
+			content,
+			redisKey: `dm:${user.id}:chatbridge:muted`,
+			cooldown: hours(1),
+		});
 	}
 
 	/**
@@ -396,8 +393,7 @@ export class DiscordChatManager extends ChatManager {
 		// check if player is muted
 		if (this.hypixelGuild!.checkMute(player)) {
 			DiscordChatManager._dmMuteInfo(
-				message,
-				player,
+				message.author,
 				`your mute expires ${Formatters.time(
 					new Date(this.hypixelGuild!.mutedPlayers.get(player!.minecraftUuid)!),
 					Formatters.TimestampStyles.RelativeTime,
@@ -408,15 +404,14 @@ export class DiscordChatManager extends ChatManager {
 
 		// check if the player is auto muted
 		if (player?.infractions! >= this.client.config.get('CHATBRIDGE_AUTOMUTE_MAX_INFRACTIONS')) {
-			DiscordChatManager._dmMuteInfo(message, player, 'you are currently muted due to continues infractions');
+			DiscordChatManager._dmMuteInfo(message.author, 'you are currently muted due to continues infractions');
 			return MessageUtil.react(message, MUTED_EMOJI);
 		}
 
 		// check if guild chat is muted
 		if (this.hypixelGuild!.muted && (!player || !this.hypixelGuild!.checkStaff(player))) {
 			DiscordChatManager._dmMuteInfo(
-				message,
-				player,
+				message.author,
 				`${this.hypixelGuild!.name}'s guild chat mute expires ${Formatters.time(
 					new Date(this.hypixelGuild!.mutedTill),
 					Formatters.TimestampStyles.RelativeTime,
@@ -428,8 +423,7 @@ export class DiscordChatManager extends ChatManager {
 		// check if the chatBridge bot is muted
 		if (this.hypixelGuild!.checkMute(this.minecraft.botPlayer)) {
 			DiscordChatManager._dmMuteInfo(
-				message,
-				player,
+				message.author,
 				`the bot's mute expires ${Formatters.time(
 					new Date(this.hypixelGuild!.mutedPlayers.get(this.minecraft.botUuid)!),
 					Formatters.TimestampStyles.RelativeTime,
