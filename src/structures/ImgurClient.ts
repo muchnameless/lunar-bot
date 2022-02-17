@@ -48,7 +48,7 @@ export interface UploadResponse {
 
 interface Cache {
 	get(key: string): Promise<unknown | undefined>;
-	set(key: string, value: unknown): Promise<true>;
+	set(key: string, value: unknown): Promise<unknown>;
 }
 
 interface RateLimitData {

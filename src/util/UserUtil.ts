@@ -1,7 +1,7 @@
 import { DiscordAPIError, RESTJSONErrorCodes } from 'discord.js';
 import { hours, logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
-import { cache } from '../api';
+import { redis } from '../api';
 import type { Embed, Message, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 
@@ -63,18 +63,9 @@ export class UserUtil extends null {
 			return null;
 		}
 
-		// user had DMs closed
-		if (await cache.get(`dm:${user.id}:closed`)) {
-			const MESSAGE = `[USER SEND DM]: ${user.tag} had their DMs closed`;
-
-			if (_options.rejectOnError) throw new Error(MESSAGE);
-			logger.warn(_options, MESSAGE);
-			return null;
-		}
-
-		// user has already been DMed recently
-		if (redisKey && (await cache.get(redisKey))) {
-			const MESSAGE = `[USER SEND DM]: DMing ${user.tag} is currently on cooldown`;
+		// user had DMs closed or has already been DMed recently
+		if (await redis.exists(`dm:${user.id}:closed`, redisKey!)) {
+			const MESSAGE = `[USER SEND DM]: aborted DMing ${user.tag}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn(_options, MESSAGE);
@@ -113,14 +104,14 @@ export class UserUtil extends null {
 			return await user.send(_options);
 		} catch (error) {
 			if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.CannotSendMessagesToThisUser) {
-				cache.set(`dm:${user.id}:closed`, true, hours(1));
+				redis.psetex(`dm:${user.id}:closed`, hours(1), 1);
 			}
 
 			if (_options.rejectOnError) throw error;
 			logger.error(error, `[USER SEND DM]: ${user.tag} | ${user.id}`);
 			return null;
 		} finally {
-			if (redisKey) cache.set(redisKey, true, cooldown ?? hours(1));
+			if (redisKey) redis.psetex(redisKey, cooldown ?? hours(1), 1);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 import { BUST_IMAGE_URL } from '../constants';
-import { cache, imgur } from '../api';
+import { redis, imgur } from '../api';
 import { days, logger } from '.';
 import type { LunarClient } from '../structures/LunarClient';
 
@@ -13,7 +13,7 @@ export const uuidToBustURL = (uuid: string) => `${BUST_IMAGE_URL}${uuid}` as con
 export async function uuidToImgurBustURL({ config }: LunarClient, uuid: string) {
 	try {
 		const cacheKey = `image:bust:${uuid}`;
-		const cachedResult = (await cache.get(cacheKey)) as string | undefined;
+		const cachedResult = await redis.get(cacheKey);
 
 		if (cachedResult) return cachedResult;
 
@@ -21,7 +21,7 @@ export async function uuidToImgurBustURL({ config }: LunarClient, uuid: string) 
 
 		const URL = (await imgur.upload(uuidToBustURL(uuid))).data.link;
 
-		cache.set(cacheKey, URL, days(3));
+		redis.psetex(cacheKey, days(3), URL);
 
 		return URL;
 	} catch (error) {

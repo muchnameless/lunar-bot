@@ -3,7 +3,7 @@ import { URL } from 'node:url';
 import { env, exit } from 'node:process';
 import { Client, Embed } from 'discord.js';
 import { GuildUtil, UserUtil } from '../util';
-import { cache, imgur } from '../api';
+import { redis, imgur } from '../api';
 import { hours, logger, safePromiseAll } from '../functions';
 import { DatabaseManager } from './database/managers/DatabaseManager';
 import { LogHandler } from './LogHandler';
@@ -146,11 +146,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 			logger.fatal(error);
 		}
 
-		for (const output of await Promise.allSettled([
-			this.db.sequelize.close(),
-			// @ts-expect-error
-			cache.opts.store?.redis?.quit(),
-		])) {
+		for (const output of await Promise.allSettled([this.db.sequelize.close(), redis.quit()])) {
 			if (output.status === 'rejected') {
 				logger.fatal(output.reason);
 				hasError = true;

@@ -24,7 +24,7 @@ import {
 	Y_EMOJI_ALT,
 } from '../constants';
 import { InteractionUtil, UserUtil } from '../util';
-import { cache } from '../api';
+import { redis } from '../api';
 import { days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
 import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
@@ -292,7 +292,7 @@ export async function handleLeaderboardCommandInteraction(
 ) {
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	const embeds =
-		((await cache.get(CACHE_KEY)) as Embed[]) ??
+		(JSON.parse((await redis.get(CACHE_KEY))!) as Embed[] | null) ??
 		createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
@@ -309,10 +309,10 @@ export async function handleLeaderboardCommandInteraction(
 		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 	});
 
-	await cache.set(
+	await redis.psetex(
 		CACHE_KEY,
-		embeds.map((embed) => embed.toJSON?.() ?? embed),
 		interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
+		JSON.stringify(embeds),
 	);
 }
 
@@ -346,7 +346,7 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 				interaction.client,
 				getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
 		  )
-		: ((await cache.get(CACHE_KEY)) as Embed[]);
+		: (JSON.parse((await redis.get(CACHE_KEY))!) as Embed[] | null);
 
 	if (!embeds) {
 		await InteractionUtil.update(interaction, {
@@ -373,10 +373,10 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 	});
 
 	if (IS_RELOAD) {
-		await cache.set(
+		await redis.psetex(
 			CACHE_KEY,
-			embeds.map((embed) => embed.toJSON?.() ?? embed),
 			interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
+			JSON.stringify(embeds),
 		);
 	}
 }
@@ -447,7 +447,7 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 	const embeds =
-		((await cache.get(CACHE_KEY)) as Embed[]) ??
+		(JSON.parse((await redis.get(CACHE_KEY))!) as Embed[] | null) ??
 		createLeaderboardEmbeds(
 			interaction.client,
 			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
@@ -458,10 +458,10 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
 	});
 
-	await cache.set(
+	await redis.psetex(
 		CACHE_KEY,
-		embeds.map((embed) => embed.toJSON?.() ?? embed),
 		interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
+		embeds.map((embed) => embed.toJSON?.() ?? embed),
 	);
 }
 

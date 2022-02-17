@@ -2,7 +2,7 @@ import { env } from 'node:process';
 import { Client } from '@zikeji/hypixel';
 import { HYPIXEL_KEY } from '../constants';
 import { days, logger, minutes, seconds } from '../functions';
-import { cache } from '.';
+import { redis } from '.';
 import type { DefaultMeta } from '@zikeji/hypixel';
 
 export const SKYBLOCK_PROFILE_TTL = seconds(30);
@@ -12,8 +12,8 @@ export const hypixel = new Client(env.HYPIXEL_KEY!, {
 	rateLimitResetOffset: seconds(1),
 	retries: 1,
 	cache: {
-		get<T>(key: string) {
-			return cache.get(`${HYPIXEL_KEY}:${key}`) as Promise<T & DefaultMeta>;
+		async get<T>(key: string): Promise<(T & DefaultMeta) | null> {
+			return JSON.parse((await redis.get(`${HYPIXEL_KEY}:${key}`))!);
 		},
 		// @ts-expect-error return types
 		set(key, value) {
@@ -38,7 +38,7 @@ export const hypixel = new Client(env.HYPIXEL_KEY!, {
 				ttl = minutes(1); // this endpoint is cached by cloudflare and updates every 60 seconds
 			}
 
-			return cache.set(`${HYPIXEL_KEY}:${key}`, value, ttl);
+			return redis.psetex(`${HYPIXEL_KEY}:${key}`, ttl, JSON.stringify(value));
 		},
 	},
 });

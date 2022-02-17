@@ -15,12 +15,12 @@ interface MojangFetchOptions {
 }
 
 interface Cache {
-	get(key: string): Promise<(MojangResult & { error?: boolean; status?: number; statusText?: string }) | undefined>;
+	get(key: string): Promise<(MojangResult & { error?: boolean; status?: number; statusText?: string }) | null>;
 	set(
 		key: string,
 		value: MojangResult | { error: boolean; status: number; statusText: string },
 		isError?: boolean,
-	): Promise<true>;
+	): Promise<unknown>;
 }
 
 interface MojangClientOptions {

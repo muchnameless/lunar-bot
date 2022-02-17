@@ -1,10 +1,7 @@
 import { env } from 'node:process';
-import Keyv from 'keyv';
-import { logger, minutes } from '../functions';
+import Redis from 'ioredis';
+import { logger } from '../functions';
 
-export const cache = new Keyv<unknown>(env.REDIS_URI, {
-	namespace: env.NAMESPACE,
-	ttl: minutes(10),
-});
+export const redis = new Redis(env.REDIS_URI);
 
-cache.on('error', (error) => logger.error(error));
+redis.on('error', (error) => logger.error(error));

@@ -1,15 +1,15 @@
 import { MOJANG_KEY } from '../constants';
 import { MojangClient } from '../structures/MojangClient';
 import { days, hours, minutes, seconds } from '../functions';
-import { cache } from '.';
+import { redis } from '.';
 import type { MojangResult } from '../structures/MojangClient';
 
 export const mojang = new MojangClient({
 	timeout: seconds(30),
 	retries: 1,
 	cache: {
-		get(key) {
-			return cache.get(`${MOJANG_KEY}:${key}`) as Promise<MojangResult | undefined>;
+		async get(key): Promise<MojangResult | null> {
+			return JSON.parse((await redis.get(`${MOJANG_KEY}:${key}`))!);
 		},
 		set(key, value, isError = false) {
 			let ttl = minutes(5);
@@ -23,7 +23,7 @@ export const mojang = new MojangClient({
 				ttl = hours(1);
 			}
 
-			return cache.set(`${MOJANG_KEY}:${key}`, value, ttl);
+			return redis.psetex(`${MOJANG_KEY}:${key}`, ttl, JSON.stringify(value));
 		},
 	},
 });
