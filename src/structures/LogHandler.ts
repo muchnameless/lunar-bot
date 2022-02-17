@@ -7,7 +7,6 @@ import ms from 'ms';
 import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';
-import type { APIEmbed } from 'discord-api-types/v9';
 import type { GuildChannel, Message, TextChannel } from 'discord.js';
 import type { URL } from 'node:url';
 import type { LunarClient } from './LunarClient';
@@ -258,7 +257,7 @@ export class LogHandler {
 						.replace(', ', '_')
 						.replaceAll(':', '.')}_${SnowflakeUtil.generate()}`,
 				),
-				embeds.map((embed) => JSON.stringify(embed)).join('\n'),
+				embeds.map((embed) => embed.toJSON()).join('\n'),
 			);
 		} catch (error) {
 			logger.error(error, '[LOG TO FILE]');
@@ -280,7 +279,9 @@ export class LogHandler {
 				const FILE_PATH = join(fileURLToPath(this.logURL), file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
-				await this._log({ embeds: FILE_CONTENT.split('\n').map((x) => new Embed(JSON.parse(x) as APIEmbed)) });
+				await this._log({
+					embeds: FILE_CONTENT.split('\n').map((x) => new Embed(JSON.parse(x) as ReturnType<Embed['toJSON']>)),
+				});
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {
