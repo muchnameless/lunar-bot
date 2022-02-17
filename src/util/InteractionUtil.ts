@@ -29,6 +29,7 @@ import type {
 	InteractionDeferReplyOptions,
 	InteractionDeferUpdateOptions,
 	InteractionReplyOptions,
+	InteractionResponseFields,
 	InteractionUpdateOptions,
 	Message,
 	MessageComponentInteraction,
@@ -172,10 +173,9 @@ export default class InteractionUtil extends null {
 		if (!(error instanceof DiscordAPIError)) return false;
 
 		switch (error.code) {
-			// TODO: use RESTJSONErrorCodes.InteractionHasAlreadyBeenAcknowledged
 			case RESTJSONErrorCodes.UnknownWebhook:
 			case RESTJSONErrorCodes.UnknownInteraction:
-			case 40_060:
+			case RESTJSONErrorCodes.InteractionHasAlreadyBeenAcknowledged:
 			case RESTJSONErrorCodes.InvalidWebhookToken:
 				return true;
 
@@ -344,15 +344,15 @@ export default class InteractionUtil extends null {
 	 * @param options
 	 */
 	static async reply(
-		interaction: ChatInteraction,
+		interaction: Interaction & InteractionResponseFields,
 		options: InteractionUtilReplyOptions & { rejectOnError: true; fetchReply: true },
 	): Promise<Message>;
 	static async reply(
-		interaction: ChatInteraction,
+		interaction: Interaction & InteractionResponseFields,
 		options: InteractionUtilReplyOptions & { rejectOnError: true },
 	): Promise<void | Message>;
 	static async reply(
-		interaction: ChatInteraction,
+		interaction: Interaction & InteractionResponseFields,
 		options: string | InteractionUtilReplyOptions,
 	): Promise<void | null | Message>;
 	static async reply(
