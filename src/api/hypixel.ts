@@ -15,7 +15,6 @@ export const hypixel = new Client(env.HYPIXEL_KEY!, {
 		async get<T>(key: string): Promise<(T & DefaultMeta) | null> {
 			return JSON.parse((await redis.get(`${HYPIXEL_KEY}:${key}`))!);
 		},
-		// @ts-expect-error return types
 		set(key, value) {
 			let ttl = minutes(5); // default 5 minute ttl
 
