@@ -54,16 +54,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/builders@npm:0.13.0-dev.1644753796.3ae6f3c":
-  version: 0.13.0-dev.1644753796.3ae6f3c
-  resolution: "@discordjs/builders@npm:0.13.0-dev.1644753796.3ae6f3c"
+"@discordjs/builders@npm:0.13.0-dev.1645056350.dee27db":
+  version: 0.13.0-dev.1645056350.dee27db
+  resolution: "@discordjs/builders@npm:0.13.0-dev.1645056350.dee27db"
   dependencies:
     "@sindresorhus/is": ^4.4.0
-    discord-api-types: ^0.26.1
+    discord-api-types: ^0.27.0
     ts-mixer: ^6.0.0
     tslib: ^2.3.1
     zod: ^3.11.6
-  checksum: c9456389f7e0e0ccccaee0bc06924d6a92e47e941c334258b555c50c7d64cac72caafdbdbd913df62f107d21cd42d1f01f0dcbc75b9396a9ac3e3ea849cb501f
+  checksum: 270c87be834c0136e74a73d129f03750e372d61e30ac24f2d4b350fc6bd5a3c37b063c6b112d1709f636e524454061130483d578e1937fa2eff0c8af08b04caf
   languageName: node
   linkType: hard
 
@@ -1306,7 +1306,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"discord-api-types@npm:0.26.1, discord-api-types@npm:^0.26.1":
+"discord-api-types@npm:0.26.1":
   version: 0.26.1
   resolution: "discord-api-types@npm:0.26.1"
   checksum: e53bfa7589b24108e6b403dbe213da34c4592f72e2b8fde6800dcb6c703065887ecbd644e1cdf694e4c7796954bc51462ced868f26ec45dc1e0dc4fa8d3c723c
@@ -2922,7 +2922,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "lunar-bot@workspace:."
   dependencies:
-    "@discordjs/builders": 0.13.0-dev.1644753796.3ae6f3c
+    "@discordjs/builders": 0.13.0-dev.1645056350.dee27db
     "@discordjs/rest": 0.4.0-dev.1645056356.dee27db
     "@keyv/redis": ^2.2.3
     "@sapphire/async-queue": ^1.2.0
