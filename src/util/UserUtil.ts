@@ -3,6 +3,11 @@ import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../consta
 import type { Embed, Message, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 
+interface SendDMOptions extends MessageOptions {
+	rejectOnError?: boolean;
+	embeds?: Embed[];
+}
+
 export default class UserUtil extends null {
 	/**
 	 * cache
@@ -37,12 +42,9 @@ export default class UserUtil extends null {
 	 * @param user
 	 * @param options
 	 */
-	static async sendDM(user: User, options: MessageOptions & { rejectOnError: true }): Promise<Message>;
-	static async sendDM(
-		user: User,
-		options: string | (MessageOptions & { rejectOnError?: boolean }),
-	): Promise<Message | null>;
-	static async sendDM(user: User, options: string | (MessageOptions & { rejectOnError?: boolean })) {
+	static async sendDM(user: User, options: SendDMOptions & { rejectOnError: true }): Promise<Message>;
+	static async sendDM(user: User, options: string | SendDMOptions): Promise<Message | null>;
+	static async sendDM(user: User, options: string | SendDMOptions) {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
 		if (user.bot) {
@@ -62,10 +64,7 @@ export default class UserUtil extends null {
 				return null;
 			}
 
-			const TOTAL_LENGTH = _options.embeds!.reduce(
-				(acc, cur) => acc + (cur as Embed).length ?? Number.POSITIVE_INFINITY,
-				0,
-			);
+			const TOTAL_LENGTH = _options.embeds!.reduce((acc, cur) => acc + cur.length, 0);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
 				const MESSAGE = `[USER SEND DM]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;

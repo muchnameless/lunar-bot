@@ -21,10 +21,12 @@ interface AwaitReplyOptions extends MessageOptions {
 	question?: string;
 	/** time in milliseconds to wait for a response */
 	time?: number;
+	embeds?: Embed[];
 }
 
 interface EditOptions extends MessageEditOptions {
 	rejectOnError?: boolean;
+	embeds?: Embed[];
 }
 
 interface QueuedDeletionTimeout {
@@ -313,10 +315,7 @@ export default class MessageUtil extends null {
 				return message;
 			}
 
-			const TOTAL_LENGTH = _options.embeds!.reduce(
-				(acc, cur) => acc + (cur as Embed).length ?? Number.POSITIVE_INFINITY,
-				0,
-			);
+			const TOTAL_LENGTH = _options.embeds!.reduce((acc, cur) => acc + cur.length, 0);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
 				const MESSAGE = `[MESSAGE EDIT]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;

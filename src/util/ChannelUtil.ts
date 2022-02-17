@@ -7,6 +7,7 @@ import type { AnyChannel, Embed, Message, MessageOptions, Snowflake, TextBasedCh
 
 export interface SendOptions extends MessageOptions {
 	rejectOnError?: boolean;
+	embeds?: Embed[];
 }
 
 export default class ChannelUtil extends null {
@@ -135,10 +136,7 @@ export default class ChannelUtil extends null {
 				return null;
 			}
 
-			const TOTAL_LENGTH = _options.embeds!.reduce(
-				(acc, cur) => acc + (cur as Embed).length ?? Number.POSITIVE_INFINITY,
-				0,
-			);
+			const TOTAL_LENGTH = _options.embeds!.reduce((acc, cur) => acc + cur.length, 0);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
 				const MESSAGE = `[CHANNEL SEND]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;
