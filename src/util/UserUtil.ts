@@ -67,7 +67,7 @@ export class UserUtil extends null {
 
 		// user had DMs closed
 		if (await cache.get(`dm:${user.id}:closed`)) {
-			const MESSAGE = `[USER SEND DM]: DMing ${user.tag} is currently on cooldown`;
+			const MESSAGE = `[USER SEND DM]: ${user.tag} had their DMs closed`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn(_options, MESSAGE);
