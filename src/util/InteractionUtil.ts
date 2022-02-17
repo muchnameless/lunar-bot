@@ -1,6 +1,7 @@
 import { setTimeout, clearTimeout } from 'node:timers';
 import {
 	ActionRow,
+	ApplicationCommandType,
 	ButtonComponent,
 	ButtonStyle,
 	ChannelType,
@@ -8,6 +9,7 @@ import {
 	ComponentType,
 	DiscordAPIError,
 	Embed,
+	InteractionType,
 	RESTJSONErrorCodes,
 	SnowflakeUtil,
 } from 'discord.js';
@@ -188,7 +190,7 @@ export default class InteractionUtil extends null {
 	static logInfo(interaction: Interaction) {
 		if (interaction.isChatInputCommand()) {
 			return {
-				type: interaction.type,
+				type: InteractionType[interaction.type],
 				command: interaction.toString(),
 				user: interaction.member
 					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
@@ -202,7 +204,7 @@ export default class InteractionUtil extends null {
 
 		if (interaction.isButton()) {
 			return {
-				type: interaction.componentType,
+				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
 				user: interaction.member
 					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
@@ -216,7 +218,7 @@ export default class InteractionUtil extends null {
 
 		if (interaction.isSelectMenu()) {
 			return {
-				type: interaction.componentType,
+				type: ComponentType[interaction.componentType],
 				customId: interaction.customId,
 				values: interaction.values,
 				user: interaction.member
@@ -231,7 +233,7 @@ export default class InteractionUtil extends null {
 
 		if (interaction.isContextMenuCommand()) {
 			return {
-				type: interaction.commandType,
+				type: ApplicationCommandType[interaction.commandType],
 				command: interaction.commandName,
 				user: interaction.member
 					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
@@ -245,7 +247,7 @@ export default class InteractionUtil extends null {
 
 		if (interaction.isAutocomplete()) {
 			return {
-				type: interaction.type,
+				type: InteractionType[interaction.type],
 				command: interaction.commandName,
 				focused: interaction.options.getFocused(true),
 				user: interaction.member
@@ -259,7 +261,7 @@ export default class InteractionUtil extends null {
 		}
 
 		return {
-			type: interaction.type,
+			type: InteractionType[interaction.type],
 			user: interaction.member
 				? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
 				: interaction.user.tag,
