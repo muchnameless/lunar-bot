@@ -65,7 +65,7 @@ export class UserUtil extends null {
 
 		// user had DMs closed or has already been DMed recently
 		if (await redis.exists(`dm:${user.id}:closed`, redisKey!)) {
-			const MESSAGE = `[USER SEND DM]: aborted DMing ${user.tag}`;
+			const MESSAGE = `[USER SEND DM]: aborted DMing ${user.tag} | ${user.id}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
 			logger.warn(_options, MESSAGE);
