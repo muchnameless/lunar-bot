@@ -63,8 +63,12 @@ export class UserUtil extends null {
 			return null;
 		}
 
+		const keysToCheck = [`dm:${user.id}:closed`];
+		if (redisKey) keysToCheck.push(redisKey);
+		if (!user.dmChannel) keysToCheck.push('dm:channel:creation:error');
+
 		// user had DMs closed or has already been DMed recently
-		if (await redis.exists(`dm:${user.id}:closed`, redisKey!)) {
+		if (await redis.exists(...keysToCheck)) {
 			const MESSAGE = `[USER SEND DM]: aborted DMing ${user.tag} | ${user.id}`;
 
 			if (_options.rejectOnError) throw new Error(MESSAGE);
@@ -103,8 +107,16 @@ export class UserUtil extends null {
 		try {
 			return await user.send(_options);
 		} catch (error) {
-			if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.CannotSendMessagesToThisUser) {
-				redis.psetex(`dm:${user.id}:closed`, hours(1), 1);
+			if (error instanceof DiscordAPIError) {
+				switch (error.code) {
+					case RESTJSONErrorCodes.CannotSendMessagesToThisUser:
+						redis.psetex(`dm:${user.id}:closed`, hours(1), 1);
+						break;
+
+					case RESTJSONErrorCodes.OpeningDirectMessagesTooFast:
+						redis.psetex('dm:channel:creation:error', hours(1), 1);
+						break;
+				}
 			}
 
 			if (_options.rejectOnError) throw error;
