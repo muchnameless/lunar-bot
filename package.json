@@ -92,7 +92,7 @@
 		"node": ">=v17.5.0",
 		"npm": ">=8.4.1"
 	},
-	"packageManager": "yarn@3.1.1",
+	"packageManager": "yarn@3.2.0",
 	"resolutions": {
 		"@discordjs/builders": "0.13.0-dev.1645402064.78aa36f",
 		"@discordjs/rest": "0.4.0-dev.1645402054.78aa36f",

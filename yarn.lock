@@ -2,7 +2,7 @@
 # Manual changes might be lost - proceed with caution!
 
 __metadata:
-  version: 5
+  version: 6
   cacheKey: 8
 
 "@azure/msal-common@npm:^6.1.0":
@@ -4908,7 +4908,7 @@ __metadata:
 
 "typescript@patch:typescript@^4.6.0-dev.20220211#~builtin<compat/typescript>":
   version: 4.6.0-dev.20220211
-  resolution: "typescript@patch:typescript@npm%3A4.6.0-dev.20220211#~builtin<compat/typescript>::version=4.6.0-dev.20220211&hash=493e53"
+  resolution: "typescript@patch:typescript@npm%3A4.6.0-dev.20220211#~builtin<compat/typescript>::version=4.6.0-dev.20220211&hash=bda367"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
