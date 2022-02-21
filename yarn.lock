@@ -69,9 +69,9 @@ __metadata:
   linkType: hard
 
 "@discordjs/collection@npm:^0.6.0-dev":
-  version: 0.6.0-dev.1644797195.0dfdb2c
-  resolution: "@discordjs/collection@npm:0.6.0-dev.1644797195.0dfdb2c"
-  checksum: 74b09940eb92dc0695f7e370b92b46778f61512c6055a6aeffbecb2966ad2eac9a851b3c99f6343a3ed40e69dea05416299962a10bb022be14c9047e98f2eacc
+  version: 0.6.0-dev.1645402055.78aa36f
+  resolution: "@discordjs/collection@npm:0.6.0-dev.1645402055.78aa36f"
+  checksum: 011c34c222f156e87f525b4be6e797008110211697da64ab23e095d1022e0632797c571cd8def8dc8d4e8e34a1a223ce9a2a46b8fef4bcdb015256f16419ea27
   languageName: node
   linkType: hard
 
@@ -128,9 +128,9 @@ __metadata:
   linkType: hard
 
 "@gar/promisify@npm:^1.0.1":
-  version: 1.1.2
-  resolution: "@gar/promisify@npm:1.1.2"
-  checksum: d05081e0887a49c178b75ee3067bd6ee086f73c154d121b854fb2e044e8a89cb1cbb6de3a0dd93a519b80f0531fda68b099dd7256205f7fbb3490324342f2217
+  version: 1.1.3
+  resolution: "@gar/promisify@npm:1.1.3"
+  checksum: 4059f790e2d07bf3c3ff3e0fec0daa8144fe35c1f6e0111c9921bd32106adaa97a4ab096ad7dab1e28ee6a9060083c4d1a4ada42a7f5f3f7a96b8812e2b757c1
   languageName: node
   linkType: hard
 
@@ -362,23 +362,16 @@ __metadata:
   linkType: hard
 
 "@types/node-fetch@npm:^2.5.12":
-  version: 2.5.12
-  resolution: "@types/node-fetch@npm:2.5.12"
+  version: 2.6.1
+  resolution: "@types/node-fetch@npm:2.6.1"
   dependencies:
     "@types/node": "*"
     form-data: ^3.0.0
-  checksum: ad63c85ba6a9477b8e057ec8682257738130d98e8ece4e31141789bd99df9d9147985cc8bc0cb5c8983ed5aa6bb95d46df23d1e055f4ad5cf8b82fc69cf626c7
+  checksum: a3e5d7f413d1638d795dff03f7b142b1b0e0c109ed210479000ce7b3ea11f9a6d89d9a024c96578d9249570c5fe5287a5f0f4aaba98199222230196ff2d6b283
   languageName: node
   linkType: hard
 
-"@types/node@npm:*":
-  version: 17.0.17
-  resolution: "@types/node@npm:17.0.17"
-  checksum: 8ddba2829acdf1684fbd8fd248ec13f033efb70ecd1085677b547c40ef8e936a006b95eac3bdc28c47939c62526f3f027afeb4a930e30e4394923bbae4626476
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^17.0.18":
+"@types/node@npm:*, @types/node@npm:^17.0.18":
   version: 17.0.18
   resolution: "@types/node@npm:17.0.18"
   checksum: 6c4edfc2b3ba2342a9c3d56e934c5245948ab752f4dc04bd6790b9603e6ebc53bc4f5befc3662e207f7dba2ddd17ccf657f915e319ea7cdd4f77b851079d1611
@@ -411,11 +404,11 @@ __metadata:
   linkType: hard
 
 "@types/ws@npm:^8.2.2":
-  version: 8.2.2
-  resolution: "@types/ws@npm:8.2.2"
+  version: 8.2.3
+  resolution: "@types/ws@npm:8.2.3"
   dependencies:
     "@types/node": "*"
-  checksum: 308957864b9a5a0378ac82f1b084fa31b1bbe85106fb0d84ed2b392e4829404f21ab6ab2c1eb782d556e59cd33d57c75ad2d0cedc4b9b9d0ca3b2311bc915578
+  checksum: 94e949ef66909334eb8d77079a28ce8fcea8780295eadab1bccdbb85adc0534d96d9a61910a80720769c6019e7bfaba90cea6f95f58e93de135b766074aa53cb
   languageName: node
   linkType: hard
 
@@ -1917,12 +1910,12 @@ __metadata:
   linkType: hard
 
 "follow-redirects@npm:^1.14.0":
-  version: 1.14.8
-  resolution: "follow-redirects@npm:1.14.8"
+  version: 1.14.9
+  resolution: "follow-redirects@npm:1.14.9"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: 40c67899c2e3149a27e8b6498a338ff27f39fe138fde8d7f0756cb44b073ba0bfec3d52af28f20c5bdd67263d564d0d8d7b5efefd431de95c18c42f7b4aef457
+  checksum: f5982e0eb481818642492d3ca35a86989c98af1128b8e1a62911a3410621bc15d2b079e8170b35b19d3bdee770b73ed431a257ed86195af773771145baa57845
   languageName: node
   linkType: hard
 
@@ -1996,8 +1989,8 @@ __metadata:
   linkType: hard
 
 "gauge@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "gauge@npm:4.0.0"
+  version: 4.0.1
+  resolution: "gauge@npm:4.0.1"
   dependencies:
     ansi-regex: ^5.0.1
     aproba: ^1.0.3 || ^2.0.0
@@ -2008,7 +2001,7 @@ __metadata:
     string-width: ^4.2.3
     strip-ansi: ^6.0.1
     wide-align: ^1.1.2
-  checksum: 637b34c84f518defa89319dbef68211a24e9302182ad2a619e3be1be5b7dcf2a962c8359e889294af667440f4722e7e6e61671859e00bd8ec280a136ded89b25
+  checksum: 398540c761f2efbd8c35323b781a572db09a3ab2d62ea672fc440eb88e9249624ac8b64275731d9ef266cde6491880df5360d74d0829da077136ee614b08f85c
   languageName: node
   linkType: hard
 
@@ -3067,17 +3060,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-data@npm:^2.113.1":
+"minecraft-data@npm:^2.113.1, minecraft-data@npm:^2.62.1, minecraft-data@npm:^2.98.0":
   version: 2.113.1
   resolution: "minecraft-data@npm:2.113.1"
   checksum: 395851755695cf8e10c6db00d0fe4ab590be8e4e60dff42d1249f9d5bcac1cfd032097ea01eac81f48f6ff4eaf96576741902bfafec75950f2eadc2f14b851d6
-  languageName: node
-  linkType: hard
-
-"minecraft-data@npm:^2.62.1, minecraft-data@npm:^2.98.0":
-  version: 2.113.0
-  resolution: "minecraft-data@npm:2.113.0"
-  checksum: c482b1957c0b06f9463b221bd2f1bf26e0b806f97846df4f83f59a588c7d1f1d660415b9ca6e9cda701c3c84474383d8958a9e7dfc6ea7537bf86ee51201c05e
   languageName: node
   linkType: hard
 
@@ -3113,11 +3099,11 @@ __metadata:
   linkType: hard
 
 "minimatch@npm:^3.0.4":
-  version: 3.1.1
-  resolution: "minimatch@npm:3.1.1"
+  version: 3.1.2
+  resolution: "minimatch@npm:3.1.2"
   dependencies:
     brace-expansion: ^1.1.7
-  checksum: e9e3772e4ea06ea3a888d39bc7690d3c812ee7e5a70c2d2f568ccadac0249a027f865589d19ad03ed937e6ca3b4ad35f85411db9670f7877d8fc2ed452f1cd37
+  checksum: c154e566406683e7bcb746e000b84d74465b3a832c45d59912b9b55cd50dee66e5c4b1e5566dba26154040e51672f9aa450a9aef0c97cfc7336b78b7afb9540a
   languageName: node
   linkType: hard
 
