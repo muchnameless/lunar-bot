@@ -71,28 +71,26 @@ export default class PurgeRolesCommand extends ApplicationCommand {
 				)}?`,
 			);
 
-			await Promise.all(
-				toPurge.map(async ({ id, rolesToPurge }, index) => {
-					await sleep(index * PurgeRolesCommand.TIMEOUT);
+			let success = 0;
 
-					try {
-						const member = guild.members.cache.get(id);
-						if (!member) return;
+			for (const { id, rolesToPurge } of toPurge) {
+				await sleep(PurgeRolesCommand.TIMEOUT);
 
-						await member.roles.remove(rolesToPurge);
+				const member = guild.members.cache.get(id);
+				if (!member) continue;
 
-						logger.info(
-							`[PURGE ROLES]: removed ${rolesToPurge.length} role(s) from ${member.user.tag} | ${member.displayName}`,
-						);
-					} catch (error) {
-						logger.error(error, '[PURGE ROLES]');
-					}
-				}),
-			);
+				await member.roles.remove(rolesToPurge);
+
+				++success;
+
+				logger.info(
+					`[PURGE ROLES]: removed ${rolesToPurge.length} role(s) from ${member.user.tag} | ${member.displayName}`,
+				);
+			}
 
 			return InteractionUtil.reply(
 				interaction,
-				`done, purged roles from ${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`,
+				`done, purged roles from ${success}/${PURGE_AMOUNT} member${PURGE_AMOUNT !== 1 ? 's' : ''}`,
 			);
 		} finally {
 			PurgeRolesCommand.running.delete(guild.id);
