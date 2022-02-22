@@ -2953,7 +2953,7 @@ __metadata:
     pretty-quick: ^3.1.3
     prismarine-chat: ^1.6.0
     prismarine-nbt: ^2.2.0
-    re2: ^1.17.3
+    re2: ^1.17.4
     readdirp: ^3.6.0
     rss-parser: ^3.12.0
     sequelize: 6.16.2
@@ -4025,14 +4025,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"re2@npm:^1.17.3":
-  version: 1.17.3
-  resolution: "re2@npm:1.17.3"
+"re2@npm:^1.17.4":
+  version: 1.17.4
+  resolution: "re2@npm:1.17.4"
   dependencies:
     install-artifact-from-github: ^1.3.0
     nan: ^2.15.0
     node-gyp: ^8.4.1
-  checksum: 038e06860677aeff0b1a2ad5d43f59f62113871a29c997ee7a7519f89444edfbc533a528cb7181e37a63e94fe32eae6e59d4d5cc80db844c4171a7f1b006d01a
+  checksum: dec55c66efbf3e815e88fc8d584bdba8436229ae9299a8611f013e61182714ee8348e7cc1860df8895351b6a741dc18bd68285682b0a2024d76d07bbdf70abc1
   languageName: node
   linkType: hard
 
