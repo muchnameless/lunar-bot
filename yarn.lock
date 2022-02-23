@@ -54,9 +54,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/builders@npm:0.13.0-dev.1645402064.78aa36f":
-  version: 0.13.0-dev.1645402064.78aa36f
-  resolution: "@discordjs/builders@npm:0.13.0-dev.1645402064.78aa36f"
+"@discordjs/builders@npm:0.13.0-dev.1645617791.5158332":
+  version: 0.13.0-dev.1645617791.5158332
+  resolution: "@discordjs/builders@npm:0.13.0-dev.1645617791.5158332"
   dependencies:
     "@sindresorhus/is": ^4.4.0
     discord-api-types: ^0.27.0
@@ -64,7 +64,7 @@ __metadata:
     ts-mixer: ^6.0.0
     tslib: ^2.3.1
     zod: ^3.11.6
-  checksum: 2e43f9ff922a0ce1e518c011648ef37e6bfe0e4fcb3b90fecd0c6b3613ceb5e2804dfcea2178a0a0beef525b176235936c88b8cee8f08d38d53b9ddc56c298de
+  checksum: 1b73622ce5f49bcebe2ba49f822865cd03e9f6c15610e7b9f52d73958a08782e98533cb5f20484a227b0dce0b377661e304fff40c733e5803aaf9ee185e2b6d1
   languageName: node
   linkType: hard
 
