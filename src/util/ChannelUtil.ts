@@ -53,6 +53,7 @@ export class ChannelUtil extends null {
 
 		switch (channel.type) {
 			case ChannelType.DM:
+			case ChannelType.GroupDM:
 				return this.DM_PERMISSIONS;
 
 			default:
