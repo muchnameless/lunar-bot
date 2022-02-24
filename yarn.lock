@@ -2928,7 +2928,7 @@ __metadata:
     re2: ^1.17.4
     readdirp: ^3.6.0
     rss-parser: ^3.12.0
-    sequelize: 6.16.2
+    sequelize: 6.16.3
     timezonecomplete: ^5.12.4
     tiny-typed-emitter: ^2.1.0
     tslib: ^2.3.1
@@ -4334,9 +4334,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sequelize@npm:6.16.2":
-  version: 6.16.2
-  resolution: "sequelize@npm:6.16.2"
+"sequelize@npm:6.16.3":
+  version: 6.16.3
+  resolution: "sequelize@npm:6.16.3"
   dependencies:
     "@types/debug": ^4.1.7
     debug: ^4.3.3
@@ -4370,7 +4370,7 @@ __metadata:
       optional: true
     tedious:
       optional: true
-  checksum: 43799f8bcc9b608fe941d890bae19c62dfb028267baa5facdbed15a74ea1418c8c135d059522a5952d673b74e2399b48e95a9307d25fccf1c2a30703800174a7
+  checksum: d9ac5c1978c4afe69090a82f29477baf3cd05436e0938c38017d1ddc20228a25383f7d2aaaf90dfed410e50c19dfc47bd2c4d17cba096fbf1ede8dda893bdd3f
   languageName: node
   linkType: hard
 
