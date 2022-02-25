@@ -54,7 +54,7 @@ export const DUNGEON_EXPONENTS = {
  */
 
 import lilyConstants from 'lilyweight/lib/constants.json' assert { type: 'json' };
-import type { SKILLS } from '.';
+import { keys } from '../types/util';
 
-export const LILY_SKILL_NAMES_API = Object.keys(lilyConstants.skillNames);
-export const LILY_SKILL_NAMES = Object.keys(lilyConstants.skillRatioWeight) as unknown as typeof SKILLS;
+export const LILY_SKILL_NAMES_API = keys(lilyConstants.skillNames);
+export const LILY_SKILL_NAMES = keys(lilyConstants.skillRatioWeight);

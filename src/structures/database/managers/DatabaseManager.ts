@@ -7,6 +7,7 @@ import { DEFAULT_CONFIG, X_EMOJI, Y_EMOJI_ALT } from '../../../constants';
 import { hypixel } from '../../../api';
 import { ChannelUtil } from '../../../util';
 import { asyncFilter, compareAlphabetically, formatNumber, logger } from '../../../functions';
+import { entries } from '../../../types/util';
 import { ConfigManager } from './ConfigManager';
 import { HypixelGuildManager } from './HypixelGuildManager';
 import { PlayerManager } from './PlayerManager';
@@ -124,10 +125,8 @@ export class DatabaseManager {
 
 		// set default config
 		await Promise.all(
-			Object.entries(DEFAULT_CONFIG).map(([key, value]) =>
-				this.modelManagers.config.get(key as keyof typeof DEFAULT_CONFIG) !== null
-					? null
-					: this.modelManagers.config.set(key, value),
+			entries(DEFAULT_CONFIG).map(
+				([key, value]) => this.modelManagers.config.get(key) === null && this.modelManagers.config.set(key, value),
 			),
 		);
 

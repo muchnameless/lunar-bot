@@ -4,6 +4,7 @@ import { AsyncQueue } from '@sapphire/async-queue';
 import { fetch, FormData } from 'undici';
 import ms from 'ms';
 import { consumeBody, logger, seconds } from '../functions';
+import { keys } from '../types/util';
 import { FetchError } from './errors/FetchError';
 import type { RequestInit, Response } from 'undici';
 
@@ -227,20 +228,20 @@ export class ImgurClient {
 			const NOW = date ? Date.parse(date) || Date.now() : Date.now();
 
 			// get ratelimit headers
-			for (const type of Object.keys(this.rateLimit)) {
+			for (const type of keys(this.rateLimit)) {
 				const data = Number.parseInt(res.headers.get(`x-ratelimit-${type}`)!, 10);
 				if (Number.isNaN(data)) continue;
 
-				this.rateLimit[type as keyof RateLimitData] = type.endsWith('reset')
+				this.rateLimit[type] = type.endsWith('reset')
 					? (data < 1e9 ? NOW : 0) + seconds(data) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
 					: data;
 			}
 
-			for (const type of Object.keys(this.postRateLimit)) {
+			for (const type of keys(this.postRateLimit)) {
 				const data = Number.parseInt(res.headers.get(`x-post-rate-limit-${type}`)!, 10);
 				if (Number.isNaN(data)) continue;
 
-				this.postRateLimit[type as keyof PostRateLimitData] = type.endsWith('reset')
+				this.postRateLimit[type] = type.endsWith('reset')
 					? (data < 1e9 ? NOW : 0) + seconds(data) + this.rateLimitOffset // x-ratelimit-reset is seconds until reset -> convert to timestamp
 					: data;
 			}

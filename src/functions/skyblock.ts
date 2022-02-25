@@ -8,6 +8,7 @@ import {
 	SKILL_XP_PAST_50,
 	SLAYER_XP,
 } from '../constants';
+import { keys } from '../types/util';
 import { getLilyWeight } from '.';
 import type { Components } from '@zikeji/hypixel';
 import type { DungeonTypes, SkillTypes } from '../constants';
@@ -32,11 +33,11 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
 		: type === 'runecrafting'
 		? RUNECRAFTING_XP
 		: SKILL_XP;
-	let maxLevel = Math.max(...(Object.keys(xpTable) as unknown as number[]));
+	let maxLevel = Math.max(...keys(xpTable));
 
 	if (LEVEL_CAP[type] > maxLevel || individualCap) {
 		xpTable = { ...SKILL_XP_PAST_50, ...xpTable };
-		maxLevel = individualCap !== null ? individualCap : Math.max(...(Object.keys(xpTable) as unknown as number[]));
+		maxLevel = individualCap !== null ? individualCap : Math.max(...keys(xpTable));
 	}
 
 	let xpTotal = 0;
@@ -75,7 +76,7 @@ export function getSkillLevel(type: SkillTypes | DungeonTypes, xp = 0, individua
  * @param xp
  */
 export function getSlayerLevel(xp = 0) {
-	const MAX_LEVEL = Math.max(...(Object.keys(SLAYER_XP) as unknown as number[]));
+	const MAX_LEVEL = Math.max(...keys(SLAYER_XP));
 
 	let level = 0;
 

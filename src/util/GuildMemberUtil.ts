@@ -12,6 +12,7 @@ import {
 	SLAYERS,
 } from '../constants';
 import { logger, seconds } from '../functions';
+import { toUpperCase } from '../types/util';
 import { GuildUtil, UserUtil } from '.';
 import type { GuildMember, Message, Snowflake, Role } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
@@ -82,7 +83,7 @@ export class GuildMemberUtil extends null {
 			}
 
 			// individual skills
-			for (const skill of SKILLS.map((s) => s.toUpperCase() as Uppercase<typeof s>)) {
+			for (const skill of SKILLS.map((s) => toUpperCase(s))) {
 				for (const level of SKILL_ROLES) {
 					if (roleCache.has(discordGuild[`${skill}_${level}_ROLE_ID`]!)) {
 						rolesToRemove.push(discordGuild[`${skill}_${level}_ROLE_ID`]!);
@@ -98,7 +99,7 @@ export class GuildMemberUtil extends null {
 			}
 
 			// individual slayer
-			for (const slayer of SLAYERS.map((s) => s.toUpperCase() as Uppercase<typeof s>)) {
+			for (const slayer of SLAYERS.map((s) => toUpperCase(s))) {
 				for (const level of SLAYER_ROLES) {
 					if (roleCache.has(discordGuild[`${slayer}_${level}_ROLE_ID`]!)) {
 						rolesToRemove.push(discordGuild[`${slayer}_${level}_ROLE_ID`]!);

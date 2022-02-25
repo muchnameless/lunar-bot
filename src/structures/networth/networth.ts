@@ -68,6 +68,7 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
 		farming_for_dummies_count: number;
 		gems: Record<string, string>;
 		gemstone_slots: number;
+		modifier: keyof typeof REFORGES;
 		petInfo: string;
 		skin: string;
 		talisman_enrichment: string;
@@ -271,7 +272,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 
 	// reforge
 	if (ExtraAttributes.modifier && !TALISMANS.has(itemId)) {
-		price += getPrice(REFORGES[ExtraAttributes.modifier as keyof typeof REFORGES]) * PriceModifier.Reforge;
+		price += getPrice(REFORGES[ExtraAttributes.modifier]) * PriceModifier.Reforge;
 	}
 
 	// scrolls (Necron's Blade)

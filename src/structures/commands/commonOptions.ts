@@ -7,6 +7,7 @@ import {
 	XP_OFFSETS_SHORT,
 } from '../../constants';
 import { upperCaseFirstChar } from '../../functions';
+import { keys } from '../../types/util';
 
 export const optionalIgnOption = new SlashCommandStringOption()
 	.setName('ign')
@@ -85,9 +86,9 @@ export const offsetOption = new SlashCommandStringOption()
 	.setDescription('Δ offset')
 	.setRequired(false)
 	.addChoices(
-		...Object.keys(XP_OFFSETS_SHORT).map((x) => ({
+		...keys(XP_OFFSETS_SHORT).map((x) => ({
 			name: x,
-			value: XP_OFFSETS_CONVERTER[x as keyof typeof XP_OFFSETS_SHORT],
+			value: XP_OFFSETS_CONVERTER[x],
 		})),
 	);
 

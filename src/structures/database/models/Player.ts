@@ -50,6 +50,7 @@ import {
 	validateDiscordId,
 	validateNumber,
 } from '../../../functions';
+import { toUpperCase } from '../../../types/util';
 import { TransactionType } from './Transaction';
 import type {
 	CreationOptional,
@@ -1078,7 +1079,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				// individual skill lvl 45+ / 50+ / 55+ / 60
 				const { progressLevel } = this.getSkillLevel(skill);
 				const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
-				const SKILL = skill.toUpperCase() as Uppercase<typeof skill>;
+				const SKILL = toUpperCase(skill);
 
 				// individual skills
 				for (const level of SKILL_ROLES) {
@@ -1114,7 +1115,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		const LOWEST_SLAYER_LVL = Math.min(
 			...SLAYERS.map((slayer) => {
 				const SLAYER_LVL = this.getSlayerLevel(slayer);
-				const SLAYER = slayer.toUpperCase() as Uppercase<typeof slayer>;
+				const SLAYER = toUpperCase(slayer);
 
 				// individual slayer
 				for (const level of SLAYER_ROLES) {

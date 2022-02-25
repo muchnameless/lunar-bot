@@ -10,9 +10,7 @@ export const { getWeightRaw: getLilyWeightRaw } = LilyWeight;
  * @param skyblockMember
  */
 export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfileMember): WeightData {
-	const SKILL_XP_LILY = LILY_SKILL_NAMES_API.map(
-		(skill) => (skyblockMember[skill as keyof typeof skyblockMember] as number) ?? 0,
-	);
+	const SKILL_XP_LILY = LILY_SKILL_NAMES_API.map((skill) => skyblockMember[skill] ?? 0);
 	const {
 		total,
 		skill: { base: skill, overflow },

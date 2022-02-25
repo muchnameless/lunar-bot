@@ -9,6 +9,7 @@ import {
 	SLAYER_ROLES,
 	SLAYER_TOTAL_ROLES,
 } from '../../../constants';
+import { toUpperCase } from '../../../types/util';
 import type {
 	CreationOptional,
 	InferAttributes,
@@ -123,7 +124,7 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 
 		for (const skill of SKILLS) {
 			for (const level of SKILL_ROLES) {
-				attributes[`${skill.toUpperCase() as Uppercase<typeof skill>}_${level}_ROLE_ID`] = {
+				attributes[`${toUpperCase(skill)}_${level}_ROLE_ID`] = {
 					type: DataTypes.STRING,
 					defaultValue: null,
 					allowNull: true,
@@ -141,7 +142,7 @@ export class DiscordGuild extends Model<InferAttributes<DiscordGuild>, InferCrea
 
 		for (const slayer of SLAYERS) {
 			for (const level of SLAYER_ROLES) {
-				attributes[`${slayer.toUpperCase() as Uppercase<typeof slayer>}_${level}_ROLE_ID`] = {
+				attributes[`${toUpperCase(slayer)}_${level}_ROLE_ID`] = {
 					type: DataTypes.STRING,
 					defaultValue: null,
 					allowNull: true,
