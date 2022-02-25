@@ -130,21 +130,21 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	declare minecraftUuid: string;
 	declare ign: CreationOptional<string>;
-	declare discordId: CreationOptional<string | null>;
+	declare discordId: string | null;
 	declare inDiscord: CreationOptional<boolean>;
-	declare guildId: CreationOptional<string | null>;
+	declare guildId: string | null;
 	declare guildRankPriority: CreationOptional<number>;
-	declare _infractions: CreationOptional<number[] | null>;
+	declare _infractions: number[] | null;
 	declare hasDiscordPingPermission: CreationOptional<boolean>;
-	declare notes: CreationOptional<string | null>;
+	declare notes: string | null;
 	declare paid: CreationOptional<boolean>;
-	declare mainProfileId: CreationOptional<string | null>;
-	declare mainProfileName: CreationOptional<string | null>;
-	declare xpLastUpdatedAt: CreationOptional<Date | null>;
+	declare mainProfileId: string | null;
+	declare mainProfileName: string | null;
+	declare xpLastUpdatedAt: Date | null;
 	declare xpUpdatesDisabled: CreationOptional<boolean>;
 	declare discordMemberUpdatesDisabled: CreationOptional<boolean>;
 	declare farmingLvlCap: CreationOptional<number>;
-	declare guildXpDay: CreationOptional<string | null>;
+	declare guildXpDay: string | null;
 	declare guildXpDaily: CreationOptional<number>;
 	declare lastActivityAt: CreationOptional<Date>;
 

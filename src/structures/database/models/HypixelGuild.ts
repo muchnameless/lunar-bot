@@ -95,15 +95,15 @@ export class HypixelGuild extends Model<
 	declare client: NonAttribute<LunarClient>;
 
 	declare guildId: string;
-	declare discordId: CreationOptional<Snowflake | null>;
+	declare discordId: Snowflake | null;
 	/** Lunar */
-	declare GUILD_ROLE_ID: CreationOptional<Snowflake | null>;
-	declare EX_GUILD_ROLE_ID: CreationOptional<Snowflake | null>;
-	declare BRIDGER_ROLE_ID: CreationOptional<Snowflake | null>;
+	declare GUILD_ROLE_ID: Snowflake | null;
+	declare EX_GUILD_ROLE_ID: Snowflake | null;
+	declare BRIDGER_ROLE_ID: Snowflake | null;
 	declare staffRoleIds: CreationOptional<Snowflake[]>;
 	declare adminRoleIds: CreationOptional<Snowflake[]>;
 	declare name: CreationOptional<string>;
-	declare weightReq: CreationOptional<number | null>;
+	declare weightReq: number | null;
 	declare chatBridgeEnabled: CreationOptional<boolean>;
 	declare mutedTill: CreationOptional<number>;
 	declare _mutedPlayers: CreationOptional<MutedGuildMember[]>;
@@ -113,13 +113,13 @@ export class HypixelGuild extends Model<
 	/** amount of non GM ranks with staff perms */
 	declare staffRanksAmount: CreationOptional<number>;
 	declare statsHistory: CreationOptional<StatsHistory[]>;
-	declare statDiscordChannels: CreationOptional<HypixelGuildStats | null>;
+	declare statDiscordChannels: HypixelGuildStats | null;
 	declare updateStatDiscordChannelsEnabled: CreationOptional<boolean>;
 	declare acceptJoinRequests: CreationOptional<boolean>;
-	declare taxChannelId: CreationOptional<Snowflake | null>;
-	declare taxMessageId: CreationOptional<Snowflake | null>;
-	declare announcementsChannelId: CreationOptional<Snowflake | null>;
-	declare loggingChannelId: CreationOptional<Snowflake | null>;
+	declare taxChannelId: Snowflake | null;
+	declare taxMessageId: Snowflake | null;
+	declare announcementsChannelId: Snowflake | null;
+	declare loggingChannelId: Snowflake | null;
 	declare syncIgnThreshold: CreationOptional<number>;
 	declare kickCooldown: CreationOptional<number>;
 	declare lastKickAt: CreationOptional<Date>;

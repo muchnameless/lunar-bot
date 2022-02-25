@@ -13,7 +13,7 @@ export class HypixelGuildBan extends Model<InferAttributes<HypixelGuildBan>, Inf
 	declare client: NonAttribute<LunarClient>;
 
 	declare minecraftUuid: string;
-	declare _reason: CreationOptional<string | null>;
+	declare _reason: string | null;
 
 	declare readonly createdAt: CreationOptional<Date>;
 	declare readonly updatedAt: CreationOptional<Date>;
