@@ -53,7 +53,6 @@ export const DUNGEON_EXPONENTS = {
  * https://github.com/Antonio32A/lilyweight
  */
 
-// @ts-expect-error works fine in node.js v17.5+
 import lilyConstants from 'lilyweight/lib/constants.json' assert { type: 'json' };
 import type { SKILLS } from '.';
 
