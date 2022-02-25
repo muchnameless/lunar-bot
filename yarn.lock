@@ -394,6 +394,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/validator@npm:^13.7.1":
+  version: 13.7.1
+  resolution: "@types/validator@npm:13.7.1"
+  checksum: 810649a23bc46928c85d933be73b106bacb651a412c4172e30a70e84c63cada595d391042274b16e1c05b391af3a4f157b360890fbc5462ee347275222d59b64
+  languageName: node
+  linkType: hard
+
 "@types/ws@npm:^8.2.2":
   version: 8.2.3
   resolution: "@types/ws@npm:8.2.3"
@@ -2267,7 +2274,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"inflection@npm:^1.13.1":
+"inflection@npm:^1.13.2":
   version: 1.13.2
   resolution: "inflection@npm:1.13.2"
   checksum: e7ad0559384ed7c526813404bde843f8f17941d47625ad60fc3b09e46efde873dd9840818007c6bd4dbe388e6248fa033d5a8c405c5fc62738c51b118a0e940f
@@ -2928,7 +2935,7 @@ __metadata:
     re2: ^1.17.4
     readdirp: ^3.6.0
     rss-parser: ^3.12.0
-    sequelize: 6.16.3
+    sequelize: 6.17.0
     timezonecomplete: ^5.12.4
     tiny-typed-emitter: ^2.1.0
     tslib: ^2.3.1
@@ -4334,14 +4341,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sequelize@npm:6.16.3":
-  version: 6.16.3
-  resolution: "sequelize@npm:6.16.3"
+"sequelize@npm:6.17.0":
+  version: 6.17.0
+  resolution: "sequelize@npm:6.17.0"
   dependencies:
     "@types/debug": ^4.1.7
+    "@types/validator": ^13.7.1
     debug: ^4.3.3
     dottie: ^2.0.2
-    inflection: ^1.13.1
+    inflection: ^1.13.2
     lodash: ^4.17.21
     moment: ^2.29.1
     moment-timezone: ^0.5.34
@@ -4370,7 +4378,7 @@ __metadata:
       optional: true
     tedious:
       optional: true
-  checksum: d9ac5c1978c4afe69090a82f29477baf3cd05436e0938c38017d1ddc20228a25383f7d2aaaf90dfed410e50c19dfc47bd2c4d17cba096fbf1ede8dda893bdd3f
+  checksum: 54bef508cff51e1330604dfeb926dc3f0618ec28ddcc9f97c3a6d9e94d1d4ce625e66c3f40d50e91f028239a7ecb5d85aeb11ee7f402666448b25991d249b21b
   languageName: node
   linkType: hard
 
