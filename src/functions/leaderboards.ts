@@ -144,6 +144,16 @@ const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild, lbType, xpType, o
 	}:${lbType}:${xpType}:${offset}` as const;
 
 /**
+ * default xp offset based on wether there is a current competition or not
+ * @param config
+ */
+export const getDefaultOffset = (config: ConfigManager) =>
+	config.get('COMPETITION_RUNNING') ||
+	(Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= days(1))
+		? OFFSET_FLAGS.COMPETITION_START
+		: config.get('DEFAULT_XP_OFFSET');
+
+/**
  * returns a message action row with pagination buttons
  * @param client
  * @param cacheKey
@@ -259,17 +269,6 @@ function createActionRows(
 	);
 
 	return rows;
-}
-
-/**
- * default xp offset based on wether there is a current competition or not
- * @param config
- */
-export function getDefaultOffset(config: ConfigManager) {
-	return config.get('COMPETITION_RUNNING') ||
-		(Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= days(1))
-		? OFFSET_FLAGS.COMPETITION_START
-		: config.get('DEFAULT_XP_OFFSET');
 }
 
 /**
