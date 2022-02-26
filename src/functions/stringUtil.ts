@@ -61,7 +61,7 @@ export const stringToMS = (string: string) => string.split(/(?<=[a-z])(?=\d)/).r
 export const removeMcFormatting = (string: string) => string.replace(/§[\da-gk-or]/g, '');
 
 /**
- * escapes '*' and '_' if those are neither within an URL nor a code block or inline code
+ * escapes '*' and '_' if those are neither within a URL nor a code block or inline code
  * @param string
  * @param escapeEverything wether to also escape '\' before '*' and '_'
  */
