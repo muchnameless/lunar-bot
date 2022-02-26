@@ -27,6 +27,7 @@ import { InteractionUtil, UserUtil } from '../util';
 import { redis } from '../api';
 import { days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
 import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
+import type { APIEmbed } from 'discord-api-types/v9';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { LunarClient } from '../structures/LunarClient';
@@ -55,16 +56,6 @@ export type LeaderboardXPTypes = ArrayElement<
 		'guild',
 	]
 >;
-
-interface LeaderboardData {
-	title: string;
-	description: string;
-	playerData: PlayerData[];
-	playerRequestingEntry: string;
-	getEntry: GetEntry;
-	isCompetition?: boolean;
-	lastUpdatedAt: number;
-}
 
 type GetEntry = (player: PlayerData) => string;
 
@@ -290,30 +281,7 @@ export async function handleLeaderboardCommandInteraction(
 	interaction: ChatInteraction,
 	leaderboardArgs: LeaderboardArgsWithPage,
 ) {
-	const CACHE_KEY = createCacheKey(leaderboardArgs);
-	const embeds =
-		(JSON.parse((await redis.get(CACHE_KEY))!) as Embed[] | null) ??
-		createLeaderboardEmbeds(
-			interaction.client,
-			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
-		);
-
-	if (leaderboardArgs.page < 1) {
-		leaderboardArgs.page = 1;
-	} else if (leaderboardArgs.page > embeds.length) {
-		leaderboardArgs.page = embeds.length;
-	}
-
-	await InteractionUtil.reply(interaction, {
-		embeds: [embeds[leaderboardArgs.page - 1]],
-		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
-	});
-
-	await redis.psetex(
-		CACHE_KEY,
-		interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
-		JSON.stringify(embeds),
-	);
+	return InteractionUtil.reply(interaction, await getLeaderboardMessageOptions(interaction.client, leaderboardArgs));
 }
 
 /**
@@ -339,18 +307,15 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 		return handleLeaderboardCommandInteraction(interaction, leaderboardArgs);
 	}
 
-	const CACHE_KEY = createCacheKey(leaderboardArgs);
-	const IS_RELOAD = EMOJI === RELOAD_EMOJI;
-	const embeds = IS_RELOAD
-		? createLeaderboardEmbeds(
-				interaction.client,
-				getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
-		  )
-		: (JSON.parse((await redis.get(CACHE_KEY))!) as Embed[] | null);
+	const { embeds, components } = await getLeaderboardMessageOptions(
+		interaction.client,
+		leaderboardArgs,
+		EMOJI === RELOAD_EMOJI,
+	);
 
-	if (!embeds) {
+	if (!embeds.length) {
 		await InteractionUtil.update(interaction, {
-			components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, Number.POSITIVE_INFINITY, true),
+			components,
 		});
 
 		return InteractionUtil.reply(interaction, {
@@ -361,24 +326,10 @@ export async function handleLeaderboardButtonInteraction(interaction: ButtonInte
 		});
 	}
 
-	if (leaderboardArgs.page < 1) {
-		leaderboardArgs.page = 1;
-	} else if (leaderboardArgs.page > embeds.length) {
-		leaderboardArgs.page = embeds.length;
-	}
-
-	await InteractionUtil.update(interaction, {
-		embeds: [embeds[leaderboardArgs.page - 1]],
-		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
+	return InteractionUtil.update(interaction, {
+		embeds,
+		components,
 	});
-
-	if (IS_RELOAD) {
-		await redis.psetex(
-			CACHE_KEY,
-			interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
-			JSON.stringify(embeds),
-		);
-	}
 }
 
 /**
@@ -445,35 +396,42 @@ export async function handleLeaderboardSelectMenuInteraction(interaction: Select
 		return handleLeaderboardCommandInteraction(interaction, leaderboardArgs);
 	}
 
-	const CACHE_KEY = createCacheKey(leaderboardArgs);
-	const embeds =
-		(JSON.parse((await redis.get(CACHE_KEY))!) as Embed[] | null) ??
-		createLeaderboardEmbeds(
-			interaction.client,
-			getLeaderboardDataCreater(leaderboardArgs.lbType)(interaction.client, leaderboardArgs),
-		);
-
-	await InteractionUtil.update(interaction, {
-		embeds: [embeds[leaderboardArgs.page - 1]],
-		components: createActionRows(interaction.client, CACHE_KEY, leaderboardArgs, embeds.length),
-	});
-
-	await redis.psetex(
-		CACHE_KEY,
-		interaction.client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1),
-		embeds.map((embed) => embed.toJSON?.() ?? embed),
-	);
+	return InteractionUtil.update(interaction, await getLeaderboardMessageOptions(interaction.client, leaderboardArgs));
 }
 
 /**
  * creates an embed from the LeaderboardData
  * @param client
- * @param data
+ * @param leaderboardArgs
+ * @param isReloadButton
  */
-function createLeaderboardEmbeds(
+async function getLeaderboardMessageOptions(
 	client: LunarClient,
-	{ title, description, playerData, playerRequestingEntry, getEntry, isCompetition, lastUpdatedAt }: LeaderboardData,
+	leaderboardArgs: LeaderboardArgsWithPage,
+	isReloadButton: boolean | null = null,
 ) {
+	const CACHE_KEY = createCacheKey(leaderboardArgs);
+
+	if (!isReloadButton) {
+		const cachedEmbeds: Embed[] | APIEmbed[] | null = JSON.parse((await redis.get(CACHE_KEY))!);
+
+		if (cachedEmbeds) {
+			return {
+				embeds: [new Embed(cachedEmbeds[leaderboardArgs.page - 1])],
+				components: createActionRows(client, CACHE_KEY, leaderboardArgs, cachedEmbeds.length),
+			};
+		}
+
+		if (isReloadButton == false) {
+			return {
+				embeds: [],
+				components: createActionRows(client, CACHE_KEY, leaderboardArgs, Number.POSITIVE_INFINITY, true),
+			};
+		}
+	}
+
+	const { title, description, playerData, playerRequestingEntry, getEntry, isCompetition, lastUpdatedAt } =
+		getLeaderboardDataCreator(leaderboardArgs.lbType)(client, leaderboardArgs);
 	const { config } = client;
 	const ELEMENTS_PER_PAGE = config.get('ELEMENTS_PER_PAGE');
 	const PLAYER_COUNT = playerData.length;
@@ -519,14 +477,25 @@ function createLeaderboardEmbeds(
 		);
 	}
 
-	return embeds;
+	redis.psetex(CACHE_KEY, client.config.get('DATABASE_UPDATE_INTERVAL') * minutes(1), JSON.stringify(embeds));
+
+	if (leaderboardArgs.page < 1) {
+		leaderboardArgs.page = 1;
+	} else if (leaderboardArgs.page > embeds.length) {
+		leaderboardArgs.page = embeds.length;
+	}
+
+	return {
+		embeds: [embeds[leaderboardArgs.page - 1]],
+		components: createActionRows(client, CACHE_KEY, leaderboardArgs, embeds.length),
+	};
 }
 
 /**
  * returns the create[type]LeaderboardData function
  * @param lbType
  */
-function getLeaderboardDataCreater(lbType: string) {
+function getLeaderboardDataCreator(lbType: string) {
 	switch (lbType) {
 		case 'gained':
 			return createGainedLeaderboardData;
@@ -1139,6 +1108,7 @@ function createTotalLeaderboardData(client: LunarClient, { hypixelGuild, user, o
 		playerData,
 		playerRequestingEntry,
 		getEntry,
+		isCompetition: false,
 		lastUpdatedAt: offset
 			? config.get(XP_OFFSETS_TIME[offset])
 			: Math.min(...playerData.map(({ xpLastUpdatedAt }) => xpLastUpdatedAt?.getTime() ?? Number.POSITIVE_INFINITY)),
