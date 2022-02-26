@@ -161,14 +161,13 @@ export default class AhCommand extends ApplicationCommand {
 
 	// eslint-disable-next-line class-methods-use-this
 	private _generateProfileOptions(profiles: SkyBlockProfile[]) {
-		/* eslint-disable camelcase */
 		return profiles.map(({ cute_name, profile_id }) =>
 			new SelectMenuOption()
 				.setLabel(cute_name)
 				.setValue(profile_id)
+				// eslint-disable-next-line camelcase
 				.setEmoji({ name: PROFILE_EMOJIS[cute_name as keyof typeof PROFILE_EMOJIS] }),
 		);
-		/* eslint-enable camelcase */
 	}
 
 	/**

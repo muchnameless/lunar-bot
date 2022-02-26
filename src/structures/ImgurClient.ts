@@ -9,7 +9,6 @@ import { FetchError } from './errors/FetchError';
 import type { RequestInit, Response } from 'undici';
 
 export interface ImageData {
-	/* eslint-disable camelcase */
 	id: string;
 	title: string | null;
 	description: string | null;
@@ -38,7 +37,6 @@ export interface ImageData {
 	deletehash: string;
 	name: string;
 	link: string;
-	/* eslint-enable camelcase */
 }
 
 export interface UploadResponse {

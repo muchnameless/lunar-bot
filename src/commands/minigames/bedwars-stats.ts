@@ -32,7 +32,6 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 	override _generateReply({ ign, playerData }: FetchedData) {
 		if (!playerData?.stats?.Bedwars) return `\`${ign}\` has no BedWars stats`;
 
-		/* eslint-disable camelcase */
 		const {
 			wins_bedwars = 0,
 			losses_bedwars = 0,
@@ -43,6 +42,7 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 			beds_broken_bedwars = 0,
 		} = playerData.stats.Bedwars;
 
+		// eslint-disable-next-line camelcase
 		if (wins_bedwars + losses_bedwars === 0) return `\`${ign}\` has no BedWars stats`;
 
 		return oneLine`
@@ -51,7 +51,10 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 			level: ${formatNumber(getBedwarsLevelInfo(playerData).level)},
 			wins: ${formatNumber(wins_bedwars)},
 			losses: ${formatNumber(losses_bedwars)},
-			win rate: ${formatDecimalNumber(wins_bedwars / (wins_bedwars + losses_bedwars))},
+			win rate: ${
+				// eslint-disable-next-line camelcase
+				formatDecimalNumber(wins_bedwars / (wins_bedwars + losses_bedwars))
+			},
 			games played: ${formatNumber(games_played_bedwars)},
 			final kills: ${formatNumber(final_kills_bedwars)},
 			final deaths: ${formatNumber(final_deaths_bedwars)},
@@ -59,6 +62,5 @@ export default class BedWarsStatsCommand extends BaseStatsCommand {
 			win streak: ${formatNumber(winstreak)},
 			beds broken: ${formatNumber(beds_broken_bedwars)}
 		`;
-		/* eslint-enable camelcase */
 	}
 }

@@ -13,7 +13,6 @@ import { getLilyWeight } from '.';
 import type { Components } from '@zikeji/hypixel';
 import type { DungeonTypes, SkillTypes } from '../constants';
 
-// eslint-disable-next-line camelcase
 export type SkyBlockProfile = Components.Schemas.SkyBlockProfileCuteName & { cute_name: string };
 
 type SkyBlockProfiles = Components.Schemas.SkyBlockProfileCuteName[];

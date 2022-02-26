@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 // defined here since mineral armor has the same data
 const HARDENED_DIAMOND_HELMET = {
 	type: 'diamond',

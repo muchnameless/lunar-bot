@@ -7,7 +7,6 @@ import BaseStatsCommand from './~base-stats-command';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { FetchedData } from './~base-stats-command';
 
-/* eslint-disable camelcase */
 interface SkyWarsStats {
 	wins: number;
 	losses: number;
@@ -17,7 +16,6 @@ interface SkyWarsStats {
 	deaths: number;
 	win_streak: number;
 }
-/* eslint-enable camelcase */
 
 export default class SkyWarsStatsCommand extends BaseStatsCommand {
 	constructor(context: CommandContext) {
@@ -45,7 +43,6 @@ export default class SkyWarsStatsCommand extends BaseStatsCommand {
 		if (!playerData?.stats?.SkyWars) return `\`${ign}\` has no SkyWars stats`;
 
 		try {
-			/* eslint-disable camelcase */
 			const {
 				wins = 0,
 				losses = 0,
@@ -70,7 +67,6 @@ export default class SkyWarsStatsCommand extends BaseStatsCommand {
 				games played: ${formatNumber(games_played_skywars)},
 				win streak: ${formatNumber(win_streak)}
 			`;
-			/* eslint-enable camelcase */
 		} catch {
 			return `\`${ign}\` has no SkyWars stats`;
 		}

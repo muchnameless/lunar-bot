@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 export const REFORGES = {
 	ambered: 'AMBER_MATERIAL',
 	ancient: 'PRECURSOR_GEAR',

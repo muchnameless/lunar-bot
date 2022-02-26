@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 export const TALISMANS = new Set([
 	'WEDDING_RING_0',
 	'WEDDING_RING_2',
