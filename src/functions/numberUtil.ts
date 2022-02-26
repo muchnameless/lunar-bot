@@ -62,44 +62,11 @@ const asyncRandomBytes = promisify(randomBytes);
  */
 export async function randomNumber(minimum: number, maximum: number) {
 	const range = maximum - minimum;
-
-	let bitsNeeded = 0;
-	let bytesNeeded = 0;
-	let mask = 1;
-	let range_ = range;
-
-	/**
-	 * This does the equivalent of:
-	 *
-	 *    bitsNeeded = Math.ceil(Math.log2(range));
-	 *    bytesNeeded = Math.ceil(bitsNeeded / 8);
-	 *    mask = Math.pow(2, bitsNeeded) - 1;
-	 *
-	 * ... however, it implements it as bitwise operations, to sidestep any
-	 * possible implementation errors regarding floating point numbers in
-	 * JavaScript runtimes. This is an easier solution than assessing each
-	 * runtime and architecture individually.
-	 */
-	while (range_ > 0) {
-		if (bitsNeeded % 8 === 0) {
-			++bytesNeeded;
-		}
-
-		++bitsNeeded;
-		mask = (mask << 1) | 1; /* 0x00001111 -> 0x00011111 */
-		range_ = range_ >>> 1; /* 0x01000000 -> 0x00100000 */
-	}
+	const bitsNeeded = Math.ceil(Math.log2(range));
+	const bytesNeeded = Math.ceil(bitsNeeded / 8);
+	const mask = 2 ** bitsNeeded - 1;
 
 	for (;;) {
-		const randomBytes_ = await asyncRandomBytes(bytesNeeded);
-
-		let randomValue = 0;
-
-		/* Turn the random bytes into an integer, using bitwise operations. */
-		for (let i = 0; i < bytesNeeded; i++) {
-			randomValue |= randomBytes_[i] << (8 * i);
-		}
-
 		/**
 		 * We apply the mask to reduce the amount of attempts we might need
 		 * to make to get a number that is in range. This is somewhat like
@@ -118,7 +85,7 @@ export async function randomNumber(minimum: number, maximum: number) {
 		 *
 		 *   (Source: Scott Arciszewski)
 		 */
-		randomValue = randomValue & mask;
+		const randomValue = (await asyncRandomBytes(bytesNeeded)).reduce((acc, cur, i) => acc | (cur << (8 * i))) & mask;
 
 		if (randomValue <= range) {
 			/**
