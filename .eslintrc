@@ -52,7 +52,6 @@
 		"unicorn/no-await-expression-member": "off",
 		"unicorn/no-null": "off",
 		"unicorn/no-process-exit": "off",
-		"unicorn/no-unreadable-array-destructuring": "off",
 		"unicorn/no-unused-properties": "error",
 		"unicorn/no-useless-undefined": "warn",
 		"unicorn/numeric-separators-style": [
@@ -242,7 +241,7 @@
 			}
 		],
 		"prefer-const": "error",
-		"prefer-destructuring": "error",
+		"prefer-destructuring": ["error", { "array": false }],
 		"prefer-exponentiation-operator": "error",
 		"prefer-numeric-literals": "error",
 		"prefer-object-spread": "error",

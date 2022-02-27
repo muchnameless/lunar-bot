@@ -8,7 +8,7 @@ import type {
 	RESTPutAPIGuildApplicationCommandsPermissionsJSONBody,
 } from 'discord-api-types/v9';
 
-const [, , GUILD_ID] = argv;
+const GUILD_ID = argv[2];
 const client = new LunarClient({
 	db,
 	intents: 0,
