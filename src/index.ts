@@ -1,10 +1,9 @@
 import process from 'node:process';
-import { ActivityType, GatewayIntentBits, Options, Partials, SnowflakeUtil, Sweepers } from 'discord.js';
+import { ActivityType, GatewayIntentBits, Options, Partials, Sweepers } from 'discord.js';
 import { RequestMethod } from '@discordjs/rest';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';
-import type { AnyChannel, ThreadChannel } from 'discord.js';
 
 const client = new LunarClient({
 	// custom options
@@ -13,25 +12,11 @@ const client = new LunarClient({
 
 	// default options
 	makeCache: Options.cacheWithLimits({
+		...Options.defaultMakeCacheSettings,
 		ApplicationCommandManager: 0,
-		MessageManager: 200,
-		// @ts-expect-error
-		ChannelManager: {
-			sweepInterval: 3_600, // 1h
-			sweepFilter: Sweepers.filterByLifetime({
-				lifetime: 14_400, // 4h
-				getComparisonTimestamp(e: AnyChannel) {
-					if (e.isDM()) {
-						// DM -> last message
-						return e.lastMessageId ? SnowflakeUtil.timestampFrom(e.lastMessageId!) : -1;
-					}
-					return (e as ThreadChannel).archiveTimestamp ?? -1; // threads -> archived
-				},
-				excludeFromSweep: (e) => !e.isDM() && !(e as ThreadChannel).archived,
-			}),
-		},
 		GuildBanManager: 0,
 		GuildInviteManager: 0,
+		GuildScheduledEventManager: 0,
 		PresenceManager: 0,
 		ReactionUserManager: {
 			// cache only the bot user
