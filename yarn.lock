@@ -315,7 +315,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ioredis@npm:^4":
+"@types/ioredis@npm:^4.28.8":
   version: 4.28.8
   resolution: "@types/ioredis@npm:4.28.8"
   dependencies:
@@ -362,7 +362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^17.0.19":
+"@types/node@npm:*, @types/node@npm:^17.0.21":
   version: 17.0.21
   resolution: "@types/node@npm:17.0.21"
   checksum: 89dcd2fe82f21d3634266f8384e9c865cf8af49685639fbdbd799bdd1040480fb1e8eeda2d3b9fce41edbe704d2a4be9f427118c4ae872e8d9bb7cbeb3c41a94
@@ -2885,9 +2885,9 @@ __metadata:
     "@skyra/jaro-winkler": ^1.0.0
     "@types/common-tags": ^1.8.1
     "@types/cron": ^1.7.3
-    "@types/ioredis": ^4
+    "@types/ioredis": ^4.28.8
     "@types/ms": ^0.7.31
-    "@types/node": ^17.0.19
+    "@types/node": ^17.0.21
     "@types/pg": ^8.6.4
     "@typescript-eslint/eslint-plugin": ^5.12.1
     "@typescript-eslint/parser": ^5.12.1
