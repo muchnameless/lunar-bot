@@ -1,5 +1,5 @@
 import { setTimeout, clearTimeout } from 'node:timers';
-import { MessageFlags, MessageType, PermissionFlagsBits, Util } from 'discord.js';
+import { DiscordAPIError, MessageFlags, MessageType, PermissionFlagsBits, RESTJSONErrorCodes, Util } from 'discord.js';
 import { commaListsAnd } from 'common-tags';
 import ms from 'ms';
 import { logger, seconds } from '../functions';
@@ -15,6 +15,7 @@ import type {
 	Snowflake,
 	TextChannel,
 } from 'discord.js';
+import type { DiscordErrorData } from '@discordjs/rest';
 import type { SendOptions } from '.';
 
 interface AwaitReplyOptions extends MessageOptions {
@@ -253,17 +254,58 @@ export class MessageUtil extends null {
 	 * @param message
 	 * @param options
 	 */
-	static reply(message: Message, options: SendOptions & { rejectOnError: true }): Promise<Message>;
-	static reply(message: Message, options: string | SendOptions): Promise<Message | null>;
-	static reply(message: Message, options: string | SendOptions) {
+	static async reply(message: Message, options: SendOptions & { rejectOnError: true }): Promise<Message>;
+	static async reply(message: Message, options: string | SendOptions): Promise<Message | null>;
+	static async reply(message: Message, options: string | SendOptions) {
 		const _options = typeof options === 'string' ? { content: options } : options;
 
-		return ChannelUtil.send(message.channel, {
-			reply: {
-				messageReference: message,
-			},
-			..._options,
-		});
+		try {
+			return await ChannelUtil.send(message.channel, {
+				..._options,
+				reply: {
+					messageReference: message,
+					failIfNotExists: true,
+				},
+				rejectOnError: true,
+			});
+		} catch (error) {
+			// messageReference has been deleted / is an invalid id
+			if (
+				error instanceof DiscordAPIError &&
+				error.code === RESTJSONErrorCodes.InvalidFormBodyOrContentType &&
+				((error.rawError as DiscordErrorData).errors as Record<string, unknown>)?.message_reference
+			) {
+				logger.error({ err: error, data: _options }, '[MESSAGE REPLY]');
+
+				// don't change pinging behaviour and don't modify allowedMentions.users ref
+				const allowedMentions = _options.allowedMentions ?? message.client.options.allowedMentions ?? {};
+				if (allowedMentions.repliedUser) {
+					if (!allowedMentions.parse?.includes('users') || !allowedMentions.users?.includes(message.author.id)) {
+						allowedMentions.users = [message.author.id, ...(allowedMentions.users ?? [])];
+					}
+				} else if (allowedMentions.users?.includes(message.author.id)) {
+					allowedMentions.users = allowedMentions.users.filter((id) => id !== message.author.id);
+				}
+
+				const mention = message.author.toString();
+
+				// retry with a standard ping
+				return ChannelUtil.send(message.channel, {
+					..._options,
+					reply: undefined,
+					allowedMentions,
+					content: _options.content?.startsWith(mention)
+						? _options.content
+						: _options.content
+						? `${mention}, ${_options.content}`
+						: mention,
+				});
+			}
+
+			if (_options.rejectOnError) throw error instanceof Error ? new Error('[MESSAGE REPLY]', { cause: error }) : error;
+			logger.error({ err: error, data: _options }, '[MESSAGE REPLY]');
+			return null;
+		}
 	}
 
 	/**
