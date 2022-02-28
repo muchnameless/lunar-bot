@@ -281,10 +281,12 @@ export class MessageUtil extends null {
 				const allowedMentions = _options.allowedMentions ?? message.client.options.allowedMentions ?? {};
 				if (allowedMentions.repliedUser) {
 					if (!allowedMentions.parse?.includes('users') || !allowedMentions.users?.includes(message.author.id)) {
-						allowedMentions.users = [message.author.id, ...(allowedMentions.users ?? [])];
+						_options.allowedMentions ??= {};
+						_options.allowedMentions.users = [message.author.id, ...(allowedMentions.users ?? [])];
 					}
 				} else if (allowedMentions.users?.includes(message.author.id)) {
-					allowedMentions.users = allowedMentions.users.filter((id) => id !== message.author.id);
+					_options.allowedMentions ??= {};
+					_options.allowedMentions.users = allowedMentions.users.filter((id) => id !== message.author.id);
 				}
 
 				const mention = message.author.toString();
@@ -293,7 +295,6 @@ export class MessageUtil extends null {
 				return ChannelUtil.send(message.channel, {
 					..._options,
 					reply: undefined,
-					allowedMentions,
 					content: _options.content?.startsWith(mention)
 						? _options.content
 						: _options.content
