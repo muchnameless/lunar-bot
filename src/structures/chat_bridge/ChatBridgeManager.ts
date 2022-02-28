@@ -99,17 +99,14 @@ export class ChatBridgeManager {
 	 * disconnects a single or all bridges
 	 * @param index
 	 */
-	disconnect(): ChatBridge[];
+	disconnect(index?: undefined): ChatBridge[];
 	disconnect(index: number): ChatBridge;
 	disconnect(index?: number) {
 		// single
 		if (typeof index === 'number') {
-			return (
-				this.cache[index]?.disconnect() ??
-				(() => {
-					throw new Error(`no chatBridge with index #${index}`);
-				})()
-			);
+			const chatBridge = this.cache[index];
+			if (!chatBridge) throw new Error(`no chatBridge with index #${index}`);
+			return chatBridge.disconnect();
 		}
 
 		// all

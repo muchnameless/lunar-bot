@@ -7,7 +7,11 @@ import type { ChatBridge } from '../ChatBridge';
  * @param chatBridge
  */
 export default function (chatBridge: ChatBridge) {
-	if (!chatBridge.bot) return logger.error(`${chatBridge.logInfo}: no bot on login event`);
+	// uuid can be undefined (despite not being typed as such) in case of network issues
+	if (!chatBridge.bot?.uuid) {
+		logger.error(`${chatBridge.logInfo}: no bot on login event`);
+		return chatBridge.reconnect();
+	}
 
 	logger.debug(`[MINECRAFT BOT LOGIN]: ${chatBridge.bot.username}: logged in`);
 
