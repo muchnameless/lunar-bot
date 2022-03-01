@@ -2915,7 +2915,7 @@ __metadata:
     lilyweight: ^2.3.0
     lint-staged: ^12.3.4
     minecraft-data: ^2.114.1
-    minecraft-protocol: ^1.30.0
+    minecraft-protocol: ^1.31.0
     ms: ^2.1.3
     pg: ^8.7.3
     pg-hstore: ^2.3.4
@@ -3039,14 +3039,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-data@npm:^2.114.1":
+"minecraft-data@npm:^2.109.0, minecraft-data@npm:^2.114.1":
   version: 2.114.1
   resolution: "minecraft-data@npm:2.114.1"
   checksum: f1269dc9a13a83e4f6bf19bffd9d6d5b718bce073c4f95ba6033fc73ec28902fade8e2b3821ea76451cd4a1355e83afa2151b928110766564989fee395ed1cbe
   languageName: node
   linkType: hard
 
-"minecraft-data@npm:^2.62.1, minecraft-data@npm:^2.98.0":
+"minecraft-data@npm:^2.62.1":
   version: 2.113.3
   resolution: "minecraft-data@npm:2.113.3"
   checksum: 21b4d494065f14bc3ec78dcce6b1b6371149275d1b5f9da2ffe4513354a4775ad6316f5a056a9c2c6539097ac1c820f49130b960a503d9098df77b4c90eab377
@@ -3060,9 +3060,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-protocol@npm:^1.30.0":
-  version: 1.30.0
-  resolution: "minecraft-protocol@npm:1.30.0"
+"minecraft-protocol@npm:^1.31.0":
+  version: 1.31.0
+  resolution: "minecraft-protocol@npm:1.31.0"
   dependencies:
     aes-js: ^3.1.2
     buffer-equal: ^1.0.0
@@ -3070,7 +3070,7 @@ __metadata:
     endian-toggle: ^0.0.0
     lodash.get: ^4.1.2
     lodash.merge: ^4.3.0
-    minecraft-data: ^2.98.0
+    minecraft-data: ^2.109.0
     minecraft-folder-path: ^1.2.0
     node-fetch: ^2.6.1
     node-rsa: ^0.4.2
@@ -3080,7 +3080,7 @@ __metadata:
     readable-stream: ^3.0.6
     uuid-1345: ^1.0.1
     yggdrasil: ^1.4.0
-  checksum: 5c6018ef6b444c6edc3d2ffd638cb47ba30a918cecd26b7db5e1c3baef4d733172d0b5c5802ba167ad5b9bb8a34d06c0918fd67a09f51a4927579c57f694bc98
+  checksum: 733c0926ad3542c6098c173e4248ce01857bd884576cc4f11d8668f69c396ae226308606f87189e2fb8da628e7c1b2ce856326174086fce547f1c853cffd2c2d
   languageName: node
   linkType: hard
 
