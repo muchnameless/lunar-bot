@@ -1,5 +1,6 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 sleep;
+import { Buffer } from 'node:buffer';
 import util from 'node:util';
 import fs from 'node:fs/promises';
 import v8 from 'node:v8';
@@ -10,6 +11,7 @@ import Discord, {
 	ButtonStyle,
 	Embed,
 	Formatters,
+	MessageAttachment,
 	PermissionFlagsBits,
 	Util,
 } from 'discord.js';
@@ -66,6 +68,8 @@ const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
 const { logger, minutes, splitForEmbedFields } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
+	MAX_FILE_SIZE = 8e6;
+
 	constructor(context: CommandContext) {
 		super(context, {
 			slash: new SlashCommandBuilder()
@@ -98,7 +102,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param input
 	 * @param depth
 	 */
-	private _cleanOutput(input: unknown, depth = 1) {
+	private _cleanOutput(input: unknown, depth: number) {
 		return (typeof input === 'string' ? input : util.inspect(input, { depth }))
 			.replaceAll('`', '`\u200B')
 			.replace(new RegExp(this.client.token!, 'gi'), '****');
@@ -119,6 +123,14 @@ export default class EvalCommand extends ApplicationCommand {
 				InteractionUtil.getDeleteButton(interaction),
 			),
 		];
+	}
+
+	/**
+	 * returns an attachment trimmed to the max file size
+	 * @param content
+	 */
+	private _getFiles(content: string) {
+		return [new MessageAttachment(Buffer.from(content).slice(0, this.MAX_FILE_SIZE), 'result.ts')];
 	}
 
 	/**
@@ -195,14 +207,24 @@ export default class EvalCommand extends ApplicationCommand {
 				stopwatch.stop();
 			}
 
-			const OUTPUT_ARRAY = splitForEmbedFields(this._cleanOutput(evaled, inspectDepth), 'ts');
+			const CLEANED_OUTPUT = this._cleanOutput(evaled, inspectDepth);
+			const OUTPUT_ARRAY = splitForEmbedFields(CLEANED_OUTPUT, 'ts');
 			const INFO = `d.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``;
+
+			let files: MessageAttachment[] | undefined;
 
 			// add output fields till embed character limit is reached
 			for (const [index, value] of OUTPUT_ARRAY.entries()) {
 				const name = index ? '\u200B' : 'Output';
 
-				if (responseEmbed.length + INFO.length + 1 + name.length + value.length > EMBED_MAX_CHARS) break;
+				// embed size overflow -> convert output to file
+				if (responseEmbed.length + INFO.length + 1 + name.length + value.length > EMBED_MAX_CHARS) {
+					// remove result fields
+					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY);
+					// add files
+					files = this._getFiles(CLEANED_OUTPUT);
+					break;
+				}
 
 				responseEmbed.addFields({ name, value });
 			}
@@ -212,7 +234,7 @@ export default class EvalCommand extends ApplicationCommand {
 				value: INFO,
 			});
 
-			return [responseEmbed];
+			return { embeds: [responseEmbed], files };
 		} catch (error) {
 			stopwatch.stop();
 
@@ -220,11 +242,21 @@ export default class EvalCommand extends ApplicationCommand {
 
 			const errorType = new Type(error);
 			const FOOTER = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
+			const CLEANED_OUTPUT = this._cleanOutput(error, inspectDepth);
 
-			for (const [index, value] of splitForEmbedFields(this._cleanOutput(error), 'xl').entries()) {
+			let files: MessageAttachment[] | undefined;
+
+			for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'xl').entries()) {
 				const name = index ? '\u200B' : 'Error';
 
-				if (responseEmbed.length + FOOTER.length + 1 + name.length + value.length > EMBED_MAX_CHARS) break;
+				// embed size overflow -> convert output to file
+				if (responseEmbed.length + FOOTER.length + 1 + name.length + value.length > EMBED_MAX_CHARS) {
+					// remove error fields
+					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY);
+					// add files
+					files = this._getFiles(CLEANED_OUTPUT);
+					break;
+				}
 
 				responseEmbed.addFields({ name, value });
 			}
@@ -234,7 +266,7 @@ export default class EvalCommand extends ApplicationCommand {
 				value: FOOTER,
 			});
 
-			return [responseEmbed];
+			return { embeds: [responseEmbed], files };
 		}
 	}
 
@@ -256,7 +288,7 @@ export default class EvalCommand extends ApplicationCommand {
 		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH');
 
 		return InteractionUtil.reply(interaction, {
-			embeds: await this._eval(interaction, content, IS_ASYNC, INSPECT_DEPTH),
+			...(await this._eval(interaction, content, IS_ASYNC, INSPECT_DEPTH)),
 			components: this._getRows(interaction, IS_ASYNC, INSPECT_DEPTH),
 		});
 	}
@@ -284,14 +316,15 @@ export default class EvalCommand extends ApplicationCommand {
 						errors: ['time'],
 					});
 
-					return InteractionUtil.update(interaction, {
-						embeds: await this._eval(
+					return InteractionUtil.update(
+						interaction,
+						await this._eval(
 							interaction,
 							collected.first()!.content,
 							async === 'true' || undefined,
 							Number(inspectDepth),
 						),
-					});
+					);
 				} catch (error) {
 					return logger.error(error);
 				}
@@ -328,7 +361,7 @@ export default class EvalCommand extends ApplicationCommand {
 		const INSPECT_DEPTH = interaction.options.getInteger('inspect') ?? this.config.get('EVAL_INSPECT_DEPTH');
 
 		return InteractionUtil.reply(interaction, {
-			embeds: await this._eval(interaction, INPUT, IS_ASYNC, INSPECT_DEPTH),
+			...(await this._eval(interaction, INPUT, IS_ASYNC, INSPECT_DEPTH)),
 			components: this._getRows(interaction, IS_ASYNC, INSPECT_DEPTH),
 		});
 	}

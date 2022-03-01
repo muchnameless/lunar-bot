@@ -176,6 +176,10 @@
 				"message": "Use import instead"
 			},
 			{
+				"name": "Blob",
+				"message": "Import Blob from `node:buffer` instead"
+			},
+			{
 				"name": "Buffer",
 				"message": "Import Buffer from `node:buffer` instead"
 			},
