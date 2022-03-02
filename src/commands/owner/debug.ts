@@ -57,7 +57,7 @@ export default class DebugCommand extends ApplicationCommand {
 								${(channels.cache.filter((c) => c.isDM()) as Collection<Snowflake, DMChannel>)
 									.map(
 										(c) =>
-											[c.recipient.tag ?? c.recipient.id, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const,
+											[c.recipient?.tag ?? c.recipientId, SnowflakeUtil.timestampFrom(c.lastMessageId ?? '')] as const,
 									)
 									.sort(([, a], [, b]) => b - a)
 									.map(([name, timestamp]) =>

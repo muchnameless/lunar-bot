@@ -35,7 +35,7 @@ export class ChannelUtil extends null {
 
 		switch (channel.type) {
 			case ChannelType.DM:
-				return `#${channel.recipient?.tag ?? `DM-${channel.recipient.id}`}`;
+				return `#${channel.recipient?.tag ?? `DM-${channel.recipientId}`}`;
 
 			default:
 				return `#${channel.name}`;

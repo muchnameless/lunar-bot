@@ -43,7 +43,7 @@ const client = new LunarClient({
 				getComparisonTimestamp: () => -1,
 				excludeFromSweep: (e) =>
 					e.client.guilds.cache.some((guild) => guild.members.cache.has(e.id)) || // user is part of a member
-					e.client.channels.cache.some((channel) => channel.isDM() && channel.recipient.id === e.id) || // user has a DM channel
+					e.client.channels.cache.some((channel) => channel.isDM() && channel.recipientId === e.id) || // user has a DM channel
 					e.discriminator === '0000', // webhook message 'author'
 			}),
 		},
