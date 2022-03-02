@@ -40,7 +40,7 @@ import type {
 import type { SplitOptions } from '../functions';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { Player } from '../structures/database/models/Player';
-import type { SendDMOptions } from '.';
+import type { EditOptions, SendDMOptions } from '.';
 
 interface InteractionData {
 	deferReplyPromise: Promise<void | Message> | null;
@@ -449,7 +449,7 @@ export class InteractionUtil extends null {
 				logger.error({ err: error, options }, '[INTERACTION EDIT REPLY]');
 
 				try {
-					return MessageUtil.edit((await interaction.fetchReply()) as Message, options);
+					return MessageUtil.edit((await interaction.fetchReply()) as Message, options as EditOptions);
 				} catch (error_) {
 					if (typeof options !== 'string' && options.rejectOnError) throw error_;
 					logger.error({ err: error_, options }, '[INTERACTION EDIT REPLY]');

@@ -25,7 +25,7 @@ interface AwaitReplyOptions extends MessageOptions {
 	embeds?: Embed[];
 }
 
-interface EditOptions extends MessageEditOptions {
+export interface EditOptions extends MessageEditOptions {
 	rejectOnError?: boolean;
 	embeds?: Embed[];
 }
