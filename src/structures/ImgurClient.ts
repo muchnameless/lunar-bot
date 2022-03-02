@@ -4,6 +4,7 @@ import { fetch, FormData } from 'undici';
 import ms from 'ms';
 import { consumeBody, logger, seconds } from '../functions';
 import { keys } from '../types/util';
+import { ErrorCode } from '../constants';
 import { FetchError } from './errors/FetchError';
 import type { RequestInit, Response } from 'undici';
 
@@ -277,7 +278,7 @@ export class ImgurClient {
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
-			if ((error as any)?.code === 'ABORT_ERR' && retries !== this.retries) {
+			if ((error as any)?.code === ErrorCode.AbortErr && retries !== this.retries) {
 				return this._request(endpoint, { headers, ...options }, retries + 1);
 			}
 

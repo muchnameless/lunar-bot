@@ -9,6 +9,7 @@ import {
 	DUNGEON_CLASSES,
 	DUNGEON_TYPES,
 	DUNGEON_TYPES_AND_CLASSES,
+	ErrorCode,
 	FindProfileStrategy,
 	GUILD_ID_ERROR,
 	isXPType,
@@ -1729,7 +1730,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			// prevent further auto updates
 			this.client.config.set('MOJANG_API_ERROR', true);
 
-			if ((error as any)?.code === 'ABORT_ERR') {
+			if ((error as any)?.code === ErrorCode.AbortErr) {
 				return logger.error(`[UPDATE IGN]: ${this.logInfo}: request timeout`);
 			}
 
