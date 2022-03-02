@@ -63,6 +63,8 @@
 		"utf-8-validate": "^5.0.8"
 	},
 	"devDependencies": {
+		"@commitlint/cli": "^16.2.1",
+		"@commitlint/config-angular": "^16.2.1",
 		"@types/common-tags": "^1.8.1",
 		"@types/cron": "^1.7.3",
 		"@types/ioredis": "^4.28.8",
