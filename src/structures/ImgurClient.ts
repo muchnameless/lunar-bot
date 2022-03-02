@@ -1,5 +1,4 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { setTimeout, clearTimeout } from 'node:timers';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { fetch, FormData } from 'undici';
 import ms from 'ms';
@@ -266,27 +265,23 @@ export class ImgurClient {
 	 * @param retries current retry
 	 */
 	private async _request(endpoint: string, { headers, ...options }: RequestInit, retries = 0): Promise<Response> {
-		const controller = new AbortController();
-		const timeout = setTimeout(() => controller.abort(), this.timeout);
-
 		try {
 			return await fetch(`${this.baseURL}${endpoint}`, {
 				headers: {
 					Authorization: this.#authorisation,
 					...headers,
 				},
-				signal: controller.signal,
+				// @ts-expect-error
+				signal: AbortSignal.timeout(this.timeout),
 				...options,
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
-			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
+			if ((error as any)?.code === 'ABORT_ERR' && retries !== this.retries) {
 				return this._request(endpoint, { headers, ...options }, retries + 1);
 			}
 
 			throw error;
-		} finally {
-			clearTimeout(timeout);
 		}
 	}
 }

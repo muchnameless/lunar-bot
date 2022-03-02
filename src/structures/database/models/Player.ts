@@ -1729,7 +1729,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			// prevent further auto updates
 			this.client.config.set('MOJANG_API_ERROR', true);
 
-			if (error instanceof Error && error.name === 'AbortError') {
+			if ((error as any)?.code === 'ABORT_ERR') {
 				return logger.error(`[UPDATE IGN]: ${this.logInfo}: request timeout`);
 			}
 

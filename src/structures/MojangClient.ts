@@ -1,4 +1,3 @@
-import { setTimeout, clearTimeout } from 'node:timers';
 import { fetch } from 'undici';
 import { /* days, */ consumeBody, seconds, validateMinecraftIgn, validateMinecraftUuid } from '../functions';
 import { MojangAPIError } from './errors/MojangAPIError';
@@ -238,22 +237,18 @@ export class MojangClient {
 	 * @param retries
 	 */
 	private async _request(url: string, retries = 0): Promise<Response> {
-		const controller = new AbortController();
-		const timeout = setTimeout(() => controller.abort(), this.timeout);
-
 		try {
 			return await fetch(url, {
-				signal: controller.signal,
+				// @ts-expect-error
+				signal: AbortSignal.timeout(this.timeout),
 			});
 		} catch (error) {
 			// Retry the specified number of times for possible timed out requests
-			if (error instanceof Error && error.name === 'AbortError' && retries !== this.retries) {
+			if ((error as any)?.code === 'ABORT_ERR' && retries !== this.retries) {
 				return this._request(url, retries + 1);
 			}
 
 			throw error;
-		} finally {
-			clearTimeout(timeout);
 		}
 	}
 }
