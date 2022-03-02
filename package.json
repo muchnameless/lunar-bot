@@ -92,7 +92,7 @@
 	"packageManager": "yarn@3.2.0",
 	"resolutions": {
 		"@discordjs/builders": "0.13.0-dev.1646222605.53defb8",
-		"@discordjs/rest": "0.4.0-dev.1645877008.a8321d8",
+		"@discordjs/rest": "0.4.0-dev.1646222604.53defb8",
 		"discord-api-types": "0.27.3"
 	}
 }
