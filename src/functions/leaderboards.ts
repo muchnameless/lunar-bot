@@ -189,8 +189,14 @@ function createActionRows(
 		.setCustomId(`${cacheKey}:guild`)
 		.setPlaceholder(hypixelGuild !== GUILD_ID_ALL ? `Guild: ${hypixelGuild}` : 'Guilds: All')
 		.addOptions(
-			...client.hypixelGuilds.cache.map(({ guildId, name }) => new SelectMenuOption().setLabel(name).setValue(guildId)),
-			new SelectMenuOption().setLabel('ALL').setValue(GUILD_ID_ALL),
+			...client.hypixelGuilds.cache.map(({ guildId, name }) =>
+				new SelectMenuOption() //
+					.setLabel(name)
+					.setValue(guildId),
+			),
+			new SelectMenuOption() //
+				.setLabel('ALL')
+				.setValue(GUILD_ID_ALL),
 		);
 
 	if (xpType !== 'purge') {
@@ -207,7 +213,13 @@ function createActionRows(
 				),
 			);
 
-		if (lbType === 'total') offsetSelectMenu.addOptions(new SelectMenuOption().setLabel('None').setValue('none'));
+		if (lbType === 'total') {
+			offsetSelectMenu.addOptions(
+				new SelectMenuOption() //
+					.setLabel('None')
+					.setValue('none'),
+			);
+		}
 
 		rows.push(
 			new ActionRow().addComponents(
@@ -215,8 +227,12 @@ function createActionRows(
 					.setCustomId(`${cacheKey}:lbType`)
 					.setPlaceholder(`Lb Type: ${upperCaseFirstChar(lbType)}`)
 					.addOptions(
-						new SelectMenuOption().setLabel('Total XP').setValue('total'),
-						new SelectMenuOption().setLabel('Gained XP').setValue('gained'),
+						new SelectMenuOption() //
+							.setLabel('Total XP')
+							.setValue('total'),
+						new SelectMenuOption() //
+							.setLabel('Gained XP')
+							.setValue('gained'),
 					),
 			),
 			new ActionRow().addComponents(
@@ -230,7 +246,9 @@ function createActionRows(
 					)
 					.addOptions(
 						...LEADERBOARD_XP_TYPES.map((type) =>
-							new SelectMenuOption().setLabel(upperCaseFirstChar(type.replaceAll('-', ' '))).setValue(type),
+							new SelectMenuOption() //
+								.setLabel(upperCaseFirstChar(type.replaceAll('-', ' ')))
+								.setValue(type),
 						),
 					),
 			),

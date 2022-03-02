@@ -154,7 +154,11 @@ export default class AhCommand extends ApplicationCommand {
 			logger.error(error);
 
 			return {
-				embeds: [embed.setColor(this.config.get('EMBED_RED')).setDescription(formatError(error))],
+				embeds: [
+					embed //
+						.setColor(this.config.get('EMBED_RED'))
+						.setDescription(formatError(error)),
+				],
 			};
 		}
 	}

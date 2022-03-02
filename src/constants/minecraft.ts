@@ -3,7 +3,7 @@ import minecraftDataLoader from 'minecraft-data';
 /**
  * mc client version
  */
-export const MC_CLIENT_VERSION = '1.18';
+export const MC_CLIENT_VERSION = '1.18.2';
 
 /**
  * minecraft data from the version the bridge bot uses

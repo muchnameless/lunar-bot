@@ -1398,17 +1398,19 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 			this.setDiscordMember(null, error instanceof DiscordAPIError);
 
-			loggingEmbed.setColor(config.get('EMBED_RED')).addFields(
-				error instanceof Error
-					? {
-							name: error.name,
-							value: error.message,
-					  }
-					: {
-							name: 'Error',
-							value: `${error}`,
-					  },
-			);
+			loggingEmbed //
+				.setColor(config.get('EMBED_RED'))
+				.addFields(
+					error instanceof Error
+						? {
+								name: error.name,
+								value: error.message,
+						  }
+						: {
+								name: 'Error',
+								value: `${error}`,
+						  },
+				);
 
 			if (NAMES_TO_ADD) {
 				loggingEmbed.addFields({

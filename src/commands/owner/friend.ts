@@ -83,7 +83,11 @@ export default class FriendCommand extends ApplicationCommand {
 		return (InteractionUtil[interaction.isCommand() ? 'reply' : 'update'] as typeof InteractionUtil['reply'])(
 			interaction as ButtonInteraction,
 			{
-				embeds: [this.client.defaultEmbed.setTitle(`/${command}`).setDescription(Formatters.codeBlock(response))],
+				embeds: [
+					this.client.defaultEmbed //
+						.setTitle(`/${command}`)
+						.setDescription(Formatters.codeBlock(response)),
+				],
 				components: this._getPaginationButtons(
 					hypixelGuild.guildId,
 					Number(pageMatched?.groups!.current),

@@ -142,7 +142,11 @@ export default class TaxCommand extends ApplicationCommand {
 						throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
 				}
 
-				this.client.log(this.client.defaultEmbed.setTitle('Guild Tax').setDescription(log));
+				this.client.log(
+					this.client.defaultEmbed //
+						.setTitle('Guild Tax')
+						.setDescription(log),
+				);
 
 				return InteractionUtil.reply(interaction, log);
 			}
@@ -227,10 +231,12 @@ export default class TaxCommand extends ApplicationCommand {
 						});
 
 						this.client.log(
-							this.client.defaultEmbed.setTitle('Guild Tax').addFields({
-								name: `/ah ${collector}`,
-								value: Formatters.codeBlock(`${player}: ${formatNumber(AMOUNT)} (manually)`),
-							}),
+							this.client.defaultEmbed //
+								.setTitle('Guild Tax')
+								.addFields({
+									name: `/ah ${collector}`,
+									value: Formatters.codeBlock(`${player}: ${formatNumber(AMOUNT)} (manually)`),
+								}),
 						);
 
 						return InteractionUtil.reply(

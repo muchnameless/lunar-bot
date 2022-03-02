@@ -142,13 +142,15 @@ export default class BanListCommand extends ApplicationCommand {
 			] as typeof InteractionUtil['reply']
 		)(interaction as ButtonInteraction, {
 			embeds: [
-				this.client.defaultEmbed.setTitle(`${'Ban list'.padEnd(166, '\u00A0')}\u200B`).setDescription(stripIndents`
-					Total: ${count} players
+				this.client.defaultEmbed //
+					.setTitle(`${'Ban list'.padEnd(166, '\u00A0')}\u200B`) //
+					.setDescription(stripIndents`
+						Total: ${count} players
 
-					${withIgn.join('\n\n')}
+						${withIgn.join('\n\n')}
 
-					Page: ${page} / ${TOTAL_PAGES}
-				`),
+						Page: ${page} / ${TOTAL_PAGES}
+					`),
 			],
 			components: this._getPaginationButtons(
 				interaction.user.id,

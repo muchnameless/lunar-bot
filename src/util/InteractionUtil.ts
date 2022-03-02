@@ -583,7 +583,12 @@ export class InteractionUtil extends null {
 
 		try {
 			const channel =
-				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel);
+				interaction.channel ??
+				(interaction.channelId !== null
+					? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel)
+					: null);
+
+			if (!channel) throw `no channel with the id '${interaction.channelId}'`;
 
 			await this.reply(interaction, {
 				content: question,
@@ -619,16 +624,27 @@ export class InteractionUtil extends null {
 		const SUCCESS_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const CANCEL_ID = `confirm:${SnowflakeUtil.generate()}`;
 		const row = new ActionRow().addComponents(
-			new ButtonComponent().setCustomId(SUCCESS_ID).setStyle(ButtonStyle.Success).setEmoji({ name: Y_EMOJI }),
-			new ButtonComponent().setCustomId(CANCEL_ID).setStyle(ButtonStyle.Danger).setEmoji({ name: X_EMOJI }),
+			new ButtonComponent() //
+				.setCustomId(SUCCESS_ID)
+				.setStyle(ButtonStyle.Success)
+				.setEmoji({ name: Y_EMOJI }),
+			new ButtonComponent() //
+				.setCustomId(CANCEL_ID)
+				.setStyle(ButtonStyle.Danger)
+				.setEmoji({ name: X_EMOJI }),
 		);
 
-		let channel: TextBasedChannel;
+		let channel: TextBasedChannel | null;
 		let message: Message | void;
 
 		try {
 			channel =
-				interaction.channel ?? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel);
+				interaction.channel ??
+				(interaction.channelId !== null
+					? ((await interaction.client.channels.fetch(interaction.channelId)) as TextBasedChannel)
+					: null);
+
+			if (!channel) throw `no channel with the id '${interaction.channelId}'`;
 
 			message = await this.reply(interaction, {
 				embeds: [interaction.client.defaultEmbed.setDescription(question)],

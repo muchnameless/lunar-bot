@@ -289,7 +289,11 @@ export class DatabaseManager {
 
 					// logging
 					if (taxPaidLog.length) {
-						this.client.log(this.client.defaultEmbed.setTitle('Guild Tax').addFields(...taxPaidLog));
+						this.client.log(
+							this.client.defaultEmbed //
+								.setTitle('Guild Tax')
+								.addFields(...taxPaidLog),
+						);
 					}
 				})(),
 				0,

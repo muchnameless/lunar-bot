@@ -635,7 +635,11 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('COMPETITION_SCHEDULED', false),
 		]);
 
-		this.client.log(this.client.defaultEmbed.setTitle('Guild Competition').setDescription('started'));
+		this.client.log(
+			this.client.defaultEmbed //
+				.setTitle('Guild Competition')
+				.setDescription('started'),
+		);
 
 		return this;
 	}
@@ -649,7 +653,11 @@ export class PlayerManager extends ModelManager<Player> {
 			this.client.config.set('COMPETITION_RUNNING', false),
 		]);
 
-		this.client.log(this.client.defaultEmbed.setTitle('Guild Competition').setDescription('ended'));
+		this.client.log(
+			this.client.defaultEmbed //
+				.setTitle('Guild Competition')
+				.setDescription('ended'),
+		);
 
 		return this;
 	}
