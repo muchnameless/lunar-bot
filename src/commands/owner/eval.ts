@@ -68,7 +68,10 @@ const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
 const { logger, minutes, splitForEmbedFields } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
-	MAX_FILE_SIZE = 8e6;
+	/**
+	 * slightly less than 8 MB
+	 */
+	MAX_FILE_SIZE = 8_387_600;
 
 	constructor(context: CommandContext) {
 		super(context, {
@@ -129,7 +132,11 @@ export default class EvalCommand extends ApplicationCommand {
 	 * returns an attachment trimmed to the max file size
 	 * @param content
 	 */
-	private _getFiles(content: string) {
+	private _getFiles(
+		interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction,
+		content: string,
+	) {
+		InteractionUtil.defer(interaction);
 		return [new MessageAttachment(Buffer.from(content).slice(0, this.MAX_FILE_SIZE), 'result.ts')];
 	}
 
@@ -160,6 +167,7 @@ export default class EvalCommand extends ApplicationCommand {
 					: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
 			);
 		const type = (x: unknown) => new Type(x).toString();
+		const inspect = (x: unknown) => util.inspect(x, { depth: inspectDepth, getters: true, showHidden: true });
 		const saveHeapdump = () => fs.writeFile(`${Date.now()}.heapsnapshot`, v8.getHeapSnapshot());
 		const i = interaction;
 		const { client, config } = this;
@@ -222,7 +230,7 @@ export default class EvalCommand extends ApplicationCommand {
 					// remove result fields
 					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY);
 					// add files
-					files = this._getFiles(CLEANED_OUTPUT);
+					files = this._getFiles(interaction, CLEANED_OUTPUT);
 					break;
 				}
 
@@ -254,7 +262,7 @@ export default class EvalCommand extends ApplicationCommand {
 					// remove error fields
 					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY);
 					// add files
-					files = this._getFiles(CLEANED_OUTPUT);
+					files = this._getFiles(interaction, CLEANED_OUTPUT);
 					break;
 				}
 
