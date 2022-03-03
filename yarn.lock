@@ -3495,7 +3495,7 @@ __metadata:
     pg: ^8.7.3
     pg-hstore: ^2.3.4
     pino: ^7.8.0
-    pino-pretty: ^7.5.2
+    pino-pretty: ^7.5.3
     prettier: ^2.5.1
     pretty-quick: ^3.1.3
     prismarine-chat: ^1.6.0
@@ -4389,9 +4389,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-pretty@npm:^7.5.2":
-  version: 7.5.2
-  resolution: "pino-pretty@npm:7.5.2"
+"pino-pretty@npm:^7.5.3":
+  version: 7.5.3
+  resolution: "pino-pretty@npm:7.5.3"
   dependencies:
     args: ^5.0.1
     colorette: ^2.0.7
@@ -4407,7 +4407,7 @@ __metadata:
     strip-json-comments: ^3.1.1
   bin:
     pino-pretty: bin.js
-  checksum: d13dbb244424953dc7d787d6b22276bbfcf86160f15a10d9be1f330c4ba5d576c9ef63a1d333aabb311346ebf54b5e216afe70ace7598d8600b2e8922fd96e17
+  checksum: bb9f0d4b35754cf5205227e7ee66abbd787760bd3150ba9eb147a0b8858f1b55460ef577606a1388098199f9000af6586f45b6dfe27770afecad1390fef0b4bc
   languageName: node
   linkType: hard
 
