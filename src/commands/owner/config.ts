@@ -68,6 +68,14 @@ export default class ConfigCommand extends ApplicationCommand {
 	}
 
 	/**
+	 * uppercased and (consecutive) spaces replaces with underscores
+	 * @param key
+	 */
+	static transformKey(key: string) {
+		return key.toUpperCase().replace(/ +/g, '');
+	}
+
+	/**
 	 * @param entries
 	 */
 	private static _listEntries(entries: Collection<string, Config>) {
@@ -98,11 +106,11 @@ export default class ConfigCommand extends ApplicationCommand {
 			case 'search':
 				return interaction.respond([
 					{ name: value, value }, // current input
-					...sortCache(this.config.cache, value.toUpperCase().replace(/ +/g, '_'), 'key', 'key', MAX_CHOICES - 1),
+					...sortCache(this.config.cache, ConfigCommand.transformKey(value), 'key', 'key', MAX_CHOICES - 1),
 				]);
 
 			case 'delete':
-				return interaction.respond(sortCache(this.config.cache, value.toUpperCase().replace(/ +/g, '_'), 'key', 'key'));
+				return interaction.respond(sortCache(this.config.cache, ConfigCommand.transformKey(value), 'key', 'key'));
 
 			default:
 				throw new Error(`unknown subcommand '${interaction.options.getSubcommand()}'`);
@@ -116,7 +124,7 @@ export default class ConfigCommand extends ApplicationCommand {
 	override async runSlash(interaction: ChatInputCommandInteraction) {
 		switch (interaction.options.getSubcommand()) {
 			case 'edit': {
-				const KEY = interaction.options.getString('key', true).toUpperCase().replace(/ +/g, '_');
+				const KEY = ConfigCommand.transformKey(interaction.options.getString('key', true));
 				const OLD_VALUE = this.config.get(KEY);
 				const OLD_TYPE = typeof OLD_VALUE;
 
@@ -152,7 +160,7 @@ export default class ConfigCommand extends ApplicationCommand {
 			}
 
 			case 'delete': {
-				const KEY = interaction.options.getString('key', true).toUpperCase().replace(/ +/g, '_');
+				const KEY = ConfigCommand.transformKey(interaction.options.getString('key', true));
 
 				if (!this.config.cache.has(KEY)) return InteractionUtil.reply(interaction, `\`${KEY}\` is not in the config`);
 
