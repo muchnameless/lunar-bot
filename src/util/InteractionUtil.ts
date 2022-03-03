@@ -134,11 +134,7 @@ export class InteractionUtil extends null {
 						`[INTERACTION UTIL]: auto defer triggered after ${Date.now() - interaction.createdTimestamp} ms`,
 					);
 
-					if (interaction.isMessageComponent()) {
-						this.deferUpdate(interaction);
-					} else {
-						this.deferReply(interaction);
-					}
+					this.defer(interaction);
 
 					interactionData.autoDefer = null;
 				},
@@ -312,6 +308,19 @@ export class InteractionUtil extends null {
 			.setCustomId(`${DELETE_KEY}:${interaction.user.id}`)
 			.setEmoji({ name: DELETE_EMOJI })
 			.setStyle(ButtonStyle.Danger);
+	}
+
+	/**
+	 * deferUpdate for components, else deferReply
+	 * @param interaction
+	 * @param options
+	 */
+	static defer<T extends ChatInteraction>(
+		interaction: T,
+		options?: T extends MessageComponentInteraction ? DeferUpdateOptions : DeferReplyOptions,
+	) {
+		if (interaction.isMessageComponent()) return this.deferUpdate(interaction, options);
+		return this.deferReply(interaction, options);
 	}
 
 	/**
