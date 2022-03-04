@@ -20,9 +20,8 @@ import { MessageUtil, ChannelUtil, UserUtil } from '.';
 import type {
 	AutocompleteInteraction,
 	BaseGuildTextChannel,
+	CacheType,
 	ChatInputCommandInteraction,
-	CommandInteraction,
-	CommandInteractionOptionResolver,
 	EmojiIdentifierResolvable,
 	GuildMember,
 	Interaction,
@@ -49,7 +48,8 @@ interface InteractionData {
 	autoDefer: NodeJS.Timeout | null;
 }
 
-export type ChatInteraction = CommandInteraction | MessageComponentInteraction;
+export type RepliableInteraction<Cached extends CacheType = CacheType> = Interaction<Cached> &
+	InteractionResponseFields<Cached>;
 
 interface DeferReplyOptions extends InteractionDeferReplyOptions {
 	rejectOnError?: boolean;
@@ -116,7 +116,7 @@ export class InteractionUtil extends null {
 	/**
 	 * @param interaction
 	 */
-	static add(interaction: ChatInteraction) {
+	static add(interaction: RepliableInteraction) {
 		const { channel } = interaction;
 		const interactionData: InteractionData = {
 			deferReplyPromise: null,
@@ -151,10 +151,10 @@ export class InteractionUtil extends null {
 	 * checks the command options for the ephemeral option
 	 * @param interaction
 	 */
-	static checkEphemeralOption(interaction: ChatInteraction) {
-		if (interaction.isMessageComponent()) return null;
+	static checkEphemeralOption(interaction: Interaction) {
+		if (!interaction.isChatInputCommand()) return null;
 
-		switch ((interaction.options as CommandInteractionOptionResolver).getString('visibility')) {
+		switch (interaction.options.getString('visibility')) {
 			case 'everyone':
 				return false;
 
@@ -261,6 +261,8 @@ export class InteractionUtil extends null {
 			};
 		}
 
+		// TODO: modal submit
+
 		return {
 			type: InteractionType[interaction.type],
 			user: interaction.member
@@ -311,16 +313,41 @@ export class InteractionUtil extends null {
 	}
 
 	/**
+	 * whether the interaction has a message attached
+	 * @param interaction
+	 */
+	static hasMessage<T extends Interaction>(interaction: T): interaction is T & MessageComponentInteraction {
+		return Reflect.has(interaction, 'message');
+	}
+
+	/**
 	 * deferUpdate for components, else deferReply
 	 * @param interaction
 	 * @param options
 	 */
-	static defer<T extends ChatInteraction>(
+	static defer<T extends RepliableInteraction>(
 		interaction: T,
 		options?: T extends MessageComponentInteraction ? DeferUpdateOptions : DeferReplyOptions,
 	) {
-		if (interaction.isMessageComponent()) return this.deferUpdate(interaction, options);
+		// deferUpdate for interactions which have a message attached (MessageComponentInteractions or ModalSubmitInteractions from MessageComponents)
+		if (this.hasMessage(interaction)) return this.deferUpdate(interaction, options);
+
+		// deferReply if there is no message yet
 		return this.deferReply(interaction, options);
+	}
+
+	/**
+	 * update for components, else reply
+	 * @param interaction
+	 * @param options
+	 */
+	static replyOrUpdate<T extends RepliableInteraction>(
+		interaction: T,
+		options: string | (T extends MessageComponentInteraction ? UpdateOptions : InteractionUtilReplyOptions),
+	) {
+		if (this.hasMessage(interaction)) return this.update(interaction, options as UpdateOptions);
+
+		return this.reply(interaction, options);
 	}
 
 	/**
@@ -328,11 +355,11 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static async deferReply(
-		interaction: ChatInteraction,
+		interaction: RepliableInteraction,
 		options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true },
 	): Promise<Message>;
-	static async deferReply(interaction: ChatInteraction, options?: DeferReplyOptions): Promise<void | Message>;
-	static async deferReply(interaction: ChatInteraction, options?: DeferReplyOptions) {
+	static async deferReply(interaction: RepliableInteraction, options?: DeferReplyOptions): Promise<void | Message>;
+	static async deferReply(interaction: RepliableInteraction, options?: DeferReplyOptions) {
 		const cached = this.CACHE.get(interaction)!;
 		if (cached.deferReplyPromise) return cached.deferReplyPromise;
 
@@ -358,19 +385,19 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static async reply(
-		interaction: Interaction & InteractionResponseFields,
+		interaction: RepliableInteraction,
 		options: InteractionUtilReplyOptions & { rejectOnError: true; fetchReply: true },
 	): Promise<Message>;
 	static async reply(
-		interaction: Interaction & InteractionResponseFields,
+		interaction: RepliableInteraction,
 		options: InteractionUtilReplyOptions & { rejectOnError: true },
 	): Promise<void | Message>;
 	static async reply(
-		interaction: Interaction & InteractionResponseFields,
+		interaction: RepliableInteraction,
 		options: string | InteractionUtilReplyOptions,
 	): Promise<void | null | Message>;
 	static async reply(
-		interaction: ChatInteraction,
+		interaction: RepliableInteraction,
 		options: string | InteractionUtilReplyOptions,
 	): Promise<void | null | Message> {
 		const cached = this.CACHE.get(interaction)!;
@@ -430,21 +457,25 @@ export class InteractionUtil extends null {
 	 * @param message optional followUp Message to edit
 	 */
 	static async editReply(
-		interaction: ChatInteraction,
+		interaction: RepliableInteraction,
 		options: EditReplyOptions,
 		message: MessageResolvable,
 	): Promise<Message>;
 	static async editReply(
-		interaction: ChatInteraction,
+		interaction: RepliableInteraction,
 		options: EditReplyOptions & { rejectOnError: true },
 	): Promise<Message>;
-	static async editReply(interaction: ChatInteraction, options: string | EditReplyOptions): Promise<null | Message>;
 	static async editReply(
-		interaction: ChatInteraction,
+		interaction: RepliableInteraction,
+		options: string | EditReplyOptions,
+	): Promise<null | Message>;
+	static async editReply(
+		interaction: RepliableInteraction,
 		options: string | EditReplyOptions,
 		message?: MessageResolvable,
 	) {
 		try {
+			// @ts-expect-error will be resolved with d.js #7597
 			if (message) return (await interaction.webhook.editMessage(message, options)) as Message;
 
 			const { deferReplyPromise, deferUpdatePromise } = this.CACHE.get(interaction)!;
@@ -477,10 +508,10 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static async deferUpdate(
-		interaction: ChatInteraction,
+		interaction: RepliableInteraction,
 		options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true },
 	): Promise<Message>;
-	static async deferUpdate(interaction: ChatInteraction, options?: DeferReplyOptions): Promise<void | Message>;
+	static async deferUpdate(interaction: RepliableInteraction, options?: DeferReplyOptions): Promise<void | Message>;
 	static async deferUpdate(
 		interaction: MessageComponentInteraction,
 		options?: DeferUpdateOptions,
@@ -510,9 +541,19 @@ export class InteractionUtil extends null {
 		interaction: MessageComponentInteraction,
 		options: UpdateOptions & { rejectOnError: true },
 	): Promise<Message>;
-	static async update(interaction: MessageComponentInteraction, options: UpdateOptions): Promise<void | Message>;
-	static async update(interaction: MessageComponentInteraction, options: UpdateOptions): Promise<void | Message> {
+	static async update(
+		interaction: MessageComponentInteraction,
+		options: string | UpdateOptions,
+	): Promise<void | Message>;
+	static async update(
+		interaction: MessageComponentInteraction,
+		options: string | UpdateOptions,
+	): Promise<void | Message> {
 		const cached = this.CACHE.get(interaction)!;
+		const _options =
+			typeof options === 'string'
+				? { ephemeral: cached.useEphemeral, content: options }
+				: { ephemeral: cached.useEphemeral, ...options };
 
 		try {
 			if (cached.deferReplyPromise) await cached.deferReplyPromise;
@@ -521,7 +562,7 @@ export class InteractionUtil extends null {
 			if (interaction.replied) {
 				return (await interaction.webhook.editMessage(
 					interaction.message as Message,
-					options as WebhookEditMessageOptions,
+					_options as WebhookEditMessageOptions,
 				)) as Message;
 			}
 
@@ -529,19 +570,19 @@ export class InteractionUtil extends null {
 			if (cached.deferUpdatePromise) await cached.deferUpdatePromise;
 
 			// deferred but not replied
-			if (interaction.deferred) return (await interaction.editReply(options as WebhookEditMessageOptions)) as Message;
+			if (interaction.deferred) return (await interaction.editReply(_options as WebhookEditMessageOptions)) as Message;
 
 			// initial reply
 			clearTimeout(cached.autoDefer!);
-			return await interaction.update(options);
+			return await interaction.update(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
-				logger.error({ err: error, options }, '[INTERACTION UPDATE]');
-				return MessageUtil.edit(interaction.message as Message, options);
+				logger.error({ err: error, data: _options }, '[INTERACTION UPDATE]');
+				return MessageUtil.edit(interaction.message as Message, _options);
 			}
 
-			if (options.rejectOnError) throw error;
-			logger.error({ err: error, options }, '[INTERACTION UPDATE]');
+			if (_options.rejectOnError) throw error;
+			logger.error({ err: error, data: _options }, '[INTERACTION UPDATE]');
 		}
 	}
 
@@ -583,7 +624,7 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async awaitReply(interaction: ChatInteraction, options: string | AwaitReplyOptions = {}) {
+	static async awaitReply(interaction: RepliableInteraction, options: string | AwaitReplyOptions = {}) {
 		const {
 			question = 'confirm this action?',
 			time = seconds(60),
@@ -623,7 +664,7 @@ export class InteractionUtil extends null {
 	 * @param interaction
 	 * @param options
 	 */
-	static async awaitConfirmation(interaction: ChatInteraction, options: string | AwaitConfirmationOptions = {}) {
+	static async awaitConfirmation(interaction: RepliableInteraction, options: string | AwaitConfirmationOptions = {}) {
 		const {
 			question = 'confirm this action?',
 			time = seconds(60),

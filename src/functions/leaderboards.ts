@@ -32,7 +32,7 @@ import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { LunarClient } from '../structures/LunarClient';
 import type { ConfigManager } from '../structures/database/managers/ConfigManager';
-import type { ChatInteraction } from '../util';
+import type { RepliableInteraction } from '../util';
 import type {
 	DungeonTypes,
 	SkillTypes,
@@ -295,7 +295,7 @@ function createActionRows(
  * @param leaderboardArgs
  */
 export async function handleLeaderboardCommandInteraction(
-	interaction: ChatInteraction,
+	interaction: RepliableInteraction,
 	leaderboardArgs: LeaderboardArgsWithPage,
 ) {
 	return InteractionUtil.reply(interaction, await getLeaderboardMessageOptions(interaction.client, leaderboardArgs));

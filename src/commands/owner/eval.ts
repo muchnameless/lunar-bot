@@ -12,7 +12,9 @@ import Discord, {
 	Embed,
 	Formatters,
 	MessageAttachment,
-	PermissionFlagsBits,
+	Modal,
+	TextInputComponent,
+	TextInputStyle,
 	Util,
 } from 'discord.js';
 Embed;
@@ -43,6 +45,7 @@ import {
 	MessageUtil,
 	UserUtil,
 } from '../../util';
+ChannelUtil;
 GuildMemberUtil;
 GuildUtil;
 LeaderboardUtil;
@@ -59,13 +62,14 @@ import type {
 	ContextMenuCommandInteraction,
 	ButtonInteraction,
 	Message,
-	Interaction,
+	ModalActionRowComponent,
+	ModalSubmitInteraction,
 } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
-import type { InteractionUtilReplyOptions } from '../../util';
+import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
 const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
-const { logger, minutes, splitForEmbedFields } = functions;
+const { logger, splitForEmbedFields } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
 	/**
@@ -101,6 +105,14 @@ export default class EvalCommand extends ApplicationCommand {
 	}
 
 	/**
+	 * @param subcommand
+	 * @param inspectDepth
+	 */
+	private _generateCustomId(subcommand: string, inspectDepth: number | `${number}`) {
+		return `${this.baseCustomId}:${subcommand}:${inspectDepth}` as const;
+	}
+
+	/**
 	 * replaces the client's token in 'text' and escapes `
 	 * @param input
 	 * @param depth
@@ -112,30 +124,10 @@ export default class EvalCommand extends ApplicationCommand {
 	}
 
 	/**
-	 * @param interaction
-	 * @param isAsync
-	 * @param inspectDepth
-	 */
-	private _getRows(interaction: Interaction, isAsync: boolean, inspectDepth: number) {
-		return [
-			new ActionRow().addComponents(
-				new ButtonComponent()
-					.setCustomId(`${this.baseCustomId}:edit:${isAsync}:${inspectDepth}`)
-					.setEmoji({ name: EDIT_MESSAGE_EMOJI })
-					.setStyle(ButtonStyle.Secondary),
-				InteractionUtil.getDeleteButton(interaction),
-			),
-		];
-	}
-
-	/**
 	 * returns an attachment trimmed to the max file size
 	 * @param content
 	 */
-	private _getFiles(
-		interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction,
-		content: string,
-	) {
+	private _getFiles(interaction: RepliableInteraction, content: string) {
 		InteractionUtil.defer(interaction);
 		return [new MessageAttachment(Buffer.from(content).slice(0, this.MAX_FILE_SIZE), 'result.ts')];
 	}
@@ -143,14 +135,12 @@ export default class EvalCommand extends ApplicationCommand {
 	/**
 	 * @param interaction
 	 * @param input
-	 * @param isAsync
-	 * @param inspectDepth
+	 * @param options
 	 */
-	private async _eval(
-		interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction | ButtonInteraction,
+	private async _run(
+		interaction: RepliableInteraction,
 		input: string,
-		isAsync = /\bawait\b/.test(input),
-		inspectDepth = 0,
+		{ isAsync = /\bawait\b/.test(input), inspectDepth = this.config.get('EVAL_INSPECT_DEPTH') } = {},
 	) {
 		if (interaction.user.id !== this.client.ownerId) {
 			throw `eval is restricted to ${Formatters.userMention(this.client.ownerId)}`;
@@ -193,6 +183,8 @@ export default class EvalCommand extends ApplicationCommand {
 
 		const stopwatch = new Stopwatch();
 
+		let files: MessageAttachment[] | undefined;
+
 		try {
 			stopwatch.restart();
 
@@ -219,8 +211,6 @@ export default class EvalCommand extends ApplicationCommand {
 			const OUTPUT_ARRAY = splitForEmbedFields(CLEANED_OUTPUT, 'ts');
 			const INFO = `d.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``;
 
-			let files: MessageAttachment[] | undefined;
-
 			// add output fields till embed character limit is reached
 			for (const [index, value] of OUTPUT_ARRAY.entries()) {
 				const name = index ? '\u200B' : 'Output';
@@ -241,8 +231,6 @@ export default class EvalCommand extends ApplicationCommand {
 				name: '\u200B',
 				value: INFO,
 			});
-
-			return { embeds: [responseEmbed], files };
 		} catch (error) {
 			stopwatch.stop();
 
@@ -251,8 +239,6 @@ export default class EvalCommand extends ApplicationCommand {
 			const errorType = new Type(error);
 			const FOOTER = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
 			const CLEANED_OUTPUT = this._cleanOutput(error, inspectDepth);
-
-			let files: MessageAttachment[] | undefined;
 
 			for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'xl').entries()) {
 				const name = index ? '\u200B' : 'Error';
@@ -273,9 +259,21 @@ export default class EvalCommand extends ApplicationCommand {
 				name: '\u200B',
 				value: FOOTER,
 			});
-
-			return { embeds: [responseEmbed], files };
 		}
+
+		return InteractionUtil.replyOrUpdate(interaction, {
+			embeds: [responseEmbed],
+			components: [
+				new ActionRow().addComponents(
+					new ButtonComponent()
+						.setCustomId(this._generateCustomId('edit', inspectDepth))
+						.setEmoji({ name: EDIT_MESSAGE_EMOJI })
+						.setStyle(ButtonStyle.Secondary),
+					InteractionUtil.getDeleteButton(interaction),
+				),
+			],
+			files,
+		});
 	}
 
 	/**
@@ -283,7 +281,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param message
 	 */
-	override async runMessage(interaction: ContextMenuCommandInteraction, { content, author }: Message) {
+	override runMessage(interaction: ContextMenuCommandInteraction, { content, author }: Message) {
 		if (!content) {
 			throw 'no content to evaluate';
 		}
@@ -292,13 +290,7 @@ export default class EvalCommand extends ApplicationCommand {
 			throw `cannot evaluate a message from ${author}`;
 		}
 
-		const IS_ASYNC = /\bawait\b/.test(content);
-		const INSPECT_DEPTH = this.config.get('EVAL_INSPECT_DEPTH');
-
-		return InteractionUtil.reply(interaction, {
-			...(await this._eval(interaction, content, IS_ASYNC, INSPECT_DEPTH)),
-			components: this._getRows(interaction, IS_ASYNC, INSPECT_DEPTH),
-		});
+		return this._run(interaction, content);
 	}
 
 	/**
@@ -306,36 +298,28 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override async runButton(interaction: ButtonInteraction, args: string[]) {
-		const { channel } = interaction;
-		const [subcommand, async, inspectDepth] = args;
+	override runButton(interaction: ButtonInteraction, args: string[]) {
+		const [subcommand, inspectDepth] = args;
 
 		switch (subcommand) {
 			case 'edit': {
-				try {
-					if (!ChannelUtil.botPermissions(channel!).has(PermissionFlagsBits.ViewChannel)) {
-						throw `missing VIEW_CHANNEL permissions in ${interaction.channel ?? 'this channel'}`;
-					}
-
-					const collected = await channel!.awaitMessages({
-						filter: (msg) => msg.author.id === interaction.user.id,
-						max: 1,
-						time: minutes(5),
-						errors: ['time'],
-					});
-
-					return InteractionUtil.update(
-						interaction,
-						await this._eval(
-							interaction,
-							collected.first()!.content,
-							async === 'true' || undefined,
-							Number(inspectDepth),
+				return interaction.showModal(
+					new Modal()
+						.setTitle(this.name)
+						.setCustomId(this._generateCustomId(subcommand, inspectDepth as `${number}`))
+						.addComponents(
+							new ActionRow<ModalActionRowComponent>().addComponents(
+								new TextInputComponent()
+									.setCustomId('input')
+									.setStyle(TextInputStyle.Paragraph)
+									.setLabel('Input')
+									.setPlaceholder(
+										interaction.message.embeds[0]?.fields?.[0].value.replace(/^```[a-z]*\n|```$/g, '') ?? 'to evaluate',
+									)
+									.setRequired(true),
+							),
 						),
-					);
-				} catch (error) {
-					return logger.error(error);
-				}
+				);
 			}
 
 			default:
@@ -346,31 +330,35 @@ export default class EvalCommand extends ApplicationCommand {
 	/**
 	 * execute the command
 	 * @param interaction
+	 * @param args parsed customId, split by ':'
 	 */
-	override async runSlash(interaction: ChatInputCommandInteraction) {
-		let indentationCount = 0;
+	override runModal(interaction: ModalSubmitInteraction, args: string[]) {
+		const [subcommand, inspectDepth] = args;
 
-		const INPUT = interaction.options
-			.getString('input', true)
-			.replace(/(?<=(?<![$)\]]|\\u)\{)/g, '\n') // insert new line for new scopes if not in template strings
-			.split(/; *|\n/)
-			.map((line) => {
-				// add indentation
-				let indentation = '';
+		switch (subcommand) {
+			case 'edit': {
+				return this._run(
+					// @ts-expect-error
+					interaction, //
+					interaction.fields.getTextInputValue('input'),
+					{
+						inspectDepth: Number(inspectDepth),
+					},
+				);
+			}
 
-				indentationCount -= line.match(/\}/g)?.length ?? 0;
-				for (let i = 0; i < indentationCount; ++i) indentation += '  ';
-				indentationCount += line.match(/\{/g)?.length ?? 0;
-
-				return `${indentation}${line}`;
-			})
-			.reduce((acc, cur) => `${acc}${acc ? '\n' : ''}${cur}${cur.endsWith('{') ? '' : ';'}`, '');
-		const IS_ASYNC = interaction.options.getBoolean('async') ?? /\bawait\b/.test(INPUT);
-		const INSPECT_DEPTH = interaction.options.getInteger('inspect') ?? this.config.get('EVAL_INSPECT_DEPTH');
-
-		return InteractionUtil.reply(interaction, {
-			...(await this._eval(interaction, INPUT, IS_ASYNC, INSPECT_DEPTH)),
-			components: this._getRows(interaction, IS_ASYNC, INSPECT_DEPTH),
+			default:
+				throw new Error(`unknown subcommand '${subcommand}'`);
+		}
+	}
+	/**
+	 * execute the command
+	 * @param interaction
+	 */
+	override runSlash(interaction: ChatInputCommandInteraction) {
+		return this._run(interaction, interaction.options.getString('input', true).replace(/(?<=;)(?!$)/, '\n'), {
+			isAsync: interaction.options.getBoolean('async') ?? undefined,
+			inspectDepth: interaction.options.getInteger('inspect') ?? undefined,
 		});
 	}
 }

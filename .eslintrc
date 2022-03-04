@@ -86,12 +86,13 @@
 				"exceptMethods": [
 					"run",
 					"runAutocomplete",
-					"runButton",
+					"runUser",
 					"runMessage",
-					"runMinecraft",
+					"runButton",
 					"runSelect",
 					"runSlash",
-					"runUser",
+					"runModal",
+					"runMinecraft",
 					"_run",
 					"_generateReply"
 				]

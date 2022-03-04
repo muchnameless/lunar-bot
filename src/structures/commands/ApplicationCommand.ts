@@ -35,6 +35,7 @@ import type {
 	GuildMember,
 	Interaction,
 	Message,
+	ModalSubmitInteraction,
 	SelectMenuInteraction,
 	Snowflake,
 	User,
@@ -367,6 +368,15 @@ export class ApplicationCommand extends BaseCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	runButton(interaction: ButtonInteraction, args: string[]): unknown | Promise<unknown> {
+		throw new Error('no run function specified for buttons');
+	}
+
+	/**
+	 * execute the command
+	 * @param interaction
+	 * @param args parsed customId, split by ':'
+	 */
+	runModal(interaction: ModalSubmitInteraction, args: string[]): unknown | Promise<unknown> {
 		throw new Error('no run function specified for buttons');
 	}
 

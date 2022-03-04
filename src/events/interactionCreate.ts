@@ -19,10 +19,11 @@ import type {
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,
 	GuildMember,
+	Interaction,
 	Message,
+	ModalSubmitInteraction,
 	SelectMenuInteraction,
 } from 'discord.js';
-import type { ChatInteraction } from '../util/InteractionUtil';
 import type LeaderboardCommand from '../commands/guild/leaderboard';
 
 export default class InteractionCreateEvent extends Event {
@@ -346,16 +347,62 @@ export default class InteractionCreateEvent extends Event {
 	}
 
 	/**
+	 * @param interaction
+	 */
+	private async _handleModalSubmitInteraction(interaction: ModalSubmitInteraction) {
+		logger.info(
+			{
+				type: InteractionType[interaction.type],
+				customId: interaction.customId,
+				user: interaction.member
+					? `${(interaction.member as GuildMember).displayName} | ${interaction.user.tag}`
+					: interaction.user.tag,
+				channel: interaction.guildId
+					? (interaction.channel as BaseGuildTextChannel)?.name ?? interaction.channelId
+					: 'DM',
+				guild: interaction.guild?.name ?? null,
+			},
+			'INTERACTION_CREATE',
+		);
+
+		const args = interaction.customId.split(':');
+		const TYPE = args.shift();
+
+		switch (TYPE) {
+			// command message buttons
+			case COMMAND_KEY: {
+				const commandName = args.shift();
+				const command = this.client.commands.get(commandName!);
+
+				if (!command) {
+					if (commandName) {
+						throw `the \`${commandName}\` command is currently disabled`;
+					}
+
+					throw 'unknown modal';
+				}
+
+				// role permissions
+				await command.assertPermissions(interaction);
+
+				return command.runModal(interaction, args);
+			}
+		}
+	}
+
+	/**
 	 * event listener callback
 	 * @param interaction
 	 */
-	override async run(interaction: ChatInteraction | AutocompleteInteraction) {
+	override async run(interaction: Interaction) {
 		try {
-			// autocomplete
-			if (interaction.isAutocomplete()) return await this._handleAutocompleteInteraction(interaction);
-
-			// add interaction to the WeakMap which holds InteractionData
-			InteractionUtil.add(interaction);
+			// add interaction to the WeakMap which holds InteractionData and schedules deferring
+			if (interaction.isRepliable()) {
+				InteractionUtil.add(interaction);
+			} else if (interaction.isAutocomplete()) {
+				// autocomplete
+				return await this._handleAutocompleteInteraction(interaction);
+			}
 
 			// commands
 			if (interaction.isChatInputCommand()) return await this._handleCommandInteraction(interaction);
@@ -369,32 +416,32 @@ export default class InteractionCreateEvent extends Event {
 			// context menu
 			if (interaction.isContextMenuCommand()) return await this._handleContextMenuInteraction(interaction);
 
+			// modals
+			if (interaction.isModalSubmit()) return await this._handleModalSubmitInteraction(interaction);
+
 			throw `unknown interaction type '${interaction.type}'`;
 		} catch (error) {
 			logger.error({ err: error, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
 
 			if (InteractionUtil.isInteractionError(error)) return; // interaction expired
 
-			// autocomplete
-			if (interaction.isAutocomplete()) {
-				// send empty choices
-				if (!interaction.responded) {
-					try {
-						await interaction.respond([]);
-					} catch (error_) {
-						logger.error({ err: error_, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
-					}
+			// error reply
+			if (interaction.isRepliable()) {
+				InteractionUtil.reply(interaction, {
+					content: typeof error === 'string' ? error : `an error occurred while executing the command: ${error}`,
+					ephemeral: true,
+					allowedMentions: { parse: [], repliedUser: true },
+				});
+			} else if (
+				interaction.isAutocomplete() && // autocomplete -> send empty choices
+				!interaction.responded
+			) {
+				try {
+					await interaction.respond([]);
+				} catch (error_) {
+					logger.error({ err: error_, ...InteractionUtil.logInfo(interaction) }, '[INTERACTION CREATE]');
 				}
-
-				return;
 			}
-
-			// other interactions
-			InteractionUtil.reply(interaction, {
-				content: typeof error === 'string' ? error : `an error occurred while executing the command: ${error}`,
-				ephemeral: true,
-				allowedMentions: { parse: [], repliedUser: true },
-			});
 		}
 	}
 }

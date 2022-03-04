@@ -80,21 +80,18 @@ export default class FriendCommand extends ApplicationCommand {
 		const response = await hypixelGuild.chatBridge.minecraft.command({ command });
 		const pageMatched = response.match(/\(Page (?<current>\d+) of (?<total>\d+)\)/);
 
-		return (InteractionUtil[interaction.isCommand() ? 'reply' : 'update'] as typeof InteractionUtil['reply'])(
-			interaction as ButtonInteraction,
-			{
-				embeds: [
-					this.client.defaultEmbed //
-						.setTitle(`/${command}`)
-						.setDescription(Formatters.codeBlock(response)),
-				],
-				components: this._getPaginationButtons(
-					hypixelGuild.guildId,
-					Number(pageMatched?.groups!.current),
-					Number(pageMatched?.groups!.total),
-				),
-			},
-		);
+		return InteractionUtil.replyOrUpdate(interaction, {
+			embeds: [
+				this.client.defaultEmbed //
+					.setTitle(`/${command}`)
+					.setDescription(Formatters.codeBlock(response)),
+			],
+			components: this._getPaginationButtons(
+				hypixelGuild.guildId,
+				Number(pageMatched?.groups!.current),
+				Number(pageMatched?.groups!.total),
+			),
+		});
 	}
 
 	/**
