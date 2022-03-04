@@ -105,14 +105,6 @@ export default class EvalCommand extends ApplicationCommand {
 	}
 
 	/**
-	 * @param subcommand
-	 * @param inspectDepth
-	 */
-	private _generateCustomId(subcommand: string, inspectDepth: number | `${number}`) {
-		return `${this.baseCustomId}:${subcommand}:${inspectDepth}` as const;
-	}
-
-	/**
 	 * replaces the client's token in 'text' and escapes `
 	 * @param input
 	 * @param depth
@@ -186,16 +178,26 @@ export default class EvalCommand extends ApplicationCommand {
 		let files: MessageAttachment[] | undefined;
 
 		try {
+			let toEvaluate = input;
+
+			// wrap input in async IIFE
+			if (isAsync) {
+				const lines = input.split(';');
+				const lastLine = lines.pop()!;
+
+				if (lastLine.trimStart().startsWith('return ')) {
+					lines.push(lastLine);
+				} else {
+					lines.push(`return ${lastLine}`);
+				}
+
+				toEvaluate = `(async () => { ${lines.join(';')} })()`;
+			}
+
 			stopwatch.restart();
 
 			// eval args
-			let evaled = isAsync
-				? eval(
-						`(async () => {
-							${input}
-						})()`,
-				  )
-				: eval(input);
+			let evaled = eval(toEvaluate);
 
 			stopwatch.stop();
 
@@ -208,17 +210,22 @@ export default class EvalCommand extends ApplicationCommand {
 			}
 
 			const CLEANED_OUTPUT = this._cleanOutput(evaled, inspectDepth);
-			const OUTPUT_ARRAY = splitForEmbedFields(CLEANED_OUTPUT, 'ts');
-			const INFO = `d.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``;
+			const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``;
 
 			// add output fields till embed character limit is reached
-			for (const [index, value] of OUTPUT_ARRAY.entries()) {
+			for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'ts').entries()) {
 				const name = index ? '\u200B' : 'Output';
 
 				// embed size overflow -> convert output to file
-				if (responseEmbed.length + INFO.length + 1 + name.length + value.length > EMBED_MAX_CHARS) {
+				if (
+					responseEmbed.length + '\u200B'.length + FOOTER_FIELD.length + name.length + value.length >
+					EMBED_MAX_CHARS
+				) {
 					// remove result fields
-					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY);
+					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY, {
+						name: 'Output',
+						value: 'result.ts',
+					});
 					// add files
 					files = this._getFiles(interaction, CLEANED_OUTPUT);
 					break;
@@ -229,7 +236,7 @@ export default class EvalCommand extends ApplicationCommand {
 
 			responseEmbed.addFields({
 				name: '\u200B',
-				value: INFO,
+				value: FOOTER_FIELD,
 			});
 		} catch (error) {
 			stopwatch.stop();
@@ -237,16 +244,22 @@ export default class EvalCommand extends ApplicationCommand {
 			logger.debug(error, '[EVAL ERROR]');
 
 			const errorType = new Type(error);
-			const FOOTER = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
+			const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
 			const CLEANED_OUTPUT = this._cleanOutput(error, inspectDepth);
 
 			for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'xl').entries()) {
 				const name = index ? '\u200B' : 'Error';
 
 				// embed size overflow -> convert output to file
-				if (responseEmbed.length + FOOTER.length + 1 + name.length + value.length > EMBED_MAX_CHARS) {
+				if (
+					responseEmbed.length + '\u200B'.length + FOOTER_FIELD.length + name.length + value.length >
+					EMBED_MAX_CHARS
+				) {
 					// remove error fields
-					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY);
+					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY, {
+						name: 'Error',
+						value: 'result.ts',
+					});
 					// add files
 					files = this._getFiles(interaction, CLEANED_OUTPUT);
 					break;
@@ -257,7 +270,7 @@ export default class EvalCommand extends ApplicationCommand {
 
 			responseEmbed.addFields({
 				name: '\u200B',
-				value: FOOTER,
+				value: FOOTER_FIELD,
 			});
 		}
 
@@ -266,7 +279,7 @@ export default class EvalCommand extends ApplicationCommand {
 			components: [
 				new ActionRow().addComponents(
 					new ButtonComponent()
-						.setCustomId(this._generateCustomId('edit', inspectDepth))
+						.setCustomId(`${this.baseCustomId}:edit:${inspectDepth}`)
 						.setEmoji({ name: EDIT_MESSAGE_EMOJI })
 						.setStyle(ButtonStyle.Secondary),
 					InteractionUtil.getDeleteButton(interaction),
@@ -299,14 +312,14 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override runButton(interaction: ButtonInteraction, args: string[]) {
-		const [subcommand, inspectDepth] = args;
+		const [subcommand] = args;
 
 		switch (subcommand) {
 			case 'edit': {
 				return interaction.showModal(
 					new Modal()
 						.setTitle(this.name)
-						.setCustomId(this._generateCustomId(subcommand, inspectDepth as `${number}`))
+						.setCustomId(interaction.customId)
 						.addComponents(
 							new ActionRow<ModalActionRowComponent>().addComponents(
 								new TextInputComponent()
@@ -316,7 +329,7 @@ export default class EvalCommand extends ApplicationCommand {
 									.setPlaceholder(
 										interaction.message.embeds[0]?.fields?.[0].value
 											.replace(/^```[a-z]*\n|```$/g, '')
-											.slice(0, MAX_PLACEHOLDER_LENGTH) ?? 'to evaluate',
+											.slice(0, MAX_PLACEHOLDER_LENGTH) ?? 'code to evaluate',
 									)
 									.setRequired(true),
 							),
