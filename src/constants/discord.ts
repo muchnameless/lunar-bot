@@ -19,3 +19,4 @@ export const WEBHOOKS_MAX_PER_CHANNEL = 10;
 
 // interactions
 export const MAX_CHOICES = 25;
+export const MAX_PLACEHOLDER_LENGTH = 100;

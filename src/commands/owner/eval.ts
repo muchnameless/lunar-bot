@@ -57,6 +57,7 @@ import { calculateItemPrice } from '../../structures/networth/networth';
 calculateItemPrice;
 import { prices } from '../../structures/networth/prices';
 prices;
+import { MAX_PLACEHOLDER_LENGTH } from '../../constants';
 import type {
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,
@@ -314,7 +315,9 @@ export default class EvalCommand extends ApplicationCommand {
 									.setStyle(TextInputStyle.Paragraph)
 									.setLabel('Input')
 									.setPlaceholder(
-										interaction.message.embeds[0]?.fields?.[0].value.replace(/^```[a-z]*\n|```$/g, '') ?? 'to evaluate',
+										interaction.message.embeds[0]?.fields?.[0].value
+											.replace(/^```[a-z]*\n|```$/g, '')
+											.slice(0, MAX_PLACEHOLDER_LENGTH) ?? 'to evaluate',
 									)
 									.setRequired(true),
 							),
