@@ -126,13 +126,13 @@ export default class EvalCommand extends ApplicationCommand {
 
 	/**
 	 * @param interaction
-	 * @param input
+	 * @param _input
 	 * @param options
 	 */
 	private async _run(
 		interaction: RepliableInteraction,
-		input: string,
-		{ isAsync = /\bawait\b/.test(input), inspectDepth = this.config.get('EVAL_INSPECT_DEPTH') } = {},
+		_input: string,
+		{ isAsync = /\bawait\b/.test(_input), inspectDepth = this.config.get('EVAL_INSPECT_DEPTH') } = {},
 	) {
 		if (interaction.user.id !== this.client.ownerId) {
 			throw `eval is restricted to ${Formatters.userMention(this.client.ownerId)}`;
@@ -166,6 +166,31 @@ export default class EvalCommand extends ApplicationCommand {
 			iconURL: (me ?? this.client.user!).displayAvatarURL(),
 		});
 
+		let input: string;
+		let toEvaluate: string;
+
+		// wrap input in async IIFE
+		if (isAsync) {
+			const lines = _input.split(';');
+
+			for (let index = lines.length - 1; index >= 0; --index) {
+				const trimmed = lines[index].replace(/^ +/, '');
+
+				if (!trimmed) continue;
+				if (/^\n*return /.test(trimmed)) break;
+
+				lines[index] = trimmed.startsWith('\n')
+					? `\nreturn ${lines[index].slice('\n'.length)}`
+					: `return ${lines[index]}`;
+				break;
+			}
+
+			input = lines.join(';');
+			toEvaluate = `(async () => { ${input} })()`;
+		} else {
+			input = toEvaluate = _input;
+		}
+
 		for (const [index, inputPart] of splitForEmbedFields(input, 'ts').entries()) {
 			responseEmbed.addFields({
 				name: index ? '\u200B' : isAsync ? 'Async Input' : 'Input',
@@ -178,22 +203,6 @@ export default class EvalCommand extends ApplicationCommand {
 		let files: MessageAttachment[] | undefined;
 
 		try {
-			let toEvaluate = input;
-
-			// wrap input in async IIFE
-			if (isAsync) {
-				const lines = input.split(';');
-				const lastLine = lines.pop()!;
-
-				if (lastLine.trimStart().startsWith('return ')) {
-					lines.push(lastLine);
-				} else {
-					lines.push(`return ${lastLine}`);
-				}
-
-				toEvaluate = `(async () => { ${lines.join(';')} })()`;
-			}
-
 			stopwatch.restart();
 
 			// eval args
@@ -295,12 +304,12 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param message
 	 */
 	override runMessage(interaction: ContextMenuCommandInteraction, { content, author }: Message) {
-		if (!content) {
-			throw 'no content to evaluate';
-		}
-
 		if (author.id !== this.client.ownerId) {
 			throw `cannot evaluate a message from ${author}`;
+		}
+
+		if (!content) {
+			throw 'no content to evaluate';
 		}
 
 		return this._run(interaction, content);
@@ -371,7 +380,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override runSlash(interaction: ChatInputCommandInteraction) {
-		return this._run(interaction, interaction.options.getString('input', true).replace(/(?<=;)(?!$)/, '\n'), {
+		return this._run(interaction, interaction.options.getString('input', true).replace(/(?<=;) *(?!$)/, '\n'), {
 			isAsync: interaction.options.getBoolean('async') ?? undefined,
 			inspectDepth: interaction.options.getInteger('inspect') ?? undefined,
 		});
