@@ -57,7 +57,6 @@ import { calculateItemPrice } from '../../structures/networth/networth';
 calculateItemPrice;
 import { prices } from '../../structures/networth/prices';
 prices;
-import { MAX_PLACEHOLDER_LENGTH } from '../../constants';
 import type {
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,
@@ -69,7 +68,7 @@ import type {
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
-const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS } = constants;
+const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH } = constants;
 const { logger, splitForEmbedFields } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
