@@ -19,6 +19,8 @@ import Discord, {
 } from 'discord.js';
 Embed;
 Util; // unused imports are 'used' so that tsc doesn't remove them
+import { Routes } from 'discord-api-types/v9';
+Routes;
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
 import { transformItemData } from '@zikeji/hypixel';
@@ -154,7 +156,7 @@ export default class EvalCommand extends ApplicationCommand {
 		const i = interaction;
 		const { client, config } = this;
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
-		const { discordGuilds, hypixelGuilds, players, taxCollectors, db } = client;
+		const { discordGuilds, hypixelGuilds, players, taxCollectors, db, rest } = client;
 		const me = guild?.me ?? null;
 		const player = UserUtil.getPlayer(user);
 		const p = player;
