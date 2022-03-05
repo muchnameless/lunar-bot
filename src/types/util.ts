@@ -51,3 +51,9 @@ export type DeepPartialAny<T> = {
 };
 
 type AnyObject = Record<string, any>;
+
+export type FilterByPropertyType<Base, Condition> = {
+	[Key in keyof Base]: Base[Key] extends Condition ? Key : never;
+};
+
+export type KeysByType<Base, Condition> = FilterByPropertyType<Base, Condition>[keyof Base];

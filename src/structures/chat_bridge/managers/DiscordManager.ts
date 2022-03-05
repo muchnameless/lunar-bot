@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 import { EMOJI_NAME_TO_UNICODE, INVISIBLE_CHARACTER_REGEXP } from '../constants';
 import { asyncReplace, autocorrect, escapeMarkdown, replaceSmallLatinCapitalLetters } from '../../../functions';
 import { DiscordChatManager } from './DiscordChatManager';
-import type { Snowflake } from 'discord.js';
+import type { GuildEmoji, Snowflake } from 'discord.js';
 import type { HypixelMessageType } from '../constants';
 import type { ChatBridge } from '../ChatBridge';
 
@@ -76,7 +76,12 @@ export class DiscordManager {
 
 		if (emoji) return emoji;
 
-		const { value, similarity } = autocorrect(inColon, this.client.emojis.cache, 'name');
+		const { value, similarity } = autocorrect(
+			inColon,
+			// https://discord.com/developers/docs/resources/emoji#emoji-object name - ?string (can be null only in reaction emoji objects)
+			this.client.emojis.cache as Collection<string, GuildEmoji & { name: string }>,
+			'name',
+		);
 
 		if (similarity >= this.client.config.get('AUTOCORRECT_THRESHOLD')) return `${value}`;
 	}

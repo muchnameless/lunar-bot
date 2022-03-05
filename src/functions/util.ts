@@ -4,6 +4,7 @@ import { MAX_CHOICES } from '../constants';
 import { days, jaroWinklerSimilarity, logger } from '.';
 import type { URL } from 'node:url';
 import type { Collection } from 'discord.js';
+import type { KeysByType } from '../types/util';
 
 /**
  * returns the ISO week number of the given date
@@ -40,23 +41,24 @@ interface AutocompleteResult<T> {
  */
 export function autocorrect(
 	query: string,
-	validInput: readonly string[] | Map<unknown, string> | IterableIterator<string>,
+	validInput: readonly string[] | ReadonlyMap<unknown, string> | IterableIterator<string>,
+	attributeToQuery?: undefined,
 ): AutocompleteResult<string>;
 export function autocorrect<T>(
 	query: string,
-	validInput: readonly T[] | Map<unknown, T> | IterableIterator<T>,
-	attributeToQuery: keyof T,
+	validInput: readonly T[] | ReadonlyMap<unknown, T> | IterableIterator<T>,
+	attributeToQuery: KeysByType<T, string>,
 ): AutocompleteResult<T>;
 export function autocorrect<T>(
 	query: string,
-	validInput: readonly T[] | Map<unknown, T> | IterableIterator<T>,
-	attributeToQuery?: T[keyof T] extends string ? keyof T : never,
+	validInput: readonly T[] | ReadonlyMap<unknown, T> | IterableIterator<T>,
+	attributeToQuery?: KeysByType<T, string>,
 ) {
 	let currentBestElement!: T;
 	let currentBestSimilarity = 0;
 
 	if (attributeToQuery) {
-		for (const element of (validInput as Map<unknown, T>).values?.() ?? validInput) {
+		for (const element of (validInput as ReadonlyMap<unknown, T>).values?.() ?? validInput) {
 			const similarity = jaroWinklerSimilarity(query, element[attributeToQuery] as unknown as string);
 
 			if (similarity === 1) {
@@ -81,7 +83,7 @@ export function autocorrect<T>(
 			'[AUTOCORRECT]',
 		);
 	} else {
-		for (const element of (validInput as Map<unknown, T>).values?.() ?? validInput) {
+		for (const element of (validInput as ReadonlyMap<unknown, T>).values?.() ?? validInput) {
 			const similarity = jaroWinklerSimilarity(query, element as unknown as string);
 
 			if (similarity === 1) {
