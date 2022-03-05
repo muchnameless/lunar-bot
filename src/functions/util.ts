@@ -27,7 +27,7 @@ export function getWeekOfYear(date: Date) {
 	return Math.ceil((firstThursday - target.getTime()) / days(7)) + 1;
 }
 
-interface AutocompleteResult<T> {
+interface AutocorrectResult<T> {
 	value: T;
 	/** 0 (no match) to 1 (exact match) */
 	similarity: number;
@@ -43,12 +43,12 @@ export function autocorrect(
 	query: string,
 	validInput: readonly string[] | ReadonlyMap<unknown, string> | IterableIterator<string>,
 	attributeToQuery?: undefined,
-): AutocompleteResult<string>;
+): AutocorrectResult<string>;
 export function autocorrect<T>(
 	query: string,
 	validInput: readonly T[] | ReadonlyMap<unknown, T> | IterableIterator<T>,
 	attributeToQuery: KeysByType<T, string>,
-): AutocompleteResult<T>;
+): AutocorrectResult<T>;
 export function autocorrect<T>(
 	query: string,
 	validInput: readonly T[] | ReadonlyMap<unknown, T> | IterableIterator<T>,
