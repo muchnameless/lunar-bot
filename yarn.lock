@@ -450,12 +450,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/stopwatch@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@sapphire/stopwatch@npm:1.3.0"
+"@sapphire/stopwatch@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@sapphire/stopwatch@npm:1.4.0"
   dependencies:
     tslib: ^2.3.1
-  checksum: 7f0227eb1006c9352811fa4868a8818bd582a3be37a37c34445dd108e854f812c4cc61b2b2ab31f4d5d87d9ef725dc3323100f4a3454f38db6226bc66ccdda79
+  checksum: 8e3c92c4643f20284d6591ac20f6231ff2562c66e39cd5ad962208cfb661d1dd04e4ac13813013e892b99d83524317fdee2df6f27fa5464f56164f1fd1034b8a
   languageName: node
   linkType: hard
 
@@ -3469,7 +3469,7 @@ __metadata:
     "@discordjs/builders": "*"
     "@discordjs/rest": "*"
     "@sapphire/async-queue": ^1.3.0
-    "@sapphire/stopwatch": ^1.3.0
+    "@sapphire/stopwatch": ^1.4.0
     "@sapphire/time-utilities": ^1.6.0
     "@sapphire/type": ^2.1.2
     "@sapphire/utilities": ^3.3.0
