@@ -436,6 +436,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sapphire/async-queue@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@sapphire/async-queue@npm:1.3.0"
+  checksum: 267a3970ac93aaffc9886582c39ca23a345e8d472042200635044d7e5c48f615d389623de5e6679c4fa335b554357faf872e1e32098b33e5d700099345d29559
+  languageName: node
+  linkType: hard
+
 "@sapphire/snowflake@npm:^3.1.0":
   version: 3.1.0
   resolution: "@sapphire/snowflake@npm:3.1.0"
@@ -3461,7 +3468,7 @@ __metadata:
     "@commitlint/config-angular": ^16.2.1
     "@discordjs/builders": "*"
     "@discordjs/rest": "*"
-    "@sapphire/async-queue": ^1.2.0
+    "@sapphire/async-queue": ^1.3.0
     "@sapphire/stopwatch": ^1.3.0
     "@sapphire/time-utilities": ^1.6.0
     "@sapphire/type": ^2.1.2
