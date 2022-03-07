@@ -645,7 +645,7 @@ export default class GuildCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param hypixelGuild
 	 * @param subcommand
-	 * @param baseCommand
+	 * @param commandOptions
 	 * @param userId
 	 * @param page
 	 */

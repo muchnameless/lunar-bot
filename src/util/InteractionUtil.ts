@@ -49,7 +49,7 @@ interface InteractionData {
 }
 
 export type RepliableInteraction<Cached extends CacheType = CacheType> = Interaction<Cached> &
-	InteractionResponseFields<Cached>;
+	Omit<InteractionResponseFields<Cached>, 'showModal'>;
 
 interface DeferReplyOptions extends InteractionDeferReplyOptions {
 	rejectOnError?: boolean;

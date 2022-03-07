@@ -363,14 +363,9 @@ export default class EvalCommand extends ApplicationCommand {
 
 		switch (subcommand) {
 			case 'edit': {
-				return this._run(
-					// @ts-expect-error
-					interaction, //
-					interaction.fields.getTextInputValue('input'),
-					{
-						inspectDepth: Number(inspectDepth),
-					},
-				);
+				return this._run(interaction, interaction.fields.getTextInputValue('input'), {
+					inspectDepth: Number(inspectDepth),
+				});
 			}
 
 			default:

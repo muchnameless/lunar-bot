@@ -50,11 +50,13 @@ const client = new LunarClient({
 	},
 	allowedMentions: { parse: ['users'], repliedUser: true },
 	partials: [
+		Partials.User, // reactions on uncached messages
 		Partials.Channel, // DM channels
-		Partials.GuildMember,
-		Partials.Message,
+		Partials.GuildMember, // leave / update events for uncached members
+		Partials.Message, // reactions on uncached messages
 		Partials.Reaction, // reactions on uncached messages
-		Partials.User,
+		Partials.GuildScheduledEvent,
+		Partials.ThreadMember,
 	],
 	failIfNotExists: false,
 	presence: {
