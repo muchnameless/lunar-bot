@@ -479,13 +479,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/utilities@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "@sapphire/utilities@npm:3.3.0"
-  checksum: 0bbc527239d396ae7f5f76601190cc54c46b1f9483038ec5f37c4fac6a7d70428a2ce032df0fbfb22d036d31b4352c5b647786a8436b060ddeed77897baa4df9
-  languageName: node
-  linkType: hard
-
 "@sapphire/utilities@npm:^3.4.0":
   version: 3.4.0
   resolution: "@sapphire/utilities@npm:3.4.0"
@@ -3479,7 +3472,7 @@ __metadata:
     "@sapphire/stopwatch": ^1.4.0
     "@sapphire/time-utilities": ^1.7.0
     "@sapphire/type": ^2.2.0
-    "@sapphire/utilities": ^3.3.0
+    "@sapphire/utilities": ^3.4.0
     "@skyra/jaro-winkler": ^1.0.0
     "@types/common-tags": ^1.8.1
     "@types/cron": ^1.7.3
