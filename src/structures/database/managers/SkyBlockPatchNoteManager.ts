@@ -35,6 +35,11 @@ interface HypixelForumResponse {
 export class SkyBlockPatchNoteManager extends ModelManager<SkyBlockPatchNote> {
 	private parser = new Parser<HypixelForumResponse>();
 
+	// eslint-disable-next-line require-await, @typescript-eslint/no-unused-vars
+	override async loadCache(condition?: FindOptions<Attributes<SkyBlockPatchNote>>) {
+		return this;
+	}
+
 	/**
 	 * fetch forum posts from hypixel's rss feed
 	 */
