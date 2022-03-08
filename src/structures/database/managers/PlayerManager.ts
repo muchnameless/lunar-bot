@@ -20,7 +20,7 @@ import {
 	upperCaseFirstChar,
 } from '../../../functions';
 import { ModelManager } from './ModelManager';
-import type { CreationAttributes } from 'sequelize';
+import type { Attributes, CreationAttributes, FindOptions } from 'sequelize';
 import type { ModelResovable } from './ModelManager';
 import type { Player, PlayerInGuild, PlayerUpdateOptions, ResetXpOptions, TransferXpOptions } from '../models/Player';
 import type { HypixelGuild } from '../models/HypixelGuild';
@@ -48,8 +48,9 @@ export class PlayerManager extends ModelManager<Player> {
 
 	/**
 	 * loads the player cache and sorts alphabetically by IGN
+	 * @param condition
 	 */
-	override async loadCache() {
+	override async loadCache(condition?: FindOptions<Attributes<Player>>) {
 		await super.loadCache({
 			where: {
 				guildId: {
@@ -57,6 +58,7 @@ export class PlayerManager extends ModelManager<Player> {
 					[Op.ne]: null,
 				},
 			},
+			...condition,
 		});
 
 		return this.sortAlphabetically();
