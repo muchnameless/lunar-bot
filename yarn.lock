@@ -3543,7 +3543,7 @@ __metadata:
     tiny-typed-emitter: ^2.1.0
     tslib: ^2.3.1
     typescript: ^4.7.0-dev.20220307
-    undici: ^4.15.0
+    undici: ^4.15.1
     utf-8-validate: ^5.0.8
   languageName: unknown
   linkType: soft
@@ -5817,10 +5817,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^4.14.1, undici@npm:^4.15.0":
+"undici@npm:^4.14.1":
   version: 4.15.0
   resolution: "undici@npm:4.15.0"
   checksum: be1f7bc0cf17dacc0b2619c694f2d8c3d17d2ca23264469a7032425e5f5c2915cc105f6efa2df26da368bb6921b76c3f0207f727b2fdc11e8e35c6c16839f848
+  languageName: node
+  linkType: hard
+
+"undici@npm:^4.15.1":
+  version: 4.15.1
+  resolution: "undici@npm:4.15.1"
+  checksum: 13b264d4966de105e211e1ca9433e2d8be5fcfe85e4cafea6b97c4685df3364bc8bc9e9b27796ce400e8a1e45e92a65b1453fcb499557e4f5c013af18f194852
   languageName: node
   linkType: hard
 
