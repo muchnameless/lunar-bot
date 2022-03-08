@@ -2,6 +2,7 @@ import Parser from 'rss-parser';
 import { CronJob } from 'cron';
 import { logger } from '../../../functions';
 import { ModelManager } from './ModelManager';
+import type { Attributes, FindOptions } from 'sequelize';
 import type { SkyBlockPatchNote } from '../models/SkyBlockPatchNote';
 
 interface HypixelForumResponseItem {
