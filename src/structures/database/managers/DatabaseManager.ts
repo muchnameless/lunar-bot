@@ -349,7 +349,7 @@ export class DatabaseManager {
 				let index = -1;
 
 				for (const player of hypixelGuild.players.values()) {
-					values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n${
+					values[Math.trunc(++index / ENTRIES_PER_ROW)] += `\n${
 						player.paid ? Y_EMOJI_ALT : X_EMOJI
 					}\u00A0${player.ign.slice(0, 15)}`;
 				}
@@ -357,7 +357,7 @@ export class DatabaseManager {
 				let index = -1;
 
 				for (const player of hypixelGuild.players.values()) {
-					values[Math.floor(++index / ENTRIES_PER_ROW)] += `\n•\u00A0${player.ign.slice(0, 15)}`;
+					values[Math.trunc(++index / ENTRIES_PER_ROW)] += `\n•\u00A0${player.ign.slice(0, 15)}`;
 				}
 			}
 

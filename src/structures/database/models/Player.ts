@@ -1079,7 +1079,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			SKILLS.map((skill) => {
 				// individual skill lvl 45+ / 50+ / 55+ / 60
 				const { progressLevel } = this.getSkillLevel(skill);
-				const CURRENT_LEVEL_MILESTONE = Math.floor(progressLevel / 5) * 5; // round down to nearest divisible by 5
+				const CURRENT_LEVEL_MILESTONE = Math.trunc(progressLevel / 5) * 5; // round down to nearest divisible by 5
 				const SKILL = toUpperCase(skill);
 
 				// individual skills
@@ -1100,7 +1100,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			}).reduce((acc, level) => acc + level, 0) / SKILLS.length;
 
 		// average skill
-		let currentLvlMilestone = Math.floor(skillAverage / 5) * 5; // round down to nearest divisible by 5
+		let currentLvlMilestone = Math.trunc(skillAverage / 5) * 5; // round down to nearest divisible by 5
 
 		for (const level of SKILL_AVERAGE_ROLES) {
 			if (level === currentLvlMilestone) {
@@ -1145,7 +1145,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		}
 
 		// dungeons
-		currentLvlMilestone = Math.floor(this.getSkillLevel('catacombs').trueLevel / 5) * 5; // round down to nearest divisible by 5
+		currentLvlMilestone = Math.trunc(this.getSkillLevel('catacombs').trueLevel / 5) * 5; // round down to nearest divisible by 5
 
 		for (const level of CATACOMBS_ROLES) {
 			if (level === currentLvlMilestone) {

@@ -57,8 +57,8 @@ export default class RanksCommand extends ApplicationCommand {
 
 			embed.addFields({
 				name: `${name} (top ${Math.round((1 - positionReq) * 100)}%)`,
-				value: `${formatNumber(Math.floor(weight))} / ${formatNumber(currentWeightReq)} weight (${formatNumber(
-					Math.floor(Math.abs(currentWeightReq - weight)),
+				value: `${formatNumber(Math.trunc(weight))} / ${formatNumber(currentWeightReq)} weight (${formatNumber(
+					Math.trunc(Math.abs(currentWeightReq - weight)),
 				)} ${weight < currentWeightReq ? 'below' : 'above'})`,
 			});
 		}

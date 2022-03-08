@@ -25,7 +25,7 @@ export default class BaseWeightCommand extends BaseSkyBlockCommand {
 	 */
 	// eslint-disable-next-line class-methods-use-this
 	private formatNumber(number: number, decimals = 1) {
-		return formatDecimalNumber(Math.floor(number * 100) / 100, { decimals });
+		return formatDecimalNumber(Math.trunc(number * 100) / 100, { decimals });
 	}
 
 	/**

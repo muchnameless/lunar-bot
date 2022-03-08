@@ -30,7 +30,7 @@ export default class BaseStatsCommand extends DualCommand {
 	// eslint-disable-next-line class-methods-use-this
 	calculateKD(kills?: number | string | null, deaths?: number | string | null) {
 		if (kills == null || deaths == null) return null;
-		return formatDecimalNumber(Math.floor((Number(kills) / Math.max(Number(deaths), 1)) * 100) / 100);
+		return formatDecimalNumber(Math.trunc((Number(kills) / Math.max(Number(deaths), 1)) * 100) / 100);
 	}
 
 	/**
