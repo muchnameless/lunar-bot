@@ -96,6 +96,6 @@
 	"resolutions": {
 		"@discordjs/builders": "0.13.0-dev.1646611698.b9ff7b0",
 		"@discordjs/rest": "0.4.0-dev.1646654929.b162f27",
-		"discord-api-types": "0.27.3"
+		"discord-api-types": "0.28.0"
 	}
 }
