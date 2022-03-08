@@ -3713,14 +3713,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-data@npm:^2.109.0, minecraft-data@npm:^2.62.1":
-  version: 2.114.1
-  resolution: "minecraft-data@npm:2.114.1"
-  checksum: f1269dc9a13a83e4f6bf19bffd9d6d5b718bce073c4f95ba6033fc73ec28902fade8e2b3821ea76451cd4a1355e83afa2151b928110766564989fee395ed1cbe
-  languageName: node
-  linkType: hard
-
-"minecraft-data@npm:^2.115.2":
+"minecraft-data@npm:^2.109.0, minecraft-data@npm:^2.115.2, minecraft-data@npm:^2.62.1":
   version: 2.115.2
   resolution: "minecraft-data@npm:2.115.2"
   checksum: ab996d02785b76164876d6bd1d361002d083467d98c8049edafb0f47eabbae6d81a99ccce293fe3a06f89785b69d1a24ef309c1adcb7c949ecaea4bab448207f
@@ -5824,14 +5817,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^4.14.1":
-  version: 4.15.0
-  resolution: "undici@npm:4.15.0"
-  checksum: be1f7bc0cf17dacc0b2619c694f2d8c3d17d2ca23264469a7032425e5f5c2915cc105f6efa2df26da368bb6921b76c3f0207f727b2fdc11e8e35c6c16839f848
-  languageName: node
-  linkType: hard
-
-"undici@npm:^4.15.1":
+"undici@npm:^4.14.1, undici@npm:^4.15.1":
   version: 4.15.1
   resolution: "undici@npm:4.15.1"
   checksum: 13b264d4966de105e211e1ca9433e2d8be5fcfe85e4cafea6b97c4685df3364bc8bc9e9b27796ce400e8a1e45e92a65b1453fcb499557e4f5c013af18f194852
