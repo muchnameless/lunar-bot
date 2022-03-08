@@ -33,7 +33,7 @@ export class ModelManager<M extends Model> {
 	 * loads the database cache (performs a sweep first)
 	 * @param condition optional condition to query the db with
 	 */
-	async loadCache(condition?: FindOptions) {
+	async loadCache(condition?: FindOptions<Attributes<M>>) {
 		this.sweepCache();
 
 		for (const element of (await this.model.findAll(condition)) as M[]) {
