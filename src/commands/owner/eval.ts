@@ -343,7 +343,8 @@ export default class EvalCommand extends ApplicationCommand {
 
 		switch (subcommand) {
 			case 'edit': {
-				return interaction.showModal(
+				return InteractionUtil.showModal(
+					interaction,
 					new Modal()
 						.setTitle(this.name)
 						.setCustomId(interaction.customId)

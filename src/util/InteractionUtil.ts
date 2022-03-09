@@ -33,6 +33,8 @@ import type {
 	Message,
 	MessageComponentInteraction,
 	MessageResolvable,
+	Modal,
+	ModalMessageModalSubmitInteraction,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
 } from 'discord.js';
@@ -45,11 +47,18 @@ interface InteractionData {
 	deferReplyPromise: Promise<void | Message> | null;
 	deferUpdatePromise: Promise<void> | null;
 	useEphemeral: boolean;
-	autoDefer: NodeJS.Timeout | null;
+	autoDeferTimeout: NodeJS.Timeout | null;
 }
 
 export type RepliableInteraction<Cached extends CacheType = CacheType> = Interaction<Cached> &
 	Omit<InteractionResponseFields<Cached>, 'showModal'>;
+
+export type ModalRepliableInteraction<Cached extends CacheType = CacheType> = Interaction<Cached> &
+	InteractionResponseFields<Cached>;
+
+export type FromMessageInteraction<Cached extends CacheType = CacheType> =
+	| MessageComponentInteraction<Cached>
+	| ModalMessageModalSubmitInteraction<Cached>;
 
 interface DeferReplyOptions extends InteractionDeferReplyOptions {
 	rejectOnError?: boolean;
@@ -126,7 +135,7 @@ export class InteractionUtil extends null {
 				(channel !== null && channel.type !== ChannelType.DM
 					? !channel.name.includes('command') && !channel.name.includes('ᴄᴏᴍᴍᴀɴᴅ') // guild channel
 					: false), // DM channel
-			autoDefer: setTimeout(
+			autoDeferTimeout: setTimeout(
 				// interactions must be acked within 3 seconds
 				() => {
 					logger.warn(
@@ -136,7 +145,7 @@ export class InteractionUtil extends null {
 
 					this.defer(interaction);
 
-					interactionData.autoDefer = null;
+					interactionData.autoDeferTimeout = null;
 				},
 				this.AUTO_DEFER_TIMEOUT,
 			),
@@ -316,8 +325,8 @@ export class InteractionUtil extends null {
 	 * whether the interaction has a message attached
 	 * @param interaction
 	 */
-	static hasMessage<T extends Interaction>(interaction: T): interaction is T & MessageComponentInteraction {
-		return Reflect.has(interaction, 'message');
+	static isFromMessage<T extends Interaction>(interaction: T): interaction is T & FromMessageInteraction {
+		return interaction.isMessageComponent() || (interaction.isModalSubmit() && interaction.isFromMessage());
 	}
 
 	/**
@@ -327,10 +336,10 @@ export class InteractionUtil extends null {
 	 */
 	static defer<T extends RepliableInteraction>(
 		interaction: T,
-		options?: T extends MessageComponentInteraction ? DeferUpdateOptions : DeferReplyOptions,
+		options?: T extends FromMessageInteraction ? DeferUpdateOptions : DeferReplyOptions,
 	) {
 		// deferUpdate for interactions which have a message attached (MessageComponentInteractions or ModalSubmitInteractions from MessageComponents)
-		if (this.hasMessage(interaction)) return this.deferUpdate(interaction, options);
+		if (this.isFromMessage(interaction)) return this.deferUpdate(interaction, options);
 
 		// deferReply if there is no message yet
 		return this.deferReply(interaction, options);
@@ -343,9 +352,9 @@ export class InteractionUtil extends null {
 	 */
 	static replyOrUpdate<T extends RepliableInteraction>(
 		interaction: T,
-		options: string | (T extends MessageComponentInteraction ? UpdateOptions : InteractionUtilReplyOptions),
+		options: string | (T extends FromMessageInteraction ? UpdateOptions : InteractionUtilReplyOptions),
 	) {
-		if (this.hasMessage(interaction)) return this.update(interaction, options as UpdateOptions);
+		if (this.isFromMessage(interaction)) return this.update(interaction, options as UpdateOptions);
 
 		return this.reply(interaction, options);
 	}
@@ -370,7 +379,7 @@ export class InteractionUtil extends null {
 			return logger.warn(this.logInfo(interaction), '[INTERACTION DEFER REPLY]: already replied');
 		}
 
-		clearTimeout(cached.autoDefer!);
+		clearTimeout(cached.autoDeferTimeout!);
 
 		try {
 			return await (cached.deferReplyPromise = interaction.deferReply({ ephemeral: cached.useEphemeral, ...options }));
@@ -437,7 +446,7 @@ export class InteractionUtil extends null {
 			}
 
 			// initial reply
-			clearTimeout(cached.autoDefer!);
+			clearTimeout(cached.autoDeferTimeout!);
 			return await interaction.reply(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
@@ -508,14 +517,11 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static async deferUpdate(
-		interaction: RepliableInteraction,
+		interaction: FromMessageInteraction,
 		options?: DeferReplyOptions & { fetchReply: true; rejectOnError: true },
 	): Promise<Message>;
-	static async deferUpdate(interaction: RepliableInteraction, options?: DeferReplyOptions): Promise<void | Message>;
-	static async deferUpdate(
-		interaction: MessageComponentInteraction,
-		options?: DeferUpdateOptions,
-	): Promise<void | Message> {
+	static async deferUpdate(interaction: FromMessageInteraction, options?: DeferReplyOptions): Promise<void | Message>;
+	static async deferUpdate(interaction: FromMessageInteraction, options?: DeferUpdateOptions): Promise<void | Message> {
 		const cached = this.CACHE.get(interaction)!;
 		if (cached.deferUpdatePromise) return cached.deferUpdatePromise;
 
@@ -523,7 +529,7 @@ export class InteractionUtil extends null {
 			return logger.warn(this.logInfo(interaction), '[INTERACTION DEFER UPDATE]: already replied');
 		}
 
-		clearTimeout(cached.autoDefer!);
+		clearTimeout(cached.autoDeferTimeout!);
 
 		try {
 			return await (cached.deferUpdatePromise = interaction.deferUpdate(options));
@@ -538,17 +544,11 @@ export class InteractionUtil extends null {
 	 * @param options
 	 */
 	static async update(
-		interaction: MessageComponentInteraction,
+		interaction: FromMessageInteraction,
 		options: UpdateOptions & { rejectOnError: true },
 	): Promise<Message>;
-	static async update(
-		interaction: MessageComponentInteraction,
-		options: string | UpdateOptions,
-	): Promise<void | Message>;
-	static async update(
-		interaction: MessageComponentInteraction,
-		options: string | UpdateOptions,
-	): Promise<void | Message> {
+	static async update(interaction: FromMessageInteraction, options: string | UpdateOptions): Promise<void | Message>;
+	static async update(interaction: FromMessageInteraction, options: string | UpdateOptions): Promise<void | Message> {
 		const cached = this.CACHE.get(interaction)!;
 		const _options =
 			typeof options === 'string'
@@ -573,7 +573,7 @@ export class InteractionUtil extends null {
 			if (interaction.deferred) return (await interaction.editReply(_options as WebhookEditMessageOptions)) as Message;
 
 			// initial reply
-			clearTimeout(cached.autoDefer!);
+			clearTimeout(cached.autoDeferTimeout!);
 			return await interaction.update(_options);
 		} catch (error) {
 			if (this.isInteractionError(error)) {
@@ -590,7 +590,7 @@ export class InteractionUtil extends null {
 	 * deletes the message which the component is attached to
 	 * @param interaction
 	 */
-	static async deleteMessage(interaction: MessageComponentInteraction) {
+	static async deleteMessage(interaction: FromMessageInteraction) {
 		const cached = this.CACHE.get(interaction)!;
 
 		try {
@@ -617,6 +617,16 @@ export class InteractionUtil extends null {
 			logger.error({ err: error, ...this.logInfo(interaction) }, '[INTERACTION DELETE MESSAGE]');
 			return MessageUtil.delete(interaction.message as Message);
 		}
+	}
+
+	/**
+	 * @param interaction
+	 * @param modal
+	 */
+	static showModal(interaction: ModalRepliableInteraction, modal: Modal) {
+		clearTimeout(this.CACHE.get(interaction)!.autoDeferTimeout!);
+
+		return interaction.showModal(modal);
 	}
 
 	/**
@@ -870,7 +880,7 @@ export class InteractionUtil extends null {
 	/**
 	 * returns the player object's IGN, optional fallback to interaction.user's player
 	 * @param interaction
-	 * @param fallbackToCurrentUser
+	 * @param options
 	 */
 	static getIgn(
 		interaction: ChatInputCommandInteraction,
@@ -891,6 +901,7 @@ export class InteractionUtil extends null {
 	/**
 	 * returns a HypixelGuild instance
 	 * @param interaction
+	 * @param options
 	 */
 	static getHypixelGuild(
 		interaction: Interaction,
