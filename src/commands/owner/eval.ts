@@ -1,6 +1,7 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 sleep;
 import { Buffer } from 'node:buffer';
+import { env } from 'node:process';
 import util from 'node:util';
 import fs from 'node:fs/promises';
 import v8 from 'node:v8';
@@ -112,9 +113,24 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param depth
 	 */
 	private _cleanOutput(input: unknown, depth: number) {
-		return (typeof input === 'string' ? input : util.inspect(input, { depth }))
+		let inputString = (typeof input === 'string' ? input : util.inspect(input, { depth }))
+			// escape codeblock markdown
 			.replaceAll('`', '`\u200B')
-			.replace(new RegExp(this.client.token!, 'gi'), '****');
+			// replace the client token
+			.replace(new RegExp(this.client.token!, 'gi'), '***');
+
+		// replace other .env values
+		let keys = Object.keys(env);
+		keys = keys.slice(keys.indexOf('DISCORD_TOKEN'));
+
+		for (const key of keys) {
+			const value = env[key];
+			if (!value || !Number.isNaN(Number(value))) continue;
+
+			inputString = inputString.replace(new RegExp(value, 'gi'), '***');
+		}
+
+		return inputString;
 	}
 
 	/**
