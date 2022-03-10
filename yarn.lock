@@ -305,9 +305,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discordjs/rest@npm:0.4.0-dev.1646870855.e787cd5":
-  version: 0.4.0-dev.1646870855.e787cd5
-  resolution: "@discordjs/rest@npm:0.4.0-dev.1646870855.e787cd5"
+"@discordjs/rest@npm:0.4.0-dev.1646913818.dcd4797":
+  version: 0.4.0-dev.1646913818.dcd4797
+  resolution: "@discordjs/rest@npm:0.4.0-dev.1646913818.dcd4797"
   dependencies:
     "@discordjs/collection": ^0.6.0-dev
     "@sapphire/async-queue": ^1.2.0
@@ -317,7 +317,7 @@ __metadata:
     form-data: ^4.0.0
     node-fetch: ^2.6.7
     tslib: ^2.3.1
-  checksum: f0070d2f91d0555404177f5618357f49c16c855479730f868c9c94ee29ad2417ca2121a51ec505231ff335d5f6c421461b1cc4c46a2f1636f7b71f481b85f09e
+  checksum: d8166fd0b427c73aa8b890310b14e1eabb40a389b40f312ba6bc0407de60c65221b3626762f98c826d5afed402d4e62b55b87eea2ed1c0b7e8bf1f9bd091330d
   languageName: node
   linkType: hard
 
