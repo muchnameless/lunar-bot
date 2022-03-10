@@ -15,6 +15,9 @@ export const bree = new Bree({
 	root: false,
 	logger: logger as unknown as Record<string, unknown>,
 	worker: { execArgv: [...execArgv, '--no-warnings'] },
+	errorHandler(error, workerMetadata) {
+		logger.error({ err: error, workerMetadata }, '[BREE]');
+	},
 });
 
 bree.add({
