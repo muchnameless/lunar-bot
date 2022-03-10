@@ -200,7 +200,8 @@ export default class EvalCommand extends ApplicationCommand {
 			for (let index = lines.length - 1; index >= 0; --index) {
 				const trimmed = lines[index].trimStart();
 
-				if (!trimmed || trimmed.startsWith('return ')) continue;
+				if (!trimmed) continue;
+				if (trimmed.startsWith('return ')) break;
 
 				lines[index] = `return ${lines[index]}`;
 				break;
