@@ -13,7 +13,6 @@ import { HypixelGuildManager } from './HypixelGuildManager';
 import { PlayerManager } from './PlayerManager';
 import { TaxCollectorManager } from './TaxCollectorManager';
 import { ModelManager } from './ModelManager';
-import { SkyBlockPatchNoteManager } from './SkyBlockPatchNoteManager';
 import type { EmbedFieldData, GuildChannel } from 'discord.js';
 import type { ModelStatic, Sequelize } from 'sequelize';
 import type { Components } from '@zikeji/hypixel';
@@ -56,7 +55,6 @@ export class DatabaseManager {
 		discordGuilds: ModelManager<DiscordGuild>;
 		hypixelGuilds: HypixelGuildManager;
 		players: PlayerManager;
-		skyBlockPatchNotes: SkyBlockPatchNoteManager;
 		taxCollectors: TaxCollectorManager;
 	};
 	/**
@@ -80,7 +78,6 @@ export class DatabaseManager {
 			discordGuilds: new ModelManager(client, db.DiscordGuild),
 			hypixelGuilds: new HypixelGuildManager(client, db.HypixelGuild),
 			players: new PlayerManager(client, db.Player),
-			skyBlockPatchNotes: new SkyBlockPatchNoteManager(client, db.SkyBlockPatchNote),
 			taxCollectors: new TaxCollectorManager(client, db.TaxCollector),
 		};
 		this.models = Object.fromEntries(

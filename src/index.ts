@@ -4,6 +4,7 @@ import { RequestMethod } from '@discordjs/rest';
 import { db } from './structures/database';
 import { LunarClient } from './structures/LunarClient';
 import { logger, seconds } from './functions';
+import { startJobs } from './jobs';
 
 const client = new LunarClient({
 	// custom options
@@ -82,6 +83,8 @@ const client = new LunarClient({
 			method === RequestMethod.Patch && route === '/channels/:id' && timeToReset > seconds(30),
 	},
 });
+
+startJobs(client);
 
 // catch rejections
 process
