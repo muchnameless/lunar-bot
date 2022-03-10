@@ -186,29 +186,30 @@ export default class EvalCommand extends ApplicationCommand {
 			iconURL: (me ?? this.client.user!).displayAvatarURL(),
 		});
 
-		let input: string;
+		// format input
+		let input = _input.replace(/(?<=;) *(?!$|\n)/g, '\n');
+
+		if (!input.endsWith(';')) input += ';';
+
 		let toEvaluate: string;
 
 		// wrap input in async IIFE
 		if (isAsync) {
-			const lines = _input.split(';');
+			const lines = input.split(';\n');
 
 			for (let index = lines.length - 1; index >= 0; --index) {
-				const trimmed = lines[index].replace(/^ +/, '');
+				const trimmed = lines[index].trimStart();
 
-				if (!trimmed) continue;
-				if (/^\n*return /.test(trimmed)) break;
+				if (!trimmed || trimmed.startsWith('return ')) continue;
 
-				lines[index] = trimmed.startsWith('\n')
-					? `\nreturn ${lines[index].slice('\n'.length)}`
-					: `return ${lines[index]}`;
+				lines[index] = `return ${lines[index]}`;
 				break;
 			}
 
-			input = lines.join(';');
+			input = lines.join(';\n');
 			toEvaluate = `(async () => { ${input} })()`;
 		} else {
-			input = toEvaluate = _input;
+			toEvaluate = input;
 		}
 
 		for (const [index, inputPart] of splitForEmbedFields(input, 'ts').entries()) {
@@ -396,7 +397,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 */
 	override runSlash(interaction: ChatInputCommandInteraction) {
-		return this._run(interaction, interaction.options.getString('input', true).replace(/(?<=;) *(?!$)/, '\n'), {
+		return this._run(interaction, interaction.options.getString('input', true), {
 			isAsync: interaction.options.getBoolean('async') ?? undefined,
 			inspectDepth: interaction.options.getInteger('inspect') ?? undefined,
 		});
