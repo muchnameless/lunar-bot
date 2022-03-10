@@ -11,7 +11,7 @@ export const enum JobType {
 	SkyblockAuctionPriceUpdate,
 }
 
-const bree = new Bree({ root: false, logger: logger as unknown as Record<string, unknown> });
+export const bree = new Bree({ root: false, logger: logger as unknown as Record<string, unknown> });
 
 bree.add({
 	name: 'skyblockPatchNotes',

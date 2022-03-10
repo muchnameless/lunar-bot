@@ -60,6 +60,8 @@ import { calculateItemPrice } from '../../structures/networth/networth';
 calculateItemPrice;
 import { prices } from '../../structures/networth/prices';
 prices;
+import { bree } from '../../jobs';
+bree;
 import type {
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,
