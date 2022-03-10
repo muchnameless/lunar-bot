@@ -3543,7 +3543,7 @@ __metadata:
     timezonecomplete: ^5.12.4
     tiny-typed-emitter: ^2.1.0
     tslib: ^2.3.1
-    typescript: ^4.7.0-dev.20220309
+    typescript: ^4.7.0-dev.20220310
     undici: ^4.15.1
     utf-8-validate: ^5.0.9
   languageName: unknown
@@ -5762,13 +5762,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.7.0-dev.20220309":
-  version: 4.7.0-dev.20220309
-  resolution: "typescript@npm:4.7.0-dev.20220309"
+"typescript@npm:^4.7.0-dev.20220310":
+  version: 4.7.0-dev.20220310
+  resolution: "typescript@npm:4.7.0-dev.20220310"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: f94775d28a3f5098b6cad0a8d9e22176fc431af2959e7cb0889173f1fbc3918249a61d1cfd76429833abad9d52ad4189a5212c184d73c95ac0ee81b114632f90
+  checksum: d3e007ea62f65a1d77e6211f77b6f16ce77e753877f7edc03c74c983a36dba463428aeb120c25078b88259eef11e92492e5afba5fcbd8fd4d27d154207e6ad4c
   languageName: node
   linkType: hard
 
@@ -5782,13 +5782,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.7.0-dev.20220309#~builtin<compat/typescript>":
-  version: 4.7.0-dev.20220309
-  resolution: "typescript@patch:typescript@npm%3A4.7.0-dev.20220309#~builtin<compat/typescript>::version=4.7.0-dev.20220309&hash=bda367"
+"typescript@patch:typescript@^4.7.0-dev.20220310#~builtin<compat/typescript>":
+  version: 4.7.0-dev.20220310
+  resolution: "typescript@patch:typescript@npm%3A4.7.0-dev.20220310#~builtin<compat/typescript>::version=4.7.0-dev.20220310&hash=bda367"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: d23c159b62b6191d0536148af110d937a464db9756cdad210c122d5832a8b8011984f835f6fba2f7a7d9feb655c22f8d871ffc400846a864cc89973acc2c56fc
+  checksum: 4f22094b2ac3ac3fad866a4d12d3de5e8459fb4626581bbbb7a127abb839bfd57e27a3474e924b63b195f33bcc18a7a9512a3e421884d2674f1af2e80c6e0e62
   languageName: node
   linkType: hard
 
