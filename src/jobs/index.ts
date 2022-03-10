@@ -11,20 +11,22 @@ export const enum JobType {
 	SkyblockAuctionPriceUpdate,
 }
 
-export const bree = new Bree({ root: false, logger: logger as unknown as Record<string, unknown> });
+export const bree = new Bree({
+	root: false,
+	logger: logger as unknown as Record<string, unknown>,
+	worker: { execArgv: [...execArgv, '--no-warnings'] },
+});
 
 bree.add({
 	name: 'skyblockPatchNotes',
 	cron: '*/1 * * * *',
 	path: fileURLToPath(new URL('./skyblockPatchNotes.js', import.meta.url)),
-	worker: { execArgv: [...execArgv, '--no-warnings'] },
 });
 
 bree.add({
 	name: 'skyblockAuctions',
 	cron: '*/1 * * * *',
 	path: fileURLToPath(new URL('./skyblockAuctions.js', import.meta.url)),
-	worker: { execArgv: [...execArgv, '--no-warnings'] },
 });
 
 export function startJobs(client: LunarClient) {
