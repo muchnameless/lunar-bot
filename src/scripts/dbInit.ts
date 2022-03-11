@@ -1,6 +1,6 @@
 import { argv, exit } from 'node:process';
 import '../structures/database/pgEnum-fix'; // to allow `sync --alter` with pg enums set
-import { sequelize } from '../structures/database';
+import { sequelize } from '../structures/database/sequelize';
 import { logger } from '../functions';
 
 // @ts-expect-error
