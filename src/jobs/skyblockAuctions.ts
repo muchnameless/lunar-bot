@@ -1,16 +1,17 @@
 /* eslint-disable unicorn/prefer-top-level-await */
-import { exit } from 'node:process';
+import { env, exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
 import { fetch } from 'undici';
 import { transformItemData } from '@zikeji/hypixel';
-import { col, fn } from 'sequelize';
+import { col, fn, Sequelize } from 'sequelize';
 import { Collection } from 'discord.js';
-import { db } from '../structures/database';
 import { consumeBody, logger } from '../functions';
 import { FetchError } from '../structures/errors/FetchError';
-import { VANILLA_ITEM_NAMES } from '../constants';
-import { calculatePetSkillLevel } from '../structures/networth/networth';
+import { VANILLA_ITEM_NAMES } from '../constants/minecraft';
 import { EnchantmentType, getEnchantmentType, MAX_HISTORY_LENGTH } from '../structures/networth/constants';
+import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
+import { SkyBlockAuction } from '../structures/database/models/SkyBlockAuction';
+import { SkyBlockBazaar } from '../structures/database/models/SkyBlockBazaar';
 import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
 
@@ -20,6 +21,13 @@ export interface ItemPrice {
 }
 
 const itemPrices: ItemPrice[] = [];
+
+const sequelize = new Sequelize(env.DATABASE_URL!, {
+	logging: false,
+});
+
+const skyBlockBazaar = SkyBlockBazaar.initialise(sequelize);
+const skyBlockAuction = SkyBlockAuction.initialise(sequelize);
 
 /**
  * https://github.com/SkyCryptWebsite/SkyCrypt/blob/481de4411c4093576c728f04540f497ef55ceadf/src/helper.js#L494
@@ -60,7 +68,7 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
  */
 async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
 	try {
-		const existing = await db.SkyBlockBazaar.findByPk(itemId, { attributes: ['buyPriceHistory'], raw: true });
+		const existing = await skyBlockBazaar.findByPk(itemId, { attributes: ['buyPriceHistory'], raw: true });
 
 		if (existing) {
 			// calculate median value
@@ -69,13 +77,13 @@ async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
 
 			itemPrices.push({ itemId, price: buyPrice });
 
-			await db.SkyBlockBazaar.update(
+			await skyBlockBazaar.update(
 				{ buyPrice, buyPriceHistory: fn('array_prepend', currentBuyPrice, col('buyPriceHistory')) },
 				{ where: { id: itemId } },
 			);
 
 			if (existing.buyPriceHistory.length > MAX_HISTORY_LENGTH) {
-				await db.SkyBlockBazaar.update(
+				await skyBlockBazaar.update(
 					{
 						buyPriceHistory: fn(
 							'trim_array',
@@ -89,7 +97,7 @@ async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
 		} else {
 			itemPrices.push({ itemId, price: currentBuyPrice });
 
-			await db.SkyBlockBazaar.create({
+			await skyBlockBazaar.create({
 				id: itemId,
 				buyPrice: currentBuyPrice,
 				buyPriceHistory: [currentBuyPrice],
@@ -144,7 +152,7 @@ async function updateBazaarPrices() {
  */
 async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 	try {
-		const existing = await db.SkyBlockAuction.findByPk(itemId, { attributes: ['lowestBINHistory'], raw: true });
+		const existing = await skyBlockAuction.findByPk(itemId, { attributes: ['lowestBINHistory'], raw: true });
 
 		if (existing) {
 			// calculate median value
@@ -153,13 +161,13 @@ async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 
 			itemPrices.push({ itemId, price: lowestBIN });
 
-			await db.SkyBlockAuction.update(
+			await skyBlockAuction.update(
 				{ lowestBIN, lowestBINHistory: fn('array_prepend', currentLowestBIN, col('lowestBINHistory')) },
 				{ where: { id: itemId } },
 			);
 
 			if (existing.lowestBINHistory.length > MAX_HISTORY_LENGTH) {
-				await db.SkyBlockAuction.update(
+				await skyBlockAuction.update(
 					{
 						lowestBINHistory: fn(
 							'trim_array',
@@ -173,7 +181,7 @@ async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 		} else {
 			itemPrices.push({ itemId, price: currentLowestBIN });
 
-			await db.SkyBlockAuction.create({
+			await skyBlockAuction.create({
 				id: itemId,
 				lowestBIN: currentLowestBIN,
 				lowestBINHistory: [currentLowestBIN],

@@ -1,7 +1,9 @@
-import { exit } from 'node:process';
+import { env, exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
+import { Sequelize } from 'sequelize';
 import Parser from 'rss-parser';
-import { db } from '../structures/database';
+import { Config } from '../structures/database/models/Config';
+import { SkyBlockPatchNote } from '../structures/database/models/SkyBlockPatchNote';
 import { JobType } from '.';
 
 interface HypixelForumResponseItem {
@@ -53,24 +55,32 @@ const parsedItems = skyblockPatchnotes.map(({ guid, title, creator, link }) => (
 	creator,
 	link,
 }));
-const LAST_GUID = JSON.parse(
-	(await db.Config.findOne({ where: { key: 'HYPIXEL_FORUM_LAST_GUID' } }))!.value!,
-) as number;
+
+const sequelize = new Sequelize(env.DATABASE_URL!, {
+	logging: false,
+});
+const config = Config.initialise(sequelize);
+const LAST_GUID = JSON.parse((await config.findOne({ where: { key: 'HYPIXEL_FORUM_LAST_GUID' } }))!.value!) as number;
 const newPosts = parsedItems.filter(({ guid }) => guid > LAST_GUID);
 
-if (newPosts.length && parentPort) {
-	parentPort.postMessage({
-		op: JobType.HypixelForumLastGUIDUpdate,
-		d: { HYPIXEL_FORUM_LAST_GUID: Math.max(...newPosts.map(({ guid }) => guid)) },
-	});
-}
+const skyBlockPatchNote = SkyBlockPatchNote.initialise(sequelize);
 
-await db.SkyBlockPatchNote.bulkCreate(parsedItems, {
+await skyBlockPatchNote.bulkCreate(parsedItems, {
 	updateOnDuplicate: ['title', 'creator', 'link', 'updatedAt'],
 });
 
 if (parentPort) {
+	if (newPosts.length) {
+		parentPort.postMessage({
+			op: JobType.HypixelForumLastGUIDUpdate,
+			d: { HYPIXEL_FORUM_LAST_GUID: Math.max(...newPosts.map(({ guid }) => guid)) },
+		});
+	}
 	parentPort.postMessage('done');
 } else {
+	await config.update(
+		{ value: JSON.stringify(Math.max(...newPosts.map(({ guid }) => guid))) },
+		{ where: { key: 'HYPIXEL_FORUM_LAST_GUID' } },
+	);
 	exit(0);
 }

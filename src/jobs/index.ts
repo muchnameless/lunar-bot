@@ -11,31 +11,18 @@ export const enum JobType {
 	SkyblockAuctionPriceUpdate,
 }
 
-export const bree = new Bree({
-	root: false,
-	logger: logger as unknown as Record<string, unknown>,
-	worker: { execArgv: [...execArgv, '--no-warnings'] },
-	errorHandler(error, workerMetadata) {
-		logger.error({ err: error, workerMetadata }, '[BREE]');
-	},
-});
-
-bree.add({
-	name: 'skyblockPatchNotes',
-	cron: '*/1 * * * *',
-	path: fileURLToPath(new URL('./skyblockPatchNotes.js', import.meta.url)),
-});
-
-bree.add({
-	name: 'skyblockAuctions',
-	cron: '*/1 * * * *',
-	path: fileURLToPath(new URL('./skyblockAuctions.js', import.meta.url)),
-});
+export let bree: Bree;
 
 export function startJobs(client: LunarClient) {
-	bree.on('worker created', (name) => {
-		bree.workers.get(name)?.on('message', (message) => {
-			if (message === 'done') return;
+	bree = new Bree({
+		root: false,
+		logger: logger as unknown as Record<string, unknown>,
+		worker: { execArgv: [...execArgv, '--no-warnings'] },
+		errorHandler(error, workerMetadata) {
+			logger.error({ err: error, workerMetadata }, '[BREE]');
+		},
+		workerMessageHandler({ message, name }: { message: 'done' | { op: JobType; d: any }; name: string }) {
+			if (message === 'done') return logger.info(`[BREE]: '${name}' signaled completion`);
 
 			switch (message.op) {
 				case JobType.HypixelForumLastGUIDUpdate:
@@ -51,12 +38,21 @@ export function startJobs(client: LunarClient) {
 					);
 					break;
 			}
-		});
+		},
 	});
 
-	bree.on('worker deleted', (name) => {
-		bree.workers.get(name)?.removeAllListeners();
-	});
+	bree.add([
+		{
+			name: 'skyblockPatchNotes',
+			cron: '*/1 * * * *',
+			path: fileURLToPath(new URL('./skyblockPatchNotes.js', import.meta.url)),
+		},
+		{
+			name: 'skyblockAuctions',
+			cron: '*/1 * * * *',
+			path: fileURLToPath(new URL('./skyblockAuctions.js', import.meta.url)),
+		},
+	]);
 
 	bree.start();
 }

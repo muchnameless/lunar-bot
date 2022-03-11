@@ -10,8 +10,6 @@ import {
 	getEnchantmentType,
 	MASTER_STARS,
 	MATERIALS_TO_ID,
-	PET_LEVELS_XP,
-	PET_RARITY_OFFSET,
 	PriceModifier,
 	REFORGES,
 	SKYBLOCK_INVENTORIES,
@@ -20,6 +18,7 @@ import {
 	EnchantmentType,
 } from './constants';
 import { getPrice, prices } from './prices';
+import { calculatePetSkillLevel } from './functions/pets';
 import type { SkyBlockProfile } from '../../functions';
 import type { Buffer } from 'node:buffer';
 import type { Components, NBTInventory, NBTInventoryItem, NBTExtraAttributes } from '@zikeji/hypixel';
@@ -306,27 +305,6 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 	}
 
 	return price;
-}
-
-/**
- * @param pet
- */
-export function calculatePetSkillLevel(pet: Components.Schemas.SkyBlockProfilePet) {
-	const maxLevel = pet.type === 'GOLDEN_DRAGON' ? 200 : 100;
-	const rarityOffset = PET_RARITY_OFFSET[pet.tier as keyof typeof PET_RARITY_OFFSET];
-	const levels = PET_LEVELS_XP.slice(rarityOffset, rarityOffset + maxLevel);
-
-	let level = 0;
-	let totalExperience = 0;
-
-	for (; level < maxLevel && totalExperience <= pet.exp; ++level) {
-		totalExperience += levels[level];
-	}
-
-	return {
-		maxXP: levels.reduce((a, b) => a + b, 0),
-		level,
-	};
 }
 
 /**
