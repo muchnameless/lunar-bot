@@ -1,9 +1,9 @@
 /* eslint-disable unicorn/prefer-top-level-await */
-import { env, exit } from 'node:process';
+import { exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
 import { fetch } from 'undici';
 import { transformItemData } from '@zikeji/hypixel';
-import { col, fn, Sequelize } from 'sequelize';
+import { col, fn } from 'sequelize';
 import { Collection } from 'discord.js';
 import { consumeBody, logger } from '../functions';
 import { FetchError } from '../structures/errors/FetchError';
@@ -12,6 +12,7 @@ import { EnchantmentType, getEnchantmentType, MAX_HISTORY_LENGTH } from '../stru
 import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
 import { SkyBlockAuction } from '../structures/database/models/SkyBlockAuction';
 import { SkyBlockBazaar } from '../structures/database/models/SkyBlockBazaar';
+import { sequelize } from '../structures/database/sequelize';
 import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
 
@@ -21,10 +22,6 @@ export interface ItemPrice {
 }
 
 const itemPrices: ItemPrice[] = [];
-
-const sequelize = new Sequelize(env.DATABASE_URL!, {
-	logging: false,
-});
 
 const skyBlockBazaar = SkyBlockBazaar.initialise(sequelize);
 const skyBlockAuction = SkyBlockAuction.initialise(sequelize);

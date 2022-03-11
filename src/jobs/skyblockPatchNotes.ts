@@ -1,9 +1,9 @@
-import { env, exit } from 'node:process';
+import { exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
-import { Sequelize } from 'sequelize';
 import Parser from 'rss-parser';
 import { Config } from '../structures/database/models/Config';
 import { SkyBlockPatchNote } from '../structures/database/models/SkyBlockPatchNote';
+import { sequelize } from '../structures/database/sequelize';
 import { JobType } from '.';
 
 interface HypixelForumResponseItem {
@@ -56,13 +56,9 @@ const parsedItems = skyblockPatchnotes.map(({ guid, title, creator, link }) => (
 	link,
 }));
 
-const sequelize = new Sequelize(env.DATABASE_URL!, {
-	logging: false,
-});
 const config = Config.initialise(sequelize);
 const LAST_GUID = JSON.parse((await config.findOne({ where: { key: 'HYPIXEL_FORUM_LAST_GUID' } }))!.value!) as number;
 const newPosts = parsedItems.filter(({ guid }) => guid > LAST_GUID);
-
 const skyBlockPatchNote = SkyBlockPatchNote.initialise(sequelize);
 
 await skyBlockPatchNote.bulkCreate(parsedItems, {
