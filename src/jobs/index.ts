@@ -42,9 +42,9 @@ export function startJobs(client: LunarClient) {
 			path: fileURLToPath(new URL('./skyblockPatchNotes.js', import.meta.url)),
 		},
 		{
-			name: 'skyblockAuctions',
+			name: 'skyblockPrices',
 			cron: '*/1 * * * *',
-			path: fileURLToPath(new URL('./skyblockAuctions.js', import.meta.url)),
+			path: fileURLToPath(new URL('./skyblockPrices.js', import.meta.url)),
 		},
 	]);
 

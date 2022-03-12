@@ -341,6 +341,8 @@ await updateBazaarPricesPromise;
 
 await sql.end();
 
+logger.debug(`[SKYBLOCK PRICES]: updated ${BINAuctions.size} items from ${firstPage.totalPages} auction pages`);
+
 if (parentPort) {
 	parentPort.postMessage('done');
 } else {
