@@ -1,9 +1,7 @@
-import { exit } from 'node:process';
+import { env, exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
 import Parser from 'rss-parser';
-import { Config } from '../structures/database/models/Config';
-import { SkyBlockPatchNote } from '../structures/database/models/SkyBlockPatchNote';
-import { sequelize } from '../structures/database/sequelize';
+import postgres from 'postgres';
 import { JobType } from '.';
 
 interface HypixelForumResponseItem {
@@ -35,6 +33,16 @@ interface HypixelForumResponse {
 }
 
 const parser = new Parser<HypixelForumResponse>();
+const sql = postgres(env.DATABASE_URL!, {
+	types: {
+		date: {
+			to: 1_184,
+			from: [1_082, 1_083, 1_114, 1_184],
+			serialize: (date: Date) => date.toISOString(),
+			parse: (isoString) => isoString,
+		},
+	},
+});
 
 // fetch RSS feeds
 const [{ items: skyblockPatchnotes }, { items: newsAndAnnouncements }] = await Promise.all([
@@ -49,21 +57,36 @@ for (const item of newsAndAnnouncements) {
 	}
 }
 
+const now = new Date();
 const parsedItems = skyblockPatchnotes.map(({ guid, title, creator, link }) => ({
 	guid: Number(guid),
 	title,
 	creator,
 	link,
+	createdAt: now,
+	updatedAt: now,
 }));
 
-const config = Config.initialise(sequelize);
-const LAST_GUID = JSON.parse((await config.findOne({ where: { key: 'HYPIXEL_FORUM_LAST_GUID' } }))!.value!) as number;
+const LAST_GUID = JSON.parse(
+	(
+		await sql<[{ value: string }]>`
+			SELECT value FROM "Config" WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
+		`
+	)[0].value,
+) as number;
 const newPosts = parsedItems.filter(({ guid }) => guid > LAST_GUID);
-const skyBlockPatchNote = SkyBlockPatchNote.initialise(sequelize);
 
-await skyBlockPatchNote.bulkCreate(parsedItems, {
-	updateOnDuplicate: ['title', 'creator', 'link', 'updatedAt'],
-});
+await sql`
+  INSERT INTO "SkyBlockPatchNotes" ${sql(
+		parsedItems,
+		'guid',
+		'title',
+		'creator',
+		'link',
+		'createdAt',
+		'updatedAt',
+	)} ON CONFLICT ("guid") DO UPDATE SET "title"=EXCLUDED."title","creator"=EXCLUDED."creator","link"=EXCLUDED."link","updatedAt"=EXCLUDED."updatedAt"
+`;
 
 if (parentPort) {
 	if (newPosts.length) {
@@ -72,11 +95,16 @@ if (parentPort) {
 			d: { HYPIXEL_FORUM_LAST_GUID: Math.max(...newPosts.map(({ guid }) => guid)) },
 		});
 	}
+
+	await sql.end();
 	parentPort.postMessage('done');
 } else {
-	await config.update(
-		{ value: JSON.stringify(Math.max(...newPosts.map(({ guid }) => guid))) },
-		{ where: { key: 'HYPIXEL_FORUM_LAST_GUID' } },
-	);
+	await sql`
+		UPDATE "Config" SET "value" = ${JSON.stringify(
+			Math.max(...newPosts.map(({ guid }) => guid)),
+		)} WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
+	`;
+
+	await sql.end();
 	exit(0);
 }
