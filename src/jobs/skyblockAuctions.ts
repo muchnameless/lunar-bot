@@ -339,6 +339,8 @@ await Promise.all(promises);
 await Promise.all(BINAuctions.map((auctions, itemId) => updateAuctionItem(itemId, Math.min(...auctions))));
 await updateBazaarPricesPromise;
 
+await sql.end();
+
 if (parentPort) {
 	parentPort.postMessage('done');
 } else {
