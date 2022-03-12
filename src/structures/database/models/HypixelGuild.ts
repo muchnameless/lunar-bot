@@ -11,6 +11,7 @@ import {
 	Offset,
 	SKYBLOCK_XP_TYPES,
 	UNKNOWN_IGN,
+	XP_OFFSETS_TIME,
 } from '../../../constants';
 import { GuildUtil } from '../../../util';
 import { hypixel, mojang } from '../../../api';
@@ -826,22 +827,22 @@ export class HypixelGuild extends Model<
 							const DAYS_PASSED_SINCE_LAST_XP_UPDATE = Math.max(
 								0,
 								Math.min(
-									Math.ceil((config.get('LAST_DAILY_XP_RESET_TIME') - XP_LAST_UPDATED_AT) / days(1)),
+									Math.ceil((config.get(XP_OFFSETS_TIME[Offset.Day]) - XP_LAST_UPDATED_AT) / days(1)),
 									player.guildXpHistory.length,
 								),
 							);
 
 							// to trigger the xp gained reset if global reset happened after the player left the guild
 							await safePromiseAll([
-								config.get('COMPETITION_START_TIME') >= XP_LAST_UPDATED_AT &&
+								config.get(XP_OFFSETS_TIME[Offset.CompetitionStart]) >= XP_LAST_UPDATED_AT &&
 									player.resetXp({ offsetToReset: Offset.CompetitionStart }),
-								config.get('COMPETITION_END_TIME') >= XP_LAST_UPDATED_AT &&
+								config.get(XP_OFFSETS_TIME[Offset.CompetitionEnd]) >= XP_LAST_UPDATED_AT &&
 									player.resetXp({ offsetToReset: Offset.CompetitionEnd }),
-								config.get('LAST_MAYOR_XP_RESET_TIME') >= XP_LAST_UPDATED_AT &&
+								config.get(XP_OFFSETS_TIME[Offset.Mayor]) >= XP_LAST_UPDATED_AT &&
 									player.resetXp({ offsetToReset: Offset.Mayor }),
-								config.get('LAST_WEEKLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT &&
+								config.get(XP_OFFSETS_TIME[Offset.Week]) >= XP_LAST_UPDATED_AT &&
 									player.resetXp({ offsetToReset: Offset.Week }),
-								config.get('LAST_MONTHLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT &&
+								config.get(XP_OFFSETS_TIME[Offset.Month]) >= XP_LAST_UPDATED_AT &&
 									player.resetXp({ offsetToReset: Offset.Month }),
 								...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE }).map(() =>
 									player.resetXp({ offsetToReset: Offset.Day }),

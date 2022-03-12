@@ -8,6 +8,7 @@ import {
 	EMBED_MAX_FIELDS,
 	MAYOR_CHANGE_INTERVAL,
 	Offset,
+	XP_OFFSETS_TIME,
 } from '../../../constants';
 import { hypixel } from '../../../api';
 import {
@@ -527,6 +528,11 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	async resetXp(options?: ResetXpOptions) {
 		await safePromiseAll(this.cache.map((player) => player.resetXp(options)));
+
+		if (options?.offsetToReset) {
+			this.client.config.set(XP_OFFSETS_TIME[options.offsetToReset as keyof typeof XP_OFFSETS_TIME], Date.now());
+		}
+
 		return this;
 	}
 
@@ -538,11 +544,13 @@ export class PlayerManager extends ModelManager<Player> {
 
 		// auto competition starting
 		if (config.get('COMPETITION_SCHEDULED')) {
-			if (config.get('COMPETITION_START_TIME') - seconds(10) > Date.now()) {
+			const COMPETITION_START = config.get(XP_OFFSETS_TIME[Offset.CompetitionStart]);
+
+			if (COMPETITION_START - seconds(10) > Date.now()) {
 				this.client.cronJobs.schedule(
 					`${this.constructor.name}:competitionStart`,
 					new CronJob({
-						cronTime: new Date(config.get('COMPETITION_START_TIME')),
+						cronTime: new Date(COMPETITION_START),
 						onTick: () => this._startCompetition(),
 					}),
 				);
@@ -552,11 +560,13 @@ export class PlayerManager extends ModelManager<Player> {
 		}
 
 		// auto competition ending
-		if (config.get('COMPETITION_END_TIME') - seconds(10) > Date.now()) {
+		const COMPETITION_END = config.get(XP_OFFSETS_TIME[Offset.CompetitionEnd]);
+
+		if (COMPETITION_END - seconds(10) > Date.now()) {
 			this.client.cronJobs.schedule(
 				`${this.constructor.name}:competitionEnd`,
 				new CronJob({
-					cronTime: new Date(config.get('COMPETITION_END_TIME')),
+					cronTime: new Date(COMPETITION_END),
 					onTick: () => this._endCompetition(),
 				}),
 			);
@@ -565,7 +575,7 @@ export class PlayerManager extends ModelManager<Player> {
 		}
 
 		// mayor change reset
-		const NEXT_MAYOR_TIME = config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
+		const NEXT_MAYOR_TIME = config.get(XP_OFFSETS_TIME[Offset.Mayor]) + MAYOR_CHANGE_INTERVAL;
 
 		if (NEXT_MAYOR_TIME - seconds(10) > Date.now()) {
 			this.client.cronJobs.schedule(
@@ -582,7 +592,7 @@ export class PlayerManager extends ModelManager<Player> {
 		const now = new Date();
 
 		// daily reset
-		if (new Date(config.get('LAST_DAILY_XP_RESET_TIME')).getUTCDay() !== now.getUTCDay()) this._performDailyXpReset();
+		if (new Date(config.get(XP_OFFSETS_TIME[Offset.Day])).getUTCDay() !== now.getUTCDay()) this._performDailyXpReset();
 
 		// each day at 00:00:00
 		this.client.cronJobs.schedule(
@@ -595,7 +605,7 @@ export class PlayerManager extends ModelManager<Player> {
 		);
 
 		// weekly reset
-		if (getWeekOfYear(new Date(config.get('LAST_WEEKLY_XP_RESET_TIME'))) !== getWeekOfYear(now)) {
+		if (getWeekOfYear(new Date(config.get(XP_OFFSETS_TIME[Offset.Week]))) !== getWeekOfYear(now)) {
 			this._performWeeklyXpReset();
 		}
 
@@ -610,7 +620,7 @@ export class PlayerManager extends ModelManager<Player> {
 		);
 
 		// monthly reset
-		if (new Date(config.get('LAST_MONTHLY_XP_RESET_TIME')).getUTCMonth() !== now.getUTCMonth()) {
+		if (new Date(config.get(XP_OFFSETS_TIME[Offset.Month])).getUTCMonth() !== now.getUTCMonth()) {
 			this._performMonthlyXpReset();
 		}
 
@@ -669,13 +679,10 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	private async _performMayorXpReset() {
 		// if the bot skipped a mayor change readd the interval time
-		let currentMayorTime = this.client.config.get('LAST_MAYOR_XP_RESET_TIME') + MAYOR_CHANGE_INTERVAL;
+		let currentMayorTime = this.client.config.get(XP_OFFSETS_TIME[Offset.Mayor]) + MAYOR_CHANGE_INTERVAL;
 		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
 
-		await Promise.all([
-			this.resetXp({ offsetToReset: Offset.Mayor }),
-			this.client.config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime),
-		]);
+		await this.resetXp({ offsetToReset: Offset.Mayor });
 
 		this.client.log(
 			this.client.defaultEmbed
@@ -698,10 +705,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * shifts the daily xp array, updates the config and logs the event
 	 */
 	private async _performDailyXpReset() {
-		await Promise.all([
-			this.resetXp({ offsetToReset: Offset.Day }),
-			this.client.config.set('LAST_DAILY_XP_RESET_TIME', Date.now()),
-		]);
+		await this.resetXp({ offsetToReset: Offset.Day });
 
 		this.client.log(
 			this.client.defaultEmbed
@@ -716,10 +720,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * resets offsetWeek xp, updates the config and logs the event
 	 */
 	private async _performWeeklyXpReset() {
-		await Promise.all([
-			this.resetXp({ offsetToReset: Offset.Week }),
-			this.client.config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now()),
-		]);
+		await this.resetXp({ offsetToReset: Offset.Week });
 
 		this.client.log(
 			this.client.defaultEmbed
@@ -734,10 +735,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 * resets offsetMonth xp, updates the config and logs the event
 	 */
 	private async _performMonthlyXpReset() {
-		await Promise.all([
-			this.resetXp({ offsetToReset: Offset.Month }),
-			this.client.config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now()),
-		]);
+		await this.resetXp({ offsetToReset: Offset.Month });
 
 		this.client.log(
 			this.client.defaultEmbed

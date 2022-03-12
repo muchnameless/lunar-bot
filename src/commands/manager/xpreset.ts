@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 import { Offset } from '../../constants';
 import { optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
-import { safePromiseAll, seconds } from '../../functions';
+import { seconds } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -60,13 +60,8 @@ export default class XpResetCommand extends ApplicationCommand {
 			// delete players who left the guild
 			await players.sweepDb();
 
-			await safePromiseAll([
-				...players.cache.map((player) => {
-					if (player.notes === 'skill api disabled') player.notes = null;
-					return player.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
-				}),
-				this.config.set('COMPETITION_START_TIME', Date.now()),
-			]);
+			// reset xp
+			await players.resetXp({ offsetToReset: XpResetCommand.OFFSET_TO_RESET });
 
 			result = `reset the competition xp gained from ${PLAYER_COUNT} guild members`;
 		}
