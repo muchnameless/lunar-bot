@@ -1,30 +1,29 @@
 /* eslint-disable unicorn/prefer-top-level-await */
-import { exit } from 'node:process';
+import { env, exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
 import { fetch } from 'undici';
 import { transformItemData } from '@zikeji/hypixel';
-import { col, fn } from 'sequelize';
 import { Collection } from 'discord.js';
+import postgres from 'postgres';
 import { consumeBody, logger } from '../functions';
 import { FetchError } from '../structures/errors/FetchError';
 import { VANILLA_ITEM_NAMES } from '../constants/minecraft';
 import { EnchantmentType, getEnchantmentType, MAX_HISTORY_LENGTH } from '../structures/networth/constants';
 import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
-import { SkyBlockAuction } from '../structures/database/models/SkyBlockAuction';
-import { SkyBlockBazaar } from '../structures/database/models/SkyBlockBazaar';
-import { sequelize } from '../structures/database/sequelize';
 import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
 
-export interface ItemPrice {
-	itemId: string;
-	price: number;
-}
-
-const itemPrices: ItemPrice[] = [];
-
-const skyBlockBazaar = SkyBlockBazaar.initialise(sequelize);
-const skyBlockAuction = SkyBlockAuction.initialise(sequelize);
+const sql = postgres(env.DATABASE_URL!, {
+	types: {
+		numeric: {
+			// This conversion is identical to the `number` conversion in types.js line 11
+			to: 0,
+			from: [1_700],
+			serialize: (x: number) => x.toString(),
+			parse: (x: string) => Number.parseFloat(x),
+		},
+	},
+});
 
 /**
  * https://github.com/SkyCryptWebsite/SkyCrypt/blob/481de4411c4093576c728f04540f497ef55ceadf/src/helper.js#L494
@@ -65,40 +64,46 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
  */
 async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
 	try {
-		const existing = await skyBlockBazaar.findByPk(itemId, { attributes: ['buyPriceHistory'], raw: true });
+		const [existing] = await sql<[{ buyPriceHistory: number[] }]>`
+			SELECT "buyPriceHistory"
+			FROM "SkyBlockBazaars"
+			WHERE id = ${itemId}
+		`;
 
 		if (existing) {
 			// calculate median value
 			existing.buyPriceHistory.push(currentBuyPrice);
 			const buyPrice = existing.buyPriceHistory.sort((a, b) => a - b).at(existing.buyPriceHistory.length / 2)!;
 
-			itemPrices.push({ itemId, price: buyPrice });
+			parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: buyPrice } });
 
-			await skyBlockBazaar.update(
-				{ buyPrice, buyPriceHistory: fn('array_prepend', currentBuyPrice, col('buyPriceHistory')) },
-				{ where: { id: itemId } },
-			);
+			await sql`
+				UPDATE "SkyBlockBazaars"
+				SET "buyPrice" = ${buyPrice}, "buyPriceHistory" = array_prepend(${currentBuyPrice}, "buyPriceHistory")
+				WHERE id = ${itemId}
+			`;
 
 			if (existing.buyPriceHistory.length > MAX_HISTORY_LENGTH) {
-				await skyBlockBazaar.update(
-					{
-						buyPriceHistory: fn(
-							'trim_array',
-							col('buyPriceHistory'),
-							existing.buyPriceHistory.length - MAX_HISTORY_LENGTH,
-						),
-					},
-					{ where: { id: itemId } },
-				);
+				await sql`
+					UPDATE "SkyBlockBazaars" SET "buyPriceHistory" = trim_array("buyPriceHistory", ${
+						existing.buyPriceHistory.length - MAX_HISTORY_LENGTH
+					}) WHERE id = ${itemId}
+				`;
 			}
 		} else {
-			itemPrices.push({ itemId, price: currentBuyPrice });
+			parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: currentBuyPrice } });
 
-			await skyBlockBazaar.create({
-				id: itemId,
-				buyPrice: currentBuyPrice,
-				buyPriceHistory: [currentBuyPrice],
-			});
+			await sql`
+				INSERT INTO "SkyBlockBazaars" (
+					id,
+					"buyPrice",
+					"buyPriceHistory"
+				) VALUES (
+					${itemId},
+					${currentBuyPrice},
+					ARRAY [${currentBuyPrice}::NUMERIC]
+				)
+			`;
 
 			logger.debug(
 				{
@@ -149,40 +154,46 @@ async function updateBazaarPrices() {
  */
 async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 	try {
-		const existing = await skyBlockAuction.findByPk(itemId, { attributes: ['lowestBINHistory'], raw: true });
+		const [existing] = await sql<[{ lowestBINHistory: number[] }]>`
+			SELECT "lowestBINHistory"
+			FROM "SkyBlockAuctions"
+			WHERE id = ${itemId}
+		`;
 
 		if (existing) {
 			// calculate median value
 			existing.lowestBINHistory.push(currentLowestBIN);
 			const lowestBIN = existing.lowestBINHistory.sort((a, b) => a - b).at(existing.lowestBINHistory.length / 2)!;
 
-			itemPrices.push({ itemId, price: lowestBIN });
+			parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: lowestBIN } });
 
-			await skyBlockAuction.update(
-				{ lowestBIN, lowestBINHistory: fn('array_prepend', currentLowestBIN, col('lowestBINHistory')) },
-				{ where: { id: itemId } },
-			);
+			await sql`
+				UPDATE "SkyBlockAuctions"
+				SET "lowestBIN" = ${lowestBIN}, "lowestBINHistory" = array_prepend(${currentLowestBIN}, "lowestBINHistory")
+				WHERE id = ${itemId}
+			`;
 
 			if (existing.lowestBINHistory.length > MAX_HISTORY_LENGTH) {
-				await skyBlockAuction.update(
-					{
-						lowestBINHistory: fn(
-							'trim_array',
-							col('lowestBINHistory'),
-							existing.lowestBINHistory.length - MAX_HISTORY_LENGTH,
-						),
-					},
-					{ where: { id: itemId } },
-				);
+				await sql`
+					UPDATE "SkyBlockAuctions" SET "lowestBINHistory" = trim_array("lowestBINHistory", ${
+						existing.lowestBINHistory.length - MAX_HISTORY_LENGTH
+					}) WHERE id = ${itemId}
+				`;
 			}
 		} else {
-			itemPrices.push({ itemId, price: currentLowestBIN });
+			parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: currentLowestBIN } });
 
-			await skyBlockAuction.create({
-				id: itemId,
-				lowestBIN: currentLowestBIN,
-				lowestBINHistory: [currentLowestBIN],
-			});
+			await sql`
+				INSERT INTO "SkyBlockAuctions" (
+					id,
+					"lowestBIN",
+					"lowestBINHistory"
+				) VALUES (
+					${itemId},
+					${currentLowestBIN},
+					ARRAY [${currentLowestBIN}::NUMERIC]
+				)
+			`;
 
 			logger.debug(
 				{
@@ -329,10 +340,6 @@ await Promise.all(BINAuctions.map((auctions, itemId) => updateAuctionItem(itemId
 await updateBazaarPricesPromise;
 
 if (parentPort) {
-	parentPort.postMessage({
-		op: JobType.SkyblockAuctionPriceUpdate,
-		d: { itemPrices, totalPages: firstPage.totalPages },
-	});
 	parentPort.postMessage('done');
 } else {
 	exit(0);

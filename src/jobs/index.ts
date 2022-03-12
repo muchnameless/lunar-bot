@@ -4,7 +4,6 @@ import Bree from 'bree';
 import { logger } from '../functions';
 import { prices } from '../structures/networth/prices';
 import type { LunarClient } from '../structures/LunarClient';
-import type { ItemPrice } from './skyblockAuctions';
 
 export const enum JobType {
 	HypixelForumLastGUIDUpdate,
@@ -30,12 +29,7 @@ export function startJobs(client: LunarClient) {
 					break;
 
 				case JobType.SkyblockAuctionPriceUpdate:
-					for (const { itemId, price } of message.d.itemPrices as ItemPrice[]) {
-						prices.set(itemId, price);
-					}
-					logger.debug(
-						`[UPDATE PRICES]: updated ${message.d.itemPrices.length} items from ${message.d.totalPages} auction pages`,
-					);
+					prices.set(message.d.itemId, message.d.price);
 					break;
 			}
 		},

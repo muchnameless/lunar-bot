@@ -67,25 +67,18 @@ const parsedItems = skyblockPatchnotes.map(({ guid, title, creator, link }) => (
 	updatedAt: now,
 }));
 
-const LAST_GUID = JSON.parse(
-	(
-		await sql<[{ value: string }]>`
-			SELECT value FROM "Config" WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
-		`
-	)[0].value,
-) as number;
+const [lastGuidEntry] = await sql<[{ value: string }]>`
+  SELECT value
+  FROM "Config"
+  WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
+`;
+const LAST_GUID: number = lastGuidEntry ? JSON.parse(lastGuidEntry.value) : 0;
 const newPosts = parsedItems.filter(({ guid }) => guid > LAST_GUID);
 
 await sql`
-  INSERT INTO "SkyBlockPatchNotes" ${sql(
-		parsedItems,
-		'guid',
-		'title',
-		'creator',
-		'link',
-		'createdAt',
-		'updatedAt',
-	)} ON CONFLICT ("guid") DO UPDATE SET "title"=EXCLUDED."title","creator"=EXCLUDED."creator","link"=EXCLUDED."link","updatedAt"=EXCLUDED."updatedAt"
+  INSERT INTO "SkyBlockPatchNotes"
+  ${sql(parsedItems)}
+  ON CONFLICT ("guid") DO UPDATE SET "title"=EXCLUDED."title","creator"=EXCLUDED."creator","link"=EXCLUDED."link","updatedAt"=EXCLUDED."updatedAt"
 `;
 
 if (parentPort) {
@@ -100,9 +93,9 @@ if (parentPort) {
 	parentPort.postMessage('done');
 } else {
 	await sql`
-		UPDATE "Config" SET "value" = ${JSON.stringify(
-			Math.max(...newPosts.map(({ guid }) => guid)),
-		)} WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
+		UPDATE "Config"
+		SET "value" = ${JSON.stringify(Math.max(...newPosts.map(({ guid }) => guid)))}
+		WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
 	`;
 
 	await sql.end();
