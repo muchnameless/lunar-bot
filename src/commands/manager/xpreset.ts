@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Op } from 'sequelize';
-import { OFFSET_FLAGS } from '../../constants';
+import { Offset } from '../../constants';
 import { optionalPlayerOption } from '../../structures/commands/commonOptions';
 import { InteractionUtil } from '../../util';
 import { safePromiseAll, seconds } from '../../functions';
@@ -18,7 +18,7 @@ export default class XpResetCommand extends ApplicationCommand {
 		});
 	}
 
-	static OFFSET_TO_RESET = OFFSET_FLAGS.COMPETITION_START;
+	static OFFSET_TO_RESET = Offset.CompetitionStart;
 
 	/**
 	 * execute the command

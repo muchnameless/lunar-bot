@@ -8,7 +8,7 @@ import {
 	EMBED_FIELD_MAX_CHARS,
 	EMBED_MAX_CHARS,
 	EMBED_MAX_FIELDS,
-	OFFSET_FLAGS,
+	Offset,
 	SKYBLOCK_XP_TYPES,
 	UNKNOWN_IGN,
 } from '../../../constants';
@@ -818,7 +818,7 @@ export class HypixelGuild extends Model<
 						setTimeout(async () => {
 							// reset current xp to 0
 							await player
-								.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT, typesToReset: SKYBLOCK_XP_TYPES })
+								.resetXp({ offsetToReset: Offset.Current, typesToReset: SKYBLOCK_XP_TYPES })
 								.catch((error) => logger.error(error));
 
 							const XP_LAST_UPDATED_AT = player.xpLastUpdatedAt?.getTime() ?? Number.NEGATIVE_INFINITY;
@@ -834,17 +834,17 @@ export class HypixelGuild extends Model<
 							// to trigger the xp gained reset if global reset happened after the player left the guild
 							await safePromiseAll([
 								config.get('COMPETITION_START_TIME') >= XP_LAST_UPDATED_AT &&
-									player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
+									player.resetXp({ offsetToReset: Offset.CompetitionStart }),
 								config.get('COMPETITION_END_TIME') >= XP_LAST_UPDATED_AT &&
-									player.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
+									player.resetXp({ offsetToReset: Offset.CompetitionEnd }),
 								config.get('LAST_MAYOR_XP_RESET_TIME') >= XP_LAST_UPDATED_AT &&
-									player.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
+									player.resetXp({ offsetToReset: Offset.Mayor }),
 								config.get('LAST_WEEKLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT &&
-									player.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
+									player.resetXp({ offsetToReset: Offset.Week }),
 								config.get('LAST_MONTHLY_XP_RESET_TIME') >= XP_LAST_UPDATED_AT &&
-									player.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
+									player.resetXp({ offsetToReset: Offset.Month }),
 								...Array.from({ length: DAYS_PASSED_SINCE_LAST_XP_UPDATE }).map(() =>
-									player.resetXp({ offsetToReset: OFFSET_FLAGS.DAY }),
+									player.resetXp({ offsetToReset: Offset.Day }),
 								),
 							]);
 

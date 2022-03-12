@@ -15,7 +15,7 @@ import {
 	LB_KEY,
 	LEADERBOARD_XP_TYPES,
 	LEFT_EMOJI,
-	OFFSET_FLAGS,
+	Offset,
 	RELOAD_EMOJI,
 	RIGHT_EMOJI,
 	XP_OFFSETS_CONVERTER,
@@ -150,7 +150,7 @@ const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild, lbType, xpType, o
 export const getDefaultOffset = (config: ConfigManager) =>
 	config.get('COMPETITION_RUNNING') ||
 	(Date.now() - config.get('COMPETITION_END_TIME') >= 0 && Date.now() - config.get('COMPETITION_END_TIME') <= days(1))
-		? OFFSET_FLAGS.COMPETITION_START
+		? Offset.CompetitionStart
 		: config.get('DEFAULT_XP_OFFSET');
 
 /**
@@ -548,9 +548,9 @@ function createGainedLeaderboardData(client: LunarClient, { hypixelGuild, user, 
 	const { config } = client;
 	const COMPETITION_RUNNING = config.get('COMPETITION_RUNNING');
 	const COMPETITION_END_TIME = config.get('COMPETITION_END_TIME');
-	const IS_COMPETITION_LB = offset === OFFSET_FLAGS.COMPETITION_START;
+	const IS_COMPETITION_LB = offset === Offset.CompetitionStart;
 	const SHOULD_USE_COMPETITION_END = !COMPETITION_RUNNING && IS_COMPETITION_LB;
-	const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END ? OFFSET_FLAGS.COMPETITION_END : '';
+	const CURRENT_OFFSET = SHOULD_USE_COMPETITION_END ? Offset.CompetitionEnd : '';
 
 	let playerData: PlayerData[];
 	let totalStats: string;

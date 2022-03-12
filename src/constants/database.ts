@@ -29,7 +29,7 @@ export const DEFAULT_CONFIG = {
 	CURRENT_COMPETITION: 'lily-weight',
 	DATABASE_UPDATE_INTERVAL: 5,
 	DEFAULT_MAX_PARTS: 5,
-	DEFAULT_XP_OFFSET: 'OffsetWeek',
+	DEFAULT_XP_OFFSET: Offset.Week,
 	ELEMENTS_PER_PAGE: 10,
 	EMBED_BLUE: 0x34_98_db,
 	EMBED_GREEN: 0x2e_dd_30,
@@ -86,7 +86,7 @@ export type ConfigValues = {
 	CURRENT_COMPETITION: 'lily-weight';
 	DATABASE_UPDATE_INTERVAL: number;
 	DEFAULT_MAX_PARTS: number;
-	DEFAULT_XP_OFFSET: 'OffsetWeek';
+	DEFAULT_XP_OFFSET: Offset.Week;
 	ELEMENTS_PER_PAGE: number;
 	EMBED_BLUE: number;
 	EMBED_GREEN: number;
@@ -122,44 +122,47 @@ export type ConfigValues = {
 	XP_TRACKING_ENABLED: boolean;
 };
 
-export const OFFSET_FLAGS = {
-	COMPETITION_END: 'CompetitionEnd',
-	COMPETITION_START: 'CompetitionStart',
-	MAYOR: 'OffsetMayor',
-	WEEK: 'OffsetWeek',
-	MONTH: 'OffsetMonth',
-	CURRENT: 'current',
-	DAY: 'day',
-} as const;
+export const enum Offset {
+	CompetitionEnd = 'CompetitionEnd',
+	CompetitionStart = 'CompetitionStart',
+	Mayor = 'OffsetMayor',
+	Week = 'OffsetWeek',
+	Month = 'OffsetMonth',
+	Current = 'current',
+	Day = 'day',
+}
 
-export const XP_OFFSETS = ['CompetitionStart', 'CompetitionEnd', 'OffsetMayor', 'OffsetWeek', 'OffsetMonth'] as const;
+export const XP_OFFSETS = [
+	Offset.CompetitionEnd,
+	Offset.CompetitionStart,
+	Offset.Mayor,
+	Offset.Week,
+	Offset.Month,
+] as const;
 
 export const XP_OFFSETS_SHORT = {
-	competition: 'CompetitionStart',
-	mayor: 'OffsetMayor',
-	week: 'OffsetWeek',
-	month: 'OffsetMonth',
+	competition: Offset.CompetitionStart,
+	mayor: Offset.Mayor,
+	week: Offset.Week,
+	month: Offset.Month,
 } as const;
 
 export const XP_OFFSETS_CONVERTER = {
-	competition: 'CompetitionStart',
-	mayor: 'OffsetMayor',
-	week: 'OffsetWeek',
-	month: 'OffsetMonth',
+	...XP_OFFSETS_SHORT,
 
-	CompetitionStart: 'competition',
-	OffsetMayor: 'mayor',
-	OffsetWeek: 'week',
-	OffsetMonth: 'month',
+	[Offset.CompetitionStart]: 'competition',
+	[Offset.Mayor]: 'mayor',
+	[Offset.Week]: 'week',
+	[Offset.Month]: 'month',
 } as const;
 
 export const XP_OFFSETS_TIME = {
-	CompetitionStart: 'COMPETITION_START_TIME',
-	CompetitionEnd: 'COMPETITION_END_TIME',
-	OffsetMayor: 'LAST_MAYOR_XP_RESET_TIME',
-	OffsetWeek: 'LAST_WEEKLY_XP_RESET_TIME',
-	OffsetMonth: 'LAST_MONTHLY_XP_RESET_TIME',
-	day: 'LAST_DAILY_XP_RESET_TIME',
+	[Offset.CompetitionStart]: 'COMPETITION_START_TIME',
+	[Offset.CompetitionEnd]: 'COMPETITION_END_TIME',
+	[Offset.Mayor]: 'LAST_MAYOR_XP_RESET_TIME',
+	[Offset.Week]: 'LAST_WEEKLY_XP_RESET_TIME',
+	[Offset.Month]: 'LAST_MONTHLY_XP_RESET_TIME',
+	[Offset.Day]: 'LAST_DAILY_XP_RESET_TIME',
 } as const;
 
 export type XPOffsets = ArrayElement<typeof XP_OFFSETS> | '';

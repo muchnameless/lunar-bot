@@ -7,7 +7,7 @@ import {
 	EMBED_MAX_CHARS,
 	EMBED_MAX_FIELDS,
 	MAYOR_CHANGE_INTERVAL,
-	OFFSET_FLAGS,
+	Offset,
 } from '../../../constants';
 import { hypixel } from '../../../api';
 import {
@@ -632,7 +632,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	private async _startCompetition() {
 		await Promise.all([
-			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_START }),
+			this.resetXp({ offsetToReset: Offset.CompetitionStart }),
 			this.client.config.set('COMPETITION_RUNNING', true),
 			this.client.config.set('COMPETITION_SCHEDULED', false),
 		]);
@@ -651,7 +651,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	private async _endCompetition() {
 		await Promise.all([
-			this.resetXp({ offsetToReset: OFFSET_FLAGS.COMPETITION_END }),
+			this.resetXp({ offsetToReset: Offset.CompetitionEnd }),
 			this.client.config.set('COMPETITION_RUNNING', false),
 		]);
 
@@ -673,7 +673,7 @@ export class PlayerManager extends ModelManager<Player> {
 		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
 
 		await Promise.all([
-			this.resetXp({ offsetToReset: OFFSET_FLAGS.MAYOR }),
+			this.resetXp({ offsetToReset: Offset.Mayor }),
 			this.client.config.set('LAST_MAYOR_XP_RESET_TIME', currentMayorTime),
 		]);
 
@@ -699,7 +699,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	private async _performDailyXpReset() {
 		await Promise.all([
-			this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY }),
+			this.resetXp({ offsetToReset: Offset.Day }),
 			this.client.config.set('LAST_DAILY_XP_RESET_TIME', Date.now()),
 		]);
 
@@ -717,7 +717,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	private async _performWeeklyXpReset() {
 		await Promise.all([
-			this.resetXp({ offsetToReset: OFFSET_FLAGS.WEEK }),
+			this.resetXp({ offsetToReset: Offset.Week }),
 			this.client.config.set('LAST_WEEKLY_XP_RESET_TIME', Date.now()),
 		]);
 
@@ -735,7 +735,7 @@ export class PlayerManager extends ModelManager<Player> {
 	 */
 	private async _performMonthlyXpReset() {
 		await Promise.all([
-			this.resetXp({ offsetToReset: OFFSET_FLAGS.MONTH }),
+			this.resetXp({ offsetToReset: Offset.Month }),
 			this.client.config.set('LAST_MONTHLY_XP_RESET_TIME', Date.now()),
 		]);
 

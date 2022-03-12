@@ -15,7 +15,7 @@ import {
 	isXPType,
 	LILY_SKILL_NAMES,
 	NICKNAME_MAX_CHARS,
-	OFFSET_FLAGS,
+	Offset,
 	SKILL_ACHIEVEMENTS,
 	SKILL_AVERAGE_ROLES,
 	SKILL_ROLES,
@@ -97,7 +97,7 @@ export interface TransferXpOptions {
 }
 
 export interface ResetXpOptions {
-	offsetToReset?: XPOffsets | null | typeof OFFSET_FLAGS.DAY | typeof OFFSET_FLAGS.CURRENT;
+	offsetToReset?: XPOffsets | null | Offset.Day | Offset.Current;
 	typesToReset?: readonly XPAndDataTypes[];
 }
 
@@ -1669,7 +1669,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 		if (!mainProfile) {
 			this.update({ mainProfileId: null, xpUpdatesDisabled: true }).catch((error) => logger.error(error));
-			this.resetXp({ offsetToReset: OFFSET_FLAGS.CURRENT });
+			this.resetXp({ offsetToReset: Offset.Current });
 
 			throw 'no SkyBlock profiles';
 		}
@@ -1768,9 +1768,9 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			case null:
 				// no offset type specifies -> resetting everything
 				await Promise.all(XP_OFFSETS.map((offset) => this.resetXp({ offsetToReset: offset, typesToReset })));
-				return this.resetXp({ offsetToReset: OFFSET_FLAGS.DAY, typesToReset });
+				return this.resetXp({ offsetToReset: Offset.Day, typesToReset });
 
-			case OFFSET_FLAGS.DAY:
+			case Offset.Day:
 				// append current xp to the beginning of the xpHistory-Array and pop of the last value
 				for (const type of typesToReset) {
 					if (isXPType(type)) {
@@ -1787,7 +1787,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 				}
 				break;
 
-			case OFFSET_FLAGS.CURRENT:
+			case Offset.Current:
 				for (const type of typesToReset) {
 					if (isXPType(type)) {
 						this[`${type}Xp`] = 0;
