@@ -2,12 +2,12 @@ import { DiscordAPIError, RESTJSONErrorCodes } from 'discord.js';
 import { hours, logger } from '../functions';
 import { EMBEDS_MAX_AMOUNT, EMBED_MAX_CHARS, MESSAGE_MAX_CHARS } from '../constants';
 import { redis } from '../api';
-import type { Embed, Message, MessageOptions, User } from 'discord.js';
+import { EmbedUtil } from '.';
+import type { Message, MessageOptions, User } from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 
 export interface SendDMOptions extends MessageOptions {
 	rejectOnError?: boolean;
-	embeds?: Embed[];
 	/** identifier used to prevent multiple DMs of the same type within `cooldown` ms */
 	redisKey?: string;
 	/** defaults to 1 hour */
@@ -85,7 +85,7 @@ export class UserUtil extends null {
 				return null;
 			}
 
-			const TOTAL_LENGTH = _options.embeds!.reduce((acc, cur) => acc + cur.length, 0);
+			const TOTAL_LENGTH = EmbedUtil.totalLength(_options.embeds!);
 
 			if (TOTAL_LENGTH > EMBED_MAX_CHARS) {
 				const MESSAGE = `[USER SEND DM]: embeds total char length ${TOTAL_LENGTH} > ${EMBED_MAX_CHARS}`;

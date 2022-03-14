@@ -1,11 +1,11 @@
 import { promisify } from 'node:util';
 import { exec } from 'node:child_process';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ActionRow, Formatters } from 'discord.js';
+import { ActionRowBuilder, Formatters } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { buildDeleteButton, logger } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
-import type { ChatInputCommandInteraction } from 'discord.js';
+import type { ButtonBuilder, ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 
 export default class ExecCommand extends ApplicationCommand {
@@ -62,14 +62,14 @@ export default class ExecCommand extends ApplicationCommand {
 
 			return InteractionUtil.reply(interaction, {
 				embeds: [responseEmbed],
-				components: [new ActionRow().addComponents(buildDeleteButton(interaction.user))],
+				components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user))],
 			});
 		} catch (error) {
 			logger.error(error); // should contain code (exit code) and signal (that caused the termination)
 
 			return InteractionUtil.reply(interaction, {
 				content: Formatters.codeBlock('xl', `${error}`),
-				components: [new ActionRow().addComponents(buildDeleteButton(interaction.user))],
+				components: [new ActionRowBuilder<ButtonBuilder>().addComponents(buildDeleteButton(interaction.user))],
 			});
 		}
 	}

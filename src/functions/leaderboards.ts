@@ -1,4 +1,11 @@
-import { ActionRow, ButtonStyle, Embed, Formatters, SelectMenuComponent, SelectMenuOption } from 'discord.js';
+import {
+	ActionRowBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	Formatters,
+	SelectMenuBuilder,
+	SelectMenuOptionBuilder,
+} from 'discord.js';
 import { stripIndent, oneLine } from 'common-tags';
 import {
 	GUILD_ID_ALL,
@@ -14,8 +21,16 @@ import {
 import { InteractionUtil, UserUtil } from '../util';
 import { redis } from '../api';
 import { buildPaginationActionRow, days, formatDecimalNumber, formatNumber, minutes, upperCaseFirstChar } from '.';
-import type { ButtonInteraction, Message, SelectMenuInteraction, Snowflake, User } from 'discord.js';
-import type { APIEmbed } from 'discord-api-types/v9';
+import type { APIEmbed } from 'discord-api-types/v10';
+import type { JSONEncodable } from '@discordjs/builders';
+import type {
+	ButtonInteraction,
+	Message,
+	MessageActionRowComponentBuilder,
+	SelectMenuInteraction,
+	Snowflake,
+	User,
+} from 'discord.js';
 import type { Player } from '../structures/database/models/Player';
 import type { HypixelGuild } from '../structures/database/models/HypixelGuild';
 import type { LunarClient } from '../structures/LunarClient';
@@ -161,30 +176,30 @@ function createActionRows(
 	totalPages: number,
 	isExpired = false,
 ) {
-	const rows: ActionRow[] = [];
-	const guildSelectMenu = new SelectMenuComponent()
+	const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
+	const guildSelectMenu = new SelectMenuBuilder()
 		.setCustomId(`${cacheKey}:guild`)
 		.setPlaceholder(hypixelGuild !== GUILD_ID_ALL ? `Guild: ${hypixelGuild}` : 'Guilds: All')
 		.addOptions(
 			...client.hypixelGuilds.cache.map(({ guildId, name }) =>
-				new SelectMenuOption() //
+				new SelectMenuOptionBuilder() //
 					.setLabel(name)
 					.setValue(guildId),
 			),
-			new SelectMenuOption() //
+			new SelectMenuOptionBuilder() //
 				.setLabel('ALL')
 				.setValue(GUILD_ID_ALL),
 		);
 
 	if (xpType !== 'purge') {
-		const offsetSelectMenu = new SelectMenuComponent()
+		const offsetSelectMenu = new SelectMenuBuilder()
 			.setCustomId(`${cacheKey}:offset`)
 			.setPlaceholder(
 				`Offset: ${upperCaseFirstChar(XP_OFFSETS_CONVERTER[offset as keyof typeof XP_OFFSETS_CONVERTER] ?? 'None')}`,
 			)
 			.addOptions(
 				...Object.keys(XP_OFFSETS_SHORT).map((_offset) =>
-					new SelectMenuOption()
+					new SelectMenuOptionBuilder()
 						.setLabel(upperCaseFirstChar(_offset))
 						.setValue(XP_OFFSETS_CONVERTER[_offset as keyof typeof XP_OFFSETS_CONVERTER]),
 				),
@@ -192,28 +207,28 @@ function createActionRows(
 
 		if (lbType === 'total') {
 			offsetSelectMenu.addOptions(
-				new SelectMenuOption() //
+				new SelectMenuOptionBuilder() //
 					.setLabel('None')
 					.setValue('none'),
 			);
 		}
 
 		rows.push(
-			new ActionRow().addComponents(
-				new SelectMenuComponent()
+			new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+				new SelectMenuBuilder()
 					.setCustomId(`${cacheKey}:lbType`)
 					.setPlaceholder(`Lb Type: ${upperCaseFirstChar(lbType)}`)
 					.addOptions(
-						new SelectMenuOption() //
+						new SelectMenuOptionBuilder() //
 							.setLabel('Total XP')
 							.setValue('total'),
-						new SelectMenuOption() //
+						new SelectMenuOptionBuilder() //
 							.setLabel('Gained XP')
 							.setValue('gained'),
 					),
 			),
-			new ActionRow().addComponents(
-				new SelectMenuComponent()
+			new ActionRowBuilder<SelectMenuBuilder>().addComponents(
+				new SelectMenuBuilder()
 					.setCustomId(`${cacheKey}:xpType`)
 					.setPlaceholder(
 						`XP Type: ${xpType
@@ -223,18 +238,18 @@ function createActionRows(
 					)
 					.addOptions(
 						...LEADERBOARD_XP_TYPES.map((type) =>
-							new SelectMenuOption() //
+							new SelectMenuOptionBuilder() //
 								.setLabel(upperCaseFirstChar(type.replaceAll('-', ' ')))
 								.setValue(type),
 						),
 					),
 			),
-			new ActionRow().addComponents(offsetSelectMenu),
+			new ActionRowBuilder<SelectMenuBuilder>().addComponents(offsetSelectMenu),
 		);
 	}
 
 	rows.push(
-		new ActionRow().addComponents(guildSelectMenu),
+		new ActionRowBuilder<SelectMenuBuilder>().addComponents(guildSelectMenu),
 		buildPaginationActionRow(cacheKey, page, totalPages, {
 			disablePages: isExpired,
 			pageStyle: isExpired ? ButtonStyle.Secondary : ButtonStyle.Primary,
@@ -386,11 +401,11 @@ async function getLeaderboardMessageOptions(
 	const CACHE_KEY = createCacheKey(leaderboardArgs);
 
 	if (!isReloadButton) {
-		const cachedEmbeds: Embed[] | APIEmbed[] | null = JSON.parse((await redis.get(CACHE_KEY))!);
+		const cachedEmbeds: APIEmbed[] | null = JSON.parse((await redis.get(CACHE_KEY))!);
 
 		if (cachedEmbeds) {
 			return {
-				embeds: [new Embed(cachedEmbeds[leaderboardArgs.page - 1])],
+				embeds: [cachedEmbeds[leaderboardArgs.page - 1]],
 				components: createActionRows(client, CACHE_KEY, leaderboardArgs, cachedEmbeds.length),
 			};
 		}
@@ -409,7 +424,7 @@ async function getLeaderboardMessageOptions(
 	const ELEMENTS_PER_PAGE = config.get('ELEMENTS_PER_PAGE');
 	const PLAYER_COUNT = playerData.length;
 	const PAGES_TOTAL = PLAYER_COUNT ? Math.ceil(PLAYER_COUNT / ELEMENTS_PER_PAGE) : 1; // to create at least one page if player list is empty
-	const embeds: Embed[] = [];
+	const embeds: JSONEncodable<APIEmbed>[] = [];
 
 	for (let page = 1; page <= PAGES_TOTAL; ++page) {
 		let playerList = '';
@@ -429,7 +444,7 @@ async function getLeaderboardMessageOptions(
 		}
 
 		embeds.push(
-			new Embed()
+			new EmbedBuilder()
 				.setColor(config.get('EMBED_BLUE'))
 				.setTitle(title)
 				.setDescription(

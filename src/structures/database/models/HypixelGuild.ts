@@ -1,8 +1,9 @@
 import { setTimeout, clearTimeout } from 'node:timers';
 import { Model, DataTypes } from 'sequelize';
-import { Embed, Formatters, Util } from 'discord.js';
+import { EmbedBuilder, Formatters, Util } from 'discord.js';
 import { RateLimitError } from '@zikeji/hypixel';
 import ms from 'ms';
+import { embedLength } from '@discordjs/builders';
 import { mute, setRank, unmute } from '../../chat_bridge/constants';
 import {
 	EMBED_FIELD_MAX_CHARS,
@@ -28,6 +29,8 @@ import {
 	safePromiseAll,
 	seconds,
 } from '../../../functions';
+import type { APIEmbed } from 'discord-api-types/v10';
+import type { JSONEncodable } from '@discordjs/builders';
 import type {
 	CreationOptional,
 	InferAttributes,
@@ -881,7 +884,7 @@ export class HypixelGuild extends Model<
 							if (!existingBan) return;
 
 							void this.client.log(
-								new Embed()
+								new EmbedBuilder()
 									.setColor(this.client.config.get('EMBED_RED'))
 									.setAuthor({
 										name: discordMember?.user.tag ?? player.ign,
@@ -936,9 +939,9 @@ export class HypixelGuild extends Model<
 			leftLog = HypixelGuild.transformLogArray(leftLog);
 
 			const EMBED_COUNT = Math.max(joinedLog.length, leftLog.length);
-			const loggingEmbeds: Embed[] = [];
+			const loggingEmbeds: JSONEncodable<APIEmbed>[] = [];
 			const createEmbed = () => {
-				const embed = new Embed()
+				const embed = new EmbedBuilder()
 					.setColor(hasError ? config.get('EMBED_RED') : config.get('EMBED_BLUE'))
 					.setTitle(`${this.name} Player Database: ${CHANGES} change${CHANGES !== 1 ? 's' : ''}`)
 					.setDescription(`Number of players: ${PLAYERS_OLD_AMOUNT} -> ${this.playerCount}`)
@@ -950,7 +953,7 @@ export class HypixelGuild extends Model<
 			};
 
 			let embed = createEmbed();
-			let currentLength = embed.length;
+			let currentLength = embedLength(embed.data);
 
 			for (let index = 0; index < EMBED_COUNT; ++index) {
 				let joinedLogElement = joinedLog[index] ?? '';
@@ -983,13 +986,16 @@ export class HypixelGuild extends Model<
 				];
 				const ADDITIONAL_LENGTH = newFields.reduce((acc, { name, value }) => acc + name.length + value.length, 0);
 
-				if (currentLength + ADDITIONAL_LENGTH <= EMBED_MAX_CHARS && (embed.fields?.length ?? 0) < EMBED_MAX_FIELDS) {
+				if (
+					currentLength + ADDITIONAL_LENGTH <= EMBED_MAX_CHARS &&
+					(embed.data.fields?.length ?? 0) < EMBED_MAX_FIELDS
+				) {
 					embed.addFields(...newFields);
 					currentLength += ADDITIONAL_LENGTH;
 				} else {
 					embed = createEmbed();
 					embed.addFields(...newFields);
-					currentLength = embed.length;
+					currentLength = embedLength(embed.data);
 				}
 			}
 
@@ -1093,7 +1099,7 @@ export class HypixelGuild extends Model<
 			if (!this.chatBridgeEnabled) return this;
 
 			const { chatBridge } = this;
-			const setRankLog: Embed[] = [];
+			const setRankLog: JSONEncodable<APIEmbed>[] = [];
 
 			for (const [index, { player }] of nonStaffWithWeight.entries()) {
 				// automatedRanks is sorted descendingly by positionReq

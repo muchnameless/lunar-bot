@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Embed, Formatters } from 'discord.js';
+import { EmbedBuilder, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import {
 	COSMETIC_SKILLS,
@@ -10,9 +10,11 @@ import {
 	XP_OFFSETS_TIME,
 } from '../../constants';
 import { optionalPlayerOption, pageOption, offsetOption } from '../../structures/commands/commonOptions';
-import { InteractionUtil, MessageEmbedUtil } from '../../util';
+import { EmbedUtil, InteractionUtil } from '../../util';
 import { formatDecimalNumber, formatNumber, getDefaultOffset, upperCaseFirstChar } from '../../functions';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
+import type { APIEmbed } from 'discord-api-types/v10';
+import type { JSONEncodable } from '@discordjs/builders';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { XPOffsets } from '../../constants';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -46,11 +48,11 @@ export default class XpCommand extends ApplicationCommand {
 		// update db?
 		if (interaction.options.getBoolean('update')) await player.updateXp();
 
-		const embeds: Embed[] = [];
+		const embeds: JSONEncodable<APIEmbed>[] = [];
 		const { skillAverage, trueAverage } = player.getSkillAverage();
 		const { skillAverage: skillAverageOffset, trueAverage: trueAverageOffset } = player.getSkillAverage(OFFSET);
 
-		let embed = new Embed()
+		let embed = new EmbedBuilder()
 			.setColor(this.config.get('EMBED_BLUE'))
 			.setAuthor({
 				name: `${player}${player.mainProfileName ? ` (${player.mainProfileName})` : ''}`,
@@ -99,7 +101,7 @@ export default class XpCommand extends ApplicationCommand {
 			});
 		}
 
-		MessageEmbedUtil.padFields(embed);
+		EmbedUtil.padFields(embed);
 
 		for (const skill of COSMETIC_SKILLS) {
 			const SKILL_ARGUMENT = `${skill}Xp` as const;
@@ -116,7 +118,7 @@ export default class XpCommand extends ApplicationCommand {
 			});
 		}
 
-		MessageEmbedUtil.padFields(embed);
+		EmbedUtil.padFields(embed);
 
 		// slayer
 		const TOTAL_SLAYER_XP = player.getSlayerTotal();
@@ -176,7 +178,7 @@ export default class XpCommand extends ApplicationCommand {
 			overflow: overflowOffset,
 		} = player.getLilyWeight(OFFSET);
 
-		MessageEmbedUtil.padFields(embed).addFields(
+		EmbedUtil.padFields(embed).addFields(
 			{
 				name: '\u200B',
 				value: `${Formatters.codeBlock('Miscellaneous')}\u200B`,
@@ -204,7 +206,7 @@ export default class XpCommand extends ApplicationCommand {
 			},
 		);
 
-		embeds.push(MessageEmbedUtil.padFields(embed));
+		embeds.push(EmbedUtil.padFields(embed));
 
 		return InteractionUtil.reply(interaction, { embeds });
 	}

@@ -1,7 +1,7 @@
 import { setInterval } from 'node:timers';
 import { URL } from 'node:url';
 import { env } from 'node:process';
-import { Client, Embed } from 'discord.js';
+import { Client, EmbedBuilder } from 'discord.js';
 import { GuildUtil, UserUtil } from '../util';
 import { hours, logger, safePromiseAll } from '../functions';
 import { exitProcess } from '../process';
@@ -65,7 +65,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	 * default embed, blue border and current timestamp
 	 */
 	override get defaultEmbed() {
-		return new Embed({
+		return new EmbedBuilder({
 			color: this.config.get('EMBED_BLUE'),
 			timestamp: Date.now(),
 		});
@@ -108,7 +108,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 	 * sends a DM to the bot owner
 	 * @param options
 	 */
-	override async dmOwner(options: string | (MessageOptions & { embeds?: Embed[] })) {
+	override async dmOwner(options: string | MessageOptions) {
 		try {
 			return UserUtil.sendDM(await this.users.fetch(this.ownerId), options);
 		} catch (error) {

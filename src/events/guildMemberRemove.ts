@@ -1,7 +1,7 @@
-import { Embed, Formatters } from 'discord.js';
+import { EmbedBuilder, Formatters } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import { logger } from '../functions';
-import { GuildMemberUtil, MessageEmbedUtil } from '../util';
+import { EmbedUtil, GuildMemberUtil } from '../util';
 import { Event, type EventContext } from '../structures/events/Event';
 import type { GuildMember } from 'discord.js';
 
@@ -36,8 +36,8 @@ export default class GuildMemberRemoveEvent extends Event {
 		player.update({ inDiscord: false }).catch((error) => logger.error(error));
 
 		void this.client.log(
-			MessageEmbedUtil.padFields(
-				new Embed()
+			EmbedUtil.padFields(
+				new EmbedBuilder()
 					.setColor(this.config.get('EMBED_RED'))
 					.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL(), url: player.url })
 					.setThumbnail(player.imageURL)

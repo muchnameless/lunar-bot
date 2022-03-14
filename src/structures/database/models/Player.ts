@@ -1,4 +1,4 @@
-import { DiscordAPIError, Embed, Formatters, GuildMember, PermissionFlagsBits } from 'discord.js';
+import { DiscordAPIError, EmbedBuilder, Formatters, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { DataTypes, fn, Model, UniqueConstraintError } from 'sequelize';
 import { stripIndents } from 'common-tags';
 import { RateLimitError } from '@zikeji/hypixel';
@@ -30,7 +30,7 @@ import {
 	XP_TYPES,
 	STATS_URL_BASE,
 } from '../../../constants';
-import { GuildMemberUtil, GuildUtil, MessageEmbedUtil, UserUtil } from '../../../util';
+import { EmbedUtil, GuildMemberUtil, GuildUtil, UserUtil } from '../../../util';
 import { hypixel, mojang } from '../../../api';
 import {
 	days,
@@ -1358,7 +1358,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 		}
 
 		const { config } = this.client;
-		const loggingEmbed = new Embed()
+		const loggingEmbed = new EmbedBuilder()
 			.setAuthor({ name: member.user.tag, iconURL: member.displayAvatarURL(), url: this.url })
 			.setThumbnail(this.imageURL)
 			.setDescription(
@@ -1446,7 +1446,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 			return false;
 		} finally {
 			// logging
-			void this.client.log(MessageEmbedUtil.padFields(loggingEmbed, 2));
+			void this.client.log(EmbedUtil.padFields(loggingEmbed, 2));
 		}
 	}
 

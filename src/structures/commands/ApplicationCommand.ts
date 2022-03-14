@@ -26,7 +26,7 @@ import type {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	RESTPostAPIContextMenuApplicationCommandsJSONBody,
 	APIApplicationCommandPermission,
-} from 'discord-api-types/v9';
+} from 'discord-api-types/v10';
 import type {
 	AutocompleteInteraction,
 	ButtonInteraction,

@@ -1,4 +1,4 @@
-import { ButtonComponent, ButtonStyle, ActionRow } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import {
 	DELETE_EMOJI,
 	DELETE_KEY,
@@ -15,7 +15,7 @@ import type { User } from 'discord.js';
  * @param user
  */
 export const buildDeleteButton = (user: User) =>
-	new ButtonComponent()
+	new ButtonBuilder()
 		.setCustomId(`${DELETE_KEY}:${user.id}`)
 		.setEmoji({ name: DELETE_EMOJI })
 		.setStyle(ButtonStyle.Danger);
@@ -54,28 +54,28 @@ export function buildPaginationActionRow(
 	const INC_DISABLED = currentPage === totalPages || INVALID_PAGES;
 
 	// emojis are added to customIds to ensure they are unique, e.g. "firstPage" could equal "currentPage - 1"
-	return new ActionRow().addComponents(
-		new ButtonComponent()
+	return new ActionRowBuilder<ButtonBuilder>().addComponents(
+		new ButtonBuilder()
 			.setCustomId(`${baseCustomId}:${firstPage}:${DOUBLE_LEFT_EMOJI}`)
 			.setEmoji({ name: DOUBLE_LEFT_EMOJI })
 			.setStyle(pageStyle)
 			.setDisabled(DEC_DISABLED),
-		new ButtonComponent()
+		new ButtonBuilder()
 			.setCustomId(`${baseCustomId}:${currentPage - 1}:${LEFT_EMOJI}`)
 			.setEmoji({ name: LEFT_EMOJI })
 			.setStyle(pageStyle)
 			.setDisabled(DEC_DISABLED),
-		new ButtonComponent()
+		new ButtonBuilder()
 			.setCustomId(`${baseCustomId}:${currentPage + 1}:${RIGHT_EMOJI}`)
 			.setEmoji({ name: RIGHT_EMOJI })
 			.setStyle(pageStyle)
 			.setDisabled(INC_DISABLED),
-		new ButtonComponent()
+		new ButtonBuilder()
 			.setCustomId(`${baseCustomId}:${totalPages}:${DOUBLE_RIGHT_EMOJI}`)
 			.setEmoji({ name: DOUBLE_RIGHT_EMOJI })
 			.setStyle(pageStyle)
 			.setDisabled(INC_DISABLED),
-		new ButtonComponent()
+		new ButtonBuilder()
 			.setCustomId(`${baseCustomId}:${currentPage}:${RELOAD_EMOJI}`)
 			.setEmoji({ name: RELOAD_EMOJI })
 			.setStyle(reloadStyle),

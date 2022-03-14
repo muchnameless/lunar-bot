@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Formatters } from 'discord.js';
 import { stripIndent } from 'common-tags';
 import { mojang } from '../../api';
-import { InteractionUtil, MessageEmbedUtil } from '../../util';
+import { EmbedUtil, InteractionUtil } from '../../util';
 import { formatNumber, logger } from '../../functions';
 import { TransactionType } from '../../structures/database/models/Transaction';
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
@@ -73,7 +73,7 @@ export default class DonationsCommand extends ApplicationCommand {
 						});
 					}
 
-					MessageEmbedUtil.padFields(embed);
+					EmbedUtil.padFields(embed);
 
 					totalAmount += amount;
 				}),

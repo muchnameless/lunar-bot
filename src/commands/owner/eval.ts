@@ -5,22 +5,21 @@ import { env } from 'node:process';
 import util from 'node:util';
 import fs from 'node:fs/promises';
 import v8 from 'node:v8';
-import { ContextMenuCommandBuilder, SlashCommandBuilder } from '@discordjs/builders';
+import { ContextMenuCommandBuilder, embedLength, SlashCommandBuilder } from '@discordjs/builders';
 import Discord, {
-	ActionRow,
-	ButtonComponent,
+	ActionRowBuilder,
+	ButtonBuilder,
 	ButtonStyle,
-	Embed,
+	EmbedBuilder,
 	Formatters,
 	MessageAttachment,
-	Modal,
-	TextInputComponent,
+	ModalBuilder,
+	TextInputBuilder,
 	TextInputStyle,
 	Util,
 } from 'discord.js';
-Embed;
 Util; // unused imports are 'used' so that tsc doesn't remove them
-import { Routes } from 'discord-api-types/v9';
+import { Routes } from 'discord-api-types/v10';
 Routes;
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
@@ -38,19 +37,19 @@ imgur;
 mojang;
 import {
 	ChannelUtil,
+	EmbedUtil,
 	GuildMemberUtil,
 	GuildUtil,
 	InteractionUtil,
 	LeaderboardUtil,
-	MessageEmbedUtil,
 	MessageUtil,
 	UserUtil,
 } from '../../util';
 ChannelUtil;
+EmbedUtil;
 GuildMemberUtil;
 GuildUtil;
 LeaderboardUtil;
-MessageEmbedUtil;
 import * as functions from '../../functions';
 import * as nwFunctions from '../../structures/networth/functions';
 nwFunctions;
@@ -70,7 +69,6 @@ import type {
 	ButtonInteraction,
 	Message,
 	MessageComponentInteraction,
-	ModalActionRowComponent,
 	ModalSubmitInteraction,
 } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
@@ -188,7 +186,7 @@ export default class EvalCommand extends ApplicationCommand {
 				interaction,
 				typeof options === 'string'
 					? { content: options, ephemeral: false, rejectOnError: true, fetchReply: true }
-					: options instanceof Embed
+					: options instanceof EmbedBuilder
 					? { embeds: [options], ephemeral: false, rejectOnError: true, fetchReply: true }
 					: { ephemeral: false, rejectOnError: true, fetchReply: true, ...options },
 			);
@@ -271,17 +269,16 @@ export default class EvalCommand extends ApplicationCommand {
 			const CLEANED_OUTPUT = this._cleanOutput(evaled, inspectDepth);
 			const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${resultType}\` • time taken: \`${stopwatch}\``;
 
+			let length = embedLength(responseEmbed.data) + '\u200B'.length + FOOTER_FIELD.length;
+
 			// add output fields till embed character limit is reached
 			for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'ts').entries()) {
 				const name = index ? '\u200B' : 'Output';
 
 				// embed size overflow -> convert output to file
-				if (
-					responseEmbed.length + '\u200B'.length + FOOTER_FIELD.length + name.length + value.length >
-					EMBED_MAX_CHARS
-				) {
+				if ((length += name.length + value.length) > EMBED_MAX_CHARS) {
 					// remove result fields
-					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY, {
+					responseEmbed.spliceFields(responseEmbed.data.fields!.length - index, Number.POSITIVE_INFINITY, {
 						name: 'Output',
 						value: 'result.ts',
 					});
@@ -306,16 +303,15 @@ export default class EvalCommand extends ApplicationCommand {
 			const FOOTER_FIELD = `d.js ${Discord.version} • type: \`${errorType}\` • time taken: \`${stopwatch}\``;
 			const CLEANED_OUTPUT = this._cleanOutput(error, inspectDepth);
 
+			let length = embedLength(responseEmbed.data) + '\u200B'.length + FOOTER_FIELD.length;
+
 			for (const [index, value] of splitForEmbedFields(CLEANED_OUTPUT, 'xl').entries()) {
 				const name = index ? '\u200B' : 'Error';
 
 				// embed size overflow -> convert output to file
-				if (
-					responseEmbed.length + '\u200B'.length + FOOTER_FIELD.length + name.length + value.length >
-					EMBED_MAX_CHARS
-				) {
+				if ((length += name.length + value.length) > EMBED_MAX_CHARS) {
 					// remove error fields
-					responseEmbed.spliceFields(responseEmbed.fields!.length - index, Number.POSITIVE_INFINITY, {
+					responseEmbed.spliceFields(responseEmbed.data.fields!.length - index, Number.POSITIVE_INFINITY, {
 						name: 'Error',
 						value: 'result.ts',
 					});
@@ -336,16 +332,16 @@ export default class EvalCommand extends ApplicationCommand {
 		return InteractionUtil.replyOrUpdate(interaction, {
 			embeds: [responseEmbed],
 			components: [
-				new ActionRow().addComponents(
-					new ButtonComponent()
+				new ActionRowBuilder<ButtonBuilder>().addComponents(
+					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:edit:${inspectDepth}`)
 						.setEmoji({ name: EDIT_MESSAGE_EMOJI })
 						.setStyle(ButtonStyle.Secondary),
-					new ButtonComponent()
+					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:repeat:${inspectDepth}`)
 						.setEmoji({ name: RELOAD_EMOJI })
 						.setStyle(ButtonStyle.Secondary),
-					new ButtonComponent()
+					new ButtonBuilder()
 						.setCustomId(`${this.baseCustomId}:visibility:${inspectDepth}`)
 						.setEmoji({ name: EYES_EMOJI })
 						.setStyle(ButtonStyle.Secondary),
@@ -385,12 +381,12 @@ export default class EvalCommand extends ApplicationCommand {
 			case 'edit':
 				return InteractionUtil.showModal(
 					interaction,
-					new Modal()
+					new ModalBuilder()
 						.setTitle(this.name)
 						.setCustomId(interaction.customId)
 						.addComponents(
-							new ActionRow<ModalActionRowComponent>().addComponents(
-								new TextInputComponent()
+							new ActionRowBuilder<TextInputBuilder>().addComponents(
+								new TextInputBuilder()
 									.setCustomId('input')
 									.setStyle(TextInputStyle.Paragraph)
 									.setLabel('Input')
@@ -403,8 +399,8 @@ export default class EvalCommand extends ApplicationCommand {
 									)
 									.setRequired(false),
 							),
-							new ActionRow<ModalActionRowComponent>().addComponents(
-								new TextInputComponent()
+							new ActionRowBuilder<TextInputBuilder>().addComponents(
+								new TextInputBuilder()
 									.setCustomId('inspectDepth')
 									.setStyle(TextInputStyle.Short)
 									.setLabel('Inspect depth')
@@ -428,9 +424,9 @@ export default class EvalCommand extends ApplicationCommand {
 				// send new message
 				return InteractionUtil.reply(interaction, {
 					content: interaction.message.content || null,
-					// @ts-expect-error
 					embeds: interaction.message.embeds,
 					files: (interaction.message as Message).attachments.map(({ url }) => url),
+					// @ts-expect-error
 					components: interaction.message.components,
 					ephemeral: isNotEphemeral,
 				});

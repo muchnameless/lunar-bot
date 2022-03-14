@@ -1,11 +1,11 @@
 import { argv, env, exit } from 'node:process';
-import { Routes } from 'discord-api-types/v9';
+import { Routes } from 'discord-api-types/v10';
 import { LunarClient } from '../structures/LunarClient';
 import { logger } from '../functions';
 import type {
 	RESTPutAPIApplicationCommandsResult,
 	RESTPutAPIGuildApplicationCommandsPermissionsJSONBody,
-} from 'discord-api-types/v9';
+} from 'discord-api-types/v10';
 
 const GUILD_ID = argv[2];
 const client = new LunarClient({
