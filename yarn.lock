@@ -15,15 +15,15 @@ __metadata:
   linkType: hard
 
 "@azure/msal-node@npm:^1.1.0":
-  version: 1.6.0
-  resolution: "@azure/msal-node@npm:1.6.0"
+  version: 1.7.0
+  resolution: "@azure/msal-node@npm:1.7.0"
   dependencies:
     "@azure/msal-common": ^6.1.0
     axios: ^0.21.4
     https-proxy-agent: ^5.0.0
     jsonwebtoken: ^8.5.1
     uuid: ^8.3.0
-  checksum: 7c42499faa740a1bfc6818e709e69a139d3513e4440a5a52a3f12dbea5c1b18570e651a01083f3b84c992541b162934727c1280943e761bc626b9a189f0be99d
+  checksum: f1c208a5c8503269afb8209118cbc52fdb5acb218dcd0ba5693b34c73b437df653bf9abf80ff9936622b47148315fb8dd686a19f832cd3326c8127bb2b391ae3
   languageName: node
   linkType: hard
 
@@ -685,11 +685,11 @@ __metadata:
   linkType: hard
 
 "@types/ws@npm:^8.2.2":
-  version: 8.5.2
-  resolution: "@types/ws@npm:8.5.2"
+  version: 8.5.3
+  resolution: "@types/ws@npm:8.5.3"
   dependencies:
     "@types/node": "*"
-  checksum: 3182db3a84474636cd990482b451c1e247bb2c4524eb85f937e3734c9600af34dfc07f9a2d973d4a39dfe433339f9afd8c5824e32a597e7cffba475cbbd487c9
+  checksum: 0ce46f850d41383fcdc2149bcacc86d7232fa7a233f903d2246dff86e31701a02f8566f40af5f8b56d1834779255c04ec6ec78660fe0f9b2a69cf3d71937e4ae
   languageName: node
   linkType: hard
 
@@ -1167,8 +1167,8 @@ __metadata:
   linkType: hard
 
 "bree@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "bree@npm:8.0.0"
+  version: 8.0.1
+  resolution: "bree@npm:8.0.1"
   dependencies:
     "@breejs/later": ^4.1.0
     boolean: ^3.1.4
@@ -1181,7 +1181,7 @@ __metadata:
     ms: ^2.1.3
     p-wait-for: 3
     safe-timers: ^1.1.0
-  checksum: 3383503aea74519ddca44b60c045abd78adb041e8375649528927dcf42627254a6dd44534638c6c0368cb5484844db06a26d8e42c334d183484baa10f89842b2
+  checksum: 2d1a7b0a4a7f9fe8eb9f0da0ab7b996246a9524bb20485258587bc7874fded1d7300668e5fa8d6bc3e6126120f0f4d4054979db1688879c2590d73a0be2524eb
   languageName: node
   linkType: hard
 
@@ -2529,10 +2529,9 @@ __metadata:
   linkType: hard
 
 "gauge@npm:^4.0.0":
-  version: 4.0.2
-  resolution: "gauge@npm:4.0.2"
+  version: 4.0.3
+  resolution: "gauge@npm:4.0.3"
   dependencies:
-    ansi-regex: ^5.0.1
     aproba: ^1.0.3 || ^2.0.0
     color-support: ^1.1.3
     console-control-strings: ^1.1.0
@@ -2541,7 +2540,7 @@ __metadata:
     string-width: ^4.2.3
     strip-ansi: ^6.0.1
     wide-align: ^1.1.5
-  checksum: 65077b87a7138bf465c7ea9541a81cdaeba42224f8650427529d47dda99c0a9273b596a8ee54a62af2a04a31682fa49de9b35ef7dd52ed8da5f0436d288ead23
+  checksum: baf982238a5270def90a4895f2e083b5cf8e6f7df20b53b24a932845aec363a6cf411f88b33dcb016a43c9334fdfccd956e4514ee875d70af016bf6fead3d3ae
   languageName: node
   linkType: hard
 
@@ -3431,15 +3430,15 @@ __metadata:
   linkType: hard
 
 "listr2@npm:^4.0.1":
-  version: 4.0.4
-  resolution: "listr2@npm:4.0.4"
+  version: 4.0.5
+  resolution: "listr2@npm:4.0.5"
   dependencies:
     cli-truncate: ^2.1.0
     colorette: ^2.0.16
     log-update: ^4.0.0
     p-map: ^4.0.0
     rfdc: ^1.3.0
-    rxjs: ^7.5.4
+    rxjs: ^7.5.5
     through: ^2.3.8
     wrap-ansi: ^7.0.0
   peerDependencies:
@@ -3447,7 +3446,7 @@ __metadata:
   peerDependenciesMeta:
     enquirer:
       optional: true
-  checksum: 1e6e44a3a0337f47d0a1bc90712b0001129d3ca3fae56dc5b834da556b634862a211d8c638528600daf1c1899a3f2366f822ecb03dba5327ff2c017578815e61
+  checksum: 7af31851abe25969ef0581c6db808117e36af15b131401795182427769d9824f451ba9e8aff6ccd25b6a4f6c8796f816292caf08e5f1f9b1775e8e9c313dc6c5
   languageName: node
   linkType: hard
 
@@ -3671,10 +3670,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^7.4.0":
-  version: 7.4.1
-  resolution: "lru-cache@npm:7.4.1"
-  checksum: de6d8aa83b0a304943a1e1ec2a982d9b44ef36963c20bd01950f13dcb3eb482c57bfa15ab49b1baa15c682d6d33a10842bb7b33d8a449845009ffab6a2faec3c
+"lru-cache@npm:^7.4.1":
+  version: 7.4.4
+  resolution: "lru-cache@npm:7.4.4"
+  checksum: c042ac73b48c1eddd22cc061eb41c4738c2eb71818ba503f625df4b3199d789281d7a2da18a017095a1304b5808f9d91fff7a77d69e3fefecef2b460460ed6d6
   languageName: node
   linkType: hard
 
@@ -3776,8 +3775,8 @@ __metadata:
   linkType: hard
 
 "make-fetch-happen@npm:^10.0.3":
-  version: 10.0.4
-  resolution: "make-fetch-happen@npm:10.0.4"
+  version: 10.0.5
+  resolution: "make-fetch-happen@npm:10.0.5"
   dependencies:
     agentkeepalive: ^4.2.1
     cacache: ^15.3.0
@@ -3785,17 +3784,17 @@ __metadata:
     http-proxy-agent: ^5.0.0
     https-proxy-agent: ^5.0.0
     is-lambda: ^1.0.1
-    lru-cache: ^7.4.0
+    lru-cache: ^7.4.1
     minipass: ^3.1.6
     minipass-collect: ^1.0.2
-    minipass-fetch: ^2.0.1
+    minipass-fetch: ^2.0.2
     minipass-flush: ^1.0.5
     minipass-pipeline: ^1.2.4
     negotiator: ^0.6.3
     promise-retry: ^2.0.1
     socks-proxy-agent: ^6.1.1
     ssri: ^8.0.1
-  checksum: 036fcfaec18b69ce6384644275850b0871aff105663aecc0130b5c45fe318542d7e2004cf1f4cd26b7c6842c282f8b37f00da67aa3bae13c13693e405480ac74
+  checksum: 150071e41262bffafccafa764bab0e6a929a46be5abc1dfee414ffb821d052942596f3660ff84b17e4d6c44f51b2d2741f6d02a49e2dad44e06c94c3baf624fa
   languageName: node
   linkType: hard
 
@@ -3880,19 +3879,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mime-db@npm:1.51.0":
-  version: 1.51.0
-  resolution: "mime-db@npm:1.51.0"
-  checksum: 613b1ac9d6e725cc24444600b124a7f1ce6c60b1baa654f39a3e260d0995a6dffc5693190217e271af7e2a5612dae19f2a73f3e316707d797a7391165f7ef423
+"mime-db@npm:1.52.0":
+  version: 1.52.0
+  resolution: "mime-db@npm:1.52.0"
+  checksum: 0d99a03585f8b39d68182803b12ac601d9c01abfa28ec56204fa330bc9f3d1c5e14beb049bafadb3dbdf646dfb94b87e24d4ec7b31b7279ef906a8ea9b6a513f
   languageName: node
   linkType: hard
 
 "mime-types@npm:^2.1.12":
-  version: 2.1.34
-  resolution: "mime-types@npm:2.1.34"
+  version: 2.1.35
+  resolution: "mime-types@npm:2.1.35"
   dependencies:
-    mime-db: 1.51.0
-  checksum: 67013de9e9d6799bde6d669d18785b7e18bcd212e710d3e04a4727f92f67a8ad4e74aee24be28b685adb794944814bde649119b58ee3282ffdbee58f9278d9f3
+    mime-db: 1.52.0
+  checksum: 89a5b7f1def9f3af5dad6496c5ed50191ae4331cc5389d7c521c8ad28d5fdad2d06fd81baf38fed813dc4e46bb55c8145bb0ff406330818c9cf712fb2e9b3836
   languageName: node
   linkType: hard
 
@@ -3917,7 +3916,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minecraft-data@npm:^2.109.0, minecraft-data@npm:^2.220.0, minecraft-data@npm:^2.62.1":
+"minecraft-data@npm:^2.109.0, minecraft-data@npm:^2.118.0, minecraft-data@npm:^2.220.0, minecraft-data@npm:^2.62.1":
   version: 2.220.0
   resolution: "minecraft-data@npm:2.220.0"
   checksum: 776fe066325c87ec08f1744ef5a951f7ea606b643526ef2a20724efdf5cd2e5d732eee38488a41c7576d05dedf9e183ded4442404e760414dbcd51b732b59021
@@ -4006,9 +4005,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minipass-fetch@npm:^2.0.1":
-  version: 2.0.2
-  resolution: "minipass-fetch@npm:2.0.2"
+"minipass-fetch@npm:^2.0.2":
+  version: 2.0.3
+  resolution: "minipass-fetch@npm:2.0.3"
   dependencies:
     encoding: ^0.1.13
     minipass: ^3.1.6
@@ -4017,7 +4016,7 @@ __metadata:
   dependenciesMeta:
     encoding:
       optional: true
-  checksum: 0613b0a6ef427609707c2b73b69230348fe3c24b33c144622e8e248404534fa1f125b94c324c555cd665ef623abedab0f7891e460b1c9ac6babc3ab2385b3c18
+  checksum: 78a4a509b1e73f5e63b84065969790373b36b04da586744815c7f7f80013f1d786797842cc33cfa517eba0ad2f2142eb0ac808c46738da1c53e0e3aeed81df11
   languageName: node
   linkType: hard
 
@@ -4856,8 +4855,8 @@ __metadata:
   linkType: hard
 
 "prismarine-auth@npm:^1.1.0":
-  version: 1.4.2
-  resolution: "prismarine-auth@npm:1.4.2"
+  version: 1.5.0
+  resolution: "prismarine-auth@npm:1.5.0"
   dependencies:
     "@azure/msal-node": ^1.1.0
     "@xboxreplay/xboxlive-auth": ^3.3.3
@@ -4866,7 +4865,7 @@ __metadata:
     node-fetch: ^2.6.1
     smart-buffer: ^4.1.0
     uuid-1345: ^1.0.2
-  checksum: 4b682ad145dfa2a0f83bc8fc2efa17ea9ae34b757851f7c522af222a9c903399bdb44b4207552f872a2e5a61311b646076f09501692fef8505849b77e3aa9f54
+  checksum: 44f47666d408e5effdf7d6a6d1d5759b65322c8e39633ad512eb797ea166b6984a9796ec9a530a8ed2c94d534366e56ef7fdd8c1dcf386b59797fc4247a89989
   languageName: node
   linkType: hard
 
@@ -4884,13 +4883,12 @@ __metadata:
   linkType: hard
 
 "prismarine-item@npm:^1.10.0":
-  version: 1.11.2
-  resolution: "prismarine-item@npm:1.11.2"
+  version: 1.11.3
+  resolution: "prismarine-item@npm:1.11.3"
   dependencies:
+    minecraft-data: ^2.118.0
     prismarine-nbt: ^2.0.0
-  peerDependencies:
-    minecraft-data: ^2.79.0
-  checksum: 3b86db4df4944aa4228b11f56d2c043172093a03414b8a249de2451d1b8dc810a8ac8774491b3599ee789f93931eff620dfd8775b722907b7170e2da54540389
+  checksum: 84eca4a33494398df08951ed49d359a3e924264c6e434c07264aef7e6b9f6deee3dd59fdbeecf29407f459f00383f7795eab5eb15cf8e14c0b2498221c02530b
   languageName: node
   linkType: hard
 
@@ -5296,12 +5294,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^7.5.4":
-  version: 7.5.4
-  resolution: "rxjs@npm:7.5.4"
+"rxjs@npm:^7.5.5":
+  version: 7.5.5
+  resolution: "rxjs@npm:7.5.5"
   dependencies:
     tslib: ^2.1.0
-  checksum: 6f55f835f2543bc8214900f9e28b6320e6adc95875011fbca63e80a66eb18c9ff7cfdccb23b2180cbb6412762b98ed158c89fd51cb020799d127c66ea38c3c0e
+  checksum: e034f60805210cce756dd2f49664a8108780b117cf5d0e2281506e9e6387f7b4f1532d974a8c8b09314fa7a16dd2f6cff3462072a5789672b5dcb45c4173f3c6
   languageName: node
   linkType: hard
 
@@ -5904,9 +5902,9 @@ __metadata:
   linkType: hard
 
 "ts-mixer@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "ts-mixer@npm:6.0.0"
-  checksum: 791a513c9ca318a979928f5265fd6029858fa21595153a9386063c11239a6b1c352db1e277c19f0544d017a67cf78d120a7438b86b2c828b1115eb607538eff8
+  version: 6.0.1
+  resolution: "ts-mixer@npm:6.0.1"
+  checksum: 7050f6e85a24155d18cecdcc0a098d1038991cc498317fcffa9d7a8654c776d417fb97e65de1ce8e7ed54ef4814abd8057d0efb9c3b24e9cc78ac3c0f48bbf53
   languageName: node
   linkType: hard
 
@@ -5949,14 +5947,14 @@ __metadata:
   linkType: hard
 
 "tsconfig-paths@npm:^3.12.0":
-  version: 3.13.0
-  resolution: "tsconfig-paths@npm:3.13.0"
+  version: 3.14.0
+  resolution: "tsconfig-paths@npm:3.14.0"
   dependencies:
     "@types/json5": ^0.0.29
     json5: ^1.0.1
     minimist: ^1.2.0
     strip-bom: ^3.0.0
-  checksum: 64f0de3c882c016cdfe34d5261087fcf0c75048c4206ee32540e36df9f99d82d2caa5872135d3b6704324f5fd7d9032131caf316c1da83c2ac465d5dfb2aafd4
+  checksum: edd81e8f053a67e4a308037d2668c1fff06b01d4c3989170b90eb7eae5bdbebcc4910a8b7fbe0af3c21c62b68f67c1a9b9de5d9fe96cfe15ca45f7a198ee2c0c
   languageName: node
   linkType: hard
 
