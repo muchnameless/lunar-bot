@@ -15,9 +15,9 @@ import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
 
 /**
- * 60 per hour (every minute), 3 hours, -1 since the new value gets pushed before calculating the median
+ * 60 per hour (every minute), 6 hours, -1 since the new value gets pushed before calculating the median
  */
-const MAX_HISTORY_LENGTH = 179;
+const MAX_HISTORY_LENGTH = 359;
 
 /**
  * display names of vanilla mc items and blocks, including "null"
@@ -79,16 +79,16 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
  */
 async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
 	try {
-		const [existing] = await sql<[{ buyPriceHistory: number[] }]>`
-			SELECT "buyPriceHistory"
+		const [existing] = await sql<[{ array: number[] }]>`
+			SELECT ARRAY(SELECT unnest("buyPriceHistory") ORDER BY 1)
 			FROM "SkyBlockBazaars"
 			WHERE id = ${itemId}
 		`;
 
 		if (existing) {
 			// calculate median value
-			existing.buyPriceHistory.push(currentBuyPrice);
-			const buyPrice = existing.buyPriceHistory.sort((a, b) => a - b).at(existing.buyPriceHistory.length / 2)!;
+			existing.array.push(currentBuyPrice);
+			const buyPrice = existing.array.sort((a, b) => a - b).at(existing.array.length / 2)!;
 
 			parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: buyPrice } });
 
@@ -98,10 +98,10 @@ async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
 				WHERE id = ${itemId}
 			`;
 
-			if (existing.buyPriceHistory.length > MAX_HISTORY_LENGTH) {
+			if (existing.array.length > MAX_HISTORY_LENGTH) {
 				await sql`
 					UPDATE "SkyBlockBazaars" SET "buyPriceHistory" = trim_array("buyPriceHistory", ${
-						existing.buyPriceHistory.length - MAX_HISTORY_LENGTH
+						existing.array.length - MAX_HISTORY_LENGTH
 					}) WHERE id = ${itemId}
 				`;
 			}
@@ -169,16 +169,16 @@ async function updateBazaarPrices() {
  */
 async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 	try {
-		const [existing] = await sql<[{ lowestBINHistory: number[] }]>`
-			SELECT "lowestBINHistory"
+		const [existing] = await sql<[{ array: number[] }]>`
+			SELECT ARRAY(SELECT unnest("lowestBINHistory") ORDER BY 1)
 			FROM "SkyBlockAuctions"
 			WHERE id = ${itemId}
 		`;
 
 		if (existing) {
 			// calculate median value
-			existing.lowestBINHistory.push(currentLowestBIN);
-			const lowestBIN = existing.lowestBINHistory.sort((a, b) => a - b).at(existing.lowestBINHistory.length / 2)!;
+			existing.array.push(currentLowestBIN);
+			const lowestBIN = existing.array.sort((a, b) => a - b).at(existing.array.length / 2)!;
 
 			parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: lowestBIN } });
 
@@ -188,10 +188,10 @@ async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
 				WHERE id = ${itemId}
 			`;
 
-			if (existing.lowestBINHistory.length > MAX_HISTORY_LENGTH) {
+			if (existing.array.length > MAX_HISTORY_LENGTH) {
 				await sql`
 					UPDATE "SkyBlockAuctions" SET "lowestBINHistory" = trim_array("lowestBINHistory", ${
-						existing.lowestBINHistory.length - MAX_HISTORY_LENGTH
+						existing.array.length - MAX_HISTORY_LENGTH
 					}) WHERE id = ${itemId}
 				`;
 			}
