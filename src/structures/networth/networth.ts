@@ -210,7 +210,7 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 				essenceAmount += essenceItem[star as 1 | 2 | 3 | 4 | 5] ?? 0;
 			}
 
-			price += essenceAmount * ESSENCE_PRICES[essenceItem.type];
+			price += essenceAmount * (ESSENCE_PRICES[essenceItem.type] ?? 0) * PriceModifier.DungeonEssence;
 
 			// master stars (4 -> 0 cause array index)
 			for (let star = ExtraAttributes.dungeon_item_level - 5; star-- >= 0; ) {
@@ -348,7 +348,7 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 
 	// held item
 	if (pet.heldItem && level !== 200) {
-		price += getPrice(pet.heldItem);
+		price += getPrice(pet.heldItem) * PriceModifier.PetItem;
 	}
 
 	// candy + skins
@@ -434,6 +434,12 @@ export async function getNetworth(
 
 	if (member.backpack_contents) {
 		for (const backpack of Object.values(member.backpack_contents)) {
+			promises.push(parseItems(backpack.data));
+		}
+	}
+
+	if (member.backpack_icons) {
+		for (const backpack of Object.values(member.backpack_icons)) {
 			promises.push(parseItems(backpack.data));
 		}
 	}

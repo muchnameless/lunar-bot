@@ -4,8 +4,9 @@
 export const enum PriceModifier {
 	ArtOfWar = 0.6,
 	DrillUpgrade = 1,
+	DungeonEssence = 0.55,
 	DungeonStar = 1,
-	Enchantment = 1,
+	Enchantment = 0.85,
 	EtherwarpConduit = 1,
 	EtherwarpMerger = 1,
 	FarmingForDummies = 0.5,
@@ -15,6 +16,7 @@ export const enum PriceModifier {
 	HotPotatoBook = 1,
 	ItemSkin = 0.9,
 	NecronBladeScroll = 1,
+	PetItem = 1,
 	PetSkinNoCandy = 0.9,
 	PetSkinWithCandy = 0.5,
 	PetWithCandy = 0.65,
