@@ -1,4 +1,4 @@
-import { logger } from '../../../functions';
+import { logger } from '../../../functions/logger';
 
 export const enum EnchantmentType {
 	AnvilUpgradableFrom1,
