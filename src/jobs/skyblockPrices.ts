@@ -5,13 +5,28 @@ import { fetch } from 'undici';
 import { transformItemData } from '@zikeji/hypixel';
 import { Collection } from 'discord.js';
 import postgres from 'postgres';
-import { consumeBody, logger } from '../functions';
+import { logger } from '../functions/logger';
+import { consumeBody } from '../functions/fetch';
 import { FetchError } from '../structures/errors/FetchError';
-import { VANILLA_ITEM_NAMES } from '../constants/minecraft';
-import { EnchantmentType, getEnchantmentType, MAX_HISTORY_LENGTH } from '../structures/networth/constants';
+import { EnchantmentType, getEnchantmentType } from '../structures/networth/constants/enchantments';
 import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
+import { MINECRAFT_DATA } from '../constants/minecraft';
 import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
+
+/**
+ * 60 per hour (every minute), 3 hours, -1 since the new value gets pushed before calculating the median
+ */
+const MAX_HISTORY_LENGTH = 179;
+
+/**
+ * display names of vanilla mc items and blocks, including "null"
+ */
+const VANILLA_ITEM_NAMES = new Set<string>().add('null');
+
+for (const { displayName } of MINECRAFT_DATA.itemsArray) {
+	VANILLA_ITEM_NAMES.add(displayName);
+}
 
 const sql = postgres(env.DATABASE_URL!, {
 	types: {

@@ -6,8 +6,3 @@ export const SKYBLOCK_INVENTORIES = [
 	'talisman_bag',
 	'personal_vault_contents',
 ] as const;
-
-/**
- * 60 per hour (every minute), 3 hours, -1 since the new value gets pushed before calculating the median
- */
-export const MAX_HISTORY_LENGTH = 179;

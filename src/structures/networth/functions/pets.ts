@@ -1,4 +1,4 @@
-import { PET_RARITY_OFFSET, PET_LEVELS_XP } from '../constants';
+import { PET_RARITY_OFFSET, PET_LEVELS_XP } from '../constants/pets';
 import type { Components } from '@zikeji/hypixel';
 
 /**
