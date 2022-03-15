@@ -525,12 +525,16 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * reset xp of all players
 	 * @param options reset options
+	 * @param time last reset config time, defaults to Date.now()
 	 */
-	async resetXp(options?: ResetXpOptions) {
+	async resetXp(options?: ResetXpOptions, time?: number) {
 		await safePromiseAll(this.cache.map((player) => player.resetXp(options)));
 
 		if (options?.offsetToReset) {
-			this.client.config.set(XP_OFFSETS_TIME[options.offsetToReset as keyof typeof XP_OFFSETS_TIME], Date.now());
+			this.client.config.set(
+				XP_OFFSETS_TIME[options.offsetToReset as keyof typeof XP_OFFSETS_TIME],
+				time ?? Date.now(),
+			);
 		}
 
 		return this;
@@ -682,7 +686,7 @@ export class PlayerManager extends ModelManager<Player> {
 		let currentMayorTime = this.client.config.get(XP_OFFSETS_TIME[Offset.Mayor]) + MAYOR_CHANGE_INTERVAL;
 		while (currentMayorTime + MAYOR_CHANGE_INTERVAL < Date.now()) currentMayorTime += MAYOR_CHANGE_INTERVAL;
 
-		await this.resetXp({ offsetToReset: Offset.Mayor });
+		await this.resetXp({ offsetToReset: Offset.Mayor }, currentMayorTime);
 
 		this.client.log(
 			this.client.defaultEmbed
