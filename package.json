@@ -32,7 +32,7 @@
 		"@sapphire/utilities": "^3.5.0",
 		"@skyra/jaro-winkler": "^1.0.0",
 		"@zikeji/hypixel": "github:muchnameless/node-hypixel#6da21ece522ea8dd61f44b5c74ab64b2f0e8be82",
-		"bree": "^8.0.1",
+		"bree": "^8.0.2",
 		"bufferutil": "^4.0.6",
 		"chart.js": "^3.7.1",
 		"chartjs-node-canvas": "^4.1.6",
