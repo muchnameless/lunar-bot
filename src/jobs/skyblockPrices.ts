@@ -214,24 +214,28 @@ async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
  * fetches a single auction page
  * @param page
  */
-async function fetchAuctionPage(page = 0) {
+async function fetchAuctionPage(
+	page: number,
+): Promise<Pick<Components.Schemas.SkyBlockAuctionsResponse, 'auctions' | 'success' | 'totalPages'>> {
 	const res = await fetch(`https://api.hypixel.net/skyblock/auctions?page=${page}`, {
 		// @ts-expect-error
 		signal: AbortSignal.timeout(30_000),
 	});
 
-	if (res.status !== 200) {
-		throw new FetchError('FetchAuctionError', res);
-	}
+	if (res.status === 200) return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
 
-	return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
+	// page does not exist -> no-op
+	if (res.status === 404) return { success: false, totalPages: -1, auctions: [] };
+
+	// different error -> abort process
+	throw new FetchError('FetchAuctionError', res);
 }
 
 /**
  * fetches all auction pages
  */
 // fetch first auction page
-const firstPage = await fetchAuctionPage();
+const firstPage = await fetchAuctionPage(0);
 
 // abort on error
 if (!firstPage.success) exit(-1);
@@ -332,15 +336,21 @@ const processAuctions = (auctions: Components.Schemas.SkyBlockAuctionsResponse['
 			BINAuctions.get(itemId)?.push(price) ?? BINAuctions.set(itemId, [price]);
 		}),
 	);
+const fetchAndProcessAuctions = async (page: number) => processAuctions((await fetchAuctionPage(page)).auctions);
 
 const promises: Promise<void[]>[] = [(() => processAuctions(firstPage.auctions))()];
 
-for (let i = 0; i < firstPage.totalPages; ++i) {
-	promises.push((async () => processAuctions((await fetchAuctionPage(i)).auctions))());
+for (let page = 1; page < firstPage.totalPages; ++page) {
+	promises.push(fetchAndProcessAuctions(page));
 }
 
+// fetch and process all auction pages
 await Promise.all(promises);
+
+// update database and prices map
 await Promise.all(BINAuctions.map((auctions, itemId) => updateAuctionItem(itemId, Math.min(...auctions))));
+
+// wait for bazaar update to finish
 await updateBazaarPricesPromise;
 
 await sql.end();
