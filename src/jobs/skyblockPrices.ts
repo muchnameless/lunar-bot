@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/prefer-top-level-await */
-import { env, exit } from 'node:process';
+import { exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
 import { fetch } from 'undici';
 import { transformItemData } from '@zikeji/hypixel';
@@ -14,9 +14,9 @@ import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
 
 /**
- * 60 per hour (every minute), 6 hours, -1 since the new value gets pushed before calculating the median
+ * 60 per hour (every minute), 24 hours, -1 since the new value gets pushed before calculating the median
  */
-const MAX_HISTORY_LENGTH = 359;
+const MAX_HISTORY_LENGTH = 1_439;
 
 /**
  * display names of vanilla mc items and blocks, including "null"
@@ -27,7 +27,7 @@ for (const { displayName } of MINECRAFT_DATA.itemsArray) {
 	VANILLA_ITEM_NAMES.add(displayName);
 }
 
-const sql = postgres(env.DATABASE_URL!, {
+const sql = postgres({
 	types: {
 		numeric: {
 			// This conversion is identical to the `number` conversion in types.js line 11
@@ -38,6 +38,29 @@ const sql = postgres(env.DATABASE_URL!, {
 		},
 	},
 });
+
+/**
+ * updates the database and the prices map with the median of the buy price
+ * @param itemId
+ * @param currentPrice
+ */
+async function updateItem(itemId: string, currentPrice: number) {
+	const [{ median }] = await sql<[{ median: number }]>`
+		INSERT INTO prices (
+			id,
+			history
+		) VALUES (
+			${itemId},
+			ARRAY [${currentPrice}::NUMERIC]
+		)
+		ON CONFLICT (id)
+		DO UPDATE SET history = array_append(prices.history, ${currentPrice})
+		WHERE prices.id = ${itemId}
+		RETURNING median(history);
+	`;
+
+	parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: median } });
+}
 
 /**
  * https://github.com/SkyCryptWebsite/SkyCrypt/blob/481de4411c4093576c728f04540f497ef55ceadf/src/helper.js#L494
@@ -70,63 +93,6 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
 }
 
 /**
- * updates the database and the prices map with the median of the buy price
- * @param itemId
- * @param currentBuyPrice
- */
-async function updateBazaarItem(itemId: string, currentBuyPrice: number) {
-	const [existing] = await sql<[{ array: number[] }]>`
-		SELECT ARRAY(SELECT unnest("buyPriceHistory") ORDER BY 1)
-		FROM "SkyBlockBazaars"
-		WHERE id = ${itemId}
-	`;
-
-	if (existing) {
-		// calculate median value
-		existing.array.push(currentBuyPrice);
-		const buyPrice = existing.array.sort((a, b) => a - b).at(existing.array.length / 2)!;
-
-		parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: buyPrice } });
-
-		await sql`
-			UPDATE "SkyBlockBazaars"
-			SET "buyPrice" = ${buyPrice}, "buyPriceHistory" = array_prepend(${currentBuyPrice}, "buyPriceHistory")
-			WHERE id = ${itemId}
-		`;
-
-		if (existing.array.length > MAX_HISTORY_LENGTH) {
-			await sql`
-				UPDATE "SkyBlockBazaars" SET "buyPriceHistory" = trim_array("buyPriceHistory", ${
-					existing.array.length - MAX_HISTORY_LENGTH
-				}) WHERE id = ${itemId}
-			`;
-		}
-	} else {
-		parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: currentBuyPrice } });
-
-		await sql`
-			INSERT INTO "SkyBlockBazaars" (
-				id,
-				"buyPrice",
-				"buyPriceHistory"
-			) VALUES (
-				${itemId},
-				${currentBuyPrice},
-				ARRAY [${currentBuyPrice}::NUMERIC]
-			)
-		`;
-
-		logger.debug(
-			{
-				itemId,
-				currentBuyPrice,
-			},
-			'[UPDATE BAZAAR ITEM]: new database entry',
-		);
-	}
-}
-
-/**
  * fetches bazaar products
  */
 async function updateBazaarPrices() {
@@ -143,7 +109,7 @@ async function updateBazaarPrices() {
 
 	return Promise.all(
 		Object.entries(products).map(([item, data]) =>
-			updateBazaarItem(
+			updateItem(
 				item,
 				data.quick_status.buyPrice < 2_147_483_647 && data.quick_status.buyPrice / data.quick_status.sellPrice < 1e3
 					? data.quick_status.buyPrice
@@ -151,63 +117,6 @@ async function updateBazaarPrices() {
 			),
 		),
 	);
-}
-
-/**
- * updates the database and the prices map with the median of the lowest BIN
- * @param itemId
- * @param currentLowestBIN
- */
-async function updateAuctionItem(itemId: string, currentLowestBIN: number) {
-	const [existing] = await sql<[{ array: number[] }]>`
-		SELECT ARRAY(SELECT unnest("lowestBINHistory") ORDER BY 1)
-		FROM "SkyBlockAuctions"
-		WHERE id = ${itemId}
-	`;
-
-	if (existing) {
-		// calculate median value
-		existing.array.push(currentLowestBIN);
-		const lowestBIN = existing.array.sort((a, b) => a - b).at(existing.array.length / 2)!;
-
-		parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: lowestBIN } });
-
-		await sql`
-			UPDATE "SkyBlockAuctions"
-			SET "lowestBIN" = ${lowestBIN}, "lowestBINHistory" = array_prepend(${currentLowestBIN}, "lowestBINHistory")
-			WHERE id = ${itemId}
-		`;
-
-		if (existing.array.length > MAX_HISTORY_LENGTH) {
-			await sql`
-				UPDATE "SkyBlockAuctions" SET "lowestBINHistory" = trim_array("lowestBINHistory", ${
-					existing.array.length - MAX_HISTORY_LENGTH
-				}) WHERE id = ${itemId}
-			`;
-		}
-	} else {
-		parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: currentLowestBIN } });
-
-		await sql`
-			INSERT INTO "SkyBlockAuctions" (
-				id,
-				"lowestBIN",
-				"lowestBINHistory"
-			) VALUES (
-				${itemId},
-				${currentLowestBIN},
-				ARRAY [${currentLowestBIN}::NUMERIC]
-			)
-		`;
-
-		logger.debug(
-			{
-				itemId,
-				currentLowestBIN,
-			},
-			'[UPDATE AUCTION ITEM]: new database entry',
-		);
-	}
 }
 
 /**
@@ -348,10 +257,14 @@ for (let page = 1; page < firstPage.totalPages; ++page) {
 await Promise.all(promises);
 
 // update database and prices map
-await Promise.all(BINAuctions.map((auctions, itemId) => updateAuctionItem(itemId, Math.min(...auctions))));
+await Promise.all(BINAuctions.map((auctions, itemId) => updateItem(itemId, Math.min(...auctions))));
 
 // wait for bazaar update to finish
 await updateBazaarPricesPromise;
+
+await sql`
+  UPDATE prices SET history = trim_array(history, array_length(history, 1) - ${MAX_HISTORY_LENGTH}) WHERE array_length(history, 1) > ${MAX_HISTORY_LENGTH}
+`;
 
 await sql.end();
 

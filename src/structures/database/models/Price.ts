@@ -9,12 +9,11 @@ import type {
 } from 'sequelize';
 import type { LunarClient } from '../../LunarClient';
 
-export class SkyBlockBazaar extends Model<InferAttributes<SkyBlockBazaar>, InferCreationAttributes<SkyBlockBazaar>> {
+export class Price extends Model<InferAttributes<Price>, InferCreationAttributes<Price>> {
 	declare client: NonAttribute<LunarClient>;
 
 	declare id: string;
-	declare buyPrice: CreationOptional<number>;
-	declare buyPriceHistory: CreationOptional<number[]>;
+	declare history: CreationOptional<number[]>;
 
 	static initialise(sequelize: Sequelize) {
 		return this.init(
@@ -23,12 +22,7 @@ export class SkyBlockBazaar extends Model<InferAttributes<SkyBlockBazaar>, Infer
 					type: DataTypes.STRING,
 					primaryKey: true,
 				},
-				buyPrice: {
-					type: DataTypes.DECIMAL,
-					defaultValue: 0,
-					allowNull: false,
-				},
-				buyPriceHistory: {
+				history: {
 					type: DataTypes.ARRAY(DataTypes.DECIMAL),
 					defaultValue: [],
 					allowNull: false,
@@ -37,9 +31,10 @@ export class SkyBlockBazaar extends Model<InferAttributes<SkyBlockBazaar>, Infer
 			{
 				sequelize,
 				timestamps: false,
+				tableName: 'price',
 			},
-		) as ModelStatic<SkyBlockBazaar>;
+		) as ModelStatic<Price>;
 	}
 }
 
-export default SkyBlockBazaar;
+export default Price;

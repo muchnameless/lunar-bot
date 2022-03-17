@@ -4,7 +4,7 @@ import { sequelize } from '../structures/database/sequelize';
 import { logger } from '../functions';
 
 // @ts-expect-error
-sequelize.options.logging = logger.debug.bind(logger);
+sequelize.options.logging = (...x) => logger.debug(...x);
 
 const force = argv.includes('--force') || argv.includes('-f');
 const alter = argv.includes('--alter') || argv.includes('-a');

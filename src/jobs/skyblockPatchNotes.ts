@@ -1,4 +1,4 @@
-import { env, exit } from 'node:process';
+import { exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
 import Parser from 'rss-parser';
 import postgres from 'postgres';
@@ -33,7 +33,7 @@ interface HypixelForumResponse {
 }
 
 const parser = new Parser<HypixelForumResponse>();
-const sql = postgres(env.DATABASE_URL!, {
+const sql = postgres({
 	types: {
 		date: {
 			to: 1_184,

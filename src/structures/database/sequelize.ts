@@ -14,7 +14,12 @@ class CustomDecimal extends DataTypes.DECIMAL {
 	}
 }
 
-export const sequelize = new Sequelize(env.DATABASE_URL!, {
+export const sequelize = new Sequelize({
+	host: env.PGHOST,
+	database: env.PGDATABASE,
+	username: env.PGUSERNAME,
+	password: env.PGPASSWORD,
+
 	logging: false,
 
 	// use floats instead of strings as decimal representation (2/2)

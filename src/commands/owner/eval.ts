@@ -62,6 +62,8 @@ import { prices } from '../../structures/networth/prices';
 prices;
 import { bree } from '../../jobs';
 bree;
+import { sql } from '../../structures/database/sql';
+sql;
 import type {
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,

@@ -1504,6 +1504,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:^4.0.0":
+  version: 4.1.1
+  resolution: "commander@npm:4.1.1"
+  checksum: d7b9913ff92cae20cb577a4ac6fcc121bd6223319e54a40f51a14740a681ad5c574fd29a57da478a5f234a6fa6c52cbf0b7c641353e03c648b1ae85ba670b977
+  languageName: node
+  linkType: hard
+
 "commander@npm:^8.3.0":
   version: 8.3.0
   resolution: "commander@npm:8.3.0"
@@ -1939,6 +1946,18 @@ __metadata:
   version: 2.2.0
   resolution: "entities@npm:2.2.0"
   checksum: 19010dacaf0912c895ea262b4f6128574f9ccf8d4b3b65c7e8334ad0079b3706376360e28d8843ff50a78aabcb8f08f0a32dbfacdc77e47ed77ca08b713669b3
+  languageName: node
+  linkType: hard
+
+"env-cmd@npm:^10.1.0":
+  version: 10.1.0
+  resolution: "env-cmd@npm:10.1.0"
+  dependencies:
+    commander: ^4.0.0
+    cross-spawn: ^7.0.0
+  bin:
+    env-cmd: bin/env-cmd.js
+  checksum: efef55074250f14cfc0b80c98dd98f1f056a80e1f3c7db14097ceefdd2d56c766bbb83b54c22932112707f41b36ce2e923f8015d69e62a75c12d98640b972e75
   languageName: node
   linkType: hard
 
@@ -3359,6 +3378,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"kleur@npm:^4.1.0":
+  version: 4.1.4
+  resolution: "kleur@npm:4.1.4"
+  checksum: 7f6db36e378045dec14acd3cbf0b1e59130c09e984ee8b8ce56dd2d2257cfff90389c1e8f8b19bd09dd5d241080566a814b4ccd99fdcef91f59ef93ec33c8a44
+  languageName: node
+  linkType: hard
+
 "leven@npm:2.1.0":
   version: 2.1.0
   resolution: "leven@npm:2.1.0"
@@ -3380,6 +3406,20 @@ __metadata:
   version: 1.7.9
   resolution: "lex@npm:1.7.9"
   checksum: 4593125ada61dac3e15e936227c07271e591f0c7ba56231aa21108123b635a4117e3125baeb33a230f665f7e8b3f5f1ca74b6a4d16883a497fff33c376edae9f
+  languageName: node
+  linkType: hard
+
+"ley@npm:^0.7.1":
+  version: 0.7.1
+  resolution: "ley@npm:0.7.1"
+  dependencies:
+    kleur: ^4.1.0
+    mk-dirs: ^3.0.0
+    sade: ^1.7.0
+    totalist: ^2.0.0
+  bin:
+    ley: bin.js
+  checksum: 88abd370fda26aca766446029bfc14008db03299bf9ef991c9bb634288b9fc798ca785eb8174f27976c684dd058ec9a65b01207adac4f62d2fa24143d5fb2c0f
   languageName: node
   linkType: hard
 
@@ -3715,6 +3755,7 @@ __metadata:
     discord.js: 14.0.0-dev.1646914074.dcd4797
     dotenv: ^16.0.0
     emoji-regex: 9.2.2
+    env-cmd: ^10.1.0
     eslint: ^8.11.0
     eslint-config-prettier: ^8.5.0
     eslint-plugin-import: ^2.25.4
@@ -3725,6 +3766,7 @@ __metadata:
     ioredis: ^4.28.5
     js-big-decimal: ^1.3.4
     lex: ^1.7.9
+    ley: ^0.7.1
     lilyweight: ^2.4.0
     lint-staged: ^12.3.6
     minecraft-data: ^2.220.0
@@ -4067,6 +4109,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mk-dirs@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "mk-dirs@npm:3.0.0"
+  checksum: aba678d9c3c0616045cb2db730d935522d801f6bb32b69d50a586dfedad748252c52a7db45f76d4523d0eedddc4f31f4180958da2f935201d10d00ba9f9fca00
+  languageName: node
+  linkType: hard
+
 "mkdirp@npm:^1.0.3, mkdirp@npm:^1.0.4":
   version: 1.0.4
   resolution: "mkdirp@npm:1.0.4"
@@ -4115,7 +4164,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mri@npm:^1.1.5":
+"mri@npm:^1.1.0, mri@npm:^1.1.5":
   version: 1.2.0
   resolution: "mri@npm:1.2.0"
   checksum: 83f515abbcff60150873e424894a2f65d68037e5a7fcde8a9e2b285ee9c13ac581b63cfc1e6826c4732de3aeb84902f7c1e16b7aff46cd3f897a0f757a894e85
@@ -5313,6 +5362,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sade@npm:^1.7.0":
+  version: 1.8.1
+  resolution: "sade@npm:1.8.1"
+  dependencies:
+    mri: ^1.1.0
+  checksum: 0756e5b04c51ccdc8221ebffd1548d0ce5a783a44a0fa9017a026659b97d632913e78f7dca59f2496aa996a0be0b0c322afd87ca72ccd909406f49dbffa0f45d
+  languageName: node
+  linkType: hard
+
 "safe-buffer@npm:^5.0.1, safe-buffer@npm:~5.2.0":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
@@ -5894,6 +5952,13 @@ __metadata:
   version: 2.0.2
   resolution: "toposort@npm:2.0.2"
   checksum: d64c74b570391c9432873f48e231b439ee56bc49f7cb9780b505cfdf5cb832f808d0bae072515d93834dd6bceca5bb34448b5b4b408335e4d4716eaf68195dcb
+  languageName: node
+  linkType: hard
+
+"totalist@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "totalist@npm:2.0.0"
+  checksum: 9cc5aa15c78374e50ea90a93fd0137dfec68c2139db6767f0707951681fa931343ae9a71ed257da80bc5deb994cf841f14a1512cb6708c4806617eb4513cd965
   languageName: node
   linkType: hard
 
