@@ -15,6 +15,7 @@ class CustomDecimal extends DataTypes.DECIMAL {
 }
 
 export const sequelize = new Sequelize({
+	dialect: 'postgres',
 	host: env.PGHOST,
 	database: env.PGDATABASE,
 	username: env.PGUSERNAME,
