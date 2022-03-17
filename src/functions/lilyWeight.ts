@@ -19,8 +19,11 @@ export function getLilyWeight(skyblockMember: Components.Schemas.SkyBlockProfile
 	} = getLilyWeightRaw(
 		LILY_SKILL_NAMES.map((_skill, index) => getSkillLevel(_skill, SKILL_XP_LILY[index], 60).trueLevel), // skill levels
 		SKILL_XP_LILY, // skill xp
-		skyblockMember.dungeons?.dungeon_types?.catacombs?.tier_completions ?? {}, // catacombs completions
-		skyblockMember.dungeons?.dungeon_types?.master_catacombs?.tier_completions ?? {}, // master catacombs completions
+		(skyblockMember.dungeons?.dungeon_types?.catacombs?.tier_completions as Parameters<typeof getLilyWeightRaw>[2]) ??
+			{}, // catacombs completions
+		(skyblockMember.dungeons?.dungeon_types?.master_catacombs?.tier_completions as Parameters<
+			typeof getLilyWeightRaw
+		>[3]) ?? {}, // master catacombs completions
 		skyblockMember.dungeons?.dungeon_types?.catacombs?.experience ?? 0, // catacombs xp
 		SLAYERS.map((_slayer) => skyblockMember.slayer_bosses?.[_slayer]?.xp ?? 0), // slayer xp
 	);
