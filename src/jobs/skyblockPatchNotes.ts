@@ -78,7 +78,8 @@ const newPosts = parsedItems.filter(({ guid }) => guid > LAST_GUID);
 await sql`
   INSERT INTO "SkyBlockPatchNotes"
   ${sql(parsedItems)}
-  ON CONFLICT ("guid") DO UPDATE SET "title"=EXCLUDED."title","creator"=EXCLUDED."creator","link"=EXCLUDED."link","updatedAt"=EXCLUDED."updatedAt"
+  ON CONFLICT (guid)
+  DO UPDATE SET title=EXCLUDED.title, creator=EXCLUDED.creator, link=EXCLUDED.link, "updatedAt"=EXCLUDED."updatedAt"
 `;
 
 if (parentPort) {
@@ -94,7 +95,7 @@ if (parentPort) {
 } else {
 	await sql`
 		UPDATE "Config"
-		SET "value" = ${JSON.stringify(Math.max(...newPosts.map(({ guid }) => guid)))}
+		SET value = ${JSON.stringify(Math.max(...newPosts.map(({ guid }) => guid)))}
 		WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
 	`;
 

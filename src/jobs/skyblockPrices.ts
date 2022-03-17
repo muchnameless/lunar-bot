@@ -55,7 +55,6 @@ async function updateItem(itemId: string, currentPrice: number) {
 		)
 		ON CONFLICT (id)
 		DO UPDATE SET history = array_append(prices.history, ${currentPrice})
-		WHERE prices.id = ${itemId}
 		RETURNING median(history);
 	`;
 
