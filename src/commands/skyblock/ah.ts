@@ -110,7 +110,7 @@ export default class AhCommand extends ApplicationCommand {
 							? ` - ${upperCaseFirstChar(tier)}`
 							: item === 'Enchanted Book'
 							? (() => {
-									const matched = lore.match(/(?<=^(§[\da-gk-or])+)[^\n§]+/)?.[0];
+									const matched = lore.match(/(?<=^(?:§[\da-gk-or])+)[^\n§]+/)?.[0];
 									if (matched) return ` - ${matched}`;
 									return '';
 							  })()
