@@ -1,7 +1,7 @@
 import { fileURLToPath, URL } from 'node:url';
 import { execArgv } from 'node:process';
 import Bree from 'bree';
-import { logger } from '../functions';
+import { logger, minutes } from '../functions';
 import { prices } from '../structures/networth/prices';
 import type { LunarClient } from '../structures/LunarClient';
 
@@ -17,6 +17,19 @@ export function startJobs(client: LunarClient) {
 		root: false,
 		logger: logger as unknown as Record<string, unknown>,
 		worker: { execArgv: [...execArgv, '--no-warnings'] },
+		jobs: [
+			{
+				name: 'skyblockPatchNotes',
+				cron: '*/1 * * * *',
+				path: fileURLToPath(new URL('./skyblockPatchNotes.js', import.meta.url)),
+			},
+			{
+				name: 'skyblockPrices',
+				cron: '*/1 * * * *',
+				path: fileURLToPath(new URL('./skyblockPrices.js', import.meta.url)),
+			},
+		],
+		closeWorkerAfterMs: minutes(5),
 		errorHandler(error, workerMetadata) {
 			logger.error({ err: error, workerMetadata }, '[BREE]');
 		},
@@ -34,19 +47,6 @@ export function startJobs(client: LunarClient) {
 			}
 		},
 	});
-
-	bree.add([
-		{
-			name: 'skyblockPatchNotes',
-			cron: '*/1 * * * *',
-			path: fileURLToPath(new URL('./skyblockPatchNotes.js', import.meta.url)),
-		},
-		{
-			name: 'skyblockPrices',
-			cron: '*/1 * * * *',
-			path: fileURLToPath(new URL('./skyblockPrices.js', import.meta.url)),
-		},
-	]);
 
 	bree.start();
 }
