@@ -14,9 +14,9 @@ import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
 
 /**
- * 60 per hour (every minute), 24 hours, -1 since the new value gets pushed before calculating the median
+ * 60 per hour (every minute), 24 hours
  */
-const MAX_HISTORY_LENGTH = 1_439;
+const MAX_HISTORY_LENGTH = 1_440;
 
 /**
  * display names of vanilla mc items and blocks, including "null"
