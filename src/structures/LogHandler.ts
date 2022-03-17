@@ -257,7 +257,7 @@ export class LogHandler {
 						.replace(', ', '_')
 						.replaceAll(':', '.')}_${SnowflakeUtil.generate()}`,
 				),
-				embeds.map((embed) => embed.toJSON()).join('\n'),
+				JSON.stringify(embeds),
 			);
 		} catch (error) {
 			logger.error(error, '[LOG TO FILE]');
