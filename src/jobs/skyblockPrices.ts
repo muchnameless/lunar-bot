@@ -262,7 +262,9 @@ await Promise.all(BINAuctions.map((auctions, itemId) => updateItem(itemId, Math.
 await updateBazaarPricesPromise;
 
 await sql`
-  UPDATE prices SET history = trim_array(history, array_length(history, 1) - ${MAX_HISTORY_LENGTH}) WHERE array_length(history, 1) > ${MAX_HISTORY_LENGTH}
+  UPDATE prices
+  SET history = trim_array(history, array_length(history, 1) - ${MAX_HISTORY_LENGTH})
+  WHERE array_length(history, 1) > ${MAX_HISTORY_LENGTH}
 `;
 
 await sql.end();
