@@ -14,11 +14,6 @@ import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
 
 /**
- * 60 per hour (every minute), 24 hours
- */
-const MAX_HISTORY_LENGTH = 1_440;
-
-/**
  * display names of vanilla mc items and blocks, including "null"
  */
 const VANILLA_ITEM_NAMES = new Set<string>().add('null');
@@ -45,6 +40,7 @@ const sql = postgres({
  * @param currentPrice
  */
 async function updateItem(itemId: string, currentPrice: number) {
+	// history is a circular buffer with length 1440 (24*60, each minute for 1 day), index points to the next element, $2 is currentPrice
 	const [{ median }] = await sql<[{ median: number }]>`
 		INSERT INTO prices (
 			id,
@@ -53,8 +49,12 @@ async function updateItem(itemId: string, currentPrice: number) {
 			${itemId},
 			ARRAY [${currentPrice}::NUMERIC]
 		)
-		ON CONFLICT (id)
-		DO UPDATE SET history = array_append(prices.history, ${currentPrice})
+		ON CONFLICT (id) DO
+		UPDATE SET
+			history[prices.index] = $2,
+			index = CASE WHEN prices.index >= 1440 THEN 1
+			             ELSE prices.index + 1
+			    	END
 		RETURNING median(history);
 	`;
 
@@ -137,8 +137,8 @@ async function updateBazaarPrices() {
 			'HYPIXEL_BAZAAR_LAST_UPDATED',
 			${JSON.stringify(lastUpdated)}
 		)
-		ON CONFLICT (key)
-		DO UPDATE SET value = excluded.value
+		ON CONFLICT (key) DO
+		UPDATE SET value = excluded.value
 	`;
 }
 
@@ -306,21 +306,14 @@ async function updateAuctionPrices() {
 			'HYPIXEL_AUCTIONS_LAST_UPDATED',
 			${JSON.stringify(lastUpdated)}
 		)
-		ON CONFLICT (key)
-		DO UPDATE SET value = excluded.value
+		ON CONFLICT (key) DO
+		UPDATE SET value = excluded.value
 	`;
 
 	logger.debug(`[UPDATE AUCTION PRICES]: updated ${BINAuctions.size} items from ${totalPages} auction pages`);
 }
 
 await Promise.all([updateAuctionPrices(), updateBazaarPrices()]);
-
-// remove old history entries
-await sql`
-  UPDATE prices
-  SET history = trim_array(history, array_length(history, 1) - ${MAX_HISTORY_LENGTH})
-  WHERE array_length(history, 1) > ${MAX_HISTORY_LENGTH}
-`;
 
 await sql.end();
 
