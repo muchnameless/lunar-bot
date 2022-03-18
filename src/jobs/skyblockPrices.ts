@@ -92,7 +92,7 @@ function getBuyPrice(orderSummary: Components.Schemas.SkyBlockBazaarProduct['buy
 }
 
 /**
- * fetches bazaar products
+ * fetches and processes bazaar products
  */
 async function updateBazaarPrices() {
 	const res = await fetch('https://api.hypixel.net/skyblock/bazaar', {
@@ -157,6 +157,9 @@ async function fetchAuctionPage(
 	throw new FetchError('FetchAuctionError', res);
 }
 
+/**
+ * fetches and processes all auction pages
+ */
 async function updateAuctionPrices() {
 	/**
 	 * fetches all auction pages
