@@ -3,6 +3,7 @@ import { Formatters } from 'discord.js';
 import { InteractionUtil } from '../../util';
 import { logger, seconds } from '../../functions';
 import { DualCommand } from '../../structures/commands/DualCommand';
+import { sql } from '../../structures/database/sql';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
@@ -28,14 +29,14 @@ export default class PatchnotesCommand extends DualCommand {
 	 */
 	private async _generateReply() {
 		try {
-			const entry = await this.client.db.models.SkyBlockPatchNote.findByPk(this.config.get('HYPIXEL_FORUM_LAST_GUID'), {
-				raw: true,
-				attributes: ['link'],
-			});
+			const [existing] = await sql<[{ link: string }]>`
+				SELECT link FROM "SkyBlockPatchNotes"
+				WHERE guid = ${this.config.get('HYPIXEL_FORUM_LAST_GUID')}
+			`;
 
-			if (!entry) return 'no patchnotes found';
+			if (!existing) return 'no patchnotes found';
 
-			return Formatters.hideLinkEmbed(entry.link);
+			return Formatters.hideLinkEmbed(existing.link);
 		} catch (error) {
 			logger.error(error, '[PATCHNOTES CMD]');
 
