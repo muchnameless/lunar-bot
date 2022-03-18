@@ -104,9 +104,20 @@ async function updateBazaarPrices() {
 		throw new FetchError('FetchBazaarError', res);
 	}
 
-	const { products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
+	const { lastUpdated, products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
 
-	return Promise.all(
+	// check if API data is updated
+	const [lastUpdatedEntry] = await sql<[{ value: string }]>`
+		SELECT value
+		FROM "Config"
+		WHERE key = 'HYPIXEL_BAZAAR_LAST_UPDATED'
+	`;
+	if (lastUpdatedEntry && lastUpdated <= JSON.parse(lastUpdatedEntry.value)) {
+		return logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntry.value }, '[UPDATE BAZAAR PRICES]');
+	}
+
+	// update database and prices map
+	await Promise.all(
 		Object.entries(products).map(([item, data]) =>
 			updateItem(
 				item,
@@ -116,6 +127,13 @@ async function updateBazaarPrices() {
 			),
 		),
 	);
+
+	// update config key
+	await sql`
+		UPDATE "Config"
+		SET value = ${JSON.stringify(lastUpdated)}
+		WHERE key = 'HYPIXEL_BAZAAR_LAST_UPDATED'
+	`;
 }
 
 /**
@@ -124,7 +142,7 @@ async function updateBazaarPrices() {
  */
 async function fetchAuctionPage(
 	page: number,
-): Promise<Pick<Components.Schemas.SkyBlockAuctionsResponse, 'auctions' | 'success' | 'totalPages'>> {
+): Promise<Pick<Components.Schemas.SkyBlockAuctionsResponse, 'auctions' | 'lastUpdated' | 'success' | 'totalPages'>> {
 	const res = await fetch(`https://api.hypixel.net/skyblock/auctions?page=${page}`, {
 		// @ts-expect-error
 		signal: AbortSignal.timeout(30_000),
@@ -133,134 +151,156 @@ async function fetchAuctionPage(
 	if (res.status === 200) return res.json() as Promise<Components.Schemas.SkyBlockAuctionsResponse>;
 
 	// page does not exist -> no-op
-	if (res.status === 404) return { success: false, totalPages: -1, auctions: [] };
+	if (res.status === 404) return { success: false, lastUpdated: -1, totalPages: -1, auctions: [] };
 
 	// different error -> abort process
 	throw new FetchError('FetchAuctionError', res);
 }
 
-/**
- * fetches all auction pages
- */
-// fetch first auction page
-const firstPage = await fetchAuctionPage(0);
+async function updateAuctionPrices() {
+	/**
+	 * fetches all auction pages
+	 */
+	// fetch first auction page
+	const { success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(0);
 
-// abort on error
-if (!firstPage.success) exit(-1);
+	// abort on error
+	if (!success) {
+		return logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
+	}
 
-// update bazaar prices if the first auction page request was successful
-const updateBazaarPricesPromise = updateBazaarPrices();
+	// check if API data is updated
+	const [lastUpdatedEntry] = await sql<[{ value: string }]>`
+		SELECT value
+		FROM "Config"
+		WHERE key = 'HYPIXEL_AUCTIONS_LAST_UPDATED'
+	`;
+	if (lastUpdatedEntry && lastUpdated <= JSON.parse(lastUpdatedEntry.value)) {
+		return logger.error({ lastUpdated, lastUpdatedEntry: lastUpdatedEntry.value }, '[UPDATE AUCTION PRICES]');
+	}
 
-// fetch remaining auction pages
-const BINAuctions = new Collection<string, number[]>();
-const processAuctions = (auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
-	Promise.all(
-		auctions.map(async (auction) => {
-			if (!auction.bin) return;
+	// fetch remaining auction pages
+	const BINAuctions = new Collection<string, number[]>();
+	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
+		Promise.all(
+			_auctions.map(async (auction) => {
+				if (!auction.bin) return;
 
-			const [item] = await transformItemData(auction.item_bytes);
+				const [item] = await transformItemData(auction.item_bytes);
 
-			if (!item) return;
+				if (!item) return;
 
-			let itemId = item.tag?.ExtraAttributes?.id;
-			let count = item.Count;
+				let itemId = item.tag?.ExtraAttributes?.id;
+				let count = item.Count;
 
-			switch (itemId) {
-				case 'ENCHANTED_BOOK': {
-					const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
+				switch (itemId) {
+					case 'ENCHANTED_BOOK': {
+						const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
 
-					if (enchants.length !== 1) return;
+						if (enchants.length !== 1) return;
 
-					const [ENCHANTMENT] = enchants;
+						const [ENCHANTMENT] = enchants;
 
-					let level = item.tag!.ExtraAttributes!.enchantments[enchants[0]];
+						let level = item.tag!.ExtraAttributes!.enchantments[enchants[0]];
 
-					switch (getEnchantmentType(ENCHANTMENT, level)) {
-						case EnchantmentType.AnvilUpgradableFrom1:
-							count = 2 ** (level - 1);
-							level = 1;
-							break;
+						switch (getEnchantmentType(ENCHANTMENT, level)) {
+							case EnchantmentType.AnvilUpgradableFrom1:
+								count = 2 ** (level - 1);
+								level = 1;
+								break;
 
-						case EnchantmentType.AnvilUpgradableFrom3:
-							count = 2 ** (level - 3);
-							level = 3;
-							break;
+							case EnchantmentType.AnvilUpgradableFrom3:
+								count = 2 ** (level - 3);
+								level = 3;
+								break;
 
-						case EnchantmentType.AnvilUpgradableFrom6:
-							count = 2 ** (level - 6);
-							level = 6;
-							break;
+							case EnchantmentType.AnvilUpgradableFrom6:
+								count = 2 ** (level - 6);
+								level = 6;
+								break;
 
-						case EnchantmentType.UsageUpgradable:
-							level = 1;
-							break;
+							case EnchantmentType.UsageUpgradable:
+								level = 1;
+								break;
+						}
+
+						itemId = `${ENCHANTMENT}_${level}`;
+						break;
 					}
 
-					itemId = `${ENCHANTMENT}_${level}`;
-					break;
-				}
+					case 'PET': {
+						const pet = JSON.parse(
+							item.tag!.ExtraAttributes!.petInfo as string,
+						) as Components.Schemas.SkyBlockProfilePet;
 
-				case 'PET': {
-					const pet = JSON.parse(item.tag!.ExtraAttributes!.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
+						// ignore candied and skinned pets
+						if (pet.candyUsed || pet.skin) return;
 
-					// ignore candied and skinned pets
-					if (pet.candyUsed || pet.skin) return;
+						let { level } = calculatePetSkillLevel(pet);
 
-					let { level } = calculatePetSkillLevel(pet);
+						if (level < 50) {
+							level = 1;
+						} else if (level > 100 && level < 150) {
+							level = 100;
+						}
 
-					if (level < 50) {
-						level = 1;
-					} else if (level > 100 && level < 150) {
-						level = 100;
+						if (level !== 1 && level !== 100 && level !== 200) return;
+
+						itemId = `LVL_${level}_${pet.tier}_${pet.type}`;
+						break;
 					}
 
-					if (level !== 1 && level !== 100 && level !== 200) return;
+					case 'RUNE': {
+						const [[RUNE, LEVEL]] = Object.entries(item.tag!.ExtraAttributes!.runes!);
 
-					itemId = `LVL_${level}_${pet.tier}_${pet.type}`;
-					break;
-				}
+						itemId = `RUNE_${RUNE}_${LEVEL}`;
+						break;
+					}
 
-				case 'RUNE': {
-					const [[RUNE, LEVEL]] = Object.entries(item.tag!.ExtraAttributes!.runes!);
-
-					itemId = `RUNE_${RUNE}_${LEVEL}`;
-					break;
-				}
-
-				case undefined:
-					// no itemId
-					logger.warn(item?.tag?.ExtraAttributes ?? item, '[UPDATE PRICES]: malformed item data');
-					return;
-
-				default:
-					// ignore vanilla mc items
-					if (auction.tier === 'COMMON' && (itemId.includes(':') || VANILLA_ITEM_NAMES.has(auction.item_name))) {
+					case undefined:
+						// no itemId
+						logger.warn(item?.tag?.ExtraAttributes ?? item, '[UPDATE PRICES]: malformed item data');
 						return;
-					}
-			}
 
-			const price = auction.starting_bid / count;
+					default:
+						// ignore vanilla mc items
+						if (auction.tier === 'COMMON' && (itemId.includes(':') || VANILLA_ITEM_NAMES.has(auction.item_name))) {
+							return;
+						}
+				}
 
-			BINAuctions.get(itemId)?.push(price) ?? BINAuctions.set(itemId, [price]);
-		}),
-	);
-const fetchAndProcessAuctions = async (page: number) => processAuctions((await fetchAuctionPage(page)).auctions);
+				const price = auction.starting_bid / count;
 
-const promises: Promise<void[]>[] = [(() => processAuctions(firstPage.auctions))()];
+				BINAuctions.get(itemId)?.push(price) ?? BINAuctions.set(itemId, [price]);
+			}),
+		);
+	const fetchAndProcessAuctions = async (page: number) => processAuctions((await fetchAuctionPage(page)).auctions);
 
-for (let page = 1; page < firstPage.totalPages; ++page) {
-	promises.push(fetchAndProcessAuctions(page));
+	const promises: Promise<void[]>[] = [(() => processAuctions(auctions))()];
+
+	for (let page = 1; page < totalPages; ++page) {
+		promises.push(fetchAndProcessAuctions(page));
+	}
+
+	// process all auction pages
+	await Promise.all(promises);
+
+	// update database and prices map
+	await Promise.all(BINAuctions.map((_auctions, itemId) => updateItem(itemId, Math.min(..._auctions))));
+
+	// update config key
+	await sql`
+		UPDATE "Config"
+		SET value = ${JSON.stringify(lastUpdated)}
+		WHERE key = 'HYPIXEL_AUCTIONS_LAST_UPDATED'
+	`;
+
+	logger.debug(`[UPDATE AUCTION PRICES]: updated ${BINAuctions.size} items from ${totalPages} auction pages`);
 }
 
-// fetch and process all auction pages
-await Promise.all(promises);
+await Promise.all([updateAuctionPrices(), updateBazaarPrices()]);
 
-// update database and prices map
-await Promise.all(BINAuctions.map((auctions, itemId) => updateItem(itemId, Math.min(...auctions))));
-
-// wait for bazaar update to finish
-await updateBazaarPricesPromise;
-
+// remove old history entries
 await sql`
   UPDATE prices
   SET history = trim_array(history, array_length(history, 1) - ${MAX_HISTORY_LENGTH})
@@ -268,8 +308,6 @@ await sql`
 `;
 
 await sql.end();
-
-logger.debug(`[SKYBLOCK PRICES]: updated ${BINAuctions.size} items from ${firstPage.totalPages} auction pages`);
 
 if (parentPort) {
 	parentPort.postMessage('done');
