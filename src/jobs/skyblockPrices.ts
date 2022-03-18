@@ -54,7 +54,7 @@ async function updateItem(itemId: string, currentPrice: number) {
 			history[prices.index] = $2,
 			index = CASE WHEN prices.index >= 1440 THEN 1
 			             ELSE prices.index + 1
-			    	END
+			        END
 		RETURNING median(history);
 	`;
 
