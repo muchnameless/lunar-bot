@@ -22,6 +22,7 @@ import type { Config } from '../models/Config';
 import type { DiscordGuild } from '../models/DiscordGuild';
 import type { HypixelGuild } from '../models/HypixelGuild';
 import type { HypixelGuildBan } from '../models/HypixelGuildBan';
+import type { SkyBlockPatchNote } from '../models/SkyBlockPatchNote';
 import type { Player } from '../models/Player';
 import type { TaxCollector } from '../models/TaxCollector';
 import type { db as DbType } from '..';
@@ -36,6 +37,7 @@ export interface Models {
 	HypixelGuildBan: ModelStatic<HypixelGuildBan>;
 	Player: ModelStatic<Player>;
 	Price: ModelStatic<Price>;
+	SkyBlockPatchNote: ModelStatic<SkyBlockPatchNote>;
 	TaxCollector: ModelStatic<TaxCollector>;
 	Transaction: ModelStatic<Transaction>;
 }
