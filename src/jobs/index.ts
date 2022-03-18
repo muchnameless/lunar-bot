@@ -29,7 +29,7 @@ export function startJobs(client: LunarClient) {
 				path: fileURLToPath(new URL('./skyblockPrices.js', import.meta.url)),
 			},
 		],
-		closeWorkerAfterMs: minutes(5),
+		closeWorkerAfterMs: minutes(1.5),
 		errorHandler(error, workerMetadata) {
 			logger.error({ err: error, workerMetadata }, '[BREE]');
 		},
