@@ -79,7 +79,7 @@ await sql`
   INSERT INTO "SkyBlockPatchNotes"
   ${sql(parsedItems)}
   ON CONFLICT (guid)
-  DO UPDATE SET title=EXCLUDED.title, creator=EXCLUDED.creator, link=EXCLUDED.link, "updatedAt"=EXCLUDED."updatedAt"
+  DO UPDATE SET title = excluded.title, creator = excluded.creator, link = excluded.link, "updatedAt" = excluded."updatedAt"
 `;
 
 if (parentPort) {
@@ -94,9 +94,15 @@ if (parentPort) {
 	parentPort.postMessage('done');
 } else {
 	await sql`
-		UPDATE "Config"
-		SET value = ${JSON.stringify(Math.max(...newPosts.map(({ guid }) => guid)))}
-		WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
+		INSERT INTO "Config" (
+			key,
+			value
+		) VALUES (
+			'HYPIXEL_FORUM_LAST_GUID',
+			${JSON.stringify(Math.max(...newPosts.map(({ guid }) => guid)))}
+		)
+		ON CONFLICT (key)
+		DO UPDATE SET value = excluded.value
 	`;
 
 	await sql.end();

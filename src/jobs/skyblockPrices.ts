@@ -130,9 +130,15 @@ async function updateBazaarPrices() {
 
 	// update config key
 	await sql`
-		UPDATE "Config"
-		SET value = ${JSON.stringify(lastUpdated)}
-		WHERE key = 'HYPIXEL_BAZAAR_LAST_UPDATED'
+		INSERT INTO "Config" (
+			key,
+			value
+		) VALUES (
+			'HYPIXEL_BAZAAR_LAST_UPDATED',
+			${JSON.stringify(lastUpdated)}
+		)
+		ON CONFLICT (key)
+		DO UPDATE SET value = excluded.value
 	`;
 }
 
@@ -293,9 +299,15 @@ async function updateAuctionPrices() {
 
 	// update config key
 	await sql`
-		UPDATE "Config"
-		SET value = ${JSON.stringify(lastUpdated)}
-		WHERE key = 'HYPIXEL_AUCTIONS_LAST_UPDATED'
+		INSERT INTO "Config" (
+			key,
+			value
+		) VALUES (
+			'HYPIXEL_AUCTIONS_LAST_UPDATED',
+			${JSON.stringify(lastUpdated)}
+		)
+		ON CONFLICT (key)
+		DO UPDATE SET value = excluded.value
 	`;
 
 	logger.debug(`[UPDATE AUCTION PRICES]: updated ${BINAuctions.size} items from ${totalPages} auction pages`);
