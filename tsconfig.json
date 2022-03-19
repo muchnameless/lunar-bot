@@ -23,7 +23,7 @@
 		"noEmitHelpers": true,
 		"outDir": "dist",
 		"preserveConstEnums": false,
-		"removeComments": false,
+		"removeComments": true,
 		"sourceMap": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
