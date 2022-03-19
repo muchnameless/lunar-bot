@@ -5,6 +5,7 @@ import { env } from 'node:process';
 import { Embed, Formatters, SnowflakeUtil } from 'discord.js';
 import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
+import minecraftData from 'minecraft-data';
 import ms from 'ms';
 import emojiRegex from 'emoji-regex/es2015';
 import { jaroWinkler } from '@skyra/jaro-winkler';
@@ -17,7 +18,7 @@ import {
 	randomPadding,
 	UNICODE_TO_EMOJI_NAME,
 } from '../constants';
-import { MC_CLIENT_VERSION, MINECRAFT_DATA, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
+import { MC_CLIENT_VERSION, STOP_EMOJI, UNKNOWN_IGN, X_EMOJI } from '../../../constants';
 import { createBot } from '../MinecraftBot';
 import { MessageUtil, UserUtil } from '../../../util';
 import { MessageCollector, MessageCollectorEvent } from '../MessageCollector';
@@ -305,7 +306,10 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * 100 pre 1.10.2, 256 post 1.10.2
 	 */
-	static MAX_MESSAGE_LENGTH = MINECRAFT_DATA.isNewerOrEqualTo('1.11') ? (256 as const) : (100 as const);
+	// @ts-expect-error supportFeature missing in typings
+	static MAX_MESSAGE_LENGTH = minecraftData(MC_CLIENT_VERSION).supportFeature('lessCharsInChat')
+		? (100 as const)
+		: (256 as const);
 
 	/**
 	 * reacts to the message and DMs the author
