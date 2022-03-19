@@ -1,19 +1,11 @@
 import { logger } from '../../../functions/logger';
 
-export const enum EnchantmentType {
-	AnvilUpgradableFrom1,
-	AnvilUpgradableFrom3,
-	AnvilUpgradableFrom6,
-	NotUpgradable,
-	UsageUpgradable,
-}
-
 /**
- * wether the enchantment is upgradable via an anvil
+ * returns the enchantment id (name_level) and count
  * @param enchantment
  * @param level
  */
-export const getEnchantmentType = (enchantment: string, level: number) => {
+export const getEnchantment = (enchantment: string, level: number) => {
 	switch (enchantment) {
 		case 'aqua_affinity':
 		case 'counter_strike':
@@ -26,18 +18,19 @@ export const getEnchantmentType = (enchantment: string, level: number) => {
 		case 'smelting_touch':
 		case 'telekinesis':
 		case 'true_protection':
-			return EnchantmentType.NotUpgradable;
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		case 'compact':
 		case 'cultivating':
 		case 'expertise':
-			return EnchantmentType.UsageUpgradable;
+			return { itemId: `${enchantment}_1`, count: 1 };
 
 		case 'fire_aspect':
 		case 'frost_walker':
 		case 'knockback':
 		case 'punch':
-			return level <= 2 ? EnchantmentType.AnvilUpgradableFrom1 : EnchantmentType.NotUpgradable;
+			if (level <= 2) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		case 'chance':
 		case 'depth_strider':
@@ -53,11 +46,13 @@ export const getEnchantmentType = (enchantment: string, level: number) => {
 		case 'sugar_rush':
 		case 'syphon':
 		case 'thorns':
-			return level <= 3 ? EnchantmentType.AnvilUpgradableFrom1 : EnchantmentType.NotUpgradable;
+			if (level <= 3) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		case 'first_strike':
 		case 'triple_strike':
-			return level <= 4 ? EnchantmentType.AnvilUpgradableFrom1 : EnchantmentType.NotUpgradable;
+			if (level <= 4) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		case 'aiming':
 		case 'angler':
@@ -100,24 +95,25 @@ export const getEnchantmentType = (enchantment: string, level: number) => {
 		case 'titan_killer':
 		case 'vampirism':
 		case 'venomous':
-			return level <= 5 ? EnchantmentType.AnvilUpgradableFrom1 : EnchantmentType.NotUpgradable;
+			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		case 'feather_falling':
 		case 'infinite_quiver':
-			if (level <= 5) return EnchantmentType.AnvilUpgradableFrom1;
-			if (level <= 10) return EnchantmentType.AnvilUpgradableFrom6;
-			return EnchantmentType.NotUpgradable;
+			if (level <= 5) return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
+			if (level <= 10) return { itemId: `${enchantment}_6`, count: 2 ** (level - 6) };
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 
 		case 'big_brain':
 		case 'vicious':
-			return EnchantmentType.AnvilUpgradableFrom3;
+			return { itemId: `${enchantment}_3`, count: 2 ** (level - 3) };
 
 		default:
 			if (enchantment.startsWith('ultimate_') || enchantment.startsWith('turbo_')) {
-				return EnchantmentType.AnvilUpgradableFrom1;
+				return { itemId: `${enchantment}_1`, count: 2 ** (level - 1) };
 			}
 
 			logger.warn(`[GET ENCHANTMENT TYPE]: unknown enchantment '${enchantment}', level: '${level}'`);
-			return EnchantmentType.NotUpgradable;
+			return { itemId: `${enchantment}_${level}`, count: 1 };
 	}
 };

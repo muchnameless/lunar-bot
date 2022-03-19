@@ -7,7 +7,7 @@ import {
 	ESSENCE_UPGRADES,
 	GEMSTONES,
 	IGNORED_GEMSTONES,
-	getEnchantmentType,
+	getEnchantment,
 	MASTER_STARS,
 	MATERIALS_TO_ID,
 	PriceModifier,
@@ -15,7 +15,6 @@ import {
 	SKYBLOCK_INVENTORIES,
 	SPECIAL_GEMSTONES,
 	TALISMANS,
-	EnchantmentType,
 } from './constants';
 import { getPrice, prices } from './prices';
 import { calculatePetSkillLevel } from './functions/pets';
@@ -138,27 +137,8 @@ export function calculateItemPrice(item: NBTInventoryItem) {
 				level = 5;
 			}
 
-			switch (getEnchantmentType(enchantment, level)) {
-				case EnchantmentType.AnvilUpgradableFrom1:
-					price += getPrice(`${enchantment}_1`) * PriceModifier.Enchantment * 2 ** (level - 1);
-					break;
-
-				case EnchantmentType.AnvilUpgradableFrom3:
-					price += getPrice(`${enchantment}_3`) * PriceModifier.Enchantment * 2 ** (level - 3);
-					break;
-
-				case EnchantmentType.AnvilUpgradableFrom6:
-					price += getPrice(`${enchantment}_6`) * PriceModifier.Enchantment * 2 ** (level - 6);
-					break;
-
-				case EnchantmentType.UsageUpgradable:
-					price += getPrice(`${enchantment}_1`) * PriceModifier.Enchantment;
-					break;
-
-				case EnchantmentType.NotUpgradable:
-					price += getPrice(`${enchantment}_${level}`) * PriceModifier.Enchantment;
-					break;
-			}
+			const { itemId: enchantmentId, count } = getEnchantment(enchantment, level);
+			price += getPrice(enchantmentId) * PriceModifier.Enchantment * count;
 		}
 	}
 

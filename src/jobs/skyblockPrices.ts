@@ -8,7 +8,7 @@ import { parse, simplify } from 'prismarine-nbt';
 import postgres from 'postgres';
 import { logger } from '../functions/logger';
 import { FetchError } from '../structures/errors/FetchError';
-import { EnchantmentType, getEnchantmentType } from '../structures/networth/constants/enchantments';
+import { getEnchantment } from '../structures/networth/constants/enchantments';
 import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
 import { JobType } from '.';
 import type { Components, NBTInventoryItem } from '@zikeji/hypixel';
@@ -203,32 +203,7 @@ async function updateAuctionPrices() {
 
 				if (enchants.length !== 1) return;
 
-				const [ENCHANTMENT] = enchants;
-
-				let level = item.tag!.ExtraAttributes!.enchantments[enchants[0]];
-
-				switch (getEnchantmentType(ENCHANTMENT, level)) {
-					case EnchantmentType.AnvilUpgradableFrom1:
-						count = 2 ** (level - 1);
-						level = 1;
-						break;
-
-					case EnchantmentType.AnvilUpgradableFrom3:
-						count = 2 ** (level - 3);
-						level = 3;
-						break;
-
-					case EnchantmentType.AnvilUpgradableFrom6:
-						count = 2 ** (level - 6);
-						level = 6;
-						break;
-
-					case EnchantmentType.UsageUpgradable:
-						level = 1;
-						break;
-				}
-
-				itemId = `${ENCHANTMENT}_${level}`;
+				({ itemId, count } = getEnchantment(enchants[0], item.tag!.ExtraAttributes!.enchantments[enchants[0]]));
 				break;
 			}
 
