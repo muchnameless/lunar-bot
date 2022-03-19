@@ -1,26 +1,20 @@
 /* eslint-disable unicorn/prefer-top-level-await */
 import { exit } from 'node:process';
+import { Buffer } from 'node:buffer';
 import { parentPort } from 'node:worker_threads';
 import { fetch } from 'undici';
-import { transformItemData } from '@zikeji/hypixel';
 import { Collection } from 'discord.js';
+import { parse, simplify } from 'prismarine-nbt';
 import postgres from 'postgres';
 import { logger } from '../functions/logger';
 import { FetchError } from '../structures/errors/FetchError';
 import { EnchantmentType, getEnchantmentType } from '../structures/networth/constants/enchantments';
 import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
-import { MINECRAFT_DATA } from '../constants/minecraft';
 import { JobType } from '.';
-import type { Components } from '@zikeji/hypixel';
+import type { Components, NBTInventoryItem } from '@zikeji/hypixel';
 
-/**
- * display names of vanilla mc items and blocks, including "null"
- */
-const VANILLA_ITEM_NAMES = new Set<string>().add('null');
-
-for (const { displayName } of MINECRAFT_DATA.itemsArray) {
-	VANILLA_ITEM_NAMES.add(displayName);
-}
+type SkyBlockAuctionItem = Components.Schemas.SkyBlockAuctionsResponse['auctions'][0];
+type SkyBlockAuctionEndedItem = Components.Schemas.SkyBlockAuctionsEndedResponse['auctions'][0];
 
 const sql = postgres({
 	types: {
@@ -163,6 +157,9 @@ async function fetchAuctionPage(
 	throw new FetchError('FetchAuctionError', res);
 }
 
+const transformItemData = async (data: string): Promise<NBTInventoryItem[]> =>
+	simplify((await parse(Buffer.from(data, 'base64'))).parsed.value.i as never);
+
 /**
  * fetches and processes all auction pages
  */
@@ -190,113 +187,132 @@ async function updateAuctionPrices() {
 
 	// fetch remaining auction pages
 	const BINAuctions = new Collection<string, number[]>();
-	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
-		Promise.all(
-			_auctions.map(async (auction) => {
-				if (!auction.bin) return;
+	const processAuction = async (auction: SkyBlockAuctionItem | SkyBlockAuctionEndedItem) => {
+		if (!auction.bin) return;
 
-				const [item] = await transformItemData(auction.item_bytes);
+		const [item] = await transformItemData(auction.item_bytes);
 
-				if (!item) return;
+		if (!item) return;
 
-				let itemId = item.tag?.ExtraAttributes?.id;
-				let count = item.Count;
+		let itemId = item.tag?.ExtraAttributes?.id;
+		let count = item.Count;
 
-				switch (itemId) {
-					case 'ENCHANTED_BOOK': {
-						const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
+		switch (itemId) {
+			case 'ENCHANTED_BOOK': {
+				const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
 
-						if (enchants.length !== 1) return;
+				if (enchants.length !== 1) return;
 
-						const [ENCHANTMENT] = enchants;
+				const [ENCHANTMENT] = enchants;
 
-						let level = item.tag!.ExtraAttributes!.enchantments[enchants[0]];
+				let level = item.tag!.ExtraAttributes!.enchantments[enchants[0]];
 
-						switch (getEnchantmentType(ENCHANTMENT, level)) {
-							case EnchantmentType.AnvilUpgradableFrom1:
-								count = 2 ** (level - 1);
-								level = 1;
-								break;
-
-							case EnchantmentType.AnvilUpgradableFrom3:
-								count = 2 ** (level - 3);
-								level = 3;
-								break;
-
-							case EnchantmentType.AnvilUpgradableFrom6:
-								count = 2 ** (level - 6);
-								level = 6;
-								break;
-
-							case EnchantmentType.UsageUpgradable:
-								level = 1;
-								break;
-						}
-
-						itemId = `${ENCHANTMENT}_${level}`;
+				switch (getEnchantmentType(ENCHANTMENT, level)) {
+					case EnchantmentType.AnvilUpgradableFrom1:
+						count = 2 ** (level - 1);
+						level = 1;
 						break;
-					}
 
-					case 'PET': {
-						const pet = JSON.parse(
-							item.tag!.ExtraAttributes!.petInfo as string,
-						) as Components.Schemas.SkyBlockProfilePet;
-
-						// ignore candied pets
-						if (pet.candyUsed) return;
-
-						// ignore skinned pets and pets with items held for lower tiers
-						switch (pet.tier) {
-							case 'COMMON':
-							case 'UNCOMMON':
-								if (pet.heldItem) return;
-							// fallthrough
-							case 'RARE':
-							case 'EPIC':
-								if (pet.skin) return;
-						}
-
-						let { level } = calculatePetSkillLevel(pet);
-
-						if (level < 50) {
-							level = 1;
-						} else if (level > 100 && level < 150) {
-							level = 100;
-						}
-
-						if (level !== 1 && level !== 100 && level !== 200) return;
-
-						itemId = `LVL_${level}_${pet.tier}_${pet.type}`;
+					case EnchantmentType.AnvilUpgradableFrom3:
+						count = 2 ** (level - 3);
+						level = 3;
 						break;
-					}
 
-					case 'RUNE': {
-						const [[RUNE, LEVEL]] = Object.entries(item.tag!.ExtraAttributes!.runes!);
-
-						itemId = `RUNE_${RUNE}_${LEVEL}`;
+					case EnchantmentType.AnvilUpgradableFrom6:
+						count = 2 ** (level - 6);
+						level = 6;
 						break;
-					}
 
-					case undefined:
-						// no itemId
-						logger.warn(item?.tag?.ExtraAttributes ?? item, '[UPDATE PRICES]: malformed item data');
-						return;
-
-					default:
-						// ignore vanilla mc items
-						if (auction.tier === 'COMMON' && (itemId.includes(':') || VANILLA_ITEM_NAMES.has(auction.item_name))) {
-							return;
-						}
+					case EnchantmentType.UsageUpgradable:
+						level = 1;
+						break;
 				}
 
-				const price = auction.starting_bid / count;
+				itemId = `${ENCHANTMENT}_${level}`;
+				break;
+			}
 
-				BINAuctions.get(itemId)?.push(price) ?? BINAuctions.set(itemId, [price]);
-			}),
-		);
+			case 'PET': {
+				const pet = JSON.parse(item.tag!.ExtraAttributes!.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
+
+				// ignore candied pets
+				if (pet.candyUsed) return;
+
+				// ignore skinned pets and pets with items held for lower tiers
+				switch (pet.tier) {
+					case 'COMMON':
+					case 'UNCOMMON':
+						if (pet.heldItem) return;
+					// fallthrough
+					case 'RARE':
+					case 'EPIC':
+						if (pet.skin) return;
+				}
+
+				let { level } = calculatePetSkillLevel(pet);
+
+				if (level < 50) {
+					level = 1;
+				} else if (level > 100 && level < 150) {
+					level = 100;
+				}
+
+				if (level !== 1 && level !== 100 && level !== 200) return;
+
+				itemId = `LVL_${level}_${pet.tier}_${pet.type}`;
+				break;
+			}
+
+			case 'RUNE': {
+				const [[RUNE, LEVEL]] = Object.entries(item.tag!.ExtraAttributes!.runes!);
+
+				itemId = `RUNE_${RUNE}_${LEVEL}`;
+				break;
+			}
+
+			case undefined:
+				// no itemId
+				logger.warn(item?.tag?.ExtraAttributes ?? item, '[UPDATE PRICES]: malformed item data');
+				return;
+
+			default:
+				// ignore vanilla mc items
+				if (
+					// common rarity
+					((auction as SkyBlockAuctionItem).tier === 'COMMON' || (auction as SkyBlockAuctionItem).tier == undefined) &&
+					// rarity in lore is sometimes different, e.g. for SILEX (not SIL_EX)
+					item.tag!.display?.Lore?.at(-1)?.match(/(?<=^(?:§[a-z\d])*)[A-Z]+/)?.[0] === 'COMMON' &&
+					// custom skin
+					!item.tag!.SkullOwner &&
+					// ':' in id
+					(itemId.includes(':') ||
+						// no lore
+						(item.tag!.display?.Lore?.length ?? 0) <= 1)
+				) {
+					return;
+				}
+		}
+
+		const price =
+			((auction as SkyBlockAuctionItem).starting_bid ?? (auction as SkyBlockAuctionEndedItem).price) / count;
+
+		BINAuctions.get(itemId)?.push(price) ?? BINAuctions.set(itemId, [price]);
+	};
+	const processAuctions = (_auctions: (SkyBlockAuctionItem | SkyBlockAuctionEndedItem)[]) =>
+		Promise.all(_auctions.map((auction) => processAuction(auction)));
 	const fetchAndProcessAuctions = async (page: number) => processAuctions((await fetchAuctionPage(page)).auctions);
+	const fetchAndProcessEndedAuctions = async () => {
+		const res = await fetch('https://api.hypixel.net/skyblock/auctions_ended', {
+			// @ts-expect-error
+			signal: AbortSignal.timeout(30_000),
+		});
 
-	const promises: Promise<void[]>[] = [processAuctions(auctions)];
+		if (res.status !== 200) throw new FetchError('FetchAuctionError', res);
+
+		return processAuctions(((await res.json()) as Components.Schemas.SkyBlockAuctionsEndedResponse).auctions);
+	};
+
+	const promises: Promise<unknown>[] = [processAuctions(auctions), fetchAndProcessEndedAuctions()];
 
 	for (let page = 1; page < totalPages; ++page) {
 		promises.push(fetchAndProcessAuctions(page));
