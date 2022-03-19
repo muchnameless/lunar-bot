@@ -187,9 +187,7 @@ async function updateAuctionPrices() {
 
 	// fetch remaining auction pages
 	const BINAuctions = new Collection<string, number[]>();
-	const processAuction = async (auction: SkyBlockAuctionItem | SkyBlockAuctionEndedItem) => {
-		if (!auction.bin && !(auction as SkyBlockAuctionEndedItem).price) return;
-
+	const processAuction = async (auction: SkyBlockAuctionItem | SkyBlockAuctionEndedItem, price: number) => {
 		const [item] = await transformItemData(auction.item_bytes);
 
 		if (!item) return;
@@ -280,13 +278,10 @@ async function updateAuctionPrices() {
 				}
 		}
 
-		const price =
-			((auction as SkyBlockAuctionItem).starting_bid ?? (auction as SkyBlockAuctionEndedItem).price) / count;
-
-		BINAuctions.get(itemId)?.push(price) ?? BINAuctions.set(itemId, [price]);
+		BINAuctions.get(itemId)?.push(price / count) ?? BINAuctions.set(itemId, [price / count]);
 	};
-	const processAuctions = (_auctions: (SkyBlockAuctionItem | SkyBlockAuctionEndedItem)[]) =>
-		Promise.all(_auctions.map((auction) => processAuction(auction)));
+	const processAuctions = (_auctions: Components.Schemas.SkyBlockAuctionsResponse['auctions']) =>
+		Promise.all(_auctions.map((auction) => auction.bin && processAuction(auction, auction.starting_bid)));
 	const fetchAndProcessAuctions = async (page: number) => processAuctions((await fetchAuctionPage(page)).auctions);
 	const fetchAndProcessEndedAuctions = async () => {
 		const res = await fetch('https://api.hypixel.net/skyblock/auctions_ended', {
@@ -296,7 +291,11 @@ async function updateAuctionPrices() {
 
 		if (res.status !== 200) throw new FetchError('FetchAuctionError', res);
 
-		return processAuctions(((await res.json()) as Components.Schemas.SkyBlockAuctionsEndedResponse).auctions);
+		return Promise.all(
+			((await res.json()) as Components.Schemas.SkyBlockAuctionsEndedResponse).auctions.map((auction) =>
+				processAuction(auction, auction.price),
+			),
+		);
 	};
 
 	const promises: Promise<unknown>[] = [processAuctions(auctions), fetchAndProcessEndedAuctions()];
