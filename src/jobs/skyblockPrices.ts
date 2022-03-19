@@ -245,8 +245,22 @@ async function updateAuctionPrices() {
 				break;
 			}
 
-			case undefined:
-				// no itemId
+			case 'POTION':
+				switch (item.tag!.ExtraAttributes!.potion_name) {
+					case 'Dungeon': // Dungeon potions
+						itemId = `POTION_${item.tag!.ExtraAttributes!.potion_name}_${item.tag!.ExtraAttributes!.potion_level}`;
+						break;
+
+					default:
+						// ignore other potions with multiple effects
+						if (item.tag!.ExtraAttributes!.effects?.length !== 1) return;
+
+						itemId = `POTION_${item.tag!.ExtraAttributes!.potion}_${item.tag!.ExtraAttributes!.potion_level}`;
+						break;
+				}
+				break;
+
+			case undefined: // no itemId
 				logger.warn(item?.tag?.ExtraAttributes ?? item, '[UPDATE PRICES]: malformed item data');
 				return;
 
@@ -255,14 +269,12 @@ async function updateAuctionPrices() {
 				if (
 					// common rarity
 					((auction as SkyBlockAuctionItem).tier === 'COMMON' || (auction as SkyBlockAuctionItem).tier == undefined) &&
-					// rarity in lore is sometimes different, e.g. for SILEX (not SIL_EX)
-					item.tag!.display?.Lore?.at(-1)?.match(/(?<=^(?:§[a-z\d])*)[A-Z]+/)?.[0] === 'COMMON' &&
+					// no lore (at most one line)
+					(item.tag!.display?.Lore?.length ?? 0) <= 1 &&
 					// custom skin
 					!item.tag!.SkullOwner &&
-					// ':' in id
-					(itemId.includes(':') ||
-						// no lore
-						(item.tag!.display?.Lore?.length ?? 0) <= 1)
+					// rarity in lore is sometimes different, e.g. EPIC instead of COMMON for SILEX (not SIL_EX)
+					item.tag!.display?.Lore?.[0]?.match(/(?<=^(?:§[a-z\d])*)[A-Z]+/)?.[0] === 'COMMON'
 				) {
 					return;
 				}
