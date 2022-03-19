@@ -242,8 +242,19 @@ async function updateAuctionPrices() {
 							item.tag!.ExtraAttributes!.petInfo as string,
 						) as Components.Schemas.SkyBlockProfilePet;
 
-						// ignore candied and skinned pets
-						if (pet.candyUsed || pet.skin) return;
+						// ignore candied pets
+						if (pet.candyUsed) return;
+
+						// ignore skinned pets and pets with items held for lower tiers
+						switch (pet.tier) {
+							case 'COMMON':
+							case 'UNCOMMON':
+								if (pet.heldItem) return;
+							// fallthrough
+							case 'RARE':
+							case 'EPIC':
+								if (pet.skin) return;
+						}
 
 						let { level } = calculatePetSkillLevel(pet);
 
@@ -285,7 +296,7 @@ async function updateAuctionPrices() {
 		);
 	const fetchAndProcessAuctions = async (page: number) => processAuctions((await fetchAuctionPage(page)).auctions);
 
-	const promises: Promise<void[]>[] = [(() => processAuctions(auctions))()];
+	const promises: Promise<void[]>[] = [processAuctions(auctions)];
 
 	for (let page = 1; page < totalPages; ++page) {
 		promises.push(fetchAndProcessAuctions(page));
