@@ -24,8 +24,6 @@ import { Routes } from 'discord-api-types/v9';
 Routes;
 import { Stopwatch } from '@sapphire/stopwatch';
 import { Type } from '@sapphire/type';
-import { transformItemData } from '@zikeji/hypixel';
-transformItemData;
 import { fetch } from 'undici';
 fetch;
 import ms from 'ms';
@@ -203,7 +201,7 @@ export default class EvalCommand extends ApplicationCommand {
 				const trimmed = lines[index].trimStart();
 
 				if (!trimmed || ['//', '/*'].some((x) => trimmed.startsWith(x))) continue;
-				if (['return ', 'const ', 'let ', 'var '].some((x) => trimmed.startsWith(x))) break;
+				if (['return ', 'const ', 'let ', 'var ', '}', ')'].some((x) => trimmed.startsWith(x))) break;
 
 				lines[index] = `return ${lines[index]}`;
 				break;
