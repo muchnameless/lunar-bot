@@ -188,7 +188,7 @@ async function updateAuctionPrices() {
 	// fetch remaining auction pages
 	const BINAuctions = new Collection<string, number[]>();
 	const processAuction = async (auction: SkyBlockAuctionItem | SkyBlockAuctionEndedItem) => {
-		if (!auction.bin) return;
+		if (!auction.bin && !(auction as SkyBlockAuctionEndedItem).price) return;
 
 		const [item] = await transformItemData(auction.item_bytes);
 
