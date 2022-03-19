@@ -1,6 +1,5 @@
 export * from './craftingRecipes';
 export * from './dungeons';
-export * from './enchantments';
 export * from './essenceUpgrades';
 export * from './farming';
 export * from './gemstones';

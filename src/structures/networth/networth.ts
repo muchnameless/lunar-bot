@@ -1,4 +1,5 @@
-import { transformItemData } from '@zikeji/hypixel';
+import { Buffer } from 'node:buffer';
+import { parse, simplify } from 'prismarine-nbt';
 import { logger } from '../../functions';
 import { hypixel } from '../../api';
 import {
@@ -7,7 +8,6 @@ import {
 	ESSENCE_UPGRADES,
 	GEMSTONES,
 	IGNORED_GEMSTONES,
-	getEnchantment,
 	MASTER_STARS,
 	MATERIALS_TO_ID,
 	PriceModifier,
@@ -17,15 +17,15 @@ import {
 	TALISMANS,
 } from './constants';
 import { getPrice, prices } from './prices';
-import { calculatePetSkillLevel } from './functions/pets';
+import { calculatePetSkillLevel, getEnchantment, isVanillaItem, transformItemData } from './functions';
 import type { SkyBlockProfile } from '../../functions';
-import type { Buffer } from 'node:buffer';
-import type { Components, NBTInventory, NBTInventoryItem, NBTExtraAttributes } from '@zikeji/hypixel';
+import type { Components, NBTExtraAttributes, NBTInventoryItem } from '@zikeji/hypixel';
 
 /**
+ * parse base64 item_data strings and calculate item prices
  * @param base64
  */
-async function parseItems(base64: string | number[] | Buffer) {
+async function parseItems(base64: string) {
 	let networth = 0;
 
 	for (const item of await transformItemData(base64)) {
@@ -35,11 +35,11 @@ async function parseItems(base64: string | number[] | Buffer) {
 		if (item.tag.ExtraAttributes.id.endsWith('BACKPACK')) {
 			const _items = item.tag.ExtraAttributes[
 				Object.keys(item.tag.ExtraAttributes).find((key) => key.endsWith('_data'))!
-			] as NBTInventory;
+			] as number[];
 
 			if (!Array.isArray(_items)) continue;
 
-			for (const _item of _items) {
+			for (const _item of simplify((await parse(Buffer.from(_items))).parsed.value.i as never) as NBTInventoryItem[]) {
 				if (!_item?.tag?.ExtraAttributes?.id) continue;
 
 				networth += calculateItemPrice(_item);
@@ -79,6 +79,9 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
  * @param item
  */
 export function calculateItemPrice(item: NBTInventoryItem) {
+	// ignore vanilla items (common rarity and no lore)
+	if (isVanillaItem(item)) return 0;
+
 	const ExtraAttributes = item.tag!.ExtraAttributes as SkyBlockNBTExtraAttributes;
 
 	// pet item

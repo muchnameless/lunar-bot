@@ -53,6 +53,8 @@ LeaderboardUtil;
 MessageEmbedUtil;
 MessageUtil;
 import * as functions from '../../functions';
+import * as nwFunctions from '../../structures/networth/functions';
+nwFunctions;
 import { ApplicationCommand } from '../../structures/commands/ApplicationCommand';
 import { calculateItemPrice } from '../../structures/networth/networth';
 calculateItemPrice;

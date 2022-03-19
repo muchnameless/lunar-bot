@@ -1,17 +1,19 @@
 /* eslint-disable unicorn/prefer-top-level-await */
 import { exit } from 'node:process';
-import { Buffer } from 'node:buffer';
 import { parentPort } from 'node:worker_threads';
 import { fetch } from 'undici';
 import { Collection } from 'discord.js';
-import { parse, simplify } from 'prismarine-nbt';
 import postgres from 'postgres';
 import { logger } from '../functions/logger';
 import { FetchError } from '../structures/errors/FetchError';
-import { getEnchantment } from '../structures/networth/constants/enchantments';
-import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
+import {
+	calculatePetSkillLevel,
+	getEnchantment,
+	isVanillaItem,
+	transformItemData,
+} from '../structures/networth/functions';
 import { JobType } from '.';
-import type { Components, NBTInventoryItem } from '@zikeji/hypixel';
+import type { Components } from '@zikeji/hypixel';
 
 type SkyBlockAuctionItem = Components.Schemas.SkyBlockAuctionsResponse['auctions'][0];
 type SkyBlockAuctionEndedItem = Components.Schemas.SkyBlockAuctionsEndedResponse['auctions'][0];
@@ -157,9 +159,6 @@ async function fetchAuctionPage(
 	throw new FetchError('FetchAuctionError', res);
 }
 
-const transformItemData = async (data: string): Promise<NBTInventoryItem[]> =>
-	simplify((await parse(Buffer.from(data, 'base64'))).parsed.value.i as never);
-
 /**
  * fetches and processes all auction pages
  */
@@ -264,18 +263,7 @@ async function updateAuctionPrices() {
 
 			default:
 				// ignore vanilla mc items
-				if (
-					// common rarity
-					((auction as SkyBlockAuctionItem).tier === 'COMMON' || (auction as SkyBlockAuctionItem).tier == undefined) &&
-					// no lore (at most one line)
-					(item.tag!.display?.Lore?.length ?? 0) <= 1 &&
-					// custom skin
-					!item.tag!.SkullOwner &&
-					// rarity in lore is sometimes different, e.g. EPIC instead of COMMON for SILEX (not SIL_EX)
-					item.tag!.display?.Lore?.[0]?.match(/(?<=^(?:§[a-z\d])*)[A-Z]+/)?.[0] === 'COMMON'
-				) {
-					return;
-				}
+				if (isVanillaItem(item)) return;
 		}
 
 		BINAuctions.get(itemId)?.push(price / count) ?? BINAuctions.set(itemId, [price / count]);
