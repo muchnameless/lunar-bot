@@ -502,10 +502,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@skyra/jaro-winkler@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@skyra/jaro-winkler@npm:1.0.0"
-  checksum: 2fc705ec1c2e22182ec0533382c419961c3d45131eaafccafc0c764cae4a513f7b99952cca94725fd0c6c99512231b654d2413656a978fadc4db35734513b5c3
+"@skyra/jaro-winkler@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@skyra/jaro-winkler@npm:1.1.0"
+  checksum: f46641f73363f19d2bc7f27534385d885d3c9dc4f7df81866860fcd549ec4f90de6249f078a49da33e4cc6a0ba5e4f2d687f63df9ccd14de70bd745e6927b29a
   languageName: node
   linkType: hard
 
@@ -3720,7 +3720,7 @@ __metadata:
     "@sapphire/time-utilities": ^1.7.3
     "@sapphire/type": ^2.2.0
     "@sapphire/utilities": ^3.6.1
-    "@skyra/jaro-winkler": ^1.0.0
+    "@skyra/jaro-winkler": ^1.1.0
     "@types/common-tags": ^1.8.1
     "@types/cron": ^1.7.3
     "@types/ioredis": ^4.28.10
