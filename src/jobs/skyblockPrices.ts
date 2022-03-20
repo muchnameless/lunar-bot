@@ -190,8 +190,6 @@ async function updateAuctionPrices() {
 	const processAuction = async (auction: SkyBlockAuctionItem | SkyBlockAuctionEndedItem, price: number) => {
 		const [item] = await transformItemData(auction.item_bytes);
 
-		if (!item) return;
-
 		let itemId = item.tag?.ExtraAttributes?.id;
 		let count = item.Count;
 
@@ -259,7 +257,7 @@ async function updateAuctionPrices() {
 				break;
 
 			case undefined: // no itemId
-				logger.warn(item?.tag?.ExtraAttributes ?? item, '[UPDATE PRICES]: malformed item data');
+				logger.warn(item, '[UPDATE PRICES]: malformed item data');
 				return;
 
 			default:
