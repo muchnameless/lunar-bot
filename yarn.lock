@@ -468,12 +468,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/time-utilities@npm:^1.7.1":
-  version: 1.7.1
-  resolution: "@sapphire/time-utilities@npm:1.7.1"
+"@sapphire/time-utilities@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "@sapphire/time-utilities@npm:1.7.2"
   dependencies:
-    "@sapphire/utilities": ^3.5.0
-  checksum: 0a6a3b0bd5fcd58bd8801430615a0f79ba918e2e938a10e4f08f4be05103d42a30f735554170f598930e924315963b8baa9bcb6327bcaf094b647f44c701b20b
+    "@sapphire/utilities": ^3.6.0
+  checksum: 32194be1fa521e76b8fff4d0db6e93573efe8fdcfc4e935fe64f41ec6c0abbcf22a864be1204111c7741a4fe5becf2e772170bcc8613f0589dbefeb886b9dac2
   languageName: node
   linkType: hard
 
@@ -488,10 +488,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sapphire/utilities@npm:^3.5.0":
-  version: 3.5.0
-  resolution: "@sapphire/utilities@npm:3.5.0"
-  checksum: 6c2de9b69d17b565e1a206c10093843fc024dd036874fe058a41abeb752fd5cc786a1768402879c7f174d94f3b0b5a725647a571a6a534b9a2ae244b5260162e
+"@sapphire/utilities@npm:^3.5.0, @sapphire/utilities@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "@sapphire/utilities@npm:3.6.0"
+  checksum: bb46f3590f8e609ca1aa492d2347a99fe79e75768a6592f47b4915dcdc93e0d933026d3ad4e872d75d84ba45a3afe27c940149f11931b299e8dc228b5f7e87ab
   languageName: node
   linkType: hard
 
@@ -3717,7 +3717,7 @@ __metadata:
     "@discordjs/rest": "*"
     "@sapphire/async-queue": ^1.3.0
     "@sapphire/stopwatch": ^1.4.0
-    "@sapphire/time-utilities": ^1.7.1
+    "@sapphire/time-utilities": ^1.7.2
     "@sapphire/type": ^2.2.0
     "@sapphire/utilities": ^3.5.0
     "@skyra/jaro-winkler": ^1.0.0
