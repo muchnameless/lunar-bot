@@ -1,0 +1,22 @@
+export const enum ItemId {
+	ArtOfWar = 'THE_ART_OF_WAR',
+	EnchantedBook = 'ENCHANTED_BOOK',
+	EnderDragon = 'ENDER_DRAGON',
+	EtherwarpConduit = 'ETHERWARP_CONDUIT',
+	EtherwarpMerger = 'ETHERWARP_MERGER',
+	FarmingForDummies = 'FARMING_FOR_DUMMIES',
+	FumingPotatoBook = 'FUMING_POTATO_BOOK',
+	GemstoneChamber = 'GEMSTONE_CHAMBER',
+	HegemonyArtifact = 'HEGEMONY_ARTIFACT',
+	HotPotatoBook = 'HOT_POTATO_BOOK',
+	JacobsTicket = 'JACOBS_TICKET',
+	Pet = 'PET',
+	Potion = 'POTION',
+	Recombobulator = 'RECOMBOBULATOR_3000',
+	Rune = 'RUNE',
+	Silex = 'SIL_EX', // SILEX is the old variant of the item
+	Stonk = 'STONK_PICKAXE',
+	TheoreticalHoe = 'THEORETICAL_HOE',
+	TransmissionTuner = 'TRANSMISSION_TUNER',
+	WoodSingularity = 'WOOD_SINGULARITY',
+}

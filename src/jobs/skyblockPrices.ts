@@ -12,6 +12,7 @@ import {
 	isVanillaItem,
 	transformItemData,
 } from '../structures/networth/functions';
+import { ItemId } from '../structures/networth/constants/itemId';
 import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
 
@@ -195,7 +196,7 @@ async function updateAuctionPrices() {
 		let count = item.Count;
 
 		switch (itemId) {
-			case 'ENCHANTED_BOOK': {
+			case ItemId.EnchantedBook: {
 				const enchants = Object.keys(item.tag!.ExtraAttributes!.enchantments ?? {});
 
 				if (enchants.length !== 1) return;
@@ -204,7 +205,7 @@ async function updateAuctionPrices() {
 				break;
 			}
 
-			case 'PET': {
+			case ItemId.Pet: {
 				const pet = JSON.parse(item.tag!.ExtraAttributes!.petInfo as string) as Components.Schemas.SkyBlockProfilePet;
 
 				// ignore candied pets
@@ -235,14 +236,14 @@ async function updateAuctionPrices() {
 				break;
 			}
 
-			case 'RUNE': {
+			case ItemId.Rune: {
 				const [[RUNE, LEVEL]] = Object.entries(item.tag!.ExtraAttributes!.runes!);
 
 				itemId = `RUNE_${RUNE}_${LEVEL}`;
 				break;
 			}
 
-			case 'POTION':
+			case ItemId.Potion:
 				switch (item.tag!.ExtraAttributes!.potion_name) {
 					case 'Dungeon': // Dungeon potions
 						itemId = `POTION_${item.tag!.ExtraAttributes!.potion_name}_${item.tag!.ExtraAttributes!.potion_level}`;

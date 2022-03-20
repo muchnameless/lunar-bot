@@ -2,11 +2,11 @@
  * multiplicative price modifier for the applied item
  */
 export const enum PriceModifier {
+	AppliedEnchantment = 0.85,
 	ArtOfWar = 0.6,
 	DrillUpgrade = 1,
 	DungeonEssence = 0.55,
 	DungeonStar = 1,
-	Enchantment = 0.85,
 	EtherwarpConduit = 1,
 	EtherwarpMerger = 1,
 	FarmingForDummies = 0.5,
