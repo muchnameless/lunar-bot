@@ -92,7 +92,7 @@
 		"pino-pretty": "^7.5.4",
 		"prettier": "^2.6.0",
 		"pretty-quick": "^3.1.3",
-		"typescript": "^4.7.0-dev.20220319"
+		"typescript": "^4.7.0-dev.20220320"
 	},
 	"engines": {
 		"node": ">=v17.5.0",
