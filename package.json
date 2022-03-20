@@ -30,7 +30,7 @@
 		"@sapphire/stopwatch": "^1.4.0",
 		"@sapphire/time-utilities": "^1.7.3",
 		"@sapphire/type": "^2.2.0",
-		"@sapphire/utilities": "^3.6.0",
+		"@sapphire/utilities": "^3.6.1",
 		"@skyra/jaro-winkler": "^1.0.0",
 		"@zikeji/hypixel": "github:muchnameless/node-hypixel#6da21ece522ea8dd61f44b5c74ab64b2f0e8be82",
 		"bree": "^8.0.2",
