@@ -3793,7 +3793,7 @@ __metadata:
     prettier: ^2.6.0
     pretty-quick: ^3.1.3
     prismarine-chat: ^1.6.0
-    prismarine-nbt: ^2.2.0
+    prismarine-nbt: ^2.2.1
     re2: ^1.17.4
     readdirp: ^3.6.0
     rss-parser: ^3.12.0
@@ -4965,12 +4965,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismarine-nbt@npm:^2.0.0, prismarine-nbt@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "prismarine-nbt@npm:2.2.0"
+"prismarine-nbt@npm:^2.0.0, prismarine-nbt@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "prismarine-nbt@npm:2.2.1"
   dependencies:
     protodef: ^1.9.0
-  checksum: 4858b4092c9af950b4437a4773a44f136f10ded0fa1af356ab4d49ffb43169608a0dd0412a0f82c95e5e8b09fabe23610514ee21ef097064a2effc8a9fd67ddf
+  checksum: 264ab200c65e9cf3ee47f810df266de5db1116a9a1139531a65dd3471d573ea67a11500c4053dbb590a5c11b290b63a41acdc5b41f3ba9f38972788a6161d24a
   languageName: node
   linkType: hard
 

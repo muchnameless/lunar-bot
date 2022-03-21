@@ -55,7 +55,7 @@
 		"pino": "^7.9.1",
 		"postgres": "3.0.0-rc.1",
 		"prismarine-chat": "^1.6.0",
-		"prismarine-nbt": "^2.2.0",
+		"prismarine-nbt": "^2.2.1",
 		"re2": "^1.17.4",
 		"readdirp": "^3.6.0",
 		"rss-parser": "^3.12.0",
