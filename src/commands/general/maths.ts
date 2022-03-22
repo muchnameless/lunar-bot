@@ -285,14 +285,8 @@ export default class MathsCommand extends DualCommand {
 	/**
 	 * lexer for mathematical expressions
 	 */
-	// eslint-disable-next-line prefer-arrow-callback
-	static lexer = new Lexer(function (c: string) {
-		throw new Error(
-			`LexerError: unexpected character at index ${
-				// @ts-expect-error
-				(this as Lexer).index
-			}: '${c}'`,
-		);
+	static lexer = new Lexer((c: string) => {
+		throw new Error(`LexerError: unexpected character '${c}' at index ${this.lexer.index}`);
 	})
 		.addRule(/,/, () => void 0) // ignore ','
 		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)/, (lexeme: string) => lexeme) // numbers
