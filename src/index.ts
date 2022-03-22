@@ -70,10 +70,9 @@ const client = new LunarClient({
 		status: 'online',
 	},
 	intents: [
-		GatewayIntentBits.DirectMessages, // eval edit button
 		GatewayIntentBits.Guilds, // to populate guild and channel caches
-		GatewayIntentBits.GuildEmojisAndStickers, // to keep the cache updated for the chat bridge
 		GatewayIntentBits.GuildMembers, // guildMemberAdd, remove
+		GatewayIntentBits.GuildEmojisAndStickers, // to keep the cache updated for the chat bridge
 		GatewayIntentBits.GuildMessages, // chat bridge
 		GatewayIntentBits.GuildMessageReactions, // forward announcements to guild chat
 	],
