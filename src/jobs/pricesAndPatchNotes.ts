@@ -246,7 +246,7 @@ async function updateAuctionPrices() {
 				break;
 
 			case undefined: // no itemId
-				logger.warn(item, '[UPDATE PRICES]: malformed item data');
+				logger.warn({ auction, item }, '[UPDATE PRICES]: malformed item data');
 				return;
 
 			default:
