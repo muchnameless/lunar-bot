@@ -19,14 +19,9 @@ export function startJobs(client: LunarClient) {
 		worker: { execArgv: [...execArgv, '--no-warnings'] },
 		jobs: [
 			{
-				name: 'skyblockPatchNotes',
+				name: 'pricesAndPatchNotes',
 				cron: '*/1 * * * *',
-				path: fileURLToPath(new URL('./skyblockPatchNotes.js', import.meta.url)),
-			},
-			{
-				name: 'skyblockPrices',
-				cron: '*/1 * * * *',
-				path: fileURLToPath(new URL('./skyblockPrices.js', import.meta.url)),
+				path: fileURLToPath(new URL('./pricesAndPatchNotes.js', import.meta.url)),
 			},
 		],
 		closeWorkerAfterMs: minutes(1.5),

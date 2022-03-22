@@ -3,7 +3,7 @@ import { exit } from 'node:process';
 import { parentPort } from 'node:worker_threads';
 import { fetch } from 'undici';
 import { Collection } from 'discord.js';
-import postgres from 'postgres';
+import { XMLParser } from 'fast-xml-parser';
 import { logger } from '../functions/logger';
 import { FetchError } from '../structures/errors/FetchError';
 import {
@@ -13,23 +13,16 @@ import {
 	transformItemData,
 } from '../structures/networth/functions';
 import { ItemId } from '../structures/networth/constants/itemId';
+import { sql } from '../structures/database/sql';
 import { JobType } from '.';
 import type { Components } from '@zikeji/hypixel';
 
+/**
+ * prices
+ */
+
 type SkyBlockAuctionItem = Components.Schemas.SkyBlockAuctionsResponse['auctions'][0];
 type SkyBlockAuctionEndedItem = Components.Schemas.SkyBlockAuctionsEndedResponse['auctions'][0];
-
-const sql = postgres({
-	types: {
-		numeric: {
-			// This conversion is identical to the `number` conversion in types.js line 11
-			to: 0,
-			from: [1_700],
-			serialize: (x: number) => x.toString(),
-			parse: (x: string) => Number.parseFloat(x),
-		},
-	},
-});
 
 /**
  * updates the database and the prices map with the median of the buy price
@@ -97,9 +90,7 @@ async function updateBazaarPrices() {
 		signal: AbortSignal.timeout(30_000),
 	});
 
-	if (res.status !== 200) {
-		throw new FetchError('FetchBazaarError', res);
-	}
+	if (res.status !== 200) throw new FetchError('FetchBazaarError', res);
 
 	const { lastUpdated, products } = (await res.json()) as Components.Schemas.SkyBlockBazaarResponse;
 
@@ -171,9 +162,7 @@ async function updateAuctionPrices() {
 	const { success, lastUpdated, totalPages, auctions } = await fetchAuctionPage(0);
 
 	// abort on error
-	if (!success) {
-		return logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
-	}
+	if (!success) return logger.error(`[UPDATE AUCTION PRICES]: success ${success}`);
 
 	// check if API data is updated
 	const [lastUpdatedEntry] = await sql<[{ value: string }]>`
@@ -313,9 +302,137 @@ async function updateAuctionPrices() {
 	logger.debug(`[UPDATE AUCTION PRICES]: updated ${BINAuctions.size} items from ${totalPages} auction pages`);
 }
 
-await Promise.all([updateAuctionPrices(), updateBazaarPrices()]);
+/**
+ * patchnotes
+ */
+
+interface HypixelForumResponse {
+	rss: {
+		channel: {
+			title: string;
+			description: string;
+			pubDate: string;
+			lastBuildDate: string;
+			generator: string;
+			link: string;
+			'atom:link': '';
+			item: {
+				title: string;
+				pubDate: string;
+				link: string;
+				guid: number;
+				author: string;
+				category: string;
+				'dc:creator': string;
+				'content:encoded': string;
+				'slash:comments': number;
+			}[];
+		};
+	};
+}
+
+const xmlParser = new XMLParser({ ignoreDeclaration: true });
+
+/**
+ * fetch and parse xml data
+ * @param forum
+ */
+async function fetchForumEntries(forum: string) {
+	const res = await fetch(`https://hypixel.net/forums/${forum}/index.rss`, {
+		// @ts-expect-error
+		signal: AbortSignal.timeout(30_000),
+	});
+
+	if (res.status !== 200) throw new FetchError('FetchError', res);
+
+	return (xmlParser.parse(await res.text()) as HypixelForumResponse).rss.channel.item;
+}
+
+/**
+ * updates skyblock patchnotes from hypixel forum rss feeds
+ */
+async function updatePatchNotes() {
+	// fetch RSS feeds
+	const [skyblockPatchnotes, newsAndAnnouncements] = await Promise.all([
+		fetchForumEntries('skyblock-patch-notes.158'),
+		fetchForumEntries('news-and-announcements.4'),
+	]);
+
+	// add skyblock related posts from news and announcements
+	for (const item of newsAndAnnouncements) {
+		if (item.title.toLowerCase().includes('skyblock') || item['content:encoded'].toLowerCase().includes('skyblock')) {
+			skyblockPatchnotes.push(item);
+		}
+	}
+
+	const now = new Date();
+	const parsedItems = skyblockPatchnotes.map(({ guid, title, ['dc:creator']: creator, link }) => ({
+		guid,
+		title,
+		creator,
+		link,
+		createdAt: now,
+		updatedAt: now,
+	}));
+
+	const [lastGuidEntry] = await sql<[{ value: string }]>`
+		SELECT value
+		FROM "Config"
+		WHERE key = 'HYPIXEL_FORUM_LAST_GUID'
+	`;
+	const LAST_GUID: number = lastGuidEntry ? JSON.parse(lastGuidEntry.value) : 0;
+	const newPosts = parsedItems.filter(({ guid }) => guid > LAST_GUID);
+
+	await sql`
+		INSERT INTO "SkyBlockPatchNotes"
+		${sql(parsedItems)}
+		ON CONFLICT (guid) DO
+		UPDATE SET
+			title = excluded.title,
+		 	creator = excluded.creator,
+		 	link = excluded.link,
+		  "updatedAt" = excluded."updatedAt"
+	`;
+
+	if (!newPosts.length) return;
+
+	if (parentPort) {
+		parentPort.postMessage({
+			op: JobType.HypixelForumLastGUIDUpdate,
+			d: { HYPIXEL_FORUM_LAST_GUID: Math.max(...newPosts.map(({ guid }) => guid)) },
+		});
+	} else {
+		await sql`
+			INSERT INTO "Config" (
+				key,
+				value
+			) VALUES (
+				'HYPIXEL_FORUM_LAST_GUID',
+				${JSON.stringify(Math.max(...newPosts.map(({ guid }) => guid)))}
+			)
+			ON CONFLICT (key) DO
+			UPDATE SET value = excluded.value
+		`;
+	}
+}
+
+/**
+ * run jobs
+ */
+
+const errors = (await Promise.allSettled([updateAuctionPrices(), updateBazaarPrices(), updatePatchNotes()])).filter(
+	(x) => x.status === 'rejected',
+) as PromiseRejectedResult[];
+
+/**
+ * cleanup
+ */
 
 await sql.end();
+
+if (errors.length) {
+	throw errors.map((x) => x.reason);
+}
 
 if (parentPort) {
 	parentPort.postMessage('done');
