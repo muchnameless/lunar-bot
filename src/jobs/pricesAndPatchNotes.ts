@@ -389,9 +389,9 @@ async function updatePatchNotes() {
 		ON CONFLICT (guid) DO
 		UPDATE SET
 			title = excluded.title,
-		 	creator = excluded.creator,
-		 	link = excluded.link,
-		  "updatedAt" = excluded."updatedAt"
+			creator = excluded.creator,
+			link = excluded.link,
+			"updatedAt" = excluded."updatedAt"
 	`;
 
 	if (!newPosts.length) return;
@@ -419,10 +419,14 @@ async function updatePatchNotes() {
 /**
  * run jobs
  */
+let exitCode = 0;
 
-const errors = (await Promise.allSettled([updateAuctionPrices(), updateBazaarPrices(), updatePatchNotes()])).filter(
-	(x) => x.status === 'rejected',
-) as PromiseRejectedResult[];
+for (const res of await Promise.allSettled([updateAuctionPrices(), updateBazaarPrices(), updatePatchNotes()])) {
+	if (res.status === 'rejected') {
+		logger.fatal(res.reason);
+		exitCode = 1;
+	}
+}
 
 /**
  * cleanup
@@ -430,12 +434,8 @@ const errors = (await Promise.allSettled([updateAuctionPrices(), updateBazaarPri
 
 await sql.end();
 
-if (errors.length) {
-	throw errors.map((x) => x.reason);
-}
-
 if (parentPort) {
 	parentPort.postMessage('done');
 } else {
-	exit(0);
+	exit(exitCode);
 }
