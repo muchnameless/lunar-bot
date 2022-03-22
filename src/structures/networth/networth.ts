@@ -32,8 +32,8 @@ async function parseItems(base64: string) {
 	for (const item of await transformItemData(base64)) {
 		if (!item.tag?.ExtraAttributes?.id) continue;
 
-		// backpacks -> iterate over contained items
-		if (item.tag.ExtraAttributes.id.endsWith('BACKPACK')) {
+		// backpacks / new year cake bag -> iterate over contained items
+		if (item.tag.ExtraAttributes.id.endsWith('BACKPACK') || item.tag.ExtraAttributes.id.endsWith('_BAG')) {
 			const _items = item.tag.ExtraAttributes[
 				Object.keys(item.tag.ExtraAttributes).find((key) => key.endsWith('_data'))!
 			] as number[];
