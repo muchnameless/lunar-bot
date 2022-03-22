@@ -11,6 +11,7 @@ import { CronJobManager } from './CronJobManager';
 import { ChatBridgeManager } from './chat_bridge/ChatBridgeManager';
 import { ApplicationCommandCollection } from './commands/ApplicationCommandCollection';
 import { EventCollection } from './events/EventCollection';
+import { sql } from './database/sql';
 import type { ActivitiesOptions, ClientOptions, MessageOptions, Snowflake } from 'discord.js';
 import type { db } from './database';
 
@@ -146,7 +147,7 @@ export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> 
 			logger.fatal(error);
 		}
 
-		for (const output of await Promise.allSettled([this.db.sequelize.close(), redis.quit()])) {
+		for (const output of await Promise.allSettled([this.db.sequelize.close(), sql.end(), redis.quit()])) {
 			if (output.status === 'rejected') {
 				logger.fatal(output.reason);
 				hasError = true;
