@@ -1,10 +1,12 @@
+import { ItemRarity } from '.';
+
 export const PET_RARITY_OFFSET = {
-	COMMON: 0,
-	UNCOMMON: 6,
-	RARE: 11,
-	EPIC: 16,
-	LEGENDARY: 20,
-	MYTHIC: 20,
+	[ItemRarity.Common]: 0,
+	[ItemRarity.Uncommon]: 6,
+	[ItemRarity.Rare]: 11,
+	[ItemRarity.Epic]: 16,
+	[ItemRarity.Legendary]: 20,
+	[ItemRarity.Mythic]: 20,
 };
 
 export const PET_LEVELS_XP = [
