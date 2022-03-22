@@ -69,7 +69,7 @@ export class MessageUtil extends null {
 	}
 
 	/**
-	 * wether the message was sent by a non-bot user account
+	 * whether the message was sent by a non-bot user account
 	 * @param message
 	 */
 	static isUserMessage(message: Message) {
@@ -77,7 +77,7 @@ export class MessageUtil extends null {
 	}
 
 	/**
-	 * wether the message was sent by a non-application-command webhook
+	 * whether the message was sent by a non-application-command webhook
 	 * @param message
 	 */
 	static isNormalWebhookMessage(message: Message) {
@@ -85,7 +85,7 @@ export class MessageUtil extends null {
 	}
 
 	/**
-	 * wether the message is a reply but not to an application command
+	 * whether the message is a reply but not to an application command
 	 * @param message
 	 */
 	static isNormalReplyMessage(message: Message) {
@@ -93,7 +93,7 @@ export class MessageUtil extends null {
 	}
 
 	/**
-	 * wether the message is from the bot user and not related to application commands
+	 * whether the message is from the bot user and not related to application commands
 	 * @param message
 	 */
 	static isNormalBotMessage(message: Message) {

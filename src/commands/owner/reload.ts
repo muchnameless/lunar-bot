@@ -14,11 +14,11 @@ export default class ReloadCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		const reloadOption = new SlashCommandBooleanOption()
 			.setName('reload')
-			.setDescription('wether to reimport the file')
+			.setDescription('whether to reimport the file')
 			.setRequired(false);
 		const forceOption = new SlashCommandBooleanOption()
 			.setName('force')
-			.setDescription('wether to load disabled events')
+			.setDescription('whether to load disabled events')
 			.setRequired(false);
 
 		super(

@@ -83,11 +83,11 @@ interface ParsedTransaction extends InferAttributes<Transaction> {
 export interface PlayerUpdateOptions {
 	/** role update reason for discord's audit logs */
 	reason?: string;
-	/** wether to dm the user that they should include their ign somewhere in their nickname */
+	/** whether to dm the user that they should include their ign somewhere in their nickname */
 	shouldSendDm?: boolean;
-	/** wether to only await the updateXp call and not updateDiscordMember */
+	/** whether to only await the updateXp call and not updateDiscordMember */
 	shouldOnlyAwaitUpdateXp?: boolean;
-	/** wether to reject if the hypixel API reponded with an error */
+	/** whether to reject if the hypixel API reponded with an error */
 	rejectOnAPIError?: boolean;
 }
 
@@ -573,7 +573,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	}
 
 	/**
-	 * wether the player is in a cached hypixel guild
+	 * whether the player is in a cached hypixel guild
 	 */
 	inGuild(): this is PlayerInGuild {
 		return this.client.hypixelGuilds.cache.has(this.guildId!);
@@ -712,7 +712,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	}
 
 	/**
-	 * wether the player has an in-game staff rank in their current hypixel guild
+	 * whether the player has an in-game staff rank in their current hypixel guild
 	 */
 	get isStaff(): NonAttribute<boolean> {
 		const { hypixelGuild } = this;
@@ -948,7 +948,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * updates discord roles and nickname
 	 * @param options
 	 * @param options.reason role update reason for discord's audit logs
-	 * @param options.shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
+	 * @param options.shouldSendDm whether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async updateDiscordMember({ reason: reasonInput = 'synced with in-game stats', shouldSendDm = false } = {}) {
 		if (this.discordMemberUpdatesDisabled || !this.guildId) return;
@@ -1481,7 +1481,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 
 	/**
 	 * check if the discord member's display name includes the player ign and is unique. Tries to change it if it doesn't / isn't
-	 * @param shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
+	 * @param shouldSendDm whether to dm the user that they should include their ign somewhere in their nickname
 	 */
 	async syncIgnWithDisplayName(shouldSendDm = false) {
 		if (!this.inGuild() || this.guildRankPriority > this.hypixelGuild.syncIgnThreshold) return;
@@ -1537,7 +1537,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	/**
 	 * sets a nickname for the player's discord member
 	 * @param newNick new nickname, null to remove the current nickname
-	 * @param shouldSendDm wether to dm the user that they should include their ign somewhere in their nickname
+	 * @param shouldSendDm whether to dm the user that they should include their ign somewhere in their nickname
 	 * @param reason reason for discord's audit logs and the DM
 	 */
 	async makeNickAPICall({
@@ -1971,7 +1971,7 @@ export class Player extends Model<InferAttributes<Player>, InferCreationAttribut
 	 * returns the true and progression level for the provided skill type
 	 * @param type the skill or dungeon type
 	 * @param offset optional offset value to use instead of the current xp value
-	 * @param useIndividualCap wether to use the individual max level cap if existing
+	 * @param useIndividualCap whether to use the individual max level cap if existing
 	 */
 	getSkillLevel(type: SkillTypes | DungeonTypes, offset: XPOffsets = '', useIndividualCap = true) {
 		return getSkillLevel(

@@ -90,7 +90,7 @@ export class LogHandler {
 	}
 
 	/**
-	 * wether the log handler has a valid channel with all neccessary permissions
+	 * whether the log handler has a valid channel with all neccessary permissions
 	 */
 	get ready() {
 		return Boolean(this.channel);

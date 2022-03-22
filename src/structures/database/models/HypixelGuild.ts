@@ -395,7 +395,7 @@ export class HypixelGuild extends Model<
 	}
 
 	/**
-	 * wether the player is muted and that mute is not expired
+	 * whether the player is muted and that mute is not expired
 	 */
 	get muted(): NonAttribute<boolean> {
 		if (this.mutedTill) {
@@ -536,7 +536,7 @@ export class HypixelGuild extends Model<
 	}
 
 	/**
-	 * wether the player is muted in-game in this hypixel guild
+	 * whether the player is muted in-game in this hypixel guild
 	 * @param player
 	 */
 	checkMute(player: Player | null) {
@@ -575,7 +575,7 @@ export class HypixelGuild extends Model<
 	}
 
 	/**
-	 * wether the player has an in-game staff rank in this hypixel guild
+	 * whether the player has an in-game staff rank in this hypixel guild
 	 * @param player
 	 */
 	checkStaff(player: Player) {

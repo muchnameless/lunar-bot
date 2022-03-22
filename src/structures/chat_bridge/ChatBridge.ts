@@ -30,7 +30,7 @@ export interface MessageForwardOptions {
 	link?: DiscordChatManagerResolvable;
 	/** player for muted and isStaff check */
 	player?: Player;
-	/** wether the message is an edit instead of a new message */
+	/** whether the message is an edit instead of a new message */
 	isEdit?: boolean;
 }
 
@@ -69,7 +69,7 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 	 */
 	hypixelGuild: HypixelGuild | null = null;
 	/**
-	 * wether to retry linking the chat bridge to a guild
+	 * whether to retry linking the chat bridge to a guild
 	 */
 	shouldRetryLinking = true;
 	/**
@@ -116,14 +116,14 @@ export class ChatBridge<loggedIn extends boolean = boolean> extends TypedEmitter
 	}
 
 	/**
-	 * wether the minecraft bot and all discord channel managers (webhooks) are ready
+	 * whether the minecraft bot and all discord channel managers (webhooks) are ready
 	 */
 	isReady(): this is ChatBridge<true> {
 		return this.minecraft.isReady() && this.discord.ready;
 	}
 
 	/**
-	 * wether the guild has the chatBridge feature enabled
+	 * whether the guild has the chatBridge feature enabled
 	 */
 	isEnabled(): this is ChatBridge & { hypixelGuild: HypixelGuild } {
 		return this.hypixelGuild?.chatBridgeEnabled ?? false;

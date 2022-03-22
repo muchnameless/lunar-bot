@@ -193,7 +193,7 @@ export class HypixelMessage {
 	}
 
 	/**
-	 * wether the message was sent by the bot
+	 * whether the message was sent by the bot
 	 */
 	get me() {
 		return this.author?.ign === this.chatBridge.bot?.username ?? '@';
@@ -228,7 +228,7 @@ export class HypixelMessage {
 	}
 
 	/**
-	 * wether the message was sent by a non-bot user
+	 * whether the message was sent by a non-bot user
 	 */
 	isUserMessage(): this is HypixelUserMessage {
 		return this.type !== null && !this.me;

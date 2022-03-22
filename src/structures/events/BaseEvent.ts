@@ -31,7 +31,7 @@ export class BaseEvent {
 
 	/**
 	 * add the event listener
-	 * @param force wether to also load disabled events
+	 * @param force whether to also load disabled events
 	 */
 	load(force = false) {
 		if (this.enabled || force) this.emitter[this.once ? 'once' : 'on'](this.name, this.callback);

@@ -36,7 +36,7 @@ export class DualCommand
 	}
 
 	/**
-	 * wether the command is part of a visible category
+	 * whether the command is part of a visible category
 	 */
 	get visible() {
 		return !BaseCommandCollection.INVISIBLE_CATEGORIES.has(this.category!);

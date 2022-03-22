@@ -63,7 +63,7 @@ export const removeMcFormatting = (string: string) => string.replace(/§[\da-gk-
 /**
  * escapes '*' and '_' if those are neither within a URL nor a code block or inline code
  * @param string
- * @param escapeEverything wether to also escape '\' before '*' and '_'
+ * @param escapeEverything whether to also escape '\' before '*' and '_'
  */
 export const escapeMarkdown = (string: string, escapeEverything = false) =>
 	string

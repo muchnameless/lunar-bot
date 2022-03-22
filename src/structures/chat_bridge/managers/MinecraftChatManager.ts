@@ -47,7 +47,7 @@ export interface SendToChatOptions {
 	prefix?: string;
 	isMessage?: boolean;
 	discordMessage?: Message | null;
-	/** wether to whisper to the author */
+	/** whether to whisper to the author */
 	ephemeral?: boolean;
 }
 
@@ -60,13 +60,13 @@ export interface CommandOptions {
 	abortRegExp?: RegExp | null;
 	/** maximum amount of response messages, -1 or Number.POSITIVE_INFINITY for an infinite amount */
 	max?: number;
-	/** wether to return an array of the collected hypixel message objects instead of just the content */
+	/** whether to return an array of the collected hypixel message objects instead of just the content */
 	raw?: boolean;
 	/** response collector timeout in milliseconds */
 	timeout?: number;
-	/** wether to reject the promise if the collected amount is less than max */
+	/** whether to reject the promise if the collected amount is less than max */
 	rejectOnTimeout?: boolean;
-	/** wether to reject the promise if the abortRegExp triggered */
+	/** whether to reject the promise if the abortRegExp triggered */
 	rejectOnAbort?: boolean;
 }
 
@@ -123,7 +123,7 @@ class LastMessages {
 	}
 
 	/**
-	 * check wether the content is already in the buffer
+	 * check whether the content is already in the buffer
 	 * @param content
 	 * @param retry
 	 */
@@ -169,7 +169,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	private _contentFilter: string | null = null;
 	/**
-	 * wether the message sent collector is active
+	 * whether the message sent collector is active
 	 */
 	private _collecting = false;
 	/**
@@ -193,7 +193,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	 */
 	private commandQueue = new AsyncQueue();
 	/**
-	 * wether the minecraft bot is logged in and ready to receive and send chat messages
+	 * whether the minecraft bot is logged in and ready to receive and send chat messages
 	 */
 	botReady = false;
 	/**
@@ -222,7 +222,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	private _lastMessages = new LastMessages();
 
 	/**
-	 * wether the minecraft bot is logged in and ready to receive and send chat messages
+	 * whether the minecraft bot is logged in and ready to receive and send chat messages
 	 */
 	isReady(): this is MinecraftChatManager<true> {
 		return this.botReady && !(this.bot?.ended ?? true);
@@ -261,7 +261,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	}
 
 	/**
-	 * wether the minecraft bot can send chat messages
+	 * whether the minecraft bot can send chat messages
 	 */
 	get chatReady() {
 		if (!this.bot) return Promise.resolve(false);
@@ -770,7 +770,7 @@ export class MinecraftChatManager<loggedIn extends boolean = boolean> extends Ch
 	/**
 	 * splits the message into the max in-game chat length, prefixes all parts and sends them
 	 * @param options
-	 * @returns success - wether all message parts were send
+	 * @returns success - whether all message parts were send
 	 */
 	async chat(options: string | ChatOptions) {
 		const {

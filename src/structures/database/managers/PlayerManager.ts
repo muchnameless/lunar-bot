@@ -120,7 +120,7 @@ export class PlayerManager extends ModelManager<Player> {
 	/**
 	 * add a player to the db and db cache
 	 * @param options options for the new db entry
-	 * @param isAddingSingleEntry wether to call sortAlphabetically() and updateXp() after adding the new entry
+	 * @param isAddingSingleEntry whether to call sortAlphabetically() and updateXp() after adding the new entry
 	 */
 	override async add(options: CreationAttributes<Player>, isAddingSingleEntry = true) {
 		const newPlayer = await super.add(options);

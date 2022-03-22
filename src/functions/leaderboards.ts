@@ -144,7 +144,7 @@ const createCacheKey = ({ user: { id: USER_ID }, hypixelGuild, lbType, xpType, o
 	}:${lbType}:${xpType}:${offset}` as const;
 
 /**
- * default xp offset based on wether there is a current competition or not
+ * default xp offset based on whether there is a current competition or not
  * @param config
  */
 export const getDefaultOffset = (config: ConfigManager) =>

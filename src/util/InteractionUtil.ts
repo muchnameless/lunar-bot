@@ -86,16 +86,16 @@ interface UpdateOptions extends InteractionUpdateOptions {
 }
 
 interface GetPlayerOptions {
-	/** wether to use the current user in case that no player / target option is provided */
+	/** whether to use the current user in case that no player / target option is provided */
 	fallbackToCurrentUser?: boolean;
-	/** wether to throw an error if no linked player is found */
+	/** whether to throw an error if no linked player is found */
 	throwIfNotFound?: boolean;
 }
 
 interface GetHypixelGuildOptions {
-	/** wether to use the current user in case that no player / target option is provided */
+	/** whether to use the current user in case that no player / target option is provided */
 	fallbackIfNoInput?: boolean;
-	/** wether the return value may also be a string with GUILD_ID_ALL */
+	/** whether the return value may also be a string with GUILD_ID_ALL */
 	includeAll?: boolean;
 }
 
@@ -176,7 +176,7 @@ export class InteractionUtil extends null {
 	}
 
 	/**
-	 * wether the error is due to an interaction reply
+	 * whether the error is due to an interaction reply
 	 * @param error
 	 */
 	static isInteractionError(error: unknown): error is DiscordAPIError {
@@ -303,7 +303,7 @@ export class InteractionUtil extends null {
 	}
 
 	/**
-	 * wether the force option was set to true
+	 * whether the force option was set to true
 	 * @param interaction
 	 */
 	static checkForce(interaction: ChatInputCommandInteraction | AutocompleteInteraction) {

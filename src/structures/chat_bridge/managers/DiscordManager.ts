@@ -90,7 +90,7 @@ export class DiscordManager {
 	 * readable string -> discord markdown
 	 * async to allow database queries for @uncached_player_ign
 	 * @param string
-	 * @param fromMinecraft wether the message was sent in mc chat
+	 * @param fromMinecraft whether the message was sent in mc chat
 	 */
 	async parseContent(string: string, fromMinecraft = false) {
 		return escapeMarkdown(

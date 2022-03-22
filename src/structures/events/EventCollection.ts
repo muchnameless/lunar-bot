@@ -7,9 +7,9 @@ import type { URL } from 'node:url';
 import type { BaseEvent } from './BaseEvent';
 
 interface EventLoadOptions {
-	/** wether to reload the imported file */
+	/** whether to reload the imported file */
 	reload?: boolean;
-	/** wether to load disabled events */
+	/** whether to load disabled events */
 	force?: boolean;
 }
 
