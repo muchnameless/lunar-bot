@@ -4,6 +4,7 @@ export * from './essenceUpgrades';
 export * from './farming';
 export * from './gemstones';
 export * from './itemId';
+export * from './itemRarity';
 export * from './misc';
 export * from './modifiers';
 export * from './pets';

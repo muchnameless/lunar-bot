@@ -9,6 +9,7 @@ log_buffer
 logs
 node_modules
 src/tests
+data
 
 .pnp.*
 .yarn/*
