@@ -19,43 +19,21 @@ import type { NBTInventoryItem } from '@zikeji/hypixel';
  */
 
 /**
- * get the rarity colour code from the item's lore -> 2nd char of last line
+ * whether the item is a (recombobulated) common item, uses the rarity colour code from the item's lore -> 2nd char of last line
  * @param item
  */
-export const getRarityColourCode = (item: NBTInventoryItem) => {
-	const COLOUR_CODE = item.tag!.display?.Lore?.at(-1)?.[1];
-
-	// not recombobulated
-	if (!item.tag!.ExtraAttributes?.rarity_upgrades) return (COLOUR_CODE as ItemRarityColourCode) ?? null;
-
-	// recombobulated -> reduce rarity by 1
-	switch (COLOUR_CODE) {
-		// case ItemRarityColourCode.Common: // lowest tier -> cannot be upgraded
+export const isCommonItem = (item: NBTInventoryItem) => {
+	switch (item.tag!.display?.Lore?.at(-1)?.[1]) {
+		case ItemRarityColourCode.Common:
+		case undefined: // no lore
+			return true;
 
 		case ItemRarityColourCode.Uncommon:
-			return ItemRarityColourCode.Common;
-
-		case ItemRarityColourCode.Rare:
-			return ItemRarityColourCode.Uncommon;
-
-		case ItemRarityColourCode.Epic:
-			return ItemRarityColourCode.Rare;
-
-		case ItemRarityColourCode.Legendary:
-			return ItemRarityColourCode.Epic;
-
-		case ItemRarityColourCode.Mythic:
-			return ItemRarityColourCode.Legendary;
-
-		case ItemRarityColourCode.Divine:
-			return ItemRarityColourCode.Mythic;
-
-		case ItemRarityColourCode.Special:
-		case ItemRarityColourCode.VerySpecial:
-			return ItemRarityColourCode.Special;
+			// recombobulated?
+			return Boolean(item.tag!.ExtraAttributes?.rarity_upgrades);
 
 		default:
-			return null;
+			return false;
 	}
 };
 
@@ -64,10 +42,14 @@ export const getRarityColourCode = (item: NBTInventoryItem) => {
  * @param item
  */
 export const isVanillaItem = (item: NBTInventoryItem) =>
-	[ItemRarityColourCode.Common, null].includes(getRarityColourCode(item)) &&
+	isCommonItem(item) &&
 	((item.tag!.display?.Lore?.length ?? 0) <= 1 ||
 		item.tag!.ExtraAttributes!.id.includes(':') ||
-		VANILLA_ITEM_DISPLAY_NAMES.has(item.tag!.display?.Name?.replace(/§[\da-gk-or]/g, '').trim()!)) &&
+		VANILLA_ITEM_DISPLAY_NAMES.has(
+			item.tag!.display?.Name?.startsWith('§')
+				? item.tag!.display.Name.slice(2 /* '§f'.length */)
+				: item.tag!.display?.Name!,
+		)) &&
 	!item.tag!.SkullOwner;
 
 /**
