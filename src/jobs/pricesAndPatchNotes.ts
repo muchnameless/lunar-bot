@@ -31,7 +31,7 @@ type SkyBlockAuctionEndedItem = Components.Schemas.SkyBlockAuctionsEndedResponse
  */
 async function updateItem(itemId: string, currentPrice: number) {
 	// history is a circular buffer with length 1440 (24*60, each minute for 1 day), index points to the next element, $2 is currentPrice
-	const [{ median, array_length }] = await sql<[{ median: number; array_length: number }]>`
+	const [{ median, new_entry }] = await sql<[{ median: number; new_entry: boolean }]>`
 		INSERT INTO prices (
 			id,
 			history
@@ -45,13 +45,15 @@ async function updateItem(itemId: string, currentPrice: number) {
 			index = CASE WHEN prices.index >= 1440 THEN 1
 			             ELSE prices.index + 1
 			        END
-		RETURNING median(history), array_length(history, 1);
+		RETURNING
+			median(history),
+			array_length(history, 1) = 1 AS new_entry
 	`;
 
 	parentPort?.postMessage({ op: JobType.SkyblockAuctionPriceUpdate, d: { itemId, price: median } });
 
 	// eslint-disable-next-line camelcase
-	if (array_length === 1) {
+	if (new_entry) {
 		logger.debug(
 			{
 				itemId,
