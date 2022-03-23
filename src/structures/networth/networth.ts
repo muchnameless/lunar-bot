@@ -80,15 +80,15 @@ type SkyBlockNBTExtraAttributes = NBTExtraAttributes &
  * @param item
  */
 export function calculateItemPrice(item: NBTInventoryItem) {
-	// ignore vanilla items (common rarity and no lore)
-	if (isVanillaItem(item)) return 0;
-
 	const ExtraAttributes = item.tag!.ExtraAttributes as SkyBlockNBTExtraAttributes;
 
 	// pet item
 	if (ExtraAttributes.petInfo) {
 		return getPetPrice(JSON.parse(ExtraAttributes.petInfo) as Components.Schemas.SkyBlockProfilePet);
 	}
+
+	// ignore vanilla items (they are not worth much and tend to be binned for way to high / sold for coin transfers)
+	if (isVanillaItem(item)) return 0;
 
 	const itemId = ExtraAttributes.id;
 

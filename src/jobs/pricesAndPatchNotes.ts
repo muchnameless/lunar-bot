@@ -4,14 +4,11 @@ import { parentPort } from 'node:worker_threads';
 import { fetch } from 'undici';
 import { Collection } from 'discord.js';
 import { XMLParser } from 'fast-xml-parser';
-import { logger } from '../functions/logger';
+import { logger } from '../functions/logger'; // no index imports to not import unused files in the worker
 import { FetchError } from '../structures/errors/FetchError';
-import {
-	calculatePetSkillLevel,
-	getEnchantment,
-	isVanillaItem,
-	transformItemData,
-} from '../structures/networth/functions';
+import { getEnchantment } from '../structures/networth/functions/enchantments'; // separate imports to not import unused files in the worker
+import { transformItemData } from '../structures/networth/functions/nbt';
+import { calculatePetSkillLevel } from '../structures/networth/functions/pets';
 import { ItemId } from '../structures/networth/constants/itemId';
 import { sql } from '../structures/database/sql';
 import { JobType } from '.';
@@ -261,10 +258,6 @@ async function updateAuctionPrices() {
 			case undefined: // no itemId
 				logger.warn({ auction, item }, '[UPDATE PRICES]: malformed item data');
 				return;
-
-			default:
-				// ignore vanilla mc items
-				if (isVanillaItem(item)) return;
 		}
 
 		BINAuctions.get(itemId)?.push(price / count) ?? BINAuctions.set(itemId, [price / count]);

@@ -1,7 +1,7 @@
 import { fileURLToPath, URL } from 'node:url';
 import { execArgv } from 'node:process';
 import Bree from 'bree';
-import { logger, minutes } from '../functions';
+import { logger, minutes, seconds } from '../functions';
 import { prices } from '../structures/networth/prices';
 import type { LunarClient } from '../structures/LunarClient';
 
@@ -24,7 +24,7 @@ export function startJobs(client: LunarClient) {
 				path: fileURLToPath(new URL('./pricesAndPatchNotes.js', import.meta.url)),
 			},
 		],
-		closeWorkerAfterMs: minutes(1.5),
+		closeWorkerAfterMs: minutes(1) + seconds(45),
 		errorHandler(error, workerMetadata) {
 			logger.error({ err: error, workerMetadata }, '[BREE]');
 		},

@@ -1,7 +1,5 @@
-import { Buffer } from 'node:buffer';
-import { simplify, parse } from 'prismarine-nbt';
 import { ItemRarityColourCode } from '../constants/itemRarity';
-import { VANILLA_ITEM_DISPLAY_NAMES } from '../../../constants/minecraft';
+import { VANILLA_ITEM_DISPLAY_NAMES, VANILLA_ITEM_IDS } from '../../../constants/minecraft';
 import type { NBTInventoryItem } from '@zikeji/hypixel';
 
 /**
@@ -38,23 +36,45 @@ export const isCommonItem = (item: NBTInventoryItem) => {
 };
 
 /**
+ * returns the display name of a common item, doesn't work (and does not need to work) for multiple colour codes
+ * @param item
+ */
+export const getDisplayName = (item: NBTInventoryItem) => {
+	let name = item.tag!.display?.Name;
+	if (!name) return null;
+
+	// remove colour code
+	if (name.startsWith('§')) name = name.slice(2 /* '§f'.length */);
+
+	// remove reforge
+	if (item.tag!.ExtraAttributes?.modifier) name = name.slice(item.tag!.ExtraAttributes.modifier.length + 1);
+
+	return name;
+};
+
+/**
  * whether the item is a vanilla mc item and not a custom hypixel skyblock variant
  * @param item
  */
-export const isVanillaItem = (item: NBTInventoryItem) =>
-	isCommonItem(item) &&
-	((item.tag!.display?.Lore?.length ?? 0) <= 1 ||
-		item.tag!.ExtraAttributes!.id.includes(':') ||
-		VANILLA_ITEM_DISPLAY_NAMES.has(
-			item.tag!.display?.Name?.startsWith('§')
-				? item.tag!.display.Name.slice(2 /* '§f'.length */)
-				: item.tag!.display?.Name!,
-		)) &&
-	!item.tag!.SkullOwner;
+export const isVanillaItem = (item: NBTInventoryItem) => {
+	// higher rarity
+	if (!isCommonItem(item)) return false;
 
-/**
- * transforms gzipped nbt strings to objects
- * @param data
- */
-export const transformItemData = async (data: string): Promise<NBTInventoryItem[]> =>
-	simplify((await parse(Buffer.from(data, 'base64'))).parsed.value.i as never);
+	const loreCount = item.tag!.display?.Lore?.length ?? 0;
+
+	// to not filter out items like beacons
+	if (Object.keys(item.tag!.ExtraAttributes!).length === 1 && loreCount > 1) return false;
+
+	return (
+		// no lore
+		(loreCount <= 1 ||
+			// null items
+			item.tag!.ExtraAttributes!.id.includes(':') ||
+			// BOW, modifier: "rich_bow" instead of "rich"
+			VANILLA_ITEM_IDS.has(item.tag!.ExtraAttributes?.id!) ||
+			// displayName: "Golden ...", itemId: "GOLD_..."; displayName: "Wooden ...", itemId: "WOOD_..."
+			VANILLA_ITEM_DISPLAY_NAMES.has(getDisplayName(item)!)) &&
+		// don't filter out items with custom skins
+		!item.tag!.SkullOwner
+	);
+};
