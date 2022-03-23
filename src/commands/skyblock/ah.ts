@@ -64,11 +64,12 @@ export default class AhCommand extends ApplicationCommand {
 	 */
 	private async _generateReply({ ign, uuid, profileId, profiles, userId }: GenerateReplyOptions) {
 		const { label: PROFILE_NAME } = profiles.find(({ value }) => value === profileId)!;
-		const embed = this.client.defaultEmbed.setAuthor({
-			name: ign,
-			iconURL: uuidToBustURL(uuid),
-			url: `${STATS_URL_BASE}${ign}/${PROFILE_NAME}`,
-		});
+		const embed = this.client.defaultEmbed //
+			.setAuthor({
+				name: ign,
+				iconURL: uuidToBustURL(uuid),
+				url: `${STATS_URL_BASE}${ign}/${PROFILE_NAME}`,
+			});
 
 		try {
 			const auctions = (await hypixel.skyblock.auction.profile(profileId))

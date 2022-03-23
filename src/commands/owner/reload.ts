@@ -14,7 +14,7 @@ export default class ReloadCommand extends DualCommand {
 	constructor(context: CommandContext) {
 		const reloadOption = new SlashCommandBooleanOption()
 			.setName('reload')
-			.setDescription('whether to reimport the file')
+			.setDescription('whether to re-import the file')
 			.setRequired(false);
 		const forceOption = new SlashCommandBooleanOption()
 			.setName('force')
@@ -271,7 +271,7 @@ export default class ReloadCommand extends DualCommand {
 			await this._run(
 				interaction.options.getSubcommand(),
 				interaction.options.getString('name'),
-				interaction.options.getBoolean('reload') ?? false,
+				interaction.options.getBoolean('reload') ?? true,
 				interaction.options.getBoolean('force') ?? false,
 			),
 		);

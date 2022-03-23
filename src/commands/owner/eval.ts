@@ -69,13 +69,14 @@ import type {
 	ContextMenuCommandInteraction,
 	ButtonInteraction,
 	Message,
+	MessageComponentInteraction,
 	ModalActionRowComponent,
 	ModalSubmitInteraction,
 } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
-const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH } = constants;
+const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH, RELOAD_EMOJI } = constants;
 const { logger, splitForEmbedFields } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
@@ -147,6 +148,27 @@ export default class EvalCommand extends ApplicationCommand {
 	}
 
 	/**
+	 * gets the original eval input from the result embed
+	 * @param message
+	 */
+	// eslint-disable-next-line class-methods-use-this
+	private _getInputFromMessage(message: MessageComponentInteraction['message'] | null) {
+		const fields = message?.embeds[0]?.fields;
+
+		if (!fields) throw 'unable to extract the input from the attached message';
+
+		let input = '';
+
+		for (const { name, value } of fields) {
+			if (['Output', 'Error'].includes(name)) break;
+
+			input += value.replace(/^```[a-z]*\n|\n?```$/g, '');
+		}
+
+		return input;
+	}
+
+	/**
 	 * @param interaction
 	 * @param _input
 	 * @param options
@@ -183,13 +205,14 @@ export default class EvalCommand extends ApplicationCommand {
 		const bridges = client.chatBridges.cache;
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
-		const responseEmbed = this.client.defaultEmbed.setFooter({
-			text: me?.displayName ?? this.client.user!.username,
-			iconURL: (me ?? this.client.user!).displayAvatarURL(),
-		});
+		const responseEmbed = this.client.defaultEmbed //
+			.setFooter({
+				text: me?.displayName ?? this.client.user!.username,
+				iconURL: (me ?? this.client.user!).displayAvatarURL(),
+			});
 
 		// format input
-		let input = _input.replace(/(?<=;) *(?!$|\n)/g, '\n');
+		let input = _input.replace(/(?<=;) *(?!$|\n)/g, '\n').trim();
 
 		if (!input.endsWith(';')) input += ';';
 
@@ -315,6 +338,10 @@ export default class EvalCommand extends ApplicationCommand {
 						.setCustomId(`${this.baseCustomId}:edit:${inspectDepth}`)
 						.setEmoji({ name: EDIT_MESSAGE_EMOJI })
 						.setStyle(ButtonStyle.Secondary),
+					new ButtonComponent()
+						.setCustomId(`${this.baseCustomId}:repeat:${inspectDepth}`)
+						.setEmoji({ name: RELOAD_EMOJI })
+						.setStyle(ButtonStyle.Secondary),
 					InteractionUtil.getDeleteButton(interaction),
 				),
 			],
@@ -345,10 +372,10 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param args parsed customId, split by ':'
 	 */
 	override runButton(interaction: ButtonInteraction, args: string[]) {
-		const [subcommand] = args;
+		const [subcommand, inspectDepth] = args;
 
 		switch (subcommand) {
-			case 'edit': {
+			case 'edit':
 				return InteractionUtil.showModal(
 					interaction,
 					new Modal()
@@ -365,10 +392,22 @@ export default class EvalCommand extends ApplicationCommand {
 											.replace(/^```[a-z]*\n|```$/g, '')
 											.slice(0, MAX_PLACEHOLDER_LENGTH) ?? 'code to evaluate',
 									)
-									.setRequired(true),
+									.setRequired(false),
+							),
+							new ActionRow<ModalActionRowComponent>().addComponents(
+								new TextInputComponent()
+									.setCustomId('inspectDepth')
+									.setStyle(TextInputStyle.Short)
+									.setLabel('Inspect depth')
+									.setPlaceholder(inspectDepth)
+									.setRequired(false),
 							),
 						),
 				);
+
+			case 'repeat': {
+				const input = this._getInputFromMessage(interaction.message);
+				return this._run(interaction, input, { inspectDepth: Number(inspectDepth) });
 			}
 
 			default:
@@ -385,11 +424,20 @@ export default class EvalCommand extends ApplicationCommand {
 		const [subcommand, inspectDepth] = args;
 
 		switch (subcommand) {
-			case 'edit': {
-				return this._run(interaction, interaction.fields.getTextInputValue('input'), {
-					inspectDepth: Number(inspectDepth),
-				});
-			}
+			case 'edit':
+				return this._run(
+					interaction,
+					interaction.fields.getTextInputValue('input') ||
+						// @ts-expect-error
+						this._getInputFromMessage(interaction.message),
+					{
+						// use parseInt over Number so that 12a is still a valid input
+						inspectDepth: Number.parseInt(
+							interaction.fields.getTextInputValue('inspectDepth').trim() || inspectDepth,
+							10,
+						),
+					},
+				);
 
 			default:
 				throw new Error(`unknown subcommand '${subcommand}'`);
