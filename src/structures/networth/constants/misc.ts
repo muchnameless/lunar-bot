@@ -5,4 +5,8 @@ export const SKYBLOCK_INVENTORIES = [
 	'wardrobe_contents',
 	'talisman_bag',
 	'personal_vault_contents',
+	'quiver',
+	'fishing_bag',
+	'potion_bag',
+	'candy_inventory_contents',
 ] as const;
