@@ -44,7 +44,7 @@ export const getDisplayName = (item: NBTInventoryItem) => {
 	if (!name) return null;
 
 	// remove colour code
-	if (name.startsWith('§')) name = name.slice(2 /* '§f'.length */);
+	if (name.startsWith('§')) name = name.slice('§f'.length);
 
 	// remove reforge
 	if (item.tag!.ExtraAttributes?.modifier) name = name.slice(item.tag!.ExtraAttributes.modifier.length + 1);
