@@ -361,11 +361,16 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 }
 
 /**
- * max of item worth and current highest bid
+ * networth of a single running auction
  * @param auction
  */
-const getRunningAuctionWorth = async (auction: Components.Schemas.SkyBlockAuctionResponse['auctions'][0]) =>
-	Math.max(await parseItems(auction.item_bytes.data), auction.highest_bid_amount);
+const getRunningAuctionWorth = async (auction: Components.Schemas.SkyBlockAuctionResponse['auctions'][0]) => {
+	const itemPrice = await parseItems(auction.item_bytes.data);
+
+	// BIN? -> min(price, BIN price)
+	// regular auction -> max(price, highest bid)
+	return auction.bin ? Math.min(itemPrice, auction.starting_bid) : Math.max(itemPrice, auction.highest_bid_amount);
+};
 
 /**
  * @param profileId
@@ -399,7 +404,7 @@ export async function getAuctionNetworth(profileId: string, uuid?: string) {
 		}
 	}
 
-	return (await Promise.all(promises)).reduce((a, b) => a + b, collectableBids);
+	return (await Promise.all(promises)).reduce((acc, cur) => acc + cur, collectableBids);
 }
 
 /**
