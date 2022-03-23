@@ -451,8 +451,6 @@ export async function getNetworth(
 		}
 	}
 
-	(await Promise.all(promises)).reduce((acc, cur) => acc + cur, networth);
-
 	// sacks
 	if (member.sacks_counts) {
 		for (const [index, count] of Object.entries(member.sacks_counts)) {
@@ -468,7 +466,7 @@ export async function getNetworth(
 	}
 
 	return {
-		networth,
+		networth: (await Promise.all(promises)).reduce((acc, cur) => acc + cur, networth),
 		bankingAPIEnabled,
 		inventoryAPIEnabled,
 	};
