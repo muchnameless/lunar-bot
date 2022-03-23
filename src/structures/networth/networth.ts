@@ -361,6 +361,13 @@ function getPetPrice(pet: Components.Schemas.SkyBlockProfilePet) {
 }
 
 /**
+ * max of item worth and current highest bid
+ * @param auction
+ */
+const getRunningAuctionWorth = async (auction: Components.Schemas.SkyBlockAuctionResponse['auctions'][0]) =>
+	Math.max(await parseItems(auction.item_bytes.data), auction.highest_bid_amount);
+
+/**
  * @param profileId
  * @param uuid
  */
@@ -374,18 +381,25 @@ export async function getAuctionNetworth(profileId: string, uuid?: string) {
 	let collectableBids = 0;
 
 	for (const auction of auctions) {
+		// player already claimed the money or is not the seller
 		if (auction.claimed || auction.auctioneer !== uuid) continue;
 
 		if (auction.end < Date.now()) {
-			collectableBids += auction.highest_bid_amount;
+			// auction ended
+			if (auction.highest_bid_amount) {
+				// sold
+				collectableBids += auction.highest_bid_amount;
+			} else {
+				// expired
+				promises.push(parseItems(auction.item_bytes.data));
+			}
 		} else {
-			promises.push(parseItems(auction.item_bytes.data));
+			// ongoing auction
+			promises.push(getRunningAuctionWorth(auction));
 		}
 	}
 
-	if (!promises.length) return collectableBids;
-
-	return collectableBids + (await Promise.all(promises)).reduce((a, b) => a + b);
+	return (await Promise.all(promises)).reduce((a, b) => a + b, collectableBids);
 }
 
 /**
@@ -400,15 +414,18 @@ export async function getNetworth(
 ) {
 	const member = members[uuid];
 
+	// banking
 	let bankingAPIEnabled = true;
 	let networth = (addBanking ? banking?.balance ?? ((bankingAPIEnabled = false), 0) : 0) + (member.coin_purse ?? 0);
 
 	const promises: Promise<number>[] = [];
 
+	// auctions
 	if (addAuctions) {
 		promises.push(getAuctionNetworth(profileId, uuid));
 	}
 
+	// inventories
 	let inventoryAPIEnabled = true;
 
 	for (const inventory of SKYBLOCK_INVENTORIES) {
@@ -422,28 +439,28 @@ export async function getNetworth(
 		promises.push(parseItems(data));
 	}
 
+	// backpacks
 	if (member.backpack_contents) {
 		for (const backpack of Object.values(member.backpack_contents)) {
 			promises.push(parseItems(backpack.data));
 		}
 	}
-
 	if (member.backpack_icons) {
 		for (const backpack of Object.values(member.backpack_icons)) {
 			promises.push(parseItems(backpack.data));
 		}
 	}
 
-	for (const inventoryPrice of await Promise.all(promises)) {
-		networth += inventoryPrice;
-	}
+	(await Promise.all(promises)).reduce((acc, cur) => acc + cur, networth);
 
+	// sacks
 	if (member.sacks_counts) {
 		for (const [index, count] of Object.entries(member.sacks_counts)) {
 			networth += getPrice(index) * (count ?? 0);
 		}
 	}
 
+	// pets
 	if (member.pets) {
 		for (const pet of member.pets) {
 			networth += getPetPrice(pet);
