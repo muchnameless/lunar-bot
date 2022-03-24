@@ -40,7 +40,9 @@ async function parseItems(base64: string) {
 
 			if (!Array.isArray(_items)) continue;
 
-			for (const _item of simplify((await parse(Buffer.from(_items))).parsed.value.i as never) as NBTInventoryItem[]) {
+			for (const _item of simplify(
+				(await parse(Buffer.from(_items), 'big')).parsed.value.i as never,
+			) as NBTInventoryItem[]) {
 				if (!_item.tag?.ExtraAttributes?.id) continue;
 
 				networth += calculateItemPrice(_item);

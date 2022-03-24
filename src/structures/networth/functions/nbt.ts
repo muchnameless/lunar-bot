@@ -7,4 +7,4 @@ import type { NBTInventoryItem } from '@zikeji/hypixel';
  * @param data
  */
 export const transformItemData = async (data: string): Promise<NBTInventoryItem[]> =>
-	simplify((await parse(Buffer.from(data, 'base64'))).parsed.value.i as never);
+	simplify((await parse(Buffer.from(data, 'base64'), 'big')).parsed.value.i as never);
