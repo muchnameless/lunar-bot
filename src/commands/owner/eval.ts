@@ -425,6 +425,7 @@ export default class EvalCommand extends ApplicationCommand {
 					// @ts-expect-error
 					embeds: interaction.message.embeds,
 					files: (interaction.message as Message).attachments.map(({ url }) => url),
+					components: interaction.message.components,
 					ephemeral: isNotEphemeral,
 				});
 			}
