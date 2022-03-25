@@ -51,7 +51,6 @@ GuildMemberUtil;
 GuildUtil;
 LeaderboardUtil;
 MessageEmbedUtil;
-MessageUtil;
 import * as functions from '../../functions';
 import * as nwFunctions from '../../structures/networth/functions';
 nwFunctions;
@@ -76,7 +75,7 @@ import type {
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { InteractionUtilReplyOptions, RepliableInteraction } from '../../util';
 
-const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS, MAX_PLACEHOLDER_LENGTH, RELOAD_EMOJI } = constants;
+const { EDIT_MESSAGE_EMOJI, EMBED_MAX_CHARS, EYES_EMOJI, MAX_PLACEHOLDER_LENGTH, RELOAD_EMOJI } = constants;
 const { logger, splitForEmbedFields } = functions;
 
 export default class EvalCommand extends ApplicationCommand {
@@ -342,6 +341,10 @@ export default class EvalCommand extends ApplicationCommand {
 						.setCustomId(`${this.baseCustomId}:repeat:${inspectDepth}`)
 						.setEmoji({ name: RELOAD_EMOJI })
 						.setStyle(ButtonStyle.Secondary),
+					new ButtonComponent()
+						.setCustomId(`${this.baseCustomId}:visibility:${inspectDepth}`)
+						.setEmoji({ name: EYES_EMOJI })
+						.setStyle(ButtonStyle.Secondary),
 					InteractionUtil.getDeleteButton(interaction),
 				),
 			],
@@ -371,7 +374,7 @@ export default class EvalCommand extends ApplicationCommand {
 	 * @param interaction
 	 * @param args parsed customId, split by ':'
 	 */
-	override runButton(interaction: ButtonInteraction, args: string[]) {
+	override async runButton(interaction: ButtonInteraction, args: string[]) {
 		const [subcommand, inspectDepth] = args;
 
 		switch (subcommand) {
@@ -408,6 +411,30 @@ export default class EvalCommand extends ApplicationCommand {
 			case 'repeat': {
 				const input = this._getInputFromMessage(interaction.message);
 				return this._run(interaction, input, { inspectDepth: Number(inspectDepth) });
+			}
+
+			case 'visibility': {
+				if (MessageUtil.isEphemeral(interaction.message as Message)) {
+					// send non-ephemeral message
+					return InteractionUtil.reply(interaction, {
+						content: interaction.message.content,
+						// @ts-expect-error
+						embeds: interaction.message.embeds,
+						files: (interaction.message as Message).attachments.map(({ url }) => url),
+					});
+				}
+
+				// delete old message
+				await InteractionUtil.deleteMessage(interaction);
+
+				// send new ephemeral message
+				return InteractionUtil.reply(interaction, {
+					content: interaction.message.content,
+					// @ts-expect-error
+					embeds: interaction.message.embeds,
+					files: (interaction.message as Message).attachments.map(({ url }) => url),
+					ephemeral: true,
+				});
 			}
 
 			default:
