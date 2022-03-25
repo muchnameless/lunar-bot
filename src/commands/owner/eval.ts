@@ -421,7 +421,7 @@ export default class EvalCommand extends ApplicationCommand {
 
 				// send new message
 				return InteractionUtil.reply(interaction, {
-					content: interaction.message.content || '',
+					content: interaction.message.content || null,
 					// @ts-expect-error
 					embeds: interaction.message.embeds,
 					files: (interaction.message as Message).attachments.map(({ url }) => url),
