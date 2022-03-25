@@ -414,26 +414,18 @@ export default class EvalCommand extends ApplicationCommand {
 			}
 
 			case 'visibility': {
-				if (MessageUtil.isEphemeral(interaction.message as Message)) {
-					// send non-ephemeral message
-					return InteractionUtil.reply(interaction, {
-						content: interaction.message.content,
-						// @ts-expect-error
-						embeds: interaction.message.embeds,
-						files: (interaction.message as Message).attachments.map(({ url }) => url),
-					});
-				}
+				const isNotEphemeral = !MessageUtil.isEphemeral(interaction.message as Message);
 
 				// delete old message
-				await InteractionUtil.deleteMessage(interaction);
+				if (isNotEphemeral) await InteractionUtil.deleteMessage(interaction);
 
-				// send new ephemeral message
+				// send new message
 				return InteractionUtil.reply(interaction, {
-					content: interaction.message.content,
+					content: interaction.message.content || '',
 					// @ts-expect-error
 					embeds: interaction.message.embeds,
 					files: (interaction.message as Message).attachments.map(({ url }) => url),
-					ephemeral: true,
+					ephemeral: isNotEphemeral,
 				});
 			}
 
