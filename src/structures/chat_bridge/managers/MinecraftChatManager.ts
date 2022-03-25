@@ -7,7 +7,7 @@ import { AsyncQueue } from '@sapphire/async-queue';
 import { stripIndents } from 'common-tags';
 import minecraftData from 'minecraft-data';
 import ms from 'ms';
-import emojiRegex from 'emoji-regex/es2015/RGI_Emoji';
+import emojiRegex from 'emoji-regex/es2015';
 import { jaroWinkler } from '@skyra/jaro-winkler';
 import {
 	INVISIBLE_CHARACTER_REGEXP,
