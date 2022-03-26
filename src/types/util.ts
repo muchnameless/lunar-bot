@@ -4,9 +4,9 @@ type Entries<T> = {
 	[K in keyof T]: [K, T[K]];
 }[keyof T][];
 
-export const keys = <T>(o: T) => Object.keys(o) as (keyof T)[];
-export const values = <T>(o: T) => Object.values(o) as T[keyof T][];
-export const entries = <T>(obj: T) => Object.entries(obj) as Entries<T>;
+export const keys = <T extends object>(o: T) => Object.keys(o) as (keyof T)[];
+export const values = <T extends object>(o: T) => Object.values(o) as T[keyof T][];
+export const entries = <T extends object>(obj: T) => Object.entries(obj) as Entries<T>;
 export const toUpperCase = <T extends string>(s: T) => s.toUpperCase() as Uppercase<T>;
 export const toLowerCase = <T extends string>(s: T) => s.toLowerCase() as Lowercase<T>;
 
