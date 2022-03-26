@@ -9,9 +9,14 @@ import type { ChatInputCommandInteraction } from 'discord.js';
 import type { CommandContext } from '../../structures/commands/BaseCommand';
 import type { HypixelUserMessage } from '../../structures/chat_bridge/HypixelMessage';
 
+const enum OperatorAssociativity {
+	Left,
+	Right,
+}
+
 interface Operator {
 	precedence: number;
-	associativity: 'left' | 'right';
+	associativity: OperatorAssociativity;
 }
 
 class Parser {
@@ -32,12 +37,12 @@ class Parser {
 		for (let token of input) {
 			switch (token) {
 				case '(':
-					stack.unshift(token);
+					stack.push(token);
 					break;
 
 				case ')':
 					while (stack.length) {
-						token = stack.shift()!;
+						token = stack.pop()!;
 						if (token === '(') break;
 						output.push(token);
 					}
@@ -51,26 +56,32 @@ class Parser {
 						let shouldWriteToStack = true;
 
 						while (stack.length) {
-							const [punctuator] = stack;
+							const punctuator = stack.at(-1)!;
 							const operator = this.table[token];
 
 							if (punctuator === '(') {
-								if (operator.associativity === 'right') {
+								if (operator.associativity === OperatorAssociativity.Right) {
 									shouldWriteToStack = false;
 									output.push(token);
 								}
+
 								break;
 							}
 
 							const { precedence } = operator;
 							const antecedence = this.table[punctuator].precedence;
 
-							if (precedence > antecedence || (precedence === antecedence && operator.associativity === 'right')) break;
+							if (
+								precedence > antecedence ||
+								(precedence === antecedence && operator.associativity === OperatorAssociativity.Right)
+							) {
+								break;
+							}
 
-							output.push(stack.shift()!);
+							output.push(stack.pop()!);
 						}
 
-						if (shouldWriteToStack) stack.unshift(token);
+						if (shouldWriteToStack) stack.push(token);
 
 						continue;
 					}
@@ -79,16 +90,25 @@ class Parser {
 					output.push(token);
 
 					// check if token is followed by a unary operator
-					const nonBracketIndex = stack.findIndex((x) => x !== '(');
+					let nonBracketIndex = -1;
+					for (let i = stack.length; i !== 0; --i) {
+						if (stack[i] !== '(') {
+							nonBracketIndex = i;
+							break;
+						}
+					}
 
-					if (nonBracketIndex !== -1 && this.table[stack[nonBracketIndex]]?.associativity === 'right') {
+					if (
+						nonBracketIndex !== -1 &&
+						this.table[stack[nonBracketIndex]]?.associativity === OperatorAssociativity.Right
+					) {
 						output.push(stack.splice(nonBracketIndex, 1)[0]);
 					}
 				}
 			}
 		}
 
-		if (stack.includes('(')) throw new Error('ParserError: mismatched parentheses');
+		if (stack.includes('(')) throw 'ParserError: mismatched parentheses';
 
 		output.push(...stack);
 
@@ -127,39 +147,39 @@ export default class MathsCommand extends DualCommand {
 
 	static percent = {
 		precedence: 8,
-		associativity: 'right',
+		associativity: OperatorAssociativity.Right,
 	} as const;
 	static multiplier = {
 		precedence: 7,
-		associativity: 'right',
+		associativity: OperatorAssociativity.Right,
 	} as const;
 	static degree = {
 		precedence: 6,
-		associativity: 'right',
+		associativity: OperatorAssociativity.Right,
 	} as const;
 	static factorialPost = {
 		precedence: 5,
-		associativity: 'right',
+		associativity: OperatorAssociativity.Right,
 	} as const;
 	static factorialPre = {
 		precedence: 5,
-		associativity: 'left',
-	} as const;
-	static power = {
-		precedence: 4,
-		associativity: 'left',
+		associativity: OperatorAssociativity.Left,
 	} as const;
 	static func = {
+		precedence: 4,
+		associativity: OperatorAssociativity.Left,
+	} as const;
+	static power = {
 		precedence: 3,
-		associativity: 'left',
+		associativity: OperatorAssociativity.Left,
 	} as const;
 	static factor = {
 		precedence: 2,
-		associativity: 'left',
+		associativity: OperatorAssociativity.Left,
 	} as const;
 	static term = {
 		precedence: 1,
-		associativity: 'left',
+		associativity: OperatorAssociativity.Left,
 	} as const;
 
 	unaryOperators = {
@@ -286,7 +306,7 @@ export default class MathsCommand extends DualCommand {
 	 * lexer for mathematical expressions
 	 */
 	static lexer = new Lexer((c: string) => {
-		throw new Error(`LexerError: unexpected character '${c}' at index ${this.lexer.index}`);
+		throw `LexerError: unexpected character '${c}' at index ${this.lexer.index}`;
 	})
 		.addRule(/,/, () => void 0) // ignore ','
 		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)/, (lexeme: string) => lexeme) // numbers
@@ -332,12 +352,18 @@ export default class MathsCommand extends DualCommand {
 	});
 
 	static parse(input: string) {
-		MathsCommand.lexer.setInput(input);
 		const tokens: string[] = [];
+
 		let token: string | undefined;
+
+		MathsCommand.lexer.setInput(input);
+
 		while ((token = MathsCommand.lexer.lex())) tokens.push(token);
+
 		// logger.debug({ tokens });
-		if (!tokens.length) throw new Error('LexerError: token list empty');
+
+		if (!tokens.length) throw 'LexerError: token list empty';
+
 		return MathsCommand.parser.parse(tokens);
 	}
 
@@ -347,7 +373,7 @@ export default class MathsCommand extends DualCommand {
 	 */
 	static validateNumber(value?: string | number) {
 		if (Math.abs(Number(value)) > Number.MAX_SAFE_INTEGER) {
-			throw new Error(`(intermediate) result larger than ${formatNumber(Number.MAX_SAFE_INTEGER)}`);
+			throw `(intermediate) result larger than ${formatNumber(Number.MAX_SAFE_INTEGER)}`;
 		}
 
 		if (typeof value === 'string') return Number(value);
