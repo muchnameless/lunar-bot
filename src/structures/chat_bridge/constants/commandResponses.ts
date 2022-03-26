@@ -101,7 +101,9 @@ const kickResponses = [
 	_genericErrors.playerNotInGuild,
 ];
 const kickResponsesError = [
-	...Object.entries(_kick).flatMap(([key, value]) => (key !== 'success' ? value : [])),
+	...Object.entries(_kick)
+		.filter(([key]) => key !== 'success')
+		.map(([, value]) => value),
 	_genericErrors.MUST_BE_GM,
 	_genericErrors.MISSING_PERMS,
 	_genericErrors.RANK_MISSING_PERMS,

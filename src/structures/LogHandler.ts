@@ -194,13 +194,12 @@ export class LogHandler {
 				{
 					description: LogHandler.cleanLoggingEmbedString(embed.description) || undefined,
 					user: embed.author?.name,
-					fields: embed.fields?.flatMap(({ name, value }) => {
-						if (name === '\u200B' && value === '\u200B') return [];
-						return {
+					fields: embed.fields
+						?.filter(({ name, value }) => name !== '\u200B' || value !== '\u200B')
+						.map(({ name, value }) => ({
 							name: name.replaceAll('\u200B', '').trim() || undefined,
 							value: LogHandler.cleanLoggingEmbedString(value).replace(/\n/g, ', '),
-						};
-					}),
+						})),
 				},
 				embed.title,
 			);

@@ -27,9 +27,7 @@ export class DualCommand
 	) {
 		super(context, slashData);
 
-		this.aliasesInGame = aliases?.filter(Boolean).length
-			? aliases.flatMap((alias) => (!alias ? [] : alias.toLowerCase()))
-			: null;
+		this.aliasesInGame = aliases?.map((alias) => alias.toLowerCase()).filter(Boolean) || null;
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;
 		this.usage = usage ?? null;

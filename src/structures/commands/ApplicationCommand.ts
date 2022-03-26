@@ -94,9 +94,7 @@ export class ApplicationCommand extends BaseCommand {
 				this.aliases ??= [];
 				this.aliases.push(...aliases);
 
-				this.slashAliases = aliases.filter(Boolean).length
-					? aliases.flatMap((alias) => (!alias ? [] : alias.toLowerCase()))
-					: null;
+				this.slashAliases = aliases.map((alias) => alias.toLowerCase()).filter(Boolean) || null;
 			}
 
 			if (!slash.name) {

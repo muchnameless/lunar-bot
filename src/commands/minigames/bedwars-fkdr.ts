@@ -39,14 +39,15 @@ export default class BedWarsFkdrCommand extends BaseStatsCommand {
 					{ name: '3s', key: 'four_three_' },
 					{ name: '4s', key: 'four_four_' },
 				] as const
-			).flatMap(({ name, key }) => {
-				const kd = this.calculateKD(
-					playerData.stats.Bedwars![`${key}final_kills_bedwars`] as number,
-					playerData.stats.Bedwars![`${key}final_deaths_bedwars`] as number,
-				);
-
-				return kd !== null ? { name, kd } : [];
-			});
+			)
+				.map(({ name, key }) => ({
+					name,
+					kd: this.calculateKD(
+						playerData.stats.Bedwars![`${key}final_kills_bedwars`] as number,
+						playerData.stats.Bedwars![`${key}final_deaths_bedwars`] as number,
+					),
+				}))
+				.filter(({ kd }) => kd);
 
 			if (!kds.length) return `\`${ign}\` has no BedWars stats`;
 

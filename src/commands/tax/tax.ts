@@ -251,9 +251,11 @@ export default class TaxCommand extends ApplicationCommand {
 						const SHOULD_GHOST_PING = interaction.options.getBoolean('ghostping') ?? false;
 						const hypixelGuild = interaction.options.get('guild') ? InteractionUtil.getHypixelGuild(interaction) : null;
 						const EXCLUDED_INPUT = interaction.options.getString('exclude');
-						const excluded = EXCLUDED_INPUT
+						const excluded = EXCLUDED_INPUT // lower case IGN array
 							? new Set(
-									EXCLUDED_INPUT.split(/\W/).flatMap((x) => (x ? x.toLowerCase() : [])), // lower case IGN array
+									EXCLUDED_INPUT.split(/\W/)
+										.map((x) => x.toLowerCase())
+										.filter(Boolean),
 							  )
 							: null;
 						const playersToRemind = (hypixelGuild?.players ?? this.client.players.inGuild).filter(

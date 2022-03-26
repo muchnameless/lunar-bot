@@ -27,9 +27,7 @@ export class BridgeCommand extends BaseCommand {
 	constructor(context: CommandContext, { aliases, description, guildOnly, args, usage, ...data }: BridgeCommandData) {
 		super(context, data);
 
-		this.aliases = aliases?.filter(Boolean).length
-			? aliases?.flatMap((alias) => (!alias ? [] : alias.toLowerCase())) || null
-			: null;
+		this.aliases = aliases?.map((alias) => alias.toLowerCase()).filter(Boolean) || null;
 		this.description = description || null;
 		this.guildOnly = guildOnly ?? false;
 		this.args = args ?? false;

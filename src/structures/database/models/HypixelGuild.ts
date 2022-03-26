@@ -51,13 +51,15 @@ export type GuildRank =
 			positionReq: null;
 			currentWeightReq: null;
 	  }
-	| {
-			name: string;
-			roleId: string;
-			priority: number;
-			positionReq: number;
-			currentWeightReq: number;
-	  };
+	| AutomatedGuildRank;
+
+interface AutomatedGuildRank {
+	name: string;
+	roleId: string;
+	priority: number;
+	positionReq: number;
+	currentWeightReq: number;
+}
 
 export interface ChatBridgeChannel {
 	type: keyof typeof PREFIX_BY_TYPE;
@@ -1040,27 +1042,29 @@ export class HypixelGuild extends Model<
 			}
 
 			/** ranks with an absolute instead of a relative positionReq, sorted descendingly by it */
-			const automatedRanks = this.ranks
-				.flatMap((rank) => {
-					if (rank.positionReq == null) return [];
+			const automatedRanks: AutomatedGuildRank[] = [];
 
-					const positionReq = Math.round(rank.positionReq * nonStaffWithWeight.length);
-					const playerAtReq = nonStaffWithWeight[positionReq];
+			for (const rank of this.ranks) {
+				if (rank.positionReq == null) continue;
 
-					if (!playerAtReq) return [];
+				const positionReq = Math.round(rank.positionReq * nonStaffWithWeight.length);
+				const playerAtReq = nonStaffWithWeight[positionReq];
 
-					// update 'currentWeightReq' (1/2)
-					rank.currentWeightReq = Math.ceil(playerAtReq.weight);
+				if (!playerAtReq) continue;
 
-					return {
-						...rank,
-						positionReq,
-					};
-				})
-				.sort(({ positionReq: a }, { positionReq: b }) => b - a);
+				// update 'currentWeightReq' (1/2)
+				rank.currentWeightReq = Math.ceil(playerAtReq.weight);
+
+				automatedRanks.push({
+					...rank,
+					positionReq,
+				});
+			}
 
 			// no ranks with a positionReq
 			if (!automatedRanks.length) return this;
+
+			automatedRanks.sort(({ positionReq: a }, { positionReq: b }) => b - a);
 
 			// update 'currentWeightReq' (2/2)
 			this.changed('ranks', true);

@@ -202,11 +202,8 @@ export default class PollCommand extends DualCommand {
 	override async runMinecraft(hypixelMessage: HypixelUserMessage) {
 		const inputMatched = hypixelMessage.content
 			.match(new RegExp(`(?<=[${this.quoteChars.join('')}]).+?(?=[${this.quoteChars.join('')}])`, 'g'))
-			?.flatMap((x) => {
-				const input = x.trim();
-				if (!input.length) return [];
-				return input;
-			});
+			?.map((x) => x.trim())
+			.filter(Boolean);
 
 		if (!inputMatched || inputMatched.length < 2) return hypixelMessage.reply(this.usageInfo);
 

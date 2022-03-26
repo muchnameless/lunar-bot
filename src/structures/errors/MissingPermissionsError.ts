@@ -14,9 +14,7 @@ export const missingPermissionsError = (
 	guild: Guild | null,
 	requiredRolesRaw: Snowflake[],
 ) => {
-	const requiredRoles = requiredRolesRaw.flatMap((roleId) => {
-		if (!roleId) return [];
-
+	const requiredRoles = requiredRolesRaw.map((roleId) => {
 		const role = guild?.roles.cache.get(roleId);
 		if (!role) return roleId;
 
