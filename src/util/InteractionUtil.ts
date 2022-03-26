@@ -23,6 +23,7 @@ import type {
 	CacheType,
 	ChatInputCommandInteraction,
 	EmojiIdentifierResolvable,
+	GuildCacheMessage,
 	GuildMember,
 	Interaction,
 	InteractionDeferReplyOptions,
@@ -31,10 +32,9 @@ import type {
 	InteractionResponseFields,
 	InteractionUpdateOptions,
 	Message,
-	MessageComponentInteraction,
+	MessagePayload,
 	MessageResolvable,
 	Modal,
-	ModalMessageModalSubmitInteraction,
 	TextBasedChannel,
 	WebhookEditMessageOptions,
 } from 'discord.js';
@@ -56,9 +56,17 @@ export type RepliableInteraction<Cached extends CacheType = CacheType> = Interac
 export type ModalRepliableInteraction<Cached extends CacheType = CacheType> = Interaction<Cached> &
 	InteractionResponseFields<Cached>;
 
-export type FromMessageInteraction<Cached extends CacheType = CacheType> =
-	| MessageComponentInteraction<Cached>
-	| ModalMessageModalSubmitInteraction<Cached>;
+export type FromMessageInteraction<Cached extends CacheType = CacheType> = Interaction<Cached> &
+	FromMessageInteractionResponseFields<Cached>;
+
+export interface FromMessageInteractionResponseFields<Cached extends CacheType = CacheType>
+	extends InteractionResponseFields<Cached> {
+	message: GuildCacheMessage<Cached>;
+	deferUpdate(options: InteractionDeferUpdateOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
+	deferUpdate(options?: InteractionDeferUpdateOptions): Promise<void>;
+	update(options: InteractionUpdateOptions & { fetchReply: true }): Promise<GuildCacheMessage<Cached>>;
+	update(options: string | MessagePayload | InteractionUpdateOptions): Promise<void>;
+}
 
 interface DeferReplyOptions extends InteractionDeferReplyOptions {
 	rejectOnError?: boolean;
@@ -325,8 +333,10 @@ export class InteractionUtil extends null {
 	 * whether the interaction has a message attached
 	 * @param interaction
 	 */
-	static isFromMessage<T extends Interaction>(interaction: T): interaction is T & FromMessageInteraction {
-		return interaction.isMessageComponent() || (interaction.isModalSubmit() && interaction.isFromMessage());
+	static isFromMessage<C extends CacheType, T extends Interaction<C>>(
+		interaction: T,
+	): interaction is T & FromMessageInteractionResponseFields<C> {
+		return Boolean((interaction as any).message);
 	}
 
 	/**
@@ -562,6 +572,7 @@ export class InteractionUtil extends null {
 
 			// replied
 			if (interaction.replied) {
+				// @ts-expect-error
 				return (await interaction.webhook.editMessage(
 					interaction.message as Message,
 					_options as WebhookEditMessageOptions,
