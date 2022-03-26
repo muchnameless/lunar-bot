@@ -35,7 +35,7 @@
 		"useDefineForClassFields": true,
 		// Completeness
 		"skipDefaultLibCheck": true,
-		"skipLibCheck": false
+		"skipLibCheck": true
 	},
 	"include": ["src", "scripts"]
 }
