@@ -306,7 +306,7 @@ export default class MathsCommand extends DualCommand {
 	 * lexer for mathematical expressions
 	 */
 	static lexer = new Lexer((c: string) => {
-		throw `LexerError: unexpected character '${c}' at index ${this.lexer.index}`;
+		throw `LexerError: unexpected character \`${c}\` at index ${this.lexer.index}`;
 	})
 		.addRule(/,/, () => void 0) // ignore ','
 		.addRule(/(?:(?<=[(*+/^-]\s*)-)?(\d+(?:\.\d+)?|\.\d+)/, (lexeme: string) => lexeme) // numbers
@@ -405,7 +405,7 @@ export default class MathsCommand extends DualCommand {
 		try {
 			parsed = MathsCommand.parse(INPUT);
 		} catch (error) {
-			throw `${error instanceof Error ? error.message : error}, input: '${INPUT}'`;
+			throw `${error instanceof Error ? error.message : error}, input: \`${INPUT}\``;
 		}
 
 		// logger.debug({ rawInput, INPUT, parsed });
@@ -441,7 +441,7 @@ export default class MathsCommand extends DualCommand {
 
 			if (stack.length !== 0) throw new Error('unprocessed parts');
 		} catch (error) {
-			throw `CalculationError: ${error instanceof Error ? error.message : error}, input: '${INPUT}'`;
+			throw `CalculationError: ${error instanceof Error ? error.message : error}, input: \`${INPUT}\``;
 		}
 
 		// logger.debug({ input: PRETTIFIED_INPUT, output })
@@ -477,7 +477,7 @@ export default class MathsCommand extends DualCommand {
 	override runSlash(interaction: ChatInputCommandInteraction) {
 		return InteractionUtil.reply(
 			interaction,
-			Util.escapeMarkdown(this._generateReply(interaction.options.getString('input', true))),
+			Util.escapeMarkdown(this._generateReply(interaction.options.getString('input', true)), { inlineCode: false }),
 		);
 	}
 
