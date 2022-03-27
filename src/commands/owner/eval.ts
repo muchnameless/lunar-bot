@@ -193,7 +193,10 @@ export default class EvalCommand extends ApplicationCommand {
 			);
 		const type = (x: unknown) => new Type(x).toString();
 		const inspect = (x: unknown) => util.inspect(x, { depth: inspectDepth, getters: true, showHidden: true });
-		const saveHeapdump = () => fs.writeFile(`${Date.now()}.heapsnapshot`, v8.getHeapSnapshot());
+		const saveHeapdump = () => {
+			InteractionUtil.defer(interaction);
+			return fs.writeFile(`${Date.now()}.heapsnapshot`, v8.getHeapSnapshot());
+		};
 		const i = interaction;
 		const { client, config } = this;
 		const { channel, channel: ch, guild, guild: g, user, user: author, member, member: m } = interaction;
