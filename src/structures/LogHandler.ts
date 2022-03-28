@@ -278,9 +278,7 @@ export class LogHandler {
 				const FILE_PATH = join(fileURLToPath(this.logURL), file);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
-				await this._log({
-					embeds: FILE_CONTENT.split('\n').map((x) => new Embed(JSON.parse(x) as ReturnType<Embed['toJSON']>)),
-				});
+				await this._log({ embeds: JSON.parse(FILE_CONTENT) });
 				await unlink(FILE_PATH);
 			}
 		} catch (error) {
