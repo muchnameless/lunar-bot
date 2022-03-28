@@ -41,7 +41,7 @@ export class ChatBridgeManager {
 		}
 
 		this.client = client;
-		this.commands = new BridgeCommandCollection(client, new URL('./commands', import.meta.url));
+		this.commands = new BridgeCommandCollection(client, new URL('./commands/', import.meta.url));
 	}
 
 	/**

@@ -1,8 +1,7 @@
-import { fileURLToPath } from 'node:url';
-import readdirp from 'readdirp';
+import { URL } from 'node:url';
+import { opendir } from 'node:fs/promises';
 import { MAX_CHOICES } from '../constants';
 import { days, jaroWinklerSimilarity, logger } from '.';
-import type { URL } from 'node:url';
 import type { Collection } from 'discord.js';
 import type { KeysByType } from '../types/util';
 
@@ -176,10 +175,16 @@ export async function safePromiseAll(array: unknown[]) {
 }
 
 /**
- * creates a 'await for..of'-consumable ReaddirpStream from all .js files that don't start with a '~'
+ * creates an async iterable from all .js files that don't start with a '~'
  * @param root
  */
-export const readJSFiles = (root: string | URL) => readdirp(fileURLToPath(root), { fileFilter: ['*.js', '!~*'] });
+export async function* readJSFiles(root: string | URL): AsyncGenerator<string> {
+	for await (const dir of await opendir(root)) {
+		if (dir.isDirectory()) yield* readJSFiles(new URL(`${dir.name}/`, root));
+		if (!dir.name.endsWith('.js') || dir.name.startsWith('~')) continue;
+		yield new URL(dir.name, root).href;
+	}
+}
 
 /**
  * build autocomplete reponse from cached database entries

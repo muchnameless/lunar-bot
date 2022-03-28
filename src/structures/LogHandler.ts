@@ -1,6 +1,5 @@
-import { mkdir, writeFile, readdir, readFile, unlink } from 'node:fs/promises';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { mkdir, opendir, readFile, rm, writeFile } from 'node:fs/promises';
+import { URL } from 'node:url';
 import { commaListsAnd } from 'common-tags';
 import { Embed, MessageAttachment, PermissionFlagsBits, SnowflakeUtil } from 'discord.js';
 import ms from 'ms';
@@ -8,7 +7,6 @@ import { EMBED_MAX_CHARS, EMBEDS_MAX_AMOUNT } from '../constants';
 import { ChannelUtil } from '../util';
 import { logger } from '../functions';
 import type { GuildChannel, Message, TextChannel } from 'discord.js';
-import type { URL } from 'node:url';
 import type { LunarClient } from './LunarClient';
 
 type LogInput = Embed | MessageAttachment | string | undefined | null;
@@ -242,8 +240,7 @@ export class LogHandler {
 		try {
 			await this._createLogBufferFolder();
 			await writeFile(
-				join(
-					fileURLToPath(this.logURL),
+				new URL(
 					`${new Date()
 						.toLocaleString('de-DE', {
 							day: '2-digit',
@@ -255,6 +252,7 @@ export class LogHandler {
 						})
 						.replace(', ', '_')
 						.replaceAll(':', '.')}_${SnowflakeUtil.generate()}`,
+					this.logURL,
 				),
 				JSON.stringify(embeds),
 			);
@@ -270,16 +268,12 @@ export class LogHandler {
 		try {
 			await this._createLogBufferFolder();
 
-			const logBufferFiles = await readdir(this.logURL);
-
-			if (!logBufferFiles) return;
-
-			for (const file of logBufferFiles) {
-				const FILE_PATH = join(fileURLToPath(this.logURL), file);
+			for await (const { name } of await opendir(this.logURL)) {
+				const FILE_PATH = new URL(name, this.logURL);
 				const FILE_CONTENT = await readFile(FILE_PATH, 'utf8');
 
 				await this._log({ embeds: JSON.parse(FILE_CONTENT) });
-				await unlink(FILE_PATH);
+				await rm(FILE_PATH);
 			}
 		} catch (error) {
 			logger.error(error, '[POST FILE LOGS]');

@@ -58,7 +58,6 @@
 		"prismarine-chat": "^1.6.0",
 		"prismarine-nbt": "^2.2.1",
 		"re2": "^1.17.4",
-		"readdirp": "^3.6.0",
 		"sequelize": "6.17.0",
 		"timezonecomplete": "^5.12.4",
 		"tiny-typed-emitter": "^2.1.0",

@@ -1,5 +1,4 @@
 import { basename } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { Collection } from 'discord.js';
 import { logger, readJSFiles } from '../../functions';
 import type { EventEmitter } from 'node:events';
@@ -45,9 +44,7 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	 */
 	async loadFromFile(file: string, { reload = false, force = false }: EventLoadOptions = {}) {
 		const name = basename(file, '.js');
-
-		let filePath = pathToFileURL(file).href;
-		if (reload) filePath = `${filePath}?update=${Date.now()}`;
+		const filePath = reload ? `${file}?update=${Date.now()}` : file;
 
 		const Event = (await import(filePath)).default as typeof BaseEvent;
 		const event = new Event({
@@ -69,8 +66,8 @@ export class EventCollection extends Collection<string, BaseEvent> {
 	async loadAll(options?: EventLoadOptions) {
 		let eventCount = 0;
 
-		for await (const { fullPath } of readJSFiles(this.dirURL)) {
-			await this.loadFromFile(fullPath, options);
+		for await (const path of readJSFiles(this.dirURL)) {
+			await this.loadFromFile(path, options);
 
 			++eventCount;
 		}

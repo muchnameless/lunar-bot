@@ -23,14 +23,14 @@ export interface LunarClientOptions {
 export class LunarClient<Ready extends boolean = boolean> extends Client<Ready> {
 	override ownerId: Snowflake;
 	override db: DatabaseManager;
-	override logHandler: LogHandler = new LogHandler(this, new URL('../../log_buffer', import.meta.url));
+	override logHandler: LogHandler = new LogHandler(this, new URL('../../log_buffer/', import.meta.url));
 	override cronJobs: CronJobManager = new CronJobManager(this);
 	override chatBridges: ChatBridgeManager = new ChatBridgeManager(this);
 	override commands: ApplicationCommandCollection = new ApplicationCommandCollection(
 		this,
-		new URL('../commands', import.meta.url),
+		new URL('../commands/', import.meta.url),
 	);
-	override events = new EventCollection(this, new URL('../events', import.meta.url));
+	override events = new EventCollection(this, new URL('../events/', import.meta.url));
 	override log = this.logHandler.log.bind(this.logHandler);
 
 	constructor(options: ClientOptions) {
