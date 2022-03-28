@@ -104,10 +104,10 @@ export default class ReloadCommand extends DualCommand {
 					// try to find file with INPUT name
 					let commandFile: string | undefined;
 
-					for await (const dir of readJSFiles(this.collection.dirURL)) {
-						if (dir.basename.slice(0, -'.js'.length).toLowerCase() !== commandName) continue;
+					for await (const path of readJSFiles(this.collection.dirURL)) {
+						if (basename(path, '.js').toLowerCase() !== commandName) continue;
 
-						commandFile = dir.fullPath;
+						commandFile = path;
 						break;
 					}
 
@@ -121,10 +121,10 @@ export default class ReloadCommand extends DualCommand {
 						if (command) {
 							commandName = command.name;
 
-							for await (const dir of readJSFiles(this.collection.dirURL)) {
-								if (dir.basename.slice(0, -'.js'.length).toLowerCase() !== commandName) continue;
+							for await (const path of readJSFiles(this.collection.dirURL)) {
+								if (basename(path, '.js').toLowerCase() !== commandName) continue;
 
-								commandFile = dir.fullPath;
+								commandFile = path;
 								break;
 							}
 						}
@@ -180,10 +180,10 @@ export default class ReloadCommand extends DualCommand {
 					// try to find file with INPUT name
 					let eventFile: string | undefined;
 
-					for await (const dir of readJSFiles(this.client.events.dirURL)) {
-						if (dir.basename.slice(0, -'.js'.length).toLowerCase() !== eventName) continue;
+					for await (const path of readJSFiles(this.client.events.dirURL)) {
+						if (basename(path, '.js').toLowerCase() !== eventName) continue;
 
-						eventFile = dir.fullPath;
+						eventFile = path;
 						break;
 					}
 
