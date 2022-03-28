@@ -180,8 +180,9 @@ export async function safePromiseAll(array: unknown[]) {
  */
 export async function* readJSFiles(root: string | URL): AsyncGenerator<string> {
 	for await (const dir of await opendir(root)) {
+		if (dir.name.startsWith('~')) continue;
 		if (dir.isDirectory()) yield* readJSFiles(new URL(`${dir.name}/`, root));
-		if (!dir.name.endsWith('.js') || dir.name.startsWith('~')) continue;
+		if (!dir.name.endsWith('.js')) continue;
 		yield new URL(dir.name, root).href;
 	}
 }
