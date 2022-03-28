@@ -1,18 +1,18 @@
 import { argv, exit } from 'node:process';
 import '../structures/database/pgEnum-fix'; // to allow `sync --alter` with pg enums set
-import { sequelize } from '../structures/database/sequelize';
+import { db } from '../structures/database';
 import { logger } from '../functions';
 
 // @ts-expect-error
-sequelize.options.logging = (...x) => logger.debug(...x);
+db.sequelize.options.logging = (...x) => logger.debug(...x);
 
 const force = argv.includes('--force') || argv.includes('-f');
 const alter = argv.includes('--alter') || argv.includes('-a');
 
 try {
-	await sequelize.sync({ force, alter });
+	await db.sequelize.sync({ force, alter });
 	logger.info('Database synced');
-	await sequelize.close();
+	await db.sequelize.close();
 	exit(0);
 } catch (error) {
 	logger.error(error);
